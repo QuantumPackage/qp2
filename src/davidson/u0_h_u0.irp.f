@@ -179,10 +179,12 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
 !
 !  compute_singles = (mem+rss > qp_max_mem)
 !
-!  if (.not.compute_singles) then
-!    provide singles_beta_csc
-!  endif
-compute_singles=.True.
+   compute_singles=.True.
+
+   if (.not.compute_singles) then
+     provide singles_alpha_csc singles_beta_csc
+   endif
+
 
 
   maxab = max(N_det_alpha_unique, N_det_beta_unique)+1
@@ -287,8 +289,7 @@ compute_singles=.True.
 
       tmp_det2(1:$N_int,2) = psi_det_beta_unique(1:$N_int, lcol)
 
-!---
-!      if (compute_singles) then
+      if (compute_singles) then
 
         l_a = psi_bilinear_matrix_columns_loc(lcol)
         ASSERT (l_a <= N_det)
@@ -311,69 +312,67 @@ compute_singles=.True.
             buffer, idx, tmp_det(1,1), j,                              &
             singles_a, n_singles_a )
 
-!-----
-!      else
-!
-! ! Search for singles
-!
-!call cpu_time(time0)
-! ! Right boundary
-!        l_a = psi_bilinear_matrix_columns_loc(lcol+1)-1
-!        ASSERT (l_a <= N_det)
-!        do j=1,psi_bilinear_matrix_columns_loc(lcol+1) - psi_bilinear_matrix_columns_loc(lcol)
-!          lrow = psi_bilinear_matrix_rows(l_a)
-!          ASSERT (lrow <= N_det_alpha_unique)
-!
-!          left = singles_alpha_csc_idx(krow)
-!          right_max = -1_8
-!          right = singles_alpha_csc_idx(krow+1)
-!          do while (right-left>0_8)
-!            k8 = shiftr(right+left,1)
-!            if (singles_alpha_csc(k8) > lrow) then
-!              right = k8
-!            else if (singles_alpha_csc(k8) < lrow) then
-!              left = k8 + 1_8
-!            else
-!              right_max = k8+1_8
-!              exit
-!            endif
-!          enddo
-!          if (right_max > 0_8) exit
-!          l_a = l_a-1
-!        enddo
-!        if (right_max < 0_8) right_max = singles_alpha_csc_idx(krow)
-!
-! ! Search
-!        n_singles_a = 0
-!        l_a = psi_bilinear_matrix_columns_loc(lcol)
-!        ASSERT (l_a <= N_det)
-!
-!        last_found = singles_alpha_csc_idx(krow)
-!        do j=1,psi_bilinear_matrix_columns_loc(lcol+1) - psi_bilinear_matrix_columns_loc(lcol)
-!          lrow = psi_bilinear_matrix_rows(l_a)
-!          ASSERT (lrow <= N_det_alpha_unique)
-!
-!          left = last_found
-!          right = right_max
-!          do while (right-left>0_8)
-!            k8 = shiftr(right+left,1)
-!            if (singles_alpha_csc(k8) > lrow) then
-!              right = k8
-!            else if (singles_alpha_csc(k8) < lrow) then
-!              left = k8 + 1_8
-!            else
-!              n_singles_a += 1
-!              singles_a(n_singles_a) = l_a
-!              last_found = k8+1_8
-!              exit
-!            endif
-!          enddo
-!          l_a = l_a+1
-!        enddo
-!        j = j-1
-!
-!      endif
-!-----
+      else
+
+ ! Search for singles
+
+ ! Right boundary
+        l_a = psi_bilinear_matrix_columns_loc(lcol+1)-1
+        ASSERT (l_a <= N_det)
+        do j=1,psi_bilinear_matrix_columns_loc(lcol+1) - psi_bilinear_matrix_columns_loc(lcol)
+          lrow = psi_bilinear_matrix_rows(l_a)
+          ASSERT (lrow <= N_det_alpha_unique)
+
+          left = singles_alpha_csc_idx(krow)
+          right_max = -1_8
+          right = singles_alpha_csc_idx(krow+1)
+          do while (right-left>0_8)
+            k8 = shiftr(right+left,1)
+            if (singles_alpha_csc(k8) > lrow) then
+              right = k8
+            else if (singles_alpha_csc(k8) < lrow) then
+              left = k8 + 1_8
+            else
+              right_max = k8+1_8
+              exit
+            endif
+          enddo
+          if (right_max > 0_8) exit
+          l_a = l_a-1
+        enddo
+        if (right_max < 0_8) right_max = singles_alpha_csc_idx(krow)
+
+ ! Search
+        n_singles_a = 0
+        l_a = psi_bilinear_matrix_columns_loc(lcol)
+        ASSERT (l_a <= N_det)
+
+        last_found = singles_alpha_csc_idx(krow)
+        do j=1,psi_bilinear_matrix_columns_loc(lcol+1) - psi_bilinear_matrix_columns_loc(lcol)
+          lrow = psi_bilinear_matrix_rows(l_a)
+          ASSERT (lrow <= N_det_alpha_unique)
+
+          left = last_found
+          right = right_max
+          do while (right-left>0_8)
+            k8 = shiftr(right+left,1)
+            if (singles_alpha_csc(k8) > lrow) then
+              right = k8
+            else if (singles_alpha_csc(k8) < lrow) then
+              left = k8 + 1_8
+            else
+              n_singles_a += 1
+              singles_a(n_singles_a) = l_a
+              last_found = k8+1_8
+              exit
+            endif
+          enddo
+          l_a = l_a+1
+        enddo
+        j = j-1
+
+      endif
+
 
       ! Loop over alpha singles
       ! -----------------------

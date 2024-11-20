@@ -5,7 +5,7 @@ double precision function get_ao_integ_chol(i,j,k,l)
   !     i(r1) j(r1) 1/r12 k(r2) l(r2)
   END_DOC
  integer, intent(in) :: i,j,k,l
- double precision, external :: ddot                                                                                  
+ double precision, external :: ddot
  get_ao_integ_chol = ddot(cholesky_ao_num, cholesky_ao_transp(1,i,j), 1, cholesky_ao_transp(1,k,l), 1)
 
 end
@@ -76,11 +76,10 @@ END_PROVIDER
    ndim8 = ao_num*ao_num*1_8+1
    double precision :: wall0,wall1
 
-   type(c_ptr)                    :: c_pointer(2)
-   integer                        :: fd(2)
+   type(mmap_type) :: map
 
    PROVIDE nproc ao_cholesky_threshold do_direct_integrals qp_max_mem
-   PROVIDE nucl_coord ao_two_e_integral_schwartz
+   PROVIDE nucl_coord
    call set_multiple_levels_omp(.False.)
 
    call wall_time(wall0)
@@ -156,7 +155,7 @@ END_PROVIDER
        enddo
        !$OMP END PARALLEL DO
      endif
-     ! Just to guarentee termination 
+     ! Just to guarentee termination
      D(ndim8) = 0.d0
 
      D_sorted(:) = -D(:)
@@ -181,14 +180,9 @@ END_PROVIDER
      if (elec_num > 10) then
        rank_max = min(np,20*elec_num*elec_num)
      endif
-     call mmap(trim(ezfio_work_dir)//'cholesky_ao_tmp', (/ ndim8, rank_max /), 8, fd(1), .False., .True., c_pointer(1))
-     call c_f_pointer(c_pointer(1), L, (/ ndim8, rank_max /))
 
-     ! Deleting the file while it is open makes the file invisible on the filesystem,
-     ! and automatically deleted, even if the program crashes
-     iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_ao_tmp', 'R')
-     close(iunit,status='delete')
-
+     call mmap_create_d('', (/ ndim8, rank_max /), .False., .True., map)
+     L => map%d2
 
      ! 3.
      N = 0
@@ -205,7 +199,7 @@ END_PROVIDER
      do while ( (Dmax > tau).and.(np > 0) )
        ! a.
        i = i+1
-       
+
 
 
        block_size = max(N,24)
@@ -317,7 +311,7 @@ END_PROVIDER
        ! g.
 
        iblock = 0
-       
+
        do j=1,nq
 
          if ( (Qmax < Dmin).or.(N+j*1_8 > ndim8) ) exit
@@ -480,7 +474,7 @@ END_PROVIDER
      enddo
      !$OMP END PARALLEL DO
 
-     call munmap( (/ ndim8, rank_max /), 8, fd(1), c_pointer(1) )
+     call mmap_destroy(map)
 
      cholesky_ao_num = rank
 

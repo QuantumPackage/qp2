@@ -894,9 +894,8 @@ END_PROVIDER
    do t=1, pt2_N_teeth
      tooth_width = tilde_cW(pt2_n_0(t+1)) - tilde_cW(pt2_n_0(t))
      if (tooth_width == 0.d0) then
-       tooth_width = sum(tilde_w(pt2_n_0(t):pt2_n_0(t+1)))
+       tooth_width = max(1.d-15,sum(tilde_w(pt2_n_0(t):pt2_n_0(t+1))))
      endif
-     ASSERT(tooth_width > 0.d0)
      do i=pt2_n_0(t)+1, pt2_n_0(t+1)
        pt2_w(i) = tilde_w(i) * pt2_W_T / tooth_width
      end do

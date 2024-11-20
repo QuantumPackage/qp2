@@ -60,3 +60,16 @@ BEGIN_PROVIDER [ character*(1024), ezfio_work_dir ]
  ezfio_work_dir = trim(ezfio_filename)//'/work/'
 END_PROVIDER
 
+BEGIN_PROVIDER [ character*(1024), ezfio_work_dir_pid ]
+ use c_functions
+ implicit none
+ BEGIN_DOC
+ ! EZFIO/work/pid_
+ END_DOC
+ character*(32)                 :: pid_str
+ integer :: getpid
+
+ write(pid_str,*) getpid()
+ ezfio_work_dir_pid = trim(ezfio_work_dir)//'/'//trim(pid_str)//'_'
+END_PROVIDER
+

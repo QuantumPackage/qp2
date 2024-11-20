@@ -30,31 +30,30 @@
     ref_bitmask_energy += mo_one_e_integrals(occ(i,1),occ(i,1)) + mo_one_e_integrals(occ(i,2),occ(i,2))
     ref_bitmask_kinetic_energy += mo_kinetic_integrals(occ(i,1),occ(i,1)) + mo_kinetic_integrals(occ(i,2),occ(i,2))
     ref_bitmask_n_e_energy += mo_integrals_n_e(occ(i,1),occ(i,1)) + mo_integrals_n_e(occ(i,2),occ(i,2))
+    do j = i+1, elec_alpha_num
+      ref_bitmask_two_e_energy += mo_two_e_integrals_jj_anti(occ(j,1),occ(i,1))
+      ref_bitmask_energy += mo_two_e_integrals_jj_anti(occ(j,1),occ(i,1))
+    enddo
+    do j= 1, elec_alpha_num
+      ref_bitmask_two_e_energy += mo_two_e_integrals_jj(occ(j,1),occ(i,2))
+      ref_bitmask_energy += mo_two_e_integrals_jj(occ(j,1),occ(i,2))
+    enddo
+    do j = i+1, elec_beta_num
+      ref_bitmask_two_e_energy += mo_two_e_integrals_jj_anti(occ(j,2),occ(i,2))
+      ref_bitmask_energy += mo_two_e_integrals_jj_anti(occ(j,2),occ(i,2))
+    enddo
   enddo
 
   do i = elec_beta_num+1,elec_alpha_num
     ref_bitmask_energy += mo_one_e_integrals(occ(i,1),occ(i,1))
     ref_bitmask_kinetic_energy += mo_kinetic_integrals(occ(i,1),occ(i,1))
     ref_bitmask_n_e_energy += mo_integrals_n_e(occ(i,1),occ(i,1))
-  enddo
-
-  do j= 1, elec_alpha_num
-    do i = j+1, elec_alpha_num
-      ref_bitmask_two_e_energy += mo_two_e_integrals_jj_anti(occ(i,1),occ(j,1))
-      ref_bitmask_energy += mo_two_e_integrals_jj_anti(occ(i,1),occ(j,1))
+    do j = i+1, elec_alpha_num
+      ref_bitmask_two_e_energy += mo_two_e_integrals_jj_anti(occ(j,1),occ(i,1))
+      ref_bitmask_energy += mo_two_e_integrals_jj_anti(occ(j,1),occ(i,1))
     enddo
   enddo
 
-  do j= 1, elec_beta_num
-    do i = j+1, elec_beta_num
-      ref_bitmask_two_e_energy += mo_two_e_integrals_jj_anti(occ(i,2),occ(j,2))
-      ref_bitmask_energy += mo_two_e_integrals_jj_anti(occ(i,2),occ(j,2))
-    enddo
-    do i= 1, elec_alpha_num
-      ref_bitmask_two_e_energy += mo_two_e_integrals_jj(occ(i,1),occ(j,2))
-      ref_bitmask_energy += mo_two_e_integrals_jj(occ(i,1),occ(j,2))
-    enddo
-  enddo
   ref_bitmask_one_e_energy = ref_bitmask_kinetic_energy +   ref_bitmask_n_e_energy
 
  ref_bitmask_energy_ab = 0.d0

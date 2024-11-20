@@ -143,7 +143,7 @@ module gpu
       b, ldb, c, ldc) bind(C, name='gpu_dgeam')
       import
       type(c_ptr), value, intent(in)        :: handle
-      character(c_char), intent(in), value  :: transa, transb
+      character(c_char), intent(in)         :: transa, transb
       integer(c_int64_t), intent(in), value :: m, n, lda, ldb, ldc
       real(c_double), intent(in)            :: alpha, beta
       type(c_ptr), value :: a, b, c
@@ -153,7 +153,7 @@ module gpu
       b, ldb, c, ldc) bind(C, name='gpu_sgeam')
       import
       type(c_ptr), value, intent(in)        :: handle
-      character(c_char), intent(in), value  :: transa, transb
+      character(c_char), intent(in)         :: transa, transb
       integer(c_int64_t), intent(in), value :: m, n, lda, ldb, ldc
       real(c_float), intent(in)             :: alpha, beta
       real(c_float) :: a, b, c
@@ -194,7 +194,7 @@ module gpu
       b, ldb, beta, c, ldc) bind(C, name='gpu_sgemm')
       import
       type(c_ptr), value, intent(in)        :: handle
-      character(c_char), intent(in), value  :: transa, transb
+      character(c_char), intent(in)         :: transa, transb
       integer(c_int64_t), intent(in), value :: m, n, k, lda, ldb, ldc
       real(c_float), intent(in)             :: alpha, beta
       real(c_float) :: a, b, c
@@ -268,8 +268,12 @@ module gpu
       implicit none
       type(gpu_double1), intent(inout) :: ptr
       integer, intent(in) :: s
+      integer*8 :: s_8, n
 
-      call gpu_allocate_c(ptr%c, s*8_8)
+      s_8 = s
+      n = s_8 * 8_8
+
+      call gpu_allocate_c(ptr%c, n)
       call c_f_pointer(ptr%c, ptr%f, (/ s /))
     end subroutine
 
@@ -277,8 +281,13 @@ module gpu
       implicit none
       type(gpu_double2), intent(inout) :: ptr
       integer, intent(in) :: s1, s2
+      integer*8 :: s1_8, s2_8, n
 
-      call gpu_allocate_c(ptr%c, s1*s2*8_8)
+      s1_8 = s1
+      s2_8 = s2
+      n = s1_8 * s2_8 * 8_8
+
+      call gpu_allocate_c(ptr%c, n)
       call c_f_pointer(ptr%c, ptr%f, (/ s1, s2 /))
     end subroutine
 
@@ -286,8 +295,14 @@ module gpu
       implicit none
       type(gpu_double3), intent(inout) :: ptr
       integer, intent(in) :: s1, s2, s3
+      integer*8 :: s1_8, s2_8, s3_8, n
 
-      call gpu_allocate_c(ptr%c, s1*s2*s3*8_8)
+      s1_8 = s1
+      s2_8 = s2
+      s3_8 = s3
+      n = s1_8 * s2_8 * s3_8 * 8_8
+
+      call gpu_allocate_c(ptr%c, n)
       call c_f_pointer(ptr%c, ptr%f, (/ s1, s2, s3 /))
     end subroutine
 
@@ -295,8 +310,15 @@ module gpu
       implicit none
       type(gpu_double4), intent(inout) :: ptr
       integer, intent(in) :: s1, s2, s3, s4
+      integer*8 :: s1_8, s2_8, s3_8, s4_8, n
 
-      call gpu_allocate_c(ptr%c, s1*s2*s3*s4*8_8)
+      s1_8 = s1
+      s2_8 = s2
+      s3_8 = s3
+      s4_8 = s4
+      n = s1_8 * s2_8 * s3_8 * s4_8 * 8_8
+
+      call gpu_allocate_c(ptr%c, n)
       call c_f_pointer(ptr%c, ptr%f, (/ s1, s2, s3, s4 /))
     end subroutine
 
@@ -304,8 +326,16 @@ module gpu
       implicit none
       type(gpu_double5), intent(inout) :: ptr
       integer, intent(in) :: s1, s2, s3, s4, s5
+      integer*8 :: s1_8, s2_8, s3_8, s4_8, s5_8, n
 
-      call gpu_allocate_c(ptr%c, s1*s2*s3*s4*s5*8_8)
+      s1_8 = s1
+      s2_8 = s2
+      s3_8 = s3
+      s4_8 = s4
+      s5_8 = s5
+      n = s1_8 * s2_8 * s3_8 * s4_8 * s5_8 * 8_8
+
+      call gpu_allocate_c(ptr%c, n)
       call c_f_pointer(ptr%c, ptr%f, (/ s1, s2, s3, s4, s5 /))
     end subroutine
 
@@ -313,8 +343,17 @@ module gpu
       implicit none
       type(gpu_double6), intent(inout) :: ptr
       integer, intent(in) :: s1, s2, s3, s4, s5, s6
+      integer*8 :: s1_8, s2_8, s3_8, s4_8, s5_8, s6_8, n
 
-      call gpu_allocate_c(ptr%c, s1*s2*s3*s4*s5*s6*8_8)
+      s1_8 = s1
+      s2_8 = s2
+      s3_8 = s3
+      s4_8 = s4
+      s5_8 = s5
+      s6_8 = s6
+      n = s1_8 * s2_8 * s3_8 * s4_8 * s5_8 * s6_8 * 8_8
+
+      call gpu_allocate_c(ptr%c, n)
       call c_f_pointer(ptr%c, ptr%f, (/ s1, s2, s3, s4, s5, s6 /))
     end subroutine
 

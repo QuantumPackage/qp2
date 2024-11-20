@@ -14,6 +14,8 @@ Options:
 import sys
 import os
 import numpy as np
+import subprocess
+import tempfile
 from functools import reduce
 from ezfio import ezfio
 from docopt import docopt
@@ -77,10 +79,8 @@ def generate_xyz(l):
 
 def write_ezfio(trexio_filename, filename):
 
-    try:
-        trexio_file = trexio.File(trexio_filename,mode='r',back_end=trexio.TREXIO_TEXT)
-    except:
-        trexio_file = trexio.File(trexio_filename,mode='r',back_end=trexio.TREXIO_HDF5)
+    warnings = []
+    trexio_file = trexio.File(trexio_filename,mode='r',back_end=trexio.TREXIO_AUTO)
 
     ezfio.set_file(filename)
     ezfio.set_trexio_trexio_file(trexio_filename)
@@ -113,6 +113,7 @@ def write_ezfio(trexio_filename, filename):
         ezfio.set_nuclei_nucl_coord([0.,0.,0.])
         ezfio.set_nuclei_nucl_label(["X"])
         print("None")
+        warnings.append("No geometry found in the TREXIO file")
 
 
 
@@ -142,7 +143,6 @@ def write_ezfio(trexio_filename, filename):
     try:
         basis_type = trexio.read_basis_type(trexio_file)
 
-        print ("BASIS TYPE: ", basis_type.lower())
         if basis_type.lower() in ["gaussian", "slater"]:
             shell_num   = trexio.read_basis_shell_num(trexio_file)
             prim_num    = trexio.read_basis_prim_num(trexio_file)
@@ -251,6 +251,7 @@ def write_ezfio(trexio_filename, filename):
 
         print(basis_type)
     except:
+        raise
         print("None")
         ezfio.set_ao_basis_ao_cartesian(True)
 
@@ -261,13 +262,23 @@ def write_ezfio(trexio_filename, filename):
     except:
         cartesian = True
 
-    if not cartesian:
-        raise TypeError('Only cartesian TREXIO files can be converted')
-
     ao_num = trexio.read_ao_num(trexio_file)
     ezfio.set_ao_basis_ao_num(ao_num)
 
-    if shell_num > 0:
+    trexio_file_cart = trexio_file
+    if basis_type.lower() == "gaussian" and not cartesian:
+        try:
+          import trexio_tools
+          fd, tmp = tempfile.mkstemp()
+          os.close(fd)
+          retcode = subprocess.call(["trexio", "convert-to", "-t", "cartesian", "-o", tmp, trexio_filename])
+          trexio_file_cart = trexio.File(tmp,mode='r',back_end=trexio.TREXIO_AUTO)
+          cartesian = trexio.read_ao_cartesian(trexio_file_cart)
+          os.unlink(tmp)
+        except:
+          pass
+
+    if cartesian and basis_type.lower() == "gaussian" and shell_num > 0:
         ao_shell    = trexio.read_ao_shell(trexio_file)
         at = [ nucl_index[i]+1 for i in ao_shell ]
         ezfio.set_ao_basis_ao_nucl(at)
@@ -330,7 +341,11 @@ def write_ezfio(trexio_filename, filename):
         print("OK")
 
     else:
+        if basis_type.lower() == "gaussian" and not cartesian:
+          warnings.append(f"Spherical AOs not handled by QP. Convert the TREXIO file using trexio_tools:\n trexio convert-to -t cartesian -o cartesian_{trexio_filename} {trexio_filename}")
+        warnings.append("Integrals should be imported using:\n qp run import_trexio_integrals")
         print("None")
+
 
 
     #                _
@@ -367,7 +382,8 @@ def write_ezfio(trexio_filename, filename):
       mo_num = trexio.read_mo_num(trexio_file)
       ezfio.set_mo_basis_mo_num(mo_num)
 
-      MoMatrix = trexio.read_mo_coefficient(trexio_file)
+      # Read coefs from temporary cartesian file created in the AO section
+      MoMatrix = trexio.read_mo_coefficient(trexio_file_cart)
       ezfio.set_mo_basis_mo_coef(MoMatrix)
 
       mo_occ = [ 0. for i in range(mo_num) ]
@@ -474,7 +490,7 @@ def write_ezfio(trexio_filename, filename):
          alpha = [ alpha[i] for i in range(num_alpha) ]
          beta  = [ i for i in range(len(spin)) if spin[i] == 1 ]
          beta  = [ beta[i] for i in range(num_beta) ]
-         print("Warning -- UHF orbitals --", end=' ')
+         warnings.append("UHF orbitals orbitals read", end=' ')
     alpha_s = ['0']*mo_num
     beta_s  = ['0']*mo_num
     for i in alpha:
@@ -499,6 +515,12 @@ def write_ezfio(trexio_filename, filename):
     ezfio.set_determinants_psi_det(alpha+beta)
     ezfio.set_determinants_psi_coef([[1.0]])
     print("OK")
+
+
+    for w in warnings:
+      s = "-------------"
+      print (s)
+      print (w)
 
 
 

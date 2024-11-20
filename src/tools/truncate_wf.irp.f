@@ -56,9 +56,14 @@ subroutine routine_s2
  double precision :: accu(N_states)
 
  print *,  'Weights of the CFG'
- do i=1,N_det
+ integer :: step
+
+ step = max(1,N_det/100)
+ do i=1,N_det-1,step
    print *,  i, real(weight_configuration(det_to_configuration(i),:)), real(sum(weight_configuration(det_to_configuration(i),:)))
  enddo
+ i=N_det
+ print *,  i, real(weight_configuration(det_to_configuration(i),:)), real(sum(weight_configuration(det_to_configuration(i),:)))
  print*, 'Min weight of the configuration?'
  read(5,*) wmin
 

@@ -51,6 +51,11 @@ END_DOC
 !
   PROVIDE FPS_SPF_matrix_AO Fock_matrix_AO 
 
+  ! Initialize MO to run IMOM
+  if(do_mom)then
+     call initialize_mo_coef_begin_iteration
+  endif
+  
   converged = .False.
   do while ( .not.converged .and. (iteration_SCF < n_it_SCF_max) )
 
@@ -88,16 +93,17 @@ END_DOC
       Fock_matrix_AO_beta  = Fock_matrix_AO*0.5d0
       TOUCH Fock_matrix_AO_alpha Fock_matrix_AO_beta
 
-    endif
-
+   endif
     MO_coef = eigenvectors_Fock_matrix_MO
+    if(do_mom)then
+       call reorder_mo_max_overlap
+    endif
     if(frozen_orb_scf)then
-     call reorder_core_orb
-     call initialize_mo_coef_begin_iteration
+      call reorder_core_orb
+      call initialize_mo_coef_begin_iteration
     endif
 
     TOUCH MO_coef
-
 !   Calculate error vectors
 
     max_error_DIIS = maxval(Abs(FPS_SPF_Matrix_MO))
@@ -106,41 +112,46 @@ END_DOC
 
     energy_SCF = SCF_energy
     Delta_Energy_SCF = energy_SCF - energy_SCF_previous
-    if ( (SCF_algorithm == 'DIIS').and.(Delta_Energy_SCF > 0.d0) ) then
+    if ( (SCF_algorithm == 'DIIS').and.(Delta_Energy_SCF > 0.d0).and.(.not.do_mom) ) then
       Fock_matrix_AO(1:ao_num,1:ao_num) = Fock_matrix_DIIS (1:ao_num,1:ao_num,index_dim_DIIS)
       Fock_matrix_AO_alpha = Fock_matrix_AO*0.5d0
       Fock_matrix_AO_beta  = Fock_matrix_AO*0.5d0
       TOUCH Fock_matrix_AO_alpha Fock_matrix_AO_beta
     endif
 
-    double precision :: level_shift_save
-    level_shift_save = level_shift
-    mo_coef_save(1:ao_num,1:mo_num) = mo_coef(1:ao_num,1:mo_num)
-    do while (Delta_energy_SCF > 0.d0)
-      mo_coef(1:ao_num,1:mo_num) = mo_coef_save
-      if (level_shift <= .1d0) then
-        level_shift = 1.d0
-      else
-        level_shift = level_shift * 3.0d0
-      endif
-      TOUCH mo_coef level_shift
-      mo_coef(1:ao_num,1:mo_num) = eigenvectors_Fock_matrix_MO(1:ao_num,1:mo_num)
-      if(frozen_orb_scf)then
-        call reorder_core_orb
-        call initialize_mo_coef_begin_iteration
-      endif
-      TOUCH mo_coef
-      Delta_Energy_SCF = SCF_energy - energy_SCF_previous
-      energy_SCF = SCF_energy
-      if (level_shift-level_shift_save > 40.d0) then
-        level_shift = level_shift_save * 4.d0
-        SOFT_TOUCH level_shift
-        exit
-      endif
-      dim_DIIS=0
-    enddo
-    level_shift = level_shift * 0.5d0
-    SOFT_TOUCH level_shift
+    if (.not.do_mom) then
+       double precision :: level_shift_save
+       level_shift_save = level_shift
+       mo_coef_save(1:ao_num,1:mo_num) = mo_coef(1:ao_num,1:mo_num)
+       do while (Delta_energy_SCF > 0.d0)
+          mo_coef(1:ao_num,1:mo_num) = mo_coef_save
+          if (level_shift <= .1d0) then
+             level_shift = 1.d0
+          else
+             level_shift = level_shift * 3.0d0
+          endif
+          TOUCH mo_coef level_shift
+          mo_coef(1:ao_num,1:mo_num) = eigenvectors_Fock_matrix_MO(1:ao_num,1:mo_num)
+          if(do_mom)then
+             call reorder_mo_max_overlap
+          endif
+          if(frozen_orb_scf)then
+             call reorder_core_orb
+             call initialize_mo_coef_begin_iteration
+          endif
+          TOUCH mo_coef
+          Delta_Energy_SCF = SCF_energy - energy_SCF_previous
+          energy_SCF = SCF_energy
+          if (level_shift-level_shift_save > 40.d0) then
+             level_shift = level_shift_save * 4.d0
+             SOFT_TOUCH level_shift
+             exit
+          endif
+          dim_DIIS=0
+       enddo
+       level_shift = level_shift * 0.5d0
+       SOFT_TOUCH level_shift
+    endif
     energy_SCF_previous = energy_SCF
 
     converged = ( (max_error_DIIS <= threshold_DIIS_nonzero) .and. &
@@ -205,7 +216,7 @@ END_DOC
 
   if(.not.frozen_orb_scf)then
    call mo_as_eigvectors_of_mo_matrix(Fock_matrix_mo,size(Fock_matrix_mo,1), &
-      size(Fock_matrix_mo,2),mo_label,1,.true.)
+        size(Fock_matrix_mo,2),mo_label,1,.true.)
    call restore_symmetry(ao_num, mo_num, mo_coef, size(mo_coef,1), 1.d-10)
    call orthonormalize_mos
   endif
@@ -228,6 +239,9 @@ END_DOC
     i = j+1
   enddo
 
+  if(do_mom)then
+     call reorder_mo_max_overlap
+  endif
 
   call save_mos
 
