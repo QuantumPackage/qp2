@@ -14,4 +14,5 @@ subroutine routine
  implicit none
  print*,'average_extrapolated_on_top = ',average_extrapolated_on_top
  print*,'average_on_top              = ',average_on_top
+ print*,'mu_average_prov             = ',mu_average_prov
 end
