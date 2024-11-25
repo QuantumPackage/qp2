@@ -388,7 +388,6 @@ def write_ezfio(trexio_filename, filename):
       # Renormalize MO coefs if needed
       if trexio.has_ao_normalization(trexio_file_cart):
         norm = trexio.read_ao_normalization(trexio_file_cart)
-        print (norm)
         for j in range(mo_num):
           for i,f in enumerate(norm):
              MoMatrix[i,j] *= f
