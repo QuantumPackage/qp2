@@ -1672,23 +1672,3 @@ recursive subroutine I_x2_pol_mult_cgtos(c, B_10, B_01, B_00, C_00, D_00, d, nd,
 
 end
 
-! ---
-
-BEGIN_PROVIDER [logical, use_pw]
-
-  implicit none
-
-  logical :: exist
-
-  use_pw = .false.
-
-  call ezfio_has_ao_basis_ao_expo_pw(exist)
-  if(exist) then
-    PROVIDE ao_expo_pw_ord_transp
-    if(maxval(dabs(ao_expo_pw_ord_transp(4,:,:))) .gt. 1d-15) use_pw = .true.
-  endif
-
-END_PROVIDER
-
-! ---
-

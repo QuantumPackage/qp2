@@ -282,3 +282,23 @@ END_PROVIDER
 
 
 
+! ---
+
+BEGIN_PROVIDER [logical, use_pw]
+
+  implicit none
+
+  logical :: exist
+
+  use_pw = .false.
+
+  call ezfio_has_ao_basis_ao_expo_pw(exist)
+  if(exist) then
+    PROVIDE ao_expo_pw_ord_transp
+    if(maxval(dabs(ao_expo_pw_ord_transp(4,:,:))) .gt. 1d-15) use_pw = .true.
+  endif
+
+END_PROVIDER
+
+! ---
+
