@@ -384,6 +384,14 @@ def write_ezfio(trexio_filename, filename):
 
       # Read coefs from temporary cartesian file created in the AO section
       MoMatrix = trexio.read_mo_coefficient(trexio_file_cart)
+
+      # Renormalize MO coefs if needed
+      if trexio.has_ao_normalization(trexio_file_cart):
+        norm = trexio.read_ao_normalization(trexio_file_cart)
+        print (norm)
+        for j in range(mo_num):
+          for i,f in enumerate(norm):
+             MoMatrix[i,j] *= f
       ezfio.set_mo_basis_mo_coef(MoMatrix)
 
       mo_occ = [ 0. for i in range(mo_num) ]
@@ -486,10 +494,10 @@ def write_ezfio(trexio_filename, filename):
     if trexio.has_mo_spin(trexio_file):
        spin = trexio.read_mo_spin(trexio_file)
        if max(spin) == 1:
-         alpha = [ i for i in range(len(spin)) if spin[i] == 0 ]
-         alpha = [ alpha[i] for i in range(num_alpha) ]
-         beta  = [ i for i in range(len(spin)) if spin[i] == 1 ]
-         beta  = [ beta[i] for i in range(num_beta) ]
+         tmp   = [ i for i in range(len(spin)) if spin[i] == 0 ]
+         alpha = [ tmp[i] for i in range(num_alpha) ]
+         tmp   = [ i for i in range(len(spin)) if spin[i] == 1 ]
+         beta  = [ tmp[i] for i in range(num_beta) ]
          warnings.append("UHF orbitals orbitals read", end=' ')
     alpha_s = ['0']*mo_num
     beta_s  = ['0']*mo_num
