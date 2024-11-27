@@ -160,7 +160,6 @@ def write_ezfio(trexio_filename, filename):
             ezfio.set_basis_shell_ang_mom(ang_mom)
             ezfio.set_basis_basis_nucleus_index([ x+1 for x in nucl_index ])
             ezfio.set_basis_prim_expo(exponent)
-            ezfio.set_basis_prim_coef(coefficient)
 
             nucl_shell_num = []
             prev = None
@@ -194,6 +193,10 @@ def write_ezfio(trexio_filename, filename):
 
             shell_factor = trexio.read_basis_shell_factor(trexio_file)
             prim_factor  = trexio.read_basis_prim_factor(trexio_file)
+            for i,p in enumerate(prim_factor):
+                coefficient[i] *= prim_factor[i]
+            ezfio.set_ao_basis_primitives_normalized(False)
+            ezfio.set_basis_prim_coef(coefficient)
 
         elif basis_type.lower() == "numerical":
 
@@ -245,7 +248,6 @@ def write_ezfio(trexio_filename, filename):
             ezfio.set_basis_nucleus_shell_num(nucl_shell_num)
 
             shell_factor = trexio.read_basis_shell_factor(trexio_file)
-            prim_factor  = [1.]*prim_num
         else:
            raise TypeError
 
@@ -387,10 +389,11 @@ def write_ezfio(trexio_filename, filename):
 
       # Renormalize MO coefs if needed
       if trexio.has_ao_normalization(trexio_file_cart):
+        ezfio.set_ao_basis_ao_normalized(False)
         norm = trexio.read_ao_normalization(trexio_file_cart)
-        for j in range(mo_num):
-          for i,f in enumerate(norm):
-             MoMatrix[i,j] *= f
+#        for j in range(mo_num):
+#           for i,f in enumerate(norm):
+#              MoMatrix[i,j] *= f
       ezfio.set_mo_basis_mo_coef(MoMatrix)
 
       mo_occ = [ 0. for i in range(mo_num) ]
