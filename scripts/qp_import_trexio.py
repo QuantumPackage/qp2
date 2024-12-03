@@ -264,9 +264,6 @@ def write_ezfio(trexio_filename, filename):
     except:
         cartesian = True
 
-    ao_num = trexio.read_ao_num(trexio_file)
-    ezfio.set_ao_basis_ao_num(ao_num)
-
     trexio_file_cart = trexio_file
     if basis_type.lower() == "gaussian" and not cartesian:
         try:
@@ -280,8 +277,12 @@ def write_ezfio(trexio_filename, filename):
         except:
           pass
 
+    ao_num = trexio.read_ao_num(trexio_file_cart)
+    ezfio.set_ao_basis_ao_num(ao_num)
+
+
     if cartesian and basis_type.lower() == "gaussian" and shell_num > 0:
-        ao_shell    = trexio.read_ao_shell(trexio_file)
+        ao_shell    = trexio.read_ao_shell(trexio_file_cart)
         at = [ nucl_index[i]+1 for i in ao_shell ]
         ezfio.set_ao_basis_ao_nucl(at)
 
@@ -316,6 +317,7 @@ def write_ezfio(trexio_filename, filename):
                 exponent.append(expo[i])
                 num_prim.append(num_prim0[i])
 
+        print (len(coefficient), ao_num)
         assert (len(coefficient) == ao_num)
         ezfio.set_ao_basis_ao_power(power_x + power_y + power_z)
         ezfio.set_ao_basis_ao_prim_num(num_prim)
