@@ -1,4 +1,4 @@
-program print_2rdm
+program get_energy
  implicit none
  BEGIN_DOC
  ! get the active part of the bielectronic energy on a given wave function.

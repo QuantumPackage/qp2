@@ -1,4 +1,4 @@
-program import_integrals_ao
+program import_trexio_integrals
   use trexio
   implicit none
   integer(trexio_t)              :: f ! TREXIO file handle

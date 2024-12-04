@@ -19,7 +19,7 @@ The main providers for this module are:
 The main routines for this module are:
 
 * :c:func:`i_H_j`: computes the Hamiltonian matrix element between two arbitrary Slater determinants.
-* :c:func:`i_H_j_s2`: computes the Hamiltonian and (|S^2|) matrix element between two arbitrary Slater determinants.
+* :c:function:`i_h_j_s2`: computes the Hamiltonian and (|S^2|) matrix element between two arbitrary Slater determinants.
 * :c:func:`i_H_j_verbose`: returns the decomposition in terms of one- and two-body components of the Hamiltonian matrix elements between two arbitrary Slater determinants. Also return the fermionic phase factor.
 * :c:func:`i_H_psi`: computes the Hamiltonian matrix element between an arbitrary Slater determinant and a wave function composed of a sum of arbitrary Slater determinants.
 
@@ -75,9 +75,9 @@ EZFIO parameters
  
 .. option:: weight_selection
  
-    Weight used in the selection. 0: input state-average weight, 1: 1./(c_0^2), 2: rPT2 matching, 3: variance matching, 4: variance and rPT2 matching, 5: variance minimization and matching, 6: CI coefficients
+    Weight used in the selection. 0: input state-average weight, 1: 1./(c_0^2), 2: PT2 matching, 3: variance matching, 4: variance and PT2 matching, 5: variance minimization and matching, 6: CI coefficients 7: input state-average multiplied by variance and PT2 matching 8: input state-average multiplied by PT2 matching 9: input state-average multiplied by variance matching
  
-    Default: 2
+    Default: 1
  
 .. option:: threshold_generators
  
@@ -164,6 +164,12 @@ EZFIO parameters
  
     Default: False
  
+.. option:: save_threshold
+ 
+    Cut-off to apply to the CI coefficients when the wave function is stored
+ 
+    Default: 1.e-14
+ 
  
 Providers 
 --------- 
@@ -220,6 +226,56 @@ Providers
 
 
  
+.. c:var:: attachment_numbers_sorted
+
+
+    File : :file:`determinants/density_matrix.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: attachment_numbers_sorted	(mo_num,N_states)
+        double precision, allocatable	:: dettachment_numbers_sorted	(mo_num,N_states)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`difference_dm_eigvect`
+       * :c:data:`mo_num`
+       * :c:data:`n_attachment`
+       * :c:data:`n_states`
+
+
+ 
+.. c:var:: attachment_orbitals
+
+
+    File : :file:`determinants/density_matrix.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: attachment_orbitals	(ao_num,mo_num,N_states)
+        double precision, allocatable	:: dettachment_orbitals	(ao_num,mo_num,N_states)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`difference_dm_eigvect`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_num`
+       * :c:data:`n_attachment`
+       * :c:data:`n_states`
+
+
+ 
 .. c:var:: barycentric_electronic_energy
 
 
@@ -242,6 +298,12 @@ Providers
        * :c:data:`n_states`
        * :c:data:`psi_coef`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`pt2_e0_denominator`
 
  
 .. c:var:: c0_weight
@@ -269,6 +331,7 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`selection_weight`
        * :c:data:`state_average_weight`
 
  
@@ -330,38 +393,54 @@ Providers
 
 
  
-.. c:var:: det_to_occ_pattern
+.. c:var:: dettachment_numbers_sorted
 
 
-    File : :file:`determinants/occ_pattern.irp.f`
+    File : :file:`determinants/density_matrix.irp.f`
 
     .. code:: fortran
 
-        integer, allocatable	:: det_to_occ_pattern	(N_det)
+        double precision, allocatable	:: attachment_numbers_sorted	(mo_num,N_states)
+        double precision, allocatable	:: dettachment_numbers_sorted	(mo_num,N_states)
 
 
-    Returns the index of the occupation pattern for each determinant
 
     Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`elec_alpha_num`
-       * :c:data:`n_det`
-       * :c:data:`n_int`
-       * :c:data:`psi_det`
-       * :c:data:`psi_occ_pattern`
+       * :c:data:`difference_dm_eigvect`
+       * :c:data:`mo_num`
+       * :c:data:`n_attachment`
+       * :c:data:`n_states`
 
-    Needed by:
+
+ 
+.. c:var:: dettachment_orbitals
+
+
+    File : :file:`determinants/density_matrix.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: attachment_orbitals	(ao_num,mo_num,N_states)
+        double precision, allocatable	:: dettachment_orbitals	(ao_num,mo_num,N_states)
+
+
+
+    Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`pruned`
-       * :c:data:`psi_occ_pattern_hii`
-       * :c:data:`weight_occ_pattern`
-       * :c:data:`weight_occ_pattern_average`
+       * :c:data:`ao_num`
+       * :c:data:`difference_dm_eigvect`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_num`
+       * :c:data:`n_attachment`
+       * :c:data:`n_states`
+
 
  
 .. c:var:: diagonal_h_matrix_on_psi_det
@@ -381,8 +460,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
        * :c:data:`elec_num`
        * :c:data:`n_det`
        * :c:data:`n_int`
@@ -396,6 +473,128 @@ Providers
        :columns: 3
 
        * :c:data:`barycentric_electronic_energy`
+
+ 
+.. c:var:: difference_dm
+
+
+    File : :file:`determinants/density_matrix.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: difference_dm	(mo_num,mo_num,N_states)
+
+
+    difference_dm(i,j,istate) = dm(i,j,1) - dm(i,j,istate)
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_num`
+       * :c:data:`n_states`
+       * :c:data:`one_e_dm_mo_alpha`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`difference_dm_eigvect`
+
+ 
+.. c:var:: difference_dm_eigval
+
+
+    File : :file:`determinants/density_matrix.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: difference_dm_eigvect	(mo_num,mo_num,N_states)
+        double precision, allocatable	:: difference_dm_eigval	(mo_num,N_states)
+
+
+    eigenvalues and eigevenctors of the difference_dm
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`difference_dm`
+       * :c:data:`mo_num`
+       * :c:data:`n_states`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`attachment_numbers_sorted`
+       * :c:data:`attachment_orbitals`
+       * :c:data:`n_attachment`
+
+ 
+.. c:var:: difference_dm_eigvect
+
+
+    File : :file:`determinants/density_matrix.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: difference_dm_eigvect	(mo_num,mo_num,N_states)
+        double precision, allocatable	:: difference_dm_eigval	(mo_num,N_states)
+
+
+    eigenvalues and eigevenctors of the difference_dm
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`difference_dm`
+       * :c:data:`mo_num`
+       * :c:data:`n_states`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`attachment_numbers_sorted`
+       * :c:data:`attachment_orbitals`
+       * :c:data:`n_attachment`
+
+ 
+.. c:var:: dominant_det
+
+
+    File : :file:`determinants/determinants.irp.f`
+
+    .. code:: fortran
+
+        integer, allocatable	:: dominant_det	(N_states)
+
+
+    Determinant with the largest weight, for each state
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_det`
+       * :c:data:`n_states`
+       * :c:data:`psi_coef`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`dominant_cfg`
 
  
 .. c:var:: double_exc_bitmask
@@ -473,7 +672,11 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`cholesky_mo_num`
+       * :c:data:`cholesky_mo_transp`
+       * :c:data:`do_mo_cholesky`
        * :c:data:`full_ijkl_bitmask`
+       * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
        * :c:data:`mo_one_e_integrals`
@@ -499,7 +702,11 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`cholesky_mo_num`
+       * :c:data:`cholesky_mo_transp`
+       * :c:data:`do_mo_cholesky`
        * :c:data:`full_ijkl_bitmask`
+       * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_in_map`
@@ -579,8 +786,6 @@ Providers
 
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`big_array_coulomb_integrals`
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det`
@@ -614,8 +819,6 @@ Providers
 
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`big_array_coulomb_integrals`
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_int`
@@ -628,6 +831,33 @@ Providers
 
        * :c:data:`psi_cas_energy`
        * :c:data:`psi_coef_cas_diagonalized`
+
+ 
+.. c:var:: h_matrix_diag_all_dets
+
+
+    File : :file:`determinants/utils.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: h_matrix_diag_all_dets	(N_det)
+
+
+    |H| matrix on the basis of the Slater determinants defined by psi_det
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`mo_integrals_map`
+       * :c:data:`mo_two_e_integrals_in_map`
+       * :c:data:`n_det`
+       * :c:data:`n_int`
+       * :c:data:`psi_det`
+
 
  
 .. c:var:: idx_cas
@@ -712,6 +942,70 @@ Providers
        * :c:data:`psi_non_cas_sorted_bit`
 
  
+.. c:var:: list_attachment
+
+
+    File : :file:`determinants/density_matrix.irp.f`
+
+    .. code:: fortran
+
+        integer, allocatable	:: n_attachment	(N_states)
+        integer, allocatable	:: n_dettachment	(N_states)
+        integer, allocatable	:: list_attachment	(mo_num,N_states)
+        integer, allocatable	:: list_dettachment	(mo_num,N_states)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`difference_dm_eigvect`
+       * :c:data:`mo_num`
+       * :c:data:`n_states`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`attachment_numbers_sorted`
+       * :c:data:`attachment_orbitals`
+
+ 
+.. c:var:: list_dettachment
+
+
+    File : :file:`determinants/density_matrix.irp.f`
+
+    .. code:: fortran
+
+        integer, allocatable	:: n_attachment	(N_states)
+        integer, allocatable	:: n_dettachment	(N_states)
+        integer, allocatable	:: list_attachment	(mo_num,N_states)
+        integer, allocatable	:: list_dettachment	(mo_num,N_states)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`difference_dm_eigvect`
+       * :c:data:`mo_num`
+       * :c:data:`n_states`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`attachment_numbers_sorted`
+       * :c:data:`attachment_orbitals`
+
+ 
 .. c:var:: max_degree_exc
 
 
@@ -735,6 +1029,38 @@ Providers
        * :c:data:`n_int`
        * :c:data:`psi_det`
 
+
+ 
+.. c:var:: n_attachment
+
+
+    File : :file:`determinants/density_matrix.irp.f`
+
+    .. code:: fortran
+
+        integer, allocatable	:: n_attachment	(N_states)
+        integer, allocatable	:: n_dettachment	(N_states)
+        integer, allocatable	:: list_attachment	(mo_num,N_states)
+        integer, allocatable	:: list_dettachment	(mo_num,N_states)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`difference_dm_eigvect`
+       * :c:data:`mo_num`
+       * :c:data:`n_states`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`attachment_numbers_sorted`
+       * :c:data:`attachment_orbitals`
 
  
 .. c:var:: n_det
@@ -769,20 +1095,33 @@ Providers
        * :c:data:`act_2_rdm_ab_mo`
        * :c:data:`act_2_rdm_bb_mo`
        * :c:data:`act_2_rdm_spin_trace_mo`
+       * :c:data:`act_2_rdm_trans_spin_trace_mo`
        * :c:data:`barycentric_electronic_energy`
        * :c:data:`ci_electronic_energy`
        * :c:data:`ci_energy`
        * :c:data:`det_alpha_norm`
-       * :c:data:`det_to_occ_pattern`
+       * :c:data:`det_to_configuration`
        * :c:data:`diag_algorithm`
        * :c:data:`diagonal_h_matrix_on_psi_det`
+       * :c:data:`dominant_cfg`
+       * :c:data:`dominant_det`
        * :c:data:`dressed_column_idx`
        * :c:data:`dressing_column_h`
+       * :c:data:`gradvec_old`
        * :c:data:`h_apply_buffer_allocated`
        * :c:data:`h_matrix_all_dets`
+       * :c:data:`h_matrix_diag_all_dets`
+       * :c:data:`hessmat_old`
        * :c:data:`max_degree_exc`
+       * :c:data:`multi_s_dipole_moment`
+       * :c:data:`n_det_generators`
        * :c:data:`n_det_qp_edit`
+       * :c:data:`n_det_selectors`
        * :c:data:`one_e_dm_mo_alpha`
+       * :c:data:`one_e_tr_dm_mo`
+       * :c:data:`one_e_tr_dm_mo_alpha`
+       * :c:data:`overlap_states`
+       * :c:data:`p0tuvx_peter`
        * :c:data:`pruned`
        * :c:data:`psi_average_norm_contrib`
        * :c:data:`psi_bilinear_matrix`
@@ -794,27 +1133,30 @@ Providers
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_cas`
        * :c:data:`psi_coef`
+       * :c:data:`psi_configuration`
+       * :c:data:`psi_configuration_hii`
+       * :c:data:`psi_configuration_to_psi_det`
+       * :c:data:`psi_csf_coef`
        * :c:data:`psi_det`
        * :c:data:`psi_det_alpha`
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_beta`
        * :c:data:`psi_det_beta_unique`
+       * :c:data:`psi_det_generators`
        * :c:data:`psi_det_hii`
        * :c:data:`psi_det_sorted`
        * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_energy`
        * :c:data:`psi_energy_two_e`
+       * :c:data:`psi_energy_two_e_trans`
        * :c:data:`psi_non_cas`
-       * :c:data:`psi_occ_pattern`
-       * :c:data:`psi_occ_pattern_hii`
        * :c:data:`s2_matrix_all_dets`
        * :c:data:`s2_values`
        * :c:data:`state_av_act_2_rdm_aa_mo`
        * :c:data:`state_av_act_2_rdm_ab_mo`
        * :c:data:`state_av_act_2_rdm_bb_mo`
-       * :c:data:`state_av_act_2_rdm_spin_trace_mo`
-       * :c:data:`weight_occ_pattern`
-       * :c:data:`weight_occ_pattern_average`
+       * :c:data:`weight_configuration`
+       * :c:data:`weight_configuration_average`
 
  
 .. c:var:: n_det_alpha_unique
@@ -847,13 +1189,16 @@ Providers
        :columns: 3
 
        * :c:data:`det_alpha_norm`
+       * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
+       * :c:data:`one_e_tr_dm_mo`
+       * :c:data:`one_e_tr_dm_mo_alpha`
        * :c:data:`psi_bilinear_matrix`
        * :c:data:`psi_bilinear_matrix_transp_rows_loc`
-       * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`singles_alpha_csc`
        * :c:data:`singles_alpha_csc_idx`
+       * :c:data:`singles_alpha_csc_map`
 
  
 .. c:var:: n_det_beta_unique
@@ -886,13 +1231,17 @@ Providers
        :columns: 3
 
        * :c:data:`det_alpha_norm`
+       * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
+       * :c:data:`one_e_tr_dm_mo`
+       * :c:data:`one_e_tr_dm_mo_alpha`
        * :c:data:`psi_bilinear_matrix`
        * :c:data:`psi_bilinear_matrix_columns_loc`
        * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`singles_beta_csc`
        * :c:data:`singles_beta_csc_idx`
+       * :c:data:`singles_beta_csc_map`
 
  
 .. c:var:: n_det_cas
@@ -998,6 +1347,38 @@ Providers
 
 
  
+.. c:var:: n_dettachment
+
+
+    File : :file:`determinants/density_matrix.irp.f`
+
+    .. code:: fortran
+
+        integer, allocatable	:: n_attachment	(N_states)
+        integer, allocatable	:: n_dettachment	(N_states)
+        integer, allocatable	:: list_attachment	(mo_num,N_states)
+        integer, allocatable	:: list_dettachment	(mo_num,N_states)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`difference_dm_eigvect`
+       * :c:data:`mo_num`
+       * :c:data:`n_states`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`attachment_numbers_sorted`
+       * :c:data:`attachment_orbitals`
+
+ 
 .. c:var:: n_double_exc_bitmasks
 
 
@@ -1018,49 +1399,6 @@ Providers
        * :c:data:`double_exc_bitmask`
 
  
-.. c:var:: n_occ_pattern
-
-
-    File : :file:`determinants/occ_pattern.irp.f`
-
-    .. code:: fortran
-
-        integer(bit_kind), allocatable	:: psi_occ_pattern	(N_int,2,psi_det_size)
-        integer	:: n_occ_pattern	
-
-
-    Array of the occ_patterns present in the wave function.
-    
-    psi_occ_pattern(:,1,j) = j-th occ_pattern of the wave function : represents all the single occupations
-    
-    psi_occ_pattern(:,2,j) = j-th occ_pattern of the wave function : represents all the double occupations
-    
-    The occ patterns are sorted by :c:func:`occ_pattern_search_key`
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`elec_alpha_num`
-       * :c:data:`n_det`
-       * :c:data:`n_int`
-       * :c:data:`psi_det`
-       * :c:data:`psi_det_size`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`det_to_occ_pattern`
-       * :c:data:`pruned`
-       * :c:data:`psi_occ_pattern_hii`
-       * :c:data:`psi_occ_pattern_sorted`
-       * :c:data:`weight_occ_pattern`
-       * :c:data:`weight_occ_pattern_average`
-
- 
 .. c:var:: n_single_exc_bitmasks
 
 
@@ -1079,6 +1417,28 @@ Providers
        :columns: 3
 
        * :c:data:`single_exc_bitmask`
+
+ 
+.. c:var:: one_e_dm_ao
+
+
+    File : :file:`determinants/density_matrix.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: one_e_dm_ao	(ao_num,ao_num)
+
+
+    one_e_dm_ao = one_e_dm_ao_alpha + one_e_dm_ao_beta
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`one_e_dm_ao_alpha`
+
 
  
 .. c:var:: one_e_dm_ao_alpha
@@ -1104,6 +1464,38 @@ Providers
        * :c:data:`mo_num`
        * :c:data:`one_e_dm_mo_alpha_average`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`one_e_dm_ao`
+
+ 
+.. c:var:: one_e_dm_ao_alpha_nstates
+
+
+    File : :file:`determinants/density_matrix.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: one_e_dm_ao_alpha_nstates	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: one_e_dm_ao_beta_nstates	(ao_num,ao_num,N_states)
+
+
+    One body density matrix on the |AO| basis : :math:`\rho_{AO}(\alpha), \rho_{AO}(\beta)` .
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_num`
+       * :c:data:`n_states`
+       * :c:data:`one_e_dm_mo_alpha`
+
 
  
 .. c:var:: one_e_dm_ao_beta
@@ -1128,6 +1520,38 @@ Providers
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
        * :c:data:`one_e_dm_mo_alpha_average`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`one_e_dm_ao`
+
+ 
+.. c:var:: one_e_dm_ao_beta_nstates
+
+
+    File : :file:`determinants/density_matrix.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: one_e_dm_ao_alpha_nstates	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: one_e_dm_ao_beta_nstates	(ao_num,ao_num,N_states)
+
+
+    One body density matrix on the |AO| basis : :math:`\rho_{AO}(\alpha), \rho_{AO}(\beta)` .
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_num`
+       * :c:data:`n_states`
+       * :c:data:`one_e_dm_mo_alpha`
 
 
  
@@ -1210,10 +1634,12 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`difference_dm`
        * :c:data:`full_occ_2_rdm_aa_mo`
        * :c:data:`full_occ_2_rdm_ab_mo`
        * :c:data:`full_occ_2_rdm_bb_mo`
        * :c:data:`full_occ_2_rdm_spin_trace_mo`
+       * :c:data:`one_e_dm_ao_alpha_nstates`
        * :c:data:`one_e_dm_dagger_mo_spin_index`
        * :c:data:`one_e_dm_mo_alpha_average`
        * :c:data:`one_e_dm_mo_alpha_for_dft`
@@ -1221,6 +1647,8 @@ Providers
        * :c:data:`one_e_dm_mo_diff`
        * :c:data:`one_e_dm_mo_spin_index`
        * :c:data:`psi_energy_h_core`
+       * :c:data:`v_ne_psi_energy`
+       * :c:data:`z_dipole_moment`
 
  
 .. c:var:: one_e_dm_mo_alpha_average
@@ -1251,6 +1679,8 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`d0tu`
+       * :c:data:`d0tu_alpha_ao`
        * :c:data:`one_e_dm_ao_alpha`
        * :c:data:`one_e_dm_mo`
        * :c:data:`one_e_dm_mo_alpha_for_dft`
@@ -1297,10 +1727,12 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`difference_dm`
        * :c:data:`full_occ_2_rdm_aa_mo`
        * :c:data:`full_occ_2_rdm_ab_mo`
        * :c:data:`full_occ_2_rdm_bb_mo`
        * :c:data:`full_occ_2_rdm_spin_trace_mo`
+       * :c:data:`one_e_dm_ao_alpha_nstates`
        * :c:data:`one_e_dm_dagger_mo_spin_index`
        * :c:data:`one_e_dm_mo_alpha_average`
        * :c:data:`one_e_dm_mo_alpha_for_dft`
@@ -1308,6 +1740,8 @@ Providers
        * :c:data:`one_e_dm_mo_diff`
        * :c:data:`one_e_dm_mo_spin_index`
        * :c:data:`psi_energy_h_core`
+       * :c:data:`v_ne_psi_energy`
+       * :c:data:`z_dipole_moment`
 
  
 .. c:var:: one_e_dm_mo_beta_average
@@ -1338,6 +1772,8 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`d0tu`
+       * :c:data:`d0tu_alpha_ao`
        * :c:data:`one_e_dm_ao_alpha`
        * :c:data:`one_e_dm_mo`
        * :c:data:`one_e_dm_mo_alpha_for_dft`
@@ -1446,6 +1882,105 @@ Providers
        * :c:data:`one_e_spin_density_ao`
 
  
+.. c:var:: one_e_tr_dm_mo
+
+
+    File : :file:`determinants/tr_density_matrix.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: one_e_tr_dm_mo	(mo_num,mo_num,N_states,N_states)
+
+
+    One body transition density matrix for all pairs of states n and m, < Psi^n | a_i^\dagger a_a | Psi^m >
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`elec_alpha_num`
+       * :c:data:`elec_beta_num`
+       * :c:data:`mo_num`
+       * :c:data:`n_det`
+       * :c:data:`n_int`
+       * :c:data:`n_states`
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`multi_s_deriv_1`
+       * :c:data:`multi_s_dipole_moment`
+
+ 
+.. c:var:: one_e_tr_dm_mo_alpha
+
+
+    File : :file:`determinants/tr_density_matrix.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: one_e_tr_dm_mo_alpha	(mo_num,mo_num,N_states,N_states)
+        double precision, allocatable	:: one_e_tr_dm_mo_beta	(mo_num,mo_num,N_states,N_states)
+
+
+    :math:`\alpha`  and :math:`\beta`  one-body transition density matrices for all pairs of states
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`elec_alpha_num`
+       * :c:data:`elec_beta_num`
+       * :c:data:`mo_num`
+       * :c:data:`n_det`
+       * :c:data:`n_int`
+       * :c:data:`n_states`
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+
+
+ 
+.. c:var:: one_e_tr_dm_mo_beta
+
+
+    File : :file:`determinants/tr_density_matrix.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: one_e_tr_dm_mo_alpha	(mo_num,mo_num,N_states,N_states)
+        double precision, allocatable	:: one_e_tr_dm_mo_beta	(mo_num,mo_num,N_states,N_states)
+
+
+    :math:`\alpha`  and :math:`\beta`  one-body transition density matrices for all pairs of states
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`elec_alpha_num`
+       * :c:data:`elec_beta_num`
+       * :c:data:`mo_num`
+       * :c:data:`n_det`
+       * :c:data:`n_int`
+       * :c:data:`n_states`
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+
+
+ 
 .. c:var:: pruned
 
 
@@ -1463,14 +1998,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`det_to_occ_pattern`
        * :c:data:`n_det`
        * :c:data:`pruning`
        * :c:data:`psi_average_norm_contrib`
        * :c:data:`psi_det_sorted`
-       * :c:data:`psi_occ_pattern`
-       * :c:data:`psi_occ_pattern_sorted`
-       * :c:data:`s2_eig`
 
 
  
@@ -1541,7 +2072,11 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`n_det_generators`
+       * :c:data:`n_det_selectors`
        * :c:data:`pruned`
+       * :c:data:`psi_det_generators`
+       * :c:data:`psi_selectors`
 
  
 .. c:var:: psi_bilinear_matrix
@@ -1614,8 +2149,12 @@ Providers
        * :c:data:`act_2_rdm_ab_mo`
        * :c:data:`act_2_rdm_bb_mo`
        * :c:data:`act_2_rdm_spin_trace_mo`
+       * :c:data:`act_2_rdm_trans_spin_trace_mo`
        * :c:data:`det_alpha_norm`
+       * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
+       * :c:data:`one_e_tr_dm_mo`
+       * :c:data:`one_e_tr_dm_mo_alpha`
        * :c:data:`psi_bilinear_matrix`
        * :c:data:`psi_bilinear_matrix_columns_loc`
        * :c:data:`psi_bilinear_matrix_order_reverse`
@@ -1623,7 +2162,6 @@ Providers
        * :c:data:`state_av_act_2_rdm_aa_mo`
        * :c:data:`state_av_act_2_rdm_ab_mo`
        * :c:data:`state_av_act_2_rdm_bb_mo`
-       * :c:data:`state_av_act_2_rdm_spin_trace_mo`
 
  
 .. c:var:: psi_bilinear_matrix_columns_loc
@@ -1698,8 +2236,12 @@ Providers
        * :c:data:`act_2_rdm_ab_mo`
        * :c:data:`act_2_rdm_bb_mo`
        * :c:data:`act_2_rdm_spin_trace_mo`
+       * :c:data:`act_2_rdm_trans_spin_trace_mo`
        * :c:data:`det_alpha_norm`
+       * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
+       * :c:data:`one_e_tr_dm_mo`
+       * :c:data:`one_e_tr_dm_mo_alpha`
        * :c:data:`psi_bilinear_matrix`
        * :c:data:`psi_bilinear_matrix_columns_loc`
        * :c:data:`psi_bilinear_matrix_order_reverse`
@@ -1707,7 +2249,6 @@ Providers
        * :c:data:`state_av_act_2_rdm_aa_mo`
        * :c:data:`state_av_act_2_rdm_ab_mo`
        * :c:data:`state_av_act_2_rdm_bb_mo`
-       * :c:data:`state_av_act_2_rdm_spin_trace_mo`
 
  
 .. c:var:: psi_bilinear_matrix_order_reverse
@@ -1739,10 +2280,10 @@ Providers
        * :c:data:`act_2_rdm_ab_mo`
        * :c:data:`act_2_rdm_bb_mo`
        * :c:data:`act_2_rdm_spin_trace_mo`
+       * :c:data:`act_2_rdm_trans_spin_trace_mo`
        * :c:data:`state_av_act_2_rdm_aa_mo`
        * :c:data:`state_av_act_2_rdm_ab_mo`
        * :c:data:`state_av_act_2_rdm_bb_mo`
-       * :c:data:`state_av_act_2_rdm_spin_trace_mo`
 
  
 .. c:var:: psi_bilinear_matrix_order_transp_reverse
@@ -1811,8 +2352,12 @@ Providers
        * :c:data:`act_2_rdm_ab_mo`
        * :c:data:`act_2_rdm_bb_mo`
        * :c:data:`act_2_rdm_spin_trace_mo`
+       * :c:data:`act_2_rdm_trans_spin_trace_mo`
        * :c:data:`det_alpha_norm`
+       * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
+       * :c:data:`one_e_tr_dm_mo`
+       * :c:data:`one_e_tr_dm_mo_alpha`
        * :c:data:`psi_bilinear_matrix`
        * :c:data:`psi_bilinear_matrix_columns_loc`
        * :c:data:`psi_bilinear_matrix_order_reverse`
@@ -1820,7 +2365,6 @@ Providers
        * :c:data:`state_av_act_2_rdm_aa_mo`
        * :c:data:`state_av_act_2_rdm_ab_mo`
        * :c:data:`state_av_act_2_rdm_bb_mo`
-       * :c:data:`state_av_act_2_rdm_spin_trace_mo`
 
  
 .. c:var:: psi_bilinear_matrix_transp_columns
@@ -1852,7 +2396,6 @@ Providers
        * :c:data:`n_states`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_det_sorted_bit`
-       * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_beta_unique`
 
     Needed by:
@@ -1860,7 +2403,10 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
+       * :c:data:`one_e_tr_dm_mo`
+       * :c:data:`one_e_tr_dm_mo_alpha`
        * :c:data:`psi_bilinear_matrix_order_transp_reverse`
        * :c:data:`psi_bilinear_matrix_transp_rows_loc`
 
@@ -1894,7 +2440,6 @@ Providers
        * :c:data:`n_states`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_det_sorted_bit`
-       * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_beta_unique`
 
     Needed by:
@@ -1902,7 +2447,10 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
+       * :c:data:`one_e_tr_dm_mo`
+       * :c:data:`one_e_tr_dm_mo_alpha`
        * :c:data:`psi_bilinear_matrix_order_transp_reverse`
        * :c:data:`psi_bilinear_matrix_transp_rows_loc`
 
@@ -1936,7 +2484,6 @@ Providers
        * :c:data:`n_states`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_det_sorted_bit`
-       * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_beta_unique`
 
     Needed by:
@@ -1944,7 +2491,10 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
+       * :c:data:`one_e_tr_dm_mo`
+       * :c:data:`one_e_tr_dm_mo_alpha`
        * :c:data:`psi_bilinear_matrix_order_transp_reverse`
        * :c:data:`psi_bilinear_matrix_transp_rows_loc`
 
@@ -2001,7 +2551,6 @@ Providers
        * :c:data:`n_states`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_det_sorted_bit`
-       * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_beta_unique`
 
     Needed by:
@@ -2009,7 +2558,10 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
+       * :c:data:`one_e_tr_dm_mo`
+       * :c:data:`one_e_tr_dm_mo_alpha`
        * :c:data:`psi_bilinear_matrix_order_transp_reverse`
        * :c:data:`psi_bilinear_matrix_transp_rows_loc`
 
@@ -2057,8 +2609,12 @@ Providers
        * :c:data:`act_2_rdm_ab_mo`
        * :c:data:`act_2_rdm_bb_mo`
        * :c:data:`act_2_rdm_spin_trace_mo`
+       * :c:data:`act_2_rdm_trans_spin_trace_mo`
        * :c:data:`det_alpha_norm`
+       * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
+       * :c:data:`one_e_tr_dm_mo`
+       * :c:data:`one_e_tr_dm_mo_alpha`
        * :c:data:`psi_bilinear_matrix`
        * :c:data:`psi_bilinear_matrix_columns_loc`
        * :c:data:`psi_bilinear_matrix_order_reverse`
@@ -2066,7 +2622,6 @@ Providers
        * :c:data:`state_av_act_2_rdm_aa_mo`
        * :c:data:`state_av_act_2_rdm_ab_mo`
        * :c:data:`state_av_act_2_rdm_bb_mo`
-       * :c:data:`state_av_act_2_rdm_spin_trace_mo`
 
  
 .. c:var:: psi_cas
@@ -2278,6 +2833,7 @@ Providers
        * :c:data:`mpi_master`
        * :c:data:`n_det`
        * :c:data:`n_states`
+       * :c:data:`psi_det`
        * :c:data:`psi_det_size`
        * :c:data:`read_wf`
 
@@ -2290,26 +2846,35 @@ Providers
        * :c:data:`act_2_rdm_ab_mo`
        * :c:data:`act_2_rdm_bb_mo`
        * :c:data:`act_2_rdm_spin_trace_mo`
+       * :c:data:`act_2_rdm_trans_spin_trace_mo`
        * :c:data:`barycentric_electronic_energy`
        * :c:data:`c0_weight`
        * :c:data:`ci_electronic_energy`
+       * :c:data:`dettocsftransformationmatrix`
+       * :c:data:`dominant_det`
        * :c:data:`dressed_column_idx`
+       * :c:data:`gradvec_old`
+       * :c:data:`hessmat_old`
+       * :c:data:`overlap_states`
+       * :c:data:`p0tuvx_peter`
        * :c:data:`psi_average_norm_contrib`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_cas`
        * :c:data:`psi_coef_max`
+       * :c:data:`psi_csf_coef`
        * :c:data:`psi_det_sorted`
        * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_energy`
        * :c:data:`psi_energy_two_e`
+       * :c:data:`psi_energy_two_e_trans`
        * :c:data:`psi_non_cas`
+       * :c:data:`pt2_e0_denominator`
        * :c:data:`s2_values`
        * :c:data:`state_av_act_2_rdm_aa_mo`
        * :c:data:`state_av_act_2_rdm_ab_mo`
        * :c:data:`state_av_act_2_rdm_bb_mo`
-       * :c:data:`state_av_act_2_rdm_spin_trace_mo`
-       * :c:data:`weight_occ_pattern`
-       * :c:data:`weight_occ_pattern_average`
+       * :c:data:`weight_configuration`
+       * :c:data:`weight_configuration_average`
 
  
 .. c:var:: psi_coef_cas_diagonalized
@@ -2422,7 +2987,11 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`n_det_generators`
+       * :c:data:`n_det_selectors`
        * :c:data:`pruned`
+       * :c:data:`psi_det_generators`
+       * :c:data:`psi_selectors`
 
  
 .. c:var:: psi_coef_sorted_bit
@@ -2496,13 +3065,23 @@ Providers
        :columns: 3
 
        * :c:data:`ci_electronic_energy`
-       * :c:data:`det_to_occ_pattern`
+       * :c:data:`det_to_configuration`
+       * :c:data:`dettocsftransformationmatrix`
        * :c:data:`diagonal_h_matrix_on_psi_det`
+       * :c:data:`gradvec_old`
        * :c:data:`h_matrix_all_dets`
+       * :c:data:`h_matrix_diag_all_dets`
+       * :c:data:`hessmat_old`
        * :c:data:`max_degree_exc`
+       * :c:data:`n_elec_alpha_for_psi_configuration`
        * :c:data:`one_e_dm_mo_alpha`
+       * :c:data:`p0tuvx_peter`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_cas`
+       * :c:data:`psi_coef`
+       * :c:data:`psi_configuration`
+       * :c:data:`psi_configuration_to_psi_det`
+       * :c:data:`psi_csf_coef`
        * :c:data:`psi_det_alpha`
        * :c:data:`psi_det_beta`
        * :c:data:`psi_det_hii`
@@ -2510,8 +3089,8 @@ Providers
        * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_energy`
        * :c:data:`psi_energy_two_e`
+       * :c:data:`psi_energy_two_e_trans`
        * :c:data:`psi_non_cas`
-       * :c:data:`psi_occ_pattern`
        * :c:data:`s2_matrix_all_dets`
        * :c:data:`s2_values`
 
@@ -2576,13 +3155,16 @@ Providers
        :columns: 3
 
        * :c:data:`det_alpha_norm`
+       * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
+       * :c:data:`one_e_tr_dm_mo`
+       * :c:data:`one_e_tr_dm_mo_alpha`
        * :c:data:`psi_bilinear_matrix`
        * :c:data:`psi_bilinear_matrix_transp_rows_loc`
-       * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`singles_alpha_csc`
        * :c:data:`singles_alpha_csc_idx`
+       * :c:data:`singles_alpha_csc_map`
 
  
 .. c:var:: psi_det_beta
@@ -2645,13 +3227,17 @@ Providers
        :columns: 3
 
        * :c:data:`det_alpha_norm`
+       * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
+       * :c:data:`one_e_tr_dm_mo`
+       * :c:data:`one_e_tr_dm_mo_alpha`
        * :c:data:`psi_bilinear_matrix`
        * :c:data:`psi_bilinear_matrix_columns_loc`
        * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`singles_beta_csc`
        * :c:data:`singles_beta_csc_idx`
+       * :c:data:`singles_beta_csc_map`
 
  
 .. c:var:: psi_det_hii
@@ -2671,8 +3257,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
        * :c:data:`elec_num`
        * :c:data:`n_det`
        * :c:data:`n_int`
@@ -2685,7 +3269,8 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_occ_pattern_hii`
+       * :c:data:`psi_configuration_hii`
+       * :c:data:`pt2_e0_denominator`
 
  
 .. c:var:: psi_det_size
@@ -2707,6 +3292,7 @@ Providers
 
        * :c:data:`ezfio_filename`
        * :c:data:`mpi_master`
+       * :c:data:`read_wf`
 
     Needed by:
 
@@ -2717,18 +3303,20 @@ Providers
        * :c:data:`psi_cas`
        * :c:data:`psi_cas_sorted_bit`
        * :c:data:`psi_coef`
+       * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_alpha`
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_beta`
        * :c:data:`psi_det_beta_unique`
+       * :c:data:`psi_det_generators`
        * :c:data:`psi_det_sorted`
        * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_energy`
        * :c:data:`psi_energy_two_e`
        * :c:data:`psi_non_cas`
        * :c:data:`psi_non_cas_sorted_bit`
-       * :c:data:`psi_occ_pattern`
+       * :c:data:`psi_selectors_size`
        * :c:data:`s2_values`
 
  
@@ -2767,7 +3355,11 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`n_det_generators`
+       * :c:data:`n_det_selectors`
        * :c:data:`pruned`
+       * :c:data:`psi_det_generators`
+       * :c:data:`psi_selectors`
 
  
 .. c:var:: psi_det_sorted_bit
@@ -2842,7 +3434,11 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`n_det_generators`
+       * :c:data:`n_det_selectors`
        * :c:data:`pruned`
+       * :c:data:`psi_det_generators`
+       * :c:data:`psi_selectors`
 
  
 .. c:var:: psi_energy_h_core
@@ -3004,171 +3600,6 @@ Providers
 
 
  
-.. c:var:: psi_occ_pattern
-
-
-    File : :file:`determinants/occ_pattern.irp.f`
-
-    .. code:: fortran
-
-        integer(bit_kind), allocatable	:: psi_occ_pattern	(N_int,2,psi_det_size)
-        integer	:: n_occ_pattern	
-
-
-    Array of the occ_patterns present in the wave function.
-    
-    psi_occ_pattern(:,1,j) = j-th occ_pattern of the wave function : represents all the single occupations
-    
-    psi_occ_pattern(:,2,j) = j-th occ_pattern of the wave function : represents all the double occupations
-    
-    The occ patterns are sorted by :c:func:`occ_pattern_search_key`
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`elec_alpha_num`
-       * :c:data:`n_det`
-       * :c:data:`n_int`
-       * :c:data:`psi_det`
-       * :c:data:`psi_det_size`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`det_to_occ_pattern`
-       * :c:data:`pruned`
-       * :c:data:`psi_occ_pattern_hii`
-       * :c:data:`psi_occ_pattern_sorted`
-       * :c:data:`weight_occ_pattern`
-       * :c:data:`weight_occ_pattern_average`
-
- 
-.. c:var:: psi_occ_pattern_hii
-
-
-    File : :file:`determinants/occ_pattern.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: psi_occ_pattern_hii	(N_occ_pattern)
-
-
-    :math:`\langle I|H|I \rangle`  where :math:`|I\rangle`  is an occupation pattern.
-    This is the minimum :math:`H_{ii}` , where the :math:`|i\rangle`  are the
-    determinants of :math:`|I\rangle` .
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`det_to_occ_pattern`
-       * :c:data:`n_det`
-       * :c:data:`psi_det_hii`
-       * :c:data:`psi_occ_pattern`
-
-
- 
-.. c:var:: psi_occ_pattern_sorted
-
-
-    File : :file:`determinants/occ_pattern.irp.f`
-
-    .. code:: fortran
-
-        integer(bit_kind), allocatable	:: psi_occ_pattern_sorted	(N_int,2,N_occ_pattern)
-        double precision, allocatable	:: weight_occ_pattern_average_sorted	(N_occ_pattern)
-        integer, allocatable	:: psi_occ_pattern_sorted_order	(N_occ_pattern)
-        integer, allocatable	:: psi_occ_pattern_sorted_order_reverse	(N_occ_pattern)
-
-
-    Occupation patterns sorted by weight
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
-       * :c:data:`psi_occ_pattern`
-       * :c:data:`weight_occ_pattern_average`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pruned`
-
- 
-.. c:var:: psi_occ_pattern_sorted_order
-
-
-    File : :file:`determinants/occ_pattern.irp.f`
-
-    .. code:: fortran
-
-        integer(bit_kind), allocatable	:: psi_occ_pattern_sorted	(N_int,2,N_occ_pattern)
-        double precision, allocatable	:: weight_occ_pattern_average_sorted	(N_occ_pattern)
-        integer, allocatable	:: psi_occ_pattern_sorted_order	(N_occ_pattern)
-        integer, allocatable	:: psi_occ_pattern_sorted_order_reverse	(N_occ_pattern)
-
-
-    Occupation patterns sorted by weight
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
-       * :c:data:`psi_occ_pattern`
-       * :c:data:`weight_occ_pattern_average`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pruned`
-
- 
-.. c:var:: psi_occ_pattern_sorted_order_reverse
-
-
-    File : :file:`determinants/occ_pattern.irp.f`
-
-    .. code:: fortran
-
-        integer(bit_kind), allocatable	:: psi_occ_pattern_sorted	(N_int,2,N_occ_pattern)
-        double precision, allocatable	:: weight_occ_pattern_average_sorted	(N_occ_pattern)
-        integer, allocatable	:: psi_occ_pattern_sorted_order	(N_occ_pattern)
-        integer, allocatable	:: psi_occ_pattern_sorted_order_reverse	(N_occ_pattern)
-
-
-    Occupation patterns sorted by weight
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
-       * :c:data:`psi_occ_pattern`
-       * :c:data:`weight_occ_pattern_average`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pruned`
-
- 
 .. c:var:: ref_bitmask_energy
 
 
@@ -3207,8 +3638,11 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`coef_hf_selector`
        * :c:data:`diagonal_h_matrix_on_psi_det`
        * :c:data:`psi_det_hii`
+       * :c:data:`psi_energy_two_e_trans`
+       * :c:data:`psi_selectors_diag_h_mat`
 
  
 .. c:var:: ref_bitmask_energy_aa
@@ -3249,8 +3683,11 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`coef_hf_selector`
        * :c:data:`diagonal_h_matrix_on_psi_det`
        * :c:data:`psi_det_hii`
+       * :c:data:`psi_energy_two_e_trans`
+       * :c:data:`psi_selectors_diag_h_mat`
 
  
 .. c:var:: ref_bitmask_energy_ab
@@ -3291,8 +3728,11 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`coef_hf_selector`
        * :c:data:`diagonal_h_matrix_on_psi_det`
        * :c:data:`psi_det_hii`
+       * :c:data:`psi_energy_two_e_trans`
+       * :c:data:`psi_selectors_diag_h_mat`
 
  
 .. c:var:: ref_bitmask_energy_bb
@@ -3333,8 +3773,11 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`coef_hf_selector`
        * :c:data:`diagonal_h_matrix_on_psi_det`
        * :c:data:`psi_det_hii`
+       * :c:data:`psi_energy_two_e_trans`
+       * :c:data:`psi_selectors_diag_h_mat`
 
  
 .. c:var:: ref_bitmask_kinetic_energy
@@ -3375,8 +3818,11 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`coef_hf_selector`
        * :c:data:`diagonal_h_matrix_on_psi_det`
        * :c:data:`psi_det_hii`
+       * :c:data:`psi_energy_two_e_trans`
+       * :c:data:`psi_selectors_diag_h_mat`
 
  
 .. c:var:: ref_bitmask_n_e_energy
@@ -3417,8 +3863,11 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`coef_hf_selector`
        * :c:data:`diagonal_h_matrix_on_psi_det`
        * :c:data:`psi_det_hii`
+       * :c:data:`psi_energy_two_e_trans`
+       * :c:data:`psi_selectors_diag_h_mat`
 
  
 .. c:var:: ref_bitmask_one_e_energy
@@ -3459,8 +3908,11 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`coef_hf_selector`
        * :c:data:`diagonal_h_matrix_on_psi_det`
        * :c:data:`psi_det_hii`
+       * :c:data:`psi_energy_two_e_trans`
+       * :c:data:`psi_selectors_diag_h_mat`
 
  
 .. c:var:: ref_bitmask_two_e_energy
@@ -3501,8 +3953,11 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`coef_hf_selector`
        * :c:data:`diagonal_h_matrix_on_psi_det`
        * :c:data:`psi_det_hii`
+       * :c:data:`psi_energy_two_e_trans`
+       * :c:data:`psi_selectors_diag_h_mat`
 
  
 .. c:var:: ref_closed_shell_bitmask
@@ -3573,6 +4028,34 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: s2_values	(N_states)
+        double precision, allocatable	:: s_values	(N_states)
+
+
+    array of the averaged values of the S^2 operator on the various states
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_det`
+       * :c:data:`n_int`
+       * :c:data:`n_states`
+       * :c:data:`psi_coef`
+       * :c:data:`psi_det`
+       * :c:data:`psi_det_size`
+
+
+ 
+.. c:var:: s_values
+
+
+    File : :file:`determinants/s2.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: s2_values	(N_states)
+        double precision, allocatable	:: s_values	(N_states)
 
 
     array of the averaged values of the S^2 operator on the various states
@@ -3707,8 +4190,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`elec_alpha_num`
-       * :c:data:`mo_num`
        * :c:data:`n_int`
        * :c:data:`psi_det_alpha_unique`
 
@@ -3718,6 +4199,30 @@ Providers
        :columns: 3
 
        * :c:data:`singles_alpha_csc`
+       * :c:data:`singles_alpha_csc_map`
+
+ 
+.. c:var:: singles_alpha_csc_map
+
+
+    File : :file:`determinants/spindeterminants.irp.f`
+
+    .. code:: fortran
+
+        type(mmap_type)	:: singles_alpha_csc_map	
+
+
+    Indices of all single excitations
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_int`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`singles_alpha_csc_idx`
+
 
  
 .. c:var:: singles_alpha_csc_size
@@ -3740,8 +4245,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`elec_alpha_num`
-       * :c:data:`mo_num`
        * :c:data:`n_int`
        * :c:data:`psi_det_alpha_unique`
 
@@ -3751,6 +4254,7 @@ Providers
        :columns: 3
 
        * :c:data:`singles_alpha_csc`
+       * :c:data:`singles_alpha_csc_map`
 
  
 .. c:var:: singles_beta_csc
@@ -3796,8 +4300,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`elec_beta_num`
-       * :c:data:`mo_num`
        * :c:data:`n_int`
        * :c:data:`psi_det_beta_unique`
 
@@ -3807,6 +4309,30 @@ Providers
        :columns: 3
 
        * :c:data:`singles_beta_csc`
+       * :c:data:`singles_beta_csc_map`
+
+ 
+.. c:var:: singles_beta_csc_map
+
+
+    File : :file:`determinants/spindeterminants.irp.f`
+
+    .. code:: fortran
+
+        type(mmap_type)	:: singles_beta_csc_map	
+
+
+    Indices of all single excitations
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_int`
+       * :c:data:`psi_det_beta_unique`
+       * :c:data:`singles_beta_csc_idx`
+
 
  
 .. c:var:: singles_beta_csc_size
@@ -3829,8 +4355,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`elec_beta_num`
-       * :c:data:`mo_num`
        * :c:data:`n_int`
        * :c:data:`psi_det_beta_unique`
 
@@ -3840,6 +4364,7 @@ Providers
        :columns: 3
 
        * :c:data:`singles_beta_csc`
+       * :c:data:`singles_beta_csc_map`
 
  
 .. c:var:: state_average_weight
@@ -3873,100 +4398,128 @@ Providers
        * :c:data:`one_e_dm_average_beta_mo_for_dft`
        * :c:data:`one_e_dm_mo_alpha_average`
        * :c:data:`psi_average_norm_contrib`
+       * :c:data:`selection_weight`
        * :c:data:`state_av_act_2_rdm_aa_mo`
        * :c:data:`state_av_act_2_rdm_ab_mo`
        * :c:data:`state_av_act_2_rdm_bb_mo`
        * :c:data:`state_av_act_2_rdm_spin_trace_mo`
-       * :c:data:`weight_occ_pattern_average`
+       * :c:data:`weight_configuration_average`
 
  
-.. c:var:: weight_occ_pattern
+.. c:var:: v_ne_psi_energy
 
 
-    File : :file:`determinants/occ_pattern.irp.f`
+    File : :file:`determinants/psi_energy_mono_elec.irp.f`
 
     .. code:: fortran
 
-        double precision, allocatable	:: weight_occ_pattern	(N_occ_pattern,N_states)
+        double precision, allocatable	:: v_ne_psi_energy	(N_states)
 
 
-    Weight of the occupation patterns in the wave function
+    v_ne_psi_energy = :math:`\langle \Psi | v_ne |\Psi \rangle` 
+    
+    computed using the :c:data:`one_e_dm_mo_alpha` +
+    :c:data:`one_e_dm_mo_beta` and :c:data:`mo_one_e_integrals`
 
     Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`det_to_occ_pattern`
-       * :c:data:`n_det`
+       * :c:data:`elec_alpha_num`
+       * :c:data:`elec_beta_num`
+       * :c:data:`mo_integrals_n_e`
+       * :c:data:`mo_num`
        * :c:data:`n_states`
-       * :c:data:`psi_coef`
-       * :c:data:`psi_occ_pattern`
+       * :c:data:`one_e_dm_mo_alpha`
 
 
  
-.. c:var:: weight_occ_pattern_average
+.. c:var:: x_dipole_moment
 
 
-    File : :file:`determinants/occ_pattern.irp.f`
+    File : :file:`determinants/dipole_moments.irp.f`
 
     .. code:: fortran
 
-        double precision, allocatable	:: weight_occ_pattern_average	(N_occ_pattern)
+        double precision, allocatable	:: z_dipole_moment	(N_states)
+        double precision, allocatable	:: y_dipole_moment	(N_states)
+        double precision, allocatable	:: x_dipole_moment	(N_states)
 
 
-    State-average weight of the occupation patterns in the wave function
+    blablabla
 
     Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`det_to_occ_pattern`
-       * :c:data:`n_det`
+       * :c:data:`mo_dipole_x`
+       * :c:data:`mo_num`
        * :c:data:`n_states`
-       * :c:data:`psi_coef`
-       * :c:data:`psi_occ_pattern`
-       * :c:data:`state_average_weight`
+       * :c:data:`nucl_charge`
+       * :c:data:`nucl_coord`
+       * :c:data:`nucl_num`
+       * :c:data:`one_e_dm_mo_alpha`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`psi_occ_pattern_sorted`
 
  
-.. c:var:: weight_occ_pattern_average_sorted
+.. c:var:: y_dipole_moment
 
 
-    File : :file:`determinants/occ_pattern.irp.f`
+    File : :file:`determinants/dipole_moments.irp.f`
 
     .. code:: fortran
 
-        integer(bit_kind), allocatable	:: psi_occ_pattern_sorted	(N_int,2,N_occ_pattern)
-        double precision, allocatable	:: weight_occ_pattern_average_sorted	(N_occ_pattern)
-        integer, allocatable	:: psi_occ_pattern_sorted_order	(N_occ_pattern)
-        integer, allocatable	:: psi_occ_pattern_sorted_order_reverse	(N_occ_pattern)
+        double precision, allocatable	:: z_dipole_moment	(N_states)
+        double precision, allocatable	:: y_dipole_moment	(N_states)
+        double precision, allocatable	:: x_dipole_moment	(N_states)
 
 
-    Occupation patterns sorted by weight
+    blablabla
 
     Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_int`
-       * :c:data:`psi_occ_pattern`
-       * :c:data:`weight_occ_pattern_average`
+       * :c:data:`mo_dipole_x`
+       * :c:data:`mo_num`
+       * :c:data:`n_states`
+       * :c:data:`nucl_charge`
+       * :c:data:`nucl_coord`
+       * :c:data:`nucl_num`
+       * :c:data:`one_e_dm_mo_alpha`
 
-    Needed by:
+
+ 
+.. c:var:: z_dipole_moment
+
+
+    File : :file:`determinants/dipole_moments.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: z_dipole_moment	(N_states)
+        double precision, allocatable	:: y_dipole_moment	(N_states)
+        double precision, allocatable	:: x_dipole_moment	(N_states)
+
+
+    blablabla
+
+    Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`pruned`
+       * :c:data:`mo_dipole_x`
+       * :c:data:`mo_num`
+       * :c:data:`n_states`
+       * :c:data:`nucl_charge`
+       * :c:data:`nucl_coord`
+       * :c:data:`nucl_num`
+       * :c:data:`one_e_dm_mo_alpha`
+
 
  
  
@@ -4059,8 +4612,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
        * :c:data:`mo_num`
        * :c:data:`mo_one_e_integrals`
        * :c:data:`mo_two_e_integrals_jj`
@@ -4097,8 +4648,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
        * :c:data:`mo_two_e_integrals_jj`
 
     Called by:
@@ -4139,6 +4688,16 @@ Subroutines / functions
 
 
 
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`fill_buffer_double`
+       * :c:func:`fill_buffer_single`
+       * :c:func:`select_singles`
+       * :c:func:`select_singles_and_doubles`
+
  
 .. c:function:: apply_holes:
 
@@ -4150,6 +4709,14 @@ Subroutines / functions
         subroutine apply_holes(det, s1, h1, s2, h2, res, ok, Nint)
 
 
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`fill_buffer_double`
+       * :c:func:`fill_buffer_single`
 
  
 .. c:function:: apply_particle:
@@ -4163,6 +4730,16 @@ Subroutines / functions
 
 
 
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`fill_buffer_double`
+       * :c:func:`fill_buffer_single`
+       * :c:func:`get_m0`
+       * :c:func:`get_m1`
+
  
 .. c:function:: apply_particles:
 
@@ -4175,6 +4752,18 @@ Subroutines / functions
 
 
 
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`fill_buffer_double`
+       * :c:func:`fill_buffer_single`
+       * :c:func:`get_d0`
+       * :c:func:`get_d0_reference`
+       * :c:func:`get_d1`
+       * :c:func:`get_d1_reference`
+
  
 .. c:function:: bitstring_to_list_ab:
 
@@ -4186,7 +4775,7 @@ Subroutines / functions
         subroutine bitstring_to_list_ab( string, list, n_elements, Nint)
 
 
-    Gives the inidices(+1) of the bits set to 1 in the bit string
+    Gives the indices(+1) of the bits set to 1 in the bit string
     For alpha/beta determinants.
 
     Called by:
@@ -4211,16 +4800,25 @@ Subroutines / functions
        * :c:func:`i_h_j_s2`
        * :c:func:`i_h_j_two_e`
        * :c:func:`i_h_j_verbose`
+       * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
+       * :c:data:`one_e_tr_dm_mo`
+       * :c:data:`one_e_tr_dm_mo_alpha`
        * :c:func:`orb_range_diag_to_all_2_rdm_dm_buffer`
        * :c:func:`orb_range_diag_to_all_states_2_rdm_dm_buffer`
+       * :c:func:`orb_range_diag_to_all_states_2_rdm_trans_buffer`
        * :c:func:`orb_range_off_diag_single_to_2_rdm_aa_dm_buffer`
        * :c:func:`orb_range_off_diag_single_to_2_rdm_ab_dm_buffer`
        * :c:func:`orb_range_off_diag_single_to_2_rdm_bb_dm_buffer`
        * :c:func:`orb_range_off_diag_single_to_all_states_aa_dm_buffer`
+       * :c:func:`orb_range_off_diag_single_to_all_states_aa_trans_rdm_buffer`
        * :c:func:`orb_range_off_diag_single_to_all_states_ab_dm_buffer`
+       * :c:func:`orb_range_off_diag_single_to_all_states_ab_trans_rdm_buffer`
        * :c:func:`orb_range_off_diag_single_to_all_states_bb_dm_buffer`
+       * :c:func:`orb_range_off_diag_single_to_all_states_bb_trans_rdm_buffer`
        * :c:data:`ref_closed_shell_bitmask`
+       * :c:func:`select_singles`
+       * :c:func:`select_singles_and_doubles`
        * :c:func:`single_excitation_wee`
 
  
@@ -4248,6 +4846,13 @@ Subroutines / functions
        * :c:data:`mo_one_e_integrals`
        * :c:data:`mo_two_e_integrals_jj`
        * :c:data:`n_int`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`select_connected`
 
     Calls:
 
@@ -4346,13 +4951,6 @@ Subroutines / functions
     
               -i : key is the ith determinant of the reference wf keys
 
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
-
  
 .. c:function:: connected_to_ref_by_single:
 
@@ -4379,13 +4977,6 @@ Subroutines / functions
     
               -i : key is the ith determinant of the reference wf keys
 
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
-
  
 .. c:function:: copy_h_apply_buffer_to_wf:
 
@@ -4405,8 +4996,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
        * :c:data:`h_apply_buffer_allocated`
        * :c:data:`n_det`
        * :c:data:`n_int`
@@ -4424,6 +5013,9 @@ Subroutines / functions
 
        * :c:func:`generate_all_alpha_beta_det_products`
        * :c:func:`make_s2_eigenfunction`
+       * :c:func:`replace_wf`
+       * :c:func:`run_cipsi`
+       * :c:func:`run_stochastic_cipsi`
 
     Calls:
 
@@ -4489,6 +5081,18 @@ Subroutines / functions
 
        * :c:data:`mo_num`
 
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`perturb_buffer_dummy`
+       * :c:func:`perturb_buffer_epstein_nesbet`
+       * :c:func:`perturb_buffer_epstein_nesbet_2x2`
+       * :c:func:`perturb_buffer_epstein_nesbet_2x2_no_ci_diag`
+       * :c:func:`perturb_buffer_moller_plesset`
+       * :c:func:`perturb_buffer_qdpt`
+
     Calls:
 
     .. hlist::
@@ -4508,6 +5112,24 @@ Subroutines / functions
 
 
 
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`perturb_buffer_by_mono_dummy`
+       * :c:func:`perturb_buffer_by_mono_epstein_nesbet`
+       * :c:func:`perturb_buffer_by_mono_epstein_nesbet_2x2`
+       * :c:func:`perturb_buffer_by_mono_epstein_nesbet_2x2_no_ci_diag`
+       * :c:func:`perturb_buffer_by_mono_moller_plesset`
+       * :c:func:`perturb_buffer_by_mono_qdpt`
+       * :c:func:`perturb_buffer_dummy`
+       * :c:func:`perturb_buffer_epstein_nesbet`
+       * :c:func:`perturb_buffer_epstein_nesbet_2x2`
+       * :c:func:`perturb_buffer_epstein_nesbet_2x2_no_ci_diag`
+       * :c:func:`perturb_buffer_moller_plesset`
+       * :c:func:`perturb_buffer_qdpt`
+
  
 .. c:function:: create_minilist_find_previous:
 
@@ -4519,6 +5141,24 @@ Subroutines / functions
         subroutine create_minilist_find_previous(key_mask, fullList, miniList, N_fullList, N_miniList, fullMatch, Nint)
 
 
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`perturb_buffer_by_mono_dummy`
+       * :c:func:`perturb_buffer_by_mono_epstein_nesbet`
+       * :c:func:`perturb_buffer_by_mono_epstein_nesbet_2x2`
+       * :c:func:`perturb_buffer_by_mono_epstein_nesbet_2x2_no_ci_diag`
+       * :c:func:`perturb_buffer_by_mono_moller_plesset`
+       * :c:func:`perturb_buffer_by_mono_qdpt`
+       * :c:func:`perturb_buffer_dummy`
+       * :c:func:`perturb_buffer_epstein_nesbet`
+       * :c:func:`perturb_buffer_epstein_nesbet_2x2`
+       * :c:func:`perturb_buffer_epstein_nesbet_2x2_no_ci_diag`
+       * :c:func:`perturb_buffer_moller_plesset`
+       * :c:func:`perturb_buffer_qdpt`
 
  
 .. c:function:: create_wf_of_psi_bilinear_matrix:
@@ -4534,28 +5174,13 @@ Subroutines / functions
     Generates a wave function containing all possible products
     of $\alpha$ and $\beta$ determinants
 
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det`
-       * :c:data:`n_int`
-       * :c:data:`n_states`
-       * :c:data:`psi_bilinear_matrix`
-       * :c:data:`psi_coef`
-       * :c:data:`psi_det`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`psi_det_sorted`
-       * :c:data:`psi_det_sorted_bit`
-
     Calls:
 
     .. hlist::
        :columns: 3
 
        * :c:func:`generate_all_alpha_beta_det_products`
+       * :c:func:`update_wf_of_psi_bilinear_matrix`
 
     Touches:
 
@@ -4563,10 +5188,14 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`n_det`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_det`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
 
@@ -4594,6 +5223,7 @@ Subroutines / functions
 
        * :c:func:`diag_h_mat_elem_fock`
        * :c:func:`example_determinants`
+       * :c:func:`pt2_moller_plesset`
 
  
 .. c:function:: decode_exc_spin:
@@ -4617,7 +5247,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
+       * :c:data:`one_e_tr_dm_mo`
+       * :c:data:`one_e_tr_dm_mo_alpha`
 
  
 .. c:function:: det_inf:
@@ -4694,8 +5327,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
        * :c:data:`elec_num`
        * :c:data:`ref_bitmask`
        * :c:data:`ref_bitmask_energy`
@@ -4759,8 +5390,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
        * :c:data:`mo_one_e_integrals`
 
     Calls:
@@ -4801,8 +5430,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
        * :c:data:`elec_num`
        * :c:data:`ref_bitmask`
        * :c:data:`ref_bitmask_energy`
@@ -4839,7 +5466,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_num`
        * :c:data:`n_int`
 
     Called by:
@@ -4848,7 +5474,10 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`build_singly_excited_wavefunction`
+       * :c:func:`do_signed_mono_excitation`
        * :c:func:`example_determinants`
+       * :c:func:`get_excitation_general`
+       * :c:func:`get_phase_general`
 
  
 .. c:function:: example_determinants:
@@ -4938,11 +5567,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
        * :c:data:`h_apply_buffer_allocated`
        * :c:data:`n_det`
-       * :c:data:`n_int`
        * :c:data:`n_states`
 
     Called by:
@@ -4952,6 +5578,9 @@ Subroutines / functions
 
        * :c:func:`generate_all_alpha_beta_det_products`
        * :c:func:`make_s2_eigenfunction`
+       * :c:func:`replace_wf`
+       * :c:func:`zmq_pt2`
+       * :c:func:`zmq_selection`
 
     Calls:
 
@@ -5009,13 +5638,6 @@ Subroutines / functions
     
     idx(0) is the number of determinants that interact with key1
 
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
-
     Called by:
 
     .. hlist::
@@ -5064,6 +5686,8 @@ Subroutines / functions
 
        * :c:data:`h_apply_buffer_allocated`
        * :c:data:`n_det`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
        * :c:data:`n_int`
        * :c:data:`psi_coef`
        * :c:data:`psi_det`
@@ -5076,6 +5700,7 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`create_wf_of_psi_bilinear_matrix`
+       * :c:func:`generate_cas_space`
 
     Calls:
 
@@ -5091,10 +5716,74 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`n_det`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_det`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+       * :c:data:`psi_det_size`
+       * :c:data:`psi_det_sorted_bit`
+
+ 
+.. c:function:: generate_cas_space:
+
+
+    File : :file:`determinants/generate_cas_space.irp.f`
+
+    .. code:: fortran
+
+        subroutine generate_cas_space
+
+
+    Generates the CAS space
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`binom_int`
+       * :c:data:`elec_alpha_num`
+       * :c:data:`elec_beta_num`
+       * :c:data:`list_act`
+       * :c:data:`list_core_inact`
+       * :c:data:`n_act_orb`
+       * :c:data:`n_core_inact_orb`
+       * :c:data:`n_det`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+       * :c:data:`n_int`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`bitstring_to_list`
+       * :c:func:`generate_all_alpha_beta_det_products`
+       * :c:func:`list_to_bitstring`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_det`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+       * :c:data:`c0_weight`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+       * :c:data:`psi_coef`
+       * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
 
@@ -5159,7 +5848,7 @@ Subroutines / functions
 .. c:function:: get_all_spin_doubles_2:
 
 
-    File : :file:`determinants/spindeterminants.irp.f_template_1316`
+    File : :file:`determinants/spindeterminants.irp.f_template_1365`
 
     .. code:: fortran
 
@@ -5182,7 +5871,7 @@ Subroutines / functions
 .. c:function:: get_all_spin_doubles_3:
 
 
-    File : :file:`determinants/spindeterminants.irp.f_template_1316`
+    File : :file:`determinants/spindeterminants.irp.f_template_1365`
 
     .. code:: fortran
 
@@ -5205,7 +5894,7 @@ Subroutines / functions
 .. c:function:: get_all_spin_doubles_4:
 
 
-    File : :file:`determinants/spindeterminants.irp.f_template_1316`
+    File : :file:`determinants/spindeterminants.irp.f_template_1365`
 
     .. code:: fortran
 
@@ -5228,7 +5917,7 @@ Subroutines / functions
 .. c:function:: get_all_spin_doubles_n_int:
 
 
-    File : :file:`determinants/spindeterminants.irp.f_template_1316`
+    File : :file:`determinants/spindeterminants.irp.f_template_1365`
 
     .. code:: fortran
 
@@ -5284,8 +5973,10 @@ Subroutines / functions
 
        * :c:data:`singles_alpha_csc`
        * :c:data:`singles_alpha_csc_idx`
+       * :c:data:`singles_alpha_csc_map`
        * :c:data:`singles_beta_csc`
        * :c:data:`singles_beta_csc_idx`
+       * :c:data:`singles_beta_csc_map`
 
     Calls:
 
@@ -5322,14 +6013,16 @@ Subroutines / functions
        * :c:func:`get_all_spin_singles`
        * :c:func:`h_s2_u_0_nstates_openmp_work_1`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_1`
+       * :c:func:`h_u_0_nstates_openmp_work_1`
        * :c:func:`orb_range_2_rdm_openmp_work_1`
        * :c:func:`orb_range_2_rdm_state_av_openmp_work_1`
+       * :c:func:`orb_range_2_trans_rdm_openmp_work_1`
 
  
 .. c:function:: get_all_spin_singles_2:
 
 
-    File : :file:`determinants/spindeterminants.irp.f_template_1316`
+    File : :file:`determinants/spindeterminants.irp.f_template_1365`
 
     .. code:: fortran
 
@@ -5349,14 +6042,16 @@ Subroutines / functions
        * :c:func:`get_all_spin_singles`
        * :c:func:`h_s2_u_0_nstates_openmp_work_2`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_2`
+       * :c:func:`h_u_0_nstates_openmp_work_2`
        * :c:func:`orb_range_2_rdm_openmp_work_2`
        * :c:func:`orb_range_2_rdm_state_av_openmp_work_2`
+       * :c:func:`orb_range_2_trans_rdm_openmp_work_2`
 
  
 .. c:function:: get_all_spin_singles_3:
 
 
-    File : :file:`determinants/spindeterminants.irp.f_template_1316`
+    File : :file:`determinants/spindeterminants.irp.f_template_1365`
 
     .. code:: fortran
 
@@ -5376,14 +6071,16 @@ Subroutines / functions
        * :c:func:`get_all_spin_singles`
        * :c:func:`h_s2_u_0_nstates_openmp_work_3`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_3`
+       * :c:func:`h_u_0_nstates_openmp_work_3`
        * :c:func:`orb_range_2_rdm_openmp_work_3`
        * :c:func:`orb_range_2_rdm_state_av_openmp_work_3`
+       * :c:func:`orb_range_2_trans_rdm_openmp_work_3`
 
  
 .. c:function:: get_all_spin_singles_4:
 
 
-    File : :file:`determinants/spindeterminants.irp.f_template_1316`
+    File : :file:`determinants/spindeterminants.irp.f_template_1365`
 
     .. code:: fortran
 
@@ -5403,8 +6100,10 @@ Subroutines / functions
        * :c:func:`get_all_spin_singles`
        * :c:func:`h_s2_u_0_nstates_openmp_work_4`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_4`
+       * :c:func:`h_u_0_nstates_openmp_work_4`
        * :c:func:`orb_range_2_rdm_openmp_work_4`
        * :c:func:`orb_range_2_rdm_state_av_openmp_work_4`
+       * :c:func:`orb_range_2_trans_rdm_openmp_work_4`
 
  
 .. c:function:: get_all_spin_singles_and_doubles:
@@ -5461,14 +6160,16 @@ Subroutines / functions
        * :c:func:`get_all_spin_singles_and_doubles`
        * :c:func:`h_s2_u_0_nstates_openmp_work_1`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_1`
+       * :c:func:`h_u_0_nstates_openmp_work_1`
        * :c:func:`orb_range_2_rdm_openmp_work_1`
        * :c:func:`orb_range_2_rdm_state_av_openmp_work_1`
+       * :c:func:`orb_range_2_trans_rdm_openmp_work_1`
 
  
 .. c:function:: get_all_spin_singles_and_doubles_2:
 
 
-    File : :file:`determinants/spindeterminants.irp.f_template_1316`
+    File : :file:`determinants/spindeterminants.irp.f_template_1365`
 
     .. code:: fortran
 
@@ -5490,14 +6191,16 @@ Subroutines / functions
        * :c:func:`get_all_spin_singles_and_doubles`
        * :c:func:`h_s2_u_0_nstates_openmp_work_2`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_2`
+       * :c:func:`h_u_0_nstates_openmp_work_2`
        * :c:func:`orb_range_2_rdm_openmp_work_2`
        * :c:func:`orb_range_2_rdm_state_av_openmp_work_2`
+       * :c:func:`orb_range_2_trans_rdm_openmp_work_2`
 
  
 .. c:function:: get_all_spin_singles_and_doubles_3:
 
 
-    File : :file:`determinants/spindeterminants.irp.f_template_1316`
+    File : :file:`determinants/spindeterminants.irp.f_template_1365`
 
     .. code:: fortran
 
@@ -5519,14 +6222,16 @@ Subroutines / functions
        * :c:func:`get_all_spin_singles_and_doubles`
        * :c:func:`h_s2_u_0_nstates_openmp_work_3`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_3`
+       * :c:func:`h_u_0_nstates_openmp_work_3`
        * :c:func:`orb_range_2_rdm_openmp_work_3`
        * :c:func:`orb_range_2_rdm_state_av_openmp_work_3`
+       * :c:func:`orb_range_2_trans_rdm_openmp_work_3`
 
  
 .. c:function:: get_all_spin_singles_and_doubles_4:
 
 
-    File : :file:`determinants/spindeterminants.irp.f_template_1316`
+    File : :file:`determinants/spindeterminants.irp.f_template_1365`
 
     .. code:: fortran
 
@@ -5548,14 +6253,16 @@ Subroutines / functions
        * :c:func:`get_all_spin_singles_and_doubles`
        * :c:func:`h_s2_u_0_nstates_openmp_work_4`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_4`
+       * :c:func:`h_u_0_nstates_openmp_work_4`
        * :c:func:`orb_range_2_rdm_openmp_work_4`
        * :c:func:`orb_range_2_rdm_state_av_openmp_work_4`
+       * :c:func:`orb_range_2_trans_rdm_openmp_work_4`
 
  
 .. c:function:: get_all_spin_singles_and_doubles_n_int:
 
 
-    File : :file:`determinants/spindeterminants.irp.f_template_1316`
+    File : :file:`determinants/spindeterminants.irp.f_template_1365`
 
     .. code:: fortran
 
@@ -5584,14 +6291,16 @@ Subroutines / functions
        * :c:func:`get_all_spin_singles_and_doubles`
        * :c:func:`h_s2_u_0_nstates_openmp_work_n_int`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_n_int`
+       * :c:func:`h_u_0_nstates_openmp_work_n_int`
        * :c:func:`orb_range_2_rdm_openmp_work_n_int`
        * :c:func:`orb_range_2_rdm_state_av_openmp_work_n_int`
+       * :c:func:`orb_range_2_trans_rdm_openmp_work_n_int`
 
  
 .. c:function:: get_all_spin_singles_n_int:
 
 
-    File : :file:`determinants/spindeterminants.irp.f_template_1316`
+    File : :file:`determinants/spindeterminants.irp.f_template_1365`
 
     .. code:: fortran
 
@@ -5618,8 +6327,10 @@ Subroutines / functions
        * :c:func:`get_all_spin_singles`
        * :c:func:`h_s2_u_0_nstates_openmp_work_n_int`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_n_int`
+       * :c:func:`h_u_0_nstates_openmp_work_n_int`
        * :c:func:`orb_range_2_rdm_openmp_work_n_int`
        * :c:func:`orb_range_2_rdm_state_av_openmp_work_n_int`
+       * :c:func:`orb_range_2_trans_rdm_openmp_work_n_int`
 
  
 .. c:function:: get_double_excitation:
@@ -5648,6 +6359,7 @@ Subroutines / functions
        * :c:func:`i_h_j_verbose`
        * :c:func:`orb_range_off_diag_double_to_2_rdm_ab_dm_buffer`
        * :c:func:`orb_range_off_diag_double_to_all_states_ab_dm_buffer`
+       * :c:func:`orb_range_off_diag_double_to_all_states_ab_trans_rdm_buffer`
 
  
 .. c:function:: get_double_excitation_spin:
@@ -5673,7 +6385,9 @@ Subroutines / functions
        * :c:func:`orb_range_off_diag_double_to_2_rdm_aa_dm_buffer`
        * :c:func:`orb_range_off_diag_double_to_2_rdm_bb_dm_buffer`
        * :c:func:`orb_range_off_diag_double_to_all_states_aa_dm_buffer`
+       * :c:func:`orb_range_off_diag_double_to_all_states_aa_trans_rdm_buffer`
        * :c:func:`orb_range_off_diag_double_to_all_states_bb_dm_buffer`
+       * :c:func:`orb_range_off_diag_double_to_all_states_trans_rdm_bb_buffer`
 
  
 .. c:function:: get_excitation:
@@ -5695,6 +6409,7 @@ Subroutines / functions
 
        * :c:func:`example_determinants`
        * :c:func:`get_phase`
+       * :c:func:`pt2_moller_plesset`
 
     Calls:
 
@@ -5726,6 +6441,9 @@ Subroutines / functions
        * :c:func:`connected_to_hf`
        * :c:func:`diag_h_mat_elem_fock`
        * :c:func:`example_determinants`
+       * :c:data:`exc_degree_per_selectors`
+       * :c:func:`fill_buffer_double`
+       * :c:func:`fill_buffer_single`
        * :c:func:`get_excitation`
        * :c:func:`get_s2`
        * :c:func:`i_h_j`
@@ -5734,7 +6452,9 @@ Subroutines / functions
        * :c:func:`i_h_j_two_e`
        * :c:func:`i_h_j_verbose`
        * :c:data:`max_degree_exc`
+       * :c:data:`psi_configuration_to_psi_det`
        * :c:data:`psi_non_cas`
+       * :c:func:`pt2_qdpt`
 
  
 .. c:function:: get_excitation_degree_spin:
@@ -5754,8 +6474,14 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`fill_buffer_double`
+       * :c:func:`fill_buffer_single`
        * :c:func:`get_excitation_spin`
+       * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
+       * :c:data:`one_e_tr_dm_mo`
+       * :c:data:`one_e_tr_dm_mo_alpha`
+       * :c:func:`select_singles_and_doubles`
 
  
 .. c:function:: get_excitation_degree_vector:
@@ -5848,6 +6574,36 @@ Subroutines / functions
        * :c:func:`debug_det`
 
  
+.. c:function:: get_excitation_general:
+
+
+    File : :file:`determinants/slater_rules_general.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_excitation_general(key_i,key_j, Nint,degree_array,holes_array, particles_array,phase)
+
+
+    returns the array, for each spin, of holes/particles between key_i and key_j
+    
+    with the following convention: a^+_{particle} a_{hole}|key_i> = |key_j>
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_int`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`do_single_excitation`
+       * :c:func:`get_single_excitation`
+
+ 
 .. c:function:: get_excitation_spin:
 
 
@@ -5868,6 +6624,28 @@ Subroutines / functions
        * :c:func:`get_double_excitation_spin`
        * :c:func:`get_excitation_degree_spin`
        * :c:func:`get_single_excitation_spin`
+
+ 
+.. c:function:: get_holes_general:
+
+
+    File : :file:`determinants/slater_rules_general.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_holes_general(key_i, key_j,Nint, holes_array)
+
+
+    returns the array, per spin, of holes between key_i and key_j
+    
+    with the following convention: a_{hole}|key_i> --> |key_j>
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_int`
 
  
 .. c:function:: get_index_in_psi_det_alpha_unique:
@@ -5921,6 +6699,7 @@ Subroutines / functions
 
 
     Returns the index of the determinant in the ``psi_det_sorted_bit`` array
+    using a binary search
 
     Needs:
 
@@ -5951,7 +6730,6 @@ Subroutines / functions
        * :c:data:`mo_num`
        * :c:data:`n_det`
        * :c:data:`n_int`
-       * :c:data:`n_states`
        * :c:data:`psi_coef`
        * :c:data:`psi_det`
 
@@ -5961,6 +6739,35 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`bitstring_to_list_ab`
+
+ 
+.. c:function:: get_particles_general:
+
+
+    File : :file:`determinants/slater_rules_general.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_particles_general(key_i, key_j,Nint,particles_array)
+
+
+    returns the array, per spin, of particles between key_i and key_j
+    
+    with the following convention: a^dagger_{particle}|key_i> --> |key_j>
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_int`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`debug_det`
 
  
 .. c:function:: get_phase:
@@ -5988,6 +6795,33 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`get_excitation`
+
+ 
+.. c:function:: get_phase_general:
+
+
+    File : :file:`determinants/slater_rules_general.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_phase_general(key_i,Nint,degree, holes_array, particles_array,phase)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_int`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`do_single_excitation`
+       * :c:func:`get_single_excitation`
 
  
 .. c:function:: get_phasemask_bit:
@@ -6062,7 +6896,10 @@ Subroutines / functions
 
        * :c:func:`connected_to_hf`
        * :c:func:`diag_h_mat_elem_fock`
+       * :c:func:`do_signed_mono_excitation`
        * :c:func:`get_excitation`
+       * :c:func:`get_excitation_general`
+       * :c:func:`get_phase_general`
        * :c:func:`i_h_j`
        * :c:func:`i_h_j_one_e`
        * :c:func:`i_h_j_s2`
@@ -6072,8 +6909,11 @@ Subroutines / functions
        * :c:func:`orb_range_off_diag_single_to_2_rdm_ab_dm_buffer`
        * :c:func:`orb_range_off_diag_single_to_2_rdm_bb_dm_buffer`
        * :c:func:`orb_range_off_diag_single_to_all_states_aa_dm_buffer`
+       * :c:func:`orb_range_off_diag_single_to_all_states_aa_trans_rdm_buffer`
        * :c:func:`orb_range_off_diag_single_to_all_states_ab_dm_buffer`
+       * :c:func:`orb_range_off_diag_single_to_all_states_ab_trans_rdm_buffer`
        * :c:func:`orb_range_off_diag_single_to_all_states_bb_dm_buffer`
+       * :c:func:`orb_range_off_diag_single_to_all_states_bb_trans_rdm_buffer`
 
  
 .. c:function:: get_single_excitation_from_fock:
@@ -6137,7 +6977,10 @@ Subroutines / functions
        * :c:func:`i_h_j_mono_spin_one_e`
        * :c:func:`i_h_j_single_spin`
        * :c:func:`i_wee_j_single`
+       * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
+       * :c:data:`one_e_tr_dm_mo`
+       * :c:data:`one_e_tr_dm_mo_alpha`
 
  
 .. c:function:: get_uj_s2_ui:
@@ -6187,6 +7030,18 @@ Subroutines / functions
 
        * :c:data:`mo_num`
 
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`perturb_buffer_dummy`
+       * :c:func:`perturb_buffer_epstein_nesbet`
+       * :c:func:`perturb_buffer_epstein_nesbet_2x2`
+       * :c:func:`perturb_buffer_epstein_nesbet_2x2_no_ci_diag`
+       * :c:func:`perturb_buffer_moller_plesset`
+       * :c:func:`perturb_buffer_qdpt`
+
     Calls:
 
     .. hlist::
@@ -6214,23 +7069,30 @@ Subroutines / functions
 
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`big_array_coulomb_integrals`
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_two_e_integrals_in_map`
-       * :c:data:`n_int`
 
     Called by:
 
     .. hlist::
        :columns: 3
 
+       * :c:func:`calc_hess_elem`
+       * :c:data:`coef_hf_selector`
        * :c:func:`connected_to_hf`
        * :c:func:`example_determinants`
+       * :c:func:`get_d0`
+       * :c:func:`get_d0_reference`
+       * :c:func:`get_d1`
+       * :c:func:`get_d1_reference`
+       * :c:func:`get_m0`
+       * :c:func:`get_m1`
        * :c:data:`h_matrix_all_dets`
        * :c:data:`h_matrix_cas`
+       * :c:data:`h_matrix_diag_all_dets`
        * :c:func:`i_h_psi`
        * :c:func:`i_h_psi_minilist`
+       * :c:func:`pt2_qdpt`
        * :c:func:`routine_example_psi_det`
 
     Calls:
@@ -6283,6 +7145,11 @@ Subroutines / functions
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_3`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_4`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_n_int`
+       * :c:func:`h_u_0_nstates_openmp_work_1`
+       * :c:func:`h_u_0_nstates_openmp_work_2`
+       * :c:func:`h_u_0_nstates_openmp_work_3`
+       * :c:func:`h_u_0_nstates_openmp_work_4`
+       * :c:func:`h_u_0_nstates_openmp_work_n_int`
 
     Calls:
 
@@ -6329,6 +7196,11 @@ Subroutines / functions
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_3`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_4`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_n_int`
+       * :c:func:`h_u_0_nstates_openmp_work_1`
+       * :c:func:`h_u_0_nstates_openmp_work_2`
+       * :c:func:`h_u_0_nstates_openmp_work_3`
+       * :c:func:`h_u_0_nstates_openmp_work_4`
+       * :c:func:`h_u_0_nstates_openmp_work_n_int`
 
     Calls:
 
@@ -6415,11 +7287,8 @@ Subroutines / functions
 
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`big_array_coulomb_integrals`
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_two_e_integrals_in_map`
-       * :c:data:`n_int`
 
     Calls:
 
@@ -6464,6 +7333,11 @@ Subroutines / functions
        * :c:func:`h_s2_u_0_nstates_openmp_work_3`
        * :c:func:`h_s2_u_0_nstates_openmp_work_4`
        * :c:func:`h_s2_u_0_nstates_openmp_work_n_int`
+       * :c:func:`h_u_0_nstates_openmp_work_1`
+       * :c:func:`h_u_0_nstates_openmp_work_2`
+       * :c:func:`h_u_0_nstates_openmp_work_3`
+       * :c:func:`h_u_0_nstates_openmp_work_4`
+       * :c:func:`h_u_0_nstates_openmp_work_n_int`
 
     Calls:
 
@@ -6493,12 +7367,16 @@ Subroutines / functions
 
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`big_array_coulomb_integrals`
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_two_e_integrals_in_map`
-       * :c:data:`n_int`
        * :c:data:`ref_bitmask_energy`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`psi_energy_two_e_trans`
 
     Calls:
 
@@ -6534,7 +7412,6 @@ Subroutines / functions
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_one_e_integrals`
        * :c:data:`mo_two_e_integrals_in_map`
-       * :c:data:`n_int`
 
     Calls:
 
@@ -6564,12 +7441,16 @@ Subroutines / functions
     The i_H_psi_minilist is much faster but requires to build the
     minilists.
 
-    Needs:
+    Called by:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_int`
+       * :c:func:`calc_grad_elem`
+       * :c:func:`calc_hess_elem`
+       * :c:func:`pt2_epstein_nesbet_2x2`
+       * :c:func:`pt2_epstein_nesbet_2x2_no_ci_diag`
+       * :c:func:`remove_small_contributions`
 
     Calls:
 
@@ -6595,12 +7476,15 @@ Subroutines / functions
     Uses filter_connected_i_H_psi0 to get all the $|J \rangle$ to which $|i \rangle$
     is connected. The $|J\rangle$ are searched in short pre-computed lists.
 
-    Needs:
+    Called by:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_int`
+       * :c:func:`pt2_dummy`
+       * :c:func:`pt2_epstein_nesbet`
+       * :c:func:`pt2_moller_plesset`
+       * :c:func:`pt2_qdpt`
 
     Calls:
 
@@ -6625,13 +7509,6 @@ Subroutines / functions
     
     Uses filter_connected_i_H_psi0 to get all the $|J\rangle$ to which $|i\rangle$
     is connected. The $|J\rangle$ are searched in short pre-computed lists.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
 
     Calls:
 
@@ -6695,13 +7572,6 @@ Subroutines / functions
 
     Returns |true| if determinant ``key`` is connected to ``keys``
 
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
-
  
 .. c:function:: is_connected_to_by_single:
 
@@ -6714,13 +7584,6 @@ Subroutines / functions
 
 
     Returns |true| is ``key`` is connected to ``keys`` by a single excitation.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
 
  
 .. c:function:: is_in_wavefunction:
@@ -6757,14 +7620,14 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: make_s2_eigenfunction:
+.. c:function:: print_dipole_moments:
 
 
-    File : :file:`determinants/occ_pattern.irp.f`
+    File : :file:`determinants/dipole_moments.irp.f`
 
     .. code:: fortran
 
-        subroutine make_s2_eigenfunction
+        subroutine print_dipole_moments
 
 
 
@@ -6773,142 +7636,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`elec_alpha_num`
-       * :c:data:`n_det`
-       * :c:data:`n_int`
-       * :c:data:`psi_occ_pattern`
-       * :c:data:`psi_coef`
-       * :c:data:`psi_det`
-       * :c:data:`psi_occ_pattern`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`copy_h_apply_buffer_to_wf`
-       * :c:func:`fill_h_apply_buffer_no_selection`
-       * :c:func:`occ_pattern_to_dets`
-       * :c:func:`occ_pattern_to_dets_size`
-       * :c:func:`write_int`
-       * :c:func:`write_time`
-
-    Touches:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det`
-       * :c:data:`psi_occ_pattern`
-       * :c:data:`c0_weight`
-       * :c:data:`psi_coef`
-       * :c:data:`psi_det_sorted_bit`
-       * :c:data:`psi_det`
-       * :c:data:`psi_det_size`
-       * :c:data:`psi_det_sorted_bit`
-       * :c:data:`psi_occ_pattern`
-
- 
-.. c:function:: occ_pattern_of_det:
-
-
-    File : :file:`determinants/occ_pattern.irp.f`
-
-    .. code:: fortran
-
-        subroutine occ_pattern_of_det(d,o,Nint)
-
-
-    Transforms a determinant to an occupation pattern
-    
-    occ(:,1) : Single occupations
-    
-    occ(:,2) : Double occupations
-    
-
- 
-.. c:function:: occ_pattern_search_key:
-
-
-    File : :file:`determinants/connected_to_ref.irp.f`
-
-    .. code:: fortran
-
-        integer*8 function occ_pattern_search_key(det,Nint)
-
-
-    Return an integer*8 corresponding to a determinant index for searching
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`elec_alpha_num`
-
- 
-.. c:function:: occ_pattern_to_dets:
-
-
-    File : :file:`determinants/occ_pattern.irp.f`
-
-    .. code:: fortran
-
-        subroutine occ_pattern_to_dets(o,d,sze,n_alpha,Nint)
-
-
-    Generate all possible determinants for a given occ_pattern
-    
-    Input :
-       o   : occupation pattern : (doubly occupied, singly occupied)
-       sze : Number of produced determinants, computed by `occ_pattern_to_dets_size`
-       n_alpha : Number of $\alpha$ electrons
-       Nint    : N_int
-    
-    Output:
-       d : determinants
-    
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`binom_int`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`make_s2_eigenfunction`
-
- 
-.. c:function:: occ_pattern_to_dets_size:
-
-
-    File : :file:`determinants/occ_pattern.irp.f`
-
-    .. code:: fortran
-
-        subroutine occ_pattern_to_dets_size(o,sze,n_alpha,Nint)
-
-
-    Number of possible determinants for a given occ_pattern
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`binom_int`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`make_s2_eigenfunction`
+       * :c:data:`n_states`
+       * :c:data:`z_dipole_moment`
 
  
 .. c:function:: read_dets:
@@ -7048,6 +7777,54 @@ Subroutines / functions
        * :c:data:`psi_det_sorted_bit`
 
  
+.. c:function:: replace_wf:
+
+
+    File : :file:`determinants/h_apply.irp.f`
+
+    .. code:: fortran
+
+        subroutine replace_wf(N_det_new, LDA, psi_coef_new, psi_det_new)
+
+
+    Replaces the wave function.
+    After calling this subroutine, N_det, psi_det and psi_coef need to be touched
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`h_apply_buffer_allocated`
+       * :c:data:`n_det`
+       * :c:data:`n_int`
+       * :c:data:`n_states`
+       * :c:data:`nproc`
+       * :c:data:`psi_coef`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`abort`
+       * :c:func:`copy_h_apply_buffer_to_wf`
+       * :c:func:`fill_h_apply_buffer_no_selection`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_det`
+       * :c:data:`c0_weight`
+       * :c:data:`psi_coef`
+       * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det`
+       * :c:data:`psi_det_size`
+       * :c:data:`psi_det_sorted_bit`
+
+ 
 .. c:function:: resize_h_apply_buffer:
 
 
@@ -7066,8 +7843,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
        * :c:data:`h_apply_buffer_allocated`
        * :c:data:`n_det`
        * :c:data:`n_int`
@@ -7080,6 +7855,14 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`fill_h_apply_buffer_no_selection`
+       * :c:func:`fill_h_apply_buffer_selection`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`abort`
 
  
 .. c:function:: routine_example_psi_det:
@@ -7165,7 +7948,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_int`
        * :c:data:`ref_bitmask_energy`
 
     Called by:
@@ -7227,6 +8009,88 @@ Subroutines / functions
        * :c:data:`mo_occ`
 
  
+.. c:function:: save_natural_mos_canon_label:
+
+
+    File : :file:`determinants/density_matrix.irp.f`
+
+    .. code:: fortran
+
+        subroutine save_natural_mos_canon_label
+
+
+    Save natural orbitals, obtained by diagonalization of the one-body density matrix in
+    the |MO| basis
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_num`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`nullify_small_elements`
+       * :c:func:`orthonormalize_mos`
+       * :c:func:`save_mos`
+       * :c:func:`set_natural_mos_canon_label`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_coef`
+       * :c:data:`mo_occ`
+
+ 
+.. c:function:: save_natural_mos_no_ov_rot:
+
+
+    File : :file:`determinants/density_matrix.irp.f`
+
+    .. code:: fortran
+
+        subroutine save_natural_mos_no_ov_rot
+
+
+    Save natural orbitals, obtained by diagonalization of the one-body density matrix in
+    the |MO| basis
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_num`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`nullify_small_elements`
+       * :c:func:`orthonormalize_mos`
+       * :c:func:`save_mos`
+       * :c:func:`set_natorb_no_ov_rot`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_coef`
+       * :c:data:`mo_occ`
+
+ 
 .. c:function:: save_ref_determinant:
 
 
@@ -7276,6 +8140,14 @@ Subroutines / functions
        * :c:data:`n_states`
        * :c:data:`psi_det_sorted`
        * :c:data:`read_wf`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`run_cipsi`
+       * :c:func:`run_stochastic_cipsi`
 
     Calls:
 
@@ -7333,6 +8205,46 @@ Subroutines / functions
        * :c:func:`ezfio_set_determinants_psi_det`
        * :c:func:`ezfio_set_determinants_psi_det_qp_edit`
        * :c:func:`normalize`
+       * :c:func:`write_int`
+
+ 
+.. c:function:: save_wavefunction_general_unormalized:
+
+
+    File : :file:`determinants/determinants.irp.f`
+
+    .. code:: fortran
+
+        subroutine save_wavefunction_general_unormalized(ndet,nstates,psidet,dim_psicoef,psicoef)
+
+
+    Save the wave function into the |EZFIO| file
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_label`
+       * :c:data:`mpi_master`
+       * :c:data:`n_det_qp_edit`
+       * :c:data:`n_int`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`ezfio_set_determinants_bit_kind`
+       * :c:func:`ezfio_set_determinants_mo_label`
+       * :c:func:`ezfio_set_determinants_n_det`
+       * :c:func:`ezfio_set_determinants_n_det_qp_edit`
+       * :c:func:`ezfio_set_determinants_n_int`
+       * :c:func:`ezfio_set_determinants_n_states`
+       * :c:func:`ezfio_set_determinants_psi_coef`
+       * :c:func:`ezfio_set_determinants_psi_coef_qp_edit`
+       * :c:func:`ezfio_set_determinants_psi_det`
+       * :c:func:`ezfio_set_determinants_psi_det_qp_edit`
        * :c:func:`write_int`
 
  
@@ -7437,12 +8349,68 @@ Subroutines / functions
        * :c:data:`psi_coef`
        * :c:data:`psi_det`
 
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`run_orb_opt_trust_v2`
+       * :c:func:`update_parameters`
+
     Calls:
 
     .. hlist::
        :columns: 3
 
        * :c:func:`save_wavefunction_general`
+
+ 
+.. c:function:: set_natorb_no_ov_rot:
+
+
+    File : :file:`determinants/density_matrix.irp.f`
+
+    .. code:: fortran
+
+        subroutine set_natorb_no_ov_rot
+
+
+    Set natural orbitals, obtained by diagonalization of the one-body density matrix
+    in the |MO| basis
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`list_core_inact_act`
+       * :c:data:`list_virt`
+       * :c:data:`mo_num`
+       * :c:data:`mo_occ`
+       * :c:data:`n_core_inact_act_orb`
+       * :c:data:`n_virt_orb`
+       * :c:data:`one_e_dm_mo`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`save_natural_mos_no_ov_rot`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`mo_as_svd_vectors_of_mo_matrix_eig`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_occ`
 
  
 .. c:function:: set_natural_mos:
@@ -7477,6 +8445,54 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`save_natural_mos`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`mo_as_svd_vectors_of_mo_matrix_eig`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_occ`
+
+ 
+.. c:function:: set_natural_mos_canon_label:
+
+
+    File : :file:`determinants/density_matrix.irp.f`
+
+    .. code:: fortran
+
+        subroutine set_natural_mos_canon_label
+
+
+    Set natural orbitals, obtained by diagonalization of the one-body density matrix
+    in the |MO| basis
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`list_core_inact_act`
+       * :c:data:`list_virt`
+       * :c:data:`mo_num`
+       * :c:data:`mo_occ`
+       * :c:data:`n_core_inact_act_orb`
+       * :c:data:`n_virt_orb`
+       * :c:data:`one_e_dm_mo`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`save_natural_mos_canon_label`
 
     Calls:
 
@@ -7708,6 +8724,57 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`s2_u_0_nstates`
+
+ 
+.. c:function:: update_wf_of_psi_bilinear_matrix:
+
+
+    File : :file:`determinants/spindeterminants.irp.f`
+
+    .. code:: fortran
+
+        subroutine update_wf_of_psi_bilinear_matrix(truncate)
+
+
+    Updates a wave function when psi_bilinear_matrix was modified
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_det`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+       * :c:data:`n_int`
+       * :c:data:`n_states`
+       * :c:data:`psi_bilinear_matrix`
+       * :c:data:`psi_coef`
+       * :c:data:`psi_det`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+       * :c:data:`psi_det_sorted`
+       * :c:data:`psi_det_sorted_bit`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`create_wf_of_psi_bilinear_matrix`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_det`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+       * :c:data:`psi_coef`
+       * :c:data:`psi_det`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
 
  
 .. c:function:: wf_of_psi_bilinear_matrix:

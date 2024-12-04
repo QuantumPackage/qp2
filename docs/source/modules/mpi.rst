@@ -59,19 +59,39 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`absolute_eig`
+       * :c:data:`act_mos_opt`
+       * :c:data:`adaptive_pt2_max`
        * :c:data:`ao_cartesian`
+       * :c:data:`ao_cholesky_threshold`
        * :c:data:`ao_coef`
        * :c:data:`ao_expo`
+       * :c:data:`ao_expo_im`
+       * :c:data:`ao_expo_phase`
+       * :c:data:`ao_expo_pw`
        * :c:data:`ao_integrals_threshold`
        * :c:data:`ao_md5`
+       * :c:data:`ao_normalized`
        * :c:data:`ao_nucl`
        * :c:data:`ao_num`
+       * :c:data:`ao_one_e_integrals_threshold`
+       * :c:data:`ao_ortho_canonical_coef`
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`ao_two_e_integrals_in_map`
-       * :c:data:`cas_bitmask`
+       * :c:data:`avoid_saddle`
+       * :c:data:`basis`
+       * :c:data:`basis_nucleus_index`
+       * :c:data:`calc_dipole_moment`
+       * :c:data:`calc_energy_components`
+       * :c:data:`calc_osc_str`
+       * :c:data:`calc_tr_dipole_moment`
        * :c:data:`ci_energy`
        * :c:data:`correlation_energy_ratio_max`
+       * :c:data:`correlation_functional`
+       * :c:data:`criterion_casscf`
+       * :c:data:`csf_based`
+       * :c:data:`damping_for_rs_dft`
        * :c:data:`data_energy_proj`
        * :c:data:`data_energy_var`
        * :c:data:`data_one_e_dm_alpha_ao`
@@ -79,63 +99,90 @@ Providers
        * :c:data:`data_one_e_dm_beta_ao`
        * :c:data:`data_one_e_dm_beta_mo`
        * :c:data:`davidson_sze_max`
-       * :c:data:`disk_access_nuclear_repulsion`
+       * :c:data:`density_for_dft`
+       * :c:data:`diag_hess_cas`
        * :c:data:`disk_based_davidson`
        * :c:data:`distributed_davidson`
-       * :c:data:`do_direct_integrals`
+       * :c:data:`do_ao_cholesky`
+       * :c:data:`do_mom`
+       * :c:data:`do_ormas`
        * :c:data:`do_pseudo`
        * :c:data:`do_pt2`
        * :c:data:`elec_alpha_num`
        * :c:data:`elec_beta_num`
        * :c:data:`element_name`
-       * :c:data:`energy_iterations`
+       * :c:data:`exchange_functional`
+       * :c:data:`excitation_alpha_max`
+       * :c:data:`excitation_beta_max`
+       * :c:data:`excitation_max`
+       * :c:data:`excitation_ref`
+       * :c:data:`fast_2rdm`
        * :c:data:`frozen_orb_scf`
-       * :c:data:`generators_bitmask`
-       * :c:data:`generators_bitmask_restart`
        * :c:data:`h0_type`
-       * :c:data:`io_ao_integrals_e_n`
+       * :c:data:`hess_cv_cv`
+       * :c:data:`hf_exchange`
+       * :c:data:`io_ao_cholesky`
        * :c:data:`io_ao_integrals_kinetic`
+       * :c:data:`io_ao_integrals_n_e`
        * :c:data:`io_ao_integrals_overlap`
        * :c:data:`io_ao_integrals_pseudo`
        * :c:data:`io_ao_one_e_integrals`
        * :c:data:`io_ao_two_e_integrals`
        * :c:data:`io_ao_two_e_integrals_erf`
-       * :c:data:`io_mo_integrals_e_n`
+       * :c:data:`io_mo_cholesky`
        * :c:data:`io_mo_integrals_kinetic`
+       * :c:data:`io_mo_integrals_n_e`
        * :c:data:`io_mo_integrals_pseudo`
        * :c:data:`io_mo_one_e_integrals`
        * :c:data:`io_mo_two_e_integrals`
        * :c:data:`io_mo_two_e_integrals_erf`
+       * :c:data:`io_nuclear_repulsion`
+       * :c:data:`io_two_body_rdm_aa`
+       * :c:data:`io_two_body_rdm_ab`
+       * :c:data:`io_two_body_rdm_bb`
+       * :c:data:`io_two_body_rdm_spin_trace`
+       * :c:data:`is_periodic`
        * :c:data:`level_shift`
+       * :c:data:`level_shift_casscf`
+       * :c:data:`lin_dep_cutoff`
        * :c:data:`max_dim_diis`
        * :c:data:`mo_class`
        * :c:data:`mo_coef`
+       * :c:data:`mo_coef_aux`
+       * :c:data:`mo_coef_imag`
        * :c:data:`mo_guess_type`
+       * :c:data:`mo_integrals_cache_shift`
        * :c:data:`mo_integrals_threshold`
        * :c:data:`mo_label`
        * :c:data:`mo_num`
        * :c:data:`mo_occ`
+       * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
+       * :c:data:`mu_dft_type`
        * :c:data:`mu_erf`
-       * :c:data:`n_cas_bitmask`
+       * :c:data:`n_act_orb`
+       * :c:data:`n_big_act_orb`
        * :c:data:`n_core_orb`
+       * :c:data:`n_del_orb`
        * :c:data:`n_det`
        * :c:data:`n_det_generators`
-       * :c:data:`n_det_iterations`
        * :c:data:`n_det_max`
        * :c:data:`n_det_max_full`
+       * :c:data:`n_det_max_opt`
        * :c:data:`n_det_print_wf`
        * :c:data:`n_det_selectors`
-       * :c:data:`n_generators_bitmask`
-       * :c:data:`n_generators_bitmask_restart`
+       * :c:data:`n_inact_orb`
        * :c:data:`n_int`
        * :c:data:`n_it_scf_max`
-       * :c:data:`n_iter`
+       * :c:data:`n_pts_charge`
        * :c:data:`n_states`
        * :c:data:`n_states_diag`
-       * :c:data:`no_ivvv_integrals`
-       * :c:data:`no_vvv_integrals`
-       * :c:data:`no_vvvv_integrals`
+       * :c:data:`n_virt_orb`
+       * :c:data:`nb_it_max_lambda`
+       * :c:data:`nb_it_max_pre_search`
+       * :c:data:`no_core_density`
+       * :c:data:`no_oa_or_av_opt`
+       * :c:data:`normalize_dm`
        * :c:data:`nthreads_davidson`
        * :c:data:`nthreads_pt2`
        * :c:data:`nucl_charge`
@@ -144,7 +191,22 @@ Providers
        * :c:data:`nucl_label`
        * :c:data:`nucl_num`
        * :c:data:`nuclear_repulsion`
+       * :c:data:`nucleus_shell_num`
        * :c:data:`only_expected_s2`
+       * :c:data:`optimization_max_nb_iter`
+       * :c:data:`optimization_method`
+       * :c:data:`ormas_max_e`
+       * :c:data:`ormas_min_e`
+       * :c:data:`ormas_mstart`
+       * :c:data:`ormas_n_space`
+       * :c:data:`point_charges`
+       * :c:data:`prim_coef`
+       * :c:data:`prim_expo`
+       * :c:data:`prim_normalization_factor`
+       * :c:data:`prim_num`
+       * :c:data:`primitives_normalized`
+       * :c:data:`print_all_transitions`
+       * :c:data:`pruning`
        * :c:data:`pseudo_dz_k`
        * :c:data:`pseudo_dz_kl`
        * :c:data:`pseudo_grid_rmax`
@@ -166,25 +228,59 @@ Providers
        * :c:data:`psi_det_size`
        * :c:data:`pt2_e0_denominator`
        * :c:data:`pt2_f`
-       * :c:data:`pt2_iterations`
        * :c:data:`pt2_max`
+       * :c:data:`pt2_min_casscf`
+       * :c:data:`pt2_min_parallel_tasks`
        * :c:data:`pt2_n_teeth`
        * :c:data:`pt2_relative_error`
+       * :c:data:`pts_charge_coord`
+       * :c:data:`pts_charge_z`
        * :c:data:`qp_max_mem`
        * :c:data:`read_wf`
+       * :c:data:`restore_symm`
        * :c:data:`s2_eig`
+       * :c:data:`save_threshold`
+       * :c:data:`save_wf_after_selection`
        * :c:data:`scf_algorithm`
        * :c:data:`selection_factor`
+       * :c:data:`seniority_max`
+       * :c:data:`shell_ang_mom`
+       * :c:data:`shell_index`
+       * :c:data:`shell_normalization_factor`
+       * :c:data:`shell_num`
+       * :c:data:`shell_prim_num`
+       * :c:data:`small_active_space`
        * :c:data:`state_following`
+       * :c:data:`state_following_casscf`
        * :c:data:`target_energy`
+       * :c:data:`thresh_casscf`
+       * :c:data:`thresh_cc`
+       * :c:data:`thresh_delta`
+       * :c:data:`thresh_eig`
+       * :c:data:`thresh_model`
+       * :c:data:`thresh_model_2`
+       * :c:data:`thresh_opt_max_elem_grad`
+       * :c:data:`thresh_rho`
+       * :c:data:`thresh_rho_2`
        * :c:data:`thresh_scf`
        * :c:data:`thresh_sym`
+       * :c:data:`thresh_wtg`
+       * :c:data:`thresh_wtg2`
        * :c:data:`threshold_davidson`
+       * :c:data:`threshold_davidson_from_pt2`
        * :c:data:`threshold_diis`
        * :c:data:`threshold_generators`
+       * :c:data:`threshold_nonsym_davidson`
+       * :c:data:`twice_hierarchy_max`
+       * :c:data:`typ`
+       * :c:data:`use_cgtos`
+       * :c:data:`use_only_lr`
        * :c:data:`variance_max`
+       * :c:data:`version_avoid_saddle`
+       * :c:data:`version_lambda_search`
        * :c:data:`weight_one_e_dm`
        * :c:data:`weight_selection`
+       * :c:data:`without_diagonal`
 
  
 .. c:var:: mpi_rank

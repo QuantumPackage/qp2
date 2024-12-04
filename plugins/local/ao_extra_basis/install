@@ -1,0 +1,23 @@
+#!/bin/bash
+                                                                                                                                                        
+# Check if the QP_ROOT environment variable is set. 
+if [[ -z ${QP_ROOT} ]]
+then
+  print "The QP_ROOT environment variable is not set."
+  print "Please reload the quantum_package.rc file."
+  exit -1
+fi
+
+# Get the absolute path of the current directory.
+currdir=${PWD}
+
+# list of the scripts to be used by the module 
+scripts_list="qp_copy_extra_basis"
+
+# Make a symbolic link for all scripts to be used in the ${QP_ROOT}/scripts/
+# directory. 
+ for i in $scripts_list
+ do
+  ln --symbolic ${currdir}/$i ${QP_ROOT}/scripts/
+ done
+
