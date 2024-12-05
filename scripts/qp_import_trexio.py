@@ -253,7 +253,7 @@ def write_ezfio(trexio_filename, filename):
 
         print(basis_type)
     except:
-        raise
+        basis_type = "None"
         print("None")
         ezfio.set_ao_basis_ao_cartesian(True)
 
