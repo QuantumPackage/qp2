@@ -12,4 +12,5 @@ program extra_basis
   print*,'extra_nucl_coord  = '
   print*,extra_nucl_coord(i,1:3)
  enddo
+ print*,ao_extra_num
 end
