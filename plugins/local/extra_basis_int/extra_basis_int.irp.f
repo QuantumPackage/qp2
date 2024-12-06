@@ -5,7 +5,12 @@ program extra_basis_int
   END_DOC
 !  call test_overlap
 !  call routine_test_pot_ne
- call routine_test_pot_ne_mixed
+! call routine_test_pot_ne_mixed
+! call routine_pot_ne_extra
+! call routine_test_pot_ne_mixed
+! call routine_pot_ne
+ call routine_test_pot_ne_extra_mixed
+ 
 end
 
 subroutine test_overlap
@@ -50,7 +55,7 @@ subroutine  routine_test_pot_ne
 
 end
 
-subroutine  routine_test_pot_ne_mixed
+subroutine  routine_test_pot_mixed
  implicit none
  integer :: i,j
  double precision :: integral, C_center(3), mu_in
@@ -62,6 +67,56 @@ subroutine  routine_test_pot_ne_mixed
  do j = 1, ao_num
   do i = 1, ao_extra_num
    integral = NAI_pol_mult_erf_ao_extra_mixed(i, j, mu_in, C_center)
+   write(33,*)integral
+  enddo
+ enddo
+
+end
+
+subroutine routine_pot_ne_extra
+ implicit none
+ integer :: i,j
+ double precision :: v_extra_nucl_extra_ao
+ do i = 1, ao_extra_num
+  do j = 1, ao_extra_num
+   write(33,*)v_extra_nucl_extra_ao(i,j)
+  enddo
+ enddo
+end
+
+
+subroutine routine_pot_ne
+ implicit none
+ integer :: i,j
+ double precision :: v_nucl_extra_ao
+ do i = 1, ao_extra_num
+  do j = 1, ao_extra_num
+   write(33,*)v_nucl_extra_ao(i,j)
+  enddo
+ enddo
+end
+
+
+subroutine  routine_test_pot_ne_mixed
+ implicit none
+ integer :: i,j
+ double precision :: integral,v_extra_nucl_mixed_ao
+ do j = 1, ao_num
+  do i = 1, ao_extra_num
+   integral = v_extra_nucl_mixed_ao(i,j)
+   write(33,*)integral
+  enddo
+ enddo
+
+end
+
+subroutine  routine_test_pot_ne_extra_mixed
+ implicit none
+ integer :: i,j
+ double precision :: integral,v_nucl_mixed_ao
+ do j = 1, ao_num
+  do i = 1, ao_extra_num
+   integral = v_nucl_mixed_ao(i,j)
    write(33,*)integral
   enddo
  enddo
