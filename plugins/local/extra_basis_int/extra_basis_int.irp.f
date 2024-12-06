@@ -4,7 +4,8 @@ program extra_basis_int
 ! TODO : Put the documentation of the program here
   END_DOC
 !  call test_overlap
-  call routine_test_pot_ne
+!  call routine_test_pot_ne
+ call routine_test_pot_ne_mixed
 end
 
 subroutine test_overlap
@@ -44,6 +45,24 @@ subroutine  routine_test_pot_ne
   do j = 1, ao_extra_num
    integral = NAI_pol_mult_erf_ao_extra(i, j, mu_in, C_center)
    write(33,*)j,i,integral
+  enddo
+ enddo
+
+end
+
+subroutine  routine_test_pot_ne_mixed
+ implicit none
+ integer :: i,j
+ double precision :: integral, C_center(3), mu_in
+ double precision :: NAI_pol_mult_erf_ao_extra_mixed
+ C_center(1) = 0.1d0
+ C_center(2) = -0.3d0
+ C_center(3) =  0.8d0
+ mu_in = 1.d10
+ do j = 1, ao_num
+  do i = 1, ao_extra_num
+   integral = NAI_pol_mult_erf_ao_extra_mixed(i, j, mu_in, C_center)
+   write(33,*)integral
   enddo
  enddo
 
