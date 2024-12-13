@@ -4,7 +4,11 @@ QP=$QP_ROOT
 dir=${QP}
 # sourcing the quantum_package.rc file
 . ${QP}/quantum_package.rc
+# script that copy all data from |AO| basis and nuclei of EZFIO_extra to the ao_extra_basis and extra_nuclei of EZFIO_target
+# use:
+# qp_copy_extra_basis EZFIO_extra EZFIO_target
 EZFIO_extra=${1%/}
+EZFIO_extra=${EZFIO_extra%.xyz}
 EZFIO_target=${2%/}
 
 
@@ -56,4 +60,8 @@ i=primitives_normalized
 newfile=primitives_normalized_extra
 cp ${EZFIO_extra}/ao_basis/$i ${EZFIO_target}/ao_extra_basis/$newfile
 
+echo "COPYING ALL DATA FROM "$EZFIO_extra"/aux_quantities/ to "${EZFIO_target}"/ao_extra_basis/"
+i=data_one_e_dm_tot_ao.gz
+newfile=ao_extra_one_e_dm.gz
+cp ${EZFIO_extra}/aux_quantities/$i ${EZFIO_target}/ao_extra_basis/$newfile
 

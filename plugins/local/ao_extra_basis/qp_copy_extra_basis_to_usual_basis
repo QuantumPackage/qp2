@@ -1,5 +1,6 @@
 #!/bin/bash 
 # specify the QP folder 
+# script that copy all data in ao_extra_basis and extra_nuclei and copy it to ao_basis and ao_nuclei
 QP=$QP_ROOT
 dir=${QP}
 # sourcing the quantum_package.rc file
@@ -52,8 +53,5 @@ do
  echo $newfile
  cp ${EZFIO_extra}/ao_extra_basis/$i ${EZFIO_target}/ao_basis/$newfile
 done
-#i=primitives_normalized
-#newfile=primitives_normalized_extra
-#cp ${EZFIO_extra}/ao_basis/$i ${EZFIO_target}/ao_extra_basis/$newfile
 
 

@@ -84,20 +84,31 @@ BEGIN_PROVIDER [ integer, list_2p_functions, (n_2p_func_orig)]
  enddo
 END_PROVIDER 
 
+BEGIN_PROVIDER [ integer, extra_fictious_nucl]
+ implicit none
+ extra_fictious_nucl = n_2p_func_tot
+END_PROVIDER 
+
 BEGIN_PROVIDER [ integer, new_nucl_num]
  implicit none
  new_nucl_num = nucl_num + n_2p_func_tot
  print*,'new_nucl_num = ',new_nucl_num
 END_PROVIDER 
 
-BEGIN_PROVIDER [ character*(32), new_nucl_label_1s , (new_nucl_num) ]
+ BEGIN_PROVIDER [ character*(32), new_nucl_label_1s , (new_nucl_num) ]
+&BEGIN_PROVIDER [ integer, list_real_nucl, (nucl_num) ]
+&BEGIN_PROVIDER [ integer, list_fict_nucl, (extra_fictious_nucl) ]
  implicit none
- integer :: i
+ integer :: i,j
  do i = 1, nucl_num 
   new_nucl_label_1s(i) = nucl_label(i)
+  list_real_nucl(i) = i
  enddo
+ j=0
  do i = nucl_num+1,new_nucl_num
+  j+=1
   new_nucl_label_1s(i) = "X"
+  list_fict_nucl(j) = i
  enddo
 END_PROVIDER 
  
@@ -111,6 +122,7 @@ END_PROVIDER
 
  BEGIN_PROVIDER [ double precision, new_nucl_coord_1s_transp, (3,new_nucl_num)]
 &BEGIN_PROVIDER [ double precision, new_nucl_charge_1s, (new_nucl_num)]
+&BEGIN_PROVIDER [ integer, extra_nucl_real_fictious_list_prov, (extra_fictious_nucl)]
  implicit none
  BEGIN_DOC
 ! the real atoms are located in the first nucl_num entries 
@@ -138,11 +150,13 @@ END_PROVIDER
      new_nucl_coord_1s_transp(1:3,k)= nucl_coord_transp(1:3,i)
      new_nucl_coord_1s_transp(good_i,k)+= ao_extra_center
      new_nucl_charge_1s(k) = 0.d0
+     extra_nucl_real_fictious_list_prov(k-nucl_num)=i
      k+=1
      ! one is centered in R_x - d 
      new_nucl_coord_1s_transp(1:3,k)= nucl_coord_transp(1:3,i)
      new_nucl_coord_1s_transp(good_i,k)-= ao_extra_center
      new_nucl_charge_1s(k) = 0.d0
+     extra_nucl_real_fictious_list_prov(k-nucl_num)=i
     enddo
    else if(ao_l(i_ao).gt.1)then
     print*,'WARNING ! Lmax value not implemented yet !'
