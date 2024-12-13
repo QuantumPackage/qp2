@@ -314,7 +314,7 @@ END_PROVIDER
 
        do j=1,nq
 
-         if ( (Qmax < Dmin).or.(N+j*1_8 > ndim8) ) exit
+         if ( (Qmax <= Dmin).or.(N+j*1_8 > ndim8) ) exit
 
          ! i.
          rank = N+j

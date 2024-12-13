@@ -160,7 +160,6 @@ def write_ezfio(trexio_filename, filename):
             ezfio.set_basis_shell_ang_mom(ang_mom)
             ezfio.set_basis_basis_nucleus_index([ x+1 for x in nucl_index ])
             ezfio.set_basis_prim_expo(exponent)
-            ezfio.set_basis_prim_coef(coefficient)
 
             nucl_shell_num = []
             prev = None
@@ -194,6 +193,10 @@ def write_ezfio(trexio_filename, filename):
 
             shell_factor = trexio.read_basis_shell_factor(trexio_file)
             prim_factor  = trexio.read_basis_prim_factor(trexio_file)
+            for i,p in enumerate(prim_factor):
+                coefficient[i] *= prim_factor[i]
+            ezfio.set_ao_basis_primitives_normalized(False)
+            ezfio.set_basis_prim_coef(coefficient)
 
         elif basis_type.lower() == "numerical":
 
@@ -245,13 +248,12 @@ def write_ezfio(trexio_filename, filename):
             ezfio.set_basis_nucleus_shell_num(nucl_shell_num)
 
             shell_factor = trexio.read_basis_shell_factor(trexio_file)
-            prim_factor  = [1.]*prim_num
         else:
            raise TypeError
 
         print(basis_type)
     except:
-        raise
+        basis_type = "None"
         print("None")
         ezfio.set_ao_basis_ao_cartesian(True)
 
@@ -261,9 +263,6 @@ def write_ezfio(trexio_filename, filename):
         cartesian = trexio.read_ao_cartesian(trexio_file)
     except:
         cartesian = True
-
-    ao_num = trexio.read_ao_num(trexio_file)
-    ezfio.set_ao_basis_ao_num(ao_num)
 
     trexio_file_cart = trexio_file
     if basis_type.lower() == "gaussian" and not cartesian:
@@ -278,8 +277,12 @@ def write_ezfio(trexio_filename, filename):
         except:
           pass
 
+    ao_num = trexio.read_ao_num(trexio_file_cart)
+    ezfio.set_ao_basis_ao_num(ao_num)
+
+
     if cartesian and basis_type.lower() == "gaussian" and shell_num > 0:
-        ao_shell    = trexio.read_ao_shell(trexio_file)
+        ao_shell    = trexio.read_ao_shell(trexio_file_cart)
         at = [ nucl_index[i]+1 for i in ao_shell ]
         ezfio.set_ao_basis_ao_nucl(at)
 
@@ -314,6 +317,7 @@ def write_ezfio(trexio_filename, filename):
                 exponent.append(expo[i])
                 num_prim.append(num_prim0[i])
 
+        print (len(coefficient), ao_num)
         assert (len(coefficient) == ao_num)
         ezfio.set_ao_basis_ao_power(power_x + power_y + power_z)
         ezfio.set_ao_basis_ao_prim_num(num_prim)
@@ -384,6 +388,14 @@ def write_ezfio(trexio_filename, filename):
 
       # Read coefs from temporary cartesian file created in the AO section
       MoMatrix = trexio.read_mo_coefficient(trexio_file_cart)
+
+      # Renormalize MO coefs if needed
+      if trexio.has_ao_normalization(trexio_file_cart):
+        ezfio.set_ao_basis_ao_normalized(False)
+        norm = trexio.read_ao_normalization(trexio_file_cart)
+#        for j in range(mo_num):
+#           for i,f in enumerate(norm):
+#              MoMatrix[i,j] *= f
       ezfio.set_mo_basis_mo_coef(MoMatrix)
 
       mo_occ = [ 0. for i in range(mo_num) ]
@@ -486,10 +498,10 @@ def write_ezfio(trexio_filename, filename):
     if trexio.has_mo_spin(trexio_file):
        spin = trexio.read_mo_spin(trexio_file)
        if max(spin) == 1:
-         alpha = [ i for i in range(len(spin)) if spin[i] == 0 ]
-         alpha = [ alpha[i] for i in range(num_alpha) ]
-         beta  = [ i for i in range(len(spin)) if spin[i] == 1 ]
-         beta  = [ beta[i] for i in range(num_beta) ]
+         tmp   = [ i for i in range(len(spin)) if spin[i] == 0 ]
+         alpha = [ tmp[i] for i in range(num_alpha) ]
+         tmp   = [ i for i in range(len(spin)) if spin[i] == 1 ]
+         beta  = [ tmp[i] for i in range(num_beta) ]
          warnings.append("UHF orbitals orbitals read", end=' ')
     alpha_s = ['0']*mo_num
     beta_s  = ['0']*mo_num

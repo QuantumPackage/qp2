@@ -55,9 +55,6 @@ END_PROVIDER
 
   do i=1,ao_num
 
-!    powA(1) = ao_power(i,1) +  ao_power(i,2) +  ao_power(i,3)
-!    powA(2) = 0
-!    powA(3) = 0
     powA(1) = ao_power(i,1)
     powA(2) = ao_power(i,2)
     powA(3) = ao_power(i,3)
@@ -76,16 +73,19 @@ END_PROVIDER
     endif
 
     ! Normalization of the contracted basis functions
-    if (ao_normalized) then
-      norm = 0.d0
-      do j=1,ao_prim_num(i)
-        do k=1,ao_prim_num(i)
-          call overlap_gaussian_xyz(C_A,C_A,ao_expo(i,j),ao_expo(i,k),powA,powA,overlap_x,overlap_y,overlap_z,c,nz)
-          norm = norm+c*ao_coef_normalized(i,j)*ao_coef_normalized(i,k)
-        enddo
+    norm = 0.d0
+    do j=1,ao_prim_num(i)
+      do k=1,ao_prim_num(i)
+        call overlap_gaussian_xyz(C_A,C_A,ao_expo(i,j),ao_expo(i,k),powA,powA,overlap_x,overlap_y,overlap_z,c,nz)
+        norm = norm+c*ao_coef_normalized(i,j)*ao_coef_normalized(i,k)
       enddo
-      ao_coef_normalization_factor(i) = 1.d0/dsqrt(norm)
-    else
+    enddo
+    ao_coef_normalization_factor(i) = 1.d0/dsqrt(norm)
+
+    if (.not.ao_normalized) then
+      do j=1,ao_prim_num(i)
+        ao_coef_normalized(i,j) = ao_coef_normalized(i,j) * ao_coef_normalization_factor(i)
+      enddo
       ao_coef_normalization_factor(i) = 1.d0
     endif
   enddo
@@ -339,3 +339,22 @@ BEGIN_PROVIDER [ character*(4), ao_l_char_space, (ao_num) ]
    ao_l_char_space(i) = give_ao_character_space
  enddo
 END_PROVIDER
+
+! ---
+
+BEGIN_PROVIDER [ logical, use_pw ]
+
+  implicit none
+
+  logical :: exist
+
+  use_pw = .false.
+
+  call ezfio_has_ao_basis_ao_expo_pw(exist)
+  if(exist) then
+    PROVIDE ao_expo_pw_ord_transp
+    if(maxval(dabs(ao_expo_pw_ord_transp(4,:,:))) .gt. 1d-15) use_pw = .true.
+  endif
+
+END_PROVIDER
+

@@ -45,4 +45,3 @@ BEGIN_PROVIDER [ double precision, ao_one_e_integrals_imag,(ao_num,ao_num)]
 
 END_PROVIDER
 
-
