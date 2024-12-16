@@ -120,3 +120,19 @@ BEGIN_PROVIDER [ double precision, extra_center_of_mass, (3) ]
   extra_center_of_mass(:) = extra_center_of_mass(:)*s
 END_PROVIDER
 
+
+BEGIN_PROVIDER [ double precision, extra_nucl_dist, (extra_nucl_num,extra_nucl_num)]
+ implicit none
+ integer :: i,j
+ double precision :: x,y,z
+ do i = 1, extra_nucl_num
+  do j = 1, extra_nucl_num
+   x = extra_nucl_coord(i,1)-extra_nucl_coord(j,1)
+   y = extra_nucl_coord(i,2)-extra_nucl_coord(j,2)
+   z = extra_nucl_coord(i,3)-extra_nucl_coord(j,3)
+   extra_nucl_dist(j,i) = x*x+y*y+z*z
+   extra_nucl_dist(j,i) = dsqrt(extra_nucl_dist(j,i))
+  enddo
+ enddo
+
+END_PROVIDER 

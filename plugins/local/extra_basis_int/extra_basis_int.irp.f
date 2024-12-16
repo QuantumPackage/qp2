@@ -9,7 +9,8 @@ program extra_basis_int
 ! call routine_pot_ne_extra
 ! call routine_test_pot_ne_mixed
 ! call routine_pot_ne
- call routine_test_pot_ne_extra_mixed
+! call routine_test_pot_ne_extra_mixed
+ call routine_test_coul_1s
  
 end
 
@@ -121,4 +122,28 @@ subroutine  routine_test_pot_ne_extra_mixed
   enddo
  enddo
 
+end
+
+subroutine routine_test_coul_1s
+ implicit none
+ integer :: i,j
+ double precision :: r(3) ,mu_in,NAI_pol_mult_erf_ao_extra
+ double precision :: ref,new, accu,coul_full_pq_r_1s,v_nucl_extra_ao
+ r(1) = 0.d0
+ r(2) = 0.5d0
+ r(3) = -1.5d0
+ r=nucl_coord(1,1:3)
+ mu_in = 1.d+10
+ accu = 0.d0
+ do i = 1, ao_extra_num
+  do j = 1, ao_extra_num
+! do i = 1, 1
+!  do j = 1, 1
+   ref = NAI_pol_mult_erf_ao_extra(i, j, mu_in, r)
+   new = coul_full_pq_r_1s(i,j,r,ao_extra_center_1s(1,i),ao_extra_center_1s(1,j))
+!   new = v_nucl_extra_ao(i,j)
+   accu += dabs(new-ref)
+  enddo
+ enddo
+ print*,'accu = ',accu
 end
