@@ -1,4 +1,4 @@
-program sort_wf
+program print_sorted_wf_coef
  implicit none
  read_wf =.True.
  call routine

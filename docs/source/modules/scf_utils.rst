@@ -97,15 +97,57 @@ EZFIO parameters
     Calculated HF energy
  
  
+.. option:: do_mom
+ 
+    If true, this will run a MOM calculation. The overlap will be computed at each step with respect to the initial MOs. After an initial Hartree-Fock calculation, the guess can be created by swapping molecular orbitals through the qp run swap_mos command.
+ 
+    Default: False
+ 
 .. option:: frozen_orb_scf
  
     If true, leave untouched all the orbitals defined as core and optimize all the orbitals defined as active with qp_set_mo_class
  
     Default: False
  
+.. option:: no_oa_or_av_opt
+ 
+    If true, you set to zero all Fock elements between the orbital set to active and all the other orbitals
+ 
+    Default: False
+ 
  
 Providers 
 --------- 
+ 
+.. c:var:: all_shells_closed
+
+
+    File : :file:`scf_utils/scf_density_matrix_ao.irp.f`
+
+    .. code:: fortran
+
+        logical	:: all_shells_closed	
+
+
+    
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`elec_alpha_num`
+       * :c:data:`elec_beta_num`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`fock_matrix_ao`
+       * :c:data:`fock_matrix_mo`
+       * :c:data:`scf_density_matrix_ao`
+
  
 .. c:var:: eigenvalues_fock_matrix_ao
 
@@ -180,10 +222,15 @@ Providers
        * :c:data:`level_shift`
        * :c:data:`list_act`
        * :c:data:`list_core`
+       * :c:data:`list_inact`
+       * :c:data:`list_virt`
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
        * :c:data:`n_act_orb`
        * :c:data:`n_core_orb`
+       * :c:data:`n_inact_orb`
+       * :c:data:`n_virt_orb`
+       * :c:data:`no_oa_or_av_opt`
 
 
  
@@ -224,7 +271,6 @@ Providers
        :columns: 3
 
        * :c:func:`dgecon`
-       * :c:func:`dgemm`
        * :c:func:`dgesv`
        * :c:func:`dgetrf`
 
@@ -246,9 +292,8 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`all_shells_closed`
        * :c:data:`ao_num`
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
        * :c:data:`fock_matrix_ao_alpha`
        * :c:data:`fock_matrix_mo`
        * :c:data:`frozen_orb_scf`
@@ -279,16 +324,27 @@ Providers
     Fock matrix on the MO basis.
     For open shells, the ROHF Fock Matrix is ::
     
-          |   F-K    |  F + K/2  |    F     |
-          |---------------------------------|
-          | F + K/2  |     F     |  F - K/2 |
-          |---------------------------------|
-          |    F     |  F - K/2  |  F + K   |
+          |  Rcc  |  F^b  |  Fcv  |
+          |-----------------------|
+          |  F^b  |  Roo  |  F^a  |
+          |-----------------------|
+          |  Fcv  |  F^a  |  Rvv  |
     
+    C: Core, O: Open, V: Virtual
     
-    F = 1/2 (Fa + Fb)
+    Rcc = Acc Fcc^a + Bcc Fcc^b
+    Roo = Aoo Foo^a + Boo Foo^b
+    Rvv = Avv Fvv^a + Bvv Fvv^b
+    Fcv = (F^a + F^b)/2
     
-    K = Fb - Fa
+    F^a: Fock matrix alpha (MO), F^b: Fock matrix beta (MO)
+    A,B: Coupling parameters
+    
+    J. Chem. Phys. 133, 141102 (2010), https://doi.org/10.1063/1.3503173
+    Coupling parameters from J. Chem. Phys. 125, 204110 (2006); https://doi.org/10.1063/1.2393223.
+          cc   oo   vv
+     A  -0.5  0.5  1.5
+     B   1.5  0.5 -0.5
     
 
     Needs:
@@ -296,6 +352,7 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`all_shells_closed`
        * :c:data:`elec_alpha_num`
        * :c:data:`elec_beta_num`
        * :c:data:`fock_matrix_mo_alpha`
@@ -303,9 +360,14 @@ Providers
        * :c:data:`frozen_orb_scf`
        * :c:data:`list_act`
        * :c:data:`list_core`
+       * :c:data:`list_inact`
+       * :c:data:`list_virt`
        * :c:data:`mo_num`
        * :c:data:`n_act_orb`
        * :c:data:`n_core_orb`
+       * :c:data:`n_inact_orb`
+       * :c:data:`n_virt_orb`
+       * :c:data:`no_oa_or_av_opt`
 
     Needed by:
 
@@ -330,16 +392,27 @@ Providers
     Fock matrix on the MO basis.
     For open shells, the ROHF Fock Matrix is ::
     
-          |   F-K    |  F + K/2  |    F     |
-          |---------------------------------|
-          | F + K/2  |     F     |  F - K/2 |
-          |---------------------------------|
-          |    F     |  F - K/2  |  F + K   |
+          |  Rcc  |  F^b  |  Fcv  |
+          |-----------------------|
+          |  F^b  |  Roo  |  F^a  |
+          |-----------------------|
+          |  Fcv  |  F^a  |  Rvv  |
     
+    C: Core, O: Open, V: Virtual
     
-    F = 1/2 (Fa + Fb)
+    Rcc = Acc Fcc^a + Bcc Fcc^b
+    Roo = Aoo Foo^a + Boo Foo^b
+    Rvv = Avv Fvv^a + Bvv Fvv^b
+    Fcv = (F^a + F^b)/2
     
-    K = Fb - Fa
+    F^a: Fock matrix alpha (MO), F^b: Fock matrix beta (MO)
+    A,B: Coupling parameters
+    
+    J. Chem. Phys. 133, 141102 (2010), https://doi.org/10.1063/1.3503173
+    Coupling parameters from J. Chem. Phys. 125, 204110 (2006); https://doi.org/10.1063/1.2393223.
+          cc   oo   vv
+     A  -0.5  0.5  1.5
+     B   1.5  0.5 -0.5
     
 
     Needs:
@@ -347,6 +420,7 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`all_shells_closed`
        * :c:data:`elec_alpha_num`
        * :c:data:`elec_beta_num`
        * :c:data:`fock_matrix_mo_alpha`
@@ -354,9 +428,14 @@ Providers
        * :c:data:`frozen_orb_scf`
        * :c:data:`list_act`
        * :c:data:`list_core`
+       * :c:data:`list_inact`
+       * :c:data:`list_virt`
        * :c:data:`mo_num`
        * :c:data:`n_act_orb`
        * :c:data:`n_core_orb`
+       * :c:data:`n_inact_orb`
+       * :c:data:`n_virt_orb`
+       * :c:data:`no_oa_or_av_opt`
 
     Needed by:
 
@@ -498,9 +577,8 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`all_shells_closed`
        * :c:data:`ao_num`
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
        * :c:data:`scf_density_matrix_ao_alpha`
        * :c:data:`scf_density_matrix_ao_beta`
 
@@ -509,6 +587,7 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`ao_two_e_integral_alpha_chol`
        * :c:data:`fps_spf_matrix_ao`
 
  
@@ -539,7 +618,10 @@ Providers
        :columns: 3
 
        * :c:data:`ao_two_e_integral_alpha`
+       * :c:data:`ao_two_e_integral_alpha_chol`
        * :c:data:`hf_energy`
+       * :c:data:`hf_kinetic_energy`
+       * :c:data:`mcscf_fock_alpha_ao`
        * :c:data:`scf_density_matrix_ao`
        * :c:data:`scf_energy`
 
@@ -571,7 +653,10 @@ Providers
        :columns: 3
 
        * :c:data:`ao_two_e_integral_alpha`
+       * :c:data:`ao_two_e_integral_alpha_chol`
        * :c:data:`hf_energy`
+       * :c:data:`hf_kinetic_energy`
+       * :c:data:`mcscf_fock_alpha_ao`
        * :c:data:`scf_density_matrix_ao`
        * :c:data:`scf_energy`
 
@@ -734,6 +819,47 @@ Subroutines / functions
        * :c:data:`mo_coef`
 
  
+.. c:function:: reorder_mo_max_overlap:
+
+
+    File : :file:`scf_utils/reorder_mo_max_overlap.irp.f`
+
+    .. code:: fortran
+
+        subroutine reorder_mo_max_overlap
+
+
+    routines that compute the projection of each MO of the current `mo_coef` on the space spanned by the occupied orbitals of `mo_coef_begin_iteration`
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`ao_overlap`
+       * :c:data:`elec_alpha_num`
+       * :c:data:`elec_beta_num`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_coef_begin_iteration`
+       * :c:data:`mo_num`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`roothaan_hall_scf`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dgemm`
+       * :c:func:`dsort`
+
+ 
 .. c:function:: roothaan_hall_scf:
 
 
@@ -753,6 +879,7 @@ Subroutines / functions
 
        * :c:data:`ao_md5`
        * :c:data:`ao_num`
+       * :c:data:`do_mom`
        * :c:data:`eigenvectors_fock_matrix_mo`
        * :c:data:`fock_matrix_ao`
        * :c:data:`fock_matrix_ao_alpha`
@@ -761,6 +888,8 @@ Subroutines / functions
        * :c:data:`fps_spf_matrix_ao`
        * :c:data:`fps_spf_matrix_mo`
        * :c:data:`frozen_orb_scf`
+       * :c:data:`json_int_fmt`
+       * :c:data:`json_unit`
        * :c:data:`level_shift`
        * :c:data:`max_dim_diis`
        * :c:data:`mo_coef`
@@ -773,18 +902,31 @@ Subroutines / functions
        * :c:data:`thresh_scf`
        * :c:data:`threshold_diis_nonzero`
 
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`run`
+
     Calls:
 
     .. hlist::
        :columns: 3
 
+       * :c:func:`dgemm`
        * :c:func:`extrapolate_fock_matrix`
        * :c:func:`initialize_mo_coef_begin_iteration`
+       * :c:func:`lock_io`
        * :c:func:`mo_as_eigvectors_of_mo_matrix`
-       * :c:func:`nullify_small_elements`
        * :c:func:`orthonormalize_mos`
+       * :c:func:`pivoted_cholesky`
        * :c:func:`reorder_core_orb`
+       * :c:func:`reorder_mo_max_overlap`
+       * :c:func:`restore_symmetry`
        * :c:func:`save_mos`
+       * :c:func:`sleep`
+       * :c:func:`unlock_io`
        * :c:func:`write_double`
        * :c:func:`write_time`
 

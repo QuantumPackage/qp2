@@ -60,6 +60,7 @@ Providers
 
        * :c:data:`ao_num`
        * :c:data:`ao_overlap`
+       * :c:data:`lin_dep_cutoff`
 
     Needed by:
 
@@ -138,9 +139,11 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_label`
-       * :c:data:`mo_one_e_integrals`
+       * :c:data:`ao_num`
        * :c:data:`mo_coef`
+       * :c:data:`mo_label`
+       * :c:data:`mo_num`
+       * :c:data:`mo_one_e_integrals`
 
     Calls:
 
@@ -148,6 +151,7 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`mo_as_eigvectors_of_mo_matrix`
+       * :c:func:`nullify_small_elements`
        * :c:func:`save_mos`
 
     Touches:

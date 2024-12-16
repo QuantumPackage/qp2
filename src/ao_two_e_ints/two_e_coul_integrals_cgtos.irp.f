@@ -1672,5 +1672,3 @@ recursive subroutine I_x2_pol_mult_cgtos(c, B_10, B_01, B_00, C_00, D_00, d, nd,
 
 end
 
-! ---
-

@@ -72,9 +72,13 @@ cisd
  .. hlist:: 
     :columns: 3 
  
-    * :c:data:`fock_matrix_ao_alpha` 
-    * :c:data:`fock_matrix_ao_alpha` 
-    * :c:data:`mo_coef` 
-    * :c:data:`level_shift` 
-    * :c:data:`mo_coef` 
+    * :c:data:`psi_configuration` 
+    * :c:data:`n_det` 
+    * :c:data:`c0_weight` 
+    * :c:data:`psi_coef` 
+    * :c:data:`psi_det_sorted_bit` 
+    * :c:data:`psi_configuration` 
+    * :c:data:`psi_det` 
+    * :c:data:`psi_det_size` 
+    * :c:data:`psi_det_sorted_bit` 
     * :c:data:`read_wf` 

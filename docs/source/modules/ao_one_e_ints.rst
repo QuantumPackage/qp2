@@ -23,12 +23,17 @@ The most important providers for usual quantum-chemistry calculation are:
 EZFIO parameters 
 ---------------- 
  
-.. option:: ao_integrals_e_n
+.. option:: ao_integrals_n_e
  
     Nucleus-electron integrals in |AO| basis set
  
  
-.. option:: io_ao_integrals_e_n
+.. option:: ao_integrals_n_e_imag
+ 
+    Imaginary part of the nucleus-electron integrals in |AO| basis set
+ 
+ 
+.. option:: io_ao_integrals_n_e
  
     Read/Write |AO| nucleus-electron attraction integrals from/to disk [ Write | Read | None ]
  
@@ -37,6 +42,11 @@ EZFIO parameters
 .. option:: ao_integrals_kinetic
  
     Kinetic energy integrals in |AO| basis set
+ 
+ 
+.. option:: ao_integrals_kinetic_imag
+ 
+    Imaginary part of the kinetic energy integrals in |AO| basis set
  
  
 .. option:: io_ao_integrals_kinetic
@@ -50,6 +60,11 @@ EZFIO parameters
     Pseudopotential integrals in |AO| basis set
  
  
+.. option:: ao_integrals_pseudo_imag
+ 
+    Imaginary part of the pseudopotential integrals in |AO| basis set
+ 
+ 
 .. option:: io_ao_integrals_pseudo
  
     Read/Write |AO| pseudopotential integrals from/to disk [ Write | Read | None ]
@@ -59,6 +74,11 @@ EZFIO parameters
 .. option:: ao_integrals_overlap
  
     Overlap integrals in |AO| basis set
+ 
+ 
+.. option:: ao_integrals_overlap_imag
+ 
+    Imaginary part of the overlap integrals in |AO| basis set
  
  
 .. option:: io_ao_integrals_overlap
@@ -72,11 +92,28 @@ EZFIO parameters
     Combined integrals in |AO| basis set
  
  
+.. option:: ao_one_e_integrals_imag
+ 
+    Imaginary part of the combined integrals in |AO| basis set
+ 
+ 
 .. option:: io_ao_one_e_integrals
  
     Read/Write |AO| one-electron integrals from/to disk [ Write | Read | None ]
  
     Default: None
+ 
+.. option:: lin_dep_cutoff
+ 
+    Remove linear dependencies when the eigenvalues of the overlap matrix are below this value
+ 
+    Default: 1.e-6
+ 
+.. option:: ao_one_e_integrals_threshold
+ 
+    If | (p|q) | < `ao_one_e_integrals_threshold` then (p|q) is zero
+ 
+    Default: 1.e-15
  
  
 Providers 
@@ -218,6 +255,418 @@ Providers
        * :c:data:`ao_ortho_canonical_coef`
 
  
+.. c:var:: ao_coef_cgtos_norm_ord_transp
+
+
+    File : :file:`ao_one_e_ints/aos_cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_coef_cgtos_norm_ord_transp	(ao_prim_num_max,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos_ord`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_2e_cgtos_schwartz`
+       * :c:data:`ao_deriv2_cgtos_x`
+       * :c:data:`ao_integrals_n_e_cgtos`
+       * :c:data:`ao_overlap_cgtos`
+
+ 
+.. c:var:: ao_coef_norm_cgtos
+
+
+    File : :file:`ao_one_e_ints/aos_cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_coef_norm_cgtos	(ao_num,ao_prim_num_max)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef`
+       * :c:data:`ao_expo`
+       * :c:data:`ao_expo_im`
+       * :c:data:`ao_expo_phase`
+       * :c:data:`ao_expo_pw`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`ao_prim_num_max`
+       * :c:data:`nucl_coord`
+       * :c:data:`primitives_normalized`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos_ord`
+
+ 
+.. c:var:: ao_coef_norm_cgtos_ord
+
+
+    File : :file:`ao_one_e_ints/aos_cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_coef_norm_cgtos_ord	(ao_num,ao_prim_num_max)
+        complex*16, allocatable	:: ao_expo_cgtos_ord	(ao_num,ao_prim_num_max)
+        double precision, allocatable	:: ao_expo_pw_ord	(4,ao_num,ao_prim_num_max)
+        double precision, allocatable	:: ao_expo_phase_ord	(4,ao_num,ao_prim_num_max)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos`
+       * :c:data:`ao_expo`
+       * :c:data:`ao_expo_im`
+       * :c:data:`ao_expo_phase`
+       * :c:data:`ao_expo_pw`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num`
+       * :c:data:`ao_prim_num_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_cgtos_norm_ord_transp`
+       * :c:data:`ao_expo_cgtos_ord_transp`
+
+ 
+.. c:var:: ao_coef_norm_cosgtos
+
+
+    File : :file:`ao_one_e_ints/aos_cosgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_coef_norm_cosgtos	(ao_num,ao_prim_num_max)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef`
+       * :c:data:`ao_expo`
+       * :c:data:`ao_expoim_cosgtos`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`ao_prim_num_max`
+       * :c:data:`primitives_normalized`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_ord_cosgtos`
+
+ 
+.. c:var:: ao_coef_norm_ord_cosgtos
+
+
+    File : :file:`ao_one_e_ints/aos_cosgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_coef_norm_ord_cosgtos	(ao_num,ao_prim_num_max)
+        complex*16, allocatable	:: ao_expo_ord_cosgtos	(ao_num,ao_prim_num_max)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cosgtos`
+       * :c:data:`ao_expo`
+       * :c:data:`ao_expoim_cosgtos`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num`
+       * :c:data:`ao_prim_num_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_ord_transp_cosgtos`
+       * :c:data:`ao_expo_ord_transp_cosgtos`
+
+ 
+.. c:var:: ao_coef_norm_ord_transp_cosgtos
+
+
+    File : :file:`ao_one_e_ints/aos_cosgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_coef_norm_ord_transp_cosgtos	(ao_prim_num_max,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_ord_cosgtos`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_2e_cosgtos_schwartz`
+       * :c:data:`ao_deriv2_cosgtos_x`
+       * :c:data:`ao_integrals_n_e_cosgtos`
+       * :c:data:`ao_overlap_cosgtos`
+
+ 
+.. c:var:: ao_deriv2_cgtos_x
+
+
+    File : :file:`ao_one_e_ints/one_e_kin_integrals_cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_deriv2_cgtos_x	(ao_num,ao_num)
+        double precision, allocatable	:: ao_deriv2_cgtos_y	(ao_num,ao_num)
+        double precision, allocatable	:: ao_deriv2_cgtos_z	(ao_num,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_cgtos_norm_ord_transp`
+       * :c:data:`ao_expo_cgtos_ord_transp`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`nucl_coord`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_deriv2_x`
+       * :c:data:`ao_kinetic_integrals_cgtos`
+
+ 
+.. c:var:: ao_deriv2_cgtos_y
+
+
+    File : :file:`ao_one_e_ints/one_e_kin_integrals_cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_deriv2_cgtos_x	(ao_num,ao_num)
+        double precision, allocatable	:: ao_deriv2_cgtos_y	(ao_num,ao_num)
+        double precision, allocatable	:: ao_deriv2_cgtos_z	(ao_num,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_cgtos_norm_ord_transp`
+       * :c:data:`ao_expo_cgtos_ord_transp`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`nucl_coord`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_deriv2_x`
+       * :c:data:`ao_kinetic_integrals_cgtos`
+
+ 
+.. c:var:: ao_deriv2_cgtos_z
+
+
+    File : :file:`ao_one_e_ints/one_e_kin_integrals_cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_deriv2_cgtos_x	(ao_num,ao_num)
+        double precision, allocatable	:: ao_deriv2_cgtos_y	(ao_num,ao_num)
+        double precision, allocatable	:: ao_deriv2_cgtos_z	(ao_num,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_cgtos_norm_ord_transp`
+       * :c:data:`ao_expo_cgtos_ord_transp`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`nucl_coord`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_deriv2_x`
+       * :c:data:`ao_kinetic_integrals_cgtos`
+
+ 
+.. c:var:: ao_deriv2_cosgtos_x
+
+
+    File : :file:`ao_one_e_ints/one_e_kin_integrals_cosgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_deriv2_cosgtos_x	(ao_num,ao_num)
+        double precision, allocatable	:: ao_deriv2_cosgtos_y	(ao_num,ao_num)
+        double precision, allocatable	:: ao_deriv2_cosgtos_z	(ao_num,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_ord_transp_cosgtos`
+       * :c:data:`ao_expo_ord_transp_cosgtos`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`nucl_coord`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_deriv2_x`
+       * :c:data:`ao_kinetic_integrals_cosgtos`
+
+ 
+.. c:var:: ao_deriv2_cosgtos_y
+
+
+    File : :file:`ao_one_e_ints/one_e_kin_integrals_cosgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_deriv2_cosgtos_x	(ao_num,ao_num)
+        double precision, allocatable	:: ao_deriv2_cosgtos_y	(ao_num,ao_num)
+        double precision, allocatable	:: ao_deriv2_cosgtos_z	(ao_num,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_ord_transp_cosgtos`
+       * :c:data:`ao_expo_ord_transp_cosgtos`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`nucl_coord`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_deriv2_x`
+       * :c:data:`ao_kinetic_integrals_cosgtos`
+
+ 
+.. c:var:: ao_deriv2_cosgtos_z
+
+
+    File : :file:`ao_one_e_ints/one_e_kin_integrals_cosgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_deriv2_cosgtos_x	(ao_num,ao_num)
+        double precision, allocatable	:: ao_deriv2_cosgtos_y	(ao_num,ao_num)
+        double precision, allocatable	:: ao_deriv2_cosgtos_z	(ao_num,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_ord_transp_cosgtos`
+       * :c:data:`ao_expo_ord_transp_cosgtos`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`nucl_coord`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_deriv2_x`
+       * :c:data:`ao_kinetic_integrals_cosgtos`
+
+ 
 .. c:var:: ao_deriv2_x
 
 
@@ -244,12 +693,14 @@ Providers
        :columns: 3
 
        * :c:data:`ao_coef_normalized_ordered_transp`
+       * :c:data:`ao_deriv2_cgtos_x`
        * :c:data:`ao_expo_ordered_transp`
        * :c:data:`ao_nucl`
        * :c:data:`ao_num`
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
+       * :c:data:`use_cgtos`
 
     Needed by:
 
@@ -285,12 +736,14 @@ Providers
        :columns: 3
 
        * :c:data:`ao_coef_normalized_ordered_transp`
+       * :c:data:`ao_deriv2_cgtos_x`
        * :c:data:`ao_expo_ordered_transp`
        * :c:data:`ao_nucl`
        * :c:data:`ao_num`
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
+       * :c:data:`use_cgtos`
 
     Needed by:
 
@@ -326,12 +779,14 @@ Providers
        :columns: 3
 
        * :c:data:`ao_coef_normalized_ordered_transp`
+       * :c:data:`ao_deriv2_cgtos_x`
        * :c:data:`ao_expo_ordered_transp`
        * :c:data:`ao_nucl`
        * :c:data:`ao_num`
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
+       * :c:data:`use_cgtos`
 
     Needed by:
 
@@ -372,6 +827,12 @@ Providers
        * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_deriv_1_x`
 
  
 .. c:var:: ao_deriv_1_y
@@ -405,6 +866,12 @@ Providers
        * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_deriv_1_x`
 
  
 .. c:var:: ao_deriv_1_z
@@ -438,6 +905,12 @@ Providers
        * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_deriv_1_x`
 
  
 .. c:var:: ao_dipole_x
@@ -557,6 +1030,283 @@ Providers
        * :c:data:`mo_dipole_x`
 
  
+.. c:var:: ao_expo_cgtos_ord
+
+
+    File : :file:`ao_one_e_ints/aos_cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_coef_norm_cgtos_ord	(ao_num,ao_prim_num_max)
+        complex*16, allocatable	:: ao_expo_cgtos_ord	(ao_num,ao_prim_num_max)
+        double precision, allocatable	:: ao_expo_pw_ord	(4,ao_num,ao_prim_num_max)
+        double precision, allocatable	:: ao_expo_phase_ord	(4,ao_num,ao_prim_num_max)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos`
+       * :c:data:`ao_expo`
+       * :c:data:`ao_expo_im`
+       * :c:data:`ao_expo_phase`
+       * :c:data:`ao_expo_pw`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num`
+       * :c:data:`ao_prim_num_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_cgtos_norm_ord_transp`
+       * :c:data:`ao_expo_cgtos_ord_transp`
+
+ 
+.. c:var:: ao_expo_cgtos_ord_transp
+
+
+    File : :file:`ao_one_e_ints/aos_cgtos.irp.f`
+
+    .. code:: fortran
+
+        complex*16, allocatable	:: ao_expo_cgtos_ord_transp	(ao_prim_num_max,ao_num)
+        double precision, allocatable	:: ao_expo_pw_ord_transp	(4,ao_prim_num_max,ao_num)
+        double precision, allocatable	:: ao_expo_phase_ord_transp	(4,ao_prim_num_max,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos_ord`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_2e_cgtos_schwartz`
+       * :c:data:`ao_deriv2_cgtos_x`
+       * :c:data:`ao_integrals_n_e_cgtos`
+       * :c:data:`ao_overlap_cgtos`
+       * :c:data:`use_pw`
+
+ 
+.. c:var:: ao_expo_ord_cosgtos
+
+
+    File : :file:`ao_one_e_ints/aos_cosgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_coef_norm_ord_cosgtos	(ao_num,ao_prim_num_max)
+        complex*16, allocatable	:: ao_expo_ord_cosgtos	(ao_num,ao_prim_num_max)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cosgtos`
+       * :c:data:`ao_expo`
+       * :c:data:`ao_expoim_cosgtos`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num`
+       * :c:data:`ao_prim_num_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_ord_transp_cosgtos`
+       * :c:data:`ao_expo_ord_transp_cosgtos`
+
+ 
+.. c:var:: ao_expo_ord_transp_cosgtos
+
+
+    File : :file:`ao_one_e_ints/aos_cosgtos.irp.f`
+
+    .. code:: fortran
+
+        complex*16, allocatable	:: ao_expo_ord_transp_cosgtos	(ao_prim_num_max,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_ord_cosgtos`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_2e_cosgtos_schwartz`
+       * :c:data:`ao_deriv2_cosgtos_x`
+       * :c:data:`ao_integrals_n_e_cosgtos`
+       * :c:data:`ao_overlap_cosgtos`
+
+ 
+.. c:var:: ao_expo_phase_ord
+
+
+    File : :file:`ao_one_e_ints/aos_cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_coef_norm_cgtos_ord	(ao_num,ao_prim_num_max)
+        complex*16, allocatable	:: ao_expo_cgtos_ord	(ao_num,ao_prim_num_max)
+        double precision, allocatable	:: ao_expo_pw_ord	(4,ao_num,ao_prim_num_max)
+        double precision, allocatable	:: ao_expo_phase_ord	(4,ao_num,ao_prim_num_max)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos`
+       * :c:data:`ao_expo`
+       * :c:data:`ao_expo_im`
+       * :c:data:`ao_expo_phase`
+       * :c:data:`ao_expo_pw`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num`
+       * :c:data:`ao_prim_num_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_cgtos_norm_ord_transp`
+       * :c:data:`ao_expo_cgtos_ord_transp`
+
+ 
+.. c:var:: ao_expo_phase_ord_transp
+
+
+    File : :file:`ao_one_e_ints/aos_cgtos.irp.f`
+
+    .. code:: fortran
+
+        complex*16, allocatable	:: ao_expo_cgtos_ord_transp	(ao_prim_num_max,ao_num)
+        double precision, allocatable	:: ao_expo_pw_ord_transp	(4,ao_prim_num_max,ao_num)
+        double precision, allocatable	:: ao_expo_phase_ord_transp	(4,ao_prim_num_max,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos_ord`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_2e_cgtos_schwartz`
+       * :c:data:`ao_deriv2_cgtos_x`
+       * :c:data:`ao_integrals_n_e_cgtos`
+       * :c:data:`ao_overlap_cgtos`
+       * :c:data:`use_pw`
+
+ 
+.. c:var:: ao_expo_pw_ord
+
+
+    File : :file:`ao_one_e_ints/aos_cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_coef_norm_cgtos_ord	(ao_num,ao_prim_num_max)
+        complex*16, allocatable	:: ao_expo_cgtos_ord	(ao_num,ao_prim_num_max)
+        double precision, allocatable	:: ao_expo_pw_ord	(4,ao_num,ao_prim_num_max)
+        double precision, allocatable	:: ao_expo_phase_ord	(4,ao_num,ao_prim_num_max)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos`
+       * :c:data:`ao_expo`
+       * :c:data:`ao_expo_im`
+       * :c:data:`ao_expo_phase`
+       * :c:data:`ao_expo_pw`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num`
+       * :c:data:`ao_prim_num_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_cgtos_norm_ord_transp`
+       * :c:data:`ao_expo_cgtos_ord_transp`
+
+ 
+.. c:var:: ao_expo_pw_ord_transp
+
+
+    File : :file:`ao_one_e_ints/aos_cgtos.irp.f`
+
+    .. code:: fortran
+
+        complex*16, allocatable	:: ao_expo_cgtos_ord_transp	(ao_prim_num_max,ao_num)
+        double precision, allocatable	:: ao_expo_pw_ord_transp	(4,ao_prim_num_max,ao_num)
+        double precision, allocatable	:: ao_expo_phase_ord_transp	(4,ao_prim_num_max,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos_ord`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_2e_cgtos_schwartz`
+       * :c:data:`ao_deriv2_cgtos_x`
+       * :c:data:`ao_integrals_n_e_cgtos`
+       * :c:data:`ao_overlap_cgtos`
+       * :c:data:`use_pw`
+
+ 
 .. c:var:: ao_integrals_n_e
 
 
@@ -580,6 +1330,8 @@ Providers
 
        * :c:data:`ao_coef_normalized_ordered_transp`
        * :c:data:`ao_expo_ordered_transp`
+       * :c:data:`ao_integrals_n_e_cgtos`
+       * :c:data:`ao_integrals_pt_chrg`
        * :c:data:`ao_nucl`
        * :c:data:`ao_num`
        * :c:data:`ao_power`
@@ -590,7 +1342,9 @@ Providers
        * :c:data:`nucl_charge`
        * :c:data:`nucl_coord`
        * :c:data:`nucl_num`
+       * :c:data:`point_charges`
        * :c:data:`read_ao_integrals_n_e`
+       * :c:data:`use_cgtos`
 
     Needed by:
 
@@ -598,7 +1352,91 @@ Providers
        :columns: 3
 
        * :c:data:`ao_one_e_integrals`
+       * :c:data:`ao_ortho_canonical_nucl_elec_integrals`
+       * :c:data:`ao_ortho_lowdin_nucl_elec_integrals`
+       * :c:data:`hf_kinetic_energy`
        * :c:data:`mo_integrals_n_e`
+
+ 
+.. c:var:: ao_integrals_n_e_cgtos
+
+
+    File : :file:`ao_one_e_ints/one_e_coul_integrals_cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_integrals_n_e_cgtos	(ao_num,ao_num)
+
+
+    
+    Nucleus-electron interaction, in the cgtos |AO| basis set.
+    
+    :math:`\langle \chi_i | -\sum_A \frac{1}{|r-R_A|} | \chi_j \rangle`
+    
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_cgtos_norm_ord_transp`
+       * :c:data:`ao_expo_cgtos_ord_transp`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`n_pt_max_integrals`
+       * :c:data:`nucl_charge`
+       * :c:data:`nucl_coord`
+       * :c:data:`nucl_num`
+       * :c:data:`use_pw`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_n_e`
+
+ 
+.. c:var:: ao_integrals_n_e_cosgtos
+
+
+    File : :file:`ao_one_e_ints/one_e_Coul_integrals_cosgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_integrals_n_e_cosgtos	(ao_num,ao_num)
+
+
+    
+    Nucleus-electron interaction, in the cosgtos |AO| basis set.
+    
+    :math:`\langle \chi_i | -\sum_A \frac{1}{|r-R_A|} | \chi_j \rangle`
+    
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_ord_transp_cosgtos`
+       * :c:data:`ao_expo_ord_transp_cosgtos`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`n_pt_max_integrals`
+       * :c:data:`nucl_charge`
+       * :c:data:`nucl_coord`
+       * :c:data:`nucl_num`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_n_e`
 
  
 .. c:var:: ao_integrals_n_e_imag
@@ -662,6 +1500,47 @@ Providers
        * :c:data:`mo_integrals_n_e_per_atom`
 
  
+.. c:var:: ao_integrals_pt_chrg
+
+
+    File : :file:`ao_one_e_ints/pot_pt_charges.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_integrals_pt_chrg	(ao_num,ao_num)
+
+
+     Point charge-electron interaction, in the |AO| basis set.
+    
+     :math:`\langle \chi_i | -\sum_charge charge * \frac{1}{|r-R_charge|} | \chi_j \rangle`
+    
+    Notice the minus sign convention as it is supposed to be for electrons.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_normalized_ordered_transp`
+       * :c:data:`ao_expo_ordered_transp`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`n_pt_max_integrals`
+       * :c:data:`n_pts_charge`
+       * :c:data:`nucl_coord`
+       * :c:data:`pts_charge_coord`
+       * :c:data:`pts_charge_z`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_n_e`
+
+ 
 .. c:var:: ao_kinetic_integrals
 
 
@@ -692,7 +1571,60 @@ Providers
        :columns: 3
 
        * :c:data:`ao_one_e_integrals`
+       * :c:data:`hf_kinetic_energy`
        * :c:data:`mo_kinetic_integrals`
+
+ 
+.. c:var:: ao_kinetic_integrals_cgtos
+
+
+    File : :file:`ao_one_e_ints/one_e_kin_integrals_cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_kinetic_integrals_cgtos	(ao_num,ao_num)
+
+
+    
+    Kinetic energy integrals in the cgtos |AO| basis.
+    
+    :math:`\langle \chi_i |\hat{T}| \chi_j \rangle` 
+    
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_deriv2_cgtos_x`
+       * :c:data:`ao_num`
+
+
+ 
+.. c:var:: ao_kinetic_integrals_cosgtos
+
+
+    File : :file:`ao_one_e_ints/one_e_kin_integrals_cosgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_kinetic_integrals_cosgtos	(ao_num,ao_num)
+
+
+    
+    Kinetic energy integrals in the cosgtos |AO| basis.
+    
+    :math:`\langle \chi_i |\hat{T}| \chi_j \rangle` 
+    
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_deriv2_cosgtos_x`
+       * :c:data:`ao_num`
+
 
  
 .. c:var:: ao_kinetic_integrals_imag
@@ -743,6 +1675,14 @@ Providers
        * :c:data:`ao_num`
        * :c:data:`read_ao_one_e_integrals`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`fock_matrix_ao_alpha`
+       * :c:data:`hf_energy`
+       * :c:data:`scf_energy`
 
  
 .. c:var:: ao_one_e_integrals_diag
@@ -768,6 +1708,14 @@ Providers
        * :c:data:`ao_num`
        * :c:data:`read_ao_one_e_integrals`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`fock_matrix_ao_alpha`
+       * :c:data:`hf_energy`
+       * :c:data:`scf_energy`
 
  
 .. c:var:: ao_one_e_integrals_imag
@@ -826,8 +1774,10 @@ Providers
        :columns: 3
 
        * :c:data:`ao_ortho_canonical_coef_inv`
+       * :c:data:`ao_ortho_canonical_nucl_elec_integrals`
        * :c:data:`ao_ortho_canonical_overlap`
        * :c:data:`mo_coef`
+       * :c:data:`mo_coef_aux`
        * :c:data:`mo_num`
 
  
@@ -893,8 +1843,10 @@ Providers
        :columns: 3
 
        * :c:data:`ao_ortho_canonical_coef_inv`
+       * :c:data:`ao_ortho_canonical_nucl_elec_integrals`
        * :c:data:`ao_ortho_canonical_overlap`
        * :c:data:`mo_coef`
+       * :c:data:`mo_coef_aux`
        * :c:data:`mo_num`
 
  
@@ -948,10 +1900,12 @@ Providers
        * :c:data:`ao_expo_ordered_transp`
        * :c:data:`ao_nucl`
        * :c:data:`ao_num`
+       * :c:data:`ao_overlap_cgtos`
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
        * :c:data:`read_ao_integrals_overlap`
+       * :c:data:`use_cgtos`
 
     Needed by:
 
@@ -961,7 +1915,10 @@ Providers
        * :c:data:`ao_cart_to_sphe_overlap`
        * :c:data:`ao_ortho_canonical_coef`
        * :c:data:`ao_ortho_canonical_overlap`
+       * :c:data:`ao_ortho_lowdin_coef`
+       * :c:data:`ao_ortho_lowdin_overlap`
        * :c:data:`ao_overlap_complex`
+       * :c:data:`fps_spf_matrix_ao`
        * :c:data:`mo_overlap`
        * :c:data:`s_half`
        * :c:data:`s_half_inv`
@@ -998,6 +1955,153 @@ Providers
        * :c:data:`is_periodic`
        * :c:data:`nucl_coord`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_two_e_integral_alpha`
+       * :c:data:`cholesky_ao_num`
+
+ 
+.. c:var:: ao_overlap_cgtos
+
+
+    File : :file:`ao_one_e_ints/aos_cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_overlap_cgtos	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cgtos_x	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cgtos_y	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cgtos_z	(ao_num,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_cgtos_norm_ord_transp`
+       * :c:data:`ao_expo_cgtos_ord_transp`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`nucl_coord`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_overlap`
+
+ 
+.. c:var:: ao_overlap_cgtos_x
+
+
+    File : :file:`ao_one_e_ints/aos_cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_overlap_cgtos	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cgtos_x	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cgtos_y	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cgtos_z	(ao_num,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_cgtos_norm_ord_transp`
+       * :c:data:`ao_expo_cgtos_ord_transp`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`nucl_coord`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_overlap`
+
+ 
+.. c:var:: ao_overlap_cgtos_y
+
+
+    File : :file:`ao_one_e_ints/aos_cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_overlap_cgtos	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cgtos_x	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cgtos_y	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cgtos_z	(ao_num,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_cgtos_norm_ord_transp`
+       * :c:data:`ao_expo_cgtos_ord_transp`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`nucl_coord`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_overlap`
+
+ 
+.. c:var:: ao_overlap_cgtos_z
+
+
+    File : :file:`ao_one_e_ints/aos_cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_overlap_cgtos	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cgtos_x	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cgtos_y	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cgtos_z	(ao_num,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_cgtos_norm_ord_transp`
+       * :c:data:`ao_expo_cgtos_ord_transp`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`nucl_coord`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_overlap`
 
  
 .. c:var:: ao_overlap_complex
@@ -1028,6 +2132,146 @@ Providers
 
        * :c:data:`ao_overlap_abs`
        * :c:data:`s_inv_complex`
+
+ 
+.. c:var:: ao_overlap_cosgtos
+
+
+    File : :file:`ao_one_e_ints/aos_cosgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_overlap_cosgtos	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cosgtos_x	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cosgtos_y	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cosgtos_z	(ao_num,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_ord_transp_cosgtos`
+       * :c:data:`ao_expo_ord_transp_cosgtos`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`nucl_coord`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_overlap`
+
+ 
+.. c:var:: ao_overlap_cosgtos_x
+
+
+    File : :file:`ao_one_e_ints/aos_cosgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_overlap_cosgtos	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cosgtos_x	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cosgtos_y	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cosgtos_z	(ao_num,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_ord_transp_cosgtos`
+       * :c:data:`ao_expo_ord_transp_cosgtos`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`nucl_coord`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_overlap`
+
+ 
+.. c:var:: ao_overlap_cosgtos_y
+
+
+    File : :file:`ao_one_e_ints/aos_cosgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_overlap_cosgtos	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cosgtos_x	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cosgtos_y	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cosgtos_z	(ao_num,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_ord_transp_cosgtos`
+       * :c:data:`ao_expo_ord_transp_cosgtos`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`nucl_coord`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_overlap`
+
+ 
+.. c:var:: ao_overlap_cosgtos_z
+
+
+    File : :file:`ao_one_e_ints/aos_cosgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_overlap_cosgtos	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cosgtos_x	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cosgtos_y	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_cosgtos_z	(ao_num,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_ord_transp_cosgtos`
+       * :c:data:`ao_expo_ord_transp_cosgtos`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`nucl_coord`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_overlap`
 
  
 .. c:var:: ao_overlap_imag
@@ -1083,10 +2327,12 @@ Providers
        * :c:data:`ao_expo_ordered_transp`
        * :c:data:`ao_nucl`
        * :c:data:`ao_num`
+       * :c:data:`ao_overlap_cgtos`
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
        * :c:data:`read_ao_integrals_overlap`
+       * :c:data:`use_cgtos`
 
     Needed by:
 
@@ -1096,7 +2342,10 @@ Providers
        * :c:data:`ao_cart_to_sphe_overlap`
        * :c:data:`ao_ortho_canonical_coef`
        * :c:data:`ao_ortho_canonical_overlap`
+       * :c:data:`ao_ortho_lowdin_coef`
+       * :c:data:`ao_ortho_lowdin_overlap`
        * :c:data:`ao_overlap_complex`
+       * :c:data:`fps_spf_matrix_ao`
        * :c:data:`mo_overlap`
        * :c:data:`s_half`
        * :c:data:`s_half_inv`
@@ -1130,10 +2379,12 @@ Providers
        * :c:data:`ao_expo_ordered_transp`
        * :c:data:`ao_nucl`
        * :c:data:`ao_num`
+       * :c:data:`ao_overlap_cgtos`
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
        * :c:data:`read_ao_integrals_overlap`
+       * :c:data:`use_cgtos`
 
     Needed by:
 
@@ -1143,7 +2394,10 @@ Providers
        * :c:data:`ao_cart_to_sphe_overlap`
        * :c:data:`ao_ortho_canonical_coef`
        * :c:data:`ao_ortho_canonical_overlap`
+       * :c:data:`ao_ortho_lowdin_coef`
+       * :c:data:`ao_ortho_lowdin_overlap`
        * :c:data:`ao_overlap_complex`
+       * :c:data:`fps_spf_matrix_ao`
        * :c:data:`mo_overlap`
        * :c:data:`s_half`
        * :c:data:`s_half_inv`
@@ -1177,10 +2431,12 @@ Providers
        * :c:data:`ao_expo_ordered_transp`
        * :c:data:`ao_nucl`
        * :c:data:`ao_num`
+       * :c:data:`ao_overlap_cgtos`
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
        * :c:data:`read_ao_integrals_overlap`
+       * :c:data:`use_cgtos`
 
     Needed by:
 
@@ -1190,7 +2446,10 @@ Providers
        * :c:data:`ao_cart_to_sphe_overlap`
        * :c:data:`ao_ortho_canonical_coef`
        * :c:data:`ao_ortho_canonical_overlap`
+       * :c:data:`ao_ortho_lowdin_coef`
+       * :c:data:`ao_ortho_lowdin_overlap`
        * :c:data:`ao_overlap_complex`
+       * :c:data:`fps_spf_matrix_ao`
        * :c:data:`mo_overlap`
        * :c:data:`s_half`
        * :c:data:`s_half_inv`
@@ -1258,7 +2517,9 @@ Providers
        * :c:data:`nucl_charge`
        * :c:data:`nucl_coord`
        * :c:data:`nucl_num`
+       * :c:data:`pseudo_v_k_transp`
        * :c:data:`pseudo_klocmax`
+       * :c:data:`pseudo_v_k_transp`
        * :c:data:`pseudo_v_k_transp`
 
     Needed by:
@@ -1267,6 +2528,7 @@ Providers
        :columns: 3
 
        * :c:data:`ao_pseudo_integrals`
+       * :c:data:`mo_pseudo_integrals_local`
 
  
 .. c:var:: ao_pseudo_integrals_non_local
@@ -1295,8 +2557,10 @@ Providers
        * :c:data:`nucl_charge`
        * :c:data:`nucl_coord`
        * :c:data:`nucl_num`
+       * :c:data:`pseudo_v_kl_transp`
        * :c:data:`pseudo_kmax`
        * :c:data:`pseudo_lmax`
+       * :c:data:`pseudo_v_kl_transp`
        * :c:data:`pseudo_v_kl_transp`
 
     Needed by:
@@ -1305,6 +2569,7 @@ Providers
        :columns: 3
 
        * :c:data:`ao_pseudo_integrals`
+       * :c:data:`mo_pseudo_integrals_non_local`
 
  
 .. c:var:: ao_spread_x
@@ -1424,44 +2689,18 @@ Providers
        * :c:data:`mo_spread_x`
 
  
-.. c:function:: give_polynomial_mult_center_one_e_erf:
+.. c:function:: give_cpolynomial_mult_center_one_e:
 
 
-    File : :file:`ao_one_e_ints/pot_ao_erf_ints.irp.f`
-
-    .. code:: fortran
-
-        subroutine give_polynomial_mult_center_one_e_erf(A_center,B_center,alpha,beta,&
-      power_A,power_B,C_center,n_pt_in,d,n_pt_out,mu_in)
-
-
-    Returns the explicit polynomial in terms of the $t$ variable of the
-    following polynomial:
-    
-    $I_{x1}(a_x, d_x,p,q) \times I_{x1}(a_y, d_y,p,q) \times I_{x1}(a_z, d_z,p,q)$.
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`i_x1_pol_mult_one_e`
-       * :c:func:`multiply_poly`
-
- 
-.. c:function:: give_polynomial_mult_center_one_e_erf_opt:
-
-
-    File : :file:`ao_one_e_ints/pot_ao_erf_ints.irp.f`
+    File : :file:`ao_one_e_ints/one_e_coul_integrals_cgtos.irp.f`
 
     .. code:: fortran
 
-        subroutine give_polynomial_mult_center_one_e_erf_opt(A_center,B_center,alpha,beta,&
-      power_A,power_B,C_center,n_pt_in,d,n_pt_out,mu_in,p,p_inv,p_inv_2,p_new,P_center)
+        subroutine give_cpolynomial_mult_center_one_e(A_center, B_center, alpha, beta, &
+                                              power_A, power_B, C_center, n_pt_in, d, n_pt_out)
 
 
-    Returns the explicit polynomial in terms of the $t$ variable of the
-    following polynomial:
+    Returns the explicit polynomial in terms of the "t" variable of the following
     
     $I_{x1}(a_x, d_x,p,q) \times I_{x1}(a_y, d_y,p,q) \times I_{x1}(a_z, d_z,p,q)$.
 
@@ -1470,15 +2709,15 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:func:`nai_pol_mult_erf`
+       * :c:func:`nai_pol_mult_cgtos`
 
     Calls:
 
     .. hlist::
        :columns: 3
 
-       * :c:func:`i_x1_pol_mult_one_e`
-       * :c:func:`multiply_poly`
+       * :c:func:`i_x1_pol_mult_one_e_cgtos`
+       * :c:func:`multiply_cpoly`
 
  
 .. c:function:: i_x1_pol_mult_one_e:
@@ -1511,7 +2750,69 @@ Providers
 
        * :c:func:`i_x1_pol_mult_one_e`
        * :c:func:`i_x2_pol_mult_one_e`
-       * :c:func:`multiply_poly`
+       * :c:func:`multiply_poly_c2`
+
+ 
+.. c:function:: i_x1_pol_mult_one_e_cgtos:
+
+
+    File : :file:`ao_one_e_ints/one_e_coul_integrals_cgtos.irp.f`
+
+    .. code:: fortran
+
+        recursive subroutine I_x1_pol_mult_one_e_cgtos(a, c, R1x, R1xp, R2x, d, nd, n_pt_in)
+
+
+    Recursive routine involved in the electron-nucleus potential
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`give_cpolynomial_mult_center_one_e`
+       * :c:func:`i_x1_pol_mult_one_e_cgtos`
+       * :c:func:`i_x2_pol_mult_one_e_cgtos`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`i_x1_pol_mult_one_e_cgtos`
+       * :c:func:`i_x2_pol_mult_one_e_cgtos`
+       * :c:func:`multiply_cpoly`
+
+ 
+.. c:function:: i_x1_pol_mult_one_e_cosgtos:
+
+
+    File : :file:`ao_one_e_ints/one_e_Coul_integrals_cosgtos.irp.f`
+
+    .. code:: fortran
+
+        recursive subroutine I_x1_pol_mult_one_e_cosgtos(a, c, R1x, R1xp, R2x, d, nd, n_pt_in)
+
+
+    Recursive routine involved in the electron-nucleus potential
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`give_cpolynomial_mult_center_one_e`
+       * :c:func:`i_x1_pol_mult_one_e_cosgtos`
+       * :c:func:`i_x2_pol_mult_one_e_cosgtos`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`i_x1_pol_mult_one_e_cosgtos`
+       * :c:func:`i_x2_pol_mult_one_e_cosgtos`
+       * :c:func:`multiply_cpoly`
 
  
 .. c:function:: i_x2_pol_mult_one_e:
@@ -1539,7 +2840,126 @@ Providers
        :columns: 3
 
        * :c:func:`i_x1_pol_mult_one_e`
-       * :c:func:`multiply_poly`
+       * :c:func:`multiply_poly_c2`
+
+ 
+.. c:function:: i_x2_pol_mult_one_e_cgtos:
+
+
+    File : :file:`ao_one_e_ints/one_e_coul_integrals_cgtos.irp.f`
+
+    .. code:: fortran
+
+        recursive subroutine I_x2_pol_mult_one_e_cgtos(c, R1x, R1xp, R2x, d, nd, dim)
+
+
+    Recursive routine involved in the electron-nucleus potential
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`i_x1_pol_mult_one_e_cgtos`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`i_x1_pol_mult_one_e_cgtos`
+       * :c:func:`multiply_cpoly`
+
+ 
+.. c:function:: i_x2_pol_mult_one_e_cosgtos:
+
+
+    File : :file:`ao_one_e_ints/one_e_Coul_integrals_cosgtos.irp.f`
+
+    .. code:: fortran
+
+        recursive subroutine I_x2_pol_mult_one_e_cosgtos(c, R1x, R1xp, R2x, d, nd, dim)
+
+
+    Recursive routine involved in the electron-nucleus potential
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`i_x1_pol_mult_one_e_cosgtos`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`i_x1_pol_mult_one_e_cosgtos`
+       * :c:func:`multiply_cpoly`
+
+ 
+.. c:function:: nai_pol_mult_cgtos:
+
+
+    File : :file:`ao_one_e_ints/one_e_coul_integrals_cgtos.irp.f`
+
+    .. code:: fortran
+
+        complex*16 function NAI_pol_mult_cgtos(Ae_center, Be_center, power_A, power_B, alpha, beta, &
+                                       Ap_center, Bp_center, C_center, n_pt_in)
+
+
+    
+    Computes the electron-nucleus attraction with two primitves cgtos.
+    
+    :math:`\langle g_i | \frac{1}{|r-R_c|} | g_j \rangle`
+    
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`use_pw`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`give_cpolynomial_mult_center_one_e`
+
+ 
+.. c:function:: nai_pol_mult_erf_with1s:
+
+
+    File : :file:`ao_one_e_ints/pot_ao_erf_ints.irp.f`
+
+    .. code:: fortran
+
+        double precision function NAI_pol_mult_erf_with1s( A1_center, A2_center, power_A1, power_A2, alpha1, alpha2 &
+                                                 , beta, B_center, C_center, n_pt_in, mu_in )
+
+
+    
+    Computes the following integral :
+    
+    .. math::
+    
+      \int dx (x - A1_x)^a_1 (x - B1_x)^a_2 \exp(-\alpha_1 (x - A1_x)^2 - \alpha_2 (x - A2_x)^2)
+      \int dy (y - A1_y)^b_1 (y - B1_y)^b_2 \exp(-\alpha_1 (y - A1_y)^2 - \alpha_2 (y - A2_y)^2)
+      \int dz (x - A1_z)^c_1 (z - B1_z)^c_2 \exp(-\alpha_1 (z - A1_z)^2 - \alpha_2 (z - A2_z)^2)
+      \exp(-\beta (r - B)^2)
+      \frac{\erf(\mu |r - R_C|)}{|r - R_C|}$.
+    
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`give_polynomial_mult_center_one_e_erf_opt`
 
  
 .. c:var:: pseudo_dz_k_transp
@@ -1785,6 +3205,12 @@ Providers
        * :c:data:`ao_num`
        * :c:data:`ao_overlap`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`eigenvalues_fock_matrix_ao`
 
  
 .. c:var:: s_inv
@@ -1833,6 +3259,34 @@ Providers
 
 
  
+.. c:var:: use_pw
+
+
+    File : :file:`ao_one_e_ints/aos_cgtos.irp.f`
+
+    .. code:: fortran
+
+        logical	:: use_pw	
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_expo_cgtos_ord_transp`
+       * :c:data:`ao_expo_cgtos_ord_transp`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_2e_cgtos_schwartz`
+       * :c:data:`ao_integrals_n_e_cgtos`
+
+ 
  
 Subroutines / functions 
 ----------------------- 
@@ -1853,10 +3307,11 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_integrals_threshold`
+       * :c:data:`ao_one_e_integrals_threshold`
        * :c:data:`ao_overlap_abs`
        * :c:data:`io_ao_integrals_overlap`
        * :c:data:`is_periodic`
+       * :c:data:`use_cgtos`
 
  
 .. c:function:: give_all_erf_kl_ao:
@@ -1910,6 +3365,64 @@ Subroutines / functions
        * :c:func:`multiply_poly`
 
  
+.. c:function:: give_polynomial_mult_center_one_e_erf:
+
+
+    File : :file:`ao_one_e_ints/pot_ao_erf_ints.irp.f`
+
+    .. code:: fortran
+
+        subroutine give_polynomial_mult_center_one_e_erf(A_center,B_center,alpha,beta,power_A,power_B,C_center,n_pt_in,d,n_pt_out,mu_in)
+
+
+    Returns the explicit polynomial in terms of the $t$ variable of the
+    following polynomial:
+    
+    $I_{x1}(a_x, d_x,p,q) \times I_{x1}(a_y, d_y,p,q) \times I_{x1}(a_z, d_z,p,q)$.
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`i_x1_pol_mult_one_e`
+       * :c:func:`multiply_poly`
+
+ 
+.. c:function:: give_polynomial_mult_center_one_e_erf_opt:
+
+
+    File : :file:`ao_one_e_ints/pot_ao_erf_ints.irp.f`
+
+    .. code:: fortran
+
+        subroutine give_polynomial_mult_center_one_e_erf_opt(A_center, B_center, power_A, power_B, C_center, n_pt_in, d, n_pt_out, p_inv_2, p_new, P_center)
+
+
+    Returns the explicit polynomial in terms of the $t$ variable of the
+    following polynomial:
+    
+    $I_{x1}(a_x, d_x,p,q) \times I_{x1}(a_y, d_y,p,q) \times I_{x1}(a_z, d_z,p,q)$.
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`nai_pol_mult_erf`
+       * :c:func:`nai_pol_mult_erf_v`
+       * :c:func:`nai_pol_mult_erf_with1s`
+       * :c:func:`nai_pol_mult_erf_with1s_v`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`i_x1_pol_mult_one_e`
+       * :c:func:`multiply_poly`
+
+ 
 .. c:function:: int_gaus_pol:
 
 
@@ -1947,6 +3460,30 @@ Subroutines / functions
        * :c:func:`give_polynomial_mult_center_one_e`
 
  
+.. c:function:: nai_pol_mult_cosgtos:
+
+
+    File : :file:`ao_one_e_ints/one_e_Coul_integrals_cosgtos.irp.f`
+
+    .. code:: fortran
+
+        complex*16 function NAI_pol_mult_cosgtos(A_center, B_center, power_A, power_B, alpha, beta, C_center, n_pt_in)
+
+
+    
+    Computes the electron-nucleus attraction with two primitves cosgtos.
+    
+    :math:`\langle g_i | \frac{1}{|r-R_c|} | g_j \rangle`
+    
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`give_cpolynomial_mult_center_one_e`
+
+ 
 .. c:function:: nai_pol_mult_erf:
 
 
@@ -1954,15 +3491,16 @@ Subroutines / functions
 
     .. code:: fortran
 
-        double precision function NAI_pol_mult_erf(A_center,B_center,power_A,power_B,alpha,beta,C_center,n_pt_in,mu_in)
+        double precision function NAI_pol_mult_erf(A_center, B_center, power_A, power_B, alpha, beta, C_center, n_pt_in, mu_in)
 
 
+    
     Computes the following integral :
     
     .. math::
     
       \int dr (x-A_x)^a (x-B_x)^b \exp(-\alpha (x-A_x)^2 - \beta (x-B_x)^2 )
-      \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+      \frac{\erf(\mu |r - R_C |)}{| r - R_C |}$.
     
 
     Calls:
@@ -1980,11 +3518,13 @@ Subroutines / functions
 
     .. code:: fortran
 
-        double precision function NAI_pol_mult_erf_ao(i_ao,j_ao,mu_in,C_center)
+        double precision function NAI_pol_mult_erf_ao(i_ao, j_ao, mu_in, C_center)
 
 
+    
     Computes the following integral :
-    $\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+    $\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) \frac{\erf(\mu |r - R_C|)}{|r - R_C|}$.
+    
 
     Needs:
 
@@ -1998,6 +3538,92 @@ Subroutines / functions
        * :c:data:`ao_prim_num`
        * :c:data:`n_pt_max_integrals`
        * :c:data:`nucl_coord`
+
+ 
+.. c:function:: nai_pol_mult_erf_ao_with1s:
+
+
+    File : :file:`ao_one_e_ints/pot_ao_erf_ints.irp.f`
+
+    .. code:: fortran
+
+        double precision function NAI_pol_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center, mu_in, C_center)
+
+
+    
+    Computes the following integral :
+    $\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) e^{-\beta (r - B_center)^2} \frac{\erf(\mu |r - R_C|)}{|r - R_C|}$.
+    
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_normalized_ordered_transp`
+       * :c:data:`ao_expo_ordered_transp`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`n_pt_max_integrals`
+       * :c:data:`nucl_coord`
+
+ 
+.. c:function:: nai_pol_mult_erf_v:
+
+
+    File : :file:`ao_one_e_ints/pot_ao_erf_ints.irp.f`
+
+    .. code:: fortran
+
+        subroutine NAI_pol_mult_erf_v(A_center, B_center, power_A, power_B, alpha, beta, C_center, LD_C, n_pt_in, mu_in, res_v, LD_resv, n_points)
+
+
+    
+    Computes the following integral :
+    
+    .. math::
+    
+      \int dr (x-A_x)^a (x-B_x)^b \exp(-\alpha (x-A_x)^2 - \beta (x-B_x)^2 )
+      \frac{\erf(\mu |r - R_C |)}{| r - R_C |}$.
+    
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`give_polynomial_mult_center_one_e_erf_opt`
+
+ 
+.. c:function:: nai_pol_mult_erf_with1s_v:
+
+
+    File : :file:`ao_one_e_ints/pot_ao_erf_ints.irp.f`
+
+    .. code:: fortran
+
+        subroutine NAI_pol_mult_erf_with1s_v(A1_center, A2_center, power_A1, power_A2, alpha1, alpha2, beta, B_center, LD_B, C_center, LD_C, n_pt_in, mu_in, res_v, LD_resv, n_points)
+
+
+    
+    Computes the following integral :
+    
+    .. math                      ::
+    
+      \int dx (x - A1_x)^a_1 (x - B1_x)^a_2 \exp(-\alpha_1 (x - A1_x)^2 - \alpha_2 (x - A2_x)^2)
+      \int dy (y - A1_y)^b_1 (y - B1_y)^b_2 \exp(-\alpha_1 (y - A1_y)^2 - \alpha_2 (y - A2_y)^2)
+      \int dz (x - A1_z)^c_1 (z - B1_z)^c_2 \exp(-\alpha_1 (z - A1_z)^2 - \alpha_2 (z - A2_z)^2)
+      \exp(-\beta (r - B)^2)
+      \frac{\erf(\mu |r - R_C|)}{|r - R_C|}$.
+    
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`give_polynomial_mult_center_one_e_erf_opt`
 
  
 .. c:function:: overlap_bourrin_deriv_x:
@@ -2056,7 +3682,7 @@ Subroutines / functions
 
 
     Computes the following integral :
-     int [-infty ; +infty] of [(x-A_center)^(power_A) * (x-B_center)^power_B * exp(-alpha(x-A_center)^2) * exp(-beta(x-B_center)^2) * x ]
+     int [-infty ; +infty] of [(x-A_center)^(power_A) * (x-B_center)^power_B * exp(-alpha(x-A_center)^2) * exp(-beta(x-B_center)^2) * x^2 ]
      needed for the dipole and those things
 
     Called by:
@@ -2103,19 +3729,38 @@ Subroutines / functions
     $p_2 = x^{b_x} y^{b_y} z^{b_z} \exp(-\beta  r^2)$
 
  
-.. c:function:: v_phi:
+.. c:function:: v_n_e_cgtos:
 
 
-    File : :file:`ao_one_e_ints/pot_ao_ints.irp.f`
+    File : :file:`ao_one_e_ints/one_e_coul_integrals_cgtos.irp.f`
 
     .. code:: fortran
 
-        double precision function V_phi(n,m)
+        complex*16 function V_n_e_cgtos(a_x, a_y, a_z, b_x, b_y, b_z, alpha, beta)
 
 
-    Computes the angular $\phi$ part of the nuclear attraction integral:
+    Primitve nuclear attraction between the two primitves centered on the same atom.
     
-    $\int_{0}^{2 \pi} \cos(\phi)^n \sin(\phi)^m d\phi$.
+    $p_1 = x^{a_x} y^{a_y} z^{a_z} \exp(-\alpha r^2)$
+    
+    $p_2 = x^{b_x} y^{b_y} z^{b_z} \exp(-\beta  r^2)$
+
+ 
+.. c:function:: v_n_e_cosgtos:
+
+
+    File : :file:`ao_one_e_ints/one_e_Coul_integrals_cosgtos.irp.f`
+
+    .. code:: fortran
+
+        complex*16 function V_n_e_cosgtos(a_x, a_y, a_z, b_x, b_y, b_z, alpha, beta)
+
+
+    Primitve nuclear attraction between the two primitves centered on the same atom.
+    
+    $p_1 = x^{a_x} y^{a_y} z^{a_z} \exp(-\alpha r^2)$
+    
+    $p_2 = x^{b_x} y^{b_y} z^{b_z} \exp(-\beta  r^2)$
 
  
 .. c:function:: v_r:
@@ -2134,32 +3779,34 @@ Subroutines / functions
     
 
  
-.. c:function:: v_theta:
+.. c:function:: v_r_cgtos:
 
 
-    File : :file:`ao_one_e_ints/pot_ao_ints.irp.f`
+    File : :file:`ao_one_e_ints/one_e_coul_integrals_cgtos.irp.f`
 
     .. code:: fortran
 
-        double precision function V_theta(n,m)
+        complex*16 function V_r_cgtos(n, alpha)
 
 
-    Computes the angular $\theta$ part of the nuclear attraction integral:
+    Computes the radial part of the nuclear attraction integral:
     
-    $\int_{0}^{\pi} \cos(\theta)^n \sin(\theta)^m d\theta$
+    $\int_{0}^{\infty} r^n  \exp(-\alpha  r^2)  dr$
+    
 
  
-.. c:function:: wallis:
+.. c:function:: v_r_cosgtos:
 
 
-    File : :file:`ao_one_e_ints/pot_ao_ints.irp.f`
+    File : :file:`ao_one_e_ints/one_e_Coul_integrals_cosgtos.irp.f`
 
     .. code:: fortran
 
-        double precision function Wallis(n)
+        complex*16 function V_r_cosgtos(n, alpha)
 
 
-    Wallis integral:
+    Computes the radial part of the nuclear attraction integral:
     
-    $\int_{0}^{\pi} \cos(\theta)^n d\theta$.
+    $\int_{0}^{\infty} r^n  \exp(-\alpha  r^2)  dr$
+    
 

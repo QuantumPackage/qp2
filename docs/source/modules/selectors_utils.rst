@@ -579,9 +579,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`mpi_master`
        * :c:data:`n_det_generators`
        * :c:data:`zmq_state`
-       * :c:data:`mpi_master`
 
  
 .. c:function:: zmq_get_n_det_selectors:
@@ -601,9 +601,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`mpi_master`
        * :c:data:`n_det_selectors`
        * :c:data:`zmq_state`
-       * :c:data:`mpi_master`
 
  
 .. c:function:: zmq_put_n_det_generators:

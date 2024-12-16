@@ -47,19 +47,25 @@ EZFIO parameters
  
     name of the exchange functional
  
-    Default: short_range_LDA
+    Default: sr_pbe
  
 .. option:: correlation_functional
  
     name of the correlation functional
  
-    Default: short_range_LDA
+    Default: sr_pbe
  
 .. option:: HF_exchange
  
     Percentage of HF exchange in the DFT model
  
     Default: 0.
+ 
+.. option:: mu_dft_type
+ 
+    type of mu(r) for rsdft [ cst ]
+ 
+    Default: cst
  
  
 Providers 

@@ -180,4 +180,29 @@
  enddo
  END_PROVIDER
 
-
+ BEGIN_PROVIDER [ double precision, extrapolated_on_top, (n_points_final_grid,N_states)]
+&BEGIN_PROVIDER [ double precision, average_extrapolated_on_top, (N_states)]
+ implicit none
+ double precision :: weight,on_top, on_top_extrap, mu_correction_of_on_top,mu
+ integer :: istate, ipoint
+ extrapolated_on_top = 0.d0
+ average_extrapolated_on_top = 0.d0
+ do istate = 1, N_states
+  do ipoint = 1, n_points_final_grid
+   weight = final_weight_at_r_vector(ipoint)
+   mu    = mu_of_r_prov(ipoint,istate)
+   if(mu_of_r_potential == "cas_full")then
+    ! You take the on-top of the CAS wave function which is computed with mu(r) 
+    on_top = on_top_cas_mu_r(ipoint,istate)
+   else
+    ! You take the on-top of the CAS wave function computed separately
+    on_top = total_cas_on_top_density(ipoint,istate)
+   endif
+!  We take the extrapolated on-top pair density 
+   on_top_extrap = mu_correction_of_on_top(mu,on_top)
+   extrapolated_on_top(ipoint,istate) = on_top_extrap
+   average_extrapolated_on_top(istate) += on_top_extrap * weight
+  enddo
+ enddo
+ 
+ END_PROVIDER 

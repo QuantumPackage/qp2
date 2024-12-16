@@ -46,10 +46,18 @@ pt2
  .. hlist:: 
     :columns: 3 
  
+    * :c:data:`n_det_generators` 
+    * :c:data:`n_det_selectors` 
     * :c:data:`distributed_davidson` 
+    * :c:data:`psi_coef` 
+    * :c:data:`psi_det` 
     * :c:data:`pt2_e0_denominator` 
+    * :c:data:`pt2_match_weight` 
+    * :c:data:`pt2_overlap` 
     * :c:data:`pt2_stoch_istate` 
     * :c:data:`read_wf` 
     * :c:data:`selection_weight` 
     * :c:data:`state_average_weight` 
+    * :c:data:`threshold_davidson_pt2` 
     * :c:data:`threshold_generators` 
+    * :c:data:`variance_match_weight` 

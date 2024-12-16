@@ -28,11 +28,11 @@ The :c:func:`run_cipsi` subroutine iteratively:
 
 The difference between :c:func:`run_stochastic_cipsi` and :c:func:`run_cipsi` is that
 :c:func:`run_stochastic_cipsi` selects the determinants on the fly with the computation
-of the stochastic |PT2| :cite:`Garniron_2017.2`. Hence, it is a semi-stochastic selection. It
+of the stochastic |PT2| :cite:`Garniron_2017b`. Hence, it is a semi-stochastic selection. It
 
 * Selects the most important determinants from the external space and adds them to the
   internal space, on the fly with the computation of the PT2 with the stochastic algorithm
-  presented in :cite:`Garniron_2017.2`.
+  presented in :cite:`Garniron_2017b`.
 * If :option:`determinants s2_eig` is |true|, it adds all the necessary
   determinants to allow the eigenstates of |H| to be eigenstates of |S^2|
 * Extrapolates the variational energy by fitting
@@ -138,58 +138,51 @@ value is stable with the number of points.
 EZFIO parameters 
 ---------------- 
  
-.. option:: pert_2rdm
+.. option:: save_wf_after_selection
  
-    If true, computes the one- and two-body rdms with perturbation theory
+    If true, saves the wave function after the selection, before the diagonalization
  
     Default: False
+ 
+.. option:: seniority_max
+ 
+    Maximum number of allowed open shells. Using -1 selects all determinants
+ 
+    Default: -1
+ 
+.. option:: excitation_ref
+ 
+    1: Hartree-Fock determinant, 2:All determinants of the dominant configuration
+ 
+    Default: 1
+ 
+.. option:: excitation_max
+ 
+    Maximum number of excitation with respect to the Hartree-Fock determinant. Using -1 selects all determinants
+ 
+    Default: -1
+ 
+.. option:: excitation_alpha_max
+ 
+    Maximum number of excitation for alpha determinants with respect to the Hartree-Fock determinant. Using -1 selects all determinants
+ 
+    Default: -1
+ 
+.. option:: excitation_beta_max
+ 
+    Maximum number of excitation for beta determinants with respect to the Hartree-Fock determinant. Using -1 selects all determinants
+ 
+    Default: -1
+ 
+.. option:: twice_hierarchy_max
+ 
+    Twice the maximum hierarchy parameter (excitation degree plus half the seniority number). Using -1 selects all determinants
+ 
+    Default: -1
  
  
 Providers 
 --------- 
- 
-.. c:var:: global_selection_buffer
-
-
-    File : :file:`cipsi/run_pt2_slave.irp.f`
-
-    .. code:: fortran
-
-        type(selection_buffer)	:: global_selection_buffer	
-
-
-    Global buffer for the OpenMP selection
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`global_selection_buffer_lock`
-       * :c:data:`n_det_generators`
-       * :c:data:`n_int`
-
-
- 
-.. c:var:: global_selection_buffer_lock
-
-
-    File : :file:`cipsi/run_pt2_slave.irp.f`
-
-    .. code:: fortran
-
-        integer(omp_lock_kind)	:: global_selection_buffer_lock	
-
-
-    Global buffer for the OpenMP selection
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`global_selection_buffer`
-
  
 .. c:var:: initialize_pt2_e0_denominator
 
@@ -209,165 +202,6 @@ Providers
        :columns: 3
 
        * :c:data:`pt2_e0_denominator`
-
- 
-.. c:var:: list_orb_pert_rdm
-
-
-    File : :file:`cipsi/pert_rdm_providers.irp.f`
-
-    .. code:: fortran
-
-        integer, allocatable	:: list_orb_pert_rdm	(n_orb_pert_rdm)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`list_act`
-       * :c:data:`n_orb_pert_rdm`
-
-
- 
-.. c:var:: list_orb_reverse_pert_rdm
-
-
-    File : :file:`cipsi/pert_rdm_providers.irp.f`
-
-    .. code:: fortran
-
-        integer, allocatable	:: list_orb_reverse_pert_rdm	(mo_num)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`list_act`
-       * :c:data:`mo_num`
-
-
- 
-.. c:var:: n_orb_pert_rdm
-
-
-    File : :file:`cipsi/pert_rdm_providers.irp.f`
-
-    .. code:: fortran
-
-        integer	:: n_orb_pert_rdm	
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_act_orb`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`list_orb_pert_rdm`
-       * :c:data:`pert_2rdm_provider`
-
- 
-.. c:var:: nthreads_pt2
-
-
-    File : :file:`cipsi/environment.irp.f`
-
-    .. code:: fortran
-
-        integer	:: nthreads_pt2	
-
-
-    Number of threads for Davidson
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mpi_master`
-       * :c:data:`nproc`
-
-
- 
-.. c:var:: pert_2rdm_lock
-
-
-    File : :file:`cipsi/pert_rdm_providers.irp.f`
-
-    .. code:: fortran
-
-        integer(omp_lock_kind)	:: pert_2rdm_lock	
-
-
-
-
- 
-.. c:var:: pert_2rdm_provider
-
-
-    File : :file:`cipsi/pert_rdm_providers.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: pert_2rdm_provider	(n_orb_pert_rdm,n_orb_pert_rdm,n_orb_pert_rdm,n_orb_pert_rdm)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_orb_pert_rdm`
-
-
- 
-.. c:var:: pt2_cw
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: pt2_w	(N_det_generators)
-        double precision, allocatable	:: pt2_cw	(0:N_det_generators)
-        double precision	:: pt2_w_t	
-        double precision	:: pt2_u_0	
-        integer, allocatable	:: pt2_n_0	(pt2_N_teeth+1)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det_generators`
-       * :c:data:`psi_det_sorted_gen`
-       * :c:data:`pt2_n_teeth`
-       * :c:data:`pt2_stoch_istate`
-       * :c:data:`qp_max_mem`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pt2_f`
-       * :c:data:`pt2_j`
 
  
 .. c:var:: pt2_e0_denominator
@@ -399,542 +233,9 @@ Providers
 
 
  
-.. c:var:: pt2_f
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        integer, allocatable	:: pt2_f	(N_det_generators)
-        integer	:: pt2_n_tasks_max	
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
-       * :c:data:`mpi_master`
-       * :c:data:`n_core_orb`
-       * :c:data:`n_det_generators`
-       * :c:data:`pt2_min_parallel_tasks`
-       * :c:data:`pt2_n_teeth`
-       * :c:data:`pt2_w`
-
-
- 
-.. c:var:: pt2_j
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        integer, allocatable	:: pt2_j	(N_det_generators)
-        integer, allocatable	:: pt2_r	(N_det_generators)
-
-
-    pt2_J contains the list of generators after ordering them according to the
-    Monte Carlo sampling.
-    
-    pt2_R(i) is the number of combs drawn when determinant i is computed.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det_generators`
-       * :c:data:`pt2_n_tasks`
-       * :c:data:`pt2_n_teeth`
-       * :c:data:`pt2_u`
-       * :c:data:`pt2_w`
-       * :c:data:`qp_max_mem`
-
-
- 
-.. c:var:: pt2_match_weight
-
-
-    File : :file:`cipsi/selection.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: pt2_match_weight	(N_states)
-
-
-    Weights adjusted along the selection to make the PT2 contributions
-    of each state coincide.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_states`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`selection_weight`
-
- 
-.. c:var:: pt2_mindetinfirstteeth
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        integer	:: pt2_n_teeth	
-        integer	:: pt2_mindetinfirstteeth	
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mpi_master`
-       * :c:data:`n_det_generators`
-       * :c:data:`psi_det_sorted_gen`
-       * :c:data:`pt2_stoch_istate`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pt2_f`
-       * :c:data:`pt2_j`
-       * :c:data:`pt2_w`
-
- 
-.. c:var:: pt2_n_0
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: pt2_w	(N_det_generators)
-        double precision, allocatable	:: pt2_cw	(0:N_det_generators)
-        double precision	:: pt2_w_t	
-        double precision	:: pt2_u_0	
-        integer, allocatable	:: pt2_n_0	(pt2_N_teeth+1)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det_generators`
-       * :c:data:`psi_det_sorted_gen`
-       * :c:data:`pt2_n_teeth`
-       * :c:data:`pt2_stoch_istate`
-       * :c:data:`qp_max_mem`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pt2_f`
-       * :c:data:`pt2_j`
-
- 
-.. c:var:: pt2_n_tasks
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        integer	:: pt2_n_tasks	
-
-
-    Number of parallel tasks for the Monte Carlo
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det_generators`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pt2_j`
-
- 
-.. c:var:: pt2_n_tasks_max
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        integer, allocatable	:: pt2_f	(N_det_generators)
-        integer	:: pt2_n_tasks_max	
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
-       * :c:data:`mpi_master`
-       * :c:data:`n_core_orb`
-       * :c:data:`n_det_generators`
-       * :c:data:`pt2_min_parallel_tasks`
-       * :c:data:`pt2_n_teeth`
-       * :c:data:`pt2_w`
-
-
- 
-.. c:var:: pt2_n_teeth
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        integer	:: pt2_n_teeth	
-        integer	:: pt2_mindetinfirstteeth	
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mpi_master`
-       * :c:data:`n_det_generators`
-       * :c:data:`psi_det_sorted_gen`
-       * :c:data:`pt2_stoch_istate`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pt2_f`
-       * :c:data:`pt2_j`
-       * :c:data:`pt2_w`
-
- 
-.. c:var:: pt2_overlap
-
-
-    File : :file:`cipsi/energy.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: pt2_overlap	(N_states,N_states)
-
-
-    Overlap between the perturbed wave functions
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_states`
-
-
- 
-.. c:var:: pt2_r
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        integer, allocatable	:: pt2_j	(N_det_generators)
-        integer, allocatable	:: pt2_r	(N_det_generators)
-
-
-    pt2_J contains the list of generators after ordering them according to the
-    Monte Carlo sampling.
-    
-    pt2_R(i) is the number of combs drawn when determinant i is computed.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det_generators`
-       * :c:data:`pt2_n_tasks`
-       * :c:data:`pt2_n_teeth`
-       * :c:data:`pt2_u`
-       * :c:data:`pt2_w`
-       * :c:data:`qp_max_mem`
-
-
- 
-.. c:var:: pt2_stoch_istate
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        integer	:: pt2_stoch_istate	
-
-
-    State for stochatsic PT2
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pt2_n_teeth`
-       * :c:data:`pt2_w`
-
- 
-.. c:var:: pt2_u
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: pt2_u	(N_det_generators)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det_generators`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pt2_j`
-
- 
-.. c:var:: pt2_u_0
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: pt2_w	(N_det_generators)
-        double precision, allocatable	:: pt2_cw	(0:N_det_generators)
-        double precision	:: pt2_w_t	
-        double precision	:: pt2_u_0	
-        integer, allocatable	:: pt2_n_0	(pt2_N_teeth+1)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det_generators`
-       * :c:data:`psi_det_sorted_gen`
-       * :c:data:`pt2_n_teeth`
-       * :c:data:`pt2_stoch_istate`
-       * :c:data:`qp_max_mem`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pt2_f`
-       * :c:data:`pt2_j`
-
- 
-.. c:var:: pt2_w
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: pt2_w	(N_det_generators)
-        double precision, allocatable	:: pt2_cw	(0:N_det_generators)
-        double precision	:: pt2_w_t	
-        double precision	:: pt2_u_0	
-        integer, allocatable	:: pt2_n_0	(pt2_N_teeth+1)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det_generators`
-       * :c:data:`psi_det_sorted_gen`
-       * :c:data:`pt2_n_teeth`
-       * :c:data:`pt2_stoch_istate`
-       * :c:data:`qp_max_mem`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pt2_f`
-       * :c:data:`pt2_j`
-
- 
-.. c:var:: pt2_w_t
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: pt2_w	(N_det_generators)
-        double precision, allocatable	:: pt2_cw	(0:N_det_generators)
-        double precision	:: pt2_w_t	
-        double precision	:: pt2_u_0	
-        integer, allocatable	:: pt2_n_0	(pt2_N_teeth+1)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det_generators`
-       * :c:data:`psi_det_sorted_gen`
-       * :c:data:`pt2_n_teeth`
-       * :c:data:`pt2_stoch_istate`
-       * :c:data:`qp_max_mem`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pt2_f`
-       * :c:data:`pt2_j`
-
- 
-.. c:var:: selection_weight
-
-
-    File : :file:`cipsi/selection.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: selection_weight	(N_states)
-
-
-    Weights used in the selection criterion
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`c0_weight`
-       * :c:data:`n_states`
-       * :c:data:`pt2_match_weight`
-       * :c:data:`state_average_weight`
-       * :c:data:`variance_match_weight`
-       * :c:data:`weight_selection`
-
-
- 
-.. c:var:: variance_match_weight
-
-
-    File : :file:`cipsi/selection.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: variance_match_weight	(N_states)
-
-
-    Weights adjusted along the selection to make the variances
-    of each state coincide.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_states`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`selection_weight`
-
- 
  
 Subroutines / functions 
 ----------------------- 
- 
-.. c:function:: add_to_selection_buffer:
-
-
-    File : :file:`cipsi/selection_buffer.irp.f`
-
-    .. code:: fortran
-
-        subroutine add_to_selection_buffer(b, det, val)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`fill_buffer_double`
-       * :c:func:`fill_buffer_double_rdm`
-       * :c:func:`pt2_collector`
-       * :c:func:`selection_collector`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`sort_selection_buffer`
-
  
 .. c:function:: bitstring_to_list_in_selection:
 
@@ -946,7 +247,7 @@ Subroutines / functions
         subroutine bitstring_to_list_in_selection( string, list, n_elements, Nint)
 
 
-    Gives the inidices(+1) of the bits set to 1 in the bit string
+    Gives the indices(+1) of the bits set to 1 in the bit string
 
     Called by:
 
@@ -957,78 +258,10 @@ Subroutines / functions
        * :c:func:`spot_isinwf`
 
  
-.. c:function:: create_selection_buffer:
-
-
-    File : :file:`cipsi/selection_buffer.irp.f`
-
-    .. code:: fortran
-
-        subroutine create_selection_buffer(N, size_in, res)
-
-
-    Allocates the memory for a selection buffer.
-    The arrays have dimension size_in and the maximum number of elements is N
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`global_selection_buffer`
-       * :c:func:`pt2_collector`
-       * :c:func:`run_pt2_slave_large`
-       * :c:func:`run_pt2_slave_small`
-       * :c:func:`run_selection_slave`
-       * :c:func:`selection_collector`
-       * :c:func:`zmq_pt2`
-       * :c:func:`zmq_selection`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`check_mem`
-
- 
-.. c:function:: delete_selection_buffer:
-
-
-    File : :file:`cipsi/selection_buffer.irp.f`
-
-    .. code:: fortran
-
-        subroutine delete_selection_buffer(b)
-
-
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`global_selection_buffer`
-       * :c:func:`pt2_collector`
-       * :c:func:`run_pt2_slave_large`
-       * :c:func:`run_pt2_slave_small`
-       * :c:func:`run_selection_slave`
-       * :c:func:`selection_collector`
-       * :c:func:`zmq_pt2`
-       * :c:func:`zmq_selection`
-
- 
 .. c:function:: fill_buffer_double:
 
 
-    File : :file:`cipsi/selection.irp.f`
+    File : :file:`cipsi/selection.irp.f_template_915`
 
     .. code:: fortran
 
@@ -1041,18 +274,31 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`det_to_occ_pattern`
+       * :c:data:`c0_weight`
+       * :c:data:`det_to_configuration`
        * :c:data:`do_only_1h1p`
+       * :c:data:`do_ormas`
+       * :c:data:`dominant_dets_of_cfgs`
+       * :c:data:`elec_alpha_num`
+       * :c:data:`excitation_alpha_max`
+       * :c:data:`excitation_beta_max`
+       * :c:data:`excitation_max`
+       * :c:data:`excitation_ref`
        * :c:data:`h0_type`
+       * :c:data:`hf_bitmask`
+       * :c:data:`mo_integrals_threshold`
        * :c:data:`mo_num`
+       * :c:data:`n_dominant_dets_of_cfgs`
        * :c:data:`n_int`
        * :c:data:`n_states`
        * :c:data:`pseudo_sym`
+       * :c:data:`psi_configuration_hii`
        * :c:data:`psi_det_generators`
        * :c:data:`psi_det_hii`
-       * :c:data:`psi_occ_pattern_hii`
        * :c:data:`selection_weight`
+       * :c:data:`seniority_max`
        * :c:data:`thresh_sym`
+       * :c:data:`twice_hierarchy_max`
        * :c:data:`weight_selection`
 
     Called by:
@@ -1068,19 +314,24 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`add_to_selection_buffer`
+       * :c:func:`apply_hole`
        * :c:func:`apply_holes`
+       * :c:func:`apply_particle`
        * :c:func:`apply_particles`
-       * :c:func:`dsyevd`
+       * :c:func:`configuration_to_dets_size`
+       * :c:func:`dsyev`
+       * :c:func:`get_excitation_degree`
+       * :c:func:`get_excitation_degree_spin`
 
  
-.. c:function:: fill_buffer_double_rdm:
+.. c:function:: fill_buffer_single:
 
 
-    File : :file:`cipsi/pert_rdm_providers.irp.f`
+    File : :file:`cipsi/selection.irp.f_template_915`
 
     .. code:: fortran
 
-        subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf, psi_det_connection, psi_coef_connection_reverse, n_det_connection)
+        subroutine fill_buffer_single(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf)
 
 
 
@@ -1089,20 +340,31 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`det_to_occ_pattern`
+       * :c:data:`c0_weight`
+       * :c:data:`det_to_configuration`
        * :c:data:`do_only_1h1p`
+       * :c:data:`do_ormas`
+       * :c:data:`dominant_dets_of_cfgs`
+       * :c:data:`elec_alpha_num`
+       * :c:data:`excitation_alpha_max`
+       * :c:data:`excitation_beta_max`
+       * :c:data:`excitation_max`
+       * :c:data:`excitation_ref`
        * :c:data:`h0_type`
        * :c:data:`hf_bitmask`
+       * :c:data:`mo_integrals_threshold`
        * :c:data:`mo_num`
+       * :c:data:`n_dominant_dets_of_cfgs`
        * :c:data:`n_int`
-       * :c:data:`n_orb_pert_rdm`
        * :c:data:`n_states`
-       * :c:data:`pert_2rdm_lock`
-       * :c:data:`pert_2rdm_provider`
+       * :c:data:`pseudo_sym`
+       * :c:data:`psi_configuration_hii`
        * :c:data:`psi_det_generators`
        * :c:data:`psi_det_hii`
-       * :c:data:`psi_occ_pattern_hii`
        * :c:data:`selection_weight`
+       * :c:data:`seniority_max`
+       * :c:data:`thresh_sym`
+       * :c:data:`twice_hierarchy_max`
        * :c:data:`weight_selection`
 
     Called by:
@@ -1110,7 +372,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`select_singles_and_doubles`
+       * :c:func:`select_singles`
 
     Calls:
 
@@ -1118,11 +380,14 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`add_to_selection_buffer`
+       * :c:func:`apply_hole`
        * :c:func:`apply_holes`
+       * :c:func:`apply_particle`
        * :c:func:`apply_particles`
+       * :c:func:`configuration_to_dets_size`
+       * :c:func:`dsyev`
        * :c:func:`get_excitation_degree`
-       * :c:func:`give_2rdm_pert_contrib`
-       * :c:func:`update_keys_values`
+       * :c:func:`get_excitation_degree_spin`
 
  
 .. c:function:: get_d0:
@@ -1142,6 +407,7 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`mo_integrals_map`
+       * :c:data:`mo_integrals_threshold`
        * :c:data:`mo_num`
        * :c:data:`n_int`
        * :c:data:`n_states`
@@ -1166,7 +432,7 @@ Subroutines / functions
 .. c:function:: get_d0_reference:
 
 
-    File : :file:`cipsi/selection.irp.f`
+    File : :file:`cipsi/selection_old.irp.f`
 
     .. code:: fortran
 
@@ -1233,7 +499,7 @@ Subroutines / functions
 .. c:function:: get_d1_reference:
 
 
-    File : :file:`cipsi/selection.irp.f`
+    File : :file:`cipsi/selection_old.irp.f`
 
     .. code:: fortran
 
@@ -1275,6 +541,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`mo_integrals_threshold`
        * :c:data:`mo_num`
        * :c:data:`n_int`
        * :c:data:`n_states`
@@ -1290,7 +557,7 @@ Subroutines / functions
 .. c:function:: get_d2_reference:
 
 
-    File : :file:`cipsi/selection.irp.f`
+    File : :file:`cipsi/selection_old.irp.f`
 
     .. code:: fortran
 
@@ -1306,6 +573,106 @@ Subroutines / functions
        * :c:data:`mo_num`
        * :c:data:`n_int`
        * :c:data:`n_states`
+
+ 
+.. c:function:: get_m0:
+
+
+    File : :file:`cipsi/selection_singles.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_m0(gen, phasemask, bannedOrb, vect, mask, h, p, sp, coefs)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_num`
+       * :c:data:`n_int`
+       * :c:data:`n_states`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`splash_p`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`apply_particle`
+       * :c:func:`i_h_j`
+
+ 
+.. c:function:: get_m1:
+
+
+    File : :file:`cipsi/selection_singles.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_m1(gen, phasemask, bannedOrb, vect, mask, h, p, sp, coefs)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_num`
+       * :c:data:`n_int`
+       * :c:data:`n_states`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`splash_p`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`apply_particle`
+       * :c:func:`i_h_j`
+
+ 
+.. c:function:: get_m2:
+
+
+    File : :file:`cipsi/selection_singles.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_m2(gen, phasemask, bannedOrb, vect, mask, h, p, sp, coefs)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_num`
+       * :c:data:`n_int`
+       * :c:data:`n_states`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`splash_p`
 
  
 .. c:function:: get_mask_phase:
@@ -1324,6 +691,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`splash_p`
        * :c:func:`splash_pq`
 
  
@@ -1339,533 +707,14 @@ Subroutines / functions
 
 
  
-.. c:function:: give_2rdm_pert_contrib:
-
-
-    File : :file:`cipsi/update_2rdm.irp.f`
-
-    .. code:: fortran
-
-        subroutine give_2rdm_pert_contrib(det,coef,psi_det_connection,psi_coef_connection_reverse,n_det_connection,nkeys,keys,values,sze_buff)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`elec_alpha_num`
-       * :c:data:`n_int`
-       * :c:data:`n_orb_pert_rdm`
-       * :c:data:`n_states`
-       * :c:data:`pert_2rdm_lock`
-       * :c:data:`pert_2rdm_provider`
-       * :c:data:`state_average_weight`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`fill_buffer_double_rdm`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_excitation`
-       * :c:func:`update_buffer_single_exc_rdm`
-       * :c:func:`update_keys_values`
-
- 
-.. c:function:: make_selection_buffer_s2:
-
-
-    File : :file:`cipsi/selection_buffer.irp.f`
-
-    .. code:: fortran
-
-        subroutine make_selection_buffer_s2(b)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`elec_alpha_num`
-       * :c:data:`n_int`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`zmq_pt2`
-       * :c:func:`zmq_selection`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`check_mem`
-       * :c:func:`dsort`
-       * :c:func:`i8sort`
-       * :c:func:`occ_pattern_to_dets`
-       * :c:func:`occ_pattern_to_dets_size`
-
- 
-.. c:function:: merge_selection_buffers:
-
-
-    File : :file:`cipsi/selection_buffer.irp.f`
-
-    .. code:: fortran
-
-        subroutine merge_selection_buffers(b1, b2)
-
-
-    Merges the selection buffers b1 and b2 into b2
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_pt2_slave_large`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`check_mem`
-
- 
-.. c:function:: past_d1:
-
-
-    File : :file:`cipsi/selection.irp.f`
-
-    .. code:: fortran
-
-        subroutine past_d1(bannedOrb, p)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mo_num`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`splash_pq`
-
- 
-.. c:function:: past_d2:
-
-
-    File : :file:`cipsi/selection.irp.f`
-
-    .. code:: fortran
-
-        subroutine past_d2(banned, p, sp)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mo_num`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`splash_pq`
-
- 
-.. c:function:: provide_everything:
-
-
-    File : :file:`cipsi/slave_cipsi.irp.f`
-
-    .. code:: fortran
-
-        subroutine provide_everything
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ci_energy`
-       * :c:data:`generators_bitmask`
-       * :c:data:`h_apply_buffer_allocated`
-       * :c:data:`mo_num`
-       * :c:data:`mo_two_e_integrals_in_map`
-       * :c:data:`mpi_master`
-       * :c:data:`n_det`
-       * :c:data:`n_det_generators`
-       * :c:data:`n_det_selectors`
-       * :c:data:`n_int`
-       * :c:data:`n_states`
-       * :c:data:`n_states_diag`
-       * :c:data:`pseudo_sym`
-       * :c:data:`psi_coef`
-       * :c:data:`psi_det_generators`
-       * :c:data:`psi_det`
-       * :c:data:`psi_det_generators`
-       * :c:data:`psi_det_sorted_bit`
-       * :c:data:`psi_selectors`
-       * :c:data:`pt2_e0_denominator`
-       * :c:data:`pt2_stoch_istate`
-       * :c:data:`selection_weight`
-       * :c:data:`state_average_weight`
-       * :c:data:`threshold_generators`
-       * :c:data:`zmq_context`
-       * :c:data:`zmq_state`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_slave_cipsi`
-
- 
-.. c:function:: pt2_add:
-
-
-    File : :file:`cipsi/pt2_type.irp.f`
-
-    .. code:: fortran
-
-        subroutine pt2_add(p1, w, p2)
-
-
-    p1 =! p1 +( w * p2)
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`pt2_collector`
-       * :c:func:`selection_collector`
-
- 
-.. c:function:: pt2_add2:
-
-
-    File : :file:`cipsi/pt2_type.irp.f`
-
-    .. code:: fortran
-
-        subroutine pt2_add2(p1, w, p2)
-
-
-    p1 =! p1 +( w * p2**2)
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`pt2_collector`
-
- 
-.. c:function:: pt2_addr:
-
-
-    File : :file:`cipsi/pt2_type.irp.f`
-
-    .. code:: fortran
-
-        subroutine pt2_addr(p1, a, b, p2)
-
-
-    p1 =! p1 +( a / b * p2)
-
- 
-.. c:function:: pt2_alloc:
-
-
-    File : :file:`cipsi/pt2_type.irp.f`
-
-    .. code:: fortran
-
-        subroutine pt2_alloc(pt2_data,N)
-
-
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`pt2_collector`
-       * :c:func:`run_cipsi`
-       * :c:func:`run_pt2_slave_large`
-       * :c:func:`run_pt2_slave_small`
-       * :c:func:`run_selection_slave`
-       * :c:func:`run_stochastic_cipsi`
-       * :c:func:`selection_collector`
-
- 
-.. c:function:: pt2_collector:
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_err, b, N_)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det_generators`
-       * :c:data:`n_states`
-       * :c:data:`pt2_f`
-       * :c:data:`pt2_j`
-       * :c:data:`pt2_n_teeth`
-       * :c:data:`pt2_stoch_istate`
-       * :c:data:`pt2_u`
-       * :c:data:`pt2_w`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`zmq_pt2`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`add_to_selection_buffer`
-       * :c:func:`check_mem`
-       * :c:func:`create_selection_buffer`
-       * :c:func:`delete_selection_buffer`
-       * :c:func:`end_zmq_to_qp_run_socket`
-       * :c:func:`pt2_add`
-       * :c:func:`pt2_add2`
-       * :c:func:`pt2_alloc`
-       * :c:func:`pt2_dealloc`
-       * :c:func:`pull_pt2_results`
-       * :c:func:`sleep`
-       * :c:func:`sort_selection_buffer`
-       * :c:func:`wall_time`
-
- 
-.. c:function:: pt2_dealloc:
-
-
-    File : :file:`cipsi/pt2_type.irp.f`
-
-    .. code:: fortran
-
-        subroutine pt2_dealloc(pt2_data)
-
-
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`pt2_collector`
-       * :c:func:`run_cipsi`
-       * :c:func:`run_pt2_slave_large`
-       * :c:func:`run_pt2_slave_small`
-       * :c:func:`run_selection_slave`
-       * :c:func:`run_stochastic_cipsi`
-       * :c:func:`selection_collector`
-
- 
-.. c:function:: pt2_deserialize:
-
-
-    File : :file:`cipsi/pt2_type.irp.f`
-
-    .. code:: fortran
-
-        subroutine pt2_deserialize(pt2_data, n, x)
-
-
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`pull_pt2_results`
-       * :c:func:`pull_selection_results`
-
- 
-.. c:function:: pt2_find_sample:
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        integer function pt2_find_sample(v, w)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det_generators`
-
- 
-.. c:function:: pt2_find_sample_lr:
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        integer function pt2_find_sample_lr(v, w, l_in, r_in)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det_generators`
-
- 
-.. c:function:: pt2_serialize:
-
-
-    File : :file:`cipsi/pt2_type.irp.f`
-
-    .. code:: fortran
-
-        subroutine pt2_serialize(pt2_data, n, x)
-
-
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`push_pt2_results_async_send`
-       * :c:func:`push_selection_results`
-
- 
-.. c:function:: pt2_slave_inproc:
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        subroutine pt2_slave_inproc(i)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`global_selection_buffer`
-       * :c:data:`pt2_e0_denominator`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`zmq_pt2`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_pt2_slave`
-
- 
-.. c:function:: pull_pt2_results:
-
-
-    File : :file:`cipsi/run_pt2_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine pull_pt2_results(zmq_socket_pull, index, pt2_data, task_id, n_tasks, b)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
-       * :c:data:`n_states`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`pt2_collector`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`pt2_deserialize`
-
- 
-.. c:function:: pull_selection_results:
+.. c:function:: provide_for_selection_slave:
 
 
     File : :file:`cipsi/run_selection_slave.irp.f`
 
     .. code:: fortran
 
-        subroutine pull_selection_results(zmq_socket_pull, pt2_data, val, det, N, task_id, ntasks)
+        subroutine provide_for_selection_slave
 
 
 
@@ -1874,124 +723,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_int`
-       * :c:data:`n_states`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`selection_collector`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`pt2_deserialize`
-
- 
-.. c:function:: push_pt2_results:
-
-
-    File : :file:`cipsi/run_pt2_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine push_pt2_results(zmq_socket_push, index, pt2_data, b, task_id, n_tasks)
-
-
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_pt2_slave_small`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`push_pt2_results_async_recv`
-       * :c:func:`push_pt2_results_async_send`
-
- 
-.. c:function:: push_pt2_results_async_recv:
-
-
-    File : :file:`cipsi/run_pt2_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine push_pt2_results_async_recv(zmq_socket_push,mini,sending)
-
-
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`push_pt2_results`
-       * :c:func:`run_pt2_slave_large`
-
- 
-.. c:function:: push_pt2_results_async_send:
-
-
-    File : :file:`cipsi/run_pt2_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine push_pt2_results_async_send(zmq_socket_push, index, pt2_data, b, task_id, n_tasks, sending)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
-       * :c:data:`n_states`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`push_pt2_results`
-       * :c:func:`run_pt2_slave_large`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`pt2_serialize`
-
- 
-.. c:function:: push_selection_results:
-
-
-    File : :file:`cipsi/run_selection_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine push_selection_results(zmq_socket_push, pt2_data, b, task_id, ntasks)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
-       * :c:data:`n_states`
+       * :c:data:`psi_det_sorted`
+       * :c:data:`psi_det_sorted`
+       * :c:data:`psi_selectors_coef_transp`
 
     Called by:
 
@@ -2000,22 +734,15 @@ Subroutines / functions
 
        * :c:func:`run_selection_slave`
 
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`pt2_serialize`
-
  
-.. c:function:: remove_duplicates_in_selection_buffer:
+.. c:function:: provide_for_zmq_pt2:
 
 
-    File : :file:`cipsi/selection_buffer.irp.f`
+    File : :file:`cipsi/pt2_stoch_routines.irp.f`
 
     .. code:: fortran
 
-        subroutine remove_duplicates_in_selection_buffer(b)
+        subroutine provide_for_zmq_pt2
 
 
 
@@ -2024,22 +751,18 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_int`
+       * :c:data:`psi_det_hii`
+       * :c:data:`psi_det_sorted`
+       * :c:data:`psi_det_sorted`
+       * :c:data:`psi_selectors_coef_transp`
 
     Called by:
 
     .. hlist::
        :columns: 3
 
+       * :c:func:`run_slave_main`
        * :c:func:`zmq_pt2`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`check_mem`
-       * :c:func:`i8sort`
 
  
 .. c:function:: run_cipsi:
@@ -2065,29 +788,22 @@ Subroutines / functions
        * :c:data:`h_apply_buffer_allocated`
        * :c:data:`n_det`
        * :c:data:`n_det_max`
-       * :c:data:`n_iter`
        * :c:data:`n_states`
        * :c:data:`n_states_diag`
        * :c:data:`psi_coef`
+       * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_sorted`
        * :c:data:`psi_energy`
        * :c:data:`psi_energy_with_nucl_rep`
-       * :c:data:`psi_occ_pattern`
        * :c:data:`pt2_max`
        * :c:data:`pt2_relative_error`
        * :c:data:`ref_bitmask_energy`
        * :c:data:`s2_eig`
+       * :c:data:`save_wf_after_selection`
        * :c:data:`selection_factor`
        * :c:data:`threshold_generators`
        * :c:data:`variance_max`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`fci`
 
     Calls:
 
@@ -2099,14 +815,16 @@ Subroutines / functions
        * :c:func:`diagonalize_ci`
        * :c:func:`ezfio_get_hartree_fock_energy`
        * :c:func:`ezfio_has_hartree_fock_energy`
+       * :c:func:`increment_n_iter`
        * :c:func:`make_s2_eigenfunction`
        * :c:func:`print_extrapolated_energy`
+       * :c:func:`print_mol_properties`
        * :c:func:`print_summary`
        * :c:func:`pt2_alloc`
        * :c:func:`pt2_dealloc`
        * :c:func:`save_energy`
-       * :c:func:`save_iterations`
        * :c:func:`save_wavefunction`
+       * :c:func:`write_cipsi_json`
        * :c:func:`write_double`
        * :c:func:`zmq_pt2`
        * :c:func:`zmq_selection`
@@ -2120,17 +838,16 @@ Subroutines / functions
        * :c:data:`ci_electronic_energy`
        * :c:data:`ci_energy`
        * :c:data:`ci_electronic_energy`
+       * :c:data:`psi_configuration`
        * :c:data:`n_det`
-       * :c:data:`n_iter`
-       * :c:data:`psi_occ_pattern`
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_energy`
-       * :c:data:`psi_occ_pattern`
        * :c:data:`psi_energy`
        * :c:data:`pt2_match_weight`
        * :c:data:`pt2_overlap`
@@ -2142,322 +859,6 @@ Subroutines / functions
        * :c:data:`variance_match_weight`
 
  
-.. c:function:: run_pt2_slave:
-
-
-    File : :file:`cipsi/run_pt2_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine run_pt2_slave(thread,iproc,energy)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_states_diag`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`pt2_slave_inproc`
-       * :c:func:`run_slave_main`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_pt2_slave_large`
-
- 
-.. c:function:: run_pt2_slave_large:
-
-
-    File : :file:`cipsi/run_pt2_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine run_pt2_slave_large(thread,iproc,energy)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`elec_alpha_num`
-       * :c:data:`global_selection_buffer`
-       * :c:data:`global_selection_buffer_lock`
-       * :c:data:`mo_num`
-       * :c:data:`n_states`
-       * :c:data:`n_states_diag`
-       * :c:data:`pt2_f`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_pt2_slave`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`create_selection_buffer`
-       * :c:func:`delete_selection_buffer`
-       * :c:func:`end_zmq_push_socket`
-       * :c:func:`end_zmq_to_qp_run_socket`
-       * :c:func:`merge_selection_buffers`
-       * :c:func:`omp_set_lock`
-       * :c:func:`omp_unset_lock`
-       * :c:func:`pt2_alloc`
-       * :c:func:`pt2_dealloc`
-       * :c:func:`push_pt2_results_async_recv`
-       * :c:func:`push_pt2_results_async_send`
-       * :c:func:`select_connected`
-       * :c:func:`sleep`
-       * :c:func:`sort_selection_buffer`
-       * :c:func:`wall_time`
-
- 
-.. c:function:: run_pt2_slave_small:
-
-
-    File : :file:`cipsi/run_pt2_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine run_pt2_slave_small(thread,iproc,energy)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`elec_alpha_num`
-       * :c:data:`mo_num`
-       * :c:data:`n_states`
-       * :c:data:`n_states_diag`
-       * :c:data:`nproc`
-       * :c:data:`pt2_f`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`create_selection_buffer`
-       * :c:func:`delete_selection_buffer`
-       * :c:func:`end_zmq_push_socket`
-       * :c:func:`end_zmq_to_qp_run_socket`
-       * :c:func:`pt2_alloc`
-       * :c:func:`pt2_dealloc`
-       * :c:func:`push_pt2_results`
-       * :c:func:`select_connected`
-       * :c:func:`sort_selection_buffer`
-       * :c:func:`usleep`
-       * :c:func:`wall_time`
-
- 
-.. c:function:: run_selection_slave:
-
-
-    File : :file:`cipsi/run_selection_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine run_selection_slave(thread,iproc,energy)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
-       * :c:data:`n_states`
-       * :c:data:`pseudo_sym`
-       * :c:data:`psi_bilinear_matrix_columns_loc`
-       * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`psi_det_sorted`
-       * :c:data:`psi_det_sorted`
-       * :c:data:`psi_selectors_coef_transp`
-       * :c:data:`pt2_f`
-       * :c:data:`weight_selection`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_slave_main`
-       * :c:func:`selection_slave_inproc`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`create_selection_buffer`
-       * :c:func:`delete_selection_buffer`
-       * :c:func:`end_zmq_push_socket`
-       * :c:func:`end_zmq_to_qp_run_socket`
-       * :c:func:`pt2_alloc`
-       * :c:func:`pt2_dealloc`
-       * :c:func:`push_selection_results`
-       * :c:func:`select_connected`
-       * :c:func:`sort_selection_buffer`
-       * :c:func:`usleep`
-
- 
-.. c:function:: run_slave_cipsi:
-
-
-    File : :file:`cipsi/slave_cipsi.irp.f`
-
-    .. code:: fortran
-
-        subroutine run_slave_cipsi
-
-
-    Helper program for distributed parallelism
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`distributed_davidson`
-       * :c:data:`read_wf`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`fci`
-       * :c:func:`pt2`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`omp_set_nested`
-       * :c:func:`provide_everything`
-       * :c:func:`run_slave_main`
-       * :c:func:`switch_qp_run_to_master`
-
-    Touches:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`distributed_davidson`
-       * :c:data:`pt2_e0_denominator`
-       * :c:data:`pt2_stoch_istate`
-       * :c:data:`read_wf`
-       * :c:data:`selection_weight`
-       * :c:data:`state_average_weight`
-       * :c:data:`threshold_generators`
-
- 
-.. c:function:: run_slave_main:
-
-
-    File : :file:`cipsi/slave_cipsi.irp.f`
-
-    .. code:: fortran
-
-        subroutine run_slave_main
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`det_to_occ_pattern`
-       * :c:data:`elec_alpha_num`
-       * :c:data:`global_selection_buffer`
-       * :c:data:`h0_type`
-       * :c:data:`mo_num`
-       * :c:data:`mpi_master`
-       * :c:data:`mpi_rank`
-       * :c:data:`n_det`
-       * :c:data:`n_det_generators`
-       * :c:data:`n_det_selectors`
-       * :c:data:`n_int`
-       * :c:data:`n_states`
-       * :c:data:`n_states_diag`
-       * :c:data:`nthreads_pt2`
-       * :c:data:`psi_coef`
-       * :c:data:`psi_det`
-       * :c:data:`pt2_e0_denominator`
-       * :c:data:`pt2_f`
-       * :c:data:`pt2_stoch_istate`
-       * :c:data:`qp_max_mem`
-       * :c:data:`selection_weight`
-       * :c:data:`state_average_weight`
-       * :c:data:`threshold_generators`
-       * :c:data:`zmq_context`
-       * :c:data:`zmq_state`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_slave_cipsi`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`check_mem`
-       * :c:func:`davidson_slave_tcp`
-       * :c:func:`mpi_print`
-       * :c:func:`omp_set_nested`
-       * :c:func:`resident_memory`
-       * :c:func:`run_pt2_slave`
-       * :c:func:`run_selection_slave`
-       * :c:func:`usleep`
-       * :c:func:`wait_for_states`
-       * :c:func:`wall_time`
-       * :c:func:`write_double`
-
-    Touches:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pt2_e0_denominator`
-       * :c:data:`pt2_stoch_istate`
-       * :c:data:`selection_weight`
-       * :c:data:`state_average_weight`
-       * :c:data:`threshold_generators`
-
- 
 .. c:function:: run_stochastic_cipsi:
 
 
@@ -2465,7 +866,7 @@ Subroutines / functions
 
     .. code:: fortran
 
-        subroutine run_stochastic_cipsi
+        subroutine run_stochastic_cipsi(Ev,PT2)
 
 
     Selected Full Configuration Interaction with Stochastic selection and PT2.
@@ -2476,22 +877,24 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`correlation_energy_ratio_max`
+       * :c:data:`distributed_davidson`
        * :c:data:`h_apply_buffer_allocated`
+       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det`
        * :c:data:`n_det_max`
-       * :c:data:`n_iter`
        * :c:data:`n_states`
        * :c:data:`n_states_diag`
        * :c:data:`psi_coef`
+       * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_sorted`
        * :c:data:`psi_energy`
        * :c:data:`psi_energy_with_nucl_rep`
-       * :c:data:`psi_occ_pattern`
        * :c:data:`pt2_max`
        * :c:data:`pt2_relative_error`
        * :c:data:`ref_bitmask_energy`
        * :c:data:`s2_eig`
+       * :c:data:`save_wf_after_selection`
        * :c:data:`selection_factor`
        * :c:data:`threshold_generators`
        * :c:data:`variance_max`
@@ -2501,7 +904,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`fci`
+       * :c:func:`run_optimization_mos_cipsi`
 
     Calls:
 
@@ -2513,14 +916,16 @@ Subroutines / functions
        * :c:func:`diagonalize_ci`
        * :c:func:`ezfio_get_hartree_fock_energy`
        * :c:func:`ezfio_has_hartree_fock_energy`
+       * :c:func:`increment_n_iter`
        * :c:func:`make_s2_eigenfunction`
        * :c:func:`print_extrapolated_energy`
+       * :c:func:`print_mol_properties`
        * :c:func:`print_summary`
        * :c:func:`pt2_alloc`
        * :c:func:`pt2_dealloc`
        * :c:func:`save_energy`
-       * :c:func:`save_iterations`
        * :c:func:`save_wavefunction`
+       * :c:func:`write_cipsi_json`
        * :c:func:`write_double`
        * :c:func:`zmq_pt2`
 
@@ -2533,17 +938,16 @@ Subroutines / functions
        * :c:data:`ci_electronic_energy`
        * :c:data:`ci_energy`
        * :c:data:`ci_electronic_energy`
+       * :c:data:`psi_configuration`
        * :c:data:`n_det`
-       * :c:data:`n_iter`
-       * :c:data:`psi_occ_pattern`
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_energy`
-       * :c:data:`psi_occ_pattern`
        * :c:data:`psi_energy`
        * :c:data:`pt2_match_weight`
        * :c:data:`pt2_overlap`
@@ -2592,7 +996,54 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`build_fock_tmp`
+       * :c:func:`select_singles`
        * :c:func:`select_singles_and_doubles`
+
+ 
+.. c:function:: select_singles:
+
+
+    File : :file:`cipsi/selection_singles.irp.f`
+
+    .. code:: fortran
+
+        subroutine select_singles(i_gen,hole_mask,particle_mask,fock_diag_tmp,E0,pt2_data,buf)
+
+
+    Select determinants connected to i_det by H
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_num`
+       * :c:data:`n_det`
+       * :c:data:`n_det_selectors`
+       * :c:data:`n_int`
+       * :c:data:`n_states`
+       * :c:data:`psi_det_generators`
+       * :c:data:`psi_det_sorted`
+       * :c:data:`psi_selectors`
+       * :c:data:`psi_selectors_coef_transp`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`select_connected`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`apply_hole`
+       * :c:func:`bitstring_to_list_ab`
+       * :c:func:`fill_buffer_single`
+       * :c:func:`splash_p`
+       * :c:func:`spot_hasbeen`
 
  
 .. c:function:: select_singles_and_doubles:
@@ -2602,7 +1053,7 @@ Subroutines / functions
 
     .. code:: fortran
 
-        subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_diag_tmp,E0,pt2_data,buf,subset,csubset)
+        subroutine select_singles_and_doubles(i_generator, hole_mask, particle_mask, fock_diag_tmp, E0, pt2_data, buf, subset, csubset)
 
 
     WARNING /!\ : It is assumed that the generators and selectors are psi_det_sorted
@@ -2618,7 +1069,6 @@ Subroutines / functions
        * :c:data:`n_det_selectors`
        * :c:data:`n_int`
        * :c:data:`n_states`
-       * :c:data:`pert_2rdm`
        * :c:data:`psi_bilinear_matrix_columns_loc`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_bilinear_matrix_values`
@@ -2649,21 +1099,20 @@ Subroutines / functions
        * :c:func:`apply_hole`
        * :c:func:`bitstring_to_list_ab`
        * :c:func:`fill_buffer_double`
-       * :c:func:`fill_buffer_double_rdm`
        * :c:func:`get_excitation_degree_spin`
-       * :c:func:`isort`
+       * :c:func:`isort_noidx`
        * :c:func:`splash_pq`
        * :c:func:`spot_isinwf`
 
  
-.. c:function:: selection_collector:
+.. c:function:: splash_p:
 
 
-    File : :file:`cipsi/zmq_selection.irp.f`
+    File : :file:`cipsi/selection_singles.irp.f`
 
     .. code:: fortran
 
-        subroutine selection_collector(zmq_socket_pull, b, N, pt2_data)
+        subroutine splash_p(mask, sp, det, coefs, N_sel, bannedOrb, vect)
 
 
 
@@ -2672,103 +1121,28 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_det_generators`
-       * :c:data:`n_states`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`zmq_selection`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`add_to_selection_buffer`
-       * :c:func:`check_mem`
-       * :c:func:`create_selection_buffer`
-       * :c:func:`delete_selection_buffer`
-       * :c:func:`end_zmq_to_qp_run_socket`
-       * :c:func:`pt2_add`
-       * :c:func:`pt2_alloc`
-       * :c:func:`pt2_dealloc`
-       * :c:func:`pull_selection_results`
-       * :c:func:`sort_selection_buffer`
-
- 
-.. c:function:: selection_slave_inproc:
-
-
-    File : :file:`cipsi/zmq_selection.irp.f`
-
-    .. code:: fortran
-
-        subroutine selection_slave_inproc(i)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pt2_e0_denominator`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`zmq_selection`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_selection_slave`
-
- 
-.. c:function:: sort_selection_buffer:
-
-
-    File : :file:`cipsi/selection_buffer.irp.f`
-
-    .. code:: fortran
-
-        subroutine sort_selection_buffer(b)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
+       * :c:data:`mo_num`
        * :c:data:`n_int`
+       * :c:data:`n_states`
+       * :c:data:`psi_det_sorted`
 
     Called by:
 
     .. hlist::
        :columns: 3
 
-       * :c:func:`add_to_selection_buffer`
-       * :c:func:`pt2_collector`
-       * :c:func:`run_pt2_slave_large`
-       * :c:func:`run_pt2_slave_small`
-       * :c:func:`run_selection_slave`
-       * :c:func:`selection_collector`
+       * :c:func:`select_singles`
 
     Calls:
 
     .. hlist::
        :columns: 3
 
-       * :c:func:`check_mem`
-       * :c:func:`dsort`
+       * :c:func:`bitstring_to_list`
+       * :c:func:`get_m0`
+       * :c:func:`get_m1`
+       * :c:func:`get_m2`
+       * :c:func:`get_mask_phase`
 
  
 .. c:function:: splash_pq:
@@ -2813,8 +1187,40 @@ Subroutines / functions
        * :c:func:`get_d1`
        * :c:func:`get_d2`
        * :c:func:`get_mask_phase`
-       * :c:func:`past_d1`
-       * :c:func:`past_d2`
+
+ 
+.. c:function:: spot_hasbeen:
+
+
+    File : :file:`cipsi/selection_singles.irp.f`
+
+    .. code:: fortran
+
+        subroutine spot_hasBeen(mask, sp, det, i_gen, N, banned, fullMatch)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_num`
+       * :c:data:`n_int`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`select_singles`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`bitstring_to_list`
 
  
 .. c:function:: spot_isinwf:
@@ -2827,7 +1233,7 @@ Subroutines / functions
         subroutine spot_isinwf(mask, det, i_gen, N, banned, fullMatch, interesting)
 
 
-    Identify the determinants in det which are in the internal space. These are
+    Identify the determinants in det that are in the internal space. These are
     the determinants that can be produced by creating two particles on the mask.
 
     Needs:
@@ -2853,188 +1259,35 @@ Subroutines / functions
        * :c:func:`bitstring_to_list_in_selection`
 
  
-.. c:function:: testteethbuilding:
+.. c:function:: write_cipsi_json:
 
 
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
+    File : :file:`cipsi/write_cipsi_json.irp.f`
 
     .. code:: fortran
 
-        logical function testTeethBuilding(minF, N)
+        subroutine write_cipsi_json(pt2_data, pt2_data_err)
 
 
+    Writes JSON data for CIPSI runs
 
     Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_det_generators`
-       * :c:data:`psi_det_sorted_gen`
-       * :c:data:`pt2_stoch_istate`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`check_mem`
-
- 
-.. c:function:: update_buffer_double_exc_rdm:
-
-
-    File : :file:`cipsi/update_2rdm.irp.f`
-
-    .. code:: fortran
-
-        subroutine update_buffer_double_exc_rdm(exc,phase,contrib,nkeys,keys,values,sze_buff)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`list_orb_reverse_pert_rdm`
-
- 
-.. c:function:: update_buffer_single_exc_rdm:
-
-
-    File : :file:`cipsi/update_2rdm.irp.f`
-
-    .. code:: fortran
-
-        subroutine update_buffer_single_exc_rdm(det1,det2,exc,phase,contrib,nkeys,keys,values,sze_buff)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`list_orb_reverse_pert_rdm`
-       * :c:data:`n_int`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`give_2rdm_pert_contrib`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`bitstring_to_list_ab`
-
- 
-.. c:function:: update_pt2_and_variance_weights:
-
-
-    File : :file:`cipsi/selection.irp.f`
-
-    .. code:: fortran
-
-        subroutine update_pt2_and_variance_weights(pt2_data, N_st)
-
-
-    Updates the PT2- and Variance- matching weights.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
+       * :c:data:`energy_iterations`
+       * :c:data:`json_int_fmt`
+       * :c:data:`json_unit`
        * :c:data:`n_det`
+       * :c:data:`n_iter`
        * :c:data:`n_states`
-       * :c:data:`pt2_match_weight`
-       * :c:data:`pt2_relative_error`
-       * :c:data:`threshold_davidson`
-       * :c:data:`threshold_davidson_pt2`
-       * :c:data:`variance_match_weight`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`zmq_pt2`
-       * :c:func:`zmq_selection`
-
-    Touches:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pt2_match_weight`
-       * :c:data:`threshold_davidson_pt2`
-       * :c:data:`variance_match_weight`
-
- 
-.. c:function:: zmq_pt2:
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`det_to_occ_pattern`
-       * :c:data:`elec_alpha_num`
-       * :c:data:`global_selection_buffer`
-       * :c:data:`h0_type`
-       * :c:data:`mo_num`
-       * :c:data:`mo_one_e_integrals`
-       * :c:data:`mo_two_e_integrals_in_map`
-       * :c:data:`n_det`
-       * :c:data:`n_det_generators`
-       * :c:data:`n_int`
-       * :c:data:`n_states`
-       * :c:data:`nproc`
-       * :c:data:`nthreads_pt2`
-       * :c:data:`pseudo_sym`
-       * :c:data:`psi_bilinear_matrix_columns_loc`
-       * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`psi_det_hii`
-       * :c:data:`psi_det_sorted`
-       * :c:data:`psi_det_sorted`
-       * :c:data:`psi_occ_pattern_hii`
-       * :c:data:`psi_selectors`
-       * :c:data:`psi_selectors_coef_transp`
-       * :c:data:`pt2_e0_denominator`
-       * :c:data:`pt2_f`
-       * :c:data:`pt2_j`
-       * :c:data:`pt2_n_teeth`
-       * :c:data:`pt2_overlap`
-       * :c:data:`pt2_j`
-       * :c:data:`pt2_stoch_istate`
-       * :c:data:`pt2_u`
-       * :c:data:`pt2_w`
-       * :c:data:`qp_max_mem`
+       * :c:data:`nsomomax`
+       * :c:data:`only_expected_s2`
+       * :c:data:`psi_configuration`
+       * :c:data:`psi_energy`
+       * :c:data:`psi_energy_with_nucl_rep`
        * :c:data:`s2_eig`
-       * :c:data:`selection_weight`
-       * :c:data:`state_average_weight`
-       * :c:data:`threshold_generators`
 
     Called by:
 
@@ -3049,113 +1302,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`check_mem`
-       * :c:func:`create_selection_buffer`
-       * :c:func:`delete_selection_buffer`
-       * :c:func:`end_parallel_job`
-       * :c:func:`fill_h_apply_buffer_no_selection`
-       * :c:func:`make_selection_buffer_s2`
-       * :c:func:`new_parallel_job`
-       * :c:func:`omp_set_nested`
-       * :c:func:`pt2_collector`
-       * :c:func:`pt2_slave_inproc`
-       * :c:func:`remove_duplicates_in_selection_buffer`
-       * :c:func:`resident_memory`
-       * :c:func:`update_pt2_and_variance_weights`
-       * :c:func:`write_double`
-       * :c:func:`write_int`
-       * :c:func:`zmq_selection`
-
-    Touches:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pt2_match_weight`
-       * :c:data:`pt2_overlap`
-       * :c:data:`pt2_stoch_istate`
-       * :c:data:`selection_weight`
-       * :c:data:`state_average_weight`
-       * :c:data:`threshold_davidson_pt2`
-       * :c:data:`variance_match_weight`
-
- 
-.. c:function:: zmq_selection:
-
-
-    File : :file:`cipsi/zmq_selection.irp.f`
-
-    .. code:: fortran
-
-        subroutine ZMQ_selection(N_in, pt2_data)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`do_pt2`
-       * :c:data:`elec_alpha_num`
-       * :c:data:`mo_num`
-       * :c:data:`n_det`
-       * :c:data:`n_det_generators`
-       * :c:data:`n_det_selectors`
-       * :c:data:`n_int`
-       * :c:data:`n_states`
-       * :c:data:`nproc`
-       * :c:data:`pseudo_sym`
-       * :c:data:`psi_bilinear_matrix_columns_loc`
-       * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`psi_det_sorted`
-       * :c:data:`psi_selectors`
-       * :c:data:`pt2_e0_denominator`
-       * :c:data:`pt2_f`
-       * :c:data:`pt2_overlap`
-       * :c:data:`qp_max_mem`
-       * :c:data:`s2_eig`
-       * :c:data:`selection_weight`
-       * :c:data:`state_average_weight`
-       * :c:data:`threshold_generators`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_cipsi`
-       * :c:func:`zmq_pt2`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`create_selection_buffer`
-       * :c:func:`delete_selection_buffer`
-       * :c:func:`end_parallel_job`
-       * :c:func:`fill_h_apply_buffer_no_selection`
-       * :c:func:`make_selection_buffer_s2`
-       * :c:func:`new_parallel_job`
-       * :c:func:`selection_collector`
-       * :c:func:`selection_slave_inproc`
-       * :c:func:`update_pt2_and_variance_weights`
-       * :c:func:`write_double`
-
-    Touches:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pt2_match_weight`
-       * :c:data:`pt2_overlap`
-       * :c:data:`threshold_davidson_pt2`
-       * :c:data:`variance_match_weight`
+       * :c:func:`lock_io`
+       * :c:func:`unlock_io`
 

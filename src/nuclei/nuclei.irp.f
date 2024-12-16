@@ -201,6 +201,9 @@ BEGIN_PROVIDER [ double precision, nuclear_repulsion ]
          x(2) = nucl_coord(k,2) - nucl_coord(l,2)
          x(3) = nucl_coord(k,3) - nucl_coord(l,3)
          r2 = x(1)*x(1) + x(2)*x(2) + x(3)*x(3)
+         if(r2.lt.1.d-6)then
+          r2 = 1.d-6
+         endif
          nuclear_repulsion += Z12/dsqrt(r2)
        enddo
      enddo

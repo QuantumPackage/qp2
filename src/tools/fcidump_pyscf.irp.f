@@ -1,4 +1,4 @@
-program fcidump
+program fcidump_pyscf
   implicit none
   BEGIN_DOC
 ! Produce a regular `FCIDUMP` file from the |MOs| stored in the |EZFIO|

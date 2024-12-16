@@ -17,7 +17,7 @@ Our goals:
 We want to create a plugin to do the following things: 
  1) print out one- and two-electron integrals on the AO/MO basis,  
 
- 2) creates two providers which manipulate these objects, 
+ 2) create two providers which manipulate these objects, 
 
  3) print out these providers. 
 

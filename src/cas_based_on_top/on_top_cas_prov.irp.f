@@ -74,3 +74,17 @@
 
  END_PROVIDER 
 
+
+ BEGIN_PROVIDER [ double precision, average_on_top, (n_states)]
+ implicit none
+ integer :: i_point,istate
+ double precision :: wall_0,wall_1,core_inact_dm,pure_act_on_top_of_r,weight
+ average_on_top = 0.d0
+ do istate = 1, N_states
+  do i_point = 1, n_points_final_grid
+   weight = final_weight_at_r_vector(i_point)
+   average_on_top(istate) += total_cas_on_top_density(i_point,istate) * weight
+  enddo
+ enddo
+ print*,'Average on top pair density = ',average_on_top
+ END_PROVIDER 

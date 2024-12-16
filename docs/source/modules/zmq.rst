@@ -381,6 +381,13 @@ Subroutines / functions
 
        * :c:data:`zmq_state`
 
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`sscanf_ssds`
+
  
 .. c:function:: disconnect_from_taskserver:
 
@@ -414,12 +421,12 @@ Subroutines / functions
 
     Disconnect from the task server
 
-    Needs:
+    Calls:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`zmq_state`
+       * :c:func:`sscanf_ss`
 
  
 .. c:function:: end_parallel_job:
@@ -439,8 +446,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`zmq_state`
        * :c:data:`zmq_context`
+       * :c:data:`zmq_state`
 
     Called by:
 
@@ -450,6 +457,7 @@ Subroutines / functions
        * :c:data:`ao_two_e_integrals_erf_in_map`
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:func:`h_s2_u_0_nstates_zmq`
+       * :c:func:`h_u_0_nstates_zmq`
        * :c:func:`zmq_pt2`
        * :c:func:`zmq_selection`
 
@@ -555,6 +563,8 @@ Subroutines / functions
 
        * :c:func:`ao_two_e_integrals_erf_in_map_slave`
        * :c:func:`ao_two_e_integrals_in_map_slave`
+       * :c:func:`davidson_csf_run_slave`
+       * :c:func:`davidson_nos2_run_slave`
        * :c:func:`davidson_run_slave`
        * :c:func:`run_pt2_slave_large`
        * :c:func:`run_pt2_slave_small`
@@ -627,6 +637,8 @@ Subroutines / functions
        * :c:func:`ao_two_e_integrals_erf_in_map_slave`
        * :c:func:`ao_two_e_integrals_in_map_collector`
        * :c:func:`ao_two_e_integrals_in_map_slave`
+       * :c:func:`davidson_csf_run_slave`
+       * :c:func:`davidson_nos2_run_slave`
        * :c:func:`davidson_run_slave`
        * :c:func:`end_parallel_job`
        * :c:func:`pt2_collector`
@@ -654,6 +666,13 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`zmq_state`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`sscanf_sd`
 
  
 .. c:function:: get_tasks_from_taskserver:
@@ -693,9 +712,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`zmq_state`
-       * :c:data:`zmq_socket_pull_tcp_address`
        * :c:data:`zmq_context`
+       * :c:data:`zmq_socket_pull_tcp_address`
+       * :c:data:`zmq_state`
 
     Called by:
 
@@ -705,6 +724,7 @@ Subroutines / functions
        * :c:data:`ao_two_e_integrals_erf_in_map`
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:func:`h_s2_u_0_nstates_zmq`
+       * :c:func:`h_u_0_nstates_zmq`
        * :c:func:`zmq_pt2`
        * :c:func:`zmq_selection`
 
@@ -735,8 +755,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`zmq_socket_pull_tcp_address`
        * :c:data:`zmq_context`
+       * :c:data:`zmq_socket_pull_tcp_address`
 
     Calls:
 
@@ -765,8 +785,8 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`qp_run_address`
-       * :c:data:`zmq_socket_pull_tcp_address`
        * :c:data:`zmq_context`
+       * :c:data:`zmq_socket_pull_tcp_address`
 
     Calls:
 
@@ -795,8 +815,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`zmq_socket_pull_tcp_address`
        * :c:data:`zmq_context`
+       * :c:data:`zmq_socket_pull_tcp_address`
 
     Calls:
 
@@ -824,8 +844,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`zmq_socket_pull_tcp_address`
        * :c:data:`zmq_context`
+       * :c:data:`zmq_socket_pull_tcp_address`
 
     Calls:
 
@@ -1185,8 +1205,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`zmq_state`
        * :c:data:`mpi_master`
+       * :c:data:`zmq_state`
 
  
 .. c:function:: zmq_get8_ivector:
@@ -1206,8 +1226,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`zmq_state`
        * :c:data:`mpi_master`
+       * :c:data:`zmq_state`
 
  
 .. c:function:: zmq_get_dmatrix:
@@ -1227,8 +1247,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`zmq_state`
        * :c:data:`mpi_master`
+       * :c:data:`zmq_state`
 
  
 .. c:function:: zmq_get_dvector:
@@ -1248,8 +1268,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`zmq_state`
        * :c:data:`mpi_master`
+       * :c:data:`zmq_state`
 
  
 .. c:function:: zmq_get_i8matrix:
@@ -1269,8 +1289,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`zmq_state`
        * :c:data:`mpi_master`
+       * :c:data:`zmq_state`
 
  
 .. c:function:: zmq_get_imatrix:
@@ -1290,8 +1310,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`zmq_state`
        * :c:data:`mpi_master`
+       * :c:data:`zmq_state`
 
  
 .. c:function:: zmq_get_int:
@@ -1311,8 +1331,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`zmq_state`
        * :c:data:`mpi_master`
+       * :c:data:`zmq_state`
 
  
 .. c:function:: zmq_get_int_nompi:
@@ -1352,8 +1372,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`zmq_state`
        * :c:data:`mpi_master`
+       * :c:data:`zmq_state`
 
  
 .. c:function:: zmq_port:
