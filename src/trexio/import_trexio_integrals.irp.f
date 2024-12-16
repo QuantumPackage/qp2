@@ -165,6 +165,7 @@ subroutine run(f)
           write(iunit) tmp(:,:,:)
           close(iunit)
           call ezfio_set_ao_two_e_ints_io_ao_cholesky('Read')
+          call ezfio_set_ao_two_e_ints_do_ao_cholesky(.True.)
 
           deallocate(Vi, V, tmp)
           print *, 'Cholesky AO integrals read from TREXIO file'
@@ -206,6 +207,7 @@ subroutine run(f)
 
               call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints',ao_integrals_map)
               call ezfio_set_ao_two_e_ints_io_ao_two_e_integrals('Read')
+              call ezfio_set_ao_two_e_ints_do_ao_cholesky(.False.)
 
               deallocate(buffer_i, buffer_values, Vi, V)
               print *, 'AO integrals read from TREXIO file'
@@ -274,6 +276,7 @@ subroutine run(f)
           write(iunit) tmp(:,:,:)
           close(iunit)
           call ezfio_set_mo_two_e_ints_io_mo_cholesky('Read')
+          call ezfio_set_ao_two_e_ints_do_ao_cholesky(.True.)
 
           deallocate(Vi, V, tmp)
           print *, 'Cholesky MO integrals read from TREXIO file'
@@ -314,6 +317,7 @@ subroutine run(f)
 
             call map_save_to_disk(trim(ezfio_filename)//'/work/mo_ints',mo_integrals_map)
             call ezfio_set_mo_two_e_ints_io_mo_two_e_integrals('Read')
+            call ezfio_set_ao_two_e_ints_do_ao_cholesky(.False.)
             deallocate(buffer_i, buffer_values, Vi, V)
             print *, 'MO integrals read from TREXIO file'
         endif
