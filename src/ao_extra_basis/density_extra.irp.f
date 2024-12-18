@@ -14,7 +14,7 @@ BEGIN_PROVIDER [ double precision, effective_ao_extra_dm, (ao_extra_num, ao_extr
  integer :: i,j
  do i = 1, ao_extra_num
   do j = 1, ao_extra_num
-   effective_ao_extra_dm(j,i) = ao_extra_one_e_dm(j,i) * ao_extra_coef_normalized(j,1) * ao_extra_coef_normalized(i,1) & 
+   effective_ao_extra_dm(j,i) = ao_extra_one_e_dm(j,i,1) * ao_extra_coef_normalized(j,1) * ao_extra_coef_normalized(i,1) & 
        * inv_pi_gamma_pq_3_2_ao_extra(j,i) * E_pq_ao_extra(j,i)
   enddo
  enddo
