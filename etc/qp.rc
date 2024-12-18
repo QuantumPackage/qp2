@@ -198,7 +198,7 @@ _qp_Complete()
         do
           dir_name=${i%/.version}  # Remove the ".version" suffix
           dir_name=${dir_name#./}  # Remove the leading "./"
-          dirs+="./$dir_name "
+          dirs+="$dir_name "
         done
 
         COMPREPLY=( $(compgen -W "$dirs" -- ${cur} ) )
