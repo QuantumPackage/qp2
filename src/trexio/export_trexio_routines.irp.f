@@ -272,9 +272,9 @@ subroutine export_trexio(update,full_path)
 
      allocate(factor(shell_num))
 !     if (ao_normalized) then
-!       factor(1:shell_num) = shell_normalization_factor(1:shell_num)
+       factor(1:shell_num) = shell_normalization_factor(1:shell_num)
 !     else
-       factor(1:shell_num) = 1.d0
+!       factor(1:shell_num) = 1.d0
 !     endif
      rc = trexio_write_basis_shell_factor(f(1), factor)
      call trexio_assert(rc, TREXIO_SUCCESS)
@@ -291,11 +291,11 @@ subroutine export_trexio(update,full_path)
     call trexio_assert(rc, TREXIO_SUCCESS)
 
     allocate(factor(prim_num))
-    if (primitives_normalized) then
+!    if (primitives_normalized) then
       factor(1:prim_num) = prim_normalization_factor(1:prim_num)
-    else
-      factor(1:prim_num) = 1.d0
-    endif
+!    else
+!      factor(1:prim_num) = 1.d0
+!    endif
     rc = trexio_write_basis_prim_factor(f(1), factor)
     call trexio_assert(rc, TREXIO_SUCCESS)
     deallocate(factor)

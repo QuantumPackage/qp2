@@ -3,11 +3,11 @@
 convert TREXIO file to EZFIO
 
 Usage:
-    qp_import_trexio [-o EZFIO_DIR] FILE
+    qp_import_trexio [-o EZFIO_DIR] [-p] FILE
 
 Options:
-    -o --output=EZFIO_DIR    Produced directory
-                             by default is FILE.ezfio
+    -o --output=EZFIO_DIR              Produced directory
+                                       by default is FILE.ezfio
 
 """
 
@@ -195,7 +195,7 @@ def write_ezfio(trexio_filename, filename):
             prim_factor  = trexio.read_basis_prim_factor(trexio_file)
             for i,p in enumerate(prim_factor):
                 coefficient[i] *= prim_factor[i]
-            ezfio.set_ao_basis_primitives_normalized(False)
+            ezfio.set_ao_basis_primitives_normalized(True)
             ezfio.set_basis_prim_coef(coefficient)
 
         elif basis_type.lower() == "numerical":
