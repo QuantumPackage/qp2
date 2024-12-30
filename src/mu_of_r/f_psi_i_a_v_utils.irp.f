@@ -122,7 +122,7 @@ subroutine give_f_ia_val_ab(r1,r2,f_ia_val_ab,two_bod_dens,istate)
 
  ! Contracted two-e integrals : intermediate quantity
  ! v_tilde(i,a) = \sum_{m,n} phi_m(1) * phi_n(2) < i a | m n >
- allocate( v_tilde(n_act_orb,n_act_orb)   )
+ allocate( v_tilde(n_inact_orb,n_act_orb)   )
  allocate( integrals_array(mo_num,mo_num) )
  v_tilde = 0.d0
  do a = 1, n_act_orb 
