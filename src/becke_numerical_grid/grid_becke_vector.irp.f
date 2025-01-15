@@ -71,8 +71,8 @@ END_PROVIDER
     enddo
   enddo
 
-  FREE grid_points_per_atom
-  FREE final_weight_at_r
+!  FREE grid_points_per_atom
+!  FREE final_weight_at_r
 
   call wall_time(wall1)
   print *, ' wall time for final_grid_points,', wall1 - wall0
