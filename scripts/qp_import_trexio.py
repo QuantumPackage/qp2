@@ -195,7 +195,7 @@ def write_ezfio(trexio_filename, filename):
             prim_factor  = trexio.read_basis_prim_factor(trexio_file)
             for i,p in enumerate(prim_factor):
                 coefficient[i] *= prim_factor[i]
-            ezfio.set_ao_basis_primitives_normalized(True)
+            ezfio.set_ao_basis_primitives_normalized(False)
             ezfio.set_basis_prim_coef(coefficient)
 
         elif basis_type.lower() == "numerical":
