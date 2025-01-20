@@ -42,7 +42,7 @@ subroutine davidson_diag_nonsym_h(dets_in, u_in, dim_in, energies, sze, N_st, N_
   ASSERT (sze  > 0)
   ASSERT (Nint > 0)
   ASSERT (Nint == N_int)
-  PROVIDE mo_two_e_integrals_in_map
+  PROVIDE all_mo_integrals
 
   allocate(H_jj(sze))
 

@@ -1,5 +1,15 @@
 use map_module
 
+BEGIN_PROVIDER [ logical, all_mo_integrals ]
+  implicit none
+  BEGIN_DOC
+! Used to provide everything needed before using MO integrals
+! PROVIDE all_mo_integrals
+  END_DOC
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache mo_two_e_integrals_jj_exchange mo_two_e_integrals_jj_anti mo_two_e_integrals_jj big_array_exchange_integrals big_array_coulomb_integrals
+END_PROVIDER
+
+
 !! MO Map
 !! ======
 
@@ -35,20 +45,24 @@ end
  BEGIN_PROVIDER [ integer, mo_integrals_cache_min ]
 &BEGIN_PROVIDER [ integer, mo_integrals_cache_max ]
 &BEGIN_PROVIDER [ integer, mo_integrals_cache_size ]
+&BEGIN_PROVIDER [ integer*8, mo_integrals_cache_size_8 ]
  implicit none
  BEGIN_DOC
  ! Min and max values of the MOs for which the integrals are in the cache
  END_DOC
 
- mo_integrals_cache_size  = 2**mo_integrals_cache_shift
+ mo_integrals_cache_size  = shiftl(1,mo_integrals_cache_shift)
+ mo_integrals_cache_size_8  = shiftl(1_8, mo_integrals_cache_shift*4)
+
 
  mo_integrals_cache_min = max(1,elec_alpha_num - (mo_integrals_cache_size/2 - 1) )
  mo_integrals_cache_max = min(mo_num, mo_integrals_cache_min + mo_integrals_cache_size - 1)
- print *, 'MO integrals cache: (', mo_integrals_cache_min, ', ', mo_integrals_cache_max, ')'
+ print *, 'MO integrals cache: (', mo_integrals_cache_min, ', ', mo_integrals_cache_max, '), ', &
+          shiftr(mo_integrals_cache_size_8, 17), 'MiB'
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:(1_8*mo_integrals_cache_size)**4) ]
+BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:mo_integrals_cache_size_8**4_8) ]
  implicit none
  BEGIN_DOC
  ! Cache of MO integrals for fast access
@@ -67,8 +81,7 @@ BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:(1_8*mo_integrals_ca
      do k=mo_integrals_cache_min,mo_integrals_cache_max
          ii = int(l-mo_integrals_cache_min,8)
          ii = ior( shiftl(ii,mo_integrals_cache_shift), int(k-mo_integrals_cache_min,8))
-         ii = shiftl(ii,mo_integrals_cache_shift)
-         ii = shiftl(ii,mo_integrals_cache_shift)
+         ii = shiftl(ii,2*mo_integrals_cache_shift)
          call dgemm('T','N', mo_integrals_cache_max-mo_integrals_cache_min+1, &
                              mo_integrals_cache_max-mo_integrals_cache_min+1, &
            cholesky_mo_num, 1.d0, &
@@ -328,7 +341,7 @@ double precision function mo_two_e_integral(i,j,k,l)
   END_DOC
   integer, intent(in)            :: i,j,k,l
   double precision               :: get_two_e_integral
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache
+  PROVIDE all_mo_integrals
   !DIR$ FORCEINLINE
   mo_two_e_integral = get_two_e_integral(i,j,k,l,mo_integrals_map)
   return

@@ -62,7 +62,7 @@ subroutine davidson_diag_hs2(dets_in,u_in,s2_out,dim_in,energies,sze,N_st,N_st_d
   ASSERT (sze > 0)
   ASSERT (Nint > 0)
   ASSERT (Nint == N_int)
-  PROVIDE mo_two_e_integrals_in_map
+  PROVIDE all_mo_integrals
   allocate(H_jj(sze))
 
   H_jj(1) = diag_h_mat_elem(dets_in(1,1,1),Nint)
