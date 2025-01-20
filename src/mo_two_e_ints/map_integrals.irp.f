@@ -62,7 +62,7 @@ end
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:mo_integrals_cache_size_8**4_8) ]
+BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:mo_integrals_cache_size_8) ]
  implicit none
  BEGIN_DOC
  ! Cache of MO integrals for fast access
