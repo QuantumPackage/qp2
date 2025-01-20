@@ -505,7 +505,7 @@ subroutine export_trexio(update,full_path)
 
   if (export_mo_two_e_ints) then
     print *, 'MO two-e integrals'
-    PROVIDE mo_two_e_integrals_in_map
+    PROVIDE all_mo_integrals
 
     double precision, external :: mo_two_e_integral
 

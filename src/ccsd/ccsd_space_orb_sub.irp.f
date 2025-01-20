@@ -35,7 +35,7 @@ subroutine run_ccsd_space_orb
     PROVIDE cholesky_mo_transp
     FREE cholesky_ao
   else
-    PROVIDE mo_two_e_integrals_in_map
+    PROVIDE all_mo_integrals
   endif
 
   det = psi_det(:,:,cc_ref)

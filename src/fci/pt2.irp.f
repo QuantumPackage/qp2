@@ -11,7 +11,7 @@ program pt2
   !
   ! The main option for the |PT2| correction is the
   ! :option:`perturbation pt2_relative_error` which is the relative
-  ! stochastic error on the |PT2| to reach before stopping the 
+  ! stochastic error on the |PT2| to reach before stopping the
   ! sampling.
   !
   END_DOC
@@ -19,7 +19,7 @@ program pt2
      read_wf = .True.
      threshold_generators = 1.d0
      SOFT_TOUCH read_wf threshold_generators
-     PROVIDE mo_two_e_integrals_in_map
+     PROVIDE all_mo_integrals
      PROVIDE psi_energy
      call run
   else
@@ -32,22 +32,22 @@ subroutine run
   use selection_types
   integer                        :: i,j,k
   logical, external              :: detEq
-  
+
   type(pt2_type)                 :: pt2_data, pt2_data_err
   integer                        :: degree
   integer                        :: n_det_before, to_select
   double precision               :: threshold_davidson_in
-  
+
   double precision               :: relative_error
   double precision, allocatable  :: E_CI_before(:)
-  
+
   allocate ( E_CI_before(N_states))
   call pt2_alloc(pt2_data, N_states)
   call pt2_alloc(pt2_data_err, N_states)
-  
+
   E_CI_before(:) = psi_energy(:) + nuclear_repulsion
   relative_error=PT2_relative_error
-  
+
   if (do_pt2) then
      call ZMQ_pt2(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, relative_error, 0) ! Stochastic PT2
   else
@@ -56,7 +56,7 @@ subroutine run
 
   call print_summary(psi_energy_with_nucl_rep(1:N_states), &
        pt2_data, pt2_data_err, N_det,N_configuration,N_states,psi_s2)
-  
+
   call save_energy(E_CI_before, pt2_data % pt2)
   call pt2_dealloc(pt2_data)
   call pt2_dealloc(pt2_data_err)

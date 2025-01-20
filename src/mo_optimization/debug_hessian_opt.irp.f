@@ -36,20 +36,20 @@ program debug_hessian
   double precision              :: max_error, max_error_H
   integer                       :: nb_error, nb_error_H
   double precision              :: threshold
-  
-  ! Definition of n  
+
+  ! Definition of n
   n = mo_num*(mo_num-1)/2
 
-  PROVIDE mo_two_e_integrals_in_map 
+  PROVIDE all_mo_integrals
 
   ! Allocation
-  allocate(H(n,n),H2(n,n))  
+  allocate(H(n,n),H2(n,n))
   allocate(h_f(mo_num,mo_num,mo_num,mo_num),h_f2(mo_num,mo_num,mo_num,mo_num))
 
   ! Calculation
-  
-  ! Hessian 
-  if (optimization_method == 'full') then 
+
+  ! Hessian
+  if (optimization_method == 'full') then
 
     print*,'Use the full hessian matrix'
     call hessian_opt(n,H,h_f)
@@ -59,7 +59,7 @@ program debug_hessian
     h_f = h_f - h_f2
     H = H - H2
     max_error = 0d0
-    nb_error = 0    
+    nb_error = 0
     threshold = 1d-12
 
     do l = 1, mo_num
@@ -93,7 +93,7 @@ program debug_hessian
 
        endif
      enddo
-   enddo 
+   enddo
 
   elseif (optimization_method == 'diag') then
 
@@ -128,43 +128,43 @@ program debug_hessian
     enddo
 
     h=H-H2
-  
+
     max_error_H = 0d0
     nb_error_H = 0
- 
+
     do j = 1, n
       do i = 1, n
         if (ABS(H(i,j)) > threshold) then
           print*, H(i,j)
           nb_error_H = nb_error_H + 1
- 
+
           if (ABS(H(i,j)) > ABS(max_error_H)) then
             max_error_H = H(i,j)
           endif
- 
+
         endif
       enddo
     enddo
-  
+
   else
     print*,'Unknown optimization_method, please select full, diag'
     call abort
   endif
-  
+
   print*,''
   if (optimization_method == 'full') then
     print*,'Check the full hessian'
   else
     print*,'Check the diagonal hessian'
   endif
-   
+
   print*,'Threshold :', threshold
   print*,'Nb error :', nb_error
   print*,'Max error :', max_error
   print*,''
   print*,'Nb error_H :', nb_error_H
   print*,'Max error_H :', max_error_H
- 
+
   ! Deallocation
   deallocate(H,H2,h_f,h_f2)
 

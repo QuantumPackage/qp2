@@ -380,7 +380,7 @@ BEGIN_PROVIDER [double precision, hessmat, (nMonoEx,nMonoEx)]
  !  c-v |     X  X 
  !  a-v |        X
 
-  provide mo_two_e_integrals_in_map
+  provide all_mo_integrals
 
  hessmat = 0.d0
 

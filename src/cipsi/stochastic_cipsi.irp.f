@@ -1,11 +1,11 @@
-subroutine run_stochastic_cipsi(Ev,PT2) 
+subroutine run_stochastic_cipsi(Ev,PT2)
   use selection_types
   implicit none
   BEGIN_DOC
 ! Selected Full Configuration Interaction with Stochastic selection and PT2.
   END_DOC
   integer                        :: i,j,k
-  double precision, intent(out)  :: Ev(N_states), PT2(N_states) 
+  double precision, intent(out)  :: Ev(N_states), PT2(N_states)
   double precision, allocatable  :: zeros(:)
   integer                        :: to_select
   type(pt2_type)                 :: pt2_data, pt2_data_err
@@ -14,7 +14,7 @@ subroutine run_stochastic_cipsi(Ev,PT2)
 
   double precision :: rss
   double precision, external :: memory_of_double
-  PROVIDE H_apply_buffer_allocated distributed_davidson mo_two_e_integrals_in_map
+  PROVIDE H_apply_buffer_allocated distributed_davidson all_mo_integrals
 
   threshold_generators = 1.d0
   SOFT_TOUCH threshold_generators

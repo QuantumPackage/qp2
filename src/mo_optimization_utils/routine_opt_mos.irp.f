@@ -9,7 +9,7 @@ subroutine run_optimization_mos_CIPSI
   logical :: not_converged
   character (len=100) :: filename
 
-  PROVIDE psi_det psi_coef mo_two_e_integrals_in_map ao_pseudo_integrals
+  PROVIDE psi_det psi_coef all_mo_integrals ao_pseudo_integrals
   allocate(Ev(N_states),PT2(N_states))
 
   not_converged = .True.
@@ -30,7 +30,7 @@ subroutine run_optimization_mos_CIPSI
       print*,'======================'
       print*,' Cipsi step:', nb_iter
       print*,'======================'
-      print*,'' 
+      print*,''
       print*,'********** cipsi step **********'
       ! cispi calculation
       call run_stochastic_cipsi(Ev,PT2)
@@ -70,7 +70,7 @@ subroutine run_optimization_mos_CIPSI
           print*, 'The program will exit'
           exit
       endif
-      
+
       ! To double the number of determinants in the wf
       N_det_max = int(dble(n_det * 2)*0.9)
       TOUCH N_det_max
