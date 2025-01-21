@@ -193,9 +193,11 @@ def write_ezfio(trexio_filename, filename):
 
             shell_factor = trexio.read_basis_shell_factor(trexio_file)
             prim_factor  = trexio.read_basis_prim_factor(trexio_file)
-            for i,p in enumerate(prim_factor):
-                coefficient[i] *= prim_factor[i]
-            ezfio.set_ao_basis_primitives_normalized(False)
+            ezfio.set_basis_prim_normalization_factor(prim_factor)
+            ezfio.set_basis_primitives_normalized(True)
+            ezfio.set_basis_ao_normalized(False)
+            for i, shell_idx in enumerate(shell_index):
+               coefficient[i] *= shell_factor[shell_idx]
             ezfio.set_basis_prim_coef(coefficient)
 
         elif basis_type.lower() == "numerical":
@@ -391,7 +393,7 @@ def write_ezfio(trexio_filename, filename):
 
       # Renormalize MO coefs if needed
       if trexio.has_ao_normalization(trexio_file_cart):
-        ezfio.set_ao_basis_ao_normalized(False)
+        ezfio.set_basis_ao_normalized(False)
         norm = trexio.read_ao_normalization(trexio_file_cart)
 #        for j in range(mo_num):
 #           for i,f in enumerate(norm):

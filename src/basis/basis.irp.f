@@ -6,6 +6,11 @@ BEGIN_PROVIDER [ double precision, shell_normalization_factor , (shell_num) ]
 
   logical                        :: has
   PROVIDE ezfio_filename
+  if (.not.ao_normalized) then
+    shell_normalization_factor = 1.d0
+    return
+  endif
+
   if (mpi_master) then
     if (size(shell_normalization_factor) == 0) return
 
@@ -70,6 +75,12 @@ BEGIN_PROVIDER [ double precision, prim_normalization_factor , (prim_num) ]
 
   logical                        :: has
   PROVIDE ezfio_filename
+
+  if (.not.primitives_normalized) then
+    prim_normalization_factor(:) = 1.d0
+    return
+  endif
+
   if (mpi_master) then
     if (size(prim_normalization_factor) == 0) return
 
@@ -95,9 +106,9 @@ BEGIN_PROVIDER [ double precision, prim_normalization_factor , (prim_num) ]
 
         do k=1, prim_num
           if (shell_index(k) /= i) cycle
-            call overlap_gaussian_xyz(C_A,C_A,prim_expo(k),prim_expo(k), &
-              powA,powA,overlap_x,overlap_y,overlap_z,norm,nz)
-            prim_normalization_factor(k) = 1.d0/dsqrt(norm)
+          call overlap_gaussian_xyz(C_A,C_A,prim_expo(k),prim_expo(k), &
+            powA,powA,overlap_x,overlap_y,overlap_z,norm,nz)
+          prim_normalization_factor(k) = 1.d0/dsqrt(norm)
         enddo
       enddo
 
