@@ -143,7 +143,7 @@ double precision function get_two_e_integral(i,j,k,l,map)
   END_DOC
   integer, intent(in)            :: i,j,k,l
   integer(key_kind)              :: idx
-  integer                        :: ii
+  integer                        :: ii, kk
   type(map_type), intent(inout)  :: map
   real(integral_kind)            :: tmp
 
@@ -177,10 +177,10 @@ double precision function get_two_e_integral(i,j,k,l,map)
 
     if  (do_mo_cholesky) then
 
-      double precision, external :: ddot
-      get_two_e_integral = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, cholesky_mo_transp(1,j,l), 1)
-!       double precision, external :: get_from_mo_cholesky_cache
-!       get_two_e_integral = get_from_mo_cholesky_cache(i,j,k,l,.False.)
+      get_two_e_integral = 0.d0
+      do kk=1,cholesky_mo_num
+        get_two_e_integral = get_two_e_integral + cholesky_mo_transp(kk,i,k)*cholesky_mo_transp(kk,i,l)
+      enddo
 
     else
 
@@ -516,11 +516,39 @@ subroutine get_mo_two_e_integrals_exch_ii(k,l,sze,out_val,map)
 
     if (do_mo_cholesky) then
 
-      double precision, external :: ddot
-      do i=1,sze
-        out_val(i) = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, &
-                                           cholesky_mo_transp(1,i,l), 1)
-      enddo
+      if ( (k>=mo_integrals_cache_min).and.(k<=mo_integrals_cache_max).and. &
+           (l>=mo_integrals_cache_min).and.(l<=mo_integrals_cache_max) ) then
+
+        integer :: kk
+
+        do i=1,mo_integrals_cache_min-1
+          out_val(i) = 0.d0
+          do kk=1,cholesky_mo_num
+            out_val(i) = out_val(i) + cholesky_mo_transp(kk,i,k)*cholesky_mo_transp(kk,i,l)
+          enddo
+        enddo
+
+        do i=mo_integrals_cache_min,mo_integrals_cache_max
+          out_val(i) = get_two_e_integral_cache(i,i,k,l)
+        enddo
+
+        do i=mo_integrals_cache_max, sze
+          out_val(i) = 0.d0
+          do kk=1,cholesky_mo_num
+            out_val(i) = out_val(i) + cholesky_mo_transp(kk,i,k)*cholesky_mo_transp(kk,i,l)
+          enddo
+        enddo
+
+      else
+
+        do i=1,sze
+          out_val(i) = 0.d0
+          do kk=1,cholesky_mo_num
+            out_val(i) = out_val(i) + cholesky_mo_transp(kk,i,k)*cholesky_mo_transp(kk,i,l)
+          enddo
+        enddo
+
+      endif
 
     else
 
