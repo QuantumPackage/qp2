@@ -77,7 +77,7 @@ subroutine gen_v_space(n1,n2,n3,n4,list1,list2,list3,list4,v)
   else
     double precision              :: get_two_e_integral
 
-    PROVIDE mo_two_e_integrals_in_map
+    PROVIDE all_mo_integrals
 
     !$OMP PARALLEL &
     !$OMP SHARED(n1,n2,n3,n4,list1,list2,list3,list4,v,mo_integrals_map) &
@@ -161,7 +161,7 @@ BEGIN_PROVIDER [double precision, cc_space_v, (mo_num,mo_num,mo_num,mo_num)]
     integer          :: i,j,k,l
     double precision :: get_two_e_integral
 
-    PROVIDE mo_two_e_integrals_in_map
+    PROVIDE all_mo_integrals
 
     !$OMP PARALLEL &
     !$OMP SHARED(cc_space_v,mo_num,mo_integrals_map) &
@@ -194,7 +194,7 @@ BEGIN_PROVIDER [double precision, cc_space_v_oooo, (cc_nOa, cc_nOa, cc_nOa, cc_n
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_oooo,1)
     n2 = size(cc_space_v_oooo,2)
     n3 = size(cc_space_v_oooo,3)
@@ -237,7 +237,7 @@ BEGIN_PROVIDER [double precision, cc_space_v_vooo, (cc_nVa, cc_nOa, cc_nOa, cc_n
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_vooo,1)
     n2 = size(cc_space_v_vooo,2)
     n3 = size(cc_space_v_vooo,3)
@@ -281,7 +281,7 @@ BEGIN_PROVIDER [double precision, cc_space_v_ovoo, (cc_nOa, cc_nVa, cc_nOa, cc_n
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_ovoo,1)
     n2 = size(cc_space_v_ovoo,2)
     n3 = size(cc_space_v_ovoo,3)
@@ -315,7 +315,7 @@ BEGIN_PROVIDER [double precision, cc_space_v_oovo, (cc_nOa, cc_nOa, cc_nVa, cc_n
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_oovo,1)
     n2 = size(cc_space_v_oovo,2)
     n3 = size(cc_space_v_oovo,3)
@@ -349,7 +349,7 @@ BEGIN_PROVIDER [double precision, cc_space_v_ooov, (cc_nOa, cc_nOa, cc_nOa, cc_n
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_oovo,1)
     n2 = size(cc_space_v_oovo,2)
     n3 = size(cc_space_v_oovo,3)
@@ -383,7 +383,7 @@ BEGIN_PROVIDER [double precision, cc_space_v_vvoo, (cc_nVa, cc_nVa, cc_nOa, cc_n
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_vvoo,1)
     n2 = size(cc_space_v_vvoo,2)
     n3 = size(cc_space_v_vvoo,3)
@@ -426,7 +426,7 @@ BEGIN_PROVIDER [double precision, cc_space_v_vovo, (cc_nVa, cc_nOa, cc_nVa, cc_n
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_vovo,1)
     n2 = size(cc_space_v_vovo,2)
     n3 = size(cc_space_v_vovo,3)
@@ -469,7 +469,7 @@ BEGIN_PROVIDER [double precision, cc_space_v_voov, (cc_nVa, cc_nOa, cc_nOa, cc_n
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_voov,1)
     n2 = size(cc_space_v_voov,2)
     n3 = size(cc_space_v_voov,3)
@@ -503,7 +503,7 @@ BEGIN_PROVIDER [double precision, cc_space_v_ovvo, (cc_nOa, cc_nVa, cc_nVa, cc_n
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_ovvo,1)
     n2 = size(cc_space_v_ovvo,2)
     n3 = size(cc_space_v_ovvo,3)
@@ -537,7 +537,7 @@ BEGIN_PROVIDER [double precision, cc_space_v_ovov, (cc_nOa, cc_nVa, cc_nOa, cc_n
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_ovov,1)
     n2 = size(cc_space_v_ovov,2)
     n3 = size(cc_space_v_ovov,3)
@@ -571,7 +571,7 @@ BEGIN_PROVIDER [double precision, cc_space_v_oovv, (cc_nOa, cc_nOa, cc_nVa, cc_n
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_oovv,1)
     n2 = size(cc_space_v_oovv,2)
     n3 = size(cc_space_v_oovv,3)

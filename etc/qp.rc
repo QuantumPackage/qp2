@@ -190,21 +190,8 @@ _qp_Complete()
             ;;
         esac;;
       set_file)
-        # Caching the search results to reduce repeated find calls
-        if [[ -z "$QP_FILE_CACHE" || "$CACHE_DIR" != "$PWD" ]]; then
-          CACHE_DIR="$PWD"
-          QP_FILE_CACHE=$(find . -type f -name .version -exec dirname {} \; | sed 's/\/\.version$//')
-        fi
-
-        # Support for relative paths
-        prefix=$(dirname "${cur}")
-        if [[ "$prefix" != "." ]]; then
-          dirs=$(echo "$QP_FILE_CACHE" | grep "^$prefix")
-        else
-          dirs="$QP_FILE_CACHE"
-        fi
-
-        COMPREPLY=( $(compgen -W "$dirs" -- "$cur") )
+        compopt -o nospace
+        COMPREPLY=( $(compgen -d -- "$cur") )
         return 0
         ;;
       plugins)

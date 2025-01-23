@@ -191,11 +191,14 @@ def write_ezfio(trexio_filename, filename):
             ezfio.set_basis_nucleus_shell_num(nucl_shell_num)
 
 
-            shell_factor = trexio.read_basis_shell_factor(trexio_file)
             prim_factor  = trexio.read_basis_prim_factor(trexio_file)
-            for i,p in enumerate(prim_factor):
-                coefficient[i] *= prim_factor[i]
-            ezfio.set_ao_basis_primitives_normalized(True)
+            ezfio.set_basis_prim_normalization_factor(prim_factor)
+            ezfio.set_basis_primitives_normalized(True)
+            ezfio.set_basis_ao_normalized(False)
+
+            shell_factor = trexio.read_basis_shell_factor(trexio_file)
+            for i, shell_idx in enumerate(shell_index):
+               coefficient[i] *= shell_factor[shell_idx]
             ezfio.set_basis_prim_coef(coefficient)
 
         elif basis_type.lower() == "numerical":
@@ -247,7 +250,6 @@ def write_ezfio(trexio_filename, filename):
             ezfio.set_basis_shell_index([x+1 for x in shell_index])
             ezfio.set_basis_nucleus_shell_num(nucl_shell_num)
 
-            shell_factor = trexio.read_basis_shell_factor(trexio_file)
         else:
            raise TypeError
 
@@ -317,12 +319,17 @@ def write_ezfio(trexio_filename, filename):
                 exponent.append(expo[i])
                 num_prim.append(num_prim0[i])
 
-        print (len(coefficient), ao_num)
         assert (len(coefficient) == ao_num)
+
         ezfio.set_ao_basis_ao_power(power_x + power_y + power_z)
         ezfio.set_ao_basis_ao_prim_num(num_prim)
 
         prim_num_max = max( [ len(x) for x in coefficient ] )
+
+        ao_normalization = trexio.read_ao_normalization(trexio_file_cart)
+        for i, coef in enumerate(coefficient):
+           for j in range(len(coef)):
+              coef[j] *= ao_normalization[i]
 
         for i in range(ao_num):
             coefficient[i] += [0. for j in range(len(coefficient[i]), prim_num_max)]
@@ -338,7 +345,6 @@ def write_ezfio(trexio_filename, filename):
                 coef.append(coefficient[j])
                 expo.append(exponent[j])
 
-#        ezfio.set_ao_basis_ao_prim_num_max(prim_num_max)
         ezfio.set_ao_basis_ao_coef(coef)
         ezfio.set_ao_basis_ao_expo(expo)
 
@@ -388,14 +394,6 @@ def write_ezfio(trexio_filename, filename):
 
       # Read coefs from temporary cartesian file created in the AO section
       MoMatrix = trexio.read_mo_coefficient(trexio_file_cart)
-
-      # Renormalize MO coefs if needed
-      if trexio.has_ao_normalization(trexio_file_cart):
-        ezfio.set_ao_basis_ao_normalized(False)
-        norm = trexio.read_ao_normalization(trexio_file_cart)
-#        for j in range(mo_num):
-#           for i,f in enumerate(norm):
-#              MoMatrix[i,j] *= f
       ezfio.set_mo_basis_mo_coef(MoMatrix)
 
       mo_occ = [ 0. for i in range(mo_num) ]

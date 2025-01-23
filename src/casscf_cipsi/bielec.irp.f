@@ -1,7 +1,7 @@
 BEGIN_PROVIDER [real*8, bielec_PQxx_array, (mo_num, mo_num,n_core_inact_act_orb,n_core_inact_act_orb)]
   BEGIN_DOC
-  ! WARNING !!! Old version !!! NOT USED ANYMORE IN THE PROGRAM !!! TOO BIG TO BE STORED ON LARGE SYSTEMS !!! 
-  ! 
+  ! WARNING !!! Old version !!! NOT USED ANYMORE IN THE PROGRAM !!! TOO BIG TO BE STORED ON LARGE SYSTEMS !!!
+  !
   ! Replaced by the Cholesky-based function bielec_PQxx
   !
   ! bielec_PQxx_array : integral (pq|xx) with p,q arbitrary, x core or active
@@ -13,10 +13,10 @@ BEGIN_PROVIDER [real*8, bielec_PQxx_array, (mo_num, mo_num,n_core_inact_act_orb,
   print*,''
   print*,'Providing bielec_PQxx_array, WARNING IT CAN BE A VERY BIG ARRAY WHEN MO_NUM IS LARGE !!!'
   print*,''
-  
+
   bielec_PQxx_array(:,:,:,:) = 0.d0
-  PROVIDE mo_two_e_integrals_in_map
-  
+  PROVIDE all_mo_integrals
+
   !$OMP PARALLEL DEFAULT(NONE) &
   !$OMP PRIVATE(i,ii,j,jj,i3,j3) &
   !$OMP SHARED(n_core_inact_orb,list_core_inact,mo_num,bielec_PQxx_array, &
@@ -61,8 +61,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [real*8, bielec_PxxQ_array, (mo_num,n_core_inact_act_orb,n_core_inact_act_orb, mo_num)]
   BEGIN_DOC
-  ! WARNING !!! Old version !!! NOT USED ANYMORE IN THE PROGRAM !!! TOO BIG TO BE STORED ON LARGE SYSTEMS !!! 
-  ! 
+  ! WARNING !!! Old version !!! NOT USED ANYMORE IN THE PROGRAM !!! TOO BIG TO BE STORED ON LARGE SYSTEMS !!!
+  !
   ! Replaced by the Cholesky-based function bielec_PxxQ
   !
   ! bielec_PxxQ_array : integral (px|xq) with p,q arbitrary, x core or active
@@ -72,11 +72,11 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ_array, (mo_num,n_core_inact_act_orb,n_core_i
   integer                        :: i,j,ii,jj,p,q,i3,j3,t3,v3
   double precision, allocatable  :: integrals_array(:,:)
   real*8                         :: mo_two_e_integral
-  
+
   print*,''
   print*,'Providing bielec_PxxQ_array, WARNING IT CAN BE A VERY BIG ARRAY WHEN MO_NUM IS LARGE !!!'
   print*,''
-  PROVIDE mo_two_e_integrals_in_map
+  PROVIDE all_mo_integrals
   bielec_PxxQ_array = 0.d0
 
   !$OMP PARALLEL DEFAULT(NONE) &
@@ -85,7 +85,7 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ_array, (mo_num,n_core_inact_act_orb,n_core_i
   !$OMP  n_act_orb,mo_integrals_map,list_act)
 
   allocate(integrals_array(mo_num,mo_num))
-  
+
   !$OMP DO
   do i=1,n_core_inact_orb
     ii=list_core_inact(i)
@@ -143,17 +143,17 @@ BEGIN_PROVIDER [real*8, bielecCI, (n_act_orb,n_act_orb,n_act_orb, mo_num)]
   BEGIN_DOC
   ! bielecCI : integrals (tu|vp) with p arbitrary, tuv active
   ! index p runs over the whole basis, t,u,v only over the active orbitals
-  ! 
+  !
   ! This array can be stored anyway. Ex: 50 active orbitals, 1500 MOs ==> 8x50^3x1500 = 1.5 Gb
   END_DOC
   implicit none
   integer                        :: i,j,k,p,t,u,v
   double precision, external     :: mo_two_e_integral
-  double precision :: wall0, wall1 
+  double precision :: wall0, wall1
   call wall_time(wall0)
   print*,'Providing bielecCI'
-  PROVIDE mo_two_e_integrals_in_map
-  
+  PROVIDE all_mo_integrals
+
   !$OMP PARALLEL DO DEFAULT(NONE) &
   !$OMP PRIVATE(i,j,k,p,t,u,v) &
   !$OMP SHARED(mo_num,n_act_orb,list_act,bielecCI)

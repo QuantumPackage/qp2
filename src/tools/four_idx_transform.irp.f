@@ -18,6 +18,6 @@ program four_idx_transform
   io_mo_two_e_integrals = 'Write'
   SOFT_TOUCH io_mo_two_e_integrals
   if (.true.) then
-    PROVIDE mo_two_e_integrals_in_map
+    PROVIDE all_mo_integrals
   endif
 end

@@ -82,10 +82,11 @@ END_PROVIDER
     enddo
     ao_coef_normalization_factor(i) = 1.d0/dsqrt(norm)
 
-    if (.not.ao_normalized) then
+    if (ao_normalized) then
       do j=1,ao_prim_num(i)
         ao_coef_normalized(i,j) = ao_coef_normalized(i,j) * ao_coef_normalization_factor(i)
       enddo
+    else
       ao_coef_normalization_factor(i) = 1.d0
     endif
   enddo

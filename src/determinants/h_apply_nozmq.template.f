@@ -17,7 +17,7 @@ subroutine $subroutine($params_main)
   double precision, allocatable  :: fock_diag_tmp(:,:)
 
   $initialization
-  PROVIDE H_apply_buffer_allocated mo_two_e_integrals_in_map psi_det_generators psi_coef_generators
+  PROVIDE H_apply_buffer_allocated all_mo_integrals psi_det_generators psi_coef_generators
 
 
   call wall_time(wall_0)

@@ -222,13 +222,13 @@ END_DOC
   endif
 
 
-  ! Identify degenerate MOs and force them on the axes
+  ! Identify degenerate MOs and force them to be on the axes
   allocate(S(ao_num,ao_num))
   i=1
   do while (i<mo_num)
-    j=i
+    j=i+1
     m=1
-    do while ( (j+1<mo_num).and.(fock_matrix_diag_mo(j+1)-fock_matrix_diag_mo(i) < 1.d-8) )
+    do while ( (j<=mo_num).and.(fock_matrix_diag_mo(j)-fock_matrix_diag_mo(i) < 1.d-5) )
       j += 1
       m += 1
     enddo
@@ -236,7 +236,7 @@ END_DOC
       call dgemm('N','T',ao_num,ao_num,m,1.d0,mo_coef(1,i),size(mo_coef,1),mo_coef(1,i),size(mo_coef,1),0.d0,S,size(S,1))
       call pivoted_cholesky( S, m, -1.d0, ao_num, mo_coef(1,i))
     endif
-    i = j+1
+    i = j
   enddo
 
   if(do_mom)then
