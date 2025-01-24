@@ -116,7 +116,8 @@ END_PROVIDER
     end if
   end do
   if(best_vector_ovrlp_casscf.lt.0)then 
-   best_vector_ovrlp_casscf = minloc(SXeigenval,nMonoEx+1) 
+!   best_vector_ovrlp_casscf = minloc(SXeigenval) 
+    best_vector_ovrlp_casscf = 1
   endif
   c0=SXeigenvec(1,best_vector_ovrlp_casscf)
   if (bavard) then
