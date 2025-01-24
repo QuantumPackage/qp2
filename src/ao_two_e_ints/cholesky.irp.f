@@ -466,10 +466,11 @@ END_PROVIDER
      endif
 
 
+     ! Reverse order of Cholesky vectors to increase precision in dot products
      !$OMP PARALLEL DO PRIVATE(k,j)
      do k=1,rank
        do j=1,ao_num
-           cholesky_ao(1:ao_num,j,k) = L((j-1_8)*ao_num+1_8:1_8*j*ao_num,k)
+           cholesky_ao(1:ao_num,j,rank-k+1) = L((j-1_8)*ao_num+1_8:1_8*j*ao_num,rank-k+1)
        enddo
      enddo
      !$OMP END PARALLEL DO

@@ -7,7 +7,8 @@ BEGIN_PROVIDER [ logical, do_mo_cholesky ]
 ! do_mo_cholesky = .False.
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, cholesky_mo_num ]
+ BEGIN_PROVIDER [ integer, cholesky_mo_num ]
+&BEGIN_PROVIDER [ integer, cholesky_mo_num_split, (1:5)]
  implicit none
  BEGIN_DOC
  ! Number of Cholesky vectors in MO basis
@@ -21,6 +22,12 @@ BEGIN_PROVIDER [ integer, cholesky_mo_num ]
  else
    cholesky_mo_num = cholesky_ao_num
  endif
+ cholesky_mo_num_split(1) = 0
+ cholesky_mo_num_split(2) = cholesky_mo_num/4
+ cholesky_mo_num_split(3) = 2*cholesky_mo_num_split(2)
+ cholesky_mo_num_split(4) = 3*cholesky_mo_num_split(2)
+ cholesky_mo_num_split(5) = cholesky_mo_num
+ cholesky_mo_num_split += 1
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, cholesky_mo, (mo_num, mo_num, cholesky_mo_num) ]
@@ -49,7 +56,7 @@ BEGIN_PROVIDER [ double precision, cholesky_mo_transp, (cholesky_mo_num, mo_num,
  BEGIN_DOC
  ! Cholesky vectors in MO basis. Warning: it is transposed wrt cholesky_ao:
  !
- ! -  cholesky_ao        is (ao_num^2 x cholesky_ao_num)
+ ! - cholesky_ao        is (ao_num^2 x cholesky_ao_num)
  !
  ! - cholesky_mo_transp is (cholesky_mo_num x mo_num^2)
  END_DOC
@@ -131,4 +138,52 @@ BEGIN_PROVIDER [ double precision, cholesky_semi_mo_transp_simple, (cholesky_mo_
  enddo
 
 END_PROVIDER
+
+
+
+
+BEGIN_PROVIDER [ real, cholesky_mo_sp, (mo_num, mo_num, cholesky_mo_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Cholesky vectors in MO basis in stored in single precision
+ END_DOC
+
+ integer :: k, i, j
+
+ call set_multiple_levels_omp(.False.)
+ !$OMP PARALLEL DO PRIVATE(k)
+ do k=1,cholesky_mo_num
+  do j=1,mo_num
+    do i=1,mo_num
+      cholesky_mo_sp(i,j,k) = cholesky_mo_transp_sp(k,i,j)
+    enddo
+  enddo
+ enddo
+ !$OMP END PARALLEL DO
+
+END_PROVIDER
+
+BEGIN_PROVIDER [ real, cholesky_mo_transp_sp, (cholesky_mo_num, mo_num, mo_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Cholesky vectors in MO basis in s. Warning: it is transposed wrt cholesky_ao:
+ !
+ ! - cholesky_ao        is (ao_num^2 x cholesky_ao_num)
+ !
+ ! - cholesky_mo_transp is (cholesky_mo_num x mo_num^2)
+ END_DOC
+
+ integer :: i,j,k
+ !$OMP PARALLEL DO PRIVATE(k)
+ do k=1,cholesky_mo_num
+  do j=1,mo_num
+    do i=1,mo_num
+      cholesky_mo_transp_sp(k,i,j) = cholesky_mo_transp(k,i,j)
+    enddo
+  enddo
+ enddo
+ !$OMP END PARALLEL DO
+
+END_PROVIDER
+
 

@@ -15,11 +15,11 @@ program pt2
   ! sampling.
   !
   END_DOC
+  PROVIDE all_mo_integrals
   if (.not. is_zmq_slave) then
      read_wf = .True.
      threshold_generators = 1.d0
      SOFT_TOUCH read_wf threshold_generators
-     PROVIDE all_mo_integrals
      PROVIDE psi_energy
      call run
   else
