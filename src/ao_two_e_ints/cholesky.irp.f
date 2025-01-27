@@ -194,13 +194,10 @@ END_PROVIDER
          + (np+1)*memory_of_double(block_size)   ! Ltmp_p(np,block_size) + Ltmp_q(nq,block_size)
 
 !     call check_mem(mem)
-
      ! 5.
      do while ( (Dmax > tau).and.(np > 0) )
        ! a.
        i = i+1
-
-
 
        block_size = max(N,24)
 
@@ -307,6 +304,8 @@ END_PROVIDER
        do q=1,nq
          Qmax = max(Qmax, D(Dset(q)))
        enddo
+
+       if (Qmax <= Dmin) exit
 
        ! g.
 
