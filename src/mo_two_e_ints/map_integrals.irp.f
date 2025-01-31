@@ -155,7 +155,7 @@ double precision function get_two_e_integral(i,j,k,l,map)
   type(map_type), intent(inout)  :: map
   real(integral_kind)            :: tmp
 
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache do_mo_cholesky mo_cholesky_double cholesky_mo_transp_sp cholesky_mo_transp
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache do_mo_cholesky
 
   if (use_banned_excitation) then
     if (banned_excitation(i,k)) then
@@ -570,7 +570,7 @@ subroutine get_mo_two_e_integrals_exch_ii(k,l,sze,out_val,map)
   type(map_type), intent(inout)  :: map
   integer                        :: i
   double precision, external     :: get_two_e_integral
-  PROVIDE mo_two_e_integrals_in_map mo_cholesky_double cholesky_mo_transp cholesky_mo_transp_sp
+  PROVIDE mo_two_e_integrals_in_map mo_cholesky_double
 
   if ( (mo_integrals_cache_min>1).or.(mo_integrals_cache_max<mo_num) ) then
 
