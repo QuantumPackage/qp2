@@ -157,11 +157,15 @@ A = np.array( [ [ data[-1][1], 1. ],
 B = np.array( [ [ data[-1][0] ],
                 [ data[-2][0] ] ] )
 E0 = np.linalg.solve(A,B)[1]
+E0 = E0[0]
+
 A = np.array( [ [ data[-1][4], 1. ],
                 [ data[-2][4], 1. ] ] )
 B = np.array( [ [ data[-1][3] ],
                 [ data[-2][3] ] ] )
 E1 = np.linalg.solve(A,B)[1]
+E1 = E1[0]
+
 average_2 = (E1-E0)*to_eV
 
 A = np.array( [ [ data[-1][1], 1. ],
@@ -170,14 +174,18 @@ A = np.array( [ [ data[-1][1], 1. ],
 B = np.array( [ [ data[-1][0] ],
                 [ data[-2][0] ],
                 [ data[-3][0] ] ] )
-E0 = np.linalg.lstsq(A,B,rcond=None)[0][1]
+E0 = np.linalg.lstsq(A,B,rcond=None)[0]
+E0 = E0[0][0]
+
 A = np.array( [ [ data[-1][4], 1. ],
                 [ data[-2][4], 1. ],
                 [ data[-3][4], 1. ] ] )
 B = np.array( [ [ data[-1][3] ],
                 [ data[-2][3] ],
                 [ data[-3][3] ] ] )
-E1 = np.linalg.lstsq(A,B,rcond=None)[0][1]
+E1 = np.linalg.lstsq(A,B,rcond=None)[0]
+E1 = E1[0][0]
+
 average_3 = (E1-E0)*to_eV
 
 exc = ((data[-1][3] + data[-1][4]) - (data[-1][0] + data[-1][1])) * to_eV
