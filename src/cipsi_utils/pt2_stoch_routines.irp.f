@@ -212,6 +212,7 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
           ipos += 1
         endif
       enddo
+      call write_int(6,pt2_stoch_istate,'State')
       call write_int(6,sum(pt2_F),'Number of tasks')
       call write_int(6,ipos,'Number of fragmented tasks')
 
