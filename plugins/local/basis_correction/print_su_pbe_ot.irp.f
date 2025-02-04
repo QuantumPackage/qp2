@@ -18,6 +18,7 @@ end
 subroutine print_su_pbe_ot
  implicit none
  integer :: istate 
+ print*,'Two flavours of PBE functionals :'
  do istate = 1, N_states
   write(*, '(A29,X,I3,X,A3,X,F16.10)') '  ECMD PBE-UEG       , state ',istate,' = ',ecmd_pbe_ueg_mu_of_r(istate)
  enddo
