@@ -1006,6 +1006,22 @@ BEGIN_PROVIDER [double precision, cc_space_f_v, (cc_nVa)]
 
 END_PROVIDER
 
+
+BEGIN_PROVIDER [ double precision, cc_spin_f_oo, (cc_nOab, cc_nOab)]
+ implicit none
+ call gen_f_spin(psi_det(1,1,cc_ref), cc_nO_m, cc_nO_m, cc_nO_S, cc_nO_S, cc_list_occ_spin, cc_list_occ_spin, cc_nOab, cc_nOab, cc_spin_f_oo)
+END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, cc_spin_f_ov, (cc_nOab, cc_nVab)]
+ implicit none
+ call gen_f_spin(psi_det(1,1,cc_ref), cc_nO_m, cc_nV_m, cc_nO_S, cc_nV_S, cc_list_occ_spin, cc_list_vir_spin, cc_nOab, cc_nVab, cc_spin_f_ov)
+END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, cc_spin_f_vv, (cc_nVab, cc_nVab)]
+ implicit none
+ call gen_f_spin(psi_det(1,1,cc_ref), cc_nV_m, cc_nV_m, cc_nV_S, cc_nV_S, cc_list_vir_spin, cc_list_vir_spin, cc_nVab, cc_nVab, cc_spin_f_vv)
+END_PROVIDER
+
 ! Shift
 
 subroutine shift_idx_spin(s,n_S,shift)
