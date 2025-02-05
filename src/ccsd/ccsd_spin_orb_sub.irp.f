@@ -14,65 +14,31 @@ subroutine run_ccsd_spin_orb
   double precision, allocatable :: cW_oooo(:,:,:,:), cW_ovvo(:,:,:,:) !, cW_vvvv(:,:,:,:)
 
   double precision, allocatable :: f_o(:), f_v(:)
-  double precision, allocatable :: v_oooo(:,:,:,:), v_vooo(:,:,:,:), v_ovoo(:,:,:,:)
-  double precision, allocatable :: v_oovo(:,:,:,:), v_ooov(:,:,:,:), v_vvoo(:,:,:,:)
-  double precision, allocatable :: v_vovo(:,:,:,:), v_voov(:,:,:,:), v_ovvo(:,:,:,:)
-  double precision, allocatable :: v_ovov(:,:,:,:), v_oovv(:,:,:,:), v_vvvo(:,:,:,:)
-  double precision, allocatable :: v_vvov(:,:,:,:), v_vovv(:,:,:,:), v_ovvv(:,:,:,:)
-  double precision, allocatable :: v_vvvv(:,:,:,:)
+!  double precision, allocatable :: v_ovvv(:,:,:,:)
 
   double precision, allocatable :: all_err(:,:), all_t(:,:)
 
   logical                       :: not_converged
-  integer                       :: nOa,nOb,nVa,nVb,nO_m,nV_m,nO_S(2),nV_S(2),n_spin(4)
+  integer                       :: n_spin(4)
   integer                       :: nb_iter, i,j,a,b
   double precision              :: uncorr_energy, energy, max_r, max_r1, max_r2, cc, ta, tb,ti,tf,tbi,tfi
-  integer(bit_kind)             :: det(N_int,2)
 
-  det = psi_det(:,:,cc_ref)
+  if (do_mo_cholesky) then
+    PROVIDE cholesky_mo_transp
+    FREE cholesky_ao
+  else
+    PROVIDE all_mo_integrals
+  endif
+
   print*,'Reference determinant:'
-  call print_det(det,N_int)
-
-  ! Extract number of occ/vir alpha/beta spin orbitals
-  !call extract_n_spin(det,n_spin)
-  nOa = cc_nOa !n_spin(1)
-  nOb = cc_nOb !n_spin(2)
-  nVa = cc_nVa !n_spin(3)
-  nVb = cc_nVb !n_spin(4)
-
-  ! Number of occ/vir spin orb per spin
-  nO_S = cc_nO_S !(/nOa,nOb/)
-  nV_S = cc_nV_S !(/nVa,nVb/)
-  ! Debug
-  !print*,nO_S,nV_S
-
-  ! Maximal number of occ/vir
-  nO_m = cc_nO_m !max(nOa, nOb)
-  nV_m = cc_nV_m !max(nVa, nVb)
-  ! Debug
-  !print*,nO_m,nV_m
+  call print_det(psi_det(1,1,cc_ref),N_int)
 
   ! Allocation
   allocate(t1(cc_nOab,cc_nVab), t2(cc_nOab,cc_nOab,cc_nVab,cc_nVab), tau(cc_nOab,cc_nOab,cc_nVab,cc_nVab), tau_t(cc_nOab,cc_nOab,cc_nVab,cc_nVab))
   allocate(r1(cc_nOab,cc_nVab), r2(cc_nOab,cc_nOab,cc_nVab,cc_nVab))
   allocate(cF_oo(cc_nOab,cc_nOab), cF_ov(cc_nOab,cc_nVab), cF_vv(cc_nVab,cc_nVab))
   allocate(cW_oooo(cc_nOab,cc_nOab,cc_nOab,cc_nOab), cW_ovvo(cc_nOab,cc_nVab,cc_nVab,cc_nOab))!, cW_vvvv(cc_nVab,cc_nVab,cc_nVab,cc_nVab))
-  allocate(v_oooo(cc_nOab,cc_nOab,cc_nOab,cc_nOab))
-  !allocate(v_vooo(cc_nVab,cc_nOab,cc_nOab,cc_nOab))
-  allocate(v_ovoo(cc_nOab,cc_nVab,cc_nOab,cc_nOab))
-  allocate(v_oovo(cc_nOab,cc_nOab,cc_nVab,cc_nOab))
-  allocate(v_ooov(cc_nOab,cc_nOab,cc_nOab,cc_nVab))
-  allocate(v_vvoo(cc_nVab,cc_nVab,cc_nOab,cc_nOab))
-  !allocate(v_vovo(cc_nVab,cc_nOab,cc_nVab,cc_nOab))
-  !allocate(v_voov(cc_nVab,cc_nOab,cc_nOab,cc_nVab))
-  allocate(v_ovvo(cc_nOab,cc_nVab,cc_nVab,cc_nOab))
-  allocate(v_ovov(cc_nOab,cc_nVab,cc_nOab,cc_nVab))
-  allocate(v_oovv(cc_nOab,cc_nOab,cc_nVab,cc_nVab))
-  !allocate(v_vvvo(cc_nVab,cc_nVab,cc_nVab,cc_nOab))
-  !allocate(v_vvov(cc_nVab,cc_nVab,cc_nOab,cc_nVab))
-  !allocate(v_vovv(cc_nVab,cc_nOab,cc_nVab,cc_nVab))
-  !allocate(v_ovvv(cc_nOab,cc_nVab,cc_nVab,cc_nVab))
-  !allocate(v_vvvv(cc_nVab,cc_nVab,cc_nVab,cc_nVab))
+
   allocate(f_o(cc_nOab), f_v(cc_nVab))
 
   ! Allocation for the diis
@@ -90,44 +56,19 @@ subroutine run_ccsd_spin_orb
     f_v(i) = cc_spin_f_vv(i,i)
   enddo
 
-  ! Bi electronic integrals from list
-  call wall_time(ti)
-  ! OOOO
-  call gen_v_spin(nO_m,nO_m,nO_m,nO_m, nO_S,nO_S,nO_S,nO_S, cc_list_occ_spin,cc_list_occ_spin,cc_list_occ_spin,cc_list_occ_spin, cc_nOab,cc_nOab,cc_nOab,cc_nOab, v_oooo)
-
-  ! OOO V
-  !call gen_v_spin(nV_m,nO_m,nO_m,nO_m, nV_S,nO_S,nO_S,nO_S, cc_list_vir_spin,cc_list_occ_spin,cc_list_occ_spin,cc_list_occ_spin, cc_nVab,cc_nOab,cc_nOab,cc_nOab, v_vooo)
-  call gen_v_spin(nO_m,nV_m,nO_m,nO_m, nO_S,nV_S,nO_S,nO_S, cc_list_occ_spin,cc_list_vir_spin,cc_list_occ_spin,cc_list_occ_spin, cc_nOab,cc_nVab,cc_nOab,cc_nOab, v_ovoo)
-  call gen_v_spin(nO_m,nO_m,nV_m,nO_m, nO_S,nO_S,nV_S,nO_S, cc_list_occ_spin,cc_list_occ_spin,cc_list_vir_spin,cc_list_occ_spin, cc_nOab,cc_nOab,cc_nVab,cc_nOab, v_oovo)
-  call gen_v_spin(nO_m,nO_m,nO_m,nV_m, nO_S,nO_S,nO_S,nV_S, cc_list_occ_spin,cc_list_occ_spin,cc_list_occ_spin,cc_list_vir_spin, cc_nOab,cc_nOab,cc_nOab,cc_nVab, v_ooov)
-
-  ! OO VV
-  call gen_v_spin(nV_m,nV_m,nO_m,nO_m, nV_S,nV_S,nO_S,nO_S, cc_list_vir_spin,cc_list_vir_spin,cc_list_occ_spin,cc_list_occ_spin, cc_nVab,cc_nVab,cc_nOab,cc_nOab, v_vvoo)
-  !call gen_v_spin(nV_m,nO_m,nV_m,nO_m, nV_S,nO_S,nV_S,nO_S, cc_list_vir_spin,cc_list_occ_spin,cc_list_vir_spin,cc_list_occ_spin, cc_nVab,cc_nOab,cc_nVab,cc_nOab, v_vovo)
-  !call gen_v_spin(nV_m,nO_m,nO_m,nV_m, nV_S,nO_S,nO_S,nV_S, cc_list_vir_spin,cc_list_occ_spin,cc_list_occ_spin,cc_list_vir_spin, cc_nVab,cc_nOab,cc_nOab,cc_nVab, v_voov)
-  call gen_v_spin(nO_m,nV_m,nV_m,nO_m, nO_S,nV_S,nV_S,nO_S, cc_list_occ_spin,cc_list_vir_spin,cc_list_vir_spin,cc_list_occ_spin, cc_nOab,cc_nVab,cc_nVab,cc_nOab, v_ovvo)
-  call gen_v_spin(nO_m,nV_m,nO_m,nV_m, nO_S,nV_S,nO_S,nV_S, cc_list_occ_spin,cc_list_vir_spin,cc_list_occ_spin,cc_list_vir_spin, cc_nOab,cc_nVab,cc_nOab,cc_nVab, v_ovov)
-  call gen_v_spin(nO_m,nO_m,nV_m,nV_m, nO_S,nO_S,nV_S,nV_S, cc_list_occ_spin,cc_list_occ_spin,cc_list_vir_spin,cc_list_vir_spin, cc_nOab,cc_nOab,cc_nVab,cc_nVab, v_oovv)
-
-  ! O VVV
-  !call gen_v_spin(nV_m,nV_m,nV_m,nO_m, nV_S,nV_S,nV_S,nO_S, cc_list_vir_spin,cc_list_vir_spin,cc_list_vir_spin,cc_list_occ_spin, cc_nVab,cc_nVab,cc_nVab,cc_nOab, v_vvvo)
-  !call gen_v_spin(nV_m,nV_m,nO_m,nV_m, nV_S,nV_S,nO_S,nV_S, cc_list_vir_spin,cc_list_vir_spin,cc_list_occ_spin,cc_list_vir_spin, cc_nVab,cc_nVab,cc_nOab,cc_nVab, v_vvov)
-  !call gen_v_spin(nV_m,nO_m,nV_m,nV_m, nV_S,nO_S,nV_S,nV_S, cc_list_vir_spin,cc_list_occ_spin,cc_list_vir_spin,cc_list_vir_spin, cc_nVab,cc_nOab,cc_nVab,cc_nVab, v_vovv)
-  !call gen_v_spin(nO_m,nV_m,nV_m,nV_m, nO_S,nV_S,nV_S,nV_S, cc_list_occ_spin,cc_list_vir_spin,cc_list_vir_spin,cc_list_vir_spin, cc_nOab,cc_nVab,cc_nVab,cc_nVab, v_ovvv)
-
-  ! VVVV
-  !call gen_v_spin(nV_m,nV_m,nV_m,nV_m, nV_S,nV_S,nV_S,nV_S, cc_list_vir_spin,cc_list_vir_spin,cc_list_vir_spin,cc_list_vir_spin, cc_nVab,cc_nVab,cc_nVab,cc_nVab, v_vvvv)
-  call wall_time(tf)
-  if (cc_dev) then
-    print*,'Load bi elec int:',tf-ti,'s'
-  endif
 
   ! Init of T
   t1 = 0d0
   call guess_t1(cc_nOab,cc_nVab,f_o,f_v,cc_spin_f_ov,t1)
-  call guess_t2(cc_nOab,cc_nVab,f_o,f_v,v_oovv,t2)
+  call guess_t2(cc_nOab,cc_nVab,f_o,f_v,cc_spin_v_oovv,t2)
   call compute_tau_spin(cc_nOab,cc_nVab,t1,t2,tau)
   call compute_tau_t_spin(cc_nOab,cc_nVab,t1,t2,tau_t)
+
+  call det_energy(psi_det(1,1,cc_ref),uncorr_energy)
+  print*,'Det energy', uncorr_energy
+
+  call ccsd_energy_spin(cc_nOab,cc_nVab,t1,t2,cc_spin_F_ov,cc_spin_v_oovv,energy)
+  print*,'guess energy', uncorr_energy+energy, energy
 
   ! Loop init
   nb_iter = 0
@@ -136,11 +77,6 @@ subroutine run_ccsd_spin_orb
   r2 = 0d0
   max_r1 = 0d0
   max_r2 = 0d0
-
-  call det_energy(det,uncorr_energy)
-  print*,'Det energy', uncorr_energy
-  call ccsd_energy_spin(cc_nOab,cc_nVab,t1,t2,cc_spin_F_ov,v_oovv,energy)
-  print*,'guess energy', uncorr_energy+energy, energy
 
   write(*,'(A77)') ' -----------------------------------------------------------------------------'
   write(*,'(A77)') ' |   It.  |       E(CCSD) (Ha) | Correlation (Ha) |  Conv. T1  |  Conv. T2  |'
@@ -152,38 +88,16 @@ subroutine run_ccsd_spin_orb
   do while (not_converged)
 
     ! Intermediates
-    call wall_time(tbi)
-    call wall_time(ti)
-    call compute_cF_oo(cc_nOab,cc_nVab,t1,tau_t,cc_spin_F_oo,cc_spin_F_ov,v_ooov,v_oovv,cF_oo)
-    call compute_cF_ov(cc_nOab,cc_nVab,t1,cc_spin_F_ov,v_oovv,cF_ov)
-    call compute_cF_vv(cc_nOab,cc_nVab,t1,tau_t,cc_spin_F_ov,cc_spin_F_vv,v_oovv,cF_vv)
-    call wall_time(tf)
-    if (cc_dev) then
-      print*,'Compute cFs:',tf-ti,'s'
-    endif
+    call compute_cF_oo(cc_nOab,cc_nVab,t1,tau_t,cc_spin_F_oo,cc_spin_F_ov,cc_spin_v_ooov,cc_spin_v_oovv,cF_oo)
+    call compute_cF_ov(cc_nOab,cc_nVab,t1,cc_spin_F_ov,cc_spin_v_oovv,cF_ov)
+    call compute_cF_vv(cc_nOab,cc_nVab,t1,tau_t,cc_spin_F_ov,cc_spin_F_vv,cc_spin_v_oovv,cF_vv)
 
-    call wall_time(ti)
-    call compute_cW_oooo(cc_nOab,cc_nVab,t1,t2,tau,v_oooo,v_ooov,v_oovv,cW_oooo)
-    call compute_cW_ovvo(cc_nOab,cc_nVab,t1,t2,tau,v_ovvo,v_oovo,v_oovv,cW_ovvo)
-    !call compute_cW_vvvv(cc_nOab,cc_nVab,t1,t2,tau,v_vvvv,v_vovv,v_oovv,cW_vvvv)
-    call wall_time(tf)
-    if (cc_dev) then
-      print*,'Compute cFs:',tf-ti,'s'
-    endif
+    call compute_cW_oooo(cc_nOab,cc_nVab,t1,t2,tau,cc_spin_v_oooo,cc_spin_v_ooov,cc_spin_v_oovv,cW_oooo)
+    call compute_cW_ovvo(cc_nOab,cc_nVab,t1,t2,tau,cc_spin_v_ovvo,cc_spin_v_oovo,cc_spin_v_oovv,cW_ovvo)
 
     ! Residuals
-    call wall_time(ti)
-    call compute_r1_spin(cc_nOab,cc_nVab,t1,t2,f_o,f_v,cc_spin_F_ov,cF_oo,cF_ov,cF_vv,v_oovo,v_ovov,r1)
-    call wall_time(tf)
-    if (cc_dev) then
-      print*,'Compute r1:',tf-ti,'s'
-    endif
-    call wall_time(ti)
-    call compute_r2_spin(cc_nOab,cc_nVab,t1,t2,tau,f_o,f_v,cF_oo,cF_ov,cF_vv,cW_oooo,cW_ovvo,v_ovoo,v_oovv,v_ovvo,r2)
-    call wall_time(tf)
-    if (cc_dev) then
-      print*,'Compute r2:',tf-ti,'s'
-    endif
+    call compute_r1_spin(cc_nOab,cc_nVab,t1,t2,f_o,f_v,cc_spin_F_ov,cF_oo,cF_ov,cF_vv,cc_spin_v_oovo,cc_spin_v_ovov,r1)
+    call compute_r2_spin(cc_nOab,cc_nVab,t1,t2,tau,f_o,f_v,cF_oo,cF_ov,cF_vv,cW_oooo,cW_ovvo,cc_spin_v_ovoo,cc_spin_v_oovv,cc_spin_v_ovvo,r2)
 
     ! Max elements in the residuals
     max_r1 = maxval(abs(r1(:,:)))
@@ -213,7 +127,7 @@ subroutine run_ccsd_spin_orb
     endif
 
     ! Print
-    call ccsd_energy_spin(cc_nOab,cc_nVab,t1,t2,cc_spin_F_ov,v_oovv,energy)
+    call ccsd_energy_spin(cc_nOab,cc_nVab,t1,t2,cc_spin_F_ov,cc_spin_v_oovv,energy)
     call wall_time(tfi)
 
     write(*,'(A3,I6,A3,F18.12,A3,F16.12,A3,ES10.2,A3,ES10.2,A2)') ' | ',nb_iter,' | ', &
@@ -258,25 +172,13 @@ subroutine run_ccsd_spin_orb
   deallocate(r1,r2)
   deallocate(cF_oo,cF_ov,cF_vv)
   deallocate(cW_oooo,cW_ovvo)!,cW_vvvv)
-  deallocate(v_oooo)
-  deallocate(v_ovoo,v_oovo)
-  deallocate(v_ovvo,v_ovov,v_oovv)
 
   double precision :: t_corr
   t_corr = 0.d0
   if (cc_par_t .and. elec_alpha_num  +elec_beta_num > 2) then
     print*,'CCSD(T) calculation...'
     call wall_time(ta)
-    !allocate(v_vvvo(cc_nVab,cc_nVab,cc_nVab,cc_nOab))
-    !call gen_v_spin(cc_nV_m,cc_nV_m,cc_nV_m,cc_nO_m, &
-    !   cc_nV_S,cc_nV_S,cc_nV_S,cc_nO_S, &
-    !   cc_list_vir_spin,cc_list_vir_spin,cc_list_vir_spin,cc_list_occ_spin, &
-    !   cc_nVab,cc_nVab,cc_nVab,cc_nOab, v_vvvo)
-
-    !call ccsd_par_t_spin(cc_nOab,cc_nVab,t1,t2,f_o,f_v,cc_spin_f_ov,v_ooov,v_vvoo,v_vvvo,t_corr)
-    call ccsd_par_t_spin_v2(cc_nOab,cc_nVab,t1,t2,f_o,f_v,cc_spin_f_ov,v_ooov,v_vvoo,t_corr)
-    !print*,'Working on it...'
-    !call abort
+    call ccsd_par_t_spin_v2(cc_nOab,cc_nVab,t1,t2,f_o,f_v,cc_spin_f_ov,cc_spin_v_ooov,cc_spin_v_vvoo,t_corr)
     call wall_time(tb)
     print*,'Done'
     print*,'Time: ',tb-ta, ' s'
@@ -290,9 +192,7 @@ subroutine run_ccsd_spin_orb
   call save_energy(uncorr_energy + energy, t_corr)
 
   deallocate(f_o,f_v)
-  deallocate(v_ooov,v_vvoo,t1,t2)
-  !deallocate(v_ovvv,v_vvvo,v_vovv)
-  !deallocate(v_vvvv)
+  deallocate(t1,t2)
 
 end
 

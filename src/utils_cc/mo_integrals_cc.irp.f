@@ -227,6 +227,19 @@ BEGIN_PROVIDER [double precision, cc_space_v_oooo, (cc_nOa, cc_nOa, cc_nOa, cc_n
 
 END_PROVIDER
 
+BEGIN_PROVIDER [double precision, cc_spin_v_oooo, (cc_nOab, cc_nOab, cc_nOab, cc_nOab)]
+
+  implicit none
+
+  !TODO
+  call gen_v_spin(cc_nO_m,cc_nO_m,cc_nO_m,cc_nO_m, &
+                    cc_nO_S,cc_nO_S,cc_nO_S,cc_nO_S, &
+                    cc_list_occ_spin,cc_list_occ_spin,cc_list_occ_spin,cc_list_occ_spin, &
+                    cc_nOab,cc_nOab,cc_nOab,cc_nOab, &
+                    cc_spin_v_oooo)
+
+END_PROVIDER
+
 ! vooo
 
 BEGIN_PROVIDER [double precision, cc_space_v_vooo, (cc_nVa, cc_nOa, cc_nOa, cc_nOa)]
@@ -305,6 +318,17 @@ BEGIN_PROVIDER [double precision, cc_space_v_ovoo, (cc_nOa, cc_nVa, cc_nOa, cc_n
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, cc_spin_v_ovoo, (cc_nOab,cc_nVab,cc_nOab,cc_nOab)]
+ implicit none
+
+ call gen_v_spin(cc_nO_m,cc_nV_m,cc_nO_m,cc_nO_m, &
+                 cc_nO_S,cc_nV_S,cc_nO_S,cc_nO_S, &
+                 cc_list_occ_spin,cc_list_vir_spin,cc_list_occ_spin,cc_list_occ_spin, &
+                 cc_nOab,cc_nVab,cc_nOab,cc_nOab, &
+                 cc_spin_v_ovoo)
+
+END_PROVIDER
+
 ! oovo
 
 BEGIN_PROVIDER [double precision, cc_space_v_oovo, (cc_nOa, cc_nOa, cc_nVa, cc_nOa)]
@@ -339,6 +363,17 @@ BEGIN_PROVIDER [double precision, cc_space_v_oovo, (cc_nOa, cc_nOa, cc_nVa, cc_n
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, cc_spin_v_oovo, (cc_nOab,cc_nOab,cc_nVab,cc_nOab)]
+ implicit none
+
+ call gen_v_spin(cc_nO_m,cc_nO_m,cc_nV_m,cc_nO_m, &
+                 cc_nO_S,cc_nO_S,cc_nV_S,cc_nO_S, &
+                 cc_list_occ_spin,cc_list_occ_spin,cc_list_vir_spin,cc_list_occ_spin, &
+                 cc_nOab,cc_nOab,cc_nVab,cc_nOab, &
+                 cc_spin_v_oovo)
+END_PROVIDER
+
+
 ! ooov
 
 BEGIN_PROVIDER [double precision, cc_space_v_ooov, (cc_nOa, cc_nOa, cc_nOa, cc_nVa)]
@@ -372,6 +407,17 @@ BEGIN_PROVIDER [double precision, cc_space_v_ooov, (cc_nOa, cc_nOa, cc_nOa, cc_n
   endif
 
 END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, cc_spin_v_ooov, (cc_nOab,cc_nOab,cc_nOab,cc_nVab)]
+ implicit none
+
+ call gen_v_spin(cc_nO_m,cc_nO_m,cc_nO_m,cc_nV_m, &
+                 cc_nO_S,cc_nO_S,cc_nO_S,cc_nV_S, &
+                 cc_list_occ_spin,cc_list_occ_spin,cc_list_occ_spin,cc_list_vir_spin, &
+                 cc_nOab,cc_nOab,cc_nOab,cc_nVab, &
+                 cc_spin_v_ooov)
+END_PROVIDER
+
 
 ! vvoo
 
@@ -415,6 +461,18 @@ BEGIN_PROVIDER [double precision, cc_space_v_vvoo, (cc_nVa, cc_nVa, cc_nOa, cc_n
   endif
 
 END_PROVIDER
+
+
+BEGIN_PROVIDER [ double precision, cc_spin_v_vvoo, (cc_nVab,cc_nVab,cc_nOab,cc_nOab)]
+ implicit none
+
+ call gen_v_spin(cc_nV_m,cc_nV_m,cc_nO_m,cc_nO_m, &
+                 cc_nV_S,cc_nV_S,cc_nO_S,cc_nO_S, &
+                 cc_list_vir_spin,cc_list_vir_spin,cc_list_occ_spin,cc_list_occ_spin, &
+                 cc_nVab,cc_nVab,cc_nOab,cc_nOab, &
+                 cc_spin_v_vvoo)
+END_PROVIDER
+
 
 ! vovo
 
@@ -527,6 +585,16 @@ BEGIN_PROVIDER [double precision, cc_space_v_ovvo, (cc_nOa, cc_nVa, cc_nVa, cc_n
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, cc_spin_v_ovvo, (cc_nOab,cc_nVab,cc_nVab,cc_nOab) ]
+ implicit none
+
+ call gen_v_spin(cc_nO_m,cc_nV_m,cc_nV_m,cc_nO_m, &
+                 cc_nO_S,cc_nV_S,cc_nV_S,cc_nO_S, &
+                 cc_list_occ_spin,cc_list_vir_spin,cc_list_vir_spin,cc_list_occ_spin, &
+                 cc_nOab,cc_nVab,cc_nVab,cc_nOab, &
+                 cc_spin_v_ovvo)
+END_PROVIDER
+
 ! ovov
 
 BEGIN_PROVIDER [double precision, cc_space_v_ovov, (cc_nOa, cc_nVa, cc_nOa, cc_nVa)]
@@ -559,6 +627,16 @@ BEGIN_PROVIDER [double precision, cc_space_v_ovov, (cc_nOa, cc_nVa, cc_nOa, cc_n
     call gen_v_space(cc_nOa,cc_nVa,cc_nOa,cc_nVa, cc_list_occ,cc_list_vir,cc_list_occ,cc_list_vir, cc_space_v_ovov)
   endif
 
+END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, cc_spin_v_ovov, (cc_nOab,cc_nVab,cc_nOab,cc_nVab) ]
+ implicit none
+
+ call gen_v_spin(cc_nO_m,cc_nV_m,cc_nO_m,cc_nV_m, &
+                 cc_nO_S,cc_nV_S,cc_nO_S,cc_nV_S, &
+                 cc_list_occ_spin,cc_list_vir_spin,cc_list_occ_spin,cc_list_vir_spin, &
+                 cc_nOab,cc_nVab,cc_nOab,cc_nVab, &
+                 cc_spin_v_ovov)
 END_PROVIDER
 
 ! oovv
@@ -595,6 +673,16 @@ BEGIN_PROVIDER [double precision, cc_space_v_oovv, (cc_nOa, cc_nOa, cc_nVa, cc_n
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, cc_spin_v_oovv, (cc_nOab,cc_nOab,cc_nVab,cc_nVab) ]
+ implicit none
+
+ call gen_v_spin(cc_nO_m,cc_nO_m,cc_nV_m,cc_nV_m, &
+                 cc_nO_S,cc_nO_S,cc_nV_S,cc_nV_S, &
+                 cc_list_occ_spin,cc_list_occ_spin,cc_list_vir_spin,cc_list_vir_spin, &
+                 cc_nOab,cc_nOab,cc_nVab,cc_nVab, &
+                 cc_spin_v_oovv)
+END_PROVIDER
+
 ! vvvo
 
 BEGIN_PROVIDER [double precision, cc_space_v_vvvo, (cc_nVa, cc_nVa, cc_nVa, cc_nOa)]
@@ -624,6 +712,7 @@ BEGIN_PROVIDER [double precision, cc_space_v_vovv, (cc_nVa, cc_nOa, cc_nVa, cc_n
   call gen_v_space(cc_nVa,cc_nOa,cc_nVa,cc_nVa, cc_list_vir,cc_list_occ,cc_list_vir,cc_list_vir, cc_space_v_vovv)
 
 END_PROVIDER
+
 
 ! ovvv
 
@@ -674,6 +763,18 @@ BEGIN_PROVIDER [double precision, cc_space_v_oo_chol, (cholesky_mo_num, cc_nOa, 
   implicit none
 
   call gen_v_space_chol(cc_nOa, cc_nOa, cc_list_occ, cc_list_occ, cc_space_v_oo_chol, cholesky_mo_num)
+
+END_PROVIDER
+
+BEGIN_PROVIDER [double precision, cc_spin_v_oo_chol, (cholesky_mo_num, cc_nOab, cc_nOab)]
+
+  implicit none
+  integer :: list_occ(cc_nOab)
+
+  list_occ(1:cc_nOa) = cc_list_occ_spin(1:cc_nOa,1)
+  list_occ(cc_nOa+1:cc_nOab) = cc_list_occ_spin(1:cc_nOb,2)
+  call gen_v_space_chol(cc_nOab, cc_nOab, list_occ, list_occ, &
+         cc_spin_v_oo_chol, cholesky_mo_num)
 
 END_PROVIDER
 
