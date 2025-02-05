@@ -177,9 +177,11 @@ subroutine run_ccsd_space_orb
   call guess_t2(nO,nV,cc_space_f_o,cc_space_f_v,cc_space_v_oovv,h_t2)
   call gpu_upload(h_t2, t2)
 
+  deallocate(h_t1, h_t2)
 
-  call update_tau_space(nO,nV,h_t1,t1,t2,tau)
+  call update_tau_space(nO,nV,t1%f,t1,t2,tau)
   call update_tau_x_space(nO,nV,tau,tau_x)
+
   call det_energy(psi_det(1,1,cc_ref),uncorr_energy)
   print*,'Det energy', uncorr_energy
 
@@ -310,7 +312,6 @@ subroutine run_ccsd_space_orb
 
   call save_energy(uncorr_energy + energy, e_t)
 
-  deallocate(h_t1, h_t2)
   if (do_mo_cholesky) then
     call gpu_deallocate(d_cc_space_v_oo_chol)
     call gpu_deallocate(d_cc_space_v_ov_chol)

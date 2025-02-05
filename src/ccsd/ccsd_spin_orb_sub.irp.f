@@ -1,6 +1,5 @@
-! Code
-
 subroutine run_ccsd_spin_orb
+  use gpu
 
   implicit none
 
@@ -8,8 +7,6 @@ subroutine run_ccsd_spin_orb
   ! CCSD in spin orbitals
   END_DOC
 
-  double precision, allocatable :: t1(:,:), t2(:,:,:,:), tau(:,:,:,:), tau_t(:,:,:,:)
-  double precision, allocatable :: r1(:,:), r2(:,:,:,:)
   double precision, allocatable :: cF_oo(:,:), cF_ov(:,:), cF_vv(:,:)
   double precision, allocatable :: cW_oooo(:,:,:,:), cW_ovvo(:,:,:,:) !, cW_vvvv(:,:,:,:)
 
@@ -23,6 +20,9 @@ subroutine run_ccsd_spin_orb
   integer                       :: nb_iter, i,j,a,b
   double precision              :: uncorr_energy, energy, max_r, max_r1, max_r2, cc, ta, tb,ti,tf,tbi,tfi
 
+  type(gpu_double4) :: t2, r2, tau, tau_t
+  type(gpu_double2) :: t1, r1
+
   if (do_mo_cholesky) then
     PROVIDE cholesky_mo_transp
     FREE cholesky_ao
@@ -34,12 +34,17 @@ subroutine run_ccsd_spin_orb
   call print_det(psi_det(1,1,cc_ref),N_int)
 
   ! Allocation
-  allocate(t1(cc_nOab,cc_nVab), t2(cc_nOab,cc_nOab,cc_nVab,cc_nVab), tau(cc_nOab,cc_nOab,cc_nVab,cc_nVab), tau_t(cc_nOab,cc_nOab,cc_nVab,cc_nVab))
-  allocate(r1(cc_nOab,cc_nVab), r2(cc_nOab,cc_nOab,cc_nVab,cc_nVab))
   allocate(cF_oo(cc_nOab,cc_nOab), cF_ov(cc_nOab,cc_nVab), cF_vv(cc_nVab,cc_nVab))
   allocate(cW_oooo(cc_nOab,cc_nOab,cc_nOab,cc_nOab), cW_ovvo(cc_nOab,cc_nVab,cc_nVab,cc_nOab))!, cW_vvvv(cc_nVab,cc_nVab,cc_nVab,cc_nVab))
 
   allocate(f_o(cc_nOab), f_v(cc_nVab))
+
+  call gpu_allocate(t1, cc_nOab,cc_nVab)
+  call gpu_allocate(r1, cc_nOab,cc_nVab)
+  call gpu_allocate(t2, cc_nOab,cc_nOab,cc_nVab,cc_nVab)
+  call gpu_allocate(r2, cc_nOab,cc_nOab,cc_nVab,cc_nVab)
+  call gpu_allocate(tau,   cc_nOab,cc_nOab,cc_nVab,cc_nVab)
+  call gpu_allocate(tau_t, cc_nOab,cc_nOab,cc_nVab,cc_nVab)
 
   ! Allocation for the diis
   if (cc_update_method == 'diis') then
@@ -58,23 +63,29 @@ subroutine run_ccsd_spin_orb
 
 
   ! Init of T
-  t1 = 0d0
-  call guess_t1(cc_nOab,cc_nVab,f_o,f_v,cc_spin_f_ov,t1)
-  call guess_t2(cc_nOab,cc_nVab,f_o,f_v,cc_spin_v_oovv,t2)
-  call compute_tau_spin(cc_nOab,cc_nVab,t1,t2,tau)
-  call compute_tau_t_spin(cc_nOab,cc_nVab,t1,t2,tau_t)
+  double precision, allocatable :: h_t1(:,:),  h_t2(:,:,:,:)
+  allocate(h_t1(cc_nOab,cc_nVab), h_t2(cc_nOab,cc_nOab,cc_nVab,cc_nVab))
+  h_t1 = 0d0
+  call guess_t1(cc_nOab,cc_nVab,f_o,f_v,cc_spin_f_ov,h_t1)
+  call gpu_upload(h_t1, t1)
+
+  call guess_t2(cc_nOab,cc_nVab,f_o,f_v,cc_spin_v_oovv,h_t2)
+  call gpu_upload(h_t2, t2)
+
+  deallocate(h_t1,h_t2)
+
+  call compute_tau_spin(cc_nOab,cc_nVab,t1%f,t2%f,tau%f)
+  call compute_tau_t_spin(cc_nOab,cc_nVab,t1%f,t2%f,tau_t%f)
 
   call det_energy(psi_det(1,1,cc_ref),uncorr_energy)
   print*,'Det energy', uncorr_energy
 
-  call ccsd_energy_spin(cc_nOab,cc_nVab,t1,t2,cc_spin_F_ov,cc_spin_v_oovv,energy)
+  call ccsd_energy_spin(cc_nOab,cc_nVab,t1%f,t2%f,cc_spin_F_ov,cc_spin_v_oovv,energy)
   print*,'guess energy', uncorr_energy+energy, energy
 
   ! Loop init
   nb_iter = 0
   not_converged = .True.
-  r1 = 0d0
-  r2 = 0d0
   max_r1 = 0d0
   max_r2 = 0d0
 
@@ -88,46 +99,46 @@ subroutine run_ccsd_spin_orb
   do while (not_converged)
 
     ! Intermediates
-    call compute_cF_oo(cc_nOab,cc_nVab,t1,tau_t,cc_spin_F_oo,cc_spin_F_ov,cc_spin_v_ooov,cc_spin_v_oovv,cF_oo)
-    call compute_cF_ov(cc_nOab,cc_nVab,t1,cc_spin_F_ov,cc_spin_v_oovv,cF_ov)
-    call compute_cF_vv(cc_nOab,cc_nVab,t1,tau_t,cc_spin_F_ov,cc_spin_F_vv,cc_spin_v_oovv,cF_vv)
+    call compute_cF_oo(cc_nOab,cc_nVab,t1%f,tau_t%f,cc_spin_F_oo,cc_spin_F_ov,cc_spin_v_ooov,cc_spin_v_oovv,cF_oo)
+    call compute_cF_ov(cc_nOab,cc_nVab,t1%f,cc_spin_F_ov,cc_spin_v_oovv,cF_ov)
+    call compute_cF_vv(cc_nOab,cc_nVab,t1%f,tau_t%f,cc_spin_F_ov,cc_spin_F_vv,cc_spin_v_oovv,cF_vv)
 
-    call compute_cW_oooo(cc_nOab,cc_nVab,t1,t2,tau,cc_spin_v_oooo,cc_spin_v_ooov,cc_spin_v_oovv,cW_oooo)
-    call compute_cW_ovvo(cc_nOab,cc_nVab,t1,t2,tau,cc_spin_v_ovvo,cc_spin_v_oovo,cc_spin_v_oovv,cW_ovvo)
+    call compute_cW_oooo(cc_nOab,cc_nVab,t1%f,t2%f,tau%f,cc_spin_v_oooo,cc_spin_v_ooov,cc_spin_v_oovv,cW_oooo)
+    call compute_cW_ovvo(cc_nOab,cc_nVab,t1%f,t2%f,tau%f,cc_spin_v_ovvo,cc_spin_v_oovo,cc_spin_v_oovv,cW_ovvo)
 
     ! Residuals
-    call compute_r1_spin(cc_nOab,cc_nVab,t1,t2,f_o,f_v,cc_spin_F_ov,cF_oo,cF_ov,cF_vv,cc_spin_v_oovo,cc_spin_v_ovov,r1)
-    call compute_r2_spin(cc_nOab,cc_nVab,t1,t2,tau,f_o,f_v,cF_oo,cF_ov,cF_vv,cW_oooo,cW_ovvo,cc_spin_v_ovoo,cc_spin_v_oovv,cc_spin_v_ovvo,r2)
+    call compute_r1_spin(cc_nOab,cc_nVab,t1%f,t2%f,f_o,f_v,cc_spin_F_ov,cF_oo,cF_ov,cF_vv,cc_spin_v_oovo,cc_spin_v_ovov,r1%f)
+    call compute_r2_spin(cc_nOab,cc_nVab,t1%f,t2%f,tau%f,f_o,f_v,cF_oo,cF_ov,cF_vv,cW_oooo,cW_ovvo,cc_spin_v_ovoo,cc_spin_v_oovv,cc_spin_v_ovvo,r2%f)
 
     ! Max elements in the residuals
-    max_r1 = maxval(abs(r1(:,:)))
-    max_r2 = maxval(abs(r2(:,:,:,:)))
+    max_r1 = maxval(abs(r1%f(:,:)))
+    max_r2 = maxval(abs(r2%f(:,:,:,:)))
     max_r  = max(max_r1,max_r2)
 
     call wall_time(ti)
     ! Update
     if (cc_update_method == 'diis') then
-      !call update_t_ccsd(cc_nOab,cc_nVab,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err1,all_err2,all_t1,all_t2)
-      !call update_t_ccsd_diis(cc_nOab,cc_nVab,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err1,all_err2,all_t1,all_t2)
-      call update_t_ccsd_diis_v3(cc_nOab,cc_nVab,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err,all_t)
+      !call update_t_ccsd(cc_nOab,cc_nVab,nb_iter,f_o,f_v,r1%f,r2%f,t1%f,t2%f,all_err1,all_err2,all_t1%f,all_t2)
+      !call update_t_ccsd_diis(cc_nOab,cc_nVab,nb_iter,f_o,f_v,r1%f,r2%f,t1%f,t2%f,all_err1,all_err2,all_t1%f,all_t2)
+      call update_t_ccsd_diis_v3(cc_nOab,cc_nVab,nb_iter,f_o,f_v,r1%f,r2%f,t1%f,t2%f,all_err,all_t)
 
     ! Standard update as T = T - Delta
     elseif (cc_update_method == 'none') then
-      call update_t1(cc_nOab,cc_nVab,f_o,f_v,r1,t1)
-      call update_t2(cc_nOab,cc_nVab,f_o,f_v,r2,t2)
+      call update_t1(cc_nOab,cc_nVab,f_o,f_v,r1%f,t1%f)
+      call update_t2(cc_nOab,cc_nVab,f_o,f_v,r2%f,t2%f)
     else
       print*,'Unkonw cc_method_method: '//cc_update_method
     endif
 
-    call compute_tau_spin(cc_nOab,cc_nVab,t1,t2,tau)
-    call compute_tau_t_spin(cc_nOab,cc_nVab,t1,t2,tau_t)
+    call compute_tau_spin(cc_nOab,cc_nVab,t1%f,t2%f,tau%f)
+    call compute_tau_t_spin(cc_nOab,cc_nVab,t1%f,t2%f,tau_t%f)
     call wall_time(tf)
     if (cc_dev) then
       print*,'Update:',tf-ti,'s'
     endif
 
     ! Print
-    call ccsd_energy_spin(cc_nOab,cc_nVab,t1,t2,cc_spin_F_ov,cc_spin_v_oovv,energy)
+    call ccsd_energy_spin(cc_nOab,cc_nVab,t1%f,t2%f,cc_spin_F_ov,cc_spin_v_oovv,energy)
     call wall_time(tfi)
 
     write(*,'(A3,I6,A3,F18.12,A3,F16.12,A3,ES10.2,A3,ES10.2,A2)') ' | ',nb_iter,' | ', &
@@ -159,8 +170,8 @@ subroutine run_ccsd_spin_orb
   print*,''
 
   if (write_amplitudes) then
-    call write_t1(cc_nOab,cc_nVab,t1)
-    call write_t2(cc_nOab,cc_nVab,t2)
+    call write_t1(cc_nOab,cc_nVab,t1%f)
+    call write_t2(cc_nOab,cc_nVab,t2%f)
     call ezfio_set_utils_cc_io_amplitudes('Read')
   endif
 
@@ -168,8 +179,6 @@ subroutine run_ccsd_spin_orb
   if (cc_update_method == 'diis') then
      deallocate(all_err,all_t)
   endif
-  deallocate(tau,tau_t)
-  deallocate(r1,r2)
   deallocate(cF_oo,cF_ov,cF_vv)
   deallocate(cW_oooo,cW_ovvo)!,cW_vvvv)
 
@@ -178,7 +187,7 @@ subroutine run_ccsd_spin_orb
   if (cc_par_t .and. elec_alpha_num  +elec_beta_num > 2) then
     print*,'CCSD(T) calculation...'
     call wall_time(ta)
-    call ccsd_par_t_spin_v2(cc_nOab,cc_nVab,t1,t2,f_o,f_v,cc_spin_f_ov,cc_spin_v_ooov,cc_spin_v_vvoo,t_corr)
+    call ccsd_par_t_spin_v2(cc_nOab,cc_nVab,t1%f,t2%f,f_o,f_v,cc_spin_f_ov,cc_spin_v_ooov,cc_spin_v_vvoo,t_corr)
     call wall_time(tb)
     print*,'Done'
     print*,'Time: ',tb-ta, ' s'
@@ -192,7 +201,13 @@ subroutine run_ccsd_spin_orb
   call save_energy(uncorr_energy + energy, t_corr)
 
   deallocate(f_o,f_v)
-  deallocate(t1,t2)
+
+  call gpu_deallocate(t1)
+  call gpu_deallocate(r1)
+  call gpu_deallocate(t2)
+  call gpu_deallocate(r2)
+  call gpu_deallocate(tau)
+  call gpu_deallocate(tau_t)
 
 end
 
