@@ -241,73 +241,176 @@ real*8 function hessmat_taub(t,a,u,b)
   END_DOC
   implicit none
   integer                        :: t,a,u,b,tt,aa,uu,bb,v,vv,x,xx,y
-  integer                        :: v3,x3
-  real*8                         :: term,t1,t2,t3
+  integer                        :: v3,x3, ichol
+  real*8                         :: term,t1,t2,t3, tmp
   double precision :: bielec_pqxx_no,bielec_pxxq_no
+
+  double precision, allocatable :: tmp1(:), tmp2(:,:)
+  allocate(tmp1(n_act_orb))
+  allocate(tmp2(n_act_orb,n_act_orb))
 
   tt=list_act(t)
   aa=list_virt(a)
+
   if (t == u) then
     if (a == b) then
       ! ta/ta
-      t1=occnum(tt)*Fipq(aa,aa)
+      t1=occnum(tt)*Fipq(aa,aa) - occnum(tt)*Fipq(tt,tt)
+
       t2=0.D0
-      t3=0.D0
-      t1-=occnum(tt)*Fipq(tt,tt)
+!      do x=1,n_act_orb
+!        x3=x+n_core_inact_orb
+!        do v=1,n_act_orb
+!          v3=v+n_core_inact_orb
+!          tmp = 0.d0
+!          do ichol = 1, cholesky_mo_num
+!            tmp = tmp + cholesky_no_total_transp(ichol,aa,aa) * cholesky_no_total_transp(ichol,v3,x3)
+!          enddo
+!          t2 = t2 + 2.D0*P0tuvx_no(t,t,v,x)*tmp
+!        enddo
+!      enddo
+
+      do x=1,n_act_orb
+        x3=x+n_core_inact_orb
+        call dgemv('T', cholesky_mo_num, n_act_orb, 2.d0, &
+                 cholesky_no_total_transp(1,n_core_inact_orb+1,x3), cholesky_mo_num, &
+                 cholesky_no_total_transp(1,aa,aa), 1, 0.d0, &
+                 tmp1, 1)
+        do v=1,n_act_orb
+          t2 = t2 + P0tuvx_no(t,t,v,x)*tmp1(v)
+        enddo
+      enddo
+!      do v=1,n_act_orb
+!        v3=v+n_core_inact_orb
+!        do x=1,n_act_orb
+!          x3=x+n_core_inact_orb
+!          tmp = 0.d0
+!          do ichol = 1, cholesky_mo_num
+!            tmp = tmp + cholesky_no_total_transp(ichol,aa,x3) * cholesky_no_total_transp(ichol,v3,aa)
+!          enddo
+!          t2 = t2 + 2.d0*(P0tuvx_no(t,x,v,t)+P0tuvx_no(t,x,t,v))*tmp
+!        end do
+!      end do
+      call dgemm('T','N', n_act_orb, n_act_orb, cholesky_mo_num, 2.d0, &
+                 cholesky_no_total_transp(1,n_core_inact_orb+1,aa), cholesky_mo_num, &
+                 cholesky_no_total_transp(1,n_core_inact_orb+1,aa), cholesky_mo_num, 0.d0, &
+                 tmp2, n_act_orb)
       do v=1,n_act_orb
-        vv=list_act(v)
-        v3=v+n_core_inact_orb
         do x=1,n_act_orb
-          xx=list_act(x)
-          x3=x+n_core_inact_orb
-          t2+=2.D0*(P0tuvx_no(t,t,v,x)*bielec_pqxx_no(aa,aa,v3,x3)      &
-              +(P0tuvx_no(t,x,v,t)+P0tuvx_no(t,x,t,v))*              &
-              bielec_pxxq_no(aa,x3,v3,aa))
-          do y=1,n_act_orb
-            t3-=2.D0*P0tuvx_no(t,v,x,y)*bielecCI_no(t,v,y,xx)
+          t2 = t2 + P0tuvx_no(t,x,v,t)*tmp2(x,v) + P0tuvx_no(t,x,t,v)*tmp2(x,v)
+        enddo
+      enddo
+
+      t3=0.D0
+      do x=1,n_act_orb
+        xx=list_act(x)
+        do y=1,n_act_orb
+          do v=1,n_act_orb
+            t3 = t3 - P0tuvx_no(t,v,x,y)*bielecCI_no(v,t,y,xx)
           end do
         end do
       end do
-      term=t1+t2+t3
+      term=t1+t2+t3*2.d0
+
     else
+
       bb=list_virt(b)
       ! ta/tb b/=a
       term=occnum(tt)*Fipq(aa,bb)
+!      do v=1,n_act_orb
+!        vv=list_act(v)
+!        v3=v+n_core_inact_orb
+!        do x=1,n_act_orb
+!          xx=list_act(x)
+!          x3=x+n_core_inact_orb
+!          term+=2.D0*P0tuvx_no(t,t,v,x)*bielec_pqxx_no(aa,bb,v3,x3)
+!        end do
+!      end do
+      do x=1,n_act_orb
+        x3=x+n_core_inact_orb
+        call dgemv('T', cholesky_mo_num, n_act_orb, 2.d0, &
+                 cholesky_no_total_transp(1,n_core_inact_orb+1,x3), cholesky_mo_num, &
+                 cholesky_no_total_transp(1,aa,bb), 1, 0.d0, &
+                 tmp1, 1)
+        do v=1,n_act_orb
+          term = term + P0tuvx_no(t,t,v,x)*tmp1(v)
+        enddo
+      enddo
+
+!      do v=1,n_act_orb
+!        vv=list_act(v)
+!        v3=v+n_core_inact_orb
+!        do x=1,n_act_orb
+!          xx=list_act(x)
+!          x3=x+n_core_inact_orb
+!          term+=2.d0*(P0tuvx_no(t,x,v,t)+P0tuvx_no(t,x,t,v))*bielec_pxxq_no(aa,x3,v3,bb)
+!        end do
+!      end do
+      call dgemm('T','N', n_act_orb, n_act_orb, cholesky_mo_num, 2.d0, &
+                 cholesky_no_total_transp(1,n_core_inact_orb+1,aa), cholesky_mo_num, &
+                 cholesky_no_total_transp(1,n_core_inact_orb+1,bb), cholesky_mo_num, 0.d0, &
+                 tmp2, n_act_orb)
       do v=1,n_act_orb
-        vv=list_act(v)
-        v3=v+n_core_inact_orb
         do x=1,n_act_orb
-          xx=list_act(x)
-          x3=x+n_core_inact_orb
-          term+=2.D0*(P0tuvx_no(t,t,v,x)*bielec_pqxx_no(aa,bb,v3,x3)    &
-              +(P0tuvx_no(t,x,v,t)+P0tuvx_no(t,x,t,v))               &
-              *bielec_pxxq_no(aa,x3,v3,bb))
-        end do
-      end do
+          term = term + P0tuvx_no(t,x,v,t)*tmp2(x,v) + P0tuvx_no(t,x,t,v)*tmp2(x,v)
+        enddo
+      enddo
+
     end if
+
   else
+
     ! ta/ub t/=u
     uu=list_act(u)
     bb=list_virt(b)
+
     term=0.D0
+!    do v=1,n_act_orb
+!      vv=list_act(v)
+!      v3=v+n_core_inact_orb
+!      do x=1,n_act_orb
+!        xx=list_act(x)
+!        x3=x+n_core_inact_orb
+!        term+=2.D0*(P0tuvx_no(t,u,v,x)*bielec_pqxx_no(aa,bb,v3,x3)
+!      end do
+!    end do
+    do x=1,n_act_orb
+      x3=x+n_core_inact_orb
+      call dgemv('T', cholesky_mo_num, n_act_orb, 2.d0, &
+               cholesky_no_total_transp(1,n_core_inact_orb+1,x3), cholesky_mo_num, &
+               cholesky_no_total_transp(1,aa,bb), 1, 0.d0, &
+               tmp1, 1)
+      do v=1,n_act_orb
+        term = term + P0tuvx_no(t,u,v,x)*tmp1(v)
+      enddo
+    enddo
+
+!    do v=1,n_act_orb
+!      vv=list_act(v)
+!      v3=v+n_core_inact_orb
+!      do x=1,n_act_orb
+!        xx=list_act(x)
+!        x3=x+n_core_inact_orb
+!        term+=2.D0*(P0tuvx_no(t,x,v,u)+P0tuvx_no(t,x,u,v))*bielec_pxxq_no(aa,x3,v3,bb)
+!      end do
+!    end do
+    call dgemm('T','N', n_act_orb, n_act_orb, cholesky_mo_num, 2.d0, &
+                 cholesky_no_total_transp(1,n_core_inact_orb+1,aa), cholesky_mo_num, &
+                 cholesky_no_total_transp(1,n_core_inact_orb+1,bb), cholesky_mo_num, 0.d0, &
+                 tmp2, n_act_orb)
     do v=1,n_act_orb
-      vv=list_act(v)
-      v3=v+n_core_inact_orb
       do x=1,n_act_orb
-        xx=list_act(x)
-        x3=x+n_core_inact_orb
-        term+=2.D0*(P0tuvx_no(t,u,v,x)*bielec_pqxx_no(aa,bb,v3,x3)      &
-            +(P0tuvx_no(t,x,v,u)+P0tuvx_no(t,x,u,v))                 &
-            *bielec_pxxq_no(aa,x3,v3,bb))
-      end do
-    end do
+        term = term + P0tuvx_no(t,x,v,u)*tmp2(x,v)+P0tuvx_no(t,x,u,v)*tmp2(x,v)
+      enddo
+    enddo
+
     if (a.eq.b) then
       term-=0.5D0*(occnum(tt)*Fipq(uu,tt)+occnum(uu)*Fipq(tt,uu))
       do v=1,n_act_orb
         do y=1,n_act_orb
           do x=1,n_act_orb
-            term-=P0tuvx_no(t,v,x,y)*bielecCI_no(x,y,v,uu)
-            term-=P0tuvx_no(u,v,x,y)*bielecCI_no(x,y,v,tt)
+            term = term - P0tuvx_no(t,v,x,y)*bielecCI_no(x,y,v,uu) &
+                        - P0tuvx_no(u,v,x,y)*bielecCI_no(x,y,v,tt)
           end do
         end do
       end do
