@@ -13,7 +13,7 @@ BEGIN_PROVIDER [real*8, Fipq, (mo_num,mo_num) ]
 
    ! the inactive Fock matrix
    do k=1,n_core_inact_orb
-     kk=list_core_inact_act(k)
+     kk=list_core_inact(k)
 !     do q=1,mo_num
 !       do p=1,mo_num
 !         do i=1,cholesky_mo_num
@@ -21,10 +21,11 @@ BEGIN_PROVIDER [real*8, Fipq, (mo_num,mo_num) ]
 !         enddo
 !       end do
 !     end do
-     call dgemm('T','N', mo_num*mo_num, 1, cholesky_mo_num, 2.d0, &
+     call dgemv('T', cholesky_mo_num, mo_num*mo_num, 2.d0, &
                  cholesky_no_total_transp, cholesky_mo_num, &
-                 cholesky_no_total_transp(1,kk,kk), cholesky_mo_num, 1.d0, &
-                 Fipq, mo_num*mo_num)
+                 cholesky_no_total_transp(1,kk,kk), 1, 1.d0, &
+                 Fipq, 1)
+
 !     do q=1,mo_num
 !       do p=1,mo_num
 !         do i=1,cholesky_mo_num
@@ -73,10 +74,10 @@ BEGIN_PROVIDER [real*8, Fapq, (mo_num,mo_num) ]
 !         enddo
 !       end do
 !     end do
-     call dgemm('T','N', mo_num*mo_num, 1, cholesky_mo_num, occnum(tt), &
+     call dgemv('T', cholesky_mo_num, mo_num*mo_num, occnum(tt), &
                  cholesky_no_total_transp, cholesky_mo_num, &
-                 cholesky_no_total_transp(1,tt,tt), cholesky_mo_num, 1.d0, &
-                 Fapq, mo_num*mo_num)
+                 cholesky_no_total_transp(1,tt,tt), 1, 1.d0, &
+                 Fapq, 1)
 !     do q=1,mo_num
 !       do p=1,mo_num
 !         do i=1,cholesky_mo_num
