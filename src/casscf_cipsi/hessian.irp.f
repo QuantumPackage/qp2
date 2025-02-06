@@ -11,13 +11,14 @@ real*8 function hessmat_itju(i,t,j,u)
   integer                        :: i,t,j,u,ii,tt,uu,v,vv,x,xx,y,jj
   real*8                         :: term,t2
   double precision :: bielec_pqxx_no,bielec_pxxq_no
-  
+
   ii=list_core_inact(i)
   tt=list_act(t)
   if (i.eq.j) then
     if (t.eq.u) then
       ! diagonal element
-      term=occnum(tt)*Fipq(ii,ii)+2.D0*(Fipq(tt,tt)+Fapq(tt,tt))     &
+      term = occnum(tt)*Fipq(ii,ii) +      &
+           2.D0*(Fipq(tt,tt)+Fapq(tt,tt))     &
           -2.D0*(Fipq(ii,ii)+Fapq(ii,ii))
       term+=2.D0*(3.D0*bielec_pxxq_no(tt,i,i,tt)-bielec_pqxx_no(tt,tt,i,i))
       term-=2.D0*occnum(tt)*(3.D0*bielec_pxxq_no(tt,i,i,tt)             &
@@ -83,10 +84,10 @@ real*8 function hessmat_itju(i,t,j,u)
       end do
     end do
   end if
-  
+
   term*=2.D0
   hessmat_itju=term
-  
+
 end function hessmat_itju
 
 real*8 function hessmat_itja(i,t,j,a)
@@ -97,7 +98,7 @@ real*8 function hessmat_itja(i,t,j,a)
   integer                        :: i,t,j,a,ii,tt,jj,aa,v,vv,x,y
   real*8                         :: term
   double precision :: bielec_pqxx_no,bielec_pxxq_no
-  
+
   ! it/ja
   ii=list_core_inact(i)
   tt=list_act(t)
@@ -120,7 +121,7 @@ real*8 function hessmat_itja(i,t,j,a)
   end if
   term*=2.D0
   hessmat_itja=term
-  
+
 end function hessmat_itja
 
 real*8 function hessmat_itua(i,t,u,a)
@@ -131,7 +132,7 @@ real*8 function hessmat_itua(i,t,u,a)
   integer                        :: i,t,u,a,ii,tt,uu,aa,v,vv,x,xx,u3,t3,v3
   real*8                         :: term
   double precision :: bielec_pqxx_no,bielec_pxxq_no
-  
+
   ii=list_core_inact(i)
   tt=list_act(t)
   t3=t+n_core_inact_orb
@@ -162,7 +163,7 @@ real*8 function hessmat_itua(i,t,u,a)
   end if
   term*=2.D0
   hessmat_itua=term
-  
+
 end function hessmat_itua
 
 real*8 function hessmat_iajb(i,a,j,b)
@@ -173,7 +174,7 @@ real*8 function hessmat_iajb(i,a,j,b)
   integer                        :: i,a,j,b,ii,aa,jj,bb
   real*8                         :: term
   double precision :: bielec_pqxx_no,bielec_pxxq_no
-  
+
   ii=list_core_inact(i)
   aa=list_virt(a)
   if (i.eq.j) then
@@ -199,7 +200,7 @@ real*8 function hessmat_iajb(i,a,j,b)
   end if
   term*=2.D0
   hessmat_iajb=term
-  
+
 end function hessmat_iajb
 
 real*8 function hessmat_iatb(i,a,t,b)
@@ -210,7 +211,7 @@ real*8 function hessmat_iatb(i,a,t,b)
   integer                        :: i,a,t,b,ii,aa,tt,bb,v,vv,x,y,v3,t3
   real*8                         :: term
   double precision :: bielec_pqxx_no,bielec_pxxq_no
-  
+
   ii=list_core_inact(i)
   aa=list_virt(a)
   tt=list_act(t)
@@ -231,7 +232,7 @@ real*8 function hessmat_iatb(i,a,t,b)
   end if
   term*=2.D0
   hessmat_iatb=term
-  
+
 end function hessmat_iatb
 
 real*8 function hessmat_taub(t,a,u,b)
@@ -243,7 +244,7 @@ real*8 function hessmat_taub(t,a,u,b)
   integer                        :: v3,x3
   real*8                         :: term,t1,t2,t3
   double precision :: bielec_pqxx_no,bielec_pxxq_no
-  
+
   tt=list_act(t)
   aa=list_virt(a)
   if (t == u) then
@@ -311,12 +312,12 @@ real*8 function hessmat_taub(t,a,u,b)
         end do
       end do
     end if
-    
+
   end if
-  
+
   term*=2.D0
   hessmat_taub=term
-  
+
 end function hessmat_taub
 
 BEGIN_PROVIDER [real*8, hessdiag, (nMonoEx)]
@@ -326,7 +327,7 @@ BEGIN_PROVIDER [real*8, hessdiag, (nMonoEx)]
   implicit none
   integer                        :: i,t,a,indx,indx_shift
   real*8                         :: hessmat_itju,hessmat_iajb,hessmat_taub
-  
+
   !$OMP PARALLEL DEFAULT(NONE) &
   !$OMP SHARED(hessdiag,n_core_inact_orb,n_act_orb,n_virt_orb,nMonoEx) &
   !$OMP PRIVATE(i,indx,t,a,indx_shift)
@@ -339,9 +340,9 @@ BEGIN_PROVIDER [real*8, hessdiag, (nMonoEx)]
     end do
   end do
   !$OMP END DO NOWAIT
-  
+
   indx_shift = n_core_inact_orb*n_act_orb
-  !$OMP DO 
+  !$OMP DO
   do a=1,n_virt_orb
     do i=1,n_core_inact_orb
       indx = a + (i-1)*n_virt_orb + indx_shift
@@ -349,9 +350,9 @@ BEGIN_PROVIDER [real*8, hessdiag, (nMonoEx)]
     end do
   end do
   !$OMP END DO NOWAIT
-  
+
   indx_shift += n_core_inact_orb*n_virt_orb
-  !$OMP DO 
+  !$OMP DO
   do a=1,n_virt_orb
     do t=1,n_act_orb
       indx = a + (t-1)*n_virt_orb + indx_shift
@@ -360,7 +361,7 @@ BEGIN_PROVIDER [real*8, hessdiag, (nMonoEx)]
   end do
   !$OMP END DO
   !$OMP END PARALLEL
-  
+
 END_PROVIDER
 
 
@@ -377,7 +378,7 @@ BEGIN_PROVIDER [double precision, hessmat, (nMonoEx,nMonoEx)]
  real*8                         :: hessmat_taub
  !       c-a c-v a-v
  !  c-a | X   X  X
- !  c-v |     X  X 
+ !  c-v |     X  X
  !  a-v |        X
 
   provide all_mo_integrals
@@ -390,12 +391,12 @@ BEGIN_PROVIDER [double precision, hessmat, (nMonoEx,nMonoEx)]
 
  !$OMP DO
 !!!! < Core-active| H |Core-active >
- ! Core-active excitations 
+ ! Core-active excitations
  do indx_tmp = 1, n_c_a_prov
   indx = list_idx_c_a(1,indx_tmp)
   i    = list_idx_c_a(2,indx_tmp)
   t    = list_idx_c_a(3,indx_tmp)
-  ! Core-active excitations 
+  ! Core-active excitations
   do j = 1, n_core_inact_orb
    if (i.eq.j) then
      ustart=t
@@ -418,12 +419,12 @@ BEGIN_PROVIDER [double precision, hessmat, (nMonoEx,nMonoEx)]
 
  !$OMP DO
 !!!! < Core-active| H |Core-VIRTUAL >
- ! Core-active excitations 
+ ! Core-active excitations
  do indx_tmp = 1, n_c_a_prov
   indx = list_idx_c_a(1,indx_tmp)
   i    = list_idx_c_a(2,indx_tmp)
   t    = list_idx_c_a(3,indx_tmp)
-  ! Core-VIRTUAL excitations 
+  ! Core-VIRTUAL excitations
   do jndx_tmp = 1, n_c_v_prov
    jndx = list_idx_c_v(1,jndx_tmp)
    j    = list_idx_c_v(2,jndx_tmp)
@@ -441,12 +442,12 @@ BEGIN_PROVIDER [double precision, hessmat, (nMonoEx,nMonoEx)]
 
  !$OMP DO
 !!!! < Core-active| H |ACTIVE-VIRTUAL >
- ! Core-active excitations 
+ ! Core-active excitations
  do indx_tmp = 1, n_c_a_prov
   indx = list_idx_c_a(1,indx_tmp)
   i    = list_idx_c_a(2,indx_tmp)
   t    = list_idx_c_a(3,indx_tmp)
-  ! ACTIVE-VIRTUAL excitations 
+  ! ACTIVE-VIRTUAL excitations
   do jndx_tmp = 1, n_a_v_prov
    jndx = list_idx_a_v(1,jndx_tmp)
    u    = list_idx_a_v(2,jndx_tmp)
@@ -466,12 +467,12 @@ BEGIN_PROVIDER [double precision, hessmat, (nMonoEx,nMonoEx)]
  !$OMP PRIVATE(indx_tmp,indx,i,a,j,b,bstart,jndx)
   !$OMP DO
 !!!!! < Core-VIRTUAL | H |Core-VIRTUAL >
-  ! Core-VIRTUAL excitations 
+  ! Core-VIRTUAL excitations
   do indx_tmp = 1, n_c_v_prov
    indx = list_idx_c_v(1,indx_tmp)
    i    = list_idx_c_v(2,indx_tmp)
    a    = list_idx_c_v(3,indx_tmp)
-   ! Core-VIRTUAL excitations 
+   ! Core-VIRTUAL excitations
    do j = 1, n_core_inact_orb
     if (i.eq.j) then
       bstart=a
@@ -485,7 +486,7 @@ BEGIN_PROVIDER [double precision, hessmat, (nMonoEx,nMonoEx)]
     enddo
    enddo
   enddo
- 
+
   !$OMP END DO NOWAIT
   !$OMP END PARALLEL
  endif
@@ -496,12 +497,12 @@ BEGIN_PROVIDER [double precision, hessmat, (nMonoEx,nMonoEx)]
 
  !$OMP DO
 !!!! < Core-VIRTUAL | H |Active-VIRTUAL >
- ! Core-VIRTUAL excitations 
+ ! Core-VIRTUAL excitations
  do indx_tmp = 1, n_c_v_prov
   indx = list_idx_c_v(1,indx_tmp)
   i    = list_idx_c_v(2,indx_tmp)
   a    = list_idx_c_v(3,indx_tmp)
-  ! Active-VIRTUAL excitations 
+  ! Active-VIRTUAL excitations
   do jndx_tmp = 1, n_a_v_prov
    jndx = list_idx_a_v(1,jndx_tmp)
    t    = list_idx_a_v(2,jndx_tmp)
@@ -520,12 +521,12 @@ BEGIN_PROVIDER [double precision, hessmat, (nMonoEx,nMonoEx)]
 
  !$OMP DO
 !!!! < Active-VIRTUAL | H |Active-VIRTUAL >
- ! Active-VIRTUAL excitations 
+ ! Active-VIRTUAL excitations
  do indx_tmp = 1, n_a_v_prov
   indx = list_idx_a_v(1,indx_tmp)
   t    = list_idx_a_v(2,indx_tmp)
   a    = list_idx_a_v(3,indx_tmp)
-  ! Active-VIRTUAL excitations 
+  ! Active-VIRTUAL excitations
   do u=t,n_act_orb
    if (t.eq.u) then
      bstart=a
@@ -542,4 +543,4 @@ BEGIN_PROVIDER [double precision, hessmat, (nMonoEx,nMonoEx)]
   !$OMP END DO NOWAIT
   !$OMP END PARALLEL
 
-END_PROVIDER 
+END_PROVIDER
