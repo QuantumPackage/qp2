@@ -158,7 +158,7 @@ subroutine H_S2_u_0_nstates_openmp_work(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,
   double precision, intent(out)  :: v_t(N_st,sze), s_t(N_st,sze)
 
 
-  PROVIDE ref_bitmask_energy N_int
+  PROVIDE ref_bitmask_energy N_int all_mo_integrals
 
   select case (N_int)
     case (1)
