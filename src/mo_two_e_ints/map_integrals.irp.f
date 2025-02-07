@@ -81,11 +81,15 @@ BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:mo_integrals_cache_s
  integer(key_kind)              :: idx
  real(integral_kind)            :: integral
  FREE ao_integrals_cache
+
  if (do_mo_cholesky) then
 
    call set_multiple_levels_omp(.False.)
-   !$OMP PARALLEL DO PRIVATE (k,l,ii)
+
+
+   !$OMP PARALLEL DO PRIVATE(k,l,ii) SCHEDULE(dynamic)
    do l=mo_integrals_cache_min,mo_integrals_cache_max
+     print *, l
      do k=mo_integrals_cache_min,mo_integrals_cache_max
          ii = int(l-mo_integrals_cache_min,8)
          ii = ior( shiftl(ii,mo_integrals_cache_shift), int(k-mo_integrals_cache_min,8))
@@ -101,7 +105,7 @@ BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:mo_integrals_cache_s
    !$OMP END PARALLEL DO
 
  else
-   !$OMP PARALLEL DO PRIVATE (i,j,k,l,idx,ii,integral)
+   !$OMP PARALLEL DO PRIVATE (i,j,k,l,idx,ii,integral) SCHEDULE(dynamic)
    do l=mo_integrals_cache_min,mo_integrals_cache_max
      do k=mo_integrals_cache_min,mo_integrals_cache_max
        do j=mo_integrals_cache_min,mo_integrals_cache_max

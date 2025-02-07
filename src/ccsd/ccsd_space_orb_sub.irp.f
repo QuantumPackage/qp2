@@ -26,7 +26,6 @@ subroutine run_ccsd_space_orb
 
   double precision, allocatable :: all_err(:,:), all_t(:,:)
   integer, allocatable          :: list_occ(:), list_vir(:)
-  integer(bit_kind)             :: det(N_int,2)
   integer                       :: nO, nV, nOa, nVa
 
   call set_multiple_levels_omp(.False.)
@@ -38,9 +37,8 @@ subroutine run_ccsd_space_orb
     PROVIDE all_mo_integrals
   endif
 
-  det = psi_det(:,:,cc_ref)
   print*,'Reference determinant:'
-  call print_det(det,N_int)
+  call print_det(psi_det(1,1,cc_ref),N_int)
 
   nOa = cc_nOa
   nVa = cc_nVa
@@ -57,10 +55,6 @@ subroutine run_ccsd_space_orb
   allocate(list_occ(nO),list_vir(nV))
   list_occ = cc_list_occ
   list_vir = cc_list_vir
-  ! Debug
-  !call extract_list_orb_space(det,nO,nV,list_occ,list_vir)
-  !print*,'occ',list_occ
-  !print*,'vir',list_vir
 
   ! GPU arrays
   call gpu_allocate(d_cc_space_f_oo, nO, nO)
@@ -183,10 +177,12 @@ subroutine run_ccsd_space_orb
   call guess_t2(nO,nV,cc_space_f_o,cc_space_f_v,cc_space_v_oovv,h_t2)
   call gpu_upload(h_t2, t2)
 
+  deallocate(h_t1, h_t2)
 
-  call update_tau_space(nO,nV,h_t1,t1,t2,tau)
+  call update_tau_space(nO,nV,t1%f,t1,t2,tau)
   call update_tau_x_space(nO,nV,tau,tau_x)
-  call det_energy(det,uncorr_energy)
+
+  call det_energy(psi_det(1,1,cc_ref),uncorr_energy)
   print*,'Det energy', uncorr_energy
 
   call ccsd_energy_space_x(nO,nV,d_cc_space_v_oovv,d_cc_space_f_vo,tau_x,t1,energy)
@@ -316,7 +312,6 @@ subroutine run_ccsd_space_orb
 
   call save_energy(uncorr_energy + energy, e_t)
 
-  deallocate(h_t1, h_t2)
   if (do_mo_cholesky) then
     call gpu_deallocate(d_cc_space_v_oo_chol)
     call gpu_deallocate(d_cc_space_v_ov_chol)
