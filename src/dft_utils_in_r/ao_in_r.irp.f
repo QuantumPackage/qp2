@@ -185,9 +185,9 @@ END_PROVIDER
  END_PROVIDER
 
  BEGIN_PROVIDER[double precision, aos_in_r_array_extra, (ao_num,n_points_extra_final_grid)]
- implicit none                                                                                                                                                                                             
+ implicit none
  BEGIN_DOC
- ! aos_in_r_array_extra(i,j)        = value of the ith ao on the jth grid point
+ ! aos_in_r_array_extra(i,j)        = value of the ith ao on the jth grid point of the EXTRA grid 
  END_DOC
  integer :: i,j
  double precision :: aos_array(ao_num), r(3)
@@ -214,7 +214,7 @@ END_PROVIDER
 BEGIN_PROVIDER[double precision, aos_in_r_array_extra_transp, (n_points_extra_final_grid,ao_num)]
 
   BEGIN_DOC
-  ! aos_in_r_array_extra_transp(i,j) = value of the jth ao on the ith grid point
+  ! aos_in_r_array_extra_transp(i,j) = value of the jth ao on the ith grid point of the EXTRA grid 
   END_DOC
  
   implicit none
