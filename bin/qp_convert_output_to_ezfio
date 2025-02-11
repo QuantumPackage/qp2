@@ -154,8 +154,7 @@ def write_ezfio(res, filename):
     prim_num_max = ezfio.get_ao_basis_ao_prim_num_max()
 
     for i in range(len(res.basis)):
-        coefficient[
-            i] += [0. for j in range(len(coefficient[i]), prim_num_max)]
+        coefficient[i] += [0. for j in range(len(coefficient[i]), prim_num_max)]
         exponent[i] += [0. for j in range(len(exponent[i]), prim_num_max)]
 
     coefficient = reduce(lambda x, y: x + y, coefficient, [])

@@ -77,6 +77,7 @@ module Xyz = struct
   type t = { x: Positive_int.t ;
              y: Positive_int.t ;
              z: Positive_int.t } [@@deriving sexp]
+
   type state_type = Null | X | Y | Z
 
   (** Builds an XYZ triplet from a string.
@@ -147,8 +148,8 @@ module Xyz = struct
    in Positive_int.of_int (x+y+z)
 
 
- (** Returns a list of XYZ powers for a given symmetry *)
- let of_symmetry sym =
+ (** Returns a list of XYZ powers for a given angular momentum *)
+ let of_angmom sym =
    let l = Positive_int.to_int (to_l sym) in
    let create_z xyz =
     { x=xyz.x ;
@@ -179,7 +180,31 @@ module Xyz = struct
    |> List.rev
 
 
- (** Returns the symmetry corresponding to the XYZ triplet *)
+ (** Returns the angular momentum corresponding to the XYZ triplet *)
+ let to_symmetry sym = of_l (get_l sym)
+
+end
+
+module Spd = struct
+  type t = { l: st; m: int } [@@deriving sexp]
+
+  let to_string { l ; m } =
+    (to_string l) ^ " " ^ (if m > 0 then "+" else "") ^ (string_of_int m)
+
+  let of_string s = match String_ext.lsplit2 ~on:' ' s with
+    | Some (l, m) -> { l=of_string l ; m=int_of_string m }
+    | _ -> failwith ("Invalid Spd: "^s)
+
+ (** Returns the l quantum number from a XYZ powers triplet *)
+  let get_l { l ; _ } = to_l l
+
+ (** Returns a list of XYZ powers for a given angular momentum *)
+ let of_angmom sym =
+   let l = Positive_int.to_int (to_l sym) in
+   Array.init (2*l+1) (fun i -> { l=sym ; m=i-l })
+   |> Array.to_list
+
+ (** Returns the angular momentum corresponding to the XYZ triplet *)
  let to_symmetry sym = of_l (get_l sym)
 
 end

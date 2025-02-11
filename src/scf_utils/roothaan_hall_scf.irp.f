@@ -70,7 +70,7 @@ END_DOC
 
     dim_DIIS = min(dim_DIIS+1,max_dim_DIIS)
 
-    if ( (scf_algorithm == 'DIIS').and.(dabs(Delta_energy_SCF) > 1.d-6) )  then
+    if ( (scf_algorithm == 'DIIS').and.(dabs(Delta_energy_SCF) > 1.d-10) )  then
 
       ! Store Fock and error matrices at each iteration
       do j=1,ao_num

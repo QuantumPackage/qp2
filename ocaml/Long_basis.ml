@@ -10,7 +10,7 @@ let of_basis b =
     | (g,n)::tail ->
         begin
           let new_accu =
-            Angmom.Xyz.of_symmetry g.Gto.sym
+            Angmom.Xyz.of_angmom g.Gto.sym
             |> List.rev_map (fun x-> (x,g,n))
           in
           do_work (new_accu@accu) tail
@@ -25,7 +25,7 @@ let to_basis b =
   | [] -> List.rev accu
   | (s,g,n)::tail ->
     let first_sym =
-      Angmom.Xyz.of_symmetry g.Gto.sym
+      Angmom.Xyz.of_angmom g.Gto.sym
       |> List.hd
     in
     let new_accu =
