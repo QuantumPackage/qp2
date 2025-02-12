@@ -15,6 +15,8 @@ subroutine export_trexio(update,full_path)
 
   integer, external :: getunitandopen
 
+  integer :: i,j,l
+
   if (full_path) then
     fp = trexio_filename
     call system('realpath '//trim(fp)//' > '//trim(fp)//'.tmp')
@@ -271,7 +273,7 @@ subroutine export_trexio(update,full_path)
      call trexio_assert(rc, TREXIO_SUCCESS)
 
      allocate(factor(shell_num))
-     factor(1:shell_num) = shell_normalization_factor(1:shell_num)
+     factor(1:shell_num) = 1.d0
      rc = trexio_write_basis_shell_factor(f(1), factor)
      call trexio_assert(rc, TREXIO_SUCCESS)
 
@@ -312,22 +314,27 @@ subroutine export_trexio(update,full_path)
     rc = trexio_write_ao_shell(f(1), ao_shell)
     call trexio_assert(rc, TREXIO_SUCCESS)
 
-    integer :: i, pow0(3), powA(3), j, l, nz
-    double precision :: normA, norm0, C_A(3), overlap_x, overlap_z, overlap_y, c
-    nz=100
+    if (ezfio_convention >= 20250211) then
+      rc = trexio_write_ao_normalization(f(1), ao_coef_normalization_factor)
+      print *, ao_coef_normalization_factor(:)
+    else
+      integer :: pow0(3), powA(3), nz
+      double precision :: normA, norm0, C_A(3), overlap_x, overlap_z, overlap_y, c
+      nz=100
 
-    C_A(1) = 0.d0
-    C_A(2) = 0.d0
-    C_A(3) = 0.d0
+      C_A(1) = 0.d0
+      C_A(2) = 0.d0
+      C_A(3) = 0.d0
 
-    allocate(factor(ao_num))
-    do i=1,ao_num
-      l = ao_first_of_shell(ao_shell(i))
-      factor(i) = (ao_coef_normalized(i,1)+tiny(1.d0))/(ao_coef_normalized(l,1)+tiny(1.d0))
-    enddo
-    rc = trexio_write_ao_normalization(f(1), factor)
+      allocate(factor(ao_num))
+      do i=1,ao_num
+        l = ao_first_of_shell(ao_shell(i))
+        factor(i) = (ao_coef_normalized(i,1)+tiny(1.d0))/(ao_coef_normalized(l,1)+tiny(1.d0))
+      enddo
+      rc = trexio_write_ao_normalization(f(1), factor)
+      deallocate(factor)
+    endif
     call trexio_assert(rc, TREXIO_SUCCESS)
-    deallocate(factor)
 
   endif
 

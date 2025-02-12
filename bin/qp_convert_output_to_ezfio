@@ -44,6 +44,7 @@ def write_ezfio(res, filename):
 
     res.clean_uncontractions()
     ezfio.set_file(filename)
+    ezfio.set_ezfio_files_ezfio_convention(20250211)
 
     #  _
     # |_ |  _   _ _|_ ._ _  ._   _
@@ -172,6 +173,7 @@ def write_ezfio(res, filename):
     # ~#~#~#~#~ #
 
     ezfio.set_ao_basis_ao_coef(coef)
+    ezfio.set_basis_ao_normalized(True)
     ezfio.set_ao_basis_ao_expo(expo)
     ezfio.set_ao_basis_ao_basis("Read by resultsFile")
 

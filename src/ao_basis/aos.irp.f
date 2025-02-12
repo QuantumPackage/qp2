@@ -53,42 +53,84 @@ END_PROVIDER
   C_A(3) = 0.d0
   ao_coef_normalized = 0.d0
 
-  do i=1,ao_num
+  if (primitives_normalized) then
 
-    powA(1) = ao_power(i,1)
-    powA(2) = ao_power(i,2)
-    powA(3) = ao_power(i,3)
+    if (ezfio_convention >= 20250211) then
+      ! Same primitive normalization factors for all AOs of the same shell, or read from trexio file
 
-    ! Normalization of the primitives
-    if (primitives_normalized) then
-      do j=1,ao_prim_num(i)
-        call overlap_gaussian_xyz(C_A,C_A,ao_expo(i,j),ao_expo(i,j), &
-           powA,powA,overlap_x,overlap_y,overlap_z,norm,nz)
-        ao_coef_normalized(i,j) = ao_coef(i,j)/dsqrt(norm)
+      do i=1,ao_num
+        k=1
+        do while (k<=prim_num .and. shell_index(k) /= ao_shell(i))
+          k = k+1
+        end do
+        do j=1,ao_prim_num(i)
+          ao_coef_normalized(i,j) = ao_coef(i,j)*prim_normalization_factor(k+j-1)
+        enddo
       enddo
+
     else
+        ! GAMESS convention for primitive factors
+
+      do i=1,ao_num
+        powA(1) = ao_power(i,1)
+        powA(2) = ao_power(i,2)
+        powA(3) = ao_power(i,3)
+
+        do j=1,ao_prim_num(i)
+          call overlap_gaussian_xyz(C_A,C_A,ao_expo(i,j),ao_expo(i,j), &
+             powA,powA,overlap_x,overlap_y,overlap_z,norm,nz)
+          ao_coef_normalized(i,j) = ao_coef(i,j)/dsqrt(norm)
+        enddo
+      enddo
+
+    endif
+
+  else
+
+    do i=1,ao_num
       do j=1,ao_prim_num(i)
         ao_coef_normalized(i,j) = ao_coef(i,j)
       enddo
-    endif
-
-    ! Normalization of the contracted basis functions
-    norm = 0.d0
-    do j=1,ao_prim_num(i)
-      do k=1,ao_prim_num(i)
-        call overlap_gaussian_xyz(C_A,C_A,ao_expo(i,j),ao_expo(i,k),powA,powA,overlap_x,overlap_y,overlap_z,c,nz)
-        norm = norm+c*ao_coef_normalized(i,j)*ao_coef_normalized(i,k)
-      enddo
     enddo
-    ao_coef_normalization_factor(i) = 1.d0/dsqrt(norm)
 
-    if (ao_normalized) then
-      do j=1,ao_prim_num(i)
-        ao_coef_normalized(i,j) = ao_coef_normalized(i,j) * ao_coef_normalization_factor(i)
+  endif
+
+  double precision, allocatable :: self_overlap(:)
+  allocate(self_overlap(ao_num))
+
+  do i=1,ao_num
+    powA(1) = ao_power(i,1)
+    powA(2) = ao_power(i,2)
+    powA(3) = ao_power(i,3)
+    self_overlap(i) = 0.d0
+    do j=1,ao_prim_num(i)
+      do k=1,j-1
+        call overlap_gaussian_xyz(C_A,C_A,ao_expo(i,j),ao_expo(i,k),powA,powA,overlap_x,overlap_y,overlap_z,c,nz)
+        self_overlap(i) = self_overlap(i) + 2.d0*c*ao_coef_normalized(i,j)*ao_coef_normalized(i,k)
       enddo
-    else
+      call overlap_gaussian_xyz(C_A,C_A,ao_expo(i,j),ao_expo(i,j),powA,powA,overlap_x,overlap_y,overlap_z,c,nz)
+      self_overlap(i) = self_overlap(i) +c*ao_coef_normalized(i,j)*ao_coef_normalized(i,j)
+    enddo
+  enddo
+
+  if (ao_normalized) then
+
+    do i=1,ao_num
+      ao_coef_normalization_factor(i) = 1.d0/dsqrt(self_overlap(i))
+    enddo
+
+  else
+
+    do i=1,ao_num
       ao_coef_normalization_factor(i) = 1.d0
-    endif
+    enddo
+
+  endif
+
+  do i=1,ao_num
+    do j=1,ao_prim_num(i)
+      ao_coef_normalized(i,j) = ao_coef_normalized(i,j) * ao_coef_normalization_factor(i)
+    enddo
   enddo
 
 END_PROVIDER
