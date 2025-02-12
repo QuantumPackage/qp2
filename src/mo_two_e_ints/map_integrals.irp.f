@@ -86,7 +86,6 @@ BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:mo_integrals_cache_s
 
    call set_multiple_levels_omp(.False.)
 
-
    !$OMP PARALLEL DO PRIVATE(k,l,ii) SCHEDULE(dynamic)
    do l=mo_integrals_cache_min,mo_integrals_cache_max
      do k=mo_integrals_cache_min,mo_integrals_cache_max
