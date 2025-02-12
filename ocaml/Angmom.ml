@@ -2,6 +2,7 @@ open Qptypes
 open Sexplib.Std
 
 type t = S|P|D|F|G|H|I|J|K|L [@@deriving sexp]
+type st = t [@@deriving sexp]
 
 let to_string = function
   | S -> "S"
@@ -68,9 +69,6 @@ let of_l i =
   | 8 -> K
   | 9 -> L
   | x -> raise (Failure ("Angmom should be S|P|D|F|G|H|I|J|K|L"))
-
-
-type st = t
 
 
 module Xyz = struct
