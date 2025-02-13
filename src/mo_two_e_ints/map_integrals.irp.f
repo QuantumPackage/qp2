@@ -262,8 +262,14 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
             out_val, 1)
         else
           integer :: isplit
-          out_val = 0.d0
-          do isplit=1,4
+          call sgemv('T', cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
+              mo_integrals_cache_min-1, 1., &
+              cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,k), cholesky_mo_num, &
+              cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),j,l), 1, 0., &
+              out_val_sp, 1)
+            out_val(1:mo_integrals_cache_min-1) += out_val_sp(1:mo_integrals_cache_min-1)
+          out_val(1:mo_integrals_cache_min-1) = out_val_sp(1:mo_integrals_cache_min-1)
+          do isplit=2,4
             call sgemv('T', cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
               mo_integrals_cache_min-1, 1., &
               cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,k), cholesky_mo_num, &
@@ -442,16 +448,36 @@ subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
   double precision, intent(out)  :: out_array(sze,sze)
   type(map_type), intent(inout)  :: map
   integer                        :: j
-  real(integral_kind), allocatable :: tmp_val(:)
 
   if ( (mo_integrals_cache_min>1).or.(mo_integrals_cache_max<mo_num) ) then
 
     if (do_mo_cholesky) then
 
-      call dgemm('T', 'N', mo_num, mo_num, cholesky_mo_num, 1.d0, &
-         cholesky_mo_transp(1,1,k), cholesky_mo_num, &
-         cholesky_mo_transp(1,1,l), cholesky_mo_num, 0.d0, &
-         out_array, sze)
+      if (mo_cholesky_double) then
+          call dgemm('T', 'N', mo_num, mo_num, cholesky_mo_num, 1.d0, &
+             cholesky_mo_transp(1,1,k), cholesky_mo_num, &
+             cholesky_mo_transp(1,1,l), cholesky_mo_num, 0.d0, &
+             out_array, sze)
+      else
+          integer :: isplit
+          double precision, allocatable :: out_array_sp(:,:)
+          allocate(out_array_sp(sze,sze))
+          call sgemm('T', 'N', mo_num, mo_num, &
+             cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), 1.d0, &
+             cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,k), cholesky_mo_num, &
+             cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,l), cholesky_mo_num, 0.d0, &
+             out_array_sp, sze)
+          out_array(1:sze,1:sze) = out_array_sp(1:sze,1:sze)
+          do isplit=2,4
+            call sgemm('T', 'N', mo_num, mo_num, &
+             cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), 1.d0, &
+             cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,k), cholesky_mo_num, &
+             cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,l), cholesky_mo_num, 0.d0, &
+             out_array_sp, sze)
+            out_array(1:sze,1:sze) = out_array(1:sze,1:sze) + out_array_sp(1:sze,1:sze)
+         enddo
+         deallocate(out_array_sp)
+      endif
 
     else
 
