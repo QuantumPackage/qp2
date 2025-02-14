@@ -316,7 +316,6 @@ subroutine export_trexio(update,full_path)
 
     if (ezfio_convention >= 20250211) then
       rc = trexio_write_ao_normalization(f(1), ao_coef_normalization_factor)
-      print *, ao_coef_normalization_factor(:)
     else
       integer :: pow0(3), powA(3), nz
       double precision :: normA, norm0, C_A(3), overlap_x, overlap_z, overlap_y, c

@@ -197,7 +197,9 @@ integer function get_index_in_psi_det_alpha_unique(key,Nint)
   enddo
   i += 1
 
-  ASSERT (i <= N_det_alpha_unique)
+  if (i> N_det_alpha_unique) then
+    call qp_bug(irp_here, i, 'i> N_det_alpha_unique')
+  endif
 
   !DIR$ FORCEINLINE
   do while (spin_det_search_key(psi_det_alpha_unique(1,i),Nint) == det_ref)
@@ -219,11 +221,14 @@ integer function get_index_in_psi_det_alpha_unique(key,Nint)
     endif
     i += 1
     if (i > N_det_alpha_unique) then
-      ASSERT (get_index_in_psi_det_alpha_unique > 0)
-      return
+      exit
     endif
 
   enddo
+
+  if (get_index_in_psi_det_alpha_unique <= 0) then
+    call qp_bug(irp_here, get_index_in_psi_det_alpha_unique, 'get_index_in_psi_det_alpha_unique <= 0')
+  endif
 
 end
 
@@ -277,7 +282,9 @@ integer function get_index_in_psi_det_beta_unique(key,Nint)
   enddo
   i += 1
 
-  ASSERT (i <= N_det_beta_unique)
+  if (i > N_det_beta_unique) then
+    call qp_bug(irp_here, i, 'i> N_det_beta_unique')
+  endif
 
   !DIR$ FORCEINLINE
   do while (spin_det_search_key(psi_det_beta_unique(1,i),Nint) == det_ref)
@@ -299,11 +306,14 @@ integer function get_index_in_psi_det_beta_unique(key,Nint)
     endif
     i += 1
     if (i > N_det_beta_unique) then
-      ASSERT (get_index_in_psi_det_beta_unique > 0)
-      return
+      exit
     endif
 
   enddo
+
+  if (get_index_in_psi_det_beta_unique <= 0) then
+    call qp_bug(irp_here, i, 'get_index_in_psi_det_beta_unique <= 0')
+  endif
 
 end
 
