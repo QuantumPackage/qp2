@@ -131,7 +131,8 @@ let run ?o b au c d m p cart xyz_file =
             let key =
               Element.to_string elem.Atom.element
             in
-            Hashtbl.add basis_table key new_channel
+            if not (Hashtbl.mem basis_table key) then
+              Hashtbl.add basis_table key new_channel
           ) nuclei
         end
       | Some (key, basis) -> (*Aux basis *)
