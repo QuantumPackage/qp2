@@ -267,6 +267,7 @@ let run ?o b au c d m p cart xyz_file =
       (* Create EZFIO *)
       Ezfio.set_file ezfio_file;
       Ezfio.set_ezfio_files_ezfio_convention 20250211;
+      Ezfio.set_basis_ao_normalized true ;
 
       (* Write Pseudo *)
       let pseudo =
