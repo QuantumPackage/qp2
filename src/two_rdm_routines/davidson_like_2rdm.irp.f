@@ -139,6 +139,7 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
 
    call list_to_bitstring( orb_bitmask, list_orb, norb, N_int)
    sze_buff = 6 * norb + elec_alpha_num * elec_alpha_num * 60
+   sze_buff = sze_buff*100
    list_orb_reverse = -1000
    do i = 1, norb
     list_orb_reverse(list_orb(i)) = i
@@ -191,7 +192,7 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
    ASSERT (istart > 0)
    ASSERT (istep  > 0)
 
-    !$OMP DO SCHEDULE(dynamic,64)
+    !$OMP DO SCHEDULE(dynamic)
    do k_a=istart+ishift,iend,istep
 
      krow = psi_bilinear_matrix_rows(k_a)
@@ -272,14 +273,14 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
        enddo
       endif
 
-      call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
-      nkeys = 0
      enddo
+!     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+!     nkeys = 0
 
    enddo
      !$OMP END DO
 
-     !$OMP DO SCHEDULE(dynamic,64)
+     !$OMP DO SCHEDULE(dynamic)
    do k_a=istart+ishift,iend,istep
 
 
@@ -343,24 +344,24 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
          c_1(l) = u_t(l,l_a) * u_t(l,k_a)
        enddo
        if(alpha_beta.or.spin_trace.or.alpha_alpha)then
-       ! increment the alpha/beta part for single excitations
-       if (nkeys+ 2 * elec_alpha_num .ge. sze_buff) then
-         call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
-         nkeys = 0
-       endif
-       call orb_range_off_diag_single_to_all_states_ab_dm_buffer(tmp_det, tmp_det2,c_1,N_st,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
-       ! increment the alpha/alpha part for single excitations
-       if (nkeys+4 * elec_alpha_num .ge. sze_buff ) then
-         call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
-         nkeys = 0
-       endif
-       call orb_range_off_diag_single_to_all_states_aa_dm_buffer(tmp_det,tmp_det2,c_1,N_st,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+         ! increment the alpha/beta part for single excitations
+         if (nkeys+ 2 * elec_alpha_num .ge. sze_buff) then
+           call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+           nkeys = 0
+         endif
+         call orb_range_off_diag_single_to_all_states_ab_dm_buffer(tmp_det, tmp_det2,c_1,N_st,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+         ! increment the alpha/alpha part for single excitations
+         if (nkeys+4 * elec_alpha_num .ge. sze_buff ) then
+           call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+           nkeys = 0
+         endif
+         call orb_range_off_diag_single_to_all_states_aa_dm_buffer(tmp_det,tmp_det2,c_1,N_st,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
        endif
 
      enddo
 
-     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
-     nkeys = 0
+!     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+!     nkeys = 0
 
      ! Compute Hij for all alpha doubles
      ! ----------------------------------
@@ -383,8 +384,8 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
         call orb_range_off_diag_double_to_all_states_aa_dm_buffer(tmp_det(1,1),psi_det_alpha_unique(1, lrow),c_1,N_st,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
       enddo
      endif
-     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
-     nkeys = 0
+!     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+!     nkeys = 0
 
 
      ! Single and double beta excitations
@@ -459,8 +460,8 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
         call orb_range_off_diag_single_to_all_states_bb_dm_buffer(tmp_det, tmp_det2,c_1,N_st,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
        endif
      enddo
-     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
-     nkeys = 0
+!     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+!     nkeys = 0
 
      ! Compute Hij for all beta doubles
      ! ----------------------------------
@@ -487,8 +488,8 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
 
       enddo
      endif
-     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
-     nkeys = 0
+!     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+!     nkeys = 0
 
 
      ! Diagonal contribution
@@ -550,22 +551,43 @@ subroutine update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,loc
 
  integer :: istate
  integer :: i,h1,h2,p1,p2
- call omp_set_lock(lock_2rdm)
+ integer, allocatable :: iorder(:)
+ integer*8, allocatable :: to_sort(:)
+
+ allocate(iorder(nkeys))
+ do i=1,nkeys
+   iorder(i) = i
+ enddo
+
+ ! If the lock is already taken, sort the keys while waiting for a faster access
+ if (.not.omp_test_lock(lock_2rdm)) then
+   allocate(to_sort(nkeys))
+   do i=1,nkeys
+     h1 = keys(1,iorder(i))
+     h2 = keys(2,iorder(i))-1
+     p1 = keys(3,iorder(i))-1
+     p2 = keys(4,iorder(i))-1
+     to_sort(i) = int(h1,8) + int(dim1,8)*(int(h2,8) + int(dim1,8)*(int(p1,8) + int(dim1,8)*int(p2,8)))
+   enddo
+   call i8sort(to_sort, iorder, nkeys)
+   deallocate(to_sort)
+   call omp_set_lock(lock_2rdm)
+ endif
 
 ! print*,'*************'
 ! print*,'updating'
 ! print*,'nkeys',nkeys
- do i = 1, nkeys
-   h1 = keys(1,i)
-   h2 = keys(2,i)
-   p1 = keys(3,i)
-   p2 = keys(4,i)
-   do istate = 1, N_st
-!    print*,h1,h2,p1,p2,values(istate,i)
-    big_array(h1,h2,p1,p2,istate) += values(istate,i)
+ do istate = 1, N_st
+   do i = 1, nkeys
+    h1 = keys(1,iorder(i))
+    h2 = keys(2,iorder(i))
+    p1 = keys(3,iorder(i))
+    p2 = keys(4,iorder(i))
+    big_array(h1,h2,p1,p2,istate) = big_array(h1,h2,p1,p2,istate) + values(istate,iorder(i))
    enddo
  enddo
  call omp_unset_lock(lock_2rdm)
+ deallocate(iorder)
 
 end
 
