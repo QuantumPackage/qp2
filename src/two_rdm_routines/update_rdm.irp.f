@@ -596,6 +596,15 @@ subroutine orb_range_off_diag_single_to_all_states_aa_dm_buffer(det_1,det_2,c_1,
         do istate = 1, N_st
           values(istate,nkeys) = - c_1(istate) * phase
         enddo
+        keys(1,nkeys) = h2
+        keys(2,nkeys) = h1
+        keys(3,nkeys) = p1
+        keys(4,nkeys) = h2
+
+        nkeys += 1
+        do istate = 1, N_st
+          values(istate,nkeys) = - c_1(istate) * phase
+        enddo
         keys(1,nkeys) = h1
         keys(2,nkeys) = h2
         keys(3,nkeys) = h2
@@ -609,15 +618,6 @@ subroutine orb_range_off_diag_single_to_all_states_aa_dm_buffer(det_1,det_2,c_1,
         keys(2,nkeys) = h1
         keys(3,nkeys) = h2
         keys(4,nkeys) = p1
-
-        nkeys += 1
-        do istate = 1, N_st
-          values(istate,nkeys) = - c_1(istate) * phase
-        enddo
-        keys(1,nkeys) = h2
-        keys(2,nkeys) = h1
-        keys(3,nkeys) = p1
-        keys(4,nkeys) = h2
       enddo
     else
       return
@@ -710,6 +710,15 @@ subroutine orb_range_off_diag_single_to_all_states_bb_dm_buffer(det_1,det_2,c_1,
         do istate = 1, N_st
           values(istate,nkeys) = - c_1(istate) * phase
         enddo
+        keys(1,nkeys) = h2
+        keys(2,nkeys) = h1
+        keys(3,nkeys) = p1
+        keys(4,nkeys) = h2
+
+        nkeys += 1
+        do istate = 1, N_st
+          values(istate,nkeys) = - c_1(istate) * phase
+        enddo
         keys(1,nkeys) = h1
         keys(2,nkeys) = h2
         keys(3,nkeys) = h2
@@ -723,15 +732,6 @@ subroutine orb_range_off_diag_single_to_all_states_bb_dm_buffer(det_1,det_2,c_1,
         keys(2,nkeys) = h1
         keys(3,nkeys) = h2
         keys(4,nkeys) = p1
-
-        nkeys += 1
-        do istate = 1, N_st
-          values(istate,nkeys) = - c_1(istate) * phase
-        enddo
-        keys(1,nkeys) = h2
-        keys(2,nkeys) = h1
-        keys(3,nkeys) = p1
-        keys(4,nkeys) = h2
       enddo
     endif
 !  endif
@@ -818,6 +818,15 @@ subroutine orb_range_off_diag_double_to_all_states_aa_dm_buffer(det_1,det_2,c_1,
     do istate = 1, N_st
       values(istate,nkeys) = - c_1(istate) * phase
     enddo
+    keys(1,nkeys) = h2
+    keys(2,nkeys) = h1
+    keys(3,nkeys) = p1
+    keys(4,nkeys) = p2
+
+    nkeys += 1
+    do istate = 1, N_st
+      values(istate,nkeys) = - c_1(istate) * phase
+    enddo
     keys(1,nkeys) = h1
     keys(2,nkeys) = h2
     keys(3,nkeys) = p2
@@ -831,15 +840,6 @@ subroutine orb_range_off_diag_double_to_all_states_aa_dm_buffer(det_1,det_2,c_1,
     keys(2,nkeys) = h1
     keys(3,nkeys) = p2
     keys(4,nkeys) = p1
-
-    nkeys += 1
-    do istate = 1, N_st
-      values(istate,nkeys) = - c_1(istate) * phase
-    enddo
-    keys(1,nkeys) = h2
-    keys(2,nkeys) = h1
-    keys(3,nkeys) = p1
-    keys(4,nkeys) = p2
 !  endif
 end
 
@@ -921,6 +921,15 @@ subroutine orb_range_off_diag_double_to_all_states_bb_dm_buffer(det_1,det_2,c_1,
     do istate = 1, N_st
       values(istate,nkeys) = - c_1(istate) * phase
     enddo
+    keys(1,nkeys) = h2
+    keys(2,nkeys) = h1
+    keys(3,nkeys) = p1
+    keys(4,nkeys) = p2
+
+    nkeys += 1
+    do istate = 1, N_st
+      values(istate,nkeys) = - c_1(istate) * phase
+    enddo
     keys(1,nkeys) = h1
     keys(2,nkeys) = h2
     keys(3,nkeys) = p2
@@ -934,15 +943,6 @@ subroutine orb_range_off_diag_double_to_all_states_bb_dm_buffer(det_1,det_2,c_1,
     keys(2,nkeys) = h1
     keys(3,nkeys) = p2
     keys(4,nkeys) = p1
-
-    nkeys += 1
-    do istate = 1, N_st
-      values(istate,nkeys) = - c_1(istate) * phase
-    enddo
-    keys(1,nkeys) = h2
-    keys(2,nkeys) = h1
-    keys(3,nkeys) = p1
-    keys(4,nkeys) = p2
 !  endif
 end
 

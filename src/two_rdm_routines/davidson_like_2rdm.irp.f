@@ -632,11 +632,11 @@ subroutine update_keys_values_n_states_local(keys,values,nkeys,dim1,n_st,big_arr
  integer :: i,h1,h2,p1,p2
 
  do i = 1, nkeys
+   h1 = keys(1,i)
+   h2 = keys(2,i)
+   p1 = keys(3,i)
+   p2 = keys(4,i)
    do istate = 1, N_st
-    h1 = keys(1,i)
-    h2 = keys(2,i)
-    p1 = keys(3,i)
-    p2 = keys(4,i)
     big_array_local(istate,h1,h2,p1,p2) = big_array_local(istate,h1,h2,p1,p2) + values(istate,i)
    enddo
  enddo
