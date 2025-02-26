@@ -145,6 +145,7 @@
  print*,''
  print*,'Providing act_2_rdm_spin_trace_mo '
  character*(128) :: name_file
+ PROVIDE all_mo_integrals
  name_file = 'act_2_rdm_spin_trace_mo'
  ispin = 4
  act_2_rdm_spin_trace_mo = 0.d0

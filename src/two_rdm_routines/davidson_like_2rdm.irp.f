@@ -194,6 +194,7 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
 
     !$OMP DO SCHEDULE(dynamic)
    do k_a=istart+ishift,iend,istep
+!print *, 'aa', k_a, '/', iend
 
      krow = psi_bilinear_matrix_rows(k_a)
      ASSERT (krow <= N_det_alpha_unique)
@@ -282,6 +283,7 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
 
      !$OMP DO SCHEDULE(dynamic)
    do k_a=istart+ishift,iend,istep
+!print *, 'ab', k_a, '/', iend
 
 
      ! Single and double alpha exitations

@@ -283,33 +283,16 @@ subroutine print_det_one_dimension(string,Nint)
 
 end
 
-logical function is_integer_in_string(bite,string,Nint)
-  use bitmasks
+logical function is_integer_in_string(orb,bitmask,Nint)
+ use bitmasks
  implicit none
- integer, intent(in) :: bite,Nint
- integer(bit_kind), intent(in) :: string(Nint)
- integer(bit_kind) :: string_bite(Nint)
- integer   :: i,itot,itot_and
- character*(2048)                :: output(1)
- string_bite = 0_bit_kind
- call set_bit_to_integer(bite,string_bite,Nint)
- itot = 0
- itot_and = 0
- is_integer_in_string = .False.
-!print*,''
-!print*,''
-!print*,'bite = ',bite
-!call bitstring_to_str( output(1), string_bite, Nint )
-! print *,  trim(output(1))
-!call bitstring_to_str( output(1), string, Nint )
-! print *,  trim(output(1))
- do i = 1, Nint
-  itot += popcnt(string(i))
-  itot_and += popcnt(ior(string(i),string_bite(i)))
- enddo
-!print*,'itot,itot_and',itot,itot_and
- if(itot == itot_and)then
-  is_integer_in_string = .True. 
- endif
-!pause 
+ BEGIN_DOC
+! Checks is the orbital orb is set to 1 in the bit string
+ END_DOC
+ integer, intent(in) :: orb, Nint
+ integer(bit_kind), intent(in) :: bitmask(Nint)
+ integer :: j, k
+ k = ishft(orb-1,-bit_kind_shift)+1
+ j = orb-ishft(k-1,bit_kind_shift)-1
+ is_integer_in_string = iand(bitmask(k), ibset(0_bit_kind, j)) /= 0_bit_kind
 end
