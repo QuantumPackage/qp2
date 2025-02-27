@@ -269,7 +269,7 @@ BEGIN_PROVIDER [double precision, mu_of_r_projector_mo, (n_points_final_grid) ]
    ! epsilon
    mu_of_r_projector_mo(ipoint) = 1.d0/(2.d0*dacos(-1.d0) * mu_of_r_projector_mo(ipoint)**(2.d0/3.d0))
    ! mu
-   mu_of_r_projector_mo(ipoint) = 1.d0/dsqrt( mu_of_r_projector_mo(ipoint) )
+   mu_of_r_projector_mo(ipoint) = 1.d0/dsqrt( 2.d0*mu_of_r_projector_mo(ipoint) )
  enddo
 END_PROVIDER
 
