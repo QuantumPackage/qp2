@@ -79,7 +79,8 @@ subroutine print_basis_correction
   print*,''
   print*,'**************'
   do istate = 1, N_states
-    write(*, '(A29,X,I3,X,A3,X,F16.10)') '  Average mu(r)      , state ',istate,' = ',mu_average_prov(istate)
+    write(*, '(A29,X,I3,X,A3,X,F16.10)') '  Average mu(r) [rho  ], state ',istate,' = ',mu_average_prov(istate)
+    write(*, '(A29,X,I3,X,A3,X,F16.10)') '  Average mu(r) [rho^2], state ',istate,' = ',mu_average_prov2(istate)
   enddo
 
 end

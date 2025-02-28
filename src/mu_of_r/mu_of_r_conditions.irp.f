@@ -211,7 +211,7 @@
  END_PROVIDER
 
 
- BEGIN_PROVIDER [double precision, mu_average_prov, (N_states)]
+BEGIN_PROVIDER [double precision, mu_average_prov, (N_states)]
  implicit none
  BEGIN_DOC
  ! average value of mu(r) weighted with the total one-e density and divided by the number of electrons
@@ -233,7 +233,33 @@
   enddo
   mu_average_prov(istate) = mu_average_prov(istate) / elec_num_grid_becke(istate)
  enddo
- END_PROVIDER
+END_PROVIDER
+
+BEGIN_PROVIDER [double precision, mu_average_prov2, (N_states)]
+ implicit none
+ BEGIN_DOC
+ ! average value of mu(r) weighted with square of the total one-e density
+ !
+ ! !!!!!! WARNING !!!!!! if no_core_density == .True. then all contributions from the core orbitals
+ !
+ ! in the one- and two-body density matrix are excluded
+ END_DOC
+ integer :: ipoint,istate
+ double precision :: weight,density,norm
+ mu_average_prov2 = 0.d0
+ do istate = 1, N_states
+  norm = 0.d0
+  do ipoint = 1, n_points_final_grid
+   weight =final_weight_at_r_vector(ipoint)
+   density = one_e_dm_and_grad_alpha_in_r(4,ipoint,istate) &
+           + one_e_dm_and_grad_beta_in_r(4,ipoint,istate)
+   if(mu_of_r_prov(ipoint,istate).gt.1.d+09)cycle
+   mu_average_prov2(istate) += mu_of_r_prov(ipoint,istate) * weight * density*density
+   norm = norm + density*density*weight
+  enddo
+  mu_average_prov2(istate) = mu_average_prov2(istate) / norm
+ enddo
+END_PROVIDER
 
 
 BEGIN_PROVIDER [double precision, mu_of_r_projector_mo, (n_points_final_grid) ]
