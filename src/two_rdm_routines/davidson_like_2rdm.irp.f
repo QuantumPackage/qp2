@@ -13,7 +13,7 @@ subroutine orb_range_2_rdm_openmp(big_array,dim1,norb,list_orb,ispin,u_0,N_st,sz
    END_DOC
    integer, intent(in)             :: N_st,sze
    integer, intent(in)             :: dim1,norb,list_orb(norb),ispin
-   double precision, intent(inout) :: big_array(dim1,dim1,dim1,dim1)
+   double precision, intent(inout) :: big_array(dim1,dim1,dim1,dim1,N_st)
    double precision, intent(in)    :: u_0(sze,N_st)
 
    integer                        :: k
@@ -50,7 +50,7 @@ subroutine orb_range_2_rdm_openmp_work(big_array,dim1,norb,list_orb,ispin,u_t,N_
    END_DOC
    integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep
    integer, intent(in)             :: dim1,norb,list_orb(norb),ispin
-   double precision, intent(inout) :: big_array(dim1,dim1,dim1,dim1)
+   double precision, intent(inout) :: big_array(dim1,dim1,dim1,dim1,N_st)
    double precision, intent(in)   :: u_t(N_st,N_det)
 
    integer :: k
@@ -91,7 +91,7 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
    integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep
    double precision, intent(in)   :: u_t(N_st,N_det)
    integer, intent(in)            :: dim1,norb,list_orb(norb),ispin
-   double precision, intent(inout) :: big_array(dim1,dim1,dim1,dim1)
+   double precision, intent(inout) :: big_array(dim1,dim1,dim1,dim1,N_st)
 
    integer(omp_lock_kind)          :: lock_2rdm
    integer                        :: i,j,k,l
@@ -139,6 +139,7 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
 
    call list_to_bitstring( orb_bitmask, list_orb, norb, N_int)
    sze_buff = 6 * norb + elec_alpha_num * elec_alpha_num * 60
+   sze_buff = sze_buff*100
    list_orb_reverse = -1000
    do i = 1, norb
     list_orb_reverse(list_orb(i)) = i
@@ -153,6 +154,8 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
 
    ! Prepare the array of all alpha single excitations
    ! -------------------------------------------------
+
+   double precision, allocatable :: big_array_local(:,:,:,:,:)
 
    PROVIDE N_int nthreads_davidson elec_alpha_num
     !$OMP PARALLEL DEFAULT(NONE) NUM_THREADS(nthreads_davidson)      &
@@ -173,7 +176,7 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
             !$OMP          buffer, doubles, n_doubles,               &
             !$OMP          tmp_det2, idx, l, kcol_prev,              &
             !$OMP          singles_a, n_singles_a, singles_b,        &
-            !$OMP          n_singles_b, nkeys, keys, values)
+            !$OMP          n_singles_b, nkeys, keys, values, big_array_local)
 
    ! Alpha/Beta double excitations
    ! =============================
@@ -184,6 +187,8 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
        singles_b(maxab),                                             &
        doubles(maxab),                                               &
        idx(maxab))
+   allocate( big_array_local(N_states,dim1, dim1, dim1, dim1) )
+   big_array_local(:,:,:,:,:) = 0.d0
 
    kcol_prev=-1
 
@@ -191,8 +196,9 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
    ASSERT (istart > 0)
    ASSERT (istep  > 0)
 
-    !$OMP DO SCHEDULE(dynamic,64)
+    !$OMP DO SCHEDULE(dynamic)
    do k_a=istart+ishift,iend,istep
+!print *, 'aa', k_a, '/', iend
 
      krow = psi_bilinear_matrix_rows(k_a)
      ASSERT (krow <= N_det_alpha_unique)
@@ -254,33 +260,36 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
          do l= 1, N_states
            c_1(l) = u_t(l,l_a) * u_t(l,k_a)
          enddo
-         if(alpha_beta)then
-          ! only ONE contribution
-          if (nkeys+1 .ge. sze_buff) then
-            call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
-            nkeys = 0
-          endif
-         else if (spin_trace)then
-          ! TWO contributions
+!         if(alpha_beta)then
+!          ! only ONE contribution
+!          if (nkeys+1 .ge. sze_buff) then
+!            call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+!            nkeys = 0
+!          endif
+!         else if (spin_trace)then
+!          ! TWO contributions
           if (nkeys+2 .ge. sze_buff) then
-            call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+!            call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+            call update_keys_values_n_states_local(keys,values,nkeys,dim1,n_st,big_array_local)
             nkeys = 0
           endif
-         endif
+!         endif
          call orb_range_off_diag_double_to_all_states_ab_dm_buffer(tmp_det,tmp_det2,c_1,N_st,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
 
        enddo
       endif
 
-      call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
-      nkeys = 0
      enddo
 
    enddo
-     !$OMP END DO
+     !$OMP END DO NOWAIT
+!     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+     call update_keys_values_n_states_local(keys,values,nkeys,dim1,n_st,big_array_local)
+     nkeys = 0
 
-     !$OMP DO SCHEDULE(dynamic,64)
+     !$OMP DO SCHEDULE(dynamic)
    do k_a=istart+ishift,iend,istep
+!print *, 'ab', k_a, '/', iend
 
 
      ! Single and double alpha exitations
@@ -331,36 +340,39 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
      ! ----------------------------------
 
      tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
-     do i=1,n_singles_a
-       l_a = singles_a(i)
-       ASSERT (l_a <= N_det)
+     if(alpha_beta.or.spin_trace.or.alpha_alpha)then
+       do i=1,n_singles_a
+         l_a = singles_a(i)
+         ASSERT (l_a <= N_det)
 
-       lrow = psi_bilinear_matrix_rows(l_a)
-       ASSERT (lrow <= N_det_alpha_unique)
+         lrow = psi_bilinear_matrix_rows(l_a)
+         ASSERT (lrow <= N_det_alpha_unique)
 
-       tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
-       do l= 1, N_states
-         c_1(l) = u_t(l,l_a) * u_t(l,k_a)
+         tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
+         do l= 1, N_states
+           c_1(l) = u_t(l,l_a) * u_t(l,k_a)
+         enddo
+
+         ! increment the alpha/beta part for single excitations
+         if (nkeys+ 2 * elec_alpha_num .ge. sze_buff) then
+!           call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+           call update_keys_values_n_states_local(keys,values,nkeys,dim1,n_st,big_array_local)
+           nkeys = 0
+         endif
+         call orb_range_off_diag_single_to_all_states_ab_dm_buffer(tmp_det, tmp_det2,c_1,N_st,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+         ! increment the alpha/alpha part for single excitations
+         if (nkeys+4 * elec_alpha_num .ge. sze_buff ) then
+!           call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+           call update_keys_values_n_states_local(keys,values,nkeys,dim1,n_st,big_array_local)
+           nkeys = 0
+         endif
+         call orb_range_off_diag_single_to_all_states_aa_dm_buffer(tmp_det,tmp_det2,c_1,N_st,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+
        enddo
-       if(alpha_beta.or.spin_trace.or.alpha_alpha)then
-       ! increment the alpha/beta part for single excitations
-       if (nkeys+ 2 * elec_alpha_num .ge. sze_buff) then
-         call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
-         nkeys = 0
-       endif
-       call orb_range_off_diag_single_to_all_states_ab_dm_buffer(tmp_det, tmp_det2,c_1,N_st,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
-       ! increment the alpha/alpha part for single excitations
-       if (nkeys+4 * elec_alpha_num .ge. sze_buff ) then
-         call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
-         nkeys = 0
-       endif
-       call orb_range_off_diag_single_to_all_states_aa_dm_buffer(tmp_det,tmp_det2,c_1,N_st,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
-       endif
+     endif
 
-     enddo
-
-     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
-     nkeys = 0
+!     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+!     nkeys = 0
 
      ! Compute Hij for all alpha doubles
      ! ----------------------------------
@@ -377,14 +389,15 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
           c_1(l) = u_t(l,l_a) * u_t(l,k_a)
         enddo
         if (nkeys+4 .ge. sze_buff) then
-          call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+!          call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+          call update_keys_values_n_states_local(keys,values,nkeys,dim1,n_st,big_array_local)
           nkeys = 0
         endif
         call orb_range_off_diag_double_to_all_states_aa_dm_buffer(tmp_det(1,1),psi_det_alpha_unique(1, lrow),c_1,N_st,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
       enddo
      endif
-     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
-     nkeys = 0
+!     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+!     nkeys = 0
 
 
      ! Single and double beta excitations
@@ -432,35 +445,39 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
      ! ----------------------------------
 
      tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
-     do i=1,n_singles_b
-       l_b = singles_b(i)
-       ASSERT (l_b <= N_det)
+     if(alpha_beta.or.spin_trace.or.beta_beta)then
+      do i=1,n_singles_b
+        l_b = singles_b(i)
+        ASSERT (l_b <= N_det)
 
-       lcol = psi_bilinear_matrix_transp_columns(l_b)
-       ASSERT (lcol <= N_det_beta_unique)
+        lcol = psi_bilinear_matrix_transp_columns(l_b)
+        ASSERT (lcol <= N_det_beta_unique)
 
-       tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, lcol)
-       l_a = psi_bilinear_matrix_transp_order(l_b)
-       do l= 1, N_states
-         c_1(l) = u_t(l,l_a) * u_t(l,k_a)
-       enddo
-       if(alpha_beta.or.spin_trace.or.beta_beta)then
+        tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, lcol)
+        l_a = psi_bilinear_matrix_transp_order(l_b)
+        do l= 1, N_states
+          c_1(l) = u_t(l,l_a) * u_t(l,k_a)
+        enddo
+
         ! increment the alpha/beta  part for single excitations
         if (nkeys+2 * elec_alpha_num .ge. sze_buff ) then
-          call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+!          call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+          call update_keys_values_n_states_local(keys,values,nkeys,dim1,n_st,big_array_local)
           nkeys = 0
         endif
          call orb_range_off_diag_single_to_all_states_ab_dm_buffer(tmp_det, tmp_det2,c_1,N_st,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
         ! increment the beta /beta  part for single excitations
         if (nkeys+4 * elec_alpha_num .ge. sze_buff) then
-          call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+!          call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+          call update_keys_values_n_states_local(keys,values,nkeys,dim1,n_st,big_array_local)
           nkeys = 0
         endif
         call orb_range_off_diag_single_to_all_states_bb_dm_buffer(tmp_det, tmp_det2,c_1,N_st,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
-       endif
-     enddo
-     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
-     nkeys = 0
+       enddo
+     endif
+
+!     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+!     nkeys = 0
 
      ! Compute Hij for all beta doubles
      ! ----------------------------------
@@ -478,7 +495,8 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
           c_1(l) = u_t(l,l_a) * u_t(l,k_a)
         enddo
         if (nkeys+4 .ge. sze_buff) then
-          call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+!          call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+          call update_keys_values_n_states_local(keys,values,nkeys,dim1,n_st,big_array_local)
           nkeys = 0
         endif
         call orb_range_off_diag_double_to_all_states_bb_dm_buffer(tmp_det(1,2),psi_det_beta_unique(1, lcol),c_1,N_st,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
@@ -487,8 +505,8 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
 
       enddo
      endif
-     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
-     nkeys = 0
+!     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+!     nkeys = 0
 
 
      ! Diagonal contribution
@@ -514,16 +532,28 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
        c_1(l) = u_t(l,k_a) * u_t(l,k_a)
      enddo
 
-     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
-     nkeys = 0
+     if (nkeys+elec_alpha_num*elec_alpha_num .ge. sze_buff) then
+!       call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+       call update_keys_values_n_states_local(keys,values,nkeys,dim1,n_st,big_array_local)
+       nkeys = 0
+     endif
+
      call orb_range_diag_to_all_states_2_rdm_dm_buffer(tmp_det,c_1,N_states,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
-     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+
+!     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
+     call update_keys_values_n_states_local(keys,values,nkeys,dim1,n_st,big_array_local)
      nkeys = 0
 
    end do
-    !$OMP END DO
+    !$OMP END DO NOWAIT
    deallocate(buffer, singles_a, singles_b, doubles, idx, keys, values)
-    !$OMP END PARALLEL
+   !$OMP CRITICAL
+   do i=1,N_states
+     big_array(:,:,:,:,i) = big_array(:,:,:,:,i) + big_array_local(i,:,:,:,:)
+   enddo
+   !$OMP END CRITICAL
+   deallocate(big_array_local)
+   !$OMP END PARALLEL
 
 end
 
@@ -550,22 +580,66 @@ subroutine update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,loc
 
  integer :: istate
  integer :: i,h1,h2,p1,p2
- call omp_set_lock(lock_2rdm)
+ integer, allocatable :: iorder(:)
+ integer*8, allocatable :: to_sort(:)
+
+ allocate(iorder(nkeys))
+ do i=1,nkeys
+   iorder(i) = i
+ enddo
+
+ ! If the lock is already taken, sort the keys while waiting for a faster access
+ if (.not.omp_test_lock(lock_2rdm)) then
+   allocate(to_sort(nkeys))
+   do i=1,nkeys
+     h1 = keys(1,iorder(i))
+     h2 = keys(2,iorder(i))-1
+     p1 = keys(3,iorder(i))-1
+     p2 = keys(4,iorder(i))-1
+     to_sort(i) = int(h1,8) + int(dim1,8)*(int(h2,8) + int(dim1,8)*(int(p1,8) + int(dim1,8)*int(p2,8)))
+   enddo
+   call i8sort(to_sort, iorder, nkeys)
+   deallocate(to_sort)
+   call omp_set_lock(lock_2rdm)
+ endif
 
 ! print*,'*************'
 ! print*,'updating'
 ! print*,'nkeys',nkeys
+ do istate = 1, N_st
+   do i = 1, nkeys
+    h1 = keys(1,iorder(i))
+    h2 = keys(2,iorder(i))
+    p1 = keys(3,iorder(i))
+    p2 = keys(4,iorder(i))
+    big_array(h1,h2,p1,p2,istate) = big_array(h1,h2,p1,p2,istate) + values(istate,iorder(i))
+   enddo
+ enddo
+ call omp_unset_lock(lock_2rdm)
+ deallocate(iorder)
+
+end
+
+subroutine update_keys_values_n_states_local(keys,values,nkeys,dim1,n_st,big_array_local)
+ use omp_lib
+ implicit none
+ integer, intent(in) :: n_st,nkeys,dim1
+ integer, intent(in) :: keys(4,nkeys)
+ double precision, intent(in) :: values(n_st,nkeys)
+ double precision, intent(inout) :: big_array_local(n_st,dim1,dim1,dim1,dim1)
+
+ integer :: istate
+ integer :: i,h1,h2,p1,p2
+
  do i = 1, nkeys
    h1 = keys(1,i)
    h2 = keys(2,i)
    p1 = keys(3,i)
    p2 = keys(4,i)
    do istate = 1, N_st
-!    print*,h1,h2,p1,p2,values(istate,i)
-    big_array(h1,h2,p1,p2,istate) += values(istate,i)
+    big_array_local(istate,h1,h2,p1,p2) = big_array_local(istate,h1,h2,p1,p2) + values(istate,i)
    enddo
  enddo
- call omp_unset_lock(lock_2rdm)
 
 end
 

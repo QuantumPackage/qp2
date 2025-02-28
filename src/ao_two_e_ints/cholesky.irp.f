@@ -178,7 +178,7 @@ END_PROVIDER
      rank_max = np
      ! Avoid too large arrays when there are many electrons
      if (elec_num > 10) then
-       rank_max = min(np,20*elec_num*elec_num)
+       rank_max = min(np,25*elec_num*elec_num)
      endif
 
      call mmap_create_d('', (/ ndim8, rank_max /), .False., .True., map)
