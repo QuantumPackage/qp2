@@ -107,7 +107,16 @@ def optimize_geometry(file, state, arguments):
     else:
         tolerance = 1.e-3
 
-    result = minimize(energy_function, x0, args=(file, state, arguments), method='BFGS', jac=None, tol=tolerance, options={'eps': 1.e-3})
+    result = minimize(energy_function, x0, args=(file, state, arguments),
+                      method='Powell',
+                      tol=tolerance,
+                      options={'xtol': tolerance, 'ftol': tolerance})
+    
+#    result = minimize(energy_function, x0, args=(file, state, arguments),
+#                      method='BFGS',
+#                      jac=None,
+#                      tol=tolerance,
+#                      options={'eps': 1.e-3})
     
     if result.success:
         print("Optimization successful!")
