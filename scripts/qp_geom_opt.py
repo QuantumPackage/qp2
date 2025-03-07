@@ -80,10 +80,16 @@ def get_coordinates():
     return np.array(ezfio.get_nuclei_nucl_coord())
 
 
+memo_energy = {}
 def energy_function(coord, file, state, arguments):
     """Wrapper for the energy calculation, ensuring coordinates are updated."""
+    h = np.array_str(coord)
+    if h in memo_energy:
+        return memo_energy[h]
+
     set_coordinates(coord)
     energy = get_energy(file, state, arguments)
+    memo_energy[h] = energy
 
     label = ezfio.get_nuclei_nucl_label()
     num_atoms = len(label)
