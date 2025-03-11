@@ -1,12 +1,3 @@
-BEGIN_PROVIDER [ logical, do_mo_cholesky ]
- implicit none
- BEGIN_DOC
- ! If True, use Cholesky vectors for MO integrals
- END_DOC
- do_mo_cholesky = do_ao_cholesky
-! do_mo_cholesky = .False.
-END_PROVIDER
-
  BEGIN_PROVIDER [ integer, cholesky_mo_num ]
 &BEGIN_PROVIDER [ integer, cholesky_mo_num_split, (1:5)]
  implicit none

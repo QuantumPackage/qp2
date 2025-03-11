@@ -22,22 +22,32 @@
  endif
 
  do istate = 1, N_states
-  do ipoint = 1, n_points_final_grid
    if(mu_of_r_potential.EQ."hf")then
-    mu_of_r_prov(ipoint,istate) =  mu_of_r_hf(ipoint)
+     do ipoint = 1, n_points_final_grid
+       mu_of_r_prov(ipoint,istate) =  mu_of_r_hf(ipoint)
+     enddo
    else if(mu_of_r_potential.EQ."hf_old")then
-    mu_of_r_prov(ipoint,istate) =  mu_of_r_hf_old(ipoint)
+     do ipoint = 1, n_points_final_grid
+       mu_of_r_prov(ipoint,istate) =  mu_of_r_hf_old(ipoint)
+     enddo
    else if(mu_of_r_potential.EQ."hf_sparse")then
-    mu_of_r_prov(ipoint,istate) =  mu_of_r_hf_sparse(ipoint)
+     do ipoint = 1, n_points_final_grid
+       mu_of_r_prov(ipoint,istate) =  mu_of_r_hf_sparse(ipoint)
+     enddo
    else if(mu_of_r_potential.EQ."cas_full".or.mu_of_r_potential.EQ."cas_truncated".or.mu_of_r_potential.EQ."pure_act")then
-    mu_of_r_prov(ipoint,istate) =  mu_of_r_psi_cas(ipoint,istate)
+     do ipoint = 1, n_points_final_grid
+       mu_of_r_prov(ipoint,istate) =  mu_of_r_psi_cas(ipoint,istate)
+     enddo
+   else if(mu_of_r_potential.EQ."proj")then
+     do ipoint = 1, n_points_final_grid
+       mu_of_r_prov(ipoint,istate) =  mu_of_r_projector_mo(ipoint)
+     enddo
    else
     print*,'you requested the following mu_of_r_potential'
     print*,mu_of_r_potential
     print*,'which does not correspond to any of the options for such keyword'
     stop
    endif
-  enddo
  enddo
 
  if (write_mu_of_r) then
@@ -201,7 +211,7 @@
  END_PROVIDER
 
 
- BEGIN_PROVIDER [double precision, mu_average_prov, (N_states)]
+BEGIN_PROVIDER [double precision, mu_average_prov, (N_states)]
  implicit none
  BEGIN_DOC
  ! average value of mu(r) weighted with the total one-e density and divided by the number of electrons
@@ -223,5 +233,94 @@
   enddo
   mu_average_prov(istate) = mu_average_prov(istate) / elec_num_grid_becke(istate)
  enddo
- END_PROVIDER
+END_PROVIDER
+
+BEGIN_PROVIDER [double precision, mu_average_prov2, (N_states)]
+ implicit none
+ BEGIN_DOC
+ ! average value of mu(r) weighted with square of the total one-e density
+ !
+ ! !!!!!! WARNING !!!!!! if no_core_density == .True. then all contributions from the core orbitals
+ !
+ ! in the one- and two-body density matrix are excluded
+ END_DOC
+ integer :: ipoint,istate
+ double precision :: weight,density,norm
+ mu_average_prov2 = 0.d0
+ do istate = 1, N_states
+  norm = 0.d0
+  do ipoint = 1, n_points_final_grid
+   weight =final_weight_at_r_vector(ipoint)
+   density = one_e_dm_and_grad_alpha_in_r(4,ipoint,istate) &
+           + one_e_dm_and_grad_beta_in_r(4,ipoint,istate)
+   if(mu_of_r_prov(ipoint,istate).gt.1.d+09)cycle
+   mu_average_prov2(istate) += mu_of_r_prov(ipoint,istate) * weight * density*density
+   norm = norm + density*density*weight
+  enddo
+  mu_average_prov2(istate) = mu_average_prov2(istate) / norm
+ enddo
+END_PROVIDER
+
+
+BEGIN_PROVIDER [double precision, mu_of_r_projector_mo, (n_points_final_grid) ]
+ implicit none
+ BEGIN_DOC
+ ! mu(r) computed with the projector onto the atomic basis
+ !  P_B(\mathbf{r},\mathbf{r}') = \sum_{ij} |
+ !  \chi_{i} \rangle \left[S^{-1}\right]_{ij} \langle \chi_{j} |
+ !  \] where $i$ and $j$ denote all atomic orbitals.
+ END_DOC
+
+ double precision, parameter :: factor = dsqrt(2.d0*dacos(-1.d0))
+ double precision, allocatable :: tmp(:,:)
+ integer :: ipoint
+
+
+ do ipoint=1,n_points_final_grid
+   mu_of_r_projector_mo(ipoint) = 0.d0
+   integer :: i,j
+   do j=1,n_inact_act_orb
+     i = list_inact_act(j)
+     mu_of_r_projector_mo(ipoint) = mu_of_r_projector_mo(ipoint) + &
+         mos_in_r_array_omp(i,ipoint) * mos_in_r_array_omp(i,ipoint)
+   enddo
+   do j=1,n_virt_orb
+     i = list_virt(j)
+     mu_of_r_projector_mo(ipoint) = mu_of_r_projector_mo(ipoint) + &
+         mos_in_r_array_omp(i,ipoint) * mos_in_r_array_omp(i,ipoint)
+   enddo
+ enddo
+
+ do ipoint=1,n_points_final_grid
+   ! epsilon
+   mu_of_r_projector_mo(ipoint) = 1.d0/(2.d0*dacos(-1.d0) * mu_of_r_projector_mo(ipoint)**(2.d0/3.d0))
+   ! mu
+   mu_of_r_projector_mo(ipoint) = 1.d0/dsqrt( 2.d0*mu_of_r_projector_mo(ipoint) )
+ enddo
+END_PROVIDER
+
+
+
+BEGIN_PROVIDER [double precision, mu_average_proj, (N_states)]
+ implicit none
+ BEGIN_DOC
+ ! average value of mu(r) weighted with the total one-e density and divided by the number of electrons
+ !
+ ! !!!!!! WARNING !!!!!! if no_core_density == .True. then all contributions from the core orbitals
+ !
+ ! in the one- and two-body density matrix are excluded
+ END_DOC
+ integer :: ipoint,istate
+ double precision :: weight,density
+ do istate = 1, N_states
+  mu_average_proj(istate) = 0.d0
+  do ipoint = 1, n_points_final_grid
+   weight =final_weight_at_r_vector(ipoint)
+   density = one_e_dm_and_grad_alpha_in_r(4,ipoint,istate) &
+           + one_e_dm_and_grad_beta_in_r(4,ipoint,istate)
+   mu_average_proj(istate) += mu_of_r_projector_mo(ipoint) * weight * density
+  enddo
+  mu_average_proj(istate) = mu_average_proj(istate) / elec_num_grid_becke(istate)
+ enddo
+END_PROVIDER
 
