@@ -58,7 +58,7 @@ do
 done
 i=primitives_normalized
 newfile=primitives_normalized_extra
-cp ${EZFIO_extra}/ao_basis/$i ${EZFIO_target}/ao_extra_basis/$newfile
+cp ${EZFIO_extra}/basis/$i ${EZFIO_target}/ao_extra_basis/$newfile
 
 echo "COPYING ALL DATA FROM "$EZFIO_extra"/aux_quantities/ to "${EZFIO_target}"/ao_extra_basis/"
 i=data_one_e_dm_tot_ao.gz

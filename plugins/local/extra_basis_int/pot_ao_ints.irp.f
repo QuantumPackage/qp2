@@ -1,3 +1,32 @@
+BEGIN_PROVIDER [ double precision, pot_vne_A_extra_basis, (ao_extra_num,ao_extra_num)]
+ implicit none
+  BEGIN_DOC
+  !
+  ! Computes the following integral :
+  ! $\sum_{R in nuclei} -Z <chi_i|1/|r-R||chi_j>$ 
+  !
+  !
+  ! where $\chi_i(r)$ AND $\chi_j(r)$ belongs to the extra basis 
+  END_DOC
+  integer :: mu,nu,k_nucl
+  double precision :: mu_in, R_nucl(3),charge_nucl, integral
+  double precision :: NAI_pol_mult_erf_ao_extra
+  mu_in = 10.d0**10
+  pot_vne_A_extra_basis = 0.d0
+  do mu = 1, ao_extra_num
+   do nu = 1, ao_extra_num
+    do k_nucl = 1, nucl_num
+     R_nucl(1:3) = nucl_coord_transp(1:3,k_nucl)
+     charge_nucl = nucl_charge(k_nucl)
+     integral = NAI_pol_mult_erf_ao_extra(mu, nu, mu_in, R_nucl)
+     pot_vne_A_extra_basis(nu,mu) += -integral * charge_nucl
+    enddo
+   enddo
+  enddo
+
+END_PROVIDER 
+
+
 
 double precision function NAI_pol_mult_erf_ao_extra(i_ao, j_ao, mu_in, C_center)
 
