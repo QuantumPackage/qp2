@@ -13,7 +13,8 @@ program extra_basis_int
 ! call routine_test_coul_1s
 ! call print_v_ne_extra_basis
 ! call print_v_ne_basis
- call test_v_ne_a_extra_basis
+! call test_v_ne_a_extra_basis
+ call print_v_ee_mixed_direct
  
 end
 
@@ -197,5 +198,21 @@ subroutine print_v_ne_basis
   enddo
  enddo
  print*,'accu = ',accu
+
+end
+
+subroutine print_v_ee_mixed_direct
+ implicit none
+ integer :: i,j,k,l
+ double precision :: ao_two_e_integral_mixed_direct
+ do i = 1, ao_num
+  do j = 1, ao_num
+   do k = 1, ao_extra_num
+    do l = 1, ao_extra_num
+     write(34,*)ao_two_e_integral_mixed_direct(i, j, k, l)
+    enddo
+   enddo
+  enddo
+ enddo
 
 end
