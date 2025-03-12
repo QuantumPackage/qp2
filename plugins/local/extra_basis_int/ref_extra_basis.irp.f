@@ -7,7 +7,8 @@ program pouet
 ! call ref_pot_ne_mixed
 ! call ref_pot_ne
 ! call ref_pot_ne_extra_mixed
- call ref_v_ee_mixed_direct
+! call ref_v_ee_mixed_direct
+ call ref_v_ee_mixed_exchange
 
 end
 
@@ -122,6 +123,22 @@ subroutine ref_v_ee_mixed_direct
  do i = 1, 15
   do j = 1, 15
    do k = 16, ao_num
+    do l = 16, ao_num
+     write(33,*)ao_two_e_integral(i, j, k, l)
+    enddo
+   enddo
+  enddo
+ enddo
+
+end
+
+subroutine ref_v_ee_mixed_exchange
+ implicit none
+ integer :: i,j,k,l
+ double precision :: ao_two_e_integral
+ do i = 1, 15
+  do j = 16, ao_num
+   do k = 1, 15
     do l = 16, ao_num
      write(33,*)ao_two_e_integral(i, j, k, l)
     enddo
