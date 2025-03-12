@@ -9,9 +9,9 @@ double precision function v_extra_nucl_extra_ao(i_ao,j_ao)
   ! $\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) v_ne^{extra}(r)$.
   !
   !
-  ! where BOTH $\chi_i(r)$ AND $\chi_j(r)$ belongs to the EXTRA basis 
+  ! where BOTH $\chi_i(r)$ AND $\chi_j(r)$ belongs to the EXTRA basis (system B)
   !
-  ! and v_ne^{extra}(r) is the Coulomb potential coming from the EXTRA nuclei
+  ! and v_ne^{extra}(r) is the Coulomb potential coming from the EXTRA nuclei (system B)
   END_DOC
  integer, intent(in) ::i_ao,j_ao
  double precision :: mu_in,charge,coord(3)
@@ -34,9 +34,9 @@ double precision function v_extra_nucl_ao(i_ao,j_ao)
   ! $\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) v_ne(r)$.
   !
   !
-  ! where BOTH $\chi_i(r)$ AND $\chi_j(r)$ belongs to the REGULAR basis 
+  ! where BOTH $\chi_i(r)$ AND $\chi_j(r)$ belongs to the REGULAR basis (system A)
   !
-  ! and v_ne(r) is the Coulomb potential coming from the EXTRA nuclei
+  ! and v_ne(r) is the Coulomb potential coming from the EXTRA nuclei (system B)
   END_DOC
  integer, intent(in) ::i_ao,j_ao
  integer :: i
@@ -59,9 +59,9 @@ double precision function v_nucl_extra_ao(i_ao,j_ao)
   ! $\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) v_ne(r)$.
   !
   !
-  ! where BOTH $\chi_i(r)$ AND $\chi_j(r)$ belongs to the EXTRA basis 
+  ! where BOTH $\chi_i(r)$ AND $\chi_j(r)$ belongs to the EXTRA basis (system B)
   !
-  ! and v_ne(r) is the Coulomb potential coming from the REGULAR nuclei
+  ! and v_ne(r) is the Coulomb potential coming from the REGULAR nuclei (system A)
   END_DOC
  integer, intent(in) ::i_ao,j_ao
  double precision :: mu_in,charge,coord(3)

@@ -5,7 +5,6 @@ BEGIN_PROVIDER [ double precision, pot_vne_A_extra_basis, (ao_extra_num,ao_extra
   ! Computes the following integral :
   ! $\sum_{R in the USUAL nuclei} -Z <chi_i|1/|r-R||chi_j>$ 
   !
-  !
   ! where $\chi_i(r)$ AND $\chi_j(r)$ belongs to the EXTRA basis 
   END_DOC
   integer :: mu,nu
