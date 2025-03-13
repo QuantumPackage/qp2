@@ -346,3 +346,12 @@ subroutine ao_ortho_cano_to_ao(A_ao,LDA_ao,A,LDA)
   deallocate(T)
 end
 
+
+BEGIN_PROVIDER [ double precision, mo_coef_spherical]
+ implicit none
+ BEGIN_DOC
+ ! MO coefficients in the basis of spherical harmonics AOs.
+ END_DOC
+ 
+END_PROVIDER
+
