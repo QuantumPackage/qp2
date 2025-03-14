@@ -30,6 +30,7 @@ BEGIN_PROVIDER [ double precision, trace_ao_one_e_ints]
 !          have the same number of functions
  END_DOC
  integer :: i,j
+ double precision :: accu
  double precision, allocatable :: inv_overlap_times_integrals(:,:) ! = h S^{-1}
  allocate(inv_overlap_times_integrals(ao_num,ao_num))
  ! routine that computes the product of two matrices, you can check it with 

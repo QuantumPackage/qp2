@@ -5,7 +5,9 @@ extra_basis
 Plugin to handle an extra basis, which is attached to the extra_nuclei.
 It is essentially a duplication of all important quantities (coefficients, exponents and so on) of the usual |AO| basis. 
 
-An interesting feature is the possibility to fit any basis made at most with "p" functions onto a purely "s" basis. 
+Check in the directory "tuto" for a simple example of how to create a fictious system "B" attached independently to a system "A"
+
+Another interesting feature is the possibility to fit any basis made at most with "p" functions onto a purely "s" basis. 
 This is done with the various scripts here: 
  
  - qp_fit_1s_basis : script that creates an |EZFIO| folder corresponding to an .xyz file and a basis fitted with only "s" functions
@@ -13,3 +15,4 @@ This is done with the various scripts here:
  
 Ex: 
 qp_add_extra_fit_system LiH.ezfio/ h2o.xyz # takes the EZFIO folder "LiH.ezfio" and creates all necessary additional basis and nuclei based on h2o.xyz, but only with 1s functions. 
+
