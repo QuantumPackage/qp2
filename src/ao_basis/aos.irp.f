@@ -22,6 +22,19 @@ BEGIN_PROVIDER [ integer, ao_shell, (ao_num) ]
  enddo
 END_PROVIDER
 
+BEGIN_PROVIDER [ integer, ao_sphe_num ]
+ implicit none
+ BEGIN_DOC
+ ! Number of spherical AOs
+ END_DOC
+ integer :: n, i
+ ao_sphe_num=0
+ do i=1,shell_num
+   n = shell_ang_mom(i)
+   ao_sphe_num += 2*n+1
+ enddo
+END_PROVIDER
+
 BEGIN_PROVIDER [ integer, ao_sphe_shell, (ao_sphe_num) ]
  implicit none
  BEGIN_DOC
