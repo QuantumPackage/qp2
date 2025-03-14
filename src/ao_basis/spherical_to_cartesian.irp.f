@@ -4,7 +4,8 @@
 ! First index is the index of the cartesian AO, obtained by ao_power_index
 ! Second index is the index of the spherical AO
 
-BEGIN_PROVIDER [ double precision, cart_to_sphe_0, (1,1) ]
+ BEGIN_PROVIDER [ double precision, cart_to_sphe_0, (1,1) ]
+&BEGIN_PROVIDER [ double precision, cart_to_sphe_norm_0, (1) ]
   implicit none
   BEGIN_DOC
 ! Spherical -> Cartesian Transformation matrix for l=0
@@ -12,10 +13,12 @@ BEGIN_PROVIDER [ double precision, cart_to_sphe_0, (1,1) ]
   cart_to_sphe_0 = 0.d0
 
   cart_to_sphe_0 ( 1, 1) = 1.0d0
+  cart_to_sphe_norm_0 (1) = 1.d0
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, cart_to_sphe_1, (3,3) ]
+ BEGIN_PROVIDER [ double precision, cart_to_sphe_1, (3,3) ]
+&BEGIN_PROVIDER [ double precision, cart_to_sphe_norm_1, (3) ]
   implicit none
   BEGIN_DOC
 ! Spherical -> Cartesian Transformation matrix for l=1
@@ -25,10 +28,14 @@ BEGIN_PROVIDER [ double precision, cart_to_sphe_1, (3,3) ]
   cart_to_sphe_1 ( 3, 1) = 1.0d0
   cart_to_sphe_1 ( 1, 2) = 1.0d0
   cart_to_sphe_1 ( 2, 3) = 1.0d0
+  cart_to_sphe_norm_1 (1) = 1.d0
+  cart_to_sphe_norm_1 (2) = 1.d0
+  cart_to_sphe_norm_1 (3) = 1.d0
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, cart_to_sphe_2, (6,5) ]
+ BEGIN_PROVIDER [ double precision, cart_to_sphe_2, (6,5) ]
+&BEGIN_PROVIDER [ double precision, cart_to_sphe_norm_2, (6) ]
   implicit none
   BEGIN_DOC
 ! Spherical -> Cartesian Transformation matrix for l=2
@@ -43,10 +50,14 @@ BEGIN_PROVIDER [ double precision, cart_to_sphe_2, (6,5) ]
   cart_to_sphe_2 ( 1, 4) = 0.86602540378443864676d0
   cart_to_sphe_2 ( 4, 4) = -0.86602540378443864676d0
   cart_to_sphe_2 ( 2, 5) = 1.0d0
+
+  cart_to_sphe_norm_2 = (/ 1.0d0, 1.7320508075688772d0, 1.7320508075688772d0, 1.0d0, &
+                           1.7320508075688772d0, 1.0d0 /)
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, cart_to_sphe_3, (10,7) ]
+ BEGIN_PROVIDER [ double precision, cart_to_sphe_3, (10,7) ]
+&BEGIN_PROVIDER [ double precision, cart_to_sphe_norm_3, (10) ]
   implicit none
   BEGIN_DOC
 ! Spherical -> Cartesian Transformation matrix for l=3
@@ -69,10 +80,15 @@ BEGIN_PROVIDER [ double precision, cart_to_sphe_3, (10,7) ]
   cart_to_sphe_3 ( 4, 6) = -1.0606601717798212866d0
   cart_to_sphe_3 ( 2, 7) = 1.0606601717798212866d0
   cart_to_sphe_3 ( 7, 7) = -0.790569415042094833d0
+
+  cart_to_sphe_norm_3 = (/ 1.0d0, 2.23606797749979d0, 2.23606797749979d0, &
+  2.23606797749979d0, 3.872983346207417d0, 2.23606797749979d0, 1.0d0, 2.23606797749979d0, &
+  2.23606797749979d0, 1.d00 /)
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, cart_to_sphe_4, (15,9) ]
+ BEGIN_PROVIDER [ double precision, cart_to_sphe_4, (15,9) ]
+&BEGIN_PROVIDER [ double precision, cart_to_sphe_norm_4, (15) ]
   implicit none
   BEGIN_DOC
 ! Spherical -> Cartesian Transformation matrix for l=4
@@ -107,10 +123,18 @@ BEGIN_PROVIDER [ double precision, cart_to_sphe_4, (15,9) ]
   cart_to_sphe_4 (11, 8) = 0.73950997288745200532d0
   cart_to_sphe_4 ( 2, 9) = 1.1180339887498948482d0
   cart_to_sphe_4 ( 7, 9) = -1.1180339887498948482d0
+
+  cart_to_sphe_norm_4 = (/ 1.0d0, 2.6457513110645907d0, 2.6457513110645907d0, &
+  3.4156502553198664d0, 5.916079783099616d0, 3.415650255319866d0, &
+  2.6457513110645907d0, 5.916079783099616d0, 5.916079783099616d0, &
+  2.6457513110645907d0, 1.0d0, 2.6457513110645907d0, 3.415650255319866d0, &
+  2.6457513110645907d0, 1.d00 /)
+
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, cart_to_sphe_5, (21,11) ]
+ BEGIN_PROVIDER [ double precision, cart_to_sphe_5, (21,11) ]
+&BEGIN_PROVIDER [ double precision, cart_to_sphe_norm_5, (21) ]
   implicit none
   BEGIN_DOC
 ! Spherical -> Cartesian Transformation matrix for l=5
@@ -163,10 +187,18 @@ BEGIN_PROVIDER [ double precision, cart_to_sphe_5, (21,11) ]
   cart_to_sphe_5 ( 2,11) = 1.169267933366856683d0
   cart_to_sphe_5 ( 7,11) = -1.5309310892394863114d0
   cart_to_sphe_5 (16,11) = 0.7015607600201140098d0
+
+  cart_to_sphe_norm_5 = (/ 1.0d0, 3.0d0, 3.0d0, 4.58257569495584d0, &
+  7.937253933193773d0, 4.58257569495584d0, 4.58257569495584d0, &
+  10.246950765959598d0, 10.246950765959598d0, 4.582575694955841d0, 3.0d0, &
+  7.937253933193773d0, 10.246950765959598d0, 7.937253933193773d0, 3.0d0, 1.0d0, &
+  3.0d0, 4.58257569495584d0, 4.582575694955841d0, 3.0d0, 1.d00 /)
+
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, cart_to_sphe_6, (28,13) ]
+ BEGIN_PROVIDER [ double precision, cart_to_sphe_6, (28,13) ]
+&BEGIN_PROVIDER [ double precision, cart_to_sphe_norm_6, (28) ]
   implicit none
   BEGIN_DOC
 ! Spherical -> Cartesian Transformation matrix for l=6
@@ -243,10 +275,22 @@ BEGIN_PROVIDER [ double precision, cart_to_sphe_6, (28,13) ]
   cart_to_sphe_6 ( 2,13) = 1.2151388809514737933d0
   cart_to_sphe_6 ( 7,13) = -1.9764235376052370825d0
   cart_to_sphe_6 (16,13) = 1.2151388809514737933d0
+
+  cart_to_sphe_norm_6 = (/ 1.0d0, 3.3166247903554003d0, 3.3166247903554003d0, &
+  5.744562646538029d0, 9.949874371066201d0, 5.744562646538029d0, &
+  6.797058187186571d0, 15.198684153570666d0, 15.198684153570664d0, &
+  6.797058187186572d0, 5.744562646538029d0, 15.198684153570666d0, &
+  19.621416870348583d0, 15.198684153570666d0, 5.744562646538029d0, &
+  3.3166247903554003d0, 9.949874371066201d0, 15.198684153570664d0, &
+  15.198684153570666d0, 9.9498743710662d0, 3.3166247903554003d0, 1.0d0, &
+  3.3166247903554003d0, 5.744562646538029d0, 6.797058187186572d0, &
+  5.744562646538029d0, 3.3166247903554003d0, 1.d00 /)
+
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, cart_to_sphe_7, (36,15) ]
+ BEGIN_PROVIDER [ double precision, cart_to_sphe_7, (36,15) ]
+&BEGIN_PROVIDER [ double precision, cart_to_sphe_norm_7, (36) ]
   implicit none
   BEGIN_DOC
 ! Spherical -> Cartesian Transformation matrix for l=7
@@ -355,10 +399,25 @@ BEGIN_PROVIDER [ double precision, cart_to_sphe_7, (36,15) ]
   cart_to_sphe_7 ( 7,15) = -2.4456993503903949804d0
   cart_to_sphe_7 (16,15) = 1.96875d0
   cart_to_sphe_7 (29,15) = -0.64725984928774934788d0
+
+  cart_to_sphe_norm_7 = (/ 1.0d0, 3.6055512754639896d0, 3.605551275463989d0, &
+  6.904105059069327d0, 11.958260743101398d0, 6.904105059069326d0, &
+  9.26282894152753d0, 20.712315177207984d0, 20.71231517720798d0, &
+  9.26282894152753d0, 9.26282894152753d0, 24.507141816213494d0, &
+  31.63858403911275d0, 24.507141816213494d0, 9.262828941527529d0, &
+  6.904105059069327d0, 20.712315177207984d0, 31.63858403911275d0, &
+  31.63858403911275d0, 20.71231517720798d0, 6.904105059069327d0, &
+  3.6055512754639896d0, 11.958260743101398d0, 20.71231517720798d0, &
+  24.507141816213494d0, 20.71231517720798d0, 11.958260743101398d0, &
+  3.6055512754639896d0, 1.0d0, 3.605551275463989d0, 6.904105059069326d0, &
+  9.26282894152753d0, 9.262828941527529d0, 6.904105059069327d0, &
+  3.6055512754639896d0, 1.d00 /)
+
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, cart_to_sphe_8, (45,17) ]
+ BEGIN_PROVIDER [ double precision, cart_to_sphe_8, (45,17) ]
+&BEGIN_PROVIDER [ double precision, cart_to_sphe_norm_8, (45) ]
   implicit none
   BEGIN_DOC
 ! Spherical -> Cartesian Transformation matrix for l=8
@@ -506,10 +565,28 @@ BEGIN_PROVIDER [ double precision, cart_to_sphe_8, (45,17) ]
   cart_to_sphe_8 ( 7,17) = -2.9348392204684739765d0
   cart_to_sphe_8 (16,17) = 2.9348392204684739765d0
   cart_to_sphe_8 (29,17) = -1.2945196985754986958d0
+
+  cart_to_sphe_norm_8 = (/ 1.0d0, 3.872983346207417d0, 3.872983346207417d0, &
+  8.062257748298551d0, 13.964240043768942d0, 8.06225774829855d0, &
+  11.958260743101398d0, 26.739483914241877d0, 26.739483914241877d0, &
+  11.958260743101398d0, 13.55939315961975d0, 35.874782229304195d0, &
+  46.31414470763765d0, 35.874782229304195d0, 13.55939315961975d0, &
+  11.958260743101398d0, 35.874782229304195d0, 54.79963503528103d0, &
+  54.79963503528103d0, 35.874782229304195d0, 11.958260743101398d0, &
+  8.062257748298551d0, 26.739483914241877d0, 46.31414470763765d0, &
+  54.79963503528103d0, 46.314144707637645d0, 26.739483914241877d0, &
+  8.06225774829855d0, 3.872983346207417d0, 13.964240043768942d0, &
+  26.739483914241877d0, 35.874782229304195d0, 35.874782229304195d0, &
+  26.739483914241877d0, 13.96424004376894d0, 3.8729833462074166d0, 1.0d0, &
+  3.872983346207417d0, 8.06225774829855d0, 11.958260743101398d0, &
+  13.55939315961975d0, 11.958260743101398d0, 8.06225774829855d0, &
+  3.8729833462074166d0, 1.d0 /)
+
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, cart_to_sphe_9, (55,19) ]
+ BEGIN_PROVIDER [ double precision, cart_to_sphe_9, (55,19) ]
+&BEGIN_PROVIDER [ double precision, cart_to_sphe_norm_9, (55) ]
   implicit none
   BEGIN_DOC
 ! Spherical -> Cartesian Transformation matrix for l=9
@@ -703,5 +780,28 @@ BEGIN_PROVIDER [ double precision, cart_to_sphe_9, (55,19) ]
   cart_to_sphe_9 (16,19) = 4.1179360680974030877d0
   cart_to_sphe_9 (29,19) = -2.3781845426185916576d0
   cart_to_sphe_9 (46,19) = 0.60904939217552380708d0
+
+  cart_to_sphe_norm_9 = (/ 1.0d0, 4.1231056256176615d0, 4.1231056256176615d0, &
+  9.219544457292889d0, 15.968719422671313d0, 9.219544457292889d0, &
+  14.86606874731851d0, 33.24154027718933d0, 33.24154027718933d0, &
+  14.866068747318508d0, 18.635603405463275d0, 49.30517214248421d0, &
+  63.652703529910404d0, 49.30517214248421d0, 18.635603405463275d0, &
+  18.635603405463275d0, 55.90681021638982d0, 85.39906322671229d0, &
+  85.39906322671229d0, 55.90681021638983d0, 18.635603405463275d0, &
+  14.86606874731851d0, 49.30517214248421d0, 85.39906322671229d0, &
+  101.04553429023969d0, 85.3990632267123d0, 49.30517214248421d0, &
+  14.866068747318508d0, 9.219544457292889d0, 33.24154027718933d0, &
+  63.652703529910404d0, 85.39906322671229d0, 85.3990632267123d0, &
+  63.65270352991039d0, 33.24154027718933d0, 9.219544457292887d0, &
+  4.1231056256176615d0, 15.968719422671313d0, 33.24154027718933d0, &
+  49.30517214248421d0, 55.90681021638983d0, 49.30517214248421d0, &
+  33.24154027718933d0, 15.968719422671313d0, 4.1231056256176615d0, 1.0d0, &
+  4.1231056256176615d0, 9.219544457292889d0, 14.866068747318508d0, &
+  18.635603405463275d0, 18.635603405463275d0, 14.866068747318508d0, &
+  9.219544457292887d0, 4.1231056256176615d0, 1.d0 /)
+
 END_PROVIDER
+
+
+
 

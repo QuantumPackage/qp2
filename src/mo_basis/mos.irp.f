@@ -347,11 +347,19 @@ subroutine ao_ortho_cano_to_ao(A_ao,LDA_ao,A,LDA)
 end
 
 
-BEGIN_PROVIDER [ double precision, mo_coef_spherical]
+BEGIN_PROVIDER [ double precision, mo_sphe_coef, (ao_sphe_num, mo_num) ]
  implicit none
  BEGIN_DOC
  ! MO coefficients in the basis of spherical harmonics AOs.
  END_DOC
- 
+ double precision, allocatable :: tmp(:,:)
+ allocate (tmp(ao_sphe_num,ao_num))
+
+ call dgemm('T','N',ao_sphe_num,ao_num,ao_num, 1.d0, &
+   ao_cart_to_sphe_coef,ao_num, &
+   mo_coef,size(mo_coef,1), 0.d0, &
+   mo_sphe_coef, size(mo_sphe_coef,1))
+
+ deallocate (tmp)
 END_PROVIDER
 

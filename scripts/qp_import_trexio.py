@@ -271,12 +271,11 @@ def write_ezfio(trexio_filename, filename):
     if basis_type.lower() == "gaussian" and not cartesian:
         try:
           import trexio_tools
-          fd, tmp = tempfile.mkstemp()
-          os.close(fd)
+          tmp = "cartesian_"+trexio_filename
           retcode = subprocess.call(["trexio", "convert-to", "-t", "cartesian", "-o", tmp, trexio_filename])
           trexio_file_cart = trexio.File(tmp,mode='r',back_end=trexio.TREXIO_AUTO)
           cartesian = trexio.read_ao_cartesian(trexio_file_cart)
-          os.unlink(tmp)
+          ezfio.set_trexio_trexio_file(tmp)
         except:
           pass
 

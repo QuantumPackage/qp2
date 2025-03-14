@@ -77,6 +77,7 @@ subroutine export_trexio(update,full_path)
     rc = trexio_read_metadata_code_num(f(k), code_num)
     if (rc == TREXIO_ATTR_MISSING) then
       i = 1
+      code_num = 0
       code(:) = ""
     else
       rc = trexio_read_metadata_code(f(k), code, 64)
@@ -97,6 +98,7 @@ subroutine export_trexio(update,full_path)
     rc = trexio_read_metadata_author_num(f(k), author_num)
     if (rc == TREXIO_ATTR_MISSING) then
       i = 1
+      author_num = 0
       author(:) = ""
     else
       rc = trexio_read_metadata_author(f(k), author, 64)
@@ -305,35 +307,46 @@ subroutine export_trexio(update,full_path)
 
     print *, 'AOs'
 
-    rc = trexio_write_ao_num(f(1), ao_num)
-    call trexio_assert(rc, TREXIO_SUCCESS)
+    if (export_cartesian) then
+      rc = trexio_write_ao_cartesian(f(1), 1)
+      call trexio_assert(rc, TREXIO_SUCCESS)
 
-    rc = trexio_write_ao_cartesian(f(1), 1)
-    call trexio_assert(rc, TREXIO_SUCCESS)
+      rc = trexio_write_ao_num(f(1), ao_num)
+      call trexio_assert(rc, TREXIO_SUCCESS)
 
-    rc = trexio_write_ao_shell(f(1), ao_shell)
-    call trexio_assert(rc, TREXIO_SUCCESS)
+      rc = trexio_write_ao_shell(f(1), ao_shell)
+      call trexio_assert(rc, TREXIO_SUCCESS)
 
-    if (ezfio_convention >= 20250211) then
-      rc = trexio_write_ao_normalization(f(1), ao_coef_normalization_factor)
+      if (ezfio_convention >= 20250211) then
+        rc = trexio_write_ao_normalization(f(1), ao_coef_normalization_factor)
+      else
+
+        allocate(factor(ao_num))
+        do i=1,ao_num
+          l = ao_first_of_shell(ao_shell(i))
+          factor(i) = (ao_coef_normalized(i,1)+tiny(1.d0))/(ao_coef_normalized(l,1)+tiny(1.d0))
+        enddo
+        rc = trexio_write_ao_normalization(f(1), factor)
+        deallocate(factor)
+      endif
+
+      call trexio_assert(rc, TREXIO_SUCCESS)
+
+
     else
-      integer :: pow0(3), powA(3), nz
-      double precision :: normA, norm0, C_A(3), overlap_x, overlap_z, overlap_y, c
-      nz=100
+      rc = trexio_write_ao_cartesian(f(1), 0)
+      call trexio_assert(rc, TREXIO_SUCCESS)
 
-      C_A(1) = 0.d0
-      C_A(2) = 0.d0
-      C_A(3) = 0.d0
+      rc = trexio_write_ao_num(f(1), ao_sphe_num)
+      call trexio_assert(rc, TREXIO_SUCCESS)
 
-      allocate(factor(ao_num))
-      do i=1,ao_num
-        l = ao_first_of_shell(ao_shell(i))
-        factor(i) = (ao_coef_normalized(i,1)+tiny(1.d0))/(ao_coef_normalized(l,1)+tiny(1.d0))
-      enddo
-      rc = trexio_write_ao_normalization(f(1), factor)
-      deallocate(factor)
+      rc = trexio_write_ao_shell(f(1), ao_sphe_shell)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+
+      rc = trexio_write_ao_normalization(f(1), ao_sphe_coef_normalization_factor)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+
     endif
-    call trexio_assert(rc, TREXIO_SUCCESS)
 
   endif
 
@@ -341,23 +354,45 @@ subroutine export_trexio(update,full_path)
 ! ------------------
 
   if (export_ao_one_e_ints) then
-    print *, 'AO one-e integrals'
 
-    rc = trexio_write_ao_1e_int_overlap(f(1),ao_overlap)
-    call trexio_assert(rc, TREXIO_SUCCESS)
+    double precision, allocatable :: tmp_ao(:,:)
+    if (export_cartesian) then
+      print *, 'AO one-e integrals (cartesian)'
 
-    rc = trexio_write_ao_1e_int_kinetic(f(1),ao_kinetic_integrals)
-    call trexio_assert(rc, TREXIO_SUCCESS)
-
-    rc = trexio_write_ao_1e_int_potential_n_e(f(1),ao_integrals_n_e)
-    call trexio_assert(rc, TREXIO_SUCCESS)
-
-    if (do_pseudo) then
-      rc = trexio_write_ao_1e_int_ecp(f(1), ao_pseudo_integrals_local + ao_pseudo_integrals_non_local)
+      rc = trexio_write_ao_1e_int_overlap(f(1),ao_overlap)
       call trexio_assert(rc, TREXIO_SUCCESS)
-    endif
 
-    rc = trexio_write_ao_1e_int_core_hamiltonian(f(1),ao_one_e_integrals)
+      rc = trexio_write_ao_1e_int_kinetic(f(1),ao_kinetic_integrals)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+
+      rc = trexio_write_ao_1e_int_potential_n_e(f(1),ao_integrals_n_e)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+
+      if (do_pseudo) then
+        rc = trexio_write_ao_1e_int_ecp(f(1), ao_pseudo_integrals)
+        call trexio_assert(rc, TREXIO_SUCCESS)
+      endif
+
+      rc = trexio_write_ao_1e_int_core_hamiltonian(f(1),ao_one_e_integrals)
+    else
+      print *, 'AO one-e integrals (spherical)'
+
+      rc = trexio_write_ao_1e_int_overlap(f(1),ao_sphe_overlap)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+
+      rc = trexio_write_ao_1e_int_kinetic(f(1),ao_sphe_kinetic_integrals)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+
+      rc = trexio_write_ao_1e_int_potential_n_e(f(1),ao_sphe_integrals_n_e)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+
+      if (do_pseudo) then
+        rc = trexio_write_ao_1e_int_ecp(f(1), ao_sphe_pseudo_integrals)
+        call trexio_assert(rc, TREXIO_SUCCESS)
+      endif
+
+      rc = trexio_write_ao_1e_int_core_hamiltonian(f(1),ao_sphe_one_e_integrals)
+    endif
     call trexio_assert(rc, TREXIO_SUCCESS)
   end if
 
@@ -465,8 +500,13 @@ subroutine export_trexio(update,full_path)
       call trexio_assert(rc, TREXIO_SUCCESS)
     enddo
 
-    rc = trexio_write_mo_coefficient(f(1), mo_coef)
-    call trexio_assert(rc, TREXIO_SUCCESS)
+    if (export_cartesian) then
+      rc = trexio_write_mo_coefficient(f(1), mo_coef)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+    else
+      rc = trexio_write_mo_coefficient(f(1), mo_sphe_coef)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+    endif
 
     if ( (trim(mo_label) == 'Canonical').and. &
          (export_mo_two_e_ints_cholesky.or.export_mo_two_e_ints) ) then
