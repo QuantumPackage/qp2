@@ -14,8 +14,8 @@ END_PROVIDER
   implicit none
   n_c_a_prov = n_core_inact_orb * n_act_orb
   n_c_v_prov = n_core_inact_orb * n_virt_orb
-  n_a_v_prov = n_act_orb * n_virt_orb 
- END_PROVIDER 
+  n_a_v_prov = n_act_orb * n_virt_orb
+ END_PROVIDER
 
  BEGIN_PROVIDER [integer, excit, (2,nMonoEx)]
 &BEGIN_PROVIDER [character*3, excit_class, (nMonoEx)]
@@ -28,7 +28,7 @@ END_PROVIDER
   BEGIN_DOC
   ! a list of the orbitals involved in the excitation
   END_DOC
-  
+
   implicit none
   integer                        :: i,t,a,ii,tt,aa,indx,indx_tmp
   indx=0
@@ -48,7 +48,7 @@ END_PROVIDER
       mat_idx_c_a(ii,tt) = indx
     end do
   end do
-  
+
   indx_tmp = 0
   do ii=1,n_core_inact_orb
     i=list_core_inact(ii)
@@ -61,11 +61,11 @@ END_PROVIDER
       indx_tmp += 1
       list_idx_c_v(1,indx_tmp) = indx
       list_idx_c_v(2,indx_tmp) = ii
-      list_idx_c_v(3,indx_tmp) = aa 
+      list_idx_c_v(3,indx_tmp) = aa
       mat_idx_c_v(ii,aa) = indx
     end do
   end do
-  
+
   indx_tmp = 0
   do tt=1,n_act_orb
     t=list_act(tt)
@@ -82,7 +82,7 @@ END_PROVIDER
       mat_idx_a_v(tt,aa) = indx
     end do
   end do
-  
+
   if (bavard) then
     write(6,*) ' Filled the table of the Monoexcitations '
     do indx=1,nMonoEx
@@ -90,7 +90,7 @@ END_PROVIDER
           ,excit(2,indx),'  ',excit_class(indx)
     end do
   end if
-  
+
 END_PROVIDER
 
  BEGIN_PROVIDER [real*8, gradvec2, (nMonoEx)]
@@ -104,7 +104,7 @@ END_PROVIDER
   implicit none
   integer                        :: i,t,a,indx
   real*8                         :: gradvec_it,gradvec_ia,gradvec_ta
-  
+
   indx=0
   norm_grad_vec2_tab = 0.d0
   do i=1,n_core_inact_orb
@@ -114,7 +114,7 @@ END_PROVIDER
       norm_grad_vec2_tab(1) += gradvec2(indx)*gradvec2(indx)
     end do
   end do
-  
+
   do i=1,n_core_inact_orb
     do a=1,n_virt_orb
       indx+=1
@@ -122,7 +122,7 @@ END_PROVIDER
       norm_grad_vec2_tab(2) += gradvec2(indx)*gradvec2(indx)
     end do
   end do
-  
+
   do t=1,n_act_orb
     do a=1,n_virt_orb
       indx+=1
@@ -130,7 +130,7 @@ END_PROVIDER
       norm_grad_vec2_tab(3) += gradvec2(indx)*gradvec2(indx)
     end do
   end do
-  
+
   norm_grad_vec2=0.d0
   do indx=1,nMonoEx
     norm_grad_vec2+=gradvec2(indx)*gradvec2(indx)
@@ -144,7 +144,7 @@ END_PROVIDER
    write(6,*) ' Norm of the orbital gradient (via D, P and integrals): ', norm_grad_vec2
    write(6,*)
   endif
-  
+
 END_PROVIDER
 
 real*8 function gradvec_it(i,t)
@@ -154,23 +154,30 @@ real*8 function gradvec_it(i,t)
   END_DOC
   implicit none
   integer                        :: i,t
-  
+
   integer                        :: ii,tt,v,vv,x,y
   integer                        :: x3,y3
   double precision :: bielec_PQxx_no
-  
+
   ii=list_core_inact(i)
   tt=list_act(t)
   gradvec_it=2.D0*(Fipq(tt,ii)+Fapq(tt,ii))
   gradvec_it-=occnum(tt)*Fipq(ii,tt)
-  do v=1,n_act_orb ! active 
-    vv=list_act(v)
-    do x=1,n_act_orb ! active 
-      x3=x+n_core_inact_orb ! list_act(x) 
-      do y=1,n_act_orb ! active
-        y3=y+n_core_inact_orb ! list_act(y)
+  do y=1,n_act_orb ! active
+!   y3=y+n_core_inact_orb ! list_act(y)
+    do x=1,n_act_orb ! active
+!      x3=x+n_core_inact_orb ! list_act(x)
+      do v=1,n_act_orb ! active
+        vv=list_act(v)
         !                Gamma(2)  a a a a      1/r12      i  a  a  a
-        gradvec_it-=2.D0*P0tuvx_no(t,v,x,y)*bielec_PQxx_no(ii,vv,x3,y3)
+!        gradvec_it-=2.D0*P0tuvx_no(t,v,x,y)*bielec_PQxx_no(ii,vv,x3,y3)
+         integer :: ichol
+         double precision :: tmp
+         tmp = 0.d0
+         do ichol=1,cholesky_mo_num
+           tmp = tmp + cholesky_no_total_transp(ichol,vv,ii) * cholesky_no_total_transp(ichol,list_act(x),list_act(y))
+         enddo
+         gradvec_it = gradvec_it - 2.D0*P0tuvx_no(t,v,x,y)*tmp
       end do
     end do
   end do
@@ -183,12 +190,12 @@ real*8 function gradvec_ia(i,a)
   END_DOC
   implicit none
   integer                        :: i,a,ii,aa
-  
+
   ii=list_core_inact(i)
   aa=list_virt(a)
   gradvec_ia=2.D0*(Fipq(aa,ii)+Fapq(aa,ii))
   gradvec_ia*=2.D0
-  
+
 end function gradvec_ia
 
 real*8 function gradvec_ta(t,a)
@@ -198,7 +205,7 @@ real*8 function gradvec_ta(t,a)
   END_DOC
   implicit none
   integer                        :: t,a,tt,aa,v,vv,x,y
-  
+
   tt=list_act(t)
   aa=list_virt(a)
   gradvec_ta=0.D0
@@ -211,6 +218,6 @@ real*8 function gradvec_ta(t,a)
     end do
   end do
   gradvec_ta*=2.D0
-  
+
 end function gradvec_ta
 

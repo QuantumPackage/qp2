@@ -84,6 +84,7 @@ def write_ezfio(trexio_filename, filename):
 
     ezfio.set_file(filename)
     ezfio.set_trexio_trexio_file(trexio_filename)
+    ezfio.set_ezfio_files_ezfio_convention(20250211)
 
     print("Nuclei\t\t...\t", end=' ')
 
@@ -274,12 +275,11 @@ def write_ezfio(trexio_filename, filename):
     if basis_type.lower() == "gaussian" and not cartesian:
         try:
           import trexio_tools
-          fd, tmp = tempfile.mkstemp()
-          os.close(fd)
+          tmp = "cartesian_"+trexio_filename
           retcode = subprocess.call(["trexio", "convert-to", "-t", "cartesian", "-o", tmp, trexio_filename])
           trexio_file_cart = trexio.File(tmp,mode='r',back_end=trexio.TREXIO_AUTO)
           cartesian = trexio.read_ao_cartesian(trexio_file_cart)
-          os.unlink(tmp)
+          ezfio.set_trexio_trexio_file(tmp)
         except:
           pass
 
@@ -319,8 +319,8 @@ def write_ezfio(trexio_filename, filename):
                 power_x.append(x)
                 power_y.append(y)
                 power_z.append(z)
-                coefficient.append(coef[i])
-                exponent.append(expo[i])
+                coefficient.append(list(coef[i]))
+                exponent.append(list(expo[i]))
                 num_prim.append(num_prim0[i])
 
         assert (len(coefficient) == ao_num)
@@ -330,14 +330,14 @@ def write_ezfio(trexio_filename, filename):
 
         prim_num_max = max( [ len(x) for x in coefficient ] )
 
-        ao_normalization = trexio.read_ao_normalization(trexio_file_cart)
-        for i, coef in enumerate(coefficient):
-           for j in range(len(coef)):
-              coef[j] *= ao_normalization[i]
-
         for i in range(ao_num):
             coefficient[i] += [0. for j in range(len(coefficient[i]), prim_num_max)]
             exponent   [i] += [0. for j in range(len(exponent[i]), prim_num_max)]
+
+        ao_normalization = trexio.read_ao_normalization(trexio_file_cart)
+        for i in range(ao_num):
+           for j in range(prim_num_max):
+               coefficient[i][j] *= ao_normalization[i]
 
         coefficient = reduce(lambda x, y: x + y, coefficient, [])
         exponent    = reduce(lambda x, y: x + y, exponent   , [])
@@ -348,6 +348,7 @@ def write_ezfio(trexio_filename, filename):
             for j in range(i, len(coefficient), prim_num_max):
                 coef.append(coefficient[j])
                 expo.append(exponent[j])
+
 
         ezfio.set_ao_basis_ao_coef(coef)
         ezfio.set_ao_basis_ao_expo(expo)

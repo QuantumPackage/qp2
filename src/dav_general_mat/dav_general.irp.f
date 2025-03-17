@@ -82,7 +82,7 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
   nproc_target = nproc
   double precision :: rss
   integer :: maxab
-  maxab = sze 
+  maxab = sze
 
   m=1
   disk_based = .False.
@@ -204,7 +204,7 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
       u_in(i,k) = r1*dcos(r2)
     enddo
   enddo
-  ! Normalize all states 
+  ! Normalize all states
   do k=1,N_st_diag
     call normalize(u_in(:,k),sze)
   enddo
@@ -228,20 +228,13 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
       shift  = N_st_diag*(iter-1)
       shift2 = N_st_diag*iter
 
-      if ((iter > 1).or.(itertot == 1)) then
-        ! Compute |W_k> = \sum_i |i><i|H|u_k>
-        ! -----------------------------------
+      ! Compute |W_k> = \sum_i |i><i|H|u_k>
+      ! -----------------------------------
 
-         ! Gram-Smitt to orthogonalize all new guess with the previous vectors 
-          call ortho_qr(U,size(U,1),sze,shift2)
-          call ortho_qr(U,size(U,1),sze,shift2)
+       ! Gram-Smitt to orthogonalize all new guess with the previous vectors
+      call ortho_qr(U,size(U,1),sze,shift2)
 
-!            call H_S2_u_0_nstates_openmp(W(:,shift+1),U(:,shift+1),N_st_diag,sze)
-            call hpsi(W(:,shift+1),U(:,shift+1),N_st_diag,sze,h_mat)
-      else
-         ! Already computed in update below
-         continue
-      endif
+      call hpsi(W(:,shift+1),U(:,shift+1),N_st_diag,sze,h_mat)
 
       ! Compute h_kl = <u_k | W_l> = <u_k| H |u_l>
       ! -------------------------------------------
@@ -311,12 +304,12 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
         do i=1,sze
           U(i,shift2+k) =  &
             (lambda(k) * U(i,shift2+k) - W(i,shift2+k) )      &
-              /max(H_jj(i) - lambda (k),1.d-2)
+              /max(dabs(H_jj(i) - lambda (k)),1.d-2) * dsign(1d0,H_jj(i) - lambda (k))
         enddo
 
         if (k <= N_st) then
           residual_norm(k) = u_dot_u(U(:,shift2+k),sze)
-          to_print(1,k) = lambda(k) 
+          to_print(1,k) = lambda(k)
           to_print(2,k) = residual_norm(k)
         endif
       enddo
@@ -324,7 +317,7 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
 
 
       if ((itertot>1).and.(iter == 1)) then
-        !don't print 
+        !don't print
         continue
       else
         write(*,'(1X,I3,1X,100(1X,F16.10,1X,F11.6,1X,ES11.3))') iter-1, to_print(1:2,1:N_st)
@@ -333,11 +326,11 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
       ! Check convergence
       if (iter > 1) then
           converged = dabs(maxval(residual_norm(1:N_st))) < threshold_davidson
-      endif   
-      
+      endif
+
 
       do k=1,N_st
-        if (residual_norm(k) > 1.e8) then
+        if (residual_norm(k) > 1.d8) then
           print *, 'Davidson failed'
           stop -1
         endif
@@ -365,13 +358,15 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
 
     call dgemm('N','N', sze, N_st_diag, shift2, 1.d0,      &
         U, size(U,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
+
     do k=1,N_st_diag
       do i=1,sze
         U(i,k) = u_in(i,k)
       enddo
     enddo
-      call ortho_qr(U,size(U,1),sze,N_st_diag)
-      call ortho_qr(U,size(U,1),sze,N_st_diag)
+
+    call ortho_qr(U,size(U,1),sze,N_st_diag)
+
     do j=1,N_st_diag
       k=1
       do while ((k<sze).and.(U(k,j) == 0.d0))
@@ -412,7 +407,7 @@ subroutine hpsi(v,u,N_st,sze,h_mat)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $v = H | u \rangle$ and 
+  ! Computes $v = H | u \rangle$ and
   END_DOC
   integer, intent(in)              :: N_st,sze
   double precision, intent(in)     :: u(sze,N_st),h_mat(sze,sze)

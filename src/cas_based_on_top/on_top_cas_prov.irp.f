@@ -15,14 +15,17 @@
  pure_act_on_top_of_r = 0.d0
   do l = 1, n_act_orb
    phi_l = act_mos_in_r_array(l,ipoint)
+   if (dabs(phi_l) < 1.d-12) cycle
    do k = 1, n_act_orb
-    phi_k = act_mos_in_r_array(k,ipoint)
+    phi_k = act_mos_in_r_array(k,ipoint) * phi_l
+    if (dabs(phi_k) < 1.d-12) cycle
      do j = 1, n_act_orb
-      phi_j = act_mos_in_r_array(j,ipoint)
+      phi_j = act_mos_in_r_array(j,ipoint) * phi_k
+      if (dabs(phi_j) < 1.d-12) cycle
       do i = 1, n_act_orb
-       phi_i = act_mos_in_r_array(i,ipoint)
-       !                                       1 2 1 2
-       pure_act_on_top_of_r += act_2_rdm_ab_mo(i,j,k,l,istate) * phi_i * phi_j * phi_k * phi_l
+       phi_i = act_mos_in_r_array(i,ipoint) * phi_j
+       !                                                             1 2 1 2
+       pure_act_on_top_of_r = pure_act_on_top_of_r + act_2_rdm_ab_mo(i,j,k,l,istate) * phi_i !* phi_j * phi_k * phi_l
      enddo
     enddo
    enddo

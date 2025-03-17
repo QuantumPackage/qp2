@@ -14,9 +14,8 @@ end
 
 subroutine run
  implicit none
- call print_mol_properties
- print *, psi_energy + nuclear_repulsion
- call print_energy_components
+  call print_mol_properties
+  call print_energy_components
 ! print *, 'E(HF) = ', HF_energy
  print *, 'E(CI) = ', psi_energy + nuclear_repulsion
 ! print *, ''

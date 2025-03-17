@@ -3,37 +3,53 @@ BEGIN_PROVIDER [real*8, Fipq, (mo_num,mo_num) ]
    ! the inactive Fock matrix, in molecular orbitals
    END_DOC
    implicit none
-   integer                        :: p,q,k,kk,t,tt,u,uu
-   double precision :: bielec_pxxq_no, bielec_pqxx_no
-   
+   integer                        :: i,p,q,k,kk,t,tt,u,uu
+
    do q=1,mo_num
      do p=1,mo_num
        Fipq(p,q)=one_ints_no(p,q)
      end do
    end do
-   
+
    ! the inactive Fock matrix
    do k=1,n_core_inact_orb
      kk=list_core_inact(k)
-     do q=1,mo_num
-       do p=1,mo_num
-         Fipq(p,q)+=2.D0*bielec_pqxx_no(p,q,k,k) -bielec_pxxq_no(p,k,k,q)
-       end do
-     end do
+!     do q=1,mo_num
+!       do p=1,mo_num
+!         do i=1,cholesky_mo_num
+!           Fipq(p,q) = Fipq(p,q) + 2.d0* cholesky_no_total_transp(i,p,q) * cholesky_no_total_transp(i,kk,kk)
+!         enddo
+!       end do
+!     end do
+     call dgemv('T', cholesky_mo_num, mo_num*mo_num, 2.d0, &
+                 cholesky_no_total_transp, cholesky_mo_num, &
+                 cholesky_no_total_transp(1,kk,kk), 1, 1.d0, &
+                 Fipq, 1)
+
+!     do q=1,mo_num
+!       do p=1,mo_num
+!         do i=1,cholesky_mo_num
+!           Fipq(p,q) = Fipq(p,q) - cholesky_no_total_transp(i,p,kk) * cholesky_no_total_transp(i,kk,q)
+!         enddo
+!       end do
+!     end do
+     call dgemm('T','N', mo_num, mo_num, cholesky_mo_num, -1.d0, &
+                 cholesky_no_total_transp(1,1,kk), cholesky_mo_num, &
+                 cholesky_no_total_transp(1,kk,1), cholesky_mo_num*mo_num, 1.d0, &
+                 Fipq, mo_num)
    end do
-   
+
    if (bavard) then
-     integer                        :: i
      write(6,*)
      write(6,*) ' the diagonal of the inactive effective Fock matrix '
      write(6,'(5(i3,F12.5))') (i,Fipq(i,i),i=1,mo_num)
      write(6,*)
    end if
-   
-   
+
+
 END_PROVIDER
- 
- 
+
+
 BEGIN_PROVIDER [real*8, Fapq, (mo_num,mo_num) ]
    BEGIN_DOC
    ! the active active Fock matrix, in molecular orbitals
@@ -45,27 +61,42 @@ BEGIN_PROVIDER [real*8, Fapq, (mo_num,mo_num) ]
    END_DOC
    implicit none
    integer                        :: p,q,k,kk,t,tt,u,uu
-   double precision :: bielec_pxxq_no, bielec_pqxx_no
-   
+
    Fapq = 0.d0
-   
+
    ! the active Fock matrix, D0tu is diagonal
    do t=1,n_act_orb
      tt=list_act(t)
-     do q=1,mo_num
-       do p=1,mo_num
-         Fapq(p,q)+=occnum(tt)                                       &
-             *(bielec_pqxx_no(p,q,tt,tt)-0.5D0*bielec_pxxq_no(p,tt,tt,q))
-       end do
-     end do
+!     do q=1,mo_num
+!       do p=1,mo_num
+!         do i=1,cholesky_mo_num
+!           Fapq(p,q) = Fapq(p,q) + occnum(tt)* cholesky_no_total_transp(i,p,q) * cholesky_no_total_transp(i,tt,tt)
+!         enddo
+!       end do
+!     end do
+     call dgemv('T', cholesky_mo_num, mo_num*mo_num, occnum(tt), &
+                 cholesky_no_total_transp, cholesky_mo_num, &
+                 cholesky_no_total_transp(1,tt,tt), 1, 1.d0, &
+                 Fapq, 1)
+!     do q=1,mo_num
+!       do p=1,mo_num
+!         do i=1,cholesky_mo_num
+!           Fapq(p,q) = Fapq(p,q) - 0.5d0*occnum(tt)*cholesky_no_total_transp(i,p,tt) * cholesky_no_total_transp(i,tt,q)
+!         enddo
+!       end do
+!     end do
+     call dgemm('T','N', mo_num, mo_num, cholesky_mo_num, -0.5d0*occnum(tt), &
+                 cholesky_no_total_transp(1,1,tt), cholesky_mo_num, &
+                 cholesky_no_total_transp(1,tt,1), cholesky_mo_num*mo_num, 1.d0, &
+                 Fapq, mo_num)
    end do
-   
+
    if (bavard) then
      integer                        :: i
      write(6,*)
      write(6,*) ' the effective Fock matrix over MOs'
      write(6,*)
-     
+
      write(6,*)
      write(6,*) ' the diagonal of the inactive effective Fock matrix '
      write(6,'(5(i3,F12.5))') (i,Fipq(i,i),i=1,mo_num)
@@ -75,35 +106,35 @@ BEGIN_PROVIDER [real*8, Fapq, (mo_num,mo_num) ]
      write(6,'(5(i3,F12.5))') (i,Fapq(i,i),i=1,mo_num)
      write(6,*)
    end if
-   
-   
+
+
 END_PROVIDER
- 
- BEGIN_PROVIDER [ double precision, mcscf_fock_alpha_ao, (ao_num, ao_num)] 
-&BEGIN_PROVIDER [ double precision, mcscf_fock_beta_ao, (ao_num, ao_num)] 
+
+ BEGIN_PROVIDER [ double precision, mcscf_fock_alpha_ao, (ao_num, ao_num)]
+&BEGIN_PROVIDER [ double precision, mcscf_fock_beta_ao, (ao_num, ao_num)]
  implicit none
  BEGIN_DOC
-  ! mcscf_fock_alpha_ao are set to usual Fock like operator but computed with the MCSCF densities on the AO basis 
+  ! mcscf_fock_alpha_ao are set to usual Fock like operator but computed with the MCSCF densities on the AO basis
  END_DOC
  SCF_density_matrix_ao_alpha = D0tu_alpha_ao
  SCF_density_matrix_ao_beta = D0tu_beta_ao
- soft_touch SCF_density_matrix_ao_alpha SCF_density_matrix_ao_beta 
+ soft_touch SCF_density_matrix_ao_alpha SCF_density_matrix_ao_beta
  mcscf_fock_beta_ao = fock_matrix_ao_beta
  mcscf_fock_alpha_ao = fock_matrix_ao_alpha
-END_PROVIDER 
+END_PROVIDER
 
 
- BEGIN_PROVIDER [ double precision, mcscf_fock_alpha_mo, (mo_num, mo_num)] 
-&BEGIN_PROVIDER [ double precision, mcscf_fock_beta_mo, (mo_num, mo_num)] 
+ BEGIN_PROVIDER [ double precision, mcscf_fock_alpha_mo, (mo_num, mo_num)]
+&BEGIN_PROVIDER [ double precision, mcscf_fock_beta_mo, (mo_num, mo_num)]
  implicit none
  BEGIN_DOC
-  ! Mo_mcscf_fock_alpha are set to usual Fock like operator but computed with the MCSCF densities on the MO basis 
+  ! Mo_mcscf_fock_alpha are set to usual Fock like operator but computed with the MCSCF densities on the MO basis
  END_DOC
 
  call ao_to_mo(mcscf_fock_alpha_ao,ao_num,mcscf_fock_alpha_mo,mo_num)
  call ao_to_mo(mcscf_fock_beta_ao,ao_num,mcscf_fock_beta_mo,mo_num)
 
-END_PROVIDER 
+END_PROVIDER
 
  BEGIN_PROVIDER [ double precision, mcscf_fock_mo, (mo_num,mo_num) ]
 &BEGIN_PROVIDER [ double precision, mcscf_fock_diag_mo, (mo_num)]
@@ -118,13 +149,13 @@ END_PROVIDER
    !       |-----------------------|
    !       |  Fcv  |  F^a  |  Rvv  |
    !
-   ! C: Core, O: Open, V: Virtual 
-   ! 
+   ! C: Core, O: Open, V: Virtual
+   !
    ! Rcc = Acc Fcc^a + Bcc Fcc^b
    ! Roo = Aoo Foo^a + Boo Foo^b
    ! Rvv = Avv Fvv^a + Bvv Fvv^b
    ! Fcv = (F^a + F^b)/2
-   ! 
+   !
    ! F^a: Fock matrix alpha (MO), F^b: Fock matrix beta (MO)
    ! A,B: Coupling parameters
    !
@@ -133,7 +164,7 @@ END_PROVIDER
    !       cc   oo   vv
    !  A  -0.5  0.5  1.5
    !  B   1.5  0.5 -0.5
-   ! 
+   !
    END_DOC
    integer                        :: i,j,n
    if (elec_alpha_num == elec_beta_num) then
@@ -194,4 +225,4 @@ END_PROVIDER
  do i = 1, mo_num
   mcscf_fock_diag_mo(i) = mcscf_fock_mo(i,i)
  enddo
-END_PROVIDER 
+END_PROVIDER

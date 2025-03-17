@@ -70,7 +70,7 @@ END_DOC
 
     dim_DIIS = min(dim_DIIS+1,max_dim_DIIS)
 
-    if ( (scf_algorithm == 'DIIS').and.(dabs(Delta_energy_SCF) > 1.d-6) )  then
+    if ( (scf_algorithm == 'DIIS').and.(dabs(Delta_energy_SCF) > 1.d-10) )  then
 
       ! Store Fock and error matrices at each iteration
       do j=1,ao_num
@@ -228,9 +228,10 @@ END_DOC
   do while (i<mo_num)
     j=i+1
     m=1
-    do while ( (j<=mo_num).and.(fock_matrix_diag_mo(j)-fock_matrix_diag_mo(i) < 1.d-5) )
+    do while ( (fock_matrix_diag_mo(j)-fock_matrix_diag_mo(i) < 1.d-5) )
       j += 1
       m += 1
+      if (j > mo_num) exit
     enddo
     if (m>1) then
       call dgemm('N','T',ao_num,ao_num,m,1.d0,mo_coef(1,i),size(mo_coef,1),mo_coef(1,i),size(mo_coef,1),0.d0,S,size(S,1))

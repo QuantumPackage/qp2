@@ -212,6 +212,7 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
           ipos += 1
         endif
       enddo
+      call write_int(6,pt2_stoch_istate,'State')
       call write_int(6,sum(pt2_F),'Number of tasks')
       call write_int(6,ipos,'Number of fragmented tasks')
 
@@ -530,7 +531,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
         avg  = E0 + pt2_data_S(t) % pt2(pt2_stoch_istate) / dble(c)
         avg2 = v0 + pt2_data_S(t) % variance(pt2_stoch_istate) / dble(c)
         avg3(:) = n0(:) + pt2_data_S(t) % overlap(:,pt2_stoch_istate) / dble(c)
-        if ((avg /= 0.d0) .or. (n == N_det_generators) ) then
+        if (((c>=10).and.(avg /= 0.d0)) .or. (n == N_det_generators) ) then
           do_exit = .true.
         endif
         if (qp_stop()) then

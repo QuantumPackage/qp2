@@ -11,18 +11,30 @@ program extra_basis_int
 ! call routine_pot_ne
 ! call routine_test_pot_ne_extra_mixed
 ! call routine_test_coul_1s
- call print_v_ne_extra_basis
- call print_v_ne_basis
+! call print_v_ne_extra_basis
+! call print_v_ne_basis
+! call test_v_ne_a_extra_basis
+! call print_v_ee_mixed_direct
+ call print_v_ee_mixed_exchange
  
 end
+
+subroutine test_v_ne_a_extra_basis
+ implicit none
+ integer :: i,j
+ do i = 1, ao_extra_num
+  write(*,'(100(F16.10,X))')pot_vne_A_extra_basis(1:ao_extra_num,i)
+ enddo
+end
+
 
 subroutine test_overlap
  implicit none
   integer :: i,j
-  do i = 1, ao_extra_num
-   do j = 1, ao_extra_num 
-    write(33,*)ao_extra_overlap(j,i)
-   enddo
+  do i = 1, ao_num
+!   do j = 1, ao_num 
+    write(33,'(100(F16.10,X))')ao_extra_overlap_mixed(i,1:ao_extra_num)
+!   enddo
   enddo
 end
 
@@ -187,5 +199,37 @@ subroutine print_v_ne_basis
   enddo
  enddo
  print*,'accu = ',accu
+
+end
+
+subroutine print_v_ee_mixed_direct
+ implicit none
+ integer :: i,j,k,l
+ double precision :: ao_two_e_integral_mixed_direct
+ do i = 1, ao_num
+  do j = 1, ao_num
+   do k = 1, ao_extra_num
+    do l = 1, ao_extra_num
+     write(34,*)ao_two_e_integral_mixed_direct(i, j, k, l)
+    enddo
+   enddo
+  enddo
+ enddo
+
+end
+
+subroutine print_v_ee_mixed_exchange
+ implicit none
+ integer :: i,j,k,l
+ double precision :: ao_two_e_integral_mixed_exchange
+ do i = 1, ao_num
+  do j = 1, ao_extra_num
+   do k = 1, ao_num
+    do l = 1, ao_extra_num
+     write(34,*)ao_two_e_integral_mixed_exchange(i, j, k, l)
+    enddo
+   enddo
+  enddo
+ enddo
 
 end
