@@ -120,7 +120,7 @@ subroutine run(f)
   endif
 
   ! Some codes only provide ao_1e_int_core_hamiltonian rather than
-  ! kinetic and nuclear potentials separately, so we need tneed to work
+  ! kinetic and nuclear potentials separately, so we need to work
   ! around that. This is needed for non-GTO basis sets since some QP
   ! functions will try to calculate these matrices from the nonexisting 
   ! GTO basis if they are not set.
