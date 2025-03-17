@@ -119,6 +119,28 @@ subroutine run(f)
     call ezfio_set_ao_one_e_ints_io_ao_integrals_n_e('Read')
   endif
 
+  ! Some codes only provide ao_1e_int_core_hamiltonian rather than
+  ! kinetic and nuclear potentials separately, so we need tneed to work
+  ! around that. This is needed for non-GTO basis sets since some QP
+  ! functions will try to calculate these matrices from the nonexisting 
+  ! GTO basis if they are not set.
+  if (trexio_has_ao_1e_int_core_hamiltonian(f) == TREXIO_SUCCESS .and. &
+      trexio_has_ao_1e_int_potential_n_e(f) /= TREXIO_SUCCESS .and. &
+      trexio_has_ao_1e_int_kinetic(f) /= TREXIO_SUCCESS) then
+    rc = trexio_read_ao_1e_int_core_hamiltonian(f, A)
+    if (rc /= TREXIO_SUCCESS) then
+      print *, irp_here
+      print *, 'Error reading AO core Hamiltonian.'
+      call trexio_assert(rc, TREXIO_SUCCESS)
+      stop -1
+    endif
+    call ezfio_set_ao_one_e_ints_ao_integrals_n_e(A)
+    call ezfio_set_ao_one_e_ints_io_ao_integrals_n_e('Read')
+    A=0.d0
+    call ezfio_set_ao_one_e_ints_ao_integrals_kinetic(A)
+    call ezfio_set_ao_one_e_ints_io_ao_integrals_kinetic('Read')
+  endif
+
   deallocate(A,B)
 
   ! AO 2e integrals
