@@ -210,6 +210,7 @@ def write_ezfio(trexio_filename, filename):
             nucl_index  = trexio.read_basis_nucleus_index(trexio_file)
             exponent    = [1.]*prim_num
             coefficient = [1.]*prim_num
+            prim_factor = [1.]*prim_num
             shell_index = [i for i in range(shell_num)]
             ao_shell    = trexio.read_ao_shell(trexio_file)
 
@@ -221,6 +222,9 @@ def write_ezfio(trexio_filename, filename):
             ezfio.set_basis_basis_nucleus_index([ x+1 for x in nucl_index ])
             ezfio.set_basis_prim_expo(exponent)
             ezfio.set_basis_prim_coef(coefficient)
+            ezfio.set_basis_prim_normalization_factor(prim_factor)
+            ezfio.set_basis_primitives_normalized(True)
+            ezfio.set_basis_ao_normalized(False)
 
             nucl_shell_num = []
             prev = None
@@ -283,7 +287,7 @@ def write_ezfio(trexio_filename, filename):
     ezfio.set_ao_basis_ao_num(ao_num)
 
 
-    if cartesian and basis_type.lower() == "gaussian" and shell_num > 0:
+    if cartesian and basis_type.lower() in ["gaussian", "numerical"] and shell_num > 0:
         ao_shell    = trexio.read_ao_shell(trexio_file_cart)
         at = [ nucl_index[i]+1 for i in ao_shell ]
         ezfio.set_ao_basis_ao_nucl(at)
