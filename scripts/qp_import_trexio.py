@@ -524,11 +524,11 @@ def write_ezfio(trexio_filename, filename):
     alpha = [ uint64_to_int64(int(i,2)) for i in qp_bitmasks.string_to_bitmask(alpha_s) ][::-1]
     beta  = [ uint64_to_int64(int(i,2)) for i in qp_bitmasks.string_to_bitmask(beta_s ) ][::-1]
     ezfio.set_determinants_bit_kind(8)
-    ezfio.set_determinants_n_int(1+mo_num//64)
+    ezfio.set_determinants_n_int(1+(mo_num-1)//64)
     ezfio.set_determinants_n_det(1)
     ezfio.set_determinants_n_states(1)
-    ezfio.set_determinants_psi_det(alpha+beta)
     ezfio.set_determinants_psi_coef([[1.0]])
+    ezfio.set_determinants_psi_det(alpha+beta)
     print("OK")
 
 

@@ -222,7 +222,7 @@ END_DOC
   endif
 
 
-  ! Identify degenerate MOs and force them to be on the axes
+  ! Identify degenerate MOs and combine them to force them to be on the axes
   allocate(S(ao_num,ao_num))
   i=1
   do while (i<mo_num)
@@ -239,6 +239,10 @@ END_DOC
     endif
     i = j
   enddo
+  TOUCH mo_coef
+  call mo_as_eigvectors_of_mo_matrix(Fock_matrix_mo,size(Fock_matrix_mo,1), &
+       size(Fock_matrix_mo,2),mo_label,1,.true.)
+  call restore_symmetry(ao_num, mo_num, mo_coef, size(mo_coef,1), 1.d-10)
 
   if(do_mom)then
      call reorder_mo_max_overlap
