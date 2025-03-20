@@ -352,14 +352,31 @@ BEGIN_PROVIDER [ double precision, mo_sphe_coef, (ao_sphe_num, mo_num) ]
  BEGIN_DOC
  ! MO coefficients in the basis of spherical harmonics AOs.
  END_DOC
- double precision, allocatable :: tmp(:,:)
- allocate (tmp(ao_sphe_num,ao_num))
+ double precision, allocatable, dimension (:,:) :: C0, S, tmp
+ allocate(C0(ao_sphe_num,mo_num), S(mo_num,mo_num), tmp(mo_num,ao_sphe_num))
 
- call dgemm('T','N',ao_sphe_num,ao_num,ao_num, 1.d0, &
+ call dgemm('T','N',ao_sphe_num,mo_num,ao_num, 1.d0, &
    ao_cart_to_sphe_coef,ao_num, &
    mo_coef,size(mo_coef,1), 0.d0, &
-   mo_sphe_coef, size(mo_sphe_coef,1))
+   C0, size(C0,1))
 
- deallocate (tmp)
+ ! C0^T S S^0
+ call dgemm('T','N',mo_num,ao_sphe_num,ao_sphe_num, 1.d0, &
+   C0,size(C0,1), &
+   ao_sphe_overlap,size(ao_sphe_overlap,1), 0.d0, &
+   tmp, size(tmp,1))
+
+ call dgemm('N','N',mo_num,mo_num,ao_sphe_num, 1.d0, &
+   tmp, size(tmp,1), &
+   C0,size(C0,1), 0.d0, &
+   S, size(S,1))
+
+ integer :: m
+ m = ao_sphe_num
+ mo_sphe_coef = C0
+ call ortho_lowdin(S,size(S,1),mo_num,mo_sphe_coef,ao_sphe_num,m,1.d-10)
+
+
+ deallocate (tmp, S, C0)
 END_PROVIDER
 

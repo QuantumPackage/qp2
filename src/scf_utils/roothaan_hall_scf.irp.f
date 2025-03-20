@@ -239,10 +239,6 @@ END_DOC
     endif
     i = j
   enddo
-  TOUCH mo_coef
-  call mo_as_eigvectors_of_mo_matrix(Fock_matrix_mo,size(Fock_matrix_mo,1), &
-       size(Fock_matrix_mo,2),mo_label,1,.true.)
-  call restore_symmetry(ao_num, mo_num, mo_coef, size(mo_coef,1), 1.d-10)
 
   if(do_mom)then
      call reorder_mo_max_overlap

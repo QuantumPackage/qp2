@@ -199,12 +199,12 @@ BEGIN_PROVIDER [ double precision, ao_sphe_kinetic_integrals, (ao_sphe_num,ao_sp
  double precision, allocatable :: tmp(:,:)
  allocate (tmp(ao_sphe_num,ao_num))
 
- call dgemm('T','N',ao_sphe_num,ao_num,ao_num, 1.d0, &
+ call dgemm('N','N',ao_sphe_num,ao_num,ao_num, 1.d0, &
    ao_cart_to_sphe_inv,size(ao_cart_to_sphe_inv,1), &
    ao_kinetic_integrals,size(ao_kinetic_integrals,1), 0.d0, &
    tmp, size(tmp,1))
 
- call dgemm('N','N',ao_sphe_num,ao_sphe_num,ao_num, 1.d0, &
+ call dgemm('N','T',ao_sphe_num,ao_sphe_num,ao_num, 1.d0, &
    tmp, size(tmp,1), &
    ao_cart_to_sphe_inv,size(ao_cart_to_sphe_inv,1), 0.d0, &
    ao_sphe_kinetic_integrals,size(ao_sphe_kinetic_integrals,1))

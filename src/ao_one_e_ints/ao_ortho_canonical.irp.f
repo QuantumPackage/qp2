@@ -99,8 +99,9 @@ BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_inv, (ao_sphe_num,ao_num) ]
   R(:,:) = ao_cart_to_sphe_coef(:,:)
 
   call dgemm('N','T', m, m, k, 1.d0, R, k, R, k, 0.d0, S, m)
-  call get_pseudo_inverse(S, k, k, m, Sinv, k, 1.d-20)
-  call dgemm('T','T', m, m, k, 1.d0, R, k, Sinv, k, 0.d0, Rinv, m)
+  call get_pseudo_inverse(S, k, k, m, Sinv, k, 1.d-12)
+  call dgemm('T','N', m, m, k, 1.d0, R, k, Sinv, k, 0.d0, Rinv, m)
+
 
   integer :: i
   do i=1,ao_num
