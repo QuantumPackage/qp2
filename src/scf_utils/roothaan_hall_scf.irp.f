@@ -222,7 +222,7 @@ END_DOC
   endif
 
 
-  ! Identify degenerate MOs and force them to be on the axes
+  ! Identify degenerate MOs and combine them to force them to be on the axes
   allocate(S(ao_num,ao_num))
   i=1
   do while (i<mo_num)

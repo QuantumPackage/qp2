@@ -649,11 +649,20 @@ double precision function general_primitive_integral(dim,            &
 !  call multiply_poly(d_poly ,n_pt_tmp ,Iz_pol,n_Iz,d1,n_pt_out)
   if (ior(n_pt_tmp,n_Iz) >= 0) then
     ! Bottleneck here
-    do ib=0,n_pt_tmp
-      do ic = 0,n_Iz
-        d1(ib+ic) = d1(ib+ic) + Iz_pol(ic) * d_poly(ib)
+    if (ic > ib) then
+      do ib=0,n_pt_tmp
+          d1(ib:) = d1(ib:) + Iz_pol(:) * d_poly(ib)
       enddo
-    enddo
+    else
+      do ic = 0,n_Iz
+        d1(ic:) = d1(ic:) + Iz_pol(ic) * d_poly(:)
+      enddo
+    endif
+!    do ib=0,n_pt_tmp
+!      do ic = 0,n_Iz
+!        d1(ib+ic) = d1(ib+ic) + Iz_pol(ic) * d_poly(ib)
+!      enddo
+!    enddo
 
     do n_pt_out = n_pt_tmp+n_Iz, 0, -1
       if (d1(n_pt_out) /= 0.d0) exit

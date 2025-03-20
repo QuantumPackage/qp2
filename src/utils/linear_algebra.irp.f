@@ -1392,15 +1392,6 @@ subroutine get_pseudo_inverse(A, LDA, m, n, C, LDC, cutoff)
 
   call dgemm('T', 'T', n, m, n_svd, 1.d0, Vt, size(Vt,1), U, size(U,1), 0.d0, C, size(C,1))
 
-!  C = 0.d0
-!  do i=1,m
-!    do j=1,n
-!      do k=1,n_svd
-!        C(j,i) = C(j,i) + U(i,k) * D(k) * Vt(k,j)
-!      enddo
-!    enddo
-!  enddo
-
   deallocate(U,D,Vt,work,A_tmp)
 
 end
