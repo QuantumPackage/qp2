@@ -28,11 +28,15 @@ BEGIN_PROVIDER [ integer, ao_sphe_num ]
  ! Number of spherical AOs
  END_DOC
  integer :: n, i
- ao_sphe_num=0
- do i=1,shell_num
-   n = shell_ang_mom(i)
-   ao_sphe_num += 2*n+1
- enddo
+ if (ao_cartesian) then
+   ao_sphe_num = ao_num
+ else
+   ao_sphe_num=0
+   do i=1,shell_num
+     n = shell_ang_mom(i)
+     ao_sphe_num += 2*n+1
+   enddo
+ endif
 END_PROVIDER
 
 BEGIN_PROVIDER [ integer, ao_sphe_shell, (ao_sphe_num) ]
