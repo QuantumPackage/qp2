@@ -16,11 +16,10 @@ integer*8 function spin_det_search_key(det,Nint)
   integer(bit_kind), intent(in) :: det(Nint)
   integer(bit_kind), parameter :: unsigned_shift = 1_bit_kind-huge(1_bit_kind) ! 100...00
   integer :: i
-  spin_det_search_key = det(1)
+  spin_det_search_key = det(1)+unsigned_shift
   do i=2,Nint
     spin_det_search_key = ieor(spin_det_search_key,det(i))
   enddo
-  spin_det_search_key = spin_det_search_key+unsigned_shift
 end
 
 
