@@ -38,7 +38,7 @@
      do ipoint = 1, n_points_final_grid
        mu_of_r_prov(ipoint,istate) =  mu_of_r_psi_cas(ipoint,istate)
      enddo
-   else if(mu_of_r_potential.EQ."proj")then
+   else if((mu_of_r_potential.EQ."proj").or.(mu_of_r_potential.EQ."proj_cas"))then
      do ipoint = 1, n_points_final_grid
        mu_of_r_prov(ipoint,istate) =  mu_of_r_projector_mo(ipoint)
      enddo
