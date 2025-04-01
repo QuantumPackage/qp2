@@ -116,13 +116,14 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
         alpha = ao_expo_ordered_transp(l,j)
 
         do m=1,ao_prim_num(i)
-          beta = ao_expo_ordered_transp(m,i)
-          c = 0.d0
-
           if (dabs(ao_coef_normalized_ordered_transp(l,j)*ao_coef_normalized_ordered_transp(m,i))&
                 < thresh) then
             cycle
           endif
+
+          beta = ao_expo_ordered_transp(m,i)
+          c = 0.d0
+
           do  k = 1, nucl_num
             Z = nucl_charge(k)
 
@@ -154,6 +155,12 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
  !$OMP END DO
  !$OMP END PARALLEL
 
+  do i=1,ao_num
+    do j=1,i
+      ao_pseudo_integrals_local(j,i) = 0.5d0*(ao_pseudo_integrals_local(i,j) + ao_pseudo_integrals_local(i,j))
+      ao_pseudo_integrals_local(i,j) = ao_pseudo_integrals_local(i,j)
+    enddo
+  enddo
  END_PROVIDER
 
 
@@ -216,13 +223,13 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
         alpha = ao_expo_ordered_transp(l,j)
 
         do m=1,ao_prim_num(i)
-          beta = ao_expo_ordered_transp(m,i)
-          c = 0.d0
-
           if (dabs(ao_coef_normalized_ordered_transp(l,j)*ao_coef_normalized_ordered_transp(m,i))&
                 < thresh) then
             cycle
           endif
+
+          beta = ao_expo_ordered_transp(m,i)
+          c = 0.d0
 
           do  k = 1, nucl_num
             Z = nucl_charge(k)
@@ -256,6 +263,12 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
   !$OMP END PARALLEL
 
 
+  do i=1,ao_num
+    do j=1,i
+      ao_pseudo_integrals_non_local(j,i) = 0.5d0*(ao_pseudo_integrals_non_local(i,j) + ao_pseudo_integrals_non_local(i,j))
+      ao_pseudo_integrals_non_local(i,j) = ao_pseudo_integrals_non_local(i,j)
+    enddo
+  enddo
 END_PROVIDER
 
  BEGIN_PROVIDER [ double precision, pseudo_v_k_transp, (pseudo_klocmax,nucl_num) ]

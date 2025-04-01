@@ -43,7 +43,8 @@ subroutine print_basis_correction
 
   else if(mu_of_r_potential.EQ."cas_full".or. &
           mu_of_r_potential.EQ."cas_truncated".or. &
-          mu_of_r_potential.EQ."pure_act") then
+          mu_of_r_potential.EQ."pure_act".or. &
+          mu_of_r_potential.EQ."proj_cas") then
      print*, ''
      print*,'Using a CAS-like two-body density to define mu(r)'
      print*,'This assumes that the CAS is a qualitative representation of the wave function '
