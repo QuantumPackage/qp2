@@ -10,7 +10,8 @@ dir=${QP}
 EZFIO_extra=${1%/}
 EZFIO_extra=${EZFIO_extra%.xyz}
 EZFIO_target=${2%/}
-
+qp set_file ${EZFIO_extra}
+qp run write_extra_grid
 
 
 echo "********** SCRIPT TO COPY DATA FROM EZFIO TO ANOTHER *********"
@@ -64,4 +65,25 @@ echo "COPYING ALL DATA FROM "$EZFIO_extra"/aux_quantities/ to "${EZFIO_target}"/
 i=data_one_e_dm_tot_ao.gz
 newfile=ao_extra_one_e_dm.gz
 cp ${EZFIO_extra}/aux_quantities/$i ${EZFIO_target}/ao_extra_basis/$newfile
+
+echo "COPYING ALL DATA FROM "$EZFIO_extra" extra grid to "${EZFIO_target}"/becke_numerical_grid/"
+## NPOINTS
+i=n_points_extra_final_grid
+newfile=n_points_extra_final_grid
+cp ${EZFIO_extra}/becke_numerical_grid/$i ${EZFIO_target}/becke_numerical_grid/$newfile
+
+## WEIGHTS
+i=final_weight_at_r_vector_extra.gz
+newfile=final_weight_at_r_vector_extra.gz
+cp ${EZFIO_extra}/becke_numerical_grid/$i ${EZFIO_target}/becke_numerical_grid/$newfile
+
+## GRID POINTS 
+i=final_grid_points_extra.gz
+newfile=final_grid_points_extra.gz
+cp ${EZFIO_extra}/becke_numerical_grid/$i ${EZFIO_target}/becke_numerical_grid/$newfile
+
+## INPUT/OUTPUT 
+i=io_extra_grid
+newfile=io_extra_grid
+cp ${EZFIO_extra}/becke_numerical_grid/$i ${EZFIO_target}/becke_numerical_grid/$newfile
 

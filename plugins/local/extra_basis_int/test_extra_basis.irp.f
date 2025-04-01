@@ -26,12 +26,21 @@ program test_extra_basis
    print*,j,i,pot_vne_A_extra_basis(j,i)
   enddo
  enddo
- print*,'Density matrix from system A'
+ print*,'Density matrix from system A in the AO basis'
  do i = 1, ao_num
-  do j = 1, ao_num
-   print*,j,i,one_e_dm_ao(j,i)
-  enddo
+!  do j = 1, ao_num
+   write(*,'(100(F16.10,X))')one_e_dm_ao(:,i)
+!  enddo
  enddo
+
+ print*,'Density matrix from system A in the MO basis'
+ do i = 1, mo_num
+!  do j = 1, mo_num
+   write(*,'(100(F16.10,X))')one_e_dm_mo(:,i)
+!  enddo
+ enddo
+
+
  print*,'Density matrix from system B'
  output=trim(ezfio_filename)//'.one_e_dm_b'
  i_unit_output = getUnitAndOpen(output,'w')
