@@ -80,6 +80,8 @@ def generate_xyz(l):
 def write_ezfio(trexio_filename, filename):
 
     warnings = []
+    while trexio_filename[-1] == '/':
+        trexio_filename = trexio_filename[:-1]
     trexio_file = trexio.File(trexio_filename,mode='r',back_end=trexio.TREXIO_AUTO)
 
     ezfio.set_file(filename)
@@ -258,7 +260,6 @@ def write_ezfio(trexio_filename, filename):
         else:
            raise TypeError
 
-        print(basis_type)
     except:
         basis_type = "None"
         print("None")
@@ -275,7 +276,7 @@ def write_ezfio(trexio_filename, filename):
     if basis_type.lower() == "gaussian" and not cartesian:
         try:
           import trexio_tools
-          tmp = "cartesian_"+trexio_filename
+          tmp = trexio_filename+"_cartesian"
           retcode = subprocess.call(["trexio", "convert-to", "-t", "cartesian", "-o", tmp, trexio_filename])
           trexio_file_cart = trexio.File(tmp,mode='r',back_end=trexio.TREXIO_AUTO)
           cartesian = trexio.read_ao_cartesian(trexio_file_cart)
@@ -357,7 +358,7 @@ def write_ezfio(trexio_filename, filename):
 
     else:
         if basis_type.lower() == "gaussian" and not cartesian:
-          warnings.append(f"Spherical AOs not handled by QP. Convert the TREXIO file using trexio_tools:\n trexio convert-to -t cartesian -o cartesian_{trexio_filename} {trexio_filename}")
+          warnings.append(f"Spherical AOs not handled by QP. Convert the TREXIO file using trexio_tools:\n trexio convert-to -t cartesian -o {trexio_filename}_cartesian {trexio_filename}")
         warnings.append("Integrals should be imported using:\n qp run import_trexio_integrals")
         print("None")
 
