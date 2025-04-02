@@ -15,6 +15,8 @@ qp create_ezfio -b $basis_B $sys_B -o ${output_B}
 qp run scf 
 # we save the density matrix in the EZFIO
 qp run save_one_e_dm 
+# we specify a small grid for the system B
+qp set becke_numerical_grid extra_grid_type_sgn 0
 # we create the system "A" 
 qp create_ezfio -b $basis_A $sys_A -o ${output_A}
 # We perform an SCF calculation

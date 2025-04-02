@@ -323,3 +323,98 @@ BEGIN_PROVIDER [ character*(4), ao_extra_l_char_space, (ao_extra_num) ]
    ao_extra_l_char_space(i) = give_ao_extra_character_space
  enddo
 END_PROVIDER
+
+
+ ---
+
+double precision function ao_extra_value(i, r)
+
+  BEGIN_DOC
+  ! Returns the value of the i-th ao belonging the EXTRA BASIS at point $\textbf{r}$
+  END_DOC
+
+  implicit none
+  integer,          intent(in) :: i
+  double precision, intent(in) :: r(3)
+
+  integer          :: m, num_ao
+  integer          :: power_ao(3)
+  double precision :: center_ao(3)
+  double precision :: beta
+  double precision :: accu, dx, dy, dz, r2
+
+  num_ao = ao_extra_nucl(i)
+  power_ao(1:3) = ao_extra_power(i,1:3)
+  center_ao(1:3) = extra_nucl_coord(num_ao,1:3)
+  dx = r(1) - center_ao(1)
+  dy = r(2) - center_ao(2)
+  dz = r(3) - center_ao(3)
+  r2 = dx*dx + dy*dy + dz*dz
+  dx = dx**power_ao(1)
+  dy = dy**power_ao(2)
+  dz = dz**power_ao(3)
+ 
+  accu = 0.d0
+  do m = 1, ao_extra_prim_num(i)
+    beta = ao_extra_expo_ordered_transp(m,i)
+    accu += ao_extra_coef_normalized_ordered_transp(m,i) * dexp(-beta*r2)
+  enddo
+  ao_extra_value = accu * dx * dy * dz
+
+end
+
+
+subroutine give_all_aos_extra_at_r(r, tmp_array)
+ implicit none
+  BEGIN_dOC
+  !
+  ! input  : r == r(1) = x and so on
+  !
+  ! output : tmp_array(i) = EXTRA aos(i) evaluated in $\textbf{r}$
+  !
+  END_DOC
+  double precision, intent(in)  :: r(3)
+  double precision, intent(out) :: tmp_array(ao_extra_num)
+  integer :: i
+ double precision :: ao_extra_value
+ do i = 1, ao_extra_num
+  tmp_array(i) = ao_extra_value(i, r)
+ enddo
+end
+
+double precision function extra_density_at_r(r)
+ implicit none
+  BEGIN_dOC
+  !
+  ! input  : r == r(1) = x and so on
+  !
+  ! output : density corresponding to the extra system at r
+  !
+  END_DOC
+ double precision, intent(in)  :: r(3)
+ integer :: mu,nu
+ double precision, allocatable :: tmp_array(:)
+ allocate(tmp_array(ao_extra_num))
+ call give_all_aos_extra_at_r(r, tmp_array) 
+ extra_density_at_r = 0.d0
+ do nu = 1, ao_extra_num
+  do mu = 1, ao_extra_num
+   extra_density_at_r += ao_extra_one_e_dm(mu,nu,1) * tmp_array(mu) * tmp_array(nu)
+  enddo
+ enddo
+end
+
+BEGIN_PROVIDER [ double precision, ao_extra_one_e_dm_at_extra_r, (n_points_extra_final_grid)]
+ implicit none
+ BEGIN_DOC
+! ao_extra_one_e_dm_at_extra_r(i) = extra density on the extra grid points
+ END_DOC
+ integer :: i
+ double precision :: extra_density_at_r, r(3)
+ do i = 1, n_points_extra_final_grid
+  r(1) = final_grid_points_extra(1,i)
+  r(2) = final_grid_points_extra(2,i)
+  r(3) = final_grid_points_extra(3,i)
+  ao_extra_one_e_dm_at_extra_r(i) = extra_density_at_r(r)
+ enddo
+END_PROVIDER 
