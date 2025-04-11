@@ -73,6 +73,11 @@ BEGIN_PROVIDER [ integer*8, qmckl_ctx_jastrow ]
     rc = qmckl_check(qmckl_ctx_jastrow, rc)
     if (rc /= QMCKL_SUCCESS) stop -1
   endif
+!  print*,'jast_qmckl_cord_num = ',jast_qmckl_cord_num
+!  integer :: i
+!  do i = 1, jast_qmckl_c_vector_size
+!   print*,jast_qmckl_c_vector(i) 
+!  enddo
 
 END_PROVIDER
 
