@@ -305,7 +305,7 @@ END_PROVIDER
          Qmax = max(Qmax, D(Dset(q)))
        enddo
 
-       if (Qmax <= Dmin) exit
+       if (Qmax < Dmin) exit
 
        ! g.
 
@@ -313,7 +313,7 @@ END_PROVIDER
 
        do j=1,nq
 
-         if ( (Qmax <= Dmin).or.(N+j*1_8 > ndim8) ) exit
+         if ( (Qmax < Dmin).or.(N+j*1_8 > ndim8) ) exit
 
          ! i.
          rank = N+j
