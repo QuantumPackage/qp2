@@ -26,12 +26,12 @@ subroutine grad_pipek(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gra
         j = tmp_list(tmp_j) 
         do tmp_i = 1, tmp_list_size
            i = tmp_list(tmp_i)
-           do rho = 1, ao_num ! loop over all the AOs
+           do rho = 1, ao_cart_num ! loop over all the AOs
               do b = 1, nucl_n_aos(a) ! loop over the number of AOs which belongs to the nuclei a
                  mu = nucl_aos(a,b) ! AO centered on atom a 
 
-                 tmp_int(tmp_i,tmp_j) = tmp_int(tmp_i,tmp_j) + 0.5d0 * (mo_coef(rho,i) * ao_overlap(rho,mu) * mo_coef(mu,j) &
-                      + mo_coef(mu,i) * ao_overlap(mu,rho) * mo_coef(rho,j))
+                 tmp_int(tmp_i,tmp_j) = tmp_int(tmp_i,tmp_j) + 0.5d0 * (mo_cart_coef(rho,i) * ao_cart_overlap(rho,mu) * mo_cart_coef(mu,j) &
+                      + mo_cart_coef(mu,i) * ao_cart_overlap(mu,rho) * mo_cart_coef(rho,j))
 
               enddo
            enddo
@@ -112,12 +112,12 @@ end subroutine grad_pipek
 ! | tmp_int(tmp_list_size,tmp_list_size)      |                  | Temporary array to store the integrals                   |
 ! | tmp_accu(tmp_list_size,tmp_list_size)     |                  | Temporary array to store a matrix                        |
 ! |                                           |                  | product and compute tmp_int                              |
-! | CS(tmp_list_size,ao_num)                  |                  | Array to store the result of mo_coef * ao_overlap        |
-! | tmp_mo_coef(ao_num,tmp_list_size)         |                  | Array to store just the useful MO coefficients           |
+! | CS(tmp_list_size,ao_cart_num)                  |                  | Array to store the result of mo_cart_coef * ao_cart_overlap        |
+! | tmp_mo_cart_coef(ao_cart_num,tmp_list_size)         |                  | Array to store just the useful MO coefficients           |
 ! |                                           |                  | depending of the mo_class                                |
-! | tmp_mo_coef2(nucl_n_aos(a),tmp_list_size) |                  | Array to store just the useful MO coefficients           |
+! | tmp_mo_cart_coef2(nucl_n_aos(a),tmp_list_size) |                  | Array to store just the useful MO coefficients           |
 ! |                                           |                  | depending of the nuclei                                  |
-! | tmp_CS(tmp_list_size,nucl_n_aos(a))       |                  | Array to store just the useful mo_coef * ao_overlap      |
+! | tmp_CS(tmp_list_size,nucl_n_aos(a))       |                  | Array to store just the useful mo_cart_coef * ao_cart_overlap      |
 ! |                                           |                  | values depending of the nuclei                           |
 ! | a                                         |                  | index to loop over the nuclei                            |
 ! | b                                         |                  | index to loop over the AOs which belongs to the nuclei a |
@@ -135,7 +135,7 @@ subroutine gradient_PM(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gr
   
   integer, intent(in)           :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: v_grad(tmp_n), max_elem, norm_grad
-  double precision, allocatable :: m_grad(:,:), tmp_int(:,:), CS(:,:), tmp_mo_coef(:,:), tmp_mo_coef2(:,:),tmp_accu(:,:),tmp_CS(:,:)
+  double precision, allocatable :: m_grad(:,:), tmp_int(:,:), CS(:,:), tmp_mo_cart_coef(:,:), tmp_mo_cart_coef2(:,:),tmp_accu(:,:),tmp_CS(:,:)
   integer                       :: i,j,k,tmp_i,tmp_j,tmp_k, a, b, mu ,rho
   double precision              :: t1,t2,t3
 
@@ -146,20 +146,20 @@ subroutine gradient_PM(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gr
 
   ! Allocation
   allocate(m_grad(tmp_list_size, tmp_list_size), tmp_int(tmp_list_size, tmp_list_size),tmp_accu(tmp_list_size, tmp_list_size))
-  allocate(CS(tmp_list_size,ao_num),tmp_mo_coef(ao_num,tmp_list_size))
+  allocate(CS(tmp_list_size,ao_cart_num),tmp_mo_cart_coef(ao_cart_num,tmp_list_size))
 
 
-  ! submatrix of the mo_coef
+  ! submatrix of the mo_cart_coef
   do tmp_i = 1, tmp_list_size
     i = tmp_list(tmp_i)
-    do j = 1, ao_num
+    do j = 1, ao_cart_num
 
-      tmp_mo_coef(j,tmp_i) = mo_coef(j,i)
+      tmp_mo_cart_coef(j,tmp_i) = mo_cart_coef(j,i)
  
     enddo
   enddo
 
-  call dgemm('T','N',tmp_list_size,ao_num,ao_num,1d0,tmp_mo_coef,size(tmp_mo_coef,1),ao_overlap,size(ao_overlap,1),0d0,CS,size(CS,1))
+  call dgemm('T','N',tmp_list_size,ao_cart_num,ao_cart_num,1d0,tmp_mo_cart_coef,size(tmp_mo_cart_coef,1),ao_cart_overlap,size(ao_cart_overlap,1),0d0,CS,size(CS,1))
  
   m_grad = 0d0
 
@@ -171,22 +171,22 @@ subroutine gradient_PM(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gr
     !    do b = 1, nucl_n_aos(a) ! loop over the number of AOs which belongs to the nuclei a
     !      mu = nucl_aos(a,b)
 
-    !      tmp_int(tmp_i,tmp_j) = tmp_int(tmp_i,tmp_j) + 0.5d0 * (CS(tmp_i,mu) * tmp_mo_coef(mu,tmp_j) + tmp_mo_coef(mu,tmp_i) * CS(tmp_j,mu))
+    !      tmp_int(tmp_i,tmp_j) = tmp_int(tmp_i,tmp_j) + 0.5d0 * (CS(tmp_i,mu) * tmp_mo_cart_coef(mu,tmp_j) + tmp_mo_cart_coef(mu,tmp_i) * CS(tmp_j,mu))
 
-    !                             !  (mo_coef(rho,i) * ao_overlap(rho,mu) * mo_coef(mu,j) &
-    !                             !+ mo_coef(mu,i) * ao_overlap(mu,rho) * mo_coef(rho,j))
+    !                             !  (mo_cart_coef(rho,i) * ao_cart_overlap(rho,mu) * mo_cart_coef(mu,j) &
+    !                             !+ mo_cart_coef(mu,i) * ao_cart_overlap(mu,rho) * mo_cart_coef(rho,j))
 
     !    enddo
     !  enddo
     !enddo
 
-    allocate(tmp_mo_coef2(nucl_n_aos(a),tmp_list_size),tmp_CS(tmp_list_size,nucl_n_aos(a)))
+    allocate(tmp_mo_cart_coef2(nucl_n_aos(a),tmp_list_size),tmp_CS(tmp_list_size,nucl_n_aos(a)))
 
     do tmp_i = 1, tmp_list_size
       do b = 1, nucl_n_aos(a)
         mu = nucl_aos(a,b)
 
-        tmp_mo_coef2(b,tmp_i) = tmp_mo_coef(mu,tmp_i)
+        tmp_mo_cart_coef2(b,tmp_i) = tmp_mo_cart_coef(mu,tmp_i)
 
       enddo
     enddo
@@ -200,7 +200,7 @@ subroutine gradient_PM(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gr
       enddo
     enddo   
 
-    call dgemm('N','N',tmp_list_size,tmp_list_size,nucl_n_aos(a),1d0,tmp_CS,size(tmp_CS,1),tmp_mo_coef2,size(tmp_mo_coef2,1),0d0,tmp_accu,size(tmp_accu,1))
+    call dgemm('N','N',tmp_list_size,tmp_list_size,nucl_n_aos(a),1d0,tmp_CS,size(tmp_CS,1),tmp_mo_cart_coef2,size(tmp_mo_cart_coef2,1),0d0,tmp_accu,size(tmp_accu,1))
  
     do tmp_j = 1, tmp_list_size
       do tmp_i = 1, tmp_list_size
@@ -210,7 +210,7 @@ subroutine gradient_PM(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gr
       enddo
     enddo
 
-    deallocate(tmp_mo_coef2,tmp_CS)
+    deallocate(tmp_mo_cart_coef2,tmp_CS)
 
     do tmp_j = 1, tmp_list_size
       do tmp_i = 1, tmp_list_size
@@ -247,7 +247,7 @@ subroutine gradient_PM(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gr
   print*, 'Norm of the gradient:', norm_grad
 
   ! Deallocation
-  deallocate(m_grad,tmp_int,CS,tmp_mo_coef)
+  deallocate(m_grad,tmp_int,CS,tmp_mo_cart_coef)
 
   call wall_time(t2)
   t3 = t2 - t1
@@ -285,12 +285,12 @@ subroutine hess_pipek(tmp_n, tmp_list_size, tmp_list, H)
       j = tmp_list(tmp_j)
       do tmp_i = 1, tmp_list_size
         i = tmp_list(tmp_i)
-        do rho = 1, ao_num
+        do rho = 1, ao_cart_num
           do b = 1, nucl_n_aos(a) ! loop over the number of AOs which belongs to the nuclei a
             mu = nucl_aos(a,b)
 
-            tmp_int(tmp_i,tmp_j) = tmp_int(tmp_i,tmp_j) + 0.5d0 * (mo_coef(rho,i) * ao_overlap(rho,mu) * mo_coef(mu,j) &
-                                   + mo_coef(mu,i) * ao_overlap(mu,rho) * mo_coef(rho,j))
+            tmp_int(tmp_i,tmp_j) = tmp_int(tmp_i,tmp_j) + 0.5d0 * (mo_cart_coef(rho,i) * ao_cart_overlap(rho,mu) * mo_cart_coef(mu,j) &
+                                   + mo_cart_coef(mu,i) * ao_cart_overlap(mu,rho) * mo_cart_coef(rho,j))
 
           enddo
         enddo  
@@ -348,7 +348,7 @@ subroutine hessian_PM(tmp_n, tmp_list_size, tmp_list, H)
 
   integer, intent(in)           :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: H(tmp_n)
-  double precision, allocatable :: beta(:,:),tmp_int(:,:),CS(:,:),tmp_mo_coef(:,:),tmp_mo_coef2(:,:),tmp_accu(:,:),tmp_CS(:,:)
+  double precision, allocatable :: beta(:,:),tmp_int(:,:),CS(:,:),tmp_mo_cart_coef(:,:),tmp_mo_cart_coef2(:,:),tmp_accu(:,:),tmp_CS(:,:)
   integer                       :: i,j,tmp_k,tmp_i, tmp_j, a,b,rho,mu
   double precision              :: max_elem, t1,t2,t3
     
@@ -359,20 +359,20 @@ subroutine hessian_PM(tmp_n, tmp_list_size, tmp_list, H)
 
   ! Allocation
   allocate(beta(tmp_list_size,tmp_list_size),tmp_int(tmp_list_size,tmp_list_size),tmp_accu(tmp_list_size,tmp_list_size))
-  allocate(CS(tmp_list_size,ao_num),tmp_mo_coef(ao_num,tmp_list_size))
+  allocate(CS(tmp_list_size,ao_cart_num),tmp_mo_cart_coef(ao_cart_num,tmp_list_size))
 
   beta = 0d0
 
   do tmp_i = 1, tmp_list_size
     i = tmp_list(tmp_i)
-    do j = 1, ao_num
+    do j = 1, ao_cart_num
 
-      tmp_mo_coef(j,tmp_i) = mo_coef(j,i)
+      tmp_mo_cart_coef(j,tmp_i) = mo_cart_coef(j,i)
  
     enddo
   enddo
 
-  call dgemm('T','N',tmp_list_size,ao_num,ao_num,1d0,tmp_mo_coef,size(tmp_mo_coef,1),ao_overlap,size(ao_overlap,1),0d0,CS,size(CS,1))
+  call dgemm('T','N',tmp_list_size,ao_cart_num,ao_cart_num,1d0,tmp_mo_cart_coef,size(tmp_mo_cart_coef,1),ao_cart_overlap,size(ao_cart_overlap,1),0d0,CS,size(CS,1))
  
   do a = 1, nucl_num ! loop over the nuclei
     tmp_int = 0d0
@@ -382,22 +382,22 @@ subroutine hessian_PM(tmp_n, tmp_list_size, tmp_list, H)
     !    do b = 1, nucl_n_aos(a) ! loop over the number of AOs which belongs to the nuclei a
     !      mu = nucl_aos(a,b)
 
-    !      tmp_int(tmp_i,tmp_j) = tmp_int(tmp_i,tmp_j) + 0.5d0 * (CS(tmp_i,mu) * tmp_mo_coef(mu,tmp_j) + tmp_mo_coef(mu,tmp_i) * CS(tmp_j,mu))
+    !      tmp_int(tmp_i,tmp_j) = tmp_int(tmp_i,tmp_j) + 0.5d0 * (CS(tmp_i,mu) * tmp_mo_cart_coef(mu,tmp_j) + tmp_mo_cart_coef(mu,tmp_i) * CS(tmp_j,mu))
 
-    !                             !  (mo_coef(rho,i) * ao_overlap(rho,mu) * mo_coef(mu,j) &
-    !                             !+ mo_coef(mu,i) * ao_overlap(mu,rho) * mo_coef(rho,j))
+    !                             !  (mo_cart_coef(rho,i) * ao_cart_overlap(rho,mu) * mo_cart_coef(mu,j) &
+    !                             !+ mo_cart_coef(mu,i) * ao_cart_overlap(mu,rho) * mo_cart_coef(rho,j))
 
     !    enddo
     !  enddo
     !enddo
  
-    allocate(tmp_mo_coef2(nucl_n_aos(a),tmp_list_size),tmp_CS(tmp_list_size,nucl_n_aos(a)))
+    allocate(tmp_mo_cart_coef2(nucl_n_aos(a),tmp_list_size),tmp_CS(tmp_list_size,nucl_n_aos(a)))
 
     do tmp_i = 1, tmp_list_size
       do b = 1, nucl_n_aos(a)
         mu = nucl_aos(a,b)
 
-        tmp_mo_coef2(b,tmp_i) = tmp_mo_coef(mu,tmp_i)
+        tmp_mo_cart_coef2(b,tmp_i) = tmp_mo_cart_coef(mu,tmp_i)
 
       enddo
     enddo
@@ -411,7 +411,7 @@ subroutine hessian_PM(tmp_n, tmp_list_size, tmp_list, H)
       enddo
     enddo   
 
-    call dgemm('N','N',tmp_list_size,tmp_list_size,nucl_n_aos(a),1d0,tmp_CS,size(tmp_CS,1),tmp_mo_coef2,size(tmp_mo_coef2,1),0d0,tmp_accu,size(tmp_accu,1))
+    call dgemm('N','N',tmp_list_size,tmp_list_size,nucl_n_aos(a),1d0,tmp_CS,size(tmp_CS,1),tmp_mo_cart_coef2,size(tmp_mo_cart_coef2,1),0d0,tmp_accu,size(tmp_accu,1))
  
     do tmp_j = 1, tmp_list_size
       do tmp_i = 1, tmp_list_size
@@ -421,7 +421,7 @@ subroutine hessian_PM(tmp_n, tmp_list_size, tmp_list, H)
       enddo
     enddo
 
-    deallocate(tmp_mo_coef2,tmp_CS)
+    deallocate(tmp_mo_cart_coef2,tmp_CS)
 
     ! Calculation
     do tmp_j = 1, tmp_list_size
@@ -474,12 +474,12 @@ subroutine compute_crit_pipek(criterion)
     tmp_int = 0d0
 
     do i = 1, mo_num
-      do rho = 1, ao_num ! loop over all the AOs
+      do rho = 1, ao_cart_num ! loop over all the AOs
         do b = 1, nucl_n_aos(a) ! loop over the number of AOs which belongs to the nuclei a
           mu = nucl_aos(a,b)
 
-          tmp_int(i,i) = tmp_int(i,i) + 0.5d0 * (mo_coef(rho,i) * ao_overlap(rho,mu) * mo_coef(mu,i) &
-                                 + mo_coef(mu,i) * ao_overlap(mu,rho) * mo_coef(rho,i))
+          tmp_int(i,i) = tmp_int(i,i) + 0.5d0 * (mo_cart_coef(rho,i) * ao_cart_overlap(rho,mu) * mo_cart_coef(mu,i) &
+                                 + mo_cart_coef(mu,i) * ao_cart_overlap(mu,rho) * mo_cart_coef(rho,i))
 
         enddo
       enddo  
@@ -526,12 +526,12 @@ subroutine criterion_PM(tmp_list_size,tmp_list,criterion)
   print*,'---criterion_PM---'
   
   ! Allocation
-  allocate(tmp_int(tmp_list_size, tmp_list_size),CS(mo_num,ao_num))
+  allocate(tmp_int(tmp_list_size, tmp_list_size),CS(mo_num,ao_cart_num))
   
   ! Initialization
   criterion = 0d0
 
-  call dgemm('T','N',mo_num,ao_num,ao_num,1d0,mo_coef,size(mo_coef,1),ao_overlap,size(ao_overlap,1),0d0,CS,size(CS,1))
+  call dgemm('T','N',mo_num,ao_cart_num,ao_cart_num,1d0,mo_cart_coef,size(mo_cart_coef,1),ao_cart_overlap,size(ao_cart_overlap,1),0d0,CS,size(CS,1))
  
   do a = 1, nucl_num ! loop over the nuclei
     tmp_int = 0d0
@@ -541,10 +541,10 @@ subroutine criterion_PM(tmp_list_size,tmp_list,criterion)
         do b = 1, nucl_n_aos(a) ! loop over the number of AOs which belongs to the nuclei a
           mu = nucl_aos(a,b)
           
-          tmp_int(tmp_i,tmp_i) = tmp_int(tmp_i,tmp_i) + 0.5d0 * (CS(i,mu) * mo_coef(mu,i) + mo_coef(mu,i) * CS(i,mu))
+          tmp_int(tmp_i,tmp_i) = tmp_int(tmp_i,tmp_i) + 0.5d0 * (CS(i,mu) * mo_cart_coef(mu,i) + mo_cart_coef(mu,i) * CS(i,mu))
 
-                                 !  (mo_coef(rho,i) * ao_overlap(rho,mu) * mo_coef(mu,j) &
-                                 !+ mo_coef(mu,i) * ao_overlap(mu,rho) * mo_coef(rho,j))
+                                 !  (mo_cart_coef(rho,i) * ao_cart_overlap(rho,mu) * mo_cart_coef(mu,j) &
+                                 !+ mo_cart_coef(mu,i) * ao_cart_overlap(mu,rho) * mo_cart_coef(rho,j))
 
       enddo
     enddo
@@ -575,7 +575,7 @@ subroutine criterion_PM_v3(tmp_list_size,tmp_list,criterion)
   
   integer, intent(in)           :: tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: criterion
-  double precision, allocatable :: tmp_int(:,:), CS(:,:), tmp_mo_coef(:,:), tmp_mo_coef2(:,:),tmp_accu(:,:),tmp_CS(:,:)
+  double precision, allocatable :: tmp_int(:,:), CS(:,:), tmp_mo_cart_coef(:,:), tmp_mo_cart_coef2(:,:),tmp_accu(:,:),tmp_CS(:,:)
   integer                       :: i,j,k,tmp_i,tmp_j,tmp_k, a, b, mu ,rho,nu,c
   double precision              :: t1,t2,t3
 
@@ -586,23 +586,23 @@ subroutine criterion_PM_v3(tmp_list_size,tmp_list,criterion)
 
   ! Allocation
   allocate(tmp_int(tmp_list_size, tmp_list_size),tmp_accu(tmp_list_size, tmp_list_size))
-  allocate(CS(tmp_list_size,ao_num),tmp_mo_coef(ao_num,tmp_list_size))
+  allocate(CS(tmp_list_size,ao_cart_num),tmp_mo_cart_coef(ao_cart_num,tmp_list_size))
 
   criterion = 0d0
 
-  ! submatrix of the mo_coef
+  ! submatrix of the mo_cart_coef
   do tmp_i = 1, tmp_list_size
     i = tmp_list(tmp_i)
-    do j = 1, ao_num
+    do j = 1, ao_cart_num
 
-      tmp_mo_coef(j,tmp_i) = mo_coef(j,i)
+      tmp_mo_cart_coef(j,tmp_i) = mo_cart_coef(j,i)
  
     enddo
   enddo
 
-  ! ao_overlap(ao_num,ao_num)
-  ! mo_coef(ao_num,mo_num)
-  call dgemm('T','N',tmp_list_size,ao_num,ao_num,1d0,tmp_mo_coef,size(tmp_mo_coef,1),ao_overlap,size(ao_overlap,1),0d0,CS,size(CS,1))
+  ! ao_cart_overlap(ao_cart_num,ao_cart_num)
+  ! mo_cart_coef(ao_cart_num,mo_num)
+  call dgemm('T','N',tmp_list_size,ao_cart_num,ao_cart_num,1d0,tmp_mo_cart_coef,size(tmp_mo_cart_coef,1),ao_cart_overlap,size(ao_cart_overlap,1),0d0,CS,size(CS,1))
  
   do a = 1, nucl_num ! loop over the nuclei
   
@@ -617,22 +617,22 @@ subroutine criterion_PM_v3(tmp_list_size,tmp_list,criterion)
     !    do b = 1, nucl_n_aos(a) ! loop over the number of AOs which belongs to the nuclei a
     !      mu = nucl_aos(a,b)
 
-    !      tmp_int(tmp_i,tmp_j) = tmp_int(tmp_i,tmp_j) + 0.5d0 * (CS(tmp_i,mu) * tmp_mo_coef(mu,tmp_j) + tmp_mo_coef(mu,tmp_i) * CS(tmp_j,mu))
+    !      tmp_int(tmp_i,tmp_j) = tmp_int(tmp_i,tmp_j) + 0.5d0 * (CS(tmp_i,mu) * tmp_mo_cart_coef(mu,tmp_j) + tmp_mo_cart_coef(mu,tmp_i) * CS(tmp_j,mu))
 
-    !                             !  (mo_coef(rho,i) * ao_overlap(rho,mu) * mo_coef(mu,j) &
-    !                             !+ mo_coef(mu,i) * ao_overlap(mu,rho) * mo_coef(rho,j))
+    !                             !  (mo_cart_coef(rho,i) * ao_cart_overlap(rho,mu) * mo_cart_coef(mu,j) &
+    !                             !+ mo_cart_coef(mu,i) * ao_cart_overlap(mu,rho) * mo_cart_coef(rho,j))
 
     !    enddo
     !  enddo
     !enddo
 
-    allocate(tmp_mo_coef2(nucl_n_aos(a),tmp_list_size),tmp_CS(tmp_list_size,nucl_n_aos(a)))
+    allocate(tmp_mo_cart_coef2(nucl_n_aos(a),tmp_list_size),tmp_CS(tmp_list_size,nucl_n_aos(a)))
  
     do tmp_i = 1, tmp_list_size
       do b = 1, nucl_n_aos(a)
         mu = nucl_aos(a,b)
 
-        tmp_mo_coef2(b,tmp_i) = tmp_mo_coef(mu,tmp_i)
+        tmp_mo_cart_coef2(b,tmp_i) = tmp_mo_cart_coef(mu,tmp_i)
 
       enddo
     enddo
@@ -646,7 +646,7 @@ subroutine criterion_PM_v3(tmp_list_size,tmp_list,criterion)
       enddo
     enddo   
 
-    call dgemm('N','N',tmp_list_size,tmp_list_size,nucl_n_aos(a),1d0,tmp_CS,size(tmp_CS,1),tmp_mo_coef2,size(tmp_mo_coef2,1),0d0,tmp_accu,size(tmp_accu,1))
+    call dgemm('N','N',tmp_list_size,tmp_list_size,nucl_n_aos(a),1d0,tmp_CS,size(tmp_CS,1),tmp_mo_cart_coef2,size(tmp_mo_cart_coef2,1),0d0,tmp_accu,size(tmp_accu,1))
  
     ! Integrals
     do tmp_j = 1, tmp_list_size
@@ -657,7 +657,7 @@ subroutine criterion_PM_v3(tmp_list_size,tmp_list,criterion)
       enddo
     enddo
 
-    deallocate(tmp_mo_coef2,tmp_CS)
+    deallocate(tmp_mo_cart_coef2,tmp_CS)
 
     ! Criterion
     do tmp_i = 1, tmp_list_size
@@ -668,7 +668,7 @@ subroutine criterion_PM_v3(tmp_list_size,tmp_list,criterion)
 
   criterion = - criterion 
 
-  deallocate(tmp_int,CS,tmp_accu,tmp_mo_coef)
+  deallocate(tmp_int,CS,tmp_accu,tmp_mo_cart_coef)
 
   call wall_time(t2)
   t3 = t2 - t1
@@ -705,12 +705,12 @@ subroutine theta_PM(l, n, m_x, max_elem)
       j = l(tmp_j) 
       do tmp_i = 1, n
          i = l(tmp_i)
-        do rho = 1, ao_num ! loop over all the AOs
+        do rho = 1, ao_cart_num ! loop over all the AOs
           do b = 1, nucl_n_aos(a) ! loop over the number of AOs which belongs to the nuclei a
             mu = nucl_aos(a,b) ! AO centered on atom a 
 
-            Pa(tmp_i,tmp_j) = Pa(tmp_i,tmp_j) + 0.5d0 * (mo_coef(rho,i) * ao_overlap(rho,mu) * mo_coef(mu,j) &
-                                   + mo_coef(mu,i) * ao_overlap(mu,rho) * mo_coef(rho,j))
+            Pa(tmp_i,tmp_j) = Pa(tmp_i,tmp_j) + 0.5d0 * (mo_cart_coef(rho,i) * ao_cart_overlap(rho,mu) * mo_cart_coef(mu,j) &
+                                   + mo_cart_coef(mu,i) * ao_cart_overlap(mu,rho) * mo_cart_coef(rho,j))
 
           enddo
         enddo  
