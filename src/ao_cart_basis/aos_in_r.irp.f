@@ -4,7 +4,7 @@
 double precision function ao_cart_value(i, r)
 
   BEGIN_DOC
-  ! Returns the value of the i-th ao at point $\textbf{r}$
+  ! Returns the value of the i-th CARTESIAN ao at point $\textbf{r}$
   END_DOC
 
   implicit none
