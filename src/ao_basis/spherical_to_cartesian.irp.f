@@ -1,3 +1,47 @@
+BEGIN_PROVIDER [ integer, ao_sphe_num ]
+ implicit none
+ BEGIN_DOC
+ ! Number of spherical AOs
+ END_DOC
+ integer :: n, i
+ if (ao_cartesian) then
+   ao_sphe_num = ao_num
+ else
+   ao_sphe_num=0
+   do i=1,shell_num
+     n = shell_ang_mom(i)
+     ao_sphe_num += 2*n+1
+   enddo
+ endif
+END_PROVIDER
+
+BEGIN_PROVIDER [ integer, ao_sphe_shell, (ao_sphe_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Index of the shell to which the AO corresponds
+ END_DOC
+ integer :: i, j, k, n
+ k=0
+ do i=1,shell_num
+   n = shell_ang_mom(i)
+   do j=-n,n
+     k = k+1
+     ao_sphe_shell(k) = i
+   enddo
+ enddo
+END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, ao_sphe_coef_normalization_factor, (ao_sphe_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Normalization factor in spherical AO basis
+ END_DOC
+
+ ao_sphe_coef_normalization_factor(:) = 1.d0
+
+END_PROVIDER
+
+
 ! Spherical to cartesian transformation matrix obtained with
 ! Horton (http://theochem.github.com/horton/, 2015)
 
