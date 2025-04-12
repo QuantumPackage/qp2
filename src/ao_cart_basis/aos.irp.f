@@ -22,39 +22,6 @@ BEGIN_PROVIDER [ integer, ao_cart_shell, (ao_cart_num) ]
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, ao_cart_sphe_num ]
- implicit none
- BEGIN_DOC
- ! Number of spherical AOs
- END_DOC
- integer :: n, i
- if (ao_cart_cartesian) then
-   ao_cart_sphe_num = ao_cart_num
- else
-   ao_cart_sphe_num=0
-   do i=1,shell_num
-     n = shell_ang_mom(i)
-     ao_cart_sphe_num += 2*n+1
-   enddo
- endif
-END_PROVIDER
-
-BEGIN_PROVIDER [ integer, ao_cart_sphe_shell, (ao_cart_sphe_num) ]
- implicit none
- BEGIN_DOC
- ! Index of the shell to which the AO corresponds
- END_DOC
- integer :: i, j, k, n
- k=0
- do i=1,shell_num
-   n = shell_ang_mom(i)
-   do j=-n,n
-     k = k+1
-     ao_cart_sphe_shell(k) = i
-   enddo
- enddo
-END_PROVIDER
-
 BEGIN_PROVIDER [ integer, ao_cart_first_of_shell, (shell_num) ]
  implicit none
  BEGIN_DOC
@@ -88,7 +55,7 @@ END_PROVIDER
   if (primitives_normalized) then
 
     if (ezfio_convention >= 20250211) then
-      ! Same primitive normalization factors for all AOs of the same shell, or read from trexio file
+      ! Same primitive normalization factors for all aos_cart of the same shell, or read from trexio file
 
       do i=1,ao_cart_num
         k=1
@@ -164,16 +131,6 @@ END_PROVIDER
       ao_cart_coef_normalized(i,j) = ao_cart_coef_normalized(i,j) * ao_cart_coef_normalization_factor(i)
     enddo
   enddo
-
-END_PROVIDER
-
-BEGIN_PROVIDER [ double precision, ao_cart_sphe_coef_normalization_factor, (ao_cart_sphe_num) ]
- implicit none
- BEGIN_DOC
- ! Normalization factor in spherical AO basis
- END_DOC
-
- ao_cart_sphe_coef_normalization_factor(:) = 1.d0
 
 END_PROVIDER
 
@@ -276,53 +233,53 @@ BEGIN_PROVIDER [ character*(128), l_to_character, (0:7)]
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ integer, Nucl_N_Aos, (nucl_num)]
-&BEGIN_PROVIDER [ integer, N_AOs_max ]
+ BEGIN_PROVIDER [ integer, Nucl_N_aos_cart, (nucl_num)]
+&BEGIN_PROVIDER [ integer, N_aos_cart_max ]
  implicit none
  BEGIN_DOC
- ! Number of |AOs| per atom
+ ! Number of |aos_cart| per atom
  END_DOC
  integer :: i
- Nucl_N_Aos = 0
+ Nucl_N_aos_cart = 0
  do i = 1, ao_cart_num
-  Nucl_N_Aos(ao_cart_nucl(i)) +=1
+  Nucl_N_aos_cart(ao_cart_nucl(i)) +=1
  enddo
- N_AOs_max = maxval(Nucl_N_Aos)
+ N_aos_cart_max = maxval(Nucl_N_aos_cart)
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer, nucl_aos, (nucl_num,N_AOs_max)]
+ BEGIN_PROVIDER [ integer, nucl_aos_cart, (nucl_num,N_aos_cart_max)]
  implicit none
  BEGIN_DOC
- ! List of |AOs| centered on each atom
+ ! List of |aos_cart| centered on each atom
  END_DOC
  integer :: i
  integer, allocatable :: nucl_tmp(:)
  allocate(nucl_tmp(nucl_num))
  nucl_tmp = 0
- Nucl_Aos = 0
+ Nucl_aos_cart = 0
  do i = 1, ao_cart_num
   nucl_tmp(ao_cart_nucl(i))+=1
-  Nucl_Aos(ao_cart_nucl(i),nucl_tmp(ao_cart_nucl(i))) = i
+  Nucl_aos_cart(ao_cart_nucl(i),nucl_tmp(ao_cart_nucl(i))) = i
  enddo
  deallocate(nucl_tmp)
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ integer, Nucl_list_shell_Aos, (nucl_num,N_AOs_max)]
-&BEGIN_PROVIDER [ integer, Nucl_num_shell_Aos, (nucl_num)]
+ BEGIN_PROVIDER [ integer, Nucl_list_shell_aos_cart, (nucl_num,N_aos_cart_max)]
+&BEGIN_PROVIDER [ integer, Nucl_num_shell_aos_cart, (nucl_num)]
  implicit none
  integer :: i,j,k
  BEGIN_DOC
- ! Index of the shell type |AOs| and of the corresponding |AOs|
- ! By convention, for p,d,f and g |AOs|, we take the index
+ ! Index of the shell type |aos_cart| and of the corresponding |aos_cart|
+ ! By convention, for p,d,f and g |aos_cart|, we take the index
  ! of the |AO| with the the corresponding power in the x axis
  END_DOC
  do i = 1, nucl_num
-  Nucl_num_shell_Aos(i) = 0
-  do j = 1, Nucl_N_Aos(i)
-    if (ao_cart_power(Nucl_Aos(i,j),1) == ao_cart_l(Nucl_Aos(i,j))) then
-     Nucl_num_shell_Aos(i)+=1
-     Nucl_list_shell_Aos(i,Nucl_num_shell_Aos(i))=Nucl_Aos(i,j)
+  Nucl_num_shell_aos_cart(i) = 0
+  do j = 1, Nucl_N_aos_cart(i)
+    if (ao_cart_power(Nucl_aos_cart(i,j),1) == ao_cart_l(Nucl_aos_cart(i,j))) then
+     Nucl_num_shell_aos_cart(i)+=1
+     Nucl_list_shell_aos_cart(i,Nucl_num_shell_aos_cart(i))=Nucl_aos_cart(i,j)
     endif
   enddo
  enddo

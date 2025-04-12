@@ -1,10 +1,10 @@
 
 ! ---
 
-BEGIN_PROVIDER [ integer, nucl_aos_transposed, (n_AOs_max,nucl_num)]
+BEGIN_PROVIDER [ integer, nucl_aos_cart_transposed, (n_aos_cart_max,nucl_num)]
 
   BEGIN_DOC
-  ! List of AOs attached on each atom
+  ! List of aos_cart attached on each atom
   END_DOC
  
   implicit none
@@ -15,7 +15,7 @@ BEGIN_PROVIDER [ integer, nucl_aos_transposed, (n_AOs_max,nucl_num)]
   nucl_tmp = 0
   do i = 1, ao_cart_num
     nucl_tmp(ao_cart_nucl(i)) += 1
-    Nucl_Aos_transposed(nucl_tmp(ao_cart_nucl(i)),ao_cart_nucl(i)) = i
+    Nucl_aos_cart_transposed(nucl_tmp(ao_cart_nucl(i)),ao_cart_nucl(i)) = i
   enddo
   deallocate(nucl_tmp)
 
@@ -23,12 +23,12 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [double precision, ao_cart_expo_ordered_transp_per_nucl, (ao_cart_prim_num_max,N_AOs_max,nucl_num) ]
+BEGIN_PROVIDER [double precision, ao_cart_expo_ordered_transp_per_nucl, (ao_cart_prim_num_max,N_aos_cart_max,nucl_num) ]
  implicit none
  integer :: i,j,k,l
  do i = 1, nucl_num
-  do j = 1,Nucl_N_Aos(i)
-   k = Nucl_Aos_transposed(j,i)
+  do j = 1,Nucl_N_aos_cart(i)
+   k = Nucl_aos_cart_transposed(j,i)
    do l = 1, ao_cart_prim_num(k)
     ao_cart_expo_ordered_transp_per_nucl(l,j,i) = ao_cart_expo_ordered_transp(l,k)
    enddo
@@ -38,12 +38,12 @@ BEGIN_PROVIDER [double precision, ao_cart_expo_ordered_transp_per_nucl, (ao_cart
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ integer, ao_cart_power_ordered_transp_per_nucl, (3,N_AOs_max,nucl_num) ]
+BEGIN_PROVIDER [ integer, ao_cart_power_ordered_transp_per_nucl, (3,N_aos_cart_max,nucl_num) ]
  implicit none
  integer :: i,j,k,l
  do i = 1, nucl_num
-  do j = 1,Nucl_N_Aos(i)
-   k = Nucl_Aos_transposed(j,i)
+  do j = 1,Nucl_N_aos_cart(i)
+   k = Nucl_aos_cart_transposed(j,i)
    do l = 1, 3
     ao_cart_power_ordered_transp_per_nucl(l,j,i) = ao_cart_power(k,l)
    enddo
@@ -52,12 +52,12 @@ BEGIN_PROVIDER [ integer, ao_cart_power_ordered_transp_per_nucl, (3,N_AOs_max,nu
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, ao_cart_coef_normalized_ordered_transp_per_nucl, (ao_cart_prim_num_max,N_AOs_max,nucl_num) ]
+BEGIN_PROVIDER [ double precision, ao_cart_coef_normalized_ordered_transp_per_nucl, (ao_cart_prim_num_max,N_aos_cart_max,nucl_num) ]
  implicit none
  integer :: i,j,k,l
  do i = 1, nucl_num
-  do j = 1,Nucl_N_Aos(i)
-   k = Nucl_Aos_transposed(j,i)
+  do j = 1,Nucl_N_aos_cart(i)
+   k = Nucl_aos_cart_transposed(j,i)
    do l = 1, ao_cart_prim_num(k)
     ao_cart_coef_normalized_ordered_transp_per_nucl(l,j,i) = ao_cart_coef_normalized_ordered_transp(l,k)
    enddo

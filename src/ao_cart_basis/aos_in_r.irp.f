@@ -76,13 +76,13 @@ end
 
 ! ---
 
-subroutine give_all_aos_at_r(r, tmp_array)
+subroutine give_all_aos_cart_at_r(r, tmp_array)
 
   BEGIN_dOC
   !
   ! input  : r == r(1) = x and so on
   !
-  ! output : tmp_array(i) = aos(i) evaluated in $\textbf{r}$
+  ! output : tmp_array(i) = aos_cart(i) evaluated in $\textbf{r}$
   !
   END_DOC
 
@@ -104,9 +104,9 @@ subroutine give_all_aos_at_r(r, tmp_array)
     dz = r(3) - c_ao(3)
     r2 = dx*dx + dy*dy + dz*dz
 
-    do j = 1, Nucl_N_Aos(i)
+    do j = 1, Nucl_N_aos_cart(i)
 
-      k = Nucl_Aos_transposed(j,i) ! index of the ao in the ordered format
+      k = Nucl_aos_cart_transposed(j,i) ! index of the ao in the ordered format
       p_ao(1:3) = ao_cart_power_ordered_transp_per_nucl(1:3,j,i)
       dx2 = dx**p_ao(1)
       dy2 = dy**p_ao(2)
@@ -129,7 +129,7 @@ end
 
 ! ---
 
-subroutine give_all_aos_and_grad_at_r(r, aos_array, aos_grad_array)
+subroutine give_all_aos_cart_and_grad_at_r(r, aos_cart_array, aos_cart_grad_array)
 
   BEGIN_DOC
   !
@@ -137,15 +137,15 @@ subroutine give_all_aos_and_grad_at_r(r, aos_array, aos_grad_array)
   !
   ! output : 
   !
-  ! * aos_array(i) = ao(i) evaluated at ro
-  ! * aos_grad_array(1,i) = gradient X of the ao(i) evaluated at $\textbf{r}$
+  ! * aos_cart_array(i) = ao(i) evaluated at ro
+  ! * aos_cart_grad_array(1,i) = gradient X of the ao(i) evaluated at $\textbf{r}$
   !
   END_DOC
 
   implicit none
   double precision, intent(in)  :: r(3)
-  double precision, intent(out) :: aos_array(ao_cart_num)
-  double precision, intent(out) :: aos_grad_array(3,ao_cart_num)
+  double precision, intent(out) :: aos_cart_array(ao_cart_num)
+  double precision, intent(out) :: aos_cart_grad_array(3,ao_cart_num)
 
   integer                       :: power_ao(3)
   integer                       :: i, j, k, l, m
@@ -164,14 +164,14 @@ subroutine give_all_aos_and_grad_at_r(r, aos_array, aos_grad_array)
     dz = r(3) - center_ao(3)
     r2 = dx*dx + dy*dy + dz*dz
 
-    do j = 1, Nucl_N_Aos(i)
+    do j = 1, Nucl_N_aos_cart(i)
 
-      k = Nucl_Aos_transposed(j,i) ! index of the ao in the ordered format
+      k = Nucl_aos_cart_transposed(j,i) ! index of the ao in the ordered format
 
-      aos_array(k) = 0.d0
-      aos_grad_array(1,k) = 0.d0
-      aos_grad_array(2,k) = 0.d0
-      aos_grad_array(3,k) = 0.d0
+      aos_cart_array(k) = 0.d0
+      aos_cart_grad_array(1,k) = 0.d0
+      aos_cart_grad_array(2,k) = 0.d0
+      aos_cart_grad_array(3,k) = 0.d0
 
       power_ao(1:3) = ao_cart_power_ordered_transp_per_nucl(1:3,j,i)
       dx2 = dx**power_ao(1)
@@ -203,10 +203,10 @@ subroutine give_all_aos_and_grad_at_r(r, aos_array, aos_grad_array)
         accu_2 += contrib * beta
       enddo
 
-      aos_array(k) = accu_1 * dx2 * dy2 * dz2
-      aos_grad_array(1,k) = accu_1 * dx1 * dy2 * dz2 - 2.d0 * dx2 * dx  * dy2 * dz2 * accu_2
-      aos_grad_array(2,k) = accu_1 * dx2 * dy1 * dz2 - 2.d0 * dx2 * dy2 * dy  * dz2 * accu_2
-      aos_grad_array(3,k) = accu_1 * dx2 * dy2 * dz1 - 2.d0 * dx2 * dy2 * dz2 * dz  * accu_2
+      aos_cart_array(k) = accu_1 * dx2 * dy2 * dz2
+      aos_cart_grad_array(1,k) = accu_1 * dx1 * dy2 * dz2 - 2.d0 * dx2 * dx  * dy2 * dz2 * accu_2
+      aos_cart_grad_array(2,k) = accu_1 * dx2 * dy1 * dz2 - 2.d0 * dx2 * dy2 * dy  * dz2 * accu_2
+      aos_cart_grad_array(3,k) = accu_1 * dx2 * dy2 * dz1 - 2.d0 * dx2 * dy2 * dz2 * dz  * accu_2
     enddo
   enddo
 
@@ -214,7 +214,7 @@ end
 
 ! ---
 
-subroutine give_all_aos_and_grad_and_lapl_at_r(r, aos_array, aos_grad_array, aos_lapl_array)
+subroutine give_all_aos_cart_and_grad_and_lapl_at_r(r, aos_cart_array, aos_cart_grad_array, aos_cart_lapl_array)
 
   BEGIN_DOC
   !
@@ -222,16 +222,16 @@ subroutine give_all_aos_and_grad_and_lapl_at_r(r, aos_array, aos_grad_array, aos
   !
   ! output :
   !
-  ! * aos_array(i) = ao(i) evaluated at $\textbf{r}$
-  ! * aos_grad_array(1,i) = $\nabla_x$ of the ao(i) evaluated at $\textbf{r}$
+  ! * aos_cart_array(i) = ao(i) evaluated at $\textbf{r}$
+  ! * aos_cart_grad_array(1,i) = $\nabla_x$ of the ao(i) evaluated at $\textbf{r}$
   !
   END_DOC
 
   implicit none
   double precision, intent(in)  :: r(3)
-  double precision, intent(out) :: aos_array(ao_cart_num)
-  double precision, intent(out) :: aos_grad_array(3,ao_cart_num)
-  double precision, intent(out) :: aos_lapl_array(3,ao_cart_num)
+  double precision, intent(out) :: aos_cart_array(ao_cart_num)
+  double precision, intent(out) :: aos_cart_grad_array(3,ao_cart_num)
+  double precision, intent(out) :: aos_cart_lapl_array(3,ao_cart_num)
 
   integer                       :: power_ao(3)
   integer                       :: i, j, k, l, m
@@ -253,17 +253,17 @@ subroutine give_all_aos_and_grad_and_lapl_at_r(r, aos_array, aos_grad_array, aos
     dz = r(3) - center_ao(3)
     r2 = dx*dx + dy*dy + dz*dz
     
-    do j = 1, Nucl_N_Aos(i)
+    do j = 1, Nucl_N_aos_cart(i)
 
-      k = Nucl_Aos_transposed(j,i) ! index of the ao in the ordered format
+      k = Nucl_aos_cart_transposed(j,i) ! index of the ao in the ordered format
 
-      aos_array(k) = 0.d0
-      aos_grad_array(1,k) = 0.d0
-      aos_grad_array(2,k) = 0.d0
-      aos_grad_array(3,k) = 0.d0      
-      aos_lapl_array(1,k) = 0.d0
-      aos_lapl_array(2,k) = 0.d0
-      aos_lapl_array(3,k) = 0.d0
+      aos_cart_array(k) = 0.d0
+      aos_cart_grad_array(1,k) = 0.d0
+      aos_cart_grad_array(2,k) = 0.d0
+      aos_cart_grad_array(3,k) = 0.d0      
+      aos_cart_lapl_array(1,k) = 0.d0
+      aos_cart_lapl_array(2,k) = 0.d0
+      aos_cart_lapl_array(3,k) = 0.d0
       
       power_ao(1:3)= ao_cart_power_ordered_transp_per_nucl(1:3,j,i)
       dx2 = dx**power_ao(1)
@@ -344,13 +344,13 @@ subroutine give_all_aos_and_grad_and_lapl_at_r(r, aos_array, aos_grad_array, aos
         accu_3 += contrib * beta**2
       enddo
 
-      aos_array(k) = accu_1 * dx2 * dy2 * dz2
-      aos_grad_array(1,k) = accu_1 * dx1 * dy2 * dz2 - 2.d0 * dx2 * dx  * dy2 * dz2 * accu_2
-      aos_grad_array(2,k) = accu_1 * dx2 * dy1 * dz2 - 2.d0 * dx2 * dy2 * dy  * dz2 * accu_2
-      aos_grad_array(3,k) = accu_1 * dx2 * dy2 * dz1 - 2.d0 * dx2 * dy2 * dz2 * dz  * accu_2
-      aos_lapl_array(1,k) = accu_1 * dx3 * dy2 * dz2 - 2.d0 * dx4 * dy2 * dz2 * accu_2 + 4.d0 * dx5 * dy2 * dz2 * accu_3
-      aos_lapl_array(2,k) = accu_1 * dx2 * dy3 * dz2 - 2.d0 * dx2 * dy4 * dz2 * accu_2 + 4.d0 * dx2 * dy5 * dz2 * accu_3
-      aos_lapl_array(3,k) = accu_1 * dx2 * dy2 * dz3 - 2.d0 * dx2 * dy2 * dz4 * accu_2 + 4.d0 * dx2 * dy2 * dz5 * accu_3
+      aos_cart_array(k) = accu_1 * dx2 * dy2 * dz2
+      aos_cart_grad_array(1,k) = accu_1 * dx1 * dy2 * dz2 - 2.d0 * dx2 * dx  * dy2 * dz2 * accu_2
+      aos_cart_grad_array(2,k) = accu_1 * dx2 * dy1 * dz2 - 2.d0 * dx2 * dy2 * dy  * dz2 * accu_2
+      aos_cart_grad_array(3,k) = accu_1 * dx2 * dy2 * dz1 - 2.d0 * dx2 * dy2 * dz2 * dz  * accu_2
+      aos_cart_lapl_array(1,k) = accu_1 * dx3 * dy2 * dz2 - 2.d0 * dx4 * dy2 * dz2 * accu_2 + 4.d0 * dx5 * dy2 * dz2 * accu_3
+      aos_cart_lapl_array(2,k) = accu_1 * dx2 * dy3 * dz2 - 2.d0 * dx2 * dy4 * dz2 * accu_2 + 4.d0 * dx2 * dy5 * dz2 * accu_3
+      aos_cart_lapl_array(3,k) = accu_1 * dx2 * dy2 * dz3 - 2.d0 * dx2 * dy2 * dz4 * accu_2 + 4.d0 * dx2 * dy2 * dz5 * accu_3
     enddo
   enddo
 

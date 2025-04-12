@@ -11,12 +11,12 @@ BEGIN_PROVIDER [logical, use_cgtos]
   PROVIDE ezfio_filename
   use_cgtos = .False.
   if (mpi_master) then
-    call ezfio_has_ao_basis_use_cgtos(has)
+    call ezfio_has_ao_cart_basis_use_cgtos(has)
     if (has) then
 !      write(6,'(A)') '.. >>>>> [ IO READ: use_cgtos ] <<<<< ..'
-      call ezfio_get_ao_basis_use_cgtos(use_cgtos)
+      call ezfio_get_ao_cart_basis_use_cgtos(use_cgtos)
     else
-      call ezfio_set_ao_basis_use_cgtos(use_cgtos)
+      call ezfio_set_ao_cart_basis_use_cgtos(use_cgtos)
     endif
   endif
   IRP_IF MPI_DEBUG
@@ -38,22 +38,22 @@ END_PROVIDER
 
 ! ---
 
- BEGIN_PROVIDER [complex*16, ao_expo_cgtos_ord_transp, (ao_prim_num_max, ao_num)]
-&BEGIN_PROVIDER [double precision, ao_expo_pw_ord_transp, (4, ao_prim_num_max, ao_num)]
-&BEGIN_PROVIDER [double precision, ao_expo_phase_ord_transp, (4, ao_prim_num_max, ao_num)]
+ BEGIN_PROVIDER [complex*16, ao_cart_expo_cgtos_ord_transp, (ao_cart_prim_num_max, ao_cart_num)]
+&BEGIN_PROVIDER [double precision, ao_cart_expo_pw_ord_transp, (4, ao_cart_prim_num_max, ao_cart_num)]
+&BEGIN_PROVIDER [double precision, ao_cart_expo_phase_ord_transp, (4, ao_cart_prim_num_max, ao_cart_num)]
 
   implicit none
 
   integer :: i, j, m
 
-  do j = 1, ao_num
-    do i = 1, ao_prim_num_max
+  do j = 1, ao_cart_num
+    do i = 1, ao_cart_prim_num_max
 
-      ao_expo_cgtos_ord_transp(i,j) = ao_expo_cgtos_ord(j,i)
+      ao_cart_expo_cgtos_ord_transp(i,j) = ao_cart_expo_cgtos_ord(j,i)
 
       do m = 1, 4
-        ao_expo_pw_ord_transp(m,i,j) = ao_expo_pw_ord(m,j,i)
-        ao_expo_phase_ord_transp(m,i,j) = ao_expo_phase_ord(m,j,i)
+        ao_cart_expo_pw_ord_transp(m,i,j) = ao_cart_expo_pw_ord(m,j,i)
+        ao_cart_expo_phase_ord_transp(m,i,j) = ao_cart_expo_phase_ord(m,j,i)
       enddo
     enddo
   enddo
@@ -62,50 +62,50 @@ END_PROVIDER
 
 ! ---
 
- BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos_ord, (ao_num, ao_prim_num_max)]
-&BEGIN_PROVIDER [complex*16      , ao_expo_cgtos_ord, (ao_num, ao_prim_num_max)]
-&BEGIN_PROVIDER [double precision, ao_expo_pw_ord, (4, ao_num, ao_prim_num_max)]
-&BEGIN_PROVIDER [double precision, ao_expo_phase_ord, (4, ao_num, ao_prim_num_max)]
+ BEGIN_PROVIDER [double precision, ao_cart_coef_norm_cgtos_ord, (ao_cart_num, ao_cart_prim_num_max)]
+&BEGIN_PROVIDER [complex*16      , ao_cart_expo_cgtos_ord, (ao_cart_num, ao_cart_prim_num_max)]
+&BEGIN_PROVIDER [double precision, ao_cart_expo_pw_ord, (4, ao_cart_num, ao_cart_prim_num_max)]
+&BEGIN_PROVIDER [double precision, ao_cart_expo_phase_ord, (4, ao_cart_num, ao_cart_prim_num_max)]
 
   implicit none
 
   integer          :: i, j, m
-  integer          :: iorder(ao_prim_num_max)
-  double precision :: d(ao_prim_num_max,11)
+  integer          :: iorder(ao_cart_prim_num_max)
+  double precision :: d(ao_cart_prim_num_max,11)
 
   d = 0.d0
 
-  do i = 1, ao_num
+  do i = 1, ao_cart_num
 
-    do j = 1, ao_prim_num(i)
+    do j = 1, ao_cart_prim_num(i)
       iorder(j) = j
-      d(j,1) = ao_expo(i,j)
-      d(j,2) = ao_coef_norm_cgtos(i,j)
-      d(j,3) = ao_expo_im(i,j)
+      d(j,1) = ao_cart_expo(i,j)
+      d(j,2) = ao_cart_coef_norm_cgtos(i,j)
+      d(j,3) = ao_cart_expo_im(i,j)
 
       do m = 1, 3
-        d(j,3+m) = ao_expo_pw(m,i,j)
+        d(j,3+m) = ao_cart_expo_pw(m,i,j)
       enddo
       d(j,7) = d(j,4) * d(j,4) + d(j,5) * d(j,5) + d(j,6) * d(j,6)
 
       do m = 1, 3
-        d(j,7+m) = ao_expo_phase(m,i,j)
+        d(j,7+m) = ao_cart_expo_phase(m,i,j)
       enddo
       d(j,11) = d(j,8) + d(j,9) + d(j,10)
     enddo
 
-    call dsort(d(1,1), iorder, ao_prim_num(i))
+    call dsort(d(1,1), iorder, ao_cart_prim_num(i))
     do j = 2, 11
-      call dset_order(d(1,j), iorder, ao_prim_num(i))
+      call dset_order(d(1,j), iorder, ao_cart_prim_num(i))
     enddo
 
-    do j = 1, ao_prim_num(i)
-      ao_expo_cgtos_ord     (i,j) = d(j,1) + (0.d0, 1.d0) * d(j,3)
-      ao_coef_norm_cgtos_ord(i,j) = d(j,2)
+    do j = 1, ao_cart_prim_num(i)
+      ao_cart_expo_cgtos_ord     (i,j) = d(j,1) + (0.d0, 1.d0) * d(j,3)
+      ao_cart_coef_norm_cgtos_ord(i,j) = d(j,2)
 
       do m = 1, 4
-        ao_expo_pw_ord(m,i,j) = d(j,3+m)
-        ao_expo_phase_ord(m,i,j) = d(j,7+m)
+        ao_cart_expo_pw_ord(m,i,j) = d(j,3+m)
+        ao_cart_expo_phase_ord(m,i,j) = d(j,7+m)
       enddo
     enddo
   enddo
@@ -116,15 +116,15 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [double precision, ao_coef_cgtos_norm_ord_transp, (ao_prim_num_max, ao_num)]
+BEGIN_PROVIDER [double precision, ao_cart_coef_cgtos_norm_ord_transp, (ao_cart_prim_num_max, ao_cart_num)]
 
   implicit none
 
   integer :: i, j
 
-  do j = 1, ao_num
-    do i = 1, ao_prim_num_max
-      ao_coef_cgtos_norm_ord_transp(i,j) = ao_coef_norm_cgtos_ord(j,i)
+  do j = 1, ao_cart_num
+    do i = 1, ao_cart_prim_num_max
+      ao_cart_coef_cgtos_norm_ord_transp(i,j) = ao_cart_coef_norm_cgtos_ord(j,i)
     enddo
   enddo
 
@@ -133,7 +133,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
+BEGIN_PROVIDER [double precision, ao_cart_coef_norm_cgtos, (ao_cart_num, ao_cart_prim_num_max)]
 
   implicit none
 
@@ -146,30 +146,30 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
 
   nz = 100
 
-  ao_coef_norm_cgtos = 0.d0
+  ao_cart_coef_norm_cgtos = 0.d0
 
-  do i = 1, ao_num
+  do i = 1, ao_cart_num
 
-    ii = ao_nucl(i)
-    powA(1) = ao_power(i,1)
-    powA(2) = ao_power(i,2)
-    powA(3) = ao_power(i,3)
+    ii = ao_cart_nucl(i)
+    powA(1) = ao_cart_power(i,1)
+    powA(2) = ao_cart_power(i,2)
+    powA(3) = ao_cart_power(i,3)
  
     if(primitives_normalized) then
 
       ! Normalization of the primitives
-      do j = 1, ao_prim_num(i)
+      do j = 1, ao_cart_prim_num(i)
 
-        expo = ao_expo(i,j) + (0.d0, 1.d0) * ao_expo_im(i,j)
+        expo = ao_cart_expo(i,j) + (0.d0, 1.d0) * ao_cart_expo_im(i,j)
         expo_inv = (1.d0, 0.d0) / expo
         do m = 1, 3
           C_Ap(m) = nucl_coord(ii,m)
-          C_Ae(m) = nucl_coord(ii,m) - (0.d0, 0.5d0) * expo_inv * ao_expo_pw(m,i,j)
+          C_Ae(m) = nucl_coord(ii,m) - (0.d0, 0.5d0) * expo_inv * ao_cart_expo_pw(m,i,j)
         enddo
-        phiA = ao_expo_phase(1,i,j) + ao_expo_phase(2,i,j) + ao_expo_phase(3,i,j)
-        KA2 = ao_expo_pw(1,i,j) * ao_expo_pw(1,i,j) &
-            + ao_expo_pw(2,i,j) * ao_expo_pw(2,i,j) &
-            + ao_expo_pw(3,i,j) * ao_expo_pw(3,i,j)
+        phiA = ao_cart_expo_phase(1,i,j) + ao_cart_expo_phase(2,i,j) + ao_cart_expo_phase(3,i,j)
+        KA2 = ao_cart_expo_pw(1,i,j) * ao_cart_expo_pw(1,i,j) &
+            + ao_cart_expo_pw(2,i,j) * ao_cart_expo_pw(2,i,j) &
+            + ao_cart_expo_pw(3,i,j) * ao_cart_expo_pw(3,i,j)
 
         C1 = zexp(-(0.d0, 2.d0) * phiA - 0.5d0 * expo_inv * KA2)
         C2 = zexp(-(0.5d0, 0.d0) * real(expo_inv) * KA2)
@@ -182,14 +182,14 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
 
         norm = 2.d0 * real(C1 * integ1 + C2 * integ2)
 
-        !ao_coef_norm_cgtos(i,j) = 1.d0 / dsqrt(norm)
-        ao_coef_norm_cgtos(i,j) = ao_coef(i,j) / dsqrt(norm)
+        !ao_cart_coef_norm_cgtos(i,j) = 1.d0 / dsqrt(norm)
+        ao_cart_coef_norm_cgtos(i,j) = ao_cart_coef(i,j) / dsqrt(norm)
       enddo
 
     else
 
-      do j = 1, ao_prim_num(i)
-        ao_coef_norm_cgtos(i,j) = ao_coef(i,j)
+      do j = 1, ao_cart_prim_num(i)
+        ao_cart_coef_norm_cgtos(i,j) = ao_cart_coef(i,j)
       enddo
 
     endif ! primitives_normalized
