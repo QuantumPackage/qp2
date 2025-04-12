@@ -9,6 +9,8 @@ open Qputils
 
 let print_list () =
   Lazy.force Qpackage.executables
+  |> List.filter (fun (x,_) -> not (String.starts_with ~prefix:"debug_" x))
+  |> List.filter (fun (x,_) -> not (String.starts_with ~prefix:"test_" x))
   |> List.iter (fun (x,_) -> Printf.printf " * %s\n" x)
 
 let () =
@@ -62,7 +64,10 @@ let run slave ?prefix exe ezfio_file =
   if (not (List.exists (fun (x,_) -> x = exe) executables)) then
     begin
         Printf.printf "\nPossible choices:\n";
-        List.iter (fun (x,_) -> Printf.printf "* %s\n%!" x) executables;
+        executables
+        |> List.filter (fun (x,_) -> not (String.starts_with ~prefix:"debug_" x))
+        |> List.filter (fun (x,_) -> not (String.starts_with ~prefix:"test_" x))
+        |> List.iter (fun (x,_) -> Printf.printf "* %s\n%!" x);
         failwith ("Executable "^exe^" not found")
     end;
 
@@ -171,6 +176,8 @@ let () =
     set_header_doc (Sys.argv.(0) ^ " - Quantum Package command");
     "Executes a Quantum Package binary file among these:\n\n"
     ^ (Lazy.force Qpackage.executables
+       |> List.filter (fun (x,_) -> not (String.starts_with ~prefix:"debug_" x))
+       |> List.filter (fun (x,_) -> not (String.starts_with ~prefix:"test_" x))
        |> List.map (fun (x,_) -> Printf.sprintf " * %s" x )
        |> String.concat "\n")
     |> set_description_doc;
