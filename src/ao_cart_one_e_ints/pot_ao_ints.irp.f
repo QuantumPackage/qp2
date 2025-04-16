@@ -1,7 +1,7 @@
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, ao_cart_integrals_n_e, (ao_cart_num,ao_cart_num)]
+BEGIN_PROVIDER [ double precision, ao_cart_coul_n_e, (ao_cart_num,ao_cart_num)]
 
   BEGIN_DOC
   !  Nucleus-electron interaction, in the |AO| basis set.
@@ -18,11 +18,11 @@ BEGIN_PROVIDER [ double precision, ao_cart_integrals_n_e, (ao_cart_num,ao_cart_n
   double precision :: A_center(3),B_center(3),C_center(3)
   double precision :: overlap_x,overlap_y,overlap_z,overlap,dx,NAI_pol_mult
 
-  ao_cart_integrals_n_e = 0.d0
+  ao_cart_coul_n_e = 0.d0
 
-  if (read_ao_cart_integrals_n_e) then
+  if (read_ao_cart_coul_n_e) then
 
-    call ezfio_get_ao_cart_one_e_ints_ao_cart_integrals_n_e(ao_cart_integrals_n_e)
+    call ezfio_get_ao_cart_one_e_ints_ao_cart_coul_n_e(ao_cart_coul_n_e)
     print *,  'AO N-e integrals read from disk'
 
   else
@@ -31,7 +31,7 @@ BEGIN_PROVIDER [ double precision, ao_cart_integrals_n_e, (ao_cart_num,ao_cart_n
 
       do j = 1, ao_cart_num
         do i = 1, ao_cart_num
-          ao_cart_integrals_n_e(i,j) = ao_cart_integrals_n_e_cgtos(i,j)
+          ao_cart_coul_n_e(i,j) = ao_cart_coul_n_e_cgtos(i,j)
         enddo
       enddo
 
@@ -42,7 +42,7 @@ BEGIN_PROVIDER [ double precision, ao_cart_integrals_n_e, (ao_cart_num,ao_cart_n
           !$OMP PRIVATE (i,j,k,l,m,alpha,beta,A_center,B_center,C_center,power_A,power_B,&
           !$OMP          num_A,num_B,Z,c,c1,n_pt_in)                      &
           !$OMP SHARED (ao_cart_num,ao_cart_prim_num,ao_cart_expo_ordered_transp,ao_cart_power,ao_cart_nucl,nucl_coord,ao_cart_coef_normalized_ordered_transp,&
-          !$OMP         n_pt_max_integrals,ao_cart_integrals_n_e,nucl_num,nucl_charge)
+          !$OMP         n_pt_max_integrals,ao_cart_coul_n_e,nucl_num,nucl_charge)
 
       n_pt_in = n_pt_max_integrals
 
@@ -86,7 +86,7 @@ BEGIN_PROVIDER [ double precision, ao_cart_integrals_n_e, (ao_cart_num,ao_cart_n
                 c = c - Z * c1
 
               enddo
-              ao_cart_integrals_n_e(i,j) = ao_cart_integrals_n_e(i,j)  &
+              ao_cart_coul_n_e(i,j) = ao_cart_coul_n_e(i,j)  &
                   + ao_cart_coef_normalized_ordered_transp(l,j)             &
                   * ao_cart_coef_normalized_ordered_transp(m,i) * c
             enddo
@@ -99,25 +99,17 @@ BEGIN_PROVIDER [ double precision, ao_cart_integrals_n_e, (ao_cart_num,ao_cart_n
 
     endif
 
-
-    IF(do_pseudo) THEN
-       ao_cart_integrals_n_e += ao_cart_pseudo_integrals
-    ENDIF
-    IF(point_charges) THEN
-       ao_cart_integrals_n_e += ao_cart_integrals_pt_chrg
-    ENDIF
-
   endif
 
 
-  if (write_ao_cart_integrals_n_e) then
-    call ezfio_set_ao_cart_one_e_ints_ao_cart_integrals_n_e(ao_cart_integrals_n_e)
+  if (write_ao_cart_coul_n_e) then
+    call ezfio_set_ao_cart_one_e_ints_ao_cart_coul_n_e(ao_cart_coul_n_e)
     print *,  'AO N-e integrals written to disk'
   endif
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, ao_cart_integrals_n_e_imag, (ao_cart_num,ao_cart_num)]
+BEGIN_PROVIDER [ double precision, ao_cart_coul_n_e_imag, (ao_cart_num,ao_cart_num)]
   BEGIN_DOC
   !  Nucleus-electron interaction, in the |AO| basis set.
   !
@@ -131,8 +123,8 @@ BEGIN_PROVIDER [ double precision, ao_cart_integrals_n_e_imag, (ao_cart_num,ao_c
   integer                        :: i,j,k,l,n_pt_in,m
   double precision               :: overlap_x,overlap_y,overlap_z,overlap,dx,NAI_pol_mult
 
-  if (read_ao_cart_integrals_n_e) then
-    call ezfio_get_ao_cart_one_e_ints_ao_cart_integrals_n_e_imag(ao_cart_integrals_n_e_imag)
+  if (read_ao_cart_coul_n_e) then
+    call ezfio_get_ao_cart_one_e_ints_ao_cart_coul_n_e_imag(ao_cart_coul_n_e_imag)
     print *,  'AO N-e integrals read from disk'
   else
    print *,  irp_here, ': Not yet implemented'
@@ -140,7 +132,7 @@ BEGIN_PROVIDER [ double precision, ao_cart_integrals_n_e_imag, (ao_cart_num,ao_c
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, ao_cart_integrals_n_e_per_atom, (ao_cart_num,ao_cart_num,nucl_num)]
+BEGIN_PROVIDER [ double precision, ao_cart_coul_n_e_per_atom, (ao_cart_num,ao_cart_num,nucl_num)]
   BEGIN_DOC
 ! Nucleus-electron interaction in the |AO| basis set, per atom A.
 !
@@ -154,14 +146,14 @@ BEGIN_PROVIDER [ double precision, ao_cart_integrals_n_e_per_atom, (ao_cart_num,
   integer                        :: i,j,k,l,n_pt_in,m
   double precision               :: overlap_x,overlap_y,overlap_z,overlap,dx,NAI_pol_mult
 
-  ao_cart_integrals_n_e_per_atom = 0.d0
+  ao_cart_coul_n_e_per_atom = 0.d0
 
   !$OMP PARALLEL                                                    &
       !$OMP DEFAULT (NONE)                                          &
       !$OMP PRIVATE (i,j,k,l,m,alpha,beta,A_center,B_center,power_A,power_B,&
       !$OMP  num_A,num_B,c,n_pt_in,C_center)                        &
       !$OMP SHARED (ao_cart_num,ao_cart_prim_num,ao_cart_expo_ordered_transp,ao_cart_power,ao_cart_nucl,nucl_coord,ao_cart_coef_normalized_ordered_transp,&
-      !$OMP  n_pt_max_integrals,ao_cart_integrals_n_e_per_atom,nucl_num)
+      !$OMP  n_pt_max_integrals,ao_cart_coul_n_e_per_atom,nucl_num)
   n_pt_in = n_pt_max_integrals
   !$OMP DO SCHEDULE (dynamic)
 
@@ -197,7 +189,7 @@ BEGIN_PROVIDER [ double precision, ao_cart_integrals_n_e_per_atom, (ao_cart_num,
                 * ao_cart_coef_normalized_ordered_transp(m,i)
           enddo
         enddo
-        ao_cart_integrals_n_e_per_atom(i,j,k) = -c
+        ao_cart_coul_n_e_per_atom(i,j,k) = -c
       enddo
     enddo
   enddo

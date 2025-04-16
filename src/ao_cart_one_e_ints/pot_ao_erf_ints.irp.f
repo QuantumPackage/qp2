@@ -1,7 +1,7 @@
 
 ! ---
 
-subroutine give_all_erf_kl_ao(integrals_ao,mu_in,C_center)
+subroutine give_all_erf_kl_ao_cart(integrals_ao,mu_in,C_center)
   implicit none
   BEGIN_DOC
   ! Subroutine that returns all integrals over $r$ of type
@@ -9,18 +9,18 @@ subroutine give_all_erf_kl_ao(integrals_ao,mu_in,C_center)
   END_DOC
   double precision, intent(in)   :: mu_in,C_center(3)
   double precision, intent(out)  :: integrals_ao(ao_cart_num,ao_cart_num)
-  double precision               :: NAI_pol_mult_erf_ao
+  double precision               :: NAI_pol_mult_erf_ao_cart
   integer                        :: i,j,l,k,m
   do k = 1, ao_cart_num
     do m = 1, ao_cart_num
-      integrals_ao(m,k) = NAI_pol_mult_erf_ao(m,k,mu_in,C_center)
+      integrals_ao(m,k) = NAI_pol_mult_erf_ao_cart(m,k,mu_in,C_center)
     enddo
   enddo
 end
 
 ! ---
 
-double precision function NAI_pol_mult_erf_ao(i_ao, j_ao, mu_in, C_center)
+double precision function NAI_pol_mult_erf_ao_cart(i_ao, j_ao, mu_in, C_center)
 
   BEGIN_DOC
   !
