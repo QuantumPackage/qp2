@@ -13,6 +13,13 @@ BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_coef, (ao_num,ao_sphe_num)]
   END_DOC
   integer :: row,col,k,j
   !
+ if (ao_cartesian) then
+    ! Identity matrix
+    integer :: i
+    do i=1,ao_sphe_num
+      ao_cart_to_sphe_coef(i,i) = 1.d0
+    enddo
+ else
   ao_cart_to_sphe_coef(:,:) = 0.d0
   row = 1
   col = 1
@@ -49,6 +56,7 @@ BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_coef, (ao_num,ao_sphe_num)]
         stop 'Error in ao_cart_to_sphe : angular momentum too high'
     end select
   enddo
+ endif
 END_PROVIDER
 
 
