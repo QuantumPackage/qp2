@@ -9,7 +9,10 @@ BEGIN_PROVIDER [ integer*8, qmckl_ctx_jastrow ]
 
   qmckl_ctx_jastrow = qmckl_context_create()
 
-  rc =  qmckl_set_jastrow_champ_spin_independent(qmckl_ctx_jastrow, 1)
+  if (.not.jast_qmckl_spin_independent) then
+    print *, 'WARNING: In QMCkl Jastrow, jast_qmckl_spin_independent should to be set to True'
+  endif
+  rc =  qmckl_set_jastrow_champ_spin_independent(qmckl_ctx_jastrow, jast_qmckl_spin_independent)
   rc = qmckl_check(qmckl_ctx_jastrow, rc)
   if (rc /= QMCKL_SUCCESS) stop -1
 
