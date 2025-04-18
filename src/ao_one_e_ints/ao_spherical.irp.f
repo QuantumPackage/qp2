@@ -1,0 +1,138 @@
+BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_coef, (ao_num,ao_sphe_num)]
+  implicit none
+  BEGIN_DOC
+  ! Coefficients to go from current cartesian AO basis set to spherical AO basis set
+  !
+  ! ao_cart_to_sphe_coef(i,j) = coefficient of the i-th cartesian |AO| on the j-th spherical |AO|
+  !
+  ! :math:`\chi^s_{\nu} = \sum_{\nu}^{N_{\text{cart}}} B^{sc}_{\mu\nu} \chi^c_{\mu}`
+  !
+  ! where :math:`\chi^s_{\nu}` is an element of the spherical AO basis, 
+  ! :math:`\chi^c_{\mu}` is an element of the cartesian AO basis, 
+  ! and :math:`B^{sc}_{\mu\nu}` is an change of basis matrix
+  END_DOC
+  integer :: row,col,k,j
+  !
+ if (ao_cartesian) then
+    ! Identity matrix
+    integer :: i
+    do i=1,ao_sphe_num
+      ao_cart_to_sphe_coef(i,i) = 1.d0
+    enddo
+ else
+  ao_cart_to_sphe_coef(:,:) = 0.d0
+  row = 1
+  col = 1
+  do while (row <= ao_num)
+    ! Select case based on azimuthal quantum number of i-th AO orbitals
+    select case ( ao_l(row) )
+      case (0)
+        ! S orbital 
+        ao_cart_to_sphe_coef(row,col) = 1.d0
+        row += 1 
+        col += 1
+      BEGIN_TEMPLATE 
+      case ($SHELL)
+        ! P,D,F,... orbitals
+        do k=1,size(cart_to_sphe_$SHELL,2)
+          do j=1,size(cart_to_sphe_$SHELL,1)
+            ao_cart_to_sphe_coef(row+j-1,col+k-1) = cart_to_sphe_$SHELL(j,k)
+          enddo
+        enddo
+        row += size(cart_to_sphe_$SHELL,1)
+        col += size(cart_to_sphe_$SHELL,2)
+      SUBST [ SHELL ]
+        1;;
+        2;;
+        3;;
+        4;;
+        5;;
+        6;;
+        7;;
+        8;;
+        9;;
+      END_TEMPLATE
+      case default
+        stop 'Error in ao_cart_to_sphe : angular momentum too high'
+    end select
+  enddo
+ endif
+END_PROVIDER
+
+
+BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_coef_transp, (ao_sphe_num,ao_num)]
+  implicit none
+  BEGIN_DOC
+  ! Transpose of :c:data:`ao_cart_to_sphe_coef` 
+  END_DOC
+  integer :: i,j
+  do i = 1, ao_num
+    do j = 1, ao_sphe_num
+      ao_cart_to_sphe_coef_transp(j,i) = ao_cart_to_sphe_coef(i,j)
+    enddo
+  enddo
+END_PROVIDER
+
+
+subroutine ao_cart_to_ao_sphe(A_ao_cart,LDA_ao_cart,A_ao_sphe,LDA_ao_sphe)
+  implicit none
+  BEGIN_DOC
+  ! Transform matrix A from the |AO| cartesian basis to the |AO| spherical basis
+  !
+  ! :math:`(B^{sc})^T.A^c.B^{sc}`
+  !
+  ! where :math:`B^{sc}` is :c:data:`ao_cart_to_sphe_coef`, 
+  ! the matrix of coefficients from the cartesian AO basis to spherical one,
+  ! and :math:`B^{sc}` is :c:data:`ao_cart_to_sphe_coef_transp`, its transpose.
+  END_DOC
+  integer, intent(in)            :: LDA_ao_cart,LDA_ao_sphe
+  double precision, intent(in)   :: A_ao_cart(LDA_ao_cart,ao_num)
+  double precision, intent(out)  :: A_ao_sphe(LDA_ao_sphe,ao_sphe_num)
+  double precision, allocatable  :: T(:,:)
+  !
+  allocate (T(ao_num,ao_sphe_num) )
+  !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: T
+
+  call dgemm('N','N', ao_num, ao_sphe_num, ao_num,        &
+      1.d0, A_ao_cart, LDA_ao_cart,                       &
+      ao_cart_to_sphe_coef, size(ao_cart_to_sphe_coef,1), &
+      0.d0, T, size(T,1))
+  ! Notice that for the following dgemm we could have used
+  ! ao_cart_to_sphe_coef_transp, but instead we transposed with the 'T' argument
+  call dgemm('T','N', ao_sphe_num, ao_sphe_num, ao_num,         &
+      1.d0, ao_cart_to_sphe_coef, size(ao_cart_to_sphe_coef,1), &
+      T, ao_num,                                                &
+      0.d0, A_ao_sphe, size(A_ao_sphe,1))
+  !
+  ! call restore_symmetry(mo_num,mo_num,A_ao_sphe,size(A_ao_sphe,1),1.d-15)
+  deallocate(T)
+end
+
+
+BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_overlap, (ao_sphe_num,ao_sphe_num) ]
+  implicit none
+  BEGIN_DOC
+  ! |AO| overlap matrix in the spherical basis set obtained as
+  !
+  ! :math:`(B^{sc})^T.S^c.B^{sc}`
+  !
+  ! where :math:`S^c` is the overlap matrix in the cartesian AO basis
+  END_DOC
+  !
+  call ao_cart_to_ao_sphe(ao_overlap,ao_num,ao_cart_to_sphe_overlap,ao_sphe_num)
+  !
+END_PROVIDER
+
+
+BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_overlap_inv, (ao_sphe_num,ao_sphe_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Inverse of :c:data:`ao_cart_to_sphe_overlap`
+ END_DOC
+ !
+ call get_pseudo_inverse(                                            &
+   ao_cart_to_sphe_overlap, size(ao_cart_to_sphe_overlap,1),         &
+   ao_sphe_num,ao_sphe_num,                                          &
+   ao_cart_to_sphe_overlap_inv, size(ao_cart_to_sphe_overlap_inv,1), &
+   lin_dep_cutoff)
+END_PROVIDER
