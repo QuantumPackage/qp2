@@ -100,13 +100,9 @@ END_PROVIDER
 
      call set_multiple_levels_omp(.False.)
 
-     if (do_direct_integrals) then
-       if (ao_cart_two_e_integral(1,1,1,1) < huge(1.d0)) then
-         ! Trigger providers inside ao_cart_two_e_integral
-         continue
-       endif
-     else
-       PROVIDE ao_cart_two_e_integrals_in_map
+     if (ao_cart_two_e_integral(1,1,1,1) < huge(1.d0)) then
+       ! Trigger providers inside ao_cart_two_e_integral
+       continue
      endif
 
      tau = ao_cart_cholesky_threshold
@@ -140,21 +136,12 @@ END_PROVIDER
        enddo
      enddo
 
-     if (do_direct_integrals) then
-       !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i8) SCHEDULE(dynamic,21)
-       do i8=ndim8-1,1,-1
-         D(i8) = ao_cart_two_e_integral(addr1(i8), addr2(i8),              &
-             addr1(i8), addr2(i8))
-       enddo
-       !$OMP END PARALLEL DO
-     else
-       !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i8) SCHEDULE(dynamic,21)
-       do i8=ndim8-1,1,-1
-         D(i8) = get_ao_cart_two_e_integral(addr1(i8), addr1(i8),          &
-             addr2(i8), addr2(i8), ao_cart_integrals_map)
-       enddo
-       !$OMP END PARALLEL DO
-     endif
+     !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i8) SCHEDULE(dynamic,21)
+     do i8=ndim8-1,1,-1
+       D(i8) = ao_cart_two_e_integral(addr1(i8), addr2(i8),              &
+           addr1(i8), addr2(i8))
+     enddo
+     !$OMP END PARALLEL DO
      ! Just to guarentee termination
      D(ndim8) = 0.d0
 
@@ -352,32 +339,17 @@ END_PROVIDER
 
          if (.not.computed(dj)) then
            m = dj
-           if (do_direct_integrals) then
-               !$OMP PARALLEL DO PRIVATE(k) SCHEDULE(dynamic,21)
-               do k=1,np
-                 Delta_col(k) = 0.d0
-                 if (.not.ao_cart_two_e_integral_zero( addr1(Lset(k)), addr1(Dset(m)),&
-                       addr2(Lset(k)), addr2(Dset(m)) ) ) then
-                     Delta_col(k) = &
-                         ao_cart_two_e_integral(addr1(Lset(k)), addr2(Lset(k)),&
-                         addr1(Dset(m)), addr2(Dset(m)))
-                 endif
-               enddo
-               !$OMP END PARALLEL DO
-           else
-               PROVIDE ao_cart_integrals_map
-               !$OMP PARALLEL DO PRIVATE(k) SCHEDULE(dynamic,21)
-               do k=1,np
-                 Delta_col(k) = 0.d0
-                 if (.not.ao_cart_two_e_integral_zero( addr1(Lset(k)), addr1(Dset(m)),&
-                       addr2(Lset(k)), addr2(Dset(m)) ) ) then
-                     Delta_col(k) = &
-                         get_ao_cart_two_e_integral( addr1(Lset(k)), addr1(Dset(m)),&
-                         addr2(Lset(k)), addr2(Dset(m)), ao_cart_integrals_map)
-                 endif
-               enddo
-               !$OMP END PARALLEL DO
-           endif
+           !$OMP PARALLEL DO PRIVATE(k) SCHEDULE(dynamic,21)
+           do k=1,np
+             Delta_col(k) = 0.d0
+             if (.not.ao_cart_two_e_integral_zero( addr1(Lset(k)), addr1(Dset(m)),&
+                   addr2(Lset(k)), addr2(Dset(m)) ) ) then
+                 Delta_col(k) = &
+                     ao_cart_two_e_integral(addr1(Lset(k)), addr2(Lset(k)),&
+                     addr1(Dset(m)), addr2(Dset(m)))
+             endif
+           enddo
+           !$OMP END PARALLEL DO
 
            !$OMP PARALLEL DO PRIVATE(p)
            do p=1,np

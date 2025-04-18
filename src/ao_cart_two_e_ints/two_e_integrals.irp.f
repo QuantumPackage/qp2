@@ -364,7 +364,6 @@ end
 
 subroutine compute_ao_cart_two_e_integrals(j,k,l,sze,buffer_value)
   implicit none
-  use map_module
 
   BEGIN_DOC
   ! Compute AO 1/r12 integrals for all i and fixed j,k,l
@@ -395,90 +394,6 @@ subroutine compute_ao_cart_two_e_integrals(j,k,l,sze,buffer_value)
   enddo
 
 end
-
-BEGIN_PROVIDER [ logical, ao_cart_two_e_integrals_in_map ]
-  implicit none
-  use map_module
-  BEGIN_DOC
-  !  Map of Atomic integrals
-  !     i(r1) j(r2) 1/r12 k(r1) l(r2)
-  END_DOC
-
-  integer                        :: i,j,k,l
-  double precision               :: ao_cart_two_e_integral,cpu_1,cpu_2, wall_1, wall_2
-  double precision               :: integral, wall_0
-  include 'utils/constants.include.F'
-
-  ! For integrals file
-  integer(key_kind),allocatable  :: buffer_i(:)
-  integer                        :: size_buffer 
-  real(integral_kind),allocatable :: buffer_value(:)
-
-  integer                        :: n_integrals, rc
-  integer                        :: kk, m, j1, i1, lmax
-  character*(64)                 :: fmt
-
-  double precision               :: map_mb
-  PROVIDE read_ao_cart_two_e_integrals io_ao_cart_two_e_integrals ao_cart_integrals_map
-
-  if (read_ao_cart_two_e_integrals) then
-    print*,'Reading the AO integrals'
-    call map_load_from_disk(trim(ezfio_filename)//'/work/ao_cart_ints',ao_cart_integrals_map)
-    print*, 'AO integrals provided'
-    ao_cart_two_e_integrals_in_map = .True.
-    return
-  endif
-
-  print*, 'Providing the AO integrals'
-  call wall_time(wall_0)
-  call wall_time(wall_1)
-  call cpu_time(cpu_1)
-
-  if (.True.) then
-    ! Avoid openMP
-    integral = ao_cart_two_e_integral(1,1,1,1)
-  endif
-
-  size_buffer = ao_cart_num*ao_cart_num
-  !$OMP PARALLEL DEFAULT(shared) private(j,l) &
-  !$OMP PRIVATE(buffer_i, buffer_value, n_integrals)
-  allocate(buffer_i(size_buffer), buffer_value(size_buffer))
-  n_integrals = 0
-  !$OMP DO COLLAPSE(1) SCHEDULE(dynamic)
-  do l=1,ao_cart_num
-    do j=1,l
-      call compute_ao_cart_integrals_jl(j,l,n_integrals,buffer_i,buffer_value)
-      call insert_into_ao_cart_integrals_map(n_integrals,buffer_i,buffer_value)
-    enddo
-  enddo
-  !$OMP END DO
-  deallocate(buffer_i, buffer_value)
-  !$OMP END PARALLEL
-
-  print*, 'Sorting the map'
-  call map_sort(ao_cart_integrals_map)
-  call cpu_time(cpu_2)
-  call wall_time(wall_2)
-  integer(map_size_kind)         :: get_ao_cart_map_size, ao_cart_map_size
-  ao_cart_map_size = get_ao_cart_map_size()
-
-  print*, 'AO integrals provided:'
-  print*, ' Size of AO map :         ', map_mb(ao_cart_integrals_map) ,'MB'
-  print*, ' Number of AO integrals :', ao_cart_map_size
-  print*, ' cpu  time :',cpu_2 - cpu_1, 's'
-  print*, ' wall time :',wall_2 - wall_1, 's  ( x ', (cpu_2-cpu_1)/(wall_2-wall_1+tiny(1.d0)), ' )'
-
-  ao_cart_two_e_integrals_in_map = .True.
-
-  if (write_ao_cart_two_e_integrals.and.mpi_master) then
-    call ezfio_set_work_empty(.False.)
-    call map_save_to_disk(trim(ezfio_filename)//'/work/ao_cart_ints',ao_cart_integrals_map)
-    call ezfio_set_ao_cart_two_e_ints_io_ao_cart_two_e_integrals('Read')
-  endif
-
-END_PROVIDER
-
-! ---
 
 BEGIN_PROVIDER [ double precision, ao_cart_two_e_integral_schwartz, (ao_cart_num, ao_cart_num) ]
 
@@ -1651,59 +1566,6 @@ recursive subroutine I_x2_pol_mult(c,B_10,B_01,B_00,C_00,D_00,d,nd,dim)
 end
 
 
-
-
-subroutine compute_ao_cart_integrals_jl(j,l,n_integrals,buffer_i,buffer_value)
-  implicit none
-  use map_module
-  BEGIN_DOC
-  !  Parallel client for AO integrals
-  END_DOC
-
-  integer, intent(in)             :: j,l
-  integer,intent(out)             :: n_integrals
-  integer(key_kind),intent(out)   :: buffer_i(ao_cart_num*ao_cart_num)
-  real(integral_kind),intent(out) :: buffer_value(ao_cart_num*ao_cart_num)
-  logical, external               :: ao_cart_two_e_integral_zero
-
-  integer                         :: i,k
-  double precision, external      :: ao_cart_two_e_integral
-  double precision                :: cpu_1,cpu_2, wall_1, wall_2
-  double precision                :: integral, wall_0
-  double precision                :: thr
-  integer                         :: kk, m, j1, i1
-
-  thr = ao_cart_integrals_threshold
-
-  n_integrals = 0
-
-  j1 = j+shiftr(l*l-l,1)
-  do k = 1, ao_cart_num           ! r1
-    i1 = shiftr(k*k-k,1)
-    if (i1 > j1) then
-      exit
-    endif
-    do i = 1, k
-      i1 += 1
-      if (i1 > j1) then
-        exit
-      endif
-      if (ao_cart_two_e_integral_zero(i,j,k,l)) then
-        cycle
-      endif
-      !DIR$ FORCEINLINE
-      integral = ao_cart_two_e_integral(i,k,j,l)  ! i,k : r1    j,l : r2
-      if (abs(integral) < thr) then
-        cycle
-      endif
-      n_integrals += 1
-      !DIR$ FORCEINLINE
-      call two_e_integrals_index(i,j,k,l,buffer_i(n_integrals))
-      buffer_value(n_integrals) = integral
-    enddo
-  enddo
-
-end
 
 
 subroutine multiply_poly_local(b,nb,c,nc,d,nd)
