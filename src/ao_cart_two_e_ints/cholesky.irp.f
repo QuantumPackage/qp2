@@ -1,16 +1,18 @@
-double precision function get_ao_cart_integ_chol(i,j,k,l)
+BEGIN_TEMPLATE 
+double precision function get_ao_cart$_erf_integ_chol(i,j,k,l)
  implicit none
   BEGIN_DOC
   !  CHOLESKY representation of the integral of the AO basis <ik|jl> or (ij|kl)
   !     i(r1) j(r1) 1/r12 k(r2) l(r2)
+  ! 
   END_DOC
  integer, intent(in) :: i,j,k,l
  double precision, external :: ddot
- get_ao_cart_integ_chol = ddot(cholesky_ao_cart_num, cholesky_ao_cart_transp(1,i,j), 1, cholesky_ao_cart_transp(1,k,l), 1)
+ get_ao_cart$_erf_integ_chol = ddot(cholesky_ao_cart$_erf_num, cholesky_ao_cart$_erf_transp(1,i,j), 1, cholesky_ao_cart$_erf_transp(1,k,l), 1)
 
 end
 
-BEGIN_PROVIDER [ double precision, cholesky_ao_cart_transp, (cholesky_ao_cart_num, ao_cart_num, ao_cart_num) ]
+BEGIN_PROVIDER [ double precision, cholesky_ao_cart_transp, (cholesky_ao$_erf_cart_num, ao_cart_num, ao_cart_num) ]
  implicit none
  BEGIN_DOC
 ! Transposed of the Cholesky vectors in AO basis set
@@ -18,23 +20,23 @@ BEGIN_PROVIDER [ double precision, cholesky_ao_cart_transp, (cholesky_ao_cart_nu
  integer :: i,j,k
  do j=1,ao_cart_num
   do i=1,ao_cart_num
-   do k=1,cholesky_ao_cart_num
-    cholesky_ao_cart_transp(k,i,j) = cholesky_ao(i,j,k)
+   do k=1,cholesky_ao_cart$_erf_num
+    cholesky_ao_cart$_erf_transp(k,i,j) = cholesky_ao(i,j,k)
    enddo
   enddo
  enddo
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ integer, cholesky_ao_cart_num ]
-&BEGIN_PROVIDER [ double precision, cholesky_ao, (ao_cart_num, ao_cart_num, 1) ]
+ BEGIN_PROVIDER [ integer, cholesky_ao_cart$_erf_num ]
+&BEGIN_PROVIDER [ double precision, cholesky_ao_cart$_erf, (ao_cart_num, ao_cart_num, 1) ]
    use mmap_module
    implicit none
    BEGIN_DOC
    ! Cholesky vectors in AO basis: (ik|a):
    ! <ij|kl> = (ik|jl) = sum_a (ik|a).(a|jl)
    !
-   ! Last dimension of cholesky_ao is cholesky_ao_cart_num
+   ! Last dimension of cholesky_ao is cholesky_ao_cart$_erf_num
    !
    ! https://mogp-emulator.readthedocs.io/en/latest/methods/proc/ProcPivotedCholesky.html
    !
@@ -60,10 +62,9 @@ END_PROVIDER
    integer                        :: N, np, nq
 
    double precision               :: Dmax, Dmin, Qmax, f
-   double precision, external     :: get_ao_cart_two_e_integral
    logical, external              :: ao_cart_two_e_integral_zero
 
-   double precision, external     :: ao_cart_two_e_integral
+   double precision, external     :: ao_cart_two_e_integral$_erf
    integer                        :: block_size, iblock
 
    double precision               :: mem, mem0
@@ -78,7 +79,7 @@ END_PROVIDER
 
    type(mmap_type) :: map
 
-   PROVIDE nproc ao_cart_cholesky_threshold do_direct_integrals qp_max_mem
+   PROVIDE nproc ao_cholesky_threshold do_direct_integrals qp_max_mem
    PROVIDE nucl_coord
    call set_multiple_levels_omp(.False.)
 
@@ -87,25 +88,25 @@ END_PROVIDER
    ! Will be reallocated at the end
    deallocate(cholesky_ao)
 
-   if (read_ao_cart_cholesky) then
-     print *,  'Reading Cholesky AO vectors from disk...'
-     iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_ao', 'R')
+   if (read_ao_cart$_erf_cholesky) then
+     print *,  'Reading Cholesky AO$_erf vectors from disk...'
+     iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_ao_cart$_erf', 'R')
      read(iunit) rank
      allocate(cholesky_ao(ao_cart_num,ao_cart_num,rank), stat=ierr)
      read(iunit) cholesky_ao
      close(iunit)
-     cholesky_ao_cart_num = rank
+     cholesky_ao_cart$_erf_num = rank
 
    else
 
      call set_multiple_levels_omp(.False.)
 
-     if (ao_cart_two_e_integral(1,1,1,1) < huge(1.d0)) then
+     if (ao_cart_two_e_integral$_erf(1,1,1,1) < huge(1.d0)) then
        ! Trigger providers inside ao_cart_two_e_integral
        continue
      endif
 
-     tau = ao_cart_cholesky_threshold
+     tau = ao_cholesky_threshold
      tau2 = tau*tau
 
      rank = 0
@@ -118,7 +119,7 @@ END_PROVIDER
      call print_memory_usage()
 
      print *,  ''
-     print *,  'Cholesky decomposition of AO integrals'
+     print *,  'Cholesky decomposition of AO$_erf integrals'
      print *,  '======================================'
      print *,  ''
      print *,  '============ ============='
@@ -138,7 +139,7 @@ END_PROVIDER
 
      !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i8) SCHEDULE(dynamic,21)
      do i8=ndim8-1,1,-1
-       D(i8) = ao_cart_two_e_integral(addr1(i8), addr2(i8),              &
+       D(i8) = ao_cart_two_e_integral$_erf(addr1(i8), addr2(i8),              &
            addr1(i8), addr2(i8))
      enddo
      !$OMP END PARALLEL DO
@@ -345,7 +346,7 @@ END_PROVIDER
              if (.not.ao_cart_two_e_integral_zero( addr1(Lset(k)), addr1(Dset(m)),&
                    addr2(Lset(k)), addr2(Dset(m)) ) ) then
                  Delta_col(k) = &
-                     ao_cart_two_e_integral(addr1(Lset(k)), addr2(Lset(k)),&
+                     ao_cart_two_e_integral$_erf(addr1(Lset(k)), addr2(Lset(k)),&
                      addr1(Dset(m)), addr2(Dset(m)))
              endif
            enddo
@@ -448,24 +449,31 @@ END_PROVIDER
 
      call mmap_destroy(map)
 
-     cholesky_ao_cart_num = rank
+     cholesky_ao_cart$_erf_num = rank
 
-     if (write_ao_cart_cholesky) then
-       print *,  'Writing Cholesky AO vectors to disk...'
-       iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_ao', 'W')
+     if (write_ao_cart$_erf_cholesky) then
+       print *,  'Writing Cholesky AO$_erf vectors to disk...'
+       iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_ao_cart', 'W')
        write(iunit) rank
-       write(iunit) cholesky_ao
+       write(iunit) cholesky_ao_cart
        close(iunit)
-       call ezfio_set_ao_cart_two_e_ints_io_ao_cart_cholesky('Read')
+       call ezfio_set_ao_cart_two_e_ints_io_ao_cart$_erf_cholesky('Read')
      endif
 
    endif
 
-   print *, 'Rank  : ', cholesky_ao_cart_num, '(', 100.d0*dble(cholesky_ao_cart_num)/dble(ao_cart_num*ao_cart_num), ' %)'
+   print *, 'Rank  : ', cholesky_ao_cart$_erf_num, '(', 100.d0*dble(cholesky_ao_cart$_erf_num)/dble(ao_cart_num*ao_cart_num), ' %)'
    print *,  ''
    call wall_time(wall1)
-   print*,'Time to provide AO cholesky vectors = ',(wall1-wall0)/60.d0, ' min'
+   print*,'Time to provide AO$_erf cholesky vectors = ',(wall1-wall0)/60.d0, ' min'
 
 
 END_PROVIDER
 
+SUBST [ _erf ]
+  
+;;
+_erf;;
+_cgtos;;
+  
+END_TEMPLATE     
