@@ -805,3 +805,74 @@ END_PROVIDER
 
 
 
+ BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_coef, (ao_num,ao_num)]
+&BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_normalization, (ao_num)]
+  implicit none
+  BEGIN_DOC
+! Coefficients to go from cartesian to spherical coordinates in the current
+! basis set
+!
+!  S_cart^-1 <cart|sphe>
+  END_DOC
+  integer :: i
+  integer, external              :: ao_power_index
+  integer                        :: ibegin,j,k
+  integer                        :: prev, ao_sphe_count
+  prev = 0
+  ao_cart_to_sphe_coef(:,:) = 0.d0
+  ao_cart_to_sphe_normalization(:) = 1.d0
+
+  if (ao_cartesian) then
+    ! Identity matrix
+    do i=1,ao_sphe_num
+      ao_cart_to_sphe_coef(i,i) = 1.d0
+    enddo
+
+  else
+    ! Assume order provided by ao_power_index
+    i = 1
+    ao_sphe_count = 0
+    do while (i <= ao_num)
+      select case ( ao_l(i) )
+        case (0)
+          ao_sphe_count += 1
+          ao_cart_to_sphe_coef(i,ao_sphe_count) = 1.d0
+          ao_cart_to_sphe_normalization(i) = 1.d0
+          i += 1
+        BEGIN_TEMPLATE
+        case ($SHELL)
+          if (ao_power(i,1) == $SHELL) then
+            do k=1,size(cart_to_sphe_$SHELL,2)
+              do j=1,size(cart_to_sphe_$SHELL,1)
+                ao_cart_to_sphe_coef(i+j-1,ao_sphe_count+k) = cart_to_sphe_$SHELL(j,k)
+              enddo
+            enddo
+            do j=1,size(cart_to_sphe_$SHELL,1)
+              ao_cart_to_sphe_normalization(i+j-1) = cart_to_sphe_norm_$SHELL(j)
+            enddo
+            i += size(cart_to_sphe_$SHELL,1)
+            ao_sphe_count += size(cart_to_sphe_$SHELL,2)
+          endif
+        SUBST [ SHELL ]
+          1;;
+          2;;
+          3;;
+          4;;
+          5;;
+          6;;
+          7;;
+          8;;
+          9;;
+        END_TEMPLATE
+        case default
+          stop 'Error in ao_cart_to_sphe : angular momentum too high'
+      end select
+    enddo
+
+  endif
+
+  if (ao_sphe_count /= ao_sphe_num) then
+    call qp_bug(irp_here, ao_sphe_count, "ao_sphe_count /= ao_sphe_num")
+  endif
+END_PROVIDER
+

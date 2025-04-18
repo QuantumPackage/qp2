@@ -66,4 +66,5 @@ if __name__ == '__main__':
   ezfio.set_jastrow_jast_qmckl_a_vector(jastrow['vec_a'])
   ezfio.set_jastrow_jast_qmckl_b_vector(jastrow['vec_b'])
   ezfio.set_jastrow_jast_qmckl_c_vector(jastrow['vec_c'])
+  ezfio.set_jastrow_jast_qmckl_spin_independent(True)
 
