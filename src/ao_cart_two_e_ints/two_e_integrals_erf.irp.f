@@ -1,4 +1,4 @@
-double precision function ao_two_e_integral_erf(i,j,k,l)
+double precision function ao_cart_two_e_integral_erf(i,j,k,l)
   implicit none
   BEGIN_DOC
   !  integral of the AO basis <ik|jl> or (ij|kl)
@@ -14,29 +14,29 @@ double precision function ao_two_e_integral_erf(i,j,k,l)
   double precision               :: P_new(0:max_dim,3),P_center(3),fact_p,pp
   double precision               :: Q_new(0:max_dim,3),Q_center(3),fact_q,qq
   integer                        :: iorder_p(3), iorder_q(3)
-  double precision               :: ao_two_e_integral_schwartz_accel_erf
+  double precision               :: ao_cart_two_e_integral_schwartz_accel_erf
   
   provide mu_erf
 
-   if (ao_prim_num(i) * ao_prim_num(j) * ao_prim_num(k) * ao_prim_num(l) > 1024 ) then
-     ao_two_e_integral_erf = ao_two_e_integral_schwartz_accel_erf(i,j,k,l)
+   if (ao_cart_prim_num(i) * ao_cart_prim_num(j) * ao_cart_prim_num(k) * ao_cart_prim_num(l) > 1024 ) then
+     ao_cart_two_e_integral_erf = ao_cart_two_e_integral_schwartz_accel_erf(i,j,k,l)
      return
    endif
 
   dim1 = n_pt_max_integrals
 
-  num_i = ao_nucl(i)
-  num_j = ao_nucl(j)
-  num_k = ao_nucl(k)
-  num_l = ao_nucl(l)
-  ao_two_e_integral_erf = 0.d0
+  num_i = ao_cart_nucl(i)
+  num_j = ao_cart_nucl(j)
+  num_k = ao_cart_nucl(k)
+  num_l = ao_cart_nucl(l)
+  ao_cart_two_e_integral_erf = 0.d0
 
   if (num_i /= num_j .or. num_k /= num_l .or. num_j /= num_k)then
     do p = 1, 3
-      I_power(p) = ao_power(i,p)
-      J_power(p) = ao_power(j,p)
-      K_power(p) = ao_power(k,p)
-      L_power(p) = ao_power(l,p)
+      I_power(p) = ao_cart_power(i,p)
+      J_power(p) = ao_cart_power(j,p)
+      K_power(p) = ao_cart_power(k,p)
+      L_power(p) = ao_cart_power(l,p)
       I_center(p) = nucl_coord(num_i,p)
       J_center(p) = nucl_coord(num_j,p)
       K_center(p) = nucl_coord(num_k,p)
@@ -47,26 +47,26 @@ double precision function ao_two_e_integral_erf(i,j,k,l)
     double precision               :: p_inv,q_inv
     double precision               :: general_primitive_integral_erf
 
-    do p = 1, ao_prim_num(i)
-      coef1 = ao_coef_normalized_ordered_transp(p,i)
-      do q = 1, ao_prim_num(j)
-        coef2 = coef1*ao_coef_normalized_ordered_transp(q,j)
+    do p = 1, ao_cart_prim_num(i)
+      coef1 = ao_cart_coef_normalized_ordered_transp(p,i)
+      do q = 1, ao_cart_prim_num(j)
+        coef2 = coef1*ao_cart_coef_normalized_ordered_transp(q,j)
         call give_explicit_poly_and_gaussian(P_new,P_center,pp,fact_p,iorder_p,&
-            ao_expo_ordered_transp(p,i),ao_expo_ordered_transp(q,j),                 &
+            ao_cart_expo_ordered_transp(p,i),ao_cart_expo_ordered_transp(q,j),                 &
             I_power,J_power,I_center,J_center,dim1)
         p_inv = 1.d0/pp
-        do r = 1, ao_prim_num(k)
-          coef3 = coef2*ao_coef_normalized_ordered_transp(r,k)
-          do s = 1, ao_prim_num(l)
-            coef4 = coef3*ao_coef_normalized_ordered_transp(s,l)
+        do r = 1, ao_cart_prim_num(k)
+          coef3 = coef2*ao_cart_coef_normalized_ordered_transp(r,k)
+          do s = 1, ao_cart_prim_num(l)
+            coef4 = coef3*ao_cart_coef_normalized_ordered_transp(s,l)
             call give_explicit_poly_and_gaussian(Q_new,Q_center,qq,fact_q,iorder_q,&
-                ao_expo_ordered_transp(r,k),ao_expo_ordered_transp(s,l),             &
+                ao_cart_expo_ordered_transp(r,k),ao_cart_expo_ordered_transp(s,l),             &
                 K_power,L_power,K_center,L_center,dim1)
             q_inv = 1.d0/qq
             integral = general_primitive_integral_erf(dim1,              &
                 P_new,P_center,fact_p,pp,p_inv,iorder_p,             &
                 Q_new,Q_center,fact_q,qq,q_inv,iorder_q)
-            ao_two_e_integral_erf = ao_two_e_integral_erf +  coef4 * integral
+            ao_cart_two_e_integral_erf = ao_cart_two_e_integral_erf +  coef4 * integral
           enddo ! s
         enddo  ! r
       enddo   ! q
@@ -75,27 +75,27 @@ double precision function ao_two_e_integral_erf(i,j,k,l)
   else
 
     do p = 1, 3
-      I_power(p) = ao_power(i,p)
-      J_power(p) = ao_power(j,p)
-      K_power(p) = ao_power(k,p)
-      L_power(p) = ao_power(l,p)
+      I_power(p) = ao_cart_power(i,p)
+      J_power(p) = ao_cart_power(j,p)
+      K_power(p) = ao_cart_power(k,p)
+      L_power(p) = ao_cart_power(l,p)
     enddo
     double  precision              :: ERI_erf
 
-    do p = 1, ao_prim_num(i)
-      coef1 = ao_coef_normalized_ordered_transp(p,i)
-      do q = 1, ao_prim_num(j)
-        coef2 = coef1*ao_coef_normalized_ordered_transp(q,j)
-        do r = 1, ao_prim_num(k)
-          coef3 = coef2*ao_coef_normalized_ordered_transp(r,k)
-          do s = 1, ao_prim_num(l)
-            coef4 = coef3*ao_coef_normalized_ordered_transp(s,l)
+    do p = 1, ao_cart_prim_num(i)
+      coef1 = ao_cart_coef_normalized_ordered_transp(p,i)
+      do q = 1, ao_cart_prim_num(j)
+        coef2 = coef1*ao_cart_coef_normalized_ordered_transp(q,j)
+        do r = 1, ao_cart_prim_num(k)
+          coef3 = coef2*ao_cart_coef_normalized_ordered_transp(r,k)
+          do s = 1, ao_cart_prim_num(l)
+            coef4 = coef3*ao_cart_coef_normalized_ordered_transp(s,l)
             integral = ERI_erf(                                          &
-                ao_expo_ordered_transp(p,i),ao_expo_ordered_transp(q,j),ao_expo_ordered_transp(r,k),ao_expo_ordered_transp(s,l),&
+                ao_cart_expo_ordered_transp(p,i),ao_cart_expo_ordered_transp(q,j),ao_cart_expo_ordered_transp(r,k),ao_cart_expo_ordered_transp(s,l),&
                 I_power(1),J_power(1),K_power(1),L_power(1),         &
                 I_power(2),J_power(2),K_power(2),L_power(2),         &
                 I_power(3),J_power(3),K_power(3),L_power(3))
-            ao_two_e_integral_erf = ao_two_e_integral_erf + coef4 * integral
+            ao_cart_two_e_integral_erf = ao_cart_two_e_integral_erf + coef4 * integral
           enddo ! s
         enddo  ! r
       enddo   ! q
@@ -105,7 +105,7 @@ double precision function ao_two_e_integral_erf(i,j,k,l)
 
 end
 
-double precision function ao_two_e_integral_schwartz_accel_erf(i,j,k,l)
+double precision function ao_cart_two_e_integral_schwartz_accel_erf(i,j,k,l)
   implicit none
   BEGIN_DOC
   !  integral of the AO basis <ik|jl> or (ij|kl)
@@ -125,15 +125,15 @@ double precision function ao_two_e_integral_schwartz_accel_erf(i,j,k,l)
 
   dim1 = n_pt_max_integrals
 
-  num_i = ao_nucl(i)
-  num_j = ao_nucl(j)
-  num_k = ao_nucl(k)
-  num_l = ao_nucl(l)
-  ao_two_e_integral_schwartz_accel_erf = 0.d0
+  num_i = ao_cart_nucl(i)
+  num_j = ao_cart_nucl(j)
+  num_k = ao_cart_nucl(k)
+  num_l = ao_cart_nucl(l)
+  ao_cart_two_e_integral_schwartz_accel_erf = 0.d0
   double precision               :: thr
-  thr = ao_integrals_threshold*ao_integrals_threshold
+  thr = ao_cart_integrals_threshold*ao_cart_integrals_threshold
 
-  allocate(schwartz_kl(0:ao_prim_num(l),0:ao_prim_num(k)))
+  allocate(schwartz_kl(0:ao_cart_prim_num(l),0:ao_cart_prim_num(k)))
 
       double precision               :: coef3
       double precision               :: coef2
@@ -143,10 +143,10 @@ double precision function ao_two_e_integral_schwartz_accel_erf(i,j,k,l)
 
   if (num_i /= num_j .or. num_k /= num_l .or. num_j /= num_k)then
     do p = 1, 3
-      I_power(p) = ao_power(i,p)
-      J_power(p) = ao_power(j,p)
-      K_power(p) = ao_power(k,p)
-      L_power(p) = ao_power(l,p)
+      I_power(p) = ao_cart_power(i,p)
+      J_power(p) = ao_cart_power(j,p)
+      K_power(p) = ao_cart_power(k,p)
+      L_power(p) = ao_cart_power(l,p)
       I_center(p) = nucl_coord(num_i,p)
       J_center(p) = nucl_coord(num_j,p)
       K_center(p) = nucl_coord(num_k,p)
@@ -154,13 +154,13 @@ double precision function ao_two_e_integral_schwartz_accel_erf(i,j,k,l)
     enddo
 
     schwartz_kl(0,0) = 0.d0
-    do r = 1, ao_prim_num(k)
-      coef1 = ao_coef_normalized_ordered_transp(r,k)*ao_coef_normalized_ordered_transp(r,k)
+    do r = 1, ao_cart_prim_num(k)
+      coef1 = ao_cart_coef_normalized_ordered_transp(r,k)*ao_cart_coef_normalized_ordered_transp(r,k)
       schwartz_kl(0,r) = 0.d0
-      do s = 1, ao_prim_num(l)
-        coef2 = coef1 * ao_coef_normalized_ordered_transp(s,l) * ao_coef_normalized_ordered_transp(s,l)
+      do s = 1, ao_cart_prim_num(l)
+        coef2 = coef1 * ao_cart_coef_normalized_ordered_transp(s,l) * ao_cart_coef_normalized_ordered_transp(s,l)
         call give_explicit_poly_and_gaussian(Q_new,Q_center,qq,fact_q,iorder_q,&
-            ao_expo_ordered_transp(r,k),ao_expo_ordered_transp(s,l),                 &
+            ao_cart_expo_ordered_transp(r,k),ao_cart_expo_ordered_transp(s,l),                 &
             K_power,L_power,K_center,L_center,dim1)
         q_inv = 1.d0/qq
         schwartz_kl(s,r) = general_primitive_integral_erf(dim1,          &
@@ -172,12 +172,12 @@ double precision function ao_two_e_integral_schwartz_accel_erf(i,j,k,l)
       schwartz_kl(0,0) = max(schwartz_kl(0,r),schwartz_kl(0,0))
     enddo
 
-    do p = 1, ao_prim_num(i)
-      coef1 = ao_coef_normalized_ordered_transp(p,i)
-      do q = 1, ao_prim_num(j)
-        coef2 = coef1*ao_coef_normalized_ordered_transp(q,j)
+    do p = 1, ao_cart_prim_num(i)
+      coef1 = ao_cart_coef_normalized_ordered_transp(p,i)
+      do q = 1, ao_cart_prim_num(j)
+        coef2 = coef1*ao_cart_coef_normalized_ordered_transp(q,j)
         call give_explicit_poly_and_gaussian(P_new,P_center,pp,fact_p,iorder_p,&
-            ao_expo_ordered_transp(p,i),ao_expo_ordered_transp(q,j),                 &
+            ao_cart_expo_ordered_transp(p,i),ao_cart_expo_ordered_transp(q,j),                 &
             I_power,J_power,I_center,J_center,dim1)
         p_inv = 1.d0/pp
         schwartz_ij = general_primitive_integral_erf(dim1,               &
@@ -187,25 +187,25 @@ double precision function ao_two_e_integral_schwartz_accel_erf(i,j,k,l)
         if (schwartz_kl(0,0)*schwartz_ij < thr) then
            cycle
         endif
-        do r = 1, ao_prim_num(k)
+        do r = 1, ao_cart_prim_num(k)
           if (schwartz_kl(0,r)*schwartz_ij < thr) then
              cycle
           endif
-          coef3 = coef2*ao_coef_normalized_ordered_transp(r,k)
-          do s = 1, ao_prim_num(l)
+          coef3 = coef2*ao_cart_coef_normalized_ordered_transp(r,k)
+          do s = 1, ao_cart_prim_num(l)
             if (schwartz_kl(s,r)*schwartz_ij < thr) then
                cycle
             endif
-            coef4 = coef3*ao_coef_normalized_ordered_transp(s,l)
+            coef4 = coef3*ao_cart_coef_normalized_ordered_transp(s,l)
             double precision               :: general_primitive_integral_erf
             call give_explicit_poly_and_gaussian(Q_new,Q_center,qq,fact_q,iorder_q,&
-                ao_expo_ordered_transp(r,k),ao_expo_ordered_transp(s,l),             &
+                ao_cart_expo_ordered_transp(r,k),ao_cart_expo_ordered_transp(s,l),             &
                 K_power,L_power,K_center,L_center,dim1)
             q_inv = 1.d0/qq
             integral = general_primitive_integral_erf(dim1,              &
                 P_new,P_center,fact_p,pp,p_inv,iorder_p,             &
                 Q_new,Q_center,fact_q,qq,q_inv,iorder_q)
-            ao_two_e_integral_schwartz_accel_erf = ao_two_e_integral_schwartz_accel_erf + coef4 * integral
+            ao_cart_two_e_integral_schwartz_accel_erf = ao_cart_two_e_integral_schwartz_accel_erf + coef4 * integral
           enddo ! s
         enddo  ! r
       enddo   ! q
@@ -214,21 +214,21 @@ double precision function ao_two_e_integral_schwartz_accel_erf(i,j,k,l)
   else
 
     do p = 1, 3
-      I_power(p) = ao_power(i,p)
-      J_power(p) = ao_power(j,p)
-      K_power(p) = ao_power(k,p)
-      L_power(p) = ao_power(l,p)
+      I_power(p) = ao_cart_power(i,p)
+      J_power(p) = ao_cart_power(j,p)
+      K_power(p) = ao_cart_power(k,p)
+      L_power(p) = ao_cart_power(l,p)
     enddo
     double  precision              :: ERI_erf
 
     schwartz_kl(0,0) = 0.d0
-    do r = 1, ao_prim_num(k)
-      coef1 = ao_coef_normalized_ordered_transp(r,k)*ao_coef_normalized_ordered_transp(r,k)
+    do r = 1, ao_cart_prim_num(k)
+      coef1 = ao_cart_coef_normalized_ordered_transp(r,k)*ao_cart_coef_normalized_ordered_transp(r,k)
       schwartz_kl(0,r) = 0.d0
-      do s = 1, ao_prim_num(l)
-        coef2 = coef1*ao_coef_normalized_ordered_transp(s,l)*ao_coef_normalized_ordered_transp(s,l)
+      do s = 1, ao_cart_prim_num(l)
+        coef2 = coef1*ao_cart_coef_normalized_ordered_transp(s,l)*ao_cart_coef_normalized_ordered_transp(s,l)
         schwartz_kl(s,r) = ERI_erf(                                      &
-            ao_expo_ordered_transp(r,k),ao_expo_ordered_transp(s,l),ao_expo_ordered_transp(r,k),ao_expo_ordered_transp(s,l),&
+            ao_cart_expo_ordered_transp(r,k),ao_cart_expo_ordered_transp(s,l),ao_cart_expo_ordered_transp(r,k),ao_cart_expo_ordered_transp(s,l),&
             K_power(1),L_power(1),K_power(1),L_power(1),             &
             K_power(2),L_power(2),K_power(2),L_power(2),             &
             K_power(3),L_power(3),K_power(3),L_power(3)) * &
@@ -238,34 +238,34 @@ double precision function ao_two_e_integral_schwartz_accel_erf(i,j,k,l)
       schwartz_kl(0,0) = max(schwartz_kl(0,r),schwartz_kl(0,0))
     enddo
 
-    do p = 1, ao_prim_num(i)
-      coef1 = ao_coef_normalized_ordered_transp(p,i)
-      do q = 1, ao_prim_num(j)
-        coef2 = coef1*ao_coef_normalized_ordered_transp(q,j)
+    do p = 1, ao_cart_prim_num(i)
+      coef1 = ao_cart_coef_normalized_ordered_transp(p,i)
+      do q = 1, ao_cart_prim_num(j)
+        coef2 = coef1*ao_cart_coef_normalized_ordered_transp(q,j)
         schwartz_ij = ERI_erf(                                          &
-                ao_expo_ordered_transp(p,i),ao_expo_ordered_transp(q,j),ao_expo_ordered_transp(p,i),ao_expo_ordered_transp(q,j),&
+                ao_cart_expo_ordered_transp(p,i),ao_cart_expo_ordered_transp(q,j),ao_cart_expo_ordered_transp(p,i),ao_cart_expo_ordered_transp(q,j),&
                 I_power(1),J_power(1),I_power(1),J_power(1),         &
                 I_power(2),J_power(2),I_power(2),J_power(2),         &
                 I_power(3),J_power(3),I_power(3),J_power(3))*coef2*coef2
         if (schwartz_kl(0,0)*schwartz_ij < thr) then
            cycle
         endif
-        do r = 1, ao_prim_num(k)
+        do r = 1, ao_cart_prim_num(k)
           if (schwartz_kl(0,r)*schwartz_ij < thr) then
              cycle
           endif
-          coef3 = coef2*ao_coef_normalized_ordered_transp(r,k)
-          do s = 1, ao_prim_num(l)
+          coef3 = coef2*ao_cart_coef_normalized_ordered_transp(r,k)
+          do s = 1, ao_cart_prim_num(l)
             if (schwartz_kl(s,r)*schwartz_ij < thr) then
                cycle
             endif
-            coef4 = coef3*ao_coef_normalized_ordered_transp(s,l)
+            coef4 = coef3*ao_cart_coef_normalized_ordered_transp(s,l)
             integral = ERI_erf(                                          &
-                ao_expo_ordered_transp(p,i),ao_expo_ordered_transp(q,j),ao_expo_ordered_transp(r,k),ao_expo_ordered_transp(s,l),&
+                ao_cart_expo_ordered_transp(p,i),ao_cart_expo_ordered_transp(q,j),ao_cart_expo_ordered_transp(r,k),ao_cart_expo_ordered_transp(s,l),&
                 I_power(1),J_power(1),K_power(1),L_power(1),         &
                 I_power(2),J_power(2),K_power(2),L_power(2),         &
                 I_power(3),J_power(3),K_power(3),L_power(3))
-            ao_two_e_integral_schwartz_accel_erf = ao_two_e_integral_schwartz_accel_erf +  coef4 * integral
+            ao_cart_two_e_integral_schwartz_accel_erf = ao_cart_two_e_integral_schwartz_accel_erf +  coef4 * integral
           enddo ! s
         enddo  ! r
       enddo   ! q
@@ -277,7 +277,7 @@ double precision function ao_two_e_integral_schwartz_accel_erf(i,j,k,l)
 end
 
 
-subroutine compute_ao_two_e_integrals_erf(j,k,l,sze,buffer_value)
+subroutine compute_ao_cart_two_e_integrals_erf(j,k,l,sze,buffer_value)
   implicit none
   use map_module
 
@@ -288,32 +288,32 @@ subroutine compute_ao_two_e_integrals_erf(j,k,l,sze,buffer_value)
   include 'utils/constants.include.F'
   integer, intent(in)            :: j,k,l,sze
   real(integral_kind), intent(out) :: buffer_value(sze)
-  double precision               :: ao_two_e_integral_erf
+  double precision               :: ao_cart_two_e_integral_erf
 
   integer                        :: i
-  logical, external              :: ao_one_e_integral_zero
-  logical, external              :: ao_two_e_integral_zero
+  logical, external              :: ao_cart_one_e_integral_zero
+  logical, external              :: ao_cart_two_e_integral_zero
 
-  if (ao_one_e_integral_zero(j,l)) then
+  if (ao_cart_one_e_integral_zero(j,l)) then
     buffer_value = 0._integral_kind
     return
   endif
-  if (ao_two_e_integral_erf_schwartz(j,l) < thresh ) then
+  if (ao_cart_two_e_integral_erf_schwartz(j,l) < thresh ) then
     buffer_value = 0._integral_kind
     return
   endif
 
-  do i = 1, ao_num
-    if (ao_two_e_integral_zero(i,j,k,l)) then
+  do i = 1, ao_cart_num
+    if (ao_cart_two_e_integral_zero(i,j,k,l)) then
       buffer_value(i) = 0._integral_kind
       cycle
     endif
-    if (ao_two_e_integral_erf_schwartz(i,k)*ao_two_e_integral_erf_schwartz(j,l) < thresh ) then
+    if (ao_cart_two_e_integral_erf_schwartz(i,k)*ao_cart_two_e_integral_erf_schwartz(j,l) < thresh ) then
       buffer_value(i) = 0._integral_kind
       cycle
     endif
     !DIR$ FORCEINLINE
-    buffer_value(i) = ao_two_e_integral_erf(i,k,j,l)
+    buffer_value(i) = ao_cart_two_e_integral_erf(i,k,j,l)
   enddo
 
 end
@@ -599,60 +599,5 @@ subroutine integrale_new_erf(I_f,a_x,b_x,c_x,d_x,a_y,b_y,c_y,d_y,a_z,b_z,c_z,d_z
   enddo
 
 
-
-end
-
-
-subroutine compute_ao_integrals_erf_jl(j,l,n_integrals,buffer_i,buffer_value)
-  implicit none
-  use map_module
-  BEGIN_DOC
-  !  Parallel client for AO integrals
-  END_DOC
-
-  integer, intent(in)            :: j,l
-  integer,intent(out)            :: n_integrals
-  integer(key_kind),intent(out)  :: buffer_i(ao_num*ao_num)
-  real(integral_kind),intent(out) :: buffer_value(ao_num*ao_num)
-
-  integer                        :: i,k
-  double precision               :: ao_two_e_integral_erf,cpu_1,cpu_2, wall_1, wall_2
-  double precision               :: integral, wall_0
-  double precision               :: thr
-  integer                        :: kk, m, j1, i1
-  logical, external              :: ao_two_e_integral_zero
-
-  thr = ao_integrals_threshold
-
-  n_integrals = 0
-
-  j1 = j+ishft(l*l-l,-1)
-  do k = 1, ao_num           ! r1
-    i1 = ishft(k*k-k,-1)
-    if (i1 > j1) then
-      exit
-    endif
-    do i = 1, k
-      i1 += 1
-      if (i1 > j1) then
-        exit
-      endif
-      if (ao_two_e_integral_zero(i,j,k,l)) then
-        cycle
-      endif
-      if (ao_two_e_integral_erf_schwartz(i,k)*ao_two_e_integral_erf_schwartz(j,l) < thr ) then
-        cycle
-      endif
-      !DIR$ FORCEINLINE
-      integral = ao_two_e_integral_erf(i,k,j,l)  ! i,k : r1    j,l : r2
-      if (abs(integral) < thr) then
-        cycle
-      endif
-      n_integrals += 1
-      !DIR$ FORCEINLINE
-      call two_e_integrals_index(i,j,k,l,buffer_i(n_integrals))
-      buffer_value(n_integrals) = integral
-    enddo
-  enddo
 
 end

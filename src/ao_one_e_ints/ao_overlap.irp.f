@@ -2,9 +2,6 @@
 ! ---
 
  BEGIN_PROVIDER [double precision, ao_overlap  , (ao_num, ao_num)]
-&BEGIN_PROVIDER [double precision, ao_overlap_x, (ao_num, ao_num)]
-&BEGIN_PROVIDER [double precision, ao_overlap_y, (ao_num, ao_num)]
-&BEGIN_PROVIDER [double precision, ao_overlap_z, (ao_num, ao_num)]
 
   BEGIN_DOC
   ! Overlap between atomic basis functions:
@@ -19,78 +16,12 @@
   double precision :: A_center(3), B_center(3)
 
   ao_overlap   = 0.d0
-  ao_overlap_x = 0.d0
-  ao_overlap_y = 0.d0
-  ao_overlap_z = 0.d0
 
   if(read_ao_integrals_overlap) then
-
-    call ezfio_get_ao_one_e_ints_ao_integrals_overlap(ao_overlap(1:ao_num, 1:ao_num))
-    print *,  'AO overlap integrals read from disk'
-
+   call ezfio_get_ao_one_e_ints_ao_integrals_overlap(ao_overlap(1:ao_num, 1:ao_num))
+   print *,  'AO overlap integrals read from disk'
   else
-
-    if(use_cgtos) then
-
-      do j = 1, ao_num
-        do i = 1, ao_num
-          ao_overlap  (i,j) = ao_overlap_cgtos  (i,j) 
-          ao_overlap_x(i,j) = ao_overlap_cgtos_x(i,j)
-          ao_overlap_y(i,j) = ao_overlap_cgtos_y(i,j)
-          ao_overlap_z(i,j) = ao_overlap_cgtos_z(i,j)
-        enddo
-      enddo
-
-    else
-
-      dim1=100
-      !$OMP PARALLEL DO SCHEDULE(GUIDED) &
-      !$OMP DEFAULT(NONE) &
-      !$OMP PRIVATE(A_center,B_center,power_A,power_B,&
-      !$OMP  overlap_x,overlap_y, overlap_z, overlap, &
-      !$OMP  alpha, beta,i,j,n,l,c) &
-      !$OMP SHARED(nucl_coord,ao_power,ao_prim_num, &
-      !$OMP  ao_overlap_x,ao_overlap_y,ao_overlap_z,ao_overlap,ao_num,ao_coef_normalized_ordered_transp,ao_nucl, &
-      !$OMP  ao_expo_ordered_transp,dim1)
-      do j=1,ao_num
-      A_center(1) = nucl_coord( ao_nucl(j), 1 )
-      A_center(2) = nucl_coord( ao_nucl(j), 2 )
-      A_center(3) = nucl_coord( ao_nucl(j), 3 )
-      power_A(1)  = ao_power( j, 1 )
-      power_A(2)  = ao_power( j, 2 )
-      power_A(3)  = ao_power( j, 3 )
-      do i= 1,ao_num
-        B_center(1) = nucl_coord( ao_nucl(i), 1 )
-        B_center(2) = nucl_coord( ao_nucl(i), 2 )
-        B_center(3) = nucl_coord( ao_nucl(i), 3 )
-        power_B(1)  = ao_power( i, 1 )
-        power_B(2)  = ao_power( i, 2 )
-        power_B(3)  = ao_power( i, 3 )
-        do n = 1,ao_prim_num(j)
-        alpha = ao_expo_ordered_transp(n,j)
-        do l = 1, ao_prim_num(i)
-          beta = ao_expo_ordered_transp(l,i)
-          call overlap_gaussian_xyz(A_center,B_center,alpha,beta,power_A,power_B,overlap_x,overlap_y,overlap_z,overlap,dim1)
-          c = ao_coef_normalized_ordered_transp(n,j) * ao_coef_normalized_ordered_transp(l,i)
-          ao_overlap(i,j) += c * overlap
-          if(isnan(ao_overlap(i,j)))then
-           print*,'i,j',i,j
-           print*,'l,n',l,n
-           print*,'c,overlap',c,overlap
-           print*,overlap_x,overlap_y,overlap_z
-           stop
-          endif
-          ao_overlap_x(i,j) += c * overlap_x
-          ao_overlap_y(i,j) += c * overlap_y
-          ao_overlap_z(i,j) += c * overlap_z
-        enddo
-        enddo
-      enddo
-      enddo
-      !$OMP END PARALLEL DO
-
-    endif
-
+   call ao_cart_to_ao_basis(ao_cart_overlap, ao_cart_num, ao_overlap, ao_num)
   endif
 
   if (write_ao_integrals_overlap) then
@@ -151,45 +82,8 @@ BEGIN_PROVIDER [ double precision, ao_overlap_abs, (ao_num, ao_num) ]
     enddo
 
   else
-
-    dim1=100
-    lower_exp_val = 40.d0
- !$OMP PARALLEL DO SCHEDULE(GUIDED)               &
- !$OMP DEFAULT(NONE)                              &
- !$OMP PRIVATE(A_center,B_center,power_A,power_B, &
- !$OMP  overlap_x,overlap_y, overlap_z,           &
- !$OMP  alpha, beta,i,j,dx)                       &
- !$OMP SHARED(nucl_coord,ao_power,ao_prim_num,    &
- !$OMP  ao_overlap_abs,ao_num,ao_coef_normalized_ordered_transp,ao_nucl,&
- !$OMP  ao_expo_ordered_transp,dim1,lower_exp_val)
-    do j=1,ao_num
-      A_center(1) = nucl_coord( ao_nucl(j), 1 )
-      A_center(2) = nucl_coord( ao_nucl(j), 2 )
-      A_center(3) = nucl_coord( ao_nucl(j), 3 )
-      power_A(1)  = ao_power( j, 1 )
-      power_A(2)  = ao_power( j, 2 )
-      power_A(3)  = ao_power( j, 3 )
-      do i= 1,ao_num
-        ao_overlap_abs(i,j)= 0.d0
-        B_center(1) = nucl_coord( ao_nucl(i), 1 )
-        B_center(2) = nucl_coord( ao_nucl(i), 2 )
-        B_center(3) = nucl_coord( ao_nucl(i), 3 )
-        power_B(1)  = ao_power( i, 1 )
-        power_B(2)  = ao_power( i, 2 )
-        power_B(3)  = ao_power( i, 3 )
-        do n = 1,ao_prim_num(j)
-          alpha = ao_expo_ordered_transp(n,j)
-          do l = 1, ao_prim_num(i)
-            beta = ao_expo_ordered_transp(l,i)
-            call overlap_x_abs(A_center(1),B_center(1),alpha,beta,power_A(1),power_B(1),overlap_x,lower_exp_val,dx,dim1)
-            call overlap_x_abs(A_center(2),B_center(2),alpha,beta,power_A(2),power_B(2),overlap_y,lower_exp_val,dx,dim1)
-            call overlap_x_abs(A_center(3),B_center(3),alpha,beta,power_A(3),power_B(3),overlap_z,lower_exp_val,dx,dim1)
-            ao_overlap_abs(i,j) += abs(ao_coef_normalized_ordered_transp(n,j) * ao_coef_normalized_ordered_transp(l,i)) * overlap_x * overlap_y * overlap_z
-          enddo
-        enddo
-      enddo
-    enddo
- !$OMP END PARALLEL DO
+   print*,'todo ! numerical integration on DFT grid !'
+   stop
 
   endif
 
@@ -305,29 +199,6 @@ BEGIN_PROVIDER [ double precision, S_half, (ao_num,ao_num)  ]
   enddo
 
   deallocate(U,Vt,D)
-
-END_PROVIDER
-
-
-BEGIN_PROVIDER [ double precision, ao_sphe_overlap, (ao_sphe_num,ao_sphe_num) ]
- implicit none
- BEGIN_DOC
- ! |AO| overlap matrix in the spherical basis set
- END_DOC
- double precision, allocatable :: tmp(:,:)
- allocate (tmp(ao_sphe_num,ao_num))
-
- call dgemm('N','N',ao_sphe_num,ao_num,ao_num, 1.d0, &
-   ao_cart_to_sphe_inv,size(ao_cart_to_sphe_inv,1), &
-   ao_overlap,size(ao_overlap,1), 0.d0, &
-   tmp, size(tmp,1))
-
- call dgemm('N','T',ao_sphe_num,ao_sphe_num,ao_num, 1.d0, &
-   tmp, size(tmp,1), &
-   ao_cart_to_sphe_inv,size(ao_cart_to_sphe_inv,1), 0.d0, &
-   ao_sphe_overlap,size(ao_sphe_overlap,1))
-
- deallocate(tmp)
 
 END_PROVIDER
 

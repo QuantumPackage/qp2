@@ -1,0 +1,402 @@
+BEGIN_PROVIDER [ integer, ao_cart_prim_num_max ]
+ implicit none
+ BEGIN_DOC
+ ! Max number of primitives.
+ END_DOC
+ ao_cart_prim_num_max = maxval(ao_cart_prim_num)
+END_PROVIDER
+
+BEGIN_PROVIDER [ integer, ao_cart_shell, (ao_cart_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Index of the shell to which the AO corresponds
+ END_DOC
+ integer :: i, j, k, n
+ k=0
+ do i=1,shell_num
+   n = shell_ang_mom(i)+1
+   do j=1,(n*(n+1))/2
+     k = k+1
+     ao_cart_shell(k) = i
+   enddo
+ enddo
+END_PROVIDER
+
+BEGIN_PROVIDER [ integer, ao_cart_first_of_shell, (shell_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Index of the shell to which the AO corresponds
+ END_DOC
+ integer :: i, j, k, n
+ k=1
+ do i=1,shell_num
+   ao_cart_first_of_shell(i) = k
+   n = shell_ang_mom(i)+1
+   k = k+(n*(n+1))/2
+ enddo
+
+END_PROVIDER
+
+ BEGIN_PROVIDER [ double precision, ao_cart_coef_normalized, (ao_cart_num,ao_cart_prim_num_max) ]
+&BEGIN_PROVIDER [ double precision, ao_cart_coef_normalization_factor, (ao_cart_num) ]
+  implicit none
+  BEGIN_DOC
+  ! Coefficients including the |AO| normalization
+  END_DOC
+  double precision               :: norm,overlap_x,overlap_y,overlap_z,C_A(3), c
+  integer                        :: l, powA(3), nz
+  integer                        :: i,j,k
+  nz=100
+  C_A(1) = 0.d0
+  C_A(2) = 0.d0
+  C_A(3) = 0.d0
+  ao_cart_coef_normalized = 0.d0
+
+  if (primitives_normalized) then
+
+    if (ezfio_convention >= 20250211) then
+      ! Same primitive normalization factors for all aos_cart of the same shell, or read from trexio file
+
+      do i=1,ao_cart_num
+        k=1
+        do while (k<=prim_num .and. shell_index(k) /= ao_cart_shell(i))
+          k = k+1
+        end do
+        do j=1,ao_cart_prim_num(i)
+          ao_cart_coef_normalized(i,j) = ao_cart_coef(i,j)*prim_normalization_factor(k+j-1)
+        enddo
+      enddo
+
+    else
+        ! GAMESS convention for primitive factors
+
+      do i=1,ao_cart_num
+        powA(1) = ao_cart_power(i,1)
+        powA(2) = ao_cart_power(i,2)
+        powA(3) = ao_cart_power(i,3)
+
+        do j=1,ao_cart_prim_num(i)
+          call overlap_gaussian_xyz(C_A,C_A,ao_cart_expo(i,j),ao_cart_expo(i,j), &
+             powA,powA,overlap_x,overlap_y,overlap_z,norm,nz)
+          ao_cart_coef_normalized(i,j) = ao_cart_coef(i,j)/dsqrt(norm)
+        enddo
+      enddo
+
+    endif
+
+  else
+
+    do i=1,ao_cart_num
+      do j=1,ao_cart_prim_num(i)
+        ao_cart_coef_normalized(i,j) = ao_cart_coef(i,j)
+      enddo
+    enddo
+
+  endif
+
+  double precision, allocatable :: self_overlap(:)
+  allocate(self_overlap(ao_cart_num))
+
+  do i=1,ao_cart_num
+    powA(1) = ao_cart_power(i,1)
+    powA(2) = ao_cart_power(i,2)
+    powA(3) = ao_cart_power(i,3)
+    self_overlap(i) = 0.d0
+    do j=1,ao_cart_prim_num(i)
+      do k=1,j-1
+        call overlap_gaussian_xyz(C_A,C_A,ao_cart_expo(i,j),ao_cart_expo(i,k),powA,powA,overlap_x,overlap_y,overlap_z,c,nz)
+        self_overlap(i) = self_overlap(i) + 2.d0*c*ao_cart_coef_normalized(i,j)*ao_cart_coef_normalized(i,k)
+      enddo
+      call overlap_gaussian_xyz(C_A,C_A,ao_cart_expo(i,j),ao_cart_expo(i,j),powA,powA,overlap_x,overlap_y,overlap_z,c,nz)
+      self_overlap(i) = self_overlap(i) +c*ao_cart_coef_normalized(i,j)*ao_cart_coef_normalized(i,j)
+    enddo
+  enddo
+
+  if (ao_cart_normalized) then
+
+    do i=1,ao_cart_num
+      ao_cart_coef_normalization_factor(i) = 1.d0/dsqrt(self_overlap(i))
+    enddo
+
+  else
+
+    do i=1,ao_cart_num
+      ao_cart_coef_normalization_factor(i) = 1.d0
+    enddo
+
+  endif
+
+  do i=1,ao_cart_num
+    do j=1,ao_cart_prim_num(i)
+      ao_cart_coef_normalized(i,j) = ao_cart_coef_normalized(i,j) * ao_cart_coef_normalization_factor(i)
+    enddo
+  enddo
+
+END_PROVIDER
+
+ BEGIN_PROVIDER [ double precision, ao_cart_coef_normalized_ordered, (ao_cart_num,ao_cart_prim_num_max) ]
+&BEGIN_PROVIDER [ double precision, ao_cart_expo_ordered, (ao_cart_num,ao_cart_prim_num_max) ]
+  implicit none
+  BEGIN_DOC
+  ! Sorted primitives to accelerate 4 index |MO| transformation
+  END_DOC
+
+  integer                        :: iorder(ao_cart_prim_num_max)
+  double precision               :: d(ao_cart_prim_num_max,2)
+  integer                        :: i,j
+  do i=1,ao_cart_num
+    do j=1,ao_cart_prim_num(i)
+      iorder(j) = j
+      d(j,1) = ao_cart_expo(i,j)
+      d(j,2) = ao_cart_coef_normalized(i,j)
+    enddo
+    call dsort(d(1,1),iorder,ao_cart_prim_num(i))
+    call dset_order(d(1,2),iorder,ao_cart_prim_num(i))
+    do j=1,ao_cart_prim_num(i)
+      ao_cart_expo_ordered(i,j) = d(j,1)
+      ao_cart_coef_normalized_ordered(i,j) = d(j,2)
+    enddo
+  enddo
+END_PROVIDER
+
+
+BEGIN_PROVIDER [ double precision, ao_cart_coef_normalized_ordered_transp, (ao_cart_prim_num_max,ao_cart_num) ]
+  implicit none
+  BEGIN_DOC
+  ! Transposed :c:data:`ao_cart_coef_normalized_ordered`
+  END_DOC
+  integer                        :: i,j
+  do j=1, ao_cart_num
+    do i=1, ao_cart_prim_num_max
+      ao_cart_coef_normalized_ordered_transp(i,j) = ao_cart_coef_normalized_ordered(j,i)
+    enddo
+  enddo
+
+END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, ao_cart_expo_ordered_transp, (ao_cart_prim_num_max,ao_cart_num) ]
+  implicit none
+  BEGIN_DOC
+  ! Transposed :c:data:`ao_cart_expo_ordered`
+  END_DOC
+  integer                        :: i,j
+  do j=1, ao_cart_num
+    do i=1, ao_cart_prim_num_max
+      ao_cart_expo_ordered_transp(i,j) = ao_cart_expo_ordered(j,i)
+    enddo
+  enddo
+
+END_PROVIDER
+
+ BEGIN_PROVIDER [ integer, ao_cart_l, (ao_cart_num) ]
+&BEGIN_PROVIDER [ integer, ao_cart_l_max  ]
+&BEGIN_PROVIDER [ character*(128), ao_cart_l_char, (ao_cart_num) ]
+ implicit none
+ BEGIN_DOC
+! :math:`l` value of the |AO|: :math`a+b+c` in :math:`x^a y^b z^c`
+ END_DOC
+ integer :: i
+ do i=1,ao_cart_num
+   ao_cart_l(i) = ao_cart_power(i,1) + ao_cart_power(i,2) + ao_cart_power(i,3)
+   ao_cart_l_char(i) = l_to_character(ao_cart_l(i))
+ enddo
+ ao_cart_l_max = maxval(ao_cart_l)
+END_PROVIDER
+
+integer function ao_cart_power_index(nx,ny,nz)
+  implicit none
+  integer, intent(in)            :: nx, ny, nz
+  BEGIN_DOC
+  ! Unique index given to a triplet of powers:
+  !
+  ! :math:`\frac{1}{2} (l-n_x) (l-n_x+1) + n_z + 1`
+  END_DOC
+  integer                        :: l
+  l = nx + ny + nz
+  ao_cart_power_index = ((l-nx)*(l-nx+1))/2 + nz + 1
+end
+
+
+BEGIN_PROVIDER [ character*(128), l_to_character, (0:7)]
+ BEGIN_DOC
+ ! Character corresponding to the "l" value of an |AO|
+ END_DOC
+ implicit none
+ l_to_character(0)='s'
+ l_to_character(1)='p'
+ l_to_character(2)='d'
+ l_to_character(3)='f'
+ l_to_character(4)='g'
+ l_to_character(5)='h'
+ l_to_character(6)='i'
+ l_to_character(7)='j'
+END_PROVIDER
+
+
+ BEGIN_PROVIDER [ integer, Nucl_N_aos_cart, (nucl_num)]
+&BEGIN_PROVIDER [ integer, N_aos_cart_max ]
+ implicit none
+ BEGIN_DOC
+ ! Number of |aos_cart| per atom
+ END_DOC
+ integer :: i
+ Nucl_N_aos_cart = 0
+ do i = 1, ao_cart_num
+  Nucl_N_aos_cart(ao_cart_nucl(i)) +=1
+ enddo
+ N_aos_cart_max = maxval(Nucl_N_aos_cart)
+END_PROVIDER
+
+ BEGIN_PROVIDER [ integer, nucl_aos_cart, (nucl_num,N_aos_cart_max)]
+ implicit none
+ BEGIN_DOC
+ ! List of |aos_cart| centered on each atom
+ END_DOC
+ integer :: i
+ integer, allocatable :: nucl_tmp(:)
+ allocate(nucl_tmp(nucl_num))
+ nucl_tmp = 0
+ Nucl_aos_cart = 0
+ do i = 1, ao_cart_num
+  nucl_tmp(ao_cart_nucl(i))+=1
+  Nucl_aos_cart(ao_cart_nucl(i),nucl_tmp(ao_cart_nucl(i))) = i
+ enddo
+ deallocate(nucl_tmp)
+END_PROVIDER
+
+
+ BEGIN_PROVIDER [ integer, Nucl_list_shell_aos_cart, (nucl_num,N_aos_cart_max)]
+&BEGIN_PROVIDER [ integer, Nucl_num_shell_aos_cart, (nucl_num)]
+ implicit none
+ integer :: i,j,k
+ BEGIN_DOC
+ ! Index of the shell type |aos_cart| and of the corresponding |aos_cart|
+ ! By convention, for p,d,f and g |aos_cart|, we take the index
+ ! of the |AO| with the the corresponding power in the x axis
+ END_DOC
+ do i = 1, nucl_num
+  Nucl_num_shell_aos_cart(i) = 0
+  do j = 1, Nucl_N_aos_cart(i)
+    if (ao_cart_power(Nucl_aos_cart(i,j),1) == ao_cart_l(Nucl_aos_cart(i,j))) then
+     Nucl_num_shell_aos_cart(i)+=1
+     Nucl_list_shell_aos_cart(i,Nucl_num_shell_aos_cart(i))=Nucl_aos_cart(i,j)
+    endif
+  enddo
+ enddo
+
+END_PROVIDER
+
+
+BEGIN_PROVIDER [ character*(4), ao_cart_l_char_space, (ao_cart_num) ]
+ implicit none
+ BEGIN_DOC
+! Converts an l value to a string
+ END_DOC
+ integer :: i
+ character*(4) :: give_ao_cart_character_space
+ do i=1,ao_cart_num
+
+  if(ao_cart_l(i)==0)then
+  ! S type AO
+   give_ao_cart_character_space = 'S   '
+  elseif(ao_cart_l(i) == 1)then
+  ! P type AO
+   if(ao_cart_power(i,1)==1)then
+    give_ao_cart_character_space = 'X   '
+   elseif(ao_cart_power(i,2) == 1)then
+    give_ao_cart_character_space = 'Y   '
+   else
+    give_ao_cart_character_space = 'Z   '
+   endif
+  elseif(ao_cart_l(i) == 2)then
+  ! D type AO
+   if(ao_cart_power(i,1)==2)then
+    give_ao_cart_character_space = 'XX  '
+   elseif(ao_cart_power(i,2) == 2)then
+    give_ao_cart_character_space = 'YY  '
+   elseif(ao_cart_power(i,3) == 2)then
+    give_ao_cart_character_space = 'ZZ  '
+   elseif(ao_cart_power(i,1) == 1 .and. ao_cart_power(i,2) == 1)then
+    give_ao_cart_character_space = 'XY  '
+   elseif(ao_cart_power(i,1) == 1 .and. ao_cart_power(i,3) == 1)then
+    give_ao_cart_character_space = 'XZ  '
+   else
+    give_ao_cart_character_space = 'YZ  '
+   endif
+  elseif(ao_cart_l(i) == 3)then
+  ! F type AO
+   if(ao_cart_power(i,1)==3)then
+    give_ao_cart_character_space = 'XXX '
+   elseif(ao_cart_power(i,2) == 3)then
+    give_ao_cart_character_space = 'YYY '
+   elseif(ao_cart_power(i,3) == 3)then
+    give_ao_cart_character_space = 'ZZZ '
+   elseif(ao_cart_power(i,1) == 2 .and. ao_cart_power(i,2) == 1)then
+    give_ao_cart_character_space = 'XXY '
+   elseif(ao_cart_power(i,1) == 2 .and. ao_cart_power(i,3) == 1)then
+    give_ao_cart_character_space = 'XXZ '
+   elseif(ao_cart_power(i,2) == 2 .and. ao_cart_power(i,1) == 1)then
+    give_ao_cart_character_space = 'YYX '
+   elseif(ao_cart_power(i,2) == 2 .and. ao_cart_power(i,3) == 1)then
+    give_ao_cart_character_space = 'YYZ '
+   elseif(ao_cart_power(i,3) == 2 .and. ao_cart_power(i,1) == 1)then
+    give_ao_cart_character_space = 'ZZX '
+   elseif(ao_cart_power(i,3) == 2 .and. ao_cart_power(i,2) == 1)then
+    give_ao_cart_character_space = 'ZZY '
+   elseif(ao_cart_power(i,3) == 1 .and. ao_cart_power(i,2) == 1 .and. ao_cart_power(i,3) == 1)then
+    give_ao_cart_character_space = 'XYZ '
+   endif
+  elseif(ao_cart_l(i) == 4)then
+  ! G type AO
+   if(ao_cart_power(i,1)==4)then
+    give_ao_cart_character_space = 'XXXX'
+   elseif(ao_cart_power(i,2) == 4)then
+    give_ao_cart_character_space = 'YYYY'
+   elseif(ao_cart_power(i,3) == 4)then
+    give_ao_cart_character_space = 'ZZZZ'
+   elseif(ao_cart_power(i,1) == 3 .and. ao_cart_power(i,2) == 1)then
+    give_ao_cart_character_space = 'XXXY'
+   elseif(ao_cart_power(i,1) == 3 .and. ao_cart_power(i,3) == 1)then
+    give_ao_cart_character_space = 'XXXZ'
+   elseif(ao_cart_power(i,2) == 3 .and. ao_cart_power(i,1) == 1)then
+    give_ao_cart_character_space = 'YYYX'
+   elseif(ao_cart_power(i,2) == 3 .and. ao_cart_power(i,3) == 1)then
+    give_ao_cart_character_space = 'YYYZ'
+   elseif(ao_cart_power(i,3) == 3 .and. ao_cart_power(i,1) == 1)then
+    give_ao_cart_character_space = 'ZZZX'
+   elseif(ao_cart_power(i,3) == 3 .and. ao_cart_power(i,2) == 1)then
+    give_ao_cart_character_space = 'ZZZY'
+   elseif(ao_cart_power(i,1) == 2 .and. ao_cart_power(i,2) == 2)then
+    give_ao_cart_character_space = 'XXYY'
+   elseif(ao_cart_power(i,2) == 2 .and. ao_cart_power(i,3) == 2)then
+    give_ao_cart_character_space = 'YYZZ'
+   elseif(ao_cart_power(i,1) == 2 .and. ao_cart_power(i,2) == 1 .and. ao_cart_power(i,3) == 1)then
+    give_ao_cart_character_space = 'XXYZ'
+   elseif(ao_cart_power(i,2) == 2 .and. ao_cart_power(i,1) == 1 .and. ao_cart_power(i,3) == 1)then
+    give_ao_cart_character_space = 'YYXZ'
+   elseif(ao_cart_power(i,3) == 2 .and. ao_cart_power(i,1) == 1 .and. ao_cart_power(i,2) == 1)then
+    give_ao_cart_character_space = 'ZZXY'
+   endif
+  endif
+   ao_cart_l_char_space(i) = give_ao_cart_character_space
+ enddo
+END_PROVIDER
+
+! ---
+
+BEGIN_PROVIDER [ logical, use_pw ]
+
+  implicit none
+
+  logical :: exist
+
+  use_pw = .false.
+
+  call ezfio_has_ao_cart_basis_ao_cart_expo_pw(exist)
+  if(exist) then
+    PROVIDE ao_cart_expo_pw_ord_transp
+    if(maxval(dabs(ao_cart_expo_pw_ord_transp(4,:,:))) .gt. 1d-15) use_pw = .true.
+  endif
+
+END_PROVIDER
+

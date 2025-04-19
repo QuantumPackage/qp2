@@ -1,7 +1,7 @@
 
 ! ---
 
-BEGIN_PROVIDER [double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
+BEGIN_PROVIDER [double precision, ao_cart_integrals_n_e_cgtos, (ao_cart_num, ao_cart_num)]
 
   BEGIN_DOC
   !
@@ -26,51 +26,51 @@ BEGIN_PROVIDER [double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
 
 
 
-  ao_integrals_n_e_cgtos = 0.d0
+  ao_cart_coul_n_e_cgtos = 0.d0
 
   !$OMP PARALLEL                                                             &
   !$OMP DEFAULT (NONE)                                                       &
   !$OMP PRIVATE (i, j, k, l, m, n, ii, jj, C_center, Z, c, C1, C2, I1, I2,   &
   !$OMP          alpha, alpha_inv, Ae_center, Ap_center, phiA, KA2, power_A, &
   !$OMP          beta, beta_inv, Be_center, Bp_center, phiB, KB2, power_B)   &
-  !$OMP SHARED (ao_num, ao_prim_num, ao_nucl, nucl_coord,                    &
-  !$OMP         ao_power, nucl_num, nucl_charge, n_pt_max_integrals,         &
-  !$OMP         ao_expo_cgtos_ord_transp, ao_coef_cgtos_norm_ord_transp,     &
-  !$OMP         ao_expo_pw_ord_transp, ao_expo_phase_ord_transp,             &
-  !$OMP         ao_integrals_n_e_cgtos)
+  !$OMP SHARED (ao_cart_num, ao_cart_prim_num, ao_cart_nucl, nucl_coord,                    &
+  !$OMP         ao_cart_power, nucl_num, nucl_charge, n_pt_max_integrals,         &
+  !$OMP         ao_cart_expo_cgtos_ord_transp, ao_cart_coef_cgtos_norm_ord_transp,     &
+  !$OMP         ao_cart_expo_pw_ord_transp, ao_cart_expo_phase_ord_transp,             &
+  !$OMP         ao_cart_coul_n_e_cgtos)
   !$OMP DO SCHEDULE (dynamic)
 
-  do j = 1, ao_num
+  do j = 1, ao_cart_num
 
-    jj = ao_nucl(j)
-    power_A(1:3) = ao_power(j,1:3)
+    jj = ao_cart_nucl(j)
+    power_A(1:3) = ao_cart_power(j,1:3)
 
-    do i = 1, ao_num
+    do i = 1, ao_cart_num
 
-      ii = ao_nucl(i)
-      power_B(1:3) = ao_power(i,1:3)
+      ii = ao_cart_nucl(i)
+      power_B(1:3) = ao_cart_power(i,1:3)
 
-      do n = 1, ao_prim_num(j)
+      do n = 1, ao_cart_prim_num(j)
 
-        alpha = ao_expo_cgtos_ord_transp(n,j)
+        alpha = ao_cart_expo_cgtos_ord_transp(n,j)
         alpha_inv = (1.d0, 0.d0) / alpha
         do m = 1, 3
           Ap_center(m) = nucl_coord(jj,m)
-          Ae_center(m) = nucl_coord(jj,m) - (0.d0, 0.5d0) * alpha_inv * ao_expo_pw_ord_transp(m,n,j)
+          Ae_center(m) = nucl_coord(jj,m) - (0.d0, 0.5d0) * alpha_inv * ao_cart_expo_pw_ord_transp(m,n,j)
         enddo
-        phiA = ao_expo_phase_ord_transp(4,n,j)
-        KA2 = ao_expo_pw_ord_transp(4,n,j)
+        phiA = ao_cart_expo_phase_ord_transp(4,n,j)
+        KA2 = ao_cart_expo_pw_ord_transp(4,n,j)
 
-        do l = 1, ao_prim_num(i)
+        do l = 1, ao_cart_prim_num(i)
 
-          beta = ao_expo_cgtos_ord_transp(l,i)
+          beta = ao_cart_expo_cgtos_ord_transp(l,i)
           beta_inv = (1.d0, 0.d0) / beta
           do m = 1, 3
             Bp_center(m) = nucl_coord(ii,m)
-            Be_center(m) = nucl_coord(ii,m) - (0.d0, 0.5d0) * beta_inv * ao_expo_pw_ord_transp(m,l,i)
+            Be_center(m) = nucl_coord(ii,m) - (0.d0, 0.5d0) * beta_inv * ao_cart_expo_pw_ord_transp(m,l,i)
           enddo
-          phiB = ao_expo_phase_ord_transp(4,l,i)
-          KB2 = ao_expo_pw_ord_transp(4,l,i)
+          phiB = ao_cart_expo_phase_ord_transp(4,l,i)
+          KB2 = ao_cart_expo_pw_ord_transp(4,l,i)
 
           C1 = zexp((0.d0, 1.d0) * (-phiA - phiB) - 0.25d0 * (alpha_inv        * KA2 + beta_inv * KB2))
           C2 = zexp((0.d0, 1.d0) * ( phiA - phiB) - 0.25d0 * (conjg(alpha_inv) * KA2 + beta_inv * KB2))
@@ -91,8 +91,8 @@ BEGIN_PROVIDER [double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
             c = c - Z * 2.d0 * real(C1 * I1 + C2 * I2)
           enddo
 
-          ao_integrals_n_e_cgtos(i,j) += c * ao_coef_cgtos_norm_ord_transp(n,j) &
-                                           * ao_coef_cgtos_norm_ord_transp(l,i)
+          ao_cart_coul_n_e_cgtos(i,j) += c * ao_cart_coef_cgtos_norm_ord_transp(n,j) &
+                                           * ao_cart_coef_cgtos_norm_ord_transp(l,i)
         enddo
       enddo
     enddo

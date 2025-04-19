@@ -138,7 +138,7 @@ END_PROVIDER
  enddo
  k = nucl_num
  do i = 1, nucl_num
-  do ii = 1, Nucl_N_Aos(i)
+  do ii = 1, nucl_n_aos_cart(i)
    i_ao = nucl_aos_transposed(ii,i)
    if(ao_l(i_ao)==1)then
     ! split the function into 2 s functions 
@@ -175,7 +175,7 @@ END_PROVIDER
  END_PROVIDER 
 
 
- BEGIN_PROVIDER [ integer, new_Nucl_N_Aos, (new_nucl_num)]
+ BEGIN_PROVIDER [ integer, new_nucl_n_aos_cart, (new_nucl_num)]
 &BEGIN_PROVIDER [ integer, new_nucl_aos_transposed, (new_n_AOs_max,new_nucl_num) ]
 &BEGIN_PROVIDER [ double precision, new_ao_expo_1s , (n_func_tot) ]
 &BEGIN_PROVIDER [ integer, new_ao_nucl_1s, (n_func_tot)]
@@ -185,7 +185,7 @@ END_PROVIDER
  n_func_total = 0
  do i = 1, nucl_num
   n_func = 0
-  do ii = 1, Nucl_N_Aos(i)
+  do ii = 1, nucl_n_aos_cart(i)
    i_ao = nucl_aos_transposed(ii,i)
    if(ao_l(i_ao)==0)then
     do j = 1, ao_prim_num(i_ao)
@@ -198,11 +198,11 @@ END_PROVIDER
     enddo
    endif
   enddo
-  new_Nucl_N_Aos(i) = n_func
+  new_nucl_n_aos_cart(i) = n_func
  enddo
  n_nucl=nucl_num
  do i = 1, nucl_num
-  do ii = 1, Nucl_N_Aos(i)
+  do ii = 1, nucl_n_aos_cart(i)
    i_ao = nucl_aos_transposed(ii,i)
    if(ao_l(i_ao)==1)then
     do j = 1, ao_prim_num(i_ao)
@@ -211,14 +211,14 @@ END_PROVIDER
      n_nucl +=1
      new_nucl_aos_transposed(1,n_nucl) = n_func_total
      new_ao_expo_1s(n_func_total) = coef
-     new_Nucl_N_Aos(n_nucl)=1
+     new_nucl_n_aos_cart(n_nucl)=1
      new_ao_nucl_1s(n_func_total) = n_nucl
 
      n_func_total+=1
      n_nucl +=1
      new_nucl_aos_transposed(1,n_nucl) = n_func_total
      new_ao_expo_1s(n_func_total) = coef
-     new_Nucl_N_Aos(n_nucl)=1
+     new_nucl_n_aos_cart(n_nucl)=1
      new_ao_nucl_1s(n_func_total) = n_nucl
     enddo
    endif

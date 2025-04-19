@@ -1,9 +1,9 @@
 
 ! ---
 
- BEGIN_PROVIDER [double precision, ao_deriv2_cgtos_x, (ao_num, ao_num)]
-&BEGIN_PROVIDER [double precision, ao_deriv2_cgtos_y, (ao_num, ao_num)]
-&BEGIN_PROVIDER [double precision, ao_deriv2_cgtos_z, (ao_num, ao_num)]
+ BEGIN_PROVIDER [double precision, ao_cart_deriv2_cgtos_x, (ao_cart_num, ao_cart_num)]
+&BEGIN_PROVIDER [double precision, ao_cart_deriv2_cgtos_y, (ao_cart_num, ao_cart_num)]
+&BEGIN_PROVIDER [double precision, ao_cart_deriv2_cgtos_z, (ao_cart_num, ao_cart_num)]
 
   implicit none
   integer          :: i, j, m, n, l, ii, jj, dim1, power_A(3), power_B(3)
@@ -50,52 +50,52 @@
   !$OMP         overlap_m2_2, overlap_m1_2, overlap_p1_2, overlap_p2_2,     &
   !$OMP         overlap_x0_1, overlap_y0_1, overlap_z0_1, overlap_x0_2,     &
   !$OMP         overlap_y0_2, overlap_z0_2)                                 &
-  !$OMP SHARED(nucl_coord, ao_power, ao_prim_num, ao_num, ao_nucl, dim1,    &
-  !$OMP        ao_coef_cgtos_norm_ord_transp, ao_expo_cgtos_ord_transp,     & 
-  !$OMP        ao_expo_pw_ord_transp, ao_expo_phase_ord_transp,             & 
-  !$OMP        ao_deriv2_cgtos_x, ao_deriv2_cgtos_y, ao_deriv2_cgtos_z) 
+  !$OMP SHARED(nucl_coord, ao_cart_power, ao_cart_prim_num, ao_cart_num, ao_cart_nucl, dim1,    &
+  !$OMP        ao_cart_coef_cgtos_norm_ord_transp, ao_cart_expo_cgtos_ord_transp,     & 
+  !$OMP        ao_cart_expo_pw_ord_transp, ao_cart_expo_phase_ord_transp,             & 
+  !$OMP        ao_cart_deriv2_cgtos_x, ao_cart_deriv2_cgtos_y, ao_cart_deriv2_cgtos_z) 
   !$OMP DO SCHEDULE(GUIDED)
-  do j = 1, ao_num
+  do j = 1, ao_cart_num
 
-    jj = ao_nucl(j)
-    power_A(1) = ao_power(j,1)
-    power_A(2) = ao_power(j,2)
-    power_A(3) = ao_power(j,3)
+    jj = ao_cart_nucl(j)
+    power_A(1) = ao_cart_power(j,1)
+    power_A(2) = ao_cart_power(j,2)
+    power_A(3) = ao_cart_power(j,3)
 
-    do i = 1, ao_num
+    do i = 1, ao_cart_num
 
-      ii = ao_nucl(i)
-      power_B(1) = ao_power(i,1)
-      power_B(2) = ao_power(i,2)
-      power_B(3) = ao_power(i,3)
+      ii = ao_cart_nucl(i)
+      power_B(1) = ao_cart_power(i,1)
+      power_B(2) = ao_cart_power(i,2)
+      power_B(3) = ao_cart_power(i,3)
 
-      ao_deriv2_cgtos_x(i,j) = 0.d0
-      ao_deriv2_cgtos_y(i,j) = 0.d0
-      ao_deriv2_cgtos_z(i,j) = 0.d0
+      ao_cart_deriv2_cgtos_x(i,j) = 0.d0
+      ao_cart_deriv2_cgtos_y(i,j) = 0.d0
+      ao_cart_deriv2_cgtos_z(i,j) = 0.d0
 
-      do n = 1, ao_prim_num(j)
+      do n = 1, ao_cart_prim_num(j)
 
-        alpha = ao_expo_cgtos_ord_transp(n,j)
+        alpha = ao_cart_expo_cgtos_ord_transp(n,j)
         alpha_inv = (1.d0, 0.d0) / alpha
         do m = 1, 3
           Ap_center(m) = nucl_coord(jj,m)
-          Ae_center(m) = nucl_coord(jj,m) - (0.d0, 0.5d0) * alpha_inv * ao_expo_pw_ord_transp(m,n,j)
+          Ae_center(m) = nucl_coord(jj,m) - (0.d0, 0.5d0) * alpha_inv * ao_cart_expo_pw_ord_transp(m,n,j)
         enddo
-        phiA = ao_expo_phase_ord_transp(4,n,j)
-        KA2 = ao_expo_pw_ord_transp(4,n,j)
+        phiA = ao_cart_expo_phase_ord_transp(4,n,j)
+        KA2 = ao_cart_expo_pw_ord_transp(4,n,j)
 
-        do l = 1, ao_prim_num(i)
+        do l = 1, ao_cart_prim_num(i)
 
-          beta = ao_expo_cgtos_ord_transp(l,i)
+          beta = ao_cart_expo_cgtos_ord_transp(l,i)
           beta_inv = (1.d0, 0.d0) / beta
           do m = 1, 3
             Bp_center(m) = nucl_coord(ii,m)
-            Be_center(m) = nucl_coord(ii,m) - (0.d0, 0.5d0) * beta_inv * ao_expo_pw_ord_transp(m,l,i)
+            Be_center(m) = nucl_coord(ii,m) - (0.d0, 0.5d0) * beta_inv * ao_cart_expo_pw_ord_transp(m,l,i)
           enddo
-          phiB = ao_expo_phase_ord_transp(4,l,i)
-          KB2 = ao_expo_pw_ord_transp(4,l,i)
+          phiB = ao_cart_expo_phase_ord_transp(4,l,i)
+          KB2 = ao_cart_expo_pw_ord_transp(4,l,i)
 
-          c = ao_coef_cgtos_norm_ord_transp(n,j) * ao_coef_cgtos_norm_ord_transp(l,i)
+          c = ao_cart_coef_cgtos_norm_ord_transp(n,j) * ao_cart_coef_cgtos_norm_ord_transp(l,i)
 
           C1 = zexp((0.d0, 1.d0) * (-phiA - phiB) - 0.25d0 * (alpha_inv * KA2 + beta_inv        * KB2))
           C2 = zexp((0.d0, 1.d0) * (-phiA + phiB) - 0.25d0 * (alpha_inv * KA2 + conjg(beta_inv) * KB2))
@@ -159,7 +159,7 @@
 
           deriv_tmp = 2.d0 * real(C1 * deriv_tmp_1 + C2 * deriv_tmp_2)
 
-          ao_deriv2_cgtos_x(i,j) += c * deriv_tmp
+          ao_cart_deriv2_cgtos_x(i,j) += c * deriv_tmp
 
           ! ---
 
@@ -215,7 +215,7 @@
 
           deriv_tmp = 2.d0 * real(C1 * deriv_tmp_1 + C2 * deriv_tmp_2)
 
-          ao_deriv2_cgtos_y(i,j) += c * deriv_tmp
+          ao_cart_deriv2_cgtos_y(i,j) += c * deriv_tmp
 
           ! ---
 
@@ -271,7 +271,7 @@
 
           deriv_tmp = 2.d0 * real(C1 * deriv_tmp_1 + C2 * deriv_tmp_2)
 
-          ao_deriv2_cgtos_z(i,j) += c * deriv_tmp
+          ao_cart_deriv2_cgtos_z(i,j) += c * deriv_tmp
 
           ! ---
 
@@ -286,7 +286,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [double precision, ao_kinetic_integrals_cgtos, (ao_num, ao_num)]
+BEGIN_PROVIDER [double precision, ao_cart_kinetic_integrals_cgtos, (ao_cart_num, ao_cart_num)]
 
   BEGIN_DOC
   ! 
@@ -302,12 +302,12 @@ BEGIN_PROVIDER [double precision, ao_kinetic_integrals_cgtos, (ao_num, ao_num)]
 
   !$OMP PARALLEL DO DEFAULT(NONE) &
   !$OMP PRIVATE(i, j)             &
-  !$OMP SHARED(ao_num, ao_kinetic_integrals_cgtos, ao_deriv2_cgtos_x, ao_deriv2_cgtos_y, ao_deriv2_cgtos_z)
-  do j = 1, ao_num
-    do i = 1, ao_num
-      ao_kinetic_integrals_cgtos(i,j) = -0.5d0 * (ao_deriv2_cgtos_x(i,j) + &
-                                                  ao_deriv2_cgtos_y(i,j) + &
-                                                  ao_deriv2_cgtos_z(i,j))
+  !$OMP SHARED(ao_cart_num, ao_cart_kinetic_integrals_cgtos, ao_cart_deriv2_cgtos_x, ao_cart_deriv2_cgtos_y, ao_cart_deriv2_cgtos_z)
+  do j = 1, ao_cart_num
+    do i = 1, ao_cart_num
+      ao_cart_kinetic_integrals_cgtos(i,j) = -0.5d0 * (ao_cart_deriv2_cgtos_x(i,j) + &
+                                                  ao_cart_deriv2_cgtos_y(i,j) + &
+                                                  ao_cart_deriv2_cgtos_z(i,j))
     enddo
   enddo
   !$OMP END PARALLEL DO
