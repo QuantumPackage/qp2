@@ -6,13 +6,19 @@ BEGIN_PROVIDER [ integer*8, qmckl_ctx_jastrow ]
   ! Context for the QMCKL library
   END_DOC
   integer(qmckl_exit_code) :: rc
+  integer :: i
 
   qmckl_ctx_jastrow = qmckl_context_create()
 
   if (.not.jast_qmckl_spin_independent) then
     print *, 'WARNING: In QMCkl Jastrow, jast_qmckl_spin_independent should to be set to True'
   endif
-  rc =  qmckl_set_jastrow_champ_spin_independent(qmckl_ctx_jastrow, jast_qmckl_spin_independent)
+  if (jast_qmckl_spin_independent) then
+    i = 1
+  else
+    i = 0
+  endif
+  rc =  qmckl_set_jastrow_champ_spin_independent(qmckl_ctx_jastrow, i)
   rc = qmckl_check(qmckl_ctx_jastrow, rc)
   if (rc /= QMCKL_SUCCESS) stop -1
 
