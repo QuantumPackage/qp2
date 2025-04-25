@@ -39,7 +39,7 @@ double precision function NAI_pol_mult_erf_ao(i_ao, j_ao, mu_in, C_center)
 end function NAI_pol_mult_erf_ao
 
 ! ---
-subroutine all_NAI_pol_mult_erf_ao_with1s(beta, B_center, mu_in, C_center)
+subroutine all_NAI_pol_mult_erf_ao_with1s(beta, B_center, mu_in, C_center,integrals_ao)
 
   BEGIN_DOC
   !
@@ -59,7 +59,7 @@ subroutine all_NAI_pol_mult_erf_ao_with1s(beta, B_center, mu_in, C_center)
   allocate(integrals_ao_cart(ao_cart_num,ao_cart_num))
   do i = 1, ao_cart_num
    do j = 1, ao_cart_num
-    integrals_ao_car(j,i) = NAI_pol_mult_erf_ao_cart_with1s(i_ao, j_ao, beta, B_center, mu_in, C_center)
+    integrals_ao_cart(j,i) = NAI_pol_mult_erf_ao_cart_with1s(i, j, beta, B_center, mu_in, C_center)
    enddo
   enddo
   call ao_cart_to_ao_basis(integrals_ao_cart, ao_cart_num, integrals_ao, ao_num)
@@ -84,7 +84,7 @@ double precision function NAI_pol_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center,
   allocate(integrals_ao(ao_num,ao_num),integrals_ao_cart(ao_cart_num,ao_cart_num))
   do i = 1, ao_cart_num
    do j = 1, ao_cart_num
-    integrals_ao_car(j,i) = NAI_pol_mult_erf_ao_cart_with1s(i_ao, j_ao, beta, B_center, mu_in, C_center)
+    integrals_ao_cart(j,i) = NAI_pol_mult_erf_ao_cart_with1s(i_ao, j_ao, beta, B_center, mu_in, C_center)
    enddo
   enddo
   call ao_cart_to_ao_basis(integrals_ao_cart, ao_cart_num, integrals_ao, ao_num)

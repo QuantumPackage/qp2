@@ -47,7 +47,7 @@ double precision function NAI_pol_mult_erf_ao_cart(i_ao, j_ao, mu_in, C_center)
 
   n_pt_in = n_pt_max_integrals
 
-  NAI_pol_mult_erf_ao = 0.d0
+  NAI_pol_mult_erf_ao_cart = 0.d0
   do i = 1, ao_cart_prim_num(i_ao)
     alpha = ao_cart_expo_ordered_transp(i,i_ao)
     do j = 1, ao_cart_prim_num(j_ao)
@@ -55,11 +55,11 @@ double precision function NAI_pol_mult_erf_ao_cart(i_ao, j_ao, mu_in, C_center)
 
       integral = NAI_pol_mult_erf(A_center, B_center, power_A, power_B, alpha, beta, C_center, n_pt_in,mu_in)
 
-      NAI_pol_mult_erf_ao += integral * ao_cart_coef_normalized_ordered_transp(j,j_ao) * ao_cart_coef_normalized_ordered_transp(i,i_ao)
+      NAI_pol_mult_erf_ao_cart += integral * ao_cart_coef_normalized_ordered_transp(j,j_ao) * ao_cart_coef_normalized_ordered_transp(i,i_ao)
     enddo
   enddo
 
-end function NAI_pol_mult_erf_ao
+end function NAI_pol_mult_erf_ao_cart
 
 ! ---
 

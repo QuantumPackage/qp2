@@ -67,8 +67,8 @@ subroutine ao_cart_to_ao_basis(A_cart, LDA_cart, A_ao_basis, LDA_ao_basis)
  !
  ! A_cart = ao_cart_to_ao_basis_mat A_cart ao_cart_to_ao_basis_mat^T
  END_DOC
- double precision, intent(in) :: A_cart(LDA_cart, ao_cart_num)
- double precision, intent(out :: A_ao_basis(LDA_ao_basis, ao_num)
+ double precision, intent(in)  :: A_cart(LDA_cart, ao_cart_num)
+ double precision, intent(out) :: A_ao_basis(LDA_ao_basis, ao_num)
  integer, intent(in) :: LDA_cart, LDA_ao_basis
  double precision, allocatable :: tmp(:,:)
  allocate (tmp(ao_num,ao_cart_num))
@@ -96,8 +96,8 @@ subroutine ao_cart_to_ao_basis_vec(V_cart, V_ao_basis)
  !
  ! V_cart = ao_cart_to_ao_basis_mat V_cart 
  END_DOC
- double precision, intent(in) :: V_cart(ao_cart_num)
- double precision, intent(out :: A_ao_basis(ao_num)
+ double precision, intent(in)  :: V_cart(ao_cart_num)
+ double precision, intent(out) :: V_ao_basis(ao_num)
 
  call dgemv('N',ao_num,ao_cart_num, 1.d0, &
    ao_cart_to_ao_basis_mat,size(ao_cart_to_ao_basis_mat,1), &

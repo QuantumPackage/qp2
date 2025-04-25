@@ -26,7 +26,7 @@ BEGIN_PROVIDER [double precision, ao_cart_integrals_n_e_cgtos, (ao_cart_num, ao_
 
 
 
-  ao_cart_coul_n_e_cgtos = 0.d0
+  ao_cart_integrals_n_e_cgtos = 0.d0
 
   !$OMP PARALLEL                                                             &
   !$OMP DEFAULT (NONE)                                                       &
@@ -37,7 +37,7 @@ BEGIN_PROVIDER [double precision, ao_cart_integrals_n_e_cgtos, (ao_cart_num, ao_
   !$OMP         ao_cart_power, nucl_num, nucl_charge, n_pt_max_integrals,         &
   !$OMP         ao_cart_expo_cgtos_ord_transp, ao_cart_coef_cgtos_norm_ord_transp,     &
   !$OMP         ao_cart_expo_pw_ord_transp, ao_cart_expo_phase_ord_transp,             &
-  !$OMP         ao_cart_coul_n_e_cgtos)
+  !$OMP         ao_cart_integrals_n_e_cgtos)
   !$OMP DO SCHEDULE (dynamic)
 
   do j = 1, ao_cart_num
@@ -91,7 +91,7 @@ BEGIN_PROVIDER [double precision, ao_cart_integrals_n_e_cgtos, (ao_cart_num, ao_
             c = c - Z * 2.d0 * real(C1 * I1 + C2 * I2)
           enddo
 
-          ao_cart_coul_n_e_cgtos(i,j) += c * ao_cart_coef_cgtos_norm_ord_transp(n,j) &
+          ao_cart_integrals_n_e_cgtos(i,j) += c * ao_cart_coef_cgtos_norm_ord_transp(n,j) &
                                            * ao_cart_coef_cgtos_norm_ord_transp(l,i)
         enddo
       enddo

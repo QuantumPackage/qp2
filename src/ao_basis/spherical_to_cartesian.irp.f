@@ -45,7 +45,7 @@ END_PROVIDER
 ! Spherical to cartesian transformation matrix obtained with
 ! Horton (http://theochem.github.com/horton/, 2015)
 
-! First index is the index of the cartesian AO, obtained by ao_power_index
+! First index is the index of the cartesian AO, obtained by ao_cart_power_index
 ! Second index is the index of the spherical AO
 
  BEGIN_PROVIDER [ double precision, cart_to_sphe_0, (1,1) ]
@@ -855,7 +855,7 @@ END_PROVIDER
 !! S_cart^-1 <cart|sphe>
 ! END_DOC
 ! integer :: i
-! integer, external              :: ao_power_index
+! integer, external              :: ao_cart_power_index
 ! integer                        :: ibegin,j,k
 ! integer                        :: prev, ao_sphe_count
 ! prev = 0
@@ -868,18 +868,18 @@ END_PROVIDER
 !   enddo
 
 ! else
-!   ! Assume order provided by ao_power_index
+!   ! Assume order provided by ao_cart_power_index
 !   i = 1
 !   ao_sphe_count = 0
 !   do while (i <= ao_num)
-!     select case ( ao_l(i) )
+!     select case ( ao_cart_l(i) )
 !       case (0)
 !         ao_sphe_count += 1
 !         ao_cart_to_sphe_coef(i,ao_sphe_count) = 1.d0
 !         i += 1
 !       BEGIN_TEMPLATE
 !       case ($SHELL)
-!         if (ao_power(i,1) == $SHELL) then
+!         if (ao_cart_power(i,1) == $SHELL) then
 !           do k=1,size(cart_to_sphe_$SHELL,2)
 !             do j=1,size(cart_to_sphe_$SHELL,1)
 !               ao_cart_to_sphe_coef(i+j-1,ao_sphe_count+k) = cart_to_sphe_$SHELL(j,k)
@@ -924,7 +924,7 @@ END_PROVIDER
 !  S_cart^-1 <cart|sphe>
   END_DOC
   integer :: i
-  integer, external              :: ao_power_index
+  integer, external              :: ao_cart_power_index
   integer                        :: ibegin,j,k
   integer                        :: prev, ao_sphe_count
   prev = 0
@@ -938,11 +938,11 @@ END_PROVIDER
     enddo
 
   else
-    ! Assume order provided by ao_power_index
+    ! Assume order provided by ao_cart_power_index
     i = 1
     ao_sphe_count = 0
     do while (i <= ao_num)
-      select case ( ao_l(i) )
+      select case ( ao_cart_l(i) )
         case (0)
           ao_sphe_count += 1
           ao_cart_to_sphe_coef(i,ao_sphe_count) = 1.d0
@@ -950,7 +950,7 @@ END_PROVIDER
           i += 1
         BEGIN_TEMPLATE
         case ($SHELL)
-          if (ao_power(i,1) == $SHELL) then
+          if (ao_cart_power(i,1) == $SHELL) then
             do k=1,size(cart_to_sphe_$SHELL,2)
               do j=1,size(cart_to_sphe_$SHELL,1)
                 ao_cart_to_sphe_coef(i+j-1,ao_sphe_count+k) = cart_to_sphe_$SHELL(j,k)

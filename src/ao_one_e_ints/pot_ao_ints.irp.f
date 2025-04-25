@@ -27,7 +27,7 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
 
   else
 
-   call ao_cart_to_ao_basis(ao_cart_coul_n_e, ao_cart_num, ao_integrals_n_e, ao_num)
+   call ao_cart_to_ao_basis(ao_cart_integrals_n_e, ao_cart_num, ao_integrals_n_e, ao_num)
 
     IF(do_pseudo) THEN
        ao_integrals_n_e += ao_pseudo_integrals
@@ -78,7 +78,7 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e_per_atom, (ao_num,ao_num,nuc
   implicit none
   integer :: i
   do i = 1, nucl_num
-   call ao_cart_to_ao_basis(ao_cart_coul_n_e_per_atom(1,1,i), ao_cart_num,ao_integrals_n_e_per_atom(1,1,i), ao_num)
+   call ao_cart_to_ao_basis(ao_cart_integrals_n_e_per_atom(1,1,i), ao_cart_num,ao_integrals_n_e_per_atom(1,1,i), ao_num)
   enddo
 END_PROVIDER
 

@@ -7,7 +7,7 @@
  integer :: n_pt_sup
  integer :: prim_power_l_max
  include 'utils/constants.include.F'
- prim_power_l_max = maxval(ao_power)
+ prim_power_l_max = maxval(ao_cart_power)
  n_pt_max_integrals = 24 * prim_power_l_max + 4
  n_pt_max_i_x = 8 * prim_power_l_max
  ASSERT (n_pt_max_i_x-1 <= max_dim)
