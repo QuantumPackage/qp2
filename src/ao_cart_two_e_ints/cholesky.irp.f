@@ -12,7 +12,7 @@ double precision function get_ao_cart$_erf_integ_chol(i,j,k,l)
 
 end
 
-BEGIN_PROVIDER [ double precision, cholesky_ao_cart_transp, (cholesky_ao$_erf_cart_num, ao_cart_num, ao_cart_num) ]
+BEGIN_PROVIDER [ double precision, cholesky_ao_cart$_erf_transp, (cholesky_ao$_erf_cart_num, ao_cart_num, ao_cart_num) ]
  implicit none
  BEGIN_DOC
 ! Transposed of the Cholesky vectors in AO basis set
@@ -21,7 +21,7 @@ BEGIN_PROVIDER [ double precision, cholesky_ao_cart_transp, (cholesky_ao$_erf_ca
  do j=1,ao_cart_num
   do i=1,ao_cart_num
    do k=1,cholesky_ao_cart$_erf_num
-    cholesky_ao_cart$_erf_transp(k,i,j) = cholesky_ao(i,j,k)
+    cholesky_ao_cart$_erf_transp(k,i,j) = cholesky_ao_cart$_erf(i,j,k)
    enddo
   enddo
  enddo
