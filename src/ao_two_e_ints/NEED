@@ -1,7 +1,7 @@
 hamiltonian
 ao_one_e_ints
 pseudo
-bitmask
 ao_basis
+bitmask_mod
 two_e_ints_keywords
 ao_cart_two_e_ints

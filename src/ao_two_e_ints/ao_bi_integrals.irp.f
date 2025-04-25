@@ -131,7 +131,7 @@ subroutine add_integrals$_erf_to_map_cholesky_ao
 
 end
 
-subroutine clear_ao_map
+subroutine clear_ao$_erf_map
   implicit none
   BEGIN_DOC
   ! Frees the meaory of the AO map

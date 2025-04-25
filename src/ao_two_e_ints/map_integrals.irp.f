@@ -78,9 +78,9 @@ double precision function get_ao_two_e_integral$_erf(i, j, k, l) result(result)
   logical, external              :: ao_two_e_integral_zero
   PROVIDE ao_two_e_integrals$_erf_in_map ao_integrals$_erf_cache ao_integrals$_erf_cache_min
   !DIR$ FORCEINLINE
-  if (ao_two_e_integral_zero(i,j,k,l)) then
-    tmp = 0.d0
-  else
+!  if (ao_two_e_integral_zero(i,j,k,l)) then
+!    tmp = 0.d0
+!  else
     ii = l-ao_integrals$_erf_cache_min
     ii = ior(ii, k-ao_integrals$_erf_cache_min)
     ii = ior(ii, j-ao_integrals$_erf_cache_min)
@@ -89,7 +89,7 @@ double precision function get_ao_two_e_integral$_erf(i, j, k, l) result(result)
       !DIR$ FORCEINLINE
       call two_e_integrals_index(i,j,k,l,idx)
       !DIR$ FORCEINLINE
-      call map_get(map,idx,tmp)
+      call map_get(ao_integrals$_erf_map,idx,tmp)
     else
       ii = l-ao_integrals$_erf_cache_min
       ii = ior( shiftl(ii,6), k-ao_integrals$_erf_cache_min)
@@ -97,7 +97,7 @@ double precision function get_ao_two_e_integral$_erf(i, j, k, l) result(result)
       ii = ior( shiftl(ii,6), i-ao_integrals$_erf_cache_min)
       tmp = ao_integrals$_erf_cache(ii)
     endif
-  endif
+!  endif
   result = tmp
 end
 
@@ -203,9 +203,9 @@ subroutine get_ao_two_e_integrals$_erf_non_zero_jl(j,l,thresh,sze_max,sze,out_va
      integer, external :: ao_l4
      double precision, external :: ao_two_e_integral
      !DIR$ FORCEINLINE
-     if (ao_two_e_integral_zero(i,j,k,l)) then
-       cycle
-     endif
+!     if (ao_two_e_integral_zero(i,j,k,l)) then
+!       cycle
+!     endif
      call two_e_integrals_index(i,j,k,l,hash)
      call map_get(ao_integrals$_erf_map, hash,tmp)
      if (dabs(tmp) < thresh ) cycle
@@ -253,9 +253,9 @@ subroutine get_ao_two_e_integrals$_erf_non_zero_jl_from_list(j,l,thresh,list,n_l
    integer, external :: ao_l4
    double precision, external :: ao_two_e_integral
    !DIR$ FORCEINLINE
-   if (ao_two_e_integral_zero(i,j,k,l)) then
-     cycle
-   endif
+!   if (ao_two_e_integral_zero(i,j,k,l)) then
+!     cycle
+!   endif
    call two_e_integrals_index(i,j,k,l,hash)
    call map_get(ao_integrals$_erf_map, hash,tmp)
    if (dabs(tmp) < thresh ) cycle
@@ -272,11 +272,11 @@ end
 
 function get_ao$_erf_map_size()
   implicit none
-  integer (map_size_kind) :: get_ao_map_size
+  integer (map_size_kind) :: get_ao$_erf_map_size
   BEGIN_DOC
   ! Returns the number of elements in the AO map
   END_DOC
-  get_ao_map$_erf_size = ao_integrals$_erf_map % n_elements
+  get_ao$_erf_map_size = ao_integrals$_erf_map % n_elements
 end
 
 subroutine clear_ao$_erf_map
@@ -316,7 +316,7 @@ subroutine dump_ao_integrals$_erf(filename)
   call ezfio_set_work_empty(.False.)
   open(unit=66,file=filename,FORM='unformatted')
   write(66) integral_kind, key_kind
-  write(66) ao_integral$s_erf_map%sorted, ao_integrals$_erf_map%map_size,    &
+  write(66) ao_integrals$_erf_map%sorted, ao_integrals$_erf_map%map_size,    &
       ao_integrals$_erf_map%n_elements
   do i=0_8,ao_integrals$_erf_map%map_size
     write(66) ao_integrals$_erf_map%map(i)%sorted, ao_integrals$_erf_map%map(i)%map_size,&
