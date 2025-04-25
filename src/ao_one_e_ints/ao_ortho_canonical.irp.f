@@ -1,25 +1,3 @@
-BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_overlap, (ao_sphe_num,ao_sphe_num) ]
- implicit none
- BEGIN_DOC
- ! T^T . S . T
- END_DOC
- double precision, allocatable :: S(:,:)
- allocate (S(ao_sphe_num,ao_num))
-
- call dgemm('T','N',ao_sphe_num,ao_num,ao_num, 1.d0, &
-   ao_cart_to_sphe_coef,size(ao_cart_to_sphe_coef,1), &
-   ao_overlap,size(ao_overlap,1), 0.d0, &
-   S, size(S,1))
-
- call dgemm('N','N',ao_sphe_num,ao_sphe_num,ao_num, 1.d0, &
-   S, size(S,1), &
-   ao_cart_to_sphe_coef,size(ao_cart_to_sphe_coef,1), 0.d0, &
-   ao_cart_to_sphe_overlap,size(ao_cart_to_sphe_overlap,1))
-
- deallocate(S)
-
-END_PROVIDER
-
 BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_inv, (ao_sphe_num,ao_num) ]
  implicit none
  BEGIN_DOC

@@ -40,7 +40,8 @@
      enddo
    else if((mu_of_r_potential.EQ."proj").or.(mu_of_r_potential.EQ."proj_cas"))then
      do ipoint = 1, n_points_final_grid
-       mu_of_r_prov(ipoint,istate) =  mu_of_r_projector_mo(ipoint)
+!       mu_of_r_prov(ipoint,istate) =  mu_of_r_projector_mo(ipoint)
+       mu_of_r_prov(ipoint,istate) =  mu_of_r_projector_ao_prod(ipoint)
      enddo
    else
     print*,'you requested the following mu_of_r_potential'
@@ -293,9 +294,10 @@ BEGIN_PROVIDER [double precision, mu_of_r_projector_mo, (n_points_final_grid) ]
 
  do ipoint=1,n_points_final_grid
    ! epsilon
-   mu_of_r_projector_mo(ipoint) = 1.d0/(2.d0*dacos(-1.d0) * mu_of_r_projector_mo(ipoint)**(2.d0/3.d0))
+!  mu_of_r_projector_mo(ipoint) = 1.d0/(2.d0*dacos(-1.d0) * mu_of_r_projector_mo(ipoint)**(2.d0/3.d0))
    ! mu
-   mu_of_r_projector_mo(ipoint) = 1.d0/dsqrt( 2.d0*mu_of_r_projector_mo(ipoint) )
+!  mu_of_r_projector_mo(ipoint) = 1.d0/dsqrt( 2.d0*mu_of_r_projector_mo(ipoint) )
+   mu_of_r_projector_mo(ipoint) = mu_of_r_projector_mo(ipoint)**(1.d0/3.d0) * 2.199085233011538d0
  enddo
 END_PROVIDER
 
@@ -323,4 +325,43 @@ BEGIN_PROVIDER [double precision, mu_average_proj, (N_states)]
   mu_average_proj(istate) = mu_average_proj(istate) / elec_num_grid_becke(istate)
  enddo
 END_PROVIDER
+
+
+BEGIN_PROVIDER [double precision, mu_of_r_projector_ao_prod, (n_points_final_grid) ]
+ implicit none
+ BEGIN_DOC
+ ! mu(r) computed with the projector onto the atomic basis
+ !  P_B(\mathbf{r},\mathbf{r}') = \sum_{ij} |
+ !  \chi_{i} \rangle \left[S^{-1}\right]_{ij} \langle \chi_{j} |
+ !  \] where $i$ and $j$ denote all atomic orbitals.
+ END_DOC
+
+ integer :: ipoint
+
+ !$OMP PARALLEL PRIVATE(ipoint,a,b,i,j,k,l,f1,f2) DEFAULT(SHARED)
+ !$OMP DO
+ do ipoint=1,n_points_final_grid
+   mu_of_r_projector_ao_prod(ipoint) = 0.d0
+   integer :: i,j,k,l,a,b
+   double precision :: f1, f2
+   do a=1,basis_prod_num
+     i = basis_prod_idx(1,a)
+     j = basis_prod_idx(2,a)
+     f1 = aos_in_r_array(i,ipoint) * aos_in_r_array(j,ipoint)
+     do b=1,basis_prod_num
+       k = basis_prod_idx(1,b)
+       l = basis_prod_idx(2,b)
+       f2 = aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint)
+       mu_of_r_projector_ao_prod(ipoint) = mu_of_r_projector_ao_prod(ipoint) + &
+          f1*f2 * basis_prod_overlap_inv(a,b)
+     enddo
+   enddo
+   mu_of_r_projector_ao_prod(ipoint) = mu_of_r_projector_ao_prod(ipoint)**(1.d0/3.d0) * 2.199085233011538d0
+ enddo
+ !$OMP END DO
+ !$OMP END PARALLEL 
+
+END_PROVIDER
+
+
 
