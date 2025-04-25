@@ -12,7 +12,7 @@ double precision function get_ao_cart$_erf_integ_chol(i,j,k,l)
 
 end
 
-BEGIN_PROVIDER [ double precision, cholesky_ao_cart$_erf_transp, (cholesky_ao$_erf_cart_num, ao_cart_num, ao_cart_num) ]
+BEGIN_PROVIDER [ double precision, cholesky_ao_cart$_erf_transp, (cholesky_ao_cart$_erf_num, ao_cart_num, ao_cart_num) ]
  implicit none
  BEGIN_DOC
 ! Transposed of the Cholesky vectors in AO basis set
@@ -86,14 +86,14 @@ END_PROVIDER
    call wall_time(wall0)
 
    ! Will be reallocated at the end
-   deallocate(cholesky_ao)
+   deallocate(cholesky_ao_cart$_erf)
 
    if (read_ao_cart$_erf_cholesky) then
      print *,  'Reading Cholesky AO$_erf vectors from disk...'
      iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_ao_cart$_erf', 'R')
      read(iunit) rank
-     allocate(cholesky_ao(ao_cart_num,ao_cart_num,rank), stat=ierr)
-     read(iunit) cholesky_ao
+     allocate(cholesky_ao_cart$_erf(ao_cart_num,ao_cart_num,rank), stat=ierr)
+     read(iunit) cholesky_ao_cart$_erf 
      close(iunit)
      cholesky_ao_cart$_erf_num = rank
 
@@ -429,7 +429,7 @@ END_PROVIDER
      deallocate( addr1, addr2, Delta_col, computed )
 
 
-     allocate(cholesky_ao(ao_cart_num,ao_cart_num,rank), stat=ierr)
+     allocate(cholesky_ao_cart$_erf(ao_cart_num,ao_cart_num,rank), stat=ierr)
 
      if (ierr /= 0) then
        call print_memory_usage()
@@ -442,7 +442,7 @@ END_PROVIDER
      !$OMP PARALLEL DO PRIVATE(k,j)
      do k=1,rank
        do j=1,ao_cart_num
-           cholesky_ao(1:ao_cart_num,j,k) = L((j-1_8)*ao_cart_num+1_8:1_8*j*ao_cart_num,rank-k+1)
+           cholesky_ao_cart$_erf(1:ao_cart_num,j,k) = L((j-1_8)*ao_cart_num+1_8:1_8*j*ao_cart_num,rank-k+1)
        enddo
      enddo
      !$OMP END PARALLEL DO
@@ -453,9 +453,9 @@ END_PROVIDER
 
      if (write_ao_cart$_erf_cholesky) then
        print *,  'Writing Cholesky AO$_erf vectors to disk...'
-       iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_ao_cart', 'W')
+       iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_ao_cart$_erf', 'W')
        write(iunit) rank
-       write(iunit) cholesky_ao_cart
+       write(iunit) cholesky_ao_cart$_erf
        close(iunit)
        call ezfio_set_ao_cart_two_e_ints_io_ao_cart$_erf_cholesky('Read')
      endif

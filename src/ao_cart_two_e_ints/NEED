@@ -1,6 +1,6 @@
 hamiltonian
 ao_one_e_ints
 pseudo
-bitmask
 ao_basis
 two_e_ints_keywords
+electrons

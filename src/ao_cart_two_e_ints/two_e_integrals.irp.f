@@ -1,4 +1,3 @@
-
 ! ---
 
 logical function do_schwartz_accel(i,j,k,l)
@@ -358,41 +357,6 @@ integer function ao_cart_l4(i,j,k,l)
   END_DOC
   integer, intent(in) :: i,j,k,l
   ao_cart_l4 = ao_cart_l(i)*ao_cart_l(j)*ao_cart_l(k)*ao_cart_l(l)
-end
-
-
-
-subroutine compute_ao_cart_two_e_integrals(j,k,l,sze,buffer_value)
-  implicit none
-
-  BEGIN_DOC
-  ! Compute AO 1/r12 integrals for all i and fixed j,k,l
-  END_DOC
-
-  include 'utils/constants.include.F'
-  integer, intent(in)            :: j,k,l,sze
-  real(integral_kind), intent(out) :: buffer_value(sze)
-  double precision               :: ao_cart_two_e_integral
-
-  integer                        :: i
-  logical, external              :: ao_cart_one_e_integral_zero
-  logical, external              :: ao_cart_two_e_integral_zero
-
-
-  if (ao_cart_one_e_integral_zero(j,l)) then
-    buffer_value = 0._integral_kind
-    return
-  endif
-
-  do i = 1, ao_cart_num
-    if (ao_cart_two_e_integral_zero(i,j,k,l)) then
-      buffer_value(i) = 0._integral_kind
-      cycle
-    endif
-    !DIR$ FORCEINLINE
-    buffer_value(i) = ao_cart_two_e_integral(i,k,j,l)
-  enddo
-
 end
 
 BEGIN_PROVIDER [ double precision, ao_cart_two_e_integral_schwartz, (ao_cart_num, ao_cart_num) ]

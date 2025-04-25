@@ -276,48 +276,6 @@ double precision function ao_cart_two_e_integral_schwartz_accel_erf(i,j,k,l)
 
 end
 
-
-subroutine compute_ao_cart_two_e_integrals_erf(j,k,l,sze,buffer_value)
-  implicit none
-  use map_module
-
-  BEGIN_DOC
-  ! Compute AO 1/r12 integrals for all i and fixed j,k,l
-  END_DOC
-
-  include 'utils/constants.include.F'
-  integer, intent(in)            :: j,k,l,sze
-  real(integral_kind), intent(out) :: buffer_value(sze)
-  double precision               :: ao_cart_two_e_integral_erf
-
-  integer                        :: i
-  logical, external              :: ao_cart_one_e_integral_zero
-  logical, external              :: ao_cart_two_e_integral_zero
-
-  if (ao_cart_one_e_integral_zero(j,l)) then
-    buffer_value = 0._integral_kind
-    return
-  endif
-  if (ao_cart_two_e_integral_erf_schwartz(j,l) < thresh ) then
-    buffer_value = 0._integral_kind
-    return
-  endif
-
-  do i = 1, ao_cart_num
-    if (ao_cart_two_e_integral_zero(i,j,k,l)) then
-      buffer_value(i) = 0._integral_kind
-      cycle
-    endif
-    if (ao_cart_two_e_integral_erf_schwartz(i,k)*ao_cart_two_e_integral_erf_schwartz(j,l) < thresh ) then
-      buffer_value(i) = 0._integral_kind
-      cycle
-    endif
-    !DIR$ FORCEINLINE
-    buffer_value(i) = ao_cart_two_e_integral_erf(i,k,j,l)
-  enddo
-
-end
-
 double precision function general_primitive_integral_erf(dim,            &
       P_new,P_center,fact_p,p,p_inv,iorder_p,                        &
       Q_new,Q_center,fact_q,q,q_inv,iorder_q)
