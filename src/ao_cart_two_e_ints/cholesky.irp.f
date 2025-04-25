@@ -457,7 +457,7 @@ END_PROVIDER
        write(iunit) rank
        write(iunit) cholesky_ao_cart$_erf
        close(iunit)
-       call ezfio_set_ao_cart_two_e_ints_io_ao_cart$_erf_cholesky('Read')
+       call ezfio_set_two_e_ints_keywords_io_ao_cart$_erf_cholesky('Read')
      endif
 
    endif
