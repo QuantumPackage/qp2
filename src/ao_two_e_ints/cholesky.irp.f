@@ -24,7 +24,7 @@ end
    read(iunit) cholesky_ao$_erf_num
    close(iunit)
  else
-   cholesky_ao$_erf_num = cholesky_ao$_erf_cart_num
+   cholesky_ao$_erf_num = cholesky_ao_cart$_erf_num
  endif
 END_PROVIDER
 
@@ -87,7 +87,7 @@ BEGIN_PROVIDER [ double precision, cholesky_ao$_erf_transp, (cholesky_ao$_erf_nu
        print *, irp_here, ': Allocation failed'
      endif
      call dgemm('T','N', ao_cart_num*cholesky_ao$_erf_num, ao_num, ao_cart_num, 1.d0, &
-         cholesky_ao$_erf_cart, ao_cart_num, ao_cart_to_ao_basis_mat_transp, ao_cart_num, & 
+         cholesky_ao_cart$_erf, ao_cart_num, ao_cart_to_ao_basis_mat_transp, ao_cart_num, & 
          0.d0, X, ao_cart_num*cholesky_ao$_erf_num)
      call dgemm('T','N', cholesky_ao$_erf_num*ao_num, ao_num, ao_cart_num, 1.d0, &
          X, ao_cart_num, ao_cart_to_ao_basis_mat_transp, ao_cart_num, 0.d0, & 
