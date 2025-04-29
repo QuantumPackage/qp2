@@ -254,6 +254,7 @@ end = struct
 
 
   let read () =
+    try
       Some { ao_extra_basis        = read_ao_extra_basis ();
             ao_extra_num          = read_ao_extra_num () ;
             ao_extra_prim_num     = read_ao_extra_prim_num ();
@@ -266,6 +267,8 @@ end = struct
             ao_extra_normalized   = read_ao_extra_normalized () ;
             primitives_normalized_extra   = read_primitives_normalized_extra () ;
           }
+    with
+    | _ -> None
   ;;
 
 
