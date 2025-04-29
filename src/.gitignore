@@ -1,6 +1,4 @@
 *
-!README.rst
-!NEED
 !*/
 */*
 !*/*.*
@@ -9,4 +7,5 @@
 */ezfio_interface.irp.f
 */.gitignore
 */*.swp
-
+!README.rst
+!NEED
