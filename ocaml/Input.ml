@@ -1,7 +1,7 @@
 open Qputils;;
 open Qptypes;;
 
-include Input_ao_basis;;
+include Input_ao_cart_basis;;
 include Input_ao_extra_basis;;
 include Input_bitmasks;;
 include Input_determinants_by_hand;;

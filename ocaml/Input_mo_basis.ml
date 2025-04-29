@@ -11,7 +11,6 @@ module Mo_basis : sig
         mo_occ          : MO_occ.t array;
         mo_coef         : (MO_coef.t array) array;
         mo_coef_imag    : (MO_coef.t array) array option;
-        ao_md5          : MD5.t;
       } [@@deriving sexp]
   val read : unit -> t option
   val write : t -> unit
@@ -26,7 +25,6 @@ end = struct
         mo_occ          : MO_occ.t array;
         mo_coef         : (MO_coef.t array) array;
         mo_coef_imag    : (MO_coef.t array) array option;
-        ao_md5          : MD5.t;
       } [@@deriving sexp]
   let get_default = Qpackage.get_ezfio_default "mo_basis"
 
@@ -52,29 +50,6 @@ end = struct
                 (fun i -> mo.(ordering.(i)))
             ) x )
     }
-
-  let read_ao_md5 () =
-    let ao_md5 =
-      match (Input_ao_basis.Ao_basis.read ()) with
-      | None -> ("None"
-                 |> Digest.string
-                 |> Digest.to_hex
-                 |> MD5.of_string)
-      | Some result -> Input_ao_basis.Ao_basis.to_md5 result
-    in
-    let result =
-      if not (Ezfio.has_mo_basis_ao_md5 ()) then
-        begin
-          MD5.to_string ao_md5
-          |> Ezfio.set_mo_basis_ao_md5
-        end;
-      Ezfio.get_mo_basis_ao_md5 ()
-      |> MD5.of_string
-    in
-    if (ao_md5 <> result) then
-      failwith "The current MOs don't correspond to the current AOs.";
-    result
-
 
   let read_mo_num () =
     let elec_alpha_num =
@@ -157,7 +132,6 @@ end = struct
           mo_occ          = read_mo_occ ();
           mo_coef         = read_mo_coef ();
           mo_coef_imag    = read_mo_coef_imag ();
-          ao_md5          = read_ao_md5 ();
         }
     else
       None
@@ -296,11 +270,6 @@ mo_coef         = %s
     |> Ezfio.set_mo_basis_mo_occ
 
 
-  let write_md5 a =
-    MD5.to_string a
-    |> Ezfio.set_mo_basis_ao_md5
-
-
   let write_mo_coef a =
     let mo_num = Array.length a in
     let ao_num = Array.length a.(0) in
@@ -337,15 +306,13 @@ mo_coef         = %s
         mo_occ          : MO_occ.t array;
         mo_coef         : (MO_coef.t array) array;
         mo_coef_imag    : (MO_coef.t array) array option;
-        ao_md5          : MD5.t;
       } =
       write_mo_num mo_num;
       write_mo_label mo_label;
       write_mo_class mo_class;
       write_mo_occ mo_occ;
       write_mo_coef mo_coef;
-      write_mo_coef_imag mo_coef_imag;
-      write_md5 ao_md5
+      write_mo_coef_imag mo_coef_imag
 
 
 end

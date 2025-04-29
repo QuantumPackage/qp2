@@ -23,7 +23,6 @@ module Ao_extra_basis : sig
   val reorder : t -> t
   val ordering : t -> int array
   val write  : t -> unit
-  val to_md5 : t -> MD5.t
   val to_rst : t -> Rst_string.t
 end = struct
   type t =
@@ -185,19 +184,6 @@ end = struct
     |> Long_basis.to_basis
   ;;
 
-  let to_md5 b =
-    let short_basis = to_basis b in
-    Basis.to_md5 short_basis
-  ;;
-
-
-
-  let write_md5 b =
-    to_md5 b
-    |> MD5.to_string
-    |> Ezfio.set_ao_extra_basis_ao_extra_md5
-  ;;
-
   let write_ao_extra_basis name =
     AO_basis_name.to_string name
     |> Ezfio.set_ao_extra_basis_ao_extra_basis
@@ -217,7 +203,6 @@ end = struct
          primitives_normalized_extra ;
        } = b
      in
-     write_md5 b ;
      write_ao_extra_basis ao_extra_basis;
      let ao_extra_num = AO_number.to_int ao_extra_num
      and ao_extra_prim_num_max =  AO_prim_number.to_int ao_extra_prim_num_max
@@ -269,9 +254,7 @@ end = struct
 
 
   let read () =
-      try
-        let result =
-          { ao_extra_basis        = read_ao_extra_basis ();
+      Some { ao_extra_basis        = read_ao_extra_basis ();
             ao_extra_num          = read_ao_extra_num () ;
             ao_extra_prim_num     = read_ao_extra_prim_num ();
             ao_extra_prim_num_max = read_ao_extra_prim_num_max ();
@@ -283,16 +266,6 @@ end = struct
             ao_extra_normalized   = read_ao_extra_normalized () ;
             primitives_normalized_extra   = read_primitives_normalized_extra () ;
           }
-        in
-        to_md5 result
-        |> MD5.to_string
-        |> Ezfio.set_ao_extra_basis_ao_extra_md5 ;
-        Some result
-      with
-      | _ -> ( "None"
-               |> Digest.string
-               |> Digest.to_hex
-               |> Ezfio.set_ao_extra_basis_ao_extra_md5 ; None)
   ;;
 
 
@@ -509,7 +482,6 @@ ao_extra_expo                 = %s
 ao_extra_cartesian            = %s
 ao_extra_normalized           = %s
 primitives_normalized_extra   = %s
-md5                     = %s
 "
     (AO_basis_name.to_string b.ao_extra_basis)
     (AO_number.to_string b.ao_extra_num)
@@ -527,7 +499,6 @@ md5                     = %s
     (b.ao_extra_cartesian |> string_of_bool)
     (b.ao_extra_normalized |> string_of_bool)
     (b.primitives_normalized_extra |> string_of_bool)
-    (to_md5 b |> MD5.to_string )
 
   ;;
 end

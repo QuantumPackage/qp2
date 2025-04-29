@@ -267,7 +267,7 @@ let run ?o b au c d m p cart xyz_file =
       (* Create EZFIO *)
       Ezfio.set_file ezfio_file;
       Ezfio.set_ezfio_files_ezfio_convention 20250211;
-      Ezfio.set_basis_ao_normalized true ;
+      Ezfio.set_basis_ao_cart_normalized true ;
 
       (* Write Pseudo *)
       let pseudo =
@@ -526,8 +526,8 @@ let run ?o b au c d m p cart xyz_file =
       let ao_num = List.length long_basis in
       if ao_num > 0 then
         begin
-          Ezfio.set_ao_basis_ao_num ao_num;
-          Ezfio.set_ao_basis_ao_basis b;
+          Ezfio.set_ao_cart_basis_ao_cart_num ao_num;
+          Ezfio.set_ao_cart_basis_ao_cart_basis b;
           Ezfio.set_basis_basis b;
           let ao_prim_num = list_map (fun (_,g,_) -> List.length g.Gto.lc) long_basis
           and ao_nucl = list_map (fun (_,_,n) -> Nucl_number.to_int n) long_basis
@@ -646,21 +646,21 @@ let run ?o b au c d m p cart xyz_file =
               ~rank:1 ~dim:[| prim_num |] ~data:expo) ;
 
 
-            Ezfio.set_ao_basis_ao_prim_num (Ezfio.ezfio_array_of_list
+            Ezfio.set_ao_cart_basis_ao_cart_prim_num (Ezfio.ezfio_array_of_list
               ~rank:1 ~dim:[| ao_num |] ~data:ao_prim_num) ;
-            Ezfio.set_ao_basis_ao_nucl(Ezfio.ezfio_array_of_list
+            Ezfio.set_ao_cart_basis_ao_cart_nucl(Ezfio.ezfio_array_of_list
               ~rank:1 ~dim:[| ao_num |] ~data:ao_nucl) ;
-            Ezfio.set_ao_basis_ao_power(Ezfio.ezfio_array_of_list
+            Ezfio.set_ao_cart_basis_ao_cart_power(Ezfio.ezfio_array_of_list
             ~rank:2 ~dim:[| ao_num ; 3 |] ~data:ao_power) ;
-            Ezfio.set_ao_basis_ao_coef(Ezfio.ezfio_array_of_list
+            Ezfio.set_ao_cart_basis_ao_cart_coef(Ezfio.ezfio_array_of_list
             ~rank:2 ~dim:[| ao_num ; ao_prim_num_max |] ~data:ao_coef) ;
-            Ezfio.set_ao_basis_ao_expo(Ezfio.ezfio_array_of_list
+            Ezfio.set_ao_cart_basis_ao_cart_expo(Ezfio.ezfio_array_of_list
             ~rank:2 ~dim:[| ao_num ; ao_prim_num_max |] ~data:ao_expo) ;
             Ezfio.set_ao_basis_ao_cartesian(cart);
           in
-          match Input.Ao_basis.read () with
+          match Input.Ao_cart_basis.read () with
           | None -> failwith "Error in basis"
-          | Some x -> Input.Ao_basis.write x
+          | Some x -> Input.Ao_cart_basis.write x
      end
   in
   let () =

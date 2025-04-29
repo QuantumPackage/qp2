@@ -2,17 +2,16 @@ open Qptypes;;
 open Qputils;;
 open Sexplib.Std;;
 
-module Ao_basis : sig
+module Ao_cart_basis : sig
   type t =
-    { ao_basis        : AO_basis_name.t;
-      ao_num          : AO_number.t ;
-      ao_prim_num     : AO_prim_number.t array;
-      ao_prim_num_max : AO_prim_number.t;
-      ao_nucl         : Nucl_number.t array;
-      ao_power        : Angmom.Xyz.t array;
-      ao_coef         : AO_coef.t array;
-      ao_expo         : AO_expo.t array;
-      ao_cartesian    : bool;
+    { ao_cart_basis        : AO_basis_name.t;
+      ao_cart_num          : AO_number.t ;
+      ao_cart_prim_num     : AO_prim_number.t array;
+      ao_cart_prim_num_max : AO_prim_number.t;
+      ao_cart_nucl         : Nucl_number.t array;
+      ao_cart_power        : Angmom.Xyz.t array;
+      ao_cart_coef         : AO_coef.t array;
+      ao_cart_expo         : AO_expo.t array;
     } [@@deriving sexp]
   ;;
   val read : unit -> t option
@@ -21,50 +20,48 @@ module Ao_basis : sig
   val reorder : t -> t
   val ordering : t -> int array
   val write  : t -> unit
-  val to_md5 : t -> MD5.t
   val to_rst : t -> Rst_string.t
 end = struct
   type t =
-    { ao_basis        : AO_basis_name.t;
-      ao_num          : AO_number.t ;
-      ao_prim_num     : AO_prim_number.t array;
-      ao_prim_num_max : AO_prim_number.t;
-      ao_nucl         : Nucl_number.t array;
-      ao_power        : Angmom.Xyz.t array;
-      ao_coef         : AO_coef.t array;
-      ao_expo         : AO_expo.t array;
-      ao_cartesian    : bool;
+    { ao_cart_basis        : AO_basis_name.t;
+      ao_cart_num          : AO_number.t ;
+      ao_cart_prim_num     : AO_prim_number.t array;
+      ao_cart_prim_num_max : AO_prim_number.t;
+      ao_cart_nucl         : Nucl_number.t array;
+      ao_cart_power        : Angmom.Xyz.t array;
+      ao_cart_coef         : AO_coef.t array;
+      ao_cart_expo         : AO_expo.t array;
     } [@@deriving sexp]
   ;;
 
-  let get_default = Qpackage.get_ezfio_default "ao_basis";;
+  let get_default = Qpackage.get_ezfio_default "ao_cart_basis";;
 
-  let read_ao_basis () =
+  let read_ao_cart_basis () =
     let result =
-      Ezfio.get_ao_basis_ao_basis ()
+      Ezfio.get_ao_cart_basis_ao_cart_basis ()
     in
     if result <> "None" then
       AO_basis_name.of_string result
     else failwith "No basis"
   ;;
 
-  let read_ao_num () =
-    Ezfio.get_ao_basis_ao_num ()
+  let read_ao_cart_num () =
+    Ezfio.get_ao_cart_basis_ao_cart_num ()
     |> AO_number.of_int
   ;;
 
-  let read_ao_prim_num () =
-    if Ezfio.has_ao_basis_ao_prim_num () then
-      Ezfio.get_ao_basis_ao_prim_num ()
+  let read_ao_cart_prim_num () =
+    if Ezfio.has_ao_cart_basis_ao_cart_prim_num () then
+      Ezfio.get_ao_cart_basis_ao_cart_prim_num ()
       |> Ezfio.flattened_ezfio
       |> Array.map AO_prim_number.of_int
     else
       [||]
   ;;
 
-  let read_ao_prim_num_max () =
-    if Ezfio.has_ao_basis_ao_prim_num () then
-      Ezfio.get_ao_basis_ao_prim_num ()
+  let read_ao_cart_prim_num_max () =
+    if Ezfio.has_ao_cart_basis_ao_cart_prim_num () then
+      Ezfio.get_ao_cart_basis_ao_cart_prim_num ()
       |> Ezfio.flattened_ezfio
       |> Array.fold_left (fun x y -> if x>y then x else y) 0
       |> AO_prim_number.of_int
@@ -72,19 +69,19 @@ end = struct
       AO_prim_number.of_int 0
   ;;
 
-  let read_ao_nucl () =
-    if Ezfio.has_ao_basis_ao_nucl () then
+  let read_ao_cart_nucl () =
+    if Ezfio.has_ao_cart_basis_ao_cart_nucl () then
       let nmax = Nucl_number.get_max () in
-      Ezfio.get_ao_basis_ao_nucl ()
+      Ezfio.get_ao_cart_basis_ao_cart_nucl ()
       |> Ezfio.flattened_ezfio
       |> Array.map (fun x-> Nucl_number.of_int ~max:nmax x)
     else
       [||]
   ;;
 
-  let read_ao_power () =
-    if Ezfio.has_ao_basis_ao_power () then
-      let x = Ezfio.get_ao_basis_ao_power () in
+  let read_ao_cart_power () =
+    if Ezfio.has_ao_cart_basis_ao_cart_power () then
+      let x = Ezfio.get_ao_cart_basis_ao_cart_power () in
       let dim = x.Ezfio.dim.(0) in
       let data = Ezfio.flattened_ezfio x in
       let result = Array.init dim (fun x -> "") in
@@ -102,45 +99,36 @@ end = struct
       [||]
   ;;
 
-  let read_ao_coef () =
-    if Ezfio.has_ao_basis_ao_coef () then
-      Ezfio.get_ao_basis_ao_coef ()
+  let read_ao_cart_coef () =
+    if Ezfio.has_ao_cart_basis_ao_cart_coef () then
+      Ezfio.get_ao_cart_basis_ao_cart_coef ()
       |> Ezfio.flattened_ezfio
       |> Array.map AO_coef.of_float
     else
       [||]
   ;;
 
-  let read_ao_expo () =
-    if Ezfio.has_ao_basis_ao_expo () then
-      Ezfio.get_ao_basis_ao_expo ()
+  let read_ao_cart_expo () =
+    if Ezfio.has_ao_cart_basis_ao_cart_expo () then
+      Ezfio.get_ao_cart_basis_ao_cart_expo ()
       |> Ezfio.flattened_ezfio
       |> Array.map AO_expo.of_float
     else
       [||]
   ;;
 
-  let read_ao_cartesian () =
-    if not (Ezfio.has_ao_basis_ao_cartesian ()) then
-       get_default "ao_cartesian"
-       |> bool_of_string
-       |> Ezfio.set_ao_basis_ao_cartesian
-    ;
-    Ezfio.get_ao_basis_ao_cartesian ()
-  ;;
-
   let to_long_basis b =
-    let ao_num = AO_number.to_int b.ao_num in
-    let gto_array = Array.init (AO_number.to_int b.ao_num)
+    let ao_cart_num = AO_number.to_int b.ao_cart_num in
+    let gto_array = Array.init (AO_number.to_int b.ao_cart_num)
       (fun i ->
-        let s = Angmom.Xyz.to_symmetry b.ao_power.(i) in
-        let ao_prim_num = AO_prim_number.to_int b.ao_prim_num.(i) in
-        let prims = List.init ao_prim_num (fun j ->
+        let s = Angmom.Xyz.to_symmetry b.ao_cart_power.(i) in
+        let ao_cart_prim_num = AO_prim_number.to_int b.ao_cart_prim_num.(i) in
+        let prims = List.init ao_cart_prim_num (fun j ->
           let prim = { GaussianPrimitive.sym  = s ;
-                       GaussianPrimitive.expo = b.ao_expo.(ao_num*j+i)
+                       GaussianPrimitive.expo = b.ao_cart_expo.(ao_cart_num*j+i)
                      }
           in
-          let coef = b.ao_coef.(ao_num*j+i) in
+          let coef = b.ao_cart_coef.(ao_cart_num*j+i) in
           (prim,coef)
         ) in
         Gto.of_prim_coef_list prims
@@ -154,89 +142,72 @@ end = struct
         | _ -> assert false
     in
     do_work []
-      (Array.to_list b.ao_power)
+      (Array.to_list b.ao_cart_power)
       (Array.to_list gto_array)
-      (Array.to_list b.ao_nucl)
+      (Array.to_list b.ao_cart_nucl)
   ;;
   let to_basis b =
     to_long_basis b
     |> Long_basis.to_basis
   ;;
 
-  let to_md5 b =
-    let short_basis = to_basis b in
-    Basis.to_md5 short_basis
-  ;;
-
-
-
-  let write_md5 b =
-    to_md5 b
-    |> MD5.to_string
-    |> Ezfio.set_ao_basis_ao_md5
-  ;;
-
-  let write_ao_basis name =
+  let write_ao_cart_basis name =
     AO_basis_name.to_string name
-    |> Ezfio.set_ao_basis_ao_basis
+    |> Ezfio.set_ao_cart_basis_ao_cart_basis
   ;;
 
   let write b =
-   let { ao_basis        ;
-         ao_num          ;
-         ao_prim_num     ;
-         ao_prim_num_max ;
-         ao_nucl         ;
-         ao_power        ;
-         ao_coef         ;
-         ao_expo         ;
-         ao_cartesian    ;
+   let { ao_cart_basis        ;
+         ao_cart_num          ;
+         ao_cart_prim_num     ;
+         ao_cart_prim_num_max ;
+         ao_cart_nucl         ;
+         ao_cart_power        ;
+         ao_cart_coef         ;
+         ao_cart_expo         ;
        } = b
      in
-     write_md5 b ;
-     write_ao_basis ao_basis;
-     let ao_num = AO_number.to_int ao_num
-     and ao_prim_num_max =  AO_prim_number.to_int ao_prim_num_max
+     write_ao_cart_basis ao_cart_basis;
+     let ao_cart_num = AO_number.to_int ao_cart_num
+     and ao_cart_prim_num_max =  AO_prim_number.to_int ao_cart_prim_num_max
      in
-     let ao_prim_num =
-      Array.to_list ao_prim_num
+     let ao_cart_prim_num =
+      Array.to_list ao_cart_prim_num
       |> list_map AO_prim_number.to_int
      in
-     Ezfio.set_ao_basis_ao_prim_num (Ezfio.ezfio_array_of_list
-       ~rank:1 ~dim:[| ao_num |] ~data:ao_prim_num) ;
+     Ezfio.set_ao_cart_basis_ao_cart_prim_num (Ezfio.ezfio_array_of_list
+       ~rank:1 ~dim:[| ao_cart_num |] ~data:ao_cart_prim_num) ;
 
-     let ao_nucl =
-       Array.to_list ao_nucl
+     let ao_cart_nucl =
+       Array.to_list ao_cart_nucl
        |> list_map Nucl_number.to_int
      in
-     Ezfio.set_ao_basis_ao_nucl(Ezfio.ezfio_array_of_list
-       ~rank:1 ~dim:[| ao_num |] ~data:ao_nucl) ;
+     Ezfio.set_ao_cart_basis_ao_cart_nucl(Ezfio.ezfio_array_of_list
+       ~rank:1 ~dim:[| ao_cart_num |] ~data:ao_cart_nucl) ;
 
-     let ao_power =
-       let l = Array.to_list ao_power in
+     let ao_cart_power =
+       let l = Array.to_list ao_cart_power in
        List.concat [
          (list_map (fun a -> Positive_int.to_int a.Angmom.Xyz.x) l) ;
          (list_map (fun a -> Positive_int.to_int a.Angmom.Xyz.y) l) ;
          (list_map (fun a -> Positive_int.to_int a.Angmom.Xyz.z) l) ]
      in
-     Ezfio.set_ao_basis_ao_power(Ezfio.ezfio_array_of_list
-     ~rank:2 ~dim:[| ao_num ; 3 |] ~data:ao_power) ;
+     Ezfio.set_ao_cart_basis_ao_cart_power(Ezfio.ezfio_array_of_list
+     ~rank:2 ~dim:[| ao_cart_num ; 3 |] ~data:ao_cart_power) ;
 
-     Ezfio.set_ao_basis_ao_cartesian(ao_cartesian);
-
-     let ao_coef =
-      Array.to_list ao_coef
+     let ao_cart_coef =
+      Array.to_list ao_cart_coef
       |> list_map AO_coef.to_float
      in
-     Ezfio.set_ao_basis_ao_coef(Ezfio.ezfio_array_of_list
-     ~rank:2 ~dim:[| ao_num ; ao_prim_num_max |] ~data:ao_coef) ;
+     Ezfio.set_ao_cart_basis_ao_cart_coef(Ezfio.ezfio_array_of_list
+     ~rank:2 ~dim:[| ao_cart_num ; ao_cart_prim_num_max |] ~data:ao_cart_coef) ;
 
-     let ao_expo =
-      Array.to_list ao_expo
+     let ao_cart_expo =
+      Array.to_list ao_cart_expo
       |> list_map AO_expo.to_float
      in
-     Ezfio.set_ao_basis_ao_expo(Ezfio.ezfio_array_of_list
-     ~rank:2 ~dim:[| ao_num ; ao_prim_num_max |] ~data:ao_expo) ;
+     Ezfio.set_ao_cart_basis_ao_cart_expo(Ezfio.ezfio_array_of_list
+     ~rank:2 ~dim:[| ao_cart_num ; ao_cart_prim_num_max |] ~data:ao_cart_expo) ;
 
 
   ;;
@@ -244,27 +215,18 @@ end = struct
 
   let read () =
       try
-        let result =
-          { ao_basis        = read_ao_basis ();
-            ao_num          = read_ao_num () ;
-            ao_prim_num     = read_ao_prim_num ();
-            ao_prim_num_max = read_ao_prim_num_max ();
-            ao_nucl         = read_ao_nucl ();
-            ao_power        = read_ao_power ();
-            ao_coef         = read_ao_coef () ;
-            ao_expo         = read_ao_expo () ;
-            ao_cartesian    = read_ao_cartesian () ;
+        Some
+          { ao_cart_basis        = read_ao_cart_basis ();
+            ao_cart_num          = read_ao_cart_num () ;
+            ao_cart_prim_num     = read_ao_cart_prim_num ();
+            ao_cart_prim_num_max = read_ao_cart_prim_num_max ();
+            ao_cart_nucl         = read_ao_cart_nucl ();
+            ao_cart_power        = read_ao_cart_power ();
+            ao_cart_coef         = read_ao_cart_coef () ;
+            ao_cart_expo         = read_ao_cart_expo () ;
           }
-        in
-        to_md5 result
-        |> MD5.to_string
-        |> Ezfio.set_ao_basis_ao_md5 ;
-        Some result
       with
-      | _ -> ( "None"
-               |> Digest.string
-               |> Digest.to_hex
-               |> Ezfio.set_ao_basis_ao_md5 ; None)
+      _ -> None
   ;;
 
 
@@ -306,22 +268,22 @@ end = struct
   ;;
 
 
-  let of_long_basis long_basis name ao_cartesian =
-      let ao_num = List.length long_basis |> AO_number.of_int in
-      let ao_prim_num =
+  let of_long_basis long_basis name =
+      let ao_cart_num = List.length long_basis |> AO_number.of_int in
+      let ao_cart_prim_num =
         list_map (fun (_,g,_) -> List.length g.Gto.lc
           |> AO_prim_number.of_int ) long_basis
         |> Array.of_list
-      and ao_nucl =
+      and ao_cart_nucl =
         list_map (fun (_,_,n) -> n) long_basis
         |> Array.of_list
-      and ao_power =
+      and ao_cart_power =
         list_map (fun (x,_,_) -> x) long_basis
         |> Array.of_list
       in
-      let ao_prim_num_max = Array.fold_left (fun s x ->
+      let ao_cart_prim_num_max = Array.fold_left (fun s x ->
         if AO_prim_number.to_int x > s then AO_prim_number.to_int x else s) 0
-        ao_prim_num
+        ao_cart_prim_num
         |> AO_prim_number.of_int
       in
 
@@ -348,46 +310,46 @@ end = struct
                 get_n n (y::accu) tail
           in
           let rec build accu = function
-            | n when n=(AO_prim_number.to_int ao_prim_num_max) -> accu
+            | n when n=(AO_prim_number.to_int ao_cart_prim_num_max) -> accu
             | n -> build ( accu @ (get_n n [] coefs) ) (n+1)
           in
           build [] 0
       in
 
-      let ao_coef = create_expo_coef `Coefs
+      let ao_cart_coef = create_expo_coef `Coefs
       |> Array.of_list
       |> Array.map AO_coef.of_float
-      and ao_expo = create_expo_coef `Expos
+      and ao_cart_expo = create_expo_coef `Expos
       |> Array.of_list
       |> Array.map AO_expo.of_float
       in
-      { ao_basis = name ;
-        ao_num ; ao_prim_num ; ao_prim_num_max ; ao_nucl ;
-        ao_power ; ao_coef ; ao_expo ; ao_cartesian ;
+      { ao_cart_basis = name ;
+        ao_cart_num ; ao_cart_prim_num ; ao_cart_prim_num_max ; ao_cart_nucl ;
+        ao_cart_power ; ao_cart_coef ; ao_cart_expo ; 
         }
   ;;
 
   let reorder b =
     let order = ordering b in
     let f a = Array.init (Array.length a) (fun i -> a.(order.(i))) in
-    let ao_prim_num_max = AO_prim_number.to_int b.ao_prim_num_max
-    and ao_num = AO_number.to_int b.ao_num in
-    let ao_coef =
-      Array.init ao_prim_num_max (fun i ->
-        f @@ Array.init ao_num (fun j -> b.ao_coef.(i*ao_num + j) )
+    let ao_cart_prim_num_max = AO_prim_number.to_int b.ao_cart_prim_num_max
+    and ao_cart_num = AO_number.to_int b.ao_cart_num in
+    let ao_cart_coef =
+      Array.init ao_cart_prim_num_max (fun i ->
+        f @@ Array.init ao_cart_num (fun j -> b.ao_cart_coef.(i*ao_cart_num + j) )
       ) |> Array.to_list |> Array.concat
     in
-    let ao_expo =
-      Array.init ao_prim_num_max (fun i ->
-        f @@ Array.init ao_num (fun j -> b.ao_expo.(i*ao_num + j) )
+    let ao_cart_expo =
+      Array.init ao_cart_prim_num_max (fun i ->
+        f @@ Array.init ao_cart_num (fun j -> b.ao_cart_expo.(i*ao_cart_num + j) )
       ) |> Array.to_list |> Array.concat
     in
     { b with
-      ao_prim_num = f b.ao_prim_num ;
-      ao_nucl     = f b.ao_nucl  ;
-      ao_power    = f b.ao_power ;
-      ao_coef ;
-      ao_expo ;
+      ao_cart_prim_num = f b.ao_cart_prim_num ;
+      ao_cart_nucl     = f b.ao_cart_nucl  ;
+      ao_cart_power    = f b.ao_cart_power ;
+      ao_cart_coef ;
+      ao_cart_expo ;
     }
   ;;
 
@@ -395,8 +357,8 @@ end = struct
 
   let to_rst b =
     let print_sym =
-      let l = List.init (Array.length b.ao_power) (
-         fun i -> ( (i+1),b.ao_nucl.(i),b.ao_power.(i) ) )
+      let l = List.init (Array.length b.ao_cart_power) (
+         fun i -> ( (i+1),b.ao_cart_nucl.(i),b.ao_cart_power.(i) ) )
       in
       let rec do_work = function
       | [] -> []
@@ -412,11 +374,7 @@ end = struct
     Printf.sprintf "
 Name of the AO basis ::
 
-  ao_basis = %s
-
-Cartesian coordinates (6d,10f,...) ::
-
-  ao_cartesian = %s
+  ao_cart_basis = %s
 
 Basis set (read-only) ::
 
@@ -429,8 +387,7 @@ Basis set (read-only) ::
 %s
 ======= ========= ===========
 
-"   (AO_basis_name.to_string b.ao_basis)
-    (string_of_bool b.ao_cartesian)
+"   (AO_basis_name.to_string b.ao_cart_basis)
     (Basis.to_string short_basis
        |> String_ext.split ~on:'\n'
        |> list_map (fun x-> "  "^x)
@@ -458,32 +415,28 @@ Basis set (read-only) ::
 
   let to_string b =
     Printf.sprintf "
-ao_basis                = %s
-ao_num                  = %s
-ao_prim_num             = %s
-ao_prim_num_max         = %s
-ao_nucl                 = %s
-ao_power                = %s
-ao_coef                 = %s
-ao_expo                 = %s
-ao_cartesian            = %s
-md5                     = %s
+ao_cart_basis                = %s
+ao_cart_num                  = %s
+ao_cart_prim_num             = %s
+ao_cart_prim_num_max         = %s
+ao_cart_nucl                 = %s
+ao_cart_power                = %s
+ao_cart_coef                 = %s
+ao_cart_expo                 = %s
 "
-    (AO_basis_name.to_string b.ao_basis)
-    (AO_number.to_string b.ao_num)
-    (b.ao_prim_num |> Array.to_list |> list_map
+    (AO_basis_name.to_string b.ao_cart_basis)
+    (AO_number.to_string b.ao_cart_num)
+    (b.ao_cart_prim_num |> Array.to_list |> list_map
       (AO_prim_number.to_string) |> String.concat ", " )
-    (AO_prim_number.to_string b.ao_prim_num_max)
-    (b.ao_nucl |> Array.to_list |> list_map Nucl_number.to_string |>
+    (AO_prim_number.to_string b.ao_cart_prim_num_max)
+    (b.ao_cart_nucl |> Array.to_list |> list_map Nucl_number.to_string |>
       String.concat ", ")
-    (b.ao_power |> Array.to_list |> list_map (fun x->
+    (b.ao_cart_power |> Array.to_list |> list_map (fun x->
       "("^(Angmom.Xyz.to_string x)^")" )|> String.concat ", ")
-    (b.ao_coef  |> Array.to_list |> list_map AO_coef.to_string
+    (b.ao_cart_coef  |> Array.to_list |> list_map AO_coef.to_string
       |> String.concat ", ")
-    (b.ao_expo  |> Array.to_list |> list_map AO_expo.to_string
+    (b.ao_cart_expo  |> Array.to_list |> list_map AO_expo.to_string
       |> String.concat ", ")
-    (b.ao_cartesian |> string_of_bool)
-    (to_md5 b |> MD5.to_string )
 
   ;;
 end

@@ -17,7 +17,7 @@ END_DOC
   logical, external              :: qp_stop
   double precision, allocatable :: mo_coef_save(:,:), S(:,:)
 
-  PROVIDE ao_md5 mo_occ level_shift
+  PROVIDE mo_occ level_shift
 
   allocate(mo_coef_save(ao_num,mo_num),                          &
       Fock_matrix_DIIS (ao_num,ao_num,max_dim_DIIS),                 &

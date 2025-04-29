@@ -5,7 +5,6 @@ subroutine save_mos
 
   call ezfio_set_mo_basis_mo_num(mo_num)
   call ezfio_set_mo_basis_mo_label(mo_label)
-  call ezfio_set_mo_basis_ao_md5(ao_md5)
   allocate ( buffer(ao_num,mo_num) )
   buffer = 0.d0
   do j = 1, mo_num
@@ -29,7 +28,6 @@ subroutine save_mos_no_occ
 !  call system('$QP_ROOT/scripts/save_current_mos.sh '//trim(ezfio_filename))
  !call ezfio_set_mo_basis_mo_num(mo_num)
  !call ezfio_set_mo_basis_mo_label(mo_label)
- !call ezfio_set_mo_basis_ao_md5(ao_md5)
   allocate ( buffer(ao_num,mo_num) )
   buffer = 0.d0
   do j = 1, mo_num
@@ -51,7 +49,6 @@ subroutine save_mos_truncated(n)
 
   call ezfio_set_mo_basis_mo_num(n)
   call ezfio_set_mo_basis_mo_label(mo_label)
-  call ezfio_set_mo_basis_ao_md5(ao_md5)
   allocate ( buffer(ao_num,n) )
   buffer = 0.d0
   do j = 1, n
