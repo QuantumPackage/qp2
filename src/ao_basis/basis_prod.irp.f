@@ -3,7 +3,8 @@ BEGIN_PROVIDER [ integer, basis_prod_num ]
   BEGIN_DOC
   ! Maximum number of basis functions for the projector
   END_DOC
-  basis_prod_num = ao_num * (ao_num+1) / 2
+!  basis_prod_num = ao_num * (ao_num+1) / 2
+  basis_prod_num = ao_num
 END_PROVIDER
 
 BEGIN_PROVIDER [ integer, basis_prod_idx, (2,basis_prod_num) ]
@@ -12,13 +13,19 @@ BEGIN_PROVIDER [ integer, basis_prod_idx, (2,basis_prod_num) ]
   ! Indices of main basis to create projector basis
   END_DOC
   integer :: i,j,a
+!  a=0
+!  do j=1,ao_num
+!     do i=1,j
+!        a = a+1
+!        basis_prod_idx(1,a) = i
+!        basis_prod_idx(2,a) = j
+!     enddo
+!  enddo
   a=0
   do j=1,ao_num
-     do i=1,j
         a = a+1
         basis_prod_idx(1,a) = i
-        basis_prod_idx(2,a) = j
-     enddo
+        basis_prod_idx(2,a) = i
   enddo
 END_PROVIDER
 
@@ -86,18 +93,25 @@ end function basis_prod_overlap_func
   !$OMP PARALLEL DO PRIVATE(a,b) SCHEDULE(guided)
   do a=1,basis_prod_num
      do b=1,a
-        basis_prod_overlap(a,b) = basis_prod_overlap_func(a,b)
-        basis_prod_overlap(b,a) = basis_prod_overlap(a,b)
+        basis_prod_overlap(b,a) = basis_prod_overlap_func(a,b)
      enddo
-     print *, a, '/', basis_prod_num
+!DEBUG
+print *, a, '/', basis_prod_num
   enddo
   !$OMP END PARALLEL DO
+
+  do a=1,basis_prod_num
+     do b=1,a
+        basis_prod_overlap(a,b) = basis_prod_overlap(b,a)
+     enddo
+  enddo
 
   ! Eliminate linear dependencies
 
   double precision, allocatable :: U(:,:), D(:), Vt(:,:)
   allocate(U(basis_prod_num,basis_prod_num),Vt(basis_prod_num,basis_prod_num), D(basis_prod_num))
 
+!DEBUG
 print *, 'svd'
   call svd( &
        basis_prod_overlap, size(basis_prod_overlap,1), &
@@ -125,6 +139,7 @@ print *, 'svd'
      print *,  'Removed Linear dependencies below ', local_cutoff
   endif
 
+!DEBUG
 print *, 'gemm1'
   double precision :: dk, dk_inv
   double precision, allocatable :: U2(:,:)
@@ -139,6 +154,7 @@ print *, 'gemm1'
   call dgemm('N','N', basis_prod_num, basis_prod_num, basis_prod_num, 1.d0, &
        U2, basis_prod_num, Vt, basis_prod_num, 0.d0, basis_prod_overlap, basis_prod_num)
 
+!DEBUG
 print *, 'gemm2'
   do k=1,basis_prod_num
      if (D(k) == 0.d0) then
@@ -154,6 +170,8 @@ print *, 'gemm2'
   call dgemm('N','N', basis_prod_num, basis_prod_num, basis_prod_num, 1.d0, &
        U2, basis_prod_num, Vt, basis_prod_num, 0.d0, basis_prod_overlap_inv, basis_prod_num)
 
+!DEBUG
+print *, 'Done'
 
   deallocate(U,U2,D,Vt)
 END_PROVIDER
