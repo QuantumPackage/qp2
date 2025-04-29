@@ -34,8 +34,8 @@ program scf
 !
   END_DOC
   call create_guess
-  call orthonormalize_mos
-  call run
+   call orthonormalize_mos
+   call run
 end
 
 subroutine create_guess

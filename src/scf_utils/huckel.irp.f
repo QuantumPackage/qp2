@@ -10,7 +10,7 @@ subroutine huckel_guess
   double precision, allocatable  :: A(:,:)
   label = "Guess"
   c = 0.5d0 * 1.75d0
-
+  print*,'Preparing Huckel guess'
   allocate (A(ao_num, ao_num))
   A = 0.d0
   do j=1,ao_num
@@ -20,7 +20,6 @@ subroutine huckel_guess
     enddo
     A(j,j) = ao_one_e_integrals_diag(j) + ao_two_e_integral_alpha(j,j) 
   enddo
-
   Fock_matrix_ao_alpha(1:ao_num,1:ao_num) = A(1:ao_num,1:ao_num)
   Fock_matrix_ao_beta (1:ao_num,1:ao_num) = A(1:ao_num,1:ao_num)
 
