@@ -5,7 +5,7 @@ BEGIN_PROVIDER [ integer, ao_sphe_num ]
  END_DOC
  integer :: n, i
  if (ao_cartesian) then
-   ao_sphe_num = ao_num
+   ao_sphe_num = ao_cart_num
  else
    ao_sphe_num=0
    do i=1,shell_num
@@ -871,7 +871,7 @@ END_PROVIDER
 !   ! Assume order provided by ao_cart_power_index
 !   i = 1
 !   ao_sphe_count = 0
-!   do while (i <= ao_num)
+!   do while (i <= ao_cart_num)
 !     select case ( ao_cart_l(i) )
 !       case (0)
 !         ao_sphe_count += 1
@@ -914,8 +914,7 @@ END_PROVIDER
 
 
 
- BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_coef, (ao_num,ao_num)]
-&BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_normalization, (ao_num)]
+ BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_coef, (ao_cart_num,ao_sphe_num)]
   implicit none
   BEGIN_DOC
 ! Coefficients to go from cartesian to spherical coordinates in the current
@@ -929,7 +928,6 @@ END_PROVIDER
   integer                        :: prev, ao_sphe_count
   prev = 0
   ao_cart_to_sphe_coef(:,:) = 0.d0
-  ao_cart_to_sphe_normalization(:) = 1.d0
 
   if (ao_cartesian) then
     ! Identity matrix
@@ -941,12 +939,11 @@ END_PROVIDER
     ! Assume order provided by ao_cart_power_index
     i = 1
     ao_sphe_count = 0
-    do while (i <= ao_num)
+    do while (i <= ao_cart_num)
       select case ( ao_cart_l(i) )
         case (0)
           ao_sphe_count += 1
           ao_cart_to_sphe_coef(i,ao_sphe_count) = 1.d0
-          ao_cart_to_sphe_normalization(i) = 1.d0
           i += 1
         BEGIN_TEMPLATE
         case ($SHELL)
@@ -955,9 +952,6 @@ END_PROVIDER
               do j=1,size(cart_to_sphe_$SHELL,1)
                 ao_cart_to_sphe_coef(i+j-1,ao_sphe_count+k) = cart_to_sphe_$SHELL(j,k)
               enddo
-            enddo
-            do j=1,size(cart_to_sphe_$SHELL,1)
-              ao_cart_to_sphe_normalization(i+j-1) = cart_to_sphe_norm_$SHELL(j)
             enddo
             i += size(cart_to_sphe_$SHELL,1)
             ao_sphe_count += size(cart_to_sphe_$SHELL,2)
@@ -977,11 +971,19 @@ END_PROVIDER
           stop 'Error in ao_cart_to_sphe : angular momentum too high'
       end select
     enddo
+    if (ao_sphe_count /= ao_sphe_num) then
+      call qp_bug(irp_here, ao_sphe_count, "ao_sphe_count /= ao_sphe_num")
+    endif
 
   endif
 
-  if (ao_sphe_count /= ao_sphe_num) then
-    call qp_bug(irp_here, ao_sphe_count, "ao_sphe_count /= ao_sphe_num")
-  endif
 END_PROVIDER
 
+ BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_coef_inv, (ao_sphe_num,ao_cart_num)]
+  implicit none
+  BEGIN_DOC
+! Pseudo inverse of ao_cart_to_sphe_coef 
+  END_DOC
+  call get_pseudo_inverse(ao_cart_to_sphe_coef, ao_cart_num, ao_cart_num, ao_sphe_num,& 
+                          ao_cart_to_sphe_coef_inv, ao_sphe_num, 1.d-10)
+ END_PROVIDER 

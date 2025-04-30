@@ -7,14 +7,15 @@ BEGIN_PROVIDER [ integer, ao_num  ]
   logical                        :: has
   PROVIDE ezfio_filename
   if (mpi_master) then
-    
     call ezfio_has_ao_basis_ao_num(has)
     if (has) then
 !      write(6,'(A)') '.. >>>>> [ IO READ: ao_num ] <<<<< ..'
       call ezfio_get_ao_basis_ao_num(ao_num)
     else
       print *, 'Using the transformation matrix'
-      if(.True.)then
+      if(.not.ao_cartesian)then
+       ao_num = ao_sphe_num
+      else
        ao_num = ao_cart_num 
       endif
     endif
@@ -36,9 +37,11 @@ BEGIN_PROVIDER [ integer, ao_num  ]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, ao_cart_to_ao_basis_mat, (ao_num, ao_cart_num)]
+BEGIN_PROVIDER [ double precision, ao_cart_to_ao_basis_mat, ( ao_num,ao_cart_num)]
  implicit none
- if(.True.)then
+ if(.not.ao_cartesian)then
+  ao_cart_to_ao_basis_mat(1:ao_num,1:ao_cart_num) = ao_cart_to_sphe_coef_inv(1:ao_sphe_num,1:ao_cart_num)
+ else
   ao_cart_to_ao_basis_mat=0.d0
   integer :: i
   do i = 1, ao_num
@@ -48,7 +51,7 @@ BEGIN_PROVIDER [ double precision, ao_cart_to_ao_basis_mat, (ao_num, ao_cart_num
 
 END_PROVIDER 
 
-BEGIN_PROVIDER [ double precision, ao_cart_to_ao_basis_mat_transp, (ao_cart_num, ao_num)]
+BEGIN_PROVIDER [ double precision, ao_cart_to_ao_basis_mat_transp, (ao_cart_num,ao_num)]
  implicit none
  integer :: i,j
  do i = 1, ao_num
