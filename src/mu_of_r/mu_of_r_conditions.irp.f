@@ -337,28 +337,40 @@ BEGIN_PROVIDER [double precision, mu_of_r_projector_ao_prod, (n_points_final_gri
  END_DOC
 
  integer :: ipoint
+ double precision :: f
 
- !$OMP PARALLEL PRIVATE(ipoint,a,b,i,j,k,l,f1,f2) DEFAULT(SHARED)
+ integer :: i,j,a,b
+ double precision, allocatable :: tmp(:), tmp2(:)
+ double precision :: epsilon, pb
+ double precision, external :: ddot
+ f = 2.d0/dsqrt(dacos(-1.d0)) * (0.75d0*dacos(-1.d0)**2)**(1.d0/3.d0)
+
+ !$OMP PARALLEL PRIVATE(ipoint,a,b,i,j,tmp,epsilon,pb,tmp2) DEFAULT(SHARED)
+ allocate(tmp(basis_prod_num), tmp2(basis_prod_num))
  !$OMP DO
  do ipoint=1,n_points_final_grid
-   mu_of_r_projector_ao_prod(ipoint) = 0.d0
-   integer :: i,j,k,l,a,b
-   double precision :: f1, f2
    do a=1,basis_prod_num
      i = basis_prod_idx(1,a)
      j = basis_prod_idx(2,a)
-     f1 = aos_in_r_array(i,ipoint) * aos_in_r_array(j,ipoint)
-     do b=1,basis_prod_num
-       k = basis_prod_idx(1,b)
-       l = basis_prod_idx(2,b)
-       f2 = aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint)
-       mu_of_r_projector_ao_prod(ipoint) = mu_of_r_projector_ao_prod(ipoint) + &
-          f1*f2 * basis_prod_overlap_inv(a,b)
-     enddo
+     tmp(a) = aos_in_r_array(i,ipoint) * aos_in_r_array(j,ipoint)
    enddo
-   mu_of_r_projector_ao_prod(ipoint) = mu_of_r_projector_ao_prod(ipoint)**(1.d0/3.d0) * 2.199085233011538d0
+
+!   pb = 0.d0
+!   do a=1,basis_prod_num
+!     do b=1,basis_prod_num
+!       pb = pb + tmp(a) * basis_prod_overlap_inv(b,a) * tmp(b)
+!     enddo
+!   enddo
+
+   call dgemv('N', basis_prod_num, basis_prod_num, 1.d0, basis_prod_overlap_inv, &
+     basis_prod_num, tmp, 1, 0.d0, tmp2, 1)
+   pb = ddot(basis_prod_num, tmp, 1, tmp2, 1)
+
+   epsilon = 1.d0/(2.d0*dacos(-1.d0) * pb**(2.d0/3.d0) )
+   mu_of_r_projector_ao_prod(ipoint) = 1.d0/(2.d0*dsqrt(epsilon))
  enddo
  !$OMP END DO
+ deallocate(tmp,tmp2)
  !$OMP END PARALLEL 
 
 END_PROVIDER

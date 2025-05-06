@@ -22,7 +22,7 @@
     mu     = mu_of_r_prov(ipoint,istate)
     weight = final_weight_at_r_vector(ipoint)
     rho_a = one_e_dm_and_grad_alpha_in_r(4,ipoint,istate)
-    rho_b =  one_e_dm_and_grad_beta_in_r(4,ipoint,istate)
+    rho_b = one_e_dm_and_grad_beta_in_r (4,ipoint,istate)
     ! Ecmd within the LDA approximation of PRB 73, 155111 (2006)
     call ESRC_MD_LDAERF (mu,rho_a,rho_b,dospin,ec)
     if(isnan(ec))then

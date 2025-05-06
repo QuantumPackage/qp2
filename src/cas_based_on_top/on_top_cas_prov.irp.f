@@ -1,5 +1,5 @@
 
- subroutine act_on_top_on_grid_pt(ipoint,istate,pure_act_on_top_of_r)
+subroutine act_on_top_on_grid_pt(ipoint,istate,pure_act_on_top_of_r)
  implicit none
  BEGIN_DOC
  ! act_on_top_on_grid_pt returns the purely ACTIVE part of the on top pair density
@@ -10,27 +10,27 @@
  double precision, intent(out) :: pure_act_on_top_of_r
  double precision :: phi_i,phi_j,phi_k,phi_l
  integer :: i,j,k,l
+ double precision, allocatable :: x(:,:)
+ double precision, external :: ddot
+ allocate(x(n_act_orb,n_act_orb))
+
+ do l = 1, n_act_orb
+   phi_l = act_mos_in_r_array(l,ipoint)
+   do k = 1, n_act_orb
+    phi_k = act_mos_in_r_array(k,ipoint)
+    x(k,l) = phi_k*phi_l
+   enddo
+ enddo
  ASSERT (istate <= N_states)
 
  pure_act_on_top_of_r = 0.d0
-  do l = 1, n_act_orb
-   phi_l = act_mos_in_r_array(l,ipoint)
-   if (dabs(phi_l) < 1.d-12) cycle
-   do k = 1, n_act_orb
-    phi_k = act_mos_in_r_array(k,ipoint) * phi_l
-    if (dabs(phi_k) < 1.d-12) cycle
-     do j = 1, n_act_orb
-      phi_j = act_mos_in_r_array(j,ipoint) * phi_k
-      if (dabs(phi_j) < 1.d-12) cycle
-      do i = 1, n_act_orb
-       phi_i = act_mos_in_r_array(i,ipoint) * phi_j
-       !                                                             1 2 1 2
-       pure_act_on_top_of_r = pure_act_on_top_of_r + act_2_rdm_ab_mo(i,j,k,l,istate) * phi_i !* phi_j * phi_k * phi_l
-     enddo
-    enddo
-   enddo
+ do l = 1, n_act_orb
+  do k = 1, n_act_orb
+    if (dabs(x(k,l)) < 1.d-10) cycle
+    pure_act_on_top_of_r = pure_act_on_top_of_r + ddot(n_act_orb*n_act_orb,act_2_rdm_ab_mo(1,1,k,l,istate), 1, x, 1) * x(k,l)
   enddo
- end
+ enddo
+end
 
 
  BEGIN_PROVIDER [double precision, total_cas_on_top_density,(n_points_final_grid,N_states) ]
