@@ -1326,7 +1326,7 @@ end
 subroutine get_pseudo_inverse(A, LDA, m, n, C, LDC, cutoff)
 
   BEGIN_DOC
-  ! Find C = A^-1
+  ! Find C = A^-1: A(m,n), C(n,m)
   END_DOC
 
   implicit none
