@@ -14,6 +14,7 @@
   enddo
 END_PROVIDER
 
+
 BEGIN_PROVIDER [ double precision, psi_energy_with_nucl_rep, (N_states) ]
  implicit none
  BEGIN_DOC

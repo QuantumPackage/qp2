@@ -115,8 +115,6 @@ end function basis_prod_overlap_func
         endif
         basis_prod_overlap(a,b) = basis_prod_overlap(b,a)
      enddo
-!DEBUG
-print *, a, '/', basis_prod_num
   enddo
   !$OMP END PARALLEL DO
 
@@ -127,8 +125,6 @@ print *, a, '/', basis_prod_num
   allocate(U(basis_prod_num,basis_prod_num), D(basis_prod_num))
 !  allocate(Vt(basis_prod_num,basis_prod_num))
 
-!DEBUG
-print *, 'svd'
 !  call svd( &
 !       basis_prod_overlap, size(basis_prod_overlap,1), &
 !       U,  size(U,1), D, &
@@ -156,8 +152,6 @@ print *, 'svd'
      print *,  'Removed Linear dependencies below ', local_cutoff
   endif
 
-!DEBUG
-print *, 'gemm1'
   double precision :: dk, dk_inv
   double precision, allocatable :: U2(:,:)
   allocate(U2(basis_prod_num,basis_prod_num))
@@ -171,8 +165,6 @@ print *, 'gemm1'
   call dgemm('N','T', basis_prod_num, basis_prod_num, basis_prod_num, 1.d0, &
        U2, basis_prod_num, U, basis_prod_num, 0.d0, basis_prod_overlap, basis_prod_num)
 
-!DEBUG
-print *, 'gemm2'
   do k=1,basis_prod_num
      if (D(k) == 0.d0) then
        dk = 0.d0
@@ -186,9 +178,6 @@ print *, 'gemm2'
 
   call dgemm('N','T', basis_prod_num, basis_prod_num, basis_prod_num, 1.d0, &
        U2, basis_prod_num, U, basis_prod_num, 0.d0, basis_prod_overlap_inv, basis_prod_num)
-
-!DEBUG
-print *, 'Done'
 
   deallocate(U,U2,D)
 !  deallocate(Vt)
