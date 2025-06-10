@@ -1,0 +1,28 @@
+# Overview
+
+Overview for src/davidson/davidson_parallel_csf.irp.f (auto-generated placeholder).
+
+# Key Components
+
+### Key Components (auto-extracted, descriptions needed)
+- **davidson_csf_slave_inproc** (subroutine): [Description]
+- **davidson_csf_slave_tcp** (subroutine): [Description]
+- **davidson_csf_run_slave** (subroutine): [Description]
+- **davidson_csf_slave_work** (subroutine): [Description]
+- **davidson_csf_push_results** (subroutine): [Description]
+- **davidson_csf_push_results_async_send** (subroutine): [Description]
+- **davidson_csf_pull_results** (subroutine): [Description]
+- **davidson_csf_collector** (subroutine): [Description]
+- **H_u_0_nstates_zmq** (subroutine): [Description]
+
+# Important Variables/Constants
+
+[Descriptions of any critical variables or constants defined in the file that affect its behavior.]
+
+# Usage Examples
+
+[If applicable, provide examples or code snippets demonstrating how to use the functions, classes, or modules in the file.]
+
+# Dependencies and Interactions
+
+[Notes on any dependencies the file has on other parts of the system or external libraries, and how it interacts with other components.]
