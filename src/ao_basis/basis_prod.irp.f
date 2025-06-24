@@ -1,3 +1,12 @@
+BEGIN_PROVIDER [ double precision, ao_basis_prod_threshold ]
+ implicit none
+ BEGIN_DOC
+ ! Threshold to select a product of basis functions
+ END_DOC
+ ao_basis_prod_threshold = 1.d-8
+
+END_PROVIDER
+
 BEGIN_PROVIDER [ integer, basis_prod_num ]
   implicit none
   BEGIN_DOC
@@ -15,7 +24,7 @@ BEGIN_PROVIDER [ integer, basis_prod_idx, (2,basis_prod_num) ]
   a=0
   do j=1,ao_num
      do i=1,j
-        if (ao_overlap_abs(i,j) > ao_integrals_threshold) then
+        if (ao_overlap_abs(i,j) > ao_basis_prod_threshold) then
           a = a+1
           basis_prod_idx(1,a) = i
           basis_prod_idx(2,a) = j
@@ -82,7 +91,7 @@ double precision function basis_prod_overlap_func(a,b)
   k = basis_prod_idx(2,a)
   j = basis_prod_idx(1,b)
   l = basis_prod_idx(2,b)
-  if (ao_overlap_abs(i,j)*ao_overlap_abs(k,l) > ao_integrals_threshold) then
+  if (ao_overlap_abs(i,j)*ao_overlap_abs(k,l) > ao_basis_prod_threshold) then
     basis_prod_overlap_func = ao_two_e_integral_general(i,j,k,l,general_overlap_integral)
   else
     basis_prod_overlap_func = 0.d0
@@ -108,7 +117,7 @@ end function basis_prod_overlap_func
   !$OMP PARALLEL DO PRIVATE(a,b) SCHEDULE(guided)
   do a=1,basis_prod_num
      do b=1,a-1
-        if (basis_prod_overlap(a,a)*basis_prod_overlap(b,b) > ao_integrals_threshold*ao_integrals_threshold) then
+        if (basis_prod_overlap(a,a)*basis_prod_overlap(b,b) > ao_basis_prod_threshold*ao_basis_prod_threshold) then
           basis_prod_overlap(b,a) = basis_prod_overlap_func(b,a)
         else
           basis_prod_overlap(b,a) = 0.d0

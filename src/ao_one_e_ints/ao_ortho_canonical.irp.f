@@ -13,7 +13,7 @@ BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_inv, (ao_sphe_num,ao_num) ]
 
   allocate(S(k,k), R(k,m), Rinv(m,k), Sinv(k,k))
 
-  R(:,:) = ao_cart_to_sphe_coef(:,:)
+  R(1:k,1:m) = ao_cart_to_sphe_coef(1:k,1:m)
 
   call dgemm('N','T', m, m, k, 1.d0, R, k, R, k, 0.d0, S, m)
   call get_pseudo_inverse(S, k, k, m, Sinv, k, 1.d-12)
@@ -52,7 +52,7 @@ END_PROVIDER
     ao_ortho_canonical_coef(i,i) = 1.d0
   enddo
 
-  call write_double(6, lin_dep_cutoff, "Linear dependencies cut-off") 
+  call write_double(6, lin_dep_cutoff, "Linear dependencies cut-off")
   if (ao_cartesian) then
 
     ao_ortho_canonical_num = ao_num

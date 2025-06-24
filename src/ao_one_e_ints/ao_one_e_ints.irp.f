@@ -55,7 +55,7 @@ END_PROVIDER
 
   ao_sphe_one_e_integrals = ao_sphe_integrals_n_e + ao_sphe_kinetic_integrals
 
-  do j = 1, ao_num
+  do j = 1, ao_sphe_num
     ao_sphe_one_e_integrals_diag(j) = ao_sphe_one_e_integrals(j,j)
   enddo
 

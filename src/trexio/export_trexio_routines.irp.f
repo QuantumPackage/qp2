@@ -6,16 +6,19 @@ subroutine export_trexio(update,full_path)
   END_DOC
 
   logical, intent(in)            :: update, full_path
-  integer(trexio_t)              :: f(N_states) ! TREXIO file handle
+  integer(trexio_t), allocatable :: f(:) ! TREXIO file handle
   integer(trexio_exit_code)      :: rc
   integer                        :: k, iunit
   double precision, allocatable  :: factor(:)
-  character*(256)  :: filenames(N_states), fp
+  character*(256)  :: fp
+  character*(256), allocatable  :: filenames(:)
   character :: rw
 
   integer, external :: getunitandopen
 
   integer :: i,j,l
+
+  allocate(f(N_states), filenames(N_states))
 
   if (full_path) then
     fp = trexio_filename
