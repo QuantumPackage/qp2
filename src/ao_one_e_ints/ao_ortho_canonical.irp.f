@@ -22,7 +22,7 @@ BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_inv, (ao_sphe_num,ao_num) ]
 
   integer :: i
   do i=1,ao_num
-    ao_cart_to_sphe_inv(:,i) = Rinv(:,i)
+    ao_cart_to_sphe_inv(1:ao_sphe_num,i) = Rinv(1:ao_sphe_num,i)
   enddo
 
 END_PROVIDER
