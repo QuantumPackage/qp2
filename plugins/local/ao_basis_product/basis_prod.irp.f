@@ -3,7 +3,7 @@ BEGIN_PROVIDER [ double precision, ao_basis_prod_threshold ]
  BEGIN_DOC
  ! Threshold to select a product of basis functions
  END_DOC
- ao_basis_prod_threshold = 1.d-8
+ ao_basis_prod_threshold = ao_one_e_integrals_threshold
 
 END_PROVIDER
 
