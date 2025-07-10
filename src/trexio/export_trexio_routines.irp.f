@@ -681,49 +681,50 @@ subroutine export_trexio(update,full_path)
 
 ! ------------------------------------------------------------------------------
 
+  integer :: nint
+  integer*8, allocatable :: det_buffer(:,:,:)
+  double precision, allocatable :: coef_buffer(:,:)
+
+  do k=1, N_states
+    rc = trexio_write_state_num(f(k), n_states)
+    call trexio_assert(rc, TREXIO_SUCCESS)
+
+    rc = trexio_write_state_id(f(k), k)
+    call trexio_assert(rc, TREXIO_SUCCESS)
+
+    rc = trexio_write_state_file_name(f(k), filenames, len(filenames(1)))
+    call trexio_assert(rc, TREXIO_SUCCESS)
+  enddo
+
+  rc = trexio_get_int64_num(f(1), nint)
+  call trexio_assert(rc, TREXIO_SUCCESS)
+
+  if (nint /= N_int) then
+     stop 'Problem with N_int'
+  endif
+
+  allocate ( det_buffer(nint, 2, BUFSIZE), coef_buffer(BUFSIZE, n_states) )
+
   ! Determinants
   ! ------------
 
-    integer*8, allocatable :: det_buffer(:,:,:)
-    double precision, allocatable :: coef_buffer(:,:)
-    integer :: nint
-
-    rc = trexio_get_int64_num(f(1), nint)
-    call trexio_assert(rc, TREXIO_SUCCESS)
-!    nint = N_int
-    if (nint /= N_int) then
-       stop 'Problem with N_int'
-    endif
-    allocate ( det_buffer(nint, 2, BUFSIZE), coef_buffer(BUFSIZE, n_states) )
-
-    do k=1, N_states
-      icount = 0_8
-      offset = 0_8
-      rc = trexio_write_state_num(f(k), n_states)
-      call trexio_assert(rc, TREXIO_SUCCESS)
-
-      rc = trexio_write_state_id(f(k), k)
-      call trexio_assert(rc, TREXIO_SUCCESS)
-
-      rc = trexio_write_state_file_name(f(k), filenames, len(filenames(1)))
-      call trexio_assert(rc, TREXIO_SUCCESS)
-    enddo
-
-    do k=1,n_det
-       icount += 1_8
-       det_buffer(1:nint, 1:2, icount) = psi_det(1:N_int, 1:2, k)
-       coef_buffer(icount,1:N_states) = psi_coef(k,1:N_states)
-       if (icount == BUFSIZE) then
-         do i=1,N_states
-           rc = trexio_write_determinant_list(f(i), offset, icount, det_buffer)
-           call trexio_assert(rc, TREXIO_SUCCESS)
-           rc = trexio_write_determinant_coefficient(f(i), offset, icount, coef_buffer(1,i))
-           call trexio_assert(rc, TREXIO_SUCCESS)
-         end do
-         offset += icount
-         icount = 0_8
-       end if
-    end do
+  icount = 0_8
+  offset = 0_8
+  do k=1,n_det
+     icount += 1_8
+     det_buffer(1:nint, 1:2, icount) = psi_det(1:N_int, 1:2, k)
+     coef_buffer(icount,1:N_states) = psi_coef(k,1:N_states)
+     if (icount == BUFSIZE) then
+       do i=1,N_states
+         rc = trexio_write_determinant_list(f(i), offset, icount, det_buffer)
+         call trexio_assert(rc, TREXIO_SUCCESS)
+         rc = trexio_write_determinant_coefficient(f(i), offset, icount, coef_buffer(1,i))
+         call trexio_assert(rc, TREXIO_SUCCESS)
+       end do
+       offset += icount
+       icount = 0_8
+     end if
+  end do
 
   if (icount >= 0_8) then
     do i=1,N_states
@@ -734,7 +735,102 @@ subroutine export_trexio(update,full_path)
     end do
   end if
 
+  if (export_csf) then
+    ! CSFs
+    ! ----
+
+    integer :: startdet, enddet, s, bfIcfg, icsf, ii, idx
+    integer, allocatable :: dc_index(:,:)
+    double precision, allocatable :: dc_value(:)
+    double precision               :: phasedet
+
+
+    ! Write CSF coefficients
+    icount = 0_8
+    offset = 0_8
+    do ii=1,N_csf
+      icount += 1
+      coef_buffer(icount,1:N_states) = psi_csf_coef(ii,1:N_states)
+      if (icount == BUFSIZE) then
+         do i=1,N_states
+           rc = trexio_write_csf_coefficient(f(i), offset, icount, coef_buffer(1,i))
+           call trexio_assert(rc, TREXIO_SUCCESS)
+         end do
+         offset += icount
+         icount = 0_8
+      endif
+    enddo
+
+    if (icount >= 0_8) then
+      do i=1,N_states
+        rc = trexio_write_csf_coefficient(f(i), offset, icount, coef_buffer(1,i))
+        call trexio_assert(rc, TREXIO_SUCCESS)
+      end do
+    end if
+
+    do i=1,N_states
+      rc = trexio_write_csf_num(f(i), N_csf)
+    enddo
+
+    icount = 0_8
+    rc = trexio_read_csf_num_64(f(1), icount)
+    print *, icount
+
+    ! Write CSF to determinant mapping
+    allocate (dc_index(2,BUFSIZE))
+    allocate (dc_value(BUFSIZE))
+
+    icount = 0_8
+    offset = 0_8
+    icsf = 0
+    do ii=1,N_configuration
+      startdet = psi_configuration_to_psi_det(1,ii)
+      enddet = psi_configuration_to_psi_det(2,ii)
+
+      s = 0
+      do k=1,N_int
+        if (psi_configuration(k,1,ii) == 0_bit_kind) cycle
+        s = s + popcnt(psi_configuration(k,1,ii))
+      enddo
+      bfIcfg = max(1,int(binom(s,(s+1)/2)-binom(s,((s+1)/2)+1)+0.5d0))
+
+      do k=1,bfIcfg
+        icsf += 1
+        do j = startdet, enddet
+          if (DetToCSFTransformationMatrix(s,k,j-startdet+1) == 0.d0) cycle
+          icount += 1_8
+          idx = psi_configuration_to_psi_det_data(j)
+          call get_phase_qp_to_cfg(psi_det(1,1,idx), psi_det(1,2,idx), phasedet)
+          dc_index(1,icount) = icsf
+          dc_index(2,icount) = idx
+          dc_value(icount) = DetToCSFTransformationMatrix(s,k,j-startdet+1)*phasedet
+          if (icount == BUFSIZE) then
+            do i=1,N_states
+              rc = trexio_write_csf_det_coefficient(f(i), offset, icount, dc_index, dc_value)
+              call trexio_assert(rc, TREXIO_SUCCESS)
+              offset += icount
+              icount = 0_8
+            end do
+          end if
+        end do
+      end do
+    end do
+
+    if (icount > 0_8) then
+      do i=1,N_states
+        rc = trexio_write_csf_det_coefficient(f(i), offset, icount, dc_index, dc_value)
+        call trexio_assert(rc, TREXIO_SUCCESS)
+      end do
+    end if
+
+    deallocate (dc_index)
+    deallocate (dc_value)
+
+  endif
+
   deallocate ( det_buffer, coef_buffer )
+
+  ! ---------------------------------------
 
   do k=1,N_states
     rc = trexio_close(f(k))
