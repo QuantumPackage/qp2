@@ -702,8 +702,6 @@ subroutine export_trexio(update,full_path)
       rc = trexio_write_state_num(f(k), n_states)
       call trexio_assert(rc, TREXIO_SUCCESS)
 
-! Will need to be updated with TREXIO 2.4
-!      rc = trexio_write_state_id(f(k), k-1)
       rc = trexio_write_state_id(f(k), k)
       call trexio_assert(rc, TREXIO_SUCCESS)
 
