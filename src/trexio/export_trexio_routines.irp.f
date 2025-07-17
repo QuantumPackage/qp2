@@ -775,9 +775,10 @@ subroutine export_trexio(update,full_path)
       end do
     end if
 
-    do i=1,N_states
-      rc = trexio_write_csf_num(f(i), N_csf)
-    enddo
+! TODO: activate with TREXIO 2.6
+!    do i=1,N_states
+!      rc = trexio_write_csf_num(f(i), N_csf)
+!    enddo
 
     icount = 0_8
     rc = trexio_read_csf_num_64(f(1), icount)

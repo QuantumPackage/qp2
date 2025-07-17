@@ -1,7 +1,35 @@
+BEGIN_PROVIDER [ integer*8, det_csf_transformation_size ]
+ implicit none
+ BEGIN_DOC
+ ! Size of the det-csf transformation matrix
+ END_DOC
+
+ integer :: i_cfg
+ integer*8 :: istart, iend, sze
+
+ det_csf_transformation_size = 0_8
+
+ do i_cfg=1,N_configuration
+
+   istart = psi_configuration_to_psi_det(1,i_cfg)
+   iend   = psi_configuration_to_psi_det(2,i_cfg)
+   sze    = iend-istart+1
+   det_csf_transformation_size = det_csf_transformation_size  + sze*sze
+
+ enddo
+
+ call write_time(6)
+ double precision :: memory
+ memory = dble(det_csf_transformation_size*8) / (1024.d0**3)
+ call write_double(6, memory, 'Det-CSF transformation matrix (GB)')
+
+END_PROVIDER
+
+
  BEGIN_PROVIDER [ integer, N_csf ]
 &BEGIN_PROVIDER [ integer, psi_configuration_to_psi_csf, (2,N_configuration) ]
 &BEGIN_PROVIDER [ integer, psi_configuration_n_csf, (N_configuration) ]
-&BEGIN_PROVIDER [ double precision, det_csf_transformation, (n_det_per_config_max*n_det_per_config_max*N_configuration) ]
+&BEGIN_PROVIDER [ double precision, det_csf_transformation, (det_csf_transformation_size)]
 &BEGIN_PROVIDER [ integer*8, det_csf_transformation_index, (N_configuration) ]
  implicit none
  BEGIN_DOC
@@ -74,7 +102,7 @@
        if (dabs(eigenvalues(j) - expected_s2) < 0.1d0) then
          i_csf = i_csf + 1
          det_csf_transformation(index:index+sze-1) = s2mat(1:sze,j)
-         index = index + sze
+         index = index + int(sze,8)
        end if
      enddo
      if (i_csf == 0) cycle
