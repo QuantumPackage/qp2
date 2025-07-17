@@ -549,7 +549,10 @@ subroutine export_trexio(update,full_path)
 
   if (export_mo_two_e_ints) then
     print *, 'MO two-e integrals'
-    PROVIDE all_mo_integrals
+    do_mo_cholesky = .False.
+    if (.true.) then
+      PROVIDE all_mo_integrals
+    endif
 
     double precision, external :: mo_two_e_integral
 
@@ -591,6 +594,10 @@ subroutine export_trexio(update,full_path)
 ! -----------------------------
 
   if (export_mo_two_e_ints_cholesky) then
+    do_mo_cholesky = .True.
+    if (.true.) then
+      PROVIDE all_mo_integrals
+    endif
     print *, 'MO two-e integrals Cholesky'
 
     rc = trexio_write_mo_2e_int_eri_cholesky_num(f(1), cholesky_ao_num)
