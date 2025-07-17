@@ -24,7 +24,8 @@ END_PROVIDER
  BEGIN_PROVIDER [ integer, N_csf ]
 &BEGIN_PROVIDER [ integer, psi_configuration_to_psi_csf, (2,N_configuration) ]
 &BEGIN_PROVIDER [ integer, psi_configuration_n_csf, (N_configuration) ]
-&BEGIN_PROVIDER [ integer, det_csf_transformation, (det_csf_transformation_size)]
+&BEGIN_PROVIDER [ integer*2, det_csf_transformation, (det_csf_transformation_size)]
+&BEGIN_PROVIDER [ double precision, csf_compressed, (-32768:32768) ]
 &BEGIN_PROVIDER [ integer*8, det_csf_transformation_index, (N_configuration) ]
  implicit none
  BEGIN_DOC
@@ -46,6 +47,9 @@ END_PROVIDER
  double precision, allocatable :: eigenvalues(:), work(:)
  integer :: info
  integer*8 :: index
+ integer*2 :: compressed
+ integer*2 :: min_compressed
+ double precision, parameter :: undefined = 2.d0
 
  lwork = n_det_per_config_max**3
 
@@ -54,7 +58,12 @@ END_PROVIDER
 
  N_csf = 0
  index = 1_8
+ min_compressed = -32767_2
 
+ csf_compressed(:) = undefined
+ csf_compressed(0) = 0.d0
+ csf_compressed(huge(1_2)) = 1.d0
+ csf_compressed(-huge(1_2)) = -1.d0
  do i_cfg=1,N_configuration
 
    istart = psi_configuration_to_psi_det(1,i_cfg)
@@ -69,7 +78,7 @@ END_PROVIDER
    if (sze == 1) then
 
      N_csf = N_csf + 1
-     det_csf_transformation(index) = 1000000000
+     det_csf_transformation(index) = huge(1_2)
      psi_configuration_to_psi_csf(1,i_cfg) = N_csf
      psi_configuration_to_psi_csf(2,i_cfg) = N_csf
      psi_configuration_n_csf(i_cfg) = 1
@@ -95,13 +104,30 @@ END_PROVIDER
      psi_configuration_to_psi_csf(1,i_cfg) = N_csf+1
      i_csf = 0
 
-     s2mat(1:sze,1:sze) = s2mat(1:sze,1:sze) * 1.d9
-
      do j=1,sze
        if (dabs(eigenvalues(j) - expected_s2) < 0.1d0) then
          i_csf = i_csf + 1
-         det_csf_transformation(index:index+sze-1) = int(s2mat(1:sze,j),4)
-         index = index + int(sze,8)
+         do i=1,sze
+           compressed = int(s2mat(i,j)*dble(huge(1_2)), 2)
+           if ( (csf_compressed(compressed) /= undefined).and. &
+                (dabs(csf_compressed(compressed) - s2mat(i,j)) > 1.d-9) ) then
+             compressed = min_compressed
+             do while (compressed < huge(1_2))
+               if (csf_compressed(compressed) == undefined) exit
+               if (dabs(csf_compressed(compressed) - s2mat(i,j)) < 1.d-9) exit
+               compressed = compressed + 1_2
+             end do
+             if (compressed == huge(1_2) ) then
+               do compressed=-huge(1_2), huge(1_2)
+                 print *, compressed, csf_compressed(compressed)
+               enddo
+               call qp_bug(irp_here, 1_4*huge(1_2), 'Hash table full')
+             endif
+           endif
+           csf_compressed(compressed) = s2mat(i,j)
+           det_csf_transformation(index) = compressed
+           index = index + 1_8
+         end do
        end if
      enddo
      if (i_csf == 0) cycle
@@ -123,7 +149,8 @@ subroutine get_det_csf_transformation(matrix, dim, i_cfg)
   double precision, intent(out) :: matrix(dim,dim)
   integer, intent(in) :: dim, i_cfg
 
-  integer :: index, ncsf, ndet
+  integer*8 :: index
+  integer :: ncsf, ndet
   ndet = psi_configuration_n_det(i_cfg)
 
   if (ndet == 1) then
@@ -138,10 +165,13 @@ subroutine get_det_csf_transformation(matrix, dim, i_cfg)
   if (dim < ncsf) call qp_bug(irp_here, 2, 'dimensions too small')
 
   integer :: i, j
+  integer*2 :: compressed
   do j=1,ncsf
-    matrix(1:ndet,j) = dble(det_csf_transformation(index:index+ndet-1))
-    matrix(1:ndet,j) = matrix(1:ndet,j)*1.d-9
-    index = index+ndet
+    do i=1,ndet
+      compressed = det_csf_transformation(index)
+      matrix(i,j) = csf_compressed(compressed)
+      index = index+1_8
+    end do
   enddo
 
 end
@@ -185,15 +215,19 @@ subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_csf_out)
 
    else
 
-      integer :: index, ncsf, ndet
+      integer*8 :: index
+      integer :: ncsf, ndet
       index = det_csf_transformation_index(i_cfg)
       ncsf = psi_configuration_n_csf(i_cfg)
       ndet = psi_configuration_n_det(i_cfg)
 
+      integer*2 :: compressed
       do j=1,ncsf
-        matrix(1:ndet,j) = dble(det_csf_transformation(index:index+ndet-1))
-        matrix(1:ndet,j) = matrix(1:ndet,j)*1.d-9
-        index = index+ndet
+        do i=1,ndet
+          compressed = det_csf_transformation(index)
+          matrix(i,j) = csf_compressed(compressed)
+          index = index+1_8
+        end do
       enddo
 
       call dgemm('T','N', ncsf, N_st, ndet, 1.d0, &
@@ -238,15 +272,19 @@ subroutine convertWFfromCSFtoDET(N_st,psi_coef_csf_in, psi_coef_det_out)
 
    else
 
-      integer :: index, ncsf, ndet
+      integer*8 :: index
+      integer :: ncsf, ndet
       index = det_csf_transformation_index(i_cfg)
       ncsf = psi_configuration_n_csf(i_cfg)
       ndet = psi_configuration_n_det(i_cfg)
 
+      integer*2 :: compressed
       do j=1,ncsf
-        matrix(1:ndet,j) = dble(det_csf_transformation(index:index+ndet-1))
-        matrix(1:ndet,j) = matrix(1:ndet,j)*1.d-9
-        index = index+ndet
+        do i=1,ndet
+          compressed = det_csf_transformation(index)
+          matrix(i,j) = csf_compressed(compressed)
+          index = index+1_8
+        end do
       enddo
 
       call dgemm('N','N', ndet, N_st, ncsf, 1.d0, &
