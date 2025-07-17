@@ -774,47 +774,47 @@ subroutine export_trexio(update,full_path)
 
     icount = 0_8
     rc = trexio_read_csf_num_64(f(1), icount)
-    print *, icount
 
     ! Write CSF to determinant mapping
     allocate (dc_index(2,BUFSIZE))
     allocate (dc_value(BUFSIZE))
 
+    integer :: i_cfg, i_csf, i_det
+    double precision, allocatable :: tmp(:,:)
+    double precision :: c
+    allocate(tmp(n_det_per_config_max,n_det_per_config_max))
+
     icount = 0_8
     offset = 0_8
-    icsf = 0
-    do ii=1,N_configuration
-      startdet = psi_configuration_to_psi_det(1,ii)
-      enddet = psi_configuration_to_psi_det(2,ii)
 
-      s = 0
-      do k=1,N_int
-        if (psi_configuration(k,1,ii) == 0_bit_kind) cycle
-        s = s + popcnt(psi_configuration(k,1,ii))
-      enddo
-      bfIcfg = max(1,int(binom(s,(s+1)/2)-binom(s,((s+1)/2)+1)+0.5d0))
+    do i_cfg=1,N_configuration
 
-      do k=1,bfIcfg
-        icsf += 1
-        do j = startdet, enddet
-          if (DetToCSFTransformationMatrix(s,k,j-startdet+1) == 0.d0) cycle
-          icount += 1_8
-          idx = psi_configuration_to_psi_det_data(j)
-          call get_phase_qp_to_cfg(psi_det(1,1,idx), psi_det(1,2,idx), phasedet)
-          dc_index(1,icount) = icsf
-          dc_index(2,icount) = idx
-          dc_value(icount) = DetToCSFTransformationMatrix(s,k,j-startdet+1)*phasedet
-          if (icount == BUFSIZE) then
-            do i=1,N_states
-              rc = trexio_write_csf_det_coefficient(f(i), offset, icount, dc_index, dc_value)
-              call trexio_assert(rc, TREXIO_SUCCESS)
-              offset += icount
-              icount = 0_8
-            end do
-          end if
+      call get_det_csf_transformation(tmp, size(tmp,1), i_cfg)
+
+      do i_csf=psi_configuration_to_psi_csf(1,i_cfg), psi_configuration_to_psi_csf(2,i_cfg)
+
+        do i=psi_configuration_to_psi_det(1,i_cfg), psi_configuration_to_psi_det(2,i_cfg)
+          c = tmp(i - psi_configuration_to_psi_det(1,i_cfg)+1, &
+                  i_csf - psi_configuration_to_psi_csf(1,i_cfg)+1)
+          if (dabs(c) > 1.d-12) then
+            i_det = psi_configuration_to_psi_det_data(i)
+            icount += 1_8
+            dc_index(1,icount) = i_csf
+            dc_index(2,icount) = i_det
+            dc_value(icount) = c
+            if (icount == BUFSIZE) then
+              do ii=1,N_states
+                rc = trexio_write_csf_det_coefficient(f(ii), offset, icount, dc_index, &
+                            dc_value)
+                call trexio_assert(rc, TREXIO_SUCCESS)
+                offset += icount
+                icount = 0_8
+              end do
+            end if
+          endif
         end do
       end do
-    end do
+    enddo
 
     if (icount > 0_8) then
       do i=1,N_states

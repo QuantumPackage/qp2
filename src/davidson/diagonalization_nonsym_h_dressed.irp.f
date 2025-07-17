@@ -339,7 +339,7 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
       if(dressing_state > 0) then
 
         call dgemm( 'T', 'N', N_st, N_st_diag, sze, 1.d0                   &
-                  , psi_coef, size(psi_coef, 1), U(1, shift+1), size(U, 1) &
+                  , psi_coef, size(psi_coef, 1), U(:, shift+1:shift+N_st_diag), size(U, 1) &
                   , 0.d0, u_tmp, size(u_tmp, 1))
 
         do istate = 1, N_st_diag
@@ -405,15 +405,15 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
 
       call dgemm( 'N', 'N', sze, N_st_diag, shift2, 1.d0 &
                 , U, size(U, 1), y, size(y, 1)           &
-                , 0.d0, U(1,shift2+1), size(U, 1))
+                , 0.d0, U(:,shift2+1:shift2+N_st_diag), size(U, 1))
 
       do k = 1, N_st_diag
-        call normalize(U(1,shift2+k), sze)
+        call normalize(U(:,shift2+k), sze)
       enddo
 
       call dgemm( 'N', 'N', sze, N_st_diag, shift2, 1.d0 &
                 , W, size(W, 1), y, size(y, 1)           &
-                , 0.d0, W(1,shift2+1), size(W,1))
+                , 0.d0, W(:,shift2+1:shift2+N_st_diag), size(W,1))
 
       ! Compute residual vector and davidson step
       ! -----------------------------------------

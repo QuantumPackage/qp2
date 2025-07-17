@@ -169,7 +169,7 @@ BEGIN_PROVIDER [ real, cholesky_mo_transp_sp, (cholesky_mo_num, mo_num, mo_num) 
  do j=1,mo_num
   do i=1,mo_num
    do k=1,cholesky_mo_num
-      cholesky_mo_transp_sp(k,i,j) = cholesky_mo_transp(k,i,j)
+      cholesky_mo_transp_sp(k,i,j) = real(cholesky_mo_transp(k,i,j),4)
     enddo
   enddo
  enddo
