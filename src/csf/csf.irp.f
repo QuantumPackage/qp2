@@ -18,25 +18,21 @@ BEGIN_PROVIDER [ integer*8, det_csf_transformation_size ]
 
  enddo
 
- call write_time(6)
- double precision :: memory
- memory = dble(det_csf_transformation_size*8) / (1024.d0**3)
- call write_double(6, memory, 'Det-CSF transformation matrix (GB)')
-
 END_PROVIDER
 
 
  BEGIN_PROVIDER [ integer, N_csf ]
 &BEGIN_PROVIDER [ integer, psi_configuration_to_psi_csf, (2,N_configuration) ]
 &BEGIN_PROVIDER [ integer, psi_configuration_n_csf, (N_configuration) ]
-&BEGIN_PROVIDER [ double precision, det_csf_transformation, (det_csf_transformation_size)]
+&BEGIN_PROVIDER [ integer, det_csf_transformation, (det_csf_transformation_size)]
 &BEGIN_PROVIDER [ integer*8, det_csf_transformation_index, (N_configuration) ]
  implicit none
  BEGIN_DOC
  ! First index is the CSF, second is index of the determinant in psi_det
  ! det_csf_transformation: Transformation matrix between determinants and CSF. First index is determinant, second is CSF.
- ! det_csf_transformation contains all transformation matrices concatenated in
- ! a flat 1D array to compress the storage. The address of the matrix is obtained from
+ ! det_csf_transformation contains all transformation matrices. The numbers are
+ ! converted into fixed-point precision (9 digits) and concatenated in ! a flat
+ ! 1D array to compress the storage. The address of the matrix is obtained from
  ! det_csf_transformation
  ! To get the transformation, call get_det_csf_transformation
  END_DOC
@@ -73,7 +69,7 @@ END_PROVIDER
    if (sze == 1) then
 
      N_csf = N_csf + 1
-     det_csf_transformation(index) = 1.d0
+     det_csf_transformation(index) = 1000000000
      psi_configuration_to_psi_csf(1,i_cfg) = N_csf
      psi_configuration_to_psi_csf(2,i_cfg) = N_csf
      psi_configuration_n_csf(i_cfg) = 1
@@ -98,10 +94,13 @@ END_PROVIDER
 
      psi_configuration_to_psi_csf(1,i_cfg) = N_csf+1
      i_csf = 0
+
+     s2mat(1:sze,1:sze) = s2mat(1:sze,1:sze) * 1.d9
+
      do j=1,sze
        if (dabs(eigenvalues(j) - expected_s2) < 0.1d0) then
          i_csf = i_csf + 1
-         det_csf_transformation(index:index+sze-1) = s2mat(1:sze,j)
+         det_csf_transformation(index:index+sze-1) = int(s2mat(1:sze,j),4)
          index = index + int(sze,8)
        end if
      enddo
@@ -140,8 +139,9 @@ subroutine get_det_csf_transformation(matrix, dim, i_cfg)
 
   integer :: i, j
   do j=1,ncsf
-    matrix(1:ndet,j) = det_csf_transformation(index:index+ndet-1)
-    index = index+1
+    matrix(1:ndet,j) = dble(det_csf_transformation(index:index+ndet-1))
+    matrix(1:ndet,j) = matrix(1:ndet,j)*1.d-9
+    index = index+ndet
   enddo
 
 end
@@ -155,12 +155,13 @@ subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_csf_out)
  double precision, intent(in)   :: psi_coef_det_in(N_det,N_st)
  double precision, intent(out)  :: psi_coef_csf_out(N_csf,N_st)
 
- integer :: i_state, i, i_csf, i_cfg
+ integer :: i_state, i, i_csf, i_cfg, j
  integer :: startdet, enddet, i_det, j_det
 
- double precision, allocatable :: coef(:,:)
+ double precision, allocatable :: coef(:,:), matrix(:,:)
 
  allocate (coef(n_det_per_config_max,N_st))
+ allocate (matrix(n_det_per_config_max,n_det_per_config_max))
 
  do i_cfg=1,N_configuration
 
@@ -189,8 +190,14 @@ subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_csf_out)
       ncsf = psi_configuration_n_csf(i_cfg)
       ndet = psi_configuration_n_det(i_cfg)
 
+      do j=1,ncsf
+        matrix(1:ndet,j) = dble(det_csf_transformation(index:index+ndet-1))
+        matrix(1:ndet,j) = matrix(1:ndet,j)*1.d-9
+        index = index+ndet
+      enddo
+
       call dgemm('T','N', ncsf, N_st, ndet, 1.d0, &
-                det_csf_transformation(index), ndet, &
+                matrix, size(matrix,1), &
                 coef, size(coef,1), &
                 0.d0, psi_coef_csf_out( psi_configuration_to_psi_csf(1,i_cfg), 1), &
                 size(psi_coef_csf_out,1))
@@ -211,12 +218,13 @@ subroutine convertWFfromCSFtoDET(N_st,psi_coef_csf_in, psi_coef_det_out)
  double precision, intent(in)   :: psi_coef_csf_in(N_csf,N_st)
  double precision, intent(out)  :: psi_coef_det_out(N_det,N_st)
 
- integer :: i_state, i, i_csf, i_cfg
+ integer :: i_state, i, i_csf, i_cfg, j
  integer :: startdet, enddet, i_det, j_det
 
- double precision, allocatable :: coef(:,:)
+ double precision, allocatable :: coef(:,:), matrix(:,:)
 
  allocate (coef(n_det_per_config_max,N_st))
+ allocate (matrix(n_det_per_config_max,n_det_per_config_max))
 
  do i_cfg=1,N_configuration
 
@@ -235,8 +243,14 @@ subroutine convertWFfromCSFtoDET(N_st,psi_coef_csf_in, psi_coef_det_out)
       ncsf = psi_configuration_n_csf(i_cfg)
       ndet = psi_configuration_n_det(i_cfg)
 
+      do j=1,ncsf
+        matrix(1:ndet,j) = dble(det_csf_transformation(index:index+ndet-1))
+        matrix(1:ndet,j) = matrix(1:ndet,j)*1.d-9
+        index = index+ndet
+      enddo
+
       call dgemm('N','N', ndet, N_st, ncsf, 1.d0, &
-                det_csf_transformation(index), ndet, &
+                matrix, size(matrix,1), &
                 psi_coef_csf_in( psi_configuration_to_psi_csf(1,i_cfg), 1), &
                 size(psi_coef_csf_in,1), &
                 0.d0, coef, size(coef,1))
