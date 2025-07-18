@@ -148,10 +148,10 @@ END_PROVIDER
 
 
 
-subroutine get_det_csf_transformation(matrix, dim1, i_cfg)
+subroutine get_det_csf_transformation(matrix, sze, i_cfg)
   implicit none
-  double precision, intent(out) :: matrix(dim1,dim1)
-  integer, intent(in) :: dim1, i_cfg
+  double precision, intent(out) :: matrix(sze,sze)
+  integer, intent(in) :: sze, i_cfg
 
   integer :: ncsf, ndet
   ndet = psi_configuration_n_det(i_cfg)
@@ -163,8 +163,8 @@ subroutine get_det_csf_transformation(matrix, dim1, i_cfg)
 
   ncsf = psi_configuration_n_csf(i_cfg)
 
-  if (dim1 < ndet) call qp_bug(irp_here, 1, 'dimensions too small')
-  if (dim1 < ncsf) call qp_bug(irp_here, 2, 'dimensions too small')
+  if (sze< ndet) call qp_bug(irp_here, 1, 'dimensions too small')
+  if (sze< ncsf) call qp_bug(irp_here, 2, 'dimensions too small')
 
   integer :: i, j, i_csf
   integer :: index
