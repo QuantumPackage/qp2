@@ -1,69 +1,52 @@
-BEGIN_PROVIDER [ integer*8, det_csf_transformation_size ]
+BEGIN_PROVIDER [ integer, csf_unique_vector_value_size ]
  implicit none
  BEGIN_DOC
- ! Size of the det-csf transformation matrix
+ ! Is reset in the provider of csf_unique_vector_value
  END_DOC
-
- integer :: i_cfg
- integer*8 :: istart, iend, sze
-
- det_csf_transformation_size = 0_8
-
- do i_cfg=1,N_configuration
-
-   istart = psi_configuration_to_psi_det(1,i_cfg)
-   iend   = psi_configuration_to_psi_det(2,i_cfg)
-   sze    = iend-istart+1
-   det_csf_transformation_size = det_csf_transformation_size  + sze*sze
-
- enddo
-
+ csf_unique_vector_value_size = 10
 END_PROVIDER
 
 
  BEGIN_PROVIDER [ integer, N_csf ]
 &BEGIN_PROVIDER [ integer, psi_configuration_to_psi_csf, (2,N_configuration) ]
 &BEGIN_PROVIDER [ integer, psi_configuration_n_csf, (N_configuration) ]
-&BEGIN_PROVIDER [ integer*2, det_csf_transformation, (det_csf_transformation_size)]
-&BEGIN_PROVIDER [ double precision, csf_compressed, (-32768:32768) ]
-&BEGIN_PROVIDER [ integer*8, det_csf_transformation_index, (N_configuration) ]
+&BEGIN_PROVIDER [ integer, csf_unique_vector_index, (N_det) ]
+&BEGIN_PROVIDER [ double precision, csf_unique_vector_value, (csf_unique_vector_value_size) ]
  implicit none
  BEGIN_DOC
- ! First index is the CSF, second is index of the determinant in psi_det
- ! det_csf_transformation: Transformation matrix between determinants and CSF. First index is determinant, second is CSF.
- ! det_csf_transformation contains all transformation matrices. The numbers are
- ! converted into fixed-point precision (9 digits) and concatenated in ! a flat
- ! 1D array to compress the storage. The address of the matrix is obtained from
- ! det_csf_transformation
- ! To get the transformation, call get_det_csf_transformation
+ ! To get the det-csf transformation matrix, call get_det_csf_transformation
  END_DOC
 
  integer :: i_det, j_det
- integer :: i_cfg, i_csf, i, j, lwork
+ integer :: i_cfg, i_csf, i, j, k, lwork
  integer :: sze, istart, iend
  double precision, allocatable :: s2mat(:,:)
  double precision :: sij
 
  double precision, allocatable :: eigenvalues(:), work(:)
  integer :: info
- integer*8 :: index
+ integer :: index, index_max, n_unique
  integer*2 :: compressed
- integer*2 :: min_compressed
  double precision, parameter :: undefined = 2.d0
 
+ double precision, allocatable :: resize_array(:)
+ logical :: found
+ integer, allocatable :: unique_index(:)
+
+ PROVIDE expected_s2 N_int psi_det 
  lwork = n_det_per_config_max**3
 
  allocate(eigenvalues(n_det_per_config_max), work(lwork))
  allocate(s2mat(n_det_per_config_max,n_det_per_config_max))
+ allocate(unique_index(N_det))
 
  N_csf = 0
- index = 1_8
- min_compressed = -32767_2
 
- csf_compressed(:) = undefined
- csf_compressed(0) = 0.d0
- csf_compressed(huge(1_2)) = 1.d0
- csf_compressed(-huge(1_2)) = -1.d0
+ n_unique = 1
+ unique_index(1) = 1
+ csf_unique_vector_value(1) = 1.d0
+ index_max = 2
+
  do i_cfg=1,N_configuration
 
    istart = psi_configuration_to_psi_det(1,i_cfg)
@@ -74,15 +57,13 @@ END_PROVIDER
     call qp_bug(irp_here, -1, 'Configuration has more determinants than allowed by n_det_per_config_max')
    endif
 
-   det_csf_transformation_index(i_cfg) = index
    if (sze == 1) then
 
      N_csf = N_csf + 1
-     det_csf_transformation(index) = huge(1_2)
+     csf_unique_vector_index(N_csf) = 1
      psi_configuration_to_psi_csf(1,i_cfg) = N_csf
      psi_configuration_to_psi_csf(2,i_cfg) = N_csf
      psi_configuration_n_csf(i_cfg) = 1
-     index = index + 1_8
 
    else
 
@@ -107,31 +88,51 @@ END_PROVIDER
      do j=1,sze
        if (dabs(eigenvalues(j) - expected_s2) < 0.1d0) then
          i_csf = i_csf + 1
-         do i=1,sze
-           compressed = int(s2mat(i,j)*dble(huge(1_2)), 2)
-           if ( (csf_compressed(compressed) /= undefined).and. &
-                (dabs(csf_compressed(compressed) - s2mat(i,j)) > 1.d-9) ) then
-             compressed = min_compressed
-             do while (compressed < huge(1_2))
-               if (csf_compressed(compressed) == undefined) exit
-               if (dabs(csf_compressed(compressed) - s2mat(i,j)) < 1.d-9) exit
-               compressed = compressed + 1_2
-             end do
-             if (compressed == huge(1_2) ) then
-               do compressed=-huge(1_2), huge(1_2)
-                 print *, compressed, csf_compressed(compressed)
-               enddo
-               call qp_bug(irp_here, 1_4*huge(1_2), 'Hash table full')
-             endif
-           endif
-           csf_compressed(compressed) = s2mat(i,j)
-           det_csf_transformation(index) = compressed
-           index = index + 1_8
+         N_csf = N_csf + 1
+
+         found = .False.
+         do k=2,n_unique
+           index = unique_index(k)
+           if (dabs(s2mat(1,j)-csf_unique_vector_value(index)) < 1.d-9) then
+             ! We have found that the 1st component matches, we now check the dot product
+             ! is 1.
+             double precision :: dot
+             dot = 0.d0
+             do i=1,sze
+               dot = dot + s2mat(i,j)*csf_unique_vector_value(index+i-1)
+             enddo
+             if (dabs(1.d0-dot) < 1.d-9) then
+               csf_unique_vector_index(N_csf) = index
+               found = .True.
+               exit
+             end if
+           end if
          end do
+
+         if (.not.found) then
+
+           ! Reallocate csf_unique_vector_value 2x larger if needed
+           if (index_max+sze > csf_unique_vector_value_size) then
+             allocate(resize_array(csf_unique_vector_value_size))
+             resize_array(:) = csf_unique_vector_value(:)
+             deallocate(csf_unique_vector_value)
+             allocate(csf_unique_vector_value(2*csf_unique_vector_value_size))
+             csf_unique_vector_value(:csf_unique_vector_value_size) = resize_array(:)
+             deallocate(resize_array)
+             csf_unique_vector_value_size *= 2
+!             SOFT_TOUCH csf_unique_vector_value_size
+           endif
+
+           n_unique = n_unique+1
+           csf_unique_vector_index(N_csf) = index_max
+           unique_index(n_unique) = index_max
+           csf_unique_vector_value(index_max:index_max+sze-1) = s2mat(1:sze,j)
+           index_max = index_max + sze
+         end if
+
        end if
      enddo
      if (i_csf == 0) cycle
-     N_csf = N_csf + i_csf
      psi_configuration_n_csf(i_cfg) = i_csf
      psi_configuration_to_psi_csf(2,i_cfg) = N_csf
 
@@ -141,15 +142,17 @@ END_PROVIDER
 
  deallocate(s2mat, work, eigenvalues)
 
-
 END_PROVIDER
+
+
+
+
 
 subroutine get_det_csf_transformation(matrix, dim, i_cfg)
   implicit none
   double precision, intent(out) :: matrix(dim,dim)
   integer, intent(in) :: dim, i_cfg
 
-  integer*8 :: index
   integer :: ncsf, ndet
   ndet = psi_configuration_n_det(i_cfg)
 
@@ -158,23 +161,23 @@ subroutine get_det_csf_transformation(matrix, dim, i_cfg)
     return
   endif
 
-  index = det_csf_transformation_index(i_cfg)
   ncsf = psi_configuration_n_csf(i_cfg)
 
   if (dim < ndet) call qp_bug(irp_here, 1, 'dimensions too small')
   if (dim < ncsf) call qp_bug(irp_here, 2, 'dimensions too small')
 
-  integer :: i, j
-  integer*2 :: compressed
+  integer :: i, j, i_csf
+  integer :: index
+  i_csf = psi_configuration_to_psi_csf(1,i_cfg)
   do j=1,ncsf
-    do i=1,ndet
-      compressed = det_csf_transformation(index)
-      matrix(i,j) = csf_compressed(compressed)
-      index = index+1_8
-    end do
+    i = csf_unique_vector_index(i_csf+j-1)
+    matrix(1:ndet,j) = csf_unique_vector_value(i:i+ndet-1)
   enddo
 
 end
+
+
+
 
 subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_csf_out)
  implicit none
@@ -215,20 +218,11 @@ subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_csf_out)
 
    else
 
-      integer*8 :: index
       integer :: ncsf, ndet
-      index = det_csf_transformation_index(i_cfg)
       ncsf = psi_configuration_n_csf(i_cfg)
       ndet = psi_configuration_n_det(i_cfg)
 
-      integer*2 :: compressed
-      do j=1,ncsf
-        do i=1,ndet
-          compressed = det_csf_transformation(index)
-          matrix(i,j) = csf_compressed(compressed)
-          index = index+1_8
-        end do
-      enddo
+      call get_det_csf_transformation(matrix, size(matrix,1), i_cfg)
 
       call dgemm('T','N', ncsf, N_st, ndet, 1.d0, &
                 matrix, size(matrix,1), &
@@ -272,20 +266,11 @@ subroutine convertWFfromCSFtoDET(N_st,psi_coef_csf_in, psi_coef_det_out)
 
    else
 
-      integer*8 :: index
       integer :: ncsf, ndet
-      index = det_csf_transformation_index(i_cfg)
       ncsf = psi_configuration_n_csf(i_cfg)
       ndet = psi_configuration_n_det(i_cfg)
 
-      integer*2 :: compressed
-      do j=1,ncsf
-        do i=1,ndet
-          compressed = det_csf_transformation(index)
-          matrix(i,j) = csf_compressed(compressed)
-          index = index+1_8
-        end do
-      enddo
+      call get_det_csf_transformation(matrix, size(matrix,1), i_cfg)
 
       call dgemm('N','N', ndet, N_st, ncsf, 1.d0, &
                 matrix, size(matrix,1), &
