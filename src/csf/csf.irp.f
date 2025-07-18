@@ -150,8 +150,8 @@ END_PROVIDER
 
 subroutine get_det_csf_transformation(matrix, sze, i_cfg)
   implicit none
-  double precision, intent(out) :: matrix(sze,sze)
   integer, intent(in) :: sze, i_cfg
+  double precision, intent(out) :: matrix(sze,sze)
 
   integer :: ncsf, ndet
   ndet = psi_configuration_n_det(i_cfg)
