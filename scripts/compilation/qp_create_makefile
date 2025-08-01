@@ -296,7 +296,7 @@ def create_main_makefile(pwd_config_file, l_all_module):
             continue
             
         l_string.extend([
-            f"module_{module.rel}: {comp_path(module.abs)}/{module.rel}.bin",
+            f"module_{module.rel}: {comp_path(module.abs)}.bin",
             ""
         ])
     

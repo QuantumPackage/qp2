@@ -52,8 +52,8 @@ modules: module_gpu_arch module_ao_basis module_ao_one_e_ints module_ao_two_e_in
 
 # Rule to build module binaries
 %.bin: %/IRPF90_temp/Makefile $(EZFIO_LIB)
-	@echo 'Building binaries for $(dir $<)'
-	@cd $(dir $<)/IRPF90_temp && $(MAKE) && \
+	@echo 'Building binaries for $*'
+	@cd $*/IRPF90_temp && $(MAKE) && \
 	for i in $$(find . -type f -executable); do [ -x $$i ] && touch $$i; done
 
 # EZFIO library
@@ -61,147 +61,147 @@ $(EZFIO_LIB):
 	@echo 'Building EZFIO library'
 	@cd $(QP_ROOT)/external/ezfio && $(MAKE)
 
-module_gpu_arch: $(QP_ROOT)/plugins/local/gpu_x86/gpu_arch.bin
+module_gpu_arch: $(QP_ROOT)/plugins/local/gpu_x86.bin
 
-module_ao_basis: $(QP_ROOT)/src/ao_basis/ao_basis.bin
+module_ao_basis: $(QP_ROOT)/src/ao_basis.bin
 
-module_ao_one_e_ints: $(QP_ROOT)/src/ao_one_e_ints/ao_one_e_ints.bin
+module_ao_one_e_ints: $(QP_ROOT)/src/ao_one_e_ints.bin
 
-module_ao_two_e_ints: $(QP_ROOT)/src/ao_two_e_ints/ao_two_e_ints.bin
+module_ao_two_e_ints: $(QP_ROOT)/src/ao_two_e_ints.bin
 
-module_aux_quantities: $(QP_ROOT)/src/aux_quantities/aux_quantities.bin
+module_aux_quantities: $(QP_ROOT)/src/aux_quantities.bin
 
-module_basis: $(QP_ROOT)/src/basis/basis.bin
+module_basis: $(QP_ROOT)/src/basis.bin
 
-module_becke_numerical_grid: $(QP_ROOT)/src/becke_numerical_grid/becke_numerical_grid.bin
+module_becke_numerical_grid: $(QP_ROOT)/src/becke_numerical_grid.bin
 
-module_bitmask: $(QP_ROOT)/src/bitmask/bitmask.bin
+module_bitmask: $(QP_ROOT)/src/bitmask.bin
 
-module_cas_based_on_top: $(QP_ROOT)/src/cas_based_on_top/cas_based_on_top.bin
+module_cas_based_on_top: $(QP_ROOT)/src/cas_based_on_top.bin
 
-module_casscf_cipsi: $(QP_ROOT)/src/casscf_cipsi/casscf_cipsi.bin
+module_casscf_cipsi: $(QP_ROOT)/src/casscf_cipsi.bin
 
-module_ccsd: $(QP_ROOT)/src/ccsd/ccsd.bin
+module_ccsd: $(QP_ROOT)/src/ccsd.bin
 
-module_cipsi: $(QP_ROOT)/src/cipsi/cipsi.bin
+module_cipsi: $(QP_ROOT)/src/cipsi.bin
 
-module_cipsi_utils: $(QP_ROOT)/src/cipsi_utils/cipsi_utils.bin
+module_cipsi_utils: $(QP_ROOT)/src/cipsi_utils.bin
 
-module_cis: $(QP_ROOT)/src/cis/cis.bin
+module_cis: $(QP_ROOT)/src/cis.bin
 
-module_cisd: $(QP_ROOT)/src/cisd/cisd.bin
+module_cisd: $(QP_ROOT)/src/cisd.bin
 
-module_csf: $(QP_ROOT)/src/csf/csf.bin
+module_csf: $(QP_ROOT)/src/csf.bin
 
-module_dav_general_mat: $(QP_ROOT)/src/dav_general_mat/dav_general_mat.bin
+module_dav_general_mat: $(QP_ROOT)/src/dav_general_mat.bin
 
-module_davidson: $(QP_ROOT)/src/davidson/davidson.bin
+module_davidson: $(QP_ROOT)/src/davidson.bin
 
-module_davidson_dressed: $(QP_ROOT)/src/davidson_dressed/davidson_dressed.bin
+module_davidson_dressed: $(QP_ROOT)/src/davidson_dressed.bin
 
-module_davidson_keywords: $(QP_ROOT)/src/davidson_keywords/davidson_keywords.bin
+module_davidson_keywords: $(QP_ROOT)/src/davidson_keywords.bin
 
-module_davidson_undressed: $(QP_ROOT)/src/davidson_undressed/davidson_undressed.bin
+module_davidson_undressed: $(QP_ROOT)/src/davidson_undressed.bin
 
-module_density_for_dft: $(QP_ROOT)/src/density_for_dft/density_for_dft.bin
+module_density_for_dft: $(QP_ROOT)/src/density_for_dft.bin
 
-module_determinants: $(QP_ROOT)/src/determinants/determinants.bin
+module_determinants: $(QP_ROOT)/src/determinants.bin
 
-module_dft_keywords: $(QP_ROOT)/src/dft_keywords/dft_keywords.bin
+module_dft_keywords: $(QP_ROOT)/src/dft_keywords.bin
 
-module_dft_one_e: $(QP_ROOT)/src/dft_one_e/dft_one_e.bin
+module_dft_one_e: $(QP_ROOT)/src/dft_one_e.bin
 
-module_dft_utils_func: $(QP_ROOT)/src/dft_utils_func/dft_utils_func.bin
+module_dft_utils_func: $(QP_ROOT)/src/dft_utils_func.bin
 
-module_dft_utils_in_r: $(QP_ROOT)/src/dft_utils_in_r/dft_utils_in_r.bin
+module_dft_utils_in_r: $(QP_ROOT)/src/dft_utils_in_r.bin
 
-module_dressing: $(QP_ROOT)/src/dressing/dressing.bin
+module_dressing: $(QP_ROOT)/src/dressing.bin
 
-module_electrons: $(QP_ROOT)/src/electrons/electrons.bin
+module_electrons: $(QP_ROOT)/src/electrons.bin
 
-module_ezfio_files: $(QP_ROOT)/src/ezfio_files/ezfio_files.bin
+module_ezfio_files: $(QP_ROOT)/src/ezfio_files.bin
 
-module_fci: $(QP_ROOT)/src/fci/fci.bin
+module_fci: $(QP_ROOT)/src/fci.bin
 
-module_functionals: $(QP_ROOT)/src/functionals/functionals.bin
+module_functionals: $(QP_ROOT)/src/functionals.bin
 
-module_generators_cas: $(QP_ROOT)/src/generators_cas/generators_cas.bin
+module_generators_cas: $(QP_ROOT)/src/generators_cas.bin
 
-module_generators_full: $(QP_ROOT)/src/generators_full/generators_full.bin
+module_generators_full: $(QP_ROOT)/src/generators_full.bin
 
-module_generators_full_tc: $(QP_ROOT)/src/generators_full_tc/generators_full_tc.bin
+module_generators_full_tc: $(QP_ROOT)/src/generators_full_tc.bin
 
-module_gpu: $(QP_ROOT)/src/gpu/gpu.bin
+module_gpu: $(QP_ROOT)/src/gpu.bin
 
-module_hamiltonian: $(QP_ROOT)/src/hamiltonian/hamiltonian.bin
+module_hamiltonian: $(QP_ROOT)/src/hamiltonian.bin
 
-module_hartree_fock: $(QP_ROOT)/src/hartree_fock/hartree_fock.bin
+module_hartree_fock: $(QP_ROOT)/src/hartree_fock.bin
 
-module_iterations: $(QP_ROOT)/src/iterations/iterations.bin
+module_iterations: $(QP_ROOT)/src/iterations.bin
 
-module_json: $(QP_ROOT)/src/json/json.bin
+module_json: $(QP_ROOT)/src/json.bin
 
-module_kohn_sham: $(QP_ROOT)/src/kohn_sham/kohn_sham.bin
+module_kohn_sham: $(QP_ROOT)/src/kohn_sham.bin
 
-module_kohn_sham_rs: $(QP_ROOT)/src/kohn_sham_rs/kohn_sham_rs.bin
+module_kohn_sham_rs: $(QP_ROOT)/src/kohn_sham_rs.bin
 
-module_mo_basis: $(QP_ROOT)/src/mo_basis/mo_basis.bin
+module_mo_basis: $(QP_ROOT)/src/mo_basis.bin
 
-module_mo_guess: $(QP_ROOT)/src/mo_guess/mo_guess.bin
+module_mo_guess: $(QP_ROOT)/src/mo_guess.bin
 
-module_mo_one_e_ints: $(QP_ROOT)/src/mo_one_e_ints/mo_one_e_ints.bin
+module_mo_one_e_ints: $(QP_ROOT)/src/mo_one_e_ints.bin
 
-module_mo_optimization: $(QP_ROOT)/src/mo_optimization/mo_optimization.bin
+module_mo_optimization: $(QP_ROOT)/src/mo_optimization.bin
 
-module_mo_optimization_utils: $(QP_ROOT)/src/mo_optimization_utils/mo_optimization_utils.bin
+module_mo_optimization_utils: $(QP_ROOT)/src/mo_optimization_utils.bin
 
-module_mo_two_e_ints: $(QP_ROOT)/src/mo_two_e_ints/mo_two_e_ints.bin
+module_mo_two_e_ints: $(QP_ROOT)/src/mo_two_e_ints.bin
 
-module_mol_properties: $(QP_ROOT)/src/mol_properties/mol_properties.bin
+module_mol_properties: $(QP_ROOT)/src/mol_properties.bin
 
-module_mp2: $(QP_ROOT)/src/mp2/mp2.bin
+module_mp2: $(QP_ROOT)/src/mp2.bin
 
-module_mpi: $(QP_ROOT)/src/mpi/mpi.bin
+module_mpi: $(QP_ROOT)/src/mpi.bin
 
-module_mu_of_r: $(QP_ROOT)/src/mu_of_r/mu_of_r.bin
+module_mu_of_r: $(QP_ROOT)/src/mu_of_r.bin
 
-module_nuclei: $(QP_ROOT)/src/nuclei/nuclei.bin
+module_nuclei: $(QP_ROOT)/src/nuclei.bin
 
-module_perturbation: $(QP_ROOT)/src/perturbation/perturbation.bin
+module_perturbation: $(QP_ROOT)/src/perturbation.bin
 
-module_pseudo: $(QP_ROOT)/src/pseudo/pseudo.bin
+module_pseudo: $(QP_ROOT)/src/pseudo.bin
 
-module_psiref_cas: $(QP_ROOT)/src/psiref_cas/psiref_cas.bin
+module_psiref_cas: $(QP_ROOT)/src/psiref_cas.bin
 
-module_psiref_utils: $(QP_ROOT)/src/psiref_utils/psiref_utils.bin
+module_psiref_utils: $(QP_ROOT)/src/psiref_utils.bin
 
-module_scf_utils: $(QP_ROOT)/src/scf_utils/scf_utils.bin
+module_scf_utils: $(QP_ROOT)/src/scf_utils.bin
 
-module_selectors_cassd: $(QP_ROOT)/src/selectors_cassd/selectors_cassd.bin
+module_selectors_cassd: $(QP_ROOT)/src/selectors_cassd.bin
 
-module_selectors_full: $(QP_ROOT)/src/selectors_full/selectors_full.bin
+module_selectors_full: $(QP_ROOT)/src/selectors_full.bin
 
-module_selectors_utils: $(QP_ROOT)/src/selectors_utils/selectors_utils.bin
+module_selectors_utils: $(QP_ROOT)/src/selectors_utils.bin
 
-module_single_ref_method: $(QP_ROOT)/src/single_ref_method/single_ref_method.bin
+module_single_ref_method: $(QP_ROOT)/src/single_ref_method.bin
 
-module_tools: $(QP_ROOT)/src/tools/tools.bin
+module_tools: $(QP_ROOT)/src/tools.bin
 
-module_trexio: $(QP_ROOT)/src/trexio/trexio.bin
+module_trexio: $(QP_ROOT)/src/trexio.bin
 
-module_two_body_rdm: $(QP_ROOT)/src/two_body_rdm/two_body_rdm.bin
+module_two_body_rdm: $(QP_ROOT)/src/two_body_rdm.bin
 
-module_two_rdm_routines: $(QP_ROOT)/src/two_rdm_routines/two_rdm_routines.bin
+module_two_rdm_routines: $(QP_ROOT)/src/two_rdm_routines.bin
 
-module_utils: $(QP_ROOT)/src/utils/utils.bin
+module_utils: $(QP_ROOT)/src/utils.bin
 
-module_utils_cc: $(QP_ROOT)/src/utils_cc/utils_cc.bin
+module_utils_cc: $(QP_ROOT)/src/utils_cc.bin
 
-module_utils_periodic: $(QP_ROOT)/src/utils_periodic/utils_periodic.bin
+module_utils_periodic: $(QP_ROOT)/src/utils_periodic.bin
 
-module_utils_trust_region: $(QP_ROOT)/src/utils_trust_region/utils_trust_region.bin
+module_utils_trust_region: $(QP_ROOT)/src/utils_trust_region.bin
 
-module_zmq: $(QP_ROOT)/src/zmq/zmq.bin
+module_zmq: $(QP_ROOT)/src/zmq.bin
 
 clean:
 	@echo 'Cleaning build files'
