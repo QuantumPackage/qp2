@@ -58,6 +58,7 @@ END_PROVIDER
    integer                        :: i,j,k,m,p,q, dj, p2, q2, ii, jj
    integer*8                      :: i8, j8, p8, qj8, rank_max, np8
    integer                        :: N, np, nq
+   logical                        :: rank_max_reached
 
    double precision               :: Dmax, Dmin, Qmax, f
    double precision, external     :: get_ao_two_e_integral
@@ -189,13 +190,14 @@ END_PROVIDER
 
      ! 4.
      i = 0
+     rank_max_reached = .False.
 
      mem = memory_of_double(np)                & ! Delta(np,nq)
          + (np+1)*memory_of_double(block_size)   ! Ltmp_p(np,block_size) + Ltmp_q(nq,block_size)
 
 !     call check_mem(mem)
      ! 5.
-     do while ( (Dmax > tau).and.(np > 0) )
+     do while ( (Dmax > tau).and.(np > 0).and.(.not.rank_max_reached) )
        ! a.
        i = i+1
 
@@ -317,8 +319,9 @@ END_PROVIDER
 
          ! i.
          rank = N+j
-         if (rank == rank_max) then
+         if (rank >= rank_max) then
            print *, 'cholesky: rank_max reached'
+           rank_max_reached = .True.
            exit
          endif
 
