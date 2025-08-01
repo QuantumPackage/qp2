@@ -1,0 +1,429 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Usage: qp_create_makefile create <config_file> (--development | --production)
+       qp_create_makefile update
+
+"""
+
+import os
+import sys
+import glob
+from os.path import join
+from collections import namedtuple
+from collections import defaultdict
+import pickle
+
+try:
+    from module_handler import ModuleHandler
+    from read_compilation_cfg import get_compilation_option
+    from docopt import docopt
+except ImportError:
+    f = os.path.realpath(os.path.join(os.path.dirname(__file__),
+                                      "..",
+                                      "..",
+                                      "quantum_package.rc"))
+
+    print("\n".join(["", "Error:", "source %s" % f, ""]))
+    raise
+
+# Compress path
+def comp_path(path):
+    return path.replace(QP_ROOT,"$(QP_ROOT)")
+
+from qp_path import QP_ROOT, QP_SRC, QP_EZFIO
+
+LIB = " -lz"
+EZFIO_LIB = join("$(QP_ROOT)", "lib", "libezfio_irp.a")
+ROOT_BUILD_MAKEFILE = join("$(QP_ROOT)", "config", "Makefile")
+ROOT_BUILD_MAKEFILE_EXP =  join(QP_ROOT, "config", "Makefile")
+ROOT_BUILD_MAKEFILE_EXP_tmp =  join(QP_ROOT, "config", "Makefile.tmp")
+
+header = r"""#
+#  _______                     _____
+#  __  __ \___  _______ _________  /____  ________ ___
+#  _  / / /  / / /  __ `/_  __ \  __/  / / /_  __ `__ \
+#  / /_/ // /_/ // /_/ /_  / / / /_ / /_/ /_  / / / / /
+#  \___\_\\__,_/ \__,_/ /_/ /_/\__/ \__,_/ /_/ /_/ /_/
+#
+#               ________             ______
+#               ___  __ \_____ _________  /_______ _______ _____
+#               __  /_/ /  __ `/  ___/_  //_/  __ `/_  __ `/  _ \
+#               _  ____// /_/ // /__ _  ,<  / /_/ /_  /_/ //  __/
+#               /_/     \__,_/ \___/ /_/|_| \__,_/ _\__, / \___/
+#                                                  /____/
+#
+# https://github.com/QuantumPackage/qp2,
+#
+# Generated automatically by {0}
+#
+#
+""".format(__file__).replace(QP_ROOT,"$(QP_ROOT)")
+
+header += """
+QP_ROOT = {0}
+
+""".format(QP_ROOT)
+
+# Named tuples for data structures (same as ninja version)
+Path = namedtuple('Path', ['abs', 'rel'])
+EZ_config_path = namedtuple('EZ_config', ['path_in_module', 'path_in_ezfio'])
+EZ_handler = namedtuple('EZ_handler', ['ez_module', 'ez_cfg', 'ez_interface',
+                                       'ez_config'])
+Sym_link = namedtuple('Sym_link', ['source', 'destination'])
+module_instance = ModuleHandler()
+
+def real_join(*args):
+    return os.path.realpath(join(*args))
+
+def make_create_env_variable(pwd_config_file):
+    """
+    Return makefile variables with the env variable expanded
+    FC, FCFLAGS, IRPF90, IRPF90_FLAGS
+    """
+    l_string = ["# Build configuration", ""]
+
+    for flag in ["FC", "FCFLAGS", "IRPF90", "IRPF90_FLAGS"]:
+        str_ = "{0} = {1}".format(flag, get_compilation_option(pwd_config_file,
+                                                               flag))
+        
+        # Replace --ninja with --make for IRPF90_FLAGS
+        if flag == "IRPF90_FLAGS":
+            str_ = str_.replace("--ninja", "--make")
+        
+        for directory in [real_join(QP_SRC, m) for m in sorted(os.listdir(QP_SRC))]:
+            includefile = real_join(directory, flag)
+            try:
+                content = ""
+                with open(includefile,'r') as f:
+                    content = f.read().strip()
+                    if content:
+                        str_ += " "+content
+            except IOError:
+                pass
+
+        l_string.append(str_)
+
+    lib_lapack = get_compilation_option(pwd_config_file, "LAPACK_LIB")
+    lib_usr = get_compilation_option(pwd_config_file, "LIB")
+
+    str_lib = " ".join([lib_lapack, EZFIO_LIB, LIB, lib_usr])
+
+    # Read all LIB files in modules
+    for directory in [real_join(QP_SRC, m) for m in sorted(os.listdir(QP_SRC))]:
+        libfile = real_join(directory, "LIB")
+        try:
+            content = ""
+            with open(libfile,'r') as f:
+                content = f.read().replace('\n','')
+                if content:
+                    str_lib += " "+content
+        except IOError:
+            pass
+
+    l_string.append("LIB = {0}".format(str_lib))
+    l_string.append("CONFIG_FILE = {0}".format(pwd_config_file))
+    l_string.append("")
+
+    return l_string
+
+def dict_module_genelogy_path(d_module_genelogy):
+    """
+    Just a dict with relative, and absolute path for the
+    d_module_genelogy
+    """
+    d = {}
+    for key, values in d_module_genelogy.items():
+        abs_path = real_join(QP_SRC, key)
+        rel_path = key
+        path_key = Path(abs_path, rel_path)
+
+        l_path_children = []
+        for children in values:
+            abs_path = real_join(QP_SRC, children)
+            rel_path = children
+            l_path_children.append(Path(abs_path, rel_path))
+
+        d[path_key] = l_path_children
+
+    return d
+
+# Import functions from ninja version that we'll adapt
+# (copying key functions needed for makefile generation)
+
+# Module and dependency handling functions (adapted from ninja version)
+def get_l_module_with_ezfio_cfg():
+    """Return all module who have a EZFIO.cfg"""
+    l_module_with_ezfio_cfg = []
+    
+    for f in module_instance.l_module:
+        ezfio_cfg_path = join(f, "EZFIO.cfg")
+        if os.path.isfile(ezfio_cfg_path):
+            l_module_with_ezfio_cfg.append(f)
+    
+    return l_module_with_ezfio_cfg
+
+def make_ezfio_cfg_rule():
+    """Return makefile rule for ezfio_interface"""
+    l_string = [
+        "# Rule to build EZFIO interface files",
+        "%.ezfio_interface_config %ezfio_interface.irp.f: %EZFIO.cfg",
+        "\t@echo 'Building EZFIO interface for $<'",
+        "\tei_handler.py --path_module $(dir $<)",
+        ""
+    ]
+    return l_string
+
+def get_l_file_for_module(path_module):
+    '''Return the list of files in a module'''
+    l_depend = []
+    l_src = []
+    l_obj = []
+    l_template = []
+
+    for f in sorted(os.listdir(path_module.abs)):
+        if f.lower().endswith(tuple([".template.f", ".include.f"])):
+            l_template.append(join(path_module.abs, f))
+        elif f.endswith(".irp.f"):
+            l_depend.append(join(path_module.abs, f))
+        elif f.lower().endswith(tuple([".f", ".f90", ".c", ".cpp", ".cxx"])):
+            l_depend.append(join(path_module.abs, f))
+            l_src.append(f)
+            obj = '{0}.o'.format(os.path.splitext(f)[0])
+            l_obj.append(obj)
+        elif f.lower().endswith(".o"):
+             l_obj.append(join(path_module.abs, f))
+        elif f == "EZFIO.cfg":
+            l_depend.append(join(path_module.abs, "ezfio_interface.irp.f"))
+
+    d = {
+        "l_depend": l_depend,
+        "l_src": l_src,
+        "l_obj": l_obj,
+        "l_template": l_template
+    }
+
+    return d
+
+def get_file_dependency(d_info_module):
+    """For a module return all the irp.f90 needed files"""
+    d_irp = defaultdict(dict)
+
+    for module, l_children in d_info_module.items():
+        for key, values in get_l_file_for_module(module).items():
+            if key in ["l_src"]:
+                values = [join(module.abs, o) for o in values]
+            if key in ["l_obj"]:
+                values = [join(module.abs, "IRPF90_temp", o) for o in values]
+
+            d_irp[module][key] = values
+
+        for children in l_children:
+            for key, values in get_l_file_for_module(children).items():
+                if key in ["l_src"]:
+                    values = [join(module.abs, children.rel, o)
+                              for o in values]
+                if key in ["l_obj"]:
+                    values = [join(module.abs, "IRPF90_temp", children.rel, o)
+                              for o in values]
+
+                d_irp[module][key].extend(values)
+
+    return d_irp
+
+def make_irpf90_make_rule():
+    """Rule for creating the irpf90 build files using make"""
+    l_string = [
+        "# Rule to run IRPF90 preprocessing",
+        "%/IRPF90_temp/Makefile:",
+        "\t@echo 'Running IRPF90 for $(dir $@)'",
+        "\t@cd $(dir $@)/.. && \\",
+        "\texport FC='$(FC)' && \\",
+        "\texport FCFLAGS='$(FCFLAGS)' && \\", 
+        "\texport LIB='$(LIB)' && \\",
+        "\t$(IRPF90) $(IRPF90_FLAGS)",
+        ""
+    ]
+    return l_string
+
+def make_binaries_rule():
+    """Rule for creating the binaries"""
+    l_string = [
+        "# Rule to build module binaries", 
+        "%.bin: %/IRPF90_temp/Makefile $(EZFIO_LIB)",
+        "\t@echo 'Building binaries for $*'",
+        "\t@cd $*/IRPF90_temp && $(MAKE) && \\",
+        "\tfor i in $$(find . -type f -executable); do [ -x $$i ] && touch $$i; done",
+        ""
+    ]
+    return l_string
+
+def create_main_makefile(pwd_config_file, l_all_module):
+    """Create the main Makefile content"""
+    l_string = []
+    
+    # Add header and variables
+    l_string.extend(make_create_env_variable(pwd_config_file))
+    
+    # Add main targets
+    l_string.extend([
+        "# Main targets",
+        ".PHONY: all clean modules install",
+        "",
+        "all: $(EZFIO_LIB) modules",
+        "",
+        "modules: " + " ".join([f"module_{mod.rel}" for mod in l_all_module]),
+        ""
+    ])
+    
+    # Add rules
+    l_string.extend(make_ezfio_cfg_rule())
+    l_string.extend(make_irpf90_make_rule()) 
+    l_string.extend(make_binaries_rule())
+    
+    # Add EZFIO library rule
+    l_string.extend([
+        "# EZFIO library",
+        "$(EZFIO_LIB):",
+        "\t@echo 'Building EZFIO library'",
+        "\t@cd $(QP_ROOT)/external/ezfio && $(MAKE)",
+        ""
+    ])
+    
+    # Add module-specific targets
+    for module in l_all_module:
+        if module.rel == "dummy":
+            continue
+            
+        l_string.extend([
+            f"module_{module.rel}: {comp_path(module.abs)}/{module.rel}.bin",
+            ""
+        ])
+    
+    # Add clean target
+    l_string.extend([
+        "clean:",
+        "\t@echo 'Cleaning build files'",
+        "\t@find $(QP_ROOT)/src -name 'IRPF90_temp' -type d -exec rm -rf {} + 2>/dev/null || true",
+        "\t@find $(QP_ROOT)/src -name '*.bin' -delete 2>/dev/null || true",
+        ""
+    ])
+    
+    return l_string
+
+def create_module_makefile(path_module, l_children, d_irp, d_binaries):
+    """Create individual Makefile for a module"""
+    makefile_path = join(path_module.abs, "Makefile")
+    
+    l_string = [
+        f"# Makefile for module {path_module.rel}",
+        f"# Generated automatically",
+        "",
+        f"MODULE_DIR = {comp_path(path_module.abs)}",
+        f"MODULE_NAME = {path_module.rel}",
+        ""
+    ]
+    
+    # Add dependencies from NEED file
+    need_file = join(path_module.abs, "NEED")
+    if os.path.exists(need_file):
+        with open(need_file, 'r') as f:
+            deps = [line.strip() for line in f if line.strip()]
+        
+        l_string.extend([
+            f"# Dependencies: {' '.join(deps)}",
+            f"DEPS = {' '.join([f'$(QP_ROOT)/src/{dep}' for dep in deps])}",
+            ""
+        ])
+    
+    # Add source files
+    if path_module in d_irp:
+        src_files = d_irp[path_module].get('l_src', [])
+        if src_files:
+            l_string.extend([
+                "SOURCES = \\",
+                *[f"\t{comp_path(src)} \\" for src in src_files[:-1]],
+                f"\t{comp_path(src_files[-1])}" if src_files else "",
+                ""
+            ])
+    
+    # Add targets
+    l_string.extend([
+        f"{path_module.rel}.bin: IRPF90_temp/Makefile",
+        "\t@cd IRPF90_temp && $(MAKE)",
+        "",
+        "IRPF90_temp/Makefile: $(SOURCES) $(DEPS)",
+        "\t@echo 'Running IRPF90 for $(MODULE_NAME)'",
+        "\t@$(IRPF90) $(IRPF90_FLAGS)",
+        "",
+        "clean:",
+        "\t@rm -rf IRPF90_temp *.bin",
+        "",
+        ".PHONY: clean",
+        ""
+    ])
+    
+    return makefile_path, l_string
+
+def main():
+    """Main function"""
+    arguments = docopt(__doc__)
+    
+    if arguments["create"]:
+        config_file = arguments["<config_file>"]
+        mode = "development" if arguments["--development"] else "production"
+        
+        # Get module information
+        d_genealogy = module_instance.dict_descendant
+        d_genealogy_path = dict_module_genelogy_path(d_genealogy)
+        d_irp = get_file_dependency(d_genealogy_path)
+        
+        l_all_module = sorted(list(d_genealogy_path.keys()))
+        
+        # Create binaries dict (simplified for now)
+        d_binaries = defaultdict(list)
+        
+        # Create main Makefile
+        l_string = create_main_makefile(config_file, l_all_module)
+        
+        # Write main Makefile
+        with open(ROOT_BUILD_MAKEFILE_EXP_tmp, "w+") as f:
+            f.write(header)
+            f.write("\n".join(l_string))
+        
+        # Check if file changed
+        try:
+            with open(ROOT_BUILD_MAKEFILE_EXP, "r") as f:
+                old_content = f.read()
+        except:
+            old_content = None
+        
+        with open(ROOT_BUILD_MAKEFILE_EXP_tmp, "r") as f:
+            new_content = f.read()
+        
+        if new_content != old_content:
+            os.rename(ROOT_BUILD_MAKEFILE_EXP_tmp, ROOT_BUILD_MAKEFILE_EXP)
+            print(f"Created {ROOT_BUILD_MAKEFILE_EXP}")
+        else:
+            os.remove(ROOT_BUILD_MAKEFILE_EXP_tmp)
+            print("Makefile unchanged")
+        
+        # Create individual module Makefiles
+        for module in l_all_module:
+            if module.rel == "dummy":
+                continue
+                
+            l_children = d_genealogy_path[module]
+            makefile_path, makefile_content = create_module_makefile(
+                module, l_children, d_irp, d_binaries)
+                
+            with open(makefile_path, "w") as f:
+                f.write("\n".join(makefile_content))
+            print(f"Created {makefile_path}")
+    
+    elif arguments["update"]:
+        # For now, just regenerate (could be more intelligent)
+        print("Update functionality not implemented yet")
+
+if __name__ == "__main__":
+    main()
