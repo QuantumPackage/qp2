@@ -112,14 +112,17 @@ END_PROVIDER
          if (.not.found) then
 
            ! Reallocate csf_unique_vector_value 2x larger if needed
-           if (index_max+sze > csf_unique_vector_value_size) then
+           if (index_max+sze >= csf_unique_vector_value_size) then
+             integer :: csf_unique_vector_value_size_new
+             csf_unique_vector_value_size_new = &
+               max(2*csf_unique_vector_value_size, index_max+sze)
              allocate(resize_array(csf_unique_vector_value_size))
              resize_array(:) = csf_unique_vector_value(:)
              deallocate(csf_unique_vector_value)
-             allocate(csf_unique_vector_value(2*csf_unique_vector_value_size))
+             allocate(csf_unique_vector_value(csf_unique_vector_value_size_new))
              csf_unique_vector_value(:csf_unique_vector_value_size) = resize_array(:)
              deallocate(resize_array)
-             csf_unique_vector_value_size *= 2
+             csf_unique_vector_value_size = csf_unique_vector_value_size_new
 !             SOFT_TOUCH csf_unique_vector_value_size
            endif
 
