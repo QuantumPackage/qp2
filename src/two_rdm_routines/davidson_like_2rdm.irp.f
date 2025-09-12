@@ -196,7 +196,7 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
    ASSERT (istart > 0)
    ASSERT (istep  > 0)
 
-    !$OMP DO SCHEDULE(dynamic)
+   !$OMP DO SCHEDULE(dynamic)
    do k_a=istart+ishift,iend,istep
 !print *, 'aa', k_a, '/', iend
 
@@ -282,12 +282,12 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
      enddo
 
    enddo
-     !$OMP END DO NOWAIT
+   !$OMP END DO NOWAIT
 !     call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
      call update_keys_values_n_states_local(keys,values,nkeys,dim1,n_st,big_array_local)
      nkeys = 0
 
-     !$OMP DO SCHEDULE(dynamic)
+   !$OMP DO SCHEDULE(dynamic)
    do k_a=istart+ishift,iend,istep
 !print *, 'ab', k_a, '/', iend
 
@@ -545,7 +545,7 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
      nkeys = 0
 
    end do
-    !$OMP END DO NOWAIT
+   !$OMP END DO NOWAIT
    deallocate(buffer, singles_a, singles_b, doubles, idx, keys, values)
    !$OMP CRITICAL
    do i=1,N_states

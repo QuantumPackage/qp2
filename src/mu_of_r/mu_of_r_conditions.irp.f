@@ -226,10 +226,10 @@ BEGIN_PROVIDER [double precision, mu_average_prov, (N_states)]
  mu_average_prov = 0.d0
  do istate = 1, N_states
   do ipoint = 1, n_points_final_grid
+   if(mu_of_r_prov(ipoint,istate).gt.1.d+09)cycle
    weight =final_weight_at_r_vector(ipoint)
    density = one_e_dm_and_grad_alpha_in_r(4,ipoint,istate) &
            + one_e_dm_and_grad_beta_in_r(4,ipoint,istate)
-   if(mu_of_r_prov(ipoint,istate).gt.1.d+09)cycle
    mu_average_prov(istate) += mu_of_r_prov(ipoint,istate) * weight * density
   enddo
   mu_average_prov(istate) = mu_average_prov(istate) / elec_num_grid_becke(istate)
@@ -247,14 +247,14 @@ BEGIN_PROVIDER [double precision, mu_average_prov2, (N_states)]
  END_DOC
  integer :: ipoint,istate
  double precision :: weight,density,norm
- mu_average_prov2 = 0.d0
  do istate = 1, N_states
+  mu_average_prov2(istate) = 0.d0
   norm = 0.d0
   do ipoint = 1, n_points_final_grid
+   if(mu_of_r_prov(ipoint,istate).gt.1.d+09)cycle
    weight =final_weight_at_r_vector(ipoint)
    density = one_e_dm_and_grad_alpha_in_r(4,ipoint,istate) &
            + one_e_dm_and_grad_beta_in_r(4,ipoint,istate)
-   if(mu_of_r_prov(ipoint,istate).gt.1.d+09)cycle
    mu_average_prov2(istate) += mu_of_r_prov(ipoint,istate) * weight * density*density
    norm = norm + density*density*weight
   enddo
@@ -285,6 +285,36 @@ BEGIN_PROVIDER [double precision, mu_average_prov_ot, (N_states)]
    norm = norm + weight*on_top_cas_mu_r(ipoint,istate)
   enddo
   mu_average_prov_ot(istate) = mu_average_prov_ot(istate) / norm
+ enddo
+END_PROVIDER
+
+
+BEGIN_PROVIDER [double precision, mu_average_prov3, (N_states)]
+ implicit none
+ BEGIN_DOC
+ ! average value of mu(r) weighted with square of the total one-e density
+ !
+ ! !!!!!! WARNING !!!!!! if no_core_density == .True. then all contributions from the core orbitals
+ !
+ ! in the one- and two-body density matrix are excluded
+ END_DOC
+ integer :: ipoint,istate
+ double precision :: weight,density,norm, ratio
+ do istate = 1, N_states
+  mu_average_prov3(istate) = 0.d0
+  norm = 0.d0
+  do ipoint = 1, n_points_final_grid
+   weight =final_weight_at_r_vector(ipoint)
+   density = one_e_dm_and_grad_alpha_in_r(4,ipoint,istate) &
+           + one_e_dm_and_grad_beta_in_r(4,ipoint,istate)
+   if(mu_of_r_prov(ipoint,istate).lt.1.d-09)cycle
+   ratio = density/mu_of_r_prov(ipoint,istate)
+   mu_average_prov3(istate) += ratio*ratio * weight
+   norm += density*density*weight
+  enddo
+  mu_average_prov3(istate) = mu_average_prov3(istate) / norm
+  mu_average_prov3(istate) = 1.d0/dsqrt(mu_average_prov3(istate))
+  print *, norm
  enddo
 END_PROVIDER
 

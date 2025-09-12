@@ -233,6 +233,7 @@ subroutine compute_err1(nO,nV,f_o,f_v,r1,err1)
 
   integer                       :: i,a
   
+  print *, 'coucou'
   !$OMP PARALLEL &
   !$OMP SHARED(err1,r1,f_o,f_v,nO,nV,cc_level_shift) &
   !$OMP PRIVATE(i,a) &
@@ -265,6 +266,7 @@ subroutine compute_err2(nO,nV,f_o,f_v,r2,err2)
 
   integer                       :: i,j,a,b
 
+print *, 'coucou2'
   !$OMP PARALLEL &
   !$OMP SHARED(err2,r2,f_o,f_v,nO,nV,cc_level_shift) &
   !$OMP PRIVATE(i,j,a,b) &
