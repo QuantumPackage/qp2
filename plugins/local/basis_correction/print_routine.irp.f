@@ -81,9 +81,12 @@ subroutine print_basis_correction
   endif
   print*,''
   print*,'**************'
+  write(*, *) 'Average mu(r)'
   do istate = 1, N_states
-    write(*, '(A29,X,I3,X,A3,X,F16.10)') '  Average mu(r) [rho  ], state ',istate,' = ',mu_average_prov(istate)
-    write(*, '(A29,X,I3,X,A3,X,F16.10)') '  Average mu(r) [rho^2], state ',istate,' = ',mu_average_prov2(istate)
+    write(*, *) 'State', istate
+    write(*, '(A60,X,''='',X,F16.10)') ' \int rho(r) mu(r) dr / \int rho(r) dr = ',mu_average_prov(istate)
+    write(*, '(A60,X,''='',X,F16.10)') ' \int rho(r)^2 mu(r) dr / \int rho(r)^2 dr = ',mu_average_prov2(istate)
+    write(*, '(A60,X,''='',X,F16.10)') ' [ \int rho(r)^2 mu(r)^{-2} dr / \int rho(r)^2 dr ]^{-1/2}  = ',mu_average_prov3(istate)
   enddo
 
   if(mu_of_r_potential.EQ."cas_full".or. &
