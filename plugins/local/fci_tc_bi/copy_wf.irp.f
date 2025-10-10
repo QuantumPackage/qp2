@@ -116,6 +116,7 @@ subroutine remove_duplicates_in_psi_det_tc(found_duplicates)
   logical,allocatable            :: duplicate(:)
   logical                        :: dup
 
+
   allocate (duplicate(N_det), bit_tmp(N_det))
 
   found_duplicates = .False.
@@ -128,6 +129,7 @@ subroutine remove_duplicates_in_psi_det_tc(found_duplicates)
     !$DIR FORCEINLINE
     bit_tmp(i) = det_search_key(psi_det_sorted_bit_tc(1,1,i),N_int)
     duplicate(i) = .False.
+    call debug_det(psi_det_sorted_bit_tc(1,1,i),N_int)
   enddo
   !$OMP END DO
 
@@ -207,9 +209,11 @@ end
    ! function.
    END_DOC
 
+ integer, allocatable :: iorder(:) 
+ allocate(iorder(size(psi_r_coef_bi_ortho,1)))
    call sort_dets_by_det_search_key(N_det, psi_det, psi_r_coef_bi_ortho, size(psi_r_coef_bi_ortho,1),       &
-       psi_det_sorted_bit_tc, psi_r_coef_sorted_bit, N_states)
+       psi_det_sorted_bit_tc, psi_r_coef_sorted_bit, iorder, N_states)
    call sort_dets_by_det_search_key(N_det, psi_det, psi_l_coef_bi_ortho, size(psi_l_coef_bi_ortho,1),       &
-       psi_det_sorted_bit_tc, psi_l_coef_sorted_bit, N_states)
+       psi_det_sorted_bit_tc, psi_l_coef_sorted_bit, iorder, N_states)
 
 END_PROVIDER
