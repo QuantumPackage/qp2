@@ -5,11 +5,11 @@ Usage:
        qp_geom_opt [-s state] [-r executable] [-f] [-t tolerance] <EZFIO_FILE>
 
 Options:
-      -s --state=<state>       Excited state to optimize 
+      -s --state=<state>       Excited state to optimize
       -f --scf                 Perform an SCF after each geomety change
-      -r --qp_run=executable   Excited state to optimize 
+      -r --qp_run=executable   Excited state to optimize
       -t --tol=tolerance       Convergence criterion on the energy
-"""                  
+"""
 
 
 try:
@@ -22,7 +22,7 @@ except ImportError:
     print("(`source ${QP_ROOT}/quantum_package.rc`)")
     print(sys.exit(1))
 
-    
+
 import numpy as np
 import subprocess
 from scipy.optimize import minimize
@@ -60,13 +60,13 @@ def get_energy(file, state, arguments):
     executable = arguments["--qp_run"]
     result = subprocess.run( f"qp_run {executable} {file} > {file}.energy.out",
                              shell=True)
-    
+
     energy = None
     with open(f"{file}.energy.out", 'r') as f:
         for line in f:
             if "Energy of state" in line and f"{state}" in line:
                 energy = float(line.split()[-1])  # Extracts the energy value
-    
+
     return energy
     raise ValueError("Energy not found in Quantum Package output. Update script {sys.argv[0]}")
 
@@ -95,7 +95,7 @@ def energy_function(coord, file, state, arguments):
     num_atoms = len(label)
     coord = coord.reshape(3, num_atoms).T  # Reshape into (num_atoms, 3)
     coord_angstrom = coord * 0.529177  # Convert atomic units to angstroms
-    
+
     print(num_atoms)
     print(f"Energy: {energy:15.10f}")
     for i, (x, y, z) in enumerate(coord_angstrom):
@@ -109,7 +109,7 @@ def optimize_geometry(file, state, arguments):
     x0 = get_coordinates().flatten()
 
     if arguments["--tol"]:
-        tolerance = float(tol=arguments["--tol"])
+        tolerance = float(arguments["--tol"])
     else:
         tolerance = 1.e-3
 
@@ -117,20 +117,20 @@ def optimize_geometry(file, state, arguments):
                       method='Powell',
                       tol=tolerance,
                       options={'xtol': tolerance, 'ftol': tolerance})
-    
+
 #    result = minimize(energy_function, x0, args=(file, state, arguments),
 #                      method='BFGS',
 #                      jac=None,
 #                      tol=tolerance,
 #                      options={'eps': 1.e-3})
-    
+
     if result.success:
         print("Optimization successful!")
         print("Final energy:", result.fun)
         print("Optimized coordinates:", result.x)
     else:
         print("Optimization failed:", result.message)
-    
+
     set_coordinates(result.x)  # Store the optimized geometry
     return result
 
