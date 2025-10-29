@@ -129,7 +129,7 @@ subroutine remove_duplicates_in_psi_det_tc(found_duplicates)
     !$DIR FORCEINLINE
     bit_tmp(i) = det_search_key(psi_det_sorted_bit_tc(1,1,i),N_int)
     duplicate(i) = .False.
-    call debug_det(psi_det_sorted_bit_tc(1,1,i),N_int)
+!    call debug_det(psi_det_sorted_bit_tc(1,1,i),N_int)
   enddo
   !$OMP END DO
 
