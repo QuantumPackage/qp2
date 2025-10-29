@@ -3,12 +3,12 @@
 subroutine davidson_diag_sx_mat(N_st, u_in, energies)
  implicit none
  integer, intent(in) :: N_st
- double precision, intent(out) :: u_in(nMonoEx+1,n_states_diag), energies(N_st)
+ double precision, intent(out) :: u_in(nMonoEx+1,N_st*n_states_diag), energies(N_st)
  integer :: i,j,N_st_tmp, dim_in, sze, N_st_diag_in
  integer, allocatable :: list_guess(:)
  double precision, allocatable :: H_jj(:)
- logical    :: converged                                                                                                
- N_st_diag_in = n_states_diag
+ logical    :: converged
+ N_st_diag_in = n_states_diag * N_st
  provide SXmatrix
  sze = nMonoEx+1
  dim_in = sze
@@ -18,9 +18,9 @@ subroutine davidson_diag_sx_mat(N_st, u_in, energies)
  list_guess(1) = 1
  do j = 2, nMonoEx+1
   H_jj(j) = SXmatrix(j,j)
-  if(H_jj(j).lt.0.d0)then 
-   list_guess(N_st_tmp) = j
+  if(H_jj(j).lt.0.d0)then
    N_st_tmp += 1
+   list_guess(N_st_tmp) = j
   endif
  enddo
  if(N_st_tmp .ne. N_st)then
@@ -29,12 +29,11 @@ subroutine davidson_diag_sx_mat(N_st, u_in, energies)
   print*,N_st_tmp, N_st
   stop
  endif
- print*,'Number of possibly interesting states = ',N_st
+ print*,'Number of possibly interesting states = ', N_st
  print*,'Corresponding diagonal elements of the SX matrix '
  u_in = 0.d0
- do i = 1, min(N_st, N_st_diag_in)
-! do i = 1, N_st
-  j = list_guess(i) 
+ do i = 1, N_st
+  j = list_guess(i)
   print*,'i,j',i,j
   print*,'SX(i,i) = ',H_jj(j)
   u_in(j,i) = 1.d0
