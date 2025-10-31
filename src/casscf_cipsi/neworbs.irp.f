@@ -123,7 +123,6 @@ END_PROVIDER
     write(6,*) ' SXdiag : eigenvalue for best overlap with '
     write(6,*) ' previous orbitals = ',SXeigenval(best_vector_ovrlp_casscf)
     write(6,*) ' weight of the 1st element ',c0
-    write(6,*) ' weight of the 1st elements ', SXeigenvec(1,:)
   endif
  END_PROVIDER
 
