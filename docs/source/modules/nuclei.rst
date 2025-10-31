@@ -49,6 +49,34 @@ EZFIO parameters
     Nuclear repulsion (Computed automaticaly or Read in the |EZFIO|)
  
  
+.. option:: is_periodic
+ 
+    If true, the calculation uses periodic boundary conditions
+ 
+    Default: false
+ 
+.. option:: n_pts_charge
+ 
+    Number of point charges to be added to the potential
+ 
+    Default: 0
+ 
+.. option:: pts_charge_z
+ 
+    Charge associated to each point charge
+ 
+ 
+.. option:: pts_charge_coord
+ 
+    Coordinate of each point charge.
+ 
+ 
+.. option:: point_charges
+ 
+    If |true|, point charges (see nuclei/write_pt_charges.py) are added to the one-electron potential
+ 
+    Default: False
+ 
  
 Providers 
 --------- 
@@ -216,6 +244,39 @@ Providers
 
 
  
+.. c:var:: n_pts_charge
+
+
+    File : :file:`nuclei/point_charges.irp.f`
+
+    .. code:: fortran
+
+        integer	:: n_pts_charge	
+
+
+    Number of point charges to be added to the potential
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ezfio_filename`
+       * :c:data:`mpi_master`
+       * :c:data:`output_wall_time_0`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_pt_chrg`
+       * :c:data:`pt_chrg_interaction`
+       * :c:data:`pt_chrg_nuclei_interaction`
+       * :c:data:`pts_charge_coord`
+       * :c:data:`pts_charge_z`
+
+ 
 .. c:var:: nucl_coord
 
 
@@ -245,23 +306,37 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`ao_2e_cgtos_schwartz`
+       * :c:data:`ao_coef_norm_cgtos`
+       * :c:data:`ao_deriv2_cgtos_x`
        * :c:data:`ao_deriv2_x`
        * :c:data:`ao_deriv_1_x`
        * :c:data:`ao_dipole_x`
        * :c:data:`ao_integrals_n_e`
+       * :c:data:`ao_integrals_n_e_cgtos`
        * :c:data:`ao_integrals_n_e_per_atom`
+       * :c:data:`ao_integrals_pt_chrg`
        * :c:data:`ao_overlap`
        * :c:data:`ao_overlap_abs`
+       * :c:data:`ao_overlap_cgtos`
        * :c:data:`ao_pseudo_integrals_local`
        * :c:data:`ao_pseudo_integrals_non_local`
        * :c:data:`ao_spread_x`
+       * :c:data:`ao_two_e_integral_alpha`
+       * :c:data:`ao_two_e_integral_erf_schwartz`
        * :c:data:`ao_two_e_integral_schwartz`
+       * :c:data:`ao_two_e_integrals_erf_in_map`
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:data:`center_of_mass`
+       * :c:data:`cholesky_ao_num`
        * :c:data:`inertia_tensor`
+       * :c:data:`multi_s_deriv_1`
+       * :c:data:`multi_s_dipole_moment`
        * :c:data:`nucl_coord_transp`
        * :c:data:`nucl_dist_2`
        * :c:data:`nuclear_repulsion`
+       * :c:data:`pt_chrg_nuclei_interaction`
+       * :c:data:`z_dipole_moment`
 
  
 .. c:var:: nucl_coord_transp
@@ -501,6 +576,8 @@ Providers
        * :c:data:`nucl_coord`
        * :c:data:`nucl_num`
        * :c:data:`output_wall_time_0`
+       * :c:data:`point_charges`
+       * :c:data:`pt_chrg_nuclei_interaction`
 
     Needed by:
 
@@ -508,8 +585,139 @@ Providers
        :columns: 3
 
        * :c:data:`ci_energy`
+       * :c:data:`ci_energy_no_diag`
        * :c:data:`core_energy`
+       * :c:data:`core_energy_erf`
+       * :c:data:`etwo`
+       * :c:data:`hf_energy`
        * :c:data:`psi_energy_with_nucl_rep`
+       * :c:data:`pt2_e0_denominator`
+       * :c:data:`scf_energy`
+
+ 
+.. c:var:: pt_chrg_interaction
+
+
+    File : :file:`nuclei/point_charges.irp.f`
+
+    .. code:: fortran
+
+        double precision	:: pt_chrg_interaction	
+
+
+    Interaction between the point charges
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_pts_charge`
+       * :c:data:`pts_charge_coord`
+       * :c:data:`pts_charge_z`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`pt_chrg_nuclei_interaction`
+
+ 
+.. c:var:: pt_chrg_nuclei_interaction
+
+
+    File : :file:`nuclei/point_charges.irp.f`
+
+    .. code:: fortran
+
+        double precision	:: pt_chrg_nuclei_interaction	
+
+
+    repulsion between the point charges and the nuclei
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_pts_charge`
+       * :c:data:`nucl_charge`
+       * :c:data:`nucl_coord`
+       * :c:data:`nucl_num`
+       * :c:data:`point_charges`
+       * :c:data:`pt_chrg_interaction`
+       * :c:data:`pts_charge_coord`
+       * :c:data:`pts_charge_z`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`nuclear_repulsion`
+
+ 
+.. c:var:: pts_charge_coord
+
+
+    File : :file:`nuclei/point_charges.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: pts_charge_coord	(n_pts_charge,3)
+
+
+    Coordinates of each point charge.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ezfio_filename`
+       * :c:data:`mpi_master`
+       * :c:data:`n_pts_charge`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_pt_chrg`
+       * :c:data:`pt_chrg_interaction`
+       * :c:data:`pt_chrg_nuclei_interaction`
+
+ 
+.. c:var:: pts_charge_z
+
+
+    File : :file:`nuclei/point_charges.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: pts_charge_z	(n_pts_charge)
+
+
+    Charge associated to each point charge.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ezfio_filename`
+       * :c:data:`mpi_master`
+       * :c:data:`n_pts_charge`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_pt_chrg`
+       * :c:data:`pt_chrg_interaction`
+       * :c:data:`pt_chrg_nuclei_interaction`
 
  
 .. c:var:: slater_bragg_radii

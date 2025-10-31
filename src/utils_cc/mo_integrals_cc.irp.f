@@ -47,7 +47,7 @@ subroutine gen_v_space(n1,n2,n3,n4,list1,list2,list3,list4,v)
 
   integer                       :: i1,i2,i3,i4,idx1,idx2,idx3,idx4,k
 
-  if (do_ao_cholesky) then
+  if (do_mo_cholesky) then
     double precision, allocatable :: buffer(:,:,:,:)
     double precision, allocatable :: v1(:,:,:), v2(:,:,:)
     allocate(v1(cholesky_mo_num,n1,n3), v2(cholesky_mo_num,n2,n4))
@@ -77,7 +77,7 @@ subroutine gen_v_space(n1,n2,n3,n4,list1,list2,list3,list4,v)
   else
     double precision              :: get_two_e_integral
 
-    PROVIDE mo_two_e_integrals_in_map
+    PROVIDE all_mo_integrals
 
     !$OMP PARALLEL &
     !$OMP SHARED(n1,n2,n3,n4,list1,list2,list3,list4,v,mo_integrals_map) &
@@ -132,7 +132,7 @@ end
 
 BEGIN_PROVIDER [double precision, cc_space_v, (mo_num,mo_num,mo_num,mo_num)]
   implicit none
-  if (do_ao_cholesky) then
+  if (do_mo_cholesky) then
     integer                       :: i1,i2,i3,i4
     double precision, allocatable :: buffer(:,:,:)
     call set_multiple_levels_omp(.False.)
@@ -161,7 +161,7 @@ BEGIN_PROVIDER [double precision, cc_space_v, (mo_num,mo_num,mo_num,mo_num)]
     integer          :: i,j,k,l
     double precision :: get_two_e_integral
 
-    PROVIDE mo_two_e_integrals_in_map
+    PROVIDE all_mo_integrals
 
     !$OMP PARALLEL &
     !$OMP SHARED(cc_space_v,mo_num,mo_integrals_map) &
@@ -190,11 +190,11 @@ BEGIN_PROVIDER [double precision, cc_space_v_oooo, (cc_nOa, cc_nOa, cc_nOa, cc_n
 
   implicit none
 
-  if (do_ao_cholesky) then
+  if (do_mo_cholesky) then
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_oooo,1)
     n2 = size(cc_space_v_oooo,2)
     n3 = size(cc_space_v_oooo,3)
@@ -227,17 +227,30 @@ BEGIN_PROVIDER [double precision, cc_space_v_oooo, (cc_nOa, cc_nOa, cc_nOa, cc_n
 
 END_PROVIDER
 
+BEGIN_PROVIDER [double precision, cc_spin_v_oooo, (cc_nOab, cc_nOab, cc_nOab, cc_nOab)]
+
+  implicit none
+
+  !TODO
+  call gen_v_spin(cc_nO_m,cc_nO_m,cc_nO_m,cc_nO_m, &
+                    cc_nO_S,cc_nO_S,cc_nO_S,cc_nO_S, &
+                    cc_list_occ_spin,cc_list_occ_spin,cc_list_occ_spin,cc_list_occ_spin, &
+                    cc_nOab,cc_nOab,cc_nOab,cc_nOab, &
+                    cc_spin_v_oooo)
+
+END_PROVIDER
+
 ! vooo
 
 BEGIN_PROVIDER [double precision, cc_space_v_vooo, (cc_nVa, cc_nOa, cc_nOa, cc_nOa)]
 
   implicit none
 
-  if (do_ao_cholesky) then
+  if (do_mo_cholesky) then
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_vooo,1)
     n2 = size(cc_space_v_vooo,2)
     n3 = size(cc_space_v_vooo,3)
@@ -277,11 +290,11 @@ BEGIN_PROVIDER [double precision, cc_space_v_ovoo, (cc_nOa, cc_nVa, cc_nOa, cc_n
   implicit none
 
 
-  if (do_ao_cholesky) then
+  if (do_mo_cholesky) then
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_ovoo,1)
     n2 = size(cc_space_v_ovoo,2)
     n3 = size(cc_space_v_ovoo,3)
@@ -305,17 +318,28 @@ BEGIN_PROVIDER [double precision, cc_space_v_ovoo, (cc_nOa, cc_nVa, cc_nOa, cc_n
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, cc_spin_v_ovoo, (cc_nOab,cc_nVab,cc_nOab,cc_nOab)]
+ implicit none
+
+ call gen_v_spin(cc_nO_m,cc_nV_m,cc_nO_m,cc_nO_m, &
+                 cc_nO_S,cc_nV_S,cc_nO_S,cc_nO_S, &
+                 cc_list_occ_spin,cc_list_vir_spin,cc_list_occ_spin,cc_list_occ_spin, &
+                 cc_nOab,cc_nVab,cc_nOab,cc_nOab, &
+                 cc_spin_v_ovoo)
+
+END_PROVIDER
+
 ! oovo
 
 BEGIN_PROVIDER [double precision, cc_space_v_oovo, (cc_nOa, cc_nOa, cc_nVa, cc_nOa)]
 
   implicit none
 
-  if (do_ao_cholesky) then
+  if (do_mo_cholesky) then
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_oovo,1)
     n2 = size(cc_space_v_oovo,2)
     n3 = size(cc_space_v_oovo,3)
@@ -339,17 +363,28 @@ BEGIN_PROVIDER [double precision, cc_space_v_oovo, (cc_nOa, cc_nOa, cc_nVa, cc_n
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, cc_spin_v_oovo, (cc_nOab,cc_nOab,cc_nVab,cc_nOab)]
+ implicit none
+
+ call gen_v_spin(cc_nO_m,cc_nO_m,cc_nV_m,cc_nO_m, &
+                 cc_nO_S,cc_nO_S,cc_nV_S,cc_nO_S, &
+                 cc_list_occ_spin,cc_list_occ_spin,cc_list_vir_spin,cc_list_occ_spin, &
+                 cc_nOab,cc_nOab,cc_nVab,cc_nOab, &
+                 cc_spin_v_oovo)
+END_PROVIDER
+
+
 ! ooov
 
 BEGIN_PROVIDER [double precision, cc_space_v_ooov, (cc_nOa, cc_nOa, cc_nOa, cc_nVa)]
 
   implicit none
 
-  if (do_ao_cholesky) then
+  if (do_mo_cholesky) then
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_oovo,1)
     n2 = size(cc_space_v_oovo,2)
     n3 = size(cc_space_v_oovo,3)
@@ -373,17 +408,28 @@ BEGIN_PROVIDER [double precision, cc_space_v_ooov, (cc_nOa, cc_nOa, cc_nOa, cc_n
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, cc_spin_v_ooov, (cc_nOab,cc_nOab,cc_nOab,cc_nVab)]
+ implicit none
+
+ call gen_v_spin(cc_nO_m,cc_nO_m,cc_nO_m,cc_nV_m, &
+                 cc_nO_S,cc_nO_S,cc_nO_S,cc_nV_S, &
+                 cc_list_occ_spin,cc_list_occ_spin,cc_list_occ_spin,cc_list_vir_spin, &
+                 cc_nOab,cc_nOab,cc_nOab,cc_nVab, &
+                 cc_spin_v_ooov)
+END_PROVIDER
+
+
 ! vvoo
 
 BEGIN_PROVIDER [double precision, cc_space_v_vvoo, (cc_nVa, cc_nVa, cc_nOa, cc_nOa)]
 
   implicit none
 
-  if (do_ao_cholesky) then
+  if (do_mo_cholesky) then
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_vvoo,1)
     n2 = size(cc_space_v_vvoo,2)
     n3 = size(cc_space_v_vvoo,3)
@@ -416,17 +462,29 @@ BEGIN_PROVIDER [double precision, cc_space_v_vvoo, (cc_nVa, cc_nVa, cc_nOa, cc_n
 
 END_PROVIDER
 
+
+BEGIN_PROVIDER [ double precision, cc_spin_v_vvoo, (cc_nVab,cc_nVab,cc_nOab,cc_nOab)]
+ implicit none
+
+ call gen_v_spin(cc_nV_m,cc_nV_m,cc_nO_m,cc_nO_m, &
+                 cc_nV_S,cc_nV_S,cc_nO_S,cc_nO_S, &
+                 cc_list_vir_spin,cc_list_vir_spin,cc_list_occ_spin,cc_list_occ_spin, &
+                 cc_nVab,cc_nVab,cc_nOab,cc_nOab, &
+                 cc_spin_v_vvoo)
+END_PROVIDER
+
+
 ! vovo
 
 BEGIN_PROVIDER [double precision, cc_space_v_vovo, (cc_nVa, cc_nOa, cc_nVa, cc_nOa)]
 
   implicit none
 
-  if (do_ao_cholesky) then
+  if (do_mo_cholesky) then
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_vovo,1)
     n2 = size(cc_space_v_vovo,2)
     n3 = size(cc_space_v_vovo,3)
@@ -465,11 +523,11 @@ BEGIN_PROVIDER [double precision, cc_space_v_voov, (cc_nVa, cc_nOa, cc_nOa, cc_n
 
   implicit none
 
-  if (do_ao_cholesky) then
+  if (do_mo_cholesky) then
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_voov,1)
     n2 = size(cc_space_v_voov,2)
     n3 = size(cc_space_v_voov,3)
@@ -499,11 +557,11 @@ BEGIN_PROVIDER [double precision, cc_space_v_ovvo, (cc_nOa, cc_nVa, cc_nVa, cc_n
 
   implicit none
 
-  if (do_ao_cholesky) then
+  if (do_mo_cholesky) then
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_ovvo,1)
     n2 = size(cc_space_v_ovvo,2)
     n3 = size(cc_space_v_ovvo,3)
@@ -527,17 +585,27 @@ BEGIN_PROVIDER [double precision, cc_space_v_ovvo, (cc_nOa, cc_nVa, cc_nVa, cc_n
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, cc_spin_v_ovvo, (cc_nOab,cc_nVab,cc_nVab,cc_nOab) ]
+ implicit none
+
+ call gen_v_spin(cc_nO_m,cc_nV_m,cc_nV_m,cc_nO_m, &
+                 cc_nO_S,cc_nV_S,cc_nV_S,cc_nO_S, &
+                 cc_list_occ_spin,cc_list_vir_spin,cc_list_vir_spin,cc_list_occ_spin, &
+                 cc_nOab,cc_nVab,cc_nVab,cc_nOab, &
+                 cc_spin_v_ovvo)
+END_PROVIDER
+
 ! ovov
 
 BEGIN_PROVIDER [double precision, cc_space_v_ovov, (cc_nOa, cc_nVa, cc_nOa, cc_nVa)]
 
   implicit none
 
-  if (do_ao_cholesky) then
+  if (do_mo_cholesky) then
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_ovov,1)
     n2 = size(cc_space_v_ovov,2)
     n3 = size(cc_space_v_ovov,3)
@@ -561,17 +629,27 @@ BEGIN_PROVIDER [double precision, cc_space_v_ovov, (cc_nOa, cc_nVa, cc_nOa, cc_n
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, cc_spin_v_ovov, (cc_nOab,cc_nVab,cc_nOab,cc_nVab) ]
+ implicit none
+
+ call gen_v_spin(cc_nO_m,cc_nV_m,cc_nO_m,cc_nV_m, &
+                 cc_nO_S,cc_nV_S,cc_nO_S,cc_nV_S, &
+                 cc_list_occ_spin,cc_list_vir_spin,cc_list_occ_spin,cc_list_vir_spin, &
+                 cc_nOab,cc_nVab,cc_nOab,cc_nVab, &
+                 cc_spin_v_ovov)
+END_PROVIDER
+
 ! oovv
 
 BEGIN_PROVIDER [double precision, cc_space_v_oovv, (cc_nOa, cc_nOa, cc_nVa, cc_nVa)]
 
   implicit none
 
-  if (do_ao_cholesky) then
+  if (do_mo_cholesky) then
 
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
-    
+
     n1 = size(cc_space_v_oovv,1)
     n2 = size(cc_space_v_oovv,2)
     n3 = size(cc_space_v_oovv,3)
@@ -593,6 +671,16 @@ BEGIN_PROVIDER [double precision, cc_space_v_oovv, (cc_nOa, cc_nOa, cc_nVa, cc_n
     call gen_v_space(cc_nOa,cc_nOa,cc_nVa,cc_nVa, cc_list_occ,cc_list_occ,cc_list_vir,cc_list_vir, cc_space_v_oovv)
   endif
 
+END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, cc_spin_v_oovv, (cc_nOab,cc_nOab,cc_nVab,cc_nVab) ]
+ implicit none
+
+ call gen_v_spin(cc_nO_m,cc_nO_m,cc_nV_m,cc_nV_m, &
+                 cc_nO_S,cc_nO_S,cc_nV_S,cc_nV_S, &
+                 cc_list_occ_spin,cc_list_occ_spin,cc_list_vir_spin,cc_list_vir_spin, &
+                 cc_nOab,cc_nOab,cc_nVab,cc_nVab, &
+                 cc_spin_v_oovv)
 END_PROVIDER
 
 ! vvvo
@@ -624,6 +712,7 @@ BEGIN_PROVIDER [double precision, cc_space_v_vovv, (cc_nVa, cc_nOa, cc_nVa, cc_n
   call gen_v_space(cc_nVa,cc_nOa,cc_nVa,cc_nVa, cc_list_vir,cc_list_occ,cc_list_vir,cc_list_vir, cc_space_v_vovv)
 
 END_PROVIDER
+
 
 ! ovvv
 
@@ -674,6 +763,18 @@ BEGIN_PROVIDER [double precision, cc_space_v_oo_chol, (cholesky_mo_num, cc_nOa, 
   implicit none
 
   call gen_v_space_chol(cc_nOa, cc_nOa, cc_list_occ, cc_list_occ, cc_space_v_oo_chol, cholesky_mo_num)
+
+END_PROVIDER
+
+BEGIN_PROVIDER [double precision, cc_spin_v_oo_chol, (cholesky_mo_num, cc_nOab, cc_nOab)]
+
+  implicit none
+  integer :: list_occ(cc_nOab)
+
+  list_occ(1:cc_nOa) = cc_list_occ_spin(1:cc_nOa,1)
+  list_occ(cc_nOa+1:cc_nOab) = cc_list_occ_spin(1:cc_nOb,2)
+  call gen_v_space_chol(cc_nOab, cc_nOab, list_occ, list_occ, &
+         cc_spin_v_oo_chol, cholesky_mo_num)
 
 END_PROVIDER
 
@@ -1006,6 +1107,22 @@ BEGIN_PROVIDER [double precision, cc_space_f_v, (cc_nVa)]
 
 END_PROVIDER
 
+
+BEGIN_PROVIDER [ double precision, cc_spin_f_oo, (cc_nOab, cc_nOab)]
+ implicit none
+ call gen_f_spin(psi_det(1,1,cc_ref), cc_nO_m, cc_nO_m, cc_nO_S, cc_nO_S, cc_list_occ_spin, cc_list_occ_spin, cc_nOab, cc_nOab, cc_spin_f_oo)
+END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, cc_spin_f_ov, (cc_nOab, cc_nVab)]
+ implicit none
+ call gen_f_spin(psi_det(1,1,cc_ref), cc_nO_m, cc_nV_m, cc_nO_S, cc_nV_S, cc_list_occ_spin, cc_list_vir_spin, cc_nOab, cc_nVab, cc_spin_f_ov)
+END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, cc_spin_f_vv, (cc_nVab, cc_nVab)]
+ implicit none
+ call gen_f_spin(psi_det(1,1,cc_ref), cc_nV_m, cc_nV_m, cc_nV_S, cc_nV_S, cc_list_vir_spin, cc_list_vir_spin, cc_nVab, cc_nVab, cc_spin_f_vv)
+END_PROVIDER
+
 ! Shift
 
 subroutine shift_idx_spin(s,n_S,shift)
@@ -1153,7 +1270,7 @@ subroutine gen_v_spin(n1,n2,n3,n4, n1_S,n2_S,n3_S,n4_S, list1,list2,list3,list4,
   implicit none
 
    BEGIN_DOC
-  ! Compute the bi electronic integrals corresponding to four lists of spin orbitals.
+  ! Compute the 2e-integrals corresponding to four lists of spin orbitals.
   ! Ex: occ/occ/occ/occ, occ/vir/occ/vir, ...
   END_DOC
 
@@ -1162,128 +1279,305 @@ subroutine gen_v_spin(n1,n2,n3,n4, n1_S,n2_S,n3_S,n4_S, list1,list2,list3,list4,
   integer, intent(in)           :: dim1, dim2, dim3, dim4
   double precision, intent(out) :: v(dim1,dim2,dim3,dim4)
 
-  double precision              :: mo_two_e_integral
+  double precision, external    :: mo_two_e_integral
   integer                       :: i,j,k,l,idx_i,idx_j,idx_k,idx_l
   integer                       :: i_shift,j_shift,k_shift,l_shift
   integer                       :: tmp_i,tmp_j,tmp_k,tmp_l
   integer                       :: si,sj,sk,sl,s
 
-  PROVIDE cc_space_v
+  double precision, allocatable :: buffer(:,:,:,:)
+  double precision, allocatable :: v1(:,:,:), v2(:,:,:)
 
-  !$OMP PARALLEL &
-  !$OMP SHARED(cc_space_v,n1_S,n2_S,n3_S,n4_S,list1,list2,list3,list4,v) &
-  !$OMP PRIVATE(s,si,sj,sk,sl,i_shift,j_shift,k_shift,l_shift, &
-  !$OMP i,j,k,l,idx_i,idx_j,idx_k,idx_l,&
-  !$OMP tmp_i,tmp_j,tmp_k,tmp_l)&
-  !$OMP DEFAULT(NONE)
+  if (do_mo_cholesky) then
 
-  do sl = 1, 2
-    call shift_idx_spin(sl,n4_S,l_shift)
-    do sk = 1, 2
-      call shift_idx_spin(sk,n3_S,k_shift)
-      do sj = 1, 2
-        call shift_idx_spin(sj,n2_S,j_shift)
-        do si = 1, 2
-          call shift_idx_spin(si,n1_S,i_shift)
+    do sl = 1, 2
+      call shift_idx_spin(sl,n4_S,l_shift)
+      do sk = 1, 2
+        call shift_idx_spin(sk,n3_S,k_shift)
+        do sj = 1, 2
+          call shift_idx_spin(sj,n2_S,j_shift)
+          do si = 1, 2
+            call shift_idx_spin(si,n1_S,i_shift)
 
-          s = si+sj+sk+sl
-          ! <aa||aa> or <bb||bb>
-          if (s == 4 .or. s == 8) then
-            !$OMP DO collapse(3)
-            do tmp_l = 1, n4_S(sl)
-              do tmp_k = 1, n3_S(sk)
-                do tmp_j = 1, n2_S(sj)
-                  do tmp_i = 1, n1_S(si)
-                    l = list4(tmp_l,sl)
-                    idx_l = tmp_l + l_shift
-                    k = list3(tmp_k,sk)
-                    idx_k = tmp_k + k_shift
-                    j = list2(tmp_j,sj)
-                    idx_j = tmp_j + j_shift
-                    i = list1(tmp_i,si)
-                    idx_i = tmp_i + i_shift
-                       !v(idx_i,idx_j,idx_k,idx_l) = mo_two_e_integral(i,j,k,l) - mo_two_e_integral(j,i,k,l)
-                       v(idx_i,idx_j,idx_k,idx_l) = cc_space_v(i,j,k,l) - cc_space_v(j,i,k,l)
+            s = si+sj+sk+sl
+            ! <aa||aa> or <bb||bb>
+            if (s == 4 .or. s == 8) then
+
+              allocate(v1(cholesky_mo_num,n1_S(si),n3_S(sk)), v2(cholesky_mo_num,n2_S(sj),n4_S(sl)))
+              allocate(buffer(n1_S(si),n3_S(sk),n2_S(sj),n4_S(sl)))
+
+              call gen_v_space_chol(n1_S(si),n3_S(sk),list1(1,si),list3(1,sk),v1,cholesky_mo_num)
+              call gen_v_space_chol(n2_S(sj),n4_S(sl),list2(1,sj),list4(1,sl),v2,cholesky_mo_num)
+
+              call dgemm('T','N', n1_S(si)*n3_S(sk), n2_S(sj)*n4_S(sl), cholesky_mo_num, 1.d0, &
+                    v1, cholesky_mo_num, &
+                    v2, cholesky_mo_num, 0.d0, buffer, n1_S(si)*n3_S(sk))
+
+              !$OMP PARALLEL &
+              !$OMP DEFAULT(SHARED) &
+              !$OMP PRIVATE(i,j,k,l,idx_i,idx_j,idx_k,idx_l)
+              !$OMP DO collapse(3)
+              do l = 1, n4_S(sl)
+                do k = 1, n3_S(sk)
+                  do j = 1, n2_S(sj)
+                    idx_l = l + l_shift
+                    idx_k = k + k_shift
+                    idx_j = j + j_shift
+                    do i = 1, n1_S(si)
+                      idx_i = i + i_shift
+                      v(idx_i,idx_j,idx_k,idx_l) = buffer(i,k,j,l)
+                    enddo
                   enddo
                 enddo
               enddo
-            enddo
-            !$OMP END DO
+              !$OMP END DO
+              !$OMP END PARALLEL
 
-          ! <ab||ab> or <ba||ba>
-          elseif (si == sk .and. sj == sl) then
-            !$OMP DO collapse(3)
-            do tmp_l = 1, n4_S(sl)
-              do tmp_k = 1, n3_S(sk)
-                do tmp_j = 1, n2_S(sj)
-                  do tmp_i = 1, n1_S(si)
-                    l = list4(tmp_l,sl)
-                    idx_l = tmp_l + l_shift
-                    k = list3(tmp_k,sk)
-                    idx_k = tmp_k + k_shift
-                    j = list2(tmp_j,sj)
-                    idx_j = tmp_j + j_shift
-                    i = list1(tmp_i,si)
-                    idx_i = tmp_i + i_shift
-                       !v(idx_i,idx_j,idx_k,idx_l) = mo_two_e_integral(i,j,k,l)
-                       v(idx_i,idx_j,idx_k,idx_l) = cc_space_v(i,j,k,l)
+              deallocate(v1, v2, buffer)
+
+              allocate(v1(cholesky_mo_num,n2_S(sj),n3_S(sk)), v2(cholesky_mo_num,n1_S(si),n4_S(sl)))
+              allocate(buffer(n2_S(sj),n3_S(sk),n1_S(si),n4_S(sl)))
+
+              call gen_v_space_chol(n2_S(sj),n3_S(sk),list2(1,sj),list3(1,sk),v1,cholesky_mo_num)
+              call gen_v_space_chol(n1_S(si),n4_S(sl),list1(1,si),list4(1,sl),v2,cholesky_mo_num)
+
+              call dgemm('T','N', n2_S(sj)*n3_S(sk), n1_S(si)*n4_S(sl), cholesky_mo_num, 1.d0, &
+                    v1, cholesky_mo_num, &
+                    v2, cholesky_mo_num, 0.d0, buffer, n2_S(sj)*n3_S(sk))
+
+              !$OMP PARALLEL &
+              !$OMP DEFAULT(SHARED) &
+              !$OMP PRIVATE(i,j,k,l,idx_i,idx_j,idx_k,idx_l)
+              !$OMP DO collapse(3)
+              do l = 1, n4_S(sl)
+                do k = 1, n3_S(sk)
+                  do j = 1, n2_S(sj)
+                    idx_l = l + l_shift
+                    idx_k = k + k_shift
+                    idx_j = j + j_shift
+                    do i = 1, n1_S(si)
+                      idx_i = i + i_shift
+                      v(idx_i,idx_j,idx_k,idx_l) = v(idx_i,idx_j,idx_k,idx_l) - buffer(j,k,i,l)
+                    enddo
                   enddo
                 enddo
               enddo
-            enddo
-            !$OMP END DO
+              !$OMP END DO
+              !$OMP END PARALLEL
 
-          ! <ab||ba> or <ba||ab>
-          elseif (si == sl .and. sj == sk) then
-            !$OMP DO collapse(3)
-            do tmp_l = 1, n4_S(sl)
-              do tmp_k = 1, n3_S(sk)
-                do tmp_j = 1, n2_S(sj)
-                  do tmp_i = 1, n1_S(si)
-                    l = list4(tmp_l,sl)
-                    idx_l = tmp_l + l_shift
-                    k = list3(tmp_k,sk)
-                    idx_k = tmp_k + k_shift
-                    j = list2(tmp_j,sj)
-                    idx_j = tmp_j + j_shift
-                    i = list1(tmp_i,si)
-                    idx_i = tmp_i + i_shift
-                       !v(idx_i,idx_j,idx_k,idx_l) = - mo_two_e_integral(j,i,k,l)
-                       v(idx_i,idx_j,idx_k,idx_l) = - cc_space_v(j,i,k,l)
+              deallocate(v1, v2, buffer)
+
+            ! <ab||ab> or <ba||ba>
+            elseif (si == sk .and. sj == sl) then
+
+              allocate(v1(cholesky_mo_num,n1_S(si),n3_S(sk)), v2(cholesky_mo_num,n2_S(sj),n4_S(sl)))
+              allocate(buffer(n1_S(si),n3_S(sk),n2_S(sj),n4_S(sl)))
+
+              call gen_v_space_chol(n1_S(si),n3_S(sk),list1(1,si),list3(1,sk),v1,cholesky_mo_num)
+              call gen_v_space_chol(n2_S(sj),n4_S(sl),list2(1,sj),list4(1,sl),v2,cholesky_mo_num)
+
+              call dgemm('T','N', n1_S(si)*n3_S(sk), n2_S(sj)*n4_S(sl), cholesky_mo_num, 1.d0, &
+                    v1, cholesky_mo_num, &
+                    v2, cholesky_mo_num, 0.d0, buffer, n1_S(si)*n3_S(sk))
+
+              !$OMP PARALLEL &
+              !$OMP DEFAULT(SHARED) &
+              !$OMP PRIVATE(i,j,k,l,idx_i,idx_j,idx_k,idx_l)
+              !$OMP DO collapse(3)
+              do l = 1, n4_S(sl)
+                do k = 1, n3_S(sk)
+                  do j = 1, n2_S(sj)
+                    idx_l = l + l_shift
+                    idx_k = k + k_shift
+                    idx_j = j + j_shift
+                    do i = 1, n1_S(si)
+                      idx_i = i + i_shift
+                      v(idx_i,idx_j,idx_k,idx_l) = buffer(i,k,j,l)
+                    enddo
                   enddo
                 enddo
               enddo
-            enddo
-            !$OMP END DO
-          else
-             !$OMP DO collapse(3)
-            do tmp_l = 1, n4_S(sl)
-              do tmp_k = 1, n3_S(sk)
-                do tmp_j = 1, n2_S(sj)
-                  do tmp_i = 1, n1_S(si)
-                    l = list4(tmp_l,sl)
-                    idx_l = tmp_l + l_shift
-                    k = list3(tmp_k,sk)
-                    idx_k = tmp_k + k_shift
-                    j = list2(tmp_j,sj)
-                    idx_j = tmp_j + j_shift
-                    i = list1(tmp_i,si)
-                    idx_i = tmp_i + i_shift
-                       v(idx_i,idx_j,idx_k,idx_l) = 0d0
+              !$OMP END DO
+              !$OMP END PARALLEL
+
+              deallocate(v1, v2, buffer)
+
+            ! <ab||ba> or <ba||ab>
+            elseif (si == sl .and. sj == sk) then
+
+              allocate(v1(cholesky_mo_num,n2_S(sj),n3_S(sk)), v2(cholesky_mo_num,n1_S(si),n4_S(sl)))
+              allocate(buffer(n2_S(sj),n3_S(sk),n1_S(si),n4_S(sl)))
+
+              call gen_v_space_chol(n2_S(sj),n3_S(sk),list2(1,sj),list3(1,sk),v1,cholesky_mo_num)
+              call gen_v_space_chol(n1_S(si),n4_S(sl),list1(1,si),list4(1,sl),v2,cholesky_mo_num)
+
+              call dgemm('T','N', n2_S(sj)*n3_S(sk), n1_S(si)*n4_S(sl), cholesky_mo_num, -1.d0, &
+                    v1, cholesky_mo_num, &
+                    v2, cholesky_mo_num, 0.d0, buffer, n2_S(sj)*n3_S(sk))
+
+              !$OMP PARALLEL &
+              !$OMP DEFAULT(SHARED) &
+              !$OMP PRIVATE(i,j,k,l,idx_i,idx_j,idx_k,idx_l)
+              !$OMP DO collapse(3)
+              do l = 1, n4_S(sl)
+                do k = 1, n3_S(sk)
+                  do j = 1, n2_S(sj)
+                    idx_l = l + l_shift
+                    idx_k = k + k_shift
+                    idx_j = j + j_shift
+                    do i = 1, n1_S(si)
+                      idx_i = i + i_shift
+                      v(idx_i,idx_j,idx_k,idx_l) = buffer(j,k,i,l)
+                    enddo
                   enddo
                 enddo
               enddo
-            enddo
-            !$OMP END DO
-          endif
+              !$OMP END DO
+              !$OMP END PARALLEL
 
+              deallocate(v1, v2, buffer)
+
+            else
+
+              !$OMP PARALLEL &
+              !$OMP DEFAULT(SHARED) &
+              !$OMP PRIVATE(i,j,k,l,idx_i,idx_j,idx_k,idx_l)
+              !$OMP DO collapse(3)
+              do l = 1, n4_S(sl)
+                do k = 1, n3_S(sk)
+                  do j = 1, n2_S(sj)
+                    idx_l = l + l_shift
+                    idx_k = k + k_shift
+                    idx_j = j + j_shift
+                    do i = 1, n1_S(si)
+                      idx_i = i + i_shift
+                      v(idx_i,idx_j,idx_k,idx_l) = 0d0
+                    enddo
+                  enddo
+                enddo
+              enddo
+              !$OMP END DO
+              !$OMP END PARALLEL
+
+            endif
+
+          enddo
         enddo
       enddo
     enddo
-  enddo
-  !$OMP END PARALLEL
+
+  else
+    !$OMP PARALLEL &
+    !$OMP SHARED(n1_S,n2_S,n3_S,n4_S,list1,list2,list3,list4,v) &
+    !$OMP PRIVATE(s,si,sj,sk,sl,i_shift,j_shift,k_shift,l_shift, &
+    !$OMP i,j,k,l,idx_i,idx_j,idx_k,idx_l,&
+    !$OMP tmp_i,tmp_j,tmp_k,tmp_l)&
+    !$OMP DEFAULT(NONE)
+
+    do sl = 1, 2
+      call shift_idx_spin(sl,n4_S,l_shift)
+      do sk = 1, 2
+        call shift_idx_spin(sk,n3_S,k_shift)
+        do sj = 1, 2
+          call shift_idx_spin(sj,n2_S,j_shift)
+          do si = 1, 2
+            call shift_idx_spin(si,n1_S,i_shift)
+
+            s = si+sj+sk+sl
+            ! <aa||aa> or <bb||bb>
+            if (s == 4 .or. s == 8) then
+              !$OMP DO collapse(3)
+              do tmp_l = 1, n4_S(sl)
+                do tmp_k = 1, n3_S(sk)
+                  do tmp_j = 1, n2_S(sj)
+                    l = list4(tmp_l,sl)
+                    idx_l = tmp_l + l_shift
+                    k = list3(tmp_k,sk)
+                    idx_k = tmp_k + k_shift
+                    j = list2(tmp_j,sj)
+                    idx_j = tmp_j + j_shift
+                    do tmp_i = 1, n1_S(si)
+                      i = list1(tmp_i,si)
+                      idx_i = tmp_i + i_shift
+                      v(idx_i,idx_j,idx_k,idx_l) = mo_two_e_integral(i,j,k,l) - mo_two_e_integral(j,i,k,l)
+                    enddo
+                  enddo
+                enddo
+              enddo
+              !$OMP END DO
+
+            ! <ab||ab> or <ba||ba>
+            elseif (si == sk .and. sj == sl) then
+              !$OMP DO collapse(3)
+              do tmp_l = 1, n4_S(sl)
+                do tmp_k = 1, n3_S(sk)
+                  do tmp_j = 1, n2_S(sj)
+                    l = list4(tmp_l,sl)
+                    idx_l = tmp_l + l_shift
+                    k = list3(tmp_k,sk)
+                    idx_k = tmp_k + k_shift
+                    j = list2(tmp_j,sj)
+                    idx_j = tmp_j + j_shift
+                    do tmp_i = 1, n1_S(si)
+                      i = list1(tmp_i,si)
+                      idx_i = tmp_i + i_shift
+                      v(idx_i,idx_j,idx_k,idx_l) = mo_two_e_integral(i,j,k,l)
+                    enddo
+                  enddo
+                enddo
+              enddo
+              !$OMP END DO
+
+            ! <ab||ba> or <ba||ab>
+            elseif (si == sl .and. sj == sk) then
+              !$OMP DO collapse(3)
+              do tmp_l = 1, n4_S(sl)
+                do tmp_k = 1, n3_S(sk)
+                  do tmp_j = 1, n2_S(sj)
+                    l = list4(tmp_l,sl)
+                    idx_l = tmp_l + l_shift
+                    k = list3(tmp_k,sk)
+                    idx_k = tmp_k + k_shift
+                    j = list2(tmp_j,sj)
+                    idx_j = tmp_j + j_shift
+                    do tmp_i = 1, n1_S(si)
+                      i = list1(tmp_i,si)
+                      idx_i = tmp_i + i_shift
+                      v(idx_i,idx_j,idx_k,idx_l) = - mo_two_e_integral(j,i,k,l)
+                    enddo
+                  enddo
+                enddo
+              enddo
+              !$OMP END DO
+            else
+               !$OMP DO collapse(3)
+              do tmp_l = 1, n4_S(sl)
+                do tmp_k = 1, n3_S(sk)
+                  do tmp_j = 1, n2_S(sj)
+                    idx_l = tmp_l + l_shift
+                    idx_k = tmp_k + k_shift
+                    idx_j = tmp_j + j_shift
+                    do tmp_i = 1, n1_S(si)
+                      i = list1(tmp_i,si)
+                      idx_i = tmp_i + i_shift
+                      v(idx_i,idx_j,idx_k,idx_l) = 0d0
+                    enddo
+                  enddo
+                enddo
+              enddo
+              !$OMP END DO
+            endif
+
+          enddo
+        enddo
+      enddo
+    enddo
+    !$OMP END PARALLEL
+
+  endif
 
 end
+
 
 ! V_3idx
 
@@ -1307,7 +1601,8 @@ subroutine gen_v_spin_3idx(n1,n2,n3,n4, idx_l, n1_S,n2_S,n3_S,n4_S, list1,list2,
   integer                       :: tmp_i,tmp_j,tmp_k,tmp_l
   integer                       :: si,sj,sk,sl,s
 
-  PROVIDE cc_space_v
+  double precision, allocatable :: buffer(:,:,:)
+  double precision, allocatable :: v1(:,:,:), v2(:,:,:)
 
   if (idx_l <= n4_S(1)) then
     sl = 1
@@ -1318,99 +1613,255 @@ subroutine gen_v_spin_3idx(n1,n2,n3,n4, idx_l, n1_S,n2_S,n3_S,n4_S, list1,list2,
   tmp_l = idx_l - l_shift
   l = list4(tmp_l,sl)
 
-  !$OMP PARALLEL &
-  !$OMP SHARED(l,sl,idx_l,cc_space_v,n1_S,n2_S,n3_S,n4_S,list1,list2,list3,list4,v_l) &
-  !$OMP PRIVATE(s,si,sj,sk,i_shift,j_shift,k_shift, &
-  !$OMP i,j,k,idx_i,idx_j,idx_k,&
-  !$OMP tmp_i,tmp_j,tmp_k)&
-  !$OMP DEFAULT(NONE)
+  if (do_mo_cholesky) then
 
-  do sk = 1, 2
-    call shift_idx_spin(sk,n3_S,k_shift)
-    do sj = 1, 2
-      call shift_idx_spin(sj,n2_S,j_shift)
-      do si = 1, 2
-        call shift_idx_spin(si,n1_S,i_shift)
+    do sk = 1, 2
+      call shift_idx_spin(sk,n3_S,k_shift)
+      do sj = 1, 2
+        call shift_idx_spin(sj,n2_S,j_shift)
+        do si = 1, 2
+          call shift_idx_spin(si,n1_S,i_shift)
 
-        s = si+sj+sk+sl
-        ! <aa||aa> or <bb||bb>
-        if (s == 4 .or. s == 8) then
-          !$OMP DO collapse(2)
-          do tmp_k = 1, n3_S(sk)
-            do tmp_j = 1, n2_S(sj)
-              do tmp_i = 1, n1_S(si)
-                k = list3(tmp_k,sk)
+          s = si+sj+sk+sl
+          ! <aa||aa> or <bb||bb>
+          if (s == 4 .or. s == 8) then
+
+              allocate(v1(cholesky_mo_num,n1_S(si),n3_S(sk)), v2(cholesky_mo_num,n2_S(sj),1))
+              allocate(buffer(n1_S(si),n3_S(sk),n2_S(sj)))
+
+              call gen_v_space_chol(n1_S(si),n3_S(sk),list1(1,si),list3(1,sk),v1,cholesky_mo_num)
+              call gen_v_space_chol(n2_S(sj),1,list2(1,sj),list4(tmp_l,sl),v2,cholesky_mo_num)
+
+              call dgemm('T','N', n1_S(si)*n3_S(sk), n2_S(sj), cholesky_mo_num, 1.d0, &
+                    v1, cholesky_mo_num, &
+                    v2, cholesky_mo_num, 0.d0, buffer, n1_S(si)*n3_S(sk))
+
+              !$OMP PARALLEL &
+              !$OMP DEFAULT(SHARED) &
+              !$OMP PRIVATE(i,j,k,idx_i,idx_j,idx_k)
+              !$OMP DO collapse(2)
+              do k = 1, n3_S(sk)
+                do j = 1, n2_S(sj)
+                    idx_k = k + k_shift
+                    idx_j = j + j_shift
+                    do i = 1, n1_S(si)
+                      idx_i = i + i_shift
+                      v_l(idx_i,idx_j,idx_k) = buffer(i,k,j)
+                    enddo
+                enddo
+              enddo
+              !$OMP END DO
+              !$OMP END PARALLEL
+
+              deallocate(v1, v2, buffer)
+
+              allocate(v1(cholesky_mo_num,n2_S(sj),n3_S(sk)), v2(cholesky_mo_num,n1_S(si),1))
+              allocate(buffer(n2_S(sj),n3_S(sk),n1_S(si)))
+
+              call gen_v_space_chol(n2_S(sj),n3_S(sk),list2(1,sj),list3(1,sk),v1,cholesky_mo_num)
+              call gen_v_space_chol(n1_S(si),1,list1(1,si),list4(tmp_l,sl),v2,cholesky_mo_num)
+
+              call dgemm('T','N', n2_S(sj)*n3_S(sk), n1_S(si), cholesky_mo_num, 1.d0, &
+                    v1, cholesky_mo_num, &
+                    v2, cholesky_mo_num, 0.d0, buffer, n2_S(sj)*n3_S(sk))
+
+              !$OMP PARALLEL &
+              !$OMP DEFAULT(SHARED) &
+              !$OMP PRIVATE(i,j,k,idx_i,idx_j,idx_k)
+              !$OMP DO collapse(2)
+              do k = 1, n3_S(sk)
+                do j = 1, n2_S(sj)
+                    idx_k = k + k_shift
+                    idx_j = j + j_shift
+                    do i = 1, n1_S(si)
+                      idx_i = i + i_shift
+                      v_l(idx_i,idx_j,idx_k) = v_l(idx_i,idx_j,idx_k) - buffer(j,k,i)
+                    enddo
+                enddo
+              enddo
+              !$OMP END DO
+              !$OMP END PARALLEL
+
+              deallocate(v1, v2, buffer)
+
+          ! <ab||ab> or <ba||ba>
+          elseif (si == sk .and. sj == sl) then
+
+              allocate(v1(cholesky_mo_num,n1_S(si),n3_S(sk)), v2(cholesky_mo_num,n2_S(sj),1))
+              allocate(buffer(n1_S(si),n3_S(sk),n2_S(sj)))
+
+              call gen_v_space_chol(n1_S(si),n3_S(sk),list1(1,si),list3(1,sk),v1,cholesky_mo_num)
+              call gen_v_space_chol(n2_S(sj),1,list2(1,sj),list4(tmp_l,sl),v2,cholesky_mo_num)
+
+              call dgemm('T','N', n1_S(si)*n3_S(sk), n2_S(sj), cholesky_mo_num, 1.d0, &
+                    v1, cholesky_mo_num, &
+                    v2, cholesky_mo_num, 0.d0, buffer, n1_S(si)*n3_S(sk))
+
+              !$OMP PARALLEL &
+              !$OMP DEFAULT(SHARED) &
+              !$OMP PRIVATE(i,j,k,idx_i,idx_j,idx_k)
+              !$OMP DO collapse(2)
+              do k = 1, n3_S(sk)
+                do j = 1, n2_S(sj)
+                    idx_k = k + k_shift
+                    idx_j = j + j_shift
+                    do i = 1, n1_S(si)
+                      idx_i = i + i_shift
+                      v_l(idx_i,idx_j,idx_k) = buffer(i,k,j)
+                    enddo
+                enddo
+              enddo
+              !$OMP END DO
+              !$OMP END PARALLEL
+
+              deallocate(v1, v2, buffer)
+
+          ! <ab||ba> or <ba||ab>
+          elseif (si == sl .and. sj == sk) then
+
+              allocate(v1(cholesky_mo_num,n2_S(sj),n3_S(sk)), v2(cholesky_mo_num,n1_S(si),1))
+              allocate(buffer(n2_S(sj),n3_S(sk),n1_S(si)))
+
+              call gen_v_space_chol(n2_S(sj),n3_S(sk),list2(1,sj),list3(1,sk),v1,cholesky_mo_num)
+              call gen_v_space_chol(n1_S(si),1,list1(1,si),list4(tmp_l,sl),v2,cholesky_mo_num)
+
+              call dgemm('T','N', n2_S(sj)*n3_S(sk), n1_S(si), cholesky_mo_num, -1.d0, &
+                    v1, cholesky_mo_num, &
+                    v2, cholesky_mo_num, 0.d0, buffer, n2_S(sj)*n3_S(sk))
+
+              !$OMP PARALLEL &
+              !$OMP DEFAULT(SHARED) &
+              !$OMP PRIVATE(i,j,k,idx_i,idx_j,idx_k,idx_l)
+              !$OMP DO collapse(2)
+              do k = 1, n3_S(sk)
+                do j = 1, n2_S(sj)
+                    idx_k = k + k_shift
+                    idx_j = j + j_shift
+                    do i = 1, n1_S(si)
+                      idx_i = i + i_shift
+                      v_l(idx_i,idx_j,idx_k) = buffer(j,k,i)
+                    enddo
+                enddo
+              enddo
+              !$OMP END DO
+              !$OMP END PARALLEL
+
+              deallocate(v1, v2, buffer)
+
+          else
+            !$OMP DO collapse(2)
+            do tmp_k = 1, n3_S(sk)
+              do tmp_j = 1, n2_S(sj)
                 idx_k = tmp_k + k_shift
-                j = list2(tmp_j,sj)
                 idx_j = tmp_j + j_shift
-                i = list1(tmp_i,si)
-                idx_i = tmp_i + i_shift
-                   !v(idx_i,idx_j,idx_k,idx_l) = mo_two_e_integral(i,j,k,l) - mo_two_e_integral(j,i,k,l)
-                   v_l(idx_i,idx_j,idx_k) = cc_space_v(i,j,k,l) - cc_space_v(j,i,k,l)
+                do tmp_i = 1, n1_S(si)
+                  idx_i = tmp_i + i_shift
+                  v_l(idx_i,idx_j,idx_k) = 0d0
+                enddo
               enddo
             enddo
-          enddo
-          !$OMP END DO
+            !$OMP END DO
 
-        ! <ab||ab> or <ba||ba>
-        elseif (si == sk .and. sj == sl) then
-          !$OMP DO collapse(2)
-          do tmp_k = 1, n3_S(sk)
-            do tmp_j = 1, n2_S(sj)
-              do tmp_i = 1, n1_S(si)
-                k = list3(tmp_k,sk)
-                idx_k = tmp_k + k_shift
-                j = list2(tmp_j,sj)
-                idx_j = tmp_j + j_shift
-                i = list1(tmp_i,si)
-                idx_i = tmp_i + i_shift
-                   !v(idx_i,idx_j,idx_k,idx_l) = mo_two_e_integral(i,j,k,l)
-                   v_l(idx_i,idx_j,idx_k) = cc_space_v(i,j,k,l)
-              enddo
-            enddo
-          enddo
-          !$OMP END DO
+          endif
 
-        ! <ab||ba> or <ba||ab>
-        elseif (si == sl .and. sj == sk) then
-          !$OMP DO collapse(2)
-          do tmp_k = 1, n3_S(sk)
-            do tmp_j = 1, n2_S(sj)
-              do tmp_i = 1, n1_S(si)
-                k = list3(tmp_k,sk)
-                idx_k = tmp_k + k_shift
-                j = list2(tmp_j,sj)
-                idx_j = tmp_j + j_shift
-                i = list1(tmp_i,si)
-                idx_i = tmp_i + i_shift
-                   !v(idx_i,idx_j,idx_k,idx_l) = - mo_two_e_integral(j,i,k,l)
-                   v_l(idx_i,idx_j,idx_k) = - cc_space_v(j,i,k,l)
-              enddo
-            enddo
-          enddo
-          !$OMP END DO
-        else
-          !$OMP DO collapse(2)
-          do tmp_k = 1, n3_S(sk)
-            do tmp_j = 1, n2_S(sj)
-              do tmp_i = 1, n1_S(si)
-                k = list3(tmp_k,sk)
-                idx_k = tmp_k + k_shift
-                j = list2(tmp_j,sj)
-                idx_j = tmp_j + j_shift
-                i = list1(tmp_i,si)
-                idx_i = tmp_i + i_shift
-                   v_l(idx_i,idx_j,idx_k) = 0d0
-              enddo
-            enddo
-          enddo
-          !$OMP END DO
-        endif
-
+        enddo
       enddo
     enddo
-  enddo
-  !$OMP END PARALLEL
+
+
+  else
+
+    PROVIDE cc_space_v
+
+    !$OMP PARALLEL &
+    !$OMP SHARED(l,sl,idx_l,cc_space_v,n1_S,n2_S,n3_S,n4_S,list1,list2,list3,list4,v_l) &
+    !$OMP PRIVATE(s,si,sj,sk,i_shift,j_shift,k_shift, &
+    !$OMP i,j,k,idx_i,idx_j,idx_k,&
+    !$OMP tmp_i,tmp_j,tmp_k)&
+    !$OMP DEFAULT(NONE)
+
+    do sk = 1, 2
+      call shift_idx_spin(sk,n3_S,k_shift)
+      do sj = 1, 2
+        call shift_idx_spin(sj,n2_S,j_shift)
+        do si = 1, 2
+          call shift_idx_spin(si,n1_S,i_shift)
+
+          s = si+sj+sk+sl
+          ! <aa||aa> or <bb||bb>
+          if (s == 4 .or. s == 8) then
+            !$OMP DO collapse(2)
+            do tmp_k = 1, n3_S(sk)
+              do tmp_j = 1, n2_S(sj)
+                k = list3(tmp_k,sk)
+                idx_k = tmp_k + k_shift
+                j = list2(tmp_j,sj)
+                idx_j = tmp_j + j_shift
+                do tmp_i = 1, n1_S(si)
+                  i = list1(tmp_i,si)
+                  idx_i = tmp_i + i_shift
+                  v_l(idx_i,idx_j,idx_k) = cc_space_v(i,j,k,l) - cc_space_v(j,i,k,l)
+                enddo
+              enddo
+            enddo
+            !$OMP END DO
+
+          ! <ab||ab> or <ba||ba>
+          elseif (si == sk .and. sj == sl) then
+            !$OMP DO collapse(2)
+            do tmp_k = 1, n3_S(sk)
+              do tmp_j = 1, n2_S(sj)
+                k = list3(tmp_k,sk)
+                idx_k = tmp_k + k_shift
+                j = list2(tmp_j,sj)
+                idx_j = tmp_j + j_shift
+                do tmp_i = 1, n1_S(si)
+                  i = list1(tmp_i,si)
+                  idx_i = tmp_i + i_shift
+                  v_l(idx_i,idx_j,idx_k) = cc_space_v(i,j,k,l)
+                enddo
+              enddo
+            enddo
+            !$OMP END DO
+
+          ! <ab||ba> or <ba||ab>
+          elseif (si == sl .and. sj == sk) then
+            !$OMP DO collapse(2)
+            do tmp_k = 1, n3_S(sk)
+              do tmp_j = 1, n2_S(sj)
+                k = list3(tmp_k,sk)
+                idx_k = tmp_k + k_shift
+                j = list2(tmp_j,sj)
+                idx_j = tmp_j + j_shift
+                do tmp_i = 1, n1_S(si)
+                  i = list1(tmp_i,si)
+                  idx_i = tmp_i + i_shift
+                  v_l(idx_i,idx_j,idx_k) = - cc_space_v(j,i,k,l)
+                enddo
+              enddo
+            enddo
+            !$OMP END DO
+          else
+            !$OMP DO collapse(2)
+            do tmp_k = 1, n3_S(sk)
+              do tmp_j = 1, n2_S(sj)
+                idx_k = tmp_k + k_shift
+                idx_j = tmp_j + j_shift
+                do tmp_i = 1, n1_S(si)
+                  idx_i = tmp_i + i_shift
+                  v_l(idx_i,idx_j,idx_k) = 0d0
+                enddo
+              enddo
+            enddo
+            !$OMP END DO
+          endif
+
+        enddo
+      enddo
+    enddo
+    !$OMP END PARALLEL
+
+  endif
 
 end
 
@@ -1436,7 +1887,8 @@ subroutine gen_v_spin_3idx_ij_l(n1,n2,n3,n4, idx_k, n1_S,n2_S,n3_S,n4_S, list1,l
   integer                       :: tmp_i,tmp_j,tmp_k,tmp_l
   integer                       :: si,sj,sk,sl,s
 
-  PROVIDE cc_space_v
+  double precision, allocatable :: buffer(:,:,:)
+  double precision, allocatable :: v1(:,:,:), v2(:,:,:)
 
   if (idx_k <= n3_S(1)) then
     sk = 1
@@ -1447,100 +1899,257 @@ subroutine gen_v_spin_3idx_ij_l(n1,n2,n3,n4, idx_k, n1_S,n2_S,n3_S,n4_S, list1,l
   tmp_k = idx_k - k_shift
   k = list3(tmp_k,sk)
 
-  !$OMP PARALLEL &
-  !$OMP SHARED(k,sk,idx_k,cc_space_v,n1_S,n2_S,n3_S,n4_S,list1,list2,list3,list4,v_k) &
-  !$OMP PRIVATE(s,si,sj,sl,i_shift,j_shift,l_shift, &
-  !$OMP i,j,l,idx_i,idx_j,idx_l,&
-  !$OMP tmp_i,tmp_j,tmp_l)&
-  !$OMP DEFAULT(NONE)
+  if (do_mo_cholesky) then
 
-  do sl = 1, 2
-    call shift_idx_spin(sl,n4_S,l_shift)
-    do sj = 1, 2
-      call shift_idx_spin(sj,n2_S,j_shift)
-      do si = 1, 2
-        call shift_idx_spin(si,n1_S,i_shift)
+    do sl = 1, 2
+      call shift_idx_spin(sl,n4_S,l_shift)
+      do sj = 1, 2
+        call shift_idx_spin(sj,n2_S,j_shift)
+        do si = 1, 2
+          call shift_idx_spin(si,n1_S,i_shift)
 
-        s = si+sj+sk+sl
-        ! <aa||aa> or <bb||bb>
-        if (s == 4 .or. s == 8) then
-          !$OMP DO collapse(2)
-          do tmp_l = 1, n4_S(sl)
-            do tmp_j = 1, n2_S(sj)
-              do tmp_i = 1, n1_S(si)
-                l = list4(tmp_l,sl)
+          s = si+sj+sk+sl
+          ! <aa||aa> or <bb||bb>
+          if (s == 4 .or. s == 8) then
+
+              allocate(v1(cholesky_mo_num,n1_S(si),1), v2(cholesky_mo_num,n2_S(sj),n4_S(sl)))
+              allocate(buffer(n1_S(si),n2_S(sj),n4_S(sl)))
+
+              call gen_v_space_chol(n1_S(si),1,list1(1,si),list3(tmp_k,sk),v1,cholesky_mo_num)
+              call gen_v_space_chol(n2_S(sj),n4_S(sl),list2(1,sj),list4(1,sl),v2,cholesky_mo_num)
+
+              call dgemm('T','N', n1_S(si), n2_S(sj)*n4_S(sl), cholesky_mo_num, 1.d0, &
+                    v1, cholesky_mo_num, &
+                    v2, cholesky_mo_num, 0.d0, buffer, n1_S(si))
+
+              !$OMP PARALLEL &
+              !$OMP DEFAULT(SHARED) &
+              !$OMP PRIVATE(i,j,l,idx_i,idx_j,idx_l)
+              !$OMP DO collapse(2)
+              do l = 1, n4_S(sl)
+                do j = 1, n2_S(sj)
+                    idx_l = l + l_shift
+                    idx_j = j + j_shift
+                    do i = 1, n1_S(si)
+                      idx_i = i + i_shift
+                      v_k(idx_i,idx_j,idx_l) = buffer(i,j,l)
+                    enddo
+                enddo
+              enddo
+              !$OMP END DO
+              !$OMP END PARALLEL
+
+              deallocate(v1, v2, buffer)
+
+              allocate(v1(cholesky_mo_num,n2_S(sj),1), v2(cholesky_mo_num,n1_S(si),n4_S(sl)))
+              allocate(buffer(n2_S(sj),n1_S(si),n4_S(sl)))
+
+              call gen_v_space_chol(n2_S(sj),1,list2(1,sj),list3(tmp_k,sk),v1,cholesky_mo_num)
+              call gen_v_space_chol(n1_S(si),n4_S(sl),list1(1,si),list4(1,sl),v2,cholesky_mo_num)
+
+              call dgemm('T','N', n2_S(sj), n1_S(si)*n4_S(sl), cholesky_mo_num, 1.d0, &
+                    v1, cholesky_mo_num, &
+                    v2, cholesky_mo_num, 0.d0, buffer, n2_S(sj))
+
+              !$OMP PARALLEL &
+              !$OMP DEFAULT(SHARED) &
+              !$OMP PRIVATE(i,j,l,idx_i,idx_j,idx_l)
+              !$OMP DO collapse(2)
+              do l = 1, n4_S(sl)
+                do j = 1, n2_S(sj)
+                    idx_l = l + l_shift
+                    idx_j = j + j_shift
+                    do i = 1, n1_S(si)
+                      idx_i = i + i_shift
+                      v_k(idx_i,idx_j,idx_l) = v_k(idx_i,idx_j,idx_l) - buffer(j,i,l)
+                    enddo
+                enddo
+              enddo
+              !$OMP END DO
+              !$OMP END PARALLEL
+
+              deallocate(v1, v2, buffer)
+
+          ! <ab||ab> or <ba||ba>
+          elseif (si == sk .and. sj == sl) then
+
+              allocate(v1(cholesky_mo_num,n1_S(si),1), v2(cholesky_mo_num,n2_S(sj),n4_S(sl)))
+              allocate(buffer(n1_S(si),n2_S(sj),n4_S(sl)))
+
+              call gen_v_space_chol(n1_S(si),1,list1(1,si),list3(tmp_k,sk),v1,cholesky_mo_num)
+              call gen_v_space_chol(n2_S(sj),n4_S(sl),list2(1,sj),list4(1,sl),v2,cholesky_mo_num)
+
+              call dgemm('T','N', n1_S(si), n2_S(sj)*n4_S(sl), cholesky_mo_num, 1.d0, &
+                    v1, cholesky_mo_num, &
+                    v2, cholesky_mo_num, 0.d0, buffer, n1_S(si))
+
+              !$OMP PARALLEL &
+              !$OMP DEFAULT(SHARED) &
+              !$OMP PRIVATE(i,j,l,idx_i,idx_j,idx_l)
+              !$OMP DO collapse(2)
+              do l = 1, n4_S(sl)
+                do j = 1, n2_S(sj)
+                    idx_l = l + l_shift
+                    idx_j = j + j_shift
+                    do i = 1, n1_S(si)
+                      idx_i = i + i_shift
+                      v_k(idx_i,idx_j,idx_l) = buffer(i,j,l)
+                    enddo
+                enddo
+              enddo
+              !$OMP END DO
+              !$OMP END PARALLEL
+
+              deallocate(v1, v2, buffer)
+
+          ! <ab||ba> or <ba||ab>
+          elseif (si == sl .and. sj == sk) then
+
+              allocate(v1(cholesky_mo_num,n2_S(sj),1), v2(cholesky_mo_num,n1_S(si),n4_S(sl)))
+              allocate(buffer(n2_S(sj),n1_S(si),n4_S(sl)))
+
+              call gen_v_space_chol(n2_S(sj),1,list2(1,sj),list3(tmp_k,sk),v1,cholesky_mo_num)
+              call gen_v_space_chol(n1_S(si),n4_S(sl),list1(1,si),list4(1,sl),v2,cholesky_mo_num)
+
+              call dgemm('T','N', n2_S(sj), n1_S(si)*n4_S(sl), cholesky_mo_num, -1.d0, &
+                    v1, cholesky_mo_num, &
+                    v2, cholesky_mo_num, 0.d0, buffer, n2_S(sj))
+
+              !$OMP PARALLEL &
+              !$OMP DEFAULT(SHARED) &
+              !$OMP PRIVATE(i,j,l,idx_i,idx_j,idx_l)
+              !$OMP DO collapse(2)
+              do l = 1, n4_S(sl)
+                do j = 1, n2_S(sj)
+                    idx_l = l + l_shift
+                    idx_j = j + j_shift
+                    do i = 1, n1_S(si)
+                      idx_i = i + i_shift
+                      v_k(idx_i,idx_j,idx_l) = buffer(j,i,l)
+                    enddo
+                enddo
+              enddo
+              !$OMP END DO
+              !$OMP END PARALLEL
+
+              deallocate(v1, v2, buffer)
+
+          else
+            !$OMP DO collapse(2)
+            do tmp_l = 1, n4_S(sl)
+              do tmp_j = 1, n2_S(sj)
                 idx_l = tmp_l + l_shift
-                j = list2(tmp_j,sj)
                 idx_j = tmp_j + j_shift
-                i = list1(tmp_i,si)
-                idx_i = tmp_i + i_shift
-                   !v(idx_i,idx_j,idx_k,idx_l) = mo_two_e_integral(i,j,k,l) - mo_two_e_integral(j,i,k,l)
-                   v_k(idx_i,idx_j,idx_l) = cc_space_v(i,j,k,l) - cc_space_v(j,i,k,l)
+                do tmp_i = 1, n1_S(si)
+                  idx_i = tmp_i + i_shift
+                  v_k(idx_i,idx_j,idx_l) = 0d0
+                enddo
               enddo
             enddo
-          enddo
-          !$OMP END DO
+            !$OMP END DO
 
-        ! <ab||ab> or <ba||ba>
-        elseif (si == sk .and. sj == sl) then
-          !$OMP DO collapse(2)
-          do tmp_l = 1, n4_S(sl)
-            do tmp_j = 1, n2_S(sj)
-              do tmp_i = 1, n1_S(si)
-                l = list4(tmp_l,sl)
-                idx_l = tmp_l + l_shift
-                j = list2(tmp_j,sj)
-                idx_j = tmp_j + j_shift
-                i = list1(tmp_i,si)
-                idx_i = tmp_i + i_shift
-                   !v(idx_i,idx_j,idx_k,idx_l) = mo_two_e_integral(i,j,k,l)
-                   v_k(idx_i,idx_j,idx_l) = cc_space_v(i,j,k,l)
-              enddo
-            enddo
-          enddo
-          !$OMP END DO
+          endif
 
-        ! <ab||ba> or <ba||ab>
-        elseif (si == sl .and. sj == sk) then
-          !$OMP DO collapse(2)
-          do tmp_l = 1, n4_S(sl)
-            do tmp_j = 1, n2_S(sj)
-              do tmp_i = 1, n1_S(si)
-                l = list4(tmp_l,sl)
-                idx_l = tmp_l + l_shift
-                j = list2(tmp_j,sj)
-                idx_j = tmp_j + j_shift
-                i = list1(tmp_i,si)
-                idx_i = tmp_i + i_shift
-                   !v(idx_i,idx_j,idx_k,idx_l) = - mo_two_e_integral(j,i,k,l)
-                   v_k(idx_i,idx_j,idx_l) = - cc_space_v(j,i,k,l)
-              enddo
-            enddo
-          enddo
-          !$OMP END DO
-        else
-          !$OMP DO collapse(2)
-          do tmp_l = 1, n4_S(sl)
-            do tmp_j = 1, n2_S(sj)
-              do tmp_i = 1, n1_S(si)
-                l = list4(tmp_l,sl)
-                idx_l = tmp_l + l_shift
-                j = list2(tmp_j,sj)
-                idx_j = tmp_j + j_shift
-                i = list1(tmp_i,si)
-                idx_i = tmp_i + i_shift
-                   v_k(idx_i,idx_j,idx_l) = 0d0
-              enddo
-            enddo
-          enddo
-          !$OMP END DO
-        endif
-
+        enddo
       enddo
     enddo
-  enddo
-  !$OMP END PARALLEL
 
+  else
+
+    PROVIDE cc_space_v
+
+    !$OMP PARALLEL &
+    !$OMP SHARED(k,sk,idx_k,cc_space_v,n1_S,n2_S,n3_S,n4_S,list1,list2,list3,list4,v_k) &
+    !$OMP PRIVATE(s,si,sj,sl,i_shift,j_shift,l_shift, &
+    !$OMP i,j,l,idx_i,idx_j,idx_l,&
+    !$OMP tmp_i,tmp_j,tmp_l)&
+    !$OMP DEFAULT(NONE)
+
+    do sl = 1, 2
+      call shift_idx_spin(sl,n4_S,l_shift)
+      do sj = 1, 2
+        call shift_idx_spin(sj,n2_S,j_shift)
+        do si = 1, 2
+          call shift_idx_spin(si,n1_S,i_shift)
+
+          s = si+sj+sk+sl
+          ! <aa||aa> or <bb||bb>
+          if (s == 4 .or. s == 8) then
+            !$OMP DO collapse(2)
+            do tmp_l = 1, n4_S(sl)
+              do tmp_j = 1, n2_S(sj)
+                l = list4(tmp_l,sl)
+                idx_l = tmp_l + l_shift
+                j = list2(tmp_j,sj)
+                idx_j = tmp_j + j_shift
+                do tmp_i = 1, n1_S(si)
+                  i = list1(tmp_i,si)
+                  idx_i = tmp_i + i_shift
+                  v_k(idx_i,idx_j,idx_l) = cc_space_v(i,j,k,l) - cc_space_v(j,i,k,l)
+                enddo
+              enddo
+            enddo
+            !$OMP END DO
+
+          ! <ab||ab> or <ba||ba>
+          elseif (si == sk .and. sj == sl) then
+            !$OMP DO collapse(2)
+            do tmp_l = 1, n4_S(sl)
+              do tmp_j = 1, n2_S(sj)
+                l = list4(tmp_l,sl)
+                idx_l = tmp_l + l_shift
+                j = list2(tmp_j,sj)
+                idx_j = tmp_j + j_shift
+                do tmp_i = 1, n1_S(si)
+                  i = list1(tmp_i,si)
+                  idx_i = tmp_i + i_shift
+                  v_k(idx_i,idx_j,idx_l) = cc_space_v(i,j,k,l)
+                enddo
+              enddo
+            enddo
+            !$OMP END DO
+
+          ! <ab||ba> or <ba||ab>
+          elseif (si == sl .and. sj == sk) then
+            !$OMP DO collapse(2)
+            do tmp_l = 1, n4_S(sl)
+              do tmp_j = 1, n2_S(sj)
+                l = list4(tmp_l,sl)
+                idx_l = tmp_l + l_shift
+                j = list2(tmp_j,sj)
+                idx_j = tmp_j + j_shift
+                do tmp_i = 1, n1_S(si)
+                  i = list1(tmp_i,si)
+                  idx_i = tmp_i + i_shift
+                  v_k(idx_i,idx_j,idx_l) = - cc_space_v(j,i,k,l)
+                enddo
+              enddo
+            enddo
+            !$OMP END DO
+          else
+            !$OMP DO collapse(2)
+            do tmp_l = 1, n4_S(sl)
+              do tmp_j = 1, n2_S(sj)
+                l = list4(tmp_l,sl)
+                idx_l = tmp_l + l_shift
+                j = list2(tmp_j,sj)
+                idx_j = tmp_j + j_shift
+                do tmp_i = 1, n1_S(si)
+                  i = list1(tmp_i,si)
+                  idx_i = tmp_i + i_shift
+                  v_k(idx_i,idx_j,idx_l) = 0d0
+                enddo
+              enddo
+            enddo
+            !$OMP END DO
+          endif
+
+        enddo
+      enddo
+    enddo
+    !$OMP END PARALLEL
+
+  endif
 end
 
 ! V_3idx_i_kl
@@ -1565,7 +2174,8 @@ subroutine gen_v_spin_3idx_i_kl(n1,n2,n3,n4, idx_j, n1_S,n2_S,n3_S,n4_S, list1,l
   integer                       :: tmp_i,tmp_j,tmp_k,tmp_l
   integer                       :: si,sj,sk,sl,s
 
-  PROVIDE cc_space_v
+  double precision, allocatable :: buffer(:,:,:)
+  double precision, allocatable :: v1(:,:,:), v2(:,:,:)
 
   if (idx_j <= n2_S(1)) then
     sj = 1
@@ -1576,98 +2186,265 @@ subroutine gen_v_spin_3idx_i_kl(n1,n2,n3,n4, idx_j, n1_S,n2_S,n3_S,n4_S, list1,l
   tmp_j = idx_j - j_shift
   j = list2(tmp_j,sj)
 
-  !$OMP PARALLEL &
-  !$OMP SHARED(j,sj,idx_j,cc_space_v,n1_S,n2_S,n3_S,n4_S,list1,list2,list3,list4,v_j) &
-  !$OMP PRIVATE(s,si,sk,sl,i_shift,l_shift,k_shift, &
-  !$OMP i,k,l,idx_i,idx_k,idx_l,&
-  !$OMP tmp_i,tmp_k,tmp_l)&
-  !$OMP DEFAULT(NONE)
 
-  do sl = 1, 2
-    call shift_idx_spin(sl,n4_S,l_shift)
-    do sk = 1, 2
-      call shift_idx_spin(sk,n3_S,k_shift)
-      do si = 1, 2
-        call shift_idx_spin(si,n1_S,i_shift)
+  if (do_mo_cholesky) then
+    do sl = 1, 2
+      call shift_idx_spin(sl,n4_S,l_shift)
+      do sk = 1, 2
+        call shift_idx_spin(sk,n3_S,k_shift)
+        do si = 1, 2
+          call shift_idx_spin(si,n1_S,i_shift)
 
-        s = si+sj+sk+sl
-        ! <aa||aa> or <bb||bb>
-        if (s == 4 .or. s == 8) then
-          !$OMP DO collapse(2)
-          do tmp_l = 1, n4_S(sl)
-            do tmp_k = 1, n3_S(sk)
-              do tmp_i = 1, n1_S(si)
-                l = list4(tmp_l,sl)
-                idx_l = tmp_l + l_shift
-                k = list3(tmp_k,sk)
-                idx_k = tmp_k + k_shift
-                i = list1(tmp_i,si)
-                idx_i = tmp_i + i_shift
-                   !v(idx_i,idx_j,idx_k,idx_l) = mo_two_e_integral(i,j,k,l) - mo_two_e_integral(j,i,k,l)
-                   v_j(idx_i,idx_k,idx_l) = cc_space_v(i,j,k,l) - cc_space_v(j,i,k,l)
+          s = si+sj+sk+sl
+          ! <aa||aa> or <bb||bb>
+          if (s == 4 .or. s == 8) then
+
+              allocate(v1(cholesky_mo_num,n1_S(si),n3_S(sk)), v2(cholesky_mo_num,1,n4_S(sl)))
+              allocate(buffer(n1_S(si),n3_S(sk),n4_S(sl)))
+
+              call gen_v_space_chol(n1_S(si),n3_S(sk),list1(1,si),list3(1,sk),v1,cholesky_mo_num)
+              call gen_v_space_chol(1,n4_S(sl),list2(tmp_j,sj),list4(1,sl),v2,cholesky_mo_num)
+
+              call dgemm('T','N', n1_S(si)*n3_S(sk), n4_S(sl), cholesky_mo_num, 1.d0, &
+                    v1, cholesky_mo_num, &
+                    v2, cholesky_mo_num, 0.d0, buffer, n1_S(si)*n3_S(sk))
+
+              !$OMP PARALLEL &
+              !$OMP DEFAULT(SHARED) &
+              !$OMP PRIVATE(i,k,l,idx_i,idx_k,idx_l)
+              !$OMP DO collapse(2)
+              do l = 1, n4_S(sl)
+                do k = 1, n3_S(sk)
+                    idx_l = l + l_shift
+                    idx_k = k + k_shift
+                    do i = 1, n1_S(si)
+                      idx_i = i + i_shift
+                      v_j(idx_i,idx_k,idx_l) = buffer(i,k,l)
+                    enddo
+                enddo
               enddo
-            enddo
-          enddo
-          !$OMP END DO
+              !$OMP END DO
+              !$OMP END PARALLEL
 
-        ! <ab||ab> or <ba||ba>
-        elseif (si == sk .and. sj == sl) then
-          !$OMP DO collapse(2)
-          do tmp_l = 1, n4_S(sl)
-            do tmp_k = 1, n3_S(sk)
-              do tmp_i = 1, n1_S(si)
-                l = list4(tmp_l,sl)
-                idx_l = tmp_l + l_shift
-                k = list3(tmp_k,sk)
-                idx_k = tmp_k + k_shift
-                i = list1(tmp_i,si)
-                idx_i = tmp_i + i_shift
-                   !v(idx_i,idx_j,idx_k,idx_l) = mo_two_e_integral(i,j,k,l)
-                   v_j(idx_i,idx_k,idx_l) = cc_space_v(i,j,k,l)
-              enddo
-            enddo
-          enddo
-          !$OMP END DO
+              deallocate(v1, v2, buffer)
 
-        ! <ab||ba> or <ba||ab>
-        elseif (si == sl .and. sj == sk) then
-          !$OMP DO collapse(2)
-          do tmp_l = 1, n4_S(sl)
-            do tmp_k = 1, n3_S(sk)
-              do tmp_i = 1, n1_S(si)
-                l = list4(tmp_l,sl)
-                idx_l = tmp_l + l_shift
-                k = list3(tmp_k,sk)
-                idx_k = tmp_k + k_shift
-                i = list1(tmp_i,si)
-                idx_i = tmp_i + i_shift
-                   !v(idx_i,idx_j,idx_k,idx_l) = - mo_two_e_integral(j,i,k,l)
-                   v_j(idx_i,idx_k,idx_l) = - cc_space_v(j,i,k,l)
-              enddo
-            enddo
-          enddo
-          !$OMP END DO
-        else
-          !$OMP DO collapse(2)
-          do tmp_l = 1, n4_S(sl)
-            do tmp_k = 1, n3_S(sk)
-              do tmp_i = 1, n1_S(si)
-                l = list4(tmp_l,sl)
-                idx_l = tmp_l + l_shift
-                k = list3(tmp_k,sk)
-                idx_k = tmp_k + k_shift
-                i = list1(tmp_i,si)
-                idx_i = tmp_i + i_shift
-                   v_j(idx_i,idx_k,idx_l) = 0d0
-              enddo
-            enddo
-          enddo
-          !$OMP END DO
-        endif
+              allocate(v1(cholesky_mo_num,1,n3_S(sk)), v2(cholesky_mo_num,n1_S(si),n4_S(sl)))
+              allocate(buffer(n3_S(sk),n1_S(si),n4_S(sl)))
 
+              call gen_v_space_chol(1,n3_S(sk),list2(tmp_j,sj),list3(1,sk),v1,cholesky_mo_num)
+              call gen_v_space_chol(n1_S(si),n4_S(sl),list1(1,si),list4(1,sl),v2,cholesky_mo_num)
+
+              call dgemm('T','N', n3_S(sk), n1_S(si)*n4_S(sl), cholesky_mo_num, 1.d0, &
+                    v1, cholesky_mo_num, &
+                    v2, cholesky_mo_num, 0.d0, buffer, n3_S(sk))
+
+              !$OMP PARALLEL &
+              !$OMP DEFAULT(SHARED) &
+              !$OMP PRIVATE(i,k,l,idx_i,idx_k,idx_l)
+              !$OMP DO collapse(2)
+              do l = 1, n4_S(sl)
+                do k = 1, n3_S(sk)
+                    idx_l = l + l_shift
+                    idx_k = k + k_shift
+                    do i = 1, n1_S(si)
+                      idx_i = i + i_shift
+                      v_j(idx_i,idx_k,idx_l) = v_j(idx_i,idx_k,idx_l) - buffer(k,i,l)
+                    enddo
+                enddo
+              enddo
+              !$OMP END DO
+              !$OMP END PARALLEL
+
+              deallocate(v1, v2, buffer)
+
+          ! <ab||ab> or <ba||ba>
+          elseif (si == sk .and. sj == sl) then
+
+              allocate(v1(cholesky_mo_num,n1_S(si),n3_S(sk)), v2(cholesky_mo_num,1,n4_S(sl)))
+              allocate(buffer(n1_S(si),n3_S(sk),n4_S(sl)))
+
+              call gen_v_space_chol(n1_S(si),n3_S(sk),list1(1,si),list3(1,sk),v1,cholesky_mo_num)
+              call gen_v_space_chol(1,n4_S(sl),list2(tmp_j,sj),list4(1,sl),v2,cholesky_mo_num)
+
+              call dgemm('T','N', n1_S(si)*n3_S(sk), n4_S(sl), cholesky_mo_num, 1.d0, &
+                    v1, cholesky_mo_num, &
+                    v2, cholesky_mo_num, 0.d0, buffer, n1_S(si)*n3_S(sk))
+
+              !$OMP PARALLEL &
+              !$OMP DEFAULT(SHARED) &
+              !$OMP PRIVATE(i,k,l,idx_i,idx_k,idx_l)
+              !$OMP DO collapse(2)
+              do l = 1, n4_S(sl)
+                do k = 1, n3_S(sk)
+                    idx_l = l + l_shift
+                    idx_k = k + k_shift
+                    do i = 1, n1_S(si)
+                      idx_i = i + i_shift
+                      v_j(idx_i,idx_k,idx_l) = buffer(i,k,l)
+                    enddo
+                enddo
+              enddo
+              !$OMP END DO
+              !$OMP END PARALLEL
+
+              deallocate(v1, v2, buffer)
+
+          ! <ab||ba> or <ba||ab>
+          elseif (si == sl .and. sj == sk) then
+
+              allocate(v1(cholesky_mo_num,1,n3_S(sk)), v2(cholesky_mo_num,n1_S(si),n4_S(sl)))
+              allocate(buffer(n3_S(sk),n1_S(si),n4_S(sl)))
+
+              call gen_v_space_chol(1,n3_S(sk),list2(tmp_j,sj),list3(1,sk),v1,cholesky_mo_num)
+              call gen_v_space_chol(n1_S(si),n4_S(sl),list1(1,si),list4(1,sl),v2,cholesky_mo_num)
+
+              call dgemm('T','N', n3_S(sk), n1_S(si)*n4_S(sl), cholesky_mo_num, -1.d0, &
+                    v1, cholesky_mo_num, &
+                    v2, cholesky_mo_num, 0.d0, buffer, n3_S(sk))
+
+              !$OMP PARALLEL &
+              !$OMP DEFAULT(SHARED) &
+              !$OMP PRIVATE(i,k,l,idx_i,idx_k,idx_l)
+              !$OMP DO collapse(2)
+              do l = 1, n4_S(sl)
+                do k = 1, n3_S(sk)
+                    idx_l = l + l_shift
+                    idx_k = k + k_shift
+                    do i = 1, n1_S(si)
+                      idx_i = i + i_shift
+                      v_j(idx_i,idx_k,idx_l) = buffer(k,i,l)
+                    enddo
+                enddo
+              enddo
+              !$OMP END DO
+              !$OMP END PARALLEL
+
+              deallocate(v1, v2, buffer)
+
+          else
+
+              !$OMP PARALLEL &
+              !$OMP DEFAULT(SHARED) &
+              !$OMP PRIVATE(i,k,l,idx_i,idx_k,idx_l)
+              !$OMP DO collapse(2)
+              do l = 1, n4_S(sl)
+                do k = 1, n3_S(sk)
+                    idx_l = l + l_shift
+                    idx_k = k + k_shift
+                    do i = 1, n1_S(si)
+                      idx_i = i + i_shift
+                      v_j(idx_i,idx_k,idx_l) = 0d0
+                    enddo
+                enddo
+              enddo
+              !$OMP END DO
+              !$OMP END PARALLEL
+
+          endif
+
+        enddo
       enddo
     enddo
-  enddo
-  !$OMP END PARALLEL
 
+
+
+  else
+
+    PROVIDE cc_space_v
+
+    !$OMP PARALLEL &
+    !$OMP SHARED(j,sj,idx_j,cc_space_v,n1_S,n2_S,n3_S,n4_S,list1,list2,list3,list4,v_j) &
+    !$OMP PRIVATE(s,si,sk,sl,i_shift,l_shift,k_shift, &
+    !$OMP i,k,l,idx_i,idx_k,idx_l,&
+    !$OMP tmp_i,tmp_k,tmp_l)&
+    !$OMP DEFAULT(NONE)
+
+    do sl = 1, 2
+      call shift_idx_spin(sl,n4_S,l_shift)
+      do sk = 1, 2
+        call shift_idx_spin(sk,n3_S,k_shift)
+        do si = 1, 2
+          call shift_idx_spin(si,n1_S,i_shift)
+
+          s = si+sj+sk+sl
+          ! <aa||aa> or <bb||bb>
+          if (s == 4 .or. s == 8) then
+            !$OMP DO collapse(2)
+            do tmp_l = 1, n4_S(sl)
+              do tmp_k = 1, n3_S(sk)
+                l = list4(tmp_l,sl)
+                idx_l = tmp_l + l_shift
+                k = list3(tmp_k,sk)
+                idx_k = tmp_k + k_shift
+                do tmp_i = 1, n1_S(si)
+                  i = list1(tmp_i,si)
+                  idx_i = tmp_i + i_shift
+                  !v(idx_i,idx_j,idx_k,idx_l) = mo_two_e_integral(i,j,k,l) - mo_two_e_integral(j,i,k,l)
+                  v_j(idx_i,idx_k,idx_l) = cc_space_v(i,j,k,l) - cc_space_v(j,i,k,l)
+                enddo
+              enddo
+            enddo
+            !$OMP END DO
+
+          ! <ab||ab> or <ba||ba>
+          elseif (si == sk .and. sj == sl) then
+            !$OMP DO collapse(2)
+            do tmp_l = 1, n4_S(sl)
+              do tmp_k = 1, n3_S(sk)
+                l = list4(tmp_l,sl)
+                idx_l = tmp_l + l_shift
+                k = list3(tmp_k,sk)
+                idx_k = tmp_k + k_shift
+                do tmp_i = 1, n1_S(si)
+                  i = list1(tmp_i,si)
+                  idx_i = tmp_i + i_shift
+                  !v(idx_i,idx_j,idx_k,idx_l) = mo_two_e_integral(i,j,k,l)
+                  v_j(idx_i,idx_k,idx_l) = cc_space_v(i,j,k,l)
+                enddo
+              enddo
+            enddo
+            !$OMP END DO
+
+          ! <ab||ba> or <ba||ab>
+          elseif (si == sl .and. sj == sk) then
+            !$OMP DO collapse(2)
+            do tmp_l = 1, n4_S(sl)
+              do tmp_k = 1, n3_S(sk)
+                l = list4(tmp_l,sl)
+                idx_l = tmp_l + l_shift
+                k = list3(tmp_k,sk)
+                idx_k = tmp_k + k_shift
+                do tmp_i = 1, n1_S(si)
+                  i = list1(tmp_i,si)
+                  idx_i = tmp_i + i_shift
+                  !v(idx_i,idx_j,idx_k,idx_l) = - mo_two_e_integral(j,i,k,l)
+                  v_j(idx_i,idx_k,idx_l) = - cc_space_v(j,i,k,l)
+                enddo
+              enddo
+            enddo
+            !$OMP END DO
+          else
+            !$OMP DO collapse(2)
+            do tmp_l = 1, n4_S(sl)
+              do tmp_k = 1, n3_S(sk)
+                l = list4(tmp_l,sl)
+                idx_l = tmp_l + l_shift
+                k = list3(tmp_k,sk)
+                idx_k = tmp_k + k_shift
+                do tmp_i = 1, n1_S(si)
+                  i = list1(tmp_i,si)
+                  idx_i = tmp_i + i_shift
+                  v_j(idx_i,idx_k,idx_l) = 0d0
+                enddo
+              enddo
+            enddo
+            !$OMP END DO
+          endif
+
+        enddo
+      enddo
+    enddo
+    !$OMP END PARALLEL
+
+  endif
 end

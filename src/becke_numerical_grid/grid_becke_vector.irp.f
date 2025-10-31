@@ -22,7 +22,8 @@ BEGIN_PROVIDER [integer, n_points_final_grid]
 
   print*,' n_points_final_grid = ', n_points_final_grid
   print*,' n max point         = ', n_points_integration_angular*(n_points_radial_grid*nucl_num - 1)
-  call ezfio_set_becke_numerical_grid_n_points_final_grid(n_points_final_grid)
+ ! no reason to write in the EZFIO file the number of grid points ?
+!  call ezfio_set_becke_numerical_grid_n_points_final_grid(n_points_final_grid)
 
 END_PROVIDER
 
@@ -71,8 +72,8 @@ END_PROVIDER
     enddo
   enddo
 
-  FREE grid_points_per_atom
-  FREE final_weight_at_r
+!  FREE grid_points_per_atom
+!  FREE final_weight_at_r
 
   call wall_time(wall1)
   print *, ' wall time for final_grid_points,', wall1 - wall0

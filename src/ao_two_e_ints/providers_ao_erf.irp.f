@@ -1,7 +1,5 @@
-
 BEGIN_PROVIDER [ logical, ao_two_e_integrals_erf_in_map ]
   implicit none
-  use f77_zmq
   use map_module
   BEGIN_DOC
   !  Map of Atomic integrals
@@ -15,17 +13,16 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_erf_in_map ]
 
   ! For integrals file
   integer(key_kind),allocatable  :: buffer_i(:)
-  integer,parameter              :: size_buffer = 1024*64
+  integer                        :: size_buffer 
   real(integral_kind),allocatable :: buffer_value(:)
 
   integer                        :: n_integrals, rc
   integer                        :: kk, m, j1, i1, lmax
   character*(64)                 :: fmt
 
-  integral = ao_two_e_integral_erf(1,1,1,1)
-
   double precision               :: map_mb
-  PROVIDE read_ao_two_e_integrals_erf io_ao_two_e_integrals_erf
+  PROVIDE read_ao_two_e_integrals_erf io_ao_two_e_integrals_erf ao_integrals_erf_map
+
   if (read_ao_two_e_integrals_erf) then
     print*,'Reading the AO ERF integrals'
       call map_load_from_disk(trim(ezfio_filename)//'/work/ao_ints_erf',ao_integrals_erf_map)
@@ -39,37 +36,27 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_erf_in_map ]
   call wall_time(wall_1)
   call cpu_time(cpu_1)
 
-  integer(ZMQ_PTR) :: zmq_to_qp_run_socket, zmq_socket_pull
-  call new_parallel_job(zmq_to_qp_run_socket,zmq_socket_pull,'ao_integrals_erf')
-
-  character(len=:), allocatable :: task
-  allocate(character(len=ao_num*12) :: task)
-  write(fmt,*) '(', ao_num, '(I5,X,I5,''|''))'
-  do l=1,ao_num
-    write(task,fmt) (i,l, i=1,l)
-    integer, external :: add_task_to_taskserver
-    if (add_task_to_taskserver(zmq_to_qp_run_socket,trim(task)) == -1) then
-      stop 'Unable to add task to server'
-    endif
-  enddo
-  deallocate(task)
-
-  integer, external :: zmq_set_running
-  if (zmq_set_running(zmq_to_qp_run_socket) == -1) then
-    print *,  irp_here, ': Failed in zmq_set_running'
+  if (.True.) then
+    ! Avoid openMP
+    integral = ao_two_e_integral_erf(1,1,1,1)
   endif
 
-  PROVIDE nproc
-  !$OMP PARALLEL DEFAULT(shared) private(i) num_threads(nproc+1)
-      i = omp_get_thread_num()
-      if (i==0) then
-        call ao_two_e_integrals_erf_in_map_collector(zmq_socket_pull)
-      else
-        call ao_two_e_integrals_erf_in_map_slave_inproc(i)
-      endif
+  size_buffer = ao_num*ao_num
+  !$OMP PARALLEL DEFAULT(shared) private(j,l) &
+  !$OMP PRIVATE(buffer_i, buffer_value, n_integrals)
+  allocate(buffer_i(size_buffer), buffer_value(size_buffer))
+  n_integrals = 0
+  !$OMP DO COLLAPSE(1) SCHEDULE(dynamic)
+  do l=1,ao_num
+    do j=1,l
+      call compute_ao_integrals_erf_jl(j,l,n_integrals,buffer_i,buffer_value)
+      call insert_into_ao_integrals_erf_map(n_integrals,buffer_i,buffer_value)
+    enddo
+  enddo
+  !$OMP END DO
+  deallocate(buffer_i, buffer_value)
   !$OMP END PARALLEL
 
-  call end_parallel_job(zmq_to_qp_run_socket, zmq_socket_pull, 'ao_integrals_erf')
 
 
   print*, 'Sorting the map'

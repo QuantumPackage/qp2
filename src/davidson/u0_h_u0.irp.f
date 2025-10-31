@@ -46,7 +46,7 @@ subroutine u_0_H_u_0(e_0,u_0,n,keys_tmp,Nint,N_st,sze)
   do i=1,N_st
     norm = u_dot_u(u_0(1,i),n)
     if (norm /= 0.d0) then
-      e_0(i) = u_dot_v(v_0(1,i),u_0(1,i),n) / dsqrt(norm)
+      e_0(i) = u_dot_v(v_0(1,i),u_0(1,i),n)/norm
     else
       e_0(i) = 0.d0
     endif
@@ -164,7 +164,7 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
   integer, allocatable           :: doubles(:)
   integer, allocatable           :: singles_a(:)
   integer, allocatable           :: singles_b(:)
-  integer, allocatable           :: idx(:), idx0(:)
+  integer, allocatable           :: idx(:), buffer_lrow(:), idx0(:)
   integer                        :: maxab, n_singles_a, n_singles_b, kcol_prev
   integer*8                      :: k8
   logical                        :: compute_singles
@@ -182,7 +182,8 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
    compute_singles=.True.
 
    if (.not.compute_singles) then
-     provide singles_alpha_csc singles_beta_csc
+     provide singles_alpha_csc
+     provide singles_beta_csc
    endif
 
 
@@ -216,7 +217,7 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
       !$OMP   PRIVATE(krow, kcol, tmp_det, spindet, k_a, k_b, i,     &
       !$OMP          lcol, lrow, l_a, l_b, utl, kk, u_is_sparse,     &
       !$OMP          buffer, doubles, n_doubles, umax,               &
-      !$OMP          tmp_det2, hij, idx, l, kcol_prev,          &
+      !$OMP          tmp_det2, hij, idx, buffer_lrow, l, kcol_prev,  &
       !$OMP          singles_a, n_singles_a, singles_b, ratio,       &
       !$OMP          n_singles_b, k8, last_found,left,right,right_max)
 
@@ -227,7 +228,7 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
       singles_a(maxab),                                              &
       singles_b(maxab),                                              &
       doubles(maxab),                                                &
-      idx(maxab), utl(N_st,block_size))
+      idx(maxab), buffer_lrow(maxab), utl(N_st,block_size))
 
   kcol_prev=-1
 
@@ -251,7 +252,7 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
   ASSERT (istart > 0)
   ASSERT (istep  > 0)
 
-  !$OMP DO SCHEDULE(guided,64)
+  !$OMP DO SCHEDULE(dynamic,64)
   do k_a=istart+ishift,iend,istep
 
     krow = psi_bilinear_matrix_rows(k_a)
@@ -277,6 +278,7 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
           singles_b(n_singles_b) = singles_beta_csc(k8)
         enddo
       endif
+
     endif
     kcol_prev = kcol
 
@@ -294,17 +296,19 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
         l_a = psi_bilinear_matrix_columns_loc(lcol)
         ASSERT (l_a <= N_det)
 
-        !DIR$ UNROLL(8)
-        !DIR$ LOOP COUNT avg(50000)
         do j=1,psi_bilinear_matrix_columns_loc(lcol+1) - psi_bilinear_matrix_columns_loc(lcol)
           lrow = psi_bilinear_matrix_rows(l_a)
           ASSERT (lrow <= N_det_alpha_unique)
 
-          buffer(1:$N_int,j) = psi_det_alpha_unique(1:$N_int, lrow)  ! hot spot
+          buffer_lrow(j) = lrow
 
           ASSERT (l_a <= N_det)
           idx(j) = l_a
           l_a = l_a+1
+        enddo
+
+        do j=1,psi_bilinear_matrix_columns_loc(lcol+1) - psi_bilinear_matrix_columns_loc(lcol)
+          buffer(1:$N_int,j) = psi_det_alpha_unique(1:$N_int, buffer_lrow(j))  ! hot spot
         enddo
         j = j-1
 
@@ -373,7 +377,6 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
 
       endif
 
-
       ! Loop over alpha singles
       ! -----------------------
 
@@ -425,7 +428,7 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
   enddo
   !$OMP END DO
 
-  !$OMP DO SCHEDULE(guided,64)
+  !$OMP DO SCHEDULE(dynamic,64)
   do k_a=istart+ishift,iend,istep
 
 
@@ -555,6 +558,7 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
         if (i+kk > n_doubles) exit
         l_a = doubles(i+kk)
         lrow = psi_bilinear_matrix_rows(l_a)
+          ! single => sij = 0
         ASSERT (lrow <= N_det_alpha_unique)
 
         call i_H_j_double_spin( tmp_det(1,1), psi_det_alpha_unique(1, lrow), $N_int, hij)
@@ -741,7 +745,7 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
 
   end do
   !$OMP END DO
-  deallocate(buffer, singles_a, singles_b, doubles, idx, utl)
+  deallocate(buffer, singles_a, singles_b, doubles, idx, buffer_lrow, utl)
   !$OMP END PARALLEL
 
 end

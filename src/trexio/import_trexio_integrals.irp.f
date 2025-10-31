@@ -1,4 +1,4 @@
-program import_integrals_ao
+program import_trexio_integrals
   use trexio
   implicit none
   integer(trexio_t)              :: f ! TREXIO file handle
@@ -36,7 +36,7 @@ subroutine run(f)
   real(integral_kind), allocatable :: buffer_values(:)
 
 
-  double precision, allocatable :: A(:,:)
+  double precision, allocatable :: A(:,:), B(:,:)
   double precision, allocatable :: V(:)
   integer         , allocatable :: Vi(:,:)
   double precision              :: s
@@ -66,6 +66,7 @@ subroutine run(f)
   ! ------------
 
   allocate(A(ao_num, ao_num))
+  allocate(B(ao_num, ao_num))
 
 
   if (trexio_has_ao_1e_int_overlap(f) == TREXIO_SUCCESS) then
@@ -92,17 +93,19 @@ subroutine run(f)
     call ezfio_set_ao_one_e_ints_io_ao_integrals_kinetic('Read')
   endif
 
-!  if (trexio_has_ao_1e_int_ecp(f) == TREXIO_SUCCESS) then
-!    rc = trexio_read_ao_1e_int_ecp(f, A)
-!    if (rc /= TREXIO_SUCCESS) then
-!      print *, irp_here
-!      print *, 'Error reading AO ECP local integrals'
-!      call trexio_assert(rc, TREXIO_SUCCESS)
-!      stop -1
-!    endif
-!    call ezfio_set_ao_one_e_ints_ao_integrals_pseudo(A)
-!    call ezfio_set_ao_one_e_ints_io_ao_integrals_pseudo('Read')
-!  endif
+  B=0.d0
+  if (trexio_has_ao_1e_int_ecp(f) == TREXIO_SUCCESS) then
+    rc = trexio_read_ao_1e_int_ecp(f, B)
+    if (rc /= TREXIO_SUCCESS) then
+      print *, irp_here
+      print *, 'Error reading AO ECP local integrals'
+      call trexio_assert(rc, TREXIO_SUCCESS)
+      stop -1
+    endif
+    call ezfio_set_ao_one_e_ints_ao_integrals_pseudo(B)
+    call ezfio_set_pseudo_do_pseudo(.True.)
+    call ezfio_set_ao_one_e_ints_io_ao_integrals_pseudo('Read')
+  endif
 
   if (trexio_has_ao_1e_int_potential_n_e(f) == TREXIO_SUCCESS) then
     rc = trexio_read_ao_1e_int_potential_n_e(f, A)
@@ -112,11 +115,33 @@ subroutine run(f)
       call trexio_assert(rc, TREXIO_SUCCESS)
       stop -1
     endif
-    call ezfio_set_ao_one_e_ints_ao_integrals_n_e(A)
+    call ezfio_set_ao_one_e_ints_ao_integrals_n_e(A+B)
     call ezfio_set_ao_one_e_ints_io_ao_integrals_n_e('Read')
   endif
 
-  deallocate(A)
+  ! Some codes only provide ao_1e_int_core_hamiltonian rather than
+  ! kinetic and nuclear potentials separately, so we need to work
+  ! around that. This is needed for non-GTO basis sets since some QP
+  ! functions will try to calculate these matrices from the nonexisting 
+  ! GTO basis if they are not set.
+  if (trexio_has_ao_1e_int_core_hamiltonian(f) == TREXIO_SUCCESS .and. &
+      trexio_has_ao_1e_int_potential_n_e(f) /= TREXIO_SUCCESS .and. &
+      trexio_has_ao_1e_int_kinetic(f) /= TREXIO_SUCCESS) then
+    rc = trexio_read_ao_1e_int_core_hamiltonian(f, A)
+    if (rc /= TREXIO_SUCCESS) then
+      print *, irp_here
+      print *, 'Error reading AO core Hamiltonian.'
+      call trexio_assert(rc, TREXIO_SUCCESS)
+      stop -1
+    endif
+    call ezfio_set_ao_one_e_ints_ao_integrals_n_e(A)
+    call ezfio_set_ao_one_e_ints_io_ao_integrals_n_e('Read')
+    A=0.d0
+    call ezfio_set_ao_one_e_ints_ao_integrals_kinetic(A)
+    call ezfio_set_ao_one_e_ints_io_ao_integrals_kinetic('Read')
+  endif
+
+  deallocate(A,B)
 
   ! AO 2e integrals
   ! ---------------
@@ -162,6 +187,7 @@ subroutine run(f)
           write(iunit) tmp(:,:,:)
           close(iunit)
           call ezfio_set_ao_two_e_ints_io_ao_cholesky('Read')
+          call ezfio_set_ao_two_e_ints_do_ao_cholesky(.True.)
 
           deallocate(Vi, V, tmp)
           print *, 'Cholesky AO integrals read from TREXIO file'
@@ -203,6 +229,7 @@ subroutine run(f)
 
               call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints',ao_integrals_map)
               call ezfio_set_ao_two_e_ints_io_ao_two_e_integrals('Read')
+              call ezfio_set_ao_two_e_ints_do_ao_cholesky(.False.)
 
               deallocate(buffer_i, buffer_values, Vi, V)
               print *, 'AO integrals read from TREXIO file'
@@ -271,6 +298,7 @@ subroutine run(f)
           write(iunit) tmp(:,:,:)
           close(iunit)
           call ezfio_set_mo_two_e_ints_io_mo_cholesky('Read')
+          call ezfio_set_ao_two_e_ints_do_ao_cholesky(.True.)
 
           deallocate(Vi, V, tmp)
           print *, 'Cholesky MO integrals read from TREXIO file'
@@ -311,6 +339,7 @@ subroutine run(f)
 
             call map_save_to_disk(trim(ezfio_filename)//'/work/mo_ints',mo_integrals_map)
             call ezfio_set_mo_two_e_ints_io_mo_two_e_integrals('Read')
+            call ezfio_set_ao_two_e_ints_do_ao_cholesky(.False.)
             deallocate(buffer_i, buffer_values, Vi, V)
             print *, 'MO integrals read from TREXIO file'
         endif

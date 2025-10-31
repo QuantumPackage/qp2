@@ -7,7 +7,7 @@ subroutine run
   double precision, allocatable  :: pt2(:), norm_pert(:)
   double precision               :: H_pert_diag, E_old
   integer                        :: N_st, iter
-  PROVIDE Fock_matrix_diag_mo H_apply_buffer_allocated
+  PROVIDE all_mo_integrals  Fock_matrix_diag_mo H_apply_buffer_allocated
   N_st = N_states
   allocate (pt2(N_st), norm_pert(N_st))
   E_old = HF_energy

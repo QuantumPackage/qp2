@@ -19,7 +19,7 @@
 
 
 program debug_gradient
-  
+
   implicit none
 
   ! Variables
@@ -30,27 +30,27 @@ program debug_gradient
   double precision              :: threshold
   double precision              :: max_error, max_elem
   integer                       :: nb_error
-  
-  ! Definition of n  
+
+  ! Definition of n
   n = mo_num*(mo_num-1)/2
 
-  PROVIDE mo_two_e_integrals_in_map ! Check for suppression
+  PROVIDE all_mo_integrals ! Check for suppression
 
   ! Allocation
   allocate(v_grad(n), v_grad2(n))
 
   ! Calculation
 
-  call diagonalize_ci 
+  call diagonalize_ci
 
-  ! Gradient  
+  ! Gradient
   call first_gradient_opt(n,v_grad)
   call gradient_opt(n,v_grad2,max_elem)
-  
+
   v_grad = v_grad - v_grad2
   nb_error = 0
-  max_error = 0d0 
-  threshold = 1d-12 
+  max_error = 0d0
+  threshold = 1d-12
 
   do i = 1, n
     if (ABS(v_grad(i)) > threshold) then
@@ -63,9 +63,9 @@ program debug_gradient
 
     endif
   enddo
- 
+
   print*,''
-  print*,'Check the gradient' 
+  print*,'Check the gradient'
   print*,'Threshold :', threshold
   print*,'Nb error :', nb_error
   print*,'Max error :', max_error

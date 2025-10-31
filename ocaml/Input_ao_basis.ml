@@ -13,8 +13,6 @@ module Ao_basis : sig
       ao_coef         : AO_coef.t array;
       ao_expo         : AO_expo.t array;
       ao_cartesian    : bool;
-      ao_normalized   : bool;
-      primitives_normalized : bool;
     } [@@deriving sexp]
   ;;
   val read : unit -> t option
@@ -36,8 +34,6 @@ end = struct
       ao_coef         : AO_coef.t array;
       ao_expo         : AO_expo.t array;
       ao_cartesian    : bool;
-      ao_normalized   : bool;
-      primitives_normalized : bool;
     } [@@deriving sexp]
   ;;
 
@@ -133,24 +129,6 @@ end = struct
     Ezfio.get_ao_basis_ao_cartesian ()
   ;;
 
-  let read_ao_normalized () =
-    if not (Ezfio.has_ao_basis_ao_normalized()) then
-       get_default "ao_normalized"
-       |> bool_of_string
-       |> Ezfio.set_ao_basis_ao_normalized
-    ;
-    Ezfio.get_ao_basis_ao_normalized ()
-  ;;
-
-  let read_primitives_normalized () =
-    if not (Ezfio.has_ao_basis_primitives_normalized()) then
-       get_default "primitives_normalized"
-       |> bool_of_string
-       |> Ezfio.set_ao_basis_primitives_normalized
-    ;
-    Ezfio.get_ao_basis_primitives_normalized ()
-  ;;
-
   let to_long_basis b =
     let ao_num = AO_number.to_int b.ao_num in
     let gto_array = Array.init (AO_number.to_int b.ao_num)
@@ -213,8 +191,6 @@ end = struct
          ao_coef         ;
          ao_expo         ;
          ao_cartesian    ;
-         ao_normalized   ;
-         primitives_normalized ;
        } = b
      in
      write_md5 b ;
@@ -247,8 +223,6 @@ end = struct
      ~rank:2 ~dim:[| ao_num ; 3 |] ~data:ao_power) ;
 
      Ezfio.set_ao_basis_ao_cartesian(ao_cartesian);
-     Ezfio.set_ao_basis_ao_normalized(ao_normalized);
-     Ezfio.set_ao_basis_primitives_normalized(primitives_normalized);
 
      let ao_coef =
       Array.to_list ao_coef
@@ -280,8 +254,6 @@ end = struct
             ao_coef         = read_ao_coef () ;
             ao_expo         = read_ao_expo () ;
             ao_cartesian    = read_ao_cartesian () ;
-            ao_normalized   = read_ao_normalized () ;
-            primitives_normalized   = read_primitives_normalized () ;
           }
         in
         to_md5 result
@@ -392,8 +364,6 @@ end = struct
       { ao_basis = name ;
         ao_num ; ao_prim_num ; ao_prim_num_max ; ao_nucl ;
         ao_power ; ao_coef ; ao_expo ; ao_cartesian ;
-        ao_normalized = bool_of_string @@ get_default "ao_normalized";
-        primitives_normalized = bool_of_string @@ get_default "primitives_normalized";
         }
   ;;
 
@@ -448,14 +418,6 @@ Cartesian coordinates (6d,10f,...) ::
 
   ao_cartesian = %s
 
-Use normalized primitive functions ::
-
-  primitives_normalized = %s
-
-Use normalized basis functions ::
-
-  ao_normalized = %s
-
 Basis set (read-only) ::
 
 %s
@@ -469,8 +431,6 @@ Basis set (read-only) ::
 
 "   (AO_basis_name.to_string b.ao_basis)
     (string_of_bool b.ao_cartesian)
-    (string_of_bool b.primitives_normalized)
-    (string_of_bool b.ao_normalized)
     (Basis.to_string short_basis
        |> String_ext.split ~on:'\n'
        |> list_map (fun x-> "  "^x)
@@ -507,8 +467,6 @@ ao_power                = %s
 ao_coef                 = %s
 ao_expo                 = %s
 ao_cartesian            = %s
-ao_normalized           = %s
-primitives_normalized   = %s
 md5                     = %s
 "
     (AO_basis_name.to_string b.ao_basis)
@@ -525,8 +483,6 @@ md5                     = %s
     (b.ao_expo  |> Array.to_list |> list_map AO_expo.to_string
       |> String.concat ", ")
     (b.ao_cartesian |> string_of_bool)
-    (b.ao_normalized |> string_of_bool)
-    (b.primitives_normalized |> string_of_bool)
     (to_md5 b |> MD5.to_string )
 
   ;;

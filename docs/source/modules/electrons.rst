@@ -74,8 +74,13 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`cfg_seniority_index`
+       * :c:data:`cholesky_ao_num`
        * :c:data:`diagonal_h_matrix_on_psi_det`
+       * :c:data:`nsomomax`
+       * :c:data:`ormas_max_e`
        * :c:data:`psi_det_hii`
+       * :c:data:`psi_selectors_diag_h_mat`
 
  
 .. c:var:: elec_num_tab
@@ -105,6 +110,11 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`cfg_seniority_index`
+       * :c:data:`cholesky_ao_num`
        * :c:data:`diagonal_h_matrix_on_psi_det`
+       * :c:data:`nsomomax`
+       * :c:data:`ormas_max_e`
        * :c:data:`psi_det_hii`
+       * :c:data:`psi_selectors_diag_h_mat`
 

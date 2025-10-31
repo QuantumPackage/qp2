@@ -1,4 +1,4 @@
-program fcidump
+program fcidump_pyscf
   implicit none
   BEGIN_DOC
 ! Produce a regular `FCIDUMP` file from the |MOs| stored in the |EZFIO|
@@ -41,7 +41,7 @@ program fcidump
   integer(key_kind), allocatable :: keys(:)
   double precision, allocatable  :: values(:)
   integer(cache_map_size_kind)   :: n_elements, n_elements_max
-  PROVIDE mo_two_e_integrals_in_map
+  PROVIDE all_mo_integrals
 
   double precision :: get_two_e_integral, integral
 

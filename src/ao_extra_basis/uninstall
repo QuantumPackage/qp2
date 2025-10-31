@@ -1,0 +1,20 @@
+#!/bin/bash                                                                                                                                             
+
+# Check if the QP_ROOT environment variable is set. 
+if [[ -z ${QP_ROOT} ]]
+then
+  print "The QP_ROOT environment variable is not set."
+  print "Please reload the quantum_package.rc file."
+  exit -1
+fi
+
+# list of the scripts to be used by the module 
+scripts_list="qp_copy_extra_basis qp_add_extra_fit_system qp_copy_extra_basis_to_usual_basis qp_fit_1s_basis"
+
+# Destroy ONLY the symbolic link for the scripts to be used in the
+# ${QP_ROOT}/scripts/ directory. 
+ for i in $scripts_list
+ do
+  find ${QP_ROOT}/scripts/$i -type l -delete
+ done
+

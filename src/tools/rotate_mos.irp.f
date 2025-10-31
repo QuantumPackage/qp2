@@ -10,6 +10,11 @@ program rotate_mos
   double precision               :: dsqrt2_inv
   double precision, allocatable  :: mo_coef_tmp(:,:)
 
+  print *, 'Rotates molecular orbitals i and j by combining them as'
+  print *, ' $1/\sqrt{2} ( \phi_i + \phi_j )$ and'
+  print *, ' $1/\sqrt{2} ( \phi_i - \phi_j )$.'
+  print *, ''
+  print *, 'Input i and j:'
   read(5,*)iorb,jorb
 
   allocate(mo_coef_tmp(ao_num,mo_num))

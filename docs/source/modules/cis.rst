@@ -119,15 +119,15 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`psi_configuration`
        * :c:data:`n_det`
-       * :c:data:`psi_occ_pattern`
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
-       * :c:data:`psi_occ_pattern`
 
  
 .. c:function:: h_apply_cis_diexc:
@@ -328,15 +328,15 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`psi_configuration`
        * :c:data:`n_det`
-       * :c:data:`psi_occ_pattern`
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
-       * :c:data:`psi_occ_pattern`
 
  
 .. c:function:: h_apply_cis_sym_diexc:

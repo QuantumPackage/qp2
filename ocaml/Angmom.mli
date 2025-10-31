@@ -28,9 +28,30 @@ module Xyz :
     val get_l : t -> Qptypes.Positive_int.t
 
     (** Returns a list of XYZ powers for a given symmetry *)
-    val of_symmetry : st -> t list
+    val of_angmom : st -> t list
 
     (** Returns the symmetry corresponding to the XYZ powers *)
     val to_symmetry : t -> st
 
-  end
+end
+
+
+module Spd :
+  sig
+    type t = { l: st; m: int } [@@deriving sexp]
+
+    (** The string format contains the l and m quantum numbers *)
+
+    val of_string : string -> t
+    val to_string : t -> string
+
+    (** Returns the quantum number l *)
+    val get_l : t -> Qptypes.Positive_int.t
+
+    (** Returns a list of XYZ powers for a given symmetry *)
+    val of_angmom : st -> t list
+
+    (** Returns the symmetry corresponding to the XYZ powers *)
+    val to_symmetry : t -> st
+
+end

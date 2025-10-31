@@ -1,5 +1,14 @@
 use map_module
 
+BEGIN_PROVIDER [ logical, all_mo_integrals ]
+  implicit none
+  BEGIN_DOC
+! Used to provide everything needed before using MO integrals
+! PROVIDE all_mo_integrals
+  END_DOC
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache mo_two_e_integrals_jj_exchange mo_two_e_integrals_jj_anti mo_two_e_integrals_jj big_array_exchange_integrals big_array_coulomb_integrals mo_one_e_integrals
+END_PROVIDER
+
 !! MO Map
 !! ======
 
@@ -35,20 +44,24 @@ end
  BEGIN_PROVIDER [ integer, mo_integrals_cache_min ]
 &BEGIN_PROVIDER [ integer, mo_integrals_cache_max ]
 &BEGIN_PROVIDER [ integer, mo_integrals_cache_size ]
+&BEGIN_PROVIDER [ integer*8, mo_integrals_cache_size_8 ]
  implicit none
  BEGIN_DOC
  ! Min and max values of the MOs for which the integrals are in the cache
  END_DOC
 
- mo_integrals_cache_size  = 2**mo_integrals_cache_shift
+ mo_integrals_cache_size  = shiftl(1,mo_integrals_cache_shift)
+ mo_integrals_cache_size_8  = shiftl(1_8, mo_integrals_cache_shift*4)
+
 
  mo_integrals_cache_min = max(1,elec_alpha_num - (mo_integrals_cache_size/2 - 1) )
  mo_integrals_cache_max = min(mo_num, mo_integrals_cache_min + mo_integrals_cache_size - 1)
- print *, 'MO integrals cache: (', mo_integrals_cache_min, ', ', mo_integrals_cache_max, ')'
+ print *, 'MO integrals cache: (', mo_integrals_cache_min, ', ', mo_integrals_cache_max, '), ', &
+          shiftr(mo_integrals_cache_size_8, 17), 'MiB'
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:(1_8*mo_integrals_cache_size)**4) ]
+BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:mo_integrals_cache_size_8) ]
  implicit none
  BEGIN_DOC
  ! Cache of MO integrals for fast access
@@ -59,16 +72,17 @@ BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:(1_8*mo_integrals_ca
  integer(key_kind)              :: idx
  real(integral_kind)            :: integral
  FREE ao_integrals_cache
+
  if (do_mo_cholesky) then
 
    call set_multiple_levels_omp(.False.)
-   !$OMP PARALLEL DO PRIVATE (k,l,ii)
+
+   !$OMP PARALLEL DO PRIVATE(k,l,ii) SCHEDULE(dynamic)
    do l=mo_integrals_cache_min,mo_integrals_cache_max
      do k=mo_integrals_cache_min,mo_integrals_cache_max
          ii = int(l-mo_integrals_cache_min,8)
          ii = ior( shiftl(ii,mo_integrals_cache_shift), int(k-mo_integrals_cache_min,8))
-         ii = shiftl(ii,mo_integrals_cache_shift)
-         ii = shiftl(ii,mo_integrals_cache_shift)
+         ii = shiftl(ii,2*mo_integrals_cache_shift)
          call dgemm('T','N', mo_integrals_cache_max-mo_integrals_cache_min+1, &
                              mo_integrals_cache_max-mo_integrals_cache_min+1, &
            cholesky_mo_num, 1.d0, &
@@ -80,7 +94,7 @@ BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:(1_8*mo_integrals_ca
    !$OMP END PARALLEL DO
 
  else
-   !$OMP PARALLEL DO PRIVATE (i,j,k,l,idx,ii,integral)
+   !$OMP PARALLEL DO PRIVATE (i,j,k,l,idx,ii,integral) SCHEDULE(dynamic)
    do l=mo_integrals_cache_min,mo_integrals_cache_max
      do k=mo_integrals_cache_min,mo_integrals_cache_max
        do j=mo_integrals_cache_min,mo_integrals_cache_max
@@ -130,7 +144,7 @@ double precision function get_two_e_integral(i,j,k,l,map)
   END_DOC
   integer, intent(in)            :: i,j,k,l
   integer(key_kind)              :: idx
-  integer                        :: ii
+  integer                        :: ii, kk
   type(map_type), intent(inout)  :: map
   real(integral_kind)            :: tmp
 
@@ -165,9 +179,20 @@ double precision function get_two_e_integral(i,j,k,l,map)
     if  (do_mo_cholesky) then
 
       double precision, external :: ddot
-      get_two_e_integral = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, cholesky_mo_transp(1,j,l), 1)
-!       double precision, external :: get_from_mo_cholesky_cache
-!       get_two_e_integral = get_from_mo_cholesky_cache(i,j,k,l,.False.)
+      real, external :: sdot
+      integer :: isplit
+      if (mo_cholesky_double) then
+        get_two_e_integral = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, cholesky_mo_transp(1,j,l), 1)
+      else
+        get_two_e_integral = sdot(cholesky_mo_num, cholesky_mo_transp_sp(1,i,k), 1, cholesky_mo_transp_sp(1,j,l), 1)
+!        get_two_e_integral = 0.d0
+!        do isplit=1,4
+!          get_two_e_integral = get_two_e_integral + &
+!                               sdot(cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
+!                                    cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),i,k), 1, &
+!                                    cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),j,l), 1)
+!        enddo
+      endif
 
     else
 
@@ -198,7 +223,8 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
   real(integral_kind)            :: tmp
   integer(key_kind)              :: i1, idx
   integer(key_kind)              :: p,q,r,s,i2
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache
+  real, allocatable :: out_val_sp(:)
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache cholesky_mo_transp cholesky_mo_transp_sp
 
   if (banned_excitation(j,l)) then
       out_val(1:sze) = 0.d0
@@ -209,6 +235,10 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
   ii = ior(ii, k-mo_integrals_cache_min)
   ii = ior(ii, j-mo_integrals_cache_min)
 
+  if (do_mo_cholesky.and. .not.mo_cholesky_double) then
+    allocate(out_val_sp(mo_num))
+  endif
+
   if (iand(ii, -mo_integrals_cache_size) == 0) then
     ! Some integrals are in the cache
 
@@ -216,11 +246,35 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 
       if (do_mo_cholesky) then
 
-        !TODO: here
-        call dgemv('T', cholesky_mo_num, mo_integrals_cache_min-1, 1.d0, &
-           cholesky_mo_transp(1,1,k), cholesky_mo_num, &
-           cholesky_mo_transp(1,j,l), 1, 0.d0, &
-           out_val, 1)
+        !TODO: bottleneck here
+        if (mo_cholesky_double) then
+          call dgemv('T', cholesky_mo_num, mo_integrals_cache_min-1, 1.d0, &
+            cholesky_mo_transp(1,1,k), cholesky_mo_num, &
+            cholesky_mo_transp(1,j,l), 1, 0.d0, &
+            out_val, 1)
+        else
+          call sgemv('T', cholesky_mo_num, mo_integrals_cache_min-1, 1., &
+            cholesky_mo_transp_sp(1,1,k), cholesky_mo_num, &
+            cholesky_mo_transp_sp(1,j,l), 1, 0., &
+            out_val_sp, 1)
+          out_val(1:mo_integrals_cache_min-1) = out_val_sp(1:mo_integrals_cache_min-1)
+!          integer :: isplit
+!          isplit=1
+!          call sgemv('T', cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
+!              mo_integrals_cache_min-1, 1., &
+!              cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,k), cholesky_mo_num, &
+!              cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),j,l), 1, 0., &
+!              out_val_sp, 1)
+!          out_val(1:mo_integrals_cache_min-1) = out_val_sp(1:mo_integrals_cache_min-1)
+!          do isplit=2,4
+!              call sgemv('T', cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
+!                mo_integrals_cache_min-1, 1., &
+!                cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,k), cholesky_mo_num, &
+!                cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),j,l), 1, 0., &
+!                out_val_sp, 1)
+!              out_val(1:mo_integrals_cache_min-1) += out_val_sp(1:mo_integrals_cache_min-1)
+!          enddo
+        endif
 
       else
 
@@ -254,11 +308,34 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 
       if (do_mo_cholesky) then
 
-        !TODO: here
-        call dgemv('T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1.d0, &
-           cholesky_mo_transp(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
-           cholesky_mo_transp(1,j,l), 1, 0.d0, &
-           out_val(mo_integrals_cache_max+1), 1)
+        !TODO: bottleneck here
+        if (mo_cholesky_double) then
+          call dgemv('T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1.d0, &
+             cholesky_mo_transp(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
+             cholesky_mo_transp(1,j,l), 1, 0.d0, &
+             out_val(mo_integrals_cache_max+1), 1)
+        else
+          call sgemv('T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1., &
+             cholesky_mo_transp_sp(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
+             cholesky_mo_transp_sp(1,j,l), 1, 0., &
+             out_val_sp(mo_integrals_cache_max+1), 1)
+          out_val(mo_integrals_cache_max+1:sze) = out_val_sp(mo_integrals_cache_max+1:sze)
+!          isplit=1
+!          call sgemv('T', cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
+!            mo_num-mo_integrals_cache_max, 1., &
+!            cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),mo_integrals_cache_max+1,k), cholesky_mo_num, &
+!            cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),j,l), 1, 0., &
+!            out_val_sp(mo_integrals_cache_max+1), 1)
+!          out_val(mo_integrals_cache_max+1:sze) = out_val_sp(mo_integrals_cache_max+1:sze)
+!          do isplit=2,4
+!            call sgemv('T', cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
+!              mo_num-mo_integrals_cache_max, 1., &
+!              cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),mo_integrals_cache_max+1,k), cholesky_mo_num, &
+!              cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),j,l), 1, 0., &
+!              out_val_sp(mo_integrals_cache_max+1), 1)
+!            out_val(mo_integrals_cache_max+1:sze) += out_val_sp(mo_integrals_cache_max+1:sze)
+!          enddo
+        endif
 
       else
 
@@ -290,11 +367,34 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 
     if (do_mo_cholesky) then
 
-      !TODO: here
-      call dgemv('T', cholesky_mo_num, mo_num, 1.d0, &
-           cholesky_mo_transp(1,1,k), cholesky_mo_num, &
-           cholesky_mo_transp(1,j,l), 1, 0.d0, &
-           out_val, 1)
+      !TODO: bottleneck here
+      if (mo_cholesky_double) then
+          call dgemv('T', cholesky_mo_num, sze, 1.d0, &
+               cholesky_mo_transp(1,1,k), cholesky_mo_num, &
+               cholesky_mo_transp(1,j,l), 1, 0.d0, &
+               out_val, 1)
+      else
+          call sgemv('T', cholesky_mo_num, sze, 1., &
+               cholesky_mo_transp_sp(1,1,k), cholesky_mo_num, &
+               cholesky_mo_transp_sp(1,j,l), 1, 0., &
+               out_val_sp, 1)
+          out_val(1:sze) = out_val_sp(1:sze)
+!          isplit=1
+!          call sgemv('T', cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
+!            sze, 1., &
+!            cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,k), cholesky_mo_num, &
+!            cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),j,l), 1, 0., &
+!            out_val_sp, 1)
+!          out_val(1:sze) = out_val_sp(1:sze)
+!          do isplit=2,4
+!            call sgemv('T', cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
+!              sze, 1., &
+!              cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,k), cholesky_mo_num, &
+!              cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),j,l), 1, 0., &
+!              out_val_sp, 1)
+!            out_val(1:sze) += out_val_sp(1:sze)
+!          enddo
+      endif
 
     else
 
@@ -328,7 +428,7 @@ double precision function mo_two_e_integral(i,j,k,l)
   END_DOC
   integer, intent(in)            :: i,j,k,l
   double precision               :: get_two_e_integral
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache
+  PROVIDE all_mo_integrals
   !DIR$ FORCEINLINE
   mo_two_e_integral = get_two_e_integral(i,j,k,l,mo_integrals_map)
   return
@@ -367,16 +467,43 @@ subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
   double precision, intent(out)  :: out_array(sze,sze)
   type(map_type), intent(inout)  :: map
   integer                        :: j
-  real(integral_kind), allocatable :: tmp_val(:)
 
   if ( (mo_integrals_cache_min>1).or.(mo_integrals_cache_max<mo_num) ) then
 
     if (do_mo_cholesky) then
 
-      call dgemm('T', 'N', mo_num, mo_num, cholesky_mo_num, 1.d0, &
-         cholesky_mo_transp(1,1,k), cholesky_mo_num, &
-         cholesky_mo_transp(1,1,l), cholesky_mo_num, 0.d0, &
-         out_array, sze)
+      if (mo_cholesky_double) then
+          call dgemm('T', 'N', mo_num, mo_num, cholesky_mo_num, 1.d0, &
+             cholesky_mo_transp(1,1,k), cholesky_mo_num, &
+             cholesky_mo_transp(1,1,l), cholesky_mo_num, 0.d0, &
+             out_array, sze)
+      else
+          real, allocatable :: out_array_sp(:,:)
+          allocate(out_array_sp(sze,sze))
+          call sgemm('T', 'N', mo_num, mo_num, cholesky_mo_num, 1.0, &
+             cholesky_mo_transp_sp(1,1,k), cholesky_mo_num, &
+             cholesky_mo_transp_sp(1,1,l), cholesky_mo_num, 0.0, &
+             out_array_sp, sze)
+          out_array(1:sze,1:sze) = out_array_sp(1:sze,1:sze)
+!
+!          isplit=1
+!          call sgemm('T', 'N', mo_num, mo_num, &
+!             cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), 1., &
+!             cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,k), cholesky_mo_num, &
+!             cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,l), cholesky_mo_num, 0., &
+!             out_array_sp, sze)
+!          out_array(1:sze,1:sze) = out_array_sp(1:sze,1:sze)
+!          integer :: isplit
+!          do isplit=2,4
+!            call sgemm('T', 'N', mo_num, mo_num, &
+!             cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), 1., &
+!             cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,k), cholesky_mo_num, &
+!             cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,l), cholesky_mo_num, 0., &
+!             out_array_sp, sze)
+!            out_array(1:sze,1:sze) = out_array(1:sze,1:sze) + out_array_sp(1:sze,1:sze)
+!         enddo
+         deallocate(out_array_sp)
+      endif
 
     else
 
@@ -497,17 +624,84 @@ subroutine get_mo_two_e_integrals_exch_ii(k,l,sze,out_val,map)
   type(map_type), intent(inout)  :: map
   integer                        :: i
   double precision, external     :: get_two_e_integral
-  PROVIDE mo_two_e_integrals_in_map
+  PROVIDE mo_two_e_integrals_in_map mo_cholesky_double
 
   if ( (mo_integrals_cache_min>1).or.(mo_integrals_cache_max<mo_num) ) then
 
     if (do_mo_cholesky) then
 
-      double precision, external :: ddot
-      do i=1,sze
-        out_val(i) = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, &
-                                           cholesky_mo_transp(1,i,l), 1)
-      enddo
+      if ( (k>=mo_integrals_cache_min).and.(k<=mo_integrals_cache_max).and. &
+           (l>=mo_integrals_cache_min).and.(l<=mo_integrals_cache_max) ) then
+
+        double precision, external :: ddot
+        real, external :: sdot
+        integer :: kk
+
+        if (mo_cholesky_double) then
+
+          do i=1,mo_integrals_cache_min-1
+            out_val(i) = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, &
+                                               cholesky_mo_transp(1,i,l), 1)
+          enddo
+
+          do i=mo_integrals_cache_min,mo_integrals_cache_max
+            out_val(i) = get_two_e_integral_cache(i,i,k,l)
+          enddo
+
+          do i=mo_integrals_cache_max, sze
+            out_val(i) = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, &
+                                               cholesky_mo_transp(1,i,l), 1)
+          enddo
+
+        else
+
+          integer :: isplit
+          do i=1,mo_integrals_cache_min-1
+             out_val(i) = sdot(cholesky_mo_num, cholesky_mo_transp_sp(1,i,k), 1, cholesky_mo_transp_sp(1,i,l), 1)
+!             out_val(i) = 0.d0
+!             do isplit=1,4
+!               out_val(i) += sdot(cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
+!                                          cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),i,k), 1, &
+!                                          cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),i,l), 1)
+!             enddo
+          enddo
+
+          do i=mo_integrals_cache_min,mo_integrals_cache_max
+            out_val(i) = get_two_e_integral_cache(i,i,k,l)
+          enddo
+
+          do i=mo_integrals_cache_max, sze
+             out_val(i) = sdot(cholesky_mo_num, cholesky_mo_transp_sp(1,i,k), 1, cholesky_mo_transp_sp(1,i,l), 1)
+!             out_val(i) = 0.d0
+!             do isplit=1,4
+!               out_val(i) += sdot(cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
+!                                          cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),i,k), 1, &
+!                                          cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),i,l), 1)
+!             enddo
+          enddo
+
+        endif
+
+      else
+
+        if (mo_cholesky_double) then
+          do i=1,sze
+            out_val(i) = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, &
+                                               cholesky_mo_transp(1,i,l), 1)
+          enddo
+        else
+          do i=1,sze
+             out_val(i) = sdot(cholesky_mo_num, cholesky_mo_transp_sp(1,i,k), 1, cholesky_mo_transp_sp(1,i,l), 1)
+!             out_val(i) = 0.d0
+!             do isplit=1,4
+!               out_val(i) += sdot(cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
+!                                          cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),i,k), 1, &
+!                                          cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),i,l), 1)
+!             enddo
+          enddo
+        endif
+
+      endif
 
     else
 

@@ -14,5 +14,6 @@ subroutine save_erf_two_e_ints_ao_into_ints_ao
  call ezfio_set_work_empty(.False.)
  call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints',ao_integrals_erf_map)
  call ezfio_set_ao_two_e_ints_io_ao_two_e_integrals('Read')
+ call ezfio_set_ao_two_e_ints_do_ao_cholesky('Read')
 end
 

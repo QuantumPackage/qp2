@@ -116,13 +116,14 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
         alpha = ao_expo_ordered_transp(l,j)
 
         do m=1,ao_prim_num(i)
-          beta = ao_expo_ordered_transp(m,i)
-          c = 0.d0
-
           if (dabs(ao_coef_normalized_ordered_transp(l,j)*ao_coef_normalized_ordered_transp(m,i))&
                 < thresh) then
             cycle
           endif
+
+          beta = ao_expo_ordered_transp(m,i)
+          c = 0.d0
+
           do  k = 1, nucl_num
             Z = nucl_charge(k)
 
@@ -154,6 +155,12 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
  !$OMP END DO
  !$OMP END PARALLEL
 
+  do i=1,ao_num
+    do j=1,i
+      ao_pseudo_integrals_local(j,i) = 0.5d0*(ao_pseudo_integrals_local(i,j) + ao_pseudo_integrals_local(i,j))
+      ao_pseudo_integrals_local(i,j) = ao_pseudo_integrals_local(i,j)
+    enddo
+  enddo
  END_PROVIDER
 
 
@@ -216,13 +223,13 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
         alpha = ao_expo_ordered_transp(l,j)
 
         do m=1,ao_prim_num(i)
-          beta = ao_expo_ordered_transp(m,i)
-          c = 0.d0
-
           if (dabs(ao_coef_normalized_ordered_transp(l,j)*ao_coef_normalized_ordered_transp(m,i))&
                 < thresh) then
             cycle
           endif
+
+          beta = ao_expo_ordered_transp(m,i)
+          c = 0.d0
 
           do  k = 1, nucl_num
             Z = nucl_charge(k)
@@ -256,6 +263,12 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
   !$OMP END PARALLEL
 
 
+  do i=1,ao_num
+    do j=1,i
+      ao_pseudo_integrals_non_local(j,i) = 0.5d0*(ao_pseudo_integrals_non_local(i,j) + ao_pseudo_integrals_non_local(i,j))
+      ao_pseudo_integrals_non_local(i,j) = ao_pseudo_integrals_non_local(i,j)
+    enddo
+  enddo
 END_PROVIDER
 
  BEGIN_PROVIDER [ double precision, pseudo_v_k_transp, (pseudo_klocmax,nucl_num) ]
@@ -294,5 +307,69 @@ END_PROVIDER
      enddo
    enddo
  enddo
+END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, ao_sphe_pseudo_integrals_local, (ao_sphe_num,ao_sphe_num) ]
+ implicit none
+ BEGIN_DOC
+ ! |AO| pseudo_integrals_local matrix in the spherical basis set
+ END_DOC
+ double precision, allocatable :: tmp(:,:)
+ allocate (tmp(ao_sphe_num,ao_num))
+
+ call dgemm('T','N',ao_sphe_num,ao_num,ao_num, 1.d0, &
+   ao_cart_to_sphe_inv,size(ao_cart_to_sphe_inv,1), &
+   ao_pseudo_integrals_local,size(ao_pseudo_integrals_local,1), 0.d0, &
+   tmp, size(tmp,1))
+
+ call dgemm('N','N',ao_sphe_num,ao_sphe_num,ao_num, 1.d0, &
+   tmp, size(tmp,1), &
+   ao_cart_to_sphe_inv,size(ao_cart_to_sphe_inv,1), 0.d0, &
+   ao_sphe_pseudo_integrals_local,size(ao_sphe_pseudo_integrals_local,1))
+
+ deallocate(tmp)
+
+END_PROVIDER
+
+
+BEGIN_PROVIDER [ double precision, ao_sphe_pseudo_integrals_non_local, (ao_sphe_num,ao_sphe_num) ]
+ implicit none
+ BEGIN_DOC
+ ! |AO| pseudo_integrals_non_local matrix in the spherical basis set
+ END_DOC
+ double precision, allocatable :: tmp(:,:)
+ allocate (tmp(ao_sphe_num,ao_num))
+
+ call dgemm('T','N',ao_sphe_num,ao_num,ao_num, 1.d0, &
+   ao_cart_to_sphe_inv,size(ao_cart_to_sphe_inv,1), &
+   ao_pseudo_integrals_non_local,size(ao_pseudo_integrals_non_local,1), 0.d0, &
+   tmp, size(tmp,1))
+
+ call dgemm('N','N',ao_sphe_num,ao_sphe_num,ao_num, 1.d0, &
+   tmp, size(tmp,1), &
+   ao_cart_to_sphe_inv,size(ao_cart_to_sphe_inv,1), 0.d0, &
+   ao_sphe_pseudo_integrals_non_local,size(ao_sphe_pseudo_integrals_non_local,1))
+
+ deallocate(tmp)
+
+END_PROVIDER
+
+
+BEGIN_PROVIDER [ double precision, ao_sphe_pseudo_integrals, (ao_sphe_num,ao_sphe_num)]
+  implicit none
+  BEGIN_DOC
+  ! Pseudo-potential integrals in the |AO| basis set.
+  END_DOC
+
+  ao_sphe_pseudo_integrals = 0.d0
+  if (do_pseudo) then
+    if (pseudo_klocmax > 0) then
+      ao_sphe_pseudo_integrals += ao_sphe_pseudo_integrals_local
+    endif
+    if (pseudo_kmax > 0) then
+      ao_sphe_pseudo_integrals += ao_sphe_pseudo_integrals_non_local
+    endif
+  endif
+
 END_PROVIDER
 

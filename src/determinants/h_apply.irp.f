@@ -298,15 +298,16 @@ subroutine remove_duplicates_in_psi_det(found_duplicates)
           psi_coef(k,:)  = psi_coef_sorted_bit(i,:)
         endif
       endif
+      psi_coef_sorted_bit_order(i) = i
     enddo
     N_det = k
     psi_det_sorted_bit(:,:,1:N_det) = psi_det(:,:,1:N_det)
     psi_coef_sorted_bit(1:N_det,:) = psi_coef(1:N_det,:)
-    TOUCH N_det psi_det psi_coef psi_det_sorted_bit psi_coef_sorted_bit c0_weight
+    TOUCH N_det psi_det psi_coef psi_det_sorted_bit psi_coef_sorted_bit psi_coef_sorted_bit_order c0_weight
   endif
   psi_det = psi_det_sorted
   psi_coef = psi_coef_sorted
-  SOFT_TOUCH psi_det psi_coef psi_det_sorted_bit psi_coef_sorted_bit
+  SOFT_TOUCH psi_det psi_coef psi_det_sorted_bit psi_coef_sorted_bit psi_coef_sorted_bit_order
   deallocate (duplicate,bit_tmp)
 end
 

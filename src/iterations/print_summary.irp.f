@@ -69,7 +69,9 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_configuration_,n_st,s
     print *,  '< S^2 >         = ', s2_(k)
     print *,  'E               = ', e_(k)
     print *,  'Variance        = ', pt2_data % variance(k), ' +/- ', pt2_data_err % variance(k)
-    print *,  'PT norm         = ', dsqrt(pt2_data % overlap(k,k)), ' +/- ', 0.5d0*dsqrt(pt2_data % overlap(k,k)) * pt2_data_err % overlap(k,k) / (pt2_data % overlap(k,k))
+    if(dabs(pt2_data % overlap(k,k)).gt.0.d0)then
+     print *,  'PT norm         = ', dsqrt(pt2_data % overlap(k,k)), ' +/- ', 0.5d0*dsqrt(pt2_data % overlap(k,k)) * pt2_data_err % overlap(k,k) / (pt2_data % overlap(k,k))
+    endif
     print *,  'PT2             = ', pt2_data % pt2(k), ' +/- ', pt2_data_err % pt2(k)
     print *,  'rPT2            = ', pt2_data % rpt2(k), ' +/- ', pt2_data_err % rpt2(k)
     print *,  'E+PT2 '//pt2_string//' = ', e_(k)+pt2_data % pt2(k), ' +/- ', pt2_data_err % pt2(k)

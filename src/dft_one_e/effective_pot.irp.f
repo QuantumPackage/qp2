@@ -30,6 +30,16 @@
  enddo
 END_PROVIDER
 
+ BEGIN_PROVIDER [double precision, ref_vhxc]
+ implicit none
+ integer :: i
+ do i = 1, elec_beta_num
+  ref_vhxc += effective_one_e_potential(i,i,1)*2.d0
+ enddo
+ do i = elec_beta_num+1, elec_beta_num
+  ref_vhxc += effective_one_e_potential(i,i,1)*1.d0
+ enddo
+ END_PROVIDER 
 
  BEGIN_PROVIDER [double precision, effective_one_e_potential_sa, (mo_num, mo_num)]
 &BEGIN_PROVIDER [double precision, effective_one_e_potential_without_kin_sa, (mo_num, mo_num)]

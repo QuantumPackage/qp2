@@ -4,20 +4,20 @@
   BEGIN_DOC
   ! Single-excitation matrix
   END_DOC
-  
+
   integer                        :: i,j
-  
+
   do i=1,nMonoEx+1
     do j=1,nMonoEx+1
       SXmatrix(i,j)=0.D0
     end do
   end do
-  
+
   do i=1,nMonoEx
     SXmatrix(1,i+1)=gradvec2(i)
     SXmatrix(1+i,1)=gradvec2(i)
   end do
-  if(diag_hess_cas)then  
+  if(diag_hess_cas)then
    do i = 1, nMonoEx
     SXmatrix(i+1,i+1) = hessdiag(i)
    enddo
@@ -29,7 +29,7 @@
      end do
    end do
   endif
-  
+
   do i = 1, nMonoEx
    SXmatrix(i+1,i+1) += level_shift_casscf
   enddo
@@ -44,7 +44,7 @@
       write(6,*) ' diagonal of the Hessian : ',i,hessmat(i,i)
     end do
   end if
-  
+
 END_PROVIDER
 
  BEGIN_PROVIDER [real*8, SXeigenvec, (nMonoEx+1,nMonoEx+1)]
@@ -58,7 +58,7 @@ END_PROVIDER
     print*,'Using the Davidson algorithm to diagonalize the SXmatrix'
    endif
    double precision, allocatable :: u_in(:,:),energies(:)
-   allocate(u_in(nMonoEx+1,n_states_diag),energies(n_guess_sx_mat))
+   allocate(u_in(nMonoEx+1,n_guess_sx_mat*n_states_diag),energies(n_guess_sx_mat))
    call davidson_diag_sx_mat(n_guess_sx_mat, u_in, energies)
    integer :: i,j
    SXeigenvec = 0.d0
@@ -71,7 +71,7 @@ END_PROVIDER
    enddo
   else
    if(bavard)then
-    print*,'Diagonalize the SXmatrix with Jacobi'
+    print*,'Diagonalize the SXmatrix with Lapack'
    endif
    call lapack_diag(SXeigenval,SXeigenvec,SXmatrix,nMonoEx+1,nMonoEx+1)
   endif
@@ -93,10 +93,10 @@ END_PROVIDER
  implicit none
  if(state_following_casscf)then
   energy_improvement = SXeigenval(best_vector_ovrlp_casscf)
- else 
+ else
   energy_improvement = SXeigenval(1)
  endif
- END_PROVIDER 
+ END_PROVIDER
 
 
 
@@ -115,8 +115,8 @@ END_PROVIDER
       end if
     end if
   end do
-  if(best_vector_ovrlp_casscf.lt.0)then 
-   best_vector_ovrlp_casscf = minloc(SXeigenval,nMonoEx+1) 
+  if(best_vector_ovrlp_casscf.lt.0)then
+    best_vector_ovrlp_casscf = 1
   endif
   c0=SXeigenvec(1,best_vector_ovrlp_casscf)
   if (bavard) then
@@ -124,7 +124,7 @@ END_PROVIDER
     write(6,*) ' previous orbitals = ',SXeigenval(best_vector_ovrlp_casscf)
     write(6,*) ' weight of the 1st element ',c0
   endif
- END_PROVIDER 
+ END_PROVIDER
 
  BEGIN_PROVIDER [double precision, SXvector, (nMonoEx+1)]
   implicit none
@@ -134,6 +134,7 @@ END_PROVIDER
   integer           :: i
   double precision  :: c0
   c0=SXeigenvec(1,best_vector_ovrlp_casscf)
+  if (c0*c0 < 0.5d0) c0 = 1.d0
   do i=1,nMonoEx+1
     SXvector(i)=SXeigenvec(i,best_vector_ovrlp_casscf)/c0
   end do
@@ -146,7 +147,7 @@ BEGIN_PROVIDER [double precision, NewOrbs, (ao_num,mo_num) ]
   ! Updated orbitals
   END_DOC
   integer                        :: i,j,ialph
-  
+
   if(state_following_casscf)then
    print*,'Using the state following casscf '
    call dgemm('N','T', ao_num,mo_num,mo_num,1.d0,                     &
@@ -169,7 +170,7 @@ BEGIN_PROVIDER [double precision, NewOrbs, (ao_num,mo_num) ]
     !soft_touch mo_coef
     !call save_mos_no_occ
     !stop
-   else 
+   else
     level_shift_casscf *= 0.5D0
     level_shift_casscf = max(level_shift_casscf,0.002d0)
    !touch level_shift_casscf
@@ -179,7 +180,7 @@ BEGIN_PROVIDER [double precision, NewOrbs, (ao_num,mo_num) ]
         NewOrbs, size(NewOrbs,1))
    endif
   endif
-  
+
 END_PROVIDER
 
 BEGIN_PROVIDER [real*8, Umat, (mo_num,mo_num) ]
@@ -189,11 +190,11 @@ BEGIN_PROVIDER [real*8, Umat, (mo_num,mo_num) ]
   END_DOC
   integer                        :: i,j,indx,k,iter,t,a,ii,tt,aa
   logical                        :: converged
-  
-  real*8 :: Tpotmat (mo_num,mo_num), Tpotmat2 (mo_num,mo_num) 
-  real*8 :: Tmat(mo_num,mo_num) 
+
+  real*8 :: Tpotmat (mo_num,mo_num), Tpotmat2 (mo_num,mo_num)
+  real*8 :: Tmat(mo_num,mo_num)
   real*8 :: f
-  
+
   ! the orbital rotation matrix T
   Tmat(:,:)=0.D0
   indx=1
@@ -224,9 +225,13 @@ BEGIN_PROVIDER [real*8, Umat, (mo_num,mo_num) ]
       Tmat(aa,tt)=-SXvector(indx)
     end do
   end do
-  
+
   ! Form the exponential
   call exp_matrix_taylor(Tmat,mo_num,Umat,converged)
+  if (bavard) then
+    print *, 'maxval(Tmat), minval(Tmat)', maxval(Tmat), minval(Tmat)
+    print *, 'maxval(Umat), minval(Umat)', maxval(Umat), minval(Umat)
+  endif
 
 !  Tpotmat(:,:)=0.D0
 !  Umat(:,:)   =0.D0
@@ -245,10 +250,10 @@ BEGIN_PROVIDER [real*8, Umat, (mo_num,mo_num) ]
 !        Tmat, size(Tmat,1), 0.d0,                                    &
 !        Tpotmat, size(Tpotmat,1))
 !    Umat(:,:) = Umat(:,:) + Tpotmat(:,:)
-!    
+!
 !    converged = ( sum(abs(Tpotmat(:,:))) < 1.d-6).or.(iter>30)
 !  end do
 END_PROVIDER
-  
+
 
 

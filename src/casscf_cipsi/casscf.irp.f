@@ -14,7 +14,7 @@ program casscf
    thresh_scf = max(1.d-4,thresh_scf)
    pt2_relative_error = 0.04
   endif
-  touch pt2_relative_error 
+  touch pt2_relative_error
   call run
 end
 
@@ -56,7 +56,7 @@ subroutine run
      energy_old = energy
      energy = eone+etwo+ecore
      pt2_max_before = pt2_max
- 
+
      call write_time(6)
      call write_int(6,iteration,'CAS-SCF iteration = ')
      call write_double(6,energy,'State-average CAS-SCF energy = ')
@@ -66,7 +66,7 @@ subroutine run
       double precision :: delta_E_istate, e_av
       e_av = 0.d0
       do istate=1,N_states
-       e_av += state_average_weight(istate) * Ev(istate) 
+       e_av += state_average_weight(istate) * Ev(istate)
        if(istate.gt.1)then
         delta_E_istate = E_PT2(istate)  - E_PT2(1)
        write(*,'(A6,I2,A18,F16.10)')'state ',istate,' Delta E+PT2    = ',delta_E_istate
@@ -79,7 +79,7 @@ subroutine run
       call write_double(6,e_av,'State-average CAS-SCF energy bis = ')
       call write_double(6,pt2_max,' PT2_MAX       = ')
 !!    endif
- 
+
      print*,''
      call write_double(6,norm_grad_vec2,'Norm of gradients = ')
      call write_double(6,norm_grad_vec2_tab(1), '     Core-active  gradients = ')
@@ -87,7 +87,7 @@ subroutine run
      call write_double(6,norm_grad_vec2_tab(3), '   Active-virtual gradients = ')
      print*,''
      call write_double(6,energy_improvement, 'Predicted energy improvement = ')
- 
+
      if(criterion_casscf == "energy")then
       converged = dabs(energy_improvement) < thresh_scf
      else if (criterion_casscf == "gradients")then
@@ -111,11 +111,12 @@ subroutine run
      endif
      print*,''
      call write_double(6,pt2_max, 'PT2_MAX for next iteration = ')
- 
+
      mo_coef = NewOrbs
      mo_occ  = occnum
      if(.not.converged)then
       call save_mos
+      call save_energy(Ev,E_PT2)
       iteration += 1
       if(norm_grad_vec2.gt.0.01d0)then
        N_det = N_states
@@ -129,7 +130,7 @@ subroutine run
       SOFT_TOUCH mo_coef N_det psi_det psi_coef
       if(.not.small_active_space)then
        if(adaptive_pt2_max)then
-         SOFT_TOUCH pt2_max  
+         SOFT_TOUCH pt2_max
        endif
       endif
       if(iteration .gt. 3)then
@@ -138,15 +139,16 @@ subroutine run
       endif
      endif
     endif
- 
+
   enddo
+  call save_energy(Ev,E_PT2)
   if(.True.)then
      integer :: i
     print*,'Converged CASSCF '
     print*,'--------------------------'
-    write(6,*) ' occupation numbers of orbitals '
+    write(6,*) ' Occupation numbers of orbitals     Fock matrix diagonal'
     do i=1,mo_num
-      write(6,*) i,occnum(i)
+        write(6,*) i,occnum(i),mcscf_fock_diag_mo(i)
     end do
     print*,'--------------'
 !
@@ -154,11 +156,6 @@ subroutine run
 !     write(6,*) ' the diagonal of the inactive effective Fock matrix '
 !     write(6,'(5(i3,F12.5))') (i,Fipq(i,i),i=1,mo_num)
 !     write(6,*)
-  print*,'Fock MCSCF'
-  do i = 1, mo_num
-   write(*,*)i,mcscf_fock_diag_mo(i)
-!   write(*,*)mcscf_fock_alpha_mo(i,i)
-  enddo
 
  endif
 
