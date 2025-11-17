@@ -132,9 +132,6 @@ END_DOC
           endif
           TOUCH mo_coef level_shift
           mo_coef(1:ao_num,1:mo_num) = eigenvectors_Fock_matrix_MO(1:ao_num,1:mo_num)
-          if(do_mom)then
-             call reorder_mo_max_overlap
-          endif
           if(frozen_orb_scf)then
              call reorder_core_orb
              call initialize_mo_coef_begin_iteration
@@ -200,6 +197,9 @@ END_DOC
 
  if (iteration_SCF < n_it_SCF_max) then
    mo_label = 'Canonical'
+   if (do_mom) then
+     mo_label = 'MOM'
+   endif
  endif
 !
 ! End of Main SCF loop
@@ -215,34 +215,49 @@ END_DOC
 
 
   if(.not.frozen_orb_scf)then
-   call mo_as_eigvectors_of_mo_matrix(Fock_matrix_mo,size(Fock_matrix_mo,1), &
-        size(Fock_matrix_mo,2),mo_label,1,.true.)
+   mo_coef(1:ao_num,1:mo_num) = eigenvectors_Fock_matrix_MO(1:ao_num,1:mo_num)
+!   call mo_as_eigvectors_of_mo_matrix(Fock_matrix_mo,size(Fock_matrix_mo,1), &
+!        size(Fock_matrix_mo,2),mo_label,1,.true.)
    call restore_symmetry(ao_num, mo_num, mo_coef, size(mo_coef,1), 1.d-10)
    call orthonormalize_mos
   endif
 
 
   ! Identify degenerate MOs and combine them to force them to be on the axes
-  allocate(S(ao_num,ao_num))
-  i=1
-  do while (i<mo_num)
-    j=i+1
-    m=1
-    do while ( (fock_matrix_diag_mo(j)-fock_matrix_diag_mo(i) < 1.d-5) )
-      j += 1
-      m += 1
-      if (j > mo_num) exit
+  if (.not.do_mom) then
+    allocate(S(ao_num,ao_num))
+    i=1
+    do while (i<mo_num)
+      j=i+1
+      m=1
+      do while ( (fock_matrix_diag_mo(j)-fock_matrix_diag_mo(i) < 1.d-5) )
+        j += 1
+        m += 1
+        if (j > mo_num) exit
+      enddo
+      if (m>1) then
+        call dgemm('N','T',ao_num,ao_num,m,1.d0,mo_coef(1,i),size(mo_coef,1),mo_coef(1,i),size(mo_coef,1),0.d0,S,size(S,1))
+        call pivoted_cholesky( S, m, -1.d0, ao_num, mo_coef(1,i))
+      endif
+      i = j
     enddo
-    if (m>1) then
-      call dgemm('N','T',ao_num,ao_num,m,1.d0,mo_coef(1,i),size(mo_coef,1),mo_coef(1,i),size(mo_coef,1),0.d0,S,size(S,1))
-      call pivoted_cholesky( S, m, -1.d0, ao_num, mo_coef(1,i))
-    endif
-    i = j
-  enddo
+  endif
 
   if(do_mom)then
      call reorder_mo_max_overlap
-  endif
+  end if
+  TOUCH mo_coef
+
+  print *, ''
+  print *, 'Eigenvalues'
+  print *, '-----------'
+  print *, ''
+  print *, '======== ================'
+  do i=1,mo_num
+   write (6,'(I8,1X,F16.10)')  i, Fock_matrix_diag_mo(i)
+  enddo
+  print *, '======== ================'
+
 
   call save_mos
 
