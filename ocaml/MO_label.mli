@@ -5,6 +5,7 @@ type t =
   | Localized
   | Orthonormalized
   | MCSCF
+  | MOM
   | None
 [@@deriving sexp]
 
