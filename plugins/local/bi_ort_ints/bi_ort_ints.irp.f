@@ -25,7 +25,8 @@ program bi_ort_ints
 
 !  call test_mos_in_r()
 !  call test_int2_grad2_u22_bimo_t()
-  call test_nol_fc
+!  call test_nol_fc
+ call test_total_fc
 
 end
 
@@ -53,6 +54,33 @@ subroutine test_nol_fc
   enddo
  enddo
  print*,'accu = ',accu
+end
+
+subroutine test_total_fc
+ implicit none
+ integer :: i,j,k,l
+ double precision :: accu
+ logical :: is_i_in_core, core_i, core_j, core_k, core_l
+ accu = 0.d0
+ do i = 1, mo_num
+  core_i = is_i_in_core(i)
+  do j = 1, mo_num
+   core_j = is_i_in_core(j)
+   do k = 1, mo_num
+    core_k = is_i_in_core(k)
+    do l = 1, mo_num
+     core_l = is_i_in_core(l)
+     if(core_i.or.core_j.or.core_k.or.core_l)then
+      if(dabs(mo_bi_ortho_tc_two_e_chemist(l,k,j,i)).ne.0.d0)then
+       print*,'pb !! '
+       print*,i,j,k,l,mo_bi_ortho_tc_two_e_chemist(l,k,j,i)
+      endif
+     endif
+    enddo
+   enddo
+  enddo
+ enddo
+
 end
 
 subroutine test_5idx2

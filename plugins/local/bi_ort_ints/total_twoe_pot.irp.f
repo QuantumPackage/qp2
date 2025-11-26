@@ -140,6 +140,27 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_two_e_chemist, (mo_num, mo_num,
     deallocate(a2)
   
   endif
+  
+  
+ !! IF EFFECTIVE CORE OPERATOR THEN CANCEL ALL INTEGRALS INVOLVING CORE ORBITALS
+  if(core_tc_op)then
+   logical :: is_i_in_core, core_i, core_j, core_k, core_l
+   do i = 1, mo_num
+    core_i = is_i_in_core(i)
+    do j = 1, mo_num
+     core_j = is_i_in_core(j)
+     do k = 1, mo_num
+      core_k = is_i_in_core(k)
+      do l = 1, mo_num
+       core_l = is_i_in_core(l)
+       if(core_i.or.core_j.or.core_k.or.core_l)then
+        mo_bi_ortho_tc_two_e_chemist(l,k,j,i) = 0.d0
+       endif
+      enddo
+     enddo
+    enddo
+   enddo
+  endif
 
   !allocate(a1(mo_num,ao_num,ao_num,ao_num))
   !a1 = 0.d0
