@@ -3,6 +3,16 @@
 
 BEGIN_PROVIDER [double precision, noL_0e_v0]
 
+  BEGIN_DOC
+  ! 
+  ! < Phi_left | L | Phi_right > COMPUTED IN A NAIVE WAY
+  !
+  ! ZERO-body part of the normal ordering (on HF reference) of 3-e operator
+  !
+  ! WARNING: if core_tc_op 
+  !
+  ! then does not take into account any contribution from core orbitals
+ END_DOC
   implicit none
   integer                       :: i, j, k, istart
   double precision              :: I_ijk_ijk, I_ijk_kij, I_ijk_jik, I_ijk_jki, I_ijk_ikj, I_ijk_kji
@@ -134,6 +144,13 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, noL_1e_v0, (mo_num, mo_num)]
 
+ BEGIN_DOC
+ ! one-body part of the normal ordering (on HF reference) of 3-e operator COMPUTED IN A NAIVE WAY
+ !
+ ! WARNING: if core_tc_op 
+ !
+ ! then does not take into account any contribution from core orbitals
+ END_DOC
   implicit none
   integer          :: p, s, i, j,istart
   double precision :: I_pij_sij, I_pij_isj, I_pij_ijs, I_pij_sji, I_pij_jsi, I_pij_jis
@@ -235,6 +252,19 @@ BEGIN_PROVIDER [double precision, noL_1e_v0, (mo_num, mo_num)]
 
   endif
 
+  if(core_tc_op)then
+   logical :: is_i_in_core, core_i, core_j
+   do i = 1, mo_num
+    core_i = is_i_in_core(i)
+    do j = 1, mo_num
+     core_j = is_i_in_core(j)
+      if(core_i.or.core_j)then
+       noL_1e_v0(j,i) = 0.d0
+      endif
+    enddo
+   enddo
+  endif
+
   call wall_time(t1)
   print*, " Wall time for noL_1e_v0 (min) = ", (t1 - t0)/60.d0
 
@@ -244,6 +274,13 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, noL_2e_v0, (mo_num, mo_num, mo_num, mo_num)]
 
+ BEGIN_DOC
+ ! two-body part of the normal ordering (on HF reference) of 3-e operator COMPUTED IN A NAIVE WAY
+ !
+ ! WARNING: if core_tc_op 
+ !
+ ! then does not take into account any contribution from core orbitals
+ END_DOC
   implicit none
   integer          :: p, q, s, t, i, istart
   double precision :: I_ipq_sit, I_ipq_tsi, I_ipq_ist
@@ -330,6 +367,25 @@ BEGIN_PROVIDER [double precision, noL_2e_v0, (mo_num, mo_num, mo_num, mo_num)]
 
   endif
 
+  if(core_tc_op)then
+   logical :: is_i_in_core, core_i, core_j, core_k, core_l
+   do i = 1, mo_num
+    core_i = is_i_in_core(i)
+    do j = 1, mo_num
+     core_j = is_i_in_core(j)
+     do k = 1, mo_num
+      core_k = is_i_in_core(k)
+      do l = 1, mo_num
+       core_l = is_i_in_core(l)
+       if(core_i.or.core_j.or.core_k.or.core_l)then
+        noL_2e_v0(l,k,j,i) = 0.d0
+       endif
+      enddo
+     enddo
+    enddo
+   enddo
+  endif
+
   call wall_time(t1)
   print*, " Wall time for noL_2e_v0 (min) = ", (t1 - t0)/60.d0
 
@@ -343,7 +399,12 @@ BEGIN_PROVIDER [double precision, noL_0e]
   ! 
   ! < Phi_left | L | Phi_right >
   !
-  END_DOC 
+  ! ZERO-body part of the normal ordering (on HF reference) of 3-e operator
+  !
+  ! WARNING: if core_tc_op 
+  !
+  ! then does not take into account any contribution from core orbitals
+ END_DOC
 
   implicit none
   integer                       :: i, j, k, ipoint, istart
@@ -741,6 +802,13 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, noL_1e, (mo_num, mo_num)]
 
+ BEGIN_DOC
+ ! one-body part of the normal ordering (on HF reference) of 3-e operator
+ !
+ ! WARNING: if core_tc_op 
+ !
+ ! then does not take into account any contribution from core orbitals
+ END_DOC
   implicit none
   integer                       :: p, s, i, j, ipoint, istart
   double precision              :: t0, t1
@@ -1329,6 +1397,19 @@ BEGIN_PROVIDER [double precision, noL_1e, (mo_num, mo_num)]
 
   endif
 
+  if(core_tc_op)then
+   logical :: is_i_in_core, core_i, core_j
+   do i = 1, mo_num
+    core_i = is_i_in_core(i)
+    do j = 1, mo_num
+     core_j = is_i_in_core(j)
+      if(core_i.or.core_j)then
+       noL_1e(j,i) = 0.d0
+      endif
+    enddo
+   enddo
+  endif
+
   call wall_time(t1)
   print*, " Wall time for noL_1e (min) = ", (t1 - t0)/60.d0
 
@@ -1338,6 +1419,13 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, noL_2e, (mo_num, mo_num, mo_num, mo_num)]
 
+ BEGIN_DOC
+ ! two-body part of the normal ordering (on HF reference) of 3-e operator 
+ !
+ ! WARNING: if core_tc_op 
+ !
+ ! then does not take into account any contribution from core orbitals
+ END_DOC
   implicit none
   integer                       :: p, q, s, t, i, ipoint, istart
   double precision              :: t0, t1
@@ -1633,6 +1721,25 @@ BEGIN_PROVIDER [double precision, noL_2e, (mo_num, mo_num, mo_num, mo_num)]
   
     deallocate(tmp)
 
+  endif
+
+  if(core_tc_op)then
+   logical :: is_i_in_core, core_i, core_j, core_k, core_l
+   do i = 1, mo_num
+    core_i = is_i_in_core(i)
+    do j = 1, mo_num
+     core_j = is_i_in_core(j)
+     do k = 1, mo_num
+      core_k = is_i_in_core(k)
+      do l = 1, mo_num
+       core_l = is_i_in_core(l)
+       if(core_i.or.core_j.or.core_k.or.core_l)then
+        noL_2e(l,k,j,i) = 0.d0
+       endif
+      enddo
+     enddo
+    enddo
+   enddo
   endif
 
   call wall_time(t1)
