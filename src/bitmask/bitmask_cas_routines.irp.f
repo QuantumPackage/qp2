@@ -215,9 +215,10 @@ integer function number_of_holes_verbose(key_in)
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
  integer :: i
- integer(bit_kind) :: key_tmp(N_int,2)
+ integer(bit_kind), allocatable :: key_tmp(:,:)
+ allocate(key_tmp(N_int,2))
  print*,'HOLES '
- print*,'jey_in = '
+ print*,'key_in = '
  call debug_det(key_in,N_int)
  number_of_holes_verbose = 0
    key_tmp(1,1) = xor(key_in(1,1),iand(key_in(1,1),act_bitmask(1,1)))
@@ -245,9 +246,10 @@ integer function number_of_particles_verbose(key_in)
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
  integer :: i
- integer(bit_kind) :: key_tmp(N_int,2)
+ integer(bit_kind), allocatable :: key_tmp(:,:)
+ allocate(key_tmp(N_int,2))
  print*,'PARTICLES '
- print*,'jey_in = '
+ print*,'key_in = '
  call debug_det(key_in,N_int)
  number_of_particles_verbose = 0
    key_tmp(1,1) = xor(key_in(1,2),iand(key_in(1,2),act_bitmask(1,1)))
@@ -332,7 +334,8 @@ end
 logical function is_i_in_virtual(i)
  implicit none
  integer,intent(in) :: i
- integer(bit_kind) :: key(N_int)
+ integer(bit_kind), allocatable :: key(:)
+ allocate(key(N_int))
  integer :: k,j
  integer :: accu
  is_i_in_virtual = .False.
@@ -346,6 +349,28 @@ logical function is_i_in_virtual(i)
  enddo
  if(accu .ne. 0)then
   is_i_in_virtual = .True.
+ endif
+
+end
+
+logical function is_i_in_core(i)
+ implicit none
+ integer,intent(in) :: i
+ integer(bit_kind), allocatable :: key(:)
+ allocate(key(N_int))
+ integer :: k,j
+ integer :: accu
+ is_i_in_core = .False.
+ key= 0_bit_kind
+ k = shiftr(i-1,bit_kind_shift)+1
+ j = i-shiftl(k-1,bit_kind_shift)-1
+ key(k) = ibset(key(k),j)
+ accu = 0
+ do k = 1, N_int
+  accu += popcnt(iand(key(k),core_bitmask(k,1)))
+ enddo
+ if(accu .ne. 0)then
+  is_i_in_core = .True.
  endif
 
 end
