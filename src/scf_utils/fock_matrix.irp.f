@@ -96,8 +96,15 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_param, (2,3) ]
 
 END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, Fock_matrix_mo, (mo_num,mo_num) ]
-&BEGIN_PROVIDER [ double precision, Fock_matrix_diag_mo, (mo_num)]
+ BEGIN_PROVIDER [ double precision, Fock_matrix_diag_mo, (mo_num)]
+   implicit none
+   integer :: i
+   do i = 1, mo_num
+     Fock_matrix_diag_mo(i) = Fock_matrix_mo(i,i)
+   enddo
+ END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, Fock_matrix_mo, (mo_num,mo_num) ]
    implicit none
    BEGIN_DOC
    ! Fock matrix on the MO basis.
@@ -181,11 +188,6 @@ END_PROVIDER
        enddo
      enddo
    endif
-
-
-   do i = 1, mo_num
-     Fock_matrix_diag_mo(i) = Fock_matrix_mo(i,i)
-   enddo
 
 
    if(frozen_orb_scf)then
@@ -291,4 +293,8 @@ BEGIN_PROVIDER [ double precision, SCF_energy ]
  SCF_energy = 0.5d0 * SCF_energy + extra_e_contrib_density + nuclear_repulsion
 
 END_PROVIDER
+
+
+
+
 
