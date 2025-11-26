@@ -83,7 +83,8 @@ subroutine run
   write(json_unit,json_array_open_fmt) 'scf'
 
   if (use_optimal_damping.and.all_shells_closed) then
-    call OpenOrbitalOptimiserSCF
+!    call OpenOrbitalOptimiserSCF
+    call Roothaan_Hall_SCF
   else
     call Roothaan_Hall_SCF
   endif
