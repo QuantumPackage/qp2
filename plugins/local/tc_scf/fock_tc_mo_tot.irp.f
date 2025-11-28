@@ -169,6 +169,20 @@
     deallocate(tmp)
 
   endif
+  if (core_tc_op)then
+   ! adding the contribution from the core orbitals 
+   Fock_matrix_tc_mo_tot += Fock_matrix_tc_mo_core_eri 
+   ! Removing the off-diagonal elements between core and the rest of orbitals 
+   do i = 1, n_core_orb 
+    do j = n_core_orb+1,mo_num
+     Fock_matrix_tc_mo_tot(j,i) = 0.d0
+     Fock_matrix_tc_mo_tot(i,j) = 0.d0
+    enddo
+   enddo
+   do i = 1, n_core_orb 
+    Fock_matrix_tc_mo_tot(i,i) = Fock_matrix_tc_mo_core_eri(i,i)
+   enddo
+  endif
 
 END_PROVIDER
 
