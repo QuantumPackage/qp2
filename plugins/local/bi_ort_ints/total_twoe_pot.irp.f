@@ -154,75 +154,13 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_two_e_chemist, (mo_num, mo_num,
       do l = 1, mo_num
        core_l = is_i_in_core(l)
        if(core_i.or.core_j.or.core_k.or.core_l)then
-        mo_bi_ortho_tc_two_e_chemist(l,k,j,i) = 0.d0
+        mo_bi_ortho_tc_two_e_chemist(l,k,j,i) = mo_bi_ortho_eri_two_e_chemist(l,k,j,i)
        endif
       enddo
      enddo
     enddo
    enddo
   endif
-
-  !allocate(a1(mo_num,ao_num,ao_num,ao_num))
-  !a1 = 0.d0
-
-  !do m = 1, ao_num
-  !  do p = 1, ao_num
-  !    do n = 1, ao_num
-  !      do q = 1, ao_num
-  !        do k = 1, mo_num
-  !          !       (k n|p m)    = sum_q c_qk * (q n|p m)
-  !          a1(k,n,p,m) += mo_l_coef_transp(k,q) * ao_two_e_tc_tot(q,n,p,m)
-  !        enddo
-  !      enddo
-  !    enddo
-  !  enddo
-  !enddo
-
-  !allocate(a2(mo_num,mo_num,ao_num,ao_num))
-  !a2 = 0.d0
-
-  !do m = 1, ao_num
-  !  do p = 1, ao_num
-  !    do n = 1, ao_num
-  !      do i = 1, mo_num
-  !        do k = 1, mo_num
-  !          !       (k i|p m) = sum_n c_ni * (k n|p m)
-  !          a2(k,i,p,m) += mo_r_coef_transp(i,n) * a1(k,n,p,m)
-  !        enddo
-  !      enddo
-  !    enddo
-  !  enddo
-  !enddo
-  !deallocate(a1)
-
-  !allocate(a1(mo_num,mo_num,mo_num,ao_num))
-  !a1 = 0.d0
-  !do m = 1, ao_num
-  !  do p = 1, ao_num
-  !    do l = 1, mo_num
-  !      do i = 1, mo_num
-  !        do k = 1, mo_num
-  !          a1(k,i,l,m) += mo_l_coef_transp(l,p) * a2(k,i,p,m)
-  !        enddo
-  !      enddo
-  !    enddo
-  !  enddo
-  !enddo
-  !deallocate(a2)
-
-  !mo_bi_ortho_tc_two_e_chemist = 0.d0 
-  !do m = 1, ao_num
-  !  do j = 1, mo_num
-  !    do l = 1, mo_num
-  !      do i = 1, mo_num
-  !        do k = 1, mo_num
-  !          mo_bi_ortho_tc_two_e_chemist(k,i,l,j) += mo_r_coef_transp(j,m) * a1(k,i,l,m)
-  !        enddo
-  !      enddo
-  !    enddo
-  !  enddo
-  !enddo
-  !deallocate(a1)
 
   call wall_time(t2)
   print *, ' WALL TIME for PROVIDING mo_bi_ortho_tc_two_e_chemist (min)', (t2-t1)/60.d0
@@ -373,3 +311,82 @@ END_PROVIDER
   enddo
 
 END_PROVIDER 
+
+BEGIN_PROVIDER [double precision, mo_bi_ortho_eri_two_e_chemist, (mo_num, mo_num, mo_num, mo_num)]
+
+  BEGIN_DOC
+  !
+  ! mo_bi_ortho_eri_two_e_chemist(k,i,l,j) = <k l|V(r_12)|i j> where i,j are right MOs and k,l are left MOs
+  !
+  END_DOC
+
+  implicit none
+  integer                       :: i, j, k, l, m, n, p, q, s, r
+  double precision              :: t1, t2, tt1, tt2
+  double precision, allocatable :: a1(:,:,:,:), a2(:,:,:,:),ao_eri(:,:,:,:)
+  double precision, allocatable :: a_jkp(:,:,:), a_kpq(:,:,:), ao_two_e_tc_tot_tmp(:,:,:)
+
+  print *, ' PROVIDING mo_bi_ortho_eri_two_e_chemist ...'
+  call wall_time(t1)
+  call print_memory_usage()
+
+  PROVIDE mo_r_coef mo_l_coef
+
+    print*, ' memory scale of TC ao -> mo: O(N4) '
+    allocate(ao_eri(ao_num,ao_num,ao_num,mo_num))
+    print*,'Cholesky vectors will be used '
+    double precision :: get_ao_integ_chol,eri
+    eri = get_ao_integ_chol(1,1,1,1) ! FOR OPENMP 
+    !$OMP PARALLEL DEFAULT(NONE)                            &
+    !$OMP SHARED(ao_num, ao_eri) &
+    !$OMP PRIVATE(i, j, k, l)
+    !$OMP DO COLLAPSE(3)
+    do j = 1, ao_num
+      do l = 1, ao_num
+        do i = 1, ao_num
+          do k = 1, ao_num
+            ao_eri(k,i,l,j) = get_ao_integ_chol(k,i,l,j)
+          enddo
+        enddo
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+
+    allocate(a2(ao_num,ao_num,ao_num,mo_num))
+  
+    call dgemm( 'T', 'N', ao_num*ao_num*ao_num, mo_num, ao_num, 1.d0     &
+              , ao_eri(1,1,1,1), ao_num, mo_l_coef(1,1), ao_num &
+              , 0.d0, a2(1,1,1,1), ao_num*ao_num*ao_num)
+  
+    FREE ao_two_e_tc_tot
+
+    allocate(a1(ao_num,ao_num,mo_num,mo_num))
+  
+    call dgemm( 'T', 'N', ao_num*ao_num*mo_num, mo_num, ao_num, 1.d0 &
+              , a2(1,1,1,1), ao_num, mo_r_coef(1,1), ao_num          &
+              , 0.d0, a1(1,1,1,1), ao_num*ao_num*mo_num)
+  
+    deallocate(a2)
+    allocate(a2(ao_num,mo_num,mo_num,mo_num))
+  
+    call dgemm( 'T', 'N', ao_num*mo_num*mo_num, mo_num, ao_num, 1.d0 &
+              , a1(1,1,1,1), ao_num, mo_l_coef(1,1), ao_num          &
+              , 0.d0, a2(1,1,1,1), ao_num*mo_num*mo_num)
+  
+    deallocate(a1)
+  
+    call dgemm( 'T', 'N', mo_num*mo_num*mo_num, mo_num, ao_num, 1.d0 &
+              , a2(1,1,1,1), ao_num, mo_r_coef(1,1), ao_num          &
+              , 0.d0, mo_bi_ortho_eri_two_e_chemist(1,1,1,1), mo_num*mo_num*mo_num)
+  
+    deallocate(a2)
+  
+  
+  call wall_time(t2)
+  print *, ' WALL TIME for PROVIDING mo_bi_ortho_eri_two_e_chemist (min)', (t2-t1)/60.d0
+  call print_memory_usage()
+
+END_PROVIDER 
+
+! ---
