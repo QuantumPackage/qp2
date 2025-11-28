@@ -1,3 +1,6 @@
+!!! TODO:: optimize when "ao_extra_only_1s" is True
+
+
 double precision function v_extra_nucl_extra_ao(i_ao,j_ao)
  implicit none
   BEGIN_DOC
@@ -6,9 +9,9 @@ double precision function v_extra_nucl_extra_ao(i_ao,j_ao)
   ! $\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) v_ne^{extra}(r)$.
   !
   !
-  ! where BOTH $\chi_i(r)$ AND $\chi_j(r)$ belongs to the EXTRA basis 
+  ! where BOTH $\chi_i(r)$ AND $\chi_j(r)$ belongs to the EXTRA basis (system B)
   !
-  ! and v_ne^{extra}(r) is the Coulomb potential coming from the EXTRA nuclei
+  ! and v_ne^{extra}(r) is the Coulomb potential coming from the EXTRA nuclei (system B)
   END_DOC
  integer, intent(in) ::i_ao,j_ao
  double precision :: mu_in,charge,coord(3)
@@ -23,6 +26,30 @@ double precision function v_extra_nucl_extra_ao(i_ao,j_ao)
  enddo
 end
 
+double precision function v_extra_nucl_ao(i_ao,j_ao)
+ implicit none
+  BEGIN_DOC
+  !
+  ! Computes the following integral :
+  ! $\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) v_ne(r)$.
+  !
+  !
+  ! where BOTH $\chi_i(r)$ AND $\chi_j(r)$ belongs to the REGULAR basis (system A)
+  !
+  ! and v_ne(r) is the Coulomb potential coming from the EXTRA nuclei (system B)
+  END_DOC
+ integer, intent(in) ::i_ao,j_ao
+ integer :: i
+ double precision :: mu_in, coord(3),charge, integral
+ double precision :: NAI_pol_mult_erf_ao
+ mu_in = 1.d+10
+ do i = 1, extra_nucl_num
+  coord(1:3) = extra_nucl_coord_transp(1:3,i)
+  charge = extra_nucl_charge(i)
+  v_extra_nucl_ao += -NAI_pol_mult_erf_ao(i_ao, j_ao, mu_in, coord) * charge
+ enddo
+end
+
 
 double precision function v_nucl_extra_ao(i_ao,j_ao)
  implicit none
@@ -32,9 +59,9 @@ double precision function v_nucl_extra_ao(i_ao,j_ao)
   ! $\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) v_ne(r)$.
   !
   !
-  ! where BOTH $\chi_i(r)$ AND $\chi_j(r)$ belongs to the EXTRA basis 
+  ! where BOTH $\chi_i(r)$ AND $\chi_j(r)$ belongs to the EXTRA basis (system B)
   !
-  ! and v_ne(r) is the Coulomb potential coming from the REGULAR nuclei
+  ! and v_ne(r) is the Coulomb potential coming from the REGULAR nuclei (system A)
   END_DOC
  integer, intent(in) ::i_ao,j_ao
  double precision :: mu_in,charge,coord(3)

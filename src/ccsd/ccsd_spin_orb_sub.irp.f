@@ -82,6 +82,8 @@ subroutine run_ccsd_spin_orb
 
   call ccsd_energy_spin(cc_nOab,cc_nVab,t1%f,t2%f,cc_spin_F_ov,cc_spin_v_oovv,energy)
   print*,'guess energy', uncorr_energy+energy, energy
+  print *, 'Update_method: ', cc_update_method
+
 
   ! Loop init
   nb_iter = 0
@@ -127,7 +129,7 @@ subroutine run_ccsd_spin_orb
       call update_t1(cc_nOab,cc_nVab,f_o,f_v,r1%f,t1%f)
       call update_t2(cc_nOab,cc_nVab,f_o,f_v,r2%f,t2%f)
     else
-      print*,'Unkonw cc_method_method: '//cc_update_method
+      print*,'Unknown cc_method_method: '//cc_update_method
     endif
 
     call compute_tau_spin(cc_nOab,cc_nVab,t1%f,t2%f,tau%f)

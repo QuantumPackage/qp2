@@ -140,7 +140,7 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
   write(6,'(A)') ''
   write_buffer = '====='
   do i=1,N_st
-    write_buffer = trim(write_buffer)//' ================  ==========='
+    write_buffer = trim(write_buffer)//' ===============  ==========='
   enddo
   write(6,'(A)') write_buffer(1:6+41*N_st)
   write_buffer = 'Iter'
@@ -320,7 +320,7 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
         !don't print
         continue
       else
-        write(*,'(1X,I3,1X,100(1X,F16.10,1X,F11.6,1X,ES11.3))') iter-1, to_print(1:2,1:N_st)
+        write(*,'(1X,I3,100(1X,F16.10,1X,ES11.3))') iter-1, to_print(1:2,1:N_st)
       endif
 
       ! Check convergence

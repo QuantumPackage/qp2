@@ -31,6 +31,7 @@ program fit_1s_basis
  call ezfio_set_extra_nuclei_extra_nucl_label(new_nucl_label_1s)
 !
  call ezfio_set_ao_extra_basis_ao_extra_num(n_func_tot)
+ call ezfio_set_ao_extra_basis_ao_extra_only_1s(.True.)
  call ezfio_set_ao_extra_basis_ao_extra_center(ao_extra_center)
  call ezfio_set_ao_extra_basis_ao_extra_nucl(new_ao_nucl_1s)
  call ezfio_set_ao_extra_basis_ao_extra_prim_num(new_ao_prim_num_1s)

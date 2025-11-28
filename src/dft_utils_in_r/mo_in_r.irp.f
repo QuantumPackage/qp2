@@ -21,20 +21,11 @@
  BEGIN_DOC
  ! mos_in_r_array(i,j)        = value of the ith mo on the jth grid point
  END_DOC
- integer :: i,j
- double precision :: mos_array(mo_num), r(3)
- !$OMP PARALLEL DO &
- !$OMP DEFAULT (NONE)  &
- !$OMP PRIVATE (i,r,mos_array,j) & 
+ integer :: i
+ !$OMP PARALLEL DO DEFAULT(NONE) PRIVATE (i) & 
  !$OMP SHARED(mos_in_r_array_omp,n_points_final_grid,mo_num,final_grid_points)
  do i = 1, n_points_final_grid
-  r(1) = final_grid_points(1,i)
-  r(2) = final_grid_points(2,i)
-  r(3) = final_grid_points(3,i)
-  call give_all_mos_at_r(r,mos_array)
-  do j = 1, mo_num
-   mos_in_r_array_omp(j,i) = mos_array(j)
-  enddo
+  call give_all_mos_at_r(final_grid_points(1,i),mos_in_r_array_omp(1,i))
  enddo
  !$OMP END PARALLEL DO
  END_PROVIDER

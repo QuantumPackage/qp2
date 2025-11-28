@@ -49,7 +49,7 @@ BEGIN_PROVIDER [ double precision, trace_ao_one_e_ints]
    test += ao_one_e_integrals(j,i) * s_inv(i,j)
   enddo
  enddo
- if(dabs(accu - trace_ao_one_e_ints).gt.1.d-12)then
+ if(dabs(test - trace_ao_one_e_ints).gt.1.d-12)then
   print*,'Warning ! '
   print*,'Something is wrong because Tr(AB) \ne sum_{mn}A_mn B_nm'
  endif

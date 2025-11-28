@@ -54,6 +54,7 @@ double precision function ao_two_e_integral(i, j, k, l)
   else if (use_only_lr) then
 
     ao_two_e_integral = ao_two_e_integral_erf(i, j, k, l)
+    return
 
   else if (do_schwartz_accel(i,j,k,l)) then
 

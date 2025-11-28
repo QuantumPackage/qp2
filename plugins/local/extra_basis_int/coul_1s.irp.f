@@ -11,6 +11,11 @@ double precision function coul_full_ao_pq_r_1s(p,q,R,R_p,R_q)
  double precision, intent(in) :: R(3),R_p(3),R_q(3)
  integer, intent(in) :: p,q
  double precision :: coef,dist,P_pq(3),coefaos
+ if(.not.ao_extra_only_1s)then
+   print*,'You are using a function assuming that the extra basis is fitted on 1s functions'
+   print*,'But this is not the case apparently ... stopping'
+   stop
+ endif
  coefaos= ao_extra_coef_normalized(p,1) * ao_extra_coef_normalized(q,1) 
  coef = inv_pi_gamma_pq_3_2_ao_extra(p,q) * E_pq_ao_extra(p,q)
  P_pq = ao_extra_expo(p,1) * R_p + ao_extra_expo(q,1) * R_q
@@ -40,6 +45,11 @@ double precision function coul_pq_r_1s(p,q,R,R_p,R_q)
  double precision, intent(in) :: R(3),R_p(3),R_q(3)
  integer, intent(in) :: p,q
  double precision :: dist,P_pq(3)
+ if(.not.ao_extra_only_1s)then
+   print*,'You are using a function assuming that the extra basis is fitted on 1s functions'
+   print*,'But this is not the case apparently ... stopping'
+   stop
+ endif
  P_pq = ao_extra_expo(p,1) * R_p + ao_extra_expo(q,1) * R_q
  P_pq = P_pq * inv_gamma_pq_ao_extra(q,p)
  dist = (P_pq(1)-R(1)) * (P_pq(1)-R(1))

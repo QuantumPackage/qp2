@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 # Computes the error on the excitation energy of a CIPSI run.
+# see "QUESTDB: a database of highly-accurate excitation energies for the electronic structure community"
+# doi:10.1002/wcms.1517 or arXiv:2011.14675
+
 
 def student(p,df):
     import scipy

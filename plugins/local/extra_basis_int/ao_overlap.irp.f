@@ -4,7 +4,7 @@
  BEGIN_PROVIDER [double precision, ao_extra_overlap  , (ao_extra_num, ao_extra_num)]
 
   BEGIN_DOC
-  ! Overlap between atomic basis functions:
+  ! Overlap between atomic basis functions belonging to the EXTRA BASIS 
   !
   ! :math:`\int \chi_i(r) \chi_j(r) dr`
   END_DOC
@@ -69,7 +69,9 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, ao_extra_overlap_mixed  , (ao_num, ao_extra_num)]
 
   BEGIN_DOC
-  ! Overlap between atomic basis functions:
+  ! Overlap between atomic basis functions:  
+  !
+  ! first index belongs to the REGULAR AO basis, second to the EXTRA basis 
   !
   ! <AO_i|AO_j extra basis>
   END_DOC

@@ -258,7 +258,7 @@ integer function return_xyz_int(power)
   return_xyz_int = 1
  else if (power(2) == 1 .and. power(1) ==0 .and. power(3) ==0)then
   return_xyz_int = 2
- else if (power(3) == 1 .and. power(1) ==0 .and. power(1) ==0)then
+ else if (power(3) == 1 .and. power(1) ==0 .and. power(2) ==0)then
   return_xyz_int = 3
  else 
   return_xyz_int = -1000

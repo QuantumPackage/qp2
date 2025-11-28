@@ -21,6 +21,7 @@ double precision, parameter :: c_4_3 = 4.d0/3.d0
 double precision, parameter :: c_1_3 = 1.d0/3.d0
 double precision, parameter :: sq_op5 = dsqrt(0.5d0)
 double precision, parameter :: dlog_2pi =  dlog(2.d0*dacos(-1.d0))
+double precision, parameter :: const_rs=  (3.d0/(4.D0*pi))**(1.d0/3.d0)
 
 ! physical constants and units conversion factors
 double precision, parameter :: k_boltzman_si    = 1.38066d-23       ! K k^-1 

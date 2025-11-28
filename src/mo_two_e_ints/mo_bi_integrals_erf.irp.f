@@ -89,10 +89,12 @@ subroutine four_idx_dgemm_erf
   allocate (a1(ao_num,ao_num,ao_num,ao_num))
 
   print *, 'Getting AOs'
-  !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q,r,s)
+  call get_ao_two_e_integrals_erf(1,1,1,ao_num,a1(1,1,1,1))
+  !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q,r,s) COLLAPSE(2)
   do s=1,ao_num
     do r=1,ao_num
       do q=1,ao_num
+        a1(:,q,r,s) = 0.d0
         call get_ao_two_e_integrals_erf(q,r,s,ao_num,a1(1,q,r,s))
       enddo
     enddo

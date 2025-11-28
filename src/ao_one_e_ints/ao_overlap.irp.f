@@ -308,3 +308,26 @@ BEGIN_PROVIDER [ double precision, S_half, (ao_num,ao_num)  ]
 
 END_PROVIDER
 
+
+BEGIN_PROVIDER [ double precision, ao_sphe_overlap, (ao_sphe_num,ao_sphe_num) ]
+ implicit none
+ BEGIN_DOC
+ ! |AO| overlap matrix in the spherical basis set
+ END_DOC
+ double precision, allocatable :: tmp(:,:)
+ allocate (tmp(ao_sphe_num,ao_num))
+
+ call dgemm('N','N',ao_sphe_num,ao_num,ao_num, 1.d0, &
+   ao_cart_to_sphe_inv,size(ao_cart_to_sphe_inv,1), &
+   ao_overlap,size(ao_overlap,1), 0.d0, &
+   tmp, size(tmp,1))
+
+ call dgemm('N','T',ao_sphe_num,ao_sphe_num,ao_num, 1.d0, &
+   tmp, size(tmp,1), &
+   ao_cart_to_sphe_inv,size(ao_cart_to_sphe_inv,1), 0.d0, &
+   ao_sphe_overlap,size(ao_sphe_overlap,1))
+
+ deallocate(tmp)
+
+END_PROVIDER
+

@@ -117,9 +117,12 @@
 
     integer*8 :: n_points, n_points_max, k
     integer :: ipoint_block, ipoint_end
-
+    integer :: block_size
+    ! TODO block_size in the EZFIO
+    block_size = 10
     n_points_max = n_points_extra_final_grid * n_points_final_grid
-    n_points = 100_8*n_points_extra_final_grid
+    n_points = block_size*n_points_extra_final_grid
+!    n_points = n_points_max
 
     double precision, allocatable :: rij(:,:,:)
     allocate( rij(3, 2, n_points) )
@@ -131,9 +134,10 @@
 
     allocate( gl(2,4,n_points) )
 
-    do ipoint_block = 1, n_points_final_grid, 100  ! r1
-      ipoint_end = min(n_points_final_grid, ipoint_block+99)
+    do ipoint_block = 1, n_points_final_grid, block_size ! r1
+      ipoint_end = min(n_points_final_grid, ipoint_block+block_size-1)
 
+      integer*8 :: n_points_local
       k=0
       do ipoint = ipoint_block, ipoint_end
         do jpoint = 1, n_points_extra_final_grid ! r2
@@ -142,8 +146,9 @@
           rij(1:3, 2, k) = final_grid_points_extra(1:3, jpoint)
         end do
       enddo
+      n_points_local = k
 
-      rc = qmckl_set_electron_coord(qmckl_ctx_jastrow, 'N', n_points, rij, n_points*6_8)
+      rc = qmckl_set_electron_coord(qmckl_ctx_jastrow, 'N', n_points_local, rij, n_points*6_8)
       if (rc /= QMCKL_SUCCESS) then
         print *, irp_here, 'qmckl error in set_electron_coord'
         rc = qmckl_check(qmckl_ctx_jastrow, rc)
@@ -173,22 +178,22 @@
       ! ---
       ! e-e-n term
 
-!      rc = qmckl_get_jastrow_champ_factor_een_gl(qmckl_ctx_jastrow, gl, 8_8*n_points)
-!      if (rc /= QMCKL_SUCCESS) then
-!        print *, irp_here, 'qmckl error in fact_een_gl'
-!          rc = qmckl_check(qmckl_ctx_jastrow, rc)
-!        stop -1
-!      endif
-!
-!      k=0
-!      do ipoint = 1, n_points_final_grid  ! r1
-!      do jpoint = 1, n_points_extra_final_grid ! r2
-!          k=k+1
-!          grad1_u12_num(jpoint,ipoint,1) = grad1_u12_num(jpoint,ipoint,1) + gl(1,1,k)
-!          grad1_u12_num(jpoint,ipoint,2) = grad1_u12_num(jpoint,ipoint,2) + gl(1,2,k)
-!          grad1_u12_num(jpoint,ipoint,3) = grad1_u12_num(jpoint,ipoint,3) + gl(1,3,k)
-!      enddo
-!      enddo
+       rc = qmckl_get_jastrow_champ_factor_een_gl(qmckl_ctx_jastrow, gl, 8_8*n_points)
+       if (rc /= QMCKL_SUCCESS) then
+         print *, irp_here, 'qmckl error in fact_een_gl'
+           rc = qmckl_check(qmckl_ctx_jastrow, rc)
+         stop -1
+       endif
+ 
+       k=0
+      do ipoint = ipoint_block, ipoint_end
+       do jpoint = 1, n_points_extra_final_grid ! r2
+           k=k+1
+           grad1_u12_num(jpoint,ipoint,1) = grad1_u12_num(jpoint,ipoint,1) + gl(1,1,k)
+           grad1_u12_num(jpoint,ipoint,2) = grad1_u12_num(jpoint,ipoint,2) + gl(1,2,k)
+           grad1_u12_num(jpoint,ipoint,3) = grad1_u12_num(jpoint,ipoint,3) + gl(1,3,k)
+        enddo
+       enddo
 
       ! ---
       ! e-n term
