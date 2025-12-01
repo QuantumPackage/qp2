@@ -193,7 +193,7 @@ BEGIN_PROVIDER [ double precision, mo_l_core_coef, (ao_num, mo_num) ]
  END_DOC
  integer :: i
  mo_l_core_coef = 0.d0
- do i = 1,n_core_orb+1
+ do i = 1,n_core_orb
   mo_l_core_coef(1:ao_num,i) = mo_l_coef(1:ao_num,i)
  enddo
 END_PROVIDER 

@@ -115,9 +115,6 @@
 
   endif
 
-  do i = 1, mo_num
-    Fock_matrix_tc_diag_mo_tot(i) = Fock_matrix_tc_mo_tot(i,i)
-  enddo
 
 
    if(frozen_orb_scf)then
@@ -180,9 +177,14 @@
     enddo
    enddo
    do i = 1, n_core_orb 
-    Fock_matrix_tc_mo_tot(i,i) = Fock_matrix_tc_mo_core_eri(i,i) + Fock_matrix_tc_eri_mo_valence(i,i)
+!    print*,i,mo_bi_ortho_tc_one_e(i,i) , Fock_matrix_tc_mo_core_eri(i,i) , Fock_matrix_tc_eri_mo_valence(i,i)
+    Fock_matrix_tc_mo_tot(i,i) = mo_bi_ortho_tc_one_e(i,i) + Fock_matrix_tc_mo_core_eri(i,i) + Fock_matrix_tc_eri_mo_valence(i,i)
    enddo
   endif
+
+  do i = 1, mo_num
+    Fock_matrix_tc_diag_mo_tot(i) = Fock_matrix_tc_mo_tot(i,i)
+  enddo
 
 END_PROVIDER
 

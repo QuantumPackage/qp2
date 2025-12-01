@@ -17,4 +17,15 @@ subroutine routine
  implicit none
  provide total_cas_on_top_density
  provide average_on_top
+ integer :: i,j,ii,jj
+ double precision :: accu
+ accu = 0.d0
+ do ii = 1, n_act_orb
+  i = list_act(ii)
+  do jj = 1, n_act_orb
+   j = list_act(jj)
+   accu += act_2_rdm_ab_mo(i,j,i,j,1)
+  enddo
+ enddo
+ print*,'accu = ',accu
 end
