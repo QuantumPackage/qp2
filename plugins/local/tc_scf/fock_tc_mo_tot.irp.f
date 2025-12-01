@@ -180,7 +180,7 @@
     enddo
    enddo
    do i = 1, n_core_orb 
-    Fock_matrix_tc_mo_tot(i,i) = Fock_matrix_tc_mo_core_eri(i,i)
+    Fock_matrix_tc_mo_tot(i,i) = Fock_matrix_tc_mo_core_eri(i,i) + Fock_matrix_tc_eri_mo_valence(i,i)
    enddo
   endif
 

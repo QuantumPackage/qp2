@@ -126,27 +126,6 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [double precision, Fock_matrix_tc_mo_core_eri, (mo_num, mo_num)]
-
-  BEGIN_DOC
-  ! Two-electron part with BARE COULOMB interaction of the Fock matrix 
-  ! 
-  ! with contributions coming only from the CORE ELECTRONS
-  END_DOC
-
-  implicit none
-  double precision              :: t0, t1, tt0, tt1
-  double precision, allocatable :: tmp(:,:)
-
-  PROVIDE mo_l_coef mo_r_coef
-
-  call ao_to_mo_bi_ortho( ao_two_e_tc_core_integral, size(ao_two_e_tc_core_integral, 1) &
-                        ,  Fock_matrix_tc_mo_core_eri, size( Fock_matrix_tc_mo_core_eri, 1) )
-
-
-END_PROVIDER
-
-! ---
 
 BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_beta, (mo_num,mo_num) ]
 
