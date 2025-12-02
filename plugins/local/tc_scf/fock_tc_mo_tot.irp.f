@@ -25,66 +25,61 @@
   integer          :: i, j, n
   double precision :: t0, t1
 
-  if(elec_alpha_num == elec_beta_num) then
-
-    PROVIDE Fock_matrix_tc_mo_alpha
-
-    Fock_matrix_tc_mo_tot = Fock_matrix_tc_mo_alpha
-
-  else
-
-    PROVIDE Fock_matrix_tc_mo_beta Fock_matrix_tc_mo_alpha
-
-    do j = 1, elec_beta_num
-      ! F-K
-      do i = 1, elec_beta_num !CC
-        Fock_matrix_tc_mo_tot(i,j) = 0.5d0*(Fock_matrix_tc_mo_alpha(i,j)+Fock_matrix_tc_mo_beta(i,j))&
-             - (Fock_matrix_tc_mo_beta(i,j) - Fock_matrix_tc_mo_alpha(i,j))
-      enddo
-      ! F+K/2
-      do i = elec_beta_num+1, elec_alpha_num  !CA
-        Fock_matrix_tc_mo_tot(i,j) = 0.5d0*(Fock_matrix_tc_mo_alpha(i,j)+Fock_matrix_tc_mo_beta(i,j))&
-             + 0.5d0*(Fock_matrix_tc_mo_beta(i,j) - Fock_matrix_tc_mo_alpha(i,j))
-      enddo
-      ! F
-      do i = elec_alpha_num+1, mo_num !CV
-        Fock_matrix_tc_mo_tot(i,j) = 0.5d0*(Fock_matrix_tc_mo_alpha(i,j)+Fock_matrix_tc_mo_beta(i,j))
-      enddo
-    enddo
-
-    do j = elec_beta_num+1, elec_alpha_num
-      ! F+K/2
-      do i = 1, elec_beta_num !AC
-        Fock_matrix_tc_mo_tot(i,j) = 0.5d0*(Fock_matrix_tc_mo_alpha(i,j)+Fock_matrix_tc_mo_beta(i,j))&
-             + 0.5d0*(Fock_matrix_tc_mo_beta(i,j) - Fock_matrix_tc_mo_alpha(i,j))
-      enddo
-      ! F
-      do i = elec_beta_num+1, elec_alpha_num !AA
-        Fock_matrix_tc_mo_tot(i,j) = 0.5d0*(Fock_matrix_tc_mo_alpha(i,j)+Fock_matrix_tc_mo_beta(i,j))
-      enddo
-      ! F-K/2
-      do i = elec_alpha_num+1, mo_num !AV
-        Fock_matrix_tc_mo_tot(i,j) = 0.5d0*(Fock_matrix_tc_mo_alpha(i,j)+Fock_matrix_tc_mo_beta(i,j))&
-             - 0.5d0*(Fock_matrix_tc_mo_beta(i,j) - Fock_matrix_tc_mo_alpha(i,j))
-      enddo
-    enddo
-
-    do j = elec_alpha_num+1, mo_num
-      ! F
-      do i = 1, elec_beta_num !VC
-        Fock_matrix_tc_mo_tot(i,j) = 0.5d0*(Fock_matrix_tc_mo_alpha(i,j)+Fock_matrix_tc_mo_beta(i,j))
-      enddo
-      ! F-K/2
-      do i = elec_beta_num+1, elec_alpha_num !VA
-        Fock_matrix_tc_mo_tot(i,j) = 0.5d0*(Fock_matrix_tc_mo_alpha(i,j)+Fock_matrix_tc_mo_beta(i,j))&
-             - 0.5d0*(Fock_matrix_tc_mo_beta(i,j) - Fock_matrix_tc_mo_alpha(i,j))
-      enddo
-      ! F+K
-      do i = elec_alpha_num+1, mo_num !VV
-        Fock_matrix_tc_mo_tot(i,j) = 0.5d0*(Fock_matrix_tc_mo_alpha(i,j)+Fock_matrix_tc_mo_beta(i,j)) &
-             + (Fock_matrix_tc_mo_beta(i,j) - Fock_matrix_tc_mo_alpha(i,j))
-      enddo
-    enddo
+   PROVIDE Fock_matrix_tc_mo_beta Fock_matrix_tc_mo_alpha
+   if (all_shells_closed) then
+     Fock_matrix_tc_mo_tot = Fock_matrix_tc_mo_alpha
+   else
+     ! Core
+     do j = 1, elec_beta_num
+       ! Core
+       do i = 1, elec_beta_num
+         Fock_matrix_tc_mo_tot(i,j) = Fock_matrix_param(1,1) * Fock_matrix_tc_mo_alpha(i,j) + &
+                               Fock_matrix_param(2,1) * Fock_matrix_tc_mo_beta(i,j)
+       enddo
+       ! Open
+       do i = elec_beta_num+1, elec_alpha_num
+         Fock_matrix_tc_mo_tot(i,j) = Fock_matrix_tc_mo_beta(i,j)
+       enddo
+       ! Virtual
+       do i = elec_alpha_num+1, mo_num
+         Fock_matrix_tc_mo_tot(i,j) = 0.5d0 * Fock_matrix_tc_mo_alpha(i,j) + &
+                               0.5d0 * Fock_matrix_tc_mo_beta(i,j)
+       enddo
+     enddo
+     ! Open
+     do j = elec_beta_num+1, elec_alpha_num
+       ! Core
+       do i = 1, elec_beta_num
+         Fock_matrix_tc_mo_tot(i,j) = Fock_matrix_tc_mo_beta(i,j)
+       enddo
+       ! Open
+       do i = elec_beta_num+1, elec_alpha_num
+         Fock_matrix_tc_mo_tot(i,j) = Fock_matrix_param(1,2) * Fock_matrix_tc_mo_alpha(i,j) + &
+                               Fock_matrix_param(2,2) * Fock_matrix_tc_mo_beta(i,j)
+       enddo
+       ! Virtual
+       do i = elec_alpha_num+1, mo_num
+         Fock_matrix_tc_mo_tot(i,j) =  Fock_matrix_tc_mo_alpha(i,j)
+       enddo
+     enddo
+     ! Virtual
+     do j = elec_alpha_num+1, mo_num
+       ! Core
+       do i = 1, elec_beta_num
+         Fock_matrix_tc_mo_tot(i,j) =   0.5d0 * Fock_matrix_tc_mo_alpha(i,j) &
+                               + 0.5d0 * Fock_matrix_tc_mo_beta(i,j)
+       enddo
+       ! Open
+       do i = elec_beta_num+1, elec_alpha_num
+         Fock_matrix_tc_mo_tot(i,j) = Fock_matrix_tc_mo_alpha(i,j)
+       enddo
+       ! Virtual
+       do i = elec_alpha_num+1, mo_num
+         Fock_matrix_tc_mo_tot(i,j) = Fock_matrix_param(1,3) * Fock_matrix_tc_mo_alpha(i,j) + &
+                               Fock_matrix_param(2,3) * Fock_matrix_tc_mo_beta(i,j)
+       enddo
+     enddo
+   endif
 
     if(three_body_h_tc) then
 
@@ -113,7 +108,6 @@
       enddo
     endif
 
-  endif
 
 
 
@@ -171,13 +165,12 @@
    Fock_matrix_tc_mo_tot += Fock_matrix_tc_mo_core_eri 
    ! Removing the off-diagonal elements between core and the rest of orbitals 
    do i = 1, n_core_orb 
-    do j = n_core_orb+1,mo_num
+    do j = 1, mo_num
      Fock_matrix_tc_mo_tot(j,i) = 0.d0
      Fock_matrix_tc_mo_tot(i,j) = 0.d0
     enddo
    enddo
    do i = 1, n_core_orb 
-!    print*,i,mo_bi_ortho_tc_one_e(i,i) , Fock_matrix_tc_mo_core_eri(i,i) , Fock_matrix_tc_eri_mo_valence(i,i)
     Fock_matrix_tc_mo_tot(i,i) = mo_bi_ortho_tc_one_e(i,i) + Fock_matrix_tc_mo_core_eri(i,i) + Fock_matrix_tc_eri_mo_valence(i,i)
    enddo
   endif

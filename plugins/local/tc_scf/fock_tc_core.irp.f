@@ -70,69 +70,61 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_eri_mo_valence, (mo_num, mo_nu
  BEGIN_DOC
  ! Fock matrix containing only the 1/r12 interaction and only the VALENCE density matrix
  END_DOC
- istart = n_core_orb + 1
- integer :: i,j,istart
-  if(elec_alpha_num == elec_beta_num) then
-
-    PROVIDE Fock_matrix_alpha_tc_mo_valence_eri
-
-    Fock_matrix_tc_eri_mo_valence = Fock_matrix_alpha_tc_mo_valence_eri
-
-  else
-
-    PROVIDE Fock_matrix_beta_tc_mo_valence_eri Fock_matrix_alpha_tc_mo_valence_eri
-
-    do j = 1, n_core_orb
-      ! F-K
-      do i = 1, n_core_orb !CC
-        Fock_matrix_tc_eri_mo_valence(i,j) = 0.5d0*(Fock_matrix_alpha_tc_mo_valence_eri(i,j)+Fock_matrix_beta_tc_mo_valence_eri(i,j))&
-             - (Fock_matrix_beta_tc_mo_valence_eri(i,j) - Fock_matrix_alpha_tc_mo_valence_eri(i,j))
-      enddo
-      ! F+K/2
-      do i = elec_beta_num+1, elec_alpha_num  !CA
-        Fock_matrix_tc_eri_mo_valence(i,j) = 0.5d0*(Fock_matrix_alpha_tc_mo_valence_eri(i,j)+Fock_matrix_beta_tc_mo_valence_eri(i,j))&
-             + 0.5d0*(Fock_matrix_beta_tc_mo_valence_eri(i,j) - Fock_matrix_alpha_tc_mo_valence_eri(i,j))
-      enddo
-      ! F
-      do i = elec_alpha_num+1, mo_num !CV
-        Fock_matrix_tc_eri_mo_valence(i,j) = 0.5d0*(Fock_matrix_alpha_tc_mo_valence_eri(i,j)+Fock_matrix_beta_tc_mo_valence_eri(i,j))
-      enddo
-    enddo
-
-    do j = elec_beta_num+1, elec_alpha_num
-      ! F+K/2
-      do i = 1, n_core_orb !AC
-        Fock_matrix_tc_eri_mo_valence(i,j) = 0.5d0*(Fock_matrix_alpha_tc_mo_valence_eri(i,j)+Fock_matrix_beta_tc_mo_valence_eri(i,j))&
-             + 0.5d0*(Fock_matrix_beta_tc_mo_valence_eri(i,j) - Fock_matrix_alpha_tc_mo_valence_eri(i,j))
-      enddo
-      ! F
-      do i = elec_beta_num+1, elec_alpha_num !AA
-        Fock_matrix_tc_eri_mo_valence(i,j) = 0.5d0*(Fock_matrix_alpha_tc_mo_valence_eri(i,j)+Fock_matrix_beta_tc_mo_valence_eri(i,j))
-      enddo
-      ! F-K/2
-      do i = elec_alpha_num+1, mo_num !AV
-        Fock_matrix_tc_eri_mo_valence(i,j) = 0.5d0*(Fock_matrix_alpha_tc_mo_valence_eri(i,j)+Fock_matrix_beta_tc_mo_valence_eri(i,j))&
-             - 0.5d0*(Fock_matrix_beta_tc_mo_valence_eri(i,j) - Fock_matrix_alpha_tc_mo_valence_eri(i,j))
-      enddo
-    enddo
-
-    do j = elec_alpha_num+1, mo_num
-      ! F
-      do i = 1, n_core_orb! VC
-        Fock_matrix_tc_eri_mo_valence(i,j) = 0.5d0*(Fock_matrix_alpha_tc_mo_valence_eri(i,j)+Fock_matrix_beta_tc_mo_valence_eri(i,j))
-      enddo
-      ! F-K/2
-      do i = elec_beta_num+1, elec_alpha_num !VA
-        Fock_matrix_tc_eri_mo_valence(i,j) = 0.5d0*(Fock_matrix_alpha_tc_mo_valence_eri(i,j)+Fock_matrix_beta_tc_mo_valence_eri(i,j))&
-             - 0.5d0*(Fock_matrix_beta_tc_mo_valence_eri(i,j) - Fock_matrix_alpha_tc_mo_valence_eri(i,j))
-      enddo
-      ! F+K
-      do i = elec_alpha_num+1, mo_num !VV
-        Fock_matrix_tc_eri_mo_valence(i,j) = 0.5d0*(Fock_matrix_alpha_tc_mo_valence_eri(i,j)+Fock_matrix_beta_tc_mo_valence_eri(i,j)) &
-             + (Fock_matrix_beta_tc_mo_valence_eri(i,j) - Fock_matrix_alpha_tc_mo_valence_eri(i,j))
-      enddo
-    enddo
-  endif
+ integer :: i,j
+ if (all_shells_closed) then
+   Fock_matrix_tc_eri_mo_valence = Fock_matrix_alpha_tc_mo_valence_eri
+ else
+   ! Core
+   do j = 1, elec_beta_num
+     ! Core
+     do i = 1, elec_beta_num
+       Fock_matrix_tc_eri_mo_valence(i,j) = Fock_matrix_param(1,1) * Fock_matrix_alpha_tc_mo_valence_eri(i,j) + &
+                             Fock_matrix_param(2,1) * Fock_matrix_beta_tc_mo_valence_eri(i,j)
+     enddo
+     ! Open
+     do i = elec_beta_num+1, elec_alpha_num
+       Fock_matrix_tc_eri_mo_valence(i,j) = Fock_matrix_beta_tc_mo_valence_eri(i,j)
+     enddo
+     ! Virtual
+     do i = elec_alpha_num+1, mo_num
+       Fock_matrix_tc_eri_mo_valence(i,j) = 0.5d0 * Fock_matrix_alpha_tc_mo_valence_eri(i,j) + &
+                             0.5d0 * Fock_matrix_beta_tc_mo_valence_eri(i,j)
+     enddo
+   enddo
+   ! Open
+   do j = elec_beta_num+1, elec_alpha_num
+     ! Core
+     do i = 1, elec_beta_num
+       Fock_matrix_tc_eri_mo_valence(i,j) = Fock_matrix_beta_tc_mo_valence_eri(i,j)
+     enddo
+     ! Open
+     do i = elec_beta_num+1, elec_alpha_num
+       Fock_matrix_tc_eri_mo_valence(i,j) = Fock_matrix_param(1,2) * Fock_matrix_alpha_tc_mo_valence_eri(i,j) + &
+                             Fock_matrix_param(2,2) * Fock_matrix_beta_tc_mo_valence_eri(i,j)
+     enddo
+     ! Virtual
+     do i = elec_alpha_num+1, mo_num
+       Fock_matrix_tc_eri_mo_valence(i,j) =  Fock_matrix_alpha_tc_mo_valence_eri(i,j)
+     enddo
+   enddo
+   ! Virtual
+   do j = elec_alpha_num+1, mo_num
+     ! Core
+     do i = 1, elec_beta_num
+       Fock_matrix_tc_eri_mo_valence(i,j) =   0.5d0 * Fock_matrix_alpha_tc_mo_valence_eri(i,j) &
+                             + 0.5d0 * Fock_matrix_beta_tc_mo_valence_eri(i,j)
+     enddo
+     ! Open
+     do i = elec_beta_num+1, elec_alpha_num
+       Fock_matrix_tc_eri_mo_valence(i,j) = Fock_matrix_alpha_tc_mo_valence_eri(i,j)
+     enddo
+     ! Virtual
+     do i = elec_alpha_num+1, mo_num
+       Fock_matrix_tc_eri_mo_valence(i,j) = Fock_matrix_param(1,3) * Fock_matrix_alpha_tc_mo_valence_eri(i,j) + &
+                             Fock_matrix_param(2,3) * Fock_matrix_beta_tc_mo_valence_eri(i,j)
+     enddo
+   enddo
+ endif
 END_PROVIDER 
 
 
@@ -217,8 +209,8 @@ END_PROVIDER
 
 END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, ao_two_e_valence_integral_alpha, (ao_num, ao_num) ]
-&BEGIN_PROVIDER [ double precision, ao_two_e_valence_integral_beta ,  (ao_num, ao_num) ]
+ BEGIN_PROVIDER [ double precision, ao_two_e_valence_integral_alpha_chol, (ao_num, ao_num) ]
+&BEGIN_PROVIDER [ double precision, ao_two_e_valence_integral_beta_chol ,  (ao_num, ao_num) ]
  use map_module
  implicit none
  BEGIN_DOC
@@ -242,12 +234,12 @@ END_PROVIDER
  call dgemm('N','N',ao_num*ao_num,1,cholesky_ao_num, 1.d0,           &
      cholesky_ao, ao_num*ao_num,                                     &
      X, cholesky_ao_num, 0.d0,                                       &
-     ao_two_e_valence_integral_alpha, ao_num*ao_num)
+     ao_two_e_valence_integral_alpha_chol, ao_num*ao_num)
 
  deallocate(X)
 
  if (elec_alpha_num > elec_beta_num) then
-   ao_two_e_valence_integral_beta = ao_two_e_valence_integral_alpha
+   ao_two_e_valence_integral_beta_chol = ao_two_e_valence_integral_alpha_chol
  endif
 
 
@@ -273,7 +265,7 @@ END_PROVIDER
  allocate(X2(ao_num,ao_num,block_size,2))
  allocate(X3(ao_num,block_size,ao_num,2))
 
-! ao_two_e_valence_integral_alpha (l,s) -= cholesky_ao(l,m,j) * SCF_density_matrix_ao_beta (m,n) * cholesky_ao(n,s,j)
+! ao_two_e_valence_integral_alpha_chol (l,s) -= cholesky_ao(l,m,j) * SCF_density_matrix_ao_beta (m,n) * cholesky_ao(n,s,j)
 
  do iblock=1,cholesky_ao_num,block_size
 
@@ -311,24 +303,94 @@ END_PROVIDER
    call dgemm('N','N',ao_num,ao_num,ao_num*min(cholesky_ao_num-iblock+1,block_size), -1.d0,     &
        cholesky_ao(1,1,iblock), ao_num,       &
        X3(1,1,1,1), ao_num*block_size, 1.d0,  &
-       ao_two_e_valence_integral_alpha, ao_num)
+       ao_two_e_valence_integral_alpha_chol, ao_num)
 
    if (elec_alpha_num > elec_beta_num) then
      call dgemm('N','N',ao_num,ao_num,ao_num*min(cholesky_ao_num-iblock+1,block_size), -1.d0,     &
        cholesky_ao(1,1,iblock), ao_num,        &
        X3(1,1,1,2), ao_num*block_size, 1.d0,   &
-       ao_two_e_valence_integral_beta, ao_num)
+       ao_two_e_valence_integral_beta_chol, ao_num)
    endif
 
  enddo
 
  if (elec_alpha_num == elec_beta_num) then
-   ao_two_e_valence_integral_beta = ao_two_e_valence_integral_alpha
+   ao_two_e_valence_integral_beta_chol = ao_two_e_valence_integral_alpha_chol
  endif
  deallocate(X2,X3)
 
 END_PROVIDER
 
+!!!!!!!!!!!!!!!!
+ BEGIN_PROVIDER [ double precision, ao_two_e_valence_integral_alpha, (ao_num, ao_num) ]
+&BEGIN_PROVIDER [ double precision, ao_two_e_valence_integral_beta ,  (ao_num, ao_num) ]
+ use map_module
+ implicit none
+ BEGIN_DOC
+ ! Fock matrices in AO basis set for only the core orbitals 
+ ! 
+ ! WARNING : use the TCSCF_bi_ort_core_dm_ao matrix  
+ END_DOC
+ integer(omp_lock_kind)         :: lck(ao_num)
+ integer(map_size_kind)         :: i8
+ integer                        :: ii(8), jj(8), kk(8), ll(8), k2,i,j,k,l,k1
+ integer(cache_map_size_kind)   :: n_elements_max, n_elements
+ integer(key_kind), allocatable :: keys(:)
+ double precision, allocatable  :: values(:)
+ double precision, allocatable  :: ao_two_e_valence_integral_alpha_tmp(:,:)
+ double precision, allocatable  :: ao_two_e_valence_integral_beta_tmp(:,:)
+ double precision :: integral
+
+ ao_two_e_valence_integral_alpha = 0.d0
+ ao_two_e_valence_integral_beta = 0.d0
+ PROVIDE ao_two_e_integrals_in_map
+
+ !$OMP PARALLEL DEFAULT(NONE)                                    &
+     !$OMP PRIVATE(i,j,l,k1,k,integral,ii,jj,kk,ll,i8,keys,values,n_elements_max,&
+     !$OMP  n_elements,ao_two_e_valence_integral_alpha_tmp,ao_two_e_valence_integral_beta_tmp)&
+     !$OMP SHARED(ao_num,TCSCF_bi_ort_valence_dm_ao_beta,TCSCF_bi_ort_valence_dm_ao_alpha,&
+     !$OMP  ao_integrals_map, ao_two_e_valence_integral_alpha, ao_two_e_valence_integral_beta)
+
+ call get_cache_map_n_elements_max(ao_integrals_map,n_elements_max)
+ allocate(keys(n_elements_max), values(n_elements_max))
+ allocate(ao_two_e_valence_integral_alpha_tmp(ao_num,ao_num),            &
+     ao_two_e_valence_integral_beta_tmp(ao_num,ao_num))
+ ao_two_e_valence_integral_alpha_tmp = 0.d0
+ ao_two_e_valence_integral_beta_tmp  = 0.d0
+
+ !$OMP DO SCHEDULE(static,1)
+ do i8=0_8,ao_integrals_map%map_size
+   n_elements = n_elements_max
+   call get_cache_map(ao_integrals_map,i8,keys,values,n_elements)
+   do k1=1,n_elements
+     call two_e_integrals_index_reverse(kk,ii,ll,jj,keys(k1))
+
+     do k2=1,8
+       if (kk(k2)==0) then
+         cycle
+       endif
+       i = ii(k2)
+       j = jj(k2)
+       k = kk(k2)
+       l = ll(k2)
+       integral = (TCSCF_bi_ort_valence_dm_ao_alpha(k,l)+TCSCF_bi_ort_valence_dm_ao_beta(k,l)) * values(k1)
+       ao_two_e_valence_integral_alpha_tmp(i,j) += integral
+       ao_two_e_valence_integral_beta_tmp (i,j) += integral
+       integral = values(k1)
+       ao_two_e_valence_integral_alpha_tmp(l,j) -= TCSCF_bi_ort_valence_dm_ao_alpha(k,i) * integral
+       ao_two_e_valence_integral_beta_tmp (l,j) -= TCSCF_bi_ort_valence_dm_ao_beta(k,i)  * integral
+     enddo
+   enddo
+ enddo
+ !$OMP END DO NOWAIT
+ !$OMP CRITICAL
+ ao_two_e_valence_integral_alpha += ao_two_e_valence_integral_alpha_tmp
+ ao_two_e_valence_integral_beta  += ao_two_e_valence_integral_beta_tmp
+ !$OMP END CRITICAL
+ deallocate(keys,values,ao_two_e_valence_integral_alpha_tmp,ao_two_e_valence_integral_beta_tmp)
+ !$OMP END PARALLEL
+
+END_PROVIDER
 !!!!!!!!!!!!!!!! 
  BEGIN_PROVIDER [ double precision, ao_two_e_core_integral, (ao_num, ao_num) ]
  use map_module
