@@ -44,9 +44,10 @@ subroutine main()
   logical :: good_angles
 
   print *, ' TC-SCF with:'
-  print *, ' j2e_type = ', j2e_type
-  print *, ' j1e_type = ', j1e_type
-  print *, ' env_type = ', env_type
+  print *, ' j2e_type   = ', j2e_type
+  print *, ' j1e_type   = ', j1e_type
+  print *, ' env_type   = ', env_type
+  print *, ' core_tc_op = ',core_tc_op
 
   write(json_unit,json_array_open_fmt) 'tc-scf'
 
