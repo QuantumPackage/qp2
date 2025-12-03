@@ -333,7 +333,7 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_eri_two_e_chemist, (mo_num, mo_num
   PROVIDE mo_r_coef mo_l_coef
 
     print*, ' memory scale of TC ao -> mo: O(N4) '
-    allocate(ao_eri(ao_num,ao_num,ao_num,mo_num))
+    allocate(ao_eri(ao_num,ao_num,ao_num,ao_num))
     print*,'Cholesky vectors will be used '
     double precision :: get_ao_integ_chol,eri
     eri = get_ao_integ_chol(1,1,1,1) ! FOR OPENMP 
@@ -353,6 +353,8 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_eri_two_e_chemist, (mo_num, mo_num
     !$OMP END DO
     !$OMP END PARALLEL
 
+  call print_memory_usage()
+    print*,ao_num,ao_num,ao_num,mo_num
     allocate(a2(ao_num,ao_num,ao_num,mo_num))
   
     call dgemm( 'T', 'N', ao_num*ao_num*ao_num, mo_num, ao_num, 1.d0     &
