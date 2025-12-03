@@ -283,6 +283,7 @@ BEGIN_PROVIDER [double precision, noL_2e_v0, (mo_num, mo_num, mo_num, mo_num)]
  END_DOC
   implicit none
   integer          :: p, q, s, t, i, istart
+  integer :: j,k,l
   double precision :: I_ipq_sit, I_ipq_tsi, I_ipq_ist
   double precision :: t0, t1
 
@@ -1725,6 +1726,7 @@ BEGIN_PROVIDER [double precision, noL_2e, (mo_num, mo_num, mo_num, mo_num)]
 
   if(core_tc_op)then
    logical :: is_i_in_core, core_i, core_j, core_k, core_l
+   integer :: j,k,l
    do i = 1, mo_num
     core_i = is_i_in_core(i)
     do j = 1, mo_num

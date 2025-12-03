@@ -1203,7 +1203,7 @@ double precision function rint(n,rho)
     else
       u_inv=1.d0/dsqrt(rho)
       u=rho*u_inv
-      rint=0.5d0*u_inv*sqpi*derf(u)
+      rint=0.5d0*u_inv*sqpi*erf(u)
     endif
     return
   endif
@@ -1219,7 +1219,7 @@ double precision function rint(n,rho)
       endif
       u=rho*u_inv
       two_rho_inv = 0.5d0*u_inv*u_inv
-      val0=0.5d0*u_inv*sqpi*derf(u)
+      val0=0.5d0*u_inv*sqpi*erf(u)
       rint=(val0-v)*two_rho_inv
       do k=2,n
         rint=(rint*dfloat(k+k-1)-v)*two_rho_inv
@@ -1252,7 +1252,7 @@ double precision function rint_sum(n_pt_out,rho,d1)
     else
       u_inv=1.d0/dsqrt(rho)
       u=rho*u_inv
-      rint_sum=0.5d0*u_inv*sqpi*derf(u) *d1(0)
+      rint_sum=0.5d0*u_inv*sqpi*erf(u) *d1(0)
     endif
 
     do i=2,n_pt_out,2
@@ -1271,7 +1271,7 @@ double precision function rint_sum(n_pt_out,rho,d1)
     u_inv=1.d0/dsqrt(rho)
     u=rho*u_inv
     two_rho_inv = 0.5d0*u_inv*u_inv
-    val0=0.5d0*u_inv*sqpi*derf(u)
+    val0=0.5d0*u_inv*sqpi*erf(u)
     rint_sum=val0*d1(0)
     rint_tmp=(val0-v)*two_rho_inv
     di = 3.d0

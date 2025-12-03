@@ -46,8 +46,8 @@ subroutine give_explicit_cpoly_and_cgaussian_x(P_new, P_center, p, fact_k, iorde
   ! get the factor
   d_AB = (Ae_center - Be_center) * (Ae_center - Be_center)
   tmp = ab * p_inv * d_AB
-  if(zabs(tmp) .lt. 50.d0) then
-    fact_k = zexp(-tmp)
+  if(abs(tmp) .lt. 50.d0) then
+    fact_k = exp(-tmp)
   else
     fact_k = (0.d0, 0.d0)
   endif
@@ -113,7 +113,7 @@ subroutine give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_k, iorder,
 
   ! IF fact_k is too smal then: returns a "s" function centered in zero
   ! with an inifinite exponent and a zero polynom coef
-  if(zabs(fact_k) < 1d-14) then
+  if(abs(fact_k) < 1d-14) then
     iorder               = 0
     p                    = (1.d+14, 0.d0)
     fact_k               = (0.d0  , 0.d0)
@@ -192,7 +192,7 @@ subroutine cgaussian_product(a, xa, b, xb, k, p, xp)
     return
   endif
 
-  k = zexp(-k)
+  k = exp(-k)
   xp(1) = (a * xa(1) + b * xb(1)) * p_inv
   xp(2) = (a * xa(2) + b * xb(2)) * p_inv
   xp(3) = (a * xa(3) + b * xb(3)) * p_inv
@@ -235,7 +235,7 @@ subroutine cgaussian_product_x(a, xa, b, xb, k, p, xp)
     return
   endif
 
-  k  = zexp(-k)
+  k  = exp(-k)
   xp = (a*xa + b*xb) * p_inv
 
 end
@@ -302,7 +302,7 @@ subroutine add_cpoly(b, nb, c, nc, d, nd)
   enddo
 
   tmp = d(nd)
-  do while( (zabs(tmp) .lt. 1.d-15) .and. (nd >= 0) )
+  do while( (abs(tmp) .lt. 1.d-15) .and. (nd >= 0) )
     nd -= 1
     tmp = d(nd)
     if(nd < 0) exit
@@ -337,7 +337,7 @@ subroutine add_cpoly_multiply(b, nb, cst, d, nd)
     enddo
 
     tmp = d(nd)
-    do while(zabs(tmp) .lt. 1.d-15)
+    do while(abs(tmp) .lt. 1.d-15)
       nd -= 1
       if(nd < 0) exit
       tmp = d(nd)

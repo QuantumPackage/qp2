@@ -1,9 +1,15 @@
+logical function isnan(x)
+  implicit none
+  double precision :: x
+  isnan = x /= x
+end
+
 double precision function derf_mu_x(mu,x)
  implicit none
  include 'utils/constants.include.F'
  double precision, intent(in) :: mu,x
   if(dabs(x).gt.1.d-6)then
-   derf_mu_x = derf(mu * x)/x
+   derf_mu_x = erf(mu * x)/x
   else
    derf_mu_x =  inv_sq_pi * 2.d0 * mu * (1.d0 - mu*mu*x*x/3.d0)                                                           
   endif                      

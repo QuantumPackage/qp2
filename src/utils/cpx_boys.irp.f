@@ -16,7 +16,7 @@ complex*16 function crint_1(n, rho)
 
   complex*16             :: crint_smallz
 
-  rho_mod = zabs(rho)
+  rho_mod = abs(rho)
 
   if(rho_mod < 3.5d0) then
 
@@ -94,7 +94,7 @@ complex*16 function crint_1(n, rho)
 
   else
 
-    rho_exp = 0.5d0 * zexp(-rho)
+    rho_exp = 0.5d0 * exp(-rho)
     rho_inv = (1.d0, 0.d0) / rho
 
     call zboysfun00_1(rho, crint_1)
@@ -125,7 +125,7 @@ subroutine crint_1_vec(n_max, rho, vals)
 
   complex*16             :: crint_smallz
 
-  rho_mod = zabs(rho)
+  rho_mod = abs(rho)
 
   if(rho_mod < 3.5d0) then
 
@@ -212,7 +212,7 @@ subroutine crint_1_vec(n_max, rho, vals)
 
   else
 
-    rho_exp = 0.5d0 * zexp(-rho)
+    rho_exp = 0.5d0 * exp(-rho)
     rho_inv = (1.d0, 0.d0) / rho
 
     call zboysfun00_1(rho, vals(0))
@@ -244,7 +244,7 @@ complex*16 function crint_smallz(n, rho)
   double precision            :: delta_mod
   complex*16                  :: rho_k, ct, delta_k
 
-  ct           = 0.5d0 * zexp(-rho) * gamma(dble(n) + 0.5d0)
+  ct           = 0.5d0 * exp(-rho) * gamma(dble(n) + 0.5d0)
   crint_smallz = ct / gamma(dble(n) + 1.5d0)
 
   rho_k = (1.d0, 0.d0)
@@ -282,7 +282,7 @@ complex*16 function crint_2(n, rho)
 
   complex*16, external   :: crint_smallz
 
-  abs_rho = zabs(rho)
+  abs_rho = abs(rho)
 
   if(abs_rho < 3.5d0) then
 
@@ -368,7 +368,7 @@ complex*16 function crint_2(n, rho)
     else
 
       call zboysfunnrp(n, rho, vals)
-      crint_2 = vals(n) * zexp(-rho)
+      crint_2 = vals(n) * exp(-rho)
 
     endif
   endif
@@ -404,7 +404,7 @@ subroutine zboysfun(n_max, x, vals)
 
   call zboysfun00_2(x, vals(0))
 
-  yy = 0.5d0 * zexp(-x)
+  yy = 0.5d0 * exp(-x)
   x_inv = (1.d0, 0.d0) / x
   do n = 1, n_max
     vals(n) = ((dble(n) - 0.5d0) * vals(n-1) - yy) * x_inv
@@ -591,7 +591,7 @@ subroutine crint_2_vec(n_max, rho, vals)
     else
 
       call zboysfunnrp(n_max, rho, vals)
-      erho = zexp(-rho)
+      erho = exp(-rho)
       do n = 0, n_max
         vals(n) = vals(n) * erho
       enddo
@@ -632,7 +632,7 @@ subroutine crint_smallz_vec(n_max, rho, vals)
     rho_k(k) = rho_k(k-1) * rho
   enddo
 
-  rhoe = 0.5d0 * zexp(-rho)
+  rhoe = 0.5d0 * exp(-rho)
 
   do n = 0, n_max
 
@@ -676,7 +676,7 @@ subroutine crint_quad_1(n, rho, n_quad, crint_quad)
 
   tmp_inv = 1.d0 / dble(n_quad)
 
-  crint_quad = 7.d0 * zexp(-rho)
+  crint_quad = 7.d0 * exp(-rho)
 
   tmp0 = 0.d0
   select case (n)
@@ -685,7 +685,7 @@ subroutine crint_quad_1(n, rho, n_quad, crint_quad)
       do i_quad = 1, n_quad - 1
         tmp0 = tmp0 + tmp_inv
         tmp1 = tmp0 * tmp0
-        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1)
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * exp(-rho*tmp1)
       enddo
       crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
 
@@ -693,7 +693,7 @@ subroutine crint_quad_1(n, rho, n_quad, crint_quad)
       do i_quad = 1, n_quad - 1
         tmp0 = tmp0 + tmp_inv
         tmp1 = tmp0 * tmp0
-        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1) * tmp1
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * exp(-rho*tmp1) * tmp1
       enddo
       crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
 
@@ -701,7 +701,7 @@ subroutine crint_quad_1(n, rho, n_quad, crint_quad)
       do i_quad = 1, n_quad - 1
         tmp0 = tmp0 + tmp_inv
         tmp1 = tmp0 * tmp0
-        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1) * tmp1 * tmp1
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * exp(-rho*tmp1) * tmp1 * tmp1
       enddo
       crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
 
@@ -709,7 +709,7 @@ subroutine crint_quad_1(n, rho, n_quad, crint_quad)
       do i_quad = 1, n_quad - 1
         tmp0 = tmp0 + tmp_inv
         tmp1 = tmp0 * tmp0
-        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1) * tmp1 * tmp1 * tmp1
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * exp(-rho*tmp1) * tmp1 * tmp1 * tmp1
       enddo
       crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
 
@@ -718,7 +718,7 @@ subroutine crint_quad_1(n, rho, n_quad, crint_quad)
         tmp0 = tmp0 + tmp_inv
         tmp1 = tmp0 * tmp0
         tmp2 = tmp1 * tmp1
-        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1) * tmp2 * tmp2
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * exp(-rho*tmp1) * tmp2 * tmp2
       enddo
       crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
 
@@ -726,7 +726,7 @@ subroutine crint_quad_1(n, rho, n_quad, crint_quad)
       do i_quad = 1, n_quad - 1
         tmp0 = tmp0 + tmp_inv
         tmp1 = tmp0 * tmp0
-        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1) * tmp1**n
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * exp(-rho*tmp1) * tmp1**n
       enddo
       crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
   end select
@@ -750,10 +750,10 @@ subroutine crint_quad_2(n, rho, n_quad, crint_quad)
 
   tmp_inv = 1.d0 / dble(n_quad)
 
-  crint_quad = 7.d0 * zexp(-rho)
+  crint_quad = 7.d0 * exp(-rho)
 
   tmp0 = 0.d0
-  rhoc = zexp(-rho*tmp_inv)
+  rhoc = exp(-rho*tmp_inv)
   rhoe = (1.d0, 0.d0)
   select case (n)
 
@@ -839,10 +839,10 @@ subroutine crint_quad_12(n, rho, n_quad, crint_quad)
 
   tmp_inv = 1.d0 / dble(n_quad)
 
-  crint_quad = 7.d0 * zexp(-rho)
+  crint_quad = 7.d0 * exp(-rho)
 
   tmp0 = 0.d0
-  rhoc = zexp(-rho*tmp_inv)
+  rhoc = exp(-rho*tmp_inv)
   rhoe = (1.d0, 0.d0)
   select case (n)
 
@@ -850,7 +850,7 @@ subroutine crint_quad_12(n, rho, n_quad, crint_quad)
       do i_quad = 1, n_quad - 1
         tmp0 = tmp0 + tmp_inv
         tmp1 = tmp0 * tmp0
-        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1)
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * exp(-rho*tmp1)
       enddo
       crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
 
