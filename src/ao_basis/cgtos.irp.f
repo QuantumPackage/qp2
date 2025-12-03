@@ -171,8 +171,8 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
             + ao_expo_pw(2,i,j) * ao_expo_pw(2,i,j) &
             + ao_expo_pw(3,i,j) * ao_expo_pw(3,i,j)
 
-        C1 = zexp(-(0.d0, 2.d0) * phiA - 0.5d0 * expo_inv * KA2)
-        C2 = zexp(-(0.5d0, 0.d0) * real(expo_inv) * KA2)
+        C1 = exp(-(0.d0, 2.d0) * phiA - 0.5d0 * expo_inv * KA2)
+        C2 = exp(-(0.5d0, 0.d0) * real(expo_inv) * KA2)
 
         call overlap_cgaussian_xyz(C_Ae, C_Ae, expo, expo, powA, powA, &
                                    C_Ap, C_Ap, overlap_x, overlap_y, overlap_z, integ1, nz)

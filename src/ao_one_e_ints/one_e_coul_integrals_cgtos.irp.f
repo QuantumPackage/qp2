@@ -72,8 +72,8 @@ BEGIN_PROVIDER [double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
           phiB = ao_expo_phase_ord_transp(4,l,i)
           KB2 = ao_expo_pw_ord_transp(4,l,i)
 
-          C1 = zexp((0.d0, 1.d0) * (-phiA - phiB) - 0.25d0 * (alpha_inv        * KA2 + beta_inv * KB2))
-          C2 = zexp((0.d0, 1.d0) * ( phiA - phiB) - 0.25d0 * (conjg(alpha_inv) * KA2 + beta_inv * KB2))
+          C1 = exp((0.d0, 1.d0) * (-phiA - phiB) - 0.25d0 * (alpha_inv        * KA2 + beta_inv * KB2))
+          C2 = exp((0.d0, 1.d0) * ( phiA - phiB) - 0.25d0 * (conjg(alpha_inv) * KA2 + beta_inv * KB2))
 
           c = 0.d0
           do k = 1, nucl_num
@@ -179,7 +179,7 @@ complex*16 function NAI_pol_mult_cgtos(Ae_center, Be_center, power_A, power_B, a
                 + (P_center(3) - C_center(3)) * (P_center(3) - C_center(3))
 
   const = p * dist_integral
-  factor = zexp(-const_factor)
+  factor = exp(-const_factor)
   coeff = dtwo_pi * factor * p_inv
 
   n_pt = 2 * ((power_A(1) + power_B(1)) + (power_A(2) + power_B(2)) + (power_A(3) + power_B(3)))
@@ -549,7 +549,7 @@ complex*16 function V_r_cgtos(n, alpha)
   if(iand(n, 1) .eq. 1) then
     V_r_cgtos = 0.5d0 * fact(shiftr(n, 1)) / (alpha**(shiftr(n, 1) + 1))
   else
-    V_r_cgtos = sqpi * fact(n) / fact(shiftr(n, 1)) * (0.5d0/zsqrt(alpha))**(n+1)
+    V_r_cgtos = sqpi * fact(n) / fact(shiftr(n, 1)) * (0.5d0/sqrt(alpha))**(n+1)
   endif
 
 end

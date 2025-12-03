@@ -56,14 +56,14 @@ complex*16 function cpx_erf_1(x, y)
 
   if(yabs .lt. 1.d-15) then
 
-    cpx_erf_1 = (1.d0, 0.d0) * derf(x)
+    cpx_erf_1 = (1.d0, 0.d0) * erf(x)
     return
 
   else
 
-    erf_tmp1 = (1.d0, 0.d0) * derf(x)
+    erf_tmp1 = (1.d0, 0.d0) * erf(x)
     erf_tmp2 = erf_E(x, yabs) + erf_F(x, yabs)
-    erf_tmp3 = zexp(-(0.d0, 2.d0) * x * yabs) * (erf_G(x, yabs) + erf_H(x, yabs))
+    erf_tmp3 = exp(-(0.d0, 2.d0) * x * yabs) * (erf_G(x, yabs) + erf_H(x, yabs))
     erf_tot  = erf_tmp1 + erf_tmp2 - erf_tmp3
 
   endif
@@ -117,7 +117,7 @@ complex*16 function erf_E(x, yabs)
   else
 
     erf_E = 0.5d0 * inv_pi * dexp(-x*x) &
-          * ((1.d0, 0.d0) - zexp(-(0.d0, 2.d0) * xy)) / x
+          * ((1.d0, 0.d0) - exp(-(0.d0, 2.d0) * xy)) / x
 
   endif
 
@@ -233,7 +233,7 @@ complex*16 function erf_H(x, yabs)
       tmp2  = dexp(-tmp1-idble*yabs) * (x + (0.d0, 1.d0)*tmp0) / tmp1
       erf_H = erf_H + tmp2
 
-      if(zabs(tmp2) .lt. 1d-15) exit
+      if(abs(tmp2) .lt. 1d-15) exit
     enddo
 
     erf_H = 0.5d0 * inv_pi * erf_H
@@ -342,13 +342,13 @@ subroutine zboysfun00_2(z, val)
   if(abs(z) .ge. 100.0d0) then
 
     ! large |z|
-    z1 = (1.d0, 0.d0) / zsqrt(z)
+    z1 = (1.d0, 0.d0) / sqrt(z)
     y  = (1.d0, 0.d0) / z
     val = asymcoef(7)
     do k = 6, 1, -1
       val = val * y + asymcoef(k)
     enddo
-    val = zexp(-z) * val * y + z1 * sqpio2
+    val = exp(-z) * val * y + z1 * sqpio2
 
   else if(abs(z) .le. 0.35d0) then
 
@@ -361,7 +361,7 @@ subroutine zboysfun00_2(z, val)
   else
 
     ! intermediate |z|
-    val = sqpio2 / zsqrt(z) - 0.5d0 * zexp(-z) * sum(ff(1:22)/(z+pp(1:22)))
+    val = sqpio2 / sqrt(z) - 0.5d0 * exp(-z) * sum(ff(1:22)/(z+pp(1:22)))
 
   endif
 
@@ -526,11 +526,11 @@ subroutine zboysfun00nrp(z, val)
   integer    :: k
   complex*16 :: z1, zz, y, zsum, tmp, zt, q, p
 
-  zz = zexp(z)
+  zz = exp(z)
 
   if(abs(z) .ge. 100.0d0) then
     ! large |z|
-    z1 = (1.d0, 0.d0) / zsqrt(z)
+    z1 = (1.d0, 0.d0) / sqrt(z)
     y  = (1.d0, 0.d0) / z
     val = asymcoef(7)
     do k = 6, 1, -1
@@ -562,9 +562,9 @@ subroutine zboysfun00nrp(z, val)
         zsum = zsum + ww(k) * p * zz
       endif
     enddo
-    zt = ima * zsqrt(z / etmax)
+    zt = ima * sqrt(z / etmax)
     tmp = 0.5d0 * ima * log((1.0d0 - zt) / (1.0d0 + zt))
-    val = dsqrt(etmax) * zsum * inv_sq_pi + zz * tmp / zsqrt(pi*z)
+    val = dsqrt(etmax) * zsum * inv_sq_pi + zz * tmp / sqrt(pi*z)
   else
     zsum = (0.d0, 0.d0)
     do k = 1, 16
@@ -577,9 +577,9 @@ subroutine zboysfun00nrp(z, val)
         zsum = zsum + ww(k) * p * zz
       endif
     enddo
-    zt = ima * zsqrt(z / etmax1)
+    zt = ima * sqrt(z / etmax1)
     tmp = 0.5d0 * ima * log((1.0d0 - zt) / (1.0d0 + zt))
-    val = dsqrt(etmax1) * zsum * inv_sq_pi + zz * tmp / zsqrt(pi*z)
+    val = dsqrt(etmax1) * zsum * inv_sq_pi + zz * tmp / sqrt(pi*z)
   endif
 
   return
