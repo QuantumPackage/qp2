@@ -1,3 +1,5 @@
+use gpu
+
  BEGIN_PROVIDER [ integer, cholesky_mo_num ]
 &BEGIN_PROVIDER [ integer, cholesky_mo_num_split, (1:5)]
  implicit none
@@ -42,8 +44,9 @@ BEGIN_PROVIDER [ double precision, cholesky_mo, (mo_num, mo_num, cholesky_mo_num
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, cholesky_mo_transp, (cholesky_mo_num, mo_num, mo_num) ]
- use gpu
+
+ BEGIN_PROVIDER [ double precision, cholesky_mo_transp, (cholesky_mo_num, mo_num, mo_num) ]
+&BEGIN_PROVIDER [ type(gpu_double3), cholesky_mo_transp_d ]
  implicit none
  BEGIN_DOC
  ! Cholesky vectors in MO basis. Warning: it is transposed wrt cholesky_ao:
@@ -53,13 +56,14 @@ BEGIN_PROVIDER [ double precision, cholesky_mo_transp, (cholesky_mo_num, mo_num,
  ! - cholesky_mo_transp is (cholesky_mo_num x mo_num^2)
  END_DOC
 
- type(gpu_double3) :: X, cholesky_ao_d, cholesky_mo_transp_d
+ type(gpu_double3) :: X, cholesky_ao_d
  type(gpu_double2) :: mo_coef_d
  double precision :: wall0, wall1
  integer, external              :: getUnitAndOpen
  integer                        :: iunit, ierr, rank
 
-  if (read_mo_cholesky) then
+ call gpu_allocate(cholesky_mo_transp_d, cholesky_mo_num, mo_num, mo_num)
+ if (read_mo_cholesky) then
       print *,  'Reading Cholesky MO vectors from disk...'
      iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_mo_transp', 'R')
      read(iunit) rank
@@ -67,11 +71,12 @@ BEGIN_PROVIDER [ double precision, cholesky_mo_transp, (cholesky_mo_num, mo_num,
         stop 'inconsistent rank'
      endif
      read(iunit) cholesky_mo_transp
+     call gpu_upload(cholesky_mo_transp, cholesky_mo_transp_d)
      close(iunit)
-  else
+ else
      print *, ''
-     print *, 'AO->MO Transformation of Cholesky vectors'
-     print *, '-----------------------------------------'
+     print *, 'AO->MO Transformation of Cholesky vectors (GPU)'
+     print *, '-----------------------------------------------'
      print *, ''
 
      call wall_time(wall0)
@@ -79,21 +84,22 @@ BEGIN_PROVIDER [ double precision, cholesky_mo_transp, (cholesky_mo_num, mo_num,
      call gpu_allocate(mo_coef_d, ao_num,mo_num)
      call gpu_upload(mo_coef, mo_coef_d)
 
-     call gpu_allocate(Cholesky_ao_d, ao_num,ao_num,cholesky_ao_num)
+     call gpu_allocate(cholesky_ao_d, ao_num,ao_num,cholesky_ao_num)
      call gpu_upload(cholesky_ao, cholesky_ao_d)
 
-     call gpu_allocate(cholesky_mo_transp_d, cholesky_mo_num, mo_num, mo_num)
      call gpu_allocate(X, mo_num,cholesky_mo_num,ao_num)
 
      call gpu_dgemm(blas_handle, 'T','N', ao_num*cholesky_mo_num, mo_num, ao_num, 1.d0, &
          cholesky_ao_d%f(1,1,1), ao_num, mo_coef_d%f(1,1), ao_num, 0.d0, X%f(1,1,1), ao_num*cholesky_mo_num)
      call gpu_deallocate(cholesky_ao_d)
+
      call gpu_dgemm(blas_handle, 'T','N', cholesky_mo_num*mo_num, mo_num, ao_num, 1.d0, &
          X%f(1,1,1), ao_num, mo_coef_d%f(1,1), ao_num, 0.d0, cholesky_mo_transp_d%f(1,1,1), cholesky_mo_num*mo_num)
      call gpu_deallocate(X)
+
      call gpu_deallocate(mo_coef_d)
+
      call gpu_download(cholesky_mo_transp_d,cholesky_mo_transp)
-     call gpu_deallocate(cholesky_mo_transp_d)
      call wall_time(wall1)
      print*,'Time to provide MO cholesky vectors = ',(wall1-wall0)/60.d0, ' min'
 
@@ -109,6 +115,7 @@ BEGIN_PROVIDER [ double precision, cholesky_mo_transp, (cholesky_mo_num, mo_num,
   endif
 
 END_PROVIDER
+
 
 
 BEGIN_PROVIDER [ double precision, cholesky_semi_mo_transp_simple, (cholesky_mo_num, ao_num, mo_num) ]
@@ -188,4 +195,11 @@ BEGIN_PROVIDER [ real, cholesky_mo_transp_sp, (cholesky_mo_num, mo_num, mo_num) 
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ type(gpu_real3), cholesky_mo_transp_sp_d ]
+ BEGIN_DOC
+ ! Cholesky vectors in MO basis, on GPU, single precision.
+ END_DOC
+ call gpu_allocate(cholesky_mo_transp_sp_d, cholesky_mo_num, mo_num, mo_num)
+ call gpu_upload(cholesky_mo_transp_sp,cholesky_mo_transp_sp_d)
+END_PROVIDER
 
