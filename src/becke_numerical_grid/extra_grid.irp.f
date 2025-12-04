@@ -182,6 +182,7 @@ BEGIN_PROVIDER [double precision, weight_at_r_extra, (n_points_extra_integration
         accu = 1.d0/accu
         weight_at_r_extra(l,k,j) = tmp_array(j) * accu
 
+        logical :: isnan
         if(isnan(weight_at_r_extra(l,k,j)))then
           print*,'isnan(weight_at_r_extra(l,k,j))'
           print*,l,k,j
@@ -229,6 +230,7 @@ BEGIN_PROVIDER [double precision, final_weight_at_r_extra, (n_points_extra_integ
           contrib_integration = derivative_knowles_function(alpha_knowles(grid_atomic_number(j)),m_knowles,x)&
                               * knowles_function(alpha_knowles(grid_atomic_number(j)),m_knowles,x)**2
           final_weight_at_r_extra(k,i,j) = weights_angular_points_extra(k) * weight_at_r_extra(k,i,j) * contrib_integration * dr_radial_extra_integral
+        logical :: isnan
           if(isnan(final_weight_at_r_extra(k,i,j)))then
             print*,'isnan(final_weight_at_r_extra(k,i,j))' 
             print*,k,i,j
