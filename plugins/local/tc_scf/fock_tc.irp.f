@@ -816,6 +816,12 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
   double precision, allocatable :: tmp_1(:,:), tmp_2(:,:,:,:), tmp_22(:,:,:)
   double precision, allocatable :: tmp_3(:,:,:), tmp_4(:,:,:)
 
+  if(core_tc_op)then
+   istart = n_core_orb+1
+  else
+   istart = 1
+  endif
+
   PROVIDE mo_l_coef mo_r_coef
 
   ! ---
