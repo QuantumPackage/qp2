@@ -75,8 +75,8 @@ END_PROVIDER
      close(iunit)
  else
      print *, ''
-     print *, 'AO->MO Transformation of Cholesky vectors (GPU)'
-     print *, '-----------------------------------------------'
+     print *, 'AO->MO Transformation of Cholesky vectors'
+     print *, '-----------------------------------------'
      print *, ''
 
      call wall_time(wall0)

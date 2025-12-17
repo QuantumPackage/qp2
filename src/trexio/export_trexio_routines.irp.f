@@ -264,7 +264,7 @@ subroutine export_trexio(update,full_path)
 
     print *, 'Basis'
 
-    rc = trexio_write_basis_type(f(1), 'Gaussian', len('Gaussian'))
+    rc = trexio_write_basis_type(f(1), basis_type, len(trim(basis_type)))
     call trexio_assert(rc, TREXIO_SUCCESS)
 
     rc = trexio_write_basis_prim_num(f(1), prim_num)
@@ -304,6 +304,13 @@ subroutine export_trexio(update,full_path)
 
     rc = trexio_write_basis_prim_factor(f(1), factor)
     call trexio_assert(rc, TREXIO_SUCCESS)
+
+    if (trim(basis_type) == 'Slater') then
+      print *, slater_r_power
+      rc = trexio_write_basis_r_power(f(1), slater_r_power)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+    endif
+
     deallocate(factor)
 
 
