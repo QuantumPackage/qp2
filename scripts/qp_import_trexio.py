@@ -191,12 +191,12 @@ def write_ezfio(trexio_filename, filename):
                 prev = i
             shell_prim_num.append(count)
 
+            print (len(shell_prim_num), shell_num)
             assert (len(shell_prim_num) == shell_num)
 
             ezfio.set_basis_shell_prim_num(shell_prim_num)
             ezfio.set_basis_shell_index([x+1 for x in shell_index])
             ezfio.set_basis_nucleus_shell_num(nucl_shell_num)
-
 
             prim_factor  = trexio.read_basis_prim_factor(trexio_file)
             ezfio.set_basis_prim_normalization_factor(prim_factor)
@@ -272,6 +272,7 @@ def write_ezfio(trexio_filename, filename):
         print (basis_type)
 
     except:
+        raise
         basis_type = "None"
         print("None")
         ezfio.set_ao_basis_ao_cartesian(True)
