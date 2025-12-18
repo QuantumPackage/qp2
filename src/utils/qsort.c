@@ -1,4 +1,4 @@
-/* [[file:~/qp2/src/utils/qsort.org::*Generated%20C%20file][Generated C file:1]] */
+/* [[file:qsort.org::*Generated C file][Generated C file:1]] */
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -7,13 +7,16 @@ struct int16_t_comp {
   int32_t i;
 };
 
-int compare_int16_t( const void * l, const void * r )
+int compare_int16_t( const void * restrict l, const void * restrict r )
 {
   const int16_t * restrict _l= l;
   const int16_t * restrict _r= r;
+  /*
   if( *_l > *_r ) return 1;
   if( *_l < *_r ) return -1;
   return 0;
+  */
+  return (*_l>*_r) - (*_l<*_r);
 }
 
 void qsort_int16_t(int16_t* restrict A_in, int32_t* restrict iorder, int32_t isize) {
@@ -44,13 +47,16 @@ struct int16_t_comp_big {
   int64_t i;
 };
 
-int compare_int16_t_big( const void * l, const void * r )
+int compare_int16_t_big( const void * restrict l, const void * restrict r )
 {
   const int16_t * restrict _l= l;
   const int16_t * restrict _r= r;
+  /*
   if( *_l > *_r ) return 1;
   if( *_l < *_r ) return -1;
   return 0;
+  */
+  return (*_l>*_r) - (*_l<*_r);
 }
 
 void qsort_int16_t_big(int16_t* restrict A_in, int64_t* restrict iorder, int64_t isize) {
@@ -81,13 +87,16 @@ struct int32_t_comp {
   int32_t i;
 };
 
-int compare_int32_t( const void * l, const void * r )
+int compare_int32_t( const void * restrict l, const void * restrict r )
 {
   const int32_t * restrict _l= l;
   const int32_t * restrict _r= r;
+  /*
   if( *_l > *_r ) return 1;
   if( *_l < *_r ) return -1;
   return 0;
+  */
+  return (*_l>*_r) - (*_l<*_r);
 }
 
 void qsort_int32_t(int32_t* restrict A_in, int32_t* restrict iorder, int32_t isize) {
@@ -118,13 +127,16 @@ struct int32_t_comp_big {
   int64_t i;
 };
 
-int compare_int32_t_big( const void * l, const void * r )
+int compare_int32_t_big( const void * restrict l, const void * restrict r )
 {
   const int32_t * restrict _l= l;
   const int32_t * restrict _r= r;
+  /*
   if( *_l > *_r ) return 1;
   if( *_l < *_r ) return -1;
   return 0;
+  */
+  return (*_l>*_r) - (*_l<*_r);
 }
 
 void qsort_int32_t_big(int32_t* restrict A_in, int64_t* restrict iorder, int64_t isize) {
@@ -155,13 +167,16 @@ struct int64_t_comp {
   int32_t i;
 };
 
-int compare_int64_t( const void * l, const void * r )
+int compare_int64_t( const void * restrict l, const void * restrict r )
 {
   const int64_t * restrict _l= l;
   const int64_t * restrict _r= r;
+  /*
   if( *_l > *_r ) return 1;
   if( *_l < *_r ) return -1;
   return 0;
+  */
+  return (*_l>*_r) - (*_l<*_r);
 }
 
 void qsort_int64_t(int64_t* restrict A_in, int32_t* restrict iorder, int32_t isize) {
@@ -192,13 +207,16 @@ struct int64_t_comp_big {
   int64_t i;
 };
 
-int compare_int64_t_big( const void * l, const void * r )
+int compare_int64_t_big( const void * restrict l, const void * restrict r )
 {
   const int64_t * restrict _l= l;
   const int64_t * restrict _r= r;
+  /*
   if( *_l > *_r ) return 1;
   if( *_l < *_r ) return -1;
   return 0;
+  */
+  return (*_l>*_r) - (*_l<*_r);
 }
 
 void qsort_int64_t_big(int64_t* restrict A_in, int64_t* restrict iorder, int64_t isize) {
@@ -229,13 +247,16 @@ struct double_comp {
   int32_t i;
 };
 
-int compare_double( const void * l, const void * r )
+int compare_double( const void * restrict l, const void * restrict r )
 {
   const double * restrict _l= l;
   const double * restrict _r= r;
+  /*
   if( *_l > *_r ) return 1;
   if( *_l < *_r ) return -1;
   return 0;
+  */
+  return (*_l>*_r) - (*_l<*_r);
 }
 
 void qsort_double(double* restrict A_in, int32_t* restrict iorder, int32_t isize) {
@@ -266,13 +287,16 @@ struct double_comp_big {
   int64_t i;
 };
 
-int compare_double_big( const void * l, const void * r )
+int compare_double_big( const void * restrict l, const void * restrict r )
 {
   const double * restrict _l= l;
   const double * restrict _r= r;
+  /*
   if( *_l > *_r ) return 1;
   if( *_l < *_r ) return -1;
   return 0;
+  */
+  return (*_l>*_r) - (*_l<*_r);
 }
 
 void qsort_double_big(double* restrict A_in, int64_t* restrict iorder, int64_t isize) {
@@ -303,13 +327,16 @@ struct float_comp {
   int32_t i;
 };
 
-int compare_float( const void * l, const void * r )
+int compare_float( const void * restrict l, const void * restrict r )
 {
   const float * restrict _l= l;
   const float * restrict _r= r;
+  /*
   if( *_l > *_r ) return 1;
   if( *_l < *_r ) return -1;
   return 0;
+  */
+  return (*_l>*_r) - (*_l<*_r);
 }
 
 void qsort_float(float* restrict A_in, int32_t* restrict iorder, int32_t isize) {
@@ -340,13 +367,16 @@ struct float_comp_big {
   int64_t i;
 };
 
-int compare_float_big( const void * l, const void * r )
+int compare_float_big( const void * restrict l, const void * restrict r )
 {
   const float * restrict _l= l;
   const float * restrict _r= r;
+  /*
   if( *_l > *_r ) return 1;
   if( *_l < *_r ) return -1;
   return 0;
+  */
+  return (*_l>*_r) - (*_l<*_r);
 }
 
 void qsort_float_big(float* restrict A_in, int64_t* restrict iorder, int64_t isize) {
