@@ -233,6 +233,10 @@ subroutine compute_err1(nO,nV,f_o,f_v,r1,err1)
 
   integer                       :: i,a
   
+<<<<<<< HEAD
+=======
+!  print *, 'coucou'
+>>>>>>> 9e4623afaa2c75e76e04de2f3de88cdc09305087
   !$OMP PARALLEL &
   !$OMP SHARED(err1,r1,f_o,f_v,nO,nV,cc_level_shift) &
   !$OMP PRIVATE(i,a) &
