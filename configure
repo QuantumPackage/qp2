@@ -264,7 +264,7 @@ EOF
 EOF
     elif [[ ${PACKAGE} = qmckl ]] ; then
 
-            VERSION=0.5.4
+            VERSION=1.1.0
             execute << EOF
               cd "\${QP_ROOT}"/external
               wget https://github.com/TREX-CoE/qmckl/releases/download/v${VERSION}/qmckl-${VERSION}.tar.gz
@@ -276,7 +276,7 @@ EOF
 EOF
     elif [[ ${PACKAGE} = qmckl-intel ]] ; then
 
-            VERSION=0.5.4
+            VERSION=1.1.0
             execute << EOF
               cd "\${QP_ROOT}"/external
               wget https://github.com/TREX-CoE/qmckl/releases/download/v${VERSION}/qmckl-${VERSION}.tar.gz
