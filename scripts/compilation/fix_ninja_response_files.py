@@ -12,6 +12,14 @@ import sys
 import os
 
 
+# Regex pattern to match $in variable without matching $include, $include_dir, etc.
+# Matches $in followed by whitespace, end of line, or non-identifier characters
+DOLLAR_IN_PATTERN = r'\$in(?=\s|$|[^a-zA-Z0-9_])'
+
+# Compiler and linker keywords to identify rules that should use response files
+COMPILER_KEYWORDS = ['$fc', '$cc', 'gfortran', 'ifort', 'gcc', 'g++', 'clang', 'ar']
+
+
 def fix_ninja_file(ninja_file_path):
     """
     Read a ninja file and convert long linking commands to use response files.
@@ -60,11 +68,11 @@ def fix_ninja_file(ninja_file_path):
             
             # Look for link, archive, or similar commands with $in
             # Check command line specifically for keywords to avoid false positives
+            command_line_lower = command_line_text.lower() if command_line_text else ''
             is_link_rule = ('$in' in rule_text and 
                            'rspfile' not in rule_text and
                            command_line_text and
-                           any(keyword in command_line_text.lower() 
-                               for keyword in ['$fc', '$cc', 'gfortran', 'ifort', 'gcc', 'g++', 'clang', 'ar']))
+                           any(keyword in command_line_lower for keyword in COMPILER_KEYWORDS))
             
             if is_link_rule:
                 # This rule might benefit from response files
@@ -111,10 +119,8 @@ def fix_link_rule_lines(rule_lines, rule_name):
     
     command_line = rule_lines[command_line_idx]
     
-    # Replace $in with @$out.rsp in the command using regex
-    # Match $in followed by whitespace, end of line, or non-alphanumeric/underscore characters
-    # This avoids matching $include, $include_dir, etc.
-    new_command = re.sub(r'\$in(?=\s|$|[^a-zA-Z0-9_])', '@$out.rsp', command_line)
+    # Replace $in with @$out.rsp in the command using the defined pattern
+    new_command = re.sub(DOLLAR_IN_PATTERN, '@$out.rsp', command_line)
     
     # If nothing changed, this rule might not need fixing
     if new_command == command_line:
