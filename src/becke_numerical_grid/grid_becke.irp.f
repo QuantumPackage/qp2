@@ -209,6 +209,7 @@ BEGIN_PROVIDER [double precision, weight_at_r, (n_points_integration_angular,n_p
         accu = 1.d0/accu
         weight_at_r(l,k,j) = tmp_array(j) * accu
 
+        logical :: isnan
         if(isnan(weight_at_r(l,k,j))) then
           print*,'isnan(weight_at_r(l,k,j))'
           print*,l,k,j
@@ -260,6 +261,7 @@ BEGIN_PROVIDER [double precision, final_weight_at_r, (n_points_integration_angul
 
           final_weight_at_r(k,i,j) = weights_angular_points(k)  * weight_at_r(k,i,j) * contrib_integration * dr_radial_integral
 
+          logical :: isnan
           if(isnan(final_weight_at_r(k,i,j))) then
            print*,'isnan(final_weight_at_r(k,i,j))' 
            print*,k,i,j

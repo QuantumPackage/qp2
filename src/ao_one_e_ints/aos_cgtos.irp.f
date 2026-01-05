@@ -76,14 +76,14 @@
 
           c = ao_coef_cgtos_norm_ord_transp(n,j) * ao_coef_cgtos_norm_ord_transp(l,i)
 
-          C1(1) = zexp((0.d0, 1.d0) * (-phiA(1) - phiB(1)) - 0.25d0 * (alpha_inv * KA2(1) + beta_inv * KB2(1)))
-          C1(2) = zexp((0.d0, 1.d0) * (-phiA(2) - phiB(2)) - 0.25d0 * (alpha_inv * KA2(2) + beta_inv * KB2(2)))
-          C1(3) = zexp((0.d0, 1.d0) * (-phiA(3) - phiB(3)) - 0.25d0 * (alpha_inv * KA2(3) + beta_inv * KB2(3)))
+          C1(1) = exp((0.d0, 1.d0) * (-phiA(1) - phiB(1)) - 0.25d0 * (alpha_inv * KA2(1) + beta_inv * KB2(1)))
+          C1(2) = exp((0.d0, 1.d0) * (-phiA(2) - phiB(2)) - 0.25d0 * (alpha_inv * KA2(2) + beta_inv * KB2(2)))
+          C1(3) = exp((0.d0, 1.d0) * (-phiA(3) - phiB(3)) - 0.25d0 * (alpha_inv * KA2(3) + beta_inv * KB2(3)))
           C1(4) = C1(1) * C1(2) * C1(3)
 
-          C2(1) = zexp((0.d0, 1.d0) * (phiA(1) - phiB(1)) - 0.25d0 * (conjg(alpha_inv) * KA2(1) + beta_inv * KB2(1)))
-          C2(2) = zexp((0.d0, 1.d0) * (phiA(2) - phiB(2)) - 0.25d0 * (conjg(alpha_inv) * KA2(2) + beta_inv * KB2(2)))
-          C2(3) = zexp((0.d0, 1.d0) * (phiA(3) - phiB(3)) - 0.25d0 * (conjg(alpha_inv) * KA2(3) + beta_inv * KB2(3)))
+          C2(1) = exp((0.d0, 1.d0) * (phiA(1) - phiB(1)) - 0.25d0 * (conjg(alpha_inv) * KA2(1) + beta_inv * KB2(1)))
+          C2(2) = exp((0.d0, 1.d0) * (phiA(2) - phiB(2)) - 0.25d0 * (conjg(alpha_inv) * KA2(2) + beta_inv * KB2(2)))
+          C2(3) = exp((0.d0, 1.d0) * (phiA(3) - phiB(3)) - 0.25d0 * (conjg(alpha_inv) * KA2(3) + beta_inv * KB2(3)))
           C2(4) = C2(1) * C2(2) * C2(3)
 
           call overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
@@ -99,6 +99,7 @@
 
           ao_overlap_cgtos(i,j) = ao_overlap_cgtos(i,j) + c * overlap
 
+          logical :: isnan
           if(isnan(ao_overlap_cgtos(i,j))) then
             print*,'i, j', i, j
             print*,'l, n', l, n

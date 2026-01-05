@@ -155,6 +155,10 @@ def write_ezfio(trexio_filename, filename):
             coefficient = trexio.read_basis_coefficient(trexio_file)
             shell_index = trexio.read_basis_shell_index(trexio_file)
             ao_shell    = trexio.read_ao_shell(trexio_file)
+            if basis_type.lower() in ["slater"]:
+              r_power     = trexio.read_basis_r_power(trexio_file)
+            else:
+              r_power = None
 
             ezfio.set_basis_basis("Read from TREXIO")
             ezfio.set_ao_basis_ao_basis("Read from TREXIO")
@@ -187,12 +191,12 @@ def write_ezfio(trexio_filename, filename):
                 prev = i
             shell_prim_num.append(count)
 
+            print (len(shell_prim_num), shell_num)
             assert (len(shell_prim_num) == shell_num)
 
             ezfio.set_basis_shell_prim_num(shell_prim_num)
             ezfio.set_basis_shell_index([x+1 for x in shell_index])
             ezfio.set_basis_nucleus_shell_num(nucl_shell_num)
-
 
             prim_factor  = trexio.read_basis_prim_factor(trexio_file)
             ezfio.set_basis_prim_normalization_factor(prim_factor)
@@ -203,6 +207,10 @@ def write_ezfio(trexio_filename, filename):
             for i, shell_idx in enumerate(shell_index):
                coefficient[i] *= shell_factor[shell_idx]
             ezfio.set_basis_prim_coef(coefficient)
+            ezfio.set_basis_typ(basis_type)
+
+            if r_power is not None:
+              ezfio.set_basis_r_power(r_power)
 
         elif basis_type.lower() == "numerical":
 
@@ -256,11 +264,15 @@ def write_ezfio(trexio_filename, filename):
             ezfio.set_basis_shell_prim_num(shell_prim_num)
             ezfio.set_basis_shell_index([x+1 for x in shell_index])
             ezfio.set_basis_nucleus_shell_num(nucl_shell_num)
+            ezfio.set_basis_typ(basis_type)
 
         else:
            raise TypeError
 
+        print (basis_type)
+
     except:
+        raise
         basis_type = "None"
         print("None")
         ezfio.set_ao_basis_ao_cartesian(True)
@@ -288,7 +300,7 @@ def write_ezfio(trexio_filename, filename):
     ezfio.set_ao_basis_ao_num(ao_num)
 
 
-    if cartesian and basis_type.lower() in ["gaussian", "numerical"] and shell_num > 0:
+    if cartesian and basis_type.lower() in ["gaussian", "numerical", "slater"] and shell_num > 0:
         ao_shell    = trexio.read_ao_shell(trexio_file_cart)
         at = [ nucl_index[i]+1 for i in ao_shell ]
         ezfio.set_ao_basis_ao_nucl(at)
@@ -410,6 +422,7 @@ def write_ezfio(trexio_filename, filename):
       ezfio.set_mo_basis_mo_occ(mo_occ)
       print("OK")
     except:
+      mo_num = num_alpha
       print("None")
 
 

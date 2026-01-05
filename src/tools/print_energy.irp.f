@@ -16,7 +16,7 @@ subroutine run
  implicit none
   call print_mol_properties
   call print_energy_components
-! print *, 'E(HF) = ', HF_energy
+ print *, 'E(HF) = ', HF_energy
  print *, 'E(CI) = ', psi_energy + nuclear_repulsion
 ! print *, ''
 ! print *, 'E_kin(CI) = ', ref_bitmask_kinetic_energy

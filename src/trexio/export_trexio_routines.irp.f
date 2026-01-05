@@ -264,7 +264,7 @@ subroutine export_trexio(update,full_path)
 
     print *, 'Basis'
 
-    rc = trexio_write_basis_type(f(1), 'Gaussian', len('Gaussian'))
+    rc = trexio_write_basis_type(f(1), basis_type, len(trim(basis_type)))
     call trexio_assert(rc, TREXIO_SUCCESS)
 
     rc = trexio_write_basis_prim_num(f(1), prim_num)
@@ -304,6 +304,12 @@ subroutine export_trexio(update,full_path)
 
     rc = trexio_write_basis_prim_factor(f(1), factor)
     call trexio_assert(rc, TREXIO_SUCCESS)
+
+    if (trim(basis_type) == 'Slater') then
+      rc = trexio_write_basis_r_power(f(1), slater_r_power)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+    endif
+
     deallocate(factor)
 
 
@@ -311,6 +317,7 @@ subroutine export_trexio(update,full_path)
 ! ---------------
 
     print *, 'AOs'
+
 
     if (export_cartesian) then
       rc = trexio_write_ao_cartesian(f(1), 1)
@@ -322,20 +329,23 @@ subroutine export_trexio(update,full_path)
       rc = trexio_write_ao_shell(f(1), ao_shell)
       call trexio_assert(rc, TREXIO_SUCCESS)
 
-      if (ezfio_convention >= 20250211) then
-        rc = trexio_write_ao_normalization(f(1), ao_coef_normalization_factor)
-      else
+!      if (trim(basis_type) /= 'Slater') then
 
-        allocate(factor(ao_num))
-        do i=1,ao_num
-          l = ao_first_of_shell(ao_shell(i))
-          factor(i) = (ao_coef_normalized(i,1)+tiny(1.d0))/(ao_coef_normalized(l,1)+tiny(1.d0))
-        enddo
-        rc = trexio_write_ao_normalization(f(1), factor)
-        deallocate(factor)
-      endif
+        if (ezfio_convention >= 20250211) then
+          rc = trexio_write_ao_normalization(f(1), ao_coef_normalization_factor)
+        else
 
-      call trexio_assert(rc, TREXIO_SUCCESS)
+          allocate(factor(ao_num))
+          do i=1,ao_num
+            l = ao_first_of_shell(ao_shell(i))
+            factor(i) = (ao_coef_normalized(i,1)+tiny(1.d0))/(ao_coef_normalized(l,1)+tiny(1.d0))
+          enddo
+          rc = trexio_write_ao_normalization(f(1), factor)
+          deallocate(factor)
+        endif
+
+        call trexio_assert(rc, TREXIO_SUCCESS)
+!      endif
 
 
     else
@@ -348,10 +358,24 @@ subroutine export_trexio(update,full_path)
       rc = trexio_write_ao_shell(f(1), ao_sphe_shell)
       call trexio_assert(rc, TREXIO_SUCCESS)
 
-      rc = trexio_write_ao_normalization(f(1), ao_sphe_coef_normalization_factor)
-      call trexio_assert(rc, TREXIO_SUCCESS)
+!      if (trim(basis_type) /= 'Slater') then
+        rc = trexio_write_ao_normalization(f(1), ao_sphe_coef_normalization_factor)
+        call trexio_assert(rc, TREXIO_SUCCESS)
+!      endif
 
     endif
+
+!    if (trim(basis_type) == 'Slater') then
+!
+!      allocate(factor(ao_num))
+!      do i=1,ao_num
+!        factor(i) = 1.d0 !/dsqrt(ao_overlap(i,i))
+!      enddo
+!      rc = trexio_write_ao_normalization(f(1), factor)
+!      call trexio_assert(rc, TREXIO_SUCCESS)
+!      deallocate(factor)
+!
+!    endif
 
   endif
 

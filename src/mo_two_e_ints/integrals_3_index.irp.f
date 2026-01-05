@@ -1,3 +1,4 @@
+ use gpu
  BEGIN_PROVIDER [double precision, big_array_coulomb_integrals, (mo_num,mo_num, mo_num)]
 &BEGIN_PROVIDER [double precision, big_array_exchange_integrals,(mo_num,mo_num, mo_num)]
  implicit none
@@ -12,43 +13,47 @@
 
  if (do_mo_cholesky) then
 
-    double precision, allocatable :: buffer_jj(:,:), buffer(:,:,:)
-    allocate(buffer_jj(cholesky_mo_num,mo_num), buffer(mo_num,mo_num,mo_num))
+    type(gpu_double2) :: buffer_jj
+    type(gpu_double3) :: buffer
+
+    call gpu_allocate(buffer_jj,cholesky_mo_num,mo_num)
+    call gpu_allocate(buffer,mo_num,mo_num,mo_num)
     do j=1,mo_num
-      buffer_jj(:,j) = cholesky_mo_transp(:,j,j)
+      buffer_jj%f(:,j) = cholesky_mo_transp_d%f(:,j,j)
     enddo
 
-    call dgemm('T','N', mo_num*mo_num,mo_num,cholesky_mo_num, 1.d0, &
-        cholesky_mo_transp, cholesky_mo_num, &
-        buffer_jj, cholesky_mo_num, 0.d0, &
-        buffer, mo_num*mo_num)
+    call gpu_dgemm(blas_handle, 'T','N', mo_num*mo_num,mo_num,cholesky_mo_num, 1.d0, &
+        cholesky_mo_transp_d%f(1,1,1), cholesky_mo_num, &
+        buffer_jj%f(1,1), cholesky_mo_num, 0.d0, &
+        buffer%f(1,1,1), mo_num*mo_num)
 
-    do k = 1, mo_num
-      do i = 1, mo_num
-        do j = 1, mo_num
-          big_array_coulomb_integrals(j,i,k) = buffer(i,k,j)
+    do j = 1, mo_num
+      do k = 1, mo_num
+        do i = 1, mo_num
+          big_array_coulomb_integrals(j,i,k) = buffer%f(i,k,j)
         enddo
       enddo
     enddo
-    deallocate(buffer_jj)
+    call gpu_deallocate(buffer)
+    call gpu_deallocate(buffer_jj)
 
-    allocate(buffer_jj(mo_num,mo_num))
+    call gpu_allocate(buffer_jj,mo_num,mo_num)
 
     do j = 1, mo_num
 
       call dgemm('T','N',mo_num,mo_num,cholesky_mo_num, 1.d0, &
-        cholesky_mo_transp(1,1,j), cholesky_mo_num, &
-        cholesky_mo_transp(1,1,j), cholesky_mo_num, 0.d0, &
-        buffer_jj, mo_num)
+        cholesky_mo_transp_d%f(1,1,j), cholesky_mo_num, &
+        cholesky_mo_transp_d%f(1,1,j), cholesky_mo_num, 0.d0, &
+        buffer_jj%f(1,1), mo_num)
 
       do k=1,mo_num
         do i=1,mo_num
-          big_array_exchange_integrals(j,i,k) = buffer_jj(i,k)
+          big_array_exchange_integrals(j,i,k) = buffer_jj%f(i,k)
        enddo
      enddo
     enddo
 
-    deallocate(buffer_jj)
+    call gpu_deallocate(buffer_jj)
 
  else
 

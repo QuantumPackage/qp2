@@ -1070,7 +1070,8 @@ subroutine ortho_canonical(overlap,LDA,N,C,LDC,m,cutoff)
   call svd(overlap,lda,U,ldc,D,Vt,lda,n,n)
 
   D(:) = dsqrt(D(:))
-  local_cutoff = dsqrt(cutoff)*D(1) ! such that D(i)/D(1) > dsqrt(cutoff) is kept
+!  local_cutoff = dsqrt(cutoff)*D(1) ! such that D(i)/D(1) > dsqrt(cutoff) is kept
+  local_cutoff = cutoff*D(1) ! such that D(i)/D(1) > cutoff is kept
   m=n
   do i=1,n
     if ( D(i) >= local_cutoff ) then

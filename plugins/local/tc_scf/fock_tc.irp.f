@@ -11,6 +11,8 @@
   !
   ! where F^tc_2e is the TWO-BODY part of the TC Fock matrix and k,i are AO basis functions
   !
+  ! WARNING: if core_tc_op then only the valence electrons are considered 
+  ! 
   END_DOC
 
   implicit none
@@ -38,7 +40,7 @@
   !$OMP DO
   do j = 1, ao_num
     do l = 1, ao_num
-      density_a = TCSCF_density_matrix_ao_alpha(l,j)
+      density_a = TCSCF_density_matrix_ao_alpha(l,j) 
       density_b = TCSCF_density_matrix_ao_beta (l,j)
       density   = density_a + density_b                      
       do i = 1, ao_num
@@ -123,6 +125,7 @@ BEGIN_PROVIDER [double precision, Fock_matrix_tc_mo_alpha, (mo_num, mo_num)]
 END_PROVIDER
 
 ! ---
+
 
 BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_beta, (mo_num,mo_num) ]
 
@@ -285,6 +288,12 @@ END_PROVIDER
   double precision, allocatable :: tmp_omp_d1(:), tmp_omp_d2(:,:)
   double precision, allocatable :: tmp_1(:,:), tmp_2(:,:,:,:)
   double precision, allocatable :: tmp_3(:,:,:), tmp_4(:,:,:)
+  integer :: istart
+  if(core_tc_op)then
+   istart = n_core_orb+1
+  else
+   istart = 1
+  endif
 
   PROVIDE mo_l_coef mo_r_coef
 
@@ -302,14 +311,14 @@ END_PROVIDER
   !$OMP PRIVATE (ipoint, i, tmp_omp_d1, tmp_omp_d2)                 &
   !$OMP SHARED (n_points_final_grid, elec_beta_num, elec_alpha_num, &
   !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp,   &
-  !$OMP         int2_grad1_u12_bimo_t, Okappa, Jkappa, Obarkappa, Jbarkappa)
+  !$OMP         int2_grad1_u12_bimo_t, Okappa, Jkappa, Obarkappa, Jbarkappa,istart)
 
   allocate(tmp_omp_d2(n_points_final_grid,3), tmp_omp_d1(n_points_final_grid))
 
   tmp_omp_d2 = 0.d0
   tmp_omp_d1 = 0.d0
   !$OMP DO
-  do i = 1, elec_beta_num
+  do i = istart, elec_beta_num
     do ipoint = 1, n_points_final_grid
       tmp_omp_d2(ipoint,1) += int2_grad1_u12_bimo_t(ipoint,1,i,i)
       tmp_omp_d2(ipoint,2) += int2_grad1_u12_bimo_t(ipoint,2,i,i)
@@ -373,13 +382,13 @@ END_PROVIDER
   !$OMP PRIVATE (ipoint, i, j, loc_1, loc_2, tmp_omp_d2)            &
   !$OMP SHARED (n_points_final_grid, elec_beta_num, elec_alpha_num, &
   !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp,   &
-  !$OMP         int2_grad1_u12_bimo_t, tmp_1)
+  !$OMP         int2_grad1_u12_bimo_t, tmp_1,istart)
 
   allocate(tmp_omp_d2(n_points_final_grid,3))
 
   tmp_omp_d2 = 0.d0
   !$OMP DO COLLAPSE(2)
-  do i = 1, elec_beta_num
+  do i = istart, elec_beta_num
     do j = elec_beta_num+1, elec_alpha_num
       do ipoint = 1, n_points_final_grid
 
@@ -456,13 +465,13 @@ END_PROVIDER
   !$OMP PRIVATE (ipoint, a, b, i)                                           &
   !$OMP SHARED (n_points_final_grid, mo_num, elec_beta_num, elec_alpha_num, &
   !$OMP         final_weight_at_r_vector, int2_grad1_u12_bimo_t,            &
-  !$OMP         tmp_2)
+  !$OMP         tmp_2,istart)
   !$OMP DO COLLAPSE(2)
   do a = 1, mo_num
     do b = 1, mo_num
 
       tmp_2(:,4,b,a) = 0.d0
-      do i = 1, elec_beta_num
+      do i = istart, elec_beta_num
         do ipoint = 1, n_points_final_grid
           tmp_2(ipoint,4,b,a) += final_weight_at_r_vector(ipoint) * ( int2_grad1_u12_bimo_t(ipoint,1,b,i) * int2_grad1_u12_bimo_t(ipoint,1,i,a) &
                                                                     + int2_grad1_u12_bimo_t(ipoint,2,b,i) * int2_grad1_u12_bimo_t(ipoint,2,i,a) &
@@ -519,11 +528,11 @@ END_PROVIDER
   !$OMP SHARED (n_points_final_grid, mo_num, elec_beta_num, elec_alpha_num, &
   !$OMP         final_weight_at_r_vector, int2_grad1_u12_bimo_t,            &
   !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp,           &
-  !$OMP         Jkappa, Jbarkappa, tmp_3, tmp_4)
+  !$OMP         Jkappa, Jbarkappa, tmp_3, tmp_4,istart)
   !$OMP DO
   do b = 1, mo_num
 
-    do i = 1, elec_beta_num
+    do i = istart, elec_beta_num
       do ipoint = 1, n_points_final_grid
 
         loc_1 = final_weight_at_r_vector(ipoint) * mos_l_in_r_array_transp(ipoint,i)
@@ -532,7 +541,7 @@ END_PROVIDER
         tmp_3(ipoint,2,b) += loc_1 * ( Jbarkappa(ipoint,1) * int2_grad1_u12_bimo_t(ipoint,1,b,i) &
                                      + Jbarkappa(ipoint,2) * int2_grad1_u12_bimo_t(ipoint,2,b,i) &
                                      + Jbarkappa(ipoint,3) * int2_grad1_u12_bimo_t(ipoint,3,b,i) )
-                                                                                                       
+
         tmp_4(ipoint,1,b) += loc_2 * ( Jbarkappa(ipoint,1) * int2_grad1_u12_bimo_t(ipoint,1,i,b) &
                                      + Jbarkappa(ipoint,2) * int2_grad1_u12_bimo_t(ipoint,2,i,b) &
                                      + Jbarkappa(ipoint,3) * int2_grad1_u12_bimo_t(ipoint,3,i,b) )
@@ -548,10 +557,10 @@ END_PROVIDER
   !$OMP SHARED (n_points_final_grid, mo_num, elec_beta_num, elec_alpha_num, &
   !$OMP         final_weight_at_r_vector, int2_grad1_u12_bimo_t,            &
   !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp,           &
-  !$OMP         tmp_3, tmp_4)
+  !$OMP         tmp_3, tmp_4,istart)
   !$OMP DO
   do b = 1, mo_num
-    do i = 1, elec_beta_num
+    do i = istart, elec_beta_num
       do j = elec_beta_num+1, elec_alpha_num
         do ipoint = 1, n_points_final_grid
 
@@ -661,10 +670,10 @@ END_PROVIDER
   !$OMP SHARED (n_points_final_grid, mo_num, elec_beta_num, elec_alpha_num, &
   !$OMP         final_weight_at_r_vector, int2_grad1_u12_bimo_t,            &
   !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp,           &
-  !$OMP         Jkappa, Jbarkappa, tmp_3, tmp_4)
+  !$OMP         Jkappa, Jbarkappa, tmp_3, tmp_4,istart)
   !$OMP DO
   do b = 1, mo_num
-    do i = 1, elec_beta_num
+    do i = istart, elec_beta_num
       do ipoint = 1, n_points_final_grid
 
         loc_1 = final_weight_at_r_vector(ipoint) * mos_l_in_r_array_transp(ipoint,i)
@@ -719,11 +728,11 @@ END_PROVIDER
   !$OMP SHARED (n_points_final_grid, mo_num, elec_beta_num, elec_alpha_num, &
   !$OMP         final_weight_at_r_vector, int2_grad1_u12_bimo_t,            &
   !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp,           &
-  !$OMP         tmp_3, tmp_4)
+  !$OMP         tmp_3, tmp_4,istart)
   !$OMP DO
   do b = 1, mo_num
 
-    do i = 1, elec_beta_num
+    do i = istart, elec_beta_num
       do j = elec_beta_num+1, elec_alpha_num
         do ipoint = 1, n_points_final_grid
 
@@ -790,15 +799,28 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
+  BEGIN_DOC
+  ! 
+  ! Closed Shell part of the Fock matrix from three-electron terms 
+  !
+  ! WARNING: if core_tc_op then only the valence electrons are considered 
+  ! 
+  END_DOC
 
   implicit none
-  integer                       :: a, b, i, j, ipoint
+  integer                       :: a, b, i, j, ipoint, istart
   double precision              :: ti, tf
   double precision              :: loc_1, loc_2, loc_3
   double precision, allocatable :: Okappa(:), Jkappa(:,:)
   double precision, allocatable :: tmp_omp_d1(:), tmp_omp_d2(:,:)
   double precision, allocatable :: tmp_1(:,:), tmp_2(:,:,:,:), tmp_22(:,:,:)
   double precision, allocatable :: tmp_3(:,:,:), tmp_4(:,:,:)
+
+  if(core_tc_op)then
+   istart = n_core_orb+1
+  else
+   istart = 1
+  endif
 
   PROVIDE mo_l_coef mo_r_coef
 
@@ -813,14 +835,14 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
   !$OMP PRIVATE (ipoint, i, tmp_omp_d1, tmp_omp_d2)               &
   !$OMP SHARED (n_points_final_grid, elec_beta_num,               &
   !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp, &
-  !$OMP         int2_grad1_u12_bimo_t, Okappa, Jkappa)
+  !$OMP         int2_grad1_u12_bimo_t, Okappa, Jkappa,istart)
 
   allocate(tmp_omp_d2(n_points_final_grid,3), tmp_omp_d1(n_points_final_grid))
   tmp_omp_d2 = 0.d0
   tmp_omp_d1 = 0.d0
 
   !$OMP DO
-  do i = 1, elec_beta_num
+  do i = istart, elec_beta_num
     do ipoint = 1, n_points_final_grid
       tmp_omp_d2(ipoint,1) += int2_grad1_u12_bimo_t(ipoint,1,i,i)
       tmp_omp_d2(ipoint,2) += int2_grad1_u12_bimo_t(ipoint,2,i,i)
@@ -860,14 +882,14 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
   !$OMP PRIVATE (ipoint, i, j, loc_1, tmp_omp_d2)                 &
   !$OMP SHARED (n_points_final_grid, elec_beta_num,               &
   !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp, &
-  !$OMP         int2_grad1_u12_bimo_t, tmp_1)
+  !$OMP         int2_grad1_u12_bimo_t, tmp_1,istart)
 
   allocate(tmp_omp_d2(n_points_final_grid,3))
   tmp_omp_d2 = 0.d0
 
   !$OMP DO COLLAPSE(2)
-  do i = 1, elec_beta_num
-    do j = 1, elec_beta_num
+  do i = istart, elec_beta_num
+    do j = istart, elec_beta_num
       do ipoint = 1, n_points_final_grid
 
         loc_1 = mos_l_in_r_array_transp(ipoint,j) * mos_r_in_r_array_transp(ipoint,i) 
@@ -903,7 +925,7 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
       !$OMP SHARED (n_points_final_grid, mo_num, elec_beta_num, a,    &
       !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp, &
       !$OMP         int2_grad1_u12_bimo_t, final_weight_at_r_vector,  &
-      !$OMP         tmp_22)
+      !$OMP         tmp_22,istart)
       !$OMP DO
       do b = 1, mo_num
         do ipoint = 1, n_points_final_grid
@@ -912,7 +934,7 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
           tmp_22(ipoint,3,b) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,3,b,a)
         enddo
         tmp_22(:,4,b) = 0.d0
-        do i = 1, elec_beta_num
+        do i = istart, elec_beta_num
           do ipoint = 1, n_points_final_grid
             tmp_22(ipoint,4,b) -= final_weight_at_r_vector(ipoint) * ( int2_grad1_u12_bimo_t(ipoint,1,b,i) * int2_grad1_u12_bimo_t(ipoint,1,i,a) &
                                                                      + int2_grad1_u12_bimo_t(ipoint,2,b,i) * int2_grad1_u12_bimo_t(ipoint,2,i,a) &
@@ -938,7 +960,7 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
     !$OMP SHARED (n_points_final_grid, mo_num, elec_beta_num,       &
     !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp, &
     !$OMP         int2_grad1_u12_bimo_t, final_weight_at_r_vector,  &
-    !$OMP         tmp_2)
+    !$OMP         tmp_2,istart)
     !$OMP DO COLLAPSE(2)
     do a = 1, mo_num
       do b = 1, mo_num
@@ -948,7 +970,7 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
           tmp_2(ipoint,3,b,a) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,3,b,a)
         enddo
         tmp_2(:,4,b,a) = 0.d0
-        do i = 1, elec_beta_num
+        do i = istart, elec_beta_num
           do ipoint = 1, n_points_final_grid
             tmp_2(ipoint,4,b,a) -= final_weight_at_r_vector(ipoint) * ( int2_grad1_u12_bimo_t(ipoint,1,b,i) * int2_grad1_u12_bimo_t(ipoint,1,i,a) &
                                                                       + int2_grad1_u12_bimo_t(ipoint,2,b,i) * int2_grad1_u12_bimo_t(ipoint,2,i,a) &
@@ -1001,10 +1023,10 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
   !$OMP SHARED (n_points_final_grid, mo_num, elec_beta_num,       &
   !$OMP         final_weight_at_r_vector, int2_grad1_u12_bimo_t,  &
   !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp, &
-  !$OMP         Jkappa, tmp_3, tmp_4)
+  !$OMP         Jkappa, tmp_3, tmp_4,istart)
   !$OMP DO
   do b = 1, mo_num
-    do i = 1, elec_beta_num
+    do i = istart, elec_beta_num
       do ipoint = 1, n_points_final_grid
 
         loc_1 = final_weight_at_r_vector(ipoint) * mos_l_in_r_array_transp(ipoint,i)
@@ -1016,7 +1038,7 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
         tmp_3(ipoint,5,b) += 2.d0 * loc_1 * ( Jkappa(ipoint,1) * int2_grad1_u12_bimo_t(ipoint,1,b,i) &
                                             + Jkappa(ipoint,2) * int2_grad1_u12_bimo_t(ipoint,2,b,i) &
                                             + Jkappa(ipoint,3) * int2_grad1_u12_bimo_t(ipoint,3,b,i) )
-                                                                                                       
+
         tmp_4(ipoint,2,b) += loc_2 * int2_grad1_u12_bimo_t(ipoint,1,i,b)
         tmp_4(ipoint,3,b) += loc_2 * int2_grad1_u12_bimo_t(ipoint,2,i,b)
         tmp_4(ipoint,4,b) += loc_2 * int2_grad1_u12_bimo_t(ipoint,3,i,b)
@@ -1035,11 +1057,11 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
   !$OMP SHARED (n_points_final_grid, mo_num, elec_beta_num,       &
   !$OMP         final_weight_at_r_vector, int2_grad1_u12_bimo_t,  &
   !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp, &
-  !$OMP         tmp_3, tmp_4)
+  !$OMP         tmp_3, tmp_4,istart)
   !$OMP DO
   do b = 1, mo_num
-    do i = 1, elec_beta_num
-      do j = 1, elec_beta_num
+    do i = istart, elec_beta_num
+      do j = istart, elec_beta_num
         do ipoint = 1, n_points_final_grid
 
           loc_1 = final_weight_at_r_vector(ipoint) * mos_l_in_r_array_transp(ipoint,j)
