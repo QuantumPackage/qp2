@@ -42,18 +42,26 @@ def fix_ninja_file(ninja_file_path):
             i += 1
             
             # Collect all lines in this rule
+            command_line_text = ''
             while i < len(lines) and (lines[i].startswith('  ') or lines[i].startswith('\t') or lines[i].strip() == ''):
                 rule_lines.append(lines[i])
+                # Extract command line for keyword checking
+                if lines[i].strip().startswith('command ='):
+                    command_line_text = lines[i].strip()
                 i += 1
             
             # Check if this is a linking rule and needs fixing
             rule_text = ''.join(rule_lines)
             
             # Look for link, archive, or similar commands with $in
-            if ('$in' in rule_text and 
-                ('rspfile' not in rule_text) and
-                any(keyword in rule_text.lower() for keyword in ['link', 'archive', '$fc', '$cc', 'ar '])):
-                
+            # Check command line specifically for keywords to avoid false positives
+            is_link_rule = ('$in' in rule_text and 
+                           'rspfile' not in rule_text and
+                           command_line_text and
+                           any(keyword in command_line_text.lower() 
+                               for keyword in ['$fc', '$cc', 'gfortran', 'ifort', 'gcc', 'g++', 'clang', 'ar ']))
+            
+            if is_link_rule:
                 # This rule might benefit from response files
                 fixed_rule = fix_link_rule_lines(rule_lines, rule_name)
                 new_lines.extend(fixed_rule)
@@ -99,8 +107,8 @@ def fix_link_rule_lines(rule_lines, rule_name):
     command_line = rule_lines[command_line_idx]
     
     # Replace $in with @$out.rsp in the command using regex
-    # Use word boundary to avoid replacing $include or similar
-    new_command = re.sub(r'\$in\b', '@$out.rsp', command_line)
+    # Match $in followed by whitespace, end of line, or non-word characters
+    new_command = re.sub(r'\$in(?=\s|$|[^\w])', '@$out.rsp', command_line)
     
     # If nothing changed, this rule might not need fixing
     if new_command == command_line:
