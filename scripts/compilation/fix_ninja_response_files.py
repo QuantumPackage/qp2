@@ -43,12 +43,17 @@ def fix_ninja_file(ninja_file_path):
             
             # Collect all lines in this rule
             command_line_text = ''
-            while i < len(lines) and (lines[i].startswith('  ') or lines[i].startswith('\t') or lines[i].strip() == ''):
-                rule_lines.append(lines[i])
-                # Extract command line for keyword checking
-                if lines[i].strip().startswith('command ='):
-                    command_line_text = lines[i].strip()
-                i += 1
+            while i < len(lines) and not lines[i].startswith('rule ') and not lines[i].startswith('build '):
+                # Only collect lines that are part of the rule (indented or empty)
+                if lines[i].startswith('  ') or lines[i].startswith('\t') or lines[i].strip() == '':
+                    rule_lines.append(lines[i])
+                    # Extract command line for keyword checking
+                    if lines[i].strip().startswith('command ='):
+                        command_line_text = lines[i].strip()
+                    i += 1
+                else:
+                    # Non-indented, non-empty line that's not rule/build = end of rule
+                    break
             
             # Check if this is a linking rule and needs fixing
             rule_text = ''.join(rule_lines)
@@ -59,7 +64,7 @@ def fix_ninja_file(ninja_file_path):
                            'rspfile' not in rule_text and
                            command_line_text and
                            any(keyword in command_line_text.lower() 
-                               for keyword in ['$fc', '$cc', 'gfortran', 'ifort', 'gcc', 'g++', 'clang', 'ar ']))
+                               for keyword in ['$fc', '$cc', 'gfortran', 'ifort', 'gcc', 'g++', 'clang', 'ar']))
             
             if is_link_rule:
                 # This rule might benefit from response files
@@ -107,8 +112,9 @@ def fix_link_rule_lines(rule_lines, rule_name):
     command_line = rule_lines[command_line_idx]
     
     # Replace $in with @$out.rsp in the command using regex
-    # Match $in followed by whitespace, end of line, or non-word characters
-    new_command = re.sub(r'\$in(?=\s|$|[^\w])', '@$out.rsp', command_line)
+    # Match $in followed by whitespace, end of line, or non-alphanumeric/underscore characters
+    # This avoids matching $include, $include_dir, etc.
+    new_command = re.sub(r'\$in(?=\s|$|[^a-zA-Z0-9_])', '@$out.rsp', command_line)
     
     # If nothing changed, this rule might not need fixing
     if new_command == command_line:
