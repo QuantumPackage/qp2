@@ -493,7 +493,7 @@ def ninja_irpf90_make_rule():
     # Run irpf90 and then post-process the generated ninja file to use response files
     # This fixes the "Argument list too long" error when linking with many .o files
     l_cmd = ["cd $module_abs"] + l_flag + ["irpf90 $include_dir $IRPF90_FLAGS"] + \
-            ["{0} $module_abs".format(fix_script)]
+            ["python3 {0} $module_abs".format(fix_script)]
 
     # ~#~#~#~#~#~ #
     # s t r i n g #

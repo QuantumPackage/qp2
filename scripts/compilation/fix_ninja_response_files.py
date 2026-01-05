@@ -25,7 +25,7 @@ def fix_ninja_file(ninja_file_path):
     if not os.path.exists(ninja_file_path):
         return False
     
-    with open(ninja_file_path, 'r') as f:
+    with open(ninja_file_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
     
     modified = False
@@ -66,7 +66,7 @@ def fix_ninja_file(ninja_file_path):
     
     if modified:
         # Write the modified content back
-        with open(ninja_file_path, 'w') as f:
+        with open(ninja_file_path, 'w', encoding='utf-8') as f:
             f.writelines(new_lines)
         return True
     
@@ -98,11 +98,9 @@ def fix_link_rule_lines(rule_lines, rule_name):
     
     command_line = rule_lines[command_line_idx]
     
-    # Replace $in with @$out.rsp in the command
-    # Handle various cases: $in at end, $in in middle, $in_newline, etc.
-    new_command = command_line.replace('$in ', '@$out.rsp ')
-    new_command = new_command.replace(' $in\n', ' @$out.rsp\n')
-    new_command = new_command.replace('$in\n', '@$out.rsp\n')
+    # Replace $in with @$out.rsp in the command using regex
+    # Use word boundary to avoid replacing $include or similar
+    new_command = re.sub(r'\$in\b', '@$out.rsp', command_line)
     
     # If nothing changed, this rule might not need fixing
     if new_command == command_line:
@@ -116,9 +114,6 @@ def fix_link_rule_lines(rule_lines, rule_name):
             indent = '  ' if line.startswith('  ') else '\t'
             new_rule_lines.append(f'{indent}rspfile = $out.rsp\n')
             new_rule_lines.append(f'{indent}rspfile_content = $in_newline\n')
-        elif line.strip().startswith('command ='):
-            # Skip if we already processed it
-            pass
         else:
             new_rule_lines.append(line)
     
