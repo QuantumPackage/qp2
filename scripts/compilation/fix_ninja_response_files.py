@@ -45,7 +45,8 @@ def fix_ninja_file(ninja_file_path):
         
         # Look for rule definitions that might be link rules
         if line.startswith('rule '):
-            rule_name = line.strip().split()[1] if len(line.strip().split()) > 1 else ''
+            split_line = line.strip().split()
+            rule_name = split_line[1] if len(split_line) > 1 else ''
             rule_lines = [line]
             i += 1
             
@@ -76,7 +77,7 @@ def fix_ninja_file(ninja_file_path):
             
             if is_link_rule:
                 # This rule might benefit from response files
-                fixed_rule = fix_link_rule_lines(rule_lines, rule_name)
+                fixed_rule = fix_link_rule_lines(rule_lines)
                 new_lines.extend(fixed_rule)
                 modified = True
             else:
@@ -94,13 +95,12 @@ def fix_ninja_file(ninja_file_path):
     return False
 
 
-def fix_link_rule_lines(rule_lines, rule_name):
+def fix_link_rule_lines(rule_lines):
     """
     Fix a rule to use response files.
     
     Args:
         rule_lines: List of lines making up the rule
-        rule_name: Name of the rule
     
     Returns:
         List of fixed lines
@@ -131,7 +131,9 @@ def fix_link_rule_lines(rule_lines, rule_name):
         if idx == command_line_idx:
             new_rule_lines.append(new_command)
             # Add rspfile directives right after the command
-            indent = '  ' if line.startswith('  ') else '\t'
+            # Preserve the exact indentation from the command line
+            indent_match = re.match(r'^(\s*)', line)
+            indent = indent_match.group(1) if indent_match else '  '
             new_rule_lines.append(f'{indent}rspfile = $out.rsp\n')
             new_rule_lines.append(f'{indent}rspfile_content = $in_newline\n')
         else:
