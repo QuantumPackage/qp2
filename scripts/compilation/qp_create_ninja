@@ -107,7 +107,7 @@ def ninja_create_env_variable(pwd_config_file):
             try:
                 content = ""
                 with open(includefile,'r') as f:
-                    content = f.read()
+                    content = f.read().strip()
                     str_ += " "+content
             except IOError:
                 pass
