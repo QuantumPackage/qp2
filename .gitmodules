@@ -10,3 +10,6 @@
 [submodule "external/OpenOrbitalOptimizer"]
 	path = external/OpenOrbitalOptimizer
 	url = https://github.com/susilehtola/OpenOrbitalOptimizer.git
+[submodule "external/armadillo-code"]
+	path = external/armadillo-code
+	url = https://gitlab.com/conradsnicta/armadillo-code
