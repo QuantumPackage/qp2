@@ -63,7 +63,7 @@ BEGIN_PROVIDER [ double precision, one_e_dm_dagger_mo_spin_index, (mo_num,mo_num
    ispin = 1
    do istate = 1, N_states
      do j = 1, mo_num
-       one_e_dm_dagger_mo_spin_index(j,j,istate,ispin) = 1 - one_e_dm_mo_alpha(j,j,istate)
+       one_e_dm_dagger_mo_spin_index(j,j,istate,ispin) = 1.d0 - one_e_dm_mo_alpha(j,j,istate)
        do i = j+1, mo_num
          one_e_dm_dagger_mo_spin_index(i,j,istate,ispin) = -one_e_dm_mo_alpha(i,j,istate)
          one_e_dm_dagger_mo_spin_index(j,i,istate,ispin) = -one_e_dm_mo_alpha(i,j,istate)
@@ -74,7 +74,7 @@ BEGIN_PROVIDER [ double precision, one_e_dm_dagger_mo_spin_index, (mo_num,mo_num
    ispin = 2
    do istate = 1, N_states
      do j = 1, mo_num
-       one_e_dm_dagger_mo_spin_index(j,j,istate,ispin) = 1 - one_e_dm_mo_beta(j,j,istate)
+       one_e_dm_dagger_mo_spin_index(j,j,istate,ispin) = 1.d0 - one_e_dm_mo_beta(j,j,istate)
        do i = j+1, mo_num
          one_e_dm_dagger_mo_spin_index(i,j,istate,ispin) = -one_e_dm_mo_beta(i,j,istate)
          one_e_dm_dagger_mo_spin_index(j,i,istate,ispin) = -one_e_dm_mo_beta(i,j,istate)
