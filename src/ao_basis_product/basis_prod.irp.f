@@ -132,14 +132,14 @@ end function basis_prod_overlap_func
 
   double precision, allocatable :: U(:,:), D(:), Vt(:,:)
   allocate(U(basis_prod_num,basis_prod_num), D(basis_prod_num))
-!  allocate(Vt(basis_prod_num,basis_prod_num))
-
-!  call svd( &
-!       basis_prod_overlap, size(basis_prod_overlap,1), &
-!       U,  size(U,1), D, &
-!       Vt, size(Vt,1), &
-!       basis_prod_num,basis_prod_num)
-  call lapack_diagd(D,U,basis_prod_overlap,basis_prod_num,basis_prod_num)
+  allocate(Vt(basis_prod_num,basis_prod_num))
+!
+  call svd( &
+       basis_prod_overlap, size(basis_prod_overlap,1), &
+       U,  size(U,1), D, &
+       Vt, size(Vt,1), &
+       basis_prod_num,basis_prod_num)
+!  call lapack_diagd(D,U,basis_prod_overlap,basis_prod_num,basis_prod_num)
 
   double precision :: local_cutoff
   integer          :: i, j, k, mm
