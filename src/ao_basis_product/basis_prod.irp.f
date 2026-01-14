@@ -13,6 +13,7 @@ BEGIN_PROVIDER [ integer, basis_prod_num ]
   ! Maximum number of basis functions for the projector
   END_DOC
   basis_prod_num = ao_num * (ao_num+1) / 2
+!  basis_prod_num = ao_num 
 END_PROVIDER
 
 BEGIN_PROVIDER [ integer, basis_prod_idx, (2,basis_prod_num) ]
@@ -31,7 +32,7 @@ BEGIN_PROVIDER [ integer, basis_prod_idx, (2,basis_prod_num) ]
         endif
      enddo
   enddo
-
+!
 !   a=0
 !   do i=1,ao_num
 !         a = a+1
@@ -132,18 +133,19 @@ end function basis_prod_overlap_func
 
   double precision, allocatable :: U(:,:), D(:), Vt(:,:)
   allocate(U(basis_prod_num,basis_prod_num), D(basis_prod_num))
-!  allocate(Vt(basis_prod_num,basis_prod_num))
-
-!  call svd( &
-!       basis_prod_overlap, size(basis_prod_overlap,1), &
-!       U,  size(U,1), D, &
-!       Vt, size(Vt,1), &
-!       basis_prod_num,basis_prod_num)
-  call lapack_diagd(D,U,basis_prod_overlap,basis_prod_num,basis_prod_num)
-
+  allocate(Vt(basis_prod_num,basis_prod_num))
+!
+  call svd( &
+       basis_prod_overlap, size(basis_prod_overlap,1), &
+       U,  size(U,1), D, &
+       Vt, size(Vt,1), &
+       basis_prod_num,basis_prod_num)
+!  call lapack_diag(D,U,basis_prod_overlap,basis_prod_num,basis_prod_num)
+!
   double precision :: local_cutoff
   integer          :: i, j, k, mm
 
+!  local_cutoff = 1.d-4
   local_cutoff = 1.d-10
   mm=basis_prod_num
   do i=1,basis_prod_num
