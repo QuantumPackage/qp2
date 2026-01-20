@@ -682,14 +682,17 @@ end subroutine
  ! --------------------------------------------
 
  integer(bit_kind), allocatable :: dets(:,:,:)
- integer                        :: nmax, sze, degree, istart, iend, j
+ integer                        :: nmax, sze, degree, istart, iend, j, alloc_stat
  integer, allocatable           :: old_order(:)
 
 
  n_det_per_config_max = 0
 
  nmax = 1000
- allocate(dets(N_int,2,nmax), old_order(nmax))
+ allocate(dets(N_int,2,nmax), old_order(nmax), stat=alloc_stat)
+ if (alloc_stat /= 0) then
+   stop 'Not enough memory'
+ endif
 
  do k=1,N_configuration
    istart = psi_configuration_to_psi_det(1,k)
@@ -698,8 +701,14 @@ end subroutine
 
    if (iend-istart+1 > nmax) then
       nmax = iend-istart+1
-      deallocate(dets)
-      allocate(dets(N_int,2,nmax))
+      deallocate(dets,old_order)
+      double precision :: gb
+      gb = dble(N_int*2+1)*dble(nmax)*8.d0/(1024.d0)**3
+      call check_mem(gb,irp_here)
+      allocate(dets(N_int,2,nmax),old_order(nmax),stat=alloc_stat)
+      if (alloc_stat /= 0) then
+        stop 'Not enough memory'
+      endif
    endif
 
    sze = nmax

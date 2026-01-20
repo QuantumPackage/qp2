@@ -129,7 +129,7 @@ subroutine check_mem(rss_in,routine)
   double precision :: mem
   call resident_memory(mem)
   mem += rss_in
-  if (mem > qp_max_mem) then
+  if (mem > dble(qp_max_mem)) then
     call print_memory_usage()
     print *,  'Not enough memory: aborting in ', routine
     print *,  mem, ' GB required'
