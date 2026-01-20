@@ -1022,7 +1022,6 @@ module gpu
 ! ---
 
 subroutine gpu_ddot(handle, n, dx, incx, dy, incy, res)
-!  use gpu
   type(gpu_blas), intent(in)     :: handle
   integer*4                      :: n, incx, incy
   double precision, target       :: dx, dy
@@ -1032,7 +1031,6 @@ end subroutine
 
 
 subroutine gpu_ddot_64(handle, n, dx, incx, dy, incy, res)
-!  use gpu
   type(gpu_blas), intent(in)     :: handle
   integer*8                      :: n, incx, incy
   double precision, target       :: dx, dy
@@ -1042,7 +1040,6 @@ end subroutine
 
 
 subroutine gpu_sdot(handle, n, dx, incx, dy, incy, res)
-!  use gpu
   type(gpu_blas), intent(in)     :: handle
   integer*4                      :: n, incx, incy
   real, target       :: dx, dy
@@ -1052,7 +1049,6 @@ end subroutine
 
 
 subroutine gpu_sdot_64(handle, n, dx, incx, dy, incy, res)
-!  use gpu
   type(gpu_blas), intent(in)     :: handle
   integer*8                      :: n, incx, incy
   real, target       :: dx, dy
@@ -1066,7 +1062,6 @@ end subroutine
 
 subroutine gpu_dgeam(handle, transa, transb, m, n, alpha, a, lda, beta, &
   b, ldb, c, ldc)
-!  use gpu
   type(gpu_blas), intent(in)   :: handle
   character, intent(in)        :: transa, transb
   integer*4, intent(in)        :: m, n, lda, ldb, ldc
@@ -1079,7 +1074,6 @@ end subroutine
 
 subroutine gpu_dgeam_64(handle, transa, transb, m, n, alpha, a, lda, beta, &
   b, ldb, c, ldc)
-!  use gpu
   type(gpu_blas), intent(in)   :: handle
   character, intent(in)        :: transa, transb
   integer*8, intent(in)        :: m, n, lda, ldb, ldc
@@ -1092,7 +1086,6 @@ end subroutine
 
 subroutine gpu_sgeam(handle, transa, transb, m, n, alpha, a, lda, beta, &
   b, ldb, c, ldc)
-!  use gpu
   type(gpu_blas), intent(in)   :: handle
   character, intent(in)        :: transa, transb
   integer*4, intent(in)        :: m, n, lda, ldb, ldc
@@ -1105,7 +1098,6 @@ end subroutine
 
 subroutine gpu_sgeam_64(handle, transa, transb, m, n, alpha, a, lda, beta, &
   b, ldb, c, ldc)
-!  use gpu
   type(gpu_blas), intent(in)   :: handle
   character, intent(in)        :: transa, transb
   integer*8, intent(in)        :: m, n, lda, ldb, ldc
@@ -1121,7 +1113,6 @@ end subroutine
 
 subroutine gpu_dgemv(handle, transa, m, n, alpha, a, lda, &
   x, incx, beta, y, incy)
-!  use gpu
   type(gpu_blas), intent(in)   :: handle
   character, intent(in)        :: transa
   integer*4, intent(in)        :: m, n, lda, incx, incy
@@ -1134,7 +1125,6 @@ end subroutine
 
 subroutine gpu_dgemv_64(handle, transa, m, n, alpha, a, lda, &
   x, incx, beta, y, incy)
-!  use gpu
   type(gpu_blas), intent(in)   :: handle
   character, intent(in)        :: transa
   integer*8, intent(in)        :: m, n, lda, incx, incy
@@ -1148,7 +1138,6 @@ end subroutine
 
 subroutine gpu_sgemv(handle, transa, m, n, alpha, a, lda, &
   x, incx, beta, y, incy)
-!  use gpu
   type(gpu_blas), intent(in)   :: handle
   character, intent(in)        :: transa
   integer*4, intent(in)        :: m, n, lda, incx, incy
@@ -1161,7 +1150,6 @@ end subroutine
 
 subroutine gpu_sgemv_64(handle, transa, m, n, alpha, a, lda, &
   x, incx, beta, y, incy)
-!  use gpu
   type(gpu_blas), intent(in)   :: handle
   character, intent(in)        :: transa
   integer*8, intent(in)        :: m, n, lda, incx, incy
@@ -1178,7 +1166,6 @@ end subroutine
 
 subroutine gpu_dgemm(handle, transa, transb, m, n, k, alpha, a, lda, &
   b, ldb, beta, c, ldc)
-!  use gpu
   type(gpu_blas), intent(in)   :: handle
   character, intent(in)        :: transa, transb
   integer*4, intent(in)        :: m, n, k, lda, ldb, ldc
@@ -1191,7 +1178,6 @@ end subroutine
 
 subroutine gpu_dgemm_64(handle, transa, transb, m, n, k, alpha, a, lda, &
   b, ldb, beta, c, ldc)
-!  use gpu
   type(gpu_blas), intent(in)   :: handle
   character, intent(in)        :: transa, transb
   integer*8, intent(in)        :: m, n, k, lda, ldb, ldc
@@ -1203,7 +1189,6 @@ end subroutine
 
 subroutine gpu_sgemm(handle, transa, transb, m, n, k, alpha, a, lda, &
   b, ldb, beta, c, ldc)
-!  use gpu
   type(gpu_blas), intent(in)   :: handle
   character, intent(in)        :: transa, transb
   integer*4, intent(in)        :: m, n, k, lda, ldb, ldc
@@ -1216,7 +1201,6 @@ end subroutine
 
 subroutine gpu_sgemm_64(handle, transa, transb, m, n, k, alpha, a, lda, &
   b, ldb, beta, c, ldc)
-!  use gpu
   type(gpu_blas), intent(in)   :: handle
   character, intent(in)        :: transa, transb
   integer*8, intent(in)        :: m, n, k, lda, ldb, ldc

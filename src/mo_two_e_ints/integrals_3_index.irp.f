@@ -27,6 +27,7 @@
         buffer_jj%f(1,1), cholesky_mo_num, 0.d0, &
         buffer%f(1,1,1), mo_num*mo_num)
 
+    call gpu_synchronize()
     do j = 1, mo_num
       do k = 1, mo_num
         do i = 1, mo_num
@@ -34,26 +35,25 @@
         enddo
       enddo
     enddo
-    call gpu_deallocate(buffer)
     call gpu_deallocate(buffer_jj)
 
-    call gpu_allocate(buffer_jj,mo_num,mo_num)
-
     do j = 1, mo_num
-
-      call dgemm('T','N',mo_num,mo_num,cholesky_mo_num, 1.d0, &
+      call gpu_dgemm(blas_handle,'T','N',mo_num,mo_num,cholesky_mo_num, 1.d0, &
         cholesky_mo_transp_d%f(1,1,j), cholesky_mo_num, &
         cholesky_mo_transp_d%f(1,1,j), cholesky_mo_num, 0.d0, &
-        buffer_jj%f(1,1), mo_num)
+        buffer%f(1,1,j), mo_num)
+    enddo
 
+    call gpu_synchronize()
+    do j = 1, mo_num
       do k=1,mo_num
         do i=1,mo_num
-          big_array_exchange_integrals(j,i,k) = buffer_jj%f(i,k)
+          big_array_exchange_integrals(j,i,k) = buffer%f(i,k,j)
        enddo
      enddo
     enddo
 
-    call gpu_deallocate(buffer_jj)
+    call gpu_deallocate(buffer)
 
  else
 

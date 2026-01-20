@@ -84,19 +84,24 @@ END_PROVIDER
      call gpu_allocate(mo_coef_d, ao_num,mo_num)
      call gpu_upload(mo_coef, mo_coef_d)
 
+     if (size(cholesky_ao,3) /= cholesky_ao_num) then
+       call qp_bug(irp_here, size(cholesky_ao,3), 'size(cholesky_ao,3) /= cholesky_ao_num')
+     endif
      call gpu_allocate(cholesky_ao_d, ao_num,ao_num,cholesky_ao_num)
+
      call gpu_upload(cholesky_ao, cholesky_ao_d)
 
      call gpu_allocate(X, mo_num,cholesky_mo_num,ao_num)
 
      call gpu_dgemm(blas_handle, 'T','N', ao_num*cholesky_mo_num, mo_num, ao_num, 1.d0, &
          cholesky_ao_d%f(1,1,1), ao_num, mo_coef_d%f(1,1), ao_num, 0.d0, X%f(1,1,1), ao_num*cholesky_mo_num)
-     call gpu_deallocate(cholesky_ao_d)
 
      call gpu_dgemm(blas_handle, 'T','N', cholesky_mo_num*mo_num, mo_num, ao_num, 1.d0, &
          X%f(1,1,1), ao_num, mo_coef_d%f(1,1), ao_num, 0.d0, cholesky_mo_transp_d%f(1,1,1), cholesky_mo_num*mo_num)
-     call gpu_deallocate(X)
 
+     call gpu_synchronize()
+     call gpu_deallocate(cholesky_ao_d)
+     call gpu_deallocate(X)
      call gpu_deallocate(mo_coef_d)
 
      call gpu_download(cholesky_mo_transp_d,cholesky_mo_transp)
