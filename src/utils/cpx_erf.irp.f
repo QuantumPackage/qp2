@@ -1,6 +1,37 @@
 
 ! ---
 
+subroutine zboysfun00_1(rho, F0)
+
+  implicit none
+
+  include 'constants.include.F'
+  
+  complex*16, intent(in)  :: rho
+  complex*16, intent(out) :: F0
+
+  double precision        :: rho_re, rho_im, rho_mod
+  double precision        :: sq_rho_re, sq_rho_im
+  complex*16              :: sq_rho
+
+  complex*16, external    :: cpx_erf_1
+
+
+  rho_re  = real(rho)
+  rho_im  = aimag(rho)
+  rho_mod = dsqrt(rho_re*rho_re + rho_im*rho_im)
+
+  sq_rho_re = sq_op5 * dsqrt(rho_re + rho_mod)
+  sq_rho_im = 0.5d0 * rho_im / sq_rho_re
+  sq_rho    = sq_rho_re + (0.d0, 1.d0) * sq_rho_im
+
+  F0 = 0.5d0 * sqpi * cpx_erf_1(sq_rho_re, sq_rho_im) / sq_rho
+
+  return
+end 
+
+! ---
+
 complex*16 function cpx_erf_1(x, y)
 
   BEGIN_DOC
@@ -43,6 +74,7 @@ complex*16 function cpx_erf_1(x, y)
     cpx_erf_1 = conjg(erf_tot)
   endif
 
+  return
 end
 
 ! ---
@@ -54,22 +86,42 @@ complex*16 function erf_E(x, yabs)
 
   double precision, intent(in) :: x, yabs
 
-  if((dabs(x).gt.6.d0) .or. (x==0.d0)) then
+  double precision             :: xy
+
+
+  if(dabs(x) .gt. 6.d0) then
     erf_E = (0.d0, 0.d0)
     return
   endif
 
-  if(dabs(x) .lt. 1.d-7) then
+  xy = x * yabs
 
-    erf_E = -inv_pi * (0.d0, 1.d0) * yabs
+  if(dabs(xy) .lt. 0.1d0) then
+
+    erf_E = ((((((((((((-(0.d0, 9.3968347936601903d-8) * xy + (6.5777843555621328d-7, 0.d0) &
+          ) * xy + (0.d0, 4.2755598311153869d-6)    &
+          ) * xy - (2.5653358986692322d-5, 0.d0)    &
+          ) * xy - (0.d0, 0.00014109347442680775d0) &
+          ) * xy + (0.00070546737213403885d0, 0.d0) &
+          ) * xy + (0.d0, 0.0031746031746031746d0)  &
+          ) * xy - (0.012698412698412698d0, 0.d0)   &
+          ) * xy - (0.d0, 0.044444444444444446d0)   &
+          ) * xy + (0.13333333333333333d0, 0.d0)    &
+          ) * xy + (0.d0, 0.33333333333333331d0)    &
+          ) * xy - (0.66666666666666663d0, 0.d0)    &
+          ) * xy - (0.d0, 1.d0)                     &
+          ) * xy + (1.d0, 0.d0)
+
+    erf_E = erf_E * (0.d0, 1.d0) * yabs * inv_pi * dexp(-x*x)
 
   else
 
     erf_E = 0.5d0 * inv_pi * dexp(-x*x) &
-          * ((1.d0, 0.d0) - zexp(-(2.d0, 0.d0) * x * yabs)) / x
+          * ((1.d0, 0.d0) - zexp(-(0.d0, 2.d0) * xy)) / x
 
   endif
 
+  return
 end
 
 ! ---
@@ -84,31 +136,30 @@ double precision function erf_F(x, yabs)
   integer, parameter           :: Nmax = 13
 
   integer                      :: i
-  double precision             :: tmp1, tmp2, x2, ct 
+  double precision             :: tmp1, tmp2, x2
 
 
   if(dabs(x) .gt. 5.8d0) then
-
     erf_F = 0.d0
+    return
+  endif
 
-  else
 
-    x2 = x * x
-    ct = x * inv_pi
+  x2 = x * x
 
-    erf_F = 0.d0
-    do i = 1, Nmax
+  erf_F = 0.d0
+  do i = 1, Nmax
 
-      tmp1  = 0.25d0 * dble(i) * dble(i) + x2
-      tmp2  = dexp(-tmp1) / tmp1
-      erf_F = erf_F + tmp2
+    tmp1  = 0.25d0 * dble(i*i) + x2
+    tmp2  = dexp(-tmp1) / tmp1
+    erf_F = erf_F + tmp2
 
-      if(dabs(tmp2) .lt. 1d-15) exit
-    enddo
-    erf_F = ct * erf_F
+    if(tmp2 .lt. 1d-15) exit
+  enddo
 
-  endif 
+  erf_F = x * inv_pi * erf_F
 
+  return
 end
 
 ! ---
@@ -149,6 +200,7 @@ complex*16 function erf_G(x, yabs)
 
   enddo
 
+  return
 end
 
 ! ---
@@ -163,19 +215,14 @@ complex*16 function erf_H(x, yabs)
   integer, parameter           :: Nmax = 13
 
   integer                      :: i
-  double precision             :: tmp0, tmp1, tmp_mod, x2, ct, idble
+  double precision             :: tmp0, tmp1, x2, idble
   complex*16                   :: tmp2
 
-  if(x .eq. 0.d0) then
-    erf_H = (0.d0, 0.d0)
-    return
-  endif
 
-
-  if((dabs(x) .lt. 10d0) .and. (yabs .lt. 6.1d0)) then
+  if((dabs(x) .lt. 107d0) .and. (yabs .lt. 6.1d0)) then
+  !if((dabs(x) .lt. 10d0) .and. (yabs .lt. 6.1d0)) then
 
     x2 = x * x
-    ct = 0.5d0 * inv_pi
 
     erf_H = 0.d0
     do i = 1, Nmax
@@ -186,10 +233,10 @@ complex*16 function erf_H(x, yabs)
       tmp2  = dexp(-tmp1-idble*yabs) * (x + (0.d0, 1.d0)*tmp0) / tmp1
       erf_H = erf_H + tmp2
 
-      tmp_mod = dsqrt(real(tmp2)*real(tmp2) + aimag(tmp2)*aimag(tmp2))
-      if(tmp_mod .lt. 1d-15) exit
+      if(zabs(tmp2) .lt. 1d-15) exit
     enddo
-    erf_H = ct * erf_H
+
+    erf_H = 0.5d0 * inv_pi * erf_H
 
   else
 
@@ -201,7 +248,7 @@ end
 
 ! ---
 
-subroutine zboysfun00(z, val)
+subroutine zboysfun00_2(z, val)
 
   BEGIN_DOC
   !

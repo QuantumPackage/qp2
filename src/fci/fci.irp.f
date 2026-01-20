@@ -36,8 +36,9 @@ program fci
   !
   END_DOC
 
+  PROVIDE all_mo_integrals
   if (.not.is_zmq_slave) then
-    PROVIDE psi_det psi_coef mo_two_e_integrals_in_map
+    PROVIDE psi_det psi_coef
 
     write(json_unit,json_array_open_fmt) 'fci'
 
@@ -55,7 +56,7 @@ program fci
     call json_close
 
   else
-    PROVIDE mo_two_e_integrals_in_map pt2_min_parallel_tasks
+    PROVIDE pt2_min_parallel_tasks
 
     call run_slave_cipsi
 

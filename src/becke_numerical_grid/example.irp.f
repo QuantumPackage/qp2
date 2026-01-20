@@ -50,6 +50,7 @@ subroutine example_becke_numerical_grid
  print*,'The second example uses the grid points as a collection of spherical grids centered on each atom'
  print*,'This is mostly useful if one needs to split contributions between radial/angular/atomic of an integral'
  ! you browse the nuclei
+ integral_2 = 0.d0
  do i = 1, nucl_num
  ! you browse the radial points attached to each nucleus
   do j = 1, n_points_radial_grid

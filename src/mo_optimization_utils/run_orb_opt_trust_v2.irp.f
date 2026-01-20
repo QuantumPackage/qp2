@@ -93,7 +93,7 @@ subroutine run_orb_opt_trust_v2
   integer,allocatable           :: tmp_list(:), key(:)
   double precision, allocatable :: tmp_m_x(:,:),tmp_R(:,:), tmp_x(:), W(:,:), e_val(:)
 
-  PROVIDE mo_two_e_integrals_in_map ci_energy psi_det psi_coef
+  PROVIDE all_mo_integrals ci_energy psi_det psi_coef
 
 ! Allocation
 
@@ -110,17 +110,17 @@ allocate(tmp_R(m,m), tmp_m_x(m,m), tmp_x(tmp_n))
 allocate(e_val(tmp_n),key(tmp_n),v_grad(tmp_n))
 
 ! Method
-!    There are three different methods : 
+!    There are three different methods :
 !    - the "full" hessian, which uses all the elements of the hessian
 !      matrix"
 !    - the "diagonal" hessian, which uses only the diagonal elements of the
 !      hessian
-!    - without the hessian (hessian = identity matrix) 
+!    - without the hessian (hessian = identity matrix)
 
 
 !Display the method
  print*, 'Method :', optimization_method
-if (optimization_method == 'full') then 
+if (optimization_method == 'full') then
   print*, 'Full hessian'
   allocate(H(tmp_n,tmp_n), h_f(m,m,m,m),W(tmp_n,tmp_n))
   tmp_n2 = tmp_n
@@ -147,13 +147,13 @@ print*, 'Absolute value of the hessian:', absolute_eig
 ! - We diagonalize the hessian
 ! - We compute a step and loop to reduce the radius of the
 !   trust region (and the size of the step by the way) until the step is
-!   accepted 
-! - We repeat the process until the convergence 
+!   accepted
+! - We repeat the process until the convergence
 !   NB: the convergence criterion can be changed
 
 
 ! Loop until the convergence of the optimization
-! call diagonalize_ci 
+! call diagonalize_ci
 
 !### Initialization ###
 nb_iter = 0
@@ -183,14 +183,14 @@ do while (not_converged)
     ! Full hessian
     call hessian_list_opt(tmp_n, m, tmp_list, H, h_f)
 
-    ! Diagonalization of the hessian 
+    ! Diagonalization of the hessian
     call diagonalization_hessian(tmp_n, H, e_val, w)
 
   elseif (optimization_method == 'diag') then
-    ! Diagonal hessian 
+    ! Diagonal hessian
     call diag_hessian_list_opt(tmp_n, m, tmp_list, H)
   else
-    ! Identity matrix 
+    ! Identity matrix
     do tmp_i = 1, tmp_n
       H(tmp_i,1) = 1d0
     enddo
@@ -212,7 +212,7 @@ do while (not_converged)
   endif
 
   ! Init before the internal loop
-  cancel_step = .True. ! To enter in the loop just after 
+  cancel_step = .True. ! To enter in the loop just after
   nb_cancel = 0
   nb_sub_iter = 0
 
@@ -225,15 +225,15 @@ do while (not_converged)
     print*,'Max elem grad:', max_elem_grad
     print*,'-----------------------------'
 
-    ! Hessian,gradient,Criterion -> x 
-    call trust_region_step_w_expected_e(tmp_n,tmp_n2,H,W,e_val,v_grad,prev_criterion,rho,nb_iter,delta,criterion_model,tmp_x,must_exit) 
+    ! Hessian,gradient,Criterion -> x
+    call trust_region_step_w_expected_e(tmp_n,tmp_n2,H,W,e_val,v_grad,prev_criterion,rho,nb_iter,delta,criterion_model,tmp_x,must_exit)
 
     if (must_exit) then
       print*,'step_in_trust_region sends: Exit'
       exit
     endif
 
-    ! 1D tmp -> 2D tmp 
+    ! 1D tmp -> 2D tmp
     call vec_to_mat_v2(tmp_n, m, tmp_x, tmp_m_x)
 
     ! Rotation matrix for the active MOs
@@ -250,14 +250,14 @@ do while (not_converged)
     call sub_to_full_rotation_matrix(m, tmp_list, tmp_R, R)
 
     ! MO rotations
-    call apply_mo_rotation(R, prev_mos)   
+    call apply_mo_rotation(R, prev_mos)
 
     ! Update of the energy before the diagonalization of the hamiltonian
     call clear_mo_map
-    TOUCH mo_coef psi_det psi_coef ci_energy two_e_dm_mo 
+    TOUCH mo_coef psi_det psi_coef ci_energy two_e_dm_mo
     call state_average_energy(criterion)
 
-    ! Criterion -> step accepted or rejected 
+    ! Criterion -> step accepted or rejected
     call trust_region_is_step_cancelled(nb_iter, prev_criterion, criterion, criterion_model, rho, cancel_step)
 
     ! Cancellation of the step if necessary
@@ -283,7 +283,7 @@ do while (not_converged)
   ! To exit the external loop if must_exit = .True.
   if (must_exit) then
     exit
-  endif 
+  endif
 
   ! Step accepted, nb iteration + 1
   nb_iter = nb_iter + 1
@@ -295,7 +295,7 @@ do while (not_converged)
   endif
   if (nb_iter >= optimization_max_nb_iter) then
     print*,'Not converged: nb_iter >= optimization_max_nb_iter'
-    not_converged = .False. 
+    not_converged = .False.
   endif
 
   if (.not. not_converged) then

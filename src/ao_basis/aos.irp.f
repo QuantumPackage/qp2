@@ -20,7 +20,39 @@ BEGIN_PROVIDER [ integer, ao_shell, (ao_num) ]
      ao_shell(k) = i
    enddo
  enddo
+END_PROVIDER
 
+BEGIN_PROVIDER [ integer, ao_sphe_num ]
+ implicit none
+ BEGIN_DOC
+ ! Number of spherical AOs
+ END_DOC
+ integer :: n, i
+ if (ao_cartesian) then
+   ao_sphe_num = ao_num
+ else
+   ao_sphe_num=0
+   do i=1,shell_num
+     n = shell_ang_mom(i)
+     ao_sphe_num += 2*n+1
+   enddo
+ endif
+END_PROVIDER
+
+BEGIN_PROVIDER [ integer, ao_sphe_shell, (ao_sphe_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Index of the shell to which the AO corresponds
+ END_DOC
+ integer :: i, j, k, n
+ k=0
+ do i=1,shell_num
+   n = shell_ang_mom(i)
+   do j=-n,n
+     k = k+1
+     ao_sphe_shell(k) = i
+   enddo
+ enddo
 END_PROVIDER
 
 BEGIN_PROVIDER [ integer, ao_first_of_shell, (shell_num) ]
@@ -53,46 +85,95 @@ END_PROVIDER
   C_A(3) = 0.d0
   ao_coef_normalized = 0.d0
 
-  do i=1,ao_num
+  if (primitives_normalized) then
 
-!    powA(1) = ao_power(i,1) +  ao_power(i,2) +  ao_power(i,3)
-!    powA(2) = 0
-!    powA(3) = 0
-    powA(1) = ao_power(i,1)
-    powA(2) = ao_power(i,2)
-    powA(3) = ao_power(i,3)
+    if (ezfio_convention >= 20250211) then
+      ! Same primitive normalization factors for all AOs of the same shell, or read from trexio file
 
-    ! Normalization of the primitives
-    if (primitives_normalized) then
-      do j=1,ao_prim_num(i)
-        call overlap_gaussian_xyz(C_A,C_A,ao_expo(i,j),ao_expo(i,j), &
-           powA,powA,overlap_x,overlap_y,overlap_z,norm,nz)
-        ao_coef_normalized(i,j) = ao_coef(i,j)/dsqrt(norm)
+      do i=1,ao_num
+        k=1
+        do while (k<=prim_num .and. shell_index(k) /= ao_shell(i))
+          k = k+1
+        end do
+        do j=1,ao_prim_num(i)
+          ao_coef_normalized(i,j) = ao_coef(i,j)*prim_normalization_factor(k+j-1)
+        enddo
       enddo
+
     else
+        ! GAMESS convention for primitive factors
+
+      do i=1,ao_num
+        powA(1) = ao_power(i,1)
+        powA(2) = ao_power(i,2)
+        powA(3) = ao_power(i,3)
+
+        do j=1,ao_prim_num(i)
+          call overlap_gaussian_xyz(C_A,C_A,ao_expo(i,j),ao_expo(i,j), &
+             powA,powA,overlap_x,overlap_y,overlap_z,norm,nz)
+          ao_coef_normalized(i,j) = ao_coef(i,j)/dsqrt(norm)
+        enddo
+      enddo
+
+    endif
+
+  else
+
+    do i=1,ao_num
       do j=1,ao_prim_num(i)
         ao_coef_normalized(i,j) = ao_coef(i,j)
       enddo
-    endif
+    enddo
 
+  endif
+
+  double precision, allocatable :: self_overlap(:)
+  allocate(self_overlap(ao_num))
+
+  do i=1,ao_num
     powA(1) = ao_power(i,1)
     powA(2) = ao_power(i,2)
     powA(3) = ao_power(i,3)
-
-    ! Normalization of the contracted basis functions
-    if (ao_normalized) then
-      norm = 0.d0
-      do j=1,ao_prim_num(i)
-        do k=1,ao_prim_num(i)
-          call overlap_gaussian_xyz(C_A,C_A,ao_expo(i,j),ao_expo(i,k),powA,powA,overlap_x,overlap_y,overlap_z,c,nz)
-          norm = norm+c*ao_coef_normalized(i,j)*ao_coef_normalized(i,k)
-        enddo
+    self_overlap(i) = 0.d0
+    do j=1,ao_prim_num(i)
+      do k=1,j-1
+        call overlap_gaussian_xyz(C_A,C_A,ao_expo(i,j),ao_expo(i,k),powA,powA,overlap_x,overlap_y,overlap_z,c,nz)
+        self_overlap(i) = self_overlap(i) + 2.d0*c*ao_coef_normalized(i,j)*ao_coef_normalized(i,k)
       enddo
-      ao_coef_normalization_factor(i) = 1.d0/dsqrt(norm)
-    else
-      ao_coef_normalization_factor(i) = 1.d0
-    endif
+      call overlap_gaussian_xyz(C_A,C_A,ao_expo(i,j),ao_expo(i,j),powA,powA,overlap_x,overlap_y,overlap_z,c,nz)
+      self_overlap(i) = self_overlap(i) +c*ao_coef_normalized(i,j)*ao_coef_normalized(i,j)
+    enddo
   enddo
+
+  if (ao_normalized) then
+
+    do i=1,ao_num
+      ao_coef_normalization_factor(i) = 1.d0/dsqrt(self_overlap(i))
+    enddo
+
+  else
+
+    do i=1,ao_num
+      ao_coef_normalization_factor(i) = 1.d0
+    enddo
+
+  endif
+
+  do i=1,ao_num
+    do j=1,ao_prim_num(i)
+      ao_coef_normalized(i,j) = ao_coef_normalized(i,j) * ao_coef_normalization_factor(i)
+    enddo
+  enddo
+
+END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, ao_sphe_coef_normalization_factor, (ao_sphe_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Normalization factor in spherical AO basis
+ END_DOC
+
+ ao_sphe_coef_normalization_factor(:) = 1.d0
 
 END_PROVIDER
 
@@ -343,3 +424,22 @@ BEGIN_PROVIDER [ character*(4), ao_l_char_space, (ao_num) ]
    ao_l_char_space(i) = give_ao_character_space
  enddo
 END_PROVIDER
+
+! ---
+
+BEGIN_PROVIDER [ logical, use_pw ]
+
+  implicit none
+
+  logical :: exist
+
+  use_pw = .false.
+
+  call ezfio_has_ao_basis_ao_expo_pw(exist)
+  if(exist) then
+    PROVIDE ao_expo_pw_ord_transp
+    if(maxval(dabs(ao_expo_pw_ord_transp(4,:,:))) .gt. 1d-15) use_pw = .true.
+  endif
+
+END_PROVIDER
+

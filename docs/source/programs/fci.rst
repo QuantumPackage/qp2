@@ -50,15 +50,20 @@ fci
  
     * :c:data:`do_pt2` 
     * :c:data:`is_zmq_slave` 
+    * :c:data:`json_int_fmt` 
+    * :c:data:`json_unit` 
     * :c:data:`mo_two_e_integrals_in_map` 
+    * :c:data:`n_states` 
     * :c:data:`psi_coef` 
     * :c:data:`psi_det` 
+    * :c:data:`pt2_min_parallel_tasks` 
  
  Calls: 
  
  .. hlist:: 
     :columns: 3 
  
+    * :c:func:`json_close` 
     * :c:func:`run_cipsi` 
     * :c:func:`run_slave_cipsi` 
     * :c:func:`run_stochastic_cipsi` 
@@ -72,18 +77,19 @@ fci
     * :c:data:`ci_electronic_energy` 
     * :c:data:`ci_energy` 
     * :c:data:`ci_electronic_energy` 
+    * :c:data:`psi_configuration` 
     * :c:data:`n_det` 
-    * :c:data:`n_iter` 
-    * :c:data:`psi_occ_pattern` 
+    * :c:data:`n_det_generators` 
+    * :c:data:`n_det_selectors` 
     * :c:data:`c0_weight` 
     * :c:data:`distributed_davidson` 
     * :c:data:`psi_coef` 
     * :c:data:`psi_det_sorted_bit` 
+    * :c:data:`psi_configuration` 
     * :c:data:`psi_det` 
     * :c:data:`psi_det_size` 
     * :c:data:`psi_det_sorted_bit` 
     * :c:data:`psi_energy` 
-    * :c:data:`psi_occ_pattern` 
     * :c:data:`psi_energy` 
     * :c:data:`pt2_e0_denominator` 
     * :c:data:`pt2_match_weight` 

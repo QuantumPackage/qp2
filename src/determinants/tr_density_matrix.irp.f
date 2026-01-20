@@ -1,5 +1,5 @@
 BEGIN_PROVIDER [double precision, one_e_tr_dm_mo, (mo_num, mo_num, N_states, N_states)]
-
+ use OMP_LIB
   implicit none
 
   BEGIN_DOC
@@ -15,6 +15,19 @@ BEGIN_PROVIDER [double precision, one_e_tr_dm_mo, (mo_num, mo_num, N_states, N_s
   integer                        :: exc(0:2,2),n_occ(2)
   double precision, allocatable  :: tmp_a(:,:,:,:), tmp_b(:,:,:,:)
   integer                        :: krow, kcol, lrow, lcol
+
+  double precision :: mem_tot_tr_dm
+  integer :: nthreads
+  nthreads = OMP_GET_MAX_THREADS()
+  mem_tot_tr_dm = 8.d0*mo_num*mo_num*n_states*n_states*1d-9*(nthreads+1)
+  if(mem_tot_tr_dm .gt. 0.9d0 * qp_max_mem) then
+   print*,'Warning ! you are providing one_e_tr_dm_mo in parallel ! '
+   print*,'Using that amount of threads ',nthreads
+   print*,'Each thread needs that amount of Gb ',8.d0*mo_num*mo_num*n_states*n_states*1d-9
+   print*,'So it takes in total that amount of Gb ',mem_tot_tr_dm
+   print*,'The max memory for the calculation is ',qp_max_mem
+   print*,'It may crash because of lack of memory ...'
+  endif
 
   PROVIDE psi_det_alpha_unique psi_det_beta_unique
 

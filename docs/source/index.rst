@@ -41,6 +41,7 @@
    programmers_guide/plugins
    programmers_guide/plugins_tuto_intro
    programmers_guide/plugins_tuto_I
+   programmers_guide/plugins_tuto_II
    programmers_guide/new_ks
    programmers_guide/index
 

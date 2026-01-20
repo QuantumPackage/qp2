@@ -191,10 +191,15 @@ double precision function bielec_PQxx_no(i_mo, j_mo, i_ca, j_ca)
  END_DOC
  integer, intent(in) :: i_ca, j_ca, i_mo, j_mo
  integer :: ii_ca, jj_ca
- double precision :: bielec_no_basis
  ii_ca = list_core_inact_act(i_ca)
  jj_ca = list_core_inact_act(j_ca)
- bielec_PQxx_no = bielec_no_basis(i_mo,j_mo,ii_ca,jj_ca)
+! double precision :: bielec_no_basis
+! bielec_PQxx_no = bielec_no_basis(i_mo,j_mo,ii_ca,jj_ca)
+ integer :: i
+ bielec_PQxx_no = 0.d0
+ do i = 1, cholesky_mo_num
+  bielec_PQxx_no = bielec_PQxx_no + cholesky_no_total_transp(i,i_mo, j_mo) * cholesky_no_total_transp(i,ii_ca,jj_ca)
+ enddo
 end
 
 double precision function bielec_PxxQ_no(i_mo, j_ca, i_ca, j_mo)
@@ -206,10 +211,15 @@ double precision function bielec_PxxQ_no(i_mo, j_ca, i_ca, j_mo)
   END_DOC
  integer, intent(in) :: i_ca, j_ca, i_mo, j_mo
  integer :: ii_ca, jj_ca
- double precision :: bielec_no_basis
  ii_ca = list_core_inact_act(i_ca)
  jj_ca = list_core_inact_act(j_ca)
- bielec_PxxQ_no = bielec_no_basis(i_mo, jj_ca, ii_ca, j_mo)
+ double precision :: bielec_no_basis
+! bielec_PxxQ_no = bielec_no_basis(i_mo, jj_ca, ii_ca, j_mo)
+ integer :: i
+ bielec_PxxQ_no = 0.d0
+ do i = 1, cholesky_mo_num
+  bielec_PxxQ_no = bielec_PxxQ_no + cholesky_no_total_transp(i,i_mo, jj_ca) * cholesky_no_total_transp(i,ii_ca,j_mo)
+ enddo
 
 end
 

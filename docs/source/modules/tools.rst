@@ -15,160 +15,158 @@ Useful tools are grouped in this module.
 Programs 
 -------- 
  
+ * :ref:`attachement_orb` 
+ * :ref:`cas_complete` 
  * :ref:`diagonalize_h` 
  * :ref:`fcidump` 
+ * :ref:`fcidump_pyscf` 
  * :ref:`four_idx_transform` 
+ * :ref:`guess_hcore` 
+ * :ref:`guess_huckel` 
  * :ref:`molden` 
  * :ref:`print_ci_vectors` 
- * :ref:`print_e_conv` 
+ * :ref:`print_detweights` 
+ * :ref:`print_dipole` 
+ * :ref:`print_energy` 
+ * :ref:`print_hamiltonian` 
+ * :ref:`print_sorted_wf_coef` 
+ * :ref:`print_var_energy` 
  * :ref:`print_wf` 
  * :ref:`rotate_mos` 
  * :ref:`save_natorb` 
+ * :ref:`save_natorb_no_ov_rot` 
+ * :ref:`save_natorb_no_ref` 
  * :ref:`save_one_e_dm` 
  * :ref:`save_ortho_mos` 
  * :ref:`sort_by_fock_energies` 
+ * :ref:`sort_wf` 
  * :ref:`swap_mos` 
+ * :ref:`truncate_wf` 
  * :ref:`write_integrals_erf` 
  
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: print_energy:
+.. c:function:: molden_attachment:
 
 
-    File : :file:`print_energy.irp.f`
+    File : :file:`attachement_orb.irp.f`
 
     .. code:: fortran
 
-        subroutine print_energy
+        subroutine molden_attachment
 
 
-    Prints the energy of the wave function stored in the |EZFIO| directory.
+    Produces a Molden file
 
     Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_states`
-       * :c:data:`read_wf`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run`
-
-    Touches:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`read_wf`
-
- 
-.. c:function:: print_hamiltonian:
-
-
-    File : :file:`print_hamiltonian.irp.f`
-
-    .. code:: fortran
-
-        subroutine print_hamiltonian
-
-
-    Prints the Hamiltonian matrix defined in the space of determinants
-    present in the |EZFIO| directory.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`read_wf`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run`
-
-    Touches:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`read_wf`
-
- 
-.. c:function:: routine:
-
-
-    File : :file:`write_integrals_erf.irp.f`
-
-    .. code:: fortran
-
-        subroutine routine
-
-
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`diagonalize_h`
-       * :c:func:`print_ci_vectors`
-       * :c:func:`print_wf`
-       * :c:func:`write_integrals_erf`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`save_erf_two_e_integrals_ao`
-       * :c:func:`save_erf_two_e_integrals_mo`
-
- 
-.. c:function:: routine_e_conv:
-
-
-    File : :file:`print_e_conv.irp.f`
-
-    .. code:: fortran
-
-        subroutine routine_e_conv
-
-
-    routine called by :c:func:`print_e_conv`
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
+       * :c:data:`ao_coef`
+       * :c:data:`ao_expo`
+       * :c:data:`ao_l`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`attachment_numbers_sorted`
+       * :c:data:`attachment_orbitals`
+       * :c:data:`element_name`
        * :c:data:`ezfio_filename`
-       * :c:data:`n_states`
+       * :c:data:`n_attachment`
+       * :c:data:`nucl_charge`
+       * :c:data:`nucl_coord`
+       * :c:data:`nucl_list_shell_aos`
+       * :c:data:`nucl_num`
 
     Called by:
 
     .. hlist::
        :columns: 3
 
-       * :c:func:`print_e_conv`
+       * :c:func:`attachement_orb`
 
     Calls:
 
     .. hlist::
        :columns: 3
 
-       * :c:func:`ezfio_get_iterations_energy_iterations`
-       * :c:func:`ezfio_get_iterations_n_det_iterations`
-       * :c:func:`ezfio_get_iterations_n_iter`
-       * :c:func:`ezfio_get_iterations_pt2_iterations`
+       * :c:func:`isort`
+
+ 
+.. c:function:: print_exc:
+
+
+    File : :file:`print_detweights.irp.f`
+
+    .. code:: fortran
+
+        subroutine print_exc()
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_det`
+       * :c:data:`n_int`
+       * :c:data:`psi_det`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`print_detweights`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_excitation_degree`
+
+ 
+.. c:function:: routine_s2:
+
+
+    File : :file:`truncate_wf.irp.f`
+
+    .. code:: fortran
+
+        subroutine routine_s2
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`det_to_configuration`
+       * :c:data:`n_det`
+       * :c:data:`n_int`
+       * :c:data:`n_states`
+       * :c:data:`psi_coef`
+       * :c:data:`psi_det`
+       * :c:data:`weight_configuration`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`truncate_wf`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`save_wavefunction_general`
 
  
 .. c:function:: routine_save_one_e_dm:
@@ -207,42 +205,4 @@ Subroutines / functions
        * :c:func:`ezfio_set_aux_quantities_data_one_e_dm_alpha_mo`
        * :c:func:`ezfio_set_aux_quantities_data_one_e_dm_beta_ao`
        * :c:func:`ezfio_set_aux_quantities_data_one_e_dm_beta_mo`
-
- 
-.. c:function:: run:
-
-
-    File : :file:`print_hamiltonian.irp.f`
-
-    .. code:: fortran
-
-        subroutine run
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det`
-       * :c:data:`n_int`
-       * :c:data:`psi_det`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`print_energy`
-       * :c:func:`print_hamiltonian`
-       * :c:func:`pt2`
-       * :c:func:`scf`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`i_h_j`
 

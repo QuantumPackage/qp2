@@ -27,4 +27,5 @@ subroutine routine_save_one_e_dm
  call ezfio_set_aux_quantities_data_one_e_dm_beta_mo(one_e_dm_mo_beta)
  call ezfio_set_aux_quantities_data_one_e_dm_alpha_ao(one_e_dm_ao_alpha)
  call ezfio_set_aux_quantities_data_one_e_dm_beta_ao(one_e_dm_ao_beta)
+ call ezfio_set_aux_quantities_data_one_e_dm_tot_ao(one_e_dm_ao)
 end

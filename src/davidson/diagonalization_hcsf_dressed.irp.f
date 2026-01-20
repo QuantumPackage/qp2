@@ -15,6 +15,7 @@ subroutine davidson_diag_h_csf(dets_in,u_in,dim_in,energies,sze,sze_csf,N_st,N_s
   !
   ! N_st : Number of eigenstates
   !
+  ! Initial guess vectors are not necessarily orthonormal
   END_DOC
   integer, intent(in)            :: dim_in, sze, sze_csf, N_st, N_st_diag, Nint
   integer(bit_kind), intent(in)  :: dets_in(Nint,2,sze)
@@ -30,7 +31,7 @@ subroutine davidson_diag_h_csf(dets_in,u_in,dim_in,energies,sze,sze_csf,N_st,N_s
   ASSERT (sze > 0)
   ASSERT (Nint > 0)
   ASSERT (Nint == N_int)
-  PROVIDE mo_two_e_integrals_in_map
+  PROVIDE all_mo_integrals
   allocate(H_jj(sze))
 
   H_jj(1) = diag_h_mat_elem(dets_in(1,1,1),Nint)
@@ -46,9 +47,14 @@ subroutine davidson_diag_h_csf(dets_in,u_in,dim_in,energies,sze,sze_csf,N_st,N_s
 
   if (dressing_state > 0) then
     do k=1,N_st
+
       do i=1,sze
-        H_jj(i)  += u_in(i,k) * dressing_column_h(i,k)
+        H_jj(i) += u_in(i,k) * dressing_column_h(i,k)
       enddo
+
+      !l = dressed_column_idx(k)
+      !H_jj(l) += u_in(l,k) * dressing_column_h(l,k)
+
     enddo
   endif
 
@@ -79,6 +85,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   !
   ! N_st_diag_in : Number of states in which H is diagonalized. Assumed > sze
   !
+  ! Initial guess vectors are not necessarily orthonormal
   END_DOC
   integer, intent(in)            :: dim_in, sze, sze_csf, N_st, N_st_diag_in, Nint
   integer(bit_kind), intent(in)  :: dets_in(Nint,2,sze)
@@ -97,7 +104,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
 
   integer                        :: iter2, itertot
   double precision, allocatable  :: y(:,:), h(:,:), lambda(:)
-  double precision, allocatable  :: s_tmp(:,:)
+  double precision, allocatable  :: s_tmp(:,:), prev_y(:,:)
   double precision               :: diag_h_mat_elem
   double precision, allocatable  :: residual_norm(:)
   character*(16384)              :: write_buffer
@@ -109,15 +116,23 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   integer                        :: nproc_target
   integer                        :: order(N_st_diag_in)
   double precision               :: cmax
-  double precision, allocatable  :: U(:,:), U_csf(:,:), overlap(:,:)
+  double precision, allocatable  :: U(:,:), overlap(:,:)
   double precision, pointer      :: W(:,:), W_csf(:,:)
+  double precision, allocatable  :: U_csf(:,:), u_csf_in(:,:)
   logical                        :: disk_based
   double precision               :: energy_shift(N_st_diag_in*davidson_sze_max)
 
   include 'constants.include.F'
 
+  if (sze /= N_det) then
+    call qp_bug(irp_here, -1, 'N_det /= sze')
+  endif
+
+  if (sze_csf /= N_csf) then
+    call qp_bug(irp_here, -1, 'N_csf /= sze_csf')
+  endif
+
   N_st_diag = N_st_diag_in
-  !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: U, W, y, h, lambda
   if (N_st_diag*3 > sze) then
     print *,  'error in Davidson :'
     print *,  'Increase n_det_max_full to ', N_st_diag*3
@@ -181,12 +196,11 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
       exit
     endif
 
-    if (itermax > 4) then
-      itermax = itermax - 1
-    else if (m==1.and.disk_based_davidson) then
+    if (disk_based_davidson) then
       m=0
       disk_based = .True.
-      itermax = 6
+    else if (itermax > 4) then
+      itermax = itermax - 1
     else
       nproc_target = nproc_target - 1
     endif
@@ -225,24 +239,27 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
 
 
   if (disk_based) then
-    ! Create memory-mapped files for W and S
-    type(c_ptr) :: ptr_w, ptr_s
-    integer :: fd_s, fd_w
-    call mmap(trim(ezfio_work_dir)//'davidson_w', (/int(sze,8),int(N_st_diag*itermax,8)/),&
-        8, fd_w, .False., .True., ptr_w)
-    call c_f_pointer(ptr_w, W_csf, (/sze_csf,N_st_diag*itermax/))
+    ! Create memory-mapped files for W
+    type(mmap_type) :: map_w, map_w_csf
+
+    call mmap_create_d('', (/ 1_8*sze, 1_8*N_st_diag /), .False., .True., map_w)
+    call mmap_create_d('', (/ 1_8*sze_csf, 1_8*N_st_diag*itermax /), .False., .True., map_w_csf)
+    W => map_w%d2
+    W_csf => map_w_csf%d2
   else
     allocate(W(sze,N_st_diag),W_csf(sze_csf,N_st_diag*itermax))
   endif
 
   allocate(                                                          &
       ! Large
-      U(sze,N_st_diag),                                              &
+      U(sze,N_st_diag),                                      &
       U_csf(sze_csf,N_st_diag*itermax),                              &
+      u_csf_in(sze_csf,N_st_diag),                                   &
 
       ! Small
       h(N_st_diag*itermax,N_st_diag*itermax),                        &
       y(N_st_diag*itermax,N_st_diag*itermax),                        &
+      prev_y(N_st_diag*itermax,N_st_diag*itermax),                   &
       s_tmp(N_st_diag*itermax,N_st_diag*itermax),                    &
       residual_norm(N_st_diag),                                      &
       lambda(N_st_diag*itermax))
@@ -252,6 +269,10 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   y = 0.d0
   s_tmp = 0.d0
 
+  prev_y = 0.d0
+  do i = 1, N_st_diag*itermax
+    prev_y(i,i) = 1d0
+  enddo
 
   ASSERT (N_st > 0)
   ASSERT (N_st_diag >= N_st)
@@ -264,29 +285,34 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
 
   converged = .False.
 
+  call convertWFfromDETtoCSF(N_st_diag,u_in,u_csf_in)
+
   do k=N_st+1,N_st_diag
-    do i=1,sze
+    do i=1,sze_csf
         call random_number(r1)
         call random_number(r2)
         r1 = dsqrt(-2.d0*dlog(r1))
         r2 = dtwo_pi*r2
-        u_in(i,k) = r1*dcos(r2) * u_in(i,k-N_st)
+        u_csf_in(i,k) = r1*dcos(r2) * u_csf_in(i,k-N_st)
     enddo
-    u_in(k,k) = u_in(k,k) + 10.d0
+    u_csf_in(k,k) = u_csf_in(k,k) + 10.d0
   enddo
+
   do k=1,N_st_diag
-    call normalize(u_in(1,k),sze)
+    call normalize(u_csf_in(1,k),sze_csf)
   enddo
+
+  call convertWFfromCSFtoDET(N_st_diag,u_csf_in,u_in)
 
   do k=1,N_st_diag
     do i=1,sze
       U(i,k) = u_in(i,k)
     enddo
+    do i=1,sze_csf
+      U_csf(i,k) = u_csf_in(i,k)
+    enddo
   enddo
 
-  ! Make random verctors eigenstates of S2
-  call convertWFfromDETtoCSF(N_st_diag,U(1,1),U_csf(1,1))
-  call convertWFfromCSFtoDET(N_st_diag,U_csf(1,1),U(1,1))
 
   do while (.not.converged)
     itertot = itertot+1
@@ -294,7 +320,10 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
       exit
     endif
 
-    do iter=1,itermax-1
+    iter = 0
+    do while (iter < itermax-1)
+      iter += 1
+!    do iter=1,itermax-1
 
       shift  = N_st_diag*(iter-1)
       shift2 = N_st_diag*iter
@@ -303,7 +332,8 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
         ! Compute |W_k> = \sum_i |i><i|H|u_k>
         ! -----------------------------------
 
-        call convertWFfromCSFtoDET(N_st_diag,U_csf(1,shift+1),U)
+        call convertWFfromCSFtoDET(N_st_diag,U_csf(1:sze_csf,shift+1:shift2),U(1:sze,1:N_st_diag))
+
         if ((sze > 100000).and.distributed_davidson) then
             call H_u_0_nstates_zmq   (W,U,N_st_diag,sze)
         else
@@ -333,25 +363,25 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
 
           call dgemm('T','N', N_st, N_st_diag, sze, 1.d0, &
             psi_coef, size(psi_coef,1), &
-            U(1,1), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
+            U, size(U,1), 0.d0, s_tmp, size(s_tmp,1))
 
           call dgemm('N','N', sze, N_st_diag, N_st, 1.0d0, &
             dressing_column_h, size(dressing_column_h,1), s_tmp, size(s_tmp,1), &
-            1.d0, W(1,1), size(W,1))
+            1.d0, W, size(W,1))
 
 
           call dgemm('T','N', N_st, N_st_diag, sze, 1.d0, &
             dressing_column_h, size(dressing_column_h,1), &
-            U(1,1), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
+            U, size(U,1), 0.d0, s_tmp, size(s_tmp,1))
 
           call dgemm('N','N', sze, N_st_diag, N_st, 1.0d0, &
             psi_coef, size(psi_coef,1), s_tmp, size(s_tmp,1), &
-            1.d0, W(1,1), size(W,1))
+            1.d0, W, size(W,1))
 
         endif
       endif
 
-      call convertWFfromDETtoCSF(N_st_diag,W,W_csf(1,shift+1))
+      call convertWFfromDETtoCSF(N_st_diag,W(1:sze,1:N_st_diag),W_csf(1:sze_csf,shift+1:shift2))
 
       ! Compute h_kl = <u_k | W_l> = <u_k| H |u_l>
       ! -------------------------------------------
@@ -360,11 +390,11 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
           1.d0, U_csf, size(U_csf,1), W_csf, size(W_csf,1),                          &
           0.d0, h, size(h,1))
       call dgemm('T','N', shift2, shift2, sze_csf,                       &
-          1.d0, U_csf, size(U_csf,1), U_csf, size(U_csf,1),                          &
+          1.d0, U_csf, size(U_csf,1), U_csf, size(U_csf,1),              &
           0.d0, s_tmp, size(s_tmp,1))
 
       ! Diagonalize h
-      ! ---------------
+      ! -------------
 
        integer :: lwork, info
        double precision, allocatable :: work(:)
@@ -380,8 +410,14 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
        call dsygv(1,'V','U',shift2,y,size(y,1), &
           s_tmp,size(s_tmp,1), lambda, work,lwork,info)
        deallocate(work)
-       if (info /= 0) then
-         stop 'DSYGV Diagonalization failed'
+       if (info > 0) then
+         ! Numerical errors propagate. We need to reduce the number of iterations
+         itermax = iter-1
+
+         ! eigenvectors of the previous iteration
+         y = prev_y
+         shift2 = shift2 - N_st_diag
+         exit
        endif
 
       ! Compute Energy for each eigenvector
@@ -401,80 +437,139 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
 
       if (state_following) then
 
-        overlap = -1.d0
-        do i=1,shift2
-          do k=1,shift2
-            overlap(k,i) = dabs(y(k,i))
+        integer ::  state(N_st), idx
+        double precision :: omax
+        logical :: used
+        logical, allocatable :: ok(:)
+        double precision, allocatable :: overlp(:,:)
+
+        allocate(overlp(shift2,N_st),ok(shift2))
+
+        overlp = 0d0
+        do j = 1, shift2-1, N_st_diag
+
+          ! Computes some states from the guess vectors
+          ! Psi(:,j:j+N_st_diag) = U_csf y(:,j:j+N_st_diag) and put them
+          ! in U(1,shift2+1:shift2+1+N_st_diag) as temporary array
+          call dgemm('N','N', sze_csf, N_st_diag, shift2,                    &
+          1.d0, U_csf, size(U_csf,1), y(1,j), size(y,1), 0.d0, &
+          U_csf(1,shift2+1), size(U_csf,1))
+
+          ! Overlap
+          do l = 1, N_st
+            do k = 1, N_st_diag
+              do i = 1, sze_csf
+                overlp(k+j-1,l) += u_csf_in(i,l) * U_csf(i,shift2+k)
+              enddo
+            enddo
           enddo
-        enddo
-        do k=1,N_st
-          cmax = -1.d0
-          do i=1,N_st
-            if (overlap(i,k) > cmax) then
-              cmax = overlap(i,k)
-              order(k) = i
-            endif
-          enddo
-          do i=1,N_st_diag
-            overlap(order(k),i) = -1.d0
-          enddo
-        enddo
-        overlap = y
-        do k=1,N_st
-          l = order(k)
-          if (k /= l) then
-            y(1:shift2,k) = overlap(1:shift2,l)
-          endif
-        enddo
-        do k=1,N_st
-          overlap(k,1) = lambda(k)
+
         enddo
 
+        state = 0
+        do l = 1, N_st
+
+          omax = 0d0
+          idx = 0
+          do k = 1, shift2
+
+            ! Already used ?
+            used = .False.
+            do i = 1, N_st
+              if (state(i) == k) then
+                used = .True.
+              endif
+            enddo
+
+            ! Maximum overlap
+            if ((dabs(overlp(k,l)) > omax) .and. (.not. used) .and. state_ok(k)) then
+              omax = dabs(overlp(k,l))
+              idx = k
+            endif
+          enddo
+
+          state(l) = idx
+        enddo
+
+        ! Check if all states are attributed. If not, exit and N_st_diag will be increased.
+        do l=1,N_st
+          if (state(l) == 0) then
+            return
+          endif
+        enddo
+
+        ! tmp array before setting state_ok
+        ok = .False.
+        do l = 1, N_st
+          ok(state(l)) = .True.
+        enddo
+
+        do k = 1, shift2
+          if (.not. ok(k)) then
+            state_ok(k) = .False.
+          endif
+        enddo
+
+        deallocate(overlp,ok)
       endif
+
+      do k=1,shift2
+        if (.not. state_ok(k)) then
+          do l=k+1,shift2
+            if (state_ok(l)) then
+              call dswap(shift2, y(1,k), 1, y(1,l), 1)
+              call dswap(1, lambda(k), 1, lambda(l), 1)
+              state_ok(k) = .True.
+              state_ok(l) = .False.
+              exit
+            endif
+          enddo
+        endif
+      enddo
+
+      ! Swapped eigenvectors
+      prev_y = y
 
 
       ! Express eigenvectors of h in the csf basis
       ! ------------------------------------------
 
       call dgemm('N','N', sze_csf, N_st_diag, shift2,                    &
-          1.d0, U_csf, size(U_csf,1), y, size(y,1), 0.d0, U_csf(1,shift2+1), size(U_csf,1))
-      call convertWFfromCSFtoDET(N_st_diag,U_csf(1,shift2+1),U)
-
+          1.d0, U_csf, size(U_csf,1), y, size(y,1), 0.d0, &
+          U_csf(:,shift2+1:shift2+N_st_diag), size(U_csf,1))
       call dgemm('N','N', sze_csf, N_st_diag, shift2,                    &
-          1.d0, W_csf, size(W_csf,1), y, size(y,1), 0.d0, W_csf(1,shift2+1), size(W_csf,1))
-      call convertWFfromCSFtoDET(N_st_diag,W_csf(1,shift2+1),W)
+          1.d0, W_csf, size(W_csf,1), y, size(y,1), 0.d0, &
+          W_csf(:,shift2+1:shift2+N_st_diag), size(W_csf,1))
+
+      ! Express eigenvectors of h in the determinant basis
+      ! --------------------------------------------------
+
+      call convertWFfromCSFtoDET(N_st_diag,U_csf(:,shift2+1:shift2+N_st_diag),U)
+      call convertWFfromCSFtoDET(N_st_diag,W_csf(:,shift2+1:shift2+N_st_diag),W)
 
       ! Compute residual vector and davidson step
       ! -----------------------------------------
 
-      if (without_diagonal) then
-        !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
-        do k=1,N_st_diag
-          do i=1,sze
-             U(i,k) =  (lambda(k) * U(i,k) - W(i,k) )      &
-                /max(H_jj(i) - lambda (k),1.d-2)
-          enddo
+      !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
+      do k=1,N_st_diag
+        do i=1,sze
+           U(i,k) = &
+             (lambda(k) * U(i,k) - W(i,k) )      &
+              /max(dabs(H_jj(i) - lambda (k)),1.d-2) * dsign(1d0,H_jj(i) - lambda (k))
         enddo
-        !$OMP END PARALLEL DO
-      else
-        !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
-        do k=1,N_st_diag
-          do i=1,sze
-             U(i,k) =  (lambda(k) * U(i,k) - W(i,k) )  
-          enddo
-        enddo
-        !$OMP END PARALLEL DO
-      endif
 
-      do k=1,N_st
-        residual_norm(k) = u_dot_u(U(1,k),sze)
-        to_print(1,k) = lambda(k) + nuclear_repulsion
-        to_print(2,k) = residual_norm(k)
+        if (k <= N_st) then
+          residual_norm(k) = u_dot_u(U(1,k),sze)
+          to_print(1,k) = lambda(k) + nuclear_repulsion
+          to_print(2,k) = residual_norm(k)
+        endif
       enddo
+      !$OMP END PARALLEL DO
+
       call convertWFfromDETtoCSF(N_st_diag,U,U_csf(1,shift2+1))
 
       if ((itertot>1).and.(iter == 1)) then
-        !don't print
+        ! Don't print
         continue
       else
         write(*,'(1X,I3,1X,100(1X,F16.10,1X,ES11.3))') iter-1, to_print(1:2,1:N_st)
@@ -508,14 +603,22 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
 
     enddo
 
-    ! Re-contract U
-    ! -------------
+    ! Re-contract U and update W
+    ! --------------------------
 
     call dgemm('N','N', sze_csf, N_st_diag, shift2, 1.d0,      &
-        U_csf, size(U_csf,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
+        W_csf, size(W_csf,1), y, size(y,1), 0.d0, u_csf_in, size(u_csf_in,1))
     do k=1,N_st_diag
       do i=1,sze_csf
-        U_csf(i,k) = u_in(i,k)
+        W_csf(i,k) = u_csf_in(i,k)
+      enddo
+    enddo
+
+    call dgemm('N','N', sze_csf, N_st_diag, shift2, 1.d0,      &
+        U_csf, size(U_csf,1), y, size(y,1), 0.d0, u_csf_in, size(u_csf_in,1))
+    do k=1,N_st_diag
+      do i=1,sze_csf
+        U_csf(i,k) = u_csf_in(i,k)
       enddo
     enddo
     call convertWFfromCSFtoDET(N_st_diag,U_csf,U)
@@ -543,21 +646,21 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
 
   if (disk_based)then
     ! Remove temp files
-    integer, external :: getUnitAndOpen
-    call munmap( (/int(sze,8),int(N_st_diag*itermax,8)/), 8, fd_w, ptr_w )
-    fd_w = getUnitAndOpen(trim(ezfio_work_dir)//'davidson_w','r')
-    close(fd_w,status='delete')
+    call mmap_destroy(map_w)
+    call mmap_destroy(map_w_csf)
   else
-    deallocate(W, W_csf)
+    deallocate(W,W_csf)
   endif
 
   deallocate (                                                       &
       residual_norm,                                                 &
       U, U_csf, overlap,                                             &
-      h, y, s_tmp,                                                   &
+      h, u_csf_in,                                         &
+      y, s_tmp, prev_y,                                          &
       lambda                                                         &
       )
   FREE nthreads_davidson
+
 end
 
 

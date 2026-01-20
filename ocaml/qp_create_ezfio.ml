@@ -57,7 +57,7 @@ let ghost_centers ~threshold ~molecule ~nuclei =
 
 
 (** Run the program *)
-let run ?o b au c d m p cart xyz_file =
+let run ?o b au c d m p qmc cart xyz_file =
 
   (* Read molecule *)
   let molecule =
@@ -131,7 +131,8 @@ let run ?o b au c d m p cart xyz_file =
             let key =
               Element.to_string elem.Atom.element
             in
-            Hashtbl.add basis_table key new_channel
+            if not (Hashtbl.mem basis_table key) then
+              Hashtbl.add basis_table key new_channel
           ) nuclei
         end
       | Some (key, basis) -> (*Aux basis *)
@@ -262,9 +263,16 @@ let run ?o b au c d m p cart xyz_file =
   if Sys.file_exists ezfio_file then
     failwith (ezfio_file^" already exists");
 
+  let convention =
+    if qmc then 20210101
+    else 20250211
+  in
+  
   let write_file () =
       (* Create EZFIO *)
       Ezfio.set_file ezfio_file;
+      Ezfio.set_ezfio_files_ezfio_convention convention;
+      Ezfio.set_basis_ao_normalized true ;
 
       (* Write Pseudo *)
       let pseudo =
@@ -722,10 +730,15 @@ If a file with the same name as the basis set exists, this file will be read.  O
         arg=With_arg "<string>";
         doc="Name of the pseudopotential."} ;
 
+      { opt=Optional ; short='q'; long="qmc";
+        arg=Without_arg;
+        doc="Use old EZFIO conventions for compatibility with QMC=Chem and QMCPACK"} ;
+
       { opt=Optional ; short='x'; long="cartesian";
         arg=Without_arg;
         doc="Compute AOs in the Cartesian basis set (6d, 10f, ...)."} ;
 
+     (* If you add an option, don't forget to modify also etc/qp.rc for bash completion *)
       anonymous "FILE" Mandatory "Input file in xyz format or z-matrix.";
     ]
     |> set_specs
@@ -772,6 +785,10 @@ If a file with the same name as the basis set exists, this file will be read.  O
     Command_line.get "pseudo"
   in
 
+  let qmc =
+    Command_line.get_bool "qmc"
+  in
+
   let cart =
     Command_line.get_bool "cartesian"
   in
@@ -782,7 +799,7 @@ If a file with the same name as the basis set exists, this file will be read.  O
     | x::_ -> x
   in
 
-  run ?o:output basis au charge ghost multiplicity pseudo cart xyz_filename
+  run ?o:output basis au charge ghost multiplicity pseudo qmc cart xyz_filename
   )
   with
 (*  | Failure txt  -> Printf.eprintf "Fatal error: %s\n%!" txt *)

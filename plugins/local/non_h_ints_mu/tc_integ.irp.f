@@ -125,10 +125,10 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
 
       else
         ! TODO combine 1shot & int2_grad1_u12_ao_num
-        PROVIDE int2_grad1_u12_ao_num
-        int2_grad1_u12_ao = int2_grad1_u12_ao_num
-!         PROVIDE int2_grad1_u12_ao_num_1shot
-!         int2_grad1_u12_ao = int2_grad1_u12_ao_num_1shot
+!        PROVIDE int2_grad1_u12_ao_num
+!        int2_grad1_u12_ao = int2_grad1_u12_ao_num
+         PROVIDE int2_grad1_u12_ao_num_1shot
+         int2_grad1_u12_ao = int2_grad1_u12_ao_num_1shot
       endif
 
     elseif(tc_integ_type .eq. "semi-analytic") then
@@ -332,10 +332,10 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
     else
 
       ! TODO combine 1shot & int2_grad1_u12_square_ao_num
-      PROVIDE int2_grad1_u12_square_ao_num
-      int2_grad1_u12_square_ao = int2_grad1_u12_square_ao_num
-      !PROVIDE int2_grad1_u12_square_ao_num_1shot
-      !int2_grad1_u12_square_ao = int2_grad1_u12_square_ao_num_1shot
+!      PROVIDE int2_grad1_u12_square_ao_num
+!      int2_grad1_u12_square_ao = int2_grad1_u12_square_ao_num
+       PROVIDE int2_grad1_u12_square_ao_num_1shot
+       int2_grad1_u12_square_ao = int2_grad1_u12_square_ao_num_1shot
     endif
 
   elseif(tc_integ_type .eq. "semi-analytic") then

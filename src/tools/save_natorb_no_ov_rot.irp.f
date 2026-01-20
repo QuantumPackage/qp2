@@ -1,4 +1,4 @@
-program save_natorb
+program save_natorb_no_ov_rot
   implicit none
   BEGIN_DOC
 ! Save natural |MOs| into the |EZFIO|.

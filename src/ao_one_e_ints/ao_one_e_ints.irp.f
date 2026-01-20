@@ -9,7 +9,7 @@
   IF (read_ao_one_e_integrals) THEN
      call ezfio_get_ao_one_e_ints_ao_one_e_integrals(ao_one_e_integrals)
   ELSE
-        ao_one_e_integrals = ao_integrals_n_e + ao_kinetic_integrals
+     ao_one_e_integrals = ao_integrals_n_e + ao_kinetic_integrals
 
   ENDIF
 
@@ -45,13 +45,19 @@ BEGIN_PROVIDER [ double precision, ao_one_e_integrals_imag,(ao_num,ao_num)]
 
 END_PROVIDER
 
+ BEGIN_PROVIDER [ double precision, ao_sphe_one_e_integrals,(ao_sphe_num,ao_sphe_num)]
+&BEGIN_PROVIDER [ double precision, ao_sphe_one_e_integrals_diag,(ao_sphe_num)]
+  implicit none
+  integer :: i,j,n,l
+  BEGIN_DOC
+ ! One-electron Hamiltonian in the spherical |AO| basis.
+  END_DOC
 
-BEGIN_PROVIDER [ double precision, ao_one_e_integrals_from_mo, (ao_num, ao_num)]
- implicit none
- BEGIN_DOC
-! Integrals of the one e hamiltonian obtained from the integrals on the MO basis 
-!
-! WARNING : this is equal to ao_one_e_integrals only if the AO and MO basis have the same number of functions
- END_DOC
- call mo_to_ao(mo_one_e_integrals,mo_num,ao_one_e_integrals_from_mo,ao_num)
-END_PROVIDER 
+  ao_sphe_one_e_integrals = ao_sphe_integrals_n_e + ao_sphe_kinetic_integrals
+
+  do j = 1, ao_sphe_num
+    ao_sphe_one_e_integrals_diag(j) = ao_sphe_one_e_integrals(j,j)
+  enddo
+
+END_PROVIDER
+

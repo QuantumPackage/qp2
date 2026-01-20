@@ -521,7 +521,7 @@ subroutine i_H_j_s2(key_i,key_j,Nint,hij,s2)
   integer                        :: occ(Nint*bit_kind_size,2)
   double precision               :: diag_H_mat_elem, phase
   integer                        :: n_occ_ab(2)
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals
+  PROVIDE all_mo_integrals
 
   ASSERT (Nint > 0)
   ASSERT (Nint == N_int)
@@ -623,7 +623,7 @@ subroutine i_H_j(key_i,key_j,Nint,hij)
   integer                        :: occ(Nint*bit_kind_size,2)
   double precision               :: diag_H_mat_elem, phase
   integer                        :: n_occ_ab(2)
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals
+  PROVIDE all_mo_integrals
 
   ASSERT (Nint > 0)
   ASSERT (Nint == N_int)
@@ -724,7 +724,7 @@ subroutine i_H_j_verbose(key_i,key_j,Nint,hij,hmono,hdouble,phase)
   integer                        :: n_occ_ab(2)
   logical                        :: has_mipi(Nint*bit_kind_size)
   double precision               :: mipi(Nint*bit_kind_size), miip(Nint*bit_kind_size)
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_map
+  PROVIDE all_mo_integrals
 
   ASSERT (Nint > 0)
   ASSERT (Nint == N_int)
@@ -2227,7 +2227,7 @@ subroutine i_H_j_single_spin(key_i,key_j,Nint,spin,hij)
   integer                        :: exc(0:2,2)
   double precision               :: phase
 
-  PROVIDE big_array_exchange_integrals mo_two_e_integrals_in_map
+  PROVIDE all_mo_integrals
 
   call get_single_excitation_spin(key_i(1,spin),key_j(1,spin),exc,phase,Nint)
   call get_single_excitation_from_fock(key_i,key_j,exc(1,1),exc(1,2),spin,phase,hij)
@@ -2248,7 +2248,7 @@ subroutine i_H_j_double_spin(key_i,key_j,Nint,hij)
   double precision               :: phase
   double precision, external     :: get_two_e_integral
 
-  PROVIDE big_array_exchange_integrals mo_two_e_integrals_in_map
+  PROVIDE all_mo_integrals
   call get_double_excitation_spin(key_i,key_j,exc,phase,Nint)
   hij = phase*(get_two_e_integral(                             &
       exc(1,1),                                                    &
@@ -2277,7 +2277,7 @@ subroutine i_H_j_double_alpha_beta(key_i,key_j,Nint,hij)
   double precision               :: phase, phase2
   double precision, external     :: get_two_e_integral
 
-  PROVIDE big_array_exchange_integrals mo_two_e_integrals_in_map
+  PROVIDE all_mo_integrals
 
   call get_single_excitation_spin(key_i(1,1),key_j(1,1),exc(0,1,1),phase,Nint)
   call get_single_excitation_spin(key_i(1,2),key_j(1,2),exc(0,1,2),phase2,Nint)

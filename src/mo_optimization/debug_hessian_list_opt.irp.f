@@ -43,18 +43,18 @@ program debug_hessian_list_opt
   double precision              :: max_error, max_error_H
   integer                       :: nb_error, nb_error_H
   double precision              :: threshold
-  
+
   m = dim_list_act_orb !mo_num
 
-  ! Definition of n  
+  ! Definition of n
   n = m*(m-1)/2
 
-  PROVIDE mo_two_e_integrals_in_map 
+  PROVIDE all_mo_integrals
 
-  ! Hessian 
+  ! Hessian
   if (optimization_method == 'full') then
     print*,'Use the full hessian matrix'
-    allocate(H(n,n),H2(n,n))  
+    allocate(H(n,n),H2(n,n))
     allocate(h_f(m,m,m,m),h_f2(m,m,m,m))
 
     call hessian_list_opt(n,m,list_act,H,h_f)
@@ -65,7 +65,7 @@ program debug_hessian_list_opt
     h_f = h_f - h_f2
     H = H - H2
     max_error = 0d0
-    nb_error = 0    
+    nb_error = 0
     threshold = 1d-12
 
     do l = 1, m
@@ -99,7 +99,7 @@ program debug_hessian_list_opt
 
         endif
       enddo
-    enddo 
+    enddo
 
     ! Deallocation
     deallocate(H, H2, h_f, h_f2)
@@ -110,26 +110,26 @@ program debug_hessian_list_opt
     allocate(H(n,1),H2(n,1))
     call diag_hessian_list_opt(n,m,list_act,H)
     call first_diag_hessian_list_opt(n,m,list_act,H2)
-    
+
     H = H - H2
-  
+
     max_error_H = 0d0
     nb_error_H = 0
- 
+
     do i = 1, n
       if (ABS(H(i,1)) > threshold) then
         print*, H(i,1)
         nb_error_H = nb_error_H + 1
- 
+
         if (ABS(H(i,1)) > ABS(max_error_H)) then
           max_error_H = H(i,1)
         endif
- 
+
       endif
     enddo
-   
+
  endif
-  
+
   print*,''
   if (optimization_method == 'full') then
     print*,'Check of the full hessian'
@@ -140,8 +140,8 @@ program debug_hessian_list_opt
   else
     print*,'Check of the diagonal hessian'
   endif
-   
+
   print*,'Nb error_H:', nb_error_H
   print*,'Max error_H:', max_error_H
- 
+
 end program

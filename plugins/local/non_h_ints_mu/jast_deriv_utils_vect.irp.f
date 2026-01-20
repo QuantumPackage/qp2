@@ -814,7 +814,7 @@ subroutine get_grad1_u12_2e_r1_seq(ipoint, n_grid2, resx, resy, resz)
 
   else
 
-    print *, ' Error in get_grad1_u12_withsq_r1_seq: Unknown Jastrow'
+    print *, ' Error in get_grad1_u12_2e_r1_seq: Unknown Jastrow'
     stop
 
   endif ! j2e_type

@@ -14,13 +14,12 @@ integer*8 function spin_det_search_key(det,Nint)
   END_DOC
   integer, intent(in) :: Nint
   integer(bit_kind), intent(in) :: det(Nint)
-  integer(bit_kind), parameter :: unsigned_shift = -huge(1_bit_kind) ! 100...00
+  integer(bit_kind), parameter :: unsigned_shift = 0_bit_kind ! 1_bit_kind-huge(1_bit_kind) ! 100...00
   integer :: i
-  spin_det_search_key = det(1)
+  spin_det_search_key = det(1) !+unsigned_shift
   do i=2,Nint
     spin_det_search_key = ieor(spin_det_search_key,det(i))
   enddo
-  spin_det_search_key = spin_det_search_key+unsigned_shift
 end
 
 
@@ -197,7 +196,9 @@ integer function get_index_in_psi_det_alpha_unique(key,Nint)
   enddo
   i += 1
 
-  ASSERT (i <= N_det_alpha_unique)
+  if (i> N_det_alpha_unique) then
+    call qp_bug(irp_here, i, 'i> N_det_alpha_unique')
+  endif
 
   !DIR$ FORCEINLINE
   do while (spin_det_search_key(psi_det_alpha_unique(1,i),Nint) == det_ref)
@@ -219,11 +220,14 @@ integer function get_index_in_psi_det_alpha_unique(key,Nint)
     endif
     i += 1
     if (i > N_det_alpha_unique) then
-      ASSERT (get_index_in_psi_det_alpha_unique > 0)
-      return
+      exit
     endif
 
   enddo
+
+  if (get_index_in_psi_det_alpha_unique <= 0) then
+    call qp_bug(irp_here, get_index_in_psi_det_alpha_unique, 'get_index_in_psi_det_alpha_unique <= 0')
+  endif
 
 end
 
@@ -277,7 +281,9 @@ integer function get_index_in_psi_det_beta_unique(key,Nint)
   enddo
   i += 1
 
-  ASSERT (i <= N_det_beta_unique)
+  if (i > N_det_beta_unique) then
+    call qp_bug(irp_here, i, 'i> N_det_beta_unique')
+  endif
 
   !DIR$ FORCEINLINE
   do while (spin_det_search_key(psi_det_beta_unique(1,i),Nint) == det_ref)
@@ -299,11 +305,14 @@ integer function get_index_in_psi_det_beta_unique(key,Nint)
     endif
     i += 1
     if (i > N_det_beta_unique) then
-      ASSERT (get_index_in_psi_det_beta_unique > 0)
-      return
+      exit
     endif
 
   enddo
+
+  if (get_index_in_psi_det_beta_unique <= 0) then
+    call qp_bug(irp_here, i, 'get_index_in_psi_det_beta_unique <= 0')
+  endif
 
 end
 

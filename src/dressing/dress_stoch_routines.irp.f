@@ -258,7 +258,7 @@ subroutine ZMQ_dress(E, dress, delta_out, delta_s2_out, relative_error)
     state_average_weight(dress_stoch_istate) = 1.d0
     TOUCH state_average_weight dress_stoch_istate
 
-    provide nproc mo_two_e_integrals_in_map mo_one_e_integrals psi_selectors pt2_F pt2_N_teeth dress_M_m
+    provide nproc all_mo_integrals mo_one_e_integrals psi_selectors pt2_F pt2_N_teeth dress_M_m
 
     print *, '========== ================= ================= ================='
     print *, ' Samples        Energy         Stat. Error         Seconds      '

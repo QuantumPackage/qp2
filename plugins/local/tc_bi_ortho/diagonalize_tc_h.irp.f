@@ -17,6 +17,10 @@ program tc_bi_ortho
   my_n_pt_a_grid = tc_grid1_a
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
+  pruning = -1.d0
+  touch pruning
+  call write_int(6, my_n_pt_r_grid, 'radial  external grid over')
+  call write_int(6, my_n_pt_a_grid, 'angular external grid over')
   if(tc_integ_type .eq. "numeric") then
     my_extra_grid_becke  = .True.
     PROVIDE tc_grid2_a tc_grid2_r

@@ -26,6 +26,11 @@ subroutine reorder_orbitals_for_casscf
   array(iorb) = 3 * mo_num + i
  enddo
 
+ do i = 1, n_del_orb
+  iorb = list_del(i)
+  array(iorb) = 4 * mo_num + i
+ enddo
+
  do i = 1, mo_num
   iorder(i) = i
  enddo

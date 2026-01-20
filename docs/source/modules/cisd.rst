@@ -53,14 +53,144 @@ EZFIO parameters
     Variational |CISD| energy
  
  
+.. option:: lcc_energy
+ 
+    lccsd energy
+ 
+ 
  
 Programs 
 -------- 
  
  * :ref:`cisd` 
+ * :ref:`lccsd` 
+ 
+Providers 
+--------- 
+ 
+.. c:var:: lccsd_coef
+
+
+    File : :file:`lccsd_prov.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: lccsd_coef	(N_det,N_states)
+        double precision, allocatable	:: lccsd_energies	(N_states)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`davidson_sze_max`
+       * :c:data:`disk_based_davidson`
+       * :c:data:`mo_integrals_map`
+       * :c:data:`mo_two_e_integrals_in_map`
+       * :c:data:`n_det`
+       * :c:data:`n_int`
+       * :c:data:`n_states`
+       * :c:data:`n_states_diag`
+       * :c:data:`nproc`
+       * :c:data:`nthreads_davidson`
+       * :c:data:`psi_det`
+       * :c:data:`qp_max_mem`
+       * :c:data:`ref_bitmask`
+       * :c:data:`state_following`
+       * :c:data:`threshold_davidson`
+
+
+ 
+.. c:var:: lccsd_energies
+
+
+    File : :file:`lccsd_prov.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: lccsd_coef	(N_det,N_states)
+        double precision, allocatable	:: lccsd_energies	(N_states)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`davidson_sze_max`
+       * :c:data:`disk_based_davidson`
+       * :c:data:`mo_integrals_map`
+       * :c:data:`mo_two_e_integrals_in_map`
+       * :c:data:`n_det`
+       * :c:data:`n_int`
+       * :c:data:`n_states`
+       * :c:data:`n_states_diag`
+       * :c:data:`nproc`
+       * :c:data:`nthreads_davidson`
+       * :c:data:`psi_det`
+       * :c:data:`qp_max_mem`
+       * :c:data:`ref_bitmask`
+       * :c:data:`state_following`
+       * :c:data:`threshold_davidson`
+
+
+ 
  
 Subroutines / functions 
 ----------------------- 
+ 
+.. c:function:: get_lccsd_2:
+
+
+    File : :file:`lccsd.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_lccsd_2
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ha_to_ev`
+       * :c:data:`lccsd_coef`
+       * :c:data:`n_det`
+       * :c:data:`n_states`
+       * :c:data:`psi_coef`
+       * :c:data:`save_threshold`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`run`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`ezfio_set_cisd_lcc_energy`
+       * :c:func:`save_wavefunction_truncated`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`psi_coef`
+
  
 .. c:function:: h_apply_cisd:
 
@@ -99,6 +229,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`run`
        * :c:func:`run_cisd`
 
     Calls:
@@ -119,15 +250,15 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`psi_configuration`
        * :c:data:`n_det`
-       * :c:data:`psi_occ_pattern`
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
-       * :c:data:`psi_occ_pattern`
 
  
 .. c:function:: h_apply_cisd_diexc:
@@ -315,6 +446,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`run`
        * :c:func:`run_cisd`
 
     Calls:
@@ -335,15 +467,15 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`psi_configuration`
        * :c:data:`n_det`
-       * :c:data:`psi_occ_pattern`
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
-       * :c:data:`psi_occ_pattern`
 
  
 .. c:function:: h_apply_cisd_sym_diexc:
@@ -534,13 +666,13 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`psi_configuration`
        * :c:data:`n_det`
-       * :c:data:`psi_occ_pattern`
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
-       * :c:data:`psi_occ_pattern`
 

@@ -70,7 +70,7 @@ END_DOC
 
     dim_DIIS = min(dim_DIIS+1,max_dim_DIIS)
 
-    if ( (scf_algorithm == 'DIIS').and.(dabs(Delta_energy_SCF) > 1.d-6) )  then
+    if ( (scf_algorithm == 'DIIS').and.(dabs(Delta_energy_SCF) > 1.d-10) )  then
 
       ! Store Fock and error matrices at each iteration
       do j=1,ao_num
@@ -222,21 +222,22 @@ END_DOC
   endif
 
 
-  ! Identify degenerate MOs and force them on the axes
+  ! Identify degenerate MOs and combine them to force them to be on the axes
   allocate(S(ao_num,ao_num))
   i=1
   do while (i<mo_num)
-    j=i
+    j=i+1
     m=1
-    do while ( (j+1<mo_num).and.(fock_matrix_diag_mo(j+1)-fock_matrix_diag_mo(i) < 1.d-8) )
+    do while ( (fock_matrix_diag_mo(j)-fock_matrix_diag_mo(i) < 1.d-5) )
       j += 1
       m += 1
+      if (j > mo_num) exit
     enddo
     if (m>1) then
       call dgemm('N','T',ao_num,ao_num,m,1.d0,mo_coef(1,i),size(mo_coef,1),mo_coef(1,i),size(mo_coef,1),0.d0,S,size(S,1))
       call pivoted_cholesky( S, m, -1.d0, ao_num, mo_coef(1,i))
     endif
-    i = j+1
+    i = j
   enddo
 
   if(do_mom)then

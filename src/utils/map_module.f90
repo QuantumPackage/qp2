@@ -157,7 +157,7 @@ subroutine cache_map_reallocate(map,sze)
     stop 2
   endif
   if (associated(map%value)) then
-    do i=1_8,min(size(map%key),map%n_elements)
+    do i=1_8,min(size(map%value),map%n_elements)
       value_new(i) = map%value(i)
     enddo
     deallocate(map%value)

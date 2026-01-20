@@ -13,18 +13,18 @@ BEGIN_PROVIDER [real*8, hessmat_old, (nMonoEx,nMonoEx)]
   integer                        :: jndx,jhole,jpart
   character*3                    :: iexc,jexc
   real*8                         :: res
-  
+
   if (bavard) then
     write(6,*) ' providing Hessian matrix hessmat_old '
     write(6,*) '  nMonoEx = ',nMonoEx
   endif
-  
+
   do indx=1,nMonoEx
     do jndx=1,nMonoEx
       hessmat_old(indx,jndx)=0.D0
     end do
   end do
-  
+
   do indx=1,nMonoEx
     ihole=excit(1,indx)
     ipart=excit(2,indx)
@@ -38,7 +38,7 @@ BEGIN_PROVIDER [real*8, hessmat_old, (nMonoEx,nMonoEx)]
       hessmat_old(jndx,indx)=res
     end do
   end do
-  
+
 END_PROVIDER
 
 subroutine calc_hess_elem(ihole,ipart,jhole,jpart,res)
@@ -75,9 +75,9 @@ subroutine calc_hess_elem(ihole,ipart,jhole,jpart,res)
   integer                        :: nu_rs_possible
   integer                        :: mu_pqrs_possible
   integer                        :: mu_rspq_possible
-  
+
   res=0.D0
-  
+
   ! the terms <0|E E H |0>
   do mu=1,n_det
     ! get the string of the determinant
@@ -174,10 +174,10 @@ subroutine calc_hess_elem(ihole,ipart,jhole,jpart,res)
       end if
     end do
   end do
-  
+
   ! state-averaged Hessian
   res*=1.D0/dble(N_states)
-  
+
 end subroutine calc_hess_elem
 
 BEGIN_PROVIDER [real*8, hessmat_peter, (nMonoEx,nMonoEx)]
@@ -190,26 +190,26 @@ BEGIN_PROVIDER [real*8, hessmat_peter, (nMonoEx,nMonoEx)]
   END_DOC
   implicit none
   integer                        :: i,j,t,u,a,b,indx,jndx,bstart,ustart,indx_shift
-  
+
   real*8                         :: hessmat_itju
   real*8                         :: hessmat_itja
   real*8                         :: hessmat_itua
   real*8                         :: hessmat_iajb
   real*8                         :: hessmat_iatb
   real*8                         :: hessmat_taub
-  
+
   if (bavard) then
     write(6,*) ' providing Hessian matrix hessmat_peter '
     write(6,*) '  nMonoEx = ',nMonoEx
   endif
-  provide mo_two_e_integrals_in_map
-  
+  provide all_mo_integrals
+
   !$OMP PARALLEL DEFAULT(NONE) &
   !$OMP SHARED(hessmat_peter,n_core_inact_orb,n_act_orb,n_virt_orb,nMonoEx) &
   !$OMP PRIVATE(i,indx,jndx,j,ustart,t,u,a,bstart,indx_shift)
 
   !$OMP DO
-  ! (DOUBLY OCCUPIED ---> ACT ) 
+  ! (DOUBLY OCCUPIED ---> ACT )
   do i=1,n_core_inact_orb
     do t=1,n_act_orb
       indx = t + (i-1)*n_act_orb
@@ -226,14 +226,14 @@ BEGIN_PROVIDER [real*8, hessmat_peter, (nMonoEx,nMonoEx)]
           jndx+=1
         end do
       end do
-      ! (DOUBLY OCCUPIED ---> VIRTUAL) 
+      ! (DOUBLY OCCUPIED ---> VIRTUAL)
       do j=1,n_core_inact_orb
         do a=1,n_virt_orb
           hessmat_peter(jndx,indx)=hessmat_itja(i,t,j,a)
           jndx+=1
         end do
       end do
-      ! (ACTIVE ---> VIRTUAL) 
+      ! (ACTIVE ---> VIRTUAL)
       do u=1,n_act_orb
         do a=1,n_virt_orb
           hessmat_peter(jndx,indx)=hessmat_itua(i,t,u,a)
@@ -243,15 +243,15 @@ BEGIN_PROVIDER [real*8, hessmat_peter, (nMonoEx,nMonoEx)]
     end do
   end do
   !$OMP END DO NOWAIT
-  
+
   indx_shift = n_core_inact_orb*n_act_orb
   !$OMP DO
-  ! (DOUBLY OCCUPIED ---> VIRTUAL) 
+  ! (DOUBLY OCCUPIED ---> VIRTUAL)
   do a=1,n_virt_orb
     do i=1,n_core_inact_orb
       indx = a + (i-1)*n_virt_orb + indx_shift
       jndx=indx
-      ! (DOUBLY OCCUPIED ---> VIRTUAL) 
+      ! (DOUBLY OCCUPIED ---> VIRTUAL)
       do j=i,n_core_inact_orb
         if (i.eq.j) then
           bstart=a
@@ -263,7 +263,7 @@ BEGIN_PROVIDER [real*8, hessmat_peter, (nMonoEx,nMonoEx)]
           jndx+=1
         end do
       end do
-      ! (ACT ---> VIRTUAL) 
+      ! (ACT ---> VIRTUAL)
       do t=1,n_act_orb
         do b=1,n_virt_orb
           hessmat_peter(jndx,indx)=hessmat_iatb(i,a,t,b)
@@ -273,15 +273,15 @@ BEGIN_PROVIDER [real*8, hessmat_peter, (nMonoEx,nMonoEx)]
     end do
   end do
   !$OMP END DO NOWAIT
-  
+
   indx_shift += n_core_inact_orb*n_virt_orb
-  !$OMP DO 
-  ! (ACT ---> VIRTUAL) 
+  !$OMP DO
+  ! (ACT ---> VIRTUAL)
   do a=1,n_virt_orb
     do t=1,n_act_orb
       indx = a + (t-1)*n_virt_orb + indx_shift
       jndx=indx
-      ! (ACT ---> VIRTUAL) 
+      ! (ACT ---> VIRTUAL)
       do u=t,n_act_orb
         if (t.eq.u) then
           bstart=a
@@ -295,16 +295,16 @@ BEGIN_PROVIDER [real*8, hessmat_peter, (nMonoEx,nMonoEx)]
       end do
     end do
   end do
-  !$OMP END DO 
+  !$OMP END DO
 
   !$OMP END PARALLEL
-  
+
   do jndx=1,nMonoEx
     do indx=1,jndx-1
       hessmat_peter(indx,jndx) = hessmat_peter(jndx,indx)
     enddo
   enddo
 
-  
+
 END_PROVIDER
 

@@ -39,24 +39,28 @@
   ! p,q: general spatial MOs 
   ! gamma^{nm}: density matrix \bra{\Psi^n} a^{\dagger}_a a_i \ket{\Psi^m}
   END_DOC
-
+  USE OMP_LIB
   integer          :: istate, jstate ! States
   integer          :: i, j           ! general spatial MOs
   double precision :: nuclei_part_x, nuclei_part_y, nuclei_part_z
+  double precision :: mem_tot_tr_dm
+  integer :: nthreads
+  nthreads = OMP_GET_MAX_THREADS()
+  mem_tot_tr_dm = 8.d0*mo_num*mo_num*n_states*n_states*1d-9*(nthreads+1)
  
   multi_s_x_dipole_moment = 0.d0
   multi_s_y_dipole_moment = 0.d0
   multi_s_z_dipole_moment = 0.d0
 
-  if(8.d0*mo_num*mo_num*n_states*n_states*1d-9 .lt. 200.d0) then
+  if(mem_tot_tr_dm .lt. 0.9d0 * qp_max_mem) then
  
     do jstate = 1, N_states
       do istate = 1, N_states
         do i = 1, mo_num  
           do j = 1, mo_num  
-            multi_s_x_dipole_moment(istate,jstate) -= one_e_tr_dm_mo(j,i,istate,jstate) * mo_dipole_x(j,i)  
-            multi_s_y_dipole_moment(istate,jstate) -= one_e_tr_dm_mo(j,i,istate,jstate) * mo_dipole_y(j,i) 
-            multi_s_z_dipole_moment(istate,jstate) -= one_e_tr_dm_mo(j,i,istate,jstate) * mo_dipole_z(j,i) 
+            multi_s_x_dipole_moment(istate,jstate) -= one_e_tr_dm_mo(j,i,istate,jstate) * mo_prop_dipole_x(j,i)  
+            multi_s_y_dipole_moment(istate,jstate) -= one_e_tr_dm_mo(j,i,istate,jstate) * mo_prop_dipole_y(j,i) 
+            multi_s_z_dipole_moment(istate,jstate) -= one_e_tr_dm_mo(j,i,istate,jstate) * mo_prop_dipole_z(j,i) 
           enddo
         enddo 
       enddo
@@ -66,6 +70,7 @@
 
     ! no enouph memory
     ! on the fly scheme
+    print*,'Computing on the fly the various dipole matrix elements '
 
     PROVIDE psi_det_alpha_unique psi_det_beta_unique
 
@@ -85,7 +90,7 @@
     !$OMP        psi_bilinear_matrix_transp_rows, psi_bilinear_matrix_transp_columns, &
     !$OMP        psi_det_alpha_unique, psi_det_beta_unique,                           &
     !$OMP        psi_bilinear_matrix_values, psi_bilinear_matrix_transp_values,       &
-    !$OMP        mo_dipole_x, mo_dipole_y, mo_dipole_z,                               &
+    !$OMP        mo_prop_dipole_x, mo_prop_dipole_y, mo_prop_dipole_z,                               &
     !$OMP        multi_s_x_dipole_moment, multi_s_y_dipole_moment, multi_s_z_dipole_moment)
     !$OMP DO COLLAPSE(2)
     do istate = 1, N_states
@@ -103,9 +108,9 @@
           ck = psi_bilinear_matrix_values(k_a,istate)*psi_bilinear_matrix_values(k_a,jstate)
           do l = 1, elec_alpha_num
             j = occ(l,1)
-            multi_s_x_dipole_moment(istate,jstate) -= ck * mo_dipole_x(j,j) 
-            multi_s_y_dipole_moment(istate,jstate) -= ck * mo_dipole_y(j,j) 
-            multi_s_z_dipole_moment(istate,jstate) -= ck * mo_dipole_z(j,j) 
+            multi_s_x_dipole_moment(istate,jstate) -= ck * mo_prop_dipole_x(j,j) 
+            multi_s_y_dipole_moment(istate,jstate) -= ck * mo_prop_dipole_y(j,j) 
+            multi_s_z_dipole_moment(istate,jstate) -= ck * mo_prop_dipole_z(j,j) 
           enddo
   
           if (k_a == N_det) cycle
@@ -121,13 +126,13 @@
               call get_single_excitation_spin(tmp_det(1,1), tmp_det2, exc, phase, N_int)
               call decode_exc_spin(exc, h1, p1, h2, p2)
               ckl = psi_bilinear_matrix_values(k_a,istate)*psi_bilinear_matrix_values(l,jstate) * phase
-              multi_s_x_dipole_moment(istate,jstate) -= ckl * mo_dipole_x(h1,p1) 
-              multi_s_y_dipole_moment(istate,jstate) -= ckl * mo_dipole_y(h1,p1) 
-              multi_s_z_dipole_moment(istate,jstate) -= ckl * mo_dipole_z(h1,p1) 
+              multi_s_x_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_x(h1,p1) 
+              multi_s_y_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_y(h1,p1) 
+              multi_s_z_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_z(h1,p1) 
               ckl = psi_bilinear_matrix_values(k_a,jstate)*psi_bilinear_matrix_values(l,istate) * phase
-              multi_s_x_dipole_moment(istate,jstate) -= ckl * mo_dipole_x(p1,h1) 
-              multi_s_y_dipole_moment(istate,jstate) -= ckl * mo_dipole_y(p1,h1) 
-              multi_s_z_dipole_moment(istate,jstate) -= ckl * mo_dipole_z(p1,h1) 
+              multi_s_x_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_x(p1,h1) 
+              multi_s_y_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_y(p1,h1) 
+              multi_s_z_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_z(p1,h1) 
             endif
             l = l+1
             if (l > N_det) exit
@@ -148,9 +153,9 @@
           ck = psi_bilinear_matrix_transp_values(k_b,istate)*psi_bilinear_matrix_transp_values(k_b,jstate)
           do l = 1, elec_beta_num
             j = occ(l,2)
-            multi_s_x_dipole_moment(istate,jstate) -= ck * mo_dipole_x(j,j) 
-            multi_s_y_dipole_moment(istate,jstate) -= ck * mo_dipole_y(j,j) 
-            multi_s_z_dipole_moment(istate,jstate) -= ck * mo_dipole_z(j,j) 
+            multi_s_x_dipole_moment(istate,jstate) -= ck * mo_prop_dipole_x(j,j) 
+            multi_s_y_dipole_moment(istate,jstate) -= ck * mo_prop_dipole_y(j,j) 
+            multi_s_z_dipole_moment(istate,jstate) -= ck * mo_prop_dipole_z(j,j) 
           enddo
       
           if (k_b == N_det) cycle
@@ -166,13 +171,13 @@
               call get_single_excitation_spin(tmp_det(1,2), tmp_det2, exc, phase, N_int)
               call decode_exc_spin(exc, h1, p1, h2, p2)
               ckl = psi_bilinear_matrix_transp_values(k_b,istate)*psi_bilinear_matrix_transp_values(l,jstate) * phase
-              multi_s_x_dipole_moment(istate,jstate) -= ckl * mo_dipole_x(h1,p1) 
-              multi_s_y_dipole_moment(istate,jstate) -= ckl * mo_dipole_y(h1,p1) 
-              multi_s_z_dipole_moment(istate,jstate) -= ckl * mo_dipole_z(h1,p1) 
+              multi_s_x_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_x(h1,p1) 
+              multi_s_y_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_y(h1,p1) 
+              multi_s_z_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_z(h1,p1) 
               ckl = psi_bilinear_matrix_transp_values(k_b,jstate)*psi_bilinear_matrix_transp_values(l,istate) * phase
-              multi_s_x_dipole_moment(istate,jstate) -= ckl * mo_dipole_x(p1,h1) 
-              multi_s_y_dipole_moment(istate,jstate) -= ckl * mo_dipole_y(p1,h1) 
-              multi_s_z_dipole_moment(istate,jstate) -= ckl * mo_dipole_z(p1,h1) 
+              multi_s_x_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_x(p1,h1) 
+              multi_s_y_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_y(p1,h1) 
+              multi_s_z_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_z(p1,h1) 
             endif
             l = l+1
             if (l > N_det) exit

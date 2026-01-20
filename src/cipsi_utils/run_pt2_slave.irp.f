@@ -350,7 +350,6 @@ subroutine push_pt2_results_async_send(zmq_socket_push, index, pt2_data, b, task
   enddo
 
   rc = f77_zmq_send( zmq_socket_push, pt2_serialized, size(pt2_serialized)*8, ZMQ_SNDMORE)
-  deallocate(pt2_serialized)
   if (rc == -1) then
     print *,  irp_here, ': error sending result'
     stop 3
@@ -358,6 +357,7 @@ subroutine push_pt2_results_async_send(zmq_socket_push, index, pt2_data, b, task
   else if(rc /= size(pt2_serialized)*8) then
     stop 'push'
   endif
+  deallocate(pt2_serialized)
 
 
   rc = f77_zmq_send( zmq_socket_push, task_id, n_tasks*4, ZMQ_SNDMORE)

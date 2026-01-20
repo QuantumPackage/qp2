@@ -92,14 +92,14 @@ def real_join(*args):
 def ninja_create_env_variable(pwd_config_file):
     """
     Return some ninja variable with the env variable expanded
-    FC, FCFLAGS, IRPF90, IRPF90_FLAGS
+    FC, CC, FCFLAGS, CFLAGS, IRPF90, IRPF90_FLAGS
     The env variable is useful for the generation of EZFIO, and IRPF90
     """
     l_string = ["builddir = {0}".format(os.path.dirname(ROOT_BUILD_NINJA)),
                 ""]
 
 
-    for flag in ["FC", "FCFLAGS", "IRPF90", "IRPF90_FLAGS"]:
+    for flag in ["FC", "CC", "CFLAGS", "FCFLAGS", "IRPF90", "IRPF90_FLAGS"]:
         str_ = "{0} = {1}".format(flag, get_compilation_option(pwd_config_file,
                                                                flag))
         for directory in [real_join(QP_SRC, m) for m in sorted(os.listdir(QP_SRC))]:
@@ -296,7 +296,7 @@ def ninja_ezfio_rule():
     and run ninja
     """
     l_flag = ["export {0}='${0}'".format(flag)
-              for flag in ["FC", "FCFLAGS", "IRPF90"]]
+              for flag in ["FC", "CC", "FCFLAGS", "CFLAGS", "IRPF90"]]
 
     install_lib_ezfio = comp_path(join(QP_EZFIO, "lib", "libezfio_irp.a"))
     l_cmd = ["cd {0}".format(comp_path(QP_EZFIO))] + l_flag
@@ -473,14 +473,13 @@ def ninja_irpf90_make_rule():
     """
     The rule for creating the irpf90.make
     Export the flag and compile
-    Only secontial make a possible
     """
 
     # ~#~#~#~#~ #
     # F l a g s #
     # ~#~#~#~#~ #
     l_flag = []
-    for flag in ["FC", "FCFLAGS", "LIB", "SRC", "OBJ"]:
+    for flag in ["FC", "FCFLAGS", "CC", "CFLAGS", "LIB", "SRC", "OBJ"]:
         str_ = "export {0}='${0}'".format(flag)
         l_flag.append(str_)
 

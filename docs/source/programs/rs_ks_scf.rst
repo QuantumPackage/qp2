@@ -30,7 +30,6 @@ rs_ks_scf
  .. hlist:: 
     :columns: 3 
  
-    * :c:func:`check_coherence_functional` 
     * :c:func:`create_guess` 
     * :c:func:`orthonormalize_mos` 
     * :c:func:`run` 

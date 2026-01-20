@@ -23,12 +23,12 @@ Note that you can find other interesting integrals related to the position opera
 EZFIO parameters 
 ---------------- 
  
-.. option:: mo_integrals_e_n
+.. option:: mo_integrals_n_e
  
     Nucleus-electron integrals in |MO| basis set
  
  
-.. option:: io_mo_integrals_e_n
+.. option:: io_mo_integrals_n_e
  
     Read/Write |MO| electron-nucleus attraction integrals from/to disk [ Write | Read | None ]
  
@@ -71,6 +71,32 @@ EZFIO parameters
 Providers 
 --------- 
  
+.. c:var:: ao_one_e_integrals_from_mo
+
+
+    File : :file:`mo_one_e_ints/ao_to_mo.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_one_e_integrals_from_mo	(ao_num,ao_num)
+
+
+    Integrals of the one e hamiltonian obtained from the integrals on the MO basis
+    
+    WARNING : this is equal to ao_one_e_integrals only if the AO and MO basis have the same number of functions
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`mo_num`
+       * :c:data:`mo_one_e_integrals`
+       * :c:data:`s_mo_coef`
+
+
+ 
 .. c:var:: mo_dipole_x
 
 
@@ -97,6 +123,14 @@ Providers
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_spread_centered_x`
+       * :c:data:`multi_s_dipole_moment`
+       * :c:data:`z_dipole_moment`
 
  
 .. c:var:: mo_dipole_y
@@ -125,6 +159,14 @@ Providers
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_spread_centered_x`
+       * :c:data:`multi_s_dipole_moment`
+       * :c:data:`z_dipole_moment`
 
  
 .. c:var:: mo_dipole_z
@@ -153,6 +195,14 @@ Providers
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_spread_centered_x`
+       * :c:data:`multi_s_dipole_moment`
+       * :c:data:`z_dipole_moment`
 
  
 .. c:var:: mo_integrals_n_e
@@ -185,6 +235,7 @@ Providers
 
        * :c:data:`mo_one_e_integrals`
        * :c:data:`ref_bitmask_energy`
+       * :c:data:`v_ne_psi_energy`
 
  
 .. c:var:: mo_integrals_n_e_per_atom
@@ -274,8 +325,12 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`ao_one_e_integrals_from_mo`
        * :c:data:`core_energy`
+       * :c:data:`etwo`
        * :c:data:`fock_operator_closed_shell_ref_bitmask`
+       * :c:data:`h_core_ri`
+       * :c:data:`one_ints_no`
        * :c:data:`psi_energy_h_core`
        * :c:data:`ref_bitmask_energy`
 
@@ -330,6 +385,137 @@ Providers
 
 
  
+.. c:var:: mo_pseudo_integrals_local
+
+
+    File : :file:`mo_one_e_ints/pot_mo_pseudo_ints.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_pseudo_integrals_local	(mo_num,mo_num)
+
+
+    Pseudopotential integrals in |MO| basis
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`ao_pseudo_integrals_local`
+       * :c:data:`do_pseudo`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_num`
+
+
+ 
+.. c:var:: mo_pseudo_integrals_non_local
+
+
+    File : :file:`mo_one_e_ints/pot_mo_pseudo_ints.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_pseudo_integrals_non_local	(mo_num,mo_num)
+
+
+    Pseudopotential integrals in |MO| basis
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`ao_pseudo_integrals_non_local`
+       * :c:data:`do_pseudo`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_num`
+
+
+ 
+.. c:var:: mo_spread_centered_x
+
+
+    File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_spread_centered_x	(mo_num,mo_num)
+        double precision, allocatable	:: mo_spread_centered_y	(mo_num,mo_num)
+        double precision, allocatable	:: mo_spread_centered_z	(mo_num,mo_num)
+
+
+    array of the integrals of MO_i * (x^2 - <MO_i|x|MO_j>^2) MO_j = MO_i x^2 MO_j - (MO_i x MO_j)^2
+    array of the integrals of MO_i * (y^2 - <MO_i|y|MO_j>^2) MO_j = MO_i y^2 MO_j - (MO_i y MO_j)^2
+    array of the integrals of MO_i * (z^2 - <MO_i|z|MO_j>^2) MO_j = MO_i z^2 MO_j - (MO_i z MO_j)^2
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_dipole_x`
+       * :c:data:`mo_num`
+       * :c:data:`mo_spread_x`
+
+
+ 
+.. c:var:: mo_spread_centered_y
+
+
+    File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_spread_centered_x	(mo_num,mo_num)
+        double precision, allocatable	:: mo_spread_centered_y	(mo_num,mo_num)
+        double precision, allocatable	:: mo_spread_centered_z	(mo_num,mo_num)
+
+
+    array of the integrals of MO_i * (x^2 - <MO_i|x|MO_j>^2) MO_j = MO_i x^2 MO_j - (MO_i x MO_j)^2
+    array of the integrals of MO_i * (y^2 - <MO_i|y|MO_j>^2) MO_j = MO_i y^2 MO_j - (MO_i y MO_j)^2
+    array of the integrals of MO_i * (z^2 - <MO_i|z|MO_j>^2) MO_j = MO_i z^2 MO_j - (MO_i z MO_j)^2
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_dipole_x`
+       * :c:data:`mo_num`
+       * :c:data:`mo_spread_x`
+
+
+ 
+.. c:var:: mo_spread_centered_z
+
+
+    File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_spread_centered_x	(mo_num,mo_num)
+        double precision, allocatable	:: mo_spread_centered_y	(mo_num,mo_num)
+        double precision, allocatable	:: mo_spread_centered_z	(mo_num,mo_num)
+
+
+    array of the integrals of MO_i * (x^2 - <MO_i|x|MO_j>^2) MO_j = MO_i x^2 MO_j - (MO_i x MO_j)^2
+    array of the integrals of MO_i * (y^2 - <MO_i|y|MO_j>^2) MO_j = MO_i y^2 MO_j - (MO_i y MO_j)^2
+    array of the integrals of MO_i * (z^2 - <MO_i|z|MO_j>^2) MO_j = MO_i z^2 MO_j - (MO_i z MO_j)^2
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_dipole_x`
+       * :c:data:`mo_num`
+       * :c:data:`mo_spread_x`
+
+
+ 
 .. c:var:: mo_spread_x
 
 
@@ -356,6 +542,12 @@ Providers
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_spread_centered_x`
 
  
 .. c:var:: mo_spread_y
@@ -384,6 +576,12 @@ Providers
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_spread_centered_x`
 
  
 .. c:var:: mo_spread_z
@@ -412,6 +610,12 @@ Providers
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_spread_centered_x`
 
  
 .. c:var:: s_mo_coef
@@ -436,6 +640,13 @@ Providers
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_one_e_integrals_from_mo`
+       * :c:data:`fock_matrix_ao`
 
  
  
@@ -464,6 +675,14 @@ Subroutines / functions
        * :c:data:`ao_num`
        * :c:data:`mo_num`
        * :c:data:`s_mo_coef`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_one_e_integrals_from_mo`
+       * :c:data:`fock_matrix_ao`
 
     Calls:
 
@@ -499,6 +718,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`d0tu_alpha_ao`
        * :c:data:`one_e_dm_alpha_ao_for_dft`
        * :c:data:`one_e_dm_alpha_ao_for_dft_no_core`
 
@@ -537,16 +757,19 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`huckel_guess`
+       * :c:func:`roothaan_hall_scf`
        * :c:func:`save_natural_mos`
+       * :c:func:`save_natural_mos_canon_label`
+       * :c:func:`save_natural_mos_no_ov_rot`
+       * :c:func:`scf`
 
     Calls:
 
     .. hlist::
        :columns: 3
 
-       * :c:func:`nullify_small_elements`
        * :c:func:`ortho_lowdin`
-       * :c:func:`restore_symmetry`
 
     Touches:
 

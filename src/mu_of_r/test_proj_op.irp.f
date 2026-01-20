@@ -1,4 +1,4 @@
-program projected_operators
+program test_proj_op
   implicit none
   BEGIN_DOC
 ! TODO

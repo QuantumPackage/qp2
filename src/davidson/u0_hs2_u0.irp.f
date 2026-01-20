@@ -14,6 +14,7 @@
   enddo
 END_PROVIDER
 
+
 BEGIN_PROVIDER [ double precision, psi_energy_with_nucl_rep, (N_states) ]
  implicit none
  BEGIN_DOC
@@ -158,7 +159,7 @@ subroutine H_S2_u_0_nstates_openmp_work(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,
   double precision, intent(out)  :: v_t(N_st,sze), s_t(N_st,sze)
 
 
-  PROVIDE ref_bitmask_energy N_int
+  PROVIDE ref_bitmask_energy N_int all_mo_integrals
 
   select case (N_int)
     case (1)
@@ -256,7 +257,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
       !$OMP   PRIVATE(krow, kcol, tmp_det, spindet, k_a, k_b, i,     &
       !$OMP          lcol, lrow, l_a, l_b, utl, kk, u_is_sparse,     &
       !$OMP          buffer, doubles, n_doubles, umax,               &
-      !$OMP          tmp_det2, hij, sij, idx, buffer_lrow, l, kcol_prev,          &
+      !$OMP          tmp_det2, hij, sij, idx, buffer_lrow, l, kcol_prev,  &
       !$OMP          singles_a, n_singles_a, singles_b, ratio,       &
       !$OMP          n_singles_b, k8, last_found,left,right,right_max)
 
@@ -291,7 +292,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
   ASSERT (istart > 0)
   ASSERT (istep  > 0)
 
-  !$OMP DO SCHEDULE(guided,64)
+  !$OMP DO SCHEDULE(dynamic,64)
   do k_a=istart+ishift,iend,istep
 
     krow = psi_bilinear_matrix_rows(k_a)
@@ -469,7 +470,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
   enddo
   !$OMP END DO
 
-  !$OMP DO SCHEDULE(guided,64)
+  !$OMP DO SCHEDULE(dynamic,64)
   do k_a=istart+ishift,iend,istep
 
 

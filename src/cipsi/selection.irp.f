@@ -1478,17 +1478,19 @@ subroutine get_d0(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
 
   integer, parameter :: bant=1
 
-  double precision, allocatable :: hij_cache1(:), hij_cache2(:)
-  allocate (hij_cache1(mo_num),hij_cache2(mo_num))
+  double precision, allocatable :: hij_cache(:,:)
 
   PROVIDE mo_integrals_threshold
 
+  allocate(hij_cache(mo_num,mo_num))
+
   if(sp == 3) then ! AB
+
     h1 = p(1,1)
     h2 = p(1,2)
+    call get_mo_two_e_integrals_ij(h2,h1,mo_num,hij_cache,mo_integrals_map)
     do p1=1, mo_num
       if(bannedOrb(p1, 1)) cycle
-      call get_mo_two_e_integrals(p1,h2,h1,mo_num,hij_cache1,mo_integrals_map)
       do p2=1, mo_num
         if(bannedOrb(p2,2)) cycle
         if(banned(p1, p2, bant)) cycle ! rentable?
@@ -1497,7 +1499,7 @@ subroutine get_d0(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
           call i_h_j(gen, det, N_int, hij)
         else
           phase = get_phase_bi(phasemask, 1, 2, h1, p1, h2, p2, N_int)
-          hij = hij_cache1(p2) * phase
+          hij = hij_cache(p2,p1) * phase
         end if
         if (dabs(hij) < mo_integrals_threshold) cycle
         !DIR$ LOOP COUNT AVG(4)
@@ -1508,12 +1510,12 @@ subroutine get_d0(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
     end do
 
   else ! AA BB
+
     p1 = p(1,sp)
     p2 = p(2,sp)
+    call get_mo_two_e_integrals_ij(p2,p1,mo_num,hij_cache,mo_integrals_map)
     do puti=1, mo_num
       if (bannedOrb(puti, sp)) cycle
-      call get_mo_two_e_integrals(puti,p2,p1,mo_num,hij_cache1,mo_integrals_map)
-      call get_mo_two_e_integrals(puti,p1,p2,mo_num,hij_cache2,mo_integrals_map)
       do putj=puti+1, mo_num
         if(bannedOrb(putj, sp)) cycle
         if(banned(puti, putj, bant)) cycle ! rentable?
@@ -1522,7 +1524,7 @@ subroutine get_d0(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
           call i_h_j(gen, det, N_int, hij)
           if (dabs(hij) < mo_integrals_threshold) cycle
         else
-          hij = hij_cache1(putj) - hij_cache2(putj)
+          hij = hij_cache(putj,puti) - hij_cache(puti,putj)
           if (dabs(hij) < mo_integrals_threshold) cycle
           hij = hij * get_phase_bi(phasemask, sp, sp, puti, p1 , putj, p2, N_int)
         end if
@@ -1532,9 +1534,11 @@ subroutine get_d0(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
         enddo
       end do
     end do
+
   end if
 
-  deallocate(hij_cache1,hij_cache2)
+  deallocate(hij_cache)
+
 end
 
 

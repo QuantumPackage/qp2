@@ -4,12 +4,11 @@ BEGIN_PROVIDER [ double precision, H_matrix_all_dets,(N_det,N_det) ]
  BEGIN_DOC
  ! |H| matrix on the basis of the Slater determinants defined by psi_det
  END_DOC
- integer :: i,j,k
+ integer :: i,j
  double precision :: hij
- integer :: degree(N_det),idx(0:N_det)
- call  i_H_j(psi_det(1,1,1),psi_det(1,1,1),N_int,hij)
+ PROVIDE all_mo_integrals
  print*,'Providing the H_matrix_all_dets ...'
- !$OMP PARALLEL DO SCHEDULE(GUIDED) DEFAULT(NONE) PRIVATE(i,j,hij,degree,idx,k) &
+ !$OMP PARALLEL DO SCHEDULE(GUIDED) DEFAULT(NONE) PRIVATE(i,j,hij) &
  !$OMP SHARED (N_det, psi_det, N_int,H_matrix_all_dets)
  do i =1,N_det
    do j = i, N_det
@@ -31,7 +30,7 @@ BEGIN_PROVIDER [ double precision, H_matrix_diag_all_dets,(N_det) ]
  integer :: i
  double precision :: hij
  integer :: degree(N_det)
- call  i_H_j(psi_det(1,1,1),psi_det(1,1,1),N_int,hij)
+ PROVIDE all_mo_integrals
  !$OMP PARALLEL DO SCHEDULE(GUIDED) DEFAULT(NONE) PRIVATE(i,hij,degree) &
  !$OMP SHARED (N_det, psi_det, N_int,H_matrix_diag_all_dets)
  do i =1,N_det

@@ -25,7 +25,7 @@ Usage:
 
     qp get <module> <parameter>    Returns the value of <module>/<parameter>.
 
-    qp set <module> <parameter> [<value>] 
+    qp set <module> <parameter> [<value>]
                                    Sets the value of <module>/<parameter>. If the
                                    value is not given in the command line it is read
                                    from the standard input.
@@ -41,8 +41,8 @@ Usage:
 
   Running quantum package commands:
 
-    qp convert_output_to_ezfio      
-    qp create_ezfio                 
+    qp convert_output_to_ezfio
+    qp create_ezfio
     qp plugins                      The corresponding commands start with "qp_".
     qp reset                        To get help for a command <qp_command>, run
     qp set_frozen_core                <qp_command> --help
@@ -169,39 +169,25 @@ _qp_Complete()
         ;;
       create_ezfio)
         case "${prev}" in
-          create_ezfio)
-            COMPREPLY=( $(compgen -W "-b -a -c -d -h -m -o -p -x $(\ls)" -- $cur ) )
-            return 0
-            ;;
-          -m|-d|-c)
+          -m|-c)   # Charge, multiplicity
             COMPREPLY=( $(compgen -W "" -- $cur ) )
             return 0;;
-          -b)
+          -b)      # Basis
             COMPREPLY=( $(compgen -W "$(ls ${QP_ROOT}/data/basis)" -- $cur ) )
             return 0
             ;;
-          -p)
+          -p)      # Pseudo
             COMPREPLY=( $(compgen -W "$(cd ${QP_ROOT}/data/pseudo ; \ls)" -- $cur ) )
             return 0
             ;;
           *)
-            COMPREPLY=( $(compgen -W "-b -a -c -d -h -m -o -p -x $(\ls)" -- $cur ) )
+            COMPREPLY=( $(compgen -W "-b -a -c -d -h -m -o -p -x -q $(\ls)" -- $cur ) )
             return 0
             ;;
         esac;;
       set_file)
-        # Array to store directory names
-        dirs=""
-
-        # Find directories containing "ezfio/.version" file recursively
-        for i in $(find . -name ezfio | sed 's/ezfio$/.version/')
-        do
-          dir_name=${i%/.version}  # Remove the ".version" suffix
-          dir_name=${dir_name#./}  # Remove the leading "./"
-          dirs+="./$dir_name "
-        done
-
-        COMPREPLY=( $(compgen -W "$dirs" -- ${cur} ) )
+        compopt -o nospace
+        COMPREPLY=( $(compgen -d -- "$cur") )
         return 0
         ;;
       plugins)

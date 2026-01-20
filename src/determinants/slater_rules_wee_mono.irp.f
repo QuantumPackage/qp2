@@ -13,7 +13,7 @@ subroutine i_Wee_j_single(key_i,key_j,Nint,spin,hij)
   integer                        :: exc(0:2,2)
   double precision               :: phase
 
-  PROVIDE big_array_exchange_integrals mo_two_e_integrals_in_map
+  PROVIDE all_mo_integrals
 
   call get_single_excitation_spin(key_i(1,spin),key_j(1,spin),exc,phase,Nint)
   call single_excitation_wee(key_i,key_j,exc(1,1),exc(1,2),spin,phase,hij)
@@ -285,7 +285,7 @@ subroutine i_H_j_two_e(key_i,key_j,Nint,hij)
   integer                        :: occ(Nint*bit_kind_size,2)
   double precision               :: diag_H_mat_elem, phase,phase_2
   integer                        :: n_occ_ab(2)
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals ref_bitmask_two_e_energy
+  PROVIDE all_mo_integrals ref_bitmask_two_e_energy
 
   ASSERT (Nint > 0)
   ASSERT (Nint == N_int)

@@ -1,0 +1,19 @@
+#!/bin/bash 
+# specify the QP folder 
+QP=$QP_ROOT
+dir=${QP}
+# sourcing the quantum_package.rc file
+. ${QP}/quantum_package.rc
+# The main EZFIO folder 
+main=${1%/} 
+# The XYZ file containing the geometry of the additional system you want to add
+extra=${2%.xyz}
+basis_extra=sto-3g
+ezfio_extra=${extra}_${basis_extra}_1s
+echo $ezfio_extra
+qp_fit_1s_basis $extra $basis_extra
+qp set_file $ezfio_extra
+qp run scf | tee ${ezfio_extra}.scf.out
+qp run save_one_e_dm | tee ${ezfio_extra}.one_rdm.out
+qp_copy_extra_basis ${ezfio_extra} $main
+

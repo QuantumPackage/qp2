@@ -51,7 +51,6 @@ Programs
 -------- 
  
  * :ref:`scf` 
- * :ref:`test` 
  
 Providers 
 --------- 
@@ -83,8 +82,10 @@ Providers
        * :c:data:`ao_overlap_abs`
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
+       * :c:data:`ao_two_e_integral_alpha_chol`
        * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`do_ao_cholesky`
        * :c:data:`do_direct_integrals`
        * :c:data:`is_periodic`
        * :c:data:`n_pt_max_integrals`
@@ -92,6 +93,8 @@ Providers
        * :c:data:`read_ao_two_e_integrals`
        * :c:data:`scf_density_matrix_ao_alpha`
        * :c:data:`scf_density_matrix_ao_beta`
+       * :c:data:`use_cgtos`
+       * :c:data:`use_only_lr`
 
     Needed by:
 
@@ -100,6 +103,41 @@ Providers
 
        * :c:data:`fock_matrix_ao_alpha`
        * :c:data:`hf_energy`
+
+ 
+.. c:var:: ao_two_e_integral_alpha_chol
+
+
+    File : :file:`hartree_fock/fock_matrix_hf.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_two_e_integral_alpha_chol	(ao_num,ao_num)
+        double precision, allocatable	:: ao_two_e_integral_beta_chol	(ao_num,ao_num)
+
+
+    Alpha and Beta Fock matrices in AO basis set
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`cholesky_ao_num`
+       * :c:data:`elec_alpha_num`
+       * :c:data:`elec_beta_num`
+       * :c:data:`qp_max_mem`
+       * :c:data:`scf_density_matrix_ao`
+       * :c:data:`scf_density_matrix_ao_alpha`
+       * :c:data:`scf_density_matrix_ao_beta`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_two_e_integral_alpha`
 
  
 .. c:var:: ao_two_e_integral_beta
@@ -129,8 +167,10 @@ Providers
        * :c:data:`ao_overlap_abs`
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
+       * :c:data:`ao_two_e_integral_alpha_chol`
        * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`do_ao_cholesky`
        * :c:data:`do_direct_integrals`
        * :c:data:`is_periodic`
        * :c:data:`n_pt_max_integrals`
@@ -138,6 +178,8 @@ Providers
        * :c:data:`read_ao_two_e_integrals`
        * :c:data:`scf_density_matrix_ao_alpha`
        * :c:data:`scf_density_matrix_ao_beta`
+       * :c:data:`use_cgtos`
+       * :c:data:`use_only_lr`
 
     Needed by:
 
@@ -146,6 +188,41 @@ Providers
 
        * :c:data:`fock_matrix_ao_alpha`
        * :c:data:`hf_energy`
+
+ 
+.. c:var:: ao_two_e_integral_beta_chol
+
+
+    File : :file:`hartree_fock/fock_matrix_hf.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_two_e_integral_alpha_chol	(ao_num,ao_num)
+        double precision, allocatable	:: ao_two_e_integral_beta_chol	(ao_num,ao_num)
+
+
+    Alpha and Beta Fock matrices in AO basis set
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`cholesky_ao_num`
+       * :c:data:`elec_alpha_num`
+       * :c:data:`elec_beta_num`
+       * :c:data:`qp_max_mem`
+       * :c:data:`scf_density_matrix_ao`
+       * :c:data:`scf_density_matrix_ao_alpha`
+       * :c:data:`scf_density_matrix_ao_beta`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_two_e_integral_alpha`
 
  
 .. c:var:: extra_e_contrib_density
@@ -202,6 +279,7 @@ Providers
        * :c:data:`fock_matrix_ao`
        * :c:data:`fock_matrix_mo_alpha`
        * :c:data:`fock_matrix_mo_beta`
+       * :c:data:`mcscf_fock_alpha_ao`
        * :c:data:`scf_energy`
 
  
@@ -235,6 +313,7 @@ Providers
        * :c:data:`fock_matrix_ao`
        * :c:data:`fock_matrix_mo_alpha`
        * :c:data:`fock_matrix_mo_beta`
+       * :c:data:`mcscf_fock_alpha_ao`
        * :c:data:`scf_energy`
 
  
@@ -261,6 +340,58 @@ Providers
        * :c:data:`ao_one_e_integrals`
        * :c:data:`ao_two_e_integral_alpha`
        * :c:data:`nuclear_repulsion`
+       * :c:data:`scf_density_matrix_ao_alpha`
+       * :c:data:`scf_density_matrix_ao_beta`
+
+
+ 
+.. c:var:: hf_kinetic_energy
+
+
+    File : :file:`hartree_fock/hf_energy.irp.f`
+
+    .. code:: fortran
+
+        double precision	:: hf_kinetic_energy	
+        double precision	:: hf_n_e_energy	
+
+
+    Hartree-Fock energy containing the nuclear repulsion, and its one- and two-body components.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_n_e`
+       * :c:data:`ao_kinetic_integrals`
+       * :c:data:`ao_num`
+       * :c:data:`scf_density_matrix_ao_alpha`
+       * :c:data:`scf_density_matrix_ao_beta`
+
+
+ 
+.. c:var:: hf_n_e_energy
+
+
+    File : :file:`hartree_fock/hf_energy.irp.f`
+
+    .. code:: fortran
+
+        double precision	:: hf_kinetic_energy	
+        double precision	:: hf_n_e_energy	
+
+
+    Hartree-Fock energy containing the nuclear repulsion, and its one- and two-body components.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_n_e`
+       * :c:data:`ao_kinetic_integrals`
+       * :c:data:`ao_num`
        * :c:data:`scf_density_matrix_ao_alpha`
        * :c:data:`scf_density_matrix_ao_beta`
 
@@ -344,7 +475,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_num`
-       * :c:data:`ao_ortho_lowdin_coef`
        * :c:data:`ezfio_filename`
        * :c:data:`mo_coef`
        * :c:data:`mo_guess_type`
@@ -378,4 +508,150 @@ Subroutines / functions
        * :c:data:`fock_matrix_ao_alpha`
        * :c:data:`mo_coef`
        * :c:data:`mo_label`
+
+ 
+.. c:function:: main:
+
+
+    File : :file:`hartree_fock/print_scf_int.irp.f`
+
+    .. code:: fortran
+
+        subroutine main()
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_map`
+       * :c:data:`ao_num`
+       * :c:data:`ao_one_e_integrals`
+       * :c:data:`fock_matrix_ao`
+       * :c:data:`fock_matrix_mo_alpha`
+       * :c:data:`scf_density_matrix_ao_alpha`
+       * :c:data:`scf_density_matrix_ao_beta`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`print_scf_int`
+
+ 
+.. c:function:: print_fock_diag:
+
+
+    File : :file:`hartree_fock/print_fock_diag.irp.f`
+
+    .. code:: fortran
+
+        subroutine print_fock_diag
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`fock_matrix_mo`
+       * :c:data:`mo_num`
+
+ 
+.. c:function:: print_pseudo_overlap:
+
+
+    File : :file:`hartree_fock/print_pseudo_overlap.irp.f`
+
+    .. code:: fortran
+
+        subroutine print_pseudo_overlap
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`ao_overlap`
+       * :c:data:`list_core`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_num`
+       * :c:data:`n_core_orb`
+
+ 
+.. c:function:: print_scf_int:
+
+
+    File : :file:`hartree_fock/print_scf_int.irp.f`
+
+    .. code:: fortran
+
+        subroutine print_scf_int
+
+
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`main`
+
+ 
+.. c:function:: run:
+
+
+    File : :file:`hartree_fock/scf.irp.f`
+
+    .. code:: fortran
+
+        subroutine run
+
+
+    Run SCF calculation
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`json_int_fmt`
+       * :c:data:`json_unit`
+       * :c:data:`mo_label`
+       * :c:data:`scf_energy`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`casscf`
+       * :c:func:`scf`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`ezfio_set_hartree_fock_energy`
+       * :c:func:`json_close`
+       * :c:func:`roothaan_hall_scf`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`fock_matrix_ao_alpha`
+       * :c:data:`fock_matrix_ao_alpha`
+       * :c:data:`mo_coef`
+       * :c:data:`level_shift`
+       * :c:data:`mo_coef`
 

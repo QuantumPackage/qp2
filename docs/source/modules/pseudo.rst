@@ -27,7 +27,7 @@ EZFIO parameters
  
 .. option:: pseudo_n_k
  
-    Number of gaussians in the local component
+    Powers of r - 2 in the local component
  
  
 .. option:: pseudo_v_k
@@ -52,7 +52,7 @@ EZFIO parameters
  
 .. option:: pseudo_n_kl
  
-    Number of functions in the non-local component
+    Powers of r - 2 in the non-local component
  
  
 .. option:: pseudo_v_kl

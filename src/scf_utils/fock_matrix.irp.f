@@ -1,3 +1,101 @@
+BEGIN_PROVIDER [ double precision, Fock_matrix_param, (2,3) ]
+ implicit none
+ BEGIN_DOC
+ ! Fock matrix parameters.
+ ! (1,1) : A cc  (2,1) : B cc
+ ! (1,2) : A oo  (2,2) : B oo
+ ! (1,3) : A vv  (2,3) : B vv
+ END_DOC
+
+ if (trim(rohf_parameters) == 'Roothaan') then
+ ! C. C. J. Roothaan, Rev. Mod. Phys. 32, 179 ␁1960.
+
+   Fock_matrix_param(1,1) = -0.5d0
+   Fock_matrix_param(2,1) =  1.5d0
+   Fock_matrix_param(1,2) =  0.5d0
+   Fock_matrix_param(2,2) =  0.5d0
+   Fock_matrix_param(1,3) =  1.5d0
+   Fock_matrix_param(2,3) = -0.5d0
+
+ else if (trim(rohf_parameters) == 'McWeeny') then
+ ! R. McWeeny and G. Diercksen, J. Chem. Phys. 49, 4852 ␁1968
+
+   Fock_matrix_param(1,1) =  1.d0/3.d0
+   Fock_matrix_param(2,1) =  2.d0/3.d0
+   Fock_matrix_param(1,2) =  1.d0/3.d0
+   Fock_matrix_param(2,2) =  1.d0/3.d0
+   Fock_matrix_param(1,3) =  2.d0/3.d0
+   Fock_matrix_param(2,3) =  1.d0/3.d0
+
+ else if (trim(rohf_parameters) == 'Davidson') then
+ ! E. R. Davidson, Chem. Phys. Lett. 21, 565 ␁1973
+
+   Fock_matrix_param(1,1) =  0.5d0
+   Fock_matrix_param(2,1) =  0.5d0
+   Fock_matrix_param(1,2) =  1.0d0
+   Fock_matrix_param(2,2) =  0.0d0
+   Fock_matrix_param(1,3) =  1.0d0
+   Fock_matrix_param(2,3) =  0.0d0
+
+ else if (trim(rohf_parameters) == 'Guest') then
+ ! M. F. Guest and V. R. Saunders, Mol. Phys. 28, 819 ␁1974.
+
+   Fock_matrix_param(1,1) =  0.5d0
+   Fock_matrix_param(2,1) =  0.5d0
+   Fock_matrix_param(1,2) =  0.5d0
+   Fock_matrix_param(2,2) =  0.5d0
+   Fock_matrix_param(1,3) =  0.0d0
+   Fock_matrix_param(2,3) =  0.5d0
+
+ else if (trim(rohf_parameters) == 'Binkley') then
+ ! J. S. Binkley, J. A. Pople, and P. A. Dobosh, Mol. Phys. 28, 1423 ␁1974.
+
+   Fock_matrix_param(1,1) =  0.5d0
+   Fock_matrix_param(2,1) =  0.5d0
+   Fock_matrix_param(1,2) =  1.0d0
+   Fock_matrix_param(2,2) =  0.0d0
+   Fock_matrix_param(1,3) =  0.0d0
+   Fock_matrix_param(2,3) =  1.0d0
+
+ else if (trim(rohf_parameters) == 'Faegri') then
+ ! K. Faegri and R. Manne, Mol. Phys. 31, 1037 ␁1976.
+
+   Fock_matrix_param(1,1) =  0.5d0
+   Fock_matrix_param(2,1) =  0.5d0
+   Fock_matrix_param(1,2) =  1.0d0
+   Fock_matrix_param(2,2) =  0.0d0
+   Fock_matrix_param(1,3) =  0.5d0
+   Fock_matrix_param(2,3) =  0.5d0
+
+ else if (trim(rohf_parameters) == 'Euler') then
+ ! Plakhutin, B. N., et al.  J. Chem. Phys., . 125, 20, p. 204110, doi:10.1063/1.2393223.
+
+   Fock_matrix_param(1,1) =  0.5d0
+   Fock_matrix_param(2,1) =  0.5d0
+   Fock_matrix_param(1,2) =  0.5d0
+   Fock_matrix_param(2,2) =  0.0d0
+   Fock_matrix_param(1,3) =  0.5d0
+   Fock_matrix_param(2,3) =  0.5d0
+
+ else if (trim(rohf_parameters) == 'Canonical') then
+ ! Plakhutin, B. N., et al.  J. Chem. Phys., . 125, 20, p. 204110, doi:10.1063/1.2393223.
+
+   Fock_matrix_param(1,1) =  0.0d0
+   Fock_matrix_param(2,1) =  1.0d0
+   Fock_matrix_param(1,2) =  1.0d0
+   Fock_matrix_param(2,2) =  0.0d0
+   Fock_matrix_param(1,3) =  1.0d0
+   Fock_matrix_param(2,3) =  0.0d0
+
+ else
+
+  stop 'Unknown set of ROHF parameters'
+
+ endif
+
+
+END_PROVIDER
+
  BEGIN_PROVIDER [ double precision, Fock_matrix_mo, (mo_num,mo_num) ]
 &BEGIN_PROVIDER [ double precision, Fock_matrix_diag_mo, (mo_num)]
    implicit none
@@ -36,8 +134,8 @@
      do j = 1, elec_beta_num
        ! Core
        do i = 1, elec_beta_num
-         fock_matrix_mo(i,j) = - 0.5d0 * fock_matrix_mo_alpha(i,j) &
-                               + 1.5d0 * fock_matrix_mo_beta(i,j)
+         fock_matrix_mo(i,j) = Fock_matrix_param(1,1) * fock_matrix_mo_alpha(i,j) + &
+                               Fock_matrix_param(2,1) * fock_matrix_mo_beta(i,j)
        enddo
        ! Open
        do i = elec_beta_num+1, elec_alpha_num
@@ -45,8 +143,8 @@
        enddo
        ! Virtual
        do i = elec_alpha_num+1, mo_num
-         fock_matrix_mo(i,j) =   0.5d0 * fock_matrix_mo_alpha(i,j) &
-                               + 0.5d0 * fock_matrix_mo_beta(i,j)
+         fock_matrix_mo(i,j) = 0.5d0 * fock_matrix_mo_alpha(i,j) + &
+                               0.5d0 * fock_matrix_mo_beta(i,j)
        enddo
      enddo
      ! Open
@@ -57,12 +155,12 @@
        enddo
        ! Open
        do i = elec_beta_num+1, elec_alpha_num
-         fock_matrix_mo(i,j) =   0.5d0 * fock_matrix_mo_alpha(i,j) &
-                               + 0.5d0 * fock_matrix_mo_beta(i,j)
+         fock_matrix_mo(i,j) = Fock_matrix_param(1,2) * fock_matrix_mo_alpha(i,j) + &
+                               Fock_matrix_param(2,2) * fock_matrix_mo_beta(i,j)
        enddo
        ! Virtual
        do i = elec_alpha_num+1, mo_num
-         fock_matrix_mo(i,j) = fock_matrix_mo_alpha(i,j)
+         fock_matrix_mo(i,j) =  fock_matrix_mo_alpha(i,j)
        enddo
      enddo
      ! Virtual
@@ -78,86 +176,12 @@
        enddo
        ! Virtual
        do i = elec_alpha_num+1, mo_num
-         fock_matrix_mo(i,j) =   1.5d0 * fock_matrix_mo_alpha(i,j) &
-                               - 0.5d0 * fock_matrix_mo_beta(i,j)
+         fock_matrix_mo(i,j) = Fock_matrix_param(1,3) * fock_matrix_mo_alpha(i,j) + &
+                               Fock_matrix_param(2,3) * fock_matrix_mo_beta(i,j)
        enddo
      enddo
    endif
 
-   ! Old
-   ! BEGIN_DOC
-   ! Fock matrix on the MO basis.
-   ! For open shells, the ROHF Fock Matrix is ::
-   !
-   !       |   F-K    |  F + K/2  |    F     |
-   !       |---------------------------------|
-   !       | F + K/2  |     F     |  F - K/2 |
-   !       |---------------------------------|
-   !       |    F     |  F - K/2  |  F + K   |
-   !
-   !
-   ! F = 1/2 (Fa + Fb)
-   !
-   ! K = Fb - Fa
-   !
-   ! END_DOC
-   !integer                        :: i,j,n
-   !if (all_shells_closed) then
-   !  Fock_matrix_mo = Fock_matrix_mo_alpha
-   !else
-
-   !  do j=1,elec_beta_num
-   !    ! F-K
-   !    do i=1,elec_beta_num !CC
-   !      Fock_matrix_mo(i,j) = 0.5d0*(Fock_matrix_mo_alpha(i,j)+Fock_matrix_mo_beta(i,j))&
-   !          - (Fock_matrix_mo_beta(i,j) - Fock_matrix_mo_alpha(i,j))
-   !    enddo
-   !    ! F+K/2
-   !    do i=elec_beta_num+1,elec_alpha_num  !CA
-   !      Fock_matrix_mo(i,j) = 0.5d0*(Fock_matrix_mo_alpha(i,j)+Fock_matrix_mo_beta(i,j))&
-   !          + 0.5d0*(Fock_matrix_mo_beta(i,j) - Fock_matrix_mo_alpha(i,j))
-   !    enddo
-   !    ! F
-   !    do i=elec_alpha_num+1, mo_num !CV
-   !      Fock_matrix_mo(i,j) = 0.5d0*(Fock_matrix_mo_alpha(i,j)+Fock_matrix_mo_beta(i,j))
-   !    enddo
-   !  enddo
-
-   !  do j=elec_beta_num+1,elec_alpha_num
-   !    ! F+K/2
-   !    do i=1,elec_beta_num !AC
-   !      Fock_matrix_mo(i,j) = 0.5d0*(Fock_matrix_mo_alpha(i,j)+Fock_matrix_mo_beta(i,j))&
-   !          + 0.5d0*(Fock_matrix_mo_beta(i,j) - Fock_matrix_mo_alpha(i,j))
-   !    enddo
-   !    ! F
-   !    do i=elec_beta_num+1,elec_alpha_num !AA
-   !      Fock_matrix_mo(i,j) = 0.5d0*(Fock_matrix_mo_alpha(i,j)+Fock_matrix_mo_beta(i,j))
-   !    enddo
-   !    ! F-K/2
-   !    do i=elec_alpha_num+1, mo_num !AV
-   !      Fock_matrix_mo(i,j) = 0.5d0*(Fock_matrix_mo_alpha(i,j)+Fock_matrix_mo_beta(i,j))&
-   !          - 0.5d0*(Fock_matrix_mo_beta(i,j) - Fock_matrix_mo_alpha(i,j))
-   !    enddo
-   !  enddo
-
-   !  do j=elec_alpha_num+1, mo_num
-   !    ! F
-   !    do i=1,elec_beta_num !VC
-   !      Fock_matrix_mo(i,j) = 0.5d0*(Fock_matrix_mo_alpha(i,j)+Fock_matrix_mo_beta(i,j))
-   !    enddo
-   !    ! F-K/2
-   !    do i=elec_beta_num+1,elec_alpha_num !VA
-   !      Fock_matrix_mo(i,j) = 0.5d0*(Fock_matrix_mo_alpha(i,j)+Fock_matrix_mo_beta(i,j))&
-   !          - 0.5d0*(Fock_matrix_mo_beta(i,j) - Fock_matrix_mo_alpha(i,j))
-   !    enddo
-   !    ! F+K
-   !    do i=elec_alpha_num+1,mo_num !VV
-   !      Fock_matrix_mo(i,j) = 0.5d0*(Fock_matrix_mo_alpha(i,j)+Fock_matrix_mo_beta(i,j)) &
-   !          + (Fock_matrix_mo_beta(i,j) - Fock_matrix_mo_alpha(i,j))
-   !    enddo
-   !  enddo
-
-   !endif
 
    do i = 1, mo_num
      Fock_matrix_diag_mo(i) = Fock_matrix_mo(i,i)
@@ -167,9 +191,9 @@
    if(frozen_orb_scf)then
      integer                        :: iorb,jorb
      !       active|core|active
-     !active |     | 0  |      
+     !active |     | 0  |
      !core   |  0  |    |   0
-     !active |     | 0  |       
+     !active |     | 0  |
      do i = 1, n_core_orb
       iorb = list_core(i)
       do j = 1, n_act_orb
@@ -261,10 +285,10 @@ BEGIN_PROVIDER [ double precision, SCF_energy ]
    do i=1,ao_num
      SCF_energy +=  &
          (ao_one_e_integrals(i,j) + Fock_matrix_ao_alpha(i,j) ) *  SCF_density_matrix_ao_alpha(i,j) +&
-         (ao_one_e_integrals(i,j) + Fock_matrix_ao_beta (i,j) ) *  SCF_density_matrix_ao_beta (i,j) 
+         (ao_one_e_integrals(i,j) + Fock_matrix_ao_beta (i,j) ) *  SCF_density_matrix_ao_beta (i,j)
    enddo
  enddo
- SCF_energy = 0.5d0 * SCF_energy + extra_e_contrib_density + nuclear_repulsion 
+ SCF_energy = 0.5d0 * SCF_energy + extra_e_contrib_density + nuclear_repulsion
 
 END_PROVIDER
 

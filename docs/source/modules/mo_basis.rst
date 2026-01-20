@@ -44,6 +44,16 @@ EZFIO parameters
     Coefficient of the i-th |AO| on the j-th |MO|
  
  
+.. option:: mo_coef_aux
+ 
+    AUX Coefficient of the i-th |AO| on the j-th |MO|
+ 
+ 
+.. option:: mo_coef_imag
+ 
+    Imaginary part of the MO coefficient of the i-th |AO| on the j-th |MO|
+ 
+ 
 .. option:: mo_label
  
     Label characterizing the MOS (Local, Canonical, Natural, *etc*)
@@ -52,6 +62,11 @@ EZFIO parameters
 .. option:: mo_occ
  
     |MO| occupation numbers
+ 
+ 
+.. option:: mo_symmetry
+ 
+    MOs with the same integer belong to the same irrep.
  
  
 .. option:: mo_class
@@ -88,20 +103,19 @@ Providers
        * :c:data:`ezfio_filename`
        * :c:data:`mo_num`
        * :c:data:`mpi_master`
-       * :c:data:`output_wall_time_0`
 
     Needed by:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`full_ijkl_bitmask`
        * :c:data:`list_act`
        * :c:data:`list_all_but_del_orb`
        * :c:data:`list_core`
        * :c:data:`list_del`
        * :c:data:`list_inact`
        * :c:data:`list_virt`
+       * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_act_orb`
        * :c:data:`n_all_but_del_orb`
@@ -143,27 +157,65 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`attachment_orbitals`
+       * :c:data:`cholesky_mo_transp`
+       * :c:data:`d0tu_alpha_ao`
+       * :c:data:`eigenvectors_fock_matrix_mo`
+       * :c:data:`fock_matrix_mo_alpha`
+       * :c:data:`fock_matrix_mo_beta`
+       * :c:data:`fps_spf_matrix_mo`
+       * :c:data:`mcscf_fock_alpha_mo`
        * :c:data:`mo_coef_in_ao_ortho_basis`
-       * :c:data:`mo_coef_novirt`
        * :c:data:`mo_coef_transp`
+       * :c:data:`mo_deriv_1_x`
        * :c:data:`mo_dipole_x`
        * :c:data:`mo_integrals_n_e`
        * :c:data:`mo_integrals_n_e_per_atom`
        * :c:data:`mo_kinetic_integrals`
        * :c:data:`mo_overlap`
        * :c:data:`mo_pseudo_integrals`
+       * :c:data:`mo_pseudo_integrals_local`
+       * :c:data:`mo_pseudo_integrals_non_local`
        * :c:data:`mo_spread_x`
-       * :c:data:`mo_two_e_integral_jj_from_ao`
+       * :c:data:`mo_two_e_int_erf_jj_from_ao`
+       * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
-       * :c:data:`mo_two_e_integrals_vv_from_ao`
+       * :c:data:`natorbsfci`
        * :c:data:`one_e_dm_alpha_ao_for_dft`
        * :c:data:`one_e_dm_alpha_ao_for_dft_no_core`
        * :c:data:`one_e_dm_ao_alpha`
+       * :c:data:`one_e_dm_ao_alpha_nstates`
        * :c:data:`one_e_dm_mo_alpha_for_dft`
        * :c:data:`one_e_dm_mo_beta_for_dft`
        * :c:data:`one_e_spin_density_ao`
        * :c:data:`psi_det`
        * :c:data:`s_mo_coef`
+       * :c:data:`scf_density_matrix_ao_alpha`
+       * :c:data:`scf_density_matrix_ao_beta`
+
+ 
+.. c:var:: mo_coef_aux
+
+
+    File : :file:`mo_basis/mos_aux.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_coef_aux	(ao_num,mo_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`ao_ortho_canonical_coef`
+       * :c:data:`ezfio_filename`
+       * :c:data:`mo_num`
+       * :c:data:`mpi_master`
+
 
  
 .. c:var:: mo_coef_imag
@@ -246,9 +298,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_two_e_integral_jj_from_ao`
+       * :c:data:`cholesky_semi_mo_transp_simple`
+       * :c:data:`mo_two_e_int_erf_jj_from_ao`
+       * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
-       * :c:data:`mo_two_e_integrals_vv_from_ao`
 
  
 .. c:var:: mo_label
@@ -311,14 +364,44 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`ao_one_e_integrals_from_mo`
+       * :c:data:`ao_ortho_canonical_nucl_elec_integrals`
+       * :c:data:`ao_ortho_lowdin_nucl_elec_integrals`
+       * :c:data:`attachment_numbers_sorted`
+       * :c:data:`attachment_orbitals`
        * :c:data:`banned_excitation`
+       * :c:data:`bielec_pqxx_array`
+       * :c:data:`bielec_pqxx_no_array`
+       * :c:data:`bielec_pxxq_array`
+       * :c:data:`bielec_pxxq_no_array`
+       * :c:data:`bielecci`
+       * :c:data:`bielecci_no`
        * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`cholesky_mo`
+       * :c:data:`cholesky_mo_transp`
+       * :c:data:`cholesky_no_1_idx_transp`
+       * :c:data:`cholesky_no_total_transp`
+       * :c:data:`cholesky_semi_mo_transp_simple`
        * :c:data:`core_fock_operator`
+       * :c:data:`core_fock_operator_erf`
+       * :c:data:`d0tu_alpha_ao`
        * :c:data:`data_one_e_dm_alpha_mo`
        * :c:data:`data_one_e_dm_beta_mo`
+       * :c:data:`difference_dm`
+       * :c:data:`difference_dm_eigvect`
+       * :c:data:`eigenvectors_fock_matrix_mo`
+       * :c:data:`fapq`
+       * :c:data:`fipq`
+       * :c:data:`fock_matrix_ao`
+       * :c:data:`fock_matrix_mo`
+       * :c:data:`fock_matrix_mo_alpha`
+       * :c:data:`fock_matrix_mo_beta`
        * :c:data:`fock_operator_closed_shell_ref_bitmask`
        * :c:data:`fock_wee_closed_shell`
+       * :c:data:`fps_spf_matrix_mo`
        * :c:data:`full_ijkl_bitmask`
+       * :c:data:`h_core_ri`
+       * :c:data:`int_erf_3_index`
        * :c:data:`list_act`
        * :c:data:`list_all_but_del_orb`
        * :c:data:`list_core`
@@ -328,14 +411,21 @@ Providers
        * :c:data:`list_inact`
        * :c:data:`list_inact_act`
        * :c:data:`list_virt`
+       * :c:data:`lowest_super_ci_coef_mo`
+       * :c:data:`mcscf_fock_alpha_mo`
+       * :c:data:`mcscf_fock_mo`
        * :c:data:`mo_class`
        * :c:data:`mo_coef`
+       * :c:data:`mo_coef_aux`
        * :c:data:`mo_coef_begin_iteration`
        * :c:data:`mo_coef_imag`
        * :c:data:`mo_coef_in_ao_ortho_basis`
        * :c:data:`mo_coef_transp`
+       * :c:data:`mo_deriv_1_x`
        * :c:data:`mo_dipole_x`
        * :c:data:`mo_integrals_cache_min`
+       * :c:data:`mo_integrals_erf_cache_min`
+       * :c:data:`mo_integrals_erf_map`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_integrals_n_e`
        * :c:data:`mo_integrals_n_e_per_atom`
@@ -344,22 +434,34 @@ Providers
        * :c:data:`mo_one_e_integrals`
        * :c:data:`mo_overlap`
        * :c:data:`mo_pseudo_integrals`
+       * :c:data:`mo_pseudo_integrals_local`
+       * :c:data:`mo_pseudo_integrals_non_local`
+       * :c:data:`mo_spread_centered_x`
        * :c:data:`mo_spread_x`
-       * :c:data:`mo_two_e_integral_jj_from_ao`
+       * :c:data:`mo_two_e_int_erf_jj`
+       * :c:data:`mo_two_e_int_erf_jj_from_ao`
+       * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_jj`
-       * :c:data:`mo_two_e_integrals_vv_from_ao`
+       * :c:data:`multi_s_deriv_1`
+       * :c:data:`multi_s_dipole_moment`
        * :c:data:`n_act_orb`
        * :c:data:`n_all_but_del_orb`
+       * :c:data:`n_attachment`
        * :c:data:`n_core_orb`
        * :c:data:`n_del_orb`
        * :c:data:`n_inact_orb`
        * :c:data:`n_int`
        * :c:data:`n_virt_orb`
+       * :c:data:`natorbsci_mos`
+       * :c:data:`natorbsfci`
+       * :c:data:`neworbs`
+       * :c:data:`occnum`
        * :c:data:`one_body_dm_mo_alpha_one_det`
        * :c:data:`one_e_dm_alpha_ao_for_dft`
        * :c:data:`one_e_dm_alpha_ao_for_dft_no_core`
        * :c:data:`one_e_dm_ao_alpha`
+       * :c:data:`one_e_dm_ao_alpha_nstates`
        * :c:data:`one_e_dm_average_alpha_mo_for_dft`
        * :c:data:`one_e_dm_average_beta_mo_for_dft`
        * :c:data:`one_e_dm_average_mo_for_dft`
@@ -376,10 +478,19 @@ Providers
        * :c:data:`one_e_dm_mo_spin_index`
        * :c:data:`one_e_spin_density_ao`
        * :c:data:`one_e_spin_density_mo`
+       * :c:data:`one_e_tr_dm_mo`
+       * :c:data:`one_e_tr_dm_mo_alpha`
+       * :c:data:`one_ints_no`
+       * :c:data:`ormas_n_orb`
        * :c:data:`psi_energy_h_core`
        * :c:data:`s_mo_coef`
-       * :c:data:`singles_alpha_csc_idx`
-       * :c:data:`singles_beta_csc_idx`
+       * :c:data:`super_ci_dm`
+       * :c:data:`superci_natorb`
+       * :c:data:`switch_mo_coef`
+       * :c:data:`two_e_dm_mo`
+       * :c:data:`umat`
+       * :c:data:`v_ne_psi_energy`
+       * :c:data:`z_dipole_moment`
 
  
 .. c:var:: mo_occ
@@ -469,12 +580,18 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`four_idx_novvvv`
+       * :c:data:`fock_matrix_mo_alpha`
+       * :c:data:`fock_matrix_mo_beta`
+       * :c:data:`fps_spf_matrix_mo`
+       * :c:data:`mcscf_fock_alpha_mo`
+       * :c:data:`mo_deriv_1_x`
        * :c:data:`mo_dipole_x`
        * :c:data:`mo_integrals_n_e`
        * :c:data:`mo_integrals_n_e_per_atom`
        * :c:data:`mo_kinetic_integrals`
        * :c:data:`mo_pseudo_integrals`
+       * :c:data:`mo_pseudo_integrals_local`
+       * :c:data:`mo_pseudo_integrals_non_local`
        * :c:data:`mo_spread_x`
        * :c:data:`one_e_dm_mo_alpha_for_dft`
        * :c:data:`one_e_dm_mo_beta_for_dft`
@@ -554,6 +671,7 @@ Subroutines / functions
         subroutine give_all_mos_at_r(r,mos_array)
 
 
+    mos_array(i) = ith MO function evaluated at "r"
 
     Needs:
 
@@ -622,6 +740,16 @@ Subroutines / functions
        * :c:data:`mo_label`
        * :c:data:`mo_num`
 
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`create_guess`
+       * :c:func:`damping_scf`
+       * :c:func:`hcore_guess`
+       * :c:func:`roothaan_hall_scf`
+
     Calls:
 
     .. hlist::
@@ -689,7 +817,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`set_natorb_no_ov_rot`
        * :c:func:`set_natural_mos`
+       * :c:func:`set_natural_mos_canon_label`
 
     Calls:
 
@@ -751,7 +881,6 @@ Subroutines / functions
 
        * :c:data:`ao_md5`
        * :c:data:`ao_num`
-       * :c:data:`ezfio_filename`
        * :c:data:`mo_class`
        * :c:data:`mo_coef`
        * :c:data:`mo_label`
@@ -763,7 +892,14 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`damping_scf`
+       * :c:func:`hcore_guess`
+       * :c:func:`huckel_guess`
+       * :c:func:`roothaan_hall_scf`
+       * :c:func:`run_orb_opt_trust_v2`
        * :c:func:`save_natural_mos`
+       * :c:func:`save_natural_mos_canon_label`
+       * :c:func:`save_natural_mos_no_ov_rot`
 
     Calls:
 
@@ -776,7 +912,6 @@ Subroutines / functions
        * :c:func:`ezfio_set_mo_basis_mo_label`
        * :c:func:`ezfio_set_mo_basis_mo_num`
        * :c:func:`ezfio_set_mo_basis_mo_occ`
-       * :c:func:`system`
 
  
 .. c:function:: save_mos_no_occ:
@@ -796,7 +931,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_num`
-       * :c:data:`ezfio_filename`
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
 
@@ -806,7 +940,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`ezfio_set_mo_basis_mo_coef`
-       * :c:func:`system`
 
  
 .. c:function:: save_mos_truncated:
@@ -827,7 +960,6 @@ Subroutines / functions
 
        * :c:data:`ao_md5`
        * :c:data:`ao_num`
-       * :c:data:`ezfio_filename`
        * :c:data:`mo_class`
        * :c:data:`mo_coef`
        * :c:data:`mo_label`
@@ -844,5 +976,4 @@ Subroutines / functions
        * :c:func:`ezfio_set_mo_basis_mo_label`
        * :c:func:`ezfio_set_mo_basis_mo_num`
        * :c:func:`ezfio_set_mo_basis_mo_occ`
-       * :c:func:`system`
 

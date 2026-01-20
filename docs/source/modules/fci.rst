@@ -86,93 +86,38 @@ Programs
  * :ref:`fci` 
  * :ref:`pt2` 
  
-Providers 
---------- 
- 
-.. c:var:: do_ddci
-
-
-    File : :file:`fci/class.irp.f`
-
-    .. code:: fortran
-
-        logical	:: do_only_1h1p	
-        logical	:: do_only_cas	
-        logical	:: do_ddci	
-
-
-    In the FCI case, all those are always false
-
-
- 
-.. c:var:: do_only_1h1p
-
-
-    File : :file:`fci/class.irp.f`
-
-    .. code:: fortran
-
-        logical	:: do_only_1h1p	
-        logical	:: do_only_cas	
-        logical	:: do_ddci	
-
-
-    In the FCI case, all those are always false
-
-
- 
-.. c:var:: do_only_cas
-
-
-    File : :file:`fci/class.irp.f`
-
-    .. code:: fortran
-
-        logical	:: do_only_1h1p	
-        logical	:: do_only_cas	
-        logical	:: do_ddci	
-
-
-    In the FCI case, all those are always false
-
-
- 
- 
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: save_energy:
+.. c:function:: write_c_ij_ab:
 
 
-    File : :file:`fci/save_energy.irp.f`
+    File : :file:`write_c_ij_ab.irp.f`
 
     .. code:: fortran
 
-        subroutine save_energy(E,pt2)
+        subroutine write_c_ij_ab
 
 
-    Saves the energy in |EZFIO|.
 
     Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_states`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_cipsi`
-       * :c:func:`run_stochastic_cipsi`
+       * :c:data:`read_wf`
 
     Calls:
 
     .. hlist::
        :columns: 3
 
-       * :c:func:`ezfio_set_fci_energy`
-       * :c:func:`ezfio_set_fci_energy_pt2`
+       * :c:func:`routine`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`read_wf`
 
