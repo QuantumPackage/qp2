@@ -2,6 +2,7 @@
 
 int  gpu_ndevices();
 void gpu_set_device(int32_t i);
+void gpu_get_memory(size_t* free, size_t* total);
 
 void gpu_allocate(void** ptr, const int64_t n);
 void gpu_free(void** ptr);

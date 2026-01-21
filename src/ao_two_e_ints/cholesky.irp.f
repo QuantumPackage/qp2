@@ -1,3 +1,5 @@
+use gpu
+
 double precision function get_ao_integ_chol(i,j,k,l)
  implicit none
   BEGIN_DOC
@@ -288,8 +290,75 @@ END_PROVIDER
 
        if (N>0) then
 
+         double precision :: gpu_free
+         call gpu_free_memory(gpu_free)
+
+         if (gpu_free < 1.d0) then
+           ! If there is very few memory available on the GPU, or we are in CPU-only mode
            call dgemm('N', 'T', np, nq, N, -1.d0,                       &
                   Ltmp_p(1,1), np, Ltmp_q(1,1), nq, 0.d0, Delta, np)
+         else
+           integer :: gpu_block
+           gpu_block = 1
+
+           integer*8 :: nbytes, nbytes_gpu
+           nbytes_gpu = int(gpu_free,8)/8_8 * 1024_8**3
+           nbytes = int(np,8)*int(N,8) + int(nq,8)*int(N,8) + int(np,8)*int(nq,8)
+
+           do while (nbytes > nbytes_gpu)
+             gpu_block = gpu_block+1
+             nbytes = int(np/gpu_block,8)*int(N,8) + &
+                      int(nq/gpu_block,8)*int(N,8) + &
+                      int(np/gpu_block,8)*int(nq/gpu_block,8)
+           end do
+
+           integer :: pstep, qstep
+           pstep = max(np/gpu_block,1)
+           qstep = max(nq/gpu_block,1)
+
+           type(gpu_double2) :: Ltmp_p_d, Ltmp_q_d, Delta_d
+           call gpu_allocate(Ltmp_p_d, pstep, N)
+           call gpu_allocate(Ltmp_q_d, qstep, N)
+           call gpu_allocate(Delta_d, pstep, qstep)
+
+           double precision, allocatable, dimension(:,:) :: Ltmp_p_h, Ltmp_q_h, Delta_h
+           allocate(Ltmp_p_h(pstep, N))
+           allocate(Ltmp_q_h(qstep, N))
+           allocate(Delta_h(pstep, qstep))
+
+           integer :: npp, nqq
+           do ii=1,np,pstep
+             npp = min(pstep,np-ii+1)
+
+             Ltmp_p_h(1:npp,1:N) = Ltmp_p(ii:ii+npp-1,1:N)
+             call gpu_upload(Ltmp_p_h, Ltmp_p_d)
+
+             do jj=1,nq,qstep
+               nqq = min(qstep,nq-jj+1)
+
+               Ltmp_q_h(1:nqq,1:N) = Ltmp_q(jj:jj+nqq-1,1:N)
+               call gpu_upload(Ltmp_q_h, Ltmp_q_d)
+
+               call gpu_dgemm(blas_handle, 'N', 'T', npp, nqq, N, -1.d0, &
+                  Ltmp_p_d%f(1,1), pstep, &
+                  Ltmp_q_d%f(1,1), qstep, &
+                  0.d0, Delta_d%f(1,1), pstep)
+               call gpu_synchronize()
+
+               call gpu_download(Delta_d, Delta_h)
+               Delta(ii:ii+npp-1,jj:jj+nqq-1) = Delta_h(1:npp,1:nqq)
+
+             enddo
+
+           enddo
+
+           call gpu_deallocate(Ltmp_p_d)
+           call gpu_deallocate(Ltmp_q_d)
+           call gpu_deallocate(Delta_d)
+           deallocate(Ltmp_p_h)
+           deallocate(Ltmp_q_h)
+           deallocate(Delta_h)
+         endif
 
        else
 

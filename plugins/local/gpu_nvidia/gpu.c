@@ -21,6 +21,13 @@ void gpu_set_device(int32_t igpu) {
   cudaSetDevice((int) igpu);
 }
 
+void gpu_get_memory(size_t* free, size_t* total) {
+    cudaError_t rc = cudaMemGetInfo( free, total );
+    if (rc != cudaSuccess) {
+      *free = 0;
+      *total = 0;
+    }
+}
 
 /* Allocation functions */
 

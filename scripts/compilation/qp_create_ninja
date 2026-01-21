@@ -107,7 +107,7 @@ def ninja_create_env_variable(pwd_config_file):
             try:
                 content = ""
                 with open(includefile,'r') as f:
-                    content = f.read()
+                    content = f.read().strip()
                     str_ += " "+content
             except IOError:
                 pass
@@ -487,14 +487,21 @@ def ninja_irpf90_make_rule():
     # c m d #
     # ~#~#~ #
 
-    l_cmd = ["cd $module_abs"] + l_flag + ["irpf90 $include_dir $IRPF90_FLAGS"]
+    # Path to the post-processing script
+    fix_script = join("$QP_ROOT", "scripts", "compilation", "fix_ninja_response_files.py")
+    
+    # Run irpf90 and then post-process the generated ninja file to use response files
+    # This fixes the "Argument list too long" error when linking with many .o files
+    # Use && to ensure post-processing only runs if irpf90 succeeds
+    l_cmd = ["cd $module_abs"] + l_flag + ["irpf90 $include_dir $IRPF90_FLAGS"] + \
+            ["python3 {0} $module_abs".format(fix_script)]
 
     # ~#~#~#~#~#~ #
     # s t r i n g #
     # ~#~#~#~#~#~ #
 
     l_string = ["pool irp_pool", "   depth = 1", "", "rule build_irpf90.ninja",
-                "   command = {0}".format(" ; ".join(l_cmd)),
+                "   command = {0}".format(" && ".join(l_cmd)),
                 "   pool = irp_pool",
                 "   description = Running IRPF90 for $module_rel", ""]
 

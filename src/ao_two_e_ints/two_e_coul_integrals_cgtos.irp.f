@@ -1275,7 +1275,7 @@ subroutine give_cpolynom_mult_center_x(P_center, Q_center, a_x, d_x, p, q, n_pt_
   ! subroutine that returns the explicit polynom in term of the "t"
   ! variable of the following polynoms :
   !
-  ! $I_{x_1}(a_x,d_x,p,q) \, I_{x_1}(a_y,d_y,p,q) \ I_{x_1}(a_z,d_z,p,q)$
+  ! $I_{x_1}(a_x,d_x,p,q) \, I_{x_1}(a_y,d_y,p,q) \, I_{x_1}(a_z,d_z,p,q)$
   END_DOC
 
   implicit none

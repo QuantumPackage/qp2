@@ -3,6 +3,8 @@ integer, parameter :: SIMD_vector = 32
 integer, parameter :: N_int_max = 128
 
 double precision, parameter :: pi =  dacos(-1.d0)
+double precision, parameter :: inv_sqtwo = 0.7071067811865475d0
+double precision, parameter :: sqtwo = 1.4142135623730951d0
 double precision, parameter :: inv_pi =  1.d0/dacos(-1.d0)
 double precision, parameter :: sqpi =  dsqrt(dacos(-1.d0))
 double precision, parameter :: pi_5_2 =  34.9868366552d0

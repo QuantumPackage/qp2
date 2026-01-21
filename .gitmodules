@@ -7,3 +7,9 @@
 [submodule "external/qp2-dependencies"]
 	path = external/qp2-dependencies
 	url = https://github.com/QuantumPackage/qp2-dependencies.git
+[submodule "external/OpenOrbitalOptimizer"]
+	path = external/OpenOrbitalOptimizer
+	url = https://github.com/susilehtola/OpenOrbitalOptimizer.git
+[submodule "external/armadillo-code"]
+	path = external/armadillo-code
+	url = https://gitlab.com/conradsnicta/armadillo-code

@@ -15,6 +15,11 @@ void gpu_set_device(int32_t i) {
   return;
 }
 
+void gpu_get_memory(size_t* free, size_t* total) {
+  *free = 0;
+  *total = 0;
+}
+
 
 /* Allocation functions */
 

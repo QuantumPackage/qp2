@@ -879,7 +879,7 @@ subroutine give_polynom_mult_center_x(P_center,Q_center,a_x,d_x,p,q,n_pt_in,pq_i
   ! subroutine that returns the explicit polynom in term of the "t"
   ! variable of the following polynomw :
   !
-  ! $I_{x_1}(a_x,d_x,p,q) \, I_{x_1}(a_y,d_y,p,q) \ I_{x_1}(a_z,d_z,p,q)$
+  ! $I_{x_1}(a_x,d_x,p,q) \, I_{x_1}(a_y,d_y,p,q) \, I_{x_1}(a_z,d_z,p,q)$
   END_DOC
   integer, intent(in)            :: n_pt_in
   integer,intent(out)            :: n_pt_out

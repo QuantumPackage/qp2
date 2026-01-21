@@ -642,16 +642,22 @@ end
 
 
   if (do_mo_cholesky) then
-    double precision, allocatable :: buffer(:,:)
-    allocate (buffer(cholesky_mo_num,mo_num))
-    do k=1,cholesky_mo_num
-      do i=1,mo_num
-        buffer(k,i) = cholesky_mo_transp(k,i,i)
-      enddo
-    enddo
+!   The following dgemm call is equivalent to
+!    double precision, allocatable :: buffer(:,:)
+!    allocate (buffer(cholesky_mo_num,mo_num))
+!    do k=1,cholesky_mo_num
+!      do i=1,mo_num
+!        buffer(k,i) = cholesky_mo_transp(k,i,i)
+!      enddo
+!    enddo
+!    call dgemm('T','N',mo_num,mo_num,cholesky_mo_num,1.d0, &
+!      buffer, cholesky_mo_num, buffer, cholesky_mo_num, 0.d0, mo_two_e_integrals_jj, mo_num)
+!    deallocate(buffer)
+
     call dgemm('T','N',mo_num,mo_num,cholesky_mo_num,1.d0, &
-      buffer, cholesky_mo_num, buffer, cholesky_mo_num, 0.d0, mo_two_e_integrals_jj, mo_num)
-    deallocate(buffer)
+      cholesky_mo_transp, cholesky_mo_num*(mo_num+1), &
+      cholesky_mo_transp, cholesky_mo_num*(mo_num+1), &
+      0.d0, mo_two_e_integrals_jj, mo_num)
 
     do j=1,mo_num
       do i=1,mo_num

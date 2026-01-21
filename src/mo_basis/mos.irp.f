@@ -46,8 +46,6 @@ BEGIN_PROVIDER [ double precision, mo_coef, (ao_num,mo_num) ]
   ! Molecular orbital coefficients on |AO| basis set
   !
   ! mo_coef(i,j) = coefficient of the i-th |AO| on the jth |MO|
-  !
-  ! mo_label : Label characterizing the |MOs| (local, canonical, natural, etc)
   END_DOC
   integer                        :: i, j
   double precision, allocatable  :: buffer(:,:)
@@ -99,8 +97,6 @@ BEGIN_PROVIDER [ double precision, mo_coef_imag, (ao_num,mo_num) ]
   ! Molecular orbital coefficients on |AO| basis set
   !
   ! mo_coef_imag(i,j) = coefficient of the i-th |AO| on the jth |MO|
-  !
-  ! mo_label : Label characterizing the |MOs| (local, canonical, natural, etc)
   END_DOC
   integer                        :: i, j
   double precision, allocatable  :: buffer(:,:)
@@ -164,8 +160,6 @@ BEGIN_PROVIDER [ character*(64), mo_label ]
   implicit none
   BEGIN_DOC
   ! |MO| coefficients on |AO| basis set
-  !
-  ! mo_coef(i,j) = coefficient of the i-th |AO| on the j-th |MO|
   !
   ! mo_label : Label characterizing the |MOs| (local, canonical, natural, etc)
   END_DOC

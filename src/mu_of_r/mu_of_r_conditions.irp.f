@@ -348,12 +348,13 @@ BEGIN_PROVIDER [double precision, mu_of_r_projector_mo, (n_points_final_grid) ]
    enddo
  enddo
 
+return
  do ipoint=1,n_points_final_grid
    ! epsilon
-!  mu_of_r_projector_mo(ipoint) = 1.d0/(2.d0*dacos(-1.d0) * mu_of_r_projector_mo(ipoint)**(2.d0/3.d0))
+  mu_of_r_projector_mo(ipoint) = 1.d0/(2.d0*dacos(-1.d0) * mu_of_r_projector_mo(ipoint)**(2.d0/3.d0))
    ! mu
-!  mu_of_r_projector_mo(ipoint) = 1.d0/dsqrt( 2.d0*mu_of_r_projector_mo(ipoint) )
-   mu_of_r_projector_mo(ipoint) = mu_of_r_projector_mo(ipoint)**(1.d0/3.d0) * 2.199085233011538d0
+   mu_of_r_projector_mo(ipoint) = 1.d0/dsqrt( 4.d0*mu_of_r_projector_mo(ipoint) )
+!  mu_of_r_projector_mo(ipoint) = mu_of_r_projector_mo(ipoint)**(1.d0/3.d0) * 2.199085233011538d0
  enddo
 END_PROVIDER
 
@@ -417,12 +418,13 @@ BEGIN_PROVIDER [double precision, mu_of_r_projector_ao_prod, (n_points_final_gri
 !       pb = pb + tmp(a) * basis_prod_overlap_inv(b,a) * tmp(b)
 !     enddo
 !   enddo
-
+!
    call dgemv('N', basis_prod_num, basis_prod_num, 1.d0, basis_prod_overlap_inv, &
      basis_prod_num, tmp, 1, 0.d0, tmp2, 1)
    pb = ddot(basis_prod_num, tmp, 1, tmp2, 1)
 
-   epsilon = 1.d0/(2.d0*dacos(-1.d0) * pb**(2.d0/3.d0) )
+   pb = max(tiny(1.e0), pb)
+   epsilon = 1.d0/(2.d0*dacos(-1.d0) * pb**(2.d0/3.d0))
    mu_of_r_projector_ao_prod(ipoint) = 1.d0/(2.d0*dsqrt(epsilon))
  enddo
  !$OMP END DO

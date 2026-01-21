@@ -224,7 +224,7 @@ END_DOC
 
 
   ! Identify degenerate MOs and combine them to force them to be on the axes
-  if (.not.do_mom) then
+  if (do_mom.eqv..False. .and.frozen_orb_scf.eqv..False.) then
     allocate(S(ao_num,ao_num))
     i=1
     do while (i<mo_num)
@@ -246,6 +246,9 @@ END_DOC
   if(do_mom)then
      call reorder_mo_max_overlap
   end if
+  if(frozen_orb_scf)then
+     call reorder_core_orb
+  endif
   TOUCH mo_coef
 
   print *, ''
@@ -401,3 +404,4 @@ END_DOC
   !$OMP END PARALLEL DO
 
 end
+
