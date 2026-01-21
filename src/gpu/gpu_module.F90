@@ -720,6 +720,14 @@ module gpu
 ! gpu_upload
 ! ----------
 
+    subroutine gpu_upload_double_n(cpu_ptr, gpu_ptr, n)
+      implicit none
+      double precision, target, intent(in)     :: cpu_ptr
+      double precision, target, intent(in)     :: gpu_ptr
+      integer, intent(in) :: n
+      call gpu_upload_c(c_loc(cpu_ptr), c_loc(gpu_ptr), 8_8*n)
+    end subroutine
+
     subroutine gpu_upload_double1(cpu_ptr, gpu_ptr)
       implicit none
       double precision, target, intent(in)     :: cpu_ptr(*)
@@ -809,6 +817,14 @@ module gpu
 ! gpu_download
 ! ------------
 
+    subroutine gpu_download_double_n(gpu_ptr, cpu_ptr, n)
+      implicit none
+      double precision, target, intent(in)     :: gpu_ptr
+      double precision, target, intent(in)     :: cpu_ptr
+      integer, intent(in) :: n
+      call gpu_download_c(c_loc(gpu_ptr), c_loc(cpu_ptr), 8_8*n)
+    end subroutine
+
     subroutine gpu_download_double1(gpu_ptr, cpu_ptr)
       implicit none
       type(gpu_double1), intent(in)  :: gpu_ptr
@@ -895,6 +911,14 @@ module gpu
 
 ! gpu_copy
 ! --------
+
+    subroutine gpu_copy_double_n(gpu_ptr_src, gpu_ptr_dest, n)
+      implicit none
+      double precision, target, intent(in)        :: gpu_ptr_src
+      double precision, target, intent(in)        :: gpu_ptr_dest
+      integer, intent(in) :: n
+      call gpu_copy_c(c_loc(gpu_ptr_src), c_loc(gpu_ptr_dest), 8_8*n)
+    end subroutine
 
     subroutine gpu_copy_double1(gpu_ptr_src, gpu_ptr_dest)
       implicit none
