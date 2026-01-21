@@ -1,4 +1,5 @@
 use map_module
+use gpu
 
 BEGIN_PROVIDER [ logical, all_mo_integrals ]
   implicit none
@@ -71,27 +72,54 @@ BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:mo_integrals_cache_s
  integer*8                      :: ii
  integer(key_kind)              :: idx
  real(integral_kind)            :: integral
+
  FREE ao_integrals_cache
 
  if (do_mo_cholesky) then
 
    call set_multiple_levels_omp(.False.)
 
-   !$OMP PARALLEL DO PRIVATE(k,l,ii) SCHEDULE(dynamic)
-   do l=mo_integrals_cache_min,mo_integrals_cache_max
-     do k=mo_integrals_cache_min,mo_integrals_cache_max
-         ii = int(l-mo_integrals_cache_min,8)
-         ii = ior( shiftl(ii,mo_integrals_cache_shift), int(k-mo_integrals_cache_min,8))
-         ii = shiftl(ii,2*mo_integrals_cache_shift)
-         call dgemm('T','N', mo_integrals_cache_max-mo_integrals_cache_min+1, &
-                             mo_integrals_cache_max-mo_integrals_cache_min+1, &
-           cholesky_mo_num, 1.d0, &
-           cholesky_mo_transp(1,mo_integrals_cache_min,k), cholesky_mo_num, &
-           cholesky_mo_transp(1,mo_integrals_cache_min,l), cholesky_mo_num, 0.d0, &
-           mo_integrals_cache(ii), mo_integrals_cache_size)
+   if (gpu_num == 0) then
+
+     !$OMP PARALLEL DO PRIVATE(k,l,ii) SCHEDULE(dynamic)
+     do l=mo_integrals_cache_min,mo_integrals_cache_max
+       do k=mo_integrals_cache_min,mo_integrals_cache_max
+           ii = int(l-mo_integrals_cache_min,8)
+           ii = ior( shiftl(ii,mo_integrals_cache_shift), int(k-mo_integrals_cache_min,8))
+           ii = shiftl(ii,2*mo_integrals_cache_shift)
+           call dgemm('T','N', mo_integrals_cache_max-mo_integrals_cache_min+1, &
+                               mo_integrals_cache_max-mo_integrals_cache_min+1, &
+             cholesky_mo_num, 1.d0, &
+             cholesky_mo_transp(1,mo_integrals_cache_min,k), cholesky_mo_num, &
+             cholesky_mo_transp(1,mo_integrals_cache_min,l), cholesky_mo_num, 0.d0, &
+             mo_integrals_cache(ii), mo_integrals_cache_size)
+       enddo
      enddo
-   enddo
-   !$OMP END PARALLEL DO
+     !$OMP END PARALLEL DO
+
+   else
+
+     type(gpu_double1) :: mo_integrals_cache_d
+     call gpu_allocate(mo_integrals_cache_d, mo_integrals_cache_size*(mo_integrals_cache_max-mo_integrals_cache_min+1))
+
+     do l=mo_integrals_cache_min,mo_integrals_cache_max
+       do k=mo_integrals_cache_min,mo_integrals_cache_max
+           ii = int(l-mo_integrals_cache_min,8)
+           ii = ior( shiftl(ii,mo_integrals_cache_shift), int(k-mo_integrals_cache_min,8))
+           ii = shiftl(ii,2*mo_integrals_cache_shift)
+           call gpu_dgemm(blas_handle,'T','N', mo_integrals_cache_max-mo_integrals_cache_min+1, &
+                               mo_integrals_cache_max-mo_integrals_cache_min+1, &
+             cholesky_mo_num, 1.d0, &
+             cholesky_mo_transp_d%f(1,mo_integrals_cache_min,k), cholesky_mo_num, &
+             cholesky_mo_transp_d%f(1,mo_integrals_cache_min,l), cholesky_mo_num, 0.d0, &
+             mo_integrals_cache_d%f(1), mo_integrals_cache_size)
+           call gpu_synchronize()
+           call gpu_download(mo_integrals_cache_d,mo_integrals_cache(ii:))
+       enddo
+     enddo
+     call gpu_deallocate(mo_integrals_cache_d)
+
+   endif
 
  else
    !$OMP PARALLEL DO PRIVATE (i,j,k,l,idx,ii,integral) SCHEDULE(dynamic)
@@ -178,13 +206,21 @@ double precision function get_two_e_integral(i,j,k,l,map)
 
     if  (do_mo_cholesky) then
 
-      double precision, external :: ddot
-      real, external :: sdot
-      integer :: isplit
       if (mo_cholesky_double) then
+!       call gpu_ddot(blas_handle, cholesky_mo_num, &
+!             cholesky_mo_transp_d%f(1,i,k), 1, &
+!             cholesky_mo_transp_d%f(1,j,l), 1, get_two_e_integral)
+        double precision, external :: ddot
         get_two_e_integral = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, cholesky_mo_transp(1,j,l), 1)
       else
+!        real :: res
+!        call gpu_sdot(blas_handle, cholesky_mo_num, &
+!             cholesky_mo_transp_sp_d%f(1,i,k), 1, &
+!             cholesky_mo_transp_sp_d%f(1,j,l), 1, res)
+!        get_two_e_integral = res
+        real, external :: sdot
         get_two_e_integral = sdot(cholesky_mo_num, cholesky_mo_transp_sp(1,i,k), 1, cholesky_mo_transp_sp(1,j,l), 1)
+!       integer :: isplit
 !        get_two_e_integral = 0.d0
 !        do isplit=1,4
 !          get_two_e_integral = get_two_e_integral + &

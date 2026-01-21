@@ -80,10 +80,6 @@ module gpu
 ! ------------
 
   interface
-    logical(c_bool) function no_gpu() bind(C)
-      import
-    end function
-
     integer function gpu_ndevices() bind(C)
       import
     end function
@@ -91,6 +87,11 @@ module gpu
     subroutine gpu_set_device(id) bind(C)
       import
       integer(c_int32_t), value :: id
+    end subroutine
+
+    subroutine gpu_get_memory(free, total) bind(C, name='gpu_get_memory')
+      import
+      integer(c_size_t) :: free, total
     end subroutine
 
     subroutine gpu_allocate_c(ptr, n) bind(C, name='gpu_allocate')
