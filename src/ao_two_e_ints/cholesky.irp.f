@@ -409,7 +409,7 @@ END_PROVIDER
          iblock = iblock+1
 
          if (do_gpu) then
-           call gpu_copy_double_n(Delta_d%f(1,dj), Ltmp_p_d%f(1,iblock), np)
+           call gpu_copy(Delta_d%f(1,dj), Ltmp_p_d%f(1,iblock), np)
          else
            !$OMP PARALLEL DO PRIVATE(p)
            do p=1,np
@@ -448,13 +448,13 @@ END_PROVIDER
            endif
 
            if (do_gpu) then
-             call gpu_upload_double_n(Delta_col(1), Ltmp_p_d%f(1,iblock), np)
+             call gpu_upload(Delta_col(1), Ltmp_p_d%f(1,iblock), np)
              call gpu_dgeam(blas_handle, 'N', 'N', np, 1, &
                1.d0, Ltmp_p_d%f(1,iblock), np, &
                1.d0, Delta_d%f(1,dj), np, &
                      Ltmp_p_d%f(1,iblock), np)
 !             call gpu_synchronize()
-             call gpu_copy_double_n(Ltmp_p_d%f(1,iblock), Delta_d%f(1,dj), np)
+             call gpu_copy(Ltmp_p_d%f(1,iblock), Delta_d%f(1,dj), np)
            else
              !$OMP PARALLEL DO PRIVATE(p)
              do p=1,np
@@ -494,7 +494,7 @@ END_PROVIDER
                   Ltmp_p_d%f(1,iblock), np)
 !           call gpu_synchronize()
 
-           call gpu_download_double_n(Ltmp_p_d%f(1,iblock), Ltmp_p(1,iblock), np)
+           call gpu_download(Ltmp_p_d%f(1,iblock), Ltmp_p(1,iblock), np)
          else
            do p=1,np
              Ltmp_p(p,iblock) = Ltmp_p(p,iblock) * f
@@ -517,7 +517,7 @@ END_PROVIDER
          !$OMP END PARALLEL
 
          if (do_gpu) then
-           call gpu_upload_double_n(Ltmp_q(1,iblock), Ltmp_q_d%f(1,iblock), nq)
+           call gpu_upload(Ltmp_q(1,iblock), Ltmp_q_d%f(1,iblock), nq)
          endif
 
          Qmax = D(Dset(1))

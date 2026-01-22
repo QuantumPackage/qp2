@@ -642,7 +642,9 @@ end
 
 
   if (do_mo_cholesky) then
+
 !   The following dgemm call is equivalent to
+!
 !    double precision, allocatable :: buffer(:,:)
 !    allocate (buffer(cholesky_mo_num,mo_num))
 !    do k=1,cholesky_mo_num
@@ -650,24 +652,49 @@ end
 !        buffer(k,i) = cholesky_mo_transp(k,i,i)
 !      enddo
 !    enddo
+!
 !    call dgemm('T','N',mo_num,mo_num,cholesky_mo_num,1.d0, &
 !      buffer, cholesky_mo_num, buffer, cholesky_mo_num, 0.d0, mo_two_e_integrals_jj, mo_num)
+!
 !    deallocate(buffer)
 
-    call dgemm('T','N',mo_num,mo_num,cholesky_mo_num,1.d0, &
-      cholesky_mo_transp, cholesky_mo_num*(mo_num+1), &
-      cholesky_mo_transp, cholesky_mo_num*(mo_num+1), &
-      0.d0, mo_two_e_integrals_jj, mo_num)
+    type(gpu_double2) :: mo_two_e_integrals_jj_d
+    type(gpu_double2) :: mo_two_e_integrals_jj_exchange_d
+    call gpu_allocate(mo_two_e_integrals_jj_d, mo_num, mo_num)
+    call gpu_allocate(mo_two_e_integrals_jj_exchange_d, mo_num, mo_num)
 
+    call gpu_dgemm(blas_handle, 'T','N',mo_num,mo_num,cholesky_mo_num,1.d0, &
+      cholesky_mo_transp_d%f(1,1,1), cholesky_mo_num*(mo_num+1), &
+      cholesky_mo_transp_d%f(1,1,1), cholesky_mo_num*(mo_num+1), &
+      0.d0, mo_two_e_integrals_jj_d%f(1,1), mo_num)
+
+    type(gpu_stream) :: stream(mo_num)
+
+    !$OMP PARALLEL DO PRIVATE(i,j)
     do j=1,mo_num
+      call gpu_stream_create(stream(j))
+      call gpu_set_stream(blas_handle, stream(j))
       do i=1,mo_num
-          mo_two_e_integrals_jj_exchange(i,j) = 0.d0
-          do k=1,cholesky_mo_num
-            mo_two_e_integrals_jj_exchange(i,j) = mo_two_e_integrals_jj_exchange(i,j) + &
-                          cholesky_mo_transp(k,i,j)*cholesky_mo_transp(k,j,i)
-          enddo
+          call gpu_ddot(blas_handle,cholesky_mo_num, &
+             cholesky_mo_transp_d%f(1,i,j), 1, &
+             cholesky_mo_transp_d%f(1,j,i), 1, &
+             mo_two_e_integrals_jj_exchange_d%f(i,j))
       enddo
     enddo
+    !$OMP END PARALLEL DO
+
+    do j=1,mo_num
+      call gpu_stream_destroy(stream(j))
+    enddo
+    call gpu_set_stream(blas_handle, gpu_default_stream)
+
+    call gpu_synchronize()
+
+    call gpu_download(mo_two_e_integrals_jj_d,mo_two_e_integrals_jj)
+    call gpu_download(mo_two_e_integrals_jj_exchange_d,mo_two_e_integrals_jj_exchange)
+
+    call gpu_deallocate(mo_two_e_integrals_jj_d)
+    call gpu_deallocate(mo_two_e_integrals_jj_exchange_d)
 
   else
 
