@@ -141,6 +141,11 @@ module gpu
       type(c_ptr), value :: handle, stream
     end subroutine
 
+    subroutine gpu_stream_synchronize(stream) bind(C)
+      import
+      type(c_ptr), value :: stream
+    end subroutine
+
     subroutine gpu_synchronize() bind(C)
       import
     end subroutine

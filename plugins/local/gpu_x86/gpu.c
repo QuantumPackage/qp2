@@ -70,6 +70,10 @@ void gpu_synchronize() {
   return;
 }
 
+void gpu_stream_synchronize(void* stream) {
+  return;
+}
+
 
 /* BLAS functions */
 

@@ -102,7 +102,7 @@ BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:mo_integrals_cache_s
      !$OMP PARALLEL PRIVATE(k,l,ii, mo_integrals_cache_d, blas)
      type(gpu_double1) :: mo_integrals_cache_d
      type(gpu_blas)  :: blas
-     call gpu_blas_create(blas)
+     blas = blas_handle_mt(omp_get_thread_num())
      call gpu_allocate(mo_integrals_cache_d, mo_integrals_cache_size*(mo_integrals_cache_max-mo_integrals_cache_min+1))
 
      !$OMP DO
@@ -120,9 +120,9 @@ BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:mo_integrals_cache_s
            call gpu_download(mo_integrals_cache_d%f(1),mo_integrals_cache(ii),size(mo_integrals_cache_d%f))
        enddo
      enddo
-     !$OMP END DO NOWAIT
+     !$OMP END DO
 
-     call gpu_blas_destroy(blas)
+     call gpu_synchronize()
      call gpu_deallocate(mo_integrals_cache_d)
      !$OMP END PARALLEL
 
@@ -279,6 +279,8 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
   if (do_mo_cholesky.and. .not.mo_cholesky_double) then
     allocate(out_val_sp(mo_num))
   endif
+  call get_random_blas_handle(blas)
+
 
   if (iand(ii, -mo_integrals_cache_size) == 0) then
     ! Some integrals are in the cache
@@ -286,8 +288,6 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
     if (mo_integrals_cache_min > 1) then
 
       if (do_mo_cholesky) then
-
-        call gpu_blas_create(blas)
 
         !TODO: bottleneck here
         if (mo_cholesky_double) then
@@ -325,8 +325,6 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 !          enddo
         endif
 
-        call gpu_blas_destroy(blas)
-
       else
 
         q = min(j,l)
@@ -358,8 +356,6 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
     if (mo_integrals_cache_max < mo_num) then
 
       if (do_mo_cholesky) then
-
-        call gpu_blas_create(blas)
 
         !TODO: bottleneck here
         if (mo_cholesky_double) then
@@ -399,7 +395,6 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 !            out_val(mo_integrals_cache_max+1:sze) += out_val_sp(mo_integrals_cache_max+1:sze)
 !          enddo
         endif
-        call gpu_blas_destroy(blas)
 
       else
 
@@ -430,8 +425,6 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
   else
 
     if (do_mo_cholesky) then
-
-      call gpu_blas_create(blas)
 
       !TODO: bottleneck here
       if (mo_cholesky_double) then
@@ -467,7 +460,6 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 !            out_val(1:sze) += out_val_sp(1:sze)
 !          enddo
       endif
-      call gpu_blas_destroy(blas)
 
     else
 
@@ -546,7 +538,7 @@ subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
 
     if (do_mo_cholesky) then
 
-      call gpu_blas_create(blas)
+      call get_random_blas_handle(blas)
 
       if (mo_cholesky_double) then
           type(gpu_double2) :: out_array_d
@@ -595,8 +587,6 @@ subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
 !         enddo
          deallocate(out_array_sp)
       endif
-      call gpu_blas_destroy(blas)
-
 
     else
 
@@ -639,7 +629,7 @@ subroutine get_mo_two_e_integrals_i1j1(k,l,sze,out_array,map)
       type(gpu_double2) :: out_array_d
       call gpu_allocate(out_array_d, sze, sze)
 
-      call gpu_blas_create(blas)
+      call get_random_blas_handle(blas)
       call gpu_dgemv(blas, 'T', cholesky_mo_num, mo_num*mo_num, 1.d0, &
          cholesky_mo_transp_d%f(1,1,1), cholesky_mo_num, &
          cholesky_mo_transp_d%f(1,k,l), 1, 0.d0, &
@@ -647,8 +637,6 @@ subroutine get_mo_two_e_integrals_i1j1(k,l,sze,out_array,map)
 
       call gpu_download(out_array_d,out_array)
       call gpu_deallocate(out_array_d)
-      call gpu_blas_destroy(blas)
-
 
     else
 
@@ -693,7 +681,7 @@ subroutine get_mo_two_e_integrals_coulomb_ii(k,l,sze,out_val,map)
       type(gpu_double1) :: out_val_d
       call gpu_allocate(out_val_d, sze)
 
-      call gpu_blas_create(blas)
+      call get_random_blas_handle(blas)
       call gpu_dgemv(blas, 'T', cholesky_mo_num, mo_num, 1.d0, &
          cholesky_mo_transp_d%f(1,1,1), cholesky_mo_num*(mo_num+1), &
          cholesky_mo_transp_d%f(1,k,l), 1, 0.d0, &
@@ -701,7 +689,6 @@ subroutine get_mo_two_e_integrals_coulomb_ii(k,l,sze,out_val,map)
 
       call gpu_download(out_val_d,out_val)
       call gpu_deallocate(out_val_d)
-      call gpu_blas_destroy(blas)
 
     else
 
