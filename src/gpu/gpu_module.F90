@@ -141,6 +141,11 @@ module gpu
       type(c_ptr), value :: handle, stream
     end subroutine
 
+    subroutine gpu_stream_synchronize(stream) bind(C)
+      import
+      type(c_ptr), value :: stream
+    end subroutine
+
     subroutine gpu_synchronize() bind(C)
       import
     end subroutine
@@ -281,12 +286,14 @@ module gpu
   end interface gpu_deallocate
 
   interface gpu_upload
-    procedure gpu_upload_double1  &
+    procedure gpu_upload_double0  &
+             ,gpu_upload_double1  &
              ,gpu_upload_double2  &
              ,gpu_upload_double3  &
              ,gpu_upload_double4  &
              ,gpu_upload_double5  &
              ,gpu_upload_double6  &
+             ,gpu_upload_real0  &
              ,gpu_upload_real1  &
              ,gpu_upload_real2  &
              ,gpu_upload_real3  &
@@ -296,12 +303,14 @@ module gpu
   end interface gpu_upload
 
   interface gpu_download
-    procedure gpu_download_double1  &
+    procedure gpu_download_double0  &
+             ,gpu_download_double1  &
              ,gpu_download_double2  &
              ,gpu_download_double3  &
              ,gpu_download_double4  &
              ,gpu_download_double5  &
              ,gpu_download_double6  &
+             ,gpu_download_real0  &
              ,gpu_download_real1  &
              ,gpu_download_real2  &
              ,gpu_download_real3  &
@@ -311,12 +320,14 @@ module gpu
   end interface gpu_download
 
   interface gpu_copy
-    procedure gpu_copy_double1  &
+    procedure gpu_copy_double0  &
+             ,gpu_copy_double1  &
              ,gpu_copy_double2  &
              ,gpu_copy_double3  &
              ,gpu_copy_double4  &
              ,gpu_copy_double5  &
              ,gpu_copy_double6  &
+             ,gpu_copy_real0  &
              ,gpu_copy_real1  &
              ,gpu_copy_real2  &
              ,gpu_copy_real3  &
@@ -720,7 +731,7 @@ module gpu
 ! gpu_upload
 ! ----------
 
-    subroutine gpu_upload_double_n(cpu_ptr, gpu_ptr, n)
+    subroutine gpu_upload_double0(cpu_ptr, gpu_ptr, n)
       implicit none
       double precision, target, intent(in)     :: cpu_ptr
       double precision, target, intent(in)     :: gpu_ptr
@@ -771,6 +782,14 @@ module gpu
     end subroutine
 
 
+    subroutine gpu_upload_real0(cpu_ptr, gpu_ptr, n)
+      implicit none
+      real, target, intent(in)     :: cpu_ptr
+      real, target, intent(in)     :: gpu_ptr
+      integer, intent(in) :: n
+      call gpu_upload_c(c_loc(cpu_ptr), c_loc(gpu_ptr), 4_8*n)
+    end subroutine
+
     subroutine gpu_upload_real1(cpu_ptr, gpu_ptr)
       implicit none
       real, target, intent(in)     :: cpu_ptr(*)
@@ -817,7 +836,7 @@ module gpu
 ! gpu_download
 ! ------------
 
-    subroutine gpu_download_double_n(gpu_ptr, cpu_ptr, n)
+    subroutine gpu_download_double0(gpu_ptr, cpu_ptr, n)
       implicit none
       double precision, target, intent(in)     :: gpu_ptr
       double precision, target, intent(in)     :: cpu_ptr
@@ -867,6 +886,14 @@ module gpu
       call gpu_download_c(gpu_ptr%c, c_loc(cpu_ptr), 8_8*product(shape(gpu_ptr%f)*1_8))
     end subroutine
 
+    subroutine gpu_download_real0(gpu_ptr, cpu_ptr, n)
+      implicit none
+      real, target, intent(in)     :: gpu_ptr
+      real, target, intent(in)     :: cpu_ptr
+      integer, intent(in) :: n
+      call gpu_download_c(c_loc(gpu_ptr), c_loc(cpu_ptr), 4_8*n)
+    end subroutine
+
     subroutine gpu_download_real1(gpu_ptr, cpu_ptr)
       implicit none
       type(gpu_real1), intent(in)  :: gpu_ptr
@@ -912,7 +939,7 @@ module gpu
 ! gpu_copy
 ! --------
 
-    subroutine gpu_copy_double_n(gpu_ptr_src, gpu_ptr_dest, n)
+    subroutine gpu_copy_double0(gpu_ptr_src, gpu_ptr_dest, n)
       implicit none
       double precision, target, intent(in)        :: gpu_ptr_src
       double precision, target, intent(in)        :: gpu_ptr_dest
@@ -962,6 +989,13 @@ module gpu
       call gpu_copy_c(gpu_ptr_src%c, gpu_ptr_dest%c, 8_8*product(shape(gpu_ptr_dest%f)*1_8))
     end subroutine
 
+    subroutine gpu_copy_real0(gpu_ptr_src, gpu_ptr_dest, n)
+      implicit none
+      real, target, intent(in)        :: gpu_ptr_src
+      real, target, intent(in)        :: gpu_ptr_dest
+      integer, intent(in) :: n
+      call gpu_copy_c(c_loc(gpu_ptr_src), c_loc(gpu_ptr_dest), 4_8*n)
+    end subroutine
 
     subroutine gpu_copy_real1(gpu_ptr_src, gpu_ptr_dest)
       implicit none

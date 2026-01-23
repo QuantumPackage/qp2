@@ -7,7 +7,7 @@ BEGIN_PROVIDER [ logical, all_mo_integrals ]
 ! Used to provide everything needed before using MO integrals
 ! PROVIDE all_mo_integrals
   END_DOC
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache mo_two_e_integrals_jj_exchange mo_two_e_integrals_jj_anti mo_two_e_integrals_jj big_array_exchange_integrals big_array_coulomb_integrals mo_one_e_integrals
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache mo_two_e_integrals_jj_exchange mo_two_e_integrals_jj_anti mo_two_e_integrals_jj big_array_exchange_integrals big_array_coulomb_integrals mo_one_e_integrals mo_two_e_integrals_exch_ii mo_two_e_integrals_coulomb_ii
 END_PROVIDER
 
 !! MO Map
@@ -99,25 +99,32 @@ BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:mo_integrals_cache_s
 
    else
 
+     !$OMP PARALLEL PRIVATE(k,l,ii, mo_integrals_cache_d, blas)
      type(gpu_double1) :: mo_integrals_cache_d
+     type(gpu_blas)  :: blas
+     blas = blas_handle_mt(omp_get_thread_num())
      call gpu_allocate(mo_integrals_cache_d, mo_integrals_cache_size*(mo_integrals_cache_max-mo_integrals_cache_min+1))
 
+     !$OMP DO
      do l=mo_integrals_cache_min,mo_integrals_cache_max
        do k=mo_integrals_cache_min,mo_integrals_cache_max
            ii = int(l-mo_integrals_cache_min,8)
            ii = ior( shiftl(ii,mo_integrals_cache_shift), int(k-mo_integrals_cache_min,8))
            ii = shiftl(ii,2*mo_integrals_cache_shift)
-           call gpu_dgemm(blas_handle,'T','N', mo_integrals_cache_max-mo_integrals_cache_min+1, &
+           call gpu_dgemm(blas,'T','N', mo_integrals_cache_max-mo_integrals_cache_min+1, &
                                mo_integrals_cache_max-mo_integrals_cache_min+1, &
              cholesky_mo_num, 1.d0, &
              cholesky_mo_transp_d%f(1,mo_integrals_cache_min,k), cholesky_mo_num, &
              cholesky_mo_transp_d%f(1,mo_integrals_cache_min,l), cholesky_mo_num, 0.d0, &
              mo_integrals_cache_d%f(1), mo_integrals_cache_size)
-           call gpu_synchronize()
-           call gpu_download(mo_integrals_cache_d,mo_integrals_cache(ii:))
+           call gpu_download(mo_integrals_cache_d%f(1),mo_integrals_cache(ii),size(mo_integrals_cache_d%f))
        enddo
      enddo
+     !$OMP END DO
+
+     call gpu_synchronize()
      call gpu_deallocate(mo_integrals_cache_d)
+     !$OMP END PARALLEL
 
    endif
 
@@ -207,17 +214,10 @@ double precision function get_two_e_integral(i,j,k,l,map)
     if  (do_mo_cholesky) then
 
       if (mo_cholesky_double) then
-!       call gpu_ddot(blas_handle, cholesky_mo_num, &
-!             cholesky_mo_transp_d%f(1,i,k), 1, &
-!             cholesky_mo_transp_d%f(1,j,l), 1, get_two_e_integral)
         double precision, external :: ddot
         get_two_e_integral = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, cholesky_mo_transp(1,j,l), 1)
       else
-!        real :: res
-!        call gpu_sdot(blas_handle, cholesky_mo_num, &
-!             cholesky_mo_transp_sp_d%f(1,i,k), 1, &
-!             cholesky_mo_transp_sp_d%f(1,j,l), 1, res)
-!        get_two_e_integral = res
+        real :: res
         real, external :: sdot
         get_two_e_integral = sdot(cholesky_mo_num, cholesky_mo_transp_sp(1,i,k), 1, cholesky_mo_transp_sp(1,j,l), 1)
 !       integer :: isplit
@@ -260,13 +260,18 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
   integer(key_kind)              :: i1, idx
   integer(key_kind)              :: p,q,r,s,i2
   real, allocatable :: out_val_sp(:)
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache cholesky_mo_transp cholesky_mo_transp_sp
+
+  type(gpu_double1) :: out_val_d
+  type(gpu_real1)   :: out_val_sp_d
+  type(gpu_blas)  :: blas
+
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache cholesky_mo_transp cholesky_mo_transp_d cholesky_mo_transp_sp cholesky_mo_transp_sp_d
 
   if (banned_excitation(j,l)) then
       out_val(1:sze) = 0.d0
       return
   endif
-!
+
   ii = l-mo_integrals_cache_min
   ii = ior(ii, k-mo_integrals_cache_min)
   ii = ior(ii, j-mo_integrals_cache_min)
@@ -274,6 +279,8 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
   if (do_mo_cholesky.and. .not.mo_cholesky_double) then
     allocate(out_val_sp(mo_num))
   endif
+  call get_random_blas_handle(blas)
+
 
   if (iand(ii, -mo_integrals_cache_size) == 0) then
     ! Some integrals are in the cache
@@ -284,15 +291,21 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 
         !TODO: bottleneck here
         if (mo_cholesky_double) then
-          call dgemv('T', cholesky_mo_num, mo_integrals_cache_min-1, 1.d0, &
-            cholesky_mo_transp(1,1,k), cholesky_mo_num, &
-            cholesky_mo_transp(1,j,l), 1, 0.d0, &
-            out_val, 1)
+          call gpu_allocate(out_val_d, mo_integrals_cache_min-1)
+          call gpu_dgemv(blas,'T', cholesky_mo_num, mo_integrals_cache_min-1, 1.d0, &
+            cholesky_mo_transp_d%f(1,1,k), cholesky_mo_num, &
+            cholesky_mo_transp_d%f(1,j,l), 1, 0.d0, &
+            out_val_d%f(1), 1)
+          call gpu_download(out_val_d,out_val)
+          call gpu_deallocate(out_val_d)
         else
-          call sgemv('T', cholesky_mo_num, mo_integrals_cache_min-1, 1., &
-            cholesky_mo_transp_sp(1,1,k), cholesky_mo_num, &
-            cholesky_mo_transp_sp(1,j,l), 1, 0., &
-            out_val_sp, 1)
+          call gpu_allocate(out_val_sp_d, mo_integrals_cache_min-1)
+          call gpu_sgemv(blas,'T', cholesky_mo_num, mo_integrals_cache_min-1, 1., &
+            cholesky_mo_transp_sp_d%f(1,1,k), cholesky_mo_num, &
+            cholesky_mo_transp_sp_d%f(1,j,l), 1, 0., &
+            out_val_sp_d%f(1), 1)
+          call gpu_download(out_val_sp_d,out_val_sp)
+          call gpu_deallocate(out_val_sp_d)
           out_val(1:mo_integrals_cache_min-1) = out_val_sp(1:mo_integrals_cache_min-1)
 !          integer :: isplit
 !          isplit=1
@@ -346,15 +359,25 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 
         !TODO: bottleneck here
         if (mo_cholesky_double) then
-          call dgemv('T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1.d0, &
-             cholesky_mo_transp(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
-             cholesky_mo_transp(1,j,l), 1, 0.d0, &
-             out_val(mo_integrals_cache_max+1), 1)
+          call gpu_allocate(out_val_d, mo_num-mo_integrals_cache_max)
+          call gpu_dgemv(blas, 'T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1.d0, &
+             cholesky_mo_transp_d%f(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
+             cholesky_mo_transp_d%f(1,j,l), 1, 0.d0, &
+             out_val_d%f(1), 1)
+          call gpu_download(out_val_d%f(1), &
+                            out_val(mo_integrals_cache_max+1),    &
+                            mo_num-mo_integrals_cache_max)
+          call gpu_deallocate(out_val_d)
         else
-          call sgemv('T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1., &
-             cholesky_mo_transp_sp(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
-             cholesky_mo_transp_sp(1,j,l), 1, 0., &
-             out_val_sp(mo_integrals_cache_max+1), 1)
+          call gpu_allocate(out_val_sp_d, mo_num-mo_integrals_cache_max)
+          call gpu_sgemv(blas, 'T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1., &
+             cholesky_mo_transp_sp_d%f(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
+             cholesky_mo_transp_sp_d%f(1,j,l), 1, 0., &
+             out_val_sp_d%f(1), 1)
+          call gpu_download(out_val_sp_d%f(1), &
+                            out_val_sp(mo_integrals_cache_max+1),    &
+                            mo_num-mo_integrals_cache_max)
+          call gpu_deallocate(out_val_sp_d)
           out_val(mo_integrals_cache_max+1:sze) = out_val_sp(mo_integrals_cache_max+1:sze)
 !          isplit=1
 !          call sgemv('T', cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
@@ -405,15 +428,21 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 
       !TODO: bottleneck here
       if (mo_cholesky_double) then
-          call dgemv('T', cholesky_mo_num, sze, 1.d0, &
-               cholesky_mo_transp(1,1,k), cholesky_mo_num, &
-               cholesky_mo_transp(1,j,l), 1, 0.d0, &
-               out_val, 1)
+          call gpu_allocate(out_val_d, sze)
+          call gpu_dgemv(blas, 'T', cholesky_mo_num, sze, 1.d0, &
+               cholesky_mo_transp_d%f(1,1,k), cholesky_mo_num, &
+               cholesky_mo_transp_d%f(1,j,l), 1, 0.d0, &
+               out_val_d%f(1), 1)
+          call gpu_download(out_val_d,out_val)
+          call gpu_deallocate(out_val_d)
       else
-          call sgemv('T', cholesky_mo_num, sze, 1., &
-               cholesky_mo_transp_sp(1,1,k), cholesky_mo_num, &
-               cholesky_mo_transp_sp(1,j,l), 1, 0., &
-               out_val_sp, 1)
+          call gpu_allocate(out_val_sp_d, sze)
+          call gpu_sgemv(blas, 'T', cholesky_mo_num, sze, 1., &
+               cholesky_mo_transp_sp_d%f(1,1,k), cholesky_mo_num, &
+               cholesky_mo_transp_sp_d%f(1,j,l), 1, 0., &
+               out_val_sp_d%f(1), 1)
+          call gpu_download(out_val_sp_d,out_val_sp)
+          call gpu_deallocate(out_val_sp_d)
           out_val(1:sze) = out_val_sp(1:sze)
 !          isplit=1
 !          call sgemv('T', cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
@@ -503,23 +532,41 @@ subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
   double precision, intent(out)  :: out_array(sze,sze)
   type(map_type), intent(inout)  :: map
   integer                        :: j
+  type(gpu_blas)  :: blas
 
   if ( (mo_integrals_cache_min>1).or.(mo_integrals_cache_max<mo_num) ) then
 
     if (do_mo_cholesky) then
 
+      call get_random_blas_handle(blas)
+
       if (mo_cholesky_double) then
-          call dgemm('T', 'N', mo_num, mo_num, cholesky_mo_num, 1.d0, &
-             cholesky_mo_transp(1,1,k), cholesky_mo_num, &
-             cholesky_mo_transp(1,1,l), cholesky_mo_num, 0.d0, &
-             out_array, sze)
+          type(gpu_double2) :: out_array_d
+          call gpu_allocate(out_array_d, sze, sze)
+
+          call gpu_dgemm(blas, 'T', 'N', mo_num, mo_num, cholesky_mo_num, 1.d0, &
+             cholesky_mo_transp_d%f(1,1,k), cholesky_mo_num, &
+             cholesky_mo_transp_d%f(1,1,l), cholesky_mo_num, 0.d0, &
+             out_array_d%f(1,1), sze)
+
+          call gpu_download(out_array_d,out_array)
+          call gpu_deallocate(out_array_d)
+
       else
           real, allocatable :: out_array_sp(:,:)
           allocate(out_array_sp(sze,sze))
-          call sgemm('T', 'N', mo_num, mo_num, cholesky_mo_num, 1.0, &
-             cholesky_mo_transp_sp(1,1,k), cholesky_mo_num, &
-             cholesky_mo_transp_sp(1,1,l), cholesky_mo_num, 0.0, &
-             out_array_sp, sze)
+
+          type(gpu_real2) :: out_array_sp_d
+          call gpu_allocate(out_array_sp_d, sze, sze)
+
+          call gpu_sgemm(blas, 'T', 'N', mo_num, mo_num, cholesky_mo_num, 1.0, &
+             cholesky_mo_transp_sp_d%f(1,1,k), cholesky_mo_num, &
+             cholesky_mo_transp_sp_d%f(1,1,l), cholesky_mo_num, 0.0, &
+             out_array_sp_d%f(1,1), sze)
+
+          call gpu_download(out_array_sp_d,out_array_sp)
+          call gpu_deallocate(out_array_sp_d)
+
           out_array(1:sze,1:sze) = out_array_sp(1:sze,1:sze)
 !
 !          isplit=1
@@ -578,10 +625,18 @@ subroutine get_mo_two_e_integrals_i1j1(k,l,sze,out_array,map)
 
     if (do_mo_cholesky) then
 
-      call dgemv('T', cholesky_mo_num, mo_num*mo_num, 1.d0, &
-         cholesky_mo_transp(1,1,1), cholesky_mo_num, &
-         cholesky_mo_transp(1,k,l), 1, 0.d0, &
-         out_array, 1)
+      type(gpu_blas)  :: blas
+      type(gpu_double2) :: out_array_d
+      call gpu_allocate(out_array_d, sze, sze)
+
+      call get_random_blas_handle(blas)
+      call gpu_dgemv(blas, 'T', cholesky_mo_num, mo_num*mo_num, 1.d0, &
+         cholesky_mo_transp_d%f(1,1,1), cholesky_mo_num, &
+         cholesky_mo_transp_d%f(1,k,l), 1, 0.d0, &
+         out_array_d%f(1,1), 1)
+
+      call gpu_download(out_array_d,out_array)
+      call gpu_deallocate(out_array_d)
 
     else
 
@@ -622,10 +677,18 @@ subroutine get_mo_two_e_integrals_coulomb_ii(k,l,sze,out_val,map)
 
     if (do_mo_cholesky) then
 
-      call dgemv('T', cholesky_mo_num, mo_num, 1.d0, &
-         cholesky_mo_transp(1,1,1), cholesky_mo_num*(mo_num+1), &
-         cholesky_mo_transp(1,k,l), 1, 0.d0, &
-         out_val, 1)
+      type(gpu_blas)  :: blas
+      type(gpu_double1) :: out_val_d
+      call gpu_allocate(out_val_d, sze)
+
+      call get_random_blas_handle(blas)
+      call gpu_dgemv(blas, 'T', cholesky_mo_num, mo_num, 1.d0, &
+         cholesky_mo_transp_d%f(1,1,1), cholesky_mo_num*(mo_num+1), &
+         cholesky_mo_transp_d%f(1,k,l), 1, 0.d0, &
+         out_val_d%f(1), 1)
+
+      call gpu_download(out_val_d,out_val)
+      call gpu_deallocate(out_val_d)
 
     else
 
@@ -646,6 +709,40 @@ subroutine get_mo_two_e_integrals_coulomb_ii(k,l,sze,out_val,map)
 
 
 end
+
+BEGIN_PROVIDER [ double precision, mo_two_e_integrals_coulomb_ii, (mo_num,mo_num,mo_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Cache for <ki|il>
+ END_DOC
+ PROVIDE  mo_two_e_integrals_in_map
+ integer :: i,k,l
+ !$OMP PARALLEL DO PRIVATE(i,k,l)
+ do l=1,mo_num
+  do k=1,mo_num
+    call get_mo_two_e_integrals_coulomb_ii(k,l,mo_num,mo_two_e_integrals_coulomb_ii(1,k,l),mo_integrals_map)
+  enddo
+ enddo
+ !$OMP END PARALLEL DO
+
+END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, mo_two_e_integrals_exch_ii, (mo_num,mo_num,mo_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Cache for <ki|il>
+ END_DOC
+ PROVIDE  mo_two_e_integrals_in_map
+ integer :: i,k,l
+ !$OMP PARALLEL DO PRIVATE(i,k,l)
+ do l=1,mo_num
+  do k=1,mo_num
+    call get_mo_two_e_integrals_exch_ii(k,l,mo_num,mo_two_e_integrals_exch_ii(1,k,l),mo_integrals_map)
+  enddo
+ enddo
+ !$OMP END PARALLEL DO
+
+END_PROVIDER
 
 subroutine get_mo_two_e_integrals_exch_ii(k,l,sze,out_val,map)
   use map_module
@@ -673,69 +770,27 @@ subroutine get_mo_two_e_integrals_exch_ii(k,l,sze,out_val,map)
         real, external :: sdot
         integer :: kk
 
-        if (mo_cholesky_double) then
+        do i=1,mo_integrals_cache_min-1
+          out_val(i) = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, &
+                        cholesky_mo_transp(1,i,l), 1)
+        enddo
 
-          do i=1,mo_integrals_cache_min-1
-            out_val(i) = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, &
-                                               cholesky_mo_transp(1,i,l), 1)
-          enddo
+        do i=mo_integrals_cache_min,mo_integrals_cache_max
+          out_val(i) = get_two_e_integral_cache(i,i,k,l)
+        enddo
 
-          do i=mo_integrals_cache_min,mo_integrals_cache_max
-            out_val(i) = get_two_e_integral_cache(i,i,k,l)
-          enddo
+        do i=mo_integrals_cache_max+1, sze
+          out_val(i) = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, &
+                        cholesky_mo_transp(1,i,l), 1)
+        enddo
 
-          do i=mo_integrals_cache_max, sze
-            out_val(i) = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, &
-                                               cholesky_mo_transp(1,i,l), 1)
-          enddo
-
-        else
-
-          integer :: isplit
-          do i=1,mo_integrals_cache_min-1
-             out_val(i) = sdot(cholesky_mo_num, cholesky_mo_transp_sp(1,i,k), 1, cholesky_mo_transp_sp(1,i,l), 1)
-!             out_val(i) = 0.d0
-!             do isplit=1,4
-!               out_val(i) += sdot(cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
-!                                          cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),i,k), 1, &
-!                                          cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),i,l), 1)
-!             enddo
-          enddo
-
-          do i=mo_integrals_cache_min,mo_integrals_cache_max
-            out_val(i) = get_two_e_integral_cache(i,i,k,l)
-          enddo
-
-          do i=mo_integrals_cache_max, sze
-             out_val(i) = sdot(cholesky_mo_num, cholesky_mo_transp_sp(1,i,k), 1, cholesky_mo_transp_sp(1,i,l), 1)
-!             out_val(i) = 0.d0
-!             do isplit=1,4
-!               out_val(i) += sdot(cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
-!                                          cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),i,k), 1, &
-!                                          cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),i,l), 1)
-!             enddo
-          enddo
-
-        endif
 
       else
 
-        if (mo_cholesky_double) then
-          do i=1,sze
-            out_val(i) = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, &
-                                               cholesky_mo_transp(1,i,l), 1)
-          enddo
-        else
-          do i=1,sze
-             out_val(i) = sdot(cholesky_mo_num, cholesky_mo_transp_sp(1,i,k), 1, cholesky_mo_transp_sp(1,i,l), 1)
-!             out_val(i) = 0.d0
-!             do isplit=1,4
-!               out_val(i) += sdot(cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
-!                                          cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),i,k), 1, &
-!                                          cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),i,l), 1)
-!             enddo
-          enddo
-        endif
+        do i=1,sze
+          out_val(i) = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, &
+                        cholesky_mo_transp(1,i,l), 1)
+        enddo
 
       endif
 

@@ -92,6 +92,10 @@ void gpu_synchronize() {
   cudaDeviceSynchronize();
 }
 
+void gpu_stream_synchronize(void* stream) {
+  cudaStreamSynchronize(stream);
+}
+
 
 /* BLAS functions */
 
