@@ -505,8 +505,6 @@ subroutine get_mo_two_e_integrals_cache(j,k,l,sze,out_val)
   ii = ior( shiftl(ii, mo_integrals_cache_shift), int(k-mo_integrals_cache_min,8))
   ii = ior( shiftl(ii, mo_integrals_cache_shift), int(j-mo_integrals_cache_min,8))
   ii = shiftl(ii, mo_integrals_cache_shift)
-!  out_val(mo_integrals_cache_min:mo_integrals_cache_max) = &
-!       mo_integrals_cache(ii:ii+int(mo_integrals_cache_max-mo_integrals_cache_min,8))
   do jj=0_8, mo_integrals_cache_max-mo_integrals_cache_min
     out_val(mo_integrals_cache_min+jj) = mo_integrals_cache(ii+jj)
   enddo
