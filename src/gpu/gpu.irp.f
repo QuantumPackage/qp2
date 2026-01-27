@@ -17,10 +17,9 @@ END_PROVIDER
  END_DOC
  integer :: i
  do i=0,nproc+1
-   igpu_mt(i) = mod(i, gpu_num)
+   igpu_mt(i) = mod(i, max(gpu_num,1))
    call gpu_set_device(igpu_mt(i))
    call gpu_blas_create(blas_handle_mt(i))
-!   call gpu_set_stream(blas_handle_mt(i),gpu_default_stream)
  enddo
  call gpu_set_device(0)
 END_PROVIDER

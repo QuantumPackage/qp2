@@ -7,7 +7,8 @@ BEGIN_PROVIDER [ logical, all_mo_integrals ]
 ! Used to provide everything needed before using MO integrals
 ! PROVIDE all_mo_integrals
   END_DOC
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache mo_two_e_integrals_jj_exchange mo_two_e_integrals_jj_anti mo_two_e_integrals_jj big_array_exchange_integrals big_array_coulomb_integrals mo_one_e_integrals mo_two_e_integrals_exch_ii mo_two_e_integrals_coulomb_ii gpu_integral_buffer2 gpu_integral_buffer1
+  PROVIDE gpu_integral_buffer2 gpu_integral_buffer1
+  PROVIDE mo_integrals_cache mo_two_e_integrals_in_map mo_two_e_integrals_jj_exchange mo_two_e_integrals_jj_anti mo_two_e_integrals_jj big_array_exchange_integrals big_array_coulomb_integrals mo_one_e_integrals mo_two_e_integrals_exch_ii mo_two_e_integrals_coulomb_ii 
 END_PROVIDER
 
 !! MO Map
@@ -157,6 +158,8 @@ END_PROVIDER
 
  BEGIN_PROVIDER [ type(gpu_double1), gpu_integral_buffer1, (0:nproc+1) ]
 &BEGIN_PROVIDER [ type(gpu_real1), gpu_integral_buffer_sp1, (0:nproc+1) ]
+&BEGIN_PROVIDER [ type(gpu_double2), gpu_integral_buffer2, (0:nproc+1) ]
+&BEGIN_PROVIDER [ type(gpu_real2), gpu_integral_buffer_sp2, (0:nproc+1) ]
  implicit none
  BEGIN_DOC
  ! Temporary buffers for gpu_dgemv
@@ -167,21 +170,6 @@ END_PROVIDER
      call gpu_set_device(igpu_mt(i))
      call gpu_allocate(gpu_integral_buffer1(i), mo_num)
      call gpu_allocate(gpu_integral_buffer_sp1(i), mo_num)
- enddo
- call gpu_set_device(0)
-END_PROVIDER
-
- BEGIN_PROVIDER [ type(gpu_double2), gpu_integral_buffer2, (0:nproc+1) ]
-&BEGIN_PROVIDER [ type(gpu_real2), gpu_integral_buffer_sp2, (0:nproc+1) ]
- implicit none
- BEGIN_DOC
- ! Temporary buffers for gpu_dgemv
- END_DOC
-
- integer :: i
- do i=0, nproc+1
-     call gpu_set_device(igpu_mt(i))
-     print *, i, igpu_mt(i)
      call gpu_allocate(gpu_integral_buffer2(i), mo_num, mo_num)
      call gpu_allocate(gpu_integral_buffer_sp2(i), mo_num, mo_num)
  enddo
@@ -251,6 +239,7 @@ double precision function get_two_e_integral(i,j,k,l,map)
 
       integer :: iproc
       iproc = omp_get_thread_num()
+      call gpu_set_device(igpu_mt(iproc))
       if (mo_cholesky_double) then
         if (gpu_num == 0) then
           double precision, external :: ddot
@@ -276,6 +265,7 @@ double precision function get_two_e_integral(i,j,k,l,map)
           get_two_e_integral = res
         endif
       endif
+      call gpu_set_device(0)
 
     else
 
@@ -339,6 +329,7 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
     if (mo_integrals_cache_min > 1) then
 
       if (do_mo_cholesky) then
+        call gpu_set_device(igpu_mt(iproc))
         !TODO: bottleneck here
         if (mo_cholesky_double) then
           call gpu_dgemv(blas_handle_mt(iproc),'T', cholesky_mo_num, mo_integrals_cache_min-1, 1.d0, &
@@ -356,6 +347,7 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
             out_val(i) = out_val_sp(i)
           enddo
         endif
+        call gpu_set_device(0)
 
       else
 
@@ -390,6 +382,7 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
       if (do_mo_cholesky) then
 
         !TODO: bottleneck here
+        call gpu_set_device(igpu_mt(iproc))
         if (mo_cholesky_double) then
           call gpu_dgemv(blas_handle_mt(iproc), 'T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1.d0, &
              cholesky_mo_transp_d(igpu_mt(iproc))%f(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
@@ -410,6 +403,7 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
             out_val(i) = out_val_sp(i)
           enddo
         endif
+        call gpu_set_device(0)
 
       else
 
@@ -442,6 +436,7 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
     if (do_mo_cholesky) then
 
       !TODO: bottleneck here
+      call gpu_set_device(igpu_mt(iproc))
       if (mo_cholesky_double) then
           call gpu_dgemv(blas_handle_mt(iproc), 'T', cholesky_mo_num, sze, 1.d0, &
                cholesky_mo_transp_d(igpu_mt(iproc))%f(1,1,k), cholesky_mo_num, &
@@ -458,6 +453,7 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
             out_val(i) = out_val_sp(i)
           enddo
       endif
+      call gpu_set_device(0)
 
     else
 
@@ -546,6 +542,7 @@ subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
       if (iproc >= nproc+2) then
         call qp_bug(irp_here,iproc,'iproc >= nproc+2')
       endif
+      call gpu_set_device(igpu_mt(iproc))
       if (mo_cholesky_double) then
           type(gpu_double2) :: out_array_d
 
@@ -572,6 +569,7 @@ subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
           enddo
           deallocate(out_array_sp)
       endif
+      call gpu_set_device(0)
 
     else
 
@@ -619,12 +617,14 @@ subroutine get_mo_two_e_integrals_i1j1(k,l,sze,out_array,map)
       if (iproc >= nproc+2) then
         call qp_bug(irp_here,iproc,'iproc >= nproc+2')
       endif
+      call gpu_set_device(igpu_mt(iproc))
 
       call gpu_dgemv(blas_handle_mt(iproc), 'T', cholesky_mo_num, mo_num*mo_num, 1.d0, &
          cholesky_mo_transp_d(igpu_mt(iproc))%f(1,1,1), cholesky_mo_num, &
          cholesky_mo_transp_d(igpu_mt(iproc))%f(1,k,l), 1, 0.d0, &
          gpu_integral_buffer2(iproc)%f(1,1), 1)
       call gpu_download(gpu_integral_buffer2(iproc),out_array)
+      call gpu_set_device(0)
 
     else
 
@@ -675,12 +675,14 @@ subroutine get_mo_two_e_integrals_coulomb_ii(k,l,sze,out_val,map)
       if (iproc >= nproc+2) then
         call qp_bug(irp_here,iproc,'iproc >= nproc+2')
       endif
+      call gpu_set_device(igpu_mt(iproc))
 
       call gpu_dgemv(blas_handle_mt(iproc), 'T', cholesky_mo_num, mo_num, 1.d0, &
          cholesky_mo_transp_d(igpu_mt(iproc))%f(1,1,1), cholesky_mo_num*(mo_num+1), &
          cholesky_mo_transp_d(igpu_mt(iproc))%f(1,k,l), 1, 0.d0, &
          gpu_integral_buffer1(iproc)%f(1), 1)
       call gpu_download(gpu_integral_buffer1(iproc)%f(1),out_val(1),sze)
+      call gpu_set_device(0)
 
     else
 
@@ -709,6 +711,7 @@ BEGIN_PROVIDER [ double precision, mo_two_e_integrals_coulomb_ii, (mo_num,mo_num
  END_DOC
  PROVIDE  mo_two_e_integrals_in_map
  integer :: i,k,l
+ PROVIDE gpu_integral_buffer1
  !$OMP PARALLEL DO PRIVATE(i,k,l)
  do l=1,mo_num
   do k=1,mo_num

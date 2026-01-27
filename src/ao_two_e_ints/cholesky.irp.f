@@ -316,7 +316,6 @@ END_PROVIDER
                   Ltmp_p_d%f(1,1), np, &
                   Ltmp_q_d%f(1,1), nq, &
                   0.d0, Delta_d%f(1,1), np)
-!           call gpu_synchronize()
 
          else
 
@@ -332,7 +331,6 @@ END_PROVIDER
                0.d0, Delta_d%f(1,1), np, &
                0.d0, Delta_d%f(1,1), np, &
                      Delta_d%f(1,1), np)
-!           call gpu_synchronize()
          else
            !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q,j)
            do q=1,nq
@@ -382,7 +380,6 @@ END_PROVIDER
                       Ltmp_p_d%f(1,1), np, &
                       Ltmp_q_d%f(1,1), nq, &
                       1.d0, Delta_d%f(1,1), np)
-!                 call gpu_synchronize()
 
             else
 
@@ -453,7 +450,6 @@ END_PROVIDER
                1.d0, Ltmp_p_d%f(1,iblock), np, &
                1.d0, Delta_d%f(1,dj), np, &
                      Ltmp_p_d%f(1,iblock), np)
-!             call gpu_synchronize()
              call gpu_copy(Ltmp_p_d%f(1,iblock), Delta_d%f(1,dj), np)
            else
              !$OMP PARALLEL DO PRIVATE(p)
@@ -474,7 +470,6 @@ END_PROVIDER
              call gpu_dgemv(blas_handle, 'N', np, iblock-1, -1.d0, &
                 Ltmp_p_d%f(1,1), np, Ltmp_q_d%f(dj,1), nq, 1.d0,&
                 Ltmp_p_d%f(1,iblock), 1)
-!             call gpu_synchronize()
 
            else
 
@@ -492,7 +487,6 @@ END_PROVIDER
              f  , Ltmp_p_d%f(1,iblock), np, &
              0d0, Ltmp_p_d%f(1,iblock), np, &
                   Ltmp_p_d%f(1,iblock), np)
-!           call gpu_synchronize()
 
            call gpu_download(Ltmp_p_d%f(1,iblock), Ltmp_p(1,iblock), np)
          else
