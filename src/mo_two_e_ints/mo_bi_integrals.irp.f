@@ -488,7 +488,7 @@ subroutine add_integrals_to_map_cholesky
   ! Adds integrals to the MO map using Cholesky vectors
   END_DOC
 
-  integer :: i,j,k,l,m
+  integer :: i,j,k,l,m, iproc
   integer :: size_buffer, n_integrals
   size_buffer = min(mo_num*mo_num*mo_num,16000000)
 
@@ -506,20 +506,21 @@ subroutine add_integrals_to_map_cholesky
   call set_multiple_levels_omp(.False.)
 
   !$OMP PARALLEL DEFAULT(SHARED) &
-  !$OMP PRIVATE(i,j,k,l,n_integrals,buffer_value, buffer_i, Vtmp_d, blas)
+  !$OMP PRIVATE(i,j,k,l,n_integrals,buffer_value, buffer_i, Vtmp_d, iproc)
   allocate (buffer_i(size_buffer), buffer_value(size_buffer))
   n_integrals = 0
+  iproc = omp_get_thread_num()
 
-
+  call gpu_set_device(igpu_mt(iproc))
   call gpu_allocate(Vtmp_d,mo_num,mo_num,mo_num)
   !$OMP DO SCHEDULE(dynamic,4)
   do l=mo_num,1,-1
     call gpu_blas_create(blas)
-    call gpu_dgemm(blas, 'T','N',mo_num*mo_num,l,cholesky_mo_num,1.d0, &
-       cholesky_mo_transp_d%f(1,1,1), cholesky_mo_num, &
-       cholesky_mo_transp_d%f(1,1,l), cholesky_mo_num, 0.d0, &
+    call gpu_dgemm(blas_handle_mt(iproc), 'T','N',mo_num*mo_num,l,cholesky_mo_num,1.d0, &
+       cholesky_mo_transp_d(igpu_mt(iproc))%f(1,1,1), cholesky_mo_num, &
+       cholesky_mo_transp_d(igpu_mt(iproc))%f(1,1,l), cholesky_mo_num, 0.d0, &
        Vtmp_d%f(1,1,1), mo_num*mo_num)
-    call gpu_blas_destroy(blas)
+    call gpu_synchronize()
 
     do k=1,l
       do j=1,mo_num
@@ -547,6 +548,7 @@ subroutine add_integrals_to_map_cholesky
   call gpu_deallocate(Vtmp_d)
   !$OMP BARRIER
   !$OMP END PARALLEL
+  call gpu_set_device(0)
 
   call map_sort(mo_integrals_map)
   call map_unique(mo_integrals_map)
@@ -563,35 +565,35 @@ subroutine add_integrals_to_map_cholesky_sp
   END_DOC
 
   integer :: i,j,k,l,m
-  integer :: size_buffer, n_integrals
+  integer :: size_buffer, n_integrals, iproc
   size_buffer = min(mo_num*mo_num*mo_num,16000000)
 
 !  type(gpu_double3) :: Vtmp_d
   type(gpu_real3) :: Vtmp_d
   integer(key_kind)  , allocatable :: buffer_i(:)
   real(integral_kind), allocatable :: buffer_value(:)
-  type(gpu_blas) :: blas
 
 
   PROVIDE cholesky_mo_transp_sp_d
   call set_multiple_levels_omp(.False.)
 
   !$OMP PARALLEL DEFAULT(SHARED) &
-  !$OMP PRIVATE(i,j,k,l,n_integrals,buffer_value, buffer_i, Vtmp_d, blas)
+  !$OMP PRIVATE(i,j,k,l,n_integrals,buffer_value, buffer_i, Vtmp_d, iproc)
   allocate (buffer_i(size_buffer), buffer_value(size_buffer))
   n_integrals = 0
 
 
+  iproc = omp_get_thread_num()
+  call gpu_set_device(igpu_mt(iproc))
   call gpu_allocate(Vtmp_d,mo_num,mo_num,mo_num)
   !$OMP DO SCHEDULE(dynamic,4)
   do l=mo_num,1,-1
-    call gpu_blas_create(blas)
-    call gpu_sgemm(blas, 'T','N',mo_num*mo_num,l,cholesky_mo_num,1.0, &
-       cholesky_mo_transp_sp_d%f(1,1,1), cholesky_mo_num, &
-       cholesky_mo_transp_sp_d%f(1,1,l), cholesky_mo_num, 0.0, &
+    call gpu_sgemm(blas_handle_mt(iproc), 'T','N',mo_num*mo_num,l,cholesky_mo_num,1.0, &
+       cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,1,1), cholesky_mo_num, &
+       cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,1,l), cholesky_mo_num, 0.0, &
        Vtmp_d%f(1,1,1), mo_num*mo_num)
-    call gpu_blas_destroy(blas)
 
+    call gpu_synchronize()
     do k=1,l
       do j=1,mo_num
         do i=1,j
@@ -662,8 +664,8 @@ end
     call gpu_allocate(mo_two_e_integrals_jj_d, mo_num, mo_num)
 
     call gpu_dgemm(blas_handle, 'T','N',mo_num,mo_num,cholesky_mo_num,1.d0, &
-      cholesky_mo_transp_d%f(1,1,1), cholesky_mo_num*(mo_num+1), &
-      cholesky_mo_transp_d%f(1,1,1), cholesky_mo_num*(mo_num+1), &
+      cholesky_mo_transp_d(0)%f(1,1,1), cholesky_mo_num*(mo_num+1), &
+      cholesky_mo_transp_d(0)%f(1,1,1), cholesky_mo_num*(mo_num+1), &
       0.d0, mo_two_e_integrals_jj_d%f(1,1), mo_num)
 
     double precision, external :: ddot

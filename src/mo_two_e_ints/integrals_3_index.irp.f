@@ -19,11 +19,11 @@
     call gpu_allocate(buffer_jj,cholesky_mo_num,mo_num)
     call gpu_allocate(buffer,mo_num,mo_num,mo_num)
     do j=1,mo_num
-      buffer_jj%f(:,j) = cholesky_mo_transp_d%f(:,j,j)
+      buffer_jj%f(:,j) = cholesky_mo_transp_d(0)%f(:,j,j)
     enddo
 
     call gpu_dgemm(blas_handle, 'T','N', mo_num*mo_num,mo_num,cholesky_mo_num, 1.d0, &
-        cholesky_mo_transp_d%f(1,1,1), cholesky_mo_num, &
+        cholesky_mo_transp_d(0)%f(1,1,1), cholesky_mo_num, &
         buffer_jj%f(1,1), cholesky_mo_num, 0.d0, &
         buffer%f(1,1,1), mo_num*mo_num)
 
@@ -39,8 +39,8 @@
 
     do j = 1, mo_num
       call gpu_dgemm(blas_handle,'T','N',mo_num,mo_num,cholesky_mo_num, 1.d0, &
-        cholesky_mo_transp_d%f(1,1,j), cholesky_mo_num, &
-        cholesky_mo_transp_d%f(1,1,j), cholesky_mo_num, 0.d0, &
+        cholesky_mo_transp_d(0)%f(1,1,j), cholesky_mo_num, &
+        cholesky_mo_transp_d(0)%f(1,1,j), cholesky_mo_num, 0.d0, &
         buffer%f(1,1,j), mo_num)
     enddo
 
