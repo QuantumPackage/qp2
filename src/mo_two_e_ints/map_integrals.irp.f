@@ -7,7 +7,8 @@ BEGIN_PROVIDER [ logical, all_mo_integrals ]
 ! Used to provide everything needed before using MO integrals
 ! PROVIDE all_mo_integrals
   END_DOC
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache mo_two_e_integrals_jj_exchange mo_two_e_integrals_jj_anti mo_two_e_integrals_jj big_array_exchange_integrals big_array_coulomb_integrals mo_one_e_integrals mo_two_e_integrals_exch_ii mo_two_e_integrals_coulomb_ii gpu_integral_buffer2 gpu_integral_buffer1
+  PROVIDE gpu_integral_buffer2 gpu_integral_buffer1
+  PROVIDE mo_integrals_cache mo_two_e_integrals_in_map mo_two_e_integrals_jj_exchange mo_two_e_integrals_jj_anti mo_two_e_integrals_jj big_array_exchange_integrals big_array_coulomb_integrals mo_one_e_integrals mo_two_e_integrals_exch_ii mo_two_e_integrals_coulomb_ii 
 END_PROVIDER
 
 !! MO Map
@@ -50,6 +51,7 @@ end
  BEGIN_DOC
  ! Min and max values of the MOs for which the integrals are in the cache
  END_DOC
+ PROVIDE gpu_integral_buffer2 gpu_integral_buffer1
 
  mo_integrals_cache_size  = shiftl(1,mo_integrals_cache_shift)
  mo_integrals_cache_size_8  = shiftl(1_8, mo_integrals_cache_shift*4)
@@ -181,7 +183,6 @@ END_PROVIDER
  integer :: i
  do i=0, nproc+1
      call gpu_set_device(igpu_mt(i))
-     print *, i, igpu_mt(i)
      call gpu_allocate(gpu_integral_buffer2(i), mo_num, mo_num)
      call gpu_allocate(gpu_integral_buffer_sp2(i), mo_num, mo_num)
  enddo

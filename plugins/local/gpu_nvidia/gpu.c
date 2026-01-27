@@ -18,7 +18,11 @@ int gpu_ndevices() {
 }
 
 void gpu_set_device(int32_t igpu) {
-  cudaSetDevice((int) igpu);
+ cudaError_t rc = cudaSetDevice((int) igpu);
+ if (rc != cudaSuccess) {
+    fprintf(stderr,"cudaSetDevice(%d) failed: %s\n", igpu, cudaGetErrorString(rc));
+    assert (rc == cudaSuccess);
+ }
 }
 
 void gpu_get_memory(size_t* free, size_t* total) {
@@ -45,7 +49,10 @@ void gpu_allocate(void** ptr, const int64_t size) {
 //    } else {
 //      rc = cudaMallocManaged(ptr, size, cudaMemAttachGlobal);
 //    }
-    assert (rc == cudaSuccess);
+    if (rc != cudaSuccess) {
+      fprintf(stderr,"cudaMallocManaged failed: %s\n", cudaGetErrorString(rc));
+      assert (rc == cudaSuccess);
+    }
 }
 
 void gpu_deallocate(void** ptr) {
@@ -58,15 +65,27 @@ void gpu_deallocate(void** ptr) {
 /* Memory transfer functions */
 
 void gpu_upload(const void* cpu_ptr, void* gpu_ptr, const int64_t n) {
-  cudaMemcpy (gpu_ptr, cpu_ptr, n, cudaMemcpyHostToDevice);
+ cudaError_t rc = cudaMemcpy (gpu_ptr, cpu_ptr, n, cudaMemcpyHostToDevice);
+ if (rc != cudaSuccess) {
+    fprintf(stderr,"cudaMemcpy (upload) failed: %s\n", cudaGetErrorString(rc));
+    assert (rc == cudaSuccess);
+ }
 }
 
 void gpu_download(const void* gpu_ptr, void* cpu_ptr, const int64_t n) {
-  cudaMemcpy (cpu_ptr, gpu_ptr, n, cudaMemcpyDeviceToHost);
+ cudaError_t rc = cudaMemcpy (cpu_ptr, gpu_ptr, n, cudaMemcpyDeviceToHost);
+ if (rc != cudaSuccess) {
+    fprintf(stderr,"cudaMemcpy (download) failed: %s\n", cudaGetErrorString(rc));
+    assert (rc == cudaSuccess);
+ }
 }
 
 void gpu_copy(const void* gpu_ptr_src, void* gpu_ptr_dest, const int64_t n) {
-  cudaMemcpy (gpu_ptr_dest, gpu_ptr_src, n, cudaMemcpyDeviceToDevice);
+ cudaError_t rc = cudaMemcpy (gpu_ptr_dest, gpu_ptr_src, n, cudaMemcpyDeviceToDevice);
+ if (rc != cudaSuccess) {
+   fprintf(stderr,"cudaMemcpy (copy) failed: %s\n", cudaGetErrorString(rc));
+   assert (rc == cudaSuccess);
+ }
 }
 
 
@@ -74,26 +93,44 @@ void gpu_copy(const void* gpu_ptr_src, void* gpu_ptr_dest, const int64_t n) {
 
 void gpu_stream_create(cudaStream_t* ptr) {
   cudaError_t rc = cudaStreamCreate(ptr);
-  assert (rc == cudaSuccess);
+  if (rc != cudaSuccess) {
+    fprintf(stderr,"cudaStreamCreate failed: %s\n", cudaGetErrorString(rc));
+    assert (rc == cudaSuccess);
+  }
 }
 
 void gpu_stream_destroy(cudaStream_t* ptr) {
   assert (ptr != NULL);
   cudaError_t rc = cudaStreamDestroy(*ptr);
-  assert (rc == cudaSuccess);
+  if (rc != cudaSuccess) {
+    fprintf(stderr,"cudaStreamDestroy failed: %s\n", cudaGetErrorString(rc));
+    assert (rc == cudaSuccess);
+  }
   *ptr = NULL;
 }
 
 void gpu_set_stream(cublasHandle_t handle, cudaStream_t stream) {
-  cublasSetStream(handle, stream);
+  cudaError_t rc = cublasSetStream(handle, stream);
+  if (rc != cudaSuccess) {
+    fprintf(stderr,"cudaSetStream failed: %s\n", cudaGetErrorString(rc));
+    assert (rc == cudaSuccess);
+  }
 }
 
 void gpu_synchronize() {
-  cudaDeviceSynchronize();
+  cudaError_t rc = cudaDeviceSynchronize();
+  if (rc != cudaSuccess) {
+    fprintf(stderr,"cudaDeviceSynchronize failed: %s\n", cudaGetErrorString(rc));
+    assert (rc == cudaSuccess);
+  }
 }
 
 void gpu_stream_synchronize(void* stream) {
-  cudaStreamSynchronize(stream);
+  cudaError_t rc = cudaStreamSynchronize(stream);
+  if (rc != cudaSuccess) {
+    fprintf(stderr,"cudaStreamSynchronize failed: %s\n", cudaGetErrorString(rc));
+    assert (rc == cudaSuccess);
+  }
 }
 
 
