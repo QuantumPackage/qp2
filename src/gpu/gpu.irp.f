@@ -5,7 +5,9 @@ BEGIN_PROVIDER [ type(gpu_blas), blas_handle ]
  BEGIN_DOC
  ! Handle for cuBLAS or RocBLAS
  END_DOC
- call gpu_blas_create(blas_handle)
+ if (gpu_num > 0) then
+   call gpu_blas_create(blas_handle)
+ endif
 ! call gpu_set_stream(blas_handle, gpu_default_stream)
 END_PROVIDER
 
@@ -16,27 +18,15 @@ END_PROVIDER
  ! Handle for cuBLAS or RocBLAS
  END_DOC
  integer :: i
- do i=0,nproc+1
-   igpu_mt(i) = mod(i, gpu_num)
-   call gpu_set_device(igpu_mt(i))
-   call gpu_blas_create(blas_handle_mt(i))
-!   call gpu_set_stream(blas_handle_mt(i),gpu_default_stream)
- enddo
- call gpu_set_device(0)
+ if (gpu_num > 0) then
+   do i=0,nproc+1
+     igpu_mt(i) = mod(i, gpu_num)
+     call gpu_set_device(igpu_mt(i))
+     call gpu_blas_create(blas_handle_mt(i))
+   enddo
+   call gpu_set_device(0)
+ endif
 END_PROVIDER
-
-subroutine get_random_blas_handle(blas)
-  implicit none
-  BEGIN_DOC
-! Returns a random BLAS handle
-  END_DOC
-  type(gpu_blas), intent(out) :: blas
-  integer :: u
-  double precision :: r
-  call random_number(r)
-  u = FLOOR((nproc-1)*r)
-  blas = blas_handle_mt(u)
-end
 
 BEGIN_PROVIDER [ type(gpu_stream), gpu_default_stream ]
  implicit none

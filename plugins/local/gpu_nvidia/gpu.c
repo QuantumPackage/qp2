@@ -42,7 +42,9 @@ void gpu_allocate(void** ptr, const int64_t size) {
       free = INT64_MAX;
     }
 
-    rc = cudaMallocManaged(ptr, size, cudaMemAttachGlobal);
+//    rc = cudaMallocManaged(ptr, size, cudaMemAttachGlobal);
+      rc= cudaMalloc(ptr, size);
+
 //    /* Use managed memory if it does not fit on the GPU */
 //    if (size < free && size < total/2) {
 //      rc= cudaMalloc(ptr, size);
