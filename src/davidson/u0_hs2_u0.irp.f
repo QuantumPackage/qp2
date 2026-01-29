@@ -199,6 +199,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
   integer(bit_kind)              :: tmp_det($N_int,2)
   integer(bit_kind)              :: tmp_det2($N_int,2)
   integer(bit_kind)              :: tmp_det3($N_int,2)
+  integer(bit_kind), allocatable :: tmp_det4(:,:)
   integer(bit_kind), allocatable :: buffer(:,:)
   integer                        :: n_doubles
   integer, allocatable           :: doubles(:)
@@ -213,6 +214,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
   double precision, allocatable  :: utl(:,:)
   integer, parameter             :: block_size=128
   logical                        :: u_is_sparse
+  double precision, allocatable  :: hij_block(:), sij_block(:)
 
 !  call resident_memory(rss)
 !  mem = dble(singles_beta_csc_size) / 1024.d0**3
@@ -256,19 +258,21 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
       !$OMP          singles_beta_csc,singles_beta_csc_idx)          &
       !$OMP   PRIVATE(krow, kcol, tmp_det, spindet, k_a, k_b, i,     &
       !$OMP          lcol, lrow, l_a, l_b, utl, kk, u_is_sparse,     &
-      !$OMP          buffer, doubles, n_doubles, umax,               &
+      !$OMP          buffer, doubles, n_doubles, umax, tmp_det4,     &
       !$OMP          tmp_det2, hij, sij, idx, buffer_lrow, l, kcol_prev,  &
       !$OMP          singles_a, n_singles_a, singles_b, ratio,       &
-      !$OMP          n_singles_b, k8, last_found,left,right,right_max)
+      !$OMP          n_singles_b, k8, last_found,left,right,right_max, &
+      !$OMP          hij_block, sij_block)
 
   ! Alpha/Beta double excitations
   ! =============================
 
-  allocate( buffer($N_int,maxab),                                     &
+  allocate( buffer($N_int,maxab),                                    &
       singles_a(maxab),                                              &
       singles_b(maxab),                                              &
       doubles(maxab),                                                &
-      idx(maxab), buffer_lrow(maxab), utl(N_st,block_size))
+      idx(maxab), buffer_lrow(maxab), utl(N_st,block_size), &
+      tmp_det4($N_int,block_size), hij_block(block_size), sij_block(block_size))
 
   kcol_prev=-1
 
@@ -427,8 +431,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
         umax = 0.d0
         ! Prefetch u_t(:,l_a)
         if (u_is_sparse) then
-          do kk=0,block_size-1
-            if (k+kk > n_singles_a) exit
+          do kk=0,min(block_size-1,n_singles_a-k)
             l_a = singles_a(k+kk)
             ASSERT (l_a <= N_det)
 
@@ -438,8 +441,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
             enddo
           enddo
         else
-          do kk=0,block_size-1
-            if (k+kk > n_singles_a) exit
+          do kk=0,min(block_size-1, n_singles_a-k)
             l_a = singles_a(k+kk)
             ASSERT (l_a <= N_det)
             utl(:,kk+1) = u_t(:,l_a)
@@ -448,20 +450,23 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
         endif
         if (umax < 1.d-20) cycle
 
-        do kk=0,block_size-1
-          if (k+kk > n_singles_a) exit
+        do kk=0,min(block_size-1, n_singles_a-k)
           l_a = singles_a(k+kk)
           lrow = psi_bilinear_matrix_rows(l_a)
           ASSERT (lrow <= N_det_alpha_unique)
+          tmp_det4(1:$N_int,kk+1) = psi_det_alpha_unique(1:$N_int, lrow)
+        enddo
 
-          tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
-          call i_H_j_double_alpha_beta_s2(tmp_det,tmp_det2,$N_int,hij,sij)
-          !DIR$ LOOP COUNT AVG(4)
+! TODO
+        call i_H_j_double_alpha_beta_s2(tmp_det,tmp_det4(1,1),tmp_det2(1:$N_int,2),$N_int,hij_block(1),sij_block(1), min(block_size, n_singles_a-k+1))
+
+        do kk=1,min(block_size, n_singles_a-k+1)
           do l=1,N_st
-            v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
-            s_t(l,k_a) = s_t(l,k_a) + sij * utl(l,kk+1)
+            v_t(l,k_a) = v_t(l,k_a) + hij_block(kk) * utl(l,kk)
+            s_t(l,k_a) = s_t(l,k_a) + sij_block(kk) * utl(l,kk)
           enddo
         enddo
+
       enddo
 
     enddo
@@ -791,7 +796,8 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
 
   end do
   !$OMP END DO
-  deallocate(buffer, singles_a, singles_b, doubles, idx, buffer_lrow, utl)
+  deallocate(buffer, singles_a, singles_b, doubles, idx, buffer_lrow, utl, &
+   tmp_det4, hij_block, sij_block)
   !$OMP END PARALLEL
 
 end
