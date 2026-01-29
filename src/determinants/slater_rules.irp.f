@@ -2290,6 +2290,40 @@ subroutine i_H_j_double_alpha_beta(key_i,key_j,Nint,hij)
 
 end
 
+subroutine i_H_j_double_alpha_beta_s2(key_i,key_j,Nint,hij,s2)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Returns $\langle i|H|j \rangle$ where $i$ and $j$ are determinants differing by
+  ! an opposite-spin double excitation.
+  END_DOC
+  integer, intent(in)            :: Nint
+  integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
+  double precision, intent(out)  :: hij, s2
+
+  integer                        :: exc(0:2,2,2)
+  double precision               :: phase, phase2
+  double precision, external     :: get_two_e_integral
+
+  PROVIDE all_mo_integrals
+
+  call get_single_excitation_spin(key_i(1,1),key_j(1,1),exc(0,1,1),phase,Nint)
+  call get_single_excitation_spin(key_i(1,2),key_j(1,2),exc(0,1,2),phase2,Nint)
+  phase = phase*phase2
+  hij = phase*get_two_e_integral(                              &
+        exc(1,1,1),                                                  &
+        exc(1,1,2),                                                  &
+        exc(1,2,1),                                                  &
+        exc(1,2,2) ,mo_integrals_map)
+
+  if ( (exc(1,1,1) == exc(1,2,2)).and.(exc(1,1,2) == exc(1,2,1)) ) then
+    s2 =  -phase
+  else
+    s2 = 0.d0
+  endif
+
+end
+
 
 subroutine connected_to_hf(key_i,yes_no)
  implicit none

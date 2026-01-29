@@ -8,7 +8,7 @@ BEGIN_PROVIDER [ logical, all_mo_integrals ]
 ! PROVIDE all_mo_integrals
   END_DOC
   PROVIDE gpu_integral_buffer2 gpu_integral_buffer1
-  PROVIDE mo_integrals_cache mo_two_e_integrals_in_map mo_two_e_integrals_jj_exchange mo_two_e_integrals_jj_anti mo_two_e_integrals_jj big_array_exchange_integrals big_array_coulomb_integrals mo_one_e_integrals 
+  PROVIDE mo_integrals_cache mo_two_e_integrals_in_map big_array_exchange_integrals big_array_coulomb_integrals mo_two_e_integrals_jj_exchange mo_two_e_integrals_jj_anti mo_two_e_integrals_jj mo_one_e_integrals 
 END_PROVIDER
 
 !! MO Map
