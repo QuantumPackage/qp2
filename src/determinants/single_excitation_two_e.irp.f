@@ -87,7 +87,7 @@ BEGIN_PROVIDER [double precision, fock_wee_closed_shell, (mo_num, mo_num) ]
    accu = 0.d0
    do k0 = 1, n_occ_ab(1)
     k = occ(k0,1)
-    accu += 2.d0 * mo_two_e_integrals_coulomb_ii(k,i,j) - mo_two_e_integrals_exch_ii(k,i,j)
+    accu += 2.d0 * big_array_coulomb_integrals(k,i,j) - big_array_exchange_integrals(k,i,j)
    enddo
    fock_wee_closed_shell(i,j) = accu
    fock_wee_closed_shell(j,i) = accu
@@ -102,7 +102,7 @@ BEGIN_PROVIDER [double precision, fock_wee_closed_shell, (mo_num, mo_num) ]
    accu = 0.d0
    do k0 = 1, n_occ_ab(1)
     k = occ(k0,1)
-    accu += 2.d0 * mo_two_e_integrals_coulomb_ii(k,i,j) - mo_two_e_integrals_exch_ii(k,i,j)
+    accu += 2.d0 * big_array_coulomb_integrals(k,i,j) - big_array_exchange_integrals(k,i,j)
    enddo
    fock_wee_closed_shell(i,j) = accu
    fock_wee_closed_shell(j,i) = accu
@@ -117,7 +117,7 @@ BEGIN_PROVIDER [double precision, fock_wee_closed_shell, (mo_num, mo_num) ]
    accu = 0.d0
    do k0 = 1, n_occ_ab(1)
     k = occ(k0,1)
-    accu += 2.d0 * mo_two_e_integrals_coulomb_ii(k,i,j) - mo_two_e_integrals_exch_ii(k,i,j)
+    accu += 2.d0 * big_array_coulomb_integrals(k,i,j) - big_array_exchange_integrals(k,i,j)
    enddo
    fock_wee_closed_shell(i,j) = accu
    fock_wee_closed_shell(j,i) = accu

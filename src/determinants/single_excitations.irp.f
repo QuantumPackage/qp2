@@ -46,7 +46,7 @@ BEGIN_PROVIDER [double precision, fock_operator_closed_shell_ref_bitmask, (mo_nu
    accu = 0.d0
    do k0 = 1, n_occ_ab(1)
     k = occ(k0,1)
-    accu += 2.d0 * mo_two_e_integrals_coulomb_ii(k,i,j) - mo_two_e_integrals_exch_ii(k,i,j)
+    accu += 2.d0 * big_array_coulomb_integrals(k,i,j) - big_array_exchange_integrals(k,i,j)
    enddo
    fock_operator_closed_shell_ref_bitmask(i,j) = accu + mo_one_e_integrals(i,j)
    fock_operator_closed_shell_ref_bitmask(j,i) = accu + mo_one_e_integrals(i,j)
@@ -61,7 +61,7 @@ BEGIN_PROVIDER [double precision, fock_operator_closed_shell_ref_bitmask, (mo_nu
    accu = 0.d0
    do k0 = 1, n_occ_ab(1)
     k = occ(k0,1)
-    accu += 2.d0 * mo_two_e_integrals_coulomb_ii(k,i,j) - mo_two_e_integrals_exch_ii(k,i,j) 
+    accu += 2.d0 * big_array_coulomb_integrals(k,i,j) - big_array_exchange_integrals(k,i,j)
    enddo
    fock_operator_closed_shell_ref_bitmask(i,j) = accu+ mo_one_e_integrals(i,j)
    fock_operator_closed_shell_ref_bitmask(j,i) = accu+ mo_one_e_integrals(i,j)
@@ -76,7 +76,7 @@ BEGIN_PROVIDER [double precision, fock_operator_closed_shell_ref_bitmask, (mo_nu
    accu = 0.d0
    do k0 = 1, n_occ_ab(1)
     k = occ(k0,1)
-    accu += 2.d0 * mo_two_e_integrals_coulomb_ii(k,i,j) - mo_two_e_integrals_exch_ii(k,i,j)
+    accu += 2.d0 * big_array_coulomb_integrals(k,i,j) - big_array_exchange_integrals(k,i,j)
    enddo
    fock_operator_closed_shell_ref_bitmask(i,j) = accu+ mo_one_e_integrals(i,j)
    fock_operator_closed_shell_ref_bitmask(j,i) = accu+ mo_one_e_integrals(i,j)

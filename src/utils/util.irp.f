@@ -332,22 +332,6 @@ subroutine wall_time(t)
   t = dble(c)/dble(rate)
 end
 
-BEGIN_PROVIDER [ integer, nproc ]
-  use omp_lib
-  implicit none
-  BEGIN_DOC
-  ! Number of current OpenMP threads
-  END_DOC
-
-  nproc = 1
-  !$OMP PARALLEL
-  !$OMP MASTER
-  !$ nproc = omp_get_num_threads()
-  !$OMP END MASTER
-  !$OMP END PARALLEL
-END_PROVIDER
-
-
 double precision function u_dot_v(u,v,sze)
   implicit none
   BEGIN_DOC

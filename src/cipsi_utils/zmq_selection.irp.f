@@ -96,7 +96,7 @@ subroutine ZMQ_selection(N_in, pt2_data)
   if (N_det < 3*nproc) then
     nproc_target = N_det/4
   else
-    nproc_target = nproc
+    nproc_target = nthreads_pt2
   endif
   double precision :: mem
   mem = 8.d0 * N_det * (N_int * 2.d0 * 3.d0 +  3.d0 + 5.d0) / (1024.d0**3)
