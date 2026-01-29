@@ -239,8 +239,16 @@ double precision function get_two_e_integral(i,j,k,l,map)
   else
 
     ! Integral is not in the cache
+    if (j == l) then
+      get_two_e_integral = big_array_coulomb_integrals(j,i,k)
+    else if (i == k) then
+      get_two_e_integral = big_array_coulomb_integrals(i,j,l)
+    else if (j == k) then
+      get_two_e_integral = big_array_exchange_integrals(j,i,l)
+    else if (i == l) then
+      get_two_e_integral = big_array_exchange_integrals(i,j,k)
 
-    if  (do_mo_cholesky) then
+    else if  (do_mo_cholesky) then
 
       integer :: iproc
 !      iproc = omp_get_thread_num()

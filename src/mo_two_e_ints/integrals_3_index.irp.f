@@ -10,6 +10,7 @@
  integer :: i,j,k,l,a
  double precision :: get_two_e_integral
  double precision :: integral
+ PROVIDE mo_integrals_map
 
  if (do_mo_cholesky) then
 
@@ -95,15 +96,19 @@
 
  else
 
+   real(integral_kind)            :: tmp
+   integer(key_kind)              :: idx
    do k = 1, mo_num
      do i = 1, mo_num
        do j = 1, mo_num
          l = j
-         integral = get_two_e_integral(i,j,k,l,mo_integrals_map)
-         big_array_coulomb_integrals(j,i,k) = integral
+         call two_e_integrals_index(i,j,k,l,idx)
+         call map_get(mo_integrals_map,idx,tmp)
+         big_array_coulomb_integrals(j,i,k) = dble(tmp)
          l = j
-         integral = get_two_e_integral(i,j,l,k,mo_integrals_map)
-         big_array_exchange_integrals(j,i,k) = integral
+         call two_e_integrals_index(i,j,l,k,idx)
+         call map_get(mo_integrals_map,idx,tmp)
+         big_array_exchange_integrals(j,i,k) = dble(tmp)
        enddo
      enddo
    enddo

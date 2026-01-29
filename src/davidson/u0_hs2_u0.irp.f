@@ -455,6 +455,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
           ASSERT (lrow <= N_det_alpha_unique)
 
           tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
+! TODO
           call i_H_j_double_alpha_beta(tmp_det,tmp_det2,$N_int,hij)
           call get_s2(tmp_det,tmp_det2,$N_int,sij)
           !DIR$ LOOP COUNT AVG(4)

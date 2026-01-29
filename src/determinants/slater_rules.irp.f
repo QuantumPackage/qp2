@@ -2282,22 +2282,17 @@ subroutine i_H_j_double_alpha_beta(key_i,key_j,Nint,hij)
   call get_single_excitation_spin(key_i(1,1),key_j(1,1),exc(0,1,1),phase,Nint)
   call get_single_excitation_spin(key_i(1,2),key_j(1,2),exc(0,1,2),phase2,Nint)
   phase = phase*phase2
-  if (exc(1,1,1) == exc(1,2,2)) then
-    hij = phase * big_array_exchange_integrals(exc(1,1,1),exc(1,1,2),exc(1,2,1))
-  else if (exc(1,2,1) == exc(1,1,2)) then
-    hij = phase * big_array_exchange_integrals(exc(1,2,1),exc(1,1,1),exc(1,2,2))
-  else
-    hij = phase*get_two_e_integral(                              &
+  hij = phase*get_two_e_integral(                              &
         exc(1,1,1),                                                  &
         exc(1,1,2),                                                  &
         exc(1,2,1),                                                  &
         exc(1,2,2) ,mo_integrals_map)
-  endif
+
 end
 
 
 subroutine connected_to_hf(key_i,yes_no)
- implicit none 
+ implicit none
  use bitmasks
  integer(bit_kind), intent(in)  :: key_i(N_int,2)
  logical , intent(out) :: yes_no
@@ -2310,9 +2305,9 @@ subroutine connected_to_hf(key_i,yes_no)
  if(degree == 2)then
   call i_H_j(ref_bitmask,key_i,N_int,hij)
   if(dabs(hij) .lt. thresh_sym)then
-   yes_no = .False. 
+   yes_no = .False.
   endif
- else if(degree == 1)then  
+ else if(degree == 1)then
   call get_single_excitation(ref_bitmask,key_i,exc,phase,N_int)
   ! Single alpha
   if (exc(0,1,1) == 1) then
@@ -2325,7 +2320,7 @@ subroutine connected_to_hf(key_i,yes_no)
   endif
   hij = mo_one_e_integrals(m,p)
   if(dabs(hij) .lt. thresh_sym)then
-   yes_no = .False. 
+   yes_no = .False.
   endif
  else if(degree == 0)then
   yes_no = .True.
