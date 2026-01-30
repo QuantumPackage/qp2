@@ -15,7 +15,6 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   double precision              :: e,ta,tb,eccsd
 
   eccsd = energy
-  call set_multiple_levels_omp(.False.)
 
   allocate(X_vovv(nV,nO,nV,nV), X_ooov(nO,nO,nO,nV), X_oovv(nO,nO,nV,nV))
   allocate(T_voov(nV,nO,nO,nV),T_oovv(nO,nO,nV,nV))
@@ -217,7 +216,6 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   print '(A)', ' ======================= ============== =========='
 
 
-  call set_multiple_levels_omp(.False.)
   call wall_time(t00)
   imin = 1_8
   t_error = huge(1.d0)

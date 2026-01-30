@@ -78,7 +78,6 @@ BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:mo_integrals_cache_s
 
  if (do_mo_cholesky) then
 
-   call set_multiple_levels_omp(.False.)
 
    if (gpu_num == 0) then
 

@@ -31,7 +31,6 @@ BEGIN_PROVIDER [ double precision, cholesky_mo, (mo_num, mo_num, cholesky_mo_num
 
  integer :: k, i, j
 
- call set_multiple_levels_omp(.False.)
  !$OMP PARALLEL DO PRIVATE(k)
  do k=1,cholesky_mo_num
   do j=1,mo_num
@@ -197,7 +196,6 @@ BEGIN_PROVIDER [ real, cholesky_mo_sp, (mo_num, mo_num, cholesky_mo_num) ]
 
  integer :: k, i, j
 
- call set_multiple_levels_omp(.False.)
  !$OMP PARALLEL DO PRIVATE(k)
  do k=1,cholesky_mo_num
   do j=1,mo_num

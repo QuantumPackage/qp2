@@ -9,6 +9,7 @@ program print_energy
  read_wf = .True.
  touch read_wf
  PROVIDE N_states
+ PROVIDE all_mo_integrals HF_energy
  call run
 end
 

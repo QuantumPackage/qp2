@@ -2304,6 +2304,7 @@ subroutine i_H_j_double_alpha_beta_s2(key_i,key_ja,key_jb,Nint,hij,s2,n)
   integer                        :: exc(0:2,2,2)
   double precision               :: phase, phase2
   double precision, external     :: get_two_e_integral
+  double precision, allocatable  :: integral(:,:)
   integer :: i,j,k,l,m
 
   PROVIDE all_mo_integrals
@@ -2311,18 +2312,37 @@ subroutine i_H_j_double_alpha_beta_s2(key_i,key_ja,key_jb,Nint,hij,s2,n)
   call get_single_excitation_spin(key_i(1,2),key_jb,exc(0,1,2),phase2,Nint)
   j=exc(1,1,2)
   l=exc(1,2,2)
-  do m=1,n
-    call get_single_excitation_spin(key_i(1,1),key_ja(1,m),exc(0,1,1),phase,Nint)
-    phase = phase*phase2
-    i=exc(1,1,1)
-    k=exc(1,2,1)
-    hij(m) = phase*get_two_e_integral(i,j,k,l,mo_integrals_map)
+  if (.False.) then
+!  if (n > mo_num) then
+    allocate (integral(mo_num,mo_num))
+    call get_mo_two_e_integrals_i1j1(j,l,mo_num,integral,mo_integrals_map)
+    do m=1,n
+      call get_single_excitation_spin(key_i(1,1),key_ja(1,m),exc(0,1,1),phase,Nint)
+      phase = phase*phase2
+      i=exc(1,1,1)
+      k=exc(1,2,1)
+      hij(m) = phase*integral(i,k)
 
-    s2(m) = 0.d0
-    if ( (i == l).and.(j == k) ) then
-      s2(m) =  -phase
-    endif
-  enddo
+      s2(m) = 0.d0
+      if ( (i == l).and.(j == k) ) then
+        s2(m) =  -phase
+      endif
+    enddo
+    deallocate(integral)
+  else
+    do m=1,n
+      call get_single_excitation_spin(key_i(1,1),key_ja(1,m),exc(0,1,1),phase,Nint)
+      phase = phase*phase2
+      i=exc(1,1,1)
+      k=exc(1,2,1)
+      hij(m) = phase*get_two_e_integral(i,j,k,l,mo_integrals_map)
+
+      s2(m) = 0.d0
+      if ( (i == l).and.(j == k) ) then
+        s2(m) =  -phase
+      endif
+    enddo
+  endif
 
 end
 

@@ -464,8 +464,6 @@ subroutine H_u_0_nstates_zmq(v_0,u_0,N_st,sze)
     print *,  irp_here, ': Failed in zmq_set_running'
   endif
 
-  call set_multiple_levels_omp(.True.)
-
   !$OMP PARALLEL DEFAULT(shared) NUM_THREADS(2) PRIVATE(ithread)
   ithread = omp_get_thread_num()
   if (ithread == 0 ) then

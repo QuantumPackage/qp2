@@ -28,8 +28,6 @@ subroutine run_ccsd_space_orb
   integer, allocatable          :: list_occ(:), list_vir(:)
   integer                       :: nO, nV, nOa, nVa
 
-  call set_multiple_levels_omp(.False.)
-
   if (do_mo_cholesky) then
     PROVIDE cholesky_mo_transp
     FREE cholesky_ao

@@ -1,3 +1,5 @@
+ use omp_lib
+
  BEGIN_PROVIDER [ double precision, psi_energy, (N_states) ]
 &BEGIN_PROVIDER [ double precision, psi_s2, (N_states) ]
   implicit none
@@ -105,7 +107,6 @@ subroutine H_S2_u_0_nstates_openmp(v_0,s_0,u_0,N_st,sze)
   double precision, intent(inout)  :: v_0(sze,N_st), s_0(sze,N_st), u_0(sze,N_st)
   integer :: k
   double precision, allocatable  :: u_t(:,:), v_t(:,:), s_t(:,:)
-  !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: u_t
   allocate(u_t(N_st,N_det),v_t(N_st,N_det),s_t(N_st,N_det))
 
   do k=1,N_st
@@ -212,7 +213,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
   integer*8                      :: last_found, left, right, right_max
   double precision               :: rss, mem, ratio
   double precision, allocatable  :: utl(:,:)
-  integer, parameter             :: block_size=128
+  integer, parameter             :: block_size=8192
   logical                        :: u_is_sparse
   double precision, allocatable  :: hij_block(:), sij_block(:)
 
@@ -227,7 +228,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
     provide singles_alpha_csc
     provide singles_beta_csc
   endif
-
 
 
   maxab = max(N_det_alpha_unique, N_det_beta_unique)+1
@@ -316,7 +316,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
             singles_b, n_singles_b)
       else
         n_singles_b = 0
-        !DIR$ LOOP COUNT avg(1000)
         do k8=singles_beta_csc_idx(kcol),singles_beta_csc_idx(kcol+1)-1
           n_singles_b = n_singles_b+1
           singles_b(n_singles_b) = singles_beta_csc(k8)
@@ -329,7 +328,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
     ! Loop over singly excited beta columns
     ! -------------------------------------
 
-    !DIR$ LOOP COUNT avg(1000)
     do i=1,n_singles_b
       lcol = singles_b(i)
 
@@ -426,7 +424,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
 
       double precision :: umax
 
-      !DIR$ LOOP COUNT avg(1000)
       do k = 1,n_singles_a,block_size
         umax = 0.d0
         ! Prefetch u_t(:,l_a)
@@ -457,7 +454,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
           tmp_det4(1:$N_int,kk+1) = psi_det_alpha_unique(1:$N_int, lrow)
         enddo
 
-! TODO
         call i_H_j_double_alpha_beta_s2(tmp_det,tmp_det4(1,1),tmp_det2(1:$N_int,2),$N_int,hij_block(1),sij_block(1), min(block_size, n_singles_a-k+1))
 
         do kk=1,min(block_size, n_singles_a-k+1)
@@ -506,7 +502,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
     lcol = psi_bilinear_matrix_columns(k_a)
     l_a = psi_bilinear_matrix_columns_loc(lcol)
 
-    !DIR$ LOOP COUNT avg(200000)
     do i=1,N_det_alpha_unique
       if (l_a > N_det) exit
       lcol = psi_bilinear_matrix_columns(l_a)
@@ -528,7 +523,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
     ! ----------------------------------
 
     tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
-    !DIR$ LOOP COUNT avg(1000)
     do i=1,n_singles_a,block_size
       umax = 0.d0
       ! Prefetch u_t(:,l_a)
@@ -563,7 +557,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
         tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
         call i_h_j_single_spin( tmp_det, tmp_det2, $N_int, 1, hij)
 
-        !DIR$ LOOP COUNT AVG(4)
         do l=1,N_st
           v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
           ! single => sij = 0
@@ -575,7 +568,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
     ! Compute Hij for all alpha doubles
     ! ----------------------------------
 
-    !DIR$ LOOP COUNT avg(50000)
     do i=1,n_doubles,block_size
       umax = 0.d0
       ! Prefetch u_t(:,l_a)
@@ -608,7 +600,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
         ASSERT (lrow <= N_det_alpha_unique)
 
         call i_H_j_double_spin( tmp_det(1,1), psi_det_alpha_unique(1, lrow), $N_int, hij)
-        !DIR$ LOOP COUNT AVG(4)
         do l=1,N_st
           v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
           ! same spin => sij = 0
@@ -641,7 +632,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
     ! Loop inside the alpha row to gather all the connected betas
     lrow = psi_bilinear_matrix_transp_rows(k_b)
     l_b = psi_bilinear_matrix_transp_rows_loc(lrow)
-    !DIR$ LOOP COUNT avg(200000)
     do i=1,N_det_beta_unique
       if (l_b > N_det) exit
       lrow = psi_bilinear_matrix_transp_rows(l_b)
@@ -663,7 +653,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
     ! ----------------------------------
 
     tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
-    !DIR$ LOOP COUNT avg(1000)
     do i=1,n_singles_b,block_size
       umax = 0.d0
       if (u_is_sparse) then
@@ -701,7 +690,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
 
         tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, lcol)
         call i_h_j_single_spin( tmp_det, tmp_det2, $N_int, 2, hij)
-        !DIR$ LOOP COUNT AVG(4)
         do l=1,N_st
           v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
           ! single => sij = 0
@@ -712,7 +700,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
     ! Compute Hij for all beta doubles
     ! ----------------------------------
 
-    !DIR$ LOOP COUNT avg(50000)
     do i=1,n_doubles,block_size
       umax = 0.d0
       if (u_is_sparse) then
@@ -749,7 +736,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
 
         call i_H_j_double_spin( tmp_det(1,2), psi_det_beta_unique(1, lcol), $N_int, hij)
 
-        !DIR$ LOOP COUNT AVG(4)
         do l=1,N_st
           v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
           ! same spin => sij = 0
@@ -788,7 +774,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
 
     hij = diag_H_mat_elem(tmp_det,$N_int)
     sij = diag_S_mat_elem(tmp_det,$N_int)
-    !DIR$ LOOP COUNT AVG(4)
     do l=1,N_st
       v_t(l,k_a) = v_t(l,k_a) + hij * u_t(l,k_a)
       s_t(l,k_a) = s_t(l,k_a) + sij * u_t(l,k_a)

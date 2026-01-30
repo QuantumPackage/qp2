@@ -420,7 +420,6 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
 
   type(gpu_stream) :: stream(nV)
 
-  call set_multiple_levels_omp(.False.)
 
   call gpu_copy(d_cc_space_v_oovv, r2)
 
@@ -445,7 +444,6 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
   call gpu_dgemm(blas_handle, 'N','N', cholesky_mo_num*nV, nV, nO, 1.d0, &
       d_cc_space_v_vo_chol%f(1,1,1), cholesky_mo_num*nV, t1%f(1,1), nO, 0.d0, tmp_cc%f(1,1,1), cholesky_mo_num*nV)
 
-  call set_multiple_levels_omp(.False.)
   call gpu_synchronize()
 
   type(gpu_blas) :: blas

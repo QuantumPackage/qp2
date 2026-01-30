@@ -15,7 +15,6 @@ subroutine ccsd_par_t_space_v3(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
   integer                       :: i,j,k,l,a,b,c,d
   double precision              :: e,ta,tb
 
-  call set_multiple_levels_omp(.False.)
 
   allocate(X_vovv(nV,nO,nV,nV), X_ooov(nO,nO,nO,nV), X_oovv(nO,nO,nV,nV))
   allocate(T_voov(nV,nO,nO,nV),T_oovv(nO,nO,nV,nV))

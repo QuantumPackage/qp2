@@ -503,7 +503,6 @@ subroutine add_integrals_to_map_cholesky
   endif
 
   PROVIDE cholesky_mo_transp_d
-  call set_multiple_levels_omp(.False.)
 
   !$OMP PARALLEL DEFAULT(SHARED) &
   !$OMP PRIVATE(i,j,k,l,n_integrals,buffer_value, buffer_i, Vtmp_d, Vtmp, iproc)
@@ -592,7 +591,6 @@ subroutine add_integrals_to_map_cholesky_sp
 
 
   PROVIDE cholesky_mo_transp_sp_d
-  call set_multiple_levels_omp(.False.)
 
   !$OMP PARALLEL DEFAULT(SHARED) &
   !$OMP PRIVATE(i,j,k,l,n_integrals,buffer_value, buffer_i, Vtmp_d, Vtmp, iproc)

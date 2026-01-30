@@ -135,7 +135,6 @@ BEGIN_PROVIDER [double precision, cc_space_v, (mo_num,mo_num,mo_num,mo_num)]
   if (do_mo_cholesky) then
     integer                       :: i1,i2,i3,i4
     double precision, allocatable :: buffer(:,:,:)
-    call set_multiple_levels_omp(.False.)
     !$OMP PARALLEL &
     !$OMP SHARED(cc_space_v,mo_num,cholesky_mo_transp,cholesky_mo_num) &
     !$OMP PRIVATE(i1,i2,i3,i4,k,buffer)&
