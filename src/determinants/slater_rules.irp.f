@@ -2290,6 +2290,82 @@ subroutine i_H_j_double_alpha_beta(key_i,key_j,Nint,hij)
 
 end
 
+subroutine i_H_j_double_alpha_beta_s2_sorted(key_i,key_ja,key_jb,Nint,hij,s2,n)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Returns $\langle i|H|j \rangle$ where $i$ and $j$ are determinants differing by
+  ! an opposite-spin double excitation.
+  END_DOC
+  integer, intent(in)            :: Nint, n
+  integer(bit_kind), intent(in)  :: key_i(Nint,2), key_ja(Nint,n), key_jb(Nint)
+  double precision, intent(out)  :: hij(n), s2(n)
+
+  integer                        :: exc(0:2,2,2)
+  double precision               :: phase, phase2
+  double precision, external     :: get_two_e_integral
+  double precision, allocatable  :: integral(:,:)
+  integer, allocatable :: integral_count(:), iorder(:), ii(:), kk(:)
+  integer :: i,j,k,l,m,mm
+
+  PROVIDE all_mo_integrals
+
+  call get_single_excitation_spin(key_i(1,2),key_jb,exc(0,1,2),phase2,Nint)
+  j=exc(1,1,2)
+  l=exc(1,2,2)
+!  if (do_mo_cholesky.and.(n > (3*mo_num))) then
+  if (do_mo_cholesky.and.(n > mo_num)) then
+    allocate (integral(mo_num,mo_num), integral_count(mo_num), ii(n), kk(n), iorder(n))
+    do m=1,mo_num
+      integral_count(m) = 0
+    enddo
+    do m=1,n
+      call get_single_excitation_spin(key_i(1,1),key_ja(1,m),exc(0,1,1),phase,Nint)
+      ii(m)=exc(1,1,1)
+      kk(m)=exc(1,2,1)
+      integral_count(ii(m)) = integral_count(ii(m))+1
+      integral_count(kk(m)) = integral_count(kk(m))+1
+      iorder(m) = m
+      s2(m) = 0.d0
+      hij(m) = phase
+      if ( (ii(m) == l).and.(j == kk(m)) ) then
+        s2(m) =  -phase*phase2
+      endif
+    enddo
+    call isort(ii,iorder,n)
+!    call get_mo_two_e_integrals_i1j1(j,l,mo_num,integral,mo_integrals_map)
+
+    do mm=1,n
+      m = iorder(mm)
+      i = ii(mm)
+      k = kk(m)
+      if (integral_count(i) > mo_num/4) then
+        call get_mo_two_e_integrals(j,k,l,mo_num,integral(1,k),mo_integrals_map)
+        integral_count(i) = -1
+      else if (integral_count(i) > 0) then
+        integral(i,k) = get_two_e_integral(i,j,k,l,mo_integrals_map)
+      endif
+      hij(m) = hij(m)*integral(i,k)
+    enddo
+    deallocate(integral, ii, kk, iorder, integral_count)
+  else
+    do m=1,n
+      call get_single_excitation_spin(key_i(1,1),key_ja(1,m),exc(0,1,1),phase,Nint)
+      phase = phase*phase2
+      i=exc(1,1,1)
+      k=exc(1,2,1)
+      hij(m) = phase*get_two_e_integral(i,j,k,l,mo_integrals_map)
+
+      s2(m) = 0.d0
+      if ( (i == l).and.(j == k) ) then
+        s2(m) =  -phase
+      endif
+    enddo
+  endif
+
+end
+
+
 subroutine i_H_j_double_alpha_beta_s2(key_i,key_ja,key_jb,Nint,hij,s2,n)
   use bitmasks
   implicit none
@@ -2305,28 +2381,26 @@ subroutine i_H_j_double_alpha_beta_s2(key_i,key_ja,key_jb,Nint,hij,s2,n)
   double precision               :: phase, phase2
   double precision, external     :: get_two_e_integral
   double precision, allocatable  :: integral(:,:)
-  integer :: i,j,k,l,m
+  integer :: i,j,k,l,m,mm
 
   PROVIDE all_mo_integrals
 
   call get_single_excitation_spin(key_i(1,2),key_jb,exc(0,1,2),phase2,Nint)
   j=exc(1,1,2)
   l=exc(1,2,2)
-  if (.False.) then
-!  if (n > mo_num) then
+  if (do_mo_cholesky.and.(n > (3*mo_num))) then
     allocate (integral(mo_num,mo_num))
     call get_mo_two_e_integrals_i1j1(j,l,mo_num,integral,mo_integrals_map)
     do m=1,n
       call get_single_excitation_spin(key_i(1,1),key_ja(1,m),exc(0,1,1),phase,Nint)
-      phase = phase*phase2
       i=exc(1,1,1)
       k=exc(1,2,1)
-      hij(m) = phase*integral(i,k)
-
+      phase = phase*phase2
       s2(m) = 0.d0
       if ( (i == l).and.(j == k) ) then
         s2(m) =  -phase
       endif
+      hij(m) = phase*integral(i,k)
     enddo
     deallocate(integral)
   else
@@ -2336,7 +2410,6 @@ subroutine i_H_j_double_alpha_beta_s2(key_i,key_ja,key_jb,Nint,hij,s2,n)
       i=exc(1,1,1)
       k=exc(1,2,1)
       hij(m) = phase*get_two_e_integral(i,j,k,l,mo_integrals_map)
-
       s2(m) = 0.d0
       if ( (i == l).and.(j == k) ) then
         s2(m) =  -phase
