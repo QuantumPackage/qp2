@@ -519,7 +519,7 @@ def write_ezfio(trexio_filename, filename):
          alpha = [ tmp[i] for i in range(num_alpha) ]
          tmp   = [ i for i in range(len(spin)) if spin[i] == 1 ]
          beta  = [ tmp[i] for i in range(num_beta) ]
-         warnings.append("UHF orbitals orbitals read", end=' ')
+         warnings.append("UHF orbitals orbitals read")
     alpha_s = ['0']*mo_num
     beta_s  = ['0']*mo_num
     for i in alpha:
