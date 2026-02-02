@@ -33,8 +33,14 @@ subroutine run
   integer :: nint, nstates
   integer :: bufsize
 
-  rc = trexio_read_state_num(f, nstates)
-  call trexio_assert(rc, TREXIO_SUCCESS)
+  rc = trexio_has_state_num(f)
+  if (rc == TREXIO_SUCCESS) then
+    rc = trexio_read_state_num(f, nstates)
+    call trexio_assert(rc, TREXIO_SUCCESS)
+    call qp_bug(irp_here, 'Not implemented for multiple states', nstates)
+  else
+    nstates = 1
+  endif
 
 !  rc = trexio_read_determinant_int64_num(f, nint)
 !  call trexio_assert(rc, TREXIO_SUCCESS)
@@ -48,6 +54,7 @@ subroutine run
   rc = trexio_read_determinant_num(f, bufsize)
   call trexio_assert(rc, TREXIO_SUCCESS)
   print *, 'N_det = ', bufsize
+  N_det = bufsize
 
   allocate ( det_buffer(nint, 2, bufsize), coef_buffer(bufsize, n_states) )
 
@@ -62,16 +69,23 @@ subroutine run
       stop -1
   endif
 
-  do m=1,nstates
-    rc = trexio_set_state(f, m-1)
-    call trexio_assert(rc, TREXIO_SUCCESS)
-    rc = trexio_read_determinant_coefficient(f, offset, icount, coef_buffer(1,m))
-    call trexio_assert(rc, TREXIO_SUCCESS)
-    if (icount /= bufsize) then
-        print *, 'error: bufsize /= N_det for state', m, ':', icount, bufsize
-        stop -1
-    endif
-  enddo
+  rc = trexio_read_determinant_coefficient(f, offset, icount, coef_buffer(1,1))
+  call trexio_assert(rc, TREXIO_SUCCESS)
+  if (icount /= bufsize) then
+      print *, 'error: bufsize /= N_det for state', m, ':', icount, bufsize
+      stop -1
+  endif
+
+!  do m=2,nstates
+!    rc = trexio_set_state(f, m-1)
+!    call trexio_assert(rc, TREXIO_SUCCESS)
+!    rc = trexio_read_determinant_coefficient(f, offset, icount, coef_buffer(1,m))
+!    call trexio_assert(rc, TREXIO_SUCCESS)
+!    if (icount /= bufsize) then
+!        print *, 'error: bufsize /= N_det for state', m, ':', icount, bufsize
+!        stop -1
+!    endif
+!  enddo
 
   call save_wavefunction_general(bufsize,nstates,det_buffer,size(coef_buffer,1),coef_buffer)
 

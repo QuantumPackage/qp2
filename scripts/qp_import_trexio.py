@@ -191,7 +191,6 @@ def write_ezfio(trexio_filename, filename):
                 prev = i
             shell_prim_num.append(count)
 
-            print (len(shell_prim_num), shell_num)
             assert (len(shell_prim_num) == shell_num)
 
             ezfio.set_basis_shell_prim_num(shell_prim_num)
