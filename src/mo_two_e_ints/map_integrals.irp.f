@@ -316,7 +316,7 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 
   integer :: iproc
 
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache cholesky_mo_transp cholesky_mo_transp_d cholesky_mo_transp_sp cholesky_mo_transp_sp_d
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache 
 
   if (banned_excitation(j,l)) then
       out_val(1:sze) = 0.d0
