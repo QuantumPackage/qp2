@@ -80,8 +80,8 @@ subroutine print_basis_correction
        print*,''
        print*,'Work in progress'
        do istate = 1, N_states
-!!!      write(*, '(A29,X,I3,X,A3,X,F16.10)') '  ECMD LDA-OT        , state ',istate,' = ',ecmd_lda_on_top_mu_of_r(istate)
-        write(*, '(A29,X,I3,X,A3,X,F16.10)') '  Projection rho     , state ',istate,' = ', sr_correction_rho_mu_of_r(istate)
+        write(*, '(A29,X,I3,X,A3,X,F16.10)') '  Projection rho     , state ',istate,' = ', sr_correction_rho_of_r(istate)
+        write(*, '(A29,X,I3,X,A3,X,F16.10)') '  Projection rho_mu  , state ',istate,' = ', sr_correction_rho_mu_of_r(istate)
         write(*, '(A29,X,I3,X,A3,X,F16.10)') '  Projection P2      , state ',istate,' = ', sr_correction_on_top_mu_of_r(istate)
        enddo
      endif
