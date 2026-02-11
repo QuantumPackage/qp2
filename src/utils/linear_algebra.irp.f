@@ -15,7 +15,8 @@ subroutine svd(A,LDA,U,LDU,D,Vt,LDVt,m,n)
   double precision,intent(out)    :: Vt(LDVt,n)
   double precision,intent(out)    :: D(min(m,n))
   double precision,allocatable    :: work(:)
-  integer                         :: info, lwork, i, j, k
+  integer, allocatable            :: iwork(:)
+  integer                         :: info, lwork, liwork, i, j, k
 
   double precision,allocatable    :: A_tmp(:,:)
   allocate (A_tmp(LDA,n))
@@ -26,18 +27,20 @@ subroutine svd(A,LDA,U,LDU,D,Vt,LDVt,m,n)
   enddo
 
   ! Find optimal size for temp arrays
-  allocate(work(1))
+  liwork = 8*min(m,n)
   lwork = -1
-  call dgesvd('S','S', m, n, A_tmp, LDA,                             &
-      D, U, LDU, Vt, LDVt, work, lwork, info)
+  allocate(work(1), iwork(liwork))
+
+  call dgesdd('S', m, n, A_tmp, LDA,                             &
+      D, U, LDU, Vt, LDVt, work, lwork, iwork, info)
   ! /!\ int(WORK(1)) becomes negative when WORK(1) > 2147483648
   lwork = max(int(work(1)), 10*MIN(M,N))
   deallocate(work)
 
   allocate(work(lwork))
-  call dgesvd('S','S', m, n, A_tmp, LDA,                             &
-      D, U, LDU, Vt, LDVt, work, lwork, info)
-  deallocate(A_tmp,work)
+  call dgesdd('S', m, n, A_tmp, LDA,                             &
+      D, U, LDU, Vt, LDVt, work, lwork, iwork, info)
+  deallocate(A_tmp,work,iwork)
 
   if (info /= 0) then
     print *,  info, ': SVD failed'
