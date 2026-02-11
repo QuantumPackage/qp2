@@ -123,13 +123,15 @@ end
 &BEGIN_PROVIDER [ double precision, sr_correction_on_top3_mu_of_r, (N_states) ]
 &BEGIN_PROVIDER [ double precision, sr_correction_rho_mu_of_r, (N_states) ]
 &BEGIN_PROVIDER [ double precision, sr_correction_rho_of_r, (N_states) ]
+&BEGIN_PROVIDER [ double precision, sr_correction_rho_mu3_of_r, (N_states) ]
+&BEGIN_PROVIDER [ double precision, sr_correction_rho3_of_r, (N_states) ]
  implicit none
  BEGIN_DOC
 ! 1/2 \int 1/2 \rho(R)^2 g(r=0,\rho) a_3 (4 \epsilon(R))^{3/2) dR
  END_DOC
  double precision :: weight, corr, mu, epsilon, on_top, rs
- double precision  :: corr1, corr2, corr3, corr4
- double precision  :: rho, rho_a, rho_b, g0
+ double precision  :: corr1, corr2, corr3, corr4, corr5, corr6
+ double precision  :: rho, rho_a, rho_b, g0, f2_term, f3_term
  double precision, external :: g0_gori, g0_gori_mu
  double precision, parameter :: pi = dacos(-1.d0)
  double precision, parameter :: four_over_sq_pi = 4.d0/dsqrt(pi)
@@ -141,15 +143,20 @@ end
   sr_correction_on_top3_mu_of_r(istate) = 0.d0
   sr_correction_rho_of_r(istate) = 0.d0
   sr_correction_rho_mu_of_r(istate) = 0.d0
+  sr_correction_rho3_of_r(istate) = 0.d0
+  sr_correction_rho_mu3_of_r(istate) = 0.d0
   do ipoint = 1, n_points_final_grid
    weight = final_weight_at_r_vector(ipoint)
 
    mu = mu_of_r_projector_ao_prod(ipoint)
    epsilon = 1.d0 / (4.d0 * mu*mu)
 
+   f2_term = a3 * (4.d0*epsilon)**(1.5d0) / (1.d0 + four_over_sq_pi*dsqrt(epsilon))
+   f3_term = a3 * (4.d0*epsilon)**(1.5d0) / (1.d0 + four_over_sq_pi*dsqrt(epsilon) + 1.5d0*epsilon)
+
    on_top =  on_top_cas_mu_r(ipoint,istate)
-   corr1 = on_top * a3 * (4.d0*epsilon)**(1.5d0) / (1.d0 + four_over_sq_pi*dsqrt(epsilon) + 1.5d0*epsilon)
-   corr4 = on_top * a3 * (4.d0*epsilon)**(1.5d0) / (1.d0 + four_over_sq_pi*dsqrt(epsilon))
+   corr1 = on_top * f3_term
+   corr4 = on_top * f2_term
 
    rho_a = one_e_dm_and_grad_alpha_in_r(4,ipoint,istate)
    rho_b = one_e_dm_and_grad_beta_in_r(4,ipoint,istate)
@@ -159,34 +166,31 @@ end
    rs = (3.d0 / (4.d0 * pi * rho))**(1.d0/3.d0)
    g0 = g0_gori(rs, rho_a, rho_b)
 
-   corr2 = 0.5d0 * rho*rho * g0 * a3 * (4.d0*epsilon)**(1.5d0)
-!print *, rs, mu, rho
-!print *, corr2, g0
+   corr2 = 0.5d0 * rho*rho * g0 * f2_term
+   corr5 = 0.5d0 * rho*rho * g0 * f3_term
 
    if (rho > 1.d-10) then
-!     g0 = g0_gori_mu(rs, rho_a, rho_b, mu)
-     double precision, external :: g0_gori_su_mu
-     g0 = g0_gori_su_mu(rs, mu)
-     corr3 = 0.5d0 * rho*rho * g0 * a3 * (4.d0*epsilon)**(1.5d0)
+     g0 = g0_gori_mu(rs, rho_a, rho_b, mu)
+     corr3 = 0.5d0 * rho*rho * g0 * f2_term
+     corr6 = 0.5d0 * rho*rho * g0 * f3_term
    else
      corr3 = corr2
+     corr6 = corr5
    endif
-!   corr2 =  2.0d0 * rho_a*rho_b * g0_gori_su(rs) * a3 * (4.d0*epsilon)**(1.5d0)
 
-!double precision :: r
-!r = dsqrt(final_grid_points(1,ipoint)**2 +final_grid_points(2,ipoint)**2 +  &
-!          final_grid_points(3,ipoint)**2)
-!print *, r, mu, rho, g0
-!print *, 0.5d0*g0_gori(0.d0, rho_a, rho_b)
    sr_correction_on_top3_mu_of_r(istate) += corr1 * weight
    sr_correction_rho_of_r(istate) += corr2 * weight
    sr_correction_rho_mu_of_r(istate) += corr3 * weight
    sr_correction_on_top_mu_of_r(istate) += corr4 * weight
+   sr_correction_rho3_of_r(istate) += corr5 * weight
+   sr_correction_rho_mu3_of_r(istate) += corr6 * weight
   enddo
   sr_correction_on_top3_mu_of_r(istate) *= 0.5d0
   sr_correction_rho_of_r(istate) *= 0.5d0
   sr_correction_rho_mu_of_r(istate) *= 0.5d0
   sr_correction_on_top_mu_of_r(istate) *= 0.5d0
+  sr_correction_rho3_of_r(istate) *= 0.5d0
+  sr_correction_rho_mu3_of_r(istate) *= 0.5d0
  enddo
 
 END_PROVIDER
