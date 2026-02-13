@@ -11,7 +11,7 @@ BEGIN_PROVIDER [ type(gpu_blas), blas_handle ]
 ! call gpu_set_stream(blas_handle, gpu_default_stream)
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer, gpu_busy, (0:gpu_num-1) ]
+ BEGIN_PROVIDER [ integer, gpu_busy, (0:gpu_num) ]
 &BEGIN_PROVIDER [ integer, gpu_busy_max_ddot ]
 &BEGIN_PROVIDER [ integer, gpu_busy_max_dgemv ]
 &BEGIN_PROVIDER [ integer, gpu_busy_max_dgemm ]

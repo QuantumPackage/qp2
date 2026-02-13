@@ -217,6 +217,12 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
   logical                        :: u_is_sparse
   double precision, allocatable  :: hij_block(:), sij_block(:)
 
+!TODO
+!  if (do_mo_cholesky) then
+  if (.True.) then
+    call H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
+    return
+  endif
 !  call resident_memory(rss)
 !  mem = dble(singles_beta_csc_size) / 1024.d0**3
 !
@@ -784,6 +790,813 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
   deallocate(buffer, singles_a, singles_b, doubles, idx, buffer_lrow, utl, &
    tmp_det4, hij_block, sij_block)
   !$OMP END PARALLEL
+
+end
+
+subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Computes $v_t = H | u_t \\rangle$ and $s_t = S^2 | u_t\\rangle$
+  !
+  ! Default should be 1,N_det,0,1
+  END_DOC
+  integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep
+  double precision, intent(in)   :: u_t(N_st,N_det)
+  double precision, intent(out)  :: v_t(N_st,sze), s_t(N_st,sze)
+
+  double precision               :: hij, sij
+  integer                        :: i,j,k,l,kk
+  integer                        :: k_a, k_b, l_a, l_b, m_a, m_b
+  integer                        :: istate
+  integer                        :: krow, kcol, krow_b, kcol_b
+  integer                        :: lrow, lcol
+  integer                        :: mrow, mcol
+  integer(bit_kind)              :: spindet($N_int)
+  integer(bit_kind)              :: tmp_det($N_int,2)
+  integer(bit_kind)              :: tmp_det2($N_int,2)
+  integer(bit_kind)              :: tmp_det3($N_int,2)
+  integer(bit_kind), allocatable :: tmp_det4(:,:)
+  integer(bit_kind), allocatable :: buffer(:,:)
+  integer                        :: n_doubles
+  integer, allocatable           :: doubles(:)
+  integer, allocatable           :: singles_a(:)
+  integer, allocatable           :: singles_b(:)
+  integer, allocatable           :: idx(:), buffer_lrow(:), idx0(:)
+  integer                        :: maxab, n_singles_a, n_singles_b, kcol_prev
+  integer*8                      :: k8
+  logical                        :: compute_singles
+  integer*8                      :: last_found, left, right, right_max
+  double precision               :: rss, mem, ratio
+  double precision, allocatable  :: utl(:,:)
+  integer, parameter             :: block_size=8192
+  logical                        :: u_is_sparse
+  double precision, allocatable  :: hij_block(:), sij_block(:)
+
+  integer                        :: exc(0:2,2,2), i_, j_, k_, l_, m, iexc_loop
+  double precision               :: phase, phase2
+  double precision, allocatable  :: integral(:,:,:,:)
+  logical, allocatable  :: integral_ok(:,:)
+  integer(omp_lock_kind), allocatable  :: integral_lock(:,:)
+  integer :: norb_block
+
+!  call resident_memory(rss)
+!  mem = dble(singles_beta_csc_size) / 1024.d0**3
+!
+!  compute_singles = (mem+rss > qp_max_mem)
+!
+  compute_singles=.True.
+
+  if (.not.compute_singles) then
+    provide singles_alpha_csc
+    provide singles_beta_csc
+  endif
+
+
+  maxab = max(N_det_alpha_unique, N_det_beta_unique)+1
+  allocate(idx0(maxab))
+
+  do i=1,maxab
+    idx0(i) = i
+  enddo
+
+  ! Prepare the array of all alpha single excitations
+  ! -------------------------------------------------
+
+  norb_block = 8
+  allocate (integral(mo_num,mo_num,mo_num,norb_block))
+  allocate (integral_ok(mo_num,norb_block))
+  allocate (integral_lock(mo_num,norb_block))
+
+  do k=1,norb_block
+   do j=1,mo_num
+     call omp_init_lock(integral_lock(j,k))
+   enddo
+  enddo
+
+  PROVIDE N_int nthreads_davidson
+  !$OMP PARALLEL DEFAULT(SHARED) NUM_THREADS(nthreads_davidson)        &
+      !$OMP   SHARED(psi_bilinear_matrix_rows, N_det,                &
+      !$OMP          psi_bilinear_matrix_columns,                    &
+      !$OMP          psi_det_alpha_unique, psi_det_beta_unique,      &
+      !$OMP          n_det_alpha_unique, n_det_beta_unique, N_int,   &
+      !$OMP          psi_bilinear_matrix_transp_rows,                &
+      !$OMP          psi_bilinear_matrix_transp_columns,             &
+      !$OMP          psi_bilinear_matrix_transp_order, N_st,         &
+      !$OMP          psi_bilinear_matrix_order_transp_reverse,       &
+      !$OMP          psi_bilinear_matrix_columns_loc,                &
+      !$OMP          psi_bilinear_matrix_transp_rows_loc,            &
+      !$OMP          istart, iend, istep, irp_here, v_t, s_t,        &
+      !$OMP          ishift, idx0, u_t, maxab, compute_singles,      &
+      !$OMP          singles_alpha_csc,singles_alpha_csc_idx,        &
+      !$OMP          singles_beta_csc,singles_beta_csc_idx,          &
+      !$OMP          integral, integral_ok, integral_lock)           &
+      !$OMP   PRIVATE(krow, kcol, tmp_det, spindet, k_a, k_b, i,     &
+      !$OMP          lcol, lrow, l_a, l_b, utl, kk, u_is_sparse,     &
+      !$OMP          buffer, doubles, n_doubles, umax, tmp_det4,     &
+      !$OMP          tmp_det2, hij, sij, idx, buffer_lrow, l, kcol_prev,  &
+      !$OMP          singles_a, n_singles_a, singles_b, ratio,       &
+      !$OMP          n_singles_b, k8, last_found,left,right,right_max, &
+      !$OMP          hij_block, sij_block, exc, phase, phase2,       &
+      !$OMP          i_, k_, j_, l_, m, iexc_loop)
+
+  ! Alpha/Beta double excitations
+  ! =============================
+
+  allocate( buffer($N_int,maxab),                                    &
+      singles_a(maxab),                                              &
+      singles_b(maxab),                                              &
+      doubles(maxab),                                                &
+      idx(maxab), buffer_lrow(maxab), utl(N_st,block_size), &
+      tmp_det4($N_int,block_size), hij_block(block_size), sij_block(block_size))
+
+  kcol_prev=-1
+
+  ! Check if u has multiple zeros
+  kk=1 ! Avoid division by zero
+  !$OMP DO
+  do k=1,N_det
+    umax = 0.d0
+    do l=1,N_st
+      umax = max(umax, dabs(u_t(l,k)))
+    enddo
+    if (umax < 1.d-20) then
+      !$OMP ATOMIC
+      kk = kk+1
+    endif
+  enddo
+  !$OMP END DO
+  u_is_sparse = N_det / kk < 20  ! 5%
+
+  ASSERT (iend <= N_det)
+  ASSERT (istart > 0)
+  ASSERT (istep  > 0)
+
+!$OMP SINGLE
+call write_time(6)
+print *, 'Doubles'
+!$OMP END SINGLE
+
+  do iexc_loop = 1, mo_num, norb_block
+
+!$OMP SINGLE
+    print *, iexc_loop
+    integral_ok = .False.
+!$OMP END SINGLE
+
+    !$OMP DO SCHEDULE(dynamic,64)
+    do k_a=istart+ishift,iend,istep   ! Doubles ab
+
+      krow = psi_bilinear_matrix_rows(k_a)
+      ASSERT (krow <= N_det_alpha_unique)
+
+      kcol = psi_bilinear_matrix_columns(k_a)
+      ASSERT (kcol <= N_det_beta_unique)
+
+      tmp_det(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
+
+      if (kcol /= kcol_prev) then
+        tmp_det(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
+        if (compute_singles) then
+          call get_all_spin_singles_$N_int(                              &
+              psi_det_beta_unique, idx0,                                 &
+              tmp_det(1,2), N_det_beta_unique,                           &
+              singles_b, n_singles_b)
+        else
+          n_singles_b = 0
+          do k8=singles_beta_csc_idx(kcol),singles_beta_csc_idx(kcol+1)-1
+            n_singles_b = n_singles_b+1
+            singles_b(n_singles_b) = singles_beta_csc(k8)
+          enddo
+        endif
+
+      endif
+      kcol_prev = kcol
+
+
+
+    ! Loop over singly excited beta columns
+    ! -------------------------------------
+      do i=1,n_singles_b
+        lcol = singles_b(i)
+
+        tmp_det2(1:$N_int,2) = psi_det_beta_unique(1:$N_int, lcol)
+
+        call get_single_excitation_spin(tmp_det(1,2),tmp_det2(1,2),exc(0,1,2),phase2,$N_int)
+        j_=exc(1,1,2)
+        l_=exc(1,2,2)
+        if ((l_ < iexc_loop).or.(l_ >= iexc_loop+norb_block)) cycle
+
+        if (compute_singles) then
+
+          l_a = psi_bilinear_matrix_columns_loc(lcol)
+          ASSERT (l_a <= N_det)
+
+          do j=1,psi_bilinear_matrix_columns_loc(lcol+1) - psi_bilinear_matrix_columns_loc(lcol)
+            lrow = psi_bilinear_matrix_rows(l_a)
+            ASSERT (lrow <= N_det_alpha_unique)
+
+            buffer_lrow(j) = lrow
+
+            ASSERT (l_a <= N_det)
+            idx(j) = l_a
+            l_a = l_a+1
+          enddo
+
+          do j=1,psi_bilinear_matrix_columns_loc(lcol+1) - psi_bilinear_matrix_columns_loc(lcol)
+            buffer(1:$N_int,j) = psi_det_alpha_unique(1:$N_int, buffer_lrow(j))  ! hot spot
+          enddo
+          j = j-1
+
+          call get_all_spin_singles_$N_int(                              &
+              buffer, idx, tmp_det(1,1), j,                              &
+              singles_a, n_singles_a )
+
+        else
+
+   ! Search for singles
+
+   ! Right boundary
+          l_a = psi_bilinear_matrix_columns_loc(lcol+1)-1
+          ASSERT (l_a <= N_det)
+          do j=1,psi_bilinear_matrix_columns_loc(lcol+1) - psi_bilinear_matrix_columns_loc(lcol)
+            lrow = psi_bilinear_matrix_rows(l_a)
+            ASSERT (lrow <= N_det_alpha_unique)
+
+            left = singles_alpha_csc_idx(krow)
+            right_max = -1_8
+            right = singles_alpha_csc_idx(krow+1)
+            do while (right-left>0_8)
+              k8 = shiftr(right+left,1)
+              if (singles_alpha_csc(k8) > lrow) then
+                right = k8
+              else if (singles_alpha_csc(k8) < lrow) then
+                left = k8 + 1_8
+              else
+                right_max = k8+1_8
+                exit
+              endif
+            enddo
+            if (right_max > 0_8) exit
+            l_a = l_a-1
+          enddo
+          if (right_max < 0_8) right_max = singles_alpha_csc_idx(krow)
+
+   ! Search
+          n_singles_a = 0
+          l_a = psi_bilinear_matrix_columns_loc(lcol)
+          ASSERT (l_a <= N_det)
+
+          last_found = singles_alpha_csc_idx(krow)
+          do j=1,psi_bilinear_matrix_columns_loc(lcol+1) - psi_bilinear_matrix_columns_loc(lcol)
+            lrow = psi_bilinear_matrix_rows(l_a)
+            ASSERT (lrow <= N_det_alpha_unique)
+
+            left = last_found
+            right = right_max
+            do while (right-left>0_8)
+              k8 = shiftr(right+left,1)
+              if (singles_alpha_csc(k8) > lrow) then
+                right = k8
+              else if (singles_alpha_csc(k8) < lrow) then
+                left = k8 + 1_8
+              else
+                n_singles_a += 1
+                singles_a(n_singles_a) = l_a
+                last_found = k8+1_8
+                exit
+              endif
+            enddo
+            l_a = l_a+1
+          enddo
+          j = j-1
+
+        endif
+
+        if ((n_singles_a > 0) .and. (.not.integral_ok(j_,l_-iexc_loop+1))) then
+          call omp_set_lock(integral_lock(j_,l_-iexc_loop+1))
+          if (.not.(integral_ok(j_,l_-iexc_loop+1))) then
+            call get_mo_two_e_integrals_i1j1(j_,l_,mo_num,integral(1,1,j_,l_-iexc_loop+1),mo_integrals_map)
+            integral_ok(j_,l_-iexc_loop+1) = .True.
+          endif
+          call omp_unset_lock(integral_lock(j_,l_-iexc_loop+1))
+        endif
+
+        ! Loop over alpha singles
+        ! -----------------------
+
+        double precision :: umax
+
+        do k = 1,n_singles_a,block_size
+          umax = 0.d0
+          ! Prefetch u_t(:,l_a)
+          if (u_is_sparse) then
+            do kk=0,min(block_size-1,n_singles_a-k)
+              l_a = singles_a(k+kk)
+              ASSERT (l_a <= N_det)
+
+              do l=1,N_st
+                utl(l,kk+1) = u_t(l,l_a)
+                umax = max(umax, dabs(utl(l,kk+1)))
+              enddo
+            enddo
+          else
+            do kk=0,min(block_size-1, n_singles_a-k)
+              l_a = singles_a(k+kk)
+              ASSERT (l_a <= N_det)
+              utl(:,kk+1) = u_t(:,l_a)
+            enddo
+            umax = 1.d0
+          endif
+          if (umax < 1.d-20) cycle
+
+          do kk=0,min(block_size-1, n_singles_a-k)
+            l_a = singles_a(k+kk)
+            lrow = psi_bilinear_matrix_rows(l_a)
+            ASSERT (lrow <= N_det_alpha_unique)
+            tmp_det4(1:$N_int,kk+1) = psi_det_alpha_unique(1:$N_int, lrow)
+          enddo
+
+
+          do m=1,min(block_size, n_singles_a-k+1)
+            call get_single_excitation_spin(tmp_det(1,1),tmp_det4(1,m),exc(0,1,1),phase,$N_int)
+            i_=exc(1,1,1)
+            k_=exc(1,2,1)
+            phase = phase*phase2
+            sij_block(m) = 0.d0
+            if ( (i_ == l_).and.(j_ == k_) ) then
+              sij_block(m) =  -phase
+            endif
+            hij_block(m) = phase*integral(i_,k_,j_,l_-iexc_loop+1)
+          enddo
+
+          do kk=1,min(block_size, n_singles_a-k+1)
+            do l=1,N_st
+              v_t(l,k_a) = v_t(l,k_a) + hij_block(kk) * utl(l,kk)
+              s_t(l,k_a) = s_t(l,k_a) + sij_block(kk) * utl(l,kk)
+            enddo
+          enddo
+
+        enddo
+
+      enddo  ! i
+
+    enddo
+    !$OMP END DO
+
+    ! Double alpha excitations
+    ! ========================
+
+!$OMP SINGLE
+call write_time(6)
+print *, 'Doubles a'
+!$OMP END SINGLE
+
+    !$OMP DO SCHEDULE(dynamic,64)
+    do k_a=istart+ishift,iend,istep ! Doubles a
+
+
+      ! Initial determinant is at k_a in alpha-major representation
+      ! -----------------------------------------------------------------------
+
+      krow = psi_bilinear_matrix_rows(k_a)
+      ASSERT (krow <= N_det_alpha_unique)
+
+      kcol = psi_bilinear_matrix_columns(k_a)
+      ASSERT (kcol <= N_det_beta_unique)
+
+      tmp_det(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
+      tmp_det(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
+
+      ! Initial determinant is at k_b in beta-major representation
+      ! ----------------------------------------------------------------------
+
+      k_b = psi_bilinear_matrix_order_transp_reverse(k_a)
+      ASSERT (k_b <= N_det)
+
+      spindet(1:$N_int) = tmp_det(1:$N_int,1)
+
+      ! Loop inside the beta column to gather all the connected alphas
+      lcol = psi_bilinear_matrix_columns(k_a)
+      l_a = psi_bilinear_matrix_columns_loc(lcol)
+
+      do i=1,N_det_alpha_unique
+        if (l_a > N_det) exit
+        lcol = psi_bilinear_matrix_columns(l_a)
+        if (lcol /= kcol) exit
+        lrow = psi_bilinear_matrix_rows(l_a)
+        ASSERT (lrow <= N_det_alpha_unique)
+
+        buffer(1:$N_int,i) = psi_det_alpha_unique(1:$N_int, lrow) ! Hot spot
+        idx(i) = l_a
+        l_a = l_a+1
+      enddo
+      i = i-1
+
+      call get_all_spin_singles_and_doubles_$N_int(                    &
+          buffer, idx, spindet, i,                                     &
+          singles_a, doubles, n_singles_a, n_doubles )
+
+      tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
+
+      ! Compute Hij for all alpha doubles
+      ! ----------------------------------
+
+      do i=1,n_doubles,block_size
+        umax = 0.d0
+        ! Prefetch u_t(:,l_a)
+        if (u_is_sparse) then
+          do kk=0,block_size-1
+            if (i+kk > n_doubles) exit
+            l_a = doubles(i+kk)
+            ASSERT (l_a <= N_det)
+
+            do l=1,N_st
+              utl(l,kk+1) = u_t(l,l_a)
+              umax = max(umax, dabs(utl(l,kk+1)))
+            enddo
+          enddo
+        else
+          do kk=0,block_size-1
+            if (i+kk > n_doubles) exit
+            l_a = doubles(i+kk)
+            ASSERT (l_a <= N_det)
+            utl(:,kk+1) = u_t(:,l_a)
+          enddo
+          umax = 1.d0
+        endif
+        if (umax < 1.d-20) cycle
+
+        do kk=0,block_size-1
+          if (i+kk > n_doubles) exit
+          l_a = doubles(i+kk)
+          lrow = psi_bilinear_matrix_rows(l_a)
+          ASSERT (lrow <= N_det_alpha_unique)
+
+          call get_double_excitation_spin(tmp_det(1,1),psi_det_alpha_unique(1, lrow),exc,phase,$N_int)
+          i_=exc(1,1,1)
+          j_=exc(2,1,1)
+          k_=exc(1,2,1)
+          l_=exc(2,2,1)
+          if ((j_ < iexc_loop).or.(j_ >= iexc_loop+norb_block)) cycle
+          hij = phase*(integral(k_, i_, l_, j_-iexc_loop+1) - &
+                       integral(l_, i_, k_, j_-iexc_loop+1))
+          do l=1,N_st
+            v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
+            ! same spin => sij = 0
+          enddo
+        enddo
+      enddo
+
+    end do
+    !$OMP END DO
+
+
+
+    ! Double beta excitations
+    ! =======================
+
+!$OMP SINGLE
+call write_time(6)
+print *, 'Doubles b'
+!$OMP END SINGLE
+
+    !$OMP DO SCHEDULE(dynamic,64)
+    do k_a=istart+ishift,iend,istep    ! Singles b
+
+      ! Initial determinant is at k_a in alpha-major representation
+      ! -----------------------------------------------------------------------
+
+      krow = psi_bilinear_matrix_rows(k_a)
+      kcol = psi_bilinear_matrix_columns(k_a)
+
+      tmp_det(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
+      tmp_det(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
+
+      spindet(1:$N_int) = tmp_det(1:$N_int,2)
+
+      ! Initial determinant is at k_b in beta-major representation
+      ! -----------------------------------------------------------------------
+
+      k_b = psi_bilinear_matrix_order_transp_reverse(k_a)
+      ASSERT (k_b <= N_det)
+
+      ! Loop inside the alpha row to gather all the connected betas
+      lrow = psi_bilinear_matrix_transp_rows(k_b)
+      l_b = psi_bilinear_matrix_transp_rows_loc(lrow)
+      do i=1,N_det_beta_unique
+        if (l_b > N_det) exit
+        lrow = psi_bilinear_matrix_transp_rows(l_b)
+        if (lrow /= krow) exit
+        lcol = psi_bilinear_matrix_transp_columns(l_b)
+        ASSERT (lcol <= N_det_beta_unique)
+
+        buffer(1:$N_int,i) = psi_det_beta_unique(1:$N_int, lcol)
+        idx(i) = l_b
+        l_b = l_b+1
+      enddo
+      i = i-1
+
+      call get_all_spin_singles_and_doubles_$N_int(                    &
+          buffer, idx, spindet, i,                                     &
+          singles_b, doubles, n_singles_b, n_doubles )
+
+      tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
+
+      ! Compute Hij for all beta doubles
+      ! ----------------------------------
+
+      do i=1,n_doubles,block_size
+        umax = 0.d0
+        if (u_is_sparse) then
+          do kk=0,block_size-1
+            if (i+kk > n_doubles) exit
+            l_b = doubles(i+kk)
+            l_a = psi_bilinear_matrix_transp_order(l_b)
+            ASSERT (l_b <= N_det)
+            ASSERT (l_a <= N_det)
+            do l=1,N_st
+              utl(l,kk+1) = u_t(l,l_a)
+              umax = max(umax, dabs(utl(l,kk+1)))
+            enddo
+          enddo
+        else
+          do kk=0,block_size-1
+            if (i+kk > n_doubles) exit
+            l_b = doubles(i+kk)
+            l_a = psi_bilinear_matrix_transp_order(l_b)
+            ASSERT (l_b <= N_det)
+            ASSERT (l_a <= N_det)
+            utl(:,kk+1) = u_t(:,l_a)
+          enddo
+          umax = 1.d0
+        endif
+        if (umax < 1.d-20) cycle
+
+        do kk=0,block_size-1
+          if (i+kk > n_doubles) exit
+          l_b = doubles(i+kk)
+          l_a = psi_bilinear_matrix_transp_order(l_b)
+          lcol = psi_bilinear_matrix_transp_columns(l_b)
+          ASSERT (lcol <= N_det_beta_unique)
+
+          call get_double_excitation_spin(tmp_det(1,2),psi_det_alpha_unique(1, lcol),exc,phase,$N_int)
+          i_=exc(1,1,1)
+          j_=exc(2,1,1)
+          k_=exc(1,2,1)
+          l_=exc(2,2,1)
+          if ((j_ < iexc_loop).or.(j_ >= iexc_loop+norb_block)) cycle
+          hij = phase*(integral(k_, i_, l_, j_-iexc_loop+1) - &
+                       integral(l_, i_, k_, j_-iexc_loop+1))
+
+          do l=1,N_st
+            v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
+            ! same spin => sij = 0
+          enddo
+        enddo
+      enddo
+
+    end do
+    !$OMP END DO
+
+  end do  ! iexc_loop
+
+  do k=1,norb_block
+   do j=1,mo_num
+     call omp_destroy_lock(integral_lock(j,k))
+   enddo
+  enddo
+
+  ! Single alpha excitations
+  ! ========================
+
+!$OMP SINGLE
+call write_time(6)
+print *, 'Singles '
+!$OMP END SINGLE
+
+  !$OMP DO SCHEDULE(dynamic,64)
+  do k_a=istart+ishift,iend,istep ! Singles a
+
+
+    ! Initial determinant is at k_a in alpha-major representation
+    ! -----------------------------------------------------------------------
+
+    krow = psi_bilinear_matrix_rows(k_a)
+    ASSERT (krow <= N_det_alpha_unique)
+
+    kcol = psi_bilinear_matrix_columns(k_a)
+    ASSERT (kcol <= N_det_beta_unique)
+
+    tmp_det(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
+    tmp_det(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
+
+    ! Initial determinant is at k_b in beta-major representation
+    ! ----------------------------------------------------------------------
+
+    k_b = psi_bilinear_matrix_order_transp_reverse(k_a)
+    ASSERT (k_b <= N_det)
+
+    spindet(1:$N_int) = tmp_det(1:$N_int,1)
+
+    ! Loop inside the beta column to gather all the connected alphas
+    lcol = psi_bilinear_matrix_columns(k_a)
+    l_a = psi_bilinear_matrix_columns_loc(lcol)
+
+    do i=1,N_det_alpha_unique
+      if (l_a > N_det) exit
+      lcol = psi_bilinear_matrix_columns(l_a)
+      if (lcol /= kcol) exit
+      lrow = psi_bilinear_matrix_rows(l_a)
+      ASSERT (lrow <= N_det_alpha_unique)
+
+      buffer(1:$N_int,i) = psi_det_alpha_unique(1:$N_int, lrow) ! Hot spot
+      idx(i) = l_a
+      l_a = l_a+1
+    enddo
+    i = i-1
+
+    call get_all_spin_singles_$N_int(  &
+        buffer, idx, spindet, i,       &
+        singles_a, n_singles_a)
+
+    ! Compute Hij for all alpha singles
+    ! ----------------------------------
+
+    tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
+
+    do i=1,n_singles_a,block_size
+      umax = 0.d0
+      ! Prefetch u_t(:,l_a)
+      if (u_is_sparse) then
+        do kk=0,block_size-1
+          if (i+kk > n_singles_a) exit
+          l_a = singles_a(i+kk)
+          ASSERT (l_a <= N_det)
+
+          do l=1,N_st
+            utl(l,kk+1) = u_t(l,l_a)
+            umax = max(umax, dabs(utl(l,kk+1)))
+          enddo
+        enddo
+      else
+        do kk=0,block_size-1
+          if (i+kk > n_singles_a) exit
+          l_a = singles_a(i+kk)
+          ASSERT (l_a <= N_det)
+          utl(:,kk+1) = u_t(:,l_a)
+        enddo
+        umax = 1.d0
+      endif
+      if (umax < 1.d-20) cycle
+
+      do kk=0,block_size-1
+        if (i+kk > n_singles_a) exit
+        l_a = singles_a(i+kk)
+        lrow = psi_bilinear_matrix_rows(l_a)
+        ASSERT (lrow <= N_det_alpha_unique)
+
+        tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
+        call i_h_j_single_spin( tmp_det, tmp_det2, $N_int, 1, hij)
+
+        do l=1,N_st
+          v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
+          ! single => sij = 0
+        enddo
+      enddo
+    enddo
+
+    spindet(1:$N_int) = tmp_det(1:$N_int,2)
+
+    ! Initial determinant is at k_b in beta-major representation
+    ! -----------------------------------------------------------------------
+
+    k_b = psi_bilinear_matrix_order_transp_reverse(k_a)
+    ASSERT (k_b <= N_det)
+
+    ! Loop inside the alpha row to gather all the connected betas
+    lrow = psi_bilinear_matrix_transp_rows(k_b)
+    l_b = psi_bilinear_matrix_transp_rows_loc(lrow)
+    do i=1,N_det_beta_unique
+      if (l_b > N_det) exit
+      lrow = psi_bilinear_matrix_transp_rows(l_b)
+      if (lrow /= krow) exit
+      lcol = psi_bilinear_matrix_transp_columns(l_b)
+      ASSERT (lcol <= N_det_beta_unique)
+
+      buffer(1:$N_int,i) = psi_det_beta_unique(1:$N_int, lcol)
+      idx(i) = l_b
+      l_b = l_b+1
+    enddo
+    i = i-1
+
+    call get_all_spin_singles_$N_int(  &
+        buffer, idx, spindet, i,       &
+        singles_b, n_singles_b)
+
+    tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
+
+    ! Compute Hij for all beta singles
+    ! ----------------------------------
+
+    do i=1,n_singles_b,block_size
+      umax = 0.d0
+      if (u_is_sparse) then
+        do kk=0,block_size-1
+          if (i+kk > n_singles_b) exit
+          l_b = singles_b(i+kk)
+          l_a = psi_bilinear_matrix_transp_order(l_b)
+          ASSERT (l_b <= N_det)
+          ASSERT (l_a <= N_det)
+
+          do l=1,N_st
+            utl(l,kk+1) = u_t(l,l_a)
+            umax = max(umax, dabs(utl(l,kk+1)))
+          enddo
+        enddo
+      else
+        do kk=0,block_size-1
+          if (i+kk > n_singles_b) exit
+          l_b = singles_b(i+kk)
+          l_a = psi_bilinear_matrix_transp_order(l_b)
+          ASSERT (l_b <= N_det)
+          ASSERT (l_a <= N_det)
+          utl(:,kk+1) = u_t(:,l_a)
+        enddo
+        umax = 1.d0
+      endif
+      if (umax < 1.d-20) cycle
+
+      do kk=0,block_size-1
+        if (i+kk > n_singles_b) exit
+        l_b = singles_b(i+kk)
+        l_a = psi_bilinear_matrix_transp_order(l_b)
+        lcol = psi_bilinear_matrix_transp_columns(l_b)
+        ASSERT (lcol <= N_det_beta_unique)
+
+        tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, lcol)
+        call i_h_j_single_spin( tmp_det, tmp_det2, $N_int, 2, hij)
+        do l=1,N_st
+          v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
+          ! single => sij = 0
+        enddo
+      enddo
+    enddo
+
+  end do
+  !$OMP END DO
+
+
+  ! Diagonal contribution
+  ! =====================
+
+!$OMP SINGLE
+call write_time(6)
+print *, 'Diagonal'
+!$OMP END SINGLE
+
+  !$OMP DO SCHEDULE(dynamic,64)
+  do k_a=istart+ishift,iend,istep  ! Diagonal
+
+    ! Initial determinant is at k_a in alpha-major representation
+    ! -----------------------------------------------------------------------
+
+    if (u_is_sparse) then
+      umax = 0.d0
+      do l=1,N_st
+        umax = max(umax, dabs(u_t(l,k_a)))
+      enddo
+    else
+      umax = 1.d0
+    endif
+    if (umax < 1.d-20) cycle
+
+    krow = psi_bilinear_matrix_rows(k_a)
+    ASSERT (krow <= N_det_alpha_unique)
+
+    kcol = psi_bilinear_matrix_columns(k_a)
+    ASSERT (kcol <= N_det_beta_unique)
+
+    tmp_det(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
+    tmp_det(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
+
+    double precision, external :: diag_H_mat_elem, diag_S_mat_elem
+
+    hij = diag_H_mat_elem(tmp_det,$N_int)
+    sij = diag_S_mat_elem(tmp_det,$N_int)
+    do l=1,N_st
+      v_t(l,k_a) = v_t(l,k_a) + hij * u_t(l,k_a)
+      s_t(l,k_a) = s_t(l,k_a) + sij * u_t(l,k_a)
+    enddo
+
+  end do
+  !$OMP END DO
+
+  deallocate(buffer, singles_a, singles_b, doubles, idx, buffer_lrow, utl, &
+   tmp_det4, hij_block, sij_block)
+
+  !$OMP END PARALLEL
+  deallocate(integral, integral_ok, integral_lock)
 
 end
 
