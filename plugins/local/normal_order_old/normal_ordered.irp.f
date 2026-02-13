@@ -100,7 +100,6 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
     tmp = 0.d0
 
-    call set_multiple_levels_omp(.false.)
 
     !$OMP PARALLEL                                                                         &
     !$OMP DEFAULT (NONE)                                                                   &
@@ -200,7 +199,6 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
     ! purely open-shell part 
     if(Ne(2) < Ne(1)) then
 
-      call set_multiple_levels_omp(.false.)
 
       !$OMP PARALLEL                                                                         &
       !$OMP DEFAULT (NONE)                                                                   &
@@ -314,7 +312,6 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
     tmp = 0.d0
 
-    call set_multiple_levels_omp(.false.)
 
     !$OMP PARALLEL                                                                         &
     !$OMP DEFAULT (NONE)                                                                   &
@@ -460,7 +457,6 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
       tmp = 0.d0
 
-      call set_multiple_levels_omp(.false.)
 
       !$OMP PARALLEL                                                                         &
       !$OMP DEFAULT (NONE)                                                                   &
@@ -652,7 +648,6 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
       ! purely open-shell part 
       if(Ne(2) < Ne(1)) then
 
-        call set_multiple_levels_omp(.false.)
 
         !$OMP PARALLEL                                                                         &
         !$OMP DEFAULT (NONE)                                                                   &

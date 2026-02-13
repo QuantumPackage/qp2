@@ -10,26 +10,62 @@ subroutine act_on_top_on_grid_pt(ipoint,istate,pure_act_on_top_of_r)
  double precision, intent(out) :: pure_act_on_top_of_r
  double precision :: phi_i,phi_j,phi_k,phi_l
  integer :: i,j,k,l
- double precision, allocatable :: x(:,:)
+ double precision, allocatable :: x(:,:), y(:,:)
  double precision, external :: ddot
- allocate(x(n_act_orb,n_act_orb))
-
- do l = 1, n_act_orb
-   phi_l = act_mos_in_r_array(l,ipoint)
-   do k = 1, n_act_orb
-    phi_k = act_mos_in_r_array(k,ipoint)
-    x(k,l) = phi_k*phi_l
-   enddo
- enddo
+ PROVIDE act_2_rdm_ab_mo
  ASSERT (istate <= N_states)
+ allocate(x(n_act_orb,n_act_orb),y(n_act_orb,n_act_orb))
 
- pure_act_on_top_of_r = 0.d0
- do l = 1, n_act_orb
-  do k = 1, n_act_orb
-    if (dabs(x(k,l)) < 1.d-10) cycle
-    pure_act_on_top_of_r = pure_act_on_top_of_r + ddot(n_act_orb*n_act_orb,act_2_rdm_ab_mo(1,1,k,l,istate), 1, x, 1) * x(k,l)
-  enddo
- enddo
+! !$OMP PARALLEL PRIVATE(k,l,phi_k,phi_l, i, j)
+! !$OMP DO 
+! do l = 1, n_act_orb
+!   phi_l = act_mos_in_r_array(l,ipoint)
+!   do k = 1, n_act_orb
+!    phi_k = act_mos_in_r_array(k,ipoint)
+!    x(k,l) = phi_k*phi_l
+!   enddo
+! enddo
+! !$OMP END DO
+!
+! !$OMP DO COLLAPSE(2) SCHEDULE(dynamic,32)
+! do l = 1, n_act_orb
+!   do k = 1, n_act_orb
+!    y(k,l) = 0.d0
+!    if (dabs(x(k,l)) > 1.d-10) then
+!      do j=1,n_act_orb
+!        do i=1,n_act_orb
+!          y(k,l) = y(k,l) + act_2_rdm_ab_mo(i,j,k,l,istate) * x(i,j)
+!        end do
+!      end do
+!    endif
+!   enddo
+! enddo
+! !$OMP END DO
+! !$OMP END PARALLEL
+!
+!
+! pure_act_on_top_of_r = 0.d0
+! do l = 1, n_act_orb
+!  do k = 1, n_act_orb
+!    pure_act_on_top_of_r = pure_act_on_top_of_r + y(k,l)*x(k,l)
+!  enddo
+! enddo
+
+  ! Compute x as outer product: x(k,l) = phi_k * phi_l
+  x = 0.d0
+  call dger(n_act_orb, n_act_orb, 1.d0, &
+            act_mos_in_r_array(1,ipoint), 1, &
+            act_mos_in_r_array(1,ipoint), 1, &
+            x, n_act_orb)
+
+  ! Matrix-vector multiplication: y(:) = act_2_rdm_ab_mo(:,:,:,:,istate) * x(:)
+  ! Treating (i,j) and (k,l) as composite indices (length n_act_orb²)
+  call dgemv('N', n_act_orb*n_act_orb, n_act_orb*n_act_orb, &
+            1.d0, act_2_rdm_ab_mo(1,1,1,1,istate), n_act_orb*n_act_orb, &
+            x, 1, 0.d0, y, 1)
+
+  ! Final dot product
+  pure_act_on_top_of_r = ddot(n_act_orb*n_act_orb, y, 1, x, 1)
 end
 
 
@@ -40,7 +76,7 @@ end
  !
  ! Contains all core/inact/act contribution.
  !
- ! !!!!! WARNING !!!!! If no_core_density then you REMOVE ALL CONTRIBUTIONS COMING FROM THE CORE ORBITALS 
+ ! !!!!! WARNING !!!!! If no_core_density then you REMOVE ALL CONTRIBUTIONS COMING FROM THE CORE ORBITALS
  END_DOC
  integer :: i_point,istate
  double precision :: wall_0,wall_1,core_inact_dm,pure_act_on_top_of_r
@@ -58,13 +94,13 @@ end
  do istate = 1, N_states
   !$OMP PARALLEL DO &
   !$OMP DEFAULT (NONE)  &
-  !$OMP PRIVATE (i_point,core_inact_dm,pure_act_on_top_of_r) & 
+  !$OMP PRIVATE (i_point,core_inact_dm,pure_act_on_top_of_r) &
   !$OMP SHARED(total_cas_on_top_density,n_points_final_grid,inact_density,core_density,one_e_act_density_beta,one_e_act_density_alpha,no_core_density,istate)
   do i_point = 1, n_points_final_grid
     call act_on_top_on_grid_pt(i_point,istate,pure_act_on_top_of_r)
     if(no_core_density) then
-     core_inact_dm = inact_density(i_point) 
-    else 
+     core_inact_dm = inact_density(i_point)
+    else
      core_inact_dm = (inact_density(i_point) + core_density(i_point))
     endif
     total_cas_on_top_density(i_point,istate) = pure_act_on_top_of_r + core_inact_dm * (one_e_act_density_beta(i_point,istate) + one_e_act_density_alpha(i_point,istate)) + core_inact_dm*core_inact_dm
@@ -75,7 +111,7 @@ end
  print*,'provided the total_cas_on_top_density'
  print*,'Time to provide :',wall_1 - wall_0
 
- END_PROVIDER 
+ END_PROVIDER
 
 
  BEGIN_PROVIDER [ double precision, average_on_top, (n_states)]
@@ -90,4 +126,4 @@ end
   enddo
  enddo
  print*,'Average on top pair density = ',average_on_top
- END_PROVIDER 
+ END_PROVIDER
