@@ -863,7 +863,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
   ! Prepare the array of all alpha single excitations
   ! -------------------------------------------------
 
-  norb_block = mo_num
+  norb_block = 8 !mo_num
   allocate (integral(mo_num,mo_num,mo_num,norb_block))
   allocate (integral_ok(mo_num,norb_block))
   allocate (integral_lock(mo_num,norb_block))
@@ -930,17 +930,13 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
   ASSERT (istart > 0)
   ASSERT (istep  > 0)
 
-!$OMP SINGLE
-call write_time(6)
-print *, 'Doubles'
-!$OMP END SINGLE
-
   do iexc_loop = 1, mo_num, norb_block
 
-!$OMP SINGLE
-    print *, iexc_loop
+    !$OMP SINGLE
     integral_ok = .False.
-!$OMP END SINGLE
+    !$OMP END SINGLE
+
+    !$OMP BARRIER
 
     kcol_prev=-1
 
@@ -1163,13 +1159,13 @@ print *, 'Doubles'
       tmp_det(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
       tmp_det(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
 
+      spindet(1:$N_int) = tmp_det(1:$N_int,1)
+
       ! Initial determinant is at k_b in beta-major representation
       ! ----------------------------------------------------------------------
 
       k_b = psi_bilinear_matrix_order_transp_reverse(k_a)
       ASSERT (k_b <= N_det)
-
-      spindet(1:$N_int) = tmp_det(1:$N_int,1)
 
       ! Loop inside the beta column to gather all the connected alphas
       lcol = psi_bilinear_matrix_columns(k_a)
@@ -1191,8 +1187,6 @@ print *, 'Doubles'
       call get_all_spin_doubles_$N_int( &
           buffer, idx, spindet, i,      &
           doubles, n_doubles )
-
-      tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
 
       ! Compute Hij for all alpha doubles
       ! ----------------------------------
@@ -1231,6 +1225,25 @@ print *, 'Doubles'
           k_=exc(1,2,1)
           l_=exc(2,2,1)
           if ((j_ < iexc_loop).or.(j_ >= iexc_loop+norb_block)) cycle
+
+          if (.not.integral_ok(l_,j_-iexc_loop+1)) then
+            call omp_set_lock(integral_lock(l_,j_-iexc_loop+1))
+            if (.not.(integral_ok(l_,j_-iexc_loop+1))) then
+              call get_mo_two_e_integrals_i1j1(l_,j_,mo_num,integral(1,1,l_,j_-iexc_loop+1),mo_integrals_map)
+              integral_ok(l_,j_-iexc_loop+1) = .True.
+            endif
+            call omp_unset_lock(integral_lock(l_,j_-iexc_loop+1))
+          endif
+
+          if (.not.integral_ok(k_,j_-iexc_loop+1)) then
+            call omp_set_lock(integral_lock(k_,j_-iexc_loop+1))
+            if (.not.(integral_ok(k_,j_-iexc_loop+1))) then
+              call get_mo_two_e_integrals_i1j1(k_,j_,mo_num,integral(1,1,k_,j_-iexc_loop+1),mo_integrals_map)
+              integral_ok(k_,j_-iexc_loop+1) = .True.
+            endif
+            call omp_unset_lock(integral_lock(k_,j_-iexc_loop+1))
+          endif
+
           hij = phase*(integral(k_, i_, l_, j_-iexc_loop+1) - &
                        integral(l_, i_, k_, j_-iexc_loop+1))
           do l=1,N_st
@@ -1240,33 +1253,13 @@ print *, 'Doubles'
         enddo
       enddo
 
-!    end do
-!    !$OMP END DO
-
-
-
-    ! Double beta excitations
-    ! =======================
-
-!    !$OMP DO SCHEDULE(dynamic,64)
-!    do k_a=istart+ishift,iend,istep    ! Singles b
-
-      ! Initial determinant is at k_a in alpha-major representation
-      ! -----------------------------------------------------------------------
-
-      krow = psi_bilinear_matrix_rows(k_a)
-      kcol = psi_bilinear_matrix_columns(k_a)
-
-      tmp_det(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
-      tmp_det(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
+      ! Double beta excitations
+      ! =======================
 
       spindet(1:$N_int) = tmp_det(1:$N_int,2)
 
       ! Initial determinant is at k_b in beta-major representation
       ! -----------------------------------------------------------------------
-
-      k_b = psi_bilinear_matrix_order_transp_reverse(k_a)
-      ASSERT (k_b <= N_det)
 
       ! Loop inside the alpha row to gather all the connected betas
       lrow = psi_bilinear_matrix_transp_rows(k_b)
@@ -1288,8 +1281,6 @@ print *, 'Doubles'
           buffer, idx, spindet, i,      &
           doubles, n_doubles )
 
-
-      tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
 
       ! Compute Hij for all beta doubles
       ! ----------------------------------
@@ -1331,6 +1322,25 @@ print *, 'Doubles'
           k_=exc(1,2,1)
           l_=exc(2,2,1)
           if ((j_ < iexc_loop).or.(j_ >= iexc_loop+norb_block)) cycle
+
+          if (.not.integral_ok(l_,j_-iexc_loop+1)) then
+            call omp_set_lock(integral_lock(l_,j_-iexc_loop+1))
+            if (.not.(integral_ok(l_,j_-iexc_loop+1))) then
+              call get_mo_two_e_integrals_i1j1(l_,j_,mo_num,integral(1,1,l_,j_-iexc_loop+1),mo_integrals_map)
+              integral_ok(l_,j_-iexc_loop+1) = .True.
+            endif
+            call omp_unset_lock(integral_lock(l_,j_-iexc_loop+1))
+          endif
+
+          if (.not.integral_ok(k_,j_-iexc_loop+1)) then
+            call omp_set_lock(integral_lock(k_,j_-iexc_loop+1))
+            if (.not.(integral_ok(k_,j_-iexc_loop+1))) then
+              call get_mo_two_e_integrals_i1j1(k_,j_,mo_num,integral(1,1,k_,j_-iexc_loop+1),mo_integrals_map)
+              integral_ok(k_,j_-iexc_loop+1) = .True.
+            endif
+            call omp_unset_lock(integral_lock(k_,j_-iexc_loop+1))
+          endif
+
           hij = phase*(integral(k_, i_, l_, j_-iexc_loop+1) - &
                        integral(l_, i_, k_, j_-iexc_loop+1))
 
@@ -1352,16 +1362,11 @@ print *, 'Doubles'
    enddo
   enddo
 
-  ! Single alpha excitations
-  ! ========================
-
-!$OMP SINGLE
-call write_time(6)
-print *, 'Singles '
-!$OMP END SINGLE
-
   !$OMP DO SCHEDULE(dynamic,64)
   do k_a=istart+ishift,iend,istep ! Singles a
+
+    ! Single alpha excitations
+    ! ========================
 
 
     ! Initial determinant is at k_a in alpha-major representation
@@ -1414,8 +1419,7 @@ print *, 'Singles '
       umax = 0.d0
       ! Prefetch u_t(:,l_a)
       if (u_is_sparse) then
-        do kk=0,block_size-1
-          if (i+kk > n_singles_a) exit
+        do kk=0,min(block_size-1,n_singles_a-i)
           l_a = singles_a(i+kk)
           ASSERT (l_a <= N_det)
 
@@ -1425,8 +1429,7 @@ print *, 'Singles '
           enddo
         enddo
       else
-        do kk=0,block_size-1
-          if (i+kk > n_singles_a) exit
+        do kk=0,min(block_size-1,n_singles_a-i)
           l_a = singles_a(i+kk)
           ASSERT (l_a <= N_det)
           utl(:,kk+1) = u_t(:,l_a)
@@ -1435,8 +1438,7 @@ print *, 'Singles '
       endif
       if (umax < 1.d-20) cycle
 
-      do kk=0,block_size-1
-        if (i+kk > n_singles_a) exit
+      do kk=0,min(block_size-1,n_singles_a-i)
         l_a = singles_a(i+kk)
         lrow = psi_bilinear_matrix_rows(l_a)
         ASSERT (lrow <= N_det_alpha_unique)
@@ -1451,7 +1453,11 @@ print *, 'Singles '
       enddo
     enddo
 
-    spindet(1:$N_int) = tmp_det(1:$N_int,2)
+
+    ! Single beta excitations
+    ! =======================
+
+     spindet(1:$N_int) = tmp_det(1:$N_int,2)
 
     ! Initial determinant is at k_b in beta-major representation
     ! -----------------------------------------------------------------------
@@ -1487,8 +1493,7 @@ print *, 'Singles '
     do i=1,n_singles_b,block_size
       umax = 0.d0
       if (u_is_sparse) then
-        do kk=0,block_size-1
-          if (i+kk > n_singles_b) exit
+        do kk=0,min(block_size-1,n_singles_b-i)
           l_b = singles_b(i+kk)
           l_a = psi_bilinear_matrix_transp_order(l_b)
           ASSERT (l_b <= N_det)
@@ -1500,8 +1505,7 @@ print *, 'Singles '
           enddo
         enddo
       else
-        do kk=0,block_size-1
-          if (i+kk > n_singles_b) exit
+        do kk=0,min(block_size-1,n_singles_b-i)
           l_b = singles_b(i+kk)
           l_a = psi_bilinear_matrix_transp_order(l_b)
           ASSERT (l_b <= N_det)
@@ -1512,8 +1516,7 @@ print *, 'Singles '
       endif
       if (umax < 1.d-20) cycle
 
-      do kk=0,block_size-1
-        if (i+kk > n_singles_b) exit
+      do kk=0,min(block_size-1,n_singles_b-i)
         l_b = singles_b(i+kk)
         l_a = psi_bilinear_matrix_transp_order(l_b)
         lcol = psi_bilinear_matrix_transp_columns(l_b)
@@ -1528,33 +1531,13 @@ print *, 'Singles '
       enddo
     enddo
 
-  end do
-  !$OMP END DO
 
+    ! Diagonal contribution
+    ! =====================
 
-  ! Diagonal contribution
-  ! =====================
-
-!$OMP SINGLE
-call write_time(6)
-print *, 'Diagonal'
-!$OMP END SINGLE
-
-  !$OMP DO SCHEDULE(dynamic,64)
-  do k_a=istart+ishift,iend,istep  ! Diagonal
 
     ! Initial determinant is at k_a in alpha-major representation
     ! -----------------------------------------------------------------------
-
-    if (u_is_sparse) then
-      umax = 0.d0
-      do l=1,N_st
-        umax = max(umax, dabs(u_t(l,k_a)))
-      enddo
-    else
-      umax = 1.d0
-    endif
-    if (umax < 1.d-20) cycle
 
     krow = psi_bilinear_matrix_rows(k_a)
     ASSERT (krow <= N_det_alpha_unique)
