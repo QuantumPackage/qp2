@@ -1310,12 +1310,10 @@ subroutine get_all_spin_singles_$N_int(buffer, idx, spindet, size_buffer, single
         degree = degree + popcnt(xorvec(k))
     enddo
 
-    if ( degree /= 2 ) then
-      cycle
+    if ( degree == 2 ) then
+      n_singles = n_singles+1
+      singles(n_singles) = idx(i)
     endif
-
-    n_singles = n_singles+1
-    singles(n_singles) = idx(i)
 
   enddo
 
@@ -1354,12 +1352,10 @@ subroutine get_all_spin_doubles_$N_int(buffer, idx, spindet, size_buffer, double
         degree = degree + popcnt(xorvec(k))
     enddo
 
-    if ( degree /= 4 ) then
-      cycle
+    if ( degree == 4 ) then
+      n_doubles = n_doubles+1
+      doubles(n_doubles) = idx(i)
     endif
-
-    n_doubles = n_doubles+1
-    doubles(n_doubles) = idx(i)
 
   enddo
 

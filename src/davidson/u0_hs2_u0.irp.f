@@ -829,7 +829,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
   integer*8                      :: last_found, left, right, right_max
   double precision               :: rss, mem, ratio
   double precision, allocatable  :: utl(:,:)
-  integer, parameter             :: block_size=8192
+  integer, parameter             :: block_size=1024
   logical                        :: u_is_sparse
   double precision, allocatable  :: hij_block(:), sij_block(:)
 
@@ -863,7 +863,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
   ! Prepare the array of all alpha single excitations
   ! -------------------------------------------------
 
-  norb_block = 8
+  norb_block = mo_num
   allocate (integral(mo_num,mo_num,mo_num,norb_block))
   allocate (integral_ok(mo_num,norb_block))
   allocate (integral_lock(mo_num,norb_block))
@@ -910,8 +910,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
       idx(maxab), buffer_lrow(maxab), utl(N_st,block_size), &
       tmp_det4($N_int,block_size), hij_block(block_size), sij_block(block_size))
 
-  kcol_prev=-1
-
   ! Check if u has multiple zeros
   kk=1 ! Avoid division by zero
   !$OMP DO
@@ -943,6 +941,8 @@ print *, 'Doubles'
     print *, iexc_loop
     integral_ok = .False.
 !$OMP END SINGLE
+
+    kcol_prev=-1
 
     !$OMP DO SCHEDULE(dynamic,64)
     do k_a=istart+ishift,iend,istep   ! Doubles ab
@@ -1147,11 +1147,6 @@ print *, 'Doubles'
     ! Double alpha excitations
     ! ========================
 
-!$OMP SINGLE
-call write_time(6)
-print *, 'Doubles a'
-!$OMP END SINGLE
-
     !$OMP DO SCHEDULE(dynamic,64)
     do k_a=istart+ishift,iend,istep ! Doubles a
 
@@ -1193,9 +1188,9 @@ print *, 'Doubles a'
       enddo
       i = i-1
 
-      call get_all_spin_singles_and_doubles_$N_int(                    &
-          buffer, idx, spindet, i,                                     &
-          singles_a, doubles, n_singles_a, n_doubles )
+      call get_all_spin_doubles_$N_int( &
+          buffer, idx, spindet, i,      &
+          doubles, n_doubles )
 
       tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
 
@@ -1206,8 +1201,7 @@ print *, 'Doubles a'
         umax = 0.d0
         ! Prefetch u_t(:,l_a)
         if (u_is_sparse) then
-          do kk=0,block_size-1
-            if (i+kk > n_doubles) exit
+          do kk=0,min(block_size-1,n_doubles-i)
             l_a = doubles(i+kk)
             ASSERT (l_a <= N_det)
 
@@ -1217,8 +1211,7 @@ print *, 'Doubles a'
             enddo
           enddo
         else
-          do kk=0,block_size-1
-            if (i+kk > n_doubles) exit
+          do kk=0,min(block_size-1,n_doubles-i)
             l_a = doubles(i+kk)
             ASSERT (l_a <= N_det)
             utl(:,kk+1) = u_t(:,l_a)
@@ -1227,8 +1220,7 @@ print *, 'Doubles a'
         endif
         if (umax < 1.d-20) cycle
 
-        do kk=0,block_size-1
-          if (i+kk > n_doubles) exit
+        do kk=0,min(block_size-1,n_doubles-i)
           l_a = doubles(i+kk)
           lrow = psi_bilinear_matrix_rows(l_a)
           ASSERT (lrow <= N_det_alpha_unique)
@@ -1248,21 +1240,16 @@ print *, 'Doubles a'
         enddo
       enddo
 
-    end do
-    !$OMP END DO
+!    end do
+!    !$OMP END DO
 
 
 
     ! Double beta excitations
     ! =======================
 
-!$OMP SINGLE
-call write_time(6)
-print *, 'Doubles b'
-!$OMP END SINGLE
-
-    !$OMP DO SCHEDULE(dynamic,64)
-    do k_a=istart+ishift,iend,istep    ! Singles b
+!    !$OMP DO SCHEDULE(dynamic,64)
+!    do k_a=istart+ishift,iend,istep    ! Singles b
 
       ! Initial determinant is at k_a in alpha-major representation
       ! -----------------------------------------------------------------------
@@ -1297,9 +1284,10 @@ print *, 'Doubles b'
       enddo
       i = i-1
 
-      call get_all_spin_singles_and_doubles_$N_int(                    &
-          buffer, idx, spindet, i,                                     &
-          singles_b, doubles, n_singles_b, n_doubles )
+      call get_all_spin_doubles_$N_int( &
+          buffer, idx, spindet, i,      &
+          doubles, n_doubles )
+
 
       tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
 
@@ -1309,8 +1297,7 @@ print *, 'Doubles b'
       do i=1,n_doubles,block_size
         umax = 0.d0
         if (u_is_sparse) then
-          do kk=0,block_size-1
-            if (i+kk > n_doubles) exit
+          do kk=0,min(block_size-1,n_doubles-i)
             l_b = doubles(i+kk)
             l_a = psi_bilinear_matrix_transp_order(l_b)
             ASSERT (l_b <= N_det)
@@ -1321,8 +1308,7 @@ print *, 'Doubles b'
             enddo
           enddo
         else
-          do kk=0,block_size-1
-            if (i+kk > n_doubles) exit
+          do kk=0,min(block_size-1,n_doubles-i)
             l_b = doubles(i+kk)
             l_a = psi_bilinear_matrix_transp_order(l_b)
             ASSERT (l_b <= N_det)
@@ -1333,8 +1319,7 @@ print *, 'Doubles b'
         endif
         if (umax < 1.d-20) cycle
 
-        do kk=0,block_size-1
-          if (i+kk > n_doubles) exit
+        do kk=0,min(block_size-1,n_doubles-i)
           l_b = doubles(i+kk)
           l_a = psi_bilinear_matrix_transp_order(l_b)
           lcol = psi_bilinear_matrix_transp_columns(l_b)
