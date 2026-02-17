@@ -1,0 +1,164 @@
+#pragma once
+#include <stdint.h>
+
+/* 
+ * Memory layout
+ * The Fortran buffer is column-major: word k of determinant i lives at
+ * buffer[k + N_int*i]. The C code indexes it as buffer[N_int*i + k] —
+ * identical in practice, and the compiler sees it as a stride-N_int pattern,
+ * which it vectorizes well.
+ *
+ * __builtin_popcountll for the scalar path. GCC/Clang/ICC all lower this to a
+ * single POPCNT instruction on x86-64 with -march=native. No need for -mpopcnt
+ * separately.
+ *
+ * AVX2 path — the Muła nibble-LUT. Since AVX2 has no native 64-bit VPOPCNTQ, the
+ * best general approach is the byte-level nibble lookup (VPSHUFB) followed by
+ * VPSADBW to accumulate byte counts into per-lane 64-bit sums, then a horizontal
+ * add. This is typically 2–4× faster than four scalar POPCNT calls for N≥4
+ * because it hides instruction latency and eliminates the scalar-vector
+ * round-trips.
+ *
+ * AVX-512 path — _mm256_popcnt_epi64 / _mm512_popcnt_epi64. On CPUs with
+ * AVX512VPOPCNTDQ (Intel Icelake+, AMD Zen4+) this is a single instruction per
+ * 256/512-bit register. The N=4 case fits in one 256-bit register and needs only
+ * a 4-way horizontal reduce. The general-N path processes 8 words at a time with
+ * 512-bit registers.
+ *
+ */
+
+/* Singles only */
+void get_all_spin_singles_1(const uint64_t *buffer, const int *idx,
+    uint64_t spindet0, int size_buffer,
+    int *singles, int *n_singles);
+
+void get_all_spin_singles_2(const uint64_t *buffer, const int *idx,
+    const uint64_t *spindet, int size_buffer,
+    int *singles, int *n_singles);
+
+void get_all_spin_singles_3(const uint64_t *buffer, const int *idx,
+    const uint64_t *spindet, int size_buffer,
+    int *singles, int *n_singles);
+
+void get_all_spin_singles_4(const uint64_t *buffer, const int *idx,
+    const uint64_t *spindet, int size_buffer,
+    int *singles, int *n_singles);
+
+void get_all_spin_singles_N_int(const uint64_t *buffer, const int *idx,
+    const uint64_t *spindet, int N_int, int size_buffer,
+    int *singles, int *n_singles);
+
+void get_all_spin_singles(const uint64_t *buffer, const int *idx,
+    const uint64_t *spindet, int N_int, int size_buffer,
+    int *singles, int *n_singles);
+
+
+/* Doubles only */
+void get_all_spin_doubles_1(const uint64_t *buffer, const int *idx,
+    uint64_t spindet0, int size_buffer,
+    int *doubles, int *n_doubles);
+
+void get_all_spin_doubles_2(const uint64_t *buffer, const int *idx,
+    const uint64_t *spindet, int size_buffer,
+    int *doubles, int *n_doubles);
+
+void get_all_spin_doubles_3(const uint64_t *buffer, const int *idx,
+    const uint64_t *spindet, int size_buffer,
+    int *doubles, int *n_doubles);
+
+void get_all_spin_doubles_4(const uint64_t *buffer, const int *idx,
+    const uint64_t *spindet, int size_buffer,
+    int *doubles, int *n_doubles);
+
+void get_all_spin_doubles_N_int(const uint64_t *buffer, const int *idx,
+    const uint64_t *spindet, int N_int, int size_buffer,
+    int *doubles, int *n_doubles);
+
+void get_all_spin_doubles(const uint64_t *buffer, const int *idx,
+    const uint64_t *spindet, int N_int, int size_buffer,
+    int *doubles, int *n_doubles);
+
+
+/* Singles + doubles */
+void get_all_spin_singles_and_doubles_1(const uint64_t *buffer, const int *idx,
+    uint64_t spindet0, int size_buffer,
+    int *singles, int *doubles, int *n_singles, int *n_doubles);
+
+void get_all_spin_singles_and_doubles_2(const uint64_t *buffer, const int *idx,
+    const uint64_t *spindet, int size_buffer,
+    int *singles, int *doubles, int *n_singles, int *n_doubles);
+
+void get_all_spin_singles_and_doubles_3(const uint64_t *buffer, const int *idx,
+    const uint64_t *spindet, int size_buffer,
+    int *singles, int *doubles, int *n_singles, int *n_doubles);
+
+void get_all_spin_singles_and_doubles_4(const uint64_t *buffer, const int *idx,
+    const uint64_t *spindet, int size_buffer,
+    int *singles, int *doubles, int *n_singles, int *n_doubles);
+
+void get_all_spin_singles_and_doubles_N_int(const uint64_t *buffer, const int *idx,
+    const uint64_t *spindet, int N_int, int size_buffer,
+    int *singles, int *doubles, int *n_singles, int *n_doubles);
+
+void get_all_spin_singles_and_doubles(const uint64_t *buffer, const int *idx,
+    const uint64_t *spindet, int N_int, int size_buffer,
+    int *singles, int *doubles, int *n_singles, int *n_doubles);
+
+
+
+/* ================================================================== */
+/* Scalar popcount helpers                                              */
+/* ================================================================== */
+
+static inline int pc1(uint64_t a)
+    { return __builtin_popcountll(a); }
+
+static inline int pc2(uint64_t a, uint64_t b)
+    { return __builtin_popcountll(a) + __builtin_popcountll(b); }
+
+static inline int pc3(uint64_t a, uint64_t b, uint64_t c)
+    { return __builtin_popcountll(a) + __builtin_popcountll(b)
+           + __builtin_popcountll(c); }
+
+static inline int pc4(uint64_t a, uint64_t b, uint64_t c, uint64_t d)
+    { return __builtin_popcountll(a) + __builtin_popcountll(b)
+           + __builtin_popcountll(c) + __builtin_popcountll(d); }
+
+/* ================================================================== */
+/* NEON helper: popcount of a 128-bit vector (2 x uint64)              */
+/*                                                                      */
+/* vcntq_u8  counts bits in each byte (16 results).                    */
+/* vaddlvq_u8 horizontally adds all 16 bytes into one uint64.          */
+/* This is equivalent to popcount(lo) + popcount(hi) in one sequence.  */
+/* ================================================================== */
+
+#if HAVE_NEON
+static inline int popcnt_neon_128(uint64x2_t v)
+{
+    /* Reinterpret as bytes, count bits per byte, sum all bytes */
+    uint8x16_t bytes = vreinterpretq_u8_u64(v);
+    uint8x16_t cnt   = vcntq_u8(bytes);
+    return (int)vaddlvq_u8(cnt);   /* vaddlv: unsigned add-long across vector */
+}
+#endif /* HAVE_NEON */
+
+
+/* ================================================================== */
+/* SVE helper: popcount of an SVE uint64 vector                        */
+/*                                                                      */
+/* svcnt_u64_z  : per-lane popcount (VCNT on SVE = bit-count per lane) */
+/* svaddv_u64   : horizontal reduction to scalar u64                   */
+/*                                                                      */
+/* On Neoverse V1, svcntd() == 4 (256-bit vectors), so one register    */
+/* holds exactly the N=4 case. The general path processes svcntd()      */
+/* words per iteration, making it correct on wider SVE implementations. */
+/* ================================================================== */
+
+#if HAVE_SVE
+static inline int popcnt_sve(svuint64_t v, svbool_t pg)
+{
+    svuint64_t cnt = svcnt_u64_z(pg, v);
+    return (int)svaddv_u64(pg, cnt);
+}
+#endif /* HAVE_SVE */
+

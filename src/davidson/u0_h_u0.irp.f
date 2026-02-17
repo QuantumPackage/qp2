@@ -266,9 +266,9 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
     if (kcol /= kcol_prev) then
       tmp_det(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
       if (compute_singles) then
-        call get_all_spin_singles_$N_int(                              &
-            psi_det_beta_unique, idx0,                                 &
-            tmp_det(1,2), N_det_beta_unique,                           &
+        call get_all_spin_singles(                              &
+            psi_det_beta_unique, idx0,                          &
+            tmp_det(:,2), N_int, N_det_beta_unique,             &
             singles_b, n_singles_b)
       else
         n_singles_b = 0
@@ -312,8 +312,8 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
         enddo
         j = j-1
 
-        call get_all_spin_singles_$N_int(                              &
-            buffer, idx, tmp_det(1,1), j,                              &
+        call get_all_spin_singles(                  &
+            buffer, idx, tmp_det(:,1), N_int, j,    &
             singles_a, n_singles_a )
 
       else
@@ -474,8 +474,8 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
     enddo
     i = i-1
 
-    call get_all_spin_singles_and_doubles_$N_int(                    &
-        buffer, idx, spindet, i,                                     &
+    call get_all_spin_singles_and_doubles(  &
+        buffer, idx, spindet, N_int,  i,    &
         singles_a, doubles, n_singles_a, n_doubles )
 
     ! Compute Hij for all alpha singles
@@ -608,8 +608,8 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
     enddo
     i = i-1
 
-    call get_all_spin_singles_and_doubles_$N_int(                    &
-        buffer, idx, spindet, i,                                     &
+    call get_all_spin_singles_and_doubles(   &
+        buffer, idx, spindet, N_int, i,      &
         singles_b, doubles, n_singles_b, n_doubles )
 
     ! Compute Hij for all beta singles
