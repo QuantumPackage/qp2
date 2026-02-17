@@ -110,7 +110,7 @@ subroutine H_u_0_nstates_openmp_work(v_t,u_t,N_st,sze,istart,iend,ishift,istep)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $v_t = H | u_t\rangle$ 
+  ! Computes $v_t = H | u_t\rangle$
   !
   ! Default should be 1,N_det,0,1
   END_DOC
@@ -140,7 +140,7 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $v_t = H | u_t \\rangle$ 
+  ! Computes $v_t = H | u_t \\rangle$
   !
   ! Default should be 1,N_det,0,1
   END_DOC
@@ -759,5 +759,6 @@ SUBST [ N_int ]
 N_int;;
 
 END_TEMPLATE
+
 
 

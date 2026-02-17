@@ -49,13 +49,13 @@ END_DOC
 !
 ! Start of main SCF loop
 !
-  PROVIDE FPS_SPF_matrix_AO Fock_matrix_AO 
+  PROVIDE FPS_SPF_matrix_AO Fock_matrix_AO
 
   ! Initialize MO to run IMOM
   if(do_mom)then
      call initialize_mo_coef_begin_iteration
   endif
-  
+
   converged = .False.
   do while ( .not.converged .and. (iteration_SCF < n_it_SCF_max) )
 
@@ -386,3 +386,4 @@ END_DOC
   !$OMP END PARALLEL DO
 
 end
+

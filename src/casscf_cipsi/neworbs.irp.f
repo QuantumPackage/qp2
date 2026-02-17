@@ -1,4 +1,4 @@
- BEGIN_PROVIDER [real*8, SXmatrix, (nMonoEx+1,nMonoEx+1)]
+ BEGIN_PROVIDER [real*8, SXmatrix, (nMonoEx+1, nMonoEx+1)]
 &BEGIN_PROVIDER [integer, n_guess_sx_mat ]
   implicit none
   BEGIN_DOC
@@ -47,7 +47,7 @@
 
 END_PROVIDER
 
- BEGIN_PROVIDER [real*8, SXeigenvec, (nMonoEx+1,nMonoEx+1)]
+ BEGIN_PROVIDER [real*8, SXeigenvec, (nMonoEx+1, nMonoEx+1)]
 &BEGIN_PROVIDER [real*8, SXeigenval, (nMonoEx+1)]
   implicit none
   BEGIN_DOC
@@ -90,6 +90,9 @@ END_PROVIDER
 END_PROVIDER
 
  BEGIN_PROVIDER [real*8, energy_improvement]
+  BEGIN_DOC
+  ! energy_improvement
+  END_DOC
  implicit none
  if(state_following_casscf)then
   energy_improvement = SXeigenval(best_vector_ovrlp_casscf)
@@ -102,6 +105,9 @@ END_PROVIDER
 
  BEGIN_PROVIDER [ integer, best_vector_ovrlp_casscf ]
 &BEGIN_PROVIDER [ double precision,  best_overlap_casscf ]
+  BEGIN_DOC
+  ! best_vector_ovrlp_casscf
+  END_DOC
   implicit none
   integer :: i
   double precision :: c0
@@ -141,7 +147,7 @@ END_PROVIDER
  END_PROVIDER
 
 
-BEGIN_PROVIDER [double precision, NewOrbs, (ao_num,mo_num) ]
+BEGIN_PROVIDER [double precision, NewOrbs, (ao_num, mo_num) ]
   implicit none
   BEGIN_DOC
   ! Updated orbitals
@@ -183,7 +189,7 @@ BEGIN_PROVIDER [double precision, NewOrbs, (ao_num,mo_num) ]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [real*8, Umat, (mo_num,mo_num) ]
+BEGIN_PROVIDER [real*8, Umat, (mo_num, mo_num) ]
   implicit none
   BEGIN_DOC
   ! Orbital rotation matrix
@@ -254,6 +260,7 @@ BEGIN_PROVIDER [real*8, Umat, (mo_num,mo_num) ]
 !    converged = ( sum(abs(Tpotmat(:,:))) < 1.d-6).or.(iter>30)
 !  end do
 END_PROVIDER
+
 
 
 

@@ -10,7 +10,7 @@ subroutine write_tc_energy()
 
   call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,1), psi_det(1,1,1), N_int, hmono, htwoe, hthree, htot)
 
-  ! GS 
+  ! GS
   ! ---
 
   call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,1), psi_det(1,1,1), N_int, hmono, htwoe, hthree, htot)
@@ -63,7 +63,7 @@ subroutine write_tc_energy()
 
   ! ---
 
-  ! ES 
+  ! ES
   ! ---
 
   do k = 2, n_states
@@ -147,5 +147,6 @@ subroutine write_tc_gs_var_HF()
 end
 
 ! ---
+
 
 

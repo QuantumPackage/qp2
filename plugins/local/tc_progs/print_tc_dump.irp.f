@@ -42,7 +42,7 @@ subroutine KMat_tilde_dump()
   allocate(orbsym(mo_num))
   orbsym(1:mo_num) = 1
 
-  open(33, file='FCIDUMP', action='write')  
+  open(33, file='FCIDUMP', action='write')
 
     write(33,'("&",a)') 'FCI'
     write(33,'(1x,a,"=",i0,",")') 'NORB', mo_num
@@ -123,7 +123,7 @@ subroutine ERI_dump()
 
   deallocate(a2)
 
-  open(33, file='ERI.dat', action='write')  
+  open(33, file='ERI.dat', action='write')
     do l = 1, mo_num
       do k = 1, mo_num
         do j = 1, mo_num
@@ -154,7 +154,7 @@ subroutine LMat_tilde_dump()
 
   PROVIDE mo_l_coef mo_r_coef
 
-  open(33, file='TCDUMP', action='write')  
+  open(33, file='TCDUMP', action='write')
     write(33, '(4X, I4)') mo_num
     do n = 1, mo_num
       do m = 1, mo_num
@@ -185,3 +185,4 @@ subroutine LMat_tilde_dump()
 end subroutine LMat_tilde_dump
 
 ! ---
+

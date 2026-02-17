@@ -1,6 +1,6 @@
 subroutine H_tc_s2_u_0_with_pure_three(v_0, s_0, u_0, N_st, sze)
   BEGIN_DOC
-  ! Computes $v_0 = H^TC | u_0\rangle$ WITH PURE TRIPLE EXCITATION TERMS 
+  ! Computes $v_0 = H^TC | u_0\rangle$ WITH PURE TRIPLE EXCITATION TERMS
   !
   ! Assumes that the determinants are in psi_det
   !
@@ -30,7 +30,7 @@ end
 
 subroutine H_tc_s2_u_0_with_pure_three_omp(v_0, s_0, u_0, N_st, sze)
   BEGIN_DOC
-  ! Computes $v_0 = H^TC | u_0\rangle$ WITH PURE TRIPLE EXCITATION TERMS 
+  ! Computes $v_0 = H^TC | u_0\rangle$ WITH PURE TRIPLE EXCITATION TERMS
   !
   ! Assumes that the determinants are in psi_det
   !
@@ -66,7 +66,7 @@ end
 
 subroutine H_tc_s2_dagger_u_0_with_pure_three(v_0, s_0, u_0, N_st, sze)
   BEGIN_DOC
-  ! Computes $v_0 = (H^TC)^dagger | u_0\rangle$ WITH PURE TRIPLE EXCITATION TERMS 
+  ! Computes $v_0 = (H^TC)^dagger | u_0\rangle$ WITH PURE TRIPLE EXCITATION TERMS
   !
   ! Assumes that the determinants are in psi_det
   !
@@ -96,7 +96,7 @@ end
 
 subroutine H_tc_s2_dagger_u_0_with_pure_three_omp(v_0, s_0, u_0, N_st, sze)
   BEGIN_DOC
-  ! Computes $v_0 = (H^TC)^dagger | u_0\rangle$ WITH PURE TRIPLE EXCITATION TERMS 
+  ! Computes $v_0 = (H^TC)^dagger | u_0\rangle$ WITH PURE TRIPLE EXCITATION TERMS
   !
   ! Assumes that the determinants are in psi_det
   !
@@ -132,10 +132,10 @@ end
 subroutine triple_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
   use bitmasks
   BEGIN_DOC
-! <key_j | H_tilde | key_i> for triple excitation  
+! <key_j | H_tilde | key_i> for triple excitation
 !!
 !! WARNING !!
-! 
+!
 ! Genuine triple excitations of the same spin are not yet implemented
   END_DOC
   implicit none
@@ -156,37 +156,37 @@ subroutine triple_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, 
   if(degree .ne. 3)return
   if(degree_array(1)==3.or.degree_array(2)==3)then
    if(degree_array(1) == 3)then
-    h1 = holes_array(1,1) 
-    h2 = holes_array(2,1) 
-    h3 = holes_array(3,1) 
-    p1 = particles_array(1,1) 
-    p2 = particles_array(2,1) 
-    p3 = particles_array(3,1) 
+    h1 = holes_array(1,1)
+    h2 = holes_array(2,1)
+    h3 = holes_array(3,1)
+    p1 = particles_array(1,1)
+    p2 = particles_array(2,1)
+    p3 = particles_array(3,1)
    else
-    h1 = holes_array(1,2) 
-    h2 = holes_array(2,2) 
-    h3 = holes_array(3,2) 
-    p1 = particles_array(1,2) 
-    p2 = particles_array(2,2) 
-    p3 = particles_array(3,2) 
+    h1 = holes_array(1,2)
+    h2 = holes_array(2,2)
+    h3 = holes_array(3,2)
+    p1 = particles_array(1,2)
+    p2 = particles_array(2,2)
+    p3 = particles_array(3,2)
    endif
    hthree = sym_3_e_int_from_6_idx_tensor(p3, p2, p1, h3, h2, h1)
-  else 
+  else
    if(degree_array(1) == 2.and.degree_array(2) == 1)then ! double alpha + single beta
-    h1 = holes_array(1,1) 
-    h2 = holes_array(2,1) 
-    h3 = holes_array(1,2) 
-    p1 = particles_array(1,1) 
-    p2 = particles_array(2,1) 
-    p3 = particles_array(1,2) 
-   else if(degree_array(2) == 2 .and. degree_array(1) == 1)then ! double beta + single alpha 
-    h1 = holes_array(1,2) 
-    h2 = holes_array(2,2) 
-    h3 = holes_array(1,1) 
-    p1 = particles_array(1,2) 
-    p2 = particles_array(2,2) 
-    p3 = particles_array(1,1) 
-   else 
+    h1 = holes_array(1,1)
+    h2 = holes_array(2,1)
+    h3 = holes_array(1,2)
+    p1 = particles_array(1,1)
+    p2 = particles_array(2,1)
+    p3 = particles_array(1,2)
+   else if(degree_array(2) == 2 .and. degree_array(1) == 1)then ! double beta + single alpha
+    h1 = holes_array(1,2)
+    h2 = holes_array(2,2)
+    h3 = holes_array(1,1)
+    p1 = particles_array(1,2)
+    p2 = particles_array(2,2)
+    p3 = particles_array(1,1)
+   else
     print*,'PB !!'
     stop
    endif
@@ -195,4 +195,5 @@ subroutine triple_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, 
   hthree  *= phase
   htot = hthree
  end
+
 

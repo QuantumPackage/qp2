@@ -1021,7 +1021,7 @@ subroutine recentered_poly2(P_new, x_A, x_P, a, Q_new, x_B, x_Q, b)
   !   (x - x_A)^a -> \sum_{i=0}^{a} \binom{a}{i} (x_A - x_P)^{a-i} (x - x_P)^i
   !   (x - x_B)^b -> \sum_{i=0}^{b} \binom{b}{i} (x_B - x_Q)^{b-i} (x - x_Q)^i
   !
-  ! where: 
+  ! where:
   !   \binom{a}{i} = \binom{a}{a-i} = a! / [i! (a-i)!]
   !
   END_DOC
@@ -1458,4 +1458,5 @@ double precision function Wallis(n)
 end function Wallis
 
 ! ---
+
 

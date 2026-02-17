@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [double precision, mo_integrals_n_e, (mo_num,mo_num)]
+BEGIN_PROVIDER [double precision, mo_integrals_n_e, (mo_num, mo_num)]
  implicit none
  BEGIN_DOC
 ! Nucleus-electron interaction on the |MO| basis
@@ -23,7 +23,7 @@ BEGIN_PROVIDER [double precision, mo_integrals_n_e, (mo_num,mo_num)]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [double precision, mo_integrals_n_e_per_atom, (mo_num,mo_num,nucl_num)]
+BEGIN_PROVIDER [double precision, mo_integrals_n_e_per_atom, (mo_num, mo_num, nucl_num)]
  implicit none
  BEGIN_DOC
 ! mo_integrals_n_e_per_atom(i,j,k) =
@@ -43,4 +43,5 @@ BEGIN_PROVIDER [double precision, mo_integrals_n_e_per_atom, (mo_num,mo_num,nucl
  enddo
 
 END_PROVIDER
+
 

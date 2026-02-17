@@ -18,7 +18,7 @@ subroutine ccsd_par_t_spin(nO,nV,t1,t2,f_o,f_v,f_ov,v_ooov,v_vvoo,v_vvvo,energy)
   allocate(t3(nO,nO,nO,nV,nV,nV), s(nO,nV))
 
   t3 = 0d0
-  
+
   ! T3
   do c = 1, nV
     do b = 1, nV
@@ -59,7 +59,7 @@ subroutine ccsd_par_t_spin(nO,nV,t1,t2,f_o,f_v,f_ov,v_ooov,v_vvoo,v_vvvo,energy)
       enddo
     enddo
   enddo
-  
+
 
   ! E_T
   e_t = 0d0
@@ -126,7 +126,7 @@ subroutine ccsd_par_t_spin(nO,nV,t1,t2,f_o,f_v,f_ov,v_ooov,v_vvoo,v_vvvo,energy)
   energy = e_t + e_st + e_dt
 
   deallocate(t3,s)
-  
+
 end
 
 ! v2
@@ -155,8 +155,8 @@ subroutine ccsd_par_t_spin_v2(nO,nV,t1,t2,f_o,f_v,f_ov,v_ooov,v_vvoo,energy)
        cc_nV_S,cc_nV_S,cc_nV_S,cc_nO_S, &
        cc_list_vir_spin,cc_list_vir_spin,cc_list_vir_spin,cc_list_occ_spin, &
        nV,nV,nV,nO, v_vvvo)
-  
-  ! Init 
+
+  ! Init
   s = 0d0
   e_t = 0d0
   e_st = 0d0
@@ -221,7 +221,7 @@ subroutine ccsd_par_t_spin_v2(nO,nV,t1,t2,f_o,f_v,f_ov,v_ooov,v_vvoo,energy)
         enddo
       enddo
       !$OMP END DO
-      
+
       !$OMP DO collapse(3)
       do a = 1, nV
         do k = 1, nO
@@ -253,7 +253,7 @@ subroutine ccsd_par_t_spin_v2(nO,nV,t1,t2,f_o,f_v,f_ov,v_ooov,v_vvoo,energy)
         enddo
       enddo
       !$OMP END DO
-      
+
       !$OMP DO collapse(3)
       do a = 1, nV
         do k = 1, nO
@@ -292,7 +292,7 @@ subroutine ccsd_par_t_spin_v2(nO,nV,t1,t2,f_o,f_v,f_ov,v_ooov,v_vvoo,energy)
         do k = 1, nO
           do j = 1, nO
             do i = 1, nO
-               delta = f_o(i) + f_o(j) + f_o(k) - delta_abc 
+               delta = f_o(i) + f_o(j) + f_o(k) - delta_abc
                t3_bc(i,j,k,a) = t3_bc(i,j,k,a) * (1d0 / delta)
              enddo
            enddo
@@ -351,13 +351,13 @@ subroutine ccsd_par_t_spin_v2(nO,nV,t1,t2,f_o,f_v,f_ov,v_ooov,v_vvoo,energy)
   do a = 2, nV
     e_t(1) = e_t(1) + e_t(a)
   enddo
-  
+
   do a = 2, nV
     e_dt(1) = e_dt(1) + e_dt(a)
   enddo
 
   e_t = e_t / 36d0
-  
+
   do a = 1, nV
     do i = 1, nO
       e_st = e_st + s(i,a) * t1(i,a)
@@ -372,5 +372,6 @@ subroutine ccsd_par_t_spin_v2(nO,nV,t1,t2,f_o,f_v,f_ov,v_ooov,v_vvoo,energy)
   energy = e_t(1) + e_st + e_dt(1)
 
   deallocate(t3_bc,s)
-  
+
 end
+

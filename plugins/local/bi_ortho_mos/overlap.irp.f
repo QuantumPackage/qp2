@@ -4,14 +4,14 @@
 &BEGIN_PROVIDER [ double precision, overlap_diag_bi_ortho, (mo_num)]
 
   BEGIN_DOC
-  ! Overlap matrix between the RIGHT and LEFT MOs. Should be the identity matrix 
+  ! Overlap matrix between the RIGHT and LEFT MOs. Should be the identity matrix
   END_DOC
 
   implicit none
   integer                       :: i, k, m, n
-  double precision              :: accu_d, accu_nd 
+  double precision              :: accu_d, accu_nd
   double precision, allocatable :: tmp(:,:)
-  
+
 !  overlap_bi_ortho = 0.d0
 !  do i = 1, mo_num
 !    do k = 1, mo_num
@@ -25,11 +25,11 @@
 
   allocate( tmp(mo_num,ao_num) )
   ! tmp <-- L.T x S_ao
-  call dgemm( "T", "N", mo_num, ao_num, ao_num, 1.d0                                   & 
+  call dgemm( "T", "N", mo_num, ao_num, ao_num, 1.d0                                   &
             , mo_l_coef(1,1), size(mo_l_coef, 1), ao_overlap(1,1), size(ao_overlap, 1) &
             , 0.d0, tmp(1,1), size(tmp, 1) )
   ! S <-- tmp x R
-  call dgemm( "N", "N", mo_num, mo_num, ao_num, 1.d0                     & 
+  call dgemm( "N", "N", mo_num, mo_num, ao_num, 1.d0                     &
             , tmp(1,1), size(tmp, 1), mo_r_coef(1,1), size(mo_r_coef, 1) &
             , 0.d0, overlap_bi_ortho(1,1), size(overlap_bi_ortho, 1) )
   deallocate(tmp)
@@ -47,7 +47,7 @@
       else
         accu_nd += dabs(overlap_bi_ortho(k,i))
       endif
-    enddo 
+    enddo
   enddo
   accu_d = accu_d/dble(mo_num)
   accu_nd = accu_nd/dble(mo_num**2-mo_num)
@@ -66,8 +66,8 @@
   print*,'Sum of off diagonal terms of overlap_bi_ortho (should be zero)'
   print*,'accu_nd = ',accu_nd
   print*,'****************'
- 
-END_PROVIDER 
+
+END_PROVIDER
 
 ! ---
 
@@ -88,7 +88,7 @@ END_PROVIDER
   !  do j = 1, mo_num
   !    do p = 1, ao_num
   !      do q = 1, ao_num
-  !        overlap_mo_r(j,i) += mo_r_coef(q,i) * mo_r_coef(p,j) * ao_overlap(q,p) 
+  !        overlap_mo_r(j,i) += mo_r_coef(q,i) * mo_r_coef(p,j) * ao_overlap(q,p)
   !        overlap_mo_l(j,i) += mo_l_coef(q,i) * mo_l_coef(p,j) * ao_overlap(q,p)
   !      enddo
   !    enddo
@@ -98,24 +98,24 @@ END_PROVIDER
   allocate( tmp(mo_num,ao_num) )
 
   tmp = 0.d0
-  call dgemm( "T", "N", mo_num, ao_num, ao_num, 1.d0                                   & 
+  call dgemm( "T", "N", mo_num, ao_num, ao_num, 1.d0                                   &
             , mo_r_coef(1,1), size(mo_r_coef, 1), ao_overlap(1,1), size(ao_overlap, 1) &
             , 0.d0, tmp(1,1), size(tmp, 1) )
-  call dgemm( "N", "N", mo_num, mo_num, ao_num, 1.d0                     & 
+  call dgemm( "N", "N", mo_num, mo_num, ao_num, 1.d0                     &
             , tmp(1,1), size(tmp, 1), mo_r_coef(1,1), size(mo_r_coef, 1) &
             , 0.d0, overlap_mo_r(1,1), size(overlap_mo_r, 1) )
 
   tmp = 0.d0
-  call dgemm( "T", "N", mo_num, ao_num, ao_num, 1.d0                                   & 
+  call dgemm( "T", "N", mo_num, ao_num, ao_num, 1.d0                                   &
             , mo_l_coef(1,1), size(mo_l_coef, 1), ao_overlap(1,1), size(ao_overlap, 1) &
             , 0.d0, tmp(1,1), size(tmp, 1) )
-  call dgemm( "N", "N", mo_num, mo_num, ao_num, 1.d0                     & 
+  call dgemm( "N", "N", mo_num, mo_num, ao_num, 1.d0                     &
             , tmp(1,1), size(tmp, 1), mo_l_coef(1,1), size(mo_l_coef, 1) &
             , 0.d0, overlap_mo_l(1,1), size(overlap_mo_l, 1) )
 
   deallocate(tmp)
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -142,7 +142,7 @@ END_PROVIDER
     enddo
   enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -169,8 +169,9 @@ END_PROVIDER
   angle(1:mo_num) = dabs(angle_left_right(1:mo_num))
   max_angle_left_right = maxval(angle)
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
+
 
 

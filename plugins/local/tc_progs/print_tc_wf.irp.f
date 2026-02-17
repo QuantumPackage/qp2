@@ -31,7 +31,7 @@ end
 subroutine write_l_r_wf
  implicit none
  character*(128) :: output
- integer :: i_unit_output,getUnitAndOpen                                                                                 
+ integer :: i_unit_output,getUnitAndOpen
  output=trim(ezfio_filename)//'.tc_wf'
  i_unit_output = getUnitAndOpen(output,'w')
  integer :: i
@@ -57,7 +57,7 @@ subroutine routine
  accu_positive_pt = 0.D0
  accu_positive_core = 0.d0
  accu_positive_core_pt = 0.d0
- 
+
  do i = 1, N_det
   call get_excitation_degree(HF_bitmask,psi_det(1,1,i),degree,N_int)
    if(degree == 1 .or. degree == 2)then
@@ -65,11 +65,11 @@ subroutine routine
     call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,i),psi_det(1,1,i),N_int,hmono,htwoe,hthree,e_i0)
     delta_e = e_tilde_00 - e_i0
     coef_pt1 = htilde_ij / delta_e
- 
+
     call htilde_mu_mat_opt_bi_ortho(HF_bitmask,psi_det(1,1,i),N_int,hmono,htwoe,hthree,htilde_ij)
     contrib_pt = coef_pt1 * htilde_ij
     e_pt2 += contrib_pt
- 
+
     coef = psi_r_coef_bi_ortho(i,1)/psi_r_coef_bi_ortho(1,1)
     contrib = coef * htilde_ij
     e_corr += contrib
@@ -115,3 +115,4 @@ subroutine routine
  print*,'Pure core contribution              = ',accu_positive_core
  print*,'Pure core contribution PT           = ',accu_positive_core_pt
 end
+

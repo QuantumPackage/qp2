@@ -1,17 +1,17 @@
 subroutine lapack_diag_non_sym(n, A, WR, WI, VL, VR)
 
   BEGIN_DOC
-  ! You enter with a general non hermitian matrix A(n,n) 
+  ! You enter with a general non hermitian matrix A(n,n)
   !
-  ! You get out with the real WR and imaginary part WI of the eigenvalues 
+  ! You get out with the real WR and imaginary part WI of the eigenvalues
   !
   ! Eigvalue(n) = WR(n) + i * WI(n)
   !
-  ! And the left VL and right VR eigenvectors 
+  ! And the left VL and right VR eigenvectors
   !
-  ! VL(i,j) = <i|Psi_left(j)>  :: projection on the basis element |i> on the jth left  eigenvector 
+  ! VL(i,j) = <i|Psi_left(j)>  :: projection on the basis element |i> on the jth left  eigenvector
   !
-  ! VR(i,j) = <i|Psi_right(j)> :: projection on the basis element |i> on the jth right eigenvector 
+  ! VR(i,j) = <i|Psi_right(j)> :: projection on the basis element |i> on the jth right eigenvector
   !
   ! The real part of the matrix A can be written as A = VR D VL^T
   !
@@ -40,12 +40,12 @@ subroutine lapack_diag_non_sym(n, A, WR, WI, VL, VR)
     print*,'dgeev failed !!',INFO
     stop
   endif
-  LWORK = max(int(WORK(1)), 1) ! this is the optimal size of WORK 
+  LWORK = max(int(WORK(1)), 1) ! this is the optimal size of WORK
   deallocate(WORK)
 
   allocate(WORK(LWORK))
 
-  ! Actual diagonalization 
+  ! Actual diagonalization
   call dgeev('V', 'V', n, Atmp, lda, WR, WI, VL, ldvl, VR, ldvr, WORK, LWORK, INFO)
   if(INFO.ne.0) then
     print*,'dgeev failed !!', INFO
@@ -60,11 +60,11 @@ end
 subroutine non_sym_diag_inv_right(n,A,leigvec,reigvec,n_real_eigv,eigval)
  implicit none
  BEGIN_DOC
-! routine which returns the sorted REAL EIGENVALUES ONLY and corresponding LEFT/RIGHT eigenvetors 
+! routine which returns the sorted REAL EIGENVALUES ONLY and corresponding LEFT/RIGHT eigenvetors
 !
 ! of a non hermitian matrix A(n,n)
 !
-! n_real_eigv is the number of real eigenvalues, which might be smaller than the dimension "n" 
+! n_real_eigv is the number of real eigenvalues, which might be smaller than the dimension "n"
  END_DOC
  integer, intent(in) :: n
  double precision, intent(in) :: A(n,n)
@@ -73,8 +73,8 @@ subroutine non_sym_diag_inv_right(n,A,leigvec,reigvec,n_real_eigv,eigval)
  integer, intent(out) :: n_real_eigv
  print*,'Computing the left/right eigenvectors ...'
  character*1 :: JOBVL,JOBVR
- JOBVL = "V" ! computes the left  eigenvectors 
- JOBVR = "V" ! computes the right eigenvectors 
+ JOBVL = "V" ! computes the left  eigenvectors
+ JOBVR = "V" ! computes the right eigenvectors
  double precision, allocatable :: WR(:),WI(:),Vl(:,:),VR(:,:),S(:,:),inv_reigvec(:,:)
  integer :: i,j
  integer :: n_good
@@ -101,7 +101,7 @@ subroutine non_sym_diag_inv_right(n,A,leigvec,reigvec,n_real_eigv,eigval)
   enddo
  enddo
  call lapack_diag_non_sym(n,Aw,WR,WI,VL,VR)
- ! You track the real eigenvalues 
+ ! You track the real eigenvalues
  n_good = 0
 ! do i = 1, n
 !  write(*,'(100(F16.12,X))')A(:,i)
@@ -128,11 +128,11 @@ subroutine non_sym_diag_inv_right(n,A,leigvec,reigvec,n_real_eigv,eigval)
    eigval(n_good) = WR(i)
   endif
  enddo
- n_real_eigv = n_good 
+ n_real_eigv = n_good
  do i = 1, n_good
   iorder(i) = i
  enddo
- ! You sort the real eigenvalues 
+ ! You sort the real eigenvalues
  call dsort(eigval,iorder,n_good)
  do i = 1, n_real_eigv
   do j = 1, n
@@ -195,17 +195,17 @@ subroutine lapack_diag_non_sym_new(n, A, WR, WI, VL, VR)
 
   BEGIN_DOC
   !
-  ! You enter with a general non hermitian matrix A(n,n) 
+  ! You enter with a general non hermitian matrix A(n,n)
   !
-  ! You get out with the real WR and imaginary part WI of the eigenvalues 
+  ! You get out with the real WR and imaginary part WI of the eigenvalues
   !
   ! Eigvalue(n) = WR(n) + i * WI(n)
   !
-  ! And the left VL and right VR eigenvectors 
+  ! And the left VL and right VR eigenvectors
   !
-  ! VL(i,j) = <i|Psi_left(j)>  :: projection on the basis element |i> on the jth left  eigenvector 
+  ! VL(i,j) = <i|Psi_left(j)>  :: projection on the basis element |i> on the jth left  eigenvector
   !
-  ! VR(i,j) = <i|Psi_right(j)> :: projection on the basis element |i> on the jth right eigenvector 
+  ! VR(i,j) = <i|Psi_right(j)> :: projection on the basis element |i> on the jth right eigenvector
   !
   END_DOC
 
@@ -225,8 +225,8 @@ subroutine lapack_diag_non_sym_new(n, A, WR, WI, VL, VR)
   allocate( Atmp(n,n) )
   Atmp(1:n,1:n) = A(1:n,1:n)
 
-  JOBVL  = "V" ! computes the left  eigenvectors 
-  JOBVR  = "V" ! computes the right eigenvectors 
+  JOBVL  = "V" ! computes the left  eigenvectors
+  JOBVR  = "V" ! computes the right eigenvectors
   BALANC = "B" ! Diagonal scaling and Permutation for optimization
   SENSE  = "B"
   lda  = n
@@ -234,10 +234,10 @@ subroutine lapack_diag_non_sym_new(n, A, WR, WI, VL, VR)
   ldvr = n
   allocate(WORK(1),SCALE_array(n),RCONDE(n),RCONDV(n),IWORK(2*n-2))
   LWORK = -1 ! to ask for the optimal size of WORK
-  call dgeevx(BALANC,JOBVL,JOBVR,SENSE,&  ! CHARACTERS 
+  call dgeevx(BALANC,JOBVL,JOBVR,SENSE,&  ! CHARACTERS
               n,Atmp,lda,              &  ! MATRIX TO DIAGONALIZE
-              WR,WI,                   &  ! REAL AND IMAGINARY PART OF EIGENVALUES 
-              VL,ldvl,VR,ldvr,         &  ! LEFT AND RIGHT EIGENVECTORS 
+              WR,WI,                   &  ! REAL AND IMAGINARY PART OF EIGENVALUES
+              VL,ldvl,VR,ldvr,         &  ! LEFT AND RIGHT EIGENVECTORS
               ILO,IHI,SCALE_array,ABNRM,RCONDE,RCONDV, & ! OUTPUTS OF OPTIMIZATION
               WORK,LWORK,IWORK,INFO)
 
@@ -248,14 +248,14 @@ subroutine lapack_diag_non_sym_new(n, A, WR, WI, VL, VR)
     stop
   endif
 
-  LWORK = max(int(work(1)), 1) ! this is the optimal size of WORK 
+  LWORK = max(int(work(1)), 1) ! this is the optimal size of WORK
   deallocate(WORK)
   allocate(WORK(LWORK))
-  ! Actual dnon_hrmt_real_diag_newiagonalization 
-  call dgeevx(BALANC,JOBVL,JOBVR,SENSE,&  ! CHARACTERS 
+  ! Actual dnon_hrmt_real_diag_newiagonalization
+  call dgeevx(BALANC,JOBVL,JOBVR,SENSE,&  ! CHARACTERS
               n,Atmp,lda,              &  ! MATRIX TO DIAGONALIZE
-              WR,WI,                   &  ! REAL AND IMAGINARY PART OF EIGENVALUES 
-              VL,ldvl,VR,ldvr,         &  ! LEFT AND RIGHT EIGENVECTORS 
+              WR,WI,                   &  ! REAL AND IMAGINARY PART OF EIGENVALUES
+              VL,ldvl,VR,ldvr,         &  ! LEFT AND RIGHT EIGENVECTORS
               ILO,IHI,SCALE_array,ABNRM,RCONDE,RCONDV, & ! OUTPUTS OF OPTIMIZATION
               WORK,LWORK,IWORK,INFO)
 
@@ -277,11 +277,11 @@ subroutine non_hrmt_real_diag(n, A, leigvec, reigvec, n_real_eigv, eigval)
 
   BEGIN_DOC
   !
-  ! routine which returns the sorted REAL EIGENVALUES ONLY and corresponding LEFT/RIGHT eigenvetors 
+  ! routine which returns the sorted REAL EIGENVALUES ONLY and corresponding LEFT/RIGHT eigenvetors
   !
   ! of a non hermitian matrix A(n,n)
   !
-  ! n_real_eigv is the number of real eigenvalues, which might be smaller than the dimension "n" 
+  ! n_real_eigv is the number of real eigenvalues, which might be smaller than the dimension "n"
   !
   END_DOC
 
@@ -306,7 +306,7 @@ subroutine non_hrmt_real_diag(n, A, leigvec, reigvec, n_real_eigv, eigval)
   call lapack_diag_non_sym(n, Aw, WR, WI, VL, VR)
 
   ! ---
-  ! You track the real eigenvalues 
+  ! You track the real eigenvalues
 
   thr = 1d-15
 
@@ -334,7 +334,7 @@ subroutine non_hrmt_real_diag(n, A, leigvec, reigvec, n_real_eigv, eigval)
    iorder(i) = i
   enddo
 
-  ! You sort the real eigenvalues 
+  ! You sort the real eigenvalues
   call dsort(eigval, iorder, n_good)
   do i = 1, n_real_eigv
     do j = 1, n
@@ -344,7 +344,7 @@ subroutine non_hrmt_real_diag(n, A, leigvec, reigvec, n_real_eigv, eigval)
   enddo
 
 ! print *, ' ordered eigenvalues'
-! print *, ' right eigenvect' 
+! print *, ' right eigenvect'
 ! do i = 1, n
 !   print *, i, eigval(i)
 !   write(*, '(1000(F16.10,X))') reigvec(:,i)
@@ -392,15 +392,15 @@ subroutine lapack_diag_general_non_sym(n, A, B, WR, WI, VL, VR)
   BEGIN_DOC
   ! You enter with a general non hermitian matrix A(n,n) and another B(n,n)
   !
-  ! You get out with the real WR and imaginary part WI of the eigenvalues 
+  ! You get out with the real WR and imaginary part WI of the eigenvalues
   !
   ! Eigvalue(n) = (WR(n) + i * WI(n))
   !
-  ! And the left VL and right VR eigenvectors 
+  ! And the left VL and right VR eigenvectors
   !
-  ! VL(i,j) = <i|Psi_left(j)>  :: projection on the basis element |i> on the jth left  eigenvector 
+  ! VL(i,j) = <i|Psi_left(j)>  :: projection on the basis element |i> on the jth left  eigenvector
   !
-  ! VR(i,j) = <i|Psi_right(j)> :: projection on the basis element |i> on the jth right eigenvector 
+  ! VR(i,j) = <i|Psi_right(j)> :: projection on the basis element |i> on the jth right eigenvector
   END_DOC
 
   implicit none
@@ -421,14 +421,14 @@ subroutine lapack_diag_general_non_sym(n, A, B, WR, WI, VL, VR)
   Atmp(1:n,1:n) = A(1:n,1:n)
 
   allocate(WORK(1))
-  LWORK = -1 
+  LWORK = -1
   call dgeev('V', 'V', n, Atmp, lda, WR, WI, VL, ldvl, VR, ldvr, WORK, LWORK, INFO)
   if(INFO.gt.0) then
     print*,'dgeev failed !!',INFO
     stop
   endif
 
-  LWORK = max(int(WORK(1)), 1) 
+  LWORK = max(int(WORK(1)), 1)
   deallocate(WORK)
 
   allocate(WORK(LWORK))
@@ -448,15 +448,15 @@ end
 subroutine non_hrmt_general_real_diag(n, A, B, reigvec, leigvec, n_real_eigv, eigval)
 
   BEGIN_DOC
-  ! routine which returns the sorted REAL EIGENVALUES ONLY and corresponding LEFT/RIGHT eigenvetors 
+  ! routine which returns the sorted REAL EIGENVALUES ONLY and corresponding LEFT/RIGHT eigenvetors
   !
-  ! of a non hermitian matrix A(n,n) and B(n,n) 
+  ! of a non hermitian matrix A(n,n) and B(n,n)
   !
   ! A reigvec = eigval * B * reigvec
   !
   ! (A)^\dagger leigvec = eigval * B * leigvec
   !
-  ! n_real_eigv is the number of real eigenvalues, which might be smaller than the dimension "n" 
+  ! n_real_eigv is the number of real eigenvalues, which might be smaller than the dimension "n"
   END_DOC
 
   implicit none
@@ -479,7 +479,7 @@ subroutine non_hrmt_general_real_diag(n, A, B, reigvec, leigvec, n_real_eigv, ei
 
   call lapack_diag_general_non_sym(n, A, B, WR, WI, VL, VR)
 
-  ! You track the real eigenvalues 
+  ! You track the real eigenvalues
   n_good = 0
   do i = 1, n
     if(dabs(WI(i)) .lt. 1.d-12) then
@@ -499,17 +499,17 @@ subroutine non_hrmt_general_real_diag(n, A, B, reigvec, leigvec, n_real_eigv, ei
       eigval(n_good) = WR(i)
     endif
   enddo
-  n_real_eigv = n_good 
+  n_real_eigv = n_good
   do i = 1, n_good
    iorder(i) = i
   enddo
 
-  ! You sort the real eigenvalues 
+  ! You sort the real eigenvalues
   call dsort(eigval, iorder, n_good)
   print*,'n_real_eigv = ', n_real_eigv
   print*,'n           = ', n
   do i = 1, n_real_eigv
-    print*,i,'eigval(i) = ', eigval(i) 
+    print*,i,'eigval(i) = ', eigval(i)
     do j = 1, n
       reigvec(j,i) = VR(j,list_good(iorder(i)))
       leigvec(j,i) = Vl(j,list_good(iorder(i)))
@@ -522,7 +522,7 @@ end
 
 subroutine impose_biorthog_qr(m, n, thr_d, thr_nd, Vl, Vr)
 
-  implicit none 
+  implicit none
   integer,          intent(in)    :: m, n
   double precision, intent(in)    :: thr_d, thr_nd
   double precision, intent(inout) :: Vl(m,n), Vr(m,n)
@@ -536,9 +536,9 @@ subroutine impose_biorthog_qr(m, n, thr_d, thr_nd, Vl, Vr)
   ! ---
 
   call check_biorthog_binormalize(m, n, Vl, Vr, thr_d, thr_nd, .false.)
-  
+
   ! ---
-  
+
   allocate(S(n,n))
   call dgemm( 'T', 'N', n, n, m, 1.d0          &
             , Vl, size(Vl, 1), Vr, size(Vr, 1) &
@@ -619,8 +619,8 @@ subroutine impose_biorthog_qr(m, n, thr_d, thr_nd, Vl, Vr)
 
   ! -------------------------------------------------------------------------------------
   !                               get bi-orhtog left & right vectors:
-  !                                           Vr' = Vr x inv(R) 
-  !                                           Vl' = inv(Q) x Vl =  Q.T   x Vl 
+  !                                           Vr' = Vr x inv(R)
+  !                                           Vl' = inv(Q) x Vl =  Q.T   x Vl
 
   ! Q.T x Vl, where Q = S
 
@@ -638,14 +638,14 @@ subroutine impose_biorthog_qr(m, n, thr_d, thr_nd, Vl, Vr)
 
   ! ---
 
-  ! inv(R) 
+  ! inv(R)
   !print *, ' inversing upper triangular matrix ...'
   call dtrtri("U", "N", n, R, n, INFO)
   if(INFO .ne. 0) then
     print*,'dtrtri failed !!', INFO
     stop
   endif
-  !print *, ' inversing upper triangular matrix OK' 
+  !print *, ' inversing upper triangular matrix OK'
 
   do i = 1, n-1
     do j = i+1, n
@@ -658,7 +658,7 @@ subroutine impose_biorthog_qr(m, n, thr_d, thr_nd, Vl, Vr)
   !  write(*, '(1000(F16.10,X))') R(i,:)
   !enddo
 
-  ! Vr x inv(R) 
+  ! Vr x inv(R)
   allocate( tmp(m,n) )
   call dgemm( 'N', 'N', m, n, n, 1.d0        &
             , Vr, size(Vr, 1), R, size(R, 1) &
@@ -679,7 +679,7 @@ end
 
 subroutine impose_biorthog_lu(m, n, Vl, Vr, S)
 
-  implicit none 
+  implicit none
   integer, intent(in)             :: m, n
   double precision, intent(inout) :: Vl(m,n), Vr(m,n), S(n,n)
 
@@ -744,7 +744,7 @@ subroutine impose_biorthog_lu(m, n, Vl, Vr, S)
   !stop
 
   ! ------
-  ! inv(L) 
+  ! inv(L)
   ! ------
 
   allocate( L(n,n) )
@@ -764,9 +764,9 @@ subroutine impose_biorthog_lu(m, n, Vl, Vr, S)
   L(n,n) = 1.d0
 
   ! ------
-  ! inv(U) 
+  ! inv(U)
   ! ------
-  
+
   call dtrtri("U", "N", n, S, n, INFO)
   if(INFO .ne. 0) then
     print*,  'dtrtri failed !!', INFO
@@ -786,7 +786,7 @@ subroutine impose_biorthog_lu(m, n, Vl, Vr, S)
 
   ! -------------------------------------------------------------------------------------
   !                               get bi-orhtog left & right vectors:
-  !                                           Vr' = Vr x inv(U) 
+  !                                           Vr' = Vr x inv(U)
   !                                           Vl' = inv(L) x inv(P) x Vl
 
   ! inv(P) x Vl
@@ -813,7 +813,7 @@ subroutine impose_biorthog_lu(m, n, Vl, Vr, S)
 
   ! ---
 
-  ! Vr x inv(U) 
+  ! Vr x inv(U)
   allocate( tmp(m,n) )
   call dgemm( 'N', 'N', m, n, n, 1.d0        &
             , Vr, size(Vr, 1), S, size(S, 1) &
@@ -846,14 +846,14 @@ subroutine check_EIGVEC(n, m, A, eigval, leigvec, reigvec, thr_diag, thr_norm, s
   integer,          intent(in)  :: n, m
   logical,          intent(in)  :: stop_ifnot
   double precision, intent(in)  :: A(n,n), eigval(m), leigvec(n,m), reigvec(n,m), thr_diag, thr_norm
- 
+
   integer                       :: i, j
   double precision              :: tmp, tmp_abs, tmp_nrm, tmp_rel, tmp_dif
   double precision              :: V_nrm, U_nrm
   double precision, allocatable :: Mtmp(:,:)
 
   allocate( Mtmp(n,m) )
-  
+
   ! ---
 
   Mtmp = 0.d0
@@ -865,7 +865,7 @@ subroutine check_EIGVEC(n, m, A, eigval, leigvec, reigvec, thr_diag, thr_norm, s
   tmp_nrm = 0.d0
   tmp_abs = 0.d0
   do j = 1, m
-    
+
     tmp   = 0.d0
     U_nrm = 0.d0
     do i = 1, n
@@ -875,7 +875,7 @@ subroutine check_EIGVEC(n, m, A, eigval, leigvec, reigvec, thr_diag, thr_norm, s
     enddo
 
     tmp_abs = tmp_abs + tmp
-    V_nrm   = V_nrm   + U_nrm 
+    V_nrm   = V_nrm   + U_nrm
     !write(*,'(I4,X,(100(F25.16,X)))') j,eigval(j), tmp, U_nrm
 
   enddo
@@ -893,7 +893,7 @@ subroutine check_EIGVEC(n, m, A, eigval, leigvec, reigvec, thr_diag, thr_norm, s
     print *, '(tmp_rel .gt. thr_diag) = ',(tmp_rel .gt. thr_diag)
     print *, '(tmp_dif .gt. thr_norm) = ',(tmp_dif .gt. thr_norm)
     print *, ' err estim = ', tmp_abs, tmp_rel
-    print *, ' CR norm   = ', V_nrm 
+    print *, ' CR norm   = ', V_nrm
     stop
   endif
 
@@ -918,7 +918,7 @@ subroutine check_EIGVEC(n, m, A, eigval, leigvec, reigvec, thr_diag, thr_norm, s
     enddo
 
     tmp_abs = tmp_abs + tmp
-    V_nrm   = V_nrm   + U_nrm 
+    V_nrm   = V_nrm   + U_nrm
     !write(*,'(I4,X,(100(F25.16,X)))') j,eigval(j), tmp, U_nrm
 
   enddo
@@ -934,7 +934,7 @@ subroutine check_EIGVEC(n, m, A, eigval, leigvec, reigvec, thr_diag, thr_norm, s
     print *, '(tmp_rel .gt. thr_diag) = ',(tmp_rel .gt. thr_diag)
     print *, '(tmp_dif .gt. thr_norm) = ',(tmp_dif .gt. thr_norm)
     print *, ' err estim = ', tmp_abs, tmp_rel
-    print *, ' CR norm   = ', V_nrm 
+    print *, ' CR norm   = ', V_nrm
     stop
   endif
 
@@ -952,7 +952,7 @@ subroutine check_degen(n, m, eigval, leigvec, reigvec)
   integer,          intent(in)    :: n, m
   double precision, intent(in)    :: eigval(m)
   double precision, intent(inout) :: leigvec(n,m), reigvec(n,m)
- 
+
   integer                         :: i, j
   double precision                :: ei, ej, de, de_thr, accu_nd
   double precision, allocatable   :: S(:,:)
@@ -1049,7 +1049,7 @@ subroutine impose_weighted_orthog_svd(n, m, W, C)
   !enddo
 
   ! ---
- 
+
   allocate(U(m,m), Vt(m,m), D(m))
 
   call svd(S, m, U, m, D, Vt, m, m, m)
@@ -1148,7 +1148,7 @@ subroutine impose_orthog_svd(n, m, C)
   !enddo
 
   ! ---
- 
+
   allocate(U(m,m), Vt(m,m), D(m))
 
   call svd(S, m, U, m, D, Vt, m, m, m)
@@ -1249,7 +1249,7 @@ subroutine impose_orthog_svd_overlap(n, m, C, overlap)
   !enddo
 
   ! ---
- 
+
   allocate(U(m,m), Vt(m,m), D(m))
 
   call svd(S, m, U, m, D, Vt, m, m, m)
@@ -1347,8 +1347,8 @@ subroutine impose_orthog_GramSchmidt(n, m, C)
   do k = 2, m
     do j = 1, k-1
 
-      Ojk = 0.d0    
-      Ojj = 0.d0    
+      Ojk = 0.d0
+      Ojj = 0.d0
       do i = 1, n
         Ojk = Ojk + C(i,j) * C(i,k)
         Ojj = Ojj + C(i,j) * C(i,j)
@@ -1363,7 +1363,7 @@ subroutine impose_orthog_GramSchmidt(n, m, C)
   enddo
 
   do k = 1, m
-    fact_ct = 0.d0    
+    fact_ct = 0.d0
     do i = 1, n
       fact_ct = fact_ct + C(i,k) * C(i,k)
     enddo
@@ -1428,7 +1428,7 @@ subroutine impose_orthog_ones(n, deg_num, C)
       enddo
 
     endif
-  enddo 
+  enddo
 
 end
 
@@ -1467,14 +1467,14 @@ subroutine impose_orthog_degen_eigvec(n, e0, C0)
       de = dabs(ei - ej)
 
       if(de .lt. de_thr) then
-        deg_num(i) = deg_num(i) + 1 
+        deg_num(i) = deg_num(i) + 1
         deg_num(j) = 0
       endif
 
     enddo
   enddo
 
-  
+
   !do i = 1, n
   !  if(deg_num(i) .gt. 1) then
   !    print *, ' degen on', i, deg_num(i)
@@ -1490,7 +1490,7 @@ subroutine impose_orthog_degen_eigvec(n, e0, C0)
 
     if(m .gt. 1) then
     !if(m.eq.3) then
-  
+
       allocate(C(n,m))
       do j = 1, m
         C(1:n,j) = C0(1:n,i+j-1)
@@ -1590,7 +1590,7 @@ subroutine get_halfinv_svd(n, S)
     do j = 1, n
       if(i==j) then
        accu_d += Stmp2(j,i)
-      else 
+      else
        accu_nd = accu_nd + Stmp2(j,i) * Stmp2(j,i)
       endif
     enddo
@@ -1614,7 +1614,7 @@ end
 subroutine check_biorthog_binormalize(n, m, Vl, Vr, thr_d, thr_nd, stop_ifnot)
 
   implicit none
-  
+
   integer,          intent(in)    :: n, m
   logical,          intent(in)    :: stop_ifnot
   double precision, intent(in)    :: thr_d, thr_nd
@@ -1677,8 +1677,8 @@ subroutine check_biorthog_binormalize(n, m, Vl, Vr, thr_d, thr_nd, stop_ifnot)
       if(dabs(S(i,i) - 1.d0) .gt. thr_d) then
         s_tmp = 1.d0 / dsqrt(S(i,i))
         do j = 1, n
-          Vl(j,i) = Vl(j,i) * s_tmp 
-          Vr(j,i) = Vr(j,i) * s_tmp 
+          Vl(j,i) = Vl(j,i) * s_tmp
+          Vr(j,i) = Vr(j,i) * s_tmp
         enddo
       endif
 
@@ -1716,7 +1716,7 @@ subroutine check_biorthog_binormalize(n, m, Vl, Vr, thr_d, thr_nd, stop_ifnot)
   ! ---
 
   if( stop_ifnot .and. ((accu_nd .gt. thr_nd) .or. (dabs(accu_d-dble(m))/dble(m) .gt. thr_d)) ) then
-    print *, accu_nd, thr_nd 
+    print *, accu_nd, thr_nd
     print *, dabs(accu_d-dble(m))/dble(m), thr_d
     print *, ' biorthog_binormalize failed !'
     stop
@@ -1729,7 +1729,7 @@ end
 subroutine check_biorthog(n, m, Vl, Vr, accu_d, accu_nd, S, thr_d, thr_nd, stop_ifnot)
 
   implicit none
-  
+
   integer,          intent(in)  :: n, m
   double precision, intent(in)  :: Vl(n,m), Vr(n,m)
   logical,          intent(in)  :: stop_ifnot
@@ -1747,7 +1747,7 @@ subroutine check_biorthog(n, m, Vl, Vr, accu_d, accu_nd, S, thr_d, thr_nd, stop_
             , Vl, size(Vl, 1), Vr, size(Vr, 1) &
             , 0.d0, S, size(S, 1) )
 
-  ! print S s'il y a besoin 
+  ! print S s'il y a besoin
   !print *, ' overlap matrix:'
   !do i = 1, m
   !  write(*,'(1000(F16.10,X))') S(i,:)
@@ -1796,7 +1796,7 @@ end
 subroutine check_orthog(n, m, V, accu_d, accu_nd, S)
 
   implicit none
-  
+
   integer,          intent(in)  :: n, m
   double precision, intent(in)  :: V(n,m)
   double precision, intent(out) :: accu_d, accu_nd, S(m,m)
@@ -1869,7 +1869,7 @@ subroutine reorder_degen_eigvec(n, deg_num, e0, L0, R0)
 
       if(de .lt. de_thr) then
         ii = ii + 1
- 
+
         j_tmp = i + ii
 
         deg_num(j_tmp) = 0
@@ -1890,7 +1890,7 @@ subroutine reorder_degen_eigvec(n, deg_num, e0, L0, R0)
 
     deg_num(i) = ii + 1
   enddo
-  
+
   ii = 0
   do i = 1, n
     if(deg_num(i) .gt. 1) then
@@ -1913,7 +1913,7 @@ subroutine reorder_degen_eigvec(n, deg_num, e0, L0, R0)
 !    m = deg_num(i)
 !
 !    if(m .gt. 1) then
-!  
+!
 !      allocate(L(n,m))
 !      allocate(R(n,m),S(m,m))
 !
@@ -1979,7 +1979,7 @@ subroutine impose_biorthog_degen_eigvec(n, deg_num, e0, L0, R0)
     m = deg_num(i)
 
     if(m .gt. 1) then
-  
+
       allocate(L(n,m), R(n,m), S(m,m))
 
       do j = 1, m
@@ -2110,13 +2110,13 @@ subroutine impose_orthog_biorthog_degen_eigvec(n, thr_d, thr_nd, e0, L0, R0)
       de = dabs(ei - ej)
 
       if(de .lt. de_thr) then
-        deg_num(i) = deg_num(i) + 1 
+        deg_num(i) = deg_num(i) + 1
         deg_num(j) = 0
       endif
 
     enddo
   enddo
-  
+
   do i = 1, n
     if(deg_num(i).gt.1) then
       print *, ' degen on', i, deg_num(i)
@@ -2129,7 +2129,7 @@ subroutine impose_orthog_biorthog_degen_eigvec(n, thr_d, thr_nd, e0, L0, R0)
     m = deg_num(i)
 
     if(m .gt. 1) then
-  
+
       allocate(L(n,m))
       allocate(R(n,m))
 
@@ -2144,7 +2144,7 @@ subroutine impose_orthog_biorthog_degen_eigvec(n, thr_d, thr_nd, e0, L0, R0)
       call impose_orthog_svd(n, m, R)
 
       ! ---
-  
+
       call impose_biorthog_qr(n, m, thr_d, thr_nd, L, R)
 
       allocate(S(m,m))
@@ -2205,13 +2205,13 @@ subroutine impose_unique_biorthog_degen_eigvec(n, thr_d, thr_nd, e0, C0, W0, L0,
       de = dabs(ei - ej)
 
       if(de .lt. de_thr) then
-        deg_num(i) = deg_num(i) + 1 
+        deg_num(i) = deg_num(i) + 1
         deg_num(j) = 0
       endif
 
     enddo
   enddo
-  
+
   !do i = 1, n
   !  if(deg_num(i) .gt. 1) then
   !    print *, ' degen on', i, deg_num(i)
@@ -2224,7 +2224,7 @@ subroutine impose_unique_biorthog_degen_eigvec(n, thr_d, thr_nd, e0, C0, W0, L0,
     m = deg_num(i)
 
     if(m .gt. 1) then
-  
+
       allocate(L(n,m))
       allocate(R(n,m))
       allocate(C(n,m))
@@ -2277,7 +2277,7 @@ subroutine impose_unique_biorthog_degen_eigvec(n, thr_d, thr_nd, e0, C0, W0, L0,
       deallocate(S, tmp)
 
       ! ---
-  
+
       allocate(S(m,m), S_inv_half(m,m))
       call dgemm( 'T', 'N', m, m, n, 1.d0      &
                 , L, size(L, 1), R, size(R, 1) &
@@ -2309,7 +2309,7 @@ end
 
 subroutine max_overlap_qr(m, n, S0, V)
 
-  implicit none 
+  implicit none
   integer,          intent(in)    :: m, n
   double precision, intent(in)    :: S0(n,n)
   double precision, intent(inout) :: V(m,n)
@@ -2392,7 +2392,7 @@ end
 
 subroutine max_overlap_invprod(n, m, S, V)
 
-  implicit none 
+  implicit none
   integer,          intent(in)    :: m, n
   double precision, intent(in)    :: S(m,m)
   double precision, intent(inout) :: V(n,m)
@@ -2449,7 +2449,7 @@ subroutine impose_biorthog_svd(n, m, L, R)
   !enddo
 
   ! ---
- 
+
   allocate(U(m,m), Vt(m,m), D(m))
 
   call svd(S, m, U, m, D, Vt, m, m, m)
@@ -2557,7 +2557,7 @@ end
 
 subroutine impose_weighted_biorthog_qr(m, n, thr_d, thr_nd, Vl, W, Vr)
 
-  implicit none 
+  implicit none
   integer,          intent(in)    :: m, n
   double precision, intent(in)    :: thr_d, thr_nd
   double precision, intent(inout) :: Vl(m,n), W(m,m), Vr(m,n)
@@ -2570,9 +2570,9 @@ subroutine impose_weighted_biorthog_qr(m, n, thr_d, thr_nd, Vl, W, Vr)
 
 
   call check_weighted_biorthog_binormalize(m, n, Vl, W, Vr, thr_d, thr_nd, .false.)
-  
+
   ! ---
-  
+
   allocate(Stmp(n,m), S(n,n))
   call dgemm( 'T', 'N', n, m, m, 1.d0        &
             , Vl, size(Vl, 1), W, size(W, 1) &
@@ -2657,8 +2657,8 @@ subroutine impose_weighted_biorthog_qr(m, n, thr_d, thr_nd, Vl, W, Vr)
 
   ! -------------------------------------------------------------------------------------
   !                               get bi-orhtog left & right vectors:
-  !                                           Vr' = Vr x inv(R) 
-  !                                           Vl' = inv(Q) x Vl =  Q.T   x Vl 
+  !                                           Vr' = Vr x inv(R)
+  !                                           Vl' = inv(Q) x Vl =  Q.T   x Vl
 
   ! Q.T x Vl, where Q = S
 
@@ -2676,14 +2676,14 @@ subroutine impose_weighted_biorthog_qr(m, n, thr_d, thr_nd, Vl, W, Vr)
 
   ! ---
 
-  ! inv(R) 
+  ! inv(R)
   !print *, ' inversing upper triangular matrix ...'
   call dtrtri("U", "N", n, R, n, INFO)
   if(INFO .ne. 0) then
     print*,'dtrtri failed !!', INFO
     stop
   endif
-  !print *, ' inversing upper triangular matrix OK' 
+  !print *, ' inversing upper triangular matrix OK'
 
   do i = 1, n-1
     do j = i+1, n
@@ -2696,7 +2696,7 @@ subroutine impose_weighted_biorthog_qr(m, n, thr_d, thr_nd, Vl, W, Vr)
   !  write(*, '(1000(F16.10,X))') R(i,:)
   !enddo
 
-  ! Vr x inv(R) 
+  ! Vr x inv(R)
   allocate( tmp(m,n) )
   call dgemm( 'N', 'N', m, n, n, 1.d0        &
             , Vr, size(Vr, 1), R, size(R, 1) &
@@ -2720,7 +2720,7 @@ end
 subroutine check_weighted_biorthog_binormalize(n, m, Vl, W, Vr, thr_d, thr_nd, stop_ifnot)
 
   implicit none
-  
+
   integer,          intent(in)    :: n, m
   logical,          intent(in)    :: stop_ifnot
   double precision, intent(in)    :: thr_d, thr_nd
@@ -2781,8 +2781,8 @@ subroutine check_weighted_biorthog_binormalize(n, m, Vl, W, Vr, thr_d, thr_nd, s
       if(dabs(S(i,i) - 1.d0) .gt. thr_d) then
         s_tmp = 1.d0 / dsqrt(S(i,i))
         do j = 1, n
-          Vl(j,i) = Vl(j,i) * s_tmp 
-          Vr(j,i) = Vr(j,i) * s_tmp 
+          Vl(j,i) = Vl(j,i) * s_tmp
+          Vr(j,i) = Vr(j,i) * s_tmp
         enddo
       endif
     enddo
@@ -2824,7 +2824,7 @@ subroutine check_weighted_biorthog_binormalize(n, m, Vl, W, Vr, thr_d, thr_nd, s
   ! ---
 
   if( stop_ifnot .and. ((accu_nd .gt. thr_nd) .or. (dabs(accu_d-dble(m))/dble(m) .gt. thr_d)) ) then
-    print *, accu_nd, thr_nd 
+    print *, accu_nd, thr_nd
     print *, dabs(accu_d-dble(m))/dble(m), thr_d
     print *, ' weighted biorthog_binormalize failed !'
     stop
@@ -2866,7 +2866,7 @@ subroutine impose_weighted_biorthog_svd(n, m, overlap, L, R)
   !enddo
 
   ! ---
- 
+
   allocate(U(m,m), Vt(m,m), D(m))
 
   call svd(S, m, U, m, D, Vt, m, m, m)
@@ -2951,4 +2951,5 @@ subroutine impose_weighted_biorthog_svd(n, m, overlap, L, R)
 end
 
 ! ---
+
 

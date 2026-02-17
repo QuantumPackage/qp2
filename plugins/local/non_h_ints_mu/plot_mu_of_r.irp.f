@@ -1,7 +1,7 @@
 program plot_mu_of_r
  implicit none
  read_wf = .False.
- touch read_wf 
+ touch read_wf
  call routine_print
 
 end
@@ -31,10 +31,11 @@ subroutine routine_print
    sigma += grad_dm_a(i)**2
   enddo
   sigma=dsqrt(sigma)
-  grad = mu_der(1)**2 + mu_der(2)**2 + mu_der(3)**2 
+  grad = mu_der(1)**2 + mu_der(2)**2 + mu_der(3)**2
   grad = dsqrt(grad)
   print*,r(1),mu_val
   write(i_unit_output,'(100(F16.7,X))')r(1),mu_val,dm_a,grad,sigma/dm_a
   r(1) += dx
  enddo
 end
+

@@ -1,4 +1,4 @@
- BEGIN_PROVIDER [ double precision, mo_grad_ints, (mo_num, mo_num,3)]
+ BEGIN_PROVIDER [ double precision, mo_grad_ints, (mo_num, mo_num, 3)]
  implicit none
  BEGIN_DOC
 ! mo_grad_ints(i,j,m) = <phi_i^MO | d/dx | phi_j^MO>
@@ -18,9 +18,9 @@
  enddo
 
 
-END_PROVIDER 
+END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, mo_grad_ints_transp, (3,mo_num, mo_num)]
+ BEGIN_PROVIDER [ double precision, mo_grad_ints_transp, (3, mo_num, mo_num)]
  implicit none
  BEGIN_DOC
 ! mo_grad_ints(i,j,m) = <phi_i^MO | d/dx | phi_j^MO>
@@ -36,4 +36,5 @@ END_PROVIDER
  enddo
 
 
-END_PROVIDER 
+END_PROVIDER
+

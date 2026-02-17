@@ -34,5 +34,6 @@ program sort_by_fock_energies
   mo_coef = new_mo_coef
   touch mo_coef
   call save_mos
-  
+
 end
+

@@ -1,6 +1,6 @@
 
 use bitmasks
-BEGIN_PROVIDER [real*8, hessmat_old, (nMonoEx,nMonoEx)]
+BEGIN_PROVIDER [real*8, hessmat_old, (nMonoEx, nMonoEx)]
   BEGIN_DOC
   ! calculate the orbital hessian 2 <Psi| E_pq H E_rs |Psi>
   ! + <Psi| E_pq E_rs H |Psi> + <Psi| E_rs E_pq H |Psi> by hand,
@@ -180,7 +180,7 @@ subroutine calc_hess_elem(ihole,ipart,jhole,jpart,res)
 
 end subroutine calc_hess_elem
 
-BEGIN_PROVIDER [real*8, hessmat_peter, (nMonoEx,nMonoEx)]
+BEGIN_PROVIDER [real*8, hessmat_peter, (nMonoEx, nMonoEx)]
   BEGIN_DOC
   ! explicit hessian matrix from density matrices and integrals
   ! of course, this will be used for a direct Davidson procedure later
@@ -307,4 +307,5 @@ BEGIN_PROVIDER [real*8, hessmat_peter, (nMonoEx,nMonoEx)]
 
 
 END_PROVIDER
+
 

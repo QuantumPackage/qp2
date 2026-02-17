@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_inv, (ao_sphe_num,ao_num) ]
+BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_inv, (ao_sphe_num, ao_num) ]
  implicit none
  BEGIN_DOC
  ! Inverse of :c:data:`ao_cart_to_sphe_coef`
@@ -29,7 +29,7 @@ END_PROVIDER
 
 
 
-BEGIN_PROVIDER [ double precision, ao_ortho_canonical_coef_inv, (ao_num,ao_num)]
+BEGIN_PROVIDER [ double precision, ao_ortho_canonical_coef_inv, (ao_num, ao_num)]
  implicit none
  BEGIN_DOC
 ! ao_ortho_canonical_coef^(-1)
@@ -38,7 +38,7 @@ BEGIN_PROVIDER [ double precision, ao_ortho_canonical_coef_inv, (ao_num,ao_num)]
      ao_num, ao_ortho_canonical_coef_inv, size(ao_ortho_canonical_coef_inv,1))
 END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, ao_ortho_canonical_coef, (ao_num,ao_num)]
+ BEGIN_PROVIDER [ double precision, ao_ortho_canonical_coef, (ao_num, ao_num)]
 &BEGIN_PROVIDER [ integer, ao_ortho_canonical_num ]
   implicit none
   BEGIN_DOC
@@ -87,7 +87,7 @@ END_PROVIDER
 
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, ao_ortho_canonical_overlap, (ao_ortho_canonical_num,ao_ortho_canonical_num)]
+BEGIN_PROVIDER [double precision, ao_ortho_canonical_overlap, (ao_ortho_canonical_num, ao_ortho_canonical_num)]
   implicit none
   BEGIN_DOC
 ! overlap matrix of the ao_ortho_canonical.
@@ -112,4 +112,5 @@ BEGIN_PROVIDER [double precision, ao_ortho_canonical_overlap, (ao_ortho_canonica
     enddo
   enddo
 END_PROVIDER
+
 

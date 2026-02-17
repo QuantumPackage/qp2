@@ -5,7 +5,7 @@ subroutine ao_to_mo_bi_ortho(A_ao, LDA_ao, A_mo, LDA_mo)
 
   BEGIN_DOC
   !
-  ! Transform A from the |AO| basis to the BI ORTHONORMAL MOS 
+  ! Transform A from the |AO| basis to the BI ORTHONORMAL MOS
   !
   ! $C_L^\dagger.A_{ao}.C_R$ where C_L and C_R are the LEFT and RIGHT MO coefs
   !
@@ -68,7 +68,7 @@ subroutine mo_to_ao_bi_ortho(A_mo, LDA_mo, A_ao, LDA_ao)
   call dgemm( 'N', 'N', ao_num, mo_num, mo_num, 1.d0 &
             , tmp_1, size(tmp_1, 1), A_mo, LDA_mo    &
             , 0.d0, tmp_2, size(tmp_2, 1) )
-  
+
   ! ao_overlap x mo_l_coef
   tmp_1 = 0.d0
   call dgemm( 'N', 'N', ao_num, mo_num, ao_num, 1.d0                         &
@@ -79,7 +79,7 @@ subroutine mo_to_ao_bi_ortho(A_mo, LDA_mo, A_ao, LDA_ao)
   call dgemm( 'N', 'T', ao_num, ao_num, mo_num, 1.d0       &
             , tmp_2, size(tmp_2, 1), tmp_1, size(tmp_1, 1) &
             , 0.d0, A_ao, LDA_ao )
-  
+
   deallocate(tmp_1, tmp_2)
 
 end subroutine mo_to_ao_bi_ortho
@@ -199,6 +199,9 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [ double precision, mo_r_coef_transp, (mo_num, ao_num)]
+  BEGIN_DOC
+  ! mo_r_coef_transp
+  END_DOC
 
   implicit none
   integer :: j, m
@@ -208,11 +211,14 @@ BEGIN_PROVIDER [ double precision, mo_r_coef_transp, (mo_num, ao_num)]
     enddo
   enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
 BEGIN_PROVIDER [ double precision, mo_l_coef_transp, (mo_num, ao_num)]
+  BEGIN_DOC
+  ! mo_l_coef_transp
+  END_DOC
 
   implicit none
   integer :: j, m
@@ -222,8 +228,9 @@ BEGIN_PROVIDER [ double precision, mo_l_coef_transp, (mo_num, ao_num)]
     enddo
   enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
+
 
 

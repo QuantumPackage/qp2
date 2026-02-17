@@ -3,7 +3,7 @@
 
 ! ---
 
-BEGIN_PROVIDER[double precision, mos_r_in_r_array, (mo_num, n_points_final_grid)]
+BEGIN_PROVIDER [double precision, mos_r_in_r_array, (mo_num, n_points_final_grid)]
 
   BEGIN_DOC
   ! mos_in_r_array(i,j) = value of the ith RIGHT mo on the jth grid point
@@ -15,7 +15,7 @@ BEGIN_PROVIDER[double precision, mos_r_in_r_array, (mo_num, n_points_final_grid)
 
  !$OMP PARALLEL DO &
  !$OMP DEFAULT (NONE)  &
- !$OMP PRIVATE (i, j, r, mos_array) & 
+ !$OMP PRIVATE (i, j, r, mos_array) &
  !$OMP SHARED (mos_r_in_r_array, n_points_final_grid, mo_num, final_grid_points)
   do i = 1, n_points_final_grid
     r(1) = final_grid_points(1,i)
@@ -27,12 +27,12 @@ BEGIN_PROVIDER[double precision, mos_r_in_r_array, (mo_num, n_points_final_grid)
     enddo
   enddo
  !$OMP END PARALLEL DO
- 
+
 END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER[double precision, mos_r_in_r_array_transp_old, (n_points_final_grid, mo_num)]
+BEGIN_PROVIDER [double precision, mos_r_in_r_array_transp_old, (n_points_final_grid, mo_num)]
 
   BEGIN_DOC
   ! mos_r_in_r_array_transp_old(i,j) = value of the jth mo on the ith grid point
@@ -43,7 +43,7 @@ BEGIN_PROVIDER[double precision, mos_r_in_r_array_transp_old, (n_points_final_gr
 
   do i = 1, n_points_final_grid
     do j = 1, mo_num
-      mos_r_in_r_array_transp_old(i,j) = mos_r_in_r_array(j,i) 
+      mos_r_in_r_array_transp_old(i,j) = mos_r_in_r_array(j,i)
     enddo
   enddo
 
@@ -69,7 +69,7 @@ end subroutine give_all_mos_r_at_r
 
 ! ---
 
-BEGIN_PROVIDER[double precision, mos_l_in_r_array, (mo_num, n_points_final_grid)]
+BEGIN_PROVIDER [double precision, mos_l_in_r_array, (mo_num, n_points_final_grid)]
 
   BEGIN_DOC
   ! mos_in_r_array(i,j) = value of the ith LEFT mo on the jth grid point
@@ -81,7 +81,7 @@ BEGIN_PROVIDER[double precision, mos_l_in_r_array, (mo_num, n_points_final_grid)
 
  !$OMP PARALLEL DO &
  !$OMP DEFAULT (NONE)  &
- !$OMP PRIVATE (i,r,mos_array,j) & 
+ !$OMP PRIVATE (i,r,mos_array,j) &
  !$OMP SHARED(mos_l_in_r_array,n_points_final_grid,mo_num,final_grid_points)
   do i = 1, n_points_final_grid
     r(1) = final_grid_points(1,i)
@@ -93,7 +93,7 @@ BEGIN_PROVIDER[double precision, mos_l_in_r_array, (mo_num, n_points_final_grid)
     enddo
   enddo
  !$OMP END PARALLEL DO
- 
+
 END_PROVIDER
 
 ! ---
@@ -116,7 +116,7 @@ end subroutine give_all_mos_l_at_r
 
 ! ---
 
-BEGIN_PROVIDER[double precision, mos_l_in_r_array_transp_old, (n_points_final_grid,mo_num)]
+BEGIN_PROVIDER [double precision, mos_l_in_r_array_transp_old, (n_points_final_grid, mo_num)]
 
   BEGIN_DOC
   ! mos_l_in_r_array_transp_old(i,j) = value of the jth mo on the ith grid point
@@ -127,11 +127,12 @@ BEGIN_PROVIDER[double precision, mos_l_in_r_array_transp_old, (n_points_final_gr
 
   do i = 1, n_points_final_grid
     do j = 1, mo_num
-      mos_l_in_r_array_transp_old(i,j) = mos_l_in_r_array(j,i) 
+      mos_l_in_r_array_transp_old(i,j) = mos_l_in_r_array(j,i)
     enddo
   enddo
 
 END_PROVIDER
 
 ! ---
+
 

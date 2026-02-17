@@ -26,7 +26,7 @@ END_PROVIDER
 ! ---
 
  BEGIN_PROVIDER [ double precision, CI_electronic_energy_nonsym_dressed, (N_states_diag) ]
-&BEGIN_PROVIDER [ double precision, CI_eigenvectors_nonsym_dressed, (N_det,N_states_diag) ]
+&BEGIN_PROVIDER [ double precision, CI_eigenvectors_nonsym_dressed, (N_det, N_states_diag) ]
 
   BEGIN_DOC
   ! Eigenvectors/values of the CI matrix
@@ -128,7 +128,7 @@ end subroutine diagonalize_CI_nonsym_dressed
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, H_matrix_nonsym_dressed, (N_det,N_det) ]
+BEGIN_PROVIDER [ double precision, H_matrix_nonsym_dressed, (N_det, N_det) ]
 
   BEGIN_DOC
   ! Dressed H with Delta_ij
@@ -153,7 +153,7 @@ BEGIN_PROVIDER [ double precision, H_matrix_nonsym_dressed, (N_det,N_det) ]
 !    l = dressed_column_idx(1)
 !    f = 1.0d0 / psi_coef(l,1)
 !    do j = 1, N_det
-!      H_matrix_nonsym_dressed(j,l) += f * dressing_delta(j,1) 
+!      H_matrix_nonsym_dressed(j,l) += f * dressing_delta(j,1)
 !    enddo
 
     k = 1
@@ -185,4 +185,5 @@ BEGIN_PROVIDER [ double precision, H_matrix_nonsym_dressed, (N_det,N_det) ]
 END_PROVIDER
 
 ! ---
+
 

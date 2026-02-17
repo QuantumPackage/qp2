@@ -1,5 +1,5 @@
 
- BEGIN_PROVIDER [double precision, angular_quadrature_points, (n_points_integration_angular,3) ]
+ BEGIN_PROVIDER [double precision, angular_quadrature_points, (n_points_integration_angular, 3) ]
 &BEGIN_PROVIDER [double precision, weights_angular_points, (n_points_integration_angular)]
   implicit none
   BEGIN_DOC
@@ -102,3 +102,4 @@
   enddo
 
 END_PROVIDER
+

@@ -6,7 +6,7 @@ end
 
 subroutine routine_test_mu_of_r_tot
  implicit none
- integer :: ipoint,k 
+ integer :: ipoint,k
  double precision :: r2(3), weight, dr, r1(3), r1bis(3)
  double precision :: accu_grad(3)
  double precision :: jast,grad_jast(3),j_bump,j12_mu
@@ -59,4 +59,5 @@ subroutine routine_test_mu_of_r_tot
  print*, accu_grad
 
 end
+
 

@@ -1,5 +1,5 @@
 
-BEGIN_PROVIDER [double precision, tc_spin_population, (ao_num,ao_num,N_states)]
+BEGIN_PROVIDER [double precision, tc_spin_population, (ao_num, ao_num, N_states)]
  implicit none
  integer :: i,j,istate
  BEGIN_DOC
@@ -24,8 +24,11 @@ BEGIN_PROVIDER [double precision, tc_spin_population, (ao_num,ao_num,N_states)]
  endif
 END_PROVIDER
 
- BEGIN_PROVIDER [double precision, tc_spin_population_angular_momentum, (0:ao_l_max,N_states)]
-&BEGIN_PROVIDER [double precision, tc_spin_population_angular_momentum_per_atom, (0:ao_l_max,nucl_num,N_states)]
+ BEGIN_PROVIDER [double precision, tc_spin_population_angular_momentum, (0:ao_l_max, N_states)]
+&BEGIN_PROVIDER [double precision, tc_spin_population_angular_momentum_per_atom, (0:ao_l_max, nucl_num, N_states)]
+  BEGIN_DOC
+  ! tc_spin_population_angular_momentum
+  END_DOC
  implicit none
  integer :: i,istate
  double precision :: accu
@@ -38,10 +41,10 @@ END_PROVIDER
   enddo
  enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 
-BEGIN_PROVIDER [double precision, tc_spin_gross_orbital_product, (ao_num,N_states)]
+BEGIN_PROVIDER [double precision, tc_spin_gross_orbital_product, (ao_num, N_states)]
  implicit none
  tc_spin_gross_orbital_product = 0.d0
  integer :: i,j,istate
@@ -58,7 +61,7 @@ BEGIN_PROVIDER [double precision, tc_spin_gross_orbital_product, (ao_num,N_state
 
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, tc_mulliken_spin_densities, (nucl_num,N_states)]
+BEGIN_PROVIDER [double precision, tc_mulliken_spin_densities, (nucl_num, N_states)]
  implicit none
  integer :: i,j,istate
  BEGIN_DOC
@@ -111,4 +114,5 @@ subroutine tc_print_mulliken_sd
  enddo
 
 end
+
 

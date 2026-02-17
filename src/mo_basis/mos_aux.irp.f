@@ -1,7 +1,10 @@
 
 ! ---
 
-BEGIN_PROVIDER [double precision, mo_coef_aux, (ao_num,mo_num)]
+BEGIN_PROVIDER [double precision, mo_coef_aux, (ao_num, mo_num)]
+  BEGIN_DOC
+  ! mo_coef_aux
+  END_DOC
 
   implicit none
   integer                        :: i, j
@@ -50,4 +53,5 @@ BEGIN_PROVIDER [double precision, mo_coef_aux, (ao_num,mo_num)]
   endif
 
 END_PROVIDER
+
 

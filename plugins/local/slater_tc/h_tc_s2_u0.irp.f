@@ -17,7 +17,7 @@ subroutine get_H_tc_s2_l0_r0(l_0, r_0, N_st, sze, energies, s2)
   integer,          intent(in)  :: N_st,sze
   double precision, intent(in)  :: l_0(sze,N_st), r_0(sze,N_st)
   double precision, intent(out) :: energies(N_st), s2(N_st)
-  logical                       :: do_right 
+  logical                       :: do_right
   integer                       :: istate
   double precision, allocatable :: s_0(:,:), v_0(:,:)
   double precision              :: u_dot_v, norm
@@ -52,7 +52,7 @@ subroutine H_tc_s2_u_0_opt(v_0, s_0, u_0, N_st, sze)
   integer,          intent(in)  :: N_st,sze
   double precision, intent(in)  :: u_0(sze,N_st)
   double precision, intent(out) :: v_0(sze,N_st), s_0(sze,N_st)
-  logical                       :: do_right 
+  logical                       :: do_right
 
   do_right = .True.
   call H_tc_s2_u_0_nstates_openmp(v_0, s_0, u_0, N_st, sze, do_right)
@@ -76,7 +76,7 @@ subroutine H_tc_s2_dagger_u_0_opt(v_0, s_0, u_0, N_st, sze)
   integer,          intent(in)  :: N_st,sze
   double precision, intent(in)  :: u_0(sze,N_st)
   double precision, intent(out) :: v_0(sze,N_st), s_0(sze,N_st)
-  logical                       :: do_right 
+  logical                       :: do_right
 
   do_right = .False.
   call H_tc_s2_u_0_nstates_openmp(v_0, s_0, u_0, N_st, sze, do_right)
@@ -101,7 +101,7 @@ subroutine H_tc_s2_u_0_nstates_openmp(v_0, s_0, u_0, N_st, sze, do_right)
   implicit none
 
   integer,          intent(in)  :: N_st,sze
-  logical,          intent(in)  :: do_right 
+  logical,          intent(in)  :: do_right
   double precision, intent(in)  :: u_0(sze,N_st)
   double precision, intent(out) :: v_0(sze,N_st), s_0(sze,N_st)
   integer                       :: k
@@ -794,5 +794,6 @@ SUBST [ N_int ]
 N_int;;
 
 END_TEMPLATE
+
 
 

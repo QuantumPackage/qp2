@@ -23,7 +23,7 @@ program select_dets_bi_ortho()
   !!!!!!!!!!!!!!! WARNING NO 3-BODY
   !!!!!!!!!!!!!!! WARNING NO 3-BODY
   three_body_h_tc = .False.
-  touch three_body_h_tc 
+  touch three_body_h_tc
   !!!!!!!!!!!!!!! WARNING NO 3-BODY
   !!!!!!!!!!!!!!! WARNING NO 3-BODY
 
@@ -71,4 +71,5 @@ subroutine routine_test
 end
 
 ! ---
+
 

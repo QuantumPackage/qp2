@@ -49,7 +49,7 @@ subroutine provide_no_2e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     !$OMP        mos_l_in_r, mos_r_in_r, &
     !$OMP        int2_grad1_u12,         &
     !$OMP        tmpA, tmpB)
-  
+
     !$OMP DO
     do p = 1, n_mo
 
@@ -73,12 +73,12 @@ subroutine provide_no_2e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     !$OMP PARALLEL                       &
     !$OMP DEFAULT(NONE)                  &
     !$OMP PRIVATE(p, s, i, ipoint)       &
-    !$OMP SHARED(n_mo, ne_b, n_grid,     & 
+    !$OMP SHARED(n_mo, ne_b, n_grid,     &
     !$OMP        wr1,                    &
     !$OMP        mos_l_in_r, mos_r_in_r, &
     !$OMP        int2_grad1_u12,         &
     !$OMP        tmpA, tmpB, tmpO, tmpJ, tmpC, tmpD)
-  
+
     !$OMP DO COLLAPSE(2)
     do s = 1, n_mo
       do p = 1, n_mo
@@ -134,7 +134,7 @@ subroutine provide_no_2e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     !$OMP DEFAULT(NONE)       &
     !$OMP PRIVATE(t, s, q, p) &
     !$OMP SHARED(n_mo, tmpE, noL_2e)
-  
+
     !$OMP DO COLLAPSE(3)
     do t = 1, n_mo
       do s = 1, n_mo
@@ -147,7 +147,7 @@ subroutine provide_no_2e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
-  
+
     deallocate(tmpE)
 
   else
@@ -184,7 +184,7 @@ subroutine provide_no_2e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     !$OMP        mos_l_in_r, mos_r_in_r,   &
     !$OMP        int2_grad1_u12,           &
     !$OMP        tmpA, tmpB)
-  
+
     !$OMP DO
     do p = 1, n_mo
 
@@ -223,7 +223,7 @@ subroutine provide_no_2e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     !$OMP        mos_l_in_r, mos_r_in_r,   &
     !$OMP        int2_grad1_u12,           &
     !$OMP        tmpA, tmpB, tmpO, tmpJ, tmpC, tmpD)
-  
+
     !$OMP DO COLLAPSE(2)
     do s = 1, n_mo
       do p = 1, n_mo
@@ -286,7 +286,7 @@ subroutine provide_no_2e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     !$OMP DEFAULT(NONE)       &
     !$OMP PRIVATE(t, s, q, p) &
     !$OMP SHARED(n_mo, tmpE, noL_2e)
-  
+
     !$OMP DO COLLAPSE(3)
     do t = 1, n_mo
       do s = 1, n_mo
@@ -299,7 +299,7 @@ subroutine provide_no_2e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
-  
+
     deallocate(tmpE)
 
   endif
@@ -356,7 +356,7 @@ subroutine provide_no_2e_tmp(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in
     !$OMP        mos_l_in_r, mos_r_in_r, &
     !$OMP        int2_grad1_u12,         &
     !$OMP        tmpA, tmpB)
-  
+
     !$OMP DO
     do p = 1, n_mo
 
@@ -380,12 +380,12 @@ subroutine provide_no_2e_tmp(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in
     !$OMP PARALLEL                       &
     !$OMP DEFAULT(NONE)                  &
     !$OMP PRIVATE(p, s, i, ipoint)       &
-    !$OMP SHARED(n_mo, ne_b, n_grid,     & 
+    !$OMP SHARED(n_mo, ne_b, n_grid,     &
     !$OMP        wr1,                    &
     !$OMP        mos_l_in_r, mos_r_in_r, &
     !$OMP        int2_grad1_u12,         &
     !$OMP        tmpA, tmpB, tmpO, tmpJ, tmpC, tmpD)
-  
+
     !$OMP DO COLLAPSE(2)
     do s = 1, n_mo
       do p = 1, n_mo
@@ -437,7 +437,7 @@ subroutine provide_no_2e_tmp(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in
     !$OMP DEFAULT(NONE)       &
     !$OMP PRIVATE(t, s, q, p) &
     !$OMP SHARED(n_mo, tmpE, noL_2e)
-  
+
     !$OMP DO COLLAPSE(3)
     do t = 1, n_mo
       do s = 1, n_mo
@@ -450,7 +450,7 @@ subroutine provide_no_2e_tmp(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
-  
+
   else
 
     tmpO = 0.d0
@@ -480,7 +480,7 @@ subroutine provide_no_2e_tmp(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in
     !$OMP        mos_l_in_r, mos_r_in_r,   &
     !$OMP        int2_grad1_u12,           &
     !$OMP        tmpA, tmpB)
-  
+
     !$OMP DO
     do p = 1, n_mo
 
@@ -519,7 +519,7 @@ subroutine provide_no_2e_tmp(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in
     !$OMP        mos_l_in_r, mos_r_in_r,   &
     !$OMP        int2_grad1_u12,           &
     !$OMP        tmpA, tmpB, tmpO, tmpJ, tmpC, tmpD)
-  
+
     !$OMP DO COLLAPSE(2)
     do s = 1, n_mo
       do p = 1, n_mo
@@ -578,7 +578,7 @@ subroutine provide_no_2e_tmp(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in
     !$OMP DEFAULT(NONE)       &
     !$OMP PRIVATE(t, s, q, p) &
     !$OMP SHARED(n_mo, tmpE, noL_2e)
-  
+
     !$OMP DO COLLAPSE(3)
     do t = 1, n_mo
       do s = 1, n_mo
@@ -591,7 +591,7 @@ subroutine provide_no_2e_tmp(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
-  
+
   endif
 
   call wall_time(t1)
@@ -601,5 +601,6 @@ subroutine provide_no_2e_tmp(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in
 end
 
 ! ---
+
 
 

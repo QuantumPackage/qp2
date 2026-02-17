@@ -6,7 +6,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_coul, (ao_num, ao_num, ao_num, ao_num
 
   BEGIN_DOC
   !
-  ! ao_two_e_coul(k,i,l,j) = ( k i | 1/r12 | l j ) = < l k | 1/r12 | j i > 
+  ! ao_two_e_coul(k,i,l,j) = ( k i | 1/r12 | l j ) = < l k | 1/r12 | j i >
   !
   END_DOC
 
@@ -23,7 +23,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_coul, (ao_num, ao_num, ao_num, ao_num
     do l = 1, ao_num
       do i = 1, ao_num
         do k = 1, ao_num
-          !  < 1:k, 2:l | 1:i, 2:j > 
+          !  < 1:k, 2:l | 1:i, 2:j >
           ao_two_e_coul(k,i,l,j) = get_ao_two_e_integral(i, j, k, l, ao_integrals_map)
         enddo
       enddo
@@ -32,7 +32,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_coul, (ao_num, ao_num, ao_num, ao_num
   !$OMP END DO
   !$OMP END PARALLEL
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -126,7 +126,7 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_coul_e_chemist, (mo_num, mo_num, m
   enddo
   deallocate(mo_tmp_2)
 
-  mo_bi_ortho_coul_e_chemist = 0.d0 
+  mo_bi_ortho_coul_e_chemist = 0.d0
   do m = 1, ao_num
     do j = 1, mo_num
       do l = 1, mo_num
@@ -140,7 +140,7 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_coul_e_chemist, (mo_num, mo_num, m
   enddo
   deallocate(mo_tmp_1)
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -166,13 +166,13 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_coul_e, (mo_num, mo_num, mo_num, m
     enddo
   enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
 BEGIN_PROVIDER [ double precision, mo_bi_ortho_one_e, (mo_num, mo_num)]
 
-  BEGIN_DOC 
+  BEGIN_DOC
   !
   ! mo_bi_ortho_one_e(k,i) = < MO^L_k | h_c | MO^R_i >
   !
@@ -182,7 +182,8 @@ BEGIN_PROVIDER [ double precision, mo_bi_ortho_one_e, (mo_num, mo_num)]
 
   call ao_to_mo_bi_ortho(ao_one_e_integrals, ao_num, mo_bi_ortho_one_e , mo_num)
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
+
 

@@ -1,11 +1,14 @@
 use bitmasks
 
 BEGIN_PROVIDER [ integer, psi_selectors_size ]
+  BEGIN_DOC
+  ! psi_selectors_size
+  END_DOC
  implicit none
  psi_selectors_size = psi_det_size
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, psi_selectors_coef_transp, (N_states,psi_selectors_size) ]
+BEGIN_PROVIDER [ double precision, psi_selectors_coef_transp, (N_states, psi_selectors_size) ]
   implicit none
   BEGIN_DOC
   ! Transposed psi_selectors
@@ -30,5 +33,6 @@ BEGIN_PROVIDER [ double precision, psi_selectors_diag_h_mat, (psi_selectors_size
    psi_selectors_diag_h_mat(i) = diag_H_mat_elem(psi_selectors(1,1,i),N_int)
   enddo
 END_PROVIDER
+
 
 

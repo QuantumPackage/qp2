@@ -31,7 +31,7 @@
 
 
 subroutine trust_region_expected_e(n,n2,v_grad,H,x,prev_energy,e_model)
-   
+
   include 'pi.h'
 
   !BEGIN_DOC
@@ -78,11 +78,11 @@ subroutine trust_region_expected_e(n,n2,v_grad,H,x,prev_energy,e_model)
 
 ! Product v_grad.x
   part_1 = ddot(n,v_grad,1,x,1)
- 
+
   !if (debug) then
   !  print*,'g.x : ', part_1
   !endif
-    
+
   ! Product H.x
   if (n == n2) then
     call dgemv('N',n,n,1d0,H,size(H,1),x,1,0d0,part_2a,1)
@@ -97,7 +97,7 @@ subroutine trust_region_expected_e(n,n2,v_grad,H,x,prev_energy,e_model)
   part_2 = 0.5d0 * ddot(n,x,1,part_2a,1)
 
   !if (debug) then
-  !  print*,'1/2*x^T.H.x : ', part_2 
+  !  print*,'1/2*x^T.H.x : ', part_2
   !endif
 
 
@@ -108,9 +108,9 @@ subroutine trust_region_expected_e(n,n2,v_grad,H,x,prev_energy,e_model)
   print*, 'prev_energy:                        ', prev_energy
   print*, 'Predicted energy after the rotation:', e_model
   print*, 'Previous energy - predicted energy: ', prev_energy - e_model
-  
+
   ! Can be deleted, already in another subroutine
-  if (DABS(prev_energy - e_model) < 1d-12 ) then 
+  if (DABS(prev_energy - e_model) < 1d-12 ) then
     print*,'WARNING: ABS(prev_energy - e_model) < 1d-12'
   endif
 
@@ -122,5 +122,6 @@ subroutine trust_region_expected_e(n,n2,v_grad,H,x,prev_energy,e_model)
   print*,'Time in trust e model:', t3
 
   print*,'---End trust_e_model---'
- 
+
 end subroutine
+

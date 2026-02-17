@@ -17,7 +17,7 @@ BEGIN_PROVIDER [double precision, core_energy]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, core_fock_operator, (mo_num,mo_num)]
+BEGIN_PROVIDER [double precision, core_fock_operator, (mo_num, mo_num)]
  implicit none
  integer :: i,j,k,l,m,n
  double precision :: get_two_e_integral
@@ -58,4 +58,5 @@ BEGIN_PROVIDER [ double precision, h_core_ri, (mo_num, mo_num) ]
    enddo
  enddo
 END_PROVIDER
+
 

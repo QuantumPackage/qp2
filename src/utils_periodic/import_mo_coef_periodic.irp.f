@@ -7,16 +7,16 @@ end
 subroutine run
   use map_module
   implicit none
-  
+
   integer :: iunit
   integer :: getunitandopen
 
   integer ::i,j
   double precision :: int_re, int_im
 
-  
+
   iunit = getunitandopen('C.qp','r')
-  do 
+  do
     read (iunit,*,end=10) i,j, mo_coef(i,j), mo_coef_imag(i,j)
   enddo
   10 continue
@@ -25,3 +25,4 @@ subroutine run
   call save_mos
 
 end
+

@@ -138,7 +138,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [double precision, ao_kinetic_integrals, (ao_num,ao_num)]
+BEGIN_PROVIDER [double precision, ao_kinetic_integrals, (ao_num, ao_num)]
   implicit none
   BEGIN_DOC
   ! Kinetic energy integrals in the |AO| basis.
@@ -168,7 +168,7 @@ BEGIN_PROVIDER [double precision, ao_kinetic_integrals, (ao_num,ao_num)]
   endif
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, ao_kinetic_integrals_imag, (ao_num,ao_num)]
+BEGIN_PROVIDER [double precision, ao_kinetic_integrals_imag, (ao_num, ao_num)]
   implicit none
   BEGIN_DOC
   ! Kinetic energy integrals in the |AO| basis.
@@ -191,7 +191,7 @@ BEGIN_PROVIDER [double precision, ao_kinetic_integrals_imag, (ao_num,ao_num)]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, ao_sphe_kinetic_integrals, (ao_sphe_num,ao_sphe_num) ]
+BEGIN_PROVIDER [ double precision, ao_sphe_kinetic_integrals, (ao_sphe_num, ao_sphe_num) ]
  implicit none
  BEGIN_DOC
  ! |AO| kinetic inntegrals matrix in the spherical basis set
@@ -212,3 +212,4 @@ BEGIN_PROVIDER [ double precision, ao_sphe_kinetic_integrals, (ao_sphe_num,ao_sp
  deallocate(tmp)
 
 END_PROVIDER
+

@@ -1,5 +1,5 @@
 
- BEGIN_PROVIDER [double precision, mu_of_r_prov, (n_points_final_grid,N_states) ]
+ BEGIN_PROVIDER [double precision, mu_of_r_prov, (n_points_final_grid, N_states) ]
  implicit none
  BEGIN_DOC
  ! general variable for mu(r)
@@ -172,7 +172,7 @@
  END_PROVIDER
 
 
- BEGIN_PROVIDER [double precision, mu_of_r_psi_cas, (n_points_final_grid,N_states) ]
+ BEGIN_PROVIDER [double precision, mu_of_r_psi_cas, (n_points_final_grid, N_states) ]
  implicit none
  BEGIN_DOC
  ! mu(r) computed with a wave function developped in an active space
@@ -427,9 +427,10 @@ BEGIN_PROVIDER [double precision, mu_of_r_projector_ao_prod, (n_points_final_gri
  enddo
  !$OMP END DO
  deallocate(tmp,tmp2)
- !$OMP END PARALLEL 
+ !$OMP END PARALLEL
 
 END_PROVIDER
+
 
 
 

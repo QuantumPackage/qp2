@@ -51,7 +51,7 @@ subroutine davidson_run_slave(thread,iproc)
     if (ierr /= MPI_SUCCESS) then
       doexit=1
     endif
-    doexit = receive 
+    doexit = receive
   IRP_ENDIF
   if (doexit>0) then
     call end_zmq_to_qp_run_socket(zmq_to_qp_run_socket)
@@ -59,7 +59,7 @@ subroutine davidson_run_slave(thread,iproc)
   endif
 
   zmq_socket_push      = new_zmq_push_socket(thread)
-      
+
   call davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_states_diag, N_det, worker_id)
 
   integer, external :: disconnect_from_taskserver
@@ -639,4 +639,5 @@ integer function zmq_get_N_states_diag(zmq_to_qp_run_socket, worker_id)
     endif
   IRP_ENDIF
 end
+
 

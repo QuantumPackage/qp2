@@ -1,7 +1,7 @@
 
 
 
- BEGIN_PROVIDER[double precision, energy_x_sr_lda, (N_states) ]
+ BEGIN_PROVIDER [double precision, energy_x_sr_lda, (N_states) ]
  implicit none
  BEGIN_DOC
 ! exchange             energy with the short range lda functional
@@ -30,7 +30,7 @@
 
  END_PROVIDER
 
- BEGIN_PROVIDER[double precision, energy_c_sr_lda, (N_states) ]
+ BEGIN_PROVIDER [double precision, energy_c_sr_lda, (N_states) ]
  implicit none
  BEGIN_DOC
 ! exchange             energy with the short range lda functional
@@ -60,15 +60,15 @@
  END_PROVIDER
 
 
- BEGIN_PROVIDER [double precision, potential_x_alpha_ao_sr_lda,(ao_num,ao_num,N_states)]
-&BEGIN_PROVIDER [double precision, potential_x_beta_ao_sr_lda,(ao_num,ao_num,N_states)]
+ BEGIN_PROVIDER [double precision, potential_x_alpha_ao_sr_lda, (ao_num, ao_num, N_states)]
+&BEGIN_PROVIDER [double precision, potential_x_beta_ao_sr_lda, (ao_num, ao_num, N_states)]
   implicit none
   BEGIN_DOC
   ! short range exchange alpha/beta potentials with lda functional on the |AO| basis
   END_DOC
   ! Second dimension is given as ao_num * N_states so that Lapack does the loop over N_states.
 
- integer :: istate 
+ integer :: istate
  do istate = 1, N_states
    call dgemm('N','T',ao_num,ao_num,n_points_final_grid,1.d0,         &
        aos_in_r_array,size(aos_in_r_array,1),                         &
@@ -83,15 +83,15 @@
 
 END_PROVIDER
 
- BEGIN_PROVIDER [double precision, potential_c_alpha_ao_sr_lda,(ao_num,ao_num,N_states)]
-&BEGIN_PROVIDER [double precision, potential_c_beta_ao_sr_lda,(ao_num,ao_num,N_states)]
+ BEGIN_PROVIDER [double precision, potential_c_alpha_ao_sr_lda, (ao_num, ao_num, N_states)]
+&BEGIN_PROVIDER [double precision, potential_c_beta_ao_sr_lda, (ao_num, ao_num, N_states)]
  implicit none
  BEGIN_DOC
 ! short range correlation alpha/beta potentials with lda functional on the |AO| basis
  END_DOC
  ! Second dimension is given as ao_num * N_states so that Lapack does the loop over N_states.
- integer :: istate 
- do istate = 1, N_states 
+ integer :: istate
+ do istate = 1, N_states
   call dgemm('N','T',ao_num,ao_num,n_points_final_grid,1.d0,         &
        aos_in_r_array,size(aos_in_r_array,1),                         &
        aos_sr_vc_alpha_lda_w(1,1,istate),size(aos_sr_vc_alpha_lda_w,1),0.d0,&
@@ -104,10 +104,10 @@ END_PROVIDER
 
 END_PROVIDER
 
- BEGIN_PROVIDER[double precision, aos_sr_vc_alpha_lda_w, (ao_num,n_points_final_grid,N_states)]
-&BEGIN_PROVIDER[double precision, aos_sr_vc_beta_lda_w, (ao_num,n_points_final_grid,N_states)]
-&BEGIN_PROVIDER[double precision, aos_sr_vx_alpha_lda_w, (ao_num,n_points_final_grid,N_states)]
-&BEGIN_PROVIDER[double precision, aos_sr_vx_beta_lda_w, (ao_num,n_points_final_grid,N_states)]
+ BEGIN_PROVIDER [double precision, aos_sr_vc_alpha_lda_w, (ao_num, n_points_final_grid, N_states)]
+&BEGIN_PROVIDER [double precision, aos_sr_vc_beta_lda_w, (ao_num, n_points_final_grid, N_states)]
+&BEGIN_PROVIDER [double precision, aos_sr_vx_alpha_lda_w, (ao_num, n_points_final_grid, N_states)]
+&BEGIN_PROVIDER [double precision, aos_sr_vx_beta_lda_w, (ao_num, n_points_final_grid, N_states)]
  implicit none
  BEGIN_DOC
 ! aos_sr_vxc_alpha_lda_w(j,i) = ao_i(r_j) * (sr_v^x_alpha(r_j) + sr_v^c_alpha(r_j)) * W(r_j)
@@ -142,8 +142,8 @@ END_PROVIDER
  END_PROVIDER
 
 
- BEGIN_PROVIDER[double precision, aos_sr_vxc_alpha_lda_w, (ao_num,n_points_final_grid,N_states)]
-&BEGIN_PROVIDER[double precision, aos_sr_vxc_beta_lda_w, (ao_num,n_points_final_grid,N_states)]
+ BEGIN_PROVIDER [double precision, aos_sr_vxc_alpha_lda_w, (ao_num, n_points_final_grid, N_states)]
+&BEGIN_PROVIDER [double precision, aos_sr_vxc_beta_lda_w, (ao_num, n_points_final_grid, N_states)]
  implicit none
  BEGIN_DOC
 ! aos_sr_vxc_alpha_lda_w(j,i) = ao_i(r_j) * (v^x_alpha(r_j) + v^c_alpha(r_j)) * W(r_j)
@@ -176,14 +176,14 @@ END_PROVIDER
  END_PROVIDER
 
 
- BEGIN_PROVIDER [double precision, potential_xc_alpha_ao_sr_lda,(ao_num,ao_num,N_states)]
-&BEGIN_PROVIDER [double precision, potential_xc_beta_ao_sr_lda ,(ao_num,ao_num,N_states)]
+ BEGIN_PROVIDER [double precision, potential_xc_alpha_ao_sr_lda, (ao_num, ao_num, N_states)]
+&BEGIN_PROVIDER [double precision, potential_xc_beta_ao_sr_lda , (ao_num, ao_num, N_states)]
  implicit none
  BEGIN_DOC
 ! short range exchange/correlation alpha/beta potentials with lda functional on the AO basis
  END_DOC
 
- integer :: istate 
+ integer :: istate
  do istate = 1, N_states
   call dgemm('N','T',ao_num,ao_num,n_points_final_grid,1.d0,         &
       aos_in_r_array,size(aos_in_r_array,1),                         &
@@ -198,4 +198,5 @@ END_PROVIDER
 
 
  END_PROVIDER
+
 

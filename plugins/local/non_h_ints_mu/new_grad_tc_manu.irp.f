@@ -4,11 +4,11 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_test, (ao_num, ao_num, n_po
   BEGIN_DOC
   !
   !                                        !!!!!! WARNING !!!!!!!!!
-  !                                       
+  !
   !                                          DEFINED WITH - SIGN
   !
   !                                   FOR 3e-iontegrals this doesn't matter
-  !                                      
+  !
   !                                        !!!!!! WARNING !!!!!!!!!
   !
   !
@@ -195,4 +195,5 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao_test, (ao_num, ao_num, ao_
 END_PROVIDER
 
 ! ---
+
 

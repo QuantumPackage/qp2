@@ -3,39 +3,39 @@ BEGIN_PROVIDER [ double precision, effective_ao_extra_dm, (ao_extra_num, ao_extr
  BEGIN_DOC
  ! effective density matrix : rho_pq x N_p x N_q x E_pq x (pi/gamma_pq)^3/2
  !
- ! where rho_pq is the usual density matrix 
+ ! where rho_pq is the usual density matrix
  !
- ! N_p and N_q are the normalization factors associated with the two Gaussians 
+ ! N_p and N_q are the normalization factors associated with the two Gaussians
  !
- ! E_pq is the prefactor resulting from the Gaussian product 
+ ! E_pq is the prefactor resulting from the Gaussian product
  !
  ! gamma_pq = gamma_p + gamm_q
  END_DOC
  integer :: i,j
  do i = 1, ao_extra_num
   do j = 1, ao_extra_num
-  ! it is assumed that you wish to take the ground state density and therefore the "1" last entry 
-   effective_ao_extra_dm(j,i) = ao_extra_one_e_dm(j,i,1) & 
-       * ao_extra_coef_normalized(j,1) * ao_extra_coef_normalized(i,1) &  ! purely uncontracted 1s functions 
+  ! it is assumed that you wish to take the ground state density and therefore the "1" last entry
+   effective_ao_extra_dm(j,i) = ao_extra_one_e_dm(j,i,1) &
+       * ao_extra_coef_normalized(j,1) * ao_extra_coef_normalized(i,1) &  ! purely uncontracted 1s functions
        * inv_pi_gamma_pq_3_2_ao_extra(j,i) * E_pq_ao_extra(j,i) ! normalization factors and other stuffs
   enddo
  enddo
 
-END_PROVIDER 
+END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, gamma_pq_ao_extra, (ao_extra_num,ao_extra_num)]
-&BEGIN_PROVIDER [ double precision, inv_gamma_pq_ao_extra, (ao_extra_num,ao_extra_num)]
-&BEGIN_PROVIDER [ double precision, inv_pi_gamma_pq_3_2_ao_extra, (ao_extra_num,ao_extra_num)]
-&BEGIN_PROVIDER [ double precision, sqrt_gamma_pq_ao_extra, (ao_extra_num,ao_extra_num)]
+ BEGIN_PROVIDER [ double precision, gamma_pq_ao_extra, (ao_extra_num, ao_extra_num)]
+&BEGIN_PROVIDER [ double precision, inv_gamma_pq_ao_extra, (ao_extra_num, ao_extra_num)]
+&BEGIN_PROVIDER [ double precision, inv_pi_gamma_pq_3_2_ao_extra, (ao_extra_num, ao_extra_num)]
+&BEGIN_PROVIDER [ double precision, sqrt_gamma_pq_ao_extra, (ao_extra_num, ao_extra_num)]
  implicit none
  BEGIN_DOC
- ! gamma_pq_ao_extra = gamma_p + gamma_q  
+ ! gamma_pq_ao_extra = gamma_p + gamma_q
  !
  ! inv_gamma_pq_ao_extra = 1/(gamma_p + gamma_q)
  !
  ! sqrt_gamma_pq_ao_extra = sqrt(gamma_p + gamma_q)
  !
- ! WARNING :: VALID ONLY IN THE CASE OF A PURELY 1S BASIS 
+ ! WARNING :: VALID ONLY IN THE CASE OF A PURELY 1S BASIS
  END_DOC
  include 'constants.include.F'
  integer :: i,j
@@ -47,13 +47,13 @@ END_PROVIDER
    inv_pi_gamma_pq_3_2_ao_extra(j,i) = (pi * inv_gamma_pq_ao_extra(j,i))**(1.5d0)
   enddo
  enddo
-END_PROVIDER 
+END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, E_pq_ao_extra, (ao_extra_num,ao_extra_num)]
+BEGIN_PROVIDER [ double precision, E_pq_ao_extra, (ao_extra_num, ao_extra_num)]
  implicit none
  BEGIN_DOC
  ! E_pq_ao_extra = exp(-alpha_p alpha_q/gamma_pq (Q_p - Q_q)^2)
- END_DOC 
+ END_DOC
  integer :: i,j
  do i = 1, ao_extra_num
   do j = 1, ao_extra_num
@@ -61,21 +61,24 @@ BEGIN_PROVIDER [ double precision, E_pq_ao_extra, (ao_extra_num,ao_extra_num)]
   enddo
  enddo
 
-END_PROVIDER 
+END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, ao_extra_center_1s, (3,ao_extra_num)]
+BEGIN_PROVIDER [ double precision, ao_extra_center_1s, (3, ao_extra_num)]
  implicit none
  BEGIN_DOC
- ! Original position of each extra AO 
+ ! Original position of each extra AO
  END_DOC
  integer :: i,i_nucl
  do i = 1, ao_extra_num
   i_nucl= ao_extra_nucl(i)
   ao_extra_center_1s(1:3,i) = extra_nucl_coord(i_nucl,1:3)
  enddo
-END_PROVIDER 
+END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, ao_extra_center_1s_dist, (ao_extra_num,ao_extra_num)]
+BEGIN_PROVIDER [ double precision, ao_extra_center_1s_dist, (ao_extra_num, ao_extra_num)]
+  BEGIN_DOC
+  ! ao_extra_center_1s_dist
+  END_DOC
  implicit none
  integer :: i,j
  do i = 1, ao_extra_num
@@ -86,4 +89,5 @@ BEGIN_PROVIDER [ double precision, ao_extra_center_1s_dist, (ao_extra_num,ao_ext
     ao_extra_center_1s_dist(j,i)=dsqrt(ao_extra_center_1s_dist(j,i))
   enddo
  enddo
-END_PROVIDER 
+END_PROVIDER
+

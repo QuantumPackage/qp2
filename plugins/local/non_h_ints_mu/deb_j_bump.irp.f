@@ -6,7 +6,7 @@ end
 
 subroutine routine_test_mu_of_r_tot
  implicit none
- integer :: ipoint,k 
+ integer :: ipoint,k
  double precision :: r2(3), weight, dr, r1(3), r1bis(3)
  double precision :: accu_grad(3)
  double precision :: jast,grad_jast_mu_r1(3),j_bump
@@ -62,7 +62,7 @@ end
 
 subroutine routine_test_mu_of_r
  implicit none
- integer :: ipoint,k 
+ integer :: ipoint,k
  double precision :: weight, dr, r1(3), r1bis(3),accu_grad(3),num_grad_mu_r1(3)
  double precision :: mu_r1,dm_r1, mu_der_r1(3), grad_dm_r1(3)
  double precision :: mu_der_rp(3), grad_dm_rp(3),mu_rp
@@ -73,15 +73,15 @@ subroutine routine_test_mu_of_r
   do ipoint = 1, n_points_final_grid
    r1(1:3) = final_grid_points(1:3,ipoint)
    weight = final_weight_at_r_vector(ipoint)
-   call grad_mu_of_r_mean_field(r1,mu_r1,dm_r1, mu_der_r1, grad_dm_r1) 
+   call grad_mu_of_r_mean_field(r1,mu_r1,dm_r1, mu_der_r1, grad_dm_r1)
    do k = 1, 3
     r1bis= r1
     r1bis(k) += dr
-    call grad_mu_of_r_mean_field(r1bis,mu_rp, dm_r1, mu_der_rp, grad_dm_r1) 
+    call grad_mu_of_r_mean_field(r1bis,mu_rp, dm_r1, mu_der_rp, grad_dm_r1)
 
     r1bis= r1
     r1bis(k) -= dr
-    call grad_mu_of_r_mean_field(r1bis,mu_rm, dm_r1, mu_der_rm, grad_dm_r1) 
+    call grad_mu_of_r_mean_field(r1bis,mu_rm, dm_r1, mu_der_rm, grad_dm_r1)
     num_grad_mu_r1(k) = (mu_rp - mu_rm)/(2.d0* dr)
 !    print*,jast_mu_r1_p,jast_mu_r1_m
    enddo
@@ -96,3 +96,4 @@ subroutine routine_test_mu_of_r
  print*, accu_grad
 
 end
+

@@ -2,8 +2,8 @@ program test_tc_rdm
 
   BEGIN_DOC
   !
-  ! TODO : Reads psi_det in the EZFIO folder and prints out the left- and right-eigenvectors together 
-  !        with the energy. Saves the left-right wave functions at the end. 
+  ! TODO : Reads psi_det in the EZFIO folder and prints out the left- and right-eigenvectors together
+  !        with the energy. Saves the left-right wave functions at the end.
   !
   END_DOC
 
@@ -57,11 +57,12 @@ subroutine  test
   do j = 1, N_det
    call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,i), psi_det(1,1,j), N_int, hmono, htwoe, hthree, htot)
    do istate = 1,N_states
-    ref += psi_l_coef_bi_ortho(i,istate) * psi_r_coef_bi_ortho(j,istate) * state_average_weight(istate) * htwoe 
+    ref += psi_l_coef_bi_ortho(i,istate) * psi_r_coef_bi_ortho(j,istate) * state_average_weight(istate) * htwoe
    enddo
   enddo
  enddo
- print*,' ref     = ',ref 
+ print*,' ref     = ',ref
  print*,'delta= ',ref-accu
 
 end
+

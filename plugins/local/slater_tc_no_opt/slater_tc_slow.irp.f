@@ -7,7 +7,7 @@ subroutine htilde_mu_mat_bi_ortho_tot_slow(key_j, key_i, Nint, htot)
   ! <key_j |H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
   !!
   !! WARNING !!
-  ! 
+  !
   ! Non hermitian !!
   END_DOC
 
@@ -37,9 +37,9 @@ subroutine htilde_mu_mat_bi_ortho_slow(key_j, key_i, Nint, hmono, htwoe, hthree,
   !
   ! <key_j |H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
   !!
-  ! Returns the detail of the matrix element in terms of single, two and three electron contribution. 
+  ! Returns the detail of the matrix element in terms of single, two and three electron contribution.
   !! WARNING !!
-  ! 
+  !
   ! Non hermitian !!
   !
   END_DOC
@@ -50,7 +50,7 @@ subroutine htilde_mu_mat_bi_ortho_slow(key_j, key_i, Nint, hmono, htwoe, hthree,
   integer,           intent(in) :: Nint
   integer(bit_kind), intent(in) :: key_i(Nint,2), key_j(Nint,2)
   double precision, intent(out) :: hmono, htwoe, hthree, htot
-  integer                       :: degree 
+  integer                       :: degree
 
   hmono  = 0.d0
   htwoe  = 0.d0
@@ -90,7 +90,7 @@ subroutine htilde_mu_mat_bi_ortho_slow(key_j, key_i, Nint, hmono, htwoe, hthree,
       htot += noL_0e
     endif
   endif
- 
+
 end
 
 ! ---
@@ -98,17 +98,17 @@ end
 subroutine double_htilde_mu_mat_bi_ortho_slow(Nint, key_j, key_i, hmono, htwoe, htot)
 
   BEGIN_DOC
-  ! <key_j |H_tilde | key_i> for double excitation  ONLY FOR ONE- AND TWO-BODY TERMS 
+  ! <key_j |H_tilde | key_i> for double excitation  ONLY FOR ONE- AND TWO-BODY TERMS
   !!
   !! WARNING !!
-  ! 
+  !
   ! Non hermitian !!
   END_DOC
 
   use bitmasks
 
   implicit none
-  integer,           intent(in) :: Nint 
+  integer,           intent(in) :: Nint
   integer(bit_kind), intent(in) :: key_j(Nint,2), key_i(Nint,2)
   double precision, intent(out) :: hmono, htwoe, htot
   integer                       :: occ(Nint*bit_kind_size,2)
@@ -139,25 +139,25 @@ subroutine double_htilde_mu_mat_bi_ortho_slow(Nint, key_j, key_i, hmono, htwoe, 
   call decode_exc(exc, 2, h1, p1, h2, p2, s1, s2)
 
   if(s1.ne.s2)then
-   ! opposite spin two-body 
+   ! opposite spin two-body
 !   key_j, key_i
-    htwoe  = mo_bi_ortho_tc_two_e(p2,p1,h2,h1) 
+    htwoe  = mo_bi_ortho_tc_two_e(p2,p1,h2,h1)
     if(three_body_h_tc.and.double_normal_ord.and.+Ne(1).gt.2)then
      htwoe += normal_two_body_bi_orth(p2,h2,p1,h1)!!! WTF ???
     endif
   else
-   ! same spin two-body 
-   ! direct terms 
-   htwoe  = mo_bi_ortho_tc_two_e(p2,p1,h2,h1)  
-   ! exchange terms 
-   htwoe -= mo_bi_ortho_tc_two_e(p1,p2,h2,h1) 
+   ! same spin two-body
+   ! direct terms
+   htwoe  = mo_bi_ortho_tc_two_e(p2,p1,h2,h1)
+   ! exchange terms
+   htwoe -= mo_bi_ortho_tc_two_e(p1,p2,h2,h1)
    if(three_body_h_tc.and.double_normal_ord.and.+Ne(1).gt.2)then
     htwoe -= normal_two_body_bi_orth(h2,p1,h1,p2)!!! WTF ???
     htwoe += normal_two_body_bi_orth(h1,p1,h2,p2)!!! WTF ???
    endif
   endif
   htwoe *= phase
-  htot =  htwoe 
+  htot =  htwoe
 
 end
 
@@ -165,10 +165,10 @@ end
 subroutine single_htilde_mu_mat_bi_ortho_slow(Nint, key_j, key_i, hmono, htwoe, htot)
 
   BEGIN_DOC
-  ! <key_j |H_tilde | key_i> for single excitation ONLY FOR ONE- AND TWO-BODY TERMS 
+  ! <key_j |H_tilde | key_i> for single excitation ONLY FOR ONE- AND TWO-BODY TERMS
   !!
   !! WARNING !!
-  ! 
+  !
   ! Non hermitian !!
   END_DOC
 
@@ -231,32 +231,33 @@ subroutine single_htilde_mu_mat_bi_ortho_slow(Nint, key_j, key_i, hmono, htwoe, 
 !   stop
 !   hmono += phase * core_fock_operator(h1,p1)
 !  endif
-  
-   ! alpha/beta two-body 
+
+   ! alpha/beta two-body
    ispin = other_spin(s1)
    if(s1==1)then
-    ! single alpha 
-    do i = 1, Ne(ispin) ! electron 2 
-     ii = occ(i,ispin) 
-     htwoe += mo_bi_ortho_tc_two_e(ii,p1,ii,h1) 
+    ! single alpha
+    do i = 1, Ne(ispin) ! electron 2
+     ii = occ(i,ispin)
+     htwoe += mo_bi_ortho_tc_two_e(ii,p1,ii,h1)
     enddo
    else
-    ! single beta 
-    do i = 1, Ne(ispin) ! electron 1 
-     ii = occ(i,ispin) 
-     htwoe += mo_bi_ortho_tc_two_e(p1,ii,h1,ii) 
+    ! single beta
+    do i = 1, Ne(ispin) ! electron 1
+     ii = occ(i,ispin)
+     htwoe += mo_bi_ortho_tc_two_e(p1,ii,h1,ii)
     enddo
    endif
-!   ! same spin two-body 
+!   ! same spin two-body
    do i = 1, Ne(s1)
-    ii = occ(i,s1) 
+    ii = occ(i,s1)
     ! (h1p1|ii ii) - (h1 ii| p1 ii)
-    htwoe += mo_bi_ortho_tc_two_e(ii,p1,ii,h1) - mo_bi_ortho_tc_two_e(p1,ii,ii,h1) 
+    htwoe += mo_bi_ortho_tc_two_e(ii,p1,ii,h1) - mo_bi_ortho_tc_two_e(p1,ii,ii,h1)
    enddo
-   
+
   htwoe  *= phase
-  htot = hmono + htwoe 
+  htot = hmono + htwoe
 
 end
+
 
 

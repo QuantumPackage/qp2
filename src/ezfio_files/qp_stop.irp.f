@@ -33,12 +33,13 @@ logical function qp_stop()
       close(iunit, STATUS='DELETE')
     endif
 
-  else 
+  else
 
     qp_stop = .True.
 
   endif
 end
+
 
 
 

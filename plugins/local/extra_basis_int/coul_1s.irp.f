@@ -4,8 +4,8 @@ double precision function coul_full_ao_pq_r_1s(p,q,R,R_p,R_q)
  BEGIN_DOC
  ! coul_full_pq_r_1s(p,q,r) = \int d^3r phi_p(r) phi_q(r) 1/(r-R)
  !
- ! where phi_q and phi_p are centered in R_q and R_p. 
- ! 
+ ! where phi_q and phi_p are centered in R_q and R_p.
+ !
  ! WARNING :: works only for purely 1s extra basis  !!
  END_DOC
  double precision, intent(in) :: R(3),R_p(3),R_q(3)
@@ -16,7 +16,7 @@ double precision function coul_full_ao_pq_r_1s(p,q,R,R_p,R_q)
    print*,'But this is not the case apparently ... stopping'
    stop
  endif
- coefaos= ao_extra_coef_normalized(p,1) * ao_extra_coef_normalized(q,1) 
+ coefaos= ao_extra_coef_normalized(p,1) * ao_extra_coef_normalized(q,1)
  coef = inv_pi_gamma_pq_3_2_ao_extra(p,q) * E_pq_ao_extra(p,q)
  P_pq = ao_extra_expo(p,1) * R_p + ao_extra_expo(q,1) * R_q
  P_pq = P_pq * inv_gamma_pq_ao_extra(q,p)
@@ -39,7 +39,7 @@ double precision function coul_pq_r_1s(p,q,R,R_p,R_q)
  ! coul_full_pq_r_1s(p,q,r) = \int d^3r exp(-alpha_p (r-R_p)^2) exp(-alpha_q (r-R_q)^2) 1/|r-R|
  !
  ! where alpha_p and alpha_q are the 1s extra basis
- ! 
+ !
  ! WARNING :: works only for purely 1s extra basis  !!
  END_DOC
  double precision, intent(in) :: R(3),R_p(3),R_q(3)
@@ -63,3 +63,4 @@ double precision function coul_pq_r_1s(p,q,R,R_p,R_q)
  endif
 
 end
+

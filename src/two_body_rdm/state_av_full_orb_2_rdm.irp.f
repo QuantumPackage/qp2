@@ -1,5 +1,5 @@
 
- BEGIN_PROVIDER [double precision, state_av_full_occ_2_rdm_ab_mo, (n_core_inact_act_orb,n_core_inact_act_orb,n_core_inact_act_orb,n_core_inact_act_orb)]
+ BEGIN_PROVIDER [double precision, state_av_full_occ_2_rdm_ab_mo, (n_core_inact_act_orb, n_core_inact_act_orb, n_core_inact_act_orb, n_core_inact_act_orb)]
  implicit none
  state_av_full_occ_2_rdm_ab_mo = 0.d0
  integer :: i,j,k,l,iorb,jorb,korb,lorb
@@ -140,7 +140,7 @@
  END_PROVIDER
 
 
- BEGIN_PROVIDER [double precision, state_av_full_occ_2_rdm_aa_mo, (n_core_inact_act_orb,n_core_inact_act_orb,n_core_inact_act_orb,n_core_inact_act_orb)]
+ BEGIN_PROVIDER [double precision, state_av_full_occ_2_rdm_aa_mo, (n_core_inact_act_orb, n_core_inact_act_orb, n_core_inact_act_orb, n_core_inact_act_orb)]
  implicit none
  state_av_full_occ_2_rdm_aa_mo = 0.d0
  integer :: i,j,k,l,iorb,jorb,korb,lorb
@@ -253,7 +253,7 @@
  !$OMP END PARALLEL
  END_PROVIDER
 
- BEGIN_PROVIDER [double precision, state_av_full_occ_2_rdm_bb_mo, (n_core_inact_act_orb,n_core_inact_act_orb,n_core_inact_act_orb,n_core_inact_act_orb)]
+ BEGIN_PROVIDER [double precision, state_av_full_occ_2_rdm_bb_mo, (n_core_inact_act_orb, n_core_inact_act_orb, n_core_inact_act_orb, n_core_inact_act_orb)]
  implicit none
  state_av_full_occ_2_rdm_bb_mo = 0.d0
  integer :: i,j,k,l,iorb,jorb,korb,lorb
@@ -366,7 +366,7 @@
 
  END_PROVIDER
 
- BEGIN_PROVIDER [double precision, state_av_full_occ_2_rdm_spin_trace_mo, (n_core_inact_act_orb,n_core_inact_act_orb,n_core_inact_act_orb,n_core_inact_act_orb)]
+ BEGIN_PROVIDER [double precision, state_av_full_occ_2_rdm_spin_trace_mo, (n_core_inact_act_orb, n_core_inact_act_orb, n_core_inact_act_orb, n_core_inact_act_orb)]
  implicit none
  state_av_full_occ_2_rdm_spin_trace_mo = 0.d0
  integer :: i,j,k,l,iorb,jorb,korb,lorb
@@ -619,4 +619,5 @@
   !$OMP END PARALLEL
 
  END_PROVIDER
+
 

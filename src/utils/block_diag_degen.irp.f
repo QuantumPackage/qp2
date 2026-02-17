@@ -14,7 +14,7 @@ subroutine diag_mat_per_fock_degen(fock_diag, mat_ref, n, thr_d, thr_nd, thr_deg
   !
   !          : all elements having degeneracy 3 in fock_diag (i.e. two elements are equal) will be treated together
   !
-  ! etc... the advantage is to guarentee no spurious mixing because of numerical problems. 
+  ! etc... the advantage is to guarentee no spurious mixing because of numerical problems.
   !
   END_DOC
 
@@ -37,25 +37,25 @@ subroutine diag_mat_per_fock_degen(fock_diag, mat_ref, n, thr_d, thr_nd, thr_deg
   reigvec_unsrtd = 0.d0
   eigval_unsrtd  = 0.d0
 
-  ! obtain degeneracies 
+  ! obtain degeneracies
   allocate(list_degen(n,0:n))
   call give_degen_full_list(fock_diag, n, thr_deg, list_degen, n_degen_list)
 
   allocate(iorder(n_degen_list), list_degen_sorted(n_degen_list))
   do i = 1, n_degen_list
-    n_degen = list_degen(i,0) 
+    n_degen = list_degen(i,0)
     list_degen_sorted(i) = n_degen
     iorder(i) = i
   enddo
 
-  ! sort by number of degeneracies 
+  ! sort by number of degeneracies
   call isort(list_degen_sorted, iorder, n_degen_list)
 
   allocate(is_ok(n_degen_list))
   is_ok = .True.
   icount_eigval = 0
 
-  ! loop over degeneracies 
+  ! loop over degeneracies
   do i = 1, n_degen_list
     if(.not.is_ok(i)) cycle
 
@@ -66,7 +66,7 @@ subroutine diag_mat_per_fock_degen(fock_diag, mat_ref, n, thr_d, thr_nd, thr_deg
 
     k = 1
 
-   ! group all the entries having the same degeneracies 
+   ! group all the entries having the same degeneracies
 !!  do while (list_degen_sorted(i+k)==n_degen)
     do m = i+1, n_degen_list
       if(list_degen_sorted(m)==n_degen) then
@@ -76,7 +76,7 @@ subroutine diag_mat_per_fock_degen(fock_diag, mat_ref, n, thr_d, thr_nd, thr_deg
     enddo
 
     print *, ' number of identical degeneracies = ', k
-    size_mat = k*n_degen  
+    size_mat = k*n_degen
     print *, ' size_mat = ', size_mat
     allocate(mat_tmp(size_mat,size_mat), list_same_degen(size_mat))
     allocate(eigval_tmp(size_mat), leigvec_tmp(size_mat,size_mat), reigvec_tmp(size_mat,size_mat))
@@ -105,13 +105,13 @@ subroutine diag_mat_per_fock_degen(fock_diag, mat_ref, n, thr_d, thr_nd, thr_deg
     enddo
 
     call non_hrmt_bieig( size_mat, mat_tmp, thr_d, thr_nd &
-                       , leigvec_tmp, reigvec_tmp         & 
+                       , leigvec_tmp, reigvec_tmp         &
                        , n_real, eigval_tmp )
 
     do ii = 1, size_mat
       icount_eigval += 1
-      eigval_unsrtd(icount_eigval) = eigval_tmp(ii) ! copy eigenvalues 
-      do jj = 1, size_mat ! copy the eigenvectors 
+      eigval_unsrtd(icount_eigval) = eigval_tmp(ii) ! copy eigenvalues
+      do jj = 1, size_mat ! copy the eigenvectors
         j_good = list_same_degen(jj)
         leigvec_unsrtd(j_good,icount_eigval) = leigvec_tmp(jj,ii)
         reigvec_unsrtd(j_good,icount_eigval) = reigvec_tmp(jj,ii)
@@ -127,7 +127,7 @@ subroutine diag_mat_per_fock_degen(fock_diag, mat_ref, n, thr_d, thr_nd, thr_deg
     print *, ' icount_eigval,n', icount_eigval, n
     stop
   endif
- 
+
   deallocate(iorder)
   allocate(iorder(n))
   do i = 1, n
@@ -160,13 +160,13 @@ subroutine give_degen_full_list(A, n, thr, list_degen, n_degen_list)
   BEGIN_DOC
   ! you enter with an array A(n) and spits out all the elements degenerated up to thr
   !
-  ! the elements of A(n) DON'T HAVE TO BE SORTED IN THE ENTRANCE: TOTALLY GENERAL 
+  ! the elements of A(n) DON'T HAVE TO BE SORTED IN THE ENTRANCE: TOTALLY GENERAL
   !
-  ! list_degen(i,0) = number of degenerate entries 
+  ! list_degen(i,0) = number of degenerate entries
   !
   ! list_degen(i,1) = index of the first degenerate entry
   !
-  ! list_degen(i,2:list_degen(i,0)) = list of all other dengenerate entries 
+  ! list_degen(i,2:list_degen(i,0)) = list of all other dengenerate entries
   !
   ! if list_degen(i,0) == 1 it means that there is no degeneracy for that element
   END_DOC
@@ -215,4 +215,5 @@ subroutine give_degen_full_list(A, n, thr, list_degen, n_degen_list)
 end
 
 ! ---
+
 

@@ -38,7 +38,7 @@ BEGIN_PROVIDER [ integer, ao_extra_first_of_shell, (shell_num) ]
 
 END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, ao_extra_coef_normalized, (ao_extra_num,ao_extra_prim_num_max) ]
+ BEGIN_PROVIDER [ double precision, ao_extra_coef_normalized, (ao_extra_num, ao_extra_prim_num_max) ]
 &BEGIN_PROVIDER [ double precision, ao_extra_coef_normalization_factor, (ao_extra_num) ]
   implicit none
   BEGIN_DOC
@@ -92,8 +92,8 @@ END_PROVIDER
 
 END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, ao_extra_coef_normalized_ordered, (ao_extra_num,ao_extra_prim_num_max) ]
-&BEGIN_PROVIDER [ double precision, ao_extra_expo_ordered, (ao_extra_num,ao_extra_prim_num_max) ]
+ BEGIN_PROVIDER [ double precision, ao_extra_coef_normalized_ordered, (ao_extra_num, ao_extra_prim_num_max) ]
+&BEGIN_PROVIDER [ double precision, ao_extra_expo_ordered, (ao_extra_num, ao_extra_prim_num_max) ]
   implicit none
   BEGIN_DOC
   ! Sorted primitives to accelerate 4 index |MO| transformation
@@ -118,7 +118,7 @@ END_PROVIDER
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, ao_extra_coef_normalized_ordered_transp, (ao_extra_prim_num_max,ao_extra_num) ]
+BEGIN_PROVIDER [ double precision, ao_extra_coef_normalized_ordered_transp, (ao_extra_prim_num_max, ao_extra_num) ]
   implicit none
   BEGIN_DOC
   ! Transposed :c:data:`ao_extra_coef_normalized_ordered`
@@ -132,7 +132,7 @@ BEGIN_PROVIDER [ double precision, ao_extra_coef_normalized_ordered_transp, (ao_
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, ao_extra_expo_ordered_transp, (ao_extra_prim_num_max,ao_extra_num) ]
+BEGIN_PROVIDER [ double precision, ao_extra_expo_ordered_transp, (ao_extra_prim_num_max, ao_extra_num) ]
   implicit none
   BEGIN_DOC
   ! Transposed :c:data:`ao_extra_expo_ordered`
@@ -189,7 +189,7 @@ end
  N_ao_extras_max = maxval(Nucl_N_ao_extras)
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer, Nucl_ao_extras, (extra_nucl_num,N_ao_extras_max)]
+ BEGIN_PROVIDER [ integer, Nucl_ao_extras, (extra_nucl_num, N_ao_extras_max)]
  implicit none
  BEGIN_DOC
  ! List of |ao_extras| centered on each atom
@@ -207,7 +207,7 @@ END_PROVIDER
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ integer, Nucl_list_shell_ao_extras, (extra_nucl_num,N_ao_extras_max)]
+ BEGIN_PROVIDER [ integer, Nucl_list_shell_ao_extras, (extra_nucl_num, N_ao_extras_max)]
 &BEGIN_PROVIDER [ integer, Nucl_num_shell_ao_extras, (nucl_num)]
  implicit none
  integer :: i,j,k
@@ -353,7 +353,7 @@ double precision function ao_extra_value(i, r)
   dx = dx**power_ao(1)
   dy = dy**power_ao(2)
   dz = dz**power_ao(3)
- 
+
   accu = 0.d0
   do m = 1, ao_extra_prim_num(i)
     beta = ao_extra_expo_ordered_transp(m,i)
@@ -395,7 +395,7 @@ double precision function extra_density_at_r(r)
  integer :: mu,nu
  double precision, allocatable :: tmp_array(:)
  allocate(tmp_array(ao_extra_num))
- call give_all_aos_extra_at_r(r, tmp_array) 
+ call give_all_aos_extra_at_r(r, tmp_array)
  extra_density_at_r = 0.d0
  do nu = 1, ao_extra_num
   do mu = 1, ao_extra_num
@@ -417,4 +417,5 @@ BEGIN_PROVIDER [ double precision, ao_extra_one_e_dm_at_extra_r, (n_points_extra
   r(3) = final_grid_points_extra(3,i)
   ao_extra_one_e_dm_at_extra_r(i) = extra_density_at_r(r)
  enddo
-END_PROVIDER 
+END_PROVIDER
+

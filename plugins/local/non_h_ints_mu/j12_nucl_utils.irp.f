@@ -2,6 +2,9 @@
 ! ---
 
 BEGIN_PROVIDER [double precision, env_val, (n_points_final_grid)]
+  BEGIN_DOC
+  ! env_val
+  END_DOC
 
   implicit none
   integer          :: ipoint, i, j, phase
@@ -73,6 +76,9 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [double precision, env_grad, (3, n_points_final_grid)]
+  BEGIN_DOC
+  ! env_grad
+  END_DOC
 
   implicit none
   integer          :: ipoint, i, j, phase
@@ -110,7 +116,7 @@ BEGIN_PROVIDER [double precision, env_grad, (3, n_points_final_grid)]
           dx = x - nucl_coord(j,1)
           dy = y - nucl_coord(j,2)
           dz = z - nucl_coord(j,3)
-        
+
           phase  += List_env1s(j,i)
           a_expo += a * (dx*dx + dy*dy + dz*dz)
           ax_der += a * dx
@@ -119,9 +125,9 @@ BEGIN_PROVIDER [double precision, env_grad, (3, n_points_final_grid)]
         enddo
         e = -2.d0 * (-1.d0)**dble(phase) * dexp(-a_expo)
 
-        fact_x += e * ax_der 
-        fact_y += e * ay_der 
-        fact_z += e * az_der 
+        fact_x += e * ax_der
+        fact_y += e * ay_der
+        fact_z += e * az_der
       enddo
 
       env_grad(1,ipoint) = fact_x
@@ -139,9 +145,9 @@ BEGIN_PROVIDER [double precision, env_grad, (3, n_points_final_grid)]
       y = final_grid_points(2,ipoint)
       z = final_grid_points(3,ipoint)
 
-      ax_der = 0.d0 
-      ay_der = 0.d0 
-      az_der = 0.d0 
+      ax_der = 0.d0
+      ay_der = 0.d0
+      az_der = 0.d0
       do j = 1, nucl_num
 
         dx = x - nucl_coord(j,1)
@@ -173,8 +179,11 @@ END_PROVIDER
 
 ! ---
 
- BEGIN_PROVIDER [double precision, env_square_grad, (n_points_final_grid,3)]
+ BEGIN_PROVIDER [double precision, env_square_grad, (n_points_final_grid, 3)]
 &BEGIN_PROVIDER [double precision, env_square_lapl, (n_points_final_grid)  ]
+  BEGIN_DOC
+  ! env_square_grad
+  END_DOC
 
   implicit none
   integer          :: ipoint, i
@@ -276,7 +285,7 @@ double precision function j12_mu_gauss(r1, r2)
 
   r12 = (r1(1) - r2(1)) * (r1(1) - r2(1)) &
       + (r1(2) - r2(2)) * (r1(2) - r2(2)) &
-      + (r1(3) - r2(3)) * (r1(3) - r2(3)) 
+      + (r1(3) - r2(3)) * (r1(3) - r2(3))
 
   j12_mu_gauss = 0.d0
   do i = 1, n_max_fit_slat
@@ -462,9 +471,9 @@ double precision function grad1_y_jmu_modif(r1, r2)
   delta  = max(eps, dabs(eps*r1(2)))
 
   r1_eps(2) = r1_eps(2) + delta
-  fp        = jmu_modif(r1_eps, r2) 
+  fp        = jmu_modif(r1_eps, r2)
   r1_eps(2) = r1_eps(2) - 2.d0 * delta
-  fm        = jmu_modif(r1_eps, r2) 
+  fm        = jmu_modif(r1_eps, r2)
 
   grad1_y_jmu_modif = 0.5d0 * (fp - fm) / delta
 
@@ -582,7 +591,7 @@ subroutine grad1_jmu_modif_num(r1, r2, grad)
 
   call grad1_j12_mu(r1, r2, grad_u12)
 
-  tmp0 = env_nucl(r1) 
+  tmp0 = env_nucl(r1)
   tmp1 = env_nucl(r2)
   tmp2 = j12_mu(r1, r2)
 
@@ -594,4 +603,5 @@ subroutine grad1_jmu_modif_num(r1, r2, grad)
 end
 
 ! ---
+
 

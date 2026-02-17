@@ -35,7 +35,7 @@ subroutine print_summary_tc(e_,pt2_data,pt2_data_err,n_det_,n_configuration_,n_s
     error_pt2_minus(k) = pt2_data_err % pt2(k)
     error_pt2_plus(k)  = pt2_data_err % variance(k)
     error_pt2_tot(k)   = dsqrt(error_pt2_minus(k)**2+error_pt2_plus(k)**2)
-    error_pt2_abs(k)   = error_pt2_tot(k) ! same variance because independent variables 
+    error_pt2_abs(k)   = error_pt2_tot(k) ! same variance because independent variables
   enddo
   k=1
   write(*,'(A40,X,I10,X,100(F16.8,X))')'Ndet,E,E+PT2,pt2_minus,pt2_plus,pt2_abs=',n_det_,e_(k),e_(k) + pt2_tot(k),e_(k) + rpt2_tot(k),pt2_minus(k), pt2_plus(k),pt2_abs(k)
@@ -94,7 +94,7 @@ subroutine print_summary_tc(e_,pt2_data,pt2_data_err,n_det_,n_configuration_,n_s
     print *,  'E+rPT2'//pt2_string//' = ', e_(k)+rpt2_tot(k), ' +/- ', error_pt2_tot(k)
     print *,  'Positive PT2    = ',pt2_plus(k),' +/- ',error_pt2_plus(k)
     print *,  'Negative PT2    = ',pt2_minus(k),' +/- ',error_pt2_minus(k)
-    print *,  'Abs PT2         = ',pt2_abs(k),  ' +/- ',error_pt2_abs(k) 
+    print *,  'Abs PT2         = ',pt2_abs(k),  ' +/- ',error_pt2_abs(k)
     print *,  ''
   enddo
 
@@ -122,4 +122,5 @@ subroutine print_summary_tc(e_,pt2_data,pt2_data_err,n_det_,n_configuration_,n_s
 !  call print_energy_components()
 
 end subroutine
+
 

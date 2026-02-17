@@ -20,10 +20,13 @@
   n_pts_max_per_atom = maxval(n_pts_per_atom)
 END_PROVIDER
 
- BEGIN_PROVIDER [double precision, final_grid_points_per_atom, (3,n_pts_max_per_atom,nucl_num)]
-&BEGIN_PROVIDER [double precision, final_weight_at_r_vector_per_atom, (n_pts_max_per_atom,nucl_num) ]
-&BEGIN_PROVIDER [integer, index_final_points_per_atom, (3,n_pts_max_per_atom,nucl_num) ]
-&BEGIN_PROVIDER [integer, index_final_points_per_atom_reverse, (n_points_integration_angular,n_points_radial_grid,nucl_num) ]
+ BEGIN_PROVIDER [double precision, final_grid_points_per_atom, (3, n_pts_max_per_atom, nucl_num)]
+&BEGIN_PROVIDER [double precision, final_weight_at_r_vector_per_atom, (n_pts_max_per_atom, nucl_num) ]
+&BEGIN_PROVIDER [integer, index_final_points_per_atom, (3, n_pts_max_per_atom, nucl_num) ]
+&BEGIN_PROVIDER [integer, index_final_points_per_atom_reverse, (n_points_integration_angular, n_points_radial_grid, nucl_num) ]
+  BEGIN_DOC
+  ! final_grid_points_per_atom
+  END_DOC
  implicit none
  integer                        :: i,j,k,l,i_count(nucl_num)
  double precision               :: r(3)
@@ -50,4 +53,5 @@ END_PROVIDER
 
 
 
-END_PROVIDER 
+END_PROVIDER
+

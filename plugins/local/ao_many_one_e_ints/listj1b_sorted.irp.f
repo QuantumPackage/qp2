@@ -3,6 +3,9 @@
 
  BEGIN_PROVIDER [integer, List_comb_thr_b2_size, (ao_num, ao_num)]
 &BEGIN_PROVIDER [integer, max_List_comb_thr_b2_size]
+  BEGIN_DOC
+  ! List_comb_thr_b2_size
+  END_DOC
 
   implicit none
   integer          :: i_1s, i, j, ipoint
@@ -34,7 +37,7 @@
           List_comb_thr_b2_size(j,i) += 1
         endif
       enddo
-    enddo 
+    enddo
   enddo
 
   do i = 1, ao_num
@@ -46,17 +49,20 @@
     list(i) = maxval(List_comb_thr_b2_size(:,i))
   enddo
 
-  max_List_comb_thr_b2_size = maxval(list) 
+  max_List_comb_thr_b2_size = maxval(list)
   print*, ' max_List_comb_thr_b2_size = ',max_List_comb_thr_b2_size
- 
-END_PROVIDER 
+
+END_PROVIDER
 
 ! ---
 
- BEGIN_PROVIDER [ double precision, List_comb_thr_b2_coef, (  max_List_comb_thr_b2_size,ao_num,ao_num)]
-&BEGIN_PROVIDER [ double precision, List_comb_thr_b2_expo, (  max_List_comb_thr_b2_size,ao_num,ao_num)]
-&BEGIN_PROVIDER [ double precision, List_comb_thr_b2_cent, (3,max_List_comb_thr_b2_size,ao_num,ao_num)]
-&BEGIN_PROVIDER [ double precision, ao_abs_comb_b2_env   , (  max_List_comb_thr_b2_size,ao_num,ao_num)]
+ BEGIN_PROVIDER [ double precision, List_comb_thr_b2_coef, (  max_List_comb_thr_b2_size, ao_num, ao_num)]
+&BEGIN_PROVIDER [ double precision, List_comb_thr_b2_expo, (  max_List_comb_thr_b2_size, ao_num, ao_num)]
+&BEGIN_PROVIDER [ double precision, List_comb_thr_b2_cent, (3, max_List_comb_thr_b2_size, ao_num, ao_num)]
+&BEGIN_PROVIDER [ double precision, ao_abs_comb_b2_env   , (  max_List_comb_thr_b2_size, ao_num, ao_num)]
+  BEGIN_DOC
+  ! List_comb_thr_b2_coef
+  END_DOC
 
   implicit none
   integer :: i_1s,i,j,ipoint,icount
@@ -89,7 +95,7 @@ END_PROVIDER
           ao_abs_comb_b2_env(icount,j,i) = int_env
         endif
       enddo
-    enddo 
+    enddo
   enddo
 
   do i = 1, ao_num
@@ -101,13 +107,16 @@ END_PROVIDER
       enddo
     enddo
   enddo
- 
-END_PROVIDER 
+
+END_PROVIDER
 
 ! ---
 
- BEGIN_PROVIDER [integer, List_comb_thr_b3_size, (ao_num,ao_num)]
+ BEGIN_PROVIDER [integer, List_comb_thr_b3_size, (ao_num, ao_num)]
 &BEGIN_PROVIDER [integer, max_List_comb_thr_b3_size]
+  BEGIN_DOC
+  ! List_comb_thr_b3_size
+  END_DOC
 
   implicit none
   integer :: i_1s,i,j,ipoint
@@ -137,24 +146,27 @@ END_PROVIDER
           List_comb_thr_b3_size(j,i) += 1
         endif
       enddo
-    enddo 
+    enddo
   enddo
 
   do i = 1, ao_num
     list(i) = maxval(List_comb_thr_b3_size(:,i))
   enddo
 
-  max_List_comb_thr_b3_size = maxval(list) 
+  max_List_comb_thr_b3_size = maxval(list)
   print*, ' max_List_comb_thr_b3_size =  ',max_List_comb_thr_b3_size
- 
-END_PROVIDER 
+
+END_PROVIDER
 
 ! ---
 
- BEGIN_PROVIDER [double precision, List_comb_thr_b3_coef, (   max_List_comb_thr_b3_size,ao_num,ao_num)]
-&BEGIN_PROVIDER [double precision, List_comb_thr_b3_expo, (   max_List_comb_thr_b3_size,ao_num,ao_num)]
-&BEGIN_PROVIDER [double precision, List_comb_thr_b3_cent, (3, max_List_comb_thr_b3_size,ao_num,ao_num)]
-&BEGIN_PROVIDER [double precision, ao_abs_comb_b3_env   , (   max_List_comb_thr_b3_size,ao_num,ao_num)]
+ BEGIN_PROVIDER [double precision, List_comb_thr_b3_coef, (   max_List_comb_thr_b3_size, ao_num, ao_num)]
+&BEGIN_PROVIDER [double precision, List_comb_thr_b3_expo, (   max_List_comb_thr_b3_size, ao_num, ao_num)]
+&BEGIN_PROVIDER [double precision, List_comb_thr_b3_cent, (3, max_List_comb_thr_b3_size, ao_num, ao_num)]
+&BEGIN_PROVIDER [double precision, ao_abs_comb_b3_env   , (   max_List_comb_thr_b3_size, ao_num, ao_num)]
+  BEGIN_DOC
+  ! List_comb_thr_b3_coef
+  END_DOC
 
   implicit none
   integer :: i_1s,i,j,ipoint,icount
@@ -188,10 +200,11 @@ END_PROVIDER
           ao_abs_comb_b3_env(icount,j,i) = int_env
         endif
       enddo
-    enddo 
+    enddo
   enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
+
 

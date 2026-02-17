@@ -172,9 +172,9 @@ end subroutine
 
 
 
- BEGIN_PROVIDER [ double precision, mo_two_e_int_erf_jj_from_ao, (mo_num,mo_num) ]
-&BEGIN_PROVIDER [ double precision, mo_two_e_int_erf_jj_exchange_from_ao, (mo_num,mo_num) ]
-&BEGIN_PROVIDER [ double precision, mo_two_e_int_erf_jj_anti_from_ao, (mo_num,mo_num) ]
+ BEGIN_PROVIDER [ double precision, mo_two_e_int_erf_jj_from_ao, (mo_num, mo_num) ]
+&BEGIN_PROVIDER [ double precision, mo_two_e_int_erf_jj_exchange_from_ao, (mo_num, mo_num) ]
+&BEGIN_PROVIDER [ double precision, mo_two_e_int_erf_jj_anti_from_ao, (mo_num, mo_num) ]
   BEGIN_DOC
   ! mo_two_e_integral_jj_from_ao(i,j) = J_ij
   ! mo_two_e_integrals_jj_exchange_from_ao(i,j) = J_ij
@@ -306,9 +306,9 @@ end subroutine
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ double precision, mo_two_e_int_erf_jj, (mo_num,mo_num) ]
-&BEGIN_PROVIDER [ double precision, mo_two_e_int_erf_jj_exchange, (mo_num,mo_num) ]
-&BEGIN_PROVIDER [ double precision, mo_two_e_int_erf_jj_anti, (mo_num,mo_num) ]
+ BEGIN_PROVIDER [ double precision, mo_two_e_int_erf_jj, (mo_num, mo_num) ]
+&BEGIN_PROVIDER [ double precision, mo_two_e_int_erf_jj_exchange, (mo_num, mo_num) ]
+&BEGIN_PROVIDER [ double precision, mo_two_e_int_erf_jj_anti, (mo_num, mo_num) ]
   implicit none
   BEGIN_DOC
   ! mo_two_e_integrals_jj(i,j) = J_ij
@@ -656,5 +656,6 @@ subroutine add_integrals_to_map_erf(mask_ijkl)
   print*,' wall time :',wall_2 - wall_1, 's  ( x ', (cpu_2-cpu_1)/(wall_2-wall_1), ')'
 
 end
+
 
 

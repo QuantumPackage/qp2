@@ -28,5 +28,6 @@ program rotate_mos
 
   touch mo_coef
   call save_mos
-  
+
 end
+

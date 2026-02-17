@@ -13,7 +13,7 @@ subroutine do_signed_mono_excitation(key1,key2,nu,ihole,ipart,       &
   real*8                         :: phase
   logical                        :: found
   allocate(keytmp(N_int,2))
-  
+
   nu=-1
   phase=1.D0
   ierr=0
@@ -100,10 +100,10 @@ subroutine do_spinfree_mono_excitation(key_in,key_out1,key_out2      &
   integer                        :: ihole,ipart,ierr,jerr,nu1,nu2
   integer                        :: ispin
   real*8                         :: phase1,phase2
-  
+
   !        write(6,*) ' applying E_',ipart,ihole,' on determinant '
   !        call print_det(key_in,N_int)
-  
+
   ! spin alpha
   ispin=1
   call do_signed_mono_excitation(key_in,key_out1,nu1,ihole           &
@@ -120,6 +120,7 @@ subroutine do_spinfree_mono_excitation(key_in,key_out1,key_out2      &
   !         write(6,*) ' 2 result is ',nu2,phase2
   !         call print_det(key_out2,N_int)
   !        end if
-  
+
 end subroutine do_spinfree_mono_excitation
+
 

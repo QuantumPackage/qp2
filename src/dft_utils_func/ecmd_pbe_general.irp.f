@@ -3,13 +3,13 @@ subroutine ec_md_pbe_on_top_general(mu,rho_a,rho_b,grad_rho_a,grad_rho_b,on_top,
   implicit none
   BEGIN_DOC
 !
-! General e_cmd functional interpolating between : 
-! 
+! General e_cmd functional interpolating between :
+!
 !                                                  +) the large mu behaviour in cst/(\mu^3) on-top
 !
-!                                                  +) mu= 0 with the usal ec_pbe at 
+!                                                  +) mu= 0 with the usal ec_pbe at
 !
-! Depends on : mu, the density (rho_a,rho_b), the square of the density gradient (grad_rho_a,grad_rho_b) 
+! Depends on : mu, the density (rho_a,rho_b), the square of the density gradient (grad_rho_a,grad_rho_b)
 !
 !              the flavour of on-top densiyt (on_top) you fill in: in principle it should be the exact on-top
 !
@@ -26,7 +26,7 @@ subroutine ec_md_pbe_on_top_general(mu,rho_a,rho_b,grad_rho_a,grad_rho_b,on_top,
   pi = 4.d0 * datan(1.d0)
 
   eps_c_md_on_top_PBE = 0.d0
-  ! convertion from (alpha,beta) formalism to (closed, open) formalism for the density 
+  ! convertion from (alpha,beta) formalism to (closed, open) formalism for the density
   call rho_ab_to_rho_oc(rho_a,rho_b,rhoo,rhoc)
   if(rhoc.lt.1.d-10)then
    return
@@ -57,4 +57,5 @@ subroutine ec_md_pbe_on_top_general(mu,rho_a,rho_b,grad_rho_a,grad_rho_b,on_top,
   endif
  end
 
- 
+
+

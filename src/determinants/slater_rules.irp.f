@@ -2297,7 +2297,7 @@ end
 
 
 subroutine connected_to_hf(key_i,yes_no)
- implicit none 
+ implicit none
  use bitmasks
  integer(bit_kind), intent(in)  :: key_i(N_int,2)
  logical , intent(out) :: yes_no
@@ -2310,9 +2310,9 @@ subroutine connected_to_hf(key_i,yes_no)
  if(degree == 2)then
   call i_H_j(ref_bitmask,key_i,N_int,hij)
   if(dabs(hij) .lt. thresh_sym)then
-   yes_no = .False. 
+   yes_no = .False.
   endif
- else if(degree == 1)then  
+ else if(degree == 1)then
   call get_single_excitation(ref_bitmask,key_i,exc,phase,N_int)
   ! Single alpha
   if (exc(0,1,1) == 1) then
@@ -2325,9 +2325,10 @@ subroutine connected_to_hf(key_i,yes_no)
   endif
   hij = mo_one_e_integrals(m,p)
   if(dabs(hij) .lt. thresh_sym)then
-   yes_no = .False. 
+   yes_no = .False.
   endif
  else if(degree == 0)then
   yes_no = .True.
  endif
 end
+

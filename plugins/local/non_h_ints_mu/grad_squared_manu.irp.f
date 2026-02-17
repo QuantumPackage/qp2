@@ -173,6 +173,9 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [ double precision, u12sq_envsq_test, (ao_num, ao_num, n_points_final_grid) ]
+  BEGIN_DOC
+  ! u12sq_envsq_test
+  END_DOC
 
   implicit none
   integer                    :: ipoint, i, j
@@ -203,6 +206,9 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [double precision, u12_grad1_u12_env_grad1_env_test, (ao_num, ao_num, n_points_final_grid)]
+  BEGIN_DOC
+  ! u12_grad1_u12_env_grad1_env_test
+  END_DOC
 
   implicit none
   integer                    :: ipoint, i, j, m, igauss
@@ -255,6 +261,9 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [double precision, grad12_j12_test, (ao_num, ao_num, n_points_final_grid)]
+  BEGIN_DOC
+  ! grad12_j12_test
+  END_DOC
 
   implicit none
   integer                    :: ipoint, i, j, m, igauss
@@ -292,4 +301,5 @@ BEGIN_PROVIDER [double precision, grad12_j12_test, (ao_num, ao_num, n_points_fin
 END_PROVIDER
 
 ! ---
+
 

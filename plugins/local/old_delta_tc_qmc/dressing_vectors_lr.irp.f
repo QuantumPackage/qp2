@@ -2,7 +2,7 @@
 ! ---
 
 subroutine get_delta_bitc_right(psidet, psicoef, ndet, Nint, delta)
-  
+
   BEGIN_DOC
   !
   ! delta(I) = < I_left | H_TC - H | Psi_right >
@@ -55,7 +55,7 @@ end subroutine get_delta_bitc_right
 ! ---
 
 subroutine get_htc_bitc_right(psidet, psicoef, ndet, Nint, delta)
-  
+
   BEGIN_DOC
   !
   ! delta(I) = < I_left | H_TC | Psi_right >
@@ -100,7 +100,7 @@ end subroutine get_htc_bitc_right
 ! ---
 
 subroutine get_h_bitc_right(psidet, psicoef, ndet, Nint, delta)
-  
+
   BEGIN_DOC
   !
   ! delta(I) = < I_left | H | Psi_right >
@@ -131,7 +131,7 @@ subroutine get_h_bitc_right(psidet, psicoef, ndet, Nint, delta)
   !  norm += psicoef(i) * psicoef(i)
   !enddo
   !print*, ' norm = ', norm
- 
+
   call hmat_bi_ortho(psidet(1,1,i), psidet(1,1,j), Nint, h_mono, h_twoe, h_tot)
 
   delta = 0.d0
@@ -152,4 +152,5 @@ subroutine get_h_bitc_right(psidet, psicoef, ndet, Nint, delta)
 end subroutine get_h_bitc_right
 
 ! ---
+
 

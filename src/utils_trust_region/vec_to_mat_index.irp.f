@@ -1,5 +1,5 @@
 ! Vector to matrix indexes
-  
+
 ! *Compute the indexes p,q of a matrix element with the vector index i*
 
 ! Vector (i) -> lower diagonal matrix (p,q), p > q
@@ -47,25 +47,26 @@ subroutine vec_to_mat_index(i,p,q)
 
   ! in
   integer,intent(in)   :: i
-  
+
   ! out
   integer, intent(out) :: p,q
-  
-  ! internal 
+
+  ! internal
   integer              :: a,b
   double precision     :: da
 
   da = 0.5d0*(1+ sqrt(1d0+8d0*DBLE(i)))
-  a = INT(da) 
+  a = INT(da)
   if ((a*(a-1))/2==i) then
     p = a-1
   else
     p = a
   endif
   b = p*(p-1)/2
- 
+
   ! Matrix element indexes
   p = p + 1
-  q = i - b 
+  q = i - b
 
 end subroutine
+

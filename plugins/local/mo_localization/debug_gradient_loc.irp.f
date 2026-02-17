@@ -17,11 +17,11 @@ program debug_gradient_loc
   list_size = dim_list_act_orb
 
   allocate(list(list_size))
-  
+
   list = list_act
 
   n = list_size*(list_size-1)/2
-  
+
   allocate(v_grad(n),v_grad2(n))
 
   if (localization_method == 'boys') then
@@ -31,12 +31,12 @@ program debug_gradient_loc
   elseif (localization_method == 'pipek') then
     print*,'Pipek-Mezey'
     call gradient_PM(n,list_size,list,v_grad,max_elem,norm)
-    call gradient_PM(n,list_size,list,v_grad2,max_elem,norm) 
+    call gradient_PM(n,list_size,list,v_grad2,max_elem,norm)
   else
     print*,'Unknown localization_method, please select boys or pipek'
     call abort
   endif
- 
+
   do i = 1, n
     print*,i,v_grad(i)
   enddo
@@ -61,5 +61,6 @@ program debug_gradient_loc
   print*,'Max error', max_elem
 
   deallocate(v_grad,v_grad2)
- 
+
 end
+

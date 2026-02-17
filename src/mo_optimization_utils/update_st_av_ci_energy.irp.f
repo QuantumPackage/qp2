@@ -1,6 +1,6 @@
 ! Update the CI state average energy
 
-! Computes the state average energy 
+! Computes the state average energy
 ! \begin{align*}
 ! E =\sum_{i=1}^{N_{states}} E_i . w_i
 ! \end{align*}
@@ -12,7 +12,7 @@
 subroutine update_st_av_ci_energy(energy)
 
   implicit none
-  
+
   double precision, intent(out) :: energy
   integer :: i
 
@@ -20,6 +20,7 @@ subroutine update_st_av_ci_energy(energy)
   do i = 1, N_states
     energy = energy + ci_energy(i) * state_average_weight(i)
   enddo
-  
+
   print*, 'ci_energy :', energy
 end
+

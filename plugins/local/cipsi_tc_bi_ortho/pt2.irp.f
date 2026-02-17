@@ -15,7 +15,7 @@ subroutine tc_pt2
   double precision, external :: memory_of_double
   double precision :: correlation_energy_ratio,E_denom,E_tc,norm
   double precision, allocatable :: ept2(:), pt1(:),extrap_energy(:)
-  PROVIDE H_apply_buffer_allocated distributed_davidson 
+  PROVIDE H_apply_buffer_allocated distributed_davidson
 
   print*,'Diagonal elements of the Fock matrix '
   do i = 1, mo_num
@@ -73,4 +73,5 @@ subroutine tc_pt2
   call print_summary_tc(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, N_det, N_configuration, N_states, psi_s2)
 
 end
+
 

@@ -7,8 +7,8 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
   !
   ! CHEMIST NOTATION IS USED
   !
-  ! ao_two_e_tc_tot(k,i,l,j) = (ki|V^TC(r_12)|lj) 
-  !                          = <lk| V^TC(r_12) |ji> where V^TC(r_12) is the total TC operator 
+  ! ao_two_e_tc_tot(k,i,l,j) = (ki|V^TC(r_12)|lj)
+  !                          = <lk| V^TC(r_12) |ji> where V^TC(r_12) is the total TC operator
   !                          = tc_grad_and_lapl_ao(k,i,l,j) + tc_grad_square_ao(k,i,l,j) + ao_two_e_coul(k,i,l,j)
   ! AND IF(var_tc):
   !
@@ -19,8 +19,8 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
   ! where:
   !
   ! tc_grad_and_lapl_ao(k,i,l,j) = < k l | -1/2 \Delta_1 u(r1,r2) - \grad_1 u(r1,r2) . \grad_1 | ij >
-  !                              = -1/2 \int dr1 (phi_k(r1) \grad_r1 phi_i(r1) - phi_i(r1) \grad_r1 phi_k(r1)) . \int dr2      \grad_r1 u(r1,r2) \phi_l(r2) \phi_j(r2) 
-  !                              =  1/2 \int dr1 (phi_k(r1) \grad_r1 phi_i(r1) - phi_i(r1) \grad_r1 phi_k(r1)) . \int dr2 (-1) \grad_r1 u(r1,r2) \phi_l(r2) \phi_j(r2) 
+  !                              = -1/2 \int dr1 (phi_k(r1) \grad_r1 phi_i(r1) - phi_i(r1) \grad_r1 phi_k(r1)) . \int dr2      \grad_r1 u(r1,r2) \phi_l(r2) \phi_j(r2)
+  !                              =  1/2 \int dr1 (phi_k(r1) \grad_r1 phi_i(r1) - phi_i(r1) \grad_r1 phi_k(r1)) . \int dr2 (-1) \grad_r1 u(r1,r2) \phi_l(r2) \phi_j(r2)
   !
   ! tc_grad_square_ao(k,i,l,j) = -1/2 <kl | |\grad_1 u(r1,r2)|^2 + |\grad_2 u(r1,r2)|^2 | ij>
   !
@@ -121,7 +121,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
                 , 0.d0, ao_two_e_tc_tot(1,1,1,1), ao_num*ao_num)
       deallocate(c_mat)
     endif
-  
+
     FREE int2_grad1_u12_square_ao
 
     if( (tc_integ_type .eq. "semi-analytic")                            .and. &
@@ -129,7 +129,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
         ((env_type .eq. "Prod_Gauss") .or. (env_type .eq. "Sum_Gauss")) .and. &
         use_ipp ) then
 
-      ! an additional term is added here directly instead of 
+      ! an additional term is added here directly instead of
       ! being added in int2_grad1_u12_square_ao for performance
 
       allocate(c_mat(n_points_final_grid,ao_num,ao_num))
@@ -217,18 +217,18 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
         do m = 1, 3
           !$OMP PARALLEL                                                              &
           !$OMP DEFAULT (NONE)                                                        &
-          !$OMP PRIVATE (i, k, ipoint, weight1, ao_i_r, ao_k_r)                       & 
-          !$OMP SHARED (aos_in_r_array_transp, aos_grad_in_r_array_transp_bis, c_mat, & 
+          !$OMP PRIVATE (i, k, ipoint, weight1, ao_i_r, ao_k_r)                       &
+          !$OMP SHARED (aos_in_r_array_transp, aos_grad_in_r_array_transp_bis, c_mat, &
           !$OMP         ao_num, n_points_final_grid, final_weight_at_r_vector, m)
           !$OMP DO SCHEDULE (static)
           do i = 1, ao_num
             do k = 1, ao_num
               do ipoint = 1, n_points_final_grid
-  
+
                 weight1 = 0.5d0 * final_weight_at_r_vector(ipoint)
                 ao_i_r  = aos_in_r_array_transp(ipoint,i)
                 ao_k_r  = aos_in_r_array_transp(ipoint,k)
-  
+
                 c_mat(ipoint,k,i) = weight1 * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,m) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,m))
               enddo
             enddo
@@ -244,7 +244,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
 
       end if
 
-      if(tc_integ_type .eq. "semi-analytic") then 
+      if(tc_integ_type .eq. "semi-analytic") then
         FREE int2_grad1_u2e_ao
       endif
 
@@ -259,7 +259,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
     call sum_A_At(ao_two_e_tc_tot(1,1,1,1), ao_num*ao_num)
 
     ! ---
-  
+
     logical          :: integ_zero
     double precision :: integ_val
 
@@ -268,7 +268,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
     if(tc_save_mem) then
       print*, ' ao_integrals_map will not be used'
       !$OMP PARALLEL DEFAULT(NONE)                     &
-      !$OMP PRIVATE(i, j, k, l, integ_zero, integ_val) & 
+      !$OMP PRIVATE(i, j, k, l, integ_zero, integ_val) &
       !$OMP SHARED(ao_num, ao_two_e_tc_tot)
       !$OMP DO COLLAPSE(3)
       do j = 1, ao_num
@@ -292,7 +292,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
 !      PROVIDE ao_integrals_map
       print*,'Cholesky vectors will be used '
       double precision :: get_ao_integ_chol,eri
-      eri = get_ao_integ_chol(1,1,1,1) ! FOR OPENMP 
+      eri = get_ao_integ_chol(1,1,1,1) ! FOR OPENMP
       !$OMP PARALLEL DEFAULT(NONE)                            &
 !!!    !$OMP SHARED(ao_num, ao_two_e_tc_tot, ao_integrals_map) &
       !$OMP SHARED(ao_num, ao_two_e_tc_tot) &
@@ -302,7 +302,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
         do l = 1, ao_num
           do i = 1, ao_num
             do k = 1, ao_num
-              !                                                     < 1:i, 2:j | 1:k, 2:l > 
+              !                                                     < 1:i, 2:j | 1:k, 2:l >
 !              eri =  get_ao_two_e_integral(i, j, k, l, ao_integrals_map)
                eri = get_ao_integ_chol(i,k,j,l)
               ao_two_e_tc_tot(k,i,l,j) = ao_two_e_tc_tot(k,i,l,j) + eri
@@ -336,7 +336,8 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
   print*, ' Wall time for ao_two_e_tc_tot (min) = ', (time1 - time0) / 60.d0
   call print_memory_usage()
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
+
 

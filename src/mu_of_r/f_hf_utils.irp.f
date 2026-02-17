@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [double precision, two_e_int_hf_f, (n_basis_orb,n_basis_orb,n_max_occ_val_orb_for_hf,n_max_occ_val_orb_for_hf)]
+BEGIN_PROVIDER [double precision, two_e_int_hf_f, (n_basis_orb, n_basis_orb, n_max_occ_val_orb_for_hf, n_max_occ_val_orb_for_hf)]
  implicit none
  BEGIN_DOC
 ! list of two-electron integrals (built with the MOs belonging to the \mathcal{B} space)
@@ -142,3 +142,4 @@ subroutine integral_f_HF_valence_ab(r1,int_f_HF_val_ab)
  ! multiply by two to adapt to the N(N-1) normalization condition of the active two-rdm
  int_f_HF_val_ab *= 2.d0
 end
+

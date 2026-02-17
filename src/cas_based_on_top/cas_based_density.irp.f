@@ -5,12 +5,12 @@ program cas_based_density
   END_DOC
 
   !! You force QP2 to read the wave function in the EZFIO folder
-  !! It is assumed that all Slater determinants in the wave function 
-  !! belongs to an active space defined by core, inactive and active list of orbitals 
+  !! It is assumed that all Slater determinants in the wave function
+  !! belongs to an active space defined by core, inactive and active list of orbitals
   read_wf = .True.
-  touch read_wf 
+  touch read_wf
   call routine_test_cas_based_density
-  
+
 end
 
 subroutine routine_test_cas_based_density
@@ -18,7 +18,7 @@ subroutine routine_test_cas_based_density
  integer :: ipoint, istate
  double precision :: accu_n_elec(N_states),accu_n_elec_2(N_states)
 
- ! PROVIDERS 
+ ! PROVIDERS
  accu_n_elec = 0.d0
  do istate = 1, N_states
   do ipoint = 1, n_points_final_grid
@@ -28,7 +28,7 @@ subroutine routine_test_cas_based_density
   print*,'accu_n_elec = ',accu_n_elec(istate)
  enddo
 
- ! ROUTINES 
+ ! ROUTINES
  double precision :: r(3),core_dens,inact_dens,act_dens(2,N_states),total_cas_dens(N_states)
  accu_n_elec_2 = 0.d0
  do ipoint = 1, n_points_final_grid
@@ -45,3 +45,4 @@ subroutine routine_test_cas_based_density
  enddo
 
 end
+

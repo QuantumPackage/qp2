@@ -6,7 +6,7 @@
 
 ! ! The default angle for the rotations is too big for this kind of
 ! ! application, a value between 1e-3 and 1e-6 should break the spatial
-! ! symmetry with just a small change in the energy. 
+! ! symmetry with just a small change in the energy.
 
 
 program break_spatial_sym
@@ -20,8 +20,9 @@ program break_spatial_sym
   kick_in_mos = .True.
   TOUCH kick_in_mos
 
-  call set_classes_loc 
+  call set_classes_loc
   call apply_pre_rotation
-  call unset_classes_loc 
-  
+  call unset_classes_loc
+
 end
+

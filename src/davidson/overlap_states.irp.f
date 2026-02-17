@@ -1,12 +1,12 @@
 
 ! ---
 
- BEGIN_PROVIDER [ double precision, overlap_states,     (N_states,N_states) ]
-&BEGIN_PROVIDER [ double precision, overlap_states_inv, (N_states,N_states) ]
+ BEGIN_PROVIDER [ double precision, overlap_states,     (N_states, N_states) ]
+&BEGIN_PROVIDER [ double precision, overlap_states_inv, (N_states, N_states) ]
 
   BEGIN_DOC
   !
-  ! S_kl = ck.T x cl 
+  ! S_kl = ck.T x cl
   !      = psi_coef(:,k).T x psi_coef(:,l)
   !
   END_DOC
@@ -37,4 +37,5 @@
 END_PROVIDER
 
 ! ---
+
 

@@ -1,7 +1,7 @@
 subroutine get_excitation_general(key_i,key_j, Nint,degree_array,holes_array, particles_array,phase)
  use bitmasks
  BEGIN_DOC
-! returns the array, for each spin, of holes/particles between key_i and key_j 
+! returns the array, for each spin, of holes/particles between key_i and key_j
 !
 ! with the following convention: a^+_{particle} a_{hole}|key_i> = |key_j>
  END_DOC
@@ -25,10 +25,10 @@ subroutine get_excitation_general(key_i,key_j, Nint,degree_array,holes_array, pa
   enddo
   degree_array(1) = shiftr(degree_array(1),1)
   degree_array(2) = shiftr(degree_array(2),1)
-  
+
  do ispin = 1, 2
   k = 1
-  !!! GETTING THE HOLES 
+  !!! GETTING THE HOLES
   do i = 1, N_int
    key_hole = iand(xorvec(i,ispin),key_i(i,ispin))
    do while(key_hole .ne.0_bit_kind)
@@ -42,7 +42,7 @@ subroutine get_excitation_general(key_i,key_j, Nint,degree_array,holes_array, pa
      print*,'stoping ...'
      stop
     endif
-   enddo 
+   enddo
   enddo
  enddo
  do ispin = 1, 2
@@ -62,7 +62,7 @@ subroutine get_excitation_general(key_i,key_j, Nint,degree_array,holes_array, pa
      stop
     endif
    enddo
-  enddo 
+  enddo
  enddo
  integer :: h,p, i_ok
  integer(bit_kind), allocatable :: det_i(:,:),det_ip(:,:)
@@ -92,7 +92,7 @@ end
 subroutine get_holes_general(key_i, key_j,Nint, holes_array)
  use bitmasks
  BEGIN_DOC
-! returns the array, per spin, of holes between key_i and key_j 
+! returns the array, per spin, of holes between key_i and key_j
 !
 ! with the following convention: a_{hole}|key_i> --> |key_j>
  END_DOC
@@ -118,7 +118,7 @@ subroutine get_holes_general(key_i, key_j,Nint, holes_array)
      print*,'stoping ...'
      stop
     endif
-   enddo 
+   enddo
   enddo
  enddo
 end
@@ -126,7 +126,7 @@ end
 subroutine get_particles_general(key_i, key_j,Nint,particles_array)
  use bitmasks
  BEGIN_DOC
-! returns the array, per spin, of particles between key_i and key_j 
+! returns the array, per spin, of particles between key_i and key_j
 !
 ! with the following convention: a^dagger_{particle}|key_i> --> |key_j>
  END_DOC
@@ -155,7 +155,7 @@ subroutine get_particles_general(key_i, key_j,Nint,particles_array)
      print*,'stoping ...'
      stop
     endif
-   enddo 
+   enddo
   enddo
  enddo
 end
@@ -190,3 +190,4 @@ subroutine get_phase_general(key_i,Nint,degree, holes_array, particles_array,pha
  enddo
 
 end
+

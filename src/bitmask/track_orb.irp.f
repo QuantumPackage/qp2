@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [ double precision, mo_coef_begin_iteration, (ao_num,mo_num) ]
+BEGIN_PROVIDER [ double precision, mo_coef_begin_iteration, (ao_num, mo_num) ]
    implicit none
    BEGIN_DOC
    ! Void provider to store the coefficients of the |MO| basis at the beginning of the SCF iteration
@@ -60,3 +60,4 @@ subroutine reorder_core_orb
 
  deallocate(accu,index_core_orb, iorder)
 end
+

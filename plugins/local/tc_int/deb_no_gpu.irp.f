@@ -10,13 +10,13 @@ program deb_no_gpu
   print *, ' env_type = ', env_type
 
   my_grid_becke  = .True.
-  PROVIDE tc_grid1_a tc_grid1_r 
-  my_n_pt_r_grid = tc_grid1_r   
+  PROVIDE tc_grid1_a tc_grid1_r
+  my_n_pt_r_grid = tc_grid1_r
   my_n_pt_a_grid = tc_grid1_a
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
-  my_extra_grid_becke  = .True. 
-  PROVIDE tc_grid2_a tc_grid2_r 
+  my_extra_grid_becke  = .True.
+  PROVIDE tc_grid2_a tc_grid2_r
   my_n_pt_r_extra_grid = tc_grid2_r
   my_n_pt_a_extra_grid = tc_grid2_a
   touch my_extra_grid_becke my_n_pt_r_extra_grid my_n_pt_a_extra_grid
@@ -28,7 +28,7 @@ program deb_no_gpu
   call write_int(6, my_n_pt_a_extra_grid, 'angular internal grid over')
 
   call main()
-    
+
 end
 
 ! ---
@@ -78,7 +78,7 @@ subroutine main()
   call wall_time(tt0)
   !$OMP PARALLEL         &
   !$OMP DEFAULT (NONE)   &
-  !$OMP PRIVATE (ipoint) & 
+  !$OMP PRIVATE (ipoint) &
   !$OMP SHARED (ao_num, mo_num, n_points_final_grid, int2_grad1_u12_ao, tmp)
   !$OMP DO SCHEDULE (dynamic)
   do ipoint = 1, n_points_final_grid
@@ -93,7 +93,7 @@ subroutine main()
 
   !$OMP PARALLEL               &
   !$OMP DEFAULT (NONE)         &
-  !$OMP PRIVATE (i, j, ipoint) & 
+  !$OMP PRIVATE (i, j, ipoint) &
   !$OMP SHARED (mo_num, n_points_final_grid, tmp, int2_grad1_u12_bimo_t)
   !$OMP DO COLLAPSE(2) SCHEDULE (dynamic)
   do ipoint = 1, n_points_final_grid
@@ -214,5 +214,6 @@ subroutine main()
 end
 
 ! ---
+
 
 

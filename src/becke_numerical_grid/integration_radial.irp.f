@@ -7,7 +7,7 @@ double precision function knowles_function(alpha, m, x)
   ! Function proposed by Knowles (JCP, 104, 1996) for distributing the radial points :
   ! the Log "m" function ( equation (7) in the paper )
   END_DOC
- 
+
   implicit none
   double precision, intent(in) :: alpha, x
   integer,          intent(in) :: m
@@ -52,36 +52,36 @@ BEGIN_PROVIDER [double precision, alpha_knowles, (100)]
   ! H-He
   alpha_knowles(1) = 5.d0
   alpha_knowles(2) = 5.d0
- 
+
   ! Li-Be
   alpha_knowles(3) = 7.d0
   alpha_knowles(4) = 7.d0
- 
+
   ! B-Ne
   do i = 5, 10
    alpha_knowles(i) = 5.d0
   enddo
- 
+
   ! Na-Mg
   do i = 11, 12
    alpha_knowles(i) = 7.d0
   enddo
- 
+
   ! Al-Ar
   do i = 13, 18
    alpha_knowles(i) = 5.d0
   enddo
- 
+
   ! K-Ca
   do i = 19, 20
    alpha_knowles(i) = 7.d0
   enddo
- 
+
   ! Sc-Zn
   do i = 21, 30
    alpha_knowles(i) = 5.d0
   enddo
- 
+
   ! Ga-Kr
   do i = 31, 100
    alpha_knowles(i) = 7.d0
@@ -90,4 +90,5 @@ BEGIN_PROVIDER [double precision, alpha_knowles, (100)]
 END_PROVIDER
 
 ! ---
+
 

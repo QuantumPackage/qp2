@@ -32,11 +32,11 @@
   ! <\Psi_m|\mu_z|\Psi_n>
   ! ||\mu|| = \sqrt{\mu_x^2 + \mu_y^2 + \mu_z^2}
   !
-  ! <\Psi_n|x| \Psi_m > = \sum_p \gamma_{pp}^{nm} \bra{\phi_p} x \ket{\phi_p} 
+  ! <\Psi_n|x| \Psi_m > = \sum_p \gamma_{pp}^{nm} \bra{\phi_p} x \ket{\phi_p}
   !   + \sum_{pq, p \neq q} \gamma_{pq}^{nm} \bra{\phi_p} x \ket{\phi_q}
   ! \Psi: wf
   ! n,m indexes for the states
-  ! p,q: general spatial MOs 
+  ! p,q: general spatial MOs
   ! gamma^{nm}: density matrix \bra{\Psi^n} a^{\dagger}_a a_i \ket{\Psi^m}
   END_DOC
   USE OMP_LIB
@@ -47,22 +47,22 @@
   integer :: nthreads
   nthreads = OMP_GET_MAX_THREADS()
   mem_tot_tr_dm = 8.d0*mo_num*mo_num*n_states*n_states*1d-9*(nthreads+1)
- 
+
   multi_s_x_dipole_moment = 0.d0
   multi_s_y_dipole_moment = 0.d0
   multi_s_z_dipole_moment = 0.d0
 
   if(mem_tot_tr_dm .lt. 0.9d0 * qp_max_mem) then
- 
+
     do jstate = 1, N_states
       do istate = 1, N_states
-        do i = 1, mo_num  
-          do j = 1, mo_num  
-            multi_s_x_dipole_moment(istate,jstate) -= one_e_tr_dm_mo(j,i,istate,jstate) * mo_prop_dipole_x(j,i)  
-            multi_s_y_dipole_moment(istate,jstate) -= one_e_tr_dm_mo(j,i,istate,jstate) * mo_prop_dipole_y(j,i) 
-            multi_s_z_dipole_moment(istate,jstate) -= one_e_tr_dm_mo(j,i,istate,jstate) * mo_prop_dipole_z(j,i) 
+        do i = 1, mo_num
+          do j = 1, mo_num
+            multi_s_x_dipole_moment(istate,jstate) -= one_e_tr_dm_mo(j,i,istate,jstate) * mo_prop_dipole_x(j,i)
+            multi_s_y_dipole_moment(istate,jstate) -= one_e_tr_dm_mo(j,i,istate,jstate) * mo_prop_dipole_y(j,i)
+            multi_s_z_dipole_moment(istate,jstate) -= one_e_tr_dm_mo(j,i,istate,jstate) * mo_prop_dipole_z(j,i)
           enddo
-        enddo 
+        enddo
       enddo
     enddo
 
@@ -83,7 +83,7 @@
     double precision  :: ck, ckl, phase
 
     !$OMP PARALLEL DEFAULT(NONE)                                                      &
-    !$OMP PRIVATE(j, l, k_a, k_b, istate, jstate, occ, ck, ckl, h1, h2, p1, p2, exc,  & 
+    !$OMP PRIVATE(j, l, k_a, k_b, istate, jstate, occ, ck, ckl, h1, h2, p1, p2, exc,  &
     !$OMP         phase, degree, n_occ, krow, kcol, lrow, lcol, tmp_det, tmp_det2)    &
     !$OMP SHARED(N_int, N_states, elec_alpha_num, elec_beta_num, N_det,               &
     !$OMP        psi_bilinear_matrix_rows, psi_bilinear_matrix_columns,               &
@@ -99,20 +99,20 @@
         do k_a = 1, N_det
           krow = psi_bilinear_matrix_rows   (k_a)
           kcol = psi_bilinear_matrix_columns(k_a)
-  
+
           tmp_det(1:N_int,1) = psi_det_alpha_unique(1:N_int,krow)
           tmp_det(1:N_int,2) = psi_det_beta_unique (1:N_int,kcol)
-  
+
           ! Diagonal part
           call bitstring_to_list_ab(tmp_det, occ, n_occ, N_int)
           ck = psi_bilinear_matrix_values(k_a,istate)*psi_bilinear_matrix_values(k_a,jstate)
           do l = 1, elec_alpha_num
             j = occ(l,1)
-            multi_s_x_dipole_moment(istate,jstate) -= ck * mo_prop_dipole_x(j,j) 
-            multi_s_y_dipole_moment(istate,jstate) -= ck * mo_prop_dipole_y(j,j) 
-            multi_s_z_dipole_moment(istate,jstate) -= ck * mo_prop_dipole_z(j,j) 
+            multi_s_x_dipole_moment(istate,jstate) -= ck * mo_prop_dipole_x(j,j)
+            multi_s_y_dipole_moment(istate,jstate) -= ck * mo_prop_dipole_y(j,j)
+            multi_s_z_dipole_moment(istate,jstate) -= ck * mo_prop_dipole_z(j,j)
           enddo
-  
+
           if (k_a == N_det) cycle
           l = k_a + 1
           lrow = psi_bilinear_matrix_rows   (l)
@@ -126,13 +126,13 @@
               call get_single_excitation_spin(tmp_det(1,1), tmp_det2, exc, phase, N_int)
               call decode_exc_spin(exc, h1, p1, h2, p2)
               ckl = psi_bilinear_matrix_values(k_a,istate)*psi_bilinear_matrix_values(l,jstate) * phase
-              multi_s_x_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_x(h1,p1) 
-              multi_s_y_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_y(h1,p1) 
-              multi_s_z_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_z(h1,p1) 
+              multi_s_x_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_x(h1,p1)
+              multi_s_y_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_y(h1,p1)
+              multi_s_z_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_z(h1,p1)
               ckl = psi_bilinear_matrix_values(k_a,jstate)*psi_bilinear_matrix_values(l,istate) * phase
-              multi_s_x_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_x(p1,h1) 
-              multi_s_y_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_y(p1,h1) 
-              multi_s_z_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_z(p1,h1) 
+              multi_s_x_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_x(p1,h1)
+              multi_s_y_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_y(p1,h1)
+              multi_s_z_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_z(p1,h1)
             endif
             l = l+1
             if (l > N_det) exit
@@ -140,24 +140,24 @@
             lcol = psi_bilinear_matrix_columns(l)
           enddo
         enddo ! k_a
-  
+
         do k_b = 1, N_det
           krow = psi_bilinear_matrix_transp_rows   (k_b)
           kcol = psi_bilinear_matrix_transp_columns(k_b)
-      
+
           tmp_det(1:N_int,1) = psi_det_alpha_unique(1:N_int,krow)
           tmp_det(1:N_int,2) = psi_det_beta_unique (1:N_int,kcol)
-      
+
           ! Diagonal part
           call bitstring_to_list_ab(tmp_det, occ, n_occ, N_int)
           ck = psi_bilinear_matrix_transp_values(k_b,istate)*psi_bilinear_matrix_transp_values(k_b,jstate)
           do l = 1, elec_beta_num
             j = occ(l,2)
-            multi_s_x_dipole_moment(istate,jstate) -= ck * mo_prop_dipole_x(j,j) 
-            multi_s_y_dipole_moment(istate,jstate) -= ck * mo_prop_dipole_y(j,j) 
-            multi_s_z_dipole_moment(istate,jstate) -= ck * mo_prop_dipole_z(j,j) 
+            multi_s_x_dipole_moment(istate,jstate) -= ck * mo_prop_dipole_x(j,j)
+            multi_s_y_dipole_moment(istate,jstate) -= ck * mo_prop_dipole_y(j,j)
+            multi_s_z_dipole_moment(istate,jstate) -= ck * mo_prop_dipole_z(j,j)
           enddo
-      
+
           if (k_b == N_det) cycle
           l = k_b+1
           lrow = psi_bilinear_matrix_transp_rows   (l)
@@ -171,13 +171,13 @@
               call get_single_excitation_spin(tmp_det(1,2), tmp_det2, exc, phase, N_int)
               call decode_exc_spin(exc, h1, p1, h2, p2)
               ckl = psi_bilinear_matrix_transp_values(k_b,istate)*psi_bilinear_matrix_transp_values(l,jstate) * phase
-              multi_s_x_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_x(h1,p1) 
-              multi_s_y_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_y(h1,p1) 
-              multi_s_z_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_z(h1,p1) 
+              multi_s_x_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_x(h1,p1)
+              multi_s_y_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_y(h1,p1)
+              multi_s_z_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_z(h1,p1)
               ckl = psi_bilinear_matrix_transp_values(k_b,jstate)*psi_bilinear_matrix_transp_values(l,istate) * phase
-              multi_s_x_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_x(p1,h1) 
-              multi_s_y_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_y(p1,h1) 
-              multi_s_z_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_z(p1,h1) 
+              multi_s_x_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_x(p1,h1)
+              multi_s_y_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_y(p1,h1)
+              multi_s_z_dipole_moment(istate,jstate) -= ckl * mo_prop_dipole_z(p1,h1)
             endif
             l = l+1
             if (l > N_det) exit
@@ -192,32 +192,32 @@
     !$OMP END PARALLEL
 
   endif ! memory condition
- 
+
   ! Nuclei part
   nuclei_part_x = 0.d0
   nuclei_part_y = 0.d0
   nuclei_part_z = 0.d0
- 
-  do i = 1,nucl_num 
-    nuclei_part_x += nucl_charge(i) * nucl_coord(i,1) 
-    nuclei_part_y += nucl_charge(i) * nucl_coord(i,2) 
-    nuclei_part_z += nucl_charge(i) * nucl_coord(i,3) 
+
+  do i = 1,nucl_num
+    nuclei_part_x += nucl_charge(i) * nucl_coord(i,1)
+    nuclei_part_y += nucl_charge(i) * nucl_coord(i,2)
+    nuclei_part_z += nucl_charge(i) * nucl_coord(i,3)
   enddo
- 
+
   ! Only if istate = jstate, otherwise 0 by the orthogonality of the states
   do istate = 1, N_states
     multi_s_x_dipole_moment(istate,istate) += nuclei_part_x
     multi_s_y_dipole_moment(istate,istate) += nuclei_part_y
     multi_s_z_dipole_moment(istate,istate) += nuclei_part_z
   enddo
- 
+
   ! d = <Psi|r|Psi>
   do jstate = 1, N_states
     do istate = 1, N_states
       multi_s_dipole_moment(istate,jstate) = &
-        dsqrt(multi_s_x_dipole_moment(istate,jstate)**2 & 
+        dsqrt(multi_s_x_dipole_moment(istate,jstate)**2 &
             + multi_s_y_dipole_moment(istate,jstate)**2 &
-            + multi_s_z_dipole_moment(istate,jstate)**2) 
+            + multi_s_z_dipole_moment(istate,jstate)**2)
     enddo
   enddo
 
@@ -231,6 +231,9 @@ END_PROVIDER
 &BEGIN_PROVIDER [double precision, multi_s_x_dipole_moment_eigenval,           (N_states)]
 &BEGIN_PROVIDER [double precision, multi_s_y_dipole_moment_eigenval,           (N_states)]
 &BEGIN_PROVIDER [double precision, multi_s_z_dipole_moment_eigenval,           (N_states)]
+  BEGIN_DOC
+  ! multi_s_x_dipole_moment_eigenvec
+  END_DOC
 
   implicit none
   double precision, allocatable :: eigval(:), eigvec(:,:), A(:,:)
@@ -259,5 +262,6 @@ END_PROVIDER
 END_PROVIDER
 
 ! ---
+
 
 

@@ -96,7 +96,7 @@ subroutine copy_H_apply_buffer_to_wf_tc
   !$OMP BARRIER
   H_apply_buffer(j)%N_det = 0
   !$OMP END PARALLEL
-  SOFT_TOUCH N_det psi_det psi_r_coef_bi_ortho psi_l_coef_bi_ortho 
+  SOFT_TOUCH N_det psi_det psi_r_coef_bi_ortho psi_l_coef_bi_ortho
 
   logical :: found_duplicates
   call remove_duplicates_in_psi_det_tc(found_duplicates)
@@ -198,9 +198,9 @@ subroutine remove_duplicates_in_psi_det_tc(found_duplicates)
 end
 
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_bit_tc, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_r_coef_sorted_bit, (N_det,N_states) ]
-&BEGIN_PROVIDER [ double precision, psi_l_coef_sorted_bit, (N_det,N_states) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_bit_tc, (N_int, 2, psi_det_size) ]
+&BEGIN_PROVIDER [ double precision, psi_r_coef_sorted_bit, (N_det, N_states) ]
+&BEGIN_PROVIDER [ double precision, psi_l_coef_sorted_bit, (N_det, N_states) ]
    implicit none
    BEGIN_DOC
    ! Determinants on which we apply $\langle i|H|psi \rangle$ for perturbation.
@@ -209,7 +209,7 @@ end
    ! function.
    END_DOC
 
- integer, allocatable :: iorder(:) 
+ integer, allocatable :: iorder(:)
  allocate(iorder(size(psi_r_coef_bi_ortho,1)))
    call sort_dets_by_det_search_key(N_det, psi_det, psi_r_coef_bi_ortho, size(psi_r_coef_bi_ortho,1),       &
        psi_det_sorted_bit_tc, psi_r_coef_sorted_bit, iorder, N_states)
@@ -217,3 +217,4 @@ end
        psi_det_sorted_bit_tc, psi_l_coef_sorted_bit, iorder, N_states)
 
 END_PROVIDER
+

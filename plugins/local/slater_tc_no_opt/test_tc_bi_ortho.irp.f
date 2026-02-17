@@ -47,7 +47,7 @@ end
 subroutine test_h_u0
  implicit none
  double precision, allocatable :: v_0_ref(:),v_0_new(:),u_0(:), v_0_ref_dagger(:)
- double precision :: accu 
+ double precision :: accu
  logical :: do_right
  integer :: i
  allocate(v_0_new(N_det),v_0_ref(N_det),u_0(N_det),v_0_ref_dagger(N_det))
@@ -80,7 +80,7 @@ end
 subroutine test_slater_tc_opt
  implicit none
  integer :: i,j,degree
- double precision :: hmono, htwoe, htot, hthree 
+ double precision :: hmono, htwoe, htot, hthree
  double precision :: hnewmono, hnewtwoe, hnewthree, hnewtot
  double precision :: accu_d ,i_count, accu
  accu = 0.d0
@@ -92,7 +92,7 @@ subroutine test_slater_tc_opt
    call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hnewmono, hnewtwoe, hnewthree, hnewtot)
    if(dabs(htot).gt.1.d-15)then
      i_count += 1.D0
-     accu += dabs(htot-hnewtot) 
+     accu += dabs(htot-hnewtot)
      if(dabs(htot-hnewtot).gt.1.d-8.or.dabs(htot-hnewtot).gt.dabs(htot))then
       call get_excitation_degree(psi_det(1,1,j), psi_det(1,1,i),degree,N_int)
       print*,j,i,degree
@@ -115,7 +115,7 @@ subroutine timing_tot
  double precision :: wall0, wall1
  double precision, allocatable :: mat_old(:,:),mat_new(:,:)
  double precision :: hmono, htwoe, hthree, htot, i_count
- integer :: degree 
+ integer :: degree
  call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,1), psi_det(1,1,2), N_int, hmono, htwoe, hthree, htot)
  call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,1), psi_det(1,1,2), N_int, hmono, htwoe, hthree, htot)
  call wall_time(wall0)
@@ -164,12 +164,12 @@ subroutine timing_diag
  double precision :: wall0, wall1
  double precision, allocatable :: mat_old(:,:),mat_new(:,:)
  double precision :: hmono, htwoe, hthree, htot, i_count
- integer :: degree 
+ integer :: degree
  call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,1), psi_det(1,1,1), N_int, hmono, htwoe, hthree, htot)
  call wall_time(wall0)
  i_count = 0.d0
  do i = 1, N_det
-  do j = i,i 
+  do j = i,i
    i_count += 1.d0
    call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
   enddo
@@ -198,7 +198,7 @@ subroutine timing_single
  double precision :: wall0, wall1,accu
  double precision, allocatable :: mat_old(:,:),mat_new(:,:)
  double precision :: hmono, htwoe, hthree, htot, i_count
- integer :: degree 
+ integer :: degree
  call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,1), psi_det(1,1,1), N_int, hmono, htwoe, hthree, htot)
  i_count = 0.d0
  accu = 0.d0
@@ -240,7 +240,7 @@ subroutine timing_double
  double precision :: wall0, wall1,accu
  double precision, allocatable :: mat_old(:,:),mat_new(:,:)
  double precision :: hmono, htwoe, hthree, htot, i_count
- integer :: degree 
+ integer :: degree
  call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,1), psi_det(1,1,1), N_int, hmono, htwoe, hthree, htot)
  i_count = 0.d0
  accu = 0.d0
@@ -603,7 +603,7 @@ subroutine test_noL_2e_v0()
             print*, ref, new, contrib
             stop
           endif
-          
+
           accu += contrib
           norm += dabs(ref)
         enddo
@@ -649,7 +649,7 @@ subroutine test_noL_2e()
             print*, ref, new, contrib
             stop
           endif
-          
+
           accu += contrib
           norm += dabs(ref)
         enddo
@@ -663,5 +663,6 @@ subroutine test_noL_2e()
 end
 
 ! ---
+
 
 

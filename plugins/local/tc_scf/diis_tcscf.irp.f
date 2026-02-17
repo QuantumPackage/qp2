@@ -19,9 +19,9 @@ BEGIN_PROVIDER [double precision, Q_alpha, (ao_num, ao_num) ]
             , 0.d0, Q_alpha, size(Q_alpha, 1) )
 
 END_PROVIDER
-  
+
 ! ---
-    
+
 BEGIN_PROVIDER [ double precision, Q_beta, (ao_num, ao_num) ]
 
   BEGIN_DOC
@@ -48,15 +48,15 @@ BEGIN_PROVIDER [ double precision, Q_matrix, (ao_num, ao_num) ]
   BEGIN_DOC
   !
   ! Q_matrix = 2 mo_r_coef x eta_occ x mo_l_coef.T
-  ! 
-  ! with: 
+  !
+  ! with:
   !                        | 1   if i = j = 1, ..., nb of occ orbitals
-  !        [eta_occ]_ij =  |     
+  !        [eta_occ]_ij =  |
   !                        | 0   otherwise
   !
   ! the diis error is defines as:
   !                         e = F_ao x Q x ao_overlap - ao_overlap x Q x F_ao
-  ! with: 
+  ! with:
   !       mo_l_coef.T x ao_overlap x mo_r_coef = I
   !       F_mo = mo_l_coef.T x F_ao x mo_r_coef
   !       F_ao = (ao_overlap x mo_r_coef) x F_mo x (ao_overlap x mo_l_coef).T
@@ -65,7 +65,7 @@ BEGIN_PROVIDER [ double precision, Q_matrix, (ao_num, ao_num) ]
   !
   !      at convergence:
   !                                      F_mo x eta_occ - eta_occ x F_mo = 0
-  !                                  ==> [F_mo]_ij ([eta_occ]_ii - [eta_occ]_jj) = 0  
+  !                                  ==> [F_mo]_ij ([eta_occ]_ii - [eta_occ]_jj) = 0
   !                                  ==> [F_mo]_ia = [F_mo]_ai = 0 where: i = occ and a = vir
   !                                  ==> Brillouin conditions
   !
@@ -84,6 +84,9 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [double precision, FQS_SQF_ao, (ao_num, ao_num)]
+  BEGIN_DOC
+  ! FQS_SQF_ao
+  END_DOC
 
   implicit none
   integer                       :: i, j
@@ -131,6 +134,9 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [double precision, FQS_SQF_mo, (mo_num, mo_num)]
+  BEGIN_DOC
+  ! FQS_SQF_mo
+  END_DOC
 
   implicit none
   double precision :: t0, t1
@@ -144,4 +150,5 @@ BEGIN_PROVIDER [double precision, FQS_SQF_mo, (mo_num, mo_num)]
 END_PROVIDER
 
 ! ---
+
 

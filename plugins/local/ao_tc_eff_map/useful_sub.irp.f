@@ -39,7 +39,7 @@ double precision function general_primitive_integral_coul_shifted( dim          
 
   ! Gaussian Product
   ! ----------------
-  p_plus_q = (p+q) 
+  p_plus_q = (p+q)
   pq       = p_inv * 0.5d0 * q_inv
   pq_inv   = 0.5d0 / p_plus_q
   p10_1    = q * pq             ! 1/(2p)
@@ -369,11 +369,11 @@ subroutine inv_r_times_poly(r, dist_r, dist_vec, poly)
 
   BEGIN_DOC
   !
-  ! returns 
+  ! returns
   !
   ! poly(1) = x / sqrt(x^2+y^2+z^2), poly(2) = y / sqrt(x^2+y^2+z^2), poly(3) = z / sqrt(x^2+y^2+z^2)
   !
-  ! with the arguments  
+  ! with the arguments
   !
   ! r(1)  = x, r(2) = y, r(3) = z, dist_r = sqrt(x^2+y^2+z^2)
   !
@@ -406,4 +406,5 @@ subroutine inv_r_times_poly(r, dist_r, dist_vec, poly)
 end
 
 ! ---
+
 

@@ -11,8 +11,9 @@ program ccsd
 
   if (.not. cc_ref_is_open_shell) then
     call run_ccsd_space_orb
-  else 
+  else
     call run_ccsd_spin_orb
   endif
 
 end
+

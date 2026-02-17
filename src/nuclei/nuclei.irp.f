@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [ double precision, nucl_coord,  (nucl_num,3) ]
+BEGIN_PROVIDER [ double precision, nucl_coord,  (nucl_num, 3) ]
    implicit none
 
    BEGIN_DOC
@@ -86,7 +86,7 @@ BEGIN_PROVIDER [ double precision, nucl_coord,  (nucl_num,3) ]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, nucl_coord_transp, (3,nucl_num) ]
+BEGIN_PROVIDER [ double precision, nucl_coord_transp, (3, nucl_num) ]
    implicit none
    BEGIN_DOC
    ! Transposed array of nucl_coord
@@ -101,7 +101,7 @@ BEGIN_PROVIDER [ double precision, nucl_coord_transp, (3,nucl_num) ]
    enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, nucl_dist_inv, (nucl_num,nucl_num) ]
+BEGIN_PROVIDER [ double precision, nucl_dist_inv, (nucl_num, nucl_num) ]
   implicit none
   BEGIN_DOC
   ! Inverse of the distance between nucleus I and nucleus J
@@ -121,11 +121,11 @@ BEGIN_PROVIDER [ double precision, nucl_dist_inv, (nucl_num,nucl_num) ]
 
 END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, nucl_dist_2, (nucl_num,nucl_num) ]
-&BEGIN_PROVIDER [ double precision, nucl_dist_vec_x, (nucl_num,nucl_num) ]
-&BEGIN_PROVIDER [ double precision, nucl_dist_vec_y, (nucl_num,nucl_num) ]
-&BEGIN_PROVIDER [ double precision, nucl_dist_vec_z, (nucl_num,nucl_num) ]
-&BEGIN_PROVIDER [ double precision, nucl_dist, (nucl_num,nucl_num) ]
+ BEGIN_PROVIDER [ double precision, nucl_dist_2, (nucl_num, nucl_num) ]
+&BEGIN_PROVIDER [ double precision, nucl_dist_vec_x, (nucl_num, nucl_num) ]
+&BEGIN_PROVIDER [ double precision, nucl_dist_vec_y, (nucl_num, nucl_num) ]
+&BEGIN_PROVIDER [ double precision, nucl_dist_vec_z, (nucl_num, nucl_num) ]
+&BEGIN_PROVIDER [ double precision, nucl_dist, (nucl_num, nucl_num) ]
    implicit none
    BEGIN_DOC
    ! nucl_dist     : Nucleus-nucleus distances
@@ -209,11 +209,11 @@ BEGIN_PROVIDER [ double precision, nuclear_repulsion ]
      enddo
      nuclear_repulsion *= 0.5d0
      if(point_charges)then
-      print*,'bear nuclear repulsion = ',nuclear_repulsion 
+      print*,'bear nuclear repulsion = ',nuclear_repulsion
       print*,'adding the interaction between the nuclein and the point charges'
       print*,'to the usual nuclear repulsion '
-      nuclear_repulsion += pt_chrg_nuclei_interaction 
-      print*,'new nuclear repulsion =  ',nuclear_repulsion 
+      nuclear_repulsion += pt_chrg_nuclei_interaction
+      print*,'new nuclear repulsion =  ',nuclear_repulsion
       print*,'WARNING: we do not add the interaction between the point charges themselves'
      endif
    end if
@@ -294,4 +294,5 @@ BEGIN_PROVIDER [ double precision, center_of_mass, (3) ]
   s = 1.d0/s
   center_of_mass(:) = center_of_mass(:)*s
 END_PROVIDER
+
 

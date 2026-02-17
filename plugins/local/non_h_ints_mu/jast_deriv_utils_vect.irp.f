@@ -4,7 +4,7 @@
 subroutine get_grad1_u12_withsq_r1_seq(ipoint, n_grid2, resx, resy, resz, res)
 
   BEGIN_DOC
-  ! 
+  !
   ! grad_1 u(r1,r2)
   !
   ! we use grid for r1 and extra_grid for r2
@@ -185,7 +185,7 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
     !  d/dy1 j(mu,r12) = 0.5 * [(1 - erf(mu * r12)) / r12] * (y1 - y2)
     !  d/dz1 j(mu,r12) = 0.5 * [(1 - erf(mu * r12)) / r12] * (z1 - z2)
 
-    do jpoint = 1, n_points_extra_final_grid ! r2 
+    do jpoint = 1, n_points_extra_final_grid ! r2
 
       r2(1) = final_grid_points_extra(1,jpoint)
       r2(2) = final_grid_points_extra(2,jpoint)
@@ -197,9 +197,9 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
 
       r12 = dsqrt(dx * dx + dy * dy + dz * dz)
       if(r12 .lt. 1d-10) then
-        gradx(jpoint) = 0.d0 
-        grady(jpoint) = 0.d0 
-        gradz(jpoint) = 0.d0 
+        gradx(jpoint) = 0.d0
+        grady(jpoint) = 0.d0
+        gradz(jpoint) = 0.d0
         cycle
       endif
 
@@ -214,7 +214,7 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
 
     !  d/dx1 j(mu,r12) = 0.5 * [(1 - erf(mu * r12)) / r12 - mu*c*r12*exp(-(mu*alpha*r12)^2] * (x1 - x2)
 
-    do jpoint = 1, n_points_extra_final_grid ! r2 
+    do jpoint = 1, n_points_extra_final_grid ! r2
 
       r2(1) = final_grid_points_extra(1,jpoint)
       r2(2) = final_grid_points_extra(2,jpoint)
@@ -226,9 +226,9 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
 
       r12 = dsqrt(dx * dx + dy * dy + dz * dz)
       if(r12 .lt. 1d-10) then
-        gradx(jpoint) = 0.d0 
-        grady(jpoint) = 0.d0 
-        gradz(jpoint) = 0.d0 
+        gradx(jpoint) = 0.d0
+        grady(jpoint) = 0.d0
+        gradz(jpoint) = 0.d0
         cycle
       endif
 
@@ -238,7 +238,7 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
       tmp = 0.5d0 * (1.d0 - derf(r12_tmp)) / r12
       ! gradient of gaussian additional term
       r12_tmp *= alpha_mu_gauss
-      r12_tmp *= r12_tmp 
+      r12_tmp *= r12_tmp
       tmp += -0.5d0 * mu_erf * c_mu_gauss * r12 * dexp(-r12_tmp)/r12
 
       gradx(jpoint) = tmp * dx
@@ -248,10 +248,10 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
 
   elseif(j2e_type .eq. "Mur".or.j2e_type .eq. "Murgauss") then
 
-    ! d/dx1 j(mu(r1,r2),r12) = exp(-(mu(r1,r2)*r12)**2) /(2 *sqrt(pi) * mu(r1,r2)**2 ) d/dx1 mu(r1,r2) 
+    ! d/dx1 j(mu(r1,r2),r12) = exp(-(mu(r1,r2)*r12)**2) /(2 *sqrt(pi) * mu(r1,r2)**2 ) d/dx1 mu(r1,r2)
     !                        + 0.5 * (1 - erf(mu(r1,r2) *r12))/r12 * (x1 - x2)
 
-    do jpoint = 1, n_points_extra_final_grid ! r2 
+    do jpoint = 1, n_points_extra_final_grid ! r2
 
       r2(1) = final_grid_points_extra(1,jpoint)
       r2(2) = final_grid_points_extra(2,jpoint)
@@ -266,7 +266,7 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
 
     ! d/dx1 jbump(r1,r2)
 
-    do jpoint = 1, n_points_extra_final_grid ! r2 
+    do jpoint = 1, n_points_extra_final_grid ! r2
 
       r2(1) = final_grid_points_extra(1,jpoint)
       r2(2) = final_grid_points_extra(2,jpoint)
@@ -279,9 +279,9 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
 
       r12 = dsqrt(dx * dx + dy * dy + dz * dz)
       if(r12 .lt. 1d-10) then
-        gradx(jpoint) = 0.d0 
-        grady(jpoint) = 0.d0 
-        gradz(jpoint) = 0.d0 
+        gradx(jpoint) = 0.d0
+        grady(jpoint) = 0.d0
+        gradz(jpoint) = 0.d0
         cycle
       endif
 
@@ -309,7 +309,7 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
 
     PROVIDE a_boys
 
-    do jpoint = 1, n_points_extra_final_grid ! r2 
+    do jpoint = 1, n_points_extra_final_grid ! r2
 
       r2(1) = final_grid_points_extra(1,jpoint)
       r2(2) = final_grid_points_extra(2,jpoint)
@@ -320,9 +320,9 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
       dz  = r1(3) - r2(3)
       r12 = dsqrt(dx * dx + dy * dy + dz * dz)
       if(r12 .lt. 1d-10) then
-        gradx(jpoint) = 0.d0 
-        grady(jpoint) = 0.d0 
-        gradz(jpoint) = 0.d0 
+        gradx(jpoint) = 0.d0
+        grady(jpoint) = 0.d0
+        gradz(jpoint) = 0.d0
         cycle
       endif
 
@@ -363,10 +363,10 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
       r2(2) = final_grid_points_extra(2,jpoint)
       r2(3) = final_grid_points_extra(3,jpoint)
 
-      gradx(jpoint) = 0.d0 
-      grady(jpoint) = 0.d0 
-      gradz(jpoint) = 0.d0 
-      do i_nucl = 1, nucl_num 
+      gradx(jpoint) = 0.d0
+      grady(jpoint) = 0.d0
+      gradz(jpoint) = 0.d0
+      do i_nucl = 1, nucl_num
 
         rn(1) = nucl_coord(i_nucl,1)
         rn(2) = nucl_coord(i_nucl,2)
@@ -420,7 +420,7 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
 
   elseif(j2e_type .eq. "Jpsi") then
    double precision :: grad_j_psi_r1(3),jast_psi
-   do jpoint = 1, n_points_extra_final_grid ! r2 
+   do jpoint = 1, n_points_extra_final_grid ! r2
      r2(1) = final_grid_points_extra(1,jpoint)
      r2(2) = final_grid_points_extra(2,jpoint)
      r2(3) = final_grid_points_extra(3,jpoint)
@@ -463,7 +463,7 @@ subroutine grad1_jmu_r1_seq(mu, r1, n_grid2, gradx, grady, gradz)
   double precision              :: dx, dy, dz, r12, tmp
 
 
-  do jpoint = 1, n_points_extra_final_grid ! r2 
+  do jpoint = 1, n_points_extra_final_grid ! r2
 
     r2(1) = final_grid_points_extra(1,jpoint)
     r2(2) = final_grid_points_extra(2,jpoint)
@@ -475,9 +475,9 @@ subroutine grad1_jmu_r1_seq(mu, r1, n_grid2, gradx, grady, gradz)
 
     r12 = dsqrt(dx * dx + dy * dy + dz * dz)
     if(r12 .lt. 1d-10) then
-      gradx(jpoint) = 0.d0 
-      grady(jpoint) = 0.d0 
-      gradz(jpoint) = 0.d0 
+      gradx(jpoint) = 0.d0
+      grady(jpoint) = 0.d0
+      gradz(jpoint) = 0.d0
       cycle
     endif
 
@@ -513,19 +513,19 @@ subroutine j12_r1_seq(r1, n_grid2, res)
 
     PROVIDE mu_erf
 
-    do jpoint = 1, n_points_extra_final_grid ! r2 
-  
+    do jpoint = 1, n_points_extra_final_grid ! r2
+
       r2(1) = final_grid_points_extra(1,jpoint)
       r2(2) = final_grid_points_extra(2,jpoint)
       r2(3) = final_grid_points_extra(3,jpoint)
-  
+
       dx  = r1(1) - r2(1)
       dy  = r1(2) - r2(2)
       dz  = r1(3) - r2(3)
       r12 = dsqrt(dx * dx + dy * dy + dz * dz)
 
       mu_tmp = mu_erf * r12
-  
+
       res(jpoint) = 0.5d0 * r12 * (1.d0 - derf(mu_tmp)) - inv_sq_pi_2 * dexp(-mu_tmp*mu_tmp) / mu_erf
     enddo
 
@@ -535,7 +535,7 @@ subroutine j12_r1_seq(r1, n_grid2, res)
 
     PROVIDE a_boys
 
-    do jpoint = 1, n_points_extra_final_grid ! r2 
+    do jpoint = 1, n_points_extra_final_grid ! r2
 
       r2(1) = final_grid_points_extra(1,jpoint)
       r2(2) = final_grid_points_extra(2,jpoint)
@@ -577,19 +577,19 @@ subroutine jmu_r1_seq(mu, r1, n_grid2, res)
 
   tmp1 = inv_sq_pi_2 / mu
 
-  do jpoint = 1, n_points_extra_final_grid ! r2 
-  
+  do jpoint = 1, n_points_extra_final_grid ! r2
+
     r2(1) = final_grid_points_extra(1,jpoint)
     r2(2) = final_grid_points_extra(2,jpoint)
     r2(3) = final_grid_points_extra(3,jpoint)
-  
+
     dx  = r1(1) - r2(1)
     dy  = r1(2) - r2(2)
     dz  = r1(3) - r2(3)
     r12 = dsqrt(dx * dx + dy * dy + dz * dz)
 
     tmp2 = mu * r12
-  
+
     res(jpoint) = 0.5d0 * r12 * (1.d0 - derf(tmp2)) - tmp1 * dexp(-tmp2*tmp2)
   enddo
 
@@ -616,7 +616,7 @@ subroutine env_nucl_r1_seq(n_grid2, res)
 
     res = 1.d0
 
-    do jpoint = 1, n_points_extra_final_grid ! r2 
+    do jpoint = 1, n_points_extra_final_grid ! r2
       r(1) = final_grid_points_extra(1,jpoint)
       r(2) = final_grid_points_extra(2,jpoint)
       r(3) = final_grid_points_extra(3,jpoint)
@@ -635,7 +635,7 @@ subroutine env_nucl_r1_seq(n_grid2, res)
 
     res = 1.d0
 
-    do jpoint = 1, n_points_extra_final_grid ! r2 
+    do jpoint = 1, n_points_extra_final_grid ! r2
       r(1) = final_grid_points_extra(1,jpoint)
       r(2) = final_grid_points_extra(2,jpoint)
       r(3) = final_grid_points_extra(3,jpoint)
@@ -655,7 +655,7 @@ subroutine env_nucl_r1_seq(n_grid2, res)
 
     res = 1.d0
 
-    do jpoint = 1, n_points_extra_final_grid ! r2 
+    do jpoint = 1, n_points_extra_final_grid ! r2
       r(1) = final_grid_points_extra(1,jpoint)
       r(2) = final_grid_points_extra(2,jpoint)
       r(3) = final_grid_points_extra(3,jpoint)
@@ -673,7 +673,7 @@ subroutine env_nucl_r1_seq(n_grid2, res)
 
     res = 1.d0
 
-    do jpoint = 1, n_points_extra_final_grid ! r2 
+    do jpoint = 1, n_points_extra_final_grid ! r2
       r(1) = final_grid_points_extra(1,jpoint)
       r(2) = final_grid_points_extra(2,jpoint)
       r(3) = final_grid_points_extra(3,jpoint)
@@ -703,7 +703,7 @@ end
 subroutine get_grad1_u12_2e_r1_seq(ipoint, n_grid2, resx, resy, resz)
 
   BEGIN_DOC
-  ! 
+  !
   ! grad_1 u_2e(r1,r2)
   !
   ! we use grid for r1 and extra_grid for r2
@@ -827,7 +827,7 @@ end
 subroutine get_u12_2e_r1_seq(ipoint, n_grid2, res)
 
   BEGIN_DOC
-  ! 
+  !
   ! u_2e(r1,r2)
   !
   ! we use grid for r1 and extra_grid for r2
@@ -940,7 +940,7 @@ subroutine jBH_elem_fct_grad(alpha, r1, r2, fct, grad1_fct)
 
   if(dist .ge. 1d-10) then
     tmp1 = 1.d0 / (1.d0 + alpha * dist)
-    
+
     fct = alpha * dist * tmp1
     tmp2 = alpha * tmp1 * tmp1 / dist
     grad1_fct(1) = tmp2 * (r1(1) - r2(1))
@@ -954,7 +954,8 @@ subroutine jBH_elem_fct_grad(alpha, r1, r2, fct, grad1_fct)
   endif
 
   return
-end 
+end
 
 ! ---
+
 

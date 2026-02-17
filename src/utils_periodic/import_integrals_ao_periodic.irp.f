@@ -8,7 +8,7 @@ end
 subroutine run
   use map_module
   implicit none
-  
+
   integer :: iunit
   integer :: getunitandopen
 
@@ -17,14 +17,14 @@ subroutine run
   double precision, allocatable :: A(:,:), B(:,:)
   double precision :: tmp_re, tmp_im
 
-  integer             :: n_integrals 
-  integer(key_kind), allocatable   :: buffer_i(:) 
+  integer             :: n_integrals
+  integer(key_kind), allocatable   :: buffer_i(:)
   real(integral_kind), allocatable :: buffer_values(:)
 
   call ezfio_set_ao_basis_ao_num(ao_num)
 
   allocate (A(ao_num,ao_num), B(ao_num,ao_num) )
-  
+
   A(1,1) = huge(1.d0)
   iunit = getunitandopen('E.qp','r')
   read (iunit,*,end=9) A(1,1)
@@ -38,7 +38,7 @@ subroutine run
   A = 0.d0
   B = 0.d0
   iunit = getunitandopen('T.qp','r')
-  do 
+  do
     read (iunit,*,end=10) i,j, tmp_re, tmp_im
     A(i,j) = tmp_re
     B(i,j) = tmp_im
@@ -56,7 +56,7 @@ subroutine run
   A = 0.d0
   B = 0.d0
   iunit = getunitandopen('S.qp','r')
-  do 
+  do
     read (iunit,*,end=11) i,j, tmp_re, tmp_im
     A(i,j) = tmp_re
     B(i,j) = tmp_im
@@ -74,7 +74,7 @@ subroutine run
   A = 0.d0
   B = 0.d0
   iunit = getunitandopen('P.qp','r')
-  do 
+  do
     read (iunit,*,end=14) i,j, tmp_re, tmp_im
     A(i,j) = tmp_re
     B(i,j) = tmp_im
@@ -92,7 +92,7 @@ subroutine run
   A = 0.d0
   B = 0.d0
   iunit = getunitandopen('V.qp','r')
-  do 
+  do
     read (iunit,*,end=12) i,j, tmp_re, tmp_im
     A(i,j) = tmp_re
     B(i,j) = tmp_im
@@ -111,7 +111,7 @@ subroutine run
 !  iunit = getunitandopen('W.qp','r')
 !  n_integrals=0
 !  buffer_values = 0.d0
-!  do 
+!  do
 !    read (iunit,*,end=13) i,j,k,l, integral
 !    n_integrals += 1
 !    call two_e_integrals_index(i, j, k, l, buffer_i(n_integrals) )
@@ -123,7 +123,7 @@ subroutine run
 !  enddo
 !  13 continue
 !  close(iunit)
-!  
+!
 !  if (n_integrals > 0) then
 !    call insert_into_ao_integrals_map(n_integrals,buffer_i,buffer_values)
 !  endif
@@ -133,5 +133,6 @@ subroutine run
 !
 !  call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints',ao_integrals_map)
 !  call ezfio_set_ao_two_e_ints_io_ao_two_e_integrals('Read')
-  
+
 end
+

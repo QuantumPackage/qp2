@@ -77,14 +77,14 @@ subroutine run_cipsi_tc()
 
   if (.not. is_zmq_slave) then
 
-    if(.True.)then! DO NOT REMOVE THE IF(.TRUE.) !! 
+    if(.True.)then! DO NOT REMOVE THE IF(.TRUE.) !!
      ! this has to be provided before mo_bi_ortho_tc_two_e to avoid twice the computation of ao_two_e_tc_tot
-     PROVIDE Fock_matrix_tc_mo_tot 
-     ! because Fock_matrix_tc_mo_tot depends on ao_two_e_tc_tot 
-     ! and that mo_bi_ortho_tc_two_e erase ao_two_e_tc_tot after being provided 
+     PROVIDE Fock_matrix_tc_mo_tot
+     ! because Fock_matrix_tc_mo_tot depends on ao_two_e_tc_tot
+     ! and that mo_bi_ortho_tc_two_e erase ao_two_e_tc_tot after being provided
     endif
-    if(.True.)then ! DO NOT REMOVE THE IF(.TRUE.) !! 
-     PROVIDE psi_det psi_coef mo_bi_ortho_tc_two_e mo_bi_ortho_tc_one_e 
+    if(.True.)then ! DO NOT REMOVE THE IF(.TRUE.) !!
+     PROVIDE psi_det psi_coef mo_bi_ortho_tc_two_e mo_bi_ortho_tc_one_e
     endif
 
     if((elec_alpha_num+elec_beta_num) .ge. 3) then
@@ -94,7 +94,7 @@ subroutine run_cipsi_tc()
     endif
 
     FREE int2_grad1_u12_ao int2_grad1_u12_ao_t int2_grad1_u12_ao_transp
-    FREE int2_grad1_u12_bimo_transp 
+    FREE int2_grad1_u12_bimo_transp
 
     write(json_unit,json_array_open_fmt) 'fci_tc'
 
@@ -110,14 +110,14 @@ subroutine run_cipsi_tc()
     call json_close
 
   else
-    if(.True.)then! DO NOT REMOVE THE IF(.TRUE.) !! 
+    if(.True.)then! DO NOT REMOVE THE IF(.TRUE.) !!
      ! this has to be provided before mo_bi_ortho_tc_two_e to avoid twice the computation of ao_two_e_tc_tot
-     PROVIDE Fock_matrix_tc_mo_tot 
-     ! because Fock_matrix_tc_mo_tot depends on ao_two_e_tc_tot 
-     ! and that mo_bi_ortho_tc_two_e erase ao_two_e_tc_tot after being provided 
+     PROVIDE Fock_matrix_tc_mo_tot
+     ! because Fock_matrix_tc_mo_tot depends on ao_two_e_tc_tot
+     ! and that mo_bi_ortho_tc_two_e erase ao_two_e_tc_tot after being provided
     endif
 
-    if(.True.)then! DO NOT REMOVE THE IF(.TRUE.) !! 
+    if(.True.)then! DO NOT REMOVE THE IF(.TRUE.) !!
      PROVIDE mo_bi_ortho_tc_one_e mo_bi_ortho_tc_two_e pt2_min_parallel_tasks
     endif
 
@@ -128,10 +128,11 @@ subroutine run_cipsi_tc()
     endif
 
     FREE int2_grad1_u12_ao int2_grad1_u12_ao_t int2_grad1_u12_ao_transp
-    FREE int2_grad1_u12_bimo_transp 
+    FREE int2_grad1_u12_bimo_transp
 
     call run_slave_cipsi
 
   endif
 
 end
+

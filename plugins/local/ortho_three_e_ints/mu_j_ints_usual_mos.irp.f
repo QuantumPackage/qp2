@@ -10,15 +10,15 @@ subroutine give_integrals_3_body(i,j,m,k,l,n,integral)
  integral = 0.d0
  do mm = 1, 3
   do ipoint = 1, n_points_final_grid
-   weight = final_weight_at_r_vector(ipoint)                                                                          
-   integral += weight * mos_in_r_array_transp(ipoint,i) * mos_in_r_array_transp(ipoint,k) * x_W_ij_erf_rk(ipoint,mm,m,n) * x_W_ij_erf_rk(ipoint,mm,j,l) 
-   integral += weight * mos_in_r_array_transp(ipoint,j) * mos_in_r_array_transp(ipoint,l) * x_W_ij_erf_rk(ipoint,mm,m,n) * x_W_ij_erf_rk(ipoint,mm,i,k) 
-   integral += weight * mos_in_r_array_transp(ipoint,m) * mos_in_r_array_transp(ipoint,n) * x_W_ij_erf_rk(ipoint,mm,j,l) * x_W_ij_erf_rk(ipoint,mm,i,k) 
+   weight = final_weight_at_r_vector(ipoint)
+   integral += weight * mos_in_r_array_transp(ipoint,i) * mos_in_r_array_transp(ipoint,k) * x_W_ij_erf_rk(ipoint,mm,m,n) * x_W_ij_erf_rk(ipoint,mm,j,l)
+   integral += weight * mos_in_r_array_transp(ipoint,j) * mos_in_r_array_transp(ipoint,l) * x_W_ij_erf_rk(ipoint,mm,m,n) * x_W_ij_erf_rk(ipoint,mm,i,k)
+   integral += weight * mos_in_r_array_transp(ipoint,m) * mos_in_r_array_transp(ipoint,n) * x_W_ij_erf_rk(ipoint,mm,j,l) * x_W_ij_erf_rk(ipoint,mm,i,k)
   enddo
  enddo
 end
 
-BEGIN_PROVIDER [ double precision, mo_v_ij_erf_rk_cst_mu_naive, ( mo_num, mo_num,n_points_final_grid)]
+BEGIN_PROVIDER [ double precision, mo_v_ij_erf_rk_cst_mu_naive, ( mo_num, mo_num, n_points_final_grid)]
  implicit none
  BEGIN_DOC
 ! int dr phi_i(r) phi_j(r) (erf(mu(R) |r - R|) - 1 )/(2|r - R|) on the MO basis
@@ -38,9 +38,9 @@ BEGIN_PROVIDER [ double precision, mo_v_ij_erf_rk_cst_mu_naive, ( mo_num, mo_num
    enddo
   enddo
  enddo
-END_PROVIDER 
+END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, mo_v_ij_erf_rk_cst_mu, ( mo_num, mo_num,n_points_final_grid)]
+BEGIN_PROVIDER [ double precision, mo_v_ij_erf_rk_cst_mu, ( mo_num, mo_num, n_points_final_grid)]
  implicit none
  BEGIN_DOC
 ! int dr phi_i(r) phi_j(r) (erf(mu(R) |r - R|) - 1)/(2|r - R|) on the MO basis
@@ -50,7 +50,7 @@ BEGIN_PROVIDER [ double precision, mo_v_ij_erf_rk_cst_mu, ( mo_num, mo_num,n_poi
  integer :: ipoint
  !$OMP PARALLEL                  &
  !$OMP DEFAULT (NONE)            &
- !$OMP PRIVATE (ipoint) & 
+ !$OMP PRIVATE (ipoint) &
  !$OMP SHARED (n_points_final_grid,v_ij_erf_rk_cst_mu,mo_v_ij_erf_rk_cst_mu)
  !$OMP DO SCHEDULE (dynamic)
  do ipoint = 1, n_points_final_grid
@@ -59,9 +59,9 @@ BEGIN_PROVIDER [ double precision, mo_v_ij_erf_rk_cst_mu, ( mo_num, mo_num,n_poi
  !$OMP END DO
  !$OMP END PARALLEL
  mo_v_ij_erf_rk_cst_mu = mo_v_ij_erf_rk_cst_mu * 0.5d0
-END_PROVIDER 
+END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, mo_v_ij_erf_rk_cst_mu_transp, ( n_points_final_grid,mo_num, mo_num)]
+BEGIN_PROVIDER [ double precision, mo_v_ij_erf_rk_cst_mu_transp, ( n_points_final_grid, mo_num, mo_num)]
  implicit none
  BEGIN_DOC
 ! int dr phi_i(r) phi_j(r) (erf(mu(R) |r - R|) - 1)/(2|r - R|) on the MO basis
@@ -77,10 +77,10 @@ BEGIN_PROVIDER [ double precision, mo_v_ij_erf_rk_cst_mu_transp, ( n_points_fina
   enddo
  enddo
  FREE mo_v_ij_erf_rk_cst_mu
-END_PROVIDER 
+END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, mo_x_v_ij_erf_rk_cst_mu_naive, ( mo_num, mo_num,3,n_points_final_grid)]
+BEGIN_PROVIDER [ double precision, mo_x_v_ij_erf_rk_cst_mu_naive, ( mo_num, mo_num, 3, n_points_final_grid)]
  implicit none
  BEGIN_DOC
 ! int dr  x * phi_i(r) phi_j(r) (erf(mu(R) |r - R|) - 1 )/|r - R| on the MO basis
@@ -102,9 +102,9 @@ BEGIN_PROVIDER [ double precision, mo_x_v_ij_erf_rk_cst_mu_naive, ( mo_num, mo_n
    enddo
   enddo
  enddo
-END_PROVIDER 
+END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, mo_x_v_ij_erf_rk_cst_mu, ( mo_num, mo_num,3,n_points_final_grid)]
+BEGIN_PROVIDER [ double precision, mo_x_v_ij_erf_rk_cst_mu, ( mo_num, mo_num, 3, n_points_final_grid)]
  implicit none
  BEGIN_DOC
 ! int dr x * phi_i(r) phi_j(r) (erf(mu(R) |r - R|) - 1)/2|r - R| on the MO basis
@@ -114,7 +114,7 @@ BEGIN_PROVIDER [ double precision, mo_x_v_ij_erf_rk_cst_mu, ( mo_num, mo_num,3,n
  integer :: ipoint,m
  !$OMP PARALLEL                  &
  !$OMP DEFAULT (NONE)            &
- !$OMP PRIVATE (ipoint,m) & 
+ !$OMP PRIVATE (ipoint,m) &
  !$OMP SHARED (n_points_final_grid,x_v_ij_erf_rk_cst_mu_transp,mo_x_v_ij_erf_rk_cst_mu)
  !$OMP DO SCHEDULE (dynamic)
  do ipoint = 1, n_points_final_grid
@@ -126,9 +126,12 @@ BEGIN_PROVIDER [ double precision, mo_x_v_ij_erf_rk_cst_mu, ( mo_num, mo_num,3,n
  !$OMP END PARALLEL
  mo_x_v_ij_erf_rk_cst_mu = 0.5d0 * mo_x_v_ij_erf_rk_cst_mu
 
-END_PROVIDER 
+END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, mo_x_v_ij_erf_rk_cst_mu_transp, (n_points_final_grid,3, mo_num, mo_num)]
+BEGIN_PROVIDER [ double precision, mo_x_v_ij_erf_rk_cst_mu_transp, (n_points_final_grid, 3, mo_num, mo_num)]
+  BEGIN_DOC
+  ! mo_x_v_ij_erf_rk_cst_mu_transp
+  END_DOC
  implicit none
  integer :: i,j,m,ipoint
  do i = 1, mo_num
@@ -141,10 +144,10 @@ BEGIN_PROVIDER [ double precision, mo_x_v_ij_erf_rk_cst_mu_transp, (n_points_fin
   enddo
  enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, x_W_ij_erf_rk, ( n_points_final_grid,3,mo_num, mo_num)]
+BEGIN_PROVIDER [ double precision, x_W_ij_erf_rk, ( n_points_final_grid, 3, mo_num, mo_num)]
  implicit none
  BEGIN_DOC
 ! W_mn^X(R) = \int dr phi_m(r) phi_n(r) (1 - erf(mu |r-R|)) (x-X)
@@ -161,8 +164,8 @@ BEGIN_PROVIDER [ double precision, x_W_ij_erf_rk, ( n_points_final_grid,3,mo_num
  call wall_time(wall0)
  !$OMP PARALLEL                  &
  !$OMP DEFAULT (NONE)            &
- !$OMP PRIVATE (ipoint,m,i,j,xyz) & 
- !$OMP SHARED (x_W_ij_erf_rk,n_points_final_grid,mo_x_v_ij_erf_rk_cst_mu_transp,mo_v_ij_erf_rk_cst_mu_transp,mo_num,final_grid_points) 
+ !$OMP PRIVATE (ipoint,m,i,j,xyz) &
+ !$OMP SHARED (x_W_ij_erf_rk,n_points_final_grid,mo_x_v_ij_erf_rk_cst_mu_transp,mo_v_ij_erf_rk_cst_mu_transp,mo_num,final_grid_points)
  !$OMP DO SCHEDULE (dynamic)
  do i = 1, mo_num
   do j = 1, mo_num
@@ -176,10 +179,11 @@ BEGIN_PROVIDER [ double precision, x_W_ij_erf_rk, ( n_points_final_grid,3,mo_num
  enddo
  !$OMP END DO
  !$OMP END PARALLEL
- FREE mo_v_ij_erf_rk_cst_mu_transp 
+ FREE mo_v_ij_erf_rk_cst_mu_transp
  FREE mo_x_v_ij_erf_rk_cst_mu_transp
  call wall_time(wall1)
  print*,'time to provide x_W_ij_erf_rk = ',wall1 - wall0
 
-END_PROVIDER 
+END_PROVIDER
+
 

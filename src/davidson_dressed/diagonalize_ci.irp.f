@@ -19,7 +19,7 @@ BEGIN_PROVIDER [ double precision, CI_energy_dressed, (N_states_diag) ]
 END_PROVIDER
 
  BEGIN_PROVIDER [ double precision, CI_electronic_energy_dressed, (N_states_diag) ]
-&BEGIN_PROVIDER [ double precision, CI_eigenvectors_dressed, (N_det,N_states_diag) ]
+&BEGIN_PROVIDER [ double precision, CI_eigenvectors_dressed, (N_det, N_states_diag) ]
 &BEGIN_PROVIDER [ double precision, CI_eigenvectors_s2_dressed, (N_states_diag) ]
    BEGIN_DOC
    ! Eigenvectors/values of the CI matrix
@@ -40,7 +40,7 @@ END_PROVIDER
    integer, allocatable           :: iorder(:)
     logical                        :: converged
     logical                        :: do_csf
-  
+
    PROVIDE threshold_davidson nthreads_davidson
    ! Guess values for the "N_states" states of the CI_eigenvectors_dressed
    do j=1,min(N_states,N_det)
@@ -48,17 +48,17 @@ END_PROVIDER
        CI_eigenvectors_dressed(i,j) = psi_coef(i,j)
      enddo
    enddo
-  
+
    do j=min(N_states,N_det)+1,N_states_diag
      do i=1,N_det
        CI_eigenvectors_dressed(i,j) = 0.d0
      enddo
    enddo
-  
+
    do_csf = s2_eig .and. only_expected_s2 .and. csf_based
-  
+
    if (diag_algorithm == "Davidson") then
-  
+
      do j=1,min(N_states,N_det)
        do i=1,N_det
          CI_eigenvectors_dressed(i,j) = psi_coef(i,j)
@@ -132,13 +132,13 @@ END_PROVIDER
        N_states_diag = N_states_diag_save
        TOUCH N_states_diag
      endif
-  
+
    else if (diag_algorithm == "Lapack") then
-  
+
      print *,  'Diagonalization of H using Lapack'
      allocate (eigenvectors(size(H_matrix_dressed,1),N_det))
      allocate (eigenvalues(N_det))
-  
+
      call lapack_diag(eigenvalues,eigenvectors,                         &
          H_matrix_dressed,size(H_matrix_dressed,1),N_det)
       CI_electronic_energy_dressed(:) = 0.d0
@@ -147,7 +147,7 @@ END_PROVIDER
         allocate (s2_eigvalues(N_det))
         allocate(index_good_state_array(N_det),good_state_array(N_det))
         good_state_array = .False.
-  
+
         call u_0_S2_u_0(s2_eigvalues,eigenvectors,N_det,psi_det,N_int,&
                    N_det,size(eigenvectors,1))
         do j=1,N_det
@@ -227,7 +227,7 @@ subroutine diagonalize_CI_dressed
   END_DOC
   integer :: i,j
 !  PROVIDE delta_ij
-  PROVIDE dressing_column_h 
+  PROVIDE dressing_column_h
   do j=1,N_states
     do i=1,N_det
       psi_coef(i,j) = CI_eigenvectors_dressed(i,j)
@@ -238,7 +238,7 @@ end
 
 
 
-BEGIN_PROVIDER [ double precision, h_matrix_dressed, (N_det,N_det) ]
+BEGIN_PROVIDER [ double precision, h_matrix_dressed, (N_det, N_det) ]
  implicit none
  BEGIN_DOC
  ! Dressed H with Delta_ij
@@ -270,4 +270,5 @@ BEGIN_PROVIDER [ double precision, h_matrix_dressed, (N_det,N_det) ]
 
 
 END_PROVIDER
+
 

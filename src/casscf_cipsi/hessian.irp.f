@@ -468,7 +468,10 @@ BEGIN_PROVIDER [real*8, hessdiag, (nMonoEx)]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [double precision, hessmat, (nMonoEx,nMonoEx)]
+BEGIN_PROVIDER [double precision, hessmat, (nMonoEx, nMonoEx)]
+  BEGIN_DOC
+  ! hessmat
+  END_DOC
  implicit none
  integer                        :: i,j,t,u,a,b
  integer                        :: indx,indx_tmp, jndx, jndx_tmp
@@ -647,3 +650,4 @@ BEGIN_PROVIDER [double precision, hessmat, (nMonoEx,nMonoEx)]
   !$OMP END PARALLEL
 
 END_PROVIDER
+

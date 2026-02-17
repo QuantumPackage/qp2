@@ -20,7 +20,7 @@ program deb_mos
   endif
 
   call print_mos()
-  
+
 end
 
 ! ---
@@ -53,7 +53,7 @@ double precision :: accu_vgl_nrm(5)
       write(1111, '(5(f15.7, 3X))') mo_val, mo_der, mo_lap
     enddo
   enddo
- 
+
   do ipoint = 1, n_points_final_grid
     r(1) = final_grid_points(1,i)
     r(2) = final_grid_points(2,i)
@@ -66,7 +66,7 @@ double precision :: accu_vgl_nrm(5)
       write(2222, '(5(f15.7, 3X))') mo_val, mo_der, mo_lap
     enddo
   enddo
- 
+
   accu_vgl = 0.d0
   accu_vgl_nrm = 0.d0
   do ipoint = 1, n_points_final_grid
@@ -98,4 +98,5 @@ double precision :: accu_vgl_nrm(5)
 end
 
 ! ---
+
 

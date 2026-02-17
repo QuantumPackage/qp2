@@ -2,6 +2,9 @@
 ! ---
 
 BEGIN_PROVIDER [integer, List_env1s_size]
+  BEGIN_DOC
+  ! List_env1s_size
+  END_DOC
 
   implicit none
 
@@ -19,7 +22,7 @@ BEGIN_PROVIDER [integer, List_env1s_size]
 
     List_env1s_size = nucl_num + 1
 
-  else 
+  else
 
     print *, ' Error in List_env1s_size: Unknown env_type = ', env_type
     stop
@@ -33,6 +36,9 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [integer, List_env1s, (nucl_num, List_env1s_size)]
+  BEGIN_DOC
+  ! List_env1s
+  END_DOC
 
   implicit none
   integer :: i, j
@@ -59,6 +65,9 @@ END_PROVIDER
  BEGIN_PROVIDER [ double precision, List_env1s_coef, (   List_env1s_size)]
 &BEGIN_PROVIDER [ double precision, List_env1s_expo, (   List_env1s_size)]
 &BEGIN_PROVIDER [ double precision, List_env1s_cent, (3, List_env1s_size)]
+  BEGIN_DOC
+  ! List_env1s_coef
+  END_DOC
 
   implicit none
   integer          :: i, j, k, phase
@@ -94,7 +103,7 @@ END_PROVIDER
 
       if(List_env1s_expo(i) .lt. 1d-10) cycle
 
-      List_env1s_cent(1,i) = tmp_cent_x / List_env1s_expo(i) 
+      List_env1s_cent(1,i) = tmp_cent_x / List_env1s_expo(i)
       List_env1s_cent(2,i) = tmp_cent_y / List_env1s_expo(i)
       List_env1s_cent(3,i) = tmp_cent_z / List_env1s_expo(i)
     enddo
@@ -156,6 +165,9 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [integer, List_env1s_square_size]
+  BEGIN_DOC
+  ! List_env1s_square_size
+  END_DOC
 
   implicit none
   double precision :: tmp
@@ -187,6 +199,9 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [integer, List_env1s_square, (nucl_num, List_env1s_square_size)]
+  BEGIN_DOC
+  ! List_env1s_square
+  END_DOC
 
   implicit none
   integer              :: i, j, ii, jj
@@ -223,6 +238,9 @@ END_PROVIDER
  BEGIN_PROVIDER [ double precision, List_env1s_square_coef, (   List_env1s_square_size)]
 &BEGIN_PROVIDER [ double precision, List_env1s_square_expo, (   List_env1s_square_size)]
 &BEGIN_PROVIDER [ double precision, List_env1s_square_cent, (3, List_env1s_square_size)]
+  BEGIN_DOC
+  ! List_env1s_square_coef
+  END_DOC
 
   implicit none
   integer          :: i, j, k, phase
@@ -259,7 +277,7 @@ END_PROVIDER
 
       if(List_env1s_square_expo(i) .lt. 1d-10) cycle
 
-      List_env1s_square_cent(1,i) = List_env1s_square_cent(1,i) / List_env1s_square_expo(i) 
+      List_env1s_square_cent(1,i) = List_env1s_square_cent(1,i) / List_env1s_square_expo(i)
       List_env1s_square_cent(2,i) = List_env1s_square_cent(2,i) / List_env1s_square_expo(i)
       List_env1s_square_cent(3,i) = List_env1s_square_cent(3,i) / List_env1s_square_expo(i)
     enddo
@@ -291,7 +309,7 @@ END_PROVIDER
       facto = 1.d0
       phase = 0
       do j = 1, nucl_num
-        tmp_alphaj = dble(List_env1s_square(j,i)) 
+        tmp_alphaj = dble(List_env1s_square(j,i))
 
         facto *= 2.d0 / (gamma(tmp_alphaj+1.d0) * gamma(3.d0-tmp_alphaj))
         phase += List_env1s_square(j,i)
@@ -347,7 +365,7 @@ END_PROVIDER
         dy = yi - yj
         dz = zi - zj
         r2 = dx*dx + dy*dy + dz*dz
-        
+
         ii = ii + 1
         ! x 2 to avoid doing integrals twice
         List_env1s_square_coef(  ii) = 2.d0 * dexp(-tmp1*tmp2*tmp4*r2) * env_coef(i) * env_coef(j)
@@ -368,4 +386,5 @@ END_PROVIDER
 END_PROVIDER
 
 ! ---
+
 

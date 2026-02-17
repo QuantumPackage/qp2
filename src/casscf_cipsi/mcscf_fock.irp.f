@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [real*8, Fipq, (mo_num,mo_num) ]
+BEGIN_PROVIDER [real*8, Fipq, (mo_num, mo_num) ]
    BEGIN_DOC
    ! the inactive Fock matrix, in molecular orbitals
    END_DOC
@@ -50,7 +50,7 @@ BEGIN_PROVIDER [real*8, Fipq, (mo_num,mo_num) ]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [real*8, Fapq, (mo_num,mo_num) ]
+BEGIN_PROVIDER [real*8, Fapq, (mo_num, mo_num) ]
    BEGIN_DOC
    ! the active active Fock matrix, in molecular orbitals
    ! we create them in MOs, quite expensive
@@ -136,7 +136,7 @@ END_PROVIDER
 
 END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, mcscf_fock_mo, (mo_num,mo_num) ]
+ BEGIN_PROVIDER [ double precision, mcscf_fock_mo, (mo_num, mo_num) ]
 &BEGIN_PROVIDER [ double precision, mcscf_fock_diag_mo, (mo_num)]
    implicit none
    BEGIN_DOC
@@ -226,3 +226,4 @@ END_PROVIDER
   mcscf_fock_diag_mo(i) = mcscf_fock_mo(i,i)
  enddo
 END_PROVIDER
+

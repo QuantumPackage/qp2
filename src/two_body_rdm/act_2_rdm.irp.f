@@ -1,5 +1,5 @@
 
- BEGIN_PROVIDER [double precision, act_2_rdm_ab_mo, (n_act_orb,n_act_orb,n_act_orb,n_act_orb,N_states)]
+ BEGIN_PROVIDER [double precision, act_2_rdm_ab_mo, (n_act_orb, n_act_orb, n_act_orb, n_act_orb, N_states)]
  implicit none
  BEGIN_DOC
 !                             12 12
@@ -45,7 +45,7 @@
  END_PROVIDER
 
 
- BEGIN_PROVIDER [double precision, act_2_rdm_aa_mo, (n_act_orb,n_act_orb,n_act_orb,n_act_orb,N_states)]
+ BEGIN_PROVIDER [double precision, act_2_rdm_aa_mo, (n_act_orb, n_act_orb, n_act_orb, n_act_orb, N_states)]
  implicit none
  BEGIN_DOC
 ! act_2_rdm_aa_mo(i,j,k,l,istate) =  STATE SPECIFIC physicist notation for 2RDM of ALPHA/ALPHA electrons
@@ -86,7 +86,7 @@
  END_PROVIDER
 
 
- BEGIN_PROVIDER [double precision, act_2_rdm_bb_mo, (n_act_orb,n_act_orb,n_act_orb,n_act_orb,N_states)]
+ BEGIN_PROVIDER [double precision, act_2_rdm_bb_mo, (n_act_orb, n_act_orb, n_act_orb, n_act_orb, N_states)]
  implicit none
  BEGIN_DOC
 ! act_2_rdm_bb_mo(i,j,k,l,istate) =  STATE SPECIFIC physicist notation for 2RDM of BETA/BETA electrons
@@ -126,7 +126,7 @@
  act_2_rdm_bb_mo *= 2.d0
  END_PROVIDER
 
- BEGIN_PROVIDER [double precision, act_2_rdm_spin_trace_mo, (n_act_orb,n_act_orb,n_act_orb,n_act_orb,N_states)]
+ BEGIN_PROVIDER [double precision, act_2_rdm_spin_trace_mo, (n_act_orb, n_act_orb, n_act_orb, n_act_orb, N_states)]
  implicit none
  BEGIN_DOC
 ! act_2_rdm_spin_trace_mo(i,j,k,l,istate) =  STATE SPECIFIC physicist notation for 2RDM
@@ -166,3 +166,4 @@
  call wall_time(wall_2)
  print*,'Wall time to provide act_2_rdm_spin_trace_mo',wall_2 - wall_1
  END_PROVIDER
+

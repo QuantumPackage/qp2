@@ -401,7 +401,7 @@ subroutine NAI_pol_x_mult_erf_ao_v(i_ao, j_ao, mu_in, C_center, LD_C, ints, LD_i
         coef = ao_coef_normalized_ordered_transp(j,j_ao) * ao_coef_normalized_ordered_transp(i,i_ao)
 
         ! First term = (x-Ax)**(ax+1)
-        call NAI_pol_mult_erf_v( A_center, B_center, power_xA, power_B, alpha, beta & 
+        call NAI_pol_mult_erf_v( A_center, B_center, power_xA, power_B, alpha, beta &
                                , C_center(1:LD_C,1:3,m), LD_C, n_pt_in, mu_in, integral(1:LD_integral), LD_integral, n_points_m)
         do ipoint = 1, n_points_m
           ints(ipoint,m) += integral(ipoint) * coef
@@ -434,7 +434,7 @@ double precision function NAI_pol_x_mult_erf_ao_x(i_ao, j_ao, mu_in, C_center)
   !
   END_DOC
 
-  include 'utils/constants.include.F'                                                                                                                                  
+  include 'utils/constants.include.F'
 
   implicit none
 
@@ -493,7 +493,7 @@ double precision function NAI_pol_x_mult_erf_ao_y(i_ao, j_ao, mu_in, C_center)
   !
   END_DOC
 
-  include 'utils/constants.include.F'                                                                                                                                  
+  include 'utils/constants.include.F'
 
   implicit none
 
@@ -552,7 +552,7 @@ double precision function NAI_pol_x_mult_erf_ao_z(i_ao, j_ao, mu_in, C_center)
   !
   END_DOC
 
-  include 'utils/constants.include.F'                                                                                                                                  
+  include 'utils/constants.include.F'
 
   implicit none
 
@@ -611,7 +611,7 @@ double precision function NAI_pol_x_mult_erf_ao_with1s_x(i_ao, j_ao, beta, B_cen
   !
   END_DOC
 
-  include 'utils/constants.include.F'                                                                                                                                  
+  include 'utils/constants.include.F'
 
   implicit none
 
@@ -652,7 +652,7 @@ double precision function NAI_pol_x_mult_erf_ao_with1s_x(i_ao, j_ao, beta, B_cen
 
     do j = 1, ao_prim_num(j_ao)
       alphaj = ao_expo_ordered_transp                   (j,j_ao)
-      coef   = coefi * ao_coef_normalized_ordered_transp(j,j_ao) 
+      coef   = coefi * ao_coef_normalized_ordered_transp(j,j_ao)
 
       ! First term = (x-Ax)**(ax+1)
       integral = NAI_pol_mult_erf_with1s( Ai_center, Aj_center, power_xA, power_Aj, alphai, alphaj &
@@ -681,7 +681,7 @@ double precision function NAI_pol_x_mult_erf_ao_with1s_y(i_ao, j_ao, beta, B_cen
   !
   END_DOC
 
-  include 'utils/constants.include.F'                                                                                                                                  
+  include 'utils/constants.include.F'
 
   implicit none
 
@@ -722,7 +722,7 @@ double precision function NAI_pol_x_mult_erf_ao_with1s_y(i_ao, j_ao, beta, B_cen
 
     do j = 1, ao_prim_num(j_ao)
       alphaj = ao_expo_ordered_transp                   (j,j_ao)
-      coef   = coefi * ao_coef_normalized_ordered_transp(j,j_ao) 
+      coef   = coefi * ao_coef_normalized_ordered_transp(j,j_ao)
 
       ! First term = (x-Ax)**(ax+1)
       integral = NAI_pol_mult_erf_with1s( Ai_center, Aj_center, power_xA, power_Aj, alphai, alphaj &
@@ -751,7 +751,7 @@ double precision function NAI_pol_x_mult_erf_ao_with1s_z(i_ao, j_ao, beta, B_cen
   !
   END_DOC
 
-  include 'utils/constants.include.F'                                                                                                                                  
+  include 'utils/constants.include.F'
 
   implicit none
 
@@ -792,7 +792,7 @@ double precision function NAI_pol_x_mult_erf_ao_with1s_z(i_ao, j_ao, beta, B_cen
 
     do j = 1, ao_prim_num(j_ao)
       alphaj = ao_expo_ordered_transp                   (j,j_ao)
-      coef   = coefi * ao_coef_normalized_ordered_transp(j,j_ao) 
+      coef   = coefi * ao_coef_normalized_ordered_transp(j,j_ao)
 
       ! First term = (x-Ax)**(ax+1)
       integral = NAI_pol_mult_erf_with1s( Ai_center, Aj_center, power_xA, power_Aj, alphai, alphaj &
@@ -1398,4 +1398,5 @@ subroutine NAI_pol_012_mult_erf_ao(i_ao, j_ao, mu_in, C_center, ints)
 end
 
 ! ---
+
 

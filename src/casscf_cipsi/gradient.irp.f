@@ -11,20 +11,23 @@ END_PROVIDER
  BEGIN_PROVIDER [integer, n_c_a_prov]
 &BEGIN_PROVIDER [integer, n_c_v_prov]
 &BEGIN_PROVIDER [integer, n_a_v_prov]
+  BEGIN_DOC
+  ! n_c_a_prov
+  END_DOC
   implicit none
   n_c_a_prov = n_core_inact_orb * n_act_orb
   n_c_v_prov = n_core_inact_orb * n_virt_orb
   n_a_v_prov = n_act_orb * n_virt_orb
  END_PROVIDER
 
- BEGIN_PROVIDER [integer, excit, (2,nMonoEx)]
+ BEGIN_PROVIDER [integer, excit, (2, nMonoEx)]
 &BEGIN_PROVIDER [character*3, excit_class, (nMonoEx)]
-&BEGIN_PROVIDER [integer, list_idx_c_a, (3,n_c_a_prov) ]
-&BEGIN_PROVIDER [integer, list_idx_c_v, (3,n_c_v_prov) ]
-&BEGIN_PROVIDER [integer, list_idx_a_v, (3,n_a_v_prov) ]
-&BEGIN_PROVIDER [integer, mat_idx_c_a, (n_core_inact_orb,n_act_orb)
-&BEGIN_PROVIDER [integer, mat_idx_c_v, (n_core_inact_orb,n_virt_orb)
-&BEGIN_PROVIDER [integer, mat_idx_a_v, (n_act_orb,n_virt_orb)
+&BEGIN_PROVIDER [integer, list_idx_c_a, (3, n_c_a_prov) ]
+&BEGIN_PROVIDER [integer, list_idx_c_v, (3, n_c_v_prov) ]
+&BEGIN_PROVIDER [integer, list_idx_a_v, (3, n_a_v_prov) ]
+&BEGIN_PROVIDER [integer, mat_idx_c_a, (n_core_inact_orb, n_act_orb)]
+&BEGIN_PROVIDER [integer, mat_idx_c_v, (n_core_inact_orb, n_virt_orb)]
+&BEGIN_PROVIDER [integer, mat_idx_a_v, (n_act_orb, n_virt_orb)]
   BEGIN_DOC
   ! a list of the orbitals involved in the excitation
   END_DOC
@@ -220,4 +223,5 @@ real*8 function gradvec_ta(t,a)
   gradvec_ta*=2.D0
 
 end function gradvec_ta
+
 

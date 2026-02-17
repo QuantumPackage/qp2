@@ -211,7 +211,7 @@ subroutine davidson_general_ext_rout_dressed(u_in,H_jj,energies,sze,N_st,N_st_di
     enddo
     u_in(k,k) = u_in(k,k) + 10.d0
   enddo
-  ! Normalize all states 
+  ! Normalize all states
   do k=1,N_st_diag
     call normalize(u_in(:,k),sze)
   enddo
@@ -238,11 +238,11 @@ subroutine davidson_general_ext_rout_dressed(u_in,H_jj,energies,sze,N_st,N_st_di
       if ((iter > 1).or.(itertot == 1)) then
         ! Compute |W_k> = \sum_i |i><i|H|u_k>
         ! -----------------------------------
-         ! Gram-Schmidt to orthogonalize all new guess with the previous vectors 
+         ! Gram-Schmidt to orthogonalize all new guess with the previous vectors
           call ortho_qr(U,size(U,1),sze,shift2)
           call ortho_qr(U,size(U,1),sze,shift2)
           !    it does W = H U with W(sze,N_st_diag),U(sze,N_st_diag)
-          !    where sze is the size of the vector, N_st_diag is the number of states 
+          !    where sze is the size of the vector, N_st_diag is the number of states
           call hcalc(W(:,shift+1),U(:,shift+1),N_st_diag,sze)
       else
          ! Already computed in update below
@@ -386,7 +386,7 @@ subroutine davidson_general_ext_rout_dressed(u_in,H_jj,energies,sze,N_st,N_st_di
 
         if (k <= N_st) then
           residual_norm(k) = u_dot_u(U(:,shift2+k),sze)
-          to_print(1,k) = lambda(k) 
+          to_print(1,k) = lambda(k)
           to_print(2,k) = residual_norm(k)
         endif
       enddo
@@ -475,6 +475,7 @@ subroutine davidson_general_ext_rout_dressed(u_in,H_jj,energies,sze,N_st,N_st_di
       )
   FREE nthreads_davidson
 end
+
 
 
 

@@ -2,6 +2,9 @@
 ! ---
 
 BEGIN_PROVIDER [double precision, int2_grad1_u12_bimo_t, (n_points_final_grid, 3, mo_num, mo_num)]
+  BEGIN_DOC
+  ! int2_grad1_u12_bimo_t
+  END_DOC
 
   implicit none
   integer                       :: i, j, ipoint
@@ -17,7 +20,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_bimo_t, (n_points_final_grid, 3
 
   !$OMP PARALLEL         &
   !$OMP DEFAULT (NONE)   &
-  !$OMP PRIVATE (ipoint) & 
+  !$OMP PRIVATE (ipoint) &
   !$OMP SHARED (ao_num, mo_num, n_points_final_grid, int2_grad1_u12_ao, tmp)
   !$OMP DO SCHEDULE (dynamic)
   do ipoint = 1, n_points_final_grid
@@ -30,7 +33,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_bimo_t, (n_points_final_grid, 3
 
   !$OMP PARALLEL               &
   !$OMP DEFAULT (NONE)         &
-  !$OMP PRIVATE (i, j, ipoint) & 
+  !$OMP PRIVATE (i, j, ipoint) &
   !$OMP SHARED (mo_num, n_points_final_grid, tmp, int2_grad1_u12_bimo_t)
   !$OMP DO COLLAPSE(2) SCHEDULE (dynamic)
   do ipoint = 1, n_points_final_grid
@@ -39,7 +42,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_bimo_t, (n_points_final_grid, 3
         int2_grad1_u12_bimo_t(ipoint,1,j,i) = tmp(j,i,ipoint,1)
         int2_grad1_u12_bimo_t(ipoint,2,j,i) = tmp(j,i,ipoint,2)
         int2_grad1_u12_bimo_t(ipoint,3,j,i) = tmp(j,i,ipoint,3)
-      enddo                                  
+      enddo
     enddo
   enddo
   !$OMP END DO
@@ -50,7 +53,8 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_bimo_t, (n_points_final_grid, 3
   call wall_time(tt2)
   write(*,"(A,2X,F15.7)") ' wall time for int2_grad1_u12_bimo_t (sec) = ', (tt2 - tt1)
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
+
 

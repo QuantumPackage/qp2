@@ -1,5 +1,5 @@
- BEGIN_PROVIDER [double precision, effective_one_e_potential, (mo_num, mo_num,N_states)]
-&BEGIN_PROVIDER [double precision, effective_one_e_potential_without_kin, (mo_num, mo_num,N_states)]
+ BEGIN_PROVIDER [double precision, effective_one_e_potential, (mo_num, mo_num, N_states)]
+&BEGIN_PROVIDER [double precision, effective_one_e_potential_without_kin, (mo_num, mo_num, N_states)]
  implicit none
  integer :: i,j,istate
  effective_one_e_potential = 0.d0
@@ -7,12 +7,12 @@
 ! Effective_one_e_potential(i,j) = $\rangle i_{MO}| v_{H}^{sr} |j_{MO}\rangle  + \rangle i_{MO}| h_{core} |j_{MO}\rangle  + \rangle i_{MO}|v_{xc} |j_{MO}\rangle$
 !
 ! on the |MO| basis
-! 
+!
 ! Taking the expectation value does not provide any energy, but
 !
-! effective_one_e_potential(i,j) is the potential coupling DFT and WFT parts 
+! effective_one_e_potential(i,j) is the potential coupling DFT and WFT parts
 !
-! and it is used in any RS-DFT based calculations  
+! and it is used in any RS-DFT based calculations
  END_DOC
  do istate = 1, N_states
   do j = 1, mo_num
@@ -31,6 +31,9 @@
 END_PROVIDER
 
  BEGIN_PROVIDER [double precision, ref_vhxc]
+  BEGIN_DOC
+  ! ref_vhxc
+  END_DOC
  implicit none
  integer :: i
  do i = 1, elec_beta_num
@@ -39,7 +42,7 @@ END_PROVIDER
  do i = elec_beta_num+1, elec_beta_num
   ref_vhxc += effective_one_e_potential(i,i,1)*1.d0
  enddo
- END_PROVIDER 
+ END_PROVIDER
 
  BEGIN_PROVIDER [double precision, effective_one_e_potential_sa, (mo_num, mo_num)]
 &BEGIN_PROVIDER [double precision, effective_one_e_potential_without_kin_sa, (mo_num, mo_num)]
@@ -57,11 +60,11 @@ END_PROVIDER
    effective_one_e_potential_without_kin_sa(:,:) += effective_one_e_potential_without_kin(:,:,istate) * state_average_weight(istate)
  enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 
- BEGIN_PROVIDER [double precision, ao_effective_one_e_potential, (ao_num, ao_num,N_states)]
-&BEGIN_PROVIDER [double precision, ao_effective_one_e_potential_without_kin, (ao_num, ao_num,N_states)]
+ BEGIN_PROVIDER [double precision, ao_effective_one_e_potential, (ao_num, ao_num, N_states)]
+&BEGIN_PROVIDER [double precision, ao_effective_one_e_potential_without_kin, (ao_num, ao_num, N_states)]
  implicit none
  integer :: i,j,istate
  ao_effective_one_e_potential = 0.d0
@@ -70,12 +73,12 @@ END_PROVIDER
 ! Effective_one_e_potential(i,j) = $\rangle i_{AO}| v_{H}^{sr} |j_{AO}\rangle  + \rangle i_{AO}| h_{core} |j_{AO}\rangle  + \rangle i_{AO}|v_{xc} |j_{AO}\rangle$
 !
 ! on the |MO| basis
-! 
+!
 ! Taking the expectation value does not provide any energy, but
 !
-! ao_effective_one_e_potential(i,j) is the potential coupling DFT and WFT parts 
+! ao_effective_one_e_potential(i,j) is the potential coupling DFT and WFT parts
 !
-! and it is used in any RS-DFT based calculations  
+! and it is used in any RS-DFT based calculations
  END_DOC
  do istate = 1, N_states
     call mo_to_ao(effective_one_e_potential(1,1,istate),mo_num,ao_effective_one_e_potential(1,1,istate),ao_num)
@@ -100,5 +103,6 @@ END_PROVIDER
    ao_effective_one_e_potential_without_kin_sa(:,:) += ao_effective_one_e_potential_without_kin(:,:,istate) * state_average_weight(istate)
  enddo
 
-END_PROVIDER 
+END_PROVIDER
+
 

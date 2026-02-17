@@ -9,8 +9,8 @@ BEGIN_PROVIDER [ integer, N_det_generators ]
  N_det_generators = 1
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_det_generators, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_coef_generators, (psi_det_size,N_states) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_det_generators, (N_int, 2, psi_det_size) ]
+&BEGIN_PROVIDER [ double precision, psi_coef_generators, (psi_det_size, N_states) ]
  implicit none
  BEGIN_DOC
  ! For Single reference wave functions, the generator is the
@@ -54,5 +54,6 @@ BEGIN_PROVIDER [ integer, size_select_max ]
  size_select_max = 1
 
 END_PROVIDER
+
 
 

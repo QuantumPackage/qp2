@@ -1,7 +1,7 @@
 program my_program
   implicit none
   BEGIN_DOC
-! This program is there essentially to show how one can use providers in programs 
+! This program is there essentially to show how one can use providers in programs
   END_DOC
  integer :: i,j
  double precision :: accu
@@ -17,8 +17,9 @@ program my_program
   print*,'The AO basis and MO basis are different ...'
   print*,'Trace on the AO basis should not be the same as Trace of MO integrals'
   print*,'Only the second one must be equal to the trace on the MO integrals'
- else 
+ else
   print*,'The AO basis and MO basis are the same !'
   print*,'All traces should coincide '
  endif
 end
+

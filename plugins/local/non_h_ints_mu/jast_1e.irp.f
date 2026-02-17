@@ -2,6 +2,9 @@
 ! ---
 
 BEGIN_PROVIDER [double precision, j1e_val, (n_points_final_grid)]
+  BEGIN_DOC
+  ! j1e_val
+  END_DOC
 
   implicit none
   integer          :: ipoint, i, j, p
@@ -68,6 +71,9 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, j1e_gradx, (n_points_final_grid)]
 &BEGIN_PROVIDER [double precision, j1e_grady, (n_points_final_grid)]
 &BEGIN_PROVIDER [double precision, j1e_gradz, (n_points_final_grid)]
+  BEGIN_DOC
+  ! j1e_gradx
+  END_DOC
 
   implicit none
   integer                       :: ipoint, i, j, ij, p
@@ -132,7 +138,7 @@ END_PROVIDER
 
   elseif(j1e_type .eq. "Charge_Harmonizer") then
 
-    ! -[(N-1)/2N] x \sum_{\mu,\nu} P_{\mu,\nu} \int dr2 [\grad_r1 J_2e(r1,r2)] \phi_\mu(r2) \phi_nu(r2) 
+    ! -[(N-1)/2N] x \sum_{\mu,\nu} P_{\mu,\nu} \int dr2 [\grad_r1 J_2e(r1,r2)] \phi_\mu(r2) \phi_nu(r2)
 
     PROVIDE elec_alpha_num elec_beta_num elec_num
     PROVIDE mo_coef
@@ -166,7 +172,7 @@ END_PROVIDER
   elseif(j1e_type .eq. "Charge_Harmonizer_AO") then
 
     ! \grad_1 \sum_{\eta,\beta} C_{\eta,\beta} \chi_{\eta} \chi_{\beta}
-    ! where 
+    ! where
     !       \chi_{\eta} are the AOs
     !       C_{\eta,\beta} are fitted to mimic (j1e_type .eq. "Charge_Harmonizer")
     !
@@ -178,7 +184,7 @@ END_PROVIDER
 
     if(mpi_master) then
       call ezfio_has_jastrow_j1e_coef_ao2(exists)
-    endif 
+    endif
     IRP_IF MPI_DEBUG
       print *,  irp_here, mpi_rank
       call MPI_BARRIER(MPI_COMM_WORLD, ierr)
@@ -250,6 +256,9 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [double precision, j1e_lapl, (n_points_final_grid)]
+  BEGIN_DOC
+  ! j1e_lapl
+  END_DOC
 
   implicit none
   integer          :: ipoint, i, j, p
@@ -303,4 +312,5 @@ BEGIN_PROVIDER [double precision, j1e_lapl, (n_points_final_grid)]
 END_PROVIDER
 
 ! ---
+
 

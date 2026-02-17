@@ -11,7 +11,7 @@ program compute_deltamu_right
   read_wf = .True.
   touch read_wf
 
-  PROVIDE N_int 
+  PROVIDE N_int
   call delta_right()
 
 end
@@ -22,7 +22,7 @@ subroutine delta_right()
 
   implicit none
   integer                       :: k
-  double precision, allocatable :: delta(:,:) 
+  double precision, allocatable :: delta(:,:)
 
   allocate( delta(N_det,N_states) )
   delta = 0.d0
@@ -30,7 +30,7 @@ subroutine delta_right()
   do k = 1, N_states
   !do k = 1, 1
 
-    ! get < I_left | H_mu - H | psi_right > 
+    ! get < I_left | H_mu - H | psi_right >
     !call get_h_bitc_right(psi_det, psi_r_coef_bi_ortho(:,k), N_det, N_int, delta(:,k))
     call get_delta_bitc_right(psi_det, psi_r_coef_bi_ortho(:,k), N_det, N_int, delta(:,k))
 
@@ -47,4 +47,5 @@ subroutine delta_right()
 end
 
 ! ---
+
 

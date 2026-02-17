@@ -3,11 +3,11 @@
 
 BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_num, mo_num)]
 
-  BEGIN_DOC 
+  BEGIN_DOC
   !
   ! Normal ordering of the three body interaction on the HF density
   !
-  END_DOC 
+  END_DOC
 
   use bitmasks ! you need to include the bitmasks_module.f90 features
 
@@ -27,7 +27,7 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
   print*,' Providing normal_two_body_bi_orth ...'
   call wall_time(walli)
- 
+
   if(read_tc_norm_ord) then
 
     open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/normal_two_body_bi_orth', action="read")
@@ -105,7 +105,7 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
     !$OMP PARALLEL                                                                         &
     !$OMP DEFAULT (NONE)                                                                   &
     !$OMP PRIVATE (ipoint, hh1, pp1, hh2, pp2, h1, p1, h2, p2, i, ii, tmp1, tmp2,          &
-    !$OMP          tmpval_1, tmpval_2, tmpvec_1, tmpvec_2)                                 & 
+    !$OMP          tmpval_1, tmpval_2, tmpvec_1, tmpvec_2)                                 &
     !$OMP SHARED (n_points_final_grid, Ne, occ, mo_num, n_act_orb, list_act,               &
     !$OMP         mos_l_in_r_array_transp_tmp, mos_r_in_r_array_transp_tmp,                &
     !$OMP         final_weight_at_r_vector, int2_grad1_u12_bimo_t_tmp,                     &
@@ -174,7 +174,7 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
           do hh2 = 1, n_act_orb
             h2 = list_act(hh2)
             do ipoint = 1, n_points_final_grid
-              tmp2(ipoint,h2) = tmp2(ipoint,h2) + mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint) 
+              tmp2(ipoint,h2) = tmp2(ipoint,h2) + mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint)
             enddo
           enddo
 
@@ -197,7 +197,7 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
     !$OMP END PARALLEL
 
 
-    ! purely open-shell part 
+    ! purely open-shell part
     if(Ne(2) < Ne(1)) then
 
       call set_multiple_levels_omp(.false.)
@@ -205,7 +205,7 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
       !$OMP PARALLEL                                                                         &
       !$OMP DEFAULT (NONE)                                                                   &
       !$OMP PRIVATE (ipoint, hh1, pp1, hh2, pp2, h1, p1, h2, p2, i, ii, tmp1, tmp2,          &
-      !$OMP          tmpval_1, tmpval_2, tmpvec_1, tmpvec_2)                                 & 
+      !$OMP          tmpval_1, tmpval_2, tmpvec_1, tmpvec_2)                                 &
       !$OMP SHARED (n_points_final_grid, Ne, occ, mo_num, n_act_orb, list_act,               &
       !$OMP         mos_l_in_r_array_transp_tmp, mos_r_in_r_array_transp_tmp,                &
       !$OMP         final_weight_at_r_vector, int2_grad1_u12_bimo_t_tmp,                     &
@@ -276,7 +276,7 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
           do hh2 = 1, n_act_orb
             h2 = list_act(hh2)
               do ipoint = 1, n_points_final_grid
-                tmp2(ipoint,h2) = tmp2(ipoint,h2) + mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint) 
+                tmp2(ipoint,h2) = tmp2(ipoint,h2) + mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint)
               enddo
             enddo
 
@@ -379,7 +379,7 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
           do hh2 = 1, n_act_orb
             h2 = list_act(hh2)
             do ipoint = 1, n_points_final_grid
-              tmp2(ipoint,h2) = tmp2(ipoint,h2) + mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint) 
+              tmp2(ipoint,h2) = tmp2(ipoint,h2) + mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint)
             enddo
           enddo
 
@@ -405,7 +405,7 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
     !$OMP PARALLEL                 &
     !$OMP DEFAULT (NONE)           &
-    !$OMP PRIVATE (h1, h2, p1, p2) & 
+    !$OMP PRIVATE (h1, h2, p1, p2) &
     !$OMP SHARED (tmp, mo_num)
 
     !$OMP DO COLLAPSE(2)
@@ -543,7 +543,7 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
                   , tmp1(1,1,1), 3*n_points_final_grid                           &
                   , int2_grad1_u12_bimo_t_tmp(1,1,1,1), 3*n_points_final_grid    &
                   , 0.d0, tmp_3d(1,1,1), mo_num)
-  
+
         do p1 = 1, mo_num
           do h2 = 1, mo_num
             do p2 = 1, mo_num
@@ -649,7 +649,7 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
       !$OMP END PARALLEL
 
-      ! purely open-shell part 
+      ! purely open-shell part
       if(Ne(2) < Ne(1)) then
 
         call set_multiple_levels_omp(.false.)
@@ -807,7 +807,7 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
                   tmp1(ipoint,3,p2) = tmp1(ipoint,3,p2) + tmpval_2(ipoint) * int2_grad1_u12_bimo_t(ipoint,3,i,p2)
                   tmp2(ipoint,p2) = tmp2(ipoint,p2) + int2_grad1_u12_bimo_t(ipoint,1,p2,i) * tmpvec_2(ipoint,1) + int2_grad1_u12_bimo_t(ipoint,1,p2,h1) * tmpvec_3(ipoint,1) &
                                                     + int2_grad1_u12_bimo_t(ipoint,2,p2,i) * tmpvec_2(ipoint,2) + int2_grad1_u12_bimo_t(ipoint,2,p2,h1) * tmpvec_3(ipoint,2) &
-                                                    + int2_grad1_u12_bimo_t(ipoint,3,p2,i) * tmpvec_2(ipoint,3) + int2_grad1_u12_bimo_t(ipoint,3,p2,h1) * tmpvec_3(ipoint,3) 
+                                                    + int2_grad1_u12_bimo_t(ipoint,3,p2,i) * tmpvec_2(ipoint,3) + int2_grad1_u12_bimo_t(ipoint,3,p2,h1) * tmpvec_3(ipoint,3)
                 enddo
               enddo
 
@@ -843,7 +843,7 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
       !$OMP PARALLEL                 &
       !$OMP DEFAULT (NONE)           &
-      !$OMP PRIVATE (h1, h2, p1, p2) & 
+      !$OMP PRIVATE (h1, h2, p1, p2) &
       !$OMP SHARED (tmp, mo_num)
 
       !$OMP DO COLLAPSE(2)
@@ -905,7 +905,8 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
   call wall_time(wallf)
   print*,' Wall time for normal_two_body_bi_orth ', wallf-walli
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
+
 

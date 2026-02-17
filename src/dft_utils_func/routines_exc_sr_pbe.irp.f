@@ -1,32 +1,32 @@
 subroutine ec_pbe_sr(mu,rhoc,rhoo,sigmacc,sigmaco,sigmaoo,ec,vrhoc,vrhoo,vsigmacc,vsigmaco,vsigmaoo)
- BEGIN_DOC 
+ BEGIN_DOC
 ! Short-range pbe correlation energy functional for erf interaction
 !
 ! input : ==========
-! 
-! mu = range separated parameter 
+!
+! mu = range separated parameter
 !
 ! rhoc, rhoo = total density and spin density
 !
-! sigmacc    = square of the gradient of the total density 
+! sigmacc    = square of the gradient of the total density
 !
 ! sigmaco    = square of the gradient of the spin density
 !
 ! sigmaoo    = scalar product between the gradient of the total density and the one of the spin density
 !
 ! output: ==========
-! 
-! ec         = correlation energy 
 !
-! all variables v** are energy derivatives with respect to components of the density 
-! 
-! vrhoc      = derivative with respect to the total density 
+! ec         = correlation energy
+!
+! all variables v** are energy derivatives with respect to components of the density
+!
+! vrhoc      = derivative with respect to the total density
 !
 ! vrhoo      = derivative with respect to spin density
 !
 ! vsigmacc   = derivative with respect to the square of the gradient of the total density
 !
-! vsigmaco   = derivative with respect to scalar product between the gradients of total and spin densities 
+! vsigmaco   = derivative with respect to scalar product between the gradients of total and spin densities
 !
 ! vsigmaoo   = derivative with respect to the square of the gradient of the psin density
  END_DOC
@@ -253,7 +253,7 @@ END_DOC
   vx_grd_rho_b_2=0.d0
   vx_grd_rho_a_b=0.d0
 
-  
+
 ! spin scaling relation Ex[rho_a,rho_b] = (1/2) (Ex[2rho_a,2rho_a] + Ex[2rho_b,2rho_b])
 
 ! two times spin alpha density
@@ -282,7 +282,7 @@ END_DOC
    dexerfpbeddrho2_a=exerflda*berf(1.616204596739954813d-1*mu*rho**(-1.d0/3.d0))*sqss*kappa**2/(kappa+berf(1.616204596739954813d-1*mu*rho**(-1.d0/3.d0))*sq)**2
 
  endif
-   
+
 
 ! two times spin beta density
   rho = max(rho_b,tol)*2.d0
@@ -313,8 +313,8 @@ END_DOC
 
 
   ex = (exerfpbe_a+exerfpbe_b)*0.5d0
-  vx_rho_a = dexerfpbedrho_a 
-  vx_rho_b = dexerfpbedrho_a 
+  vx_rho_a = dexerfpbedrho_a
+  vx_rho_b = dexerfpbedrho_a
   vx_grd_rho_a_2 =   2.d0*dexerfpbeddrho2_a
   vx_grd_rho_b_2 =   2.d0*dexerfpbeddrho2_b
   vx_grd_rho_a_b = 0.d0
@@ -362,7 +362,7 @@ END_DOC
 ! initialization
   ex=0.d0
 
-  
+
 ! spin scaling relation Ex[rho_a,rho_b] = (1/2) (Ex[2rho_a,2rho_a] + Ex[2rho_b,2rho_b])
 
 ! two times spin alpha density
@@ -383,7 +383,7 @@ END_DOC
    exerfpbe_a=exerflda*fx
 
  endif
-   
+
 
 ! two times spin beta density
   rho = max(rho_b,tol)*2.d0
@@ -411,24 +411,24 @@ END_DOC
 
 
 subroutine ec_pbe_only(mu,rhoc,rhoo,sigmacc,sigmaco,sigmaoo,ec)
- BEGIN_DOC 
+ BEGIN_DOC
 ! Short-range pbe correlation energy functional for erf interaction
 !
 ! input : ==========
-! 
-! mu = range separated parameter 
+!
+! mu = range separated parameter
 !
 ! rhoc, rhoo = total density and spin density
 !
-! sigmacc    = square of the gradient of the total density 
+! sigmacc    = square of the gradient of the total density
 !
 ! sigmaco    = square of the gradient of the spin density
 !
 ! sigmaoo    = scalar product between the gradient of the total density and the one of the spin density
 !
 ! output: ==========
-! 
-! ec         = correlation energy 
+!
+! ec         = correlation energy
 !
  END_DOC
 include 'constants.include.F'
@@ -527,3 +527,4 @@ include 'constants.include.F'
      ec = ecerfpbe
 
 end
+

@@ -9,7 +9,7 @@ subroutine u_0_H_tc_u_0(e_0,u_0,n,keys_tmp,Nint,N_st,sze, do_right)
   ! if do_right == True then you compute H_TC |Psi>, else H_TC^T |Psi>
   END_DOC
   integer, intent(in)             :: n,Nint, N_st, sze
-  logical, intent(in)             :: do_right 
+  logical, intent(in)             :: do_right
   double precision, intent(out)   :: e_0(N_st)
   double precision, intent(inout) :: u_0(sze,N_st)
   integer(bit_kind),intent(in)    :: keys_tmp(Nint,2,n)
@@ -51,7 +51,7 @@ subroutine H_tc_u_0_opt(v_0,u_0,N_st,sze)
   END_DOC
   integer, intent(in)            :: N_st,sze
   double precision, intent(inout)  :: v_0(sze,N_st), u_0(sze,N_st)
-  logical           :: do_right 
+  logical           :: do_right
   do_right = .True.
   call H_tc_u_0_nstates_openmp(v_0,u_0,N_st,sze, do_right)
 end
@@ -68,7 +68,7 @@ subroutine H_tc_dagger_u_0_opt(v_0,u_0,N_st,sze)
   END_DOC
   integer, intent(in)            :: N_st,sze
   double precision, intent(inout)  :: v_0(sze,N_st), u_0(sze,N_st)
-  logical           :: do_right 
+  logical           :: do_right
   do_right = .False.
   call H_tc_u_0_nstates_openmp(v_0,u_0,N_st,sze, do_right)
 end
@@ -88,7 +88,7 @@ subroutine H_tc_u_0_nstates_openmp(v_0,u_0,N_st,sze, do_right)
   END_DOC
   integer, intent(in)            :: N_st,sze
   double precision, intent(inout)  :: v_0(sze,N_st), u_0(sze,N_st)
-  logical, intent(in)             :: do_right 
+  logical, intent(in)             :: do_right
   integer :: k
   double precision, allocatable  :: u_t(:,:), v_t(:,:)
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: u_t
@@ -127,7 +127,7 @@ subroutine H_tc_u_0_nstates_openmp_work(v_t,u_t,N_st,sze,istart,iend,ishift,iste
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $v_t = H | u_t\rangle$ 
+  ! Computes $v_t = H | u_t\rangle$
   !
   ! Default should be 1,N_det,0,1
   !
@@ -135,7 +135,7 @@ subroutine H_tc_u_0_nstates_openmp_work(v_t,u_t,N_st,sze,istart,iend,ishift,iste
   END_DOC
   integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep
   double precision, intent(in)   :: u_t(N_st,N_det)
-  logical, intent(in)             :: do_right 
+  logical, intent(in)             :: do_right
   double precision, intent(out)  :: v_t(N_st,sze)
 
 
@@ -160,7 +160,7 @@ subroutine H_tc_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishi
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $v_t = H | u_t \\rangle$ 
+  ! Computes $v_t = H | u_t \\rangle$
   !
   ! Default should be 1,N_det,0,1
   !
@@ -168,7 +168,7 @@ subroutine H_tc_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishi
   END_DOC
   integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep
   double precision, intent(in)   :: u_t(N_st,N_det)
-  logical, intent(in)             :: do_right 
+  logical, intent(in)             :: do_right
   double precision, intent(out)  :: v_t(N_st,sze)
 
   double precision               :: hij
@@ -543,7 +543,7 @@ compute_singles=.True.
         lrow = psi_bilinear_matrix_rows(l_a)
         ASSERT (lrow <= N_det_alpha_unique)
 
-        tmp_det2(1:N_int,1) = psi_det_alpha_unique(1:N_int, lrow) 
+        tmp_det2(1:N_int,1) = psi_det_alpha_unique(1:N_int, lrow)
 !        call i_H_j( tmp_det, tmp_det2, $N_int, hij)
 !        call i_H_j_double_spin( tmp_det(1,1), psi_det_alpha_unique(1, lrow), $N_int, hij)
         if(do_right)then
@@ -694,7 +694,7 @@ compute_singles=.True.
         lcol = psi_bilinear_matrix_transp_columns(l_b)
         ASSERT (lcol <= N_det_beta_unique)
 
-        tmp_det2(1:N_int,2) = psi_det_beta_unique(1:N_int, lcol) 
+        tmp_det2(1:N_int,2) = psi_det_beta_unique(1:N_int, lcol)
 !        call i_H_j( tmp_det, tmp_det2, $N_int, hij)
 !        call i_H_j_double_spin( tmp_det(1,2), psi_det_beta_unique(1, lcol), $N_int, hij)
         if(do_right)then
@@ -763,5 +763,6 @@ SUBST [ N_int ]
 N_int;;
 
 END_TEMPLATE
+
 
 

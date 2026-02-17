@@ -1,5 +1,5 @@
- BEGIN_PROVIDER [ double precision, gauleg_t2, (n_pt_max_integrals,n_pt_max_integrals/2) ]
-&BEGIN_PROVIDER [ double precision, gauleg_w, (n_pt_max_integrals,n_pt_max_integrals/2) ]
+ BEGIN_PROVIDER [ double precision, gauleg_t2, (n_pt_max_integrals, n_pt_max_integrals/2) ]
+&BEGIN_PROVIDER [ double precision, gauleg_w, (n_pt_max_integrals, n_pt_max_integrals/2) ]
    implicit none
    BEGIN_DOC
    ! t_w(i,1,k) = w(i)
@@ -54,4 +54,5 @@ subroutine gauleg(x1,x2,x,w,n)
      w(n+1-i)=w(i)
    enddo
 end
+
 

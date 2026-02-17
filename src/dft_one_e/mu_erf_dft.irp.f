@@ -1,8 +1,8 @@
 BEGIN_PROVIDER [double precision, mu_erf_dft]
  implicit none
  BEGIN_DOC
-! range separation parameter used in RS-DFT. 
-! 
+! range separation parameter used in RS-DFT.
+!
 ! It is set to mu_erf in order to be consistent with the module "hamiltonian"
  END_DOC
  mu_erf_dft = mu_erf
@@ -10,6 +10,9 @@ BEGIN_PROVIDER [double precision, mu_erf_dft]
 END_PROVIDER
 
 BEGIN_PROVIDER [double precision, mu_of_r_dft, (n_points_final_grid)]
+  BEGIN_DOC
+  ! mu_of_r_dft
+  END_DOC
  implicit none
  integer :: i
  if(mu_dft_type == "Read")then
@@ -24,7 +27,7 @@ BEGIN_PROVIDER [double precision, mu_of_r_dft, (n_points_final_grid)]
     mu_of_r_dft(i) = mu_rsc_of_r(i)
    else if(mu_dft_type == "grad_rho")then
     mu_of_r_dft(i) = mu_grad_rho(i)
-   else 
+   else
     print*,'mu_dft_type is not of good type = ',mu_dft_type
     print*,'it must be of type Read, cst, hf, rsc'
     print*,'Stopping ...'
@@ -32,9 +35,12 @@ BEGIN_PROVIDER [double precision, mu_of_r_dft, (n_points_final_grid)]
    endif
   enddo
  endif
-END_PROVIDER 
+END_PROVIDER
 
 BEGIN_PROVIDER [double precision, mu_rsc_of_r, (n_points_final_grid)]
+  BEGIN_DOC
+  ! mu_rsc_of_r
+  END_DOC
  implicit none
  integer :: i
  double precision :: mu_rs_c,rho,r(3), dm_a, dm_b
@@ -49,6 +55,9 @@ BEGIN_PROVIDER [double precision, mu_rsc_of_r, (n_points_final_grid)]
 END_PROVIDER
 
 BEGIN_PROVIDER [double precision, mu_grad_rho, (n_points_final_grid)]
+  BEGIN_DOC
+  ! mu_grad_rho
+  END_DOC
  implicit none
  integer :: i
  double precision :: mu_grad_rho_func, r(3)
@@ -58,10 +67,13 @@ BEGIN_PROVIDER [double precision, mu_grad_rho, (n_points_final_grid)]
   r(3) = final_grid_points(3,i)
   mu_grad_rho(i) = mu_grad_rho_func(r)
  enddo
-END_PROVIDER 
+END_PROVIDER
 
 
 BEGIN_PROVIDER [double precision, mu_of_r_dft_average]
+  BEGIN_DOC
+  ! mu_of_r_dft_average
+  END_DOC
  implicit none
  integer :: i
  double precision :: mu_rs_c,rho,r(3), dm_a, dm_b
@@ -77,4 +89,5 @@ BEGIN_PROVIDER [double precision, mu_of_r_dft_average]
  enddo
  mu_of_r_dft_average = mu_of_r_dft_average / dble(elec_alpha_num + elec_beta_num)
  print*,'mu_of_r_dft_average = ',mu_of_r_dft_average
-END_PROVIDER 
+END_PROVIDER
+

@@ -1,7 +1,7 @@
 
 
 
- BEGIN_PROVIDER[double precision, energy_x_lda, (N_states) ]
+ BEGIN_PROVIDER [double precision, energy_x_lda, (N_states) ]
  implicit none
  BEGIN_DOC
 ! exchange energy with the lda functional
@@ -28,7 +28,7 @@
 
  END_PROVIDER
 
- BEGIN_PROVIDER[double precision, energy_c_lda, (N_states) ]
+ BEGIN_PROVIDER [double precision, energy_c_lda, (N_states) ]
  implicit none
  BEGIN_DOC
 ! correlation energy with the lda functional
@@ -57,8 +57,8 @@
 
 
 
- BEGIN_PROVIDER [double precision, potential_x_alpha_ao_lda,(ao_num,ao_num,N_states)]
-&BEGIN_PROVIDER [double precision, potential_x_beta_ao_lda,(ao_num,ao_num,N_states)]
+ BEGIN_PROVIDER [double precision, potential_x_alpha_ao_lda, (ao_num, ao_num, N_states)]
+&BEGIN_PROVIDER [double precision, potential_x_beta_ao_lda, (ao_num, ao_num, N_states)]
   implicit none
   BEGIN_DOC
   ! short range exchange alpha/beta potentials with lda functional on the |AO| basis
@@ -78,8 +78,8 @@
 
 END_PROVIDER
 
- BEGIN_PROVIDER [double precision, potential_c_alpha_ao_lda,(ao_num,ao_num,N_states)]
-&BEGIN_PROVIDER [double precision, potential_c_beta_ao_lda,(ao_num,ao_num,N_states)]
+ BEGIN_PROVIDER [double precision, potential_c_alpha_ao_lda, (ao_num, ao_num, N_states)]
+&BEGIN_PROVIDER [double precision, potential_c_beta_ao_lda, (ao_num, ao_num, N_states)]
  implicit none
  BEGIN_DOC
 ! short range correlation alpha/beta potentials with lda functional on the |AO| basis
@@ -101,8 +101,8 @@ END_PROVIDER
 
 
 
- BEGIN_PROVIDER [double precision, potential_xc_alpha_ao_lda,(ao_num,ao_num,N_states)]
-&BEGIN_PROVIDER [double precision, potential_xc_beta_ao_lda ,(ao_num,ao_num,N_states)]
+ BEGIN_PROVIDER [double precision, potential_xc_alpha_ao_lda, (ao_num, ao_num, N_states)]
+&BEGIN_PROVIDER [double precision, potential_xc_beta_ao_lda , (ao_num, ao_num, N_states)]
  implicit none
  BEGIN_DOC
 ! short range exchange/correlation alpha/beta potentials with lda functional on the AO basis
@@ -120,10 +120,10 @@ END_PROVIDER
  END_PROVIDER
 
 
- BEGIN_PROVIDER[double precision, aos_vc_alpha_lda_w, (ao_num,n_points_final_grid,N_states)]
-&BEGIN_PROVIDER[double precision, aos_vc_beta_lda_w, (ao_num,n_points_final_grid,N_states)]
-&BEGIN_PROVIDER[double precision, aos_vx_alpha_lda_w, (ao_num,n_points_final_grid,N_states)]
-&BEGIN_PROVIDER[double precision, aos_vx_beta_lda_w, (ao_num,n_points_final_grid,N_states)]
+ BEGIN_PROVIDER [double precision, aos_vc_alpha_lda_w, (ao_num, n_points_final_grid, N_states)]
+&BEGIN_PROVIDER [double precision, aos_vc_beta_lda_w, (ao_num, n_points_final_grid, N_states)]
+&BEGIN_PROVIDER [double precision, aos_vx_alpha_lda_w, (ao_num, n_points_final_grid, N_states)]
+&BEGIN_PROVIDER [double precision, aos_vx_beta_lda_w, (ao_num, n_points_final_grid, N_states)]
  implicit none
  BEGIN_DOC
 ! aos_vxc_alpha_lda_w(j,i) = ao_i(r_j) * (v^x_alpha(r_j) + v^c_alpha(r_j)) * W(r_j)
@@ -161,8 +161,8 @@ END_PROVIDER
 
 
 
- BEGIN_PROVIDER[double precision, aos_vxc_alpha_lda_w, (n_points_final_grid,ao_num,N_states)]
-&BEGIN_PROVIDER[double precision, aos_vxc_beta_lda_w, (n_points_final_grid,ao_num,N_states)]
+ BEGIN_PROVIDER [double precision, aos_vxc_alpha_lda_w, (n_points_final_grid, ao_num, N_states)]
+&BEGIN_PROVIDER [double precision, aos_vxc_beta_lda_w, (n_points_final_grid, ao_num, N_states)]
  implicit none
  BEGIN_DOC
 ! aos_vxc_alpha_lda_w(j,i) = ao_i(r_j) * (v^x_alpha(r_j) + v^c_alpha(r_j)) * W(r_j)
@@ -193,4 +193,5 @@ END_PROVIDER
  enddo
 
  END_PROVIDER
+
 

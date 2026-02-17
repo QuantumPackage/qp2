@@ -1,6 +1,6 @@
 subroutine first_hessian_opt(n,H,h_tmpr)
 
-  include 'constants.h' 
+  include 'constants.h'
 
   implicit none
 
@@ -9,17 +9,17 @@ subroutine first_hessian_opt(n,H,h_tmpr)
   !==================================================================
 
   !===========
-  ! Variables  
+  ! Variables
   !===========
 
   ! in
-  integer, intent(in)           :: n 
+  integer, intent(in)           :: n
   !n         : integer, n = mo_num*(mo_num-1)/2
-  
+
   ! out
   double precision, intent(out) :: H(n,n),h_tmpr(mo_num,mo_num,mo_num,mo_num)
   ! H        : n by n double precision matrix containing the 2D hessian
- 
+
   ! internal
   double precision, allocatable :: hessian(:,:,:,:)
   integer                       :: p,q
@@ -31,11 +31,11 @@ subroutine first_hessian_opt(n,H,h_tmpr)
   ! p,q,r,s  : integer, indexes of the 4D hessian matrix
   ! t,u,v    : integer, indexes to compute hessian elements
   ! pq,rs    : integer, indexes for the conversion from 4D to 2D hessian matrix
-  ! t1,t2,t3 : double precision, t3 = t2 - t1, time to compute the hessian 
+  ! t1,t2,t3 : double precision, t3 = t2 - t1, time to compute the hessian
 
-  ! Funtion 
+  ! Funtion
   double precision              :: get_two_e_integral
-  ! get_two_e_integral :  double precision function, two e integrals 
+  ! get_two_e_integral :  double precision function, two e integrals
 
   ! Provided :
   ! mo_one_e_integrals : mono e- integrals
@@ -57,7 +57,7 @@ subroutine first_hessian_opt(n,H,h_tmpr)
     print*,'Enter in first_hess'
   endif
 
-  ! From Anderson et. al. (2014) 
+  ! From Anderson et. al. (2014)
   ! The Journal of Chemical Physics 141, 244104 (2014); doi: 10.1063/1.4904384
 
   CALL wall_time(t1)
@@ -119,7 +119,7 @@ subroutine first_hessian_opt(n,H,h_tmpr)
       enddo
     enddo
   enddo
-  
+
   CALL wall_time(t5)
   t6 = t5-t4
   print*,'l1 2 :', t6
@@ -257,7 +257,7 @@ subroutine first_hessian_opt(n,H,h_tmpr)
       enddo
     enddo
   enddo
- 
+
   CALL wall_time(t5)
   t6 = t5-t4
   print*,'l3 1 :', t6
@@ -304,11 +304,11 @@ subroutine first_hessian_opt(n,H,h_tmpr)
   print*,'Time to compute the hessian : ', t3
 
   !==============
-  ! Permutations 
+  ! Permutations
   !==============
 
   ! Hessian(p,q,r,s) = P_pq P_rs [ ...]
-  ! => Hessian(p,q,r,s) = (p,q,r,s) - (q,p,r,s) - (p,q,s,r) + (q,p,s,r) 
+  ! => Hessian(p,q,r,s) = (p,q,r,s) - (q,p,r,s) - (p,q,s,r) + (q,p,s,r)
 
   do s = 1, mo_num
     do r = 1, mo_num
@@ -335,16 +335,16 @@ subroutine first_hessian_opt(n,H,h_tmpr)
     call vec_to_mat_index(pq,p,q)
     do rs = 1, n
       call vec_to_mat_index(rs,r,s)
-      H(pq,rs) = h_tmpr(p,q,r,s)   
+      H(pq,rs) = h_tmpr(p,q,r,s)
     enddo
   enddo
 
   ! Display
-  if (debug) then 
+  if (debug) then
     print*,'2D Hessian matrix'
     do pq = 1, n
       write(*,'(100(F10.5))') H(pq,:)
-    enddo 
+    enddo
   endif
 
   !==============
@@ -358,3 +358,4 @@ subroutine first_hessian_opt(n,H,h_tmpr)
   endif
 
 end subroutine
+

@@ -11,7 +11,7 @@
   !
   ! These numbers are automatically set by setting the grid_type_sgn parameter
   END_DOC
- 
+
   implicit none
 
   if(.not. my_extra_grid_becke) then
@@ -73,7 +73,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [double precision, grid_points_extra_per_atom, (3,n_points_extra_integration_angular,n_points_extra_radial_grid,nucl_num)]
+BEGIN_PROVIDER [double precision, grid_points_extra_per_atom, (3, n_points_extra_integration_angular, n_points_extra_radial_grid, nucl_num)]
 
   BEGIN_DOC
   ! x,y,z coordinates of grid points_extra used for integration in 3d space
@@ -142,7 +142,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [double precision, weight_at_r_extra, (n_points_extra_integration_angular,n_points_extra_radial_grid,nucl_num) ]
+BEGIN_PROVIDER [double precision, weight_at_r_extra, (n_points_extra_integration_angular, n_points_extra_radial_grid, nucl_num) ]
 
   BEGIN_DOC
   ! Weight function at grid points_extra : w_n(r) according to the equation (22)
@@ -205,7 +205,7 @@ END_PROVIDER
 ! ---
 
 
-BEGIN_PROVIDER [double precision, final_weight_at_r_extra, (n_points_extra_integration_angular,n_points_extra_radial_grid,nucl_num) ]
+BEGIN_PROVIDER [double precision, final_weight_at_r_extra, (n_points_extra_integration_angular, n_points_extra_radial_grid, nucl_num) ]
 
   BEGIN_DOC
    ! Total weight on each grid point which takes into account all Lebedev, Voronoi and radial weights.
@@ -230,10 +230,10 @@ BEGIN_PROVIDER [double precision, final_weight_at_r_extra, (n_points_extra_integ
                               * knowles_function(alpha_knowles(grid_atomic_number(j)),m_knowles,x)**2
           final_weight_at_r_extra(k,i,j) = weights_angular_points_extra(k) * weight_at_r_extra(k,i,j) * contrib_integration * dr_radial_extra_integral
           if(isnan(final_weight_at_r_extra(k,i,j)))then
-            print*,'isnan(final_weight_at_r_extra(k,i,j))' 
+            print*,'isnan(final_weight_at_r_extra(k,i,j))'
             print*,k,i,j
             write(*,'(100(F16.10,X))')weights_angular_points_extra(k)  , weight_at_r_extra(k,i,j) , contrib_integration , dr_radial_extra_integral
-            stop 
+            stop
           endif
         enddo
       enddo
@@ -253,10 +253,10 @@ BEGIN_PROVIDER [double precision, final_weight_at_r_extra, (n_points_extra_integ
         do k = 1, n_points_extra_integration_angular  ! for each angular point attached to the "jth" atom
           final_weight_at_r_extra(k,i,j) = weights_angular_points_extra(k) * weight_at_r_extra(k,i,j) * contrib_integration
           if(isnan(final_weight_at_r_extra(k,i,j)))then
-            print*,'isnan(final_weight_at_r_extra(k,i,j))' 
+            print*,'isnan(final_weight_at_r_extra(k,i,j))'
             print*,k,i,j
             write(*,'(100(F16.10,X))') weights_angular_points_extra(k), weight_at_r_extra(k,i,j), contrib_integration
-            stop 
+            stop
           endif
         enddo
       enddo
@@ -271,4 +271,5 @@ BEGIN_PROVIDER [double precision, final_weight_at_r_extra, (n_points_extra_integ
 
 
 END_PROVIDER
+
 

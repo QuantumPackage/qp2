@@ -20,12 +20,12 @@ subroutine give_explicit_cpoly_and_cgaussian_x(P_new, P_center, p, fact_k, iorde
   include 'constants.include.F'
 
   integer,    intent(in)  :: dim
-  integer,    intent(in)  :: a, b 
+  integer,    intent(in)  :: a, b
   complex*16, intent(in)  :: alpha, Ae_center, Ap_center
   complex*16, intent(in)  :: beta, Be_center, Bp_center
-  integer,    intent(out) :: iorder            
-  complex*16, intent(out) :: p, P_center, fact_k          
-  complex*16, intent(out) :: P_new(0:max_dim)  
+  integer,    intent(out) :: iorder
+  complex*16, intent(out) :: p, P_center, fact_k
+  complex*16, intent(out) :: P_new(0:max_dim)
 
   integer                 :: n_new, i, j
   complex*16              :: P_a(0:max_dim), P_b(0:max_dim)
@@ -81,7 +81,7 @@ subroutine give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_k, iorder,
   !          * [sum (l_y = 0,i_order(2)) P_new(l_y,2) * (y-P_center(2))^l_y] exp (-p (y-P_center(2))^2)
   !          * [sum (l_z = 0,i_order(3)) P_new(l_z,3) * (z-P_center(3))^l_z] exp (-p (z-P_center(3))^2)
   !
-  ! WARNING ::: IF fact_k is too smal then: 
+  ! WARNING ::: IF fact_k is too smal then:
   ! returns a "s" function centered in zero
   ! with an inifinite exponent and a zero polynom coef
   !
@@ -93,7 +93,7 @@ subroutine give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_k, iorder,
   integer,    intent(in)  :: dim, a(3), b(3)
   complex*16, intent(in)  :: alpha, Ae_center(3), Ap_center(3)
   complex*16, intent(in)  :: beta, Be_center(3), Bp_center(3)
-  integer,    intent(out) :: iorder(3)         
+  integer,    intent(out) :: iorder(3)
   complex*16, intent(out) :: p, P_center(3), fact_k, P_new(0:max_dim,3)
 
   integer                 :: n_new, i, j
@@ -165,8 +165,8 @@ subroutine cgaussian_product(a, xa, b, xb, k, p, xp)
 
   implicit none
 
-  complex*16, intent(in)   :: a, b, xa(3), xb(3) 
-  complex*16, intent(out)  :: p, k, xp(3)      
+  complex*16, intent(in)   :: a, b, xa(3), xb(3)
+  complex*16, intent(out)  :: p, k, xp(3)
 
   complex*16               :: p_inv, xab(3), ab
 
@@ -326,7 +326,7 @@ subroutine add_cpoly_multiply(b, nb, cst, d, nd)
   integer,    intent(inout) :: nd
   complex*16, intent(inout) :: d(0:max(nb, nd))
 
-  integer                   :: ib 
+  integer                   :: ib
   complex*16                :: tmp
 
   nd = max(nd, nb)
@@ -353,7 +353,7 @@ subroutine recentered_cpoly2(P_A, x_A, x_P, a, P_B, x_B, x_Q, b)
 
   BEGIN_DOC
   !
-  ! write two complex polynomials (x-x_A)^a (x-x_B)^b 
+  ! write two complex polynomials (x-x_A)^a (x-x_B)^b
   ! as P_A(x-x_P) and P_B(x-x_Q)
   !
   END_DOC
@@ -418,10 +418,10 @@ complex*16 function Fc_integral(n, inv_sq_p)
   include 'constants.include.F'
 
   integer,    intent(in)     :: n
-  complex*16, intent(in)     :: inv_sq_p 
+  complex*16, intent(in)     :: inv_sq_p
 
   complex*16                 :: inv_sq_p2, inv_sq_p3, inv_sq_p4
-  ! (n)! 
+  ! (n)!
   double precision, external :: fact
 
   if(n < 0) then
@@ -461,4 +461,5 @@ complex*16 function Fc_integral(n, inv_sq_p)
 end
 
 ! ---
+
 

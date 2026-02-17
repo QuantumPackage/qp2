@@ -1,4 +1,4 @@
- BEGIN_PROVIDER[double precision, mos_in_r_array, (mo_num,n_points_final_grid)]
+ BEGIN_PROVIDER [double precision, mos_in_r_array, (mo_num, n_points_final_grid)]
  implicit none
  BEGIN_DOC
  ! mos_in_r_array(i,j)        = value of the ith mo on the jth grid point
@@ -16,13 +16,13 @@
  enddo
  END_PROVIDER
 
- BEGIN_PROVIDER[double precision, mos_in_r_array_omp, (mo_num,n_points_final_grid)]
+ BEGIN_PROVIDER [double precision, mos_in_r_array_omp, (mo_num, n_points_final_grid)]
  implicit none
  BEGIN_DOC
  ! mos_in_r_array(i,j)        = value of the ith mo on the jth grid point
  END_DOC
  integer :: i
- !$OMP PARALLEL DO DEFAULT(NONE) PRIVATE (i) & 
+ !$OMP PARALLEL DO DEFAULT(NONE) PRIVATE (i) &
  !$OMP SHARED(mos_in_r_array_omp,n_points_final_grid,mo_num,final_grid_points)
  do i = 1, n_points_final_grid
   call give_all_mos_at_r(final_grid_points(1,i),mos_in_r_array_omp(1,i))
@@ -31,7 +31,7 @@
  END_PROVIDER
 
 
- BEGIN_PROVIDER[double precision, mos_in_r_array_transp,(n_points_final_grid,mo_num)]
+ BEGIN_PROVIDER [double precision, mos_in_r_array_transp, (n_points_final_grid, mo_num)]
  implicit none
  BEGIN_DOC
  ! mos_in_r_array_transp(i,j) = value of the jth mo on the ith grid point
@@ -39,13 +39,13 @@
  integer :: i,j
  do i = 1, n_points_final_grid
   do j = 1, mo_num
-   mos_in_r_array_transp(i,j) = mos_in_r_array_omp(j,i) 
+   mos_in_r_array_transp(i,j) = mos_in_r_array_omp(j,i)
   enddo
  enddo
  END_PROVIDER
 
 
- BEGIN_PROVIDER[double precision, mos_grad_in_r_array,(mo_num,n_points_final_grid,3)]
+ BEGIN_PROVIDER [double precision, mos_grad_in_r_array, (mo_num, n_points_final_grid, 3)]
  implicit none
  BEGIN_DOC
  ! mos_grad_in_r_array(i,j,k)          = value of the kth component of the gradient of ith mo on the jth grid point
@@ -61,7 +61,7 @@
  enddo
  END_PROVIDER
 
- BEGIN_PROVIDER[double precision, mos_grad_in_r_array_tranp,(3,mo_num,n_points_final_grid)]
+ BEGIN_PROVIDER [double precision, mos_grad_in_r_array_tranp, (3, mo_num, n_points_final_grid)]
  implicit none
  BEGIN_DOC
  ! mos_grad_in_r_array_transp(i,j,k)   = value of the kth component of the gradient of jth mo on the ith grid point
@@ -80,11 +80,11 @@
  enddo
  END_PROVIDER
 
- BEGIN_PROVIDER[double precision, mos_grad_in_r_array_transp_bis, (n_points_final_grid,mo_num,3)]
+ BEGIN_PROVIDER [double precision, mos_grad_in_r_array_transp_bis, (n_points_final_grid, mo_num, 3)]
  implicit none
  BEGIN_DOC
-! Transposed gradients 
-! 
+! Transposed gradients
+!
  END_DOC
  integer :: i,j,m
  do m = 1, 3
@@ -100,6 +100,9 @@
 
  BEGIN_PROVIDER [double precision, alpha_dens_kin_in_r, (n_points_final_grid)]
 &BEGIN_PROVIDER [double precision, beta_dens_kin_in_r, (n_points_final_grid)]
+  BEGIN_DOC
+  ! alpha_dens_kin_in_r
+  END_DOC
  implicit none
  integer  :: i,m,j
  alpha_dens_kin_in_r = 0.d0
@@ -107,7 +110,7 @@
  do i = 1, n_points_final_grid
   do j = 1, elec_alpha_num
    do m = 1, 3
-    alpha_dens_kin_in_r(i) += 0.5d0 * mos_grad_in_r_array_tranp(m,j,i)**2.d0 
+    alpha_dens_kin_in_r(i) += 0.5d0 * mos_grad_in_r_array_tranp(m,j,i)**2.d0
    enddo
   enddo
   do j = 1, elec_beta_num
@@ -116,10 +119,10 @@
    enddo
   enddo
  enddo
- 
- END_PROVIDER 
 
- BEGIN_PROVIDER[double precision, mos_lapl_in_r_array,(mo_num,n_points_final_grid,3)]
+ END_PROVIDER
+
+ BEGIN_PROVIDER [double precision, mos_lapl_in_r_array, (mo_num, n_points_final_grid, 3)]
  implicit none
  BEGIN_DOC
  ! mos_lapl_in_r_array(i,j,k)          = value of the kth component of the laplacian of ith mo on the jth grid point
@@ -134,7 +137,7 @@
  END_PROVIDER
 
 
- BEGIN_PROVIDER[double precision, mos_lapl_in_r_array_tranp,(3,mo_num,n_points_final_grid)]
+ BEGIN_PROVIDER [double precision, mos_lapl_in_r_array_tranp, (3, mo_num, n_points_final_grid)]
  implicit none
  BEGIN_DOC
  ! mos_lapl_in_r_array_transp(i,j,k)   = value of the kth component of the laplient of jth mo on the ith grid point
@@ -153,11 +156,11 @@
  enddo
  END_PROVIDER
 
- BEGIN_PROVIDER[double precision, mos_grad_in_r_array_transp_3, (3,n_points_final_grid,mo_num)]
+ BEGIN_PROVIDER [double precision, mos_grad_in_r_array_transp_3, (3, n_points_final_grid, mo_num)]
  implicit none
  BEGIN_DOC
-! Transposed gradients 
-! 
+! Transposed gradients
+!
  END_DOC
  integer :: i,j,m
  double precision :: mos_array(mo_num), r(3)
@@ -173,19 +176,19 @@
 
 
 
-!!!!!EXTRA GRID 
+!!!!!EXTRA GRID
 
- BEGIN_PROVIDER[double precision, mos_in_r_array_extra_omp, (mo_num,n_points_extra_final_grid)]
+ BEGIN_PROVIDER [double precision, mos_in_r_array_extra_omp, (mo_num, n_points_extra_final_grid)]
  implicit none
  BEGIN_DOC
- ! mos_in_r_array_extra(i,j)        = value of the ith mo on the jth grid point on the EXTRA GRID 
+ ! mos_in_r_array_extra(i,j)        = value of the ith mo on the jth grid point on the EXTRA GRID
  END_DOC
  integer :: i,j
  double precision :: mos_array_extra(mo_num), r(3)
  print*,'coucou'
  !$OMP PARALLEL DO &
  !$OMP DEFAULT (NONE)  &
- !$OMP PRIVATE (i,r,mos_array_extra,j) & 
+ !$OMP PRIVATE (i,r,mos_array_extra,j) &
  !$OMP SHARED(mos_in_r_array_extra_omp,n_points_extra_final_grid,mo_num,final_grid_points_extra)
  do i = 1, n_points_extra_final_grid
   r(1) = final_grid_points_extra(1,i)
@@ -201,7 +204,7 @@
  END_PROVIDER
 
 
- BEGIN_PROVIDER[double precision, mos_in_r_array_extra_transp,(n_points_extra_final_grid,mo_num)]
+ BEGIN_PROVIDER [double precision, mos_in_r_array_extra_transp, (n_points_extra_final_grid, mo_num)]
  implicit none
  BEGIN_DOC
  ! mos_in_r_array_extra_transp(i,j) = value of the jth mo on the ith grid point
@@ -209,7 +212,8 @@
  integer :: i,j
  do i = 1, n_points_extra_final_grid
   do j = 1, mo_num
-   mos_in_r_array_extra_transp(i,j) = mos_in_r_array_extra_omp(j,i) 
+   mos_in_r_array_extra_transp(i,j) = mos_in_r_array_extra_omp(j,i)
   enddo
  enddo
  END_PROVIDER
+

@@ -3,14 +3,14 @@
 double precision function env_gauss_2e_j2(i, j, k, l)
 
   BEGIN_DOC
-  ! 
+  !
   !  integral in the AO basis:
   !     i(r1) j(r1) f(r12) k(r2) l(r2)
   !
   !  with:
   !     f(r12) = - [ (0.5 - 0.5 erf(mu r12)) / r12 ] (r1-r2) \cdot \sum_A (-2 a_A c_A) [ r1A exp(-aA r1A^2) - r2A exp(-aA r2A^2) ]
   !            = [ (1 - erf(mu r12) / r12 ] \sum_A a_A c_A [ (r1-RA)^2 exp(-aA r1A^2)
-  !                                                        + (r2-RA)^2 exp(-aA r2A^2) 
+  !                                                        + (r2-RA)^2 exp(-aA r2A^2)
   !                                                        - (r1-RA) \cdot (r2-RA) exp(-aA r1A^2)
   !                                                        - (r1-RA) \cdot (r2-RA) exp(-aA r2A^2) ]
   !
@@ -23,7 +23,7 @@ double precision function env_gauss_2e_j2(i, j, k, l)
   integer, intent(in) :: i, j, k, l
 
   integer             :: p, q, r, s
-  integer             :: num_i, num_j, num_k, num_l, num_ii 
+  integer             :: num_i, num_j, num_k, num_l, num_ii
   integer             :: I_power(3), J_power(3), K_power(3), L_power(3)
   integer             :: iorder_p(3), iorder_q(3)
   integer             :: shift_P(3), shift_Q(3)
@@ -37,7 +37,7 @@ double precision function env_gauss_2e_j2(i, j, k, l)
   double precision    :: ff, gg, cx, cy, cz
 
   double precision    :: env_gauss_2e_j2_schwartz
-  
+
   dim1 = n_pt_max_integrals
 
   if( ao_prim_num(i) * ao_prim_num(j) * ao_prim_num(k) * ao_prim_num(l) > 1024 ) then
@@ -82,7 +82,7 @@ double precision function env_gauss_2e_j2(i, j, k, l)
         do s = 1, ao_prim_num(l)
           coef4 = coef3 * ao_coef_normalized_ordered_transp(s, l)
           expo4 = ao_expo_ordered_transp(s, l)
- 
+
           call give_explicit_poly_and_gaussian( Q1_new, Q1_center, qq1, fact_q1, iorder_q, expo3, expo4 &
                                               , K_power, L_power, K_center, L_center, dim1 )
           q1_inv = 1.d0 / qq1
@@ -105,14 +105,14 @@ end
 double precision function env_gauss_2e_j2_schwartz(i, j, k, l)
 
   BEGIN_DOC
-  ! 
+  !
   !  integral in the AO basis:
   !     i(r1) j(r1) f(r12) k(r2) l(r2)
   !
   !  with:
   !     f(r12) = - [ (0.5 - 0.5 erf(mu r12)) / r12 ] (r1-r2) \cdot \sum_A (-2 a_A c_A) [ r1A exp(-aA r1A^2) - r2A exp(-aA r2A^2) ]
   !            = [ (1 - erf(mu r12) / r12 ] \sum_A a_A c_A [ (r1-RA)^2 exp(-aA r1A^2)
-  !                                                        + (r2-RA)^2 exp(-aA r2A^2) 
+  !                                                        + (r2-RA)^2 exp(-aA r2A^2)
   !                                                        - (r1-RA) \cdot (r2-RA) exp(-aA r1A^2)
   !                                                        - (r1-RA) \cdot (r2-RA) exp(-aA r2A^2) ]
   !
@@ -125,7 +125,7 @@ double precision function env_gauss_2e_j2_schwartz(i, j, k, l)
   integer, intent(in)           :: i, j, k, l
 
   integer                       :: p, q, r, s
-  integer                       :: num_i, num_j, num_k, num_l, num_ii 
+  integer                       :: num_i, num_j, num_k, num_l, num_ii
   integer                       :: I_power(3), J_power(3), K_power(3), L_power(3)
   integer                       :: iorder_p(3), iorder_q(3)
   integer                       :: dim1
@@ -137,7 +137,7 @@ double precision function env_gauss_2e_j2_schwartz(i, j, k, l)
   double precision              :: I_center(3), J_center(3), K_center(3), L_center(3)
   double precision              :: cx, cy, cz
   double precision              :: schwartz_ij, thr
-  double precision, allocatable :: schwartz_kl(:,:) 
+  double precision, allocatable :: schwartz_kl(:,:)
 
   dim1 = n_pt_max_integrals
   thr  = ao_integrals_threshold * ao_integrals_threshold
@@ -217,7 +217,7 @@ double precision function env_gauss_2e_j2_schwartz(i, j, k, l)
           if( schwartz_kl(s,r) * schwartz_ij < thr ) cycle
           coef4 = coef3 * ao_coef_normalized_ordered_transp(s, l)
           expo4 = ao_expo_ordered_transp(s, l)
- 
+
           call give_explicit_poly_and_gaussian( Q1_new, Q1_center, qq1, fact_q1, iorder_q, expo3, expo4 &
                                               , K_power, L_power, K_center, L_center, dim1 )
           q1_inv = 1.d0 / qq1
@@ -290,7 +290,7 @@ subroutine get_cxcycz_j2( dim1, cx, cy, cz                                  &
     shift_Q = (/ 0, 0, 0 /)
 
     ! x term:
-    ff = P2_center(1) - Centerii(1) 
+    ff = P2_center(1) - Centerii(1)
 
     shift_P = (/ 2, 0, 0 /)
     cx = cx + expoii * coefii * general_primitive_integral_coul_shifted( dim1      &
@@ -317,7 +317,7 @@ subroutine get_cxcycz_j2( dim1, cx, cy, cz                                  &
                       , Q1_new, Q1_center, fact_q1, qq1, q1_inv, iorder_q, shift_Q     )
 
     ! y term:
-    ff = P2_center(2) - Centerii(2) 
+    ff = P2_center(2) - Centerii(2)
 
     shift_P = (/ 0, 2, 0 /)
     cy = cy + expoii * coefii * general_primitive_integral_coul_shifted( dim1      &
@@ -344,7 +344,7 @@ subroutine get_cxcycz_j2( dim1, cx, cy, cz                                  &
                       , Q1_new, Q1_center, fact_q1, qq1, q1_inv, iorder_q, shift_Q     )
 
     ! z term:
-    ff = P2_center(3) - Centerii(3) 
+    ff = P2_center(3) - Centerii(3)
 
     shift_P = (/ 0, 0, 2 /)
     cz = cz + expoii * coefii * general_primitive_integral_coul_shifted( dim1      &
@@ -380,7 +380,7 @@ subroutine get_cxcycz_j2( dim1, cx, cy, cz                                  &
     shift_P = (/ 0, 0, 0 /)
 
     ! x term:
-    ff = Q2_center(1) - Centerii(1) 
+    ff = Q2_center(1) - Centerii(1)
 
     shift_Q = (/ 2, 0, 0 /)
     cx = cx + expoii * coefii * general_primitive_integral_coul_shifted( dim1      &
@@ -407,7 +407,7 @@ subroutine get_cxcycz_j2( dim1, cx, cy, cz                                  &
                       , Q2_new, Q2_center, fact_q2, qq2, q2_inv, iorder_q, shift_Q     )
 
     ! y term:
-    ff = Q2_center(2) - Centerii(2) 
+    ff = Q2_center(2) - Centerii(2)
 
     shift_Q = (/ 0, 2, 0 /)
     cy = cy + expoii * coefii * general_primitive_integral_coul_shifted( dim1      &
@@ -434,7 +434,7 @@ subroutine get_cxcycz_j2( dim1, cx, cy, cz                                  &
                       , Q2_new, Q2_center, fact_q2, qq2, q2_inv, iorder_q, shift_Q     )
 
     ! z term:
-    ff = Q2_center(3) - Centerii(3) 
+    ff = Q2_center(3) - Centerii(3)
 
     shift_Q = (/ 0, 0, 2 /)
     cz = cz + expoii * coefii * general_primitive_integral_coul_shifted( dim1      &
@@ -469,8 +469,8 @@ subroutine get_cxcycz_j2( dim1, cx, cy, cz                                  &
     ! ----------------------------------------------------------------------------------------------------
 
     ! x term:
-    ff = P2_center(1) - Centerii(1) 
-    gg = Q1_center(1) - Centerii(1) 
+    ff = P2_center(1) - Centerii(1)
+    gg = Q1_center(1) - Centerii(1)
 
     shift_p = (/ 1, 0, 0 /)
     shift_Q = (/ 1, 0, 0 /)
@@ -509,8 +509,8 @@ subroutine get_cxcycz_j2( dim1, cx, cy, cz                                  &
                       , Q1_new, Q1_center, fact_q1, qq1, q1_inv, iorder_q, shift_Q     )
 
     ! y term:
-    ff = P2_center(2) - Centerii(2) 
-    gg = Q1_center(2) - Centerii(2) 
+    ff = P2_center(2) - Centerii(2)
+    gg = Q1_center(2) - Centerii(2)
 
     shift_p = (/ 0, 1, 0 /)
     shift_Q = (/ 0, 1, 0 /)
@@ -549,8 +549,8 @@ subroutine get_cxcycz_j2( dim1, cx, cy, cz                                  &
                       , Q1_new, Q1_center, fact_q1, qq1, q1_inv, iorder_q, shift_Q     )
 
     ! z term:
-    ff = P2_center(3) - Centerii(3) 
-    gg = Q1_center(3) - Centerii(3) 
+    ff = P2_center(3) - Centerii(3)
+    gg = Q1_center(3) - Centerii(3)
 
     shift_p = (/ 0, 0, 1 /)
     shift_Q = (/ 0, 0, 1 /)
@@ -597,8 +597,8 @@ subroutine get_cxcycz_j2( dim1, cx, cy, cz                                  &
     ! ----------------------------------------------------------------------------------------------------
 
     ! x term:
-    ff = P1_center(1) - Centerii(1) 
-    gg = Q2_center(1) - Centerii(1) 
+    ff = P1_center(1) - Centerii(1)
+    gg = Q2_center(1) - Centerii(1)
 
     shift_p = (/ 1, 0, 0 /)
     shift_Q = (/ 1, 0, 0 /)
@@ -637,8 +637,8 @@ subroutine get_cxcycz_j2( dim1, cx, cy, cz                                  &
                       , Q2_new, Q2_center, fact_q2, qq2, q2_inv, iorder_q, shift_Q     )
 
     ! y term:
-    ff = P1_center(2) - Centerii(2) 
-    gg = Q2_center(2) - Centerii(2) 
+    ff = P1_center(2) - Centerii(2)
+    gg = Q2_center(2) - Centerii(2)
 
     shift_p = (/ 0, 1, 0 /)
     shift_Q = (/ 0, 1, 0 /)
@@ -677,8 +677,8 @@ subroutine get_cxcycz_j2( dim1, cx, cy, cz                                  &
                       , Q2_new, Q2_center, fact_q2, qq2, q2_inv, iorder_q, shift_Q     )
 
     ! z term:
-    ff = P1_center(3) - Centerii(3) 
-    gg = Q2_center(3) - Centerii(3) 
+    ff = P1_center(3) - Centerii(3)
+    gg = Q2_center(3) - Centerii(3)
 
     shift_p = (/ 0, 0, 1 /)
     shift_Q = (/ 0, 0, 1 /)
@@ -724,4 +724,5 @@ subroutine get_cxcycz_j2( dim1, cx, cy, cz                                  &
 end subroutine get_cxcycz_j2
 
 ! ---
+
 

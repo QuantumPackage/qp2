@@ -2,9 +2,9 @@
 subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sze,N_st,N_st_diag_in,converged,hcalc)
   implicit none
   BEGIN_DOC
-  ! Generic Davidson diagonalization with ONE DIAGONAL DRESSING OPERATOR 
+  ! Generic Davidson diagonalization with ONE DIAGONAL DRESSING OPERATOR
   !
-  ! Dress_jj : DIAGONAL DRESSING of the Hamiltonian 
+  ! Dress_jj : DIAGONAL DRESSING of the Hamiltonian
   !
   ! H_jj : specific diagonal H matrix elements to diagonalize de Davidson
   !
@@ -85,7 +85,7 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
   nproc_target = nproc
   double precision :: rss
   integer :: maxab
-  maxab = sze 
+  maxab = sze
 
   m=1
   disk_based = .False.
@@ -204,7 +204,7 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
       u_in(i,k) = r1*dcos(r2)
     enddo
   enddo
-  ! Normalize all states 
+  ! Normalize all states
   do k=1,N_st_diag
     call normalize(u_in(:,k),sze)
   enddo
@@ -232,13 +232,13 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
         ! Compute |W_k> = \sum_i |i><i|H|u_k>
         ! -----------------------------------
 
-         ! Gram-Schmidt to orthogonalize all new guess with the previous vectors 
+         ! Gram-Schmidt to orthogonalize all new guess with the previous vectors
           call ortho_qr(U,size(U,1),sze,shift2)
           call ortho_qr(U,size(U,1),sze,shift2)
           !    it does W = H U with W(sze,N_st_diag),U(sze,N_st_diag)
-          !    where sze is the size of the vector, N_st_diag is the number of states 
+          !    where sze is the size of the vector, N_st_diag is the number of states
           call hcalc(W(:,shift+1),U(:,shift+1),N_st_diag,sze)
-          ! Compute then the DIAGONAL PART OF THE DRESSING 
+          ! Compute then the DIAGONAL PART OF THE DRESSING
           ! <i|W_k> += Dress_jj(i) * <i|U>
           call dressing_diag_uv(W(:,shift+1),U(:,shift+1),Dress_jj,N_st_diag_in,sze)
       else
@@ -319,7 +319,7 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
 
         if (k <= N_st) then
           residual_norm(k) = u_dot_u(U(:,shift2+k),sze)
-          to_print(1,k) = lambda(k) 
+          to_print(1,k) = lambda(k)
           to_print(2,k) = residual_norm(k)
         endif
       enddo
@@ -327,7 +327,7 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
 
 
       if ((itertot>1).and.(iter == 1)) then
-        !don't print 
+        !don't print
         continue
       else
         write(*,'(1X,I3,1X,100(1X,F16.10,1X,F11.6,1X,ES11.3))') iter-1, to_print(1:2,1:N_st)
@@ -336,8 +336,8 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
       ! Check convergence
       if (iter > 1) then
           converged = dabs(maxval(residual_norm(1:N_st))) < threshold_davidson
-      endif   
-      
+      endif
+
 
       do k=1,N_st
         if (residual_norm(k) > 1.e8) then
@@ -414,11 +414,11 @@ end
 subroutine dressing_diag_uv(v,u,dress_diag,N_st,sze)
   implicit none
   BEGIN_DOC
-  ! Routine that computes the diagonal part of the dressing 
+  ! Routine that computes the diagonal part of the dressing
   !
   ! v(i) += u(i) * dress_diag(i)
   !
-  ! !!!!!!!! WARNING !!!!!!!! the vector v is not initialized 
+  ! !!!!!!!! WARNING !!!!!!!! the vector v is not initialized
   !
   ! !!!!!!!! SO MAKE SURE THERE ARE SOME MEANINGFUL VALUES IN THERE
   END_DOC
@@ -432,6 +432,7 @@ subroutine dressing_diag_uv(v,u,dress_diag,N_st,sze)
    enddo
   enddo
 end
+
 
 
 

@@ -5,12 +5,12 @@ BEGIN_PROVIDER [double precision, fock_a_tot_3e_bi_orth, (mo_num, mo_num)]
 
   BEGIN_DOC
   !
-  ! Alpha part of the Fock matrix from three-electron terms 
+  ! Alpha part of the Fock matrix from three-electron terms
   !
-  ! WARNING :: non hermitian if bi-ortho MOS used 
+  ! WARNING :: non hermitian if bi-ortho MOS used
   !
   ! This calculation becomes the dominant part one the integrals are provided
-  ! 
+  !
   END_DOC
 
   implicit none
@@ -34,9 +34,9 @@ BEGIN_PROVIDER [double precision, fock_a_tot_3e_bi_orth, (mo_num, mo_num)]
   enddo
 
   !call wall_time(t1)
-  !print*, ' Wall time for fock_a_tot_3e_bi_orth =', t1 - t0 
+  !print*, ' Wall time for fock_a_tot_3e_bi_orth =', t1 - t0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -44,9 +44,9 @@ BEGIN_PROVIDER [double precision, fock_b_tot_3e_bi_orth, (mo_num, mo_num)]
 
   BEGIN_DOC
   !
-  ! Beta part of the Fock matrix from three-electron terms 
+  ! Beta part of the Fock matrix from three-electron terms
   !
-  ! WARNING :: non hermitian if bi-ortho MOS used 
+  ! WARNING :: non hermitian if bi-ortho MOS used
   !
   ! This calculation becomes the dominant part one the integrals are provided
   !
@@ -67,11 +67,14 @@ BEGIN_PROVIDER [double precision, fock_b_tot_3e_bi_orth, (mo_num, mo_num)]
     enddo
   enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
 BEGIN_PROVIDER [double precision, fock_cs_3e_bi_orth, (mo_num, mo_num)]
+  BEGIN_DOC
+  ! fock_cs_3e_bi_orth
+  END_DOC
 
   implicit none
   integer                       :: i, a, j, k
@@ -86,7 +89,7 @@ BEGIN_PROVIDER [double precision, fock_cs_3e_bi_orth, (mo_num, mo_num)]
   PROVIDE mo_l_coef mo_r_coef
 
   ! to PROVIDE stuffs
-  call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, contrib) 
+  call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, contrib)
 
   fock_cs_3e_bi_orth = 0.d0
 
@@ -100,7 +103,7 @@ BEGIN_PROVIDER [double precision, fock_cs_3e_bi_orth, (mo_num, mo_num)]
   !$OMP DO
   do i = 1, mo_num
     do a = 1, mo_num
-    
+
       do j = 1, elec_beta_num
         do k = 1, elec_beta_num
 
@@ -108,13 +111,13 @@ BEGIN_PROVIDER [double precision, fock_cs_3e_bi_orth, (mo_num, mo_num)]
           !!call contrib_3e_soo(a,i,j,k,contrib_soo)
           !!call contrib_3e_sos(a,i,j,k,contrib_sos)
           !!contrib = 0.5d0 * (contrib_sss + contrib_soo) + contrib_sos
- 
+
           call give_integrals_3_body_bi_ort(a, k, j, i, k, j, direct_int )!!! < a k j | i k j >
           call give_integrals_3_body_bi_ort(a, k, j, j, i, k, c_3_int)      ! < a k j | j i k >
           call give_integrals_3_body_bi_ort(a, k, j, k, j, i, c_minus_3_int)! < a k j | k j i >
 
           ! negative terms :: exchange contrib
-          call give_integrals_3_body_bi_ort(a, k, j, j, k, i, exch_13_int)!!! < a k j | j k i > : E_13 
+          call give_integrals_3_body_bi_ort(a, k, j, j, k, i, exch_13_int)!!! < a k j | j k i > : E_13
           call give_integrals_3_body_bi_ort(a, k, j, i, j, k, exch_23_int)!!! < a k j | i j k > : E_23
           call give_integrals_3_body_bi_ort(a, k, j, k, i, j, exch_12_int)!!! < a k j | k i j > : E_12
 
@@ -135,17 +138,20 @@ BEGIN_PROVIDER [double precision, fock_cs_3e_bi_orth, (mo_num, mo_num)]
 
   deallocate(tmp)
   !$OMP END PARALLEL
- 
+
   fock_cs_3e_bi_orth = - fock_cs_3e_bi_orth
 
   !call wall_time(t1)
   !print*, ' Wall time for fock_cs_3e_bi_orth =', t1-t0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
 BEGIN_PROVIDER [double precision, fock_a_tmp1_bi_ortho, (mo_num, mo_num)]
+  BEGIN_DOC
+  ! fock_a_tmp1_bi_ortho
+  END_DOC
 
   implicit none
   integer                       :: i, a, j, k, ee
@@ -160,7 +166,7 @@ BEGIN_PROVIDER [double precision, fock_a_tmp1_bi_ortho, (mo_num, mo_num)]
   PROVIDE mo_l_coef mo_r_coef
 
   ! to PROVIDE stuffs
-  call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, contrib) 
+  call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, contrib)
 
   ee = elec_beta_num + 1
   fock_a_tmp1_bi_ortho = 0.d0
@@ -176,16 +182,16 @@ BEGIN_PROVIDER [double precision, fock_a_tmp1_bi_ortho, (mo_num, mo_num)]
   do i = 1, mo_num
     do a = 1, mo_num
 
-      do j = ee, elec_alpha_num 
+      do j = ee, elec_alpha_num
         do k = 1, elec_beta_num
 
           call give_integrals_3_body_bi_ort(a, k, j, i, k, j, direct_int )!!! < a k j | i k j >
           call give_integrals_3_body_bi_ort(a, k, j, j, i, k, c_3_int)      ! < a k j | j i k >
           call give_integrals_3_body_bi_ort(a, k, j, k, j, i, c_minus_3_int)! < a k j | k j i >
-          call give_integrals_3_body_bi_ort(a, k, j, j, k, i, exch_13_int)!!! < a k j | j k i > : E_13 
+          call give_integrals_3_body_bi_ort(a, k, j, j, k, i, exch_13_int)!!! < a k j | j k i > : E_13
           call give_integrals_3_body_bi_ort(a, k, j, i, j, k, exch_23_int)!!! < a k j | i j k > : E_23
           call give_integrals_3_body_bi_ort(a, k, j, k, i, j, exch_12_int)!!! < a k j | k i j > : E_12
-          
+
           tmp(a,i) += 1.5d0 * (direct_int - exch_13_int) + 0.5d0 * (c_3_int + c_minus_3_int - exch_23_int - exch_12_int)
         enddo
       enddo
@@ -209,11 +215,14 @@ BEGIN_PROVIDER [double precision, fock_a_tmp1_bi_ortho, (mo_num, mo_num)]
   !call wall_time(t1)
   !print*, ' Wall time for fock_a_tmp1_bi_ortho =', t1-t0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
 BEGIN_PROVIDER [double precision, fock_a_tmp2_bi_ortho, (mo_num, mo_num)]
+  BEGIN_DOC
+  ! fock_a_tmp2_bi_ortho
+  END_DOC
 
   implicit none
   integer                       :: i, a, j, k, ee
@@ -225,7 +234,7 @@ BEGIN_PROVIDER [double precision, fock_a_tmp2_bi_ortho, (mo_num, mo_num)]
   !call wall_time(t0)
 
   PROVIDE mo_l_coef mo_r_coef
- 
+
   ! to PROVIDE stuffs
   call contrib_3e_sss(1, 1, 1, 1, contrib_sss)
 
@@ -267,11 +276,14 @@ BEGIN_PROVIDER [double precision, fock_a_tmp2_bi_ortho, (mo_num, mo_num)]
   !call wall_time(t1)
   !print*, ' Wall time for fock_a_tmp2_bi_ortho =', t1-t0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
 BEGIN_PROVIDER [double precision, fock_b_tmp1_bi_ortho, (mo_num, mo_num)]
+  BEGIN_DOC
+  ! fock_b_tmp1_bi_ortho
+  END_DOC
 
   implicit none
   integer                       :: i, a, j, k, ee
@@ -285,7 +297,7 @@ BEGIN_PROVIDER [double precision, fock_b_tmp1_bi_ortho, (mo_num, mo_num)]
   PROVIDE mo_l_coef mo_r_coef
 
   ! to PROVIDE stuffs
-  call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, direct_int) 
+  call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, direct_int)
 
   ee = elec_beta_num + 1
   fock_b_tmp1_bi_ortho = 0.d0
@@ -303,7 +315,7 @@ BEGIN_PROVIDER [double precision, fock_b_tmp1_bi_ortho, (mo_num, mo_num)]
       do j = 1, elec_beta_num
         do k = ee, elec_alpha_num
           call  give_integrals_3_body_bi_ort(a, k, j, i, k, j, direct_int )!!! < a k j | i k j >
-          call  give_integrals_3_body_bi_ort(a, k, j, j, k, i, exch_13_int)!!! < a k j | j k i > : E_13 
+          call  give_integrals_3_body_bi_ort(a, k, j, j, k, i, exch_13_int)!!! < a k j | j k i > : E_13
           call  give_integrals_3_body_bi_ort(a, k, j, i, j, k, exch_23_int)!!! < a k j | i j k > : E_23
 
           tmp(a,i) += 1.5d0 * direct_int - 0.5d0 * exch_23_int - exch_13_int
@@ -329,11 +341,14 @@ BEGIN_PROVIDER [double precision, fock_b_tmp1_bi_ortho, (mo_num, mo_num)]
   !call wall_time(t1)
   !print*, ' Wall time for fock_b_tmp1_bi_ortho =', t1-t0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
 BEGIN_PROVIDER [double precision, fock_b_tmp2_bi_ortho, (mo_num, mo_num)]
+  BEGIN_DOC
+  ! fock_b_tmp2_bi_ortho
+  END_DOC
 
   implicit none
   integer                       :: i, a, j, k, ee
@@ -362,7 +377,7 @@ BEGIN_PROVIDER [double precision, fock_b_tmp2_bi_ortho, (mo_num, mo_num)]
   !$OMP DO
   do i = 1, mo_num
     do a = 1, mo_num
-      do j = ee, elec_alpha_num 
+      do j = ee, elec_alpha_num
         do k = 1, elec_alpha_num
           call contrib_3e_soo(a, i, j, k, contrib_soo)
 
@@ -387,7 +402,7 @@ BEGIN_PROVIDER [double precision, fock_b_tmp2_bi_ortho, (mo_num, mo_num)]
   !call wall_time(t1)
   !print*, ' Wall time for fock_b_tmp2_bi_ortho =', t1-t0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -407,13 +422,13 @@ subroutine contrib_3e_sss(a, i, j, k, integral)
   call give_integrals_3_body_bi_ort(a, k, j, i, k, j, direct_int )!!! < a k j | i k j >
   call give_integrals_3_body_bi_ort(a, k, j, j, i, k, c_3_int)      ! < a k j | j i k >
   call give_integrals_3_body_bi_ort(a, k, j, k, j, i, c_minus_3_int)! < a k j | k j i >
-  integral = direct_int + c_3_int + c_minus_3_int 
+  integral = direct_int + c_3_int + c_minus_3_int
 
   ! negative terms :: exchange contrib
-  call give_integrals_3_body_bi_ort(a, k, j, j, k, i, exch_13_int)!!! < a k j | j k i > : E_13 
+  call give_integrals_3_body_bi_ort(a, k, j, j, k, i, exch_13_int)!!! < a k j | j k i > : E_13
   call give_integrals_3_body_bi_ort(a, k, j, i, j, k, exch_23_int)!!! < a k j | i j k > : E_23
   call give_integrals_3_body_bi_ort(a, k, j, k, i, j, exch_12_int)!!! < a k j | k i j > : E_12
-  integral += - exch_13_int - exch_23_int  - exch_12_int 
+  integral += - exch_13_int - exch_23_int  - exch_12_int
 
   integral = -integral
 
@@ -436,7 +451,7 @@ subroutine contrib_3e_soo(a,i,j,k,integral)
 
   call give_integrals_3_body_bi_ort(a, k, j, i, k, j, direct_int) ! < a k j | i k j >
   call give_integrals_3_body_bi_ort(a, k, j, i, j, k, exch_23_int)! < a k j | i j k > : E_23
-  integral = direct_int - exch_23_int 
+  integral = direct_int - exch_23_int
 
   integral = -integral
 
@@ -458,12 +473,13 @@ subroutine contrib_3e_sos(a, i, j, k, integral)
   double precision              :: direct_int, exch_13_int
 
   call give_integrals_3_body_bi_ort(a, k, j, i, k, j, direct_int )! < a k j | i k j >
-  call give_integrals_3_body_bi_ort(a, k, j, j, k, i, exch_13_int)! < a k j | j k i > : E_13 
-  integral = direct_int - exch_13_int 
+  call give_integrals_3_body_bi_ort(a, k, j, j, k, i, exch_13_int)! < a k j | j k i > : E_13
+  integral = direct_int - exch_13_int
 
   integral = -integral
 
 end
 
 ! ---
+
 

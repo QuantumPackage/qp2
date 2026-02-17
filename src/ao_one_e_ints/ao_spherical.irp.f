@@ -1,7 +1,7 @@
-BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_coef_transp, (ao_sphe_num,ao_num)]
+BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_coef_transp, (ao_sphe_num, ao_num)]
   implicit none
   BEGIN_DOC
-  ! Transpose of :c:data:`ao_cart_to_sphe_coef` 
+  ! Transpose of :c:data:`ao_cart_to_sphe_coef`
   END_DOC
   integer :: i,j
   do i = 1, ao_num
@@ -19,7 +19,7 @@ subroutine ao_cart_to_ao_sphe(A_ao_cart,LDA_ao_cart,A_ao_sphe,LDA_ao_sphe)
   !
   ! :math:`(B^{sc})^T.A^c.B^{sc}`
   !
-  ! where :math:`B^{sc}` is :c:data:`ao_cart_to_sphe_coef`, 
+  ! where :math:`B^{sc}` is :c:data:`ao_cart_to_sphe_coef`,
   ! the matrix of coefficients from the cartesian AO basis to spherical one,
   ! and :math:`B^{sc}` is :c:data:`ao_cart_to_sphe_coef_transp`, its transpose.
   END_DOC
@@ -47,7 +47,7 @@ subroutine ao_cart_to_ao_sphe(A_ao_cart,LDA_ao_cart,A_ao_sphe,LDA_ao_sphe)
 end
 
 
-BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_overlap, (ao_sphe_num,ao_sphe_num) ]
+BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_overlap, (ao_sphe_num, ao_sphe_num) ]
   implicit none
   BEGIN_DOC
   ! |AO| overlap matrix in the spherical basis set obtained as
@@ -62,7 +62,7 @@ BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_overlap, (ao_sphe_num,ao_sphe
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_overlap_inv, (ao_sphe_num,ao_sphe_num) ]
+BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_overlap_inv, (ao_sphe_num, ao_sphe_num) ]
  implicit none
  BEGIN_DOC
  ! Inverse of :c:data:`ao_cart_to_sphe_overlap`
@@ -74,3 +74,4 @@ BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_overlap_inv, (ao_sphe_num,ao_
    ao_cart_to_sphe_overlap_inv, size(ao_cart_to_sphe_overlap_inv,1), &
    lin_dep_cutoff)
 END_PROVIDER
+

@@ -3,8 +3,8 @@ subroutine routine_active_only
  implicit none
  integer :: i,j,k,l,iorb,jorb,korb,lorb,istate
  BEGIN_DOC
-! This routine computes the two electron repulsion within the active space using various providers 
-! 
+! This routine computes the two electron repulsion within the active space using various providers
+!
  END_DOC
 
  double precision :: vijkl,get_two_e_integral
@@ -35,10 +35,10 @@ subroutine routine_active_only
  jorb = 1
  korb = 1
  lorb = 1
- vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)                                 
- provide act_2_rdm_ab_mo  act_2_rdm_aa_mo  act_2_rdm_bb_mo  act_2_rdm_spin_trace_mo 
- provide state_av_act_2_rdm_ab_mo  state_av_act_2_rdm_aa_mo  
- provide state_av_act_2_rdm_bb_mo  state_av_act_2_rdm_spin_trace_mo 
+ vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)
+ provide act_2_rdm_ab_mo  act_2_rdm_aa_mo  act_2_rdm_bb_mo  act_2_rdm_spin_trace_mo
+ provide state_av_act_2_rdm_ab_mo  state_av_act_2_rdm_aa_mo
+ provide state_av_act_2_rdm_bb_mo  state_av_act_2_rdm_spin_trace_mo
  i = 1
  j = 2
 ! print*,'testing stuffs'
@@ -63,8 +63,8 @@ subroutine routine_active_only
  print*,'**************************'
  print*,'**************************'
  do istate = 1, N_states
-   !! PURE ACTIVE PART 
-   !! 
+   !! PURE ACTIVE PART
+   !!
    accu_aa  = 0.d0
    accu_bb  = 0.d0
    accu_ab  = 0.d0
@@ -89,7 +89,7 @@ subroutine routine_active_only
         print*,act_2_rdm_spin_trace_mo(i,j,k,l,istate),act_2_rdm_spin_trace_mo(j,i,l,k,istate),dabs(act_2_rdm_spin_trace_mo(i,j,k,l,istate) - act_2_rdm_spin_trace_mo(j,i,l,k,istate))
        endif
 
-      !                                1 2 1 2                                   1 2 1 2 
+      !                                1 2 1 2                                   1 2 1 2
        if(dabs(act_2_rdm_spin_trace_mo(i,j,k,l,istate) - act_2_rdm_spin_trace_mo(k,l,i,j,istate)).gt.1.d-10)then
         print*,'Error in act_2_rdm_spin_trace_mo'
         print*,"dabs(act_2_rdm_spin_trace_mo(i,j,k,l,istate) - act_2_rdm_spin_trace_mo(k,l,i,j,istate),istate).gt.1.d-10"
@@ -97,14 +97,14 @@ subroutine routine_active_only
         print*,act_2_rdm_spin_trace_mo(i,j,k,l,istate),act_2_rdm_spin_trace_mo(k,l,i,j,istate),dabs(act_2_rdm_spin_trace_mo(i,j,k,l,istate) - act_2_rdm_spin_trace_mo(k,l,i,j,istate))
        endif
 
-       vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)                                 
+       vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)
 
 
        rdmab   =  act_2_rdm_ab_mo(l,k,j,i,istate)
        rdmaa   =  act_2_rdm_aa_mo(l,k,j,i,istate)
        rdmbb   =  act_2_rdm_bb_mo(l,k,j,i,istate)
        rdmtot  =  act_2_rdm_spin_trace_mo(l,k,j,i,istate)
-       spin_trace = rdmaa + rdmbb + rdmab 
+       spin_trace = rdmaa + rdmbb + rdmab
 
        if(dabs(rdmtot- spin_trace).gt.1.d-10)then
         print*,'Error    in non state average !!!!'
@@ -112,10 +112,10 @@ subroutine routine_active_only
         print*,lorb,korb,jorb,iorb
         print*,spin_trace,rdmtot,dabs(spin_trace - rdmtot)
         print*,'rdmab,rdmaa,rdmbb'
-        print*, rdmab,rdmaa,rdmbb 
+        print*, rdmab,rdmaa,rdmbb
 
        endif
- 
+
 
        wee_ab(istate)    += 0.5d0 * vijkl * rdmab
        wee_aa(istate)    += 0.5d0 * vijkl * rdmaa
@@ -150,7 +150,7 @@ subroutine routine_active_only
    print*,'accu_ab       = ',accu_ab
    print*,'N_a N_b       = ', elec_beta_num*elec_alpha_num
    print*,'accu_tot      = ',accu_tot
-   print*,'Ne(Ne-1)      = ',(elec_num-1)*elec_num 
+   print*,'Ne(Ne-1)      = ',(elec_num-1)*elec_num
   enddo
  wee_aa_st_av  = 0.d0
  wee_bb_st_av  = 0.d0
@@ -165,7 +165,7 @@ subroutine routine_active_only
     do l = 1, n_act_orb
      lorb = list_act(l)
 
-     vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)                                 
+     vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)
 
        if(dabs(state_av_act_2_rdm_spin_trace_mo(i,j,k,l) - state_av_act_2_rdm_spin_trace_mo(j,i,l,k)).gt.1.d-10)then
         print*,'Error in state_av_act_2_rdm_spin_trace_mo'
@@ -184,7 +184,7 @@ subroutine routine_active_only
      rdm_aa_st_av  = state_av_act_2_rdm_aa_mo(l,k,j,i)
      rdm_bb_st_av  = state_av_act_2_rdm_bb_mo(l,k,j,i)
      rdm_ab_st_av  = state_av_act_2_rdm_ab_mo(l,k,j,i)
-     spin_trace = rdm_aa_st_av + rdm_bb_st_av + rdm_ab_st_av 
+     spin_trace = rdm_aa_st_av + rdm_bb_st_av + rdm_ab_st_av
      rdm_tot_st_av = state_av_act_2_rdm_spin_trace_mo(l,k,j,i)
      if(dabs(spin_trace - rdm_tot_st_av).gt.1.d-10)then
       print*,'Error    !!!!'
@@ -225,8 +225,8 @@ subroutine routine_full_mos
  implicit none
  integer :: i,j,k,l,iorb,jorb,korb,lorb,istate
  BEGIN_DOC
-! This routine computes the two electron repulsion using various providers 
-! 
+! This routine computes the two electron repulsion using various providers
+!
  END_DOC
 
  double precision :: vijkl,rdmaa,get_two_e_integral,rdmab,rdmbb,rdmtot
@@ -259,8 +259,8 @@ subroutine routine_full_mos
  jorb = 1
  korb = 1
  lorb = 1
- vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)                                 
- provide full_occ_2_rdm_ab_mo  full_occ_2_rdm_aa_mo  full_occ_2_rdm_bb_mo  full_occ_2_rdm_spin_trace_mo 
+ vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)
+ provide full_occ_2_rdm_ab_mo  full_occ_2_rdm_aa_mo  full_occ_2_rdm_bb_mo  full_occ_2_rdm_spin_trace_mo
  print*,'**************************'
  print*,'**************************'
  do istate = 1, N_states
@@ -272,7 +272,7 @@ subroutine routine_full_mos
       korb = list_core_inact_act(k)
       do l = 1, n_core_inact_act_orb
        lorb = list_core_inact_act(l)
-       vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)                                 
+       vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)
 
        rdmaa  =  full_occ_2_rdm_aa_mo(l,k,j,i,istate)
        rdmab  =  full_occ_2_rdm_ab_mo(l,k,j,i,istate)
@@ -322,7 +322,7 @@ subroutine routine_full_mos
    print*,'N(N-1)                  = ',elec_num*(elec_num - 1)
   enddo
 
-! return 
+! return
  wee_aa_st_av  = 0.d0
  wee_bb_st_av  = 0.d0
  wee_ab_st_av  = 0.d0
@@ -335,7 +335,7 @@ subroutine routine_full_mos
     korb = list_core_inact_act(k)
     do l = 1, n_core_inact_act_orb
      lorb = list_core_inact_act(l)
-     vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)                                 
+     vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)
 
      rdm_aa_st_av  = state_av_full_occ_2_rdm_aa_mo(l,k,j,i)
      rdm_bb_st_av  = state_av_full_occ_2_rdm_bb_mo(l,k,j,i)
@@ -370,8 +370,8 @@ subroutine routine_active_only_trans
  implicit none
  integer :: i,j,k,l,iorb,jorb,korb,lorb,istate,jstate
  BEGIN_DOC
-! This routine computes the two electron repulsion within the active space using various providers 
-! 
+! This routine computes the two electron repulsion within the active space using various providers
+!
  END_DOC
 
  double precision :: vijkl,get_two_e_integral
@@ -387,7 +387,7 @@ subroutine routine_active_only_trans
  korb = 1
  lorb = 1
  vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)
- provide act_2_rdm_trans_spin_trace_mo 
+ provide act_2_rdm_trans_spin_trace_mo
  i = 1
  j = 2
 
@@ -395,8 +395,8 @@ subroutine routine_active_only_trans
  print*,'**************************'
  do jstate = 1, N_states
   do istate = 1, N_states
-   !! PURE ACTIVE PART 
-   !! 
+   !! PURE ACTIVE PART
+   !!
    accu_tot = 0.d0
    do i = 1, n_act_orb
     iorb = list_act(i)
@@ -414,7 +414,7 @@ subroutine routine_active_only_trans
 !        print*,act_2_rdm_trans_spin_trace_mo(i,j,k,l,istate,jstate),act_2_rdm_trans_spin_trace_mo(j,i,l,k,istate,jstate),dabs(act_2_rdm_trans_spin_trace_mo(i,j,k,l,istate,jstate) - act_2_rdm_trans_spin_trace_mo(j,i,l,k,istate,jstate))
 !       endif
 
-      !                                1 2 1 2                                   1 2 1 2 
+      !                                1 2 1 2                                   1 2 1 2
 !       if(dabs(act_2_rdm_trans_spin_trace_mo(i,j,k,l,istate,jstate) - act_2_rdm_trans_spin_trace_mo(k,l,i,j,istate,jstate)).gt.1.d-10)then
 !        print*,'Error in act_2_rdm_trans_spin_trace_mo'
 !        print*,"dabs(act_2_rdm_trans_spin_trace_mo(i,j,k,l,istate,jstate) - act_2_rdm_trans_spin_trace_mo(k,l,i,j,istate,jstate)).gt.1.d-10"
@@ -422,7 +422,7 @@ subroutine routine_active_only_trans
 !        print*,act_2_rdm_trans_spin_trace_mo(i,j,k,l,istate,jstate),act_2_rdm_trans_spin_trace_mo(k,l,i,j,istate,jstate),dabs(act_2_rdm_trans_spin_trace_mo(i,j,k,l,istate,jstate) - act_2_rdm_trans_spin_trace_mo(k,l,i,j,istate,jstate))
 !       endif
 
-       vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)                                 
+       vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)
 
 
        rdm_transtot  =  act_2_rdm_trans_spin_trace_mo(l,k,j,i,istate,jstate)
@@ -452,4 +452,5 @@ subroutine routine_active_only_trans
  enddo
 
 end
+
 

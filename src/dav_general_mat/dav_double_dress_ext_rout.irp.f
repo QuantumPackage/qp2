@@ -1,10 +1,10 @@
 subroutine dav_double_dressed(u_in,H_jj,Dress_jj,Dressing_vec,idx_dress,energies,sze,N_st,N_st_diag,converged,hcalc)
   BEGIN_DOC
-  ! Generic Davidson diagonalization with TWO DRESSING VECTORS 
+  ! Generic Davidson diagonalization with TWO DRESSING VECTORS
   !
-  ! Dress_jj : DIAGONAL DRESSING of the Hamiltonian 
+  ! Dress_jj : DIAGONAL DRESSING of the Hamiltonian
   !
-  ! Dressing_vec : COLUMN / LINE DRESSING VECTOR 
+  ! Dressing_vec : COLUMN / LINE DRESSING VECTOR
   !
   ! idx_dress : position of the basis function used to use the Dressing_vec (usually the largest coeff)
   !
@@ -80,7 +80,7 @@ subroutine dav_double_dressed(u_in,H_jj,Dress_jj,Dressing_vec,idx_dress,energies
   enddo
   include 'constants.include.F'
 
-  integer :: N_st_diag_in 
+  integer :: N_st_diag_in
   N_st_diag_in = N_st_diag
 
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: U, W, y, h, lambda
@@ -249,7 +249,7 @@ subroutine dav_double_dressed(u_in,H_jj,Dress_jj,Dressing_vec,idx_dress,energies
         ! Compute |W_k> = \sum_i |i><i|H|u_k>
         ! -----------------------------------
         call hcalc(W(:,shift+1),U(:,shift+1),N_st_diag_in,sze)
-        ! Compute then the DIAGONAL PART OF THE DRESSING 
+        ! Compute then the DIAGONAL PART OF THE DRESSING
         ! <i|W_k> += Dress_jj(i) * <i|U>
         call dressing_diag_uv(W(:,shift+1),U(:,shift+1),Dress_jj,N_st_diag_in,sze)
       else
@@ -393,7 +393,7 @@ subroutine dav_double_dressed(u_in,H_jj,Dress_jj,Dressing_vec,idx_dress,energies
 
         if (k <= N_st) then
           residual_norm(k) = u_dot_u(U(:,shift2+k),sze)
-          to_print(1,k) = lambda(k) 
+          to_print(1,k) = lambda(k)
           to_print(2,k) = residual_norm(k)
         endif
       enddo
@@ -487,11 +487,11 @@ end
 subroutine dressing_diag_uv(v,u,dress_diag,N_st,sze)
   implicit none
   BEGIN_DOC
-  ! Routine that computes the diagonal part of the dressing 
+  ! Routine that computes the diagonal part of the dressing
   !
   ! v(i) += u(i) * dress_diag(i)
   !
-  ! !!!!!!!! WARNING !!!!!!!! the vector v is not initialized 
+  ! !!!!!!!! WARNING !!!!!!!! the vector v is not initialized
   !
   ! !!!!!!!! SO MAKE SURE THERE ARE SOME MEANINGFUL VALUES IN THERE
   END_DOC
@@ -505,6 +505,7 @@ subroutine dressing_diag_uv(v,u,dress_diag,N_st,sze)
    enddo
   enddo
 end
+
 
 
 

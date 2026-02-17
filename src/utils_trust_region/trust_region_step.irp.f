@@ -8,10 +8,10 @@
 ! the new position and the same thing is done. And by doing so
 ! iteratively the method find a minimum, a local or global one depending
 ! of the starting point and the convexity/nonconvexity of the targeted
-! function.  
+! function.
 
 ! The goal of the trust region is to constrain the step size of the
-! Newton method in a certain area around the actual position, where the 
+! Newton method in a certain area around the actual position, where the
 ! Taylor series is a good approximation of the targeted function. This
 ! area is called the "trust region".
 
@@ -30,7 +30,7 @@
 ! By using the first and the second derivatives, the Newton method gives
 ! a step:
 ! \begin{align*}
-!   \textbf{x}_{(k+1)}^{\text{Newton}} = - \textbf{H}_{(k)}^{-1} \cdot 
+!   \textbf{x}_{(k+1)}^{\text{Newton}} = - \textbf{H}_{(k)}^{-1} \cdot
 !   \textbf{g}_{(k)}
 ! \end{align*}
 ! which leads to the minimizer of the Taylor series.
@@ -40,7 +40,7 @@
 ! \begin{align*}
 !   ||\textbf{x}_{(k+1)}|| \leq \Delta_{(k+1)}
 ! \end{align*}
-! which is equivalent to 
+! which is equivalent to
 ! \begin{align*}
 !   \textbf{x}_{(k+1)}^T \cdot \textbf{x}_{(k+1)} \leq \Delta_{(k+1)}^2
 ! \end{align*}
@@ -71,13 +71,13 @@
 !   E(\textbf{x}) =  E +\textbf{g}^T \cdot \textbf{x} + \frac{1}{2}
 !   \cdot \textbf{x}^T \cdot \textbf{H} \cdot \textbf{x} +
 !   \mathcal{O}(\textbf{x}^2)
-! \end{align*} 
+! \end{align*}
 
 ! With the constraint on the norm of $\textbf{x}$ we can write the
 ! Lagrangian
 ! \begin{align*}
 !   \mathcal{L}(\textbf{x},\lambda) = E + \textbf{g}^T \cdot \textbf{x}
-!   + \frac{1}{2} \cdot \textbf{x}^T \cdot \textbf{H} \cdot \textbf{x} 
+!   + \frac{1}{2} \cdot \textbf{x}^T \cdot \textbf{H} \cdot \textbf{x}
 !   + \frac{1}{2} \lambda (\textbf{x}^T \cdot \textbf{x} - \Delta^2)
 ! \end{align*}
 ! Where: \newline
@@ -94,7 +94,7 @@
 ! The derivative is:
 ! \begin{align*}
 !   \frac{\partial \mathcal{L}(\textbf{x},\lambda)}{\partial \textbf{x}}
-!   = \textbf{g} + \textbf{H} \cdot \textbf{x} + \lambda \cdot \textbf{x} 
+!   = \textbf{g} + \textbf{H} \cdot \textbf{x} + \lambda \cdot \textbf{x}
 ! \end{align*}
 
 ! So, we search $\textbf{x}$ such as:
@@ -105,10 +105,10 @@
 
 ! We can rewrite that as:
 ! \begin{align*}
-!   \textbf{g} + \textbf{H} \cdot \textbf{x} + \lambda \cdot \textbf{x} 
+!   \textbf{g} + \textbf{H} \cdot \textbf{x} + \lambda \cdot \textbf{x}
 !   = \textbf{g} + (\textbf{H} +\textbf{I} \lambda) \cdot \textbf{x} = 0
 ! \end{align*}
-! with $\textbf{I}$ is the identity matrix. 
+! with $\textbf{I}$ is the identity matrix.
 
 ! By doing so, the solution is:
 ! \begin{align*}
@@ -122,12 +122,12 @@
 ! We have to solve this previous equation to find this $\textbf{x}$ in the
 ! trust region, i.e. $||\textbf{x}|| = \Delta$. Now, this problem is
 ! just a one dimension problem because we can express $\textbf{x}$ as a
-! function of $\lambda$: 
+! function of $\lambda$:
 ! \begin{align*}
 !   \textbf{x}(\lambda) = - (\textbf{H} + \textbf{I} \lambda)^{-1} \cdot \textbf{g}
 ! \end{align*}
 
-! We start from the fact that the hessian is diagonalizable. So we have: 
+! We start from the fact that the hessian is diagonalizable. So we have:
 ! \begin{align*}
 !   \textbf{H} = \textbf{W} \cdot \textbf{h} \cdot \textbf{W}^T
 ! \end{align*}
@@ -141,13 +141,13 @@
 ! Now we use the fact that adding a constant on the diagonal just shifts
 ! the eigenvalues:
 ! \begin{align*}
-!   \textbf{H} + \textbf{I} \lambda = \textbf{W} \cdot (\textbf{h} 
+!   \textbf{H} + \textbf{I} \lambda = \textbf{W} \cdot (\textbf{h}
 !   +\textbf{I} \lambda) \cdot \textbf{W}^T
 ! \end{align*}
 
 ! By doing so we can express $\textbf{x}$ as a function of $\lambda$
 ! \begin{align*}
-!   \textbf{x}(\lambda) = - \sum_{i=1}^n \frac{\textbf{w}_i^T \cdot 
+!   \textbf{x}(\lambda) = - \sum_{i=1}^n \frac{\textbf{w}_i^T \cdot
 !   \textbf{g}}{h_i + \lambda} \cdot \textbf{w}_i
 ! \end{align*}
 ! with $\lambda \neq - h_i$.
@@ -156,16 +156,16 @@
 ! because we want $||\textbf{x}|| = \Delta$. Due to the orthogonality of
 ! the eigenvectors $\left\{\textbf{w} \right\} _{i=1}^n$ we have:
 ! \begin{align*}
-!   ||\textbf{x}(\lambda)||^2 = \sum_{i=1}^n \frac{(\textbf{w}_i^T \cdot 
+!   ||\textbf{x}(\lambda)||^2 = \sum_{i=1}^n \frac{(\textbf{w}_i^T \cdot
 !   \textbf{g})^2}{(h_i + \lambda)^2}
 ! \end{align*}
 
-! So the $||\textbf{x}(\lambda)||^2$ is just a function of $\lambda$. 
-! And if we study the properties of this function we see that: 
+! So the $||\textbf{x}(\lambda)||^2$ is just a function of $\lambda$.
+! And if we study the properties of this function we see that:
 ! \begin{align*}
 !   \lim_{\lambda\to\infty} ||\textbf{x}(\lambda)|| = 0
 ! \end{align*}
-! and if $\textbf{w}_i^T \cdot \textbf{g} \neq 0$: 
+! and if $\textbf{w}_i^T \cdot \textbf{g} \neq 0$:
 ! \begin{align*}
 !   \lim_{\lambda\to -h_i} ||\textbf{x}(\lambda)|| = + \infty
 ! \end{align*}
@@ -175,7 +175,7 @@
 ! strictly decreasing function on the interval $\lambda \in
 ! (-h_1;\infty)$. Thus, there is one $\lambda$ in this interval which
 ! gives $||\textbf{x}(\lambda)|| = \Delta$, consequently there is one
-! solution. 
+! solution.
 
 ! Since $\textbf{x} = - (\textbf{H} + \lambda \textbf{I})^{-1} \cdot
 ! \textbf{g}$ and we want to reduce the norm of $\textbf{x}$, clearly,
@@ -187,13 +187,13 @@
 ! greater than $- h_1$.
 ! \begin{align*}
 !   \lambda > 0 \quad \text{and} \quad \lambda \geq - h_1
-! \end{align*} 
+! \end{align*}
 
 ! From that there are five cases:
 ! - if $\textbf{H}$ is positive definite, $-h_1 < 0$, $\lambda \in (0,\infty)$
 ! - if $\textbf{H}$ is not positive definite and $\textbf{w}_1^T \cdot
 !   \textbf{g} \neq 0$, $(\textbf{H} + \textbf{I}
-!   \lambda)$ 
+!   \lambda)$
 !   must be positve definite, $-h_1 > 0$, $\lambda \in (-h_1, \infty)$
 ! - if $\textbf{H}$ is not positive definite , $\textbf{w}_1^T \cdot
 !   \textbf{g} = 0$ and $||\textbf{x}(-h_1)|| > \Delta$ by removing
@@ -209,7 +209,7 @@
 !   time a constant to ensure the condition $||\textbf{x}(\lambda =
 !   -h_1)|| = \Delta$ and escape from the saddle point
 
-! Thus to find the solution, we can write: 
+! Thus to find the solution, we can write:
 ! \begin{align*}
 !   ||\textbf{x}(\lambda)|| = \Delta
 ! \end{align*}
@@ -263,8 +263,8 @@
 ! mesure this agreement we use the ratio rho cf. "rho_model" and
 ! "trust_e_model". From that we use the following values:
 ! - if $\rho \geq 0.75$, then $\Delta = 2 \Delta$,
-! - if $0.5 \geq \rho < 0.75$, then $\Delta = \Delta$, 
-! - if $0.25 \geq \rho < 0.5$, then $\Delta = 0.5 \Delta$, 
+! - if $0.5 \geq \rho < 0.75$, then $\Delta = \Delta$,
+! - if $0.25 \geq \rho < 0.5$, then $\Delta = 0.5 \Delta$,
 ! - if $\rho < 0.25$, then $\Delta = 0.25 \Delta$.
 
 ! In addition, if $\rho < 0.1$ the iteration is cancelled, so it
@@ -277,9 +277,9 @@
 
 ! To summarize, knowing the hessian (eigenvectors and eigenvalues), the
 ! gradient and the radius of the trust region we can compute the norm of
-! the Newton step  
+! the Newton step
 ! \begin{align*}
-!   ||\textbf{x}(\lambda = 0)||^2 = ||- \textbf{H}^{-1} \cdot \textbf{g}||^2 = \sum_{i=1}^n 
+!   ||\textbf{x}(\lambda = 0)||^2 = ||- \textbf{H}^{-1} \cdot \textbf{g}||^2 = \sum_{i=1}^n
 !   \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2}, \quad h_i \neq 0
 ! \end{align*}
 
@@ -296,7 +296,7 @@
 !   -h_1)|| = \Delta$ and escape from the saddle point
 ! - else if $h_1 < 0$ and $\textbf{w}_1^T \cdot \textbf{g} \neq 0$ we
 !   have to search $\lambda \in (-h_1, \infty)$ such as
-!   $\textbf{x}(\lambda) = \Delta$ by solving with the Newton method 
+!   $\textbf{x}(\lambda) = \Delta$ by solving with the Newton method
 !   \begin{align*}
 !     (||\textbf{x}(\lambda)||^2 - \Delta^2)^2 = 0
 !   \end{align*}
@@ -304,19 +304,19 @@
 !   \begin{align*}
 !     (\frac{1}{||\textbf{x}(\lambda)||^2} - \frac{1}{\Delta^2})^2 = 0
 !   \end{align*}
-!   which is numerically more stable. And finally compute 
+!   which is numerically more stable. And finally compute
 !   \begin{align*}
 !     \textbf{x}^* = \textbf{x}(\lambda) = - \sum_{i=1}^n \frac{\textbf{w}_i^T \cdot
 !     \textbf{g}}{h_i + \lambda} \cdot \textbf{w}_i
 !   \end{align*}
 ! - else if $h_1 \geq 0$ and $||\textbf{x}(\lambda = 0)|| > \Delta$ we
 !   do exactly the same thing that the previous case but we search
-!   $\lambda \in (0, \infty)$ 
+!   $\lambda \in (0, \infty)$
 ! - else if $h_1 < 0$ and $\textbf{w}_1^T \cdot \textbf{g} = 0$ and
 !   $||\textbf{x}(\lambda = -h_1)|| > \Delta$ (by removing $j=1$ in the
 !   sum), again we do exactly the same thing that the previous case
 !   searching $\lambda \in (-h_1, \infty)$.
-  
+
 
 ! For the cases where $\textbf{w}_1^T \cdot \textbf{g} = 0$ it is not
 ! necessary in fact to remove the $j = 1$ in the sum since the term
@@ -327,7 +327,7 @@
 ! m_x. This matrix $\textbf{X}$ will be used to compute a rotation
 ! matrix $\textbf{R}= \exp(\textbf{X})$ in "rotation_matrix".
 
-! NB: 
+! NB:
 ! An improvement can be done using a elleptical trust region.
 
 
@@ -443,7 +443,7 @@ else
   ! For the diagonal case
   do j = 1, n
     k = int(w(j,1)+1d-15)
-    tmp_wtg(j) = v_grad(k) 
+    tmp_wtg(j) = v_grad(k)
   enddo
 endif
 
@@ -454,11 +454,11 @@ if (avoid_saddle .and. e_val(1) < - thresh_eig) then
   ! Number of negative eigenvalues
   do while (e_val(i) < - thresh_eig)
     if (tmp_wtg(i) < thresh_wtg2) then
-      if (version_avoid_saddle == 1) then  
+      if (version_avoid_saddle == 1) then
         tmp_wtg(i) = 1d0
-      elseif  (version_avoid_saddle == 2) then  
+      elseif  (version_avoid_saddle == 2) then
         tmp_wtg(i) = DABS(e_val(i))
-      elseif  (version_avoid_saddle == 3) then  
+      elseif  (version_avoid_saddle == 3) then
         tmp_wtg(i) = dsqrt(DABS(e_val(i)))
       else
         tmp_wtg(i) = thresh_wtg2
@@ -468,7 +468,7 @@ if (avoid_saddle .and. e_val(1) < - thresh_eig) then
   enddo
 
   ! For the fist one it's a little bit different
-  if (tmp_wtg(1) < thresh_wtg2) then 
+  if (tmp_wtg(1) < thresh_wtg2) then
     tmp_wtg(1) = 0d0
   endif
 
@@ -491,12 +491,12 @@ norm2_g = (dnrm2(n,v_grad,1))**2
 !     with the norm of the step generate by the Newton's method ($\textbf{x}_1 =
 !     (\textbf{H}_0)^{-1} \cdot \textbf{g}_0$,
 !     we compute this norm using f_norm_trust_region_omp as explain just
-!     below) 
+!     below)
 
 
 ! trust radius
 if (nb_iter == 0) then
-   trust_radius2 = norm2_x 
+   trust_radius2 = norm2_x
    ! To avoid infinite loop of cancellation of this first step
    ! without changing delta
    nb_iter = 1
@@ -551,20 +551,20 @@ endif
 ! By giving delta, we search (||x||^2 - delta^2)^2 = 0
 ! and not (||x||^2 - delta)^2 = 0
 
-! Research of lambda to solve ||x(lambda)|| = Delta 
+! Research of lambda to solve ||x(lambda)|| = Delta
 
 ! Display
 !print*, 'e_val(1) = ', e_val(1)
 !print*, 'w_1^T.g =', tmp_wtg(1)
 
-! H positive definite 
+! H positive definite
 if (e_val(1) > - thresh_eig) then
   norm2_x = f_norm_trust_region_omp(n,e_val,tmp_wtg,0d0)
   !print*, '||x(0)||=', dsqrt(norm2_x)
   !print*, 'Delta=', delta
 
   ! H positive definite, ||x(lambda = 0)|| <= Delta
-  if (dsqrt(norm2_x) <= delta) then 
+  if (dsqrt(norm2_x) <= delta) then
     !print*, 'H positive definite, ||x(lambda = 0)|| <= Delta'
     !print*, 'lambda = 0, no lambda optimization'
     lambda = 0d0
@@ -572,7 +572,7 @@ if (e_val(1) > - thresh_eig) then
   ! H positive definite, ||x(lambda = 0)|| > Delta
   else
     ! Constraint solution
-    !print*, 'H positive definite, ||x(lambda = 0)|| > Delta' 
+    !print*, 'H positive definite, ||x(lambda = 0)|| > Delta'
     !print*,'Computation of the optimal lambda...'
     call trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
   endif
@@ -581,10 +581,10 @@ if (e_val(1) > - thresh_eig) then
 else
   if (DABS(tmp_wtg(1)) < thresh_wtg) then
     norm2_x = f_norm_trust_region_omp(n,e_val,tmp_wtg, - e_val(1))
-    !print*, 'w_1^T.g <', thresh_wtg,', ||x(lambda = -e_val(1))|| =', dsqrt(norm2_x) 
+    !print*, 'w_1^T.g <', thresh_wtg,', ||x(lambda = -e_val(1))|| =', dsqrt(norm2_x)
   endif
 
-  ! H indefinite, w_1^T.g = 0, ||x(lambda = -e_val(1))|| <= Delta 
+  ! H indefinite, w_1^T.g = 0, ||x(lambda = -e_val(1))|| <= Delta
   if (dsqrt(norm2_x) <= delta .and. DABS(tmp_wtg(1)) < thresh_wtg) then
     ! Add e_val(1) in order to have (H - e_val(1) I) positive definite
     !print*, 'H indefinite, w_1^T.g = 0, ||x(lambda = -e_val(1))|| <= Delta'
@@ -620,7 +620,7 @@ print*,'delta:', delta
 ! x refers to $\textbf{x}^*$
 ! We compute x in function of lambda using its formula :
 ! \begin{align*}
-! \textbf{x}^* = \textbf{x}(\lambda) = - \sum_{i=1}^n \frac{\textbf{w}_i^T \cdot \textbf{g}}{h_i 
+! \textbf{x}^* = \textbf{x}(\lambda) = - \sum_{i=1}^n \frac{\textbf{w}_i^T \cdot \textbf{g}}{h_i
 ! + \lambda} \cdot \textbf{w}_i
 ! \end{align*}
 
@@ -634,7 +634,7 @@ if (n == n2) then
   ! Normal version
   if (.not. absolute_eig) then
 
-    do i = 1, n 
+    do i = 1, n
       if (DABS(e_val(i)) > thresh_eig .and. DABS(e_val(i)+lambda) > thresh_eig) then
         do j = 1, n
           x(j) = x(j) - tmp_wtg(i) * W(j,i) / (e_val(i) + lambda)
@@ -645,7 +645,7 @@ if (n == n2) then
   ! Version to use the absolute value of the eigenvalues
   else
 
-    do i = 1, n 
+    do i = 1, n
       if (DABS(e_val(i)) > thresh_eig) then
         do j = 1, n
           x(j) = x(j) - tmp_wtg(i) * W(j,i) / (DABS(e_val(i)) + lambda)
@@ -659,7 +659,7 @@ else
   ! Normal version
   if (.not. absolute_eig) then
 
-    do i = 1, n 
+    do i = 1, n
       if (DABS(e_val(i)) > thresh_eig .and. DABS(e_val(i)+lambda) > thresh_eig) then
         j = int(w(i,1) + 1d-15)
         x(j) = - tmp_wtg(i) * 1d0 / (e_val(i) + lambda)
@@ -669,7 +669,7 @@ else
   ! Version to use the absolute value of the eigenvalues
   else
 
-    do i = 1, n 
+    do i = 1, n
       if (DABS(e_val(i)) > thresh_eig) then
         j = int(w(i,1) + 1d-15)
         x(j) = - tmp_wtg(i) * 1d0 / (DABS(e_val(i)) + lambda)
@@ -683,7 +683,7 @@ double precision :: beta, norm_x
 
 ! Test
 ! If w_1^T.g = 0, the lim of ||x(lambda)|| when lambda tend to -e_val(1)
-! is not + infinity. So ||x(lambda=-e_val(1))|| < delta, we add the first 
+! is not + infinity. So ||x(lambda=-e_val(1))|| < delta, we add the first
 ! eigenvectors multiply by a constant to ensure the condition
 ! ||x(lambda=-e_val(1))|| = delta and escape the saddle point
 if (avoid_saddle .and. e_val(1) < - thresh_eig) then
@@ -692,7 +692,7 @@ if (avoid_saddle .and. e_val(1) < - thresh_eig) then
     ! norm of x
     norm_x = dnrm2(n,x,1)
 
-    ! Computes the coefficient for the w_1 
+    ! Computes the coefficient for the w_1
     beta = delta**2 - norm_x**2
 
     ! Updates the step x
@@ -702,7 +702,7 @@ if (avoid_saddle .and. e_val(1) < - thresh_eig) then
     norm_x = dnrm2(n,x,1)
 
     print*, 'Add w_1 * dsqrt(delta^2 - ||x||^2):'
-    print*, '||x||', norm_x 
+    print*, '||x||', norm_x
   endif
 endif
 
@@ -747,3 +747,4 @@ deallocate(tmp_wtg)
   print*,'======================'
 
 end
+

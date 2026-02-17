@@ -152,7 +152,7 @@ subroutine overlap_gauss_r12_v(D_center, LD_D, delta, A_center, B_center, power_
   integer,          intent(in)  :: LD_D, LD_rvec, n_points
   integer,          intent(in)  :: power_A(3), power_B(3)
   double precision, intent(in)  :: D_center(LD_D,3), delta
-  double precision, intent(in)  :: A_center(3), B_center(3), alpha, beta 
+  double precision, intent(in)  :: A_center(3), B_center(3), alpha, beta
   double precision, intent(out) :: rvec(LD_rvec)
 
   integer                       :: maxab
@@ -338,3 +338,4 @@ double precision function overlap_gauss_xyz_r12_specific(D_center,delta,A_center
  enddo
  overlap_gauss_xyz_r12_specific *= fact_a_new
 end
+

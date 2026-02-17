@@ -1,10 +1,10 @@
 ! ---
 
-BEGIN_PROVIDER [double precision, env_gauss_hermI, (ao_num,ao_num)]
+BEGIN_PROVIDER [double precision, env_gauss_hermI, (ao_num, ao_num)]
 
   BEGIN_DOC
   !
-  !  :math:`\langle \chi_A | -0.5 \Delta \tau_{env} | \chi_B \rangle` 
+  !  :math:`\langle \chi_A | -0.5 \Delta \tau_{env} | \chi_B \rangle`
   !
   END_DOC
 
@@ -34,7 +34,7 @@ BEGIN_PROVIDER [double precision, env_gauss_hermI, (ao_num,ao_num)]
   call overlap_gaussian_xyz( A_center, B_center, alpha, beta, power_A, power_B &
                            , overlap_y, d_a_2, overlap_z, overlap, dim1 )
   ! --------------------------------------------------------------------------------
-  
+
   env_gauss_hermI(1:ao_num,1:ao_num) = 0.d0
 
  !$OMP PARALLEL                                                 &
@@ -42,7 +42,7 @@ BEGIN_PROVIDER [double precision, env_gauss_hermI, (ao_num,ao_num)]
  !$OMP PRIVATE (i, j, k, l, m, alpha, beta, gama,               &
  !$OMP          A_center, B_center, C_center, power_A, power_B, &
  !$OMP          num_A, num_B, c1, c2, c)                        &
- !$OMP SHARED (ao_num, ao_prim_num, ao_expo_ordered_transp,     & 
+ !$OMP SHARED (ao_num, ao_prim_num, ao_expo_ordered_transp,     &
  !$OMP         ao_power, ao_nucl, nucl_coord,                   &
  !$OMP         ao_coef_normalized_ordered_transp,               &
  !$OMP         nucl_num, env_expo, env_gauss_hermI)
@@ -51,35 +51,35 @@ BEGIN_PROVIDER [double precision, env_gauss_hermI, (ao_num,ao_num)]
     num_A         = ao_nucl(j)
     power_A(1:3)  = ao_power(j,1:3)
     A_center(1:3) = nucl_coord(num_A,1:3)
- 
+
     do i = 1, ao_num
       num_B         = ao_nucl(i)
       power_B(1:3)  = ao_power(i,1:3)
       B_center(1:3) = nucl_coord(num_B,1:3)
- 
+
       do l = 1, ao_prim_num(j)
         alpha = ao_expo_ordered_transp(l,j)
- 
+
         do m = 1, ao_prim_num(i)
           beta = ao_expo_ordered_transp(m,i)
- 
+
           c = 0.d0
           do k = 1, nucl_num
             gama          = env_expo(k)
             C_center(1:3) = nucl_coord(k,1:3)
- 
+
             ! < XA | exp[-gama r_C^2] | XB >
             c1 = int_gauss_r0( A_center, B_center, C_center        &
                              , power_A, power_B, alpha, beta, gama )
- 
+
             ! < XA | r_A^2 exp[-gama r_C^2] | XB >
             c2 = int_gauss_r2( A_center, B_center, C_center        &
                              , power_A, power_B, alpha, beta, gama )
- 
+
             c = c + 3.d0 * gama * c1 - 2.d0 * gama * gama * c2
           enddo
- 
-          env_gauss_hermI(i,j) = env_gauss_hermI(i,j)      & 
+
+          env_gauss_hermI(i,j) = env_gauss_hermI(i,j)      &
                   + ao_coef_normalized_ordered_transp(l,j) &
                   * ao_coef_normalized_ordered_transp(m,i) * c
         enddo
@@ -105,15 +105,15 @@ double precision function int_gauss_r0(A_center, B_center, C_center, power_A, po
 
   integer         , intent(in) :: power_A(3), power_B(3)
   double precision, intent(in) :: A_center(3), B_center(3), C_center(3)
-  double precision, intent(in) :: alpha, beta, gama 
+  double precision, intent(in) :: alpha, beta, gama
 
   integer                      :: i, power_C, dim1
   integer                      :: iorder(3)
   integer                      :: nmax
   double precision             :: AB_expo, fact_AB, AB_center(3), P_AB(0:max_dim,3)
-  double precision             :: cx, cy, cz 
+  double precision             :: cx, cy, cz
 
-  double precision             :: overlap_gaussian_x 
+  double precision             :: overlap_gaussian_x
 
   dim1 = 100
 
@@ -147,7 +147,7 @@ double precision function int_gauss_r0(A_center, B_center, C_center, power_A, po
   int_gauss_r0 = fact_AB * cx * cy * cz
 
   return
-end function int_gauss_r0 
+end function int_gauss_r0
 !_____________________________________________________________________________________________________________
 !_____________________________________________________________________________________________________________
 
@@ -166,7 +166,7 @@ double precision function int_gauss_r2(A_center, B_center, C_center, power_A, po
 
   integer,          intent(in) :: power_A(3), power_B(3)
   double precision, intent(in) :: A_center(3), B_center(3), C_center(3)
-  double precision, intent(in) :: alpha, beta, gama 
+  double precision, intent(in) :: alpha, beta, gama
 
   integer                      :: i, power_C, dim1
   integer                      :: iorder(3)
@@ -235,5 +235,6 @@ double precision function int_gauss_r2(A_center, B_center, C_center, power_A, po
 end function int_gauss_r2
 !_____________________________________________________________________________________________________________
 !_____________________________________________________________________________________________________________
+
 
 

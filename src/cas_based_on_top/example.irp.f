@@ -2,7 +2,7 @@
 subroutine write_on_top_in_real_space
  implicit none
  BEGIN_DOC
-! This routines is a simple example of how to plot the on-top pair density on a simple 1D grid 
+! This routines is a simple example of how to plot the on-top pair density on a simple 1D grid
  END_DOC
  double precision :: zmax,dz,r(3),on_top_in_r,total_density,zcenter,dist
  double precision :: core_dens, inact_dens,act_dens(2,1)
@@ -27,7 +27,7 @@ subroutine write_on_top_in_real_space
  nz = 1000
  dz = zmax / dble(nz)
  r(:) = 0.d0
- r(3) = zcenter -zmax * 0.5d0                                                                                                                                          
+ r(3) = zcenter -zmax * 0.5d0
  print*,'r(3)    = ',r(3)
  istate = 1
 
@@ -40,4 +40,5 @@ subroutine write_on_top_in_real_space
  enddo
 
 end
+
 

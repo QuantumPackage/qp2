@@ -1,7 +1,7 @@
 
 ! ---
 
-BEGIN_PROVIDER[double precision, aos_in_r_array, (ao_num,n_points_final_grid)]
+BEGIN_PROVIDER [double precision, aos_in_r_array, (ao_num, n_points_final_grid)]
 
   BEGIN_DOC
   ! aos_in_r_array(i,j) = value of the ith ao on the jth grid point
@@ -23,7 +23,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER[double precision, aos_in_r_array_transp, (n_points_final_grid,ao_num)]
+BEGIN_PROVIDER [double precision, aos_in_r_array_transp, (n_points_final_grid, ao_num)]
 
   BEGIN_DOC
   ! aos_in_r_array_transp(i,j) = value of the jth ao on the ith grid point
@@ -43,7 +43,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER[double precision, aos_grad_in_r_array, (ao_num,n_points_final_grid,3)]
+BEGIN_PROVIDER [double precision, aos_grad_in_r_array, (ao_num, n_points_final_grid, 3)]
 
   BEGIN_DOC
   !
@@ -82,7 +82,7 @@ END_PROVIDER
 ! ---
 
 
- BEGIN_PROVIDER[double precision, aos_grad_in_r_array_transp, (3,ao_num,n_points_final_grid)]
+ BEGIN_PROVIDER [double precision, aos_grad_in_r_array_transp, (3, ao_num, n_points_final_grid)]
  implicit none
  BEGIN_DOC
  ! aos_grad_in_r_array_transp(k,i,j)   = value of the kth component of the gradient of jth ao on the ith grid point
@@ -101,7 +101,10 @@ END_PROVIDER
  enddo
  END_PROVIDER
 
- BEGIN_PROVIDER [double precision, aos_lapl_in_r_array_transp, (ao_num, n_points_final_grid,3)]
+ BEGIN_PROVIDER [double precision, aos_lapl_in_r_array_transp, (ao_num, n_points_final_grid, 3)]
+  BEGIN_DOC
+  ! aos_lapl_in_r_array_transp
+  END_DOC
  implicit none
  integer :: i,j,m
  do i = 1, n_points_final_grid
@@ -113,7 +116,7 @@ END_PROVIDER
  enddo
  END_PROVIDER
 
- BEGIN_PROVIDER [double precision, aos_lapl_in_r_array, (3,ao_num,n_points_final_grid)]
+ BEGIN_PROVIDER [double precision, aos_lapl_in_r_array, (3, ao_num, n_points_final_grid)]
  implicit none
  BEGIN_DOC
  ! aos_lapl_in_r_array(i,j,k)   = value of the kth component of the laplacian of jth ao on the ith grid point
@@ -128,7 +131,7 @@ END_PROVIDER
  !$OMP PRIVATE (i,aos_array,aos_grad_array,aos_lapl_array,j,m) &
  !$OMP SHARED(aos_lapl_in_r_array,n_points_final_grid,ao_num,final_grid_points)
  allocate( aos_array(ao_num), aos_grad_array(3,ao_num), aos_lapl_array(3,ao_num))
- !$OMP DO 
+ !$OMP DO
  do i = 1, n_points_final_grid
   call give_all_aos_and_grad_and_lapl_at_r(final_grid_points(1,i),aos_array,aos_grad_array,aos_lapl_array)
   do j = 1, ao_num
@@ -142,7 +145,7 @@ END_PROVIDER
  !$OMP END PARALLEL
  END_PROVIDER
 
- BEGIN_PROVIDER[double precision, aos_grad_in_r_array_transp_bis, (n_points_final_grid,ao_num,3)]
+ BEGIN_PROVIDER [double precision, aos_grad_in_r_array_transp_bis, (n_points_final_grid, ao_num, 3)]
  implicit none
  BEGIN_DOC
 ! Transposed gradients
@@ -161,7 +164,7 @@ END_PROVIDER
  END_PROVIDER
 
 
- BEGIN_PROVIDER[double precision, aos_grad_in_r_array_transp_3, (3,n_points_final_grid,ao_num)]
+ BEGIN_PROVIDER [double precision, aos_grad_in_r_array_transp_3, (3, n_points_final_grid, ao_num)]
  implicit none
  BEGIN_DOC
 ! Transposed gradients
@@ -179,7 +182,7 @@ END_PROVIDER
  enddo
  END_PROVIDER
 
- BEGIN_PROVIDER[double precision, aos_in_r_array_extra, (ao_num,n_points_extra_final_grid)]
+ BEGIN_PROVIDER [double precision, aos_in_r_array_extra, (ao_num, n_points_extra_final_grid)]
  implicit none
  BEGIN_DOC
  ! aos_in_r_array_extra(i,j)        = value of the ith ao on the jth grid point of the EXTRA grid
@@ -198,7 +201,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER[double precision, aos_in_r_array_extra_transp, (n_points_extra_final_grid,ao_num)]
+BEGIN_PROVIDER [double precision, aos_in_r_array_extra_transp, (n_points_extra_final_grid, ao_num)]
 
   BEGIN_DOC
   ! aos_in_r_array_extra_transp(i,j) = value of the jth ao on the ith grid point of the EXTRA grid
@@ -218,7 +221,10 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER[double precision, aos_grad_in_r_array_extra, (ao_num,n_points_extra_final_grid,3)]
+BEGIN_PROVIDER [double precision, aos_grad_in_r_array_extra, (ao_num, n_points_extra_final_grid, 3)]
+  BEGIN_DOC
+  ! aos_grad_in_r_array_extra
+  END_DOC
 
   implicit none
   integer          :: i, j, m
@@ -246,4 +252,5 @@ BEGIN_PROVIDER[double precision, aos_grad_in_r_array_extra, (ao_num,n_points_ext
 END_PROVIDER
 
 ! ---
+
 

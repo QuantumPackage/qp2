@@ -29,10 +29,10 @@ END_PROVIDER
 
 ! ---
 
- BEGIN_PROVIDER [double precision, final_grid_points,      (3,n_points_final_grid)]
+ BEGIN_PROVIDER [double precision, final_grid_points,      (3, n_points_final_grid)]
 &BEGIN_PROVIDER [double precision, final_weight_at_r_vector, (n_points_final_grid)]
-&BEGIN_PROVIDER [integer,          index_final_points,     (3,n_points_final_grid)]
-&BEGIN_PROVIDER [integer, index_final_points_reverse, (n_points_integration_angular,n_points_radial_grid,nucl_num)]
+&BEGIN_PROVIDER [integer,          index_final_points,     (3, n_points_final_grid)]
+&BEGIN_PROVIDER [integer, index_final_points_reverse, (n_points_integration_angular, n_points_radial_grid, nucl_num)]
 
   BEGIN_DOC
   !  final_grid_points(1:3,j) = (/ x, y, z /) of the jth grid point
@@ -83,7 +83,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [double precision, final_grid_points_transp, (n_points_final_grid,3)]
+BEGIN_PROVIDER [double precision, final_grid_points_transp, (n_points_final_grid, 3)]
 
   BEGIN_DOC
   ! Transposed final_grid_points
@@ -101,5 +101,6 @@ BEGIN_PROVIDER [double precision, final_grid_points_transp, (n_points_final_grid
 END_PROVIDER
 
 ! ---
+
 
 

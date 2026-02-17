@@ -15,7 +15,7 @@ BEGIN_PROVIDER [ integer, basis_prod_num ]
   basis_prod_num = ao_num * (ao_num+1) / 2
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, basis_prod_idx, (2,basis_prod_num) ]
+BEGIN_PROVIDER [ integer, basis_prod_idx, (2, basis_prod_num) ]
   implicit none
   BEGIN_DOC
   ! Indices of main basis to create projector basis
@@ -191,4 +191,5 @@ end function basis_prod_overlap_func
   deallocate(U,U2,D)
 !  deallocate(Vt)
 END_PROVIDER
+
 

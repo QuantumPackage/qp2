@@ -7,37 +7,37 @@ BEGIN_PROVIDER [ double precision, ao_abs_int_grid, (ao_num)]
  integer :: i,j,ipoint
  double precision :: contrib, weight,r(3)
  ao_abs_int_grid = 0.D0
- do ipoint = 1,n_points_final_grid 
+ do ipoint = 1,n_points_final_grid
   r(:) = final_grid_points(:,ipoint)
   weight = final_weight_at_r_vector(ipoint)
   do i = 1, ao_num
     contrib = dabs(aos_in_r_array(i,ipoint)) * weight
-    ao_abs_int_grid(i) += contrib 
+    ao_abs_int_grid(i) += contrib
   enddo
  enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, ao_overlap_abs_grid, (ao_num, ao_num)]
  implicit none
  BEGIN_DOC
-! ao_overlap_abs_grid(j,i) = \int dr |phi_i(r) phi_j(r)| 
+! ao_overlap_abs_grid(j,i) = \int dr |phi_i(r) phi_j(r)|
  END_DOC
  integer :: i,j,ipoint
  double precision :: contrib, weight,r(3)
  ao_overlap_abs_grid = 0.D0
- do ipoint = 1,n_points_final_grid 
+ do ipoint = 1,n_points_final_grid
   r(:) = final_grid_points(:,ipoint)
   weight = final_weight_at_r_vector(ipoint)
   do i = 1, ao_num
    do j = 1, ao_num
     contrib = dabs(aos_in_r_array(j,ipoint) * aos_in_r_array(i,ipoint)) * weight
-    ao_overlap_abs_grid(j,i) += contrib 
+    ao_overlap_abs_grid(j,i) += contrib
    enddo
   enddo
  enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, ao_prod_center, (3, ao_num, ao_num)]
  implicit none
@@ -49,7 +49,7 @@ BEGIN_PROVIDER [ double precision, ao_prod_center, (3, ao_num, ao_num)]
  integer :: i,j,m,ipoint
  double precision :: contrib, weight,r(3)
  ao_prod_center = 0.D0
- do ipoint = 1,n_points_final_grid 
+ do ipoint = 1,n_points_final_grid
   r(:) = final_grid_points(:,ipoint)
   weight = final_weight_at_r_vector(ipoint)
   do i = 1, ao_num
@@ -75,7 +75,7 @@ BEGIN_PROVIDER [ double precision, ao_prod_center, (3, ao_num, ao_num)]
   enddo
  enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, ao_prod_abs_r, (ao_num, ao_num)]
  implicit none
@@ -86,7 +86,7 @@ BEGIN_PROVIDER [ double precision, ao_prod_abs_r, (ao_num, ao_num)]
  ao_prod_abs_r = 0.d0
  integer :: i,j,m,ipoint
  double precision :: contrib, weight,r(3),contrib_x2
- do ipoint = 1,n_points_final_grid 
+ do ipoint = 1,n_points_final_grid
   r(:) = final_grid_points(:,ipoint)
   weight = final_weight_at_r_vector(ipoint)
   do i = 1, ao_num
@@ -94,7 +94,7 @@ BEGIN_PROVIDER [ double precision, ao_prod_abs_r, (ao_num, ao_num)]
     contrib = dabs(aos_in_r_array(j,ipoint) * aos_in_r_array(i,ipoint)) * weight
     contrib_x2 = 0.d0
     do m = 1, 3
-     contrib_x2 += (r(m) - ao_prod_center(m,j,i)) * (r(m) - ao_prod_center(m,j,i)) 
+     contrib_x2 += (r(m) - ao_prod_center(m,j,i)) * (r(m) - ao_prod_center(m,j,i))
     enddo
     contrib_x2 = dsqrt(contrib_x2)
     ao_prod_abs_r(j,i) += contrib * contrib_x2
@@ -103,12 +103,12 @@ BEGIN_PROVIDER [ double precision, ao_prod_abs_r, (ao_num, ao_num)]
  enddo
 
 
-END_PROVIDER 
+END_PROVIDER
 
  BEGIN_PROVIDER [double precision, ao_prod_sigma, (ao_num, ao_num)]
  implicit none
  BEGIN_DOC
-! Gaussian exponent reproducing the product |chi_i(r) chi_j(r)| 
+! Gaussian exponent reproducing the product |chi_i(r) chi_j(r)|
 !
 ! Therefore |chi_i(r) chi_j(r)|  \approx e^{-ao_prod_sigma(j,i) (r - ao_prod_center(1:3,j,i))**2}
  END_DOC
@@ -123,7 +123,7 @@ END_PROVIDER
 !   endif
   enddo
  enddo
- END_PROVIDER 
+ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, ao_prod_dist_grid, (ao_num, ao_num, n_points_final_grid)]
  implicit none
@@ -146,6 +146,7 @@ BEGIN_PROVIDER [ double precision, ao_prod_dist_grid, (ao_num, ao_num, n_points_
   enddo
  enddo
 
-END_PROVIDER 
+END_PROVIDER
+
 
 

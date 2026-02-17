@@ -7,7 +7,7 @@
 
   BEGIN_DOC
   !
-  ! two_e_tc_integral_alpha(k,i) = <k| F^tc_2e_alpha |i> ON THE AO BASIS 
+  ! two_e_tc_integral_alpha(k,i) = <k| F^tc_2e_alpha |i> ON THE AO BASIS
   !
   ! where F^tc_2e is the TWO-BODY part of the TC Fock matrix and k,i are AO basis functions
   !
@@ -40,7 +40,7 @@
     do l = 1, ao_num
       density_a = TCSCF_density_matrix_ao_alpha(l,j)
       density_b = TCSCF_density_matrix_ao_beta (l,j)
-      density   = density_a + density_b                      
+      density   = density_a + density_b
       do i = 1, ao_num
         do k = 1, ao_num
 
@@ -67,7 +67,7 @@
   deallocate(tmp_a, tmp_b)
   !$OMP END PARALLEL
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -82,7 +82,7 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_ao_alpha, (ao_num, ao_num)]
 
   Fock_matrix_tc_ao_alpha = ao_one_e_integrals_tc_tot + two_e_tc_integral_alpha
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -94,9 +94,9 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_ao_beta, (ao_num, ao_num)]
 
   implicit none
 
-  Fock_matrix_tc_ao_beta = ao_one_e_integrals_tc_tot + two_e_tc_integral_beta 
+  Fock_matrix_tc_ao_beta = ao_one_e_integrals_tc_tot + two_e_tc_integral_beta
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -124,7 +124,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_beta, (mo_num,mo_num) ]
+BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_beta, (mo_num, mo_num) ]
 
   BEGIN_DOC
   ! Total beta TC Fock matrix : h_c + Two-e^TC terms on the MO basis
@@ -148,6 +148,9 @@ END_PROVIDER
  BEGIN_PROVIDER [ double precision, grad_non_hermit_left]
 &BEGIN_PROVIDER [ double precision, grad_non_hermit_right]
 &BEGIN_PROVIDER [ double precision, grad_non_hermit]
+  BEGIN_DOC
+  ! grad_non_hermit_left
+  END_DOC
 
   implicit none
   integer :: i, k
@@ -162,14 +165,14 @@ END_PROVIDER
     enddo
   enddo
 
-  do i = 1, elec_beta_num ! doc --> virt 
+  do i = 1, elec_beta_num ! doc --> virt
     do k = elec_alpha_num+1, mo_num
       grad_non_hermit_left  = max(grad_non_hermit_left , dabs(Fock_matrix_tc_mo_tot(k,i)))
       grad_non_hermit_right = max(grad_non_hermit_right, dabs(Fock_matrix_tc_mo_tot(i,k)))
     enddo
   enddo
 
-  do i = elec_beta_num+1, elec_alpha_num ! SOMO --> virt 
+  do i = elec_beta_num+1, elec_alpha_num ! SOMO --> virt
     do k = elec_alpha_num+1, mo_num
       grad_non_hermit_left  = max(grad_non_hermit_left , dabs(Fock_matrix_tc_mo_tot(k,i)))
       grad_non_hermit_right = max(grad_non_hermit_right, dabs(Fock_matrix_tc_mo_tot(i,k)))
@@ -178,11 +181,14 @@ END_PROVIDER
 
   grad_non_hermit = max(grad_non_hermit_left, grad_non_hermit_right)
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
 BEGIN_PROVIDER [ double precision, Fock_matrix_tc_ao_tot, (ao_num, ao_num) ]
+  BEGIN_DOC
+  ! Fock_matrix_tc_ao_tot
+  END_DOC
 
   implicit none
   double precision :: t0, t1
@@ -205,9 +211,9 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_a, (mo_num, mo_num)]
 
   BEGIN_DOC
   !
-  ! Fock matrix alpha from three-electron terms 
+  ! Fock matrix alpha from three-electron terms
   !
-  ! WARNING :: non hermitian if bi-ortho MOS used 
+  ! WARNING :: non hermitian if bi-ortho MOS used
   !
   END_DOC
 
@@ -228,7 +234,7 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_a, (mo_num, mo_num)]
     fock_3e_mo_a += fock_3e_mo_a_os
   endif
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -236,9 +242,9 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_b, (mo_num, mo_num)]
 
   BEGIN_DOC
   !
-  ! Fock matrix beta from three-electron terms 
+  ! Fock matrix beta from three-electron terms
   !
-  ! WARNING :: non hermitian if bi-ortho MOS used 
+  ! WARNING :: non hermitian if bi-ortho MOS used
   !
   END_DOC
 
@@ -259,7 +265,7 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_b, (mo_num, mo_num)]
     fock_3e_mo_b += fock_3e_mo_b_os
   endif
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -271,9 +277,9 @@ END_PROVIDER
 
   BEGIN_DOC
   !
-  ! Open Shell part of the Fock matrix from three-electron terms 
+  ! Open Shell part of the Fock matrix from three-electron terms
   !
-  ! WARNING :: non hermitian if bi-ortho MOS used 
+  ! WARNING :: non hermitian if bi-ortho MOS used
   !
   END_DOC
 
@@ -320,10 +326,10 @@ END_PROVIDER
   !$OMP END DO NOWAIT
   !$OMP CRITICAL
   do ipoint = 1, n_points_final_grid
-    Jkappa(ipoint,1) += tmp_omp_d2(ipoint,1) 
-    Jkappa(ipoint,2) += tmp_omp_d2(ipoint,2) 
-    Jkappa(ipoint,3) += tmp_omp_d2(ipoint,3) 
-    Okappa(ipoint)   += tmp_omp_d1(ipoint)   
+    Jkappa(ipoint,1) += tmp_omp_d2(ipoint,1)
+    Jkappa(ipoint,2) += tmp_omp_d2(ipoint,2)
+    Jkappa(ipoint,3) += tmp_omp_d2(ipoint,3)
+    Okappa(ipoint)   += tmp_omp_d1(ipoint)
   enddo
   !$OMP END CRITICAL
 
@@ -341,10 +347,10 @@ END_PROVIDER
   !$OMP END DO NOWAIT
   !$OMP CRITICAL
   do ipoint = 1, n_points_final_grid
-    Jbarkappa(ipoint,1) += tmp_omp_d2(ipoint,1) 
-    Jbarkappa(ipoint,2) += tmp_omp_d2(ipoint,2) 
-    Jbarkappa(ipoint,3) += tmp_omp_d2(ipoint,3) 
-    Obarkappa(ipoint)   += tmp_omp_d1(ipoint)   
+    Jbarkappa(ipoint,1) += tmp_omp_d2(ipoint,1)
+    Jbarkappa(ipoint,2) += tmp_omp_d2(ipoint,2)
+    Jbarkappa(ipoint,3) += tmp_omp_d2(ipoint,3)
+    Obarkappa(ipoint)   += tmp_omp_d1(ipoint)
   enddo
   !$OMP END CRITICAL
 
@@ -357,9 +363,9 @@ END_PROVIDER
 
   do ipoint = 1, n_points_final_grid
 
-    loc_1 = -2.d0 * Okappa   (ipoint) 
-    loc_2 = -2.d0 * Obarkappa(ipoint) 
-    loc_3 =         Obarkappa(ipoint) 
+    loc_1 = -2.d0 * Okappa   (ipoint)
+    loc_2 = -2.d0 * Obarkappa(ipoint)
+    loc_3 =         Obarkappa(ipoint)
 
     tmp_1(ipoint,1) = (loc_1 - loc_3) * Jbarkappa(ipoint,1) + loc_2 * Jkappa(ipoint,1)
     tmp_1(ipoint,2) = (loc_1 - loc_3) * Jbarkappa(ipoint,2) + loc_2 * Jkappa(ipoint,2)
@@ -383,21 +389,21 @@ END_PROVIDER
     do j = elec_beta_num+1, elec_alpha_num
       do ipoint = 1, n_points_final_grid
 
-        loc_1 = mos_l_in_r_array_transp(ipoint,j) * mos_r_in_r_array_transp(ipoint,i) 
-        loc_2 = mos_l_in_r_array_transp(ipoint,i) * mos_r_in_r_array_transp(ipoint,j) 
+        loc_1 = mos_l_in_r_array_transp(ipoint,j) * mos_r_in_r_array_transp(ipoint,i)
+        loc_2 = mos_l_in_r_array_transp(ipoint,i) * mos_r_in_r_array_transp(ipoint,j)
 
-        tmp_omp_d2(ipoint,1) += loc_1 * int2_grad1_u12_bimo_t(ipoint,1,i,j) + loc_2 * int2_grad1_u12_bimo_t(ipoint,1,j,i) 
-        tmp_omp_d2(ipoint,2) += loc_1 * int2_grad1_u12_bimo_t(ipoint,2,i,j) + loc_2 * int2_grad1_u12_bimo_t(ipoint,2,j,i) 
-        tmp_omp_d2(ipoint,3) += loc_1 * int2_grad1_u12_bimo_t(ipoint,3,i,j) + loc_2 * int2_grad1_u12_bimo_t(ipoint,3,j,i) 
+        tmp_omp_d2(ipoint,1) += loc_1 * int2_grad1_u12_bimo_t(ipoint,1,i,j) + loc_2 * int2_grad1_u12_bimo_t(ipoint,1,j,i)
+        tmp_omp_d2(ipoint,2) += loc_1 * int2_grad1_u12_bimo_t(ipoint,2,i,j) + loc_2 * int2_grad1_u12_bimo_t(ipoint,2,j,i)
+        tmp_omp_d2(ipoint,3) += loc_1 * int2_grad1_u12_bimo_t(ipoint,3,i,j) + loc_2 * int2_grad1_u12_bimo_t(ipoint,3,j,i)
       enddo
     enddo
   enddo
   !$OMP END DO NOWAIT
   !$OMP CRITICAL
   do ipoint = 1, n_points_final_grid
-    tmp_1(ipoint,1) += tmp_omp_d2(ipoint,1) 
-    tmp_1(ipoint,2) += tmp_omp_d2(ipoint,2) 
-    tmp_1(ipoint,3) += tmp_omp_d2(ipoint,3) 
+    tmp_1(ipoint,1) += tmp_omp_d2(ipoint,1)
+    tmp_1(ipoint,2) += tmp_omp_d2(ipoint,2)
+    tmp_1(ipoint,3) += tmp_omp_d2(ipoint,3)
   enddo
   !$OMP END CRITICAL
 
@@ -407,7 +413,7 @@ END_PROVIDER
     do j = elec_beta_num+1, elec_alpha_num
       do ipoint = 1, n_points_final_grid
 
-        loc_1 = mos_l_in_r_array_transp(ipoint,j) * mos_r_in_r_array_transp(ipoint,i) 
+        loc_1 = mos_l_in_r_array_transp(ipoint,j) * mos_r_in_r_array_transp(ipoint,i)
 
         tmp_omp_d2(ipoint,1) += loc_1 * int2_grad1_u12_bimo_t(ipoint,1,i,j)
         tmp_omp_d2(ipoint,2) += loc_1 * int2_grad1_u12_bimo_t(ipoint,2,i,j)
@@ -418,9 +424,9 @@ END_PROVIDER
   !$OMP END DO NOWAIT
   !$OMP CRITICAL
   do ipoint = 1, n_points_final_grid
-    tmp_1(ipoint,1) += tmp_omp_d2(ipoint,1) 
-    tmp_1(ipoint,2) += tmp_omp_d2(ipoint,2) 
-    tmp_1(ipoint,3) += tmp_omp_d2(ipoint,3) 
+    tmp_1(ipoint,1) += tmp_omp_d2(ipoint,1)
+    tmp_1(ipoint,2) += tmp_omp_d2(ipoint,2)
+    tmp_1(ipoint,3) += tmp_omp_d2(ipoint,3)
   enddo
   !$OMP END CRITICAL
 
@@ -532,7 +538,7 @@ END_PROVIDER
         tmp_3(ipoint,2,b) += loc_1 * ( Jbarkappa(ipoint,1) * int2_grad1_u12_bimo_t(ipoint,1,b,i) &
                                      + Jbarkappa(ipoint,2) * int2_grad1_u12_bimo_t(ipoint,2,b,i) &
                                      + Jbarkappa(ipoint,3) * int2_grad1_u12_bimo_t(ipoint,3,b,i) )
-                                                                                                       
+
         tmp_4(ipoint,1,b) += loc_2 * ( Jbarkappa(ipoint,1) * int2_grad1_u12_bimo_t(ipoint,1,i,b) &
                                      + Jbarkappa(ipoint,2) * int2_grad1_u12_bimo_t(ipoint,2,i,b) &
                                      + Jbarkappa(ipoint,3) * int2_grad1_u12_bimo_t(ipoint,3,i,b) )
@@ -596,7 +602,7 @@ END_PROVIDER
   allocate(tmp_1(n_points_final_grid,1))
 
   do ipoint = 1, n_points_final_grid
-    tmp_1(ipoint,1) = Obarkappa(ipoint) + 2.d0 * Okappa(ipoint) 
+    tmp_1(ipoint,1) = Obarkappa(ipoint) + 2.d0 * Okappa(ipoint)
   enddo
 
   allocate(tmp_2(n_points_final_grid,1,mo_num,mo_num))
@@ -695,7 +701,7 @@ END_PROVIDER
         tmp_3(ipoint,8,b) += loc_3 * ( (Jkappa(ipoint,1) + 0.5d0 * Jbarkappa(ipoint,1)) * int2_grad1_u12_bimo_t(ipoint,1,b,i) &
                                      + (Jkappa(ipoint,2) + 0.5d0 * Jbarkappa(ipoint,2)) * int2_grad1_u12_bimo_t(ipoint,2,b,i) &
                                      + (Jkappa(ipoint,3) + 0.5d0 * Jbarkappa(ipoint,3)) * int2_grad1_u12_bimo_t(ipoint,3,b,i) )
-                                                                                                       
+
         tmp_4(ipoint,1,b) += loc_4 * ( (Jkappa(ipoint,1) + 0.5d0 * Jbarkappa(ipoint,1)) * int2_grad1_u12_bimo_t(ipoint,1,i,b) &
                                      + (Jkappa(ipoint,2) + 0.5d0 * Jbarkappa(ipoint,2)) * int2_grad1_u12_bimo_t(ipoint,2,i,b) &
                                      + (Jkappa(ipoint,3) + 0.5d0 * Jbarkappa(ipoint,3)) * int2_grad1_u12_bimo_t(ipoint,3,i,b) )
@@ -785,11 +791,14 @@ END_PROVIDER
   deallocate(tmp_3, tmp_4)
   deallocate(Jkappa, Okappa)
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
 BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
+  BEGIN_DOC
+  ! fock_3e_mo_cs
+  END_DOC
 
   implicit none
   integer                       :: a, b, i, j, ipoint
@@ -832,10 +841,10 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
 
   !$OMP CRITICAL
   do ipoint = 1, n_points_final_grid
-    Jkappa(ipoint,1) += tmp_omp_d2(ipoint,1) 
-    Jkappa(ipoint,2) += tmp_omp_d2(ipoint,2) 
-    Jkappa(ipoint,3) += tmp_omp_d2(ipoint,3) 
-    Okappa(ipoint)   += tmp_omp_d1(ipoint)   
+    Jkappa(ipoint,1) += tmp_omp_d2(ipoint,1)
+    Jkappa(ipoint,2) += tmp_omp_d2(ipoint,2)
+    Jkappa(ipoint,3) += tmp_omp_d2(ipoint,3)
+    Okappa(ipoint)   += tmp_omp_d1(ipoint)
   enddo
   !$OMP END CRITICAL
 
@@ -848,7 +857,7 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
   allocate(tmp_1(n_points_final_grid,4))
 
   do ipoint = 1, n_points_final_grid
-    loc_1 = 2.d0 * Okappa(ipoint) 
+    loc_1 = 2.d0 * Okappa(ipoint)
     tmp_1(ipoint,1) = loc_1 * Jkappa(ipoint,1)
     tmp_1(ipoint,2) = loc_1 * Jkappa(ipoint,2)
     tmp_1(ipoint,3) = loc_1 * Jkappa(ipoint,3)
@@ -870,11 +879,11 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
     do j = 1, elec_beta_num
       do ipoint = 1, n_points_final_grid
 
-        loc_1 = mos_l_in_r_array_transp(ipoint,j) * mos_r_in_r_array_transp(ipoint,i) 
+        loc_1 = mos_l_in_r_array_transp(ipoint,j) * mos_r_in_r_array_transp(ipoint,i)
 
-        tmp_omp_d2(ipoint,1) -= loc_1 * int2_grad1_u12_bimo_t(ipoint,1,i,j) 
-        tmp_omp_d2(ipoint,2) -= loc_1 * int2_grad1_u12_bimo_t(ipoint,2,i,j) 
-        tmp_omp_d2(ipoint,3) -= loc_1 * int2_grad1_u12_bimo_t(ipoint,3,i,j) 
+        tmp_omp_d2(ipoint,1) -= loc_1 * int2_grad1_u12_bimo_t(ipoint,1,i,j)
+        tmp_omp_d2(ipoint,2) -= loc_1 * int2_grad1_u12_bimo_t(ipoint,2,i,j)
+        tmp_omp_d2(ipoint,3) -= loc_1 * int2_grad1_u12_bimo_t(ipoint,3,i,j)
       enddo
     enddo
   enddo
@@ -882,9 +891,9 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
 
   !$OMP CRITICAL
   do ipoint = 1, n_points_final_grid
-    tmp_1(ipoint,1) += tmp_omp_d2(ipoint,1) 
-    tmp_1(ipoint,2) += tmp_omp_d2(ipoint,2) 
-    tmp_1(ipoint,3) += tmp_omp_d2(ipoint,3) 
+    tmp_1(ipoint,1) += tmp_omp_d2(ipoint,1)
+    tmp_1(ipoint,2) += tmp_omp_d2(ipoint,2)
+    tmp_1(ipoint,3) += tmp_omp_d2(ipoint,3)
   enddo
   !$OMP END CRITICAL
 
@@ -1016,7 +1025,7 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
         tmp_3(ipoint,5,b) += 2.d0 * loc_1 * ( Jkappa(ipoint,1) * int2_grad1_u12_bimo_t(ipoint,1,b,i) &
                                             + Jkappa(ipoint,2) * int2_grad1_u12_bimo_t(ipoint,2,b,i) &
                                             + Jkappa(ipoint,3) * int2_grad1_u12_bimo_t(ipoint,3,b,i) )
-                                                                                                       
+
         tmp_4(ipoint,2,b) += loc_2 * int2_grad1_u12_bimo_t(ipoint,1,i,b)
         tmp_4(ipoint,3,b) += loc_2 * int2_grad1_u12_bimo_t(ipoint,2,i,b)
         tmp_4(ipoint,4,b) += loc_2 * int2_grad1_u12_bimo_t(ipoint,3,i,b)
@@ -1075,7 +1084,8 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
 
   ! ---
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
+
 

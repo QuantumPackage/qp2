@@ -1,12 +1,12 @@
- BEGIN_PROVIDER [real*8, bielec_PQxx_no_array, (mo_num, mo_num,n_core_inact_act_orb,n_core_inact_act_orb)]
+ BEGIN_PROVIDER [real*8, bielec_PQxx_no_array, (mo_num, mo_num, n_core_inact_act_orb, n_core_inact_act_orb)]
   BEGIN_DOC
-  ! WARNING !!! Old version !!! NOT USED ANYMORE IN THE PROGRAM !!! TOO BIG TO BE STORED ON LARGE SYSTEMS !!! 
-  ! 
+  ! WARNING !!! Old version !!! NOT USED ANYMORE IN THE PROGRAM !!! TOO BIG TO BE STORED ON LARGE SYSTEMS !!!
+  !
   ! Replaced by the Cholesky-based function bielec_PQxx_no
   !
   ! integral (pq|xx) in the basis of natural MOs
   ! indices are unshifted orbital numbers
-  ! 
+  !
   END_DOC
   implicit none
   integer                        :: i,j,k,l,t,u,p,q
@@ -73,7 +73,7 @@
 
   allocate (f(mo_num,mo_num,n_act_orb),d(mo_num,mo_num,n_act_orb))
 
-  !$OMP DO 
+  !$OMP DO
   do l=1,n_core_inact_act_orb
 
     do p=1,n_act_orb
@@ -98,7 +98,7 @@
   end do
   !$OMP END DO NOWAIT
 
-  !$OMP BARRIER 
+  !$OMP BARRIER
 
   !$OMP DO
   do l=1,n_core_inact_act_orb
@@ -131,10 +131,10 @@ END_PROVIDER
 
 
 
-BEGIN_PROVIDER [real*8, bielec_PxxQ_no_array, (mo_num,n_core_inact_act_orb,n_core_inact_act_orb, mo_num)]
+BEGIN_PROVIDER [real*8, bielec_PxxQ_no_array, (mo_num, n_core_inact_act_orb, n_core_inact_act_orb, mo_num)]
   BEGIN_DOC
-  ! WARNING !!! Old version !!! NOT USED ANYMORE IN THE PROGRAM !!! TOO BIG TO BE STORED ON LARGE SYSTEMS !!! 
-  ! 
+  ! WARNING !!! Old version !!! NOT USED ANYMORE IN THE PROGRAM !!! TOO BIG TO BE STORED ON LARGE SYSTEMS !!!
+  !
   ! Replaced by the Cholesky-based function bielec_PxxQ_no
   !
   ! integral (px|xq) in the basis of natural MOs
@@ -242,7 +242,7 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ_no_array, (mo_num,n_core_inact_act_orb,n_cor
 
   !$OMP BARRIER
 
-  !$OMP DO 
+  !$OMP DO
   do l=1,n_core_inact_act_orb
     do p=1,n_act_orb
       do k=1,n_core_inact_act_orb
@@ -271,21 +271,21 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ_no_array, (mo_num,n_core_inact_act_orb,n_cor
 END_PROVIDER
 
 
-BEGIN_PROVIDER [real*8, bielecCI_no, (n_act_orb,n_act_orb,n_act_orb, mo_num)]
+BEGIN_PROVIDER [real*8, bielecCI_no, (n_act_orb, n_act_orb, n_act_orb, mo_num)]
   BEGIN_DOC
   ! integrals (tu|vp) in the basis of natural MOs
   ! index p runs over the whole basis, t,u,v only over the active orbitals
-  ! 
+  !
   ! This array can be stored anyway. Ex: 50 active orbitals, 1500 MOs ==> 8x50^3x1500 = 1.5 Gb
   END_DOC
   implicit none
   integer                        :: i,j,k,l,t,u,p,q
   double precision, allocatable  :: f(:,:,:), d(:,:,:)
- 
+
   double precision :: wall0, wall1
   call wall_time(wall0)
   print*,'Providing bielecCI_no'
-  
+
   !$OMP PARALLEL DEFAULT(NONE) &
   !$OMP PRIVATE(j,k,l,p,d,f) &
   !$OMP SHARED(n_core_inact_act_orb,mo_num,n_act_orb,n_core_inact_orb, &
@@ -353,9 +353,9 @@ BEGIN_PROVIDER [real*8, bielecCI_no, (n_act_orb,n_act_orb,n_act_orb, mo_num)]
         do j=1,n_act_orb
           bielecCI_no(j,k,p,l)=d(j,k,p)
         end do
-      end do 
-    end do  
-  end do  
+      end do
+    end do
+  end do
   !$OMP END DO
 
   !$OMP DO
@@ -378,11 +378,11 @@ BEGIN_PROVIDER [real*8, bielecCI_no, (n_act_orb,n_act_orb,n_act_orb, mo_num)]
         do j=1,n_act_orb
           bielecCI_no(j,k,l,list_act(p))=d(j,k,p)
         end do
-      end do 
-    end do  
-  end do  
+      end do
+    end do
+  end do
   !$OMP END DO
-  
+
   deallocate(d,f)
   !$OMP END PARALLEL
   call wall_time(wall1)
@@ -390,4 +390,5 @@ BEGIN_PROVIDER [real*8, bielecCI_no, (n_act_orb,n_act_orb,n_act_orb, mo_num)]
 
 
 END_PROVIDER
+
 

@@ -1,7 +1,7 @@
 program sort_wf
  implicit none
  read_wf = .true.
- touch read_wf 
+ touch read_wf
  call routine
 
 end
@@ -18,3 +18,4 @@ subroutine routine
  enddo
 
 end
+

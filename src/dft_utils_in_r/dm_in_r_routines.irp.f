@@ -140,8 +140,8 @@ end
   enddo
  enddo
 
- ! TODO : build the vector of chi_i(r) chi_j(r) and conscequently grad_i(r) grad_j(r) 
- !      : the same for gamma_ij and big dot product 
+ ! TODO : build the vector of chi_i(r) chi_j(r) and conscequently grad_i(r) grad_j(r)
+ !      : the same for gamma_ij and big dot product
  do istate = 1, N_states
    ! alpha density
    ! aos_array_bis = \rho_ao * aos_array
@@ -230,7 +230,7 @@ end
    lapl_dm_a(1,istate) += 2.d0 * u_dot_v(aos_grad_array(1,1),aos_grad_array_bis,ao_num)
    lapl_dm_a(2,istate) += 2.d0 * u_dot_v(aos_grad_array(1,2),aos_grad_array_bis,ao_num)
    lapl_dm_a(3,istate) += 2.d0 * u_dot_v(aos_grad_array(1,3),aos_grad_array_bis,ao_num)
- 
+
 
    ! beta density
    call dsymv('U',ao_num,1.d0,one_e_dm_beta_ao_for_dft(1,1,istate),size(one_e_dm_beta_ao_for_dft,1),aos_array,1,0.d0,aos_array_bis,1)
@@ -267,8 +267,8 @@ subroutine dm_dft_alpha_beta_no_core_at_r(r,dm_a,dm_b)
  implicit none
  BEGIN_DOC
 ! input: r(1) ==> r(1) = x, r(2) = y, r(3) = z
-! output : dm_a = alpha density evaluated at r(3) without the core orbitals 
-! output : dm_b = beta  density evaluated at r(3) without the core orbitals 
+! output : dm_a = alpha density evaluated at r(3) without the core orbitals
+! output : dm_b = beta  density evaluated at r(3) without the core orbitals
  END_DOC
  double precision, intent(in) :: r(3)
  double precision, intent(out) :: dm_a(N_states),dm_b(N_states)
@@ -296,11 +296,11 @@ end
 !
 ! output:
 !
-! * dm_a = alpha density evaluated at r without the core orbitals 
-! * dm_b = beta  density evaluated at r without the core orbitals 
-! * aos_array(i) = ao(i) evaluated at r without the core orbitals 
-! * grad_dm_a(1) = X gradient of the alpha density evaluated in r without the core orbitals 
-! * grad_dm_a(1) = X gradient of the beta  density evaluated in r without the core orbitals 
+! * dm_a = alpha density evaluated at r without the core orbitals
+! * dm_b = beta  density evaluated at r without the core orbitals
+! * aos_array(i) = ao(i) evaluated at r without the core orbitals
+! * grad_dm_a(1) = X gradient of the alpha density evaluated in r without the core orbitals
+! * grad_dm_a(1) = X gradient of the beta  density evaluated in r without the core orbitals
 ! * grad_aos_array(1) = X gradient of the aos(i) evaluated at r
 !
  END_DOC
@@ -344,5 +344,6 @@ end
    grad_dm_a *= 2.d0
    grad_dm_b *= 2.d0
  end
+
 
 

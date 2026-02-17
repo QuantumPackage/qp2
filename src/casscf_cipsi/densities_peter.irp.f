@@ -1,6 +1,6 @@
 use bitmasks
 
-BEGIN_PROVIDER [real*8, P0tuvx_peter, (n_act_orb,n_act_orb,n_act_orb,n_act_orb) ]
+BEGIN_PROVIDER [real*8, P0tuvx_peter, (n_act_orb, n_act_orb, n_act_orb, n_act_orb) ]
    BEGIN_DOC
    ! the second-order density matrix in the basis of the starting MOs
    ! matrices are state averaged
@@ -21,13 +21,13 @@ BEGIN_PROVIDER [real*8, P0tuvx_peter, (n_act_orb,n_act_orb,n_act_orb,n_act_orb) 
    integer(bit_kind), dimension(N_int,2) :: det_mu, det_mu_ex
    integer(bit_kind), dimension(N_int,2) :: det_mu_ex1, det_mu_ex11, det_mu_ex12
    integer(bit_kind), dimension(N_int,2) :: det_mu_ex2, det_mu_ex21, det_mu_ex22
-   
+
   if (bavard) then
     write(6,*) ' providing density matrix P0'
   endif
 
    P0tuvx_peter = 0.d0
-   
+
    ! first loop: we apply E_tu, once for D_tu, once for -P_tvvu
    do mu=1,n_det
      call det_extract(det_mu,mu,N_int)
@@ -105,7 +105,7 @@ BEGIN_PROVIDER [real*8, P0tuvx_peter, (n_act_orb,n_act_orb,n_act_orb,n_act_orb) 
              end do
            end do
          end if
-         
+
          ! we apply E_tu to the second resultant determinant
          if (ierr2.eq.1) then
            do t=1,n_act_orb
@@ -131,11 +131,11 @@ BEGIN_PROVIDER [real*8, P0tuvx_peter, (n_act_orb,n_act_orb,n_act_orb,n_act_orb) 
              end do
            end do
          end if
-         
+
        end do
      end do
    end do
-   
+
    ! we average by just dividing by the number of states
    do x=1,n_act_orb
      do v=1,n_act_orb
@@ -146,5 +146,6 @@ BEGIN_PROVIDER [real*8, P0tuvx_peter, (n_act_orb,n_act_orb,n_act_orb,n_act_orb) 
        end do
      end do
    end do
-   
+
 END_PROVIDER
+

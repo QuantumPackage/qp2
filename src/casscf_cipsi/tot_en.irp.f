@@ -5,6 +5,9 @@
 &BEGIN_PROVIDER [real*8, etwo_ter]
 &BEGIN_PROVIDER [real*8, ecore]
 &BEGIN_PROVIDER [real*8, ecore_bis]
+  BEGIN_DOC
+  ! etwo
+  END_DOC
    implicit none
    integer                        :: t,u,v,x,i,ii,tt,uu,vv,xx,j,jj,t3,u3,v3,x3
    real*8                         :: e_one_all,e_two_all
@@ -96,7 +99,8 @@
        end do
      end do
    end do
-   
+
 END_PROVIDER
- 
- 
+
+
+

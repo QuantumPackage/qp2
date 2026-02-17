@@ -2,7 +2,7 @@
 subroutine test_f_HF_valence_ab
  implicit none
  BEGIN_DOC
-! routine to test the function f_HF(r1,r2) 
+! routine to test the function f_HF(r1,r2)
 !
 ! the integral over r1,r2 should be equal to the alpha/beta interaction of HF determinant
  END_DOC
@@ -33,7 +33,7 @@ subroutine test_f_HF_valence_ab
 
  print*,'semi analytical form '
  accu_val = 0.d0
- ! You integrate on r2 the analytical integral over r1 of f_HF(r1,r2) 
+ ! You integrate on r2 the analytical integral over r1 of f_HF(r1,r2)
  do ipoint  = 1, n_points_final_grid
   weight1 =final_weight_at_r_vector(ipoint)
   r2(1)   = final_grid_points(1,ipoint)
@@ -43,13 +43,13 @@ subroutine test_f_HF_valence_ab
   accu_val += integral_psi_val * weight1
  enddo
  print*,'**************************'
- ! Should give you the alpha-beta repulsion of HF, excluding core contributions,  
+ ! Should give you the alpha-beta repulsion of HF, excluding core contributions,
  print*,'int dr1 dr2 f_HF(r1,r2) = ',accu_val
  double precision :: accu_2
 
 
  print*,'pure numerical form (might take quite some time as it grows as N_g^2 * N_e^2 * N_b^2 ...)'
- ! You integrate brut force on r1 and r2 
+ ! You integrate brut force on r1 and r2
  accu_val = 0.d0
  do jpoint = 1, n_points_final_grid
   weight1 =final_weight_at_r_vector(jpoint)
@@ -75,7 +75,7 @@ subroutine test_f_HF_valence_ab
  r1 = 0.d0
  r1(1) = 0.5d0
  print*,'r1 = ',r1
- ! You compute the integral over r2 of f_HF(r1,r2) 
+ ! You compute the integral over r2 of f_HF(r1,r2)
  call integral_f_HF_valence_ab(r1,integral_psi)
  do ipoint  = 1, n_points_final_grid
   weight1 =final_weight_at_r_vector(ipoint)
@@ -95,9 +95,9 @@ end
 subroutine test_f_ii_valence_ab
  implicit none
  BEGIN_DOC
-! routine to test the function f_ii(r1,r2) 
+! routine to test the function f_ii(r1,r2)
 !
-! it should be the same that f_HF(r1,r2) only for inactive orbitals 
+! it should be the same that f_HF(r1,r2) only for inactive orbitals
  END_DOC
  integer :: ipoint
  double precision :: accu_f, accu_n2, weight, r1(3),r2(3)
@@ -153,7 +153,7 @@ subroutine test_f_ia_valence_ab
   f_ref = f_psi_cas_ab_old(ipoint,istate)
   f_comp = f_ii_val_ab + f_ia_val_ab + f_aa_val_ab
   on_top_ref = total_cas_on_top_density(ipoint,istate)
-  on_top_comp= two_bod_dens_ii + two_bod_dens_ia + two_bod_dens_aa 
+  on_top_comp= two_bod_dens_ii + two_bod_dens_ia + two_bod_dens_aa
   accu_f += dabs(f_ref - f_comp) * weight
   accu_n2+= dabs(on_top_ref - on_top_comp) * weight
   accu += f_ref * weight
@@ -170,7 +170,7 @@ end
 subroutine test_f_ii_ia_aa_valence_ab
  implicit none
  BEGIN_DOC
-! routine to test the function f_Psi(r1,r2) based on core/inactive/active orbitals 
+! routine to test the function f_Psi(r1,r2) based on core/inactive/active orbitals
  END_DOC
  integer :: ipoint,istate
  double precision :: accu_f, accu_n2, weight, r1(3),r2(3)
@@ -200,3 +200,4 @@ subroutine test_f_ii_ia_aa_valence_ab
  print*,'accu    = ',accu
 
 end
+

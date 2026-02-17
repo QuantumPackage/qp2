@@ -5,13 +5,13 @@
 
 ! \begin{align*}
 ! H_{pq,rs} &= \dfrac{\partial^2 E(x)}{\partial x_{pq}^2} \\
-!   &= \mathcal{P}_{pq} \mathcal{P}_{rs} [ \frac{1}{2} \sum_u [\delta_{qr}(h_p^u \gamma_u^s + h_u^s \gamma_p^u) 
+!   &= \mathcal{P}_{pq} \mathcal{P}_{rs} [ \frac{1}{2} \sum_u [\delta_{qr}(h_p^u \gamma_u^s + h_u^s \gamma_p^u)
 !   + \delta_{ps}(h_r^u \gamma_u^q + h_u^q \gamma_r^u)]
 !   -(h_p^s \gamma_r^q + h_r^q \gamma_p^s) \\
 !   &+ \frac{1}{2} \sum_{tuv} [\delta_{qr}(v_{pt}^{uv} \Gamma_{uv}^{st} + v_{uv}^{st} \Gamma_{pt}^{uv})
 !   + \delta_{ps}(v_{uv}^{qt} \Gamma_{rt}^{uv} + v_{rt}^{uv}\Gamma_{uv}^{qt})] \\
-!   &+ \sum_{uv} (v_{pr}^{uv} \Gamma_{uv}^{qs} + v_{uv}^{qs}  \Gamma_{pr}^{uv}) 
-!   - \sum_{tu} (v_{pu}^{st} \Gamma_{rt}^{qu}+v_{pu}^{tr} \Gamma_{tr}^{qu}+v_{rt}^{qu}\Gamma_{pu}^{st} + v_{tr}^{qu}\Gamma_{pu}^{ts}) 
+!   &+ \sum_{uv} (v_{pr}^{uv} \Gamma_{uv}^{qs} + v_{uv}^{qs}  \Gamma_{pr}^{uv})
+!   - \sum_{tu} (v_{pu}^{st} \Gamma_{rt}^{qu}+v_{pu}^{tr} \Gamma_{tr}^{qu}+v_{rt}^{qu}\Gamma_{pu}^{st} + v_{tr}^{qu}\Gamma_{pu}^{ts})
 ! \end{align*}
 ! With pq a permutation operator :
 
@@ -77,18 +77,18 @@
 
 subroutine hessian_list_opt(n,m,list,H,h_tmpr)
   use omp_lib
-  include 'constants.h' 
+  include 'constants.h'
 
   implicit none
-  
+
   ! Variables
 
   ! in
-  integer, intent(in)           :: n,m,list(m) 
-  
+  integer, intent(in)           :: n,m,list(m)
+
   ! out
   double precision, intent(out) :: H(n,n),h_tmpr(m,m,m,m)
- 
+
   ! internal
   double precision, allocatable :: hessian(:,:,:,:)!, h_tmpr(:,:,:,:)
   double precision, allocatable :: H_test(:,:)
@@ -102,7 +102,7 @@ subroutine hessian_list_opt(n,m,list,H,h_tmpr)
   double precision, allocatable :: tmp_bi_int_3_3(:,:,:), tmp_2rdm_3_3(:,:,:)
   double precision, allocatable :: tmp_accu(:,:), tmp_accu_sym(:,:),tmp_one_e_dm_mo(:,:),tmp_mo_one_e_integrals(:,:)
 
-  ! Function 
+  ! Function
   double precision              :: get_two_e_integral
 
   print*,''
@@ -114,21 +114,21 @@ subroutine hessian_list_opt(n,m,list,H,h_tmpr)
 
   ! Calculations
 
-  ! OMP 
+  ! OMP
   call omp_set_max_active_levels(1)
 
   !$OMP PARALLEL                                                     &
       !$OMP PRIVATE(                                                 &
       !$OMP   tmp_p,tmp_q,tmp_r,tmp_s,p,q,r,s, tmp_accu, tmp_accu_sym,                       &
       !$OMP   u,v,t, tmp_bi_int_3, tmp_2rdm_3, ind_3, tmp_bi_int_3_3,tmp_2rdm_3_3, ind_3_3 )                       &
-      !$OMP SHARED(m,list,hessian,h_tmpr,H, mo_num,n, & 
+      !$OMP SHARED(m,list,hessian,h_tmpr,H, mo_num,n, &
       !$OMP mo_one_e_integrals, one_e_dm_mo, &
       !$OMP two_e_dm_mo,mo_integrals_map, &
       !$OMP t1,t2,t3,t4,t5,t6,&
       !$OMP tmp_mo_one_e_integrals,tmp_one_e_dm_mo)&
       !$OMP DEFAULT(NONE)
- 
-  ! Allocation of private arrays 
+
+  ! Allocation of private arrays
   allocate(tmp_bi_int_3(mo_num,mo_num,mo_num))
   allocate(tmp_2rdm_3(mo_num,mo_num,mo_num), ind_3(mo_num,mo_num,mo_num))
   allocate(tmp_accu(m,m), tmp_accu_sym(mo_num,mo_num))
@@ -168,7 +168,7 @@ CALL wall_TIME(t1)
 !$OMP END MASTER
 
 ! Line 1, term 1
-   
+
 ! Without optimization the term 1 of the line 1 is :
 
 ! do p = 1, mo_num
@@ -195,7 +195,7 @@ CALL wall_TIME(t1)
 ! $$c_{p,s} = \sum_u a_{p,u} b_{u,s}$$
 
 
-!$OMP MASTER    
+!$OMP MASTER
 CALL wall_TIME(t4)
 !$OMP END MASTER
 
@@ -229,7 +229,7 @@ do tmp_s = 1, m
     tmp_accu_sym(tmp_p,tmp_s) = 0.5d0 * (tmp_accu(tmp_p,tmp_s) + tmp_accu(tmp_s,tmp_p))
 
   enddo
-enddo 
+enddo
 !$OMP END DO
 
 !$OMP DO
@@ -310,7 +310,7 @@ t6=t5-t4
 print*,'l1 2',t6
 !$OMP END MASTER
 
-! Line 1, term 3 
+! Line 1, term 3
 
 ! Without optimization the third term is :
 
@@ -329,7 +329,7 @@ print*,'l1 2',t6
 ! enddo
 
 ! We can just re-order the indexes
- 
+
 
 !$OMP MASTER
 CALL wall_TIME(t4)
@@ -397,14 +397,14 @@ print*,'l1 3',t6
 ! two_e_dm_mo(p,t,u,v) = two_e_dm_mo(u,v,p,t)
 
 ! With t on the external loop, using temporary arrays for each t and by
-! taking u,v as one variable a matrix multplication appears. 
+! taking u,v as one variable a matrix multplication appears.
 ! $$c_{p,s} = \sum_{uv} a_{p,uv} b_{uv,s}$$
 
 ! There is a kroenecker delta $$\delta_{qr}$$, so we juste compute the
 ! terms like : hessian(p,r,r,s)
 
 
-!$OMP MASTER 
+!$OMP MASTER
 call wall_TIME(t4)
 !$OMP END MASTER
 
@@ -418,7 +418,7 @@ do t = 1, mo_num
     do v = 1, mo_num
       do u = 1, mo_num
 
-        tmp_bi_int_3_3(u,v,tmp_p) = get_two_e_integral(u,v,p,t,mo_integrals_map)              
+        tmp_bi_int_3_3(u,v,tmp_p) = get_two_e_integral(u,v,p,t,mo_integrals_map)
 
       enddo
     enddo
@@ -430,7 +430,7 @@ do t = 1, mo_num
     do v = 1, mo_num
       do u = 1, mo_num
 
-        tmp_2rdm_3_3(u,v,tmp_p) = two_e_dm_mo(u,v,p,t)  
+        tmp_2rdm_3_3(u,v,tmp_p) = two_e_dm_mo(u,v,p,t)
 
       enddo
     enddo
@@ -448,12 +448,12 @@ do t = 1, mo_num
     enddo
   enddo
 
-  !$OMP CRITICAL 
+  !$OMP CRITICAL
   do tmp_s = 1, m
     do tmp_r = 1, m
       do tmp_p = 1, m
 
-        hessian(tmp_p,tmp_r,tmp_r,tmp_s) = hessian(tmp_p,tmp_r,tmp_r,tmp_s) + tmp_accu_sym(tmp_p,tmp_s) 
+        hessian(tmp_p,tmp_r,tmp_r,tmp_s) = hessian(tmp_p,tmp_r,tmp_r,tmp_s) + tmp_accu_sym(tmp_p,tmp_s)
 
       enddo
     enddo
@@ -466,7 +466,7 @@ enddo
 !$OMP MASTER
 call wall_TIME(t5)
 t6=t5-t4
-print*,'l2 1', t6 
+print*,'l2 1', t6
 !$OMP END MASTER
 
 ! Line 2, term 2
@@ -503,8 +503,8 @@ print*,'l2 1', t6
 ! two_e_dm_mo(r,t,u,v) = two_e_dm_mo(u,v,r,t)
 
 ! With t on the external loop, using temporary arrays for each t and by
-! taking u,v as one variable a matrix multplication appears. 
-! $$c_{q,r} = \sum_uv a_{q,uv} b_{uv,r}$$ 
+! taking u,v as one variable a matrix multplication appears.
+! $$c_{q,r} = \sum_uv a_{q,uv} b_{uv,r}$$
 
 ! There is a kroenecker delta $$\delta_{ps}$$, so we juste compute the
 ! terms like : hessian(s,q,r,s)
@@ -514,7 +514,7 @@ print*,'l2 1', t6
 ! Opt Second line, second term
 !******************************
 
-!$OMP MASTER 
+!$OMP MASTER
 CALL wall_TIME(t4)
 !$OMP END MASTER
 
@@ -611,13 +611,13 @@ print*,'l2 2',t6
 
 ! With v on the external loop, using temporary arrays for each v and by
 ! taking p,r and q,s as one dimension a matrix multplication
-! appears. $$c_{pr,qs} = \sum_u a_{pr,u} b_{u,qs}$$ 
+! appears. $$c_{pr,qs} = \sum_u a_{pr,u} b_{u,qs}$$
 
 ! Part 1
 
-!$OMP MASTER 
+!$OMP MASTER
 call wall_TIME(t4)
-!$OMP END MASTER 
+!$OMP END MASTER
 
 !--------
 ! part 1
@@ -629,7 +629,7 @@ allocate(tmp_bi_int_3_3(m,m,mo_num), tmp_2rdm_3_3(mo_num,m,m),ind_3_3(m,m,m))
 !$OMP DO
 do v = 1, mo_num
 
-  do u = 1, mo_num 
+  do u = 1, mo_num
     do tmp_r = 1, m
       r = list(tmp_r)
       do tmp_p = 1, m
@@ -680,7 +680,7 @@ deallocate(tmp_bi_int_3_3, tmp_2rdm_3_3,ind_3_3)
 
 ! With v on the external loop, using temporary arrays for each v and by
 ! taking q,s and p,r as one dimension a matrix multplication
-! appears. $$c_{qs,pr} = \sum_u a_{qs,u}*b_{u,pr}$$ 
+! appears. $$c_{qs,pr} = \sum_u a_{qs,u}*b_{u,pr}$$
 
 ! Part 2
 
@@ -696,7 +696,7 @@ do v = 1, mo_num
 
   do u = 1, mo_num
     do tmp_s = 1, m
-    s = list(tmp_s)  
+    s = list(tmp_s)
       do tmp_q = 1, m
         q = list(tmp_q)
 
@@ -720,7 +720,7 @@ do v = 1, mo_num
 
   do tmp_r = 1, m
 
-    call dgemm('N','N', m*m, m, mo_num, 1d0, tmp_bi_int_3_3,& 
+    call dgemm('N','N', m*m, m, mo_num, 1d0, tmp_bi_int_3_3,&
                size(tmp_bi_int_3_3,1)*size(tmp_bi_int_3_3,2), tmp_2rdm_3_3(1,1,tmp_r),&
                mo_num, 0d0, ind_3_3, size(ind_3_3,1) * size(ind_3_3,2))
 
@@ -781,12 +781,12 @@ print*,'l3 1', t6
 ! Part 1
 
 !--------
-! Part 1 
+! Part 1
 ! - get_two_e_integral(s,t,p,u,mo_integrals_map) * two_e_dm_mo(r,t,q,u)
 !--------
 
 !$OMP MASTER
-CALL wall_TIME(t4) 
+CALL wall_TIME(t4)
 !$OMP END MASTER
 
 allocate(tmp_bi_int_3_3(mo_num,mo_num,m), tmp_2rdm_3_3(mo_num,mo_num,m))
@@ -855,7 +855,7 @@ deallocate(tmp_bi_int_3_3, tmp_2rdm_3_3)
 
 allocate(tmp_bi_int_3_3(mo_num,mo_num,m), tmp_2rdm_3_3(mo_num,mo_num,m))
 
-!$OMP DO 
+!$OMP DO
 do tmp_q = 1, m
   q = list(tmp_q)
 
@@ -882,7 +882,7 @@ do tmp_q = 1, m
 
         enddo
       enddo
-    enddo   
+    enddo
 
     call dgemm('T','N', m, m, mo_num*mo_num, 1d0, tmp_bi_int_3_3,&
                mo_num*mo_num, tmp_2rdm_3_3, mo_num*mo_num, 0d0, tmp_accu, m)
@@ -914,12 +914,12 @@ deallocate(tmp_bi_int_3_3, tmp_2rdm_3_3)
 
 !--------
 ! Part 3
-!- get_two_e_integral(q,u,r,t,mo_integrals_map) * two_e_dm_mo(p,u,s,t) 
+!- get_two_e_integral(q,u,r,t,mo_integrals_map) * two_e_dm_mo(p,u,s,t)
 !--------
 
 allocate(tmp_bi_int_3_3(mo_num,mo_num,m), tmp_2rdm_3_3(mo_num,mo_num,m))
 
-!$OMP DO 
+!$OMP DO
 do tmp_q = 1, m
   q = list(tmp_q)
 
@@ -1028,7 +1028,7 @@ do tmp_q = 1, m
   enddo
 
 enddo
-!$OMP END DO  
+!$OMP END DO
 
 deallocate(tmp_bi_int_3_3, tmp_2rdm_3_3)
 
@@ -1096,10 +1096,10 @@ do rs = 1, n
   call vec_to_mat_index(rs,r,s)
   do pq = 1, n
     call vec_to_mat_index(pq,p,q)
-    H(pq,rs) = h_tmpr(p,q,r,s)   
+    H(pq,rs) = h_tmpr(p,q,r,s)
   enddo
 enddo
-!$OMP END DO 
+!$OMP END DO
 
 !$OMP MASTER
 call wall_TIME(t5)
@@ -1111,11 +1111,11 @@ print*,'4D -> 2D :',t6
 call omp_set_max_active_levels(4)
 
 ! Display
-if (debug) then 
+if (debug) then
   print*,'2D Hessian matrix'
   do pq = 1, n
     write(*,'(100(F10.5))') H(pq,:)
-  enddo 
+  enddo
 endif
 
 ! Deallocation of shared arrays, end
@@ -1127,3 +1127,4 @@ deallocate(hessian,tmp_one_e_dm_mo,tmp_mo_one_e_integrals)!,h_tmpr)
   print*,'---End hessian---'
 
 end subroutine
+

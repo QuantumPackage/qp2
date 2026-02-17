@@ -1,5 +1,5 @@
- BEGIN_PROVIDER [ double precision, one_e_dm_mo_alpha_average, (mo_num,mo_num) ]
-&BEGIN_PROVIDER [ double precision, one_e_dm_mo_beta_average, (mo_num,mo_num) ]
+ BEGIN_PROVIDER [ double precision, one_e_dm_mo_alpha_average, (mo_num, mo_num) ]
+&BEGIN_PROVIDER [ double precision, one_e_dm_mo_beta_average, (mo_num, mo_num) ]
    implicit none
    BEGIN_DOC
    ! $\alpha$ and $\beta$ one-body density matrix for each state
@@ -13,7 +13,7 @@
    enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, one_e_dm_mo_diff, (mo_num,mo_num,2:N_states) ]
+BEGIN_PROVIDER [ double precision, one_e_dm_mo_diff, (mo_num, mo_num, 2:N_states) ]
   implicit none
   BEGIN_DOC
   ! Difference of the one-body density matrix with respect to the ground state
@@ -33,7 +33,10 @@ BEGIN_PROVIDER [ double precision, one_e_dm_mo_diff, (mo_num,mo_num,2:N_states) 
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, one_e_dm_mo_spin_index, (mo_num,mo_num,N_states,2) ]
+BEGIN_PROVIDER [ double precision, one_e_dm_mo_spin_index, (mo_num, mo_num, N_states, 2) ]
+  BEGIN_DOC
+  ! one_e_dm_mo_spin_index
+  END_DOC
   implicit none
   integer                        :: i,j,ispin,istate
   ispin = 1
@@ -57,7 +60,10 @@ BEGIN_PROVIDER [ double precision, one_e_dm_mo_spin_index, (mo_num,mo_num,N_stat
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, one_e_dm_dagger_mo_spin_index, (mo_num,mo_num,N_states,2) ]
+BEGIN_PROVIDER [ double precision, one_e_dm_dagger_mo_spin_index, (mo_num, mo_num, N_states, 2) ]
+  BEGIN_DOC
+  ! one_e_dm_dagger_mo_spin_index
+  END_DOC
    implicit none
    integer                        :: i,j,ispin,istate
    ispin = 1
@@ -84,8 +90,8 @@ BEGIN_PROVIDER [ double precision, one_e_dm_dagger_mo_spin_index, (mo_num,mo_num
 
 END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, one_e_dm_mo_alpha, (mo_num,mo_num,N_states) ]
-&BEGIN_PROVIDER [ double precision, one_e_dm_mo_beta, (mo_num,mo_num,N_states) ]
+ BEGIN_PROVIDER [ double precision, one_e_dm_mo_alpha, (mo_num, mo_num, N_states) ]
+&BEGIN_PROVIDER [ double precision, one_e_dm_mo_beta, (mo_num, mo_num, N_states) ]
   implicit none
   BEGIN_DOC
   ! $\alpha$ and $\beta$ one-body density matrix for each state
@@ -231,7 +237,7 @@ END_PROVIDER
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, one_e_dm_mo, (mo_num,mo_num) ]
+BEGIN_PROVIDER [ double precision, one_e_dm_mo, (mo_num, mo_num) ]
    implicit none
    BEGIN_DOC
    ! One-body density matrix
@@ -239,7 +245,7 @@ BEGIN_PROVIDER [ double precision, one_e_dm_mo, (mo_num,mo_num) ]
    one_e_dm_mo = one_e_dm_mo_alpha_average + one_e_dm_mo_beta_average
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, one_e_spin_density_mo, (mo_num,mo_num) ]
+BEGIN_PROVIDER [ double precision, one_e_spin_density_mo, (mo_num, mo_num) ]
    implicit none
    BEGIN_DOC
    ! $\rho(\alpha) - \rho(\beta)$
@@ -402,7 +408,7 @@ BEGIN_PROVIDER [ double precision, state_average_weight, (N_states) ]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, one_e_spin_density_ao, (ao_num,ao_num) ]
+BEGIN_PROVIDER [ double precision, one_e_spin_density_ao, (ao_num, ao_num) ]
    BEGIN_DOC
    ! One body spin density matrix on the |AO| basis : $\rho_{AO}(\alpha) - \rho_{AO}(\beta)$
    END_DOC
@@ -426,8 +432,8 @@ BEGIN_PROVIDER [ double precision, one_e_spin_density_ao, (ao_num,ao_num) ]
 
 END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, one_e_dm_ao_alpha, (ao_num,ao_num) ]
-&BEGIN_PROVIDER [ double precision, one_e_dm_ao_beta, (ao_num,ao_num) ]
+ BEGIN_PROVIDER [ double precision, one_e_dm_ao_alpha, (ao_num, ao_num) ]
+&BEGIN_PROVIDER [ double precision, one_e_dm_ao_beta, (ao_num, ao_num) ]
    BEGIN_DOC
    ! One body density matrix on the |AO| basis : $\rho_{AO}(\alpha), \rho_{AO}(\beta)$.
    END_DOC
@@ -453,8 +459,8 @@ END_PROVIDER
 
 END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, one_e_dm_ao_alpha_nstates, (ao_num,ao_num,N_states) ]
-&BEGIN_PROVIDER [ double precision, one_e_dm_ao_beta_nstates, (ao_num,ao_num,N_states) ]
+ BEGIN_PROVIDER [ double precision, one_e_dm_ao_alpha_nstates, (ao_num, ao_num, N_states) ]
+&BEGIN_PROVIDER [ double precision, one_e_dm_ao_beta_nstates, (ao_num, ao_num, N_states) ]
    BEGIN_DOC
    ! One body density matrix on the |AO| basis : $\rho_{AO}(\alpha), \rho_{AO}(\beta)$.
    END_DOC
@@ -486,10 +492,10 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, one_e_dm_ao, (ao_num, ao_num)]
  implicit none
    BEGIN_DOC
-   !  one_e_dm_ao = one_e_dm_ao_alpha + one_e_dm_ao_beta 
+   !  one_e_dm_ao = one_e_dm_ao_alpha + one_e_dm_ao_beta
    END_DOC
-    one_e_dm_ao = one_e_dm_ao_alpha + one_e_dm_ao_beta 
-END_PROVIDER 
+    one_e_dm_ao = one_e_dm_ao_alpha + one_e_dm_ao_beta
+END_PROVIDER
 
 
 subroutine get_occupation_from_dets(istate,occupation)
@@ -530,10 +536,10 @@ BEGIN_PROVIDER [double precision, difference_dm, (mo_num, mo_num, N_states)]
  END_DOC
  integer :: istate
  do istate = 1, N_states
-   difference_dm(:,:,istate) =  one_e_dm_mo_alpha(:,:,1) + one_e_dm_mo_beta(:,:,1) & 
+   difference_dm(:,:,istate) =  one_e_dm_mo_alpha(:,:,1) + one_e_dm_mo_beta(:,:,1) &
                              - (one_e_dm_mo_alpha(:,:,istate) + one_e_dm_mo_beta(:,:,istate))
  enddo
-END_PROVIDER 
+END_PROVIDER
 
  BEGIN_PROVIDER [double precision, difference_dm_eigvect, (mo_num, mo_num, N_states) ]
 &BEGIN_PROVIDER [double precision, difference_dm_eigval, (mo_num,  N_states) ]
@@ -543,19 +549,22 @@ END_PROVIDER
  END_DOC
  integer :: istate,i
  do istate = 2, N_states
-  call lapack_diag(difference_dm_eigval(1,istate),difference_dm_eigvect(1,1,istate)& 
+  call lapack_diag(difference_dm_eigval(1,istate),difference_dm_eigvect(1,1,istate)&
                   ,difference_dm(1,1,istate),mo_num,mo_num)
   print*,'Eigenvalues of difference_dm for state ',istate
   do i = 1, mo_num
    print*,i,difference_dm_eigval(i,istate)
   enddo
  enddo
-END_PROVIDER 
+END_PROVIDER
 
  BEGIN_PROVIDER [ integer         , n_attachment,  (N_states)]
 &BEGIN_PROVIDER [ integer         , n_dettachment, (N_states)]
-&BEGIN_PROVIDER [ integer         , list_attachment,  (mo_num,N_states)]
-&BEGIN_PROVIDER [ integer         , list_dettachment, (mo_num,N_states)]
+&BEGIN_PROVIDER [ integer         , list_attachment,  (mo_num, N_states)]
+&BEGIN_PROVIDER [ integer         , list_dettachment, (mo_num, N_states)]
+  BEGIN_DOC
+  ! n_attachment
+  END_DOC
  implicit none
  integer :: i,istate
  integer :: list_attachment_tmp(mo_num)
@@ -565,10 +574,10 @@ END_PROVIDER
   do i = 1, mo_num
    if(difference_dm_eigval(i,istate).lt.0.d0)then ! dettachment_orbitals
     n_dettachment(istate) += 1
-    list_dettachment(n_dettachment(istate),istate) = i ! they are already sorted 
+    list_dettachment(n_dettachment(istate),istate) = i ! they are already sorted
    else
     n_attachment(istate) += 1
-    list_attachment_tmp(n_attachment(istate)) = i ! they are not sorted 
+    list_attachment_tmp(n_attachment(istate)) = i ! they are not sorted
    endif
   enddo
   ! sorting the attachment
@@ -576,11 +585,14 @@ END_PROVIDER
    list_attachment(i+1,istate) = list_attachment_tmp(n_attachment(istate) - i)
   enddo
  enddo
- 
-END_PROVIDER 
+
+END_PROVIDER
 
  BEGIN_PROVIDER [ double precision,  attachment_numbers_sorted,  (mo_num, N_states)]
 &BEGIN_PROVIDER [ double precision,  dettachment_numbers_sorted, (mo_num, N_states)]
+  BEGIN_DOC
+  ! attachment_numbers_sorted
+  END_DOC
  implicit none
  integer :: i,istate
  do istate = 2, N_states
@@ -595,10 +607,13 @@ END_PROVIDER
    print*,i,list_attachment(i,istate),attachment_numbers_sorted(i,istate)
   enddo
  enddo
- END_PROVIDER 
+ END_PROVIDER
 
  BEGIN_PROVIDER [ double precision,  attachment_orbitals, (ao_num, mo_num, N_states)]
 &BEGIN_PROVIDER [ double precision, dettachment_orbitals, (ao_num, mo_num, N_states)]
+  BEGIN_DOC
+  ! attachment_orbitals
+  END_DOC
  implicit none
  integer :: i,j,k,istate
  attachment_orbitals = 0.d0
@@ -607,17 +622,18 @@ END_PROVIDER
    do i = 1, n_dettachment(istate)
     do j = 1, mo_num
      do k = 1, ao_num
-      dettachment_orbitals(k,list_dettachment(i,istate),istate) += mo_coef(k,j) * difference_dm_eigvect(j,list_dettachment(i,istate),istate) 
+      dettachment_orbitals(k,list_dettachment(i,istate),istate) += mo_coef(k,j) * difference_dm_eigvect(j,list_dettachment(i,istate),istate)
      enddo
     enddo
    enddo
    do i = 1, n_attachment(istate)
     do j = 1, mo_num
      do k = 1, ao_num
-      attachment_orbitals(k,i,istate) += mo_coef(k,j) * difference_dm_eigvect(j,list_attachment(i,istate),istate) 
+      attachment_orbitals(k,i,istate) += mo_coef(k,j) * difference_dm_eigvect(j,list_attachment(i,istate),istate)
      enddo
     enddo
    enddo
  enddo
 
-END_PROVIDER 
+END_PROVIDER
+

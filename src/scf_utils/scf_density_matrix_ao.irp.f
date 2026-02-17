@@ -1,12 +1,12 @@
 BEGIN_PROVIDER [ logical, all_shells_closed ]
  implicit none
  BEGIN_DOC
- ! 
+ !
  END_DOC
  all_shells_closed = (elec_alpha_num == elec_beta_num)
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, SCF_density_matrix_ao_alpha, (ao_num,ao_num) ]
+BEGIN_PROVIDER [double precision, SCF_density_matrix_ao_alpha, (ao_num, ao_num) ]
    implicit none
    BEGIN_DOC
    ! $C.C^t$ over $\alpha$ MOs
@@ -19,7 +19,7 @@ BEGIN_PROVIDER [double precision, SCF_density_matrix_ao_alpha, (ao_num,ao_num) ]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, SCF_density_matrix_ao_beta,  (ao_num,ao_num) ]
+BEGIN_PROVIDER [ double precision, SCF_density_matrix_ao_beta,  (ao_num, ao_num) ]
    implicit none
    BEGIN_DOC
    ! $C.C^t$ over $\beta$ MOs
@@ -32,7 +32,7 @@ BEGIN_PROVIDER [ double precision, SCF_density_matrix_ao_beta,  (ao_num,ao_num) 
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, SCF_density_matrix_ao, (ao_num,ao_num) ]
+BEGIN_PROVIDER [ double precision, SCF_density_matrix_ao, (ao_num, ao_num) ]
    implicit none
    BEGIN_DOC
    ! Sum of $\alpha$ and $\beta$ density matrices
@@ -46,4 +46,5 @@ BEGIN_PROVIDER [ double precision, SCF_density_matrix_ao, (ao_num,ao_num) ]
    endif
 
 END_PROVIDER
+
 

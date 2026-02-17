@@ -94,7 +94,7 @@ subroutine merge_selection_buffers(b1, b2)
   i2=1
 
   select case (N_int)
-BEGIN_TEMPLATE 
+BEGIN_TEMPLATE
   case $case
     do i=1,nmwen
       if ( (i1 > b1%cur).and.(i2 > b2%cur) ) then
@@ -423,6 +423,7 @@ subroutine remove_duplicates_in_selection_buffer(b)
   endif
 
 end
+
 
 
 

@@ -5,7 +5,7 @@ BEGIN_PROVIDER [ character*(1024), ezfio_filename ]
   ! variable if it is set, or as the 1st argument of the command line.
   END_DOC
 
-  PROVIDE mpi_initialized output_wall_time_0 
+  PROVIDE mpi_initialized output_wall_time_0
 
   integer :: i
 
@@ -72,4 +72,5 @@ BEGIN_PROVIDER [ character*(1024), ezfio_work_dir_pid ]
  write(pid_str,*) getpid()
  ezfio_work_dir_pid = trim(ezfio_work_dir)//'/'//trim(pid_str)//'_'
 END_PROVIDER
+
 

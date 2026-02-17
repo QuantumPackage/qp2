@@ -2,7 +2,7 @@
 ! - mo_two_e_integrals_jj_exchange
 ! - mo_two_e_integrals_jj_anti
 ! - mo_two_e_integrals_jj
-! 
+!
 ! 3-index integrals are always taken from:
 ! - big_array_exchange_integrals
 ! - big_array_coulomb_integrals
@@ -544,9 +544,9 @@ end
 
 
 
- BEGIN_PROVIDER [ double precision, mo_two_e_integrals_jj, (mo_num,mo_num) ]
-&BEGIN_PROVIDER [ double precision, mo_two_e_integrals_jj_exchange, (mo_num,mo_num) ]
-&BEGIN_PROVIDER [ double precision, mo_two_e_integrals_jj_anti, (mo_num,mo_num) ]
+ BEGIN_PROVIDER [ double precision, mo_two_e_integrals_jj, (mo_num, mo_num) ]
+&BEGIN_PROVIDER [ double precision, mo_two_e_integrals_jj_exchange, (mo_num, mo_num) ]
+&BEGIN_PROVIDER [ double precision, mo_two_e_integrals_jj_anti, (mo_num, mo_num) ]
   implicit none
   BEGIN_DOC
   ! mo_two_e_integrals_jj(i,j) = J_ij
@@ -609,4 +609,5 @@ subroutine clear_mo_map
   FREE mo_integrals_map mo_two_e_integrals_jj mo_two_e_integrals_jj_anti
   FREE mo_two_e_integrals_jj_exchange mo_two_e_integrals_in_map
 end
+
 

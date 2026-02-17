@@ -723,7 +723,7 @@ subroutine get_mo_two_e_integrals_exch_ii(k,l,sze,out_val,map)
 
 end
 
- BEGIN_PROVIDER [ logical, banned_excitation, (mo_num,mo_num) ]
+ BEGIN_PROVIDER [ logical, banned_excitation, (mo_num, mo_num) ]
 &BEGIN_PROVIDER [ logical, use_banned_excitation  ]
  implicit none
  use map_module
@@ -845,4 +845,5 @@ integer function load_mo_integrals(filename)
   stop 'Problem reading mo_integrals_map file in work/'
 
 end
+
 

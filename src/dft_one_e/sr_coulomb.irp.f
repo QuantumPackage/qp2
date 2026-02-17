@@ -1,4 +1,4 @@
- BEGIN_PROVIDER [double precision, short_range_Hartree_operator, (mo_num,mo_num,N_states)]
+ BEGIN_PROVIDER [double precision, short_range_Hartree_operator, (mo_num, mo_num, N_states)]
 &BEGIN_PROVIDER [double precision, short_range_Hartree, (N_states)]
  implicit none
  BEGIN_DOC
@@ -37,7 +37,7 @@
 END_PROVIDER
 
 
- BEGIN_PROVIDER [double precision, regular_range_Hartree_operator, (mo_num,mo_num,N_states)]
+ BEGIN_PROVIDER [double precision, regular_range_Hartree_operator, (mo_num, mo_num, N_states)]
 &BEGIN_PROVIDER [double precision, regular_range_Hartree, (N_states)]
  implicit none
  BEGIN_DOC
@@ -61,7 +61,7 @@ END_PROVIDER
     do k = 1, mo_num
      do l = 1, mo_num
       integral = integrals_array(l,k)
-      contrib = one_e_dm_mo_for_dft(i,j,istate) * integral 
+      contrib = one_e_dm_mo_for_dft(i,j,istate) * integral
       regular_range_Hartree_operator(l,k,istate) += contrib
       regular_range_Hartree(istate) += contrib * one_e_dm_mo_for_dft(k,l,istate)
      enddo
@@ -72,3 +72,4 @@ END_PROVIDER
  regular_range_Hartree = regular_range_Hartree * 0.5d0
  print*, 'regular_range_Hartree',regular_range_Hartree
 END_PROVIDER
+

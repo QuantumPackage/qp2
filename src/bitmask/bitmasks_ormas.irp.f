@@ -9,7 +9,7 @@ BEGIN_PROVIDER [integer, ormas_mstart, (ormas_n_space) ]
   logical                        :: has
   PROVIDE ezfio_filename
   if (mpi_master) then
-    
+
     call ezfio_has_bitmask_ormas_mstart(has)
     if (has) then
 !      write(6,'(A)') '.. >>>>> [ IO READ: ormas_mstart ] <<<<< ..'
@@ -36,7 +36,7 @@ BEGIN_PROVIDER [integer, ormas_mstart, (ormas_n_space) ]
   IRP_ENDIF
 
 !  call write_time(6)
-  
+
 
 END_PROVIDER
 
@@ -49,7 +49,7 @@ BEGIN_PROVIDER [integer, ormas_min_e, (ormas_n_space) ]
   logical                        :: has
   PROVIDE ezfio_filename
   if (mpi_master) then
-    
+
     call ezfio_has_bitmask_ormas_min_e(has)
     if (has) then
 !      write(6,'(A)') '.. >>>>> [ IO READ: ormas_min_e ] <<<<< ..'
@@ -87,7 +87,7 @@ BEGIN_PROVIDER [integer, ormas_max_e, (ormas_n_space) ]
   logical                        :: has
   PROVIDE ezfio_filename
   if (mpi_master) then
-    
+
     call ezfio_has_bitmask_ormas_max_e(has)
     if (has) then
 !      write(6,'(A)') '.. >>>>> [ IO READ: ormas_max_e ] <<<<< ..'
@@ -124,7 +124,7 @@ END_PROVIDER
   END_DOC
   integer :: i
   ormas_n_orb = 0
-  ormas_n_orb(ormas_n_space) = mo_num + 1 - ormas_mstart(ormas_n_space) 
+  ormas_n_orb(ormas_n_space) = mo_num + 1 - ormas_mstart(ormas_n_space)
   do i = ormas_n_space-1, 1, -1
     ormas_n_orb(i) = ormas_mstart(i+1) - ormas_mstart(i)
     ASSERT (ormas_n_orb(i).ge.1)
@@ -147,7 +147,7 @@ BEGIN_PROVIDER [ integer, ormas_list_orb, (ormas_max_n_orb, ormas_n_space) ]
     enddo
   enddo
 END_PROVIDER
-  
+
 BEGIN_PROVIDER [ integer(bit_kind), ormas_bitmask, (N_int, ormas_n_space) ]
   implicit none
   BEGIN_DOC
@@ -203,4 +203,5 @@ logical function det_allowed_ormas(key_in)
   enddo
   det_allowed_ormas = .True.
 end
-  
+
+

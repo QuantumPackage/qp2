@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [ double precision, inertia_tensor, (3,3) ]
+BEGIN_PROVIDER [ double precision, inertia_tensor, (3, 3) ]
   implicit none
   BEGIN_DOC
   ! Inertia tensor
@@ -18,7 +18,7 @@ BEGIN_PROVIDER [ double precision, inertia_tensor, (3,3) ]
   inertia_tensor(3,2) = inertia_tensor(2,3)
 END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, inertia_tensor_eigenvectors, (3,3) ]
+ BEGIN_PROVIDER [ double precision, inertia_tensor_eigenvectors, (3, 3) ]
 &BEGIN_PROVIDER [ double precision, inertia_tensor_eigenvalues , (3) ]
  implicit none
  BEGIN_DOC
@@ -30,4 +30,5 @@ END_PROVIDER
  print *, 'Rotational constants (GHZ):'
  print *, (1805.65468542d0/(inertia_tensor_eigenvalues(k)+1.d-32), k=1,3)
 END_PROVIDER
+
 

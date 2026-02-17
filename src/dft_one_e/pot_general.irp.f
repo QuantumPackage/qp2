@@ -1,5 +1,5 @@
- BEGIN_PROVIDER [double precision, potential_x_alpha_ao,(ao_num,ao_num,N_states)]
- &BEGIN_PROVIDER [double precision, potential_x_beta_ao ,(ao_num,ao_num,N_states)]
+ BEGIN_PROVIDER [double precision, potential_x_alpha_ao, (ao_num, ao_num, N_states)]
+ &BEGIN_PROVIDER [double precision, potential_x_beta_ao , (ao_num, ao_num, N_states)]
   implicit none
   BEGIN_DOC
  ! general providers for the alpha/beta exchange potentials on the AO basis
@@ -34,8 +34,8 @@ print("endif")
 
 
 
-  BEGIN_PROVIDER [double precision, potential_c_alpha_ao,(ao_num,ao_num,N_states)]
- &BEGIN_PROVIDER [double precision, potential_c_beta_ao,(ao_num,ao_num,N_states)]
+  BEGIN_PROVIDER [double precision, potential_c_alpha_ao, (ao_num, ao_num, N_states)]
+ &BEGIN_PROVIDER [double precision, potential_c_beta_ao, (ao_num, ao_num, N_states)]
   implicit none
   BEGIN_DOC
  ! general providers for the alpha/beta correlation potentials on the AO basis
@@ -72,8 +72,8 @@ print("endif")
 
 
 
-  BEGIN_PROVIDER [double precision, potential_x_alpha_mo,(mo_num,mo_num,N_states)]
- &BEGIN_PROVIDER [double precision, potential_x_beta_mo ,(mo_num,mo_num,N_states)]
+  BEGIN_PROVIDER [double precision, potential_x_alpha_mo, (mo_num, mo_num, N_states)]
+ &BEGIN_PROVIDER [double precision, potential_x_beta_mo , (mo_num, mo_num, N_states)]
   implicit none
   BEGIN_DOC
  ! general providers for the alpha/beta exchange potentials on the MO basis
@@ -97,8 +97,8 @@ print("endif")
 
  END_PROVIDER
 
-  BEGIN_PROVIDER [double precision, potential_c_alpha_mo,(mo_num,mo_num,N_states)]
- &BEGIN_PROVIDER [double precision, potential_c_beta_mo, (mo_num,mo_num,N_states)]
+  BEGIN_PROVIDER [double precision, potential_c_alpha_mo, (mo_num, mo_num, N_states)]
+ &BEGIN_PROVIDER [double precision, potential_c_beta_mo, (mo_num, mo_num, N_states)]
   implicit none
   BEGIN_DOC
  ! general providers for the alpha/beta correlation potentials on the MO basis
@@ -169,8 +169,11 @@ print("endif")
 
  END_PROVIDER
 
-  BEGIN_PROVIDER [double precision, potential_xc_alpha_mo,(mo_num,mo_num,N_states)]
- &BEGIN_PROVIDER [double precision, potential_xc_beta_mo,(mo_num,mo_num,N_states)]
+  BEGIN_PROVIDER [double precision, potential_xc_alpha_mo, (mo_num, mo_num, N_states)]
+ &BEGIN_PROVIDER [double precision, potential_xc_beta_mo, (mo_num, mo_num, N_states)]
+  BEGIN_DOC
+  ! potential_xc_alpha_mo
+  END_DOC
   implicit none
   integer :: istate
 
@@ -193,8 +196,8 @@ print("endif")
  END_PROVIDER
 
 
-  BEGIN_PROVIDER [double precision, potential_xc_alpha_ao,(ao_num,ao_num,N_states)]
- &BEGIN_PROVIDER [double precision, potential_xc_beta_ao,(ao_num,ao_num,N_states)]
+  BEGIN_PROVIDER [double precision, potential_xc_alpha_ao, (ao_num, ao_num, N_states)]
+ &BEGIN_PROVIDER [double precision, potential_xc_beta_ao, (ao_num, ao_num, N_states)]
   implicit none
   BEGIN_DOC
  ! general providers for the alpha/beta exchange/correlation potentials on the AO basis
@@ -225,4 +228,5 @@ print("endif")
 END_SHELL
 
  END_PROVIDER
+
 

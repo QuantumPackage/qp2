@@ -2,7 +2,7 @@
       subroutine ESRC_MD_LDAERF (mu,rho_a,rho_b,dospin,e)
 !*****************************************************************************
 !     Short-range spin-dependent LDA correlation functional with multideterminant reference
-!       for OEP calculations from Section V of 
+!       for OEP calculations from Section V of
 !       Paziani, Moroni, Gori-Giorgi and Bachelet, PRB 73, 155111 (2006)
 !
 !     Input: rhot   : total density
@@ -100,7 +100,7 @@
       endif
 
       z2=z*z
- 
+
       bd2=dexp(-0.547d0*rs)*(-0.388d0*rs+0.676*rs2)/rs2
       bd3=dexp(-0.31d0*rs)*(-4.95d0*rs+rs2)/rs3
 
@@ -113,7 +113,7 @@
       c45=(zp**2)*g0s(rs*zp**(-f13))+(zm**2)*g0s(rs*zm**(-f13))
       c4=c45+(1.d0-z2)*bd2-phi8/(5.d0*alpha2*rs2)
       c5=c45+(1.d0-z2)*bd3
- 
+
       bc2=-3.d0*(1-z2)*(g0f(rs)-0.5d0)/(8.d0*rs3)
       bc4=-9.d0*c4/(64.d0*rs3)
       bc3t=-(1-z2)*g0f(rs)*(2.d0*dsqrt(2.d0)-1)/(2.d0*dsqrt(pi)*rs3)
@@ -149,4 +149,5 @@
       rs2=rs*rs
       g0s=(2.d0**f53)*(1.d0-0.02267d0*rs)/((5.d0*alpha2*rs2)*(1.d0+0.4319d0*rs+0.04d0*rs2))
       end
+
 

@@ -27,9 +27,9 @@ program test_non_h
   print *, ' env_type = ', env_type
 
   !call routine_fit()
-  
+
   !call test_ipp()
-  
+
   !call test_v_ij_u_cst_mu_env_an()
 
   !call test_int2_grad1_u12_square_ao()
@@ -55,7 +55,7 @@ subroutine routine_fit
   implicit none
   integer :: i,nx
   double precision :: dx,xmax,x,j_mu,j_mu_F_x_j,j_mu_fit_gauss
- 
+
   nx = 500
   xmax = 5.d0
   dx = xmax/dble(nx)
@@ -149,7 +149,7 @@ subroutine test_ipp()
   call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0     &
             , int2_u2_env2(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid &
             , 0.d0, I2, ao_num*ao_num)
- 
+
   ! ---
 
   deallocate(b_mat)
@@ -166,7 +166,7 @@ subroutine test_ipp()
 
           !print*, l, k, j, i
           !print*, old, new
-          
+
           diff = new - old
           if(dabs(diff) .gt. eps) then
             print*, ' problem on :', j, l, k, i
@@ -233,7 +233,7 @@ subroutine I_grade_gradu_naive1(i, j, k, l, int)
     weight1_y = aor_i * aor_k * e1_val * final_weight_at_r_vector(ipoint) * e1_der(2)
     weight1_z = aor_i * aor_k * e1_val * final_weight_at_r_vector(ipoint) * e1_der(3)
 
-    do jpoint = 1, n_points_extra_final_grid ! r2 
+    do jpoint = 1, n_points_extra_final_grid ! r2
 
       r2(1) = final_grid_points_extra(1,jpoint)
       r2(2) = final_grid_points_extra(2,jpoint)
@@ -290,7 +290,7 @@ subroutine I_grade_gradu_naive2(i, j, k, l, int)
     weight1_y = aor_i * aor_k * final_weight_at_r_vector(ipoint) * e1_square_der(2)
     weight1_z = aor_i * aor_k * final_weight_at_r_vector(ipoint) * e1_square_der(3)
 
-    do jpoint = 1, n_points_extra_final_grid ! r2 
+    do jpoint = 1, n_points_extra_final_grid ! r2
 
       r2(1) = final_grid_points_extra(1,jpoint)
       r2(2) = final_grid_points_extra(2,jpoint)
@@ -339,7 +339,7 @@ subroutine I_grade_gradu_naive3(i, j, k, l, int)
 
     weight1 = final_weight_at_r_vector(ipoint) * (grad(1) + grad(2) + grad(3))
 
-    do jpoint = 1, n_points_extra_final_grid ! r2 
+    do jpoint = 1, n_points_extra_final_grid ! r2
 
       r2(1) = final_grid_points_extra(1,jpoint)
       r2(2) = final_grid_points_extra(2,jpoint)
@@ -390,7 +390,7 @@ subroutine I_grade_gradu_naive4(i, j, k, l, int)
             + (aor_k * aos_grad_in_r_array_transp_bis(ipoint,i,2) + aor_i * aos_grad_in_r_array_transp_bis(ipoint,k,2)) * env_square_grad(ipoint,2) &
             + (aor_k * aos_grad_in_r_array_transp_bis(ipoint,i,3) + aor_i * aos_grad_in_r_array_transp_bis(ipoint,k,3)) * env_square_grad(ipoint,3) )
 
-    do jpoint = 1, n_points_extra_final_grid ! r2 
+    do jpoint = 1, n_points_extra_final_grid ! r2
 
       r2(1) = final_grid_points_extra(1,jpoint)
       r2(2) = final_grid_points_extra(2,jpoint)
@@ -638,7 +638,7 @@ subroutine test_j1e_grad()
   double precision              :: x_loops, x_dgemm, diff, thr, accu, norm
   double precision, allocatable :: pa(:,:), Pb(:,:), Pt(:,:)
   double precision, allocatable :: x(:), y(:), z(:)
-  
+
   PROVIDE int2_grad1_u2e_ao
   PROVIDE mo_coef
 
@@ -853,7 +853,7 @@ subroutine test_j1e_fit_ao()
 
   print*, ' fit accuracy (%) = ', 100.d0 * accu / norm
 
-end 
+end
 
 ! ---
 
@@ -891,7 +891,7 @@ subroutine test_tc_grad_and_lapl_ao_new()
             stop
           endif
           accu += diff
-          norm += dabs(i_old) 
+          norm += dabs(i_old)
         enddo
       enddo
     enddo
@@ -939,7 +939,7 @@ subroutine test_tc_grad_square_ao_new()
             stop
           endif
           accu += diff
-          norm += dabs(i_old) 
+          norm += dabs(i_old)
         enddo
       enddo
     enddo
@@ -954,6 +954,9 @@ end
 ! ---
 
 BEGIN_PROVIDER [double precision, tc_grad_square_ao_new, (ao_num, ao_num, ao_num, ao_num)]
+  BEGIN_DOC
+  ! tc_grad_square_ao_new
+  END_DOC
 
   implicit none
   integer                       :: i, j, k, l, m, ipoint
@@ -1002,7 +1005,7 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_new, (ao_num, ao_num, ao_num
       ((env_type .eq. "Prod_Gauss") .or. (env_type .eq. "Sum_Gauss")) .and. &
       use_ipp ) then
 
-    ! an additional term is added here directly instead of 
+    ! an additional term is added here directly instead of
     ! being added in int2_grad1_u12_square_ao for performance
 
     PROVIDE int2_u2_env2
@@ -1046,11 +1049,14 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_new, (ao_num, ao_num, ao_num
   call wall_time(time1)
   print*, ' Wall time for tc_grad_square_ao_new (min) = ', (time1 - time0) / 60.d0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
 BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao_new, (ao_num, ao_num, ao_num, ao_num)]
+  BEGIN_DOC
+  ! tc_grad_and_lapl_ao_new
+  END_DOC
 
   implicit none
   integer                       :: i, j, k, l, m, ipoint
@@ -1076,8 +1082,8 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao_new, (ao_num, ao_num, ao_n
 
   !$OMP PARALLEL                                                              &
   !$OMP DEFAULT (NONE)                                                        &
-  !$OMP PRIVATE (i, k, ipoint, weight1, ao_i_r, ao_k_r)                       & 
-  !$OMP SHARED (aos_in_r_array_transp, aos_grad_in_r_array_transp_bis, b_mat, & 
+  !$OMP PRIVATE (i, k, ipoint, weight1, ao_i_r, ao_k_r)                       &
+  !$OMP SHARED (aos_in_r_array_transp, aos_grad_in_r_array_transp_bis, b_mat, &
   !$OMP         ao_num, n_points_final_grid, final_weight_at_r_vector)
   !$OMP DO SCHEDULE (static)
   do i = 1, ao_num
@@ -1113,7 +1119,7 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao_new, (ao_num, ao_num, ao_n
   call wall_time(time1)
   print*, ' Wall time for tc_grad_and_lapl_ao_new (min) = ', (time1 - time0) / 60.d0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -1214,7 +1220,7 @@ subroutine test_fit_coef_A1()
           endif
 
           accu += diff
-          norm += dabs(A1(ij,kl)) 
+          norm += dabs(A1(ij,kl))
         enddo
       enddo
     enddo
@@ -1334,7 +1340,7 @@ subroutine test_fit_coef_inv()
              , D(1), U(1,1), ao_num*ao_num, Vt(1,1), ao_num*ao_num, work, lwork, info)
   if(info /= 0) then
     print *,  info, ': SVD failed'
-    stop 
+    stop
   endif
 
   LWORK = max(5*ao_num*ao_num, int(WORK(1)))
@@ -1407,7 +1413,7 @@ subroutine test_fit_coef_inv()
           endif
 
           accu += diff
-          norm += dabs(A1(ij,kl)) 
+          norm += dabs(A1(ij,kl))
         enddo
       enddo
     enddo
@@ -1434,7 +1440,7 @@ subroutine test_fit_coef_inv()
           endif
 
           accu += diff
-          norm += dabs(A1_inv(ij,kl)) 
+          norm += dabs(A1_inv(ij,kl))
         enddo
       enddo
     enddo
@@ -1523,11 +1529,12 @@ subroutine test_fit_coef_testinvA()
   enddo
 
   print*, ' accuracy (%) = ', accu * 100.d0
-  
+
   deallocate(A1, A1_inv)
 
   return
 end
 
 ! ---
+
 

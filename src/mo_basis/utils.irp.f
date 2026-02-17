@@ -246,9 +246,9 @@ end
 subroutine mo_coef_new_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,mo_coef_before,eig,mo_coef_new)
   implicit none
   BEGIN_DOC
-! You enter with matrix in the MO basis defined with the mo_coef_before. 
+! You enter with matrix in the MO basis defined with the mo_coef_before.
 !
-! You SVD the matrix and set the eigenvectors as mo_coef_new ordered by increasing singular values 
+! You SVD the matrix and set the eigenvectors as mo_coef_new ordered by increasing singular values
   END_DOC
   integer,intent(in)             :: lda,m,n
   double precision, intent(in)   :: matrix(lda,n),mo_coef_before(ao_num,m)
@@ -302,5 +302,6 @@ subroutine mo_coef_new_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,mo_coef_be
   call write_time(6)
 
 end
+
 
 

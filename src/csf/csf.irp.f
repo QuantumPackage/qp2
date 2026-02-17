@@ -8,7 +8,7 @@ END_PROVIDER
 
 
  BEGIN_PROVIDER [ integer, N_csf ]
-&BEGIN_PROVIDER [ integer, psi_configuration_to_psi_csf, (2,N_configuration) ]
+&BEGIN_PROVIDER [ integer, psi_configuration_to_psi_csf, (2, N_configuration) ]
 &BEGIN_PROVIDER [ integer, psi_configuration_n_csf, (N_configuration) ]
 &BEGIN_PROVIDER [ integer, csf_unique_vector_index, (N_det) ]
 &BEGIN_PROVIDER [ double precision, csf_unique_vector_value, (csf_unique_vector_value_size) ]
@@ -33,7 +33,7 @@ END_PROVIDER
  logical :: found
  integer, allocatable :: unique_index(:)
 
- PROVIDE expected_s2 N_int psi_det 
+ PROVIDE expected_s2 N_int psi_det
  lwork = n_det_per_config_max**3
 
  allocate(eigenvalues(n_det_per_config_max), work(lwork))
@@ -308,4 +308,5 @@ BEGIN_PROVIDER [ double precision, psi_csf_coef, (N_csf, N_states) ]
 
  call convertWFfromDETtoCSF(N_states, psi_coef, psi_csf_coef)
 END_PROVIDER
+
 

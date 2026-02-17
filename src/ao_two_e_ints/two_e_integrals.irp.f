@@ -411,7 +411,7 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_in_map ]
 
   ! For integrals file
   integer(key_kind),allocatable  :: buffer_i(:)
-  integer                        :: size_buffer 
+  integer                        :: size_buffer
   real(integral_kind),allocatable :: buffer_value(:)
 
   integer                        :: n_integrals, rc
@@ -1617,13 +1617,13 @@ recursive subroutine I_x2_pol_mult(c,B_10,B_01,B_00,C_00,D_00,d,nd,dim)
             d(1) = d(1) + D_00(1) * Y(0)
             d(2) = d(2) + D_00(2) * Y(0)
 
-          case (1) 
+          case (1)
             d(0) = d(0) + D_00(0) * Y(0)
             d(1) = d(1) + D_00(0) * Y(1) + D_00(1) * Y(0)
             d(2) = d(2) + D_00(1) * Y(1) + D_00(2) * Y(0)
             d(3) = d(3) + D_00(2) * Y(1)
 
-          case (2) 
+          case (2)
             d(0) = d(0) + D_00(0) * Y(0)
             d(1) = d(1) + D_00(0) * Y(1) + D_00(1) * Y(0)
             d(2) = d(2) + D_00(0) * Y(2) + D_00(1) * Y(1) + D_00(2) * Y(0)
@@ -1787,4 +1787,5 @@ subroutine multiply_poly_c2_inline_2e(b,nb,c,d,nd)
   enddo
 
 end
+
 

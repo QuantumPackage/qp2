@@ -17,15 +17,15 @@ end
 subroutine r_phi_theta_psi_matrix(phi,theta,psi,r_mat)
  implicit none
  BEGIN_DOC
- ! routine that creates the rotation matrix corresponding to phi,theta,psi 
+ ! routine that creates the rotation matrix corresponding to phi,theta,psi
  !
  ! according to conventions in MDFT code
  END_DOC
  double precision, intent(in) :: phi,theta,psi
  double precision, intent(out):: r_mat(3,3)
- double precision :: ctheta, stheta 
- double precision :: cphi  , sphi 
- double precision :: cpsi  , spsi 
+ double precision :: ctheta, stheta
+ double precision :: cphi  , sphi
+ double precision :: cpsi  , spsi
  ctheta = dcos(theta)
  cphi = dcos(phi)
  cpsi = dcos(psi)
@@ -37,7 +37,7 @@ subroutine r_phi_theta_psi_matrix(phi,theta,psi,r_mat)
  r_mat(1,1) = ctheta*cphi*cpsi-sphi*spsi
  r_mat(1,2) = -ctheta*cphi*spsi-sphi*cpsi
  r_mat(1,3) = stheta*cphi
- 
+
  r_mat(2,1) = ctheta*sphi*cpsi+cphi*spsi
  r_mat(2,2) = -ctheta*sphi*spsi+cphi*cpsi
  r_mat(2,3) = stheta*sphi
@@ -47,3 +47,4 @@ subroutine r_phi_theta_psi_matrix(phi,theta,psi,r_mat)
  r_mat(3,3) = ctheta
 
 end
+

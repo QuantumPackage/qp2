@@ -1,18 +1,18 @@
 use bitmasks
 
-BEGIN_PROVIDER [ double precision, psi_average_norm_contrib_tc, (psi_det_size) ]                                                                
+BEGIN_PROVIDER [ double precision, psi_average_norm_contrib_tc, (psi_det_size) ]
   implicit none
   BEGIN_DOC
   ! Contribution of determinants to the state-averaged density.
   END_DOC
   integer                        :: i,j,k
   double precision               :: f
-    
+
   psi_average_norm_contrib_tc(:) = 0.d0
   do k=1,N_states
     do i=1,N_det
 !      print*,dabs(psi_l_coef_bi_ortho(i,k)*psi_r_coef_bi_ortho(i,k)),psi_l_coef_bi_ortho(i,k),psi_r_coef_bi_ortho(i,k)
-      psi_average_norm_contrib_tc(i) += & 
+      psi_average_norm_contrib_tc(i) += &
           dabs(psi_l_coef_bi_ortho(i,k)*psi_r_coef_bi_ortho(i,k))*state_average_weight(k)
     enddo
   enddo
@@ -32,8 +32,8 @@ BEGIN_PROVIDER [ double precision, psi_average_norm_contrib_tc, (psi_det_size) ]
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_tc, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_coef_sorted_tc, (psi_det_size,N_states) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_tc, (N_int, 2, psi_det_size) ]
+&BEGIN_PROVIDER [ double precision, psi_coef_sorted_tc, (psi_det_size, N_states) ]
 &BEGIN_PROVIDER [ double precision, psi_average_norm_contrib_sorted_tc, (psi_det_size) ]
 &BEGIN_PROVIDER [ integer, psi_det_sorted_tc_order, (psi_det_size) ]
 &BEGIN_PROVIDER [double precision, psi_r_coef_sorted_bi_ortho, (psi_det_size, N_states)]
@@ -92,8 +92,8 @@ END_PROVIDER
 
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_tc_bit, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_coef_sorted_tc_bit, (psi_det_size,N_states) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_tc_bit, (N_int, 2, psi_det_size) ]
+&BEGIN_PROVIDER [ double precision, psi_coef_sorted_tc_bit, (psi_det_size, N_states) ]
    implicit none
    BEGIN_DOC
    ! Determinants on which we apply $\langle i|H|psi \rangle$ for perturbation.
@@ -108,12 +108,12 @@ END_PROVIDER
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_tc_right, (N_int,2,N_det) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_tc_right, (N_int, 2, N_det) ]
 &BEGIN_PROVIDER [double precision, psi_r_coef_sorted_bi_ortho_right, (N_det)]
  implicit none
  BEGIN_DOC
  ! psi_det_sorted_tc_right : Slater determinants sorted by decreasing value of |right- coefficients|
- ! 
+ !
  ! psi_r_coef_sorted_bi_ortho_right : right wave function according to psi_det_sorted_tc_right
  END_DOC
  integer, allocatable           :: iorder(:)
@@ -132,14 +132,14 @@ END_PROVIDER
    enddo
   psi_r_coef_sorted_bi_ortho_right(i) = psi_r_coef_bi_ortho(iorder(i),1)/psi_r_coef_bi_ortho(iorder(1),1)
  enddo
-END_PROVIDER 
+END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_tc_left, (N_int,2,N_det) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_tc_left, (N_int, 2, N_det) ]
 &BEGIN_PROVIDER [double precision, psi_l_coef_sorted_bi_ortho_left, (N_det)]
  implicit none
  BEGIN_DOC
  ! psi_det_sorted_tc_left : Slater determinants sorted by decreasing value of |LEFTt- coefficients|
- ! 
+ !
  ! psi_r_coef_sorted_bi_ortho_left : LEFT wave function according to psi_det_sorted_tc_left
  END_DOC
  integer, allocatable           :: iorder(:)
@@ -158,4 +158,5 @@ END_PROVIDER
    enddo
   psi_l_coef_sorted_bi_ortho_left(i) = psi_l_coef_bi_ortho(iorder(i),1)/psi_l_coef_bi_ortho(iorder(1),1)
  enddo
-END_PROVIDER 
+END_PROVIDER
+

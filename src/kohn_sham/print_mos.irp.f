@@ -36,6 +36,7 @@ end
 double precision function g(x,alpha)
  implicit none
  double precision, intent(in) :: x,alpha
- g = dexp(-alpha*x*x) 
+ g = dexp(-alpha*x*x)
 
 end
+

@@ -1,5 +1,5 @@
- BEGIN_PROVIDER [ double precision, ao_one_e_integrals,(ao_num,ao_num)]
-&BEGIN_PROVIDER [ double precision, ao_one_e_integrals_diag,(ao_num)]
+ BEGIN_PROVIDER [ double precision, ao_one_e_integrals, (ao_num, ao_num)]
+&BEGIN_PROVIDER [ double precision, ao_one_e_integrals_diag, (ao_num)]
   implicit none
   integer :: i,j,n,l
   BEGIN_DOC
@@ -24,7 +24,7 @@
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, ao_one_e_integrals_imag,(ao_num,ao_num)]
+BEGIN_PROVIDER [ double precision, ao_one_e_integrals_imag, (ao_num, ao_num)]
   implicit none
   integer :: i,j,n,l
   BEGIN_DOC
@@ -45,8 +45,8 @@ BEGIN_PROVIDER [ double precision, ao_one_e_integrals_imag,(ao_num,ao_num)]
 
 END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, ao_sphe_one_e_integrals,(ao_sphe_num,ao_sphe_num)]
-&BEGIN_PROVIDER [ double precision, ao_sphe_one_e_integrals_diag,(ao_sphe_num)]
+ BEGIN_PROVIDER [ double precision, ao_sphe_one_e_integrals, (ao_sphe_num, ao_sphe_num)]
+&BEGIN_PROVIDER [ double precision, ao_sphe_one_e_integrals_diag, (ao_sphe_num)]
   implicit none
   integer :: i,j,n,l
   BEGIN_DOC
@@ -60,4 +60,5 @@ END_PROVIDER
   enddo
 
 END_PROVIDER
+
 

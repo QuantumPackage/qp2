@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [ double precision, ao_pseudo_integrals, (ao_num,ao_num)]
+BEGIN_PROVIDER [ double precision, ao_pseudo_integrals, (ao_num, ao_num)]
   implicit none
   BEGIN_DOC
   ! Pseudo-potential integrals in the |AO| basis set.
@@ -27,7 +27,7 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals, (ao_num,ao_num)]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
+BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num, ao_num)]
   use omp_lib
   implicit none
   BEGIN_DOC
@@ -164,7 +164,7 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
  END_PROVIDER
 
 
- BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_non_local, (ao_num,ao_num)]
+ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_non_local, (ao_num, ao_num)]
   use omp_lib
   implicit none
   BEGIN_DOC
@@ -271,9 +271,9 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
   enddo
 END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, pseudo_v_k_transp, (pseudo_klocmax,nucl_num) ]
-&BEGIN_PROVIDER [ integer         , pseudo_n_k_transp, (pseudo_klocmax,nucl_num) ]
-&BEGIN_PROVIDER [ double precision, pseudo_dz_k_transp, (pseudo_klocmax,nucl_num)]
+ BEGIN_PROVIDER [ double precision, pseudo_v_k_transp, (pseudo_klocmax, nucl_num) ]
+&BEGIN_PROVIDER [ integer         , pseudo_n_k_transp, (pseudo_klocmax, nucl_num) ]
+&BEGIN_PROVIDER [ double precision, pseudo_dz_k_transp, (pseudo_klocmax, nucl_num)]
  implicit none
  BEGIN_DOC
  ! Transposed arrays for pseudopotentials
@@ -289,9 +289,9 @@ END_PROVIDER
  enddo
 END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, pseudo_v_kl_transp, (pseudo_kmax,0:pseudo_lmax,nucl_num) ]
-&BEGIN_PROVIDER [ integer         , pseudo_n_kl_transp, (pseudo_kmax,0:pseudo_lmax,nucl_num) ]
-&BEGIN_PROVIDER [ double precision, pseudo_dz_kl_transp, (pseudo_kmax,0:pseudo_lmax,nucl_num)]
+ BEGIN_PROVIDER [ double precision, pseudo_v_kl_transp, (pseudo_kmax, 0:pseudo_lmax, nucl_num) ]
+&BEGIN_PROVIDER [ integer         , pseudo_n_kl_transp, (pseudo_kmax, 0:pseudo_lmax, nucl_num) ]
+&BEGIN_PROVIDER [ double precision, pseudo_dz_kl_transp, (pseudo_kmax, 0:pseudo_lmax, nucl_num)]
  implicit none
  BEGIN_DOC
  ! Transposed arrays for pseudopotentials
@@ -309,7 +309,7 @@ END_PROVIDER
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, ao_sphe_pseudo_integrals_local, (ao_sphe_num,ao_sphe_num) ]
+BEGIN_PROVIDER [ double precision, ao_sphe_pseudo_integrals_local, (ao_sphe_num, ao_sphe_num) ]
  implicit none
  BEGIN_DOC
  ! |AO| pseudo_integrals_local matrix in the spherical basis set
@@ -332,7 +332,7 @@ BEGIN_PROVIDER [ double precision, ao_sphe_pseudo_integrals_local, (ao_sphe_num,
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, ao_sphe_pseudo_integrals_non_local, (ao_sphe_num,ao_sphe_num) ]
+BEGIN_PROVIDER [ double precision, ao_sphe_pseudo_integrals_non_local, (ao_sphe_num, ao_sphe_num) ]
  implicit none
  BEGIN_DOC
  ! |AO| pseudo_integrals_non_local matrix in the spherical basis set
@@ -355,7 +355,7 @@ BEGIN_PROVIDER [ double precision, ao_sphe_pseudo_integrals_non_local, (ao_sphe_
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, ao_sphe_pseudo_integrals, (ao_sphe_num,ao_sphe_num)]
+BEGIN_PROVIDER [ double precision, ao_sphe_pseudo_integrals, (ao_sphe_num, ao_sphe_num)]
   implicit none
   BEGIN_DOC
   ! Pseudo-potential integrals in the |AO| basis set.
@@ -372,4 +372,5 @@ BEGIN_PROVIDER [ double precision, ao_sphe_pseudo_integrals, (ao_sphe_num,ao_sph
   endif
 
 END_PROVIDER
+
 

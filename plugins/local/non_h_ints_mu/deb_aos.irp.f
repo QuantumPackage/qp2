@@ -20,7 +20,7 @@ program deb_Aos
   endif
 
   call print_aos()
-  
+
 end
 
 ! ---
@@ -42,7 +42,7 @@ subroutine print_aos()
     r(:) = final_grid_points(:,ipoint)
     write(1000, '(3(f15.7, 3X))') r
   enddo
-  
+
   do ipoint = 1, n_points_final_grid
     do i = 1, ao_num
       ao_val    = aos_in_r_array     (i,ipoint)
@@ -51,7 +51,7 @@ subroutine print_aos()
       write(111, '(5(f15.7, 3X))') ao_val, ao_der, ao_lap
     enddo
   enddo
- 
+
   do ipoint = 1, n_points_final_grid
     do i = 1, ao_num
       ao_val    = aos_in_r_array_qmckl     (i,ipoint)
@@ -60,7 +60,7 @@ subroutine print_aos()
       write(222, '(5(f15.7, 3X))') ao_val, ao_der, ao_lap
     enddo
   enddo
- 
+
   accu_vgl = 0.d0
   accu_vgl_nrm = 0.d0
   do ipoint = 1, n_points_final_grid
@@ -92,4 +92,5 @@ subroutine print_aos()
 end
 
 ! ---
+
 

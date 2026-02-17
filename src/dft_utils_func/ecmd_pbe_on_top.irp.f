@@ -7,7 +7,7 @@ subroutine ec_md_on_top_PBE_mu_corrected(mu,r,two_dm,eps_c_md_on_top_PBE)
 !
 ! you get out with the energy density defined in J. Chem. Phys.150, 084103 (2019); doi: 10.1063/1.508263
 !
-! by Eq. (26), which includes the correction of the on-top pair density of Eq. (29). 
+! by Eq. (26), which includes the correction of the on-top pair density of Eq. (29).
   END_DOC
   double precision, intent(in)  :: mu , r(3), two_dm
   double precision, intent(out) :: eps_c_md_on_top_PBE(N_states)
@@ -41,10 +41,10 @@ subroutine ec_md_on_top_PBE_mu_corrected(mu,r,two_dm,eps_c_md_on_top_PBE)
    ! usual PBE correlation energy using the density, spin polarization and density gradients for alpha/beta electrons
    call ec_pbe_only(0.d0,rhoc,rhoo,sigmacc,sigmaco,sigmaoo,e_PBE(istate))
 
-   ! correction of the on-top pair density according to Eq. (29) 
+   ! correction of the on-top pair density according to Eq. (29)
    on_top_corrected = mu_correction_of_on_top(mu,two_dm)
 
-   ! quantity of Eq. (27) with a factor two according to the difference of normalization 
+   ! quantity of Eq. (27) with a factor two according to the difference of normalization
    ! between the on-top of the JCP paper and that of QP2
    beta(istate) = (3.d0*e_PBE(istate))/( (-2.d0+sqrt(2d0))*sqrt(2.d0*pi)*2.d0* on_top_corrected)
 
@@ -53,15 +53,15 @@ subroutine ec_md_on_top_PBE_mu_corrected(mu,r,two_dm,eps_c_md_on_top_PBE)
   enddo
  end
 
- 
+
  double precision function mu_correction_of_on_top(mu,on_top)
  implicit none
  BEGIN_DOC
-! mu-based correction to the on-top pair density provided by the assymptotic expansion of 
+! mu-based correction to the on-top pair density provided by the assymptotic expansion of
 !
 ! P. Gori-Giorgi and A. Savin, Phys. Rev. A73, 032506 (2006)
 !
-! This is used in J. Chem. Phys.150, 084103 (2019); Eq. (29). 
+! This is used in J. Chem. Phys.150, 084103 (2019); Eq. (29).
  END_DOC
  double precision, intent(in) :: mu,on_top
  double precision :: pi
@@ -69,4 +69,5 @@ subroutine ec_md_on_top_PBE_mu_corrected(mu,r,two_dm,eps_c_md_on_top_PBE)
  mu_correction_of_on_top = on_top  / ( 1.d0 + 2.d0/(dsqrt(pi)*mu) )
  mu_correction_of_on_top = max(mu_correction_of_on_top ,1.d-15)
  end
+
 

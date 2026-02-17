@@ -1,12 +1,12 @@
 
 ! ---
 
-BEGIN_PROVIDER [ integer, Nucl_ao_extras_transposed, (N_ao_extras_max,nucl_num)]
+BEGIN_PROVIDER [ integer, Nucl_ao_extras_transposed, (N_ao_extras_max, nucl_num)]
 
   BEGIN_DOC
   ! List of ao_extras attached on each atom
   END_DOC
- 
+
   implicit none
   integer              :: i
   integer, allocatable :: nucl_tmp(:)
@@ -23,7 +23,10 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [double precision, ao_extra_expo_ordered_transp_per_nucl, (ao_extra_prim_num_max,N_ao_extras_max,nucl_num) ]
+BEGIN_PROVIDER [double precision, ao_extra_expo_ordered_transp_per_nucl, (ao_extra_prim_num_max, N_ao_extras_max, nucl_num) ]
+  BEGIN_DOC
+  ! ao_extra_expo_ordered_transp_per_nucl
+  END_DOC
  implicit none
  integer :: i,j,k,l
  do i = 1, nucl_num
@@ -38,7 +41,10 @@ BEGIN_PROVIDER [double precision, ao_extra_expo_ordered_transp_per_nucl, (ao_ext
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ integer, ao_extra_power_ordered_transp_per_nucl, (3,N_ao_extras_max,nucl_num) ]
+BEGIN_PROVIDER [ integer, ao_extra_power_ordered_transp_per_nucl, (3, N_ao_extras_max, nucl_num) ]
+  BEGIN_DOC
+  ! ao_extra_power_ordered_transp_per_nucl
+  END_DOC
  implicit none
  integer :: i,j,k,l
  do i = 1, nucl_num
@@ -52,7 +58,10 @@ BEGIN_PROVIDER [ integer, ao_extra_power_ordered_transp_per_nucl, (3,N_ao_extras
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, ao_extra_coef_normalized_ordered_transp_per_nucl, (ao_extra_prim_num_max,N_ao_extras_max,nucl_num) ]
+BEGIN_PROVIDER [ double precision, ao_extra_coef_normalized_ordered_transp_per_nucl, (ao_extra_prim_num_max, N_ao_extras_max, nucl_num) ]
+  BEGIN_DOC
+  ! ao_extra_coef_normalized_ordered_transp_per_nucl
+  END_DOC
  implicit none
  integer :: i,j,k,l
  do i = 1, nucl_num
@@ -65,4 +74,5 @@ BEGIN_PROVIDER [ double precision, ao_extra_coef_normalized_ordered_transp_per_n
  enddo
 
 END_PROVIDER
+
 

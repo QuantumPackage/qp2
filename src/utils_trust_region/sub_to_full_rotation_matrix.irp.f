@@ -35,16 +35,16 @@ subroutine sub_to_full_rotation_matrix(m,tmp_list,tmp_R,R)
   !BEGIN_DOC
   ! Compute the full rotation matrix from a smaller one
   !END_DOC
-  
+
   implicit none
 
   ! in
   integer, intent(in)           :: m, tmp_list(m)
   double precision, intent(in)  :: tmp_R(m,m)
-  
+
   ! out
   double precision, intent(out) :: R(mo_num,mo_num)
- 
+
   ! internal
   integer                       :: i,j,tmp_i,tmp_j
 
@@ -60,5 +60,6 @@ subroutine sub_to_full_rotation_matrix(m,tmp_list,tmp_R,R)
       R(i,j) = tmp_R(tmp_i,tmp_j)
     enddo
   enddo
- 
+
 end
+

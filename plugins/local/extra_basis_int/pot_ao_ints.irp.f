@@ -1,11 +1,11 @@
-BEGIN_PROVIDER [ double precision, pot_vne_A_extra_basis, (ao_extra_num,ao_extra_num)]
+BEGIN_PROVIDER [ double precision, pot_vne_A_extra_basis, (ao_extra_num, ao_extra_num)]
  implicit none
   BEGIN_DOC
   !
   ! Computes the following integral :
-  ! $\sum_{R in the USUAL nuclei} -Z <chi_i|1/|r-R||chi_j>$ 
+  ! $\sum_{R in the USUAL nuclei} -Z <chi_i|1/|r-R||chi_j>$
   !
-  ! where $\chi_i(r)$ AND $\chi_j(r)$ belongs to the EXTRA basis 
+  ! where $\chi_i(r)$ AND $\chi_j(r)$ belongs to the EXTRA basis
   END_DOC
   integer :: mu,nu
   double precision :: v_nucl_extra_ao
@@ -16,18 +16,18 @@ BEGIN_PROVIDER [ double precision, pot_vne_A_extra_basis, (ao_extra_num,ao_extra
    enddo
   enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, pot_vne_extra_basis, (ao_num,ao_num)]
+BEGIN_PROVIDER [ double precision, pot_vne_extra_basis, (ao_num, ao_num)]
  implicit none
   BEGIN_DOC
   !
   ! Computes the following integral :
-  ! $\sum_{R in EXTRA nuclei} -Z <chi_i|1/|r-R||chi_j>$ 
+  ! $\sum_{R in EXTRA nuclei} -Z <chi_i|1/|r-R||chi_j>$
   !
   !
-  ! where $\chi_i(r)$ AND $\chi_j(r)$ belongs to the USUAL basis 
+  ! where $\chi_i(r)$ AND $\chi_j(r)$ belongs to the USUAL basis
   END_DOC
   integer :: mu,nu,k_nucl
   double precision :: mu_in, R_nucl(3),charge_nucl, integral
@@ -45,7 +45,7 @@ BEGIN_PROVIDER [ double precision, pot_vne_extra_basis, (ao_num,ao_num)]
    enddo
   enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 
 
@@ -57,7 +57,7 @@ double precision function NAI_pol_mult_erf_ao_extra(i_ao, j_ao, mu_in, C_center)
   ! $\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) \frac{\erf(\mu |r - R_C|)}{|r - R_C|}$.
   !
   !
-  ! where $\chi_i(r)$ AND $\chi_j(r)$ belongs to the extra basis 
+  ! where $\chi_i(r)$ AND $\chi_j(r)$ belongs to the extra basis
   END_DOC
 
   implicit none
@@ -102,7 +102,7 @@ double precision function NAI_pol_mult_erf_ao_extra_mixed(i_ao, j_ao, mu_in, C_c
   ! $\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) \frac{\erf(\mu |r - R_C|)}{|r - R_C|}$.
   !
   !
-  ! where $\chi_i(r)$ belongs to the extra basis and $\chi_j(r)$ to the regular basis 
+  ! where $\chi_i(r)$ belongs to the extra basis and $\chi_j(r)$ to the regular basis
   END_DOC
 
   implicit none
@@ -114,11 +114,11 @@ double precision function NAI_pol_mult_erf_ao_extra_mixed(i_ao, j_ao, mu_in, C_c
 
   double precision               :: NAI_pol_mult_erf
 
-  ! A = chi_i == extra basis 
+  ! A = chi_i == extra basis
   num_A         = ao_extra_nucl(i_ao)
   power_A(1:3)  = ao_extra_power(i_ao,1:3)
   A_center(1:3) = extra_nucl_coord(num_A,1:3)
-  ! B = chi_j == regular basis 
+  ! B = chi_j == regular basis
   num_B         = ao_nucl(j_ao)
   power_B(1:3)  = ao_power(j_ao,1:3)
   B_center(1:3) = nucl_coord(num_B,1:3)
@@ -137,7 +137,8 @@ double precision function NAI_pol_mult_erf_ao_extra_mixed(i_ao, j_ao, mu_in, C_c
     enddo
   enddo
 
-end 
+end
 
 ! ---
+
 

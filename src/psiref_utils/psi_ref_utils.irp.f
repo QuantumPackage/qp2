@@ -1,8 +1,8 @@
 use bitmasks
 
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_ref_sorted_bit, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_ref_coef_sorted_bit, (psi_det_size,N_states) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_ref_sorted_bit, (N_int, 2, psi_det_size) ]
+&BEGIN_PROVIDER [ double precision, psi_ref_coef_sorted_bit, (psi_det_size, N_states) ]
  implicit none
  BEGIN_DOC
  ! Reference determinants sorted to accelerate the search of a random determinant in the wave
@@ -14,7 +14,7 @@ use bitmasks
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, psi_ref_coef_transp, (n_states,psi_det_size) ]
+BEGIN_PROVIDER [ double precision, psi_ref_coef_transp, (n_states, psi_det_size) ]
  implicit none
  BEGIN_DOC
 ! Transposed psi_ref_coef
@@ -27,7 +27,7 @@ BEGIN_PROVIDER [ double precision, psi_ref_coef_transp, (n_states,psi_det_size) 
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, psi_ref_coef_normalized,  (psi_det_size,n_states) ]
+BEGIN_PROVIDER [ double precision, psi_ref_coef_normalized,  (psi_det_size, n_states) ]
  implicit none
  BEGIN_DOC
 ! Normalized coefficients of the reference
@@ -43,7 +43,7 @@ BEGIN_PROVIDER [ double precision, psi_ref_coef_normalized,  (psi_det_size,n_sta
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, psi_non_ref_coef_transp, (n_states,psi_det_size) ]
+BEGIN_PROVIDER [ double precision, psi_non_ref_coef_transp, (n_states, psi_det_size) ]
  implicit none
  BEGIN_DOC
 ! Transposed psi_non_ref_coef
@@ -56,8 +56,8 @@ BEGIN_PROVIDER [ double precision, psi_non_ref_coef_transp, (n_states,psi_det_si
  enddo
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_non_ref,  (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_non_ref_coef, (psi_det_size,n_states) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_non_ref,  (N_int, 2, psi_det_size) ]
+&BEGIN_PROVIDER [ double precision, psi_non_ref_coef, (psi_det_size, n_states) ]
 &BEGIN_PROVIDER [ integer, idx_non_ref,  (psi_det_size) ]
 &BEGIN_PROVIDER [ integer, idx_non_ref_rev,  (psi_det_size) ]
 &BEGIN_PROVIDER [ integer, N_det_non_ref ]
@@ -102,8 +102,8 @@ END_PROVIDER
  endif
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_non_ref_restart,  (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_non_ref_coef_restart, (psi_det_size,n_states) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_non_ref_restart,  (N_int, 2, psi_det_size) ]
+&BEGIN_PROVIDER [ double precision, psi_non_ref_coef_restart, (psi_det_size, n_states) ]
  implicit none
  BEGIN_DOC
   ! Set of determinants which are not part of the reference, defined from the application
@@ -144,8 +144,8 @@ END_PROVIDER
 
 
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_non_ref_sorted_bit, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_non_ref_coef_sorted_bit, (psi_det_size,N_states) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_non_ref_sorted_bit, (N_int, 2, psi_det_size) ]
+&BEGIN_PROVIDER [ double precision, psi_non_ref_coef_sorted_bit, (psi_det_size, N_states) ]
  implicit none
  BEGIN_DOC
  ! Reference determinants sorted to accelerate the search of a random determinant in the wave
@@ -157,7 +157,10 @@ END_PROVIDER
 END_PROVIDER
 
 
-BEGIN_PROVIDER [double precision, H_matrix_ref, (N_det_ref,N_det_ref)]
+BEGIN_PROVIDER [double precision, H_matrix_ref, (N_det_ref, N_det_ref)]
+  BEGIN_DOC
+  ! H_matrix_ref
+  END_DOC
  implicit none
  integer :: i,j
  double precision :: hij
@@ -169,8 +172,11 @@ BEGIN_PROVIDER [double precision, H_matrix_ref, (N_det_ref,N_det_ref)]
   enddo
 END_PROVIDER
 
- BEGIN_PROVIDER [double precision, psi_ref_coef_diagonalized, (N_det_ref,N_states)]
+ BEGIN_PROVIDER [double precision, psi_ref_coef_diagonalized, (N_det_ref, N_states)]
 &BEGIN_PROVIDER [double precision, psi_ref_energy_diagonalized, (N_states)]
+  BEGIN_DOC
+  ! psi_ref_coef_diagonalized
+  END_DOC
  implicit none
  integer :: i,j
   double precision, allocatable  :: eigenvectors(:,:), eigenvalues(:)
@@ -191,6 +197,9 @@ END_PROVIDER
  END_PROVIDER
 
  BEGIN_PROVIDER [double precision, psi_ref_energy, (N_states)]
+  BEGIN_DOC
+  ! psi_ref_energy
+  END_DOC
  implicit none
  integer :: i,j,k
  double precision :: hij,norm,u_dot_v
@@ -310,7 +319,7 @@ integer function get_index_in_psi_ref_sorted_bit(key,Nint)
 
 end
 
-BEGIN_PROVIDER [double precision, ref_hamiltonian_matrix, (n_det_ref,n_det_ref)]
+BEGIN_PROVIDER [double precision, ref_hamiltonian_matrix, (n_det_ref, n_det_ref)]
  BEGIN_DOC
  ! H matrix in the Reference space
  END_DOC
@@ -327,6 +336,9 @@ END_PROVIDER
 
 
 BEGIN_PROVIDER [ integer, idx_non_ref_from_sorted, (N_det) ]
+  BEGIN_DOC
+  ! idx_non_ref_from_sorted
+  END_DOC
   implicit none
   integer :: i,inpsisor
 
@@ -338,4 +350,5 @@ BEGIN_PROVIDER [ integer, idx_non_ref_from_sorted, (N_det) ]
     idx_non_ref_from_sorted(inpsisor) = idx_non_ref_rev(i)
   end do
 END_PROVIDER
+
 

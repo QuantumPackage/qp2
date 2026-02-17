@@ -4,7 +4,7 @@
 ! First index is the index of the cartesian AO, obtained by ao_power_index
 ! Second index is the index of the spherical AO
 
- BEGIN_PROVIDER [ double precision, cart_to_sphe_0, (1,1) ]
+ BEGIN_PROVIDER [ double precision, cart_to_sphe_0, (1, 1) ]
 &BEGIN_PROVIDER [ double precision, cart_to_sphe_norm_0, (1) ]
   implicit none
   BEGIN_DOC
@@ -17,7 +17,7 @@
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ double precision, cart_to_sphe_1, (3,3) ]
+ BEGIN_PROVIDER [ double precision, cart_to_sphe_1, (3, 3) ]
 &BEGIN_PROVIDER [ double precision, cart_to_sphe_norm_1, (3) ]
   implicit none
   BEGIN_DOC
@@ -34,7 +34,7 @@ END_PROVIDER
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ double precision, cart_to_sphe_2, (6,5) ]
+ BEGIN_PROVIDER [ double precision, cart_to_sphe_2, (6, 5) ]
 &BEGIN_PROVIDER [ double precision, cart_to_sphe_norm_2, (6) ]
   implicit none
   BEGIN_DOC
@@ -56,7 +56,7 @@ END_PROVIDER
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ double precision, cart_to_sphe_3, (10,7) ]
+ BEGIN_PROVIDER [ double precision, cart_to_sphe_3, (10, 7) ]
 &BEGIN_PROVIDER [ double precision, cart_to_sphe_norm_3, (10) ]
   implicit none
   BEGIN_DOC
@@ -87,7 +87,7 @@ END_PROVIDER
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ double precision, cart_to_sphe_4, (15,9) ]
+ BEGIN_PROVIDER [ double precision, cart_to_sphe_4, (15, 9) ]
 &BEGIN_PROVIDER [ double precision, cart_to_sphe_norm_4, (15) ]
   implicit none
   BEGIN_DOC
@@ -133,7 +133,7 @@ END_PROVIDER
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ double precision, cart_to_sphe_5, (21,11) ]
+ BEGIN_PROVIDER [ double precision, cart_to_sphe_5, (21, 11) ]
 &BEGIN_PROVIDER [ double precision, cart_to_sphe_norm_5, (21) ]
   implicit none
   BEGIN_DOC
@@ -197,7 +197,7 @@ END_PROVIDER
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ double precision, cart_to_sphe_6, (28,13) ]
+ BEGIN_PROVIDER [ double precision, cart_to_sphe_6, (28, 13) ]
 &BEGIN_PROVIDER [ double precision, cart_to_sphe_norm_6, (28) ]
   implicit none
   BEGIN_DOC
@@ -289,7 +289,7 @@ END_PROVIDER
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ double precision, cart_to_sphe_7, (36,15) ]
+ BEGIN_PROVIDER [ double precision, cart_to_sphe_7, (36, 15) ]
 &BEGIN_PROVIDER [ double precision, cart_to_sphe_norm_7, (36) ]
   implicit none
   BEGIN_DOC
@@ -416,7 +416,7 @@ END_PROVIDER
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ double precision, cart_to_sphe_8, (45,17) ]
+ BEGIN_PROVIDER [ double precision, cart_to_sphe_8, (45, 17) ]
 &BEGIN_PROVIDER [ double precision, cart_to_sphe_norm_8, (45) ]
   implicit none
   BEGIN_DOC
@@ -585,7 +585,7 @@ END_PROVIDER
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ double precision, cart_to_sphe_9, (55,19) ]
+ BEGIN_PROVIDER [ double precision, cart_to_sphe_9, (55, 19) ]
 &BEGIN_PROVIDER [ double precision, cart_to_sphe_norm_9, (55) ]
   implicit none
   BEGIN_DOC
@@ -805,7 +805,7 @@ END_PROVIDER
 
 
 
- BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_coef, (ao_num,ao_num)]
+ BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_coef, (ao_num, ao_num)]
 &BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_normalization, (ao_num)]
   implicit none
   BEGIN_DOC
@@ -875,4 +875,5 @@ END_PROVIDER
     call qp_bug(irp_here, ao_sphe_count, "ao_sphe_count /= ao_sphe_num")
   endif
 END_PROVIDER
+
 

@@ -1,5 +1,5 @@
- BEGIN_PROVIDER [double precision, int_erf_3_index, (mo_num,mo_num, mo_num)]
-&BEGIN_PROVIDER [double precision, int_erf_3_index_exc,(mo_num,mo_num, mo_num)]
+ BEGIN_PROVIDER [double precision, int_erf_3_index, (mo_num, mo_num, mo_num)]
+&BEGIN_PROVIDER [double precision, int_erf_3_index_exc, (mo_num, mo_num, mo_num)]
  implicit none
  BEGIN_DOC
  ! int_erf_3_index(i,j)     = <ij|ij> = (ii|jj) with the erf interaction
@@ -25,4 +25,5 @@
 
 
 END_PROVIDER
+
 

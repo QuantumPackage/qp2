@@ -8,23 +8,23 @@ subroutine diis_cc(all_err,all_t,sze,m,iter,t)
   ! DIIS. Take the error vectors and the amplitudes of the previous
   ! iterations to compute the new amplitudes
   END_DOC
-  
+
   ! {err_i}_{i=1}^{m_it} -> B -> c
   ! {t_i}_{i=1}^{m_it}, c, {err_i}_{i=1}^{m_it} -> t_{m_it+1}
 
   integer, intent(in)             :: m,iter,sze
   double precision, intent(in)    :: all_err(sze,m)
   double precision, intent(in)    :: all_t(sze,m)
-  
+
   double precision, intent(out)   :: t(sze)
-  
+
   double precision, allocatable   :: B(:,:), c(:), zero(:)
   integer                         :: m_iter
   integer                         :: i,j,k
   integer                         :: info
   integer, allocatable            :: ipiv(:)
   double precision                :: accu
-  
+
   m_iter = min(m,iter)
   !print*,'m_iter',m_iter
   allocate(B(m_iter+1,m_iter+1), c(m_iter), zero(m_iter+1))
@@ -51,7 +51,7 @@ subroutine diis_cc(all_err,all_t,sze,m,iter,t)
     enddo
   enddo
   !$OMP END PARALLEL
-  
+
   do i = 1, m_iter
     B(i,m_iter+1) = -1.d0
   enddo
@@ -78,11 +78,11 @@ subroutine diis_cc(all_err,all_t,sze,m,iter,t)
   c = zero(1:m_iter)
   ! Debug
   !print*,'c',c
-  !print*,'all_t' 
+  !print*,'all_t'
   !do i = 1, m
   !  write(*,'(100(F10.6))') all_t(:,i)
   !enddo
-  !print*,'all_err' 
+  !print*,'all_err'
   !do i = 1, m
   !  write(*,'(100(F10.6))') all_err(:,i)
   !enddo
@@ -144,7 +144,7 @@ subroutine update_all_err(err,all_err,sze,m,iter)
     enddo
     !$OMP END DO
   enddo
-  
+
   ! Debug
   !print*,'shift err'
   !do i = 1, m
@@ -228,11 +228,11 @@ subroutine compute_err1(nO,nV,f_o,f_v,r1,err1)
 
   integer, intent(in)           :: nO, nV
   double precision, intent(in)  :: f_o(nO), f_v(nV), r1(nO,nV)
-  
+
   double precision, intent(out) :: err1(nO,nV)
 
   integer                       :: i,a
-  
+
   print *, 'coucou'
   !$OMP PARALLEL &
   !$OMP SHARED(err1,r1,f_o,f_v,nO,nV,cc_level_shift) &
@@ -261,7 +261,7 @@ subroutine compute_err2(nO,nV,f_o,f_v,r2,err2)
 
   integer, intent(in)           :: nO, nV
   double precision, intent(in)  :: f_o(nO), f_v(nV), r2(nO,nO,nV,nV)
-  
+
   double precision, intent(out) :: err2(nO,nO,nV,nV)
 
   integer                       :: i,j,a,b
@@ -275,7 +275,7 @@ print *, 'coucou2'
   do b = 1, nV
     do a = 1, nV
       do j = 1, nO
-        do i = 1, nO       
+        do i = 1, nO
           err2(i,j,a,b) = - r2(i,j,a,b) / (f_o(i) + f_o(j) - f_v(a) - f_v(b) - cc_level_shift)
         enddo
       enddo
@@ -295,7 +295,7 @@ subroutine update_t_ccsd(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err1,all_err2,all
   integer, intent(in)             :: nO,nV,nb_iter
   double precision, intent(in)    :: f_o(nO), f_v(nV)
   double precision, intent(in)    :: r1(nO,nV), r2(nO,nO,nV,nV)
-  
+
   double precision, intent(inout) :: t1(nO,nV), t2(nO,nO,nV,nV)
   double precision, intent(inout) :: all_err1(nO*nV, cc_diis_depth), all_err2(nO*nO*nV*nV, cc_diis_depth)
   double precision, intent(inout) :: all_t1(nO*nV, cc_diis_depth), all_t2(nO*nO*nV*nV, cc_diis_depth)
@@ -303,7 +303,7 @@ subroutine update_t_ccsd(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err1,all_err2,all
   double precision, allocatable   :: err1(:,:), err2(:,:,:,:)
   double precision, allocatable   :: tmp_err1(:), tmp_err2(:)
   double precision, allocatable   :: tmp_t1(:), tmp_t2(:)
-  
+
   if (cc_update_method == 'diis') then
 
     allocate(err1(nO,nV), err2(nO,nO,nV,nV))
@@ -342,14 +342,14 @@ subroutine update_t_ccsd(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err1,all_err2,all
 
   ! Standard update as T = T - Delta
   elseif (cc_update_method == 'none') then
-     
+
     call update_t1(nO,nV,f_o,f_v,r1,t1)
     call update_t2(nO,nV,f_o,f_v,r2,t2)
-    
+
   else
     print*,'Unkonw cc_method_method: '//cc_update_method
   endif
-  
+
 end
 
 ! Update t v2
@@ -361,7 +361,7 @@ subroutine update_t_ccsd_diis(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err1,all_err
   integer, intent(in)             :: nO,nV,nb_iter
   double precision, intent(in)    :: f_o(nO), f_v(nV)
   double precision, intent(in)    :: r1(nO,nV), r2(nO,nO,nV,nV)
-  
+
   double precision, intent(inout) :: t1(nO,nV), t2(nO,nO,nV,nV)
   double precision, intent(inout) :: all_err1(nO*nV, cc_diis_depth), all_err2(nO*nO*nV*nV, cc_diis_depth)
   double precision, intent(inout) :: all_t1(nO*nV, cc_diis_depth), all_t2(nO*nO*nV*nV, cc_diis_depth)
@@ -372,7 +372,7 @@ subroutine update_t_ccsd_diis(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err1,all_err
   double precision, allocatable   :: tmp_t1(:), tmp_t2(:)
 
   integer                         :: i,j
-  
+
   ! Allocate
   allocate(all_err(nO*nV+nO*nO*nV*nV,cc_diis_depth), all_t(nO*nV+nO*nO*nV*nV,cc_diis_depth))
   allocate(tmp_t(nO*nV+nO*nO*nV*nV))
@@ -387,7 +387,7 @@ subroutine update_t_ccsd_diis(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err1,all_err
   tmp_err2 = reshape(err2,(/nO*nO*nV*nV/))
   tmp_t1   = reshape(t1  ,(/nO*nV/))
   tmp_t2   = reshape(t2  ,(/nO*nO*nV*nV/))
-  
+
   ! Update the errors and parameters for the diis
   call update_all_err(tmp_err1,all_err1,nO*nV,cc_diis_depth,nb_iter+1)
   call update_all_t  (tmp_t1  ,all_t1  ,nO*nV,cc_diis_depth,nb_iter+1)
@@ -401,7 +401,7 @@ subroutine update_t_ccsd_diis(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err1,all_err
   !$OMP PRIVATE(i,j) &
   !$OMP DEFAULT(NONE)
   do j = 1, cc_diis_depth
-    !$OMP DO 
+    !$OMP DO
     do i = 1, nO*nV
       all_err(i,j) = all_err1(i,j)
     enddo
@@ -415,21 +415,21 @@ subroutine update_t_ccsd_diis(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err1,all_err
     !$OMP END DO NOWAIT
   enddo
   do j = 1, cc_diis_depth
-    !$OMP DO 
+    !$OMP DO
     do i = 1, nO*nV
       all_t(i,j) = all_t1(i,j)
     enddo
     !$OMP END DO NOWAIT
   enddo
   do j = 1, cc_diis_depth
-    !$OMP DO 
+    !$OMP DO
     do i = 1, nO*nO*nV*nV
       all_t(i+nO*nV,j) = all_t2(i,j)
     enddo
     !$OMP END DO
   enddo
   !$OMP END PARALLEL
-  
+
   ! Diis
   call diis_cc(all_err,all_t,nO*nV+nO*nO*nV*nV,cc_diis_depth,nb_iter+1,tmp_t)
 
@@ -445,7 +445,7 @@ subroutine update_t_ccsd_diis(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err1,all_err
   !$OMP END DO NOWAIT
   !$OMP DO
   do i = 1, nO*nO*nV*nV
-    tmp_t2(i) = tmp_t(i+nO*nV) 
+    tmp_t2(i) = tmp_t(i+nO*nV)
   enddo
   !$OMP END DO
   !$OMP END PARALLEL
@@ -468,7 +468,7 @@ subroutine update_t_ccsd_diis_v3(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err,all_t
   integer, intent(in)             :: nO,nV,nb_iter
   double precision, intent(in)    :: f_o(nO), f_v(nV)
   double precision, intent(in)    :: r1(nO,nV), r2(nO,nO,nV,nV)
-  
+
   double precision, intent(inout) :: t1(nO*nV), t2(nO*nO*nV*nV)
   double precision, intent(inout) :: all_err(nO*nV+nO*nO*nV*nV, cc_diis_depth)
   double precision, intent(inout) :: all_t(nO*nV+nO*nO*nV*nV, cc_diis_depth)
@@ -476,14 +476,14 @@ subroutine update_t_ccsd_diis_v3(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err,all_t
   double precision, allocatable   :: tmp(:)
 
   integer                         :: i,j
-  
+
   ! Allocate
   allocate(tmp(nO*nV+nO*nO*nV*nV))
 
   ! Compute the errors
   call compute_err1(nO,nV,f_o,f_v,r1,tmp(1:nO*nV))
   call compute_err2(nO,nV,f_o,f_v,r2,tmp(nO*nV+1:nO*nV+nO*nO*nV*nV))
-  
+
   ! Update the errors and parameters for the diis
   call update_all_err(tmp,all_err,nO*nV+nO*nO*nV*nV,cc_diis_depth,nb_iter+1)
 
@@ -502,7 +502,7 @@ subroutine update_t_ccsd_diis_v3(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err,all_t
   enddo
   !$OMP END DO
   !$OMP END PARALLEL
-   
+
   call update_all_t(tmp,all_t,nO*nV+nO*nO*nV*nV,cc_diis_depth,nb_iter+1)
 
   ! Diis
@@ -520,7 +520,7 @@ subroutine update_t_ccsd_diis_v3(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err,all_t
   !$OMP END DO
   !$OMP DO
   do i = 1, nO*nO*nV*nV
-    t2(i) = tmp(i+nO*nV) 
+    t2(i) = tmp(i+nO*nV)
   enddo
   !$OMP END DO
   !$OMP END PARALLEL
@@ -529,3 +529,4 @@ subroutine update_t_ccsd_diis_v3(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err,all_t
   deallocate(tmp)
 
 end
+

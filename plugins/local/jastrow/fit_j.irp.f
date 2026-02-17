@@ -5,39 +5,45 @@
 &BEGIN_PROVIDER [double precision, coef_j_xmu_1gauss]
 
   implicit none
- 
+
   BEGIN_DOC
-  ! Upper bound long range fit of F(x) = x * (1 - erf(x)) - 1/sqrt(pi) * exp(-x**2) 
+  ! Upper bound long range fit of F(x) = x * (1 - erf(x)) - 1/sqrt(pi) * exp(-x**2)
   !
-  ! with a single gaussian. 
+  ! with a single gaussian.
   !
-  ! Such a function can be used to screen integrals with F(x). 
+  ! Such a function can be used to screen integrals with F(x).
   END_DOC
- 
+
   expo_j_xmu_1gauss  = 0.5d0
   coef_j_xmu_1gauss  = 1.d0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
 BEGIN_PROVIDER [double precision, expo_erfc_gauss]
+  BEGIN_DOC
+  ! expo_erfc_gauss
+  END_DOC
 
-  implicit none 
+  implicit none
 
   expo_erfc_gauss = 1.41211d0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
 BEGIN_PROVIDER [double precision, expo_erfc_mu_gauss]
+  BEGIN_DOC
+  ! expo_erfc_mu_gauss
+  END_DOC
 
-  implicit none 
+  implicit none
 
   expo_erfc_mu_gauss = expo_erfc_gauss * mu_erf * mu_erf
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -53,11 +59,11 @@ END_PROVIDER
   END_DOC
 
   implicit none
- 
+
   expo_good_j_mu_1gauss = 2.d0 * mu_erf * expo_j_xmu_1gauss
   coef_good_j_mu_1gauss = 0.5d0/mu_erf * coef_j_xmu_1gauss
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -76,13 +82,13 @@ BEGIN_PROVIDER [double precision, expo_j_xmu, (n_fit_1_erf_x)]
   !expo_j_xmu(1) = 1.7477d0
   !expo_j_xmu(2) = 0.668662d0
 
-  !expo_j_xmu(1) = 1.74766377595541d0 
+  !expo_j_xmu(1) = 1.74766377595541d0
   !expo_j_xmu(2) = 0.668719925486403d0
 
-  expo_j_xmu(1) = 1.74770446934522d0 
+  expo_j_xmu(1) = 1.74770446934522d0
   expo_j_xmu(2) = 0.668659706559979d0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -91,13 +97,13 @@ END_PROVIDER
 
   BEGIN_DOC
   !
-  ! J(mu,r12) = 1/2 r12 * (1 - erf(mu*r12)) - 1/(2 sqrt(pi)*mu) exp(-(mu*r12)^2) is expressed as 
+  ! J(mu,r12) = 1/2 r12 * (1 - erf(mu*r12)) - 1/(2 sqrt(pi)*mu) exp(-(mu*r12)^2) is expressed as
   !
-  ! J(mu,r12) = 0.5/mu * F(r12*mu) where F(x) =  x * (1 - erf(x)) - 1/sqrt(pi) * exp(-x**2) 
+  ! J(mu,r12) = 0.5/mu * F(r12*mu) where F(x) =  x * (1 - erf(x)) - 1/sqrt(pi) * exp(-x**2)
   !
-  ! F(x) is fitted by - 1/sqrt(pi) * exp(-alpha * x) exp(-beta * x^2) (see expo_j_xmu) 
-  ! 
-  ! The slater function exp(-alpha * x) is fitted with n_max_fit_slat gaussians 
+  ! F(x) is fitted by - 1/sqrt(pi) * exp(-alpha * x) exp(-beta * x^2) (see expo_j_xmu)
+  !
+  ! The slater function exp(-alpha * x) is fitted with n_max_fit_slat gaussians
   !
   ! See Appendix 2 of JCP 154, 084119 (2021)
   !
@@ -199,22 +205,22 @@ END_PROVIDER
     tmp = -1.0d0 / sqrt(dacos(-1.d0))
     do i = 1, ng_fit_jast
       expo_gauss_j_mu_x(i) = expos(i) + beta
-      coef_gauss_j_mu_x(i) = tmp * coef_fit_slat_gauss(i) 
+      coef_gauss_j_mu_x(i) = tmp * coef_fit_slat_gauss(i)
     enddo
 
   else
 
     print *, ' not implemented yet'
     stop
-  
+
   endif
 
   tmp = 0.5d0 / mu_erf
   do i = 1, ng_fit_jast
-    coef_gauss_j_mu_x(i) = tmp * coef_gauss_j_mu_x(i) 
+    coef_gauss_j_mu_x(i) = tmp * coef_gauss_j_mu_x(i)
   enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -225,9 +231,9 @@ END_PROVIDER
   !
   ! J(mu,r12)^2 = 0.25/mu^2 F(r12*mu)^2
   !
-  ! F(x)^2 = 1/pi * exp(-2 * alpha * x) exp(-2 * beta * x^2) 
-  ! 
-  ! The slater function exp(-2 * alpha * x) is fitted with n_max_fit_slat gaussians 
+  ! F(x)^2 = 1/pi * exp(-2 * alpha * x) exp(-2 * beta * x^2)
+  !
+  ! The slater function exp(-2 * alpha * x) is fitted with n_max_fit_slat gaussians
   !
   ! See Appendix 2 of JCP 154, 084119 (2021)
   !
@@ -243,7 +249,7 @@ END_PROVIDER
 
     coef_gauss_j_mu_x_2 = (/ 0.26699573d0  /)
     expo_gauss_j_mu_x_2 = (/ 11.71029824d0 /)
-    
+
     tmp = mu_erf * mu_erf
     do i = 1, ng_fit_jast
       expo_gauss_j_mu_x_2(i) = tmp * expo_gauss_j_mu_x_2(i)
@@ -253,7 +259,7 @@ END_PROVIDER
 
     coef_gauss_j_mu_x_2 = (/ 0.11627934d0  , 0.18708824d0 /)
     expo_gauss_j_mu_x_2 = (/ 102.41386863d0, 6.36239771d0 /)
-    
+
     tmp = mu_erf * mu_erf
     do i = 1, ng_fit_jast
       expo_gauss_j_mu_x_2(i) = tmp * expo_gauss_j_mu_x_2(i)
@@ -263,7 +269,7 @@ END_PROVIDER
 
     coef_gauss_j_mu_x_2 = (/ 0.04947216d0  , 0.14116238d0, 0.12276501d0  /)
     expo_gauss_j_mu_x_2 = (/ 635.29701766d0, 4.87696954d0, 33.36745891d0 /)
-    
+
     tmp = mu_erf * mu_erf
     do i = 1, ng_fit_jast
       expo_gauss_j_mu_x_2(i) = tmp * expo_gauss_j_mu_x_2(i)
@@ -273,7 +279,7 @@ END_PROVIDER
 
     coef_gauss_j_mu_x_2 = (/ 0.01461527d0  , 0.03257147d0  , 0.08831354d0  , 0.11411794d0  , 0.06858783d0   /)
     expo_gauss_j_mu_x_2 = (/ 8.76554470d+03, 4.90224577d+02, 3.68267125d+00, 1.29663940d+01, 6.58240931d+01 /)
-    
+
     tmp = mu_erf * mu_erf
     do i = 1, ng_fit_jast
       expo_gauss_j_mu_x_2(i) = tmp * expo_gauss_j_mu_x_2(i)
@@ -283,7 +289,7 @@ END_PROVIDER
 
     coef_gauss_j_mu_x_2 = (/ 0.01347632d0  , 0.03929124d0  , 0.06289468d0  , 0.10702493d0  , 0.06999865d0  , 0.02558191d0   /)
     expo_gauss_j_mu_x_2 = (/ 1.00000000d+04, 1.20900717d+02, 3.20346191d+00, 8.92157196d+00, 3.28119120d+01, 6.49045808d+02 /)
-    
+
     tmp = mu_erf * mu_erf
     do i = 1, ng_fit_jast
       expo_gauss_j_mu_x_2(i) = tmp * expo_gauss_j_mu_x_2(i)
@@ -293,7 +299,7 @@ END_PROVIDER
 
     coef_gauss_j_mu_x_2 = (/ 0.05202849d0  , 0.01031081d0  , 0.04699157d0  , 0.01451002d0  , 0.07442576d0  , 0.02692033d0  , 0.09311842d0   /)
     expo_gauss_j_mu_x_2 = (/ 3.04469415d+00, 1.40682034d+04, 7.45960945d+01, 1.43067466d+03, 2.16815661d+01, 2.95750306d+02, 7.23471236d+00 /)
-    
+
     tmp = mu_erf * mu_erf
     do i = 1, ng_fit_jast
       expo_gauss_j_mu_x_2(i) = tmp * expo_gauss_j_mu_x_2(i)
@@ -303,7 +309,7 @@ END_PROVIDER
 
     coef_gauss_j_mu_x_2 = (/ 0.00942115d0  , 0.07332421d0  , 0.0508308d0   , 0.08204949d0  , 0.0404099d0   , 0.03201288d0  , 0.01911313d0  , 0.01114732d0   /)
     expo_gauss_j_mu_x_2 = (/ 1.56957321d+04, 1.52867810d+01, 4.36016903d+01, 5.96818956d+00, 2.85535269d+00, 1.36064008d+02, 4.71968910d+02, 1.92022350d+03 /)
-    
+
     tmp = mu_erf * mu_erf
     do i = 1, ng_fit_jast
       expo_gauss_j_mu_x_2(i) = tmp * expo_gauss_j_mu_x_2(i)
@@ -313,7 +319,7 @@ END_PROVIDER
 
   !  coef_gauss_j_mu_x_2 = (/  /)
   !  expo_gauss_j_mu_x_2 = (/  /)
-  !  
+  !
   !  tmp = mu_erf * mu_erf
   !  do i = 1, ng_fit_jast
   !    expo_gauss_j_mu_x_2(i) = tmp * expo_gauss_j_mu_x_2(i)
@@ -325,26 +331,26 @@ END_PROVIDER
 
     !alpha_opt = 2.d0 * expo_j_xmu(1)
     !beta_opt  = 2.d0 * expo_j_xmu(2)
-   
+
     ! direct opt
     alpha_opt = 3.52751759d0
     beta_opt  = 1.26214809d0
-  
+
     alpha = alpha_opt * mu_erf
     call expo_fit_slater_gam(alpha, expos)
     beta = beta_opt * mu_erf * mu_erf
-    
+
     tmp = 1.d0 / dacos(-1.d0)
     do i = 1, ng_fit_jast
       expo_gauss_j_mu_x_2(i) = expos(i) + beta
-      coef_gauss_j_mu_x_2(i) = tmp * coef_fit_slat_gauss(i) 
+      coef_gauss_j_mu_x_2(i) = tmp * coef_fit_slat_gauss(i)
     enddo
 
   else
 
     print *, ' not implemented yet'
     stop
-  
+
   endif
 
   tmp = 0.25d0 / (mu_erf * mu_erf)
@@ -352,7 +358,7 @@ END_PROVIDER
     coef_gauss_j_mu_x_2(i) = tmp * coef_gauss_j_mu_x_2(i)
   enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -361,7 +367,7 @@ END_PROVIDER
 
   BEGIN_DOC
   !
-  ! J(mu,r12) x \frac{1 - erf(mu * r12)}{2} = 
+  ! J(mu,r12) x \frac{1 - erf(mu * r12)}{2} =
   !
   ! - \frac{1}{4 \sqrt{\pi} \mu} \exp(-(alpha1 + alpha2) * mu * r12 - (beta1 + beta2) * mu^2 * r12^2)
   !
@@ -377,7 +383,7 @@ END_PROVIDER
 
     coef_gauss_j_mu_1_erf = (/ -0.47742461d0 /)
     expo_gauss_j_mu_1_erf = (/ 8.72255696d0  /)
-    
+
     tmp = mu_erf * mu_erf
     do i = 1, ng_fit_jast
       expo_gauss_j_mu_1_erf(i) = tmp * expo_gauss_j_mu_1_erf(i)
@@ -387,7 +393,7 @@ END_PROVIDER
 
     coef_gauss_j_mu_1_erf = (/ -0.19342649d0, -0.34563835d0 /)
     expo_gauss_j_mu_1_erf = (/ 78.66099999d0,  5.04324363d0 /)
-    
+
     tmp = mu_erf * mu_erf
     do i = 1, ng_fit_jast
       expo_gauss_j_mu_1_erf(i) = tmp * expo_gauss_j_mu_1_erf(i)
@@ -397,7 +403,7 @@ END_PROVIDER
 
     coef_gauss_j_mu_1_erf = (/ -0.0802541d0  , -0.27019258d0, -0.20546681d0 /)
     expo_gauss_j_mu_1_erf = (/ 504.53350764d0,  4.01408169d0, 26.5758329d0  /)
-    
+
     tmp = mu_erf * mu_erf
     do i = 1, ng_fit_jast
       expo_gauss_j_mu_1_erf(i) = tmp * expo_gauss_j_mu_1_erf(i)
@@ -407,7 +413,7 @@ END_PROVIDER
 
     coef_gauss_j_mu_1_erf = (/ -0.02330531d0 , -0.11888176d0 , -0.16476192d0 , -0.19874713d0 , -0.05889174d0  /)
     expo_gauss_j_mu_1_erf = (/ 1.00000000d+04, 4.66067922d+01, 3.04359857d+00, 9.54726649d+00, 3.59796835d+02 /)
-    
+
     tmp = mu_erf * mu_erf
     do i = 1, ng_fit_jast
       expo_gauss_j_mu_1_erf(i) = tmp * expo_gauss_j_mu_1_erf(i)
@@ -459,26 +465,26 @@ END_PROVIDER
 
     !alpha_opt = expo_j_xmu(1) + expo_gauss_1_erf_x(1)
     !beta_opt  = expo_j_xmu(2) + expo_gauss_1_erf_x(2)
-   
+
     ! direct opt
     alpha_opt = 2.87875632d0
     beta_opt  = 1.34801003d0
-    
+
     alpha = alpha_opt * mu_erf
     call expo_fit_slater_gam(alpha, expos)
     beta = beta_opt * mu_erf * mu_erf
-    
+
     tmp = -1.d0 / dsqrt(dacos(-1.d0))
     do i = 1, ng_fit_jast
       expo_gauss_j_mu_1_erf(i) = expos(i) + beta
-      coef_gauss_j_mu_1_erf(i) = tmp * coef_fit_slat_gauss(i) 
+      coef_gauss_j_mu_1_erf(i) = tmp * coef_fit_slat_gauss(i)
     enddo
 
   else
 
     print *, ' not implemented yet'
     stop
-  
+
   endif
 
   tmp = 0.25d0 / mu_erf
@@ -486,13 +492,13 @@ END_PROVIDER
     coef_gauss_j_mu_1_erf(i) = tmp * coef_gauss_j_mu_1_erf(i)
   enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
 double precision  function F_x_j(x)
 
-  BEGIN_DOC 
+  BEGIN_DOC
   !
   ! dimension-less correlation factor:
   !
@@ -511,7 +517,7 @@ end
 
 double precision function j_mu_F_x_j(x)
 
-  BEGIN_DOC 
+  BEGIN_DOC
   !
   ! correlation factor:
   !
@@ -532,26 +538,26 @@ end
 
 double precision function j_mu(x)
 
-  BEGIN_DOC 
+  BEGIN_DOC
   !
   ! correlation factor:
   !
   ! j_mu(x) = 1/2 r12 * (1 - erf(mu*r12)) - 1/(2 sqrt(pi)*mu) exp(-(mu*r12)^2)
   !
   END_DOC
- 
+
   implicit none
   double precision, intent(in) :: x
- 
+
   j_mu = 0.5d0* x * (1.d0 - derf(mu_erf*x)) - 0.5d0/( dsqrt(dacos(-1.d0))*mu_erf) * dexp(-(mu_erf*x)*(mu_erf*x))
- 
+
 end
 
 ! ---
 
 double precision function j_mu_fit_gauss(x)
 
-  BEGIN_DOC 
+  BEGIN_DOC
   !
   ! correlation factor fitted with gaussians:
   !
@@ -567,12 +573,13 @@ double precision function j_mu_fit_gauss(x)
 
   j_mu_fit_gauss = 0.d0
   do i = 1, n_max_fit_slat
-    alpha = expo_gauss_j_mu_x(i) 
-    coef  = coef_gauss_j_mu_x(i) 
+    alpha = expo_gauss_j_mu_x(i)
+    coef  = coef_gauss_j_mu_x(i)
     j_mu_fit_gauss += coef * dexp(-alpha*x*x)
   enddo
- 
+
 end
 
 ! ---
+
 

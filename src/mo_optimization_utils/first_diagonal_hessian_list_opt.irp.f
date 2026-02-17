@@ -1,6 +1,6 @@
 subroutine first_diag_hessian_list_opt(tmp_n,m,list,H)!, h_tmpr)
 
-  include 'constants.h' 
+  include 'constants.h'
 
   implicit none
 
@@ -9,17 +9,17 @@ subroutine first_diag_hessian_list_opt(tmp_n,m,list,H)!, h_tmpr)
   !===========================================================================
 
   !===========
-  ! Variables 
+  ! Variables
   !===========
- 
+
   ! in
-  integer, intent(in)           :: tmp_n, m, list(m) 
+  integer, intent(in)           :: tmp_n, m, list(m)
   ! tmp_n        : integer, tmp_n = m*(m-1)/2
- 
+
   ! out
   double precision, intent(out) :: H(tmp_n)!, h_tmpr(m,m,m,m)
   ! H        : n by n double precision matrix containing the 2D hessian
-  
+
   ! internal
   double precision, allocatable :: hessian(:,:,:,:), tmp(:,:),h_tmpr(:,:,:,:)
   integer                       :: p,q, tmp_p,tmp_q
@@ -31,12 +31,12 @@ subroutine first_diag_hessian_list_opt(tmp_n,m,list,H)!, h_tmpr)
   ! p,q,r,s  : integer, indexes of the 4D hessian matrix
   ! t,u,v    : integer, indexes to compute hessian elements
   ! pq,rs    : integer, indexes for the conversion from 4D to 2D hessian matrix
-  ! t1,t2,t3 : double precision, t3 = t2 - t1, time to compute the hessian 
-  
+  ! t1,t2,t3 : double precision, t3 = t2 - t1, time to compute the hessian
+
   ! Function
   double precision :: get_two_e_integral
   ! get_two_e_integral : double precision function, two e integrals
- 
+
   ! Provided :
   ! mo_one_e_integrals : mono e- integrals
   ! get_two_e_integral : two e- integrals
@@ -48,28 +48,28 @@ subroutine first_diag_hessian_list_opt(tmp_n,m,list,H)!, h_tmpr)
   !============
   ! Allocation
   !============
-  
+
   allocate(hessian(m,m,m,m),tmp(tmp_n,tmp_n),h_tmpr(mo_num,mo_num,mo_num,mo_num))
 
   !=============
   ! Calculation
   !=============
 
-  ! From Anderson et. al. (2014) 
+  ! From Anderson et. al. (2014)
   ! The Journal of Chemical Physics 141, 244104 (2014); doi: 10.1063/1.4904384
 
   ! LaTeX formula :
 
   !\begin{align*}
   !H_{pq,rs} &= \dfrac{\partial^2 E(x)}{\partial x_{pq}^2} \\
-  !&= \mathcal{P}_{pq} \mathcal{P}_{rs} [ \frac{1}{2} \sum_u [\delta_{qr}(h_p^u \gamma_u^s + h_u^s \gamma_p^u) 
+  !&= \mathcal{P}_{pq} \mathcal{P}_{rs} [ \frac{1}{2} \sum_u [\delta_{qr}(h_p^u \gamma_u^s + h_u^s \gamma_p^u)
   !+ \delta_{ps}(h_r^u \gamma_u^q + h_u^q \gamma_u^r)]
   !-(h_p^s \gamma_r^q + h_r^q \gamma_p^s) \\
-  !&+ \frac{1}{2} \sum_{tuv} [\delta_{qr}(v_{pt}^{uv} \Gamma_{uv}^{st} +v_{uv}^{st} \Gamma_{pt}^{uv}) 
+  !&+ \frac{1}{2} \sum_{tuv} [\delta_{qr}(v_{pt}^{uv} \Gamma_{uv}^{st} +v_{uv}^{st} \Gamma_{pt}^{uv})
   !+ \delta_{ps}(v_{uv}^{qt} \Gamma_{rt}^{uv} + v_{rt}^{uv}\Gamma_{uv}^{qt})] \\
   !&+ \sum_{uv} (v_{pr}^{uv} \Gamma_{uv}^{qs} + v_{uv}^{qs}  \Gamma_{ps}^{uv}) \\
-  !&- \sum_{tu} (v_{pu}^{st} \Gamma_{rt}^{qu}+v_{pu}^{tr} \Gamma_{tr}^{qu}+v_{rt}^{qu}\Gamma_{pu}^{st} + v_{tr}^{qu}\Gamma_{pu}^{ts}) 
-  !\end{align*} 
+  !&- \sum_{tu} (v_{pu}^{st} \Gamma_{rt}^{qu}+v_{pu}^{tr} \Gamma_{tr}^{qu}+v_{rt}^{qu}\Gamma_{pu}^{st} + v_{tr}^{qu}\Gamma_{pu}^{ts})
+  !\end{align*}
 
   !================
   ! Initialization
@@ -90,10 +90,10 @@ subroutine first_diag_hessian_list_opt(tmp_n,m,list,H)!, h_tmpr)
         do tmp_s = 1, m
           s = list(tmp_s)
 
-          ! Permutations 
+          ! Permutations
           if (((p==r) .and. (q==s)) .or. ((q==r) .and. (p==s)) &
              .or. ((p==s) .and. (q==r))) then
-           
+
             if (q==r) then
               do u = 1, mo_num
 
@@ -122,7 +122,7 @@ subroutine first_diag_hessian_list_opt(tmp_n,m,list,H)!, h_tmpr)
         do tmp_s = 1, m
           s = list(tmp_s)
 
-           ! Permutations 
+           ! Permutations
            if (((p==r) .and. (q==s)) .or. ((q==r) .and. (p==s)) &
             .or. ((p==s) .and. (q==r))) then
 
@@ -152,8 +152,8 @@ subroutine first_diag_hessian_list_opt(tmp_n,m,list,H)!, h_tmpr)
         r = list(tmp_r)
         do tmp_s = 1, m
           s = list(tmp_s)
-         
-          ! Permutations 
+
+          ! Permutations
           if (((p==r) .and. (q==s)) .or. ((q==r) .and. (p==s)) &
              .or. ((p==s) .and. (q==r))) then
 
@@ -180,7 +180,7 @@ subroutine first_diag_hessian_list_opt(tmp_n,m,list,H)!, h_tmpr)
         do tmp_s = 1, m
           s = list(tmp_s)
 
-          ! Permutations 
+          ! Permutations
           if (((p==r) .and. (q==s)) .or. ((q==r) .and. (p==s)) &
              .or. ((p==s) .and. (q==r))) then
 
@@ -216,7 +216,7 @@ subroutine first_diag_hessian_list_opt(tmp_n,m,list,H)!, h_tmpr)
         do tmp_s = 1, m
           s = list(tmp_s)
 
-           ! Permutations 
+           ! Permutations
            if (((p==r) .and. (q==s)) .or. ((q==r) .and. (p==s)) &
               .or. ((p==s) .and. (q==r))) then
 
@@ -252,7 +252,7 @@ subroutine first_diag_hessian_list_opt(tmp_n,m,list,H)!, h_tmpr)
         do tmp_s = 1, m
           s = list(tmp_s)
 
-           ! Permutations 
+           ! Permutations
            if (((p==r) .and. (q==s)) .or. ((q==r) .and. (p==s)) &
                 .or. ((p==s) .and. (q==r))) then
 
@@ -284,7 +284,7 @@ subroutine first_diag_hessian_list_opt(tmp_n,m,list,H)!, h_tmpr)
         do tmp_s = 1, m
           s = list(tmp_s)
 
-          ! Permutations 
+          ! Permutations
           if (((p==r) .and. (q==s)) .or. ((q==r) .and. (p==s)) &
            .or. ((p==s) .and. (q==r))) then
 
@@ -300,8 +300,8 @@ subroutine first_diag_hessian_list_opt(tmp_n,m,list,H)!, h_tmpr)
               enddo
             enddo
 
-          endif     
-  
+          endif
+
         enddo
       enddo
     enddo
@@ -314,7 +314,7 @@ subroutine first_diag_hessian_list_opt(tmp_n,m,list,H)!, h_tmpr)
   !==============
   ! Permutations
   !==============
- 
+
   ! Convert the hessian mo_num * mo_num * mo_num * mo_num matrix in a
   ! 2D n * n matrix (n = mo_num*(mo_num-1)/2)
   ! H(pq,rs) : p<q and r<s
@@ -335,7 +335,7 @@ subroutine first_diag_hessian_list_opt(tmp_n,m,list,H)!, h_tmpr)
   !========================
   ! 4D matrix -> 2D matrix
   !========================
-  
+
   ! Convert the hessian mo_num * mo_num * mo_num * mo_num matrix in a
   ! 2D n * n matrix (n = mo_num*(mo_num-1)/2)
   ! H(pq,rs) : p<q and r<s
@@ -345,7 +345,7 @@ subroutine first_diag_hessian_list_opt(tmp_n,m,list,H)!, h_tmpr)
     call vec_to_mat_index(tmp_rs,tmp_r,tmp_s)
     do tmp_pq = 1, tmp_n
       call vec_to_mat_index(tmp_pq,tmp_p,tmp_q)
-      tmp(tmp_pq,tmp_rs) = h_tmpr(tmp_p,tmp_q,tmp_r,tmp_s)   
+      tmp(tmp_pq,tmp_rs) = h_tmpr(tmp_p,tmp_q,tmp_r,tmp_s)
     enddo
   enddo
 
@@ -354,11 +354,11 @@ subroutine first_diag_hessian_list_opt(tmp_n,m,list,H)!, h_tmpr)
   enddo
 
   ! Display
-  if (debug) then 
+  if (debug) then
     print*,'2D diag Hessian matrix'
     do tmp_pq = 1, tmp_n
       write(*,'(100(F10.5))') tmp(tmp_pq,:)
-    enddo 
+    enddo
   endif
 
   !==============
@@ -370,3 +370,4 @@ subroutine first_diag_hessian_list_opt(tmp_n,m,list,H)!, h_tmpr)
   print*,'---End first_diag_hess_list---'
 
 end subroutine
+

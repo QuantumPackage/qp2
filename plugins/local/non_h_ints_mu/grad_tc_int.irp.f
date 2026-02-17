@@ -4,7 +4,7 @@
 BEGIN_PROVIDER [double precision, ao_non_hermit_term_chemist, (ao_num, ao_num, ao_num, ao_num)]
 
   BEGIN_DOC
-  !                            1 1 2 2      1 2                                1 2 
+  !                            1 1 2 2      1 2                                1 2
   !
   ! ao_non_hermit_term_chemist(k,i,l,j) = < k l | [erf( mu r12) - 1] d/d_r12 | i j > on the AO basis
   !
@@ -25,8 +25,8 @@ BEGIN_PROVIDER [double precision, ao_non_hermit_term_chemist, (ao_num, ao_num, a
 
  !$OMP PARALLEL                         &
  !$OMP DEFAULT (NONE)                   &
- !$OMP PRIVATE (i,k,m,ipoint,r,weight1) & 
- !$OMP SHARED (aos_in_r_array_transp,aos_grad_in_r_array_transp_bis,b_mat)& 
+ !$OMP PRIVATE (i,k,m,ipoint,r,weight1) &
+ !$OMP SHARED (aos_in_r_array_transp,aos_grad_in_r_array_transp_bis,b_mat)&
  !$OMP SHARED (ao_num,n_points_final_grid,final_grid_points,final_weight_at_r_vector)
  !$OMP DO SCHEDULE (static)
   do m = 1, 3
@@ -37,7 +37,7 @@ BEGIN_PROVIDER [double precision, ao_non_hermit_term_chemist, (ao_num, ao_num, a
           r(2) = final_grid_points(2,ipoint)
           r(3) = final_grid_points(3,ipoint)
           weight1 = final_weight_at_r_vector(ipoint)
-          b_mat(ipoint,k,i,m) = 0.5d0 * aos_in_r_array_transp(ipoint,k) * r(m) * weight1 * aos_grad_in_r_array_transp_bis(ipoint,i,m) 
+          b_mat(ipoint,k,i,m) = 0.5d0 * aos_in_r_array_transp(ipoint,k) * r(m) * weight1 * aos_grad_in_r_array_transp_bis(ipoint,i,m)
         enddo
       enddo
     enddo
@@ -49,17 +49,17 @@ BEGIN_PROVIDER [double precision, ao_non_hermit_term_chemist, (ao_num, ao_num, a
   ! 1/2 \int dr1 x1 phi_k(1) d/dx1 phi_i(1) \int dr2 (1 - erf(mu_r12))/r12  phi_j(2) phi_l(2)
   ac_mat = 0.d0
   do m = 1, 3
-    !           A   B^T  dim(A,1)       dim(B,2)       dim(A,2)        alpha * A                LDA 
+    !           A   B^T  dim(A,1)       dim(B,2)       dim(A,2)        alpha * A                LDA
 
     call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0             &
               , v_ij_erf_rk_cst_mu(1,1,1), ao_num*ao_num, b_mat(1,1,1,m), n_points_final_grid &
-              , 1.d0, ac_mat, ao_num*ao_num) 
+              , 1.d0, ac_mat, ao_num*ao_num)
 
   enddo
 
  !$OMP PARALLEL                       &
  !$OMP DEFAULT (NONE)                 &
- !$OMP PRIVATE (i,k,m,ipoint,weight1) & 
+ !$OMP PRIVATE (i,k,m,ipoint,weight1) &
  !$OMP SHARED (aos_in_r_array_transp,aos_grad_in_r_array_transp_bis,b_mat,ao_num,n_points_final_grid,final_weight_at_r_vector)
  !$OMP DO SCHEDULE (static)
   do m = 1, 3
@@ -67,7 +67,7 @@ BEGIN_PROVIDER [double precision, ao_non_hermit_term_chemist, (ao_num, ao_num, a
       do k = 1, ao_num
         do ipoint = 1, n_points_final_grid
           weight1 = final_weight_at_r_vector(ipoint)
-          b_mat(ipoint,k,i,m) = 0.5d0 * aos_in_r_array_transp(ipoint,k) * weight1 * aos_grad_in_r_array_transp_bis(ipoint,i,m) 
+          b_mat(ipoint,k,i,m) = 0.5d0 * aos_in_r_array_transp(ipoint,k) * weight1 * aos_grad_in_r_array_transp_bis(ipoint,i,m)
         enddo
       enddo
     enddo
@@ -78,16 +78,16 @@ BEGIN_PROVIDER [double precision, ao_non_hermit_term_chemist, (ao_num, ao_num, a
  ! (B)                b_mat(ipoint,k,i,m) X x_v_ij_erf_rk_cst_mu(j,l,r1,m)
  ! 1/2 \int dr1 phi_k(1) d/dx1 phi_i(1) \int dr2 x2(1 - erf(mu_r12))/r12  phi_j(2) phi_l(2)
   do m = 1, 3
-   !           A   B^T  dim(A,1)       dim(B,2)       dim(A,2)        alpha * A                LDA 
+   !           A   B^T  dim(A,1)       dim(B,2)       dim(A,2)        alpha * A                LDA
 
     call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, -1.d0                &
               , x_v_ij_erf_rk_cst_mu(1,1,1,m), ao_num*ao_num, b_mat(1,1,1,m), n_points_final_grid &
-              , 1.d0, ac_mat, ao_num*ao_num) 
+              , 1.d0, ac_mat, ao_num*ao_num)
   enddo
 
  !$OMP PARALLEL          &
  !$OMP DEFAULT (NONE)    &
- !$OMP PRIVATE (i,k,j,l) & 
+ !$OMP PRIVATE (i,k,j,l) &
  !$OMP SHARED (ac_mat,ao_non_hermit_term_chemist,ao_num)
  !$OMP DO SCHEDULE (static)
   do j = 1, ao_num
@@ -95,7 +95,7 @@ BEGIN_PROVIDER [double precision, ao_non_hermit_term_chemist, (ao_num, ao_num, a
       do i = 1, ao_num
         do k = 1, ao_num
           !                          (ki|lj)           (ki|lj)           (lj|ki)
-          ao_non_hermit_term_chemist(k,i,l,j) = ac_mat(k,i,l,j) + ac_mat(l,j,k,i)    
+          ao_non_hermit_term_chemist(k,i,l,j) = ac_mat(k,i,l,j) + ac_mat(l,j,k,i)
         enddo
       enddo
     enddo
@@ -106,7 +106,7 @@ BEGIN_PROVIDER [double precision, ao_non_hermit_term_chemist, (ao_num, ao_num, a
   call wall_time(wall1)
   print *, ' wall time for ao_non_hermit_term_chemist ', wall1 - wall0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -115,7 +115,7 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, mo_non_hermit_term_chemist, (mo_num, mo_num, mo_num, mo_num)]
 
   BEGIN_DOC
-  !                            1 1 2 2      1 2                                1 2 
+  !                            1 1 2 2      1 2                                1 2
   !
   ! mo_non_hermit_term_chemist(k,i,l,j) = < k l | [erf( mu r12) - 1] d/d_r12 | i j > on the MO basis
   END_DOC
@@ -123,7 +123,7 @@ BEGIN_PROVIDER [double precision, mo_non_hermit_term_chemist, (mo_num, mo_num, m
   implicit none
   integer                       :: i, j, k, l, m, n, p, q
   double precision, allocatable :: mo_tmp_1(:,:,:,:), mo_tmp_2(:,:,:,:)
- 
+
   allocate(mo_tmp_1(mo_num,ao_num,ao_num,ao_num))
   mo_tmp_1 = 0.d0
 
@@ -139,7 +139,7 @@ BEGIN_PROVIDER [double precision, mo_non_hermit_term_chemist, (mo_num, mo_num, m
       enddo
     enddo
   enddo
-  free ao_non_hermit_term_chemist 
+  free ao_non_hermit_term_chemist
 
   allocate(mo_tmp_2(mo_num,mo_num,ao_num,ao_num))
   mo_tmp_2 = 0.d0
@@ -188,14 +188,14 @@ BEGIN_PROVIDER [double precision, mo_non_hermit_term_chemist, (mo_num, mo_num, m
   enddo
   deallocate(mo_tmp_1)
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
 BEGIN_PROVIDER [double precision, mo_non_hermit_term, (mo_num, mo_num, mo_num, mo_num)]
 
   BEGIN_DOC
-  !                    1 2 1 2      1 2                                1 2 
+  !                    1 2 1 2      1 2                                1 2
   !
   ! mo_non_hermit_term(k,l,i,j) = < k l | [erf( mu r12) - 1] d/d_r12 | i j > on the MO basis
   END_DOC
@@ -213,7 +213,8 @@ BEGIN_PROVIDER [double precision, mo_non_hermit_term, (mo_num, mo_num, mo_num, m
     enddo
   enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
+
 

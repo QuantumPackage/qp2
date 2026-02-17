@@ -13,7 +13,7 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_erf_in_map ]
 
   ! For integrals file
   integer(key_kind),allocatable  :: buffer_i(:)
-  integer                        :: size_buffer 
+  integer                        :: size_buffer
   real(integral_kind),allocatable :: buffer_value(:)
 
   integer                        :: n_integrals, rc
@@ -85,7 +85,7 @@ END_PROVIDER
 
 
 
-BEGIN_PROVIDER [ double precision, ao_two_e_integral_erf_schwartz,(ao_num,ao_num)  ]
+BEGIN_PROVIDER [ double precision, ao_two_e_integral_erf_schwartz, (ao_num, ao_num)  ]
   implicit none
   BEGIN_DOC
   !  Needed to compute Schwartz inequalities
@@ -108,5 +108,6 @@ BEGIN_PROVIDER [ double precision, ao_two_e_integral_erf_schwartz,(ao_num,ao_num
   !$OMP END PARALLEL DO
 
 END_PROVIDER
+
 
 

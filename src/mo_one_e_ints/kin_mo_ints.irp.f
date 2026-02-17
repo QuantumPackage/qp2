@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [double precision, mo_kinetic_integrals, (mo_num,mo_num)]
+BEGIN_PROVIDER [double precision, mo_kinetic_integrals, (mo_num, mo_num)]
   implicit none
   BEGIN_DOC
   !  Kinetic energy integrals in the MO basis
@@ -21,4 +21,5 @@ BEGIN_PROVIDER [double precision, mo_kinetic_integrals, (mo_num,mo_num)]
   endif
 
 END_PROVIDER
+
 

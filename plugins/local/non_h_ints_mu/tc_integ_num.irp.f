@@ -1,12 +1,12 @@
 
 ! ---
 
- BEGIN_PROVIDER [double precision, int2_grad1_u12_ao_num       , (ao_num,ao_num,n_points_final_grid,3)]
-&BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao_num, (ao_num,ao_num,n_points_final_grid)  ]
+ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao_num       , (ao_num, ao_num, n_points_final_grid, 3)]
+&BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao_num, (ao_num, ao_num, n_points_final_grid)  ]
 
   BEGIN_DOC
   !
-  ! int2_grad1_u12_ao_num(i,j,ipoint,:) = \int dr2 [\grad_r1 J(r1,r2)] \phi_i(r2) \phi_j(r2) 
+  ! int2_grad1_u12_ao_num(i,j,ipoint,:) = \int dr2 [\grad_r1 J(r1,r2)] \phi_i(r2) \phi_j(r2)
   !
   ! int2_grad1_u12_square_ao_num = -(1/2) x int dr2 chi_l(r2) chi_j(r2) [grad_1 u(r1,r2)]^2
   !
@@ -22,7 +22,7 @@
   double precision, allocatable :: tmp_grad1_u12(:,:,:), tmp_grad1_u12_squared(:,:)
 
   ! TODO
-  ! tmp_grad1_u12_squared get be obtained from tmp_grad1_u12 
+  ! tmp_grad1_u12_squared get be obtained from tmp_grad1_u12
 
   print*, ' providing int2_grad1_u12_ao_num & int2_grad1_u12_square_ao_num ...'
   call wall_time(time0)
@@ -56,18 +56,18 @@
   call write_int(6, n_blocks, 'Size of the blocks')
   call write_int(6, n_rest, 'Size of the last block')
 
-  
+
   allocate(tmp_grad1_u12_squared(n_points_extra_final_grid,n_blocks))
   allocate(tmp_grad1_u12(n_points_extra_final_grid,n_blocks,3))
-  
+
   do i_pass = 1, n_pass
     ii = (i_pass-1)*n_blocks + 1
-  
+
     !$OMP PARALLEL                   &
     !$OMP DEFAULT (NONE)             &
     !$OMP PRIVATE (i_blocks, ipoint) &
     !$OMP SHARED (n_blocks, n_points_extra_final_grid, ii, final_grid_points, tmp_grad1_u12, tmp_grad1_u12_squared)
-    !$OMP DO 
+    !$OMP DO
     do i_blocks = 1, n_blocks
       ipoint = ii - 1 + i_blocks ! r1
       call get_grad1_u12_withsq_r1_seq(ipoint, n_points_extra_final_grid, tmp_grad1_u12(1,i_blocks,1) &
@@ -81,27 +81,27 @@
     do m = 1, 3
       call dgemm( "T", "N", ao_num*ao_num, n_blocks, n_points_extra_final_grid, 1.d0                     &
                 , tmp(1,1,1), n_points_extra_final_grid, tmp_grad1_u12(1,1,m), n_points_extra_final_grid &
-                , 0.d0, int2_grad1_u12_ao_num(1,1,ii,m), ao_num*ao_num) 
+                , 0.d0, int2_grad1_u12_ao_num(1,1,ii,m), ao_num*ao_num)
     enddo
     call dgemm( "T", "N", ao_num*ao_num, n_blocks, n_points_extra_final_grid, -0.5d0                         &
               , tmp(1,1,1), n_points_extra_final_grid, tmp_grad1_u12_squared(1,1), n_points_extra_final_grid &
-              , 0.d0, int2_grad1_u12_square_ao_num(1,1,ii), ao_num*ao_num) 
+              , 0.d0, int2_grad1_u12_square_ao_num(1,1,ii), ao_num*ao_num)
   enddo
-  
+
   deallocate(tmp_grad1_u12, tmp_grad1_u12_squared)
-  
+
   if(n_rest .gt. 0) then
-  
+
     allocate(tmp_grad1_u12_squared(n_points_extra_final_grid,n_rest))
     allocate(tmp_grad1_u12(n_points_extra_final_grid,n_rest,3))
-  
+
     ii = n_pass*n_blocks + 1
 
     !$OMP PARALLEL                 &
     !$OMP DEFAULT (NONE)           &
     !$OMP PRIVATE (i_rest, ipoint) &
     !$OMP SHARED (n_rest, n_points_extra_final_grid, ii, final_grid_points, tmp_grad1_u12, tmp_grad1_u12_squared)
-    !$OMP DO 
+    !$OMP DO
     do i_rest = 1, n_rest
       ipoint = ii - 1 + i_rest ! r1
       call get_grad1_u12_withsq_r1_seq(ipoint, n_points_extra_final_grid, tmp_grad1_u12(1,i_rest,1) &
@@ -111,15 +111,15 @@
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
-  
+
     do m = 1, 3
       call dgemm( "T", "N", ao_num*ao_num, n_rest, n_points_extra_final_grid, 1.d0                       &
                 , tmp(1,1,1), n_points_extra_final_grid, tmp_grad1_u12(1,1,m), n_points_extra_final_grid &
-                , 0.d0, int2_grad1_u12_ao_num(1,1,ii,m), ao_num*ao_num) 
+                , 0.d0, int2_grad1_u12_ao_num(1,1,ii,m), ao_num*ao_num)
     enddo
     call dgemm( "T", "N", ao_num*ao_num, n_rest, n_points_extra_final_grid, -0.5d0                           &
               , tmp(1,1,1), n_points_extra_final_grid, tmp_grad1_u12_squared(1,1), n_points_extra_final_grid &
-              , 0.d0, int2_grad1_u12_square_ao_num(1,1,ii), ao_num*ao_num) 
+              , 0.d0, int2_grad1_u12_square_ao_num(1,1,ii), ao_num*ao_num)
 
     deallocate(tmp_grad1_u12, tmp_grad1_u12_squared)
   endif
@@ -134,12 +134,12 @@ END_PROVIDER
 
 ! ---
 
- BEGIN_PROVIDER [double precision, int2_grad1_u12_ao_num_1shot       , (ao_num,ao_num,n_points_final_grid,3)]
-&BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao_num_1shot, (ao_num,ao_num,n_points_final_grid)  ]
+ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao_num_1shot       , (ao_num, ao_num, n_points_final_grid, 3)]
+&BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao_num_1shot, (ao_num, ao_num, n_points_final_grid)  ]
 
   BEGIN_DOC
   !
-  ! int2_grad1_u12_ao_num_1shot(i,j,ipoint,:) = \int dr2 [\grad_r1 J(r1,r2)] \phi_i(r2) \phi_j(r2) 
+  ! int2_grad1_u12_ao_num_1shot(i,j,ipoint,:) = \int dr2 [\grad_r1 J(r1,r2)] \phi_i(r2) \phi_j(r2)
   !
   ! int2_grad1_u12_square_ao_num_1shot = -(1/2) x int dr2 chi_l(r2) chi_j(r2) [grad_1 u(r1,r2)]^2
   !
@@ -175,22 +175,23 @@ END_PROVIDER
   do m = 1, 3
     call dgemm( "T", "N", ao_num*ao_num, n_points_final_grid, n_points_extra_final_grid,  1.d0         &
               , tmp(1,1,1), n_points_extra_final_grid, grad1_u12_num(1,1,m), n_points_extra_final_grid &
-              , 0.d0, int2_grad1_u12_ao_num_1shot(1,1,1,m), ao_num*ao_num) 
+              , 0.d0, int2_grad1_u12_ao_num_1shot(1,1,1,m), ao_num*ao_num)
   enddo
   FREE grad1_u12_num
 
   call dgemm( "T", "N", ao_num*ao_num, n_points_final_grid, n_points_extra_final_grid, -0.5d0              &
             , tmp(1,1,1), n_points_extra_final_grid, grad1_u12_squared_num(1,1), n_points_extra_final_grid &
-            , 0.d0, int2_grad1_u12_square_ao_num_1shot(1,1,1), ao_num*ao_num) 
+            , 0.d0, int2_grad1_u12_square_ao_num_1shot(1,1,1), ao_num*ao_num)
   FREE grad1_u12_squared_num
 
   deallocate(tmp)
 
   call wall_time(time1)
-  print*, ' wall time for int2_grad1_u12_ao_num_1shot & int2_grad1_u12_square_ao_num_1shot =', time1-time0 
+  print*, ' wall time for int2_grad1_u12_ao_num_1shot & int2_grad1_u12_square_ao_num_1shot =', time1-time0
   call print_memory_usage()
 
 END_PROVIDER
 
 ! ---
+
 

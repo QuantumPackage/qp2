@@ -3,13 +3,13 @@
   BEGIN_DOC
   ! MO occupation numbers
   END_DOC
-  
+
   integer :: i
   occnum=0.D0
   do i=1,n_core_inact_orb
     occnum(list_core_inact(i))=2.D0
   end do
-  
+
   do i=1,n_act_orb
     occnum(list_act(i))=occ_act(i)
   end do
@@ -24,7 +24,7 @@
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ real*8, natorbsCI, (n_act_orb,n_act_orb) ]
+ BEGIN_PROVIDER [ real*8, natorbsCI, (n_act_orb, n_act_orb) ]
 &BEGIN_PROVIDER [ real*8, occ_act, (n_act_orb) ]
  implicit none
  BEGIN_DOC
@@ -32,16 +32,16 @@ END_PROVIDER
  END_DOC
  integer                        :: i, j
  double precision               :: Vt(n_act_orb,n_act_orb)
- 
+
 ! call lapack_diag(occ_act,natorbsCI,D0tu,n_act_orb,n_act_orb)
- call svd(D0tu, size(D0tu,1), natorbsCI,size(natorbsCI,1), occ_act, Vt, size(Vt,1),n_act_orb,n_act_orb) 
- 
+ call svd(D0tu, size(D0tu,1), natorbsCI,size(natorbsCI,1), occ_act, Vt, size(Vt,1),n_act_orb,n_act_orb)
+
  if (bavard) then
    write(6,*) ' found occupation numbers as '
    do i=1,n_act_orb
      write(6,*) i,occ_act(i)
    end do
- 
+
    integer                        :: nmx
    real*8                         :: xmx
    do i=1,n_act_orb
@@ -58,16 +58,16 @@ END_PROVIDER
      do j=1,n_act_orb
        natOrbsCI(j,i)*=xmx
      end do
-     
+
      write(6,*) ' Eigenvector No ',i
      write(6,'(5(I3,F12.5))') (j,natOrbsCI(j,i),j=1,n_act_orb)
    end do
  end if
-  
+
 END_PROVIDER
 
 
-BEGIN_PROVIDER [real*8, P0tuvx_no, (n_act_orb,n_act_orb,n_act_orb,n_act_orb)]
+BEGIN_PROVIDER [real*8, P0tuvx_no, (n_act_orb, n_act_orb, n_act_orb, n_act_orb)]
   implicit none
   BEGIN_DOC
   ! 4-index transformation of 2part matrices
@@ -98,7 +98,7 @@ END_PROVIDER
 
 
 
-BEGIN_PROVIDER [real*8, one_ints_no, (mo_num,mo_num)]
+BEGIN_PROVIDER [real*8, one_ints_no, (mo_num, mo_num)]
   implicit none
   BEGIN_DOC
   ! Transformed one-e integrals
@@ -157,7 +157,7 @@ BEGIN_PROVIDER [ double precision, NatOrbsCI_mos, (mo_num, mo_num) ]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [real*8, NatOrbsFCI, (ao_num,mo_num)]
+BEGIN_PROVIDER [real*8, NatOrbsFCI, (ao_num, mo_num)]
   implicit none
   BEGIN_DOC
 ! FCI natural orbitals
@@ -168,4 +168,5 @@ BEGIN_PROVIDER [real*8, NatOrbsFCI, (ao_num,mo_num)]
       NatOrbsCI_mos, size(NatOrbsCI_mos,1), 0.d0,                    &
       NatOrbsFCI, size(NatOrbsFCI,1))
 END_PROVIDER
+
 

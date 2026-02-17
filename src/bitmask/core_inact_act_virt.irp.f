@@ -6,16 +6,16 @@ BEGIN_PROVIDER [ integer, n_core_orb]
   ! Number of core MOs
   END_DOC
   integer                        :: i
-  
+
   n_core_orb = 0
   do i = 1, mo_num
     if(mo_class(i) == 'Core')then
       n_core_orb += 1
     endif
   enddo
-  
+
   call write_int(6,n_core_orb, 'Number of core     MOs')
-   
+
 END_PROVIDER
 
 BEGIN_PROVIDER [ integer, n_inact_orb ]
@@ -24,16 +24,16 @@ BEGIN_PROVIDER [ integer, n_inact_orb ]
   ! Number of inactive MOs
   END_DOC
   integer                        :: i
-  
+
   n_inact_orb = 0
   do i = 1, mo_num
     if (mo_class(i) == 'Inactive')then
       n_inact_orb += 1
     endif
   enddo
-  
+
   call write_int(6,n_inact_orb,'Number of inactive MOs')
-  
+
 END_PROVIDER
 
 BEGIN_PROVIDER [ integer, n_act_orb]
@@ -42,7 +42,7 @@ BEGIN_PROVIDER [ integer, n_act_orb]
   ! Number of active MOs
   END_DOC
   integer                        :: i
-  
+
   n_act_orb = 0
   do i = 1, mo_num
     if (mo_class(i) == 'Active')then
@@ -61,16 +61,16 @@ BEGIN_PROVIDER [ integer, n_virt_orb ]
   ! Number of virtual MOs
   END_DOC
   integer                        :: i
-  
+
   n_virt_orb = 0
   do i = 1, mo_num
     if (mo_class(i) == 'Virtual')then
       n_virt_orb += 1
     endif
   enddo
-  
+
   call write_int(6,n_virt_orb, 'Number of virtual  MOs')
-   
+
 END_PROVIDER
 
 BEGIN_PROVIDER [ integer, n_del_orb ]
@@ -79,16 +79,16 @@ BEGIN_PROVIDER [ integer, n_del_orb ]
   ! Number of deleted MOs
   END_DOC
   integer                        :: i
-  
+
   n_del_orb = 0
   do i = 1, mo_num
     if (mo_class(i) == 'Deleted')then
       n_del_orb += 1
     endif
   enddo
-  
+
   call write_int(6,n_del_orb, 'Number of deleted  MOs')
-   
+
 END_PROVIDER
 
 
@@ -111,7 +111,7 @@ BEGIN_PROVIDER [integer, n_inact_act_orb ]
   END_DOC
    n_inact_act_orb = (n_inact_orb+n_act_orb)
 END_PROVIDER
- 
+
 BEGIN_PROVIDER [integer, dim_list_core_orb]
   implicit none
   BEGIN_DOC
@@ -173,14 +173,14 @@ BEGIN_PROVIDER [integer, n_core_inact_act_orb ]
   END_DOC
   n_core_inact_act_orb = (n_core_orb + n_inact_orb + n_act_orb)
 END_PROVIDER
- 
 
 
- 
- BEGIN_PROVIDER [ integer(bit_kind), core_bitmask , (N_int,2) ]
+
+
+ BEGIN_PROVIDER [ integer(bit_kind), core_bitmask , (N_int, 2) ]
    implicit none
    BEGIN_DOC
-   ! Bitmask identifying the core MOs 
+   ! Bitmask identifying the core MOs
    END_DOC
    core_bitmask  = 0_bit_kind
    if(n_core_orb > 0)then
@@ -189,10 +189,10 @@ END_PROVIDER
    endif
  END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), inact_bitmask, (N_int,2) ]
+ BEGIN_PROVIDER [ integer(bit_kind), inact_bitmask, (N_int, 2) ]
    implicit none
    BEGIN_DOC
-   ! Bitmask identifying the  inactive MOs 
+   ! Bitmask identifying the  inactive MOs
    END_DOC
    inact_bitmask = 0_bit_kind
    if(n_inact_orb > 0)then
@@ -201,10 +201,10 @@ END_PROVIDER
    endif
  END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), act_bitmask  , (N_int,2) ]
+ BEGIN_PROVIDER [ integer(bit_kind), act_bitmask  , (N_int, 2) ]
    implicit none
    BEGIN_DOC
-   ! Bitmask identifying the active MOs 
+   ! Bitmask identifying the active MOs
    END_DOC
    act_bitmask   = 0_bit_kind
    if(n_act_orb > 0)then
@@ -213,10 +213,10 @@ END_PROVIDER
    endif
   END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), virt_bitmask , (N_int,2) ]
+ BEGIN_PROVIDER [ integer(bit_kind), virt_bitmask , (N_int, 2) ]
    implicit none
    BEGIN_DOC
-   ! Bitmask identifying the virtual MOs 
+   ! Bitmask identifying the virtual MOs
    END_DOC
    virt_bitmask  = 0_bit_kind
    if(n_virt_orb > 0)then
@@ -225,25 +225,25 @@ END_PROVIDER
    endif
  END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), del_bitmask  , (N_int,2) ]
+ BEGIN_PROVIDER [ integer(bit_kind), del_bitmask  , (N_int, 2) ]
    implicit none
    BEGIN_DOC
-   ! Bitmask identifying the deleted MOs 
+   ! Bitmask identifying the deleted MOs
    END_DOC
 
    del_bitmask   = 0_bit_kind
-   
+
    if(n_del_orb > 0)then
      call list_to_bitstring( del_bitmask(1,1), list_del, n_del_orb, N_int)
      call list_to_bitstring( del_bitmask(1,2), list_del, n_del_orb, N_int)
    endif
-   
+
  END_PROVIDER
 
 
 
 
- 
+
  BEGIN_PROVIDER [ integer, list_core        , (dim_list_core_orb) ]
 &BEGIN_PROVIDER [ integer, list_core_reverse, (mo_num) ]
    implicit none
@@ -264,9 +264,9 @@ END_PROVIDER
    enddo
    print *,  'Core MOs:'
    print *,  list_core(1:n_core_orb)
-   
+
 END_PROVIDER
- 
+
  BEGIN_PROVIDER [ integer, list_inact        , (dim_list_inact_orb) ]
 &BEGIN_PROVIDER [ integer, list_inact_reverse, (mo_num) ]
    implicit none
@@ -287,9 +287,9 @@ END_PROVIDER
    enddo
    print *,  'Inactive MOs:'
    print *,  list_inact(1:n_inact_orb)
-   
+
 END_PROVIDER
- 
+
  BEGIN_PROVIDER [ integer, list_virt        , (dim_list_virt_orb) ]
 &BEGIN_PROVIDER [ integer, list_virt_reverse, (mo_num) ]
    implicit none
@@ -310,9 +310,9 @@ END_PROVIDER
    enddo
    print *,  'Virtual MOs:'
    print *,  list_virt(1:n_virt_orb)
-   
+
 END_PROVIDER
- 
+
  BEGIN_PROVIDER [ integer, list_del        , (dim_list_del_orb) ]
 &BEGIN_PROVIDER [ integer, list_del_reverse, (mo_num) ]
    implicit none
@@ -333,9 +333,9 @@ END_PROVIDER
    enddo
    print *,  'Deleted MOs:'
    print *,  list_del(1:n_del_orb)
-   
+
 END_PROVIDER
- 
+
  BEGIN_PROVIDER [ integer, list_act        , (dim_list_act_orb) ]
 &BEGIN_PROVIDER [ integer, list_act_reverse, (mo_num) ]
    implicit none
@@ -356,11 +356,11 @@ END_PROVIDER
    enddo
    print *,  'Active MOs:'
    print *,  list_act(1:n_act_orb)
-   
-END_PROVIDER
- 
 
- 
+END_PROVIDER
+
+
+
  BEGIN_PROVIDER [ integer, list_core_inact        , (dim_list_core_inact_orb) ]
 &BEGIN_PROVIDER [ integer, list_core_inact_reverse, (mo_num) ]
    implicit none
@@ -377,8 +377,8 @@ END_PROVIDER
    print *,  'Core and Inactive MOs:'
    print *,  list_core_inact(1:n_core_inact_orb)
 END_PROVIDER
- 
- 
+
+
  BEGIN_PROVIDER [ integer, list_core_inact_act        , (n_core_inact_act_orb) ]
 &BEGIN_PROVIDER [ integer, list_core_inact_act_reverse, (mo_num) ]
    implicit none
@@ -395,8 +395,8 @@ END_PROVIDER
    print *,  'Core, Inactive and Active MOs:'
    print *,  list_core_inact_act(1:n_core_inact_act_orb)
 END_PROVIDER
- 
- 
+
+
  BEGIN_PROVIDER [ integer, list_inact_act        , (n_inact_act_orb) ]
 &BEGIN_PROVIDER [ integer, list_inact_act_reverse, (mo_num) ]
    implicit none
@@ -413,29 +413,35 @@ END_PROVIDER
    print *,  'Inactive and Active MOs:'
    print *,  list_inact_act(1:n_inact_act_orb)
 END_PROVIDER
- 
+
 
 BEGIN_PROVIDER [integer, n_all_but_del_orb]
+  BEGIN_DOC
+  ! n_all_but_del_orb
+  END_DOC
  implicit none
  integer :: i
  n_all_but_del_orb = 0
  do i = 1, mo_num
-  if(  trim(mo_class(i))=="Core" & 
-  .or. trim(mo_class(i))=="Inactive" & 
+  if(  trim(mo_class(i))=="Core" &
+  .or. trim(mo_class(i))=="Inactive" &
   .or. trim(mo_class(i))=="Active"   &
   .or. trim(mo_class(i))=="Virtual" )then
-   n_all_but_del_orb +=1 
+   n_all_but_del_orb +=1
   endif
  enddo
-END_PROVIDER 
+END_PROVIDER
 
 BEGIN_PROVIDER [integer, list_all_but_del_orb, (n_all_but_del_orb)]
+  BEGIN_DOC
+  ! list_all_but_del_orb
+  END_DOC
  implicit none
  integer :: i,j
- j = 0 
+ j = 0
  do i = 1, mo_num
-  if(  trim(mo_class(i))=="Core" & 
-  .or. trim(mo_class(i))=="Inactive" & 
+  if(  trim(mo_class(i))=="Core" &
+  .or. trim(mo_class(i))=="Inactive" &
   .or. trim(mo_class(i))=="Active"   &
   .or. trim(mo_class(i))=="Virtual" )then
    j += 1
@@ -443,5 +449,6 @@ BEGIN_PROVIDER [integer, list_all_but_del_orb, (n_all_but_del_orb)]
   endif
  enddo
 
-END_PROVIDER 
+END_PROVIDER
+
 

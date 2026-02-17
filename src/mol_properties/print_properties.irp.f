@@ -20,8 +20,8 @@ subroutine print_dipole_moment
   double precision, allocatable :: d(:), d_x(:), d_y(:), d_z(:)
 
   allocate(d(N_states),d_x(N_states),d_y(N_states),d_z(N_states))
- 
-  do istate = 1, N_states 
+
+  do istate = 1, N_states
     d_x(istate) = multi_s_x_dipole_moment(istate,istate)
     d_y(istate) = multi_s_y_dipole_moment(istate,istate)
     d_z(istate) = multi_s_z_dipole_moment(istate,istate)
@@ -33,18 +33,18 @@ subroutine print_dipole_moment
   print*,'# Dipoles:'
   print*,'=============================================='
   print*,' Dipole moments (au)'
-  print*,' State      X           Y           Z         ||MU||' 
+  print*,' State      X           Y           Z         ||MU||'
 
-  do istate = 1, N_states 
+  do istate = 1, N_states
     write(*,'(I5,4(F12.6))') (istate-1), d_x(istate), d_y(istate), d_z(istate), d(istate)
   enddo
 
   ! Debye
   print*,''
   print*,' Dipole moments (D)'
-  print*,' State      X           Y           Z         ||MU||' 
+  print*,' State      X           Y           Z         ||MU||'
 
-  do istate = 1, N_states 
+  do istate = 1, N_states
     write(*,'(I5,4(F12.6))') (istate-1), d_x(istate)*au_to_D, d_y(istate)*au_to_D, d_z(istate)*au_to_D, d(istate)*au_to_D
   enddo
 
@@ -85,7 +85,7 @@ subroutine print_transition_dipole_moment
   print*,'=============================================='
   print*,' Transition dipole moments (au)'
   write(*,'(A89)') '   #  Transition       X           Y           Z         ||MU||     Dip. str.   Osc. str.'
- 
+
   if (print_all_transitions) then
     n_states_print = N_states
   else
@@ -107,7 +107,7 @@ subroutine print_transition_dipole_moment
   print*,''
   print*,' Transition dipole moments (D)'
   write(*,'(A89)') '   #  Transition       X           Y           Z         ||MU||     Dip. str.   Osc. str.'
-  
+
   do jstate = 1, n_states_print !N_states
     do istate = jstate + 1, N_states
       d_x = multi_s_x_dipole_moment(istate,jstate) * au_to_D
@@ -149,9 +149,9 @@ subroutine print_oscillator_strength
   ! Oscillator strength in:
   ! - length gauge, f^l_{ij} = 2/3 (E_i - E_j) <\Psi_i|r|\Psi_j> <\Psi_j|r|\Psi_i>
   ! - velocity gauge, f^v_{ij} = 2/3 (E_i - E_j)^(-1) <\Psi_i|v|\Psi_j> <\Psi_j|v|\Psi_i>
-  ! - mixed gauge, f^m_{ij} = -2i/3 <\Psi_i|r|\Psi_j> <\Psi_j|v|\Psi_i> 
+  ! - mixed gauge, f^m_{ij} = -2i/3 <\Psi_i|r|\Psi_j> <\Psi_j|v|\Psi_i>
   END_DOC
-  
+
   integer :: istate,jstate,k, n_states_print
   double precision :: f_l,f_v,f_m,d,v
 
@@ -191,3 +191,4 @@ subroutine print_oscillator_strength
   print*,''
 
 end
+

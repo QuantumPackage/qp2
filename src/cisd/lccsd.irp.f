@@ -1,7 +1,7 @@
 program lccsd
   implicit none
   BEGIN_DOC
-! Linerarized CCSD 
+! Linerarized CCSD
 !
   ! This program takes a reference Slater determinant of ROHF-like occupancy,
   !
@@ -93,3 +93,4 @@ subroutine get_lccsd_2
   endif
 
 end
+

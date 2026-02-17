@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [ double precision, extra_nucl_coord,  (extra_nucl_num,3) ]
+BEGIN_PROVIDER [ double precision, extra_nucl_coord,  (extra_nucl_num, 3) ]
    implicit none
 
    BEGIN_DOC
@@ -86,7 +86,7 @@ BEGIN_PROVIDER [ double precision, extra_nucl_coord,  (extra_nucl_num,3) ]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, extra_nucl_coord_transp, (3,extra_nucl_num) ]
+BEGIN_PROVIDER [ double precision, extra_nucl_coord_transp, (3, extra_nucl_num) ]
    implicit none
    BEGIN_DOC
    ! Transposed array of extra_nucl_coord
@@ -121,7 +121,10 @@ BEGIN_PROVIDER [ double precision, extra_center_of_mass, (3) ]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, extra_nucl_dist, (extra_nucl_num,extra_nucl_num)]
+BEGIN_PROVIDER [ double precision, extra_nucl_dist, (extra_nucl_num, extra_nucl_num)]
+  BEGIN_DOC
+  ! extra_nucl_dist
+  END_DOC
  implicit none
  integer :: i,j
  double precision :: x,y,z
@@ -135,4 +138,5 @@ BEGIN_PROVIDER [ double precision, extra_nucl_dist, (extra_nucl_num,extra_nucl_n
   enddo
  enddo
 
-END_PROVIDER 
+END_PROVIDER
+

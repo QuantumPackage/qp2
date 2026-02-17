@@ -32,7 +32,7 @@ BEGIN_PROVIDER [double precision, one_e_tr_dm_mo, (mo_num, mo_num, N_states, N_s
   PROVIDE psi_det_alpha_unique psi_det_beta_unique
 
   one_e_tr_dm_mo = 0d0
- 
+
   !$OMP PARALLEL DEFAULT(NONE)                                      &
       !$OMP PRIVATE(j,k_a,k_b,l,m,n,occ,ck, ckl,phase,h1,h2,p1,p2,degree,exc,&
       !$OMP  tmp_a, tmp_b, n_occ, krow, kcol, lrow, lcol, tmp_det, tmp_det2)&
@@ -169,8 +169,8 @@ BEGIN_PROVIDER [double precision, one_e_tr_dm_mo, (mo_num, mo_num, N_states, N_s
   !$OMP END PARALLEL
 
 END_PROVIDER
- BEGIN_PROVIDER [ double precision, one_e_tr_dm_mo_alpha, (mo_num,mo_num,N_states,N_states) ]
-&BEGIN_PROVIDER [ double precision, one_e_tr_dm_mo_beta, (mo_num,mo_num,N_states,N_states) ]
+ BEGIN_PROVIDER [ double precision, one_e_tr_dm_mo_alpha, (mo_num, mo_num, N_states, N_states) ]
+&BEGIN_PROVIDER [ double precision, one_e_tr_dm_mo_beta, (mo_num, mo_num, N_states, N_states) ]
   implicit none
   BEGIN_DOC
   ! $\alpha$ and $\beta$ one-body transition density matrices for all pairs of states
@@ -323,4 +323,5 @@ END_PROVIDER
   !$OMP END PARALLEL
 
 END_PROVIDER
+
 

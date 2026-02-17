@@ -14,7 +14,7 @@ complex*16 function overlap_cgaussian_x(Ae_center, Be_center, alpha, beta, power
   implicit none
   include 'constants.include.F'
 
-  integer,    intent(in) :: dim, power_A, power_B 
+  integer,    intent(in) :: dim, power_A, power_B
   complex*16, intent(in) :: Ae_center, alpha, Ap_center
   complex*16, intent(in) :: Be_center, beta, Bp_center
 
@@ -26,7 +26,7 @@ complex*16 function overlap_cgaussian_x(Ae_center, Be_center, alpha, beta, power
 
   call give_explicit_cpoly_and_cgaussian_x(P_new, P_center, p, fact_p, iorder_p, &
                                            alpha, beta, power_A, power_B, Ae_center, Be_center, Ap_center, Bp_center, dim)
- 
+
   if(zabs(fact_p) .lt. 1.d-14) then
     overlap_cgaussian_x = (0.d0, 0.d0)
     return
@@ -52,7 +52,7 @@ subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, pow
 
   BEGIN_DOC
   !
-  !   S_x = \int (x - Ap_x)^{a_x} exp(-\alpha (x - Ae_x)^2) 
+  !   S_x = \int (x - Ap_x)^{a_x} exp(-\alpha (x - Ae_x)^2)
   !              (x - Bp_x)^{b_x} exp(-\beta  (x - Be_x)^2) dx
   !
   !   S = S_x S_y S_z
@@ -137,5 +137,6 @@ subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, pow
 end
 
 ! ---
+
 
 

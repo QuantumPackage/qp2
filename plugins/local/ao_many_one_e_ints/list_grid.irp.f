@@ -1,5 +1,8 @@
  BEGIN_PROVIDER [ integer, n_pts_grid_ao_prod, (ao_num, ao_num)]
 &BEGIN_PROVIDER [ integer, max_n_pts_grid_ao_prod]
+  BEGIN_DOC
+  ! n_pts_grid_ao_prod
+  END_DOC
  implicit none
  integer :: i,j,ipoint
  double precision :: overlap, r(3),thr, overlap_abs_gauss_r12_ao,overlap_gauss_r12_ao
@@ -57,3 +60,4 @@
  enddo
  max_n_pts_grid_ao_prod = maxval(list)
 END_PROVIDER
+

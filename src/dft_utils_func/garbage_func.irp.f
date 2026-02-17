@@ -13,7 +13,7 @@ subroutine give_all_stuffs_in_r_for_lyp_88(r,rho,rho_a,rho_b,grad_rho_a_2,grad_r
  grad_rho_b_2 = 0.d0
  grad_rho_a_b = 0.d0
  do istate = 1, N_states
-  do i = 1, 3 
+  do i = 1, 3
    grad_rho_a_2(istate) += grad_rho_a(i,istate) * grad_rho_a(i,istate)
    grad_rho_b_2(istate) += grad_rho_b(i,istate) * grad_rho_b(i,istate)
    grad_rho_a_b(istate) += grad_rho_a(i,istate) * grad_rho_b(i,istate)
@@ -29,7 +29,7 @@ double precision function ec_lyp_88(rho,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,gr
  implicit none
 
  BEGIN_DOC
-! LYP functional of the Lee, Yan, Parr, Phys. Rev B 1988, Vol 37, page 785.  
+! LYP functional of the Lee, Yan, Parr, Phys. Rev B 1988, Vol 37, page 785.
 ! The expression used is the one by Miehlich, Savin, Stoll, Preuss, CPL, 1989 which gets rid of the laplacian of the density
  END_DOC
 
@@ -58,11 +58,11 @@ double precision function ec_lyp_88(rho,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,gr
  thr = 1d-15
  huge_num = 1.d0/thr
  if(dabs(rho_a).lt.thr)then
-  return 
+  return
  endif
 
  if(dabs(rho_b).lt.thr)then
-  return 
+  return
  endif
 
  if(rho.lt.0.d0)then
@@ -165,7 +165,7 @@ double precision function ec_scan(rho_a,rho_b,tau,grad_rho_2)
  thr = 1.d-12
  nup = max(rho_a,thr)
  ndo = max(rho_b,thr)
- rho = nup + ndo 
+ rho = nup + ndo
  ec_scan = 0.d0
  if((rho).lt.thr)return
  ! constants ...
@@ -179,9 +179,9 @@ double precision function ec_scan(rho_a,rho_b,tau,grad_rho_2)
  drho2    = max(grad_rho_2,thr)
  drho     = dsqrt(drho2)
  if((nup-ndo).gt.0.d0)then
-  spin_d  = max(nup-ndo,thr) 
+  spin_d  = max(nup-ndo,thr)
  else
-  spin_d  = min(nup-ndo,-thr) 
+  spin_d  = min(nup-ndo,-thr)
  endif
  c_1c     = 0.64d0
  c_2c     = 1.5d0
@@ -193,8 +193,8 @@ double precision function ec_scan(rho_a,rho_b,tau,grad_rho_2)
  ! correlation energy lsda1
  call ec_only_lda_sr(0.d0,nup,ndo,e_c_lsda1)
 
- ! correlation energy per particle 
- e_c_lsda1 = e_c_lsda1/rho         
+ ! correlation energy per particle
+ e_c_lsda1 = e_c_lsda1/rho
  xi       = spin_d/rho
  rs       = (cst_43 * pi * rho)**(-cst_13)
  s        = drho/( 2.d0 * cst_3pi2**(cst_13) * rho**cst_43  )
@@ -217,16 +217,16 @@ double precision function ec_scan(rho_a,rho_b,tau,grad_rho_2)
  a        = beta_rs(rs) /(gama * w_1)
  g_at2    = 1.d0/(1.d0 + 4.d0 * a*t*t)**0.25d0
  h1       = gama * phi_3 * dlog(1.d0 + w_1 * (1.d0 - g_at2))
- ! interpolation function 
+ ! interpolation function
 
  if(cst_1alph.gt.0.d0)then
-  fc_alpha = dexp(-c_1c * alpha * inv_1alph) 
+  fc_alpha = dexp(-c_1c * alpha * inv_1alph)
  else
-  fc_alpha = - d_c * dexp(c_2c * inv_1alph) 
+  fc_alpha = - d_c * dexp(c_2c * inv_1alph)
  endif
- ! first part of the correlation energy 
+ ! first part of the correlation energy
  e_c_1    = e_c_lsda1 + h1
- 
+
  dx_xi    =  0.5d0 * ( (1.d0+xi)**cst_43 + (1.d0 - xi)**cst_43)
  gc_xi    = (1.d0 - 2.3631d0 * (dx_xi - 1.d0) ) * (1.d0 - xi**12.d0)
  e_c_lsda0= - b_1c / (1.d0 + b_2c * rs**0.5d0 + b_3c * rs)
@@ -237,8 +237,8 @@ double precision function ec_scan(rho_a,rho_b,tau,grad_rho_2)
  x_inf   = 0.128026d0
  f0       = -0.9d0
  g_inf    = 1.d0/(1.d0 + 4.d0 * x_inf * s*s)**0.25d0
- 
- h0       = b_1c * dlog(1.d0 + w_0 * (1.d0 - g_inf)) 
+
+ h0       = b_1c * dlog(1.d0 + w_0 * (1.d0 - g_inf))
  e_c_0    = (e_c_lsda0 + h0) * gc_xi
 
  ec_scan = e_c_1 + fc_alpha * (e_c_0 - e_c_1)
@@ -259,6 +259,7 @@ double precision function step_f(x)
  if(x.lt.0.d0)then
   step_f = 0.d0
  else
-  step_f = 1.d0 
+  step_f = 1.d0
  endif
-end             
+end
+

@@ -3,10 +3,10 @@ subroutine htc_bi_ortho_calc_tdav_slow(v, u, N_st, sze)
   use bitmasks
 
   BEGIN_DOC
-    ! Application of H_TC on a vector 
+    ! Application of H_TC on a vector
     !
-    ! v(i,istate) = \sum_j u(j,istate) H_TC(i,j), with: 
-    !   H_TC(i,j) = < Di | H_TC | Dj > 
+    ! v(i,istate) = \sum_j u(j,istate) H_TC(i,j), with:
+    !   H_TC(i,j) = < Di | H_TC | Dj >
     !
   END_DOC
 
@@ -19,11 +19,11 @@ subroutine htc_bi_ortho_calc_tdav_slow(v, u, N_st, sze)
   integer                         :: i, j, istate
   double precision                :: htot
 
-  PROVIDE N_int 
+  PROVIDE N_int
   PROVIDE psi_det
 
 
- ! TODO : transform it with the bi-linear representation in terms of alpha-beta. 
+ ! TODO : transform it with the bi-linear representation in terms of alpha-beta.
 
   i = 1
   j = 1
@@ -39,21 +39,21 @@ subroutine htc_bi_ortho_calc_tdav_slow(v, u, N_st, sze)
         call htilde_mu_mat_bi_ortho_tot_slow(psi_det(1,1,i), psi_det(1,1,j), N_int, htot)
         v(i,istate) = v(i,istate) + htot * u(j,istate)
       enddo
-    enddo 
+    enddo
   enddo
  !$OMP END PARALLEL DO
 
-end 
+end
 
 subroutine htcdag_bi_ortho_calc_tdav_slow(v, u, N_st, sze)
 
   use bitmasks
 
   BEGIN_DOC
-    ! Application of (H_TC)^dagger on a vector 
+    ! Application of (H_TC)^dagger on a vector
     !
-    ! v(i,istate) = \sum_j u(j,istate) H_TC(j,i), with: 
-    !   H_TC(i,j) = < Di | H_TC | Dj > 
+    ! v(i,istate) = \sum_j u(j,istate) H_TC(j,i), with:
+    !   H_TC(i,j) = < Di | H_TC | Dj >
     !
   END_DOC
 
@@ -88,7 +88,7 @@ subroutine htcdag_bi_ortho_calc_tdav_slow(v, u, N_st, sze)
   enddo
  !$OMP END PARALLEL DO
 
-end 
+end
 
 subroutine i_H_tc_psi_phi(key,keys,coef_l,coef_r,Nint,Ndet,Ndet_max,Nstate,chi_H_i_array,i_H_phi_array)
   use bitmasks
@@ -98,7 +98,7 @@ subroutine i_H_tc_psi_phi(key,keys,coef_l,coef_r,Nint,Ndet,Ndet_max,Nstate,chi_H
 !
 ! AND      $\langle Chi|H|  i \rangle  = \sum_J c^L_J \langle J | H | i \rangle$.
 !
-! CONVENTION: i_H_phi_array(0) =   total matrix element,  
+! CONVENTION: i_H_phi_array(0) =   total matrix element,
 !
 !             i_H_phi_array(1) =   one-electron matrix element,
 !
@@ -182,4 +182,5 @@ subroutine i_H_tc_psi_phi(key,keys,coef_l,coef_r,Nint,Ndet,Ndet_max,Nstate,chi_H
   endif
 
 end
+
 

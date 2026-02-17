@@ -42,7 +42,7 @@ program tc_natorb_bi_ortho
 end
 
 ! ---
- 
+
 subroutine save_tc_natorb()
 
   implicit none
@@ -50,9 +50,9 @@ subroutine save_tc_natorb()
   print*,'Saving the natorbs '
 
   provide natorb_tc_leigvec_ao natorb_tc_reigvec_ao
-  mo_l_coef = natorb_tc_leigvec_ao 
-  mo_r_coef = natorb_tc_reigvec_ao 
-  touch mo_l_coef mo_r_coef 
+  mo_l_coef = natorb_tc_leigvec_ao
+  mo_r_coef = natorb_tc_reigvec_ao
+  touch mo_l_coef mo_r_coef
 
   call ezfio_set_bi_ortho_mos_mo_l_coef(mo_l_coef)
   call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
@@ -62,7 +62,7 @@ subroutine save_tc_natorb()
 end
 
 ! ---
- 
+
 subroutine save_ref_determinant_nstates_1()
 
    use bitmasks
@@ -74,4 +74,5 @@ subroutine save_ref_determinant_nstates_1()
    call save_wavefunction_general(1, 1, ref_bitmask, 1, buffer)
 
 end
+
 

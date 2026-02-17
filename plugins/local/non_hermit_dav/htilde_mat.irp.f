@@ -1,7 +1,10 @@
 BEGIN_PROVIDER [ integer, n_mat]
+  BEGIN_DOC
+  ! n_mat
+  END_DOC
  implicit none
  n_mat = 2
-END_PROVIDER 
+END_PROVIDER
 
  BEGIN_PROVIDER [ double precision, h_non_hermit, (n_mat, n_mat)]
 &BEGIN_PROVIDER [ double precision, h_non_hermit_transp, (n_mat, n_mat)]
@@ -9,6 +12,9 @@ END_PROVIDER
 &BEGIN_PROVIDER [ double precision, leigvec_ht, (n_mat, n_mat)]
 &BEGIN_PROVIDER [ double precision, eigval_ht, (n_mat)]
 &BEGIN_PROVIDER [ integer, n_real_ht, (n_mat)]
+  BEGIN_DOC
+  ! h_non_hermit
+  END_DOC
  implicit none
  integer :: i,j
  do i = 1, n_mat
@@ -28,7 +34,7 @@ END_PROVIDER
  call non_hrmt_real_diag(n_mat,h_non_hermit,reigvec_ht,leigvec_ht,n_real_ht,eigval_ht)
 
 
-END_PROVIDER 
+END_PROVIDER
 
 
 subroutine hcalc_r_tmp(v,u,N_st,sze) ! v = H u
@@ -36,11 +42,11 @@ subroutine hcalc_r_tmp(v,u,N_st,sze) ! v = H u
   BEGIN_DOC
   ! Template of routine for the application of H
   !
-  ! Here, it is done with the Hamiltonian matrix 
+  ! Here, it is done with the Hamiltonian matrix
   !
-  ! on the set of determinants of psi_det 
+  ! on the set of determinants of psi_det
   !
-  ! Computes $v = H | u \rangle$ 
+  ! Computes $v = H | u \rangle$
   !
   END_DOC
   integer, intent(in)              :: N_st,sze
@@ -67,11 +73,11 @@ subroutine hcalc_l_tmp(v,u,N_st,sze) ! v = H^\dagger u
   BEGIN_DOC
   ! Template of routine for the application of H
   !
-  ! Here, it is done with the Hamiltonian matrix 
+  ! Here, it is done with the Hamiltonian matrix
   !
-  ! on the set of determinants of psi_det 
+  ! on the set of determinants of psi_det
   !
-  ! Computes $v = H | u \rangle$ 
+  ! Computes $v = H | u \rangle$
   !
   END_DOC
   integer, intent(in)              :: N_st,sze
@@ -91,3 +97,4 @@ subroutine hcalc_l_tmp(v,u,N_st,sze) ! v = H^\dagger u
    print*,v(i,1)
   enddo
 end
+

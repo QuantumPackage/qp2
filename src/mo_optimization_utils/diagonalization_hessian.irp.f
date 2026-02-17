@@ -93,7 +93,7 @@ subroutine diagonalization_hessian(n,H,e_val,w)
     !    nb_negative_vp = nb_negative_vp + 1
     !  endif
     !enddo
-    !print*,'Number of negative eigenvalues <', -thresh_eig,':', nb_negative_vp  
+    !print*,'Number of negative eigenvalues <', -thresh_eig,':', nb_negative_vp
 
     ! Deallocation
     deallocate(work)
@@ -101,13 +101,13 @@ subroutine diagonalization_hessian(n,H,e_val,w)
   elseif (optimization_method == 'diag') then
     ! Diagonalization of the diagonal hessian by hands
     allocate(key(n))
-    
+
     do i = 1, n
       e_val(i) = H(i,i)
     enddo
 
     ! Key list for dsort
-    do i = 1, n 
+    do i = 1, n
       key(i) = i
     enddo
 
@@ -134,3 +134,4 @@ subroutine diagonalization_hessian(n,H,e_val,w)
   print*,'---End diagonalization_hessian---'
 
 end subroutine
+

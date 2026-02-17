@@ -16,7 +16,7 @@ program extra_basis_int
 ! call test_v_ne_a_extra_basis
 ! call print_v_ee_mixed_direct
  call print_v_ee_mixed_exchange
- 
+
 end
 
 subroutine test_v_ne_a_extra_basis
@@ -32,7 +32,7 @@ subroutine test_overlap
  implicit none
   integer :: i,j
   do i = 1, ao_num
-!   do j = 1, ao_num 
+!   do j = 1, ao_num
     write(33,'(100(F16.10,X))')ao_extra_overlap_mixed(i,1:ao_extra_num)
 !   enddo
   enddo
@@ -45,7 +45,7 @@ subroutine test_overlap_mixed
   allocate(ao_mixed_overlap(ao_extra_num,ao_num))
   call get_ao_mixed_overlap(extra_nucl_coord,ao_mixed_overlap)
   do i = 1, ao_extra_num
-   do j = 1, ao_num 
+   do j = 1, ao_num
     write(33,*)dabs(ao_extra_overlap_mixed(j,i)-ao_mixed_overlap(i,j))
     write(*,*)ao_extra_overlap_mixed(j,i),ao_mixed_overlap(i,j),dabs(ao_extra_overlap_mixed(j,i)-ao_mixed_overlap(i,j))
    enddo
@@ -174,7 +174,7 @@ subroutine print_v_ne_extra_basis
     charge = nucl_charge(i)
     coord(1:3) = nucl_coord_transp(1:3,i)
     integral = coul_pq_r_1s(i_ao,j_ao,coord,ao_extra_center_1s(1,i_ao),ao_extra_center_1s(1,j_ao))
-    accu += -charge * integral * effective_ao_extra_dm(j_ao,i_ao) 
+    accu += -charge * integral * effective_ao_extra_dm(j_ao,i_ao)
    enddo
   enddo
  enddo
@@ -194,7 +194,7 @@ subroutine print_v_ne_basis
     charge = nucl_charge(i)
     coord(1:3) = nucl_coord_transp(1:3,i)
     integral = NAI_pol_mult_erf_ao(i_ao, j_ao, 1d+10, coord)
-    accu += -charge * integral * one_e_dm_ao(j_ao,i_ao) 
+    accu += -charge * integral * one_e_dm_ao(j_ao,i_ao)
    enddo
   enddo
  enddo
@@ -233,3 +233,4 @@ subroutine print_v_ee_mixed_exchange
  enddo
 
 end
+

@@ -7,7 +7,7 @@ double precision function plgndr(l,m,x)
  END_DOC
  integer :: i,ll
  double precision :: fact,pll,pmm,pmmp1,somx2
- if(m.lt.0.or.m.gt.l.or.dabs(x).gt.1.d0)then 
+ if(m.lt.0.or.m.gt.l.or.dabs(x).gt.1.d0)then
   print*,'bad arguments in plgndr'
   pause
  endif
@@ -18,10 +18,10 @@ double precision function plgndr(l,m,x)
   do i=1,m
    pmm=-pmm*fact*somx2
    fact=fact+2.d0
-  enddo 
+  enddo
  endif ! m > 0
  if(l.eq.m) then
-  plgndr=pmm 
+  plgndr=pmm
  else
   pmmp1=x*(2*m+1)*pmm ! Compute P_m+1^m
    if(l.eq.m+1) then
@@ -48,3 +48,4 @@ double precision function ortho_assoc_gaus_pol(l1,m1,l2)
   ortho_assoc_gaus_pol = 2.d0*fact(l1+m1) / (dble(2*l1+1)*fact(l1-m1))
  endif
 end
+

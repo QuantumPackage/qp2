@@ -3,8 +3,8 @@ program test_mu_of_r_tc
   BEGIN_DOC
 ! TODO
   END_DOC
-  ! You specify that you want to avoid any contribution from 
-  ! orbitals coming from core 
+  ! You specify that you want to avoid any contribution from
+  ! orbitals coming from core
  call test_grad_f_mean_field
  call test_grad_mu_mf
  call plot_mu_of_r_mf
@@ -30,9 +30,9 @@ subroutine test_grad_f_mean_field
  double precision :: accu_grad_dm_a(3),accu_grad_dm_b(3)
  double precision :: accu_f_mf_ab, accu_two_bod_dens, accu_dm_a, accu_dm_b
  dr = 0.00001d0
- accu_f_mf_ab = 0.d0 
- accu_two_bod_dens = 0.d0 
- accu_dm_a = 0.d0 
+ accu_f_mf_ab = 0.d0
+ accu_two_bod_dens = 0.d0
+ accu_dm_a = 0.d0
  accu_dm_b = 0.d0
 
  accu_grad_f_mf_ab = 0.d0
@@ -155,3 +155,4 @@ subroutine plot_mu_of_r_mf
  print*,'nelec      = ',accu_nelec
  print*,'mu average = ',accu_mu/accu_nelec
 end
+

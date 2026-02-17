@@ -32,7 +32,7 @@ subroutine guess_t1(nO,nV,f_o,f_v,f_ov,t1)
     print*, 'Unknown cc_guess_t1 type: '//trim(cc_guess_t1)
     call abort
   endif
-  
+
 end
 
 ! T2
@@ -73,7 +73,7 @@ subroutine guess_t2(nO,nV,f_o,f_v,v_oovv,t2)
     print*, 'Unknown cc_guess_t1 type: '//trim(cc_guess_t2)
     call abort
   endif
-  
+
 end
 
 ! T1
@@ -103,7 +103,7 @@ subroutine write_t1(nO,nV,t1)
     enddo
     close(iunit)
   endif
-  
+
 end
 
 ! T2
@@ -137,7 +137,7 @@ subroutine write_t2(nO,nV,t2)
     enddo
     close(iunit)
   endif
-  
+
 end
 
 ! T1
@@ -168,7 +168,7 @@ subroutine read_t1(nO,nV,t1)
     enddo
     close(iunit)
   endif
-  
+
 end
 
 ! T2
@@ -204,5 +204,6 @@ subroutine read_t2(nO,nV,t2)
     enddo
     close(iunit)
   endif
-  
+
 end
+

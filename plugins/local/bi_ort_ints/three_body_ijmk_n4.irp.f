@@ -14,16 +14,16 @@
   ! three_e_4_idx_direct_bi_ort_n4 (m,j,k,i) = < m j k | -L | m j i > ::: notice that i is the RIGHT MO and k is the LEFT MO
   ! three_e_4_idx_exch13_bi_ort_n4 (m,j,k,i) = < m j k | -L | i j m > ::: notice that i is the RIGHT MO and k is the LEFT MO
   ! three_e_4_idx_exch12_bi_ort_n4 (m,j,k,i) = < m j k | -L | m i j > ::: notice that i is the RIGHT MO and k is the LEFT MO
-  !                                          = three_e_4_idx_exch13_bi_ort_n4 (j,m,k,i) 
+  !                                          = three_e_4_idx_exch13_bi_ort_n4 (j,m,k,i)
   ! three_e_4_idx_cycle_1_bi_ort_n4(m,j,k,i) = < m j k | -L | j i m > ::: notice that i is the RIGHT MO and k is the LEFT MO
   ! three_e_4_idx_cycle_2_bi_ort_n4(m,j,k,i) = < m j k | -L | i m j > ::: notice that i is the RIGHT MO and k is the LEFT MO
   !                                          = three_e_4_idx_cycle_1_bi_ort_n4(j,m,k,i)
   !
   ! notice the -1 sign: in this way three_e_4_idx_direct_bi_ort_n4 can be directly used to compute Slater rules with a + sign
   !
-  ! three_e_4_idx_direct_bi_ort_n4 (m,j,k,i) : Lk Ri Imm Ijj + Lj Rj Imm Iki + Lm Rm Ijj Iki 
-  ! three_e_4_idx_exch13_bi_ort_n4 (m,j,k,i) : Lk Rm Imi Ijj + Lj Rj Imi Ikm + Lm Ri Ijj Ikm 
-  ! three_e_4_idx_cycle_1_bi_ort_n4(m,j,k,i) : Lk Rm Imj Iji + Lj Ri Imj Ikm + Lm Rj Iji Ikm 
+  ! three_e_4_idx_direct_bi_ort_n4 (m,j,k,i) : Lk Ri Imm Ijj + Lj Rj Imm Iki + Lm Rm Ijj Iki
+  ! three_e_4_idx_exch13_bi_ort_n4 (m,j,k,i) : Lk Rm Imi Ijj + Lj Rj Imi Ikm + Lm Ri Ijj Ikm
+  ! three_e_4_idx_cycle_1_bi_ort_n4(m,j,k,i) : Lk Rm Imj Iji + Lj Ri Imj Ikm + Lm Rj Iji Ikm
   !
   END_DOC
 
@@ -368,7 +368,7 @@
   print *, ' wall time for O(N^4) three_e_4_idx_bi_ort', wall1 - wall0
   call print_memory_usage()
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -415,7 +415,7 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_exch23_bi_ort_n4 , (mo_num, mo_
 
         tmp5(ipoint,l,i) = int2_grad1_u12_bimo_t(ipoint,1,l,i) * int2_grad1_u12_bimo_t(ipoint,1,i,l) &
                          + int2_grad1_u12_bimo_t(ipoint,2,l,i) * int2_grad1_u12_bimo_t(ipoint,2,i,l) &
-                         + int2_grad1_u12_bimo_t(ipoint,3,l,i) * int2_grad1_u12_bimo_t(ipoint,3,i,l) 
+                         + int2_grad1_u12_bimo_t(ipoint,3,l,i) * int2_grad1_u12_bimo_t(ipoint,3,i,l)
 
         tmp6(ipoint,l,i) = final_weight_at_r_vector(ipoint) * mos_l_in_r_array_transp(ipoint,l) * mos_r_in_r_array_transp(ipoint,i)
       enddo
@@ -480,7 +480,8 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_exch23_bi_ort_n4 , (mo_num, mo_
   print *, ' wall time for O(N^4) three_e_4_idx_exch23_bi_ort_n4', wall1 - wall0
   call print_memory_usage()
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
+
 

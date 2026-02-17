@@ -1,7 +1,10 @@
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, no_aba_contraction_v0, (mo_num,mo_num,mo_num,mo_num)]
+BEGIN_PROVIDER [ double precision, no_aba_contraction_v0, (mo_num, mo_num, mo_num, mo_num)]
+  BEGIN_DOC
+  ! no_aba_contraction_v0
+  END_DOC
 
   use bitmasks ! you need to include the bitmasks_module.f90 features
 
@@ -44,7 +47,7 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction_v0, (mo_num,mo_num,mo_num,
   allocate(tmp_2d(mo_num,mo_num))
 
 
-  ! purely closed shell part 
+  ! purely closed shell part
   do ii = 1, Ne(2)
     i = occ(ii,2)
 
@@ -79,7 +82,7 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction_v0, (mo_num,mo_num,mo_num,
       !$OMP SHARED (mo_num, n_points_final_grid, h1, i,             &
       !$OMP         mos_l_in_r_array_transp, int2_grad1_u12_bimo_t, &
       !$OMP         tmpval_1, tmpval_2, tmpvec_1, tmpvec_2, tmp1)
-      !$OMP DO 
+      !$OMP DO
       do p1 = 1, mo_num
         do ipoint = 1, n_points_final_grid
           tmp1(ipoint,1,p1) = mos_l_in_r_array_transp(ipoint,p1) * (tmpvec_1(ipoint,1) - tmpvec_2(ipoint,1)) &
@@ -136,10 +139,10 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction_v0, (mo_num,mo_num,mo_num,
         !$OMP SHARED (mo_num, n_points_final_grid, &
         !$OMP         mos_r_in_r_array_transp,     &
         !$OMP         tmpval_1, tmp2)
-        !$OMP DO 
+        !$OMP DO
         do h2 = 1, mo_num
           do ipoint = 1, n_points_final_grid
-            tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint) 
+            tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint)
           enddo
         enddo
         !$OMP END DO
@@ -163,7 +166,7 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction_v0, (mo_num,mo_num,mo_num,
   enddo ! i
 
 
-  ! purely open-shell part 
+  ! purely open-shell part
   if(Ne(2) < Ne(1)) then
     do ii = Ne(2) + 1, Ne(1)
       i = occ(ii,1)
@@ -197,7 +200,7 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction_v0, (mo_num,mo_num,mo_num,
         !$OMP SHARED (mo_num, n_points_final_grid, h1, i,             &
         !$OMP         mos_l_in_r_array_transp, int2_grad1_u12_bimo_t, &
         !$OMP         tmpval_1, tmpval_2, tmpvec_1, tmpvec_2, tmp1)
-        !$OMP DO 
+        !$OMP DO
         do p1 = 1, mo_num
           do ipoint = 1, n_points_final_grid
             tmp1(ipoint,1,p1) = mos_l_in_r_array_transp(ipoint,p1) * (tmpvec_1(ipoint,1) - tmpvec_2(ipoint,1)) &
@@ -253,10 +256,10 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction_v0, (mo_num,mo_num,mo_num,
           !$OMP SHARED (mo_num, n_points_final_grid, &
           !$OMP         mos_r_in_r_array_transp,     &
           !$OMP         tmpval_1, tmp2)
-          !$OMP DO 
+          !$OMP DO
           do h2 = 1, mo_num
             do ipoint = 1, n_points_final_grid
-              tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint) 
+              tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint)
             enddo
           enddo
           !$OMP END DO
@@ -295,7 +298,10 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, no_aab_contraction_v0, (mo_num,mo_num,mo_num,mo_num)]
+BEGIN_PROVIDER [ double precision, no_aab_contraction_v0, (mo_num, mo_num, mo_num, mo_num)]
+  BEGIN_DOC
+  ! no_aab_contraction_v0
+  END_DOC
 
   use bitmasks ! you need to include the bitmasks_module.f90 features
 
@@ -336,7 +342,7 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction_v0, (mo_num,mo_num,mo_num,
   allocate(tmpvec_1(n_points_final_grid,3))
 
 
-  ! purely closed shell part 
+  ! purely closed shell part
   do ii = 1, Ne(2)
     i = occ(ii,2)
 
@@ -367,7 +373,7 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction_v0, (mo_num,mo_num,mo_num,
       !$OMP SHARED (mo_num, n_points_final_grid, h1, i,             &
       !$OMP         mos_l_in_r_array_transp, int2_grad1_u12_bimo_t, &
       !$OMP         tmpval_1, tmpvec_1, tmp1)
-      !$OMP DO 
+      !$OMP DO
       do p1 = 1, mo_num
         do ipoint = 1, n_points_final_grid
           tmp1(ipoint,1,p1) = mos_l_in_r_array_transp(ipoint,p1) * tmpvec_1(ipoint,1) + tmpval_1(ipoint) * int2_grad1_u12_bimo_t(ipoint,1,p1,h1)
@@ -418,10 +424,10 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction_v0, (mo_num,mo_num,mo_num,
         !$OMP SHARED (mo_num, n_points_final_grid, &
         !$OMP         mos_r_in_r_array_transp,     &
         !$OMP         tmpval_1, tmp2)
-        !$OMP DO 
+        !$OMP DO
         do h2 = 1, mo_num
           do ipoint = 1, n_points_final_grid
-            tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint) 
+            tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint)
           enddo
         enddo
         !$OMP END DO
@@ -453,10 +459,10 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction_v0, (mo_num,mo_num,mo_num,
 
   !$OMP PARALLEL                 &
   !$OMP DEFAULT (NONE)           &
-  !$OMP PRIVATE (h1, h2, p1, p2) & 
+  !$OMP PRIVATE (h1, h2, p1, p2) &
   !$OMP SHARED (no_aab_contraction_v0, mo_num)
 
-  !$OMP DO 
+  !$OMP DO
   do h1 = 1, mo_num
     do h2 = 1, mo_num
       do p1 = 1, mo_num
@@ -468,7 +474,7 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction_v0, (mo_num,mo_num,mo_num,
   enddo
   !$OMP END DO
 
-  !$OMP DO 
+  !$OMP DO
   do h1 = 1, mo_num
     do h2 = 1, mo_num
       do p1 = 2, mo_num
@@ -480,7 +486,7 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction_v0, (mo_num,mo_num,mo_num,
   enddo
   !$OMP END DO
 
-  !$OMP DO 
+  !$OMP DO
   do h1 = 1, mo_num-1
     do h2 = h1+1, mo_num
       do p1 = 2, mo_num
@@ -500,7 +506,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, no_aaa_contraction_v0, (mo_num,mo_num,mo_num,mo_num)]
+BEGIN_PROVIDER [ double precision, no_aaa_contraction_v0, (mo_num, mo_num, mo_num, mo_num)]
 
   BEGIN_DOC
   !
@@ -515,7 +521,7 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction_v0, (mo_num,mo_num,mo_num,
   !
   !   no_aaa_contraction_v0(p2,h2.p1,h1) = 0.5 [Ialpha(p2,h2,p1,h1) + Ibeta(p2,h2,p1,h1)]
   !
-  ! 
+  !
   ! I(p2,h2,p1,h1) = J(p2,h2,p1,h1) - J(p1,h2,p2,h1)
   ! J(p2,h2,p1,h1) = \sum_i [ <  i p2 p1 | i h2 h1 >
   !                         + < p2 p1  i | i h2 h1 >
@@ -571,7 +577,7 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction_v0, (mo_num,mo_num,mo_num,
     allocate(tmpvec_2(n_points_final_grid,3))
     allocate(tmpvec_3(n_points_final_grid,3))
 
-    ! purely closed shell part 
+    ! purely closed shell part
     do ii = 1, Ne(2)
       i = occ(ii,2)
 
@@ -610,7 +616,7 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction_v0, (mo_num,mo_num,mo_num,
         !$OMP SHARED (mo_num, n_points_final_grid, h1, i,             &
         !$OMP         mos_l_in_r_array_transp, int2_grad1_u12_bimo_t, &
         !$OMP         tmpval_1, tmpvec_1, tmp1)
-        !$OMP DO 
+        !$OMP DO
         do p1 = 1, mo_num
           do ipoint = 1, n_points_final_grid
             tmp1(ipoint,1,p1) = mos_l_in_r_array_transp(ipoint,p1) * tmpvec_1(ipoint,1) + tmpval_1(ipoint) * int2_grad1_u12_bimo_t(ipoint,1,p1,h1)
@@ -642,7 +648,7 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction_v0, (mo_num,mo_num,mo_num,
         !$OMP SHARED (mo_num, n_points_final_grid, h1, i,             &
         !$OMP         mos_l_in_r_array_transp, int2_grad1_u12_bimo_t, &
         !$OMP         tmpval_2, tmpvec_2, tmp1)
-        !$OMP DO 
+        !$OMP DO
         do p2 = 1, mo_num
           do ipoint = 1, n_points_final_grid
             tmp1(ipoint,1,p2) = tmpval_2(ipoint) * int2_grad1_u12_bimo_t(ipoint,1,p2,i) + mos_l_in_r_array_transp(ipoint,p2) * tmpvec_2(ipoint,1)
@@ -710,11 +716,11 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction_v0, (mo_num,mo_num,mo_num,
           !$OMP         mos_r_in_r_array_transp,        &
           !$OMP         int2_grad1_u12_bimo_t,          &
           !$OMP         tmp1, tmp2, tmpval_1, tmpval_2, tmpvec_1)
-          !$OMP DO 
+          !$OMP DO
           do h2 = 1, mo_num
             do ipoint = 1, n_points_final_grid
 
-              tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint)     & 
+              tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint)     &
                               + int2_grad1_u12_bimo_t(ipoint,1,i,h2) * tmpvec_1(ipoint,1) &
                               + int2_grad1_u12_bimo_t(ipoint,2,i,h2) * tmpvec_1(ipoint,2) &
                               + int2_grad1_u12_bimo_t(ipoint,3,i,h2) * tmpvec_1(ipoint,3)
@@ -747,17 +753,17 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction_v0, (mo_num,mo_num,mo_num,
           !$OMP SHARED (mo_num, n_points_final_grid, i, h1, &
           !$OMP         int2_grad1_u12_bimo_t,              &
           !$OMP         tmpvec_2, tmpvec_3, tmp2, tmp3)
-          !$OMP DO 
+          !$OMP DO
           do p2 = 1, mo_num
             do ipoint = 1, n_points_final_grid
 
               tmp2(ipoint,p2) = int2_grad1_u12_bimo_t(ipoint,1,p2,i) * tmpvec_2(ipoint,1) + int2_grad1_u12_bimo_t(ipoint,1,p2,h1) * tmpvec_3(ipoint,1) &
                               + int2_grad1_u12_bimo_t(ipoint,2,p2,i) * tmpvec_2(ipoint,2) + int2_grad1_u12_bimo_t(ipoint,2,p2,h1) * tmpvec_3(ipoint,2) &
-                              + int2_grad1_u12_bimo_t(ipoint,3,p2,i) * tmpvec_2(ipoint,3) + int2_grad1_u12_bimo_t(ipoint,3,p2,h1) * tmpvec_3(ipoint,3) 
+                              + int2_grad1_u12_bimo_t(ipoint,3,p2,i) * tmpvec_2(ipoint,3) + int2_grad1_u12_bimo_t(ipoint,3,p2,h1) * tmpvec_3(ipoint,3)
 
-              tmp3(ipoint,1,p2) = int2_grad1_u12_bimo_t(ipoint,1,p2,h1) 
-              tmp3(ipoint,2,p2) = int2_grad1_u12_bimo_t(ipoint,2,p2,h1) 
-              tmp3(ipoint,3,p2) = int2_grad1_u12_bimo_t(ipoint,3,p2,h1) 
+              tmp3(ipoint,1,p2) = int2_grad1_u12_bimo_t(ipoint,1,p2,h1)
+              tmp3(ipoint,2,p2) = int2_grad1_u12_bimo_t(ipoint,2,p2,h1)
+              tmp3(ipoint,3,p2) = int2_grad1_u12_bimo_t(ipoint,3,p2,h1)
             enddo
           enddo
           !$OMP END DO
@@ -787,7 +793,7 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction_v0, (mo_num,mo_num,mo_num,
 
 
 
-    ! purely open-shell part 
+    ! purely open-shell part
     if(Ne(2) < Ne(1)) then
 
       do ii = Ne(2) + 1, Ne(1)
@@ -829,7 +835,7 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction_v0, (mo_num,mo_num,mo_num,
           !$OMP SHARED (mo_num, n_points_final_grid, h1, i,             &
           !$OMP         mos_l_in_r_array_transp, int2_grad1_u12_bimo_t, &
           !$OMP         tmpval_1, tmpvec_1, tmp1)
-          !$OMP DO 
+          !$OMP DO
           do p1 = 1, mo_num
             do ipoint = 1, n_points_final_grid
               tmp1(ipoint,1,p1) = mos_l_in_r_array_transp(ipoint,p1) * tmpvec_1(ipoint,1) + tmpval_1(ipoint) * int2_grad1_u12_bimo_t(ipoint,1,p1,h1)
@@ -861,7 +867,7 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction_v0, (mo_num,mo_num,mo_num,
           !$OMP SHARED (mo_num, n_points_final_grid, h1, i,             &
           !$OMP         mos_l_in_r_array_transp, int2_grad1_u12_bimo_t, &
           !$OMP         tmpval_2, tmpvec_2, tmp1)
-          !$OMP DO 
+          !$OMP DO
           do p2 = 1, mo_num
             do ipoint = 1, n_points_final_grid
               tmp1(ipoint,1,p2) = tmpval_2(ipoint) * int2_grad1_u12_bimo_t(ipoint,1,p2,i) + mos_l_in_r_array_transp(ipoint,p2) * tmpvec_2(ipoint,1)
@@ -929,11 +935,11 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction_v0, (mo_num,mo_num,mo_num,
             !$OMP         mos_r_in_r_array_transp,        &
             !$OMP         int2_grad1_u12_bimo_t,          &
             !$OMP         tmp1, tmp2, tmpval_1, tmpval_2, tmpvec_1)
-            !$OMP DO 
+            !$OMP DO
             do h2 = 1, mo_num
               do ipoint = 1, n_points_final_grid
 
-                tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint)     & 
+                tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint)     &
                                 + int2_grad1_u12_bimo_t(ipoint,1,i,h2) * tmpvec_1(ipoint,1) &
                                 + int2_grad1_u12_bimo_t(ipoint,2,i,h2) * tmpvec_1(ipoint,2) &
                                 + int2_grad1_u12_bimo_t(ipoint,3,i,h2) * tmpvec_1(ipoint,3)
@@ -966,17 +972,17 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction_v0, (mo_num,mo_num,mo_num,
             !$OMP SHARED (mo_num, n_points_final_grid, i, h1, &
             !$OMP         int2_grad1_u12_bimo_t,              &
             !$OMP         tmpvec_2, tmpvec_3, tmp2, tmp3)
-            !$OMP DO 
+            !$OMP DO
             do p2 = 1, mo_num
               do ipoint = 1, n_points_final_grid
 
                 tmp2(ipoint,p2) = int2_grad1_u12_bimo_t(ipoint,1,p2,i) * tmpvec_2(ipoint,1) + int2_grad1_u12_bimo_t(ipoint,1,p2,h1) * tmpvec_3(ipoint,1) &
                                 + int2_grad1_u12_bimo_t(ipoint,2,p2,i) * tmpvec_2(ipoint,2) + int2_grad1_u12_bimo_t(ipoint,2,p2,h1) * tmpvec_3(ipoint,2) &
-                                + int2_grad1_u12_bimo_t(ipoint,3,p2,i) * tmpvec_2(ipoint,3) + int2_grad1_u12_bimo_t(ipoint,3,p2,h1) * tmpvec_3(ipoint,3) 
+                                + int2_grad1_u12_bimo_t(ipoint,3,p2,i) * tmpvec_2(ipoint,3) + int2_grad1_u12_bimo_t(ipoint,3,p2,h1) * tmpvec_3(ipoint,3)
 
-                tmp3(ipoint,1,p2) = int2_grad1_u12_bimo_t(ipoint,1,p2,h1) 
-                tmp3(ipoint,2,p2) = int2_grad1_u12_bimo_t(ipoint,2,p2,h1) 
-                tmp3(ipoint,3,p2) = int2_grad1_u12_bimo_t(ipoint,3,p2,h1) 
+                tmp3(ipoint,1,p2) = int2_grad1_u12_bimo_t(ipoint,1,p2,h1)
+                tmp3(ipoint,2,p2) = int2_grad1_u12_bimo_t(ipoint,2,p2,h1)
+                tmp3(ipoint,3,p2) = int2_grad1_u12_bimo_t(ipoint,3,p2,h1)
               enddo
             enddo
             !$OMP END DO
@@ -1014,10 +1020,10 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction_v0, (mo_num,mo_num,mo_num,
 
     !$OMP PARALLEL                 &
     !$OMP DEFAULT (NONE)           &
-    !$OMP PRIVATE (h1, h2, p1, p2) & 
+    !$OMP PRIVATE (h1, h2, p1, p2) &
     !$OMP SHARED (no_aaa_contraction_v0, mo_num)
 
-    !$OMP DO 
+    !$OMP DO
     do h1 = 1, mo_num
       do h2 = 1, mo_num
         do p1 = 1, mo_num
@@ -1029,7 +1035,7 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction_v0, (mo_num,mo_num,mo_num,
     enddo
     !$OMP END DO
 
-    !$OMP DO 
+    !$OMP DO
     do h1 = 1, mo_num
       do h2 = 1, mo_num
         do p1 = 2, mo_num
@@ -1041,7 +1047,7 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction_v0, (mo_num,mo_num,mo_num,
     enddo
     !$OMP END DO
 
-    !$OMP DO 
+    !$OMP DO
     do h1 = 1, mo_num-1
       do h2 = h1+1, mo_num
         do p1 = 2, mo_num
@@ -1063,7 +1069,10 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, no_aba_contraction, (mo_num,mo_num,mo_num,mo_num)]
+BEGIN_PROVIDER [ double precision, no_aba_contraction, (mo_num, mo_num, mo_num, mo_num)]
+  BEGIN_DOC
+  ! no_aba_contraction
+  END_DOC
 
   use bitmasks ! you need to include the bitmasks_module.f90 features
 
@@ -1100,7 +1109,7 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction, (mo_num,mo_num,mo_num,mo_
   !$OMP DEFAULT (NONE)                                            &
   !$OMP PRIVATE (ipoint, h1, p1, h2, p2, i, ii,                   &
   !$OMP          tmp_3d, tmp_2d, tmp1, tmp2,                      &
-  !$OMP          tmpval_1, tmpval_2, tmpvec_1, tmpvec_2)          & 
+  !$OMP          tmpval_1, tmpval_2, tmpvec_1, tmpvec_2)          &
   !$OMP SHARED (n_points_final_grid, Ne, occ, mo_num,             &
   !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp, &
   !$OMP         int2_grad1_u12_bimo_t, final_weight_at_r_vector,  &
@@ -1118,7 +1127,7 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction, (mo_num,mo_num,mo_num,mo_
   tmpval_1 = 0.d0
   tmpval_2 = 0.d0
   tmpvec_1 = 0.d0
-  tmpvec_2 = 0.d0 
+  tmpvec_2 = 0.d0
 
   !$OMP DO
 
@@ -1178,7 +1187,7 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction, (mo_num,mo_num,mo_num,mo_
 
         do h2 = 1, mo_num
           do ipoint = 1, n_points_final_grid
-            tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint) 
+            tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint)
           enddo
         enddo
 
@@ -1209,14 +1218,14 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction, (mo_num,mo_num,mo_num,mo_
   !$OMP END PARALLEL
 
 
-  ! purely open-shell part 
+  ! purely open-shell part
   if(Ne(2) < Ne(1)) then
 
     !$OMP PARALLEL                                                  &
     !$OMP DEFAULT (NONE)                                            &
     !$OMP PRIVATE (ipoint, h1, p1, h2, p2, i, ii,                   &
     !$OMP          tmp_3d, tmp_2d, tmp1, tmp2,                      &
-    !$OMP          tmpval_1, tmpval_2, tmpvec_1, tmpvec_2)          & 
+    !$OMP          tmpval_1, tmpval_2, tmpvec_1, tmpvec_2)          &
     !$OMP SHARED (n_points_final_grid, Ne, occ, mo_num,             &
     !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp, &
     !$OMP         int2_grad1_u12_bimo_t, final_weight_at_r_vector,  &
@@ -1234,7 +1243,7 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction, (mo_num,mo_num,mo_num,mo_
     Tmpval_1 = 0.d0
     Tmpval_2 = 0.d0
     Tmpvec_1 = 0.d0
-    Tmpvec_2 = 0.d0 
+    Tmpvec_2 = 0.d0
 
     !$OMP DO
 
@@ -1294,7 +1303,7 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction, (mo_num,mo_num,mo_num,mo_
 
           do h2 = 1, mo_num
             do ipoint = 1, n_points_final_grid
-              tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint) 
+              tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint)
             enddo
           enddo
 
@@ -1334,7 +1343,10 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, no_aab_contraction, (mo_num,mo_num,mo_num,mo_num)]
+BEGIN_PROVIDER [ double precision, no_aab_contraction, (mo_num, mo_num, mo_num, mo_num)]
+  BEGIN_DOC
+  ! no_aab_contraction
+  END_DOC
 
   use bitmasks ! you need to include the bitmasks_module.f90 features
 
@@ -1440,7 +1452,7 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction, (mo_num,mo_num,mo_num,mo_
 
         do h2 = 1, mo_num
           do ipoint = 1, n_points_final_grid
-            tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint) 
+            tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint)
           enddo
         enddo
 
@@ -1474,10 +1486,10 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction, (mo_num,mo_num,mo_num,mo_
 
   !$OMP PARALLEL                 &
   !$OMP DEFAULT (NONE)           &
-  !$OMP PRIVATE (h1, h2, p1, p2) & 
+  !$OMP PRIVATE (h1, h2, p1, p2) &
   !$OMP SHARED (no_aab_contraction, mo_num)
 
-  !$OMP DO 
+  !$OMP DO
   do h1 = 1, mo_num
     do h2 = 1, mo_num
       do p1 = 1, mo_num
@@ -1489,7 +1501,7 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction, (mo_num,mo_num,mo_num,mo_
   enddo
   !$OMP END DO
 
-  !$OMP DO 
+  !$OMP DO
   do h1 = 1, mo_num
     do h2 = 1, mo_num
       do p1 = 2, mo_num
@@ -1501,7 +1513,7 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction, (mo_num,mo_num,mo_num,mo_
   enddo
   !$OMP END DO
 
-  !$OMP DO 
+  !$OMP DO
   do h1 = 1, mo_num-1
     do h2 = h1+1, mo_num
       do p1 = 2, mo_num
@@ -1521,7 +1533,10 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, no_aaa_contraction, (mo_num,mo_num,mo_num,mo_num)]
+BEGIN_PROVIDER [ double precision, no_aaa_contraction, (mo_num, mo_num, mo_num, mo_num)]
+  BEGIN_DOC
+  ! no_aaa_contraction
+  END_DOC
 
   use bitmasks ! you need to include the bitmasks_module.f90 features
 
@@ -1686,7 +1701,7 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction, (mo_num,mo_num,mo_num,mo_
           do h2 = 1, mo_num
             do ipoint = 1, n_points_final_grid
 
-              tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint)     & 
+              tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint)     &
                               + int2_grad1_u12_bimo_t(ipoint,1,i,h2) * tmpvec_1(ipoint,1) &
                               + int2_grad1_u12_bimo_t(ipoint,2,i,h2) * tmpvec_1(ipoint,2) &
                               + int2_grad1_u12_bimo_t(ipoint,3,i,h2) * tmpvec_1(ipoint,3)
@@ -1716,11 +1731,11 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction, (mo_num,mo_num,mo_num,mo_
 
               tmp2(ipoint,p2) = int2_grad1_u12_bimo_t(ipoint,1,p2,i) * tmpvec_2(ipoint,1) + int2_grad1_u12_bimo_t(ipoint,1,p2,h1) * tmpvec_3(ipoint,1) &
                               + int2_grad1_u12_bimo_t(ipoint,2,p2,i) * tmpvec_2(ipoint,2) + int2_grad1_u12_bimo_t(ipoint,2,p2,h1) * tmpvec_3(ipoint,2) &
-                              + int2_grad1_u12_bimo_t(ipoint,3,p2,i) * tmpvec_2(ipoint,3) + int2_grad1_u12_bimo_t(ipoint,3,p2,h1) * tmpvec_3(ipoint,3) 
+                              + int2_grad1_u12_bimo_t(ipoint,3,p2,i) * tmpvec_2(ipoint,3) + int2_grad1_u12_bimo_t(ipoint,3,p2,h1) * tmpvec_3(ipoint,3)
 
-              tmp3(ipoint,1,p2) = int2_grad1_u12_bimo_t(ipoint,1,p2,h1) 
-              tmp3(ipoint,2,p2) = int2_grad1_u12_bimo_t(ipoint,2,p2,h1) 
-              tmp3(ipoint,3,p2) = int2_grad1_u12_bimo_t(ipoint,3,p2,h1) 
+              tmp3(ipoint,1,p2) = int2_grad1_u12_bimo_t(ipoint,1,p2,h1)
+              tmp3(ipoint,2,p2) = int2_grad1_u12_bimo_t(ipoint,2,p2,h1)
+              tmp3(ipoint,3,p2) = int2_grad1_u12_bimo_t(ipoint,3,p2,h1)
             enddo
           enddo
 
@@ -1762,7 +1777,7 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction, (mo_num,mo_num,mo_num,mo_
 
 
 
-    ! purely open-shell part 
+    ! purely open-shell part
     if(Ne(2) < Ne(1)) then
 
       !$OMP PARALLEL                                                  &
@@ -1893,7 +1908,7 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction, (mo_num,mo_num,mo_num,mo_
             do h2 = 1, mo_num
               do ipoint = 1, n_points_final_grid
 
-                tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint)     & 
+                tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint)     &
                                 + int2_grad1_u12_bimo_t(ipoint,1,i,h2) * tmpvec_1(ipoint,1) &
                                 + int2_grad1_u12_bimo_t(ipoint,2,i,h2) * tmpvec_1(ipoint,2) &
                                 + int2_grad1_u12_bimo_t(ipoint,3,i,h2) * tmpvec_1(ipoint,3)
@@ -1923,11 +1938,11 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction, (mo_num,mo_num,mo_num,mo_
 
                 tmp2(ipoint,p2) = int2_grad1_u12_bimo_t(ipoint,1,p2,i) * tmpvec_2(ipoint,1) + int2_grad1_u12_bimo_t(ipoint,1,p2,h1) * tmpvec_3(ipoint,1) &
                                 + int2_grad1_u12_bimo_t(ipoint,2,p2,i) * tmpvec_2(ipoint,2) + int2_grad1_u12_bimo_t(ipoint,2,p2,h1) * tmpvec_3(ipoint,2) &
-                                + int2_grad1_u12_bimo_t(ipoint,3,p2,i) * tmpvec_2(ipoint,3) + int2_grad1_u12_bimo_t(ipoint,3,p2,h1) * tmpvec_3(ipoint,3) 
+                                + int2_grad1_u12_bimo_t(ipoint,3,p2,i) * tmpvec_2(ipoint,3) + int2_grad1_u12_bimo_t(ipoint,3,p2,h1) * tmpvec_3(ipoint,3)
 
-                tmp3(ipoint,1,p2) = int2_grad1_u12_bimo_t(ipoint,1,p2,h1) 
-                tmp3(ipoint,2,p2) = int2_grad1_u12_bimo_t(ipoint,2,p2,h1) 
-                tmp3(ipoint,3,p2) = int2_grad1_u12_bimo_t(ipoint,3,p2,h1) 
+                tmp3(ipoint,1,p2) = int2_grad1_u12_bimo_t(ipoint,1,p2,h1)
+                tmp3(ipoint,2,p2) = int2_grad1_u12_bimo_t(ipoint,2,p2,h1)
+                tmp3(ipoint,3,p2) = int2_grad1_u12_bimo_t(ipoint,3,p2,h1)
               enddo
             enddo
 
@@ -1972,10 +1987,10 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction, (mo_num,mo_num,mo_num,mo_
 
     !$OMP PARALLEL                 &
     !$OMP DEFAULT (NONE)           &
-    !$OMP PRIVATE (h1, h2, p1, p2) & 
+    !$OMP PRIVATE (h1, h2, p1, p2) &
     !$OMP SHARED (no_aaa_contraction, mo_num)
 
-    !$OMP DO 
+    !$OMP DO
     do h1 = 1, mo_num
       do h2 = 1, mo_num
         do p1 = 1, mo_num
@@ -1987,7 +2002,7 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction, (mo_num,mo_num,mo_num,mo_
     enddo
     !$OMP END DO
 
-    !$OMP DO 
+    !$OMP DO
     do h1 = 1, mo_num
       do h2 = 1, mo_num
         do p1 = 2, mo_num
@@ -1999,7 +2014,7 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction, (mo_num,mo_num,mo_num,mo_
     enddo
     !$OMP END DO
 
-    !$OMP DO 
+    !$OMP DO
     do h1 = 1, mo_num-1
       do h2 = h1+1, mo_num
         do p1 = 2, mo_num
@@ -2020,3 +2035,4 @@ BEGIN_PROVIDER [ double precision, no_aaa_contraction, (mo_num,mo_num,mo_num,mo_
 END_PROVIDER
 
 ! ---
+

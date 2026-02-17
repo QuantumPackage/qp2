@@ -38,24 +38,25 @@ subroutine mat_to_vec_index(p,q,i)
   include 'pi.h'
 
   implicit none
-  
+
   ! Variables
-  
+
   ! in
   integer, intent(in) :: p,q
-  
+
   ! out
-  integer, intent(out) :: i 
+  integer, intent(out) :: i
 
   ! internal
   integer :: a,b
   double precision :: da
 
   ! Calculation
- 
+
   a = p-1
   b = a*(a-1)/2
-  
+
   i = q+b
 
 end subroutine
+

@@ -2,8 +2,8 @@ program tc_bi_ortho
 
   BEGIN_DOC
   !
-  ! TODO : Reads psi_det in the EZFIO folder and prints out the left- and right-eigenvectors together 
-  !        with the energy. Saves the left-right wave functions at the end. 
+  ! TODO : Reads psi_det in the EZFIO folder and prints out the left- and right-eigenvectors together
+  !        with the energy. Saves the left-right wave functions at the end.
   !
   END_DOC
 
@@ -75,7 +75,7 @@ subroutine routine_i_h_psi
    test_r_hthree += dabs(i_H_phi_array(3,1)-accu_r_hthree)
 
  enddo
- 
+
  test_l_htot   *= 1.D0/dble(N_det)
  test_l_hmono  *= 1.D0/dble(N_det)
  test_l_htwoe  *= 1.D0/dble(N_det)
@@ -85,7 +85,7 @@ subroutine routine_i_h_psi
  test_r_hmono  *= 1.D0/dble(N_det)
  test_r_htwoe  *= 1.D0/dble(N_det)
  test_r_hthree *= 1.D0/dble(N_det)
- 
+
  print*,'**************************'
  print*,'test_l_htot    = ',test_l_htot
  print*,'test_l_hmono   = ',test_l_hmono
@@ -115,7 +115,7 @@ subroutine routine_grad_num
    contrib_r  =  dabs(dabs(gradvec_detail_right_old(0,indx)) -2.D0 * dabs( Fock_matrix_tc_mo_tot(p,q)))
    if(contrib_l.gt.1.d-10.or.contrib_r.gt.1.d-10)then
     print*,indx,q,p
-    print*,gradvec_detail_left_old(0,indx),gradvec_detail_right_old(0,indx) 
+    print*,gradvec_detail_left_old(0,indx),gradvec_detail_right_old(0,indx)
     print*,2.D0* Fock_matrix_tc_mo_tot(q,p), 2.d0* Fock_matrix_tc_mo_tot(p,q)
    endif
    accu_l += contrib_l
@@ -123,7 +123,7 @@ subroutine routine_grad_num
   enddo
  print*,'accu_l,accu_r'
  print*,accu_l,accu_r
- 
+
 ! do i = 1, nMonoEx
 !  print*,i,gradvec_old(i)
 ! enddo
@@ -138,7 +138,7 @@ subroutine routine_grad_num_dm_one_body
  double precision :: res_l(0:3),res_r(0:3)
 
  ibody = 2 ! check only the two-body term
- provide gradvec_detail_left_old gradvec_tc_l 
+ provide gradvec_detail_left_old gradvec_tc_l
  if(.True.)then
   print*,'**************************'
   print*,'**************************'
@@ -147,12 +147,12 @@ subroutine routine_grad_num_dm_one_body
   accu_r = 0.d0
   do ii = 1, n_core_inact_orb
    do aa = 1, n_virt_orb
-    indx = mat_idx_c_v(ii,aa) 
+    indx = mat_idx_c_v(ii,aa)
     ref_l = gradvec_detail_left_old(ibody,indx)
-    new_l = gradvec_tc_l(ibody,indx) 
+    new_l = gradvec_tc_l(ibody,indx)
     contrib_l  =  dabs(dabs(ref_l) - dabs(new_l))
     ref_r = gradvec_detail_right_old(ibody,indx)
-    new_r = gradvec_tc_r(ibody,indx) 
+    new_r = gradvec_tc_r(ibody,indx)
     contrib_r  =  dabs(dabs(ref_r) - dabs(new_r))
     i = list_core_inact(ii)
     a = list_virt(aa)
@@ -179,7 +179,7 @@ subroutine routine_grad_num_dm_one_body
   print*,'**************************'
   print*,'**************************'
  endif
- 
+
  ibody = 2 ! check only the two-body term
  if(.True.)then
   print*,'**************************'
@@ -189,12 +189,12 @@ subroutine routine_grad_num_dm_one_body
   accu_r = 0.d0
   do ii = 1, n_core_inact_orb
    do tt = 1, n_act_orb
-    indx = mat_idx_c_a(ii,tt) 
+    indx = mat_idx_c_a(ii,tt)
     ref_l = gradvec_detail_left_old(ibody,indx)
-    new_l = gradvec_tc_l(ibody,indx) 
+    new_l = gradvec_tc_l(ibody,indx)
     contrib_l  =  dabs(dabs(ref_l) - dabs(new_l))
     ref_r = gradvec_detail_right_old(ibody,indx)
-    new_r = gradvec_tc_r(ibody,indx) 
+    new_r = gradvec_tc_r(ibody,indx)
     contrib_r  =  dabs(dabs(ref_r) - dabs(new_r))
     if(contrib_l.gt.1.d-10.or.contrib_r.gt.1.d-10)then
      print*,'---------'
@@ -222,12 +222,12 @@ subroutine routine_grad_num_dm_one_body
   accu_r = 0.d0
   do tt = 1, n_act_orb
    do aa = 1, n_virt_orb
-    indx = mat_idx_a_v(tt,aa) 
+    indx = mat_idx_a_v(tt,aa)
     ref_l = gradvec_detail_left_old(ibody,indx)
-    new_l = gradvec_tc_l(ibody,indx) 
+    new_l = gradvec_tc_l(ibody,indx)
     contrib_l  =  dabs(dabs(ref_l) - dabs(new_l))
     ref_r = gradvec_detail_right_old(ibody,indx)
-    new_r = gradvec_tc_r(ibody,indx) 
+    new_r = gradvec_tc_r(ibody,indx)
     contrib_r  =  dabs(dabs(ref_r) - dabs(new_r))
     if(contrib_l.gt.1.d-10.or.contrib_r.gt.1.d-10)then
      print*,'---------'
@@ -247,6 +247,7 @@ subroutine routine_grad_num_dm_one_body
   print*,'accu_l,accu_r'
   print*,accu_l,accu_r
  endif
- 
+
 
 end
+

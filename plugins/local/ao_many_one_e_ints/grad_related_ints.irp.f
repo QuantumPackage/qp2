@@ -19,14 +19,14 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu, (ao_num, ao_num, n_points
 
   print*, ' providing v_ij_erf_rk_cst_mu ...'
 
-  provide mu_erf final_grid_points 
+  provide mu_erf final_grid_points
   call wall_time(wall0)
 
   v_ij_erf_rk_cst_mu = 0.d0
 
  !$OMP PARALLEL                                       &
  !$OMP DEFAULT (NONE)                                 &
- !$OMP PRIVATE (i, j, ipoint, r, int_mu, int_coulomb) & 
+ !$OMP PRIVATE (i, j, ipoint, r, int_mu, int_coulomb) &
  !$OMP SHARED  (ao_num, n_points_final_grid, v_ij_erf_rk_cst_mu, final_grid_points, mu_erf)
  !$OMP DO SCHEDULE (dynamic)
   do ipoint = 1, n_points_final_grid
@@ -46,7 +46,7 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu, (ao_num, ao_num, n_points
   enddo
  !$OMP END DO
  !$OMP END PARALLEL
- 
+
   do ipoint = 1, n_points_final_grid
     do i = 2, ao_num
       do j = 1, i-1
@@ -54,11 +54,11 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu, (ao_num, ao_num, n_points
       enddo
     enddo
   enddo
- 
+
   call wall_time(wall1)
   print*, ' wall time for v_ij_erf_rk_cst_mu = ', wall1 - wall0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -77,12 +77,12 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_transp, (n_points_final_gr
 
   print *, ' providing v_ij_erf_rk_cst_mu_transp ...'
 
-  provide mu_erf final_grid_points 
+  provide mu_erf final_grid_points
   call wall_time(wall0)
 
  !$OMP PARALLEL                                  &
  !$OMP DEFAULT (NONE)                            &
- !$OMP PRIVATE (i,j,ipoint,r,int_mu,int_coulomb) & 
+ !$OMP PRIVATE (i,j,ipoint,r,int_mu,int_coulomb) &
  !$OMP SHARED (ao_num,n_points_final_grid,v_ij_erf_rk_cst_mu_transp,final_grid_points,mu_erf)
  !$OMP DO SCHEDULE (dynamic)
   do ipoint = 1, n_points_final_grid
@@ -113,7 +113,7 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_transp, (n_points_final_gr
   call wall_time(wall1)
   print *, ' wall time for v_ij_erf_rk_cst_mu_transp = ', wall1 - wall0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -134,7 +134,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp, (3, ao_num, ao_num,
 
  !$OMP PARALLEL                                 &
  !$OMP DEFAULT (NONE)                           &
- !$OMP PRIVATE (i,j,ipoint,r,ints,ints_coulomb) & 
+ !$OMP PRIVATE (i,j,ipoint,r,ints,ints_coulomb) &
  !$OMP SHARED (ao_num,n_points_final_grid,x_v_ij_erf_rk_cst_mu_tmp,final_grid_points,mu_erf)
  !$OMP DO SCHEDULE (dynamic)
   do ipoint = 1, n_points_final_grid
@@ -156,7 +156,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp, (3, ao_num, ao_num,
   enddo
  !$OMP END DO
  !$OMP END PARALLEL
- 
+
   do ipoint = 1, n_points_final_grid
     do i = 2, ao_num
       do j = 1, i-1
@@ -170,7 +170,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp, (3, ao_num, ao_num,
   call wall_time(wall1)
   print *, ' wall time for x_v_ij_erf_rk_cst_mu_tmp = ', wall1 - wall0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -201,11 +201,11 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu, (ao_num, ao_num, n_poin
   call wall_time(wall1)
   print *, ' wall time for x_v_ij_erf_rk_cst_mu = ', wall1 - wall0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_transp, (ao_num, ao_num,3,n_points_final_grid)]
+BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_transp, (ao_num, ao_num, 3, n_points_final_grid)]
 
   BEGIN_DOC
   ! int dr x * phi_i(r) phi_j(r) (erf(mu(R) |r - R|) - 1)/|r - R|
@@ -232,7 +232,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_transp, (ao_num, ao_num,
   call wall_time(wall1)
   print *, ' wall time for x_v_ij_erf_rk_cst_mu_transp = ', wall1 - wall0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -263,14 +263,14 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_transp_bis, (n_points_fi
   call wall_time(wall1)
   print *, ' wall time for x_v_ij_erf_rk_cst_mu_transp_bis = ', wall1 - wall0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
 BEGIN_PROVIDER [ double precision, d_dx_v_ij_erf_rk_cst_mu_tmp, (3, n_points_final_grid, ao_num, ao_num)]
 
   BEGIN_DOC
-  ! d_dx_v_ij_erf_rk_cst_mu_tmp(m,R,j,i) = int dr phi_j(r)) (erf(mu(R) |r - R|) - 1)/|r - R| d/dx (phi_i(r) 
+  ! d_dx_v_ij_erf_rk_cst_mu_tmp(m,R,j,i) = int dr phi_j(r)) (erf(mu(R) |r - R|) - 1)/|r - R| d/dx (phi_i(r)
   !
   ! with m == 1 -> d/dx , m == 2 -> d/dy , m == 3 -> d/dz
   END_DOC
@@ -286,7 +286,7 @@ BEGIN_PROVIDER [ double precision, d_dx_v_ij_erf_rk_cst_mu_tmp, (3, n_points_fin
 
  !$OMP PARALLEL                                 &
  !$OMP DEFAULT (NONE)                           &
- !$OMP PRIVATE (i,j,ipoint,r,ints,ints_coulomb) & 
+ !$OMP PRIVATE (i,j,ipoint,r,ints,ints_coulomb) &
  !$OMP SHARED (ao_num,n_points_final_grid,d_dx_v_ij_erf_rk_cst_mu_tmp,final_grid_points,mu_erf)
  !$OMP DO SCHEDULE (dynamic)
   do ipoint = 1, n_points_final_grid
@@ -311,7 +311,7 @@ BEGIN_PROVIDER [ double precision, d_dx_v_ij_erf_rk_cst_mu_tmp, (3, n_points_fin
   call wall_time(wall1)
   print *, ' wall time for d_dx_v_ij_erf_rk_cst_mu_tmp = ', wall1 - wall0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -319,7 +319,7 @@ BEGIN_PROVIDER [ double precision, d_dx_v_ij_erf_rk_cst_mu, (n_points_final_grid
 
   BEGIN_DOC
   !
-  ! d_dx_v_ij_erf_rk_cst_mu_tmp(j,i,R,m) = int dr phi_j(r)) (erf(mu(R) |r - R|) - 1)/|r - R| d/dx (phi_i(r) 
+  ! d_dx_v_ij_erf_rk_cst_mu_tmp(j,i,R,m) = int dr phi_j(r)) (erf(mu(R) |r - R|) - 1)/|r - R| d/dx (phi_i(r)
   !
   ! with m == 1 -> d/dx , m == 2 -> d/dy , m == 3 -> d/dz
   !
@@ -345,7 +345,7 @@ BEGIN_PROVIDER [ double precision, d_dx_v_ij_erf_rk_cst_mu, (n_points_final_grid
   call wall_time(wall1)
   print *, ' wall time for d_dx_v_ij_erf_rk_cst_mu = ', wall1 - wall0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -353,7 +353,7 @@ BEGIN_PROVIDER [ double precision, x_d_dx_v_ij_erf_rk_cst_mu_tmp, (3, n_points_f
 
   BEGIN_DOC
   !
-  ! x_d_dx_v_ij_erf_rk_cst_mu_tmp(m,j,i,R) = int dr x phi_j(r)) (erf(mu(R) |r - R|) - 1)/|r - R| d/dx (phi_i(r) 
+  ! x_d_dx_v_ij_erf_rk_cst_mu_tmp(m,j,i,R) = int dr x phi_j(r)) (erf(mu(R) |r - R|) - 1)/|r - R| d/dx (phi_i(r)
   !
   ! with m == 1 -> d/dx , m == 2 -> d/dy , m == 3 -> d/dz
   !
@@ -370,7 +370,7 @@ BEGIN_PROVIDER [ double precision, x_d_dx_v_ij_erf_rk_cst_mu_tmp, (3, n_points_f
 
  !$OMP PARALLEL                                 &
  !$OMP DEFAULT (NONE)                           &
- !$OMP PRIVATE (i,j,ipoint,r,ints,ints_coulomb) & 
+ !$OMP PRIVATE (i,j,ipoint,r,ints,ints_coulomb) &
  !$OMP SHARED (ao_num,n_points_final_grid,x_d_dx_v_ij_erf_rk_cst_mu_tmp,final_grid_points,mu_erf)
  !$OMP DO SCHEDULE (dynamic)
   do ipoint = 1, n_points_final_grid
@@ -395,15 +395,15 @@ BEGIN_PROVIDER [ double precision, x_d_dx_v_ij_erf_rk_cst_mu_tmp, (3, n_points_f
   call wall_time(wall1)
   print *, ' wall time for x_d_dx_v_ij_erf_rk_cst_mu_tmp = ', wall1 - wall0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, x_d_dx_v_ij_erf_rk_cst_mu, (n_points_final_grid,ao_num, ao_num,3)]
+BEGIN_PROVIDER [ double precision, x_d_dx_v_ij_erf_rk_cst_mu, (n_points_final_grid, ao_num, ao_num, 3)]
 
   BEGIN_DOC
   !
-  ! x_d_dx_v_ij_erf_rk_cst_mu_tmp(j,i,R,m) = int dr x phi_j(r)) (erf(mu(R) |r - R|) - 1)/|r - R| d/dx (phi_i(r) 
+  ! x_d_dx_v_ij_erf_rk_cst_mu_tmp(j,i,R,m) = int dr x phi_j(r)) (erf(mu(R) |r - R|) - 1)/|r - R| d/dx (phi_i(r)
   !
   ! with m == 1 -> d/dx , m == 2 -> d/dy , m == 3 -> d/dz
   !
@@ -426,12 +426,13 @@ BEGIN_PROVIDER [ double precision, x_d_dx_v_ij_erf_rk_cst_mu, (n_points_final_gr
       enddo
     enddo
   enddo
- 
+
   call wall_time(wall1)
   print *, ' wall time for x_d_dx_v_ij_erf_rk_cst_mu = ', wall1 - wall0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
+
 
 

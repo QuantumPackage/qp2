@@ -33,7 +33,7 @@ subroutine spher_harm_func_m_pos(l,m,theta,phi,re_ylm, im_ylm)
 end
 
 subroutine spher_harm_func(l,m,theta,phi,re_ylm, im_ylm)
- implicit none 
+ implicit none
  BEGIN_DOC
  ! Y_lm(theta,phi) with -l<m<+l
  !
@@ -56,12 +56,12 @@ subroutine spher_harm_func(l,m,theta,phi,re_ylm, im_ylm)
   call spher_harm_func_m_pos(l,minus_m,theta,phi,re_ylm_pos, im_ylm_pos)
   tmp = (-1)**minus_m
   re_ylm =   tmp  * re_ylm_pos
-  im_ylm =  -tmp  * im_ylm_pos ! complex conjugate 
+  im_ylm =  -tmp  * im_ylm_pos ! complex conjugate
  endif
 end
 
 subroutine cartesian_to_spherical(r,theta,phi,r_abs)
- implicit none 
+ implicit none
  double precision, intent(in) :: r(3)
  double precision, intent(out):: theta, phi,r_abs
  double precision :: r_2,x_2_y_2,tmp
@@ -104,10 +104,10 @@ subroutine cartesian_to_spherical(r,theta,phi,r_abs)
  endif
 
  if(.false.)then
-  x_2_y_2 = dsqrt(x_2_y_2)  
+  x_2_y_2 = dsqrt(x_2_y_2)
   if(dabs(x_2_y_2).gt.1.d-20.and.dabs(r(2)).gt.1.d-20)then
-   phi = dabs(r(2))/r(2) * dacos(r(1)/x_2_y_2) 
-  else 
+   phi = dabs(r(2))/r(2) * dacos(r(1)/x_2_y_2)
+  else
    phi = 0.d0
   endif
  endif
@@ -115,7 +115,7 @@ end
 
 
 subroutine spher_harm_func_expl(l,m,theta,phi,re_ylm, im_ylm)
- implicit none 
+ implicit none
  BEGIN_DOC
  ! Y_lm(theta,phi) with -l<m<+l and 0<= l <=2
  !
@@ -126,19 +126,19 @@ subroutine spher_harm_func_expl(l,m,theta,phi,re_ylm, im_ylm)
  double precision :: tmp
  include 'constants.include.F'
  if(l==0.and.m==0)then
-  re_ylm = 0.5d0 * inv_sq_pi 
+  re_ylm = 0.5d0 * inv_sq_pi
   im_ylm = 0.d0
  else if(l==1.and.m==1)then
-  tmp = - inv_sq_pi * dsqrt(3.d0/8.d0) * dsin(theta) 
+  tmp = - inv_sq_pi * dsqrt(3.d0/8.d0) * dsin(theta)
   re_ylm = tmp * dcos(phi)
   im_ylm = tmp * dsin(phi)
  else if (l==1.and.m==-1)then
-  tmp = - inv_sq_pi * dsqrt(3.d0/8.d0) * dsin(theta) 
+  tmp = - inv_sq_pi * dsqrt(3.d0/8.d0) * dsin(theta)
   re_ylm = tmp * dcos(phi)
   im_ylm = -tmp * dsin(phi)
  else if(l==1.and.m==0)then
-  tmp = inv_sq_pi * dsqrt(3.d0/4.d0) * dcos(theta) 
-  re_ylm = tmp 
+  tmp = inv_sq_pi * dsqrt(3.d0/4.d0) * dcos(theta)
+  re_ylm = tmp
   im_ylm = 0.d0
  else if(l==2.and.m==2)then
   tmp = 0.25d0 * inv_sq_pi * dsqrt(0.5d0*15.d0) * dsin(theta)*dsin(theta)
@@ -162,3 +162,4 @@ subroutine spher_harm_func_expl(l,m,theta,phi,re_ylm, im_ylm)
   im_ylm = 0.d0
  endif
 end
+

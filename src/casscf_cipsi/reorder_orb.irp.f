@@ -40,7 +40,7 @@ subroutine reorder_orbitals_for_casscf
  do i = 1, mo_num
   mo_coef_new(:,i) = mo_coef(:,iorder(i))
  enddo
- mo_coef = mo_coef_new 
+ mo_coef = mo_coef_new
  touch mo_coef
 
  list_core_reverse = 0
@@ -70,6 +70,7 @@ subroutine reorder_orbitals_for_casscf
   list_virt_reverse(n_core_inact_orb + n_act_orb + i) = i
   mo_class(n_core_inact_orb + n_act_orb + i) = "Virtual"
  enddo
- touch list_core_reverse list_core list_inact list_inact_reverse list_act list_act_reverse list_virt list_virt_reverse 
+ touch list_core_reverse list_core list_inact list_inact_reverse list_act list_act_reverse list_virt list_virt_reverse
 
 end
+

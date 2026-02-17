@@ -105,7 +105,7 @@ BEGIN_PROVIDER [ integer, psi_det_size ]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer(bit_kind), psi_det, (N_int,2,psi_det_size) ]
+BEGIN_PROVIDER [ integer(bit_kind), psi_det, (N_int, 2, psi_det_size) ]
   implicit none
   BEGIN_DOC
   ! The determinants of the wave function. Initialized with Hartree-Fock if the |EZFIO| file
@@ -176,7 +176,7 @@ END_PROVIDER
 
 
 
-BEGIN_PROVIDER [ double precision, psi_coef, (psi_det_size,N_states) ]
+BEGIN_PROVIDER [ double precision, psi_coef, (psi_det_size, N_states) ]
   implicit none
   BEGIN_DOC
   ! The wave function coefficients. Initialized with Hartree-Fock if the |EZFIO| file
@@ -291,8 +291,8 @@ END_PROVIDER
 !==============================================================================!
 
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_coef_sorted, (psi_det_size,N_states) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted, (N_int, 2, psi_det_size) ]
+&BEGIN_PROVIDER [ double precision, psi_coef_sorted, (psi_det_size, N_states) ]
 &BEGIN_PROVIDER [ double precision, psi_average_norm_contrib_sorted, (psi_det_size) ]
 &BEGIN_PROVIDER [ integer, psi_det_sorted_order, (psi_det_size) ]
    implicit none
@@ -332,8 +332,8 @@ END_PROVIDER
 
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_bit, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_coef_sorted_bit, (psi_det_size,N_states) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_bit, (N_int, 2, psi_det_size) ]
+&BEGIN_PROVIDER [ double precision, psi_coef_sorted_bit, (psi_det_size, N_states) ]
 &BEGIN_PROVIDER [ integer, psi_coef_sorted_bit_order, (psi_det_size) ]
    implicit none
    BEGIN_DOC
@@ -1008,5 +1008,6 @@ BEGIN_PROVIDER [ double precision, psi_det_Hii, (N_det) ]
  enddo
  !$OMP END PARALLEL DO
 END_PROVIDER
+
 
 

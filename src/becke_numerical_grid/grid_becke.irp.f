@@ -11,7 +11,7 @@
   !
   ! These numbers are automatically set by setting the grid_type_sgn parameter
   END_DOC
- 
+
   implicit none
 
   if(.not. my_grid_becke) then
@@ -73,6 +73,9 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [double precision, R_gill]
+  BEGIN_DOC
+  ! R_gill
+  END_DOC
 
   implicit none
 
@@ -102,7 +105,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [double precision, grid_points_per_atom, (3,n_points_integration_angular,n_points_radial_grid,nucl_num)]
+BEGIN_PROVIDER [double precision, grid_points_per_atom, (3, n_points_integration_angular, n_points_radial_grid, nucl_num)]
 
   BEGIN_DOC
   ! x,y,z coordinates of grid points used for integration in 3d space
@@ -148,7 +151,7 @@ BEGIN_PROVIDER [double precision, grid_points_per_atom, (3,n_points_integration_
       z_ref = nucl_coord(i,3)
       do j = 1, n_points_radial_grid-1
 
-        r = R_gill * dble(j-1)**2 / dble(n_points_radial_grid-j+1)**2 
+        r = R_gill * dble(j-1)**2 / dble(n_points_radial_grid-j+1)**2
 
         ! explicit values of the grid points centered around each atom
         do k = 1, n_points_integration_angular
@@ -158,7 +161,7 @@ BEGIN_PROVIDER [double precision, grid_points_per_atom, (3,n_points_integration_
         enddo
       enddo
     enddo
- 
+
   else
 
     print*, " rad_grid_type = ", rad_grid_type, ' is not implemented'
@@ -170,7 +173,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [double precision, weight_at_r, (n_points_integration_angular,n_points_radial_grid,nucl_num)]
+BEGIN_PROVIDER [double precision, weight_at_r, (n_points_integration_angular, n_points_radial_grid, nucl_num)]
 
   BEGIN_DOC
   ! Weight function at grid points : w_n(r) according to the equation (22)
@@ -231,7 +234,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [double precision, final_weight_at_r, (n_points_integration_angular,n_points_radial_grid,nucl_num)]
+BEGIN_PROVIDER [double precision, final_weight_at_r, (n_points_integration_angular, n_points_radial_grid, nucl_num)]
 
   BEGIN_DOC
   ! Total weight on each grid point which takes into account all Lebedev, Voronoi and radial weights.
@@ -261,10 +264,10 @@ BEGIN_PROVIDER [double precision, final_weight_at_r, (n_points_integration_angul
           final_weight_at_r(k,i,j) = weights_angular_points(k)  * weight_at_r(k,i,j) * contrib_integration * dr_radial_integral
 
           if(isnan(final_weight_at_r(k,i,j))) then
-           print*,'isnan(final_weight_at_r(k,i,j))' 
+           print*,'isnan(final_weight_at_r(k,i,j))'
            print*,k,i,j
            write(*,'(100(F16.10,X))') weights_angular_points(k), weight_at_r(k,i,j), contrib_integration
-           stop 
+           stop
           endif
         enddo
       enddo
@@ -283,10 +286,10 @@ BEGIN_PROVIDER [double precision, final_weight_at_r, (n_points_integration_angul
           final_weight_at_r(k,i,j) = weights_angular_points(k) * weight_at_r(k,i,j) * contrib_integration
 
           if(isnan(final_weight_at_r(k,i,j))) then
-           print*,'isnan(final_weight_at_r(k,i,j))' 
+           print*,'isnan(final_weight_at_r(k,i,j))'
            print*,k,i,j
            write(*,'(100(F16.10,X))') weights_angular_points(k), weight_at_r(k,i,j), contrib_integration, dr_radial_integral
-           stop 
+           stop
           endif
         enddo
       enddo
@@ -300,5 +303,6 @@ BEGIN_PROVIDER [double precision, final_weight_at_r, (n_points_integration_angul
   endif
 
 END_PROVIDER
+
 
 

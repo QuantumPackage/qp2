@@ -3,7 +3,7 @@
 ! TODO
 ! level shift of SCF is well adapted
 ! for 0.5 x F
-! 
+!
 
 subroutine rh_tcscf_diis()
 
@@ -30,7 +30,7 @@ subroutine rh_tcscf_diis()
   dim_DIIS    = 0
   g_delta_th  = 1d0
   er_delta_th = 1d0
-  rate_th     = 0.1d0 
+  rate_th     = 0.1d0
 
   allocate(mo_r_coef_save(ao_num,mo_num), mo_l_coef_save(ao_num,mo_num))
   mo_l_coef_save = 0.d0
@@ -154,8 +154,8 @@ subroutine rh_tcscf_diis()
       !print *, g_delta , rate_th *  g_save
       print *, er_delta, rate_th * er_save
 
-      mo_l_coef(1:ao_num,1:mo_num) = mo_l_coef_save(1:ao_num,1:mo_num) 
-      mo_r_coef(1:ao_num,1:mo_num) = mo_r_coef_save(1:ao_num,1:mo_num) 
+      mo_l_coef(1:ao_num,1:mo_num) = mo_l_coef_save(1:ao_num,1:mo_num)
+      mo_r_coef(1:ao_num,1:mo_num) = mo_r_coef_save(1:ao_num,1:mo_num)
       if(level_shift_TCSCF <= .1d0) then
         level_shift_TCSCF = 1.d0
       else
@@ -195,7 +195,7 @@ subroutine rh_tcscf_diis()
     e_delta  = dabs(etc_tot - e_save)
     !g_delta  = tc_grad - g_save
     er_delta = er_DIIS - er_save
-    
+
     e_save           = etc_tot
     !g_save           = tc_grad
     level_shift_save = level_shift_TCSCF
@@ -277,7 +277,7 @@ subroutine extrapolate_TC_Fock_matrix(E_DIIS, F_DIIS, F_ao, size_F_ao, it, dim_D
   !
   ! Compute the extrapolated Fock matrix using the DIIS procedure
   !
-  ! e = \sum_i c_i e_i and \sum_i c_i = 1 
+  ! e = \sum_i c_i e_i and \sum_i c_i = 1
   ! ==> lagrange multiplier with L = |e|^2 - \lambda (\sum_i c_i = 1)
   !
   END_DOC
@@ -397,4 +397,5 @@ subroutine extrapolate_TC_Fock_matrix(E_DIIS, F_DIIS, F_ao, size_F_ao, it, dim_D
 end
 
 ! ---
+
 

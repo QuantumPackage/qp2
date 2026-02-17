@@ -11,7 +11,7 @@ BEGIN_PROVIDER [ integer, N_int ]
   if (N_int > N_int_max) then
     stop 'N_int > N_int_max'
   endif
-  
+
 END_PROVIDER
 
 
@@ -20,7 +20,7 @@ BEGIN_PROVIDER [ integer(bit_kind), full_ijkl_bitmask, (N_int) ]
   BEGIN_DOC
   ! Bitmask to include all possible MOs
   END_DOC
-  
+
   integer                        :: i,j,k
   k=0
   do j=1,N_int
@@ -33,7 +33,10 @@ BEGIN_PROVIDER [ integer(bit_kind), full_ijkl_bitmask, (N_int) ]
   enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer(bit_kind), full_ijkl_bitmask_4, (N_int,4) ]
+BEGIN_PROVIDER [ integer(bit_kind), full_ijkl_bitmask_4, (N_int, 4) ]
+  BEGIN_DOC
+  ! full_ijkl_bitmask_4
+  END_DOC
   implicit none
   integer                        :: i
   do i=1,N_int
@@ -44,7 +47,10 @@ BEGIN_PROVIDER [ integer(bit_kind), full_ijkl_bitmask_4, (N_int,4) ]
   enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer(bit_kind), core_inact_act_bitmask_4, (N_int,4) ]
+BEGIN_PROVIDER [ integer(bit_kind), core_inact_act_bitmask_4, (N_int, 4) ]
+  BEGIN_DOC
+  ! core_inact_act_bitmask_4
+  END_DOC
   implicit none
   integer                        :: i
   do i=1,N_int
@@ -55,7 +61,10 @@ BEGIN_PROVIDER [ integer(bit_kind), core_inact_act_bitmask_4, (N_int,4) ]
   enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer(bit_kind), virt_bitmask_4, (N_int,4) ]
+BEGIN_PROVIDER [ integer(bit_kind), virt_bitmask_4, (N_int, 4) ]
+  BEGIN_DOC
+  ! virt_bitmask_4
+  END_DOC
   implicit none
   integer                        :: i
   do i=1,N_int
@@ -69,14 +78,14 @@ END_PROVIDER
 
 
 
-BEGIN_PROVIDER [ integer(bit_kind), HF_bitmask, (N_int,2)]
+BEGIN_PROVIDER [ integer(bit_kind), HF_bitmask, (N_int, 2)]
   implicit none
   BEGIN_DOC
   ! Hartree Fock bit mask
   END_DOC
   integer                        :: i,j,n
   integer                        :: occ(elec_alpha_num)
-  
+
   HF_bitmask = 0_bit_kind
   do i=1,elec_alpha_num
     occ(i) = i
@@ -84,10 +93,10 @@ BEGIN_PROVIDER [ integer(bit_kind), HF_bitmask, (N_int,2)]
   call list_to_bitstring( HF_bitmask(1,1), occ, elec_alpha_num, N_int)
   ! elec_alpha_num <= elec_beta_num, so occ is already OK.
   call list_to_bitstring( HF_bitmask(1,2), occ, elec_beta_num, N_int)
-  
+
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer(bit_kind), ref_bitmask, (N_int,2)]
+BEGIN_PROVIDER [ integer(bit_kind), ref_bitmask, (N_int, 2)]
   implicit none
   BEGIN_DOC
   ! Reference bit mask, used in Slater rules, chosen as Hartree-Fock bitmask
@@ -97,7 +106,7 @@ END_PROVIDER
 
 
 
-BEGIN_PROVIDER [ integer(bit_kind), generators_bitmask, (N_int,2,6) ]
+BEGIN_PROVIDER [ integer(bit_kind), generators_bitmask, (N_int, 2, 6) ]
   implicit none
   BEGIN_DOC
   ! Bitmasks for generator determinants.
@@ -119,8 +128,8 @@ BEGIN_PROVIDER [ integer(bit_kind), generators_bitmask, (N_int,2,6) ]
   !
   END_DOC
   logical                        :: exists
-  PROVIDE ezfio_filename full_ijkl_bitmask 
-  
+  PROVIDE ezfio_filename full_ijkl_bitmask
+
   integer                        :: ispin, i
   do ispin=1,2
       do i=1,N_int
@@ -132,10 +141,10 @@ BEGIN_PROVIDER [ integer(bit_kind), generators_bitmask, (N_int,2,6) ]
         generators_bitmask(i,ispin,d_part2) = reunion_of_act_virt_bitmask(i,ispin)
       enddo
   enddo
-  
+
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer(bit_kind), reunion_of_core_inact_bitmask, (N_int,2)]
+BEGIN_PROVIDER [ integer(bit_kind), reunion_of_core_inact_bitmask, (N_int, 2)]
   implicit none
   BEGIN_DOC
   ! Reunion of the core and inactive and virtual bitmasks
@@ -148,26 +157,26 @@ BEGIN_PROVIDER [ integer(bit_kind), reunion_of_core_inact_bitmask, (N_int,2)]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [integer(bit_kind), reunion_of_inact_act_bitmask, (N_int,2)]
+BEGIN_PROVIDER [integer(bit_kind), reunion_of_inact_act_bitmask, (N_int, 2)]
   implicit none
   BEGIN_DOC
   ! Reunion of the  inactive and active bitmasks
   END_DOC
   integer                        :: i,j
-  
+
   do i = 1, N_int
     reunion_of_inact_act_bitmask(i,1) = ior(inact_bitmask(i,1),act_bitmask(i,1))
     reunion_of_inact_act_bitmask(i,2) = ior(inact_bitmask(i,2),act_bitmask(i,2))
   enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [integer(bit_kind), reunion_of_act_virt_bitmask, (N_int,2)]
+BEGIN_PROVIDER [integer(bit_kind), reunion_of_act_virt_bitmask, (N_int, 2)]
   implicit none
   BEGIN_DOC
   ! Reunion of the  inactive and active bitmasks
   END_DOC
   integer                        :: i,j
-  
+
   do i = 1, N_int
     reunion_of_act_virt_bitmask(i,1) = ior(virt_bitmask(i,1),act_bitmask(i,1))
     reunion_of_act_virt_bitmask(i,2) = ior(virt_bitmask(i,2),act_bitmask(i,2))
@@ -175,13 +184,13 @@ BEGIN_PROVIDER [integer(bit_kind), reunion_of_act_virt_bitmask, (N_int,2)]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [integer(bit_kind), reunion_of_core_inact_act_bitmask, (N_int,2)]
+BEGIN_PROVIDER [integer(bit_kind), reunion_of_core_inact_act_bitmask, (N_int, 2)]
   implicit none
   BEGIN_DOC
   ! Reunion of the core, inactive and active bitmasks
   END_DOC
   integer                        :: i,j
-  
+
   do i = 1, N_int
     reunion_of_core_inact_act_bitmask(i,1) = ior(reunion_of_core_inact_bitmask(i,1),act_bitmask(i,1))
     reunion_of_core_inact_act_bitmask(i,2) = ior(reunion_of_core_inact_bitmask(i,2),act_bitmask(i,2))
@@ -189,7 +198,7 @@ BEGIN_PROVIDER [integer(bit_kind), reunion_of_core_inact_act_bitmask, (N_int,2)]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ integer(bit_kind), reunion_of_bitmask, (N_int,2)]
+BEGIN_PROVIDER [ integer(bit_kind), reunion_of_bitmask, (N_int, 2)]
   implicit none
   BEGIN_DOC
   ! Reunion of the inactive, active and virtual bitmasks
@@ -202,8 +211,8 @@ BEGIN_PROVIDER [ integer(bit_kind), reunion_of_bitmask, (N_int,2)]
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ integer(bit_kind), inact_virt_bitmask, (N_int,2)]
-&BEGIN_PROVIDER [ integer(bit_kind), core_inact_virt_bitmask, (N_int,2)]
+ BEGIN_PROVIDER [ integer(bit_kind), inact_virt_bitmask, (N_int, 2)]
+&BEGIN_PROVIDER [ integer(bit_kind), core_inact_virt_bitmask, (N_int, 2)]
   implicit none
   BEGIN_DOC
   ! Reunion of the inactive and virtual bitmasks
@@ -230,7 +239,10 @@ BEGIN_PROVIDER [ integer(bit_kind), unpaired_alpha_electrons, (N_int)]
   enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [integer(bit_kind), closed_shell_ref_bitmask, (N_int,2)]
+BEGIN_PROVIDER [integer(bit_kind), closed_shell_ref_bitmask, (N_int, 2)]
+  BEGIN_DOC
+  ! closed_shell_ref_bitmask
+  END_DOC
   implicit none
   integer                        :: i,j
   do i = 1, N_int
@@ -238,3 +250,4 @@ BEGIN_PROVIDER [integer(bit_kind), closed_shell_ref_bitmask, (N_int,2)]
     closed_shell_ref_bitmask(i,2) = ior(ref_bitmask(i,2),act_bitmask(i,2))
   enddo
 END_PROVIDER
+

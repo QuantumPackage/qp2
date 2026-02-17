@@ -283,7 +283,7 @@ subroutine run_slave_main
           nproc_target = nproc_target - 1
 
         enddo
-        
+
         if (N_det > 100000) then
 
           if (mpi_master) then
@@ -338,6 +338,7 @@ subroutine run_slave_main
     call MPI_finalize(ierr)
   IRP_ENDIF
 end
+
 
 
 

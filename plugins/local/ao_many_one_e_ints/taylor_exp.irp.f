@@ -26,10 +26,10 @@ end
 
 subroutine exp_dl_ovlp_stg_phi_ij(zeta,D_center,gam,delta,A_center,B_center,power_A,power_B,alpha,beta,n_taylor,array_ints,integral_taylor,exponent_exp)
   BEGIN_DOC
-  ! Computes the following integrals : 
+  ! Computes the following integrals :
   !
   ! .. math::
-  ! 
+  !
   !   array(i) = \int dr EXP{exponent_exp * [exp(-gam*i (r - D)) exp(-delta*i * (r -D)^2)] (x-A_x)^a (x-B_x)^b \exp(-\alpha (x-A_x)^2 - \beta (x-B_x)^2 )
   !
   !
@@ -64,10 +64,10 @@ end
 
 subroutine exp_dl_erf_stg_phi_ij(zeta,D_center,gam,delta,A_center,B_center,power_A,power_B,alpha,beta,C_center,mu,n_taylor,array_ints,integral_taylor)
   BEGIN_DOC
-  ! Computes the following integrals : 
+  ! Computes the following integrals :
   !
   ! .. math::
-  ! 
+  !
   !   array(i) = \int dr exp(-gam*i (r - D)) exp(-delta*i * (r -D)^2) (x-A_x)^a (x-B_x)^b \exp(-\alpha (x-A_x)^2 - \beta (x-B_x)^2 )
   !   \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
   !
@@ -88,7 +88,7 @@ subroutine exp_dl_erf_stg_phi_ij(zeta,D_center,gam,delta,A_center,B_center,power
  integer :: i,dim1
  double precision :: delta_exp,gam_exp,NAI_pol_mult_erf,erf_mu_stg_gauss_int_phi_ij
  dim1=100
- 
+
  array_ints(0) = NAI_pol_mult_erf(A_center,B_center,power_A,power_B,alpha,beta,C_center,n_pt_max_integrals,mu)
  integral_taylor = array_ints(0)
  do i = 1, n_taylor
@@ -99,3 +99,4 @@ subroutine exp_dl_erf_stg_phi_ij(zeta,D_center,gam,delta,A_center,B_center,power
  enddo
 
 end
+

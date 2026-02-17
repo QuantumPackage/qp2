@@ -90,7 +90,7 @@ double precision function j_erf_gauss_deriv(x,mu)
  implicit none
  double precision, intent(in) :: x,mu
  BEGIN_DOC
-! d/dx (j_gauss(mu,x)+j_mu(mu,x)) 
+! d/dx (j_gauss(mu,x)+j_mu(mu,x))
  END_DOC
  double precision :: j_gauss_deriv,j_mu_deriv
  j_erf_gauss_deriv = j_gauss_deriv(x,mu)+j_mu_deriv(x,mu)
@@ -100,7 +100,7 @@ double precision function j_erf_gauss_deriv_2(x,mu)
  implicit none
  double precision, intent(in) :: x,mu
  BEGIN_DOC
-! d^2/dx^2 (j_gauss(mu,x)+j_mu(mu,x)) 
+! d^2/dx^2 (j_gauss(mu,x)+j_mu(mu,x))
  END_DOC
  double precision :: j_gauss_deriv_2,j_mu_deriv_2
  j_erf_gauss_deriv_2 = j_gauss_deriv_2(x,mu)+j_mu_deriv_2(x,mu)
@@ -112,7 +112,7 @@ double precision function pot_j_gauss(x,mu)
  double precision, intent(in) :: x,mu
  BEGIN_DOC
  ! effective scalar potential associated with the erf_gauss correlation factor
- ! 
+ !
  ! 1/x( 1 - 2 * d/dx j_erf_gauss(x,mu)) - d^2/dx^2 j_erf_gauss(x,mu)) - d/dx d/dx (j_erf_gauss(x,mu))^2
  END_DOC
  double precision :: j_erf_gauss_deriv_2,j_erf_gauss_deriv
@@ -131,7 +131,7 @@ double precision function pot_j_mu(x,mu)
  double precision, intent(in) :: x,mu
  BEGIN_DOC
  ! effective scalar potential associated with the correlation factor
- ! 
+ !
  ! 1/x( 1 - 2 * d/dx j_erf(x,mu)) - d^2/dx^2 j_erf(x,mu)) - d/dx d/dx (j_erf(x,mu))^2
  END_DOC
  double precision :: j_mu_deriv_2,j_mu_deriv
@@ -144,3 +144,4 @@ double precision function pot_j_mu(x,mu)
  endif
 
 end
+

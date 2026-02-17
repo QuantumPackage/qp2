@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [double precision, mo_pseudo_integrals, (mo_num,mo_num)]
+BEGIN_PROVIDER [double precision, mo_pseudo_integrals, (mo_num, mo_num)]
   implicit none
   BEGIN_DOC
   ! Pseudopotential integrals in |MO| basis
@@ -26,7 +26,7 @@ BEGIN_PROVIDER [double precision, mo_pseudo_integrals, (mo_num,mo_num)]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [double precision, mo_pseudo_integrals_local, (mo_num,mo_num)]
+BEGIN_PROVIDER [double precision, mo_pseudo_integrals_local, (mo_num, mo_num)]
   implicit none
   BEGIN_DOC
   ! Pseudopotential integrals in |MO| basis
@@ -46,7 +46,7 @@ BEGIN_PROVIDER [double precision, mo_pseudo_integrals_local, (mo_num,mo_num)]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [double precision, mo_pseudo_integrals_non_local, (mo_num,mo_num)]
+BEGIN_PROVIDER [double precision, mo_pseudo_integrals_non_local, (mo_num, mo_num)]
   implicit none
   BEGIN_DOC
   ! Pseudopotential integrals in |MO| basis
@@ -64,5 +64,6 @@ BEGIN_PROVIDER [double precision, mo_pseudo_integrals_non_local, (mo_num,mo_num)
   endif
 
 END_PROVIDER
+
 
 

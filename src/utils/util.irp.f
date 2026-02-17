@@ -5,9 +5,9 @@ double precision function derf_mu_x(mu,x)
   if(dabs(x).gt.1.d-6)then
    derf_mu_x = derf(mu * x)/x
   else
-   derf_mu_x =  inv_sq_pi * 2.d0 * mu * (1.d0 - mu*mu*x*x/3.d0)                                                           
-  endif                      
-end    
+   derf_mu_x =  inv_sq_pi * 2.d0 * mu * (1.d0 - mu*mu*x*x/3.d0)
+  endif
+end
 
 
 double precision function binom_func(i,j)
@@ -44,8 +44,8 @@ double precision function binom_func(i,j)
 end
 
 
- BEGIN_PROVIDER [ double precision, binom, (0:40,0:40) ]
-&BEGIN_PROVIDER [ double precision, binom_transp, (0:40,0:40) ]
+ BEGIN_PROVIDER [ double precision, binom, (0:40, 0:40) ]
+&BEGIN_PROVIDER [ double precision, binom_transp, (0:40, 0:40) ]
   implicit none
   BEGIN_DOC
   ! Binomial coefficients
@@ -61,8 +61,8 @@ end
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ integer*8, binom_int, (0:40,0:40) ]
-&BEGIN_PROVIDER [ integer*8, binom_int_transp, (0:40,0:40) ]
+ BEGIN_PROVIDER [ integer*8, binom_int, (0:40, 0:40) ]
+&BEGIN_PROVIDER [ integer*8, binom_int_transp, (0:40, 0:40) ]
   implicit none
   BEGIN_DOC
   ! Binomial coefficients, as integers*8
@@ -479,7 +479,7 @@ subroutine check_sym(A, n)
       norm    += A(j,i) * A(j,i)
     enddo
   enddo
-  
+
   print*, ' deviation from sym = ', dev_sym
   print*, ' norm               = ', norm
 
@@ -500,9 +500,9 @@ subroutine sum_A_At(A, N)
 
  !$OMP PARALLEL       &
  !$OMP DEFAULT (NONE) &
- !$OMP PRIVATE (i, j) & 
+ !$OMP PRIVATE (i, j) &
  !$OMP SHARED (A, N)
- !$OMP DO 
+ !$OMP DO
   do j = 1, N
     do i = j, N
       A(i,j) += A(j,i)
@@ -510,7 +510,7 @@ subroutine sum_A_At(A, N)
   enddo
  !$OMP END DO
 
- !$OMP DO 
+ !$OMP DO
   do j = 2, N
     do i = 1, j-1
       A(i,j) = A(j,i)
@@ -536,9 +536,9 @@ subroutine sub_A_At(A, N)
 
  !$OMP PARALLEL       &
  !$OMP DEFAULT (NONE) &
- !$OMP PRIVATE (i, j) & 
+ !$OMP PRIVATE (i, j) &
  !$OMP SHARED (A, N)
- !$OMP DO 
+ !$OMP DO
   do j = 1, N
     do i = j, N
       A(i,j) -= A(j,i)
@@ -546,7 +546,7 @@ subroutine sub_A_At(A, N)
   enddo
  !$OMP END DO
 
- !$OMP DO 
+ !$OMP DO
   do j = 2, N
     do i = 1, j-1
       A(i,j) = -A(j,i)
@@ -579,7 +579,7 @@ logical function is_same_spin(sigma_1, sigma_2)
 end
 
 ! ---
-   
+
 function Kronecker_delta(i, j) result(delta)
 
   BEGIN_DOC
@@ -644,7 +644,7 @@ subroutine give_degen(A, n, shift, list_degen, n_degen_list)
   BEGIN_DOC
   ! returns n_degen_list :: the number of degenerated SET of elements (i.e. with |A(i)-A(i+1)| below shift)
   !
-  ! for each of these sets, list_degen(1,i) = first degenerate element of the set i, 
+  ! for each of these sets, list_degen(1,i) = first degenerate element of the set i,
   !
   !                         list_degen(2,i) = last degenerate element of the set i.
   END_DOC
@@ -713,4 +713,5 @@ end
 ! ---
 
 
-  
+
+

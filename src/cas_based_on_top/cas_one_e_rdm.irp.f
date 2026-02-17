@@ -1,8 +1,8 @@
 
- BEGIN_PROVIDER [double precision, one_e_act_dm_beta_mo_for_dft, (n_act_orb,n_act_orb,N_states)]
+ BEGIN_PROVIDER [double precision, one_e_act_dm_beta_mo_for_dft, (n_act_orb, n_act_orb, N_states)]
  implicit none
  BEGIN_DOC
- ! one_e_act_dm_beta_mo_for_dft = pure ACTIVE part of the ONE ELECTRON REDUCED DENSITY MATRIX for the BETA ELECTRONS 
+ ! one_e_act_dm_beta_mo_for_dft = pure ACTIVE part of the ONE ELECTRON REDUCED DENSITY MATRIX for the BETA ELECTRONS
  END_DOC
  integer :: i,j,ii,jj,istate
  do istate = 1, N_states
@@ -15,12 +15,12 @@
   enddo
  enddo
 
-END_PROVIDER 
+END_PROVIDER
 
- BEGIN_PROVIDER [double precision, one_e_act_dm_alpha_mo_for_dft, (n_act_orb,n_act_orb,N_states)]
+ BEGIN_PROVIDER [double precision, one_e_act_dm_alpha_mo_for_dft, (n_act_orb, n_act_orb, N_states)]
  implicit none
  BEGIN_DOC
- ! one_e_act_dm_alpha_mo_for_dft = pure ACTIVE part of the ONE ELECTRON REDUCED DENSITY MATRIX for the ALPHA ELECTRONS 
+ ! one_e_act_dm_alpha_mo_for_dft = pure ACTIVE part of the ONE ELECTRON REDUCED DENSITY MATRIX for the ALPHA ELECTRONS
  END_DOC
  integer :: i,j,ii,jj,istate
  do istate = 1, N_states
@@ -33,5 +33,6 @@ END_PROVIDER
   enddo
  enddo
 
-END_PROVIDER 
+END_PROVIDER
+
 

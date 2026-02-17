@@ -4,11 +4,11 @@
 subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, eigval)
 
   BEGIN_DOC
-  ! 
-  ! routine which returns the sorted REAL EIGENVALUES ONLY and corresponding LEFT/RIGHT eigenvetors 
+  !
+  ! routine which returns the sorted REAL EIGENVALUES ONLY and corresponding LEFT/RIGHT eigenvetors
   ! of a non hermitian matrix A(n,n)
   !
-  ! n_real_eigv is the number of real eigenvalues, which might be smaller than the dimension "n" 
+  ! n_real_eigv is the number of real eigenvalues, which might be smaller than the dimension "n"
   !
   END_DOC
 
@@ -19,7 +19,7 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
   integer,          intent(out) :: n_real_eigv
   double precision, intent(out) :: reigvec(n,n), leigvec(n,n), eigval(n)
 
-  integer                       :: i, j,k 
+  integer                       :: i, j,k
   integer                       :: n_good
   double precision              :: thr, thr_cut, thr_diag, thr_norm
   double precision              :: accu_d, accu_nd
@@ -31,7 +31,7 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
 
   allocate(phi_1_tilde(n),phi_2_tilde(n),chi_1_tilde(n),chi_2_tilde(n))
 
-  allocate(WR(n), WI(n), VL(n,n), VR(n,n)) 
+  allocate(WR(n), WI(n), VL(n,n), VR(n,n))
 
   call lapack_diag_non_sym(n, A, WR, WI, VL, VR)
 
@@ -40,7 +40,7 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
 
   ! ---
 
-  ! track & sort the real eigenvalues 
+  ! track & sort the real eigenvalues
 
   n_good = 0
   thr    = Im_thresh_tc
@@ -70,14 +70,14 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
 
   deallocate( WR, WI )
 
-  n_real_eigv = n_good 
+  n_real_eigv = n_good
   do i = 1, n_good
     iorder(i) = i
   enddo
   call dsort(eigval, iorder, n_good)
-      
-  reigvec(:,:) = 0.d0 
-  leigvec(:,:) = 0.d0 
+
+  reigvec(:,:) = 0.d0
+  leigvec(:,:) = 0.d0
   do i = 1, n_real_eigv
     do j = 1, n
       reigvec(j,i) = VR(j,list_good(iorder(i)))
@@ -146,7 +146,7 @@ end
 subroutine check_bi_ortho(reigvec, leigvec, n, S, accu_nd)
 
   BEGIN_DOC
-  ! retunrs the overlap matrix S = Leigvec^T Reigvec 
+  ! retunrs the overlap matrix S = Leigvec^T Reigvec
   !
   ! and the square root of the sum of the squared off-diagonal elements of S
   END_DOC
@@ -174,5 +174,6 @@ subroutine check_bi_ortho(reigvec, leigvec, n, S, accu_nd)
   accu_nd = dsqrt(accu_nd)
 
 end
+
 
 

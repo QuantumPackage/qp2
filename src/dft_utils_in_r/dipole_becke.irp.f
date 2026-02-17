@@ -1,6 +1,9 @@
- BEGIN_PROVIDER [ double precision, mo_dipole_x_becke, (mo_num,mo_num)]
-&BEGIN_PROVIDER [ double precision, mo_dipole_y_becke, (mo_num,mo_num)]
-&BEGIN_PROVIDER [ double precision, mo_dipole_z_becke, (mo_num,mo_num)]
+ BEGIN_PROVIDER [ double precision, mo_dipole_x_becke, (mo_num, mo_num)]
+&BEGIN_PROVIDER [ double precision, mo_dipole_y_becke, (mo_num, mo_num)]
+&BEGIN_PROVIDER [ double precision, mo_dipole_z_becke, (mo_num, mo_num)]
+  BEGIN_DOC
+  ! mo_dipole_x_becke
+  END_DOC
  implicit none
  integer :: i,j,ipoint
  double precision :: r(3), weight
@@ -20,4 +23,5 @@
    enddo
   enddo
  enddo
-END_PROVIDER 
+END_PROVIDER
+

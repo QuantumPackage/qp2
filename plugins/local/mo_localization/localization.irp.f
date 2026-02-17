@@ -5,7 +5,7 @@ program localization
   call set_classes_loc
   call run_localization
   call unset_classes_loc
-  
+
 end
 
 
@@ -110,12 +110,12 @@ subroutine run_localization
 
   ! Localization criterion (FB, PM, ...) for each mo_class
   print*,'### Before the pre rotation'
-  
+
   ! Debug
   if (debug_hf) then
     print*,'HF energy:', HF_energy
   endif
-  
+
   do l = 1, 4
     if (l==1) then ! core
       tmp_list_size = dim_list_core_orb
@@ -127,7 +127,7 @@ subroutine run_localization
       tmp_list_size = dim_list_virt_orb
     endif
 
-     ! Allocation tmp array  
+     ! Allocation tmp array
     allocate(tmp_list(tmp_list_size))
 
     ! To give the list of MOs in a mo_class
@@ -146,7 +146,7 @@ subroutine run_localization
       print*,'Criterion:', criterion, mo_class(tmp_list(1))
     endif
 
-    deallocate(tmp_list)    
+    deallocate(tmp_list)
 
   enddo
 
@@ -161,13 +161,13 @@ subroutine run_localization
   ! Criterion after the pre rotation
   ! Localization criterion (FB, PM, ...) for each mo_class
   print*,'### After the pre rotation'
-  
+
   ! Debug
   if (debug_hf) then
     touch mo_coef
     print*,'HF energy:', HF_energy
   endif
-  
+
   do l = 1, 4
     if (l==1) then ! core
       tmp_list_size = dim_list_core_orb
@@ -178,9 +178,9 @@ subroutine run_localization
     else ! virt
       tmp_list_size = dim_list_virt_orb
     endif
-    
+
     if (tmp_list_size >= 2) then
-      ! Allocation tmp array  
+      ! Allocation tmp array
       allocate(tmp_list(tmp_list_size))
 
       ! To give the list of MOs in a mo_class
@@ -196,10 +196,10 @@ subroutine run_localization
 
       call criterion_localization(tmp_list_size, tmp_list,criterion)
       print*,'Criterion:', criterion, trim(mo_class(tmp_list(1)))
-      
-      deallocate(tmp_list)    
+
+      deallocate(tmp_list)
     endif
-    
+
   enddo
 
   ! Debug
@@ -209,7 +209,7 @@ subroutine run_localization
   print*,'========================'
   print*,'  Orbital localization'
   print*,'========================'
-  print*,'' 
+  print*,''
 
   !Initialization
   not_converged = .TRUE.
@@ -218,9 +218,9 @@ subroutine run_localization
   if (dim_list_core_orb >= 2) then
     not_core_converged = .TRUE.
   else
-    not_core_converged = .FALSE. 
+    not_core_converged = .FALSE.
   endif
-  
+
   if (dim_list_act_orb >= 2) then
     not_act_converged = .TRUE.
   else
@@ -238,7 +238,7 @@ subroutine run_localization
   else
     not_virt_converged = .FALSE.
   endif
- 
+
   ! Loop over the mo_classes
   do l = 1, 4
 
@@ -256,12 +256,12 @@ subroutine run_localization
       tmp_list_size = dim_list_virt_orb
     endif
 
-    ! Next iteration if converged = true 
+    ! Next iteration if converged = true
     if (.not. not_converged) then
       cycle
     endif
- 
-    ! Allocation tmp array  
+
+    ! Allocation tmp array
     allocate(tmp_list(tmp_list_size))
 
     ! To give the list of MOs in a mo_class
@@ -282,12 +282,12 @@ subroutine run_localization
       print*,''
     endif
 
-    ! Size for the 2D -> 1D transformation 
+    ! Size for the 2D -> 1D transformation
     tmp_n = tmp_list_size * (tmp_list_size - 1)/2
 
-    ! Without hessian + trust region 
+    ! Without hessian + trust region
     if (.not. localization_use_hessian) then
-       
+
       ! Allocation of temporary arrays
       allocate(v_grad(tmp_n), tmp_m_x(tmp_list_size, tmp_list_size))
       allocate(tmp_R(tmp_list_size, tmp_list_size), tmp_x(tmp_n))
@@ -301,13 +301,13 @@ subroutine run_localization
 
       !Loop
       do while (not_converged)
-         
+
         print*,''
         print*,'***********************'
         print*,'Iteration', nb_iter
         print*,'***********************'
         print*,''
-        
+
         ! Angles of rotation
         call theta_localization(tmp_list, tmp_list_size, tmp_m_x, max_elem)
         tmp_m_x = - tmp_m_x * delta
@@ -337,7 +337,7 @@ subroutine run_localization
         print*,'Criterion:', trim(mo_class(tmp_list(1))), nb_iter, criterion
         print*,'Max elem :', max_elem
         print*,'Delta    :', delta
-        
+
         nb_iter = nb_iter + 1
 
         ! Exit
@@ -357,7 +357,7 @@ subroutine run_localization
 
     ! Trust region
     else
-    
+
       ! Allocation of temporary arrays
       allocate(v_grad(tmp_n), H(tmp_n), tmp_m_x(tmp_list_size, tmp_list_size))
       allocate(tmp_R(tmp_list_size, tmp_list_size))
@@ -379,12 +379,12 @@ subroutine run_localization
         print*,'Iteration', nb_iter
         print*,'***********************'
         print*,''
-  
+
         ! Gradient
         call gradient_localization(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_grad)
         ! Diagonal hessian
         call hessian_localization(tmp_n, tmp_list_size, tmp_list, H)
-        
+
         ! Diagonalization of the diagonal hessian by hands
         !call diagonalization_hessian(tmp_n,H,e_val,w)
         do i = 1, tmp_n
@@ -392,7 +392,7 @@ subroutine run_localization
         enddo
 
         ! Key list for dsort
-        do i = 1, tmp_n 
+        do i = 1, tmp_n
           key(i) = i
         enddo
 
@@ -407,7 +407,7 @@ subroutine run_localization
 
         ! To enter in the loop just after
         cancel_step = .True.
-        nb_sub_iter = 0 
+        nb_sub_iter = 0
 
         ! Loop to reduce the trust radius until the criterion decreases and rho >= thresh_rho
         do while (cancel_step)
@@ -418,17 +418,17 @@ subroutine run_localization
           print*,'Max elem grad:', max_elem
           print*,'-----------------------------'
 
-          ! Hessian,gradient,Criterion -> x 
+          ! Hessian,gradient,Criterion -> x
           call trust_region_step_w_expected_e(tmp_n,1, H, W, e_val, v_grad, prev_criterion, &
                rho, nb_iter, delta, criterion_model, tmp_x, must_exit)
 
           ! Internal loop exit condition
           if (must_exit) then
             print*,'trust_region_step_w_expected_e sent: Exit'
-            exit 
+            exit
           endif
 
-          ! 1D tmp -> 2D tmp 
+          ! 1D tmp -> 2D tmp
           call vec_to_mat_v2(tmp_n, tmp_list_size, tmp_x, tmp_m_x)
 
           ! Rotation submatrix (square matrix tmp_list_size by tmp_list_size)
@@ -443,9 +443,9 @@ subroutine run_localization
 
           ! tmp_R to R, subspace to full space
           call sub_to_full_rotation_matrix(tmp_list_size, tmp_list, tmp_R, R)
-        
+
           ! Rotation of the MOs
-          call apply_mo_rotation(R, prev_mos)   
+          call apply_mo_rotation(R, prev_mos)
 
           ! Update the things related to mo_coef
           call update_data_localization()
@@ -454,7 +454,7 @@ subroutine run_localization
           call criterion_localization(tmp_list_size, tmp_list, criterion)
           print*,'Criterion:', trim(mo_class(tmp_list(1))), nb_iter, criterion
 
-          ! Criterion -> step accepted or rejected 
+          ! Criterion -> step accepted or rejected
           call trust_region_is_step_cancelled(nb_iter, prev_criterion, criterion, &
                criterion_model, rho, cancel_step)
 
@@ -470,7 +470,7 @@ subroutine run_localization
         ! To exit the external loop if must_exti = .True.
         if (must_exit) then
           exit
-        endif 
+        endif
 
         ! Step accepted, nb iteration + 1
         nb_iter = nb_iter + 1
@@ -486,22 +486,22 @@ subroutine run_localization
 
       ! Deallocation of temporary arrays
       deallocate(v_grad, H, tmp_m_x, tmp_R, tmp_list, tmp_x, W, e_val, key)
-      
+
       ! Save the MOs
       call save_mos()
       TOUCH mo_coef
- 
+
       ! Debug
       if (debug_hf) then
         touch mo_coef
         print*,'HF energy:', HF_energy
       endif
-      
+
     endif
   enddo
 
   ! Seems unecessary
-  TOUCH mo_coef 
+  TOUCH mo_coef
 
   ! To sort the MOs using the diagonal elements of the Fock matrix
   if (sort_mos_by_e) then
@@ -518,3 +518,4 @@ subroutine run_localization
   call compute_spatial_extent(spatial_extent)
 
 end
+

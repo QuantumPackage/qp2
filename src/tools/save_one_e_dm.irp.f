@@ -8,7 +8,7 @@ program save_one_e_dm
 !
 ! Then, the global variable :option:`aux_quantities data_one_e_dm_alpha_mo`
 ! and :option:`aux_quantities data_one_e_dm_beta_mo` (and the corresponding for |AO|)
-! will automatically ! read this density in the next calculation. 
+! will automatically ! read this density in the next calculation.
 ! This can be used to perform damping on the density in |RSDFT| calculations (see
 ! :ref:`module_density_for_dft`).
  END_DOC
@@ -29,3 +29,4 @@ subroutine routine_save_one_e_dm
  call ezfio_set_aux_quantities_data_one_e_dm_beta_ao(one_e_dm_ao_beta)
  call ezfio_set_aux_quantities_data_one_e_dm_tot_ao(one_e_dm_ao)
 end
+

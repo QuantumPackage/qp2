@@ -19,7 +19,7 @@ subroutine routine
  integer(bit_kind), allocatable :: psi_det_tmp(:,:,:)
  double precision, allocatable :: psi_coef_tmp(:,:)
  allocate(psi_det_tmp(N_int,2,ndet_max),psi_coef_tmp(ndet_max, N_states))
- 
+
  integer :: i,j
  double precision :: accu(N_states)
  accu = 0.d0
@@ -43,7 +43,7 @@ subroutine routine
  enddo
 
  call save_wavefunction_general(ndet_max,N_states,psi_det_tmp,size(psi_coef_tmp,1),psi_coef_tmp)
- 
+
 end
 
 subroutine routine_s2
@@ -74,7 +74,7 @@ subroutine routine_s2
  enddo
 
  allocate(psi_det_tmp(N_int,2,ndet_max),psi_coef_tmp(ndet_max, N_states))
- 
+
  accu = 0.d0
  k=0
  do i = 1, N_det
@@ -99,5 +99,6 @@ subroutine routine_s2
  enddo
 
  call save_wavefunction_general(ndet_max,N_states,psi_det_tmp,size(psi_coef_tmp,1),psi_coef_tmp)
- 
+
 end
+

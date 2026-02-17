@@ -15,7 +15,7 @@ end
 
 subroutine print_grad
  implicit none
- integer :: i 
+ integer :: i
  do i = 1, nMonoEx
   if(dabs(gradvec2(i)).gt.1.d-5)then
    print*,''
@@ -49,3 +49,4 @@ subroutine routine
  print*,'accu             = ',accu(1)
 
 end
+

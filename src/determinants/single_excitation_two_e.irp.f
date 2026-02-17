@@ -61,6 +61,9 @@ end
 
 
 BEGIN_PROVIDER [double precision, fock_wee_closed_shell, (mo_num, mo_num) ]
+  BEGIN_DOC
+  ! fock_wee_closed_shell
+  END_DOC
  implicit none
  integer :: i0,j0,i,j,k0,k
  integer :: n_occ_ab(2)
@@ -132,5 +135,6 @@ BEGIN_PROVIDER [double precision, fock_wee_closed_shell, (mo_num, mo_num) ]
  enddo
 
 END_PROVIDER
+
 
 

@@ -10,7 +10,7 @@
   !
   ! Various component of the TC energy for the reference "HF" Slater determinant
   !
-  END_DOC 
+  END_DOC
 
   implicit none
   double precision :: hmono, htwoe, htot, hthree
@@ -22,7 +22,7 @@
   call diag_htc_bi_orth_2e_brute(N_int, HF_bitmask, hmono, htwoe, htot)
 
   ref_tc_energy_1e = hmono
-  ref_tc_energy_2e = htwoe 
+  ref_tc_energy_2e = htwoe
 
   if(three_body_h_tc) then
     call diag_htc_bi_orth_3e_brute(N_int, HF_bitmask, hthree)
@@ -38,7 +38,7 @@
     ref_tc_energy_tot += noL_0e
   endif
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -93,14 +93,14 @@ subroutine diag_htilde_mu_mat_fock_bi_ortho(Nint, det_in, hmono, htwoe, hthree, 
   !DIR$ FORCEINLINE
   call bitstring_to_list_ab(particle, occ_particle, tmp, Nint)
   ASSERT (tmp(1) == nexc(1)) ! Number of particles alpha
-  ASSERT (tmp(2) == nexc(2)) ! Number of particle beta 
+  ASSERT (tmp(2) == nexc(2)) ! Number of particle beta
   !DIR$ FORCEINLINE
   call bitstring_to_list_ab(hole, occ_hole, tmp, Nint)
   ASSERT (tmp(1) == nexc(1)) ! Number of holes alpha
-  ASSERT (tmp(2) == nexc(2)) ! Number of holes beta 
+  ASSERT (tmp(2) == nexc(2)) ! Number of holes beta
 
   hmono  = ref_tc_energy_1e
-  htwoe  = ref_tc_energy_2e 
+  htwoe  = ref_tc_energy_2e
   hthree = ref_tc_energy_3e
 
   det_tmp = ref_bitmask
@@ -131,15 +131,15 @@ subroutine ac_tc_operator(iorb, ispin, key, hmono, htwoe, hthree, Nint, na, nb)
 
   BEGIN_DOC
   !
-  ! Routine that computes one- and two-body energy corresponding 
-  ! 
-  ! to the ADDITION of an electron in an orbital 'iorb' of spin 'ispin' 
-  ! 
+  ! Routine that computes one- and two-body energy corresponding
+  !
+  ! to the ADDITION of an electron in an orbital 'iorb' of spin 'ispin'
+  !
   ! onto a determinant 'key'.
   !
-  ! in output, the determinant key is changed by the ADDITION of that electron 
+  ! in output, the determinant key is changed by the ADDITION of that electron
   !
-  ! and the quantities hmono,htwoe,hthree are INCREMENTED 
+  ! and the quantities hmono,htwoe,hthree are INCREMENTED
   !
   END_DOC
 
@@ -155,7 +155,7 @@ subroutine ac_tc_operator(iorb, ispin, key, hmono, htwoe, hthree, Nint, na, nb)
   integer                          :: k, l, i, jj, mm, j, m
   integer                          :: tmp(2)
   double precision                 :: direct_int, exchange_int
-  
+
   if (iorb < 1) then
     print *,  irp_here, ': iorb < 1'
     print *,  iorb, mo_num
@@ -196,7 +196,7 @@ subroutine ac_tc_operator(iorb, ispin, key, hmono, htwoe, hthree, Nint, na, nb)
   enddo
 
   if(three_body_h_tc .and. (elec_num.gt.2) .and. three_e_3_idx_term) then
-    !!!!! 3-e part 
+    !!!!! 3-e part
 
     !! same-spin/same-spin
     do j = 1, na
@@ -211,18 +211,18 @@ subroutine ac_tc_operator(iorb, ispin, key, hmono, htwoe, hthree, Nint, na, nb)
       jj = occ(j,ispin)
       do m = 1, nb
         mm = occ(m,other_spin)
-        direct_int   = three_e_3_idx_direct_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
-        exchange_int = three_e_3_idx_exch12_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
+        direct_int   = three_e_3_idx_direct_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR
+        exchange_int = three_e_3_idx_exch12_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR
         hthree += direct_int - exchange_int
       enddo
     enddo
     !! oposite-spin/opposite-spin
     do j = 1, nb
-      jj = occ(j,other_spin) 
-      do m = j+1, nb 
-        mm = occ(m,other_spin) 
-        direct_int   = three_e_3_idx_direct_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
-        exchange_int = three_e_3_idx_exch23_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
+      jj = occ(j,other_spin)
+      do m = j+1, nb
+        mm = occ(m,other_spin)
+        direct_int   = three_e_3_idx_direct_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR
+        exchange_int = three_e_3_idx_exch23_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR
         hthree += direct_int - exchange_int
       enddo
     enddo
@@ -241,15 +241,15 @@ subroutine a_tc_operator(iorb, ispin, key, hmono, htwoe, hthree, Nint, na, nb)
 
   BEGIN_DOC
   !
-  ! Routine that computes one- and two-body energy corresponding 
-  ! 
-  ! to the REMOVAL of an electron in an orbital 'iorb' of spin 'ispin' 
-  ! 
+  ! Routine that computes one- and two-body energy corresponding
+  !
+  ! to the REMOVAL of an electron in an orbital 'iorb' of spin 'ispin'
+  !
   ! onto a determinant 'key'.
   !
-  ! in output, the determinant key is changed by the REMOVAL of that electron 
+  ! in output, the determinant key is changed by the REMOVAL of that electron
   !
-  ! and the quantities hmono,htwoe,hthree are INCREMENTED 
+  ! and the quantities hmono,htwoe,hthree are INCREMENTED
   !
   END_DOC
 
@@ -257,7 +257,7 @@ subroutine a_tc_operator(iorb, ispin, key, hmono, htwoe, hthree, Nint, na, nb)
   integer,           intent(inout) :: na, nb
   integer(bit_kind), intent(inout) :: key(Nint,2)
   double precision,  intent(inout) :: hmono,htwoe,hthree
-  
+
   double precision                 :: direct_int, exchange_int
   integer                          :: occ(Nint*bit_kind_size,2)
   integer                          :: other_spin
@@ -292,7 +292,7 @@ subroutine a_tc_operator(iorb, ispin, key, hmono, htwoe, hthree, Nint, na, nb)
   enddo
 
   if(three_body_h_tc .and. elec_num.gt.2 .and. three_e_3_idx_term) then
-    !!!!! 3-e part 
+    !!!!! 3-e part
 
     !! same-spin/same-spin
     do j = 1, na
@@ -307,18 +307,18 @@ subroutine a_tc_operator(iorb, ispin, key, hmono, htwoe, hthree, Nint, na, nb)
       jj = occ(j,ispin)
       do m = 1, nb
         mm = occ(m,other_spin)
-        direct_int   = three_e_3_idx_direct_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
-        exchange_int = three_e_3_idx_exch12_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
+        direct_int   = three_e_3_idx_direct_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR
+        exchange_int = three_e_3_idx_exch12_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR
         hthree -= (direct_int - exchange_int)
       enddo
-    enddo 
+    enddo
     !! oposite-spin/opposite-spin
     do j = 1, nb
-      jj = occ(j,other_spin) 
-      do m = j+1, nb 
-        mm = occ(m,other_spin) 
-        direct_int   = three_e_3_idx_direct_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
-        exchange_int = three_e_3_idx_exch23_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
+      jj = occ(j,other_spin)
+      do m = j+1, nb
+        mm = occ(m,other_spin)
+        direct_int   = three_e_3_idx_direct_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR
+        exchange_int = three_e_3_idx_exch23_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR
         hthree -= (direct_int - exchange_int)
       enddo
     enddo
@@ -377,16 +377,16 @@ subroutine diag_htilde_mu_mat_fock_bi_ortho_no_3e(Nint, det_in,htot)
   !DIR$ FORCEINLINE
   call bitstring_to_list_ab(particle, occ_particle, tmp, Nint)
   ASSERT (tmp(1) == nexc(1)) ! Number of particles alpha
-  ASSERT (tmp(2) == nexc(2)) ! Number of particle beta 
+  ASSERT (tmp(2) == nexc(2)) ! Number of particle beta
   !DIR$ FORCEINLINE
   call bitstring_to_list_ab(hole, occ_hole, tmp, Nint)
   ASSERT (tmp(1) == nexc(1)) ! Number of holes alpha
-  ASSERT (tmp(2) == nexc(2)) ! Number of holes beta 
+  ASSERT (tmp(2) == nexc(2)) ! Number of holes beta
 
   det_tmp = ref_bitmask
-  
+
   hmono = ref_tc_energy_1e
-  htwoe = ref_tc_energy_2e 
+  htwoe = ref_tc_energy_2e
   do ispin=1,2
     na = elec_num_tab(ispin)
     nb = elec_num_tab(iand(ispin,1)+1)
@@ -404,15 +404,15 @@ subroutine ac_tc_operator_no_3e(iorb,ispin,key,hmono,htwoe,Nint,na,nb)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Routine that computes one- and two-body energy corresponding 
-  ! 
-  ! to the ADDITION of an electron in an orbital 'iorb' of spin 'ispin' 
-  ! 
+  ! Routine that computes one- and two-body energy corresponding
+  !
+  ! to the ADDITION of an electron in an orbital 'iorb' of spin 'ispin'
+  !
   ! onto a determinant 'key'.
   !
-  ! in output, the determinant key is changed by the ADDITION of that electron 
+  ! in output, the determinant key is changed by the ADDITION of that electron
   !
-  ! and the quantities hmono,htwoe are INCREMENTED 
+  ! and the quantities hmono,htwoe are INCREMENTED
   END_DOC
   integer, intent(in)            :: iorb, ispin, Nint
   integer, intent(inout)         :: na, nb
@@ -423,7 +423,7 @@ subroutine ac_tc_operator_no_3e(iorb,ispin,key,hmono,htwoe,Nint,na,nb)
   integer                        :: other_spin
   integer                        :: k,l,i,jj,mm,j,m
   double precision ::  direct_int, exchange_int
-  
+
 
   if (iorb < 1) then
     print *,  irp_here, ': iorb < 1'
@@ -472,21 +472,21 @@ subroutine a_tc_operator_no_3e(iorb,ispin,key,hmono,htwoe,Nint,na,nb)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Routine that computes one- and two-body energy corresponding 
-  ! 
-  ! to the REMOVAL of an electron in an orbital 'iorb' of spin 'ispin' 
-  ! 
+  ! Routine that computes one- and two-body energy corresponding
+  !
+  ! to the REMOVAL of an electron in an orbital 'iorb' of spin 'ispin'
+  !
   ! onto a determinant 'key'.
   !
-  ! in output, the determinant key is changed by the REMOVAL of that electron 
+  ! in output, the determinant key is changed by the REMOVAL of that electron
   !
-  ! and the quantities hmono,htwoe are INCREMENTED 
+  ! and the quantities hmono,htwoe are INCREMENTED
   END_DOC
   integer, intent(in)            :: iorb, ispin, Nint
   integer, intent(inout)         :: na, nb
   integer(bit_kind), intent(inout) :: key(Nint,2)
   double precision, intent(inout) :: hmono,htwoe
-  
+
   double precision  :: direct_int, exchange_int
   integer                        :: occ(Nint*bit_kind_size,2)
   integer                        :: other_spin
@@ -528,7 +528,7 @@ subroutine diag_htc_bi_orth_2e_brute(Nint, key_i, hmono, htwoe, htot)
 
   BEGIN_DOC
   !
-  ! diagonal element of htilde ONLY FOR ONE- AND TWO-BODY TERMS 
+  ! diagonal element of htilde ONLY FOR ONE- AND TWO-BODY TERMS
   !
   END_DOC
 
@@ -562,36 +562,36 @@ subroutine diag_htc_bi_orth_2e_brute(Nint, key_i, hmono, htwoe, htot)
   ispin = 1
   jspin = 2
   do i = 1, Ne(ispin) ! electron 1 (so it can be associated to mu(r1))
-    ii = occ(i,ispin) 
-    do j = 1, Ne(jspin) ! electron 2 
-      jj = occ(j,jspin) 
-      htwoe += mo_bi_ortho_tc_two_e(jj,ii,jj,ii) 
+    ii = occ(i,ispin)
+    do j = 1, Ne(jspin) ! electron 2
+      jj = occ(j,jspin)
+      htwoe += mo_bi_ortho_tc_two_e(jj,ii,jj,ii)
     enddo
   enddo
- 
+
   ! alpha/alpha two-body
   do i = 1, Ne(ispin)
-    ii = occ(i,ispin) 
+    ii = occ(i,ispin)
     do j = i+1, Ne(ispin)
-      jj = occ(j,ispin) 
-      htwoe += mo_bi_ortho_tc_two_e(ii,jj,ii,jj) - mo_bi_ortho_tc_two_e(ii,jj,jj,ii)
-    enddo
-  enddo
- 
-  ! beta/beta two-body
-  do i = 1, Ne(jspin)
-    ii = occ(i,jspin) 
-    do j = i+1, Ne(jspin)
-      jj = occ(j,jspin) 
+      jj = occ(j,ispin)
       htwoe += mo_bi_ortho_tc_two_e(ii,jj,ii,jj) - mo_bi_ortho_tc_two_e(ii,jj,jj,ii)
     enddo
   enddo
 
-  htot = hmono + htwoe 
+  ! beta/beta two-body
+  do i = 1, Ne(jspin)
+    ii = occ(i,jspin)
+    do j = i+1, Ne(jspin)
+      jj = occ(j,jspin)
+      htwoe += mo_bi_ortho_tc_two_e(ii,jj,ii,jj) - mo_bi_ortho_tc_two_e(ii,jj,jj,ii)
+    enddo
+  enddo
+
+  htot = hmono + htwoe
 
 end
 
-! ---                                                                                           
+! ---
 
 subroutine diag_htc_bi_orth_3e_brute(Nint, key_i, hthree)
 
@@ -696,10 +696,10 @@ BEGIN_PROVIDER [ double precision, three_e_diag_parrallel_spin_prov, (mo_num, mo
 
   BEGIN_DOC
   !
-  ! matrix element of the -L  three-body operator ON A BI ORTHONORMAL BASIS 
+  ! matrix element of the -L  three-body operator ON A BI ORTHONORMAL BASIS
   !
-  ! three_e_diag_parrallel_spin_prov(m,j,i) = All combinations of the form <mji|-L|mji> for same spin matrix elements  
-  ! 
+  ! three_e_diag_parrallel_spin_prov(m,j,i) = All combinations of the form <mji|-L|mji> for same spin matrix elements
+  !
   ! notice the -1 sign: in this way three_e_diag_parrallel_spin_prov can be directly used to compute Slater rules with a + sign
   !
   END_DOC
@@ -715,7 +715,7 @@ BEGIN_PROVIDER [ double precision, three_e_diag_parrallel_spin_prov, (mo_num, mo
   call wall_time(wall0)
  !$OMP PARALLEL                 &
  !$OMP DEFAULT (NONE)           &
- !$OMP PRIVATE (i,j,m,integral) & 
+ !$OMP PRIVATE (i,j,m,integral) &
  !$OMP SHARED (mo_num,three_e_diag_parrallel_spin_prov)
  !$OMP DO SCHEDULE (dynamic)
   do i = 1, mo_num
@@ -739,7 +739,7 @@ BEGIN_PROVIDER [ double precision, three_e_diag_parrallel_spin_prov, (mo_num, mo
   call wall_time(wall1)
   print *, ' wall time for three_e_diag_parrallel_spin_prov', wall1 - wall0
 
-END_PROVIDER 
+END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, three_e_single_parrallel_spin_prov, (mo_num, mo_num, mo_num, mo_num)]
 
@@ -747,7 +747,7 @@ BEGIN_PROVIDER [ double precision, three_e_single_parrallel_spin_prov, (mo_num, 
   !
   ! matrix element of the -L  three-body operator FOR THE DIRECT TERMS OF SINGLE EXCITATIONS AND BI ORTHO MOs
   !
-  ! three_e_single_parrallel_spin_prov(m,j,k,i) = All combination of <mjk|-L|mji> for same spin matrix elements 
+  ! three_e_single_parrallel_spin_prov(m,j,k,i) = All combination of <mjk|-L|mji> for same spin matrix elements
   !
   ! notice the -1 sign: in this way three_e_3_idx_direct_bi_ort can be directly used to compute Slater rules with a + sign
   !
@@ -764,7 +764,7 @@ BEGIN_PROVIDER [ double precision, three_e_single_parrallel_spin_prov, (mo_num, 
   call wall_time(wall0)
  !$OMP PARALLEL                   &
  !$OMP DEFAULT (NONE)             &
- !$OMP PRIVATE (i,j,k,m,integral) & 
+ !$OMP PRIVATE (i,j,k,m,integral) &
  !$OMP SHARED (mo_num,three_e_single_parrallel_spin_prov)
  !$OMP DO SCHEDULE (dynamic)
   do i = 1, mo_num
@@ -782,7 +782,7 @@ BEGIN_PROVIDER [ double precision, three_e_single_parrallel_spin_prov, (mo_num, 
   call wall_time(wall1)
   print *, ' wall time for three_e_single_parrallel_spin_prov', wall1 - wall0
 
-END_PROVIDER 
+END_PROVIDER
 
 
 ! ---
@@ -809,7 +809,7 @@ BEGIN_PROVIDER [ double precision, three_e_double_parrallel_spin_prov, (mo_num, 
  integral = three_e_double_parrallel_spin(1,1,1,1,1)
  !$OMP PARALLEL                     &
  !$OMP DEFAULT (NONE)               &
- !$OMP PRIVATE (i,j,k,m,l,integral) & 
+ !$OMP PRIVATE (i,j,k,m,l,integral) &
  !$OMP SHARED (mo_num,three_e_double_parrallel_spin_prov)
  !$OMP DO SCHEDULE (dynamic)
   do i = 1, mo_num
@@ -829,5 +829,6 @@ BEGIN_PROVIDER [ double precision, three_e_double_parrallel_spin_prov, (mo_num, 
   call wall_time(wall1)
   print *, ' wall time for three_e_double_parrallel_spin_prov', wall1 - wall0
 
-END_PROVIDER 
+END_PROVIDER
+
 

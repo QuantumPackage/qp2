@@ -1,17 +1,20 @@
-BEGIN_PROVIDER [ double precision, two_e_int_mf, (elec_beta_num,elec_alpha_num,elec_beta_num,elec_alpha_num)]
+BEGIN_PROVIDER [ double precision, two_e_int_mf, (elec_beta_num, elec_alpha_num, elec_beta_num, elec_alpha_num)]
+  BEGIN_DOC
+  ! two_e_int_mf
+  END_DOC
  implicit none
- integer :: i,j,k,l 
+ integer :: i,j,k,l
  double precision :: get_two_e_integral
  do i = 1, elec_alpha_num
   do j = 1, elec_beta_num
    do k = 1, elec_alpha_num
     do l = 1, elec_beta_num
-     two_e_int_mf(l,k,j,i) = get_two_e_integral(l,k,j,i,mo_integrals_map) 
+     two_e_int_mf(l,k,j,i) = get_two_e_integral(l,k,j,i,mo_integrals_map)
     enddo
    enddo
   enddo
  enddo
-END_PROVIDER 
+END_PROVIDER
 
 subroutine get_f_mf_ab(r,f_mf_ab,two_bod_dens, dm_a, dm_b)
  implicit none
@@ -20,7 +23,7 @@ subroutine get_f_mf_ab(r,f_mf_ab,two_bod_dens, dm_a, dm_b)
  double precision, allocatable :: mos_array_r(:),mos_array_a(:), mos_array_b(:)
  integer :: i,j,k,l
  allocate(mos_array_r(mo_num), mos_array_a(elec_alpha_num), mos_array_b(elec_alpha_num))
- call give_all_mos_at_r(r,mos_array_r) 
+ call give_all_mos_at_r(r,mos_array_r)
  do i = 1, elec_alpha_num
   mos_array_a(i) = mos_array_r(i)
  enddo
@@ -30,15 +33,15 @@ subroutine get_f_mf_ab(r,f_mf_ab,two_bod_dens, dm_a, dm_b)
 
  dm_a = 0.d0
  do i = 1, elec_alpha_num
-  dm_a += mos_array_a(i) * mos_array_a(i) 
+  dm_a += mos_array_a(i) * mos_array_a(i)
  enddo
 
  dm_b = 0.d0
  do i = 1, elec_beta_num
-  dm_b += mos_array_b(i) * mos_array_b(i) 
+  dm_b += mos_array_b(i) * mos_array_b(i)
  enddo
  two_bod_dens = dm_a * dm_b
- 
+
  f_mf_ab = 0.d0
  do i = 1, elec_alpha_num
   do j = 1, elec_beta_num
@@ -50,7 +53,7 @@ subroutine get_f_mf_ab(r,f_mf_ab,two_bod_dens, dm_a, dm_b)
   enddo
  enddo
  ! multiply by two to adapt to the N(N-1) normalization condition of the active two-rdm
- f_mf_ab *= 2.d0 
+ f_mf_ab *= 2.d0
  two_bod_dens *= 2.d0
 
 end
@@ -58,7 +61,7 @@ end
 subroutine get_grad_f_mf_ab(r,grad_f_mf_ab, grad_two_bod_dens,f_mf_ab,two_bod_dens, dm_a, dm_b,grad_dm_a, grad_dm_b)
  implicit none
  BEGIN_DOC
- ! gradient of mu(r) mean field, together with the gradient of the one- and two-body HF density. 
+ ! gradient of mu(r) mean field, together with the gradient of the one- and two-body HF density.
  END_DOC
  double precision, intent(in)  :: r(3)
  double precision, intent(out) :: f_mf_ab, two_bod_dens
@@ -70,7 +73,7 @@ subroutine get_grad_f_mf_ab(r,grad_f_mf_ab, grad_two_bod_dens,f_mf_ab,two_bod_de
  double precision, allocatable :: mos_grad_array_a(:,:), mos_grad_array_b(:,:)
  double precision :: mo_i, mo_j, mo_k, mo_l
  double precision :: grad_mo_i(3), grad_mo_j(3), grad_mo_k(3), grad_mo_l(3)
- 
+
  integer :: i,j,k,l
  allocate(mos_array_r(mo_num),mos_grad_array_r(3,mo_num))
  allocate(mos_array_a(elec_alpha_num), mos_array_b(elec_beta_num))
@@ -85,26 +88,26 @@ subroutine get_grad_f_mf_ab(r,grad_f_mf_ab, grad_two_bod_dens,f_mf_ab,two_bod_de
   mos_grad_array_b(1:3,i) = mos_grad_array_r(1:3,i)
  enddo
 
- ! ALPHA DENSITY AND GRADIENT 
+ ! ALPHA DENSITY AND GRADIENT
  dm_a = 0.d0
  grad_dm_a = 0.d0
  do i = 1, elec_alpha_num
-  dm_a += mos_array_a(i) * mos_array_a(i) 
-  grad_dm_a(1:3) += 2.d0 * mos_array_a(i) * mos_grad_array_a(1:3,i)  
+  dm_a += mos_array_a(i) * mos_array_a(i)
+  grad_dm_a(1:3) += 2.d0 * mos_array_a(i) * mos_grad_array_a(1:3,i)
  enddo
 
- ! BETA DENSITY AND GRADIENT 
+ ! BETA DENSITY AND GRADIENT
  dm_b = 0.d0
  grad_dm_b = 0.d0
  do i = 1, elec_beta_num
-  dm_b += mos_array_b(i) * mos_array_b(i) 
-  grad_dm_b(1:3) += 2.d0 * mos_array_b(i) * mos_grad_array_b(1:3,i)  
+  dm_b += mos_array_b(i) * mos_array_b(i)
+  grad_dm_b(1:3) += 2.d0 * mos_array_b(i) * mos_grad_array_b(1:3,i)
  enddo
- ! TWO-BODY DENSITY AND GRADIENT 
+ ! TWO-BODY DENSITY AND GRADIENT
  two_bod_dens = dm_a * dm_b
  grad_two_bod_dens(1:3) = dm_a * grad_dm_b(1:3) + dm_b * grad_dm_a(1:3)
 
- ! F_MF and GRADIENT 
+ ! F_MF and GRADIENT
  grad_f_mf_ab = 0.d0
  f_mf_ab  = 0.d0
  do i = 1, elec_alpha_num
@@ -120,15 +123,15 @@ subroutine get_grad_f_mf_ab(r,grad_f_mf_ab, grad_two_bod_dens,f_mf_ab,two_bod_de
      mo_l = mos_array_b(l)
      grad_mo_l(1:3) = mos_grad_array_b(1:3,l)
      f_mf_ab += two_e_int_mf(l,k,j,i) * mo_i * mo_j * mo_k * mo_l
-     grad_f_mf_ab(1:3) += two_e_int_mf(l,k,j,i) * & 
-     (mo_i * mo_j * mo_k * grad_mo_l(1:3) + mo_i * mo_j * grad_mo_k(1:3) * mo_l & 
+     grad_f_mf_ab(1:3) += two_e_int_mf(l,k,j,i) * &
+     (mo_i * mo_j * mo_k * grad_mo_l(1:3) + mo_i * mo_j * grad_mo_k(1:3) * mo_l &
      +mo_i * grad_mo_j(1:3) * mo_k * mo_l + grad_mo_i(1:3) * mo_j * mo_k * mo_l)
     enddo
    enddo
   enddo
  enddo
 
- f_mf_ab *= 2.d0 
+ f_mf_ab *= 2.d0
  two_bod_dens *= 2.d0
  grad_f_mf_ab *= 2.D0
  grad_two_bod_dens *= 2.d0
@@ -163,4 +166,5 @@ subroutine mu_of_r_mean_field_tc(r,mu_mf, dm)
   mu_mf = 0.3333333333d0 * sqpi * (f_mf_ab/two_bod_dens + 0.25d0)
  endif
 end
+
 

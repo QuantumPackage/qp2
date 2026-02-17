@@ -1,13 +1,13 @@
 
- BEGIN_PROVIDER[double precision, core_mos_in_r_array, (n_core_orb,n_points_final_grid)]
-&BEGIN_PROVIDER[double precision, core_mos_in_r_array_transp,(n_points_final_grid,n_core_orb)]
+ BEGIN_PROVIDER [double precision, core_mos_in_r_array, (n_core_orb, n_points_final_grid)]
+&BEGIN_PROVIDER [double precision, core_mos_in_r_array_transp, (n_points_final_grid, n_core_orb)]
  implicit none
  BEGIN_DOC
 ! all COREE  MOs on the grid points, arranged in two different ways
  END_DOC
  integer :: i,j,k
  do i = 1, n_core_orb
-  j = list_core(i) 
+  j = list_core(i)
   do k = 1, n_points_final_grid
    core_mos_in_r_array_transp(k,i) = mos_in_r_array_transp(k,j)
   enddo
@@ -19,18 +19,18 @@
   enddo
  enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 
- BEGIN_PROVIDER[double precision, inact_mos_in_r_array, (n_inact_orb,n_points_final_grid)]
-&BEGIN_PROVIDER[double precision, inact_mos_in_r_array_transp,(n_points_final_grid,n_inact_orb)]
+ BEGIN_PROVIDER [double precision, inact_mos_in_r_array, (n_inact_orb, n_points_final_grid)]
+&BEGIN_PROVIDER [double precision, inact_mos_in_r_array_transp, (n_points_final_grid, n_inact_orb)]
  implicit none
  BEGIN_DOC
 ! all INACTIVE MOs on the grid points, arranged in two different ways
  END_DOC
  integer :: i,j,k
  do i = 1, n_inact_orb
-  j = list_inact(i) 
+  j = list_inact(i)
   do k = 1, n_points_final_grid
    inact_mos_in_r_array_transp(k,i) = mos_in_r_array_transp(k,j)
   enddo
@@ -42,17 +42,17 @@ END_PROVIDER
   enddo
  enddo
 
-END_PROVIDER 
+END_PROVIDER
 
- BEGIN_PROVIDER[double precision, act_mos_in_r_array, (n_act_orb,n_points_final_grid)]
-&BEGIN_PROVIDER[double precision, act_mos_in_r_array_transp,(n_points_final_grid,n_act_orb)]
+ BEGIN_PROVIDER [double precision, act_mos_in_r_array, (n_act_orb, n_points_final_grid)]
+&BEGIN_PROVIDER [double precision, act_mos_in_r_array_transp, (n_points_final_grid, n_act_orb)]
  implicit none
  BEGIN_DOC
 ! all ACTIVE MOs on the grid points, arranged in two different ways
  END_DOC
  integer :: i,j,k
  do i = 1, n_act_orb
-  j = list_act(i) 
+  j = list_act(i)
   do k = 1, n_points_final_grid
    act_mos_in_r_array_transp(k,i) = mos_in_r_array_transp(k,j)
   enddo
@@ -64,18 +64,18 @@ END_PROVIDER
   enddo
  enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 
- BEGIN_PROVIDER[double precision, virt_mos_in_r_array, (n_virt_orb,n_points_final_grid)]
-&BEGIN_PROVIDER[double precision, virt_mos_in_r_array_transp,(n_points_final_grid,n_virt_orb)]
+ BEGIN_PROVIDER [double precision, virt_mos_in_r_array, (n_virt_orb, n_points_final_grid)]
+&BEGIN_PROVIDER [double precision, virt_mos_in_r_array_transp, (n_points_final_grid, n_virt_orb)]
  implicit none
  BEGIN_DOC
 ! all VIRTUAL MOs on the grid points, arranged in two different ways
  END_DOC
  integer :: i,j,k
  do i = 1, n_virt_orb
-  j = list_virt(i) 
+  j = list_virt(i)
   do k = 1, n_points_final_grid
    virt_mos_in_r_array_transp(k,i) = mos_in_r_array_transp(k,j)
   enddo
@@ -87,14 +87,17 @@ END_PROVIDER
   enddo
  enddo
 
-END_PROVIDER 
+END_PROVIDER
 
- BEGIN_PROVIDER[double precision, core_inact_act_mos_in_r_array, (n_core_inact_act_orb,n_points_final_grid)]
-&BEGIN_PROVIDER[double precision, core_inact_act_mos_in_r_array_transp,(n_points_final_grid,n_core_inact_act_orb)]
+ BEGIN_PROVIDER [double precision, core_inact_act_mos_in_r_array, (n_core_inact_act_orb, n_points_final_grid)]
+&BEGIN_PROVIDER [double precision, core_inact_act_mos_in_r_array_transp, (n_points_final_grid, n_core_inact_act_orb)]
+  BEGIN_DOC
+  ! core_inact_act_mos_in_r_array
+  END_DOC
  implicit none
  integer :: i,j,k
  do i = 1, n_core_inact_act_orb
-  j = list_core_inact_act(i) 
+  j = list_core_inact_act(i)
   do k = 1, n_points_final_grid
    core_inact_act_mos_in_r_array_transp(k,i) = mos_in_r_array_transp(k,j)
   enddo
@@ -106,13 +109,16 @@ END_PROVIDER
   enddo
  enddo
 
-END_PROVIDER 
+END_PROVIDER
 
- BEGIN_PROVIDER[double precision, core_inact_act_mos_grad_in_r_array, (3,n_core_inact_act_orb,n_points_final_grid)]
+ BEGIN_PROVIDER [double precision, core_inact_act_mos_grad_in_r_array, (3, n_core_inact_act_orb, n_points_final_grid)]
+  BEGIN_DOC
+  ! core_inact_act_mos_grad_in_r_array
+  END_DOC
  implicit none
  integer :: i,j,k,l
  do i = 1, n_core_inact_act_orb
-  j = list_core_inact_act(i) 
+  j = list_core_inact_act(i)
   do k = 1, n_points_final_grid
    do l = 1, 3
     core_inact_act_mos_grad_in_r_array(l,i,k) = mos_grad_in_r_array(j,k,l)
@@ -120,6 +126,7 @@ END_PROVIDER
   enddo
  enddo
 
-END_PROVIDER 
+END_PROVIDER
+
 
 

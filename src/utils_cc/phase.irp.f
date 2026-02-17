@@ -30,8 +30,8 @@ subroutine get_excitation_general(det1,det2,degree,n,list_anni,list_crea,phase,N
   integer, intent(out)           :: list_crea(Nint*bit_kind_size,2)
   integer, intent(out)           :: list_anni(Nint*bit_kind_size,2)
   integer, intent(out)           :: degree, n(2)
-  
-  integer, allocatable           :: l1(:,:), l2(:,:) 
+
+  integer, allocatable           :: l1(:,:), l2(:,:)
   integer(bit_kind), allocatable :: det_crea(:,:), det_anni(:,:)
   integer, allocatable           :: pos_anni(:,:), pos_crea(:,:)
 
@@ -57,7 +57,7 @@ subroutine get_excitation_general(det1,det2,degree,n,list_anni,list_crea,phase,N
       det_crea(i,j) = iand(not(det1(i,j)),det2(i,j))
     enddo
   enddo
-  
+
   do j = 1, 2
     do i = 1, Nint
       det_anni(i,j) = iand(det1(i,j),not(det2(i,j)))
@@ -77,7 +77,7 @@ subroutine get_excitation_general(det1,det2,degree,n,list_anni,list_crea,phase,N
   enddo
 
   !1    11110011001  1 2 3 4 7 8  11
-  !pos               1 2 3 4 5 6  7 
+  !pos               1 2 3 4 5 6  7
   !2    11100101011  1 2 3 6 8 10 11
   !anni 00010010000  4 7
   !pos               4 5
@@ -91,7 +91,7 @@ subroutine get_excitation_general(det1,det2,degree,n,list_anni,list_crea,phase,N
 
   allocate(pos_anni(max(n(1),n(2)),2))
   allocate(pos_crea(max(n(1),n(2)),2))
-  
+
   ! Search pos anni
   do j = 1, 2
     k = 1
@@ -124,7 +124,7 @@ subroutine get_excitation_general(det1,det2,degree,n,list_anni,list_crea,phase,N
       d = d + abs(pos_anni(i,j) - pos_crea(i,j))
     enddo
   enddo
-  
+
   phase = dble((-1)**d)
 
   ! Debug
@@ -135,3 +135,4 @@ subroutine get_excitation_general(det1,det2,degree,n,list_anni,list_crea,phase,N
   !print*,phase
   !print*,''
 end
+

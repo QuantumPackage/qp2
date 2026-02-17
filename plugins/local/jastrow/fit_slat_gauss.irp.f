@@ -13,7 +13,7 @@
  implicit none
   include 'constants.include.F'
  BEGIN_DOC
- ! fit the exp(-x) as 
+ ! fit the exp(-x) as
  !
  ! \sum_{i = 1, n_max_fit_slat} coef_fit_slat_gauss(i) * exp(-expo_fit_slat_gauss(i) * x**2)
  !
@@ -64,13 +64,13 @@
 
 
 
-END_PROVIDER 
+END_PROVIDER
 
 double precision function slater_fit_gam(x,gam)
  implicit none
  double precision, intent(in) :: x,gam
  BEGIN_DOC
-! fit of the function exp(-gam * x) with gaussian functions 
+! fit of the function exp(-gam * x) with gaussian functions
  END_DOC
  integer :: i
  slater_fit_gam = 0.d0
@@ -91,4 +91,5 @@ subroutine expo_fit_slater_gam(gam,expos)
   expos(i) = expo_fit_slat_gauss(i) * gam * gam
  enddo
 end
+
 

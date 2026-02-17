@@ -1,24 +1,27 @@
 use bitmasks
 
-BEGIN_PROVIDER [real*8, D0tu, (n_act_orb,n_act_orb) ]
+BEGIN_PROVIDER [real*8, D0tu, (n_act_orb, n_act_orb) ]
   implicit none
   BEGIN_DOC
   ! the first-order density matrix in the basis of the starting MOs.
   ! matrix is state averaged.
   END_DOC
   integer                        :: t,u
-  
+
   do u=1,n_act_orb
     do t=1,n_act_orb
       D0tu(t,u) = one_e_dm_mo_alpha_average( list_act(t), list_act(u) ) + &
-                  one_e_dm_mo_beta_average ( list_act(t), list_act(u) ) 
+                  one_e_dm_mo_beta_average ( list_act(t), list_act(u) )
     enddo
   enddo
-  
+
 END_PROVIDER
 
  BEGIN_PROVIDER [double precision, D0tu_alpha_ao, (ao_num, ao_num)]
 &BEGIN_PROVIDER [double precision, D0tu_beta_ao, (ao_num, ao_num)]
+  BEGIN_DOC
+  ! D0tu_alpha_ao
+  END_DOC
  implicit none
  integer :: i,ii,j,u,t,uu,tt
  double precision, allocatable :: D0_tmp_alpha(:,:),D0_tmp_beta(:,:)
@@ -44,9 +47,9 @@ END_PROVIDER
  call mo_to_ao_no_overlap(D0_tmp_alpha,mo_num,D0tu_alpha_ao,ao_num)
  call mo_to_ao_no_overlap(D0_tmp_beta,mo_num,D0tu_beta_ao,ao_num)
 
-END_PROVIDER 
+END_PROVIDER
 
-BEGIN_PROVIDER [real*8, P0tuvx, (n_act_orb,n_act_orb,n_act_orb,n_act_orb) ]
+BEGIN_PROVIDER [real*8, P0tuvx, (n_act_orb, n_act_orb, n_act_orb, n_act_orb) ]
    BEGIN_DOC
    ! The second-order density matrix in the basis of the starting MOs ONLY IN THE RANGE OF ACTIVE MOS
    ! The values are state averaged
@@ -70,7 +73,7 @@ BEGIN_PROVIDER [real*8, P0tuvx, (n_act_orb,n_act_orb,n_act_orb,n_act_orb) ]
    integer(bit_kind), dimension(N_int,2) :: det_mu, det_mu_ex
    integer(bit_kind), dimension(N_int,2) :: det_mu_ex1, det_mu_ex11, det_mu_ex12
    integer(bit_kind), dimension(N_int,2) :: det_mu_ex2, det_mu_ex21, det_mu_ex22
-   
+
   if (bavard) then
     write(6,*) ' providing the 2 body RDM on the active part'
   endif
@@ -85,7 +88,7 @@ BEGIN_PROVIDER [real*8, P0tuvx, (n_act_orb,n_act_orb,n_act_orb,n_act_orb) ]
         !      1 1 2 2                                     1 2 1 2
         P0tuvx(t,u,v,x) = 0.5d0 * state_av_act_2_rdm_spin_trace_mo(t,v,u,x)
        enddo
-      enddo 
+      enddo
      enddo
     enddo
    enddo
@@ -94,3 +97,4 @@ BEGIN_PROVIDER [real*8, P0tuvx, (n_act_orb,n_act_orb,n_act_orb,n_act_orb) ]
   endif
 
 END_PROVIDER
+

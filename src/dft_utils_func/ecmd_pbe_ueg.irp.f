@@ -1,12 +1,12 @@
 
-subroutine ecmd_pbe_ueg_at_r(mu,r,eps_c_md_PBE) 
+subroutine ecmd_pbe_ueg_at_r(mu,r,eps_c_md_PBE)
   implicit none
   BEGIN_DOC
-! provides the integrand of Eq. (13) of Phys.Chem.Lett.2019, 10, 2931   2937 
+! provides the integrand of Eq. (13) of Phys.Chem.Lett.2019, 10, 2931   2937
 !
 ! !!! WARNING !!! This is the total integrand of Eq. (13), which is e_cmd * n
 !
-! such a function is based on the exact behaviour of the Ecmd at large mu 
+! such a function is based on the exact behaviour of the Ecmd at large mu
 !
 ! but with the exact on-top estimated with that of the UEG
 !
@@ -47,7 +47,7 @@ subroutine ecmd_pbe_ueg_at_r(mu,r,eps_c_md_PBE)
     eps_c_md_PBE(istate)=e_PBE
    else
 !   note: the on-top pair density is (1-zeta^2) rhoc^2 g0 = 4 rhoa * rhob * g0
-    denom = (-2.d0+sqrt(2d0))*sqrt(2.d0*pi) * 4.d0*rho_a(istate)*rho_b(istate)*g0_UEG_mu_inf(rho_a(istate),rho_b(istate)) 
+    denom = (-2.d0+sqrt(2d0))*sqrt(2.d0*pi) * 4.d0*rho_a(istate)*rho_b(istate)*g0_UEG_mu_inf(rho_a(istate),rho_b(istate))
     if (dabs(denom) > 1.d-12) then
      beta = (3.d0*e_PBE)/denom
      eps_c_md_PBE(istate)=e_PBE/(1.d0+beta*mu**3)
@@ -57,21 +57,21 @@ subroutine ecmd_pbe_ueg_at_r(mu,r,eps_c_md_PBE)
    endif
   enddo
  end
- 
 
- 
+
+
 subroutine eps_c_md_PBE_from_density(mu,rho_a,rho_b, grad_rho_a, grad_rho_b,eps_c_md_PBE) ! EG
   implicit none
   BEGIN_DOC
-! provides the integrand of Eq. (13) of Phys.Chem.Lett.2019, 10, 2931   2937 
+! provides the integrand of Eq. (13) of Phys.Chem.Lett.2019, 10, 2931   2937
 !
 ! !!! WARNING !!! This is the total integrand of Eq. (13), which is e_cmd * n
 !
-! such a function is based on the exact behaviour of the Ecmd at large mu 
+! such a function is based on the exact behaviour of the Ecmd at large mu
 !
 ! but with the exact on-top estimated with that of the UEG
 !
-! You enter with the alpha/beta density and density gradients 
+! You enter with the alpha/beta density and density gradients
 !
 ! You get out with eps_c_md_PBE(1:N_states)
   END_DOC
@@ -107,7 +107,7 @@ subroutine eps_c_md_PBE_from_density(mu,rho_a,rho_b, grad_rho_a, grad_rho_b,eps_
     eps_c_md_PBE(istate)=e_PBE
    else
 !   note: the on-top pair density is (1-zeta^2) rhoc^2 g0 = 4 rhoa * rhob * g0
-    denom = (-2.d0+sqrt(2d0))*sqrt(2.d0*pi) * 4.d0*rho_a(istate)*rho_b(istate)*g0_UEG_mu_inf(rho_a(istate),rho_b(istate)) 
+    denom = (-2.d0+sqrt(2d0))*sqrt(2.d0*pi) * 4.d0*rho_a(istate)*rho_b(istate)*g0_UEG_mu_inf(rho_a(istate),rho_b(istate))
     if (dabs(denom) > 1.d-12) then
      beta = (3.d0*e_PBE)/denom
      eps_c_md_PBE(istate)=e_PBE/(1.d0+beta*mu(istate)**3)
@@ -117,27 +117,27 @@ subroutine eps_c_md_PBE_from_density(mu,rho_a,rho_b, grad_rho_a, grad_rho_b,eps_
    endif
   enddo
  end
- 
 
- 
+
+
 
 
 subroutine eps_c_md_PBE_at_grid_pt(mu,i_point,eps_c_md_PBE)
   implicit none
   BEGIN_DOC
-! provides the integrand of Eq. (13) of Phys.Chem.Lett.2019, 10, 2931   2937 
+! provides the integrand of Eq. (13) of Phys.Chem.Lett.2019, 10, 2931   2937
 !
 ! !!! WARNING !!! This is the total integrand of Eq. (13), which is e_cmd * n
 !
-! such a function is based on the exact behaviour of the Ecmd at large mu 
+! such a function is based on the exact behaviour of the Ecmd at large mu
 !
 ! but with the exact on-top estimated with that of the UEG
 !
-! You enter with the alpha/beta density and density gradients 
+! You enter with the alpha/beta density and density gradients
 !
 ! You get out with eps_c_md_PBE(1:N_states)
   END_DOC
-  double precision, intent(in)  :: mu 
+  double precision, intent(in)  :: mu
   double precision, intent(out) :: eps_c_md_PBE(N_states)
   integer, intent(in) :: i_point
   double precision :: two_dm, pi, e_pbe,beta,mu_correction_of_on_top
@@ -153,10 +153,10 @@ subroutine eps_c_md_PBE_at_grid_pt(mu,i_point,eps_c_md_PBE)
 
   eps_c_md_PBE = 0.d0
   do istate = 1, N_states
-   ! total and spin density 
-   rhoc = one_e_dm_and_grad_alpha_in_r(4,i_point,istate) + one_e_dm_and_grad_beta_in_r(4,i_point,istate) 
-   rhoo = one_e_dm_and_grad_alpha_in_r(4,i_point,istate) - one_e_dm_and_grad_beta_in_r(4,i_point,istate) 
-   ! gradients of the effective spin density 
+   ! total and spin density
+   rhoc = one_e_dm_and_grad_alpha_in_r(4,i_point,istate) + one_e_dm_and_grad_beta_in_r(4,i_point,istate)
+   rhoo = one_e_dm_and_grad_alpha_in_r(4,i_point,istate) - one_e_dm_and_grad_beta_in_r(4,i_point,istate)
+   ! gradients of the effective spin density
    grad_rho_a_2 = 0.D0
    grad_rho_b_2 = 0.D0
    grad_rho_a_b = 0.D0
@@ -182,7 +182,7 @@ subroutine eps_c_md_PBE_at_grid_pt(mu,i_point,eps_c_md_PBE)
     denom = (-2.d0+dsqrt(2d0))*sqrt(2.d0*pi) * 4.d0*rho_a*rho_b*g0_UEG_mu_inf(rho_a,rho_b)
     if (dabs(denom) > 1.d-12) then
      beta = (3.d0*e_PBE)/denom
-     ! Ecmd functional with the UEG ontop pair density when mu -> infty 
+     ! Ecmd functional with the UEG ontop pair density when mu -> infty
      ! and the usual PBE correlation energy when mu = 0
      eps_c_md_PBE(istate)=e_PBE/(1.d0+beta*mu**3)
     else
@@ -191,4 +191,5 @@ subroutine eps_c_md_PBE_at_grid_pt(mu,i_point,eps_c_md_PBE)
    endif
   enddo
 end
+
 

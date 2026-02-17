@@ -1894,8 +1894,8 @@ subroutine exp_matrix(X,n,exp_X)
  integer, intent(in):: n
  double precision, intent(out):: exp_X(n,n)
  BEGIN_DOC
- ! exponential of the matrix X: X has to be ANTI HERMITIAN !! 
- ! 
+ ! exponential of the matrix X: X has to be ANTI HERMITIAN !!
+ !
  ! taken from Hellgaker, jorgensen, Olsen book
  !
  ! section evaluation of matrix exponential (Eqs. 3.1.29 to 3.1.31)
@@ -1907,19 +1907,19 @@ subroutine exp_matrix(X,n,exp_X)
  allocate(r2_mat(n,n),eigvalues(n),eigvectors(n,n))
  allocate(eigvalues_mat(n,n),matrix_tmp1(n,n),matrix_tmp2(n,n))
 
- ! r2_mat = X^2 in the 3.1.30 
+ ! r2_mat = X^2 in the 3.1.30
  call get_A_squared(X,n,r2_mat)
- call lapack_diagd(eigvalues,eigvectors,r2_mat,n,n) 
+ call lapack_diagd(eigvalues,eigvectors,r2_mat,n,n)
  eigvalues=-eigvalues
  do i = 1,n
   ! t = dsqrt(t^2) where t^2 are eigenvalues of X^2
-  eigvalues(i) = dsqrt(eigvalues(i)) 
+  eigvalues(i) = dsqrt(eigvalues(i))
  enddo
 
  if(.false.)then
  !!! For debugging and following the book intermediate
-   ! rebuilding the matrix : X^2 = -W t^2 W^T as in 3.1.30 
-   ! matrix_tmp1 = W t^2 
+   ! rebuilding the matrix : X^2 = -W t^2 W^T as in 3.1.30
+   ! matrix_tmp1 = W t^2
    print*,'eigvalues = '
    do i = 1, n
     print*,i,eigvalues(i)
@@ -1943,9 +1943,9 @@ subroutine exp_matrix(X,n,exp_X)
    enddo
  endif
 
- ! building the exponential 
+ ! building the exponential
  ! exp(X) = W cos(t) W^T + W t^-1 sin(t) W^T X as in Eq. 3.1.31
- ! matrix_tmp1 = W cos(t) 
+ ! matrix_tmp1 = W cos(t)
  do i = 1,n
   eigvalues_mat(i,i) = dcos(eigvalues(i))
  enddo
@@ -1965,25 +1965,25 @@ subroutine exp_matrix(X,n,exp_X)
                              + eigvalues(i)*eigvalues(i)*eigvalues(i)*eigvalues(i)*c_1_3*0.025d0
   endif
  enddo
- ! matrix_tmp1 = W t^-1 sin(t) 
+ ! matrix_tmp1 = W t^-1 sin(t)
  call dgemm('N','N',n,n,n,1.d0,eigvectors,size(eigvectors,1), &
  eigvalues_mat,size(eigvalues_mat,1),0.d0,matrix_tmp1,size(matrix_tmp1,1))
- ! matrix_tmp2 = W t^-1 sin(t) W^T 
+ ! matrix_tmp2 = W t^-1 sin(t) W^T
  call dgemm('N','T',n,n,n,-1.d0,matrix_tmp1,size(matrix_tmp1,1), &
  eigvectors,size(eigvectors,1),0.d0,matrix_tmp2,size(matrix_tmp2,1))
- ! exp_X += matrix_tmp2 X 
+ ! exp_X += matrix_tmp2 X
  call dgemm('N','N',n,n,n,1.d0,matrix_tmp2,size(matrix_tmp2,1), &
  X,size(X,1),1.d0,exp_X,size(exp_X,1))
- 
+
 end
 
 
 subroutine exp_matrix_taylor(X,n,exp_X,converged)
  implicit none
  BEGIN_DOC
- ! exponential of a general real matrix X using the Taylor expansion of exp(X) 
- ! 
- ! returns the logical converged which checks the convergence 
+ ! exponential of a general real matrix X using the Taylor expansion of exp(X)
+ !
+ ! returns the logical converged which checks the convergence
  END_DOC
  double precision, intent(in) :: X(n,n)
  integer, intent(in):: n
@@ -1994,7 +1994,7 @@ subroutine exp_matrix_taylor(X,n,exp_X,converged)
  double precision, allocatable :: Tpotmat(:,:),Tpotmat2(:,:)
  allocate(Tpotmat(n,n),Tpotmat2(n,n))
  BEGIN_DOC
- ! exponential of X using Taylor expansion 
+ ! exponential of X using Taylor expansion
  END_DOC
  Tpotmat(:,:)=0.D0
  exp_X(:,:)  =0.D0
@@ -2013,34 +2013,34 @@ subroutine exp_matrix_taylor(X,n,exp_X,converged)
        X, size(X,1), 0.d0,                                    &
        Tpotmat, size(Tpotmat,1))
    exp_X(:,:) = exp_X(:,:) + Tpotmat(:,:)
-   
+
    converged = ( sum(abs(Tpotmat(:,:))) < 1.d-6).or.(iter>30)
  end do
  if(.not.converged)then
   print*,'Warning !! exp_matrix_taylor did not converge !'
  endif
-  
+
 end
 
 subroutine get_A_squared(A,n,A2)
  implicit none
  BEGIN_DOC
-! A2 = A A where A is n x n matrix. Use the dgemm routine 
+! A2 = A A where A is n x n matrix. Use the dgemm routine
  END_DOC
  double precision, intent(in) :: A(n,n)
  integer, intent(in) :: n
- double precision, intent(out):: A2(n,n) 
+ double precision, intent(out):: A2(n,n)
  call dgemm('N','N',n,n,n,1.d0,A,size(A,1),A,size(A,1),0.d0,A2,size(A2,1))
 end
 
 subroutine get_AB_prod(A,n,m,B,l,AB)
  implicit none
  BEGIN_DOC
-! AB = A B where A is n x m, B is m x l. Use the dgemm routine 
+! AB = A B where A is n x m, B is m x l. Use the dgemm routine
  END_DOC
  double precision, intent(in) :: A(n,m),B(m,l)
  integer, intent(in) :: n,m,l
- double precision, intent(out):: AB(n,l) 
+ double precision, intent(out):: AB(n,l)
  if(size(A,2).ne.m.or.size(B,1).ne.m)then
   print*,'error in get_AB_prod ! '
   print*,'matrices do not have the good dimension '
@@ -2051,3 +2051,4 @@ subroutine get_AB_prod(A,n,m,B,l,AB)
  endif
  call dgemm('N','N',n,l,m,1.d0,A,size(A,1),B,size(B,1),0.d0,AB,size(AB,1))
 end
+

@@ -27,7 +27,7 @@ double precision function ao_value(i, r)
   dx = dx**power_ao(1)
   dy = dy**power_ao(2)
   dz = dz**power_ao(3)
- 
+
   accu = 0.d0
   do m = 1, ao_prim_num(i)
     beta = ao_expo_ordered_transp(m,i)
@@ -48,7 +48,7 @@ double precision function primitive_value(i, j, r)
   implicit none
   integer,          intent(in) :: i, j
   double precision, intent(in) :: r(3)
- 
+
   integer          :: m, num_ao
   integer          :: power_ao(3)
   double precision :: center_ao(3)
@@ -65,7 +65,7 @@ double precision function primitive_value(i, j, r)
   dx = dx**power_ao(1)
   dy = dy**power_ao(2)
   dz = dz**power_ao(3)
- 
+
   accu = 0.d0
   m = j
   beta = ao_expo_ordered_transp(m,i)
@@ -135,7 +135,7 @@ subroutine give_all_aos_and_grad_at_r(r, aos_array, aos_grad_array)
   !
   ! input : r(1) ==> r(1) = x, r(2) = y, r(3) = z
   !
-  ! output : 
+  ! output :
   !
   ! * aos_array(i) = ao(i) evaluated at ro
   ! * aos_grad_array(1,i) = gradient X of the ao(i) evaluated at $\textbf{r}$
@@ -252,7 +252,7 @@ subroutine give_all_aos_and_grad_and_lapl_at_r(r, aos_array, aos_grad_array, aos
     dy = r(2) - center_ao(2)
     dz = r(3) - center_ao(3)
     r2 = dx*dx + dy*dy + dz*dz
-    
+
     do j = 1, Nucl_N_Aos(i)
 
       k = Nucl_Aos_transposed(j,i) ! index of the ao in the ordered format
@@ -260,11 +260,11 @@ subroutine give_all_aos_and_grad_and_lapl_at_r(r, aos_array, aos_grad_array, aos
       aos_array(k) = 0.d0
       aos_grad_array(1,k) = 0.d0
       aos_grad_array(2,k) = 0.d0
-      aos_grad_array(3,k) = 0.d0      
+      aos_grad_array(3,k) = 0.d0
       aos_lapl_array(1,k) = 0.d0
       aos_lapl_array(2,k) = 0.d0
       aos_lapl_array(3,k) = 0.d0
-      
+
       power_ao(1:3)= ao_power_ordered_transp_per_nucl(1:3,j,i)
       dx2 = dx**power_ao(1)
       dy2 = dy**power_ao(2)
@@ -283,15 +283,15 @@ subroutine give_all_aos_and_grad_and_lapl_at_r(r, aos_array, aos_grad_array, aos
       endif
 
       if(power_ao(1) .ge. 1) then
-        dx4 = dble((2 * power_ao(1) + 1)) * dx**(power_ao(1)) 
+        dx4 = dble((2 * power_ao(1) + 1)) * dx**(power_ao(1))
       else
-        dx4 = dble((power_ao(1) + 1)) * dx**(power_ao(1)) 
+        dx4 = dble((power_ao(1) + 1)) * dx**(power_ao(1))
       endif
-      
+
       dx5 = dx**(power_ao(1)+2)
-  
+
       ! ---
-      
+
       dy1 = 0.d0
       if(power_ao(2) .ne. 0) then
         dy1 = dble(power_ao(2)) * dy**(power_ao(2)-1)
@@ -301,17 +301,17 @@ subroutine give_all_aos_and_grad_and_lapl_at_r(r, aos_array, aos_grad_array, aos
       if(power_ao(2) .ge. 2) then
         dy3 = dble(power_ao(2)) * dble((power_ao(2)-1))  * dy**(power_ao(2)-2)
       endif
-      
+
       if(power_ao(2) .ge. 1) then
-        dy4 = dble((2 * power_ao(2) + 1)) * dy**(power_ao(2)) 
+        dy4 = dble((2 * power_ao(2) + 1)) * dy**(power_ao(2))
       else
-        dy4 = dble((power_ao(2) + 1)) * dy**(power_ao(2)) 
+        dy4 = dble((power_ao(2) + 1)) * dy**(power_ao(2))
       endif
-      
+
       dy5 = dy**(power_ao(2)+2)
 
       ! ---
-      
+
       dz1 = 0.d0
       if(power_ao(3) .ne. 0) then
         dz1 = dble(power_ao(3)) * dz**(power_ao(3)-1)
@@ -321,17 +321,17 @@ subroutine give_all_aos_and_grad_and_lapl_at_r(r, aos_array, aos_grad_array, aos
       if(power_ao(3) .ge. 2) then
         dz3 = dble(power_ao(3)) * dble((power_ao(3)-1)) * dz**(power_ao(3)-2)
       endif
-      
+
       if(power_ao(3) .ge. 1) then
-        dz4 = dble((2 * power_ao(3) + 1)) * dz**(power_ao(3)) 
+        dz4 = dble((2 * power_ao(3) + 1)) * dz**(power_ao(3))
       else
-        dz4 = dble((power_ao(3) + 1)) * dz**(power_ao(3)) 
+        dz4 = dble((power_ao(3) + 1)) * dz**(power_ao(3))
       endif
-      
+
       dz5 = dz**(power_ao(3)+2)
-      
+
       ! ---
-      
+
       accu_1 = 0.d0
       accu_2 = 0.d0
       accu_3 = 0.d0
@@ -357,4 +357,5 @@ subroutine give_all_aos_and_grad_and_lapl_at_r(r, aos_array, aos_grad_array, aos
 end
 
 ! ---
+
 

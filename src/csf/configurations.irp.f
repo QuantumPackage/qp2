@@ -194,7 +194,7 @@ subroutine configuration_to_dets(o,d,sze,n_alpha,Nint)
 end
 
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_configuration, (N_int,2,psi_det_size) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_configuration, (N_int, 2, psi_det_size) ]
 &BEGIN_PROVIDER [ integer, N_configuration ]
  implicit none
  BEGIN_DOC
@@ -430,7 +430,7 @@ BEGIN_PROVIDER [ double precision, psi_configuration_Hii, (N_configuration) ]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, weight_configuration, (N_configuration,N_states) ]
+BEGIN_PROVIDER [ double precision, weight_configuration, (N_configuration, N_states) ]
  implicit none
  BEGIN_DOC
  ! Weight of the configurations in the wave function
@@ -460,7 +460,7 @@ BEGIN_PROVIDER [ double precision, weight_configuration_average, (N_configuratio
  enddo
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_configuration_sorted, (N_int,2,N_configuration) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_configuration_sorted, (N_int, 2, N_configuration) ]
 &BEGIN_PROVIDER [ double precision, weight_configuration_average_sorted, (N_configuration) ]
 &BEGIN_PROVIDER [ integer, psi_configuration_sorted_order, (N_configuration) ]
 &BEGIN_PROVIDER [ integer, psi_configuration_sorted_order_reverse, (N_configuration) ]
@@ -588,7 +588,7 @@ BEGIN_PROVIDER [ integer, N_dominant_dets_of_cfgs ]
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer(bit_kind), dominant_dets_of_cfgs, (N_int,2,N_dominant_dets_of_cfgs) ]
+BEGIN_PROVIDER [ integer(bit_kind), dominant_dets_of_cfgs, (N_int, 2, N_dominant_dets_of_cfgs) ]
  implicit none
  BEGIN_DOC
  ! Configuration of the determinants with the largest weight, for each state
@@ -610,8 +610,8 @@ subroutine binary_search_cfg(cfgInp,addcfg)
   implicit none
   BEGIN_DOC
   ! Documentation for binary_search
-  ! 
-  ! Does a binary search to find 
+  !
+  ! Does a binary search to find
   ! the address of a configuration in a list of
   ! configurations.
   END_DOC
@@ -640,7 +640,7 @@ subroutine binary_search_cfg(cfgInp,addcfg)
 
 end subroutine
 
- BEGIN_PROVIDER [ integer, psi_configuration_to_psi_det, (2,N_configuration) ]
+ BEGIN_PROVIDER [ integer, psi_configuration_to_psi_det, (2, N_configuration) ]
 &BEGIN_PROVIDER [ integer, psi_configuration_n_det, (N_configuration) ]
 &BEGIN_PROVIDER [ integer, psi_configuration_to_psi_det_data, (N_det) ]
 &BEGIN_PROVIDER [ integer, n_det_per_config_max ]
@@ -678,7 +678,7 @@ end subroutine
  psi_configuration_to_psi_det(2,k) = N_det
 
 
- ! Reorder determinants according to generation 
+ ! Reorder determinants according to generation
  ! --------------------------------------------
 
  integer(bit_kind), allocatable :: dets(:,:,:)
@@ -753,12 +753,15 @@ END_PROVIDER
 
 
 BEGIN_PROVIDER [ integer, n_elec_alpha_for_psi_configuration, (N_configuration)]
+  BEGIN_DOC
+  ! n_elec_alpha_for_psi_configuration
+  END_DOC
  implicit none
  integer :: i,j,k,l
  integer(bit_kind) :: det_tmp(N_int,2),det_alpha(N_int)
  n_elec_alpha_for_psi_configuration = 0
  do i = 1, N_configuration
-  j = psi_configuration_to_psi_det(2,i) 
+  j = psi_configuration_to_psi_det(2,i)
   det_tmp(:,:) = psi_det(:,:,j)
   k = 0
   do l = 1, N_int
@@ -768,4 +771,5 @@ BEGIN_PROVIDER [ integer, n_elec_alpha_for_psi_configuration, (N_configuration)]
   n_elec_alpha_for_psi_configuration(i) = k
  enddo
 
-END_PROVIDER 
+END_PROVIDER
+

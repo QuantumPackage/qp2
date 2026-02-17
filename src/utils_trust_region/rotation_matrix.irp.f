@@ -80,8 +80,8 @@ subroutine rotation_matrix(A,LDA,R,LDR,n,info,enforce_step_cancellation)
   logical, intent(out)            :: enforce_step_cancellation
 
   ! internal
-  double precision, allocatable   :: B(:,:) 
-  double precision, allocatable   :: work(:,:) 
+  double precision, allocatable   :: B(:,:)
+  double precision, allocatable   :: work(:,:)
   double precision, allocatable   :: W(:,:), e_val(:)
   double precision, allocatable   :: m_diag(:,:),cos_tau(:,:),sin_tau(:,:),tau_m1(:,:)
   double precision, allocatable   :: part_1(:,:),part_1a(:,:)
@@ -164,7 +164,7 @@ do j = 1, n
       print*, 'WANRING: matrix A is not antisymmetric'
       print*, 'A(i,j) /= - A(j,i):', i,j,A(i,j), A(j,i)
       print*, 'diff:', A(i,j)+A(j,i)
-      call ABORT 
+      call ABORT
     endif
   enddo
 enddo
@@ -197,7 +197,7 @@ endif
 
 ! B=A.A
 !     - Calculation of the matrix $\textbf{B} = \textbf{A}^2$
-!     - Diagonalization of $\textbf{B}$ 
+!     - Diagonalization of $\textbf{B}$
 !     W, the eigenvectors
 !     e_val, the eigenvalues
 
@@ -304,7 +304,7 @@ enddo
 
 ! Debug
 !print*,'eigenvalues:'
-!do i = 1, n 
+!do i = 1, n
 !  print*, e_val(i)
 !enddo
 
@@ -316,7 +316,7 @@ enddo
 !   enddo
 !endif
 
-! Rotation matrix 
+! Rotation matrix
 !     \begin{align*}
 !     \textbf{R} = \textbf{W} \cos(\tau) \textbf{W}^{\dagger} + \textbf{W} \tau^{-1} \sin(\tau) \textbf{W}^{\dagger} \textbf{A}
 !     \end{align*}
@@ -371,7 +371,7 @@ enddo
 call dgemm('N','T',n,n,n,1d0,R,size(R,1),R,size(R,1),-1d0,RR_t,size(RR_t,1))
 
 norm = dnrm2(n*n,RR_t,1)
-!print*, 'Rotation matrix check, norm R.R^T = ', norm 
+!print*, 'Rotation matrix check, norm R.R^T = ', norm
 
 ! Debug
 !if (debug) then
@@ -386,7 +386,7 @@ norm = dnrm2(n*n,RR_t,1)
 ! Check if R.R^T=1
 max_elem = 0d0
 do j = 1, n
-   do i = 1, n 
+   do i = 1, n
       if (ABS(RR_t(i,j)) > ABS(max_elem)) then
          max_elem = RR_t(i,j)
       endif
@@ -439,3 +439,4 @@ deallocate(B)
   print*,'---End rotation_matrix---'
 
 end subroutine
+

@@ -23,14 +23,14 @@ use bitmasks
  enddo
 END_PROVIDER
 
-  BEGIN_PROVIDER[double precision, coef_hf_selector]
- &BEGIN_PROVIDER[double precision, inv_selectors_coef_hf]
- &BEGIN_PROVIDER[double precision, inv_selectors_coef_hf_squared]
- &BEGIN_PROVIDER[double precision, E_corr_per_selectors, (N_det_selectors)]
- &BEGIN_PROVIDER[double precision, i_H_HF_per_selectors, (N_det_selectors)]
- &BEGIN_PROVIDER[double precision, Delta_E_per_selector, (N_det_selectors)]
- &BEGIN_PROVIDER[double precision, E_corr_double_only ]
- &BEGIN_PROVIDER[double precision, E_corr_second_order ]
+  BEGIN_PROVIDER [double precision, coef_hf_selector]
+ &BEGIN_PROVIDER [double precision, inv_selectors_coef_hf]
+ &BEGIN_PROVIDER [double precision, inv_selectors_coef_hf_squared]
+ &BEGIN_PROVIDER [double precision, E_corr_per_selectors, (N_det_selectors)]
+ &BEGIN_PROVIDER [double precision, i_H_HF_per_selectors, (N_det_selectors)]
+ &BEGIN_PROVIDER [double precision, Delta_E_per_selector, (N_det_selectors)]
+ &BEGIN_PROVIDER [double precision, E_corr_double_only ]
+ &BEGIN_PROVIDER [double precision, E_corr_second_order ]
  implicit none
  BEGIN_DOC
  ! Correlation energy per determinant with respect to the Hartree-Fock determinant
@@ -74,3 +74,4 @@ END_PROVIDER
  enddo
  E_corr_double_only = E_corr_double_only * inv_selectors_coef_hf
  END_PROVIDER
+

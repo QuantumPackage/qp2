@@ -31,10 +31,10 @@ double precision function diag_S_mat_elem(key_i,Nint)
       endif
     endif
   enddo
-  
+
   double precision :: sz
   sz = nup - 0.5d0*ntot
-  
+
   !<S^2> = <S+ S-> + Sz(Sz-1)
   diag_S_mat_elem = nup + sz*(sz-1)
 
@@ -399,3 +399,4 @@ subroutine i_S2_psi_minilist(key,keys,idx_key,N_minilist,coef,Nint,Ndet,Ndet_max
   endif
 
 end
+

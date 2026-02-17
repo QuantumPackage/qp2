@@ -4,7 +4,7 @@
 BEGIN_PROVIDER [double precision, TCSCF_bi_ort_dm_ao_alpha, (ao_num, ao_num) ]
 
   BEGIN_DOC
-  ! TCSCF_bi_ort_dm_ao_alpha(i,j) = <Chi_0| a^dagger_i,alpha a_j,alpha |Phi_0> where i,j are AO basis. 
+  ! TCSCF_bi_ort_dm_ao_alpha(i,j) = <Chi_0| a^dagger_i,alpha a_j,alpha |Phi_0> where i,j are AO basis.
   !
   ! This is the equivalent of the alpha density of the HF Slater determinant, but with a couple of bi-orthonormal Slater determinant |Chi_0> and |Phi_0>
   END_DOC
@@ -24,7 +24,7 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, TCSCF_bi_ort_dm_ao_beta, (ao_num, ao_num) ]
 
   BEGIN_DOC
-  ! TCSCF_bi_ort_dm_ao_beta(i,j) = <Chi_0| a^dagger_i,beta a_j,beta |Phi_0> where i,j are AO basis. 
+  ! TCSCF_bi_ort_dm_ao_beta(i,j) = <Chi_0| a^dagger_i,beta a_j,beta |Phi_0> where i,j are AO basis.
   !
   ! This is the equivalent of the beta density of the HF Slater determinant, but with a couple of bi-orthonormal Slater determinant |Chi_0> and |Phi_0>
   END_DOC
@@ -44,7 +44,7 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, TCSCF_bi_ort_dm_ao, (ao_num, ao_num) ]
 
   BEGIN_DOC
-  ! TCSCF_bi_ort_dm_ao(i,j) = <Chi_0| a^dagger_i,beta+alpha a_j,beta+alpha |Phi_0> where i,j are AO basis. 
+  ! TCSCF_bi_ort_dm_ao(i,j) = <Chi_0| a^dagger_i,beta+alpha a_j,beta+alpha |Phi_0> where i,j are AO basis.
   !
   ! This is the equivalent of the total electronic density of the HF Slater determinant, but with a couple of bi-orthonormal Slater determinant |Chi_0> and |Phi_0>
   END_DOC
@@ -65,4 +65,5 @@ BEGIN_PROVIDER [ double precision, TCSCF_bi_ort_dm_ao, (ao_num, ao_num) ]
 END_PROVIDER
 
 ! ---
+
 

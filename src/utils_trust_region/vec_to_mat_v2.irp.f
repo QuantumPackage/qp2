@@ -11,9 +11,9 @@ subroutine vec_to_mat_v2(n,m,v_x,m_x)
   !BEGIN_DOC
   ! Vector to antisymmetric matrix
   !END_DOC
-  
+
   implicit none
-  
+
   integer, intent(in) :: n,m
   double precision, intent(in) :: v_x(n)
   double precision, intent(out) :: m_x(m,m)
@@ -28,12 +28,13 @@ subroutine vec_to_mat_v2(n,m,v_x,m_x)
       m_x(i,j) = v_x(k)
     enddo
   enddo
-  
+
   ! Antisym
   do i = 1, m - 1
     do j = i + 1, m
-      m_x(i,j) = - m_x(j,i) 
+      m_x(i,j) = - m_x(j,i)
     enddo
   enddo
 
 end
+

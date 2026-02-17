@@ -54,7 +54,7 @@ subroutine test_v_ij_u_cst_mu_env()
     do j = 1, ao_num
       do i = 1, ao_num
 
-        i_exc  =     v_ij_u_cst_mu_env_fit(i,j,ipoint) 
+        i_exc  =     v_ij_u_cst_mu_env_fit(i,j,ipoint)
         i_num  = num_v_ij_u_cst_mu_env    (i,j,ipoint)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -97,7 +97,7 @@ subroutine test_v_ij_erf_rk_cst_mu_env()
     do j = 1, ao_num
       do i = 1, ao_num
 
-        i_exc  =     v_ij_erf_rk_cst_mu_env(i,j,ipoint) 
+        i_exc  =     v_ij_erf_rk_cst_mu_env(i,j,ipoint)
         i_num  = num_v_ij_erf_rk_cst_mu_env(i,j,ipoint)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -143,7 +143,7 @@ subroutine test_x_v_ij_erf_rk_cst_mu_env()
 
         call num_x_v_ij_erf_rk_cst_mu_env(i, j, ipoint, integ)
 
-        i_exc  = x_v_ij_erf_rk_cst_mu_env(i,j,ipoint,1) 
+        i_exc  = x_v_ij_erf_rk_cst_mu_env(i,j,ipoint,1)
         i_num  = integ(1)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -155,7 +155,7 @@ subroutine test_x_v_ij_erf_rk_cst_mu_env()
         acc_tot += acc_ij
         normalz += dabs(i_num)
 
-        i_exc  = x_v_ij_erf_rk_cst_mu_env(i,j,ipoint,2) 
+        i_exc  = x_v_ij_erf_rk_cst_mu_env(i,j,ipoint,2)
         i_num  = integ(2)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -167,7 +167,7 @@ subroutine test_x_v_ij_erf_rk_cst_mu_env()
         acc_tot += acc_ij
         normalz += dabs(i_num)
 
-        i_exc  = x_v_ij_erf_rk_cst_mu_env(i,j,ipoint,3) 
+        i_exc  = x_v_ij_erf_rk_cst_mu_env(i,j,ipoint,3)
         i_num  = integ(3)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -210,7 +210,7 @@ subroutine test_int2_u2_env2()
     do j = 1, ao_num
       do i = 1, ao_num
 
-        i_exc  =     int2_u2_env2(i,j,ipoint) 
+        i_exc  =     int2_u2_env2(i,j,ipoint)
         i_num  = num_int2_u2_env2(i,j,ipoint)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -255,7 +255,7 @@ subroutine test_int2_grad1u2_grad2u2_env2()
     do j = 1, ao_num
       do i = 1, ao_num
 
-        i_exc  =     int2_grad1u2_grad2u2_env2(i,j,ipoint) 
+        i_exc  =     int2_grad1u2_grad2u2_env2(i,j,ipoint)
         i_num  = num_int2_grad1u2_grad2u2_env2(i,j,ipoint)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -300,7 +300,7 @@ subroutine test_int2_grad1_u12_ao_num()
 
         call num_int2_grad1_u12_ao(i, j, ipoint, integ)
 
-        i_exc  = int2_grad1_u12_ao(i,j,ipoint,1) 
+        i_exc  = int2_grad1_u12_ao(i,j,ipoint,1)
         i_num  = integ(1)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -312,7 +312,7 @@ subroutine test_int2_grad1_u12_ao_num()
         acc_tot += acc_ij
         normalz += dabs(i_num)
 
-        i_exc  = int2_grad1_u12_ao(i,j,ipoint,2) 
+        i_exc  = int2_grad1_u12_ao(i,j,ipoint,2)
         i_num  = integ(2)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -324,7 +324,7 @@ subroutine test_int2_grad1_u12_ao_num()
         acc_tot += acc_ij
         normalz += dabs(i_num)
 
-        i_exc  = int2_grad1_u12_ao(i,j,ipoint,3) 
+        i_exc  = int2_grad1_u12_ao(i,j,ipoint,3)
         i_num  = integ(3)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -359,7 +359,7 @@ subroutine test_int2_u_grad1u_total_env2()
   print*, ' test_int2_u_grad1u_total_env2 ...'
 
   PROVIDE int2_u_grad1u_env2
-  PROVIDE int2_u_grad1u_x_env2 
+  PROVIDE int2_u_grad1u_x_env2
 
   eps_ij  = 1d-3
   acc_tot = 0.d0
@@ -388,7 +388,7 @@ subroutine test_int2_u_grad1u_total_env2()
         acc_tot += acc_ij
         normalz += dabs(i_num)
 
-        i_exc  = y * int2_u_grad1u_env2(i,j,ipoint) - int2_u_grad1u_x_env2(i,j,ipoint,2) 
+        i_exc  = y * int2_u_grad1u_env2(i,j,ipoint) - int2_u_grad1u_x_env2(i,j,ipoint,2)
         i_num  = integ(2)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -400,7 +400,7 @@ subroutine test_int2_u_grad1u_total_env2()
         acc_tot += acc_ij
         normalz += dabs(i_num)
 
-        i_exc  = z * int2_u_grad1u_env2(i,j,ipoint) - int2_u_grad1u_x_env2(i,j,ipoint,3) 
+        i_exc  = z * int2_u_grad1u_env2(i,j,ipoint) - int2_u_grad1u_x_env2(i,j,ipoint,3)
         i_num  = integ(3)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -443,7 +443,7 @@ subroutine test_grad12_j12()
     do j = 1, ao_num
       do i = 1, ao_num
 
-        i_exc  =     grad12_j12(i,j,ipoint) 
+        i_exc  =     grad12_j12(i,j,ipoint)
         i_num  = num_grad12_j12(i, j, ipoint)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -486,7 +486,7 @@ subroutine test_u12sq_envsq()
     do j = 1, ao_num
       do i = 1, ao_num
 
-        i_exc  =     u12sq_envsq(i,j,ipoint) 
+        i_exc  =     u12sq_envsq(i,j,ipoint)
         i_num  = num_u12sq_envsq(i, j, ipoint)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -529,7 +529,7 @@ subroutine test_u12_grad1_u12_env_grad1_env()
     do j = 1, ao_num
       do i = 1, ao_num
 
-        i_exc  =     u12_grad1_u12_env_grad1_env(i,j,ipoint) 
+        i_exc  =     u12_grad1_u12_env_grad1_env(i,j,ipoint)
         i_num  = num_u12_grad1_u12_env_grad1_env(i, j, ipoint)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -614,7 +614,7 @@ subroutine test_vect_overlap_gauss_r12_ao()
     do j = 1, ao_num
       do i = 1, ao_num
 
-        i_exc  = I_ref(i,j,ipoint) 
+        i_exc  = I_ref(i,j,ipoint)
         i_num  = I_vec(i,j,ipoint)
         acc_ij = dabs(i_exc - i_num)
         !acc_ij = dabs(i_exc - i_num) / dabs(i_exc)
@@ -705,7 +705,7 @@ subroutine test_vect_overlap_gauss_r12_ao_with1s()
     do j = 1, ao_num
       do i = 1, ao_num
 
-        i_exc  = I_ref(i,j,ipoint) 
+        i_exc  = I_ref(i,j,ipoint)
         i_num  = I_vec(i,j,ipoint)
         acc_ij = dabs(i_exc - i_num)
         !acc_ij = dabs(i_exc - i_num) / dabs(i_exc)
@@ -775,4 +775,5 @@ subroutine test_Ir2_Mu_long_Du_0()
 end
 
 ! ---
+
 

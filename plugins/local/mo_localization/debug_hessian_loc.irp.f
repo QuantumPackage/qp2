@@ -3,7 +3,7 @@ program debug_hessian_loc
   !BEGIN_DOC
   ! Check if the hessian is correct
   !END_DOC
-  
+
   implicit none
 
   integer :: list_size, n
@@ -17,11 +17,11 @@ program debug_hessian_loc
   list_size = dim_list_act_orb
 
   allocate(list(list_size))
-  
+
   list = list_act
 
   n = list_size*(list_size-1)/2
-  
+
   allocate(H(n),H2(n))
 
   if (localization_method == 'boys') then
@@ -36,7 +36,7 @@ program debug_hessian_loc
     print*,'Unknown localization_method, please select boys or pipek'
     call abort
   endif
- 
+
   do i = 1, n
     print*,i,H(i)
   enddo
@@ -61,5 +61,6 @@ program debug_hessian_loc
   print*,'Max error', max_elem
 
   deallocate(H,H2)
-  
+
 end
+

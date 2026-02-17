@@ -33,7 +33,7 @@ subroutine get_d2_new_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, ma
   if(p(0,1) < p(0,2)) ma = 2 ! fewer alpha particles than beta particles
   mi = mod(ma, 2) + 1
 
-  if(sp == 3) then ! if one alpha and one beta xhole 
+  if(sp == 3) then ! if one alpha and one beta xhole
     !(where xholes refer to the ionizations from the generator, not the holes occupied in the ionized generator)
     if(ma == 2) bant = 2 ! if more beta particles than alpha particles
 
@@ -51,7 +51,7 @@ subroutine get_d2_new_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, ma
         i2 = turn3(2,i)
         p1 = p(i1, ma)
         p2 = p(i2, ma)
-        
+
      ! |G> = |psi_{gen,i}>
      ! |G'> = a_{x1} a_{x2} |G>
      ! |alpha> = a_{puti}^{\dagger} a_{putj}^{\dagger} |G'>
@@ -63,8 +63,8 @@ subroutine get_d2_new_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, ma
         !      <j|H|i>  =  (<p1,p2|h1,h2> - <p2,p1|h1,h2>) * phase
         !    <j|H|psi> +=  <j|H|i> * c_i
 
-!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!! 
-        ! take the transpose of what's written above because later use the complex conjugate 
+!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!
+        ! take the transpose of what's written above because later use the complex conjugate
 
 !        hij = mo_bi_ortho_tc_two_e(h1, h2, p1, p2) - mo_bi_ortho_tc_two_e( h1, h2, p2, p1)
 !        hji = mo_bi_ortho_tc_two_e_transp(h1, h2, p1, p2) - mo_bi_ortho_tc_two_e_transp( h1, h2, p2, p1)
@@ -104,10 +104,10 @@ subroutine get_d2_new_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, ma
           puti = p(i, 1)
           if(banned(puti,putj,bant) .or. bannedOrb(puti,1)) cycle
           p1 = p(turn2(i), 1)
-    ! hij = <psi_{selectors,i}|H|alpha> 
+    ! hij = <psi_{selectors,i}|H|alpha>
 !          hij = mo_bi_ortho_tc_two_e(p1, p2, h1, h2)
-!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!! 
-        ! take the transpose of what's written above because later use the complex conjugate 
+!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!
+        ! take the transpose of what's written above because later use the complex conjugate
 !          hij = mo_bi_ortho_tc_two_e(h1, h2, p1, p2 )
 !          hji = mo_bi_ortho_tc_two_e_transp(h1, h2, p1, p2 )
           hij = mo_bi_ortho_tc_two_e_transp(p1, p2 ,h1, h2 )
@@ -146,8 +146,8 @@ subroutine get_d2_new_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, ma
           p1 = p(i1, ma)
           p2 = p(i2, ma)
 !          hij = mo_bi_ortho_tc_two_e(p1, p2, h1, h2) - mo_bi_ortho_tc_two_e(p2,p1, h1, h2)
-!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!! 
-        ! take the transpose of what's written above because later use the complex conjugate 
+!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!
+        ! take the transpose of what's written above because later use the complex conjugate
           hij = mo_bi_ortho_tc_two_e_transp(p1, p2, h1, h2) - mo_bi_ortho_tc_two_e_transp(p1, p2, h2,h1 )
           hji = mo_bi_ortho_tc_two_e(p1, p2, h1, h2) - mo_bi_ortho_tc_two_e(p1, p2, h2,h1 )
           if (hij == 0.d0.or.hji == 0.d0) cycle
@@ -178,8 +178,8 @@ subroutine get_d2_new_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, ma
         p2 = p(i, ma)
 
 !        hij = mo_bi_ortho_tc_two_e(p1, p2, h1, h2)
-!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!! 
-        ! take the transpose of what's written above because later use the complex conjugate 
+!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!
+        ! take the transpose of what's written above because later use the complex conjugate
         hij = mo_bi_ortho_tc_two_e_transp(p1, p2 ,h1, h2)
         hji = mo_bi_ortho_tc_two_e(p1, p2,h1, h2 )
         if (hij == 0.d0) cycle
@@ -213,8 +213,8 @@ subroutine get_d2_new_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, ma
         h2 = h(2, mi)
       !! <alpha|H|psi>
 !        hij = (mo_bi_ortho_tc_two_e(p1, p2, h1, h2) - mo_bi_ortho_tc_two_e(p2,p1, h1, h2))
-!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!! 
-        ! take the transpose of what's written above because later use the complex conjugate 
+!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!
+        ! take the transpose of what's written above because later use the complex conjugate
         hij = (mo_bi_ortho_tc_two_e_transp(p1, p2,h1, h2) - mo_bi_ortho_tc_two_e_transp(p2,p1,h1, h2))
         hji = (mo_bi_ortho_tc_two_e(p1, p2,h1, h2) - mo_bi_ortho_tc_two_e(p2,p1,h1, h2))
         if (hij /= 0.d0.or.hji==0.d0) then
@@ -233,3 +233,4 @@ subroutine get_d2_new_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, ma
     end if
   end if
 end
+

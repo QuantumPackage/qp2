@@ -1,7 +1,7 @@
 use bitmasks
 
- BEGIN_PROVIDER [integer(bit_kind), holes_operators, (N_int,2)]
-&BEGIN_PROVIDER [integer(bit_kind), particles_operators, (N_int,2)]
+ BEGIN_PROVIDER [integer(bit_kind), holes_operators, (N_int, 2)]
+&BEGIN_PROVIDER [integer(bit_kind), particles_operators, (N_int, 2)]
 
  BEGIN_DOC
  ! holes_operators represents an array of integers where all the holes have
@@ -43,3 +43,4 @@ use bitmasks
  deallocate(holes,particles)
 
 END_PROVIDER
+

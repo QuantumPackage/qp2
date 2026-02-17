@@ -37,7 +37,7 @@
 
   !$OMP PARALLEL DEFAULT (NONE)                                             &
   !$OMP PRIVATE (ipoint, i, j, i_1s, r, c_1s, e_1s, R_1s, int_erf, int_clb, &
-  !$OMP         tmp_Du_0, tmp_Du_x, tmp_Du_y, tmp_Du_z, tmp_Du_2)           & 
+  !$OMP         tmp_Du_0, tmp_Du_x, tmp_Du_y, tmp_Du_z, tmp_Du_2)           &
   !$OMP SHARED  (n_points_final_grid, ao_num, final_grid_points, mu_erf,    &
   !$OMP          List_env1s_size, List_env1s_expo,                          &
   !$OMP          List_env1s_coef, List_env1s_cent,                          &
@@ -103,11 +103,11 @@
       enddo
     enddo
   enddo
- 
+
   call wall_time(wall1)
   print*, ' wall time for Ir2_Mu_long_Du (min) = ', (wall1 - wall0) / 60.d0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -201,11 +201,11 @@ BEGIN_PROVIDER [double precision, Ir2_Mu_gauss_Du, (ao_num, ao_num, n_points_fin
       enddo
     enddo
   enddo
- 
+
   call wall_time(wall1)
   print*, ' wall time for Ir2_Mu_gauss_Du (min) = ', (wall1 - wall0) / 60.d0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -218,11 +218,11 @@ END_PROVIDER
   BEGIN_DOC
   !
   ! Ir2_Mu_long_Du2_0 = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12) / r_12]
-  !                                                                       
+  !
   ! Ir2_Mu_long_Du2_x = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12) / r_12] * x2
   ! Ir2_Mu_long_Du2_y = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12) / r_12] * y2
   ! Ir2_Mu_long_Du2_z = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12) / r_12] * z2
-  !                                                                       
+  !
   ! Ir2_Mu_long_Du2_2 = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12) / r_12] * r2^2
   !
   END_DOC
@@ -251,7 +251,7 @@ END_PROVIDER
   !$OMP PRIVATE (ipoint, i, j, i_1s, r, rmu_sq, dx, dy, dz,              &
   !$OMP         e_1s, c_1s, R_1s, tmp_arg, coef, beta, B_center,         &
   !$OMP         int_erf, int_clb,                                        &
-  !$OMP         tmp_Du2_0, tmp_Du2_x, tmp_Du2_y, tmp_Du2_z, tmp_Du2_2)   & 
+  !$OMP         tmp_Du2_0, tmp_Du2_x, tmp_Du2_y, tmp_Du2_z, tmp_Du2_2)   &
   !$OMP SHARED  (n_points_final_grid, ao_num, final_grid_points, mu_sq,  &
   !$OMP          mu_erf, List_env1s_square_size, List_env1s_square_expo, &
   !$OMP          List_env1s_square_coef, List_env1s_square_cent,         &
@@ -332,11 +332,11 @@ END_PROVIDER
       enddo
     enddo
   enddo
- 
+
   call wall_time(wall1)
   print*, ' wall time for Ir2_Mu_long_Du2 (min) = ', (wall1 - wall0) / 60.d0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -430,11 +430,11 @@ BEGIN_PROVIDER [double precision, Ir2_Mu_gauss_Du2, (ao_num, ao_num, n_points_fi
       enddo
     enddo
   enddo
- 
+
   call wall_time(wall1)
   print*, ' wall time for Ir2_Mu_gauss_Du2 (min) = ', (wall1 - wall0) / 60.d0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -564,11 +564,12 @@ END_PROVIDER
       enddo
     enddo
   enddo
- 
+
   call wall_time(wall1)
   print*, ' wall time for Ir2_Mu_short_Du2 (min) = ', (wall1 - wall0) / 60.d0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
+
 

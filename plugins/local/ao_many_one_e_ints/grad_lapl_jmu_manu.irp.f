@@ -26,7 +26,7 @@ BEGIN_PROVIDER [double precision, v_ij_erf_rk_cst_mu_env_test, (ao_num, ao_num, 
   v_ij_erf_rk_cst_mu_env_test = 0.d0
 
  !$OMP PARALLEL DEFAULT (NONE)                                                         &
- !$OMP PRIVATE (ipoint, i, j, i_1s, r, coef, beta, B_center, int_mu, int_coulomb, tmp, int_env)& 
+ !$OMP PRIVATE (ipoint, i, j, i_1s, r, coef, beta, B_center, int_mu, int_coulomb, tmp, int_env)&
  !$OMP SHARED  (n_points_final_grid, ao_num, List_comb_thr_b2_size, final_grid_points, &
  !$OMP          List_comb_thr_b2_coef, List_comb_thr_b2_expo, List_comb_thr_b2_cent,ao_abs_comb_b2_env,  &
  !$OMP          v_ij_erf_rk_cst_mu_env_test, mu_erf,                                   &
@@ -73,11 +73,11 @@ BEGIN_PROVIDER [double precision, v_ij_erf_rk_cst_mu_env_test, (ao_num, ao_num, 
       enddo
     enddo
   enddo
- 
+
   call wall_time(wall1)
   print*, ' wall time for v_ij_erf_rk_cst_mu_env_test (min) = ', (wall1 - wall0) / 60.d0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -104,8 +104,8 @@ BEGIN_PROVIDER [double precision, x_v_ij_erf_rk_cst_mu_env_test, (ao_num, ao_num
   x_v_ij_erf_rk_cst_mu_env_test = 0.d0
 
  !$OMP PARALLEL DEFAULT (NONE)                                                        &
- !$OMP PRIVATE (ipoint, i, j, i_1s, r, coef, beta, B_center, ints, ints_coulomb,      & 
- !$OMP          int_env, tmp_x, tmp_y, tmp_z,factor_ij_1s,beta_ij,center_ij_1s)       & 
+ !$OMP PRIVATE (ipoint, i, j, i_1s, r, coef, beta, B_center, ints, ints_coulomb,      &
+ !$OMP          int_env, tmp_x, tmp_y, tmp_z,factor_ij_1s,beta_ij,center_ij_1s)       &
  !$OMP SHARED  (n_points_final_grid, ao_num, List_comb_thr_b2_size, final_grid_points,&
  !$OMP          List_comb_thr_b2_coef, List_comb_thr_b2_expo, List_comb_thr_b2_cent,  &
  !$OMP          x_v_ij_erf_rk_cst_mu_env_test, mu_erf,ao_abs_comb_b2_env,         &
@@ -164,7 +164,7 @@ BEGIN_PROVIDER [double precision, x_v_ij_erf_rk_cst_mu_env_test, (ao_num, ao_num
   call wall_time(wall1)
   print*, ' wall time for x_v_ij_erf_rk_cst_mu_env_test (min) = ', (wall1 - wall0) / 60.d0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -200,11 +200,11 @@ BEGIN_PROVIDER [double precision, v_ij_u_cst_mu_env_test, (ao_num, ao_num, n_poi
  !$OMP PARALLEL DEFAULT (NONE)                                      &
  !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center, &
  !$OMP          beta_ij_u, factor_ij_1s_u, center_ij_1s_u,          &
- !$OMP          coef_fit, expo_fit, int_fit, tmp,coeftot,int_env)   & 
- !$OMP SHARED  (n_points_final_grid, ao_num,                        & 
+ !$OMP          coef_fit, expo_fit, int_fit, tmp,coeftot,int_env)   &
+ !$OMP SHARED  (n_points_final_grid, ao_num,                        &
  !$OMP          final_grid_points, ng_fit_jast,                     &
  !$OMP          expo_gauss_j_mu_x, coef_gauss_j_mu_x,               &
- !$OMP          List_comb_thr_b2_coef, List_comb_thr_b2_expo,List_comb_thr_b2_size, & 
+ !$OMP          List_comb_thr_b2_coef, List_comb_thr_b2_expo,List_comb_thr_b2_size, &
  !$OMP          List_comb_thr_b2_cent, v_ij_u_cst_mu_env_test,ao_abs_comb_b2_env,   &
  !$OMP          ao_overlap_abs_grid,ao_prod_center,ao_prod_sigma,dsqpi_3_2,thrsh_cycle_tc)
  !$OMP DO
@@ -271,11 +271,11 @@ BEGIN_PROVIDER [double precision, v_ij_u_cst_mu_env_test, (ao_num, ao_num, n_poi
       enddo
     enddo
   enddo
- 
+
   call wall_time(wall1)
   print*, ' wall time for v_ij_u_cst_mu_env_test (min) = ', (wall1 - wall0) / 60.d0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -308,11 +308,11 @@ BEGIN_PROVIDER [double precision, v_ij_u_cst_mu_env_ng_1_test, (ao_num, ao_num, 
  !$OMP PARALLEL DEFAULT (NONE)                                      &
  !$OMP PRIVATE (ipoint, i, j, i_1s,  r, coef, beta, B_center,       &
  !$OMP          beta_ij_u, factor_ij_1s_u, center_ij_1s_u,          &
- !$OMP          coef_fit, expo_fit, int_fit, tmp,coeftot,int_env)   & 
- !$OMP SHARED  (n_points_final_grid, ao_num,                        & 
+ !$OMP          coef_fit, expo_fit, int_fit, tmp,coeftot,int_env)   &
+ !$OMP SHARED  (n_points_final_grid, ao_num,                        &
  !$OMP          final_grid_points, expo_good_j_mu_1gauss,coef_good_j_mu_1gauss,        &
  !$OMP          expo_gauss_j_mu_x, coef_gauss_j_mu_x,                                  &
- !$OMP          List_comb_thr_b2_coef, List_comb_thr_b2_expo,List_comb_thr_b2_size,    & 
+ !$OMP          List_comb_thr_b2_coef, List_comb_thr_b2_expo,List_comb_thr_b2_size,    &
  !$OMP          List_comb_thr_b2_cent, v_ij_u_cst_mu_env_ng_1_test,ao_abs_comb_b2_env, &
  !$OMP          ao_overlap_abs_grid,ao_prod_center,ao_prod_sigma,dsqpi_3_2,thrsh_cycle_tc)
  !$OMP DO
@@ -375,11 +375,12 @@ BEGIN_PROVIDER [double precision, v_ij_u_cst_mu_env_ng_1_test, (ao_num, ao_num, 
       enddo
     enddo
   enddo
- 
+
   call wall_time(wall1)
   print*, ' wall time for v_ij_u_cst_mu_env_ng_1_test (min) = ', (wall1 - wall0) / 60.d0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
+
 

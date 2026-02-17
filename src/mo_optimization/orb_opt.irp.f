@@ -2,7 +2,7 @@
 
 ! This is an optimization program for molecular orbitals. It produces
 ! orbital rotations in order to lower the energy of a truncated wave
-! function.  
+! function.
 ! This program just optimize the orbitals for a fixed number of
 ! determinants. This optimization process must be repeated for different
 ! number of determinants.
@@ -20,3 +20,4 @@ program orb_opt
   TOUCH io_mo_two_e_integrals
   call run_orb_opt_trust_v2
 end
+

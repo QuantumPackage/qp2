@@ -15,9 +15,9 @@ BEGIN_PROVIDER [ integer, N_iter_max ]
  N_iter_max = 8
 END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, energy_iterations , (n_states,N_iter_max) ]
-&BEGIN_PROVIDER [ double precision, pt2_iterations , (n_states,N_iter_max) ]
-&BEGIN_PROVIDER [ double precision, extrapolated_energy, (N_iter_max,N_states) ]
+ BEGIN_PROVIDER [ double precision, energy_iterations , (n_states, N_iter_max) ]
+&BEGIN_PROVIDER [ double precision, pt2_iterations , (n_states, N_iter_max) ]
+&BEGIN_PROVIDER [ double precision, extrapolated_energy, (N_iter_max, N_states) ]
   implicit none
   BEGIN_DOC
 ! The energy at each iteration for the extrapolations
@@ -63,3 +63,4 @@ subroutine increment_n_iter(e, pt2_data)
     enddo
   endif
 end
+

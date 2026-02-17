@@ -25,7 +25,7 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_direct_bi_ort_old, (mo_num, mo_
 
  !$OMP PARALLEL                   &
  !$OMP DEFAULT (NONE)             &
- !$OMP PRIVATE (i,j,k,m,integral) & 
+ !$OMP PRIVATE (i,j,k,m,integral) &
  !$OMP SHARED (mo_num,three_e_4_idx_direct_bi_ort_old)
  !$OMP DO SCHEDULE (dynamic) COLLAPSE(2)
   do i = 1, mo_num
@@ -33,7 +33,7 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_direct_bi_ort_old, (mo_num, mo_
       do j = 1, mo_num
         do m = 1, mo_num
           call give_integrals_3_body_bi_ort(m, j, k, m, j, i, integral)
-          three_e_4_idx_direct_bi_ort_old(m,j,k,i) = -1.d0 * integral 
+          three_e_4_idx_direct_bi_ort_old(m,j,k,i) = -1.d0 * integral
         enddo
       enddo
     enddo
@@ -45,7 +45,7 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_direct_bi_ort_old, (mo_num, mo_
   print *, ' wall time for three_e_4_idx_direct_bi_ort_old', wall1 - wall0
   call print_memory_usage()
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -73,7 +73,7 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_cycle_1_bi_ort_old, (mo_num, mo
 
  !$OMP PARALLEL                   &
  !$OMP DEFAULT (NONE)             &
- !$OMP PRIVATE (i,j,k,m,integral) & 
+ !$OMP PRIVATE (i,j,k,m,integral) &
  !$OMP SHARED (mo_num,three_e_4_idx_cycle_1_bi_ort_old)
  !$OMP DO SCHEDULE (dynamic) COLLAPSE(2)
   do i = 1, mo_num
@@ -81,7 +81,7 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_cycle_1_bi_ort_old, (mo_num, mo
       do j = 1, mo_num
         do m = 1, mo_num
           call give_integrals_3_body_bi_ort(m, j, k, j, i, m, integral)
-          three_e_4_idx_cycle_1_bi_ort_old(m,j,k,i) = -1.d0 * integral 
+          three_e_4_idx_cycle_1_bi_ort_old(m,j,k,i) = -1.d0 * integral
         enddo
       enddo
     enddo
@@ -93,7 +93,7 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_cycle_1_bi_ort_old, (mo_num, mo
   print *, ' wall time for three_e_4_idx_cycle_1_bi_ort_old', wall1 - wall0
   call print_memory_usage()
 
-END_PROVIDER 
+END_PROVIDER
 
 ! --
 
@@ -121,7 +121,7 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_cycle_2_bi_ort_old, (mo_num, mo
 
  !$OMP PARALLEL                   &
  !$OMP DEFAULT (NONE)             &
- !$OMP PRIVATE (i,j,k,m,integral) & 
+ !$OMP PRIVATE (i,j,k,m,integral) &
  !$OMP SHARED (mo_num,three_e_4_idx_cycle_2_bi_ort_old)
  !$OMP DO SCHEDULE (dynamic) COLLAPSE(2)
   do i = 1, mo_num
@@ -129,7 +129,7 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_cycle_2_bi_ort_old, (mo_num, mo
       do j = 1, mo_num
         do m = 1, mo_num
           call give_integrals_3_body_bi_ort(m, j, k, i, m, j, integral)
-          three_e_4_idx_cycle_2_bi_ort_old(m,j,k,i) = -1.d0 * integral 
+          three_e_4_idx_cycle_2_bi_ort_old(m,j,k,i) = -1.d0 * integral
         enddo
       enddo
     enddo
@@ -141,7 +141,7 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_cycle_2_bi_ort_old, (mo_num, mo
   print *, ' wall time for three_e_4_idx_cycle_2_bi_ort_old', wall1 - wall0
   call print_memory_usage()
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -169,7 +169,7 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_exch23_bi_ort_old, (mo_num, mo_
 
  !$OMP PARALLEL                   &
  !$OMP DEFAULT (NONE)             &
- !$OMP PRIVATE (i,j,k,m,integral) & 
+ !$OMP PRIVATE (i,j,k,m,integral) &
  !$OMP SHARED (mo_num,three_e_4_idx_exch23_bi_ort_old)
  !$OMP DO SCHEDULE (dynamic) COLLAPSE(2)
   do i = 1, mo_num
@@ -177,7 +177,7 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_exch23_bi_ort_old, (mo_num, mo_
       do j = 1, mo_num
         do m = 1, mo_num
           call give_integrals_3_body_bi_ort(m, j, k, j, m, i, integral)
-          three_e_4_idx_exch23_bi_ort_old(m,j,k,i) = -1.d0 * integral 
+          three_e_4_idx_exch23_bi_ort_old(m,j,k,i) = -1.d0 * integral
         enddo
       enddo
     enddo
@@ -216,7 +216,7 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_exch13_bi_ort_old, (mo_num, mo_
 
  !$OMP PARALLEL                   &
  !$OMP DEFAULT (NONE)             &
- !$OMP PRIVATE (i,j,k,m,integral) & 
+ !$OMP PRIVATE (i,j,k,m,integral) &
  !$OMP SHARED (mo_num,three_e_4_idx_exch13_bi_ort_old)
  !$OMP DO SCHEDULE (dynamic) COLLAPSE(2)
   do i = 1, mo_num
@@ -224,7 +224,7 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_exch13_bi_ort_old, (mo_num, mo_
       do j = 1, mo_num
         do m = 1, mo_num
           call give_integrals_3_body_bi_ort(m, j, k, i, j, m, integral)
-          three_e_4_idx_exch13_bi_ort_old(m,j,k,i) = -1.d0 * integral 
+          three_e_4_idx_exch13_bi_ort_old(m,j,k,i) = -1.d0 * integral
         enddo
       enddo
     enddo
@@ -236,20 +236,20 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_exch13_bi_ort_old, (mo_num, mo_
   print *, ' wall time for three_e_4_idx_exch13_bi_ort_old', wall1 - wall0
   call print_memory_usage()
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
 BEGIN_PROVIDER [ double precision, three_e_4_idx_exch12_bi_ort_old, (mo_num, mo_num, mo_num, mo_num)]
 
   BEGIN_DOC
-  ! 
+  !
   ! matrix element of the -L  three-body operator FOR THE DIRECT TERMS OF SINGLE EXCITATIONS AND BI ORTHO MOs
   !
   ! three_e_4_idx_exch12_bi_ort_old(m,j,k,i) = <mjk|-L|mij> ::: notice that i is the RIGHT MO and k is the LEFT MO
   !
   ! notice the -1 sign: in this way three_e_3_idx_direct_bi_ort can be directly used to compute Slater rules with a + sign
-  ! 
+  !
   END_DOC
 
   implicit none
@@ -264,7 +264,7 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_exch12_bi_ort_old, (mo_num, mo_
 
  !$OMP PARALLEL                   &
  !$OMP DEFAULT (NONE)             &
- !$OMP PRIVATE (i,j,k,m,integral) & 
+ !$OMP PRIVATE (i,j,k,m,integral) &
  !$OMP SHARED (mo_num,three_e_4_idx_exch12_bi_ort_old)
  !$OMP DO SCHEDULE (dynamic) COLLAPSE(2)
   do i = 1, mo_num
@@ -272,7 +272,7 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_exch12_bi_ort_old, (mo_num, mo_
       do j = 1, mo_num
         do m = 1, mo_num
           call give_integrals_3_body_bi_ort(m, j, k, m, i, j, integral)
-          three_e_4_idx_exch12_bi_ort_old(m,j,k,i) = -1.d0 * integral 
+          three_e_4_idx_exch12_bi_ort_old(m,j,k,i) = -1.d0 * integral
         enddo
       enddo
     enddo
@@ -284,7 +284,8 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_exch12_bi_ort_old, (mo_num, mo_
   print *, ' wall time for three_e_4_idx_exch12_bi_ort_old', wall1 - wall0
   call print_memory_usage()
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
+
 

@@ -1,6 +1,6 @@
- BEGIN_PROVIDER [double precision, mo_deriv_1_x , (mo_num,mo_num)]
-&BEGIN_PROVIDER [double precision, mo_deriv_1_y , (mo_num,mo_num)]
-&BEGIN_PROVIDER [double precision, mo_deriv_1_z , (mo_num,mo_num)]
+ BEGIN_PROVIDER [double precision, mo_deriv_1_x , (mo_num, mo_num)]
+&BEGIN_PROVIDER [double precision, mo_deriv_1_y , (mo_num, mo_num)]
+&BEGIN_PROVIDER [double precision, mo_deriv_1_z , (mo_num, mo_num)]
  BEGIN_DOC
  ! array of the integrals of MO_i * d/dx MO_j
  ! array of the integrals of MO_i * d/dy MO_j
@@ -28,3 +28,4 @@
       )
 
 END_PROVIDER
+

@@ -1,7 +1,7 @@
 
 ! ---
 
- BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_tot, (mo_num,mo_num) ]
+ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_tot, (mo_num, mo_num) ]
 &BEGIN_PROVIDER [ double precision, Fock_matrix_tc_diag_mo_tot, (mo_num)]
 
   BEGIN_DOC
@@ -148,7 +148,7 @@
       do j = 1, n_core_orb
         jorb = list_core(j)
         Fock_matrix_tc_mo_tot(iorb,jorb) = 0.d0
-        Fock_matrix_tc_mo_tot(jorb,iorb) = 0.d0                                                                                                                 
+        Fock_matrix_tc_mo_tot(jorb,iorb) = 0.d0
       enddo
     enddo
   endif
@@ -173,5 +173,6 @@
 END_PROVIDER
 
 ! ---
+
 
 

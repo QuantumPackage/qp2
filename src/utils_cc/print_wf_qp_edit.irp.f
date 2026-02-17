@@ -10,13 +10,13 @@ program run
 end
 
 subroutine print_wf_qp_edit()
-  
+
   implicit none
 
   BEGIN_DOC
   ! Print the psi_det wave function up to n_det_qp_edit
   END_DOC
-  
+
   integer :: i
 
   do i = 1, n_det_qp_edit
@@ -27,3 +27,4 @@ subroutine print_wf_qp_edit()
   enddo
 
 end
+

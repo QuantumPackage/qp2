@@ -59,7 +59,7 @@ subroutine test_env_nucl()
     r(2) = final_grid_points(2,ipoint)
     r(3) = final_grid_points(3,ipoint)
 
-    i_exc  = env_val(ipoint) 
+    i_exc  = env_val(ipoint)
     i_num  = env_nucl(r)
     acc_ij = dabs(i_exc - i_num)
     if(acc_ij .gt. eps_ij) then
@@ -105,7 +105,7 @@ subroutine test_grad_env_nucl()
     r(2) = final_grid_points(2,ipoint)
     r(3) = final_grid_points(3,ipoint)
 
-    i_exc  = env_grad(1,ipoint) 
+    i_exc  = env_grad(1,ipoint)
     i_num  = grad_x_env_nucl_num(r)
     acc_ij = dabs(i_exc - i_num)
     if(acc_ij .gt. eps_ij) then
@@ -115,7 +115,7 @@ subroutine test_grad_env_nucl()
       print *, ' diff   = ', acc_ij
     endif
 
-    i_exc  = env_grad(2,ipoint) 
+    i_exc  = env_grad(2,ipoint)
     i_num  = grad_y_env_nucl_num(r)
     acc_ij = dabs(i_exc - i_num)
     if(acc_ij .gt. eps_ij) then
@@ -125,7 +125,7 @@ subroutine test_grad_env_nucl()
       print *, ' diff   = ', acc_ij
     endif
 
-    i_exc  = env_grad(3,ipoint) 
+    i_exc  = env_grad(3,ipoint)
     i_num  = grad_z_env_nucl_num(r)
     acc_ij = dabs(i_exc - i_num)
     if(acc_ij .gt. eps_ij) then
@@ -173,13 +173,13 @@ subroutine test_fit_ugradu()
       r1(1) = final_grid_points(1,ipoint)
       r1(2) = final_grid_points(2,ipoint)
       r1(3) = final_grid_points(3,ipoint)
-  
+
       dx = r1(1) - r2(1)
       dy = r1(2) - r2(2)
       dz = r1(3) - r2(3)
       x2 = dx * dx + dy * dy + dz * dz
       if(x2 .lt. 1d-10) cycle
-  
+
       i_fit = 0.d0
       do i = 1, n_max_fit_slat
         expo   = expo_gauss_j_mu_1_erf(i)
@@ -187,12 +187,12 @@ subroutine test_fit_ugradu()
         i_fit += coef * dexp(-expo*x2)
       enddo
       i_fit = i_fit / dsqrt(x2)
-  
-      tmp = j12_mu(r1, r2) 
+
+      tmp = j12_mu(r1, r2)
       call grad1_j12_mu(r1, r2, grad)
-  
+
       ! ---
-  
+
       i_exc = tmp * grad(1)
       i_num = i_fit * dx
       acc_ij = dabs(i_exc - i_num)
@@ -204,9 +204,9 @@ subroutine test_fit_ugradu()
       endif
       acc_tot += acc_ij
       normalz += dabs(i_exc)
-  
+
       ! ---
-  
+
       i_exc = tmp * grad(2)
       i_num = i_fit * dy
       acc_ij = dabs(i_exc - i_num)
@@ -218,9 +218,9 @@ subroutine test_fit_ugradu()
       endif
       acc_tot += acc_ij
       normalz += dabs(i_exc)
-  
+
       ! ---
-  
+
       i_exc = tmp * grad(3)
       i_num = i_fit * dz
       acc_ij = dabs(i_exc - i_num)
@@ -232,9 +232,9 @@ subroutine test_fit_ugradu()
       endif
       acc_tot += acc_ij
       normalz += dabs(i_exc)
-  
+
       ! ---
-  
+
     enddo
 
     if( (acc_tot/normalz) .gt. 1d-3 ) then
@@ -271,7 +271,7 @@ subroutine test_fit_u()
     acc_tot = 0.d0
     normalz = 0.d0
     do ipoint = 1, n_points_final_grid
-  
+
       r1(1) = final_grid_points(1,ipoint)
       r1(2) = final_grid_points(2,ipoint)
       r1(3) = final_grid_points(3,ipoint)
@@ -281,16 +281,16 @@ subroutine test_fit_u()
       dz = r1(3) - r2(3)
       x2 = dx * dx + dy * dy + dz * dz
       if(x2 .lt. 1d-10) cycle
-  
+
       i_fit = 0.d0
       do i = 1, n_max_fit_slat
         expo   = expo_gauss_j_mu_x(i)
         coef   = coef_gauss_j_mu_x(i)
         i_fit += coef * dexp(-expo*x2)
       enddo
-  
-      i_exc = j12_mu(r1, r2) 
-      i_num = i_fit 
+
+      i_exc = j12_mu(r1, r2)
+      i_num = i_fit
       acc_ij = dabs(i_exc - i_num)
       if(acc_ij .gt. eps_ij) then
         print *, ' problem in test_fit_u on', ipoint
@@ -302,7 +302,7 @@ subroutine test_fit_u()
       acc_tot += acc_ij
       normalz += dabs(i_exc)
     enddo
-  
+
     if( (acc_tot/normalz) .gt. 1d-3 ) then
       print*, ' acc_tot = ', acc_tot
       print*, ' normalz = ', normalz
@@ -337,7 +337,7 @@ subroutine test_fit_u2()
     acc_tot = 0.d0
     normalz = 0.d0
     do ipoint = 1, n_points_final_grid
-  
+
       r1(1) = final_grid_points(1,ipoint)
       r1(2) = final_grid_points(2,ipoint)
       r1(3) = final_grid_points(3,ipoint)
@@ -355,9 +355,9 @@ subroutine test_fit_u2()
         i_fit += coef * dexp(-expo*x2)
       enddo
 
-      tmp   = j12_mu(r1, r2) 
+      tmp   = j12_mu(r1, r2)
       i_exc = tmp * tmp
-      i_num = i_fit 
+      i_num = i_fit
       acc_ij = dabs(i_exc - i_num)
       if(acc_ij .gt. eps_ij) then
         print *, ' problem in test_fit_u2 on', ipoint
@@ -407,7 +407,7 @@ subroutine test_grad1_u12_withsq_num()
                                                                       , tmp_grad1_u12_squared(1,ipoint))
     do jpoint = 1, n_points_extra_final_grid
 
-      i_exc  = grad1_u12_squared_num(jpoint,ipoint) 
+      i_exc  = grad1_u12_squared_num(jpoint,ipoint)
       i_num  = tmp_grad1_u12_squared(jpoint,ipoint)
       acc_ij = dabs(i_exc - i_num)
       if(acc_ij .gt. eps_ij) then
@@ -421,7 +421,7 @@ subroutine test_grad1_u12_withsq_num()
       normalz += dabs(i_num)
 
       do m = 1, 3
-        i_exc  = grad1_u12_num(jpoint,ipoint,m) 
+        i_exc  = grad1_u12_num(jpoint,ipoint,m)
         i_num  = tmp_grad1_u12(jpoint,ipoint,m)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -445,5 +445,6 @@ subroutine test_grad1_u12_withsq_num()
 end
 
 ! ---
+
 
 

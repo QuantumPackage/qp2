@@ -9,7 +9,7 @@ program print_he_tc_energy
 
   call print_energy1()
 
-end 
+end
 
 ! ---
 
@@ -36,7 +36,7 @@ subroutine print_overlap()
           S_ij += mo_l_coef(k,i) * ao_overlap(k,l) * mo_r_coef(l,j)
         enddo
       enddo
-      
+
       print *, i, j, S_ij
     enddo
   enddo
@@ -57,7 +57,7 @@ subroutine print_energy1()
 
   ! --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-  ! < phi_1 phi_1 | h1 | phi_1 phi_1 > 
+  ! < phi_1 phi_1 | h1 | phi_1 phi_1 >
 
   e_tmp = 0.d0
   n_tmp = 0.d0
@@ -72,7 +72,7 @@ subroutine print_energy1()
 
   ! ---
 
-  ! < phi_1 phi_1 | h2 | phi_1 phi_1 > 
+  ! < phi_1 phi_1 | h2 | phi_1 phi_1 >
 
   e_tmp = 0.d0
   n_tmp = 0.d0
@@ -129,7 +129,7 @@ subroutine print_energy1()
 
   ! --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-  e    = e    / n 
+  e    = e    / n
   e_ns = e_ns / n
 
   print *, ' tc      energy = ', e
@@ -138,5 +138,6 @@ subroutine print_energy1()
 end subroutine print_energy1
 
 ! ---
+
 
 

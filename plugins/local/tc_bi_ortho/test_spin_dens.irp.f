@@ -1,4 +1,7 @@
-BEGIN_PROVIDER [ double precision, mo_r_coef_normalized, (ao_num,mo_num) ]
+BEGIN_PROVIDER [ double precision, mo_r_coef_normalized, (ao_num, mo_num) ]
+  BEGIN_DOC
+  ! mo_r_coef_normalized
+  END_DOC
  implicit none
  integer :: i,j,k
  double precision :: norm
@@ -17,6 +20,9 @@ BEGIN_PROVIDER [ double precision, mo_r_coef_normalized, (ao_num,mo_num) ]
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, tc_spin_dens_right_only, (ao_num, ao_num)]
+  BEGIN_DOC
+  ! tc_spin_dens_right_only
+  END_DOC
  implicit none
  integer :: i,j,k
  tc_spin_dens_right_only = 0.d0
@@ -28,3 +34,4 @@ BEGIN_PROVIDER [ double precision, tc_spin_dens_right_only, (ao_num, ao_num)]
   enddo
  enddo
 END_PROVIDER
+

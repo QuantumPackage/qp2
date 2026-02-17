@@ -11,14 +11,14 @@ BEGIN_PROVIDER [real*8, gradvec_old, (nMonoEx)]
   implicit none
   integer                        :: ii,tt,aa,indx,ihole,ipart,istate
   real*8                         :: res
-  
+
   do indx=1,nMonoEx
     ihole=excit(1,indx)
     ipart=excit(2,indx)
     call calc_grad_elem(ihole,ipart,res)
     gradvec_old(indx)=res
   end do
-  
+
   real*8                         :: norm_grad
   norm_grad=0.d0
   do indx=1,nMonoEx
@@ -30,8 +30,8 @@ BEGIN_PROVIDER [real*8, gradvec_old, (nMonoEx)]
     write(6,*) ' Norm of the orbital gradient (via <0|EH|0>) : ', norm_grad
     write(6,*)
   endif
-  
-  
+
+
 END_PROVIDER
 
 subroutine calc_grad_elem(ihole,ipart,res)
@@ -46,9 +46,9 @@ subroutine calc_grad_elem(ihole,ipart,res)
   real*8                         :: i_H_psi_array(N_states),phase
   allocate(det_mu(N_int,2))
   allocate(det_mu_ex(N_int,2))
-  
+
   res=0.D0
-  
+
   do mu=1,n_det
     ! get the string of the determinant
     call det_extract(det_mu,mu,N_int)
@@ -66,9 +66,10 @@ subroutine calc_grad_elem(ihole,ipart,res)
       end if
     end do
   end do
-  
+
   ! state-averaged gradient
   res*=2.D0/dble(N_states)
-  
+
 end subroutine calc_grad_elem
+
 

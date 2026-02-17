@@ -1,11 +1,11 @@
 
 ! ---
 
-BEGIN_PROVIDER [double precision, env_gauss_nonherm, (ao_num,ao_num)]
+BEGIN_PROVIDER [double precision, env_gauss_nonherm, (ao_num, ao_num)]
 
   BEGIN_DOC
   !
-  !  env_gauss_nonherm(i,j) = \langle \chi_j | - grad \tau_{env} \cdot grad | \chi_i \rangle  
+  !  env_gauss_nonherm(i,j) = \langle \chi_j | - grad \tau_{env} \cdot grad | \chi_i \rangle
   !
   END_DOC
 
@@ -35,7 +35,7 @@ BEGIN_PROVIDER [double precision, env_gauss_nonherm, (ao_num,ao_num)]
   call overlap_gaussian_xyz( A_center, B_center, alpha, beta, power_A, power_B &
                            , overlap_y, d_a_2, overlap_z, overlap, dim1 )
   ! --------------------------------------------------------------------------------
-  
+
 
   env_gauss_nonherm(1:ao_num,1:ao_num) = 0.d0
 
@@ -45,7 +45,7 @@ BEGIN_PROVIDER [double precision, env_gauss_nonherm, (ao_num,ao_num)]
  !$OMP PRIVATE (i, j, k, l, m, alpha, beta, gama,               &
  !$OMP          A_center, B_center, C_center, power_A, power_B, &
  !$OMP          num_A, num_B, c1, c)                            &
- !$OMP SHARED (ao_num, ao_prim_num, ao_expo_ordered_transp,     & 
+ !$OMP SHARED (ao_num, ao_prim_num, ao_expo_ordered_transp,     &
  !$OMP         ao_power, ao_nucl, nucl_coord,                   &
  !$OMP         ao_coef_normalized_ordered_transp,               &
  !$OMP         nucl_num, env_expo, env_gauss_nonherm)
@@ -75,10 +75,10 @@ BEGIN_PROVIDER [double precision, env_gauss_nonherm, (ao_num,ao_num)]
             c1 = int_gauss_deriv( A_center, B_center, C_center        &
                                 , power_A, power_B, alpha, beta, gama )
 
-            c = c + 2.d0 * gama * c1 
+            c = c + 2.d0 * gama * c1
           enddo
 
-          env_gauss_nonherm(i,j) =  env_gauss_nonherm(i,j) & 
+          env_gauss_nonherm(i,j) =  env_gauss_nonherm(i,j) &
                   + ao_coef_normalized_ordered_transp(l,j) &
                   * ao_coef_normalized_ordered_transp(m,i) * c
         enddo
@@ -107,7 +107,7 @@ double precision function int_gauss_deriv(A_center, B_center, C_center, power_A,
 
   double precision, intent(in) :: A_center(3), B_center(3), C_center(3)
   integer         , intent(in) :: power_A(3), power_B(3)
-  double precision, intent(in) :: alpha, beta, gama 
+  double precision, intent(in) :: alpha, beta, gama
 
   integer                      :: i, power_C, dim1
   integer                      :: iorder(3), power_D(3)
@@ -190,7 +190,7 @@ double precision function int_gauss_deriv(A_center, B_center, C_center, power_A,
 
   if( power_B(2) .ge. 1 ) then
 
-    power_D(1) = power_B(1) 
+    power_D(1) = power_B(1)
     power_D(2) = power_B(2) - 1
     power_D(3) = power_B(3)
 
@@ -217,7 +217,7 @@ double precision function int_gauss_deriv(A_center, B_center, C_center, power_A,
 
   ! ===============
 
-  power_D(1) = power_B(1) 
+  power_D(1) = power_B(1)
   power_D(2) = power_B(2) + 1
   power_D(3) = power_B(3)
 
@@ -251,8 +251,8 @@ double precision function int_gauss_deriv(A_center, B_center, C_center, power_A,
 
   if( power_B(3) .ge. 1 ) then
 
-    power_D(1) = power_B(1) 
-    power_D(2) = power_B(2) 
+    power_D(1) = power_B(1)
+    power_D(2) = power_B(2)
     power_D(3) = power_B(3) - 1
 
     call give_explicit_poly_and_gaussian( pol_AB, center_AB, AB_expo, fact_AB &
@@ -278,7 +278,7 @@ double precision function int_gauss_deriv(A_center, B_center, C_center, power_A,
 
   ! ===============
 
-  power_D(1) = power_B(1) 
+  power_D(1) = power_B(1)
   power_D(2) = power_B(2)
   power_D(3) = power_B(3) + 1
 
@@ -309,5 +309,6 @@ double precision function int_gauss_deriv(A_center, B_center, C_center, power_A,
 end function int_gauss_deriv
 !_____________________________________________________________________________________________________________
 !_____________________________________________________________________________________________________________
+
 
 

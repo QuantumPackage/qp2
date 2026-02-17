@@ -64,7 +64,7 @@ subroutine get_inv_half_svd(matrix, n, matrix_inv_half)
   do i = 1, n
    accu_d += dabs(tmp2(i,i) - matrix(i,i))
    do j = 1, n
-    if(i==j)cycle 
+    if(i==j)cycle
     accu_nd += dabs(tmp2(j,i) - matrix(j,i))
    enddo
   enddo
@@ -109,7 +109,7 @@ subroutine get_inv_half_svd(matrix, n, matrix_inv_half)
   do i = 1, n
    accu_d += dabs(tmp1(i,i) - matrix(i,i))
    do j = 1, n
-    if(i==j)cycle 
+    if(i==j)cycle
     accu_nd += dabs(tmp1(j,i) - matrix(j,i))
    enddo
   enddo
@@ -124,7 +124,7 @@ subroutine get_inv_half_svd(matrix, n, matrix_inv_half)
   double precision, allocatable :: pseudo_inverse(:,:),identity(:,:)
   allocate( pseudo_inverse(n,n),identity(n,n))
   call get_pseudo_inverse(matrix,n,n,n,pseudo_inverse,n,threshold)
- 
+
   ! S^-1 X S = 1
 !  identity = 0.d0
 !  call dgemm( 'N', 'N', n, n, n, 1.d0                                            &
@@ -141,7 +141,7 @@ subroutine get_inv_half_svd(matrix, n, matrix_inv_half)
   do i = 1, n
    accu_d += dabs(1.d0 - pseudo_inverse(i,i))
    do j = 1, n
-    if(i==j)cycle 
+    if(i==j)cycle
     accu_nd += dabs(tmp1(j,i) - pseudo_inverse(j,i))
    enddo
   enddo
@@ -161,12 +161,12 @@ subroutine get_inv_half_svd(matrix, n, matrix_inv_half)
 !  call dgemm( 'N', 'N', n, n, n, 1.d0                                        &
 !            , matrix_inv_half, size(matrix_inv_half, 1), Stmp, size(Stmp, 1) &
 !            , 0.d0, Stmp2, size(Stmp2, 1) )
- 
+
 !  do i = 1, n
 !    do j = 1, n
 !      if(i==j) then
 !       accu_d += Stmp2(j,i)
-!      else 
+!      else
 !       accu_nd = accu_nd + Stmp2(j,i) * Stmp2(j,i)
 !      endif
 !    enddo
@@ -197,7 +197,7 @@ subroutine get_inv_half_nonsymmat_diago(matrix, n, matrix_inv_half, complex_root
   ! S = VR D VL^T
   !   = VR D^{1/2} D^{1/2} VL^T
   !   = VR D^{1/2} VL^T VR D^{1/2} VL^T
-  !   = S^{1/2} S^{1/2} with S = VR D^{1/2} VL^T 
+  !   = S^{1/2} S^{1/2} with S = VR D^{1/2} VL^T
   !
   ! == > S^{-1/2} = VR D^{-1/2} VL^T
   !
@@ -227,7 +227,7 @@ subroutine get_inv_half_nonsymmat_diago(matrix, n, matrix_inv_half, complex_root
   call check_biorthog(n, n, VL, VR, accu_d, accu_nd, S)
   print*,'accu_nd S^{-1/2}',accu_nd
   if(accu_nd.gt.1.d-10) then
-    complex_root = .True. ! if vectors are not bi-orthogonal return 
+    complex_root = .True. ! if vectors are not bi-orthogonal return
     print*,'Eigenvectors of S are not bi-orthonormal, skipping S^{-1/2}'
     return
   endif
@@ -235,7 +235,7 @@ subroutine get_inv_half_nonsymmat_diago(matrix, n, matrix_inv_half, complex_root
   allocate(S_diag(n))
   do i = 1, n
     S_diag(i) = 1.d0/dsqrt(S(i,i))
-    if(dabs(WI(i)).gt.1.d-20.or.WR(i).lt.0.d0)then ! check that eigenvalues are real and positive 
+    if(dabs(WI(i)).gt.1.d-20.or.WR(i).lt.0.d0)then ! check that eigenvalues are real and positive
      complex_root = .True.
      print*,'Eigenvalues of S have imaginary part '
      print*,'WR(i),WI(i)',WR(i), WR(i)
@@ -247,7 +247,7 @@ subroutine get_inv_half_nonsymmat_diago(matrix, n, matrix_inv_half, complex_root
 
   if(complex_root) return
 
-  ! normalization of vectors 
+  ! normalization of vectors
   do i = 1, n
     if(S_diag(i).eq.1.d0) cycle
     do j = 1,n
@@ -265,14 +265,14 @@ subroutine get_inv_half_nonsymmat_diago(matrix, n, matrix_inv_half, complex_root
   enddo
   deallocate(WR, WI)
 
-  ! tmp1 = VR D^{-1/2} 
+  ! tmp1 = VR D^{-1/2}
   tmp1 = 0.d0
   call dgemm( 'N', 'N', n, n, n, 1.d0                &
             , VR, size(VR, 1), D_mat, size(D_mat, 1) &
             , 0.d0, tmp1, size(tmp1, 1) )
   deallocate(VR, D_mat)
 
-  ! S^{-1/2} = tmp1 X VL^T 
+  ! S^{-1/2} = tmp1 X VL^T
   matrix_inv_half = 0.d0
   call dgemm( 'N', 'T', n, n, n, 1.d0              &
             , tmp1, size(tmp1, 1), VL, size(VL, 1) &
@@ -288,15 +288,15 @@ subroutine bi_ortho_s_inv_half(n,leigvec,reigvec,S_nh_inv_half)
  integer, intent(in) :: n
  double precision, intent(in) :: S_nh_inv_half(n,n)
  double precision, intent(inout) :: leigvec(n,n),reigvec(n,n)
- BEGIN_DOC 
- ! bi-orthonormalization of left and right vectors 
- ! 
- ! S = VL^T VR 
+ BEGIN_DOC
+ ! bi-orthonormalization of left and right vectors
+ !
+ ! S = VL^T VR
  !
  ! S^{-1/2} S S^{-1/2} = 1 = S^{-1/2} VL^T VR S^{-1/2} = VL_new^T VR_new
  !
  ! VL_new = VL (S^{-1/2})^T
- ! 
+ !
  ! VR_new = VR S^{^{-1/2}}
  END_DOC
  double precision,allocatable :: vl_tmp(:,:),vr_tmp(:,:)
@@ -313,8 +313,8 @@ subroutine bi_ortho_s_inv_half(n,leigvec,reigvec,S_nh_inv_half)
              , vr_tmp, size(vr_tmp, 1), S_nh_inv_half, size(S_nh_inv_half, 1) &
              , 0.d0, reigvec, size(reigvec, 1) )
  double precision :: accu_d, accu_nd
- double precision,allocatable :: S(:,:) 
- allocate(S(n,n)) 
+ double precision,allocatable :: S(:,:)
+ allocate(S(n,n))
  call check_biorthog(n, n, leigvec, reigvec, accu_d, accu_nd, S)
  if(dabs(accu_d - n).gt.1.d-10 .or. accu_nd .gt.1.d-8 )then
   print*,'Pb in bi_ortho_s_inv_half !!'
@@ -323,3 +323,4 @@ subroutine bi_ortho_s_inv_half(n,leigvec,reigvec,S_nh_inv_half)
   stop
  endif
 end
+

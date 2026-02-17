@@ -22,7 +22,7 @@
 
 ! There are several cases:
 ! - If $\textbf{H}$ is positive definite the interval containing the
-!   solution is $\lambda \in (0, \infty)$ (and $-h_1 < 0$). 
+!   solution is $\lambda \in (0, \infty)$ (and $-h_1 < 0$).
 ! - If $\textbf{H}$ is indefinite ($h_1 < 0$) and $\textbf{w}_1^T \cdot
 !   \textbf{g} \neq 0$ then the interval containing
 !   the solution is  $\lambda \in (-h_1, \infty)$.
@@ -36,7 +36,7 @@
 ! algorithm at $\lambda=\max(0 + \epsilon,-h_1 + \epsilon)$,
 ! with $\epsilon$ a little constant.
 ! The research must be restricted to the interval containing the
-! solution. For that reason a little trust region in 1D is used.  
+! solution. For that reason a little trust region in 1D is used.
 
 ! The Newton method to find the optimal $\lambda$ is :
 ! \begin{align*}
@@ -48,43 +48,43 @@
 ! $\lambda$ at the l-th iteration.\newline
 
 ! Noting the Newton step $y = - f^{''}(\lambda)_{(l)}^{-1}
-! f^{'}(\lambda)_{(l)}^{}$ we constrain $y$ such as 
+! f^{'}(\lambda)_{(l)}^{}$ we constrain $y$ such as
 ! \begin{align*}
 !   y \leq \alpha
 ! \end{align*}
 ! with $\alpha$ a scalar representing the trust length (trust region in
 ! 1D) where the function $f$ or $\tilde{f}$ is correctly describe by the
 ! Taylor series truncated at the second order. Thus, if $y > \alpha$,
-! the constraint is applied as  
+! the constraint is applied as
 ! \begin{align*}
 !   y^* = \alpha \frac{y}{|y|}
 ! \end{align*}
-! with $y^*$ the solution in the trust region. 
+! with $y^*$ the solution in the trust region.
 
 ! The size of the trust region evolves in function of $\rho$ as for the
 ! trust region seen previously cf. trust_region, rho_model.
 ! The prediction of the value of $f$ or $\tilde{f}$ is done using the
 ! Taylor series truncated at the second order cf. "trust_region",
-! "trust_e_model". 
+! "trust_e_model".
 
 ! The first and second derivatives of $f(\lambda) = (||\textbf{x}(\lambda)||^2 -
 ! \Delta^2)^2$ with respect to $\lambda$ are:
 ! \begin{align*}
-!   \frac{\partial }{\partial \lambda} (||\textbf{x}(\lambda)||^2 - \Delta^2)^2 
+!   \frac{\partial }{\partial \lambda} (||\textbf{x}(\lambda)||^2 - \Delta^2)^2
 !   = 2 \left(\sum_{i=1}^n \frac{-2(\textbf{w}_i^T \textbf{g})^2}{(h_i + \lambda)^3} \right)
 !   \left( - \Delta^2 + \sum_{i=1}^n \frac{(\textbf{w}_i^T \textbf{g})^2}{(h_i+ \lambda)^2} \right)
 ! \end{align*}
 ! \begin{align*}
-! \frac{\partial^2}{\partial \lambda^2} (||\textbf{x}(\lambda)||^2 - \Delta^2)^2 
+! \frac{\partial^2}{\partial \lambda^2} (||\textbf{x}(\lambda)||^2 - \Delta^2)^2
 ! = 2 \left[ \left( \sum_{i=1}^n 6 \frac{(\textbf{w}_i^T \textbf{g})^2}{(h_i + \lambda)^4} \right) \left( - \Delta^2 + \sum_{i=1}^n \frac{(\textbf{w}_i^T \textbf{g})^2}{(h_i + \lambda)^2} \right) + \left( \sum_{i=1}^n -2 \frac{(\textbf{w}_i^T \textbf{g})^2}{(h_i + \lambda)^3} \right)^2 \right]
 ! \end{align*}
 
 ! The first and second derivatives of $\tilde{f}(\lambda) = (1/||\textbf{x}(\lambda)||^2 -
 ! 1/\Delta^2)^2$ with respect to $\lambda$ are:
 ! \begin{align*}
-!   \frac{\partial}{\partial \lambda} (1/||\textbf{x}(\lambda)||^2 - 1/\Delta^2)^2 
+!   \frac{\partial}{\partial \lambda} (1/||\textbf{x}(\lambda)||^2 - 1/\Delta^2)^2
 !   &= 4 \frac{\sum_{i=1}^n \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^3}}
-!        {(\sum_{i=1}^n \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^3} 
+!        {(\sum_{i=1}^n \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^3}
 !      - \frac{4}{\Delta^2} \frac{\sum_{i=1}^n \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^3)}}
 !        {(\sum_{i=1}^n \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^2} \\
 !   &= 4 \sum_{i=1}^n \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^3}
@@ -93,9 +93,9 @@
 ! \end{align*}
 
 ! \begin{align*}
-!   \frac{\partial^2}{\partial \lambda^2} (1/||\textbf{x}(\lambda)||^2 - 1/\Delta^2)^2 
+!   \frac{\partial^2}{\partial \lambda^2} (1/||\textbf{x}(\lambda)||^2 - 1/\Delta^2)^2
 !   &= 4 \left[ \frac{(\sum_{i=1}^n \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^3)})^2}
-!    {(\sum_{i=1}^n \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^4} 
+!    {(\sum_{i=1}^n \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^4}
 !   - 3 \frac{\sum_{i=1}^n \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^4}}
 !    {(\sum_{i=1}^n \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^3} \right] \\
 !   &- \frac{4}{\Delta^2} \left[ \frac{(\sum_{i=1}^n \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}
@@ -158,9 +158,9 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
   !END_DOC
 
   implicit none
-  
+
   ! Variables
-  
+
   ! in
   integer, intent(in)             :: n
   double precision, intent(inout) :: e_val(n)
@@ -216,17 +216,17 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
 ! Initialization
   epsilon = 1d-4
   lambda = max(0d0, -e_val(1))
-  
+
   ! Pre research of lambda to start near the optimal lambda
   ! by adding a constant epsilon and changing the constant to
   ! have ||x(lambda + epsilon)|| ~ delta, before setting
-  ! lambda = lambda + epsilon 
+  ! lambda = lambda + epsilon
   !print*, 'Pre research of lambda:'
   !print*,'Initial lambda =', lambda
   f_N = f_norm_trust_region_omp(n,e_val,tmp_wtg,lambda + epsilon)
-  !print*,'||x(lambda)||=', dsqrt(f_N),'delta=',delta 
+  !print*,'||x(lambda)||=', dsqrt(f_N),'delta=',delta
   i = 1
-  
+
   ! To increase lambda
   if (f_N > delta**2) then
     !print*,'Increasing lambda...'
@@ -240,7 +240,7 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
       f_N = f_norm_trust_region_omp(n,e_val,tmp_wtg,lambda + epsilon)
 
       !print*, 'lambda', lambda + epsilon, '||x||', dsqrt(f_N), 'delta', delta
-      
+
       ! Security
       if (prev_f_N < f_N) then
         print*,'WARNING, error: prev_f_N < f_N, exit'
@@ -250,14 +250,14 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
 
       i = i + 1
     enddo
-  
+
   ! To reduce lambda
   else
      !print*,'Reducing lambda...'
      do while (f_N < delta**2 .and. i <= nb_it_max_pre_search)
 
        ! Update the previous norm
-       prev_f_N = f_N  
+       prev_f_N = f_N
        ! New epsilon
        epsilon = epsilon * 0.5d0
        ! New norm
@@ -277,26 +277,26 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
   endif
 
   !print*,'End of the pre research of lambda'
-  
+
   ! New value of lambda
   lambda = lambda + epsilon
 
   !print*, 'e_val(1):', e_val(1)
   !print*, 'Staring point, lambda =', lambda
-  
+
   ! thresh_cc, threshold for the research of the optimal lambda
   ! Leaves the loop when ABS(1d0-||x||^2/delta^2) > thresh_cc
   ! thresh_rho_2, threshold to cancel the step in the research
   ! of the optimal lambda, the step is cancelled if rho_2 < thresh_rho_2
-  
+
   !print*,'Threshold for the CC:', thresh_cc
-  !print*,'Threshold for rho_2:', thresh_rho_2  
+  !print*,'Threshold for rho_2:', thresh_rho_2
   !print*, 'w_1^T . g =', tmp_wtg(1)
 
   ! Debug
   !print*, 'Iteration    rho_2    lambda    delta  ||x||  |1-(||x||^2/delta^2)|'
 
-  ! Initialization  
+  ! Initialization
   i = 1
   f_N = f_norm_trust_region_omp(n,e_val,tmp_wtg,lambda) ! Value of the ||x(lambda)||^2
   model = 0d0           ! predicted value of (||x||^2 - delta^2)^2
@@ -326,7 +326,7 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
       !print*,'--------------------------------------'
 
       ! Update of f_N, f_R and the derivatives
-      prev_f_N = f_N 
+      prev_f_N = f_N
       if (version_lambda_search == 1) then
         prev_f_R = (prev_f_N - delta**2)**2
         d_1 = d1_norm_trust_region_omp(n,e_val,tmp_wtg,lambda,delta) ! first derivative of (||x(lambda)||^2 - delta^2)^2
@@ -336,7 +336,7 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
         d_1 = d1_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta) ! first derivative of (1/||x(lambda)||^2 - 1/delta^2)^2
         d_2 = d2_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta) ! second derivative of (1/||x(lambda)||^2 - 1/delta^2)^2
       endif
-      !write(*,'(a,ES12.5,a,ES12.5)') ' 1st and 2nd derivative: ', d_1,', ', d_2  
+      !write(*,'(a,ES12.5,a,ES12.5)') ' 1st and 2nd derivative: ', d_1,', ', d_2
 
       ! Newton's step
       y = -(1d0/DABS(d_2))*d_1
@@ -348,7 +348,7 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
       !write(*,'(a,ES12.5)') ' Step length: ', y
 
       ! Predicted value of (||x(lambda)||^2 - delta^2)^2, Taylor series
-      model = prev_f_R + d_1 * y + 0.5d0 * d_2 * y**2    
+      model = prev_f_R + d_1 * y + 0.5d0 * d_2 * y**2
 
       ! Updates lambda
       prev_lambda = lambda
@@ -367,7 +367,7 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
         else
           f_R = (1d0/f_N - 1d0/delta**2)**2  ! new value of (1/||x(lambda)||^2 -1/delta^2)^2
         endif
-        
+
         !if (version_lambda_search == 1) then
         !  print*,'Previous value of (||x(lambda)||^2 - delta^2)^2:', prev_f_R
         !  print*,'Actual value of (||x(lambda)||^2 - delta^2)^2:', f_R
@@ -386,7 +386,7 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
           print*,''
           print*,'WARNING: ABS(previous - model) <', thresh_model_2, 'rho_2 will tend toward infinity'
           print*,''
-        endif        
+        endif
 
         ! Will be deleted
         !if (prev_f_R - f_R <= 1d-16 .or. prev_f_R - model <= 1d-16) then
@@ -398,7 +398,7 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
 
         ! Computes rho_2
         rho_2 = (prev_f_R - f_R)/(prev_f_R - model)
-        !print*,'rho_2:', rho_2               
+        !print*,'rho_2:', rho_2
       else
         rho_2 = 0d0 ! in order to reduce the size of the trust region, alpha, until lambda is in (-h_1, \infty)
         !print*,'lambda < -e_val(1) ===> rho_2 = 0'
@@ -411,7 +411,7 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
         alpha = alpha
       elseif (rho_2 >= 0.25d0) then
         alpha = 0.5d0 * alpha
-      else 
+      else
         alpha = 0.25d0 * alpha
       endif
       !write(*,'(a,ES12.5)') ' New trust length alpha: ', alpha
@@ -428,7 +428,7 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
       !print*, lambda, dsqrt(f_N), delta
       !print*,'CC:', DABS(1d0 - f_N/delta**2)
       !print*,''
-      
+
       i = i + 1
     enddo
 
@@ -466,7 +466,7 @@ end subroutine
 ! with respect to lambda.
 
 ! \begin{align*}
-! \frac{\partial }{\partial \lambda} (||\textbf{x}(\lambda)||^2 - \Delta^2)^2 
+! \frac{\partial }{\partial \lambda} (||\textbf{x}(\lambda)||^2 - \Delta^2)^2
 ! = -4 \left(\sum_{i=1}^n \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^3} \right)
 ! \left( - \Delta^2 + \sum_{i=1}^n \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i+ \lambda)^2} \right)
 ! \end{align*}
@@ -500,7 +500,7 @@ end subroutine
 
 
 function d1_norm_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
-  
+
   use omp_lib
   include 'pi.h'
 
@@ -516,7 +516,7 @@ function d1_norm_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   double precision, intent(in)  :: tmp_wtg(n)
   double precision, intent(in)  :: lambda
   double precision, intent(in)  :: delta
-   
+
   ! Internal
   double precision              :: wtg,accu1,accu2
   integer                       :: i,j
@@ -531,7 +531,7 @@ function d1_norm_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   ! OMP
   call omp_set_max_active_levels(1)
 
-  ! OMP 
+  ! OMP
   !$OMP PARALLEL                                         &
       !$OMP PRIVATE(i,j)                                 &
       !$OMP SHARED(n,lambda, e_val, thresh_eig,&
@@ -558,13 +558,13 @@ function d1_norm_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   !$OMP DO
   do i = 1, n
     if (ABS(e_val(i)) > thresh_eig .and. DABS(e_val(i)+lambda) > thresh_eig) then
-      tmp_accu1(i) = tmp_wtg(i)**2 /  (e_val(i) + lambda)**2 
+      tmp_accu1(i) = tmp_wtg(i)**2 /  (e_val(i) + lambda)**2
     endif
   enddo
   !$OMP END DO
- 
+
   !$OMP MASTER
-  do i = 1, n 
+  do i = 1, n
     accu1 = accu1 + tmp_accu1(i)
   enddo
   !$OMP END MASTER
@@ -572,7 +572,7 @@ function d1_norm_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   !$OMP DO
   do i = 1, n
     if (ABS(e_val(i)) > thresh_eig) then
-      tmp_accu2(i) =  tmp_wtg(i)**2 / (e_val(i) + lambda)**3 
+      tmp_accu2(i) =  tmp_wtg(i)**2 / (e_val(i) + lambda)**3
     endif
   enddo
   !$OMP END DO
@@ -600,14 +600,14 @@ end function
 ! This function computes the second derivative of (||x||^2 - Delta^2)^2
 ! with respect to lambda.
 ! \begin{align*}
-! \frac{\partial^2 }{\partial \lambda^2} (||\textbf{x}(\lambda)||^2 - \Delta^2)^2 
+! \frac{\partial^2 }{\partial \lambda^2} (||\textbf{x}(\lambda)||^2 - \Delta^2)^2
 ! = 2 \left[ \left( \sum_{i=1}^n 6 \frac{(\textbf{w}_i^T \textbf{g})^2}{(h_i + \lambda)^4} \right) \left( - \Delta^2 + \sum_{i=1}^n \frac{(\textbf{w}_i^T \textbf{g})^2}{(h_i + \lambda)^2} \right) + \left( \sum_{i=1}^n -2 \frac{(\textbf{w}_i^T \textbf{g})^2}{(h_i + \lambda)^3} \right)^2 \right]
 ! \end{align*}
 
 ! \begin{align*}
 !   \text{accu1} &= \sum_{i=1}^n \frac{(\textbf{w}_i^T \textbf{g})^2}{(h_i + \lambda)^2} \\
 !   \text{accu2} &= \sum_{i=1}^n \frac{(\textbf{w}_i^T \textbf{g})^2}{(h_i + \lambda)^3} \\
-!   \text{accu3} &= \sum_{i=1}^n \frac{(\textbf{w}_i^T \textbf{g})^2}{(h_i + \lambda)^4} 
+!   \text{accu3} &= \sum_{i=1}^n \frac{(\textbf{w}_i^T \textbf{g})^2}{(h_i + \lambda)^4}
 ! \end{align*}
 
 ! Provided:
@@ -636,14 +636,14 @@ end function
 
 
 function d2_norm_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
-  
+
   use omp_lib
   include 'pi.h'
 
   !BEGIN_DOC
   ! Compute the second derivative with respect to lambda of (||x(lambda)||^2 - Delta^2)^2
   !END_DOC
-  
+
   implicit none
 
   ! Variables
@@ -663,13 +663,13 @@ function d2_norm_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   double precision              :: accu1,accu2,accu3
   double precision, allocatable :: tmp_accu1(:), tmp_accu2(:), tmp_accu3(:)
   integer :: i, j
-  
+
   ! Allocation
   allocate(tmp_accu1(n), tmp_accu2(n), tmp_accu3(n))
 
   call omp_set_max_active_levels(1)
 
-  ! OMP 
+  ! OMP
   !$OMP PARALLEL                                         &
       !$OMP PRIVATE(i,j)                                 &
       !$OMP SHARED(n,lambda, e_val, thresh_eig,&
@@ -682,11 +682,11 @@ function d2_norm_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   !$OMP MASTER
   accu1 = 0d0
   accu2 = 0d0
-  accu3 = 0d0 
+  accu3 = 0d0
   !$OMP END MASTER
 
   !$OMP DO
-  do i = 1, n 
+  do i = 1, n
     tmp_accu1(i) = 0d0
   enddo
   !$OMP END DO
@@ -726,7 +726,7 @@ function d2_norm_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
     endif
   enddo
   !$OMP END DO
- 
+
   ! accu3
   !$OMP MASTER
   do i = 1, n
@@ -791,7 +791,7 @@ function f_norm_trust_region_omp(n,e_val,tmp_wtg,lambda)
   !BEGIN_DOC
   ! Compute ||x(lambda)||^2
   !END_DOC
-  
+
   implicit none
 
   ! Variables
@@ -801,10 +801,10 @@ function f_norm_trust_region_omp(n,e_val,tmp_wtg,lambda)
   double precision, intent(in)  :: e_val(n)
   double precision, intent(in)  :: tmp_wtg(n)
   double precision, intent(in)  :: lambda
- 
+
   ! functions
   double precision              :: f_norm_trust_region_omp
- 
+
   ! internal
   double precision, allocatable :: tmp_fN(:)
   integer                       :: i,j
@@ -814,7 +814,7 @@ function f_norm_trust_region_omp(n,e_val,tmp_wtg,lambda)
 
   call omp_set_max_active_levels(1)
 
-  ! OMP 
+  ! OMP
   !$OMP PARALLEL                                         &
       !$OMP PRIVATE(i,j)                                 &
       !$OMP SHARED(n,lambda, e_val, thresh_eig,&
@@ -833,7 +833,7 @@ function f_norm_trust_region_omp(n,e_val,tmp_wtg,lambda)
   enddo
   !$OMP END DO
 
-  ! Calculations 
+  ! Calculations
   !$OMP DO
   do i = 1, n
     if (DABS(e_val(i)) > thresh_eig .and. DABS(e_val(i)+lambda) > thresh_eig) then
@@ -841,7 +841,7 @@ function f_norm_trust_region_omp(n,e_val,tmp_wtg,lambda)
     endif
   enddo
   !$OMP END DO
-  
+
   !$OMP MASTER
   do i = 1, n
     f_norm_trust_region_omp =  f_norm_trust_region_omp + tmp_fN(i)
@@ -863,7 +863,7 @@ end function
 ! with respect to lambda.
 
 ! \begin{align*}
-! \frac{\partial }{\partial \lambda} (||\textbf{x}(\lambda)||^2 - \Delta^2)^2 
+! \frac{\partial }{\partial \lambda} (||\textbf{x}(\lambda)||^2 - \Delta^2)^2
 ! = 2 \left(-2\sum_{i=1}^n \frac{(\textbf{w}_i^T \textbf{g})^2}{(h_i + \lambda)^3} \right)
 ! \left( - \Delta^2 + \sum_{i=1}^n \frac{(\textbf{w}_i^T \textbf{g})^2}{(h_i+ \lambda)^2} \right)
 ! \end{align*}
@@ -900,13 +900,13 @@ function d1_norm_trust_region(n,e_val,w,v_grad,lambda,delta)
   include 'pi.h'
 
   !BEGIN_DOC
-  ! Compute the first derivative with respect to lambda of (||x(lambda)||^2 - Delta^2)^2 
+  ! Compute the first derivative with respect to lambda of (||x(lambda)||^2 - Delta^2)^2
   !END_DOC
-  
+
   implicit none
 
   ! Variables
-  
+
   ! in
   integer, intent(in)          :: n
   double precision, intent(in) :: e_val(n)
@@ -934,7 +934,7 @@ function d1_norm_trust_region(n,e_val,w,v_grad,lambda,delta)
         wtg = wtg + w(j,i) * v_grad(j)
       enddo
       !wtg = ddot(n,w(:,i),1,v_grad,1)
-      accu1 = accu1 + wtg**2 / (e_val(i) + lambda)**2 
+      accu1 = accu1 + wtg**2 / (e_val(i) + lambda)**2
     endif
   enddo
 
@@ -945,7 +945,7 @@ function d1_norm_trust_region(n,e_val,w,v_grad,lambda,delta)
         wtg = wtg + w(j,i) * v_grad(j)
       enddo
       !wtg = ddot(n,w(:,i),1,v_grad,1)
-      accu2 = accu2 - 2d0 * wtg**2 / (e_val(i) + lambda)**3 
+      accu2 = accu2 - 2d0 * wtg**2 / (e_val(i) + lambda)**3
     endif
   enddo
 
@@ -960,7 +960,7 @@ end function
 
 
 ! \begin{equation}
-! \frac{\partial^2 }{\partial \lambda^2} (||\textbf{x}(\lambda)||^2 - \Delta^2)^2 
+! \frac{\partial^2 }{\partial \lambda^2} (||\textbf{x}(\lambda)||^2 - \Delta^2)^2
 ! = 2 \left[ \left( \sum_{i=1}^n 6 \frac{(\textbf{w}_i^T \textbf{g})^2}{(h_i + \lambda)^4} \right) \left( - \Delta^2 + \sum_{i=1}^n \frac{(\textbf{w}_i^T \textbf{g})^2}{(h_i + \lambda)^2} \right) + \left( \sum_{i=1}^n -2 \frac{(\textbf{w}_i^T \textbf{g})^2}{(h_i + \lambda)^3} \right)^2 \right]
 ! \end{equation}
 
@@ -997,7 +997,7 @@ function d2_norm_trust_region(n,e_val,w,v_grad,lambda,delta)
   include 'pi.h'
 
   !BEGIN_DOC
-  ! Compute the second derivative with respect to lambda of (||x(lambda)||^2 - Delta^2)^2 
+  ! Compute the second derivative with respect to lambda of (||x(lambda)||^2 - Delta^2)^2
   !END_DOC
 
   implicit none
@@ -1101,7 +1101,7 @@ function f_norm_trust_region(n,e_val,tmp_wtg,lambda)
   !BEGIN_DOC
   ! Compute ||x(lambda)||^2
   !END_DOC
-  
+
   implicit none
 
   ! Variables
@@ -1111,7 +1111,7 @@ function f_norm_trust_region(n,e_val,tmp_wtg,lambda)
   double precision, intent(in) :: e_val(n)
   double precision, intent(in) :: tmp_wtg(n)
   double precision, intent(in) :: lambda
-  
+
   ! function
   double precision             :: f_norm_trust_region
   double precision             :: ddot
@@ -1123,7 +1123,7 @@ function f_norm_trust_region(n,e_val,tmp_wtg,lambda)
   f_norm_trust_region = 0d0
 
   do i = 1, n
-    if (DABS(e_val(i)) > thresh_eig .and. DABS(e_val(i)+lambda) > thresh_eig) then    
+    if (DABS(e_val(i)) > thresh_eig .and. DABS(e_val(i)+lambda) > thresh_eig) then
       f_norm_trust_region = f_norm_trust_region + tmp_wtg(i)**2 / (e_val(i) + lambda)**2
     endif
   enddo
@@ -1138,9 +1138,9 @@ end function
 ! This function computes the value of (1/||x(lambda)||^2 - 1/Delta^2)^2
 
 ! \begin{align*}
-!   \frac{\partial}{\partial \lambda} (1/||\textbf{x}(\lambda)||^2 - 1/\Delta^2)^2 
+!   \frac{\partial}{\partial \lambda} (1/||\textbf{x}(\lambda)||^2 - 1/\Delta^2)^2
 !   &= 4 \frac{\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^3}}
-!        {(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^3} 
+!        {(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^3}
 !      - \frac{4}{\Delta^2} \frac{\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^3)}}
 !        {(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^2} \\
 !   &= 4 \sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^3}
@@ -1187,7 +1187,7 @@ function d1_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   implicit none
 
   ! Variables
-  
+
   ! in
   integer, intent(in)           :: n
   double precision, intent(in)  :: e_val(n)
@@ -1209,25 +1209,25 @@ function d1_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   ! OMP
   call omp_set_max_active_levels(1)
 
-  ! OMP 
+  ! OMP
   !$OMP PARALLEL                                         &
       !$OMP PRIVATE(i,j)                                 &
       !$OMP SHARED(n,lambda, e_val, thresh_eig,&
       !$OMP tmp_accu1, tmp_accu2, tmp_wtg, accu1, accu2) &
       !$OMP DEFAULT(NONE)
-  
+
   !$OMP MASTER
   accu1 = 0d0
   accu2 = 0d0
   !$OMP END MASTER
 
-  !$OMP DO 
+  !$OMP DO
   do i = 1, n
     tmp_accu1(i) = 0d0
   enddo
   !$OMP END DO
 
-  !$OMP DO 
+  !$OMP DO
   do i = 1, n
     tmp_accu2(i) = 0d0
   enddo
@@ -1244,7 +1244,7 @@ function d1_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   !$OMP DO
   do i = 1, n
     if (DABS(e_val(i)) > thresh_eig .and. DABS(e_val(i)+lambda) > thresh_eig) then
-      tmp_accu1(i) = tmp_wtg(i)**2 /  (e_val(i) + lambda)**2 
+      tmp_accu1(i) = tmp_wtg(i)**2 /  (e_val(i) + lambda)**2
     endif
   enddo
   !$OMP END DO
@@ -1252,7 +1252,7 @@ function d1_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   !$OMP MASTER
   do i = 1, n
     accu1 = accu1 + tmp_accu1(i)
-  enddo  
+  enddo
   !$OMP END MASTER
 
 !  !$OMP MASTER
@@ -1266,7 +1266,7 @@ function d1_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   !$OMP DO
   do i = 1, n
     if (DABS(e_val(i)) > thresh_eig .and. DABS(e_val(i)+lambda) > thresh_eig) then
-      tmp_accu2(i) = tmp_wtg(i)**2 /  (e_val(i) + lambda)**3 
+      tmp_accu2(i) = tmp_wtg(i)**2 /  (e_val(i) + lambda)**3
     endif
   enddo
   !$OMP END DO
@@ -1274,9 +1274,9 @@ function d1_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   !$OMP MASTER
   do i = 1, n
     accu2 = accu2 + tmp_accu2(i)
-  enddo  
+  enddo
   !$OMP END MASTER
-  
+
   !$OMP END PARALLEL
 
   call omp_set_max_active_levels(4)
@@ -1284,7 +1284,7 @@ function d1_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   d1_norm_inverse_trust_region_omp = 4d0 * accu2 * (1d0/accu1**3 - 1d0/(delta**2 * accu1**2))
 
   deallocate(tmp_accu1, tmp_accu2)
- 
+
 end
 
 ! OMP: Second derivative of (1/||x||^2 - 1/Delta^2)^2
@@ -1295,8 +1295,8 @@ end
 ! This function computes the value of (1/||x(lambda)||^2 - 1/Delta^2)^2
 
 ! \begin{align*}
-!   \frac{\partial^2}{\partial \lambda^2} (1/||\textbf{x}(\lambda)||^2 - 1/\Delta^2)^2 
-!   &= 4 \left[ \frac{(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^3)})^2}{(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^4} 
+!   \frac{\partial^2}{\partial \lambda^2} (1/||\textbf{x}(\lambda)||^2 - 1/\Delta^2)^2
+!   &= 4 \left[ \frac{(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^3)})^2}{(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^4}
 !   - 3 \frac{\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^4}}{(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^3} \right] \\
 !   &- \frac{4}{\Delta^2} \left[ \frac{(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^3)})^2}{(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^3}
 !   - 3 \frac{\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^4}}{(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^2} \right]
@@ -1343,7 +1343,7 @@ function d2_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   implicit none
 
   ! Variables
-  
+
   ! in
   integer, intent(in)          :: n
   double precision, intent(in) :: e_val(n)
@@ -1365,27 +1365,27 @@ function d2_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   ! OMP
   call omp_set_max_active_levels(1)
 
-  ! OMP 
+  ! OMP
   !$OMP PARALLEL                                         &
       !$OMP PRIVATE(i,j)                                 &
       !$OMP SHARED(n,lambda, e_val, thresh_eig,&
       !$OMP tmp_accu1, tmp_accu2, tmp_accu3, tmp_wtg,    &
       !$OMP accu1, accu2, accu3)                         &
       !$OMP DEFAULT(NONE)
-  
+
   !$OMP MASTER
   accu1 = 0d0
   accu2 = 0d0
   accu3 = 0d0
   !$OMP END MASTER
 
-  !$OMP DO 
+  !$OMP DO
   do i = 1, n
     tmp_accu1(i) = 0d0
   enddo
   !$OMP END DO
 
-  !$OMP DO 
+  !$OMP DO
   do i = 1, n
     tmp_accu2(i) = 0d0
   enddo
@@ -1400,7 +1400,7 @@ function d2_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   !$OMP DO
   do i = 1, n
     if (DABS(e_val(i)) > thresh_eig .and. DABS(e_val(i)+lambda) > thresh_eig) then
-      tmp_accu1(i) = tmp_wtg(i)**2 /  (e_val(i) + lambda)**2 
+      tmp_accu1(i) = tmp_wtg(i)**2 /  (e_val(i) + lambda)**2
     endif
   enddo
   !$OMP END DO
@@ -1408,13 +1408,13 @@ function d2_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   !$OMP MASTER
   do i = 1, n
     accu1 = accu1 + tmp_accu1(i)
-  enddo  
+  enddo
   !$OMP END MASTER
 
   !$OMP DO
   do i = 1, n
     if (DABS(e_val(i)) > thresh_eig .and. DABS(e_val(i)+lambda) > thresh_eig) then
-      tmp_accu2(i) = tmp_wtg(i)**2 /  (e_val(i) + lambda)**3 
+      tmp_accu2(i) = tmp_wtg(i)**2 /  (e_val(i) + lambda)**3
     endif
   enddo
   !$OMP END DO
@@ -1422,7 +1422,7 @@ function d2_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   !$OMP MASTER
   do i = 1, n
     accu2 = accu2 + tmp_accu2(i)
-  enddo  
+  enddo
   !$OMP END MASTER
 
   !$OMP DO
@@ -1436,9 +1436,9 @@ function d2_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   !$OMP MASTER
   do i = 1, n
     accu3 = accu3 + tmp_accu3(i)
-  enddo  
+  enddo
   !$OMP END MASTER
-  
+
   !$OMP END PARALLEL
 
   call omp_set_max_active_levels(4)
@@ -1447,7 +1447,7 @@ function d2_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
     - 4d0/delta**2 * (4d0 * accu2**2/accu1**3 - 3d0 * accu3/accu1**2)
 
   deallocate(tmp_accu1,tmp_accu2,tmp_accu3)
- 
+
 end
 
 ! First derivative of (1/||x||^2 - 1/Delta^2)^2
@@ -1458,9 +1458,9 @@ end
 ! This function computes the value of (1/||x(lambda)||^2 - 1/Delta^2)^2
 
 ! \begin{align*}
-!   \frac{\partial}{\partial \lambda} (1/||\textbf{x}(\lambda)||^2 - 1/\Delta^2)^2 
+!   \frac{\partial}{\partial \lambda} (1/||\textbf{x}(\lambda)||^2 - 1/\Delta^2)^2
 !   &= 4 \frac{\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^3}}
-!        {(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^3} 
+!        {(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^3}
 !      - \frac{4}{\Delta^2} \frac{\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^3)}}
 !        {(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^2} \\
 !   &= 4 \sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^3}
@@ -1469,7 +1469,7 @@ end
 ! \end{align*}
 ! \begin{align*}
 ! \text{accu1} &= \sum_{i=1}^n \frac{(\textbf{w}_i^T \textbf{g})^2}{(h_i + \lambda)^2} \\
-! \text{accu2} &= \sum_{i=1}^n \frac{(\textbf{w}_i^T \textbf{g})^2}{(h_i + \lambda)^3} 
+! \text{accu2} &= \sum_{i=1}^n \frac{(\textbf{w}_i^T \textbf{g})^2}{(h_i + \lambda)^3}
 ! \end{align*}
 ! Provided:
 ! | m_num | integer | number of MOs |
@@ -1501,7 +1501,7 @@ function d1_norm_inverse_trust_region(n,e_val,w,v_grad,lambda,delta)
   implicit none
 
   ! Variables
-  
+
   ! in
   integer, intent(in)          :: n
   double precision, intent(in) :: e_val(n)
@@ -1516,7 +1516,7 @@ function d1_norm_inverse_trust_region(n,e_val,w,v_grad,lambda,delta)
 
   ! Functions
   double precision             :: d1_norm_inverse_trust_region
-  
+
   accu1 = 0d0
   accu2 = 0d0
 
@@ -1529,7 +1529,7 @@ function d1_norm_inverse_trust_region(n,e_val,w,v_grad,lambda,delta)
       accu1 = accu1 + wtg**2 / (e_val(i) + lambda)**2
     endif
   enddo
-  
+
   do i = 1, n
     if (DABS(e_val(i)) > thresh_eig .and. DABS(e_val(i)+lambda) > thresh_eig) then
       wtg = 0d0
@@ -1541,7 +1541,7 @@ function d1_norm_inverse_trust_region(n,e_val,w,v_grad,lambda,delta)
   enddo
 
   d1_norm_inverse_trust_region = 4d0 * accu2 * (1d0/accu1**3 - 1d0/(delta**2 * accu1**2))
- 
+
 end
 
 ! Second derivative of (1/||x||^2 - 1/Delta^2)^2
@@ -1552,8 +1552,8 @@ end
 ! This function computes the value of (1/||x(lambda)||^2 - 1/Delta^2)^2
 
 ! \begin{align*}
-!   \frac{\partial^2}{\partial \lambda^2} (1/||\textbf{x}(\lambda)||^2 - 1/\Delta^2)^2 
-!   &= 4 \left[ \frac{(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^3)})^2}{(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^4} 
+!   \frac{\partial^2}{\partial \lambda^2} (1/||\textbf{x}(\lambda)||^2 - 1/\Delta^2)^2
+!   &= 4 \left[ \frac{(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^3)})^2}{(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^4}
 !   - 3 \frac{\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^4}}{(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^3} \right] \\
 !   &- \frac{4}{\Delta^2} \left[ \frac{(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^3)})^2}{(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^3}
 !   - 3 \frac{\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^4}}{(\sum_i \frac{(\textbf{w}_i^T \cdot \textbf{g})^2}{(h_i + \lambda)^2})^2} \right]
@@ -1595,7 +1595,7 @@ function d2_norm_inverse_trust_region(n,e_val,w,v_grad,lambda,delta)
   implicit none
 
   ! Variables
-  
+
   ! in
   integer, intent(in)          :: n
   double precision, intent(in) :: e_val(n)
@@ -1610,7 +1610,7 @@ function d2_norm_inverse_trust_region(n,e_val,w,v_grad,lambda,delta)
 
   ! Functions
   double precision             :: d2_norm_inverse_trust_region
-  
+
   accu1 = 0d0
   accu2 = 0d0
   accu3 = 0d0
@@ -1624,7 +1624,7 @@ function d2_norm_inverse_trust_region(n,e_val,w,v_grad,lambda,delta)
       accu1 = accu1 + wtg**2 / (e_val(i) + lambda)**2
     endif
   enddo
-  
+
   do i = 1, n
     if (DABS(e_val(i)) > thresh_eig .and. DABS(e_val(i)+lambda) > thresh_eig) then
       wtg = 0d0
@@ -1647,5 +1647,6 @@ function d2_norm_inverse_trust_region(n,e_val,w,v_grad,lambda,delta)
 
   d2_norm_inverse_trust_region = 4d0 * (6d0 * accu2**2/accu1**4 - 3d0 * accu3/accu1**3) &
     - 4d0/delta**2 * (4d0 * accu2**2/accu1**3 - 3d0 * accu3/accu1**2)
-  
+
 end
+

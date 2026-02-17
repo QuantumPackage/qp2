@@ -40,7 +40,7 @@ BEGIN_PROVIDER [ integer, mo_num ]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, mo_coef, (ao_num,mo_num) ]
+BEGIN_PROVIDER [ double precision, mo_coef, (ao_num, mo_num) ]
   implicit none
   BEGIN_DOC
   ! Molecular orbital coefficients on |AO| basis set
@@ -93,7 +93,7 @@ BEGIN_PROVIDER [ double precision, mo_coef, (ao_num,mo_num) ]
   endif
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, mo_coef_imag, (ao_num,mo_num) ]
+BEGIN_PROVIDER [ double precision, mo_coef_imag, (ao_num, mo_num) ]
   implicit none
   BEGIN_DOC
   ! Molecular orbital coefficients on |AO| basis set
@@ -197,7 +197,7 @@ BEGIN_PROVIDER [ character*(64), mo_label ]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, mo_coef_transp, (mo_num,ao_num) ]
+BEGIN_PROVIDER [ double precision, mo_coef_transp, (mo_num, ao_num) ]
   implicit none
   BEGIN_DOC
   ! |MO| coefficients on |AO| basis set
@@ -379,4 +379,5 @@ BEGIN_PROVIDER [ double precision, mo_sphe_coef, (ao_sphe_num, mo_num) ]
 
  deallocate (tmp, S, C0)
 END_PROVIDER
+
 

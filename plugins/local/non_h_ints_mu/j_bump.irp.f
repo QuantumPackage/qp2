@@ -36,7 +36,7 @@ subroutine get_grad_j_bump(x,a,grad)
  double precision, intent(out) :: grad
  double precision :: inv_a,factor,x_scaled,scalar
  inv_a = 1.d0/a
- factor = 0.5d0*inv_pi*inv_a*inv_a 
+ factor = 0.5d0*inv_pi*inv_a*inv_a
  x_scaled = x*inv_a*inv_sq_pi
  x_scaled*= x_scaled
  grad = factor * dexp(-x_scaled) * (pi*a*a + 2.d0 * a*x - 2.d0*x*x)
@@ -84,7 +84,8 @@ subroutine get_grad_j_bump_mu_of_r(r1,r2,grad_j_bump)
  call get_grad_j_bump(r12,a_boys,grad_scal)
  if(r12.lt.1.d-10)then
   grad_j_bump = 0.d0
- else 
+ else
   grad_j_bump = grad_scal * r12_vec/r12
  endif
 end
+

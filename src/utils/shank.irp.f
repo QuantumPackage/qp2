@@ -1,5 +1,5 @@
 double precision function shank_general(array,n,nmax)
- implicit none                                                                                                                                                         
+ implicit none
  integer, intent(in) :: n,nmax
  double precision, intent(in) :: array(0:nmax) ! array of the partial sums
  integer :: ntmp,i
@@ -50,5 +50,6 @@ double precision function shank_function(array,i,n)
  endif
 
 end
+
 
 

@@ -1,7 +1,10 @@
 
 ! ---
 
-BEGIN_PROVIDER [double precision, ao_one_e_integrals_tc_tot, (ao_num,ao_num)]
+BEGIN_PROVIDER [double precision, ao_one_e_integrals_tc_tot, (ao_num, ao_num)]
+  BEGIN_DOC
+  ! ao_one_e_integrals_tc_tot
+  END_DOC
 
   implicit none
   integer :: i, j
@@ -21,7 +24,7 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_one_e, (mo_num, mo_num)]
   END_DOC
 
   implicit none
- 
+
   call ao_to_mo_bi_ortho(ao_one_e_integrals_tc_tot, ao_num, mo_bi_ortho_tc_one_e, mo_num)
 
   if(noL_standard) then
@@ -29,20 +32,20 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_one_e, (mo_num, mo_num)]
     mo_bi_ortho_tc_one_e = mo_bi_ortho_tc_one_e + noL_1e
   endif
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
- BEGIN_PROVIDER [double precision, mo_bi_orth_bipole_x , (mo_num,mo_num)]
-&BEGIN_PROVIDER [double precision, mo_bi_orth_bipole_y , (mo_num,mo_num)]
-&BEGIN_PROVIDER [double precision, mo_bi_orth_bipole_z , (mo_num,mo_num)]
+ BEGIN_PROVIDER [double precision, mo_bi_orth_bipole_x , (mo_num, mo_num)]
+&BEGIN_PROVIDER [double precision, mo_bi_orth_bipole_y , (mo_num, mo_num)]
+&BEGIN_PROVIDER [double precision, mo_bi_orth_bipole_z , (mo_num, mo_num)]
 
   BEGIN_DOC
   ! array of the integrals of Left MO_i * x Right MO_j
   ! array of the integrals of Left MO_i * y Right MO_j
   ! array of the integrals of Left MO_i * z Right MO_j
   END_DOC
- 
+
   implicit none
 
   call ao_to_mo_bi_ortho(                                                     &
@@ -65,4 +68,5 @@ END_PROVIDER
       )
 
 END_PROVIDER
+
 

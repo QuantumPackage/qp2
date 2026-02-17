@@ -1,5 +1,5 @@
 
-! --- 
+! ---
 
 double precision function num_v_ij_u_cst_mu_env(i, j, ipoint)
 
@@ -69,12 +69,12 @@ double precision function num_int2_u2_env2(i, j, ipoint)
     dx    = r1(1) - r2(1)
     dy    = r1(2) - r2(2)
     dz    = r1(3) - r2(3)
-    x2    = dx * dx + dy * dy + dz * dz 
+    x2    = dx * dx + dy * dy + dz * dz
     r12   = dsqrt(x2)
 
     tmp1 = env_nucl(r2)
     tmp2 = tmp1 * tmp1 * ao_value(i, r2) * ao_value(j, r2) * final_weight_at_r_vector(jpoint)
-    
+
     !tmp3 = 0.d0
     !do i_fit = 1, n_max_fit_slat
     !  expo = expo_gauss_j_mu_x_2(i_fit)
@@ -123,12 +123,12 @@ double precision function num_int2_grad1u2_grad2u2_env2(i, j, ipoint)
     dx    = r1(1) - r2(1)
     dy    = r1(2) - r2(2)
     dz    = r1(3) - r2(3)
-    x2    = dx * dx + dy * dy + dz * dz 
+    x2    = dx * dx + dy * dy + dz * dz
     r12   = dsqrt(x2)
 
     tmp1 = env_nucl(r2)
     tmp2 = tmp1 * tmp1 * ao_value(i, r2) * ao_value(j, r2) * final_weight_at_r_vector(jpoint)
-    
+
     !tmp3 = 0.d0
     !do i_fit = 1, n_max_fit_slat
     !  expo = expo_gauss_1_erf_x_2(i_fit)
@@ -537,9 +537,9 @@ subroutine num_int2_u_grad1u_total_env2(i, j, ipoint, integ)
     tmp1 = 0.5d0 * j12_mu(r1, r2) * (1.d0 - derf(mu_erf * r12)) / r12
     tmp2 = tmp0 * tmp0 * tmp1 * ao_value(i, r2) * ao_value(j, r2) * final_weight_at_r_vector(jpoint)
 
-    tmp_x += tmp2 * dx 
-    tmp_y += tmp2 * dy 
-    tmp_z += tmp2 * dz 
+    tmp_x += tmp2 * dx
+    tmp_y += tmp2 * dy
+    tmp_z += tmp2 * dz
   enddo
 
   integ(1) = tmp_x
@@ -550,3 +550,4 @@ subroutine num_int2_u_grad1u_total_env2(i, j, ipoint, integ)
 end
 
 ! ---
+

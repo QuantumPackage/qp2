@@ -18,7 +18,7 @@
 ! G(p,q) = \left[
 ! \sum_r (h_p^r \gamma_r^q - h_r^q \gamma_p^r) +
 ! \sum_{rst}(v_{pt}^{rs} \Gamma_{rs}^{qt} - v_{rs}^{qt} \Gamma_{pt}^{rs})
-! \right] - 
+! \right] -
 ! \left[
 ! \sum_r (h_q^r \gamma_r^p - h_r^p \gamma_q^r) +
 ! \sum_{rst}(v_{qt}^{rs} \Gamma_{rs}^{pt} - v_{rs}^{pt}
@@ -82,12 +82,12 @@ subroutine gradient_opt(n,v_grad,max_elem)
   include 'constants.h'
 
   implicit none
-  
+
   ! Variables
-  
+
   ! in
   integer, intent(in) :: n
-  
+
   ! out
   double precision, intent(out) :: v_grad(n), max_elem
 
@@ -103,12 +103,12 @@ subroutine gradient_opt(n,v_grad,max_elem)
   ! Functions
   double precision :: get_two_e_integral, dnrm2
 
-  
+
   print*,''
   print*,'---gradient---'
 
   ! Allocation of shared arrays
-  allocate(grad(mo_num,mo_num),A(mo_num,mo_num)) 
+  allocate(grad(mo_num,mo_num),A(mo_num,mo_num))
 
   ! Initialization omp
   call omp_set_max_active_levels(1)
@@ -120,7 +120,7 @@ subroutine gradient_opt(n,v_grad,max_elem)
       !$OMP SHARED(grad, one_e_dm_mo, mo_num,mo_one_e_integrals, &
       !$OMP mo_integrals_map,t4,t5,t6)                           &
       !$OMP DEFAULT(SHARED)
- 
+
   ! Allocation of private arrays
   allocate(tmp_accu(mo_num,mo_num))
   allocate(tmp_bi_int_3(mo_num,mo_num,mo_num))
@@ -137,7 +137,7 @@ enddo
 !$OMP END DO
 
 ! Term 1
-  
+
 ! Without optimization the term 1 is :
 
 ! do p = 1, mo_num
@@ -149,13 +149,13 @@ enddo
 !     enddo
 !   enddo
 ! enddo
-   
+
 ! Since the matrix multiplication A.B is defined like :
 ! \begin{equation}
 ! c_{ij} = \sum_k a_{ik}.b_{kj}
 ! \end{equation}
-! The previous equation can be rewritten as a matrix multplication  
-  
+! The previous equation can be rewritten as a matrix multplication
+
 
 !****************
 ! Opt first term
@@ -175,21 +175,21 @@ do q = 1, mo_num
     grad(p,q) = grad(p,q) + (tmp_accu(p,q) - tmp_accu(q,p))
 
   enddo
-enddo 
+enddo
 !$OMP END DO
 
 !$OMP MASTER
 CALL wall_TIME(t5)
 t6 = t5-t4
-print*,'Gradient, first term (s) :', t6 
+print*,'Gradient, first term (s) :', t6
 !$OMP END MASTER
 
 ! Term 2
- 
-! Without optimization the second term is : 
+
+! Without optimization the second term is :
 
 ! do p = 1, mo_num
-!   do q = 1, mo_num 
+!   do q = 1, mo_num
 !     do r = 1, mo_num
 !       do s = 1, mo_num
 !         do t= 1, mo_num
@@ -210,19 +210,19 @@ print*,'Gradient, first term (s) :', t6
 ! two_e_dm_mo(p,t,r,s) = two_e_dm_mo(r,s,p,t)
 
 ! t is one the right, we can put it on the external loop and create 3
-! indexes temporary array 
+! indexes temporary array
 ! r,s can be seen as one index
 
-! By doing so, a matrix multiplication appears 
+! By doing so, a matrix multiplication appears
 
 
 !*****************
-! Opt second term  
+! Opt second term
 !*****************
 
 !$OMP MASTER
 CALL wall_TIME(t4)
-!$OMP END MASTER 
+!$OMP END MASTER
 
 !$OMP DO
 do t = 1, mo_num
@@ -250,7 +250,7 @@ do t = 1, mo_num
   call dgemm('T','N',mo_num,mo_num,mo_num*mo_num,1d0,tmp_bi_int_3,&
     mo_num*mo_num,tmp_2rdm_3,mo_num*mo_num,0d0,tmp_accu,mo_num)
 
-  !$OMP CRITICAL   
+  !$OMP CRITICAL
   do q = 1, mo_num
     do p = 1, mo_num
 
@@ -280,7 +280,7 @@ call omp_set_max_active_levels(4)
 ! Permutation, 2D matrix -> vector, transformation
 ! In addition there is a permutation in the gradient formula :
 ! \begin{equation}
-! P_{pq} = 1 - (p <-> q) 
+! P_{pq} = 1 - (p <-> q)
 ! \end{equation}
 
 ! We need a vector to use the gradient. Here the gradient is a
@@ -293,10 +293,10 @@ call omp_set_max_active_levels(4)
 do i=1,n
   call vec_to_mat_index(i,p,q)
   v_grad(i)=(grad(p,q) - grad(q,p))
-enddo  
+enddo
 
-! Debug, diplay the vector containing the gradient elements 
-if (debug) then  
+! Debug, diplay the vector containing the gradient elements
+if (debug) then
   print*,'Vector containing the gradient :'
   write(*,'(100(F10.5))') v_grad(1:n)
 endif
@@ -320,7 +320,7 @@ do i = 1, n
   endif
 enddo
 
-print*,'Max element in the gradient :', max_elem  
+print*,'Max element in the gradient :', max_elem
 
 ! Debug, display the matrix containting the gradient elements
 if (debug) then
@@ -344,3 +344,4 @@ deallocate(grad,A)
 print*,'---End gradient---'
 
 end subroutine
+

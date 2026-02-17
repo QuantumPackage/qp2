@@ -371,12 +371,12 @@ integer*8 function binary_search(arr, key, sze)
 
     if ( key < arr(1) ) then
       binary_search = 0_8
-      return 
+      return
     end if
 
     if ( key >= arr(sze) ) then
       binary_search = sze
-      return 
+      return
     end if
 
     i = 0_8
@@ -395,4 +395,5 @@ integer*8 function binary_search(arr, key, sze)
       endif
     end do
 end function binary_search
+
 

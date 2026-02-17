@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [double precision, two_e_dm_mo, (mo_num,mo_num,mo_num,mo_num)]
+BEGIN_PROVIDER [double precision, two_e_dm_mo, (mo_num, mo_num, mo_num, mo_num)]
    implicit none
    BEGIN_DOC
    ! \sum_{\sigma \sigma'}
@@ -35,4 +35,5 @@ BEGIN_PROVIDER [double precision, two_e_dm_mo, (mo_num,mo_num,mo_num,mo_num)]
    !$OMP END PARALLEL DO
 
  END_PROVIDER
+
 

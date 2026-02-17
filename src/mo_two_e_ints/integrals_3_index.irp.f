@@ -1,5 +1,5 @@
- BEGIN_PROVIDER [double precision, big_array_coulomb_integrals, (mo_num,mo_num, mo_num)]
-&BEGIN_PROVIDER [double precision, big_array_exchange_integrals,(mo_num,mo_num, mo_num)]
+ BEGIN_PROVIDER [double precision, big_array_coulomb_integrals, (mo_num, mo_num, mo_num)]
+&BEGIN_PROVIDER [double precision, big_array_exchange_integrals, (mo_num, mo_num, mo_num)]
  implicit none
  BEGIN_DOC
  ! big_array_coulomb_integrals(j,i,k)  = <ij|kj> = (ik|jj)
@@ -68,4 +68,5 @@
  endif
 
 END_PROVIDER
+
 

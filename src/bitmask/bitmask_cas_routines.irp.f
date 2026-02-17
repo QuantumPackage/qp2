@@ -20,10 +20,10 @@ integer function number_of_holes(key_in)
  ! +---------------------+
  !    electrons in cas     xor key_in
  ! +---------------------------------+
- !        electrons outside of cas     && reunion_of_core_inact_bitmask 
- ! +------------------------------------------------------------------+ 
+ !        electrons outside of cas     && reunion_of_core_inact_bitmask
+ ! +------------------------------------------------------------------+
  !            electrons in the core/inact space     xor reunion_of_core_inact_bitmask
- ! +---------------------------------------------------------------------------------+ 
+ ! +---------------------------------------------------------------------------------+
  !              holes
  END_DOC
  implicit none
@@ -349,3 +349,4 @@ logical function is_i_in_virtual(i)
  endif
 
 end
+

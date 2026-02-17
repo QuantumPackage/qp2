@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [ double precision, Fock_matrix_param, (2,3) ]
+BEGIN_PROVIDER [ double precision, Fock_matrix_param, (2, 3) ]
  implicit none
  BEGIN_DOC
  ! Fock matrix parameters.
@@ -96,7 +96,7 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_param, (2,3) ]
 
 END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, Fock_matrix_mo, (mo_num,mo_num) ]
+ BEGIN_PROVIDER [ double precision, Fock_matrix_mo, (mo_num, mo_num) ]
 &BEGIN_PROVIDER [ double precision, Fock_matrix_diag_mo, (mo_num)]
    implicit none
    BEGIN_DOC
@@ -227,7 +227,7 @@ END_PROVIDER
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, Fock_matrix_mo_alpha, (mo_num,mo_num) ]
+BEGIN_PROVIDER [ double precision, Fock_matrix_mo_alpha, (mo_num, mo_num) ]
    implicit none
    BEGIN_DOC
    ! Fock matrix on the MO basis
@@ -237,7 +237,7 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_mo_alpha, (mo_num,mo_num) ]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, Fock_matrix_mo_beta, (mo_num,mo_num) ]
+BEGIN_PROVIDER [ double precision, Fock_matrix_mo_beta, (mo_num, mo_num) ]
    implicit none
    BEGIN_DOC
    ! Fock matrix on the MO basis
@@ -291,4 +291,5 @@ BEGIN_PROVIDER [ double precision, SCF_energy ]
  SCF_energy = 0.5d0 * SCF_energy + extra_e_contrib_density + nuclear_repulsion
 
 END_PROVIDER
+
 

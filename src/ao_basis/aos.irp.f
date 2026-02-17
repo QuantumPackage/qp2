@@ -70,7 +70,7 @@ BEGIN_PROVIDER [ integer, ao_first_of_shell, (shell_num) ]
 
 END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, ao_coef_normalized, (ao_num,ao_prim_num_max) ]
+ BEGIN_PROVIDER [ double precision, ao_coef_normalized, (ao_num, ao_prim_num_max) ]
 &BEGIN_PROVIDER [ double precision, ao_coef_normalization_factor, (ao_num) ]
   implicit none
   BEGIN_DOC
@@ -177,8 +177,8 @@ BEGIN_PROVIDER [ double precision, ao_sphe_coef_normalization_factor, (ao_sphe_n
 
 END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, ao_coef_normalized_ordered, (ao_num,ao_prim_num_max) ]
-&BEGIN_PROVIDER [ double precision, ao_expo_ordered, (ao_num,ao_prim_num_max) ]
+ BEGIN_PROVIDER [ double precision, ao_coef_normalized_ordered, (ao_num, ao_prim_num_max) ]
+&BEGIN_PROVIDER [ double precision, ao_expo_ordered, (ao_num, ao_prim_num_max) ]
   implicit none
   BEGIN_DOC
   ! Sorted primitives to accelerate 4 index |MO| transformation
@@ -203,7 +203,7 @@ END_PROVIDER
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, ao_coef_normalized_ordered_transp, (ao_prim_num_max,ao_num) ]
+BEGIN_PROVIDER [ double precision, ao_coef_normalized_ordered_transp, (ao_prim_num_max, ao_num) ]
   implicit none
   BEGIN_DOC
   ! Transposed :c:data:`ao_coef_normalized_ordered`
@@ -217,7 +217,7 @@ BEGIN_PROVIDER [ double precision, ao_coef_normalized_ordered_transp, (ao_prim_n
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, ao_expo_ordered_transp, (ao_prim_num_max,ao_num) ]
+BEGIN_PROVIDER [ double precision, ao_expo_ordered_transp, (ao_prim_num_max, ao_num) ]
   implicit none
   BEGIN_DOC
   ! Transposed :c:data:`ao_expo_ordered`
@@ -290,7 +290,7 @@ END_PROVIDER
  N_AOs_max = maxval(Nucl_N_Aos)
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer, Nucl_Aos, (nucl_num,N_AOs_max)]
+ BEGIN_PROVIDER [ integer, Nucl_Aos, (nucl_num, N_AOs_max)]
  implicit none
  BEGIN_DOC
  ! List of |AOs| centered on each atom
@@ -308,7 +308,7 @@ END_PROVIDER
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ integer, Nucl_list_shell_Aos, (nucl_num,N_AOs_max)]
+ BEGIN_PROVIDER [ integer, Nucl_list_shell_Aos, (nucl_num, N_AOs_max)]
 &BEGIN_PROVIDER [ integer, Nucl_num_shell_Aos, (nucl_num)]
  implicit none
  integer :: i,j,k
@@ -428,6 +428,9 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [ logical, use_pw ]
+  BEGIN_DOC
+  ! use_pw
+  END_DOC
 
   implicit none
 
@@ -442,4 +445,5 @@ BEGIN_PROVIDER [ logical, use_pw ]
   endif
 
 END_PROVIDER
+
 

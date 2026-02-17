@@ -6,7 +6,7 @@ end
 
 subroutine routine_deb_j_psi
  implicit none
- integer :: ipoint,k 
+ integer :: ipoint,k
  double precision :: r2(3), weight, dr, r1(3), r1bis(3)
  double precision :: accu_grad(3)
  double precision :: jast,grad_jast(3),j_bump,jastrow_psi,grad_jast_bis(3)
@@ -94,12 +94,12 @@ subroutine routine_deb_denom
       r1bis(k) += dr
       call give_all_mos_and_grad_at_r(r1bis,mos_array_r1,mos_grad_array_r1)
       call denom_jpsi(i,j,a_boys, mos_array_r1,mos_grad_array_r1,mos_array_r2,jast_p, grad_jast_bis)
-  
+
       r1bis= r1
       r1bis(k) -= dr
       call give_all_mos_and_grad_at_r(r1bis,mos_array_r1,mos_grad_array_r1)
       call denom_jpsi(i,j,a_boys, mos_array_r1,mos_grad_array_r1,mos_array_r2,jast_m, grad_jast_bis)
-  
+
       num_grad_jast(k) = (jast_p - jast_m)/(2.d0* dr)
       norm += num_grad_jast(k)*num_grad_jast(k)
      enddo
@@ -128,4 +128,5 @@ subroutine routine_deb_denom
  enddo
 
 end
+
 

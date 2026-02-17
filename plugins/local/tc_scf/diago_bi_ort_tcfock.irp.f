@@ -10,7 +10,7 @@
   END_DOC
 
   implicit none
-  integer                       :: n_real_tc 
+  integer                       :: n_real_tc
   integer                       :: i, j, k, l
   double precision              :: accu_d, accu_nd, accu_tmp
   double precision              :: norm
@@ -35,14 +35,14 @@
   enddo
 
   call non_hrmt_bieig( mo_num, F_tmp, thresh_biorthog_diag, thresh_biorthog_nondiag &
-                     , fock_tc_leigvec_mo, fock_tc_reigvec_mo                       & 
+                     , fock_tc_leigvec_mo, fock_tc_reigvec_mo                       &
                      , n_real_tc, eigval_right_tmp )
 
   deallocate(F_tmp)
 
   eigval_fock_tc_mo = eigval_right_tmp
 
-  ! L.T x R 
+  ! L.T x R
   call dgemm( "T", "N", mo_num, mo_num, mo_num, 1.d0          &
             , fock_tc_leigvec_mo, size(fock_tc_leigvec_mo, 1) &
             , fock_tc_reigvec_mo, size(fock_tc_reigvec_mo, 1) &
@@ -64,7 +64,7 @@
          print *, 'k,i', k, i, overlap_fock_tc_eigvec_mo(k,i)
         endif
       endif
-    enddo 
+    enddo
   enddo
   accu_nd = dsqrt(accu_nd) / accu_d
   if(accu_nd .gt. thresh_biorthog_nondiag) then
@@ -81,7 +81,7 @@
 
   if(dabs(accu_d - dble(mo_num))/dble(mo_num) .gt. thresh_biorthog_diag) then
 
-    print *, ' mo_num     = ', mo_num 
+    print *, ' mo_num     = ', mo_num
     print *, ' accu_d  MO = ', accu_d, thresh_biorthog_diag
     print *, ' normalizing vectors ...'
     do i = 1, mo_num
@@ -113,7 +113,7 @@
            print *, 'k,i', k, i, overlap_fock_tc_eigvec_mo(k,i)
           endif
         endif
-      enddo 
+      enddo
     enddo
     accu_nd = dsqrt(accu_nd) / accu_d
     if(accu_nd .gt. thresh_biorthog_diag) then
@@ -127,10 +127,10 @@
     endif
 
   endif
- 
+
   ! ---
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -162,7 +162,7 @@ END_PROVIDER
              , mo_l_coef, size(mo_l_coef, 1)                   &
              , fock_tc_leigvec_mo, size(fock_tc_leigvec_mo, 1) &
              , 0.d0, fock_tc_leigvec_ao, size(fock_tc_leigvec_ao, 1) )
- 
+
   allocate( tmp(mo_num,ao_num) )
 
   ! tmp <-- L.T x S_ao
@@ -202,4 +202,5 @@ END_PROVIDER
   deallocate( tmp )
 
 END_PROVIDER
+
 

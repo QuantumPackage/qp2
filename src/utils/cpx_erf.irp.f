@@ -6,7 +6,7 @@ subroutine zboysfun00_1(rho, F0)
   implicit none
 
   include 'constants.include.F'
-  
+
   complex*16, intent(in)  :: rho
   complex*16, intent(out) :: F0
 
@@ -28,7 +28,7 @@ subroutine zboysfun00_1(rho, F0)
   F0 = 0.5d0 * sqpi * cpx_erf_1(sq_rho_re, sq_rho_im) / sq_rho
 
   return
-end 
+end
 
 ! ---
 
@@ -43,13 +43,13 @@ complex*16 function cpx_erf_1(x, y)
   END_DOC
 
   implicit none
-  
+
   double precision, intent(in) :: x, y
 
   double precision             :: yabs
   complex*16                   :: erf_tmp1, erf_tmp2, erf_tmp3, erf_tot
 
-  double precision             :: erf_F 
+  double precision             :: erf_F
   complex*16                   :: erf_E, erf_G, erf_H
 
   yabs = dabs(y)
@@ -80,7 +80,7 @@ end
 ! ---
 
 complex*16 function erf_E(x, yabs)
- 
+
   implicit none
   include 'constants.include.F'
 
@@ -127,7 +127,7 @@ end
 ! ---
 
 double precision function erf_F(x, yabs)
- 
+
   implicit none
   include 'constants.include.F'
 
@@ -206,7 +206,7 @@ end
 ! ---
 
 complex*16 function erf_H(x, yabs)
- 
+
   implicit none
   include 'constants.include.F'
 
@@ -242,7 +242,7 @@ complex*16 function erf_H(x, yabs)
 
     erf_H = (0.d0, 0.d0)
 
-  endif 
+  endif
 
 end
 
@@ -252,7 +252,7 @@ subroutine zboysfun00_2(z, val)
 
   BEGIN_DOC
   !
-  ! Computes values of the Boys function for n=0 
+  ! Computes values of the Boys function for n=0
   ! for a complex valued argument
   !
   ! Input: z  --- argument, complex*16, Real(z) >= 0
@@ -279,7 +279,7 @@ subroutine zboysfun00_2(z, val)
                                                     -0.238095238095238095d-01, &
                                                      0.462962962962962963d-02, &
                                                     -0.757575757575757576d-03, &
-                                                     0.106837606837606838d-03, & 
+                                                     0.106837606837606838d-03, &
                                                     -0.132275132275132275d-04, &
                                                      1.458916900093370682d-06, &
                                                     -1.450385222315046877d-07, &
@@ -404,7 +404,7 @@ subroutine zboysfun00nrp(z, val)
                                                     -0.238095238095238095d-01, &
                                                      0.462962962962962963d-02, &
                                                     -0.757575757575757576d-03, &
-                                                     0.106837606837606838d-03, & 
+                                                     0.106837606837606838d-03, &
                                                     -0.132275132275132275d-04, &
                                                      1.458916900093370682d-06, &
                                                     -1.450385222315046877d-07, &
@@ -554,7 +554,7 @@ subroutine zboysfun00nrp(z, val)
     ! intermediate |z|
     zsum = (0.d0, 0.d0)
     do k = 1, 16
-      if(abs(z + qq(k)) .ge. tol) then 
+      if(abs(z + qq(k)) .ge. tol) then
         zsum = zsum + ww(k) * (zz - uu(k)) / (qq(k) + z)
       else
         q = z + qq(k)
@@ -568,7 +568,7 @@ subroutine zboysfun00nrp(z, val)
   else
     zsum = (0.d0, 0.d0)
     do k = 1, 16
-      if(abs(z + qq1(k)) .ge. tol) then 
+      if(abs(z + qq1(k)) .ge. tol) then
         zsum = zsum + ww(k) * (zz - uu1(k)) / (qq1(k) + z)
       else
         q = z + qq1(k)
@@ -586,4 +586,5 @@ subroutine zboysfun00nrp(z, val)
 end
 
 ! ---
+
 

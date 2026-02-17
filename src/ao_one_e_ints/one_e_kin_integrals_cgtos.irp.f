@@ -4,6 +4,9 @@
  BEGIN_PROVIDER [double precision, ao_deriv2_cgtos_x, (ao_num, ao_num)]
 &BEGIN_PROVIDER [double precision, ao_deriv2_cgtos_y, (ao_num, ao_num)]
 &BEGIN_PROVIDER [double precision, ao_deriv2_cgtos_z, (ao_num, ao_num)]
+  BEGIN_DOC
+  ! ao_deriv2_cgtos_x
+  END_DOC
 
   implicit none
   integer          :: i, j, m, n, l, ii, jj, dim1, power_A(3), power_B(3)
@@ -16,7 +19,7 @@
   complex*16       :: xa
   complex*16       :: overlap_x, overlap_y, overlap_z, overlap
   complex*16       :: overlap_x0_1, overlap_y0_1, overlap_z0_1
-  complex*16       :: overlap_x0_2, overlap_y0_2, overlap_z0_2 
+  complex*16       :: overlap_x0_2, overlap_y0_2, overlap_z0_2
   complex*16       :: overlap_m2_1, overlap_m1_1, overlap_p1_1, overlap_p2_1
   complex*16       :: overlap_m2_2, overlap_m1_2, overlap_p1_2, overlap_p2_2
   complex*16       :: deriv_tmp_1, deriv_tmp_2
@@ -51,9 +54,9 @@
   !$OMP         overlap_x0_1, overlap_y0_1, overlap_z0_1, overlap_x0_2,     &
   !$OMP         overlap_y0_2, overlap_z0_2)                                 &
   !$OMP SHARED(nucl_coord, ao_power, ao_prim_num, ao_num, ao_nucl, dim1,    &
-  !$OMP        ao_coef_cgtos_norm_ord_transp, ao_expo_cgtos_ord_transp,     & 
-  !$OMP        ao_expo_pw_ord_transp, ao_expo_phase_ord_transp,             & 
-  !$OMP        ao_deriv2_cgtos_x, ao_deriv2_cgtos_y, ao_deriv2_cgtos_z) 
+  !$OMP        ao_coef_cgtos_norm_ord_transp, ao_expo_cgtos_ord_transp,     &
+  !$OMP        ao_expo_pw_ord_transp, ao_expo_phase_ord_transp,             &
+  !$OMP        ao_deriv2_cgtos_x, ao_deriv2_cgtos_y, ao_deriv2_cgtos_z)
   !$OMP DO SCHEDULE(GUIDED)
   do j = 1, ao_num
 
@@ -289,7 +292,7 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, ao_kinetic_integrals_cgtos, (ao_num, ao_num)]
 
   BEGIN_DOC
-  ! 
+  !
   ! Kinetic energy integrals in the cgtos |AO| basis.
   !
   ! $\langle \chi_i |\hat{T}| \chi_j \rangle$
@@ -315,4 +318,5 @@ BEGIN_PROVIDER [double precision, ao_kinetic_integrals_cgtos, (ao_num, ao_num)]
 END_PROVIDER
 
 ! ---
+
 

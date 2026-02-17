@@ -62,7 +62,7 @@ subroutine get_d3_htc(gen, bannedOrb, banned, mat_m, mat_p, mask, p, sp, rcoefs,
 
   integer(bit_kind)               :: det(N_int, 2)
   integer                         :: k, h1, h2, p1, p2, puti, putj
-  double precision                :: i_h_alpha, alpha_h_i 
+  double precision                :: i_h_alpha, alpha_h_i
   logical                         :: ok
 
   if(sp == 3) then ! AB
@@ -82,13 +82,13 @@ subroutine get_d3_htc(gen, bannedOrb, banned, mat_m, mat_p, mask, p, sp, rcoefs,
         if( dabs(alpha_h_i) .gt. 0.d0) then
           !DIR$ LOOP COUNT AVG(4)
           do k = 1, N_states
-            mat_p(k, p1, p2) = mat_p(k, p1, p2) + rcoefs(k) * alpha_h_i 
+            mat_p(k, p1, p2) = mat_p(k, p1, p2) + rcoefs(k) * alpha_h_i
           enddo
         endif
         if( dabs(i_h_alpha) .gt. 0.d0) then
           !DIR$ LOOP COUNT AVG(4)
           do k = 1, N_states
-            mat_m(k, p1, p2) = mat_m(k, p1, p2) + lcoefs(k) * i_h_alpha 
+            mat_m(k, p1, p2) = mat_m(k, p1, p2) + lcoefs(k) * i_h_alpha
           enddo
         endif
 
@@ -112,13 +112,13 @@ subroutine get_d3_htc(gen, bannedOrb, banned, mat_m, mat_p, mask, p, sp, rcoefs,
         if( dabs(alpha_h_i) .gt. 0.d0) then
           !DIR$ LOOP COUNT AVG(4)
           do k = 1, N_states
-            mat_p(k, puti, putj) = mat_p(k, puti, putj) + rcoefs(k) * alpha_h_i 
+            mat_p(k, puti, putj) = mat_p(k, puti, putj) + rcoefs(k) * alpha_h_i
           enddo
         endif
         if( dabs(i_h_alpha) .gt. 0.d0) then
           !DIR$ LOOP COUNT AVG(4)
           do k = 1, N_states
-            mat_m(k, puti, putj) = mat_m(k, puti, putj) + lcoefs(k) * i_h_alpha 
+            mat_m(k, puti, putj) = mat_m(k, puti, putj) + lcoefs(k) * i_h_alpha
           enddo
         endif
 
@@ -247,7 +247,7 @@ subroutine get_d2(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, s
         p2 = p(i2, ma)
 
         ! <p1 p2|1/r12|h1 h2> --> <p1 p2| w_ee^h + t^nh | h1 h2> --> < p2 p1 | H^tilde| h1 h2 >
-        ! 
+        !
         !                      <p1 p2 | h1 h2>        -            <p2 p1 | h1 h2 >
         ! < p2 p1 | H^tilde^dag| h1 h2 > = < h1 h2 | w_ee^h + t^nh | p1 p2 >
         hji = mo_bi_ortho_tc_two_e(p1, p2, h1, h2) - mo_bi_ortho_tc_two_e(p2, p1, h1, h2)
@@ -747,7 +747,7 @@ subroutine get_d1(gen, phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, s
         if(bannedOrb(p1, s1) .or. bannedOrb(p2, s2) .or. banned(p1, p2, 1)) cycle
         call apply_particles(mask, s1, p1, s2, p2, det, ok, N_int)
 !        call i_h_j(gen, det, N_int, hij)
-        !!!! GUESS ON THE ORDER OF DETS 
+        !!!! GUESS ON THE ORDER OF DETS
         print*,'compute hij'
 !        hij = 0.d0
 !        hji = 0.d0
@@ -811,7 +811,7 @@ subroutine get_d0(gen, phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, s
 !          print*,'in p1 == h1 or p2 == h2'
           call apply_particles(mask, 1,p1,2,p2, det, ok, N_int)
 !          call i_h_j(gen, det, N_int, hij)
-           !!! GUESS ON THE ORDER 
+           !!! GUESS ON THE ORDER
           call htilde_mu_mat_opt_bi_ortho_no_3e(det,gen,N_int, hji)
           call htilde_mu_mat_opt_bi_ortho_no_3e(gen,det,N_int, hij)
         else
@@ -830,7 +830,7 @@ subroutine get_d0(gen, phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, s
     end do
 
   else ! AA BB
-!    print*, 'in AA BB' 
+!    print*, 'in AA BB'
     p1 = p(1,sp)
     p2 = p(2,sp)
     do puti=1, mo_num
@@ -849,7 +849,7 @@ subroutine get_d0(gen, phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, s
         if(puti == p1 .or. putj == p2 .or. puti == p2 .or. putj == p1) then
           call apply_particles(mask, sp,puti,sp,putj, det, ok, N_int)
 !          call i_h_j(gen, det, N_int, hij)
-          !!! GUESS 
+          !!! GUESS
           call htilde_mu_mat_opt_bi_ortho_no_3e(gen,det,N_int, hij)
           call htilde_mu_mat_opt_bi_ortho_no_3e(det,gen,N_int, hji)
           if (hij == 0.d0.or.hji == 0.d0) cycle
@@ -901,7 +901,7 @@ end subroutine get_d0
 !  double precision                :: hij_p, hij_m, phase
 !
 !  double precision, external      :: get_phase_bi
-!  double precision, external      :: get_mo_bi_ortho_tc_two_e_tc_int, get_mo_bi_ortho_tc_two_e_tcdag_int 
+!  double precision, external      :: get_mo_bi_ortho_tc_two_e_tc_int, get_mo_bi_ortho_tc_two_e_tcdag_int
 !
 !  PROVIDE mo_integrals_tc_int_map mo_integrals_tcdag_int_map
 !
@@ -1448,7 +1448,7 @@ end subroutine get_d0
 !  double precision, intent(inout) :: mat_p(N_states, mo_num, mo_num), mat_m(N_states, mo_num, mo_num)
 !
 !  double precision, external      :: get_phase_bi
-!  double precision, external      :: get_mo_bi_ortho_tc_two_e_tc_int, get_mo_bi_ortho_tc_two_e_tcdag_int 
+!  double precision, external      :: get_mo_bi_ortho_tc_two_e_tc_int, get_mo_bi_ortho_tc_two_e_tcdag_int
 !  integer, parameter              :: bant=1
 !  integer                         :: i, j, k, s, h1, h2, p1, p2, puti, putj
 !  logical                         :: ok
@@ -1899,4 +1899,5 @@ subroutine get_d2_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, 
 end subroutine get_d2_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
 
 ! ---
+
 

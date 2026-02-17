@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [ double precision, H_matrix_all_dets,(N_det,N_det) ]
+BEGIN_PROVIDER [ double precision, H_matrix_all_dets, (N_det, N_det) ]
   use bitmasks
  implicit none
  BEGIN_DOC
@@ -21,7 +21,7 @@ BEGIN_PROVIDER [ double precision, H_matrix_all_dets,(N_det,N_det) ]
  print*,'H_matrix_all_dets done '
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, H_matrix_diag_all_dets,(N_det) ]
+BEGIN_PROVIDER [ double precision, H_matrix_diag_all_dets, (N_det) ]
   use bitmasks
  implicit none
  BEGIN_DOC
@@ -41,7 +41,7 @@ BEGIN_PROVIDER [ double precision, H_matrix_diag_all_dets,(N_det) ]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, S2_matrix_all_dets,(N_det,N_det) ]
+BEGIN_PROVIDER [ double precision, S2_matrix_all_dets, (N_det, N_det) ]
   use bitmasks
  implicit none
  BEGIN_DOC
@@ -62,4 +62,5 @@ BEGIN_PROVIDER [ double precision, S2_matrix_all_dets,(N_det,N_det) ]
  enddo
  !$OMP END PARALLEL DO
 END_PROVIDER
+
 

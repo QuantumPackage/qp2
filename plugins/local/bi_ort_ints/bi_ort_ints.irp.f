@@ -33,7 +33,7 @@ subroutine test_5idx2
 end
 
 subroutine test_4idx2()
-  !PROVIDE three_e_4_idx_direct_bi_ort 
+  !PROVIDE three_e_4_idx_direct_bi_ort
   PROVIDE three_e_4_idx_exch23_bi_ort
 end
 
@@ -88,7 +88,7 @@ subroutine test_5idx
    do j = 1, mo_num
     do l = 1, mo_num
      do m = 1, mo_num
-!      if (dabs(three_e_5_idx_direct_bi_ort(m,l,j,k,i) - three_e_5_idx_exch12_bi_ort(m,l,i,k,j)) > 1.d-10) then 
+!      if (dabs(three_e_5_idx_direct_bi_ort(m,l,j,k,i) - three_e_5_idx_exch12_bi_ort(m,l,i,k,j)) > 1.d-10) then
 !         stop
 !      endif
       new = three_e_5_idx_direct_bi_ort(m,l,j,k,i)
@@ -349,7 +349,7 @@ subroutine test_4idx()
   thr = 1d-10
 
   PROVIDE three_e_4_idx_direct_bi_ort_old
-  PROVIDE three_e_4_idx_direct_bi_ort 
+  PROVIDE three_e_4_idx_direct_bi_ort
 
   accu = 0.d0
   norm = 0.d0
@@ -380,7 +380,7 @@ subroutine test_4idx()
   ! ---
 
   PROVIDE three_e_4_idx_exch13_bi_ort_old
-  PROVIDE three_e_4_idx_exch13_bi_ort 
+  PROVIDE three_e_4_idx_exch13_bi_ort
 
   accu = 0.d0
   norm = 0.d0
@@ -564,5 +564,6 @@ subroutine test_int2_grad1_u12_bimo_t()
 end
 
 ! ---
+
 
 

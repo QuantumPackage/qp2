@@ -71,7 +71,7 @@ END_PROVIDER
 
 
  BEGIN_PROVIDER [ double precision, eigenvalues_Fock_matrix_AO, (AO_num) ]
-&BEGIN_PROVIDER [ double precision, eigenvectors_Fock_matrix_AO, (AO_num,AO_num) ]
+&BEGIN_PROVIDER [ double precision, eigenvectors_Fock_matrix_AO, (AO_num, AO_num) ]
 
    BEGIN_DOC
    ! Eigenvalues and eigenvectors of the Fock matrix over the AO basis
@@ -136,4 +136,5 @@ END_PROVIDER
        eigenvectors_Fock_matrix_AO,size(eigenvectors_Fock_matrix_AO,1))
 
 END_PROVIDER
+
 

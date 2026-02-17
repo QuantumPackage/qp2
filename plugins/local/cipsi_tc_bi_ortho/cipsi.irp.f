@@ -89,7 +89,7 @@ subroutine run_cipsi
     to_select = int(sqrt(dble(N_states))*dble(N_det)*selection_factor)
     to_select = max(N_states_diag, to_select)
 
-    E_denom = E_tc ! TC Energy of the current wave function 
+    E_denom = E_tc ! TC Energy of the current wave function
     if (do_pt2) then
       call pt2_dealloc(pt2_data)
       call pt2_dealloc(pt2_data_err)
@@ -134,3 +134,4 @@ subroutine run_cipsi
   call diagonalize_CI_tc_bi_ortho(ndet, E_tc,norm,pt2_data,print_pt2)
 
 end
+

@@ -1,7 +1,7 @@
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
+BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num, ao_num)]
 
   BEGIN_DOC
   !  Nucleus-electron interaction, in the |AO| basis set.
@@ -117,7 +117,7 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, ao_integrals_n_e_imag, (ao_num,ao_num)]
+BEGIN_PROVIDER [ double precision, ao_integrals_n_e_imag, (ao_num, ao_num)]
   BEGIN_DOC
   !  Nucleus-electron interaction, in the |AO| basis set.
   !
@@ -140,7 +140,7 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e_imag, (ao_num,ao_num)]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, ao_integrals_n_e_per_atom, (ao_num,ao_num,nucl_num)]
+BEGIN_PROVIDER [ double precision, ao_integrals_n_e_per_atom, (ao_num, ao_num, nucl_num)]
   BEGIN_DOC
 ! Nucleus-electron interaction in the |AO| basis set, per atom A.
 !
@@ -610,7 +610,7 @@ end
 
 
 
-BEGIN_PROVIDER [ double precision, ao_sphe_integrals_n_e, (ao_sphe_num,ao_sphe_num) ]
+BEGIN_PROVIDER [ double precision, ao_sphe_integrals_n_e, (ao_sphe_num, ao_sphe_num) ]
  implicit none
  BEGIN_DOC
  ! |AO| VneVne  inntegrals matrix in the spherical basis set
@@ -631,3 +631,4 @@ BEGIN_PROVIDER [ double precision, ao_sphe_integrals_n_e, (ao_sphe_num,ao_sphe_n
  deallocate(tmp)
 
 END_PROVIDER
+

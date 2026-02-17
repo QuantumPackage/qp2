@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [ double precision, mo_overlap,(mo_num,mo_num) ]
+BEGIN_PROVIDER [ double precision, mo_overlap, (mo_num, mo_num) ]
   implicit none
   BEGIN_DOC
 ! Provider to check that the MOs are indeed orthonormal.
@@ -35,4 +35,5 @@ BEGIN_PROVIDER [ double precision, mo_overlap,(mo_num,mo_num) ]
   !$OMP END PARALLEL DO
 
 END_PROVIDER
+
 

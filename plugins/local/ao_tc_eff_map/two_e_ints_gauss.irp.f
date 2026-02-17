@@ -4,9 +4,9 @@ double precision function ao_tc_sym_two_e_pot(i,j,k,l)
   !  integral of the AO basis <ik|jl> or (ij|kl)
   !     i(r1) j(r1) (tc_pot(r12,mu)) k(r2) l(r2)
   !
-  ! where (tc_pot(r12,mu)) is the scalar part of the potential EXCLUDING the term erf(mu r12)/r12. 
+  ! where (tc_pot(r12,mu)) is the scalar part of the potential EXCLUDING the term erf(mu r12)/r12.
   !
-  ! See Eq. (32) of JCP 154, 084119 (2021). 
+  ! See Eq. (32) of JCP 154, 084119 (2021).
   END_DOC
   integer,intent(in)             :: i,j,k,l
   integer                        :: p,q,r,s
@@ -252,19 +252,19 @@ double precision function general_primitive_integral_gauss(dim,      &
   pi_3 = pi*pi*pi
   inv_pq_3_2 = (p_inv * q_inv)**(1.5d0)
   rho_old = (p*q)/(p+q)
-  prefactor = pi_3 * inv_pq_3_2 * fact_p * fact_q 
+  prefactor = pi_3 * inv_pq_3_2 * fact_p * fact_q
   do i = 1, n_gauss_eff_pot ! browse the gaussians with different expo/coef
   !do i = 1, n_gauss_eff_pot-1
-   aa = expo_gauss_eff_pot(i) 
+   aa = expo_gauss_eff_pot(i)
    c_a = coef_gauss_eff_pot(i)
-   t_a = dsqrt( aa /(rho_old + aa) ) 
+   t_a = dsqrt( aa /(rho_old + aa) )
    w_a = dexp(-t_a*t_a*rho_old*dist)
    accu = 0.d0
    ! evaluation of the polynom Ix(t_a) * Iy(t_a) * Iz(t_a)
    do m = 0, n_pt_out,2
-    accu += d1(m) * (t_a)**(dble(m)) 
+    accu += d1(m) * (t_a)**(dble(m))
    enddo
-   ! equation A8 of PRA-70-062505 (2004) of Toul. Col. Sav. 
+   ! equation A8 of PRA-70-062505 (2004) of Toul. Col. Sav.
    gauss_int = gauss_int + c_a * prefactor * (1.d0 - t_a*t_a)**(1.5d0) * w_a * accu
   enddo
 
@@ -325,3 +325,4 @@ subroutine compute_ao_integrals_gauss_jl(j,l,n_integrals,buffer_i,buffer_value)
   enddo
 
 end
+

@@ -58,7 +58,7 @@ complex*16 function crint_1(n, rho)
                 - 1.515151515151515d-02) * rho &
                 + 5.555555555555555d-02) * rho &
                 - 1.428571428571428d-01) * rho &
-                + 2.000000000000000d-01 
+                + 2.000000000000000d-01
       case(3)
         crint_1 = (((((((((1.020641452740218d-08 * rho &
                 - 1.102292768959436d-07) * rho &
@@ -70,7 +70,7 @@ complex*16 function crint_1(n, rho)
                 - 1.282051282051282d-02) * rho &
                 + 4.545454545454546d-02) * rho &
                 - 1.111111111111111d-01) * rho &
-                + 1.428571428571428d-01 
+                + 1.428571428571428d-01
       case default
         tmp = dble(n + n + 1)
         crint_1 = (((((((((2.755731922398589d-07 * rho / (tmp + 20.d0) &
@@ -84,7 +84,7 @@ complex*16 function crint_1(n, rho)
                 + 5.000000000000000d-01 / (tmp +  4.d0)) * rho &
                 - 1.000000000000000d+00 / (tmp +  2.d0)) * rho &
                 + 1.0d0 / tmp
-      end select 
+      end select
 
     else
 
@@ -169,7 +169,7 @@ subroutine crint_1_vec(n_max, rho, vals)
                   - 1.515151515151515d-02) * rho &
                   + 5.555555555555555d-02) * rho &
                   - 1.428571428571428d-01) * rho &
-                  + 2.000000000000000d-01 
+                  + 2.000000000000000d-01
 
           if(n_max > 2) then
 
@@ -183,7 +183,7 @@ subroutine crint_1_vec(n_max, rho, vals)
                     - 1.282051282051282d-02) * rho &
                     + 4.545454545454546d-02) * rho &
                     - 1.111111111111111d-01) * rho &
-                    + 1.428571428571428d-01 
+                    + 1.428571428571428d-01
 
             do n = 4, n_max
               tmp = dble(n + n + 1)
@@ -324,7 +324,7 @@ complex*16 function crint_2(n, rho)
                 - 1.515151515151515d-02) * rho &
                 + 5.555555555555555d-02) * rho &
                 - 1.428571428571428d-01) * rho &
-                + 2.000000000000000d-01 
+                + 2.000000000000000d-01
       case(3)
         crint_2 = (((((((((1.020641452740218d-08 * rho &
                 - 1.102292768959436d-07) * rho &
@@ -336,7 +336,7 @@ complex*16 function crint_2(n, rho)
                 - 1.282051282051282d-02) * rho &
                 + 4.545454545454546d-02) * rho &
                 - 1.111111111111111d-01) * rho &
-                + 1.428571428571428d-01 
+                + 1.428571428571428d-01
       case default
         tmp = dble(n + n + 1)
         crint_2 = (((((((((2.755731922398589d-07 * rho / (tmp + 20.d0) &
@@ -350,7 +350,7 @@ complex*16 function crint_2(n, rho)
                 + 5.000000000000000d-01 / (tmp +  4.d0)) * rho &
                 - 1.000000000000000d+00 / (tmp +  2.d0)) * rho &
                 + 1.0d0 / tmp
-      end select 
+      end select
 
     else
 
@@ -458,7 +458,7 @@ complex*16 function crint_sum(n_pt_out, rho, d1)
 
   integer,    intent(in)  :: n_pt_out
   complex*16, intent(in)  :: rho, d1(0:n_pt_out)
-                          
+
   integer                 :: i
   integer                 :: n_max
 
@@ -541,7 +541,7 @@ subroutine crint_2_vec(n_max, rho, vals)
                   - 1.515151515151515d-02) * rho &
                   + 5.555555555555555d-02) * rho &
                   - 1.428571428571428d-01) * rho &
-                  + 2.000000000000000d-01 
+                  + 2.000000000000000d-01
 
           if(n_max > 2) then
 
@@ -555,7 +555,7 @@ subroutine crint_2_vec(n_max, rho, vals)
                     - 1.282051282051282d-02) * rho &
                     + 4.545454545454546d-02) * rho &
                     - 1.111111111111111d-01) * rho &
-                    + 1.428571428571428d-01 
+                    + 1.428571428571428d-01
 
             do n = 4, n_max
               tmp = dble(n + n + 1)
@@ -638,7 +638,7 @@ subroutine crint_smallz_vec(n_max, rho, vals)
 
     ct = rhoe * gamma(dble(n) + 0.5d0)
     vals(n) = ct / gamma(dble(n) + 1.5d0)
-  
+
     do k = 1, kmax
       delta_k = ct * rho_k(k) / gamma(dble(n+k) + 1.5d0)
       vals(n) += delta_k
@@ -646,7 +646,7 @@ subroutine crint_smallz_vec(n_max, rho, vals)
         exit
       endif
     enddo
-  
+
     if(abs(delta_k) > eps) then
       write(*,*) ' pb in crint_smallz_vec !'
       write(*,*) ' n, rho = ', n, rho
@@ -924,4 +924,5 @@ subroutine crint_quad_12_vec(n_max, rho, vals)
 end
 
 ! ---
+
 

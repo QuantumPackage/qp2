@@ -38,7 +38,7 @@ program cis
 !
 ! .. note::
 !
-!   To discard some orbitals, use the :ref:`qp_set_mo_class` 
+!   To discard some orbitals, use the :ref:`qp_set_mo_class`
 !   command to specify:
 !
 !   * *core* orbitals which will be always doubly occupied
@@ -85,3 +85,4 @@ subroutine run
   call save_wavefunction_truncated(save_threshold)
 
 end
+

@@ -155,7 +155,7 @@ subroutine get_d1_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, 
           enddo
         endif
       end if
-!      
+!
       putj = p2
       if(.not. banned(putj,puti,bant)) then
         hij = hij_cache(puti,1)
@@ -355,4 +355,5 @@ subroutine get_d1_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, 
       end do
     end do
 end
+
 

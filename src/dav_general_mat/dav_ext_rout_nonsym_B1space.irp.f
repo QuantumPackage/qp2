@@ -4,7 +4,7 @@
 subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N_st, N_st_diag_in, converged, hcalc)
 
   BEGIN_DOC
-  ! Generic modified-Davidson diagonalization 
+  ! Generic modified-Davidson diagonalization
   !
   ! H_jj : specific diagonal H matrix elements to diagonalize de Davidson
   !
@@ -58,7 +58,7 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
 
   include 'constants.include.F'
 
-  N_st_diag = N_st_diag_in 
+  N_st_diag = N_st_diag_in
 !  print*,'trial vector'
    do i = 1, sze
     if(isnan(u_in(i,1)))then
@@ -79,7 +79,7 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
 
   itermax = max(2, min(davidson_sze_max, sze/N_st_diag)) + 1
 
-  provide threshold_nonsym_davidson 
+  provide threshold_nonsym_davidson
   call write_time(6)
   write(6,'(A)') ''
   write(6,'(A)') 'Davidson Diagonalization'
@@ -93,7 +93,7 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
   nproc_target = nproc
   double precision :: rss
   integer :: maxab
-  maxab = sze 
+  maxab = sze
 
   m=1
   disk_based = .False.
@@ -178,7 +178,7 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
       ! Small
       h(N_st_diag*itermax,N_st_diag*itermax),                        &
       y(N_st_diag*itermax,N_st_diag*itermax),                        &
-      lambda(N_st_diag*itermax),                                     & 
+      lambda(N_st_diag*itermax),                                     &
       residual_norm(N_st_diag),                                      &
       i_omax(N_st)                                                   &
   )
@@ -211,7 +211,7 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
       u_in(i,k) = r1*dcos(r2)
     enddo
   enddo
-  ! Normalize all states 
+  ! Normalize all states
   do k = 1, N_st_diag
     call normalize(u_in(1,k), sze)
   enddo
@@ -241,7 +241,7 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
 
       if( (iter > 1) .or. (itertot == 1) ) then
 
-        ! Gram-Schmidt to orthogonalize all new guess with the previous vectors 
+        ! Gram-Schmidt to orthogonalize all new guess with the previous vectors
         call ortho_qr(U, size(U, 1), sze, shift2)
         call ortho_qr(U, size(U, 1), sze, shift2)
 
@@ -270,10 +270,10 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
       ! ---------------------------------------------------
 
       ! y(:,k) = rk
-      ! U(:,k) = Bk 
+      ! U(:,k) = Bk
       ! U(:,shift2+k) = Rk = Bk x rk
       call dgemm( 'N', 'N', sze, N_st_diag, shift2, 1.d0 &
-                , U, size(U, 1), y, size(y, 1)           & 
+                , U, size(U, 1), y, size(y, 1)           &
                 , 0.d0, U(1,shift2+1), size(U, 1) )
 
       do k = 1, N_st_diag
@@ -298,7 +298,7 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
       !  write(455, '(100(1X, F16.10))') (Utest(j,k), k=1,shift2)
       !enddo
 
-      !do k = 1, shift2 
+      !do k = 1, shift2
       !  Otest(k) = 0.d0
       !  do i = 1, sze
       !    Otest(k) += Utest(i,k) * u_in(i,1)
@@ -306,13 +306,13 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
       !  Otest(k) = dabs(Otest(k))
       !  print *, ' Otest =', k, Otest(k), lambda(k)
       !enddo
-     
+
       !deallocate(Utest, Otest)
       !
       ! end test ------------------------------------------------------------------------
       !
 
-      ! TODO 
+      ! TODO
       ! state_following is more efficient
       do l = 1, N_st
 
@@ -327,9 +327,9 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
           !print *, ' overlap =', k, overlap(k)
         enddo
 
-        lambda_tmp = 0.d0 
+        lambda_tmp = 0.d0
         do k = 1, N_st_diag
-          if(overlap(k) .gt. lambda_tmp) then 
+          if(overlap(k) .gt. lambda_tmp) then
             i_omax(l)  = k
             lambda_tmp = overlap(k)
           endif
@@ -350,7 +350,7 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
       enddo
 
       ! y(:,k) = rk
-      ! W(:,k) = H x Bk 
+      ! W(:,k) = H x Bk
       ! W(:,shift2+k) = H x Bk x rk
       !               = Wk
       call dgemm( 'N', 'N', sze, N_st_diag, shift2, 1.d0 &
@@ -370,18 +370,18 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
         if(k <= N_st) then
           l = k
           residual_norm(k) = u_dot_u(U(1,shift2+l), sze)
-          to_print(1,k)    = lambda(l) 
+          to_print(1,k)    = lambda(l)
           to_print(2,k)    = residual_norm(l)
         endif
       enddo
       !$OMP END PARALLEL DO
       !residual_norm(1) = u_dot_u(U(1,shift2+1), sze)
-      !to_print(1,1) = lambda(1) 
+      !to_print(1,1) = lambda(1)
       !to_print(2,1) = residual_norm(1)
 
 
       if( (itertot > 1) .and. (iter == 1) ) then
-        !don't print 
+        !don't print
         continue
       else
         write(*, '(1X, I3, 1X, 100(1X, F16.10, 1X, F16.10, 1X, F16.10))') iter-1, to_print(1:2,1:N_st)
@@ -390,8 +390,8 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
       ! Check convergence
       if(iter > 1) then
         converged = dabs(maxval(residual_norm(1:N_st))) < threshold_nonsym_davidson
-      endif   
-      
+      endif
+
       do k = 1, N_st
         if(residual_norm(k) > 1.e8) then
           print *, 'Davidson failed'
@@ -469,3 +469,4 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
 end subroutine davidson_general_ext_rout_nonsym_b1space
 
 ! ---
+

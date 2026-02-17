@@ -20,7 +20,7 @@ BEGIN_PROVIDER [ double precision, CI_energy, (N_states_diag) ]
 END_PROVIDER
 
  BEGIN_PROVIDER [ double precision, CI_electronic_energy, (N_states_diag) ]
-&BEGIN_PROVIDER [ double precision, CI_eigenvectors, (N_det,N_states_diag) ]
+&BEGIN_PROVIDER [ double precision, CI_eigenvectors, (N_det, N_states_diag) ]
 &BEGIN_PROVIDER [ double precision, CI_s2, (N_states_diag) ]
    BEGIN_DOC
    ! Eigenvectors/values of the |CI| matrix
@@ -354,3 +354,4 @@ subroutine diagonalize_CI
 
   SOFT_TOUCH psi_coef CI_electronic_energy CI_energy CI_eigenvectors CI_s2 psi_energy psi_s2
 end
+

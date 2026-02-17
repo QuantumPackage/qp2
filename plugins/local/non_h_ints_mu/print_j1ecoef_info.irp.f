@@ -20,7 +20,7 @@ program print_j1ecoef_info
   endif
 
   call print_j1ecoef()
-  
+
 end
 
 ! ---
@@ -40,7 +40,7 @@ subroutine print_j1ecoef()
 
   if(mpi_master) then
     call ezfio_has_jastrow_j1e_coef_ao2(exists)
-  endif 
+  endif
   IRP_IF MPI_DEBUG
     print *,  irp_here, mpi_rank
     call MPI_BARRIER(MPI_COMM_WORLD, ierr)
@@ -85,10 +85,11 @@ subroutine print_j1ecoef()
 
 
   deallocate(coef_fit2)
- 
+
   return
 end
 
 ! ---
+
 
 

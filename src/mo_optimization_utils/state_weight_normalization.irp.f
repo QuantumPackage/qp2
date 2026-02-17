@@ -9,21 +9,22 @@ subroutine state_weight_normalization
 
   integer          :: i
   double precision :: normalization_factor
-  
+
   ! To normalize the sum of the state weights
   normalization_factor = 0d0
   do i = 1, N_states
     normalization_factor = normalization_factor + state_average_weight(i)
   enddo
   normalization_factor = 1d0 / normalization_factor
-  
+
   do i = 1, N_states
     state_average_weight(i) = state_average_weight(i) * normalization_factor
   enddo
   TOUCH state_average_weight
-  
+
   print*, 'Number of states:', N_states
   print*, 'State average weights:'
   print*, state_average_weight(:)
 
 end
+

@@ -262,7 +262,7 @@ subroutine NAI_pol_mult_erf_v(A_center, B_center, power_A, power_B, alpha, beta,
       do i = 1, 3
         dist_integral += (P_center(i) - C_center(ipoint,i)) * (P_center(i) - C_center(ipoint,i))
       enddo
-      const = coef_tmp * dist_integral 
+      const = coef_tmp * dist_integral
 
       res_v(ipoint) = coeff * rint(0, const)
     enddo
@@ -274,13 +274,13 @@ subroutine NAI_pol_mult_erf_v(A_center, B_center, power_A, power_B, alpha, beta,
       do i = 1, 3
         dist_integral += (P_center(i) - C_center(ipoint,i)) * (P_center(i) - C_center(ipoint,i))
       enddo
-      const = coef_tmp * dist_integral 
+      const = coef_tmp * dist_integral
 
       do i = 0, n_pt_in
         d(i) = 0.d0
       enddo
       call give_polynomial_mult_center_one_e_erf_opt(A_center, B_center, power_A, power_B, C_center(ipoint,1:3), n_pt_in, d, n_pt_out, p_inv_2, p_new2, P_center)
-     
+
       if(n_pt_out < 0) then
         res_v(ipoint) = 0.d0
         cycle
@@ -291,7 +291,7 @@ subroutine NAI_pol_mult_erf_v(A_center, B_center, power_A, power_B, alpha, beta,
       do i = 0, n_pt_out, 2
         accu += d(i) * rint(i/2, const)
       enddo
-     
+
       res_v(ipoint) = accu * coeff
     enddo
 
@@ -506,14 +506,14 @@ subroutine NAI_pol_mult_erf_with1s_v(A1_center, A2_center, power_A1, power_A2, a
   else
 
     do ipoint = 1, n_points
-  
+
       dist = (A12_center(1) - B_center(ipoint,1)) * (A12_center(1) - B_center(ipoint,1))&
            + (A12_center(2) - B_center(ipoint,2)) * (A12_center(2) - B_center(ipoint,2))&
-           + (A12_center(3) - B_center(ipoint,3)) * (A12_center(3) - B_center(ipoint,3)) 
+           + (A12_center(3) - B_center(ipoint,3)) * (A12_center(3) - B_center(ipoint,3))
       const_factor = const_factor12 + dist * rho
       if(const_factor > 80.d0) cycle
       coeff = coef_tmp * dexp(-const_factor)
-  
+
       P_center(1) = (alpha12 * A12_center(1) + beta * B_center(ipoint,1)) * p_inv
       P_center(2) = (alpha12 * A12_center(2) + beta * B_center(ipoint,2)) * p_inv
       P_center(3) = (alpha12 * A12_center(3) + beta * B_center(ipoint,3)) * p_inv
@@ -521,23 +521,23 @@ subroutine NAI_pol_mult_erf_with1s_v(A1_center, A2_center, power_A1, power_A2, a
                     + (P_center(2) - C_center(ipoint,2)) * (P_center(2) - C_center(ipoint,2))&
                     + (P_center(3) - C_center(ipoint,3)) * (P_center(3) - C_center(ipoint,3))
       const = cons_tmp * dist_integral
-  
+
       do i = 0, n_pt_in
         d(i) = 0.d0
       enddo
       !TODO: VECTORIZE HERE
       call give_polynomial_mult_center_one_e_erf_opt(A1_center, A2_center, power_A1, power_A2, C_center(ipoint,1:3), n_pt_in, d, n_pt_out, p_inv_2, p_new2, P_center)
-  
+
       if(n_pt_out < 0) then
         cycle
       endif
-  
+
       ! sum of integrals of type : int {t,[0,1]}  exp-(rho.(P-Q)^2 * t^2) * t^i
       accu = 0.d0
       do i = 0, n_pt_out, 2
         accu += d(i) * rint(i/2, const)
       enddo
-  
+
       res_v(ipoint) = accu * coeff
     enddo
 
@@ -791,4 +791,5 @@ subroutine give_polynomial_mult_center_one_e_erf(A_center,B_center,alpha,beta,po
   enddo
 
 end
+
 

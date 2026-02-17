@@ -1,6 +1,6 @@
 
- BEGIN_PROVIDER[double precision, mos_l_in_r_array_transp, (n_points_final_grid, mo_num)]
-&BEGIN_PROVIDER[double precision, mos_r_in_r_array_transp, (n_points_final_grid, mo_num)]
+ BEGIN_PROVIDER [double precision, mos_l_in_r_array_transp, (n_points_final_grid, mo_num)]
+&BEGIN_PROVIDER [double precision, mos_r_in_r_array_transp, (n_points_final_grid, mo_num)]
 
   BEGIN_DOC
   !
@@ -31,7 +31,7 @@
 
   !$OMP PARALLEL       &
   !$OMP DEFAULT (NONE) &
-  !$OMP PRIVATE (i, r) & 
+  !$OMP PRIVATE (i, r) &
   !$OMP SHARED(n_points_final_grid, final_grid_points, aos_r)
   !$OMP DO
   do i = 1, n_points_final_grid
@@ -69,4 +69,5 @@
 END_PROVIDER
 
 ! ---
+
 

@@ -10,7 +10,7 @@ BEGIN_PROVIDER [ integer, n_pts_charge  ]
   logical                        :: has
   PROVIDE ezfio_filename
   if (mpi_master) then
-    
+
     call ezfio_has_nuclei_n_pts_charge(has)
     if (has) then
       write(6,'(A)') '.. >>>>> [ IO READ: n_pts_charge ] <<<<< ..'
@@ -40,7 +40,7 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, pts_charge_z, (n_pts_charge) ]
 
   BEGIN_DOC
-  ! Charge associated to each point charge. 
+  ! Charge associated to each point charge.
   END_DOC
 
   implicit none
@@ -80,7 +80,7 @@ BEGIN_PROVIDER [ double precision, pts_charge_z, (n_pts_charge) ]
     endif
 
   else
- 
+
     integer :: i
     do i = 1, n_pts_charge
       pts_charge_z(i) = 0.d0
@@ -95,10 +95,10 @@ BEGIN_PROVIDER [ double precision, pts_charge_z, (n_pts_charge) ]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, pts_charge_coord, (n_pts_charge,3) ]
+BEGIN_PROVIDER [ double precision, pts_charge_coord, (n_pts_charge, 3) ]
 
   BEGIN_DOC
-  ! Coordinates of each point charge. 
+  ! Coordinates of each point charge.
   END_DOC
 
   implicit none
@@ -147,7 +147,7 @@ BEGIN_PROVIDER [ double precision, pts_charge_coord, (n_pts_charge,3) ]
     endif
 
   else
- 
+
     do i = 1, n_pts_charge
       pts_charge_coord(i,:) = 0.d0
     enddo
@@ -164,7 +164,7 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, pt_chrg_interaction]
  implicit none
  BEGIN_DOC
- ! Interaction between the point charges 
+ ! Interaction between the point charges
  END_DOC
  integer :: i,j
  double precision               :: Z_A, z_B,A_center(3), B_center(3), dist
@@ -182,7 +182,7 @@ BEGIN_PROVIDER [ double precision, pt_chrg_interaction]
  enddo
  print*,'Interaction between the point charges '
  print*,'pt_chrg_interaction = ',pt_chrg_interaction
-END_PROVIDER 
+END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, pt_chrg_nuclei_interaction]
  implicit none
@@ -208,5 +208,6 @@ BEGIN_PROVIDER [ double precision, pt_chrg_nuclei_interaction]
  if(point_charges)then
   provide pt_chrg_interaction
  endif
-END_PROVIDER 
+END_PROVIDER
+
 

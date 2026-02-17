@@ -1,7 +1,7 @@
 double precision function primitive_value_explicit(power_prim,center_prim,alpha,r)
  implicit none
  BEGIN_DOC
-! Evaluates at "r" a primitive of type : 
+! Evaluates at "r" a primitive of type :
 ! (x - center_prim(1))**power_prim(1)  (y - center_prim(2))**power_prim(2) * (z - center_prim(3))**power_prim(3)
 !
 ! exp(-alpha * [(x - center_prim(1))**2 + (y - center_prim(2))**2 + (z - center_prim(3))**2] )
@@ -34,9 +34,10 @@ double precision function give_pol_in_r(r,pol,center, alpha,iorder, max_dim)
  do m = 1, 3
   x = r(m) - center(m)
   do i = 0, iorder(m)
-   gauss(m) += pol(i,m) * dexp(-alpha *x*x ) * x**i 
+   gauss(m) += pol(i,m) * dexp(-alpha *x*x ) * x**i
   enddo
  enddo
  give_pol_in_r = gauss(1) * gauss(2) * gauss(3)
 
 end
+

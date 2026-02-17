@@ -1,7 +1,7 @@
 
 BEGIN_PROVIDER [double precision, cholesky_no_1_idx_transp, (cholesky_mo_num, n_act_orb, mo_num)]
  BEGIN_DOC
- ! Cholesky vectors with ONE orbital on the active natural orbital basis 
+ ! Cholesky vectors with ONE orbital on the active natural orbital basis
  END_DOC
  implicit none
  integer :: i_chol,i_act,i_mo,jj_act
@@ -28,11 +28,11 @@ BEGIN_PROVIDER [double precision, cholesky_no_1_idx_transp, (cholesky_mo_num, n_
  call wall_time(wall1)
  print*,'Time to provide cholesky_no_1_idx_transp = ', wall1 - wall0
 
-END_PROVIDER 
+END_PROVIDER
 
 BEGIN_PROVIDER [double precision, cholesky_no_2_idx_transp, (cholesky_mo_num, n_act_orb, n_act_orb)]
  BEGIN_DOC
- ! Cholesky vectors with TWO orbital on the active natural orbital basis 
+ ! Cholesky vectors with TWO orbital on the active natural orbital basis
  END_DOC
  implicit none
  integer :: i_chol,i_act,j_act,jj_act
@@ -59,7 +59,7 @@ BEGIN_PROVIDER [double precision, cholesky_no_2_idx_transp, (cholesky_mo_num, n_
  call wall_time(wall1)
  print*,'Time to provide  cholesky_no_2_idx_transp = ', wall1 - wall0
 
-END_PROVIDER 
+END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, cholesky_no_total_transp, (cholesky_mo_num, mo_num, mo_num)]
  implicit none
@@ -71,7 +71,7 @@ BEGIN_PROVIDER [ double precision, cholesky_no_total_transp, (cholesky_mo_num, m
  double precision :: wall0,wall1
  call wall_time(wall0)
  print*,'Providing cholesky_no_total_transp '
- ! Block when two orbitals belong to the core/inact 
+ ! Block when two orbitals belong to the core/inact
  do j_core_inact = 1, n_core_inact_orb
   jj_core_inact = list_core_inact(j_core_inact)
   do i_core_inact = 1, n_core_inact_orb
@@ -87,7 +87,7 @@ BEGIN_PROVIDER [ double precision, cholesky_no_total_transp, (cholesky_mo_num, m
   jj_core_inact = list_core_inact(j_core_inact)
   do i_act = 1, n_act_orb
    ii_act = list_act(i_act)
-   do i_chol = 1, cholesky_mo_num 
+   do i_chol = 1, cholesky_mo_num
     cholesky_no_total_transp(i_chol,ii_act,j_core_inact) = cholesky_no_1_idx_transp(i_chol,i_act,jj_core_inact)
    enddo
   enddo
@@ -96,24 +96,24 @@ BEGIN_PROVIDER [ double precision, cholesky_no_total_transp, (cholesky_mo_num, m
   jj_core_inact = list_core_inact(j_core_inact)
   do i_act = 1, n_act_orb
    ii_act = list_act(i_act)
-   do i_chol = 1, cholesky_mo_num 
+   do i_chol = 1, cholesky_mo_num
     cholesky_no_total_transp(i_chol,j_core_inact,ii_act) = cholesky_no_1_idx_transp(i_chol,i_act,jj_core_inact)
    enddo
   enddo
  enddo
- 
- ! Block when two orbitals belong to the active 
+
+ ! Block when two orbitals belong to the active
  do j_act = 1, n_act_orb
   jj_act = list_act(j_act)
   do i_act = 1, n_act_orb
    ii_act = list_act(i_act)
-   do i_chol = 1, cholesky_mo_num 
+   do i_chol = 1, cholesky_mo_num
     cholesky_no_total_transp(i_chol,ii_act,jj_act) = cholesky_no_2_idx_transp(i_chol,i_act,j_act)
    enddo
   enddo
  enddo
 
- ! Block when two orbitals belong to the virtuals 
+ ! Block when two orbitals belong to the virtuals
  do i_virt = 1, n_virt_orb
   ii_virt = list_virt(i_virt)
   do j_virt = 1, n_virt_orb
@@ -123,8 +123,8 @@ BEGIN_PROVIDER [ double precision, cholesky_no_total_transp, (cholesky_mo_num, m
    enddo
   enddo
  enddo
- 
- ! Block when one orbital is in active and the other in the virtuals 
+
+ ! Block when one orbital is in active and the other in the virtuals
  do i_virt = 1, n_virt_orb
   ii_virt = list_virt(i_virt)
   do i_act = 1, n_act_orb
@@ -143,7 +143,7 @@ BEGIN_PROVIDER [ double precision, cholesky_no_total_transp, (cholesky_mo_num, m
    enddo
   enddo
  enddo
- ! Block when one orbital is in the virtual and one in the core-inact 
+ ! Block when one orbital is in the virtual and one in the core-inact
  do i_virt = 1, n_virt_orb
   ii_virt = list_virt(i_virt)
   do i_core_inact = 1, n_core_inact_orb
@@ -165,7 +165,7 @@ BEGIN_PROVIDER [ double precision, cholesky_no_total_transp, (cholesky_mo_num, m
 
  call wall_time(wall1)
  print*,'Time to provide cholesky_no_total_transp = ', wall1 - wall0
-END_PROVIDER 
+END_PROVIDER
 
 
 double precision function bielec_no_basis(i_1,j_1,i_2,j_2)
@@ -173,9 +173,9 @@ double precision function bielec_no_basis(i_1,j_1,i_2,j_2)
  integer, intent(in) :: i_1,j_1,i_2,j_2
   BEGIN_DOC
   ! integral (i_1 j_1|i_2 j_2) in the mixed basis of both MOs and natural MOs
-  ! 
+  !
   END_DOC
-  integer :: i 
+  integer :: i
  bielec_no_basis = 0.d0
  do i = 1, cholesky_mo_num
   bielec_no_basis += cholesky_no_total_transp(i,i_1, j_1) * cholesky_no_total_transp(i,i_2,j_2)
@@ -185,8 +185,8 @@ end
 double precision function bielec_PQxx_no(i_mo, j_mo, i_ca, j_ca)
  implicit none
  BEGIN_DOC
- ! function that computes (i_mo j_mo| i_ca j_ca) with Cholesky decomposition  on the NO basis for active orbitals 
- ! 
+ ! function that computes (i_mo j_mo| i_ca j_ca) with Cholesky decomposition  on the NO basis for active orbitals
+ !
  ! where i_ca, j_ca are in [1:n_core_inact_act_orb]
  END_DOC
  integer, intent(in) :: i_ca, j_ca, i_mo, j_mo
@@ -203,10 +203,10 @@ double precision function bielec_PQxx_no(i_mo, j_mo, i_ca, j_ca)
 end
 
 double precision function bielec_PxxQ_no(i_mo, j_ca, i_ca, j_mo)
- implicit none 
+ implicit none
   BEGIN_DOC
-  ! function that computes (i_mo j_ca |i_ca j_mo) with Cholesky decomposition  on the NO basis for active orbitals 
-  ! 
+  ! function that computes (i_mo j_ca |i_ca j_mo) with Cholesky decomposition  on the NO basis for active orbitals
+  !
   ! where i_ca, j_ca are in [1:n_core_inact_act_orb]
   END_DOC
  integer, intent(in) :: i_ca, j_ca, i_mo, j_mo
@@ -226,13 +226,13 @@ end
 
 double precision function bielec_PQxx(i_mo, j_mo, i_ca, j_ca)
   BEGIN_DOC
-  ! function that computes (i_mo j_mo |i_ca j_ca) with Cholesky decomposition 
-  ! 
+  ! function that computes (i_mo j_mo |i_ca j_ca) with Cholesky decomposition
+  !
   ! indices are unshifted orbital numbers
-  ! 
+  !
   ! where i_ca, j_ca are in [1:n_core_inact_act_orb]
   END_DOC
- implicit none 
+ implicit none
  integer, intent(in) :: i_ca, j_ca, j_mo, i_mo
  double precision :: mo_two_e_integral
  integer :: ii_ca, jj_ca
@@ -243,8 +243,8 @@ end
 
 double precision function bielec_PxxQ(i_mo, i_ca, j_ca, j_mo)
   BEGIN_DOC
-  ! function that computes (i_mo j_mo |i_ca j_ca) with Cholesky decomposition 
-  ! 
+  ! function that computes (i_mo j_mo |i_ca j_ca) with Cholesky decomposition
+  !
   ! where i_ca, j_ca are in [1:n_core_inact_act_orb]
   END_DOC
  implicit none
@@ -255,4 +255,5 @@ double precision function bielec_PxxQ(i_mo, i_ca, j_ca, j_mo)
  jj_ca = list_core_inact_act(j_ca)
  bielec_PxxQ = mo_two_e_integral(i_mo,jj_ca,ii_ca,j_mo)
 end
+
 

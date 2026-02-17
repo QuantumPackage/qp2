@@ -1,6 +1,6 @@
- BEGIN_PROVIDER [double precision, mo_dipole_x , (mo_num,mo_num)]
-&BEGIN_PROVIDER [double precision, mo_dipole_y , (mo_num,mo_num)]
-&BEGIN_PROVIDER [double precision, mo_dipole_z , (mo_num,mo_num)]
+ BEGIN_PROVIDER [double precision, mo_dipole_x , (mo_num, mo_num)]
+&BEGIN_PROVIDER [double precision, mo_dipole_y , (mo_num, mo_num)]
+&BEGIN_PROVIDER [double precision, mo_dipole_z , (mo_num, mo_num)]
  BEGIN_DOC
  ! array of the integrals of MO_i * x MO_j
  ! array of the integrals of MO_i * y MO_j
@@ -29,9 +29,9 @@
 
 END_PROVIDER
 
- BEGIN_PROVIDER [double precision, mo_spread_x , (mo_num,mo_num)]
-&BEGIN_PROVIDER [double precision, mo_spread_y , (mo_num,mo_num)]
-&BEGIN_PROVIDER [double precision, mo_spread_z , (mo_num,mo_num)]
+ BEGIN_PROVIDER [double precision, mo_spread_x , (mo_num, mo_num)]
+&BEGIN_PROVIDER [double precision, mo_spread_y , (mo_num, mo_num)]
+&BEGIN_PROVIDER [double precision, mo_spread_z , (mo_num, mo_num)]
  BEGIN_DOC
  ! array of the integrals of MO_i * x^2 MO_j
  ! array of the integrals of MO_i * y^2 MO_j
@@ -76,3 +76,4 @@ END_PROVIDER
   enddo
  enddo
 END_PROVIDER
+

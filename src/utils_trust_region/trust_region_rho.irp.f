@@ -4,7 +4,7 @@
 
 ! Rho represents the agreement between the model (the predicted energy
 ! by the Taylor expansion truncated at the 2nd order) and the real
-! energy : 
+! energy :
 
 ! \begin{equation}
 ! \rho^{k+1} = \frac{E^{k} - E^{k+1}}{E^{k} - m^{k+1}}
@@ -16,7 +16,7 @@
 ! (cf. trust_e_model)
 
 ! If $\rho \approx 1$, the agreement is good, contrary to $\rho \approx 0$.
-! If $\rho \leq 0$ the previous energy is lower than the actual 
+! If $\rho \leq 0$ the previous energy is lower than the actual
 ! energy. We have to cancel the last step and use a smaller trust
 ! region.
 ! Here we cancel the last step if $\rho < 0.1$, because even if
@@ -52,13 +52,13 @@ subroutine trust_region_rho(prev_energy, energy,e_model,rho)
   !END_DOC
 
   implicit none
-   
+
   ! Variables
 
   ! In
   double precision, intent(inout) :: prev_energy
   double precision, intent(in)    :: e_model, energy
-  
+
   ! Out
   double precision, intent(out)   :: rho
 
@@ -68,7 +68,7 @@ subroutine trust_region_rho(prev_energy, energy,e_model,rho)
 
   print*,''
   print*,'---Rho_model---'
-  
+
   !call wall_time(t1)
 
 ! Rho
@@ -80,7 +80,7 @@ subroutine trust_region_rho(prev_energy, energy,e_model,rho)
 
 ! If we cancel the last step (k+1), the previous energy (k) doesn't
 ! change!
-! If the step (k+1) is accepted, then the "previous energy" becomes E(k+1) 
+! If the step (k+1) is accepted, then the "previous energy" becomes E(k+1)
 
 
 ! Already done in an other subroutine
@@ -102,9 +102,9 @@ subroutine trust_region_rho(prev_energy, energy,e_model,rho)
 
   ! Modification of prev_energy in function of rho
   if (rho < thresh_rho) then !0.1) then
-    ! the step is cancelled  
+    ! the step is cancelled
     print*, 'Rho <', thresh_rho,', the previous energy does not changed'
-    !print*, 'prev_energy :', prev_energy  
+    !print*, 'prev_energy :', prev_energy
   else
     ! the step is accepted
     prev_energy = energy
@@ -118,3 +118,4 @@ subroutine trust_region_rho(prev_energy, energy,e_model,rho)
   print*,'---End rho_model---'
 
 end subroutine
+

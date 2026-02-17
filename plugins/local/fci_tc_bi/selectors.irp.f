@@ -21,9 +21,9 @@ BEGIN_PROVIDER [ integer, N_det_selectors]
   call write_int(6,N_det_selectors,'Number of selectors')
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_selectors, (N_int,2,psi_selectors_size) ]
-&BEGIN_PROVIDER [ double precision, psi_selectors_coef, (psi_selectors_size,N_states) ]
-&BEGIN_PROVIDER [ double precision, psi_selectors_coef_tc, (psi_selectors_size,2,N_states) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_selectors, (N_int, 2, psi_selectors_size) ]
+&BEGIN_PROVIDER [ double precision, psi_selectors_coef, (psi_selectors_size, N_states) ]
+&BEGIN_PROVIDER [ double precision, psi_selectors_coef_tc, (psi_selectors_size, 2, N_states) ]
   implicit none
   BEGIN_DOC
   ! Determinants on which we apply <i|H|psi> for perturbation.
@@ -48,8 +48,8 @@ END_PROVIDER
 
 END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, psi_selectors_coef_transp, (N_states,psi_selectors_size) ]
-&BEGIN_PROVIDER [ double precision, psi_selectors_coef_transp_tc, (N_states,2,psi_selectors_size) ]
+ BEGIN_PROVIDER [ double precision, psi_selectors_coef_transp, (N_states, psi_selectors_size) ]
+&BEGIN_PROVIDER [ double precision, psi_selectors_coef_transp_tc, (N_states, 2, psi_selectors_size) ]
   implicit none
   BEGIN_DOC
   ! Transposed psi_selectors
@@ -66,7 +66,11 @@ END_PROVIDER
 END_PROVIDER
 
 BEGIN_PROVIDER [ integer, psi_selectors_size ]
+  BEGIN_DOC
+  ! psi_selectors_size
+  END_DOC
  implicit none
  psi_selectors_size = psi_det_size
 END_PROVIDER
+
 

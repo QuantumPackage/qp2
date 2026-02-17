@@ -8,13 +8,13 @@
 ! Since the calculation of the step is based on the Newton method, an
 ! estimation of the gain in energy is given using the Taylors series
 ! truncated at the second order (criterion_model).
-! If (DABS(criterion-criterion_model) < 1d-12) then 
+! If (DABS(criterion-criterion_model) < 1d-12) then
 !   must_exit = .True.
-! else 
+! else
 !   must_exit = .False.
 
 ! This estimation of the gain in energy is used by
-! is_step_cancel_trust_region to say if the step is accepted or cancelled. 
+! is_step_cancel_trust_region to say if the step is accepted or cancelled.
 
 ! If the step must be cancelled, the calculation restart from the same
 ! hessian and gradient and recomputes the step but in a smaller trust
@@ -35,21 +35,21 @@
 !  call #your_criterion(prev_criterion)
 !
 !  do while (not_converged)
-!    ! ### TODO ## 
+!    ! ### TODO ##
 !    ! Call your gradient
 !    ! Call you hessian
 !    call #your_gradient(v_grad) (1D array)
-!    call #your_hessian(H) (2D array) 
+!    call #your_hessian(H) (2D array)
 !
 !    ! ### TODO ###
-!    ! Diagonalization of the hessian 
+!    ! Diagonalization of the hessian
 !    call diagonalization_hessian(n,H,e_val,w)
 !
-!    cancel_step = .True. ! To enter in the loop just after 
+!    cancel_step = .True. ! To enter in the loop just after
 !    ! Loop to Reduce the trust radius until the criterion decreases and rho >= thresh_rho
 !    do while (cancel_step)
 !
-!      ! Hessian,gradient,Criterion -> x 
+!      ! Hessian,gradient,Criterion -> x
 !      call trust_region_step_w_expected_e(tmp_n,W,e_val,v_grad,prev_criterion,rho,nb_iter,delta,criterion_model,tmp_x,must_exit)
 !
 !      if (must_exit) then
@@ -59,11 +59,11 @@
 !        !### exit ###
 !      endif
 !
-!      !### TODO ###  
+!      !### TODO ###
 !      ! Compute x -> m_x
 !      ! Compute m_x -> R
 !      ! Apply R and keep the previous MOs...
-!      ! Update/touch 
+!      ! Update/touch
 !      ! Compute the new criterion/energy -> criterion
 !
 !      call #your_routine_1D_to_2D_antisymmetric_array(x,m_x)
@@ -71,10 +71,10 @@
 !      call #your_routine_to_apply_the_rotation_matrix(R,prev_mos)
 !
 !      TOUCH #your_variables
-!      
+!
 !      call #your_criterion(criterion)
 !
-!      ! Criterion -> step accepted or rejected 
+!      ! Criterion -> step accepted or rejected
 !      call trust_region_is_step_cancelled(nb_iter,prev_criterion, criterion, criterion_model,rho,cancel_step)
 !
 !      !### TODO ###
@@ -92,7 +92,7 @@
 !    ! To exit the external loop if must_exit = .True.
 !    if (must_exit) then
 !      !### exit ###
-!    endif 
+!    endif
 !
 !    ! Step accepted, nb iteration + 1
 !    nb_iter = nb_iter + 1
@@ -159,7 +159,7 @@ subroutine trust_region_step_w_expected_e(n,n2,H,W,e_val,v_grad,prev_criterion,r
   integer :: info
 
   must_exit = .False.
-  
+
   call trust_region_step(n,n2,nb_iter,v_grad,rho,e_val,W,x,delta)
 
   call trust_region_expected_e(n,n2,v_grad,H,x,prev_criterion,criterion_model)
@@ -215,10 +215,10 @@ subroutine trust_region_is_step_cancelled(nb_iter,prev_criterion, criterion, cri
   !END_DOC
 
   implicit none
- 
+
   ! in
   double precision, intent(in)  :: prev_criterion, criterion, criterion_model
-  
+
   ! inout
   integer, intent(inout)        :: nb_iter
 
@@ -228,9 +228,9 @@ subroutine trust_region_is_step_cancelled(nb_iter,prev_criterion, criterion, cri
 
   ! Computes rho
   call trust_region_rho(prev_criterion,criterion,criterion_model,rho)
-  
+
   if (nb_iter == 0) then
-    nb_iter = 1 ! in order to enable the change of delta if the first iteration is cancelled  
+    nb_iter = 1 ! in order to enable the change of delta if the first iteration is cancelled
   endif
 
   ! If rho < thresh_rho -> give something in output to cancel the step
@@ -244,5 +244,6 @@ subroutine trust_region_is_step_cancelled(nb_iter,prev_criterion, criterion, cri
      print*, 'Step cancel : rho <', thresh_rho
      print*, '***********************'
   endif
-  
+
 end subroutine
+

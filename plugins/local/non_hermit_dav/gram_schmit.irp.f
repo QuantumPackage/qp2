@@ -1,19 +1,19 @@
 subroutine bi_ortho_gram_schmidt(wi,vi,n,ni,wk,wk_schmidt)
  implicit none
  BEGIN_DOC
-! you enter with a set of "ni" BI-ORTHONORMAL vectors of length "n" 
+! you enter with a set of "ni" BI-ORTHONORMAL vectors of length "n"
 !
 ! vi(j,i) = <j|vi>, wi(j,i) = <j|wi>, <vi|wj> = delta_{ij} S_ii, S_ii =<vi|wi>
 !
 ! and a vector vk(j) = <j|vk>
 !
-! you go out with a vector vk_schmidt(j) = <j|vk_schmidt> 
+! you go out with a vector vk_schmidt(j) = <j|vk_schmidt>
 !
 ! which is Gram-Schmidt orthonormalized with respect to the "vi"
 !
-! <vi|wk_schmidt> = 0 
+! <vi|wk_schmidt> = 0
 !
-! |wk_schmidt> = |wk> - \sum_{i=1}^ni (<vi|wk>/<vi|wi>) |wi> 
+! |wk_schmidt> = |wk> - \sum_{i=1}^ni (<vi|wk>/<vi|wi>) |wi>
 !
 ! according to Eq. (5), (6) of Computers Structures, Vol 56, No. 4, pp 605-613, 1995
 !
@@ -37,7 +37,7 @@ subroutine bi_ortho_gram_schmidt(wi,vi,n,ni,wk,wk_schmidt)
 ! print*,''
  do i = 1, ni
 !  print*,'i',i
-  ! Gram-Schmidt 
+  ! Gram-Schmidt
   vi_wk = u_dot_v(vi(1,i),wk,n)
   vi_wk = vi_wk / sii(i)
 !  print*,''
@@ -54,3 +54,4 @@ subroutine bi_ortho_gram_schmidt(wi,vi,n,ni,wk,wk_schmidt)
 ! enddo
 ! pause
 end
+

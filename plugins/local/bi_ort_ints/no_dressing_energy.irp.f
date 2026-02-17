@@ -2,6 +2,9 @@
 ! ---
 
 BEGIN_PROVIDER [double precision, energy_1e_noL_HF]
+  BEGIN_DOC
+  ! energy_1e_noL_HF
+  END_DOC
 
   implicit none
   integer :: i
@@ -23,6 +26,9 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [double precision, energy_2e_noL_HF]
+  BEGIN_DOC
+  ! energy_2e_noL_HF
+  END_DOC
 
   implicit none
   integer :: i, j
@@ -63,4 +69,5 @@ BEGIN_PROVIDER [double precision, energy_2e_noL_HF]
 END_PROVIDER
 
 ! ---
+
 

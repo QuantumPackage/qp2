@@ -1,15 +1,21 @@
   use bitmasks ! you need to include the bitmasks_module.f90 features
  BEGIN_PROVIDER [ double precision, e_tilde_00]
+  BEGIN_DOC
+  ! e_tilde_00
+  END_DOC
  implicit none
  double precision :: hmono,htwoe,hthree,htot
  call htilde_mu_mat_opt_bi_ortho(HF_bitmask,HF_bitmask,N_int,hmono,htwoe,hthree,htot)
  e_tilde_00 = htot
- END_PROVIDER 
+ END_PROVIDER
 
  BEGIN_PROVIDER [ double precision, e_pt2_tc_bi_orth]
 &BEGIN_PROVIDER [ double precision, e_pt2_tc_bi_orth_single]
 &BEGIN_PROVIDER [ double precision, e_pt2_tc_bi_orth_double]
- implicit none 
+  BEGIN_DOC
+  ! e_pt2_tc_bi_orth
+  END_DOC
+ implicit none
  integer :: i,degree
  double precision :: hmono,htwoe,hthree,htilde_ij,coef_pt1,e_i0,delta_e
  e_pt2_tc_bi_orth = 0.d0
@@ -26,19 +32,22 @@
    e_pt2_tc_bi_orth += coef_pt1 * htilde_ij
    if(degree == 1)then
     e_pt2_tc_bi_orth_single += coef_pt1 * htilde_ij
-   else 
+   else
     e_pt2_tc_bi_orth_double += coef_pt1 * htilde_ij
    endif
   endif
  enddo
- END_PROVIDER 
+ END_PROVIDER
 
  BEGIN_PROVIDER [ double precision, e_tilde_bi_orth_00]
+  BEGIN_DOC
+  ! e_tilde_bi_orth_00
+  END_DOC
  implicit none
  double precision :: hmono,htwoe,hthree,htilde_ij
  call htilde_mu_mat_opt_bi_ortho(HF_bitmask,HF_bitmask,N_int,hmono,htwoe,hthree,e_tilde_bi_orth_00)
  e_tilde_bi_orth_00 += nuclear_repulsion
- END_PROVIDER 
+ END_PROVIDER
 
  BEGIN_PROVIDER [ double precision, e_corr_bi_orth ]
 &BEGIN_PROVIDER [ double precision, e_corr_bi_orth_proj ]
@@ -47,10 +56,13 @@
 &BEGIN_PROVIDER [ double precision, e_corr_bi_orth_proj_abs ]
 &BEGIN_PROVIDER [ double precision, e_corr_single_bi_orth_abs ]
 &BEGIN_PROVIDER [ double precision, e_corr_double_bi_orth_abs ]
- implicit none 
+  BEGIN_DOC
+  ! e_corr_bi_orth
+  END_DOC
+ implicit none
  integer :: i,degree
  double precision :: hmono,htwoe,hthree,htilde_ij
- 
+
  e_corr_bi_orth = 0.d0
  e_corr_single_bi_orth = 0.d0
  e_corr_double_bi_orth = 0.d0
@@ -68,9 +80,12 @@
  e_corr_bi_orth_proj = e_corr_single_bi_orth + e_corr_double_bi_orth
  e_corr_bi_orth = eigval_right_tc_bi_orth(1) - e_tilde_bi_orth_00
  e_corr_bi_orth_proj_abs = e_corr_single_bi_orth_abs + e_corr_double_bi_orth_abs
- END_PROVIDER 
+ END_PROVIDER
 
  BEGIN_PROVIDER [ double precision, e_tc_left_right ]
+  BEGIN_DOC
+  ! e_tc_left_right
+  END_DOC
  implicit none
  integer :: i,j
  double precision :: hmono,htwoe,hthree,htilde_ij,accu
@@ -83,13 +98,16 @@
    e_tc_left_right += htilde_ij * reigvec_tc_bi_orth(i,1) * leigvec_tc_bi_orth(j,1)
   enddo
  enddo
- e_tc_left_right *= 1.d0/accu 
+ e_tc_left_right *= 1.d0/accu
  e_tc_left_right += nuclear_repulsion
 
- END_PROVIDER 
+ END_PROVIDER
 
 
 BEGIN_PROVIDER [ double precision, coef_pt1_bi_ortho, (N_det)]
+  BEGIN_DOC
+  ! coef_pt1_bi_ortho
+  END_DOC
  implicit none
  integer :: i,degree
  double precision :: hmono,htwoe,hthree,htilde_ij,coef_pt1,e_i0,delta_e
@@ -106,3 +124,4 @@ BEGIN_PROVIDER [ double precision, coef_pt1_bi_ortho, (N_det)]
   endif
  enddo
 END_PROVIDER
+

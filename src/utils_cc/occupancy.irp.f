@@ -10,9 +10,9 @@ subroutine extract_n_spin(det,n)
   END_DOC
 
   integer(bit_kind), intent(in) :: det(N_int,2)
-  
+
   integer, intent(out)          :: n(4)
-  
+
   integer(bit_kind)             :: res(N_int,2)
   integer                       :: i, si
   logical                       :: ok, is_core, is_del
@@ -24,12 +24,12 @@ subroutine extract_n_spin(det,n)
   do si = 1, 2
     do i = 1, mo_num
       call apply_hole(det, si, i, res, ok, N_int)
-      
+
       ! in core ?
       if (is_core(i)) cycle
       ! in del ?
       if (is_del(i)) cycle
-      
+
       if (ok) then
         ! particle
         n(si) = n(si) + 1
@@ -54,12 +54,12 @@ subroutine extract_list_orb_spin(det,nO_m,nV_m,list_occ,list_vir)
   ! Returns the the list of occupied alpha/beta, virtual alpha/beta spin orbitals
   ! size(nO_m,1) must be max(nOa,nOb) and size(nV_m,1) must be max(nVa,nVb)
   END_DOC
-  
+
   integer, intent(in)           :: nO_m, nV_m
   integer(bit_kind), intent(in) :: det(N_int,2)
-  
+
   integer, intent(out)          :: list_occ(nO_m,2), list_vir(nV_m,2)
-  
+
   integer(bit_kind)             :: res(N_int,2)
   integer                       :: i, si, idx_o, idx_v, idx_i, idx_b
   logical                       :: ok, is_core, is_del
@@ -74,7 +74,7 @@ subroutine extract_list_orb_spin(det,nO_m,nV_m,list_occ,list_vir)
   ! vir alpha -> list_vir(:,1)
   ! vir beta -> list_vir(:,2)
 
-  ! Loop over the spin 
+  ! Loop over the spin
   do si = 1, 2
     ! tmp idx
     idx_o = 1
@@ -86,7 +86,7 @@ subroutine extract_list_orb_spin(det,nO_m,nV_m,list_occ,list_vir)
       if (is_core(i)) cycle
       ! in del ?
       if (is_del(i)) cycle
-            
+
       if (ok) then
         ! particle
         list_occ(idx_o,si) = i
@@ -110,16 +110,16 @@ subroutine extract_list_orb_space(det,nO,nV,list_occ,list_vir)
   BEGIN_DOC
   ! Returns the the list of occupied and virtual alpha spin orbitals
   END_DOC
-  
+
   integer, intent(in)           :: nO, nV
   integer(bit_kind), intent(in) :: det(N_int,2)
-  
+
   integer, intent(out)          :: list_occ(nO), list_vir(nV)
-  
+
   integer(bit_kind)             :: res(N_int,2)
   integer                       :: i, si, idx_o, idx_v, idx_i, idx_b
   logical                       :: ok, is_core, is_del
-  
+
   if (elec_alpha_num /= elec_beta_num) then
     print*,'Error elec_alpha_num /= elec_beta_num, impossible to create cc_list_occ and cc_list_vir, abort'
     call abort
@@ -232,14 +232,14 @@ BEGIN_PROVIDER [integer, cc_nO_m]
   BEGIN_DOC
   ! Number of orbitals without core and deleted ones of the cc_ref det in psi_det
   ! a: alpha, b: beta
-  ! nO_m: max(a,b) occupied 
-  ! nOa: nb a occupied 
-  ! nOb: nb b occupied 
-  ! nOab: nb a+b occupied 
-  ! nV_m: max(a,b) virtual 
-  ! nVa: nb a virtual 
-  ! nVb: nb b virtual 
-  ! nVab: nb a+b virtual 
+  ! nO_m: max(a,b) occupied
+  ! nOa: nb a occupied
+  ! nOb: nb b occupied
+  ! nOab: nb a+b occupied
+  ! nV_m: max(a,b) virtual
+  ! nVa: nb a virtual
+  ! nVb: nb b virtual
+  ! nVab: nb a+b virtual
   END_DOC
 
   integer :: n_spin(4)
@@ -273,7 +273,7 @@ BEGIN_PROVIDER [integer, cc_list_gen, (cc_n_mo)]
 
   integer :: i,j
   logical :: is_core, is_del
-  
+
   j = 1
   do i = 1, mo_num
     ! in core ?
@@ -303,8 +303,8 @@ END_PROVIDER
 
 ! Spin
 
-BEGIN_PROVIDER [integer, cc_list_occ_spin, (cc_nO_m,2)]
-&BEGIN_PROVIDER [integer, cc_list_vir_spin, (cc_nV_m,2)]
+BEGIN_PROVIDER [integer, cc_list_occ_spin, (cc_nO_m, 2)]
+&BEGIN_PROVIDER [integer, cc_list_vir_spin, (cc_nV_m, 2)]
 &BEGIN_PROVIDER [logical, cc_ref_is_open_shell]
 
   implicit none
@@ -326,3 +326,4 @@ BEGIN_PROVIDER [integer, cc_list_occ_spin, (cc_nO_m,2)]
 
 
 END_PROVIDER
+

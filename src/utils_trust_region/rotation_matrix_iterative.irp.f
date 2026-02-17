@@ -14,15 +14,15 @@ subroutine rotation_matrix_iterative(m,X,R)
   ! in
   integer, intent(in) :: m
   double precision, intent(in) :: X(m,m)
-  
+
   ! out
   double precision, intent(out) :: R(m,m)
- 
+
   ! internal
   double precision :: max_elem, pre_factor
   double precision :: t1,t2,t3
   integer :: k,l,i,j
-  logical :: not_converged 
+  logical :: not_converged
   double precision, allocatable :: RRT(:,:), A(:,:), B(:,:)
 
   ! Functions
@@ -38,15 +38,15 @@ subroutine rotation_matrix_iterative(m,X,R)
   do i = 1, m
     R(i,i) = 1d0
   enddo
- 
+
   ! k = 1
   R = R + X
-  
+
   k = 2
 
   not_converged = .True.
- 
-  do while (not_converged) 
+
+  do while (not_converged)
 
     pre_factor = 1d0/DBLE(factorial(k))
     if (pre_factor < 1d-15) then
@@ -96,7 +96,7 @@ subroutine rotation_matrix_iterative(m,X,R)
 
     print*, 'Iteration:', k
     print*, 'Max error in R:', max_elem
-  
+
     if (max_elem < 1d-12) then
       not_converged = .False.
     endif
@@ -130,5 +130,6 @@ function factorial(n)
   do k = 1, n
     factorial = factorial * k
   enddo
-  
+
 end
+

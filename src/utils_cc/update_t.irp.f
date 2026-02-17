@@ -22,7 +22,7 @@ subroutine update_t1(nO,nV,f_o,f_v,r1,t1)
   !$OMP SHARED(nO,nV,t1,r1,cc_level_shift,f_o,f_v) &
   !$OMP PRIVATE(i,a) &
   !$OMP DEFAULT(NONE)
-  !$OMP DO 
+  !$OMP DO
   do a = 1, nV
     do i = 1, nO
       t1(i,a) = t1(i,a) - r1(i,a) / (f_o(i) - f_v(a) - cc_level_shift)
@@ -30,7 +30,7 @@ subroutine update_t1(nO,nV,f_o,f_v,r1,t1)
   enddo
   !$OMP END DO
   !$OMP END PARALLEL
-  
+
 end
 
 ! T2
@@ -57,7 +57,7 @@ subroutine update_t2(nO,nV,f_o,f_v,r2,t2)
   !$OMP SHARED(nO,nV,t2,r2,cc_level_shift,f_o,f_v) &
   !$OMP PRIVATE(i,j,a,b) &
   !$OMP DEFAULT(NONE)
-  !$OMP DO 
+  !$OMP DO
   do b = 1, nV
     do a = 1, nV
       do j = 1, nO
@@ -69,5 +69,6 @@ subroutine update_t2(nO,nV,f_o,f_v,r2,t2)
   enddo
   !$OMP END DO
   !$OMP END PARALLEL
-  
+
 end
+

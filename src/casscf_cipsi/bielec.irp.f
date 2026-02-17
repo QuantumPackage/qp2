@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [real*8, bielec_PQxx_array, (mo_num, mo_num,n_core_inact_act_orb,n_core_inact_act_orb)]
+BEGIN_PROVIDER [real*8, bielec_PQxx_array, (mo_num, mo_num, n_core_inact_act_orb, n_core_inact_act_orb)]
   BEGIN_DOC
   ! WARNING !!! Old version !!! NOT USED ANYMORE IN THE PROGRAM !!! TOO BIG TO BE STORED ON LARGE SYSTEMS !!!
   !
@@ -59,7 +59,7 @@ END_PROVIDER
 
 
 
-BEGIN_PROVIDER [real*8, bielec_PxxQ_array, (mo_num,n_core_inact_act_orb,n_core_inact_act_orb, mo_num)]
+BEGIN_PROVIDER [real*8, bielec_PxxQ_array, (mo_num, n_core_inact_act_orb, n_core_inact_act_orb, mo_num)]
   BEGIN_DOC
   ! WARNING !!! Old version !!! NOT USED ANYMORE IN THE PROGRAM !!! TOO BIG TO BE STORED ON LARGE SYSTEMS !!!
   !
@@ -139,7 +139,7 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ_array, (mo_num,n_core_inact_act_orb,n_core_i
 END_PROVIDER
 
 
-BEGIN_PROVIDER [real*8, bielecCI, (n_act_orb,n_act_orb,n_act_orb, mo_num)]
+BEGIN_PROVIDER [real*8, bielecCI, (n_act_orb, n_act_orb, n_act_orb, mo_num)]
   BEGIN_DOC
   ! bielecCI : integrals (tu|vp) with p arbitrary, tuv active
   ! index p runs over the whole basis, t,u,v only over the active orbitals
@@ -174,3 +174,4 @@ BEGIN_PROVIDER [real*8, bielecCI, (n_act_orb,n_act_orb,n_act_orb, mo_num)]
   print*,'Time to provide bielecCI = ',wall1 - wall0
 
 END_PROVIDER
+

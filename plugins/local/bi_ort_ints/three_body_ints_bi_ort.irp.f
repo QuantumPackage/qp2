@@ -78,7 +78,7 @@ subroutine give_integrals_3_body_bi_ort_spin( n, sigma_n, l, sigma_l, k, sigma_k
   BEGIN_DOC
   !
   ! < n l k | L | m j i > with a BI-ORTHONORMAL SPIN-ORBITALS
-  ! 
+  !
   ! /!\ L is defined without the 1/6 factor
   !
   END_DOC
@@ -248,3 +248,4 @@ subroutine give_integrals_3_body_bi_ort_ao(n, l, k, m, j, i, integral)
 end subroutine give_integrals_3_body_bi_ort_ao
 
 ! ---
+

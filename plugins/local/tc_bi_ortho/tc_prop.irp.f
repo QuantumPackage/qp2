@@ -1,6 +1,6 @@
 
- BEGIN_PROVIDER [ double precision, tc_transition_matrix_mo_beta, (mo_num, mo_num,N_states,N_states) ]
-&BEGIN_PROVIDER [ double precision, tc_transition_matrix_mo_alpha, (mo_num, mo_num,N_states,N_states) ]
+ BEGIN_PROVIDER [ double precision, tc_transition_matrix_mo_beta, (mo_num, mo_num, N_states, N_states) ]
+&BEGIN_PROVIDER [ double precision, tc_transition_matrix_mo_alpha, (mo_num, mo_num, N_states, N_states) ]
  implicit none
  BEGIN_DOC
  ! tc_transition_matrix_mo_alpha(p,h,istate,jstate) = <Chi_istate| a^\dagger_p,alpha a_h,alpha |Phi_jstate>
@@ -36,14 +36,14 @@
         call get_single_excitation(psi_det(1,1,j),psi_det(1,1,i),exc,phase,N_int)
         if (exc(0,1,1) == 1) then
           ! Single alpha
-          h = exc(1,1,1) ! hole in psi_det(1,1,j) 
-          p = exc(1,2,1) ! particle in psi_det(1,1,j) 
+          h = exc(1,1,1) ! hole in psi_det(1,1,j)
+          p = exc(1,2,1) ! particle in psi_det(1,1,j)
           tc_transition_matrix_mo_alpha(p,h,istate,jstate)+= &
           phase * psi_l_coef_bi_ortho(i,istate) * psi_r_coef_bi_ortho(j,jstate)
         else
           ! Single beta
-          h = exc(1,1,2) ! hole in psi_det(1,1,j) 
-          p = exc(1,2,2) ! particle in psi_det(1,1,j) 
+          h = exc(1,1,2) ! hole in psi_det(1,1,j)
+          p = exc(1,2,2) ! particle in psi_det(1,1,j)
           tc_transition_matrix_mo_beta(p,h,istate,jstate)+=  &
           phase * psi_l_coef_bi_ortho(i,istate) * psi_r_coef_bi_ortho(j,jstate)
         endif
@@ -54,7 +54,7 @@
  enddo
  END_PROVIDER
 
- BEGIN_PROVIDER [double precision, tc_transition_matrix_mo, (mo_num, mo_num,N_states,N_states) ]
+ BEGIN_PROVIDER [double precision, tc_transition_matrix_mo, (mo_num, mo_num, N_states, N_states) ]
  implicit none
  BEGIN_DOC
  ! tc_transition_matrix_mo(p,h,istate,jstate) = \sum_{sigma=alpha,beta} <Chi_istate| a^\dagger_p,sigma a_h,sigma |Phi_jstate>
@@ -62,21 +62,24 @@
  ! where <Chi_istate| and |Phi_jstate> are the left/right eigenvectors on a bi-ortho basis
  END_DOC
  tc_transition_matrix_mo = tc_transition_matrix_mo_beta + tc_transition_matrix_mo_alpha
- END_PROVIDER 
- 
+ END_PROVIDER
 
- BEGIN_PROVIDER [double precision, tc_spin_transition_matrix_mo, (mo_num, mo_num,N_states,N_states) ]
+
+ BEGIN_PROVIDER [double precision, tc_spin_transition_matrix_mo, (mo_num, mo_num, N_states, N_states) ]
  implicit none
  BEGIN_DOC
  ! tc_spin_transition_matrix_mo = tc_transition_matrix_mo_alpha - tc_transition_matrix_mo_beta
  !
  ! where <Chi_istate| and |Phi_jstate> are the left/right eigenvectors on a bi-ortho basis
  END_DOC
- tc_spin_transition_matrix_mo = tc_transition_matrix_mo_alpha - tc_transition_matrix_mo_beta 
- END_PROVIDER 
+ tc_spin_transition_matrix_mo = tc_transition_matrix_mo_alpha - tc_transition_matrix_mo_beta
+ END_PROVIDER
 
 
- BEGIN_PROVIDER [double precision, tc_bi_ortho_dipole, (3,N_states)]
+ BEGIN_PROVIDER [double precision, tc_bi_ortho_dipole, (3, N_states)]
+  BEGIN_DOC
+  ! tc_bi_ortho_dipole
+  END_DOC
  implicit none
  integer :: i,j,istate,m
  double precision :: nuclei_part(3)
@@ -107,11 +110,11 @@
  END_PROVIDER
 
 
- BEGIN_PROVIDER [ double precision, tc_transition_matrix_ao, (ao_num, ao_num,N_states,N_states) ]
+ BEGIN_PROVIDER [ double precision, tc_transition_matrix_ao, (ao_num, ao_num, N_states, N_states) ]
  implicit none
- BEGIN_DOC 
-! tc_transition_matrix(p,h,istate,jstate) in the AO basis  
- END_DOC 
+ BEGIN_DOC
+! tc_transition_matrix(p,h,istate,jstate) in the AO basis
+ END_DOC
  integer :: i,j,k,l
  double precision :: dm_mo
  tc_transition_matrix_ao = 0.d0
@@ -130,14 +133,14 @@
     enddo
   enddo
  enddo
- 
- END_PROVIDER 
 
- BEGIN_PROVIDER [ double precision, tc_spin_transition_matrix_ao, (ao_num, ao_num,N_states,N_states) ]
+ END_PROVIDER
+
+ BEGIN_PROVIDER [ double precision, tc_spin_transition_matrix_ao, (ao_num, ao_num, N_states, N_states) ]
  implicit none
- BEGIN_DOC 
-! tc_spin_transition_matrix_ao(p,h,istate,jstate) in the AO basis  
- END_DOC 
+ BEGIN_DOC
+! tc_spin_transition_matrix_ao(p,h,istate,jstate) in the AO basis
+ END_DOC
  integer :: i,j,k,l
  double precision :: dm_mo
  tc_spin_transition_matrix_ao = 0.d0
@@ -156,5 +159,6 @@
     enddo
   enddo
  enddo
- 
- END_PROVIDER 
+
+ END_PROVIDER
+

@@ -5,13 +5,13 @@
 
 ! \begin{align*}
 ! H_{pq,rs} &= \dfrac{\partial^2 E(x)}{\partial x_{pq}^2} \\
-!   &= \mathcal{P}_{pq} \mathcal{P}_{rs} [ \frac{1}{2} \sum_u [\delta_{qr}(h_p^u \gamma_u^s + h_u^s \gamma_p^u) 
+!   &= \mathcal{P}_{pq} \mathcal{P}_{rs} [ \frac{1}{2} \sum_u [\delta_{qr}(h_p^u \gamma_u^s + h_u^s \gamma_p^u)
 !   + \delta_{ps}(h_r^u \gamma_u^q + h_u^q \gamma_r^u)]
 !   -(h_p^s \gamma_r^q + h_r^q \gamma_p^s) \\
 !   &+ \frac{1}{2} \sum_{tuv} [\delta_{qr}(v_{pt}^{uv} \Gamma_{uv}^{st} + v_{uv}^{st} \Gamma_{pt}^{uv})
 !   + \delta_{ps}(v_{uv}^{qt} \Gamma_{rt}^{uv} + v_{rt}^{uv}\Gamma_{uv}^{qt})] \\
-!   &+ \sum_{uv} (v_{pr}^{uv} \Gamma_{uv}^{qs} + v_{uv}^{qs}  \Gamma_{pr}^{uv}) 
-!   - \sum_{tu} (v_{pu}^{st} \Gamma_{rt}^{qu}+v_{pu}^{tr} \Gamma_{tr}^{qu}+v_{rt}^{qu}\Gamma_{pu}^{st} + v_{tr}^{qu}\Gamma_{pu}^{ts}) 
+!   &+ \sum_{uv} (v_{pr}^{uv} \Gamma_{uv}^{qs} + v_{uv}^{qs}  \Gamma_{pr}^{uv})
+!   - \sum_{tu} (v_{pu}^{st} \Gamma_{rt}^{qu}+v_{pu}^{tr} \Gamma_{tr}^{qu}+v_{rt}^{qu}\Gamma_{pu}^{st} + v_{tr}^{qu}\Gamma_{pu}^{ts})
 ! \end{align*}
 ! With pq a permutation operator :
 
@@ -41,10 +41,10 @@
 
 ! The hessian is (p,q,r,s), so the diagonal terms are (p,q,p,q). But
 ! with the permutations : p <-> q, r <-> s, p <-> q and r <-> s, we have
-! a diagonal term, if : 
-! p = r and q = s, => (p,q,p,q)  
+! a diagonal term, if :
+! p = r and q = s, => (p,q,p,q)
 ! or
-! q = r and p = s, => (p,q,q,p) 
+! q = r and p = s, => (p,q,q,p)
 
 ! For that reason, we will use 2D temporary arrays to store the
 ! elements. One for the terms (p,q,p,q) and an other for the terms of
@@ -95,21 +95,21 @@
 
 
 subroutine diag_hessian_opt(n,H)!, h_tmpr)
- 
+
   use omp_lib
-  
-  include 'constants.h' 
+
+  include 'constants.h'
 
   implicit none
 
   ! Variables
 
   ! in
-  integer, intent(in)           :: n 
- 
+  integer, intent(in)           :: n
+
   ! out
   double precision, intent(out) :: H(n)!,n),  h_tmpr(mo_num,mo_num,mo_num,mo_num)
-  
+
   ! internal
   !double precision, allocatable :: hessian(:,:,:,:)!, h_tmpr(:,:,:,:)
   integer                       :: p,q,k
@@ -122,7 +122,7 @@ subroutine diag_hessian_opt(n,H)!, h_tmpr)
   double precision, allocatable :: tmp_accu(:,:)
   double precision, allocatable :: tmp_accu_shared(:,:), tmp_accu_1_shared(:)
   double precision, allocatable :: tmp_h_pppp(:), tmp_h_pqpq(:,:), tmp_h_pqqp(:,:)
- 
+
   ! Function
   double precision :: get_two_e_integral
 
@@ -207,9 +207,9 @@ CALL wall_TIME(t1)
 !     do r = 1, mo_num
 !       do s = 1, mo_num
 
-!         ! Permutations 
+!         ! Permutations
 !         if (((p==r) .and. (q==s)) .or. ((q==r) .and. (p==s))) then
-       
+
 !           if (q==r) then
 !             do u = 1, mo_num
 
@@ -234,16 +234,16 @@ CALL wall_TIME(t1)
 !   0.5d0 * (  &
 !   mo_one_e_integrals(u,p) * one_e_dm_mo(u,s) &
 ! + mo_one_e_integrals(s,u) * one_e_dm_mo(p,u))
-!   =  
+!   =
 !   0.5d0 * (  &
 !   mo_one_e_integrals(u,p) * one_e_dm_mo(u,p) &
 ! + mo_one_e_integrals(p,u) * one_e_dm_mo(p,u))
-!  =  
-!   mo_one_e_integrals(u,p) * one_e_dm_mo(u,p) 
+!  =
+!   mo_one_e_integrals(u,p) * one_e_dm_mo(u,p)
 
 
 !$OMP MASTER
-CALL wall_TIME(t4) 
+CALL wall_TIME(t4)
 !$OMP END MASTER
 
 !$OMP DO
@@ -269,20 +269,20 @@ enddo
 !$OMP END DO
 
 
-  
+
 ! *Part 2 : q=r and p=s and q=r*
 
 !  hessian(p,q,r,s) -> hessian(p,q,q,p)
-   
+
 !   0.5d0 * (  &
 !   mo_one_e_integrals(u,p) * one_e_dm_mo(u,s) &
 ! + mo_one_e_integrals(s,u) * one_e_dm_mo(p,u))
-!   =  
+!   =
 !   0.5d0 * (  &
 !   mo_one_e_integrals(u,p) * one_e_dm_mo(u,p) &
 ! + mo_one_e_integrals(p,u) * one_e_dm_mo(p,u))
-!  =  
-!   mo_one_e_integrals(u,p) * one_e_dm_mo(u,p)    
+!  =
+!   mo_one_e_integrals(u,p) * one_e_dm_mo(u,p)
 
 
 !$OMP DO
@@ -330,9 +330,9 @@ print*,'l1 1',t6
 !     do r = 1, mo_num
 !       do s = 1, mo_num
 
-!         ! Permutations 
+!         ! Permutations
 !         if (((p==r) .and. (q==s)) .or. ((q==r) .and. (p==s))) then
-       
+
 !           if (p==s) then
 !             do u = 1, mo_num
 
@@ -358,17 +358,17 @@ print*,'l1 1',t6
 !  0.5d0 * ( &
 !   mo_one_e_integrals(u,p) * one_e_dm_mo(u,p) &
 ! + mo_one_e_integrals(p,u) * one_e_dm_mo(p,u))
-!  = 
+!  =
 !   mo_one_e_integrals(u,p) * one_e_dm_mo(u,p)
 
 
 !$OMP MASTER
 CALL wall_TIME(t4)
-!$OMP END MASTER  
+!$OMP END MASTER
 
 !$OMP DO
 do p = 1, mo_num
-  tmp_accu_1_shared(p) = 0d0 
+  tmp_accu_1_shared(p) = 0d0
 enddo
 !$OMP END DO
 
@@ -376,7 +376,7 @@ enddo
 do p = 1, mo_num
   do u = 1, mo_num
 
-    tmp_accu_1_shared(p) = tmp_accu_1_shared(p) +  mo_one_e_integrals(u,p) * one_e_dm_mo(u,p) 
+    tmp_accu_1_shared(p) = tmp_accu_1_shared(p) +  mo_one_e_integrals(u,p) * one_e_dm_mo(u,p)
 
   enddo
 enddo
@@ -403,7 +403,7 @@ enddo
 !  0.5d0 * ( &
 !   mo_one_e_integrals(u,q) * one_e_dm_mo(u,q) &
 ! + mo_one_e_integrals(q,u) * one_e_dm_mo(q,u))
-!  = 
+!  =
 !   mo_one_e_integrals(u,q) * one_e_dm_mo(u,q)
 
 
@@ -452,7 +452,7 @@ print*,'l1 2',t6
 !     do r = 1, mo_num
 !       do s = 1, mo_num
 
-!         ! Permutations 
+!         ! Permutations
 !         if (((p==r) .and. (q==s)) .or. ((q==r) .and. (p==s))) then
 
 !           hessian(p,q,r,s) = hessian(p,q,r,s) &
@@ -464,7 +464,7 @@ print*,'l1 2',t6
 !     enddo
 !   enddo
 ! enddo
- 
+
 ! With optimization :
 
 ! *Part 1 : p=r and q=s*
@@ -475,14 +475,14 @@ print*,'l1 2',t6
 !  - mo_one_e_integrals(q,r) * one_e_dm_mo(p,s)
 ! =
 !  - mo_one_e_integrals(q,p) * one_e_dm_mo(p,q) &
-!  - mo_one_e_integrals(q,p) * one_e_dm_mo(p,q) 
-! = 
+!  - mo_one_e_integrals(q,p) * one_e_dm_mo(p,q)
+! =
 !  - 2d0 mo_one_e_integrals(q,p) * one_e_dm_mo(p,q)
 
 
 !$OMP MASTER
 CALL wall_TIME(t4)
-!$OMP END MASTER 
+!$OMP END MASTER
 
 !$OMP DO
 do q = 1, mo_num
@@ -500,13 +500,13 @@ enddo
 ! *Part 2 : q=r and p=s*
 
 ! hessian(p,q,r,s) -> hessian(p,q,p,q)
- 
+
 !  - mo_one_e_integrals(s,p) * one_e_dm_mo(r,q) &
 !  - mo_one_e_integrals(q,r) * one_e_dm_mo(p,s)
 ! =
 !  - mo_one_e_integrals(q,p) * one_e_dm_mo(p,q) &
-!  - mo_one_e_integrals(q,p) * one_e_dm_mo(p,q) 
-! = 
+!  - mo_one_e_integrals(q,p) * one_e_dm_mo(p,q)
+! =
 !  - 2d0 mo_one_e_integrals(q,p) * one_e_dm_mo(p,q)
 
 
@@ -540,7 +540,7 @@ print*,'l1 3',t6
 !     do r = 1, mo_num
 !       do s = 1, mo_num
 
-!         ! Permutations 
+!         ! Permutations
 !         if (((p==r) .and. (q==s)) .or. ((q==r) .and. (p==s))) then
 
 !           if (q==r) then
@@ -567,7 +567,7 @@ print*,'l1 3',t6
 ! *Part 1 : p=r and q=s and q=r*
 
 !  hessian(p,q,r,s) -> hessian(p,p,p,p)
- 
+
 !  0.5d0 * (  &
 !   get_two_e_integral(u,v,p,t,mo_integrals_map) * two_e_dm_mo(u,v,s,t) &
 ! + get_two_e_integral(s,t,u,v,mo_integrals_map) * two_e_dm_mo(p,t,u,v))
@@ -575,7 +575,7 @@ print*,'l1 3',t6
 !  0.5d0 * (  &
 !   get_two_e_integral(u,v,p,t,mo_integrals_map) * two_e_dm_mo(u,v,p,t) &
 ! + get_two_e_integral(p,t,u,v,mo_integrals_map) * two_e_dm_mo(p,t,u,v))
-!  = 
+!  =
 !  get_two_e_integral(u,v,p,t,mo_integrals_map) * two_e_dm_mo(u,v,p,t)
 
 ! Just re-order the index and use 3D temporary arrays for optimal memory
@@ -593,7 +593,7 @@ enddo
 !$OMP END DO
 
 !$OMP DO
-do t = 1, mo_num 
+do t = 1, mo_num
 
   do p = 1, mo_num
     do v = 1, mo_num
@@ -603,7 +603,7 @@ do t = 1, mo_num
 
       enddo
     enddo
-  enddo 
+  enddo
 
   do p = 1, mo_num
     do v = 1, mo_num
@@ -615,18 +615,18 @@ do t = 1, mo_num
     enddo
   enddo
 
-  !$OMP CRITICAL 
+  !$OMP CRITICAL
   do p = 1, mo_num
     do v = 1, mo_num
       do u = 1, mo_num
 
         tmp_accu_1_shared(p) = tmp_accu_1_shared(p) &
-        + tmp_bi_int_3(u,v,p) * tmp_2rdm_3(u,v,p) 
+        + tmp_bi_int_3(u,v,p) * tmp_2rdm_3(u,v,p)
 
       enddo
     enddo
   enddo
-  !$OMP END CRITICAL 
+  !$OMP END CRITICAL
 
 enddo
 !$OMP END DO
@@ -644,7 +644,7 @@ enddo
 ! *Part 2 : q=r and p=s and q=r*
 
 !  hessian(p,q,r,s) -> hessian(p,q,q,p)
- 
+
 !  0.5d0 * (  &
 !   get_two_e_integral(u,v,p,t,mo_integrals_map) * two_e_dm_mo(u,v,s,t) &
 ! + get_two_e_integral(s,t,u,v,mo_integrals_map) * two_e_dm_mo(p,t,u,v))
@@ -652,7 +652,7 @@ enddo
 !  0.5d0 * (  &
 !   get_two_e_integral(u,v,p,t,mo_integrals_map) * two_e_dm_mo(u,v,p,t) &
 ! + get_two_e_integral(p,t,u,v,mo_integrals_map) * two_e_dm_mo(p,t,u,v))
-!  = 
+!  =
 !  get_two_e_integral(u,v,p,t,mo_integrals_map) * two_e_dm_mo(u,v,p,t)
 
 ! Just re-order the index and use 3D temporary arrays for optimal memory
@@ -693,7 +693,7 @@ do t = 1, mo_num
     do v = 1, mo_num
       do u = 1, mo_num
 
-        tmp_accu_1_shared(p) = tmp_accu_1_shared(p) + & 
+        tmp_accu_1_shared(p) = tmp_accu_1_shared(p) + &
           tmp_bi_int_3(u,v,p) * tmp_2rdm_3(u,v,p)
 
       enddo
@@ -708,7 +708,7 @@ enddo
 do q = 1, mo_num
   do p = 1, mo_num
 
-    tmp_h_pqqp(p,q) = tmp_h_pqqp(p,q) + tmp_accu_1_shared(p) 
+    tmp_h_pqqp(p,q) = tmp_h_pqqp(p,q) + tmp_accu_1_shared(p)
 
   enddo
 enddo
@@ -733,8 +733,8 @@ print*,'l2 1',t6
 !     do r = 1, mo_num
 !       do s = 1, mo_num
 
-!         ! Permutations 
-!         if (((p==r) .and. (q==s)) .or. ((q==r) .and. (p==s))) then 
+!         ! Permutations
+!         if (((p==r) .and. (q==s)) .or. ((q==r) .and. (p==s))) then
 
 !           if (p==s) then
 !             do t = 1, mo_num
@@ -755,7 +755,7 @@ print*,'l2 1',t6
 !   enddo
 ! enddo
 
-! With optimization : 
+! With optimization :
 
 ! *Part 1 : p=r and q=s and p=s*
 
@@ -763,8 +763,8 @@ print*,'l2 1',t6
 
 !  0.5d0 * ( &
 !   get_two_e_integral(q,t,u,v,mo_integrals_map) * two_e_dm_mo(r,t,u,v) &
-! + get_two_e_integral(u,v,r,t,mo_integrals_map) * two_e_dm_mo(u,v,q,t)) 
-!  = 
+! + get_two_e_integral(u,v,r,t,mo_integrals_map) * two_e_dm_mo(u,v,q,t))
+!  =
 !  0.5d0 * ( &
 !   get_two_e_integral(p,t,u,v,mo_integrals_map) * two_e_dm_mo(p,t,u,v) &
 ! + get_two_e_integral(u,v,p,t,mo_integrals_map) * two_e_dm_mo(u,v,p,t))
@@ -783,7 +783,7 @@ CALL wall_TIME(t4)
 do p = 1, mo_num
   tmp_accu_1_shared(p) = 0d0
 enddo
-!$OMP END DO   
+!$OMP END DO
 
 !$OMP DO
 do t = 1, mo_num
@@ -840,8 +840,8 @@ enddo
 
 !  0.5d0 * ( &
 !   get_two_e_integral(q,t,u,v,mo_integrals_map) * two_e_dm_mo(r,t,u,v) &
-! + get_two_e_integral(u,v,r,t,mo_integrals_map) * two_e_dm_mo(u,v,q,t)) 
-!  = 
+! + get_two_e_integral(u,v,r,t,mo_integrals_map) * two_e_dm_mo(u,v,q,t))
+!  =
 !  0.5d0 * ( &
 !   get_two_e_integral(q,t,u,v,mo_integrals_map) * two_e_dm_mo(q,t,u,v) &
 ! + get_two_e_integral(u,v,q,t,mo_integrals_map) * two_e_dm_mo(u,v,q,t))
@@ -905,7 +905,7 @@ do q = 1, mo_num
 
   enddo
 enddo
-!$OMP END DO   
+!$OMP END DO
 
 !$OMP MASTER
 CALL wall_TIME(t5)
@@ -926,7 +926,7 @@ print*,'l2 2',t6
 !     do r = 1, mo_num
 !       do s = 1, mo_num
 
-!         ! Permutations 
+!         ! Permutations
 !         if (((p==r) .and. (q==s)) .or. ((q==r) .and. (p==s)))) then
 
 !           do u = 1, mo_num
@@ -946,17 +946,17 @@ print*,'l2 2',t6
 ! enddo
 
 ! With optimization
-  
+
 ! *Part 1 : p=r and q=s*
-  
+
 !  hessian(p,q,r,s) -> hessian(p,q,p,q)
- 
+
 !   get_two_e_integral(u,v,p,r,mo_integrals_map) * two_e_dm_mo(u,v,q,s) &
-! + get_two_e_integral(q,s,u,v,mo_integrals_map) * two_e_dm_mo(p,r,u,v) 
-!  = 
+! + get_two_e_integral(q,s,u,v,mo_integrals_map) * two_e_dm_mo(p,r,u,v)
+!  =
 !   get_two_e_integral(u,v,p,p,mo_integrals_map) * two_e_dm_mo(u,v,q,q) &
 ! + get_two_e_integral(q,q,u,v,mo_integrals_map) * two_e_dm_mo(p,p,u,v)
-!  = 
+!  =
 !  2d0 * get_two_e_integral(u,v,p,p,mo_integrals_map) * two_e_dm_mo(u,v,q,q)
 
 ! Arrays of the kind (u,v,p,p) can be transform in 4D arrays (u,v,p).
@@ -978,7 +978,7 @@ do q = 1, mo_num
     enddo
   enddo
 enddo
-!$OMP END DO 
+!$OMP END DO
 
 !$OMP DO
 do p = 1, mo_num
@@ -1008,15 +1008,15 @@ enddo
 
 
 ! *Part 2 : q=r and p=s*
-  
+
 !  hessian(p,q,r,s) -> hessian(p,q,q,p)
- 
+
 !   get_two_e_integral(u,v,p,r,mo_integrals_map) * two_e_dm_mo(u,v,q,s) &
-! + get_two_e_integral(q,s,u,v,mo_integrals_map) * two_e_dm_mo(p,r,u,v) 
-!  = 
+! + get_two_e_integral(q,s,u,v,mo_integrals_map) * two_e_dm_mo(p,r,u,v)
+!  =
 !   get_two_e_integral(u,v,p,q,mo_integrals_map) * two_e_dm_mo(u,v,q,p) &
 ! + get_two_e_integral(q,p,u,v,mo_integrals_map) * two_e_dm_mo(p,q,u,v)
-!  = 
+!  =
 !  2d0 * get_two_e_integral(u,v,p,q,mo_integrals_map) * two_e_dm_mo(u,v,q,p)
 
 ! Just re-order the indexes and use 3D temporary arrays for optimal
@@ -1037,7 +1037,7 @@ do q = 1, mo_num
         tmp_bi_int_3(u,v,p) = 2d0 * get_two_e_integral(u,v,q,p,mo_integrals_map)
 
       enddo
-    enddo 
+    enddo
   enddo
 
   do p = 1, mo_num
@@ -1061,7 +1061,7 @@ do q = 1, mo_num
     enddo
   enddo
 
-enddo 
+enddo
 !$OMP END DO
 
 !$OMP MASTER
@@ -1083,7 +1083,7 @@ print*,'l3 1',t6
 !     do r = 1, mo_num
 !       do s = 1, mo_num
 
-!         ! Permutations 
+!         ! Permutations
 !         if (((p==r) .and. (q==s)) .or. ((q==r) .and. (p==s)) &
 !               .or. ((p==s) .and. (q==r))) then
 
@@ -1099,7 +1099,7 @@ print*,'l3 1',t6
 !             enddo
 !           enddo
 
-!         endif     
+!         endif
 
 !       enddo
 !     enddo
@@ -1123,11 +1123,11 @@ print*,'l3 1',t6
 !  - get_two_e_integral(q,u,t,p,mo_integrals_map) * two_e_dm_mo(p,u,t,q)
 !  =
 !  - 2d0 * get_two_e_integral(q,t,p,u,mo_integrals_map) * two_e_dm_mo(p,t,q,u) &
-!  - 2d0 * get_two_e_integral(t,q,p,u,mo_integrals_map) * two_e_dm_mo(t,p,q,u) 
+!  - 2d0 * get_two_e_integral(t,q,p,u,mo_integrals_map) * two_e_dm_mo(t,p,q,u)
 !  =
 !  - 2d0 * get_two_e_integral(q,u,p,t,mo_integrals_map) * two_e_dm_mo(q,u,p,t) &
 !  - 2d0 * get_two_e_integral(t,q,p,u,mo_integrals_map) * two_e_dm_mo(t,p,q,u)
- 
+
 ! Just re-order the indexes and use 3D temporary arrays for optimal
 ! memory accesses.
 
@@ -1146,7 +1146,7 @@ do q = 1, mo_num
   do p = 1, mo_num
     tmp_accu_shared(p,q) = 0d0
   enddo
-enddo 
+enddo
 !$OMP END DO
 
 !$OMP DO
@@ -1178,7 +1178,7 @@ do t = 1, mo_num
       do q = 1, mo_num
 
          tmp_accu_shared(p,q) = tmp_accu_shared(p,q) &
-         - tmp_bi_int_3(q,u,p) * tmp_2rdm_3(q,u,p) 
+         - tmp_bi_int_3(q,u,p) * tmp_2rdm_3(q,u,p)
 
       enddo
     enddo
@@ -1206,7 +1206,7 @@ enddo
 
 !--------
 ! Part 1.2
-!-------- 
+!--------
 ! - 2d0 * get_two_e_integral(t,q,p,u,mo_integrals_map) * two_e_dm_mo(t,p,q,u)
 
 !$OMP DO
@@ -1350,7 +1350,7 @@ enddo
 
 
 !--------
-! Part 2.2 
+! Part 2.2
 !--------
 ! - get_two_e_integral(t,u,p,p,mo_integrals_map) * two_e_dm_mo(q,u,t,q) &
 ! - get_two_e_integral(t,u,q,q,mo_integrals_map) * two_e_dm_mo(p,u,t,p)
@@ -1396,7 +1396,7 @@ enddo
 CALL wall_TIME(t5)
 t6= t5-t4
 print*,'l3 2',t6
-!$OMP END MASTER  
+!$OMP END MASTER
 
 !$OMP MASTER
 CALL wall_TIME(t2)
@@ -1492,11 +1492,11 @@ enddo
 call omp_set_max_active_levels(4)
 
 ! Display
-!if (debug) then 
+!if (debug) then
 !  print*,'2D diag Hessian matrix'
 !  do pq = 1, n
 !    write(*,'(100(F10.5))') H(pq,:)
-!  enddo 
+!  enddo
 !endif
 
 ! Deallocation of shared arrays, end
@@ -1504,8 +1504,9 @@ call omp_set_max_active_levels(4)
 
 !deallocate(hessian)!,h_tmpr)
   deallocate(tmp_h_pppp,tmp_h_pqpq,tmp_h_pqqp)
-  deallocate(tmp_accu_1_shared, tmp_accu_shared) 
- 
+  deallocate(tmp_accu_1_shared, tmp_accu_shared)
+
   print*,'---diagonal_hessian'
 
 end subroutine
+

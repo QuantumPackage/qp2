@@ -1,7 +1,7 @@
 
 ! ---
 
-BEGIN_PROVIDER  [ double precision, psi_bitcleft_bilinear_matrix_values, (N_det,N_states) ]
+BEGIN_PROVIDER  [ double precision, psi_bitcleft_bilinear_matrix_values, (N_det, N_states) ]
 
   BEGIN_DOC
   ! Sparse coefficient matrix if the wave function is expressed in a bilinear form :
@@ -45,4 +45,5 @@ BEGIN_PROVIDER  [ double precision, psi_bitcleft_bilinear_matrix_values, (N_det,
 END_PROVIDER
 
 ! ---
+
 

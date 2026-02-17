@@ -23,7 +23,7 @@ BEGIN_PROVIDER [ logical, same_xc_func ]
 ! true if the exchange and correlation functionals are the same
  END_DOC
  implicit none
- if(trim(correlation_functional).eq.trim(exchange_functional))then 
+ if(trim(correlation_functional).eq.trim(exchange_functional))then
   same_xc_func = .True.
  else
   same_xc_func = .False.
@@ -31,3 +31,4 @@ BEGIN_PROVIDER [ logical, same_xc_func ]
 
 
 END_PROVIDER
+

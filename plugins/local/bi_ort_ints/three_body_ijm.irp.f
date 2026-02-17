@@ -5,10 +5,10 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_direct_bi_ort, (mo_num, mo_num,
 
   BEGIN_DOC
   !
-  ! matrix element of the -L  three-body operator ON A BI ORTHONORMAL BASIS for the direct terms 
+  ! matrix element of the -L  three-body operator ON A BI ORTHONORMAL BASIS for the direct terms
   !
   ! three_e_3_idx_direct_bi_ort(m,j,i) = <mji|-L|mji>
-  ! 
+  !
   ! notice the -1 sign: in this way three_e_3_idx_direct_bi_ort can be directly used to compute Slater rules with a + sign
   !
   END_DOC
@@ -28,14 +28,14 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_direct_bi_ort, (mo_num, mo_num,
 
   !$OMP PARALLEL                 &
   !$OMP DEFAULT (NONE)           &
-  !$OMP PRIVATE (i,j,m,integral) & 
+  !$OMP PRIVATE (i,j,m,integral) &
   !$OMP SHARED (mo_num,three_e_3_idx_direct_bi_ort)
   !$OMP DO SCHEDULE (dynamic)
   do i = 1, mo_num
     do j = 1, mo_num
       do m = j, mo_num
         call give_integrals_3_body_bi_ort(m, j, i, m, j, i, integral)
-        three_e_3_idx_direct_bi_ort(m,j,i) = -1.d0 * integral 
+        three_e_3_idx_direct_bi_ort(m,j,i) = -1.d0 * integral
       enddo
     enddo
   enddo
@@ -54,7 +54,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_direct_bi_ort, (mo_num, mo_num,
   print *, ' wall time for three_e_3_idx_direct_bi_ort', wall1 - wall0
   call print_memory_usage()
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -62,7 +62,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_cycle_1_bi_ort, (mo_num, mo_num
 
   BEGIN_DOC
   !
-  ! matrix element of the -L  three-body operator ON A BI ORTHONORMAL BASIS for the first cyclic permutation 
+  ! matrix element of the -L  three-body operator ON A BI ORTHONORMAL BASIS for the first cyclic permutation
   !
   ! three_e_3_idx_cycle_1_bi_ort(m,j,i) = <mji|-L|jim>
   !
@@ -83,14 +83,14 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_cycle_1_bi_ort, (mo_num, mo_num
   call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, integral)
  !$OMP PARALLEL                 &
  !$OMP DEFAULT (NONE)           &
- !$OMP PRIVATE (i,j,m,integral) & 
+ !$OMP PRIVATE (i,j,m,integral) &
  !$OMP SHARED (mo_num,three_e_3_idx_cycle_1_bi_ort)
  !$OMP DO SCHEDULE (dynamic)
   do i = 1, mo_num
     do j = 1, mo_num
       do m = j, mo_num
         call give_integrals_3_body_bi_ort(m, j, i, j, i, m, integral)
-        three_e_3_idx_cycle_1_bi_ort(m,j,i) = -1.d0 * integral 
+        three_e_3_idx_cycle_1_bi_ort(m,j,i) = -1.d0 * integral
       enddo
     enddo
   enddo
@@ -109,7 +109,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_cycle_1_bi_ort, (mo_num, mo_num
   print *, ' wall time for three_e_3_idx_cycle_1_bi_ort', wall1 - wall0
   call print_memory_usage()
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -117,7 +117,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_cycle_2_bi_ort, (mo_num, mo_num
 
   BEGIN_DOC
   !
-  ! matrix element of the -L  three-body operator ON A BI ORTHONORMAL BASIS for the second cyclic permutation 
+  ! matrix element of the -L  three-body operator ON A BI ORTHONORMAL BASIS for the second cyclic permutation
   !
   ! three_e_3_idx_direct_bi_ort(m,j,i) = <mji|-L|imj>
   !
@@ -140,14 +140,14 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_cycle_2_bi_ort, (mo_num, mo_num
   call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, integral)
  !$OMP PARALLEL                 &
  !$OMP DEFAULT (NONE)           &
- !$OMP PRIVATE (i,j,m,integral) & 
+ !$OMP PRIVATE (i,j,m,integral) &
  !$OMP SHARED (mo_num,three_e_3_idx_cycle_2_bi_ort)
  !$OMP DO SCHEDULE (dynamic)
   do i = 1, mo_num
     do j = 1, mo_num
       do m = j, mo_num
         call give_integrals_3_body_bi_ort(m, j, i, i, m, j, integral)
-        three_e_3_idx_cycle_2_bi_ort(m,j,i) = -1.d0 * integral 
+        three_e_3_idx_cycle_2_bi_ort(m,j,i) = -1.d0 * integral
       enddo
     enddo
   enddo
@@ -166,7 +166,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_cycle_2_bi_ort, (mo_num, mo_num
   print *, ' wall time for three_e_3_idx_cycle_2_bi_ort', wall1 - wall0
   call print_memory_usage()
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -177,7 +177,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch23_bi_ort, (mo_num, mo_num,
   ! matrix element of the -L  three-body operator ON A BI ORTHONORMAL BASIS for the permutations of particle 2 and 3
   !
   ! three_e_3_idx_exch23_bi_ort(m,j,i) = <mji|-L|jmi>
-  ! 
+  !
   ! notice the -1 sign: in this way three_e_3_idx_direct_bi_ort can be directly used to compute Slater rules with a + sign
   !
   END_DOC
@@ -197,14 +197,14 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch23_bi_ort, (mo_num, mo_num,
   call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, integral)
  !$OMP PARALLEL                 &
  !$OMP DEFAULT (NONE)           &
- !$OMP PRIVATE (i,j,m,integral) & 
+ !$OMP PRIVATE (i,j,m,integral) &
  !$OMP SHARED (mo_num,three_e_3_idx_exch23_bi_ort)
  !$OMP DO SCHEDULE (dynamic)
   do i = 1, mo_num
     do j = 1, mo_num
       do m = j, mo_num
         call give_integrals_3_body_bi_ort(m, j, i, j, m, i, integral)
-        three_e_3_idx_exch23_bi_ort(m,j,i) = -1.d0 * integral 
+        three_e_3_idx_exch23_bi_ort(m,j,i) = -1.d0 * integral
       enddo
     enddo
   enddo
@@ -223,7 +223,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch23_bi_ort, (mo_num, mo_num,
   print *, ' wall time for three_e_3_idx_exch23_bi_ort', wall1 - wall0
   call print_memory_usage()
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -234,7 +234,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch13_bi_ort, (mo_num, mo_num,
   ! matrix element of the -L  three-body operator ON A BI ORTHONORMAL BASIS for the permutations of particle 1 and 3
   !
   ! three_e_3_idx_exch13_bi_ort(m,j,i) = <mji|-L|ijm>
-  ! 
+  !
   ! notice the -1 sign: in this way three_e_3_idx_direct_bi_ort can be directly used to compute Slater rules with a + sign
   !
   END_DOC
@@ -254,14 +254,14 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch13_bi_ort, (mo_num, mo_num,
   call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, integral)
  !$OMP PARALLEL                 &
  !$OMP DEFAULT (NONE)           &
- !$OMP PRIVATE (i,j,m,integral) & 
+ !$OMP PRIVATE (i,j,m,integral) &
  !$OMP SHARED (mo_num,three_e_3_idx_exch13_bi_ort)
  !$OMP DO SCHEDULE (dynamic)
   do i = 1, mo_num
     do j = 1, mo_num
       do m = j, mo_num
         call give_integrals_3_body_bi_ort(m, j, i, i, j, m,integral)
-        three_e_3_idx_exch13_bi_ort(m,j,i) = -1.d0 * integral 
+        three_e_3_idx_exch13_bi_ort(m,j,i) = -1.d0 * integral
       enddo
     enddo
   enddo
@@ -280,7 +280,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch13_bi_ort, (mo_num, mo_num,
   print *, ' wall time for three_e_3_idx_exch13_bi_ort', wall1 - wall0
   call print_memory_usage()
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -291,7 +291,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch12_bi_ort, (mo_num, mo_num,
   ! matrix element of the -L  three-body operator ON A BI ORTHONORMAL BASIS for the permutations of particle 1 and 2
   !
   ! three_e_3_idx_exch12_bi_ort(m,j,i) = <mji|-L|mij>
-  ! 
+  !
   ! notice the -1 sign: in this way three_e_3_idx_direct_bi_ort can be directly used to compute Slater rules with a + sign
   !
   END_DOC
@@ -311,14 +311,14 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch12_bi_ort, (mo_num, mo_num,
   call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, integral)
  !$OMP PARALLEL                 &
  !$OMP DEFAULT (NONE)           &
- !$OMP PRIVATE (i,j,m,integral) & 
+ !$OMP PRIVATE (i,j,m,integral) &
  !$OMP SHARED (mo_num,three_e_3_idx_exch12_bi_ort)
  !$OMP DO SCHEDULE (dynamic)
   do i = 1, mo_num
     do j = 1, mo_num
       do m = 1, mo_num
         call give_integrals_3_body_bi_ort(m, j, i, m, i, j, integral)
-        three_e_3_idx_exch12_bi_ort(m,j,i) = -1.d0 * integral 
+        three_e_3_idx_exch12_bi_ort(m,j,i) = -1.d0 * integral
       enddo
     enddo
   enddo
@@ -329,7 +329,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch12_bi_ort, (mo_num, mo_num,
   print *, ' wall time for three_e_3_idx_exch12_bi_ort', wall1 - wall0
   call print_memory_usage()
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -340,7 +340,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch12_bi_ort_new, (mo_num, mo_
   ! matrix element of the -L  three-body operator ON A BI ORTHONORMAL BASIS for the permutations of particle 1 and 2
   !
   ! three_e_3_idx_exch12_bi_ort_new(m,j,i) = <mji|-L|mij>
-  ! 
+  !
   ! notice the -1 sign: in this way three_e_3_idx_direct_bi_ort can be directly used to compute Slater rules with a + sign
   !
   END_DOC
@@ -358,14 +358,14 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch12_bi_ort_new, (mo_num, mo_
   call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, integral)
  !$OMP PARALLEL                 &
  !$OMP DEFAULT (NONE)           &
- !$OMP PRIVATE (i,j,m,integral) & 
+ !$OMP PRIVATE (i,j,m,integral) &
  !$OMP SHARED (mo_num,three_e_3_idx_exch12_bi_ort_new)
  !$OMP DO SCHEDULE (dynamic)
   do i = 1, mo_num
     do j = 1, mo_num
       do m = j, mo_num
         call give_integrals_3_body_bi_ort(m, j, i, m, i, j, integral)
-        three_e_3_idx_exch12_bi_ort_new(m,j,i) = -1.d0 * integral 
+        three_e_3_idx_exch12_bi_ort_new(m,j,i) = -1.d0 * integral
     enddo
    enddo
   enddo
@@ -384,7 +384,8 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch12_bi_ort_new, (mo_num, mo_
   print *, ' wall time for three_e_3_idx_exch12_bi_ort_new', wall1 - wall0
   call print_memory_usage()
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
+
 

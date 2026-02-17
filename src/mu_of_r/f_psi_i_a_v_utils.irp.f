@@ -232,7 +232,7 @@ subroutine give_f_aa_val_ab(r1,r2,f_aa_val_ab,two_bod_dens,istate)
  ! DO NOT multiply by two as in give_f_ii_val_ab and give_f_ia_val_ab because the N(N-1) normalization condition of the active two-rdm
 end
 
-BEGIN_PROVIDER [double precision, two_e_int_aa_f, (n_basis_orb,n_basis_orb,n_act_orb,n_act_orb)]
+BEGIN_PROVIDER [double precision, two_e_int_aa_f, (n_basis_orb, n_basis_orb, n_act_orb, n_act_orb)]
  implicit none
  BEGIN_DOC
 ! list of two-electron integrals (built with the MOs belonging to the \mathcal{B} space)
@@ -262,7 +262,7 @@ BEGIN_PROVIDER [double precision, two_e_int_aa_f, (n_basis_orb,n_basis_orb,n_act
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, two_e_int_ia_f, (n_basis_orb,n_basis_orb,n_inact_orb,n_act_orb)]
+BEGIN_PROVIDER [double precision, two_e_int_ia_f, (n_basis_orb, n_basis_orb, n_inact_orb, n_act_orb)]
  implicit none
  BEGIN_DOC
 ! list of two-electron integrals (built with the MOs belonging to the \mathcal{B} space)
@@ -292,7 +292,7 @@ BEGIN_PROVIDER [double precision, two_e_int_ia_f, (n_basis_orb,n_basis_orb,n_ina
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, two_e_int_ii_f, (n_basis_orb,n_basis_orb,n_inact_orb,n_inact_orb)]
+BEGIN_PROVIDER [double precision, two_e_int_ii_f, (n_basis_orb, n_basis_orb, n_inact_orb, n_inact_orb)]
  implicit none
  BEGIN_DOC
 ! list of two-electron integrals (built with the MOs belonging to the \mathcal{B} space)
@@ -353,3 +353,4 @@ subroutine give_mu_of_r_cas(r,istate,mu_of_r,f_psi,n2_psi)
  mu_of_r  = w_psi * sqpi * 0.5d0
 
 end
+

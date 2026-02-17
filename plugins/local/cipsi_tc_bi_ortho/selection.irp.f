@@ -928,7 +928,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
         pt2_data % overlap(:,istate) = pt2_data % overlap(:,istate) + coef(:) * coef(istate)
         if(e_pert(istate).gt.0.d0)then! accumulate the positive part of the pt2
-         pt2_data % variance(istate)  = pt2_data % variance(istate) + e_pert(istate) 
+         pt2_data % variance(istate)  = pt2_data % variance(istate) + e_pert(istate)
         else                          ! accumulate the negative part of the pt2
          pt2_data % pt2(istate)       = pt2_data % pt2(istate)      + e_pert(istate)
         endif
@@ -1062,4 +1062,5 @@ subroutine bitstring_to_list_in_selection( string, list, n_elements, Nint)
 end subroutine bitstring_to_list_in_selection
 
 ! ---
+
 

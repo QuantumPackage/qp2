@@ -2,8 +2,8 @@ program tc_bi_ortho
 
   BEGIN_DOC
   !
-  ! TODO : Reads psi_det in the EZFIO folder and prints out the left- and right-eigenvectors together 
-  !        with the energy. Saves the left-right wave functions at the end. 
+  ! TODO : Reads psi_det in the EZFIO folder and prints out the left- and right-eigenvectors together
+  !        with the energy. Saves the left-right wave functions at the end.
   !
   END_DOC
 
@@ -50,7 +50,7 @@ subroutine test()
 
   use bitmasks
   implicit none
-  integer          :: i, j 
+  integer          :: i, j
   double precision :: hmono, htwoe, hthree, htot
 
   print*, 'reading the wave function '
@@ -89,7 +89,7 @@ subroutine routine_diag()
 !    print*,'e_pt2_tc_bi_orth          = ',e_pt2_tc_bi_orth
 !    print*,'e_pt2_tc_bi_orth_single   = ',e_pt2_tc_bi_orth_single
 !    print*,'e_pt2_tc_bi_orth_double   = ',e_pt2_tc_bi_orth_double
-!    print*,'***'                      
+!    print*,'***'
 !    print*,'e_corr_bi_orth            = ',e_corr_bi_orth
 !    print*,'e_corr_bi_orth_proj       = ',e_corr_bi_orth_proj
 !    print*,'e_corr_bi_orth_proj_abs   = ',e_corr_bi_orth_proj_abs
@@ -121,6 +121,7 @@ subroutine routine_diag()
   endif
 
 end
+
 
 
 

@@ -3,7 +3,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
 
   BEGIN_DOC
   !
-  ! int2_grad1_u12_ao(i,j,ipoint,:) = \int dr2 [\grad_r1 J(r1,r2)] \phi_i(r2) \phi_j(r2) 
+  ! int2_grad1_u12_ao(i,j,ipoint,:) = \int dr2 [\grad_r1 J(r1,r2)] \phi_i(r2) \phi_j(r2)
   !
   ! where r1 = r(ipoint)
   !
@@ -12,7 +12,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
   implicit none
   integer          :: ipoint, i, j, m, jpoint
   double precision :: time0, time1
-  double precision :: x, y, z, r2 
+  double precision :: x, y, z, r2
   double precision :: dx, dy, dz
   double precision :: tmp_ct
   double precision :: tmp0, tmp1, tmp2
@@ -86,7 +86,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
           !$OMP DEFAULT (NONE)             &
           !$OMP PRIVATE (i_blocks, ipoint) &
           !$OMP SHARED (n_blocks, n_points_extra_final_grid, ii, final_grid_points, xx, tmp_grad1_u12)
-          !$OMP DO 
+          !$OMP DO
           do i_blocks = 1, n_blocks
             ipoint = ii - 1 + i_blocks ! r1
             call get_grad1_u12_withsq_r1_seq(ipoint, n_points_extra_final_grid, tmp_grad1_u12(1,i_blocks,1), tmp_grad1_u12(1,i_blocks,2), tmp_grad1_u12(1,i_blocks,3), xx(1))
@@ -107,7 +107,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
           !$OMP DEFAULT (NONE)           &
           !$OMP PRIVATE (i_rest, ipoint) &
           !$OMP SHARED (n_rest, n_points_extra_final_grid, ii, final_grid_points, xx, tmp_grad1_u12)
-          !$OMP DO 
+          !$OMP DO
           do i_rest = 1, n_rest
             ipoint = ii - 1 + i_rest ! r1
             call get_grad1_u12_withsq_r1_seq(ipoint, n_points_extra_final_grid, tmp_grad1_u12(1,i_rest,1), tmp_grad1_u12(1,i_rest,2), tmp_grad1_u12(1,i_rest,3), xx(1))
@@ -138,7 +138,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
       ! ---
 
       if(j2e_type .eq. "None") then
-      
+
         int2_grad1_u12_ao = 0.d0
 
       elseif( (j2e_type .eq. "Mu") .and. &
@@ -146,8 +146,8 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
 
         PROVIDE int2_grad1_u2e_ao
         int2_grad1_u12_ao = int2_grad1_u2e_ao
-        
-      else 
+
+      else
 
         print *, ' Error in int2_grad1_u12_ao: Unknown Jastrow'
         stop
@@ -228,7 +228,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
 
   implicit none
   integer          :: ipoint, i, j, m, jpoint
-  double precision :: x, y, z, r2 
+  double precision :: x, y, z, r2
   double precision :: dx, dy, dz, dr2
   double precision :: dx1, dy1, dz1, dx2, dy2, dz2, dr12
   double precision :: tmp_ct, tmp_ct1, tmp_ct2
@@ -254,7 +254,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
   elseif(tc_integ_type .eq. "numeric") then
 
     print *, ' Numerical integration over r1 and r2 will be performed'
-  
+
     if(tc_save_mem) then
 
       integer                       :: n_blocks, n_rest, n_pass
@@ -296,7 +296,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
         !$OMP DEFAULT (NONE)             &
         !$OMP PRIVATE (i_blocks, ipoint) &
         !$OMP SHARED (n_blocks, n_points_extra_final_grid, ii, xx, final_grid_points, tmp_grad1_u12_squared)
-        !$OMP DO 
+        !$OMP DO
         do i_blocks = 1, n_blocks
           ipoint = ii - 1 + i_blocks ! r1
           call get_grad1_u12_withsq_r1_seq(ipoint, n_points_extra_final_grid, xx(1,i_blocks,1), xx(1,i_blocks,2), xx(1,i_blocks,3), tmp_grad1_u12_squared(1,i_blocks))
@@ -315,7 +315,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
         !$OMP DEFAULT (NONE)           &
         !$OMP PRIVATE (i_rest, ipoint) &
         !$OMP SHARED (n_rest, n_points_extra_final_grid, ii, xx, final_grid_points, tmp_grad1_u12_squared)
-        !$OMP DO 
+        !$OMP DO
         do i_rest = 1, n_rest
           ipoint = ii - 1 + i_rest ! r1
           call get_grad1_u12_withsq_r1_seq(ipoint, n_points_extra_final_grid, xx(1,i_rest,1), xx(1,i_rest,2), xx(1,i_rest,3), tmp_grad1_u12_squared(1,i_rest))
@@ -450,7 +450,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
         enddo
         !$OMP END DO
         !$OMP END PARALLEL
-          
+
         FREE int2_grad1u2_grad2u2_env2
 
       else
@@ -476,7 +476,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
 
       endif ! use_ipp
 
-    else 
+    else
 
       print *, ' Error in int2_grad1_u12_square_ao: Unknown Jastrow'
       stop
@@ -548,4 +548,5 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
 END_PROVIDER
 
 ! ---
+
 

@@ -1,5 +1,5 @@
  BEGIN_PROVIDER [ double precision, tc_two_rdm_chemist, (mo_num, mo_num, mo_num, mo_num)]
-&BEGIN_PROVIDER [ double precision, tc_two_rdm_chemist_s1s2, (mo_num, mo_num, mo_num, mo_num, 2,2)]
+&BEGIN_PROVIDER [ double precision, tc_two_rdm_chemist_s1s2, (mo_num, mo_num, mo_num, mo_num, 2, 2)]
  implicit none
  BEGIN_DOC
  ! tc_two_rdm_chemist(p,s,q,r) = <Phi| a^dagger_p a^dagger_q q_r a_s |Phi> = CHEMIST NOTATION
@@ -17,13 +17,13 @@
  tc_two_rdm_chemist = 0.d0
  tc_two_rdm_chemist_s1s2 = 0.d0
 
- do i = 1, N_det ! psi_left 
-  do j = 1, N_det ! psi_right 
+ do i = 1, N_det ! psi_left
+  do j = 1, N_det ! psi_right
    call get_excitation_degree(psi_det(1,1,i),psi_det(1,1,j),degree,N_int)
    if(degree.gt.2)cycle
    if(degree.gt.0)then
     ! get excitation operators: from psi_det(j) --> psi_det(i)
-    ! T_{j-->i} = a^p1_s1 a_h1_s1 
+    ! T_{j-->i} = a^p1_s1 a_h1_s1
      call get_excitation(psi_det(1,1,j),psi_det(1,1,i),exc,degree,phase,N_int)
      call decode_exc(exc,degree,h1,p1,h2,p2,s1,s2)
      contrib = psi_l_coef_bi_ortho(i,1) * psi_r_coef_bi_ortho(j,1) * phase * state_average_weight(1)
@@ -35,23 +35,23 @@
      call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
     else if(degree==1)then
      ! occupation of the determinant psi_det(j)
-     call bitstring_to_list_ab(psi_det(1,1,j), occ, n_occ_ab, N_int) 
- 
+     call bitstring_to_list_ab(psi_det(1,1,j), occ, n_occ_ab, N_int)
+
      ! run over the electrons of opposite spin than the excitation
      s2 = other_spin(s1)
-     do mm = 1, n_occ_ab(s2) 
+     do mm = 1, n_occ_ab(s2)
       m = occ(mm,s2)
-      h2 = m 
-      p2 = m 
+      h2 = m
+      p2 = m
       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
      enddo
      ! run over the electrons of same spin than the excitation
      s2 = s1
-     do mm = 1, n_occ_ab(s2) 
+     do mm = 1, n_occ_ab(s2)
       m = occ(mm,s2)
-      h2 = m 
-      p2 = m 
+      h2 = m
+      p2 = m
       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
      enddo
@@ -63,26 +63,26 @@
      contrib += psi_l_coef_bi_ortho(i,istate) * psi_r_coef_bi_ortho(j,istate) *  state_average_weight(istate)
     enddo
     ! occupation of the determinant psi_det(j)
-    call bitstring_to_list_ab(psi_det(1,1,j), occ, n_occ_ab, N_int) 
+    call bitstring_to_list_ab(psi_det(1,1,j), occ, n_occ_ab, N_int)
     s1 = 1 ! alpha electrons
      do nn = 1, n_occ_ab(s1)
       h1 = occ(nn,s1)
       p1 = occ(nn,s1)
-      ! run over the couple of alpha-beta electrons 
+      ! run over the couple of alpha-beta electrons
       s2 = other_spin(s1)
-      do mm = 1, n_occ_ab(s2) 
+      do mm = 1, n_occ_ab(s2)
        m = occ(mm,s2)
-       h2 = m 
-       p2 = m 
+       h2 = m
+       p2 = m
        call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
        call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
       enddo
-      ! run over the couple of alpha-alpha electrons 
+      ! run over the couple of alpha-alpha electrons
       s2 = s1
-      do mm = 1, n_occ_ab(s2) 
+      do mm = 1, n_occ_ab(s2)
        m = occ(mm,s2)
-       h2 = m 
-       p2 = m 
+       h2 = m
+       p2 = m
        if(h2.le.h1)cycle
        call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
        call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
@@ -92,12 +92,12 @@
      do nn = 1, n_occ_ab(s1)
       h1 = occ(nn,s1)
       p1 = occ(nn,s1)
-      ! run over the couple of beta-beta electrons 
+      ! run over the couple of beta-beta electrons
       s2 = s1
-      do mm = 1, n_occ_ab(s2) 
+      do mm = 1, n_occ_ab(s2)
        m = occ(mm,s2)
-       h2 = m 
-       p2 = m 
+       h2 = m
+       p2 = m
        if(h2.le.h1)cycle
        call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
        call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
@@ -107,7 +107,7 @@
   enddo
  enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 subroutine update_tc_rdm(h1,p1,h2,p2,s1,s2,array,sze,contrib)
  implicit none
@@ -119,12 +119,12 @@ subroutine update_tc_rdm(h1,p1,h2,p2,s1,s2,array,sze,contrib)
    array(p1,h1,p2,h2) += contrib
    ! permutation for particle symmetry
    array(p2,h2,p1,h1) += contrib
- else ! same spin double excitation 
+ else ! same spin double excitation
    array(p1,h1,p2,h2) += contrib
-   ! exchange 
-   ! exchanging the particles 
+   ! exchange
+   ! exchanging the particles
    array(p2,h1,p1,h2) -= contrib
-   ! exchanging the 
+   ! exchanging the
    array(p1,h2,p2,h1) -= contrib
    ! permutation for particle symmetry
    array(p2,h2,p1,h1) += contrib
@@ -134,7 +134,7 @@ end
 
 
  BEGIN_PROVIDER [ double precision, tc_two_rdm, (mo_num, mo_num, mo_num, mo_num)]
-&BEGIN_PROVIDER [ double precision, tc_two_rdm_s1s2, (mo_num, mo_num, mo_num, mo_num,2,2)]
+&BEGIN_PROVIDER [ double precision, tc_two_rdm_s1s2, (mo_num, mo_num, mo_num, mo_num, 2, 2)]
  implicit none
  BEGIN_DOC
  ! tc_two_rdm(p,q,s,r) = <Phi| a^dagger_p a^dagger_q q_r a_s |Phi> = PHYSICIST NOTATION
@@ -144,7 +144,7 @@ end
   do q = 1, mo_num
    do s = 1, mo_num
     do p = 1, mo_num
-    tc_two_rdm(p,q,s,r) = tc_two_rdm_chemist(p,s,q,r) 
+    tc_two_rdm(p,q,s,r) = tc_two_rdm_chemist(p,s,q,r)
     enddo
    enddo
   enddo
@@ -155,7 +155,7 @@ end
      do q = 1, mo_num
       do s = 1, mo_num
        do p = 1, mo_num
-        tc_two_rdm_s1s2(p,q,s,r,s1,s2) = tc_two_rdm_chemist_s1s2(p,s,q,r,s1,s2) 
+        tc_two_rdm_s1s2(p,q,s,r,s1,s2) = tc_two_rdm_chemist_s1s2(p,s,q,r,s1,s2)
        enddo
       enddo
      enddo
@@ -163,4 +163,5 @@ end
    enddo
   enddo
 
-END_PROVIDER 
+END_PROVIDER
+

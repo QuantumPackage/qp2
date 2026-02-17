@@ -4,10 +4,10 @@ double precision function correction_to_on_top_from_UEG(mu,r,istate)
  integer, intent(in) :: istate
  double precision, intent(in) :: mu,r(3)
  double precision :: rho_a(N_states),rho_b(N_states)
- double precision :: g0_UEG_mu_inf, g0_UEG_mu 
+ double precision :: g0_UEG_mu_inf, g0_UEG_mu
  call dm_dft_alpha_beta_at_r(r,rho_a,rho_b)
 
- correction_to_on_top_from_UEG = g0_UEG_mu_inf(rho_a(istate),rho_b(istate)) / g0_UEG_mu(mu,rho_a(istate),rho_b(istate)) 
+ correction_to_on_top_from_UEG = g0_UEG_mu_inf(rho_a(istate),rho_b(istate)) / g0_UEG_mu(mu,rho_a(istate),rho_b(istate))
 
 end
 
@@ -16,7 +16,7 @@ end
 
 double precision function g0_UEG_mu_inf(rho_a,rho_b)
  BEGIN_DOC
-! Pair distribution function g0(n_alpha,n_beta) of the Colombic UEG 
+! Pair distribution function g0(n_alpha,n_beta) of the Colombic UEG
 !
 ! Taken from Eq. (46)  P. Gori-Giorgi and A. Savin, Phys. Rev. A 73, 032506 (2006).
  END_DOC
@@ -31,7 +31,7 @@ double precision function g0_UEG_mu_inf(rho_a,rho_b)
  B = -2d0 * ahd - d2
  C = 0.08193d0
  D = -0.01277d0
- E = 0.001859d0                     
+ E = 0.001859d0
  if (dabs(rho) > 1.d-20) then
   rs = (3d0 / (4d0*pi*rho))**(1d0/3d0) ! JT: serious bug fixed 20/03/19
   x = -d2*rs
@@ -76,13 +76,13 @@ double precision function g0_UEG_mu(mu,rho_a,rho_b)
  endif
  kf = (alpha*rs)**(-1d0)
  zeta = mu / kf
- x = -d2*rs*h_func(zeta)/ahd 
+ x = -d2*rs*h_func(zeta)/ahd
  if(dabs(x).lt.50.d0)then
   g0_UEG_mu = (dexp(x)/2d0) * (1d0- B*(h_func(zeta)/ahd)*rs + C*((h_func(zeta)**2d0)/(ahd**2d0))*(rs**2d0) + D*((h_func(zeta)**3d0)/(ahd**3d0))*(rs**3d0) + E*((h_func(zeta)**4d0)/(ahd**4d0))*(rs**4d0) )
  else
   g0_UEG_mu = 0.d0
  endif
- 
+
 end
 
 
@@ -126,11 +126,11 @@ end
   E1 = 0.00185898d0
   B1 = 0.7317d0 - F1
   if(dabs(rho).gt.1.d-20)then
-   rs = (3.d0 / (4.d0*pi*rho))**(1.d0/3.d0) 
+   rs = (3.d0 / (4.d0*pi*rho))**(1.d0/3.d0)
   else
-   rs = (3.d0 / (4.d0*pi*1.d-20))**(1.d0/3.d0) 
+   rs = (3.d0 / (4.d0*pi*1.d-20))**(1.d0/3.d0)
   endif
-   
+
   g0 = g0_UEG_mu_inf(rho_a, rho_b)
   if(dabs(F1*rs).lt.50.d0)then
    dg0drs = 0.5d0*((-B1 + 2.d0*C1*rs + 3.d0*D1*rs**2 + 4.d0*E1*rs**3)-F1*(1.d0 - B1*rs + C1*rs**2 + D1*rs**3 + E1*rs**4))*dexp(-F1*rs)
@@ -142,8 +142,8 @@ end
   else
    dg0drho = -((6.d0*dsqrt(pi)*1.d-40)**(-2.d0/3.d0))*dg0drs
   endif
- 
-  end subroutine g0_dg0 
+
+  end subroutine g0_dg0
 
   subroutine g0_dg0_d2g0(rho, rho_a, rho_b, g0, dg0drho, d2g0drho2)
 
@@ -165,11 +165,11 @@ end
   E1 = 0.00185898d0
   B1 = 0.7317d0 - F1
   if(dabs(rho).gt.1.d-20)then
-   rs = (3.d0 / (4.d0*pi*rho))**(1.d0/3.d0) 
+   rs = (3.d0 / (4.d0*pi*rho))**(1.d0/3.d0)
   else
-   rs = (3.d0 / (4.d0*pi*1.d-20))**(1.d0/3.d0) 
+   rs = (3.d0 / (4.d0*pi*1.d-20))**(1.d0/3.d0)
   endif
-   
+
   g0 = g0_UEG_mu_inf(rho_a, rho_b)
   if(dabs(F1*rs).lt.50.d0)then
    dg0drs = 0.5d0*((-B1 + 2.d0*C1*rs + 3.d0*D1*rs**2 + 4.d0*E1*rs**3)-F1*(1.d0 - B1*rs + C1*rs**2 + D1*rs**3 + E1*rs**4))*dexp(-F1*rs)
@@ -187,9 +187,10 @@ end
   else
    dg0drho = -((6.d0*dsqrt(pi)*1.d-40)**(-2.d0/3.d0))*dg0drs
    d2rsdrho2 = -8.d0*dsqrt(pi)*(1.d-20)*(6.d0*dsqrt(pi)*1.d-40)**(-5.d0/3.d0)
-   d2g0drho2 = dg0drho*d2rsdrho2 - ((6.d0*dsqrt(pi)*1.d-40)**(-4.d0/3.d0))*d2g0drs2 
+   d2g0drho2 = dg0drho*d2rsdrho2 - ((6.d0*dsqrt(pi)*1.d-40)**(-4.d0/3.d0))*d2g0drs2
   endif
- 
-  end subroutine g0_dg0 
+
+  end subroutine g0_dg0
+
 
 

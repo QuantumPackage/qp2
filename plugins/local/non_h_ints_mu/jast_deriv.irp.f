@@ -184,7 +184,7 @@
            rc = qmckl_check(qmckl_ctx_jastrow, rc)
          stop -1
        endif
- 
+
        k=0
       do ipoint = ipoint_block, ipoint_end
        do jpoint = 1, n_points_extra_final_grid ! r2
@@ -237,4 +237,5 @@
 END_PROVIDER
 
 ! ---
+
 

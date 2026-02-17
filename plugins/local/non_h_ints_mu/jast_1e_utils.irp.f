@@ -43,7 +43,7 @@ subroutine get_j1e_coef_fit_ao(dim_fit, coef_fit)
   Pt = Pa + Pb
 
   allocate(u1e_tmp(n_points_final_grid))
-  
+
   g = -0.5d0 * (dble(elec_num) - 1.d0) / dble(elec_num)
   call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_u2e_ao, ao_num*ao_num, Pt, 1, 0.d0, u1e_tmp, 1)
 
@@ -56,7 +56,7 @@ subroutine get_j1e_coef_fit_ao(dim_fit, coef_fit)
 
   allocate(A(ao_num,ao_num), b(ao_num))
 
-  A(1:ao_num,1:ao_num) = ao_overlap(1:ao_num,1:ao_num) 
+  A(1:ao_num,1:ao_num) = ao_overlap(1:ao_num,1:ao_num)
 
   !$OMP PARALLEL                             &
   !$OMP DEFAULT (NONE)                       &
@@ -166,7 +166,7 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   Pt = Pa + Pb
 
   allocate(u1e_tmp(n_points_final_grid))
-  
+
   g = -0.5d0 * (dble(elec_num) - 1.d0) / dble(elec_num)
   call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_u2e_ao, ao_num*ao_num, Pt, 1, 0.d0, u1e_tmp, 1)
 
@@ -355,7 +355,7 @@ subroutine get_j1e_coef_fit_ao3(dim_fit, coef_fit)
   Pt = Pa + Pb
 
   allocate(u1e_tmp(n_points_final_grid,3))
-  
+
   g = -0.5d0 * (dble(elec_num) - 1.d0) / dble(elec_num)
   do d = 1, 3
     call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_grad1_u2e_ao(1,1,1,d), ao_num*ao_num, Pt, 1, 0.d0, u1e_tmp(1,d), 1)
@@ -368,7 +368,7 @@ subroutine get_j1e_coef_fit_ao3(dim_fit, coef_fit)
 
   allocate(A(ao_num,ao_num), b(ao_num,3))
 
-  A(1:ao_num,1:ao_num) = ao_overlap(1:ao_num,1:ao_num) 
+  A(1:ao_num,1:ao_num) = ao_overlap(1:ao_num,1:ao_num)
 
   !$OMP PARALLEL                             &
   !$OMP DEFAULT (NONE)                       &
@@ -435,4 +435,5 @@ subroutine get_j1e_coef_fit_ao3(dim_fit, coef_fit)
 end
 
 ! ---
+
 

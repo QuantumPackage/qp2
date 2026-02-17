@@ -30,16 +30,16 @@ subroutine write_cipsi_json(pt2_data, pt2_data_err)
     do k=1,N_states_p
       pt2_plus  = pt2_data % variance(k)
       pt2_minus = pt2_data % pt2(k)
-      pt2_abs   = pt2_plus - pt2_minus 
-      pt2_tot   = pt2_plus + pt2_minus 
+      pt2_abs   = pt2_plus - pt2_minus
+      pt2_tot   = pt2_plus + pt2_minus
       error_pt2_minus = pt2_data_err % pt2(k)
       error_pt2_plus  = pt2_data_err % variance(k)
       error_pt2_tot = dsqrt(error_pt2_minus**2+error_pt2_plus**2)
-      error_pt2_abs = error_pt2_tot ! same variance because independent variables 
+      error_pt2_abs = error_pt2_tot ! same variance because independent variables
       write(json_unit, json_dict_uopen_fmt)
       write(json_unit, json_real_fmt) 'energy', psi_energy_with_nucl_rep(k)
       write(json_unit, json_real_fmt) 's2', psi_s2(k)
-      
+
       write(json_unit, json_real_fmt) 'pt2', pt2_tot
       write(json_unit, json_real_fmt) 'pt2_err', error_pt2_tot
 
@@ -72,3 +72,4 @@ subroutine write_cipsi_json(pt2_data, pt2_data_err)
     deallocate(fmtk)
     call unlock_io
 end
+

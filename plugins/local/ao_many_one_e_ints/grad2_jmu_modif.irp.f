@@ -27,7 +27,7 @@ BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2, (ao_num, ao_num, n_poin
   int2_grad1u2_grad2u2 = 0.d0
 
   !$OMP PARALLEL DEFAULT (NONE)                                               &
-  !$OMP PRIVATE (ipoint, i, j, i_fit, r, coef_fit, expo_fit, tmp)             & 
+  !$OMP PRIVATE (ipoint, i, j, i_fit, r, coef_fit, expo_fit, tmp)             &
   !$OMP SHARED  (n_points_final_grid, ao_num, final_grid_points, ng_fit_jast, &
   !$OMP          expo_gauss_1_erf_x_2, coef_gauss_1_erf_x_2,int2_grad1u2_grad2u2)
   !$OMP DO
@@ -66,7 +66,7 @@ BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2, (ao_num, ao_num, n_poin
   call wall_time(wall1)
   print*, ' wall time for int2_grad1u2_grad2u2 (min) = ', (wall1 - wall0) / 60.d0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -98,11 +98,11 @@ BEGIN_PROVIDER [double precision, int2_grad1u2_grad2u2_env2, (ao_num, ao_num, n_
 
   !$OMP PARALLEL DEFAULT (NONE)                                       &
   !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center,  &
-  !$OMP          coef_fit, expo_fit, int_fit, tmp)                    & 
-  !$OMP SHARED  (n_points_final_grid, ao_num, List_env1s_square_size, & 
+  !$OMP          coef_fit, expo_fit, int_fit, tmp)                    &
+  !$OMP SHARED  (n_points_final_grid, ao_num, List_env1s_square_size, &
   !$OMP          final_grid_points, ng_fit_jast,                      &
   !$OMP          expo_gauss_1_erf_x_2, coef_gauss_1_erf_x_2,          &
-  !$OMP          List_env1s_square_coef, List_env1s_square_expo,      & 
+  !$OMP          List_env1s_square_coef, List_env1s_square_expo,      &
   !$OMP          List_env1s_square_cent, int2_grad1u2_grad2u2_env2)
   !$OMP DO
   do ipoint = 1, n_points_final_grid
@@ -163,7 +163,7 @@ BEGIN_PROVIDER [double precision, int2_grad1u2_grad2u2_env2, (ao_num, ao_num, n_
   call wall_time(wall1)
   print*, ' wall time for int2_grad1u2_grad2u2_env2 (min) =', (wall1 - wall0) / 60.d0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -194,11 +194,11 @@ BEGIN_PROVIDER [double precision, int2_u2_env2, (ao_num, ao_num, n_points_final_
 
   !$OMP PARALLEL DEFAULT (NONE)                                       &
   !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center,  &
-  !$OMP          coef_fit, expo_fit, int_fit, tmp)                    & 
-  !$OMP SHARED  (n_points_final_grid, ao_num, List_env1s_square_size, & 
+  !$OMP          coef_fit, expo_fit, int_fit, tmp)                    &
+  !$OMP SHARED  (n_points_final_grid, ao_num, List_env1s_square_size, &
   !$OMP          final_grid_points, ng_fit_jast,                      &
   !$OMP          expo_gauss_j_mu_x_2, coef_gauss_j_mu_x_2,            &
-  !$OMP          List_env1s_square_coef, List_env1s_square_expo,      & 
+  !$OMP          List_env1s_square_coef, List_env1s_square_expo,      &
   !$OMP          List_env1s_square_cent, int2_u2_env2)
   !$OMP DO
   do ipoint = 1, n_points_final_grid
@@ -224,7 +224,7 @@ BEGIN_PROVIDER [double precision, int2_u2_env2, (ao_num, ao_num, n_points_final_
           ! ---
 
           do i_1s = 2, List_env1s_square_size
-         
+
             coef        = List_env1s_square_coef  (i_1s)
             if(dabs(coef) .lt. 1d-15) cycle ! beta = 0.0
             beta        = List_env1s_square_expo  (i_1s)
@@ -259,7 +259,7 @@ BEGIN_PROVIDER [double precision, int2_u2_env2, (ao_num, ao_num, n_points_final_
   call wall_time(wall1)
   print*, ' wall time for int2_u2_env2 (min) = ', (wall1 - wall0) / 60.d0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -290,12 +290,12 @@ BEGIN_PROVIDER [double precision, int2_u_grad1u_x_env2, (ao_num, ao_num, n_point
  !$OMP PARALLEL DEFAULT (NONE)                                       &
  !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center,  &
  !$OMP          coef_fit, expo_fit, int_fit, alpha_1s, dist,         &
- !$OMP          alpha_1s_inv, centr_1s, expo_coef_1s, coef_tmp,      & 
- !$OMP          tmp_x, tmp_y, tmp_z)                                 & 
- !$OMP SHARED  (n_points_final_grid, ao_num, List_env1s_square_size, & 
+ !$OMP          alpha_1s_inv, centr_1s, expo_coef_1s, coef_tmp,      &
+ !$OMP          tmp_x, tmp_y, tmp_z)                                 &
+ !$OMP SHARED  (n_points_final_grid, ao_num, List_env1s_square_size, &
  !$OMP          final_grid_points, ng_fit_jast,                      &
  !$OMP          expo_gauss_j_mu_1_erf, coef_gauss_j_mu_1_erf,        &
- !$OMP          List_env1s_square_coef, List_env1s_square_expo,      & 
+ !$OMP          List_env1s_square_coef, List_env1s_square_expo,      &
  !$OMP          List_env1s_square_cent, int2_u_grad1u_x_env2)
  !$OMP DO
 
@@ -326,7 +326,7 @@ BEGIN_PROVIDER [double precision, int2_u_grad1u_x_env2, (ao_num, ao_num, n_point
           ! ---
 
           do i_1s = 2, List_env1s_square_size
-          
+
             coef        = List_env1s_square_coef  (i_1s)
             if(dabs(coef) .lt. 1d-15) cycle ! beta = 0.0
             beta        = List_env1s_square_expo  (i_1s)
@@ -335,19 +335,19 @@ BEGIN_PROVIDER [double precision, int2_u_grad1u_x_env2, (ao_num, ao_num, n_point
             B_center(3) = List_env1s_square_cent(3,i_1s)
             dist        = (B_center(1) - r(1)) * (B_center(1) - r(1)) &
                         + (B_center(2) - r(2)) * (B_center(2) - r(2)) &
-                        + (B_center(3) - r(3)) * (B_center(3) - r(3)) 
+                        + (B_center(3) - r(3)) * (B_center(3) - r(3))
 
             alpha_1s     = beta + expo_fit
-            alpha_1s_inv = 1.d0 / alpha_1s 
+            alpha_1s_inv = 1.d0 / alpha_1s
 
             centr_1s(1)  = alpha_1s_inv * (beta * B_center(1) + expo_fit * r(1))
             centr_1s(2)  = alpha_1s_inv * (beta * B_center(2) + expo_fit * r(2))
             centr_1s(3)  = alpha_1s_inv * (beta * B_center(3) + expo_fit * r(3))
 
-            expo_coef_1s = beta * expo_fit * alpha_1s_inv * dist 
+            expo_coef_1s = beta * expo_fit * alpha_1s_inv * dist
             coef_tmp = coef * coef_fit * dexp(-expo_coef_1s)
 !            if(dabs(coef_tmp) .lt. 1d-12) cycle
-            
+
             call NAI_pol_x_mult_erf_ao_with1s(i, j, alpha_1s, centr_1s, 1.d+9, r, int_fit)
 
             tmp_x += coef_tmp * int_fit(1)
@@ -381,7 +381,7 @@ BEGIN_PROVIDER [double precision, int2_u_grad1u_x_env2, (ao_num, ao_num, n_point
   call wall_time(wall1)
   print*, ' wall time for int2_u_grad1u_x_env2 (min) = ', (wall1 - wall0) / 60.d0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -412,11 +412,11 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_env2, (ao_num, ao_num, n_points
  !$OMP PARALLEL DEFAULT (NONE)                                       &
  !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center,  &
  !$OMP          coef_fit, expo_fit, int_fit, tmp, alpha_1s, dist,    &
- !$OMP          alpha_1s_inv, centr_1s, expo_coef_1s, coef_tmp)      & 
- !$OMP SHARED  (n_points_final_grid, ao_num, List_env1s_square_size, & 
+ !$OMP          alpha_1s_inv, centr_1s, expo_coef_1s, coef_tmp)      &
+ !$OMP SHARED  (n_points_final_grid, ao_num, List_env1s_square_size, &
  !$OMP          final_grid_points, ng_fit_jast,                      &
  !$OMP          expo_gauss_j_mu_1_erf, coef_gauss_j_mu_1_erf,        &
- !$OMP          List_env1s_square_coef, List_env1s_square_expo,      & 
+ !$OMP          List_env1s_square_coef, List_env1s_square_expo,      &
  !$OMP          List_env1s_square_cent, int2_u_grad1u_env2)
  !$OMP DO
   do ipoint = 1, n_points_final_grid
@@ -454,7 +454,7 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_env2, (ao_num, ao_num, n_points
                         + (B_center(3) - r(3)) * (B_center(3) - r(3))
 
             alpha_1s     = beta + expo_fit
-            alpha_1s_inv = 1.d0 / alpha_1s 
+            alpha_1s_inv = 1.d0 / alpha_1s
             centr_1s(1)  = alpha_1s_inv * (beta * B_center(1) + expo_fit * r(1))
             centr_1s(2)  = alpha_1s_inv * (beta * B_center(2) + expo_fit * r(2))
             centr_1s(3)  = alpha_1s_inv * (beta * B_center(3) + expo_fit * r(3))
@@ -491,7 +491,8 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_env2, (ao_num, ao_num, n_points
   call wall_time(wall1)
   print*, ' wall time for int2_u_grad1u_env2 (min) = ', (wall1 - wall0) / 60.d0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
+
 

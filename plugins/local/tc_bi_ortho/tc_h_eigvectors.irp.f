@@ -5,7 +5,10 @@
 
 ! ---
 
-BEGIN_PROVIDER [integer, index_HF_psi_det]                                                                                                            
+BEGIN_PROVIDER [integer, index_HF_psi_det]
+  BEGIN_DOC
+  ! index_HF_psi_det
+  END_DOC
 
   implicit none
   integer :: i, degree
@@ -47,13 +50,13 @@ end
 
  BEGIN_PROVIDER [double precision, eigval_right_tc_bi_orth        , (N_states)      ]
 &BEGIN_PROVIDER [double precision, eigval_left_tc_bi_orth         , (N_states)      ]
-&BEGIN_PROVIDER [double precision, reigvec_tc_bi_orth             , (N_det,N_states)]
-&BEGIN_PROVIDER [double precision, leigvec_tc_bi_orth             , (N_det,N_states)]
+&BEGIN_PROVIDER [double precision, reigvec_tc_bi_orth             , (N_det, N_states)]
+&BEGIN_PROVIDER [double precision, leigvec_tc_bi_orth             , (N_det, N_states)]
 &BEGIN_PROVIDER [double precision, s2_eigvec_tc_bi_orth           , (N_states)      ]
 &BEGIN_PROVIDER [double precision, norm_ground_left_right_bi_orth , (N_states)      ]
 
   BEGIN_DOC
-  ! eigenvalues, right and left eigenvectors of the transcorrelated Hamiltonian on the BI-ORTHO basis 
+  ! eigenvalues, right and left eigenvectors of the transcorrelated Hamiltonian on the BI-ORTHO basis
   END_DOC
 
   implicit none
@@ -93,7 +96,7 @@ end
 !     call get_H_tc_s2_l0_r0(leigvec_tc_bi_orth_tmp(1,i),reigvec_tc_bi_orth_tmp(1,i),1,N_det,expect_e(i), s2_values_tmp(i))
 !    enddo
     call get_H_tc_s2_l0_r0(leigvec_tc_bi_orth_tmp,reigvec_tc_bi_orth_tmp,N_det,N_det,expect_e, s2_values_tmp)
-    
+
 
     allocate(index_good_state_array(N_det),good_state_array(N_det))
     i_state = 0
@@ -187,7 +190,7 @@ end
       call dsort(coef_hf_l,iorder,N_det)
       igood_l = iorder(1)
       print*,'igood_l, coef_hf_l = ',igood_l,coef_hf_l(1)
-       
+
       if(igood_r.ne.igood_l .and. igood_r.ne.1) then
         print *,''
         print *,'Warning, the left and right eigenvectors are "not the same" '
@@ -211,7 +214,7 @@ end
         do j = 1, N_det
           leigvec_tc_bi_orth(j,1) = leigvec_tc_bi_orth_tmp(j,i)
         enddo
-      else 
+      else
         do i = 1, N_states
           eigval_right_tc_bi_orth(i) = eigval_right_tmp(i)
           eigval_left_tc_bi_orth(i)  = eigval_right_tmp(i)
@@ -261,7 +264,7 @@ end
     do while (.not.converged)
       if(.not.pure_three_body_h_tc)then
        call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_left_tc_bi_orth, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_dagger_u_0_opt)
-      else 
+      else
        call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_left_tc_bi_orth, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_dagger_u_0_with_pure_three_omp)
       endif
       i_it += 1
@@ -351,7 +354,7 @@ end
   call ezfio_set_tc_bi_ortho_psi_r_coef_bi_ortho(buffer)
   deallocate(buffer)
 
-END_PROVIDER 
+END_PROVIDER
 
 
 
@@ -412,4 +415,5 @@ subroutine bi_normalize(u_l, u_r, n, ld, nstates)
   enddo
 
 end
+
 

@@ -10,6 +10,9 @@ END_PROVIDER
 &BEGIN_PROVIDER [ integer, pt2_minDetInFirstTeeth ]
 &BEGIN_PROVIDER [ integer, pt2_n_tasks_max ]
 &BEGIN_PROVIDER [ integer, pt2_F, (N_det_generators) ]
+  BEGIN_DOC
+  ! pt2_N_teeth
+  END_DOC
   implicit none
   logical, external :: testTeethBuilding
   integer :: i
@@ -84,12 +87,18 @@ logical function testTeethBuilding(minF, N)
   stop "exited testTeethBuilding"
 end function
 
-BEGIN_PROVIDER[ integer, dress_N_cp_max ]
+BEGIN_PROVIDER [ integer, dress_N_cp_max ]
+  BEGIN_DOC
+  ! dress_N_cp_max
+  END_DOC
   dress_N_cp_max = 28
 END_PROVIDER
 
- BEGIN_PROVIDER[integer, pt2_J, (N_det_generators)]
+ BEGIN_PROVIDER [integer, pt2_J, (N_det_generators)]
 &BEGIN_PROVIDER [integer, dress_R1, (0:N_det_generators) ]
+  BEGIN_DOC
+  ! pt2_J
+  END_DOC
   implicit none
   integer :: m,j
   integer :: l,nmov
@@ -119,13 +128,16 @@ END_PROVIDER
   end do
 END_PROVIDER
 
- BEGIN_PROVIDER[ integer, dress_M_m, (dress_N_cp_max)]
-&BEGIN_PROVIDER[ integer, pt2_J_, (N_det_generators)]
-&BEGIN_PROVIDER[ double precision, pt2_u, (N_det_generators)]
-&BEGIN_PROVIDER[ integer, dress_R1_, (0:N_det_generators)]
-&BEGIN_PROVIDER[ double precision, dress_M_mi, (dress_N_cp_max, N_det_generators+1)]
+ BEGIN_PROVIDER [ integer, dress_M_m, (dress_N_cp_max)]
+&BEGIN_PROVIDER [ integer, pt2_J_, (N_det_generators)]
+&BEGIN_PROVIDER [ double precision, pt2_u, (N_det_generators)]
+&BEGIN_PROVIDER [ integer, dress_R1_, (0:N_det_generators)]
+&BEGIN_PROVIDER [ double precision, dress_M_mi, (dress_N_cp_max, N_det_generators+1)]
 &BEGIN_PROVIDER [ integer, dress_T, (N_det_generators) ]
 &BEGIN_PROVIDER [ integer, dress_N_cp ]
+  BEGIN_DOC
+  ! dress_M_m
+  END_DOC
   implicit none
   integer :: N_c, N_j, U, t, i, m
   double precision :: v, dt
@@ -386,6 +398,9 @@ end
 
  BEGIN_PROVIDER [integer, dress_dot_F, (dress_N_cp)]
 &BEGIN_PROVIDER [ integer, dress_P, (N_det_generators) ]
+  BEGIN_DOC
+  ! dress_dot_F
+  END_DOC
   implicit none
   integer :: m,i
 
@@ -409,6 +424,9 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, dress_e, (N_det_generators, dress_N_cp)]
 &BEGIN_PROVIDER [integer, dress_dot_t, (0:dress_N_cp)]
 &BEGIN_PROVIDER [integer, dress_dot_n_0, (0:dress_N_cp)]
+  BEGIN_DOC
+  ! dress_e
+  END_DOC
   implicit none
 
   logical, allocatable :: d(:)
@@ -654,6 +672,9 @@ end function
 &BEGIN_PROVIDER [ double precision,     pt2_W_T ]
 &BEGIN_PROVIDER [ double precision,     pt2_u_0 ]
 &BEGIN_PROVIDER [ integer,              pt2_n_0, (pt2_N_teeth+1) ]
+  BEGIN_DOC
+  ! pt2_w
+  END_DOC
   implicit none
   integer :: i, t
   double precision, allocatable :: tilde_w(:), tilde_cW(:)
@@ -721,6 +742,7 @@ end function
   end do
   pt2_n_0(pt2_N_teeth+1) = N_det_generators
 END_PROVIDER
+
 
 
 

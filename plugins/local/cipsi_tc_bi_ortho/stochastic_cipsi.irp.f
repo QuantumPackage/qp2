@@ -24,7 +24,7 @@ subroutine run_pouet
   double precision, external    :: memory_of_double
 
   PROVIDE mo_l_coef mo_r_coef
-  PROVIDE H_apply_buffer_allocated distributed_davidson 
+  PROVIDE H_apply_buffer_allocated distributed_davidson
 
   print*, ' Diagonal elements of the Fock matrix '
   do i = 1, mo_num
@@ -55,7 +55,7 @@ subroutine run_stochastic_cipsi
   double precision, external    :: memory_of_double
 
   PROVIDE mo_l_coef mo_r_coef
-  PROVIDE H_apply_buffer_allocated distributed_davidson 
+  PROVIDE H_apply_buffer_allocated distributed_davidson
 
   print*, ' Diagonal elements of the Fock matrix '
   do i = 1, mo_num
@@ -160,4 +160,5 @@ subroutine run_stochastic_cipsi
   call pt2_dealloc(pt2_data_err)
 
 end
+
 

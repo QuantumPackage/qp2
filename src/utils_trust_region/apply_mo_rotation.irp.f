@@ -22,7 +22,7 @@
 ! | i,j                    | integer          | indexes                      |
 
 subroutine apply_mo_rotation(R,prev_mos)
-  
+
   include 'pi.h'
 
   !BEGIN_DOC
@@ -36,9 +36,9 @@ subroutine apply_mo_rotation(R,prev_mos)
   ! in
   double precision, intent(in)  :: R(mo_num,mo_num)
 
-  ! out 
+  ! out
   double precision, intent(out) :: prev_mos(ao_num,mo_num)
-  
+
   ! internal
   double precision, allocatable :: new_mos(:,:)
   integer                       :: i,j
@@ -47,20 +47,20 @@ subroutine apply_mo_rotation(R,prev_mos)
   print*,''
   print*,'---apply_mo_rotation---'
 
-  call wall_time(t1)  
+  call wall_time(t1)
 
   ! Allocation
   allocate(new_mos(ao_num,mo_num))
-  
+
   ! Calculation
 
-  ! Product of old MOs (mo_coef) by Rotation matrix (R) 
+  ! Product of old MOs (mo_coef) by Rotation matrix (R)
   call dgemm('N','N',ao_num,mo_num,mo_num,1d0,mo_coef,size(mo_coef,1),R,size(R,1),0d0,new_mos,size(new_mos,1))
 
   prev_mos = mo_coef
   mo_coef = new_mos
 
-  if (debug) then  
+  if (debug) then
     print*,'New mo_coef : '
     do i = 1, mo_num
       write(*,'(100(F10.5))') mo_coef(i,:)
@@ -71,7 +71,7 @@ subroutine apply_mo_rotation(R,prev_mos)
   mo_label = 'MCSCF'
   !call save_mos
   call ezfio_set_determinants_mo_label(mo_label)
-  
+
   !print*,'Done, MOs saved'
 
   ! Deallocation, end
@@ -83,3 +83,4 @@ subroutine apply_mo_rotation(R,prev_mos)
   print*,'---End apply_mo_rotation---'
 
 end subroutine
+

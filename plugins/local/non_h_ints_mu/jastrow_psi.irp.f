@@ -1,8 +1,11 @@
 BEGIN_PROVIDER [ double precision, c_ij_ab_jastrow, (mo_num, mo_num, elec_alpha_num, elec_beta_num)]
+  BEGIN_DOC
+  ! c_ij_ab_jastrow
+  END_DOC
  implicit none
  integer :: iunit, getUnitAndOpen
  c_ij_ab_jastrow = 0.d0
- iunit = getUnitAndOpen(trim(ezfio_work_dir)//'c_ij_ab', 'R')                                                     
+ iunit = getUnitAndOpen(trim(ezfio_work_dir)//'c_ij_ab', 'R')
  read(iunit) c_ij_ab_jastrow
  close(iunit)
  print*,'c_ij_ab_jastrow = '
@@ -10,7 +13,7 @@ BEGIN_PROVIDER [ double precision, c_ij_ab_jastrow, (mo_num, mo_num, elec_alpha_
  do i = 1, elec_beta_num ! r2
   do j = 1, elec_alpha_num ! r1
    do a = elec_beta_num+1, mo_num ! r2
-    do b = elec_alpha_num+1, mo_num ! r1 
+    do b = elec_alpha_num+1, mo_num ! r1
 !     print*,b,a,j,i
      print*,c_ij_ab_jastrow(b,a,j,i),b,a,j,i
      if(dabs(c_ij_ab_jastrow(b,a,j,i)).lt.1.d-12)then
@@ -20,7 +23,7 @@ BEGIN_PROVIDER [ double precision, c_ij_ab_jastrow, (mo_num, mo_num, elec_alpha_
    enddo
   enddo
  enddo
-END_PROVIDER 
+END_PROVIDER
 
 double precision function jastrow_psi(r1,r2)
  implicit none
@@ -39,7 +42,7 @@ double precision function jastrow_psi(r1,r2)
    phi_i_phi_j = mos_array_r1(i) * mos_array_r2(j) + eps
    denominator = 1.d0/phi_i_phi_j
    do a = elec_beta_num+1, mo_num ! r1
-    do b = elec_alpha_num+1, mo_num ! r2 
+    do b = elec_alpha_num+1, mo_num ! r2
      coef = c_ij_ab_jastrow(b,a,j,i)
      numerator = mos_array_r2(b) * mos_array_r1(a)
      jastrow_psi += coef * numerator*denominator
@@ -70,7 +73,7 @@ subroutine get_grad_r1_jastrow_psi(r1,r2,grad_j_psi_r1,jast)
    call denom_jpsi(i,j,delta,mos_array_r1,mos_grad_array_r1,mos_array_r2,denom_j, denom_j_grad)
    inv_denom_j = 1.d0/denom_j
    do a = elec_beta_num+1, mo_num ! r1
-    do b = elec_alpha_num+1, mo_num ! r2 
+    do b = elec_alpha_num+1, mo_num ! r2
      call numerator_psi(a,b,mos_array_r1,mos_grad_array_r1,mos_array_r2,num_j, num_j_grad)
      coef = c_ij_ab_jastrow(b,a,j,i)
      jast += coef * num_j * inv_denom_j
@@ -122,3 +125,4 @@ subroutine numerator_psi(a,b,mos_array_r1,mos_grad_array_r1,mos_array_r2,num, gr
  num = mos_array_r1(a) * mos_array_r2(b)
  grad_num(:) = mos_array_r2(b) * mos_grad_array_r1(:,a)
 end
+

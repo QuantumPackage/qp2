@@ -18,7 +18,7 @@ subroutine first_gradient_opt(n,v_grad)
   ! in
   integer, intent(in) :: n
   ! n : integer, n = mo_num*(mo_num-1)/2
-  
+
   ! out
   double precision, intent(out) :: v_grad(n)
   ! v_grad : double precision vector of length n containeing the gradient
@@ -31,14 +31,14 @@ subroutine first_gradient_opt(n,v_grad)
   ! grad : double precision matrix containing the gradient before the permutation
   ! A : double precision matrix containing the gradient after the permutation
   ! norm : double precision number, the norm of the vector gradient
-  ! i,p,q,r,s,t : integer, indexes 
+  ! i,p,q,r,s,t : integer, indexes
   ! istate : integer, the electronic state
 
   ! Function
   double precision :: get_two_e_integral, norm2
   ! get_two_e_integral :  double precision function that gives the two e integrals
   ! norm2 : double precision function that gives the norm of a vector
- 
+
   ! Provided :
   ! mo_one_e_integrals : mono e- integrals
   ! get_two_e_integral : two e- integrals
@@ -87,13 +87,13 @@ subroutine first_gradient_opt(n,v_grad)
   do i=1,n
     call vec_to_mat_index(i,p,q)
     v_grad(i)=(grad(p,q) - grad(q,p))
-  enddo  
+  enddo
 
-  ! Display, vector containing the gradient elements 
-  if (debug) then  
+  ! Display, vector containing the gradient elements
+  if (debug) then
     print*,'Vector containing the gradient :'
     write(*,'(100(F10.5))') v_grad(1:n)
-  endif  
+  endif
 
   ! Norm of the vector
   norm = norm2(v_grad)
@@ -108,7 +108,7 @@ subroutine first_gradient_opt(n,v_grad)
   enddo
 
   ! Display, matrix containting the gradient elements
-  if (debug) then    
+  if (debug) then
     print*,'Matrix containing the gradient :'
     do i = 1, mo_num
       write(*,'(100(ES12.5))') A(i,1:mo_num)
@@ -126,3 +126,4 @@ subroutine first_gradient_opt(n,v_grad)
   endif
 
 end subroutine
+

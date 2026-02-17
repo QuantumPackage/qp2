@@ -13,7 +13,7 @@ type(H_apply_buffer_type), pointer :: H_apply_buffer(:)
 
 
  BEGIN_PROVIDER [ logical, H_apply_buffer_allocated ]
-&BEGIN_PROVIDER [ integer(omp_lock_kind), H_apply_buffer_lock, (64,0:nproc-1) ]
+&BEGIN_PROVIDER [ integer(omp_lock_kind), H_apply_buffer_lock, (64, 0:nproc-1) ]
   use omp_lib
   implicit none
   BEGIN_DOC
@@ -381,3 +381,4 @@ subroutine replace_wf(N_det_new, LDA, psi_coef_new, psi_det_new)
   psi_coef(1:N_det_new,1:N_states) = psi_coef_new(1:N_det_new,1:N_states)
 
 end
+

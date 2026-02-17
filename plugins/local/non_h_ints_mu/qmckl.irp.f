@@ -85,14 +85,14 @@ BEGIN_PROVIDER [ integer*8, qmckl_ctx_jastrow ]
 !  print*,'jast_qmckl_cord_num = ',jast_qmckl_cord_num
 !  integer :: i
 !  do i = 1, jast_qmckl_c_vector_size
-!   print*,jast_qmckl_c_vector(i) 
+!   print*,jast_qmckl_c_vector(i)
 !  enddo
 
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ double precision, aos_in_r_array_qmckl, (ao_num,n_points_final_grid)]
-&BEGIN_PROVIDER [ double precision, aos_grad_in_r_array_qmckl, (ao_num,n_points_final_grid,3)]
+ BEGIN_PROVIDER [ double precision, aos_in_r_array_qmckl, (ao_num, n_points_final_grid)]
+&BEGIN_PROVIDER [ double precision, aos_grad_in_r_array_qmckl, (ao_num, n_points_final_grid, 3)]
 &BEGIN_PROVIDER [ double precision, aos_lapl_in_r_array_qmckl, (ao_num, n_points_final_grid)]
  implicit none
  BEGIN_DOC
@@ -142,8 +142,8 @@ END_PROVIDER
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ double precision, mos_in_r_array_qmckl, (mo_num,n_points_final_grid)]
-&BEGIN_PROVIDER [ double precision, mos_grad_in_r_array_qmckl, (mo_num,n_points_final_grid,3)]
+ BEGIN_PROVIDER [ double precision, mos_in_r_array_qmckl, (mo_num, n_points_final_grid)]
+&BEGIN_PROVIDER [ double precision, mos_grad_in_r_array_qmckl, (mo_num, n_points_final_grid, 3)]
 &BEGIN_PROVIDER [ double precision, mos_lapl_in_r_array_qmckl, (mo_num, n_points_final_grid)]
  implicit none
  BEGIN_DOC
@@ -191,5 +191,6 @@ END_PROVIDER
  enddo
 
 END_PROVIDER
+
 
 

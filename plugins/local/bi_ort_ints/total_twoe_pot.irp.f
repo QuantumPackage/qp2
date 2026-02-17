@@ -111,34 +111,34 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_two_e_chemist, (mo_num, mo_num,
     print*, ' memory scale of TC ao -> mo: O(N4) '
 
     allocate(a2(ao_num,ao_num,ao_num,mo_num))
-  
+
     call dgemm( 'T', 'N', ao_num*ao_num*ao_num, mo_num, ao_num, 1.d0     &
               , ao_two_e_tc_tot(1,1,1,1), ao_num, mo_l_coef(1,1), ao_num &
               , 0.d0, a2(1,1,1,1), ao_num*ao_num*ao_num)
-  
+
     FREE ao_two_e_tc_tot
 
     allocate(a1(ao_num,ao_num,mo_num,mo_num))
-  
+
     call dgemm( 'T', 'N', ao_num*ao_num*mo_num, mo_num, ao_num, 1.d0 &
               , a2(1,1,1,1), ao_num, mo_r_coef(1,1), ao_num          &
               , 0.d0, a1(1,1,1,1), ao_num*ao_num*mo_num)
-  
+
     deallocate(a2)
     allocate(a2(ao_num,mo_num,mo_num,mo_num))
-  
+
     call dgemm( 'T', 'N', ao_num*mo_num*mo_num, mo_num, ao_num, 1.d0 &
               , a1(1,1,1,1), ao_num, mo_l_coef(1,1), ao_num          &
               , 0.d0, a2(1,1,1,1), ao_num*mo_num*mo_num)
-  
+
     deallocate(a1)
-  
+
     call dgemm( 'T', 'N', mo_num*mo_num*mo_num, mo_num, ao_num, 1.d0 &
               , a2(1,1,1,1), ao_num, mo_r_coef(1,1), ao_num          &
               , 0.d0, mo_bi_ortho_tc_two_e_chemist(1,1,1,1), mo_num*mo_num*mo_num)
-  
+
     deallocate(a2)
-  
+
   endif
 
   !allocate(a1(mo_num,ao_num,ao_num,ao_num))
@@ -189,7 +189,7 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_two_e_chemist, (mo_num, mo_num,
   !enddo
   !deallocate(a2)
 
-  !mo_bi_ortho_tc_two_e_chemist = 0.d0 
+  !mo_bi_ortho_tc_two_e_chemist = 0.d0
   !do m = 1, ao_num
   !  do j = 1, mo_num
   !    do l = 1, mo_num
@@ -207,7 +207,7 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_two_e_chemist, (mo_num, mo_num,
   print *, ' WALL TIME for PROVIDING mo_bi_ortho_tc_two_e_chemist (min)', (t2-t1)/60.d0
   call print_memory_usage()
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -246,7 +246,7 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_two_e, (mo_num, mo_num, mo_num,
     FREE noL_2e
   endif
 
-END_PROVIDER 
+END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, mo_bi_ortho_tc_two_e_transp, (mo_num, mo_num, mo_num, mo_num)]
  implicit none
@@ -272,15 +272,15 @@ BEGIN_PROVIDER [ double precision, mo_bi_ortho_tc_two_e_transp, (mo_num, mo_num,
   enddo
  enddo
  call wall_time(t1)
- 
+
  print *, ' WALL TIME for PROVIDING mo_bi_ortho_tc_two_e_transp (min)', (t1-t0)/60.d0
 
-END_PROVIDER 
+END_PROVIDER
 ! ---
 
- BEGIN_PROVIDER [ double precision, mo_bi_ortho_tc_two_e_jj,          (mo_num,mo_num)]
-&BEGIN_PROVIDER [ double precision, mo_bi_ortho_tc_two_e_jj_exchange, (mo_num,mo_num)]
-&BEGIN_PROVIDER [ double precision, mo_bi_ortho_tc_two_e_jj_anti,     (mo_num,mo_num)]
+ BEGIN_PROVIDER [ double precision, mo_bi_ortho_tc_two_e_jj,          (mo_num, mo_num)]
+&BEGIN_PROVIDER [ double precision, mo_bi_ortho_tc_two_e_jj_exchange, (mo_num, mo_num)]
+&BEGIN_PROVIDER [ double precision, mo_bi_ortho_tc_two_e_jj_anti,     (mo_num, mo_num)]
 
   BEGIN_DOC
   !
@@ -308,12 +308,12 @@ END_PROVIDER
 
 ! ---
 
- BEGIN_PROVIDER [double precision, tc_2e_3idx_coulomb_integrals , (mo_num,mo_num,mo_num)]
-&BEGIN_PROVIDER [double precision, tc_2e_3idx_exchange_integrals, (mo_num,mo_num,mo_num)]
+ BEGIN_PROVIDER [double precision, tc_2e_3idx_coulomb_integrals , (mo_num, mo_num, mo_num)]
+&BEGIN_PROVIDER [double precision, tc_2e_3idx_exchange_integrals, (mo_num, mo_num, mo_num)]
 
   BEGIN_DOC
-  ! tc_2e_3idx_coulomb_integrals (j,k,i) = <jk|ji> 
-  ! tc_2e_3idx_exchange_integrals(j,k,i) = <kj|ji> 
+  ! tc_2e_3idx_coulomb_integrals (j,k,i) = <jk|ji>
+  ! tc_2e_3idx_exchange_integrals(j,k,i) = <kj|ji>
   END_DOC
 
   implicit none
@@ -322,8 +322,8 @@ END_PROVIDER
   do i = 1, mo_num
     do k = 1, mo_num
       do j = 1, mo_num
-        tc_2e_3idx_coulomb_integrals(j, k,i) = mo_bi_ortho_tc_two_e(j ,k ,j ,i ) 
-        tc_2e_3idx_exchange_integrals(j,k,i) = mo_bi_ortho_tc_two_e(k ,j ,j ,i ) 
+        tc_2e_3idx_coulomb_integrals(j, k,i) = mo_bi_ortho_tc_two_e(j ,k ,j ,i )
+        tc_2e_3idx_exchange_integrals(j,k,i) = mo_bi_ortho_tc_two_e(k ,j ,j ,i )
       enddo
     enddo
   enddo
@@ -332,12 +332,12 @@ END_PROVIDER
 
 ! ---
 
- BEGIN_PROVIDER [double precision, tc_2e_3idx_coulomb_integrals_transp , (mo_num,mo_num,mo_num)]
-&BEGIN_PROVIDER [double precision, tc_2e_3idx_exchange_integrals_transp, (mo_num,mo_num,mo_num)]
+ BEGIN_PROVIDER [double precision, tc_2e_3idx_coulomb_integrals_transp , (mo_num, mo_num, mo_num)]
+&BEGIN_PROVIDER [double precision, tc_2e_3idx_exchange_integrals_transp, (mo_num, mo_num, mo_num)]
 
   BEGIN_DOC
-  ! tc_2e_3idx_coulomb_integrals_transp (j,k,i) = <jk|ji> 
-  ! tc_2e_3idx_exchange_integrals_transp(j,k,i) = <kj|ji> 
+  ! tc_2e_3idx_coulomb_integrals_transp (j,k,i) = <jk|ji>
+  ! tc_2e_3idx_exchange_integrals_transp(j,k,i) = <kj|ji>
   END_DOC
  implicit none
  integer :: i, j, k
@@ -345,10 +345,11 @@ END_PROVIDER
   do i = 1, mo_num
     do k = 1, mo_num
       do j = 1, mo_num
-        tc_2e_3idx_coulomb_integrals_transp(j, k,i) = mo_bi_ortho_tc_two_e_transp(j ,k ,j ,i ) 
-        tc_2e_3idx_exchange_integrals_transp(j,k,i) = mo_bi_ortho_tc_two_e_transp(k ,j ,j ,i ) 
+        tc_2e_3idx_coulomb_integrals_transp(j, k,i) = mo_bi_ortho_tc_two_e_transp(j ,k ,j ,i )
+        tc_2e_3idx_exchange_integrals_transp(j,k,i) = mo_bi_ortho_tc_two_e_transp(k ,j ,j ,i )
       enddo
     enddo
   enddo
 
-END_PROVIDER 
+END_PROVIDER
+

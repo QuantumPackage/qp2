@@ -19,6 +19,9 @@ end subroutine
 
 
 BEGIN_PROVIDER [ integer, psi_from_sorted_gen, (N_det) ]
+  BEGIN_DOC
+  ! psi_from_sorted_gen
+  END_DOC
   implicit none
   integer :: i,inpsisor
 
@@ -1202,5 +1205,6 @@ subroutine bitstring_to_list_in_selection( string, list, n_elements, Nint)
   enddo
 
 end
+
 
 

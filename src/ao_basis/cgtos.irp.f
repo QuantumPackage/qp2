@@ -41,6 +41,9 @@ END_PROVIDER
  BEGIN_PROVIDER [complex*16, ao_expo_cgtos_ord_transp, (ao_prim_num_max, ao_num)]
 &BEGIN_PROVIDER [double precision, ao_expo_pw_ord_transp, (4, ao_prim_num_max, ao_num)]
 &BEGIN_PROVIDER [double precision, ao_expo_phase_ord_transp, (4, ao_prim_num_max, ao_num)]
+  BEGIN_DOC
+  ! ao_expo_cgtos_ord_transp
+  END_DOC
 
   implicit none
 
@@ -66,6 +69,9 @@ END_PROVIDER
 &BEGIN_PROVIDER [complex*16      , ao_expo_cgtos_ord, (ao_num, ao_prim_num_max)]
 &BEGIN_PROVIDER [double precision, ao_expo_pw_ord, (4, ao_num, ao_prim_num_max)]
 &BEGIN_PROVIDER [double precision, ao_expo_phase_ord, (4, ao_num, ao_prim_num_max)]
+  BEGIN_DOC
+  ! ao_coef_norm_cgtos_ord
+  END_DOC
 
   implicit none
 
@@ -117,6 +123,9 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [double precision, ao_coef_cgtos_norm_ord_transp, (ao_prim_num_max, ao_num)]
+  BEGIN_DOC
+  ! ao_coef_cgtos_norm_ord_transp
+  END_DOC
 
   implicit none
 
@@ -134,6 +143,9 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
+  BEGIN_DOC
+  ! ao_coef_norm_cgtos
+  END_DOC
 
   implicit none
 
@@ -154,7 +166,7 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
     powA(1) = ao_power(i,1)
     powA(2) = ao_power(i,2)
     powA(3) = ao_power(i,3)
- 
+
     if(primitives_normalized) then
 
       ! Normalization of the primitives
@@ -197,5 +209,6 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
   enddo
 
 END_PROVIDER
+
 
 

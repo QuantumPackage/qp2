@@ -5,7 +5,7 @@ double precision function mu_rs_c(rho)
  double precision :: cst_rs,alpha_rs,rs
  cst_rs   = (4.d0 * dacos(-1.d0)/3.d0)**(-1.d0/3.d0)
  alpha_rs = 2.d0 * dsqrt((9.d0 * dacos(-1.d0)/4.d0)**(-1.d0/3.d0)) / sqpi
-  
+
  rs = cst_rs * rho**(-1.d0/3.d0)
  mu_rs_c =  alpha_rs/dsqrt(rs)
 
@@ -18,7 +18,7 @@ double precision function mu_grad_rho_func(r)
  double precision :: rho, dm_a, dm_b, grad_dm_a(3), grad_dm_b(3)
  double precision :: eta, grad_rho(3), grad_sqr
   eta = mu_erf
-  call density_and_grad_alpha_beta(r,dm_a,dm_b, grad_dm_a, grad_dm_b)  
+  call density_and_grad_alpha_beta(r,dm_a,dm_b, grad_dm_a, grad_dm_b)
   rho = dm_a + dm_b
   do m = 1,3
    grad_rho(m) = grad_dm_a(m) + grad_dm_b(m)
@@ -33,5 +33,6 @@ double precision function mu_grad_rho_func(r)
   else
    mu_grad_rho_func = eta * grad_sqr / rho
   endif
-  
+
 end
+

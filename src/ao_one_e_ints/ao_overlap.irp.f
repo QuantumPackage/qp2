@@ -34,7 +34,7 @@
 
       do j = 1, ao_num
         do i = 1, ao_num
-          ao_overlap  (i,j) = ao_overlap_cgtos  (i,j) 
+          ao_overlap  (i,j) = ao_overlap_cgtos  (i,j)
           ao_overlap_x(i,j) = ao_overlap_cgtos_x(i,j)
           ao_overlap_y(i,j) = ao_overlap_cgtos_y(i,j)
           ao_overlap_z(i,j) = ao_overlap_cgtos_z(i,j)
@@ -197,7 +197,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, S_inv,(ao_num,ao_num) ]
+BEGIN_PROVIDER [ double precision, S_inv, (ao_num, ao_num) ]
  implicit none
  BEGIN_DOC
 ! Inverse of the overlap matrix
@@ -206,7 +206,7 @@ BEGIN_PROVIDER [ double precision, S_inv,(ao_num,ao_num) ]
     size(S_inv,1),lin_dep_cutoff)
 END_PROVIDER
 
-BEGIN_PROVIDER [ complex*16, S_inv_complex,(ao_num,ao_num) ]
+BEGIN_PROVIDER [ complex*16, S_inv_complex, (ao_num, ao_num) ]
  implicit none
  BEGIN_DOC
 ! Inverse of the overlap matrix
@@ -215,7 +215,7 @@ BEGIN_PROVIDER [ complex*16, S_inv_complex,(ao_num,ao_num) ]
     ao_num,ao_num,S_inv_complex,size(S_inv_complex,1),lin_dep_cutoff)
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, S_half_inv, (AO_num,AO_num) ]
+BEGIN_PROVIDER [ double precision, S_half_inv, (AO_num, AO_num) ]
 
   BEGIN_DOC
 !   :math:`X = S^{-1/2}` obtained by SVD
@@ -274,7 +274,7 @@ BEGIN_PROVIDER [ double precision, S_half_inv, (AO_num,AO_num) ]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, S_half, (ao_num,ao_num)  ]
+BEGIN_PROVIDER [ double precision, S_half, (ao_num, ao_num)  ]
  implicit none
  BEGIN_DOC
  ! :math:`S^{1/2}`
@@ -309,7 +309,7 @@ BEGIN_PROVIDER [ double precision, S_half, (ao_num,ao_num)  ]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, ao_sphe_overlap, (ao_sphe_num,ao_sphe_num) ]
+BEGIN_PROVIDER [ double precision, ao_sphe_overlap, (ao_sphe_num, ao_sphe_num) ]
  implicit none
  BEGIN_DOC
  ! |AO| overlap matrix in the spherical basis set
@@ -330,4 +330,5 @@ BEGIN_PROVIDER [ double precision, ao_sphe_overlap, (ao_sphe_num,ao_sphe_num) ]
  deallocate(tmp)
 
 END_PROVIDER
+
 

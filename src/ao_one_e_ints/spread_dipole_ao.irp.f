@@ -1,6 +1,6 @@
-  BEGIN_PROVIDER [ double precision, ao_spread_x, (ao_num,ao_num)]
- &BEGIN_PROVIDER [ double precision, ao_spread_y, (ao_num,ao_num)]
- &BEGIN_PROVIDER [ double precision, ao_spread_z, (ao_num,ao_num)]
+  BEGIN_PROVIDER [ double precision, ao_spread_x, (ao_num, ao_num)]
+ &BEGIN_PROVIDER [ double precision, ao_spread_y, (ao_num, ao_num)]
+ &BEGIN_PROVIDER [ double precision, ao_spread_z, (ao_num, ao_num)]
  BEGIN_DOC
  ! * array of the integrals of AO_i * x^2 AO_j
  !
@@ -71,9 +71,9 @@
 
 
 
-  BEGIN_PROVIDER [ double precision, ao_dipole_x, (ao_num,ao_num)]
- &BEGIN_PROVIDER [ double precision, ao_dipole_y, (ao_num,ao_num)]
- &BEGIN_PROVIDER [ double precision, ao_dipole_z, (ao_num,ao_num)]
+  BEGIN_PROVIDER [ double precision, ao_dipole_x, (ao_num, ao_num)]
+ &BEGIN_PROVIDER [ double precision, ao_dipole_y, (ao_num, ao_num)]
+ &BEGIN_PROVIDER [ double precision, ao_dipole_z, (ao_num, ao_num)]
  BEGIN_DOC
  ! * array of the integrals of AO_i * x AO_j
  !
@@ -143,9 +143,9 @@
   !$OMP END PARALLEL DO
  END_PROVIDER
 
-  BEGIN_PROVIDER [ double precision, ao_deriv_1_x, (ao_num,ao_num)]
- &BEGIN_PROVIDER [ double precision, ao_deriv_1_y, (ao_num,ao_num)]
- &BEGIN_PROVIDER [ double precision, ao_deriv_1_z, (ao_num,ao_num)]
+  BEGIN_PROVIDER [ double precision, ao_deriv_1_x, (ao_num, ao_num)]
+ &BEGIN_PROVIDER [ double precision, ao_deriv_1_y, (ao_num, ao_num)]
+ &BEGIN_PROVIDER [ double precision, ao_deriv_1_z, (ao_num, ao_num)]
  BEGIN_DOC
  ! * array of the integrals of AO_i * d/dx  AO_j
  !
@@ -373,4 +373,5 @@
  enddo
  overlap_x *= factor * dx
  end
+
 

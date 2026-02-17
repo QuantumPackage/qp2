@@ -20,10 +20,10 @@ BEGIN_PROVIDER [ integer, N_det_generators ]
   call write_int(6,N_det_generators,'Number of generators')
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_det_generators, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_coef_generators, (psi_det_size,N_states) ]
-&BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_gen, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_coef_sorted_gen, (psi_det_size,N_states) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_det_generators, (N_int, 2, psi_det_size) ]
+&BEGIN_PROVIDER [ double precision, psi_coef_generators, (psi_det_size, N_states) ]
+&BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_gen, (N_int, 2, psi_det_size) ]
+&BEGIN_PROVIDER [ double precision, psi_coef_sorted_gen, (psi_det_size, N_states) ]
 &BEGIN_PROVIDER [ integer, psi_det_sorted_gen_order, (psi_det_size) ]
   implicit none
   BEGIN_DOC
@@ -81,4 +81,5 @@ BEGIN_PROVIDER [ double precision, select_max, (size_select_max) ]
   END_DOC
   select_max = huge(1.d0)
 END_PROVIDER
+
 

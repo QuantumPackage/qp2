@@ -220,7 +220,7 @@ subroutine overlap_gauss_r12_ao_v(D_center, LD_D, delta, i, j, resv, LD_resv, n_
 
   integer                       :: ipoint
   integer                       :: power_A(3), power_B(3), l, k
-  double precision              :: A_center(3), B_center(3), alpha, beta, coef, coef1 
+  double precision              :: A_center(3), B_center(3), alpha, beta, coef, coef1
   double precision, allocatable :: analytical_j(:)
 
   resv(:) = 0.d0
@@ -381,7 +381,7 @@ subroutine overlap_gauss_r12_ao_with1s_v(B_center, beta, D_center, LD_D, delta, 
 
   bg  = beta  * gama_inv
   dg  = delta * gama_inv
-  bdg = bg * delta 
+  bdg = bg * delta
 
   do ipoint = 1, n_points
 
@@ -502,4 +502,5 @@ subroutine overlap_gauss_r12_ao_012(D_center, delta, i, j, ints)
 end
 
 ! ---
+
 

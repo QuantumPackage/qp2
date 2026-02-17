@@ -48,5 +48,6 @@ subroutine test
   enddo
  enddo
  print*,'accu = ',accu
- 
+
 end
+

@@ -32,7 +32,7 @@ subroutine provide_no_0e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     !$OMP PARALLEL                            &
     !$OMP DEFAULT(NONE)                       &
     !$OMP PRIVATE(j, i, ipoint, tmpL, tmpR)   &
-    !$OMP SHARED(ne_b, n_grid,                & 
+    !$OMP SHARED(ne_b, n_grid,                &
     !$OMP        mos_l_in_r, mos_r_in_r, wr1, &
     !$OMP        int2_grad1_u12, tmp)
 
@@ -83,8 +83,8 @@ subroutine provide_no_0e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     allocate(tmpO_priv(n_grid), tmpJ_priv(n_grid,3))
     tmpO_priv = 0.d0
     tmpJ_priv = 0.d0
-  
-    !$OMP DO 
+
+    !$OMP DO
     do i = 1, ne_b
       do ipoint = 1, n_grid
         tmpO_priv(ipoint)   = tmpO_priv(ipoint)   + mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,i)
@@ -117,7 +117,7 @@ subroutine provide_no_0e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     allocate(tmpM_priv(n_grid,3), tmpS_priv(n_grid))
     tmpM_priv = 0.d0
     tmpS_priv = 0.d0
-  
+
     !$OMP DO COLLAPSE(2)
     do i = 1, ne_b
       do j = 1, ne_b
@@ -268,8 +268,8 @@ subroutine provide_no_0e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     allocate(tmpO_priv(n_grid), tmpJ_priv(n_grid,3))
     tmpO_priv = 0.d0
     tmpJ_priv = 0.d0
-  
-    !$OMP DO 
+
+    !$OMP DO
     do i = 1, ne_b
       do ipoint = 1, n_grid
         tmpO_priv(ipoint)   = tmpO_priv(ipoint)   + mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,i)
@@ -280,7 +280,7 @@ subroutine provide_no_0e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     enddo
     !$OMP END DO NOWAIT
 
-    !$OMP DO 
+    !$OMP DO
     do i = ne_b+1, ne_a
       do ipoint = 1, n_grid
         tmpO_priv(ipoint)   = tmpO_priv(ipoint)   + 0.5d0 * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,i)
@@ -315,7 +315,7 @@ subroutine provide_no_0e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     allocate(tmpM_priv(n_grid,3), tmpS_priv(n_grid))
     tmpM_priv = 0.d0
     tmpS_priv = 0.d0
-  
+
     !$OMP DO COLLAPSE(2)
     do i = 1, ne_b
       do j = 1, ne_b
@@ -404,4 +404,5 @@ subroutine provide_no_0e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
 end
 
 ! ---
+
 

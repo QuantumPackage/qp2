@@ -1,5 +1,8 @@
  BEGIN_PROVIDER [double precision, ao_potential_alpha_xc, (ao_num, ao_num)]
 &BEGIN_PROVIDER [double precision, ao_potential_beta_xc, (ao_num, ao_num)]
+  BEGIN_DOC
+  ! ao_potential_alpha_xc
+  END_DOC
  implicit none
  integer :: i,j,k,l
  ao_potential_alpha_xc = 0.d0
@@ -7,8 +10,8 @@
   if(same_xc_func)then
    do i = 1, ao_num
     do j = 1, ao_num
-     ao_potential_alpha_xc(j,i) =  potential_xc_alpha_ao(j,i,1) 
-     ao_potential_beta_xc(j,i)  =  potential_xc_beta_ao(j,i,1)  
+     ao_potential_alpha_xc(j,i) =  potential_xc_alpha_ao(j,i,1)
+     ao_potential_beta_xc(j,i)  =  potential_xc_beta_ao(j,i,1)
     enddo
    enddo
   else
@@ -23,13 +26,20 @@
 END_PROVIDER
 
 BEGIN_PROVIDER [double precision, e_exchange_dft]
+  BEGIN_DOC
+  ! e_exchange_dft
+  END_DOC
  implicit none
   e_exchange_dft = energy_x(1)
 
 END_PROVIDER
 
 BEGIN_PROVIDER [double precision, e_correlation_dft]
+  BEGIN_DOC
+  ! e_correlation_dft
+  END_DOC
  implicit none
   e_correlation_dft = energy_c(1)
 
 END_PROVIDER
+

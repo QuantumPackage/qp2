@@ -4,6 +4,9 @@
 &BEGIN_PROVIDER [double precision, ao_overlap_cgtos_x, (ao_num, ao_num)]
 &BEGIN_PROVIDER [double precision, ao_overlap_cgtos_y, (ao_num, ao_num)]
 &BEGIN_PROVIDER [double precision, ao_overlap_cgtos_z, (ao_num, ao_num)]
+  BEGIN_DOC
+  ! ao_overlap_cgtos
+  END_DOC
 
   implicit none
 
@@ -119,6 +122,7 @@
 END_PROVIDER
 
 ! ---
+
 
 
 

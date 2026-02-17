@@ -39,10 +39,10 @@ END_PROVIDER
 
 ! ---
 
- BEGIN_PROVIDER [double precision, final_grid_points_extra, (3,n_points_extra_final_grid)]
+ BEGIN_PROVIDER [double precision, final_grid_points_extra, (3, n_points_extra_final_grid)]
 &BEGIN_PROVIDER [double precision, final_weight_at_r_vector_extra, (n_points_extra_final_grid)]
-&BEGIN_PROVIDER [integer, index_final_points_extra, (3,n_points_extra_final_grid)]
-&BEGIN_PROVIDER [integer, index_final_points_extra_reverse, (n_points_extra_integration_angular,n_points_extra_radial_grid,nucl_num)]
+&BEGIN_PROVIDER [integer, index_final_points_extra, (3, n_points_extra_final_grid)]
+&BEGIN_PROVIDER [integer, index_final_points_extra_reverse, (n_points_extra_integration_angular, n_points_extra_radial_grid, nucl_num)]
 
   BEGIN_DOC
   !  final_grid_points_extra(1:3,j) = (/ x, y, z /) of the jth grid point
@@ -62,7 +62,7 @@ END_PROVIDER
   call wall_time(wall0)
   print *, ' Providing extra_final_grid_points ...'
 
- 
+
   if (read_extra_grid)then
    print*,'Reading extra grid points and weights'
    call ezfio_get_becke_numerical_grid_final_grid_points_extra(final_grid_points_extra)
@@ -102,5 +102,6 @@ END_PROVIDER
   call print_memory_usage()
 
 END_PROVIDER
+
 
 

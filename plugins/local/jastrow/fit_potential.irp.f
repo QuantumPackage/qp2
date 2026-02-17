@@ -17,7 +17,7 @@ BEGIN_PROVIDER [integer, n_gauss_eff_pot]
 
   n_gauss_eff_pot = ng_fit_jast + 1
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -33,7 +33,7 @@ BEGIN_PROVIDER [integer, n_gauss_eff_pot_deriv]
 
   n_gauss_eff_pot_deriv = ng_fit_jast
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -54,18 +54,18 @@ END_PROVIDER
 
   implicit none
   integer :: i
- 
-  ! fit of the -0.25 * (1 - erf(mu*x))^2 with n_max_fit_slat gaussians 
+
+  ! fit of the -0.25 * (1 - erf(mu*x))^2 with n_max_fit_slat gaussians
   do i = 1, ng_fit_jast
-   expo_gauss_eff_pot(i) = expo_gauss_1_erf_x_2(i) 
+   expo_gauss_eff_pot(i) = expo_gauss_1_erf_x_2(i)
    coef_gauss_eff_pot(i) = -0.25d0 * coef_gauss_1_erf_x_2(i) ! -1/4 * (1 - erf(mu*x))^2
   enddo
 
-  ! Analytical Gaussian part of the potential: + 1/(\sqrt(pi)mu) * exp(-(mu*x)^2) 
+  ! Analytical Gaussian part of the potential: + 1/(\sqrt(pi)mu) * exp(-(mu*x)^2)
   expo_gauss_eff_pot(ng_fit_jast+1) = mu_erf * mu_erf
   coef_gauss_eff_pot(ng_fit_jast+1) =  1.d0 * mu_erf * inv_sq_pi
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -90,9 +90,9 @@ double precision function eff_pot_fit_gauss(x)
 
   BEGIN_DOC
   !
-  ! V(mu,r12) = -0.25 * (1 - erf(mu*r12))^2 + 1/(\sqrt(pi)mu) * exp(-(mu*r12)^2) 
-  ! 
-  ! but fitted with gaussians 
+  ! V(mu,r12) = -0.25 * (1 - erf(mu*r12))^2 + 1/(\sqrt(pi)mu) * exp(-(mu*r12)^2)
+  !
+  ! but fitted with gaussians
   !
   END_DOC
 
@@ -112,12 +112,15 @@ end
 ! ---
 
 BEGIN_PROVIDER [integer, n_fit_1_erf_x]
+  BEGIN_DOC
+  ! n_fit_1_erf_x
+  END_DOC
 
   implicit none
 
   n_fit_1_erf_x = 2
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -136,7 +139,7 @@ BEGIN_PROVIDER [double precision, expos_slat_gauss_1_erf_x, (n_fit_1_erf_x)]
   expos_slat_gauss_1_erf_x(1) = 1.09529d0
   expos_slat_gauss_1_erf_x(2) = 0.756023d0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -147,9 +150,9 @@ END_PROVIDER
   !
   ! (1 - erf(mu*x)) = \sum_i coef_gauss_1_erf_x(i) * exp(-expo_gauss_1_erf_x(i) * x^2)
   !
-  ! This is based on a fit of (1 - erf(mu*x)) by exp(-alpha * x) exp(-beta*mu^2x^2) 
+  ! This is based on a fit of (1 - erf(mu*x)) by exp(-alpha * x) exp(-beta*mu^2x^2)
   !
-  ! and the slater function exp(-alpha * x) is fitted with n_max_fit_slat gaussians 
+  ! and the slater function exp(-alpha * x) is fitted with n_max_fit_slat gaussians
   !
   ! See Appendix 2 of JCP 154, 084119 (2021)
   !
@@ -162,13 +165,13 @@ END_PROVIDER
   alpha = expos_slat_gauss_1_erf_x(1) * mu_erf
   call expo_fit_slater_gam(alpha, expos)
   beta = expos_slat_gauss_1_erf_x(2) * mu_erf * mu_erf
- 
+
   do i = 1, n_max_fit_slat
     expo_gauss_1_erf_x(i) = expos(i) + beta
     coef_gauss_1_erf_x(i) = coef_fit_slat_gauss(i)
   enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -202,7 +205,7 @@ end
   !
   ! This is based on a fit of (1 - erf(mu*x)) by exp(-alpha * x) exp(-beta*mu^2x^2)
   !
-  ! and the slater function exp(-alpha * x) is fitted with n_max_fit_slat gaussians 
+  ! and the slater function exp(-alpha * x) is fitted with n_max_fit_slat gaussians
   !
   END_DOC
 
@@ -309,7 +312,7 @@ end
 
   endif
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -333,3 +336,4 @@ double precision function fit_1_erf_x_2(x)
 end
 
 ! ---
+

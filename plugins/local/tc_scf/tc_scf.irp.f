@@ -53,7 +53,7 @@ subroutine main()
   call rh_tcscf_diis()
 
   PROVIDE Fock_matrix_tc_diag_mo_tot
-  print*, ' Eigenvalues:' 
+  print*, ' Eigenvalues:'
   do i = 1, mo_num
     print*, i, Fock_matrix_tc_diag_mo_tot(i)
   enddo
@@ -100,4 +100,5 @@ subroutine create_guess()
 end
 
 ! ---
+
 

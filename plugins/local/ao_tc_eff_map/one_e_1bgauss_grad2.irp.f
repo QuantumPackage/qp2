@@ -1,10 +1,10 @@
 ! ---
 
-BEGIN_PROVIDER [double precision, env_gauss_hermII, (ao_num,ao_num)]
+BEGIN_PROVIDER [double precision, env_gauss_hermII, (ao_num, ao_num)]
 
   BEGIN_DOC
   !
-  !  :math:`\langle \chi_A | -0.5 \grad \tau_{env} \cdot \grad \tau_{env} | \chi_B \rangle` 
+  !  :math:`\langle \chi_A | -0.5 \grad \tau_{env} \cdot \grad \tau_{env} | \chi_B \rangle`
   !
   END_DOC
 
@@ -34,7 +34,7 @@ BEGIN_PROVIDER [double precision, env_gauss_hermII, (ao_num,ao_num)]
   call overlap_gaussian_xyz( A_center, B_center, alpha, beta, power_A, power_B &
                            , overlap_y, d_a_2, overlap_z, overlap, dim1 )
   ! --------------------------------------------------------------------------------
-  
+
 
   env_gauss_hermII(1:ao_num,1:ao_num) = 0.d0
 
@@ -43,7 +43,7 @@ BEGIN_PROVIDER [double precision, env_gauss_hermII, (ao_num,ao_num)]
  !$OMP PRIVATE (i, j, k1, k2, l, m, alpha, beta, gama1, gama2,  &
  !$OMP          A_center, B_center, C_center1, C_center2,       &
  !$OMP          power_A, power_B, num_A, num_B, c1, c)          &
- !$OMP SHARED (ao_num, ao_prim_num, ao_expo_ordered_transp,     & 
+ !$OMP SHARED (ao_num, ao_prim_num, ao_expo_ordered_transp,     &
  !$OMP         ao_power, ao_nucl, nucl_coord,                   &
  !$OMP         ao_coef_normalized_ordered_transp,               &
  !$OMP         nucl_num, env_expo, env_gauss_hermII)
@@ -81,7 +81,7 @@ BEGIN_PROVIDER [double precision, env_gauss_hermII, (ao_num,ao_num)]
             enddo
           enddo
 
-          env_gauss_hermII(i,j) = env_gauss_hermII(i,j)      & 
+          env_gauss_hermII(i,j) = env_gauss_hermII(i,j)      &
                     + ao_coef_normalized_ordered_transp(l,j) &
                     * ao_coef_normalized_ordered_transp(m,i) * c
         enddo
@@ -157,15 +157,15 @@ double precision function int_gauss_4G( A_center, B_center, C_center1, C_center2
   ! -----------------------------------------------------------------------------------------------
   !
   ! x term:
-  !          < XA | exp[-gama1 r_C1^2 -gama2 r_C2^2] (x - x_C1) (x - x_C2) | XB > 
+  !          < XA | exp[-gama1 r_C1^2 -gama2 r_C2^2] (x - x_C1) (x - x_C2) | XB >
   !
 
   c_tmp1 = 2.d0 * C_center(1) - C_center1(1) - C_center2(1)
-  c_tmp2 = ( C_center(1) - C_center1(1) ) * ( C_center(1) - C_center2(1) ) 
+  c_tmp2 = ( C_center(1) - C_center1(1) ) * ( C_center(1) - C_center2(1) )
 
   cx = 0.d0
   do i = 0, iorder(1)
-    
+
     ! < XA | exp[-gama r_C^2] (x - x_C)^2 | XB >
     power_C = 2
     cx      = cx + P_AB(i,1) &
@@ -191,15 +191,15 @@ double precision function int_gauss_4G( A_center, B_center, C_center1, C_center2
   ! -----------------------------------------------------------------------------------------------
   !
   ! y term:
-  !          < XA | exp[-gama1 r_C1^2 -gama2 r_C2^2] (y - y_C1) (y - y_C2) | XB > 
+  !          < XA | exp[-gama1 r_C1^2 -gama2 r_C2^2] (y - y_C1) (y - y_C2) | XB >
   !
 
   c_tmp1 = 2.d0 * C_center(2) - C_center1(2) - C_center2(2)
-  c_tmp2 = ( C_center(2) - C_center1(2) ) * ( C_center(2) - C_center2(2) ) 
+  c_tmp2 = ( C_center(2) - C_center1(2) ) * ( C_center(2) - C_center2(2) )
 
   cy = 0.d0
   do i = 0, iorder(2)
-    
+
     ! < XA | exp[-gama r_C^2] (y - y_C)^2 | XB >
     power_C = 2
     cy      = cy + P_AB(i,2) &
@@ -225,15 +225,15 @@ double precision function int_gauss_4G( A_center, B_center, C_center1, C_center2
   ! -----------------------------------------------------------------------------------------------
   !
   ! z term:
-  !          < XA | exp[-gama1 r_C1^2 -gama2 r_C2^2] (z - z_C1) (z - z_C2) | XB > 
+  !          < XA | exp[-gama1 r_C1^2 -gama2 r_C2^2] (z - z_C1) (z - z_C2) | XB >
   !
 
   c_tmp1 = 2.d0 * C_center(3) - C_center1(3) - C_center2(3)
-  c_tmp2 = ( C_center(3) - C_center1(3) ) * ( C_center(3) - C_center2(3) ) 
+  c_tmp2 = ( C_center(3) - C_center1(3) ) * ( C_center(3) - C_center2(3) )
 
   cz = 0.d0
   do i = 0, iorder(3)
-    
+
     ! < XA | exp[-gama r_C^2] (z - z_C)^2 | XB >
     power_C = 2
     cz      = cz + P_AB(i,3) &
@@ -261,5 +261,6 @@ double precision function int_gauss_4G( A_center, B_center, C_center1, C_center2
 end function int_gauss_4G
 !_____________________________________________________________________________________________________________
 !_____________________________________________________________________________________________________________
+
 
 

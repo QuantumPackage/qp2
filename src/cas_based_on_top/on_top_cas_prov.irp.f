@@ -33,14 +33,14 @@ subroutine act_on_top_on_grid_pt(ipoint,istate,pure_act_on_top_of_r)
 end
 
 
- BEGIN_PROVIDER [double precision, total_cas_on_top_density,(n_points_final_grid,N_states) ]
+ BEGIN_PROVIDER [double precision, total_cas_on_top_density, (n_points_final_grid, N_states) ]
  implicit none
  BEGIN_DOC
  ! on top pair density :: n2(r,r) at each of the Becke's grid point of a CAS-BASED wf
  !
  ! Contains all core/inact/act contribution.
  !
- ! !!!!! WARNING !!!!! If no_core_density then you REMOVE ALL CONTRIBUTIONS COMING FROM THE CORE ORBITALS 
+ ! !!!!! WARNING !!!!! If no_core_density then you REMOVE ALL CONTRIBUTIONS COMING FROM THE CORE ORBITALS
  END_DOC
  integer :: i_point,istate
  double precision :: wall_0,wall_1,core_inact_dm,pure_act_on_top_of_r
@@ -58,13 +58,13 @@ end
  do istate = 1, N_states
   !$OMP PARALLEL DO &
   !$OMP DEFAULT (NONE)  &
-  !$OMP PRIVATE (i_point,core_inact_dm,pure_act_on_top_of_r) & 
+  !$OMP PRIVATE (i_point,core_inact_dm,pure_act_on_top_of_r) &
   !$OMP SHARED(total_cas_on_top_density,n_points_final_grid,inact_density,core_density,one_e_act_density_beta,one_e_act_density_alpha,no_core_density,istate)
   do i_point = 1, n_points_final_grid
     call act_on_top_on_grid_pt(i_point,istate,pure_act_on_top_of_r)
     if(no_core_density) then
-     core_inact_dm = inact_density(i_point) 
-    else 
+     core_inact_dm = inact_density(i_point)
+    else
      core_inact_dm = (inact_density(i_point) + core_density(i_point))
     endif
     total_cas_on_top_density(i_point,istate) = pure_act_on_top_of_r + core_inact_dm * (one_e_act_density_beta(i_point,istate) + one_e_act_density_alpha(i_point,istate)) + core_inact_dm*core_inact_dm
@@ -75,10 +75,13 @@ end
  print*,'provided the total_cas_on_top_density'
  print*,'Time to provide :',wall_1 - wall_0
 
- END_PROVIDER 
+ END_PROVIDER
 
 
  BEGIN_PROVIDER [ double precision, average_on_top, (n_states)]
+  BEGIN_DOC
+  ! average_on_top
+  END_DOC
  implicit none
  integer :: i_point,istate
  double precision :: wall_0,wall_1,core_inact_dm,pure_act_on_top_of_r,weight
@@ -90,4 +93,5 @@ end
   enddo
  enddo
  print*,'Average on top pair density = ',average_on_top
- END_PROVIDER 
+ END_PROVIDER
+

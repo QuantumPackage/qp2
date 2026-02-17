@@ -319,7 +319,7 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
 
 !      if( (iter > 1) .or. (itertot == 1) ) then
 
-        ! Gram-Schmidt to orthogonalize all new guess with the previous vectors 
+        ! Gram-Schmidt to orthogonalize all new guess with the previous vectors
         call ortho_qr(U, size(U, 1), sze, shift2)
         call ortho_qr(U, size(U, 1), sze, shift2)
 
@@ -471,7 +471,7 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
     ! --------------------------------
 
     call dgemm( 'N', 'N', sze, N_st_diag, shift2, 1.d0 &
-              , W, size(W, 1), y, size(y, 1)           & 
+              , W, size(W, 1), y, size(y, 1)           &
               , 0.d0, u_in, size(u_in, 1))
     do k = 1, N_st_diag
       do i = 1, sze
@@ -532,6 +532,7 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
 end subroutine davidson_diag_nonsym_hjj
 
 ! ---
+
 
 
 

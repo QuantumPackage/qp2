@@ -2,6 +2,9 @@
 ! ---
 
 BEGIN_PROVIDER [double precision, noL_0e_naive]
+  BEGIN_DOC
+  ! noL_0e_naive
+  END_DOC
 
   implicit none
   integer                       :: ii, jj, kk
@@ -27,7 +30,7 @@ BEGIN_PROVIDER [double precision, noL_0e_naive]
   do ii = 1, elec_num
 
     if(ii .le. elec_beta_num) then
-      i       = ii 
+      i       = ii
       sigma_i = -1.d0
     else
       i       = ii - elec_beta_num
@@ -97,7 +100,7 @@ BEGIN_PROVIDER [double precision, noL_0e_naive]
   print*, " Wall time for noL_0e_naive (min) = ", (t1 - t0)/60.d0
 
   print*, " noL_0e_naive = ", noL_0e_naive
-  
+
 END_PROVIDER
 
 ! ---
@@ -105,7 +108,7 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, noL_1e_naive, (mo_num, mo_num)]
 
   BEGIN_DOC
-  ! 
+  !
   ! < p | H(1) | s > is dressed with noL_1e_naive(p,s)
   !
   END_DOC
@@ -129,7 +132,7 @@ BEGIN_PROVIDER [double precision, noL_1e_naive, (mo_num, mo_num)]
   !$OMP PARALLEL                                   &
   !$OMP DEFAULT (NONE)                             &
   !$OMP PRIVATE (ii, i, sigma_i, jj, j, sigma_j,   &
-  !$OMP          I_pij_sji, I_pij_sij, I_pij_jis,  & 
+  !$OMP          I_pij_sji, I_pij_sij, I_pij_jis,  &
   !$OMP          I_pij_ijs, I_pij_isj, I_pij_jsi ) &
   !$OMP SHARED (mo_num, elec_beta_num, elec_num,   &
   !$OMP         sigma_p, sigma_s, noL_1e_naive)
@@ -142,7 +145,7 @@ BEGIN_PROVIDER [double precision, noL_1e_naive, (mo_num, mo_num)]
       noL_1e_naive(p,s) = 0.d0
       do ii = 1, elec_num
         if(ii .le. elec_beta_num) then
-          i       = ii 
+          i       = ii
           sigma_i = -1.d0
         else
           i       = ii - elec_beta_num
@@ -161,23 +164,23 @@ BEGIN_PROVIDER [double precision, noL_1e_naive, (mo_num, mo_num)]
           call give_integrals_3_body_bi_ort_spin( p, sigma_p, i, sigma_i, j, sigma_j &
                                                 , s, sigma_s, j, sigma_j, i, sigma_i &
                                                 , I_pij_sji)
-  
+
           call give_integrals_3_body_bi_ort_spin( p, sigma_p, i, sigma_i, j, sigma_j &
                                                 , s, sigma_s, i, sigma_i, j, sigma_j &
                                                 , I_pij_sij)
-  
+
           call give_integrals_3_body_bi_ort_spin( p, sigma_p, i, sigma_i, j, sigma_j &
                                                 , j, sigma_j, i, sigma_i, s, sigma_s &
                                                 , I_pij_jis)
-  
+
           call give_integrals_3_body_bi_ort_spin( p, sigma_p, i, sigma_i, j, sigma_j &
                                                 , i, sigma_i, j, sigma_j, s, sigma_s &
                                                 , I_pij_ijs)
-  
+
           call give_integrals_3_body_bi_ort_spin( p, sigma_p, i, sigma_i, j, sigma_j &
                                                 , i, sigma_i, s, sigma_s, j, sigma_j &
                                                 , I_pij_isj)
-  
+
           call give_integrals_3_body_bi_ort_spin( p, sigma_p, i, sigma_i, j, sigma_j &
                                                 , j, sigma_j, s, sigma_s, i, sigma_i &
                                                 , I_pij_jsi)
@@ -201,7 +204,7 @@ BEGIN_PROVIDER [double precision, noL_1e_naive, (mo_num, mo_num)]
   !$OMP PARALLEL                                   &
   !$OMP DEFAULT (NONE)                             &
   !$OMP PRIVATE (ii, i, sigma_i, jj, j, sigma_j,   &
-  !$OMP          I_pij_sji, I_pij_sij, I_pij_jis,  & 
+  !$OMP          I_pij_sji, I_pij_sij, I_pij_jis,  &
   !$OMP          I_pij_ijs, I_pij_isj, I_pij_jsi ) &
   !$OMP SHARED (mo_num, elec_beta_num, elec_num,   &
   !$OMP         sigma_p, sigma_s, noL_1e_naive)
@@ -213,7 +216,7 @@ BEGIN_PROVIDER [double precision, noL_1e_naive, (mo_num, mo_num)]
 
       do ii = 1, elec_num
         if(ii .le. elec_beta_num) then
-          i       = ii 
+          i       = ii
           sigma_i = -1.d0
         else
           i       = ii - elec_beta_num
@@ -232,23 +235,23 @@ BEGIN_PROVIDER [double precision, noL_1e_naive, (mo_num, mo_num)]
           call give_integrals_3_body_bi_ort_spin( p, sigma_p, i, sigma_i, j, sigma_j &
                                                 , s, sigma_s, j, sigma_j, i, sigma_i &
                                                 , I_pij_sji)
-  
+
           call give_integrals_3_body_bi_ort_spin( p, sigma_p, i, sigma_i, j, sigma_j &
                                                 , s, sigma_s, i, sigma_i, j, sigma_j &
                                                 , I_pij_sij)
-  
+
           call give_integrals_3_body_bi_ort_spin( p, sigma_p, i, sigma_i, j, sigma_j &
                                                 , j, sigma_j, i, sigma_i, s, sigma_s &
                                                 , I_pij_jis)
-  
+
           call give_integrals_3_body_bi_ort_spin( p, sigma_p, i, sigma_i, j, sigma_j &
                                                 , i, sigma_i, j, sigma_j, s, sigma_s &
                                                 , I_pij_ijs)
-  
+
           call give_integrals_3_body_bi_ort_spin( p, sigma_p, i, sigma_i, j, sigma_j &
                                                 , i, sigma_i, s, sigma_s, j, sigma_j &
                                                 , I_pij_isj)
-  
+
           call give_integrals_3_body_bi_ort_spin( p, sigma_p, i, sigma_i, j, sigma_j &
                                                 , j, sigma_j, s, sigma_s, i, sigma_i &
                                                 , I_pij_jsi)
@@ -274,7 +277,7 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, noL_2e_naive, (mo_num, mo_num, mo_num, mo_num)]
 
   BEGIN_DOC
-  ! 
+  !
   ! < p q | H(2) | s t > is dressed with noL_2e_naive(p,q,s,t)
   !
   END_DOC
@@ -314,7 +317,7 @@ BEGIN_PROVIDER [double precision, noL_2e_naive, (mo_num, mo_num, mo_num, mo_num)
           noL_2e_naive(p,q,s,t) = 0.d0
           do ii = 1, elec_num
             if(ii .le. elec_beta_num) then
-              i       = ii 
+              i       = ii
               sigma_i = -1.d0
             else
               i       = ii - elec_beta_num
@@ -367,7 +370,7 @@ BEGIN_PROVIDER [double precision, noL_2e_naive, (mo_num, mo_num, mo_num, mo_num)
 
           do ii = 1, elec_num
             if(ii .le. elec_beta_num) then
-              i       = ii 
+              i       = ii
               sigma_i = -1.d0
             else
               i       = ii - elec_beta_num
@@ -420,7 +423,7 @@ BEGIN_PROVIDER [double precision, noL_2e_naive, (mo_num, mo_num, mo_num, mo_num)
 
           do ii = 1, elec_num
             if(ii .le. elec_beta_num) then
-              i       = ii 
+              i       = ii
               sigma_i = -1.d0
             else
               i       = ii - elec_beta_num
@@ -473,7 +476,7 @@ BEGIN_PROVIDER [double precision, noL_2e_naive, (mo_num, mo_num, mo_num, mo_num)
 
           do ii = 1, elec_num
             if(ii .le. elec_beta_num) then
-              i       = ii 
+              i       = ii
               sigma_i = -1.d0
             else
               i       = ii - elec_beta_num
@@ -508,5 +511,6 @@ BEGIN_PROVIDER [double precision, noL_2e_naive, (mo_num, mo_num, mo_num, mo_num)
 END_PROVIDER
 
 ! ---
+
 
 
