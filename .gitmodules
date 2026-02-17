@@ -13,3 +13,6 @@
 [submodule "external/armadillo-code"]
 	path = external/armadillo-code
 	url = https://gitlab.com/conradsnicta/armadillo-code
+[submodule "external/simple_gpu"]
+	path = external/simple_gpu
+	url = https://github.com/scemama/simple_gpu.git
