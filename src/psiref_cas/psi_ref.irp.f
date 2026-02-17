@@ -70,7 +70,7 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, norm_psi_ref, (N_states)]
 &BEGIN_PROVIDER [double precision, inv_norm_psi_ref, (N_states)]
   BEGIN_DOC
-  ! Norm Psi Ref
+  ! norm_psi_ref
   END_DOC
   implicit none
   integer :: i,j
@@ -87,8 +87,7 @@ END_PROVIDER
 
  BEGIN_PROVIDER [double precision, psi_ref_coef_interm_norm, (N_det_ref, N_states)]
   BEGIN_DOC
-  ! Coefficient array: psi_ref_coef_interm_norm
-  ! Dimensions: (N_det_ref, N_states)
+  ! psi_ref_coef_interm_norm
   END_DOC
   implicit none
   integer :: i,j
@@ -101,8 +100,7 @@ END_PROVIDER
 
  BEGIN_PROVIDER [double precision, psi_non_ref_coef_interm_norm, (N_det_non_ref, N_states)]
   BEGIN_DOC
-  ! Coefficient array: psi_non_ref_coef_interm_norm
-  ! Dimensions: (N_det_non_ref, N_states)
+  ! psi_non_ref_coef_interm_norm
   END_DOC
   implicit none
   integer :: i,j

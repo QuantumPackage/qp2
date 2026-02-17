@@ -101,7 +101,7 @@
  BEGIN_PROVIDER [double precision, alpha_dens_kin_in_r, (n_points_final_grid)]
 &BEGIN_PROVIDER [double precision, beta_dens_kin_in_r, (n_points_final_grid)]
   BEGIN_DOC
-  ! Alpha Dens Kin In R
+  ! alpha_dens_kin_in_r
   END_DOC
  implicit none
  integer  :: i,m,j

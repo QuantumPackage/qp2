@@ -123,8 +123,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, extra_nucl_dist, (extra_nucl_num, extra_nucl_num)]
   BEGIN_DOC
-  ! Extra Nucl Dist
-  ! Dimensions: (extra_nucl_num, extra_nucl_num)
+  ! extra_nucl_dist
   END_DOC
  implicit none
  integer :: i,j

@@ -1,6 +1,6 @@
 BEGIN_PROVIDER [ integer, n_mat]
   BEGIN_DOC
-  ! Number/size parameter for mat
+  ! n_mat
   END_DOC
  implicit none
  n_mat = 2
@@ -13,8 +13,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [ double precision, eigval_ht, (n_mat)]
 &BEGIN_PROVIDER [ integer, n_real_ht, (n_mat)]
   BEGIN_DOC
-  ! H Non Hermit
-  ! Dimensions: (n_mat, n_mat)
+  ! h_non_hermit
   END_DOC
  implicit none
  integer :: i,j

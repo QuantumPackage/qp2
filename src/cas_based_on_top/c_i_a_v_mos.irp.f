@@ -92,8 +92,7 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, core_inact_act_mos_in_r_array, (n_core_inact_act_orb, n_points_final_grid)]
 &BEGIN_PROVIDER [double precision, core_inact_act_mos_in_r_array_transp, (n_points_final_grid, n_core_inact_act_orb)]
   BEGIN_DOC
-  ! Core Inact Act Mos In R Array
-  ! Dimensions: (n_core_inact_act_orb, n_points_final_grid)
+  ! core_inact_act_mos_in_r_array
   END_DOC
  implicit none
  integer :: i,j,k
@@ -114,8 +113,7 @@ END_PROVIDER
 
  BEGIN_PROVIDER [double precision, core_inact_act_mos_grad_in_r_array, (3, n_core_inact_act_orb, n_points_final_grid)]
   BEGIN_DOC
-  ! Core Inact Act Mos Grad In R Array
-  ! Dimensions: (3, n_core_inact_act_orb, n_points_final_grid)
+  ! core_inact_act_mos_grad_in_r_array
   END_DOC
  implicit none
  integer :: i,j,k,l

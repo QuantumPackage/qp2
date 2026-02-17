@@ -3,8 +3,7 @@
 
 BEGIN_PROVIDER [double precision, mo_coef_aux, (ao_num, mo_num)]
   BEGIN_DOC
-  ! Coefficient array: mo_coef_aux
-  ! Dimensions: (ao_num, mo_num)
+  ! mo_coef_aux
   END_DOC
 
   implicit none

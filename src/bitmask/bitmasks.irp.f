@@ -35,8 +35,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ integer(bit_kind), full_ijkl_bitmask_4, (N_int, 4) ]
   BEGIN_DOC
-  ! Coupling or difference term: full_ijkl_bitmask_4
-  ! Dimensions: (N_int, 4)
+  ! full_ijkl_bitmask_4
   END_DOC
   implicit none
   integer                        :: i
@@ -50,8 +49,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ integer(bit_kind), core_inact_act_bitmask_4, (N_int, 4) ]
   BEGIN_DOC
-  ! Core Inact Act Bitmask 4
-  ! Dimensions: (N_int, 4)
+  ! core_inact_act_bitmask_4
   END_DOC
   implicit none
   integer                        :: i
@@ -65,8 +63,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ integer(bit_kind), virt_bitmask_4, (N_int, 4) ]
   BEGIN_DOC
-  ! Virt Bitmask 4
-  ! Dimensions: (N_int, 4)
+  ! virt_bitmask_4
   END_DOC
   implicit none
   integer                        :: i
@@ -244,8 +241,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [integer(bit_kind), closed_shell_ref_bitmask, (N_int, 2)]
   BEGIN_DOC
-  ! Closed Shell Ref Bitmask
-  ! Dimensions: (N_int, 2)
+  ! closed_shell_ref_bitmask
   END_DOC
   implicit none
   integer                        :: i,j

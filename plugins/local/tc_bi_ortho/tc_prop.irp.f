@@ -78,8 +78,7 @@
 
  BEGIN_PROVIDER [double precision, tc_bi_ortho_dipole, (3, N_states)]
   BEGIN_DOC
-  ! Tc Bi Ortho Dipole
-  ! Dimensions: (3, N_states)
+  ! tc_bi_ortho_dipole
   END_DOC
  implicit none
  integer :: i,j,istate,m

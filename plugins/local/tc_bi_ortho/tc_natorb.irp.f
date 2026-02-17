@@ -100,8 +100,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [ double precision, fock_diag_sorted_l_natorb, (mo_num, mo_num)]
 &BEGIN_PROVIDER [ double precision, fock_diag_sorted_v_natorb, (mo_num)]
   BEGIN_DOC
-  ! Fock Diag Sorted R Natorb
-  ! Dimensions: (mo_num, mo_num)
+  ! fock_diag_sorted_r_natorb
   END_DOC
 
   implicit none

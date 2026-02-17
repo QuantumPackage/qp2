@@ -1,6 +1,6 @@
 BEGIN_PROVIDER [integer, max_exc_pert]
   BEGIN_DOC
-  ! Max Exc Pert
+  ! max_exc_pert
   END_DOC
  implicit none
  max_exc_pert = 0

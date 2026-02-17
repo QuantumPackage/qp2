@@ -3,7 +3,7 @@ use bitmasks
 
 BEGIN_PROVIDER [ integer , N_det_delta_ij ]
   BEGIN_DOC
-  ! Coupling or difference term: N_det_delta_ij
+  ! N_det_delta_ij
   END_DOC
   implicit none
   N_det_delta_ij = N_det
@@ -11,8 +11,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, delta_ij, (N_states, N_det, 2) ]
   BEGIN_DOC
-  ! Coupling or difference term: delta_ij
-  ! Dimensions: (N_states, N_det, 2)
+  ! delta_ij
   END_DOC
   implicit none
   if(.true.) then
@@ -23,8 +22,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, delta_ij_tmp, (N_states, N_det_delta_ij, 2) ]
   BEGIN_DOC
-  ! Coupling or difference term: delta_ij_tmp
-  ! Dimensions: (N_states, N_det_delta_ij, 2)
+  ! delta_ij_tmp
   END_DOC
   use bitmasks
   implicit none

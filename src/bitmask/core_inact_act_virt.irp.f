@@ -417,7 +417,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [integer, n_all_but_del_orb]
   BEGIN_DOC
-  ! Number/size parameter for all but del orb
+  ! n_all_but_del_orb
   END_DOC
  implicit none
  integer :: i
@@ -434,7 +434,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [integer, list_all_but_del_orb, (n_all_but_del_orb)]
   BEGIN_DOC
-  ! List/array of all but del orb
+  ! list_all_but_del_orb
   END_DOC
  implicit none
  integer :: i,j

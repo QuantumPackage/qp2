@@ -11,7 +11,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [ integer, pt2_n_tasks_max ]
 &BEGIN_PROVIDER [ integer, pt2_F, (N_det_generators) ]
   BEGIN_DOC
-  ! Pt2 N Teeth
+  ! pt2_N_teeth
   END_DOC
   implicit none
   logical, external :: testTeethBuilding
@@ -89,7 +89,7 @@ end function
 
 BEGIN_PROVIDER [ integer, dress_N_cp_max ]
   BEGIN_DOC
-  ! Dress N Cp Max
+  ! dress_N_cp_max
   END_DOC
   dress_N_cp_max = 28
 END_PROVIDER
@@ -97,7 +97,7 @@ END_PROVIDER
  BEGIN_PROVIDER [integer, pt2_J, (N_det_generators)]
 &BEGIN_PROVIDER [integer, dress_R1, (0:N_det_generators) ]
   BEGIN_DOC
-  ! Pt2 J
+  ! pt2_J
   END_DOC
   implicit none
   integer :: m,j
@@ -136,7 +136,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [ integer, dress_T, (N_det_generators) ]
 &BEGIN_PROVIDER [ integer, dress_N_cp ]
   BEGIN_DOC
-  ! Dress M M
+  ! dress_M_m
   END_DOC
   implicit none
   integer :: N_c, N_j, U, t, i, m
@@ -399,7 +399,7 @@ end
  BEGIN_PROVIDER [integer, dress_dot_F, (dress_N_cp)]
 &BEGIN_PROVIDER [ integer, dress_P, (N_det_generators) ]
   BEGIN_DOC
-  ! Dress Dot F
+  ! dress_dot_F
   END_DOC
   implicit none
   integer :: m,i
@@ -425,8 +425,7 @@ BEGIN_PROVIDER [double precision, dress_e, (N_det_generators, dress_N_cp)]
 &BEGIN_PROVIDER [integer, dress_dot_t, (0:dress_N_cp)]
 &BEGIN_PROVIDER [integer, dress_dot_n_0, (0:dress_N_cp)]
   BEGIN_DOC
-  ! Dress E
-  ! Dimensions: (N_det_generators, dress_N_cp)
+  ! dress_e
   END_DOC
   implicit none
 
@@ -674,7 +673,7 @@ end function
 &BEGIN_PROVIDER [ double precision,     pt2_u_0 ]
 &BEGIN_PROVIDER [ integer,              pt2_n_0, (pt2_N_teeth+1) ]
   BEGIN_DOC
-  ! Pt2 W
+  ! pt2_w
   END_DOC
   implicit none
   integer :: i, t

@@ -20,8 +20,7 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, D0tu_alpha_ao, (ao_num, ao_num)]
 &BEGIN_PROVIDER [double precision, D0tu_beta_ao, (ao_num, ao_num)]
   BEGIN_DOC
-  ! D0Tu Alpha Ao
-  ! Dimensions: (ao_num, ao_num)
+  ! D0tu_alpha_ao
   END_DOC
  implicit none
  integer :: i,ii,j,u,t,uu,tt

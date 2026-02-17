@@ -3,8 +3,7 @@
 
 BEGIN_PROVIDER [ double precision, no_aba_contraction_v0, (mo_num, mo_num, mo_num, mo_num)]
   BEGIN_DOC
-  ! No Aba Contraction V0
-  ! Dimensions: (mo_num, mo_num, mo_num, mo_num)
+  ! no_aba_contraction_v0
   END_DOC
 
   use bitmasks ! you need to include the bitmasks_module.f90 features
@@ -301,8 +300,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, no_aab_contraction_v0, (mo_num, mo_num, mo_num, mo_num)]
   BEGIN_DOC
-  ! No Aab Contraction V0
-  ! Dimensions: (mo_num, mo_num, mo_num, mo_num)
+  ! no_aab_contraction_v0
   END_DOC
 
   use bitmasks ! you need to include the bitmasks_module.f90 features
@@ -1073,8 +1071,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, no_aba_contraction, (mo_num, mo_num, mo_num, mo_num)]
   BEGIN_DOC
-  ! No Aba Contraction
-  ! Dimensions: (mo_num, mo_num, mo_num, mo_num)
+  ! no_aba_contraction
   END_DOC
 
   use bitmasks ! you need to include the bitmasks_module.f90 features
@@ -1348,8 +1345,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, no_aab_contraction, (mo_num, mo_num, mo_num, mo_num)]
   BEGIN_DOC
-  ! No Aab Contraction
-  ! Dimensions: (mo_num, mo_num, mo_num, mo_num)
+  ! no_aab_contraction
   END_DOC
 
   use bitmasks ! you need to include the bitmasks_module.f90 features
@@ -1539,8 +1535,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, no_aaa_contraction, (mo_num, mo_num, mo_num, mo_num)]
   BEGIN_DOC
-  ! No Aaa Contraction
-  ! Dimensions: (mo_num, mo_num, mo_num, mo_num)
+  ! no_aaa_contraction
   END_DOC
 
   use bitmasks ! you need to include the bitmasks_module.f90 features

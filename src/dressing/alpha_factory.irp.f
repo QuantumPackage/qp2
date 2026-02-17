@@ -20,7 +20,7 @@ end subroutine
 
 BEGIN_PROVIDER [ integer, psi_from_sorted_gen, (N_det) ]
   BEGIN_DOC
-  ! Psi From Sorted Gen
+  ! psi_from_sorted_gen
   END_DOC
   implicit none
   integer :: i,inpsisor

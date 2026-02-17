@@ -754,7 +754,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ integer, n_elec_alpha_for_psi_configuration, (N_configuration)]
   BEGIN_DOC
-  ! Number/size parameter for elec alpha for psi configuration
+  ! n_elec_alpha_for_psi_configuration
   END_DOC
  implicit none
  integer :: i,j,k,l

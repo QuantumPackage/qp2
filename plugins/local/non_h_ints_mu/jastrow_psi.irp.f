@@ -1,7 +1,6 @@
 BEGIN_PROVIDER [ double precision, c_ij_ab_jastrow, (mo_num, mo_num, elec_alpha_num, elec_beta_num)]
   BEGIN_DOC
-  ! Coupling or difference term: c_ij_ab_jastrow
-  ! Dimensions: (mo_num, mo_num, elec_alpha_num, elec_beta_num)
+  ! c_ij_ab_jastrow
   END_DOC
  implicit none
  integer :: iunit, getUnitAndOpen

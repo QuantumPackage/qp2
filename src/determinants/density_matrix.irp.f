@@ -35,8 +35,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, one_e_dm_mo_spin_index, (mo_num, mo_num, N_states, 2) ]
   BEGIN_DOC
-  ! One-body density matrix: one_e_dm_mo_spin_index
-  ! Dimensions: (mo_num, mo_num, N_states, 2)
+  ! one_e_dm_mo_spin_index
   END_DOC
   implicit none
   integer                        :: i,j,ispin,istate
@@ -63,8 +62,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, one_e_dm_dagger_mo_spin_index, (mo_num, mo_num, N_states, 2) ]
   BEGIN_DOC
-  ! One-body density matrix: one_e_dm_dagger_mo_spin_index
-  ! Dimensions: (mo_num, mo_num, N_states, 2)
+  ! one_e_dm_dagger_mo_spin_index
   END_DOC
    implicit none
    integer                        :: i,j,ispin,istate
@@ -565,7 +563,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [ integer         , list_attachment,  (mo_num, N_states)]
 &BEGIN_PROVIDER [ integer         , list_dettachment, (mo_num, N_states)]
   BEGIN_DOC
-  ! Number/size parameter for attachment
+  ! n_attachment
   END_DOC
  implicit none
  integer :: i,istate
@@ -593,8 +591,7 @@ END_PROVIDER
  BEGIN_PROVIDER [ double precision,  attachment_numbers_sorted,  (mo_num, N_states)]
 &BEGIN_PROVIDER [ double precision,  dettachment_numbers_sorted, (mo_num, N_states)]
   BEGIN_DOC
-  ! Attachment Numbers Sorted
-  ! Dimensions: (mo_num, N_states)
+  ! attachment_numbers_sorted
   END_DOC
  implicit none
  integer :: i,istate
@@ -615,8 +612,7 @@ END_PROVIDER
  BEGIN_PROVIDER [ double precision,  attachment_orbitals, (ao_num, mo_num, N_states)]
 &BEGIN_PROVIDER [ double precision, dettachment_orbitals, (ao_num, mo_num, N_states)]
   BEGIN_DOC
-  ! Attachment Orbitals
-  ! Dimensions: (ao_num, mo_num, N_states)
+  ! attachment_orbitals
   END_DOC
  implicit none
  integer :: i,j,k,istate

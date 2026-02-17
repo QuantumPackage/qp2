@@ -3,7 +3,7 @@
 
 BEGIN_PROVIDER [integer, List_env1s_size]
   BEGIN_DOC
-  ! Number/size parameter for List env1s
+  ! List_env1s_size
   END_DOC
 
   implicit none
@@ -37,8 +37,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [integer, List_env1s, (nucl_num, List_env1s_size)]
   BEGIN_DOC
-  ! List/array of env1s
-  ! Dimensions: (nucl_num, List_env1s_size)
+  ! List_env1s
   END_DOC
 
   implicit none
@@ -67,7 +66,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [ double precision, List_env1s_expo, (   List_env1s_size)]
 &BEGIN_PROVIDER [ double precision, List_env1s_cent, (3, List_env1s_size)]
   BEGIN_DOC
-  ! List/array of env1s coef
+  ! List_env1s_coef
   END_DOC
 
   implicit none
@@ -167,7 +166,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [integer, List_env1s_square_size]
   BEGIN_DOC
-  ! Number/size parameter for List env1s square
+  ! List_env1s_square_size
   END_DOC
 
   implicit none
@@ -201,8 +200,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [integer, List_env1s_square, (nucl_num, List_env1s_square_size)]
   BEGIN_DOC
-  ! List/array of env1s square
-  ! Dimensions: (nucl_num, List_env1s_square_size)
+  ! List_env1s_square
   END_DOC
 
   implicit none
@@ -241,7 +239,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [ double precision, List_env1s_square_expo, (   List_env1s_square_size)]
 &BEGIN_PROVIDER [ double precision, List_env1s_square_cent, (3, List_env1s_square_size)]
   BEGIN_DOC
-  ! List/array of env1s square coef
+  ! List_env1s_square_coef
   END_DOC
 
   implicit none

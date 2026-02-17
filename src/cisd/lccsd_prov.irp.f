@@ -1,8 +1,7 @@
  BEGIN_PROVIDER [ double precision, lccsd_coef, (N_det, N_states)]
 &BEGIN_PROVIDER [ double precision, lccsd_energies, (N_states)]
   BEGIN_DOC
-  ! Coefficient array: lccsd_coef
-  ! Dimensions: (N_det, N_states)
+  ! lccsd_coef
   END_DOC
  implicit none
  double precision, allocatable :: Dress_jj(:), H_jj(:), u_in(:,:)

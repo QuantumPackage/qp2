@@ -3,7 +3,7 @@
 
 BEGIN_PROVIDER [double precision, env_val, (n_points_final_grid)]
   BEGIN_DOC
-  ! Env Val
+  ! env_val
   END_DOC
 
   implicit none
@@ -77,8 +77,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, env_grad, (3, n_points_final_grid)]
   BEGIN_DOC
-  ! Env Grad
-  ! Dimensions: (3, n_points_final_grid)
+  ! env_grad
   END_DOC
 
   implicit none
@@ -183,8 +182,7 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, env_square_grad, (n_points_final_grid, 3)]
 &BEGIN_PROVIDER [double precision, env_square_lapl, (n_points_final_grid)  ]
   BEGIN_DOC
-  ! Env Square Grad
-  ! Dimensions: (n_points_final_grid, 3)
+  ! env_square_grad
   END_DOC
 
   implicit none

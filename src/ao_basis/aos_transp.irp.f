@@ -25,8 +25,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, ao_expo_ordered_transp_per_nucl, (ao_prim_num_max, N_AOs_max, nucl_num) ]
   BEGIN_DOC
-  ! Exponent parameters: ao_expo_ordered_transp_per_nucl
-  ! Dimensions: (ao_prim_num_max, N_AOs_max, nucl_num)
+  ! ao_expo_ordered_transp_per_nucl
   END_DOC
  implicit none
  integer :: i,j,k,l
@@ -44,8 +43,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ integer, ao_power_ordered_transp_per_nucl, (3, N_AOs_max, nucl_num) ]
   BEGIN_DOC
-  ! Orbital property: ao_power_ordered_transp_per_nucl
-  ! Dimensions: (3, N_AOs_max, nucl_num)
+  ! ao_power_ordered_transp_per_nucl
   END_DOC
  implicit none
  integer :: i,j,k,l
@@ -62,8 +60,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, ao_coef_normalized_ordered_transp_per_nucl, (ao_prim_num_max, N_AOs_max, nucl_num) ]
   BEGIN_DOC
-  ! Coefficient array: ao_coef_normalized_ordered_transp_per_nucl
-  ! Dimensions: (ao_prim_num_max, N_AOs_max, nucl_num)
+  ! ao_coef_normalized_ordered_transp_per_nucl
   END_DOC
  implicit none
  integer :: i,j,k,l

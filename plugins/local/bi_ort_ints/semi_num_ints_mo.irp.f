@@ -3,8 +3,7 @@
 
 BEGIN_PROVIDER [double precision, int2_grad1_u12_bimo_t, (n_points_final_grid, 3, mo_num, mo_num)]
   BEGIN_DOC
-  ! Integral array: int2_grad1_u12_bimo_t
-  ! Dimensions: (n_points_final_grid, 3, mo_num, mo_num)
+  ! int2_grad1_u12_bimo_t
   END_DOC
 
   implicit none

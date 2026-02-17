@@ -3,7 +3,7 @@
 
 BEGIN_PROVIDER [double precision, noL_0e_naive]
   BEGIN_DOC
-  ! Nol 0E Naive
+  ! noL_0e_naive
   END_DOC
 
   implicit none

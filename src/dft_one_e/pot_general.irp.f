@@ -172,8 +172,7 @@ print("endif")
   BEGIN_PROVIDER [double precision, potential_xc_alpha_mo, (mo_num, mo_num, N_states)]
  &BEGIN_PROVIDER [double precision, potential_xc_beta_mo, (mo_num, mo_num, N_states)]
   BEGIN_DOC
-  ! Potential Xc Alpha Mo
-  ! Dimensions: (mo_num, mo_num, N_states)
+  ! potential_xc_alpha_mo
   END_DOC
   implicit none
   integer :: istate

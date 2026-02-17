@@ -5,8 +5,7 @@
 &BEGIN_PROVIDER [double precision, ao_deriv2_cgtos_y, (ao_num, ao_num)]
 &BEGIN_PROVIDER [double precision, ao_deriv2_cgtos_z, (ao_num, ao_num)]
   BEGIN_DOC
-  ! Orbital property: ao_deriv2_cgtos_x
-  ! Dimensions: (ao_num, ao_num)
+  ! ao_deriv2_cgtos_x
   END_DOC
 
   implicit none

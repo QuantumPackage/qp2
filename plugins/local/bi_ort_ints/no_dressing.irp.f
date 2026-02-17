@@ -3,7 +3,7 @@
 
 BEGIN_PROVIDER [double precision, noL_0e_v0]
   BEGIN_DOC
-  ! Nol 0E V0
+  ! noL_0e_v0
   END_DOC
 
   implicit none
@@ -132,8 +132,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, noL_1e_v0, (mo_num, mo_num)]
   BEGIN_DOC
-  ! Nol 1E V0
-  ! Dimensions: (mo_num, mo_num)
+  ! noL_1e_v0
   END_DOC
 
   implicit none
@@ -240,8 +239,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, noL_2e_v0, (mo_num, mo_num, mo_num, mo_num)]
   BEGIN_DOC
-  ! Nol 2E V0
-  ! Dimensions: (mo_num, mo_num, mo_num, mo_num)
+  ! noL_2e_v0
   END_DOC
 
   implicit none
@@ -729,8 +727,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, noL_1e, (mo_num, mo_num)]
   BEGIN_DOC
-  ! Nol 1E
-  ! Dimensions: (mo_num, mo_num)
+  ! noL_1e
   END_DOC
 
   implicit none
@@ -1324,8 +1321,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, noL_2e, (mo_num, mo_num, mo_num, mo_num)]
   BEGIN_DOC
-  ! Nol 2E
-  ! Dimensions: (mo_num, mo_num, mo_num, mo_num)
+  ! noL_2e
   END_DOC
 
   implicit none

@@ -112,8 +112,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, H_matrix_cas, (N_det_cas, N_det_cas)]
   BEGIN_DOC
-  ! H Matrix Cas
-  ! Dimensions: (N_det_cas, N_det_cas)
+  ! H_matrix_cas
   END_DOC
  implicit none
  integer :: i,j
@@ -129,8 +128,7 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, psi_coef_cas_diagonalized, (N_det_cas, N_states)]
 &BEGIN_PROVIDER [double precision, psi_cas_energy_diagonalized, (N_states)]
   BEGIN_DOC
-  ! Coefficient array: psi_coef_cas_diagonalized
-  ! Dimensions: (N_det_cas, N_states)
+  ! psi_coef_cas_diagonalized
   END_DOC
  implicit none
  integer :: i,j

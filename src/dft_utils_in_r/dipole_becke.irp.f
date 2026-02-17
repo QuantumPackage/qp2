@@ -2,8 +2,7 @@
 &BEGIN_PROVIDER [ double precision, mo_dipole_y_becke, (mo_num, mo_num)]
 &BEGIN_PROVIDER [ double precision, mo_dipole_z_becke, (mo_num, mo_num)]
   BEGIN_DOC
-  ! Orbital property: mo_dipole_x_becke
-  ! Dimensions: (mo_num, mo_num)
+  ! mo_dipole_x_becke
   END_DOC
  implicit none
  integer :: i,j,ipoint

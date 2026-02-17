@@ -3,8 +3,7 @@
 
 BEGIN_PROVIDER [double precision, grad12_j12, (ao_num, ao_num, n_points_final_grid)]
   BEGIN_DOC
-  ! Grad12 J12
-  ! Dimensions: (ao_num, ao_num, n_points_final_grid)
+  ! grad12_j12
   END_DOC
 
   implicit none
@@ -40,8 +39,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, u12sq_envsq, (ao_num, ao_num, n_points_final_grid)]
   BEGIN_DOC
-  ! U12Sq Envsq
-  ! Dimensions: (ao_num, ao_num, n_points_final_grid)
+  ! u12sq_envsq
   END_DOC
 
   implicit none
@@ -77,8 +75,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, u12_grad1_u12_env_grad1_env, (ao_num, ao_num, n_points_final_grid)]
   BEGIN_DOC
-  ! U12 Grad1 U12 Env Grad1 Env
-  ! Dimensions: (ao_num, ao_num, n_points_final_grid)
+  ! u12_grad1_u12_env_grad1_env
   END_DOC
 
   implicit none

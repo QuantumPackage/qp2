@@ -32,7 +32,7 @@ END_PROVIDER
 
  BEGIN_PROVIDER [double precision, ref_vhxc]
   BEGIN_DOC
-  ! Ref Vhxc
+  ! ref_vhxc
   END_DOC
  implicit none
  integer :: i

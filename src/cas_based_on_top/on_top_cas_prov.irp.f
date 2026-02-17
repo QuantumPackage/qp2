@@ -80,7 +80,7 @@ end
 
  BEGIN_PROVIDER [ double precision, average_on_top, (n_states)]
   BEGIN_DOC
-  ! Average On Top
+  ! average_on_top
   END_DOC
  implicit none
  integer :: i_point,istate

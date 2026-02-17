@@ -1,6 +1,6 @@
 BEGIN_PROVIDER [ double precision, ao_extra_center]
   BEGIN_DOC
-  ! Coordinate/center data: ao_extra_center
+  ! ao_extra_center
   END_DOC
  implicit none
  ao_extra_center = 0.01d0
@@ -30,7 +30,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ integer, n_prim_tot_orig]
   BEGIN_DOC
-  ! Number/size parameter for prim tot orig
+  ! n_prim_tot_orig
   END_DOC
  implicit none
  integer :: i
@@ -43,7 +43,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ logical, lmax_too_big]
   BEGIN_DOC
-  ! Flag: lmax_too_big
+  ! lmax_too_big
   END_DOC
  implicit none
  if (ao_l_max.gt.1)then
@@ -95,7 +95,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ integer, extra_fictious_nucl]
   BEGIN_DOC
-  ! Extra Fictious Nucl
+  ! extra_fictious_nucl
   END_DOC
  implicit none
  extra_fictious_nucl = n_2p_func_tot
@@ -103,7 +103,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ integer, new_nucl_num]
   BEGIN_DOC
-  ! Number/size parameter for new nucl
+  ! new_nucl_num
   END_DOC
  implicit none
  new_nucl_num = nucl_num + n_2p_func_tot
@@ -114,7 +114,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [ integer, list_real_nucl, (nucl_num) ]
 &BEGIN_PROVIDER [ integer, list_fict_nucl, (extra_fictious_nucl) ]
   BEGIN_DOC
-  ! New Nucl Label 1S
+  ! new_nucl_label_1s
   END_DOC
  implicit none
  integer :: i,j
@@ -132,8 +132,7 @@ END_PROVIDER
 
  BEGIN_PROVIDER [ double precision,  new_nucl_coord_1s, (new_nucl_num, 3)]
   BEGIN_DOC
-  ! Coordinate/center data: new_nucl_coord_1s
-  ! Dimensions: (new_nucl_num, 3)
+  ! new_nucl_coord_1s
   END_DOC
  implicit none
  integer :: i,j
@@ -192,7 +191,7 @@ END_PROVIDER
 
  BEGIN_PROVIDER [ integer, new_n_AOs_max]
   BEGIN_DOC
-  ! New N Aos Max
+  ! new_n_AOs_max
   END_DOC
  implicit none
  new_n_AOs_max = ao_prim_num_max * n_AOs_max
@@ -205,7 +204,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [ double precision, new_ao_expo_1s , (n_func_tot) ]
 &BEGIN_PROVIDER [ integer, new_ao_nucl_1s, (n_func_tot)]
   BEGIN_DOC
-  ! New Nucl N Aos
+  ! new_Nucl_N_Aos
   END_DOC
  implicit none
  integer :: i,j,ii,i_ao,n_func,n_func_total,n_nucl
@@ -268,7 +267,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ integer, new_ao_prim_num_1s, (n_func_tot)]
   BEGIN_DOC
-  ! Orbital property: new_ao_prim_num_1s
+  ! new_ao_prim_num_1s
   END_DOC
  implicit none
  integer :: i
@@ -279,8 +278,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [integer, new_ao_power_1s, (n_func_tot, 3)]
   BEGIN_DOC
-  ! Orbital property: new_ao_power_1s
-  ! Dimensions: (n_func_tot, 3)
+  ! new_ao_power_1s
   END_DOC
  implicit none
  new_ao_power_1s = 0

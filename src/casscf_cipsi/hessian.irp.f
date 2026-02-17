@@ -470,8 +470,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, hessmat, (nMonoEx, nMonoEx)]
   BEGIN_DOC
-  ! Hessmat
-  ! Dimensions: (nMonoEx, nMonoEx)
+  ! hessmat
   END_DOC
  implicit none
  integer                        :: i,j,t,u,a,b

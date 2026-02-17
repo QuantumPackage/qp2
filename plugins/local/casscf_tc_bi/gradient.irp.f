@@ -12,7 +12,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [integer, n_c_v_prov]
 &BEGIN_PROVIDER [integer, n_a_v_prov]
   BEGIN_DOC
-  ! Number/size parameter for c a prov
+  ! n_c_a_prov
   END_DOC
   implicit none
   n_c_a_prov = n_core_inact_orb * n_act_orb

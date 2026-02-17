@@ -1,6 +1,6 @@
  BEGIN_PROVIDER [double precision, SXvector_lowest, (nMonoEx)]
   BEGIN_DOC
-  ! Sxvector Lowest
+  ! SXvector_lowest
   END_DOC
  implicit none
  integer :: i
@@ -11,7 +11,7 @@
 
  BEGIN_PROVIDER [double precision, thresh_overlap_switch]
   BEGIN_DOC
-  ! Thresh Overlap Switch
+  ! thresh_overlap_switch
   END_DOC
  implicit none
  thresh_overlap_switch = 0.5d0
@@ -21,7 +21,7 @@
 &BEGIN_PROVIDER [integer, n_max_overlap]
 &BEGIN_PROVIDER [integer, dim_n_max_overlap]
   BEGIN_DOC
-  ! Max Overlap
+  ! max_overlap
   END_DOC
  implicit none
  double precision, allocatable :: vec_tmp(:)
@@ -47,8 +47,7 @@
 &BEGIN_PROVIDER [integer, index_orb_swap, (dim_n_max_overlap)]
 &BEGIN_PROVIDER [integer, n_orb_swap ]
   BEGIN_DOC
-  ! Orb Swap
-  ! Dimensions: (2, dim_n_max_overlap)
+  ! orb_swap
   END_DOC
  implicit none
  use bitmasks ! you need to include the bitmasks_module.f90 features
@@ -129,8 +128,7 @@
 
  BEGIN_PROVIDER [double precision, switch_mo_coef, (ao_num, mo_num)]
   BEGIN_DOC
-  ! Coefficient array: switch_mo_coef
-  ! Dimensions: (ao_num, mo_num)
+  ! switch_mo_coef
   END_DOC
   implicit none
   integer :: i,j,iorb,jorb

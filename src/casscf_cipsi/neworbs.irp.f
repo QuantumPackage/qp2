@@ -91,7 +91,7 @@ END_PROVIDER
 
  BEGIN_PROVIDER [real*8, energy_improvement]
   BEGIN_DOC
-  ! Energy term: energy_improvement
+  ! energy_improvement
   END_DOC
  implicit none
  if(state_following_casscf)then
@@ -106,7 +106,7 @@ END_PROVIDER
  BEGIN_PROVIDER [ integer, best_vector_ovrlp_casscf ]
 &BEGIN_PROVIDER [ double precision,  best_overlap_casscf ]
   BEGIN_DOC
-  ! Best Vector Ovrlp Casscf
+  ! best_vector_ovrlp_casscf
   END_DOC
   implicit none
   integer :: i

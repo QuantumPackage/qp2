@@ -130,8 +130,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, mo_x_v_ij_erf_rk_cst_mu_transp, (n_points_final_grid, 3, mo_num, mo_num)]
   BEGIN_DOC
-  ! Coupling or difference term: mo_x_v_ij_erf_rk_cst_mu_transp
-  ! Dimensions: (n_points_final_grid, 3, mo_num, mo_num)
+  ! mo_x_v_ij_erf_rk_cst_mu_transp
   END_DOC
  implicit none
  integer :: i,j,m,ipoint

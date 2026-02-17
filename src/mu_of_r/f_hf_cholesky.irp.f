@@ -1,7 +1,6 @@
 BEGIN_PROVIDER [integer, list_couple_hf_orb_r1, (2, n_couple_orb_r1)]
   BEGIN_DOC
-  ! List/array of couple hf orb r1
-  ! Dimensions: (2, n_couple_orb_r1)
+  ! list_couple_hf_orb_r1
   END_DOC
  implicit none
  integer :: ii,i,mm,m,itmp
@@ -20,8 +19,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [integer, list_couple_hf_orb_r2, (2, n_couple_orb_r2)]
   BEGIN_DOC
-  ! List/array of couple hf orb r2
-  ! Dimensions: (2, n_couple_orb_r2)
+  ! list_couple_hf_orb_r2
   END_DOC
  implicit none
  integer :: ii,i,mm,m,itmp
@@ -146,7 +144,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, f_hf_cholesky, (n_points_final_grid)]
   BEGIN_DOC
-  ! F Hf Cholesky
+  ! f_hf_cholesky
   END_DOC
  implicit none
  integer :: ipoint,m,k
@@ -202,7 +200,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, f_hf_cholesky_sparse, (n_points_final_grid)]
   BEGIN_DOC
-  ! F Hf Cholesky Sparse
+  ! f_hf_cholesky_sparse
   END_DOC
  implicit none
  integer :: ipoint,m,mm,i,ii,p
@@ -305,7 +303,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, f_hf_cholesky_sparse_bis, (n_points_final_grid)]
   BEGIN_DOC
-  ! F Hf Cholesky Sparse Bis
+  ! f_hf_cholesky_sparse_bis
   END_DOC
  implicit none
  integer :: ipoint,m,mm,i,ii,p
@@ -408,7 +406,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, on_top_hf_grid, (n_points_final_grid)]
   BEGIN_DOC
-  ! Grid/point data: on_top_hf_grid
+  ! on_top_hf_grid
   END_DOC
  implicit none
  integer :: ipoint,i,ii

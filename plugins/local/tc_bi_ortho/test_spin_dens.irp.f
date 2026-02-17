@@ -1,7 +1,6 @@
 BEGIN_PROVIDER [ double precision, mo_r_coef_normalized, (ao_num, mo_num) ]
   BEGIN_DOC
-  ! Coefficient array: mo_r_coef_normalized
-  ! Dimensions: (ao_num, mo_num)
+  ! mo_r_coef_normalized
   END_DOC
  implicit none
  integer :: i,j,k
@@ -22,8 +21,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, tc_spin_dens_right_only, (ao_num, ao_num)]
   BEGIN_DOC
-  ! Tc Spin Dens Right Only
-  ! Dimensions: (ao_num, ao_num)
+  ! tc_spin_dens_right_only
   END_DOC
  implicit none
  integer :: i,j,k

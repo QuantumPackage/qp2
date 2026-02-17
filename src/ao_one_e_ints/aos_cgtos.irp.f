@@ -5,8 +5,7 @@
 &BEGIN_PROVIDER [double precision, ao_overlap_cgtos_y, (ao_num, ao_num)]
 &BEGIN_PROVIDER [double precision, ao_overlap_cgtos_z, (ao_num, ao_num)]
   BEGIN_DOC
-  ! Orbital property: ao_overlap_cgtos
-  ! Dimensions: (ao_num, ao_num)
+  ! ao_overlap_cgtos
   END_DOC
 
   implicit none

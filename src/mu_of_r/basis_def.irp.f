@@ -106,8 +106,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, basis_mos_in_r_array, (n_basis_orb, n_points_final_grid)]
   BEGIN_DOC
-  ! Basis Mos In R Array
-  ! Dimensions: (n_basis_orb, n_points_final_grid)
+  ! basis_mos_in_r_array
   END_DOC
  implicit none
  integer :: ipoint,i,ii

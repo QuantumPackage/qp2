@@ -4,8 +4,7 @@
  BEGIN_PROVIDER [integer, List_comb_thr_b2_size, (ao_num, ao_num)]
 &BEGIN_PROVIDER [integer, max_List_comb_thr_b2_size]
   BEGIN_DOC
-  ! Number/size parameter for List comb thr b2
-  ! Dimensions: (ao_num, ao_num)
+  ! List_comb_thr_b2_size
   END_DOC
 
   implicit none
@@ -62,8 +61,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [ double precision, List_comb_thr_b2_cent, (3, max_List_comb_thr_b2_size, ao_num, ao_num)]
 &BEGIN_PROVIDER [ double precision, ao_abs_comb_b2_env   , (  max_List_comb_thr_b2_size, ao_num, ao_num)]
   BEGIN_DOC
-  ! List/array of comb thr b2 coef
-  ! Dimensions: (max_List_comb_thr_b2_size, ao_num, ao_num)
+  ! List_comb_thr_b2_coef
   END_DOC
 
   implicit none
@@ -117,8 +115,7 @@ END_PROVIDER
  BEGIN_PROVIDER [integer, List_comb_thr_b3_size, (ao_num, ao_num)]
 &BEGIN_PROVIDER [integer, max_List_comb_thr_b3_size]
   BEGIN_DOC
-  ! Number/size parameter for List comb thr b3
-  ! Dimensions: (ao_num, ao_num)
+  ! List_comb_thr_b3_size
   END_DOC
 
   implicit none
@@ -168,8 +165,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [double precision, List_comb_thr_b3_cent, (3, max_List_comb_thr_b3_size, ao_num, ao_num)]
 &BEGIN_PROVIDER [double precision, ao_abs_comb_b3_env   , (   max_List_comb_thr_b3_size, ao_num, ao_num)]
   BEGIN_DOC
-  ! List/array of comb thr b3 coef
-  ! Dimensions: (max_List_comb_thr_b3_size, ao_num, ao_num)
+  ! List_comb_thr_b3_coef
   END_DOC
 
   implicit none

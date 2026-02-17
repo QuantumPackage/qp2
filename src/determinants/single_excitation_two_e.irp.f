@@ -62,8 +62,7 @@ end
 
 BEGIN_PROVIDER [double precision, fock_wee_closed_shell, (mo_num, mo_num) ]
   BEGIN_DOC
-  ! Fock Wee Closed Shell
-  ! Dimensions: (mo_num, mo_num)
+  ! fock_wee_closed_shell
   END_DOC
  implicit none
  integer :: i0,j0,i,j,k0,k
