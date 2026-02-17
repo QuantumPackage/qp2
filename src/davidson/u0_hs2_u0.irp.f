@@ -48,15 +48,33 @@ subroutine u_0_HS2_u_0(e_0,s_0,u_0,n,keys_tmp,Nint,N_st,sze)
 
   if ((n > 100000).and.distributed_davidson) then
     allocate (v_0(n,N_states_diag),s_vec(n,N_states_diag), u_1(n,N_states_diag))
-    u_1(:,:) = 0.d0
-    u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
+    do j=1,N_st
+      do i=1,n
+        u_1(i,j) = u_0(i,j)
+      enddo
+    enddo
+    do j=N_st+1,N_states_diag
+      do i=1,n
+        u_1(i,j) = 0.d0
+      enddo
+    enddo
     call H_S2_u_0_nstates_zmq(v_0,s_vec,u_1,N_states_diag,n)
   else if (n < n_det_max_full) then
     allocate (v_0(n,N_st),s_vec(n,N_st), u_1(n,N_st))
-    v_0(:,:) = 0.d0
-    u_1(:,:) = 0.d0
-    s_vec(:,:) = 0.d0
-    u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
+    do istate = 1,N_st
+      do i=1,n
+        v_0(i,istate) = 0.d0
+        s_vec(i,istate) = 0.d0
+        u_1(i,istate) = u_0(i,istate)
+      enddo
+    enddo
+    do istate=N_st+1,N_states_diag
+      do i=1,n
+        v_0(i,istate) = 0.d0
+        s_vec(i,istate) = 0.d0
+        u_1(i,j) = 0.d0
+      enddo
+    enddo
     do istate = 1,N_st
       do j=1,n
         do i=1,n
@@ -67,8 +85,12 @@ subroutine u_0_HS2_u_0(e_0,s_0,u_0,n,keys_tmp,Nint,N_st,sze)
     enddo
   else
     allocate (v_0(n,N_st),s_vec(n,N_st),u_1(n,N_st))
-    u_1(:,:) = 0.d0
-    u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
+    do j=1,N_st
+      do i=1,n
+        u_1(i,j) = 0.d0
+        u_1(i,j) = u_0(i,j)
+      enddo
+    enddo
     call H_S2_u_0_nstates_openmp(v_0,s_vec,u_1,N_st,n)
   endif
   u_0(1:n,1:N_st) = u_1(1:n,1:N_st)
@@ -836,8 +858,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
   integer                        :: exc(0:2,2,2), i_, j_, k_, l_, m, iexc_loop
   double precision               :: phase, phase2
   double precision, allocatable  :: integral(:,:,:,:)
-  logical, allocatable  :: integral_ok(:,:)
-  integer(omp_lock_kind), allocatable  :: integral_lock(:,:)
   integer :: norb_block
 
 !  call resident_memory(rss)
@@ -865,14 +885,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
 
   norb_block = 8 !mo_num
   allocate (integral(mo_num,mo_num,mo_num,norb_block))
-  allocate (integral_ok(mo_num,norb_block))
-  allocate (integral_lock(mo_num,norb_block))
-
-  do k=1,norb_block
-   do j=1,mo_num
-     call omp_init_lock(integral_lock(j,k))
-   enddo
-  enddo
 
   PROVIDE N_int nthreads_davidson
   !$OMP PARALLEL DEFAULT(SHARED) NUM_THREADS(nthreads_davidson)        &
@@ -890,7 +902,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
       !$OMP          ishift, idx0, u_t, maxab, compute_singles,      &
       !$OMP          singles_alpha_csc,singles_alpha_csc_idx,        &
       !$OMP          singles_beta_csc,singles_beta_csc_idx,          &
-      !$OMP          integral, integral_ok, integral_lock)           &
+      !$OMP          integral)           &
       !$OMP   PRIVATE(krow, kcol, tmp_det, spindet, k_a, k_b, i,     &
       !$OMP          lcol, lrow, l_a, l_b, utl, kk, u_is_sparse,     &
       !$OMP          buffer, doubles, n_doubles, umax, tmp_det4,     &
@@ -932,11 +944,13 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
 
   do iexc_loop = 1, mo_num, norb_block
 
-    !$OMP SINGLE
-    integral_ok = .False.
-    !$OMP END SINGLE
-
-    !$OMP BARRIER
+    !$OMP DO
+    do k=1,mo_num
+      do l=iexc_loop,iexc_loop+norb_block-1
+        call get_mo_two_e_integrals_ij(k,l,mo_num,integral(1,1,k,l-iexc_loop+1),mo_integrals_map)
+      end do
+    end do
+    !$OMP END DO
 
     kcol_prev=-1
 
@@ -1069,15 +1083,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
 
         endif
 
-        if ((n_singles_a > 0) .and. (.not.integral_ok(j_,l_-iexc_loop+1))) then
-          call omp_set_lock(integral_lock(j_,l_-iexc_loop+1))
-          if (.not.(integral_ok(j_,l_-iexc_loop+1))) then
-            call get_mo_two_e_integrals_i1j1(j_,l_,mo_num,integral(1,1,j_,l_-iexc_loop+1),mo_integrals_map)
-            integral_ok(j_,l_-iexc_loop+1) = .True.
-          endif
-          call omp_unset_lock(integral_lock(j_,l_-iexc_loop+1))
-        endif
-
         ! Loop over alpha singles
         ! -----------------------
 
@@ -1123,7 +1128,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
             if ( (i_ == l_).and.(j_ == k_) ) then
               sij_block(m) =  -phase
             endif
-            hij_block(m) = phase*integral(i_,k_,j_,l_-iexc_loop+1)
+            hij_block(m) = phase*integral(i_,j_,k_,l_-iexc_loop+1)
           enddo
 
           do kk=1,min(block_size, n_singles_a-k+1)
@@ -1226,26 +1231,8 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
           l_=exc(2,2,1)
           if ((j_ < iexc_loop).or.(j_ >= iexc_loop+norb_block)) cycle
 
-          if (.not.integral_ok(l_,j_-iexc_loop+1)) then
-            call omp_set_lock(integral_lock(l_,j_-iexc_loop+1))
-            if (.not.(integral_ok(l_,j_-iexc_loop+1))) then
-              call get_mo_two_e_integrals_i1j1(l_,j_,mo_num,integral(1,1,l_,j_-iexc_loop+1),mo_integrals_map)
-              integral_ok(l_,j_-iexc_loop+1) = .True.
-            endif
-            call omp_unset_lock(integral_lock(l_,j_-iexc_loop+1))
-          endif
-
-          if (.not.integral_ok(k_,j_-iexc_loop+1)) then
-            call omp_set_lock(integral_lock(k_,j_-iexc_loop+1))
-            if (.not.(integral_ok(k_,j_-iexc_loop+1))) then
-              call get_mo_two_e_integrals_i1j1(k_,j_,mo_num,integral(1,1,k_,j_-iexc_loop+1),mo_integrals_map)
-              integral_ok(k_,j_-iexc_loop+1) = .True.
-            endif
-            call omp_unset_lock(integral_lock(k_,j_-iexc_loop+1))
-          endif
-
-          hij = phase*(integral(k_, i_, l_, j_-iexc_loop+1) - &
-                       integral(l_, i_, k_, j_-iexc_loop+1))
+          hij = phase*(integral(k_, l_, i_, j_-iexc_loop+1) - &
+                       integral(l_, k_, i_, j_-iexc_loop+1))
           do l=1,N_st
             v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
             ! same spin => sij = 0
@@ -1323,26 +1310,8 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
           l_=exc(2,2,1)
           if ((j_ < iexc_loop).or.(j_ >= iexc_loop+norb_block)) cycle
 
-          if (.not.integral_ok(l_,j_-iexc_loop+1)) then
-            call omp_set_lock(integral_lock(l_,j_-iexc_loop+1))
-            if (.not.(integral_ok(l_,j_-iexc_loop+1))) then
-              call get_mo_two_e_integrals_i1j1(l_,j_,mo_num,integral(1,1,l_,j_-iexc_loop+1),mo_integrals_map)
-              integral_ok(l_,j_-iexc_loop+1) = .True.
-            endif
-            call omp_unset_lock(integral_lock(l_,j_-iexc_loop+1))
-          endif
-
-          if (.not.integral_ok(k_,j_-iexc_loop+1)) then
-            call omp_set_lock(integral_lock(k_,j_-iexc_loop+1))
-            if (.not.(integral_ok(k_,j_-iexc_loop+1))) then
-              call get_mo_two_e_integrals_i1j1(k_,j_,mo_num,integral(1,1,k_,j_-iexc_loop+1),mo_integrals_map)
-              integral_ok(k_,j_-iexc_loop+1) = .True.
-            endif
-            call omp_unset_lock(integral_lock(k_,j_-iexc_loop+1))
-          endif
-
-          hij = phase*(integral(k_, i_, l_, j_-iexc_loop+1) - &
-                       integral(l_, i_, k_, j_-iexc_loop+1))
+          hij = phase*(integral(k_, l_, i_, j_-iexc_loop+1) - &
+                       integral(l_, k_, i_, j_-iexc_loop+1))
 
           do l=1,N_st
             v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
@@ -1355,12 +1324,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
     !$OMP END DO
 
   end do  ! iexc_loop
-
-  do k=1,norb_block
-   do j=1,mo_num
-     call omp_destroy_lock(integral_lock(j,k))
-   enddo
-  enddo
 
   !$OMP DO SCHEDULE(dynamic,64)
   do k_a=istart+ishift,iend,istep ! Singles a
@@ -1564,7 +1527,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
    tmp_det4, hij_block, sij_block)
 
   !$OMP END PARALLEL
-  deallocate(integral, integral_ok, integral_lock)
+  deallocate(integral)
 
 end
 
