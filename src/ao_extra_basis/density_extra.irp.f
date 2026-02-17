@@ -77,7 +77,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, ao_extra_center_1s_dist, (ao_extra_num, ao_extra_num)]
   BEGIN_DOC
-  ! ao_extra_center_1s_dist
+  ! Coordinate/center data: ao_extra_center_1s_dist
+  ! Dimensions: (ao_extra_num, ao_extra_num)
   END_DOC
  implicit none
  integer :: i,j

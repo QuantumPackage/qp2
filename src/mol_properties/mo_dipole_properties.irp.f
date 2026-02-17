@@ -2,7 +2,8 @@
 &BEGIN_PROVIDER [double precision, mo_prop_dipole_y , (mo_num, mo_num)]
 &BEGIN_PROVIDER [double precision, mo_prop_dipole_z , (mo_num, mo_num)]
   BEGIN_DOC
-  ! mo_prop_dipole_x
+  ! Orbital property: mo_prop_dipole_x
+  ! Dimensions: (mo_num, mo_num)
   END_DOC
  implicit none
  if(dft_grid_mo_dipole)then

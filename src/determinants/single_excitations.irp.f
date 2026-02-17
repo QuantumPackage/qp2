@@ -1,7 +1,8 @@
   use bitmasks
 BEGIN_PROVIDER [integer(bit_kind), ref_closed_shell_bitmask, (N_int, 2)]
   BEGIN_DOC
-  ! ref_closed_shell_bitmask
+  ! Ref Closed Shell Bitmask
+  ! Dimensions: (N_int, 2)
   END_DOC
  implicit none
  integer :: i,i0
@@ -24,7 +25,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, fock_operator_closed_shell_ref_bitmask, (mo_num, mo_num) ]
   BEGIN_DOC
-  ! fock_operator_closed_shell_ref_bitmask
+  ! Fock Operator Closed Shell Ref Bitmask
+  ! Dimensions: (mo_num, mo_num)
   END_DOC
  implicit none
  integer :: i0,j0,i,j,k0,k

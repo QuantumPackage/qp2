@@ -3,7 +3,8 @@
 
 BEGIN_PROVIDER [double precision, ao_one_e_integrals_tc_tot, (ao_num, ao_num)]
   BEGIN_DOC
-  ! ao_one_e_integrals_tc_tot
+  ! Integral array: ao_one_e_integrals_tc_tot
+  ! Dimensions: (ao_num, ao_num)
   END_DOC
 
   implicit none

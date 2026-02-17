@@ -159,7 +159,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, H_matrix_ref, (N_det_ref, N_det_ref)]
   BEGIN_DOC
-  ! H_matrix_ref
+  ! H Matrix Ref
+  ! Dimensions: (N_det_ref, N_det_ref)
   END_DOC
  implicit none
  integer :: i,j
@@ -175,7 +176,8 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, psi_ref_coef_diagonalized, (N_det_ref, N_states)]
 &BEGIN_PROVIDER [double precision, psi_ref_energy_diagonalized, (N_states)]
   BEGIN_DOC
-  ! psi_ref_coef_diagonalized
+  ! Coefficient array: psi_ref_coef_diagonalized
+  ! Dimensions: (N_det_ref, N_states)
   END_DOC
  implicit none
  integer :: i,j
@@ -198,7 +200,7 @@ END_PROVIDER
 
  BEGIN_PROVIDER [double precision, psi_ref_energy, (N_states)]
   BEGIN_DOC
-  ! psi_ref_energy
+  ! Energy term: psi_ref_energy
   END_DOC
  implicit none
  integer :: i,j,k
@@ -337,7 +339,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ integer, idx_non_ref_from_sorted, (N_det) ]
   BEGIN_DOC
-  ! idx_non_ref_from_sorted
+  ! Idx Non Ref From Sorted
   END_DOC
   implicit none
   integer :: i,inpsisor

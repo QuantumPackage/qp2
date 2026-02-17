@@ -1,6 +1,7 @@
 BEGIN_PROVIDER [ double precision, two_e_int_mf, (elec_beta_num, elec_alpha_num, elec_beta_num, elec_alpha_num)]
   BEGIN_DOC
-  ! two_e_int_mf
+  ! Two E Int Mf
+  ! Dimensions: (elec_beta_num, elec_alpha_num, elec_beta_num, elec_alpha_num)
   END_DOC
  implicit none
  integer :: i,j,k,l

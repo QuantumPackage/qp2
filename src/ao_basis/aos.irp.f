@@ -429,7 +429,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ logical, use_pw ]
   BEGIN_DOC
-  ! use_pw
+  ! Flag: use_pw
   END_DOC
 
   implicit none

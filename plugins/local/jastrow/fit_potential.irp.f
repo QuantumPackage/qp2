@@ -113,7 +113,7 @@ end
 
 BEGIN_PROVIDER [integer, n_fit_1_erf_x]
   BEGIN_DOC
-  ! n_fit_1_erf_x
+  ! Number/size parameter for fit 1 erf x
   END_DOC
 
   implicit none

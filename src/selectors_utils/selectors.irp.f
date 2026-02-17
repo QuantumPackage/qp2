@@ -2,7 +2,7 @@ use bitmasks
 
 BEGIN_PROVIDER [ integer, psi_selectors_size ]
   BEGIN_DOC
-  ! psi_selectors_size
+  ! Number/size parameter for psi selectors
   END_DOC
  implicit none
  psi_selectors_size = psi_det_size

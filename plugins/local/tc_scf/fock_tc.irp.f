@@ -149,7 +149,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [ double precision, grad_non_hermit_right]
 &BEGIN_PROVIDER [ double precision, grad_non_hermit]
   BEGIN_DOC
-  ! grad_non_hermit_left
+  ! Grad Non Hermit Left
   END_DOC
 
   implicit none
@@ -187,7 +187,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, Fock_matrix_tc_ao_tot, (ao_num, ao_num) ]
   BEGIN_DOC
-  ! Fock_matrix_tc_ao_tot
+  ! Orbital property: Fock_matrix_tc_ao_tot
+  ! Dimensions: (ao_num, ao_num)
   END_DOC
 
   implicit none
@@ -797,7 +798,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
   BEGIN_DOC
-  ! fock_3e_mo_cs
+  ! Orbital property: fock_3e_mo_cs
+  ! Dimensions: (mo_num, mo_num)
   END_DOC
 
   implicit none

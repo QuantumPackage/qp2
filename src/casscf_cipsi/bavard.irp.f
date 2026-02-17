@@ -1,7 +1,7 @@
 ! -*- F90 -*-
 BEGIN_PROVIDER [logical, bavard]
   BEGIN_DOC
-  ! bavard
+  ! Flag: bavard
   END_DOC
 !  bavard=.true.
    bavard=.false.

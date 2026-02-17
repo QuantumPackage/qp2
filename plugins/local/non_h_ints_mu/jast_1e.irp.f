@@ -3,7 +3,7 @@
 
 BEGIN_PROVIDER [double precision, j1e_val, (n_points_final_grid)]
   BEGIN_DOC
-  ! j1e_val
+  ! J1E Val
   END_DOC
 
   implicit none
@@ -72,7 +72,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [double precision, j1e_grady, (n_points_final_grid)]
 &BEGIN_PROVIDER [double precision, j1e_gradz, (n_points_final_grid)]
   BEGIN_DOC
-  ! j1e_gradx
+  ! J1E Gradx
   END_DOC
 
   implicit none
@@ -257,7 +257,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, j1e_lapl, (n_points_final_grid)]
   BEGIN_DOC
-  ! j1e_lapl
+  ! J1E Lapl
   END_DOC
 
   implicit none

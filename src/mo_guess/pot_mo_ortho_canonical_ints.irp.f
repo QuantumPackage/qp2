@@ -1,6 +1,7 @@
 BEGIN_PROVIDER [double precision, ao_ortho_canonical_nucl_elec_integrals, (mo_num, mo_num)]
   BEGIN_DOC
-  ! ao_ortho_canonical_nucl_elec_integrals
+  ! Integral array: ao_ortho_canonical_nucl_elec_integrals
+  ! Dimensions: (mo_num, mo_num)
   END_DOC
  implicit none
  integer :: i1,j1,i,j

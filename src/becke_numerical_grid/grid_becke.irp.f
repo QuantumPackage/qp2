@@ -74,7 +74,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, R_gill]
   BEGIN_DOC
-  ! R_gill
+  ! R Gill
   END_DOC
 
   implicit none

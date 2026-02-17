@@ -73,7 +73,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, fock_cs_3e_bi_orth, (mo_num, mo_num)]
   BEGIN_DOC
-  ! fock_cs_3e_bi_orth
+  ! Fock Cs 3E Bi Orth
+  ! Dimensions: (mo_num, mo_num)
   END_DOC
 
   implicit none
@@ -150,7 +151,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, fock_a_tmp1_bi_ortho, (mo_num, mo_num)]
   BEGIN_DOC
-  ! fock_a_tmp1_bi_ortho
+  ! Fock A Tmp1 Bi Ortho
+  ! Dimensions: (mo_num, mo_num)
   END_DOC
 
   implicit none
@@ -221,7 +223,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, fock_a_tmp2_bi_ortho, (mo_num, mo_num)]
   BEGIN_DOC
-  ! fock_a_tmp2_bi_ortho
+  ! Fock A Tmp2 Bi Ortho
+  ! Dimensions: (mo_num, mo_num)
   END_DOC
 
   implicit none
@@ -282,7 +285,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, fock_b_tmp1_bi_ortho, (mo_num, mo_num)]
   BEGIN_DOC
-  ! fock_b_tmp1_bi_ortho
+  ! Fock B Tmp1 Bi Ortho
+  ! Dimensions: (mo_num, mo_num)
   END_DOC
 
   implicit none
@@ -347,7 +351,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, fock_b_tmp2_bi_ortho, (mo_num, mo_num)]
   BEGIN_DOC
-  ! fock_b_tmp2_bi_ortho
+  ! Fock B Tmp2 Bi Ortho
+  ! Dimensions: (mo_num, mo_num)
   END_DOC
 
   implicit none

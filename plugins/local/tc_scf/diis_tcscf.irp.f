@@ -85,7 +85,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, FQS_SQF_ao, (ao_num, ao_num)]
   BEGIN_DOC
-  ! FQS_SQF_ao
+  ! Fqs Sqf Ao
+  ! Dimensions: (ao_num, ao_num)
   END_DOC
 
   implicit none
@@ -135,7 +136,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, FQS_SQF_mo, (mo_num, mo_num)]
   BEGIN_DOC
-  ! FQS_SQF_mo
+  ! Fqs Sqf Mo
+  ! Dimensions: (mo_num, mo_num)
   END_DOC
 
   implicit none

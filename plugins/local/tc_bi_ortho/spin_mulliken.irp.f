@@ -27,7 +27,8 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, tc_spin_population_angular_momentum, (0:ao_l_max, N_states)]
 &BEGIN_PROVIDER [double precision, tc_spin_population_angular_momentum_per_atom, (0:ao_l_max, nucl_num, N_states)]
   BEGIN_DOC
-  ! tc_spin_population_angular_momentum
+  ! Tc Spin Population Angular Momentum
+  ! Dimensions: (0:ao_l_max, N_states)
   END_DOC
  implicit none
  integer :: i,istate

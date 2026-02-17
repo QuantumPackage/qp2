@@ -232,7 +232,8 @@ END_PROVIDER
 &BEGIN_PROVIDER [double precision, multi_s_y_dipole_moment_eigenval,           (N_states)]
 &BEGIN_PROVIDER [double precision, multi_s_z_dipole_moment_eigenval,           (N_states)]
   BEGIN_DOC
-  ! multi_s_x_dipole_moment_eigenvec
+  ! Multi S X Dipole Moment Eigenvec
+  ! Dimensions: (N_states, N_states)
   END_DOC
 
   implicit none

@@ -11,7 +11,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, mu_of_r_dft, (n_points_final_grid)]
   BEGIN_DOC
-  ! mu_of_r_dft
+  ! Mu Of R Dft
   END_DOC
  implicit none
  integer :: i
@@ -39,7 +39,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, mu_rsc_of_r, (n_points_final_grid)]
   BEGIN_DOC
-  ! mu_rsc_of_r
+  ! Mu Rsc Of R
   END_DOC
  implicit none
  integer :: i
@@ -56,7 +56,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, mu_grad_rho, (n_points_final_grid)]
   BEGIN_DOC
-  ! mu_grad_rho
+  ! Mu Grad Rho
   END_DOC
  implicit none
  integer :: i
@@ -72,7 +72,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, mu_of_r_dft_average]
   BEGIN_DOC
-  ! mu_of_r_dft_average
+  ! Mu Of R Dft Average
   END_DOC
  implicit none
  integer :: i

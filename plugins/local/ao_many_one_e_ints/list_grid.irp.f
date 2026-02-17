@@ -1,7 +1,8 @@
  BEGIN_PROVIDER [ integer, n_pts_grid_ao_prod, (ao_num, ao_num)]
 &BEGIN_PROVIDER [ integer, max_n_pts_grid_ao_prod]
   BEGIN_DOC
-  ! n_pts_grid_ao_prod
+  ! Number/size parameter for pts grid ao prod
+  ! Dimensions: (ao_num, ao_num)
   END_DOC
  implicit none
  integer :: i,j,ipoint

@@ -110,7 +110,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, one_e_dm_mo_for_dft, (mo_num, mo_num, N_states)]
   BEGIN_DOC
-  ! one_e_dm_mo_for_dft
+  ! One-body density matrix: one_e_dm_mo_for_dft
+  ! Dimensions: (mo_num, mo_num, N_states)
   END_DOC
  implicit none
  one_e_dm_mo_for_dft = one_e_dm_mo_beta_for_dft + one_e_dm_mo_alpha_for_dft
@@ -118,7 +119,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, one_e_dm_average_mo_for_dft, (mo_num, mo_num)]
   BEGIN_DOC
-  ! one_e_dm_average_mo_for_dft
+  ! One-body density matrix: one_e_dm_average_mo_for_dft
+  ! Dimensions: (mo_num, mo_num)
   END_DOC
  implicit none
  integer :: i
@@ -128,7 +130,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, one_e_dm_average_alpha_mo_for_dft, (mo_num, mo_num)]
   BEGIN_DOC
-  ! one_e_dm_average_alpha_mo_for_dft
+  ! One-body density matrix: one_e_dm_average_alpha_mo_for_dft
+  ! Dimensions: (mo_num, mo_num)
   END_DOC
  implicit none
  integer :: i
@@ -141,7 +144,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, one_e_dm_average_beta_mo_for_dft, (mo_num, mo_num)]
   BEGIN_DOC
-  ! one_e_dm_average_beta_mo_for_dft
+  ! One-body density matrix: one_e_dm_average_beta_mo_for_dft
+  ! Dimensions: (mo_num, mo_num)
   END_DOC
  implicit none
  integer :: i

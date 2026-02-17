@@ -200,7 +200,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, mo_r_coef_transp, (mo_num, ao_num)]
   BEGIN_DOC
-  ! mo_r_coef_transp
+  ! Coefficient array: mo_r_coef_transp
+  ! Dimensions: (mo_num, ao_num)
   END_DOC
 
   implicit none
@@ -217,7 +218,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, mo_l_coef_transp, (mo_num, ao_num)]
   BEGIN_DOC
-  ! mo_l_coef_transp
+  ! Coefficient array: mo_l_coef_transp
+  ! Dimensions: (mo_num, ao_num)
   END_DOC
 
   implicit none

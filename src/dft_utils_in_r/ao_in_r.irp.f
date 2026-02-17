@@ -103,7 +103,8 @@ END_PROVIDER
 
  BEGIN_PROVIDER [double precision, aos_lapl_in_r_array_transp, (ao_num, n_points_final_grid, 3)]
   BEGIN_DOC
-  ! aos_lapl_in_r_array_transp
+  ! Aos Lapl In R Array Transp
+  ! Dimensions: (ao_num, n_points_final_grid, 3)
   END_DOC
  implicit none
  integer :: i,j,m
@@ -223,7 +224,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, aos_grad_in_r_array_extra, (ao_num, n_points_extra_final_grid, 3)]
   BEGIN_DOC
-  ! aos_grad_in_r_array_extra
+  ! Aos Grad In R Array Extra
+  ! Dimensions: (ao_num, n_points_extra_final_grid, 3)
   END_DOC
 
   implicit none

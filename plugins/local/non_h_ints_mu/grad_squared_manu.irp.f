@@ -174,7 +174,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, u12sq_envsq_test, (ao_num, ao_num, n_points_final_grid) ]
   BEGIN_DOC
-  ! u12sq_envsq_test
+  ! U12Sq Envsq Test
+  ! Dimensions: (ao_num, ao_num, n_points_final_grid)
   END_DOC
 
   implicit none
@@ -207,7 +208,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, u12_grad1_u12_env_grad1_env_test, (ao_num, ao_num, n_points_final_grid)]
   BEGIN_DOC
-  ! u12_grad1_u12_env_grad1_env_test
+  ! U12 Grad1 U12 Env Grad1 Env Test
+  ! Dimensions: (ao_num, ao_num, n_points_final_grid)
   END_DOC
 
   implicit none
@@ -262,7 +264,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, grad12_j12_test, (ao_num, ao_num, n_points_final_grid)]
   BEGIN_DOC
-  ! grad12_j12_test
+  ! Grad12 J12 Test
+  ! Dimensions: (ao_num, ao_num, n_points_final_grid)
   END_DOC
 
   implicit none

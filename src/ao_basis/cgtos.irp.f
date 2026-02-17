@@ -42,7 +42,8 @@ END_PROVIDER
 &BEGIN_PROVIDER [double precision, ao_expo_pw_ord_transp, (4, ao_prim_num_max, ao_num)]
 &BEGIN_PROVIDER [double precision, ao_expo_phase_ord_transp, (4, ao_prim_num_max, ao_num)]
   BEGIN_DOC
-  ! ao_expo_cgtos_ord_transp
+  ! Exponent parameters: ao_expo_cgtos_ord_transp
+  ! Dimensions: (ao_prim_num_max, ao_num)
   END_DOC
 
   implicit none
@@ -70,7 +71,8 @@ END_PROVIDER
 &BEGIN_PROVIDER [double precision, ao_expo_pw_ord, (4, ao_num, ao_prim_num_max)]
 &BEGIN_PROVIDER [double precision, ao_expo_phase_ord, (4, ao_num, ao_prim_num_max)]
   BEGIN_DOC
-  ! ao_coef_norm_cgtos_ord
+  ! Coefficient array: ao_coef_norm_cgtos_ord
+  ! Dimensions: (ao_num, ao_prim_num_max)
   END_DOC
 
   implicit none
@@ -124,7 +126,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, ao_coef_cgtos_norm_ord_transp, (ao_prim_num_max, ao_num)]
   BEGIN_DOC
-  ! ao_coef_cgtos_norm_ord_transp
+  ! Coefficient array: ao_coef_cgtos_norm_ord_transp
+  ! Dimensions: (ao_prim_num_max, ao_num)
   END_DOC
 
   implicit none
@@ -144,7 +147,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
   BEGIN_DOC
-  ! ao_coef_norm_cgtos
+  ! Coefficient array: ao_coef_norm_cgtos
+  ! Dimensions: (ao_num, ao_prim_num_max)
   END_DOC
 
   implicit none

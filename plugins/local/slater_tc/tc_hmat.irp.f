@@ -64,7 +64,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, htilde_matrix_elmt_bi_ortho_tranp, (N_det, N_det)]
   BEGIN_DOC
-  ! htilde_matrix_elmt_bi_ortho_tranp
+  ! Htilde Matrix Elmt Bi Ortho Tranp
+  ! Dimensions: (N_det, N_det)
   END_DOC
 
   implicit none

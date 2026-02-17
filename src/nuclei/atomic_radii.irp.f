@@ -107,7 +107,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, slater_bragg_radii_ua, (0:100)]
   BEGIN_DOC
-  ! slater_bragg_radii_ua
+  ! Slater Bragg Radii Ua
   END_DOC
  implicit none
  integer :: i
@@ -118,7 +118,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, slater_bragg_radii_per_atom, (nucl_num)]
   BEGIN_DOC
-  ! slater_bragg_radii_per_atom
+  ! Slater Bragg Radii Per Atom
   END_DOC
  implicit none
  integer :: i
@@ -129,7 +129,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, slater_bragg_radii_per_atom_ua, (nucl_num)]
   BEGIN_DOC
-  ! slater_bragg_radii_per_atom_ua
+  ! Slater Bragg Radii Per Atom Ua
   END_DOC
  implicit none
  integer :: i
@@ -140,7 +140,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, slater_bragg_type_inter_distance, (nucl_num, nucl_num)]
   BEGIN_DOC
-  ! slater_bragg_type_inter_distance
+  ! Slater Bragg Type Inter Distance
+  ! Dimensions: (nucl_num, nucl_num)
   END_DOC
  implicit none
  integer :: i,j
@@ -157,7 +158,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, slater_bragg_type_inter_distance_ua, (nucl_num, nucl_num)]
   BEGIN_DOC
-  ! slater_bragg_type_inter_distance_ua
+  ! Slater Bragg Type Inter Distance Ua
+  ! Dimensions: (nucl_num, nucl_num)
   END_DOC
  implicit none
  integer :: i,j

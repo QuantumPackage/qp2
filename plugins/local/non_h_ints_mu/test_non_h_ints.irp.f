@@ -955,7 +955,8 @@ end
 
 BEGIN_PROVIDER [double precision, tc_grad_square_ao_new, (ao_num, ao_num, ao_num, ao_num)]
   BEGIN_DOC
-  ! tc_grad_square_ao_new
+  ! Orbital property: tc_grad_square_ao_new
+  ! Dimensions: (ao_num, ao_num, ao_num, ao_num)
   END_DOC
 
   implicit none
@@ -1055,7 +1056,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao_new, (ao_num, ao_num, ao_num, ao_num)]
   BEGIN_DOC
-  ! tc_grad_and_lapl_ao_new
+  ! Orbital property: tc_grad_and_lapl_ao_new
+  ! Dimensions: (ao_num, ao_num, ao_num, ao_num)
   END_DOC
 
   implicit none

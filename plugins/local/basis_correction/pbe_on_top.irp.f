@@ -183,7 +183,8 @@
  BEGIN_PROVIDER [ double precision, extrapolated_on_top, (n_points_final_grid, N_states)]
 &BEGIN_PROVIDER [ double precision, average_extrapolated_on_top, (N_states)]
   BEGIN_DOC
-  ! extrapolated_on_top
+  ! Extrapolated On Top
+  ! Dimensions: (n_points_final_grid, N_states)
   END_DOC
  implicit none
  double precision :: weight,on_top, on_top_extrap, mu_correction_of_on_top,mu

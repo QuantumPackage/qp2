@@ -7,7 +7,7 @@
 
 BEGIN_PROVIDER [integer, index_HF_psi_det]
   BEGIN_DOC
-  ! index_HF_psi_det
+  ! Index Hf Psi Det
   END_DOC
 
   implicit none

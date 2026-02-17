@@ -1,7 +1,7 @@
   use bitmasks ! you need to include the bitmasks_module.f90 features
  BEGIN_PROVIDER [ double precision, e_tilde_00]
   BEGIN_DOC
-  ! e_tilde_00
+  ! Energy term: e_tilde_00
   END_DOC
  implicit none
  double precision :: hmono,htwoe,hthree,htot
@@ -13,7 +13,7 @@
 &BEGIN_PROVIDER [ double precision, e_pt2_tc_bi_orth_single]
 &BEGIN_PROVIDER [ double precision, e_pt2_tc_bi_orth_double]
   BEGIN_DOC
-  ! e_pt2_tc_bi_orth
+  ! Energy term: e_pt2_tc_bi_orth
   END_DOC
  implicit none
  integer :: i,degree
@@ -41,7 +41,7 @@
 
  BEGIN_PROVIDER [ double precision, e_tilde_bi_orth_00]
   BEGIN_DOC
-  ! e_tilde_bi_orth_00
+  ! Energy term: e_tilde_bi_orth_00
   END_DOC
  implicit none
  double precision :: hmono,htwoe,hthree,htilde_ij
@@ -57,7 +57,7 @@
 &BEGIN_PROVIDER [ double precision, e_corr_single_bi_orth_abs ]
 &BEGIN_PROVIDER [ double precision, e_corr_double_bi_orth_abs ]
   BEGIN_DOC
-  ! e_corr_bi_orth
+  ! Energy term: e_corr_bi_orth
   END_DOC
  implicit none
  integer :: i,degree
@@ -84,7 +84,7 @@
 
  BEGIN_PROVIDER [ double precision, e_tc_left_right ]
   BEGIN_DOC
-  ! e_tc_left_right
+  ! Energy term: e_tc_left_right
   END_DOC
  implicit none
  integer :: i,j
@@ -106,7 +106,7 @@
 
 BEGIN_PROVIDER [ double precision, coef_pt1_bi_ortho, (N_det)]
   BEGIN_DOC
-  ! coef_pt1_bi_ortho
+  ! Coefficient array: coef_pt1_bi_ortho
   END_DOC
  implicit none
  integer :: i,degree

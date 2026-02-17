@@ -9,7 +9,7 @@ END_PROVIDER
  BEGIN_PROVIDER [ integer, pt2_F, (N_det_generators) ]
 &BEGIN_PROVIDER [ integer, pt2_n_tasks_max ]
   BEGIN_DOC
-  ! pt2_F
+  ! Pt2 F
   END_DOC
   implicit none
   logical, external :: testTeethBuilding
@@ -34,7 +34,7 @@ END_PROVIDER
  BEGIN_PROVIDER [ integer, pt2_N_teeth ]
 &BEGIN_PROVIDER [ integer, pt2_minDetInFirstTeeth ]
   BEGIN_DOC
-  ! pt2_N_teeth
+  ! Pt2 N Teeth
   END_DOC
   implicit none
   logical, external :: testTeethBuilding
@@ -719,7 +719,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, pt2_u, (N_det_generators)]
   BEGIN_DOC
-  ! pt2_u
+  ! Pt2 U
   END_DOC
   implicit none
   integer, allocatable :: seed(:)
@@ -836,7 +836,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [ double precision, pt2_u_0 ]
 &BEGIN_PROVIDER [ integer,          pt2_n_0, (pt2_N_teeth+1) ]
   BEGIN_DOC
-  ! pt2_w
+  ! Pt2 W
   END_DOC
    implicit none
    integer                        :: i, t

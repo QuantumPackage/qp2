@@ -1,7 +1,8 @@
  BEGIN_PROVIDER [double precision, ao_potential_alpha_xc, (ao_num, ao_num)]
 &BEGIN_PROVIDER [double precision, ao_potential_beta_xc, (ao_num, ao_num)]
   BEGIN_DOC
-  ! ao_potential_alpha_xc
+  ! Orbital property: ao_potential_alpha_xc
+  ! Dimensions: (ao_num, ao_num)
   END_DOC
  implicit none
  integer :: i,j,k,l
@@ -27,7 +28,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, e_exchange_dft]
   BEGIN_DOC
-  ! e_exchange_dft
+  ! Energy term: e_exchange_dft
   END_DOC
  implicit none
   e_exchange_dft = energy_x(1)
@@ -36,7 +37,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, e_correlation_dft]
   BEGIN_DOC
-  ! e_correlation_dft
+  ! Energy term: e_correlation_dft
   END_DOC
  implicit none
   e_correlation_dft = energy_c(1)

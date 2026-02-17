@@ -128,7 +128,8 @@
  BEGIN_PROVIDER [double precision, superci_natorb, (ao_num, mo_num)]
 &BEGIN_PROVIDER [double precision, superci_nat_occ, (mo_num)]
   BEGIN_DOC
-  ! superci_natorb
+  ! Superci Natorb
+  ! Dimensions: (ao_num, mo_num)
   END_DOC
  implicit none
  call general_mo_coef_new_as_svd_vectors_of_mo_matrix_eig(super_ci_dm,mo_num,mo_num,mo_num,NatOrbsFCI,superci_nat_occ,superci_natorb)
@@ -164,7 +165,8 @@ END_PROVIDER
 
  BEGIN_PROVIDER [double precision, lowest_super_ci_coef_mo, (mo_num, mo_num)]
   BEGIN_DOC
-  ! lowest_super_ci_coef_mo
+  ! Coefficient array: lowest_super_ci_coef_mo
+  ! Dimensions: (mo_num, mo_num)
   END_DOC
  implicit none
  integer :: i,j,iorb,jorb

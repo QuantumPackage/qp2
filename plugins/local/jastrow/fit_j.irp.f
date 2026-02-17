@@ -23,7 +23,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, expo_erfc_gauss]
   BEGIN_DOC
-  ! expo_erfc_gauss
+  ! Exponent parameters: expo_erfc_gauss
   END_DOC
 
   implicit none
@@ -36,7 +36,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, expo_erfc_mu_gauss]
   BEGIN_DOC
-  ! expo_erfc_mu_gauss
+  ! Exponent parameters: expo_erfc_mu_gauss
   END_DOC
 
   implicit none

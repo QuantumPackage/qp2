@@ -25,7 +25,8 @@ END_PROVIDER
 &BEGIN_PROVIDER [integer, index_final_points_per_atom, (3, n_pts_max_per_atom, nucl_num) ]
 &BEGIN_PROVIDER [integer, index_final_points_per_atom_reverse, (n_points_integration_angular, n_points_radial_grid, nucl_num) ]
   BEGIN_DOC
-  ! final_grid_points_per_atom
+  ! Grid/point data: final_grid_points_per_atom
+  ! Dimensions: (3, n_pts_max_per_atom, nucl_num)
   END_DOC
  implicit none
  integer                        :: i,j,k,l,i_count(nucl_num)

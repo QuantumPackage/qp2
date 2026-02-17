@@ -1,6 +1,6 @@
 BEGIN_PROVIDER [double precision, kinetic_density_generalized,  (n_points_final_grid)]
   BEGIN_DOC
-  ! kinetic_density_generalized
+  ! Density matrix: kinetic_density_generalized
   END_DOC
  implicit none
  integer :: i,j,m,i_point

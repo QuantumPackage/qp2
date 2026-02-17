@@ -6,7 +6,7 @@
 &BEGIN_PROVIDER [real*8, ecore]
 &BEGIN_PROVIDER [real*8, ecore_bis]
   BEGIN_DOC
-  ! etwo
+  ! Etwo
   END_DOC
    implicit none
    integer                        :: t,u,v,x,i,ii,tt,uu,vv,xx,j,jj,t3,u3,v3,x3

@@ -103,7 +103,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_transp, (ao_num, ao_num, 3, n_points_final_grid)]
   BEGIN_DOC
-  ! int2_grad1_u12_ao_transp
+  ! Integral array: int2_grad1_u12_ao_transp
+  ! Dimensions: (ao_num, ao_num, 3, n_points_final_grid)
   END_DOC
 
   implicit none
@@ -155,7 +156,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, int2_grad1_u12_bimo_transp, (mo_num, mo_num, 3, n_points_final_grid)]
   BEGIN_DOC
-  ! int2_grad1_u12_bimo_transp
+  ! Integral array: int2_grad1_u12_bimo_transp
+  ! Dimensions: (mo_num, mo_num, 3, n_points_final_grid)
   END_DOC
 
   implicit none
@@ -196,7 +198,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, int2_grad1_u12_bimo_t_old, (n_points_final_grid, 3, mo_num, mo_num)]
   BEGIN_DOC
-  ! int2_grad1_u12_bimo_t_old
+  ! Integral array: int2_grad1_u12_bimo_t_old
+  ! Dimensions: (n_points_final_grid, 3, mo_num, mo_num)
   END_DOC
 
   implicit none
@@ -231,7 +234,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, int2_grad1_u12_ao_t, (n_points_final_grid, 3, ao_num, ao_num)]
   BEGIN_DOC
-  ! int2_grad1_u12_ao_t
+  ! Integral array: int2_grad1_u12_ao_t
+  ! Dimensions: (n_points_final_grid, 3, ao_num, ao_num)
   END_DOC
 
   implicit none
@@ -263,7 +267,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, mo_x_v_ki_bi_ortho_erf_rk_cst_mu_transp, (n_points_final_grid, 3, mo_num, mo_num)]
   BEGIN_DOC
-  ! mo_x_v_ki_bi_ortho_erf_rk_cst_mu_transp
+  ! Orbital property: mo_x_v_ki_bi_ortho_erf_rk_cst_mu_transp
+  ! Dimensions: (n_points_final_grid, 3, mo_num, mo_num)
   END_DOC
 
   implicit none
