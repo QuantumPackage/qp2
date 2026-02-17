@@ -223,7 +223,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="cmake zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats trexio armadillo openorb simplegpu"
+        PACKAGES="cmake zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats trexio armadillo openorb simpleg_pu"
 fi
 
 
