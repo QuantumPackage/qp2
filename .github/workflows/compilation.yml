@@ -50,6 +50,7 @@ jobs:
               ./configure -i bats || :
               ./configure -i trexio-nohdf5 || :
               ./configure -i qmckl || :
+              ./configure -i simple_gpu || :
               ./configure -c ./config/gfortran_debug.cfg
        - name: Compilation
          run: |
