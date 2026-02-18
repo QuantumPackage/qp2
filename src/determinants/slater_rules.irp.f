@@ -1,4 +1,6 @@
-subroutine get_excitation_degree(key1,key2,degree,Nint)
+use slater_rules_opt
+
+subroutine get_excitation_degree_ref(key1,key2,degree,Nint)
   use bitmasks
   include 'utils/constants.include.F'
   implicit none
