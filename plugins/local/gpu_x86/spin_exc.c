@@ -5,15 +5,15 @@
  *   degree == 4  =>  double excitation
  *
  * Build flags:
- *   -DUSE_AVX512   VPOPCNTDQ  (Icelake+, Zen4+)   - best on supported CPUs
- *   -DUSE_AVX2     LUT method  (Haswell+)         - good everywhere
  *   (default)      scalar __builtin_popcountll    - universal fallback
  *
  * gcc -O3 -march=native [-DUSE_AVX512|-DUSE_AVX2] spin_singles.c -c
  */
 
 #include "spin_exc.h"
-
+#include "local_cpu.h"
+#include <stdint.h>
+#include <string.h>
 
 /* ================================================================== */
 /* SINGLES ONLY                                                         */
@@ -44,11 +44,27 @@ void get_all_spin_singles_2(
         int            * restrict singles,
         int            * restrict n_singles)
 {
-    const uint64_t s0=spindet[0], s1=spindet[1];
     int ns = 0;
+
+#if HAVE_NEON
+    /*
+     * Load spindet into a 128-bit NEON register once.
+     * For each determinant, load 2 x uint64, XOR, popcount.
+     */
+    const uint64x2_t sv = vld1q_u64(spindet);
+    for (int i = 0; i < size_buffer; ++i) {
+        uint64x2_t bv = vld1q_u64(buffer + 2*i);
+        uint64x2_t xv = veorq_u64(sv, bv);
+        if (popcnt_neon_128(xv) == 2)
+            singles[ns++] = idx[i];
+    }
+#else
+    const uint64_t s0=spindet[0], s1=spindet[1];
     for (int i = 0; i < size_buffer; ++i)
         if (pc2(s0^buffer[2*i], s1^buffer[2*i+1]) == 2)
             singles[ns++] = idx[i];
+#endif
+
     *n_singles = ns;
 }
 
@@ -61,11 +77,25 @@ void get_all_spin_singles_3(
         int            * restrict singles,
         int            * restrict n_singles)
 {
-    const uint64_t s0=spindet[0], s1=spindet[1], s2=spindet[2];
     int ns = 0;
+
+#if HAVE_NEON
+    const uint64x2_t sv01 = vld1q_u64(spindet);        /* words 0,1 */
+    const uint64_t   s2   = spindet[2];                 /* word  2   */
+    for (int i = 0; i < size_buffer; ++i) {
+        uint64x2_t bv01 = vld1q_u64(buffer + 3*i);
+        uint64x2_t xv01 = veorq_u64(sv01, bv01);
+        int deg = popcnt_neon_128(xv01)
+                + pc1(s2 ^ buffer[3*i + 2]);
+        if (deg == 2) singles[ns++] = idx[i];
+    }
+#else
+    const uint64_t s0=spindet[0], s1=spindet[1], s2=spindet[2];
     for (int i = 0; i < size_buffer; ++i)
         if (pc3(s0^buffer[3*i], s1^buffer[3*i+1], s2^buffer[3*i+2]) == 2)
             singles[ns++] = idx[i];
+#endif
+
     *n_singles = ns;
 }
 
@@ -80,7 +110,7 @@ void get_all_spin_singles_4(
 {
     int ns = 0;
 
-#if defined(USE_AVX512)
+#if HAVE_AVX512
     /* VPOPCNTDQ gives per-lane 64-bit popcnt directly */
     const __m256i sv = _mm256_loadu_si256((const __m256i *)spindet);
     for (int i = 0; i < size_buffer; ++i) {
@@ -95,12 +125,33 @@ void get_all_spin_singles_4(
         if ((int)_mm_cvtsi128_si64(s) == 2) singles[ns++] = idx[i];
     }
 
-#elif defined(USE_AVX2)
+#elif HAVE_AVX2
     const __m256i sv = _mm256_loadu_si256((const __m256i *)spindet);
     for (int i = 0; i < size_buffer; ++i) {
         __m256i xv = _mm256_xor_si256(sv,
             _mm256_loadu_si256((const __m256i *)(buffer + 4*i)));
         if (popcnt_avx2_256(xv) == 2) singles[ns++] = idx[i];
+    }
+
+#elif HAVE_SVE
+    const svbool_t   pg = svptrue_b64();
+    const svuint64_t sv = svld1_u64(pg, spindet);
+    for (int i = 0; i < size_buffer; ++i) {
+        svuint64_t bv  = svld1_u64(pg, buffer + 4*i);
+        svuint64_t xv  = sveor_u64_z(pg, sv, bv);
+        if (popcnt_sve(xv, pg) == 2)
+            singles[ns++] = idx[i];
+    }
+
+#elif HAVE_NEON
+    const uint64x2_t sv0 = vld1q_u64(spindet);
+    const uint64x2_t sv1 = vld1q_u64(spindet + 2);
+    for (int i = 0; i < size_buffer; ++i) {
+        uint64x2_t bv0 = vld1q_u64(buffer + 4*i);
+        uint64x2_t bv1 = vld1q_u64(buffer + 4*i + 2);
+        int deg = popcnt_neon_128(veorq_u64(sv0, bv0))
+                + popcnt_neon_128(veorq_u64(sv1, bv1));
+        if (deg == 2) singles[ns++] = idx[i];
     }
 
 #else
@@ -125,11 +176,11 @@ void get_all_spin_singles_N_int(
         int            * restrict n_singles)
 {
     int ns = 0;
+
+#if HAVE_AVX512
     for (int i = 0; i < size_buffer; ++i) {
         const uint64_t *col = buffer + N_int * i;
         int deg = 0;
-
-#if defined(USE_AVX512)
         int k = 0;
         for (; k + 8 <= N_int; k += 8) {
             __m512i xv = _mm512_xor_si512(
@@ -137,9 +188,15 @@ void get_all_spin_singles_N_int(
                 _mm512_loadu_si512((const __m512i *)(col + k)));
             deg += (int)_mm512_reduce_add_epi64(_mm512_popcnt_epi64(xv));
         }
-        for (; k < N_int; ++k) deg += __builtin_popcountll(spindet[k] ^ col[k]);
+        for (; k < N_int; ++k)
+          deg += __builtin_popcountll(spindet[k] ^ col[k]);
+        if (deg == 2) singles[ns++] = idx[i];
+    }
 
-#elif defined(USE_AVX2)
+#elif HAVE_AVX2
+    for (int i = 0; i < size_buffer; ++i) {
+        const uint64_t *col = buffer + N_int * i;
+        int deg = 0;
         int k = 0;
         for (; k + 4 <= N_int; k += 4) {
             __m256i xv = _mm256_xor_si256(
@@ -147,14 +204,61 @@ void get_all_spin_singles_N_int(
                 _mm256_loadu_si256((const __m256i *)(col + k)));
             deg += popcnt_avx2_256(xv);
         }
-        for (; k < N_int; ++k) deg += __builtin_popcountll(spindet[k] ^ col[k]);
-
-#else
-        for (int k = 0; k < N_int; ++k) deg += __builtin_popcountll(spindet[k] ^ col[k]);
-#endif
-
+        for (; k < N_int; ++k)
+          deg += __builtin_popcountll(spindet[k] ^ col[k]);
         if (deg == 2) singles[ns++] = idx[i];
     }
+
+#elif HAVE_SVE
+    const int sve_step = (int)svcntd();
+
+    for (int i = 0; i < size_buffer; ++i) {
+        const uint64_t *col = buffer + N_int * i;
+        int deg = 0;
+        int k = 0;
+        /* Full SVE-width chunks */
+        for (; k + sve_step <= N_int; k += sve_step) {
+            svbool_t   pg = svptrue_b64();
+            svuint64_t sv = svld1_u64(pg, spindet + k);
+            svuint64_t bv = svld1_u64(pg, col + k);
+            deg += popcnt_sve(sveor_u64_z(pg, sv, bv), pg);
+        }
+        /* Tail: fewer than sve_step words remain */
+        if (k < N_int) {
+            svbool_t   pg = svwhilelt_b64((uint64_t)k, (uint64_t)N_int);
+            svuint64_t sv = svld1_u64(pg, spindet + k);
+            svuint64_t bv = svld1_u64(pg, col + k);
+            deg += popcnt_sve(sveor_u64_z(pg, sv, bv), pg);
+        }
+        if (deg == 2) singles[ns++] = idx[i];
+    }
+
+#elif HAVE_NEON
+    const int neon_step = 2; /* 2 x uint64 per NEON register */
+    for (int i = 0; i < size_buffer; ++i) {
+        const uint64_t *col = buffer + N_int * i;
+        int deg = 0;
+        int k = 0;
+        for (; k + neon_step <= N_int; k += neon_step) {
+            uint64x2_t sv = vld1q_u64(spindet + k);
+            uint64x2_t bv = vld1q_u64(col + k);
+            deg += popcnt_neon_128(veorq_u64(sv, bv));
+        }
+        if (k < N_int)   /* one word tail */
+            deg += pc1(spindet[k] ^ col[k]);
+        if (deg == 2) singles[ns++] = idx[i];
+    }
+
+#else
+    for (int i = 0; i < size_buffer; ++i) {
+        const uint64_t *col = buffer + N_int * i;
+        int deg = 0;
+        for (int k = 0; k < N_int; ++k)
+          deg += __builtin_popcountll(spindet[k] ^ col[k]);
+        if (deg == 2) singles[ns++] = idx[i];
+    }
+#endif
+
     *n_singles = ns;
 }
 
@@ -206,11 +310,11 @@ void get_all_spin_doubles_1(
         int            * restrict doubles,
         int            * restrict n_doubles)
 {
-    int ns = 0;
+    int nd = 0;
     for (int i = 0; i < size_buffer; ++i)
         if (pc1(spindet0 ^ buffer[i]) == 4)
-            doubles[ns++] = idx[i];
-    *n_doubles = ns;
+            doubles[nd++] = idx[i];
+    *n_doubles = nd;
 }
 
 /* ---- N=2 --------------------------------------------------------- */
@@ -222,12 +326,23 @@ void get_all_spin_doubles_2(
         int            * restrict doubles,
         int            * restrict n_doubles)
 {
+    int nd=0;
+
+#if HAVE_NEON
+    const uint64x2_t sv = vld1q_u64(spindet);
+    for (int i=0; i<size_buffer; ++i) {
+        uint64x2_t bv = vld1q_u64(buffer + 2*i);
+        if (popcnt_neon_128(veorq_u64(sv, bv)) == 4)
+            doubles[nd++] = idx[i];
+    }
+#else
     const uint64_t s0=spindet[0], s1=spindet[1];
-    int ns = 0;
-    for (int i = 0; i < size_buffer; ++i)
+    for (int i=0; i<size_buffer; ++i) {
         if (pc2(s0^buffer[2*i], s1^buffer[2*i+1]) == 4)
-            doubles[ns++] = idx[i];
-    *n_doubles = ns;
+            doubles[nd++] = idx[i];
+    }
+#endif
+    *n_doubles = nd;
 }
 
 /* ---- N=3 --------------------------------------------------------- */
@@ -239,12 +354,25 @@ void get_all_spin_doubles_3(
         int            * restrict doubles,
         int            * restrict n_doubles)
 {
+    int nd=0;
+
+#if HAVE_NEON
+    const uint64x2_t sv01 = vld1q_u64(spindet);
+    const uint64_t   s2   = spindet[2];
+    for (int i=0; i<size_buffer; ++i) {
+        uint64x2_t bv01 = vld1q_u64(buffer + 3*i);
+        int deg = popcnt_neon_128(veorq_u64(sv01, bv01))
+                + pc1(s2 ^ buffer[3*i+2]);
+        if (deg == 4) doubles[nd++] = idx[i];
+    }
+#else
     const uint64_t s0=spindet[0], s1=spindet[1], s2=spindet[2];
-    int ns = 0;
-    for (int i = 0; i < size_buffer; ++i)
+    for (int i=0; i<size_buffer; ++i)
         if (pc3(s0^buffer[3*i], s1^buffer[3*i+1], s2^buffer[3*i+2]) == 4)
-            doubles[ns++] = idx[i];
-    *n_doubles = ns;
+            doubles[nd++] = idx[i];
+#endif
+
+    *n_doubles = nd;
 }
 
 /* ---- N=4 --------------------------------------------------------- */
@@ -256,9 +384,9 @@ void get_all_spin_doubles_4(
         int            * restrict doubles,
         int            * restrict n_doubles)
 {
-    int ns = 0;
+    int nd = 0;
 
-#if defined(USE_AVX512)
+#if HAVE_AVX512
     /* VPOPCNTDQ gives per-lane 64-bit popcnt directly */
     const __m256i sv = _mm256_loadu_si256((const __m256i *)spindet);
     for (int i = 0; i < size_buffer; ++i) {
@@ -270,26 +398,44 @@ void get_all_spin_doubles_4(
         __m128i hi = _mm256_extracti128_si256(pc, 1);
         __m128i s  = _mm_add_epi64(lo, hi);
         s = _mm_add_epi64(s, _mm_srli_si128(s, 8));
-        if ((int)_mm_cvtsi128_si64(s) == 4) doubles[ns++] = idx[i];
+        if ((int)_mm_cvtsi128_si64(s) == 4) doubles[nd++] = idx[i];
     }
 
-#elif defined(USE_AVX2)
+#elif HAVE_AVX2
     const __m256i sv = _mm256_loadu_si256((const __m256i *)spindet);
     for (int i = 0; i < size_buffer; ++i) {
         __m256i xv = _mm256_xor_si256(sv,
             _mm256_loadu_si256((const __m256i *)(buffer + 4*i)));
-        if (popcnt_avx2_256(xv) == 4) doubles[ns++] = idx[i];
+        if (popcnt_avx2_256(xv) == 4) doubles[nd++] = idx[i];
+    }
+
+#elif HAVE_SVE
+    const svbool_t   pg = svptrue_b64();
+    const svuint64_t sv = svld1_u64(pg, spindet);
+    for (int i=0; i<size_buffer; ++i) {
+        svuint64_t bv = svld1_u64(pg, buffer + 4*i);
+        if (popcnt_sve(sveor_u64_z(pg, sv, bv), pg) == 4)
+            doubles[nd++] = idx[i];
+    }
+
+#elif HAVE_NEON
+    const uint64x2_t sv0 = vld1q_u64(spindet);
+    const uint64x2_t sv1 = vld1q_u64(spindet + 2);
+    for (int i=0; i<size_buffer; ++i) {
+        int deg = popcnt_neon_128(veorq_u64(sv0, vld1q_u64(buffer + 4*i)))
+                + popcnt_neon_128(veorq_u64(sv1, vld1q_u64(buffer + 4*i + 2)));
+        if (deg == 4) doubles[nd++] = idx[i];
     }
 
 #else
     const uint64_t s0=spindet[0],s1=spindet[1],s2=spindet[2],s3=spindet[3];
-    for (int i = 0; i < size_buffer; ++i)
+    for (int i=0; i<size_buffer; ++i)
         if (pc4(s0^buffer[4*i],s1^buffer[4*i+1],
                 s2^buffer[4*i+2],s3^buffer[4*i+3]) == 4)
-            doubles[ns++] = idx[i];
+            doubles[nd++] = idx[i];
 #endif
 
-    *n_doubles = ns;
+    *n_doubles = nd;
 }
 
 /* ---- N=arbitrary ------------------------------------------------- */
@@ -302,12 +448,12 @@ void get_all_spin_doubles_N_int(
         int            * restrict doubles,
         int            * restrict n_doubles)
 {
-    int ns = 0;
+    int nd = 0;
+
+#if HAVE_AVX512
     for (int i = 0; i < size_buffer; ++i) {
         const uint64_t *col = buffer + N_int * i;
         int deg = 0;
-
-#if defined(USE_AVX512)
         int k = 0;
         for (; k + 8 <= N_int; k += 8) {
             __m512i xv = _mm512_xor_si512(
@@ -315,9 +461,15 @@ void get_all_spin_doubles_N_int(
                 _mm512_loadu_si512((const __m512i *)(col + k)));
             deg += (int)_mm512_reduce_add_epi64(_mm512_popcnt_epi64(xv));
         }
-        for (; k < N_int; ++k) deg += __builtin_popcountll(spindet[k] ^ col[k]);
+        for (; k < N_int; ++k)
+            deg += __builtin_popcountll(spindet[k] ^ col[k]);
+        if (deg == 4) doubles[nd++] = idx[i];
+    }
 
-#elif defined(USE_AVX2)
+#elif HAVE_AVX2
+    for (int i = 0; i < size_buffer; ++i) {
+        const uint64_t *col = buffer + N_int * i;
+        int deg = 0;
         int k = 0;
         for (; k + 4 <= N_int; k += 4) {
             __m256i xv = _mm256_xor_si256(
@@ -325,15 +477,54 @@ void get_all_spin_doubles_N_int(
                 _mm256_loadu_si256((const __m256i *)(col + k)));
             deg += popcnt_avx2_256(xv);
         }
-        for (; k < N_int; ++k) deg += __builtin_popcountll(spindet[k] ^ col[k]);
+        for (; k < N_int; ++k)
+            deg += __builtin_popcountll(spindet[k] ^ col[k]);
+        if (deg == 4) doubles[nd++] = idx[i];
+    }
+
+#elif HAVE_SVE
+    const int sve_step = (int)svcntd();
+    for (int i=0; i<size_buffer; ++i) {
+        const uint64_t *col = buffer + N_int * i;
+        int deg = 0, k = 0;
+        for (; k + sve_step <= N_int; k += sve_step) {
+            svbool_t   pg = svptrue_b64();
+            svuint64_t xv = sveor_u64_z(pg, svld1_u64(pg, spindet+k),
+                                             svld1_u64(pg, col+k));
+            deg += popcnt_sve(xv, pg);
+        }
+        if (k < N_int) {
+            svbool_t   pg = svwhilelt_b64((uint64_t)k, (uint64_t)N_int);
+            svuint64_t xv = sveor_u64_z(pg, svld1_u64(pg, spindet+k),
+                                             svld1_u64(pg, col+k));
+            deg += popcnt_sve(xv, pg);
+        }
+        if (deg == 4) doubles[nd++] = idx[i];
+    }
+
+#elif HAVE_NEON
+    for (int i=0; i<size_buffer; ++i) {
+        const uint64_t *col = buffer + N_int * i;
+        int deg = 0, k = 0;
+        for (; k + 2 <= N_int; k += 2)
+            deg += popcnt_neon_128(veorq_u64(vld1q_u64(spindet+k),
+                                             vld1q_u64(col+k)));
+        if (k < N_int)
+            deg += pc1(spindet[k] ^ col[k]);
+        if (deg == 4) doubles[nd++] = idx[i];
+    }
 
 #else
-        for (int k = 0; k < N_int; ++k) deg += __builtin_popcountll(spindet[k] ^ col[k]);
+    for (int i=0; i<size_buffer; ++i) {
+        const uint64_t *col = buffer + N_int * i;
+        int deg=0;
+        for (int k=0; k < N_int; ++k)
+            deg += __builtin_popcountll(spindet[k] ^ col[k]);
+        if (deg == 4) doubles[nd++] = idx[i];
+    }
 #endif
 
-        if (deg == 4) doubles[ns++] = idx[i];
-    }
-    *n_doubles = ns;
+    *n_doubles = nd;
 }
 
 /* ---- Dispatcher -------------------------------------------------- */
@@ -406,10 +597,20 @@ void get_all_spin_singles_and_doubles_2(
         int * restrict singles, int * restrict doubles,
         int * restrict n_singles, int * restrict n_doubles)
 {
-    const uint64_t s0=spindet[0], s1=spindet[1];
     int ns=0, nd=0;
-    for (int i=0; i<size_buffer; ++i) { CLASSIFY(pc2(s0^buffer[2*i], s1^buffer[2*i+1])); }
-    *n_singles=ns; *n_doubles=nd;
+
+#if HAVE_NEON
+    const uint64x2_t sv = vld1q_u64(spindet);
+    for (int i=0; i<size_buffer; ++i) {
+        uint64x2_t bv = vld1q_u64(buffer + 2*i);
+        CLASSIFY(popcnt_neon_128(veorq_u64(sv, bv)));
+    }
+#else
+    const uint64_t s0=spindet[0], s1=spindet[1];
+    for (int i=0; i<size_buffer; ++i)
+        CLASSIFY(pc2(s0^buffer[2*i], s1^buffer[2*i+1]));
+#endif
+    *n_singles = ns ; *n_doubles = nd;
 }
 
 /* ---- N=3 --------------------------------------------------------- */
@@ -421,10 +622,23 @@ void get_all_spin_singles_and_doubles_3(
         int * restrict singles, int * restrict doubles,
         int * restrict n_singles, int * restrict n_doubles)
 {
-    const uint64_t s0=spindet[0], s1=spindet[1], s2=spindet[2];
     int ns=0, nd=0;
+
+#if HAVE_NEON
+    const uint64x2_t sv01 = vld1q_u64(spindet);
+    const uint64_t   s2   = spindet[2];
+    for (int i=0; i<size_buffer; ++i) {
+        uint64x2_t bv01 = vld1q_u64(buffer + 3*i);
+        int deg = popcnt_neon_128(veorq_u64(sv01, bv01))
+                + pc1(s2 ^ buffer[3*i+2]);
+        CLASSIFY(deg);
+    }
+#else
+    const uint64_t s0=spindet[0], s1=spindet[1], s2=spindet[2];
     for (int i=0; i<size_buffer; ++i)
-        { CLASSIFY(pc3(s0^buffer[3*i], s1^buffer[3*i+1], s2^buffer[3*i+2])); }
+        CLASSIFY(pc3(s0^buffer[3*i], s1^buffer[3*i+1], s2^buffer[3*i+2]));
+#endif
+
     *n_singles=ns; *n_doubles=nd;
 }
 
@@ -439,7 +653,7 @@ void get_all_spin_singles_and_doubles_4(
 {
     int ns=0, nd=0;
 
-#if defined(USE_AVX512)
+#if HAVE_AVX512
     const __m256i sv = _mm256_loadu_si256((const __m256i *)spindet);
     for (int i=0; i<size_buffer; ++i) {
         __m256i xv = _mm256_xor_si256(sv,
@@ -452,12 +666,29 @@ void get_all_spin_singles_and_doubles_4(
         CLASSIFY((int)_mm_cvtsi128_si64(s));
     }
 
-#elif defined(USE_AVX2)
+#elif HAVE_AVX2
     const __m256i sv = _mm256_loadu_si256((const __m256i *)spindet);
     for (int i=0; i<size_buffer; ++i) {
         __m256i xv = _mm256_xor_si256(sv,
             _mm256_loadu_si256((const __m256i *)(buffer + 4*i)));
         CLASSIFY(popcnt_avx2_256(xv));
+    }
+
+#elif HAVE_SVE
+    const svbool_t   pg = svptrue_b64();
+    const svuint64_t sv = svld1_u64(pg, spindet);
+    for (int i=0; i<size_buffer; ++i) {
+        svuint64_t bv = svld1_u64(pg, buffer + 4*i);
+        CLASSIFY(popcnt_sve(sveor_u64_z(pg, sv, bv), pg));
+    }
+
+#elif HAVE_NEON
+    const uint64x2_t sv0 = vld1q_u64(spindet);
+    const uint64x2_t sv1 = vld1q_u64(spindet + 2);
+    for (int i=0; i<size_buffer; ++i) {
+        int deg = popcnt_neon_128(veorq_u64(sv0, vld1q_u64(buffer + 4*i)))
+                + popcnt_neon_128(veorq_u64(sv1, vld1q_u64(buffer + 4*i + 2)));
+        CLASSIFY(deg);
     }
 
 #else
@@ -481,11 +712,11 @@ void get_all_spin_singles_and_doubles_N_int(
         int * restrict n_singles, int * restrict n_doubles)
 {
     int ns=0, nd=0;
+
+#if HAVE_AVX512
     for (int i=0; i<size_buffer; ++i) {
         const uint64_t *col = buffer + N_int * i;
         int deg = 0;
-
-#if defined(USE_AVX512)
         int k=0;
         for (; k+8<=N_int; k+=8) {
             __m512i xv = _mm512_xor_si512(
@@ -493,9 +724,15 @@ void get_all_spin_singles_and_doubles_N_int(
                 _mm512_loadu_si512((const __m512i *)(col+k)));
             deg += (int)_mm512_reduce_add_epi64(_mm512_popcnt_epi64(xv));
         }
-        for (; k<N_int; ++k) deg += __builtin_popcountll(spindet[k]^col[k]);
+        for (; k<N_int; ++k)
+            deg += __builtin_popcountll(spindet[k]^col[k]);
+        CLASSIFY(deg);
+    }
 
-#elif defined(USE_AVX2)
+#elif HAVE_AVX2
+    for (int i=0; i<size_buffer; ++i) {
+        const uint64_t *col = buffer + N_int * i;
+        int deg = 0;
         int k=0;
         for (; k+4<=N_int; k+=4) {
             __m256i xv = _mm256_xor_si256(
@@ -503,14 +740,54 @@ void get_all_spin_singles_and_doubles_N_int(
                 _mm256_loadu_si256((const __m256i *)(col+k)));
             deg += popcnt_avx2_256(xv);
         }
-        for (; k<N_int; ++k) deg += __builtin_popcountll(spindet[k]^col[k]);
-
-#else
-        for (int k=0; k<N_int; ++k) deg += __builtin_popcountll(spindet[k]^col[k]);
-#endif
-
+        for (; k<N_int; ++k)
+            deg += __builtin_popcountll(spindet[k]^col[k]);
         CLASSIFY(deg);
     }
+
+#elif HAVE_SVE
+    const int sve_step = (int)svcntd();
+    for (int i=0; i<size_buffer; ++i) {
+        const uint64_t *col = buffer + N_int * i;
+        int deg = 0, k = 0;
+        for (; k + sve_step <= N_int; k += sve_step) {
+            svbool_t   pg = svptrue_b64();
+            svuint64_t xv = sveor_u64_z(pg, svld1_u64(pg, spindet+k),
+                                             svld1_u64(pg, col+k));
+            deg += popcnt_sve(xv, pg);
+        }
+        if (k < N_int) {
+            svbool_t   pg = svwhilelt_b64((uint64_t)k, (uint64_t)N_int);
+            svuint64_t xv = sveor_u64_z(pg, svld1_u64(pg, spindet+k),
+                                             svld1_u64(pg, col+k));
+            deg += popcnt_sve(xv, pg);
+        }
+        CLASSIFY(deg);
+    }
+
+#elif HAVE_NEON
+    for (int i=0; i<size_buffer; ++i) {
+        const uint64_t *col = buffer + N_int * i;
+        int deg = 0, k = 0;
+        for (; k + 2 <= N_int; k += 2)
+            deg += popcnt_neon_128(veorq_u64(vld1q_u64(spindet+k),
+                                             vld1q_u64(col+k)));
+        if (k < N_int)
+            deg += pc1(spindet[k] ^ col[k]);
+        CLASSIFY(deg);
+    }
+
+#else
+    for (int i=0; i<size_buffer; ++i) {
+        const uint64_t *col = buffer + N_int * i;
+        int deg = 0;
+        for (int k=0; k<N_int; ++k)
+            deg += __builtin_popcountll(spindet[k]^col[k]);
+        CLASSIFY(deg);
+    }
+
+#endif
+
     *n_singles=ns; *n_doubles=nd;
 }
 

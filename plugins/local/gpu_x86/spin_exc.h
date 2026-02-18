@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include "local_cpu.h"
 
 /* 
  * Memory layout
@@ -107,9 +108,6 @@ void get_all_spin_singles_and_doubles(const uint64_t *buffer, const int *idx,
 
 
 
-#if defined(USE_AVX512) || defined(USE_AVX2)
-#  include <immintrin.h>
-#endif
 
 /* ================================================================== */
 /* Scalar popcount helpers                                              */
@@ -130,11 +128,14 @@ static inline int pc4(uint64_t a, uint64_t b, uint64_t c, uint64_t d)
            + __builtin_popcountll(c) + __builtin_popcountll(d); }
 
 
+#if HAVE_AVX2 || HAVE_AVX512
+#  include <immintrin.h>
+
+
 /* ================================================================== */
 /* AVX2 horizontal popcount via Muła lookup-table method               */
 /* ================================================================== */
 
-#if defined(USE_AVX2) || defined(USE_AVX512)
 static inline int popcnt_avx2_256(__m256i v)
 {
     /*
@@ -163,4 +164,43 @@ static inline int popcnt_avx2_256(__m256i v)
     sum = _mm_add_epi64(sum, _mm_shuffle_epi32(sum, _MM_SHUFFLE(1,0,3,2)));
     return (int)_mm_cvtsi128_si64(sum);
 }
-#endif
+#endif /* HAVE_AVX2 || HAVE_AVX512 */
+
+
+/* ================================================================== */
+/* NEON helper: popcount of a 128-bit vector (2 x uint64)              */
+/*                                                                      */
+/* vcntq_u8  counts bits in each byte (16 results).                    */
+/* vaddlvq_u8 horizontally adds all 16 bytes into one uint64.          */
+/* This is equivalent to popcount(lo) + popcount(hi) in one sequence.  */
+/* ================================================================== */
+
+#if HAVE_NEON
+static inline int popcnt_neon_128(uint64x2_t v)
+{
+    /* Reinterpret as bytes, count bits per byte, sum all bytes */
+    uint8x16_t bytes = vreinterpretq_u8_u64(v);
+    uint8x16_t cnt   = vcntq_u8(bytes);
+    return (int)vaddlvq_u8(cnt);   /* vaddlv: unsigned add-long across vector */
+}
+#endif /* HAVE_NEON */
+
+
+/* ================================================================== */
+/* SVE helper: popcount of an SVE uint64 vector                        */
+/*                                                                      */
+/* svcnt_u64_z  : per-lane popcount (VCNT on SVE = bit-count per lane) */
+/* svaddv_u64   : horizontal reduction to scalar u64                   */
+/*                                                                      */
+/* On Neoverse V1, svcntd() == 4 (256-bit vectors), so one register    */
+/* holds exactly the N=4 case. The general path processes svcntd()      */
+/* words per iteration, making it correct on wider SVE implementations. */
+/* ================================================================== */
+
+#if HAVE_SVE
+static inline int popcnt_sve(svuint64_t v, svbool_t pg)
+{
+    svuint64_t cnt = svcnt_u64_z(pg, v);
+    return (int)svaddv_u64(pg, cnt);
+}
+#endif /* HAVE_SVE */
