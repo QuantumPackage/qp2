@@ -9,7 +9,7 @@ subroutine get_excitation_degree(key1,key2,degree,Nint)
   integer(bit_kind), intent(in)  :: key1(Nint*2)
   integer(bit_kind), intent(in)  :: key2(Nint*2)
   integer, intent(out)           :: degree
-  call get_excitation_degree_c(Nint,key1,key2,degree)
+  call get_excitation_degree_c(key1,key2,degree,Nint)
 end
 
 subroutine get_excitation_degree_ref(key1,key2,degree,Nint)

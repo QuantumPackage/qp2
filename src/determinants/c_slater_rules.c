@@ -10,10 +10,10 @@
 #include <arm_neon.h>
 #endif
 
-void get_excitation_degree_c(const int32_t nint,
-                             const uint64_t *restrict key1,
+void get_excitation_degree_c(const uint64_t *restrict key1,
                              const uint64_t *restrict key2,
-                             int32_t *restrict degree_ptr) {
+                             int32_t *restrict degree_ptr,
+                             const int32_t nint) {
 
   const size_t n = (size_t)nint << 1; // n = Nint * 2
   uint64_t total_pop = 0;
