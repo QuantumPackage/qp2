@@ -1,4 +1,16 @@
-use slater_rules_opt
+subroutine get_excitation_degree(key1,key2,degree,Nint)
+  use bitmasks
+  use slater_rules_opt
+  implicit none
+  BEGIN_DOC
+  ! Optimized version of get_excitation_degree_ref
+  END_DOC
+  integer, intent(in)            :: Nint
+  integer(bit_kind), intent(in)  :: key1(Nint*2)
+  integer(bit_kind), intent(in)  :: key2(Nint*2)
+  integer, intent(out)           :: degree
+  call get_excitation_degree_c(Nint,key1,key2,degree)
+end
 
 subroutine get_excitation_degree_ref(key1,key2,degree,Nint)
   use bitmasks

@@ -3,13 +3,14 @@ module slater_rules_opt
   implicit none
 
   interface
-    subroutine get_excitation_degree(nint, key1, key2, degree) bind(C, name="get_excitation_degree_c")
+    subroutine get_excitation_degree_c(nint, key1, key2, degree) bind(C)
       import :: c_int, c_int64_t
       integer(c_int), value, intent(in)  :: nint
-      integer(c_int64_t), intent(in)     :: key1(*)
-      integer(c_int64_t), intent(in)     :: key2(*)
+      integer(c_int64_t), intent(in)     :: key1(2*nint)
+      integer(c_int64_t), intent(in)     :: key2(2*nint)
       integer(c_int), intent(out)        :: degree
-    end subroutine get_excitation_degree
+    end subroutine get_excitation_degree_c
   end interface
+
 
 end module slater_rules_opt
