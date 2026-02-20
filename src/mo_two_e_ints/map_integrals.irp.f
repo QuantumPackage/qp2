@@ -425,18 +425,25 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
         !TODO: bottleneck here
         if (mo_cholesky_double) then
 
-          if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_dgemv) then
-            call gpu_set_device(igpu_mt(iproc))
-            call gpu_dgemv(blas_handle_mt(iproc), 'T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1.d0, &
-               cholesky_mo_transp_d(igpu_mt(iproc))%f(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
-               cholesky_mo_transp_d(igpu_mt(iproc))%f(1,j,l), 1, 0.d0, &
-               gpu_integral_buffer1(iproc)%f(1), 1)
-            call gpu_download(gpu_integral_buffer1(iproc)%f(1), &
-                              out_val(mo_integrals_cache_max+1),    &
-                              mo_num-mo_integrals_cache_max)
-            call gpu_set_device(0)
+          if (gpu_num > 0) then
+            if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_dgemv) then
+              call gpu_set_device(igpu_mt(iproc))
+              call gpu_dgemv(blas_handle_mt(iproc), 'T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1.d0, &
+                 cholesky_mo_transp_d(igpu_mt(iproc))%f(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
+                 cholesky_mo_transp_d(igpu_mt(iproc))%f(1,j,l), 1, 0.d0, &
+                 gpu_integral_buffer1(iproc)%f(1), 1)
+              call gpu_download(gpu_integral_buffer1(iproc)%f(1), &
+                                out_val(mo_integrals_cache_max+1),    &
+                                mo_num-mo_integrals_cache_max)
+              call gpu_set_device(0)
+            else
+              call dgemv('T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1.d0, &
+                 cholesky_mo_transp(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
+                 cholesky_mo_transp(1,j,l), 1, 0.d0, &
+                 out_val(mo_integrals_cache_max+1), 1)
+            endif
           else
-            call dgemv('T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1.d0, &
+              call dgemv('T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1.d0, &
                cholesky_mo_transp(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
                cholesky_mo_transp(1,j,l), 1, 0.d0, &
                out_val(mo_integrals_cache_max+1), 1)
@@ -444,18 +451,25 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 
         else
 
-          if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_dgemv) then
-            call gpu_set_device(igpu_mt(iproc))
-            call gpu_set_busy(igpu_mt(iproc))
-            call gpu_sgemv(blas_handle_mt(iproc), 'T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1., &
-               cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
-               cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,j,l), 1, 0., &
-               gpu_integral_buffer_sp1(iproc)%f(1), 1)
-            call gpu_download(gpu_integral_buffer_sp1(iproc)%f(1), &
-                              out_val_sp(mo_integrals_cache_max+1),    &
-                              mo_num-mo_integrals_cache_max)
-            call gpu_unset_busy(igpu_mt(iproc))
-            call gpu_set_device(0)
+          if (gpu_num > 0) then
+            if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_dgemv) then
+              call gpu_set_device(igpu_mt(iproc))
+              call gpu_set_busy(igpu_mt(iproc))
+              call gpu_sgemv(blas_handle_mt(iproc), 'T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1., &
+                 cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
+                 cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,j,l), 1, 0., &
+                 gpu_integral_buffer_sp1(iproc)%f(1), 1)
+              call gpu_download(gpu_integral_buffer_sp1(iproc)%f(1), &
+                                out_val_sp(mo_integrals_cache_max+1),    &
+                                mo_num-mo_integrals_cache_max)
+              call gpu_unset_busy(igpu_mt(iproc))
+              call gpu_set_device(0)
+            else
+              call dgemv('T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1.d0, &
+                 cholesky_mo_transp(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
+                 cholesky_mo_transp(1,j,l), 1, 0.d0, &
+                 out_val(mo_integrals_cache_max+1), 1)
+            endif
           else
             call sgemv('T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1., &
                cholesky_mo_transp_sp(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
@@ -502,16 +516,23 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
       !TODO: bottleneck here
       if (mo_cholesky_double) then
 
-        if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_dgemv) then
-          call gpu_set_device(igpu_mt(iproc))
-          call gpu_set_busy(igpu_mt(iproc))
-          call gpu_dgemv(blas_handle_mt(iproc), 'T', cholesky_mo_num, sze, 1.d0, &
-               cholesky_mo_transp_d(igpu_mt(iproc))%f(1,1,k), cholesky_mo_num, &
-               cholesky_mo_transp_d(igpu_mt(iproc))%f(1,j,l), 1, 0.d0, &
-               gpu_integral_buffer1(iproc)%f(1), 1)
-          call gpu_download(gpu_integral_buffer1(iproc)%f(1),out_val(1),sze)
-          call gpu_unset_busy(igpu_mt(iproc))
-          call gpu_set_device(0)
+        if (gpu_num > 0) then
+          if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_dgemv) then
+            call gpu_set_device(igpu_mt(iproc))
+            call gpu_set_busy(igpu_mt(iproc))
+            call gpu_dgemv(blas_handle_mt(iproc), 'T', cholesky_mo_num, sze, 1.d0, &
+                 cholesky_mo_transp_d(igpu_mt(iproc))%f(1,1,k), cholesky_mo_num, &
+                 cholesky_mo_transp_d(igpu_mt(iproc))%f(1,j,l), 1, 0.d0, &
+                 gpu_integral_buffer1(iproc)%f(1), 1)
+            call gpu_download(gpu_integral_buffer1(iproc)%f(1),out_val(1),sze)
+            call gpu_unset_busy(igpu_mt(iproc))
+            call gpu_set_device(0)
+          else
+            call dgemv('T', cholesky_mo_num, sze, 1.d0, &
+                 cholesky_mo_transp(1,1,k), cholesky_mo_num, &
+                 cholesky_mo_transp(1,j,l), 1, 0.d0, &
+                 out_val(1), 1)
+          endif
         else
           call dgemv('T', cholesky_mo_num, sze, 1.d0, &
                cholesky_mo_transp(1,1,k), cholesky_mo_num, &
@@ -521,16 +542,23 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 
       else
 
-        if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_dgemv) then
-          call gpu_set_device(igpu_mt(iproc))
-          call gpu_set_busy(igpu_mt(iproc))
-          call gpu_sgemv(blas_handle_mt(iproc), 'T', cholesky_mo_num, sze, 1., &
-               cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,1,k), cholesky_mo_num, &
-               cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,j,l), 1, 0., &
-               gpu_integral_buffer_sp1(iproc)%f(1), 1)
-          call gpu_download(gpu_integral_buffer_sp1(iproc)%f(1),out_val_sp(1),sze)
-          call gpu_unset_busy(igpu_mt(iproc))
-          call gpu_set_device(0)
+        if (gpu_num > 0) then
+          if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_dgemv) then
+            call gpu_set_device(igpu_mt(iproc))
+            call gpu_set_busy(igpu_mt(iproc))
+            call gpu_sgemv(blas_handle_mt(iproc), 'T', cholesky_mo_num, sze, 1., &
+                 cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,1,k), cholesky_mo_num, &
+                 cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,j,l), 1, 0., &
+                 gpu_integral_buffer_sp1(iproc)%f(1), 1)
+            call gpu_download(gpu_integral_buffer_sp1(iproc)%f(1),out_val_sp(1),sze)
+            call gpu_unset_busy(igpu_mt(iproc))
+            call gpu_set_device(0)
+          else
+            call sgemv('T', cholesky_mo_num, sze, 1., &
+                 cholesky_mo_transp_sp(1,1,k), cholesky_mo_num, &
+                 cholesky_mo_transp_sp(1,j,l), 1, 0., &
+                 out_val_sp(1), 1)
+          endif
         else
           call sgemv('T', cholesky_mo_num, sze, 1., &
                cholesky_mo_transp_sp(1,1,k), cholesky_mo_num, &
@@ -663,16 +691,23 @@ subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
         real, allocatable :: out_array_sp(:,:)
         allocate(out_array_sp(sze,sze))
 
-        if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_dgemm) then
-          call gpu_set_device(igpu_mt(iproc))
-          call gpu_set_busy(igpu_mt(iproc))
-          call gpu_sgemm(blas_handle_mt(iproc), 'T', 'N', mo_num, mo_num, cholesky_mo_num, 1.0, &
-             cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,1,k), cholesky_mo_num, &
-             cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,1,l), cholesky_mo_num, 0.0, &
-             gpu_integral_buffer_sp2(iproc)%f(1,1), sze)
-          call gpu_download(gpu_integral_buffer_sp2(iproc),out_array_sp)
-          call gpu_unset_busy(igpu_mt(iproc))
-          call gpu_set_device(0)
+        if (gpu_num > 0) then
+          if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_dgemm) then
+            call gpu_set_device(igpu_mt(iproc))
+            call gpu_set_busy(igpu_mt(iproc))
+            call gpu_sgemm(blas_handle_mt(iproc), 'T', 'N', mo_num, mo_num, cholesky_mo_num, 1.0, &
+               cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,1,k), cholesky_mo_num, &
+               cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,1,l), cholesky_mo_num, 0.0, &
+               gpu_integral_buffer_sp2(iproc)%f(1,1), sze)
+            call gpu_download(gpu_integral_buffer_sp2(iproc),out_array_sp)
+            call gpu_unset_busy(igpu_mt(iproc))
+            call gpu_set_device(0)
+          else
+            call sgemm('T', 'N', mo_num, mo_num, cholesky_mo_num, 1.0, &
+               cholesky_mo_transp_sp(1,1,k), cholesky_mo_num, &
+               cholesky_mo_transp_sp(1,1,l), cholesky_mo_num, 0.0, &
+               out_array_sp(1,1), sze)
+          endif
         else
           call sgemm('T', 'N', mo_num, mo_num, cholesky_mo_num, 1.0, &
              cholesky_mo_transp_sp(1,1,k), cholesky_mo_num, &
