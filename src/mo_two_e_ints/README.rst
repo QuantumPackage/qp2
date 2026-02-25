@@ -57,10 +57,8 @@ The module provides several key routines:
 
 - ``get_two_e_integral(i,j,k,l,mo_integrals_map)``: Fetches a specific MO integral
 - ``mo_two_e_integral(i,j,k,l)``: Direct access to MO integrals
-- ``mo_two_e_integrals_jj``, ``mo_two_e_integrals_jj_exchange``, ``mo_two_e_integrals_jj_anti``:
-  Specialized routines for 2-index integrals
-- ``big_array_exchange_integrals`` and ``big_array_coulomb_integrals``:
-  3-index arrays for efficient exchange and Coulomb integrals computation
+- ``mo_two_e_integrals_jj``, ``mo_two_e_integrals_jj_exchange``, ``mo_two_e_integrals_jj_anti``: Specialized routines for 2-index integrals
+- ``big_array_exchange_integrals`` and ``big_array_coulomb_integrals``: 3-index arrays for efficient exchange and Coulomb integrals computation
 
 Storage Format
 --------------

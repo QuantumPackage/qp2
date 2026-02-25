@@ -48,33 +48,15 @@ subroutine u_0_HS2_u_0(e_0,s_0,u_0,n,keys_tmp,Nint,N_st,sze)
 
   if ((n > 100000).and.distributed_davidson) then
     allocate (v_0(n,N_states_diag),s_vec(n,N_states_diag), u_1(n,N_states_diag))
-    do j=1,N_st
-      do i=1,n
-        u_1(i,j) = u_0(i,j)
-      enddo
-    enddo
-    do j=N_st+1,N_states_diag
-      do i=1,n
-        u_1(i,j) = 0.d0
-      enddo
-    enddo
+    u_1(:,:) = 0.d0
+    u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
     call H_S2_u_0_nstates_zmq(v_0,s_vec,u_1,N_states_diag,n)
   else if (n < n_det_max_full) then
     allocate (v_0(n,N_st),s_vec(n,N_st), u_1(n,N_st))
-    do istate = 1,N_st
-      do i=1,n
-        v_0(i,istate) = 0.d0
-        s_vec(i,istate) = 0.d0
-        u_1(i,istate) = u_0(i,istate)
-      enddo
-    enddo
-    do istate=N_st+1,N_states_diag
-      do i=1,n
-        v_0(i,istate) = 0.d0
-        s_vec(i,istate) = 0.d0
-        u_1(i,j) = 0.d0
-      enddo
-    enddo
+    v_0(:,:) = 0.d0
+    u_1(:,:) = 0.d0
+    s_vec(:,:) = 0.d0
+    u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
     do istate = 1,N_st
       do j=1,n
         do i=1,n
@@ -85,12 +67,8 @@ subroutine u_0_HS2_u_0(e_0,s_0,u_0,n,keys_tmp,Nint,N_st,sze)
     enddo
   else
     allocate (v_0(n,N_st),s_vec(n,N_st),u_1(n,N_st))
-    do j=1,N_st
-      do i=1,n
-        u_1(i,j) = 0.d0
-        u_1(i,j) = u_0(i,j)
-      enddo
-    enddo
+    u_1(:,:) = 0.d0
+    u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
     call H_S2_u_0_nstates_openmp(v_0,s_vec,u_1,N_st,n)
   endif
   u_0(1:n,1:N_st) = u_1(1:n,1:N_st)
@@ -239,9 +217,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
   logical                        :: u_is_sparse
   double precision, allocatable  :: hij_block(:), sij_block(:)
 
-!TODO
-!  if (do_mo_cholesky) then
-  if (.True.) then
+  if (do_mo_cholesky) then
     call H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
     return
   endif
@@ -858,7 +834,34 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
   integer                        :: exc(0:2,2,2), i_, j_, k_, l_, m, iexc_loop
   double precision               :: phase, phase2
   double precision, allocatable  :: integral(:,:,:,:)
-  integer :: norb_block
+  integer :: norb_block, nlist, count_max
+
+  integer,allocatable :: count(:)
+  integer,allocatable :: list(:)
+!  integer(bit_kind) :: mask($N_int)
+
+  allocate(count(mo_num),list(mo_num))
+  do k=1,mo_num
+    count(k) = 0
+  end do
+  do i=1,N_det_alpha_unique
+    call bitstring_to_list(psi_det_alpha_unique(:,i),list,nlist,$N_int)
+    do k=1,nlist
+      count( list(k) ) = count( list(k) ) + 1
+    enddo
+  enddo
+
+  do i=1,N_det_beta_unique
+    call bitstring_to_list(psi_det_beta_unique(:,i),list,nlist,$N_int)
+    do k=1,nlist
+      count( list(k) ) = count( list(k) ) + 1
+    enddo
+  enddo
+  count_max = N_det_alpha_unique+N_det_beta_unique
+
+!  do k=1,mo_num
+!    print *, k, count( k ) , '/', count_max
+!  enddo
 
 !  call resident_memory(rss)
 !  mem = dble(singles_beta_csc_size) / 1024.d0**3
@@ -902,7 +905,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
       !$OMP          ishift, idx0, u_t, maxab, compute_singles,      &
       !$OMP          singles_alpha_csc,singles_alpha_csc_idx,        &
       !$OMP          singles_beta_csc,singles_beta_csc_idx,          &
-      !$OMP          integral)           &
+      !$OMP          integral, count, count_max)           &
       !$OMP   PRIVATE(krow, kcol, tmp_det, spindet, k_a, k_b, i,     &
       !$OMP          lcol, lrow, l_a, l_b, utl, kk, u_is_sparse,     &
       !$OMP          buffer, doubles, n_doubles, umax, tmp_det4,     &
@@ -944,9 +947,17 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
 
   do iexc_loop = 1, mo_num, norb_block
 
-    !$OMP DO
+    ! Skip MOs that are always unoccupied
+    if (maxval( count(iexc_loop:iexc_loop+norb_block-1) ) == 0) cycle
+
+    ! Skip MOs that are always occupied
+    if (minval( count(iexc_loop:iexc_loop+norb_block-1) ) == count_max) cycle
+
+    !$OMP DO SCHEDULE(static,1) COLLAPSE(2)
     do k=1,mo_num
       do l=iexc_loop,iexc_loop+norb_block-1
+        if ( (count(l) == 0).or.(count(l) == count_max).or. &
+             (count(k) == 0).or.(count(k) == count_max) ) cycle
         call get_mo_two_e_integrals_ij(k,l,mo_num,integral(1,1,k,l-iexc_loop+1),mo_integrals_map)
       end do
     end do
