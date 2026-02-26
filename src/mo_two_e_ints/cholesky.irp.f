@@ -72,7 +72,6 @@ END_PROVIDER
      read(iunit) cholesky_mo_transp
      !$OMP PARALLEL DO PRIVATE(igpu)
      do igpu=0,gpu_num-1
-       call gpu_allocate(cholesky_mo_transp_d(igpu), cholesky_mo_num, mo_num, mo_num)
        call gpu_set_device(igpu)
        call gpu_allocate(cholesky_mo_transp_d(igpu), cholesky_mo_num, mo_num, mo_num)
        call gpu_upload(cholesky_mo_transp, cholesky_mo_transp_d(igpu))
