@@ -20,7 +20,8 @@ jobs:
     steps:
        - name: install dependencies
          run: |
-           sudo apt install gfortran gcc liblapack-dev libblas-dev wget python3 make m4 pkg-config
+           sudo apt update
+           sudo apt install -y --fix-missing --no-install-recommends  gfortran gcc liblapack-dev libblas-dev wget python3 make m4 pkg-config
 
   compilation:
     name: Compilation
