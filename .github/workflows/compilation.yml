@@ -20,6 +20,7 @@ jobs:
     steps:
        - name: install dependencies
          run: |
+           sudo rm -f /etc/apt/apt-mirrors.txt
            sudo apt install -y --no-install-recommends  gfortran gcc liblapack-dev libblas-dev wget python3 make m4 pkg-config
 
   compilation:
