@@ -15,14 +15,15 @@ on:
 jobs:
 
   configuration:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Dependencies
 
     steps:
        - uses: actions/checkout@v3
        - name: Install dependencies
          run: |
-           sudo apt install gfortran gcc liblapack-dev libblas-dev wget python3 make m4 pkg-config libhdf5-dev
+           sudo apt update
+           sudo apt install -y --fix-missing --no-install-recommends gfortran gcc liblapack-dev libblas-dev wget python3 make m4 pkg-config libhdf5-dev
        - name: zlib
          run: |
               ./configure -i zlib || echo OK
