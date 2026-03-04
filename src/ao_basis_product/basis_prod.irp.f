@@ -109,8 +109,9 @@ end function basis_prod_overlap_func
   integer                        :: a,b
   double precision, external     :: basis_prod_overlap_func
 
+  basis_prod_overlap(1,1) = basis_prod_overlap_func(1,1)
   !$OMP PARALLEL DO PRIVATE(a,b) SCHEDULE(guided)
-  do a=1,basis_prod_num
+  do a=2,basis_prod_num
      basis_prod_overlap(a,a) = basis_prod_overlap_func(a,a)
   enddo
   !$OMP END PARALLEL DO
