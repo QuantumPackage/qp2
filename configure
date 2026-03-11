@@ -411,12 +411,15 @@ EOF
 EOF
     elif [[ ${PACKAGE} = simple_gpu ]] ; then
 
+            VERSION=1.0
             execute << EOF
               cd "\${QP_ROOT}"/external
-              cd simple_gpu
-              ./autogen.sh
-              ./configure --prefix=$QP_ROOT
-              make && make check && make install
+              wget https://github.com/scemama/simple_gpu/releases/download/v${VERSION}/simple_gpu-${VERSION}.tar.gz
+              rm -rf simple_gpu-${VERSION}
+              tar -zxf simple_gpu-${VERSION}.tar.gz && rm simple_gpu-${VERSION}.tar.gz
+              cd simple_gpu-${VERSION}
+              ./configure --prefix=\${QP_ROOT} 
+              (make -j 8 || make) && make check && make install
 EOF
     else
         error "${PACKAGE} unknown."
