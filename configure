@@ -416,9 +416,7 @@ EOF
               cd simple_gpu
               ./autogen.sh
               ./configure --prefix=$QP_ROOT
-              make
-              make check
-              make install
+              make && make check && make install
 EOF
     else
         error "${PACKAGE} unknown."
@@ -514,6 +512,13 @@ if [[ ${RESULTSFILE} = $(not_found) ]] ; then
         error "resultsFile (resultsFile) is not installed."
         fail
 fi
+
+SIMPLEGPU=$(find_lib -lsimple_gpu)
+if [[ ${SIMPLEGPU} = $(not_found) ]] ; then
+        error "SimpleGPU (simple_gpu) is not installed."
+        fail
+fi
+
 
 printf "\e[0;34m"
 echo "  ___________________________  "
