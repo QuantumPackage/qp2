@@ -516,7 +516,7 @@ if [[ ${RESULTSFILE} = $(not_found) ]] ; then
         fail
 fi
 
-SIMPLEGPU=$(find_lib -lsimple_gpu)
+SIMPLEGPU=$(find_lib -lsimple_gpu-cpu)
 if [[ ${SIMPLEGPU} = $(not_found) ]] ; then
         error "SimpleGPU (simple_gpu) is not installed."
         fail
