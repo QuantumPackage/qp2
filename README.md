@@ -36,7 +36,7 @@ https://arxiv.org/abs/1902.08154
 }
 ```
 
-Many implementation details can be found in the [PhD thesis of Yann Garniron](https://theses.hal.science/tel-02089570/file/2018TOU30229a.pdf)a:
+Many implementation details can be found in the [PhD thesis of Yann Garniron](https://theses.hal.science/tel-02089570/file/2018TOU30229a.pdf):
 ```
 @phdthesis{garniron_2018,
 	author = {Garniron, Yann},
