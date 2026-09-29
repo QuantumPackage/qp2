@@ -493,14 +493,14 @@ printf "\e[m\n"
 
 if [[ -n $CONFIG ]] ; then
 
-        "${QP_ROOT}"/scripts/compilation/qp_create_ninja create --development "${CONFIG}"
+        "${QP_ROOT}"/scripts/compilation/qp_create_makefile create --development "${CONFIG}"
 fi
 
-if [[ -f ${QP_ROOT}/build.ninja ]] ; then
+if [[ -f ${QP_ROOT}/config/Makefile ]] ; then
   [[ -z ${TRAVIS} ]] && echo "You can now run ./bin/qpsh to enter in the QP shell mode :)"
 else
       echo ""
-      echo "${QP_ROOT}/build.ninja does not exist,"
+      echo "${QP_ROOT}/config/Makefile does not exist,"
       echo "you need to specify the COMPILATION configuration file."
       echo "See  ./configure -h  for more details."
       echo ""
