@@ -2,222 +2,291 @@
 Quick-start guide
 =================
 
-This tutorial should teach you everything you need to get started with
-the the basics of the |qp|. As an example, we will run a frozen core
-|CIPSI| calculation on the HCN molecule in the 6-31G basis set.
+This tutorial walks through a complete frozen-core |CIPSI| calculation on
+the HCN molecule in the 6-31G basis set, and it ends with an estimate of
+the |FCI| energy in this basis. It introduces the commands that the other
+pages of this guide rely on, and it assumes that |qp| is already
+installed and compiled (see :doc:`../intro/install`).
 
 
 Demo video
 ==========
 
-This tutorial can be directly watched at: 
-
-
+The same tutorial is available as a video:
 `<https://www.youtube.com/watch?v=4nmdCAPkZlc>`_
 
 
-Hands on
-========
+Loading the |QP| environment
+============================
 
-.. important::
-
-   Before using the |qp|, it is required to load the environment variables 
-   relatives to the |QP| or to be in the |qpsh| mode. 
-
-
-Please execute in the current shell: 
-
-.. code:: bash 
-
-  ${QP_ROOT}/bin/qpsh 
-
-where :code:`${QP_ROOT}` is the path to the source files of the |QP| installed on your architecture.  
-
-The |QPSH| mode: a Bash-like experience for quantum chemistry
--------------------------------------------------------------
-
-The |QP| has been designed pretty much as an *interactive* environment for quantum-chemistry calculations, 
-in order to facilitate the user experience. 
-
-Just like in Bash, there are many commands in the |QP| (see for instance :ref:`qp_edit` or :ref:`qp_run`) 
-which help in handling useful data or running executables (see for instance :ref:`scf` or :ref:`fci`). 
-
-All commands designed within the |qp| **begin** with `qp`, and there are two ways of running a **command**: 
-
-* running the *executable* associated with the command: 
+The commands described below are shell functions and programs that need
+the environment variables defined in :file:`quantum_package.rc`. Load it
+once in the shell where you work:
 
 .. code:: bash
 
-  qp_command 
+    source ${QP_ROOT}/quantum_package.rc
 
-or executing the *qp* shell command which calls the *executable* :code:`qp_command`: 
+where :file:`${QP_ROOT}` is the installation directory of |qp|. The
+script adds the |qp| programs to :envvar:`PATH` and defines the ``qp``
+shell function described below.
 
-.. code:: bash
-
-  qp command 
-
-Usually, when using the :command:`qp` command, the name of the |EZFIO| database is omitted.
-
-The advantage of using :code:`qp command` is that you can, just like in Bash, have: 
-
-* the :kbd:`Tab` key for the auto-completion for basically any command of the |QP| 
-
-* man pages with -h, --help or qp man 
-
-
-Just try, for instance: 
-
-.. code:: bash 
-
-  qp 
-
-and then use the auto-completion. You will show appear all possible commands that you can run: 
-
-
-.. code:: bash 
-
-  convert_output_to_ezfio  -h                       plugins                  unset_file               
-  create_ezfio             man                      set_file                 update            
-
-Then, try, still with the auto-completion, 
+Another way to obtain the same environment is to start a |qpsh|:
 
 .. code:: bash
 
-  qp create
+    ${QP_ROOT}/bin/qpsh
 
-You will see appear all the options for the :ref:`qp_create_ezfio` commands. 
+This opens a new interactive shell that has already loaded
+:file:`quantum_package.rc`, and whose prompt shows the |EZFIO| directory
+currently in use.
 
-
-Create the EZFIO database
--------------------------
-
-The data relative to calculations are stored in an |EZFIO| database.
-|EZFIO| is a hierarchical data format which uses the hierarchy of the
-file system to organize the data, as files stored in a directory. The
-data in the |EZFIO| directory are stored as plain text files, so it can
-be opened with any text editor.
-To access the data of the |EZFIO| database, the APIs (Fortran, |Python|,
-|OCaml| or Bash) provided by |EZFIO| should be used, or tools using
-these APIs such as :ref:`qp_edit` provided with the |qp|.
-
-First, create an `xyz` file containing the coordinates of the molecule.
-The file :file:`hcn.xyz` contains::
-
-   3
-   HCN molecule
-   C    0.0    0.0    0.0
-   H    0.0    0.0    1.064
-   N    0.0    0.0    -1.156
-
-
-This xyz file is now used with the :ref:`qp_create_ezfio` command to
-create an |EZFIO| database with the 6-31G basis set:
+Each command of |qp| exists as an executable named ``qp_<command>`` that
+takes the |EZFIO| directory as its last argument. The ``qp`` shell
+function calls that executable with the current database, so both lines
+below run the |SCF| program on the directory ``hcn`` when
+:envvar:`EZFIO_FILE` is set to ``hcn``:
 
 .. code:: bash
 
-  qp create_ezfio -b "6-31g" hcn.xyz -o hcn
+    qp_run scf hcn
+    qp run scf
 
-The EZFIO database now contains data relative to the nuclear coordinates
-and the atomic basis set:
+The second form is shorter, it completes the command and option names
+with the :kbd:`Tab` key, and it gives access to the manual pages:
 
 .. code:: bash
 
-  $ ls hcn
-  ao_basis           becke_numerical_grid  dft_keywords  mo_one_e_ints      perturbation
-  ao_one_e_ints      davidson              dressing      mo_two_e_erf_ints  pseudo
-  ao_two_e_erf_ints  density_for_dft       electrons     mo_two_e_ints      scf_utils
-  ao_two_e_ints      determinants          ezfio         nuclei             work
+    qp --help
+    qp man scf
 
-If you need to run using an already existing EZFIO database, use
 
-.. code::  bash
+Create the |EZFIO| database
+===========================
 
-  qp set_file hcn
+All the data of a calculation are stored in an |EZFIO| database. |EZFIO|
+is a hierarchical data format that uses the file system hierarchy to
+organize the data: each quantity is a small file in a directory named
+after the module that defines it, plain text for the scalars and
+gzipped for the arrays, so the content of a database can be inspected
+with any text editor. Programs should access it
+through the APIs provided by |EZFIO|, in Fortran, |Python|, |OCaml| or
+Bash, or through tools built on these APIs such as :ref:`qp_edit`.
+
+First write an ``xyz`` file with the geometry of the molecule in
+:file:`hcn.xyz`::
+
+    3
+    HCN molecule
+    C    0.0    0.0    0.0
+    H    0.0    0.0    1.064
+    N    0.0    0.0    -1.156
+
+Then create the database with the 6-31G basis set:
+
+.. code:: bash
+
+    qp create_ezfio -b "6-31g" hcn.xyz -o hcn
+
+The command creates the directory :file:`hcn` and makes it the current
+|EZFIO| database. The other options of :ref:`qp_create_ezfio` set the
+charge, the multiplicity, a pseudopotential or ghost atoms.
+
+The database now contains the geometry, the basis set and the number of
+electrons, which can be queried from the shell:
+
+.. code:: bash
+
+    $ qp get nuclei nucl_num
+    3
+    $ qp get electrons elec_alpha_num
+    7
+    $ qp get ao_basis ao_num
+    20
+
+In a new shell, the same database is selected with
+
+.. code:: bash
+
+    qp set_file hcn
 
 
 Run a Hartree-Fock calculation
-------------------------------
+==============================
 
-The program :ref:`qp_run` is the driver program of the |qp|. To run a
-|scf| calculation, just run
+The program :ref:`qp_run` is the driver that runs all the other programs.
+A restricted Hartree-Fock calculation is obtained with
 
 .. code:: bash
 
     qp run scf
 
-The expected energy is ``-92.827856698`` au.
+The calculation converges in nine iterations to ``-92.82785666`` au. The
+:ref:`scf` program stores the |MOs| in the |EZFIO| database, where all
+the post-Hartree-Fock methods read them, and prints their Fock
+eigenvalues. The |MOs| of this calculation are already ordered by
+increasing Fock energy; if they are not,
+:ref:`sort_by_fock_energies` reorders them.
 
-.. seealso:: 
+.. seealso::
 
-    The documentation of the :ref:`module_hartree_fock` module and that of the
+    The documentation of the :ref:`module_hartree_fock` module and of the
     :ref:`scf` program.
-
-This creates the |MOs| in the |EZFIO| database that will be used to
-in any other post-SCF method. The |qp| does not handle symmetry and
-the |MOs| are stored by increasing order of Fock energies.
 
 
 Choose the target |MO| space
-----------------------------
+============================
 
-Now, we will modify the |EZFIO| database to make a |CIPSI| calculation only in the
-full set of valence |MOs|, keeping the core |MOs| frozen. The simple
-command :ref:`qp_set_frozen_core` does this automatically:
+The next step restricts the |CIPSI| calculation to the valence |MOs| and
+keeps the core |MOs| frozen. The command :ref:`qp_set_frozen_core` finds
+the number of core electrons of each atom and sets the orbital classes
+accordingly:
 
 .. code:: bash
 
     qp set_frozen_core
 
+For HCN in 6-31G the 20 |MOs| are split into 2 core orbitals and 18
+active orbitals. The result is stored in the |EZFIO| database and can be
+checked with the :ref:`qp_set_mo_class` command:
 
-The general command to specify core and active orbitals is :ref:`qp_set_mo_class`. 
-In the case of HCN molecule in the 631G basis, one has 20 |MOs| in total and the two first orbitals are frozen:
+.. code:: bash
 
-.. code::
+    $ qp set_mo_class -q
+    Electrons: 7 7
+    MO  : 20
+    n_int: 1
+    Core     : (1, 2)
+    Inactive
+    Active   : (3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)
+    Virtual
+    Deleted
+
+The same classes are obtained explicitly with the ranges
+
+.. code:: bash
 
     qp set_mo_class --core="[1-2]" --act="[3-20]"
 
+where ``--core`` orbitals are always doubly occupied, ``--inact``
+orbitals can only receive holes, ``--virt`` orbitals can only receive
+particles, and ``--del`` orbitals are never occupied. Ranges are written
+as ``[36-53,72-107]``.
 
 
 Run the |CIPSI| calculation
-----------------------------
+===========================
 
-We will now use the |CIPSI| algorithm to estimate the |FCI| energy.
+The |CIPSI| algorithm estimates the |FCI| energy by iteratively enlarging
+a variational space. The calculation starts from the Hartree-Fock
+determinant and, at each iteration, selects the determinants of the
+external space that contribute most to the |PT2| correction and adds them
+to the internal space. All the determinants needed to make the wave
+function an eigenfunction of |S^2| are added as well, because
+:option:`determinants s2_eig` is |true| by default. The Hamiltonian is
+then diagonalized in the enlarged space, the |PT2| correction is
+estimated by stochastic sampling, and the variational energy is
+extrapolated to the |FCI| limit by fitting
+:math:`E = E_\text{FCI} - \alpha E_\text{PT2}`.
 
-.. code::
+.. code:: bash
 
-    qp run fci | tee hcn.fci.out 
+    qp run fci | tee hcn.fci.out
+
+The trajectory of the calculation is printed in the output file, with one
+summary block per iteration:
+
+.. code:: text
+
+    -----------------------------------
+    Summary at N_det =        20154
+    -----------------------------------
+    ...
+    # E             -93.04419463
+    # PT2            -0.00567047
+    # E+PT2         -93.04986510
+
+The loop stops when the number of determinants reaches
+:option:`determinants n_det_max` (one million by default) or when the
+|PT2| energy becomes smaller than :option:`perturbation pt2_max` (10\ :sup:`-4`
+au by default). The stochastic evaluation of |PT2| itself stops when its
+relative error reaches :option:`perturbation pt2_relative_error`.
+
+The run of this tutorial ends at 1 290 340 determinants, where both
+criteria are met. Because the |PT2| estimate is sampled stochastically,
+the digits printed by a new run will differ slightly; the |PT2|-corrected
+energy and the fit are stable to about five decimal places. A few of the
+summary blocks show how the energy converges:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Number of determinants
+     - Variational energy
+     - |PT2|
+     - E + |PT2|
+   * - 1 256
+     - -93.02808189
+     - -0.02229222
+     - -93.05037410
+   * - 20 154
+     - -93.04419463
+     - -0.00567047
+     - -93.04986510
+   * - 161 277
+     - -93.04909906
+     - -0.00093748
+     - -93.05003653
+   * - 645 164
+     - -93.04987142
+     - -0.00017428
+     - -93.05004571
+   * - 1 290 340
+     - -93.04997937
+     - -0.00006896
+     - -93.05004833
+
+The last iteration saves the final wave function and prints its
+properties, including the spin expectation value that confirms the
+singlet character of the state:
+
+.. code:: text
+
+    * State            1
+    < S^2 >         =    2.4553002300743978E-011
+    E               =   -93.049979367027902
+    PT2             =   -6.8962142235121408E-005  +/-  1.3802497317171859E-007
+    E+PT2           =   -93.050048329170139       +/-  1.3802497317171859E-007
+
+The fit of the last iterations gives ``-93.05005`` au for the smallest
+|PT2| cutoffs, in agreement with the |PT2| corrected energy. This is the
+estimated |FCI| energy of HCN in 6-31G with a frozen core, to be compared
+with the |HF| energy of ``-92.82785666`` au.
+
+Because the wave function is stored in the |EZFIO| database after each
+iteration, the calculation can be continued from where it stopped by
+setting :option:`determinants read_wf`, and the :ref:`pt2` program
+recomputes its |PT2| correction without performing any selection:
+
+.. code:: bash
+
+    qp set determinants read_wf true
+    qp run fci
+    qp run pt2
+
+.. seealso::
+
+    The documentation of the :ref:`module_fci` module and of the
+    :ref:`fci` program. :doc:`cipsi` describes the selection algorithm
+    and its parameters in more detail.
 
 
-The program will start with a single determinant and will iteratively:
+What next
+=========
 
-* Select the most important determinants from the external space and add them to the
-  internal space
-* Add all the necessary determinants to allow the eigenvector of |H| to be
-  also an eigenstate of |S^2|
-* Diagonalize |H| in the enlarged internal space
-* Compute (stochastically) the second-order perturbative contribution to the energy 
-* Extrapolate the variational energy by fitting
-  :math:`E=E_\text{FCI} - \alpha\, E_\text{PT2}`
-
-By default, the program will stop when more than one million determinants have
-entered in the internal space, or when the |PT2| energy is below :math:`10^{-4}` au.
-
-To have a pictural illustration of the convergence of the |CIPSI| algorithm, just run 
-
-.. code::
-
-    qp_e_conv_fci
-
-This will create the files :file:`hcn.fci.out.conv` containing the data of the
-convergence of the energy that can be plotted, together with the file
-:file:`hcn.fci.out.conv.1.eps` which is obtained from the gnuplot plot file
-:file:`hcn.fci.out.conv.plt`. 
-
-
-The estimated |FCI| energy of HCN is ``-93.0501`` au.
-
-.. seealso:: 
-
-    The documentation of the :ref:`module_fci` module and that of the :ref:`fci` program.
-
-
+The same workflow applies to any molecule and basis set, and the
+parameters described in :doc:`cipsi` control the accuracy and the cost of
+the calculation. :doc:`excited_states` explains how to compute several
+states, :doc:`parallelism` how to run the calculation on several cores or
+nodes, and :doc:`interfaces` how to export the wave function to other
+quantum-chemistry codes.

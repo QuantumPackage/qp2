@@ -9,7 +9,7 @@ excitation criterion, but selected *on the fly* among the entire set of
 determinants based on their estimated contribution to the |FCI| wave function.
 It has been noticed long ago that, even inside a predefined subspace of
 determinants, only a small number significantly contributes to the wave
-function. `Bytautas_2009,Anderson_2018` Therefore, an *on the fly*
+function. `Bytautas_2009,Anderson_2018` Therefore, an *on-the-fly*
 selection of determinants is a rather natural idea that has been proposed
 in the late 60's by Bender and Davidson `Bender_1969` as well as Whitten
 and Hackmeyer. `Whitten_1969`
@@ -110,17 +110,30 @@ The simple algorithm would be too slow to make calculations possible. Instead,
 the |QP| uses a stochastic algorithm :cite:`Garniron_2017.2` in order to compute 
 efficiently the |EPT| and to select on-the-fly the best Slater determinants. 
 
-In such a way, the selection step introduces no extra cost with respect to the |EPT| calculation and the |EPT| 
-itself is unbiased but associated with a statistical error bar rapidly converging. 
+In such a way, the selection step introduces no extra cost with respect to
+the |EPT| calculation, and the |EPT| itself is unbiased but associated with a
+statistical error bar that converges rapidly. The algorithm in use is the
+hybrid one of :cite:`Garniron_2017.2`, in which the stochastic part is
+gradually reduced by increasing the deterministic part until a target
+relative error is reached (:option:`perturbation pt2_relative_error`).
 
 
 Deterministic approximations for the selection
 ----------------------------------------------
 
-The following description was used in a previous version of the |CIPSI| algorithm
-which was less efficient. Nonetheless, it introduces the notions of **generator**  and **selector** determinants 
-which are much more general than the |CIPSI| algorithm that targets the |FCI| and can be used to realize virtually 
-**any kind of CI in a selected way**. 
+The following description corresponds to the fully deterministic algorithm,
+used when :option:`perturbation do_pt2` is set to |false|. For small or
+moderate wave functions it is cheaper than the hybrid algorithm, since every
+generated candidate is evaluated exactly once, without the overhead of the
+sampling machinery, and the hybrid algorithm itself resorts to this
+deterministic evaluation for the smallest wave functions. The |EPT| estimate
+is, however, biased by the truncation of the wave function, so the
+extrapolated |FCI| energy is less accurate than with the hybrid algorithm. It
+is suited to runs whose only goal is to generate a wave function, for instance
+as a trial wave function for |QMC| calculations. It also introduces the
+notions of **generator** and **selector** determinants which are much more
+general than the |CIPSI| algorithm that targets the |FCI| and can be used to
+realize virtually **any kind of CI in a selected way**.
 
 
 We define **generator** determinants, as determinants of the internal space
@@ -130,9 +143,10 @@ used in the computation of |ealpha|.
 
 For calculations in the |FCI| space, the determinants are sorted by decreasing
 `|c_I|^2`, and thresholds are used on the squared norm of the wave function.
-The default is to use :option:`determinants threshold_generators` = 0.99 for
-the generators, and :option:`determinants threshold_selectors` = 0.999 for the
-selectors.
+The default of :option:`determinants threshold_generators` is 0.999 for the
+generators. The threshold for the selectors is not an independent parameter:
+it is set to the square root of the generator threshold, which gives about
+0.9995 by default.
 
 This is nothing but the 3-class |CIPSI| approximation to accelerate the selection, 
 :cite:`Evangelisti_1983` where instead of generating all possible |kalpha|,
@@ -157,16 +171,16 @@ to generate only the double excitations, one will have a selected |CID|.
 
 The generators can also be chosen as determinants belonging to a |CAS|. If the
 rules allow only for excitations inside the |CAS|, we obtain a selected
-|CAS| |CI|. If the rules allow for excitations in the |FCI| space, we obtain
-a selected |CAS-SD|. And if one add the rule to prevent for doing double
-excitations with two holes and two particles outside of the active space, one
-obtains a selected |DDCI| method.
+|CAS| |CI|. If the rules allow single and double excitations from the |CAS|
+in the |FCI| space, we obtain a selected |CAS-SD|. And if one adds the rule
+to prevent double excitations with two holes and two particles outside of the
+active space, one obtains a selected |DDCI| method.
 
 All such things can be done very easily when programming the |qp|.
 
 -----------------------------------
 
-.. bibliography:: selected.bib
+.. bibliography::
    :style: unsrt
    :labelprefix: A
 
