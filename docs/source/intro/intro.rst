@@ -74,7 +74,7 @@ Multiple methods were developed with the |qp|:
   :ref:`pt2` programs
   :cite:`Caffarel_2016,Caffarel_2016.2,Loos_2018,Scemama_2018,Dash_2018`
 - Hybrid stochastic/deterministic MR-PT2, through the ``mrci`` program
-  :cite:`Garniron_2017.2,Loos_2018`
+  :cite:`Garniron_2017b,Loos_2018`
 - Orbital optimization for open-shell systems, through the ``orb_opt`` and
   ``optimization`` programs :cite:`Giner2016Mar,Giner_2017.3`
 - CIS, CISD and MP2, through the :ref:`cis`, :ref:`cisd` and ``mp2`` programs

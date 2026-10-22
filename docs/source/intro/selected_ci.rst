@@ -108,7 +108,7 @@ Stochastic approximations for the selection and the computation of |EPT|
 ------------------------------------------------------------------------
 
 The simple algorithm would be too slow to make calculations possible. Instead,
-the |QP| uses the stochastic (hybrid) algorithm of :cite:`Garniron_2017.2` to
+the |QP| uses the stochastic (hybrid) algorithm of :cite:`Garniron_2017b` to
 compute the |EPT| efficiently and to select on-the-fly the best Slater
 determinants.
 
