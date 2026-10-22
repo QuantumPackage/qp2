@@ -146,6 +146,12 @@ Providers
        * :c:data:`one_e_dm_mo_alpha_for_dft`
        * :c:data:`one_e_dm_mo_beta_for_dft`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
  
 .. c:var:: one_e_dm_alpha_ao_for_dft_no_core
@@ -283,6 +289,12 @@ Providers
        * :c:data:`one_e_dm_mo_alpha_for_dft`
        * :c:data:`one_e_dm_mo_beta_for_dft`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
  
 .. c:var:: one_e_dm_beta_ao_for_dft_no_core
@@ -483,4 +495,10 @@ Providers
        * :c:data:`one_e_dm_mo_alpha_for_dft`
        * :c:data:`one_e_dm_mo_beta_for_dft`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`kinetic_density_generalized`
 

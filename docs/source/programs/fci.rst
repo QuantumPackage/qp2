@@ -48,11 +48,11 @@ fci
  .. hlist:: 
     :columns: 3 
  
+    * :c:data:`all_mo_integrals` 
     * :c:data:`do_pt2` 
     * :c:data:`is_zmq_slave` 
     * :c:data:`json_int_fmt` 
     * :c:data:`json_unit` 
-    * :c:data:`mo_two_e_integrals_in_map` 
     * :c:data:`n_states` 
     * :c:data:`psi_coef` 
     * :c:data:`psi_det` 
@@ -84,6 +84,7 @@ fci
     * :c:data:`c0_weight` 
     * :c:data:`distributed_davidson` 
     * :c:data:`psi_coef` 
+    * :c:data:`psi_det_sorted_bit` 
     * :c:data:`psi_det_sorted_bit` 
     * :c:data:`psi_configuration` 
     * :c:data:`psi_det` 

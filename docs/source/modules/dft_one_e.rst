@@ -210,6 +210,7 @@ Providers
 
        * :c:data:`ao_effective_one_e_potential`
        * :c:data:`effective_one_e_potential_sa`
+       * :c:data:`ref_vhxc`
 
  
 .. c:var:: effective_one_e_potential_sa
@@ -278,6 +279,7 @@ Providers
 
        * :c:data:`ao_effective_one_e_potential`
        * :c:data:`effective_one_e_potential_sa`
+       * :c:data:`ref_vhxc`
 
  
 .. c:var:: effective_one_e_potential_without_kin_sa
@@ -1032,6 +1034,27 @@ Providers
 
 
  
+.. c:var:: ref_vhxc
+
+
+    File : :file:`dft_one_e/effective_pot.irp.f`
+
+    .. code:: fortran
+
+        double precision	:: ref_vhxc	
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`effective_one_e_potential`
+       * :c:data:`elec_beta_num`
+
+
+ 
 .. c:var:: regular_range_hartree
 
 
@@ -1057,11 +1080,15 @@ Providers
        * :c:data:`cholesky_mo_num`
        * :c:data:`cholesky_mo_transp`
        * :c:data:`do_mo_cholesky`
+       * :c:data:`gpu_busy`
+       * :c:data:`gpu_integral_buffer1`
+       * :c:data:`gpu_num`
        * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_states`
+       * :c:data:`nproc_max`
        * :c:data:`one_e_dm_average_mo_for_dft`
        * :c:data:`one_e_dm_mo_for_dft`
 
@@ -1092,11 +1119,15 @@ Providers
        * :c:data:`cholesky_mo_num`
        * :c:data:`cholesky_mo_transp`
        * :c:data:`do_mo_cholesky`
+       * :c:data:`gpu_busy`
+       * :c:data:`gpu_integral_buffer1`
+       * :c:data:`gpu_num`
        * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_states`
+       * :c:data:`nproc_max`
        * :c:data:`one_e_dm_average_mo_for_dft`
        * :c:data:`one_e_dm_mo_for_dft`
 
@@ -1127,6 +1158,9 @@ Providers
        * :c:data:`cholesky_mo_num`
        * :c:data:`cholesky_mo_transp`
        * :c:data:`do_mo_cholesky`
+       * :c:data:`gpu_busy`
+       * :c:data:`gpu_integral_buffer1`
+       * :c:data:`gpu_num`
        * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_erf_map`
        * :c:data:`mo_integrals_map`
@@ -1134,6 +1168,7 @@ Providers
        * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_states`
+       * :c:data:`nproc_max`
        * :c:data:`one_e_dm_average_mo_for_dft`
        * :c:data:`one_e_dm_mo_for_dft`
 
@@ -1171,6 +1206,9 @@ Providers
        * :c:data:`cholesky_mo_num`
        * :c:data:`cholesky_mo_transp`
        * :c:data:`do_mo_cholesky`
+       * :c:data:`gpu_busy`
+       * :c:data:`gpu_integral_buffer1`
+       * :c:data:`gpu_num`
        * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_erf_map`
        * :c:data:`mo_integrals_map`
@@ -1178,6 +1216,7 @@ Providers
        * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_states`
+       * :c:data:`nproc_max`
        * :c:data:`one_e_dm_average_mo_for_dft`
        * :c:data:`one_e_dm_mo_for_dft`
 

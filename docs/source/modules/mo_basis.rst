@@ -138,8 +138,6 @@ Providers
     Molecular orbital coefficients on |AO| basis set
     
     mo_coef(i,j) = coefficient of the i-th |AO| on the jth |MO|
-    
-    mo_label : Label characterizing the |MOs| (local, canonical, natural, etc)
 
     Needs:
 
@@ -172,10 +170,12 @@ Providers
        * :c:data:`mo_integrals_n_e`
        * :c:data:`mo_integrals_n_e_per_atom`
        * :c:data:`mo_kinetic_integrals`
+       * :c:data:`mo_one_e_integrals`
        * :c:data:`mo_overlap`
        * :c:data:`mo_pseudo_integrals`
        * :c:data:`mo_pseudo_integrals_local`
        * :c:data:`mo_pseudo_integrals_non_local`
+       * :c:data:`mo_sphe_coef`
        * :c:data:`mo_spread_x`
        * :c:data:`mo_two_e_int_erf_jj_from_ao`
        * :c:data:`mo_two_e_integrals_erf_in_map`
@@ -190,6 +190,7 @@ Providers
        * :c:data:`one_e_spin_density_ao`
        * :c:data:`psi_det`
        * :c:data:`s_mo_coef`
+       * :c:data:`s_mo_sphe_coef`
        * :c:data:`scf_density_matrix_ao_alpha`
        * :c:data:`scf_density_matrix_ao_beta`
 
@@ -231,8 +232,6 @@ Providers
     Molecular orbital coefficients on |AO| basis set
     
     mo_coef_imag(i,j) = coefficient of the i-th |AO| on the jth |MO|
-    
-    mo_label : Label characterizing the |MOs| (local, canonical, natural, etc)
 
     Needs:
 
@@ -302,6 +301,11 @@ Providers
        * :c:data:`mo_two_e_int_erf_jj_from_ao`
        * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
+       * :c:data:`mos_grad_in_r_array`
+       * :c:data:`mos_in_r_array`
+       * :c:data:`mos_in_r_array_extra_omp`
+       * :c:data:`mos_in_r_array_omp`
+       * :c:data:`mos_lapl_in_r_array`
 
  
 .. c:var:: mo_label
@@ -315,8 +319,6 @@ Providers
 
 
     |MO| coefficients on |AO| basis set
-    
-    mo_coef(i,j) = coefficient of the i-th |AO| on the j-th |MO|
     
     mo_label : Label characterizing the |MOs| (local, canonical, natural, etc)
 
@@ -367,6 +369,7 @@ Providers
        * :c:data:`ao_one_e_integrals_from_mo`
        * :c:data:`ao_ortho_canonical_nucl_elec_integrals`
        * :c:data:`ao_ortho_lowdin_nucl_elec_integrals`
+       * :c:data:`ao_sphe_one_e_integrals_from_mo`
        * :c:data:`attachment_numbers_sorted`
        * :c:data:`attachment_orbitals`
        * :c:data:`banned_excitation`
@@ -378,7 +381,10 @@ Providers
        * :c:data:`bielecci_no`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`cholesky_mo`
+       * :c:data:`cholesky_mo_sp`
        * :c:data:`cholesky_mo_transp`
+       * :c:data:`cholesky_mo_transp_sp`
+       * :c:data:`cholesky_mo_transp_sp_d`
        * :c:data:`cholesky_no_1_idx_transp`
        * :c:data:`cholesky_no_total_transp`
        * :c:data:`cholesky_semi_mo_transp_simple`
@@ -393,6 +399,7 @@ Providers
        * :c:data:`fapq`
        * :c:data:`fipq`
        * :c:data:`fock_matrix_ao`
+       * :c:data:`fock_matrix_diag_mo`
        * :c:data:`fock_matrix_mo`
        * :c:data:`fock_matrix_mo_alpha`
        * :c:data:`fock_matrix_mo_beta`
@@ -400,8 +407,10 @@ Providers
        * :c:data:`fock_wee_closed_shell`
        * :c:data:`fps_spf_matrix_mo`
        * :c:data:`full_ijkl_bitmask`
+       * :c:data:`gpu_integral_buffer1`
        * :c:data:`h_core_ri`
        * :c:data:`int_erf_3_index`
+       * :c:data:`kinetic_density_generalized`
        * :c:data:`list_act`
        * :c:data:`list_all_but_del_orb`
        * :c:data:`list_core`
@@ -423,6 +432,9 @@ Providers
        * :c:data:`mo_coef_transp`
        * :c:data:`mo_deriv_1_x`
        * :c:data:`mo_dipole_x`
+       * :c:data:`mo_dipole_x_becke`
+       * :c:data:`mo_grad_ints`
+       * :c:data:`mo_grad_ints_transp`
        * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_erf_cache_min`
        * :c:data:`mo_integrals_erf_map`
@@ -433,16 +445,30 @@ Providers
        * :c:data:`mo_occ`
        * :c:data:`mo_one_e_integrals`
        * :c:data:`mo_overlap`
+       * :c:data:`mo_prop_dipole_x`
        * :c:data:`mo_pseudo_integrals`
        * :c:data:`mo_pseudo_integrals_local`
        * :c:data:`mo_pseudo_integrals_non_local`
+       * :c:data:`mo_sphe_coef`
        * :c:data:`mo_spread_centered_x`
        * :c:data:`mo_spread_x`
+       * :c:data:`mo_symmetry`
        * :c:data:`mo_two_e_int_erf_jj`
        * :c:data:`mo_two_e_int_erf_jj_from_ao`
        * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_jj`
+       * :c:data:`mos_grad_in_r_array`
+       * :c:data:`mos_grad_in_r_array_tranp`
+       * :c:data:`mos_grad_in_r_array_transp_3`
+       * :c:data:`mos_grad_in_r_array_transp_bis`
+       * :c:data:`mos_in_r_array`
+       * :c:data:`mos_in_r_array_extra_omp`
+       * :c:data:`mos_in_r_array_extra_transp`
+       * :c:data:`mos_in_r_array_omp`
+       * :c:data:`mos_in_r_array_transp`
+       * :c:data:`mos_lapl_in_r_array`
+       * :c:data:`mos_lapl_in_r_array_tranp`
        * :c:data:`multi_s_deriv_1`
        * :c:data:`multi_s_dipole_moment`
        * :c:data:`n_act_orb`
@@ -482,8 +508,12 @@ Providers
        * :c:data:`one_e_tr_dm_mo_alpha`
        * :c:data:`one_ints_no`
        * :c:data:`ormas_n_orb`
+       * :c:data:`partial_occupation`
        * :c:data:`psi_energy_h_core`
        * :c:data:`s_mo_coef`
+       * :c:data:`s_mo_sphe_coef`
+       * :c:data:`scf_density_matrix_ao_alpha`
+       * :c:data:`scf_density_matrix_ao_beta`
        * :c:data:`super_ci_dm`
        * :c:data:`superci_natorb`
        * :c:data:`switch_mo_coef`
@@ -518,11 +548,96 @@ Providers
 
 
  
+.. c:var:: mo_sphe_coef
+
+
+    File : :file:`mo_basis/mos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_sphe_coef	(ao_sphe_num,mo_num)
+
+
+    MO coefficients in the basis of spherical harmonics AOs.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cart_to_sphe_coef`
+       * :c:data:`ao_num`
+       * :c:data:`ao_sphe_num`
+       * :c:data:`ao_sphe_overlap`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_num`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`s_mo_sphe_coef`
+
+ 
+.. c:var:: mo_symmetry
+
+
+    File : :file:`mo_basis/mo_class.irp.f`
+
+    .. code:: fortran
+
+        integer, allocatable	:: mo_symmetry	(mo_num)
+
+
+    MOs with the same integer belong to the same irrep.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ezfio_filename`
+       * :c:data:`mo_num`
+       * :c:data:`mpi_master`
+
+
+ 
+.. c:var:: partial_occupation
+
+
+    File : :file:`mo_basis/partial_occupation.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: partial_occupation	(mo_num)
+
+
+    Partial occupation numbers for optimal damping algorithm
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`elec_alpha_num`
+       * :c:data:`elec_beta_num`
+       * :c:data:`mo_num`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`scf_density_matrix_ao_alpha`
+       * :c:data:`scf_density_matrix_ao_beta`
+
+ 
  
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: ao_ortho_cano_to_ao:
+.. c:macro:: ao_ortho_cano_to_ao:
 
 
     File : :file:`mo_basis/mos.irp.f`
@@ -552,7 +667,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:function:: ao_to_mo:
+.. c:macro:: ao_to_mo:
 
 
     File : :file:`mo_basis/mos.irp.f`
@@ -589,6 +704,7 @@ Subroutines / functions
        * :c:data:`mo_integrals_n_e`
        * :c:data:`mo_integrals_n_e_per_atom`
        * :c:data:`mo_kinetic_integrals`
+       * :c:data:`mo_one_e_integrals`
        * :c:data:`mo_pseudo_integrals`
        * :c:data:`mo_pseudo_integrals_local`
        * :c:data:`mo_pseudo_integrals_non_local`
@@ -605,7 +721,7 @@ Subroutines / functions
        * :c:func:`restore_symmetry`
 
  
-.. c:function:: give_all_mos_and_grad_and_lapl_at_r:
+.. c:macro:: give_all_mos_and_grad_and_lapl_at_r:
 
 
     File : :file:`mo_basis/mos_in_r.irp.f`
@@ -633,7 +749,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_and_grad_and_lapl_at_r`
 
  
-.. c:function:: give_all_mos_and_grad_at_r:
+.. c:macro:: give_all_mos_and_grad_at_r:
 
 
     File : :file:`mo_basis/mos_in_r.irp.f`
@@ -661,7 +777,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_and_grad_at_r`
 
  
-.. c:function:: give_all_mos_at_r:
+.. c:macro:: give_all_mos_at_r:
 
 
     File : :file:`mo_basis/mos_in_r.irp.f`
@@ -682,6 +798,15 @@ Subroutines / functions
        * :c:data:`mo_coef_transp`
        * :c:data:`mo_num`
 
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mos_in_r_array`
+       * :c:data:`mos_in_r_array_extra_omp`
+       * :c:data:`mos_in_r_array_omp`
+
     Calls:
 
     .. hlist::
@@ -691,7 +816,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_at_r`
 
  
-.. c:function:: mix_mo_jk:
+.. c:macro:: mix_mo_jk:
 
 
     File : :file:`mo_basis/mos.irp.f`
@@ -719,7 +844,7 @@ Subroutines / functions
        * :c:data:`mo_coef`
 
  
-.. c:function:: mo_as_eigvectors_of_mo_matrix:
+.. c:macro:: mo_as_eigvectors_of_mo_matrix:
 
 
     File : :file:`mo_basis/utils.irp.f`
@@ -748,7 +873,6 @@ Subroutines / functions
        * :c:func:`create_guess`
        * :c:func:`damping_scf`
        * :c:func:`hcore_guess`
-       * :c:func:`roothaan_hall_scf`
 
     Calls:
 
@@ -760,7 +884,7 @@ Subroutines / functions
        * :c:func:`write_time`
 
  
-.. c:function:: mo_as_svd_vectors_of_mo_matrix:
+.. c:macro:: mo_as_svd_vectors_of_mo_matrix:
 
 
     File : :file:`mo_basis/utils.irp.f`
@@ -791,7 +915,7 @@ Subroutines / functions
        * :c:func:`write_time`
 
  
-.. c:function:: mo_as_svd_vectors_of_mo_matrix_eig:
+.. c:macro:: mo_as_svd_vectors_of_mo_matrix_eig:
 
 
     File : :file:`mo_basis/utils.irp.f`
@@ -831,7 +955,7 @@ Subroutines / functions
        * :c:func:`write_time`
 
  
-.. c:function:: mo_coef_new_as_svd_vectors_of_mo_matrix_eig:
+.. c:macro:: mo_coef_new_as_svd_vectors_of_mo_matrix_eig:
 
 
     File : :file:`mo_basis/utils.irp.f`
@@ -863,7 +987,7 @@ Subroutines / functions
        * :c:func:`write_time`
 
  
-.. c:function:: save_mos:
+.. c:macro:: save_mos:
 
 
     File : :file:`mo_basis/utils.irp.f`
@@ -914,7 +1038,7 @@ Subroutines / functions
        * :c:func:`ezfio_set_mo_basis_mo_occ`
 
  
-.. c:function:: save_mos_no_occ:
+.. c:macro:: save_mos_no_occ:
 
 
     File : :file:`mo_basis/utils.irp.f`
@@ -942,7 +1066,7 @@ Subroutines / functions
        * :c:func:`ezfio_set_mo_basis_mo_coef`
 
  
-.. c:function:: save_mos_truncated:
+.. c:macro:: save_mos_truncated:
 
 
     File : :file:`mo_basis/utils.irp.f`

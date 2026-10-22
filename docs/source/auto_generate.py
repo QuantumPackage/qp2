@@ -72,13 +72,16 @@ def generate_modules(abs_module, entities, local_entities=None):
     rst += ["", "Programs", "--------", ""]
     for binary, prog in progs:
         try:
-            page = subroutines[prog.lower()]
+            subroutines[prog.lower()]
         except KeyError:
             print("Error: The program %s (binary %s) in %s has no man page; \
 you probably did not run ninja at the root."%
                 (prog, os.path.basename(binary), abs_module))
             sys.exit(1)
-        rst += [" * :ref:`%s`"%(page["name"])]
+        # The program page is anchored by the binary (file) name, which is
+        # unique. The program statement name need not be: two tools
+        # programs both declare 'program print_hamiltonian'.
+        rst += [" * :ref:`%s`"%(os.path.basename(binary))]
 
   if providers:
     rst += ["", "Providers", "---------", ""]

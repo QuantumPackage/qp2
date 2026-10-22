@@ -47,11 +47,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`exc_degree_per_selectors`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det_selectors`
        * :c:data:`n_int`
        * :c:data:`psi_selectors`
@@ -91,11 +90,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`exc_degree_per_selectors`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det_selectors`
        * :c:data:`n_int`
        * :c:data:`psi_selectors`
@@ -172,11 +170,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`exc_degree_per_selectors`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det_selectors`
        * :c:data:`n_int`
        * :c:data:`psi_selectors`
@@ -216,11 +213,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`exc_degree_per_selectors`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det_selectors`
        * :c:data:`n_int`
        * :c:data:`psi_selectors`
@@ -260,11 +256,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`exc_degree_per_selectors`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det_selectors`
        * :c:data:`n_int`
        * :c:data:`psi_selectors`
@@ -341,11 +336,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`exc_degree_per_selectors`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det_selectors`
        * :c:data:`n_int`
        * :c:data:`psi_selectors`
@@ -385,11 +379,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`exc_degree_per_selectors`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det_selectors`
        * :c:data:`n_int`
        * :c:data:`psi_selectors`
@@ -429,11 +422,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`exc_degree_per_selectors`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det_selectors`
        * :c:data:`n_int`
        * :c:data:`psi_selectors`
@@ -562,7 +554,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: zmq_get_n_det_generators:
+.. c:macro:: zmq_get_n_det_generators:
 
 
     File : :file:`selectors_utils/zmq.irp.f_template_102`
@@ -584,7 +576,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_get_n_det_selectors:
+.. c:macro:: zmq_get_n_det_selectors:
 
 
     File : :file:`selectors_utils/zmq.irp.f_template_102`
@@ -606,7 +598,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_put_n_det_generators:
+.. c:macro:: zmq_put_n_det_generators:
 
 
     File : :file:`selectors_utils/zmq.irp.f_template_102`
@@ -627,7 +619,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_put_n_det_selectors:
+.. c:macro:: zmq_put_n_det_selectors:
 
 
     File : :file:`selectors_utils/zmq.irp.f_template_102`

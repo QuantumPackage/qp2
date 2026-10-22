@@ -122,6 +122,16 @@ EZFIO parameters
     Total number of extra_grid points
  
  
+.. option:: final_grid_points_extra
+ 
+    Grid points on the extra grid
+ 
+ 
+.. option:: final_weight_at_r_vector_extra
+ 
+    Weights of the points on the extra grid
+ 
+ 
 .. option:: extra_grid_type_sgn
  
     Type of extra_grid used for the Becke's numerical extra_grid. Can be, by increasing accuracy: [ 0 | 1 | 2 | 3 ]
@@ -163,6 +173,12 @@ EZFIO parameters
     method used to sample the radial space. Possible choices are [KNOWLES | GILL]
  
     Default: KNOWLES
+ 
+.. option:: io_extra_grid
+ 
+    Read/Write the extra grid from/to disk [ Write | Read | None ]
+ 
+    Default: None
  
  
 Providers 
@@ -358,32 +374,12 @@ Providers
        * :c:data:`aos_grad_in_r_array`
        * :c:data:`aos_in_r_array`
        * :c:data:`aos_lapl_in_r_array`
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`average_on_top`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`f_psi_cas_ab`
-       * :c:data:`f_psi_hf_ab`
        * :c:data:`final_grid_points_transp`
+       * :c:data:`mo_dipole_x_becke`
        * :c:data:`mo_grad_ints`
        * :c:data:`mos_in_r_array`
        * :c:data:`mos_in_r_array_omp`
-       * :c:data:`mu_average_prov`
-       * :c:data:`mu_grad_rho`
-       * :c:data:`mu_of_r_dft_average`
-       * :c:data:`mu_rsc_of_r`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
  
@@ -418,6 +414,7 @@ Providers
        * :c:data:`n_points_extra_final_grid`
        * :c:data:`n_points_extra_radial_grid`
        * :c:data:`nucl_num`
+       * :c:data:`read_extra_grid`
        * :c:data:`thresh_extra_grid`
 
     Needed by:
@@ -427,6 +424,7 @@ Providers
 
        * :c:data:`aos_grad_in_r_array_extra`
        * :c:data:`aos_in_r_array_extra`
+       * :c:data:`mos_in_r_array_extra_omp`
 
  
 .. c:var:: final_grid_points_per_atom
@@ -601,32 +599,12 @@ Providers
        * :c:data:`aos_grad_in_r_array`
        * :c:data:`aos_in_r_array`
        * :c:data:`aos_lapl_in_r_array`
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`average_on_top`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`f_psi_cas_ab`
-       * :c:data:`f_psi_hf_ab`
        * :c:data:`final_grid_points_transp`
+       * :c:data:`mo_dipole_x_becke`
        * :c:data:`mo_grad_ints`
        * :c:data:`mos_in_r_array`
        * :c:data:`mos_in_r_array_omp`
-       * :c:data:`mu_average_prov`
-       * :c:data:`mu_grad_rho`
-       * :c:data:`mu_of_r_dft_average`
-       * :c:data:`mu_rsc_of_r`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
  
@@ -661,6 +639,7 @@ Providers
        * :c:data:`n_points_extra_final_grid`
        * :c:data:`n_points_extra_radial_grid`
        * :c:data:`nucl_num`
+       * :c:data:`read_extra_grid`
        * :c:data:`thresh_extra_grid`
 
     Needed by:
@@ -670,6 +649,7 @@ Providers
 
        * :c:data:`aos_grad_in_r_array_extra`
        * :c:data:`aos_in_r_array_extra`
+       * :c:data:`mos_in_r_array_extra_omp`
 
  
 .. c:var:: final_weight_at_r_vector_per_atom
@@ -910,32 +890,12 @@ Providers
        * :c:data:`aos_grad_in_r_array`
        * :c:data:`aos_in_r_array`
        * :c:data:`aos_lapl_in_r_array`
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`average_on_top`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`f_psi_cas_ab`
-       * :c:data:`f_psi_hf_ab`
        * :c:data:`final_grid_points_transp`
+       * :c:data:`mo_dipole_x_becke`
        * :c:data:`mo_grad_ints`
        * :c:data:`mos_in_r_array`
        * :c:data:`mos_in_r_array_omp`
-       * :c:data:`mu_average_prov`
-       * :c:data:`mu_grad_rho`
-       * :c:data:`mu_of_r_dft_average`
-       * :c:data:`mu_rsc_of_r`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
  
@@ -970,6 +930,7 @@ Providers
        * :c:data:`n_points_extra_final_grid`
        * :c:data:`n_points_extra_radial_grid`
        * :c:data:`nucl_num`
+       * :c:data:`read_extra_grid`
        * :c:data:`thresh_extra_grid`
 
     Needed by:
@@ -979,6 +940,7 @@ Providers
 
        * :c:data:`aos_grad_in_r_array_extra`
        * :c:data:`aos_in_r_array_extra`
+       * :c:data:`mos_in_r_array_extra_omp`
 
  
 .. c:var:: index_final_points_extra_reverse
@@ -1012,6 +974,7 @@ Providers
        * :c:data:`n_points_extra_final_grid`
        * :c:data:`n_points_extra_radial_grid`
        * :c:data:`nucl_num`
+       * :c:data:`read_extra_grid`
        * :c:data:`thresh_extra_grid`
 
     Needed by:
@@ -1021,6 +984,7 @@ Providers
 
        * :c:data:`aos_grad_in_r_array_extra`
        * :c:data:`aos_in_r_array_extra`
+       * :c:data:`mos_in_r_array_extra_omp`
 
  
 .. c:var:: index_final_points_per_atom
@@ -1125,32 +1089,12 @@ Providers
        * :c:data:`aos_grad_in_r_array`
        * :c:data:`aos_in_r_array`
        * :c:data:`aos_lapl_in_r_array`
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`average_on_top`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`f_psi_cas_ab`
-       * :c:data:`f_psi_hf_ab`
        * :c:data:`final_grid_points_transp`
+       * :c:data:`mo_dipole_x_becke`
        * :c:data:`mo_grad_ints`
        * :c:data:`mos_in_r_array`
        * :c:data:`mos_in_r_array_omp`
-       * :c:data:`mu_average_prov`
-       * :c:data:`mu_grad_rho`
-       * :c:data:`mu_of_r_dft_average`
-       * :c:data:`mu_rsc_of_r`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
  
@@ -1197,6 +1141,7 @@ Providers
        * :c:data:`final_weight_at_r_extra`
        * :c:data:`n_points_extra_radial_grid`
        * :c:data:`nucl_num`
+       * :c:data:`read_extra_grid`
        * :c:data:`thresh_extra_grid`
 
     Needed by:
@@ -1208,6 +1153,8 @@ Providers
        * :c:data:`aos_in_r_array_extra`
        * :c:data:`aos_in_r_array_extra_transp`
        * :c:data:`final_grid_points_extra`
+       * :c:data:`mos_in_r_array_extra_omp`
+       * :c:data:`mos_in_r_array_extra_transp`
 
  
 .. c:var:: n_points_extra_grid_per_atom
@@ -1342,7 +1289,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`act_mos_in_r_array`
        * :c:data:`alpha_dens_kin_in_r`
        * :c:data:`ao_abs_int_grid`
        * :c:data:`ao_overlap_abs_grid`
@@ -1357,45 +1303,11 @@ Providers
        * :c:data:`aos_in_r_array_transp`
        * :c:data:`aos_lapl_in_r_array`
        * :c:data:`aos_lapl_in_r_array_transp`
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`average_on_top`
-       * :c:data:`basis_mos_in_r_array`
-       * :c:data:`core_density`
-       * :c:data:`core_inact_act_mos_grad_in_r_array`
-       * :c:data:`core_inact_act_mos_in_r_array`
-       * :c:data:`core_inact_act_v_kl_contracted`
-       * :c:data:`core_mos_in_r_array`
-       * :c:data:`effective_alpha_dm`
-       * :c:data:`effective_spin_dm`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`f_hf_cholesky`
-       * :c:data:`f_hf_cholesky_sparse`
-       * :c:data:`f_hf_cholesky_sparse_bis`
-       * :c:data:`f_psi_cas_ab`
-       * :c:data:`f_psi_cas_ab_old`
-       * :c:data:`f_psi_hf_ab`
        * :c:data:`final_grid_points`
        * :c:data:`final_grid_points_transp`
-       * :c:data:`full_occ_2_rdm_cntrctd`
-       * :c:data:`full_occ_2_rdm_cntrctd_trans`
-       * :c:data:`full_occ_v_kl_cntrctd`
-       * :c:data:`grad_total_cas_on_top_density`
-       * :c:data:`inact_density`
-       * :c:data:`inact_mos_in_r_array`
        * :c:data:`kinetic_density_generalized`
+       * :c:data:`mo_dipole_x_becke`
        * :c:data:`mo_grad_ints`
        * :c:data:`mos_grad_in_r_array`
        * :c:data:`mos_grad_in_r_array_tranp`
@@ -1406,39 +1318,7 @@ Providers
        * :c:data:`mos_in_r_array_transp`
        * :c:data:`mos_lapl_in_r_array`
        * :c:data:`mos_lapl_in_r_array_tranp`
-       * :c:data:`mos_times_cholesky_r1`
-       * :c:data:`mos_times_cholesky_r2`
-       * :c:data:`mu_average_prov`
-       * :c:data:`mu_grad_rho`
-       * :c:data:`mu_of_r_dft`
-       * :c:data:`mu_of_r_dft_average`
-       * :c:data:`mu_of_r_hf`
-       * :c:data:`mu_of_r_hf_old`
-       * :c:data:`mu_of_r_hf_sparse`
-       * :c:data:`mu_of_r_prov`
-       * :c:data:`mu_of_r_psi_cas`
-       * :c:data:`mu_rsc_of_r`
-       * :c:data:`on_top_hf_grid`
-       * :c:data:`one_e_act_density_alpha`
-       * :c:data:`one_e_act_density_beta`
-       * :c:data:`one_e_cas_total_density`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
-       * :c:data:`pot_grad_x_alpha_ao_pbe`
-       * :c:data:`pot_grad_x_alpha_ao_sr_pbe`
-       * :c:data:`pot_grad_xc_alpha_ao_pbe`
-       * :c:data:`pot_grad_xc_alpha_ao_sr_pbe`
-       * :c:data:`pot_scal_x_alpha_ao_pbe`
-       * :c:data:`pot_scal_x_alpha_ao_sr_pbe`
-       * :c:data:`pot_scal_xc_alpha_ao_pbe`
-       * :c:data:`pot_scal_xc_alpha_ao_sr_pbe`
-       * :c:data:`potential_c_alpha_ao_lda`
-       * :c:data:`potential_c_alpha_ao_sr_lda`
-       * :c:data:`potential_x_alpha_ao_lda`
-       * :c:data:`potential_x_alpha_ao_sr_lda`
-       * :c:data:`potential_xc_alpha_ao_lda`
-       * :c:data:`potential_xc_alpha_ao_sr_lda`
-       * :c:data:`total_cas_on_top_density`
-       * :c:data:`virt_mos_in_r_array`
 
  
 .. c:var:: n_points_grid_per_atom
@@ -1774,7 +1654,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: cell_function_becke:
+.. c:macro:: cell_function_becke:
 
 
     File : :file:`becke_numerical_grid/step_function_becke.irp.f`
@@ -1798,7 +1678,7 @@ Subroutines / functions
        * :c:data:`slater_bragg_type_inter_distance_ua`
 
  
-.. c:function:: derivative_knowles_function:
+.. c:macro:: derivative_knowles_function:
 
 
     File : :file:`becke_numerical_grid/integration_radial.irp.f`
@@ -1811,7 +1691,7 @@ Subroutines / functions
     Derivative of the function proposed by Knowles (JCP, 104, 1996) for distributing the radial points
 
  
-.. c:function:: example_becke_numerical_grid:
+.. c:macro:: example_becke_numerical_grid:
 
 
     File : :file:`becke_numerical_grid/example.irp.f`
@@ -1837,7 +1717,7 @@ Subroutines / functions
        * :c:data:`nucl_num`
 
  
-.. c:function:: f_function_becke:
+.. c:macro:: f_function_becke:
 
 
     File : :file:`becke_numerical_grid/step_function_becke.irp.f`
@@ -1849,7 +1729,7 @@ Subroutines / functions
 
 
  
-.. c:function:: knowles_function:
+.. c:macro:: knowles_function:
 
 
     File : :file:`becke_numerical_grid/integration_radial.irp.f`
@@ -1863,7 +1743,7 @@ Subroutines / functions
     the Log "m" function ( equation (7) in the paper )
 
  
-.. c:function:: step_function_becke:
+.. c:macro:: step_function_becke:
 
 
     File : :file:`becke_numerical_grid/step_function_becke.irp.f`

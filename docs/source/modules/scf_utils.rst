@@ -115,6 +115,18 @@ EZFIO parameters
  
     Default: False
  
+.. option:: rohf_parameters
+ 
+    Parameterization used for the ROHF Fock matrix: Roothaan|McWeeny|Davidson|Guest|Binkley|Faegri|Euler|Canonical
+ 
+    Default: Roothaan
+ 
+.. option:: use_optimal_damping
+ 
+    If true, use optimal damping algorithm
+ 
+    Default: False
+ 
  
 Providers 
 --------- 
@@ -234,47 +246,6 @@ Providers
 
 
  
-.. c:function:: extrapolate_fock_matrix:
-
-
-    File : :file:`scf_utils/roothaan_hall_scf.irp.f`
-
-    .. code:: fortran
-
-        subroutine extrapolate_Fock_matrix(               &
-           error_matrix_DIIS,Fock_matrix_DIIS,    &
-           Fock_matrix_AO_,size_Fock_matrix_AO,   &
-           iteration_SCF,dim_DIIS                 &
-           )
-
-
-    Compute the extrapolated Fock matrix using the DIIS procedure
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_num`
-       * :c:data:`max_dim_diis`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`roothaan_hall_scf`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`dgecon`
-       * :c:func:`dgesv`
-       * :c:func:`dgetrf`
-
- 
 .. c:var:: fock_matrix_ao
 
 
@@ -317,65 +288,18 @@ Providers
 
     .. code:: fortran
 
-        double precision, allocatable	:: fock_matrix_mo	(mo_num,mo_num)
         double precision, allocatable	:: fock_matrix_diag_mo	(mo_num)
 
 
-    Fock matrix on the MO basis.
-    For open shells, the ROHF Fock Matrix is ::
-    
-          |  Rcc  |  F^b  |  Fcv  |
-          |-----------------------|
-          |  F^b  |  Roo  |  F^a  |
-          |-----------------------|
-          |  Fcv  |  F^a  |  Rvv  |
-    
-    C: Core, O: Open, V: Virtual
-    
-    Rcc = Acc Fcc^a + Bcc Fcc^b
-    Roo = Aoo Foo^a + Boo Foo^b
-    Rvv = Avv Fvv^a + Bvv Fvv^b
-    Fcv = (F^a + F^b)/2
-    
-    F^a: Fock matrix alpha (MO), F^b: Fock matrix beta (MO)
-    A,B: Coupling parameters
-    
-    J. Chem. Phys. 133, 141102 (2010), https://doi.org/10.1063/1.3503173
-    Coupling parameters from J. Chem. Phys. 125, 204110 (2006); https://doi.org/10.1063/1.2393223.
-          cc   oo   vv
-     A  -0.5  0.5  1.5
-     B   1.5  0.5 -0.5
-    
 
     Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`all_shells_closed`
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
-       * :c:data:`fock_matrix_mo_alpha`
-       * :c:data:`fock_matrix_mo_beta`
-       * :c:data:`frozen_orb_scf`
-       * :c:data:`list_act`
-       * :c:data:`list_core`
-       * :c:data:`list_inact`
-       * :c:data:`list_virt`
+       * :c:data:`fock_matrix_mo`
        * :c:data:`mo_num`
-       * :c:data:`n_act_orb`
-       * :c:data:`n_core_orb`
-       * :c:data:`n_inact_orb`
-       * :c:data:`n_virt_orb`
-       * :c:data:`no_oa_or_av_opt`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`eigenvectors_fock_matrix_mo`
-       * :c:data:`fock_matrix_ao`
 
  
 .. c:var:: fock_matrix_mo
@@ -386,7 +310,6 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: fock_matrix_mo	(mo_num,mo_num)
-        double precision, allocatable	:: fock_matrix_diag_mo	(mo_num)
 
 
     Fock matrix on the MO basis.
@@ -425,6 +348,7 @@ Providers
        * :c:data:`elec_beta_num`
        * :c:data:`fock_matrix_mo_alpha`
        * :c:data:`fock_matrix_mo_beta`
+       * :c:data:`fock_matrix_param`
        * :c:data:`frozen_orb_scf`
        * :c:data:`list_act`
        * :c:data:`list_core`
@@ -444,6 +368,7 @@ Providers
 
        * :c:data:`eigenvectors_fock_matrix_mo`
        * :c:data:`fock_matrix_ao`
+       * :c:data:`fock_matrix_diag_mo`
 
  
 .. c:var:: fock_matrix_mo_alpha
@@ -497,6 +422,36 @@ Providers
        * :c:data:`fock_matrix_ao_alpha`
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`fock_matrix_mo`
+
+ 
+.. c:var:: fock_matrix_param
+
+
+    File : :file:`scf_utils/fock_matrix.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: fock_matrix_param	(2,3)
+
+
+    Fock matrix parameters.
+    (1,1) : A cc  (2,1) : B cc
+    (1,2) : A oo  (2,2) : B oo
+    (1,3) : A vv  (2,3) : B vv
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`rohf_parameters`
 
     Needed by:
 
@@ -611,6 +566,9 @@ Providers
        * :c:data:`ao_num`
        * :c:data:`elec_alpha_num`
        * :c:data:`mo_coef`
+       * :c:data:`mo_num`
+       * :c:data:`partial_occupation`
+       * :c:data:`use_optimal_damping`
 
     Needed by:
 
@@ -646,6 +604,9 @@ Providers
        * :c:data:`ao_num`
        * :c:data:`elec_beta_num`
        * :c:data:`mo_coef`
+       * :c:data:`mo_num`
+       * :c:data:`partial_occupation`
+       * :c:data:`use_optimal_damping`
 
     Needed by:
 
@@ -714,7 +675,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: damping_scf:
+.. c:macro:: damping_scf:
 
 
     File : :file:`scf_utils/damping_scf.irp.f`
@@ -766,7 +727,48 @@ Subroutines / functions
        * :c:data:`mo_coef`
 
  
-.. c:function:: huckel_guess:
+.. c:macro:: extrapolate_fock_matrix:
+
+
+    File : :file:`scf_utils/roothaan_hall_scf.irp.f`
+
+    .. code:: fortran
+
+        subroutine extrapolate_Fock_matrix(               &
+           error_matrix_DIIS,Fock_matrix_DIIS,    &
+           Fock_matrix_AO_,size_Fock_matrix_AO,   &
+           iteration_SCF,dim_DIIS                 &
+           )
+
+
+    Compute the extrapolated Fock matrix using the DIIS procedure
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`max_dim_diis`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`roothaan_hall_scf`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dgecon`
+       * :c:func:`dgesv`
+       * :c:func:`dgetrf`
+
+ 
+.. c:macro:: huckel_guess:
 
 
     File : :file:`scf_utils/huckel.irp.f`
@@ -819,7 +821,7 @@ Subroutines / functions
        * :c:data:`mo_coef`
 
  
-.. c:function:: reorder_mo_max_overlap:
+.. c:macro:: reorder_mo_max_overlap:
 
 
     File : :file:`scf_utils/reorder_mo_max_overlap.irp.f`
@@ -860,7 +862,7 @@ Subroutines / functions
        * :c:func:`dsort`
 
  
-.. c:function:: roothaan_hall_scf:
+.. c:macro:: roothaan_hall_scf:
 
 
     File : :file:`scf_utils/roothaan_hall_scf.irp.f`
@@ -884,7 +886,7 @@ Subroutines / functions
        * :c:data:`fock_matrix_ao`
        * :c:data:`fock_matrix_ao_alpha`
        * :c:data:`fock_matrix_ao_alpha`
-       * :c:data:`fock_matrix_mo`
+       * :c:data:`fock_matrix_diag_mo`
        * :c:data:`fps_spf_matrix_ao`
        * :c:data:`fps_spf_matrix_mo`
        * :c:data:`frozen_orb_scf`
@@ -918,7 +920,6 @@ Subroutines / functions
        * :c:func:`extrapolate_fock_matrix`
        * :c:func:`initialize_mo_coef_begin_iteration`
        * :c:func:`lock_io`
-       * :c:func:`mo_as_eigvectors_of_mo_matrix`
        * :c:func:`orthonormalize_mos`
        * :c:func:`pivoted_cholesky`
        * :c:func:`reorder_core_orb`

@@ -314,7 +314,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: extract_cas:
+.. c:macro:: extract_cas:
 
 
     File : :file:`generators_cas/extract_cas.irp.f`

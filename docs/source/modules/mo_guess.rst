@@ -122,7 +122,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: hcore_guess:
+.. c:macro:: hcore_guess:
 
 
     File : :file:`mo_guess/h_core_guess_routine.irp.f`

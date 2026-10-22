@@ -15,20 +15,23 @@ Useful tools are grouped in this module.
 Programs 
 -------- 
  
+ * :ref:`analyze_ccsd` 
  * :ref:`attachement_orb` 
+ * :ref:`benchmark` 
  * :ref:`cas_complete` 
+ * :ref:`check_orthonormality` 
  * :ref:`diagonalize_h` 
  * :ref:`fcidump` 
  * :ref:`fcidump_pyscf` 
  * :ref:`four_idx_transform` 
- * :ref:`guess_hcore` 
- * :ref:`guess_huckel` 
  * :ref:`molden` 
+ * :ref:`pouet` 
  * :ref:`print_ci_vectors` 
  * :ref:`print_detweights` 
  * :ref:`print_dipole` 
  * :ref:`print_energy` 
  * :ref:`print_hamiltonian` 
+ * :ref:`print_hmat` 
  * :ref:`print_sorted_wf_coef` 
  * :ref:`print_var_energy` 
  * :ref:`print_wf` 
@@ -47,7 +50,65 @@ Programs
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: molden_attachment:
+.. c:macro:: do_print:
+
+
+    File : :file:`check_orthonormality.irp.f`
+
+    .. code:: fortran
+
+        subroutine do_print
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_num`
+       * :c:data:`mo_overlap`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`check_ortho`
+
+ 
+.. c:macro:: main:
+
+
+    File : :file:`print_detweights.irp.f`
+
+    .. code:: fortran
+
+        subroutine main()
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_det`
+       * :c:data:`n_int`
+       * :c:data:`psi_coef`
+       * :c:data:`psi_det`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`debug_det`
+       * :c:func:`dsort`
+       * :c:func:`get_excitation_degree`
+
+ 
+.. c:macro:: molden_attachment:
 
 
     File : :file:`attachement_orb.irp.f`
@@ -95,7 +156,7 @@ Subroutines / functions
        * :c:func:`isort`
 
  
-.. c:function:: print_exc:
+.. c:macro:: print_exc:
 
 
     File : :file:`print_detweights.irp.f`
@@ -130,7 +191,42 @@ Subroutines / functions
        * :c:func:`get_excitation_degree`
 
  
-.. c:function:: routine_s2:
+.. c:macro:: routine:
+
+
+    File : :file:`write_integrals_erf.irp.f`
+
+    .. code:: fortran
+
+        subroutine routine
+
+
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`diagonalize_h`
+       * :c:func:`print_ci_vectors`
+       * :c:func:`print_sorted_wf_coef`
+       * :c:func:`print_var_energy`
+       * :c:func:`print_wf`
+       * :c:func:`read_t2_ccsd`
+       * :c:func:`sort_wf`
+       * :c:func:`truncate_wf`
+       * :c:func:`write_integrals_erf`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`save_erf_two_e_integrals_ao`
+       * :c:func:`save_erf_two_e_integrals_mo`
+
+ 
+.. c:macro:: routine_s2:
 
 
     File : :file:`truncate_wf.irp.f`
@@ -169,7 +265,7 @@ Subroutines / functions
        * :c:func:`save_wavefunction_general`
 
  
-.. c:function:: routine_save_one_e_dm:
+.. c:macro:: routine_save_one_e_dm:
 
 
     File : :file:`save_one_e_dm.irp.f`
@@ -186,6 +282,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`one_e_dm_ao`
        * :c:data:`one_e_dm_ao_alpha`
        * :c:data:`one_e_dm_mo_alpha`
 
@@ -205,4 +302,5 @@ Subroutines / functions
        * :c:func:`ezfio_set_aux_quantities_data_one_e_dm_alpha_mo`
        * :c:func:`ezfio_set_aux_quantities_data_one_e_dm_beta_ao`
        * :c:func:`ezfio_set_aux_quantities_data_one_e_dm_beta_mo`
+       * :c:func:`ezfio_set_aux_quantities_data_one_e_dm_tot_ao`
 

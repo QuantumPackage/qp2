@@ -322,13 +322,17 @@ Providers
        * :c:data:`ao_pseudo_integrals_local`
        * :c:data:`ao_pseudo_integrals_non_local`
        * :c:data:`ao_spread_x`
-       * :c:data:`ao_two_e_integral_alpha`
        * :c:data:`ao_two_e_integral_erf_schwartz`
-       * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_erf_in_map`
-       * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`aos_grad_in_r_array`
+       * :c:data:`aos_grad_in_r_array_extra`
+       * :c:data:`aos_in_r_array`
+       * :c:data:`aos_in_r_array_extra`
+       * :c:data:`aos_lapl_in_r_array`
        * :c:data:`center_of_mass`
        * :c:data:`cholesky_ao_num`
+       * :c:data:`grid_points_extra_per_atom`
+       * :c:data:`grid_points_per_atom`
        * :c:data:`inertia_tensor`
        * :c:data:`multi_s_deriv_1`
        * :c:data:`multi_s_dipole_moment`
@@ -359,6 +363,13 @@ Providers
        * :c:data:`nucl_coord`
        * :c:data:`nucl_num`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`weight_at_r`
+       * :c:data:`weight_at_r_extra`
 
  
 .. c:var:: nucl_dist
@@ -449,6 +460,13 @@ Providers
        * :c:data:`nucl_dist_2`
        * :c:data:`nucl_num`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`weight_at_r`
+       * :c:data:`weight_at_r_extra`
 
  
 .. c:var:: nucl_dist_vec_x
@@ -588,6 +606,7 @@ Providers
        * :c:data:`ci_energy_no_diag`
        * :c:data:`core_energy`
        * :c:data:`core_energy_erf`
+       * :c:data:`energy_by_projection`
        * :c:data:`etwo`
        * :c:data:`hf_energy`
        * :c:data:`psi_energy_with_nucl_rep`
@@ -864,4 +883,11 @@ Providers
        * :c:data:`nucl_num`
        * :c:data:`slater_bragg_radii_per_atom_ua`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`weight_at_r`
+       * :c:data:`weight_at_r_extra`
 

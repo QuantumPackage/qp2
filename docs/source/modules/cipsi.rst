@@ -237,7 +237,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: bitstring_to_list_in_selection:
+.. c:macro:: bitstring_to_list_in_selection:
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -258,7 +258,7 @@ Subroutines / functions
        * :c:func:`spot_isinwf`
 
  
-.. c:function:: fill_buffer_double:
+.. c:macro:: fill_buffer_double:
 
 
     File : :file:`cipsi/selection.irp.f_template_915`
@@ -324,7 +324,7 @@ Subroutines / functions
        * :c:func:`get_excitation_degree_spin`
 
  
-.. c:function:: fill_buffer_single:
+.. c:macro:: fill_buffer_single:
 
 
     File : :file:`cipsi/selection.irp.f_template_915`
@@ -390,7 +390,7 @@ Subroutines / functions
        * :c:func:`get_excitation_degree_spin`
 
  
-.. c:function:: get_d0:
+.. c:macro:: get_d0:
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -425,11 +425,11 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`apply_particles`
-       * :c:func:`get_mo_two_e_integrals`
+       * :c:func:`get_mo_two_e_integrals_ij`
        * :c:func:`i_h_j`
 
  
-.. c:function:: get_d0_reference:
+.. c:macro:: get_d0_reference:
 
 
     File : :file:`cipsi/selection_old.irp.f`
@@ -458,7 +458,7 @@ Subroutines / functions
        * :c:func:`i_h_j`
 
  
-.. c:function:: get_d1:
+.. c:macro:: get_d1:
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -496,7 +496,7 @@ Subroutines / functions
        * :c:func:`i_h_j`
 
  
-.. c:function:: get_d1_reference:
+.. c:macro:: get_d1_reference:
 
 
     File : :file:`cipsi/selection_old.irp.f`
@@ -525,7 +525,7 @@ Subroutines / functions
        * :c:func:`i_h_j`
 
  
-.. c:function:: get_d2:
+.. c:macro:: get_d2:
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -554,7 +554,7 @@ Subroutines / functions
        * :c:func:`splash_pq`
 
  
-.. c:function:: get_d2_reference:
+.. c:macro:: get_d2_reference:
 
 
     File : :file:`cipsi/selection_old.irp.f`
@@ -575,7 +575,7 @@ Subroutines / functions
        * :c:data:`n_states`
 
  
-.. c:function:: get_m0:
+.. c:macro:: get_m0:
 
 
     File : :file:`cipsi/selection_singles.irp.f`
@@ -611,7 +611,7 @@ Subroutines / functions
        * :c:func:`i_h_j`
 
  
-.. c:function:: get_m1:
+.. c:macro:: get_m1:
 
 
     File : :file:`cipsi/selection_singles.irp.f`
@@ -647,7 +647,7 @@ Subroutines / functions
        * :c:func:`i_h_j`
 
  
-.. c:function:: get_m2:
+.. c:macro:: get_m2:
 
 
     File : :file:`cipsi/selection_singles.irp.f`
@@ -675,7 +675,7 @@ Subroutines / functions
        * :c:func:`splash_p`
 
  
-.. c:function:: get_mask_phase:
+.. c:macro:: get_mask_phase:
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -695,7 +695,7 @@ Subroutines / functions
        * :c:func:`splash_pq`
 
  
-.. c:function:: get_phase_bi:
+.. c:macro:: get_phase_bi:
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -707,7 +707,7 @@ Subroutines / functions
 
 
  
-.. c:function:: provide_for_selection_slave:
+.. c:macro:: provide_for_selection_slave:
 
 
     File : :file:`cipsi/run_selection_slave.irp.f`
@@ -735,7 +735,7 @@ Subroutines / functions
        * :c:func:`run_selection_slave`
 
  
-.. c:function:: provide_for_zmq_pt2:
+.. c:macro:: provide_for_zmq_pt2:
 
 
     File : :file:`cipsi/pt2_stoch_routines.irp.f`
@@ -765,7 +765,7 @@ Subroutines / functions
        * :c:func:`zmq_pt2`
 
  
-.. c:function:: run_cipsi:
+.. c:macro:: run_cipsi:
 
 
     File : :file:`cipsi/cipsi.irp.f`
@@ -843,6 +843,7 @@ Subroutines / functions
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
@@ -859,7 +860,7 @@ Subroutines / functions
        * :c:data:`variance_match_weight`
 
  
-.. c:function:: run_stochastic_cipsi:
+.. c:macro:: run_stochastic_cipsi:
 
 
     File : :file:`cipsi/stochastic_cipsi.irp.f`
@@ -876,10 +877,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`all_mo_integrals`
        * :c:data:`correlation_energy_ratio_max`
        * :c:data:`distributed_davidson`
        * :c:data:`h_apply_buffer_allocated`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det`
        * :c:data:`n_det_max`
        * :c:data:`n_states`
@@ -943,6 +944,7 @@ Subroutines / functions
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
@@ -959,7 +961,7 @@ Subroutines / functions
        * :c:data:`variance_match_weight`
 
  
-.. c:function:: select_connected:
+.. c:macro:: select_connected:
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -1000,7 +1002,7 @@ Subroutines / functions
        * :c:func:`select_singles_and_doubles`
 
  
-.. c:function:: select_singles:
+.. c:macro:: select_singles:
 
 
     File : :file:`cipsi/selection_singles.irp.f`
@@ -1046,7 +1048,7 @@ Subroutines / functions
        * :c:func:`spot_hasbeen`
 
  
-.. c:function:: select_singles_and_doubles:
+.. c:macro:: select_singles_and_doubles:
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -1105,7 +1107,7 @@ Subroutines / functions
        * :c:func:`spot_isinwf`
 
  
-.. c:function:: splash_p:
+.. c:macro:: splash_p:
 
 
     File : :file:`cipsi/selection_singles.irp.f`
@@ -1145,7 +1147,7 @@ Subroutines / functions
        * :c:func:`get_mask_phase`
 
  
-.. c:function:: splash_pq:
+.. c:macro:: splash_pq:
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -1189,7 +1191,7 @@ Subroutines / functions
        * :c:func:`get_mask_phase`
 
  
-.. c:function:: spot_hasbeen:
+.. c:macro:: spot_hasbeen:
 
 
     File : :file:`cipsi/selection_singles.irp.f`
@@ -1223,7 +1225,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list`
 
  
-.. c:function:: spot_isinwf:
+.. c:macro:: spot_isinwf:
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -1259,7 +1261,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list_in_selection`
 
  
-.. c:function:: write_cipsi_json:
+.. c:macro:: write_cipsi_json:
 
 
     File : :file:`cipsi/write_cipsi_json.irp.f`
@@ -1279,10 +1281,10 @@ Subroutines / functions
        * :c:data:`energy_iterations`
        * :c:data:`json_int_fmt`
        * :c:data:`json_unit`
+       * :c:data:`n_csf`
        * :c:data:`n_det`
        * :c:data:`n_iter`
        * :c:data:`n_states`
-       * :c:data:`nsomomax`
        * :c:data:`only_expected_s2`
        * :c:data:`psi_configuration`
        * :c:data:`psi_energy`

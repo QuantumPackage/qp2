@@ -126,7 +126,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: increment_n_iter:
+.. c:macro:: increment_n_iter:
 
 
     File : :file:`iterations/iterations.irp.f`
@@ -165,7 +165,7 @@ Subroutines / functions
        * :c:func:`extrapolate_data`
 
  
-.. c:function:: print_extrapolated_energy:
+.. c:macro:: print_extrapolated_energy:
 
 
     File : :file:`iterations/print_extrapolation.irp.f`
@@ -196,7 +196,7 @@ Subroutines / functions
        * :c:func:`run_stochastic_cipsi`
 
  
-.. c:function:: print_summary:
+.. c:macro:: print_summary:
 
 
     File : :file:`iterations/print_summary.irp.f`
@@ -213,9 +213,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`csf_based`
        * :c:data:`do_pt2`
-       * :c:data:`nsomomax`
-       * :c:data:`only_expected_s2`
+       * :c:data:`n_csf`
        * :c:data:`s2_eig`
 
     Called by:
@@ -227,7 +227,7 @@ Subroutines / functions
        * :c:func:`run_stochastic_cipsi`
 
  
-.. c:function:: print_summary_tc:
+.. c:macro:: print_summary_tc:
 
 
     File : :file:`iterations/summary_tc.irp.f`
@@ -245,7 +245,7 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`do_pt2`
-       * :c:data:`nsomomax`
+       * :c:data:`n_csf`
        * :c:data:`only_expected_s2`
        * :c:data:`s2_eig`
 

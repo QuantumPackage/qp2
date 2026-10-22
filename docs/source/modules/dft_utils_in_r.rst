@@ -315,15 +315,6 @@ Providers
        * :c:data:`aos_grad_in_r_array`
        * :c:data:`n_points_final_grid`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
 
  
 .. c:var:: aos_grad_in_r_array_transp_3
@@ -413,25 +404,6 @@ Providers
        * :c:data:`ao_prod_abs_r`
        * :c:data:`ao_prod_center`
        * :c:data:`aos_in_r_array_transp`
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`f_hf_cholesky_sparse_bis`
-       * :c:data:`pot_scal_x_alpha_ao_pbe`
-       * :c:data:`pot_scal_x_alpha_ao_sr_pbe`
-       * :c:data:`pot_scal_xc_alpha_ao_pbe`
-       * :c:data:`pot_scal_xc_alpha_ao_sr_pbe`
-       * :c:data:`potential_c_alpha_ao_lda`
-       * :c:data:`potential_c_alpha_ao_sr_lda`
-       * :c:data:`potential_x_alpha_ao_lda`
-       * :c:data:`potential_x_alpha_ao_sr_lda`
-       * :c:data:`potential_xc_alpha_ao_lda`
-       * :c:data:`potential_xc_alpha_ao_sr_lda`
 
  
 .. c:var:: aos_in_r_array_extra
@@ -444,7 +416,7 @@ Providers
         double precision, allocatable	:: aos_in_r_array_extra	(ao_num,n_points_extra_final_grid)
 
 
-    aos_in_r_array_extra(i,j)        = value of the ith ao on the jth grid point
+    aos_in_r_array_extra(i,j)        = value of the ith ao on the jth grid point of the EXTRA grid
 
     Needs:
 
@@ -481,7 +453,7 @@ Providers
         double precision, allocatable	:: aos_in_r_array_extra_transp	(n_points_extra_final_grid,ao_num)
 
 
-    aos_in_r_array_extra_transp(i,j) = value of the jth ao on the ith grid point
+    aos_in_r_array_extra_transp(i,j) = value of the jth ao on the ith grid point of the EXTRA grid
 
     Needs:
 
@@ -515,15 +487,6 @@ Providers
        * :c:data:`aos_in_r_array`
        * :c:data:`n_points_final_grid`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pot_grad_x_alpha_ao_pbe`
-       * :c:data:`pot_grad_x_alpha_ao_sr_pbe`
-       * :c:data:`pot_grad_xc_alpha_ao_pbe`
-       * :c:data:`pot_grad_xc_alpha_ao_sr_pbe`
 
  
 .. c:var:: aos_lapl_in_r_array
@@ -643,12 +606,6 @@ Providers
        * :c:data:`n_states`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mu_average_prov`
 
  
 .. c:var:: elec_beta_num_grid_becke
@@ -677,12 +634,6 @@ Providers
        * :c:data:`n_states`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mu_average_prov`
 
  
 .. c:var:: elec_num_grid_becke
@@ -711,12 +662,6 @@ Providers
        * :c:data:`n_states`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mu_average_prov`
 
  
 .. c:var:: kinetic_density_generalized
@@ -740,6 +685,99 @@ Providers
        * :c:data:`n_points_final_grid`
        * :c:data:`one_e_dm_mo_for_dft`
 
+
+ 
+.. c:var:: mo_dipole_x_becke
+
+
+    File : :file:`dft_utils_in_r/dipole_becke.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_dipole_x_becke	(mo_num,mo_num)
+        double precision, allocatable	:: mo_dipole_y_becke	(mo_num,mo_num)
+        double precision, allocatable	:: mo_dipole_z_becke	(mo_num,mo_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`final_grid_points`
+       * :c:data:`mo_num`
+       * :c:data:`mos_in_r_array_transp`
+       * :c:data:`n_points_final_grid`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_prop_dipole_x`
+
+ 
+.. c:var:: mo_dipole_y_becke
+
+
+    File : :file:`dft_utils_in_r/dipole_becke.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_dipole_x_becke	(mo_num,mo_num)
+        double precision, allocatable	:: mo_dipole_y_becke	(mo_num,mo_num)
+        double precision, allocatable	:: mo_dipole_z_becke	(mo_num,mo_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`final_grid_points`
+       * :c:data:`mo_num`
+       * :c:data:`mos_in_r_array_transp`
+       * :c:data:`n_points_final_grid`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_prop_dipole_x`
+
+ 
+.. c:var:: mo_dipole_z_becke
+
+
+    File : :file:`dft_utils_in_r/dipole_becke.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_dipole_x_becke	(mo_num,mo_num)
+        double precision, allocatable	:: mo_dipole_y_becke	(mo_num,mo_num)
+        double precision, allocatable	:: mo_dipole_z_becke	(mo_num,mo_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`final_grid_points`
+       * :c:data:`mo_num`
+       * :c:data:`mos_in_r_array_transp`
+       * :c:data:`n_points_final_grid`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_prop_dipole_x`
 
  
 .. c:var:: mo_grad_ints
@@ -827,7 +865,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`core_inact_act_mos_grad_in_r_array`
        * :c:data:`mo_grad_ints`
        * :c:data:`mos_grad_in_r_array_tranp`
        * :c:data:`mos_grad_in_r_array_transp_3`
@@ -942,8 +979,61 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`basis_mos_in_r_array`
        * :c:data:`mo_grad_ints`
+
+ 
+.. c:var:: mos_in_r_array_extra_omp
+
+
+    File : :file:`dft_utils_in_r/mo_in_r.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mos_in_r_array_extra_omp	(mo_num,n_points_extra_final_grid)
+
+
+    mos_in_r_array_extra(i,j)        = value of the ith mo on the jth grid point on the EXTRA GRID
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`final_grid_points_extra`
+       * :c:data:`mo_coef_transp`
+       * :c:data:`mo_num`
+       * :c:data:`n_points_extra_final_grid`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mos_in_r_array_extra_transp`
+
+ 
+.. c:var:: mos_in_r_array_extra_transp
+
+
+    File : :file:`dft_utils_in_r/mo_in_r.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mos_in_r_array_extra_transp	(n_points_extra_final_grid,mo_num)
+
+
+    mos_in_r_array_extra_transp(i,j) = value of the jth mo on the ith grid point
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_num`
+       * :c:data:`mos_in_r_array_extra_omp`
+       * :c:data:`n_points_extra_final_grid`
+
 
  
 .. c:var:: mos_in_r_array_omp
@@ -974,12 +1064,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`f_hf_cholesky_sparse`
-       * :c:data:`f_hf_cholesky_sparse_bis`
        * :c:data:`mos_in_r_array_transp`
-       * :c:data:`mos_times_cholesky_r1`
-       * :c:data:`mos_times_cholesky_r2`
-       * :c:data:`on_top_hf_grid`
 
  
 .. c:var:: mos_in_r_array_transp
@@ -1008,11 +1093,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`act_mos_in_r_array`
-       * :c:data:`core_inact_act_mos_in_r_array`
-       * :c:data:`core_mos_in_r_array`
-       * :c:data:`inact_mos_in_r_array`
-       * :c:data:`virt_mos_in_r_array`
+       * :c:data:`mo_dipole_x_becke`
 
  
 .. c:var:: mos_lapl_in_r_array
@@ -1120,24 +1201,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`effective_alpha_dm`
-       * :c:data:`effective_spin_dm`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`mu_average_prov`
 
  
 .. c:var:: one_e_dm_and_grad_beta_in_r
@@ -1187,24 +1251,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`effective_alpha_dm`
-       * :c:data:`effective_spin_dm`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`mu_average_prov`
 
  
 .. c:var:: one_e_grad_2_dm_alpha_at_r
@@ -1254,24 +1301,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`effective_alpha_dm`
-       * :c:data:`effective_spin_dm`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`mu_average_prov`
 
  
 .. c:var:: one_e_grad_2_dm_beta_at_r
@@ -1321,24 +1351,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`effective_alpha_dm`
-       * :c:data:`effective_spin_dm`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`mu_average_prov`
 
  
 .. c:var:: one_e_stuff_for_pbe
@@ -1388,24 +1401,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`effective_alpha_dm`
-       * :c:data:`effective_spin_dm`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`mu_average_prov`
 
  
 .. c:var:: scal_prod_grad_one_e_dm_ab
@@ -1455,31 +1451,14 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`effective_alpha_dm`
-       * :c:data:`effective_spin_dm`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`mu_average_prov`
 
  
  
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: dens_grad_a_b_no_core_and_aos_grad_aos_at_r:
+.. c:macro:: dens_grad_a_b_no_core_and_aos_grad_aos_at_r:
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`
@@ -1521,7 +1500,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_and_grad_at_r`
 
  
-.. c:function:: density_and_grad_alpha_beta:
+.. c:macro:: density_and_grad_alpha_beta:
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`
@@ -1552,13 +1531,6 @@ Subroutines / functions
        * :c:data:`n_states`
        * :c:data:`one_e_dm_alpha_ao_for_dft`
 
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`mu_grad_rho_func`
-
     Calls:
 
     .. hlist::
@@ -1568,7 +1540,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_and_grad_at_r`
 
  
-.. c:function:: density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r:
+.. c:macro:: density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r:
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`
@@ -1606,9 +1578,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`ec_md_on_top_pbe_mu_corrected`
-       * :c:func:`ecmd_pbe_ueg_at_r`
-       * :c:func:`give_all_stuffs_in_r_for_lyp_88`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
     Calls:
@@ -1620,7 +1589,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_and_grad_at_r`
 
  
-.. c:function:: density_and_grad_lapl_alpha_beta_and_all_aos_and_grad_aos_at_r:
+.. c:macro:: density_and_grad_lapl_alpha_beta_and_all_aos_and_grad_aos_at_r:
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`
@@ -1662,7 +1631,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_and_grad_and_lapl_at_r`
 
  
-.. c:function:: dm_dft_alpha_beta_and_all_aos_at_r:
+.. c:macro:: dm_dft_alpha_beta_and_all_aos_at_r:
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`
@@ -1695,7 +1664,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_at_r`
 
  
-.. c:function:: dm_dft_alpha_beta_at_r:
+.. c:macro:: dm_dft_alpha_beta_at_r:
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`
@@ -1718,16 +1687,6 @@ Subroutines / functions
        * :c:data:`n_states`
        * :c:data:`one_e_dm_alpha_ao_for_dft`
 
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`correction_to_on_top_from_ueg`
-       * :c:data:`mu_of_r_dft_average`
-       * :c:data:`mu_rsc_of_r`
-       * :c:func:`print_mos`
-
     Calls:
 
     .. hlist::
@@ -1737,7 +1696,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_at_r`
 
  
-.. c:function:: dm_dft_alpha_beta_no_core_at_r:
+.. c:macro:: dm_dft_alpha_beta_no_core_at_r:
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`

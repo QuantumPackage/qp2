@@ -920,8 +920,6 @@ Providers
        :columns: 3
 
        * :c:data:`etwo`
-       * :c:data:`fapq`
-       * :c:data:`fipq`
        * :c:data:`two_e_dm_mo`
 
  
@@ -954,8 +952,6 @@ Providers
        :columns: 3
 
        * :c:data:`etwo`
-       * :c:data:`fapq`
-       * :c:data:`fipq`
        * :c:data:`two_e_dm_mo`
 
  
@@ -1441,7 +1437,6 @@ Providers
        * :c:data:`natorbsci`
        * :c:data:`natorbsci_mos`
        * :c:data:`nmonoex`
-       * :c:data:`nsomomax`
        * :c:data:`occnum`
        * :c:data:`one_ints_no`
        * :c:data:`p0tuvx`
@@ -1764,10 +1759,10 @@ Providers
        * :c:data:`core_inact_act_bitmask_4`
        * :c:data:`del_bitmask`
        * :c:data:`det_to_configuration`
-       * :c:data:`dettocsftransformationmatrix`
        * :c:data:`diagonal_h_matrix_on_psi_det`
        * :c:data:`dominant_dets_of_cfgs`
        * :c:data:`double_exc_bitmask`
+       * :c:data:`energy_by_projection`
        * :c:data:`exc_degree_per_selectors`
        * :c:data:`fock_operator_closed_shell_ref_bitmask`
        * :c:data:`fock_wee_closed_shell`
@@ -1792,6 +1787,7 @@ Providers
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`multi_s_dipole_moment`
        * :c:data:`n_core_inact_orb`
+       * :c:data:`n_csf`
        * :c:data:`n_det_generators`
        * :c:data:`n_dominant_dets_of_cfgs`
        * :c:data:`n_elec_alpha_for_psi_configuration`
@@ -1808,7 +1804,6 @@ Providers
        * :c:data:`psi_configuration`
        * :c:data:`psi_configuration_sorted`
        * :c:data:`psi_configuration_to_psi_det`
-       * :c:data:`psi_csf_coef`
        * :c:data:`psi_det`
        * :c:data:`psi_det_alpha`
        * :c:data:`psi_det_alpha_unique`
@@ -1826,7 +1821,11 @@ Providers
        * :c:data:`psi_selectors`
        * :c:data:`psi_selectors_diag_h_mat`
        * :c:data:`ref_bitmask`
-       * :c:data:`ref_bitmask_energy`
+       * :c:data:`ref_bitmask_energy_ab`
+       * :c:data:`ref_bitmask_kinetic_energy`
+       * :c:data:`ref_bitmask_n_e_energy`
+       * :c:data:`ref_bitmask_one_e_energy`
+       * :c:data:`ref_bitmask_two_e_energy`
        * :c:data:`ref_closed_shell_bitmask`
        * :c:data:`reunion_of_act_virt_bitmask`
        * :c:data:`reunion_of_bitmask`
@@ -2113,7 +2112,11 @@ Providers
        * :c:data:`exc_degree_per_selectors`
        * :c:data:`psi_det_hii`
        * :c:data:`psi_selectors_diag_h_mat`
-       * :c:data:`ref_bitmask_energy`
+       * :c:data:`ref_bitmask_energy_ab`
+       * :c:data:`ref_bitmask_kinetic_energy`
+       * :c:data:`ref_bitmask_n_e_energy`
+       * :c:data:`ref_bitmask_one_e_energy`
+       * :c:data:`ref_bitmask_two_e_energy`
        * :c:data:`ref_closed_shell_bitmask`
 
  
@@ -2344,7 +2347,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: bitstring_to_hexa:
+.. c:macro:: bitstring_to_hexa:
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -2366,7 +2369,7 @@ Subroutines / functions
        * :c:func:`debug_spindet`
 
  
-.. c:function:: bitstring_to_list:
+.. c:macro:: bitstring_to_list:
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -2389,15 +2392,24 @@ Subroutines / functions
        * :c:func:`example_bitmask`
        * :c:func:`generate_cas_space`
        * :c:func:`getmobiles`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_1_cholesky`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_2_cholesky`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_3_cholesky`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_4_cholesky`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_n_int_cholesky`
        * :c:data:`list_core_inact`
        * :c:data:`list_core_inact_act`
        * :c:data:`list_inact_act`
-       * :c:data:`ref_bitmask_energy`
+       * :c:data:`ref_bitmask_energy_ab`
+       * :c:data:`ref_bitmask_kinetic_energy`
+       * :c:data:`ref_bitmask_n_e_energy`
+       * :c:data:`ref_bitmask_one_e_energy`
+       * :c:data:`ref_bitmask_two_e_energy`
        * :c:func:`splash_p`
        * :c:func:`spot_hasbeen`
 
  
-.. c:function:: bitstring_to_str:
+.. c:macro:: bitstring_to_str:
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -2421,7 +2433,7 @@ Subroutines / functions
        * :c:func:`print_spindet`
 
  
-.. c:function:: broadcast_chunks_bit_kind:
+.. c:macro:: broadcast_chunks_bit_kind:
 
 
     File : :file:`bitmask/mpi.irp.f`
@@ -2434,7 +2446,7 @@ Subroutines / functions
     Broadcast with chunks of ~2GB
 
  
-.. c:function:: clear_bit_to_integer:
+.. c:macro:: clear_bit_to_integer:
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -2455,7 +2467,7 @@ Subroutines / functions
        * :c:data:`ref_closed_shell_bitmask`
 
  
-.. c:function:: configuration_to_str:
+.. c:macro:: configuration_to_str:
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -2475,7 +2487,7 @@ Subroutines / functions
        * :c:func:`debug_cfg`
 
  
-.. c:function:: debug_cfg:
+.. c:macro:: debug_cfg:
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -2497,7 +2509,7 @@ Subroutines / functions
        * :c:func:`configuration_to_str`
 
  
-.. c:function:: debug_det:
+.. c:macro:: debug_det:
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -2532,7 +2544,7 @@ Subroutines / functions
        * :c:func:`print_det`
 
  
-.. c:function:: debug_spindet:
+.. c:macro:: debug_spindet:
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -2554,7 +2566,7 @@ Subroutines / functions
        * :c:func:`print_spindet`
 
  
-.. c:function:: det_allowed_ormas:
+.. c:macro:: det_allowed_ormas:
 
 
     File : :file:`bitmask/bitmasks_ormas.irp.f`
@@ -2578,7 +2590,7 @@ Subroutines / functions
        * :c:data:`ormas_n_space`
 
  
-.. c:function:: example_bitmask:
+.. c:macro:: example_bitmask:
 
 
     File : :file:`bitmask/example.irp.f`
@@ -2617,7 +2629,7 @@ Subroutines / functions
        * :c:func:`set_bit_to_integer`
 
  
-.. c:function:: initialize_mo_coef_begin_iteration:
+.. c:macro:: initialize_mo_coef_begin_iteration:
 
 
     File : :file:`bitmask/track_orb.irp.f`
@@ -2647,7 +2659,7 @@ Subroutines / functions
        * :c:func:`roothaan_hall_scf`
 
  
-.. c:function:: is_a_1h:
+.. c:macro:: is_a_1h:
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -2666,7 +2678,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: is_a_1h1p:
+.. c:macro:: is_a_1h1p:
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -2685,7 +2697,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: is_a_1h2p:
+.. c:macro:: is_a_1h2p:
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -2704,7 +2716,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: is_a_1p:
+.. c:macro:: is_a_1p:
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -2723,7 +2735,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: is_a_2h:
+.. c:macro:: is_a_2h:
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -2742,7 +2754,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: is_a_2h1p:
+.. c:macro:: is_a_2h1p:
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -2761,7 +2773,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: is_a_2p:
+.. c:macro:: is_a_2p:
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -2780,7 +2792,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: is_a_two_holes_two_particles:
+.. c:macro:: is_a_two_holes_two_particles:
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -2807,7 +2819,27 @@ Subroutines / functions
        * :c:data:`virt_bitmask`
 
  
-.. c:function:: is_i_in_virtual:
+.. c:macro:: is_i_in_core:
+
+
+    File : :file:`bitmask/bitmask_cas_routines.irp.f`
+
+    .. code:: fortran
+
+        logical function is_i_in_core(i)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`core_bitmask`
+       * :c:data:`n_int`
+
+ 
+.. c:macro:: is_i_in_virtual:
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -2827,26 +2859,20 @@ Subroutines / functions
        * :c:data:`virt_bitmask`
 
  
-.. c:function:: is_integer_in_string:
+.. c:macro:: is_integer_in_string:
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
 
     .. code:: fortran
 
-        logical function is_integer_in_string(bite,string,Nint)
+        logical function is_integer_in_string(orb,bitmask,Nint)
 
 
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`set_bit_to_integer`
+    Checks is the orbital orb is set to 1 in the bit string
 
  
-.. c:function:: is_the_hole_in_det:
+.. c:macro:: is_the_hole_in_det:
 
 
     File : :file:`bitmask/find_hole.irp.f`
@@ -2865,7 +2891,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: is_the_particl_in_det:
+.. c:macro:: is_the_particl_in_det:
 
 
     File : :file:`bitmask/find_hole.irp.f`
@@ -2884,7 +2910,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: list_to_bitstring:
+.. c:macro:: list_to_bitstring:
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -2927,7 +2953,7 @@ Subroutines / functions
        * :c:data:`virt_bitmask`
 
  
-.. c:function:: modify_bitmasks_for_hole:
+.. c:macro:: modify_bitmasks_for_hole:
 
 
     File : :file:`bitmask/modify_bitmasks.irp.f`
@@ -2950,7 +2976,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: modify_bitmasks_for_hole_in_out:
+.. c:macro:: modify_bitmasks_for_hole_in_out:
 
 
     File : :file:`bitmask/modify_bitmasks.irp.f`
@@ -2972,7 +2998,7 @@ Subroutines / functions
        * :c:data:`index_holes_bitmask`
 
  
-.. c:function:: modify_bitmasks_for_particl:
+.. c:macro:: modify_bitmasks_for_particl:
 
 
     File : :file:`bitmask/modify_bitmasks.irp.f`
@@ -2995,7 +3021,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: number_of_holes:
+.. c:macro:: number_of_holes:
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -3040,7 +3066,7 @@ Subroutines / functions
        * :c:data:`reunion_of_core_inact_bitmask`
 
  
-.. c:function:: number_of_holes_verbose:
+.. c:macro:: number_of_holes_verbose:
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -3069,7 +3095,7 @@ Subroutines / functions
        * :c:func:`debug_det`
 
  
-.. c:function:: number_of_particles:
+.. c:macro:: number_of_particles:
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -3091,7 +3117,7 @@ Subroutines / functions
        * :c:data:`virt_bitmask`
 
  
-.. c:function:: number_of_particles_verbose:
+.. c:macro:: number_of_particles_verbose:
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -3120,7 +3146,7 @@ Subroutines / functions
        * :c:func:`debug_det`
 
  
-.. c:function:: ormas_occ:
+.. c:macro:: ormas_occ:
 
 
     File : :file:`bitmask/bitmasks_ormas.irp.f`
@@ -3142,7 +3168,7 @@ Subroutines / functions
        * :c:data:`ormas_n_space`
 
  
-.. c:function:: print_det:
+.. c:macro:: print_det:
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -3171,7 +3197,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_str`
 
  
-.. c:function:: print_det_one_dimension:
+.. c:macro:: print_det_one_dimension:
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -3191,7 +3217,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_str`
 
  
-.. c:function:: print_generators_bitmasks_holes:
+.. c:macro:: print_generators_bitmasks_holes:
 
 
     File : :file:`bitmask/modify_bitmasks.irp.f`
@@ -3212,7 +3238,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: print_generators_bitmasks_particles:
+.. c:macro:: print_generators_bitmasks_particles:
 
 
     File : :file:`bitmask/modify_bitmasks.irp.f`
@@ -3240,7 +3266,7 @@ Subroutines / functions
        * :c:func:`print_det`
 
  
-.. c:function:: print_spindet:
+.. c:macro:: print_spindet:
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -3267,7 +3293,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_str`
 
  
-.. c:function:: reorder_core_orb:
+.. c:macro:: reorder_core_orb:
 
 
     File : :file:`bitmask/track_orb.irp.f`
@@ -3308,7 +3334,7 @@ Subroutines / functions
        * :c:func:`dsort`
 
  
-.. c:function:: set_bit_to_integer:
+.. c:macro:: set_bit_to_integer:
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -3326,11 +3352,10 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`example_bitmask`
-       * :c:func:`is_integer_in_string`
        * :c:data:`orb_swap`
 
  
-.. c:function:: set_bitmask_hole_as_input:
+.. c:macro:: set_bitmask_hole_as_input:
 
 
     File : :file:`bitmask/modify_bitmasks.irp.f`
@@ -3360,7 +3385,7 @@ Subroutines / functions
        * :c:data:`generators_bitmask`
 
  
-.. c:function:: set_bitmask_particl_as_input:
+.. c:macro:: set_bitmask_particl_as_input:
 
 
     File : :file:`bitmask/modify_bitmasks.irp.f`

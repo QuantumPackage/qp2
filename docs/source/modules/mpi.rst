@@ -82,6 +82,7 @@ Providers
        * :c:data:`avoid_saddle`
        * :c:data:`basis`
        * :c:data:`basis_nucleus_index`
+       * :c:data:`basis_type`
        * :c:data:`calc_dipole_moment`
        * :c:data:`calc_energy_components`
        * :c:data:`calc_osc_str`
@@ -98,12 +99,15 @@ Providers
        * :c:data:`data_one_e_dm_alpha_mo`
        * :c:data:`data_one_e_dm_beta_ao`
        * :c:data:`data_one_e_dm_beta_mo`
+       * :c:data:`data_one_e_dm_tot_ao`
        * :c:data:`davidson_sze_max`
        * :c:data:`density_for_dft`
+       * :c:data:`dft_grid_mo_dipole`
        * :c:data:`diag_hess_cas`
        * :c:data:`disk_based_davidson`
        * :c:data:`distributed_davidson`
        * :c:data:`do_ao_cholesky`
+       * :c:data:`do_mo_cholesky`
        * :c:data:`do_mom`
        * :c:data:`do_ormas`
        * :c:data:`do_pseudo`
@@ -116,8 +120,12 @@ Providers
        * :c:data:`excitation_beta_max`
        * :c:data:`excitation_max`
        * :c:data:`excitation_ref`
+       * :c:data:`extra_grid_type_sgn`
+       * :c:data:`extra_rad_grid_type`
+       * :c:data:`ezfio_convention`
        * :c:data:`fast_2rdm`
        * :c:data:`frozen_orb_scf`
+       * :c:data:`grid_type_sgn`
        * :c:data:`h0_type`
        * :c:data:`hess_cv_cv`
        * :c:data:`hf_exchange`
@@ -129,6 +137,7 @@ Providers
        * :c:data:`io_ao_one_e_integrals`
        * :c:data:`io_ao_two_e_integrals`
        * :c:data:`io_ao_two_e_integrals_erf`
+       * :c:data:`io_extra_grid`
        * :c:data:`io_mo_cholesky`
        * :c:data:`io_mo_integrals_kinetic`
        * :c:data:`io_mo_integrals_n_e`
@@ -146,6 +155,7 @@ Providers
        * :c:data:`level_shift_casscf`
        * :c:data:`lin_dep_cutoff`
        * :c:data:`max_dim_diis`
+       * :c:data:`mo_cholesky_double`
        * :c:data:`mo_class`
        * :c:data:`mo_coef`
        * :c:data:`mo_coef_aux`
@@ -156,10 +166,17 @@ Providers
        * :c:data:`mo_label`
        * :c:data:`mo_num`
        * :c:data:`mo_occ`
+       * :c:data:`mo_symmetry`
        * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mu_dft_type`
        * :c:data:`mu_erf`
+       * :c:data:`my_extra_grid_becke`
+       * :c:data:`my_grid_becke`
+       * :c:data:`my_n_pt_a_extra_grid`
+       * :c:data:`my_n_pt_a_grid`
+       * :c:data:`my_n_pt_r_extra_grid`
+       * :c:data:`my_n_pt_r_grid`
        * :c:data:`n_act_orb`
        * :c:data:`n_big_act_orb`
        * :c:data:`n_core_orb`
@@ -236,8 +253,10 @@ Providers
        * :c:data:`pts_charge_coord`
        * :c:data:`pts_charge_z`
        * :c:data:`qp_max_mem`
+       * :c:data:`rad_grid_type`
        * :c:data:`read_wf`
        * :c:data:`restore_symm`
+       * :c:data:`rohf_parameters`
        * :c:data:`s2_eig`
        * :c:data:`save_threshold`
        * :c:data:`save_wf_after_selection`
@@ -246,9 +265,9 @@ Providers
        * :c:data:`seniority_max`
        * :c:data:`shell_ang_mom`
        * :c:data:`shell_index`
-       * :c:data:`shell_normalization_factor`
        * :c:data:`shell_num`
        * :c:data:`shell_prim_num`
+       * :c:data:`slater_r_power`
        * :c:data:`small_active_space`
        * :c:data:`state_following`
        * :c:data:`state_following_casscf`
@@ -257,6 +276,8 @@ Providers
        * :c:data:`thresh_cc`
        * :c:data:`thresh_delta`
        * :c:data:`thresh_eig`
+       * :c:data:`thresh_extra_grid`
+       * :c:data:`thresh_grid`
        * :c:data:`thresh_model`
        * :c:data:`thresh_model_2`
        * :c:data:`thresh_opt_max_elem_grad`
@@ -272,15 +293,14 @@ Providers
        * :c:data:`threshold_generators`
        * :c:data:`threshold_nonsym_davidson`
        * :c:data:`twice_hierarchy_max`
-       * :c:data:`typ`
        * :c:data:`use_cgtos`
        * :c:data:`use_only_lr`
+       * :c:data:`use_optimal_damping`
        * :c:data:`variance_max`
        * :c:data:`version_avoid_saddle`
        * :c:data:`version_lambda_search`
        * :c:data:`weight_one_e_dm`
        * :c:data:`weight_selection`
-       * :c:data:`without_diagonal`
 
  
 .. c:var:: mpi_rank
@@ -329,7 +349,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: broadcast_chunks_double:
+.. c:macro:: broadcast_chunks_double:
 
 
     File : :file:`mpi/mpi.irp.f_template_97`
@@ -342,7 +362,7 @@ Subroutines / functions
     Broadcast with chunks of ~2GB
 
  
-.. c:function:: broadcast_chunks_integer:
+.. c:macro:: broadcast_chunks_integer:
 
 
     File : :file:`mpi/mpi.irp.f_template_97`
@@ -355,7 +375,7 @@ Subroutines / functions
     Broadcast with chunks of ~2GB
 
  
-.. c:function:: broadcast_chunks_integer8:
+.. c:macro:: broadcast_chunks_integer8:
 
 
     File : :file:`mpi/mpi.irp.f_template_97`
@@ -368,7 +388,7 @@ Subroutines / functions
     Broadcast with chunks of ~2GB
 
  
-.. c:function:: mpi_print:
+.. c:macro:: mpi_print:
 
 
     File : :file:`mpi/mpi.irp.f`

@@ -27,7 +27,7 @@ The |AO| coefficients are normalized as:
 .. warning::
 
   `ao_coef` contains the |AO| coefficients given in input. These do not
-  include the normalization constant of the |AO|. The `ao_coef_normalized_factor`
+  include the normalization constant of the |AO|. The `ao_coef_normalized`
   provider includes this normalization factor.
 
 
@@ -107,18 +107,6 @@ EZFIO parameters
  
     Default: false
  
-.. option:: ao_normalized
- 
-    Use normalized basis functions
- 
-    Default: true
- 
-.. option:: primitives_normalized
- 
-    Use normalized primitive functions
- 
-    Default: true
- 
 .. option:: use_cgtos
  
     If true, use cgtos for AO integrals
@@ -143,6 +131,207 @@ EZFIO parameters
  
 Providers 
 --------- 
+ 
+.. c:var:: ao_cart_to_sphe_coef
+
+
+    File : :file:`ao_basis/spherical_to_cartesian.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_cart_to_sphe_coef	(ao_num,ao_num)
+        double precision, allocatable	:: ao_cart_to_sphe_normalization	(ao_num)
+
+
+    Coefficients to go from cartesian to spherical coordinates in the current
+    basis set
+    
+     S_cart^-1 <cart|sphe>
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cartesian`
+       * :c:data:`ao_l`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_sphe_num`
+       * :c:data:`cart_to_sphe_1`
+       * :c:data:`cart_to_sphe_2`
+       * :c:data:`cart_to_sphe_3`
+       * :c:data:`cart_to_sphe_4`
+       * :c:data:`cart_to_sphe_5`
+       * :c:data:`cart_to_sphe_6`
+       * :c:data:`cart_to_sphe_7`
+       * :c:data:`cart_to_sphe_8`
+       * :c:data:`cart_to_sphe_9`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cart_to_sphe_coef_transp`
+       * :c:data:`ao_cart_to_sphe_inv`
+       * :c:data:`ao_cart_to_sphe_overlap`
+       * :c:data:`ao_ortho_canonical_coef`
+       * :c:data:`mo_sphe_coef`
+
+ 
+.. c:var:: ao_cart_to_sphe_normalization
+
+
+    File : :file:`ao_basis/spherical_to_cartesian.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_cart_to_sphe_coef	(ao_num,ao_num)
+        double precision, allocatable	:: ao_cart_to_sphe_normalization	(ao_num)
+
+
+    Coefficients to go from cartesian to spherical coordinates in the current
+    basis set
+    
+     S_cart^-1 <cart|sphe>
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cartesian`
+       * :c:data:`ao_l`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_sphe_num`
+       * :c:data:`cart_to_sphe_1`
+       * :c:data:`cart_to_sphe_2`
+       * :c:data:`cart_to_sphe_3`
+       * :c:data:`cart_to_sphe_4`
+       * :c:data:`cart_to_sphe_5`
+       * :c:data:`cart_to_sphe_6`
+       * :c:data:`cart_to_sphe_7`
+       * :c:data:`cart_to_sphe_8`
+       * :c:data:`cart_to_sphe_9`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cart_to_sphe_coef_transp`
+       * :c:data:`ao_cart_to_sphe_inv`
+       * :c:data:`ao_cart_to_sphe_overlap`
+       * :c:data:`ao_ortho_canonical_coef`
+       * :c:data:`mo_sphe_coef`
+
+ 
+.. c:var:: ao_coef_cgtos_norm_ord_transp
+
+
+    File : :file:`ao_basis/cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_coef_cgtos_norm_ord_transp	(ao_prim_num_max,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos_ord`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_2e_cgtos_schwartz`
+       * :c:data:`ao_deriv2_cgtos_x`
+       * :c:data:`ao_integrals_n_e_cgtos`
+       * :c:data:`ao_overlap_cgtos`
+
+ 
+.. c:var:: ao_coef_norm_cgtos
+
+
+    File : :file:`ao_basis/cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_coef_norm_cgtos	(ao_num,ao_prim_num_max)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef`
+       * :c:data:`ao_expo`
+       * :c:data:`ao_expo_im`
+       * :c:data:`ao_expo_phase`
+       * :c:data:`ao_expo_pw`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`ao_prim_num_max`
+       * :c:data:`nucl_coord`
+       * :c:data:`primitives_normalized`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos_ord`
+
+ 
+.. c:var:: ao_coef_norm_cgtos_ord
+
+
+    File : :file:`ao_basis/cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_coef_norm_cgtos_ord	(ao_num,ao_prim_num_max)
+        complex*16, allocatable	:: ao_expo_cgtos_ord	(ao_num,ao_prim_num_max)
+        double precision, allocatable	:: ao_expo_pw_ord	(4,ao_num,ao_prim_num_max)
+        double precision, allocatable	:: ao_expo_phase_ord	(4,ao_num,ao_prim_num_max)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos`
+       * :c:data:`ao_expo`
+       * :c:data:`ao_expo_im`
+       * :c:data:`ao_expo_phase`
+       * :c:data:`ao_expo_pw`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num`
+       * :c:data:`ao_prim_num_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_cgtos_norm_ord_transp`
+       * :c:data:`ao_expo_cgtos_ord_transp`
+
  
 .. c:var:: ao_coef_normalization_factor
 
@@ -169,7 +358,12 @@ Providers
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`ao_prim_num_max`
+       * :c:data:`ao_shell`
+       * :c:data:`ezfio_convention`
+       * :c:data:`prim_normalization_factor`
+       * :c:data:`prim_num`
        * :c:data:`primitives_normalized`
+       * :c:data:`shell_index`
 
     Needed by:
 
@@ -204,7 +398,12 @@ Providers
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`ao_prim_num_max`
+       * :c:data:`ao_shell`
+       * :c:data:`ezfio_convention`
+       * :c:data:`prim_normalization_factor`
+       * :c:data:`prim_num`
        * :c:data:`primitives_normalized`
+       * :c:data:`shell_index`
 
     Needed by:
 
@@ -316,6 +515,87 @@ Providers
        * :c:data:`nucl_n_aos`
        * :c:data:`nucl_num`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`aos_grad_in_r_array`
+       * :c:data:`aos_grad_in_r_array_extra`
+       * :c:data:`aos_in_r_array`
+       * :c:data:`aos_in_r_array_extra`
+       * :c:data:`aos_lapl_in_r_array`
+
+ 
+.. c:var:: ao_expo_cgtos_ord
+
+
+    File : :file:`ao_basis/cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_coef_norm_cgtos_ord	(ao_num,ao_prim_num_max)
+        complex*16, allocatable	:: ao_expo_cgtos_ord	(ao_num,ao_prim_num_max)
+        double precision, allocatable	:: ao_expo_pw_ord	(4,ao_num,ao_prim_num_max)
+        double precision, allocatable	:: ao_expo_phase_ord	(4,ao_num,ao_prim_num_max)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos`
+       * :c:data:`ao_expo`
+       * :c:data:`ao_expo_im`
+       * :c:data:`ao_expo_phase`
+       * :c:data:`ao_expo_pw`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num`
+       * :c:data:`ao_prim_num_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_cgtos_norm_ord_transp`
+       * :c:data:`ao_expo_cgtos_ord_transp`
+
+ 
+.. c:var:: ao_expo_cgtos_ord_transp
+
+
+    File : :file:`ao_basis/cgtos.irp.f`
+
+    .. code:: fortran
+
+        complex*16, allocatable	:: ao_expo_cgtos_ord_transp	(ao_prim_num_max,ao_num)
+        double precision, allocatable	:: ao_expo_pw_ord_transp	(4,ao_prim_num_max,ao_num)
+        double precision, allocatable	:: ao_expo_phase_ord_transp	(4,ao_prim_num_max,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos_ord`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_2e_cgtos_schwartz`
+       * :c:data:`ao_deriv2_cgtos_x`
+       * :c:data:`ao_integrals_n_e_cgtos`
+       * :c:data:`ao_overlap_cgtos`
+       * :c:data:`use_pw`
 
  
 .. c:var:: ao_expo_ordered
@@ -420,6 +700,158 @@ Providers
        * :c:data:`nucl_n_aos`
        * :c:data:`nucl_num`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`aos_grad_in_r_array`
+       * :c:data:`aos_grad_in_r_array_extra`
+       * :c:data:`aos_in_r_array`
+       * :c:data:`aos_in_r_array_extra`
+       * :c:data:`aos_lapl_in_r_array`
+
+ 
+.. c:var:: ao_expo_phase_ord
+
+
+    File : :file:`ao_basis/cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_coef_norm_cgtos_ord	(ao_num,ao_prim_num_max)
+        complex*16, allocatable	:: ao_expo_cgtos_ord	(ao_num,ao_prim_num_max)
+        double precision, allocatable	:: ao_expo_pw_ord	(4,ao_num,ao_prim_num_max)
+        double precision, allocatable	:: ao_expo_phase_ord	(4,ao_num,ao_prim_num_max)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos`
+       * :c:data:`ao_expo`
+       * :c:data:`ao_expo_im`
+       * :c:data:`ao_expo_phase`
+       * :c:data:`ao_expo_pw`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num`
+       * :c:data:`ao_prim_num_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_cgtos_norm_ord_transp`
+       * :c:data:`ao_expo_cgtos_ord_transp`
+
+ 
+.. c:var:: ao_expo_phase_ord_transp
+
+
+    File : :file:`ao_basis/cgtos.irp.f`
+
+    .. code:: fortran
+
+        complex*16, allocatable	:: ao_expo_cgtos_ord_transp	(ao_prim_num_max,ao_num)
+        double precision, allocatable	:: ao_expo_pw_ord_transp	(4,ao_prim_num_max,ao_num)
+        double precision, allocatable	:: ao_expo_phase_ord_transp	(4,ao_prim_num_max,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos_ord`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_2e_cgtos_schwartz`
+       * :c:data:`ao_deriv2_cgtos_x`
+       * :c:data:`ao_integrals_n_e_cgtos`
+       * :c:data:`ao_overlap_cgtos`
+       * :c:data:`use_pw`
+
+ 
+.. c:var:: ao_expo_pw_ord
+
+
+    File : :file:`ao_basis/cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_coef_norm_cgtos_ord	(ao_num,ao_prim_num_max)
+        complex*16, allocatable	:: ao_expo_cgtos_ord	(ao_num,ao_prim_num_max)
+        double precision, allocatable	:: ao_expo_pw_ord	(4,ao_num,ao_prim_num_max)
+        double precision, allocatable	:: ao_expo_phase_ord	(4,ao_num,ao_prim_num_max)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos`
+       * :c:data:`ao_expo`
+       * :c:data:`ao_expo_im`
+       * :c:data:`ao_expo_phase`
+       * :c:data:`ao_expo_pw`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num`
+       * :c:data:`ao_prim_num_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_cgtos_norm_ord_transp`
+       * :c:data:`ao_expo_cgtos_ord_transp`
+
+ 
+.. c:var:: ao_expo_pw_ord_transp
+
+
+    File : :file:`ao_basis/cgtos.irp.f`
+
+    .. code:: fortran
+
+        complex*16, allocatable	:: ao_expo_cgtos_ord_transp	(ao_prim_num_max,ao_num)
+        double precision, allocatable	:: ao_expo_pw_ord_transp	(4,ao_prim_num_max,ao_num)
+        double precision, allocatable	:: ao_expo_phase_ord_transp	(4,ao_prim_num_max,ao_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos_ord`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_2e_cgtos_schwartz`
+       * :c:data:`ao_deriv2_cgtos_x`
+       * :c:data:`ao_integrals_n_e_cgtos`
+       * :c:data:`ao_overlap_cgtos`
+       * :c:data:`use_pw`
 
  
 .. c:var:: ao_first_of_shell
@@ -587,6 +1019,16 @@ Providers
        * :c:data:`nucl_n_aos`
        * :c:data:`nucl_num`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`aos_grad_in_r_array`
+       * :c:data:`aos_grad_in_r_array_extra`
+       * :c:data:`aos_in_r_array`
+       * :c:data:`aos_in_r_array_extra`
+       * :c:data:`aos_lapl_in_r_array`
 
  
 .. c:var:: ao_prim_num_max
@@ -651,6 +1093,103 @@ Providers
        * :c:data:`shell_ang_mom`
        * :c:data:`shell_num`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_normalized`
+
+ 
+.. c:var:: ao_sphe_coef_normalization_factor
+
+
+    File : :file:`ao_basis/aos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_sphe_coef_normalization_factor	(ao_sphe_num)
+
+
+    Normalization factor in spherical AO basis
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_sphe_num`
+
+
+ 
+.. c:var:: ao_sphe_num
+
+
+    File : :file:`ao_basis/aos.irp.f`
+
+    .. code:: fortran
+
+        integer	:: ao_sphe_num	
+
+
+    Number of spherical AOs
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cartesian`
+       * :c:data:`ao_num`
+       * :c:data:`shell_ang_mom`
+       * :c:data:`shell_num`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cart_to_sphe_coef`
+       * :c:data:`ao_cart_to_sphe_coef_transp`
+       * :c:data:`ao_cart_to_sphe_inv`
+       * :c:data:`ao_cart_to_sphe_overlap`
+       * :c:data:`ao_cart_to_sphe_overlap_inv`
+       * :c:data:`ao_ortho_canonical_coef`
+       * :c:data:`ao_sphe_coef_normalization_factor`
+       * :c:data:`ao_sphe_integrals_n_e`
+       * :c:data:`ao_sphe_kinetic_integrals`
+       * :c:data:`ao_sphe_one_e_integrals`
+       * :c:data:`ao_sphe_one_e_integrals_from_mo`
+       * :c:data:`ao_sphe_overlap`
+       * :c:data:`ao_sphe_pseudo_integrals`
+       * :c:data:`ao_sphe_pseudo_integrals_local`
+       * :c:data:`ao_sphe_pseudo_integrals_non_local`
+       * :c:data:`ao_sphe_shell`
+       * :c:data:`mo_sphe_coef`
+       * :c:data:`s_mo_sphe_coef`
+
+ 
+.. c:var:: ao_sphe_shell
+
+
+    File : :file:`ao_basis/aos.irp.f`
+
+    .. code:: fortran
+
+        integer, allocatable	:: ao_sphe_shell	(ao_sphe_num)
+
+
+    Index of the shell to which the AO corresponds
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_sphe_num`
+       * :c:data:`shell_ang_mom`
+       * :c:data:`shell_num`
+
 
  
 .. c:var:: cart_to_sphe_0
@@ -661,6 +1200,7 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: cart_to_sphe_0	(1,1)
+        double precision, allocatable	:: cart_to_sphe_norm_0	(1)
 
 
     Spherical -> Cartesian Transformation matrix for l=0
@@ -675,6 +1215,7 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: cart_to_sphe_1	(3,3)
+        double precision, allocatable	:: cart_to_sphe_norm_1	(3)
 
 
     Spherical -> Cartesian Transformation matrix for l=1
@@ -695,6 +1236,7 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: cart_to_sphe_2	(6,5)
+        double precision, allocatable	:: cart_to_sphe_norm_2	(6)
 
 
     Spherical -> Cartesian Transformation matrix for l=2
@@ -715,6 +1257,7 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: cart_to_sphe_3	(10,7)
+        double precision, allocatable	:: cart_to_sphe_norm_3	(10)
 
 
     Spherical -> Cartesian Transformation matrix for l=3
@@ -735,6 +1278,7 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: cart_to_sphe_4	(15,9)
+        double precision, allocatable	:: cart_to_sphe_norm_4	(15)
 
 
     Spherical -> Cartesian Transformation matrix for l=4
@@ -755,6 +1299,7 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: cart_to_sphe_5	(21,11)
+        double precision, allocatable	:: cart_to_sphe_norm_5	(21)
 
 
     Spherical -> Cartesian Transformation matrix for l=5
@@ -775,6 +1320,7 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: cart_to_sphe_6	(28,13)
+        double precision, allocatable	:: cart_to_sphe_norm_6	(28)
 
 
     Spherical -> Cartesian Transformation matrix for l=6
@@ -795,6 +1341,7 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: cart_to_sphe_7	(36,15)
+        double precision, allocatable	:: cart_to_sphe_norm_7	(36)
 
 
     Spherical -> Cartesian Transformation matrix for l=7
@@ -815,6 +1362,7 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: cart_to_sphe_8	(45,17)
+        double precision, allocatable	:: cart_to_sphe_norm_8	(45)
 
 
     Spherical -> Cartesian Transformation matrix for l=8
@@ -835,6 +1383,211 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: cart_to_sphe_9	(55,19)
+        double precision, allocatable	:: cart_to_sphe_norm_9	(55)
+
+
+    Spherical -> Cartesian Transformation matrix for l=9
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cart_to_sphe_coef`
+
+ 
+.. c:var:: cart_to_sphe_norm_0
+
+
+    File : :file:`ao_basis/spherical_to_cartesian.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: cart_to_sphe_0	(1,1)
+        double precision, allocatable	:: cart_to_sphe_norm_0	(1)
+
+
+    Spherical -> Cartesian Transformation matrix for l=0
+
+
+ 
+.. c:var:: cart_to_sphe_norm_1
+
+
+    File : :file:`ao_basis/spherical_to_cartesian.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: cart_to_sphe_1	(3,3)
+        double precision, allocatable	:: cart_to_sphe_norm_1	(3)
+
+
+    Spherical -> Cartesian Transformation matrix for l=1
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cart_to_sphe_coef`
+
+ 
+.. c:var:: cart_to_sphe_norm_2
+
+
+    File : :file:`ao_basis/spherical_to_cartesian.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: cart_to_sphe_2	(6,5)
+        double precision, allocatable	:: cart_to_sphe_norm_2	(6)
+
+
+    Spherical -> Cartesian Transformation matrix for l=2
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cart_to_sphe_coef`
+
+ 
+.. c:var:: cart_to_sphe_norm_3
+
+
+    File : :file:`ao_basis/spherical_to_cartesian.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: cart_to_sphe_3	(10,7)
+        double precision, allocatable	:: cart_to_sphe_norm_3	(10)
+
+
+    Spherical -> Cartesian Transformation matrix for l=3
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cart_to_sphe_coef`
+
+ 
+.. c:var:: cart_to_sphe_norm_4
+
+
+    File : :file:`ao_basis/spherical_to_cartesian.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: cart_to_sphe_4	(15,9)
+        double precision, allocatable	:: cart_to_sphe_norm_4	(15)
+
+
+    Spherical -> Cartesian Transformation matrix for l=4
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cart_to_sphe_coef`
+
+ 
+.. c:var:: cart_to_sphe_norm_5
+
+
+    File : :file:`ao_basis/spherical_to_cartesian.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: cart_to_sphe_5	(21,11)
+        double precision, allocatable	:: cart_to_sphe_norm_5	(21)
+
+
+    Spherical -> Cartesian Transformation matrix for l=5
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cart_to_sphe_coef`
+
+ 
+.. c:var:: cart_to_sphe_norm_6
+
+
+    File : :file:`ao_basis/spherical_to_cartesian.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: cart_to_sphe_6	(28,13)
+        double precision, allocatable	:: cart_to_sphe_norm_6	(28)
+
+
+    Spherical -> Cartesian Transformation matrix for l=6
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cart_to_sphe_coef`
+
+ 
+.. c:var:: cart_to_sphe_norm_7
+
+
+    File : :file:`ao_basis/spherical_to_cartesian.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: cart_to_sphe_7	(36,15)
+        double precision, allocatable	:: cart_to_sphe_norm_7	(36)
+
+
+    Spherical -> Cartesian Transformation matrix for l=7
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cart_to_sphe_coef`
+
+ 
+.. c:var:: cart_to_sphe_norm_8
+
+
+    File : :file:`ao_basis/spherical_to_cartesian.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: cart_to_sphe_8	(45,17)
+        double precision, allocatable	:: cart_to_sphe_norm_8	(45)
+
+
+    Spherical -> Cartesian Transformation matrix for l=8
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cart_to_sphe_coef`
+
+ 
+.. c:var:: cart_to_sphe_norm_9
+
+
+    File : :file:`ao_basis/spherical_to_cartesian.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: cart_to_sphe_9	(55,19)
+        double precision, allocatable	:: cart_to_sphe_norm_9	(55)
 
 
     Spherical -> Cartesian Transformation matrix for l=9
@@ -897,6 +1650,11 @@ Providers
        * :c:data:`ao_coef_normalized_ordered_transp_per_nucl`
        * :c:data:`ao_expo_ordered_transp_per_nucl`
        * :c:data:`ao_power_ordered_transp_per_nucl`
+       * :c:data:`aos_grad_in_r_array`
+       * :c:data:`aos_grad_in_r_array_extra`
+       * :c:data:`aos_in_r_array`
+       * :c:data:`aos_in_r_array_extra`
+       * :c:data:`aos_lapl_in_r_array`
        * :c:data:`nucl_aos`
        * :c:data:`nucl_aos_transposed`
        * :c:data:`nucl_list_shell_aos`
@@ -932,12 +1690,8 @@ Providers
        * :c:data:`ao_integrals_n_e_cgtos`
        * :c:data:`ao_integrals_n_e_per_atom`
        * :c:data:`ao_integrals_pt_chrg`
-       * :c:data:`ao_two_e_integral_alpha`
        * :c:data:`ao_two_e_integral_erf_schwartz`
-       * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_erf_in_map`
-       * :c:data:`ao_two_e_integrals_in_map`
-       * :c:data:`cholesky_ao_num`
        * :c:data:`gauleg_t2`
 
  
@@ -971,12 +1725,8 @@ Providers
        * :c:data:`ao_integrals_n_e_cgtos`
        * :c:data:`ao_integrals_n_e_per_atom`
        * :c:data:`ao_integrals_pt_chrg`
-       * :c:data:`ao_two_e_integral_alpha`
        * :c:data:`ao_two_e_integral_erf_schwartz`
-       * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_erf_in_map`
-       * :c:data:`ao_two_e_integrals_in_map`
-       * :c:data:`cholesky_ao_num`
        * :c:data:`gauleg_t2`
 
  
@@ -1040,6 +1790,11 @@ Providers
        * :c:data:`ao_coef_normalized_ordered_transp_per_nucl`
        * :c:data:`ao_expo_ordered_transp_per_nucl`
        * :c:data:`ao_power_ordered_transp_per_nucl`
+       * :c:data:`aos_grad_in_r_array`
+       * :c:data:`aos_grad_in_r_array_extra`
+       * :c:data:`aos_in_r_array`
+       * :c:data:`aos_in_r_array_extra`
+       * :c:data:`aos_lapl_in_r_array`
 
  
 .. c:var:: nucl_list_shell_aos
@@ -1100,6 +1855,11 @@ Providers
        * :c:data:`ao_coef_normalized_ordered_transp_per_nucl`
        * :c:data:`ao_expo_ordered_transp_per_nucl`
        * :c:data:`ao_power_ordered_transp_per_nucl`
+       * :c:data:`aos_grad_in_r_array`
+       * :c:data:`aos_grad_in_r_array_extra`
+       * :c:data:`aos_in_r_array`
+       * :c:data:`aos_in_r_array_extra`
+       * :c:data:`aos_lapl_in_r_array`
        * :c:data:`nucl_aos`
        * :c:data:`nucl_aos_transposed`
        * :c:data:`nucl_list_shell_aos`
@@ -1167,45 +1927,39 @@ Providers
        * :c:data:`cholesky_ao_num`
 
  
-.. c:var:: use_cosgtos
+.. c:var:: use_pw
 
 
-    File : :file:`ao_basis/cosgtos.irp.f`
+    File : :file:`ao_basis/aos.irp.f`
 
     .. code:: fortran
 
-        logical	:: use_cosgtos	
+        logical	:: use_pw	
 
 
-    If true, use cosgtos for AO integrals
 
     Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`ezfio_filename`
-       * :c:data:`mpi_master`
+       * :c:data:`ao_expo_cgtos_ord_transp`
+       * :c:data:`ao_expo_cgtos_ord_transp`
 
     Needed by:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_deriv2_x`
-       * :c:data:`ao_integrals_n_e`
-       * :c:data:`ao_overlap`
-       * :c:data:`ao_two_e_integral_alpha`
-       * :c:data:`ao_two_e_integral_schwartz`
-       * :c:data:`ao_two_e_integrals_in_map`
-       * :c:data:`cholesky_ao_num`
+       * :c:data:`ao_2e_cgtos_schwartz`
+       * :c:data:`ao_integrals_n_e_cgtos`
 
  
  
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: ao_power_index:
+.. c:macro:: ao_power_index:
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -1220,7 +1974,7 @@ Subroutines / functions
     :math:`\frac{1}{2} (l-n_x) (l-n_x+1) + n_z + 1`
 
  
-.. c:function:: ao_value:
+.. c:macro:: ao_value:
 
 
     File : :file:`ao_basis/aos_in_r.irp.f`
@@ -1245,7 +1999,7 @@ Subroutines / functions
        * :c:data:`nucl_coord`
 
  
-.. c:function:: give_all_aos_and_grad_and_lapl_at_r:
+.. c:macro:: give_all_aos_and_grad_and_lapl_at_r:
 
 
     File : :file:`ao_basis/aos_in_r.irp.f`
@@ -1284,10 +2038,12 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`aos_lapl_in_r_array`
+       * :c:func:`density_and_grad_lapl_alpha_beta_and_all_aos_and_grad_aos_at_r`
        * :c:func:`give_all_mos_and_grad_and_lapl_at_r`
 
  
-.. c:function:: give_all_aos_and_grad_at_r:
+.. c:macro:: give_all_aos_and_grad_at_r:
 
 
     File : :file:`ao_basis/aos_in_r.irp.f`
@@ -1326,10 +2082,15 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`aos_grad_in_r_array`
+       * :c:data:`aos_grad_in_r_array_extra`
+       * :c:func:`dens_grad_a_b_no_core_and_aos_grad_aos_at_r`
+       * :c:func:`density_and_grad_alpha_beta`
+       * :c:func:`density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r`
        * :c:func:`give_all_mos_and_grad_at_r`
 
  
-.. c:function:: give_all_aos_at_r:
+.. c:macro:: give_all_aos_at_r:
 
 
     File : :file:`ao_basis/aos_in_r.irp.f`
@@ -1365,10 +2126,15 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`aos_in_r_array`
+       * :c:data:`aos_in_r_array_extra`
+       * :c:func:`dm_dft_alpha_beta_and_all_aos_at_r`
+       * :c:func:`dm_dft_alpha_beta_at_r`
+       * :c:func:`dm_dft_alpha_beta_no_core_at_r`
        * :c:func:`give_all_mos_at_r`
 
  
-.. c:function:: primitive_value:
+.. c:macro:: primitive_value:
 
 
     File : :file:`ao_basis/aos_in_r.irp.f`

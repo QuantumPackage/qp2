@@ -85,12 +85,11 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`davidson_sze_max`
        * :c:data:`disk_based_davidson`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det`
        * :c:data:`n_int`
        * :c:data:`n_states`
@@ -122,12 +121,11 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`davidson_sze_max`
        * :c:data:`disk_based_davidson`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det`
        * :c:data:`n_int`
        * :c:data:`n_states`
@@ -146,7 +144,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: get_lccsd_2:
+.. c:macro:: get_lccsd_2:
 
 
     File : :file:`lccsd.irp.f`
@@ -192,7 +190,7 @@ Subroutines / functions
        * :c:data:`psi_coef`
 
  
-.. c:function:: h_apply_cisd:
+.. c:macro:: h_apply_cisd:
 
 
     File : :file:`h_apply.irp.f_shell_12`
@@ -210,10 +208,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`all_mo_integrals`
        * :c:data:`generators_bitmask`
        * :c:data:`h_apply_buffer_allocated`
        * :c:data:`mo_num`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det`
        * :c:data:`n_det_generators`
        * :c:data:`n_int`
@@ -255,13 +253,14 @@ Subroutines / functions
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
 
  
-.. c:function:: h_apply_cisd_diexc:
+.. c:macro:: h_apply_cisd_diexc:
 
 
     File : :file:`h_apply.irp.f_shell_12`
@@ -296,7 +295,7 @@ Subroutines / functions
        * :c:func:`h_apply_cisd_diexcp`
 
  
-.. c:function:: h_apply_cisd_diexcorg:
+.. c:macro:: h_apply_cisd_diexcorg:
 
 
     File : :file:`h_apply.irp.f_shell_12`
@@ -335,7 +334,7 @@ Subroutines / functions
        * :c:func:`fill_h_apply_buffer_no_selection`
 
  
-.. c:function:: h_apply_cisd_diexcp:
+.. c:macro:: h_apply_cisd_diexcp:
 
 
     File : :file:`h_apply.irp.f_shell_12`
@@ -370,7 +369,7 @@ Subroutines / functions
        * :c:func:`h_apply_cisd_diexcorg`
 
  
-.. c:function:: h_apply_cisd_monoexc:
+.. c:macro:: h_apply_cisd_monoexc:
 
 
     File : :file:`h_apply.irp.f_shell_12`
@@ -409,7 +408,7 @@ Subroutines / functions
        * :c:func:`fill_h_apply_buffer_no_selection`
 
  
-.. c:function:: h_apply_cisd_sym:
+.. c:macro:: h_apply_cisd_sym:
 
 
     File : :file:`h_apply.irp.f_shell_12`
@@ -427,10 +426,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`all_mo_integrals`
        * :c:data:`generators_bitmask`
        * :c:data:`h_apply_buffer_allocated`
        * :c:data:`mo_num`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det`
        * :c:data:`n_det_generators`
        * :c:data:`n_int`
@@ -472,13 +471,14 @@ Subroutines / functions
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
 
  
-.. c:function:: h_apply_cisd_sym_diexc:
+.. c:macro:: h_apply_cisd_sym_diexc:
 
 
     File : :file:`h_apply.irp.f_shell_12`
@@ -513,7 +513,7 @@ Subroutines / functions
        * :c:func:`h_apply_cisd_sym_diexcp`
 
  
-.. c:function:: h_apply_cisd_sym_diexcorg:
+.. c:macro:: h_apply_cisd_sym_diexcorg:
 
 
     File : :file:`h_apply.irp.f_shell_12`
@@ -553,7 +553,7 @@ Subroutines / functions
        * :c:func:`fill_h_apply_buffer_no_selection`
 
  
-.. c:function:: h_apply_cisd_sym_diexcp:
+.. c:macro:: h_apply_cisd_sym_diexcp:
 
 
     File : :file:`h_apply.irp.f_shell_12`
@@ -588,7 +588,7 @@ Subroutines / functions
        * :c:func:`h_apply_cisd_sym_diexcorg`
 
  
-.. c:function:: h_apply_cisd_sym_monoexc:
+.. c:macro:: h_apply_cisd_sym_monoexc:
 
 
     File : :file:`h_apply.irp.f_shell_12`
@@ -628,7 +628,60 @@ Subroutines / functions
        * :c:func:`fill_h_apply_buffer_no_selection`
 
  
-.. c:function:: run_cisd:
+.. c:macro:: run:
+
+
+    File : :file:`lccsd.irp.f`
+
+    .. code:: fortran
+
+        subroutine run
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`pseudo_sym`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`cisd`
+       * :c:func:`lccsd`
+       * :c:func:`scf`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_lccsd_2`
+       * :c:func:`h_apply_cisd`
+       * :c:func:`h_apply_cisd_sym`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`psi_configuration`
+       * :c:data:`n_det`
+       * :c:data:`c0_weight`
+       * :c:data:`psi_coef`
+       * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_configuration`
+       * :c:data:`psi_det`
+       * :c:data:`psi_det_size`
+       * :c:data:`psi_det_sorted_bit`
+
+ 
+.. c:macro:: run_cisd:
 
 
     File : :file:`cisd_routine.irp.f`
@@ -670,6 +723,7 @@ Subroutines / functions
        * :c:data:`n_det`
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
+       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_configuration`
        * :c:data:`psi_det`
