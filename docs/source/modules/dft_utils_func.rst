@@ -5,20 +5,33 @@
 .. default-role:: option 
  
 ===============
-dft_utils_one_e
+dft_utils_func
 ===============
 
-This module contains all the one-body related quantities needed to perform DFT or RS-DFT calculations with the LDA and PBE functionals.
-Therefore, it contains most of the properties which depends on the one-body density and density matrix.
+Exchange and correlation functionals of |DFT| and |RSDFT|.
 
-Some interesting quantities you might take a look at:
-
-* The LDA and PBE *providers* for the x/c energies in :file:`e_xc.irp.f` and :file:`sr_exc.irp.f`
-* The LDA and PBE *providers* for the x/c potentials on the AO basis in :file:`pot_ao.irp.f` and  :file:`sr_pot_ao.irp.f`
-* The :math:`h_{core}` energy computed directly with the one-body density matrix in :file:`one_e_energy_dft.irp.f`
-* LDA and PBE short-range functionals *subroutines* in :file:`exc_sr_lda.irp.f` and :file:`exc_sr_pbe.irp.f`
-
-
+* the LDA exchange and correlation, and their short range
+  variants: `ecmd_lda.irp.f` and `routines_exc_sr_lda.irp.f`
+  (:c:data:`ex_lda`, :c:data:`ec_lda`, :c:data:`ex_lda_sr`,
+  :c:data:`ec_lda_sr`, and the range separated correlation
+  :c:data:`ecorrlr` / :c:data:`vcorrlr`)
+* the PBE and the SR-PBE functionals: `ecmd_pbe_general.irp.f` and
+  `routines_exc_sr_pbe.irp.f` (:c:data:`ex_pbe_sr`,
+  :c:data:`ec_pbe_sr`)
+* the meta-GGA |PBE| on-top correlation, with its implementation in
+  terms of the uniform electron gas: `ecmd_pbe_on_top.irp.f`,
+  `ecmd_pbe_ueg.irp.f` and `on_top_from_ueg.irp.f`
+  (:c:data:`ecmd_pbe_ueg_at_r`, :c:data:`g0_ueg_mu`,
+  :c:data:`mu_correction_of_on_top`)
+* the range separation functions of the interaction:
+  `mu_of_r_dft.irp.f` (:c:data:`mu_rs_c`,
+  :c:data:`mu_grad_rho_func`) and the error function and screened
+  Coulomb functions in `utils.irp.f` (:c:data:`g0`, :c:data:`g0f`,
+  :c:data:`g0s`, :c:data:`g0d` and their derivatives)
+* the transformations between the spin resolved and the total
+  density, for the screened Coulomb interaction:
+  `rho_ab_to_rho_tot.irp.f` (:c:data:`rho_oc_to_rho_ab`,
+  :c:data:`v_rho_oc_to_v_rho_ab` and their variants)
  
  
  
