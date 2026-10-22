@@ -1,4 +1,4 @@
-program print_n2_stuffs
+program print_n2_related_stuff
   implicit none
   BEGIN_DOC
 ! TODO : Put the documentation of the program here

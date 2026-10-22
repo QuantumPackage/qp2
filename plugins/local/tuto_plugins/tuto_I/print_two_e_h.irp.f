@@ -1,4 +1,4 @@
-program my_program_to_print_stuffs
+program print_two_e_h
   implicit none
   BEGIN_DOC
 ! TODO : Put the documentation of the program here

@@ -1,4 +1,4 @@
-program tc_bi_ortho
+program test_tc_casscf
 
   BEGIN_DOC
   !

@@ -1,4 +1,4 @@
-program test_j_mu_of_r
+program deb_deriv_mu
  implicit none
  double precision :: x,mu_min,dmu,mu_max, mu, mu_p, mu_m
  double precision :: j_simple,j_p, j_m,numeric_d_mu,d_dx_mu

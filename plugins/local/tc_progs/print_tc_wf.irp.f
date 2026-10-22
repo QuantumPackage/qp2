@@ -1,7 +1,7 @@
 
 ! ---
 
-program print_tc_bi_ortho
+program print_tc_wf
 
   BEGIN_DOC
   ! TODO : Put the documentation of the program here

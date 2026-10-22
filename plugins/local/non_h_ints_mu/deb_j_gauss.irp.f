@@ -1,4 +1,4 @@
-program test_j_mu_of_r
+program deb_j_gauss
  implicit none
 ! call routine_test_mu_of_r
  call routine_test_mu_of_r_tot

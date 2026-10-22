@@ -1,4 +1,4 @@
-program test_j_mu_of_r
+program deb_j_psi
  implicit none
  call routine_deb_j_psi
 ! call routine_deb_denom

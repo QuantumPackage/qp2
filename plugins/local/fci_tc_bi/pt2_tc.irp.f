@@ -1,7 +1,7 @@
 
 ! ---
 
-program tc_pt2_prog
+program pt2_tc
 
   implicit none
 
