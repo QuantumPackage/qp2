@@ -25,7 +25,7 @@ jobs:
 
   compilation:
     name: Compilation
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
        - uses: actions/checkout@v3
@@ -43,6 +43,10 @@ jobs:
              lib64/
              libexec/
            restore-keys: qp2-
+       - name: install dependencies
+         run: |
+           sudo apt update
+           sudo apt install -y --fix-missing --no-install-recommends  gfortran gcc liblapack-dev libblas-dev wget python3 make m4 pkg-config
        - name: Configuration
          run: |
               ./configure -i ninja || :
