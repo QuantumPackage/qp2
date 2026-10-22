@@ -13,20 +13,39 @@ on:
 
 jobs:
 
+  configuration:
+    runs-on: ubuntu-24.04
+    name: Dependencies
+
+    steps:
+       - name: install dependencies
+         run: |
+           sudo apt update
+           sudo apt install -y --fix-missing --no-install-recommends  gfortran gcc liblapack-dev libblas-dev wget python3 make m4 pkg-config
+
   compilation:
     name: Compilation
     runs-on: ubuntu-22.04
 
     steps:
        - uses: actions/checkout@v3
+       - name: Restore configuration
+         id: restore
+         uses: actions/cache@v3
+         continue-on-error: false
+         with:
+           key: qp2-config
+           fail-on-cache-miss: true
+           path: |
+             external/opampack/
+             include/
+             lib/
+             lib64/
+             libexec/
+           restore-keys: qp2-
        - name: Configuration
          run: |
-              ./configure -i zlib || :
               ./configure -i ninja || :
-              ./configure -i zeromq || :
-              ./configure -i f77zmq || :
-              ./configure -i gmp || :
-              ./configure -i ocaml || :
               ./configure -i docopt || :
               ./configure -i resultsFile || :
               ./configure -i bats || :
@@ -37,3 +56,6 @@ jobs:
        - name: Compilation
          run: |
               bash -c "source quantum_package.rc ; exec ninja"
+
+
+
