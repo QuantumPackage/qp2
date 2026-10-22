@@ -20,8 +20,8 @@ the |EZFIO| database. A Hartree-Fock calculation provides both:
 
     qp run scf
 
-The command :ref:`qp_set_frozen_core` then freezes the core orbitals, and
-:ref:`qp_set_mo_class` gives full control on the orbital classes:
+The :ref:`qp_set_frozen_core` command freezes the core orbitals, and
+:ref:`qp_set_mo_class` gives full control over the orbital classes:
 
 .. code:: bash
 
@@ -53,13 +53,15 @@ steps:
 #. The Hamiltonian is diagonalized in the current space, with the Davidson
    algorithm, or with LAPACK when the number of determinants is at or below
    ``n_det_max_full``.
-#. For every determinant outside the space, the second-order perturbative
-   contribution is estimated and used to select the determinants that enter
-   the space at the next iteration.
+#. The second-order perturbative contribution of the external determinants is
+   estimated (by sampling the external space in the default path, or by
+   evaluating the candidates generated from the generator space in the
+   deterministic path) and used to select the determinants that enter the
+   space at the next iteration.
 #. The new wave function is saved in the |EZFIO| database, together with the
    variational energy and the |PT2| correction.
 
-The program prints a summary line per iteration with the number of
+The program prints a summary block per iteration with the number of
 determinants, the variational energy, the |PT2| correction, the variance, and
 the statistical error on the |PT2|. The last eight iterations are kept in
 memory to extrapolate the |FCI| energy with
@@ -77,7 +79,7 @@ diagonalization, the program diagonalizes
 :math:`H + 0.1\,(S^2 - S^2_\text{target})` instead of :math:`H`, which
 penalizes the states whose |S^2| deviates from the target value. The
 :doc:`excited_states` page describes the ``only_expected_s2`` filter and the
-state-following options.
+``state_following`` option.
 
 
 Deterministic and stochastic perturbation theory
@@ -92,8 +94,9 @@ error bar. The sampling stops when the relative error on the |PT2|,
 :option:`perturbation pt2_relative_error` (default :math:`2\times10^{-3}`).
 
 With :option:`perturbation do_pt2` set to |false|, the program calls the
-``run_cipsi`` path instead: the external space is scanned explicitly to select
-the determinants, and no stochastic |PT2| sampling is performed. The |PT2|
+``run_cipsi`` path instead: the candidates generated from the generator space
+are scanned explicitly to select the determinants, and no stochastic |PT2|
+sampling is performed. The |PT2|
 printed in this mode comes from the selection step and is biased, because it
 uses a truncated wave function. In the small-wave-function regime this path
 is cheaper than the hybrid algorithm, since every generated candidate is
@@ -105,9 +108,8 @@ The zeroth-order Hamiltonian of the perturbative correction is chosen with
 :option:`perturbation h0_type`. The default, ``EN``, uses the variational
 energy of the state in the Epstein-Nesbet denominator. ``HF`` replaces this
 denominator by the diagonal energy of the determinant with the largest
-coefficient. ``CFG`` uses configuration energies in the selection step (see
-``src/cipsi/selection.irp.f``), with the same denominator as ``EN`` in the
-|PT2|.
+coefficient. ``CFG`` uses configuration energies in the selection step, with
+the same denominator as ``EN`` in the |PT2|.
 
 
 Stopping criteria
@@ -173,9 +175,9 @@ contributions and reduces the cost of an iteration.
 The selectors are the determinants on which the matrix elements
 :math:`\langle i | H | \psi \rangle` of the perturbative estimate are
 computed. Their threshold, ``threshold_selectors``, is the square root of
-``threshold_generators``, since it applies to the coefficients rather than
-to their squares, and the selector space is never smaller than the
-generator space.
+``threshold_generators``. Because both thresholds are applied to the squared
+norm, the selector threshold is larger, and the selector space is never
+smaller than the generator space.
 
 
 Restarting a calculation

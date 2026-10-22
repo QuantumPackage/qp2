@@ -95,4 +95,5 @@ Multiple methods were developed with the |qp|:
   the QMC plugins
 
 Most of these programs can generate ground and excited states, and spin pure
-wave functions (eigenstates of |S^2|) when :option:`determinants s2_eig` is set.
+wave functions (eigenstates of |S^2|) when :option:`determinants s2_eig` is
+set to |true|.
