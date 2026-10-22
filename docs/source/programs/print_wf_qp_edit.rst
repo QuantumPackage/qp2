@@ -9,6 +9,7 @@ print_wf_qp_edit
  
  
  
+ Print the psi_det wave function up to n_det_qp_edit 
  
  Needs: 
  
@@ -17,19 +18,12 @@ print_wf_qp_edit
  
     * :c:data:`read_wf` 
  
- Called by: 
- 
- .. hlist:: 
-    :columns: 3 
- 
-    * :c:func:`scf` 
- 
  Calls: 
  
  .. hlist:: 
     :columns: 3 
  
-    * :c:func:`print_wf_qp_edit` 
+    * :c:func:`print_wf_qp_edit_subroutine` 
  
  Touches: 
  

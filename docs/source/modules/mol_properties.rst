@@ -914,7 +914,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`mol_properties`
+       * :c:func:`properties`
 
     Calls:
 

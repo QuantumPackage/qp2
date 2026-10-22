@@ -133,6 +133,127 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
+.. c:macro:: export_trexio_subroutine:
+
+
+    File : :file:`export_trexio_routines.irp.f`
+
+    .. code:: fortran
+
+        subroutine export_trexio_subroutine(update,full_path)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`all_mo_integrals`
+       * :c:data:`ao_coef_normalized`
+       * :c:data:`ao_first_of_shell`
+       * :c:data:`ao_integrals_map`
+       * :c:data:`ao_integrals_n_e`
+       * :c:data:`ao_kinetic_integrals`
+       * :c:data:`ao_num`
+       * :c:data:`ao_one_e_integrals`
+       * :c:data:`ao_overlap`
+       * :c:data:`ao_pseudo_integrals`
+       * :c:data:`ao_shell`
+       * :c:data:`ao_sphe_coef_normalization_factor`
+       * :c:data:`ao_sphe_integrals_n_e`
+       * :c:data:`ao_sphe_kinetic_integrals`
+       * :c:data:`ao_sphe_num`
+       * :c:data:`ao_sphe_one_e_integrals`
+       * :c:data:`ao_sphe_overlap`
+       * :c:data:`ao_sphe_pseudo_integrals`
+       * :c:data:`ao_sphe_shell`
+       * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`backend`
+       * :c:data:`basis_nucleus_index`
+       * :c:data:`basis_type`
+       * :c:data:`cholesky_ao_num`
+       * :c:data:`cholesky_mo_transp`
+       * :c:data:`do_mo_cholesky`
+       * :c:data:`do_pseudo`
+       * :c:data:`elec_alpha_num`
+       * :c:data:`elec_beta_num`
+       * :c:data:`export_ao_one_e_ints`
+       * :c:data:`export_ao_two_e_ints`
+       * :c:data:`export_ao_two_e_ints_cholesky`
+       * :c:data:`export_basis`
+       * :c:data:`export_cartesian`
+       * :c:data:`export_csf`
+       * :c:data:`export_mo_one_e_ints`
+       * :c:data:`export_mo_two_e_ints`
+       * :c:data:`export_mo_two_e_ints_cholesky`
+       * :c:data:`export_mos`
+       * :c:data:`export_rdm`
+       * :c:data:`ezfio_convention`
+       * :c:data:`fock_matrix_diag_mo`
+       * :c:data:`mo_class`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_integrals_n_e`
+       * :c:data:`mo_kinetic_integrals`
+       * :c:data:`mo_label`
+       * :c:data:`mo_num`
+       * :c:data:`mo_one_e_integrals`
+       * :c:data:`mo_pseudo_integrals_local`
+       * :c:data:`mo_sphe_coef`
+       * :c:data:`n_csf`
+       * :c:data:`n_det`
+       * :c:data:`n_int`
+       * :c:data:`n_states`
+       * :c:data:`nucl_charge`
+       * :c:data:`nucl_charge_remove`
+       * :c:data:`nucl_coord_transp`
+       * :c:data:`nucl_label`
+       * :c:data:`nucl_num`
+       * :c:data:`nuclear_repulsion`
+       * :c:data:`one_e_dm_mo_alpha`
+       * :c:data:`prim_coef`
+       * :c:data:`prim_expo`
+       * :c:data:`prim_normalization_factor`
+       * :c:data:`prim_num`
+       * :c:data:`primitives_normalized`
+       * :c:data:`pseudo_dz_k`
+       * :c:data:`pseudo_dz_kl`
+       * :c:data:`pseudo_klocmax`
+       * :c:data:`pseudo_kmax`
+       * :c:data:`pseudo_lmax`
+       * :c:data:`pseudo_v_k_transp`
+       * :c:data:`pseudo_v_kl_transp`
+       * :c:data:`psi_coef`
+       * :c:data:`psi_configuration`
+       * :c:data:`psi_configuration_to_psi_det`
+       * :c:data:`psi_csf_coef`
+       * :c:data:`psi_det`
+       * :c:data:`shell_ang_mom`
+       * :c:data:`shell_index`
+       * :c:data:`shell_num`
+       * :c:data:`slater_r_power`
+       * :c:data:`trexio_filename`
+       * :c:data:`two_e_dm_mo`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`export_trexio`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`ezfio_set_trexio_trexio_file`
+       * :c:func:`get_det_csf_transformation`
+       * :c:func:`getenv`
+       * :c:func:`system`
+       * :c:func:`trexio_assert`
+
+ 
 .. c:macro:: run:
 
 

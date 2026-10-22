@@ -9,7 +9,7 @@ ccsd_space_orb
  
  
  
- CCSD in spin orbitals 
+ Closed-shell CCSD 
  
  Needs: 
  
@@ -23,7 +23,7 @@ ccsd_space_orb
  .. hlist:: 
     :columns: 3 
  
-    * :c:func:`run_ccsd_spin_orb` 
+    * :c:func:`run_ccsd_space_orb` 
  
  Touches: 
  

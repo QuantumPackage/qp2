@@ -74,7 +74,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`check_ortho`
+       * :c:func:`check_orthonormality`
 
  
 .. c:macro:: main:
@@ -207,12 +207,12 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`analyze_ccsd`
        * :c:func:`diagonalize_h`
        * :c:func:`print_ci_vectors`
        * :c:func:`print_sorted_wf_coef`
        * :c:func:`print_var_energy`
        * :c:func:`print_wf`
-       * :c:func:`read_t2_ccsd`
        * :c:func:`sort_wf`
        * :c:func:`truncate_wf`
        * :c:func:`write_integrals_erf`
@@ -303,4 +303,45 @@ Subroutines / functions
        * :c:func:`ezfio_set_aux_quantities_data_one_e_dm_beta_ao`
        * :c:func:`ezfio_set_aux_quantities_data_one_e_dm_beta_mo`
        * :c:func:`ezfio_set_aux_quantities_data_one_e_dm_tot_ao`
+
+ 
+.. c:macro:: run:
+
+
+    File : :file:`print_hmat.irp.f`
+
+    .. code:: fortran
+
+        subroutine run
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_det`
+       * :c:data:`n_int`
+       * :c:data:`psi_det`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`print`
+       * :c:func:`print_energy`
+       * :c:func:`print_hamiltonian`
+       * :c:func:`print_hmat`
+       * :c:func:`pt2`
+       * :c:func:`scf`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_excitation_degree`
+       * :c:func:`i_h_j`
 

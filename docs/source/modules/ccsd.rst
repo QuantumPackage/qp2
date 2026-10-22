@@ -1644,6 +1644,14 @@ Subroutines / functions
        * :c:data:`qp_max_mem`
        * :c:data:`read_amplitudes`
 
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`ccsd`
+       * :c:func:`ccsd_space_orb`
+
     Calls:
 
     .. hlist::
@@ -1733,6 +1741,7 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`ccsd`
+       * :c:func:`ccsd_spin_orb`
 
     Calls:
 

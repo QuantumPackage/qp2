@@ -56,6 +56,13 @@ cis
    * *del* orbitals which will be never occupied 
   
  
+ Needs: 
+ 
+ .. hlist:: 
+    :columns: 3 
+ 
+    * :c:data:`read_wf` 
+ 
  Calls: 
  
  .. hlist:: 
@@ -73,3 +80,4 @@ cis
     * :c:data:`mo_coef` 
     * :c:data:`level_shift` 
     * :c:data:`mo_coef` 
+    * :c:data:`read_wf` 

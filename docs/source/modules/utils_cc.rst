@@ -3510,6 +3510,42 @@ Subroutines / functions
        * :c:data:`list_del`
 
  
+.. c:macro:: print_wf_qp_edit_subroutine:
+
+
+    File : :file:`print_wf_qp_edit.irp.f`
+
+    .. code:: fortran
+
+        subroutine print_wf_qp_edit_subroutine()
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_det_qp_edit`
+       * :c:data:`n_int`
+       * :c:data:`psi_coef`
+       * :c:data:`psi_det`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`print_wf_qp_edit`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`print_det`
+
+ 
 .. c:macro:: read_t1:
 
 

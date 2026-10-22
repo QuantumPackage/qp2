@@ -172,7 +172,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`print_energy`
+       * :c:func:`print`
        * :c:func:`pt2`
        * :c:func:`scf`
 

@@ -1291,6 +1291,7 @@ Index of Subroutines/Functions
     * :c:func:`add_poly_multiply` 
     * :c:func:`add_task_to_taskserver` 
     * :c:func:`add_to_selection_buffer` 
+    * :c:func:`analyze_ccsd` 
     * :c:func:`ao_2e_cgtos_schwartz_accel` 
     * :c:func:`ao_cart_to_ao_sphe` 
     * :c:func:`ao_extra_power_index` 
@@ -1359,6 +1360,8 @@ Index of Subroutines/Functions
     * :c:func:`ccsd_par_t_space_v3` 
     * :c:func:`ccsd_par_t_spin` 
     * :c:func:`ccsd_par_t_spin_v2` 
+    * :c:func:`ccsd_space_orb` 
+    * :c:func:`ccsd_spin_orb` 
     * :c:func:`ccsd_t_task_aba` 
     * :c:func:`ccsd_t_task_abc` 
     * :c:func:`cell_function_becke` 
@@ -1366,9 +1369,11 @@ Index of Subroutines/Functions
     * :c:func:`cgaussian_product_x` 
     * :c:func:`check_coherence_functional` 
     * :c:func:`check_mem` 
-    * :c:func:`check_ortho` 
+    * :c:func:`check_orthonormality` 
     * :c:func:`check_sym` 
+    * :c:func:`cipsi_orb_opt` 
     * :c:func:`cis` 
+    * :c:func:`cis_read` 
     * :c:func:`cisd` 
     * :c:func:`clear_ao_erf_map` 
     * :c:func:`clear_ao_map` 
@@ -1502,10 +1507,10 @@ Index of Subroutines/Functions
     * :c:func:`dble_logfact` 
     * :c:func:`debug_cfg` 
     * :c:func:`debug_det` 
-    * :c:func:`debug_gradient` 
-    * :c:func:`debug_gradient_list` 
-    * :c:func:`debug_hessian` 
+    * :c:func:`debug_gradient_list_opt` 
+    * :c:func:`debug_gradient_opt` 
     * :c:func:`debug_hessian_list_opt` 
+    * :c:func:`debug_hessian_opt` 
     * :c:func:`debug_spindet` 
     * :c:func:`decode_exc` 
     * :c:func:`decode_exc_spin` 
@@ -1601,7 +1606,7 @@ Index of Subroutines/Functions
     * :c:func:`exp_matrix` 
     * :c:func:`exp_matrix_taylor` 
     * :c:func:`export_trexio` 
-    * :c:func:`export_trexio_` 
+    * :c:func:`export_trexio_subroutine` 
     * :c:func:`extra_basis` 
     * :c:func:`extra_density_at_r` 
     * :c:func:`extra_nuclei` 
@@ -1902,6 +1907,7 @@ Index of Subroutines/Functions
     * :c:func:`i_x1_pol_mult_cgtos` 
     * :c:func:`idx2_tri_int` 
     * :c:func:`idx2_tri_rev_int` 
+    * :c:func:`import_integrals_ao_periodic` 
     * :c:func:`import_mo_coef_periodic` 
     * :c:func:`import_trexio_determinants` 
     * :c:func:`import_trexio_integrals` 
@@ -2027,7 +2033,6 @@ Index of Subroutines/Functions
     * :c:func:`number_of_holes_verbose` 
     * :c:func:`number_of_particles` 
     * :c:func:`number_of_particles_verbose` 
-    * :c:func:`optimization` 
     * :c:func:`orb_opt` 
     * :c:func:`orb_range_2_rdm_openmp` 
     * :c:func:`orb_range_2_rdm_openmp_work` 
@@ -2110,6 +2115,7 @@ Index of Subroutines/Functions
     * :c:func:`pouet` 
     * :c:func:`primitive_value` 
     * :c:func:`primitive_value_explicit` 
+    * :c:func:`print` 
     * :c:func:`print_ci_vectors` 
     * :c:func:`print_csf_map` 
     * :c:func:`print_det` 
@@ -2126,7 +2132,7 @@ Index of Subroutines/Functions
     * :c:func:`print_generators_bitmasks_particles` 
     * :c:func:`print_grad` 
     * :c:func:`print_hamiltonian` 
-    * :c:func:`print_integrals` 
+    * :c:func:`print_hmat` 
     * :c:func:`print_memory_usage` 
     * :c:func:`print_mol_properties` 
     * :c:func:`print_mos` 
@@ -2139,6 +2145,8 @@ Index of Subroutines/Functions
     * :c:func:`print_var_energy` 
     * :c:func:`print_wf` 
     * :c:func:`print_wf_qp_edit` 
+    * :c:func:`print_wf_qp_edit_subroutine` 
+    * :c:func:`properties` 
     * :c:func:`provide_all_mo_integrals_erf` 
     * :c:func:`provide_everything` 
     * :c:func:`provide_for_selection_slave` 
@@ -2179,7 +2187,6 @@ Index of Subroutines/Functions
     * :c:func:`read_spindeterminants` 
     * :c:func:`read_t1` 
     * :c:func:`read_t2` 
-    * :c:func:`read_t2_ccsd` 
     * :c:func:`recentered_cpoly2` 
     * :c:func:`recentered_poly2` 
     * :c:func:`recentered_poly2_v` 

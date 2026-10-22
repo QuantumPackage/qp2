@@ -45,8 +45,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`import_integrals_ao_periodic`
        * :c:func:`import_mo_coef_periodic`
-       * :c:func:`print_integrals`
 
     Calls:
 

@@ -9,6 +9,7 @@ export_trexio
  
  
  
+ Exports the wave function in TREXIO format 
  
  Needs: 
  
@@ -22,7 +23,7 @@ export_trexio
  .. hlist:: 
     :columns: 3 
  
-    * :c:func:`export_trexio` 
+    * :c:func:`export_trexio_subroutine` 
  
  Touches: 
  
