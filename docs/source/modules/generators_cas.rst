@@ -8,14 +8,18 @@
 generators_cas
 ==============
 
-Module defining the generator determinants as those belonging to a |CAS|.
-The |MOs| belonging to the |CAS| are those which were set as active with
-the :ref:`qp_set_mo_class` command.
+Generators for the perturbation energy, as the determinants of a
+|CAS|.
 
-This module is intended to be included in the :file:`NEED` file to define
-the generators as the |CAS| determinants, which can be useful to define post-CAS approaches (see cassd module for instance).
+The generators are the determinants of the wave function that belong
+to the |CAS|: the |MOs| of the |CAS| are the ones set as active with
+the :ref:`qp_set_mo_class` command. The subroutine
+:c:func:`extract_cas` replaces the total wave function by its
+normalized projection on the |CAS|.
 
-
+This module is intended to be included in the :file:`NEED` file to
+define the generators as the |CAS| determinants, which is useful to
+define post-CAS approaches (see the cassd module for instance).
  
  
  
