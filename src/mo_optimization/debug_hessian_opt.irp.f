@@ -24,7 +24,7 @@
 ! | nb_error_H                        | integer          | number of errors in the 2D hessian |
 
 
-program debug_hessian
+program debug_hessian_opt
 
   implicit none
 

@@ -18,7 +18,7 @@
 ! | nb_error   | integer          | number of error in the gradient    |
 
 
-program debug_gradient
+program debug_gradient_opt
 
   implicit none
 

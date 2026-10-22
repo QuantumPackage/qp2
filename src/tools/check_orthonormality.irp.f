@@ -1,4 +1,4 @@
-program check_ortho
+program check_orthonormality
  implicit none
  integer :: i,j
 

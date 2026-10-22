@@ -1,4 +1,4 @@
-program read_t2_ccsd
+program analyze_ccsd
  implicit none
  io_amplitudes = "Read"
  touch io_amplitudes

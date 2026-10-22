@@ -1,9 +1,6 @@
-subroutine export_trexio(update,full_path)
+subroutine export_trexio_subroutine(update,full_path)
   use trexio
   implicit none
-  BEGIN_DOC
-  !     Exports the wave function in TREXIO format
-  END_DOC
 
   logical, intent(in)            :: update, full_path
   integer(trexio_t), allocatable :: f(:) ! TREXIO file handle

@@ -1,4 +1,4 @@
-program ccsd
+program ccsd_spin_orb
 
   implicit none
 
