@@ -30,7 +30,7 @@ program mrci
 !   :option:`determinants expected_s2`.
 !
 ! For excited states calculations, it is recommended to start with
-! :ref:`.cis.` or :ref:`.cisd.` guess wave functions, eventually in
+! :ref:`cis` or :ref:`cisd` guess wave functions, eventually in
 ! a restricted set of |MOs|, and to set :option:`determinants s2_eig`
 ! to |true|.
 !
