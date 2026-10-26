@@ -20,7 +20,7 @@ function run() {
   qp run debug_gradient_list_opt > $file.debug_g.out
   err3="$(grep 'Max error:' $file.debug_g.out | awk '{print $3}')"
   qp run debug_hessian_list_opt > $file.debug_h1.out
-  err1="$(grep 'Max error:' $file.debug_h1.out | awk '{print $3}')"
+  err1="$(grep 'Max error_H:' $file.debug_h1.out | awk '{print $3}')"
   qp run orb_opt > $file.opt1.out
   energy1="$(grep 'State average energy:' $file.opt1.out | tail -n 1 | awk '{print $4}')"
   qp set mo_optimization_utils optimization_method diag

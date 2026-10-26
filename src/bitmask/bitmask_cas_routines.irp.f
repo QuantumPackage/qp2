@@ -3,6 +3,8 @@ integer function number_of_holes(key_in)
  BEGIN_DOC
  ! Function that returns the number of holes in the inact space
  !
+ ! ::
+ !
  !   popcnt(
  !      xor(
  !        iand(
@@ -17,14 +19,17 @@ integer function number_of_holes(key_in)
  !        reunion_of_core_inact_bitmask(1,1)) )
  !
  ! (key_in && act_bitmask)
- ! +---------------------+
- !    electrons in cas     xor key_in
- ! +---------------------------------+
- !        electrons outside of cas     && reunion_of_core_inact_bitmask 
- ! +------------------------------------------------------------------+ 
- !            electrons in the core/inact space     xor reunion_of_core_inact_bitmask
- ! +---------------------------------------------------------------------------------+ 
- !              holes
+ !
+ ! ::
+ !
+ !  +---------------------+
+ !     electrons in cas     xor key_in
+ !  +---------------------------------+
+ !     electrons outside of cas     && reunion_of_core_inact_bitmask
+ !  +------------------------------------------------------------------+
+ !     electrons in the core/inact space     xor reunion_of_core_inact_bitmask
+ !  +---------------------------------------------------------------------------------+
+ !     holes
  END_DOC
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)

@@ -25,7 +25,7 @@ double precision function NAI_pol_mult_erf_ao(i_ao, j_ao, mu_in, C_center)
   BEGIN_DOC
   !
   ! Computes the following integral :
-  ! $\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) \frac{\erf(\mu |r - R_C|)}{|r - R_C|}$.
+  ! :math:`\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) \frac{\erf(\mu \|r - R_C\|)}{\|r - R_C\|}`.
   !
   END_DOC
 
@@ -68,7 +68,7 @@ double precision function NAI_pol_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center,
   BEGIN_DOC
   !
   ! Computes the following integral :
-  ! $\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) e^{-\beta (r - B_center)^2} \frac{\erf(\mu |r - R_C|)}{|r - R_C|}$.
+  ! :math:`\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) e^{-\beta (r - B_center)^2} \frac{\erf(\mu \|r - R_C\|)}{\|r - R_C\|}`.
   !
   END_DOC
 
@@ -126,7 +126,7 @@ double precision function NAI_pol_mult_erf(A_center, B_center, power_A, power_B,
   ! .. math::
   !
   !   \int dr (x-A_x)^a (x-B_x)^b \exp(-\alpha (x-A_x)^2 - \beta (x-B_x)^2 )
-  !   \frac{\erf(\mu |r - R_C |)}{| r - R_C |}$.
+  !   \frac{\erf(\mu |r - R_C |)}{| r - R_C |}.
   !
   END_DOC
 
@@ -207,7 +207,7 @@ subroutine NAI_pol_mult_erf_v(A_center, B_center, power_A, power_B, alpha, beta,
   ! .. math::
   !
   !   \int dr (x-A_x)^a (x-B_x)^b \exp(-\alpha (x-A_x)^2 - \beta (x-B_x)^2 )
-  !   \frac{\erf(\mu |r - R_C |)}{| r - R_C |}$.
+  !   \frac{\erf(\mu |r - R_C |)}{| r - R_C |}.
   !
   END_DOC
 
@@ -314,7 +314,7 @@ double precision function NAI_pol_mult_erf_with1s( A1_center, A2_center, power_A
   !   \int dy (y - A1_y)^b_1 (y - B1_y)^b_2 \exp(-\alpha_1 (y - A1_y)^2 - \alpha_2 (y - A2_y)^2)
   !   \int dz (x - A1_z)^c_1 (z - B1_z)^c_2 \exp(-\alpha_1 (z - A1_z)^2 - \alpha_2 (z - A2_z)^2)
   !   \exp(-\beta (r - B)^2)
-  !   \frac{\erf(\mu |r - R_C|)}{|r - R_C|}$.
+  !   \frac{\erf(\mu |r - R_C|)}{|r - R_C|}.
   !
   END_DOC
 

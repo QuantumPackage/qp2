@@ -423,7 +423,7 @@ subroutine zboysfunnrp(n_max, x, vals)
   ! (where F(n,z) are the Boys functions)
   ! for a complex valued argument WITH NEGATIVE REAL PART
   !
-  ! Input: x  --- argument, complex *16 Re(x)<=0
+  ! Input: x  --- argument, complex \*16 Re(x)<=0
   ! Output: vals  --- values of e^z F(n,z), n = 0, 1, ..., n_max
   !
   ! Beylkin & Sharma, J. Chem. Phys. 155, 174117 (2021)

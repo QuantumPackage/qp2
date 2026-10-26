@@ -92,4 +92,6 @@
 .. |false| replace:: ``false``
 .. |README| replace:: :file:`README.rst`
 .. |NEED| replace:: :file:`NEED`
+.. |ao_extra| replace:: ``ao_extra``
+.. |ao_extras| replace:: ``ao_extras``
 

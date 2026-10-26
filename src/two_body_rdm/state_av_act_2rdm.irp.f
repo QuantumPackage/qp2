@@ -4,7 +4,7 @@
  BEGIN_DOC
 ! state_av_act_2_rdm_ab_mo(i,j,k,l) = state average physicist two-body rdm restricted to the ACTIVE indices for alpha/beta+beta/alpha electron pairs
 !
-!                                     = \sum_{istate} w(istate) * <Psi_{istate}| a^{\dagger}_{i,alpha} a^{\dagger}_{j,beta} a_{l,beta} a_{k,alpha} |Psi_{istate}>
+!                                     = \sum_{istate} w(istate) * <Psi_{istate}\| a^{\dagger}_{i,alpha} a^{\dagger}_{j,beta} a_{l,beta} a_{k,alpha} \|Psi_{istate}>
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
@@ -41,7 +41,7 @@
  BEGIN_DOC
 ! state_av_act_2_rdm_aa_mo(i,j,k,l) = state average physicist two-body rdm restricted to the ACTIVE indices for alpha-alpha electron pairs
 !
-!                                     = \sum_{istate} w(istate) * <Psi_{istate}| a^{\dagger}_{i,alpha} a^{\dagger}_{j,alpha} a_{l,alpha} a_{k,alpha} |Psi_{istate}>
+!                                     = \sum_{istate} w(istate) * <Psi_{istate}\| a^{\dagger}_{i,alpha} a^{\dagger}_{j,alpha} a_{l,alpha} a_{k,alpha} \|Psi_{istate}>
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
@@ -71,7 +71,7 @@
  BEGIN_DOC
 ! state_av_act_2_rdm_bb_mo(i,j,k,l) = state average physicist two-body rdm restricted to the ACTIVE indices for beta-beta electron pairs
 !
-!                                     = \sum_{istate} w(istate) * <Psi_{istate}| a^{\dagger}_{i,beta} a^{\dagger}_{j,beta} a_{l,beta} a_{k,beta} |Psi_{istate}>
+!                                     = \sum_{istate} w(istate) * <Psi_{istate}\| a^{\dagger}_{i,beta} a^{\dagger}_{j,beta} a_{l,beta} a_{k,beta} \|Psi_{istate}>
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
@@ -101,7 +101,7 @@
  BEGIN_DOC
 ! state_av_act_2_rdm_spin_trace_mo(i,j,k,l) = state average physicist spin trace two-body rdm restricted to the ACTIVE indices
 !
-!                                     = \sum_{istate} w(istate) * \sum_{sigma,sigma'} <Psi_{istate}| a^{\dagger}_{i,sigma} a^{\dagger'}_{j,sigma} a_{l,sigma'} a_{k,sigma} |Psi_{istate}>
+!                                     = \sum_{istate} w(istate) * \sum_{sigma,sigma'} <Psi_{istate}\| a^{\dagger}_{i,sigma} a^{\dagger'}_{j,sigma} a_{l,sigma'} a_{k,sigma} \|Psi_{istate}>
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !

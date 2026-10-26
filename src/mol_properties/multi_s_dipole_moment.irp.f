@@ -32,12 +32,12 @@
   ! <\Psi_m|\mu_z|\Psi_n>
   ! ||\mu|| = \sqrt{\mu_x^2 + \mu_y^2 + \mu_z^2}
   !
-  ! <\Psi_n|x| \Psi_m > = \sum_p \gamma_{pp}^{nm} \bra{\phi_p} x \ket{\phi_p} 
-  !   + \sum_{pq, p \neq q} \gamma_{pq}^{nm} \bra{\phi_p} x \ket{\phi_q}
-  ! \Psi: wf
+  ! <\Psi_n|x| \Psi_m > = \sum_p \gamma_{pp}^{nm} \bra{\phi_p} x \ket{\phi_p}
+  ! + \sum_{pq, p \neq q} \gamma_{pq}^{nm} \bra{\phi_p} x \ket{\phi_q}
+  ! \Psi\: wf
   ! n,m indexes for the states
-  ! p,q: general spatial MOs 
-  ! gamma^{nm}: density matrix \bra{\Psi^n} a^{\dagger}_a a_i \ket{\Psi^m}
+  ! p,q\: general spatial MOs 
+  ! gamma^{nm}\: density matrix \bra{\Psi^n} a^{\dagger}_a a_i \ket{\Psi^m}
   END_DOC
   USE OMP_LIB
   integer          :: istate, jstate ! States

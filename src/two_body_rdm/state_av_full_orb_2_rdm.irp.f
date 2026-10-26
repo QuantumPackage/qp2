@@ -6,7 +6,7 @@
  BEGIN_DOC
 ! state_av_full_occ_2_rdm_ab_mo(i,j,k,l) =  STATE AVERAGE physicist notation for 2RDM of alpha/beta + beta/alpha electrons
 !
-!                                     = \sum_{istate} w(istate) * <Psi_{istate}| a^{\dagger}_{i,alpha} a^{\dagger}_{j,beta} a_{l,beta} a_{k,alpha} |Psi_{istate}>
+!                                     = \sum_{istate} w(istate) * <Psi_{istate}\| a^{\dagger}_{i,alpha} a^{\dagger}_{j,beta} a_{l,beta} a_{k,alpha} \|Psi_{istate}>
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONG TO ALL OCCUPIED ORBITALS : core, inactive and active
 !
@@ -147,7 +147,7 @@
  BEGIN_DOC
 ! state_av_full_occ_2_rdm_aa_mo(i,j,k,l) =  STATE AVERAGE physicist notation for 2RDM of alpha/alpha electrons
 !
-!                                     = \sum_{istate} w(istate) * <Psi_{istate}| a^{\dagger}_{i,alpha} a^{\dagger}_{j,alpha} a_{l,alpha} a_{k,alpha} |Psi_{istate}>
+!                                     = \sum_{istate} w(istate) * <Psi_{istate}\| a^{\dagger}_{i,alpha} a^{\dagger}_{j,alpha} a_{l,alpha} a_{k,alpha} \|Psi_{istate}>
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONG TO ALL OCCUPIED ORBITALS : core, inactive and active
 !
@@ -260,7 +260,7 @@
  BEGIN_DOC
 ! state_av_full_occ_2_rdm_bb_mo(i,j,k,l) =  STATE AVERAGE physicist notation for 2RDM of beta/beta electrons
 !
-!                                     = \sum_{istate} w(istate) * <Psi_{istate}| a^{\dagger}_{i,beta} a^{\dagger}_{j,beta} a_{l,beta} a_{k,beta} |Psi_{istate}>
+!                                     = \sum_{istate} w(istate) * <Psi_{istate}\| a^{\dagger}_{i,beta} a^{\dagger}_{j,beta} a_{l,beta} a_{k,beta} \|Psi_{istate}>
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONG TO ALL OCCUPIED ORBITALS : core, inactive and active
 !
@@ -373,7 +373,7 @@
  BEGIN_DOC
 ! state_av_full_occ_2_rdm_bb_mo(i,j,k,l) =  STATE AVERAGE physicist notation for 2RDM of beta/beta electrons
 !
-!                                     = \sum_{istate} w(istate) * \sum_{sigma,sigma'} <Psi_{istate}| a^{\dagger}_{i,sigma} a^{\dagger'}_{j,sigma} a_{l,sigma'} a_{k,sigma} |Psi_{istate}>
+!                                     = \sum_{istate} w(istate) * \sum_{sigma,sigma'} <Psi_{istate}\| a^{\dagger}_{i,sigma} a^{\dagger'}_{j,sigma} a_{l,sigma'} a_{k,sigma} \|Psi_{istate}>
 !
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONG TO ALL OCCUPIED ORBITALS : core, inactive and active
