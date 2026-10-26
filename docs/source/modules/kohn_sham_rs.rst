@@ -31,7 +31,7 @@ The program associated to it is the :ref:`rs_ks_scf` executable.
 More advanced description
 -------------------------
 
-The splitting of the interaction between long- and short-range is determined by the range-separation parameter :option:`ao_two_e_erf_ints mu_erf`. The long-range part of the interaction is explicitly treated with exact exchange, and the short-range part of the interaction is treated with appropriate DFT functionals.
+The splitting of the interaction between long- and short-range is determined by the range-separation parameter :option:`mu_erf`. The long-range part of the interaction is explicitly treated with exact exchange, and the short-range part of the interaction is treated with appropriate DFT functionals.
 
 The Range-separated Kohn-Sham in an SCF and therefore is based on the :ref:`module_scf_utils` structure.
 

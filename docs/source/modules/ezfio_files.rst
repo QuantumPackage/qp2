@@ -345,7 +345,7 @@ Providers
         character*(1024)	:: ezfio_work_dir_pid	
 
 
-    EZFIO/work/pid_
+    EZFIO/work/pid\_
 
     Needs:
 

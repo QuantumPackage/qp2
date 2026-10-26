@@ -69,7 +69,7 @@ Providers
         double precision, allocatable	:: ao_abs_int_grid	(ao_num)
 
 
-    ao_abs_int_grid(i) = \int dr |phi_i(r) |
+    ao_abs_int_grid(i) = \int dr \|phi_i(r) \|
 
     Needs:
 
@@ -93,7 +93,7 @@ Providers
         double precision, allocatable	:: ao_overlap_abs_grid	(ao_num,ao_num)
 
 
-    ao_overlap_abs_grid(j,i) = \int dr |phi_i(r) phi_j(r)|
+    ao_overlap_abs_grid(j,i) = \int dr \|phi_i(r) phi_j(r)\|
 
     Needs:
 
@@ -124,7 +124,7 @@ Providers
         double precision, allocatable	:: ao_prod_abs_r	(ao_num,ao_num)
 
 
-    ao_prod_abs_r(i,j) = \int |phi_i(r) phi_j(r)| dsqrt((x - <|i|x|j|>)^2 + (y - <|i|y|j|>)^2 +(z - <|i|z|j|>)^2) / \int |phi_i(r) phi_j(r)|
+    ao_prod_abs_r(i,j) = \int \|phi_i(r) phi_j(r)\| dsqrt((x - <\|i\|x\|j\|>)^2 + (y - <\|i\|y\|j\|>)^2 +(z - <\|i\|z\|j\|>)^2) / \int \|phi_i(r) phi_j(r)\|
     
 
     Needs:
@@ -156,9 +156,9 @@ Providers
         double precision, allocatable	:: ao_prod_center	(3,ao_num,ao_num)
 
 
-    ao_prod_center(1:3,j,i) = \int dr |phi_i(r) phi_j(r)| x/y/z / \int |phi_i(r) phi_j(r)|
+    ao_prod_center(1:3,j,i) = \int dr \|phi_i(r) phi_j(r)\| x/y/z / \int \|phi_i(r) phi_j(r)\|
     
-    if \int |phi_i(r) phi_j(r)| < 1.d-10 then ao_prod_center = 10000.
+    if \int \|phi_i(r) phi_j(r)\| < 1.d-10 then ao_prod_center = 10000.
 
     Needs:
 
@@ -190,7 +190,7 @@ Providers
         double precision, allocatable	:: ao_prod_dist_grid	(ao_num,ao_num,n_points_final_grid)
 
 
-    ao_prod_dist_grid(j,i,ipoint) = distance between the center of |phi_i(r) phi_j(r)| and the grid point r(ipoint)
+    ao_prod_dist_grid(j,i,ipoint) = distance between the center of \|phi_i(r) phi_j(r)\| and the grid point r(ipoint)
 
     Needs:
 
@@ -214,9 +214,9 @@ Providers
         double precision, allocatable	:: ao_prod_sigma	(ao_num,ao_num)
 
 
-    Gaussian exponent reproducing the product |chi_i(r) chi_j(r)|
+    Gaussian exponent reproducing the product \|chi_i(r) chi_j(r)\|
     
-    Therefore |chi_i(r) chi_j(r)|  \approx e^{-ao_prod_sigma(j,i) (r - ao_prod_center(1:3,j,i))**2}
+    Therefore \|chi_i(r) chi_j(r)\|  \approx e^{-ao_prod_sigma(j,i) (r - ao_prod_center(1:3,j,i))**2}
 
     Needs:
 

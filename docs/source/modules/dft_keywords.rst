@@ -34,7 +34,7 @@ Modifying the amount of |HF| exchange
 
 Other related keywords not defined in :ref:`module_dft_keywords`
 ----------------------------------------------------------------
-The keyword for the **range separation parameter**  :math:`\mu` is the :option:`ao_two_e_erf_ints mu_erf` keyword.
+The keyword for the **range separation parameter**  :math:`\mu` is the :option:`mu_erf` keyword.
 
 The keyword for the **type of density used in RS-DFT** calculation with a **multi-configurational wave function** is the :option:`density_for_dft density_for_dft` keyword.
  

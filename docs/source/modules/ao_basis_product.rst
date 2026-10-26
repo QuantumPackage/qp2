@@ -213,8 +213,8 @@ Subroutines / functions
     .. code:: fortran
 
         double precision function general_overlap_integral(dim,            &
-     P_new,P_center,fact_p,p,p_inv,iorder_p,                       &
-     Q_new,Q_center,fact_q,q,q_inv,iorder_q)
+             P_new,P_center,fact_p,p,p_inv,iorder_p,                       &
+             Q_new,Q_center,fact_q,q,q_inv,iorder_q)
 
 
     Computes the overlap integral <p|q> where p,q are products of primitives

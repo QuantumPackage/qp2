@@ -387,7 +387,7 @@ Providers
         double precision, allocatable	:: psi_energy_two_e_trans	(N_states,N_states)
 
 
-    psi_energy_two_e_trans(istate,jstate) = <Psi_istate|W_ee |Psi_jstate>
+    psi_energy_two_e_trans(istate,jstate) = <Psi_istate\|W_ee \|Psi_jstate>
 
     Needs:
 

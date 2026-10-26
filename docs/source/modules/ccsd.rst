@@ -260,7 +260,7 @@ Subroutines / functions
     .. code:: fortran
 
         double precision function ccsd_t_task_aba(a,b,nO,nV,t1,T_oovv,T_voov,&
-      X_ooov,X_oovv,X_vovv,f_o,f_v) result(e)
+              X_ooov,X_oovv,X_vovv,f_o,f_v) result(e)
 
 
 
@@ -281,7 +281,7 @@ Subroutines / functions
     .. code:: fortran
 
         double precision function ccsd_t_task_abc(a,b,c,nO,nV,t1,T_oovv,T_voov,&
-      X_ooov,X_oovv,X_vovv,f_o,f_v) result(e)
+              X_ooov,X_oovv,X_vovv,f_o,f_v) result(e)
 
 
 
@@ -338,7 +338,7 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine compute_A1_chol(nO,nV,t1,t2,tau,d_cc_space_v_vooo, &
-  d_cc_space_v_oooo, d_cc_space_v_vvoo, A1)
+          d_cc_space_v_oooo, d_cc_space_v_vvoo, A1)
 
 
 
@@ -668,7 +668,7 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine compute_g_occ_chol(nO,nV,t1,t2,H_oo, &
-  d_cc_space_f_vo, d_cc_space_v_ov_chol, d_cc_space_v_oo_chol, d_cc_space_v_ovoo, g_occ)
+          d_cc_space_f_vo, d_cc_space_v_ov_chol, d_cc_space_v_oo_chol, d_cc_space_v_ovoo, g_occ)
 
 
 
@@ -742,7 +742,7 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine compute_g_vir_chol(nO,nV,t1,t2,H_vv,d_cc_space_f_vo, &
-  d_cc_space_v_ov_chol, d_cc_space_v_vv_chol, g_vir)
+          d_cc_space_v_ov_chol, d_cc_space_v_vv_chol, g_vir)
 
 
 
@@ -819,7 +819,7 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine compute_H_oo_chol(nO,nV,tau_x,d_cc_space_f_oo, &
-    d_cc_space_v_ov_chol,d_cc_space_v_vo_chol,H_oo)
+            d_cc_space_v_ov_chol,d_cc_space_v_vo_chol,H_oo)
 
 
 
@@ -895,7 +895,7 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine compute_H_vo_chol(nO,nV,t1,d_cc_space_f_vo, &
-         d_cc_space_v_ov_chol,d_cc_space_v_vo_chol, H_vo)
+                 d_cc_space_v_ov_chol,d_cc_space_v_vo_chol, H_vo)
 
 
 
@@ -973,7 +973,7 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine compute_H_vv_chol(nO,nV,tau_x,d_cc_space_f_vv, &
-         d_cc_space_v_ov_chol,H_vv)
+                 d_cc_space_v_ov_chol,H_vv)
 
 
 
@@ -1110,7 +1110,7 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine compute_K1_chol(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov, &
-   d_cc_space_v_ov_chol,d_cc_space_v_vv_chol,K1)
+           d_cc_space_v_ov_chol,d_cc_space_v_vv_chol,K1)
 
 
 
@@ -1193,7 +1193,7 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine compute_r1_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1,d_cc_space_f_ov,d_cc_space_f_vo, &
-    d_cc_space_v_voov, d_cc_space_v_ovov, d_cc_space_v_oovo, d_cc_space_v_vo_chol, d_cc_space_v_vv_chol)
+            d_cc_space_v_voov, d_cc_space_v_ovov, d_cc_space_v_oovo, d_cc_space_v_vo_chol, d_cc_space_v_vv_chol)
 
 
 
@@ -1320,10 +1320,10 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
-    d_cc_space_v_oovv, d_cc_space_v_vooo, d_cc_space_v_oooo, d_cc_space_v_oovo, d_cc_space_v_ovvo, d_cc_space_v_ovoo, &
-    d_cc_space_v_ovov, d_cc_space_v_vvoo, d_cc_space_v_oo_chol, d_cc_space_v_ov_chol, d_cc_space_v_vo_chol, d_cc_space_v_vv_chol, &
-    d_cc_space_f_vo, &
-    r2,max_r2)
+            d_cc_space_v_oovv, d_cc_space_v_vooo, d_cc_space_v_oooo, d_cc_space_v_oovo, d_cc_space_v_ovvo, d_cc_space_v_ovoo, &
+            d_cc_space_v_ovov, d_cc_space_v_vvoo, d_cc_space_v_oo_chol, d_cc_space_v_ov_chol, d_cc_space_v_vo_chol, d_cc_space_v_vv_chol, &
+            d_cc_space_f_vo, &
+            r2,max_r2)
 
 
 

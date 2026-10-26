@@ -333,7 +333,10 @@ Providers
     
     J. Chem. Phys. 133, 141102 (2010), https://doi.org/10.1063/1.3503173
     Coupling parameters from J. Chem. Phys. 125, 204110 (2006); https://doi.org/10.1063/1.2393223.
-          cc   oo   vv
+    
+    ::
+    
+     cc   oo   vv
      A  -0.5  0.5  1.5
      B   1.5  0.5 -0.5
     
@@ -735,10 +738,10 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine extrapolate_Fock_matrix(               &
-           error_matrix_DIIS,Fock_matrix_DIIS,    &
-           Fock_matrix_AO_,size_Fock_matrix_AO,   &
-           iteration_SCF,dim_DIIS                 &
-           )
+                   error_matrix_DIIS,Fock_matrix_DIIS,    &
+                   Fock_matrix_AO_,size_Fock_matrix_AO,   &
+                   iteration_SCF,dim_DIIS                 &
+                   )
 
 
     Compute the extrapolated Fock matrix using the DIIS procedure

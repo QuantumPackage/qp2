@@ -347,7 +347,7 @@ Providers
 
     full_occ_2_rdm_cntrctd(k,l,ipoint,istate) = \sum_{ij} \Gamma_{ij}^{kl}  phi_i(r_ipoint) phi_j(r_ipoint)
     
-    where \Gamma_{ij}^{kl}(istate)  = <Psi_{istate}| a^{\dagger}_{i \alpha} a^{\dagger}_{j \beta} a_{l \beta} a_{k \alpha} |Psi_{istate}>
+    where \Gamma_{ij}^{kl}(istate)  = <Psi_{istate}\| a^{\dagger}_{i \alpha} a^{\dagger}_{j \beta} a_{l \beta} a_{k \alpha} \|Psi_{istate}>
     
     This is needed to build the function f_{\Psi^B}(X_1,X_2) of Eq. (22) of J. Chem. Phys. 149, 194301 (2018)
     
@@ -382,7 +382,7 @@ Providers
 
     full_occ_2_rdm_cntrctd_trans(ipoint,k,l,istate) = \sum_{ij} \Gamma_{ij}^{kl}  phi_i(r_ipoint) phi_j(r_ipoint)
     
-    where \Gamma_{ij}^{kl}(istate)  = <Psi_{istate}| a^{\dagger}_{i \alpha} a^{\dagger}_{j \beta} a_{l \beta} a_{k \alpha} |Psi_{istate}>
+    where \Gamma_{ij}^{kl}(istate)  = <Psi_{istate}\| a^{\dagger}_{i \alpha} a^{\dagger}_{j \beta} a_{l \beta} a_{k \alpha} \|Psi_{istate}>
     
     This is needed to build the function f_{\Psi^B}(X_1,X_2) of Eq. (22) of J. Chem. Phys. 149, 194301 (2018)
     

@@ -1216,7 +1216,7 @@ Providers
         real*8, allocatable	:: norm_grad_vec2_tab	(3)
 
 
-    calculate the orbital gradient <Psi| H E_pq |Psi> from density
+    calculate the orbital gradient <Psi\| H E_pq \|Psi> from density
     matrices and integrals; Siegbahn et al, Phys Scr 1980
     eqs 14 a,b,c
 
@@ -1259,10 +1259,10 @@ Providers
         real*8, allocatable	:: gradvec_old	(nMonoEx)
 
 
-    calculate the orbital gradient <Psi| H E_pq |Psi> by hand, i.e. for
-    each determinant I we determine the string E_pq |I> (alpha and beta
-    separately) and generate <Psi|H E_pq |I>
-    sum_I c_I <Psi|H E_pq |I> is then the pq component of the orbital
+    calculate the orbital gradient <Psi\| H E_pq \|Psi> by hand, i.e. for
+    each determinant I we determine the string E_pq \|I> (alpha and beta
+    separately) and generate <Psi\|H E_pq \|I>
+    sum_I c_I <Psi\|H E_pq \|I> is then the pq component of the orbital
     gradient
     E_pq = a^+_pa_q + a^+_Pa_Q
 
@@ -1376,8 +1376,8 @@ Providers
         real*8, allocatable	:: hessmat_old	(nMonoEx,nMonoEx)
 
 
-    calculate the orbital hessian 2 <Psi| E_pq H E_rs |Psi>
-    + <Psi| E_pq E_rs H |Psi> + <Psi| E_rs E_pq H |Psi> by hand,
+    calculate the orbital hessian 2 <Psi\| E_pq H E_rs \|Psi>
+    + <Psi\| E_pq E_rs H \|Psi> + <Psi\| E_rs E_pq H \|Psi> by hand,
     determinant per determinant, as for the gradient
     
     we assume that we have natural active orbitals
@@ -2006,7 +2006,10 @@ Providers
     
     J. Chem. Phys. 133, 141102 (2010), https://doi.org/10.1063/1.3503173
     Coupling parameters from J. Chem. Phys. 125, 204110 (2006); https://doi.org/10.1063/1.2393223.
-          cc   oo   vv
+    
+    ::
+    
+     cc   oo   vv
      A  -0.5  0.5  1.5
      B   1.5  0.5 -0.5
     
@@ -2055,7 +2058,10 @@ Providers
     
     J. Chem. Phys. 133, 141102 (2010), https://doi.org/10.1063/1.3503173
     Coupling parameters from J. Chem. Phys. 125, 204110 (2006); https://doi.org/10.1063/1.2393223.
-          cc   oo   vv
+    
+    ::
+    
+     cc   oo   vv
      A  -0.5  0.5  1.5
      B   1.5  0.5 -0.5
     
@@ -2446,7 +2452,7 @@ Providers
         real*8, allocatable	:: norm_grad_vec2_tab	(3)
 
 
-    calculate the orbital gradient <Psi| H E_pq |Psi> from density
+    calculate the orbital gradient <Psi\| H E_pq \|Psi> from density
     matrices and integrals; Siegbahn et al, Phys Scr 1980
     eqs 14 a,b,c
 
@@ -2491,7 +2497,7 @@ Providers
         real*8, allocatable	:: norm_grad_vec2_tab	(3)
 
 
-    calculate the orbital gradient <Psi| H E_pq |Psi> from density
+    calculate the orbital gradient <Psi\| H E_pq \|Psi> from density
     matrices and integrals; Siegbahn et al, Phys Scr 1980
     eqs 14 a,b,c
 
@@ -3153,7 +3159,7 @@ Subroutines / functions
         double precision function bielec_PQxx(i_mo, j_mo, i_ca, j_ca)
 
 
-    function that computes (i_mo j_mo |i_ca j_ca) with Cholesky decomposition
+    function that computes (i_mo j_mo \|i_ca j_ca) with Cholesky decomposition
     
     indices are unshifted orbital numbers
     
@@ -3201,7 +3207,7 @@ Subroutines / functions
         double precision function bielec_PxxQ(i_mo, i_ca, j_ca, j_mo)
 
 
-    function that computes (i_mo j_mo |i_ca j_ca) with Cholesky decomposition
+    function that computes (i_mo j_mo \|i_ca j_ca) with Cholesky decomposition
     
     where i_ca, j_ca are in [1:n_core_inact_act_orb]
 
@@ -3223,7 +3229,7 @@ Subroutines / functions
         double precision function bielec_PxxQ_no(i_mo, j_ca, i_ca, j_mo)
 
 
-    function that computes (i_mo j_ca |i_ca j_mo) with Cholesky decomposition  on the NO basis for active orbitals
+    function that computes (i_mo j_ca \|i_ca j_mo) with Cholesky decomposition  on the NO basis for active orbitals
     
     where i_ca, j_ca are in [1:n_core_inact_act_orb]
 
@@ -3248,7 +3254,7 @@ Subroutines / functions
 
 
     eq 18 of Siegbahn et al, Physica Scripta 1980
-    we calculate 2 <Psi| H E_pq | Psi>, q=hole, p=particle
+    we calculate 2 <Psi\| H E_pq \| Psi>, q=hole, p=particle
 
     Needs:
 
@@ -3290,8 +3296,8 @@ Subroutines / functions
 
 
     eq 19 of Siegbahn et al, Physica Scripta 1980
-    we calculate  2 <Psi| E_pq H E_rs |Psi>
-     + <Psi| E_pq E_rs H |Psi> + <Psi| E_rs E_pq H |Psi>
+    we calculate  2 <Psi\| E_pq H E_rs \|Psi>
+    + <Psi\| E_pq E_rs H \|Psi> + <Psi\| E_rs E_pq H \|Psi>
     average over all states is performed.
     no transition between states.
 
@@ -3428,7 +3434,7 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine do_signed_mono_excitation(key1,key2,nu,ihole,ipart,       &
-      ispin,phase,ierr)
+              ispin,phase,ierr)
 
 
     we create the mono-excitation, and determine, if possible,
@@ -3470,7 +3476,7 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine do_spinfree_mono_excitation(key_in,key_out1,key_out2      &
-      ,nu1,nu2,ihole,ipart,phase1,phase2,ierr,jerr)
+              ,nu1,nu2,ihole,ipart,phase1,phase2,ierr,jerr)
 
 
     we create the spin-free mono-excitation E_pq=(a^+_p a_q + a^+_P a_Q)

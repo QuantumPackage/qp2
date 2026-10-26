@@ -1824,8 +1824,8 @@ Subroutines / functions
     .. code:: fortran
 
         double precision function general_primitive_integral(dim,            &
-      P_new,P_center,fact_p,p,p_inv,iorder_p,                        &
-      Q_new,Q_center,fact_q,q,q_inv,iorder_q)
+              P_new,P_center,fact_p,p,p_inv,iorder_p,                        &
+              Q_new,Q_center,fact_q,q,q_inv,iorder_q)
 
 
     Computes the integral <pq|rs> where p,q,r,s are Gaussian primitives
@@ -1847,7 +1847,7 @@ Subroutines / functions
     .. code:: fortran
 
         complex*16 function general_primitive_integral_cgtos(dim, P_new, P_center, fact_p, p, p_inv, iorder_p, &
-                                                          Q_new, Q_center, fact_q, q, q_inv, iorder_q)
+                                                                  Q_new, Q_center, fact_q, q, q_inv, iorder_q)
 
 
     
@@ -1872,8 +1872,8 @@ Subroutines / functions
     .. code:: fortran
 
         double precision function general_primitive_integral_erf(dim,            &
-      P_new,P_center,fact_p,p,p_inv,iorder_p,                        &
-      Q_new,Q_center,fact_q,q,q_inv,iorder_q)
+              P_new,P_center,fact_p,p,p_inv,iorder_p,                        &
+              Q_new,Q_center,fact_q,q,q_inv,iorder_q)
 
 
     Computes the integral <pq|rs> where p,q,r,s are Gaussian primitives
@@ -1969,7 +1969,7 @@ Subroutines / functions
 
     Gets one AO bi-electronic integral from the AO map in PHYSICIST NOTATION
     
-    <1:k, 2:l |1:i, 2:j>
+    <1:k, 2:l \|1:i, 2:j>
 
     Needs:
 
@@ -2275,7 +2275,7 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine give_cpolynom_mult_center_x(P_center, Q_center, a_x, d_x, p, q, n_pt_in, &
-                                       pq_inv, pq_inv_2, p10_1, p01_1, p10_2, p01_2, d, n_pt_out)
+                                               pq_inv, pq_inv_2, p10_1, p01_1, p10_2, p01_2, d, n_pt_out)
 
 
     subroutine that returns the explicit polynom in term of the "t"

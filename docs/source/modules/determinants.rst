@@ -5995,7 +5995,7 @@ Subroutines / functions
 
     returns the array, for each spin, of holes/particles between key_i and key_j
     
-    with the following convention: a^+_{particle} a_{hole}|key_i> = |key_j>
+    with the following convention: a^+_{particle} a_{hole}\|key_i> = \|key_j>
 
     Needs:
 
@@ -6047,7 +6047,7 @@ Subroutines / functions
 
     returns the array, per spin, of holes between key_i and key_j
     
-    with the following convention: a_{hole}|key_i> --> |key_j>
+    with the following convention: a_{hole}\|key_i> --> \|key_j>
 
     Needs:
 
@@ -6176,7 +6176,7 @@ Subroutines / functions
 
     returns the array, per spin, of particles between key_i and key_j
     
-    with the following convention: a^dagger_{particle}|key_i> --> |key_j>
+    with the following convention: a^dagger_{particle}\|key_i> --> \|key_j>
 
     Needs:
 

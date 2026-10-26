@@ -25,11 +25,12 @@ Key Features
    selection rules.
 
 3. **Specialized Dense Arrays**:
-   - For integrals with 2 identical indices such as <ij|ik> and <ij|jk>,
-     dedicated dense arrays are maintained to accelerate computations
-     involving single excitations
-   - These arrays significantly improve performance for CI calculations
-     that frequently compute single excitation amplitudes
+
+   For integrals with 2 identical indices such as <ij|ik> and <ij|jk>,
+   dedicated dense arrays are maintained to accelerate computations
+   involving single excitations. These arrays significantly improve
+   performance for CI calculations that frequently compute single
+   excitation amplitudes.
 
 4. **Multi-Level Caching System**:
    - Implements a sophisticated cache mechanism for frequently accessed integrals
@@ -2706,7 +2707,7 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine insert_into_mo_integrals_erf_map(n_integrals,                 &
-      buffer_i, buffer_values, thr)
+              buffer_i, buffer_values, thr)
 
 
     Create new entry into |MO| map, or accumulate in an existing entry
@@ -2741,7 +2742,7 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine insert_into_mo_integrals_map(n_integrals,                 &
-      buffer_i, buffer_values, thr)
+              buffer_i, buffer_values, thr)
 
 
     Create new entry into MO map, or accumulate in an existing entry

@@ -3033,6 +3033,8 @@ Subroutines / functions
 
     Function that returns the number of holes in the inact space
     
+    ::
+    
       popcnt(
          xor(
            iand(
@@ -3047,14 +3049,17 @@ Subroutines / functions
            reunion_of_core_inact_bitmask(1,1)) )
     
     (key_in && act_bitmask)
-    +---------------------+
-       electrons in cas     xor key_in
-    +---------------------------------+
-           electrons outside of cas     && reunion_of_core_inact_bitmask
-    +------------------------------------------------------------------+
-               electrons in the core/inact space     xor reunion_of_core_inact_bitmask
-    +---------------------------------------------------------------------------------+
-                 holes
+    
+    ::
+    
+     +---------------------+
+        electrons in cas     xor key_in
+     +---------------------------------+
+        electrons outside of cas     && reunion_of_core_inact_bitmask
+     +------------------------------------------------------------------+
+        electrons in the core/inact space     xor reunion_of_core_inact_bitmask
+     +---------------------------------------------------------------------------------+
+        holes
 
     Needs:
 

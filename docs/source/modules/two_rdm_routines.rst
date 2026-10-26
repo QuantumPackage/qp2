@@ -126,11 +126,11 @@ Subroutines / functions
         subroutine orb_range_2_rdm_openmp_work_1(big_array,dim1,norb,list_orb,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes the two rdm for the N_st vectors |u_t>
+    Computes the two rdm for the N_st vectors \|u_t>
     if ispin == 1 :: alpha/alpha 2rdm
-             == 2 :: beta /beta  2rdm
-             == 3 :: alpha/beta  2rdm
-             == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
+    if ispin == 2 :: beta /beta  2rdm
+    if ispin == 3 :: alpha/beta  2rdm
+    if ispin == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
     The 2rdm will be computed only on the list of orbitals list_orb, which contains norb
     Default should be 1,N_det,0,1 for istart,iend,ishift,istep
 
@@ -189,11 +189,11 @@ Subroutines / functions
         subroutine orb_range_2_rdm_openmp_work_2(big_array,dim1,norb,list_orb,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes the two rdm for the N_st vectors |u_t>
+    Computes the two rdm for the N_st vectors \|u_t>
     if ispin == 1 :: alpha/alpha 2rdm
-             == 2 :: beta /beta  2rdm
-             == 3 :: alpha/beta  2rdm
-             == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
+    if ispin == 2 :: beta /beta  2rdm
+    if ispin == 3 :: alpha/beta  2rdm
+    if ispin == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
     The 2rdm will be computed only on the list of orbitals list_orb, which contains norb
     Default should be 1,N_det,0,1 for istart,iend,ishift,istep
 
@@ -252,11 +252,11 @@ Subroutines / functions
         subroutine orb_range_2_rdm_openmp_work_3(big_array,dim1,norb,list_orb,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes the two rdm for the N_st vectors |u_t>
+    Computes the two rdm for the N_st vectors \|u_t>
     if ispin == 1 :: alpha/alpha 2rdm
-             == 2 :: beta /beta  2rdm
-             == 3 :: alpha/beta  2rdm
-             == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
+    if ispin == 2 :: beta /beta  2rdm
+    if ispin == 3 :: alpha/beta  2rdm
+    if ispin == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
     The 2rdm will be computed only on the list of orbitals list_orb, which contains norb
     Default should be 1,N_det,0,1 for istart,iend,ishift,istep
 
@@ -315,11 +315,11 @@ Subroutines / functions
         subroutine orb_range_2_rdm_openmp_work_4(big_array,dim1,norb,list_orb,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes the two rdm for the N_st vectors |u_t>
+    Computes the two rdm for the N_st vectors \|u_t>
     if ispin == 1 :: alpha/alpha 2rdm
-             == 2 :: beta /beta  2rdm
-             == 3 :: alpha/beta  2rdm
-             == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
+    if ispin == 2 :: beta /beta  2rdm
+    if ispin == 3 :: alpha/beta  2rdm
+    if ispin == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
     The 2rdm will be computed only on the list of orbitals list_orb, which contains norb
     Default should be 1,N_det,0,1 for istart,iend,ishift,istep
 
@@ -378,11 +378,11 @@ Subroutines / functions
         subroutine orb_range_2_rdm_openmp_work_N_int(big_array,dim1,norb,list_orb,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes the two rdm for the N_st vectors |u_t>
+    Computes the two rdm for the N_st vectors \|u_t>
     if ispin == 1 :: alpha/alpha 2rdm
-             == 2 :: beta /beta  2rdm
-             == 3 :: alpha/beta  2rdm
-             == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
+    if ispin == 2 :: beta /beta  2rdm
+    if ispin == 3 :: alpha/beta  2rdm
+    if ispin == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
     The 2rdm will be computed only on the list of orbitals list_orb, which contains norb
     Default should be 1,N_det,0,1 for istart,iend,ishift,istep
 
@@ -529,11 +529,11 @@ Subroutines / functions
         subroutine orb_range_2_rdm_state_av_openmp_work_1(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes the two rdm for the N_st vectors |u_t>
+    Computes the two rdm for the N_st vectors \|u_t>
     if ispin == 1 :: alpha/alpha 2rdm
-             == 2 :: beta /beta  2rdm
-             == 3 :: alpha/beta  2rdm
-             == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
+    if ispin == 2 :: beta /beta  2rdm
+    if ispin == 3 :: alpha/beta  2rdm
+    if ispin == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
     The 2rdm will be computed only on the list of orbitals list_orb, which contains norb
     In any cases, the state average weights will be used with an array state_weights
     Default should be 1,N_det,0,1 for istart,iend,ishift,istep
@@ -593,11 +593,11 @@ Subroutines / functions
         subroutine orb_range_2_rdm_state_av_openmp_work_2(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes the two rdm for the N_st vectors |u_t>
+    Computes the two rdm for the N_st vectors \|u_t>
     if ispin == 1 :: alpha/alpha 2rdm
-             == 2 :: beta /beta  2rdm
-             == 3 :: alpha/beta  2rdm
-             == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
+    if ispin == 2 :: beta /beta  2rdm
+    if ispin == 3 :: alpha/beta  2rdm
+    if ispin == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
     The 2rdm will be computed only on the list of orbitals list_orb, which contains norb
     In any cases, the state average weights will be used with an array state_weights
     Default should be 1,N_det,0,1 for istart,iend,ishift,istep
@@ -657,11 +657,11 @@ Subroutines / functions
         subroutine orb_range_2_rdm_state_av_openmp_work_3(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes the two rdm for the N_st vectors |u_t>
+    Computes the two rdm for the N_st vectors \|u_t>
     if ispin == 1 :: alpha/alpha 2rdm
-             == 2 :: beta /beta  2rdm
-             == 3 :: alpha/beta  2rdm
-             == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
+    if ispin == 2 :: beta /beta  2rdm
+    if ispin == 3 :: alpha/beta  2rdm
+    if ispin == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
     The 2rdm will be computed only on the list of orbitals list_orb, which contains norb
     In any cases, the state average weights will be used with an array state_weights
     Default should be 1,N_det,0,1 for istart,iend,ishift,istep
@@ -721,11 +721,11 @@ Subroutines / functions
         subroutine orb_range_2_rdm_state_av_openmp_work_4(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes the two rdm for the N_st vectors |u_t>
+    Computes the two rdm for the N_st vectors \|u_t>
     if ispin == 1 :: alpha/alpha 2rdm
-             == 2 :: beta /beta  2rdm
-             == 3 :: alpha/beta  2rdm
-             == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
+    if ispin == 2 :: beta /beta  2rdm
+    if ispin == 3 :: alpha/beta  2rdm
+    if ispin == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
     The 2rdm will be computed only on the list of orbitals list_orb, which contains norb
     In any cases, the state average weights will be used with an array state_weights
     Default should be 1,N_det,0,1 for istart,iend,ishift,istep
@@ -785,11 +785,11 @@ Subroutines / functions
         subroutine orb_range_2_rdm_state_av_openmp_work_N_int(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes the two rdm for the N_st vectors |u_t>
+    Computes the two rdm for the N_st vectors \|u_t>
     if ispin == 1 :: alpha/alpha 2rdm
-             == 2 :: beta /beta  2rdm
-             == 3 :: alpha/beta  2rdm
-             == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
+    if ispin == 2 :: beta /beta  2rdm
+    if ispin == 3 :: alpha/beta  2rdm
+    if ispin == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
     The 2rdm will be computed only on the list of orbitals list_orb, which contains norb
     In any cases, the state average weights will be used with an array state_weights
     Default should be 1,N_det,0,1 for istart,iend,ishift,istep
@@ -939,11 +939,11 @@ Subroutines / functions
         subroutine orb_range_2_trans_rdm_openmp_work_1(big_array,dim1,norb,list_orb,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes the two trans_rdm for the N_st vectors |u_t>
+    Computes the two trans_rdm for the N_st vectors \|u_t>
     if ispin == 1 :: alpha/alpha 2trans_rdm
-             == 2 :: beta /beta  2trans_rdm
-             == 3 :: alpha/beta  2trans_rdm
-             == 4 :: spin traced 2trans_rdm :: aa + bb + 0.5 (ab + ba))
+    if ispin == 2 :: beta /beta  2trans_rdm
+    if ispin == 3 :: alpha/beta  2trans_rdm
+    if ispin == 4 :: spin traced 2trans_rdm :: aa + bb + 0.5 (ab + ba))
     The 2trans_rdm will be computed only on the list of orbitals list_orb, which contains norb
     Default should be 1,N_det,0,1 for istart,iend,ishift,istep
 
@@ -1002,11 +1002,11 @@ Subroutines / functions
         subroutine orb_range_2_trans_rdm_openmp_work_2(big_array,dim1,norb,list_orb,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes the two trans_rdm for the N_st vectors |u_t>
+    Computes the two trans_rdm for the N_st vectors \|u_t>
     if ispin == 1 :: alpha/alpha 2trans_rdm
-             == 2 :: beta /beta  2trans_rdm
-             == 3 :: alpha/beta  2trans_rdm
-             == 4 :: spin traced 2trans_rdm :: aa + bb + 0.5 (ab + ba))
+    if ispin == 2 :: beta /beta  2trans_rdm
+    if ispin == 3 :: alpha/beta  2trans_rdm
+    if ispin == 4 :: spin traced 2trans_rdm :: aa + bb + 0.5 (ab + ba))
     The 2trans_rdm will be computed only on the list of orbitals list_orb, which contains norb
     Default should be 1,N_det,0,1 for istart,iend,ishift,istep
 
@@ -1065,11 +1065,11 @@ Subroutines / functions
         subroutine orb_range_2_trans_rdm_openmp_work_3(big_array,dim1,norb,list_orb,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes the two trans_rdm for the N_st vectors |u_t>
+    Computes the two trans_rdm for the N_st vectors \|u_t>
     if ispin == 1 :: alpha/alpha 2trans_rdm
-             == 2 :: beta /beta  2trans_rdm
-             == 3 :: alpha/beta  2trans_rdm
-             == 4 :: spin traced 2trans_rdm :: aa + bb + 0.5 (ab + ba))
+    if ispin == 2 :: beta /beta  2trans_rdm
+    if ispin == 3 :: alpha/beta  2trans_rdm
+    if ispin == 4 :: spin traced 2trans_rdm :: aa + bb + 0.5 (ab + ba))
     The 2trans_rdm will be computed only on the list of orbitals list_orb, which contains norb
     Default should be 1,N_det,0,1 for istart,iend,ishift,istep
 
@@ -1128,11 +1128,11 @@ Subroutines / functions
         subroutine orb_range_2_trans_rdm_openmp_work_4(big_array,dim1,norb,list_orb,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes the two trans_rdm for the N_st vectors |u_t>
+    Computes the two trans_rdm for the N_st vectors \|u_t>
     if ispin == 1 :: alpha/alpha 2trans_rdm
-             == 2 :: beta /beta  2trans_rdm
-             == 3 :: alpha/beta  2trans_rdm
-             == 4 :: spin traced 2trans_rdm :: aa + bb + 0.5 (ab + ba))
+    if ispin == 2 :: beta /beta  2trans_rdm
+    if ispin == 3 :: alpha/beta  2trans_rdm
+    if ispin == 4 :: spin traced 2trans_rdm :: aa + bb + 0.5 (ab + ba))
     The 2trans_rdm will be computed only on the list of orbitals list_orb, which contains norb
     Default should be 1,N_det,0,1 for istart,iend,ishift,istep
 
@@ -1191,11 +1191,11 @@ Subroutines / functions
         subroutine orb_range_2_trans_rdm_openmp_work_N_int(big_array,dim1,norb,list_orb,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes the two trans_rdm for the N_st vectors |u_t>
+    Computes the two trans_rdm for the N_st vectors \|u_t>
     if ispin == 1 :: alpha/alpha 2trans_rdm
-             == 2 :: beta /beta  2trans_rdm
-             == 3 :: alpha/beta  2trans_rdm
-             == 4 :: spin traced 2trans_rdm :: aa + bb + 0.5 (ab + ba))
+    if ispin == 2 :: beta /beta  2trans_rdm
+    if ispin == 3 :: alpha/beta  2trans_rdm
+    if ispin == 4 :: spin traced 2trans_rdm :: aa + bb + 0.5 (ab + ba))
     The 2trans_rdm will be computed only on the list of orbitals list_orb, which contains norb
     Default should be 1,N_det,0,1 for istart,iend,ishift,istep
 

@@ -881,9 +881,9 @@ Providers
         double precision, allocatable	:: ao_integrals_pt_chrg	(ao_num,ao_num)
 
 
-     Point charge-electron interaction, in the |AO| basis set.
+    Point charge-electron interaction, in the |AO| basis set.
     
-     :math:`\langle \chi_i | -\sum_charge charge * \frac{1}{|r-R_charge|} | \chi_j \rangle`
+    :math:`\langle \chi_i \| -\sum_charge charge * \frac{1}{\|r-R_charge\|} \| \chi_j \rangle`
     
     Notice the minus sign convention as it is supposed to be for electrons.
 
@@ -2648,7 +2648,7 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine give_cpolynomial_mult_center_one_e(A_center, B_center, alpha, beta, &
-                                              power_A, power_B, C_center, n_pt_in, d, n_pt_out)
+                                                      power_A, power_B, C_center, n_pt_in, d, n_pt_out)
 
 
     Returns the explicit polynomial in terms of the "t" variable of the following
@@ -2804,7 +2804,7 @@ Subroutines / functions
     .. code:: fortran
 
         complex*16 function NAI_pol_mult_cgtos(Ae_center, Be_center, power_A, power_B, alpha, beta, &
-                                       Ap_center, Bp_center, C_center, n_pt_in)
+                                               Ap_center, Bp_center, C_center, n_pt_in)
 
 
     
@@ -2844,7 +2844,7 @@ Subroutines / functions
     .. math::
     
       \int dr (x-A_x)^a (x-B_x)^b \exp(-\alpha (x-A_x)^2 - \beta (x-B_x)^2 )
-      \frac{\erf(\mu |r - R_C |)}{| r - R_C |}$.
+      \frac{\erf(\mu |r - R_C |)}{| r - R_C |}.
     
 
     Calls:
@@ -2867,7 +2867,7 @@ Subroutines / functions
 
     
     Computes the following integral :
-    $\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) \frac{\erf(\mu |r - R_C|)}{|r - R_C|}$.
+    :math:`\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) \frac{\erf(\mu \|r - R_C\|)}{\|r - R_C\|}`.
     
 
     Needs:
@@ -2896,7 +2896,7 @@ Subroutines / functions
 
     
     Computes the following integral :
-    $\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) e^{-\beta (r - B_center)^2} \frac{\erf(\mu |r - R_C|)}{|r - R_C|}$.
+    :math:`\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) e^{-\beta (r - B_center)^2} \frac{\erf(\mu \|r - R_C\|)}{\|r - R_C\|}`.
     
 
     Needs:
@@ -2929,7 +2929,7 @@ Subroutines / functions
     .. math::
     
       \int dr (x-A_x)^a (x-B_x)^b \exp(-\alpha (x-A_x)^2 - \beta (x-B_x)^2 )
-      \frac{\erf(\mu |r - R_C |)}{| r - R_C |}$.
+      \frac{\erf(\mu |r - R_C |)}{| r - R_C |}.
     
 
     Calls:
@@ -2948,7 +2948,7 @@ Subroutines / functions
     .. code:: fortran
 
         double precision function NAI_pol_mult_erf_with1s( A1_center, A2_center, power_A1, power_A2, alpha1, alpha2 &
-                                                 , beta, B_center, C_center, n_pt_in, mu_in )
+                                                         , beta, B_center, C_center, n_pt_in, mu_in )
 
 
     
@@ -2960,7 +2960,7 @@ Subroutines / functions
       \int dy (y - A1_y)^b_1 (y - B1_y)^b_2 \exp(-\alpha_1 (y - A1_y)^2 - \alpha_2 (y - A2_y)^2)
       \int dz (x - A1_z)^c_1 (z - B1_z)^c_2 \exp(-\alpha_1 (z - A1_z)^2 - \alpha_2 (z - A2_z)^2)
       \exp(-\beta (r - B)^2)
-      \frac{\erf(\mu |r - R_C|)}{|r - R_C|}$.
+      \frac{\erf(\mu |r - R_C|)}{|r - R_C|}.
     
 
     Calls:

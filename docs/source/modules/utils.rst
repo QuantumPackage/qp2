@@ -1729,7 +1729,7 @@ Subroutines / functions
         subroutine give_degen(A, n, shift, list_degen, n_degen_list)
 
 
-    returns n_degen_list :: the number of degenerated SET of elements (i.e. with |A(i)-A(i+1)| below shift)
+    returns n_degen_list :: the number of degenerated SET of elements (i.e. with \|A(i)-A(i+1)\| below shift)
     
     for each of these sets, list_degen(1,i) = first degenerate element of the set i,
     
@@ -1806,7 +1806,7 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_k, iorder, &
-               alpha, beta, a, b, Ae_center, Be_center, Ap_center, Bp_center, dim)
+                       alpha, beta, a, b, Ae_center, Be_center, Ap_center, Bp_center, dim)
 
 
     
@@ -1853,7 +1853,7 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine give_explicit_cpoly_and_cgaussian_x(P_new, P_center, p, fact_k, iorder, &
-                                               alpha, beta, a, b, Ae_center, Be_center, Ap_center, Bp_center, dim)
+                                                       alpha, beta, a, b, Ae_center, Be_center, Ap_center, Bp_center, dim)
 
 
     
@@ -3183,7 +3183,7 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
-                                 Ap_center, Bp_center, overlap_x, overlap_y, overlap_z, overlap, dim)
+                                         Ap_center, Bp_center, overlap_x, overlap_y, overlap_z, overlap, dim)
 
 
     
@@ -4384,7 +4384,7 @@ Subroutines / functions
     (where F(n,z) are the Boys functions)
     for a complex valued argument WITH NEGATIVE REAL PART
     
-    Input: x  --- argument, complex *16 Re(x)<=0
+    Input: x  --- argument, complex \*16 Re(x)<=0
     Output: vals  --- values of e^z F(n,z), n = 0, 1, ..., n_max
     
     Beylkin & Sharma, J. Chem. Phys. 155, 174117 (2021)
