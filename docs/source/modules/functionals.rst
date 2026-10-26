@@ -14,7 +14,7 @@ subroutines below are documented from the irpf90 man pages.
 Providers 
 --------- 
  
-.. c:var:: aos_d_vc_alpha_pbe_w
+.. c:var:: double aos_d_vc_alpha_pbe_w
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -57,7 +57,7 @@ Providers
        * :c:data:`pot_scal_x_alpha_ao_pbe`
 
  
-.. c:var:: aos_d_vc_alpha_sr_pbe_w
+.. c:var:: double aos_d_vc_alpha_sr_pbe_w
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -101,7 +101,7 @@ Providers
        * :c:data:`pot_scal_x_alpha_ao_sr_pbe`
 
  
-.. c:var:: aos_d_vc_beta_pbe_w
+.. c:var:: double aos_d_vc_beta_pbe_w
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -144,7 +144,7 @@ Providers
        * :c:data:`pot_scal_x_alpha_ao_pbe`
 
  
-.. c:var:: aos_d_vc_beta_sr_pbe_w
+.. c:var:: double aos_d_vc_beta_sr_pbe_w
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -188,7 +188,7 @@ Providers
        * :c:data:`pot_scal_x_alpha_ao_sr_pbe`
 
  
-.. c:var:: aos_d_vx_alpha_pbe_w
+.. c:var:: double aos_d_vx_alpha_pbe_w
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -231,7 +231,7 @@ Providers
        * :c:data:`pot_scal_x_alpha_ao_pbe`
 
  
-.. c:var:: aos_d_vx_alpha_sr_pbe_w
+.. c:var:: double aos_d_vx_alpha_sr_pbe_w
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -275,7 +275,7 @@ Providers
        * :c:data:`pot_scal_x_alpha_ao_sr_pbe`
 
  
-.. c:var:: aos_d_vx_beta_pbe_w
+.. c:var:: double aos_d_vx_beta_pbe_w
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -318,7 +318,7 @@ Providers
        * :c:data:`pot_scal_x_alpha_ao_pbe`
 
  
-.. c:var:: aos_d_vx_beta_sr_pbe_w
+.. c:var:: double aos_d_vx_beta_sr_pbe_w
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -362,7 +362,7 @@ Providers
        * :c:data:`pot_scal_x_alpha_ao_sr_pbe`
 
  
-.. c:var:: aos_d_vxc_alpha_pbe_w
+.. c:var:: double aos_d_vxc_alpha_pbe_w
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -399,7 +399,7 @@ Providers
        * :c:data:`pot_scal_xc_alpha_ao_pbe`
 
  
-.. c:var:: aos_d_vxc_alpha_sr_pbe_w
+.. c:var:: double aos_d_vxc_alpha_sr_pbe_w
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -437,7 +437,7 @@ Providers
        * :c:data:`pot_scal_xc_alpha_ao_sr_pbe`
 
  
-.. c:var:: aos_d_vxc_beta_pbe_w
+.. c:var:: double aos_d_vxc_beta_pbe_w
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -474,7 +474,7 @@ Providers
        * :c:data:`pot_scal_xc_alpha_ao_pbe`
 
  
-.. c:var:: aos_d_vxc_beta_sr_pbe_w
+.. c:var:: double aos_d_vxc_beta_sr_pbe_w
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -512,7 +512,7 @@ Providers
        * :c:data:`pot_scal_xc_alpha_ao_sr_pbe`
 
  
-.. c:var:: aos_sr_vc_alpha_lda_w
+.. c:var:: double aos_sr_vc_alpha_lda_w
 
 
     File : :file:`functionals/sr_lda.irp.f`
@@ -549,7 +549,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_sr_lda`
 
  
-.. c:var:: aos_sr_vc_beta_lda_w
+.. c:var:: double aos_sr_vc_beta_lda_w
 
 
     File : :file:`functionals/sr_lda.irp.f`
@@ -586,7 +586,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_sr_lda`
 
  
-.. c:var:: aos_sr_vx_alpha_lda_w
+.. c:var:: double aos_sr_vx_alpha_lda_w
 
 
     File : :file:`functionals/sr_lda.irp.f`
@@ -623,7 +623,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_sr_lda`
 
  
-.. c:var:: aos_sr_vx_beta_lda_w
+.. c:var:: double aos_sr_vx_beta_lda_w
 
 
     File : :file:`functionals/sr_lda.irp.f`
@@ -660,7 +660,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_sr_lda`
 
  
-.. c:var:: aos_sr_vxc_alpha_lda_w
+.. c:var:: double aos_sr_vxc_alpha_lda_w
 
 
     File : :file:`functionals/sr_lda.irp.f`
@@ -694,7 +694,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao_sr_lda`
 
  
-.. c:var:: aos_sr_vxc_beta_lda_w
+.. c:var:: double aos_sr_vxc_beta_lda_w
 
 
     File : :file:`functionals/sr_lda.irp.f`
@@ -728,7 +728,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao_sr_lda`
 
  
-.. c:var:: aos_vc_alpha_lda_w
+.. c:var:: double aos_vc_alpha_lda_w
 
 
     File : :file:`functionals/lda.irp.f`
@@ -764,7 +764,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_lda`
 
  
-.. c:var:: aos_vc_alpha_pbe_w
+.. c:var:: double aos_vc_alpha_pbe_w
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -807,7 +807,7 @@ Providers
        * :c:data:`pot_scal_x_alpha_ao_pbe`
 
  
-.. c:var:: aos_vc_alpha_sr_pbe_w
+.. c:var:: double aos_vc_alpha_sr_pbe_w
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -851,7 +851,7 @@ Providers
        * :c:data:`pot_scal_x_alpha_ao_sr_pbe`
 
  
-.. c:var:: aos_vc_beta_lda_w
+.. c:var:: double aos_vc_beta_lda_w
 
 
     File : :file:`functionals/lda.irp.f`
@@ -887,7 +887,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_lda`
 
  
-.. c:var:: aos_vc_beta_pbe_w
+.. c:var:: double aos_vc_beta_pbe_w
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -930,7 +930,7 @@ Providers
        * :c:data:`pot_scal_x_alpha_ao_pbe`
 
  
-.. c:var:: aos_vc_beta_sr_pbe_w
+.. c:var:: double aos_vc_beta_sr_pbe_w
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -974,7 +974,7 @@ Providers
        * :c:data:`pot_scal_x_alpha_ao_sr_pbe`
 
  
-.. c:var:: aos_vx_alpha_lda_w
+.. c:var:: double aos_vx_alpha_lda_w
 
 
     File : :file:`functionals/lda.irp.f`
@@ -1010,7 +1010,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_lda`
 
  
-.. c:var:: aos_vx_alpha_pbe_w
+.. c:var:: double aos_vx_alpha_pbe_w
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -1053,7 +1053,7 @@ Providers
        * :c:data:`pot_scal_x_alpha_ao_pbe`
 
  
-.. c:var:: aos_vx_alpha_sr_pbe_w
+.. c:var:: double aos_vx_alpha_sr_pbe_w
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -1097,7 +1097,7 @@ Providers
        * :c:data:`pot_scal_x_alpha_ao_sr_pbe`
 
  
-.. c:var:: aos_vx_beta_lda_w
+.. c:var:: double aos_vx_beta_lda_w
 
 
     File : :file:`functionals/lda.irp.f`
@@ -1133,7 +1133,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_lda`
 
  
-.. c:var:: aos_vx_beta_pbe_w
+.. c:var:: double aos_vx_beta_pbe_w
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -1176,7 +1176,7 @@ Providers
        * :c:data:`pot_scal_x_alpha_ao_pbe`
 
  
-.. c:var:: aos_vx_beta_sr_pbe_w
+.. c:var:: double aos_vx_beta_sr_pbe_w
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -1220,7 +1220,7 @@ Providers
        * :c:data:`pot_scal_x_alpha_ao_sr_pbe`
 
  
-.. c:var:: aos_vxc_alpha_lda_w
+.. c:var:: double aos_vxc_alpha_lda_w
 
 
     File : :file:`functionals/lda.irp.f`
@@ -1253,7 +1253,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao_lda`
 
  
-.. c:var:: aos_vxc_alpha_pbe_w
+.. c:var:: double aos_vxc_alpha_pbe_w
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -1290,7 +1290,7 @@ Providers
        * :c:data:`pot_scal_xc_alpha_ao_pbe`
 
  
-.. c:var:: aos_vxc_alpha_sr_pbe_w
+.. c:var:: double aos_vxc_alpha_sr_pbe_w
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -1328,7 +1328,7 @@ Providers
        * :c:data:`pot_scal_xc_alpha_ao_sr_pbe`
 
  
-.. c:var:: aos_vxc_beta_lda_w
+.. c:var:: double aos_vxc_beta_lda_w
 
 
     File : :file:`functionals/lda.irp.f`
@@ -1361,7 +1361,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao_lda`
 
  
-.. c:var:: aos_vxc_beta_pbe_w
+.. c:var:: double aos_vxc_beta_pbe_w
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -1398,7 +1398,7 @@ Providers
        * :c:data:`pot_scal_xc_alpha_ao_pbe`
 
  
-.. c:var:: aos_vxc_beta_sr_pbe_w
+.. c:var:: double aos_vxc_beta_sr_pbe_w
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -1436,7 +1436,7 @@ Providers
        * :c:data:`pot_scal_xc_alpha_ao_sr_pbe`
 
  
-.. c:var:: energy_c_lda
+.. c:var:: double energy_c_lda
 
 
     File : :file:`functionals/lda.irp.f`
@@ -1466,7 +1466,7 @@ Providers
        * :c:data:`energy_c`
 
  
-.. c:var:: energy_c_none
+.. c:var:: double energy_c_none
 
 
     File : :file:`functionals/none.irp.f`
@@ -1493,7 +1493,7 @@ Providers
        * :c:data:`energy_c`
 
  
-.. c:var:: energy_c_pbe
+.. c:var:: double energy_c_pbe
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -1528,7 +1528,7 @@ Providers
        * :c:data:`energy_x`
 
  
-.. c:var:: energy_c_sr_lda
+.. c:var:: double energy_c_sr_lda
 
 
     File : :file:`functionals/sr_lda.irp.f`
@@ -1559,7 +1559,7 @@ Providers
        * :c:data:`energy_c`
 
  
-.. c:var:: energy_c_sr_pbe
+.. c:var:: double energy_c_sr_pbe
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -1595,7 +1595,7 @@ Providers
        * :c:data:`energy_x`
 
  
-.. c:var:: energy_x_lda
+.. c:var:: double energy_x_lda
 
 
     File : :file:`functionals/lda.irp.f`
@@ -1625,7 +1625,7 @@ Providers
        * :c:data:`energy_x`
 
  
-.. c:var:: energy_x_none
+.. c:var:: double energy_x_none
 
 
     File : :file:`functionals/none.irp.f`
@@ -1652,7 +1652,7 @@ Providers
        * :c:data:`energy_x`
 
  
-.. c:var:: energy_x_pbe
+.. c:var:: double energy_x_pbe
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -1687,7 +1687,7 @@ Providers
        * :c:data:`energy_x`
 
  
-.. c:var:: energy_x_sr_lda
+.. c:var:: double energy_x_sr_lda
 
 
     File : :file:`functionals/sr_lda.irp.f`
@@ -1718,7 +1718,7 @@ Providers
        * :c:data:`energy_x`
 
  
-.. c:var:: energy_x_sr_pbe
+.. c:var:: double energy_x_sr_pbe
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -1754,7 +1754,7 @@ Providers
        * :c:data:`energy_x`
 
  
-.. c:var:: pot_grad_c_alpha_ao_pbe
+.. c:var:: double pot_grad_c_alpha_ao_pbe
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -1788,7 +1788,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_pbe`
 
  
-.. c:var:: pot_grad_c_alpha_ao_sr_pbe
+.. c:var:: double pot_grad_c_alpha_ao_sr_pbe
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -1822,7 +1822,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_sr_pbe`
 
  
-.. c:var:: pot_grad_c_beta_ao_pbe
+.. c:var:: double pot_grad_c_beta_ao_pbe
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -1856,7 +1856,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_pbe`
 
  
-.. c:var:: pot_grad_c_beta_ao_sr_pbe
+.. c:var:: double pot_grad_c_beta_ao_sr_pbe
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -1890,7 +1890,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_sr_pbe`
 
  
-.. c:var:: pot_grad_x_alpha_ao_pbe
+.. c:var:: double pot_grad_x_alpha_ao_pbe
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -1924,7 +1924,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_pbe`
 
  
-.. c:var:: pot_grad_x_alpha_ao_sr_pbe
+.. c:var:: double pot_grad_x_alpha_ao_sr_pbe
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -1958,7 +1958,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_sr_pbe`
 
  
-.. c:var:: pot_grad_x_beta_ao_pbe
+.. c:var:: double pot_grad_x_beta_ao_pbe
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -1992,7 +1992,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_pbe`
 
  
-.. c:var:: pot_grad_x_beta_ao_sr_pbe
+.. c:var:: double pot_grad_x_beta_ao_sr_pbe
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -2026,7 +2026,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_sr_pbe`
 
  
-.. c:var:: pot_grad_xc_alpha_ao_pbe
+.. c:var:: double pot_grad_xc_alpha_ao_pbe
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -2058,7 +2058,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao_pbe`
 
  
-.. c:var:: pot_grad_xc_alpha_ao_sr_pbe
+.. c:var:: double pot_grad_xc_alpha_ao_sr_pbe
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -2090,7 +2090,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao_sr_pbe`
 
  
-.. c:var:: pot_grad_xc_beta_ao_pbe
+.. c:var:: double pot_grad_xc_beta_ao_pbe
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -2122,7 +2122,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao_pbe`
 
  
-.. c:var:: pot_grad_xc_beta_ao_sr_pbe
+.. c:var:: double pot_grad_xc_beta_ao_sr_pbe
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -2154,7 +2154,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao_sr_pbe`
 
  
-.. c:var:: pot_scal_c_alpha_ao_pbe
+.. c:var:: double pot_scal_c_alpha_ao_pbe
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -2188,7 +2188,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_pbe`
 
  
-.. c:var:: pot_scal_c_alpha_ao_sr_pbe
+.. c:var:: double pot_scal_c_alpha_ao_sr_pbe
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -2222,7 +2222,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_sr_pbe`
 
  
-.. c:var:: pot_scal_c_beta_ao_pbe
+.. c:var:: double pot_scal_c_beta_ao_pbe
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -2256,7 +2256,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_pbe`
 
  
-.. c:var:: pot_scal_c_beta_ao_sr_pbe
+.. c:var:: double pot_scal_c_beta_ao_sr_pbe
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -2290,7 +2290,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_sr_pbe`
 
  
-.. c:var:: pot_scal_x_alpha_ao_pbe
+.. c:var:: double pot_scal_x_alpha_ao_pbe
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -2324,7 +2324,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_pbe`
 
  
-.. c:var:: pot_scal_x_alpha_ao_sr_pbe
+.. c:var:: double pot_scal_x_alpha_ao_sr_pbe
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -2358,7 +2358,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_sr_pbe`
 
  
-.. c:var:: pot_scal_x_beta_ao_pbe
+.. c:var:: double pot_scal_x_beta_ao_pbe
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -2392,7 +2392,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_pbe`
 
  
-.. c:var:: pot_scal_x_beta_ao_sr_pbe
+.. c:var:: double pot_scal_x_beta_ao_sr_pbe
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -2426,7 +2426,7 @@ Providers
        * :c:data:`potential_x_alpha_ao_sr_pbe`
 
  
-.. c:var:: pot_scal_xc_alpha_ao_pbe
+.. c:var:: double pot_scal_xc_alpha_ao_pbe
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -2458,7 +2458,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao_pbe`
 
  
-.. c:var:: pot_scal_xc_alpha_ao_sr_pbe
+.. c:var:: double pot_scal_xc_alpha_ao_sr_pbe
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -2490,7 +2490,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao_sr_pbe`
 
  
-.. c:var:: pot_scal_xc_beta_ao_pbe
+.. c:var:: double pot_scal_xc_beta_ao_pbe
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -2522,7 +2522,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao_pbe`
 
  
-.. c:var:: pot_scal_xc_beta_ao_sr_pbe
+.. c:var:: double pot_scal_xc_beta_ao_sr_pbe
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -2554,7 +2554,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao_sr_pbe`
 
  
-.. c:var:: potential_c_alpha_ao_lda
+.. c:var:: double potential_c_alpha_ao_lda
 
 
     File : :file:`functionals/lda.irp.f`
@@ -2586,7 +2586,7 @@ Providers
        * :c:data:`potential_c_alpha_ao`
 
  
-.. c:var:: potential_c_alpha_ao_none
+.. c:var:: double potential_c_alpha_ao_none
 
 
     File : :file:`functionals/none.irp.f`
@@ -2614,7 +2614,7 @@ Providers
        * :c:data:`potential_c_alpha_ao`
 
  
-.. c:var:: potential_c_alpha_ao_pbe
+.. c:var:: double potential_c_alpha_ao_pbe
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -2650,7 +2650,7 @@ Providers
        * :c:data:`potential_x_alpha_ao`
 
  
-.. c:var:: potential_c_alpha_ao_sr_lda
+.. c:var:: double potential_c_alpha_ao_sr_lda
 
 
     File : :file:`functionals/sr_lda.irp.f`
@@ -2682,7 +2682,7 @@ Providers
        * :c:data:`potential_c_alpha_ao`
 
  
-.. c:var:: potential_c_alpha_ao_sr_pbe
+.. c:var:: double potential_c_alpha_ao_sr_pbe
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -2718,7 +2718,7 @@ Providers
        * :c:data:`potential_x_alpha_ao`
 
  
-.. c:var:: potential_c_beta_ao_lda
+.. c:var:: double potential_c_beta_ao_lda
 
 
     File : :file:`functionals/lda.irp.f`
@@ -2750,7 +2750,7 @@ Providers
        * :c:data:`potential_c_alpha_ao`
 
  
-.. c:var:: potential_c_beta_ao_none
+.. c:var:: double potential_c_beta_ao_none
 
 
     File : :file:`functionals/none.irp.f`
@@ -2778,7 +2778,7 @@ Providers
        * :c:data:`potential_c_alpha_ao`
 
  
-.. c:var:: potential_c_beta_ao_pbe
+.. c:var:: double potential_c_beta_ao_pbe
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -2814,7 +2814,7 @@ Providers
        * :c:data:`potential_x_alpha_ao`
 
  
-.. c:var:: potential_c_beta_ao_sr_lda
+.. c:var:: double potential_c_beta_ao_sr_lda
 
 
     File : :file:`functionals/sr_lda.irp.f`
@@ -2846,7 +2846,7 @@ Providers
        * :c:data:`potential_c_alpha_ao`
 
  
-.. c:var:: potential_c_beta_ao_sr_pbe
+.. c:var:: double potential_c_beta_ao_sr_pbe
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -2882,7 +2882,7 @@ Providers
        * :c:data:`potential_x_alpha_ao`
 
  
-.. c:var:: potential_x_alpha_ao_lda
+.. c:var:: double potential_x_alpha_ao_lda
 
 
     File : :file:`functionals/lda.irp.f`
@@ -2914,7 +2914,7 @@ Providers
        * :c:data:`potential_x_alpha_ao`
 
  
-.. c:var:: potential_x_alpha_ao_none
+.. c:var:: double potential_x_alpha_ao_none
 
 
     File : :file:`functionals/none.irp.f`
@@ -2942,7 +2942,7 @@ Providers
        * :c:data:`potential_x_alpha_ao`
 
  
-.. c:var:: potential_x_alpha_ao_pbe
+.. c:var:: double potential_x_alpha_ao_pbe
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -2978,7 +2978,7 @@ Providers
        * :c:data:`potential_x_alpha_ao`
 
  
-.. c:var:: potential_x_alpha_ao_sr_lda
+.. c:var:: double potential_x_alpha_ao_sr_lda
 
 
     File : :file:`functionals/sr_lda.irp.f`
@@ -3010,7 +3010,7 @@ Providers
        * :c:data:`potential_x_alpha_ao`
 
  
-.. c:var:: potential_x_alpha_ao_sr_pbe
+.. c:var:: double potential_x_alpha_ao_sr_pbe
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -3046,7 +3046,7 @@ Providers
        * :c:data:`potential_x_alpha_ao`
 
  
-.. c:var:: potential_x_beta_ao_lda
+.. c:var:: double potential_x_beta_ao_lda
 
 
     File : :file:`functionals/lda.irp.f`
@@ -3078,7 +3078,7 @@ Providers
        * :c:data:`potential_x_alpha_ao`
 
  
-.. c:var:: potential_x_beta_ao_none
+.. c:var:: double potential_x_beta_ao_none
 
 
     File : :file:`functionals/none.irp.f`
@@ -3106,7 +3106,7 @@ Providers
        * :c:data:`potential_x_alpha_ao`
 
  
-.. c:var:: potential_x_beta_ao_pbe
+.. c:var:: double potential_x_beta_ao_pbe
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -3142,7 +3142,7 @@ Providers
        * :c:data:`potential_x_alpha_ao`
 
  
-.. c:var:: potential_x_beta_ao_sr_lda
+.. c:var:: double potential_x_beta_ao_sr_lda
 
 
     File : :file:`functionals/sr_lda.irp.f`
@@ -3174,7 +3174,7 @@ Providers
        * :c:data:`potential_x_alpha_ao`
 
  
-.. c:var:: potential_x_beta_ao_sr_pbe
+.. c:var:: double potential_x_beta_ao_sr_pbe
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -3210,7 +3210,7 @@ Providers
        * :c:data:`potential_x_alpha_ao`
 
  
-.. c:var:: potential_xc_alpha_ao_lda
+.. c:var:: double potential_xc_alpha_ao_lda
 
 
     File : :file:`functionals/lda.irp.f`
@@ -3242,7 +3242,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao`
 
  
-.. c:var:: potential_xc_alpha_ao_none
+.. c:var:: double potential_xc_alpha_ao_none
 
 
     File : :file:`functionals/none.irp.f`
@@ -3270,7 +3270,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao`
 
  
-.. c:var:: potential_xc_alpha_ao_pbe
+.. c:var:: double potential_xc_alpha_ao_pbe
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -3301,7 +3301,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao`
 
  
-.. c:var:: potential_xc_alpha_ao_sr_lda
+.. c:var:: double potential_xc_alpha_ao_sr_lda
 
 
     File : :file:`functionals/sr_lda.irp.f`
@@ -3333,7 +3333,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao`
 
  
-.. c:var:: potential_xc_alpha_ao_sr_pbe
+.. c:var:: double potential_xc_alpha_ao_sr_pbe
 
 
     File : :file:`functionals/sr_pbe.irp.f`
@@ -3364,7 +3364,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao`
 
  
-.. c:var:: potential_xc_beta_ao_lda
+.. c:var:: double potential_xc_beta_ao_lda
 
 
     File : :file:`functionals/lda.irp.f`
@@ -3396,7 +3396,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao`
 
  
-.. c:var:: potential_xc_beta_ao_none
+.. c:var:: double potential_xc_beta_ao_none
 
 
     File : :file:`functionals/none.irp.f`
@@ -3424,7 +3424,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao`
 
  
-.. c:var:: potential_xc_beta_ao_pbe
+.. c:var:: double potential_xc_beta_ao_pbe
 
 
     File : :file:`functionals/pbe.irp.f`
@@ -3455,7 +3455,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao`
 
  
-.. c:var:: potential_xc_beta_ao_sr_lda
+.. c:var:: double potential_xc_beta_ao_sr_lda
 
 
     File : :file:`functionals/sr_lda.irp.f`
@@ -3487,7 +3487,7 @@ Providers
        * :c:data:`potential_xc_alpha_ao`
 
  
-.. c:var:: potential_xc_beta_ao_sr_pbe
+.. c:var:: double potential_xc_beta_ao_sr_pbe
 
 
     File : :file:`functionals/sr_pbe.irp.f`

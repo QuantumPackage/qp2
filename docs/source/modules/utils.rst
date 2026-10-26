@@ -54,7 +54,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: au_to_d
+.. c:var:: double au_to_d
 
 
     File : :file:`utils/units.irp.f`
@@ -73,7 +73,7 @@ Providers
 
 
  
-.. c:var:: binom
+.. c:var:: double binom
 
 
     File : :file:`utils/util.irp.f`
@@ -94,7 +94,7 @@ Providers
        * :c:data:`binom_int`
 
  
-.. c:var:: binom_int
+.. c:var:: long binom_int
 
 
     File : :file:`utils/util.irp.f`
@@ -124,7 +124,7 @@ Providers
        * :c:data:`psi_configuration_to_psi_det`
 
  
-.. c:var:: binom_int_transp
+.. c:var:: long binom_int_transp
 
 
     File : :file:`utils/util.irp.f`
@@ -154,7 +154,7 @@ Providers
        * :c:data:`psi_configuration_to_psi_det`
 
  
-.. c:var:: binom_transp
+.. c:var:: double binom_transp
 
 
     File : :file:`utils/util.irp.f`
@@ -175,7 +175,7 @@ Providers
        * :c:data:`binom_int`
 
  
-.. c:var:: degree_max_integration_lebedev
+.. c:var:: int degree_max_integration_lebedev
 
 
     File : :file:`utils/angular_integration.irp.f`
@@ -197,7 +197,7 @@ Providers
        * :c:data:`theta_angular_integration_lebedev`
 
  
-.. c:macro:: dtranspose:
+.. c:function:: void dtranspose(void)
 
 
     File : :file:`utils/transpose.irp.f`
@@ -232,7 +232,7 @@ Providers
        * :c:func:`dtranspose`
 
  
-.. c:var:: fact_inv
+.. c:var:: double fact_inv
 
 
     File : :file:`utils/util.irp.f`
@@ -246,7 +246,7 @@ Providers
 
 
  
-.. c:var:: ha_to_ev
+.. c:var:: double ha_to_ev
 
 
     File : :file:`utils/units.irp.f`
@@ -265,7 +265,7 @@ Providers
 
 
  
-.. c:var:: ha_to_j
+.. c:var:: double ha_to_j
 
 
     File : :file:`utils/units.irp.f`
@@ -284,7 +284,7 @@ Providers
 
 
  
-.. c:var:: ha_to_nm
+.. c:var:: double ha_to_nm
 
 
     File : :file:`utils/units.irp.f`
@@ -303,7 +303,7 @@ Providers
 
 
  
-.. c:var:: inv_int
+.. c:var:: double inv_int
 
 
     File : :file:`utils/util.irp.f`
@@ -317,7 +317,7 @@ Providers
 
 
  
-.. c:var:: light_speed
+.. c:var:: double light_speed
 
 
     File : :file:`utils/units.irp.f`
@@ -336,7 +336,7 @@ Providers
 
 
  
-.. c:var:: n_points_integration_angular_lebedev
+.. c:var:: int n_points_integration_angular_lebedev
 
 
     File : :file:`utils/angular_integration.irp.f`
@@ -363,7 +363,7 @@ Providers
        * :c:data:`theta_angular_integration_lebedev`
 
  
-.. c:var:: phi_angular_integration_lebedev
+.. c:var:: double phi_angular_integration_lebedev
 
 
     File : :file:`utils/angular_integration.irp.f`
@@ -389,7 +389,7 @@ Providers
 
 
  
-.. c:var:: planck_cte
+.. c:var:: double planck_cte
 
 
     File : :file:`utils/units.irp.f`
@@ -408,7 +408,7 @@ Providers
 
 
  
-.. c:var:: qp_max_mem
+.. c:var:: int qp_max_mem
 
 
     File : :file:`utils/memory.irp.f`
@@ -444,7 +444,7 @@ Providers
        * :c:data:`pt2_w`
 
  
-.. c:var:: shiftfact_op5_inv
+.. c:var:: double shiftfact_op5_inv
 
 
     File : :file:`utils/util.irp.f`
@@ -460,7 +460,7 @@ Providers
 
 
  
-.. c:var:: theta_angular_integration_lebedev
+.. c:var:: double theta_angular_integration_lebedev
 
 
     File : :file:`utils/angular_integration.irp.f`
@@ -486,7 +486,7 @@ Providers
 
 
  
-.. c:macro:: transpose:
+.. c:function:: void transpose(void)
 
 
     File : :file:`utils/transpose.irp.f`
@@ -513,7 +513,7 @@ Providers
        * :c:func:`transpose`
 
  
-.. c:var:: weights_angular_integration_lebedev
+.. c:var:: double weights_angular_integration_lebedev
 
 
     File : :file:`utils/angular_integration.irp.f`
@@ -543,7 +543,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: add_cpoly:
+.. c:function:: void add_cpoly(void)
 
 
     File : :file:`utils/cgtos_utils.irp.f`
@@ -557,7 +557,7 @@ Subroutines / functions
     D(t) =! D(t) +( B(t) + C(t))
 
  
-.. c:macro:: add_cpoly_multiply:
+.. c:function:: void add_cpoly_multiply(void)
 
 
     File : :file:`utils/cgtos_utils.irp.f`
@@ -578,7 +578,7 @@ Subroutines / functions
        * :c:func:`general_primitive_integral_cgtos`
 
  
-.. c:macro:: add_poly:
+.. c:function:: void add_poly(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -592,7 +592,7 @@ Subroutines / functions
     D(t) =! D(t) +( B(t)+C(t))
 
  
-.. c:macro:: add_poly_multiply:
+.. c:function:: void add_poly_multiply(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -614,7 +614,7 @@ Subroutines / functions
        * :c:func:`general_primitive_integral_erf`
 
  
-.. c:macro:: apply_rotation:
+.. c:function:: void apply_rotation(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -634,7 +634,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: approx_dble:
+.. c:function:: void approx_dble(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -646,7 +646,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: binom_func:
+.. c:function:: void binom_func(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -662,7 +662,7 @@ Subroutines / functions
     
 
  
-.. c:macro:: cgaussian_product:
+.. c:function:: void cgaussian_product(void)
 
 
     File : :file:`utils/cgtos_utils.irp.f`
@@ -683,7 +683,7 @@ Subroutines / functions
        * :c:func:`give_explicit_cpoly_and_cgaussian`
 
  
-.. c:macro:: cgaussian_product_x:
+.. c:function:: void cgaussian_product_x(void)
 
 
     File : :file:`utils/cgtos_utils.irp.f`
@@ -697,7 +697,7 @@ Subroutines / functions
     e^{-a (x-x_A)^2} e^{-b (x-x_B)^2} = K e^{-p (x-x_P)^2}
 
  
-.. c:macro:: check_mem:
+.. c:function:: void check_mem(void)
 
 
     File : :file:`utils/memory.irp.f`
@@ -755,7 +755,7 @@ Subroutines / functions
        * :c:func:`resident_memory`
 
  
-.. c:macro:: check_sym:
+.. c:function:: void check_sym(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -767,7 +767,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: cpx_erf_1:
+.. c:function:: void cpx_erf_1(void)
 
 
     File : :file:`utils/cpx_erf.irp.f`
@@ -784,7 +784,7 @@ Subroutines / functions
     
 
  
-.. c:macro:: crint_1:
+.. c:function:: void crint_1(void)
 
 
     File : :file:`utils/cpx_boys.irp.f`
@@ -803,7 +803,7 @@ Subroutines / functions
        * :c:func:`zboysfun00_1`
 
  
-.. c:macro:: crint_1_vec:
+.. c:function:: void crint_1_vec(void)
 
 
     File : :file:`utils/cpx_boys.irp.f`
@@ -830,7 +830,7 @@ Subroutines / functions
        * :c:func:`zboysfun00_1`
 
  
-.. c:macro:: crint_2:
+.. c:function:: void crint_2(void)
 
 
     File : :file:`utils/cpx_boys.irp.f`
@@ -850,7 +850,7 @@ Subroutines / functions
        * :c:func:`zboysfunnrp`
 
  
-.. c:macro:: crint_2_vec:
+.. c:function:: void crint_2_vec(void)
 
 
     File : :file:`utils/cpx_boys.irp.f`
@@ -871,7 +871,7 @@ Subroutines / functions
        * :c:func:`zboysfunnrp`
 
  
-.. c:macro:: crint_quad_1:
+.. c:function:: void crint_quad_1(void)
 
 
     File : :file:`utils/cpx_boys.irp.f`
@@ -883,7 +883,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: crint_quad_12:
+.. c:function:: void crint_quad_12(void)
 
 
     File : :file:`utils/cpx_boys.irp.f`
@@ -902,7 +902,7 @@ Subroutines / functions
        * :c:func:`crint_quad_12_vec`
 
  
-.. c:macro:: crint_quad_12_vec:
+.. c:function:: void crint_quad_12_vec(void)
 
 
     File : :file:`utils/cpx_boys.irp.f`
@@ -921,7 +921,7 @@ Subroutines / functions
        * :c:func:`crint_quad_12`
 
  
-.. c:macro:: crint_quad_2:
+.. c:function:: void crint_quad_2(void)
 
 
     File : :file:`utils/cpx_boys.irp.f`
@@ -933,7 +933,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: crint_smallz:
+.. c:function:: void crint_smallz(void)
 
 
     File : :file:`utils/cpx_boys.irp.f`
@@ -946,7 +946,7 @@ Subroutines / functions
     Standard version of rint
 
  
-.. c:macro:: crint_smallz_vec:
+.. c:function:: void crint_smallz_vec(void)
 
 
     File : :file:`utils/cpx_boys.irp.f`
@@ -967,7 +967,7 @@ Subroutines / functions
        * :c:func:`crint_2_vec`
 
  
-.. c:macro:: crint_sum:
+.. c:function:: void crint_sum(void)
 
 
     File : :file:`utils/cpx_boys.irp.f`
@@ -986,7 +986,7 @@ Subroutines / functions
        * :c:func:`crint_1_vec`
 
  
-.. c:macro:: dble_fact:
+.. c:function:: void dble_fact(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -998,7 +998,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: dble_fact_even:
+.. c:function:: void dble_fact_even(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -1011,7 +1011,7 @@ Subroutines / functions
     n!!
 
  
-.. c:macro:: dble_fact_odd:
+.. c:function:: void dble_fact_odd(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -1024,7 +1024,7 @@ Subroutines / functions
     n!!
 
  
-.. c:macro:: dble_logfact:
+.. c:function:: void dble_logfact(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -1037,7 +1037,7 @@ Subroutines / functions
     n!!
 
  
-.. c:macro:: derf_mu_x:
+.. c:function:: void derf_mu_x(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -1049,7 +1049,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: diag_mat_per_fock_degen:
+.. c:function:: void diag_mat_per_fock_degen(void)
 
 
     File : :file:`utils/block_diag_degen.irp.f`
@@ -1084,7 +1084,7 @@ Subroutines / functions
        * :c:func:`non_hrmt_bieig`
 
  
-.. c:macro:: diag_mat_per_fock_degen_core:
+.. c:function:: void diag_mat_per_fock_degen_core(void)
 
 
     File : :file:`utils/block_diag_degen_core.irp.f`
@@ -1121,7 +1121,7 @@ Subroutines / functions
        * :c:func:`non_hrmt_bieig`
 
  
-.. c:macro:: diag_nonsym_right:
+.. c:function:: void diag_nonsym_right(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -1150,7 +1150,7 @@ Subroutines / functions
        * :c:func:`dsort`
 
  
-.. c:macro:: diagonalize_sym_matrix:
+.. c:function:: void diagonalize_sym_matrix(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -1172,7 +1172,7 @@ Subroutines / functions
        * :c:func:`dsyev`
 
  
-.. c:macro:: dset_order:
+.. c:function:: void dset_order(void)
 
 
     File : :file:`utils/sort.irp.f_template_90`
@@ -1205,7 +1205,7 @@ Subroutines / functions
        * :c:func:`restore_symmetry`
 
  
-.. c:macro:: dset_order_big:
+.. c:function:: void dset_order_big(void)
 
 
     File : :file:`utils/sort.irp.f_template_90`
@@ -1221,7 +1221,7 @@ Subroutines / functions
     to be in integer*8 format
 
  
-.. c:macro:: eigsvd:
+.. c:function:: void eigsvd(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -1246,7 +1246,7 @@ Subroutines / functions
        * :c:func:`svd`
 
  
-.. c:macro:: erf_e:
+.. c:function:: void erf_e(void)
 
 
     File : :file:`utils/cpx_erf.irp.f`
@@ -1258,7 +1258,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: erf_f:
+.. c:function:: void erf_f(void)
 
 
     File : :file:`utils/cpx_erf.irp.f`
@@ -1270,7 +1270,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: erf_g:
+.. c:function:: void erf_g(void)
 
 
     File : :file:`utils/cpx_erf.irp.f`
@@ -1282,7 +1282,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: erf_h:
+.. c:function:: void erf_h(void)
 
 
     File : :file:`utils/cpx_erf.irp.f`
@@ -1294,7 +1294,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: exp_matrix:
+.. c:function:: void exp_matrix(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -1320,7 +1320,7 @@ Subroutines / functions
        * :c:func:`lapack_diagd`
 
  
-.. c:macro:: exp_matrix_taylor:
+.. c:function:: void exp_matrix_taylor(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -1350,7 +1350,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: extrapolate_data:
+.. c:function:: void extrapolate_data(void)
 
 
     File : :file:`utils/extrapolation.irp.f`
@@ -1377,7 +1377,7 @@ Subroutines / functions
        * :c:func:`get_pseudo_inverse`
 
  
-.. c:macro:: f_integral:
+.. c:function:: void f_integral(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -1391,7 +1391,7 @@ Subroutines / functions
     \int_{\-infty}^{+\infty} x^n \exp(-p x^2) dx
 
  
-.. c:macro:: fact:
+.. c:function:: void fact(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -1404,7 +1404,7 @@ Subroutines / functions
     n!
 
  
-.. c:macro:: fc_integral:
+.. c:function:: void fc_integral(void)
 
 
     File : :file:`utils/cgtos_utils.irp.f`
@@ -1419,7 +1419,7 @@ Subroutines / functions
     for complex valued p
 
  
-.. c:macro:: find_rotation:
+.. c:function:: void find_rotation(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -1440,7 +1440,7 @@ Subroutines / functions
        * :c:func:`get_pseudo_inverse`
 
  
-.. c:macro:: format_w_error:
+.. c:function:: void format_w_error(void)
 
 
     File : :file:`utils/format_w_error.irp.f`
@@ -1468,7 +1468,7 @@ Subroutines / functions
        * :c:func:`unlock_io`
 
  
-.. c:macro:: gaussian_product:
+.. c:function:: void gaussian_product(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -1490,7 +1490,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian_double`
 
  
-.. c:macro:: gaussian_product_v:
+.. c:function:: void gaussian_product_v(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -1515,7 +1515,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian_v`
 
  
-.. c:macro:: gaussian_product_x:
+.. c:function:: void gaussian_product_x(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -1536,7 +1536,7 @@ Subroutines / functions
        * :c:func:`overlap_gaussian_xyz`
 
  
-.. c:macro:: gaussian_product_x_v:
+.. c:function:: void gaussian_product_x_v(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -1550,7 +1550,7 @@ Subroutines / functions
     e^{-a (x-x_A)^2} e^{-b (x-x_B)^2} = K_{ab}^x e^{-p (x-x_P)^2}
 
  
-.. c:macro:: get_a_squared:
+.. c:function:: void get_a_squared(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -1577,7 +1577,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: get_ab_prod:
+.. c:function:: void get_ab_prod(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -1597,7 +1597,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: get_inverse:
+.. c:function:: void get_inverse(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -1626,7 +1626,7 @@ Subroutines / functions
        * :c:func:`dgetri`
 
  
-.. c:macro:: get_inverse_complex:
+.. c:function:: void get_inverse_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -1647,7 +1647,7 @@ Subroutines / functions
        * :c:func:`zgetri`
 
  
-.. c:macro:: get_pseudo_inverse:
+.. c:function:: void get_pseudo_inverse(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -1679,7 +1679,7 @@ Subroutines / functions
        * :c:func:`dgesvd`
 
  
-.. c:macro:: get_pseudo_inverse_complex:
+.. c:function:: void get_pseudo_inverse_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -1706,7 +1706,7 @@ Subroutines / functions
        * :c:func:`zgesvd`
 
  
-.. c:macro:: get_total_available_memory:
+.. c:function:: void get_total_available_memory(void)
 
 
     File : :file:`utils/memory.irp.f`
@@ -1719,7 +1719,7 @@ Subroutines / functions
     Returns the total available memory on the current machine
 
  
-.. c:macro:: give_degen:
+.. c:function:: void give_degen(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -1736,7 +1736,7 @@ Subroutines / functions
                             list_degen(2,i) = last degenerate element of the set i.
 
  
-.. c:macro:: give_degen_full_list:
+.. c:function:: void give_degen_full_list(void)
 
 
     File : :file:`utils/block_diag_degen.irp.f`
@@ -1766,7 +1766,7 @@ Subroutines / functions
        * :c:func:`diag_mat_per_fock_degen`
 
  
-.. c:macro:: give_degen_full_listcore:
+.. c:function:: void give_degen_full_listcore(void)
 
 
     File : :file:`utils/block_diag_degen_core.irp.f`
@@ -1798,7 +1798,7 @@ Subroutines / functions
        * :c:func:`diag_mat_per_fock_degen_core`
 
  
-.. c:macro:: give_explicit_cpoly_and_cgaussian:
+.. c:function:: void give_explicit_cpoly_and_cgaussian(void)
 
 
     File : :file:`utils/cgtos_utils.irp.f`
@@ -1845,7 +1845,7 @@ Subroutines / functions
        * :c:func:`recentered_cpoly2`
 
  
-.. c:macro:: give_explicit_cpoly_and_cgaussian_x:
+.. c:function:: void give_explicit_cpoly_and_cgaussian_x(void)
 
 
     File : :file:`utils/cgtos_utils.irp.f`
@@ -1882,7 +1882,7 @@ Subroutines / functions
        * :c:func:`recentered_cpoly2`
 
  
-.. c:macro:: give_explicit_poly_and_gaussian:
+.. c:function:: void give_explicit_poly_and_gaussian(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -1925,7 +1925,7 @@ Subroutines / functions
        * :c:func:`recentered_poly2`
 
  
-.. c:macro:: give_explicit_poly_and_gaussian_double:
+.. c:function:: void give_explicit_poly_and_gaussian_double(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -1953,7 +1953,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian`
 
  
-.. c:macro:: give_explicit_poly_and_gaussian_v:
+.. c:function:: void give_explicit_poly_and_gaussian_v(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -1992,7 +1992,7 @@ Subroutines / functions
        * :c:func:`recentered_poly2_v0`
 
  
-.. c:macro:: give_explicit_poly_and_gaussian_x:
+.. c:function:: void give_explicit_poly_and_gaussian_x(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2023,7 +2023,7 @@ Subroutines / functions
        * :c:func:`recentered_poly2`
 
  
-.. c:macro:: give_pol_in_r:
+.. c:function:: void give_pol_in_r(void)
 
 
     File : :file:`utils/prim_in_r.irp.f`
@@ -2035,7 +2035,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: hermite:
+.. c:function:: void hermite(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2048,7 +2048,7 @@ Subroutines / functions
     Hermite polynomial
 
  
-.. c:macro:: i2set_order:
+.. c:function:: void i2set_order(void)
 
 
     File : :file:`utils/sort.irp.f_template_90`
@@ -2062,7 +2062,7 @@ Subroutines / functions
     elements of A. This subroutine changes the order of x to match the new order of A.
 
  
-.. c:macro:: i2set_order_big:
+.. c:function:: void i2set_order_big(void)
 
 
     File : :file:`utils/sort.irp.f_template_90`
@@ -2078,7 +2078,7 @@ Subroutines / functions
     to be in integer*8 format
 
  
-.. c:macro:: i8set_order:
+.. c:function:: void i8set_order(void)
 
 
     File : :file:`utils/sort.irp.f_template_90`
@@ -2092,7 +2092,7 @@ Subroutines / functions
     elements of A. This subroutine changes the order of x to match the new order of A.
 
  
-.. c:macro:: i8set_order_big:
+.. c:function:: void i8set_order_big(void)
 
 
     File : :file:`utils/sort.irp.f_template_90`
@@ -2108,7 +2108,7 @@ Subroutines / functions
     to be in integer*8 format
 
  
-.. c:macro:: is_same_spin:
+.. c:function:: void is_same_spin(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -2123,7 +2123,7 @@ Subroutines / functions
     
 
  
-.. c:macro:: iset_order:
+.. c:function:: void iset_order(void)
 
 
     File : :file:`utils/sort.irp.f_template_90`
@@ -2146,7 +2146,7 @@ Subroutines / functions
        * :c:func:`restore_symmetry`
 
  
-.. c:macro:: iset_order_big:
+.. c:function:: void iset_order_big(void)
 
 
     File : :file:`utils/sort.irp.f_template_90`
@@ -2162,7 +2162,7 @@ Subroutines / functions
     to be in integer*8 format
 
  
-.. c:macro:: isnan:
+.. c:function:: void isnan(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -2174,7 +2174,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: kronecker_delta:
+.. c:function:: void kronecker_delta(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -2187,7 +2187,7 @@ Subroutines / functions
     Kronecker Delta
 
  
-.. c:macro:: lapack_diag:
+.. c:function:: void lapack_diag(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2229,7 +2229,7 @@ Subroutines / functions
        * :c:func:`dsyev`
 
  
-.. c:macro:: lapack_diag_complex:
+.. c:function:: void lapack_diag_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2256,7 +2256,7 @@ Subroutines / functions
        * :c:func:`zheev`
 
  
-.. c:macro:: lapack_diagd:
+.. c:function:: void lapack_diagd(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2292,7 +2292,7 @@ Subroutines / functions
        * :c:func:`dsyevd`
 
  
-.. c:macro:: lapack_diagd_complex:
+.. c:function:: void lapack_diagd_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2319,7 +2319,7 @@ Subroutines / functions
        * :c:func:`zheevd`
 
  
-.. c:macro:: lapack_diagd_diag_complex:
+.. c:function:: void lapack_diagd_diag_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2347,7 +2347,7 @@ Subroutines / functions
        * :c:func:`zheevd`
 
  
-.. c:macro:: lapack_diagd_diag_in_place_complex:
+.. c:function:: void lapack_diagd_diag_in_place_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2375,7 +2375,7 @@ Subroutines / functions
        * :c:func:`zheevd`
 
  
-.. c:macro:: logfact:
+.. c:function:: void logfact(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -2388,7 +2388,7 @@ Subroutines / functions
     n!
 
  
-.. c:macro:: lowercase:
+.. c:function:: void lowercase(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -2409,7 +2409,7 @@ Subroutines / functions
        * :c:func:`new_parallel_job`
 
  
-.. c:macro:: map_load_from_disk:
+.. c:function:: void map_load_from_disk(void)
 
 
     File : :file:`utils/map_functions.irp.f`
@@ -2439,7 +2439,7 @@ Subroutines / functions
        * :c:func:`mmap`
 
  
-.. c:macro:: map_save_to_disk:
+.. c:function:: void map_save_to_disk(void)
 
 
     File : :file:`utils/map_functions.irp.f`
@@ -2475,7 +2475,7 @@ Subroutines / functions
        * :c:func:`msync`
 
  
-.. c:macro:: matrix_vector_product_complex:
+.. c:function:: void matrix_vector_product_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2495,7 +2495,7 @@ Subroutines / functions
        * :c:func:`zhemv`
 
  
-.. c:macro:: memory_of_double:
+.. c:function:: void memory_of_double(void)
 
 
     File : :file:`utils/memory.irp.f`
@@ -2508,7 +2508,7 @@ Subroutines / functions
     Computes the memory required for n double precision elements in gigabytes.
 
  
-.. c:macro:: memory_of_double8:
+.. c:function:: void memory_of_double8(void)
 
 
     File : :file:`utils/memory.irp.f`
@@ -2521,7 +2521,7 @@ Subroutines / functions
     Computes the memory required for n double precision elements in gigabytes.
 
  
-.. c:macro:: memory_of_int:
+.. c:function:: void memory_of_int(void)
 
 
     File : :file:`utils/memory.irp.f`
@@ -2534,7 +2534,7 @@ Subroutines / functions
     Computes the memory required for n double precision elements in gigabytes.
 
  
-.. c:macro:: memory_of_int8:
+.. c:function:: void memory_of_int8(void)
 
 
     File : :file:`utils/memory.irp.f`
@@ -2547,7 +2547,7 @@ Subroutines / functions
     Computes the memory required for n double precision elements in gigabytes.
 
  
-.. c:macro:: multiply_cpoly:
+.. c:function:: void multiply_cpoly(void)
 
 
     File : :file:`utils/cgtos_utils.irp.f`
@@ -2577,7 +2577,7 @@ Subroutines / functions
        * :c:func:`i_x2_pol_mult_one_e_cgtos`
 
  
-.. c:macro:: multiply_poly:
+.. c:function:: void multiply_poly(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2615,7 +2615,7 @@ Subroutines / functions
        * :c:func:`multiply_poly_c2`
 
  
-.. c:macro:: multiply_poly_b0:
+.. c:function:: void multiply_poly_b0(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2636,7 +2636,7 @@ Subroutines / functions
        * :c:func:`multiply_poly`
 
  
-.. c:macro:: multiply_poly_b1:
+.. c:function:: void multiply_poly_b1(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2657,7 +2657,7 @@ Subroutines / functions
        * :c:func:`multiply_poly`
 
  
-.. c:macro:: multiply_poly_b2:
+.. c:function:: void multiply_poly_b2(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2678,7 +2678,7 @@ Subroutines / functions
        * :c:func:`multiply_poly`
 
  
-.. c:macro:: multiply_poly_c0:
+.. c:function:: void multiply_poly_c0(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2699,7 +2699,7 @@ Subroutines / functions
        * :c:func:`multiply_poly`
 
  
-.. c:macro:: multiply_poly_c1:
+.. c:function:: void multiply_poly_c1(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2720,7 +2720,7 @@ Subroutines / functions
        * :c:func:`multiply_poly`
 
  
-.. c:macro:: multiply_poly_c2:
+.. c:function:: void multiply_poly_c2(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2743,7 +2743,7 @@ Subroutines / functions
        * :c:func:`multiply_poly`
 
  
-.. c:macro:: multiply_poly_v:
+.. c:function:: void multiply_poly_v(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2764,7 +2764,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian_v`
 
  
-.. c:macro:: normalize:
+.. c:function:: void normalize(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -2802,7 +2802,7 @@ Subroutines / functions
        * :c:func:`dscal`
 
  
-.. c:macro:: nullify_small_elements:
+.. c:function:: void nullify_small_elements(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2832,7 +2832,7 @@ Subroutines / functions
        * :c:func:`save_wavefunction_truncated`
 
  
-.. c:macro:: ortho_canonical:
+.. c:function:: void ortho_canonical(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2874,7 +2874,7 @@ Subroutines / functions
        * :c:func:`svd`
 
  
-.. c:macro:: ortho_canonical_complex:
+.. c:function:: void ortho_canonical_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2909,7 +2909,7 @@ Subroutines / functions
        * :c:func:`zgemm`
 
  
-.. c:macro:: ortho_lowdin:
+.. c:function:: void ortho_lowdin(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2953,7 +2953,7 @@ Subroutines / functions
        * :c:func:`svd`
 
  
-.. c:macro:: ortho_lowdin_complex:
+.. c:function:: void ortho_lowdin_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2988,7 +2988,7 @@ Subroutines / functions
        * :c:func:`zgemm`
 
  
-.. c:macro:: ortho_qr:
+.. c:function:: void ortho_qr(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -3032,7 +3032,7 @@ Subroutines / functions
        * :c:func:`dorgqr`
 
  
-.. c:macro:: ortho_qr_complex:
+.. c:function:: void ortho_qr_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -3062,7 +3062,7 @@ Subroutines / functions
        * :c:func:`zungqr`
 
  
-.. c:macro:: ortho_qr_unblocked:
+.. c:function:: void ortho_qr_unblocked(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -3092,7 +3092,7 @@ Subroutines / functions
        * :c:func:`dorg2r`
 
  
-.. c:macro:: ortho_qr_unblocked_complex:
+.. c:function:: void ortho_qr_unblocked_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -3114,7 +3114,7 @@ Subroutines / functions
     
 
  
-.. c:macro:: ortho_svd:
+.. c:function:: void ortho_svd(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -3151,7 +3151,7 @@ Subroutines / functions
        * :c:func:`svd`
 
  
-.. c:macro:: overlap_cgaussian_x:
+.. c:function:: void overlap_cgaussian_x(void)
 
 
     File : :file:`utils/cgtos_one_e.irp.f`
@@ -3175,7 +3175,7 @@ Subroutines / functions
        * :c:func:`give_explicit_cpoly_and_cgaussian_x`
 
  
-.. c:macro:: overlap_cgaussian_xyz:
+.. c:function:: void overlap_cgaussian_xyz(void)
 
 
     File : :file:`utils/cgtos_one_e.irp.f`
@@ -3212,7 +3212,7 @@ Subroutines / functions
        * :c:func:`give_explicit_cpoly_and_cgaussian`
 
  
-.. c:macro:: overlap_gaussian_x:
+.. c:function:: void overlap_gaussian_x(void)
 
 
     File : :file:`utils/one_e_integration.irp.f`
@@ -3235,7 +3235,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian_x`
 
  
-.. c:macro:: overlap_gaussian_xyz:
+.. c:function:: void overlap_gaussian_xyz(void)
 
 
     File : :file:`utils/one_e_integration.irp.f`
@@ -3273,7 +3273,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian`
 
  
-.. c:macro:: overlap_gaussian_xyz_v:
+.. c:function:: void overlap_gaussian_xyz_v(void)
 
 
     File : :file:`utils/one_e_integration.irp.f`
@@ -3297,7 +3297,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian_v`
 
  
-.. c:macro:: overlap_x_abs:
+.. c:function:: void overlap_x_abs(void)
 
 
     File : :file:`utils/one_e_integration.irp.f`
@@ -3320,7 +3320,7 @@ Subroutines / functions
        * :c:data:`ao_overlap_abs`
 
  
-.. c:macro:: pivoted_cholesky:
+.. c:function:: void pivoted_cholesky(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -3346,7 +3346,7 @@ Subroutines / functions
        * :c:func:`dpstrf`
 
  
-.. c:macro:: pol_modif_center:
+.. c:function:: void pol_modif_center(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -3371,7 +3371,7 @@ Subroutines / functions
        * :c:func:`pol_modif_center_x`
 
  
-.. c:macro:: pol_modif_center_x:
+.. c:function:: void pol_modif_center_x(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -3399,7 +3399,7 @@ Subroutines / functions
        * :c:func:`pol_modif_center`
 
  
-.. c:macro:: primitive_value_explicit:
+.. c:function:: void primitive_value_explicit(void)
 
 
     File : :file:`utils/prim_in_r.irp.f`
@@ -3415,7 +3415,7 @@ Subroutines / functions
     exp(-alpha * [(x - center_prim(1))**2 + (y - center_prim(2))**2 + (z - center_prim(3))**2] )
 
  
-.. c:macro:: print_memory_usage:
+.. c:function:: void print_memory_usage(void)
 
 
     File : :file:`utils/memory.irp.f`
@@ -3447,7 +3447,7 @@ Subroutines / functions
        * :c:func:`total_memory`
 
  
-.. c:macro:: qp_bug:
+.. c:function:: void qp_bug(void)
 
 
     File : :file:`utils/bug.irp.f`
@@ -3480,7 +3480,7 @@ Subroutines / functions
        * :c:data:`psi_configuration_to_psi_det`
 
  
-.. c:macro:: randomized_svd:
+.. c:function:: void randomized_svd(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -3513,7 +3513,7 @@ Subroutines / functions
        * :c:func:`svd`
 
  
-.. c:macro:: recentered_cpoly2:
+.. c:function:: void recentered_cpoly2(void)
 
 
     File : :file:`utils/cgtos_utils.irp.f`
@@ -3544,7 +3544,7 @@ Subroutines / functions
        * :c:func:`give_explicit_cpoly_and_cgaussian_x`
 
  
-.. c:macro:: recentered_poly2:
+.. c:function:: void recentered_poly2(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -3580,7 +3580,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian_x`
 
  
-.. c:macro:: recentered_poly2_v:
+.. c:function:: void recentered_poly2_v(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -3607,7 +3607,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian_v`
 
  
-.. c:macro:: recentered_poly2_v0:
+.. c:function:: void recentered_poly2_v0(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -3639,7 +3639,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian_v`
 
  
-.. c:macro:: resident_memory:
+.. c:function:: void resident_memory(void)
 
 
     File : :file:`utils/memory.irp.f`
@@ -3683,7 +3683,7 @@ Subroutines / functions
        * :c:func:`usleep`
 
  
-.. c:macro:: restore_symmetry:
+.. c:function:: void restore_symmetry(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -3718,7 +3718,7 @@ Subroutines / functions
        * :c:func:`iset_order`
 
  
-.. c:macro:: rint:
+.. c:function:: void rint(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -3734,7 +3734,7 @@ Subroutines / functions
     
 
  
-.. c:macro:: rint1:
+.. c:function:: void rint1(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -3755,7 +3755,7 @@ Subroutines / functions
        * :c:data:`inv_int`
 
  
-.. c:macro:: rint_large_n:
+.. c:function:: void rint_large_n(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -3768,7 +3768,7 @@ Subroutines / functions
     Version of rint for large values of n
 
  
-.. c:macro:: rint_sum:
+.. c:function:: void rint_sum(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -3781,7 +3781,7 @@ Subroutines / functions
     Needed for the calculation of two-electron integrals.
 
  
-.. c:macro:: set_order:
+.. c:function:: void set_order(void)
 
 
     File : :file:`utils/sort.irp.f_template_90`
@@ -3795,7 +3795,7 @@ Subroutines / functions
     elements of A. This subroutine changes the order of x to match the new order of A.
 
  
-.. c:macro:: set_order_big:
+.. c:function:: void set_order_big(void)
 
 
     File : :file:`utils/sort.irp.f_template_90`
@@ -3811,7 +3811,7 @@ Subroutines / functions
     to be in integer*8 format
 
  
-.. c:macro:: shank:
+.. c:function:: void shank(void)
 
 
     File : :file:`utils/shank.irp.f`
@@ -3830,7 +3830,7 @@ Subroutines / functions
        * :c:func:`shank_general`
 
  
-.. c:macro:: shank_function:
+.. c:function:: void shank_function(void)
 
 
     File : :file:`utils/shank.irp.f`
@@ -3842,7 +3842,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: shank_general:
+.. c:function:: void shank_general(void)
 
 
     File : :file:`utils/shank.irp.f`
@@ -3861,7 +3861,7 @@ Subroutines / functions
        * :c:func:`shank`
 
  
-.. c:macro:: sorted_dnumber:
+.. c:function:: void sorted_dnumber(void)
 
 
     File : :file:`utils/sort.irp.f_template_32`
@@ -3874,7 +3874,7 @@ Subroutines / functions
     Returns the number of sorted elements
 
  
-.. c:macro:: sorted_i2number:
+.. c:function:: void sorted_i2number(void)
 
 
     File : :file:`utils/sort.irp.f_template_32`
@@ -3887,7 +3887,7 @@ Subroutines / functions
     Returns the number of sorted elements
 
  
-.. c:macro:: sorted_i8number:
+.. c:function:: void sorted_i8number(void)
 
 
     File : :file:`utils/sort.irp.f_template_32`
@@ -3900,7 +3900,7 @@ Subroutines / functions
     Returns the number of sorted elements
 
  
-.. c:macro:: sorted_inumber:
+.. c:function:: void sorted_inumber(void)
 
 
     File : :file:`utils/sort.irp.f_template_32`
@@ -3913,7 +3913,7 @@ Subroutines / functions
     Returns the number of sorted elements
 
  
-.. c:macro:: sorted_number:
+.. c:function:: void sorted_number(void)
 
 
     File : :file:`utils/sort.irp.f_template_32`
@@ -3926,7 +3926,7 @@ Subroutines / functions
     Returns the number of sorted elements
 
  
-.. c:macro:: sub_a_at:
+.. c:function:: void sub_a_at(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -3938,7 +3938,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: sum_a_at:
+.. c:function:: void sum_a_at(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -3950,7 +3950,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: svd:
+.. c:function:: void svd(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -3992,7 +3992,7 @@ Subroutines / functions
        * :c:func:`dgesdd`
 
  
-.. c:macro:: svd_complex:
+.. c:function:: void svd_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -4026,7 +4026,7 @@ Subroutines / functions
        * :c:func:`zgesvd`
 
  
-.. c:macro:: svd_symm:
+.. c:function:: void svd_symm(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -4053,7 +4053,7 @@ Subroutines / functions
        * :c:func:`restore_symmetry`
 
  
-.. c:macro:: total_memory:
+.. c:function:: void total_memory(void)
 
 
     File : :file:`utils/memory.irp.f`
@@ -4081,7 +4081,7 @@ Subroutines / functions
        * :c:func:`unlock_io`
 
  
-.. c:macro:: u_dot_u:
+.. c:function:: void u_dot_u(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -4094,7 +4094,7 @@ Subroutines / functions
     Compute <u|u>
 
  
-.. c:macro:: u_dot_v:
+.. c:function:: void u_dot_v(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -4107,7 +4107,7 @@ Subroutines / functions
     Compute <u|v>
 
  
-.. c:macro:: v2_over_x:
+.. c:function:: void v2_over_x(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -4119,7 +4119,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: v_phi:
+.. c:function:: void v_phi(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -4134,7 +4134,7 @@ Subroutines / functions
     $\int_{0}^{2 \pi} \cos(\phi)^n \sin(\phi)^m d\phi$.
 
  
-.. c:macro:: v_theta:
+.. c:function:: void v_theta(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -4149,7 +4149,7 @@ Subroutines / functions
     $\int_{0}^{\pi} \cos(\theta)^n \sin(\theta)^m d\theta$
 
  
-.. c:macro:: wall_time:
+.. c:function:: void wall_time(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -4225,7 +4225,7 @@ Subroutines / functions
        * :c:func:`system_clock`
 
  
-.. c:macro:: wallis:
+.. c:function:: void wallis(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -4240,7 +4240,7 @@ Subroutines / functions
     $\int_{0}^{\pi} \cos(\theta)^n d\theta$.
 
  
-.. c:macro:: write_git_log:
+.. c:function:: void write_git_log(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -4253,7 +4253,7 @@ Subroutines / functions
     Write the last git commit in file iunit.
 
  
-.. c:macro:: zboysfun:
+.. c:function:: void zboysfun(void)
 
 
     File : :file:`utils/cpx_boys.irp.f`
@@ -4290,7 +4290,7 @@ Subroutines / functions
        * :c:func:`zboysfun00_2`
 
  
-.. c:macro:: zboysfun00_1:
+.. c:function:: void zboysfun00_1(void)
 
 
     File : :file:`utils/cpx_erf.irp.f`
@@ -4310,7 +4310,7 @@ Subroutines / functions
        * :c:func:`crint_1_vec`
 
  
-.. c:macro:: zboysfun00_2:
+.. c:function:: void zboysfun00_2(void)
 
 
     File : :file:`utils/cpx_erf.irp.f`
@@ -4339,7 +4339,7 @@ Subroutines / functions
        * :c:func:`zboysfun`
 
  
-.. c:macro:: zboysfun00nrp:
+.. c:function:: void zboysfun00nrp(void)
 
 
     File : :file:`utils/cpx_erf.irp.f`
@@ -4369,7 +4369,7 @@ Subroutines / functions
        * :c:func:`zboysfunnrp`
 
  
-.. c:macro:: zboysfunnrp:
+.. c:function:: void zboysfunnrp(void)
 
 
     File : :file:`utils/cpx_boys.irp.f`

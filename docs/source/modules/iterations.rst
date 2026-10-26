@@ -26,7 +26,7 @@ transcorrelated variant).
 Providers 
 --------- 
  
-.. c:var:: energy_iterations
+.. c:var:: double energy_iterations
 
 
     File : :file:`iterations/iterations.irp.f`
@@ -50,7 +50,7 @@ Providers
 
 
  
-.. c:var:: extrapolated_energy
+.. c:var:: double extrapolated_energy
 
 
     File : :file:`iterations/iterations.irp.f`
@@ -74,7 +74,7 @@ Providers
 
 
  
-.. c:var:: n_iter
+.. c:var:: int n_iter
 
 
     File : :file:`iterations/iterations.irp.f`
@@ -88,7 +88,7 @@ Providers
 
 
  
-.. c:var:: n_iter_max
+.. c:var:: int n_iter_max
 
 
     File : :file:`iterations/iterations.irp.f`
@@ -108,7 +108,7 @@ Providers
        * :c:data:`energy_iterations`
 
  
-.. c:var:: pt2_iterations
+.. c:var:: double pt2_iterations
 
 
     File : :file:`iterations/iterations.irp.f`
@@ -136,7 +136,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: increment_n_iter:
+.. c:function:: void increment_n_iter(void)
 
 
     File : :file:`iterations/iterations.irp.f`
@@ -175,7 +175,7 @@ Subroutines / functions
        * :c:func:`extrapolate_data`
 
  
-.. c:macro:: print_extrapolated_energy:
+.. c:function:: void print_extrapolated_energy(void)
 
 
     File : :file:`iterations/print_extrapolation.irp.f`
@@ -206,7 +206,7 @@ Subroutines / functions
        * :c:func:`run_stochastic_cipsi`
 
  
-.. c:macro:: print_summary:
+.. c:function:: void print_summary(void)
 
 
     File : :file:`iterations/print_summary.irp.f`
@@ -237,7 +237,7 @@ Subroutines / functions
        * :c:func:`run_stochastic_cipsi`
 
  
-.. c:macro:: print_summary_tc:
+.. c:function:: void print_summary_tc(void)
 
 
     File : :file:`iterations/summary_tc.irp.f`

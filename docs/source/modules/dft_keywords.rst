@@ -71,7 +71,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: dft_type
+.. c:var:: char dft_type
 
 
     File : :file:`dft_keywords/keywords.irp.f`
@@ -93,7 +93,7 @@ Providers
 
 
  
-.. c:var:: same_xc_func
+.. c:var:: bool same_xc_func
 
 
     File : :file:`dft_keywords/keywords.irp.f`

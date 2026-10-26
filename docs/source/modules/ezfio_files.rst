@@ -45,7 +45,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: ezfio_filename
+.. c:var:: char ezfio_filename
 
 
     File : :file:`ezfio_files/ezfio.irp.f`
@@ -305,7 +305,7 @@ Providers
        * :c:data:`weight_selection`
 
  
-.. c:var:: ezfio_work_dir
+.. c:var:: char ezfio_work_dir
 
 
     File : :file:`ezfio_files/ezfio.irp.f`
@@ -335,7 +335,7 @@ Providers
        * :c:data:`ezfio_work_dir_pid`
 
  
-.. c:var:: ezfio_work_dir_pid
+.. c:var:: char ezfio_work_dir_pid
 
 
     File : :file:`ezfio_files/ezfio.irp.f`
@@ -356,7 +356,7 @@ Providers
 
 
  
-.. c:var:: file_lock
+.. c:var:: int file_lock
 
 
     File : :file:`ezfio_files/lock.irp.f`
@@ -381,7 +381,7 @@ Providers
        * :c:data:`qp_max_mem`
 
  
-.. c:var:: nproc
+.. c:var:: int nproc
 
 
     File : :file:`ezfio_files/environment.irp.f`
@@ -407,7 +407,7 @@ Providers
        * :c:data:`nthreads_pt2`
 
  
-.. c:var:: nproc_max
+.. c:var:: int nproc_max
 
 
     File : :file:`ezfio_files/environment.irp.f`
@@ -438,7 +438,7 @@ Providers
        * :c:data:`gpu_integral_buffer1`
 
  
-.. c:var:: nthreads_davidson
+.. c:var:: int nthreads_davidson
 
 
     File : :file:`ezfio_files/environment.irp.f`
@@ -468,7 +468,7 @@ Providers
        * :c:data:`nproc_max`
 
  
-.. c:var:: nthreads_pt2
+.. c:var:: int nthreads_pt2
 
 
     File : :file:`ezfio_files/environment.irp.f`
@@ -499,7 +499,7 @@ Providers
        * :c:data:`nproc_max`
 
  
-.. c:var:: output_cpu_time_0
+.. c:var:: double output_cpu_time_0
 
 
     File : :file:`ezfio_files/output.irp.f`
@@ -527,7 +527,7 @@ Providers
        * :c:data:`prim_normalization_factor`
 
  
-.. c:var:: output_wall_time_0
+.. c:var:: double output_wall_time_0
 
 
     File : :file:`ezfio_files/output.irp.f`
@@ -555,7 +555,7 @@ Providers
        * :c:data:`prim_normalization_factor`
 
  
-.. c:var:: qp_kill_filename
+.. c:var:: char qp_kill_filename
 
 
     File : :file:`ezfio_files/qp_stop.irp.f`
@@ -578,7 +578,7 @@ Providers
 
 
  
-.. c:var:: qp_stop_filename
+.. c:var:: char qp_stop_filename
 
 
     File : :file:`ezfio_files/qp_stop.irp.f`
@@ -601,7 +601,7 @@ Providers
 
 
  
-.. c:var:: qp_stop_variable
+.. c:var:: int qp_stop_variable
 
 
     File : :file:`ezfio_files/qp_stop.irp.f`
@@ -628,7 +628,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: getunitandopen:
+.. c:function:: void getunitandopen(void)
 
 
     File : :file:`ezfio_files/get_unit_and_open.irp.f`
@@ -651,7 +651,7 @@ Subroutines / functions
     
 
  
-.. c:macro:: lock_io:
+.. c:function:: void lock_io(void)
 
 
     File : :file:`ezfio_files/lock.irp.f`
@@ -702,7 +702,7 @@ Subroutines / functions
        * :c:func:`omp_set_lock`
 
  
-.. c:macro:: qp_stop:
+.. c:function:: void qp_stop(void)
 
 
     File : :file:`ezfio_files/qp_stop.irp.f`
@@ -722,7 +722,7 @@ Subroutines / functions
        * :c:data:`qp_stop_filename`
 
  
-.. c:macro:: unlock_io:
+.. c:function:: void unlock_io(void)
 
 
     File : :file:`ezfio_files/lock.irp.f`
@@ -773,7 +773,7 @@ Subroutines / functions
        * :c:func:`omp_unset_lock`
 
  
-.. c:macro:: write_bool:
+.. c:function:: void write_bool(void)
 
 
     File : :file:`ezfio_files/output.irp.f`
@@ -793,7 +793,7 @@ Subroutines / functions
        * :c:data:`mpi_master`
 
  
-.. c:macro:: write_double:
+.. c:function:: void write_double(void)
 
 
     File : :file:`ezfio_files/output.irp.f`
@@ -841,7 +841,7 @@ Subroutines / functions
        * :c:func:`zmq_selection`
 
  
-.. c:macro:: write_int:
+.. c:function:: void write_int(void)
 
 
     File : :file:`ezfio_files/output.irp.f`
@@ -902,7 +902,7 @@ Subroutines / functions
        * :c:func:`zmq_pt2`
 
  
-.. c:macro:: write_time:
+.. c:function:: void write_time(void)
 
 
     File : :file:`ezfio_files/output.irp.f`

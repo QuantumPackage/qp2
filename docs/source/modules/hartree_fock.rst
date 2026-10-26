@@ -55,7 +55,7 @@ Programs
 Providers 
 --------- 
  
-.. c:var:: ao_two_e_integral_alpha
+.. c:var:: double ao_two_e_integral_alpha
 
 
     File : :file:`fock_matrix_hf.irp.f`
@@ -103,7 +103,7 @@ Providers
        * :c:data:`hf_energy`
 
  
-.. c:var:: ao_two_e_integral_alpha_chol
+.. c:var:: double ao_two_e_integral_alpha_chol
 
 
     File : :file:`fock_matrix_hf.irp.f`
@@ -138,7 +138,7 @@ Providers
        * :c:data:`ao_two_e_integral_alpha`
 
  
-.. c:var:: ao_two_e_integral_beta
+.. c:var:: double ao_two_e_integral_beta
 
 
     File : :file:`fock_matrix_hf.irp.f`
@@ -186,7 +186,7 @@ Providers
        * :c:data:`hf_energy`
 
  
-.. c:var:: ao_two_e_integral_beta_chol
+.. c:var:: double ao_two_e_integral_beta_chol
 
 
     File : :file:`fock_matrix_hf.irp.f`
@@ -221,7 +221,7 @@ Providers
        * :c:data:`ao_two_e_integral_alpha`
 
  
-.. c:var:: extra_e_contrib_density
+.. c:var:: double extra_e_contrib_density
 
 
     File : :file:`hf_energy.irp.f`
@@ -245,7 +245,7 @@ Providers
        * :c:data:`scf_energy`
 
  
-.. c:var:: fock_matrix_ao_alpha
+.. c:var:: double fock_matrix_ao_alpha
 
 
     File : :file:`fock_matrix_hf.irp.f`
@@ -278,7 +278,7 @@ Providers
        * :c:data:`scf_energy`
 
  
-.. c:var:: fock_matrix_ao_beta
+.. c:var:: double fock_matrix_ao_beta
 
 
     File : :file:`fock_matrix_hf.irp.f`
@@ -311,7 +311,7 @@ Providers
        * :c:data:`scf_energy`
 
  
-.. c:var:: hf_energy
+.. c:var:: double hf_energy
 
 
     File : :file:`hf_energy.irp.f`
@@ -339,7 +339,7 @@ Providers
 
 
  
-.. c:var:: hf_kinetic_energy
+.. c:var:: double hf_kinetic_energy
 
 
     File : :file:`hf_energy.irp.f`
@@ -365,7 +365,7 @@ Providers
 
 
  
-.. c:var:: hf_n_e_energy
+.. c:var:: double hf_n_e_energy
 
 
     File : :file:`hf_energy.irp.f`
@@ -391,7 +391,7 @@ Providers
 
 
  
-.. c:var:: hf_one_electron_energy
+.. c:var:: double hf_one_electron_energy
 
 
     File : :file:`hf_energy.irp.f`
@@ -419,7 +419,7 @@ Providers
 
 
  
-.. c:var:: hf_two_electron_energy
+.. c:var:: double hf_two_electron_energy
 
 
     File : :file:`hf_energy.irp.f`
@@ -451,7 +451,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: create_guess:
+.. c:function:: void create_guess(void)
 
 
     File : :file:`scf.irp.f`
@@ -504,7 +504,7 @@ Subroutines / functions
        * :c:data:`mo_label`
 
  
-.. c:macro:: run:
+.. c:function:: void run(void)
 
 
     File : :file:`scf.irp.f`

@@ -83,7 +83,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: mo_class
+.. c:var:: char mo_class
 
 
     File : :file:`mo_basis/mo_class.irp.f`
@@ -125,7 +125,7 @@ Providers
        * :c:data:`n_virt_orb`
 
  
-.. c:var:: mo_coef
+.. c:var:: double mo_coef
 
 
     File : :file:`mo_basis/mos.irp.f`
@@ -195,7 +195,7 @@ Providers
        * :c:data:`scf_density_matrix_ao_beta`
 
  
-.. c:var:: mo_coef_aux
+.. c:var:: double mo_coef_aux
 
 
     File : :file:`mo_basis/mos_aux.irp.f`
@@ -219,7 +219,7 @@ Providers
 
 
  
-.. c:var:: mo_coef_imag
+.. c:var:: double mo_coef_imag
 
 
     File : :file:`mo_basis/mos.irp.f`
@@ -245,7 +245,7 @@ Providers
 
 
  
-.. c:var:: mo_coef_in_ao_ortho_basis
+.. c:var:: double mo_coef_in_ao_ortho_basis
 
 
     File : :file:`mo_basis/mos.irp.f`
@@ -271,7 +271,7 @@ Providers
 
 
  
-.. c:var:: mo_coef_transp
+.. c:var:: double mo_coef_transp
 
 
     File : :file:`mo_basis/mos.irp.f`
@@ -308,7 +308,7 @@ Providers
        * :c:data:`mos_lapl_in_r_array`
 
  
-.. c:var:: mo_label
+.. c:var:: char mo_label
 
 
     File : :file:`mo_basis/mos.irp.f`
@@ -340,7 +340,7 @@ Providers
        * :c:data:`psi_det`
 
  
-.. c:var:: mo_num
+.. c:var:: int mo_num
 
 
     File : :file:`mo_basis/mos.irp.f`
@@ -523,7 +523,7 @@ Providers
        * :c:data:`z_dipole_moment`
 
  
-.. c:var:: mo_occ
+.. c:var:: double mo_occ
 
 
     File : :file:`mo_basis/mos.irp.f`
@@ -548,7 +548,7 @@ Providers
 
 
  
-.. c:var:: mo_sphe_coef
+.. c:var:: double mo_sphe_coef
 
 
     File : :file:`mo_basis/mos.irp.f`
@@ -580,7 +580,7 @@ Providers
        * :c:data:`s_mo_sphe_coef`
 
  
-.. c:var:: mo_symmetry
+.. c:var:: int mo_symmetry
 
 
     File : :file:`mo_basis/mo_class.irp.f`
@@ -603,7 +603,7 @@ Providers
 
 
  
-.. c:var:: partial_occupation
+.. c:var:: double partial_occupation
 
 
     File : :file:`mo_basis/partial_occupation.irp.f`
@@ -637,7 +637,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: ao_ortho_cano_to_ao:
+.. c:function:: void ao_ortho_cano_to_ao(void)
 
 
     File : :file:`mo_basis/mos.irp.f`
@@ -667,7 +667,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: ao_to_mo:
+.. c:function:: void ao_to_mo(void)
 
 
     File : :file:`mo_basis/mos.irp.f`
@@ -721,7 +721,7 @@ Subroutines / functions
        * :c:func:`restore_symmetry`
 
  
-.. c:macro:: give_all_mos_and_grad_and_lapl_at_r:
+.. c:function:: void give_all_mos_and_grad_and_lapl_at_r(void)
 
 
     File : :file:`mo_basis/mos_in_r.irp.f`
@@ -749,7 +749,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_and_grad_and_lapl_at_r`
 
  
-.. c:macro:: give_all_mos_and_grad_at_r:
+.. c:function:: void give_all_mos_and_grad_at_r(void)
 
 
     File : :file:`mo_basis/mos_in_r.irp.f`
@@ -777,7 +777,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_and_grad_at_r`
 
  
-.. c:macro:: give_all_mos_at_r:
+.. c:function:: void give_all_mos_at_r(void)
 
 
     File : :file:`mo_basis/mos_in_r.irp.f`
@@ -816,7 +816,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_at_r`
 
  
-.. c:macro:: mix_mo_jk:
+.. c:function:: void mix_mo_jk(void)
 
 
     File : :file:`mo_basis/mos.irp.f`
@@ -844,7 +844,7 @@ Subroutines / functions
        * :c:data:`mo_coef`
 
  
-.. c:macro:: mo_as_eigvectors_of_mo_matrix:
+.. c:function:: void mo_as_eigvectors_of_mo_matrix(void)
 
 
     File : :file:`mo_basis/utils.irp.f`
@@ -884,7 +884,7 @@ Subroutines / functions
        * :c:func:`write_time`
 
  
-.. c:macro:: mo_as_svd_vectors_of_mo_matrix:
+.. c:function:: void mo_as_svd_vectors_of_mo_matrix(void)
 
 
     File : :file:`mo_basis/utils.irp.f`
@@ -915,7 +915,7 @@ Subroutines / functions
        * :c:func:`write_time`
 
  
-.. c:macro:: mo_as_svd_vectors_of_mo_matrix_eig:
+.. c:function:: void mo_as_svd_vectors_of_mo_matrix_eig(void)
 
 
     File : :file:`mo_basis/utils.irp.f`
@@ -955,7 +955,7 @@ Subroutines / functions
        * :c:func:`write_time`
 
  
-.. c:macro:: mo_coef_new_as_svd_vectors_of_mo_matrix_eig:
+.. c:function:: void mo_coef_new_as_svd_vectors_of_mo_matrix_eig(void)
 
 
     File : :file:`mo_basis/utils.irp.f`
@@ -987,7 +987,7 @@ Subroutines / functions
        * :c:func:`write_time`
 
  
-.. c:macro:: save_mos:
+.. c:function:: void save_mos(void)
 
 
     File : :file:`mo_basis/utils.irp.f`
@@ -1038,7 +1038,7 @@ Subroutines / functions
        * :c:func:`ezfio_set_mo_basis_mo_occ`
 
  
-.. c:macro:: save_mos_no_occ:
+.. c:function:: void save_mos_no_occ(void)
 
 
     File : :file:`mo_basis/utils.irp.f`
@@ -1066,7 +1066,7 @@ Subroutines / functions
        * :c:func:`ezfio_set_mo_basis_mo_coef`
 
  
-.. c:macro:: save_mos_truncated:
+.. c:function:: void save_mos_truncated(void)
 
 
     File : :file:`mo_basis/utils.irp.f`

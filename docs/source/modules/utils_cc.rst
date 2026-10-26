@@ -101,7 +101,7 @@ Programs
 Providers 
 --------- 
  
-.. c:var:: cc_list_gen
+.. c:var:: int cc_list_gen
 
 
     File : :file:`occupancy.irp.f`
@@ -133,7 +133,7 @@ Providers
        * :c:data:`cc_space_v_ppqq`
 
  
-.. c:var:: cc_list_occ
+.. c:var:: int cc_list_occ
 
 
     File : :file:`occupancy.irp.f`
@@ -192,7 +192,7 @@ Providers
        * :c:data:`cc_space_w_vvoo`
 
  
-.. c:var:: cc_list_occ_spin
+.. c:var:: int cc_list_occ_spin
 
 
     File : :file:`occupancy.irp.f`
@@ -236,7 +236,7 @@ Providers
        * :c:data:`cc_spin_v_vvoo`
 
  
-.. c:var:: cc_list_vir
+.. c:var:: int cc_list_vir
 
 
     File : :file:`occupancy.irp.f`
@@ -295,7 +295,7 @@ Providers
        * :c:data:`cc_space_w_vvoo`
 
  
-.. c:var:: cc_list_vir_spin
+.. c:var:: int cc_list_vir_spin
 
 
     File : :file:`occupancy.irp.f`
@@ -339,7 +339,7 @@ Providers
        * :c:data:`cc_spin_v_vvoo`
 
  
-.. c:var:: cc_n_mo
+.. c:var:: int cc_n_mo
 
 
     File : :file:`occupancy.irp.f`
@@ -438,7 +438,7 @@ Providers
        * :c:data:`cc_spin_v_vvoo`
 
  
-.. c:var:: cc_no_m
+.. c:var:: int cc_no_m
 
 
     File : :file:`occupancy.irp.f`
@@ -537,7 +537,7 @@ Providers
        * :c:data:`cc_spin_v_vvoo`
 
  
-.. c:var:: cc_no_s
+.. c:var:: int cc_no_s
 
 
     File : :file:`occupancy.irp.f`
@@ -636,7 +636,7 @@ Providers
        * :c:data:`cc_spin_v_vvoo`
 
  
-.. c:var:: cc_noa
+.. c:var:: int cc_noa
 
 
     File : :file:`occupancy.irp.f`
@@ -735,7 +735,7 @@ Providers
        * :c:data:`cc_spin_v_vvoo`
 
  
-.. c:var:: cc_noab
+.. c:var:: int cc_noab
 
 
     File : :file:`occupancy.irp.f`
@@ -834,7 +834,7 @@ Providers
        * :c:data:`cc_spin_v_vvoo`
 
  
-.. c:var:: cc_nob
+.. c:var:: int cc_nob
 
 
     File : :file:`occupancy.irp.f`
@@ -933,7 +933,7 @@ Providers
        * :c:data:`cc_spin_v_vvoo`
 
  
-.. c:var:: cc_nv_m
+.. c:var:: int cc_nv_m
 
 
     File : :file:`occupancy.irp.f`
@@ -1032,7 +1032,7 @@ Providers
        * :c:data:`cc_spin_v_vvoo`
 
  
-.. c:var:: cc_nv_s
+.. c:var:: int cc_nv_s
 
 
     File : :file:`occupancy.irp.f`
@@ -1131,7 +1131,7 @@ Providers
        * :c:data:`cc_spin_v_vvoo`
 
  
-.. c:var:: cc_nva
+.. c:var:: int cc_nva
 
 
     File : :file:`occupancy.irp.f`
@@ -1230,7 +1230,7 @@ Providers
        * :c:data:`cc_spin_v_vvoo`
 
  
-.. c:var:: cc_nvab
+.. c:var:: int cc_nvab
 
 
     File : :file:`occupancy.irp.f`
@@ -1329,7 +1329,7 @@ Providers
        * :c:data:`cc_spin_v_vvoo`
 
  
-.. c:var:: cc_nvb
+.. c:var:: int cc_nvb
 
 
     File : :file:`occupancy.irp.f`
@@ -1428,7 +1428,7 @@ Providers
        * :c:data:`cc_spin_v_vvoo`
 
  
-.. c:var:: cc_ref_is_open_shell
+.. c:var:: bool cc_ref_is_open_shell
 
 
     File : :file:`occupancy.irp.f`
@@ -1472,7 +1472,7 @@ Providers
        * :c:data:`cc_spin_v_vvoo`
 
  
-.. c:var:: cc_space_f_o
+.. c:var:: double cc_space_f_o
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -1493,7 +1493,7 @@ Providers
 
 
  
-.. c:var:: cc_space_f_oo
+.. c:var:: double cc_space_f_oo
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -1524,7 +1524,7 @@ Providers
        * :c:data:`cc_space_f_o`
 
  
-.. c:var:: cc_space_f_ov
+.. c:var:: double cc_space_f_ov
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -1549,7 +1549,7 @@ Providers
 
 
  
-.. c:var:: cc_space_f_v
+.. c:var:: double cc_space_f_v
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -1570,7 +1570,7 @@ Providers
 
 
  
-.. c:var:: cc_space_f_vo
+.. c:var:: double cc_space_f_vo
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -1595,7 +1595,7 @@ Providers
 
 
  
-.. c:var:: cc_space_f_vv
+.. c:var:: double cc_space_f_vv
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -1626,7 +1626,7 @@ Providers
        * :c:data:`cc_space_f_v`
 
  
-.. c:var:: cc_space_v
+.. c:var:: double cc_space_v
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -1659,7 +1659,7 @@ Providers
 
 
  
-.. c:var:: cc_space_v_aabb
+.. c:var:: double cc_space_v_aabb
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -1682,7 +1682,7 @@ Providers
 
 
  
-.. c:var:: cc_space_v_aaii
+.. c:var:: double cc_space_v_aaii
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -1706,7 +1706,7 @@ Providers
 
 
  
-.. c:var:: cc_space_v_aiia
+.. c:var:: double cc_space_v_aiia
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -1730,7 +1730,7 @@ Providers
 
 
  
-.. c:var:: cc_space_v_iaai
+.. c:var:: double cc_space_v_iaai
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -1754,7 +1754,7 @@ Providers
 
 
  
-.. c:var:: cc_space_v_iaia
+.. c:var:: double cc_space_v_iaia
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -1778,7 +1778,7 @@ Providers
 
 
  
-.. c:var:: cc_space_v_iiaa
+.. c:var:: double cc_space_v_iiaa
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -1802,7 +1802,7 @@ Providers
 
 
  
-.. c:var:: cc_space_v_iijj
+.. c:var:: double cc_space_v_iijj
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -1825,7 +1825,7 @@ Providers
 
 
  
-.. c:var:: cc_space_v_oo_chol
+.. c:var:: double cc_space_v_oo_chol
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -1856,7 +1856,7 @@ Providers
        * :c:data:`cc_space_v_vovo`
 
  
-.. c:var:: cc_space_v_oooo
+.. c:var:: double cc_space_v_oooo
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -1888,7 +1888,7 @@ Providers
        * :c:data:`cc_space_v_iijj`
 
  
-.. c:var:: cc_space_v_ooov
+.. c:var:: double cc_space_v_ooov
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -1915,7 +1915,7 @@ Providers
 
 
  
-.. c:var:: cc_space_v_oovo
+.. c:var:: double cc_space_v_oovo
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -1947,7 +1947,7 @@ Providers
        * :c:data:`cc_space_v_ooov`
 
  
-.. c:var:: cc_space_v_oovv
+.. c:var:: double cc_space_v_oovv
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -1979,7 +1979,7 @@ Providers
        * :c:data:`cc_space_v_iiaa`
 
  
-.. c:var:: cc_space_v_ov_chol
+.. c:var:: double cc_space_v_ov_chol
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2002,7 +2002,7 @@ Providers
 
 
  
-.. c:var:: cc_space_v_ovoo
+.. c:var:: double cc_space_v_ovoo
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2034,7 +2034,7 @@ Providers
        * :c:data:`cc_space_v_ooov`
 
  
-.. c:var:: cc_space_v_ovov
+.. c:var:: double cc_space_v_ovov
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2066,7 +2066,7 @@ Providers
        * :c:data:`cc_space_v_iaia`
 
  
-.. c:var:: cc_space_v_ovvo
+.. c:var:: double cc_space_v_ovvo
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2098,7 +2098,7 @@ Providers
        * :c:data:`cc_space_v_iaai`
 
  
-.. c:var:: cc_space_v_ovvv
+.. c:var:: double cc_space_v_ovvv
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2123,7 +2123,7 @@ Providers
 
 
  
-.. c:var:: cc_space_v_ppqq
+.. c:var:: double cc_space_v_ppqq
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2149,7 +2149,7 @@ Providers
 
 
  
-.. c:var:: cc_space_v_vo_chol
+.. c:var:: double cc_space_v_vo_chol
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2179,7 +2179,7 @@ Providers
        * :c:data:`cc_space_v_vvoo`
 
  
-.. c:var:: cc_space_v_vooo
+.. c:var:: double cc_space_v_vooo
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2213,7 +2213,7 @@ Providers
        * :c:data:`cc_space_v_ovoo`
 
  
-.. c:var:: cc_space_v_voov
+.. c:var:: double cc_space_v_voov
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2245,7 +2245,7 @@ Providers
        * :c:data:`cc_space_v_aiia`
 
  
-.. c:var:: cc_space_v_vovo
+.. c:var:: double cc_space_v_vovo
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2278,7 +2278,7 @@ Providers
        * :c:data:`cc_space_v_ovov`
 
  
-.. c:var:: cc_space_v_vovv
+.. c:var:: double cc_space_v_vovv
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2303,7 +2303,7 @@ Providers
 
 
  
-.. c:var:: cc_space_v_vv_chol
+.. c:var:: double cc_space_v_vv_chol
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2332,7 +2332,7 @@ Providers
        * :c:data:`cc_space_v_vovo`
 
  
-.. c:var:: cc_space_v_vvoo
+.. c:var:: double cc_space_v_vvoo
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2367,7 +2367,7 @@ Providers
        * :c:data:`cc_space_v_voov`
 
  
-.. c:var:: cc_space_v_vvov
+.. c:var:: double cc_space_v_vvov
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2392,7 +2392,7 @@ Providers
 
 
  
-.. c:var:: cc_space_v_vvvo
+.. c:var:: double cc_space_v_vvvo
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2417,7 +2417,7 @@ Providers
 
 
  
-.. c:var:: cc_space_v_vvvv
+.. c:var:: double cc_space_v_vvvv
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2448,7 +2448,7 @@ Providers
        * :c:data:`cc_space_v_aabb`
 
  
-.. c:var:: cc_space_w_oovv
+.. c:var:: double cc_space_w_oovv
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2473,7 +2473,7 @@ Providers
 
 
  
-.. c:var:: cc_space_w_vvoo
+.. c:var:: double cc_space_w_vvoo
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2498,7 +2498,7 @@ Providers
 
 
  
-.. c:var:: cc_spin_f_oo
+.. c:var:: double cc_spin_f_oo
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2525,7 +2525,7 @@ Providers
 
 
  
-.. c:var:: cc_spin_f_ov
+.. c:var:: double cc_spin_f_ov
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2552,7 +2552,7 @@ Providers
 
 
  
-.. c:var:: cc_spin_f_vv
+.. c:var:: double cc_spin_f_vv
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2579,7 +2579,7 @@ Providers
 
 
  
-.. c:var:: cc_spin_v_oo_chol
+.. c:var:: double cc_spin_v_oo_chol
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2602,7 +2602,7 @@ Providers
 
 
  
-.. c:var:: cc_spin_v_oooo
+.. c:var:: double cc_spin_v_oooo
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2625,7 +2625,7 @@ Providers
 
 
  
-.. c:var:: cc_spin_v_ooov
+.. c:var:: double cc_spin_v_ooov
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2648,7 +2648,7 @@ Providers
 
 
  
-.. c:var:: cc_spin_v_oovo
+.. c:var:: double cc_spin_v_oovo
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2671,7 +2671,7 @@ Providers
 
 
  
-.. c:var:: cc_spin_v_oovv
+.. c:var:: double cc_spin_v_oovv
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2694,7 +2694,7 @@ Providers
 
 
  
-.. c:var:: cc_spin_v_ovoo
+.. c:var:: double cc_spin_v_ovoo
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2717,7 +2717,7 @@ Providers
 
 
  
-.. c:var:: cc_spin_v_ovov
+.. c:var:: double cc_spin_v_ovov
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2740,7 +2740,7 @@ Providers
 
 
  
-.. c:var:: cc_spin_v_ovvo
+.. c:var:: double cc_spin_v_ovvo
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2763,7 +2763,7 @@ Providers
 
 
  
-.. c:var:: cc_spin_v_vvoo
+.. c:var:: double cc_spin_v_vvoo
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -2790,7 +2790,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: compute_err1:
+.. c:function:: void compute_err1(void)
 
 
     File : :file:`diis.irp.f`
@@ -2818,7 +2818,7 @@ Subroutines / functions
        * :c:func:`update_t_ccsd_diis_v3`
 
  
-.. c:macro:: compute_err2:
+.. c:function:: void compute_err2(void)
 
 
     File : :file:`diis.irp.f`
@@ -2847,7 +2847,7 @@ Subroutines / functions
        * :c:func:`update_t_ccsd_diis_v3`
 
  
-.. c:macro:: det_energy:
+.. c:function:: void det_energy(void)
 
 
     File : :file:`energy.irp.f`
@@ -2867,7 +2867,7 @@ Subroutines / functions
        * :c:data:`nuclear_repulsion`
 
  
-.. c:macro:: diis_cc:
+.. c:function:: void diis_cc(void)
 
 
     File : :file:`diis.irp.f`
@@ -2898,7 +2898,7 @@ Subroutines / functions
        * :c:func:`dgesv`
 
  
-.. c:macro:: extract_list_orb_space:
+.. c:function:: void extract_list_orb_space(void)
 
 
     File : :file:`occupancy.irp.f`
@@ -2936,7 +2936,7 @@ Subroutines / functions
        * :c:func:`apply_hole`
 
  
-.. c:macro:: extract_list_orb_spin:
+.. c:function:: void extract_list_orb_spin(void)
 
 
     File : :file:`occupancy.irp.f`
@@ -2972,7 +2972,7 @@ Subroutines / functions
        * :c:func:`apply_hole`
 
  
-.. c:macro:: extract_n_spin:
+.. c:function:: void extract_n_spin(void)
 
 
     File : :file:`occupancy.irp.f`
@@ -3008,7 +3008,7 @@ Subroutines / functions
        * :c:func:`apply_hole`
 
  
-.. c:macro:: gen_f_space:
+.. c:function:: void gen_f_space(void)
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -3045,7 +3045,7 @@ Subroutines / functions
        * :c:func:`get_fock_matrix_spin`
 
  
-.. c:macro:: gen_f_spin:
+.. c:function:: void gen_f_spin(void)
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -3086,7 +3086,7 @@ Subroutines / functions
        * :c:func:`shift_idx_spin`
 
  
-.. c:macro:: gen_v_space:
+.. c:function:: void gen_v_space(void)
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -3141,7 +3141,7 @@ Subroutines / functions
        * :c:func:`gen_v_space_chol`
 
  
-.. c:macro:: gen_v_space_chol:
+.. c:function:: void gen_v_space_chol(void)
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -3177,7 +3177,7 @@ Subroutines / functions
        * :c:func:`gen_v_spin_3idx_ij_l`
 
  
-.. c:macro:: gen_v_spin:
+.. c:function:: void gen_v_spin(void)
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -3222,7 +3222,7 @@ Subroutines / functions
        * :c:func:`shift_idx_spin`
 
  
-.. c:macro:: gen_v_spin_3idx:
+.. c:function:: void gen_v_spin_3idx(void)
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -3254,7 +3254,7 @@ Subroutines / functions
        * :c:func:`shift_idx_spin`
 
  
-.. c:macro:: gen_v_spin_3idx_i_kl:
+.. c:function:: void gen_v_spin_3idx_i_kl(void)
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -3286,7 +3286,7 @@ Subroutines / functions
        * :c:func:`shift_idx_spin`
 
  
-.. c:macro:: gen_v_spin_3idx_ij_l:
+.. c:function:: void gen_v_spin_3idx_ij_l(void)
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -3318,7 +3318,7 @@ Subroutines / functions
        * :c:func:`shift_idx_spin`
 
  
-.. c:macro:: get_excitation_general:
+.. c:function:: void get_excitation_general(void)
 
 
     File : :file:`phase.irp.f`
@@ -3345,7 +3345,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list_ab`
 
  
-.. c:macro:: get_fock_matrix_spin:
+.. c:function:: void get_fock_matrix_spin(void)
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -3384,7 +3384,7 @@ Subroutines / functions
        * :c:func:`apply_hole`
 
  
-.. c:macro:: get_phase_general:
+.. c:function:: void get_phase_general(void)
 
 
     File : :file:`phase.irp.f`
@@ -3410,7 +3410,7 @@ Subroutines / functions
        * :c:func:`get_excitation_general`
 
  
-.. c:macro:: guess_t1:
+.. c:function:: void guess_t1(void)
 
 
     File : :file:`guess_t.irp.f`
@@ -3439,7 +3439,7 @@ Subroutines / functions
        * :c:func:`read_t1`
 
  
-.. c:macro:: guess_t2:
+.. c:function:: void guess_t2(void)
 
 
     File : :file:`guess_t.irp.f`
@@ -3468,7 +3468,7 @@ Subroutines / functions
        * :c:func:`read_t2`
 
  
-.. c:macro:: is_core:
+.. c:function:: void is_core(void)
 
 
     File : :file:`occupancy.irp.f`
@@ -3489,7 +3489,7 @@ Subroutines / functions
        * :c:data:`list_core`
 
  
-.. c:macro:: is_del:
+.. c:function:: void is_del(void)
 
 
     File : :file:`occupancy.irp.f`
@@ -3510,7 +3510,7 @@ Subroutines / functions
        * :c:data:`list_del`
 
  
-.. c:macro:: print_wf_qp_edit_subroutine:
+.. c:function:: void print_wf_qp_edit_subroutine(void)
 
 
     File : :file:`print_wf_qp_edit.irp.f`
@@ -3546,7 +3546,7 @@ Subroutines / functions
        * :c:func:`print_det`
 
  
-.. c:macro:: read_t1:
+.. c:function:: void read_t1(void)
 
 
     File : :file:`guess_t.irp.f`
@@ -3574,7 +3574,7 @@ Subroutines / functions
        * :c:func:`guess_t1`
 
  
-.. c:macro:: read_t2:
+.. c:function:: void read_t2(void)
 
 
     File : :file:`guess_t.irp.f`
@@ -3602,7 +3602,7 @@ Subroutines / functions
        * :c:func:`guess_t2`
 
  
-.. c:macro:: shift_idx_spin:
+.. c:function:: void shift_idx_spin(void)
 
 
     File : :file:`mo_integrals_cc.irp.f`
@@ -3628,7 +3628,7 @@ Subroutines / functions
        * :c:func:`gen_v_spin_3idx_ij_l`
 
  
-.. c:macro:: update_all_err:
+.. c:function:: void update_all_err(void)
 
 
     File : :file:`diis.irp.f`
@@ -3652,7 +3652,7 @@ Subroutines / functions
        * :c:func:`update_t_ccsd_diis_v3`
 
  
-.. c:macro:: update_all_t:
+.. c:function:: void update_all_t(void)
 
 
     File : :file:`diis.irp.f`
@@ -3676,7 +3676,7 @@ Subroutines / functions
        * :c:func:`update_t_ccsd_diis_v3`
 
  
-.. c:macro:: update_t1:
+.. c:function:: void update_t1(void)
 
 
     File : :file:`update_t.irp.f`
@@ -3703,7 +3703,7 @@ Subroutines / functions
        * :c:func:`update_t_ccsd`
 
  
-.. c:macro:: update_t2:
+.. c:function:: void update_t2(void)
 
 
     File : :file:`update_t.irp.f`
@@ -3730,7 +3730,7 @@ Subroutines / functions
        * :c:func:`update_t_ccsd`
 
  
-.. c:macro:: update_t_ccsd:
+.. c:function:: void update_t_ccsd(void)
 
 
     File : :file:`diis.irp.f`
@@ -3762,7 +3762,7 @@ Subroutines / functions
        * :c:func:`update_t2`
 
  
-.. c:macro:: update_t_ccsd_diis:
+.. c:function:: void update_t_ccsd_diis(void)
 
 
     File : :file:`diis.irp.f`
@@ -3792,7 +3792,7 @@ Subroutines / functions
        * :c:func:`update_all_t`
 
  
-.. c:macro:: update_t_ccsd_diis_v3:
+.. c:function:: void update_t_ccsd_diis_v3(void)
 
 
     File : :file:`diis.irp.f`
@@ -3822,7 +3822,7 @@ Subroutines / functions
        * :c:func:`update_all_t`
 
  
-.. c:macro:: write_t1:
+.. c:function:: void write_t1(void)
 
 
     File : :file:`guess_t.irp.f`
@@ -3843,7 +3843,7 @@ Subroutines / functions
        * :c:data:`read_amplitudes`
 
  
-.. c:macro:: write_t2:
+.. c:function:: void write_t2(void)
 
 
     File : :file:`guess_t.irp.f`

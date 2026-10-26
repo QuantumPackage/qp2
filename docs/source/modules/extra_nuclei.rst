@@ -85,7 +85,7 @@ Programs
 Providers 
 --------- 
  
-.. c:var:: extra_center_of_mass
+.. c:var:: double extra_center_of_mass
 
 
     File : :file:`nuclei.irp.f`
@@ -109,7 +109,7 @@ Providers
 
 
  
-.. c:var:: extra_nucl_coord
+.. c:var:: double extra_nucl_coord
 
 
     File : :file:`nuclei.irp.f`
@@ -143,7 +143,7 @@ Providers
        * :c:data:`extra_nucl_dist`
 
  
-.. c:var:: extra_nucl_coord_transp
+.. c:var:: double extra_nucl_coord_transp
 
 
     File : :file:`nuclei.irp.f`
@@ -165,7 +165,7 @@ Providers
 
 
  
-.. c:var:: extra_nucl_dist
+.. c:var:: double extra_nucl_dist
 
 
     File : :file:`nuclei.irp.f`

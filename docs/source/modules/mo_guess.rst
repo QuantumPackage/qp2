@@ -31,7 +31,7 @@ attraction integrals in them, as a starting point for the |SCF|:
 Providers 
 --------- 
  
-.. c:var:: ao_ortho_canonical_nucl_elec_integrals
+.. c:var:: double ao_ortho_canonical_nucl_elec_integrals
 
 
     File : :file:`mo_guess/pot_mo_ortho_canonical_ints.irp.f`
@@ -54,7 +54,7 @@ Providers
 
 
  
-.. c:var:: ao_ortho_lowdin_coef
+.. c:var:: double ao_ortho_lowdin_coef
 
 
     File : :file:`mo_guess/mo_ortho_lowdin.irp.f`
@@ -86,7 +86,7 @@ Providers
        * :c:data:`ao_ortho_lowdin_overlap`
 
  
-.. c:var:: ao_ortho_lowdin_nucl_elec_integrals
+.. c:var:: double ao_ortho_lowdin_nucl_elec_integrals
 
 
     File : :file:`mo_guess/pot_mo_ortho_lowdin_ints.irp.f`
@@ -109,7 +109,7 @@ Providers
 
 
  
-.. c:var:: ao_ortho_lowdin_overlap
+.. c:var:: double ao_ortho_lowdin_overlap
 
 
     File : :file:`mo_guess/mo_ortho_lowdin.irp.f`
@@ -137,7 +137,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: hcore_guess:
+.. c:function:: void hcore_guess(void)
 
 
     File : :file:`mo_guess/h_core_guess_routine.irp.f`

@@ -65,7 +65,7 @@ Programs
 Providers 
 --------- 
  
-.. c:var:: act_2_rdm_aa_mo
+.. c:var:: double act_2_rdm_aa_mo
 
 
     File : :file:`act_2_rdm.irp.f`
@@ -109,7 +109,7 @@ Providers
        * :c:data:`full_occ_2_rdm_aa_mo`
 
  
-.. c:var:: act_2_rdm_ab_mo
+.. c:var:: double act_2_rdm_ab_mo
 
 
     File : :file:`act_2_rdm.irp.f`
@@ -158,7 +158,7 @@ Providers
        * :c:data:`full_occ_2_rdm_ab_mo`
 
  
-.. c:var:: act_2_rdm_bb_mo
+.. c:var:: double act_2_rdm_bb_mo
 
 
     File : :file:`act_2_rdm.irp.f`
@@ -202,7 +202,7 @@ Providers
        * :c:data:`full_occ_2_rdm_bb_mo`
 
  
-.. c:var:: act_2_rdm_spin_trace_mo
+.. c:var:: double act_2_rdm_spin_trace_mo
 
 
     File : :file:`act_2_rdm.irp.f`
@@ -246,7 +246,7 @@ Providers
        * :c:data:`full_occ_2_rdm_spin_trace_mo`
 
  
-.. c:var:: act_2_rdm_trans_spin_trace_mo
+.. c:var:: double act_2_rdm_trans_spin_trace_mo
 
 
     File : :file:`act_2_transition_rdm.irp.f`
@@ -282,7 +282,7 @@ Providers
 
 
  
-.. c:var:: full_occ_2_rdm_aa_mo
+.. c:var:: double full_occ_2_rdm_aa_mo
 
 
     File : :file:`full_orb_2_rdm.irp.f`
@@ -323,7 +323,7 @@ Providers
 
 
  
-.. c:var:: full_occ_2_rdm_ab_mo
+.. c:var:: double full_occ_2_rdm_ab_mo
 
 
     File : :file:`full_orb_2_rdm.irp.f`
@@ -366,7 +366,7 @@ Providers
 
 
  
-.. c:var:: full_occ_2_rdm_bb_mo
+.. c:var:: double full_occ_2_rdm_bb_mo
 
 
     File : :file:`full_orb_2_rdm.irp.f`
@@ -407,7 +407,7 @@ Providers
 
 
  
-.. c:var:: full_occ_2_rdm_spin_trace_mo
+.. c:var:: double full_occ_2_rdm_spin_trace_mo
 
 
     File : :file:`full_orb_2_rdm.irp.f`
@@ -453,7 +453,7 @@ Providers
 
 
  
-.. c:var:: state_av_act_2_rdm_aa_mo
+.. c:var:: double state_av_act_2_rdm_aa_mo
 
 
     File : :file:`state_av_act_2rdm.irp.f`
@@ -496,7 +496,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_aa_mo`
 
  
-.. c:var:: state_av_act_2_rdm_ab_mo
+.. c:var:: double state_av_act_2_rdm_ab_mo
 
 
     File : :file:`state_av_act_2rdm.irp.f`
@@ -540,7 +540,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_ab_mo`
 
  
-.. c:var:: state_av_act_2_rdm_bb_mo
+.. c:var:: double state_av_act_2_rdm_bb_mo
 
 
     File : :file:`state_av_act_2rdm.irp.f`
@@ -583,7 +583,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_bb_mo`
 
  
-.. c:var:: state_av_act_2_rdm_spin_trace_mo
+.. c:var:: double state_av_act_2_rdm_spin_trace_mo
 
 
     File : :file:`state_av_act_2rdm.irp.f`
@@ -623,7 +623,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
 
  
-.. c:var:: state_av_full_occ_2_rdm_aa_mo
+.. c:var:: double state_av_full_occ_2_rdm_aa_mo
 
 
     File : :file:`state_av_full_orb_2_rdm.irp.f`
@@ -663,7 +663,7 @@ Providers
 
 
  
-.. c:var:: state_av_full_occ_2_rdm_ab_mo
+.. c:var:: double state_av_full_occ_2_rdm_ab_mo
 
 
     File : :file:`state_av_full_orb_2_rdm.irp.f`
@@ -703,7 +703,7 @@ Providers
 
 
  
-.. c:var:: state_av_full_occ_2_rdm_bb_mo
+.. c:var:: double state_av_full_occ_2_rdm_bb_mo
 
 
     File : :file:`state_av_full_orb_2_rdm.irp.f`
@@ -743,7 +743,7 @@ Providers
 
 
  
-.. c:var:: state_av_full_occ_2_rdm_spin_trace_mo
+.. c:var:: double state_av_full_occ_2_rdm_spin_trace_mo
 
 
     File : :file:`state_av_full_orb_2_rdm.irp.f`
@@ -790,7 +790,7 @@ Providers
        * :c:data:`two_e_dm_mo`
 
  
-.. c:var:: two_e_dm_mo
+.. c:var:: double two_e_dm_mo
 
 
     File : :file:`two_e_dm_mo.irp.f`
@@ -828,7 +828,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: read_array_two_rdm:
+.. c:function:: void read_array_two_rdm(void)
 
 
     File : :file:`io_two_rdm.irp.f`
@@ -866,7 +866,7 @@ Subroutines / functions
        * :c:func:`unlock_io`
 
  
-.. c:macro:: read_array_two_trans_rdm:
+.. c:function:: void read_array_two_trans_rdm(void)
 
 
     File : :file:`io_two_rdm.irp.f`
@@ -894,7 +894,7 @@ Subroutines / functions
        * :c:func:`unlock_io`
 
  
-.. c:macro:: routine_active_only:
+.. c:function:: void routine_active_only(void)
 
 
     File : :file:`example.irp.f`
@@ -938,7 +938,7 @@ Subroutines / functions
        * :c:func:`test_2_rdm`
 
  
-.. c:macro:: routine_active_only_trans:
+.. c:function:: void routine_active_only_trans(void)
 
 
     File : :file:`example.irp.f`
@@ -971,7 +971,7 @@ Subroutines / functions
        * :c:func:`test_2_rdm`
 
  
-.. c:macro:: routine_full_mos:
+.. c:function:: void routine_full_mos(void)
 
 
     File : :file:`example.irp.f`
@@ -1013,7 +1013,7 @@ Subroutines / functions
        * :c:func:`test_2_rdm`
 
  
-.. c:macro:: write_array_two_rdm:
+.. c:function:: void write_array_two_rdm(void)
 
 
     File : :file:`io_two_rdm.irp.f`
@@ -1050,7 +1050,7 @@ Subroutines / functions
        * :c:func:`unlock_io`
 
  
-.. c:macro:: write_array_two_trans_rdm:
+.. c:function:: void write_array_two_trans_rdm(void)
 
 
     File : :file:`io_two_rdm.irp.f`

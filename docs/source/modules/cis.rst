@@ -70,7 +70,7 @@ Programs
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: h_apply_cis:
+.. c:function:: void h_apply_cis(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -132,7 +132,7 @@ Subroutines / functions
        * :c:data:`psi_det_sorted_bit`
 
  
-.. c:macro:: h_apply_cis_diexc:
+.. c:function:: void h_apply_cis_diexc(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -167,7 +167,7 @@ Subroutines / functions
        * :c:func:`h_apply_cis_diexcp`
 
  
-.. c:macro:: h_apply_cis_diexcorg:
+.. c:function:: void h_apply_cis_diexcorg(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -206,7 +206,7 @@ Subroutines / functions
        * :c:func:`fill_h_apply_buffer_no_selection`
 
  
-.. c:macro:: h_apply_cis_diexcp:
+.. c:function:: void h_apply_cis_diexcp(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -241,7 +241,7 @@ Subroutines / functions
        * :c:func:`h_apply_cis_diexcorg`
 
  
-.. c:macro:: h_apply_cis_monoexc:
+.. c:function:: void h_apply_cis_monoexc(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -280,7 +280,7 @@ Subroutines / functions
        * :c:func:`fill_h_apply_buffer_no_selection`
 
  
-.. c:macro:: h_apply_cis_sym:
+.. c:function:: void h_apply_cis_sym(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -342,7 +342,7 @@ Subroutines / functions
        * :c:data:`psi_det_sorted_bit`
 
  
-.. c:macro:: h_apply_cis_sym_diexc:
+.. c:function:: void h_apply_cis_sym_diexc(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -377,7 +377,7 @@ Subroutines / functions
        * :c:func:`h_apply_cis_sym_diexcp`
 
  
-.. c:macro:: h_apply_cis_sym_diexcorg:
+.. c:function:: void h_apply_cis_sym_diexcorg(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -417,7 +417,7 @@ Subroutines / functions
        * :c:func:`fill_h_apply_buffer_no_selection`
 
  
-.. c:macro:: h_apply_cis_sym_diexcp:
+.. c:function:: void h_apply_cis_sym_diexcp(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -452,7 +452,7 @@ Subroutines / functions
        * :c:func:`h_apply_cis_sym_diexcorg`
 
  
-.. c:macro:: h_apply_cis_sym_monoexc:
+.. c:function:: void h_apply_cis_sym_monoexc(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`

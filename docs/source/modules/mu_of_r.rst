@@ -59,7 +59,7 @@ Programs
 Providers 
 --------- 
  
-.. c:var:: basis_mos_in_r_array
+.. c:var:: double basis_mos_in_r_array
 
 
     File : :file:`basis_def.irp.f`
@@ -88,7 +88,7 @@ Providers
        * :c:data:`full_occ_v_kl_cntrctd`
 
  
-.. c:var:: core_inact_act_v_kl_contracted
+.. c:var:: double core_inact_act_v_kl_contracted
 
 
     File : :file:`f_psi_utils.irp.f`
@@ -120,7 +120,7 @@ Providers
        * :c:data:`f_psi_cas_ab_old`
 
  
-.. c:var:: f_hf_cholesky
+.. c:var:: double f_hf_cholesky
 
 
     File : :file:`f_hf_cholesky.irp.f`
@@ -151,7 +151,7 @@ Providers
        * :c:data:`mu_of_r_hf`
 
  
-.. c:var:: f_hf_cholesky_sparse
+.. c:var:: double f_hf_cholesky_sparse
 
 
     File : :file:`f_hf_cholesky.irp.f`
@@ -187,7 +187,7 @@ Providers
        * :c:data:`mu_of_r_hf_sparse`
 
  
-.. c:var:: f_hf_cholesky_sparse_bis
+.. c:var:: double f_hf_cholesky_sparse_bis
 
 
     File : :file:`f_hf_cholesky.irp.f`
@@ -220,7 +220,7 @@ Providers
 
 
  
-.. c:var:: f_psi_cas_ab
+.. c:var:: double f_psi_cas_ab
 
 
     File : :file:`f_val_general.irp.f`
@@ -268,7 +268,7 @@ Providers
        * :c:data:`mu_of_r_psi_cas`
 
  
-.. c:var:: f_psi_cas_ab_old
+.. c:var:: double f_psi_cas_ab_old
 
 
     File : :file:`f_psi_old.irp.f`
@@ -298,7 +298,7 @@ Providers
 
 
  
-.. c:var:: f_psi_hf_ab
+.. c:var:: double f_psi_hf_ab
 
 
     File : :file:`f_val_general.irp.f`
@@ -335,7 +335,7 @@ Providers
        * :c:data:`mu_of_r_hf_old`
 
  
-.. c:var:: full_occ_2_rdm_cntrctd
+.. c:var:: double full_occ_2_rdm_cntrctd
 
 
     File : :file:`f_psi_utils.irp.f`
@@ -370,7 +370,7 @@ Providers
        * :c:data:`f_psi_cas_ab_old`
 
  
-.. c:var:: full_occ_2_rdm_cntrctd_trans
+.. c:var:: double full_occ_2_rdm_cntrctd_trans
 
 
     File : :file:`f_psi_utils.irp.f`
@@ -406,7 +406,7 @@ Providers
        * :c:data:`full_occ_2_rdm_cntrctd`
 
  
-.. c:var:: full_occ_v_kl_cntrctd
+.. c:var:: double full_occ_v_kl_cntrctd
 
 
     File : :file:`f_psi_utils.irp.f`
@@ -454,7 +454,7 @@ Providers
        * :c:data:`core_inact_act_v_kl_contracted`
 
  
-.. c:var:: list_basis
+.. c:var:: int list_basis
 
 
     File : :file:`basis_def.irp.f`
@@ -503,7 +503,7 @@ Providers
        * :c:data:`two_e_int_ii_f`
 
  
-.. c:var:: list_couple_hf_orb_r1
+.. c:var:: int list_couple_hf_orb_r1
 
 
     File : :file:`f_hf_cholesky.irp.f`
@@ -527,7 +527,7 @@ Providers
 
 
  
-.. c:var:: list_couple_hf_orb_r2
+.. c:var:: int list_couple_hf_orb_r2
 
 
     File : :file:`f_hf_cholesky.irp.f`
@@ -551,7 +551,7 @@ Providers
 
 
  
-.. c:var:: list_valence_orb_for_hf
+.. c:var:: int list_valence_orb_for_hf
 
 
     File : :file:`basis_def.irp.f`
@@ -593,7 +593,7 @@ Providers
        * :c:data:`two_e_int_hf_f`
 
  
-.. c:var:: mos_times_cholesky_r1
+.. c:var:: double mos_times_cholesky_r1
 
 
     File : :file:`f_hf_cholesky.irp.f`
@@ -630,7 +630,7 @@ Providers
        * :c:data:`f_hf_cholesky`
 
  
-.. c:var:: mos_times_cholesky_r2
+.. c:var:: double mos_times_cholesky_r2
 
 
     File : :file:`f_hf_cholesky.irp.f`
@@ -667,7 +667,7 @@ Providers
        * :c:data:`f_hf_cholesky`
 
  
-.. c:var:: mu_average_proj
+.. c:var:: double mu_average_proj
 
 
     File : :file:`mu_of_r_conditions.irp.f`
@@ -697,7 +697,7 @@ Providers
 
 
  
-.. c:var:: mu_average_prov
+.. c:var:: double mu_average_prov
 
 
     File : :file:`mu_of_r_conditions.irp.f`
@@ -727,7 +727,7 @@ Providers
 
 
  
-.. c:var:: mu_average_prov2
+.. c:var:: double mu_average_prov2
 
 
     File : :file:`mu_of_r_conditions.irp.f`
@@ -756,7 +756,7 @@ Providers
 
 
  
-.. c:var:: mu_average_prov3
+.. c:var:: double mu_average_prov3
 
 
     File : :file:`mu_of_r_conditions.irp.f`
@@ -785,7 +785,7 @@ Providers
 
 
  
-.. c:var:: mu_average_prov_ot
+.. c:var:: double mu_average_prov_ot
 
 
     File : :file:`mu_of_r_conditions.irp.f`
@@ -815,7 +815,7 @@ Providers
 
 
  
-.. c:var:: mu_of_r_hf
+.. c:var:: double mu_of_r_hf
 
 
     File : :file:`mu_of_r_conditions.irp.f`
@@ -850,7 +850,7 @@ Providers
        * :c:data:`mu_of_r_prov`
 
  
-.. c:var:: mu_of_r_hf_old
+.. c:var:: double mu_of_r_hf_old
 
 
     File : :file:`mu_of_r_conditions.irp.f`
@@ -885,7 +885,7 @@ Providers
        * :c:data:`mu_of_r_prov`
 
  
-.. c:var:: mu_of_r_hf_sparse
+.. c:var:: double mu_of_r_hf_sparse
 
 
     File : :file:`mu_of_r_conditions.irp.f`
@@ -920,7 +920,7 @@ Providers
        * :c:data:`mu_of_r_prov`
 
  
-.. c:var:: mu_of_r_projector_ao_prod
+.. c:var:: double mu_of_r_projector_ao_prod
 
 
     File : :file:`mu_of_r_conditions.irp.f`
@@ -954,7 +954,7 @@ Providers
        * :c:data:`mu_of_r_prov`
 
  
-.. c:var:: mu_of_r_projector_mo
+.. c:var:: double mu_of_r_projector_mo
 
 
     File : :file:`mu_of_r_conditions.irp.f`
@@ -989,7 +989,7 @@ Providers
        * :c:data:`mu_average_proj`
 
  
-.. c:var:: mu_of_r_prov
+.. c:var:: double mu_of_r_prov
 
 
     File : :file:`mu_of_r_conditions.irp.f`
@@ -1033,7 +1033,7 @@ Providers
        * :c:data:`mu_average_prov_ot`
 
  
-.. c:var:: mu_of_r_psi_cas
+.. c:var:: double mu_of_r_psi_cas
 
 
     File : :file:`mu_of_r_conditions.irp.f`
@@ -1068,7 +1068,7 @@ Providers
        * :c:data:`mu_of_r_prov`
 
  
-.. c:var:: n_basis_orb
+.. c:var:: int n_basis_orb
 
 
     File : :file:`basis_def.irp.f`
@@ -1117,7 +1117,7 @@ Providers
        * :c:data:`two_e_int_ii_f`
 
  
-.. c:var:: n_couple_orb_r1
+.. c:var:: int n_couple_orb_r1
 
 
     File : :file:`f_hf_cholesky.irp.f`
@@ -1146,7 +1146,7 @@ Providers
        * :c:data:`mos_times_cholesky_r1`
 
  
-.. c:var:: n_couple_orb_r2
+.. c:var:: int n_couple_orb_r2
 
 
     File : :file:`f_hf_cholesky.irp.f`
@@ -1175,7 +1175,7 @@ Providers
        * :c:data:`mos_times_cholesky_r2`
 
  
-.. c:var:: n_max_occ_val_orb_for_hf
+.. c:var:: int n_max_occ_val_orb_for_hf
 
 
     File : :file:`basis_def.irp.f`
@@ -1220,7 +1220,7 @@ Providers
        * :c:data:`two_e_int_hf_f`
 
  
-.. c:var:: n_occ_val_orb_for_hf
+.. c:var:: int n_occ_val_orb_for_hf
 
 
     File : :file:`basis_def.irp.f`
@@ -1265,7 +1265,7 @@ Providers
        * :c:data:`two_e_int_hf_f`
 
  
-.. c:var:: on_top_cas_mu_r
+.. c:var:: double on_top_cas_mu_r
 
 
     File : :file:`f_val_general.irp.f`
@@ -1313,7 +1313,7 @@ Providers
        * :c:data:`mu_of_r_psi_cas`
 
  
-.. c:var:: on_top_hf_grid
+.. c:var:: double on_top_hf_grid
 
 
     File : :file:`f_hf_cholesky.irp.f`
@@ -1343,7 +1343,7 @@ Providers
        * :c:data:`mu_of_r_hf_sparse`
 
  
-.. c:var:: on_top_hf_mu_r
+.. c:var:: double on_top_hf_mu_r
 
 
     File : :file:`f_val_general.irp.f`
@@ -1380,7 +1380,7 @@ Providers
        * :c:data:`mu_of_r_hf_old`
 
  
-.. c:var:: two_e_int_aa_f
+.. c:var:: double two_e_int_aa_f
 
 
     File : :file:`f_psi_i_a_v_utils.irp.f`
@@ -1433,7 +1433,7 @@ Providers
        * :c:data:`f_psi_cas_ab`
 
  
-.. c:var:: two_e_int_hf_f
+.. c:var:: double two_e_int_hf_f
 
 
     File : :file:`f_hf_utils.irp.f`
@@ -1481,7 +1481,7 @@ Providers
        * :c:data:`f_psi_hf_ab`
 
  
-.. c:var:: two_e_int_ia_f
+.. c:var:: double two_e_int_ia_f
 
 
     File : :file:`f_psi_i_a_v_utils.irp.f`
@@ -1531,7 +1531,7 @@ Providers
        * :c:data:`f_psi_cas_ab`
 
  
-.. c:var:: two_e_int_ii_f
+.. c:var:: double two_e_int_ii_f
 
 
     File : :file:`f_psi_i_a_v_utils.irp.f`
@@ -1583,7 +1583,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: f_hf_valence_ab:
+.. c:function:: void f_hf_valence_ab(void)
 
 
     File : :file:`f_hf_utils.irp.f`
@@ -1630,7 +1630,7 @@ Subroutines / functions
        * :c:func:`give_all_mos_at_r`
 
  
-.. c:macro:: give_f_aa_val_ab:
+.. c:function:: void give_f_aa_val_ab(void)
 
 
     File : :file:`f_psi_i_a_v_utils.irp.f`
@@ -1673,7 +1673,7 @@ Subroutines / functions
        * :c:func:`give_all_mos_at_r`
 
  
-.. c:macro:: give_f_ia_val_ab:
+.. c:function:: void give_f_ia_val_ab(void)
 
 
     File : :file:`f_psi_i_a_v_utils.irp.f`
@@ -1718,7 +1718,7 @@ Subroutines / functions
        * :c:func:`give_all_mos_at_r`
 
  
-.. c:macro:: give_f_ii_val_ab:
+.. c:function:: void give_f_ii_val_ab(void)
 
 
     File : :file:`f_psi_i_a_v_utils.irp.f`
@@ -1760,7 +1760,7 @@ Subroutines / functions
        * :c:func:`give_all_mos_at_r`
 
  
-.. c:macro:: give_mu_of_r_cas:
+.. c:function:: void give_mu_of_r_cas(void)
 
 
     File : :file:`f_psi_i_a_v_utils.irp.f`
@@ -1782,7 +1782,7 @@ Subroutines / functions
        * :c:func:`give_f_ii_val_ab`
 
  
-.. c:macro:: integral_f_hf_valence_ab:
+.. c:function:: void integral_f_hf_valence_ab(void)
 
 
     File : :file:`f_hf_utils.irp.f`
@@ -1829,7 +1829,7 @@ Subroutines / functions
        * :c:func:`give_all_mos_at_r`
 
  
-.. c:macro:: test:
+.. c:function:: void test(void)
 
 
     File : :file:`test_proj_op.irp.f`
@@ -1858,7 +1858,7 @@ Subroutines / functions
        * :c:func:`test_proj_op`
 
  
-.. c:macro:: test_f_hf_valence_ab:
+.. c:function:: void test_f_hf_valence_ab(void)
 
 
     File : :file:`example.irp.f`
@@ -1899,7 +1899,7 @@ Subroutines / functions
        * :c:func:`integral_f_hf_valence_ab`
 
  
-.. c:macro:: test_f_ia_valence_ab:
+.. c:function:: void test_f_ia_valence_ab(void)
 
 
     File : :file:`example.irp.f`
@@ -1938,7 +1938,7 @@ Subroutines / functions
        * :c:func:`give_f_ii_val_ab`
 
  
-.. c:macro:: test_f_ii_ia_aa_valence_ab:
+.. c:function:: void test_f_ii_ia_aa_valence_ab(void)
 
 
     File : :file:`example.irp.f`
@@ -1969,7 +1969,7 @@ Subroutines / functions
        * :c:func:`test_proj_op`
 
  
-.. c:macro:: test_f_ii_valence_ab:
+.. c:function:: void test_f_ii_valence_ab(void)
 
 
     File : :file:`example.irp.f`

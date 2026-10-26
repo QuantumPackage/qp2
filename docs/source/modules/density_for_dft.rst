@@ -69,7 +69,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: one_body_dm_mo_alpha_one_det
+.. c:var:: double one_body_dm_mo_alpha_one_det
 
 
     File : :file:`density_for_dft/density_for_dft.irp.f`
@@ -101,7 +101,7 @@ Providers
        * :c:data:`one_e_dm_mo_beta_for_dft`
 
  
-.. c:var:: one_body_dm_mo_beta_one_det
+.. c:var:: double one_body_dm_mo_beta_one_det
 
 
     File : :file:`density_for_dft/density_for_dft.irp.f`
@@ -133,7 +133,7 @@ Providers
        * :c:data:`one_e_dm_mo_beta_for_dft`
 
  
-.. c:var:: one_e_dm_alpha_ao_for_dft
+.. c:var:: double one_e_dm_alpha_ao_for_dft
 
 
     File : :file:`density_for_dft/density_for_dft.irp.f`
@@ -169,7 +169,7 @@ Providers
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
  
-.. c:var:: one_e_dm_alpha_ao_for_dft_no_core
+.. c:var:: double one_e_dm_alpha_ao_for_dft_no_core
 
 
     File : :file:`density_for_dft/density_for_dft.irp.f`
@@ -196,7 +196,7 @@ Providers
 
 
  
-.. c:var:: one_e_dm_average_alpha_mo_for_dft
+.. c:var:: double one_e_dm_average_alpha_mo_for_dft
 
 
     File : :file:`density_for_dft/density_for_dft.irp.f`
@@ -225,7 +225,7 @@ Providers
        * :c:data:`one_e_dm_average_mo_for_dft`
 
  
-.. c:var:: one_e_dm_average_beta_mo_for_dft
+.. c:var:: double one_e_dm_average_beta_mo_for_dft
 
 
     File : :file:`density_for_dft/density_for_dft.irp.f`
@@ -254,7 +254,7 @@ Providers
        * :c:data:`one_e_dm_average_mo_for_dft`
 
  
-.. c:var:: one_e_dm_average_mo_for_dft
+.. c:var:: double one_e_dm_average_mo_for_dft
 
 
     File : :file:`density_for_dft/density_for_dft.irp.f`
@@ -276,7 +276,7 @@ Providers
 
 
  
-.. c:var:: one_e_dm_beta_ao_for_dft
+.. c:var:: double one_e_dm_beta_ao_for_dft
 
 
     File : :file:`density_for_dft/density_for_dft.irp.f`
@@ -312,7 +312,7 @@ Providers
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
  
-.. c:var:: one_e_dm_beta_ao_for_dft_no_core
+.. c:var:: double one_e_dm_beta_ao_for_dft_no_core
 
 
     File : :file:`density_for_dft/density_for_dft.irp.f`
@@ -339,7 +339,7 @@ Providers
 
 
  
-.. c:var:: one_e_dm_mo_alpha_for_dft
+.. c:var:: double one_e_dm_mo_alpha_for_dft
 
 
     File : :file:`density_for_dft/density_for_dft.irp.f`
@@ -383,7 +383,7 @@ Providers
        * :c:data:`one_e_dm_mo_for_dft`
 
  
-.. c:var:: one_e_dm_mo_alpha_for_dft_no_core
+.. c:var:: double one_e_dm_mo_alpha_for_dft_no_core
 
 
     File : :file:`density_for_dft/density_for_dft.irp.f`
@@ -414,7 +414,7 @@ Providers
        * :c:data:`one_e_dm_alpha_ao_for_dft_no_core`
 
  
-.. c:var:: one_e_dm_mo_beta_for_dft
+.. c:var:: double one_e_dm_mo_beta_for_dft
 
 
     File : :file:`density_for_dft/density_for_dft.irp.f`
@@ -458,7 +458,7 @@ Providers
        * :c:data:`one_e_dm_mo_for_dft`
 
  
-.. c:var:: one_e_dm_mo_beta_for_dft_no_core
+.. c:var:: double one_e_dm_mo_beta_for_dft_no_core
 
 
     File : :file:`density_for_dft/density_for_dft.irp.f`
@@ -489,7 +489,7 @@ Providers
        * :c:data:`one_e_dm_alpha_ao_for_dft_no_core`
 
  
-.. c:var:: one_e_dm_mo_for_dft
+.. c:var:: double one_e_dm_mo_for_dft
 
 
     File : :file:`density_for_dft/density_for_dft.irp.f`

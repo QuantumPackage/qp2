@@ -80,7 +80,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: ao_2e_cgtos_schwartz
+.. c:var:: double ao_2e_cgtos_schwartz
 
 
     File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
@@ -109,7 +109,7 @@ Providers
 
 
  
-.. c:var:: ao_integrals_cache
+.. c:var:: double ao_integrals_cache
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -138,7 +138,7 @@ Providers
        * :c:data:`cholesky_ao_num`
 
  
-.. c:var:: ao_integrals_cache_max
+.. c:var:: int ao_integrals_cache_max
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -168,7 +168,7 @@ Providers
        * :c:data:`cholesky_ao_num`
 
  
-.. c:var:: ao_integrals_cache_min
+.. c:var:: int ao_integrals_cache_min
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -198,7 +198,7 @@ Providers
        * :c:data:`cholesky_ao_num`
 
  
-.. c:var:: ao_integrals_cache_periodic
+.. c:var:: double _Complex ao_integrals_cache_periodic
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -221,7 +221,7 @@ Providers
 
 
  
-.. c:var:: ao_integrals_erf_cache
+.. c:var:: double ao_integrals_erf_cache
 
 
     File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
@@ -244,7 +244,7 @@ Providers
 
 
  
-.. c:var:: ao_integrals_erf_cache_max
+.. c:var:: int ao_integrals_erf_cache_max
 
 
     File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
@@ -272,7 +272,7 @@ Providers
        * :c:data:`ao_integrals_erf_cache`
 
  
-.. c:var:: ao_integrals_erf_cache_min
+.. c:var:: int ao_integrals_erf_cache_min
 
 
     File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
@@ -300,7 +300,7 @@ Providers
        * :c:data:`ao_integrals_erf_cache`
 
  
-.. c:var:: ao_integrals_erf_map
+.. c:var:: int ao_integrals_erf_map
 
 
     File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
@@ -329,7 +329,7 @@ Providers
        * :c:data:`mo_two_e_int_erf_jj_from_ao`
 
  
-.. c:var:: ao_integrals_map
+.. c:var:: int ao_integrals_map
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -360,7 +360,7 @@ Providers
        * :c:data:`cholesky_ao_num`
 
  
-.. c:var:: ao_two_e_integral_erf_schwartz
+.. c:var:: double ao_two_e_integral_erf_schwartz
 
 
     File : :file:`ao_two_e_ints/providers_ao_erf.irp.f`
@@ -396,7 +396,7 @@ Providers
        * :c:data:`mo_two_e_int_erf_jj_from_ao`
 
  
-.. c:var:: ao_two_e_integral_schwartz
+.. c:var:: double ao_two_e_integral_schwartz
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -431,7 +431,7 @@ Providers
        * :c:data:`cholesky_ao_num`
 
  
-.. c:var:: ao_two_e_integrals_erf_in_map
+.. c:var:: bool ao_two_e_integrals_erf_in_map
 
 
     File : :file:`ao_two_e_ints/providers_ao_erf.irp.f`
@@ -475,7 +475,7 @@ Providers
        * :c:data:`mo_two_e_integrals_erf_in_map`
 
  
-.. c:var:: ao_two_e_integrals_in_map
+.. c:var:: bool ao_two_e_integrals_in_map
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -521,7 +521,7 @@ Providers
        * :c:data:`mo_two_e_integrals_in_map`
 
  
-.. c:var:: cholesky_ao
+.. c:var:: double cholesky_ao
 
 
     File : :file:`ao_two_e_ints/cholesky.irp.f`
@@ -586,7 +586,7 @@ Providers
        * :c:data:`cholesky_mo_transp`
 
  
-.. c:var:: cholesky_ao_num
+.. c:var:: int cholesky_ao_num
 
 
     File : :file:`ao_two_e_ints/cholesky.irp.f`
@@ -651,7 +651,7 @@ Providers
        * :c:data:`cholesky_mo_transp`
 
  
-.. c:var:: cholesky_ao_transp
+.. c:var:: double cholesky_ao_transp
 
 
     File : :file:`ao_two_e_ints/cholesky.irp.f`
@@ -673,7 +673,7 @@ Providers
 
 
  
-.. c:var:: do_direct_integrals
+.. c:var:: bool do_direct_integrals
 
 
     File : :file:`ao_two_e_ints/direct.irp.f`
@@ -702,7 +702,7 @@ Providers
        * :c:data:`mo_two_e_int_erf_jj_from_ao`
 
  
-.. c:var:: gauleg_t2
+.. c:var:: double gauleg_t2
 
 
     File : :file:`ao_two_e_ints/gauss_legendre.irp.f`
@@ -725,7 +725,7 @@ Providers
 
 
  
-.. c:var:: gauleg_w
+.. c:var:: double gauleg_w
 
 
     File : :file:`ao_two_e_ints/gauss_legendre.irp.f`
@@ -748,7 +748,7 @@ Providers
 
 
  
-.. c:macro:: i_x1_new:
+.. c:function:: void i_x1_new(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -786,7 +786,7 @@ Providers
        * :c:func:`i_x2_new`
 
  
-.. c:macro:: i_x1_new_cgtos:
+.. c:function:: void i_x1_new_cgtos(void)
 
 
     File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
@@ -823,7 +823,7 @@ Providers
        * :c:func:`i_x2_new_cgtos`
 
  
-.. c:macro:: i_x1_pol_mult_a1:
+.. c:function:: void i_x1_pol_mult_a1(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -852,7 +852,7 @@ Providers
        * :c:func:`i_x2_pol_mult`
 
  
-.. c:macro:: i_x1_pol_mult_a1_cgtos:
+.. c:function:: void i_x1_pol_mult_a1_cgtos(void)
 
 
     File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
@@ -882,7 +882,7 @@ Providers
        * :c:func:`multiply_cpoly`
 
  
-.. c:macro:: i_x1_pol_mult_a2:
+.. c:function:: void i_x1_pol_mult_a2(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -911,7 +911,7 @@ Providers
        * :c:func:`i_x2_pol_mult`
 
  
-.. c:macro:: i_x1_pol_mult_a2_cgtos:
+.. c:function:: void i_x1_pol_mult_a2_cgtos(void)
 
 
     File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
@@ -941,7 +941,7 @@ Providers
        * :c:func:`multiply_cpoly`
 
  
-.. c:macro:: i_x1_pol_mult_recurs:
+.. c:function:: void i_x1_pol_mult_recurs(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -971,7 +971,7 @@ Providers
        * :c:func:`i_x1_pol_mult_recurs`
 
  
-.. c:macro:: i_x1_pol_mult_recurs_cgtos:
+.. c:function:: void i_x1_pol_mult_recurs_cgtos(void)
 
 
     File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
@@ -1002,7 +1002,7 @@ Providers
        * :c:func:`multiply_cpoly`
 
  
-.. c:macro:: i_x2_new:
+.. c:function:: void i_x2_new(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -1036,7 +1036,7 @@ Providers
        * :c:func:`i_x1_new`
 
  
-.. c:macro:: i_x2_new_cgtos:
+.. c:function:: void i_x2_new_cgtos(void)
 
 
     File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
@@ -1070,7 +1070,7 @@ Providers
        * :c:func:`i_x1_new_cgtos`
 
  
-.. c:macro:: i_x2_pol_mult:
+.. c:function:: void i_x2_pol_mult(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -1100,7 +1100,7 @@ Providers
        * :c:func:`i_x2_pol_mult`
 
  
-.. c:macro:: i_x2_pol_mult_cgtos:
+.. c:function:: void i_x2_pol_mult_cgtos(void)
 
 
     File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
@@ -1135,7 +1135,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: ao_2e_cgtos_schwartz_accel:
+.. c:function:: void ao_2e_cgtos_schwartz_accel(void)
 
 
     File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
@@ -1171,7 +1171,7 @@ Subroutines / functions
        * :c:func:`give_explicit_cpoly_and_cgaussian`
 
  
-.. c:macro:: ao_idx2_sq:
+.. c:function:: void ao_idx2_sq(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -1190,7 +1190,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index_2fold`
 
  
-.. c:macro:: ao_idx2_sq_rev:
+.. c:function:: void ao_idx2_sq_rev(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -1210,7 +1210,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index_reverse_2fold`
 
  
-.. c:macro:: ao_idx2_tri_key:
+.. c:function:: void ao_idx2_tri_key(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -1229,7 +1229,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index_2fold`
 
  
-.. c:macro:: ao_idx2_tri_rev_key:
+.. c:function:: void ao_idx2_tri_rev_key(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -1249,7 +1249,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index_reverse_2fold`
 
  
-.. c:macro:: ao_l4:
+.. c:function:: void ao_l4(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -1269,7 +1269,7 @@ Subroutines / functions
        * :c:data:`ao_l`
 
  
-.. c:macro:: ao_two_e_integral:
+.. c:function:: void ao_two_e_integral(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -1296,7 +1296,7 @@ Subroutines / functions
        * :c:data:`use_only_lr`
 
  
-.. c:macro:: ao_two_e_integral_cgtos:
+.. c:function:: void ao_two_e_integral_cgtos(void)
 
 
     File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
@@ -1331,7 +1331,7 @@ Subroutines / functions
        * :c:func:`give_explicit_cpoly_and_cgaussian`
 
  
-.. c:macro:: ao_two_e_integral_erf:
+.. c:function:: void ao_two_e_integral_erf(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals_erf.irp.f`
@@ -1366,7 +1366,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian`
 
  
-.. c:macro:: ao_two_e_integral_general:
+.. c:function:: void ao_two_e_integral_general(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -1400,7 +1400,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian`
 
  
-.. c:macro:: ao_two_e_integral_schwartz_accel:
+.. c:function:: void ao_two_e_integral_schwartz_accel(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -1435,7 +1435,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian`
 
  
-.. c:macro:: ao_two_e_integral_schwartz_accel_erf:
+.. c:function:: void ao_two_e_integral_schwartz_accel_erf(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals_erf.irp.f`
@@ -1470,7 +1470,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian`
 
  
-.. c:macro:: ao_two_e_integral_zero:
+.. c:function:: void ao_two_e_integral_zero(void)
 
 
     File : :file:`ao_two_e_ints/screening.irp.f`
@@ -1494,7 +1494,7 @@ Subroutines / functions
        * :c:data:`use_cgtos`
 
  
-.. c:macro:: clear_ao_erf_map:
+.. c:function:: void clear_ao_erf_map(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
@@ -1521,7 +1521,7 @@ Subroutines / functions
        * :c:func:`map_deinit`
 
  
-.. c:macro:: clear_ao_map:
+.. c:function:: void clear_ao_map(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -1548,7 +1548,7 @@ Subroutines / functions
        * :c:func:`map_deinit`
 
  
-.. c:macro:: compute_ao_integrals_erf_jl:
+.. c:function:: void compute_ao_integrals_erf_jl(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals_erf.irp.f`
@@ -1584,7 +1584,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:macro:: compute_ao_integrals_jl:
+.. c:function:: void compute_ao_integrals_jl(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -1619,7 +1619,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:macro:: compute_ao_two_e_integrals:
+.. c:function:: void compute_ao_two_e_integrals(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -1639,7 +1639,7 @@ Subroutines / functions
        * :c:data:`ao_num`
 
  
-.. c:macro:: compute_ao_two_e_integrals_erf:
+.. c:function:: void compute_ao_two_e_integrals_erf(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals_erf.irp.f`
@@ -1667,7 +1667,7 @@ Subroutines / functions
        * :c:data:`mo_two_e_int_erf_jj_from_ao`
 
  
-.. c:macro:: do_schwartz_accel:
+.. c:function:: void do_schwartz_accel(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -1688,7 +1688,7 @@ Subroutines / functions
        * :c:data:`do_ao_cholesky`
 
  
-.. c:macro:: dump_ao_integrals_erf:
+.. c:function:: void dump_ao_integrals_erf(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
@@ -1715,7 +1715,7 @@ Subroutines / functions
        * :c:func:`ezfio_set_work_empty`
 
  
-.. c:macro:: eri:
+.. c:function:: void eri(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -1739,7 +1739,7 @@ Subroutines / functions
        * :c:func:`integrale_new`
 
  
-.. c:macro:: eri_cgtos:
+.. c:function:: void eri_cgtos(void)
 
 
     File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
@@ -1763,7 +1763,7 @@ Subroutines / functions
        * :c:func:`integrale_new_cgtos`
 
  
-.. c:macro:: eri_erf:
+.. c:function:: void eri_erf(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals_erf.irp.f`
@@ -1796,7 +1796,7 @@ Subroutines / functions
        * :c:func:`integrale_new_erf`
 
  
-.. c:macro:: gauleg:
+.. c:function:: void gauleg(void)
 
 
     File : :file:`ao_two_e_ints/gauss_legendre.irp.f`
@@ -1816,7 +1816,7 @@ Subroutines / functions
        * :c:data:`gauleg_t2`
 
  
-.. c:macro:: general_primitive_integral:
+.. c:function:: void general_primitive_integral(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -1839,7 +1839,7 @@ Subroutines / functions
        * :c:func:`give_polynom_mult_center_x`
 
  
-.. c:macro:: general_primitive_integral_cgtos:
+.. c:function:: void general_primitive_integral_cgtos(void)
 
 
     File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
@@ -1864,7 +1864,7 @@ Subroutines / functions
        * :c:func:`multiply_cpoly`
 
  
-.. c:macro:: general_primitive_integral_erf:
+.. c:function:: void general_primitive_integral_erf(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals_erf.irp.f`
@@ -1895,7 +1895,7 @@ Subroutines / functions
        * :c:func:`multiply_poly`
 
  
-.. c:macro:: get_ao_erf_map_size:
+.. c:function:: void get_ao_erf_map_size(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
@@ -1915,7 +1915,7 @@ Subroutines / functions
        * :c:data:`ao_integrals_erf_map`
 
  
-.. c:macro:: get_ao_integ_chol:
+.. c:function:: void get_ao_integ_chol(void)
 
 
     File : :file:`ao_two_e_ints/cholesky.irp.f`
@@ -1937,7 +1937,7 @@ Subroutines / functions
        * :c:data:`cholesky_ao_transp`
 
  
-.. c:macro:: get_ao_map_size:
+.. c:function:: void get_ao_map_size(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -1957,7 +1957,7 @@ Subroutines / functions
        * :c:data:`ao_integrals_map`
 
  
-.. c:macro:: get_ao_two_e_integral:
+.. c:function:: void get_ao_two_e_integral(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -1989,7 +1989,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:macro:: get_ao_two_e_integral_erf:
+.. c:function:: void get_ao_two_e_integral_erf(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
@@ -2021,7 +2021,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:macro:: get_ao_two_e_integral_periodic:
+.. c:function:: void get_ao_two_e_integral_periodic(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -2052,7 +2052,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index_2fold`
 
  
-.. c:macro:: get_ao_two_e_integrals:
+.. c:function:: void get_ao_two_e_integrals(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -2083,7 +2083,7 @@ Subroutines / functions
        * :c:func:`four_idx_dgemm`
 
  
-.. c:macro:: get_ao_two_e_integrals_erf:
+.. c:function:: void get_ao_two_e_integrals_erf(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
@@ -2114,7 +2114,7 @@ Subroutines / functions
        * :c:func:`four_idx_dgemm_erf`
 
  
-.. c:macro:: get_ao_two_e_integrals_erf_non_zero:
+.. c:function:: void get_ao_two_e_integrals_erf_non_zero(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
@@ -2153,7 +2153,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:macro:: get_ao_two_e_integrals_non_zero:
+.. c:function:: void get_ao_two_e_integrals_non_zero(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -2184,7 +2184,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:macro:: get_ao_two_e_integrals_non_zero_jl:
+.. c:function:: void get_ao_two_e_integrals_non_zero_jl(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -2214,7 +2214,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:macro:: get_ao_two_e_integrals_non_zero_jl_from_list:
+.. c:function:: void get_ao_two_e_integrals_non_zero_jl_from_list(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -2244,7 +2244,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:macro:: get_ao_two_e_integrals_periodic:
+.. c:function:: void get_ao_two_e_integrals_periodic(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -2267,7 +2267,7 @@ Subroutines / functions
        * :c:data:`ao_two_e_integrals_in_map`
 
  
-.. c:macro:: give_cpolynom_mult_center_x:
+.. c:function:: void give_cpolynom_mult_center_x(void)
 
 
     File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
@@ -2298,7 +2298,7 @@ Subroutines / functions
        * :c:func:`i_x1_pol_mult_cgtos`
 
  
-.. c:macro:: give_polynom_mult_center_x:
+.. c:function:: void give_polynom_mult_center_x(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -2329,7 +2329,7 @@ Subroutines / functions
        * :c:func:`i_x1_pol_mult`
 
  
-.. c:macro:: i_x1_pol_mult:
+.. c:function:: void i_x1_pol_mult(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -2359,7 +2359,7 @@ Subroutines / functions
        * :c:func:`i_x2_pol_mult`
 
  
-.. c:macro:: i_x1_pol_mult_cgtos:
+.. c:function:: void i_x1_pol_mult_cgtos(void)
 
 
     File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
@@ -2389,7 +2389,7 @@ Subroutines / functions
        * :c:func:`i_x2_pol_mult_cgtos`
 
  
-.. c:macro:: idx2_tri_int:
+.. c:function:: void idx2_tri_int(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -2401,7 +2401,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: idx2_tri_rev_int:
+.. c:function:: void idx2_tri_rev_int(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -2414,7 +2414,7 @@ Subroutines / functions
     return i<=k
 
  
-.. c:macro:: insert_into_ao_integrals_erf_map:
+.. c:function:: void insert_into_ao_integrals_erf_map(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
@@ -2448,7 +2448,7 @@ Subroutines / functions
        * :c:func:`map_append`
 
  
-.. c:macro:: insert_into_ao_integrals_map:
+.. c:function:: void insert_into_ao_integrals_map(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -2482,7 +2482,7 @@ Subroutines / functions
        * :c:func:`map_append`
 
  
-.. c:macro:: integrale_new:
+.. c:function:: void integrale_new(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -2520,7 +2520,7 @@ Subroutines / functions
        * :c:func:`i_x1_new`
 
  
-.. c:macro:: integrale_new_cgtos:
+.. c:function:: void integrale_new_cgtos(void)
 
 
     File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
@@ -2558,7 +2558,7 @@ Subroutines / functions
        * :c:func:`i_x1_new_cgtos`
 
  
-.. c:macro:: integrale_new_erf:
+.. c:function:: void integrale_new_erf(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals_erf.irp.f`
@@ -2598,7 +2598,7 @@ Subroutines / functions
        * :c:func:`i_x1_new`
 
  
-.. c:macro:: load_ao_integrals_erf:
+.. c:function:: void load_ao_integrals_erf(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
@@ -2627,7 +2627,7 @@ Subroutines / functions
        * :c:func:`map_sort`
 
  
-.. c:macro:: multiply_poly_c2_inline_2e:
+.. c:function:: void multiply_poly_c2_inline_2e(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -2641,7 +2641,7 @@ Subroutines / functions
     D(t) =! D(t) +( B(t)*C(t))
 
  
-.. c:macro:: multiply_poly_local:
+.. c:function:: void multiply_poly_local(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -2655,7 +2655,7 @@ Subroutines / functions
     D(t) =! D(t) +( B(t)*C(t))
 
  
-.. c:macro:: n_pt_sup:
+.. c:function:: void n_pt_sup(void)
 
 
     File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
@@ -2671,7 +2671,7 @@ Subroutines / functions
     $I_x(a_x,b_x,c_x,d_x) \, I_y(a_y,b_y,c_y,d_y) \, I_z(a_z,b_z,c_z,d_z)$
 
  
-.. c:macro:: save_erf_two_e_integrals_ao:
+.. c:function:: void save_erf_two_e_integrals_ao(void)
 
 
     File : :file:`ao_two_e_ints/routines_save_integrals_erf.irp.f`
@@ -2701,7 +2701,7 @@ Subroutines / functions
        * :c:func:`map_save_to_disk`
 
  
-.. c:macro:: save_erf_two_e_ints_ao_into_ints_ao:
+.. c:function:: void save_erf_two_e_ints_ao_into_ints_ao(void)
 
 
     File : :file:`ao_two_e_ints/routines_save_integrals_erf.irp.f`
@@ -2732,7 +2732,7 @@ Subroutines / functions
        * :c:func:`map_save_to_disk`
 
  
-.. c:macro:: two_e_integrals_index:
+.. c:function:: void two_e_integrals_index(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -2776,7 +2776,7 @@ Subroutines / functions
        * :c:data:`mo_integrals_map`
 
  
-.. c:macro:: two_e_integrals_index_2fold:
+.. c:function:: void two_e_integrals_index_2fold(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -2804,7 +2804,7 @@ Subroutines / functions
        * :c:func:`ao_idx2_tri_key`
 
  
-.. c:macro:: two_e_integrals_index_reverse:
+.. c:function:: void two_e_integrals_index_reverse(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
@@ -2832,7 +2832,7 @@ Subroutines / functions
        * :c:data:`ao_two_e_integral_alpha`
 
  
-.. c:macro:: two_e_integrals_index_reverse_2fold:
+.. c:function:: void two_e_integrals_index_reverse_2fold(void)
 
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`

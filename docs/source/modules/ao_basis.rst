@@ -132,7 +132,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: ao_cart_to_sphe_coef
+.. c:var:: double ao_cart_to_sphe_coef
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -180,7 +180,7 @@ Providers
        * :c:data:`mo_sphe_coef`
 
  
-.. c:var:: ao_cart_to_sphe_normalization
+.. c:var:: double ao_cart_to_sphe_normalization
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -228,7 +228,7 @@ Providers
        * :c:data:`mo_sphe_coef`
 
  
-.. c:var:: ao_coef_cgtos_norm_ord_transp
+.. c:var:: double ao_coef_cgtos_norm_ord_transp
 
 
     File : :file:`ao_basis/cgtos.irp.f`
@@ -259,7 +259,7 @@ Providers
        * :c:data:`ao_overlap_cgtos`
 
  
-.. c:var:: ao_coef_norm_cgtos
+.. c:var:: double ao_coef_norm_cgtos
 
 
     File : :file:`ao_basis/cgtos.irp.f`
@@ -296,7 +296,7 @@ Providers
        * :c:data:`ao_coef_norm_cgtos_ord`
 
  
-.. c:var:: ao_coef_norm_cgtos_ord
+.. c:var:: double ao_coef_norm_cgtos_ord
 
 
     File : :file:`ao_basis/cgtos.irp.f`
@@ -333,7 +333,7 @@ Providers
        * :c:data:`ao_expo_cgtos_ord_transp`
 
  
-.. c:var:: ao_coef_normalization_factor
+.. c:var:: double ao_coef_normalization_factor
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -373,7 +373,7 @@ Providers
        * :c:data:`ao_coef_normalized_ordered`
 
  
-.. c:var:: ao_coef_normalized
+.. c:var:: double ao_coef_normalized
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -413,7 +413,7 @@ Providers
        * :c:data:`ao_coef_normalized_ordered`
 
  
-.. c:var:: ao_coef_normalized_ordered
+.. c:var:: double ao_coef_normalized_ordered
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -446,7 +446,7 @@ Providers
        * :c:data:`ao_expo_ordered_transp`
 
  
-.. c:var:: ao_coef_normalized_ordered_transp
+.. c:var:: double ao_coef_normalized_ordered_transp
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -492,7 +492,7 @@ Providers
        * :c:data:`cholesky_ao_num`
 
  
-.. c:var:: ao_coef_normalized_ordered_transp_per_nucl
+.. c:var:: double ao_coef_normalized_ordered_transp_per_nucl
 
 
     File : :file:`ao_basis/aos_transp.irp.f`
@@ -527,7 +527,7 @@ Providers
        * :c:data:`aos_lapl_in_r_array`
 
  
-.. c:var:: ao_expo_cgtos_ord
+.. c:var:: double _Complex ao_expo_cgtos_ord
 
 
     File : :file:`ao_basis/cgtos.irp.f`
@@ -564,7 +564,7 @@ Providers
        * :c:data:`ao_expo_cgtos_ord_transp`
 
  
-.. c:var:: ao_expo_cgtos_ord_transp
+.. c:var:: double _Complex ao_expo_cgtos_ord_transp
 
 
     File : :file:`ao_basis/cgtos.irp.f`
@@ -598,7 +598,7 @@ Providers
        * :c:data:`use_pw`
 
  
-.. c:var:: ao_expo_ordered
+.. c:var:: double ao_expo_ordered
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -631,7 +631,7 @@ Providers
        * :c:data:`ao_expo_ordered_transp`
 
  
-.. c:var:: ao_expo_ordered_transp
+.. c:var:: double ao_expo_ordered_transp
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -677,7 +677,7 @@ Providers
        * :c:data:`cholesky_ao_num`
 
  
-.. c:var:: ao_expo_ordered_transp_per_nucl
+.. c:var:: double ao_expo_ordered_transp_per_nucl
 
 
     File : :file:`ao_basis/aos_transp.irp.f`
@@ -712,7 +712,7 @@ Providers
        * :c:data:`aos_lapl_in_r_array`
 
  
-.. c:var:: ao_expo_phase_ord
+.. c:var:: double ao_expo_phase_ord
 
 
     File : :file:`ao_basis/cgtos.irp.f`
@@ -749,7 +749,7 @@ Providers
        * :c:data:`ao_expo_cgtos_ord_transp`
 
  
-.. c:var:: ao_expo_phase_ord_transp
+.. c:var:: double ao_expo_phase_ord_transp
 
 
     File : :file:`ao_basis/cgtos.irp.f`
@@ -783,7 +783,7 @@ Providers
        * :c:data:`use_pw`
 
  
-.. c:var:: ao_expo_pw_ord
+.. c:var:: double ao_expo_pw_ord
 
 
     File : :file:`ao_basis/cgtos.irp.f`
@@ -820,7 +820,7 @@ Providers
        * :c:data:`ao_expo_cgtos_ord_transp`
 
  
-.. c:var:: ao_expo_pw_ord_transp
+.. c:var:: double ao_expo_pw_ord_transp
 
 
     File : :file:`ao_basis/cgtos.irp.f`
@@ -854,7 +854,7 @@ Providers
        * :c:data:`use_pw`
 
  
-.. c:var:: ao_first_of_shell
+.. c:var:: int ao_first_of_shell
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -876,7 +876,7 @@ Providers
 
 
  
-.. c:var:: ao_l
+.. c:var:: int ao_l
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -909,7 +909,7 @@ Providers
        * :c:data:`nucl_list_shell_aos`
 
  
-.. c:var:: ao_l_char
+.. c:var:: char ao_l_char
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -942,7 +942,7 @@ Providers
        * :c:data:`nucl_list_shell_aos`
 
  
-.. c:var:: ao_l_char_space
+.. c:var:: char ao_l_char_space
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -965,7 +965,7 @@ Providers
 
 
  
-.. c:var:: ao_l_max
+.. c:var:: int ao_l_max
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -998,7 +998,7 @@ Providers
        * :c:data:`nucl_list_shell_aos`
 
  
-.. c:var:: ao_power_ordered_transp_per_nucl
+.. c:var:: int ao_power_ordered_transp_per_nucl
 
 
     File : :file:`ao_basis/aos_transp.irp.f`
@@ -1031,7 +1031,7 @@ Providers
        * :c:data:`aos_lapl_in_r_array`
 
  
-.. c:var:: ao_prim_num_max
+.. c:var:: int ao_prim_num_max
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -1072,7 +1072,7 @@ Providers
        * :c:data:`ao_expo_pw`
 
  
-.. c:var:: ao_shell
+.. c:var:: int ao_shell
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -1101,7 +1101,7 @@ Providers
        * :c:data:`ao_coef_normalized`
 
  
-.. c:var:: ao_sphe_coef_normalization_factor
+.. c:var:: double ao_sphe_coef_normalization_factor
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -1122,7 +1122,7 @@ Providers
 
 
  
-.. c:var:: ao_sphe_num
+.. c:var:: int ao_sphe_num
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -1169,7 +1169,7 @@ Providers
        * :c:data:`s_mo_sphe_coef`
 
  
-.. c:var:: ao_sphe_shell
+.. c:var:: int ao_sphe_shell
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -1192,7 +1192,7 @@ Providers
 
 
  
-.. c:var:: cart_to_sphe_0
+.. c:var:: double cart_to_sphe_0
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -1207,7 +1207,7 @@ Providers
 
 
  
-.. c:var:: cart_to_sphe_1
+.. c:var:: double cart_to_sphe_1
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -1228,7 +1228,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_coef`
 
  
-.. c:var:: cart_to_sphe_2
+.. c:var:: double cart_to_sphe_2
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -1249,7 +1249,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_coef`
 
  
-.. c:var:: cart_to_sphe_3
+.. c:var:: double cart_to_sphe_3
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -1270,7 +1270,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_coef`
 
  
-.. c:var:: cart_to_sphe_4
+.. c:var:: double cart_to_sphe_4
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -1291,7 +1291,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_coef`
 
  
-.. c:var:: cart_to_sphe_5
+.. c:var:: double cart_to_sphe_5
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -1312,7 +1312,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_coef`
 
  
-.. c:var:: cart_to_sphe_6
+.. c:var:: double cart_to_sphe_6
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -1333,7 +1333,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_coef`
 
  
-.. c:var:: cart_to_sphe_7
+.. c:var:: double cart_to_sphe_7
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -1354,7 +1354,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_coef`
 
  
-.. c:var:: cart_to_sphe_8
+.. c:var:: double cart_to_sphe_8
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -1375,7 +1375,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_coef`
 
  
-.. c:var:: cart_to_sphe_9
+.. c:var:: double cart_to_sphe_9
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -1396,7 +1396,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_coef`
 
  
-.. c:var:: cart_to_sphe_norm_0
+.. c:var:: double cart_to_sphe_norm_0
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -1411,7 +1411,7 @@ Providers
 
 
  
-.. c:var:: cart_to_sphe_norm_1
+.. c:var:: double cart_to_sphe_norm_1
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -1432,7 +1432,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_coef`
 
  
-.. c:var:: cart_to_sphe_norm_2
+.. c:var:: double cart_to_sphe_norm_2
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -1453,7 +1453,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_coef`
 
  
-.. c:var:: cart_to_sphe_norm_3
+.. c:var:: double cart_to_sphe_norm_3
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -1474,7 +1474,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_coef`
 
  
-.. c:var:: cart_to_sphe_norm_4
+.. c:var:: double cart_to_sphe_norm_4
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -1495,7 +1495,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_coef`
 
  
-.. c:var:: cart_to_sphe_norm_5
+.. c:var:: double cart_to_sphe_norm_5
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -1516,7 +1516,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_coef`
 
  
-.. c:var:: cart_to_sphe_norm_6
+.. c:var:: double cart_to_sphe_norm_6
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -1537,7 +1537,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_coef`
 
  
-.. c:var:: cart_to_sphe_norm_7
+.. c:var:: double cart_to_sphe_norm_7
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -1558,7 +1558,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_coef`
 
  
-.. c:var:: cart_to_sphe_norm_8
+.. c:var:: double cart_to_sphe_norm_8
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -1579,7 +1579,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_coef`
 
  
-.. c:var:: cart_to_sphe_norm_9
+.. c:var:: double cart_to_sphe_norm_9
 
 
     File : :file:`ao_basis/spherical_to_cartesian.irp.f`
@@ -1600,7 +1600,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_coef`
 
  
-.. c:var:: l_to_character
+.. c:var:: char l_to_character
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -1620,7 +1620,7 @@ Providers
        * :c:data:`ao_l`
 
  
-.. c:var:: n_aos_max
+.. c:var:: int n_aos_max
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -1660,7 +1660,7 @@ Providers
        * :c:data:`nucl_list_shell_aos`
 
  
-.. c:var:: n_pt_max_i_x
+.. c:var:: int n_pt_max_i_x
 
 
     File : :file:`ao_basis/dimensions_integrals.irp.f`
@@ -1695,7 +1695,7 @@ Providers
        * :c:data:`gauleg_t2`
 
  
-.. c:var:: n_pt_max_integrals
+.. c:var:: int n_pt_max_integrals
 
 
     File : :file:`ao_basis/dimensions_integrals.irp.f`
@@ -1730,7 +1730,7 @@ Providers
        * :c:data:`gauleg_t2`
 
  
-.. c:var:: nucl_aos
+.. c:var:: int nucl_aos
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -1760,7 +1760,7 @@ Providers
        * :c:data:`nucl_list_shell_aos`
 
  
-.. c:var:: nucl_aos_transposed
+.. c:var:: int nucl_aos_transposed
 
 
     File : :file:`ao_basis/aos_transp.irp.f`
@@ -1797,7 +1797,7 @@ Providers
        * :c:data:`aos_lapl_in_r_array`
 
  
-.. c:var:: nucl_list_shell_aos
+.. c:var:: int nucl_list_shell_aos
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -1825,7 +1825,7 @@ Providers
 
 
  
-.. c:var:: nucl_n_aos
+.. c:var:: int nucl_n_aos
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -1865,7 +1865,7 @@ Providers
        * :c:data:`nucl_list_shell_aos`
 
  
-.. c:var:: nucl_num_shell_aos
+.. c:var:: int nucl_num_shell_aos
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -1893,7 +1893,7 @@ Providers
 
 
  
-.. c:var:: use_cgtos
+.. c:var:: bool use_cgtos
 
 
     File : :file:`ao_basis/cgtos.irp.f`
@@ -1927,7 +1927,7 @@ Providers
        * :c:data:`cholesky_ao_num`
 
  
-.. c:var:: use_pw
+.. c:var:: bool use_pw
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -1959,7 +1959,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: ao_power_index:
+.. c:function:: void ao_power_index(void)
 
 
     File : :file:`ao_basis/aos.irp.f`
@@ -1974,7 +1974,7 @@ Subroutines / functions
     :math:`\frac{1}{2} (l-n_x) (l-n_x+1) + n_z + 1`
 
  
-.. c:macro:: ao_value:
+.. c:function:: void ao_value(void)
 
 
     File : :file:`ao_basis/aos_in_r.irp.f`
@@ -1999,7 +1999,7 @@ Subroutines / functions
        * :c:data:`nucl_coord`
 
  
-.. c:macro:: give_all_aos_and_grad_and_lapl_at_r:
+.. c:function:: void give_all_aos_and_grad_and_lapl_at_r(void)
 
 
     File : :file:`ao_basis/aos_in_r.irp.f`
@@ -2043,7 +2043,7 @@ Subroutines / functions
        * :c:func:`give_all_mos_and_grad_and_lapl_at_r`
 
  
-.. c:macro:: give_all_aos_and_grad_at_r:
+.. c:function:: void give_all_aos_and_grad_at_r(void)
 
 
     File : :file:`ao_basis/aos_in_r.irp.f`
@@ -2090,7 +2090,7 @@ Subroutines / functions
        * :c:func:`give_all_mos_and_grad_at_r`
 
  
-.. c:macro:: give_all_aos_at_r:
+.. c:function:: void give_all_aos_at_r(void)
 
 
     File : :file:`ao_basis/aos_in_r.irp.f`
@@ -2134,7 +2134,7 @@ Subroutines / functions
        * :c:func:`give_all_mos_at_r`
 
  
-.. c:macro:: primitive_value:
+.. c:function:: void primitive_value(void)
 
 
     File : :file:`ao_basis/aos_in_r.irp.f`

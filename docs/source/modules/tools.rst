@@ -78,7 +78,7 @@ Programs
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: do_print:
+.. c:function:: void do_print(void)
 
 
     File : :file:`check_orthonormality.irp.f`
@@ -105,7 +105,7 @@ Subroutines / functions
        * :c:func:`check_orthonormality`
 
  
-.. c:macro:: main:
+.. c:function:: void main(void)
 
 
     File : :file:`print_detweights.irp.f`
@@ -136,7 +136,7 @@ Subroutines / functions
        * :c:func:`get_excitation_degree`
 
  
-.. c:macro:: molden_attachment:
+.. c:function:: void molden_attachment(void)
 
 
     File : :file:`attachement_orb.irp.f`
@@ -184,7 +184,7 @@ Subroutines / functions
        * :c:func:`isort`
 
  
-.. c:macro:: print_exc:
+.. c:function:: void print_exc(void)
 
 
     File : :file:`print_detweights.irp.f`
@@ -219,7 +219,7 @@ Subroutines / functions
        * :c:func:`get_excitation_degree`
 
  
-.. c:macro:: routine:
+.. c:function:: void routine(void)
 
 
     File : :file:`write_integrals_erf.irp.f`
@@ -254,7 +254,7 @@ Subroutines / functions
        * :c:func:`save_erf_two_e_integrals_mo`
 
  
-.. c:macro:: routine_s2:
+.. c:function:: void routine_s2(void)
 
 
     File : :file:`truncate_wf.irp.f`
@@ -293,7 +293,7 @@ Subroutines / functions
        * :c:func:`save_wavefunction_general`
 
  
-.. c:macro:: routine_save_one_e_dm:
+.. c:function:: void routine_save_one_e_dm(void)
 
 
     File : :file:`save_one_e_dm.irp.f`
@@ -333,7 +333,7 @@ Subroutines / functions
        * :c:func:`ezfio_set_aux_quantities_data_one_e_dm_tot_ao`
 
  
-.. c:macro:: run:
+.. c:function:: void run(void)
 
 
     File : :file:`print_hmat.irp.f`

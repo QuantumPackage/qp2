@@ -31,7 +31,7 @@ file `gpu_affinity.c` maps each CPU core to its closest GPU.
 Providers 
 --------- 
  
-.. c:var:: blas_handle
+.. c:var:: int blas_handle
 
 
     File : :file:`gpu/gpu.irp.f`
@@ -61,7 +61,7 @@ Providers
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: blas_handle_mt
+.. c:var:: int blas_handle_mt
 
 
     File : :file:`gpu/gpu.irp.f`
@@ -101,7 +101,7 @@ Providers
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: gpu_busy
+.. c:var:: int gpu_busy
 
 
     File : :file:`gpu/gpu.irp.f`
@@ -132,7 +132,7 @@ Providers
        * :c:data:`bielec_pxxq_array`
 
  
-.. c:var:: gpu_busy_max_ddot
+.. c:var:: int gpu_busy_max_ddot
 
 
     File : :file:`gpu/gpu.irp.f`
@@ -163,7 +163,7 @@ Providers
        * :c:data:`bielec_pxxq_array`
 
  
-.. c:var:: gpu_busy_max_dgemm
+.. c:var:: int gpu_busy_max_dgemm
 
 
     File : :file:`gpu/gpu.irp.f`
@@ -194,7 +194,7 @@ Providers
        * :c:data:`bielec_pxxq_array`
 
  
-.. c:var:: gpu_busy_max_dgemv
+.. c:var:: int gpu_busy_max_dgemv
 
 
     File : :file:`gpu/gpu.irp.f`
@@ -225,7 +225,7 @@ Providers
        * :c:data:`bielec_pxxq_array`
 
  
-.. c:var:: gpu_default_stream
+.. c:var:: int gpu_default_stream
 
 
     File : :file:`gpu/gpu.irp.f`
@@ -239,7 +239,7 @@ Providers
 
 
  
-.. c:var:: gpu_mem
+.. c:var:: int gpu_mem
 
 
     File : :file:`gpu/gpu.irp.f`
@@ -253,7 +253,7 @@ Providers
 
 
  
-.. c:var:: gpu_num
+.. c:var:: int gpu_num
 
 
     File : :file:`gpu/gpu.irp.f`
@@ -293,7 +293,7 @@ Providers
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: igpu_mt
+.. c:var:: int igpu_mt
 
 
     File : :file:`gpu/gpu.irp.f`
@@ -337,7 +337,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: gpu_free_memory:
+.. c:function:: void gpu_free_memory(void)
 
 
     File : :file:`gpu/gpu.irp.f`
@@ -364,7 +364,7 @@ Subroutines / functions
        * :c:func:`gpu_get_memory`
 
  
-.. c:macro:: gpu_set_busy:
+.. c:function:: void gpu_set_busy(void)
 
 
     File : :file:`gpu/gpu.irp.f`
@@ -393,7 +393,7 @@ Subroutines / functions
        * :c:func:`get_mo_two_e_integrals_ij`
 
  
-.. c:macro:: gpu_unset_busy:
+.. c:function:: void gpu_unset_busy(void)
 
 
     File : :file:`gpu/gpu.irp.f`

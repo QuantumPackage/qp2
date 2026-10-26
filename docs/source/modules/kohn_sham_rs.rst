@@ -63,7 +63,7 @@ Programs
 Providers 
 --------- 
  
-.. c:var:: ao_potential_alpha_xc
+.. c:var:: double ao_potential_alpha_xc
 
 
     File : :file:`pot_functionals.irp.f`
@@ -95,7 +95,7 @@ Providers
        * :c:data:`rs_ks_energy`
 
  
-.. c:var:: ao_potential_beta_xc
+.. c:var:: double ao_potential_beta_xc
 
 
     File : :file:`pot_functionals.irp.f`
@@ -127,7 +127,7 @@ Providers
        * :c:data:`rs_ks_energy`
 
  
-.. c:var:: ao_two_e_integral_alpha
+.. c:var:: double ao_two_e_integral_alpha
 
 
     File : :file:`fock_matrix_rs_ks.irp.f`
@@ -162,7 +162,7 @@ Providers
        * :c:data:`rs_ks_energy`
 
  
-.. c:var:: ao_two_e_integral_beta
+.. c:var:: double ao_two_e_integral_beta
 
 
     File : :file:`fock_matrix_rs_ks.irp.f`
@@ -197,7 +197,7 @@ Providers
        * :c:data:`rs_ks_energy`
 
  
-.. c:var:: e_correlation_dft
+.. c:var:: double e_correlation_dft
 
 
     File : :file:`pot_functionals.irp.f`
@@ -224,7 +224,7 @@ Providers
        * :c:data:`rs_ks_energy`
 
  
-.. c:var:: e_exchange_dft
+.. c:var:: double e_exchange_dft
 
 
     File : :file:`pot_functionals.irp.f`
@@ -251,7 +251,7 @@ Providers
        * :c:data:`rs_ks_energy`
 
  
-.. c:var:: extra_e_contrib_density
+.. c:var:: double extra_e_contrib_density
 
 
     File : :file:`rs_ks_energy.irp.f`
@@ -284,7 +284,7 @@ Providers
        * :c:data:`scf_energy`
 
  
-.. c:var:: fock_matrix_alpha_no_xc_ao
+.. c:var:: double fock_matrix_alpha_no_xc_ao
 
 
     File : :file:`fock_matrix_rs_ks.irp.f`
@@ -314,7 +314,7 @@ Providers
        * :c:data:`fock_matrix_ao_alpha`
 
  
-.. c:var:: fock_matrix_ao_alpha
+.. c:var:: double fock_matrix_ao_alpha
 
 
     File : :file:`fock_matrix_rs_ks.irp.f`
@@ -348,7 +348,7 @@ Providers
        * :c:data:`scf_energy`
 
  
-.. c:var:: fock_matrix_ao_beta
+.. c:var:: double fock_matrix_ao_beta
 
 
     File : :file:`fock_matrix_rs_ks.irp.f`
@@ -382,7 +382,7 @@ Providers
        * :c:data:`scf_energy`
 
  
-.. c:var:: fock_matrix_beta_no_xc_ao
+.. c:var:: double fock_matrix_beta_no_xc_ao
 
 
     File : :file:`fock_matrix_rs_ks.irp.f`
@@ -412,7 +412,7 @@ Providers
        * :c:data:`fock_matrix_ao_alpha`
 
  
-.. c:var:: fock_matrix_energy
+.. c:var:: double fock_matrix_energy
 
 
     File : :file:`rs_ks_energy.irp.f`
@@ -452,7 +452,7 @@ Providers
        * :c:data:`extra_e_contrib_density`
 
  
-.. c:var:: one_e_energy
+.. c:var:: double one_e_energy
 
 
     File : :file:`rs_ks_energy.irp.f`
@@ -492,7 +492,7 @@ Providers
        * :c:data:`extra_e_contrib_density`
 
  
-.. c:var:: rs_ks_energy
+.. c:var:: double rs_ks_energy
 
 
     File : :file:`rs_ks_energy.irp.f`
@@ -532,7 +532,7 @@ Providers
        * :c:data:`extra_e_contrib_density`
 
  
-.. c:var:: trace_potential_xc
+.. c:var:: double trace_potential_xc
 
 
     File : :file:`rs_ks_energy.irp.f`
@@ -572,7 +572,7 @@ Providers
        * :c:data:`extra_e_contrib_density`
 
  
-.. c:var:: two_e_energy
+.. c:var:: double two_e_energy
 
 
     File : :file:`rs_ks_energy.irp.f`
@@ -616,7 +616,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: check_coherence_functional:
+.. c:function:: void check_coherence_functional(void)
 
 
     File : :file:`rs_ks_scf.irp.f`
@@ -636,7 +636,7 @@ Subroutines / functions
        * :c:data:`exchange_functional`
 
  
-.. c:macro:: create_guess:
+.. c:function:: void create_guess(void)
 
 
     File : :file:`rs_ks_scf.irp.f`
@@ -687,7 +687,7 @@ Subroutines / functions
        * :c:data:`mo_label`
 
  
-.. c:macro:: run:
+.. c:function:: void run(void)
 
 
     File : :file:`rs_ks_scf.irp.f`

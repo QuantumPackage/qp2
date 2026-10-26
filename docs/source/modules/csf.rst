@@ -19,7 +19,7 @@ Programs
 Providers 
 --------- 
  
-.. c:var:: cfg_nsomo_max
+.. c:var:: int cfg_nsomo_max
 
 
     File : :file:`configurations.irp.f`
@@ -46,7 +46,7 @@ Providers
 
 
  
-.. c:var:: cfg_seniority_index
+.. c:var:: int cfg_seniority_index
 
 
     File : :file:`configurations.irp.f`
@@ -73,7 +73,7 @@ Providers
 
 
  
-.. c:var:: csf_unique_vector_index
+.. c:var:: int csf_unique_vector_index
 
 
     File : :file:`csf.irp.f`
@@ -110,7 +110,7 @@ Providers
        * :c:data:`psi_csf_coef`
 
  
-.. c:var:: csf_unique_vector_value
+.. c:var:: double csf_unique_vector_value
 
 
     File : :file:`csf.irp.f`
@@ -147,7 +147,7 @@ Providers
        * :c:data:`psi_csf_coef`
 
  
-.. c:var:: csf_unique_vector_value_size
+.. c:var:: int csf_unique_vector_value_size
 
 
     File : :file:`csf.irp.f`
@@ -167,7 +167,7 @@ Providers
        * :c:data:`n_csf`
 
  
-.. c:var:: det_to_configuration
+.. c:var:: int det_to_configuration
 
 
     File : :file:`configurations.irp.f`
@@ -202,7 +202,7 @@ Providers
        * :c:data:`weight_configuration_average`
 
  
-.. c:var:: dominant_cfg
+.. c:var:: int dominant_cfg
 
 
     File : :file:`configurations.irp.f`
@@ -233,7 +233,7 @@ Providers
        * :c:data:`n_dominant_dets_of_cfgs`
 
  
-.. c:var:: dominant_dets_of_cfgs
+.. c:var:: int dominant_dets_of_cfgs
 
 
     File : :file:`configurations.irp.f`
@@ -260,7 +260,7 @@ Providers
 
 
  
-.. c:var:: n_configuration
+.. c:var:: int n_configuration
 
 
     File : :file:`configurations.irp.f`
@@ -309,7 +309,7 @@ Providers
        * :c:data:`weight_configuration_average`
 
  
-.. c:var:: n_csf
+.. c:var:: int n_csf
 
 
     File : :file:`csf.irp.f`
@@ -346,7 +346,7 @@ Providers
        * :c:data:`psi_csf_coef`
 
  
-.. c:var:: n_det_per_config_max
+.. c:var:: int n_det_per_config_max
 
 
     File : :file:`configurations.irp.f`
@@ -391,7 +391,7 @@ Providers
        * :c:data:`psi_csf_coef`
 
  
-.. c:var:: n_dominant_dets_of_cfgs
+.. c:var:: int n_dominant_dets_of_cfgs
 
 
     File : :file:`configurations.irp.f`
@@ -423,7 +423,7 @@ Providers
        * :c:data:`dominant_dets_of_cfgs`
 
  
-.. c:var:: n_elec_alpha_for_psi_configuration
+.. c:var:: int n_elec_alpha_for_psi_configuration
 
 
     File : :file:`configurations.irp.f`
@@ -446,7 +446,7 @@ Providers
 
 
  
-.. c:var:: psi_configuration
+.. c:var:: int psi_configuration
 
 
     File : :file:`configurations.irp.f`
@@ -495,7 +495,7 @@ Providers
        * :c:data:`weight_configuration_average`
 
  
-.. c:var:: psi_configuration_hii
+.. c:var:: double psi_configuration_hii
 
 
     File : :file:`configurations.irp.f`
@@ -521,7 +521,7 @@ Providers
 
 
  
-.. c:var:: psi_configuration_n_csf
+.. c:var:: int psi_configuration_n_csf
 
 
     File : :file:`csf.irp.f`
@@ -558,7 +558,7 @@ Providers
        * :c:data:`psi_csf_coef`
 
  
-.. c:var:: psi_configuration_n_det
+.. c:var:: int psi_configuration_n_det
 
 
     File : :file:`configurations.irp.f`
@@ -603,7 +603,7 @@ Providers
        * :c:data:`psi_csf_coef`
 
  
-.. c:var:: psi_configuration_sorted
+.. c:var:: int psi_configuration_sorted
 
 
     File : :file:`configurations.irp.f`
@@ -629,7 +629,7 @@ Providers
 
 
  
-.. c:var:: psi_configuration_sorted_order
+.. c:var:: int psi_configuration_sorted_order
 
 
     File : :file:`configurations.irp.f`
@@ -655,7 +655,7 @@ Providers
 
 
  
-.. c:var:: psi_configuration_sorted_order_reverse
+.. c:var:: int psi_configuration_sorted_order_reverse
 
 
     File : :file:`configurations.irp.f`
@@ -681,7 +681,7 @@ Providers
 
 
  
-.. c:var:: psi_configuration_to_psi_csf
+.. c:var:: int psi_configuration_to_psi_csf
 
 
     File : :file:`csf.irp.f`
@@ -718,7 +718,7 @@ Providers
        * :c:data:`psi_csf_coef`
 
  
-.. c:var:: psi_configuration_to_psi_det
+.. c:var:: int psi_configuration_to_psi_det
 
 
     File : :file:`configurations.irp.f`
@@ -763,7 +763,7 @@ Providers
        * :c:data:`psi_csf_coef`
 
  
-.. c:var:: psi_configuration_to_psi_det_data
+.. c:var:: int psi_configuration_to_psi_det_data
 
 
     File : :file:`configurations.irp.f`
@@ -808,7 +808,7 @@ Providers
        * :c:data:`psi_csf_coef`
 
  
-.. c:var:: psi_csf_coef
+.. c:var:: double psi_csf_coef
 
 
     File : :file:`csf.irp.f`
@@ -834,7 +834,7 @@ Providers
 
 
  
-.. c:var:: spin_multiplicity
+.. c:var:: int spin_multiplicity
 
 
     File : :file:`configurations.irp.f`
@@ -856,7 +856,7 @@ Providers
 
 
  
-.. c:var:: weight_configuration
+.. c:var:: double weight_configuration
 
 
     File : :file:`configurations.irp.f`
@@ -881,7 +881,7 @@ Providers
 
 
  
-.. c:var:: weight_configuration_average
+.. c:var:: double weight_configuration_average
 
 
     File : :file:`configurations.irp.f`
@@ -913,7 +913,7 @@ Providers
        * :c:data:`psi_configuration_sorted`
 
  
-.. c:var:: weight_configuration_average_sorted
+.. c:var:: double weight_configuration_average_sorted
 
 
     File : :file:`configurations.irp.f`
@@ -943,7 +943,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: binary_search_cfg:
+.. c:function:: void binary_search_cfg(void)
 
 
     File : :file:`configurations.irp.f`
@@ -968,7 +968,7 @@ Subroutines / functions
        * :c:data:`psi_configuration`
 
  
-.. c:macro:: configuration_of_det:
+.. c:function:: void configuration_of_det(void)
 
 
     File : :file:`configurations.irp.f`
@@ -986,7 +986,7 @@ Subroutines / functions
     
 
  
-.. c:macro:: configuration_search_key:
+.. c:function:: void configuration_search_key(void)
 
 
     File : :file:`connected_to_ref.irp.f`
@@ -1008,7 +1008,7 @@ Subroutines / functions
        * :c:data:`elec_alpha_num`
 
  
-.. c:macro:: configuration_to_dets:
+.. c:function:: void configuration_to_dets(void)
 
 
     File : :file:`configurations.irp.f`
@@ -1047,7 +1047,7 @@ Subroutines / functions
        * :c:data:`psi_configuration_to_psi_det`
 
  
-.. c:macro:: configuration_to_dets_size:
+.. c:function:: void configuration_to_dets_size(void)
 
 
     File : :file:`configurations.irp.f`
@@ -1075,7 +1075,7 @@ Subroutines / functions
        * :c:data:`n_dominant_dets_of_cfgs`
 
  
-.. c:macro:: convertwffromcsftodet:
+.. c:function:: void convertwffromcsftodet(void)
 
 
     File : :file:`csf.irp.f`
@@ -1106,7 +1106,7 @@ Subroutines / functions
        * :c:func:`get_det_csf_transformation`
 
  
-.. c:macro:: convertwffromdettocsf:
+.. c:function:: void convertwffromdettocsf(void)
 
 
     File : :file:`csf.irp.f`
@@ -1144,7 +1144,7 @@ Subroutines / functions
        * :c:func:`get_det_csf_transformation`
 
  
-.. c:macro:: get_det_csf_transformation:
+.. c:function:: void get_det_csf_transformation(void)
 
 
     File : :file:`csf.irp.f`
@@ -1180,7 +1180,7 @@ Subroutines / functions
        * :c:func:`qp_bug`
 
  
-.. c:macro:: make_s2_eigenfunction:
+.. c:function:: void make_s2_eigenfunction(void)
 
 
     File : :file:`configurations.irp.f`

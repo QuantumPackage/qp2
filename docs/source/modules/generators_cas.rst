@@ -26,7 +26,7 @@ define post-CAS approaches (see the cassd module for instance).
 Providers 
 --------- 
  
-.. c:var:: n_det_generators
+.. c:var:: int n_det_generators
 
 
     File : :file:`generators_cas/generators.irp.f`
@@ -68,7 +68,7 @@ Providers
        * :c:data:`pt2_w`
 
  
-.. c:var:: psi_coef_generators
+.. c:var:: double psi_coef_generators
 
 
     File : :file:`generators_cas/generators.irp.f`
@@ -109,7 +109,7 @@ Providers
        * :c:data:`pt2_w`
 
  
-.. c:var:: psi_coef_sorted_gen
+.. c:var:: double psi_coef_sorted_gen
 
 
     File : :file:`generators_cas/generators.irp.f`
@@ -150,7 +150,7 @@ Providers
        * :c:data:`pt2_w`
 
  
-.. c:var:: psi_det_generators
+.. c:var:: int psi_det_generators
 
 
     File : :file:`generators_cas/generators.irp.f`
@@ -191,7 +191,7 @@ Providers
        * :c:data:`pt2_w`
 
  
-.. c:var:: psi_det_sorted_gen
+.. c:var:: int psi_det_sorted_gen
 
 
     File : :file:`generators_cas/generators.irp.f`
@@ -232,7 +232,7 @@ Providers
        * :c:data:`pt2_w`
 
  
-.. c:var:: psi_det_sorted_gen_order
+.. c:var:: int psi_det_sorted_gen_order
 
 
     File : :file:`generators_cas/generators.irp.f`
@@ -273,7 +273,7 @@ Providers
        * :c:data:`pt2_w`
 
  
-.. c:var:: select_max
+.. c:var:: double select_max
 
 
     File : :file:`generators_cas/generators.irp.f`
@@ -294,7 +294,7 @@ Providers
 
 
  
-.. c:var:: size_select_max
+.. c:var:: int size_select_max
 
 
     File : :file:`generators_cas/generators.irp.f`
@@ -318,7 +318,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: extract_cas:
+.. c:function:: void extract_cas(void)
 
 
     File : :file:`generators_cas/extract_cas.irp.f`

@@ -29,7 +29,7 @@ Programs
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: compute_mp2:
+.. c:function:: void compute_mp2(void)
 
 
     File : :file:`mp2.irp.f`
@@ -73,7 +73,7 @@ Subroutines / functions
        * :c:func:`get_mo_two_e_integrals_ij`
 
  
-.. c:macro:: h_apply_mp2:
+.. c:function:: void h_apply_mp2(void)
 
 
     File : :file:`H_apply.irp.f_shell_14`
@@ -115,7 +115,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: h_apply_mp2_diexc:
+.. c:function:: void h_apply_mp2_diexc(void)
 
 
     File : :file:`H_apply.irp.f_shell_14`
@@ -150,7 +150,7 @@ Subroutines / functions
        * :c:func:`h_apply_mp2_diexcp`
 
  
-.. c:macro:: h_apply_mp2_diexcorg:
+.. c:function:: void h_apply_mp2_diexcorg(void)
 
 
     File : :file:`H_apply.irp.f_shell_14`
@@ -194,7 +194,7 @@ Subroutines / functions
        * :c:func:`perturb_buffer_moller_plesset`
 
  
-.. c:macro:: h_apply_mp2_diexcp:
+.. c:function:: void h_apply_mp2_diexcp(void)
 
 
     File : :file:`H_apply.irp.f_shell_14`
@@ -229,7 +229,7 @@ Subroutines / functions
        * :c:func:`h_apply_mp2_diexcorg`
 
  
-.. c:macro:: h_apply_mp2_monoexc:
+.. c:function:: void h_apply_mp2_monoexc(void)
 
 
     File : :file:`H_apply.irp.f_shell_14`
@@ -273,7 +273,7 @@ Subroutines / functions
        * :c:func:`perturb_buffer_moller_plesset`
 
  
-.. c:macro:: h_apply_mp2_selection:
+.. c:function:: void h_apply_mp2_selection(void)
 
 
     File : :file:`H_apply.irp.f_shell_14`
@@ -340,7 +340,7 @@ Subroutines / functions
        * :c:data:`psi_det_sorted_bit`
 
  
-.. c:macro:: h_apply_mp2_selection_diexc:
+.. c:function:: void h_apply_mp2_selection_diexc(void)
 
 
     File : :file:`H_apply.irp.f_shell_14`
@@ -375,7 +375,7 @@ Subroutines / functions
        * :c:func:`h_apply_mp2_selection_diexcp`
 
  
-.. c:macro:: h_apply_mp2_selection_diexcorg:
+.. c:function:: void h_apply_mp2_selection_diexcorg(void)
 
 
     File : :file:`H_apply.irp.f_shell_14`
@@ -420,7 +420,7 @@ Subroutines / functions
        * :c:func:`perturb_buffer_moller_plesset`
 
  
-.. c:macro:: h_apply_mp2_selection_diexcp:
+.. c:function:: void h_apply_mp2_selection_diexcp(void)
 
 
     File : :file:`H_apply.irp.f_shell_14`
@@ -455,7 +455,7 @@ Subroutines / functions
        * :c:func:`h_apply_mp2_selection_diexcorg`
 
  
-.. c:macro:: h_apply_mp2_selection_monoexc:
+.. c:function:: void h_apply_mp2_selection_monoexc(void)
 
 
     File : :file:`H_apply.irp.f_shell_14`
@@ -500,7 +500,7 @@ Subroutines / functions
        * :c:func:`perturb_buffer_moller_plesset`
 
  
-.. c:macro:: run:
+.. c:function:: void run(void)
 
 
     File : :file:`mp2.irp.f`

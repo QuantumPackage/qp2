@@ -29,7 +29,7 @@ for the overlap of two products of primitives.
 Providers 
 --------- 
  
-.. c:var:: ao_basis_prod_threshold
+.. c:var:: double ao_basis_prod_threshold
 
 
     File : :file:`ao_basis_product/basis_prod.irp.f`
@@ -57,7 +57,7 @@ Providers
        * :c:data:`basis_prod_overlap`
 
  
-.. c:var:: basis_prod_idx
+.. c:var:: int basis_prod_idx
 
 
     File : :file:`ao_basis_product/basis_prod.irp.f`
@@ -88,7 +88,7 @@ Providers
        * :c:data:`mu_of_r_projector_ao_prod`
 
  
-.. c:var:: basis_prod_num
+.. c:var:: int basis_prod_num
 
 
     File : :file:`ao_basis_product/basis_prod.irp.f`
@@ -117,7 +117,7 @@ Providers
        * :c:data:`mu_of_r_projector_ao_prod`
 
  
-.. c:var:: basis_prod_overlap
+.. c:var:: double basis_prod_overlap
 
 
     File : :file:`ao_basis_product/basis_prod.irp.f`
@@ -148,7 +148,7 @@ Providers
        * :c:data:`mu_of_r_projector_ao_prod`
 
  
-.. c:var:: basis_prod_overlap_inv
+.. c:var:: double basis_prod_overlap_inv
 
 
     File : :file:`ao_basis_product/basis_prod.irp.f`
@@ -183,7 +183,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: basis_prod_overlap_func:
+.. c:function:: void basis_prod_overlap_func(void)
 
 
     File : :file:`ao_basis_product/basis_prod.irp.f`
@@ -205,7 +205,7 @@ Subroutines / functions
        * :c:data:`basis_prod_idx`
 
  
-.. c:macro:: general_overlap_integral:
+.. c:function:: void general_overlap_integral(void)
 
 
     File : :file:`ao_basis_product/basis_prod.irp.f`

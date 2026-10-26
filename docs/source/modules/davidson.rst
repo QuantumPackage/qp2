@@ -31,7 +31,7 @@ The important providers for that module are:
 Providers 
 --------- 
  
-.. c:var:: ci_eigenvectors
+.. c:var:: double ci_eigenvectors
 
 
     File : :file:`davidson/diagonalize_ci.irp.f`
@@ -79,7 +79,7 @@ Providers
        * :c:data:`ci_energy`
 
  
-.. c:var:: ci_electronic_energy
+.. c:var:: double ci_electronic_energy
 
 
     File : :file:`davidson/diagonalize_ci.irp.f`
@@ -127,7 +127,7 @@ Providers
        * :c:data:`ci_energy`
 
  
-.. c:var:: ci_energy
+.. c:var:: double ci_energy
 
 
     File : :file:`davidson/diagonalize_ci.irp.f`
@@ -155,7 +155,7 @@ Providers
 
 
  
-.. c:var:: ci_s2
+.. c:var:: double ci_s2
 
 
     File : :file:`davidson/diagonalize_ci.irp.f`
@@ -203,7 +203,7 @@ Providers
        * :c:data:`ci_energy`
 
  
-.. c:var:: diag_algorithm
+.. c:var:: char diag_algorithm
 
 
     File : :file:`davidson/diagonalization_hs2_dressed.irp.f`
@@ -232,7 +232,7 @@ Providers
        * :c:data:`ci_electronic_energy`
 
  
-.. c:var:: dressed_column_idx
+.. c:var:: int dressed_column_idx
 
 
     File : :file:`davidson/diagonalization_hs2_dressed.irp.f`
@@ -255,7 +255,7 @@ Providers
 
 
  
-.. c:var:: overlap_states
+.. c:var:: double overlap_states
 
 
     File : :file:`davidson/overlap_states.irp.f`
@@ -282,7 +282,7 @@ Providers
 
 
  
-.. c:var:: overlap_states_inv
+.. c:var:: double overlap_states_inv
 
 
     File : :file:`davidson/overlap_states.irp.f`
@@ -309,7 +309,7 @@ Providers
 
 
  
-.. c:var:: psi_energy
+.. c:var:: double psi_energy
 
 
     File : :file:`davidson/u0_hs2_u0.irp.f`
@@ -351,7 +351,7 @@ Providers
        * :c:data:`pt2_e0_denominator`
 
  
-.. c:var:: psi_energy_two_e
+.. c:var:: double psi_energy_two_e
 
 
     File : :file:`davidson/u0_wee_u0.irp.f`
@@ -377,7 +377,7 @@ Providers
 
 
  
-.. c:var:: psi_energy_two_e_trans
+.. c:var:: double psi_energy_two_e_trans
 
 
     File : :file:`davidson/u0_wee_u0.irp.f`
@@ -406,7 +406,7 @@ Providers
 
 
  
-.. c:var:: psi_energy_with_nucl_rep
+.. c:var:: double psi_energy_with_nucl_rep
 
 
     File : :file:`davidson/u0_hs2_u0.irp.f`
@@ -429,7 +429,7 @@ Providers
 
 
  
-.. c:var:: psi_s2
+.. c:var:: double psi_s2
 
 
     File : :file:`davidson/u0_hs2_u0.irp.f`
@@ -475,7 +475,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: davidson_collector:
+.. c:function:: void davidson_collector(void)
 
 
     File : :file:`davidson/davidson_parallel.irp.f`
@@ -509,7 +509,7 @@ Subroutines / functions
        * :c:func:`davidson_pull_results`
 
  
-.. c:macro:: davidson_csf_collector:
+.. c:function:: void davidson_csf_collector(void)
 
 
     File : :file:`davidson/davidson_parallel_csf.irp.f`
@@ -536,7 +536,7 @@ Subroutines / functions
        * :c:func:`davidson_csf_pull_results`
 
  
-.. c:macro:: davidson_csf_pull_results:
+.. c:function:: void davidson_csf_pull_results(void)
 
 
     File : :file:`davidson/davidson_parallel_csf.irp.f`
@@ -564,7 +564,7 @@ Subroutines / functions
        * :c:func:`davidson_csf_collector`
 
  
-.. c:macro:: davidson_csf_push_results:
+.. c:function:: void davidson_csf_push_results(void)
 
 
     File : :file:`davidson/davidson_parallel_csf.irp.f`
@@ -585,7 +585,7 @@ Subroutines / functions
        * :c:data:`n_states_diag`
 
  
-.. c:macro:: davidson_csf_push_results_async_send:
+.. c:function:: void davidson_csf_push_results_async_send(void)
 
 
     File : :file:`davidson/davidson_parallel_csf.irp.f`
@@ -613,7 +613,7 @@ Subroutines / functions
        * :c:func:`davidson_csf_slave_work`
 
  
-.. c:macro:: davidson_csf_run_slave:
+.. c:function:: void davidson_csf_run_slave(void)
 
 
     File : :file:`davidson/davidson_parallel_csf.irp.f`
@@ -652,7 +652,7 @@ Subroutines / functions
        * :c:func:`sleep`
 
  
-.. c:macro:: davidson_csf_slave_inproc:
+.. c:function:: void davidson_csf_slave_inproc(void)
 
 
     File : :file:`davidson/davidson_parallel_csf.irp.f`
@@ -671,7 +671,7 @@ Subroutines / functions
        * :c:func:`davidson_csf_run_slave`
 
  
-.. c:macro:: davidson_csf_slave_tcp:
+.. c:function:: void davidson_csf_slave_tcp(void)
 
 
     File : :file:`davidson/davidson_parallel_csf.irp.f`
@@ -690,7 +690,7 @@ Subroutines / functions
        * :c:func:`davidson_csf_run_slave`
 
  
-.. c:macro:: davidson_csf_slave_work:
+.. c:function:: void davidson_csf_slave_work(void)
 
 
     File : :file:`davidson/davidson_parallel_csf.irp.f`
@@ -736,7 +736,7 @@ Subroutines / functions
        * :c:func:`h_u_0_nstates_openmp_work`
 
  
-.. c:macro:: davidson_diag_csf_hjj:
+.. c:function:: void davidson_diag_csf_hjj(void)
 
 
     File : :file:`davidson/diagonalization_hcsf_dressed.irp.f`
@@ -832,7 +832,7 @@ Subroutines / functions
        * :c:data:`nthreads_davidson`
 
  
-.. c:macro:: davidson_diag_h_csf:
+.. c:function:: void davidson_diag_h_csf(void)
 
 
     File : :file:`davidson/diagonalization_hcsf_dressed.irp.f`
@@ -887,7 +887,7 @@ Subroutines / functions
        * :c:data:`nthreads_davidson`
 
  
-.. c:macro:: davidson_diag_hjj_sjj:
+.. c:function:: void davidson_diag_hjj_sjj(void)
 
 
     File : :file:`davidson/diagonalization_hs2_dressed.irp.f`
@@ -985,7 +985,7 @@ Subroutines / functions
        * :c:data:`nthreads_davidson`
 
  
-.. c:macro:: davidson_diag_hs2:
+.. c:function:: void davidson_diag_hs2(void)
 
 
     File : :file:`davidson/diagonalization_hs2_dressed.irp.f`
@@ -1040,7 +1040,7 @@ Subroutines / functions
        * :c:data:`nthreads_davidson`
 
  
-.. c:macro:: davidson_diag_nonsym_h:
+.. c:function:: void davidson_diag_nonsym_h(void)
 
 
     File : :file:`davidson/diagonalization_nonsym_h_dressed.irp.f`
@@ -1090,7 +1090,7 @@ Subroutines / functions
        * :c:data:`nthreads_davidson`
 
  
-.. c:macro:: davidson_diag_nonsym_hjj:
+.. c:function:: void davidson_diag_nonsym_hjj(void)
 
 
     File : :file:`davidson/diagonalization_nonsym_h_dressed.irp.f`
@@ -1185,7 +1185,7 @@ Subroutines / functions
        * :c:data:`nthreads_davidson`
 
  
-.. c:macro:: davidson_nos2_collector:
+.. c:function:: void davidson_nos2_collector(void)
 
 
     File : :file:`davidson/davidson_parallel_nos2.irp.f`
@@ -1219,7 +1219,7 @@ Subroutines / functions
        * :c:func:`davidson_nos2_pull_results`
 
  
-.. c:macro:: davidson_nos2_pull_results:
+.. c:function:: void davidson_nos2_pull_results(void)
 
 
     File : :file:`davidson/davidson_parallel_nos2.irp.f`
@@ -1247,7 +1247,7 @@ Subroutines / functions
        * :c:func:`davidson_nos2_collector`
 
  
-.. c:macro:: davidson_nos2_push_results:
+.. c:function:: void davidson_nos2_push_results(void)
 
 
     File : :file:`davidson/davidson_parallel_nos2.irp.f`
@@ -1268,7 +1268,7 @@ Subroutines / functions
        * :c:data:`n_states_diag`
 
  
-.. c:macro:: davidson_nos2_push_results_async_send:
+.. c:function:: void davidson_nos2_push_results_async_send(void)
 
 
     File : :file:`davidson/davidson_parallel_nos2.irp.f`
@@ -1296,7 +1296,7 @@ Subroutines / functions
        * :c:func:`davidson_nos2_slave_work`
 
  
-.. c:macro:: davidson_nos2_run_slave:
+.. c:function:: void davidson_nos2_run_slave(void)
 
 
     File : :file:`davidson/davidson_parallel_nos2.irp.f`
@@ -1335,7 +1335,7 @@ Subroutines / functions
        * :c:func:`sleep`
 
  
-.. c:macro:: davidson_nos2_slave_inproc:
+.. c:function:: void davidson_nos2_slave_inproc(void)
 
 
     File : :file:`davidson/davidson_parallel_nos2.irp.f`
@@ -1361,7 +1361,7 @@ Subroutines / functions
        * :c:func:`davidson_nos2_run_slave`
 
  
-.. c:macro:: davidson_nos2_slave_tcp:
+.. c:function:: void davidson_nos2_slave_tcp(void)
 
 
     File : :file:`davidson/davidson_parallel_nos2.irp.f`
@@ -1380,7 +1380,7 @@ Subroutines / functions
        * :c:func:`davidson_nos2_run_slave`
 
  
-.. c:macro:: davidson_nos2_slave_work:
+.. c:function:: void davidson_nos2_slave_work(void)
 
 
     File : :file:`davidson/davidson_parallel_nos2.irp.f`
@@ -1426,7 +1426,7 @@ Subroutines / functions
        * :c:func:`h_u_0_nstates_openmp_work`
 
  
-.. c:macro:: davidson_pull_results:
+.. c:function:: void davidson_pull_results(void)
 
 
     File : :file:`davidson/davidson_parallel.irp.f`
@@ -1454,7 +1454,7 @@ Subroutines / functions
        * :c:func:`davidson_collector`
 
  
-.. c:macro:: davidson_push_results:
+.. c:function:: void davidson_push_results(void)
 
 
     File : :file:`davidson/davidson_parallel.irp.f`
@@ -1475,7 +1475,7 @@ Subroutines / functions
        * :c:data:`n_states_diag`
 
  
-.. c:macro:: davidson_push_results_async_recv:
+.. c:function:: void davidson_push_results_async_recv(void)
 
 
     File : :file:`davidson/davidson_parallel.irp.f`
@@ -1497,7 +1497,7 @@ Subroutines / functions
        * :c:func:`davidson_slave_work`
 
  
-.. c:macro:: davidson_push_results_async_send:
+.. c:function:: void davidson_push_results_async_send(void)
 
 
     File : :file:`davidson/davidson_parallel.irp.f`
@@ -1525,7 +1525,7 @@ Subroutines / functions
        * :c:func:`davidson_slave_work`
 
  
-.. c:macro:: davidson_run_slave:
+.. c:function:: void davidson_run_slave(void)
 
 
     File : :file:`davidson/davidson_parallel.irp.f`
@@ -1564,7 +1564,7 @@ Subroutines / functions
        * :c:func:`sleep`
 
  
-.. c:macro:: davidson_slave_inproc:
+.. c:function:: void davidson_slave_inproc(void)
 
 
     File : :file:`davidson/davidson_parallel.irp.f`
@@ -1583,7 +1583,7 @@ Subroutines / functions
        * :c:func:`davidson_run_slave`
 
  
-.. c:macro:: davidson_slave_tcp:
+.. c:function:: void davidson_slave_tcp(void)
 
 
     File : :file:`davidson/davidson_parallel.irp.f`
@@ -1609,7 +1609,7 @@ Subroutines / functions
        * :c:func:`davidson_run_slave`
 
  
-.. c:macro:: davidson_slave_work:
+.. c:function:: void davidson_slave_work(void)
 
 
     File : :file:`davidson/davidson_parallel.irp.f`
@@ -1657,7 +1657,7 @@ Subroutines / functions
        * :c:func:`unlock_io`
 
  
-.. c:macro:: diagonalize_ci:
+.. c:function:: void diagonalize_ci(void)
 
 
     File : :file:`davidson/diagonalize_ci.irp.f`
@@ -1711,7 +1711,7 @@ Subroutines / functions
        * :c:data:`psi_energy`
 
  
-.. c:macro:: h_s2_u_0_nstates_openmp:
+.. c:function:: void h_s2_u_0_nstates_openmp(void)
 
 
     File : :file:`davidson/u0_hs2_u0.irp.f`
@@ -1754,7 +1754,7 @@ Subroutines / functions
        * :c:func:`h_s2_u_0_nstates_openmp_work`
 
  
-.. c:macro:: h_s2_u_0_nstates_openmp_work:
+.. c:function:: void h_s2_u_0_nstates_openmp_work(void)
 
 
     File : :file:`davidson/u0_hs2_u0.irp.f`
@@ -1798,7 +1798,7 @@ Subroutines / functions
        * :c:func:`h_s2_u_0_nstates_openmp_work_n_int`
 
  
-.. c:macro:: h_s2_u_0_nstates_openmp_work_1:
+.. c:function:: void h_s2_u_0_nstates_openmp_work_1(void)
 
 
     File : :file:`davidson/u0_hs2_u0.irp.f_template_1554`
@@ -1853,7 +1853,7 @@ Subroutines / functions
        * :c:func:`i_h_j_single_spin`
 
  
-.. c:macro:: h_s2_u_0_nstates_openmp_work_1_cholesky:
+.. c:function:: void h_s2_u_0_nstates_openmp_work_1_cholesky(void)
 
 
     File : :file:`davidson/u0_hs2_u0.irp.f_template_1554`
@@ -1910,7 +1910,7 @@ Subroutines / functions
        * :c:func:`i_h_j_single_spin`
 
  
-.. c:macro:: h_s2_u_0_nstates_openmp_work_2:
+.. c:function:: void h_s2_u_0_nstates_openmp_work_2(void)
 
 
     File : :file:`davidson/u0_hs2_u0.irp.f_template_1554`
@@ -1965,7 +1965,7 @@ Subroutines / functions
        * :c:func:`i_h_j_single_spin`
 
  
-.. c:macro:: h_s2_u_0_nstates_openmp_work_2_cholesky:
+.. c:function:: void h_s2_u_0_nstates_openmp_work_2_cholesky(void)
 
 
     File : :file:`davidson/u0_hs2_u0.irp.f_template_1554`
@@ -2022,7 +2022,7 @@ Subroutines / functions
        * :c:func:`i_h_j_single_spin`
 
  
-.. c:macro:: h_s2_u_0_nstates_openmp_work_3:
+.. c:function:: void h_s2_u_0_nstates_openmp_work_3(void)
 
 
     File : :file:`davidson/u0_hs2_u0.irp.f_template_1554`
@@ -2077,7 +2077,7 @@ Subroutines / functions
        * :c:func:`i_h_j_single_spin`
 
  
-.. c:macro:: h_s2_u_0_nstates_openmp_work_3_cholesky:
+.. c:function:: void h_s2_u_0_nstates_openmp_work_3_cholesky(void)
 
 
     File : :file:`davidson/u0_hs2_u0.irp.f_template_1554`
@@ -2134,7 +2134,7 @@ Subroutines / functions
        * :c:func:`i_h_j_single_spin`
 
  
-.. c:macro:: h_s2_u_0_nstates_openmp_work_4:
+.. c:function:: void h_s2_u_0_nstates_openmp_work_4(void)
 
 
     File : :file:`davidson/u0_hs2_u0.irp.f_template_1554`
@@ -2189,7 +2189,7 @@ Subroutines / functions
        * :c:func:`i_h_j_single_spin`
 
  
-.. c:macro:: h_s2_u_0_nstates_openmp_work_4_cholesky:
+.. c:function:: void h_s2_u_0_nstates_openmp_work_4_cholesky(void)
 
 
     File : :file:`davidson/u0_hs2_u0.irp.f_template_1554`
@@ -2246,7 +2246,7 @@ Subroutines / functions
        * :c:func:`i_h_j_single_spin`
 
  
-.. c:macro:: h_s2_u_0_nstates_openmp_work_n_int:
+.. c:function:: void h_s2_u_0_nstates_openmp_work_n_int(void)
 
 
     File : :file:`davidson/u0_hs2_u0.irp.f_template_1554`
@@ -2301,7 +2301,7 @@ Subroutines / functions
        * :c:func:`i_h_j_single_spin`
 
  
-.. c:macro:: h_s2_u_0_nstates_openmp_work_n_int_cholesky:
+.. c:function:: void h_s2_u_0_nstates_openmp_work_n_int_cholesky(void)
 
 
     File : :file:`davidson/u0_hs2_u0.irp.f_template_1554`
@@ -2358,7 +2358,7 @@ Subroutines / functions
        * :c:func:`i_h_j_single_spin`
 
  
-.. c:macro:: h_s2_u_0_nstates_zmq:
+.. c:function:: void h_s2_u_0_nstates_zmq(void)
 
 
     File : :file:`davidson/davidson_parallel.irp.f`
@@ -2414,7 +2414,7 @@ Subroutines / functions
        * :c:func:`qp_bug`
 
  
-.. c:macro:: h_s2_u_0_two_e_nstates_openmp:
+.. c:function:: void h_s2_u_0_two_e_nstates_openmp(void)
 
 
     File : :file:`davidson/u0_wee_u0.irp.f`
@@ -2456,7 +2456,7 @@ Subroutines / functions
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work`
 
  
-.. c:macro:: h_s2_u_0_two_e_nstates_openmp_work:
+.. c:function:: void h_s2_u_0_two_e_nstates_openmp_work(void)
 
 
     File : :file:`davidson/u0_wee_u0.irp.f`
@@ -2498,7 +2498,7 @@ Subroutines / functions
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_n_int`
 
  
-.. c:macro:: h_s2_u_0_two_e_nstates_openmp_work_1:
+.. c:function:: void h_s2_u_0_two_e_nstates_openmp_work_1(void)
 
 
     File : :file:`davidson/u0_wee_u0.irp.f_template_457`
@@ -2548,7 +2548,7 @@ Subroutines / functions
        * :c:func:`i_wee_j_single`
 
  
-.. c:macro:: h_s2_u_0_two_e_nstates_openmp_work_2:
+.. c:function:: void h_s2_u_0_two_e_nstates_openmp_work_2(void)
 
 
     File : :file:`davidson/u0_wee_u0.irp.f_template_457`
@@ -2598,7 +2598,7 @@ Subroutines / functions
        * :c:func:`i_wee_j_single`
 
  
-.. c:macro:: h_s2_u_0_two_e_nstates_openmp_work_3:
+.. c:function:: void h_s2_u_0_two_e_nstates_openmp_work_3(void)
 
 
     File : :file:`davidson/u0_wee_u0.irp.f_template_457`
@@ -2648,7 +2648,7 @@ Subroutines / functions
        * :c:func:`i_wee_j_single`
 
  
-.. c:macro:: h_s2_u_0_two_e_nstates_openmp_work_4:
+.. c:function:: void h_s2_u_0_two_e_nstates_openmp_work_4(void)
 
 
     File : :file:`davidson/u0_wee_u0.irp.f_template_457`
@@ -2698,7 +2698,7 @@ Subroutines / functions
        * :c:func:`i_wee_j_single`
 
  
-.. c:macro:: h_s2_u_0_two_e_nstates_openmp_work_n_int:
+.. c:function:: void h_s2_u_0_two_e_nstates_openmp_work_n_int(void)
 
 
     File : :file:`davidson/u0_wee_u0.irp.f_template_457`
@@ -2748,7 +2748,7 @@ Subroutines / functions
        * :c:func:`i_wee_j_single`
 
  
-.. c:macro:: h_u_0_nstates_openmp:
+.. c:function:: void h_u_0_nstates_openmp(void)
 
 
     File : :file:`davidson/u0_h_u0.irp.f`
@@ -2792,7 +2792,7 @@ Subroutines / functions
        * :c:func:`h_u_0_nstates_openmp_work`
 
  
-.. c:macro:: h_u_0_nstates_openmp_work:
+.. c:function:: void h_u_0_nstates_openmp_work(void)
 
 
     File : :file:`davidson/u0_h_u0.irp.f`
@@ -2836,7 +2836,7 @@ Subroutines / functions
        * :c:func:`h_u_0_nstates_openmp_work_n_int`
 
  
-.. c:macro:: h_u_0_nstates_openmp_work_1:
+.. c:function:: void h_u_0_nstates_openmp_work_1(void)
 
 
     File : :file:`davidson/u0_h_u0.irp.f_template_762`
@@ -2889,7 +2889,7 @@ Subroutines / functions
        * :c:func:`i_h_j_single_spin`
 
  
-.. c:macro:: h_u_0_nstates_openmp_work_2:
+.. c:function:: void h_u_0_nstates_openmp_work_2(void)
 
 
     File : :file:`davidson/u0_h_u0.irp.f_template_762`
@@ -2942,7 +2942,7 @@ Subroutines / functions
        * :c:func:`i_h_j_single_spin`
 
  
-.. c:macro:: h_u_0_nstates_openmp_work_3:
+.. c:function:: void h_u_0_nstates_openmp_work_3(void)
 
 
     File : :file:`davidson/u0_h_u0.irp.f_template_762`
@@ -2995,7 +2995,7 @@ Subroutines / functions
        * :c:func:`i_h_j_single_spin`
 
  
-.. c:macro:: h_u_0_nstates_openmp_work_4:
+.. c:function:: void h_u_0_nstates_openmp_work_4(void)
 
 
     File : :file:`davidson/u0_h_u0.irp.f_template_762`
@@ -3048,7 +3048,7 @@ Subroutines / functions
        * :c:func:`i_h_j_single_spin`
 
  
-.. c:macro:: h_u_0_nstates_openmp_work_n_int:
+.. c:function:: void h_u_0_nstates_openmp_work_n_int(void)
 
 
     File : :file:`davidson/u0_h_u0.irp.f_template_762`
@@ -3101,7 +3101,7 @@ Subroutines / functions
        * :c:func:`i_h_j_single_spin`
 
  
-.. c:macro:: h_u_0_nstates_zmq:
+.. c:function:: void h_u_0_nstates_zmq(void)
 
 
     File : :file:`davidson/davidson_parallel_nos2.irp.f`
@@ -3156,7 +3156,7 @@ Subroutines / functions
        * :c:func:`new_parallel_job`
 
  
-.. c:macro:: u_0_h_u_0:
+.. c:function:: void u_0_h_u_0(void)
 
 
     File : :file:`davidson/u0_h_u0.irp.f`
@@ -3190,7 +3190,7 @@ Subroutines / functions
        * :c:func:`h_u_0_nstates_zmq`
 
  
-.. c:macro:: u_0_h_u_0_two_e:
+.. c:function:: void u_0_h_u_0_two_e(void)
 
 
     File : :file:`davidson/u0_wee_u0.irp.f`
@@ -3220,7 +3220,7 @@ Subroutines / functions
        * :c:func:`h_s2_u_0_two_e_nstates_openmp`
 
  
-.. c:macro:: u_0_hs2_u_0:
+.. c:function:: void u_0_hs2_u_0(void)
 
 
     File : :file:`davidson/u0_hs2_u0.irp.f`
@@ -3264,7 +3264,7 @@ Subroutines / functions
        * :c:func:`h_s2_u_0_nstates_zmq`
 
  
-.. c:macro:: zmq_get_n_states_diag:
+.. c:function:: void zmq_get_n_states_diag(void)
 
 
     File : :file:`davidson/davidson_parallel.irp.f`
@@ -3293,7 +3293,7 @@ Subroutines / functions
        * :c:data:`n_states_diag`
 
  
-.. c:macro:: zmq_put_n_states_diag:
+.. c:function:: void zmq_put_n_states_diag(void)
 
 
     File : :file:`davidson/davidson_parallel.irp.f`

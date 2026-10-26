@@ -271,6 +271,7 @@ def main():
   owned = set(e["module"].lower() for e in entities.values()
               if isinstance(e.get("module"), str))
 
+  generated_modules = set()
   for abs_module in os.listdir(SRC):
     abs_module = os.path.join(SRC,abs_module)
     if os.path.islink(abs_module):
@@ -279,6 +280,17 @@ def main():
     if os.path.exists( os.path.join(abs_module, "README.rst") ) \
        or base in owned:
         generate_modules(abs_module,entities,local_entities.get(base))
+        generated_modules.add(base)
+
+  # Prune module pages for modules that no longer exist in src/ (renamed or
+  # merged). generate_modules only overwrites the pages it generates, so a
+  # page for a vanished module would otherwise persist forever and keep
+  # emitting its stale C-domain declarations.
+  moddir = os.path.join('modules')
+  if os.path.isdir(moddir):
+    for page in os.listdir(moddir):
+      if page.endswith('.rst') and page[:-4] not in generated_modules:
+        os.remove(os.path.join(moddir, page))
 
   generate_index(entities)
 

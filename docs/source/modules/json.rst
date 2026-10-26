@@ -35,7 +35,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: json_array_close_fmt
+.. c:var:: char json_array_close_fmt
 
 
     File : :file:`json/json_formats.irp.f`
@@ -69,7 +69,7 @@ Providers
 
 
  
-.. c:var:: json_array_close_fmtx
+.. c:var:: char json_array_close_fmtx
 
 
     File : :file:`json/json_formats.irp.f`
@@ -103,7 +103,7 @@ Providers
 
 
  
-.. c:var:: json_array_close_uopen_fmt
+.. c:var:: char json_array_close_uopen_fmt
 
 
     File : :file:`json/json_formats.irp.f`
@@ -137,7 +137,7 @@ Providers
 
 
  
-.. c:var:: json_array_open_fmt
+.. c:var:: char json_array_open_fmt
 
 
     File : :file:`json/json_formats.irp.f`
@@ -171,7 +171,7 @@ Providers
 
 
  
-.. c:var:: json_array_uopen_fmt
+.. c:var:: char json_array_uopen_fmt
 
 
     File : :file:`json/json_formats.irp.f`
@@ -205,7 +205,7 @@ Providers
 
 
  
-.. c:var:: json_dict_close_fmt
+.. c:var:: char json_dict_close_fmt
 
 
     File : :file:`json/json_formats.irp.f`
@@ -239,7 +239,7 @@ Providers
 
 
  
-.. c:var:: json_dict_close_fmtx
+.. c:var:: char json_dict_close_fmtx
 
 
     File : :file:`json/json_formats.irp.f`
@@ -273,7 +273,7 @@ Providers
 
 
  
-.. c:var:: json_dict_close_uopen_fmt
+.. c:var:: char json_dict_close_uopen_fmt
 
 
     File : :file:`json/json_formats.irp.f`
@@ -307,7 +307,7 @@ Providers
 
 
  
-.. c:var:: json_dict_open_fmt
+.. c:var:: char json_dict_open_fmt
 
 
     File : :file:`json/json_formats.irp.f`
@@ -341,7 +341,7 @@ Providers
 
 
  
-.. c:var:: json_dict_uopen_fmt
+.. c:var:: char json_dict_uopen_fmt
 
 
     File : :file:`json/json_formats.irp.f`
@@ -375,7 +375,7 @@ Providers
 
 
  
-.. c:var:: json_false_fmt
+.. c:var:: char json_false_fmt
 
 
     File : :file:`json/json_formats.irp.f`
@@ -409,7 +409,7 @@ Providers
 
 
  
-.. c:var:: json_false_fmtx
+.. c:var:: char json_false_fmtx
 
 
     File : :file:`json/json_formats.irp.f`
@@ -443,7 +443,7 @@ Providers
 
 
  
-.. c:var:: json_filename
+.. c:var:: char json_filename
 
 
     File : :file:`json/json.irp.f`
@@ -471,7 +471,7 @@ Providers
        * :c:data:`json_unit`
 
  
-.. c:var:: json_int_fmt
+.. c:var:: char json_int_fmt
 
 
     File : :file:`json/json_formats.irp.f`
@@ -505,7 +505,7 @@ Providers
 
 
  
-.. c:var:: json_int_fmtx
+.. c:var:: char json_int_fmtx
 
 
     File : :file:`json/json_formats.irp.f`
@@ -539,7 +539,7 @@ Providers
 
 
  
-.. c:var:: json_real_fmt
+.. c:var:: char json_real_fmt
 
 
     File : :file:`json/json_formats.irp.f`
@@ -573,7 +573,7 @@ Providers
 
 
  
-.. c:var:: json_real_fmtx
+.. c:var:: char json_real_fmtx
 
 
     File : :file:`json/json_formats.irp.f`
@@ -607,7 +607,7 @@ Providers
 
 
  
-.. c:var:: json_str_fmt
+.. c:var:: char json_str_fmt
 
 
     File : :file:`json/json_formats.irp.f`
@@ -641,7 +641,7 @@ Providers
 
 
  
-.. c:var:: json_str_fmtx
+.. c:var:: char json_str_fmtx
 
 
     File : :file:`json/json_formats.irp.f`
@@ -675,7 +675,7 @@ Providers
 
 
  
-.. c:var:: json_true_fmt
+.. c:var:: char json_true_fmt
 
 
     File : :file:`json/json_formats.irp.f`
@@ -709,7 +709,7 @@ Providers
 
 
  
-.. c:var:: json_true_fmtx
+.. c:var:: char json_true_fmtx
 
 
     File : :file:`json/json_formats.irp.f`
@@ -743,7 +743,7 @@ Providers
 
 
  
-.. c:var:: json_unit
+.. c:var:: int json_unit
 
 
     File : :file:`json/json.irp.f`
@@ -769,7 +769,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: json_close:
+.. c:function:: void json_close(void)
 
 
     File : :file:`json/json.irp.f`

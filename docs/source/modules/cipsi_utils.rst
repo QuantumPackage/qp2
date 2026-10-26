@@ -30,7 +30,7 @@ processes.
 Providers 
 --------- 
  
-.. c:var:: global_selection_buffer
+.. c:var:: int global_selection_buffer
 
 
     File : :file:`cipsi_utils/run_pt2_slave.irp.f`
@@ -53,7 +53,7 @@ Providers
 
 
  
-.. c:var:: global_selection_buffer_lock
+.. c:var:: int global_selection_buffer_lock
 
 
     File : :file:`cipsi_utils/run_pt2_slave.irp.f`
@@ -73,7 +73,7 @@ Providers
        * :c:data:`global_selection_buffer`
 
  
-.. c:var:: pt2_cw
+.. c:var:: double pt2_cw
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -108,7 +108,7 @@ Providers
        * :c:data:`pt2_j`
 
  
-.. c:var:: pt2_f
+.. c:var:: int pt2_f
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -136,7 +136,7 @@ Providers
 
 
  
-.. c:var:: pt2_j
+.. c:var:: int pt2_j
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -166,7 +166,7 @@ Providers
 
 
  
-.. c:var:: pt2_match_weight
+.. c:var:: double pt2_match_weight
 
 
     File : :file:`cipsi_utils/selection_weight.irp.f`
@@ -194,7 +194,7 @@ Providers
        * :c:data:`selection_weight`
 
  
-.. c:var:: pt2_mindetinfirstteeth
+.. c:var:: int pt2_mindetinfirstteeth
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -226,7 +226,7 @@ Providers
        * :c:data:`pt2_w`
 
  
-.. c:var:: pt2_n_0
+.. c:var:: int pt2_n_0
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -261,7 +261,7 @@ Providers
        * :c:data:`pt2_j`
 
  
-.. c:var:: pt2_n_tasks
+.. c:var:: int pt2_n_tasks
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -288,7 +288,7 @@ Providers
        * :c:data:`pt2_j`
 
  
-.. c:var:: pt2_n_tasks_max
+.. c:var:: int pt2_n_tasks_max
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -316,7 +316,7 @@ Providers
 
 
  
-.. c:var:: pt2_n_teeth
+.. c:var:: int pt2_n_teeth
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -348,7 +348,7 @@ Providers
        * :c:data:`pt2_w`
 
  
-.. c:var:: pt2_overlap
+.. c:var:: double pt2_overlap
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -369,7 +369,7 @@ Providers
 
 
  
-.. c:var:: pt2_r
+.. c:var:: int pt2_r
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -399,7 +399,7 @@ Providers
 
 
  
-.. c:var:: pt2_stoch_istate
+.. c:var:: int pt2_stoch_istate
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -420,7 +420,7 @@ Providers
        * :c:data:`pt2_w`
 
  
-.. c:var:: pt2_u
+.. c:var:: double pt2_u
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -446,7 +446,7 @@ Providers
        * :c:data:`pt2_j`
 
  
-.. c:var:: pt2_u_0
+.. c:var:: double pt2_u_0
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -481,7 +481,7 @@ Providers
        * :c:data:`pt2_j`
 
  
-.. c:var:: pt2_w
+.. c:var:: double pt2_w
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -516,7 +516,7 @@ Providers
        * :c:data:`pt2_j`
 
  
-.. c:var:: pt2_w_t
+.. c:var:: double pt2_w_t
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -551,7 +551,7 @@ Providers
        * :c:data:`pt2_j`
 
  
-.. c:var:: selection_weight
+.. c:var:: double selection_weight
 
 
     File : :file:`cipsi_utils/selection_weight.irp.f`
@@ -577,7 +577,7 @@ Providers
 
 
  
-.. c:var:: variance_match_weight
+.. c:var:: double variance_match_weight
 
 
     File : :file:`cipsi_utils/selection_weight.irp.f`
@@ -609,7 +609,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: add_to_selection_buffer:
+.. c:function:: void add_to_selection_buffer(void)
 
 
     File : :file:`cipsi_utils/selection_buffer.irp.f`
@@ -645,7 +645,7 @@ Subroutines / functions
        * :c:func:`sort_selection_buffer`
 
  
-.. c:macro:: create_selection_buffer:
+.. c:function:: void create_selection_buffer(void)
 
 
     File : :file:`cipsi_utils/selection_buffer.irp.f`
@@ -687,7 +687,7 @@ Subroutines / functions
        * :c:func:`check_mem`
 
  
-.. c:macro:: delete_selection_buffer:
+.. c:function:: void delete_selection_buffer(void)
 
 
     File : :file:`cipsi_utils/selection_buffer.irp.f`
@@ -713,7 +713,7 @@ Subroutines / functions
        * :c:func:`zmq_selection`
 
  
-.. c:macro:: make_selection_buffer_s2:
+.. c:function:: void make_selection_buffer_s2(void)
 
 
     File : :file:`cipsi_utils/selection_buffer.irp.f`
@@ -752,7 +752,7 @@ Subroutines / functions
        * :c:func:`i8sort`
 
  
-.. c:macro:: merge_selection_buffers:
+.. c:function:: void merge_selection_buffers(void)
 
 
     File : :file:`cipsi_utils/selection_buffer.irp.f`
@@ -779,7 +779,7 @@ Subroutines / functions
        * :c:func:`run_pt2_slave_large`
 
  
-.. c:macro:: provide_everything:
+.. c:function:: void provide_everything(void)
 
 
     File : :file:`cipsi_utils/slave_cipsi.irp.f`
@@ -830,7 +830,7 @@ Subroutines / functions
        * :c:func:`run_slave_cipsi`
 
  
-.. c:macro:: pt2_add:
+.. c:function:: void pt2_add(void)
 
 
     File : :file:`cipsi_utils/pt2_type.irp.f`
@@ -851,7 +851,7 @@ Subroutines / functions
        * :c:func:`selection_collector`
 
  
-.. c:macro:: pt2_add2:
+.. c:function:: void pt2_add2(void)
 
 
     File : :file:`cipsi_utils/pt2_type.irp.f`
@@ -871,7 +871,7 @@ Subroutines / functions
        * :c:func:`pt2_collector`
 
  
-.. c:macro:: pt2_alloc:
+.. c:function:: void pt2_alloc(void)
 
 
     File : :file:`cipsi_utils/pt2_type.irp.f`
@@ -896,7 +896,7 @@ Subroutines / functions
        * :c:func:`selection_collector`
 
  
-.. c:macro:: pt2_collector:
+.. c:function:: void pt2_collector(void)
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -949,7 +949,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: pt2_dealloc:
+.. c:function:: void pt2_dealloc(void)
 
 
     File : :file:`cipsi_utils/pt2_type.irp.f`
@@ -974,7 +974,7 @@ Subroutines / functions
        * :c:func:`selection_collector`
 
  
-.. c:macro:: pt2_deserialize:
+.. c:function:: void pt2_deserialize(void)
 
 
     File : :file:`cipsi_utils/pt2_type.irp.f`
@@ -994,7 +994,7 @@ Subroutines / functions
        * :c:func:`pull_selection_results`
 
  
-.. c:macro:: pt2_find_sample:
+.. c:function:: void pt2_find_sample(void)
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -1013,7 +1013,7 @@ Subroutines / functions
        * :c:data:`n_det_generators`
 
  
-.. c:macro:: pt2_find_sample_lr:
+.. c:function:: void pt2_find_sample_lr(void)
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -1032,7 +1032,7 @@ Subroutines / functions
        * :c:data:`n_det_generators`
 
  
-.. c:macro:: pt2_serialize:
+.. c:function:: void pt2_serialize(void)
 
 
     File : :file:`cipsi_utils/pt2_type.irp.f`
@@ -1052,7 +1052,7 @@ Subroutines / functions
        * :c:func:`push_selection_results`
 
  
-.. c:macro:: pt2_slave_inproc:
+.. c:function:: void pt2_slave_inproc(void)
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -1086,7 +1086,7 @@ Subroutines / functions
        * :c:func:`run_pt2_slave`
 
  
-.. c:macro:: pull_pt2_results:
+.. c:function:: void pull_pt2_results(void)
 
 
     File : :file:`cipsi_utils/run_pt2_slave.irp.f`
@@ -1120,7 +1120,7 @@ Subroutines / functions
        * :c:func:`pt2_deserialize`
 
  
-.. c:macro:: pull_selection_results:
+.. c:function:: void pull_selection_results(void)
 
 
     File : :file:`cipsi_utils/run_selection_slave.irp.f`
@@ -1154,7 +1154,7 @@ Subroutines / functions
        * :c:func:`pt2_deserialize`
 
  
-.. c:macro:: push_pt2_results:
+.. c:function:: void push_pt2_results(void)
 
 
     File : :file:`cipsi_utils/run_pt2_slave.irp.f`
@@ -1181,7 +1181,7 @@ Subroutines / functions
        * :c:func:`push_pt2_results_async_send`
 
  
-.. c:macro:: push_pt2_results_async_recv:
+.. c:function:: void push_pt2_results_async_recv(void)
 
 
     File : :file:`cipsi_utils/run_pt2_slave.irp.f`
@@ -1201,7 +1201,7 @@ Subroutines / functions
        * :c:func:`run_pt2_slave_large`
 
  
-.. c:macro:: push_pt2_results_async_send:
+.. c:function:: void push_pt2_results_async_send(void)
 
 
     File : :file:`cipsi_utils/run_pt2_slave.irp.f`
@@ -1236,7 +1236,7 @@ Subroutines / functions
        * :c:func:`pt2_serialize`
 
  
-.. c:macro:: push_selection_results:
+.. c:function:: void push_selection_results(void)
 
 
     File : :file:`cipsi_utils/run_selection_slave.irp.f`
@@ -1270,7 +1270,7 @@ Subroutines / functions
        * :c:func:`pt2_serialize`
 
  
-.. c:macro:: remove_duplicates_in_selection_buffer:
+.. c:function:: void remove_duplicates_in_selection_buffer(void)
 
 
     File : :file:`cipsi_utils/selection_buffer.irp.f`
@@ -1304,7 +1304,7 @@ Subroutines / functions
        * :c:func:`i8sort`
 
  
-.. c:macro:: run_pt2_slave:
+.. c:function:: void run_pt2_slave(void)
 
 
     File : :file:`cipsi_utils/run_pt2_slave.irp.f`
@@ -1338,7 +1338,7 @@ Subroutines / functions
        * :c:func:`run_pt2_slave_large`
 
  
-.. c:macro:: run_pt2_slave_large:
+.. c:function:: void run_pt2_slave_large(void)
 
 
     File : :file:`cipsi_utils/run_pt2_slave.irp.f`
@@ -1393,7 +1393,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: run_pt2_slave_small:
+.. c:function:: void run_pt2_slave_small(void)
 
 
     File : :file:`cipsi_utils/run_pt2_slave.irp.f`
@@ -1435,7 +1435,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: run_selection_slave:
+.. c:function:: void run_selection_slave(void)
 
 
     File : :file:`cipsi_utils/run_selection_slave.irp.f`
@@ -1492,7 +1492,7 @@ Subroutines / functions
        * :c:func:`usleep`
 
  
-.. c:macro:: run_slave_cipsi:
+.. c:function:: void run_slave_cipsi(void)
 
 
     File : :file:`cipsi_utils/slave_cipsi.irp.f`
@@ -1539,7 +1539,7 @@ Subroutines / functions
        * :c:data:`threshold_generators`
 
  
-.. c:macro:: run_slave_main:
+.. c:function:: void run_slave_main(void)
 
 
     File : :file:`cipsi_utils/slave_cipsi.irp.f`
@@ -1633,7 +1633,7 @@ Subroutines / functions
        * :c:data:`threshold_generators`
 
  
-.. c:macro:: selection_collector:
+.. c:function:: void selection_collector(void)
 
 
     File : :file:`cipsi_utils/zmq_selection.irp.f`
@@ -1676,7 +1676,7 @@ Subroutines / functions
        * :c:func:`sort_selection_buffer`
 
  
-.. c:macro:: selection_slave_inproc:
+.. c:function:: void selection_slave_inproc(void)
 
 
     File : :file:`cipsi_utils/zmq_selection.irp.f`
@@ -1709,7 +1709,7 @@ Subroutines / functions
        * :c:func:`run_selection_slave`
 
  
-.. c:macro:: sort_selection_buffer:
+.. c:function:: void sort_selection_buffer(void)
 
 
     File : :file:`cipsi_utils/selection_buffer.irp.f`
@@ -1747,7 +1747,7 @@ Subroutines / functions
        * :c:func:`dsort`
 
  
-.. c:macro:: testteethbuilding:
+.. c:function:: void testteethbuilding(void)
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -1775,7 +1775,7 @@ Subroutines / functions
        * :c:func:`check_mem`
 
  
-.. c:macro:: update_pt2_and_variance_weights:
+.. c:function:: void update_pt2_and_variance_weights(void)
 
 
     File : :file:`cipsi_utils/selection_weight.irp.f`
@@ -1818,7 +1818,7 @@ Subroutines / functions
        * :c:data:`variance_match_weight`
 
  
-.. c:macro:: zmq_pt2:
+.. c:function:: void zmq_pt2(void)
 
 
     File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
@@ -1928,7 +1928,7 @@ Subroutines / functions
        * :c:data:`variance_match_weight`
 
  
-.. c:macro:: zmq_selection:
+.. c:function:: void zmq_selection(void)
 
 
     File : :file:`cipsi_utils/zmq_selection.irp.f`

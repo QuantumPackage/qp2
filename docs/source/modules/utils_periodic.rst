@@ -20,7 +20,7 @@ Programs
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: run:
+.. c:function:: void run(void)
 
 
     File : :file:`import_mo_coef_periodic.irp.f`

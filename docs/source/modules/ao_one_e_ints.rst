@@ -135,7 +135,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: ao_cart_to_sphe_coef_transp
+.. c:var:: double ao_cart_to_sphe_coef_transp
 
 
     File : :file:`ao_one_e_ints/ao_spherical.irp.f`
@@ -158,7 +158,7 @@ Providers
 
 
  
-.. c:var:: ao_cart_to_sphe_inv
+.. c:var:: double ao_cart_to_sphe_inv
 
 
     File : :file:`ao_one_e_ints/ao_ortho_canonical.irp.f`
@@ -191,7 +191,7 @@ Providers
        * :c:data:`ao_sphe_pseudo_integrals_non_local`
 
  
-.. c:var:: ao_cart_to_sphe_overlap
+.. c:var:: double ao_cart_to_sphe_overlap
 
 
     File : :file:`ao_one_e_ints/ao_spherical.irp.f`
@@ -226,7 +226,7 @@ Providers
        * :c:data:`ao_ortho_canonical_coef`
 
  
-.. c:var:: ao_cart_to_sphe_overlap_inv
+.. c:var:: double ao_cart_to_sphe_overlap_inv
 
 
     File : :file:`ao_one_e_ints/ao_spherical.irp.f`
@@ -249,7 +249,7 @@ Providers
 
 
  
-.. c:var:: ao_deriv2_cgtos_x
+.. c:var:: double ao_deriv2_cgtos_x
 
 
     File : :file:`ao_one_e_ints/one_e_kin_integrals_cgtos.irp.f`
@@ -284,7 +284,7 @@ Providers
        * :c:data:`ao_kinetic_integrals_cgtos`
 
  
-.. c:var:: ao_deriv2_cgtos_y
+.. c:var:: double ao_deriv2_cgtos_y
 
 
     File : :file:`ao_one_e_ints/one_e_kin_integrals_cgtos.irp.f`
@@ -319,7 +319,7 @@ Providers
        * :c:data:`ao_kinetic_integrals_cgtos`
 
  
-.. c:var:: ao_deriv2_cgtos_z
+.. c:var:: double ao_deriv2_cgtos_z
 
 
     File : :file:`ao_one_e_ints/one_e_kin_integrals_cgtos.irp.f`
@@ -354,7 +354,7 @@ Providers
        * :c:data:`ao_kinetic_integrals_cgtos`
 
  
-.. c:var:: ao_deriv2_x
+.. c:var:: double ao_deriv2_x
 
 
     File : :file:`ao_one_e_ints/kin_ao_ints.irp.f`
@@ -397,7 +397,7 @@ Providers
        * :c:data:`ao_kinetic_integrals`
 
  
-.. c:var:: ao_deriv2_y
+.. c:var:: double ao_deriv2_y
 
 
     File : :file:`ao_one_e_ints/kin_ao_ints.irp.f`
@@ -440,7 +440,7 @@ Providers
        * :c:data:`ao_kinetic_integrals`
 
  
-.. c:var:: ao_deriv2_z
+.. c:var:: double ao_deriv2_z
 
 
     File : :file:`ao_one_e_ints/kin_ao_ints.irp.f`
@@ -483,7 +483,7 @@ Providers
        * :c:data:`ao_kinetic_integrals`
 
  
-.. c:var:: ao_deriv_1_x
+.. c:var:: double ao_deriv_1_x
 
 
     File : :file:`ao_one_e_ints/spread_dipole_ao.irp.f`
@@ -522,7 +522,7 @@ Providers
        * :c:data:`mo_deriv_1_x`
 
  
-.. c:var:: ao_deriv_1_y
+.. c:var:: double ao_deriv_1_y
 
 
     File : :file:`ao_one_e_ints/spread_dipole_ao.irp.f`
@@ -561,7 +561,7 @@ Providers
        * :c:data:`mo_deriv_1_x`
 
  
-.. c:var:: ao_deriv_1_z
+.. c:var:: double ao_deriv_1_z
 
 
     File : :file:`ao_one_e_ints/spread_dipole_ao.irp.f`
@@ -600,7 +600,7 @@ Providers
        * :c:data:`mo_deriv_1_x`
 
  
-.. c:var:: ao_dipole_x
+.. c:var:: double ao_dipole_x
 
 
     File : :file:`ao_one_e_ints/spread_dipole_ao.irp.f`
@@ -639,7 +639,7 @@ Providers
        * :c:data:`mo_dipole_x`
 
  
-.. c:var:: ao_dipole_y
+.. c:var:: double ao_dipole_y
 
 
     File : :file:`ao_one_e_ints/spread_dipole_ao.irp.f`
@@ -678,7 +678,7 @@ Providers
        * :c:data:`mo_dipole_x`
 
  
-.. c:var:: ao_dipole_z
+.. c:var:: double ao_dipole_z
 
 
     File : :file:`ao_one_e_ints/spread_dipole_ao.irp.f`
@@ -717,7 +717,7 @@ Providers
        * :c:data:`mo_dipole_x`
 
  
-.. c:var:: ao_integrals_n_e
+.. c:var:: double ao_integrals_n_e
 
 
     File : :file:`ao_one_e_ints/pot_ao_ints.irp.f`
@@ -769,7 +769,7 @@ Providers
        * :c:data:`mo_integrals_n_e`
 
  
-.. c:var:: ao_integrals_n_e_cgtos
+.. c:var:: double ao_integrals_n_e_cgtos
 
 
     File : :file:`ao_one_e_ints/one_e_coul_integrals_cgtos.irp.f`
@@ -810,7 +810,7 @@ Providers
        * :c:data:`ao_integrals_n_e`
 
  
-.. c:var:: ao_integrals_n_e_imag
+.. c:var:: double ao_integrals_n_e_imag
 
 
     File : :file:`ao_one_e_ints/pot_ao_ints.irp.f`
@@ -834,7 +834,7 @@ Providers
 
 
  
-.. c:var:: ao_integrals_n_e_per_atom
+.. c:var:: double ao_integrals_n_e_per_atom
 
 
     File : :file:`ao_one_e_ints/pot_ao_ints.irp.f`
@@ -871,7 +871,7 @@ Providers
        * :c:data:`mo_integrals_n_e_per_atom`
 
  
-.. c:var:: ao_integrals_pt_chrg
+.. c:var:: double ao_integrals_pt_chrg
 
 
     File : :file:`ao_one_e_ints/pot_pt_charges.irp.f`
@@ -912,7 +912,7 @@ Providers
        * :c:data:`ao_integrals_n_e`
 
  
-.. c:var:: ao_kinetic_integrals
+.. c:var:: double ao_kinetic_integrals
 
 
     File : :file:`ao_one_e_ints/kin_ao_ints.irp.f`
@@ -947,7 +947,7 @@ Providers
        * :c:data:`mo_kinetic_integrals`
 
  
-.. c:var:: ao_kinetic_integrals_cgtos
+.. c:var:: double ao_kinetic_integrals_cgtos
 
 
     File : :file:`ao_one_e_ints/one_e_kin_integrals_cgtos.irp.f`
@@ -973,7 +973,7 @@ Providers
 
 
  
-.. c:var:: ao_kinetic_integrals_imag
+.. c:var:: double ao_kinetic_integrals_imag
 
 
     File : :file:`ao_one_e_ints/kin_ao_ints.irp.f`
@@ -998,7 +998,7 @@ Providers
 
 
  
-.. c:var:: ao_one_e_integrals
+.. c:var:: double ao_one_e_integrals
 
 
     File : :file:`ao_one_e_ints/ao_one_e_ints.irp.f`
@@ -1032,7 +1032,7 @@ Providers
        * :c:data:`scf_energy`
 
  
-.. c:var:: ao_one_e_integrals_diag
+.. c:var:: double ao_one_e_integrals_diag
 
 
     File : :file:`ao_one_e_ints/ao_one_e_ints.irp.f`
@@ -1066,7 +1066,7 @@ Providers
        * :c:data:`scf_energy`
 
  
-.. c:var:: ao_one_e_integrals_imag
+.. c:var:: double ao_one_e_integrals_imag
 
 
     File : :file:`ao_one_e_ints/ao_one_e_ints.irp.f`
@@ -1088,7 +1088,7 @@ Providers
 
 
  
-.. c:var:: ao_ortho_canonical_coef
+.. c:var:: double ao_ortho_canonical_coef
 
 
     File : :file:`ao_one_e_ints/ao_ortho_canonical.irp.f`
@@ -1130,7 +1130,7 @@ Providers
        * :c:data:`mo_num`
 
  
-.. c:var:: ao_ortho_canonical_coef_inv
+.. c:var:: double ao_ortho_canonical_coef_inv
 
 
     File : :file:`ao_one_e_ints/ao_ortho_canonical.irp.f`
@@ -1158,7 +1158,7 @@ Providers
        * :c:data:`mo_coef_in_ao_ortho_basis`
 
  
-.. c:var:: ao_ortho_canonical_num
+.. c:var:: int ao_ortho_canonical_num
 
 
     File : :file:`ao_one_e_ints/ao_ortho_canonical.irp.f`
@@ -1200,7 +1200,7 @@ Providers
        * :c:data:`mo_num`
 
  
-.. c:var:: ao_ortho_canonical_overlap
+.. c:var:: double ao_ortho_canonical_overlap
 
 
     File : :file:`ao_one_e_ints/ao_ortho_canonical.irp.f`
@@ -1224,7 +1224,7 @@ Providers
 
 
  
-.. c:var:: ao_overlap
+.. c:var:: double ao_overlap
 
 
     File : :file:`ao_one_e_ints/ao_overlap.irp.f`
@@ -1278,7 +1278,7 @@ Providers
        * :c:data:`s_mo_sphe_coef`
 
  
-.. c:var:: ao_overlap_abs
+.. c:var:: double ao_overlap_abs
 
 
     File : :file:`ao_one_e_ints/ao_overlap.irp.f`
@@ -1316,7 +1316,7 @@ Providers
        * :c:data:`cholesky_ao_num`
 
  
-.. c:var:: ao_overlap_cgtos
+.. c:var:: double ao_overlap_cgtos
 
 
     File : :file:`ao_one_e_ints/aos_cgtos.irp.f`
@@ -1351,7 +1351,7 @@ Providers
        * :c:data:`ao_overlap`
 
  
-.. c:var:: ao_overlap_cgtos_x
+.. c:var:: double ao_overlap_cgtos_x
 
 
     File : :file:`ao_one_e_ints/aos_cgtos.irp.f`
@@ -1386,7 +1386,7 @@ Providers
        * :c:data:`ao_overlap`
 
  
-.. c:var:: ao_overlap_cgtos_y
+.. c:var:: double ao_overlap_cgtos_y
 
 
     File : :file:`ao_one_e_ints/aos_cgtos.irp.f`
@@ -1421,7 +1421,7 @@ Providers
        * :c:data:`ao_overlap`
 
  
-.. c:var:: ao_overlap_cgtos_z
+.. c:var:: double ao_overlap_cgtos_z
 
 
     File : :file:`ao_one_e_ints/aos_cgtos.irp.f`
@@ -1456,7 +1456,7 @@ Providers
        * :c:data:`ao_overlap`
 
  
-.. c:var:: ao_overlap_complex
+.. c:var:: double _Complex ao_overlap_complex
 
 
     File : :file:`ao_one_e_ints/ao_overlap.irp.f`
@@ -1486,7 +1486,7 @@ Providers
        * :c:data:`s_inv_complex`
 
  
-.. c:var:: ao_overlap_imag
+.. c:var:: double ao_overlap_imag
 
 
     File : :file:`ao_one_e_ints/ao_overlap.irp.f`
@@ -1513,7 +1513,7 @@ Providers
        * :c:data:`ao_overlap_complex`
 
  
-.. c:var:: ao_overlap_x
+.. c:var:: double ao_overlap_x
 
 
     File : :file:`ao_one_e_ints/ao_overlap.irp.f`
@@ -1567,7 +1567,7 @@ Providers
        * :c:data:`s_mo_sphe_coef`
 
  
-.. c:var:: ao_overlap_y
+.. c:var:: double ao_overlap_y
 
 
     File : :file:`ao_one_e_ints/ao_overlap.irp.f`
@@ -1621,7 +1621,7 @@ Providers
        * :c:data:`s_mo_sphe_coef`
 
  
-.. c:var:: ao_overlap_z
+.. c:var:: double ao_overlap_z
 
 
     File : :file:`ao_one_e_ints/ao_overlap.irp.f`
@@ -1675,7 +1675,7 @@ Providers
        * :c:data:`s_mo_sphe_coef`
 
  
-.. c:var:: ao_pseudo_integrals
+.. c:var:: double ao_pseudo_integrals
 
 
     File : :file:`ao_one_e_ints/pot_ao_pseudo_ints.irp.f`
@@ -1709,7 +1709,7 @@ Providers
        * :c:data:`mo_pseudo_integrals`
 
  
-.. c:var:: ao_pseudo_integrals_local
+.. c:var:: double ao_pseudo_integrals_local
 
 
     File : :file:`ao_one_e_ints/pot_ao_pseudo_ints.irp.f`
@@ -1750,7 +1750,7 @@ Providers
        * :c:data:`mo_pseudo_integrals_local`
 
  
-.. c:var:: ao_pseudo_integrals_non_local
+.. c:var:: double ao_pseudo_integrals_non_local
 
 
     File : :file:`ao_one_e_ints/pot_ao_pseudo_ints.irp.f`
@@ -1792,7 +1792,7 @@ Providers
        * :c:data:`mo_pseudo_integrals_non_local`
 
  
-.. c:var:: ao_sphe_integrals_n_e
+.. c:var:: double ao_sphe_integrals_n_e
 
 
     File : :file:`ao_one_e_ints/pot_ao_ints.irp.f`
@@ -1822,7 +1822,7 @@ Providers
        * :c:data:`ao_sphe_one_e_integrals`
 
  
-.. c:var:: ao_sphe_kinetic_integrals
+.. c:var:: double ao_sphe_kinetic_integrals
 
 
     File : :file:`ao_one_e_ints/kin_ao_ints.irp.f`
@@ -1852,7 +1852,7 @@ Providers
        * :c:data:`ao_sphe_one_e_integrals`
 
  
-.. c:var:: ao_sphe_one_e_integrals
+.. c:var:: double ao_sphe_one_e_integrals
 
 
     File : :file:`ao_one_e_ints/ao_one_e_ints.irp.f`
@@ -1876,7 +1876,7 @@ Providers
 
 
  
-.. c:var:: ao_sphe_one_e_integrals_diag
+.. c:var:: double ao_sphe_one_e_integrals_diag
 
 
     File : :file:`ao_one_e_ints/ao_one_e_ints.irp.f`
@@ -1900,7 +1900,7 @@ Providers
 
 
  
-.. c:var:: ao_sphe_overlap
+.. c:var:: double ao_sphe_overlap
 
 
     File : :file:`ao_one_e_ints/ao_overlap.irp.f`
@@ -1930,7 +1930,7 @@ Providers
        * :c:data:`mo_sphe_coef`
 
  
-.. c:var:: ao_sphe_pseudo_integrals
+.. c:var:: double ao_sphe_pseudo_integrals
 
 
     File : :file:`ao_one_e_ints/pot_ao_pseudo_ints.irp.f`
@@ -1956,7 +1956,7 @@ Providers
 
 
  
-.. c:var:: ao_sphe_pseudo_integrals_local
+.. c:var:: double ao_sphe_pseudo_integrals_local
 
 
     File : :file:`ao_one_e_ints/pot_ao_pseudo_ints.irp.f`
@@ -1986,7 +1986,7 @@ Providers
        * :c:data:`ao_sphe_pseudo_integrals`
 
  
-.. c:var:: ao_sphe_pseudo_integrals_non_local
+.. c:var:: double ao_sphe_pseudo_integrals_non_local
 
 
     File : :file:`ao_one_e_ints/pot_ao_pseudo_ints.irp.f`
@@ -2016,7 +2016,7 @@ Providers
        * :c:data:`ao_sphe_pseudo_integrals`
 
  
-.. c:var:: ao_spread_x
+.. c:var:: double ao_spread_x
 
 
     File : :file:`ao_one_e_ints/spread_dipole_ao.irp.f`
@@ -2055,7 +2055,7 @@ Providers
        * :c:data:`mo_spread_x`
 
  
-.. c:var:: ao_spread_y
+.. c:var:: double ao_spread_y
 
 
     File : :file:`ao_one_e_ints/spread_dipole_ao.irp.f`
@@ -2094,7 +2094,7 @@ Providers
        * :c:data:`mo_spread_x`
 
  
-.. c:var:: ao_spread_z
+.. c:var:: double ao_spread_z
 
 
     File : :file:`ao_one_e_ints/spread_dipole_ao.irp.f`
@@ -2133,7 +2133,7 @@ Providers
        * :c:data:`mo_spread_x`
 
  
-.. c:macro:: i_x1_pol_mult_one_e:
+.. c:function:: void i_x1_pol_mult_one_e(void)
 
 
     File : :file:`ao_one_e_ints/pot_ao_ints.irp.f`
@@ -2166,7 +2166,7 @@ Providers
        * :c:func:`multiply_poly_c2`
 
  
-.. c:macro:: i_x1_pol_mult_one_e_cgtos:
+.. c:function:: void i_x1_pol_mult_one_e_cgtos(void)
 
 
     File : :file:`ao_one_e_ints/one_e_coul_integrals_cgtos.irp.f`
@@ -2197,7 +2197,7 @@ Providers
        * :c:func:`multiply_cpoly`
 
  
-.. c:macro:: i_x2_pol_mult_one_e:
+.. c:function:: void i_x2_pol_mult_one_e(void)
 
 
     File : :file:`ao_one_e_ints/pot_ao_ints.irp.f`
@@ -2225,7 +2225,7 @@ Providers
        * :c:func:`multiply_poly_c2`
 
  
-.. c:macro:: i_x2_pol_mult_one_e_cgtos:
+.. c:function:: void i_x2_pol_mult_one_e_cgtos(void)
 
 
     File : :file:`ao_one_e_ints/one_e_coul_integrals_cgtos.irp.f`
@@ -2253,7 +2253,7 @@ Providers
        * :c:func:`multiply_cpoly`
 
  
-.. c:var:: pseudo_dz_k_transp
+.. c:var:: double pseudo_dz_k_transp
 
 
     File : :file:`ao_one_e_ints/pot_ao_pseudo_ints.irp.f`
@@ -2286,7 +2286,7 @@ Providers
        * :c:data:`ao_pseudo_integrals_local`
 
  
-.. c:var:: pseudo_dz_kl_transp
+.. c:var:: double pseudo_dz_kl_transp
 
 
     File : :file:`ao_one_e_ints/pot_ao_pseudo_ints.irp.f`
@@ -2320,7 +2320,7 @@ Providers
        * :c:data:`ao_pseudo_integrals_non_local`
 
  
-.. c:var:: pseudo_n_k_transp
+.. c:var:: int pseudo_n_k_transp
 
 
     File : :file:`ao_one_e_ints/pot_ao_pseudo_ints.irp.f`
@@ -2353,7 +2353,7 @@ Providers
        * :c:data:`ao_pseudo_integrals_local`
 
  
-.. c:var:: pseudo_n_kl_transp
+.. c:var:: int pseudo_n_kl_transp
 
 
     File : :file:`ao_one_e_ints/pot_ao_pseudo_ints.irp.f`
@@ -2387,7 +2387,7 @@ Providers
        * :c:data:`ao_pseudo_integrals_non_local`
 
  
-.. c:var:: pseudo_v_k_transp
+.. c:var:: double pseudo_v_k_transp
 
 
     File : :file:`ao_one_e_ints/pot_ao_pseudo_ints.irp.f`
@@ -2420,7 +2420,7 @@ Providers
        * :c:data:`ao_pseudo_integrals_local`
 
  
-.. c:var:: pseudo_v_kl_transp
+.. c:var:: double pseudo_v_kl_transp
 
 
     File : :file:`ao_one_e_ints/pot_ao_pseudo_ints.irp.f`
@@ -2454,7 +2454,7 @@ Providers
        * :c:data:`ao_pseudo_integrals_non_local`
 
  
-.. c:var:: s_half
+.. c:var:: double s_half
 
 
     File : :file:`ao_one_e_ints/ao_overlap.irp.f`
@@ -2476,7 +2476,7 @@ Providers
 
 
  
-.. c:var:: s_half_inv
+.. c:var:: double s_half_inv
 
 
     File : :file:`ao_one_e_ints/ao_overlap.irp.f`
@@ -2504,7 +2504,7 @@ Providers
        * :c:data:`eigenvalues_fock_matrix_ao`
 
  
-.. c:var:: s_inv
+.. c:var:: double s_inv
 
 
     File : :file:`ao_one_e_ints/ao_overlap.irp.f`
@@ -2527,7 +2527,7 @@ Providers
 
 
  
-.. c:var:: s_inv_complex
+.. c:var:: double _Complex s_inv_complex
 
 
     File : :file:`ao_one_e_ints/ao_overlap.irp.f`
@@ -2554,7 +2554,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: ao_cart_to_ao_sphe:
+.. c:function:: void ao_cart_to_ao_sphe(void)
 
 
     File : :file:`ao_one_e_ints/ao_spherical.irp.f`
@@ -2596,7 +2596,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: ao_one_e_integral_zero:
+.. c:function:: void ao_one_e_integral_zero(void)
 
 
     File : :file:`ao_one_e_ints/screening.irp.f`
@@ -2619,7 +2619,7 @@ Subroutines / functions
        * :c:data:`use_cgtos`
 
  
-.. c:macro:: give_all_erf_kl_ao:
+.. c:function:: void give_all_erf_kl_ao(void)
 
 
     File : :file:`ao_one_e_ints/pot_ao_erf_ints.irp.f`
@@ -2640,7 +2640,7 @@ Subroutines / functions
        * :c:data:`ao_num`
 
  
-.. c:macro:: give_cpolynomial_mult_center_one_e:
+.. c:function:: void give_cpolynomial_mult_center_one_e(void)
 
 
     File : :file:`ao_one_e_ints/one_e_coul_integrals_cgtos.irp.f`
@@ -2671,7 +2671,7 @@ Subroutines / functions
        * :c:func:`multiply_cpoly`
 
  
-.. c:macro:: give_polynomial_mult_center_one_e:
+.. c:function:: void give_polynomial_mult_center_one_e(void)
 
 
     File : :file:`ao_one_e_ints/pot_ao_ints.irp.f`
@@ -2701,7 +2701,7 @@ Subroutines / functions
        * :c:func:`multiply_poly`
 
  
-.. c:macro:: give_polynomial_mult_center_one_e_erf:
+.. c:function:: void give_polynomial_mult_center_one_e_erf(void)
 
 
     File : :file:`ao_one_e_ints/pot_ao_erf_ints.irp.f`
@@ -2725,7 +2725,7 @@ Subroutines / functions
        * :c:func:`multiply_poly`
 
  
-.. c:macro:: give_polynomial_mult_center_one_e_erf_opt:
+.. c:function:: void give_polynomial_mult_center_one_e_erf_opt(void)
 
 
     File : :file:`ao_one_e_ints/pot_ao_erf_ints.irp.f`
@@ -2759,7 +2759,7 @@ Subroutines / functions
        * :c:func:`multiply_poly`
 
  
-.. c:macro:: int_gaus_pol:
+.. c:function:: void int_gaus_pol(void)
 
 
     File : :file:`ao_one_e_ints/pot_ao_ints.irp.f`
@@ -2774,7 +2774,7 @@ Subroutines / functions
     $\int_{-\infty}^{\infty} x^n \exp(-\alpha x^2) dx$.
 
  
-.. c:macro:: nai_pol_mult:
+.. c:function:: void nai_pol_mult(void)
 
 
     File : :file:`ao_one_e_ints/pot_ao_ints.irp.f`
@@ -2796,7 +2796,7 @@ Subroutines / functions
        * :c:func:`give_polynomial_mult_center_one_e`
 
  
-.. c:macro:: nai_pol_mult_cgtos:
+.. c:function:: void nai_pol_mult_cgtos(void)
 
 
     File : :file:`ao_one_e_ints/one_e_coul_integrals_cgtos.irp.f`
@@ -2828,7 +2828,7 @@ Subroutines / functions
        * :c:func:`give_cpolynomial_mult_center_one_e`
 
  
-.. c:macro:: nai_pol_mult_erf:
+.. c:function:: void nai_pol_mult_erf(void)
 
 
     File : :file:`ao_one_e_ints/pot_ao_erf_ints.irp.f`
@@ -2855,7 +2855,7 @@ Subroutines / functions
        * :c:func:`give_polynomial_mult_center_one_e_erf_opt`
 
  
-.. c:macro:: nai_pol_mult_erf_ao:
+.. c:function:: void nai_pol_mult_erf_ao(void)
 
 
     File : :file:`ao_one_e_ints/pot_ao_erf_ints.irp.f`
@@ -2884,7 +2884,7 @@ Subroutines / functions
        * :c:data:`nucl_coord`
 
  
-.. c:macro:: nai_pol_mult_erf_ao_with1s:
+.. c:function:: void nai_pol_mult_erf_ao_with1s(void)
 
 
     File : :file:`ao_one_e_ints/pot_ao_erf_ints.irp.f`
@@ -2913,7 +2913,7 @@ Subroutines / functions
        * :c:data:`nucl_coord`
 
  
-.. c:macro:: nai_pol_mult_erf_v:
+.. c:function:: void nai_pol_mult_erf_v(void)
 
 
     File : :file:`ao_one_e_ints/pot_ao_erf_ints.irp.f`
@@ -2940,7 +2940,7 @@ Subroutines / functions
        * :c:func:`give_polynomial_mult_center_one_e_erf_opt`
 
  
-.. c:macro:: nai_pol_mult_erf_with1s:
+.. c:function:: void nai_pol_mult_erf_with1s(void)
 
 
     File : :file:`ao_one_e_ints/pot_ao_erf_ints.irp.f`
@@ -2971,7 +2971,7 @@ Subroutines / functions
        * :c:func:`give_polynomial_mult_center_one_e_erf_opt`
 
  
-.. c:macro:: nai_pol_mult_erf_with1s_v:
+.. c:function:: void nai_pol_mult_erf_with1s_v(void)
 
 
     File : :file:`ao_one_e_ints/pot_ao_erf_ints.irp.f`
@@ -3001,7 +3001,7 @@ Subroutines / functions
        * :c:func:`give_polynomial_mult_center_one_e_erf_opt`
 
  
-.. c:macro:: overlap_bourrin_deriv_x:
+.. c:function:: void overlap_bourrin_deriv_x(void)
 
 
     File : :file:`ao_one_e_ints/spread_dipole_ao.irp.f`
@@ -3027,7 +3027,7 @@ Subroutines / functions
        * :c:func:`overlap_bourrin_x`
 
  
-.. c:macro:: overlap_bourrin_dipole:
+.. c:function:: void overlap_bourrin_dipole(void)
 
 
     File : :file:`ao_one_e_ints/spread_dipole_ao.irp.f`
@@ -3046,7 +3046,7 @@ Subroutines / functions
        * :c:data:`ao_dipole_x`
 
  
-.. c:macro:: overlap_bourrin_spread:
+.. c:function:: void overlap_bourrin_spread(void)
 
 
     File : :file:`ao_one_e_ints/spread_dipole_ao.irp.f`
@@ -3068,7 +3068,7 @@ Subroutines / functions
        * :c:data:`ao_spread_x`
 
  
-.. c:macro:: overlap_bourrin_x:
+.. c:function:: void overlap_bourrin_x(void)
 
 
     File : :file:`ao_one_e_ints/spread_dipole_ao.irp.f`
@@ -3087,7 +3087,7 @@ Subroutines / functions
        * :c:func:`overlap_bourrin_deriv_x`
 
  
-.. c:macro:: v_n_e:
+.. c:function:: void v_n_e(void)
 
 
     File : :file:`ao_one_e_ints/pot_ao_ints.irp.f`
@@ -3104,7 +3104,7 @@ Subroutines / functions
     $p_2 = x^{b_x} y^{b_y} z^{b_z} \exp(-\beta  r^2)$
 
  
-.. c:macro:: v_n_e_cgtos:
+.. c:function:: void v_n_e_cgtos(void)
 
 
     File : :file:`ao_one_e_ints/one_e_coul_integrals_cgtos.irp.f`
@@ -3121,7 +3121,7 @@ Subroutines / functions
     $p_2 = x^{b_x} y^{b_y} z^{b_z} \exp(-\beta  r^2)$
 
  
-.. c:macro:: v_r:
+.. c:function:: void v_r(void)
 
 
     File : :file:`ao_one_e_ints/pot_ao_ints.irp.f`
@@ -3137,7 +3137,7 @@ Subroutines / functions
     
 
  
-.. c:macro:: v_r_cgtos:
+.. c:function:: void v_r_cgtos(void)
 
 
     File : :file:`ao_one_e_ints/one_e_coul_integrals_cgtos.irp.f`

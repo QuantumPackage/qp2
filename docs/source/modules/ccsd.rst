@@ -35,7 +35,7 @@ Programs
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: binary_search:
+.. c:function:: void binary_search(void)
 
 
     File : :file:`ccsd_t_space_orb_stoch.irp.f`
@@ -48,7 +48,7 @@ Subroutines / functions
     Searches the key in array arr(1:sze) between l_in and r_in, and returns its index
 
  
-.. c:macro:: ccsd_energy_space_x:
+.. c:function:: void ccsd_energy_space_x(void)
 
 
     File : :file:`ccsd_space_orb_sub.irp.f`
@@ -87,7 +87,7 @@ Subroutines / functions
        * :c:func:`gpu_synchronize`
 
  
-.. c:macro:: ccsd_energy_spin:
+.. c:function:: void ccsd_energy_spin(void)
 
 
     File : :file:`ccsd_spin_orb_sub.irp.f`
@@ -107,7 +107,7 @@ Subroutines / functions
        * :c:func:`run_ccsd_spin_orb`
 
  
-.. c:macro:: ccsd_par_t_space:
+.. c:function:: void ccsd_par_t_space(void)
 
 
     File : :file:`ccsd_t_space_orb.irp.f`
@@ -135,7 +135,7 @@ Subroutines / functions
        * :c:func:`form_w`
 
  
-.. c:macro:: ccsd_par_t_space_stoch:
+.. c:function:: void ccsd_par_t_space_stoch(void)
 
 
     File : :file:`ccsd_t_space_orb_stoch.irp.f`
@@ -172,7 +172,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: ccsd_par_t_space_v2:
+.. c:function:: void ccsd_par_t_space_v2(void)
 
 
     File : :file:`ccsd_t_space_orb.irp.f`
@@ -193,7 +193,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: ccsd_par_t_space_v3:
+.. c:function:: void ccsd_par_t_space_v3(void)
 
 
     File : :file:`ccsd_t_space_orb_abc.irp.f`
@@ -205,7 +205,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: ccsd_par_t_spin:
+.. c:function:: void ccsd_par_t_spin(void)
 
 
     File : :file:`ccsd_t_spin_orb.irp.f`
@@ -217,7 +217,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: ccsd_par_t_spin_v2:
+.. c:function:: void ccsd_par_t_spin_v2(void)
 
 
     File : :file:`ccsd_t_spin_orb.irp.f`
@@ -252,7 +252,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: ccsd_t_task_aba:
+.. c:function:: void ccsd_t_task_aba(void)
 
 
     File : :file:`ccsd_t_space_orb_abc.irp.f`
@@ -273,7 +273,7 @@ Subroutines / functions
        * :c:func:`form_w_abc`
 
  
-.. c:macro:: ccsd_t_task_abc:
+.. c:function:: void ccsd_t_task_abc(void)
 
 
     File : :file:`ccsd_t_space_orb_abc.irp.f`
@@ -294,7 +294,7 @@ Subroutines / functions
        * :c:func:`form_w_abc`
 
  
-.. c:macro:: compute_a1:
+.. c:function:: void compute_a1(void)
 
 
     File : :file:`ccsd_space_orb_sub.irp.f`
@@ -330,7 +330,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: compute_a1_chol:
+.. c:function:: void compute_a1_chol(void)
 
 
     File : :file:`ccsd_space_orb_sub_chol.irp.f`
@@ -372,7 +372,7 @@ Subroutines / functions
        * :c:func:`gpu_synchronize`
 
  
-.. c:macro:: compute_b1:
+.. c:function:: void compute_b1(void)
 
 
     File : :file:`ccsd_space_orb_sub.irp.f`
@@ -400,7 +400,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: compute_b1_gam:
+.. c:function:: void compute_b1_gam(void)
 
 
     File : :file:`ccsd_space_orb_sub.irp.f`
@@ -437,7 +437,7 @@ Subroutines / functions
        * :c:func:`gen_v_space`
 
  
-.. c:macro:: compute_cf_oo:
+.. c:function:: void compute_cf_oo(void)
 
 
     File : :file:`ccsd_spin_orb_sub.irp.f`
@@ -464,7 +464,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: compute_cf_ov:
+.. c:function:: void compute_cf_ov(void)
 
 
     File : :file:`ccsd_spin_orb_sub.irp.f`
@@ -484,7 +484,7 @@ Subroutines / functions
        * :c:func:`use_cf_ov`
 
  
-.. c:macro:: compute_cf_vv:
+.. c:function:: void compute_cf_vv(void)
 
 
     File : :file:`ccsd_spin_orb_sub.irp.f`
@@ -520,7 +520,7 @@ Subroutines / functions
        * :c:func:`gen_v_spin_3idx_ij_l`
 
  
-.. c:macro:: compute_cw_oooo:
+.. c:function:: void compute_cw_oooo(void)
 
 
     File : :file:`ccsd_spin_orb_sub.irp.f`
@@ -546,7 +546,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: compute_cw_ovvo:
+.. c:function:: void compute_cw_ovvo(void)
 
 
     File : :file:`ccsd_spin_orb_sub.irp.f`
@@ -581,7 +581,7 @@ Subroutines / functions
        * :c:func:`gen_v_spin_3idx_ij_l`
 
  
-.. c:macro:: compute_cw_vvvf:
+.. c:function:: void compute_cw_vvvf(void)
 
 
     File : :file:`ccsd_spin_orb_sub.irp.f`
@@ -607,7 +607,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: compute_cw_vvvv:
+.. c:function:: void compute_cw_vvvv(void)
 
 
     File : :file:`ccsd_spin_orb_sub.irp.f`
@@ -626,7 +626,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: compute_g_occ:
+.. c:function:: void compute_g_occ(void)
 
 
     File : :file:`ccsd_space_orb_sub.irp.f`
@@ -660,7 +660,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: compute_g_occ_chol:
+.. c:function:: void compute_g_occ_chol(void)
 
 
     File : :file:`ccsd_space_orb_sub_chol.irp.f`
@@ -700,7 +700,7 @@ Subroutines / functions
        * :c:func:`gpu_synchronize`
 
  
-.. c:macro:: compute_g_vir:
+.. c:function:: void compute_g_vir(void)
 
 
     File : :file:`ccsd_space_orb_sub.irp.f`
@@ -734,7 +734,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: compute_g_vir_chol:
+.. c:function:: void compute_g_vir_chol(void)
 
 
     File : :file:`ccsd_space_orb_sub_chol.irp.f`
@@ -777,7 +777,7 @@ Subroutines / functions
        * :c:func:`gpu_synchronize`
 
  
-.. c:macro:: compute_h_oo:
+.. c:function:: void compute_h_oo(void)
 
 
     File : :file:`ccsd_space_orb_sub.irp.f`
@@ -811,7 +811,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: compute_h_oo_chol:
+.. c:function:: void compute_h_oo_chol(void)
 
 
     File : :file:`ccsd_space_orb_sub_chol.irp.f`
@@ -853,7 +853,7 @@ Subroutines / functions
        * :c:func:`gpu_synchronize`
 
  
-.. c:macro:: compute_h_vo:
+.. c:function:: void compute_h_vo(void)
 
 
     File : :file:`ccsd_space_orb_sub.irp.f`
@@ -887,7 +887,7 @@ Subroutines / functions
        * :c:func:`dgemv`
 
  
-.. c:macro:: compute_h_vo_chol:
+.. c:function:: void compute_h_vo_chol(void)
 
 
     File : :file:`ccsd_space_orb_sub_chol.irp.f`
@@ -931,7 +931,7 @@ Subroutines / functions
        * :c:func:`gpu_synchronize`
 
  
-.. c:macro:: compute_h_vv:
+.. c:function:: void compute_h_vv(void)
 
 
     File : :file:`ccsd_space_orb_sub.irp.f`
@@ -965,7 +965,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: compute_h_vv_chol:
+.. c:function:: void compute_h_vv_chol(void)
 
 
     File : :file:`ccsd_space_orb_sub_chol.irp.f`
@@ -1007,7 +1007,7 @@ Subroutines / functions
        * :c:func:`gpu_synchronize`
 
  
-.. c:macro:: compute_j1:
+.. c:function:: void compute_j1(void)
 
 
     File : :file:`ccsd_space_orb_sub.irp.f`
@@ -1033,7 +1033,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: compute_j1_chol:
+.. c:function:: void compute_j1_chol(void)
 
 
     File : :file:`ccsd_space_orb_sub_chol.irp.f`
@@ -1076,7 +1076,7 @@ Subroutines / functions
        * :c:func:`gpu_synchronize`
 
  
-.. c:macro:: compute_k1:
+.. c:function:: void compute_k1(void)
 
 
     File : :file:`ccsd_space_orb_sub.irp.f`
@@ -1102,7 +1102,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: compute_k1_chol:
+.. c:function:: void compute_k1_chol(void)
 
 
     File : :file:`ccsd_space_orb_sub_chol.irp.f`
@@ -1146,7 +1146,7 @@ Subroutines / functions
        * :c:func:`gpu_synchronize`
 
  
-.. c:macro:: compute_r1_space:
+.. c:function:: void compute_r1_space(void)
 
 
     File : :file:`ccsd_space_orb_sub.irp.f`
@@ -1185,7 +1185,7 @@ Subroutines / functions
        * :c:func:`dgemv`
 
  
-.. c:macro:: compute_r1_space_chol:
+.. c:function:: void compute_r1_space_chol(void)
 
 
     File : :file:`ccsd_space_orb_sub_chol.irp.f`
@@ -1230,7 +1230,7 @@ Subroutines / functions
        * :c:func:`gpu_synchronize`
 
  
-.. c:macro:: compute_r1_spin:
+.. c:function:: void compute_r1_spin(void)
 
 
     File : :file:`ccsd_spin_orb_sub.irp.f`
@@ -1265,7 +1265,7 @@ Subroutines / functions
        * :c:func:`gen_v_spin_3idx`
 
  
-.. c:macro:: compute_r2_space:
+.. c:function:: void compute_r2_space(void)
 
 
     File : :file:`ccsd_space_orb_sub.irp.f`
@@ -1312,7 +1312,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: compute_r2_space_chol:
+.. c:function:: void compute_r2_space_chol(void)
 
 
     File : :file:`ccsd_space_orb_sub_chol.irp.f`
@@ -1367,7 +1367,7 @@ Subroutines / functions
        * :c:func:`gpu_synchronize`
 
  
-.. c:macro:: compute_r2_spin:
+.. c:function:: void compute_r2_spin(void)
 
 
     File : :file:`ccsd_spin_orb_sub.irp.f`
@@ -1405,7 +1405,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: compute_tau_spin:
+.. c:function:: void compute_tau_spin(void)
 
 
     File : :file:`ccsd_spin_orb_sub.irp.f`
@@ -1424,7 +1424,7 @@ Subroutines / functions
        * :c:func:`run_ccsd_spin_orb`
 
  
-.. c:macro:: compute_tau_t_spin:
+.. c:function:: void compute_tau_t_spin(void)
 
 
     File : :file:`ccsd_spin_orb_sub.irp.f`
@@ -1443,7 +1443,7 @@ Subroutines / functions
        * :c:func:`run_ccsd_spin_orb`
 
  
-.. c:macro:: form_v:
+.. c:function:: void form_v(void)
 
 
     File : :file:`ccsd_t_space_orb.irp.f`
@@ -1469,7 +1469,7 @@ Subroutines / functions
        * :c:func:`ccsd_par_t_space`
 
  
-.. c:macro:: form_v_abc:
+.. c:function:: void form_v_abc(void)
 
 
     File : :file:`ccsd_t_space_orb_abc.irp.f`
@@ -1489,7 +1489,7 @@ Subroutines / functions
        * :c:func:`ccsd_t_task_abc`
 
  
-.. c:macro:: form_v_ijk:
+.. c:function:: void form_v_ijk(void)
 
 
     File : :file:`ccsd_t_space_orb.irp.f`
@@ -1508,7 +1508,7 @@ Subroutines / functions
        * :c:func:`ccsd_par_t_space_v2`
 
  
-.. c:macro:: form_w:
+.. c:function:: void form_w(void)
 
 
     File : :file:`ccsd_t_space_orb.irp.f`
@@ -1535,7 +1535,7 @@ Subroutines / functions
        * :c:func:`ccsd_par_t_space`
 
  
-.. c:macro:: form_w_abc:
+.. c:function:: void form_w_abc(void)
 
 
     File : :file:`ccsd_t_space_orb_abc.irp.f`
@@ -1562,7 +1562,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: form_w_ijk:
+.. c:function:: void form_w_ijk(void)
 
 
     File : :file:`ccsd_t_space_orb.irp.f`
@@ -1588,7 +1588,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: run_ccsd_space_orb:
+.. c:function:: void run_ccsd_space_orb(void)
 
 
     File : :file:`ccsd_space_orb_sub.irp.f`
@@ -1690,7 +1690,7 @@ Subroutines / functions
        * :c:func:`write_t2`
 
  
-.. c:macro:: run_ccsd_spin_orb:
+.. c:function:: void run_ccsd_spin_orb(void)
 
 
     File : :file:`ccsd_spin_orb_sub.irp.f`
@@ -1776,7 +1776,7 @@ Subroutines / functions
        * :c:func:`write_t2`
 
  
-.. c:macro:: save_energy:
+.. c:function:: void save_energy(void)
 
 
     File : :file:`save_energy.irp.f`
@@ -1805,7 +1805,7 @@ Subroutines / functions
        * :c:func:`ezfio_set_ccsd_energy_t`
 
  
-.. c:macro:: update_tau_space:
+.. c:function:: void update_tau_space(void)
 
 
     File : :file:`ccsd_space_orb_sub.irp.f`
@@ -1843,7 +1843,7 @@ Subroutines / functions
        * :c:func:`gpu_synchronize`
 
  
-.. c:macro:: update_tau_x_space:
+.. c:function:: void update_tau_x_space(void)
 
 
     File : :file:`ccsd_space_orb_sub.irp.f`
@@ -1881,7 +1881,7 @@ Subroutines / functions
        * :c:func:`gpu_synchronize`
 
  
-.. c:macro:: use_cf_oo:
+.. c:function:: void use_cf_oo(void)
 
 
     File : :file:`ccsd_spin_orb_sub.irp.f`
@@ -1901,7 +1901,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: use_cf_ov:
+.. c:function:: void use_cf_ov(void)
 
 
     File : :file:`ccsd_spin_orb_sub.irp.f`
@@ -1921,7 +1921,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: use_cf_vv:
+.. c:function:: void use_cf_vv(void)
 
 
     File : :file:`ccsd_spin_orb_sub.irp.f`
@@ -1933,7 +1933,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: use_cw_vvvf:
+.. c:function:: void use_cw_vvvf(void)
 
 
     File : :file:`ccsd_spin_orb_sub.irp.f`

@@ -59,7 +59,7 @@ Programs
 Providers 
 --------- 
  
-.. c:var:: ci_energy_no_diag
+.. c:var:: double ci_energy_no_diag
 
 
     File : :file:`ci_energy_no_diag.irp.f`
@@ -83,7 +83,7 @@ Providers
 
 
  
-.. c:var:: mo_deriv_1_x
+.. c:var:: double mo_deriv_1_x
 
 
     File : :file:`mo_deriv_1.irp.f`
@@ -117,7 +117,7 @@ Providers
        * :c:data:`multi_s_deriv_1`
 
  
-.. c:var:: mo_deriv_1_y
+.. c:var:: double mo_deriv_1_y
 
 
     File : :file:`mo_deriv_1.irp.f`
@@ -151,7 +151,7 @@ Providers
        * :c:data:`multi_s_deriv_1`
 
  
-.. c:var:: mo_deriv_1_z
+.. c:var:: double mo_deriv_1_z
 
 
     File : :file:`mo_deriv_1.irp.f`
@@ -185,7 +185,7 @@ Providers
        * :c:data:`multi_s_deriv_1`
 
  
-.. c:var:: mo_prop_dipole_x
+.. c:var:: double mo_prop_dipole_x
 
 
     File : :file:`mo_dipole_properties.irp.f`
@@ -216,7 +216,7 @@ Providers
        * :c:data:`multi_s_dipole_moment`
 
  
-.. c:var:: mo_prop_dipole_y
+.. c:var:: double mo_prop_dipole_y
 
 
     File : :file:`mo_dipole_properties.irp.f`
@@ -247,7 +247,7 @@ Providers
        * :c:data:`multi_s_dipole_moment`
 
  
-.. c:var:: mo_prop_dipole_z
+.. c:var:: double mo_prop_dipole_z
 
 
     File : :file:`mo_dipole_properties.irp.f`
@@ -278,7 +278,7 @@ Providers
        * :c:data:`multi_s_dipole_moment`
 
  
-.. c:var:: multi_s_deriv_1
+.. c:var:: double multi_s_deriv_1
 
 
     File : :file:`multi_s_deriv_1.irp.f`
@@ -314,7 +314,7 @@ Providers
 
 
  
-.. c:var:: multi_s_dipole_moment
+.. c:var:: double multi_s_dipole_moment
 
 
     File : :file:`multi_s_dipole_moment.irp.f`
@@ -370,7 +370,7 @@ Providers
        * :c:data:`multi_s_x_dipole_moment_eigenvec`
 
  
-.. c:var:: multi_s_x_deriv_1
+.. c:var:: double multi_s_x_deriv_1
 
 
     File : :file:`multi_s_deriv_1.irp.f`
@@ -406,7 +406,7 @@ Providers
 
 
  
-.. c:var:: multi_s_x_dipole_moment
+.. c:var:: double multi_s_x_dipole_moment
 
 
     File : :file:`multi_s_dipole_moment.irp.f`
@@ -462,7 +462,7 @@ Providers
        * :c:data:`multi_s_x_dipole_moment_eigenvec`
 
  
-.. c:var:: multi_s_x_dipole_moment_eigenval
+.. c:var:: double multi_s_x_dipole_moment_eigenval
 
 
     File : :file:`multi_s_dipole_moment.irp.f`
@@ -491,7 +491,7 @@ Providers
 
 
  
-.. c:var:: multi_s_x_dipole_moment_eigenvec
+.. c:var:: double multi_s_x_dipole_moment_eigenvec
 
 
     File : :file:`multi_s_dipole_moment.irp.f`
@@ -520,7 +520,7 @@ Providers
 
 
  
-.. c:var:: multi_s_y_deriv_1
+.. c:var:: double multi_s_y_deriv_1
 
 
     File : :file:`multi_s_deriv_1.irp.f`
@@ -556,7 +556,7 @@ Providers
 
 
  
-.. c:var:: multi_s_y_dipole_moment
+.. c:var:: double multi_s_y_dipole_moment
 
 
     File : :file:`multi_s_dipole_moment.irp.f`
@@ -612,7 +612,7 @@ Providers
        * :c:data:`multi_s_x_dipole_moment_eigenvec`
 
  
-.. c:var:: multi_s_y_dipole_moment_eigenval
+.. c:var:: double multi_s_y_dipole_moment_eigenval
 
 
     File : :file:`multi_s_dipole_moment.irp.f`
@@ -641,7 +641,7 @@ Providers
 
 
  
-.. c:var:: multi_s_y_dipole_moment_eigenvec
+.. c:var:: double multi_s_y_dipole_moment_eigenvec
 
 
     File : :file:`multi_s_dipole_moment.irp.f`
@@ -670,7 +670,7 @@ Providers
 
 
  
-.. c:var:: multi_s_z_deriv_1
+.. c:var:: double multi_s_z_deriv_1
 
 
     File : :file:`multi_s_deriv_1.irp.f`
@@ -706,7 +706,7 @@ Providers
 
 
  
-.. c:var:: multi_s_z_dipole_moment
+.. c:var:: double multi_s_z_dipole_moment
 
 
     File : :file:`multi_s_dipole_moment.irp.f`
@@ -762,7 +762,7 @@ Providers
        * :c:data:`multi_s_x_dipole_moment_eigenvec`
 
  
-.. c:var:: multi_s_z_dipole_moment_eigenval
+.. c:var:: double multi_s_z_dipole_moment_eigenval
 
 
     File : :file:`multi_s_dipole_moment.irp.f`
@@ -791,7 +791,7 @@ Providers
 
 
  
-.. c:var:: multi_s_z_dipole_moment_eigenvec
+.. c:var:: double multi_s_z_dipole_moment_eigenvec
 
 
     File : :file:`multi_s_dipole_moment.irp.f`
@@ -824,7 +824,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: print_dipole_moment:
+.. c:function:: void print_dipole_moment(void)
 
 
     File : :file:`print_properties.irp.f`
@@ -853,7 +853,7 @@ Subroutines / functions
        * :c:func:`print_mol_properties`
 
  
-.. c:macro:: print_energy_components:
+.. c:function:: void print_energy_components(void)
 
 
     File : :file:`print_e_components.irp.f`
@@ -886,7 +886,7 @@ Subroutines / functions
        * :c:func:`print_mol_properties`
 
  
-.. c:macro:: print_mol_properties:
+.. c:function:: void print_mol_properties(void)
 
 
     File : :file:`print_mol_properties.irp.f`
@@ -927,7 +927,7 @@ Subroutines / functions
        * :c:func:`print_transition_dipole_moment`
 
  
-.. c:macro:: print_oscillator_strength:
+.. c:function:: void print_oscillator_strength(void)
 
 
     File : :file:`print_properties.irp.f`
@@ -965,7 +965,7 @@ Subroutines / functions
        * :c:func:`print_mol_properties`
 
  
-.. c:macro:: print_transition_dipole_moment:
+.. c:function:: void print_transition_dipole_moment(void)
 
 
     File : :file:`print_properties.irp.f`

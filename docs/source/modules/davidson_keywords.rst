@@ -102,7 +102,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: n_states_diag
+.. c:var:: int n_states_diag
 
 
     File : :file:`davidson_keywords/input.irp.f`
@@ -134,7 +134,7 @@ Providers
        * :c:data:`sxeigenvec`
 
  
-.. c:var:: threshold_davidson_pt2
+.. c:var:: double threshold_davidson_pt2
 
 
     File : :file:`davidson_keywords/usef.irp.f`

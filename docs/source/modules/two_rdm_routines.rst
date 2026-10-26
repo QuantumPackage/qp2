@@ -14,7 +14,7 @@ subroutines below are documented from the irpf90 man pages.
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: is_integer_in_string_local:
+.. c:function:: void is_integer_in_string_local(void)
 
 
     File : :file:`two_rdm_routines/update_rdm.irp.f`
@@ -26,7 +26,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: orb_range_2_rdm_openmp:
+.. c:function:: void orb_range_2_rdm_openmp(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_2rdm.irp.f`
@@ -75,7 +75,7 @@ Subroutines / functions
        * :c:func:`orb_range_2_rdm_openmp_work`
 
  
-.. c:macro:: orb_range_2_rdm_openmp_work:
+.. c:function:: void orb_range_2_rdm_openmp_work(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_2rdm.irp.f`
@@ -116,7 +116,7 @@ Subroutines / functions
        * :c:func:`orb_range_2_rdm_openmp_work_n_int`
 
  
-.. c:macro:: orb_range_2_rdm_openmp_work_1:
+.. c:function:: void orb_range_2_rdm_openmp_work_1(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_2rdm.irp.f_template_572`
@@ -179,7 +179,7 @@ Subroutines / functions
        * :c:func:`update_keys_values_n_states_local`
 
  
-.. c:macro:: orb_range_2_rdm_openmp_work_2:
+.. c:function:: void orb_range_2_rdm_openmp_work_2(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_2rdm.irp.f_template_572`
@@ -242,7 +242,7 @@ Subroutines / functions
        * :c:func:`update_keys_values_n_states_local`
 
  
-.. c:macro:: orb_range_2_rdm_openmp_work_3:
+.. c:function:: void orb_range_2_rdm_openmp_work_3(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_2rdm.irp.f_template_572`
@@ -305,7 +305,7 @@ Subroutines / functions
        * :c:func:`update_keys_values_n_states_local`
 
  
-.. c:macro:: orb_range_2_rdm_openmp_work_4:
+.. c:function:: void orb_range_2_rdm_openmp_work_4(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_2rdm.irp.f_template_572`
@@ -368,7 +368,7 @@ Subroutines / functions
        * :c:func:`update_keys_values_n_states_local`
 
  
-.. c:macro:: orb_range_2_rdm_openmp_work_n_int:
+.. c:function:: void orb_range_2_rdm_openmp_work_n_int(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_2rdm.irp.f_template_572`
@@ -431,7 +431,7 @@ Subroutines / functions
        * :c:func:`update_keys_values_n_states_local`
 
  
-.. c:macro:: orb_range_2_rdm_state_av_openmp:
+.. c:function:: void orb_range_2_rdm_state_av_openmp(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_state_av_2rdm.irp.f`
@@ -478,7 +478,7 @@ Subroutines / functions
        * :c:func:`orb_range_2_rdm_state_av_openmp_work`
 
  
-.. c:macro:: orb_range_2_rdm_state_av_openmp_work:
+.. c:function:: void orb_range_2_rdm_state_av_openmp_work(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_state_av_2rdm.irp.f`
@@ -519,7 +519,7 @@ Subroutines / functions
        * :c:func:`orb_range_2_rdm_state_av_openmp_work_n_int`
 
  
-.. c:macro:: orb_range_2_rdm_state_av_openmp_work_1:
+.. c:function:: void orb_range_2_rdm_state_av_openmp_work_1(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_state_av_2rdm.irp.f_template_557`
@@ -583,7 +583,7 @@ Subroutines / functions
        * :c:func:`update_keys_values`
 
  
-.. c:macro:: orb_range_2_rdm_state_av_openmp_work_2:
+.. c:function:: void orb_range_2_rdm_state_av_openmp_work_2(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_state_av_2rdm.irp.f_template_557`
@@ -647,7 +647,7 @@ Subroutines / functions
        * :c:func:`update_keys_values`
 
  
-.. c:macro:: orb_range_2_rdm_state_av_openmp_work_3:
+.. c:function:: void orb_range_2_rdm_state_av_openmp_work_3(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_state_av_2rdm.irp.f_template_557`
@@ -711,7 +711,7 @@ Subroutines / functions
        * :c:func:`update_keys_values`
 
  
-.. c:macro:: orb_range_2_rdm_state_av_openmp_work_4:
+.. c:function:: void orb_range_2_rdm_state_av_openmp_work_4(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_state_av_2rdm.irp.f_template_557`
@@ -775,7 +775,7 @@ Subroutines / functions
        * :c:func:`update_keys_values`
 
  
-.. c:macro:: orb_range_2_rdm_state_av_openmp_work_n_int:
+.. c:function:: void orb_range_2_rdm_state_av_openmp_work_n_int(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_state_av_2rdm.irp.f_template_557`
@@ -839,7 +839,7 @@ Subroutines / functions
        * :c:func:`update_keys_values`
 
  
-.. c:macro:: orb_range_2_trans_rdm_openmp:
+.. c:function:: void orb_range_2_trans_rdm_openmp(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_trans_2rdm.irp.f`
@@ -888,7 +888,7 @@ Subroutines / functions
        * :c:func:`orb_range_2_trans_rdm_openmp_work`
 
  
-.. c:macro:: orb_range_2_trans_rdm_openmp_work:
+.. c:function:: void orb_range_2_trans_rdm_openmp_work(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_trans_2rdm.irp.f`
@@ -929,7 +929,7 @@ Subroutines / functions
        * :c:func:`orb_range_2_trans_rdm_openmp_work_n_int`
 
  
-.. c:macro:: orb_range_2_trans_rdm_openmp_work_1:
+.. c:function:: void orb_range_2_trans_rdm_openmp_work_1(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_trans_2rdm.irp.f_template_552`
@@ -992,7 +992,7 @@ Subroutines / functions
        * :c:func:`update_keys_values_n_states_trans`
 
  
-.. c:macro:: orb_range_2_trans_rdm_openmp_work_2:
+.. c:function:: void orb_range_2_trans_rdm_openmp_work_2(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_trans_2rdm.irp.f_template_552`
@@ -1055,7 +1055,7 @@ Subroutines / functions
        * :c:func:`update_keys_values_n_states_trans`
 
  
-.. c:macro:: orb_range_2_trans_rdm_openmp_work_3:
+.. c:function:: void orb_range_2_trans_rdm_openmp_work_3(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_trans_2rdm.irp.f_template_552`
@@ -1118,7 +1118,7 @@ Subroutines / functions
        * :c:func:`update_keys_values_n_states_trans`
 
  
-.. c:macro:: orb_range_2_trans_rdm_openmp_work_4:
+.. c:function:: void orb_range_2_trans_rdm_openmp_work_4(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_trans_2rdm.irp.f_template_552`
@@ -1181,7 +1181,7 @@ Subroutines / functions
        * :c:func:`update_keys_values_n_states_trans`
 
  
-.. c:macro:: orb_range_2_trans_rdm_openmp_work_n_int:
+.. c:function:: void orb_range_2_trans_rdm_openmp_work_n_int(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_trans_2rdm.irp.f_template_552`
@@ -1244,7 +1244,7 @@ Subroutines / functions
        * :c:func:`update_keys_values_n_states_trans`
 
  
-.. c:macro:: orb_range_diag_to_all_2_rdm_dm_buffer:
+.. c:function:: void orb_range_diag_to_all_2_rdm_dm_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_state_av_rdm.irp.f`
@@ -1294,7 +1294,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list_ab`
 
  
-.. c:macro:: orb_range_diag_to_all_states_2_rdm_dm_buffer:
+.. c:function:: void orb_range_diag_to_all_states_2_rdm_dm_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_rdm.irp.f`
@@ -1344,7 +1344,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list_ab`
 
  
-.. c:macro:: orb_range_diag_to_all_states_2_rdm_trans_buffer:
+.. c:function:: void orb_range_diag_to_all_states_2_rdm_trans_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_trans_rdm.irp.f`
@@ -1394,7 +1394,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list_ab`
 
  
-.. c:macro:: orb_range_off_diag_double_to_2_rdm_aa_dm_buffer:
+.. c:function:: void orb_range_off_diag_double_to_2_rdm_aa_dm_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_state_av_rdm.irp.f`
@@ -1450,7 +1450,7 @@ Subroutines / functions
        * :c:func:`get_double_excitation_spin`
 
  
-.. c:macro:: orb_range_off_diag_double_to_2_rdm_ab_dm_buffer:
+.. c:function:: void orb_range_off_diag_double_to_2_rdm_ab_dm_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_state_av_rdm.irp.f`
@@ -1504,7 +1504,7 @@ Subroutines / functions
        * :c:func:`get_double_excitation`
 
  
-.. c:macro:: orb_range_off_diag_double_to_2_rdm_bb_dm_buffer:
+.. c:function:: void orb_range_off_diag_double_to_2_rdm_bb_dm_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_state_av_rdm.irp.f`
@@ -1560,7 +1560,7 @@ Subroutines / functions
        * :c:func:`get_double_excitation_spin`
 
  
-.. c:macro:: orb_range_off_diag_double_to_all_states_aa_dm_buffer:
+.. c:function:: void orb_range_off_diag_double_to_all_states_aa_dm_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_rdm.irp.f`
@@ -1616,7 +1616,7 @@ Subroutines / functions
        * :c:func:`get_double_excitation_spin`
 
  
-.. c:macro:: orb_range_off_diag_double_to_all_states_aa_trans_rdm_buffer:
+.. c:function:: void orb_range_off_diag_double_to_all_states_aa_trans_rdm_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_trans_rdm.irp.f`
@@ -1672,7 +1672,7 @@ Subroutines / functions
        * :c:func:`get_double_excitation_spin`
 
  
-.. c:macro:: orb_range_off_diag_double_to_all_states_ab_dm_buffer:
+.. c:function:: void orb_range_off_diag_double_to_all_states_ab_dm_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_rdm.irp.f`
@@ -1726,7 +1726,7 @@ Subroutines / functions
        * :c:func:`get_double_excitation`
 
  
-.. c:macro:: orb_range_off_diag_double_to_all_states_ab_trans_rdm_buffer:
+.. c:function:: void orb_range_off_diag_double_to_all_states_ab_trans_rdm_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_trans_rdm.irp.f`
@@ -1780,7 +1780,7 @@ Subroutines / functions
        * :c:func:`get_double_excitation`
 
  
-.. c:macro:: orb_range_off_diag_double_to_all_states_bb_dm_buffer:
+.. c:function:: void orb_range_off_diag_double_to_all_states_bb_dm_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_rdm.irp.f`
@@ -1836,7 +1836,7 @@ Subroutines / functions
        * :c:func:`get_double_excitation_spin`
 
  
-.. c:macro:: orb_range_off_diag_double_to_all_states_trans_rdm_bb_buffer:
+.. c:function:: void orb_range_off_diag_double_to_all_states_trans_rdm_bb_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_trans_rdm.irp.f`
@@ -1892,7 +1892,7 @@ Subroutines / functions
        * :c:func:`get_double_excitation_spin`
 
  
-.. c:macro:: orb_range_off_diag_single_to_2_rdm_aa_dm_buffer:
+.. c:function:: void orb_range_off_diag_single_to_2_rdm_aa_dm_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_state_av_rdm.irp.f`
@@ -1949,7 +1949,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation`
 
  
-.. c:macro:: orb_range_off_diag_single_to_2_rdm_ab_dm_buffer:
+.. c:function:: void orb_range_off_diag_single_to_2_rdm_ab_dm_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_state_av_rdm.irp.f`
@@ -2006,7 +2006,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation`
 
  
-.. c:macro:: orb_range_off_diag_single_to_2_rdm_bb_dm_buffer:
+.. c:function:: void orb_range_off_diag_single_to_2_rdm_bb_dm_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_state_av_rdm.irp.f`
@@ -2063,7 +2063,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation`
 
  
-.. c:macro:: orb_range_off_diag_single_to_all_states_aa_dm_buffer:
+.. c:function:: void orb_range_off_diag_single_to_all_states_aa_dm_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_rdm.irp.f`
@@ -2120,7 +2120,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation`
 
  
-.. c:macro:: orb_range_off_diag_single_to_all_states_aa_trans_rdm_buffer:
+.. c:function:: void orb_range_off_diag_single_to_all_states_aa_trans_rdm_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_trans_rdm.irp.f`
@@ -2177,7 +2177,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation`
 
  
-.. c:macro:: orb_range_off_diag_single_to_all_states_ab_dm_buffer:
+.. c:function:: void orb_range_off_diag_single_to_all_states_ab_dm_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_rdm.irp.f`
@@ -2234,7 +2234,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation`
 
  
-.. c:macro:: orb_range_off_diag_single_to_all_states_ab_trans_rdm_buffer:
+.. c:function:: void orb_range_off_diag_single_to_all_states_ab_trans_rdm_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_trans_rdm.irp.f`
@@ -2291,7 +2291,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation`
 
  
-.. c:macro:: orb_range_off_diag_single_to_all_states_bb_dm_buffer:
+.. c:function:: void orb_range_off_diag_single_to_all_states_bb_dm_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_rdm.irp.f`
@@ -2348,7 +2348,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation`
 
  
-.. c:macro:: orb_range_off_diag_single_to_all_states_bb_trans_rdm_buffer:
+.. c:function:: void orb_range_off_diag_single_to_all_states_bb_trans_rdm_buffer(void)
 
 
     File : :file:`two_rdm_routines/update_trans_rdm.irp.f`
@@ -2405,7 +2405,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation`
 
  
-.. c:macro:: update_keys_values:
+.. c:function:: void update_keys_values(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_state_av_2rdm.irp.f`
@@ -2436,7 +2436,7 @@ Subroutines / functions
        * :c:func:`omp_unset_lock`
 
  
-.. c:macro:: update_keys_values_n_states:
+.. c:function:: void update_keys_values_n_states(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_2rdm.irp.f`
@@ -2457,7 +2457,7 @@ Subroutines / functions
        * :c:func:`omp_unset_lock`
 
  
-.. c:macro:: update_keys_values_n_states_local:
+.. c:function:: void update_keys_values_n_states_local(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_2rdm.irp.f`
@@ -2480,7 +2480,7 @@ Subroutines / functions
        * :c:func:`orb_range_2_rdm_openmp_work_n_int`
 
  
-.. c:macro:: update_keys_values_n_states_trans:
+.. c:function:: void update_keys_values_n_states_trans(void)
 
 
     File : :file:`two_rdm_routines/davidson_like_trans_2rdm.irp.f`

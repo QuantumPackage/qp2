@@ -134,7 +134,7 @@ Programs
 Providers 
 --------- 
  
-.. c:var:: ao_extra_center
+.. c:var:: double ao_extra_center
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -153,7 +153,7 @@ Providers
        * :c:data:`new_nucl_coord_1s_transp`
 
  
-.. c:var:: ao_extra_center_1s
+.. c:var:: double ao_extra_center_1s
 
 
     File : :file:`density_extra.irp.f`
@@ -182,7 +182,7 @@ Providers
        * :c:data:`ao_extra_center_1s_dist`
 
  
-.. c:var:: ao_extra_center_1s_dist
+.. c:var:: double ao_extra_center_1s_dist
 
 
     File : :file:`density_extra.irp.f`
@@ -209,7 +209,7 @@ Providers
        * :c:data:`e_pq_ao_extra`
 
  
-.. c:var:: ao_extra_coef_normalization_factor
+.. c:var:: double ao_extra_coef_normalization_factor
 
 
     File : :file:`aos.irp.f`
@@ -245,7 +245,7 @@ Providers
        * :c:data:`effective_ao_extra_dm`
 
  
-.. c:var:: ao_extra_coef_normalized
+.. c:var:: double ao_extra_coef_normalized
 
 
     File : :file:`aos.irp.f`
@@ -281,7 +281,7 @@ Providers
        * :c:data:`effective_ao_extra_dm`
 
  
-.. c:var:: ao_extra_coef_normalized_ordered
+.. c:var:: double ao_extra_coef_normalized_ordered
 
 
     File : :file:`aos.irp.f`
@@ -314,7 +314,7 @@ Providers
        * :c:data:`ao_extra_expo_ordered_transp`
 
  
-.. c:var:: ao_extra_coef_normalized_ordered_transp
+.. c:var:: double ao_extra_coef_normalized_ordered_transp
 
 
     File : :file:`aos.irp.f`
@@ -343,7 +343,7 @@ Providers
        * :c:data:`ao_extra_coef_normalized_ordered_transp_per_nucl`
 
  
-.. c:var:: ao_extra_coef_normalized_ordered_transp_per_nucl
+.. c:var:: double ao_extra_coef_normalized_ordered_transp_per_nucl
 
 
     File : :file:`aos_transp.irp.f`
@@ -368,7 +368,7 @@ Providers
 
 
  
-.. c:var:: ao_extra_expo_ordered
+.. c:var:: double ao_extra_expo_ordered
 
 
     File : :file:`aos.irp.f`
@@ -401,7 +401,7 @@ Providers
        * :c:data:`ao_extra_expo_ordered_transp`
 
  
-.. c:var:: ao_extra_expo_ordered_transp
+.. c:var:: double ao_extra_expo_ordered_transp
 
 
     File : :file:`aos.irp.f`
@@ -430,7 +430,7 @@ Providers
        * :c:data:`ao_extra_expo_ordered_transp_per_nucl`
 
  
-.. c:var:: ao_extra_expo_ordered_transp_per_nucl
+.. c:var:: double ao_extra_expo_ordered_transp_per_nucl
 
 
     File : :file:`aos_transp.irp.f`
@@ -455,7 +455,7 @@ Providers
 
 
  
-.. c:var:: ao_extra_first_of_shell
+.. c:var:: int ao_extra_first_of_shell
 
 
     File : :file:`aos.irp.f`
@@ -477,7 +477,7 @@ Providers
 
 
  
-.. c:var:: ao_extra_l
+.. c:var:: int ao_extra_l
 
 
     File : :file:`aos.irp.f`
@@ -509,7 +509,7 @@ Providers
        * :c:data:`nucl_list_shell_ao_extras`
 
  
-.. c:var:: ao_extra_l_char
+.. c:var:: char ao_extra_l_char
 
 
     File : :file:`aos.irp.f`
@@ -541,7 +541,7 @@ Providers
        * :c:data:`nucl_list_shell_ao_extras`
 
  
-.. c:var:: ao_extra_l_char_space
+.. c:var:: char ao_extra_l_char_space
 
 
     File : :file:`aos.irp.f`
@@ -564,7 +564,7 @@ Providers
 
 
  
-.. c:var:: ao_extra_l_max
+.. c:var:: int ao_extra_l_max
 
 
     File : :file:`aos.irp.f`
@@ -596,7 +596,7 @@ Providers
        * :c:data:`nucl_list_shell_ao_extras`
 
  
-.. c:var:: ao_extra_one_e_dm_at_extra_r
+.. c:var:: double ao_extra_one_e_dm_at_extra_r
 
 
     File : :file:`aos.irp.f`
@@ -620,7 +620,7 @@ Providers
 
 
  
-.. c:var:: ao_extra_power_ordered_transp_per_nucl
+.. c:var:: int ao_extra_power_ordered_transp_per_nucl
 
 
     File : :file:`aos_transp.irp.f`
@@ -643,7 +643,7 @@ Providers
 
 
  
-.. c:var:: ao_extra_prim_num_max
+.. c:var:: int ao_extra_prim_num_max
 
 
     File : :file:`aos.irp.f`
@@ -680,7 +680,7 @@ Providers
        * :c:data:`ao_extra_expo_pw`
 
  
-.. c:var:: ao_extra_shell
+.. c:var:: int ao_extra_shell
 
 
     File : :file:`aos.irp.f`
@@ -703,7 +703,7 @@ Providers
 
 
  
-.. c:var:: e_pq_ao_extra
+.. c:var:: double e_pq_ao_extra
 
 
     File : :file:`density_extra.irp.f`
@@ -733,7 +733,7 @@ Providers
        * :c:data:`effective_ao_extra_dm`
 
  
-.. c:var:: effective_ao_extra_dm
+.. c:var:: double effective_ao_extra_dm
 
 
     File : :file:`density_extra.irp.f`
@@ -766,7 +766,7 @@ Providers
 
 
  
-.. c:var:: extra_fictious_nucl
+.. c:var:: int extra_fictious_nucl
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -793,7 +793,7 @@ Providers
        * :c:data:`new_nucl_label_1s`
 
  
-.. c:var:: extra_nucl_real_fictious_list_prov
+.. c:var:: int extra_nucl_real_fictious_list_prov
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -834,7 +834,7 @@ Providers
        * :c:data:`new_nucl_coord_1s`
 
  
-.. c:var:: gamma_pq_ao_extra
+.. c:var:: double gamma_pq_ao_extra
 
 
     File : :file:`density_extra.irp.f`
@@ -872,7 +872,7 @@ Providers
        * :c:data:`effective_ao_extra_dm`
 
  
-.. c:var:: inv_gamma_pq_ao_extra
+.. c:var:: double inv_gamma_pq_ao_extra
 
 
     File : :file:`density_extra.irp.f`
@@ -910,7 +910,7 @@ Providers
        * :c:data:`effective_ao_extra_dm`
 
  
-.. c:var:: inv_pi_gamma_pq_3_2_ao_extra
+.. c:var:: double inv_pi_gamma_pq_3_2_ao_extra
 
 
     File : :file:`density_extra.irp.f`
@@ -948,7 +948,7 @@ Providers
        * :c:data:`effective_ao_extra_dm`
 
  
-.. c:var:: list_2p_functions
+.. c:var:: int list_2p_functions
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -971,7 +971,7 @@ Providers
 
 
  
-.. c:var:: list_fict_nucl
+.. c:var:: int list_fict_nucl
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -996,7 +996,7 @@ Providers
 
 
  
-.. c:var:: list_real_nucl
+.. c:var:: int list_real_nucl
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -1021,7 +1021,7 @@ Providers
 
 
  
-.. c:var:: lmax_too_big
+.. c:var:: bool lmax_too_big
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -1041,7 +1041,7 @@ Providers
 
 
  
-.. c:var:: n_2p_func_orig
+.. c:var:: int n_2p_func_orig
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -1075,7 +1075,7 @@ Providers
        * :c:data:`new_nucl_num`
 
  
-.. c:var:: n_2p_func_tot
+.. c:var:: int n_2p_func_tot
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -1109,7 +1109,7 @@ Providers
        * :c:data:`new_nucl_num`
 
  
-.. c:var:: n_ao_extras_max
+.. c:var:: int n_ao_extras_max
 
 
     File : :file:`aos.irp.f`
@@ -1144,7 +1144,7 @@ Providers
        * :c:data:`nucl_list_shell_ao_extras`
 
  
-.. c:var:: n_func_tot
+.. c:var:: int n_func_tot
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -1178,7 +1178,7 @@ Providers
        * :c:data:`new_nucl_n_aos`
 
  
-.. c:var:: n_prim_tot_orig
+.. c:var:: int n_prim_tot_orig
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -1199,7 +1199,7 @@ Providers
 
 
  
-.. c:var:: n_pt_max_extra_basis_i_x
+.. c:var:: int n_pt_max_extra_basis_i_x
 
 
     File : :file:`dimensions_integrals.irp.f`
@@ -1221,7 +1221,7 @@ Providers
 
 
  
-.. c:var:: n_pt_max_extra_basis_integrals
+.. c:var:: int n_pt_max_extra_basis_integrals
 
 
     File : :file:`dimensions_integrals.irp.f`
@@ -1243,7 +1243,7 @@ Providers
 
 
  
-.. c:var:: new_ao_coef_1s
+.. c:var:: double new_ao_coef_1s
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -1264,7 +1264,7 @@ Providers
 
 
  
-.. c:var:: new_ao_expo_1s
+.. c:var:: double new_ao_expo_1s
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -1295,7 +1295,7 @@ Providers
 
 
  
-.. c:var:: new_ao_nucl_1s
+.. c:var:: int new_ao_nucl_1s
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -1326,7 +1326,7 @@ Providers
 
 
  
-.. c:var:: new_ao_power_1s
+.. c:var:: int new_ao_power_1s
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -1346,7 +1346,7 @@ Providers
 
 
  
-.. c:var:: new_ao_prim_num_1s
+.. c:var:: int new_ao_prim_num_1s
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -1366,7 +1366,7 @@ Providers
 
 
  
-.. c:var:: new_n_aos_max
+.. c:var:: int new_n_aos_max
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -1393,7 +1393,7 @@ Providers
        * :c:data:`new_nucl_n_aos`
 
  
-.. c:var:: new_nucl_aos_transposed
+.. c:var:: int new_nucl_aos_transposed
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -1424,7 +1424,7 @@ Providers
 
 
  
-.. c:var:: new_nucl_charge_1s
+.. c:var:: double new_nucl_charge_1s
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -1465,7 +1465,7 @@ Providers
        * :c:data:`new_nucl_coord_1s`
 
  
-.. c:var:: new_nucl_coord_1s
+.. c:var:: double new_nucl_coord_1s
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -1486,7 +1486,7 @@ Providers
 
 
  
-.. c:var:: new_nucl_coord_1s_transp
+.. c:var:: double new_nucl_coord_1s_transp
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -1527,7 +1527,7 @@ Providers
        * :c:data:`new_nucl_coord_1s`
 
  
-.. c:var:: new_nucl_label_1s
+.. c:var:: char new_nucl_label_1s
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -1552,7 +1552,7 @@ Providers
 
 
  
-.. c:var:: new_nucl_n_aos
+.. c:var:: int new_nucl_n_aos
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -1583,7 +1583,7 @@ Providers
 
 
  
-.. c:var:: new_nucl_num
+.. c:var:: int new_nucl_num
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -1613,7 +1613,7 @@ Providers
        * :c:data:`new_nucl_n_aos`
 
  
-.. c:var:: nucl_ao_extras
+.. c:var:: int nucl_ao_extras
 
 
     File : :file:`aos.irp.f`
@@ -1644,7 +1644,7 @@ Providers
        * :c:data:`nucl_list_shell_ao_extras`
 
  
-.. c:var:: nucl_ao_extras_transposed
+.. c:var:: int nucl_ao_extras_transposed
 
 
     File : :file:`aos_transp.irp.f`
@@ -1676,7 +1676,7 @@ Providers
        * :c:data:`ao_extra_power_ordered_transp_per_nucl`
 
  
-.. c:var:: nucl_list_shell_ao_extras
+.. c:var:: int nucl_list_shell_ao_extras
 
 
     File : :file:`aos.irp.f`
@@ -1705,7 +1705,7 @@ Providers
 
 
  
-.. c:var:: nucl_n_ao_extras
+.. c:var:: int nucl_n_ao_extras
 
 
     File : :file:`aos.irp.f`
@@ -1740,7 +1740,7 @@ Providers
        * :c:data:`nucl_list_shell_ao_extras`
 
  
-.. c:var:: nucl_num_shell_ao_extras
+.. c:var:: int nucl_num_shell_ao_extras
 
 
     File : :file:`aos.irp.f`
@@ -1769,7 +1769,7 @@ Providers
 
 
  
-.. c:var:: sqrt_gamma_pq_ao_extra
+.. c:var:: double sqrt_gamma_pq_ao_extra
 
 
     File : :file:`density_extra.irp.f`
@@ -1811,7 +1811,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: ao_extra_power_index:
+.. c:function:: void ao_extra_power_index(void)
 
 
     File : :file:`aos.irp.f`
@@ -1826,7 +1826,7 @@ Subroutines / functions
     :math:`\frac{1}{2} (l-n_x) (l-n_x+1) + n_z + 1`
 
  
-.. c:macro:: ao_extra_value:
+.. c:function:: void ao_extra_value(void)
 
 
     File : :file:`aos.irp.f`
@@ -1851,7 +1851,7 @@ Subroutines / functions
        * :c:data:`extra_nucl_coord`
 
  
-.. c:macro:: extra_density_at_r:
+.. c:function:: void extra_density_at_r(void)
 
 
     File : :file:`aos.irp.f`
@@ -1883,7 +1883,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_extra_at_r`
 
  
-.. c:macro:: give_all_aos_extra_at_r:
+.. c:function:: void give_all_aos_extra_at_r(void)
 
 
     File : :file:`aos.irp.f`
@@ -1914,7 +1914,7 @@ Subroutines / functions
        * :c:func:`extra_density_at_r`
 
  
-.. c:macro:: r_phi_theta_psi_matrix:
+.. c:function:: void r_phi_theta_psi_matrix(void)
 
 
     File : :file:`transform_basis.irp.f`
@@ -1936,7 +1936,7 @@ Subroutines / functions
        * :c:func:`rotate_nuclei`
 
  
-.. c:macro:: return_xyz_int:
+.. c:function:: void return_xyz_int(void)
 
 
     File : :file:`prov_fit_1s.irp.f`
@@ -1948,7 +1948,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: rotate_nuclei:
+.. c:function:: void rotate_nuclei(void)
 
 
     File : :file:`transform_basis.irp.f`
@@ -1969,7 +1969,7 @@ Subroutines / functions
        * :c:func:`r_phi_theta_psi_matrix`
 
  
-.. c:macro:: routine:
+.. c:function:: void routine(void)
 
 
     File : :file:`write_extra_grid.irp.f`

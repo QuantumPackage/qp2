@@ -1992,7 +1992,6 @@ Index of Subroutines/Functions
     * :c:func:`modify_bitmasks_for_hole` 
     * :c:func:`modify_bitmasks_for_hole_in_out` 
     * :c:func:`modify_bitmasks_for_particl` 
-    * :c:func:`mol_properties` 
     * :c:func:`molden` 
     * :c:func:`molden_attachment` 
     * :c:func:`mp2` 

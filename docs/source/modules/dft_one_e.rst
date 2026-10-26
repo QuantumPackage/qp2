@@ -39,7 +39,7 @@ In the core modules of the |QP|, two functionals are implemented:
 Providers 
 --------- 
  
-.. c:var:: ao_effective_one_e_potential
+.. c:var:: double ao_effective_one_e_potential
 
 
     File : :file:`dft_one_e/effective_pot.irp.f`
@@ -79,7 +79,7 @@ Providers
        * :c:data:`ao_effective_one_e_potential_sa`
 
  
-.. c:var:: ao_effective_one_e_potential_sa
+.. c:var:: double ao_effective_one_e_potential_sa
 
 
     File : :file:`dft_one_e/effective_pot.irp.f`
@@ -104,7 +104,7 @@ Providers
 
 
  
-.. c:var:: ao_effective_one_e_potential_without_kin
+.. c:var:: double ao_effective_one_e_potential_without_kin
 
 
     File : :file:`dft_one_e/effective_pot.irp.f`
@@ -144,7 +144,7 @@ Providers
        * :c:data:`ao_effective_one_e_potential_sa`
 
  
-.. c:var:: ao_effective_one_e_potential_without_kin_sa
+.. c:var:: double ao_effective_one_e_potential_without_kin_sa
 
 
     File : :file:`dft_one_e/effective_pot.irp.f`
@@ -169,7 +169,7 @@ Providers
 
 
  
-.. c:var:: effective_one_e_potential
+.. c:var:: double effective_one_e_potential
 
 
     File : :file:`dft_one_e/effective_pot.irp.f`
@@ -213,7 +213,7 @@ Providers
        * :c:data:`ref_vhxc`
 
  
-.. c:var:: effective_one_e_potential_sa
+.. c:var:: double effective_one_e_potential_sa
 
 
     File : :file:`dft_one_e/effective_pot.irp.f`
@@ -238,7 +238,7 @@ Providers
 
 
  
-.. c:var:: effective_one_e_potential_without_kin
+.. c:var:: double effective_one_e_potential_without_kin
 
 
     File : :file:`dft_one_e/effective_pot.irp.f`
@@ -282,7 +282,7 @@ Providers
        * :c:data:`ref_vhxc`
 
  
-.. c:var:: effective_one_e_potential_without_kin_sa
+.. c:var:: double effective_one_e_potential_without_kin_sa
 
 
     File : :file:`dft_one_e/effective_pot.irp.f`
@@ -307,7 +307,7 @@ Providers
 
 
  
-.. c:var:: energy_c
+.. c:var:: double energy_c
 
 
     File : :file:`dft_one_e/e_xc_general.irp.f`
@@ -340,7 +340,7 @@ Providers
        * :c:data:`e_correlation_dft`
 
  
-.. c:var:: energy_x
+.. c:var:: double energy_x
 
 
     File : :file:`dft_one_e/e_xc_general.irp.f`
@@ -374,7 +374,7 @@ Providers
        * :c:data:`e_exchange_dft`
 
  
-.. c:var:: mu_erf_dft
+.. c:var:: double mu_erf_dft
 
 
     File : :file:`dft_one_e/mu_erf_dft.irp.f`
@@ -403,7 +403,7 @@ Providers
        * :c:data:`mu_of_r_dft`
 
  
-.. c:var:: mu_grad_rho
+.. c:var:: double mu_grad_rho
 
 
     File : :file:`dft_one_e/mu_erf_dft.irp.f`
@@ -431,7 +431,7 @@ Providers
        * :c:data:`mu_of_r_dft`
 
  
-.. c:var:: mu_of_r_dft
+.. c:var:: double mu_of_r_dft
 
 
     File : :file:`dft_one_e/mu_erf_dft.irp.f`
@@ -469,7 +469,7 @@ Providers
        * :c:data:`mu_of_r_dft_average`
 
  
-.. c:var:: mu_of_r_dft_average
+.. c:var:: double mu_of_r_dft_average
 
 
     File : :file:`dft_one_e/mu_erf_dft.irp.f`
@@ -496,7 +496,7 @@ Providers
 
 
  
-.. c:var:: mu_rsc_of_r
+.. c:var:: double mu_rsc_of_r
 
 
     File : :file:`dft_one_e/mu_erf_dft.irp.f`
@@ -526,7 +526,7 @@ Providers
        * :c:data:`mu_of_r_dft`
 
  
-.. c:var:: potential_c_alpha_ao
+.. c:var:: double potential_c_alpha_ao
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -563,7 +563,7 @@ Providers
        * :c:data:`potential_c_alpha_mo`
 
  
-.. c:var:: potential_c_alpha_mo
+.. c:var:: double potential_c_alpha_mo
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -596,7 +596,7 @@ Providers
        * :c:data:`trace_v_xc`
 
  
-.. c:var:: potential_c_beta_ao
+.. c:var:: double potential_c_beta_ao
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -633,7 +633,7 @@ Providers
        * :c:data:`potential_c_alpha_mo`
 
  
-.. c:var:: potential_c_beta_mo
+.. c:var:: double potential_c_beta_mo
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -666,7 +666,7 @@ Providers
        * :c:data:`trace_v_xc`
 
  
-.. c:var:: potential_x_alpha_ao
+.. c:var:: double potential_x_alpha_ao
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -704,7 +704,7 @@ Providers
        * :c:data:`potential_x_alpha_mo`
 
  
-.. c:var:: potential_x_alpha_mo
+.. c:var:: double potential_x_alpha_mo
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -737,7 +737,7 @@ Providers
        * :c:data:`trace_v_xc`
 
  
-.. c:var:: potential_x_beta_ao
+.. c:var:: double potential_x_beta_ao
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -775,7 +775,7 @@ Providers
        * :c:data:`potential_x_alpha_mo`
 
  
-.. c:var:: potential_x_beta_mo
+.. c:var:: double potential_x_beta_mo
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -808,7 +808,7 @@ Providers
        * :c:data:`trace_v_xc`
 
  
-.. c:var:: potential_xc_alpha_ao
+.. c:var:: double potential_xc_alpha_ao
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -845,7 +845,7 @@ Providers
        * :c:data:`potential_xc_alpha_mo`
 
  
-.. c:var:: potential_xc_alpha_mo
+.. c:var:: double potential_xc_alpha_mo
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -876,7 +876,7 @@ Providers
        * :c:data:`trace_v_xc_new`
 
  
-.. c:var:: potential_xc_beta_ao
+.. c:var:: double potential_xc_beta_ao
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -913,7 +913,7 @@ Providers
        * :c:data:`potential_xc_alpha_mo`
 
  
-.. c:var:: potential_xc_beta_mo
+.. c:var:: double potential_xc_beta_mo
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -944,7 +944,7 @@ Providers
        * :c:data:`trace_v_xc_new`
 
  
-.. c:var:: psi_dft_energy_h_core
+.. c:var:: double psi_dft_energy_h_core
 
 
     File : :file:`dft_one_e/one_e_energy_dft.irp.f`
@@ -974,7 +974,7 @@ Providers
 
 
  
-.. c:var:: psi_dft_energy_kinetic
+.. c:var:: double psi_dft_energy_kinetic
 
 
     File : :file:`dft_one_e/one_e_energy_dft.irp.f`
@@ -1004,7 +1004,7 @@ Providers
 
 
  
-.. c:var:: psi_dft_energy_nuclear_elec
+.. c:var:: double psi_dft_energy_nuclear_elec
 
 
     File : :file:`dft_one_e/one_e_energy_dft.irp.f`
@@ -1034,7 +1034,7 @@ Providers
 
 
  
-.. c:var:: ref_vhxc
+.. c:var:: double ref_vhxc
 
 
     File : :file:`dft_one_e/effective_pot.irp.f`
@@ -1055,7 +1055,7 @@ Providers
 
 
  
-.. c:var:: regular_range_hartree
+.. c:var:: double regular_range_hartree
 
 
     File : :file:`dft_one_e/sr_coulomb.irp.f`
@@ -1094,7 +1094,7 @@ Providers
 
 
  
-.. c:var:: regular_range_hartree_operator
+.. c:var:: double regular_range_hartree_operator
 
 
     File : :file:`dft_one_e/sr_coulomb.irp.f`
@@ -1133,7 +1133,7 @@ Providers
 
 
  
-.. c:var:: short_range_hartree
+.. c:var:: double short_range_hartree
 
 
     File : :file:`dft_one_e/sr_coulomb.irp.f`
@@ -1181,7 +1181,7 @@ Providers
        * :c:data:`trace_v_xc`
 
  
-.. c:var:: short_range_hartree_operator
+.. c:var:: double short_range_hartree_operator
 
 
     File : :file:`dft_one_e/sr_coulomb.irp.f`
@@ -1229,7 +1229,7 @@ Providers
        * :c:data:`trace_v_xc`
 
  
-.. c:var:: trace_v_h
+.. c:var:: double trace_v_h
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -1260,7 +1260,7 @@ Providers
 
 
  
-.. c:var:: trace_v_hxc
+.. c:var:: double trace_v_hxc
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -1291,7 +1291,7 @@ Providers
 
 
  
-.. c:var:: trace_v_xc
+.. c:var:: double trace_v_xc
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -1322,7 +1322,7 @@ Providers
 
 
  
-.. c:var:: trace_v_xc_new
+.. c:var:: double trace_v_xc_new
 
 
     File : :file:`dft_one_e/pot_general.irp.f`

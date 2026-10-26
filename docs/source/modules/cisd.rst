@@ -77,7 +77,7 @@ Programs
 Providers 
 --------- 
  
-.. c:var:: lccsd_coef
+.. c:var:: double lccsd_coef
 
 
     File : :file:`lccsd_prov.irp.f`
@@ -113,7 +113,7 @@ Providers
 
 
  
-.. c:var:: lccsd_energies
+.. c:var:: double lccsd_energies
 
 
     File : :file:`lccsd_prov.irp.f`
@@ -153,7 +153,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: get_lccsd_2:
+.. c:function:: void get_lccsd_2(void)
 
 
     File : :file:`lccsd.irp.f`
@@ -199,7 +199,7 @@ Subroutines / functions
        * :c:data:`psi_coef`
 
  
-.. c:macro:: h_apply_cisd:
+.. c:function:: void h_apply_cisd(void)
 
 
     File : :file:`h_apply.irp.f_shell_12`
@@ -269,7 +269,7 @@ Subroutines / functions
        * :c:data:`psi_det_sorted_bit`
 
  
-.. c:macro:: h_apply_cisd_diexc:
+.. c:function:: void h_apply_cisd_diexc(void)
 
 
     File : :file:`h_apply.irp.f_shell_12`
@@ -304,7 +304,7 @@ Subroutines / functions
        * :c:func:`h_apply_cisd_diexcp`
 
  
-.. c:macro:: h_apply_cisd_diexcorg:
+.. c:function:: void h_apply_cisd_diexcorg(void)
 
 
     File : :file:`h_apply.irp.f_shell_12`
@@ -343,7 +343,7 @@ Subroutines / functions
        * :c:func:`fill_h_apply_buffer_no_selection`
 
  
-.. c:macro:: h_apply_cisd_diexcp:
+.. c:function:: void h_apply_cisd_diexcp(void)
 
 
     File : :file:`h_apply.irp.f_shell_12`
@@ -378,7 +378,7 @@ Subroutines / functions
        * :c:func:`h_apply_cisd_diexcorg`
 
  
-.. c:macro:: h_apply_cisd_monoexc:
+.. c:function:: void h_apply_cisd_monoexc(void)
 
 
     File : :file:`h_apply.irp.f_shell_12`
@@ -417,7 +417,7 @@ Subroutines / functions
        * :c:func:`fill_h_apply_buffer_no_selection`
 
  
-.. c:macro:: h_apply_cisd_sym:
+.. c:function:: void h_apply_cisd_sym(void)
 
 
     File : :file:`h_apply.irp.f_shell_12`
@@ -487,7 +487,7 @@ Subroutines / functions
        * :c:data:`psi_det_sorted_bit`
 
  
-.. c:macro:: h_apply_cisd_sym_diexc:
+.. c:function:: void h_apply_cisd_sym_diexc(void)
 
 
     File : :file:`h_apply.irp.f_shell_12`
@@ -522,7 +522,7 @@ Subroutines / functions
        * :c:func:`h_apply_cisd_sym_diexcp`
 
  
-.. c:macro:: h_apply_cisd_sym_diexcorg:
+.. c:function:: void h_apply_cisd_sym_diexcorg(void)
 
 
     File : :file:`h_apply.irp.f_shell_12`
@@ -562,7 +562,7 @@ Subroutines / functions
        * :c:func:`fill_h_apply_buffer_no_selection`
 
  
-.. c:macro:: h_apply_cisd_sym_diexcp:
+.. c:function:: void h_apply_cisd_sym_diexcp(void)
 
 
     File : :file:`h_apply.irp.f_shell_12`
@@ -597,7 +597,7 @@ Subroutines / functions
        * :c:func:`h_apply_cisd_sym_diexcorg`
 
  
-.. c:macro:: h_apply_cisd_sym_monoexc:
+.. c:function:: void h_apply_cisd_sym_monoexc(void)
 
 
     File : :file:`h_apply.irp.f_shell_12`
@@ -637,7 +637,7 @@ Subroutines / functions
        * :c:func:`fill_h_apply_buffer_no_selection`
 
  
-.. c:macro:: run:
+.. c:function:: void run(void)
 
 
     File : :file:`lccsd.irp.f`
@@ -690,7 +690,7 @@ Subroutines / functions
        * :c:data:`psi_det_sorted_bit`
 
  
-.. c:macro:: run_cisd:
+.. c:function:: void run_cisd(void)
 
 
     File : :file:`cisd_routine.irp.f`

@@ -163,7 +163,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: all_mo_integrals
+.. c:var:: bool all_mo_integrals
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -216,7 +216,7 @@ Providers
        * :c:data:`psi_energy_two_e_trans`
 
  
-.. c:var:: banned_excitation
+.. c:var:: bool banned_excitation
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -245,7 +245,7 @@ Providers
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: big_array_coulomb_integrals
+.. c:var:: double big_array_coulomb_integrals
 
 
     File : :file:`mo_two_e_ints/integrals_3_index.irp.f`
@@ -292,7 +292,7 @@ Providers
        * :c:data:`psi_energy_two_e_trans`
 
  
-.. c:var:: big_array_exchange_integrals
+.. c:var:: double big_array_exchange_integrals
 
 
     File : :file:`mo_two_e_ints/integrals_3_index.irp.f`
@@ -339,7 +339,7 @@ Providers
        * :c:data:`psi_energy_two_e_trans`
 
  
-.. c:var:: cholesky_mo
+.. c:var:: double cholesky_mo
 
 
     File : :file:`mo_two_e_ints/cholesky.irp.f`
@@ -362,7 +362,7 @@ Providers
 
 
  
-.. c:var:: cholesky_mo_num
+.. c:var:: int cholesky_mo_num
 
 
     File : :file:`mo_two_e_ints/cholesky.irp.f`
@@ -413,7 +413,7 @@ Providers
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: cholesky_mo_num_split
+.. c:var:: int cholesky_mo_num_split
 
 
     File : :file:`mo_two_e_ints/cholesky.irp.f`
@@ -464,7 +464,7 @@ Providers
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: cholesky_mo_sp
+.. c:var:: float cholesky_mo_sp
 
 
     File : :file:`mo_two_e_ints/cholesky.irp.f`
@@ -487,7 +487,7 @@ Providers
 
 
  
-.. c:var:: cholesky_mo_transp
+.. c:var:: double cholesky_mo_transp
 
 
     File : :file:`mo_two_e_ints/cholesky.irp.f`
@@ -538,7 +538,7 @@ Providers
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: cholesky_mo_transp_d
+.. c:var:: int cholesky_mo_transp_d
 
 
     File : :file:`mo_two_e_ints/cholesky.irp.f`
@@ -589,7 +589,7 @@ Providers
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: cholesky_mo_transp_sp
+.. c:var:: float cholesky_mo_transp_sp
 
 
     File : :file:`mo_two_e_ints/cholesky.irp.f`
@@ -626,7 +626,7 @@ Providers
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: cholesky_mo_transp_sp_d
+.. c:var:: int cholesky_mo_transp_sp_d
 
 
     File : :file:`mo_two_e_ints/cholesky.irp.f`
@@ -656,7 +656,7 @@ Providers
        * :c:data:`bielec_pxxq_array`
 
  
-.. c:var:: cholesky_semi_mo_transp_simple
+.. c:var:: double cholesky_semi_mo_transp_simple
 
 
     File : :file:`mo_two_e_ints/cholesky.irp.f`
@@ -681,7 +681,7 @@ Providers
 
 
  
-.. c:var:: core_energy
+.. c:var:: double core_energy
 
 
     File : :file:`mo_two_e_ints/core_quantities.irp.f`
@@ -706,7 +706,7 @@ Providers
 
 
  
-.. c:var:: core_energy_erf
+.. c:var:: double core_energy_erf
 
 
     File : :file:`mo_two_e_ints/core_quantities_erf.irp.f`
@@ -730,7 +730,7 @@ Providers
 
 
  
-.. c:var:: core_fock_operator
+.. c:var:: double core_fock_operator
 
 
     File : :file:`mo_two_e_ints/core_quantities.irp.f`
@@ -767,7 +767,7 @@ Providers
 
 
  
-.. c:var:: core_fock_operator_erf
+.. c:var:: double core_fock_operator_erf
 
 
     File : :file:`mo_two_e_ints/core_quantities_erf.irp.f`
@@ -796,7 +796,7 @@ Providers
 
 
  
-.. c:var:: gpu_integral_buffer1
+.. c:var:: int gpu_integral_buffer1
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -830,7 +830,7 @@ Providers
        * :c:data:`bielec_pxxq_array`
 
  
-.. c:var:: gpu_integral_buffer2
+.. c:var:: int gpu_integral_buffer2
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -864,7 +864,7 @@ Providers
        * :c:data:`bielec_pxxq_array`
 
  
-.. c:var:: gpu_integral_buffer_sp1
+.. c:var:: int gpu_integral_buffer_sp1
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -898,7 +898,7 @@ Providers
        * :c:data:`bielec_pxxq_array`
 
  
-.. c:var:: gpu_integral_buffer_sp2
+.. c:var:: int gpu_integral_buffer_sp2
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -932,7 +932,7 @@ Providers
        * :c:data:`bielec_pxxq_array`
 
  
-.. c:var:: h_core_ri
+.. c:var:: double h_core_ri
 
 
     File : :file:`mo_two_e_ints/core_quantities.irp.f`
@@ -957,7 +957,7 @@ Providers
 
 
  
-.. c:var:: int_erf_3_index
+.. c:var:: double int_erf_3_index
 
 
     File : :file:`mo_two_e_ints/ints_erf_3_index.irp.f`
@@ -985,7 +985,7 @@ Providers
 
 
  
-.. c:var:: int_erf_3_index_exc
+.. c:var:: double int_erf_3_index_exc
 
 
     File : :file:`mo_two_e_ints/ints_erf_3_index.irp.f`
@@ -1013,7 +1013,7 @@ Providers
 
 
  
-.. c:var:: mo_integrals_cache
+.. c:var:: double mo_integrals_cache
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -1049,7 +1049,7 @@ Providers
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: mo_integrals_cache_max
+.. c:var:: int mo_integrals_cache_max
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -1085,7 +1085,7 @@ Providers
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: mo_integrals_cache_min
+.. c:var:: int mo_integrals_cache_min
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -1121,7 +1121,7 @@ Providers
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: mo_integrals_cache_size
+.. c:var:: int mo_integrals_cache_size
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -1157,7 +1157,7 @@ Providers
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: mo_integrals_cache_size_8
+.. c:var:: long mo_integrals_cache_size_8
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -1193,7 +1193,7 @@ Providers
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: mo_integrals_erf_cache
+.. c:var:: double mo_integrals_erf_cache
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -1224,7 +1224,7 @@ Providers
        * :c:data:`mo_two_e_int_erf_jj`
 
  
-.. c:var:: mo_integrals_erf_cache_max
+.. c:var:: int mo_integrals_erf_cache_max
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -1256,7 +1256,7 @@ Providers
        * :c:data:`mo_two_e_int_erf_jj`
 
  
-.. c:var:: mo_integrals_erf_cache_min
+.. c:var:: int mo_integrals_erf_cache_min
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -1288,7 +1288,7 @@ Providers
        * :c:data:`mo_two_e_int_erf_jj`
 
  
-.. c:var:: mo_integrals_erf_map
+.. c:var:: int mo_integrals_erf_map
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -1319,7 +1319,7 @@ Providers
        * :c:data:`mo_two_e_integrals_erf_in_map`
 
  
-.. c:var:: mo_integrals_map
+.. c:var:: int mo_integrals_map
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -1359,7 +1359,7 @@ Providers
        * :c:data:`psi_energy_two_e_trans`
 
  
-.. c:var:: mo_two_e_int_erf_jj
+.. c:var:: double mo_two_e_int_erf_jj
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -1394,7 +1394,7 @@ Providers
        * :c:data:`core_energy_erf`
 
  
-.. c:var:: mo_two_e_int_erf_jj_anti
+.. c:var:: double mo_two_e_int_erf_jj_anti
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -1429,7 +1429,7 @@ Providers
        * :c:data:`core_energy_erf`
 
  
-.. c:var:: mo_two_e_int_erf_jj_anti_from_ao
+.. c:var:: double mo_two_e_int_erf_jj_anti_from_ao
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -1462,7 +1462,7 @@ Providers
 
 
  
-.. c:var:: mo_two_e_int_erf_jj_exchange
+.. c:var:: double mo_two_e_int_erf_jj_exchange
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -1497,7 +1497,7 @@ Providers
        * :c:data:`core_energy_erf`
 
  
-.. c:var:: mo_two_e_int_erf_jj_exchange_from_ao
+.. c:var:: double mo_two_e_int_erf_jj_exchange_from_ao
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -1530,7 +1530,7 @@ Providers
 
 
  
-.. c:var:: mo_two_e_int_erf_jj_from_ao
+.. c:var:: double mo_two_e_int_erf_jj_from_ao
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -1563,7 +1563,7 @@ Providers
 
 
  
-.. c:var:: mo_two_e_integrals_erf_in_map
+.. c:var:: bool mo_two_e_integrals_erf_in_map
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -1607,7 +1607,7 @@ Providers
        * :c:data:`mo_two_e_int_erf_jj`
 
  
-.. c:var:: mo_two_e_integrals_in_map
+.. c:var:: bool mo_two_e_integrals_in_map
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
@@ -1659,7 +1659,7 @@ Providers
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: mo_two_e_integrals_jj
+.. c:var:: double mo_two_e_integrals_jj
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
@@ -1707,7 +1707,7 @@ Providers
        * :c:data:`ref_bitmask_two_e_energy`
 
  
-.. c:var:: mo_two_e_integrals_jj_anti
+.. c:var:: double mo_two_e_integrals_jj_anti
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
@@ -1755,7 +1755,7 @@ Providers
        * :c:data:`ref_bitmask_two_e_energy`
 
  
-.. c:var:: mo_two_e_integrals_jj_exchange
+.. c:var:: double mo_two_e_integrals_jj_exchange
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
@@ -1803,7 +1803,7 @@ Providers
        * :c:data:`ref_bitmask_two_e_energy`
 
  
-.. c:var:: use_banned_excitation
+.. c:var:: bool use_banned_excitation
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -1836,7 +1836,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: add_integrals_to_map:
+.. c:function:: void add_integrals_to_map(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
@@ -1882,7 +1882,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: add_integrals_to_map_cholesky:
+.. c:function:: void add_integrals_to_map_cholesky(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
@@ -1934,7 +1934,7 @@ Subroutines / functions
        * :c:func:`mo_two_e_integrals_index`
 
  
-.. c:macro:: add_integrals_to_map_cholesky_sp:
+.. c:function:: void add_integrals_to_map_cholesky_sp(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
@@ -1984,7 +1984,7 @@ Subroutines / functions
        * :c:func:`sgemm`
 
  
-.. c:macro:: add_integrals_to_map_erf:
+.. c:function:: void add_integrals_to_map_erf(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -2032,7 +2032,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: clear_mo_erf_map:
+.. c:function:: void clear_mo_erf_map(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -2059,7 +2059,7 @@ Subroutines / functions
        * :c:func:`map_deinit`
 
  
-.. c:macro:: clear_mo_map:
+.. c:function:: void clear_mo_map(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
@@ -2094,7 +2094,7 @@ Subroutines / functions
        * :c:func:`map_deinit`
 
  
-.. c:macro:: dump_mo_integrals:
+.. c:function:: void dump_mo_integrals(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -2122,7 +2122,7 @@ Subroutines / functions
        * :c:func:`ezfio_set_work_empty`
 
  
-.. c:macro:: four_idx_dgemm:
+.. c:function:: void four_idx_dgemm(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
@@ -2165,7 +2165,7 @@ Subroutines / functions
        * :c:func:`mo_two_e_integrals_index`
 
  
-.. c:macro:: four_idx_dgemm_erf:
+.. c:function:: void four_idx_dgemm_erf(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -2207,7 +2207,7 @@ Subroutines / functions
        * :c:func:`mo_two_e_integrals_index`
 
  
-.. c:macro:: get_mo_erf_map_size:
+.. c:function:: void get_mo_erf_map_size(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -2227,7 +2227,7 @@ Subroutines / functions
        * :c:data:`mo_integrals_erf_map`
 
  
-.. c:macro:: get_mo_map_size:
+.. c:function:: void get_mo_map_size(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -2247,7 +2247,7 @@ Subroutines / functions
        * :c:data:`mo_integrals_map`
 
  
-.. c:macro:: get_mo_two_e_integral_erf:
+.. c:function:: void get_mo_two_e_integral_erf(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -2277,7 +2277,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:macro:: get_mo_two_e_integrals:
+.. c:function:: void get_mo_two_e_integrals(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -2339,7 +2339,7 @@ Subroutines / functions
        * :c:func:`sgemv`
 
  
-.. c:macro:: get_mo_two_e_integrals_cache:
+.. c:function:: void get_mo_two_e_integrals_cache(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -2371,7 +2371,7 @@ Subroutines / functions
        * :c:func:`get_mo_two_e_integrals_ij`
 
  
-.. c:macro:: get_mo_two_e_integrals_erf:
+.. c:function:: void get_mo_two_e_integrals_erf(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -2400,7 +2400,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:macro:: get_mo_two_e_integrals_erf_coulomb_ii:
+.. c:function:: void get_mo_two_e_integrals_erf_coulomb_ii(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -2431,7 +2431,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:macro:: get_mo_two_e_integrals_erf_exch_ii:
+.. c:function:: void get_mo_two_e_integrals_erf_exch_ii(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -2462,7 +2462,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:macro:: get_mo_two_e_integrals_erf_i1j1:
+.. c:function:: void get_mo_two_e_integrals_erf_i1j1(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -2496,7 +2496,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:macro:: get_mo_two_e_integrals_erf_ij:
+.. c:function:: void get_mo_two_e_integrals_erf_ij(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -2530,7 +2530,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:macro:: get_mo_two_e_integrals_i1j1:
+.. c:function:: void get_mo_two_e_integrals_i1j1(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -2584,7 +2584,7 @@ Subroutines / functions
        * :c:func:`qp_bug`
 
  
-.. c:macro:: get_mo_two_e_integrals_ij:
+.. c:function:: void get_mo_two_e_integrals_ij(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -2647,7 +2647,7 @@ Subroutines / functions
        * :c:func:`sgemm`
 
  
-.. c:macro:: get_two_e_integral:
+.. c:function:: void get_two_e_integral(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -2685,7 +2685,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:macro:: get_two_e_integral_cache:
+.. c:function:: void get_two_e_integral_cache(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -2698,7 +2698,7 @@ Subroutines / functions
     Returns one integral <ij|kl> in the MO basis taken from the cache
 
  
-.. c:macro:: insert_into_mo_integrals_erf_map:
+.. c:function:: void insert_into_mo_integrals_erf_map(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -2733,7 +2733,7 @@ Subroutines / functions
        * :c:func:`map_update`
 
  
-.. c:macro:: insert_into_mo_integrals_map:
+.. c:function:: void insert_into_mo_integrals_map(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -2768,7 +2768,7 @@ Subroutines / functions
        * :c:func:`map_update`
 
  
-.. c:macro:: load_mo_integrals:
+.. c:function:: void load_mo_integrals(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -2799,7 +2799,7 @@ Subroutines / functions
        * :c:func:`unlock_io`
 
  
-.. c:macro:: load_mo_integrals_erf:
+.. c:function:: void load_mo_integrals_erf(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -2828,7 +2828,7 @@ Subroutines / functions
        * :c:func:`map_sort`
 
  
-.. c:macro:: mo_two_e_integral:
+.. c:function:: void mo_two_e_integral(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -2849,7 +2849,7 @@ Subroutines / functions
        * :c:data:`mo_integrals_map`
 
  
-.. c:macro:: mo_two_e_integral_erf:
+.. c:function:: void mo_two_e_integral_erf(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -2871,7 +2871,7 @@ Subroutines / functions
        * :c:data:`mo_two_e_integrals_erf_in_map`
 
  
-.. c:macro:: mo_two_e_integrals_erf_index:
+.. c:function:: void mo_two_e_integrals_erf_index(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -2884,7 +2884,7 @@ Subroutines / functions
     Computes an unique index for i,j,k,l integrals
 
  
-.. c:macro:: mo_two_e_integrals_index:
+.. c:function:: void mo_two_e_integrals_index(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
@@ -2909,7 +2909,7 @@ Subroutines / functions
        * :c:func:`four_idx_dgemm_erf`
 
  
-.. c:macro:: provide_all_mo_integrals_erf:
+.. c:function:: void provide_all_mo_integrals_erf(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -2932,7 +2932,7 @@ Subroutines / functions
        * :c:data:`mo_two_e_integrals_erf_in_map`
 
  
-.. c:macro:: save_erf_two_e_integrals_mo:
+.. c:function:: void save_erf_two_e_integrals_mo(void)
 
 
     File : :file:`mo_two_e_ints/routines_save_integrals_erf.irp.f`
@@ -2962,7 +2962,7 @@ Subroutines / functions
        * :c:func:`map_save_to_disk`
 
  
-.. c:macro:: save_erf_two_e_ints_mo_into_ints_mo:
+.. c:function:: void save_erf_two_e_ints_mo_into_ints_mo(void)
 
 
     File : :file:`mo_two_e_ints/routines_save_integrals_erf.irp.f`

@@ -111,7 +111,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: prim_normalization_factor
+.. c:var:: double prim_normalization_factor
 
 
     File : :file:`basis/basis.irp.f`

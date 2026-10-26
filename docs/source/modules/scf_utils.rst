@@ -131,7 +131,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: all_shells_closed
+.. c:var:: bool all_shells_closed
 
 
     File : :file:`scf_utils/scf_density_matrix_ao.irp.f`
@@ -161,7 +161,7 @@ Providers
        * :c:data:`scf_density_matrix_ao`
 
  
-.. c:var:: eigenvalues_fock_matrix_ao
+.. c:var:: double eigenvalues_fock_matrix_ao
 
 
     File : :file:`scf_utils/diis.irp.f`
@@ -185,7 +185,7 @@ Providers
 
 
  
-.. c:var:: eigenvectors_fock_matrix_ao
+.. c:var:: double eigenvectors_fock_matrix_ao
 
 
     File : :file:`scf_utils/diis.irp.f`
@@ -209,7 +209,7 @@ Providers
 
 
  
-.. c:var:: eigenvectors_fock_matrix_mo
+.. c:var:: double eigenvectors_fock_matrix_mo
 
 
     File : :file:`scf_utils/diagonalize_fock.irp.f`
@@ -246,7 +246,7 @@ Providers
 
 
  
-.. c:var:: fock_matrix_ao
+.. c:var:: double fock_matrix_ao
 
 
     File : :file:`scf_utils/fock_matrix.irp.f`
@@ -281,7 +281,7 @@ Providers
        * :c:data:`fps_spf_matrix_ao`
 
  
-.. c:var:: fock_matrix_diag_mo
+.. c:var:: double fock_matrix_diag_mo
 
 
     File : :file:`scf_utils/fock_matrix.irp.f`
@@ -302,7 +302,7 @@ Providers
 
 
  
-.. c:var:: fock_matrix_mo
+.. c:var:: double fock_matrix_mo
 
 
     File : :file:`scf_utils/fock_matrix.irp.f`
@@ -371,7 +371,7 @@ Providers
        * :c:data:`fock_matrix_diag_mo`
 
  
-.. c:var:: fock_matrix_mo_alpha
+.. c:var:: double fock_matrix_mo_alpha
 
 
     File : :file:`scf_utils/fock_matrix.irp.f`
@@ -401,7 +401,7 @@ Providers
        * :c:data:`fock_matrix_mo`
 
  
-.. c:var:: fock_matrix_mo_beta
+.. c:var:: double fock_matrix_mo_beta
 
 
     File : :file:`scf_utils/fock_matrix.irp.f`
@@ -431,7 +431,7 @@ Providers
        * :c:data:`fock_matrix_mo`
 
  
-.. c:var:: fock_matrix_param
+.. c:var:: double fock_matrix_param
 
 
     File : :file:`scf_utils/fock_matrix.irp.f`
@@ -461,7 +461,7 @@ Providers
        * :c:data:`fock_matrix_mo`
 
  
-.. c:var:: fps_spf_matrix_ao
+.. c:var:: double fps_spf_matrix_ao
 
 
     File : :file:`scf_utils/diis.irp.f`
@@ -491,7 +491,7 @@ Providers
        * :c:data:`fps_spf_matrix_mo`
 
  
-.. c:var:: fps_spf_matrix_mo
+.. c:var:: double fps_spf_matrix_mo
 
 
     File : :file:`scf_utils/diis.irp.f`
@@ -515,7 +515,7 @@ Providers
 
 
  
-.. c:var:: scf_density_matrix_ao
+.. c:var:: double scf_density_matrix_ao
 
 
     File : :file:`scf_utils/scf_density_matrix_ao.irp.f`
@@ -546,7 +546,7 @@ Providers
        * :c:data:`fps_spf_matrix_ao`
 
  
-.. c:var:: scf_density_matrix_ao_alpha
+.. c:var:: double scf_density_matrix_ao_alpha
 
 
     File : :file:`scf_utils/scf_density_matrix_ao.irp.f`
@@ -584,7 +584,7 @@ Providers
        * :c:data:`scf_energy`
 
  
-.. c:var:: scf_density_matrix_ao_beta
+.. c:var:: double scf_density_matrix_ao_beta
 
 
     File : :file:`scf_utils/scf_density_matrix_ao.irp.f`
@@ -622,7 +622,7 @@ Providers
        * :c:data:`scf_energy`
 
  
-.. c:var:: scf_energy
+.. c:var:: double scf_energy
 
 
     File : :file:`scf_utils/fock_matrix.irp.f`
@@ -649,7 +649,7 @@ Providers
 
 
  
-.. c:var:: threshold_diis_nonzero
+.. c:var:: double threshold_diis_nonzero
 
 
     File : :file:`scf_utils/diis.irp.f`
@@ -675,7 +675,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: damping_scf:
+.. c:function:: void damping_scf(void)
 
 
     File : :file:`scf_utils/damping_scf.irp.f`
@@ -727,7 +727,7 @@ Subroutines / functions
        * :c:data:`mo_coef`
 
  
-.. c:macro:: extrapolate_fock_matrix:
+.. c:function:: void extrapolate_fock_matrix(void)
 
 
     File : :file:`scf_utils/roothaan_hall_scf.irp.f`
@@ -768,7 +768,7 @@ Subroutines / functions
        * :c:func:`dgetrf`
 
  
-.. c:macro:: huckel_guess:
+.. c:function:: void huckel_guess(void)
 
 
     File : :file:`scf_utils/huckel.irp.f`
@@ -821,7 +821,7 @@ Subroutines / functions
        * :c:data:`mo_coef`
 
  
-.. c:macro:: reorder_mo_max_overlap:
+.. c:function:: void reorder_mo_max_overlap(void)
 
 
     File : :file:`scf_utils/reorder_mo_max_overlap.irp.f`
@@ -862,7 +862,7 @@ Subroutines / functions
        * :c:func:`dsort`
 
  
-.. c:macro:: roothaan_hall_scf:
+.. c:function:: void roothaan_hall_scf(void)
 
 
     File : :file:`scf_utils/roothaan_hall_scf.irp.f`

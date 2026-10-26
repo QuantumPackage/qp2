@@ -62,7 +62,7 @@ Programs
 Providers 
 --------- 
  
-.. c:var:: do_only_cas
+.. c:var:: bool do_only_cas
 
 
     File : :file:`class.irp.f`
@@ -80,7 +80,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: save_energy:
+.. c:function:: void save_energy(void)
 
 
     File : :file:`save_energy.irp.f`

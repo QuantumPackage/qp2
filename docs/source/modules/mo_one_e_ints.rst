@@ -83,7 +83,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: ao_one_e_integrals_from_mo
+.. c:var:: double ao_one_e_integrals_from_mo
 
 
     File : :file:`mo_one_e_ints/ao_to_mo.irp.f`
@@ -115,7 +115,7 @@ Providers
        * :c:data:`ao_sphe_one_e_integrals_from_mo`
 
  
-.. c:var:: ao_sphe_one_e_integrals_from_mo
+.. c:var:: double ao_sphe_one_e_integrals_from_mo
 
 
     File : :file:`mo_one_e_ints/ao_to_mo.irp.f`
@@ -142,7 +142,7 @@ Providers
 
 
  
-.. c:var:: mo_dipole_x
+.. c:var:: double mo_dipole_x
 
 
     File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
@@ -178,7 +178,7 @@ Providers
        * :c:data:`z_dipole_moment`
 
  
-.. c:var:: mo_dipole_y
+.. c:var:: double mo_dipole_y
 
 
     File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
@@ -214,7 +214,7 @@ Providers
        * :c:data:`z_dipole_moment`
 
  
-.. c:var:: mo_dipole_z
+.. c:var:: double mo_dipole_z
 
 
     File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
@@ -250,7 +250,7 @@ Providers
        * :c:data:`z_dipole_moment`
 
  
-.. c:var:: mo_integrals_n_e
+.. c:var:: double mo_integrals_n_e
 
 
     File : :file:`mo_one_e_ints/pot_mo_ints.irp.f`
@@ -283,7 +283,7 @@ Providers
        * :c:data:`v_ne_psi_energy`
 
  
-.. c:var:: mo_integrals_n_e_per_atom
+.. c:var:: double mo_integrals_n_e_per_atom
 
 
     File : :file:`mo_one_e_ints/pot_mo_ints.irp.f`
@@ -310,7 +310,7 @@ Providers
 
 
  
-.. c:var:: mo_kinetic_integrals
+.. c:var:: double mo_kinetic_integrals
 
 
     File : :file:`mo_one_e_ints/kin_mo_ints.irp.f`
@@ -342,7 +342,7 @@ Providers
        * :c:data:`ref_bitmask_kinetic_energy`
 
  
-.. c:var:: mo_one_e_integrals
+.. c:var:: double mo_one_e_integrals
 
 
     File : :file:`mo_one_e_ints/mo_one_e_ints.irp.f`
@@ -386,7 +386,7 @@ Providers
        * :c:data:`ref_bitmask_one_e_energy`
 
  
-.. c:var:: mo_overlap
+.. c:var:: double mo_overlap
 
 
     File : :file:`mo_one_e_ints/mo_overlap.irp.f`
@@ -410,7 +410,7 @@ Providers
 
 
  
-.. c:var:: mo_pseudo_integrals
+.. c:var:: double mo_pseudo_integrals
 
 
     File : :file:`mo_one_e_ints/pot_mo_pseudo_ints.irp.f`
@@ -436,7 +436,7 @@ Providers
 
 
  
-.. c:var:: mo_pseudo_integrals_local
+.. c:var:: double mo_pseudo_integrals_local
 
 
     File : :file:`mo_one_e_ints/pot_mo_pseudo_ints.irp.f`
@@ -461,7 +461,7 @@ Providers
 
 
  
-.. c:var:: mo_pseudo_integrals_non_local
+.. c:var:: double mo_pseudo_integrals_non_local
 
 
     File : :file:`mo_one_e_ints/pot_mo_pseudo_ints.irp.f`
@@ -486,7 +486,7 @@ Providers
 
 
  
-.. c:var:: mo_spread_centered_x
+.. c:var:: double mo_spread_centered_x
 
 
     File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
@@ -513,7 +513,7 @@ Providers
 
 
  
-.. c:var:: mo_spread_centered_y
+.. c:var:: double mo_spread_centered_y
 
 
     File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
@@ -540,7 +540,7 @@ Providers
 
 
  
-.. c:var:: mo_spread_centered_z
+.. c:var:: double mo_spread_centered_z
 
 
     File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
@@ -567,7 +567,7 @@ Providers
 
 
  
-.. c:var:: mo_spread_x
+.. c:var:: double mo_spread_x
 
 
     File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
@@ -601,7 +601,7 @@ Providers
        * :c:data:`mo_spread_centered_x`
 
  
-.. c:var:: mo_spread_y
+.. c:var:: double mo_spread_y
 
 
     File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
@@ -635,7 +635,7 @@ Providers
        * :c:data:`mo_spread_centered_x`
 
  
-.. c:var:: mo_spread_z
+.. c:var:: double mo_spread_z
 
 
     File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
@@ -669,7 +669,7 @@ Providers
        * :c:data:`mo_spread_centered_x`
 
  
-.. c:var:: s_mo_coef
+.. c:var:: double s_mo_coef
 
 
     File : :file:`mo_one_e_ints/ao_to_mo.irp.f`
@@ -701,7 +701,7 @@ Providers
        * :c:data:`s_mo_sphe_coef`
 
  
-.. c:var:: s_mo_sphe_coef
+.. c:var:: double s_mo_sphe_coef
 
 
     File : :file:`mo_one_e_ints/ao_to_mo.irp.f`
@@ -737,7 +737,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: mo_to_ao:
+.. c:function:: void mo_to_ao(void)
 
 
     File : :file:`mo_one_e_ints/ao_to_mo.irp.f`
@@ -776,7 +776,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: mo_to_ao_no_overlap:
+.. c:function:: void mo_to_ao_no_overlap(void)
 
 
     File : :file:`mo_one_e_ints/ao_to_mo.irp.f`
@@ -814,7 +814,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: mo_to_ao_sphe:
+.. c:function:: void mo_to_ao_sphe(void)
 
 
     File : :file:`mo_one_e_ints/ao_to_mo.irp.f`
@@ -852,7 +852,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: mo_to_ao_sphe_no_overlap:
+.. c:function:: void mo_to_ao_sphe_no_overlap(void)
 
 
     File : :file:`mo_one_e_ints/ao_to_mo.irp.f`
@@ -881,7 +881,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:macro:: orthonormalize_mos:
+.. c:function:: void orthonormalize_mos(void)
 
 
     File : :file:`mo_one_e_ints/orthonormalize.irp.f`

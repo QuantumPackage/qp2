@@ -31,7 +31,7 @@ define a full set of generators.
 Providers 
 --------- 
  
-.. c:var:: degree_max_generators
+.. c:var:: int degree_max_generators
 
 
     File : :file:`generators_full/generators.irp.f`

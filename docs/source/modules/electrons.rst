@@ -49,7 +49,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: elec_num
+.. c:var:: int elec_num
 
 
     File : :file:`electrons/electrons.irp.f`
@@ -84,7 +84,7 @@ Providers
        * :c:data:`psi_selectors_diag_h_mat`
 
  
-.. c:var:: elec_num_tab
+.. c:var:: int elec_num_tab
 
 
     File : :file:`electrons/electrons.irp.f`

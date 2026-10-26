@@ -120,7 +120,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: energy_by_projection
+.. c:var:: double energy_by_projection
 
 
     File : :file:`perturbation/energy.irp.f`
@@ -149,7 +149,7 @@ Providers
 
 
  
-.. c:var:: max_exc_pert
+.. c:var:: int max_exc_pert
 
 
     File : :file:`perturbation/exc_max.irp.f`
@@ -162,7 +162,7 @@ Providers
 
 
  
-.. c:var:: selection_criterion
+.. c:var:: double selection_criterion
 
 
     File : :file:`perturbation/selection.irp.f`
@@ -178,7 +178,7 @@ Providers
 
 
  
-.. c:var:: selection_criterion_factor
+.. c:var:: double selection_criterion_factor
 
 
     File : :file:`perturbation/selection.irp.f`
@@ -194,7 +194,7 @@ Providers
 
 
  
-.. c:var:: selection_criterion_min
+.. c:var:: double selection_criterion_min
 
 
     File : :file:`perturbation/selection.irp.f`
@@ -210,7 +210,7 @@ Providers
 
 
  
-.. c:var:: var_pt2_ratio
+.. c:var:: double var_pt2_ratio
 
 
     File : :file:`perturbation/var_pt2_ratio_provider.irp.f`
@@ -236,7 +236,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: fill_h_apply_buffer_selection:
+.. c:function:: void fill_h_apply_buffer_selection(void)
 
 
     File : :file:`perturbation/selection.irp.f`
@@ -268,7 +268,7 @@ Subroutines / functions
        * :c:func:`resize_h_apply_buffer`
 
  
-.. c:macro:: perturb_buffer_by_mono_dummy:
+.. c:function:: void perturb_buffer_by_mono_dummy(void)
 
 
     File : :file:`perturbation/perturbation.irp.f_shell_13`
@@ -303,7 +303,7 @@ Subroutines / functions
        * :c:func:`pt2_dummy`
 
  
-.. c:macro:: perturb_buffer_by_mono_epstein_nesbet:
+.. c:function:: void perturb_buffer_by_mono_epstein_nesbet(void)
 
 
     File : :file:`perturbation/perturbation.irp.f_shell_13`
@@ -338,7 +338,7 @@ Subroutines / functions
        * :c:func:`pt2_epstein_nesbet`
 
  
-.. c:macro:: perturb_buffer_by_mono_epstein_nesbet_2x2:
+.. c:function:: void perturb_buffer_by_mono_epstein_nesbet_2x2(void)
 
 
     File : :file:`perturbation/perturbation.irp.f_shell_13`
@@ -373,7 +373,7 @@ Subroutines / functions
        * :c:func:`pt2_epstein_nesbet_2x2`
 
  
-.. c:macro:: perturb_buffer_by_mono_epstein_nesbet_2x2_no_ci_diag:
+.. c:function:: void perturb_buffer_by_mono_epstein_nesbet_2x2_no_ci_diag(void)
 
 
     File : :file:`perturbation/perturbation.irp.f_shell_13`
@@ -408,7 +408,7 @@ Subroutines / functions
        * :c:func:`pt2_epstein_nesbet_2x2_no_ci_diag`
 
  
-.. c:macro:: perturb_buffer_by_mono_moller_plesset:
+.. c:function:: void perturb_buffer_by_mono_moller_plesset(void)
 
 
     File : :file:`perturbation/perturbation.irp.f_shell_13`
@@ -443,7 +443,7 @@ Subroutines / functions
        * :c:func:`pt2_moller_plesset`
 
  
-.. c:macro:: perturb_buffer_by_mono_qdpt:
+.. c:function:: void perturb_buffer_by_mono_qdpt(void)
 
 
     File : :file:`perturbation/perturbation.irp.f_shell_13`
@@ -478,7 +478,7 @@ Subroutines / functions
        * :c:func:`pt2_qdpt`
 
  
-.. c:macro:: perturb_buffer_dummy:
+.. c:function:: void perturb_buffer_dummy(void)
 
 
     File : :file:`perturbation/perturbation.irp.f_shell_13`
@@ -514,7 +514,7 @@ Subroutines / functions
        * :c:func:`pt2_dummy`
 
  
-.. c:macro:: perturb_buffer_epstein_nesbet:
+.. c:function:: void perturb_buffer_epstein_nesbet(void)
 
 
     File : :file:`perturbation/perturbation.irp.f_shell_13`
@@ -550,7 +550,7 @@ Subroutines / functions
        * :c:func:`pt2_epstein_nesbet`
 
  
-.. c:macro:: perturb_buffer_epstein_nesbet_2x2:
+.. c:function:: void perturb_buffer_epstein_nesbet_2x2(void)
 
 
     File : :file:`perturbation/perturbation.irp.f_shell_13`
@@ -586,7 +586,7 @@ Subroutines / functions
        * :c:func:`pt2_epstein_nesbet_2x2`
 
  
-.. c:macro:: perturb_buffer_epstein_nesbet_2x2_no_ci_diag:
+.. c:function:: void perturb_buffer_epstein_nesbet_2x2_no_ci_diag(void)
 
 
     File : :file:`perturbation/perturbation.irp.f_shell_13`
@@ -622,7 +622,7 @@ Subroutines / functions
        * :c:func:`pt2_epstein_nesbet_2x2_no_ci_diag`
 
  
-.. c:macro:: perturb_buffer_moller_plesset:
+.. c:function:: void perturb_buffer_moller_plesset(void)
 
 
     File : :file:`perturbation/perturbation.irp.f_shell_13`
@@ -658,7 +658,7 @@ Subroutines / functions
        * :c:func:`pt2_moller_plesset`
 
  
-.. c:macro:: perturb_buffer_qdpt:
+.. c:function:: void perturb_buffer_qdpt(void)
 
 
     File : :file:`perturbation/perturbation.irp.f_shell_13`
@@ -694,7 +694,7 @@ Subroutines / functions
        * :c:func:`pt2_qdpt`
 
  
-.. c:macro:: pt2_dummy:
+.. c:function:: void pt2_dummy(void)
 
 
     File : :file:`perturbation/pt2_equations.irp.f_template_305`
@@ -733,7 +733,7 @@ Subroutines / functions
        * :c:func:`i_h_psi_minilist`
 
  
-.. c:macro:: pt2_epstein_nesbet:
+.. c:function:: void pt2_epstein_nesbet(void)
 
 
     File : :file:`perturbation/pt2_equations.irp.f_template_305`
@@ -778,7 +778,7 @@ Subroutines / functions
        * :c:func:`i_h_psi_minilist`
 
  
-.. c:macro:: pt2_epstein_nesbet_2x2:
+.. c:function:: void pt2_epstein_nesbet_2x2(void)
 
 
     File : :file:`perturbation/pt2_equations.irp.f_template_305`
@@ -822,7 +822,7 @@ Subroutines / functions
        * :c:func:`i_h_psi`
 
  
-.. c:macro:: pt2_epstein_nesbet_2x2_no_ci_diag:
+.. c:function:: void pt2_epstein_nesbet_2x2_no_ci_diag(void)
 
 
     File : :file:`perturbation/pt2_equations.irp.f_template_305`
@@ -868,7 +868,7 @@ Subroutines / functions
        * :c:func:`i_h_psi`
 
  
-.. c:macro:: pt2_moller_plesset:
+.. c:function:: void pt2_moller_plesset(void)
 
 
     File : :file:`perturbation/pt2_equations.irp.f_template_305`
@@ -916,7 +916,7 @@ Subroutines / functions
        * :c:func:`i_h_psi_minilist`
 
  
-.. c:macro:: pt2_qdpt:
+.. c:function:: void pt2_qdpt(void)
 
 
     File : :file:`perturbation/pt2_equations.irp.f_template_305`
@@ -961,7 +961,7 @@ Subroutines / functions
        * :c:func:`i_h_psi_minilist`
 
  
-.. c:macro:: remove_small_contributions:
+.. c:function:: void remove_small_contributions(void)
 
 
     File : :file:`perturbation/selection.irp.f`

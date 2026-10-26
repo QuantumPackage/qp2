@@ -108,7 +108,7 @@ EZFIO parameters
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: apply_mo_rotation:
+.. c:function:: void apply_mo_rotation(void)
 
 
     File : :file:`utils_trust_region/apply_mo_rotation.irp.f`
@@ -146,7 +146,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: d1_norm_inverse_trust_region:
+.. c:function:: void d1_norm_inverse_trust_region(void)
 
 
     File : :file:`utils_trust_region/trust_region_optimal_lambda.irp.f`
@@ -165,7 +165,7 @@ Subroutines / functions
        * :c:data:`thresh_eig`
 
  
-.. c:macro:: d1_norm_inverse_trust_region_omp:
+.. c:function:: void d1_norm_inverse_trust_region_omp(void)
 
 
     File : :file:`utils_trust_region/trust_region_optimal_lambda.irp.f`
@@ -191,7 +191,7 @@ Subroutines / functions
        * :c:func:`omp_set_max_active_levels`
 
  
-.. c:macro:: d1_norm_trust_region:
+.. c:function:: void d1_norm_trust_region(void)
 
 
     File : :file:`utils_trust_region/trust_region_optimal_lambda.irp.f`
@@ -210,7 +210,7 @@ Subroutines / functions
        * :c:data:`thresh_eig`
 
  
-.. c:macro:: d1_norm_trust_region_omp:
+.. c:function:: void d1_norm_trust_region_omp(void)
 
 
     File : :file:`utils_trust_region/trust_region_optimal_lambda.irp.f`
@@ -236,7 +236,7 @@ Subroutines / functions
        * :c:func:`omp_set_max_active_levels`
 
  
-.. c:macro:: d2_norm_inverse_trust_region:
+.. c:function:: void d2_norm_inverse_trust_region(void)
 
 
     File : :file:`utils_trust_region/trust_region_optimal_lambda.irp.f`
@@ -255,7 +255,7 @@ Subroutines / functions
        * :c:data:`thresh_eig`
 
  
-.. c:macro:: d2_norm_inverse_trust_region_omp:
+.. c:function:: void d2_norm_inverse_trust_region_omp(void)
 
 
     File : :file:`utils_trust_region/trust_region_optimal_lambda.irp.f`
@@ -281,7 +281,7 @@ Subroutines / functions
        * :c:func:`omp_set_max_active_levels`
 
  
-.. c:macro:: d2_norm_trust_region:
+.. c:function:: void d2_norm_trust_region(void)
 
 
     File : :file:`utils_trust_region/trust_region_optimal_lambda.irp.f`
@@ -300,7 +300,7 @@ Subroutines / functions
        * :c:data:`thresh_eig`
 
  
-.. c:macro:: d2_norm_trust_region_omp:
+.. c:function:: void d2_norm_trust_region_omp(void)
 
 
     File : :file:`utils_trust_region/trust_region_optimal_lambda.irp.f`
@@ -326,7 +326,7 @@ Subroutines / functions
        * :c:func:`omp_set_max_active_levels`
 
  
-.. c:macro:: f_norm_trust_region:
+.. c:function:: void f_norm_trust_region(void)
 
 
     File : :file:`utils_trust_region/trust_region_optimal_lambda.irp.f`
@@ -345,7 +345,7 @@ Subroutines / functions
        * :c:data:`thresh_eig`
 
  
-.. c:macro:: f_norm_trust_region_omp:
+.. c:function:: void f_norm_trust_region_omp(void)
 
 
     File : :file:`utils_trust_region/trust_region_optimal_lambda.irp.f`
@@ -371,7 +371,7 @@ Subroutines / functions
        * :c:func:`omp_set_max_active_levels`
 
  
-.. c:macro:: factorial:
+.. c:function:: void factorial(void)
 
 
     File : :file:`utils_trust_region/rotation_matrix_iterative.irp.f`
@@ -383,7 +383,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: mat_to_vec_index:
+.. c:function:: void mat_to_vec_index(void)
 
 
     File : :file:`utils_trust_region/mat_to_vec_index.irp.f`
@@ -402,7 +402,7 @@ Subroutines / functions
        * :c:func:`vec_to_mat_v2`
 
  
-.. c:macro:: rotation_matrix:
+.. c:function:: void rotation_matrix(void)
 
 
     File : :file:`utils_trust_region/rotation_matrix.irp.f`
@@ -431,7 +431,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: rotation_matrix_iterative:
+.. c:function:: void rotation_matrix_iterative(void)
 
 
     File : :file:`utils_trust_region/rotation_matrix_iterative.irp.f`
@@ -452,7 +452,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: sub_to_full_rotation_matrix:
+.. c:function:: void sub_to_full_rotation_matrix(void)
 
 
     File : :file:`utils_trust_region/sub_to_full_rotation_matrix.irp.f`
@@ -478,7 +478,7 @@ Subroutines / functions
        * :c:func:`run_orb_opt_trust_v2`
 
  
-.. c:macro:: trust_region_expected_e:
+.. c:function:: void trust_region_expected_e(void)
 
 
     File : :file:`utils_trust_region/trust_region_expected_e.irp.f`
@@ -505,7 +505,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: trust_region_is_step_cancelled:
+.. c:function:: void trust_region_is_step_cancelled(void)
 
 
     File : :file:`utils_trust_region/algo_trust.irp.f`
@@ -538,7 +538,7 @@ Subroutines / functions
        * :c:func:`trust_region_rho`
 
  
-.. c:macro:: trust_region_optimal_lambda:
+.. c:function:: void trust_region_optimal_lambda(void)
 
 
     File : :file:`utils_trust_region/trust_region_optimal_lambda.irp.f`
@@ -576,7 +576,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: trust_region_rho:
+.. c:function:: void trust_region_rho(void)
 
 
     File : :file:`utils_trust_region/trust_region_rho.irp.f`
@@ -602,7 +602,7 @@ Subroutines / functions
        * :c:func:`trust_region_is_step_cancelled`
 
  
-.. c:macro:: trust_region_step:
+.. c:function:: void trust_region_step(void)
 
 
     File : :file:`utils_trust_region/trust_region_step.irp.f`
@@ -641,7 +641,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: trust_region_step_w_expected_e:
+.. c:function:: void trust_region_step_w_expected_e(void)
 
 
     File : :file:`utils_trust_region/algo_trust.irp.f`
@@ -676,7 +676,7 @@ Subroutines / functions
        * :c:func:`trust_region_step`
 
  
-.. c:macro:: vec_to_mat_index:
+.. c:function:: void vec_to_mat_index(void)
 
 
     File : :file:`utils_trust_region/vec_to_mat_index.irp.f`
@@ -706,7 +706,7 @@ Subroutines / functions
        * :c:func:`hessian_opt`
 
  
-.. c:macro:: vec_to_mat_v2:
+.. c:function:: void vec_to_mat_v2(void)
 
 
     File : :file:`utils_trust_region/vec_to_mat_v2.irp.f`

@@ -26,7 +26,7 @@ rank in chunks of about 2 GB.
 Providers 
 --------- 
  
-.. c:var:: mpi_initialized
+.. c:var:: bool mpi_initialized
 
 
     File : :file:`mpi/mpi.irp.f`
@@ -46,7 +46,7 @@ Providers
        * :c:data:`ezfio_filename`
 
  
-.. c:var:: mpi_master
+.. c:var:: bool mpi_master
 
 
     File : :file:`mpi/mpi.irp.f`
@@ -314,7 +314,7 @@ Providers
        * :c:data:`weight_selection`
 
  
-.. c:var:: mpi_rank
+.. c:var:: int mpi_rank
 
 
     File : :file:`mpi/mpi.irp.f`
@@ -335,7 +335,7 @@ Providers
        * :c:data:`mpi_master`
 
  
-.. c:var:: mpi_size
+.. c:var:: int mpi_size
 
 
     File : :file:`mpi/mpi.irp.f`
@@ -360,7 +360,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: broadcast_chunks_double:
+.. c:function:: void broadcast_chunks_double(void)
 
 
     File : :file:`mpi/mpi.irp.f_template_97`
@@ -373,7 +373,7 @@ Subroutines / functions
     Broadcast with chunks of ~2GB
 
  
-.. c:macro:: broadcast_chunks_integer:
+.. c:function:: void broadcast_chunks_integer(void)
 
 
     File : :file:`mpi/mpi.irp.f_template_97`
@@ -386,7 +386,7 @@ Subroutines / functions
     Broadcast with chunks of ~2GB
 
  
-.. c:macro:: broadcast_chunks_integer8:
+.. c:function:: void broadcast_chunks_integer8(void)
 
 
     File : :file:`mpi/mpi.irp.f_template_97`
@@ -399,7 +399,7 @@ Subroutines / functions
     Broadcast with chunks of ~2GB
 
  
-.. c:macro:: mpi_print:
+.. c:function:: void mpi_print(void)
 
 
     File : :file:`mpi/mpi.irp.f`

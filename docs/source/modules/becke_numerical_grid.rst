@@ -184,7 +184,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: alpha_knowles
+.. c:var:: double alpha_knowles
 
 
     File : :file:`becke_numerical_grid/integration_radial.irp.f`
@@ -208,7 +208,7 @@ Providers
        * :c:data:`grid_points_per_atom`
 
  
-.. c:var:: angular_quadrature_points
+.. c:var:: double angular_quadrature_points
 
 
     File : :file:`becke_numerical_grid/angular_grid_pts.irp.f`
@@ -239,7 +239,7 @@ Providers
        * :c:data:`grid_points_per_atom`
 
  
-.. c:var:: angular_quadrature_points_extra
+.. c:var:: double angular_quadrature_points_extra
 
 
     File : :file:`becke_numerical_grid/angular_extra_grid.irp.f`
@@ -270,7 +270,7 @@ Providers
        * :c:data:`grid_points_extra_per_atom`
 
  
-.. c:var:: dr_radial_extra_integral
+.. c:var:: double dr_radial_extra_integral
 
 
     File : :file:`becke_numerical_grid/extra_grid.irp.f`
@@ -299,7 +299,7 @@ Providers
        * :c:data:`grid_points_extra_per_atom`
 
  
-.. c:var:: dr_radial_integral
+.. c:var:: double dr_radial_integral
 
 
     File : :file:`becke_numerical_grid/grid_becke.irp.f`
@@ -328,7 +328,7 @@ Providers
        * :c:data:`grid_points_per_atom`
 
  
-.. c:var:: final_grid_points
+.. c:var:: double final_grid_points
 
 
     File : :file:`becke_numerical_grid/grid_becke_vector.irp.f`
@@ -383,7 +383,7 @@ Providers
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
  
-.. c:var:: final_grid_points_extra
+.. c:var:: double final_grid_points_extra
 
 
     File : :file:`becke_numerical_grid/extra_grid_vector.irp.f`
@@ -427,7 +427,7 @@ Providers
        * :c:data:`mos_in_r_array_extra_omp`
 
  
-.. c:var:: final_grid_points_per_atom
+.. c:var:: double final_grid_points_per_atom
 
 
     File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
@@ -455,7 +455,7 @@ Providers
 
 
  
-.. c:var:: final_grid_points_transp
+.. c:var:: double final_grid_points_transp
 
 
     File : :file:`becke_numerical_grid/grid_becke_vector.irp.f`
@@ -477,7 +477,7 @@ Providers
 
 
  
-.. c:var:: final_weight_at_r
+.. c:var:: double final_weight_at_r
 
 
     File : :file:`becke_numerical_grid/grid_becke.irp.f`
@@ -516,7 +516,7 @@ Providers
        * :c:data:`n_pts_per_atom`
 
  
-.. c:var:: final_weight_at_r_extra
+.. c:var:: double final_weight_at_r_extra
 
 
     File : :file:`becke_numerical_grid/extra_grid.irp.f`
@@ -553,7 +553,7 @@ Providers
        * :c:data:`n_points_extra_final_grid`
 
  
-.. c:var:: final_weight_at_r_vector
+.. c:var:: double final_weight_at_r_vector
 
 
     File : :file:`becke_numerical_grid/grid_becke_vector.irp.f`
@@ -608,7 +608,7 @@ Providers
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
  
-.. c:var:: final_weight_at_r_vector_extra
+.. c:var:: double final_weight_at_r_vector_extra
 
 
     File : :file:`becke_numerical_grid/extra_grid_vector.irp.f`
@@ -652,7 +652,7 @@ Providers
        * :c:data:`mos_in_r_array_extra_omp`
 
  
-.. c:var:: final_weight_at_r_vector_per_atom
+.. c:var:: double final_weight_at_r_vector_per_atom
 
 
     File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
@@ -680,7 +680,7 @@ Providers
 
 
  
-.. c:var:: grid_atomic_number
+.. c:var:: int grid_atomic_number
 
 
     File : :file:`becke_numerical_grid/atomic_number.irp.f`
@@ -711,7 +711,7 @@ Providers
        * :c:data:`grid_points_per_atom`
 
  
-.. c:var:: grid_points_extra_per_atom
+.. c:var:: double grid_points_extra_per_atom
 
 
     File : :file:`becke_numerical_grid/extra_grid.irp.f`
@@ -748,7 +748,7 @@ Providers
        * :c:data:`weight_at_r_extra`
 
  
-.. c:var:: grid_points_extra_radial
+.. c:var:: double grid_points_extra_radial
 
 
     File : :file:`becke_numerical_grid/extra_grid.irp.f`
@@ -777,7 +777,7 @@ Providers
        * :c:data:`grid_points_extra_per_atom`
 
  
-.. c:var:: grid_points_per_atom
+.. c:var:: double grid_points_per_atom
 
 
     File : :file:`becke_numerical_grid/grid_becke.irp.f`
@@ -815,7 +815,7 @@ Providers
        * :c:data:`weight_at_r`
 
  
-.. c:var:: grid_points_radial
+.. c:var:: double grid_points_radial
 
 
     File : :file:`becke_numerical_grid/grid_becke.irp.f`
@@ -844,7 +844,7 @@ Providers
        * :c:data:`grid_points_per_atom`
 
  
-.. c:var:: index_final_points
+.. c:var:: int index_final_points
 
 
     File : :file:`becke_numerical_grid/grid_becke_vector.irp.f`
@@ -899,7 +899,7 @@ Providers
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
  
-.. c:var:: index_final_points_extra
+.. c:var:: int index_final_points_extra
 
 
     File : :file:`becke_numerical_grid/extra_grid_vector.irp.f`
@@ -943,7 +943,7 @@ Providers
        * :c:data:`mos_in_r_array_extra_omp`
 
  
-.. c:var:: index_final_points_extra_reverse
+.. c:var:: int index_final_points_extra_reverse
 
 
     File : :file:`becke_numerical_grid/extra_grid_vector.irp.f`
@@ -987,7 +987,7 @@ Providers
        * :c:data:`mos_in_r_array_extra_omp`
 
  
-.. c:var:: index_final_points_per_atom
+.. c:var:: int index_final_points_per_atom
 
 
     File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
@@ -1015,7 +1015,7 @@ Providers
 
 
  
-.. c:var:: index_final_points_per_atom_reverse
+.. c:var:: int index_final_points_per_atom_reverse
 
 
     File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
@@ -1043,7 +1043,7 @@ Providers
 
 
  
-.. c:var:: index_final_points_reverse
+.. c:var:: int index_final_points_reverse
 
 
     File : :file:`becke_numerical_grid/grid_becke_vector.irp.f`
@@ -1098,7 +1098,7 @@ Providers
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
  
-.. c:var:: m_knowles
+.. c:var:: int m_knowles
 
 
     File : :file:`becke_numerical_grid/grid_becke.irp.f`
@@ -1121,7 +1121,7 @@ Providers
        * :c:data:`grid_points_per_atom`
 
  
-.. c:var:: n_points_extra_final_grid
+.. c:var:: int n_points_extra_final_grid
 
 
     File : :file:`becke_numerical_grid/extra_grid_vector.irp.f`
@@ -1157,7 +1157,7 @@ Providers
        * :c:data:`mos_in_r_array_extra_transp`
 
  
-.. c:var:: n_points_extra_grid_per_atom
+.. c:var:: int n_points_extra_grid_per_atom
 
 
     File : :file:`becke_numerical_grid/extra_grid.irp.f`
@@ -1178,7 +1178,7 @@ Providers
 
 
  
-.. c:var:: n_points_extra_integration_angular
+.. c:var:: int n_points_extra_integration_angular
 
 
     File : :file:`becke_numerical_grid/extra_grid.irp.f`
@@ -1220,7 +1220,7 @@ Providers
        * :c:data:`weight_at_r_extra`
 
  
-.. c:var:: n_points_extra_radial_grid
+.. c:var:: int n_points_extra_radial_grid
 
 
     File : :file:`becke_numerical_grid/extra_grid.irp.f`
@@ -1262,7 +1262,7 @@ Providers
        * :c:data:`weight_at_r_extra`
 
  
-.. c:var:: n_points_final_grid
+.. c:var:: int n_points_final_grid
 
 
     File : :file:`becke_numerical_grid/grid_becke_vector.irp.f`
@@ -1321,7 +1321,7 @@ Providers
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
  
-.. c:var:: n_points_grid_per_atom
+.. c:var:: int n_points_grid_per_atom
 
 
     File : :file:`becke_numerical_grid/grid_becke.irp.f`
@@ -1342,7 +1342,7 @@ Providers
 
 
  
-.. c:var:: n_points_integration_angular
+.. c:var:: int n_points_integration_angular
 
 
     File : :file:`becke_numerical_grid/grid_becke.irp.f`
@@ -1386,7 +1386,7 @@ Providers
        * :c:data:`weight_at_r`
 
  
-.. c:var:: n_points_radial_grid
+.. c:var:: int n_points_radial_grid
 
 
     File : :file:`becke_numerical_grid/grid_becke.irp.f`
@@ -1430,7 +1430,7 @@ Providers
        * :c:data:`weight_at_r`
 
  
-.. c:var:: n_pts_max_per_atom
+.. c:var:: int n_pts_max_per_atom
 
 
     File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
@@ -1461,7 +1461,7 @@ Providers
        * :c:data:`final_grid_points_per_atom`
 
  
-.. c:var:: n_pts_per_atom
+.. c:var:: int n_pts_per_atom
 
 
     File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
@@ -1492,7 +1492,7 @@ Providers
        * :c:data:`final_grid_points_per_atom`
 
  
-.. c:var:: r_gill
+.. c:var:: double r_gill
 
 
     File : :file:`becke_numerical_grid/grid_becke.irp.f`
@@ -1514,7 +1514,7 @@ Providers
        * :c:data:`grid_points_per_atom`
 
  
-.. c:var:: weight_at_r
+.. c:var:: double weight_at_r
 
 
     File : :file:`becke_numerical_grid/grid_becke.irp.f`
@@ -1551,7 +1551,7 @@ Providers
        * :c:data:`final_weight_at_r`
 
  
-.. c:var:: weight_at_r_extra
+.. c:var:: double weight_at_r_extra
 
 
     File : :file:`becke_numerical_grid/extra_grid.irp.f`
@@ -1588,7 +1588,7 @@ Providers
        * :c:data:`final_weight_at_r_extra`
 
  
-.. c:var:: weights_angular_points
+.. c:var:: double weights_angular_points
 
 
     File : :file:`becke_numerical_grid/angular_grid_pts.irp.f`
@@ -1619,7 +1619,7 @@ Providers
        * :c:data:`grid_points_per_atom`
 
  
-.. c:var:: weights_angular_points_extra
+.. c:var:: double weights_angular_points_extra
 
 
     File : :file:`becke_numerical_grid/angular_extra_grid.irp.f`
@@ -1654,7 +1654,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: cell_function_becke:
+.. c:function:: void cell_function_becke(void)
 
 
     File : :file:`becke_numerical_grid/step_function_becke.irp.f`
@@ -1678,7 +1678,7 @@ Subroutines / functions
        * :c:data:`slater_bragg_type_inter_distance_ua`
 
  
-.. c:macro:: derivative_knowles_function:
+.. c:function:: void derivative_knowles_function(void)
 
 
     File : :file:`becke_numerical_grid/integration_radial.irp.f`
@@ -1691,7 +1691,7 @@ Subroutines / functions
     Derivative of the function proposed by Knowles (JCP, 104, 1996) for distributing the radial points
 
  
-.. c:macro:: example_becke_numerical_grid:
+.. c:function:: void example_becke_numerical_grid(void)
 
 
     File : :file:`becke_numerical_grid/example.irp.f`
@@ -1717,7 +1717,7 @@ Subroutines / functions
        * :c:data:`nucl_num`
 
  
-.. c:macro:: f_function_becke:
+.. c:function:: void f_function_becke(void)
 
 
     File : :file:`becke_numerical_grid/step_function_becke.irp.f`
@@ -1729,7 +1729,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: knowles_function:
+.. c:function:: void knowles_function(void)
 
 
     File : :file:`becke_numerical_grid/integration_radial.irp.f`
@@ -1743,7 +1743,7 @@ Subroutines / functions
     the Log "m" function ( equation (7) in the paper )
 
  
-.. c:macro:: step_function_becke:
+.. c:function:: void step_function_becke(void)
 
 
     File : :file:`becke_numerical_grid/step_function_becke.irp.f`

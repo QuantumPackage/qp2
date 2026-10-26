@@ -42,7 +42,7 @@ EZFIO parameters
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: diag_hessian_list_opt:
+.. c:function:: void diag_hessian_list_opt(void)
 
 
     File : :file:`mo_optimization_utils/diagonal_hessian_list_opt.irp.f`
@@ -82,7 +82,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: diag_hessian_opt:
+.. c:function:: void diag_hessian_opt(void)
 
 
     File : :file:`mo_optimization_utils/diagonal_hessian_opt.irp.f`
@@ -115,7 +115,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: diagonalization_hessian:
+.. c:function:: void diagonalization_hessian(void)
 
 
     File : :file:`mo_optimization_utils/diagonalization_hessian.irp.f`
@@ -151,7 +151,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: first_diag_hessian_list_opt:
+.. c:function:: void first_diag_hessian_list_opt(void)
 
 
     File : :file:`mo_optimization_utils/first_diagonal_hessian_list_opt.irp.f`
@@ -182,7 +182,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: first_diag_hessian_opt:
+.. c:function:: void first_diag_hessian_opt(void)
 
 
     File : :file:`mo_optimization_utils/first_diagonal_hessian_opt.irp.f`
@@ -213,7 +213,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: first_gradient_list_opt:
+.. c:function:: void first_gradient_list_opt(void)
 
 
     File : :file:`mo_optimization_utils/first_gradient_list_opt.irp.f`
@@ -243,7 +243,7 @@ Subroutines / functions
        * :c:func:`vec_to_mat_index`
 
  
-.. c:macro:: first_gradient_opt:
+.. c:function:: void first_gradient_opt(void)
 
 
     File : :file:`mo_optimization_utils/first_gradient_opt.irp.f`
@@ -273,7 +273,7 @@ Subroutines / functions
        * :c:func:`vec_to_mat_index`
 
  
-.. c:macro:: first_hessian_list_opt:
+.. c:function:: void first_hessian_list_opt(void)
 
 
     File : :file:`mo_optimization_utils/first_hessian_list_opt.irp.f`
@@ -304,7 +304,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: first_hessian_opt:
+.. c:function:: void first_hessian_opt(void)
 
 
     File : :file:`mo_optimization_utils/first_hessian_opt.irp.f`
@@ -335,7 +335,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: gradient_list_opt:
+.. c:function:: void gradient_list_opt(void)
 
 
     File : :file:`mo_optimization_utils/gradient_list_opt.irp.f`
@@ -375,7 +375,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: gradient_opt:
+.. c:function:: void gradient_opt(void)
 
 
     File : :file:`mo_optimization_utils/gradient_opt.irp.f`
@@ -408,7 +408,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: hessian_list_opt:
+.. c:function:: void hessian_list_opt(void)
 
 
     File : :file:`mo_optimization_utils/hessian_list_opt.irp.f`
@@ -448,7 +448,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: hessian_opt:
+.. c:function:: void hessian_opt(void)
 
 
     File : :file:`mo_optimization_utils/hessian_opt.irp.f`
@@ -481,7 +481,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:macro:: run_optimization_mos_cipsi:
+.. c:function:: void run_optimization_mos_cipsi(void)
 
 
     File : :file:`mo_optimization_utils/routine_opt_mos.irp.f`
@@ -551,7 +551,7 @@ Subroutines / functions
        * :c:data:`variance_match_weight`
 
  
-.. c:macro:: run_orb_opt_trust_v2:
+.. c:function:: void run_orb_opt_trust_v2(void)
 
 
     File : :file:`mo_optimization_utils/run_orb_opt_trust_v2.irp.f`
@@ -633,7 +633,7 @@ Subroutines / functions
        * :c:data:`two_e_dm_mo`
 
  
-.. c:macro:: state_average_energy:
+.. c:function:: void state_average_energy(void)
 
 
     File : :file:`mo_optimization_utils/state_average_energy.irp.f`
@@ -665,7 +665,7 @@ Subroutines / functions
        * :c:func:`run_orb_opt_trust_v2`
 
  
-.. c:macro:: state_weight_normalization:
+.. c:function:: void state_weight_normalization(void)
 
 
     File : :file:`mo_optimization_utils/state_weight_normalization.irp.f`
@@ -701,7 +701,7 @@ Subroutines / functions
        * :c:data:`state_average_weight`
 
  
-.. c:macro:: update_parameters:
+.. c:function:: void update_parameters(void)
 
 
     File : :file:`mo_optimization_utils/update_parameters.irp.f`
@@ -746,7 +746,7 @@ Subroutines / functions
        * :c:data:`psi_energy`
 
  
-.. c:macro:: update_st_av_ci_energy:
+.. c:function:: void update_st_av_ci_energy(void)
 
 
     File : :file:`mo_optimization_utils/update_st_av_ci_energy.irp.f`

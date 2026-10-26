@@ -35,7 +35,7 @@ The main providers for this module are:
 Providers 
 --------- 
  
-.. c:var:: alpha_dens_kin_in_r
+.. c:var:: double alpha_dens_kin_in_r
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -59,7 +59,7 @@ Providers
 
 
  
-.. c:var:: ao_abs_int_grid
+.. c:var:: double ao_abs_int_grid
 
 
     File : :file:`dft_utils_in_r/ao_prod_mlti_pl.irp.f`
@@ -83,7 +83,7 @@ Providers
 
 
  
-.. c:var:: ao_overlap_abs_grid
+.. c:var:: double ao_overlap_abs_grid
 
 
     File : :file:`dft_utils_in_r/ao_prod_mlti_pl.irp.f`
@@ -114,7 +114,7 @@ Providers
        * :c:data:`ao_prod_sigma`
 
  
-.. c:var:: ao_prod_abs_r
+.. c:var:: double ao_prod_abs_r
 
 
     File : :file:`dft_utils_in_r/ao_prod_mlti_pl.irp.f`
@@ -146,7 +146,7 @@ Providers
        * :c:data:`ao_prod_sigma`
 
  
-.. c:var:: ao_prod_center
+.. c:var:: double ao_prod_center
 
 
     File : :file:`dft_utils_in_r/ao_prod_mlti_pl.irp.f`
@@ -180,7 +180,7 @@ Providers
        * :c:data:`ao_prod_dist_grid`
 
  
-.. c:var:: ao_prod_dist_grid
+.. c:var:: double ao_prod_dist_grid
 
 
     File : :file:`dft_utils_in_r/ao_prod_mlti_pl.irp.f`
@@ -204,7 +204,7 @@ Providers
 
 
  
-.. c:var:: ao_prod_sigma
+.. c:var:: double ao_prod_sigma
 
 
     File : :file:`dft_utils_in_r/ao_prod_mlti_pl.irp.f`
@@ -229,7 +229,7 @@ Providers
 
 
  
-.. c:var:: aos_grad_in_r_array
+.. c:var:: double aos_grad_in_r_array
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -273,7 +273,7 @@ Providers
        * :c:data:`mos_grad_in_r_array`
 
  
-.. c:var:: aos_grad_in_r_array_extra
+.. c:var:: double aos_grad_in_r_array_extra
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -303,7 +303,7 @@ Providers
 
 
  
-.. c:var:: aos_grad_in_r_array_transp
+.. c:var:: double aos_grad_in_r_array_transp
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -328,7 +328,7 @@ Providers
 
 
  
-.. c:var:: aos_grad_in_r_array_transp_3
+.. c:var:: double aos_grad_in_r_array_transp_3
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -352,7 +352,7 @@ Providers
 
 
  
-.. c:var:: aos_grad_in_r_array_transp_bis
+.. c:var:: double aos_grad_in_r_array_transp_bis
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -376,7 +376,7 @@ Providers
 
 
  
-.. c:var:: aos_in_r_array
+.. c:var:: double aos_in_r_array
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -417,7 +417,7 @@ Providers
        * :c:data:`aos_in_r_array_transp`
 
  
-.. c:var:: aos_in_r_array_extra
+.. c:var:: double aos_in_r_array_extra
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -454,7 +454,7 @@ Providers
        * :c:data:`aos_in_r_array_extra_transp`
 
  
-.. c:var:: aos_in_r_array_extra_transp
+.. c:var:: double aos_in_r_array_extra_transp
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -477,7 +477,7 @@ Providers
 
 
  
-.. c:var:: aos_in_r_array_transp
+.. c:var:: double aos_in_r_array_transp
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -500,7 +500,7 @@ Providers
 
 
  
-.. c:var:: aos_lapl_in_r_array
+.. c:var:: double aos_lapl_in_r_array
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -539,7 +539,7 @@ Providers
        * :c:data:`aos_lapl_in_r_array_transp`
 
  
-.. c:var:: aos_lapl_in_r_array_transp
+.. c:var:: double aos_lapl_in_r_array_transp
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -567,7 +567,7 @@ Providers
        * :c:data:`mos_lapl_in_r_array`
 
  
-.. c:var:: beta_dens_kin_in_r
+.. c:var:: double beta_dens_kin_in_r
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -591,7 +591,7 @@ Providers
 
 
  
-.. c:var:: elec_alpha_num_grid_becke
+.. c:var:: double elec_alpha_num_grid_becke
 
 
     File : :file:`dft_utils_in_r/dm_in_r.irp.f`
@@ -619,7 +619,7 @@ Providers
 
 
  
-.. c:var:: elec_beta_num_grid_becke
+.. c:var:: double elec_beta_num_grid_becke
 
 
     File : :file:`dft_utils_in_r/dm_in_r.irp.f`
@@ -647,7 +647,7 @@ Providers
 
 
  
-.. c:var:: elec_num_grid_becke
+.. c:var:: double elec_num_grid_becke
 
 
     File : :file:`dft_utils_in_r/dm_in_r.irp.f`
@@ -675,7 +675,7 @@ Providers
 
 
  
-.. c:var:: kinetic_density_generalized
+.. c:var:: double kinetic_density_generalized
 
 
     File : :file:`dft_utils_in_r/kin_dens.irp.f`
@@ -698,7 +698,7 @@ Providers
 
 
  
-.. c:var:: mo_dipole_x_becke
+.. c:var:: double mo_dipole_x_becke
 
 
     File : :file:`dft_utils_in_r/dipole_becke.irp.f`
@@ -729,7 +729,7 @@ Providers
        * :c:data:`mo_prop_dipole_x`
 
  
-.. c:var:: mo_dipole_y_becke
+.. c:var:: double mo_dipole_y_becke
 
 
     File : :file:`dft_utils_in_r/dipole_becke.irp.f`
@@ -760,7 +760,7 @@ Providers
        * :c:data:`mo_prop_dipole_x`
 
  
-.. c:var:: mo_dipole_z_becke
+.. c:var:: double mo_dipole_z_becke
 
 
     File : :file:`dft_utils_in_r/dipole_becke.irp.f`
@@ -791,7 +791,7 @@ Providers
        * :c:data:`mo_prop_dipole_x`
 
  
-.. c:var:: mo_grad_ints
+.. c:var:: double mo_grad_ints
 
 
     File : :file:`dft_utils_in_r/ints_grad.irp.f`
@@ -822,7 +822,7 @@ Providers
        * :c:data:`mo_grad_ints_transp`
 
  
-.. c:var:: mo_grad_ints_transp
+.. c:var:: double mo_grad_ints_transp
 
 
     File : :file:`dft_utils_in_r/ints_grad.irp.f`
@@ -844,7 +844,7 @@ Providers
 
 
  
-.. c:var:: mos_grad_in_r_array
+.. c:var:: double mos_grad_in_r_array
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -882,7 +882,7 @@ Providers
        * :c:data:`mos_grad_in_r_array_transp_bis`
 
  
-.. c:var:: mos_grad_in_r_array_tranp
+.. c:var:: double mos_grad_in_r_array_tranp
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -914,7 +914,7 @@ Providers
        * :c:data:`kinetic_density_generalized`
 
  
-.. c:var:: mos_grad_in_r_array_transp_3
+.. c:var:: double mos_grad_in_r_array_transp_3
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -938,7 +938,7 @@ Providers
 
 
  
-.. c:var:: mos_grad_in_r_array_transp_bis
+.. c:var:: double mos_grad_in_r_array_transp_bis
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -962,7 +962,7 @@ Providers
 
 
  
-.. c:var:: mos_in_r_array
+.. c:var:: double mos_in_r_array
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -993,7 +993,7 @@ Providers
        * :c:data:`mo_grad_ints`
 
  
-.. c:var:: mos_in_r_array_extra_omp
+.. c:var:: double mos_in_r_array_extra_omp
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -1024,7 +1024,7 @@ Providers
        * :c:data:`mos_in_r_array_extra_transp`
 
  
-.. c:var:: mos_in_r_array_extra_transp
+.. c:var:: double mos_in_r_array_extra_transp
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -1047,7 +1047,7 @@ Providers
 
 
  
-.. c:var:: mos_in_r_array_omp
+.. c:var:: double mos_in_r_array_omp
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -1078,7 +1078,7 @@ Providers
        * :c:data:`mos_in_r_array_transp`
 
  
-.. c:var:: mos_in_r_array_transp
+.. c:var:: double mos_in_r_array_transp
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -1107,7 +1107,7 @@ Providers
        * :c:data:`mo_dipole_x_becke`
 
  
-.. c:var:: mos_lapl_in_r_array
+.. c:var:: double mos_lapl_in_r_array
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -1140,7 +1140,7 @@ Providers
        * :c:data:`mos_lapl_in_r_array_tranp`
 
  
-.. c:var:: mos_lapl_in_r_array_tranp
+.. c:var:: double mos_lapl_in_r_array_tranp
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -1165,7 +1165,7 @@ Providers
 
 
  
-.. c:var:: one_e_dm_and_grad_alpha_in_r
+.. c:var:: double one_e_dm_and_grad_alpha_in_r
 
 
     File : :file:`dft_utils_in_r/dm_in_r.irp.f`
@@ -1215,7 +1215,7 @@ Providers
        * :c:data:`elec_beta_num_grid_becke`
 
  
-.. c:var:: one_e_dm_and_grad_beta_in_r
+.. c:var:: double one_e_dm_and_grad_beta_in_r
 
 
     File : :file:`dft_utils_in_r/dm_in_r.irp.f`
@@ -1265,7 +1265,7 @@ Providers
        * :c:data:`elec_beta_num_grid_becke`
 
  
-.. c:var:: one_e_grad_2_dm_alpha_at_r
+.. c:var:: double one_e_grad_2_dm_alpha_at_r
 
 
     File : :file:`dft_utils_in_r/dm_in_r.irp.f`
@@ -1315,7 +1315,7 @@ Providers
        * :c:data:`elec_beta_num_grid_becke`
 
  
-.. c:var:: one_e_grad_2_dm_beta_at_r
+.. c:var:: double one_e_grad_2_dm_beta_at_r
 
 
     File : :file:`dft_utils_in_r/dm_in_r.irp.f`
@@ -1365,7 +1365,7 @@ Providers
        * :c:data:`elec_beta_num_grid_becke`
 
  
-.. c:var:: one_e_stuff_for_pbe
+.. c:var:: double one_e_stuff_for_pbe
 
 
     File : :file:`dft_utils_in_r/dm_in_r.irp.f`
@@ -1415,7 +1415,7 @@ Providers
        * :c:data:`elec_beta_num_grid_becke`
 
  
-.. c:var:: scal_prod_grad_one_e_dm_ab
+.. c:var:: double scal_prod_grad_one_e_dm_ab
 
 
     File : :file:`dft_utils_in_r/dm_in_r.irp.f`
@@ -1469,7 +1469,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: dens_grad_a_b_no_core_and_aos_grad_aos_at_r:
+.. c:function:: void dens_grad_a_b_no_core_and_aos_grad_aos_at_r(void)
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`
@@ -1511,7 +1511,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_and_grad_at_r`
 
  
-.. c:macro:: density_and_grad_alpha_beta:
+.. c:function:: void density_and_grad_alpha_beta(void)
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`
@@ -1551,7 +1551,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_and_grad_at_r`
 
  
-.. c:macro:: density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r:
+.. c:function:: void density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r(void)
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`
@@ -1600,7 +1600,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_and_grad_at_r`
 
  
-.. c:macro:: density_and_grad_lapl_alpha_beta_and_all_aos_and_grad_aos_at_r:
+.. c:function:: void density_and_grad_lapl_alpha_beta_and_all_aos_and_grad_aos_at_r(void)
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`
@@ -1642,7 +1642,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_and_grad_and_lapl_at_r`
 
  
-.. c:macro:: dm_dft_alpha_beta_and_all_aos_at_r:
+.. c:function:: void dm_dft_alpha_beta_and_all_aos_at_r(void)
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`
@@ -1675,7 +1675,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_at_r`
 
  
-.. c:macro:: dm_dft_alpha_beta_at_r:
+.. c:function:: void dm_dft_alpha_beta_at_r(void)
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`
@@ -1707,7 +1707,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_at_r`
 
  
-.. c:macro:: dm_dft_alpha_beta_no_core_at_r:
+.. c:function:: void dm_dft_alpha_beta_no_core_at_r(void)
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`

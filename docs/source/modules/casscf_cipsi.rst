@@ -153,7 +153,7 @@ Programs
 Providers 
 --------- 
  
-.. c:var:: bavard
+.. c:var:: bool bavard
 
 
     File : :file:`bavard.irp.f`
@@ -186,7 +186,7 @@ Providers
        * :c:data:`umat`
 
  
-.. c:var:: best_overlap_casscf
+.. c:var:: double best_overlap_casscf
 
 
     File : :file:`neworbs.irp.f`
@@ -217,7 +217,7 @@ Providers
        * :c:data:`sxvector`
 
  
-.. c:var:: best_vector_ovrlp_casscf
+.. c:var:: int best_vector_ovrlp_casscf
 
 
     File : :file:`neworbs.irp.f`
@@ -248,7 +248,7 @@ Providers
        * :c:data:`sxvector`
 
  
-.. c:var:: bielec_pqxx_array
+.. c:var:: double bielec_pqxx_array
 
 
     File : :file:`bielec.irp.f`
@@ -296,7 +296,7 @@ Providers
        * :c:data:`bielec_pqxx_no_array`
 
  
-.. c:var:: bielec_pqxx_no_array
+.. c:var:: double bielec_pqxx_no_array
 
 
     File : :file:`bielec_natorb.irp.f`
@@ -329,7 +329,7 @@ Providers
 
 
  
-.. c:var:: bielec_pxxq_array
+.. c:var:: double bielec_pxxq_array
 
 
     File : :file:`bielec.irp.f`
@@ -379,7 +379,7 @@ Providers
        * :c:data:`bielec_pxxq_no_array`
 
  
-.. c:var:: bielec_pxxq_no_array
+.. c:var:: double bielec_pxxq_no_array
 
 
     File : :file:`bielec_natorb.irp.f`
@@ -411,7 +411,7 @@ Providers
 
 
  
-.. c:var:: bielecci
+.. c:var:: double bielecci
 
 
     File : :file:`bielec.irp.f`
@@ -446,7 +446,7 @@ Providers
        * :c:data:`etwo`
 
  
-.. c:var:: bielecci_no
+.. c:var:: double bielecci_no
 
 
     File : :file:`bielec_natorb.irp.f`
@@ -483,7 +483,7 @@ Providers
        * :c:data:`hessmat_peter`
 
  
-.. c:var:: cholesky_no_1_idx_transp
+.. c:var:: double cholesky_no_1_idx_transp
 
 
     File : :file:`chol_bielec.irp.f`
@@ -516,7 +516,7 @@ Providers
        * :c:data:`cholesky_no_total_transp`
 
  
-.. c:var:: cholesky_no_2_idx_transp
+.. c:var:: double cholesky_no_2_idx_transp
 
 
     File : :file:`chol_bielec.irp.f`
@@ -547,7 +547,7 @@ Providers
        * :c:data:`cholesky_no_total_transp`
 
  
-.. c:var:: cholesky_no_total_transp
+.. c:var:: double cholesky_no_total_transp
 
 
     File : :file:`chol_bielec.irp.f`
@@ -589,7 +589,7 @@ Providers
        * :c:data:`hessmat_peter`
 
  
-.. c:var:: d0tu
+.. c:var:: double d0tu
 
 
     File : :file:`densities.irp.f`
@@ -620,7 +620,7 @@ Providers
        * :c:data:`natorbsci`
 
  
-.. c:var:: d0tu_alpha_ao
+.. c:var:: double d0tu_alpha_ao
 
 
     File : :file:`densities.irp.f`
@@ -654,7 +654,7 @@ Providers
        * :c:data:`mcscf_fock_alpha_ao`
 
  
-.. c:var:: d0tu_beta_ao
+.. c:var:: double d0tu_beta_ao
 
 
     File : :file:`densities.irp.f`
@@ -688,7 +688,7 @@ Providers
        * :c:data:`mcscf_fock_alpha_ao`
 
  
-.. c:var:: dim_n_max_overlap
+.. c:var:: int dim_n_max_overlap
 
 
     File : :file:`swap_orb.irp.f`
@@ -718,7 +718,7 @@ Providers
        * :c:data:`orb_swap`
 
  
-.. c:var:: do_ddci
+.. c:var:: bool do_ddci
 
 
     File : :file:`class.irp.f`
@@ -734,7 +734,7 @@ Providers
 
 
  
-.. c:var:: do_only_1h1p
+.. c:var:: bool do_only_1h1p
 
 
     File : :file:`class.irp.f`
@@ -750,7 +750,7 @@ Providers
 
 
  
-.. c:var:: do_only_cas
+.. c:var:: bool do_only_cas
 
 
     File : :file:`class.irp.f`
@@ -766,7 +766,7 @@ Providers
 
 
  
-.. c:var:: ecore
+.. c:var:: double ecore
 
 
     File : :file:`tot_en.irp.f`
@@ -801,7 +801,7 @@ Providers
 
 
  
-.. c:var:: ecore_bis
+.. c:var:: double ecore_bis
 
 
     File : :file:`tot_en.irp.f`
@@ -836,7 +836,7 @@ Providers
 
 
  
-.. c:var:: energy_improvement
+.. c:var:: double energy_improvement
 
 
     File : :file:`neworbs.irp.f`
@@ -858,7 +858,7 @@ Providers
 
 
  
-.. c:var:: eone
+.. c:var:: double eone
 
 
     File : :file:`tot_en.irp.f`
@@ -893,7 +893,7 @@ Providers
 
 
  
-.. c:var:: eone_bis
+.. c:var:: double eone_bis
 
 
     File : :file:`tot_en.irp.f`
@@ -928,7 +928,7 @@ Providers
 
 
  
-.. c:var:: etwo
+.. c:var:: double etwo
 
 
     File : :file:`tot_en.irp.f`
@@ -963,7 +963,7 @@ Providers
 
 
  
-.. c:var:: etwo_bis
+.. c:var:: double etwo_bis
 
 
     File : :file:`tot_en.irp.f`
@@ -998,7 +998,7 @@ Providers
 
 
  
-.. c:var:: etwo_ter
+.. c:var:: double etwo_ter
 
 
     File : :file:`tot_en.irp.f`
@@ -1033,7 +1033,7 @@ Providers
 
 
  
-.. c:var:: excit
+.. c:var:: int excit
 
 
     File : :file:`gradient.irp.f`
@@ -1079,7 +1079,7 @@ Providers
        * :c:data:`orb_swap`
 
  
-.. c:var:: excit_class
+.. c:var:: char excit_class
 
 
     File : :file:`gradient.irp.f`
@@ -1125,7 +1125,7 @@ Providers
        * :c:data:`orb_swap`
 
  
-.. c:var:: fapq
+.. c:var:: double fapq
 
 
     File : :file:`mcscf_fock.irp.f`
@@ -1167,7 +1167,7 @@ Providers
        * :c:data:`hessmat_peter`
 
  
-.. c:var:: fipq
+.. c:var:: double fipq
 
 
     File : :file:`mcscf_fock.irp.f`
@@ -1204,7 +1204,7 @@ Providers
        * :c:data:`hessmat_peter`
 
  
-.. c:var:: gradvec2
+.. c:var:: double gradvec2
 
 
     File : :file:`gradient.irp.f`
@@ -1249,7 +1249,7 @@ Providers
        * :c:data:`sxmatrix`
 
  
-.. c:var:: gradvec_old
+.. c:var:: double gradvec_old
 
 
     File : :file:`grad_old.irp.f`
@@ -1282,7 +1282,7 @@ Providers
 
 
  
-.. c:var:: hessdiag
+.. c:var:: double hessdiag
 
 
     File : :file:`hessian.irp.f`
@@ -1322,7 +1322,7 @@ Providers
        * :c:data:`sxmatrix`
 
  
-.. c:var:: hessmat
+.. c:var:: double hessmat
 
 
     File : :file:`hessian.irp.f`
@@ -1366,7 +1366,7 @@ Providers
        * :c:data:`sxmatrix`
 
  
-.. c:var:: hessmat_old
+.. c:var:: double hessmat_old
 
 
     File : :file:`hessian_old.irp.f`
@@ -1398,7 +1398,7 @@ Providers
 
 
  
-.. c:var:: hessmat_peter
+.. c:var:: double hessmat_peter
 
 
     File : :file:`hessian_old.irp.f`
@@ -1438,7 +1438,7 @@ Providers
 
 
  
-.. c:var:: index_orb_swap
+.. c:var:: int index_orb_swap
 
 
     File : :file:`swap_orb.irp.f`
@@ -1470,7 +1470,7 @@ Providers
        * :c:data:`switch_mo_coef`
 
  
-.. c:var:: list_idx_a_v
+.. c:var:: int list_idx_a_v
 
 
     File : :file:`gradient.irp.f`
@@ -1516,7 +1516,7 @@ Providers
        * :c:data:`orb_swap`
 
  
-.. c:var:: list_idx_c_a
+.. c:var:: int list_idx_c_a
 
 
     File : :file:`gradient.irp.f`
@@ -1562,7 +1562,7 @@ Providers
        * :c:data:`orb_swap`
 
  
-.. c:var:: list_idx_c_v
+.. c:var:: int list_idx_c_v
 
 
     File : :file:`gradient.irp.f`
@@ -1608,7 +1608,7 @@ Providers
        * :c:data:`orb_swap`
 
  
-.. c:var:: lowest_super_ci_coef_mo
+.. c:var:: double lowest_super_ci_coef_mo
 
 
     File : :file:`superci_dm.irp.f`
@@ -1645,7 +1645,7 @@ Providers
        * :c:data:`super_ci_dm`
 
  
-.. c:var:: mat_idx_a_v
+.. c:var:: int mat_idx_a_v
 
 
     File : :file:`gradient.irp.f`
@@ -1691,7 +1691,7 @@ Providers
        * :c:data:`orb_swap`
 
  
-.. c:var:: mat_idx_c_a
+.. c:var:: int mat_idx_c_a
 
 
     File : :file:`gradient.irp.f`
@@ -1737,7 +1737,7 @@ Providers
        * :c:data:`orb_swap`
 
  
-.. c:var:: mat_idx_c_v
+.. c:var:: int mat_idx_c_v
 
 
     File : :file:`gradient.irp.f`
@@ -1783,7 +1783,7 @@ Providers
        * :c:data:`orb_swap`
 
  
-.. c:var:: mat_tmp_dm_super_ci
+.. c:var:: double mat_tmp_dm_super_ci
 
 
     File : :file:`superci_dm.irp.f`
@@ -1818,7 +1818,7 @@ Providers
        * :c:data:`super_ci_dm`
 
  
-.. c:var:: max_overlap
+.. c:var:: int max_overlap
 
 
     File : :file:`swap_orb.irp.f`
@@ -1848,7 +1848,7 @@ Providers
        * :c:data:`orb_swap`
 
  
-.. c:var:: mcscf_fock_alpha_ao
+.. c:var:: double mcscf_fock_alpha_ao
 
 
     File : :file:`mcscf_fock.irp.f`
@@ -1880,7 +1880,7 @@ Providers
        * :c:data:`mcscf_fock_alpha_mo`
 
  
-.. c:var:: mcscf_fock_alpha_mo
+.. c:var:: double mcscf_fock_alpha_mo
 
 
     File : :file:`mcscf_fock.irp.f`
@@ -1911,7 +1911,7 @@ Providers
        * :c:data:`mcscf_fock_mo`
 
  
-.. c:var:: mcscf_fock_beta_ao
+.. c:var:: double mcscf_fock_beta_ao
 
 
     File : :file:`mcscf_fock.irp.f`
@@ -1943,7 +1943,7 @@ Providers
        * :c:data:`mcscf_fock_alpha_mo`
 
  
-.. c:var:: mcscf_fock_beta_mo
+.. c:var:: double mcscf_fock_beta_mo
 
 
     File : :file:`mcscf_fock.irp.f`
@@ -1974,7 +1974,7 @@ Providers
        * :c:data:`mcscf_fock_mo`
 
  
-.. c:var:: mcscf_fock_diag_mo
+.. c:var:: double mcscf_fock_diag_mo
 
 
     File : :file:`mcscf_fock.irp.f`
@@ -2023,7 +2023,7 @@ Providers
 
 
  
-.. c:var:: mcscf_fock_mo
+.. c:var:: double mcscf_fock_mo
 
 
     File : :file:`mcscf_fock.irp.f`
@@ -2072,7 +2072,7 @@ Providers
 
 
  
-.. c:var:: n_a_v_prov
+.. c:var:: int n_a_v_prov
 
 
     File : :file:`gradient.irp.f`
@@ -2103,7 +2103,7 @@ Providers
        * :c:data:`hessmat`
 
  
-.. c:var:: n_c_a_prov
+.. c:var:: int n_c_a_prov
 
 
     File : :file:`gradient.irp.f`
@@ -2134,7 +2134,7 @@ Providers
        * :c:data:`hessmat`
 
  
-.. c:var:: n_c_v_prov
+.. c:var:: int n_c_v_prov
 
 
     File : :file:`gradient.irp.f`
@@ -2165,7 +2165,7 @@ Providers
        * :c:data:`hessmat`
 
  
-.. c:var:: n_guess_sx_mat
+.. c:var:: int n_guess_sx_mat
 
 
     File : :file:`neworbs.irp.f`
@@ -2199,7 +2199,7 @@ Providers
        * :c:data:`sxeigenvec`
 
  
-.. c:var:: n_max_overlap
+.. c:var:: int n_max_overlap
 
 
     File : :file:`swap_orb.irp.f`
@@ -2229,7 +2229,7 @@ Providers
        * :c:data:`orb_swap`
 
  
-.. c:var:: n_orb_swap
+.. c:var:: int n_orb_swap
 
 
     File : :file:`swap_orb.irp.f`
@@ -2261,7 +2261,7 @@ Providers
        * :c:data:`switch_mo_coef`
 
  
-.. c:var:: natorbsci
+.. c:var:: double natorbsci
 
 
     File : :file:`natorb.irp.f`
@@ -2301,7 +2301,7 @@ Providers
        * :c:data:`super_ci_dm`
 
  
-.. c:var:: natorbsci_mos
+.. c:var:: double natorbsci_mos
 
 
     File : :file:`natorb.irp.f`
@@ -2331,7 +2331,7 @@ Providers
        * :c:data:`natorbsfci`
 
  
-.. c:var:: natorbsfci
+.. c:var:: double natorbsfci
 
 
     File : :file:`natorb.irp.f`
@@ -2363,7 +2363,7 @@ Providers
        * :c:data:`switch_mo_coef`
 
  
-.. c:var:: neworbs
+.. c:var:: double neworbs
 
 
     File : :file:`neworbs.irp.f`
@@ -2392,7 +2392,7 @@ Providers
 
 
  
-.. c:var:: nmonoex
+.. c:var:: int nmonoex
 
 
     File : :file:`gradient.irp.f`
@@ -2434,7 +2434,7 @@ Providers
        * :c:data:`sxvector_lowest`
 
  
-.. c:var:: norm_grad_vec2
+.. c:var:: double norm_grad_vec2
 
 
     File : :file:`gradient.irp.f`
@@ -2479,7 +2479,7 @@ Providers
        * :c:data:`sxmatrix`
 
  
-.. c:var:: norm_grad_vec2_tab
+.. c:var:: double norm_grad_vec2_tab
 
 
     File : :file:`gradient.irp.f`
@@ -2524,7 +2524,7 @@ Providers
        * :c:data:`sxmatrix`
 
  
-.. c:var:: occ_act
+.. c:var:: double occ_act
 
 
     File : :file:`natorb.irp.f`
@@ -2564,7 +2564,7 @@ Providers
        * :c:data:`super_ci_dm`
 
  
-.. c:var:: occnum
+.. c:var:: double occnum
 
 
     File : :file:`natorb.irp.f`
@@ -2601,7 +2601,7 @@ Providers
        * :c:data:`hessmat_peter`
 
  
-.. c:var:: one_ints_no
+.. c:var:: double one_ints_no
 
 
     File : :file:`natorb.irp.f`
@@ -2632,7 +2632,7 @@ Providers
        * :c:data:`fipq`
 
  
-.. c:var:: orb_swap
+.. c:var:: int orb_swap
 
 
     File : :file:`swap_orb.irp.f`
@@ -2664,7 +2664,7 @@ Providers
        * :c:data:`switch_mo_coef`
 
  
-.. c:var:: p0tuvx
+.. c:var:: double p0tuvx
 
 
     File : :file:`densities.irp.f`
@@ -2706,7 +2706,7 @@ Providers
        * :c:data:`p0tuvx_no`
 
  
-.. c:var:: p0tuvx_no
+.. c:var:: double p0tuvx_no
 
 
     File : :file:`natorb.irp.f`
@@ -2739,7 +2739,7 @@ Providers
        * :c:data:`super_ci_dm`
 
  
-.. c:var:: p0tuvx_peter
+.. c:var:: double p0tuvx_peter
 
 
     File : :file:`densities_peter.irp.f`
@@ -2780,7 +2780,7 @@ Providers
        * :c:data:`p0tuvx`
 
  
-.. c:var:: super_ci_dm
+.. c:var:: double super_ci_dm
 
 
     File : :file:`superci_dm.irp.f`
@@ -2822,7 +2822,7 @@ Providers
        * :c:data:`superci_natorb`
 
  
-.. c:var:: superci_nat_occ
+.. c:var:: double superci_nat_occ
 
 
     File : :file:`superci_dm.irp.f`
@@ -2846,7 +2846,7 @@ Providers
 
 
  
-.. c:var:: superci_natorb
+.. c:var:: double superci_natorb
 
 
     File : :file:`superci_dm.irp.f`
@@ -2870,7 +2870,7 @@ Providers
 
 
  
-.. c:var:: switch_mo_coef
+.. c:var:: double switch_mo_coef
 
 
     File : :file:`swap_orb.irp.f`
@@ -2899,7 +2899,7 @@ Providers
        * :c:data:`neworbs`
 
  
-.. c:var:: sxeigenval
+.. c:var:: double sxeigenval
 
 
     File : :file:`neworbs.irp.f`
@@ -2936,7 +2936,7 @@ Providers
        * :c:data:`sxvector_lowest`
 
  
-.. c:var:: sxeigenvec
+.. c:var:: double sxeigenvec
 
 
     File : :file:`neworbs.irp.f`
@@ -2973,7 +2973,7 @@ Providers
        * :c:data:`sxvector_lowest`
 
  
-.. c:var:: sxmatrix
+.. c:var:: double sxmatrix
 
 
     File : :file:`neworbs.irp.f`
@@ -3007,7 +3007,7 @@ Providers
        * :c:data:`sxeigenvec`
 
  
-.. c:var:: sxvector
+.. c:var:: double sxvector
 
 
     File : :file:`neworbs.irp.f`
@@ -3036,7 +3036,7 @@ Providers
        * :c:data:`umat`
 
  
-.. c:var:: sxvector_lowest
+.. c:var:: double sxvector_lowest
 
 
     File : :file:`swap_orb.irp.f`
@@ -3063,7 +3063,7 @@ Providers
        * :c:data:`max_overlap`
 
  
-.. c:var:: thresh_overlap_switch
+.. c:var:: double thresh_overlap_switch
 
 
     File : :file:`swap_orb.irp.f`
@@ -3082,7 +3082,7 @@ Providers
        * :c:data:`max_overlap`
 
  
-.. c:var:: umat
+.. c:var:: double umat
 
 
     File : :file:`neworbs.irp.f`
@@ -3121,7 +3121,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: bielec_no_basis:
+.. c:function:: void bielec_no_basis(void)
 
 
     File : :file:`chol_bielec.irp.f`
@@ -3143,7 +3143,7 @@ Subroutines / functions
        * :c:data:`cholesky_no_total_transp`
 
  
-.. c:macro:: bielec_pqxx:
+.. c:function:: void bielec_pqxx(void)
 
 
     File : :file:`chol_bielec.irp.f`
@@ -3167,7 +3167,7 @@ Subroutines / functions
        * :c:data:`list_core_inact_act`
 
  
-.. c:macro:: bielec_pqxx_no:
+.. c:function:: void bielec_pqxx_no(void)
 
 
     File : :file:`chol_bielec.irp.f`
@@ -3191,7 +3191,7 @@ Subroutines / functions
        * :c:data:`list_core_inact_act`
 
  
-.. c:macro:: bielec_pxxq:
+.. c:function:: void bielec_pxxq(void)
 
 
     File : :file:`chol_bielec.irp.f`
@@ -3213,7 +3213,7 @@ Subroutines / functions
        * :c:data:`list_core_inact_act`
 
  
-.. c:macro:: bielec_pxxq_no:
+.. c:function:: void bielec_pxxq_no(void)
 
 
     File : :file:`chol_bielec.irp.f`
@@ -3237,7 +3237,7 @@ Subroutines / functions
        * :c:data:`list_core_inact_act`
 
  
-.. c:macro:: calc_grad_elem:
+.. c:function:: void calc_grad_elem(void)
 
 
     File : :file:`grad_old.irp.f`
@@ -3279,7 +3279,7 @@ Subroutines / functions
        * :c:func:`i_h_psi`
 
  
-.. c:macro:: calc_hess_elem:
+.. c:function:: void calc_hess_elem(void)
 
 
     File : :file:`hessian_old.irp.f`
@@ -3325,7 +3325,7 @@ Subroutines / functions
        * :c:func:`i_h_psi`
 
  
-.. c:macro:: davidson_diag_sx_mat:
+.. c:function:: void davidson_diag_sx_mat(void)
 
 
     File : :file:`dav_sx_mat.irp.f`
@@ -3367,7 +3367,7 @@ Subroutines / functions
        * :c:data:`nthreads_davidson`
 
  
-.. c:macro:: det_copy:
+.. c:function:: void det_copy(void)
 
 
     File : :file:`det_manip.irp.f`
@@ -3390,7 +3390,7 @@ Subroutines / functions
        * :c:data:`p0tuvx_peter`
 
  
-.. c:macro:: det_extract:
+.. c:function:: void det_extract(void)
 
 
     File : :file:`det_manip.irp.f`
@@ -3420,7 +3420,7 @@ Subroutines / functions
        * :c:data:`p0tuvx_peter`
 
  
-.. c:macro:: do_signed_mono_excitation:
+.. c:function:: void do_signed_mono_excitation(void)
 
 
     File : :file:`det_manip.irp.f`
@@ -3462,7 +3462,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation`
 
  
-.. c:macro:: do_spinfree_mono_excitation:
+.. c:function:: void do_spinfree_mono_excitation(void)
 
 
     File : :file:`det_manip.irp.f`
@@ -3499,7 +3499,7 @@ Subroutines / functions
        * :c:func:`do_signed_mono_excitation`
 
  
-.. c:macro:: driver_optorb:
+.. c:function:: void driver_optorb(void)
 
 
     File : :file:`driver_optorb.irp.f`
@@ -3511,7 +3511,7 @@ Subroutines / functions
 
 
  
-.. c:macro:: gradvec_ia:
+.. c:function:: void gradvec_ia(void)
 
 
     File : :file:`gradient.irp.f`
@@ -3534,7 +3534,7 @@ Subroutines / functions
        * :c:data:`list_virt`
 
  
-.. c:macro:: gradvec_it:
+.. c:function:: void gradvec_it(void)
 
 
     File : :file:`gradient.irp.f`
@@ -3563,7 +3563,7 @@ Subroutines / functions
        * :c:data:`p0tuvx_no`
 
  
-.. c:macro:: gradvec_ta:
+.. c:function:: void gradvec_ta(void)
 
 
     File : :file:`gradient.irp.f`
@@ -3590,7 +3590,7 @@ Subroutines / functions
        * :c:data:`p0tuvx_no`
 
  
-.. c:macro:: hessmat_iajb:
+.. c:function:: void hessmat_iajb(void)
 
 
     File : :file:`hessian.irp.f`
@@ -3613,7 +3613,7 @@ Subroutines / functions
        * :c:data:`list_virt`
 
  
-.. c:macro:: hessmat_iatb:
+.. c:function:: void hessmat_iatb(void)
 
 
     File : :file:`hessian.irp.f`
@@ -3642,7 +3642,7 @@ Subroutines / functions
        * :c:data:`p0tuvx_no`
 
  
-.. c:macro:: hessmat_itja:
+.. c:function:: void hessmat_itja(void)
 
 
     File : :file:`hessian.irp.f`
@@ -3670,7 +3670,7 @@ Subroutines / functions
        * :c:data:`p0tuvx_no`
 
  
-.. c:macro:: hessmat_itju:
+.. c:function:: void hessmat_itju(void)
 
 
     File : :file:`hessian.irp.f`
@@ -3700,7 +3700,7 @@ Subroutines / functions
        * :c:data:`p0tuvx_no`
 
  
-.. c:macro:: hessmat_itua:
+.. c:function:: void hessmat_itua(void)
 
 
     File : :file:`hessian.irp.f`
@@ -3728,7 +3728,7 @@ Subroutines / functions
        * :c:data:`p0tuvx_no`
 
  
-.. c:macro:: hessmat_taub:
+.. c:function:: void hessmat_taub(void)
 
 
     File : :file:`hessian.irp.f`
@@ -3765,7 +3765,7 @@ Subroutines / functions
        * :c:func:`dgemv`
 
  
-.. c:macro:: print_grad:
+.. c:function:: void print_grad(void)
 
 
     File : :file:`get_energy.irp.f`
@@ -3793,7 +3793,7 @@ Subroutines / functions
        * :c:func:`get_energy`
 
  
-.. c:macro:: reorder_orbitals_for_casscf:
+.. c:function:: void reorder_orbitals_for_casscf(void)
 
 
     File : :file:`reorder_orb.irp.f`
@@ -3860,7 +3860,7 @@ Subroutines / functions
        * :c:data:`mo_coef`
 
  
-.. c:macro:: routine:
+.. c:function:: void routine(void)
 
 
     File : :file:`get_energy.irp.f`
@@ -3889,7 +3889,7 @@ Subroutines / functions
        * :c:func:`test_dav`
 
  
-.. c:macro:: routine_bielec_pqxx_no:
+.. c:function:: void routine_bielec_pqxx_no(void)
 
 
     File : :file:`test_chol.irp.f`
@@ -3911,7 +3911,7 @@ Subroutines / functions
        * :c:data:`n_core_inact_act_orb`
 
  
-.. c:macro:: routine_bielec_pxxq_no_array:
+.. c:function:: void routine_bielec_pxxq_no_array(void)
 
 
     File : :file:`test_chol.irp.f`
@@ -3933,7 +3933,7 @@ Subroutines / functions
        * :c:data:`n_core_inact_act_orb`
 
  
-.. c:macro:: save_energy:
+.. c:function:: void save_energy(void)
 
 
     File : :file:`save_energy.irp.f`
@@ -3969,7 +3969,7 @@ Subroutines / functions
        * :c:func:`ezfio_set_casscf_cipsi_energy_pt2`
 
  
-.. c:macro:: test_bielec_pqxx:
+.. c:function:: void test_bielec_pqxx(void)
 
 
     File : :file:`test_chol.irp.f`
@@ -3990,7 +3990,7 @@ Subroutines / functions
        * :c:data:`n_core_inact_act_orb`
 
  
-.. c:macro:: test_bielec_pxxq_chol:
+.. c:function:: void test_bielec_pxxq_chol(void)
 
 
     File : :file:`test_chol.irp.f`

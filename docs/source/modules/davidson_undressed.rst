@@ -22,7 +22,7 @@ Hamiltonian.
 Providers 
 --------- 
  
-.. c:var:: dressing_column_h
+.. c:var:: double dressing_column_h
 
 
     File : :file:`davidson_undressed/null_dressing_vector.irp.f`
@@ -52,7 +52,7 @@ Providers
        * :c:data:`ci_electronic_energy`
 
  
-.. c:var:: dressing_column_s
+.. c:var:: double dressing_column_s
 
 
     File : :file:`davidson_undressed/null_dressing_vector.irp.f`
@@ -82,7 +82,7 @@ Providers
        * :c:data:`ci_electronic_energy`
 
  
-.. c:var:: dressing_delta
+.. c:var:: double dressing_delta
 
 
     File : :file:`davidson_undressed/null_dressing_vector.irp.f`

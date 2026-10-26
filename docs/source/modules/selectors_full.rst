@@ -27,7 +27,7 @@ the generators. The selected determinants and their coefficients are
 Providers 
 --------- 
  
-.. c:var:: n_det_selectors
+.. c:var:: int n_det_selectors
 
 
     File : :file:`selectors_full/selectors.irp.f`
@@ -64,7 +64,7 @@ Providers
        * :c:data:`psi_selectors_diag_h_mat`
 
  
-.. c:var:: psi_selectors
+.. c:var:: int psi_selectors
 
 
     File : :file:`selectors_full/selectors.irp.f`
@@ -99,7 +99,7 @@ Providers
        * :c:data:`psi_selectors_diag_h_mat`
 
  
-.. c:var:: psi_selectors_coef
+.. c:var:: double psi_selectors_coef
 
 
     File : :file:`selectors_full/selectors.irp.f`
@@ -134,7 +134,7 @@ Providers
        * :c:data:`psi_selectors_diag_h_mat`
 
  
-.. c:var:: threshold_selectors
+.. c:var:: double threshold_selectors
 
 
     File : :file:`selectors_full/selectors.irp.f`

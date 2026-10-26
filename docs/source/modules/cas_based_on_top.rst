@@ -41,7 +41,7 @@ Programs
 Providers 
 --------- 
  
-.. c:var:: act_mos_in_r_array
+.. c:var:: double act_mos_in_r_array
 
 
     File : :file:`c_i_a_v_mos.irp.f`
@@ -74,7 +74,7 @@ Providers
        * :c:data:`total_cas_on_top_density`
 
  
-.. c:var:: act_mos_in_r_array_transp
+.. c:var:: double act_mos_in_r_array_transp
 
 
     File : :file:`c_i_a_v_mos.irp.f`
@@ -107,7 +107,7 @@ Providers
        * :c:data:`total_cas_on_top_density`
 
  
-.. c:var:: average_on_top
+.. c:var:: double average_on_top
 
 
     File : :file:`on_top_cas_prov.irp.f`
@@ -130,7 +130,7 @@ Providers
 
 
  
-.. c:var:: core_density
+.. c:var:: double core_density
 
 
     File : :file:`cas_dens_prov.irp.f`
@@ -164,7 +164,7 @@ Providers
        * :c:data:`total_cas_on_top_density`
 
  
-.. c:var:: core_inact_act_mos_grad_in_r_array
+.. c:var:: double core_inact_act_mos_grad_in_r_array
 
 
     File : :file:`c_i_a_v_mos.irp.f`
@@ -193,7 +193,7 @@ Providers
        * :c:data:`grad_total_cas_on_top_density`
 
  
-.. c:var:: core_inact_act_mos_in_r_array
+.. c:var:: double core_inact_act_mos_in_r_array
 
 
     File : :file:`c_i_a_v_mos.irp.f`
@@ -223,7 +223,7 @@ Providers
        * :c:data:`grad_total_cas_on_top_density`
 
  
-.. c:var:: core_inact_act_mos_in_r_array_transp
+.. c:var:: double core_inact_act_mos_in_r_array_transp
 
 
     File : :file:`c_i_a_v_mos.irp.f`
@@ -253,7 +253,7 @@ Providers
        * :c:data:`grad_total_cas_on_top_density`
 
  
-.. c:var:: core_mos_in_r_array
+.. c:var:: double core_mos_in_r_array
 
 
     File : :file:`c_i_a_v_mos.irp.f`
@@ -284,7 +284,7 @@ Providers
        * :c:data:`core_density`
 
  
-.. c:var:: core_mos_in_r_array_transp
+.. c:var:: double core_mos_in_r_array_transp
 
 
     File : :file:`c_i_a_v_mos.irp.f`
@@ -315,7 +315,7 @@ Providers
        * :c:data:`core_density`
 
  
-.. c:var:: effective_alpha_dm
+.. c:var:: double effective_alpha_dm
 
 
     File : :file:`eff_spin_dens.irp.f`
@@ -344,7 +344,7 @@ Providers
 
 
  
-.. c:var:: effective_beta_dm
+.. c:var:: double effective_beta_dm
 
 
     File : :file:`eff_spin_dens.irp.f`
@@ -373,7 +373,7 @@ Providers
 
 
  
-.. c:var:: effective_spin_dm
+.. c:var:: double effective_spin_dm
 
 
     File : :file:`eff_spin_dens.irp.f`
@@ -407,7 +407,7 @@ Providers
        * :c:data:`effective_alpha_dm`
 
  
-.. c:var:: grad_effective_alpha_dm
+.. c:var:: double grad_effective_alpha_dm
 
 
     File : :file:`eff_spin_dens.irp.f`
@@ -436,7 +436,7 @@ Providers
 
 
  
-.. c:var:: grad_effective_beta_dm
+.. c:var:: double grad_effective_beta_dm
 
 
     File : :file:`eff_spin_dens.irp.f`
@@ -465,7 +465,7 @@ Providers
 
 
  
-.. c:var:: grad_effective_spin_dm
+.. c:var:: double grad_effective_spin_dm
 
 
     File : :file:`eff_spin_dens.irp.f`
@@ -499,7 +499,7 @@ Providers
        * :c:data:`effective_alpha_dm`
 
  
-.. c:var:: grad_total_cas_on_top_density
+.. c:var:: double grad_total_cas_on_top_density
 
 
     File : :file:`on_top_grad.irp.f`
@@ -534,7 +534,7 @@ Providers
        * :c:data:`effective_spin_dm`
 
  
-.. c:var:: inact_density
+.. c:var:: double inact_density
 
 
     File : :file:`cas_dens_prov.irp.f`
@@ -568,7 +568,7 @@ Providers
        * :c:data:`total_cas_on_top_density`
 
  
-.. c:var:: inact_mos_in_r_array
+.. c:var:: double inact_mos_in_r_array
 
 
     File : :file:`c_i_a_v_mos.irp.f`
@@ -599,7 +599,7 @@ Providers
        * :c:data:`inact_density`
 
  
-.. c:var:: inact_mos_in_r_array_transp
+.. c:var:: double inact_mos_in_r_array_transp
 
 
     File : :file:`c_i_a_v_mos.irp.f`
@@ -630,7 +630,7 @@ Providers
        * :c:data:`inact_density`
 
  
-.. c:var:: one_e_act_density_alpha
+.. c:var:: double one_e_act_density_alpha
 
 
     File : :file:`cas_dens_prov.irp.f`
@@ -662,7 +662,7 @@ Providers
        * :c:data:`total_cas_on_top_density`
 
  
-.. c:var:: one_e_act_density_beta
+.. c:var:: double one_e_act_density_beta
 
 
     File : :file:`cas_dens_prov.irp.f`
@@ -694,7 +694,7 @@ Providers
        * :c:data:`total_cas_on_top_density`
 
  
-.. c:var:: one_e_act_dm_alpha_mo_for_dft
+.. c:var:: double one_e_act_dm_alpha_mo_for_dft
 
 
     File : :file:`cas_one_e_rdm.irp.f`
@@ -724,7 +724,7 @@ Providers
        * :c:data:`one_e_act_density_alpha`
 
  
-.. c:var:: one_e_act_dm_beta_mo_for_dft
+.. c:var:: double one_e_act_dm_beta_mo_for_dft
 
 
     File : :file:`cas_one_e_rdm.irp.f`
@@ -754,7 +754,7 @@ Providers
        * :c:data:`one_e_act_density_beta`
 
  
-.. c:var:: one_e_cas_total_density
+.. c:var:: double one_e_cas_total_density
 
 
     File : :file:`cas_dens_prov.irp.f`
@@ -783,7 +783,7 @@ Providers
 
 
  
-.. c:var:: total_cas_on_top_density
+.. c:var:: double total_cas_on_top_density
 
 
     File : :file:`on_top_cas_prov.irp.f`
@@ -825,7 +825,7 @@ Providers
        * :c:data:`effective_spin_dm`
 
  
-.. c:var:: virt_mos_in_r_array
+.. c:var:: double virt_mos_in_r_array
 
 
     File : :file:`c_i_a_v_mos.irp.f`
@@ -850,7 +850,7 @@ Providers
 
 
  
-.. c:var:: virt_mos_in_r_array_transp
+.. c:var:: double virt_mos_in_r_array_transp
 
 
     File : :file:`c_i_a_v_mos.irp.f`
@@ -875,7 +875,7 @@ Providers
 
 
  
-.. c:var:: wall_time_core_inact_act_on_top_of_r
+.. c:var:: double wall_time_core_inact_act_on_top_of_r
 
 
     File : :file:`on_top_grad.irp.f`
@@ -914,7 +914,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: act_on_top_on_grid_pt:
+.. c:function:: void act_on_top_on_grid_pt(void)
 
 
     File : :file:`on_top_cas_prov.irp.f`
@@ -953,7 +953,7 @@ Subroutines / functions
        * :c:func:`dger`
 
  
-.. c:macro:: give_active_on_top_in_r_one_state:
+.. c:function:: void give_active_on_top_in_r_one_state(void)
 
 
     File : :file:`on_top_cas_rout.irp.f`
@@ -983,7 +983,7 @@ Subroutines / functions
        * :c:func:`give_on_top_in_r_one_state`
 
  
-.. c:macro:: give_cas_density_in_r:
+.. c:function:: void give_cas_density_in_r(void)
 
 
     File : :file:`cas_dens_rout.irp.f`
@@ -1038,7 +1038,7 @@ Subroutines / functions
        * :c:func:`give_all_mos_at_r`
 
  
-.. c:macro:: give_core_inact_act_density_in_r:
+.. c:function:: void give_core_inact_act_density_in_r(void)
 
 
     File : :file:`on_top_cas_rout.irp.f`
@@ -1080,7 +1080,7 @@ Subroutines / functions
        * :c:func:`give_on_top_in_r_one_state`
 
  
-.. c:macro:: give_n2_aa_val_ab:
+.. c:function:: void give_n2_aa_val_ab(void)
 
 
     File : :file:`two_body_dens_rout.irp.f`
@@ -1117,7 +1117,7 @@ Subroutines / functions
        * :c:func:`give_all_mos_at_r`
 
  
-.. c:macro:: give_n2_cas:
+.. c:function:: void give_n2_cas(void)
 
 
     File : :file:`two_body_dens_rout.irp.f`
@@ -1139,7 +1139,7 @@ Subroutines / functions
        * :c:func:`give_n2_ii_val_ab`
 
  
-.. c:macro:: give_n2_ia_val_ab:
+.. c:function:: void give_n2_ia_val_ab(void)
 
 
     File : :file:`two_body_dens_rout.irp.f`
@@ -1179,7 +1179,7 @@ Subroutines / functions
        * :c:func:`give_all_mos_at_r`
 
  
-.. c:macro:: give_n2_ii_val_ab:
+.. c:function:: void give_n2_ii_val_ab(void)
 
 
     File : :file:`two_body_dens_rout.irp.f`
@@ -1215,7 +1215,7 @@ Subroutines / functions
        * :c:func:`give_all_mos_at_r`
 
  
-.. c:macro:: give_on_top_gradient:
+.. c:function:: void give_on_top_gradient(void)
 
 
     File : :file:`on_top_grad.irp.f`
@@ -1247,7 +1247,7 @@ Subroutines / functions
        * :c:data:`grad_total_cas_on_top_density`
 
  
-.. c:macro:: give_on_top_in_r_one_state:
+.. c:function:: void give_on_top_in_r_one_state(void)
 
 
     File : :file:`on_top_cas_rout.irp.f`
@@ -1290,7 +1290,7 @@ Subroutines / functions
        * :c:func:`give_core_inact_act_density_in_r`
 
  
-.. c:macro:: routine:
+.. c:function:: void routine(void)
 
 
     File : :file:`cas_based_on_top.irp.f`
@@ -1320,7 +1320,7 @@ Subroutines / functions
        * :c:func:`cas_based_on_top`
 
  
-.. c:macro:: routine_test_cas_based_density:
+.. c:function:: void routine_test_cas_based_density(void)
 
 
     File : :file:`cas_based_density.irp.f`
@@ -1356,7 +1356,7 @@ Subroutines / functions
        * :c:func:`give_cas_density_in_r`
 
  
-.. c:macro:: write_on_top_in_real_space:
+.. c:function:: void write_on_top_in_real_space(void)
 
 
     File : :file:`example.irp.f`

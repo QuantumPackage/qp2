@@ -102,7 +102,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: center_of_mass
+.. c:var:: double center_of_mass
 
 
     File : :file:`nuclei/nuclei.irp.f`
@@ -132,7 +132,7 @@ Providers
        * :c:data:`inertia_tensor`
 
  
-.. c:var:: element_mass
+.. c:var:: double element_mass
 
 
     File : :file:`nuclei/nuclei.irp.f`
@@ -161,7 +161,7 @@ Providers
        * :c:data:`inertia_tensor`
 
  
-.. c:var:: element_name
+.. c:var:: char element_name
 
 
     File : :file:`nuclei/nuclei.irp.f`
@@ -190,7 +190,7 @@ Providers
        * :c:data:`inertia_tensor`
 
  
-.. c:var:: inertia_tensor
+.. c:var:: double inertia_tensor
 
 
     File : :file:`nuclei/inertia.irp.f`
@@ -221,7 +221,7 @@ Providers
        * :c:data:`inertia_tensor_eigenvectors`
 
  
-.. c:var:: inertia_tensor_eigenvalues
+.. c:var:: double inertia_tensor_eigenvalues
 
 
     File : :file:`nuclei/inertia.irp.f`
@@ -243,7 +243,7 @@ Providers
 
 
  
-.. c:var:: inertia_tensor_eigenvectors
+.. c:var:: double inertia_tensor_eigenvectors
 
 
     File : :file:`nuclei/inertia.irp.f`
@@ -265,7 +265,7 @@ Providers
 
 
  
-.. c:var:: n_pts_charge
+.. c:var:: int n_pts_charge
 
 
     File : :file:`nuclei/point_charges.irp.f`
@@ -298,7 +298,7 @@ Providers
        * :c:data:`pts_charge_z`
 
  
-.. c:var:: nucl_coord
+.. c:var:: double nucl_coord
 
 
     File : :file:`nuclei/nuclei.irp.f`
@@ -364,7 +364,7 @@ Providers
        * :c:data:`z_dipole_moment`
 
  
-.. c:var:: nucl_coord_transp
+.. c:var:: double nucl_coord_transp
 
 
     File : :file:`nuclei/nuclei.irp.f`
@@ -393,7 +393,7 @@ Providers
        * :c:data:`weight_at_r_extra`
 
  
-.. c:var:: nucl_dist
+.. c:var:: double nucl_dist
 
 
     File : :file:`nuclei/nuclei.irp.f`
@@ -427,7 +427,7 @@ Providers
        * :c:data:`nucl_dist_inv`
 
  
-.. c:var:: nucl_dist_2
+.. c:var:: double nucl_dist_2
 
 
     File : :file:`nuclei/nuclei.irp.f`
@@ -461,7 +461,7 @@ Providers
        * :c:data:`nucl_dist_inv`
 
  
-.. c:var:: nucl_dist_inv
+.. c:var:: double nucl_dist_inv
 
 
     File : :file:`nuclei/nuclei.irp.f`
@@ -490,7 +490,7 @@ Providers
        * :c:data:`weight_at_r_extra`
 
  
-.. c:var:: nucl_dist_vec_x
+.. c:var:: double nucl_dist_vec_x
 
 
     File : :file:`nuclei/nuclei.irp.f`
@@ -524,7 +524,7 @@ Providers
        * :c:data:`nucl_dist_inv`
 
  
-.. c:var:: nucl_dist_vec_y
+.. c:var:: double nucl_dist_vec_y
 
 
     File : :file:`nuclei/nuclei.irp.f`
@@ -558,7 +558,7 @@ Providers
        * :c:data:`nucl_dist_inv`
 
  
-.. c:var:: nucl_dist_vec_z
+.. c:var:: double nucl_dist_vec_z
 
 
     File : :file:`nuclei/nuclei.irp.f`
@@ -592,7 +592,7 @@ Providers
        * :c:data:`nucl_dist_inv`
 
  
-.. c:var:: nuclear_repulsion
+.. c:var:: double nuclear_repulsion
 
 
     File : :file:`nuclei/nuclei.irp.f`
@@ -635,7 +635,7 @@ Providers
        * :c:data:`scf_energy`
 
  
-.. c:var:: pt_chrg_interaction
+.. c:var:: double pt_chrg_interaction
 
 
     File : :file:`nuclei/point_charges.irp.f`
@@ -664,7 +664,7 @@ Providers
        * :c:data:`pt_chrg_nuclei_interaction`
 
  
-.. c:var:: pt_chrg_nuclei_interaction
+.. c:var:: double pt_chrg_nuclei_interaction
 
 
     File : :file:`nuclei/point_charges.irp.f`
@@ -698,7 +698,7 @@ Providers
        * :c:data:`nuclear_repulsion`
 
  
-.. c:var:: pts_charge_coord
+.. c:var:: double pts_charge_coord
 
 
     File : :file:`nuclei/point_charges.irp.f`
@@ -729,7 +729,7 @@ Providers
        * :c:data:`pt_chrg_nuclei_interaction`
 
  
-.. c:var:: pts_charge_z
+.. c:var:: double pts_charge_z
 
 
     File : :file:`nuclei/point_charges.irp.f`
@@ -760,7 +760,7 @@ Providers
        * :c:data:`pt_chrg_nuclei_interaction`
 
  
-.. c:var:: slater_bragg_radii
+.. c:var:: double slater_bragg_radii
 
 
     File : :file:`nuclei/atomic_radii.irp.f`
@@ -782,7 +782,7 @@ Providers
        * :c:data:`slater_bragg_radii_ua`
 
  
-.. c:var:: slater_bragg_radii_per_atom
+.. c:var:: double slater_bragg_radii_per_atom
 
 
     File : :file:`nuclei/atomic_radii.irp.f`
@@ -810,7 +810,7 @@ Providers
        * :c:data:`slater_bragg_type_inter_distance`
 
  
-.. c:var:: slater_bragg_radii_per_atom_ua
+.. c:var:: double slater_bragg_radii_per_atom_ua
 
 
     File : :file:`nuclei/atomic_radii.irp.f`
@@ -838,7 +838,7 @@ Providers
        * :c:data:`slater_bragg_type_inter_distance_ua`
 
  
-.. c:var:: slater_bragg_radii_ua
+.. c:var:: double slater_bragg_radii_ua
 
 
     File : :file:`nuclei/atomic_radii.irp.f`
@@ -864,7 +864,7 @@ Providers
        * :c:data:`slater_bragg_radii_per_atom_ua`
 
  
-.. c:var:: slater_bragg_type_inter_distance
+.. c:var:: double slater_bragg_type_inter_distance
 
 
     File : :file:`nuclei/atomic_radii.irp.f`
@@ -885,7 +885,7 @@ Providers
 
 
  
-.. c:var:: slater_bragg_type_inter_distance_ua
+.. c:var:: double slater_bragg_type_inter_distance_ua
 
 
     File : :file:`nuclei/atomic_radii.irp.f`

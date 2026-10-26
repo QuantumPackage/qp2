@@ -118,7 +118,7 @@ Programs
 Providers 
 --------- 
  
-.. c:var:: trexio_filename
+.. c:var:: char trexio_filename
 
 
     File : :file:`trexio_file.irp.f`
@@ -146,7 +146,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: export_trexio_subroutine:
+.. c:function:: void export_trexio_subroutine(void)
 
 
     File : :file:`export_trexio_routines.irp.f`
@@ -267,7 +267,7 @@ Subroutines / functions
        * :c:func:`trexio_assert`
 
  
-.. c:macro:: run:
+.. c:function:: void run(void)
 
 
     File : :file:`import_trexio_integrals.irp.f`

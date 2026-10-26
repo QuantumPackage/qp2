@@ -37,7 +37,7 @@ Programs
 Subroutines / functions 
 ----------------------- 
  
-.. c:macro:: dav_double_dressed:
+.. c:function:: void dav_double_dressed(void)
 
 
     File : :file:`dav_double_dress_ext_rout.irp.f`
@@ -115,7 +115,7 @@ Subroutines / functions
        * :c:data:`nthreads_davidson`
 
  
-.. c:macro:: davidson_general:
+.. c:function:: void davidson_general(void)
 
 
     File : :file:`dav_general.irp.f`
@@ -188,7 +188,7 @@ Subroutines / functions
        * :c:data:`nthreads_davidson`
 
  
-.. c:macro:: davidson_general_diag_dressed_ext_rout_nonsym_b1space:
+.. c:function:: void davidson_general_diag_dressed_ext_rout_nonsym_b1space(void)
 
 
     File : :file:`dav_diag_dressed_ext_rout_nonsym_B1space.irp.f`
@@ -254,7 +254,7 @@ Subroutines / functions
        * :c:data:`nthreads_davidson`
 
  
-.. c:macro:: davidson_general_ext_rout:
+.. c:function:: void davidson_general_ext_rout(void)
 
 
     File : :file:`dav_ext_rout.irp.f`
@@ -329,7 +329,7 @@ Subroutines / functions
        * :c:data:`nthreads_davidson`
 
  
-.. c:macro:: davidson_general_ext_rout_diag_dressed:
+.. c:function:: void davidson_general_ext_rout_diag_dressed(void)
 
 
     File : :file:`dav_diag_dressed_ext_rout.irp.f`
@@ -400,7 +400,7 @@ Subroutines / functions
        * :c:data:`nthreads_davidson`
 
  
-.. c:macro:: davidson_general_ext_rout_dressed:
+.. c:function:: void davidson_general_ext_rout_dressed(void)
 
 
     File : :file:`dav_dressed_ext_rout.irp.f`
@@ -472,7 +472,7 @@ Subroutines / functions
        * :c:data:`nthreads_davidson`
 
  
-.. c:macro:: davidson_general_ext_rout_nonsym_b1space:
+.. c:function:: void davidson_general_ext_rout_nonsym_b1space(void)
 
 
     File : :file:`dav_ext_rout_nonsym_B1space.irp.f`
@@ -536,7 +536,7 @@ Subroutines / functions
        * :c:data:`nthreads_davidson`
 
  
-.. c:macro:: dress_calc:
+.. c:function:: void dress_calc(void)
 
 
     File : :file:`dav_diag_dressed_ext_rout_nonsym_B1space.irp.f`
@@ -558,7 +558,7 @@ Subroutines / functions
        * :c:func:`davidson_general_diag_dressed_ext_rout_nonsym_b1space`
 
  
-.. c:macro:: dressing_diag_uv:
+.. c:function:: void dressing_diag_uv(void)
 
 
     File : :file:`dav_double_dress_ext_rout.irp.f`
@@ -585,7 +585,7 @@ Subroutines / functions
        * :c:func:`davidson_general_ext_rout_diag_dressed`
 
  
-.. c:macro:: hcalc_template:
+.. c:function:: void hcalc_template(void)
 
 
     File : :file:`dav_ext_rout.irp.f`
@@ -613,7 +613,7 @@ Subroutines / functions
        * :c:data:`nuclear_repulsion`
 
  
-.. c:macro:: hpsi:
+.. c:function:: void hpsi(void)
 
 
     File : :file:`dav_general.irp.f`
@@ -633,7 +633,7 @@ Subroutines / functions
        * :c:func:`davidson_general`
 
  
-.. c:macro:: routine:
+.. c:function:: void routine(void)
 
 
     File : :file:`test_dav.irp.f`
@@ -679,7 +679,7 @@ Subroutines / functions
        * :c:data:`nthreads_davidson`
 
  
-.. c:macro:: test_dav_dress:
+.. c:function:: void test_dav_dress(void)
 
 
     File : :file:`test_dav.irp.f`
