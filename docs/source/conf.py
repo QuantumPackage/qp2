@@ -38,7 +38,7 @@ version = ".".join(release.split(".")[:2])
 #
 # needs_sphinx = '1.0'
 
-with open("_static/links.rst",'r') as f:
+with open(Path(__file__).resolve().parent / "_static" / "links.rst") as f:
     rst_epilog = f.read()
 
 suppress_warnings = [
@@ -170,13 +170,13 @@ latex_documents = [
 man_pages = []
 qpdoc = ' | Quantum Package >'
 import os
-for f in os.listdir("users_guide"):
+for f in os.listdir(Path(__file__).resolve().parent / "users_guide"):
   name = f.split('.')[0]
   if name not in ["index","quickstart"]:
     filename = os.path.join("users_guide",name)
     man_pages.append( (filename, name, qpdoc, [author], 1) )
 
-for f in os.listdir("programs"):
+for f in os.listdir(Path(__file__).resolve().parent / "programs"):
   name = f.split('.')[0]
   if name not in [""]:
     filename = os.path.join("programs",name)
