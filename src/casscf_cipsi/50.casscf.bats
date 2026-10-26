@@ -12,7 +12,7 @@ function run_stoch() {
   qp set davidson_keywords threshold_davidson 1.e-10
   qp set davidson_keywords n_states_diag 4
   qp run casscf | tee casscf.out 
-  energy1="$(ezfio get casscf energy_pt2 | tr '[]' ' ' | cut -d ',' -f 1)"
+  energy1="$(ezfio get casscf_cipsi energy | tr '[]' ' ' | cut -d ',' -f 1)"
   eq $energy1 $1 $thresh
 }
 

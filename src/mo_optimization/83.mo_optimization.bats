@@ -23,7 +23,7 @@ function run() {
   err1="$(grep 'Max error:' $file.debug_h1.out | awk '{print $3}')"
   qp run orb_opt > $file.opt1.out
   energy1="$(grep 'State average energy:' $file.opt1.out | tail -n 1 | awk '{print $4}')"
-  qp set orbital_optimization optimization_method diag
+  qp set mo_optimization_utils optimization_method diag
   qp reset -d 
   qp run scf
   qp run cis
@@ -31,7 +31,7 @@ function run() {
   err2="$(grep 'Max error_H:' $file.debug_h2.out | awk '{print $3}')"
   qp run orb_opt > $file.opt2.out
   energy2="$(grep 'State average energy:' $file.opt2.out | tail -n 1 | awk '{print $4}')"
-  qp set orbital_optimization optimization_method full
+  qp set mo_optimization_utils optimization_method full
   qp reset -d
   qp run scf
   eq $energy1 $2 $thresh

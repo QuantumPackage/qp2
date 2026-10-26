@@ -4,15 +4,15 @@
 Different methods are available:  
 - full hessian  
 ``` 
-qp set orbital_optimization optimization_method full  
+qp set mo_optimization_utils optimization_method full  
 ```  
 - diagonal hessian  
 ``` 
-qp set orbital_optimization optimization_method diag  
+qp set mo_optimization_utils optimization_method diag  
 ``` 
 - identity matrix  
 ``` 
-qp set orbital_optimization optimization_method none  
+qp set mo_optimization_utils optimization_method none  
 ``` 
 
 After the optimization the ezfio contains the optimized orbitals
@@ -52,7 +52,7 @@ The optimization process if the following:
 You can choos the number of determinants after what the 
 optimization will stop:
 ```
-qp set orbital_optimization n_det_max_opt 1e5 # or any number
+qp set mo_optimization_utils n_det_max_opt 1e5 # or any number
 ```
 ## Weight of the states
 You can change the weights of the differents states directly in qp edit.  
