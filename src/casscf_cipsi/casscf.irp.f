@@ -116,7 +116,7 @@ subroutine run
      mo_occ  = occnum
      if(.not.converged)then
       call save_mos
-      call save_energy(Ev,E_PT2)
+      call save_energy(Ev,PT2)
       iteration += 1
       if(norm_grad_vec2.gt.0.01d0)then
        N_det = N_states
@@ -141,7 +141,7 @@ subroutine run
     endif
 
   enddo
-  call save_energy(Ev,E_PT2)
+  call save_energy(Ev,PT2)
   if(.True.)then
      integer :: i
     print*,'Converged CASSCF '
