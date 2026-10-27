@@ -126,11 +126,15 @@ subroutine export_trexio_subroutine(update,full_path)
 
   print *, 'Electrons'
 
-  rc = trexio_write_electron_up_num(f(1), elec_alpha_num)
-  call trexio_assert(rc, TREXIO_SUCCESS)
-
-  rc = trexio_write_electron_dn_num(f(1), elec_beta_num)
-  call trexio_assert(rc, TREXIO_SUCCESS)
+  ! TREXIO >= 2.6.0 validates every determinant written to a file against
+  ! that file's own electron_up_num/electron_dn_num attributes, so these
+  ! must be written to every state file, not just f(1).
+  do k=1,N_states
+    rc = trexio_write_electron_up_num(f(k), elec_alpha_num)
+    call trexio_assert(rc, TREXIO_SUCCESS)
+    rc = trexio_write_electron_dn_num(f(k), elec_beta_num)
+    call trexio_assert(rc, TREXIO_SUCCESS)
+  enddo
 
 
 ! Nuclei
