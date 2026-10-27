@@ -148,6 +148,13 @@ subroutine ex_lda_sr(mu,rho_a,rho_b,ex,vx_a,vx_b)
 !Test on the value of a
 
 !Limit for small a (expansion not so important as for large a)
+! KNOWN QUIRK (2026-10-28, found while fixing bug 1): in this mu->0
+! small-a limit the ENERGY is 2x the standard per-spin LDA value
+! (ex_a(1) = -1.86105 here vs -0.930526 = cst_lda for plain ex_lda),
+! while the POTENTIAL is standard (vx_a(1) = -1.24070). Harmless for
+! callers reading only vx (plain `lda` in ks_scf: energy from ex_lda,
+! potential from ex_lda_sr at mu=1e-9); a caller that accumulates ex at
+! tiny mu (sr_lda energy_x_sr_lda) would get 2x the exchange energy.
  if (a.lt.1.d-9) then
    ex_a = -z3/z8*rho_a_2*(z24*rho_a_2/pi)**f13
    vx_a = - ((z3/pi)*rho_a_2)**f13
