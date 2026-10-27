@@ -8,9 +8,11 @@ architecture specific backend is selected by the LIB file of the
 tree and provides the CPU implementation of `simple_gpu`, used when
 no GPU is available.
 
-When a GPU is present (:c:data:`gpu_num` greater than 0), the provider
-:c:data:`blas_handle` creates the handle of the GPU BLAS library
-(cuBLAS or RocBLAS). :c:data:`gpu_default_stream` is the default
+The provider :c:data:`blas_handle` always creates a handle of the GPU
+BLAS library: cuBLAS or RocBLAS when a GPU is present (:c:data:`gpu_num`
+greater than 0), or the 1-byte CPU-emulation handle when no GPU is
+available, since the simple_gpu CPU backend fully emulates the GPU BLAS
+API on host memory. :c:data:`gpu_default_stream` is the default
 stream and :c:data:`gpu_mem` tracks the amount of GPU memory in use,
 released with :c:func:`gpu_free_memory`.
 
