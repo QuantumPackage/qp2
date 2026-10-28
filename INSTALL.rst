@@ -153,8 +153,8 @@ If you have *pip* for Python3, you can do
 
 Otherwise,
 
-* Download the latest version of IRPF90 (v2.0.5)
-  here : `<https://gitlab.com/scemama/irpf90/-/archive/v2.0.5/irpf90-v2.0.5.tar.gz>`_ and move
+* Download the latest version of IRPF90 (v2.1.0)
+  here : `<https://gitlab.com/scemama/irpf90/-/archive/v2.1.0/irpf90-v2.1.0.tar.gz>`_ and move
   the downloaded archive in the :file:`${QP_ROOT}/external` directory
 
 * Extract the archive and go into the :file:`irpf90-*` directory to run
