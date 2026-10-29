@@ -65,19 +65,15 @@ Requirements
 
 
 When all the dependencies have been installed, pick in the :file:`config`
-directory the configuration file that corresponds to your architecture,
-modify it if needed, and run :command:`configure` with :option:`configure -c`.
+directory the configuration file that corresponds to your machine, copy
+it to a new file, modify the copy, and run :command:`configure` with the
+:file:`-c` option. The configuration files, and the choice for each
+machine, are detailed on the :ref:`configure` page.
 
 .. code:: bash
 
-   ./configure -c config/gfortran_avx.cfg
-
-
-.. note::
-
-   The ``popcnt`` instruction accelerates *a lot* the programs, so the
-   SSE4.2, AVX or AVX2 instruction sets should be enabled in the
-   configuration file if possible.
+   cp config/gfortran.cfg config/gfortran_mybox.cfg
+   ./configure -c config/gfortran_mybox.cfg
 
 
 Help for installing external dependencies
