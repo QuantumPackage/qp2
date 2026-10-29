@@ -762,7 +762,7 @@ Providers
        :columns: 3
 
        * :c:data:`ao_one_e_integrals`
-       * :c:data:`ao_ortho_canonical_nucl_elec_integrals`
+       * :c:data:`ao_canonical_nucl_elec_ints`
        * :c:data:`ao_ortho_lowdin_nucl_elec_integrals`
        * :c:data:`ao_sphe_integrals_n_e`
        * :c:data:`hf_kinetic_energy`
@@ -1123,7 +1123,7 @@ Providers
        :columns: 3
 
        * :c:data:`ao_ortho_canonical_coef_inv`
-       * :c:data:`ao_ortho_canonical_nucl_elec_integrals`
+       * :c:data:`ao_canonical_nucl_elec_ints`
        * :c:data:`ao_ortho_canonical_overlap`
        * :c:data:`mo_coef`
        * :c:data:`mo_coef_aux`
@@ -1193,7 +1193,7 @@ Providers
        :columns: 3
 
        * :c:data:`ao_ortho_canonical_coef_inv`
-       * :c:data:`ao_ortho_canonical_nucl_elec_integrals`
+       * :c:data:`ao_canonical_nucl_elec_ints`
        * :c:data:`ao_ortho_canonical_overlap`
        * :c:data:`mo_coef`
        * :c:data:`mo_coef_aux`

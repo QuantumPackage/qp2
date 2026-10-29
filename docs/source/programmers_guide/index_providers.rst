@@ -109,7 +109,7 @@ Index of Providers
     * :c:data:`ao_one_e_integrals_imag` 
     * :c:data:`ao_ortho_canonical_coef` 
     * :c:data:`ao_ortho_canonical_coef_inv` 
-    * :c:data:`ao_ortho_canonical_nucl_elec_integrals` 
+    * :c:data:`ao_canonical_nucl_elec_ints` 
     * :c:data:`ao_ortho_canonical_num` 
     * :c:data:`ao_ortho_canonical_overlap` 
     * :c:data:`ao_ortho_lowdin_coef` 
