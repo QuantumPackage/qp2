@@ -486,7 +486,7 @@ Index of Providers
     * :c:data:`final_weight_at_r_extra` 
     * :c:data:`final_weight_at_r_vector` 
     * :c:data:`final_weight_at_r_vector_extra` 
-    * :c:data:`final_weight_at_r_vector_per_atom` 
+    * :c:data:`final_weight_at_r_per_atom` 
     * :c:data:`fipq` 
     * :c:data:`fock_matrix_alpha_no_xc_ao` 
     * :c:data:`fock_matrix_ao` 
