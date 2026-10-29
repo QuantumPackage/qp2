@@ -691,7 +691,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_aa_mo`
        * :c:data:`state_av_full_occ_2_rdm_ab_mo`
        * :c:data:`state_av_full_occ_2_rdm_bb_mo`
-       * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
+       * :c:data:`state_av_occ_2_rdm_spin_trace_mo`
        * :c:data:`super_ci_dm`
        * :c:data:`umat`
 
@@ -768,7 +768,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_aa_mo`
        * :c:data:`state_av_full_occ_2_rdm_ab_mo`
        * :c:data:`state_av_full_occ_2_rdm_bb_mo`
-       * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
+       * :c:data:`state_av_occ_2_rdm_spin_trace_mo`
        * :c:data:`super_ci_dm`
        * :c:data:`umat`
 
@@ -841,7 +841,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_aa_mo`
        * :c:data:`state_av_full_occ_2_rdm_ab_mo`
        * :c:data:`state_av_full_occ_2_rdm_bb_mo`
-       * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
+       * :c:data:`state_av_occ_2_rdm_spin_trace_mo`
 
  
 .. c:var:: int list_core_inact
@@ -1048,7 +1048,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_aa_mo`
        * :c:data:`state_av_full_occ_2_rdm_ab_mo`
        * :c:data:`state_av_full_occ_2_rdm_bb_mo`
-       * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
+       * :c:data:`state_av_occ_2_rdm_spin_trace_mo`
 
  
 .. c:var:: int list_del
@@ -1151,7 +1151,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_aa_mo`
        * :c:data:`state_av_full_occ_2_rdm_ab_mo`
        * :c:data:`state_av_full_occ_2_rdm_bb_mo`
-       * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
+       * :c:data:`state_av_occ_2_rdm_spin_trace_mo`
 
  
 .. c:var:: int list_inact_act
@@ -1242,7 +1242,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_aa_mo`
        * :c:data:`state_av_full_occ_2_rdm_ab_mo`
        * :c:data:`state_av_full_occ_2_rdm_bb_mo`
-       * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
+       * :c:data:`state_av_occ_2_rdm_spin_trace_mo`
 
  
 .. c:var:: int list_virt
@@ -1449,7 +1449,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_aa_mo`
        * :c:data:`state_av_full_occ_2_rdm_ab_mo`
        * :c:data:`state_av_full_occ_2_rdm_bb_mo`
-       * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
+       * :c:data:`state_av_occ_2_rdm_spin_trace_mo`
        * :c:data:`super_ci_dm`
        * :c:data:`umat`
 
@@ -1519,7 +1519,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_aa_mo`
        * :c:data:`state_av_full_occ_2_rdm_ab_mo`
        * :c:data:`state_av_full_occ_2_rdm_bb_mo`
-       * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
+       * :c:data:`state_av_occ_2_rdm_spin_trace_mo`
        * :c:data:`two_e_dm_mo`
 
  
@@ -1620,7 +1620,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_aa_mo`
        * :c:data:`state_av_full_occ_2_rdm_ab_mo`
        * :c:data:`state_av_full_occ_2_rdm_bb_mo`
-       * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
+       * :c:data:`state_av_occ_2_rdm_spin_trace_mo`
 
  
 .. c:var:: int n_del_orb
@@ -1722,7 +1722,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_aa_mo`
        * :c:data:`state_av_full_occ_2_rdm_ab_mo`
        * :c:data:`state_av_full_occ_2_rdm_bb_mo`
-       * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
+       * :c:data:`state_av_occ_2_rdm_spin_trace_mo`
 
  
 .. c:var:: int n_int
