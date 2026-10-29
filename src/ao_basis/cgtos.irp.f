@@ -137,10 +137,11 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
 
   implicit none
 
-  integer          :: i, j, ii, m, powA(3), nz
+  integer          :: i, j, k, ii, m, powA(3), nz
   double precision :: norm
-  double precision :: kA2, phiA
+  double precision :: kA2, phiA, KB2, phiB
   complex*16       :: expo, expo_inv, C_Ae(3), C_Ap(3)
+  complex*16       :: expo_k, expo_k_inv, C_Be(3)
   complex*16       :: overlap_x, overlap_y, overlap_z
   complex*16       :: integ1, integ2, C1, C2
 
@@ -193,6 +194,48 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
       enddo
 
     endif ! primitives_normalized
+
+    if(ao_normalized) then
+
+      ! Normalization of the contracted AO (as ao_coef_normalized does for real GTOs):
+      ! <chi|chi> = sum_jk c_j c_k 2 Re[ C1 S(z_j, z_k) + C2 S(z_j^*, z_k) ]
+      norm = 0.d0
+      do j = 1, ao_prim_num(i)
+        expo = ao_expo(i,j) + (0.d0, 1.d0) * ao_expo_im(i,j)
+        expo_inv = (1.d0, 0.d0) / expo
+        do m = 1, 3
+          C_Ap(m) = nucl_coord(ii,m)
+          C_Ae(m) = nucl_coord(ii,m) - (0.d0, 0.5d0) * expo_inv * ao_expo_pw(m,i,j)
+        enddo
+        phiA = ao_expo_phase(1,i,j) + ao_expo_phase(2,i,j) + ao_expo_phase(3,i,j)
+        KA2 = ao_expo_pw(1,i,j) * ao_expo_pw(1,i,j) &
+            + ao_expo_pw(2,i,j) * ao_expo_pw(2,i,j) &
+            + ao_expo_pw(3,i,j) * ao_expo_pw(3,i,j)
+        do k = 1, ao_prim_num(i)
+          expo_k = ao_expo(i,k) + (0.d0, 1.d0) * ao_expo_im(i,k)
+          expo_k_inv = (1.d0, 0.d0) / expo_k
+          do m = 1, 3
+            C_Be(m) = nucl_coord(ii,m) - (0.d0, 0.5d0) * expo_k_inv * ao_expo_pw(m,i,k)
+          enddo
+          phiB = ao_expo_phase(1,i,k) + ao_expo_phase(2,i,k) + ao_expo_phase(3,i,k)
+          KB2 = ao_expo_pw(1,i,k) * ao_expo_pw(1,i,k) &
+              + ao_expo_pw(2,i,k) * ao_expo_pw(2,i,k) &
+              + ao_expo_pw(3,i,k) * ao_expo_pw(3,i,k)
+          C1 = exp(-(0.d0, 1.d0) * (phiA + phiB) - 0.25d0 * (expo_inv * KA2 + expo_k_inv * KB2))
+          C2 = exp( (0.d0, 1.d0) * (phiA - phiB) - 0.25d0 * (conjg(expo_inv) * KA2 + expo_k_inv * KB2))
+          call overlap_cgaussian_xyz(C_Ae, C_Be, expo, expo_k, powA, powA, &
+                                     C_Ap, C_Ap, overlap_x, overlap_y, overlap_z, integ1, nz)
+          call overlap_cgaussian_xyz(conjg(C_Ae), C_Be, conjg(expo), expo_k, powA, powA, &
+                                     conjg(C_Ap), C_Ap, overlap_x, overlap_y, overlap_z, integ2, nz)
+          norm = norm + ao_coef_norm_cgtos(i,j) * ao_coef_norm_cgtos(i,k) &
+                      * 2.d0 * real(C1 * integ1 + C2 * integ2)
+        enddo
+      enddo
+      do j = 1, ao_prim_num(i)
+        ao_coef_norm_cgtos(i,j) = ao_coef_norm_cgtos(i,j) / dsqrt(norm)
+      enddo
+
+    endif ! ao_normalized
 
   enddo
 

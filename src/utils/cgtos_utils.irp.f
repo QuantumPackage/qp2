@@ -46,7 +46,8 @@ subroutine give_explicit_cpoly_and_cgaussian_x(P_new, P_center, p, fact_k, iorde
   ! get the factor
   d_AB = (Ae_center - Be_center) * (Ae_center - Be_center)
   tmp = ab * p_inv * d_AB
-  if(abs(tmp) .lt. 50.d0) then
+  ! |exp(-tmp)| = exp(-Re(tmp)): test the real part, not |tmp|
+  if(real(tmp) .lt. 50.d0) then
     fact_k = exp(-tmp)
   else
     fact_k = (0.d0, 0.d0)
@@ -100,6 +101,8 @@ subroutine give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_k, iorder,
   complex*16              :: P_a(0:max_dim,3), P_b(0:max_dim,3)
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: P_a, P_b
 
+  double precision, external :: cgaussian_pair_bound
+
   iorder(1) = 0
   iorder(2) = 0
   iorder(3) = 0
@@ -111,9 +114,14 @@ subroutine give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_k, iorder,
   !DIR$ FORCEINLINE
   call cgaussian_product(alpha, Ae_center, beta, Be_center, fact_k, p, P_center)
 
-  ! IF fact_k is too smal then: returns a "s" function centered in zero
+  ! IF the pair is negligible then: returns a "s" function centered in zero
   ! with an inifinite exponent and a zero polynom coef
-  if(abs(fact_k) < 1d-14) then
+  !
+  ! |fact_k| is NOT a bound of the integrals of this pair: with complex exponents P_center is
+  ! complex and exp(-p (r-P)^2) can be as large as 1/|fact_k| (ERI and nuclear attraction then
+  ! get Boys arguments with Re T << 0 which compensate). The modulus of the pair is
+  ! |poly| exp(-Re(alpha) |r-Ap|^2 - Re(beta) |r-Bp|^2) <= |poly| exp(-mu_re |Ap-Bp|^2)
+  if(cgaussian_pair_bound(alpha, beta, Ap_center, Bp_center) < 1d-14) then
     iorder               = 0
     p                    = (1.d+14, 0.d0)
     fact_k               = (0.d0  , 0.d0)
@@ -185,19 +193,42 @@ subroutine cgaussian_product(a, xa, b, xb, k, p, xp)
   p_inv = (1.d0, 0.d0) / p
   ab    = a * b * p_inv
 
+  ! no screening here: a small |k| does not mean a negligible pair (see
+  ! give_explicit_cpoly_and_cgaussian); exp underflows gracefully to 0
   k = ab * (xab(1)*xab(1) + xab(2)*xab(2) + xab(3)*xab(3))
-  if(real(k) .gt. 40.d0) then
-    k       = (0.d0, 0.d0)
-    xp(1:3) = (0.d0, 0.d0)
-    return
-  endif
-
   k = exp(-k)
   xp(1) = (a * xa(1) + b * xb(1)) * p_inv
   xp(2) = (a * xa(2) + b * xb(2)) * p_inv
   xp(3) = (a * xa(3) + b * xb(3)) * p_inv
 
   return
+end
+
+! ---
+
+double precision function cgaussian_pair_bound(alpha, beta, Ap_center, Bp_center)
+
+  BEGIN_DOC
+  ! Upper bound of |g_A(r) g_B(r)| / |polynomials| for two primitive cGTOs
+  ! (x-Ap)^a exp(-alpha |r-Ap|^2 + plane wave) and (x-Bp)^b exp(-beta |r-Bp|^2 + plane wave):
+  !   exp( - Re(alpha) Re(beta) / (Re(alpha) + Re(beta)) |Ap - Bp|^2 )
+  ! It only depends on the real parts of the exponents and on the (real) nuclear centers.
+  END_DOC
+
+  implicit none
+
+  complex*16, intent(in) :: alpha, beta, Ap_center(3), Bp_center(3)
+
+  double precision       :: a, b, d2
+
+  a  = real(alpha)
+  b  = real(beta)
+  d2 = abs(Ap_center(1) - Bp_center(1))**2 &
+     + abs(Ap_center(2) - Bp_center(2))**2 &
+     + abs(Ap_center(3) - Bp_center(3))**2
+
+  cgaussian_pair_bound = exp(-a * b / (a + b) * d2)
+
 end
 
 ! ---
