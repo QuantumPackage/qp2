@@ -10,20 +10,17 @@ subroutine zboysfun00_1(rho, F0)
   complex*16, intent(in)  :: rho
   complex*16, intent(out) :: F0
 
-  double precision        :: rho_re, rho_im, rho_mod
   double precision        :: sq_rho_re, sq_rho_im
   complex*16              :: sq_rho
 
   complex*16, external    :: cpx_erf_1
 
 
-  rho_re  = real(rho)
-  rho_im  = aimag(rho)
-  rho_mod = dsqrt(rho_re*rho_re + rho_im*rho_im)
-
-  sq_rho_re = sq_op5 * dsqrt(rho_re + rho_mod)
-  sq_rho_im = 0.5d0 * rho_im / sq_rho_re
-  sq_rho    = sq_rho_re + (0.d0, 1.d0) * sq_rho_im
+  ! principal square root; the former form sqrt((Re+|rho|)/2) gives 0/0 on the negative
+  ! real axis and loses all digits close to it (Re rho < 0, |Im rho| << |rho|)
+  sq_rho    = sqrt(rho)
+  sq_rho_re = real(sq_rho)
+  sq_rho_im = aimag(sq_rho)
 
   F0 = 0.5d0 * sqpi * cpx_erf_1(sq_rho_re, sq_rho_im) / sq_rho
 
@@ -176,11 +173,6 @@ complex*16 function erf_G(x, yabs)
   integer                      :: i, tmpi, imin, imax
   double precision             :: tmp0, tmp1, x2, idble
   complex*16                   :: tmp2
-
-  if(x .eq. 0.d0) then
-    erf_G = (0.d0, 0.d0)
-    return
-  endif
 
   tmpi = int(2.d0 * yabs)
   imin = max(1, tmpi-Nmax)

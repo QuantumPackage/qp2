@@ -8,23 +8,51 @@
 determinants
 ============
 
-Contains everything for the computation of the Hamiltonian matrix elements in the basis of orthogonal Slater determinants built on a restricted spin-orbitals basis.
+Storage of the wave function in a basis of orthogonal Slater
+determinants built on the restricted spin-orbital basis, and the basic
+operations on it.
 
 The main providers for this module are:
 
 * :option:`determinants n_states`: number of states to be computed
-* :c:data:`psi_det`: list of determinants in the wave function used in many routines/providers of the |QP|.
-* :c:data:`psi_coef`: list of coefficients, for all :option:`determinants n_states` states, and all determinants.
+* :c:data:`psi_det`: the list of determinants in the wave function,
+  stored as spin bitmasks of the occupied spin orbitals, for all
+  :option:`determinants n_states` states. It is used by many
+  routines and providers of |QP|
+* :c:data:`psi_coef`: the list of coefficients, for all states and
+  all determinants
+* the sorted variants :c:data:`psi_det_sorted` and
+  :c:data:`psi_coef_sorted`, ordered by decreasing norm contribution,
+  and the :c:data:`psi_bilinear_matrix` variants, which store the
+  wave function in the bilinear form :math:`D_\alpha^\dagger C
+  D_\beta` used by the distributed computations
 
 The main routines for this module are:
 
-* :c:func:`i_H_j`: computes the Hamiltonian matrix element between two arbitrary Slater determinants.
-* :c:function:`i_h_j_s2`: computes the Hamiltonian and (|S^2|) matrix element between two arbitrary Slater determinants.
-* :c:func:`i_H_j_verbose`: returns the decomposition in terms of one- and two-body components of the Hamiltonian matrix elements between two arbitrary Slater determinants. Also return the fermionic phase factor.
-* :c:func:`i_H_psi`: computes the Hamiltonian matrix element between an arbitrary Slater determinant and a wave function composed of a sum of arbitrary Slater determinants.
+* :c:func:`i_h_j`: computes the Hamiltonian matrix element between
+  two arbitrary Slater determinants
+* :c:func:`i_h_j_s2`: computes the Hamiltonian and |S^2| matrix
+  element between two arbitrary Slater determinants
+* :c:func:`i_h_j_verbose`: returns the decomposition in terms of
+  one- and two-body components of the Hamiltonian matrix element
+  between two arbitrary Slater determinants, and the fermionic phase
+  factor
+* :c:func:`i_h_psi`: computes the Hamiltonian matrix element between
+  an arbitrary Slater determinant and a wave function composed of a
+  sum of arbitrary Slater determinants
 
+The other files of the module provide the creation of excitations
+(`create_excitations.irp.f`), the application of the Hamiltonian to
+the wave function (`h_apply.irp.f`), the |S^2| operator
+(`s2.irp.f`), the one-, two- and three-electron density matrices
+(`density_matrix.irp.f`, `two_e_density_matrix.irp.pouet`,
+`tr_density_matrix.irp.f`), the dipole moments, the pruning of the
+wave function (`prune_wf.irp.f`), the projection on a |CAS|
+(`psi_cas.irp.f`), and the saving of the wave function in the |EZFIO|
+database (`save_wavefunction`).
 
-For an example of how to use these routines and providers, take a look at :file:`example.irp.f`.
+For an example of how to use these routines and providers, take a
+look at :file:`example.irp.f`.
  
  
  
@@ -174,7 +202,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: abs_psi_coef_max
+.. c:var:: double abs_psi_coef_max
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -200,7 +228,7 @@ Providers
 
 
  
-.. c:var:: abs_psi_coef_min
+.. c:var:: double abs_psi_coef_min
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -226,7 +254,7 @@ Providers
 
 
  
-.. c:var:: attachment_numbers_sorted
+.. c:var:: double attachment_numbers_sorted
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -250,7 +278,7 @@ Providers
 
 
  
-.. c:var:: attachment_orbitals
+.. c:var:: double attachment_orbitals
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -276,7 +304,7 @@ Providers
 
 
  
-.. c:var:: barycentric_electronic_energy
+.. c:var:: double barycentric_electronic_energy
 
 
     File : :file:`determinants/energy.irp.f`
@@ -306,7 +334,7 @@ Providers
        * :c:data:`pt2_e0_denominator`
 
  
-.. c:var:: c0_weight
+.. c:var:: double c0_weight
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -335,7 +363,7 @@ Providers
        * :c:data:`state_average_weight`
 
  
-.. c:var:: det_alpha_norm
+.. c:var:: double det_alpha_norm
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -364,7 +392,7 @@ Providers
 
 
  
-.. c:var:: det_beta_norm
+.. c:var:: double det_beta_norm
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -393,7 +421,7 @@ Providers
 
 
  
-.. c:var:: dettachment_numbers_sorted
+.. c:var:: double dettachment_numbers_sorted
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -417,7 +445,7 @@ Providers
 
 
  
-.. c:var:: dettachment_orbitals
+.. c:var:: double dettachment_orbitals
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -443,7 +471,7 @@ Providers
 
 
  
-.. c:var:: diagonal_h_matrix_on_psi_det
+.. c:var:: double diagonal_h_matrix_on_psi_det
 
 
     File : :file:`determinants/energy.irp.f`
@@ -475,7 +503,7 @@ Providers
        * :c:data:`barycentric_electronic_energy`
 
  
-.. c:var:: difference_dm
+.. c:var:: double difference_dm
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -504,7 +532,7 @@ Providers
        * :c:data:`difference_dm_eigvect`
 
  
-.. c:var:: difference_dm_eigval
+.. c:var:: double difference_dm_eigval
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -536,7 +564,7 @@ Providers
        * :c:data:`n_attachment`
 
  
-.. c:var:: difference_dm_eigvect
+.. c:var:: double difference_dm_eigvect
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -568,7 +596,7 @@ Providers
        * :c:data:`n_attachment`
 
  
-.. c:var:: dominant_det
+.. c:var:: int dominant_det
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -597,7 +625,7 @@ Providers
        * :c:data:`dominant_cfg`
 
  
-.. c:var:: double_exc_bitmask
+.. c:var:: int double_exc_bitmask
 
 
     File : :file:`determinants/determinants_bitmasks.irp.f`
@@ -628,7 +656,7 @@ Providers
 
 
  
-.. c:var:: expected_s2
+.. c:var:: double expected_s2
 
 
     File : :file:`determinants/s2.irp.f`
@@ -654,9 +682,10 @@ Providers
        :columns: 3
 
        * :c:data:`ci_electronic_energy`
+       * :c:data:`n_csf`
 
  
-.. c:var:: fock_operator_closed_shell_ref_bitmask
+.. c:var:: double fock_operator_closed_shell_ref_bitmask
 
 
     File : :file:`determinants/single_excitations.irp.f`
@@ -672,21 +701,16 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`cholesky_mo_num`
-       * :c:data:`cholesky_mo_transp`
-       * :c:data:`do_mo_cholesky`
+       * :c:data:`big_array_coulomb_integrals`
        * :c:data:`full_ijkl_bitmask`
-       * :c:data:`mo_integrals_cache_min`
-       * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
        * :c:data:`mo_one_e_integrals`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_int`
        * :c:data:`ref_closed_shell_bitmask`
 
 
  
-.. c:var:: fock_wee_closed_shell
+.. c:var:: double fock_wee_closed_shell
 
 
     File : :file:`determinants/single_excitation_two_e.irp.f`
@@ -702,20 +726,15 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`cholesky_mo_num`
-       * :c:data:`cholesky_mo_transp`
-       * :c:data:`do_mo_cholesky`
+       * :c:data:`big_array_coulomb_integrals`
        * :c:data:`full_ijkl_bitmask`
-       * :c:data:`mo_integrals_cache_min`
-       * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_int`
        * :c:data:`ref_closed_shell_bitmask`
 
 
  
-.. c:var:: h_apply_buffer_allocated
+.. c:var:: bool h_apply_buffer_allocated
 
 
     File : :file:`determinants/h_apply.irp.f`
@@ -741,7 +760,7 @@ Providers
 
 
  
-.. c:var:: h_apply_buffer_lock
+.. c:var:: int h_apply_buffer_lock
 
 
     File : :file:`determinants/h_apply.irp.f`
@@ -767,7 +786,7 @@ Providers
 
 
  
-.. c:var:: h_matrix_all_dets
+.. c:var:: double h_matrix_all_dets
 
 
     File : :file:`determinants/utils.irp.f`
@@ -784,10 +803,9 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det`
        * :c:data:`n_int`
        * :c:data:`psi_det`
@@ -801,7 +819,7 @@ Providers
        * :c:data:`psi_energy`
 
  
-.. c:var:: h_matrix_cas
+.. c:var:: double h_matrix_cas
 
 
     File : :file:`determinants/psi_cas.irp.f`
@@ -817,10 +835,9 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_int`
        * :c:data:`psi_cas`
 
@@ -833,7 +850,7 @@ Providers
        * :c:data:`psi_coef_cas_diagonalized`
 
  
-.. c:var:: h_matrix_diag_all_dets
+.. c:var:: double h_matrix_diag_all_dets
 
 
     File : :file:`determinants/utils.irp.f`
@@ -850,17 +867,16 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det`
        * :c:data:`n_int`
        * :c:data:`psi_det`
 
 
  
-.. c:var:: idx_cas
+.. c:var:: int idx_cas
 
 
     File : :file:`determinants/psi_cas.irp.f`
@@ -904,7 +920,7 @@ Providers
        * :c:data:`psi_non_cas_sorted_bit`
 
  
-.. c:var:: idx_non_cas
+.. c:var:: int idx_non_cas
 
 
     File : :file:`determinants/psi_cas.irp.f`
@@ -942,7 +958,7 @@ Providers
        * :c:data:`psi_non_cas_sorted_bit`
 
  
-.. c:var:: list_attachment
+.. c:var:: int list_attachment
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -974,7 +990,7 @@ Providers
        * :c:data:`attachment_orbitals`
 
  
-.. c:var:: list_dettachment
+.. c:var:: int list_dettachment
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -1006,7 +1022,7 @@ Providers
        * :c:data:`attachment_orbitals`
 
  
-.. c:var:: max_degree_exc
+.. c:var:: int max_degree_exc
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -1031,7 +1047,7 @@ Providers
 
 
  
-.. c:var:: n_attachment
+.. c:var:: int n_attachment
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -1063,7 +1079,7 @@ Providers
        * :c:data:`attachment_orbitals`
 
  
-.. c:var:: n_det
+.. c:var:: int n_det
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -1107,6 +1123,7 @@ Providers
        * :c:data:`dominant_det`
        * :c:data:`dressed_column_idx`
        * :c:data:`dressing_column_h`
+       * :c:data:`energy_by_projection`
        * :c:data:`gradvec_old`
        * :c:data:`h_apply_buffer_allocated`
        * :c:data:`h_matrix_all_dets`
@@ -1114,6 +1131,7 @@ Providers
        * :c:data:`hessmat_old`
        * :c:data:`max_degree_exc`
        * :c:data:`multi_s_dipole_moment`
+       * :c:data:`n_csf`
        * :c:data:`n_det_generators`
        * :c:data:`n_det_qp_edit`
        * :c:data:`n_det_selectors`
@@ -1159,7 +1177,7 @@ Providers
        * :c:data:`weight_configuration_average`
 
  
-.. c:var:: n_det_alpha_unique
+.. c:var:: int n_det_alpha_unique
 
 
     File : :file:`determinants/spindeterminants.irp.f_template_144`
@@ -1201,7 +1219,7 @@ Providers
        * :c:data:`singles_alpha_csc_map`
 
  
-.. c:var:: n_det_beta_unique
+.. c:var:: int n_det_beta_unique
 
 
     File : :file:`determinants/spindeterminants.irp.f_template_144`
@@ -1244,7 +1262,7 @@ Providers
        * :c:data:`singles_beta_csc_map`
 
  
-.. c:var:: n_det_cas
+.. c:var:: int n_det_cas
 
 
     File : :file:`determinants/psi_cas.irp.f`
@@ -1288,7 +1306,7 @@ Providers
        * :c:data:`psi_non_cas_sorted_bit`
 
  
-.. c:var:: n_det_non_cas
+.. c:var:: int n_det_non_cas
 
 
     File : :file:`determinants/psi_cas.irp.f`
@@ -1326,7 +1344,7 @@ Providers
        * :c:data:`psi_non_cas_sorted_bit`
 
  
-.. c:var:: n_det_qp_edit
+.. c:var:: int n_det_qp_edit
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -1347,7 +1365,7 @@ Providers
 
 
  
-.. c:var:: n_dettachment
+.. c:var:: int n_dettachment
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -1379,7 +1397,7 @@ Providers
        * :c:data:`attachment_orbitals`
 
  
-.. c:var:: n_double_exc_bitmasks
+.. c:var:: int n_double_exc_bitmasks
 
 
     File : :file:`determinants/determinants_bitmasks.irp.f`
@@ -1399,7 +1417,7 @@ Providers
        * :c:data:`double_exc_bitmask`
 
  
-.. c:var:: n_single_exc_bitmasks
+.. c:var:: int n_single_exc_bitmasks
 
 
     File : :file:`determinants/determinants_bitmasks.irp.f`
@@ -1419,7 +1437,7 @@ Providers
        * :c:data:`single_exc_bitmask`
 
  
-.. c:var:: one_e_dm_ao
+.. c:var:: double one_e_dm_ao
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -1441,7 +1459,7 @@ Providers
 
 
  
-.. c:var:: one_e_dm_ao_alpha
+.. c:var:: double one_e_dm_ao_alpha
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -1472,7 +1490,7 @@ Providers
        * :c:data:`one_e_dm_ao`
 
  
-.. c:var:: one_e_dm_ao_alpha_nstates
+.. c:var:: double one_e_dm_ao_alpha_nstates
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -1498,7 +1516,7 @@ Providers
 
 
  
-.. c:var:: one_e_dm_ao_beta
+.. c:var:: double one_e_dm_ao_beta
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -1529,7 +1547,7 @@ Providers
        * :c:data:`one_e_dm_ao`
 
  
-.. c:var:: one_e_dm_ao_beta_nstates
+.. c:var:: double one_e_dm_ao_beta_nstates
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -1555,7 +1573,7 @@ Providers
 
 
  
-.. c:var:: one_e_dm_dagger_mo_spin_index
+.. c:var:: double one_e_dm_dagger_mo_spin_index
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -1577,7 +1595,7 @@ Providers
 
 
  
-.. c:var:: one_e_dm_mo
+.. c:var:: double one_e_dm_mo
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -1599,7 +1617,7 @@ Providers
 
 
  
-.. c:var:: one_e_dm_mo_alpha
+.. c:var:: double one_e_dm_mo_alpha
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -1651,7 +1669,7 @@ Providers
        * :c:data:`z_dipole_moment`
 
  
-.. c:var:: one_e_dm_mo_alpha_average
+.. c:var:: double one_e_dm_mo_alpha_average
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -1692,7 +1710,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
 
  
-.. c:var:: one_e_dm_mo_beta
+.. c:var:: double one_e_dm_mo_beta
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -1744,7 +1762,7 @@ Providers
        * :c:data:`z_dipole_moment`
 
  
-.. c:var:: one_e_dm_mo_beta_average
+.. c:var:: double one_e_dm_mo_beta_average
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -1785,7 +1803,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
 
  
-.. c:var:: one_e_dm_mo_diff
+.. c:var:: double one_e_dm_mo_diff
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -1808,7 +1826,7 @@ Providers
 
 
  
-.. c:var:: one_e_dm_mo_spin_index
+.. c:var:: double one_e_dm_mo_spin_index
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -1830,7 +1848,7 @@ Providers
 
 
  
-.. c:var:: one_e_spin_density_ao
+.. c:var:: double one_e_spin_density_ao
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -1854,7 +1872,7 @@ Providers
 
 
  
-.. c:var:: one_e_spin_density_mo
+.. c:var:: double one_e_spin_density_mo
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -1882,7 +1900,7 @@ Providers
        * :c:data:`one_e_spin_density_ao`
 
  
-.. c:var:: one_e_tr_dm_mo
+.. c:var:: double one_e_tr_dm_mo
 
 
     File : :file:`determinants/tr_density_matrix.irp.f`
@@ -1909,6 +1927,7 @@ Providers
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_beta_unique`
+       * :c:data:`qp_max_mem`
 
     Needed by:
 
@@ -1919,7 +1938,7 @@ Providers
        * :c:data:`multi_s_dipole_moment`
 
  
-.. c:var:: one_e_tr_dm_mo_alpha
+.. c:var:: double one_e_tr_dm_mo_alpha
 
 
     File : :file:`determinants/tr_density_matrix.irp.f`
@@ -1950,7 +1969,7 @@ Providers
 
 
  
-.. c:var:: one_e_tr_dm_mo_beta
+.. c:var:: double one_e_tr_dm_mo_beta
 
 
     File : :file:`determinants/tr_density_matrix.irp.f`
@@ -1981,7 +2000,7 @@ Providers
 
 
  
-.. c:var:: pruned
+.. c:var:: bool pruned
 
 
     File : :file:`determinants/prune_wf.irp.f`
@@ -2005,7 +2024,7 @@ Providers
 
 
  
-.. c:var:: psi_average_norm_contrib
+.. c:var:: double psi_average_norm_contrib
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -2037,7 +2056,7 @@ Providers
        * :c:data:`psi_det_sorted`
 
  
-.. c:var:: psi_average_norm_contrib_sorted
+.. c:var:: double psi_average_norm_contrib_sorted
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -2079,7 +2098,7 @@ Providers
        * :c:data:`psi_selectors`
 
  
-.. c:var:: psi_bilinear_matrix
+.. c:var:: double psi_bilinear_matrix
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -2106,7 +2125,7 @@ Providers
 
 
  
-.. c:var:: psi_bilinear_matrix_columns
+.. c:var:: int psi_bilinear_matrix_columns
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -2164,7 +2183,7 @@ Providers
        * :c:data:`state_av_act_2_rdm_bb_mo`
 
  
-.. c:var:: psi_bilinear_matrix_columns_loc
+.. c:var:: int psi_bilinear_matrix_columns_loc
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -2193,7 +2212,7 @@ Providers
 
 
  
-.. c:var:: psi_bilinear_matrix_order
+.. c:var:: int psi_bilinear_matrix_order
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -2251,7 +2270,7 @@ Providers
        * :c:data:`state_av_act_2_rdm_bb_mo`
 
  
-.. c:var:: psi_bilinear_matrix_order_reverse
+.. c:var:: int psi_bilinear_matrix_order_reverse
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -2286,7 +2305,7 @@ Providers
        * :c:data:`state_av_act_2_rdm_bb_mo`
 
  
-.. c:var:: psi_bilinear_matrix_order_transp_reverse
+.. c:var:: int psi_bilinear_matrix_order_transp_reverse
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -2309,7 +2328,7 @@ Providers
 
 
  
-.. c:var:: psi_bilinear_matrix_rows
+.. c:var:: int psi_bilinear_matrix_rows
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -2367,7 +2386,7 @@ Providers
        * :c:data:`state_av_act_2_rdm_bb_mo`
 
  
-.. c:var:: psi_bilinear_matrix_transp_columns
+.. c:var:: int psi_bilinear_matrix_transp_columns
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -2411,7 +2430,7 @@ Providers
        * :c:data:`psi_bilinear_matrix_transp_rows_loc`
 
  
-.. c:var:: psi_bilinear_matrix_transp_order
+.. c:var:: int psi_bilinear_matrix_transp_order
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -2455,7 +2474,7 @@ Providers
        * :c:data:`psi_bilinear_matrix_transp_rows_loc`
 
  
-.. c:var:: psi_bilinear_matrix_transp_rows
+.. c:var:: int psi_bilinear_matrix_transp_rows
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -2499,7 +2518,7 @@ Providers
        * :c:data:`psi_bilinear_matrix_transp_rows_loc`
 
  
-.. c:var:: psi_bilinear_matrix_transp_rows_loc
+.. c:var:: int psi_bilinear_matrix_transp_rows_loc
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -2522,7 +2541,7 @@ Providers
 
 
  
-.. c:var:: psi_bilinear_matrix_transp_values
+.. c:var:: double psi_bilinear_matrix_transp_values
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -2566,7 +2585,7 @@ Providers
        * :c:data:`psi_bilinear_matrix_transp_rows_loc`
 
  
-.. c:var:: psi_bilinear_matrix_values
+.. c:var:: double psi_bilinear_matrix_values
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -2624,7 +2643,7 @@ Providers
        * :c:data:`state_av_act_2_rdm_bb_mo`
 
  
-.. c:var:: psi_cas
+.. c:var:: int psi_cas
 
 
     File : :file:`determinants/psi_cas.irp.f`
@@ -2668,7 +2687,7 @@ Providers
        * :c:data:`psi_non_cas_sorted_bit`
 
  
-.. c:var:: psi_cas_coef
+.. c:var:: double psi_cas_coef
 
 
     File : :file:`determinants/psi_cas.irp.f`
@@ -2712,7 +2731,7 @@ Providers
        * :c:data:`psi_non_cas_sorted_bit`
 
  
-.. c:var:: psi_cas_coef_sorted_bit
+.. c:var:: double psi_cas_coef_sorted_bit
 
 
     File : :file:`determinants/psi_cas.irp.f`
@@ -2738,7 +2757,7 @@ Providers
 
 
  
-.. c:var:: psi_cas_energy
+.. c:var:: double psi_cas_energy
 
 
     File : :file:`determinants/psi_cas.irp.f`
@@ -2761,7 +2780,7 @@ Providers
 
 
  
-.. c:var:: psi_cas_energy_diagonalized
+.. c:var:: double psi_cas_energy_diagonalized
 
 
     File : :file:`determinants/psi_cas.irp.f`
@@ -2784,7 +2803,7 @@ Providers
 
 
  
-.. c:var:: psi_cas_sorted_bit
+.. c:var:: int psi_cas_sorted_bit
 
 
     File : :file:`determinants/psi_cas.irp.f`
@@ -2810,7 +2829,7 @@ Providers
 
 
  
-.. c:var:: psi_coef
+.. c:var:: double psi_coef
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -2850,9 +2869,9 @@ Providers
        * :c:data:`barycentric_electronic_energy`
        * :c:data:`c0_weight`
        * :c:data:`ci_electronic_energy`
-       * :c:data:`dettocsftransformationmatrix`
        * :c:data:`dominant_det`
        * :c:data:`dressed_column_idx`
+       * :c:data:`energy_by_projection`
        * :c:data:`gradvec_old`
        * :c:data:`hessmat_old`
        * :c:data:`overlap_states`
@@ -2877,7 +2896,7 @@ Providers
        * :c:data:`weight_configuration_average`
 
  
-.. c:var:: psi_coef_cas_diagonalized
+.. c:var:: double psi_coef_cas_diagonalized
 
 
     File : :file:`determinants/psi_cas.irp.f`
@@ -2900,7 +2919,7 @@ Providers
 
 
  
-.. c:var:: psi_coef_max
+.. c:var:: double psi_coef_max
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -2926,7 +2945,7 @@ Providers
 
 
  
-.. c:var:: psi_coef_min
+.. c:var:: double psi_coef_min
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -2952,7 +2971,7 @@ Providers
 
 
  
-.. c:var:: psi_coef_sorted
+.. c:var:: double psi_coef_sorted
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -2994,7 +3013,7 @@ Providers
        * :c:data:`psi_selectors`
 
  
-.. c:var:: psi_coef_sorted_bit
+.. c:var:: double psi_coef_sorted_bit
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -3003,6 +3022,7 @@ Providers
 
         integer(bit_kind), allocatable	:: psi_det_sorted_bit	(N_int,2,psi_det_size)
         double precision, allocatable	:: psi_coef_sorted_bit	(psi_det_size,N_states)
+        integer, allocatable	:: psi_coef_sorted_bit_order	(psi_det_size)
 
 
     Determinants on which we apply :math:`\langle i|H|psi \rangle`  for perturbation.
@@ -3031,7 +3051,45 @@ Providers
        * :c:data:`psi_bilinear_matrix_values`
 
  
-.. c:var:: psi_det
+.. c:var:: int psi_coef_sorted_bit_order
+
+
+    File : :file:`determinants/determinants.irp.f`
+
+    .. code:: fortran
+
+        integer(bit_kind), allocatable	:: psi_det_sorted_bit	(N_int,2,psi_det_size)
+        double precision, allocatable	:: psi_coef_sorted_bit	(psi_det_size,N_states)
+        integer, allocatable	:: psi_coef_sorted_bit_order	(psi_det_size)
+
+
+    Determinants on which we apply :math:`\langle i|H|psi \rangle`  for perturbation.
+    They are sorted by determinants interpreted as integers. Useful
+    to accelerate the search of a random determinant in the wave
+    function.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_det`
+       * :c:data:`n_int`
+       * :c:data:`n_states`
+       * :c:data:`psi_coef`
+       * :c:data:`psi_det`
+       * :c:data:`psi_det_size`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_values`
+
+ 
+.. c:var:: int psi_det
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -3066,13 +3124,14 @@ Providers
 
        * :c:data:`ci_electronic_energy`
        * :c:data:`det_to_configuration`
-       * :c:data:`dettocsftransformationmatrix`
        * :c:data:`diagonal_h_matrix_on_psi_det`
+       * :c:data:`energy_by_projection`
        * :c:data:`gradvec_old`
        * :c:data:`h_matrix_all_dets`
        * :c:data:`h_matrix_diag_all_dets`
        * :c:data:`hessmat_old`
        * :c:data:`max_degree_exc`
+       * :c:data:`n_csf`
        * :c:data:`n_elec_alpha_for_psi_configuration`
        * :c:data:`one_e_dm_mo_alpha`
        * :c:data:`p0tuvx_peter`
@@ -3081,7 +3140,6 @@ Providers
        * :c:data:`psi_coef`
        * :c:data:`psi_configuration`
        * :c:data:`psi_configuration_to_psi_det`
-       * :c:data:`psi_csf_coef`
        * :c:data:`psi_det_alpha`
        * :c:data:`psi_det_beta`
        * :c:data:`psi_det_hii`
@@ -3095,7 +3153,7 @@ Providers
        * :c:data:`s2_values`
 
  
-.. c:var:: psi_det_alpha
+.. c:var:: int psi_det_alpha
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -3125,7 +3183,7 @@ Providers
        * :c:data:`psi_det_alpha_unique`
 
  
-.. c:var:: psi_det_alpha_unique
+.. c:var:: int psi_det_alpha_unique
 
 
     File : :file:`determinants/spindeterminants.irp.f_template_144`
@@ -3167,7 +3225,7 @@ Providers
        * :c:data:`singles_alpha_csc_map`
 
  
-.. c:var:: psi_det_beta
+.. c:var:: int psi_det_beta
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -3197,7 +3255,7 @@ Providers
        * :c:data:`psi_det_beta_unique`
 
  
-.. c:var:: psi_det_beta_unique
+.. c:var:: int psi_det_beta_unique
 
 
     File : :file:`determinants/spindeterminants.irp.f_template_144`
@@ -3240,7 +3298,7 @@ Providers
        * :c:data:`singles_beta_csc_map`
 
  
-.. c:var:: psi_det_hii
+.. c:var:: double psi_det_hii
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -3273,7 +3331,7 @@ Providers
        * :c:data:`pt2_e0_denominator`
 
  
-.. c:var:: psi_det_size
+.. c:var:: int psi_det_size
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -3320,7 +3378,7 @@ Providers
        * :c:data:`s2_values`
 
  
-.. c:var:: psi_det_sorted
+.. c:var:: int psi_det_sorted
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -3362,7 +3420,7 @@ Providers
        * :c:data:`psi_selectors`
 
  
-.. c:var:: psi_det_sorted_bit
+.. c:var:: int psi_det_sorted_bit
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -3371,6 +3429,7 @@ Providers
 
         integer(bit_kind), allocatable	:: psi_det_sorted_bit	(N_int,2,psi_det_size)
         double precision, allocatable	:: psi_coef_sorted_bit	(psi_det_size,N_states)
+        integer, allocatable	:: psi_coef_sorted_bit_order	(psi_det_size)
 
 
     Determinants on which we apply :math:`\langle i|H|psi \rangle`  for perturbation.
@@ -3399,7 +3458,7 @@ Providers
        * :c:data:`psi_bilinear_matrix_values`
 
  
-.. c:var:: psi_det_sorted_order
+.. c:var:: int psi_det_sorted_order
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -3441,7 +3500,7 @@ Providers
        * :c:data:`psi_selectors`
 
  
-.. c:var:: psi_energy_h_core
+.. c:var:: double psi_energy_h_core
 
 
     File : :file:`determinants/psi_energy_mono_elec.irp.f`
@@ -3470,7 +3529,7 @@ Providers
 
 
  
-.. c:var:: psi_non_cas
+.. c:var:: int psi_non_cas
 
 
     File : :file:`determinants/psi_cas.irp.f`
@@ -3508,7 +3567,7 @@ Providers
        * :c:data:`psi_non_cas_sorted_bit`
 
  
-.. c:var:: psi_non_cas_coef
+.. c:var:: double psi_non_cas_coef
 
 
     File : :file:`determinants/psi_cas.irp.f`
@@ -3546,7 +3605,7 @@ Providers
        * :c:data:`psi_non_cas_sorted_bit`
 
  
-.. c:var:: psi_non_cas_coef_sorted_bit
+.. c:var:: double psi_non_cas_coef_sorted_bit
 
 
     File : :file:`determinants/psi_cas.irp.f`
@@ -3573,7 +3632,7 @@ Providers
 
 
  
-.. c:var:: psi_non_cas_sorted_bit
+.. c:var:: int psi_non_cas_sorted_bit
 
 
     File : :file:`determinants/psi_cas.irp.f`
@@ -3600,7 +3659,7 @@ Providers
 
 
  
-.. c:var:: ref_bitmask_energy
+.. c:var:: double ref_bitmask_energy
 
 
     File : :file:`determinants/ref_bitmask.irp.f`
@@ -3608,10 +3667,36 @@ Providers
     .. code:: fortran
 
         double precision	:: ref_bitmask_energy	
-        double precision	:: ref_bitmask_one_e_energy	
-        double precision	:: ref_bitmask_kinetic_energy	
-        double precision	:: ref_bitmask_n_e_energy	
-        double precision	:: ref_bitmask_two_e_energy	
+
+
+    Energy of the reference bitmask used in Slater rules
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ref_bitmask_one_e_energy`
+       * :c:data:`ref_bitmask_two_e_energy`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`coef_hf_selector`
+       * :c:data:`diagonal_h_matrix_on_psi_det`
+       * :c:data:`psi_det_hii`
+       * :c:data:`psi_selectors_diag_h_mat`
+
+ 
+.. c:var:: double ref_bitmask_energy_aa
+
+
+    File : :file:`determinants/ref_bitmask.irp.f`
+
+    .. code:: fortran
+
         double precision	:: ref_bitmask_energy_ab	
         double precision	:: ref_bitmask_energy_bb	
         double precision	:: ref_bitmask_energy_aa	
@@ -3626,37 +3711,19 @@ Providers
 
        * :c:data:`elec_alpha_num`
        * :c:data:`elec_beta_num`
-       * :c:data:`mo_integrals_n_e`
-       * :c:data:`mo_kinetic_integrals`
-       * :c:data:`mo_one_e_integrals`
        * :c:data:`mo_two_e_integrals_jj`
        * :c:data:`n_int`
        * :c:data:`ref_bitmask`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`coef_hf_selector`
-       * :c:data:`diagonal_h_matrix_on_psi_det`
-       * :c:data:`psi_det_hii`
-       * :c:data:`psi_energy_two_e_trans`
-       * :c:data:`psi_selectors_diag_h_mat`
 
  
-.. c:var:: ref_bitmask_energy_aa
+.. c:var:: double ref_bitmask_energy_ab
 
 
     File : :file:`determinants/ref_bitmask.irp.f`
 
     .. code:: fortran
 
-        double precision	:: ref_bitmask_energy	
-        double precision	:: ref_bitmask_one_e_energy	
-        double precision	:: ref_bitmask_kinetic_energy	
-        double precision	:: ref_bitmask_n_e_energy	
-        double precision	:: ref_bitmask_two_e_energy	
         double precision	:: ref_bitmask_energy_ab	
         double precision	:: ref_bitmask_energy_bb	
         double precision	:: ref_bitmask_energy_aa	
@@ -3671,37 +3738,19 @@ Providers
 
        * :c:data:`elec_alpha_num`
        * :c:data:`elec_beta_num`
-       * :c:data:`mo_integrals_n_e`
-       * :c:data:`mo_kinetic_integrals`
-       * :c:data:`mo_one_e_integrals`
        * :c:data:`mo_two_e_integrals_jj`
        * :c:data:`n_int`
        * :c:data:`ref_bitmask`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`coef_hf_selector`
-       * :c:data:`diagonal_h_matrix_on_psi_det`
-       * :c:data:`psi_det_hii`
-       * :c:data:`psi_energy_two_e_trans`
-       * :c:data:`psi_selectors_diag_h_mat`
 
  
-.. c:var:: ref_bitmask_energy_ab
+.. c:var:: double ref_bitmask_energy_bb
 
 
     File : :file:`determinants/ref_bitmask.irp.f`
 
     .. code:: fortran
 
-        double precision	:: ref_bitmask_energy	
-        double precision	:: ref_bitmask_one_e_energy	
-        double precision	:: ref_bitmask_kinetic_energy	
-        double precision	:: ref_bitmask_n_e_energy	
-        double precision	:: ref_bitmask_two_e_energy	
         double precision	:: ref_bitmask_energy_ab	
         double precision	:: ref_bitmask_energy_bb	
         double precision	:: ref_bitmask_energy_aa	
@@ -3716,10 +3765,82 @@ Providers
 
        * :c:data:`elec_alpha_num`
        * :c:data:`elec_beta_num`
-       * :c:data:`mo_integrals_n_e`
-       * :c:data:`mo_kinetic_integrals`
-       * :c:data:`mo_one_e_integrals`
        * :c:data:`mo_two_e_integrals_jj`
+       * :c:data:`n_int`
+       * :c:data:`ref_bitmask`
+
+
+ 
+.. c:var:: double ref_bitmask_kinetic_energy
+
+
+    File : :file:`determinants/ref_bitmask.irp.f`
+
+    .. code:: fortran
+
+        double precision	:: ref_bitmask_kinetic_energy	
+
+
+    Kinetic energy of the reference bitmask used in Slater rules
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`elec_alpha_num`
+       * :c:data:`elec_beta_num`
+       * :c:data:`mo_kinetic_integrals`
+       * :c:data:`n_int`
+       * :c:data:`ref_bitmask`
+
+
+ 
+.. c:var:: double ref_bitmask_n_e_energy
+
+
+    File : :file:`determinants/ref_bitmask.irp.f`
+
+    .. code:: fortran
+
+        double precision	:: ref_bitmask_n_e_energy	
+
+
+    Nucleus-electron energy of the reference bitmask used in Slater rules
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`elec_alpha_num`
+       * :c:data:`elec_beta_num`
+       * :c:data:`mo_integrals_n_e`
+       * :c:data:`n_int`
+       * :c:data:`ref_bitmask`
+
+
+ 
+.. c:var:: double ref_bitmask_one_e_energy
+
+
+    File : :file:`determinants/ref_bitmask.irp.f`
+
+    .. code:: fortran
+
+        double precision	:: ref_bitmask_one_e_energy	
+
+
+    One-electron energy of the reference bitmask used in Slater rules
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`elec_alpha_num`
+       * :c:data:`elec_beta_num`
+       * :c:data:`mo_one_e_integrals`
        * :c:data:`n_int`
        * :c:data:`ref_bitmask`
 
@@ -3728,28 +3849,17 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`coef_hf_selector`
-       * :c:data:`diagonal_h_matrix_on_psi_det`
-       * :c:data:`psi_det_hii`
-       * :c:data:`psi_energy_two_e_trans`
-       * :c:data:`psi_selectors_diag_h_mat`
+       * :c:data:`ref_bitmask_energy`
 
  
-.. c:var:: ref_bitmask_energy_bb
+.. c:var:: double ref_bitmask_two_e_energy
 
 
     File : :file:`determinants/ref_bitmask.irp.f`
 
     .. code:: fortran
 
-        double precision	:: ref_bitmask_energy	
-        double precision	:: ref_bitmask_one_e_energy	
-        double precision	:: ref_bitmask_kinetic_energy	
-        double precision	:: ref_bitmask_n_e_energy	
         double precision	:: ref_bitmask_two_e_energy	
-        double precision	:: ref_bitmask_energy_ab	
-        double precision	:: ref_bitmask_energy_bb	
-        double precision	:: ref_bitmask_energy_aa	
 
 
     Energy of the reference bitmask used in Slater rules
@@ -3761,9 +3871,6 @@ Providers
 
        * :c:data:`elec_alpha_num`
        * :c:data:`elec_beta_num`
-       * :c:data:`mo_integrals_n_e`
-       * :c:data:`mo_kinetic_integrals`
-       * :c:data:`mo_one_e_integrals`
        * :c:data:`mo_two_e_integrals_jj`
        * :c:data:`n_int`
        * :c:data:`ref_bitmask`
@@ -3773,194 +3880,11 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`coef_hf_selector`
-       * :c:data:`diagonal_h_matrix_on_psi_det`
-       * :c:data:`psi_det_hii`
        * :c:data:`psi_energy_two_e_trans`
-       * :c:data:`psi_selectors_diag_h_mat`
+       * :c:data:`ref_bitmask_energy`
 
  
-.. c:var:: ref_bitmask_kinetic_energy
-
-
-    File : :file:`determinants/ref_bitmask.irp.f`
-
-    .. code:: fortran
-
-        double precision	:: ref_bitmask_energy	
-        double precision	:: ref_bitmask_one_e_energy	
-        double precision	:: ref_bitmask_kinetic_energy	
-        double precision	:: ref_bitmask_n_e_energy	
-        double precision	:: ref_bitmask_two_e_energy	
-        double precision	:: ref_bitmask_energy_ab	
-        double precision	:: ref_bitmask_energy_bb	
-        double precision	:: ref_bitmask_energy_aa	
-
-
-    Energy of the reference bitmask used in Slater rules
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
-       * :c:data:`mo_integrals_n_e`
-       * :c:data:`mo_kinetic_integrals`
-       * :c:data:`mo_one_e_integrals`
-       * :c:data:`mo_two_e_integrals_jj`
-       * :c:data:`n_int`
-       * :c:data:`ref_bitmask`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`coef_hf_selector`
-       * :c:data:`diagonal_h_matrix_on_psi_det`
-       * :c:data:`psi_det_hii`
-       * :c:data:`psi_energy_two_e_trans`
-       * :c:data:`psi_selectors_diag_h_mat`
-
- 
-.. c:var:: ref_bitmask_n_e_energy
-
-
-    File : :file:`determinants/ref_bitmask.irp.f`
-
-    .. code:: fortran
-
-        double precision	:: ref_bitmask_energy	
-        double precision	:: ref_bitmask_one_e_energy	
-        double precision	:: ref_bitmask_kinetic_energy	
-        double precision	:: ref_bitmask_n_e_energy	
-        double precision	:: ref_bitmask_two_e_energy	
-        double precision	:: ref_bitmask_energy_ab	
-        double precision	:: ref_bitmask_energy_bb	
-        double precision	:: ref_bitmask_energy_aa	
-
-
-    Energy of the reference bitmask used in Slater rules
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
-       * :c:data:`mo_integrals_n_e`
-       * :c:data:`mo_kinetic_integrals`
-       * :c:data:`mo_one_e_integrals`
-       * :c:data:`mo_two_e_integrals_jj`
-       * :c:data:`n_int`
-       * :c:data:`ref_bitmask`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`coef_hf_selector`
-       * :c:data:`diagonal_h_matrix_on_psi_det`
-       * :c:data:`psi_det_hii`
-       * :c:data:`psi_energy_two_e_trans`
-       * :c:data:`psi_selectors_diag_h_mat`
-
- 
-.. c:var:: ref_bitmask_one_e_energy
-
-
-    File : :file:`determinants/ref_bitmask.irp.f`
-
-    .. code:: fortran
-
-        double precision	:: ref_bitmask_energy	
-        double precision	:: ref_bitmask_one_e_energy	
-        double precision	:: ref_bitmask_kinetic_energy	
-        double precision	:: ref_bitmask_n_e_energy	
-        double precision	:: ref_bitmask_two_e_energy	
-        double precision	:: ref_bitmask_energy_ab	
-        double precision	:: ref_bitmask_energy_bb	
-        double precision	:: ref_bitmask_energy_aa	
-
-
-    Energy of the reference bitmask used in Slater rules
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
-       * :c:data:`mo_integrals_n_e`
-       * :c:data:`mo_kinetic_integrals`
-       * :c:data:`mo_one_e_integrals`
-       * :c:data:`mo_two_e_integrals_jj`
-       * :c:data:`n_int`
-       * :c:data:`ref_bitmask`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`coef_hf_selector`
-       * :c:data:`diagonal_h_matrix_on_psi_det`
-       * :c:data:`psi_det_hii`
-       * :c:data:`psi_energy_two_e_trans`
-       * :c:data:`psi_selectors_diag_h_mat`
-
- 
-.. c:var:: ref_bitmask_two_e_energy
-
-
-    File : :file:`determinants/ref_bitmask.irp.f`
-
-    .. code:: fortran
-
-        double precision	:: ref_bitmask_energy	
-        double precision	:: ref_bitmask_one_e_energy	
-        double precision	:: ref_bitmask_kinetic_energy	
-        double precision	:: ref_bitmask_n_e_energy	
-        double precision	:: ref_bitmask_two_e_energy	
-        double precision	:: ref_bitmask_energy_ab	
-        double precision	:: ref_bitmask_energy_bb	
-        double precision	:: ref_bitmask_energy_aa	
-
-
-    Energy of the reference bitmask used in Slater rules
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`elec_alpha_num`
-       * :c:data:`elec_beta_num`
-       * :c:data:`mo_integrals_n_e`
-       * :c:data:`mo_kinetic_integrals`
-       * :c:data:`mo_one_e_integrals`
-       * :c:data:`mo_two_e_integrals_jj`
-       * :c:data:`n_int`
-       * :c:data:`ref_bitmask`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`coef_hf_selector`
-       * :c:data:`diagonal_h_matrix_on_psi_det`
-       * :c:data:`psi_det_hii`
-       * :c:data:`psi_energy_two_e_trans`
-       * :c:data:`psi_selectors_diag_h_mat`
-
- 
-.. c:var:: ref_closed_shell_bitmask
+.. c:var:: int ref_closed_shell_bitmask
 
 
     File : :file:`determinants/single_excitations.irp.f`
@@ -3990,7 +3914,7 @@ Providers
        * :c:data:`fock_wee_closed_shell`
 
  
-.. c:var:: s2_matrix_all_dets
+.. c:var:: double s2_matrix_all_dets
 
 
     File : :file:`determinants/utils.irp.f`
@@ -4020,7 +3944,7 @@ Providers
        * :c:data:`psi_energy`
 
  
-.. c:var:: s2_values
+.. c:var:: double s2_values
 
 
     File : :file:`determinants/s2.irp.f`
@@ -4047,7 +3971,7 @@ Providers
 
 
  
-.. c:var:: s_values
+.. c:var:: double s_values
 
 
     File : :file:`determinants/s2.irp.f`
@@ -4074,7 +3998,7 @@ Providers
 
 
  
-.. c:var:: s_z
+.. c:var:: double s_z
 
 
     File : :file:`determinants/s2.irp.f`
@@ -4097,7 +4021,7 @@ Providers
 
 
  
-.. c:var:: s_z2_sz
+.. c:var:: double s_z2_sz
 
 
     File : :file:`determinants/s2.irp.f`
@@ -4120,7 +4044,7 @@ Providers
 
 
  
-.. c:var:: single_exc_bitmask
+.. c:var:: int single_exc_bitmask
 
 
     File : :file:`determinants/determinants_bitmasks.irp.f`
@@ -4147,7 +4071,7 @@ Providers
 
 
  
-.. c:var:: singles_alpha_csc
+.. c:var:: int singles_alpha_csc
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -4170,7 +4094,7 @@ Providers
 
 
  
-.. c:var:: singles_alpha_csc_idx
+.. c:var:: long singles_alpha_csc_idx
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -4202,7 +4126,7 @@ Providers
        * :c:data:`singles_alpha_csc_map`
 
  
-.. c:var:: singles_alpha_csc_map
+.. c:var:: int singles_alpha_csc_map
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -4225,7 +4149,7 @@ Providers
 
 
  
-.. c:var:: singles_alpha_csc_size
+.. c:var:: long singles_alpha_csc_size
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -4257,7 +4181,7 @@ Providers
        * :c:data:`singles_alpha_csc_map`
 
  
-.. c:var:: singles_beta_csc
+.. c:var:: int singles_beta_csc
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -4280,7 +4204,7 @@ Providers
 
 
  
-.. c:var:: singles_beta_csc_idx
+.. c:var:: long singles_beta_csc_idx
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -4312,7 +4236,7 @@ Providers
        * :c:data:`singles_beta_csc_map`
 
  
-.. c:var:: singles_beta_csc_map
+.. c:var:: int singles_beta_csc_map
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -4335,7 +4259,7 @@ Providers
 
 
  
-.. c:var:: singles_beta_csc_size
+.. c:var:: long singles_beta_csc_size
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -4367,7 +4291,7 @@ Providers
        * :c:data:`singles_beta_csc_map`
 
  
-.. c:var:: state_average_weight
+.. c:var:: double state_average_weight
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -4406,7 +4330,7 @@ Providers
        * :c:data:`weight_configuration_average`
 
  
-.. c:var:: v_ne_psi_energy
+.. c:var:: double v_ne_psi_energy
 
 
     File : :file:`determinants/psi_energy_mono_elec.irp.f`
@@ -4435,7 +4359,7 @@ Providers
 
 
  
-.. c:var:: x_dipole_moment
+.. c:var:: double x_dipole_moment
 
 
     File : :file:`determinants/dipole_moments.irp.f`
@@ -4464,7 +4388,7 @@ Providers
 
 
  
-.. c:var:: y_dipole_moment
+.. c:var:: double y_dipole_moment
 
 
     File : :file:`determinants/dipole_moments.irp.f`
@@ -4493,7 +4417,7 @@ Providers
 
 
  
-.. c:var:: z_dipole_moment
+.. c:var:: double z_dipole_moment
 
 
     File : :file:`determinants/dipole_moments.irp.f`
@@ -4526,7 +4450,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: a_operator:
+.. c:function:: void a_operator(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -4561,7 +4485,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list_ab`
 
  
-.. c:function:: a_operator_two_e:
+.. c:function:: void a_operator_two_e(void)
 
 
     File : :file:`determinants/slater_rules_wee_mono.irp.f`
@@ -4595,7 +4519,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list_ab`
 
  
-.. c:function:: ac_operator:
+.. c:function:: void ac_operator(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -4631,7 +4555,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list_ab`
 
  
-.. c:function:: ac_operator_two_e:
+.. c:function:: void ac_operator_two_e(void)
 
 
     File : :file:`determinants/slater_rules_wee_mono.irp.f`
@@ -4665,7 +4589,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list_ab`
 
  
-.. c:function:: apply_excitation:
+.. c:function:: void apply_excitation(void)
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -4677,7 +4601,7 @@ Subroutines / functions
 
 
  
-.. c:function:: apply_hole:
+.. c:function:: void apply_hole(void)
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -4699,7 +4623,7 @@ Subroutines / functions
        * :c:func:`select_singles_and_doubles`
 
  
-.. c:function:: apply_holes:
+.. c:function:: void apply_holes(void)
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -4719,7 +4643,7 @@ Subroutines / functions
        * :c:func:`fill_buffer_single`
 
  
-.. c:function:: apply_particle:
+.. c:function:: void apply_particle(void)
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -4741,7 +4665,7 @@ Subroutines / functions
        * :c:func:`get_m1`
 
  
-.. c:function:: apply_particles:
+.. c:function:: void apply_particles(void)
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -4765,7 +4689,7 @@ Subroutines / functions
        * :c:func:`get_d1_reference`
 
  
-.. c:function:: bitstring_to_list_ab:
+.. c:function:: void bitstring_to_list_ab(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -4822,7 +4746,7 @@ Subroutines / functions
        * :c:func:`single_excitation_wee`
 
  
-.. c:function:: build_fock_tmp:
+.. c:function:: void build_fock_tmp(void)
 
 
     File : :file:`determinants/fock_diag.irp.f`
@@ -4863,7 +4787,7 @@ Subroutines / functions
        * :c:func:`debug_det`
 
  
-.. c:function:: build_singly_excited_wavefunction:
+.. c:function:: void build_singly_excited_wavefunction(void)
 
 
     File : :file:`determinants/create_excitations.irp.f`
@@ -4896,7 +4820,7 @@ Subroutines / functions
        * :c:func:`get_phase`
 
  
-.. c:function:: connected_to_hf:
+.. c:function:: void connected_to_hf(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -4927,7 +4851,7 @@ Subroutines / functions
        * :c:func:`i_h_j`
 
  
-.. c:function:: connected_to_ref:
+.. c:function:: void connected_to_ref(void)
 
 
     File : :file:`determinants/connected_to_ref.irp.f`
@@ -4952,7 +4876,7 @@ Subroutines / functions
               -i : key is the ith determinant of the reference wf keys
 
  
-.. c:function:: connected_to_ref_by_single:
+.. c:function:: void connected_to_ref_by_single(void)
 
 
     File : :file:`determinants/connected_to_ref.irp.f`
@@ -4978,7 +4902,7 @@ Subroutines / functions
               -i : key is the ith determinant of the reference wf keys
 
  
-.. c:function:: copy_h_apply_buffer_to_wf:
+.. c:function:: void copy_h_apply_buffer_to_wf(void)
 
 
     File : :file:`determinants/h_apply.irp.f`
@@ -5034,12 +4958,13 @@ Subroutines / functions
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
 
  
-.. c:function:: copy_psi_bilinear_to_psi:
+.. c:function:: void copy_psi_bilinear_to_psi(void)
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -5063,7 +4988,7 @@ Subroutines / functions
        * :c:data:`psi_det_beta_unique`
 
  
-.. c:function:: create_microlist:
+.. c:function:: void create_microlist(void)
 
 
     File : :file:`determinants/filter_connected.irp.f`
@@ -5101,7 +5026,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list`
 
  
-.. c:function:: create_minilist:
+.. c:function:: void create_minilist(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -5131,7 +5056,7 @@ Subroutines / functions
        * :c:func:`perturb_buffer_qdpt`
 
  
-.. c:function:: create_minilist_find_previous:
+.. c:function:: void create_minilist_find_previous(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -5161,7 +5086,7 @@ Subroutines / functions
        * :c:func:`perturb_buffer_qdpt`
 
  
-.. c:function:: create_wf_of_psi_bilinear_matrix:
+.. c:function:: void create_wf_of_psi_bilinear_matrix(void)
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -5193,6 +5118,7 @@ Subroutines / functions
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_det`
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_beta_unique`
@@ -5200,7 +5126,7 @@ Subroutines / functions
        * :c:data:`psi_det_sorted_bit`
 
  
-.. c:function:: decode_exc:
+.. c:function:: void decode_exc(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -5226,7 +5152,7 @@ Subroutines / functions
        * :c:func:`pt2_moller_plesset`
 
  
-.. c:function:: decode_exc_spin:
+.. c:function:: void decode_exc_spin(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -5253,7 +5179,7 @@ Subroutines / functions
        * :c:data:`one_e_tr_dm_mo_alpha`
 
  
-.. c:function:: det_inf:
+.. c:function:: void det_inf(void)
 
 
     File : :file:`determinants/sort_dets_ab.irp.f`
@@ -5266,7 +5192,7 @@ Subroutines / functions
     Ordering function for determinants.
 
  
-.. c:function:: det_search_key:
+.. c:function:: void det_search_key(void)
 
 
     File : :file:`determinants/connected_to_ref.irp.f`
@@ -5286,7 +5212,7 @@ Subroutines / functions
        * :c:data:`elec_alpha_num`
 
  
-.. c:function:: detcmp:
+.. c:function:: void detcmp(void)
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -5298,7 +5224,7 @@ Subroutines / functions
 
 
  
-.. c:function:: deteq:
+.. c:function:: void deteq(void)
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -5310,7 +5236,7 @@ Subroutines / functions
 
 
  
-.. c:function:: diag_h_mat_elem:
+.. c:function:: void diag_h_mat_elem(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -5341,7 +5267,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list_ab`
 
  
-.. c:function:: diag_h_mat_elem_fock:
+.. c:function:: void diag_h_mat_elem_fock(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -5373,7 +5299,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation`
 
  
-.. c:function:: diag_h_mat_elem_one_e:
+.. c:function:: void diag_h_mat_elem_one_e(void)
 
 
     File : :file:`determinants/slater_rules_wee_mono.irp.f`
@@ -5400,7 +5326,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list_ab`
 
  
-.. c:function:: diag_s_mat_elem:
+.. c:function:: void diag_s_mat_elem(void)
 
 
     File : :file:`determinants/s2.irp.f`
@@ -5413,7 +5339,7 @@ Subroutines / functions
     Returns <i|S^2|i>
 
  
-.. c:function:: diag_wee_mat_elem:
+.. c:function:: void diag_wee_mat_elem(void)
 
 
     File : :file:`determinants/slater_rules_wee_mono.irp.f`
@@ -5432,7 +5358,7 @@ Subroutines / functions
 
        * :c:data:`elec_num`
        * :c:data:`ref_bitmask`
-       * :c:data:`ref_bitmask_energy`
+       * :c:data:`ref_bitmask_two_e_energy`
 
     Calls:
 
@@ -5444,7 +5370,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list_ab`
 
  
-.. c:function:: do_single_excitation:
+.. c:function:: void do_single_excitation(void)
 
 
     File : :file:`determinants/create_excitations.irp.f`
@@ -5480,7 +5406,7 @@ Subroutines / functions
        * :c:func:`get_phase_general`
 
  
-.. c:function:: example_determinants:
+.. c:function:: void example_determinants(void)
 
 
     File : :file:`determinants/example.irp.f`
@@ -5516,7 +5442,7 @@ Subroutines / functions
        * :c:func:`print_det`
 
  
-.. c:function:: example_determinants_psi_det:
+.. c:function:: void example_determinants_psi_det(void)
 
 
     File : :file:`determinants/example.irp.f`
@@ -5550,7 +5476,7 @@ Subroutines / functions
        * :c:data:`read_wf`
 
  
-.. c:function:: fill_h_apply_buffer_no_selection:
+.. c:function:: void fill_h_apply_buffer_no_selection(void)
 
 
     File : :file:`determinants/h_apply.irp.f`
@@ -5592,7 +5518,7 @@ Subroutines / functions
        * :c:func:`resize_h_apply_buffer`
 
  
-.. c:function:: filter_connected:
+.. c:function:: void filter_connected(void)
 
 
     File : :file:`determinants/filter_connected.irp.f`
@@ -5620,7 +5546,7 @@ Subroutines / functions
        * :c:func:`get_uj_s2_ui`
 
  
-.. c:function:: filter_connected_i_h_psi0:
+.. c:function:: void filter_connected_i_h_psi0(void)
 
 
     File : :file:`determinants/filter_connected.irp.f`
@@ -5648,7 +5574,7 @@ Subroutines / functions
        * :c:func:`i_s2_psi_minilist`
 
  
-.. c:function:: filter_not_connected:
+.. c:function:: void filter_not_connected(void)
 
 
     File : :file:`determinants/filter_connected.irp.f`
@@ -5667,7 +5593,7 @@ Subroutines / functions
     idx(0) is the number of determinants that DO NOT interact with key1
 
  
-.. c:function:: generate_all_alpha_beta_det_products:
+.. c:function:: void generate_all_alpha_beta_det_products(void)
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -5721,6 +5647,7 @@ Subroutines / functions
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_det`
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_beta_unique`
@@ -5728,7 +5655,7 @@ Subroutines / functions
        * :c:data:`psi_det_sorted_bit`
 
  
-.. c:function:: generate_cas_space:
+.. c:function:: void generate_cas_space(void)
 
 
     File : :file:`determinants/generate_cas_space.irp.f`
@@ -5781,6 +5708,7 @@ Subroutines / functions
        * :c:data:`psi_det_beta_unique`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_det`
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_beta_unique`
@@ -5788,552 +5716,7 @@ Subroutines / functions
        * :c:data:`psi_det_sorted_bit`
 
  
-.. c:function:: get_all_spin_doubles:
-
-
-    File : :file:`determinants/spindeterminants.irp.f`
-
-    .. code:: fortran
-
-        subroutine get_all_spin_doubles(buffer, idx, spindet, Nint, size_buffer, doubles, n_doubles)
-
-
-    
-    Returns the indices of all the double excitations in the list of
-    unique $\alpha$ determinants.
-    
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_all_spin_doubles_1`
-       * :c:func:`get_all_spin_doubles_2`
-       * :c:func:`get_all_spin_doubles_3`
-       * :c:func:`get_all_spin_doubles_4`
-       * :c:func:`get_all_spin_doubles_n_int`
-
- 
-.. c:function:: get_all_spin_doubles_1:
-
-
-    File : :file:`determinants/spindeterminants.irp.f`
-
-    .. code:: fortran
-
-        subroutine get_all_spin_doubles_1(buffer, idx, spindet, size_buffer, doubles, n_doubles)
-
-
-    
-    Returns the indices of all the double excitations in the list of
-    unique $\alpha$ determinants.
-    
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_all_spin_doubles`
-
- 
-.. c:function:: get_all_spin_doubles_2:
-
-
-    File : :file:`determinants/spindeterminants.irp.f_template_1365`
-
-    .. code:: fortran
-
-        subroutine get_all_spin_doubles_2(buffer, idx, spindet, size_buffer, doubles, n_doubles)
-
-
-    
-    Returns the indices of all the double excitations in the list of
-    unique $lpha$ determinants.
-    
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_all_spin_doubles`
-
- 
-.. c:function:: get_all_spin_doubles_3:
-
-
-    File : :file:`determinants/spindeterminants.irp.f_template_1365`
-
-    .. code:: fortran
-
-        subroutine get_all_spin_doubles_3(buffer, idx, spindet, size_buffer, doubles, n_doubles)
-
-
-    
-    Returns the indices of all the double excitations in the list of
-    unique $lpha$ determinants.
-    
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_all_spin_doubles`
-
- 
-.. c:function:: get_all_spin_doubles_4:
-
-
-    File : :file:`determinants/spindeterminants.irp.f_template_1365`
-
-    .. code:: fortran
-
-        subroutine get_all_spin_doubles_4(buffer, idx, spindet, size_buffer, doubles, n_doubles)
-
-
-    
-    Returns the indices of all the double excitations in the list of
-    unique $lpha$ determinants.
-    
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_all_spin_doubles`
-
- 
-.. c:function:: get_all_spin_doubles_n_int:
-
-
-    File : :file:`determinants/spindeterminants.irp.f_template_1365`
-
-    .. code:: fortran
-
-        subroutine get_all_spin_doubles_N_int(buffer, idx, spindet, size_buffer, doubles, n_doubles)
-
-
-    
-    Returns the indices of all the double excitations in the list of
-    unique $lpha$ determinants.
-    
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_all_spin_doubles`
-
- 
-.. c:function:: get_all_spin_singles:
-
-
-    File : :file:`determinants/spindeterminants.irp.f`
-
-    .. code:: fortran
-
-        subroutine get_all_spin_singles(buffer, idx, spindet, Nint, size_buffer, singles, n_singles)
-
-
-    
-    Returns the indices of all the single excitations in the list of
-    unique $\alpha$ determinants.
-    
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`singles_alpha_csc`
-       * :c:data:`singles_alpha_csc_idx`
-       * :c:data:`singles_alpha_csc_map`
-       * :c:data:`singles_beta_csc`
-       * :c:data:`singles_beta_csc_idx`
-       * :c:data:`singles_beta_csc_map`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_all_spin_singles_1`
-       * :c:func:`get_all_spin_singles_2`
-       * :c:func:`get_all_spin_singles_3`
-       * :c:func:`get_all_spin_singles_4`
-       * :c:func:`get_all_spin_singles_n_int`
-
- 
-.. c:function:: get_all_spin_singles_1:
-
-
-    File : :file:`determinants/spindeterminants.irp.f`
-
-    .. code:: fortran
-
-        subroutine get_all_spin_singles_1(buffer, idx, spindet, size_buffer, singles, n_singles)
-
-
-    
-    Returns the indices of all the single excitations in the list of
-    unique $\alpha$ determinants.
-    
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_all_spin_singles`
-       * :c:func:`h_s2_u_0_nstates_openmp_work_1`
-       * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_1`
-       * :c:func:`h_u_0_nstates_openmp_work_1`
-       * :c:func:`orb_range_2_rdm_openmp_work_1`
-       * :c:func:`orb_range_2_rdm_state_av_openmp_work_1`
-       * :c:func:`orb_range_2_trans_rdm_openmp_work_1`
-
- 
-.. c:function:: get_all_spin_singles_2:
-
-
-    File : :file:`determinants/spindeterminants.irp.f_template_1365`
-
-    .. code:: fortran
-
-        subroutine get_all_spin_singles_2(buffer, idx, spindet, size_buffer, singles, n_singles)
-
-
-    
-    Returns the indices of all the single excitations in the list of
-    unique $lpha$ determinants.
-    
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_all_spin_singles`
-       * :c:func:`h_s2_u_0_nstates_openmp_work_2`
-       * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_2`
-       * :c:func:`h_u_0_nstates_openmp_work_2`
-       * :c:func:`orb_range_2_rdm_openmp_work_2`
-       * :c:func:`orb_range_2_rdm_state_av_openmp_work_2`
-       * :c:func:`orb_range_2_trans_rdm_openmp_work_2`
-
- 
-.. c:function:: get_all_spin_singles_3:
-
-
-    File : :file:`determinants/spindeterminants.irp.f_template_1365`
-
-    .. code:: fortran
-
-        subroutine get_all_spin_singles_3(buffer, idx, spindet, size_buffer, singles, n_singles)
-
-
-    
-    Returns the indices of all the single excitations in the list of
-    unique $lpha$ determinants.
-    
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_all_spin_singles`
-       * :c:func:`h_s2_u_0_nstates_openmp_work_3`
-       * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_3`
-       * :c:func:`h_u_0_nstates_openmp_work_3`
-       * :c:func:`orb_range_2_rdm_openmp_work_3`
-       * :c:func:`orb_range_2_rdm_state_av_openmp_work_3`
-       * :c:func:`orb_range_2_trans_rdm_openmp_work_3`
-
- 
-.. c:function:: get_all_spin_singles_4:
-
-
-    File : :file:`determinants/spindeterminants.irp.f_template_1365`
-
-    .. code:: fortran
-
-        subroutine get_all_spin_singles_4(buffer, idx, spindet, size_buffer, singles, n_singles)
-
-
-    
-    Returns the indices of all the single excitations in the list of
-    unique $lpha$ determinants.
-    
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_all_spin_singles`
-       * :c:func:`h_s2_u_0_nstates_openmp_work_4`
-       * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_4`
-       * :c:func:`h_u_0_nstates_openmp_work_4`
-       * :c:func:`orb_range_2_rdm_openmp_work_4`
-       * :c:func:`orb_range_2_rdm_state_av_openmp_work_4`
-       * :c:func:`orb_range_2_trans_rdm_openmp_work_4`
-
- 
-.. c:function:: get_all_spin_singles_and_doubles:
-
-
-    File : :file:`determinants/spindeterminants.irp.f`
-
-    .. code:: fortran
-
-        subroutine get_all_spin_singles_and_doubles(buffer, idx, spindet, Nint, size_buffer, singles, doubles, n_singles, n_doubles)
-
-
-    
-    Returns the indices of all the single and double excitations in the list of
-    unique $\alpha$ determinants.
-    
-    Warning: The buffer is transposed.
-    
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_all_spin_singles_and_doubles_1`
-       * :c:func:`get_all_spin_singles_and_doubles_2`
-       * :c:func:`get_all_spin_singles_and_doubles_3`
-       * :c:func:`get_all_spin_singles_and_doubles_4`
-       * :c:func:`get_all_spin_singles_and_doubles_n_int`
-
- 
-.. c:function:: get_all_spin_singles_and_doubles_1:
-
-
-    File : :file:`determinants/spindeterminants.irp.f`
-
-    .. code:: fortran
-
-        subroutine get_all_spin_singles_and_doubles_1(buffer, idx, spindet, size_buffer, singles, doubles, n_singles, n_doubles)
-
-
-    
-    Returns the indices of all the single and double excitations in the list of
-    unique $\alpha$ determinants.
-    
-    /!\ : The buffer is transposed !
-    
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_all_spin_singles_and_doubles`
-       * :c:func:`h_s2_u_0_nstates_openmp_work_1`
-       * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_1`
-       * :c:func:`h_u_0_nstates_openmp_work_1`
-       * :c:func:`orb_range_2_rdm_openmp_work_1`
-       * :c:func:`orb_range_2_rdm_state_av_openmp_work_1`
-       * :c:func:`orb_range_2_trans_rdm_openmp_work_1`
-
- 
-.. c:function:: get_all_spin_singles_and_doubles_2:
-
-
-    File : :file:`determinants/spindeterminants.irp.f_template_1365`
-
-    .. code:: fortran
-
-        subroutine get_all_spin_singles_and_doubles_2(buffer, idx, spindet, size_buffer, singles, doubles, n_singles, n_doubles)
-
-
-    
-    Returns the indices of all the single and double excitations in the list of
-    unique $lpha$ determinants.
-    
-    /!\ : The buffer is transposed !
-    
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_all_spin_singles_and_doubles`
-       * :c:func:`h_s2_u_0_nstates_openmp_work_2`
-       * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_2`
-       * :c:func:`h_u_0_nstates_openmp_work_2`
-       * :c:func:`orb_range_2_rdm_openmp_work_2`
-       * :c:func:`orb_range_2_rdm_state_av_openmp_work_2`
-       * :c:func:`orb_range_2_trans_rdm_openmp_work_2`
-
- 
-.. c:function:: get_all_spin_singles_and_doubles_3:
-
-
-    File : :file:`determinants/spindeterminants.irp.f_template_1365`
-
-    .. code:: fortran
-
-        subroutine get_all_spin_singles_and_doubles_3(buffer, idx, spindet, size_buffer, singles, doubles, n_singles, n_doubles)
-
-
-    
-    Returns the indices of all the single and double excitations in the list of
-    unique $lpha$ determinants.
-    
-    /!\ : The buffer is transposed !
-    
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_all_spin_singles_and_doubles`
-       * :c:func:`h_s2_u_0_nstates_openmp_work_3`
-       * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_3`
-       * :c:func:`h_u_0_nstates_openmp_work_3`
-       * :c:func:`orb_range_2_rdm_openmp_work_3`
-       * :c:func:`orb_range_2_rdm_state_av_openmp_work_3`
-       * :c:func:`orb_range_2_trans_rdm_openmp_work_3`
-
- 
-.. c:function:: get_all_spin_singles_and_doubles_4:
-
-
-    File : :file:`determinants/spindeterminants.irp.f_template_1365`
-
-    .. code:: fortran
-
-        subroutine get_all_spin_singles_and_doubles_4(buffer, idx, spindet, size_buffer, singles, doubles, n_singles, n_doubles)
-
-
-    
-    Returns the indices of all the single and double excitations in the list of
-    unique $lpha$ determinants.
-    
-    /!\ : The buffer is transposed !
-    
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_all_spin_singles_and_doubles`
-       * :c:func:`h_s2_u_0_nstates_openmp_work_4`
-       * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_4`
-       * :c:func:`h_u_0_nstates_openmp_work_4`
-       * :c:func:`orb_range_2_rdm_openmp_work_4`
-       * :c:func:`orb_range_2_rdm_state_av_openmp_work_4`
-       * :c:func:`orb_range_2_trans_rdm_openmp_work_4`
-
- 
-.. c:function:: get_all_spin_singles_and_doubles_n_int:
-
-
-    File : :file:`determinants/spindeterminants.irp.f_template_1365`
-
-    .. code:: fortran
-
-        subroutine get_all_spin_singles_and_doubles_N_int(buffer, idx, spindet, size_buffer, singles, doubles, n_singles, n_doubles)
-
-
-    
-    Returns the indices of all the single and double excitations in the list of
-    unique $lpha$ determinants.
-    
-    /!\ : The buffer is transposed !
-    
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_all_spin_singles_and_doubles`
-       * :c:func:`h_s2_u_0_nstates_openmp_work_n_int`
-       * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_n_int`
-       * :c:func:`h_u_0_nstates_openmp_work_n_int`
-       * :c:func:`orb_range_2_rdm_openmp_work_n_int`
-       * :c:func:`orb_range_2_rdm_state_av_openmp_work_n_int`
-       * :c:func:`orb_range_2_trans_rdm_openmp_work_n_int`
-
- 
-.. c:function:: get_all_spin_singles_n_int:
-
-
-    File : :file:`determinants/spindeterminants.irp.f_template_1365`
-
-    .. code:: fortran
-
-        subroutine get_all_spin_singles_N_int(buffer, idx, spindet, size_buffer, singles, n_singles)
-
-
-    
-    Returns the indices of all the single excitations in the list of
-    unique $lpha$ determinants.
-    
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_all_spin_singles`
-       * :c:func:`h_s2_u_0_nstates_openmp_work_n_int`
-       * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_n_int`
-       * :c:func:`h_u_0_nstates_openmp_work_n_int`
-       * :c:func:`orb_range_2_rdm_openmp_work_n_int`
-       * :c:func:`orb_range_2_rdm_state_av_openmp_work_n_int`
-       * :c:func:`orb_range_2_trans_rdm_openmp_work_n_int`
-
- 
-.. c:function:: get_double_excitation:
+.. c:function:: void get_double_excitation(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -6362,7 +5745,7 @@ Subroutines / functions
        * :c:func:`orb_range_off_diag_double_to_all_states_ab_trans_rdm_buffer`
 
  
-.. c:function:: get_double_excitation_spin:
+.. c:function:: void get_double_excitation_spin(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -6381,6 +5764,11 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`get_excitation_spin`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_1_cholesky`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_2_cholesky`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_3_cholesky`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_4_cholesky`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_n_int_cholesky`
        * :c:func:`i_h_j_double_spin`
        * :c:func:`orb_range_off_diag_double_to_2_rdm_aa_dm_buffer`
        * :c:func:`orb_range_off_diag_double_to_2_rdm_bb_dm_buffer`
@@ -6390,7 +5778,7 @@ Subroutines / functions
        * :c:func:`orb_range_off_diag_double_to_all_states_trans_rdm_bb_buffer`
 
  
-.. c:function:: get_excitation:
+.. c:function:: void get_excitation(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -6421,7 +5809,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation`
 
  
-.. c:function:: get_excitation_degree:
+.. c:function:: void get_excitation_degree(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -6431,7 +5819,7 @@ Subroutines / functions
         subroutine get_excitation_degree(key1,key2,degree,Nint)
 
 
-    Returns the excitation degree between two determinants.
+    Optimized version of get_excitation_degree_ref
 
     Called by:
 
@@ -6456,8 +5844,28 @@ Subroutines / functions
        * :c:data:`psi_non_cas`
        * :c:func:`pt2_qdpt`
 
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_excitation_degree_c`
+
  
-.. c:function:: get_excitation_degree_spin:
+.. c:function:: void get_excitation_degree_ref(void)
+
+
+    File : :file:`determinants/slater_rules.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_excitation_degree_ref(key1,key2,degree,Nint)
+
+
+    Returns the excitation degree between two determinants.
+
+ 
+.. c:function:: void get_excitation_degree_spin(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -6484,7 +5892,7 @@ Subroutines / functions
        * :c:func:`select_singles_and_doubles`
 
  
-.. c:function:: get_excitation_degree_vector:
+.. c:function:: void get_excitation_degree_vector(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -6501,10 +5909,11 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`energy_by_projection`
        * :c:func:`routine_example_psi_det`
 
  
-.. c:function:: get_excitation_degree_vector_double_alpha_beta:
+.. c:function:: void get_excitation_degree_vector_double_alpha_beta(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -6518,7 +5927,7 @@ Subroutines / functions
     single excitations and the connections through exchange integrals.
 
  
-.. c:function:: get_excitation_degree_vector_single:
+.. c:function:: void get_excitation_degree_vector_single(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -6532,7 +5941,7 @@ Subroutines / functions
     the single excitations.
 
  
-.. c:function:: get_excitation_degree_vector_single_or_exchange:
+.. c:function:: void get_excitation_degree_vector_single_or_exchange(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -6546,7 +5955,7 @@ Subroutines / functions
     single excitations and the connections through exchange integrals.
 
  
-.. c:function:: get_excitation_degree_vector_single_or_exchange_verbose:
+.. c:function:: void get_excitation_degree_vector_single_or_exchange_verbose(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -6574,7 +5983,7 @@ Subroutines / functions
        * :c:func:`debug_det`
 
  
-.. c:function:: get_excitation_general:
+.. c:function:: void get_excitation_general(void)
 
 
     File : :file:`determinants/slater_rules_general.irp.f`
@@ -6586,7 +5995,7 @@ Subroutines / functions
 
     returns the array, for each spin, of holes/particles between key_i and key_j
     
-    with the following convention: a^+_{particle} a_{hole}|key_i> = |key_j>
+    with the following convention: a^+_{particle} a_{hole}\|key_i> = \|key_j>
 
     Needs:
 
@@ -6604,7 +6013,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation`
 
  
-.. c:function:: get_excitation_spin:
+.. c:function:: void get_excitation_spin(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -6626,7 +6035,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation_spin`
 
  
-.. c:function:: get_holes_general:
+.. c:function:: void get_holes_general(void)
 
 
     File : :file:`determinants/slater_rules_general.irp.f`
@@ -6638,7 +6047,7 @@ Subroutines / functions
 
     returns the array, per spin, of holes between key_i and key_j
     
-    with the following convention: a_{hole}|key_i> --> |key_j>
+    with the following convention: a_{hole}\|key_i> --> \|key_j>
 
     Needs:
 
@@ -6648,7 +6057,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: get_index_in_psi_det_alpha_unique:
+.. c:function:: void get_index_in_psi_det_alpha_unique(void)
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -6667,8 +6076,15 @@ Subroutines / functions
 
        * :c:data:`psi_det_alpha_unique`
 
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`qp_bug`
+
  
-.. c:function:: get_index_in_psi_det_beta_unique:
+.. c:function:: void get_index_in_psi_det_beta_unique(void)
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -6687,8 +6103,15 @@ Subroutines / functions
 
        * :c:data:`psi_det_beta_unique`
 
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`qp_bug`
+
  
-.. c:function:: get_index_in_psi_det_sorted_bit:
+.. c:function:: void get_index_in_psi_det_sorted_bit(void)
 
 
     File : :file:`determinants/connected_to_ref.irp.f`
@@ -6710,7 +6133,7 @@ Subroutines / functions
        * :c:data:`psi_det_sorted_bit`
 
  
-.. c:function:: get_occupation_from_dets:
+.. c:function:: void get_occupation_from_dets(void)
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -6741,7 +6164,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list_ab`
 
  
-.. c:function:: get_particles_general:
+.. c:function:: void get_particles_general(void)
 
 
     File : :file:`determinants/slater_rules_general.irp.f`
@@ -6753,7 +6176,7 @@ Subroutines / functions
 
     returns the array, per spin, of particles between key_i and key_j
     
-    with the following convention: a^dagger_{particle}|key_i> --> |key_j>
+    with the following convention: a^dagger_{particle}\|key_i> --> \|key_j>
 
     Needs:
 
@@ -6770,7 +6193,7 @@ Subroutines / functions
        * :c:func:`debug_det`
 
  
-.. c:function:: get_phase:
+.. c:function:: void get_phase(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -6797,7 +6220,7 @@ Subroutines / functions
        * :c:func:`get_excitation`
 
  
-.. c:function:: get_phase_general:
+.. c:function:: void get_phase_general(void)
 
 
     File : :file:`determinants/slater_rules_general.irp.f`
@@ -6824,7 +6247,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation`
 
  
-.. c:function:: get_phasemask_bit:
+.. c:function:: void get_phasemask_bit(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -6836,7 +6259,7 @@ Subroutines / functions
 
 
  
-.. c:function:: get_s2:
+.. c:function:: void get_s2(void)
 
 
     File : :file:`determinants/s2.irp.f`
@@ -6854,17 +6277,13 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`get_uj_s2_ui`
-       * :c:func:`h_s2_u_0_nstates_openmp_work_1`
-       * :c:func:`h_s2_u_0_nstates_openmp_work_2`
-       * :c:func:`h_s2_u_0_nstates_openmp_work_3`
-       * :c:func:`h_s2_u_0_nstates_openmp_work_4`
-       * :c:func:`h_s2_u_0_nstates_openmp_work_n_int`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_1`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_2`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_3`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_4`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_n_int`
        * :c:func:`i_s2_psi_minilist`
+       * :c:data:`n_csf`
        * :c:data:`s2_matrix_all_dets`
        * :c:func:`s2_u_0_nstates`
 
@@ -6877,7 +6296,7 @@ Subroutines / functions
        * :c:func:`get_excitation_degree`
 
  
-.. c:function:: get_single_excitation:
+.. c:function:: void get_single_excitation(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -6916,7 +6335,7 @@ Subroutines / functions
        * :c:func:`orb_range_off_diag_single_to_all_states_bb_trans_rdm_buffer`
 
  
-.. c:function:: get_single_excitation_from_fock:
+.. c:function:: void get_single_excitation_from_fock(void)
 
 
     File : :file:`determinants/single_excitations.irp.f`
@@ -6955,7 +6374,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list_ab`
 
  
-.. c:function:: get_single_excitation_spin:
+.. c:function:: void get_single_excitation_spin(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -6973,7 +6392,14 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`get_excitation_spin`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_1_cholesky`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_2_cholesky`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_3_cholesky`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_4_cholesky`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_n_int_cholesky`
        * :c:func:`i_h_j_double_alpha_beta`
+       * :c:func:`i_h_j_double_alpha_beta_s2`
+       * :c:func:`i_h_j_double_alpha_beta_s2_sorted`
        * :c:func:`i_h_j_mono_spin_one_e`
        * :c:func:`i_h_j_single_spin`
        * :c:func:`i_wee_j_single`
@@ -6983,7 +6409,7 @@ Subroutines / functions
        * :c:data:`one_e_tr_dm_mo_alpha`
 
  
-.. c:function:: get_uj_s2_ui:
+.. c:function:: void get_uj_s2_ui(void)
 
 
     File : :file:`determinants/s2.irp.f`
@@ -7012,7 +6438,7 @@ Subroutines / functions
        * :c:func:`get_s2`
 
  
-.. c:function:: getmobiles:
+.. c:function:: void getmobiles(void)
 
 
     File : :file:`determinants/filter_connected.irp.f`
@@ -7050,7 +6476,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list`
 
  
-.. c:function:: i_h_j:
+.. c:function:: void i_h_j(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -7067,10 +6493,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
 
     Called by:
 
@@ -7080,6 +6505,7 @@ Subroutines / functions
        * :c:func:`calc_hess_elem`
        * :c:data:`coef_hf_selector`
        * :c:func:`connected_to_hf`
+       * :c:data:`energy_by_projection`
        * :c:func:`example_determinants`
        * :c:func:`get_d0`
        * :c:func:`get_d0_reference`
@@ -7107,7 +6533,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation_from_fock`
 
  
-.. c:function:: i_h_j_double_alpha_beta:
+.. c:function:: void i_h_j_double_alpha_beta(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -7125,21 +6551,14 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
 
     Called by:
 
     .. hlist::
        :columns: 3
 
-       * :c:func:`h_s2_u_0_nstates_openmp_work_1`
-       * :c:func:`h_s2_u_0_nstates_openmp_work_2`
-       * :c:func:`h_s2_u_0_nstates_openmp_work_3`
-       * :c:func:`h_s2_u_0_nstates_openmp_work_4`
-       * :c:func:`h_s2_u_0_nstates_openmp_work_n_int`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_1`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_2`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_3`
@@ -7159,7 +6578,83 @@ Subroutines / functions
        * :c:func:`get_single_excitation_spin`
 
  
-.. c:function:: i_h_j_double_spin:
+.. c:function:: void i_h_j_double_alpha_beta_s2(void)
+
+
+    File : :file:`determinants/slater_rules.irp.f`
+
+    .. code:: fortran
+
+        subroutine i_H_j_double_alpha_beta_s2(key_i,key_ja,key_jb,Nint,hij,s2,n)
+
+
+    Returns $\langle i|H|j \rangle$ where $i$ and $j$ are determinants differing by
+    an opposite-spin double excitation.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`all_mo_integrals`
+       * :c:data:`do_mo_cholesky`
+       * :c:data:`mo_integrals_map`
+       * :c:data:`mo_num`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`h_s2_u_0_nstates_openmp_work_1`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_2`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_3`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_4`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_n_int`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_mo_two_e_integrals_i1j1`
+       * :c:func:`get_single_excitation_spin`
+
+ 
+.. c:function:: void i_h_j_double_alpha_beta_s2_sorted(void)
+
+
+    File : :file:`determinants/slater_rules.irp.f`
+
+    .. code:: fortran
+
+        subroutine i_H_j_double_alpha_beta_s2_sorted(key_i,key_ja,key_jb,Nint,hij,s2,n)
+
+
+    Returns $\langle i|H|j \rangle$ where $i$ and $j$ are determinants differing by
+    an opposite-spin double excitation.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`all_mo_integrals`
+       * :c:data:`do_mo_cholesky`
+       * :c:data:`mo_integrals_map`
+       * :c:data:`mo_num`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_mo_two_e_integrals`
+       * :c:func:`get_single_excitation_spin`
+       * :c:func:`isort`
+
+ 
+.. c:function:: void i_h_j_double_spin(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -7177,9 +6672,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
 
     Called by:
 
@@ -7210,7 +6704,7 @@ Subroutines / functions
        * :c:func:`get_double_excitation_spin`
 
  
-.. c:function:: i_h_j_mono_spin_one_e:
+.. c:function:: void i_h_j_mono_spin_one_e(void)
 
 
     File : :file:`determinants/slater_rules_wee_mono.irp.f`
@@ -7238,7 +6732,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation_spin`
 
  
-.. c:function:: i_h_j_one_e:
+.. c:function:: void i_h_j_one_e(void)
 
 
     File : :file:`determinants/slater_rules_wee_mono.irp.f`
@@ -7267,7 +6761,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation`
 
  
-.. c:function:: i_h_j_s2:
+.. c:function:: void i_h_j_s2(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -7285,10 +6779,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
 
     Calls:
 
@@ -7302,7 +6795,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation_from_fock`
 
  
-.. c:function:: i_h_j_single_spin:
+.. c:function:: void i_h_j_single_spin(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -7320,8 +6813,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
-       * :c:data:`mo_two_e_integrals_in_map`
+       * :c:data:`all_mo_integrals`
 
     Called by:
 
@@ -7329,10 +6821,15 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`h_s2_u_0_nstates_openmp_work_1`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_1_cholesky`
        * :c:func:`h_s2_u_0_nstates_openmp_work_2`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_2_cholesky`
        * :c:func:`h_s2_u_0_nstates_openmp_work_3`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_3_cholesky`
        * :c:func:`h_s2_u_0_nstates_openmp_work_4`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_4_cholesky`
        * :c:func:`h_s2_u_0_nstates_openmp_work_n_int`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_n_int_cholesky`
        * :c:func:`h_u_0_nstates_openmp_work_1`
        * :c:func:`h_u_0_nstates_openmp_work_2`
        * :c:func:`h_u_0_nstates_openmp_work_3`
@@ -7348,7 +6845,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation_spin`
 
  
-.. c:function:: i_h_j_two_e:
+.. c:function:: void i_h_j_two_e(void)
 
 
     File : :file:`determinants/slater_rules_wee_mono.irp.f`
@@ -7365,11 +6862,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
-       * :c:data:`ref_bitmask_energy`
+       * :c:data:`ref_bitmask_two_e_energy`
 
     Called by:
 
@@ -7390,7 +6886,7 @@ Subroutines / functions
        * :c:func:`single_excitation_wee`
 
  
-.. c:function:: i_h_j_verbose:
+.. c:function:: void i_h_j_verbose(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -7407,11 +6903,11 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`all_mo_integrals`
        * :c:data:`elec_alpha_num`
        * :c:data:`elec_beta_num`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_one_e_integrals`
-       * :c:data:`mo_two_e_integrals_in_map`
 
     Calls:
 
@@ -7424,7 +6920,7 @@ Subroutines / functions
        * :c:func:`get_single_excitation`
 
  
-.. c:function:: i_h_psi:
+.. c:function:: void i_h_psi(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -7461,7 +6957,7 @@ Subroutines / functions
        * :c:func:`i_h_j`
 
  
-.. c:function:: i_h_psi_minilist:
+.. c:function:: void i_h_psi_minilist(void)
 
 
     File : :file:`determinants/slater_rules.irp.f`
@@ -7495,7 +6991,7 @@ Subroutines / functions
        * :c:func:`i_h_j`
 
  
-.. c:function:: i_s2_psi_minilist:
+.. c:function:: void i_s2_psi_minilist(void)
 
 
     File : :file:`determinants/s2.irp.f`
@@ -7519,7 +7015,7 @@ Subroutines / functions
        * :c:func:`get_s2`
 
  
-.. c:function:: i_wee_j_single:
+.. c:function:: void i_wee_j_single(void)
 
 
     File : :file:`determinants/slater_rules_wee_mono.irp.f`
@@ -7537,8 +7033,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
-       * :c:data:`mo_two_e_integrals_in_map`
+       * :c:data:`all_mo_integrals`
 
     Called by:
 
@@ -7560,7 +7055,7 @@ Subroutines / functions
        * :c:func:`single_excitation_wee`
 
  
-.. c:function:: is_connected_to:
+.. c:function:: void is_connected_to(void)
 
 
     File : :file:`determinants/connected_to_ref.irp.f`
@@ -7573,7 +7068,7 @@ Subroutines / functions
     Returns |true| if determinant ``key`` is connected to ``keys``
 
  
-.. c:function:: is_connected_to_by_single:
+.. c:function:: void is_connected_to_by_single(void)
 
 
     File : :file:`determinants/connected_to_ref.irp.f`
@@ -7586,7 +7081,7 @@ Subroutines / functions
     Returns |true| is ``key`` is connected to ``keys`` by a single excitation.
 
  
-.. c:function:: is_in_wavefunction:
+.. c:function:: void is_in_wavefunction(void)
 
 
     File : :file:`determinants/connected_to_ref.irp.f`
@@ -7599,7 +7094,7 @@ Subroutines / functions
     |true| if the determinant ``det`` is in the wave function
 
  
-.. c:function:: is_spin_flip_possible:
+.. c:function:: void is_spin_flip_possible(void)
 
 
     File : :file:`determinants/create_excitations.irp.f`
@@ -7620,7 +7115,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: print_dipole_moments:
+.. c:function:: void print_dipole_moments(void)
 
 
     File : :file:`determinants/dipole_moments.irp.f`
@@ -7640,7 +7135,7 @@ Subroutines / functions
        * :c:data:`z_dipole_moment`
 
  
-.. c:function:: read_dets:
+.. c:function:: void read_dets(void)
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -7669,7 +7164,7 @@ Subroutines / functions
        * :c:func:`ezfio_get_determinants_psi_det`
 
  
-.. c:function:: read_spindeterminants:
+.. c:function:: void read_spindeterminants(void)
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -7731,7 +7226,7 @@ Subroutines / functions
        * :c:data:`psi_det_beta_unique`
 
  
-.. c:function:: remove_duplicates_in_psi_det:
+.. c:function:: void remove_duplicates_in_psi_det(void)
 
 
     File : :file:`determinants/h_apply.irp.f`
@@ -7753,6 +7248,7 @@ Subroutines / functions
        * :c:data:`n_int`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_det`
        * :c:data:`psi_det_sorted`
        * :c:data:`psi_det_sorted_bit`
@@ -7773,11 +7269,12 @@ Subroutines / functions
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_det`
        * :c:data:`psi_det_sorted_bit`
 
  
-.. c:function:: replace_wf:
+.. c:function:: void replace_wf(void)
 
 
     File : :file:`determinants/h_apply.irp.f`
@@ -7820,12 +7317,13 @@ Subroutines / functions
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
 
  
-.. c:function:: resize_h_apply_buffer:
+.. c:function:: void resize_h_apply_buffer(void)
 
 
     File : :file:`determinants/h_apply.irp.f`
@@ -7865,7 +7363,7 @@ Subroutines / functions
        * :c:func:`abort`
 
  
-.. c:function:: routine_example_psi_det:
+.. c:function:: void routine_example_psi_det(void)
 
 
     File : :file:`determinants/example.irp.f`
@@ -7905,7 +7403,7 @@ Subroutines / functions
        * :c:func:`i_h_j`
 
  
-.. c:function:: s2_u_0:
+.. c:function:: void s2_u_0(void)
 
 
     File : :file:`determinants/s2.irp.f`
@@ -7928,7 +7426,7 @@ Subroutines / functions
        * :c:func:`s2_u_0_nstates`
 
  
-.. c:function:: s2_u_0_nstates:
+.. c:function:: void s2_u_0_nstates(void)
 
 
     File : :file:`determinants/s2.irp.f`
@@ -7968,7 +7466,7 @@ Subroutines / functions
        * :c:func:`sort_dets_ba_v`
 
  
-.. c:function:: save_natural_mos:
+.. c:function:: void save_natural_mos(void)
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -8009,7 +7507,7 @@ Subroutines / functions
        * :c:data:`mo_occ`
 
  
-.. c:function:: save_natural_mos_canon_label:
+.. c:function:: void save_natural_mos_canon_label(void)
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -8050,7 +7548,7 @@ Subroutines / functions
        * :c:data:`mo_occ`
 
  
-.. c:function:: save_natural_mos_no_ov_rot:
+.. c:function:: void save_natural_mos_no_ov_rot(void)
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -8091,7 +7589,7 @@ Subroutines / functions
        * :c:data:`mo_occ`
 
  
-.. c:function:: save_ref_determinant:
+.. c:function:: void save_ref_determinant(void)
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -8118,7 +7616,7 @@ Subroutines / functions
        * :c:func:`save_wavefunction_general`
 
  
-.. c:function:: save_wavefunction:
+.. c:function:: void save_wavefunction(void)
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -8157,7 +7655,7 @@ Subroutines / functions
        * :c:func:`save_wavefunction_general`
 
  
-.. c:function:: save_wavefunction_general:
+.. c:function:: void save_wavefunction_general(void)
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -8208,7 +7706,7 @@ Subroutines / functions
        * :c:func:`write_int`
 
  
-.. c:function:: save_wavefunction_general_unormalized:
+.. c:function:: void save_wavefunction_general_unormalized(void)
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -8248,7 +7746,7 @@ Subroutines / functions
        * :c:func:`write_int`
 
  
-.. c:function:: save_wavefunction_specified:
+.. c:function:: void save_wavefunction_specified(void)
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -8287,7 +7785,7 @@ Subroutines / functions
        * :c:func:`write_int`
 
  
-.. c:function:: save_wavefunction_truncated:
+.. c:function:: void save_wavefunction_truncated(void)
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -8326,7 +7824,7 @@ Subroutines / functions
        * :c:data:`psi_coef`
 
  
-.. c:function:: save_wavefunction_unsorted:
+.. c:function:: void save_wavefunction_unsorted(void)
 
 
     File : :file:`determinants/determinants.irp.f`
@@ -8365,7 +7863,7 @@ Subroutines / functions
        * :c:func:`save_wavefunction_general`
 
  
-.. c:function:: set_natorb_no_ov_rot:
+.. c:function:: void set_natorb_no_ov_rot(void)
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -8413,7 +7911,7 @@ Subroutines / functions
        * :c:data:`mo_occ`
 
  
-.. c:function:: set_natural_mos:
+.. c:function:: void set_natural_mos(void)
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -8461,7 +7959,7 @@ Subroutines / functions
        * :c:data:`mo_occ`
 
  
-.. c:function:: set_natural_mos_canon_label:
+.. c:function:: void set_natural_mos_canon_label(void)
 
 
     File : :file:`determinants/density_matrix.irp.f`
@@ -8509,7 +8007,7 @@ Subroutines / functions
        * :c:data:`mo_occ`
 
  
-.. c:function:: single_excitation_wee:
+.. c:function:: void single_excitation_wee(void)
 
 
     File : :file:`determinants/single_excitation_two_e.irp.f`
@@ -8546,7 +8044,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list_ab`
 
  
-.. c:function:: sort_dets_ab:
+.. c:function:: void sort_dets_ab(void)
 
 
     File : :file:`determinants/sort_dets_ab.irp.f`
@@ -8566,7 +8064,7 @@ Subroutines / functions
        * :c:func:`tamiser`
 
  
-.. c:function:: sort_dets_ab_v:
+.. c:function:: void sort_dets_ab_v(void)
 
 
     File : :file:`determinants/sort_dets_ab.irp.f`
@@ -8594,7 +8092,7 @@ Subroutines / functions
        * :c:func:`tamiser`
 
  
-.. c:function:: sort_dets_ba_v:
+.. c:function:: void sort_dets_ba_v(void)
 
 
     File : :file:`determinants/sort_dets_ab.irp.f`
@@ -8621,14 +8119,14 @@ Subroutines / functions
        * :c:func:`sort_dets_ab_v`
 
  
-.. c:function:: sort_dets_by_det_search_key:
+.. c:function:: void sort_dets_by_det_search_key(void)
 
 
     File : :file:`determinants/determinants.irp.f`
 
     .. code:: fortran
 
-        subroutine sort_dets_by_det_search_key(Ndet, det_in, coef_in, sze, det_out, coef_out, N_st)
+        subroutine sort_dets_by_det_search_key(Ndet, det_in, coef_in, sze, det_out, coef_out, iorder, N_st)
 
 
     Determinants are sorted according to their :c:func:`det_search_key`.
@@ -8662,7 +8160,7 @@ Subroutines / functions
        * :c:func:`i8sort`
 
  
-.. c:function:: spin_det_search_key:
+.. c:function:: void spin_det_search_key(void)
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -8675,7 +8173,7 @@ Subroutines / functions
     Returns an integer(8) corresponding to a determinant index for searching
 
  
-.. c:function:: tamiser:
+.. c:function:: void tamiser(void)
 
 
     File : :file:`determinants/sort_dets_ab.irp.f`
@@ -8695,7 +8193,7 @@ Subroutines / functions
        * :c:func:`sort_dets_ab_v`
 
  
-.. c:function:: u_0_s2_u_0:
+.. c:function:: void u_0_s2_u_0(void)
 
 
     File : :file:`determinants/s2.irp.f`
@@ -8726,7 +8224,7 @@ Subroutines / functions
        * :c:func:`s2_u_0_nstates`
 
  
-.. c:function:: update_wf_of_psi_bilinear_matrix:
+.. c:function:: void update_wf_of_psi_bilinear_matrix(void)
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -8777,7 +8275,7 @@ Subroutines / functions
        * :c:data:`psi_det_beta_unique`
 
  
-.. c:function:: wf_of_psi_bilinear_matrix:
+.. c:function:: void wf_of_psi_bilinear_matrix(void)
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -8822,7 +8320,7 @@ Subroutines / functions
        * :c:data:`psi_det`
 
  
-.. c:function:: write_spindeterminants:
+.. c:function:: void write_spindeterminants(void)
 
 
     File : :file:`determinants/spindeterminants.irp.f`
@@ -8863,7 +8361,7 @@ Subroutines / functions
        * :c:func:`ezfio_set_spindeterminants_psi_det_beta`
 
  
-.. c:function:: zmq_get_n_det:
+.. c:function:: void zmq_get_n_det(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_379`
@@ -8885,7 +8383,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_get_n_det_alpha_unique:
+.. c:function:: void zmq_get_n_det_alpha_unique(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_379`
@@ -8907,7 +8405,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_get_n_det_beta_unique:
+.. c:function:: void zmq_get_n_det_beta_unique(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_379`
@@ -8929,7 +8427,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_get_n_states:
+.. c:function:: void zmq_get_n_states(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_379`
@@ -8951,7 +8449,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_get_psi:
+.. c:function:: void zmq_get_psi(void)
 
 
     File : :file:`determinants/zmq.irp.f`
@@ -8986,7 +8484,7 @@ Subroutines / functions
        * :c:data:`psi_det_size`
 
  
-.. c:function:: zmq_get_psi_bilinear:
+.. c:function:: void zmq_get_psi_bilinear(void)
 
 
     File : :file:`determinants/zmq.irp.f`
@@ -9037,7 +8535,7 @@ Subroutines / functions
        * :c:data:`psi_det_size`
 
  
-.. c:function:: zmq_get_psi_bilinear_matrix_columns:
+.. c:function:: void zmq_get_psi_bilinear_matrix_columns(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_500`
@@ -9057,7 +8555,7 @@ Subroutines / functions
        * :c:data:`psi_bilinear_matrix_values`
 
  
-.. c:function:: zmq_get_psi_bilinear_matrix_order:
+.. c:function:: void zmq_get_psi_bilinear_matrix_order(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_500`
@@ -9077,7 +8575,7 @@ Subroutines / functions
        * :c:data:`psi_bilinear_matrix_values`
 
  
-.. c:function:: zmq_get_psi_bilinear_matrix_rows:
+.. c:function:: void zmq_get_psi_bilinear_matrix_rows(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_500`
@@ -9097,7 +8595,7 @@ Subroutines / functions
        * :c:data:`psi_bilinear_matrix_values`
 
  
-.. c:function:: zmq_get_psi_bilinear_matrix_values:
+.. c:function:: void zmq_get_psi_bilinear_matrix_values(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_564`
@@ -9117,7 +8615,7 @@ Subroutines / functions
        * :c:data:`psi_bilinear_matrix_values`
 
  
-.. c:function:: zmq_get_psi_coef:
+.. c:function:: void zmq_get_psi_coef(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_564`
@@ -9137,7 +8635,7 @@ Subroutines / functions
        * :c:data:`psi_coef`
 
  
-.. c:function:: zmq_get_psi_det:
+.. c:function:: void zmq_get_psi_det(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_440`
@@ -9157,7 +8655,7 @@ Subroutines / functions
        * :c:data:`psi_det`
 
  
-.. c:function:: zmq_get_psi_det_alpha_unique:
+.. c:function:: void zmq_get_psi_det_alpha_unique(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_440`
@@ -9177,7 +8675,7 @@ Subroutines / functions
        * :c:data:`psi_det_alpha_unique`
 
  
-.. c:function:: zmq_get_psi_det_beta_unique:
+.. c:function:: void zmq_get_psi_det_beta_unique(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_440`
@@ -9197,7 +8695,7 @@ Subroutines / functions
        * :c:data:`psi_det_beta_unique`
 
  
-.. c:function:: zmq_get_psi_det_size:
+.. c:function:: void zmq_get_psi_det_size(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_379`
@@ -9219,7 +8717,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_get_psi_notouch:
+.. c:function:: void zmq_get_psi_notouch(void)
 
 
     File : :file:`determinants/zmq.irp.f`
@@ -9243,7 +8741,7 @@ Subroutines / functions
        * :c:data:`psi_det_size`
 
  
-.. c:function:: zmq_put_n_det:
+.. c:function:: void zmq_put_n_det(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_379`
@@ -9264,7 +8762,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_put_n_det_alpha_unique:
+.. c:function:: void zmq_put_n_det_alpha_unique(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_379`
@@ -9285,7 +8783,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_put_n_det_beta_unique:
+.. c:function:: void zmq_put_n_det_beta_unique(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_379`
@@ -9306,7 +8804,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_put_n_states:
+.. c:function:: void zmq_put_n_states(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_379`
@@ -9327,7 +8825,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_put_psi:
+.. c:function:: void zmq_put_psi(void)
 
 
     File : :file:`determinants/zmq.irp.f`
@@ -9340,7 +8838,7 @@ Subroutines / functions
     Put the wave function on the qp_run scheduler
 
  
-.. c:function:: zmq_put_psi_bilinear:
+.. c:function:: void zmq_put_psi_bilinear(void)
 
 
     File : :file:`determinants/zmq.irp.f`
@@ -9353,7 +8851,7 @@ Subroutines / functions
     Put the wave function on the qp_run scheduler
 
  
-.. c:function:: zmq_put_psi_bilinear_matrix_columns:
+.. c:function:: void zmq_put_psi_bilinear_matrix_columns(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_500`
@@ -9373,7 +8871,7 @@ Subroutines / functions
        * :c:data:`psi_bilinear_matrix_values`
 
  
-.. c:function:: zmq_put_psi_bilinear_matrix_order:
+.. c:function:: void zmq_put_psi_bilinear_matrix_order(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_500`
@@ -9393,7 +8891,7 @@ Subroutines / functions
        * :c:data:`psi_bilinear_matrix_values`
 
  
-.. c:function:: zmq_put_psi_bilinear_matrix_rows:
+.. c:function:: void zmq_put_psi_bilinear_matrix_rows(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_500`
@@ -9413,7 +8911,7 @@ Subroutines / functions
        * :c:data:`psi_bilinear_matrix_values`
 
  
-.. c:function:: zmq_put_psi_bilinear_matrix_values:
+.. c:function:: void zmq_put_psi_bilinear_matrix_values(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_564`
@@ -9433,7 +8931,7 @@ Subroutines / functions
        * :c:data:`psi_bilinear_matrix_values`
 
  
-.. c:function:: zmq_put_psi_coef:
+.. c:function:: void zmq_put_psi_coef(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_564`
@@ -9453,7 +8951,7 @@ Subroutines / functions
        * :c:data:`psi_coef`
 
  
-.. c:function:: zmq_put_psi_det:
+.. c:function:: void zmq_put_psi_det(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_440`
@@ -9473,7 +8971,7 @@ Subroutines / functions
        * :c:data:`psi_det`
 
  
-.. c:function:: zmq_put_psi_det_alpha_unique:
+.. c:function:: void zmq_put_psi_det_alpha_unique(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_440`
@@ -9493,7 +8991,7 @@ Subroutines / functions
        * :c:data:`psi_det_alpha_unique`
 
  
-.. c:function:: zmq_put_psi_det_beta_unique:
+.. c:function:: void zmq_put_psi_det_beta_unique(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_440`
@@ -9513,7 +9011,7 @@ Subroutines / functions
        * :c:data:`psi_det_beta_unique`
 
  
-.. c:function:: zmq_put_psi_det_size:
+.. c:function:: void zmq_put_psi_det_size(void)
 
 
     File : :file:`determinants/zmq.irp.f_template_379`

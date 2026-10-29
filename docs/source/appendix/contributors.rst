@@ -18,23 +18,30 @@ Emmanuel Giner
   | emmanuel.giner@lct.jussieu.fr
 
 
-The following people have contributed to this project (by alphabetical order):
+The following people have contributed to this project (by alphabetical order
+of the last name). The list is built from the :file:`AUTHORS` file, from the
+git history of the repository and of the plugin repositories, and from the
+author list of the |QP| 2.0 paper (:file:`CITATION.cff`):
 
 * Abdallah Ammar
 * Thomas Applencourt
 * Roland Assaraf
 * Pierrette Barbaresco
 * Anouar Benali
-* Chandler Bennet
+* Chandler Bennett
 * Michel Caffarel
 * Vijay Gopal Chilkuri
+* Alice Cuzzocrea
 * Yann Damour
 * Grégoire David
 * Amanda Dumi
 * Anthony Ferté
+* Gilles Frison
 * Madeline Galbraith
 * Yann Garniron
 * Kevin Gasperich
+* Johannes Guenzl
+* Michal Hapka
 * Fabris Kossoski
 * Pierre-François Loos
 * Jean-Paul Malrieu
@@ -44,10 +51,13 @@ The following people have contributed to this project (by alphabetical order):
 * Barthélémy Pradines
 * Peter Reinhardt
 * Nicolas Renon
+* Fileto Rodriguez
 * Lorenzo Tenti
 * Julien Toulouse
 * Diata Traoré
-* Mikaël Véril
+* Shiv Upadhyay
+* Mickaël Véril
+* Yuan Yao
 
 
 If you have contributed and don't appear in this list, please modify the file

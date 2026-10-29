@@ -8,15 +8,25 @@
 iterations
 ==========
 
-Module which saves the computed energies for an extrapolation to
-the |FCI| limit.
+Iteration counters and energy history, for the extrapolation to the
+|FCI| limit.
+
+:c:data:`n_iter` and :c:data:`n_iter_max` count the iterations
+(:c:func:`increment_n_iter`), and the energies of the iterations are
+stored in :c:data:`energy_iterations` (the variational energies) and
+:c:data:`pt2_iterations` (the |PT2| energies).
+:c:data:`extrapolated_energy` is the value extrapolated to the |FCI|
+limit, computed and printed by :c:func:`print_extrapolated_energy`,
+and the summary of the calculation is printed by
+:c:func:`print_summary` (or :c:func:`print_summary_tc` for the
+transcorrelated variant).
  
  
  
 Providers 
 --------- 
  
-.. c:var:: energy_iterations
+.. c:var:: double energy_iterations
 
 
     File : :file:`iterations/iterations.irp.f`
@@ -40,7 +50,7 @@ Providers
 
 
  
-.. c:var:: extrapolated_energy
+.. c:var:: double extrapolated_energy
 
 
     File : :file:`iterations/iterations.irp.f`
@@ -64,7 +74,7 @@ Providers
 
 
  
-.. c:var:: n_iter
+.. c:var:: int n_iter
 
 
     File : :file:`iterations/iterations.irp.f`
@@ -78,7 +88,7 @@ Providers
 
 
  
-.. c:var:: n_iter_max
+.. c:var:: int n_iter_max
 
 
     File : :file:`iterations/iterations.irp.f`
@@ -98,7 +108,7 @@ Providers
        * :c:data:`energy_iterations`
 
  
-.. c:var:: pt2_iterations
+.. c:var:: double pt2_iterations
 
 
     File : :file:`iterations/iterations.irp.f`
@@ -126,7 +136,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: increment_n_iter:
+.. c:function:: void increment_n_iter(void)
 
 
     File : :file:`iterations/iterations.irp.f`
@@ -165,7 +175,7 @@ Subroutines / functions
        * :c:func:`extrapolate_data`
 
  
-.. c:function:: print_extrapolated_energy:
+.. c:function:: void print_extrapolated_energy(void)
 
 
     File : :file:`iterations/print_extrapolation.irp.f`
@@ -196,7 +206,7 @@ Subroutines / functions
        * :c:func:`run_stochastic_cipsi`
 
  
-.. c:function:: print_summary:
+.. c:function:: void print_summary(void)
 
 
     File : :file:`iterations/print_summary.irp.f`
@@ -213,9 +223,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`csf_based`
        * :c:data:`do_pt2`
-       * :c:data:`nsomomax`
-       * :c:data:`only_expected_s2`
+       * :c:data:`n_csf`
        * :c:data:`s2_eig`
 
     Called by:
@@ -227,7 +237,7 @@ Subroutines / functions
        * :c:func:`run_stochastic_cipsi`
 
  
-.. c:function:: print_summary_tc:
+.. c:function:: void print_summary_tc(void)
 
 
     File : :file:`iterations/summary_tc.irp.f`
@@ -245,7 +255,7 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`do_pt2`
-       * :c:data:`nsomomax`
+       * :c:data:`n_csf`
        * :c:data:`only_expected_s2`
        * :c:data:`s2_eig`
 

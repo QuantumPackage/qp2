@@ -1,4 +1,4 @@
-program print_integrals
+program import_integrals_ao_periodic
   print *, 'Number of AOs?'
   read(*,*) ao_num
   TOUCH ao_num

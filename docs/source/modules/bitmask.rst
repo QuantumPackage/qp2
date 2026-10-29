@@ -74,7 +74,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: act_bitmask
+.. c:var:: int act_bitmask
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -110,7 +110,7 @@ Providers
        * :c:data:`reunion_of_inact_act_bitmask`
 
  
-.. c:var:: closed_shell_ref_bitmask
+.. c:var:: int closed_shell_ref_bitmask
 
 
     File : :file:`bitmask/bitmasks.irp.f`
@@ -132,7 +132,7 @@ Providers
 
 
  
-.. c:var:: core_bitmask
+.. c:var:: int core_bitmask
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -162,7 +162,7 @@ Providers
        * :c:data:`reunion_of_core_inact_bitmask`
 
  
-.. c:var:: core_inact_act_bitmask_4
+.. c:var:: int core_inact_act_bitmask_4
 
 
     File : :file:`bitmask/bitmasks.irp.f`
@@ -183,7 +183,7 @@ Providers
 
 
  
-.. c:var:: core_inact_virt_bitmask
+.. c:var:: int core_inact_virt_bitmask
 
 
     File : :file:`bitmask/bitmasks.irp.f`
@@ -208,7 +208,7 @@ Providers
 
 
  
-.. c:var:: del_bitmask
+.. c:var:: int del_bitmask
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -231,7 +231,7 @@ Providers
 
 
  
-.. c:var:: dim_list_act_orb
+.. c:var:: int dim_list_act_orb
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -259,7 +259,7 @@ Providers
        * :c:data:`list_act`
 
  
-.. c:var:: dim_list_core_inact_orb
+.. c:var:: int dim_list_core_inact_orb
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -287,7 +287,7 @@ Providers
        * :c:data:`list_core_inact`
 
  
-.. c:var:: dim_list_core_orb
+.. c:var:: int dim_list_core_orb
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -315,7 +315,7 @@ Providers
        * :c:data:`list_core`
 
  
-.. c:var:: dim_list_del_orb
+.. c:var:: int dim_list_del_orb
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -343,7 +343,7 @@ Providers
        * :c:data:`list_del`
 
  
-.. c:var:: dim_list_inact_orb
+.. c:var:: int dim_list_inact_orb
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -371,7 +371,7 @@ Providers
        * :c:data:`list_inact`
 
  
-.. c:var:: dim_list_virt_orb
+.. c:var:: int dim_list_virt_orb
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -399,7 +399,7 @@ Providers
        * :c:data:`list_virt`
 
  
-.. c:var:: full_ijkl_bitmask
+.. c:var:: int full_ijkl_bitmask
 
 
     File : :file:`bitmask/bitmasks.irp.f`
@@ -430,7 +430,7 @@ Providers
        * :c:data:`generators_bitmask`
 
  
-.. c:var:: full_ijkl_bitmask_4
+.. c:var:: int full_ijkl_bitmask_4
 
 
     File : :file:`bitmask/bitmasks.irp.f`
@@ -458,7 +458,7 @@ Providers
        * :c:data:`mo_two_e_integrals_in_map`
 
  
-.. c:var:: generators_bitmask
+.. c:var:: int generators_bitmask
 
 
     File : :file:`bitmask/bitmasks.irp.f`
@@ -499,7 +499,7 @@ Providers
 
 
  
-.. c:var:: hf_bitmask
+.. c:var:: int hf_bitmask
 
 
     File : :file:`bitmask/bitmasks.irp.f`
@@ -534,7 +534,7 @@ Providers
        * :c:data:`unpaired_alpha_electrons`
 
  
-.. c:var:: inact_bitmask
+.. c:var:: int inact_bitmask
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -566,7 +566,7 @@ Providers
        * :c:data:`reunion_of_inact_act_bitmask`
 
  
-.. c:var:: inact_virt_bitmask
+.. c:var:: int inact_virt_bitmask
 
 
     File : :file:`bitmask/bitmasks.irp.f`
@@ -591,7 +591,7 @@ Providers
 
 
  
-.. c:var:: index_holes_bitmask
+.. c:var:: int index_holes_bitmask
 
 
     File : :file:`bitmask/modify_bitmasks.irp.f`
@@ -605,7 +605,7 @@ Providers
 
 
  
-.. c:var:: index_particl_bitmask
+.. c:var:: int index_particl_bitmask
 
 
     File : :file:`bitmask/modify_bitmasks.irp.f`
@@ -619,7 +619,7 @@ Providers
 
 
  
-.. c:var:: list_act
+.. c:var:: int list_act
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -696,7 +696,7 @@ Providers
        * :c:data:`umat`
 
  
-.. c:var:: list_act_reverse
+.. c:var:: int list_act_reverse
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -773,7 +773,7 @@ Providers
        * :c:data:`umat`
 
  
-.. c:var:: list_all_but_del_orb
+.. c:var:: int list_all_but_del_orb
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -795,7 +795,7 @@ Providers
 
 
  
-.. c:var:: list_core
+.. c:var:: int list_core
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -844,7 +844,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
 
  
-.. c:var:: list_core_inact
+.. c:var:: int list_core_inact
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -891,7 +891,7 @@ Providers
        * :c:data:`umat`
 
  
-.. c:var:: list_core_inact_act
+.. c:var:: int list_core_inact_act
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -920,12 +920,10 @@ Providers
        :columns: 3
 
        * :c:data:`etwo`
-       * :c:data:`fapq`
-       * :c:data:`fipq`
        * :c:data:`two_e_dm_mo`
 
  
-.. c:var:: list_core_inact_act_reverse
+.. c:var:: int list_core_inact_act_reverse
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -954,12 +952,10 @@ Providers
        :columns: 3
 
        * :c:data:`etwo`
-       * :c:data:`fapq`
-       * :c:data:`fipq`
        * :c:data:`two_e_dm_mo`
 
  
-.. c:var:: list_core_inact_reverse
+.. c:var:: int list_core_inact_reverse
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -1006,7 +1002,7 @@ Providers
        * :c:data:`umat`
 
  
-.. c:var:: list_core_reverse
+.. c:var:: int list_core_reverse
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -1055,7 +1051,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
 
  
-.. c:var:: list_del
+.. c:var:: int list_del
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -1086,7 +1082,7 @@ Providers
        * :c:data:`del_bitmask`
 
  
-.. c:var:: list_del_reverse
+.. c:var:: int list_del_reverse
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -1117,7 +1113,7 @@ Providers
        * :c:data:`del_bitmask`
 
  
-.. c:var:: list_inact
+.. c:var:: int list_inact
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -1158,7 +1154,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
 
  
-.. c:var:: list_inact_act
+.. c:var:: int list_inact_act
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -1183,7 +1179,7 @@ Providers
 
 
  
-.. c:var:: list_inact_act_reverse
+.. c:var:: int list_inact_act_reverse
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -1208,7 +1204,7 @@ Providers
 
 
  
-.. c:var:: list_inact_reverse
+.. c:var:: int list_inact_reverse
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -1249,7 +1245,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
 
  
-.. c:var:: list_virt
+.. c:var:: int list_virt
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -1292,7 +1288,7 @@ Providers
        * :c:data:`virt_bitmask`
 
  
-.. c:var:: list_virt_reverse
+.. c:var:: int list_virt_reverse
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -1335,7 +1331,7 @@ Providers
        * :c:data:`virt_bitmask`
 
  
-.. c:var:: mo_coef_begin_iteration
+.. c:var:: double mo_coef_begin_iteration
 
 
     File : :file:`bitmask/track_orb.irp.f`
@@ -1359,7 +1355,7 @@ Providers
 
 
  
-.. c:var:: mpi_bit_kind
+.. c:var:: int mpi_bit_kind
 
 
     File : :file:`bitmask/mpi.irp.f`
@@ -1373,7 +1369,7 @@ Providers
 
 
  
-.. c:var:: n_act_orb
+.. c:var:: int n_act_orb
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -1441,7 +1437,6 @@ Providers
        * :c:data:`natorbsci`
        * :c:data:`natorbsci_mos`
        * :c:data:`nmonoex`
-       * :c:data:`nsomomax`
        * :c:data:`occnum`
        * :c:data:`one_ints_no`
        * :c:data:`p0tuvx`
@@ -1459,7 +1454,7 @@ Providers
        * :c:data:`umat`
 
  
-.. c:var:: n_all_but_del_orb
+.. c:var:: int n_all_but_del_orb
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -1486,7 +1481,7 @@ Providers
        * :c:data:`list_all_but_del_orb`
 
  
-.. c:var:: n_core_inact_act_orb
+.. c:var:: int n_core_inact_act_orb
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -1528,7 +1523,7 @@ Providers
        * :c:data:`two_e_dm_mo`
 
  
-.. c:var:: n_core_inact_orb
+.. c:var:: int n_core_inact_orb
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -1577,7 +1572,7 @@ Providers
        * :c:data:`umat`
 
  
-.. c:var:: n_core_orb
+.. c:var:: int n_core_orb
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -1628,7 +1623,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
 
  
-.. c:var:: n_del_orb
+.. c:var:: int n_del_orb
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -1659,7 +1654,7 @@ Providers
        * :c:data:`list_del`
 
  
-.. c:var:: n_inact_act_orb
+.. c:var:: int n_inact_act_orb
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -1687,7 +1682,7 @@ Providers
        * :c:data:`list_inact_act`
 
  
-.. c:var:: n_inact_orb
+.. c:var:: int n_inact_orb
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -1730,7 +1725,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
 
  
-.. c:var:: n_int
+.. c:var:: int n_int
 
 
     File : :file:`bitmask/bitmasks.irp.f`
@@ -1764,10 +1759,10 @@ Providers
        * :c:data:`core_inact_act_bitmask_4`
        * :c:data:`del_bitmask`
        * :c:data:`det_to_configuration`
-       * :c:data:`dettocsftransformationmatrix`
        * :c:data:`diagonal_h_matrix_on_psi_det`
        * :c:data:`dominant_dets_of_cfgs`
        * :c:data:`double_exc_bitmask`
+       * :c:data:`energy_by_projection`
        * :c:data:`exc_degree_per_selectors`
        * :c:data:`fock_operator_closed_shell_ref_bitmask`
        * :c:data:`fock_wee_closed_shell`
@@ -1792,6 +1787,7 @@ Providers
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`multi_s_dipole_moment`
        * :c:data:`n_core_inact_orb`
+       * :c:data:`n_csf`
        * :c:data:`n_det_generators`
        * :c:data:`n_dominant_dets_of_cfgs`
        * :c:data:`n_elec_alpha_for_psi_configuration`
@@ -1808,7 +1804,6 @@ Providers
        * :c:data:`psi_configuration`
        * :c:data:`psi_configuration_sorted`
        * :c:data:`psi_configuration_to_psi_det`
-       * :c:data:`psi_csf_coef`
        * :c:data:`psi_det`
        * :c:data:`psi_det_alpha`
        * :c:data:`psi_det_alpha_unique`
@@ -1826,7 +1821,11 @@ Providers
        * :c:data:`psi_selectors`
        * :c:data:`psi_selectors_diag_h_mat`
        * :c:data:`ref_bitmask`
-       * :c:data:`ref_bitmask_energy`
+       * :c:data:`ref_bitmask_energy_ab`
+       * :c:data:`ref_bitmask_kinetic_energy`
+       * :c:data:`ref_bitmask_n_e_energy`
+       * :c:data:`ref_bitmask_one_e_energy`
+       * :c:data:`ref_bitmask_two_e_energy`
        * :c:data:`ref_closed_shell_bitmask`
        * :c:data:`reunion_of_act_virt_bitmask`
        * :c:data:`reunion_of_bitmask`
@@ -1847,7 +1846,7 @@ Providers
        * :c:data:`virt_bitmask_4`
 
  
-.. c:var:: n_virt_orb
+.. c:var:: int n_virt_orb
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -1892,7 +1891,7 @@ Providers
        * :c:data:`virt_bitmask`
 
  
-.. c:var:: ormas_bitmask
+.. c:var:: int ormas_bitmask
 
 
     File : :file:`bitmask/bitmasks_ormas.irp.f`
@@ -1916,7 +1915,7 @@ Providers
 
 
  
-.. c:var:: ormas_list_orb
+.. c:var:: int ormas_list_orb
 
 
     File : :file:`bitmask/bitmasks_ormas.irp.f`
@@ -1944,7 +1943,7 @@ Providers
        * :c:data:`ormas_bitmask`
 
  
-.. c:var:: ormas_max_e
+.. c:var:: int ormas_max_e
 
 
     File : :file:`bitmask/bitmasks_ormas.irp.f`
@@ -1968,7 +1967,7 @@ Providers
 
 
  
-.. c:var:: ormas_max_n_orb
+.. c:var:: int ormas_max_n_orb
 
 
     File : :file:`bitmask/bitmasks_ormas.irp.f`
@@ -1999,7 +1998,7 @@ Providers
        * :c:data:`ormas_list_orb`
 
  
-.. c:var:: ormas_min_e
+.. c:var:: int ormas_min_e
 
 
     File : :file:`bitmask/bitmasks_ormas.irp.f`
@@ -2022,7 +2021,7 @@ Providers
 
 
  
-.. c:var:: ormas_mstart
+.. c:var:: int ormas_mstart
 
 
     File : :file:`bitmask/bitmasks_ormas.irp.f`
@@ -2051,7 +2050,7 @@ Providers
        * :c:data:`ormas_n_orb`
 
  
-.. c:var:: ormas_n_orb
+.. c:var:: int ormas_n_orb
 
 
     File : :file:`bitmask/bitmasks_ormas.irp.f`
@@ -2082,7 +2081,7 @@ Providers
        * :c:data:`ormas_list_orb`
 
  
-.. c:var:: ref_bitmask
+.. c:var:: int ref_bitmask
 
 
     File : :file:`bitmask/bitmasks.irp.f`
@@ -2113,11 +2112,15 @@ Providers
        * :c:data:`exc_degree_per_selectors`
        * :c:data:`psi_det_hii`
        * :c:data:`psi_selectors_diag_h_mat`
-       * :c:data:`ref_bitmask_energy`
+       * :c:data:`ref_bitmask_energy_ab`
+       * :c:data:`ref_bitmask_kinetic_energy`
+       * :c:data:`ref_bitmask_n_e_energy`
+       * :c:data:`ref_bitmask_one_e_energy`
+       * :c:data:`ref_bitmask_two_e_energy`
        * :c:data:`ref_closed_shell_bitmask`
 
  
-.. c:var:: reunion_of_act_virt_bitmask
+.. c:var:: int reunion_of_act_virt_bitmask
 
 
     File : :file:`bitmask/bitmasks.irp.f`
@@ -2146,7 +2149,7 @@ Providers
        * :c:data:`generators_bitmask`
 
  
-.. c:var:: reunion_of_bitmask
+.. c:var:: int reunion_of_bitmask
 
 
     File : :file:`bitmask/bitmasks.irp.f`
@@ -2170,7 +2173,7 @@ Providers
 
 
  
-.. c:var:: reunion_of_core_inact_act_bitmask
+.. c:var:: int reunion_of_core_inact_act_bitmask
 
 
     File : :file:`bitmask/bitmasks.irp.f`
@@ -2200,7 +2203,7 @@ Providers
        * :c:data:`list_core_inact_act`
 
  
-.. c:var:: reunion_of_core_inact_bitmask
+.. c:var:: int reunion_of_core_inact_bitmask
 
 
     File : :file:`bitmask/bitmasks.irp.f`
@@ -2233,7 +2236,7 @@ Providers
        * :c:data:`reunion_of_core_inact_act_bitmask`
 
  
-.. c:var:: reunion_of_inact_act_bitmask
+.. c:var:: int reunion_of_inact_act_bitmask
 
 
     File : :file:`bitmask/bitmasks.irp.f`
@@ -2263,7 +2266,7 @@ Providers
        * :c:data:`list_inact_act`
 
  
-.. c:var:: unpaired_alpha_electrons
+.. c:var:: int unpaired_alpha_electrons
 
 
     File : :file:`bitmask/bitmasks.irp.f`
@@ -2285,7 +2288,7 @@ Providers
 
 
  
-.. c:var:: virt_bitmask
+.. c:var:: int virt_bitmask
 
 
     File : :file:`bitmask/core_inact_act_virt.irp.f`
@@ -2319,7 +2322,7 @@ Providers
        * :c:data:`virt_bitmask_4`
 
  
-.. c:var:: virt_bitmask_4
+.. c:var:: int virt_bitmask_4
 
 
     File : :file:`bitmask/bitmasks.irp.f`
@@ -2344,7 +2347,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: bitstring_to_hexa:
+.. c:function:: void bitstring_to_hexa(void)
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -2366,7 +2369,7 @@ Subroutines / functions
        * :c:func:`debug_spindet`
 
  
-.. c:function:: bitstring_to_list:
+.. c:function:: void bitstring_to_list(void)
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -2389,15 +2392,24 @@ Subroutines / functions
        * :c:func:`example_bitmask`
        * :c:func:`generate_cas_space`
        * :c:func:`getmobiles`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_1_cholesky`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_2_cholesky`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_3_cholesky`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_4_cholesky`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_n_int_cholesky`
        * :c:data:`list_core_inact`
        * :c:data:`list_core_inact_act`
        * :c:data:`list_inact_act`
-       * :c:data:`ref_bitmask_energy`
+       * :c:data:`ref_bitmask_energy_ab`
+       * :c:data:`ref_bitmask_kinetic_energy`
+       * :c:data:`ref_bitmask_n_e_energy`
+       * :c:data:`ref_bitmask_one_e_energy`
+       * :c:data:`ref_bitmask_two_e_energy`
        * :c:func:`splash_p`
        * :c:func:`spot_hasbeen`
 
  
-.. c:function:: bitstring_to_str:
+.. c:function:: void bitstring_to_str(void)
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -2421,7 +2433,7 @@ Subroutines / functions
        * :c:func:`print_spindet`
 
  
-.. c:function:: broadcast_chunks_bit_kind:
+.. c:function:: void broadcast_chunks_bit_kind(void)
 
 
     File : :file:`bitmask/mpi.irp.f`
@@ -2434,7 +2446,7 @@ Subroutines / functions
     Broadcast with chunks of ~2GB
 
  
-.. c:function:: clear_bit_to_integer:
+.. c:function:: void clear_bit_to_integer(void)
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -2455,7 +2467,7 @@ Subroutines / functions
        * :c:data:`ref_closed_shell_bitmask`
 
  
-.. c:function:: configuration_to_str:
+.. c:function:: void configuration_to_str(void)
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -2475,7 +2487,7 @@ Subroutines / functions
        * :c:func:`debug_cfg`
 
  
-.. c:function:: debug_cfg:
+.. c:function:: void debug_cfg(void)
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -2497,7 +2509,7 @@ Subroutines / functions
        * :c:func:`configuration_to_str`
 
  
-.. c:function:: debug_det:
+.. c:function:: void debug_det(void)
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -2532,7 +2544,7 @@ Subroutines / functions
        * :c:func:`print_det`
 
  
-.. c:function:: debug_spindet:
+.. c:function:: void debug_spindet(void)
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -2554,7 +2566,7 @@ Subroutines / functions
        * :c:func:`print_spindet`
 
  
-.. c:function:: det_allowed_ormas:
+.. c:function:: void det_allowed_ormas(void)
 
 
     File : :file:`bitmask/bitmasks_ormas.irp.f`
@@ -2578,7 +2590,7 @@ Subroutines / functions
        * :c:data:`ormas_n_space`
 
  
-.. c:function:: example_bitmask:
+.. c:function:: void example_bitmask(void)
 
 
     File : :file:`bitmask/example.irp.f`
@@ -2617,7 +2629,7 @@ Subroutines / functions
        * :c:func:`set_bit_to_integer`
 
  
-.. c:function:: initialize_mo_coef_begin_iteration:
+.. c:function:: void initialize_mo_coef_begin_iteration(void)
 
 
     File : :file:`bitmask/track_orb.irp.f`
@@ -2647,7 +2659,7 @@ Subroutines / functions
        * :c:func:`roothaan_hall_scf`
 
  
-.. c:function:: is_a_1h:
+.. c:function:: void is_a_1h(void)
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -2666,7 +2678,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: is_a_1h1p:
+.. c:function:: void is_a_1h1p(void)
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -2685,7 +2697,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: is_a_1h2p:
+.. c:function:: void is_a_1h2p(void)
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -2704,7 +2716,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: is_a_1p:
+.. c:function:: void is_a_1p(void)
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -2723,7 +2735,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: is_a_2h:
+.. c:function:: void is_a_2h(void)
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -2742,7 +2754,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: is_a_2h1p:
+.. c:function:: void is_a_2h1p(void)
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -2761,7 +2773,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: is_a_2p:
+.. c:function:: void is_a_2p(void)
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -2780,7 +2792,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: is_a_two_holes_two_particles:
+.. c:function:: void is_a_two_holes_two_particles(void)
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -2807,7 +2819,27 @@ Subroutines / functions
        * :c:data:`virt_bitmask`
 
  
-.. c:function:: is_i_in_virtual:
+.. c:function:: void is_i_in_core(void)
+
+
+    File : :file:`bitmask/bitmask_cas_routines.irp.f`
+
+    .. code:: fortran
+
+        logical function is_i_in_core(i)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`core_bitmask`
+       * :c:data:`n_int`
+
+ 
+.. c:function:: void is_i_in_virtual(void)
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -2827,26 +2859,20 @@ Subroutines / functions
        * :c:data:`virt_bitmask`
 
  
-.. c:function:: is_integer_in_string:
+.. c:function:: void is_integer_in_string(void)
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
 
     .. code:: fortran
 
-        logical function is_integer_in_string(bite,string,Nint)
+        logical function is_integer_in_string(orb,bitmask,Nint)
 
 
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`set_bit_to_integer`
+    Checks is the orbital orb is set to 1 in the bit string
 
  
-.. c:function:: is_the_hole_in_det:
+.. c:function:: void is_the_hole_in_det(void)
 
 
     File : :file:`bitmask/find_hole.irp.f`
@@ -2865,7 +2891,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: is_the_particl_in_det:
+.. c:function:: void is_the_particl_in_det(void)
 
 
     File : :file:`bitmask/find_hole.irp.f`
@@ -2884,7 +2910,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: list_to_bitstring:
+.. c:function:: void list_to_bitstring(void)
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -2927,7 +2953,7 @@ Subroutines / functions
        * :c:data:`virt_bitmask`
 
  
-.. c:function:: modify_bitmasks_for_hole:
+.. c:function:: void modify_bitmasks_for_hole(void)
 
 
     File : :file:`bitmask/modify_bitmasks.irp.f`
@@ -2950,7 +2976,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: modify_bitmasks_for_hole_in_out:
+.. c:function:: void modify_bitmasks_for_hole_in_out(void)
 
 
     File : :file:`bitmask/modify_bitmasks.irp.f`
@@ -2972,7 +2998,7 @@ Subroutines / functions
        * :c:data:`index_holes_bitmask`
 
  
-.. c:function:: modify_bitmasks_for_particl:
+.. c:function:: void modify_bitmasks_for_particl(void)
 
 
     File : :file:`bitmask/modify_bitmasks.irp.f`
@@ -2995,7 +3021,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: number_of_holes:
+.. c:function:: void number_of_holes(void)
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -3006,6 +3032,8 @@ Subroutines / functions
 
 
     Function that returns the number of holes in the inact space
+    
+    ::
     
       popcnt(
          xor(
@@ -3021,14 +3049,17 @@ Subroutines / functions
            reunion_of_core_inact_bitmask(1,1)) )
     
     (key_in && act_bitmask)
-    +---------------------+
-       electrons in cas     xor key_in
-    +---------------------------------+
-           electrons outside of cas     && reunion_of_core_inact_bitmask
-    +------------------------------------------------------------------+
-               electrons in the core/inact space     xor reunion_of_core_inact_bitmask
-    +---------------------------------------------------------------------------------+
-                 holes
+    
+    ::
+    
+     +---------------------+
+        electrons in cas     xor key_in
+     +---------------------------------+
+        electrons outside of cas     && reunion_of_core_inact_bitmask
+     +------------------------------------------------------------------+
+        electrons in the core/inact space     xor reunion_of_core_inact_bitmask
+     +---------------------------------------------------------------------------------+
+        holes
 
     Needs:
 
@@ -3040,7 +3071,7 @@ Subroutines / functions
        * :c:data:`reunion_of_core_inact_bitmask`
 
  
-.. c:function:: number_of_holes_verbose:
+.. c:function:: void number_of_holes_verbose(void)
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -3069,7 +3100,7 @@ Subroutines / functions
        * :c:func:`debug_det`
 
  
-.. c:function:: number_of_particles:
+.. c:function:: void number_of_particles(void)
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -3091,7 +3122,7 @@ Subroutines / functions
        * :c:data:`virt_bitmask`
 
  
-.. c:function:: number_of_particles_verbose:
+.. c:function:: void number_of_particles_verbose(void)
 
 
     File : :file:`bitmask/bitmask_cas_routines.irp.f`
@@ -3120,7 +3151,7 @@ Subroutines / functions
        * :c:func:`debug_det`
 
  
-.. c:function:: ormas_occ:
+.. c:function:: void ormas_occ(void)
 
 
     File : :file:`bitmask/bitmasks_ormas.irp.f`
@@ -3142,7 +3173,7 @@ Subroutines / functions
        * :c:data:`ormas_n_space`
 
  
-.. c:function:: print_det:
+.. c:function:: void print_det(void)
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -3171,7 +3202,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_str`
 
  
-.. c:function:: print_det_one_dimension:
+.. c:function:: void print_det_one_dimension(void)
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -3191,7 +3222,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_str`
 
  
-.. c:function:: print_generators_bitmasks_holes:
+.. c:function:: void print_generators_bitmasks_holes(void)
 
 
     File : :file:`bitmask/modify_bitmasks.irp.f`
@@ -3212,7 +3243,7 @@ Subroutines / functions
        * :c:data:`n_int`
 
  
-.. c:function:: print_generators_bitmasks_particles:
+.. c:function:: void print_generators_bitmasks_particles(void)
 
 
     File : :file:`bitmask/modify_bitmasks.irp.f`
@@ -3240,7 +3271,7 @@ Subroutines / functions
        * :c:func:`print_det`
 
  
-.. c:function:: print_spindet:
+.. c:function:: void print_spindet(void)
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -3267,7 +3298,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_str`
 
  
-.. c:function:: reorder_core_orb:
+.. c:function:: void reorder_core_orb(void)
 
 
     File : :file:`bitmask/track_orb.irp.f`
@@ -3308,7 +3339,7 @@ Subroutines / functions
        * :c:func:`dsort`
 
  
-.. c:function:: set_bit_to_integer:
+.. c:function:: void set_bit_to_integer(void)
 
 
     File : :file:`bitmask/bitmasks_routines.irp.f`
@@ -3326,11 +3357,10 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`example_bitmask`
-       * :c:func:`is_integer_in_string`
        * :c:data:`orb_swap`
 
  
-.. c:function:: set_bitmask_hole_as_input:
+.. c:function:: void set_bitmask_hole_as_input(void)
 
 
     File : :file:`bitmask/modify_bitmasks.irp.f`
@@ -3360,7 +3390,7 @@ Subroutines / functions
        * :c:data:`generators_bitmask`
 
  
-.. c:function:: set_bitmask_particl_as_input:
+.. c:function:: void set_bitmask_particl_as_input(void)
 
 
     File : :file:`bitmask/modify_bitmasks.irp.f`

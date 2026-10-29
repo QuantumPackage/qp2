@@ -1,6 +1,14 @@
 Benchmarks
 ==========
 
+.. note::
+
+   These benchmarks date from 2020. They were measured with a
+   development version of the 2.x series of |QP|, between the 2.1.2
+   and 2.2.1 releases, on the machines described below, and are kept
+   as a reference of the parallel scaling of that series. Do not take
+   them as the performance of the current release.
+
 The determinant selection, MR-PT2 and diagonalization are parallelized with
 distributed parallelism. Benchmarks for the [NH2-CH-NH2]+ molecule in the
 aug-cc-pVDZ basis set are presented with up to 50 nodes (1800 cores) on

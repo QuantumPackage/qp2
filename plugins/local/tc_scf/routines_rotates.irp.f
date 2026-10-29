@@ -146,10 +146,10 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
     call give_degen_full_list(fock_diag, mo_num, thr_deg, list_degen, n_degen_list)
   endif
 
-  print *, ' fock_matrix_mo'
-  do i = 1, mo_num
-    print *, i, fock_diag(i), angle_left_right(i)
-  enddo
+!  print *, ' fock_matrix_mo'
+!  do i = 1, mo_num
+!    print *, i, fock_diag(i), angle_left_right(i)
+!  enddo
    
   do i = 1, n_degen_list
 !  ifirst = list_degen(1,i)
@@ -160,21 +160,21 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
     if(n_degen .ge. 1000) n_degen = 1 ! convention for core orbitals
      
     if(n_degen .eq. 1) cycle
-    print*, ' working on orbital', i
-    print*, ' multiplicity =', n_degen
+!    print*, ' working on orbital', i
+!    print*, ' multiplicity =', n_degen
 
     allocate(stmp(n_degen,n_degen), smat2(n_degen,n_degen))
     allocate(mo_r_coef_tmp(ao_num,n_degen), mo_l_coef_tmp(ao_num,n_degen), mo_l_coef_new(ao_num,n_degen))
     allocate(T(n_degen,n_degen), Snew(n_degen,n_degen))
 
-    print*,'Right orbitals before'
-    do j = 1, n_degen
-      write(*,'(1000(F16.10,X))') mo_r_coef_new(1:ao_num,list_degen(i,j))
-    enddo
-    print*,'Left orbitals before'
-    do j = 1, n_degen
-      write(*,'(1000(F16.10,X))') mo_l_coef(1:ao_num,list_degen(i,j)) 
-    enddo
+!    print*,'Right orbitals before'
+!    do j = 1, n_degen
+!      write(*,'(1000(F16.10,X))') mo_r_coef_new(1:ao_num,list_degen(i,j))
+!    enddo
+!    print*,'Left orbitals before'
+!    do j = 1, n_degen
+!      write(*,'(1000(F16.10,X))') mo_l_coef(1:ao_num,list_degen(i,j)) 
+!    enddo
     if(angle_left_right(list_degen(i,1)).gt.80.d0.and.n_degen==2)then
       integer :: i_list, j_list
       i_list = list_degen(i,1)
@@ -190,34 +190,34 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
       mo_l_coef_tmp(1:ao_num,2) = mo_r_coef_new(1:ao_num,j_list)
     else
       do j = 1, n_degen
-        print*,'i_list = ',list_degen(i,j)
+!        print*,'i_list = ',list_degen(i,j)
         mo_r_coef_tmp(1:ao_num,j) = mo_r_coef_new(1:ao_num,list_degen(i,j))
         mo_l_coef_tmp(1:ao_num,j) = mo_l_coef(1:ao_num,list_degen(i,j))
       enddo
     endif
-    print*,'Right orbitals '
-    do j = 1, n_degen
-      write(*,'(1000(F16.10,X))') mo_r_coef_tmp(1:ao_num,j) 
-    enddo
-    print*,'Left orbitals '
-    do j = 1, n_degen
-      write(*,'(100(F16.10,X))') mo_l_coef_tmp(1:ao_num,j) 
-    enddo
+!    print*,'Right orbitals '
+!    do j = 1, n_degen
+!      write(*,'(1000(F16.10,X))') mo_r_coef_tmp(1:ao_num,j) 
+!    enddo
+!    print*,'Left orbitals '
+!    do j = 1, n_degen
+!      write(*,'(100(F16.10,X))') mo_l_coef_tmp(1:ao_num,j) 
+!    enddo
     ! Orthogonalization of right functions
-    print *, ' Orthogonalization of RIGHT functions'
-    print *, ' ------------------------------------'
+!    print *, ' Orthogonalization of RIGHT functions'
+!    print *, ' ------------------------------------'
     call orthog_functions(ao_num, n_degen, mo_r_coef_tmp, ao_overlap)
   
     ! Orthogonalization of left functions
-    print *, ' Orthogonalization of LEFT functions'
-    print *, ' ------------------------------------'
+!    print *, ' Orthogonalization of LEFT functions'
+!    print *, ' ------------------------------------'
     call orthog_functions(ao_num, n_degen, mo_l_coef_tmp, ao_overlap)
 
-    print *, ' Overlap left-right '
+!    print *, ' Overlap left-right '
     call build_s_matrix(ao_num, n_degen, mo_r_coef_tmp, mo_l_coef_tmp, ao_overlap, stmp)
-    do j = 1, n_degen
-     write(*,'(100(F8.4,X))') stmp(:,j)
-    enddo
+!    do j = 1, n_degen
+!     write(*,'(100(F8.4,X))') stmp(:,j)
+!    enddo
     call build_s_matrix(ao_num, n_degen, mo_l_coef_tmp, mo_l_coef_tmp, ao_overlap, stmp)
 
     !print*,'LEFT/LEFT OVERLAP '
@@ -421,7 +421,7 @@ subroutine print_angles_tc()
     left  = overlap_mo_l(i,i)
     right = overlap_mo_r(i,i)
 !  print*,Fock_matrix_tc_mo_tot(i,i),left*right,angle_left_right(i)
-    print *, left*right, angle_left_right(i)
+    print *, i, left*right, angle_left_right(i)
   enddo
 
 end

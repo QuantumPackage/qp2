@@ -11,6 +11,9 @@ Automatically finds *n*, the number of core electrons. Calls
 :math:`n/2` first ones which are set as ``Core``. If pseudo-potentials
 are used, all the |MOs| are set as ``Active``.
 
+The table below gives the number of frozen *electrons*; the number of
+frozen |MOs| is half that value.
+
 
 ========== ========= ======= ======= 
   Range     Default   Small   Large  
@@ -44,12 +47,12 @@ Usage
 
 .. code:: bash
 
-      qp_set_frozen_core [-q|--query] [(-l|-s|--large|--small)  EZFIO_DIR
+      qp_set_frozen_core [-q|--query] [(-l|-s|-u|--large|--small|--unset)] EZFIO_DIR
 
 
-.. option:: -q, --query 
+.. option:: -q, --query
 
-    Prints in the standard output the number of core electrons.
+    Prints in the standard output the number of frozen |MOs| and exits.
 
 .. option:: -s, --small
 
@@ -58,5 +61,11 @@ Usage
 .. option:: -l, --large
 
     Use a large core.
+
+.. option:: -u, --unset
+
+    Do not freeze any core orbital: all the |MOs| are set as ``Active``.
+    This is also what happens automatically when pseudo-potentials are
+    used.
 
 

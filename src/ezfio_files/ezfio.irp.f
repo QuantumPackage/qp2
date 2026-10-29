@@ -64,7 +64,7 @@ BEGIN_PROVIDER [ character*(1024), ezfio_work_dir_pid ]
  use c_functions
  implicit none
  BEGIN_DOC
- ! EZFIO/work/pid_
+ ! EZFIO/work/pid\_
  END_DOC
  character*(32)                 :: pid_str
  integer :: getpid

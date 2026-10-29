@@ -77,13 +77,17 @@ function qp()
     "create_ezfio")
       shift
       NAME=$(qp_create_ezfio "$@")
-      if [[ -d $NAME ]] ; then
+      result=$?
+      if [[ $result -ne 0 ]] ; then
+        >&2 echo "qp: create_ezfio failed (exit $result); see the message above, or run 'qp create_ezfio -h'"
+      elif [[ -d $NAME ]] ; then
         [[ -d $EZFIO_FILE ]] && ezfio unset_file
         ezfio set_file $NAME
       else
         qp_create_ezfio -h | more
       fi
       unset _ARGS
+      return $result
       ;;
 
     "man")

@@ -6,9 +6,9 @@ qp_test
 
 .. program:: qp_test
 
-This command runs the consistency test of |qp|.
+This command runs the consistency tests of |qp|.
 The tests are run with the |Bats| shell testing environment.
-If the name of a test of its number is specified on the command line, only this
+If the name of a test or its number is specified on the command line, only this
 test will be run.
 
 Usage
@@ -24,8 +24,8 @@ Usage
 
 .. option:: -a
 
-   Runs all the tests. By default, run only the tests of the current
-   directory, and the directories below.
+   Runs the tests of all the installed modules. By default, run only the
+   tests of the current directory, and the directories below.
 
 .. option:: -v
 

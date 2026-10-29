@@ -69,6 +69,59 @@
  
 END_PROVIDER 
 
+
+! ---
+
+ BEGIN_PROVIDER [ double precision, overlap_mo_read_r, (mo_num, mo_num)]
+&BEGIN_PROVIDER [ double precision, overlap_mo_read_l, (mo_num, mo_num)]
+
+  BEGIN_DOC
+  ! overlap_mo_read_r_mo(j,i) = <MO_i|MO_R_j>
+  END_DOC
+
+  implicit none
+  integer                       :: i, j, p, q
+  double precision, allocatable :: tmp(:,:)
+
+  overlap_mo_read_r = 0.d0
+  overlap_mo_read_l = 0.d0
+  do i = 1, mo_num
+!    print*,mo_r_coef_read(1,i) , mo_r_coef(1,i)
+    do j = 1, mo_num
+      do p = 1, ao_num
+        do q = 1, ao_num
+          overlap_mo_read_r(j,i) += mo_r_coef_read(q,i) * mo_r_coef(p,j) * ao_overlap(q,p) 
+          overlap_mo_read_l(j,i) += mo_l_coef_read(q,i) * mo_l_coef(p,j) * ao_overlap(q,p)
+        enddo
+      enddo
+      overlap_mo_read_r(j,i) *= 1.d0/dsqrt(overlap_mo_r(j,j) * overlap_mo_r_read_read(i,i))
+      overlap_mo_read_l(j,i) *= 1.d0/dsqrt(overlap_mo_l(j,j) * overlap_mo_l_read_read(i,i))
+    enddo
+  enddo
+
+! allocate( tmp(mo_num,ao_num) )
+
+! tmp = 0.d0
+! call dgemm( "T", "N", mo_num, ao_num, ao_num, 1.d0                                   & 
+!           , mo_r_coef(1,1), size(mo_r_coef, 1), ao_overlap(1,1), size(ao_overlap, 1) &
+!           , 0.d0, tmp(1,1), size(tmp, 1) )
+! call dgemm( "N", "N", mo_num, mo_num, ao_num, 1.d0                     & 
+!           , tmp(1,1), size(tmp, 1), mo_r_coef(1,1), size(mo_r_coef, 1) &
+!           , 0.d0, overlap_mo_read_r(1,1), size(overlap_mo_read_r, 1) )
+
+! tmp = 0.d0
+! call dgemm( "T", "N", mo_num, ao_num, ao_num, 1.d0                                   & 
+!           , mo_l_coef(1,1), size(mo_l_coef, 1), ao_overlap(1,1), size(ao_overlap, 1) &
+!           , 0.d0, tmp(1,1), size(tmp, 1) )
+! call dgemm( "N", "N", mo_num, mo_num, ao_num, 1.d0                     & 
+!           , tmp(1,1), size(tmp, 1), mo_l_coef(1,1), size(mo_l_coef, 1) &
+!           , 0.d0, overlap_mo_read_l(1,1), size(overlap_mo_read_l, 1) )
+
+! deallocate(tmp)
+
+END_PROVIDER 
+
+! ---
 ! ---
 
  BEGIN_PROVIDER [ double precision, overlap_mo_r, (mo_num, mo_num)]
@@ -119,6 +172,54 @@ END_PROVIDER
 
 ! ---
 
+ BEGIN_PROVIDER [ double precision, overlap_mo_r_read_read, (mo_num, mo_num)]
+&BEGIN_PROVIDER [ double precision, overlap_mo_l_read_read, (mo_num, mo_num)]
+
+  BEGIN_DOC
+  ! overlap_mo_r_mo(j,i) = <MO_i|MO_R_j> over between reads 
+  END_DOC
+
+  implicit none
+  integer                       :: i, j, p, q
+  double precision, allocatable :: tmp(:,:)
+
+  !overlap_mo_r = 0.d0
+  !overlap_mo_l = 0.d0
+  !do i = 1, mo_num
+  !  do j = 1, mo_num
+  !    do p = 1, ao_num
+  !      do q = 1, ao_num
+  !        overlap_mo_r(j,i) += mo_r_coef_read(q,i) * mo_r_coef_read(p,j) * ao_overlap(q,p) 
+  !        overlap_mo_l(j,i) += mo_l_coef_read(q,i) * mo_l_coef_read(p,j) * ao_overlap(q,p)
+  !      enddo
+  !    enddo
+  !  enddo
+  !enddo
+
+  allocate( tmp(mo_num,ao_num) )
+
+  tmp = 0.d0
+  call dgemm( "T", "N", mo_num, ao_num, ao_num, 1.d0                                   & 
+            , mo_r_coef_read(1,1), size(mo_r_coef_read, 1), ao_overlap(1,1), size(ao_overlap, 1) &
+            , 0.d0, tmp(1,1), size(tmp, 1) )
+  call dgemm( "N", "N", mo_num, mo_num, ao_num, 1.d0                     & 
+            , tmp(1,1), size(tmp, 1), mo_r_coef_read(1,1), size(mo_r_coef_read, 1) &
+            , 0.d0, overlap_mo_r_read_read(1,1), size(overlap_mo_r, 1) )
+
+  tmp = 0.d0
+  call dgemm( "T", "N", mo_num, ao_num, ao_num, 1.d0                                   & 
+            , mo_l_coef_read(1,1), size(mo_l_coef_read, 1), ao_overlap(1,1), size(ao_overlap, 1) &
+            , 0.d0, tmp(1,1), size(tmp, 1) )
+  call dgemm( "N", "N", mo_num, mo_num, ao_num, 1.d0                     & 
+            , tmp(1,1), size(tmp, 1), mo_l_coef_read(1,1), size(mo_l_coef_read, 1) &
+            , 0.d0, overlap_mo_l_read_read(1,1), size(overlap_mo_l, 1) )
+
+  deallocate(tmp)
+
+END_PROVIDER 
+
+! ---
+
  BEGIN_PROVIDER [ double precision, overlap_mo_r_mo, (mo_num, mo_num)]
 &BEGIN_PROVIDER [ double precision, overlap_mo_l_mo, (mo_num, mo_num)]
 
@@ -145,6 +246,7 @@ END_PROVIDER
 END_PROVIDER 
 
 ! ---
+
 
  BEGIN_PROVIDER [ double precision, angle_left_right, (mo_num)]
 &BEGIN_PROVIDER [ double precision, max_angle_left_right]

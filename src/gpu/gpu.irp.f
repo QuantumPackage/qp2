@@ -4,11 +4,11 @@ use gpu_affinity_mod
 BEGIN_PROVIDER [ type(gpu_blas), blas_handle ]
  implicit none
  BEGIN_DOC
- ! Handle for cuBLAS or RocBLAS
+ ! Handle for cuBLAS/RocBLAS, or the 1-byte CPU-emulation handle when
+ ! gpu_num = 0 (the simple_gpu CPU backend fully emulates the GPU BLAS
+ ! API on host memory)
  END_DOC
- if (gpu_num > 0) then
-   call gpu_blas_create(blas_handle)
- endif
+ call gpu_blas_create(blas_handle)
 ! call gpu_set_stream(blas_handle, gpu_default_stream)
 END_PROVIDER
 

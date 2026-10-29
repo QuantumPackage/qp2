@@ -5,7 +5,7 @@
 .. _Dice: https://sanshar.github.io/Dice/
 .. _EMSL_Basis_Set_Exchange_Local: https://github.com/TApplencourt/EMSL_Basis_Set_Exchange_Local
 .. _EZFIO: http://gitlab.com/scemama/EZFIO
-.. _external plugins: https://gitlab.com/scemama/qp_plugins
+.. _external plugins: https://gitlab.com/scemama/qp_plugins_scemama
 .. _GAMESS: https://www.msg.chem.iastate.edu/gamess/
 .. _GNU make: http://www.gnu.org/software/make
 .. _GNU Patch: http://savannah.gnu.org/projects/patch
@@ -18,6 +18,7 @@
 .. _OCaml: http://ocaml.org/
 .. _OPAM: http://opam.ocaml.org/
 .. _Olympe:  https://www.calmip.univ-toulouse.fr/spip.php?article582&lang=fr
+.. _pkg-config: https://www.freedesktop.org/wiki/Software/pkg-config/
 .. _Python:  http://www.python.org
 .. _QMC=Chem: https://gitlab.com/scemama/qmcchem
 .. _QMCPack: https://qmcpack.org
@@ -36,6 +37,7 @@
 .. |Ninja|  replace:: `Ninja`_
 .. |OCaml|  replace:: `OCaml`_
 .. |OPAM|  replace:: `OPAM`_
+.. |pkg-config|  replace:: `pkg-config`_
 .. |Python|  replace:: `Python`_
 .. |qp| replace:: *Quantum Package*
 .. |QP| replace:: *Quantum Package* 
@@ -90,4 +92,6 @@
 .. |false| replace:: ``false``
 .. |README| replace:: :file:`README.rst`
 .. |NEED| replace:: :file:`NEED`
+.. |ao_extra| replace:: ``ao_extra``
+.. |ao_extras| replace:: ``ao_extras``
 

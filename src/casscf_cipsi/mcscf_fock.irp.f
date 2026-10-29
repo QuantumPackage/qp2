@@ -161,7 +161,10 @@ END_PROVIDER
    !
    ! J. Chem. Phys. 133, 141102 (2010), https://doi.org/10.1063/1.3503173
    ! Coupling parameters from J. Chem. Phys. 125, 204110 (2006); https://doi.org/10.1063/1.2393223.
-   !       cc   oo   vv
+   !
+   ! ::
+   !
+   !  cc   oo   vv
    !  A  -0.5  0.5  1.5
    !  B   1.5  0.5 -0.5
    !

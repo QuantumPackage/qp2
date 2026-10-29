@@ -237,8 +237,8 @@ complex*16 function crint_smallz(n, rho)
   integer,    intent(in)      :: n
   complex*16, intent(in)      :: rho
 
-  integer,          parameter :: kmax = 40
-  double precision, parameter :: eps = 1.d-10
+  integer,          parameter :: kmax = 100
+  double precision, parameter :: eps = 1.d-17
 
   integer                     :: k
   double precision            :: delta_mod
@@ -254,11 +254,11 @@ complex*16 function crint_smallz(n, rho)
     delta_k      = ct * rho_k / gamma(dble(n+k) + 1.5d0)
     crint_smallz = crint_smallz + delta_k
 
-    delta_mod = dsqrt(real(delta_k)*real(delta_k) + aimag(delta_k)*aimag(delta_k))
-    if(delta_mod .lt. eps) return
+    delta_mod = abs(delta_k)
+    if(delta_mod .lt. eps * abs(crint_smallz)) return
   enddo
 
-  if(delta_mod > eps) then
+  if(delta_mod > eps * abs(crint_smallz)) then
     write(*,*) ' pb in crint_smallz !'
     write(*,*) ' n, rho = ', n, rho
     write(*,*) ' value = ', crint_smallz
@@ -423,7 +423,7 @@ subroutine zboysfunnrp(n_max, x, vals)
   ! (where F(n,z) are the Boys functions)
   ! for a complex valued argument WITH NEGATIVE REAL PART
   !
-  ! Input: x  --- argument, complex *16 Re(x)<=0
+  ! Input: x  --- argument, complex \*16 Re(x)<=0
   ! Output: vals  --- values of e^z F(n,z), n = 0, 1, ..., n_max
   !
   ! Beylkin & Sharma, J. Chem. Phys. 155, 174117 (2021)
@@ -616,8 +616,8 @@ subroutine crint_smallz_vec(n_max, rho, vals)
   complex*16, intent(in)      :: rho
   complex*16, intent(out)     :: vals(0:n_max)
 
-  integer,          parameter :: kmax = 40
-  double precision, parameter :: eps = 1.d-10
+  integer,          parameter :: kmax = 100
+  double precision, parameter :: eps = 1.d-17
 
   integer                     :: k, n
   complex*16                  :: ct, delta_k
@@ -642,12 +642,12 @@ subroutine crint_smallz_vec(n_max, rho, vals)
     do k = 1, kmax
       delta_k = ct * rho_k(k) / gamma(dble(n+k) + 1.5d0)
       vals(n) += delta_k
-      if(abs(delta_k) .lt. eps) then
+      if(abs(delta_k) .lt. eps * abs(vals(n))) then
         exit
       endif
     enddo
   
-    if(abs(delta_k) > eps) then
+    if(abs(delta_k) > eps * abs(vals(n))) then
       write(*,*) ' pb in crint_smallz_vec !'
       write(*,*) ' n, rho = ', n, rho
       write(*,*) ' value = ', vals(n)

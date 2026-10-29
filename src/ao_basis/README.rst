@@ -31,7 +31,7 @@ the two electron integrals.
 
 
 Complex Gaussian-Type Orbitals (cGTOs)
-=====================================
+======================================
 
 Complex Gaussian-Type Orbitals (cGTOs) are also supported:
 

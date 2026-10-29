@@ -1,4 +1,4 @@
-program test_j_mu_of_r
+program deb_j_mu_of_r
  implicit none
 ! call routine_test_mu_of_r
  call routine_test_mu_of_r_tot

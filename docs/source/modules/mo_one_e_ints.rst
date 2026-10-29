@@ -5,18 +5,30 @@
 .. default-role:: option 
  
 ==================
-mo_one_e_integrals
+mo_one_e_ints
 ==================
 
-All the one-electron integrals in |MO| basis are defined here.
+All the one-electron integrals in the |MO| basis.
 
-The most important providers for usual quantum-chemistry calculation are:
+They are obtained from the |AO| integrals of the
+:ref:`module_ao_one_e_ints` module with the |MO| transformation
+(:c:func:`mo_to_ao` and its variants, and
+:c:data:`ao_one_e_integrals_from_mo`):
 
-* `mo_kinetic_integrals` which are the kinetic operator integrals on the |AO| basis (see :file:`kin_mo_ints.irp.f`)
-* `mo_integrals_n_e` which are the nuclear-elctron operator integrals on the |AO| basis (see :file:`pot_mo_ints.irp.f`)
-* `mo_one_e_integrals` which are the the h_core operator integrals on the |AO| basis (see :file:`mo_mono_ints.irp.f`)
+* :c:data:`mo_kinetic_integrals`: the kinetic operator integrals
+  (`kin_mo_ints.irp.f`)
+* :c:data:`mo_integrals_n_e`: the nuclear-electron integrals
+  (`pot_mo_ints.irp.f`)
+* :c:data:`mo_one_e_integrals`: the core Hamiltonian integrals
+  (`mo_one_e_ints.irp.f`)
+* :c:data:`mo_pseudo_integrals`, with the local and non local parts
+  (`pot_mo_pseudo_ints.irp.f`)
 
-Note that you can find other interesting integrals related to the position operator in :file:`spread_dipole_mo.irp.f`.
+Other integrals related to the position operator, dipole moments and
+spreads, are in `spread_dipole_mo.irp.f`, the orthonormalization of
+the |MOs| in `orthonormalize.irp.f`, and the reading and writing of
+the integrals in the |EZFIO| database are provided by the
+`read_mo_integrals_*` and `write_mo_integrals_*` subroutines.
  
  
  
@@ -71,7 +83,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: ao_one_e_integrals_from_mo
+.. c:var:: double ao_one_e_integrals_from_mo
 
 
     File : :file:`mo_one_e_ints/ao_to_mo.irp.f`
@@ -95,9 +107,42 @@ Providers
        * :c:data:`mo_one_e_integrals`
        * :c:data:`s_mo_coef`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_sphe_one_e_integrals_from_mo`
 
  
-.. c:var:: mo_dipole_x
+.. c:var:: double ao_sphe_one_e_integrals_from_mo
+
+
+    File : :file:`mo_one_e_ints/ao_to_mo.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_sphe_one_e_integrals_from_mo	(ao_sphe_num,ao_sphe_num)
+
+
+    Integrals of the one e hamiltonian obtained from the integrals on the MO basis
+    
+    WARNING : this is equal to ao_one_e_integrals only if the AO and MO basis have the same number of functions
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_one_e_integrals_from_mo`
+       * :c:data:`ao_sphe_num`
+       * :c:data:`mo_num`
+       * :c:data:`mo_one_e_integrals`
+       * :c:data:`s_mo_sphe_coef`
+
+
+ 
+.. c:var:: double mo_dipole_x
 
 
     File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
@@ -128,12 +173,12 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`mo_prop_dipole_x`
        * :c:data:`mo_spread_centered_x`
-       * :c:data:`multi_s_dipole_moment`
        * :c:data:`z_dipole_moment`
 
  
-.. c:var:: mo_dipole_y
+.. c:var:: double mo_dipole_y
 
 
     File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
@@ -164,12 +209,12 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`mo_prop_dipole_x`
        * :c:data:`mo_spread_centered_x`
-       * :c:data:`multi_s_dipole_moment`
        * :c:data:`z_dipole_moment`
 
  
-.. c:var:: mo_dipole_z
+.. c:var:: double mo_dipole_z
 
 
     File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
@@ -200,12 +245,12 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`mo_prop_dipole_x`
        * :c:data:`mo_spread_centered_x`
-       * :c:data:`multi_s_dipole_moment`
        * :c:data:`z_dipole_moment`
 
  
-.. c:var:: mo_integrals_n_e
+.. c:var:: double mo_integrals_n_e
 
 
     File : :file:`mo_one_e_ints/pot_mo_ints.irp.f`
@@ -234,11 +279,11 @@ Providers
        :columns: 3
 
        * :c:data:`mo_one_e_integrals`
-       * :c:data:`ref_bitmask_energy`
+       * :c:data:`ref_bitmask_n_e_energy`
        * :c:data:`v_ne_psi_energy`
 
  
-.. c:var:: mo_integrals_n_e_per_atom
+.. c:var:: double mo_integrals_n_e_per_atom
 
 
     File : :file:`mo_one_e_ints/pot_mo_ints.irp.f`
@@ -265,7 +310,7 @@ Providers
 
 
  
-.. c:var:: mo_kinetic_integrals
+.. c:var:: double mo_kinetic_integrals
 
 
     File : :file:`mo_one_e_ints/kin_mo_ints.irp.f`
@@ -294,10 +339,10 @@ Providers
        :columns: 3
 
        * :c:data:`mo_one_e_integrals`
-       * :c:data:`ref_bitmask_energy`
+       * :c:data:`ref_bitmask_kinetic_energy`
 
  
-.. c:var:: mo_one_e_integrals
+.. c:var:: double mo_one_e_integrals
 
 
     File : :file:`mo_one_e_ints/mo_one_e_ints.irp.f`
@@ -315,9 +360,13 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`ao_num`
+       * :c:data:`ao_one_e_integrals`
+       * :c:data:`mo_coef`
        * :c:data:`mo_integrals_n_e`
        * :c:data:`mo_kinetic_integrals`
        * :c:data:`mo_num`
+       * :c:data:`read_ao_one_e_integrals`
        * :c:data:`read_mo_one_e_integrals`
 
     Needed by:
@@ -325,17 +374,19 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`all_mo_integrals`
        * :c:data:`ao_one_e_integrals_from_mo`
+       * :c:data:`ao_sphe_one_e_integrals_from_mo`
        * :c:data:`core_energy`
        * :c:data:`etwo`
        * :c:data:`fock_operator_closed_shell_ref_bitmask`
        * :c:data:`h_core_ri`
        * :c:data:`one_ints_no`
        * :c:data:`psi_energy_h_core`
-       * :c:data:`ref_bitmask_energy`
+       * :c:data:`ref_bitmask_one_e_energy`
 
  
-.. c:var:: mo_overlap
+.. c:var:: double mo_overlap
 
 
     File : :file:`mo_one_e_ints/mo_overlap.irp.f`
@@ -359,7 +410,7 @@ Providers
 
 
  
-.. c:var:: mo_pseudo_integrals
+.. c:var:: double mo_pseudo_integrals
 
 
     File : :file:`mo_one_e_ints/pot_mo_pseudo_ints.irp.f`
@@ -385,7 +436,7 @@ Providers
 
 
  
-.. c:var:: mo_pseudo_integrals_local
+.. c:var:: double mo_pseudo_integrals_local
 
 
     File : :file:`mo_one_e_ints/pot_mo_pseudo_ints.irp.f`
@@ -410,7 +461,7 @@ Providers
 
 
  
-.. c:var:: mo_pseudo_integrals_non_local
+.. c:var:: double mo_pseudo_integrals_non_local
 
 
     File : :file:`mo_one_e_ints/pot_mo_pseudo_ints.irp.f`
@@ -435,7 +486,7 @@ Providers
 
 
  
-.. c:var:: mo_spread_centered_x
+.. c:var:: double mo_spread_centered_x
 
 
     File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
@@ -462,7 +513,7 @@ Providers
 
 
  
-.. c:var:: mo_spread_centered_y
+.. c:var:: double mo_spread_centered_y
 
 
     File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
@@ -489,7 +540,7 @@ Providers
 
 
  
-.. c:var:: mo_spread_centered_z
+.. c:var:: double mo_spread_centered_z
 
 
     File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
@@ -516,7 +567,7 @@ Providers
 
 
  
-.. c:var:: mo_spread_x
+.. c:var:: double mo_spread_x
 
 
     File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
@@ -550,7 +601,7 @@ Providers
        * :c:data:`mo_spread_centered_x`
 
  
-.. c:var:: mo_spread_y
+.. c:var:: double mo_spread_y
 
 
     File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
@@ -584,7 +635,7 @@ Providers
        * :c:data:`mo_spread_centered_x`
 
  
-.. c:var:: mo_spread_z
+.. c:var:: double mo_spread_z
 
 
     File : :file:`mo_one_e_ints/spread_dipole_mo.irp.f`
@@ -618,7 +669,7 @@ Providers
        * :c:data:`mo_spread_centered_x`
 
  
-.. c:var:: s_mo_coef
+.. c:var:: double s_mo_coef
 
 
     File : :file:`mo_one_e_ints/ao_to_mo.irp.f`
@@ -647,13 +698,46 @@ Providers
 
        * :c:data:`ao_one_e_integrals_from_mo`
        * :c:data:`fock_matrix_ao`
+       * :c:data:`s_mo_sphe_coef`
+
+ 
+.. c:var:: double s_mo_sphe_coef
+
+
+    File : :file:`mo_one_e_ints/ao_to_mo.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: s_mo_sphe_coef	(ao_sphe_num,mo_num)
+
+
+    Product S.C where S is the overlap matrix in the AO basis and C the mo_sphe_coef matrix.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_overlap`
+       * :c:data:`ao_sphe_num`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_num`
+       * :c:data:`mo_sphe_coef`
+       * :c:data:`s_mo_coef`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_sphe_one_e_integrals_from_mo`
 
  
  
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: mo_to_ao:
+.. c:function:: void mo_to_ao(void)
 
 
     File : :file:`mo_one_e_ints/ao_to_mo.irp.f`
@@ -692,7 +776,7 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:function:: mo_to_ao_no_overlap:
+.. c:function:: void mo_to_ao_no_overlap(void)
 
 
     File : :file:`mo_one_e_ints/ao_to_mo.irp.f`
@@ -730,7 +814,74 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:function:: orthonormalize_mos:
+.. c:function:: void mo_to_ao_sphe(void)
+
+
+    File : :file:`mo_one_e_ints/ao_to_mo.irp.f`
+
+    .. code:: fortran
+
+        subroutine mo_to_ao_sphe(A_mo,LDA_mo,A_ao,LDA_ao)
+
+
+    Transform A from the MO basis to the AO basis
+    
+    $(S.C).A_{mo}.(S.C)^\dagger$
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_sphe_num`
+       * :c:data:`mo_num`
+       * :c:data:`s_mo_sphe_coef`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_sphe_one_e_integrals_from_mo`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dgemm`
+
+ 
+.. c:function:: void mo_to_ao_sphe_no_overlap(void)
+
+
+    File : :file:`mo_one_e_ints/ao_to_mo.irp.f`
+
+    .. code:: fortran
+
+        subroutine mo_to_ao_sphe_no_overlap(A_mo,LDA_mo,A_ao,LDA_ao)
+
+
+    $C.A_{mo}.C^\dagger$
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_sphe_num`
+       * :c:data:`mo_num`
+       * :c:data:`mo_sphe_coef`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dgemm`
+
+ 
+.. c:function:: void orthonormalize_mos(void)
 
 
     File : :file:`mo_one_e_ints/orthonormalize.irp.f`

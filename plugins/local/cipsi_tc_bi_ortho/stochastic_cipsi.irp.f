@@ -57,9 +57,9 @@ subroutine run_stochastic_cipsi
   PROVIDE mo_l_coef mo_r_coef
   PROVIDE H_apply_buffer_allocated distributed_davidson 
 
-  print*, ' Diagonal elements of the Fock matrix '
+  print*, ' Diagonal elements of the Fock matrix and Left/Right angles'
   do i = 1, mo_num
-    write(*,*) i, Fock_matrix_tc_mo_tot(i,i)
+    write(*,*) i, Fock_matrix_tc_mo_tot(i,i), angle_left_right(i)
   enddo
 
   threshold_generators = 1.d0

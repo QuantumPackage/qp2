@@ -495,7 +495,7 @@ end
 BEGIN_PROVIDER [double precision, psi_energy_two_e_trans, (N_states, N_states)]
  implicit none
  BEGIN_DOC
-! psi_energy_two_e_trans(istate,jstate) = <Psi_istate|W_ee |Psi_jstate>
+! psi_energy_two_e_trans(istate,jstate) = <Psi_istate\|W_ee \|Psi_jstate>
  END_dOC
  integer :: i,j,istate,jstate
  double precision :: hij, coef_i, coef_j

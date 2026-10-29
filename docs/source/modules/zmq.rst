@@ -8,16 +8,42 @@
 zmq
 ===
 
-Definition of |ZeroMQ| sockets and messages.
+|ZeroMQ| sockets and messages, used to parallelize a |QP| calculation
+over several processes.
 
+The master process runs the calculation. The slave processes, started
+with `qp_run -slave`, connect to the master through the address
+:c:data:`qp_run_address`. The context of the |ZeroMQ| library is
+:c:data:`zmq_context`, and the socket addresses and ports are provided
+by :c:data:`zmq_socket_pull_tcp_address` and the related providers.
+Sockets of the pair, pull, push and sub types are created by
+:c:func:`new_zmq_pair_socket` and the related subroutines, and closed
+by the `end_zmq_*` subroutines.
 
+Two levels of parallelism are provided:
+
+* parallel jobs, started with :c:func:`new_parallel_job` and ended
+  with :c:func:`end_parallel_job`: during the job, the slave tasks
+  execute a designated subroutine, and
+  :c:func:`zmq_set_running` marks the job as running. The current job
+  is identified by the state :c:data:`zmq_state`
+* a task server, for a finer granularity of the work: the workers
+  connect with :c:func:`connect_to_taskserver`, which returns their
+  worker id, and then fetch and acknowledge tasks through the
+  `get_task_from_taskserver` and `task_done_to_taskserver` functions
+
+Data is exchanged between the master and the workers with the
+`zmq_put_*` and `zmq_get_*` functions, which move vectors, matrices
+and scalars through the qp_run socket: for example
+:c:func:`zmq_put_dvector` and :c:func:`zmq_get_dvector` for double
+precision vectors.
  
  
  
 Providers 
 --------- 
  
-.. c:var:: is_zmq_slave
+.. c:var:: bool is_zmq_slave
 
 
     File : :file:`zmq/utils.irp.f`
@@ -31,7 +57,7 @@ Providers
 
 
  
-.. c:var:: qp_run_address
+.. c:var:: char qp_run_address
 
 
     File : :file:`zmq/utils.irp.f`
@@ -53,7 +79,7 @@ Providers
        * :c:data:`zmq_socket_pull_tcp_address`
 
  
-.. c:var:: zmq_context
+.. c:var:: int zmq_context
 
 
     File : :file:`zmq/utils.irp.f`
@@ -66,16 +92,9 @@ Providers
 
     Context for the ZeroMQ library
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_two_e_integrals_erf_in_map`
-       * :c:data:`ao_two_e_integrals_in_map`
 
  
-.. c:var:: zmq_lock
+.. c:var:: int zmq_lock
 
 
     File : :file:`zmq/utils.irp.f`
@@ -88,16 +107,9 @@ Providers
 
     Context for the ZeroMQ library
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_two_e_integrals_erf_in_map`
-       * :c:data:`ao_two_e_integrals_in_map`
 
  
-.. c:var:: zmq_port_start
+.. c:var:: int zmq_port_start
 
 
     File : :file:`zmq/utils.irp.f`
@@ -119,7 +131,7 @@ Providers
        * :c:data:`zmq_socket_pull_tcp_address`
 
  
-.. c:var:: zmq_socket_pair_inproc_address
+.. c:var:: char zmq_socket_pair_inproc_address
 
 
     File : :file:`zmq/utils.irp.f`
@@ -143,16 +155,9 @@ Providers
 
        * :c:data:`qp_run_address`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_two_e_integrals_erf_in_map`
-       * :c:data:`ao_two_e_integrals_in_map`
 
  
-.. c:var:: zmq_socket_pull_inproc_address
+.. c:var:: char zmq_socket_pull_inproc_address
 
 
     File : :file:`zmq/utils.irp.f`
@@ -176,16 +181,9 @@ Providers
 
        * :c:data:`qp_run_address`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_two_e_integrals_erf_in_map`
-       * :c:data:`ao_two_e_integrals_in_map`
 
  
-.. c:var:: zmq_socket_pull_tcp_address
+.. c:var:: char zmq_socket_pull_tcp_address
 
 
     File : :file:`zmq/utils.irp.f`
@@ -209,16 +207,9 @@ Providers
 
        * :c:data:`qp_run_address`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_two_e_integrals_erf_in_map`
-       * :c:data:`ao_two_e_integrals_in_map`
 
  
-.. c:var:: zmq_socket_push_inproc_address
+.. c:var:: char zmq_socket_push_inproc_address
 
 
     File : :file:`zmq/utils.irp.f`
@@ -242,16 +233,9 @@ Providers
 
        * :c:data:`qp_run_address`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_two_e_integrals_erf_in_map`
-       * :c:data:`ao_two_e_integrals_in_map`
 
  
-.. c:var:: zmq_socket_push_tcp_address
+.. c:var:: char zmq_socket_push_tcp_address
 
 
     File : :file:`zmq/utils.irp.f`
@@ -275,16 +259,9 @@ Providers
 
        * :c:data:`qp_run_address`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_two_e_integrals_erf_in_map`
-       * :c:data:`ao_two_e_integrals_in_map`
 
  
-.. c:var:: zmq_socket_sub_tcp_address
+.. c:var:: char zmq_socket_sub_tcp_address
 
 
     File : :file:`zmq/utils.irp.f`
@@ -308,16 +285,9 @@ Providers
 
        * :c:data:`qp_run_address`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_two_e_integrals_erf_in_map`
-       * :c:data:`ao_two_e_integrals_in_map`
 
  
-.. c:var:: zmq_state
+.. c:var:: char zmq_state
 
 
     File : :file:`zmq/utils.irp.f`
@@ -329,20 +299,13 @@ Providers
 
     Threads executing work through the ZeroMQ interface
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_two_e_integrals_erf_in_map`
-       * :c:data:`ao_two_e_integrals_in_map`
 
  
  
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: add_task_to_taskserver:
+.. c:function:: void add_task_to_taskserver(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -362,7 +325,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: connect_to_taskserver:
+.. c:function:: void connect_to_taskserver(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -389,7 +352,7 @@ Subroutines / functions
        * :c:func:`sscanf_ssds`
 
  
-.. c:function:: disconnect_from_taskserver:
+.. c:function:: void disconnect_from_taskserver(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -409,7 +372,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: disconnect_from_taskserver_state:
+.. c:function:: void disconnect_from_taskserver_state(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -429,7 +392,7 @@ Subroutines / functions
        * :c:func:`sscanf_ss`
 
  
-.. c:function:: end_parallel_job:
+.. c:function:: void end_parallel_job(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -454,8 +417,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_two_e_integrals_erf_in_map`
-       * :c:data:`ao_two_e_integrals_in_map`
        * :c:func:`h_s2_u_0_nstates_zmq`
        * :c:func:`h_u_0_nstates_zmq`
        * :c:func:`zmq_pt2`
@@ -474,7 +435,7 @@ Subroutines / functions
        * :c:func:`sleep`
 
  
-.. c:function:: end_zmq_pair_socket:
+.. c:function:: void end_zmq_pair_socket(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -502,7 +463,7 @@ Subroutines / functions
        * :c:func:`omp_unset_lock`
 
  
-.. c:function:: end_zmq_pull_socket:
+.. c:function:: void end_zmq_pull_socket(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -537,7 +498,7 @@ Subroutines / functions
        * :c:func:`omp_unset_lock`
 
  
-.. c:function:: end_zmq_push_socket:
+.. c:function:: void end_zmq_push_socket(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -561,8 +522,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`ao_two_e_integrals_erf_in_map_slave`
-       * :c:func:`ao_two_e_integrals_in_map_slave`
        * :c:func:`davidson_csf_run_slave`
        * :c:func:`davidson_nos2_run_slave`
        * :c:func:`davidson_run_slave`
@@ -579,7 +538,7 @@ Subroutines / functions
        * :c:func:`omp_unset_lock`
 
  
-.. c:function:: end_zmq_sub_socket:
+.. c:function:: void end_zmq_sub_socket(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -616,7 +575,7 @@ Subroutines / functions
        * :c:func:`omp_unset_lock`
 
  
-.. c:function:: end_zmq_to_qp_run_socket:
+.. c:function:: void end_zmq_to_qp_run_socket(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -633,10 +592,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`ao_two_e_integrals_erf_in_map_collector`
-       * :c:func:`ao_two_e_integrals_erf_in_map_slave`
-       * :c:func:`ao_two_e_integrals_in_map_collector`
-       * :c:func:`ao_two_e_integrals_in_map_slave`
        * :c:func:`davidson_csf_run_slave`
        * :c:func:`davidson_nos2_run_slave`
        * :c:func:`davidson_run_slave`
@@ -648,7 +603,7 @@ Subroutines / functions
        * :c:func:`selection_collector`
 
  
-.. c:function:: get_task_from_taskserver:
+.. c:function:: void get_task_from_taskserver(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -675,7 +630,7 @@ Subroutines / functions
        * :c:func:`sscanf_sd`
 
  
-.. c:function:: get_tasks_from_taskserver:
+.. c:function:: void get_tasks_from_taskserver(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -695,7 +650,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: new_parallel_job:
+.. c:function:: void new_parallel_job(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -721,8 +676,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_two_e_integrals_erf_in_map`
-       * :c:data:`ao_two_e_integrals_in_map`
        * :c:func:`h_s2_u_0_nstates_zmq`
        * :c:func:`h_u_0_nstates_zmq`
        * :c:func:`zmq_pt2`
@@ -738,7 +691,7 @@ Subroutines / functions
        * :c:func:`omp_unset_lock`
 
  
-.. c:function:: new_zmq_pair_socket:
+.. c:function:: void new_zmq_pair_socket(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -767,7 +720,7 @@ Subroutines / functions
        * :c:func:`omp_unset_lock`
 
  
-.. c:function:: new_zmq_pull_socket:
+.. c:function:: void new_zmq_pull_socket(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -798,7 +751,7 @@ Subroutines / functions
        * :c:func:`sleep`
 
  
-.. c:function:: new_zmq_push_socket:
+.. c:function:: void new_zmq_push_socket(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -827,7 +780,7 @@ Subroutines / functions
        * :c:func:`omp_unset_lock`
 
  
-.. c:function:: new_zmq_sub_socket:
+.. c:function:: void new_zmq_sub_socket(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -856,7 +809,7 @@ Subroutines / functions
        * :c:func:`omp_unset_lock`
 
  
-.. c:function:: new_zmq_to_qp_run_socket:
+.. c:function:: void new_zmq_to_qp_run_socket(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -885,7 +838,7 @@ Subroutines / functions
        * :c:func:`omp_unset_lock`
 
  
-.. c:function:: reset_zmq_addresses:
+.. c:function:: void reset_zmq_addresses(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -913,7 +866,7 @@ Subroutines / functions
        * :c:func:`switch_qp_run_to_master`
 
  
-.. c:function:: switch_qp_run_to_master:
+.. c:function:: void switch_qp_run_to_master(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -950,7 +903,7 @@ Subroutines / functions
        * :c:func:`reset_zmq_addresses`
 
  
-.. c:function:: task_done_to_taskserver:
+.. c:function:: void task_done_to_taskserver(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -970,7 +923,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: tasks_done_to_taskserver:
+.. c:function:: void tasks_done_to_taskserver(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -990,7 +943,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: wait_for_next_state:
+.. c:function:: void wait_for_next_state(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -1009,7 +962,7 @@ Subroutines / functions
        * :c:func:`end_zmq_sub_socket`
 
  
-.. c:function:: wait_for_state:
+.. c:function:: void wait_for_state(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -1029,7 +982,7 @@ Subroutines / functions
        * :c:func:`end_zmq_sub_socket`
 
  
-.. c:function:: wait_for_states:
+.. c:function:: void wait_for_states(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -1056,7 +1009,7 @@ Subroutines / functions
        * :c:func:`end_zmq_sub_socket`
 
  
-.. c:function:: zmq_abort:
+.. c:function:: void zmq_abort(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -1076,7 +1029,7 @@ Subroutines / functions
        * :c:func:`sleep`
 
  
-.. c:function:: zmq_delete_task:
+.. c:function:: void zmq_delete_task(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -1097,7 +1050,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_delete_task_async_recv:
+.. c:function:: void zmq_delete_task_async_recv(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -1111,7 +1064,7 @@ Subroutines / functions
     queue. This guarantees that the results have been received in the pull.
 
  
-.. c:function:: zmq_delete_task_async_send:
+.. c:function:: void zmq_delete_task_async_send(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -1132,7 +1085,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_delete_tasks:
+.. c:function:: void zmq_delete_tasks(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -1153,7 +1106,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_delete_tasks_async_recv:
+.. c:function:: void zmq_delete_tasks_async_recv(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -1167,7 +1120,7 @@ Subroutines / functions
     queue. This guarantees that the results have been received in the pull.
 
  
-.. c:function:: zmq_delete_tasks_async_send:
+.. c:function:: void zmq_delete_tasks_async_send(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -1188,7 +1141,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_get8_dvector:
+.. c:function:: void zmq_get8_dvector(void)
 
 
     File : :file:`zmq/put_get.irp.f`
@@ -1209,7 +1162,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_get8_ivector:
+.. c:function:: void zmq_get8_ivector(void)
 
 
     File : :file:`zmq/put_get.irp.f`
@@ -1230,7 +1183,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_get_dmatrix:
+.. c:function:: void zmq_get_dmatrix(void)
 
 
     File : :file:`zmq/put_get.irp.f`
@@ -1251,7 +1204,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_get_dvector:
+.. c:function:: void zmq_get_dvector(void)
 
 
     File : :file:`zmq/put_get.irp.f`
@@ -1272,7 +1225,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_get_i8matrix:
+.. c:function:: void zmq_get_i8matrix(void)
 
 
     File : :file:`zmq/put_get.irp.f`
@@ -1293,7 +1246,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_get_imatrix:
+.. c:function:: void zmq_get_imatrix(void)
 
 
     File : :file:`zmq/put_get.irp.f`
@@ -1314,7 +1267,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_get_int:
+.. c:function:: void zmq_get_int(void)
 
 
     File : :file:`zmq/put_get.irp.f`
@@ -1335,7 +1288,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_get_int_nompi:
+.. c:function:: void zmq_get_int_nompi(void)
 
 
     File : :file:`zmq/put_get.irp.f`
@@ -1355,7 +1308,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_get_ivector:
+.. c:function:: void zmq_get_ivector(void)
 
 
     File : :file:`zmq/put_get.irp.f`
@@ -1376,7 +1329,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_port:
+.. c:function:: void zmq_port(void)
 
 
     File : :file:`zmq/utils.irp.f`
@@ -1396,7 +1349,7 @@ Subroutines / functions
        * :c:data:`qp_run_address`
 
  
-.. c:function:: zmq_put8_dvector:
+.. c:function:: void zmq_put8_dvector(void)
 
 
     File : :file:`zmq/put_get.irp.f`
@@ -1416,7 +1369,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_put8_ivector:
+.. c:function:: void zmq_put8_ivector(void)
 
 
     File : :file:`zmq/put_get.irp.f`
@@ -1436,7 +1389,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_put_dmatrix:
+.. c:function:: void zmq_put_dmatrix(void)
 
 
     File : :file:`zmq/put_get.irp.f`
@@ -1456,7 +1409,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_put_dvector:
+.. c:function:: void zmq_put_dvector(void)
 
 
     File : :file:`zmq/put_get.irp.f`
@@ -1476,7 +1429,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_put_i8matrix:
+.. c:function:: void zmq_put_i8matrix(void)
 
 
     File : :file:`zmq/put_get.irp.f`
@@ -1496,7 +1449,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_put_imatrix:
+.. c:function:: void zmq_put_imatrix(void)
 
 
     File : :file:`zmq/put_get.irp.f`
@@ -1516,7 +1469,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_put_int:
+.. c:function:: void zmq_put_int(void)
 
 
     File : :file:`zmq/put_get.irp.f`
@@ -1536,7 +1489,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_put_ivector:
+.. c:function:: void zmq_put_ivector(void)
 
 
     File : :file:`zmq/put_get.irp.f`
@@ -1556,7 +1509,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_set_running:
+.. c:function:: void zmq_set_running(void)
 
 
     File : :file:`zmq/utils.irp.f`

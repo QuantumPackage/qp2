@@ -65,11 +65,12 @@ Programs
 -------- 
  
  * :ref:`cis` 
+ * :ref:`cis_read` 
  
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: h_apply_cis:
+.. c:function:: void h_apply_cis(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -87,10 +88,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`all_mo_integrals`
        * :c:data:`generators_bitmask`
        * :c:data:`h_apply_buffer_allocated`
        * :c:data:`mo_num`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det`
        * :c:data:`n_det_generators`
        * :c:data:`n_int`
@@ -124,13 +125,14 @@ Subroutines / functions
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
 
  
-.. c:function:: h_apply_cis_diexc:
+.. c:function:: void h_apply_cis_diexc(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -165,7 +167,7 @@ Subroutines / functions
        * :c:func:`h_apply_cis_diexcp`
 
  
-.. c:function:: h_apply_cis_diexcorg:
+.. c:function:: void h_apply_cis_diexcorg(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -204,7 +206,7 @@ Subroutines / functions
        * :c:func:`fill_h_apply_buffer_no_selection`
 
  
-.. c:function:: h_apply_cis_diexcp:
+.. c:function:: void h_apply_cis_diexcp(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -239,7 +241,7 @@ Subroutines / functions
        * :c:func:`h_apply_cis_diexcorg`
 
  
-.. c:function:: h_apply_cis_monoexc:
+.. c:function:: void h_apply_cis_monoexc(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -278,7 +280,7 @@ Subroutines / functions
        * :c:func:`fill_h_apply_buffer_no_selection`
 
  
-.. c:function:: h_apply_cis_sym:
+.. c:function:: void h_apply_cis_sym(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -296,10 +298,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`all_mo_integrals`
        * :c:data:`generators_bitmask`
        * :c:data:`h_apply_buffer_allocated`
        * :c:data:`mo_num`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det`
        * :c:data:`n_det_generators`
        * :c:data:`n_int`
@@ -333,13 +335,14 @@ Subroutines / functions
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
 
  
-.. c:function:: h_apply_cis_sym_diexc:
+.. c:function:: void h_apply_cis_sym_diexc(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -374,7 +377,7 @@ Subroutines / functions
        * :c:func:`h_apply_cis_sym_diexcp`
 
  
-.. c:function:: h_apply_cis_sym_diexcorg:
+.. c:function:: void h_apply_cis_sym_diexcorg(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -414,7 +417,7 @@ Subroutines / functions
        * :c:func:`fill_h_apply_buffer_no_selection`
 
  
-.. c:function:: h_apply_cis_sym_diexcp:
+.. c:function:: void h_apply_cis_sym_diexcp(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -449,7 +452,7 @@ Subroutines / functions
        * :c:func:`h_apply_cis_sym_diexcorg`
 
  
-.. c:function:: h_apply_cis_sym_monoexc:
+.. c:function:: void h_apply_cis_sym_monoexc(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`

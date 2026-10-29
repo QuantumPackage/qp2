@@ -632,7 +632,7 @@ end
 subroutine give_degen(A, n, shift, list_degen, n_degen_list)
 
   BEGIN_DOC
-  ! returns n_degen_list :: the number of degenerated SET of elements (i.e. with |A(i)-A(i+1)| below shift)
+  ! returns n_degen_list :: the number of degenerated SET of elements (i.e. with \|A(i)-A(i+1)\| below shift)
   !
   ! for each of these sets, list_degen(1,i) = first degenerate element of the set i, 
   !

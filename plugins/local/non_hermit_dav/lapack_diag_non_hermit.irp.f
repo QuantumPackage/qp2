@@ -1229,7 +1229,7 @@ subroutine impose_orthog_svd_overlap(n, m, C, overlap)
   double precision, allocatable   :: S(:,:), tmp(:,:), Stmp(:,:)
   double precision, allocatable   :: U(:,:), Vt(:,:), D(:)
 
-  print *, ' apply SVD to orthogonalize vectors'
+!  print *, ' apply SVD to orthogonalize vectors'
 
   ! ---
 
@@ -1748,10 +1748,10 @@ subroutine check_biorthog(n, m, Vl, Vr, accu_d, accu_nd, S, thr_d, thr_nd, stop_
             , 0.d0, S, size(S, 1) )
 
   ! print S s'il y a besoin 
-  !print *, ' overlap matrix:'
-  !do i = 1, m
-  !  write(*,'(1000(F16.10,X))') S(i,:)
-  !enddo
+  print *, ' overlap matrix:'
+  do i = 1, m
+    write(*,'(1000(F10.7,X))') S(i,:)
+  enddo
 
   accu_d  = 0.d0
   accu_nd = 0.d0
@@ -1759,7 +1759,7 @@ subroutine check_biorthog(n, m, Vl, Vr, accu_d, accu_nd, S, thr_d, thr_nd, stop_
     do j = 1, m
       if(i==j) then
         accu_d = accu_d + dabs(S(i,i))
-        !print*, i, S(i,i)
+        print*, i, S(i,i)
       else
         accu_nd = accu_nd + S(j,i) * S(j,i)
       endif
@@ -1773,7 +1773,7 @@ subroutine check_biorthog(n, m, Vl, Vr, accu_d, accu_nd, S, thr_d, thr_nd, stop_
     print *, ' accu_nd = ', accu_nd
     print *, ' accu_d  = ', dabs(accu_d-dble(m))/dble(m)
   else
-    print *, ' vectors are bi-orthogonals'
+    print *, ' vectors are bi-orthogonal'
   endif
 
   ! ---
@@ -1782,10 +1782,10 @@ subroutine check_biorthog(n, m, Vl, Vr, accu_d, accu_nd, S, thr_d, thr_nd, stop_
     print *, ' non bi-orthogonal vectors !'
     print *, ' accu_nd = ', accu_nd
     print *, ' accu_d  = ', dabs(accu_d-dble(m))/dble(m)
-    !print *, ' overlap matrix:'
-    !do i = 1, m
-    !  write(*,'(1000(F16.10,X))') S(i,:)
-    !enddo
+    print *, ' overlap matrix:'
+    do i = 1, m
+      write(*,'(1000(F16.10,X))') S(i,:)
+    enddo
     stop
   endif
 

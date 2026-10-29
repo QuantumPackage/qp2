@@ -36,6 +36,19 @@ https://arxiv.org/abs/1902.08154
 }
 ```
 
+Many implementation details can be found in the [PhD thesis of Yann Garniron](https://theses.hal.science/tel-02089570/file/2018TOU30229a.pdf):
+```
+@phdthesis{garniron_2018,
+	author = {Garniron, Yann},
+	title = {{Development and parallel implementation of selected configuration interaction methods}},
+	year = {2018},
+	month = dec,
+	address = {Toulouse, France},
+	school = {Universit{\'{e}} Paul Sabatier - Toulouse III},
+	url = { https://theses.hal.science/tel-02089570 }
+}
+```
+
 # Getting started
 
 * [Visit the web site](https://quantumpackage.github.io/qp2)

@@ -1,10 +1,10 @@
 
 BEGIN_PROVIDER [real*8, gradvec_old, (nMonoEx)]
   BEGIN_DOC
-  ! calculate the orbital gradient <Psi| H E_pq |Psi> by hand, i.e. for
-  ! each determinant I we determine the string E_pq |I> (alpha and beta
-  ! separately) and generate <Psi|H E_pq |I>
-  ! sum_I c_I <Psi|H E_pq |I> is then the pq component of the orbital
+  ! calculate the orbital gradient <Psi\| H E_pq \|Psi> by hand, i.e. for
+  ! each determinant I we determine the string E_pq \|I> (alpha and beta
+  ! separately) and generate <Psi\|H E_pq \|I>
+  ! sum_I c_I <Psi\|H E_pq \|I> is then the pq component of the orbital
   ! gradient
   ! E_pq = a^+_pa_q + a^+_Pa_Q
   END_DOC
@@ -37,7 +37,7 @@ END_PROVIDER
 subroutine calc_grad_elem(ihole,ipart,res)
   BEGIN_DOC
   ! eq 18 of Siegbahn et al, Physica Scripta 1980
-  ! we calculate 2 <Psi| H E_pq | Psi>, q=hole, p=particle
+  ! we calculate 2 <Psi\| H E_pq \| Psi>, q=hole, p=particle
   END_DOC
   implicit none
   integer                        :: ihole,ipart,mu,iii,ispin,ierr,nu,istate

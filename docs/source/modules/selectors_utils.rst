@@ -8,15 +8,30 @@
 selectors_utils
 ===============
 
-Helper functions for selectors.
+Quantities derived from the selectors.
 
+From the selectors of the wave function, this module computes:
+
+* the excitation degree of each selector with respect to the |HF|
+  reference, :c:data:`exc_degree_per_selectors`, and the list
+  :c:data:`double_index_selectors` and the number
+  :c:data:`n_double_selectors` of the double excitations among them
+* the correlation energy per selector,
+  :c:data:`e_corr_per_selectors`: for a double excitation
+  :math:`D_i`, it is
+  :math:`\langle D_i | H | \text{HF} \rangle c(D_i)/c(\text{HF})`
+* the second order estimate of the correlation energy,
+  :c:data:`e_corr_second_order`, and its variant restricted to the
+  double excitations, :c:data:`e_corr_double_only`
+* the diagonal elements of the Hamiltonian matrix for each selector,
+  :c:data:`psi_selectors_diag_h_mat`
  
  
  
 Providers 
 --------- 
  
-.. c:var:: coef_hf_selector
+.. c:var:: double coef_hf_selector
 
 
     File : :file:`selectors_utils/e_corr_selectors.irp.f`
@@ -47,11 +62,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`exc_degree_per_selectors`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det_selectors`
        * :c:data:`n_int`
        * :c:data:`psi_selectors`
@@ -60,7 +74,7 @@ Providers
 
 
  
-.. c:var:: delta_e_per_selector
+.. c:var:: double delta_e_per_selector
 
 
     File : :file:`selectors_utils/e_corr_selectors.irp.f`
@@ -91,11 +105,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`exc_degree_per_selectors`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det_selectors`
        * :c:data:`n_int`
        * :c:data:`psi_selectors`
@@ -104,7 +117,7 @@ Providers
 
 
  
-.. c:var:: double_index_selectors
+.. c:var:: int double_index_selectors
 
 
     File : :file:`selectors_utils/e_corr_selectors.irp.f`
@@ -141,7 +154,7 @@ Providers
        * :c:data:`coef_hf_selector`
 
  
-.. c:var:: e_corr_double_only
+.. c:var:: double e_corr_double_only
 
 
     File : :file:`selectors_utils/e_corr_selectors.irp.f`
@@ -172,11 +185,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`exc_degree_per_selectors`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det_selectors`
        * :c:data:`n_int`
        * :c:data:`psi_selectors`
@@ -185,7 +197,7 @@ Providers
 
 
  
-.. c:var:: e_corr_per_selectors
+.. c:var:: double e_corr_per_selectors
 
 
     File : :file:`selectors_utils/e_corr_selectors.irp.f`
@@ -216,11 +228,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`exc_degree_per_selectors`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det_selectors`
        * :c:data:`n_int`
        * :c:data:`psi_selectors`
@@ -229,7 +240,7 @@ Providers
 
 
  
-.. c:var:: e_corr_second_order
+.. c:var:: double e_corr_second_order
 
 
     File : :file:`selectors_utils/e_corr_selectors.irp.f`
@@ -260,11 +271,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`exc_degree_per_selectors`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det_selectors`
        * :c:data:`n_int`
        * :c:data:`psi_selectors`
@@ -273,7 +283,7 @@ Providers
 
 
  
-.. c:var:: exc_degree_per_selectors
+.. c:var:: int exc_degree_per_selectors
 
 
     File : :file:`selectors_utils/e_corr_selectors.irp.f`
@@ -310,7 +320,7 @@ Providers
        * :c:data:`coef_hf_selector`
 
  
-.. c:var:: i_h_hf_per_selectors
+.. c:var:: double i_h_hf_per_selectors
 
 
     File : :file:`selectors_utils/e_corr_selectors.irp.f`
@@ -341,11 +351,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`exc_degree_per_selectors`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det_selectors`
        * :c:data:`n_int`
        * :c:data:`psi_selectors`
@@ -354,7 +363,7 @@ Providers
 
 
  
-.. c:var:: inv_selectors_coef_hf
+.. c:var:: double inv_selectors_coef_hf
 
 
     File : :file:`selectors_utils/e_corr_selectors.irp.f`
@@ -385,11 +394,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`exc_degree_per_selectors`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det_selectors`
        * :c:data:`n_int`
        * :c:data:`psi_selectors`
@@ -398,7 +406,7 @@ Providers
 
 
  
-.. c:var:: inv_selectors_coef_hf_squared
+.. c:var:: double inv_selectors_coef_hf_squared
 
 
     File : :file:`selectors_utils/e_corr_selectors.irp.f`
@@ -429,11 +437,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`exc_degree_per_selectors`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det_selectors`
        * :c:data:`n_int`
        * :c:data:`psi_selectors`
@@ -442,7 +449,7 @@ Providers
 
 
  
-.. c:var:: n_double_selectors
+.. c:var:: int n_double_selectors
 
 
     File : :file:`selectors_utils/e_corr_selectors.irp.f`
@@ -479,7 +486,7 @@ Providers
        * :c:data:`coef_hf_selector`
 
  
-.. c:var:: psi_selectors_coef_transp
+.. c:var:: double psi_selectors_coef_transp
 
 
     File : :file:`selectors_utils/selectors.irp.f`
@@ -503,7 +510,7 @@ Providers
 
 
  
-.. c:var:: psi_selectors_diag_h_mat
+.. c:var:: double psi_selectors_diag_h_mat
 
 
     File : :file:`selectors_utils/selectors.irp.f`
@@ -530,7 +537,7 @@ Providers
 
 
  
-.. c:var:: psi_selectors_size
+.. c:var:: int psi_selectors_size
 
 
     File : :file:`selectors_utils/selectors.irp.f`
@@ -562,7 +569,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: zmq_get_n_det_generators:
+.. c:function:: void zmq_get_n_det_generators(void)
 
 
     File : :file:`selectors_utils/zmq.irp.f_template_102`
@@ -584,7 +591,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_get_n_det_selectors:
+.. c:function:: void zmq_get_n_det_selectors(void)
 
 
     File : :file:`selectors_utils/zmq.irp.f_template_102`
@@ -606,7 +613,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_put_n_det_generators:
+.. c:function:: void zmq_put_n_det_generators(void)
 
 
     File : :file:`selectors_utils/zmq.irp.f_template_102`
@@ -627,7 +634,7 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: zmq_put_n_det_selectors:
+.. c:function:: void zmq_put_n_det_selectors(void)
 
 
     File : :file:`selectors_utils/zmq.irp.f_template_102`

@@ -130,6 +130,7 @@ complex*16 function NAI_pol_mult_cgtos(Ae_center, Be_center, power_A, power_B, a
   complex*16                   :: P_center(3)
   complex*16                   :: d(0:n_pt_in)
 
+  double precision, external   :: cgaussian_pair_bound
   complex*16, external         :: V_n_e_cgtos
   complex*16, external         :: crint_sum
   complex*16, external         :: crint_1
@@ -165,7 +166,9 @@ complex*16 function NAI_pol_mult_cgtos(Ae_center, Be_center, power_A, power_B, a
        + (Ae_center(3) - Be_center(3)) * (Ae_center(3) - Be_center(3))
 
   const_factor = dist * rho
-  if(real(const_factor) > 80.d0) then
+  ! exp(-const_factor) is not a bound of the integral (Re of the Boys argument can be << 0),
+  ! use the bound of the pair modulus instead (see cgaussian_pair_bound)
+  if(cgaussian_pair_bound(alpha, beta, Ap_center, Bp_center) < 1d-35) then
     NAI_pol_mult_cgtos = (0.d0, 0.d0)
     return
   endif
@@ -189,7 +192,8 @@ complex*16 function NAI_pol_mult_cgtos(Ae_center, Be_center, power_A, power_B, a
   endif
 
   d(0:n_pt_in) = (0.d0, 0.d0)
-  call give_cpolynomial_mult_center_one_e(Ap_center, Bp_center, alpha, beta, &
+  ! P_center is the centre of the Gaussian product (from Ae, Be); the polynomials are centred on Ap, Bp
+  call give_cpolynomial_mult_center_one_e(Ap_center, Bp_center, P_center, alpha, beta, &
                                           power_A, power_B, C_center, n_pt_in, d, n_pt_out)
 
   if(n_pt_out < 0) then
@@ -204,26 +208,28 @@ end
 
 ! ---
 
-subroutine give_cpolynomial_mult_center_one_e(A_center, B_center, alpha, beta, &
+subroutine give_cpolynomial_mult_center_one_e(A_center, B_center, P_center, alpha, beta, &
                                               power_A, power_B, C_center, n_pt_in, d, n_pt_out)
 
   BEGIN_DOC
   ! Returns the explicit polynomial in terms of the "t" variable of the following
   !
   ! $I_{x1}(a_x, d_x,p,q) \times I_{x1}(a_y, d_y,p,q) \times I_{x1}(a_z, d_z,p,q)$.
+  !
+  ! A_center, B_center: polynomial centres; P_center: centre of the Gaussian product
   END_DOC
 
   implicit none
 
   integer,          intent(in) :: n_pt_in, power_A(3), power_B(3)
   double precision, intent(in) :: C_center(3)
-  complex*16,       intent(in) :: alpha, beta, A_center(3), B_center(3)
+  complex*16,       intent(in) :: alpha, beta, A_center(3), B_center(3), P_center(3)
   integer,         intent(out) :: n_pt_out
   complex*16,    intent(inout) :: d(0:n_pt_in)
 
   integer                      :: a_x, b_x, a_y, b_y, a_z, b_z
   integer                      :: n_pt1, n_pt2, n_pt3, dim, i, n_pt_tmp
-  complex*16                   :: p, P_center(3), rho, p_inv, p_inv_2
+  complex*16                   :: p, rho, p_inv, p_inv_2
   complex*16                   :: R1x(0:2), B01(0:2), R1xp(0:2), R2x(0:2)
   complex*16                   :: d1(0:n_pt_in), d2(0:n_pt_in), d3(0:n_pt_in)
 
@@ -233,9 +239,8 @@ subroutine give_cpolynomial_mult_center_one_e(A_center, B_center, alpha, beta, &
   p_inv   = (1.d0, 0.d0) / p
   p_inv_2 = 0.5d0 * p_inv
 
-  P_center(1) = (alpha * A_center(1) + beta * B_center(1)) * p_inv
-  P_center(2) = (alpha * A_center(2) + beta * B_center(2)) * p_inv
-  P_center(3) = (alpha * A_center(3) + beta * B_center(3)) * p_inv
+  ! P_center is an input: with plane waves the Gaussian centres (Ae, Be) differ from the
+  ! polynomial centres A_center, B_center (= Ap, Bp), and P must be built from Ae, Be
 
   do i = 0, n_pt_in
     d(i)  = (0.d0, 0.d0)

@@ -61,12 +61,22 @@ let run ?o b au c d m p qmc cart xyz_file =
 
   (* Read molecule *)
   let molecule =
-    if au then
-      (Molecule.of_file xyz_file ~charge:(Charge.of_int c)
-        ~multiplicity:(Multiplicity.of_int m) ~units:Units.Bohr)
-    else
-      (Molecule.of_file xyz_file ~charge:(Charge.of_int c)
-        ~multiplicity:(Multiplicity.of_int m) )
+    try
+      if au then
+        (Molecule.of_file xyz_file ~charge:(Charge.of_int c)
+          ~multiplicity:(Multiplicity.of_int m) ~units:Units.Bohr)
+      else
+        (Molecule.of_file xyz_file ~charge:(Charge.of_int c)
+          ~multiplicity:(Multiplicity.of_int m) )
+    with
+    | Failure msg ->
+      failwith (Printf.sprintf
+        "cannot parse geometry from %s: expected xyz (atom count on line 1, then 'Element x y z' lines) or a Gaussian z-matrix (parse error: %s)"
+        xyz_file msg)
+    | Sys_error msg ->
+      failwith (Printf.sprintf
+        "cannot parse geometry from %s: expected xyz (atom count on line 1, then 'Element x y z' lines) or a Gaussian z-matrix (%s)"
+        xyz_file msg)
   in
   let ghost =
     ghost_centers ~threshold:d ~molecule ~nuclei:molecule.Molecule.nuclei
@@ -802,7 +812,11 @@ If a file with the same name as the basis set exists, this file will be read.  O
   run ?o:output basis au charge ghost multiplicity pseudo qmc cart xyz_filename
   )
   with
-(*  | Failure txt  -> Printf.eprintf "Fatal error: %s\n%!" txt *)
-  | Command_line.Error txt  -> Printf.eprintf "Command line error: %s\n%!" txt
+  | Failure txt ->
+    Printf.eprintf "qp_create_ezfio: %s\n%!" txt;
+    exit 2
+  | Command_line.Error txt ->
+    Printf.eprintf "qp_create_ezfio: %s\n%!" txt;
+    exit 2
 
 

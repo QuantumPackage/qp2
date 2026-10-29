@@ -77,6 +77,7 @@ cisd
     * :c:data:`c0_weight` 
     * :c:data:`psi_coef` 
     * :c:data:`psi_det_sorted_bit` 
+    * :c:data:`psi_det_sorted_bit` 
     * :c:data:`psi_configuration` 
     * :c:data:`psi_det` 
     * :c:data:`psi_det_size` 

@@ -97,7 +97,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [real*8, norm_grad_vec2]
 &BEGIN_PROVIDER [real*8, norm_grad_vec2_tab, (3)]
   BEGIN_DOC
-  ! calculate the orbital gradient <Psi| H E_pq |Psi> from density
+  ! calculate the orbital gradient <Psi\| H E_pq \|Psi> from density
   ! matrices and integrals; Siegbahn et al, Phys Scr 1980
   ! eqs 14 a,b,c
   END_DOC

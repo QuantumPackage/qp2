@@ -8,21 +8,25 @@
 generators_cas
 ==============
 
-Module defining the generator determinants as those belonging to a |CAS|.
-The |MOs| belonging to the |CAS| are those which were set as active with
-the :ref:`qp_set_mo_class` command.
+Generators for the perturbation energy, as the determinants of a
+|CAS|.
 
-This module is intended to be included in the :file:`NEED` file to define
-the generators as the |CAS| determinants, which can be useful to define post-CAS approaches (see cassd module for instance).
+The generators are the determinants of the wave function that belong
+to the |CAS|: the |MOs| of the |CAS| are the ones set as active with
+the :ref:`qp_set_mo_class` command. The subroutine
+:c:func:`extract_cas` replaces the total wave function by its
+normalized projection on the |CAS|.
 
-
+This module is intended to be included in the :file:`NEED` file to
+define the generators as the |CAS| determinants, which is useful to
+define post-CAS approaches (see the cassd module for instance).
  
  
  
 Providers 
 --------- 
  
-.. c:var:: n_det_generators
+.. c:var:: int n_det_generators
 
 
     File : :file:`generators_cas/generators.irp.f`
@@ -64,7 +68,7 @@ Providers
        * :c:data:`pt2_w`
 
  
-.. c:var:: psi_coef_generators
+.. c:var:: double psi_coef_generators
 
 
     File : :file:`generators_cas/generators.irp.f`
@@ -105,7 +109,7 @@ Providers
        * :c:data:`pt2_w`
 
  
-.. c:var:: psi_coef_sorted_gen
+.. c:var:: double psi_coef_sorted_gen
 
 
     File : :file:`generators_cas/generators.irp.f`
@@ -146,7 +150,7 @@ Providers
        * :c:data:`pt2_w`
 
  
-.. c:var:: psi_det_generators
+.. c:var:: int psi_det_generators
 
 
     File : :file:`generators_cas/generators.irp.f`
@@ -187,7 +191,7 @@ Providers
        * :c:data:`pt2_w`
 
  
-.. c:var:: psi_det_sorted_gen
+.. c:var:: int psi_det_sorted_gen
 
 
     File : :file:`generators_cas/generators.irp.f`
@@ -228,7 +232,7 @@ Providers
        * :c:data:`pt2_w`
 
  
-.. c:var:: psi_det_sorted_gen_order
+.. c:var:: int psi_det_sorted_gen_order
 
 
     File : :file:`generators_cas/generators.irp.f`
@@ -269,7 +273,7 @@ Providers
        * :c:data:`pt2_w`
 
  
-.. c:var:: select_max
+.. c:var:: double select_max
 
 
     File : :file:`generators_cas/generators.irp.f`
@@ -290,7 +294,7 @@ Providers
 
 
  
-.. c:var:: size_select_max
+.. c:var:: int size_select_max
 
 
     File : :file:`generators_cas/generators.irp.f`
@@ -314,7 +318,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: extract_cas:
+.. c:function:: void extract_cas(void)
 
 
     File : :file:`generators_cas/extract_cas.irp.f`

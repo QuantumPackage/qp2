@@ -1,4 +1,4 @@
-program pouet
+program test_chol_bas
  implicit none
  call test
 end

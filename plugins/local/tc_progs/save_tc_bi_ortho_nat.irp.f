@@ -1,7 +1,7 @@
 
 ! ---
 
-program tc_natorb_bi_ortho
+program save_tc_bi_ortho_nat
 
   BEGIN_DOC
   ! TODO : Put the documentation of the program here

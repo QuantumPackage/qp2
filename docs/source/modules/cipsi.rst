@@ -184,7 +184,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: initialize_pt2_e0_denominator
+.. c:var:: bool initialize_pt2_e0_denominator
 
 
     File : :file:`cipsi/energy.irp.f`
@@ -204,7 +204,7 @@ Providers
        * :c:data:`pt2_e0_denominator`
 
  
-.. c:var:: pt2_e0_denominator
+.. c:var:: double pt2_e0_denominator
 
 
     File : :file:`cipsi/energy.irp.f`
@@ -237,7 +237,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: bitstring_to_list_in_selection:
+.. c:function:: void bitstring_to_list_in_selection(void)
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -258,7 +258,7 @@ Subroutines / functions
        * :c:func:`spot_isinwf`
 
  
-.. c:function:: fill_buffer_double:
+.. c:function:: void fill_buffer_double(void)
 
 
     File : :file:`cipsi/selection.irp.f_template_915`
@@ -324,7 +324,7 @@ Subroutines / functions
        * :c:func:`get_excitation_degree_spin`
 
  
-.. c:function:: fill_buffer_single:
+.. c:function:: void fill_buffer_single(void)
 
 
     File : :file:`cipsi/selection.irp.f_template_915`
@@ -390,7 +390,7 @@ Subroutines / functions
        * :c:func:`get_excitation_degree_spin`
 
  
-.. c:function:: get_d0:
+.. c:function:: void get_d0(void)
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -425,11 +425,11 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`apply_particles`
-       * :c:func:`get_mo_two_e_integrals`
+       * :c:func:`get_mo_two_e_integrals_ij`
        * :c:func:`i_h_j`
 
  
-.. c:function:: get_d0_reference:
+.. c:function:: void get_d0_reference(void)
 
 
     File : :file:`cipsi/selection_old.irp.f`
@@ -458,7 +458,7 @@ Subroutines / functions
        * :c:func:`i_h_j`
 
  
-.. c:function:: get_d1:
+.. c:function:: void get_d1(void)
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -496,7 +496,7 @@ Subroutines / functions
        * :c:func:`i_h_j`
 
  
-.. c:function:: get_d1_reference:
+.. c:function:: void get_d1_reference(void)
 
 
     File : :file:`cipsi/selection_old.irp.f`
@@ -525,7 +525,7 @@ Subroutines / functions
        * :c:func:`i_h_j`
 
  
-.. c:function:: get_d2:
+.. c:function:: void get_d2(void)
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -554,7 +554,7 @@ Subroutines / functions
        * :c:func:`splash_pq`
 
  
-.. c:function:: get_d2_reference:
+.. c:function:: void get_d2_reference(void)
 
 
     File : :file:`cipsi/selection_old.irp.f`
@@ -575,7 +575,7 @@ Subroutines / functions
        * :c:data:`n_states`
 
  
-.. c:function:: get_m0:
+.. c:function:: void get_m0(void)
 
 
     File : :file:`cipsi/selection_singles.irp.f`
@@ -611,7 +611,7 @@ Subroutines / functions
        * :c:func:`i_h_j`
 
  
-.. c:function:: get_m1:
+.. c:function:: void get_m1(void)
 
 
     File : :file:`cipsi/selection_singles.irp.f`
@@ -647,7 +647,7 @@ Subroutines / functions
        * :c:func:`i_h_j`
 
  
-.. c:function:: get_m2:
+.. c:function:: void get_m2(void)
 
 
     File : :file:`cipsi/selection_singles.irp.f`
@@ -675,7 +675,7 @@ Subroutines / functions
        * :c:func:`splash_p`
 
  
-.. c:function:: get_mask_phase:
+.. c:function:: void get_mask_phase(void)
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -695,7 +695,7 @@ Subroutines / functions
        * :c:func:`splash_pq`
 
  
-.. c:function:: get_phase_bi:
+.. c:function:: void get_phase_bi(void)
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -707,7 +707,7 @@ Subroutines / functions
 
 
  
-.. c:function:: provide_for_selection_slave:
+.. c:function:: void provide_for_selection_slave(void)
 
 
     File : :file:`cipsi/run_selection_slave.irp.f`
@@ -735,7 +735,7 @@ Subroutines / functions
        * :c:func:`run_selection_slave`
 
  
-.. c:function:: provide_for_zmq_pt2:
+.. c:function:: void provide_for_zmq_pt2(void)
 
 
     File : :file:`cipsi/pt2_stoch_routines.irp.f`
@@ -765,7 +765,7 @@ Subroutines / functions
        * :c:func:`zmq_pt2`
 
  
-.. c:function:: run_cipsi:
+.. c:function:: void run_cipsi(void)
 
 
     File : :file:`cipsi/cipsi.irp.f`
@@ -843,6 +843,7 @@ Subroutines / functions
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
@@ -859,7 +860,7 @@ Subroutines / functions
        * :c:data:`variance_match_weight`
 
  
-.. c:function:: run_stochastic_cipsi:
+.. c:function:: void run_stochastic_cipsi(void)
 
 
     File : :file:`cipsi/stochastic_cipsi.irp.f`
@@ -876,10 +877,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`all_mo_integrals`
        * :c:data:`correlation_energy_ratio_max`
        * :c:data:`distributed_davidson`
        * :c:data:`h_apply_buffer_allocated`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det`
        * :c:data:`n_det_max`
        * :c:data:`n_states`
@@ -943,6 +944,7 @@ Subroutines / functions
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
@@ -959,7 +961,7 @@ Subroutines / functions
        * :c:data:`variance_match_weight`
 
  
-.. c:function:: select_connected:
+.. c:function:: void select_connected(void)
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -1000,7 +1002,7 @@ Subroutines / functions
        * :c:func:`select_singles_and_doubles`
 
  
-.. c:function:: select_singles:
+.. c:function:: void select_singles(void)
 
 
     File : :file:`cipsi/selection_singles.irp.f`
@@ -1046,7 +1048,7 @@ Subroutines / functions
        * :c:func:`spot_hasbeen`
 
  
-.. c:function:: select_singles_and_doubles:
+.. c:function:: void select_singles_and_doubles(void)
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -1105,7 +1107,7 @@ Subroutines / functions
        * :c:func:`spot_isinwf`
 
  
-.. c:function:: splash_p:
+.. c:function:: void splash_p(void)
 
 
     File : :file:`cipsi/selection_singles.irp.f`
@@ -1145,7 +1147,7 @@ Subroutines / functions
        * :c:func:`get_mask_phase`
 
  
-.. c:function:: splash_pq:
+.. c:function:: void splash_pq(void)
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -1189,7 +1191,7 @@ Subroutines / functions
        * :c:func:`get_mask_phase`
 
  
-.. c:function:: spot_hasbeen:
+.. c:function:: void spot_hasbeen(void)
 
 
     File : :file:`cipsi/selection_singles.irp.f`
@@ -1223,7 +1225,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list`
 
  
-.. c:function:: spot_isinwf:
+.. c:function:: void spot_isinwf(void)
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -1259,7 +1261,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list_in_selection`
 
  
-.. c:function:: write_cipsi_json:
+.. c:function:: void write_cipsi_json(void)
 
 
     File : :file:`cipsi/write_cipsi_json.irp.f`
@@ -1279,10 +1281,10 @@ Subroutines / functions
        * :c:data:`energy_iterations`
        * :c:data:`json_int_fmt`
        * :c:data:`json_unit`
+       * :c:data:`n_csf`
        * :c:data:`n_det`
        * :c:data:`n_iter`
        * :c:data:`n_states`
-       * :c:data:`nsomomax`
        * :c:data:`only_expected_s2`
        * :c:data:`psi_configuration`
        * :c:data:`psi_energy`

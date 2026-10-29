@@ -8,8 +8,36 @@
 utils
 =====
 
-Contains general purpose utilities (sorting, maps, etc).
+General purpose utilities.
 
+* units conversions: :c:func:`ha_to_ev`, :c:func:`au_to_d`, and the
+  constants :c:data:`light_speed`, :c:data:`planck_cte`
+* mathematics: factorials and binomials (:c:func:`fact`,
+  :c:func:`logfact`, :c:func:`binom`), the error function and its
+  complex variants, the Boys functions (:c:func:`zboysfun` and its
+  variants)
+* polynomial and Gaussian products, the workhorse of the integral
+  computations: :c:func:`multiply_poly` and its variants,
+  :c:func:`give_explicit_poly_and_gaussian` and its variants,
+  :c:func:`recentered_poly2` and its variants,
+  :c:func:`overlap_gaussian_x` and its variants
+* one dimensional numerical integration: :c:func:`crint_1`,
+  :c:func:`crint_2` and their variants, :c:func:`v2_over_x`
+* linear algebra: :c:func:`lapack_diag` and its variants,
+  :c:func:`svd` and its variants, the orthonormalizations
+  :c:func:`ortho_lowdin`, :c:func:`ortho_qr`,
+  :c:func:`ortho_canonical`, :c:func:`pivoted_cholesky`,
+  :c:func:`randomized_svd`, :c:func:`exp_matrix`,
+  :c:func:`get_inverse` and its variants
+* maps for the sparse storage of the integrals
+  (:c:func:`map_load_from_disk`, :c:func:`map_save_to_disk`)
+* the Lebedev grids for the angular integration
+  (:c:data:`phi_angular_integration_lebedev`,
+  :c:data:`theta_angular_integration_lebedev`,
+  :c:data:`weights_angular_integration_lebedev`)
+* memory management (:c:func:`check_mem`, :c:func:`total_memory`,
+  :c:data:`memory_of_double` and its variants) and sorting
+  (:c:func:`set_order` and its variants)
  
  
  
@@ -26,7 +54,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: au_to_d
+.. c:var:: double au_to_d
 
 
     File : :file:`utils/units.irp.f`
@@ -45,7 +73,7 @@ Providers
 
 
  
-.. c:var:: binom
+.. c:var:: double binom
 
 
     File : :file:`utils/util.irp.f`
@@ -64,12 +92,9 @@ Providers
        :columns: 3
 
        * :c:data:`binom_int`
-       * :c:data:`dettocsftransformationmatrix`
-       * :c:data:`nsomomax`
-       * :c:data:`psi_csf_coef`
 
  
-.. c:var:: binom_int
+.. c:var:: long binom_int
 
 
     File : :file:`utils/util.irp.f`
@@ -99,7 +124,7 @@ Providers
        * :c:data:`psi_configuration_to_psi_det`
 
  
-.. c:var:: binom_int_transp
+.. c:var:: long binom_int_transp
 
 
     File : :file:`utils/util.irp.f`
@@ -129,7 +154,7 @@ Providers
        * :c:data:`psi_configuration_to_psi_det`
 
  
-.. c:var:: binom_transp
+.. c:var:: double binom_transp
 
 
     File : :file:`utils/util.irp.f`
@@ -148,12 +173,9 @@ Providers
        :columns: 3
 
        * :c:data:`binom_int`
-       * :c:data:`dettocsftransformationmatrix`
-       * :c:data:`nsomomax`
-       * :c:data:`psi_csf_coef`
 
  
-.. c:var:: degree_max_integration_lebedev
+.. c:var:: int degree_max_integration_lebedev
 
 
     File : :file:`utils/angular_integration.irp.f`
@@ -175,7 +197,7 @@ Providers
        * :c:data:`theta_angular_integration_lebedev`
 
  
-.. c:function:: dtranspose:
+.. c:function:: void dtranspose(void)
 
 
     File : :file:`utils/transpose.irp.f`
@@ -210,7 +232,7 @@ Providers
        * :c:func:`dtranspose`
 
  
-.. c:var:: fact_inv
+.. c:var:: double fact_inv
 
 
     File : :file:`utils/util.irp.f`
@@ -224,7 +246,1559 @@ Providers
 
 
  
-.. c:function:: give_explicit_cpoly_and_cgaussian:
+.. c:var:: double ha_to_ev
+
+
+    File : :file:`utils/units.irp.f`
+
+    .. code:: fortran
+
+        double precision	:: ha_to_ev	
+        double precision	:: au_to_d	
+        double precision	:: planck_cte	
+        double precision	:: light_speed	
+        double precision	:: ha_to_j	
+        double precision	:: ha_to_nm	
+
+
+    Some conversion between different units
+
+
+ 
+.. c:var:: double ha_to_j
+
+
+    File : :file:`utils/units.irp.f`
+
+    .. code:: fortran
+
+        double precision	:: ha_to_ev	
+        double precision	:: au_to_d	
+        double precision	:: planck_cte	
+        double precision	:: light_speed	
+        double precision	:: ha_to_j	
+        double precision	:: ha_to_nm	
+
+
+    Some conversion between different units
+
+
+ 
+.. c:var:: double ha_to_nm
+
+
+    File : :file:`utils/units.irp.f`
+
+    .. code:: fortran
+
+        double precision	:: ha_to_ev	
+        double precision	:: au_to_d	
+        double precision	:: planck_cte	
+        double precision	:: light_speed	
+        double precision	:: ha_to_j	
+        double precision	:: ha_to_nm	
+
+
+    Some conversion between different units
+
+
+ 
+.. c:var:: double inv_int
+
+
+    File : :file:`utils/util.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: inv_int	(128)
+
+
+    1/i
+
+
+ 
+.. c:var:: double light_speed
+
+
+    File : :file:`utils/units.irp.f`
+
+    .. code:: fortran
+
+        double precision	:: ha_to_ev	
+        double precision	:: au_to_d	
+        double precision	:: planck_cte	
+        double precision	:: light_speed	
+        double precision	:: ha_to_j	
+        double precision	:: ha_to_nm	
+
+
+    Some conversion between different units
+
+
+ 
+.. c:var:: int n_points_integration_angular_lebedev
+
+
+    File : :file:`utils/angular_integration.irp.f`
+
+    .. code:: fortran
+
+        integer	:: n_points_integration_angular_lebedev	
+
+
+    Number of points needed for the angular integral
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`degree_max_integration_lebedev`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`theta_angular_integration_lebedev`
+
+ 
+.. c:var:: double phi_angular_integration_lebedev
+
+
+    File : :file:`utils/angular_integration.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: theta_angular_integration_lebedev	(n_points_integration_angular_lebedev)
+        double precision, allocatable	:: phi_angular_integration_lebedev	(n_points_integration_angular_lebedev)
+        double precision, allocatable	:: weights_angular_integration_lebedev	(n_points_integration_angular_lebedev)
+
+
+    Theta phi values together with the weights values for the angular integration :
+    integral [dphi,dtheta] f(x,y,z) = 4 * pi * sum (1<i<n_points_integration_angular_lebedev) f(xi,yi,zi)
+    Note that theta and phi are in DEGREES !!
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`degree_max_integration_lebedev`
+       * :c:data:`n_points_integration_angular_lebedev`
+
+
+ 
+.. c:var:: double planck_cte
+
+
+    File : :file:`utils/units.irp.f`
+
+    .. code:: fortran
+
+        double precision	:: ha_to_ev	
+        double precision	:: au_to_d	
+        double precision	:: planck_cte	
+        double precision	:: light_speed	
+        double precision	:: ha_to_j	
+        double precision	:: ha_to_nm	
+
+
+    Some conversion between different units
+
+
+ 
+.. c:var:: int qp_max_mem
+
+
+    File : :file:`utils/memory.irp.f`
+
+    .. code:: fortran
+
+        integer	:: qp_max_mem	
+
+
+    Maximum memory in Gb
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`file_lock`
+       * :c:data:`mpi_master`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_two_e_integral_alpha_chol`
+       * :c:data:`cholesky_ao_num`
+       * :c:data:`mo_two_e_integrals_erf_in_map`
+       * :c:data:`mo_two_e_integrals_in_map`
+       * :c:data:`multi_s_dipole_moment`
+       * :c:data:`one_e_tr_dm_mo`
+       * :c:data:`psi_configuration_to_psi_det`
+       * :c:data:`pt2_j`
+       * :c:data:`pt2_w`
+
+ 
+.. c:var:: double shiftfact_op5_inv
+
+
+    File : :file:`utils/util.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: shiftfact_op5_inv	(128)
+
+
+    
+    1 / Gamma(n + 0.5)
+    
+
+
+ 
+.. c:var:: double theta_angular_integration_lebedev
+
+
+    File : :file:`utils/angular_integration.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: theta_angular_integration_lebedev	(n_points_integration_angular_lebedev)
+        double precision, allocatable	:: phi_angular_integration_lebedev	(n_points_integration_angular_lebedev)
+        double precision, allocatable	:: weights_angular_integration_lebedev	(n_points_integration_angular_lebedev)
+
+
+    Theta phi values together with the weights values for the angular integration :
+    integral [dphi,dtheta] f(x,y,z) = 4 * pi * sum (1<i<n_points_integration_angular_lebedev) f(xi,yi,zi)
+    Note that theta and phi are in DEGREES !!
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`degree_max_integration_lebedev`
+       * :c:data:`n_points_integration_angular_lebedev`
+
+
+ 
+.. c:function:: void transpose(void)
+
+
+    File : :file:`utils/transpose.irp.f`
+
+    .. code:: fortran
+
+        recursive subroutine transpose(A,LDA,B,LDB,d1,d2)
+
+
+    Transpose input matrix A into output matrix B
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`transpose`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`transpose`
+
+ 
+.. c:var:: double weights_angular_integration_lebedev
+
+
+    File : :file:`utils/angular_integration.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: theta_angular_integration_lebedev	(n_points_integration_angular_lebedev)
+        double precision, allocatable	:: phi_angular_integration_lebedev	(n_points_integration_angular_lebedev)
+        double precision, allocatable	:: weights_angular_integration_lebedev	(n_points_integration_angular_lebedev)
+
+
+    Theta phi values together with the weights values for the angular integration :
+    integral [dphi,dtheta] f(x,y,z) = 4 * pi * sum (1<i<n_points_integration_angular_lebedev) f(xi,yi,zi)
+    Note that theta and phi are in DEGREES !!
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`degree_max_integration_lebedev`
+       * :c:data:`n_points_integration_angular_lebedev`
+
+
+ 
+ 
+Subroutines / functions 
+----------------------- 
+ 
+.. c:function:: void add_cpoly(void)
+
+
+    File : :file:`utils/cgtos_utils.irp.f`
+
+    .. code:: fortran
+
+        subroutine add_cpoly(b, nb, c, nc, d, nd)
+
+
+    Add two complex polynomials
+    D(t) =! D(t) +( B(t) + C(t))
+
+ 
+.. c:function:: void add_cpoly_multiply(void)
+
+
+    File : :file:`utils/cgtos_utils.irp.f`
+
+    .. code:: fortran
+
+        subroutine add_cpoly_multiply(b, nb, cst, d, nd)
+
+
+    Add a complex polynomial multiplied by a complex constant
+    D(t) =! D(t) +( cst * B(t))
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`general_primitive_integral_cgtos`
+
+ 
+.. c:function:: void add_poly(void)
+
+
+    File : :file:`utils/integration.irp.f`
+
+    .. code:: fortran
+
+        subroutine add_poly(b,nb,c,nc,d,nd)
+
+
+    Add two polynomials
+    D(t) =! D(t) +( B(t)+C(t))
+
+ 
+.. c:function:: void add_poly_multiply(void)
+
+
+    File : :file:`utils/integration.irp.f`
+
+    .. code:: fortran
+
+        subroutine add_poly_multiply(b,nb,cst,d,nd)
+
+
+    Add a polynomial multiplied by a constant
+    D(t) =! D(t) +( cst * B(t))
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`general_primitive_integral`
+       * :c:func:`general_primitive_integral_erf`
+
+ 
+.. c:function:: void apply_rotation(void)
+
+
+    File : :file:`utils/linear_algebra.irp.f`
+
+    .. code:: fortran
+
+        subroutine apply_rotation(A,LDA,R,LDR,B,LDB,m,n)
+
+
+    Apply the rotation found by find_rotation
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dgemm`
+
+ 
+.. c:function:: void approx_dble(void)
+
+
+    File : :file:`utils/util.irp.f`
+
+    .. code:: fortran
+
+        double precision function approx_dble(a,n)
+
+
+
+ 
+.. c:function:: void binom_func(void)
+
+
+    File : :file:`utils/util.irp.f`
+
+    .. code:: fortran
+
+        double precision function binom_func(i,j)
+
+
+    .. math                       ::
+    
+      \frac{i!}{j!(i-j)!}
+    
+
+ 
+.. c:function:: void cgaussian_product(void)
+
+
+    File : :file:`utils/cgtos_utils.irp.f`
+
+    .. code:: fortran
+
+        subroutine cgaussian_product(a, xa, b, xb, k, p, xp)
+
+
+    complex Gaussian product
+    e^{-a (r-r_A)^2} e^{-b (r-r_B)^2} = k e^{-p (r-r_P)^2}
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`give_explicit_cpoly_and_cgaussian`
+
+ 
+.. c:function:: void cgaussian_product_x(void)
+
+
+    File : :file:`utils/cgtos_utils.irp.f`
+
+    .. code:: fortran
+
+        subroutine cgaussian_product_x(a, xa, b, xb, k, p, xp)
+
+
+    complex Gaussian product in 1D.
+    e^{-a (x-x_A)^2} e^{-b (x-x_B)^2} = K e^{-p (x-x_P)^2}
+
+ 
+.. c:function:: void check_mem(void)
+
+
+    File : :file:`utils/memory.irp.f`
+
+    .. code:: fortran
+
+        subroutine check_mem(rss_in,routine)
+
+
+    Checks if n gigabytes can be allocated. If not, exit the run.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`qp_max_mem`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_two_e_integral_alpha_chol`
+       * :c:func:`create_selection_buffer`
+       * :c:func:`dav_double_dressed`
+       * :c:func:`davidson_diag_csf_hjj`
+       * :c:func:`davidson_diag_hjj_sjj`
+       * :c:func:`davidson_diag_nonsym_hjj`
+       * :c:func:`davidson_general`
+       * :c:func:`davidson_general_diag_dressed_ext_rout_nonsym_b1space`
+       * :c:func:`davidson_general_ext_rout`
+       * :c:func:`davidson_general_ext_rout_diag_dressed`
+       * :c:func:`davidson_general_ext_rout_dressed`
+       * :c:func:`davidson_general_ext_rout_nonsym_b1space`
+       * :c:func:`make_selection_buffer_s2`
+       * :c:data:`psi_configuration_to_psi_det`
+       * :c:func:`pt2_collector`
+       * :c:data:`pt2_j`
+       * :c:data:`pt2_w`
+       * :c:func:`remove_duplicates_in_selection_buffer`
+       * :c:func:`run_cipsi`
+       * :c:func:`run_slave_main`
+       * :c:func:`run_stochastic_cipsi`
+       * :c:func:`selection_collector`
+       * :c:func:`testteethbuilding`
+       * :c:func:`zmq_pt2`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`print_memory_usage`
+       * :c:func:`resident_memory`
+
+ 
+.. c:function:: void check_sym(void)
+
+
+    File : :file:`utils/util.irp.f`
+
+    .. code:: fortran
+
+        subroutine check_sym(A, n)
+
+
+
+ 
+.. c:function:: void cpx_erf_1(void)
+
+
+    File : :file:`utils/cpx_erf.irp.f`
+
+    .. code:: fortran
+
+        complex*16 function cpx_erf_1(x, y)
+
+
+    
+    compute erf(z) for z = x + i y
+    
+    REF: Abramowitz and Stegun
+    
+
+ 
+.. c:function:: void crint_1(void)
+
+
+    File : :file:`utils/cpx_boys.irp.f`
+
+    .. code:: fortran
+
+        complex*16 function crint_1(n, rho)
+
+
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`zboysfun00_1`
+
+ 
+.. c:function:: void crint_1_vec(void)
+
+
+    File : :file:`utils/cpx_boys.irp.f`
+
+    .. code:: fortran
+
+        subroutine crint_1_vec(n_max, rho, vals)
+
+
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`crint_sum`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`crint_smallz_vec`
+       * :c:func:`zboysfun00_1`
+
+ 
+.. c:function:: void crint_2(void)
+
+
+    File : :file:`utils/cpx_boys.irp.f`
+
+    .. code:: fortran
+
+        complex*16 function crint_2(n, rho)
+
+
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`zboysfun`
+       * :c:func:`zboysfunnrp`
+
+ 
+.. c:function:: void crint_2_vec(void)
+
+
+    File : :file:`utils/cpx_boys.irp.f`
+
+    .. code:: fortran
+
+        subroutine crint_2_vec(n_max, rho, vals)
+
+
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`crint_smallz_vec`
+       * :c:func:`zboysfun`
+       * :c:func:`zboysfunnrp`
+
+ 
+.. c:function:: void crint_quad_1(void)
+
+
+    File : :file:`utils/cpx_boys.irp.f`
+
+    .. code:: fortran
+
+        subroutine crint_quad_1(n, rho, n_quad, crint_quad)
+
+
+
+ 
+.. c:function:: void crint_quad_12(void)
+
+
+    File : :file:`utils/cpx_boys.irp.f`
+
+    .. code:: fortran
+
+        subroutine crint_quad_12(n, rho, n_quad, crint_quad)
+
+
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`crint_quad_12_vec`
+
+ 
+.. c:function:: void crint_quad_12_vec(void)
+
+
+    File : :file:`utils/cpx_boys.irp.f`
+
+    .. code:: fortran
+
+        subroutine crint_quad_12_vec(n_max, rho, vals)
+
+
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`crint_quad_12`
+
+ 
+.. c:function:: void crint_quad_2(void)
+
+
+    File : :file:`utils/cpx_boys.irp.f`
+
+    .. code:: fortran
+
+        subroutine crint_quad_2(n, rho, n_quad, crint_quad)
+
+
+
+ 
+.. c:function:: void crint_smallz(void)
+
+
+    File : :file:`utils/cpx_boys.irp.f`
+
+    .. code:: fortran
+
+        complex*16 function crint_smallz(n, rho)
+
+
+    Standard version of rint
+
+ 
+.. c:function:: void crint_smallz_vec(void)
+
+
+    File : :file:`utils/cpx_boys.irp.f`
+
+    .. code:: fortran
+
+        subroutine crint_smallz_vec(n_max, rho, vals)
+
+
+    Standard version of rint
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`crint_1_vec`
+       * :c:func:`crint_2_vec`
+
+ 
+.. c:function:: void crint_sum(void)
+
+
+    File : :file:`utils/cpx_boys.irp.f`
+
+    .. code:: fortran
+
+        complex*16 function crint_sum(n_pt_out, rho, d1)
+
+
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`crint_1_vec`
+
+ 
+.. c:function:: void dble_fact(void)
+
+
+    File : :file:`utils/util.irp.f`
+
+    .. code:: fortran
+
+        double precision function dble_fact(n)
+
+
+
+ 
+.. c:function:: void dble_fact_even(void)
+
+
+    File : :file:`utils/util.irp.f`
+
+    .. code:: fortran
+
+        double precision function dble_fact_even(n) result(fact2)
+
+
+    n!!
+
+ 
+.. c:function:: void dble_fact_odd(void)
+
+
+    File : :file:`utils/util.irp.f`
+
+    .. code:: fortran
+
+        double precision function dble_fact_odd(n) result(fact2)
+
+
+    n!!
+
+ 
+.. c:function:: void dble_logfact(void)
+
+
+    File : :file:`utils/util.irp.f`
+
+    .. code:: fortran
+
+        double precision function dble_logfact(n) result(logfact2)
+
+
+    n!!
+
+ 
+.. c:function:: void derf_mu_x(void)
+
+
+    File : :file:`utils/util.irp.f`
+
+    .. code:: fortran
+
+        double precision function derf_mu_x(mu,x)
+
+
+
+ 
+.. c:function:: void diag_mat_per_fock_degen(void)
+
+
+    File : :file:`utils/block_diag_degen.irp.f`
+
+    .. code:: fortran
+
+        subroutine diag_mat_per_fock_degen(fock_diag, mat_ref, n, thr_d, thr_nd, thr_deg, leigvec, reigvec, eigval)
+
+
+    
+    subroutine that diagonalizes a matrix mat_ref BY BLOCK
+    
+    the blocks are defined by the elements having the SAME DEGENERACIES in the entries "fock_diag"
+    
+    examples : all elements having degeneracy 1 in fock_diag (i.e. not being degenerated) will be treated together
+    
+             : all elements having degeneracy 2 in fock_diag (i.e. two elements are equal) will be treated together
+    
+             : all elements having degeneracy 3 in fock_diag (i.e. two elements are equal) will be treated together
+    
+    etc... the advantage is to guarentee no spurious mixing because of numerical problems.
+    
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dsort`
+       * :c:func:`give_degen_full_list`
+       * :c:func:`isort`
+       * :c:func:`non_hrmt_bieig`
+
+ 
+.. c:function:: void diag_mat_per_fock_degen_core(void)
+
+
+    File : :file:`utils/block_diag_degen_core.irp.f`
+
+    .. code:: fortran
+
+        subroutine diag_mat_per_fock_degen_core(fock_diag, mat_ref, listcore,ncore, n, thr_d, thr_nd, thr_deg, leigvec, reigvec, eigval)
+
+
+    
+    subroutine that diagonalizes a matrix mat_ref BY BLOCK
+    
+    the blocks are defined by the elements having the SAME DEGENERACIES in the entries "fock_diag"
+    
+    the elements of listcore are untouched
+    
+    examples : all elements having degeneracy 1 in fock_diag (i.e. not being degenerated) will be treated together
+    
+             : all elements having degeneracy 2 in fock_diag (i.e. two elements are equal) will be treated together
+    
+             : all elements having degeneracy 3 in fock_diag (i.e. two elements are equal) will be treated together
+    
+    etc... the advantage is to guarentee no spurious mixing because of numerical problems.
+    
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dsort`
+       * :c:func:`give_degen_full_listcore`
+       * :c:func:`isort`
+       * :c:func:`non_hrmt_bieig`
+
+ 
+.. c:function:: void diag_nonsym_right(void)
+
+
+    File : :file:`utils/linear_algebra.irp.f`
+
+    .. code:: fortran
+
+        subroutine diag_nonsym_right(n, A, A_ldim, V, V_ldim, energy, E_ldim)
+
+
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`davidson_diag_nonsym_hjj`
+       * :c:func:`davidson_general_diag_dressed_ext_rout_nonsym_b1space`
+       * :c:func:`davidson_general_ext_rout_nonsym_b1space`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dgeevx`
+       * :c:func:`dsort`
+
+ 
+.. c:function:: void diagonalize_sym_matrix(void)
+
+
+    File : :file:`utils/util.irp.f`
+
+    .. code:: fortran
+
+        subroutine diagonalize_sym_matrix(N, A, e)
+
+
+    
+    Diagonalize a symmetric matrix
+    
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dsyev`
+
+ 
+.. c:function:: void dset_order(void)
+
+
+    File : :file:`utils/sort.irp.f_template_90`
+
+    .. code:: fortran
+
+        subroutine dset_order(x,iorder,isize)
+
+
+    array A has already been sorted, and iorder has contains the new order of
+    elements of A. This subroutine changes the order of x to match the new order of A.
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos_ord`
+       * :c:data:`ao_coef_normalized_ordered`
+       * :c:func:`h_s2_u_0_nstates_openmp`
+       * :c:func:`h_s2_u_0_nstates_zmq`
+       * :c:func:`h_s2_u_0_two_e_nstates_openmp`
+       * :c:func:`h_u_0_nstates_openmp`
+       * :c:func:`h_u_0_nstates_zmq`
+       * :c:func:`orb_range_2_rdm_openmp`
+       * :c:func:`orb_range_2_rdm_state_av_openmp`
+       * :c:func:`orb_range_2_trans_rdm_openmp`
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:func:`restore_symmetry`
+
+ 
+.. c:function:: void dset_order_big(void)
+
+
+    File : :file:`utils/sort.irp.f_template_90`
+
+    .. code:: fortran
+
+        subroutine dset_order_big(x,iorder,isize)
+
+
+    array A has already been sorted, and iorder has contains the new order of
+    elements of A. This subroutine changes the order of x to match the new order of A.
+    This is a version for very large arrays where the indices need
+    to be in integer*8 format
+
+ 
+.. c:function:: void eigsvd(void)
+
+
+    File : :file:`utils/linear_algebra.irp.f`
+
+    .. code:: fortran
+
+        subroutine eigSVD(A,LDA,U,LDU,D,Vt,LDVt,m,n)
+
+
+    Algorithm 3 of https://arxiv.org/pdf/1810.06860.pdf
+    
+    A(m,n) = U(m,n) D(n) Vt(n,n) with m>n
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dgemm`
+       * :c:func:`dscal`
+       * :c:func:`lapack_diagd`
+       * :c:func:`svd`
+
+ 
+.. c:function:: void erf_e(void)
+
+
+    File : :file:`utils/cpx_erf.irp.f`
+
+    .. code:: fortran
+
+        complex*16 function erf_E(x, yabs)
+
+
+
+ 
+.. c:function:: void erf_f(void)
+
+
+    File : :file:`utils/cpx_erf.irp.f`
+
+    .. code:: fortran
+
+        double precision function erf_F(x, yabs)
+
+
+
+ 
+.. c:function:: void erf_g(void)
+
+
+    File : :file:`utils/cpx_erf.irp.f`
+
+    .. code:: fortran
+
+        complex*16 function erf_G(x, yabs)
+
+
+
+ 
+.. c:function:: void erf_h(void)
+
+
+    File : :file:`utils/cpx_erf.irp.f`
+
+    .. code:: fortran
+
+        complex*16 function erf_H(x, yabs)
+
+
+
+ 
+.. c:function:: void exp_matrix(void)
+
+
+    File : :file:`utils/linear_algebra.irp.f`
+
+    .. code:: fortran
+
+        subroutine exp_matrix(X,n,exp_X)
+
+
+    exponential of the matrix X: X has to be ANTI HERMITIAN !!
+    
+    taken from Hellgaker, jorgensen, Olsen book
+    
+    section evaluation of matrix exponential (Eqs. 3.1.29 to 3.1.31)
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dgemm`
+       * :c:func:`get_a_squared`
+       * :c:func:`lapack_diagd`
+
+ 
+.. c:function:: void exp_matrix_taylor(void)
+
+
+    File : :file:`utils/linear_algebra.irp.f`
+
+    .. code:: fortran
+
+        subroutine exp_matrix_taylor(X,n,exp_X,converged)
+
+
+    exponential of a general real matrix X using the Taylor expansion of exp(X)
+    
+    returns the logical converged which checks the convergence
+    exponential of X using Taylor expansion
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`umat`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dgemm`
+
+ 
+.. c:function:: void extrapolate_data(void)
+
+
+    File : :file:`utils/extrapolation.irp.f`
+
+    .. code:: fortran
+
+        subroutine extrapolate_data(N_data, data, pt2, output)
+
+
+    Extrapolate the data to the FCI limit
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`increment_n_iter`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_pseudo_inverse`
+
+ 
+.. c:function:: void f_integral(void)
+
+
+    File : :file:`utils/integration.irp.f`
+
+    .. code:: fortran
+
+        double precision function F_integral(n,p)
+
+
+    function that calculates the following integral
+    \int_{\-infty}^{+\infty} x^n \exp(-p x^2) dx
+
+ 
+.. c:function:: void fact(void)
+
+
+    File : :file:`utils/util.irp.f`
+
+    .. code:: fortran
+
+        double precision function fact(n)
+
+
+    n!
+
+ 
+.. c:function:: void fc_integral(void)
+
+
+    File : :file:`utils/cgtos_utils.irp.f`
+
+    .. code:: fortran
+
+        complex*16 function Fc_integral(n, inv_sq_p)
+
+
+    function that calculates the following integral
+    \int_{\-infty}^{+\infty} x^n \exp(-p x^2) dx
+    for complex valued p
+
+ 
+.. c:function:: void find_rotation(void)
+
+
+    File : :file:`utils/linear_algebra.irp.f`
+
+    .. code:: fortran
+
+        subroutine find_rotation(A,LDA,B,m,C,n)
+
+
+    Find A.C = B
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dgemm`
+       * :c:func:`get_pseudo_inverse`
+
+ 
+.. c:function:: void format_w_error(void)
+
+
+    File : :file:`utils/format_w_error.irp.f`
+
+    .. code:: fortran
+
+        subroutine format_w_error(value,error,size_nb,max_nb_digits,format_value,str_error)
+
+
+    Format for double precision, value(error)
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pt2_collector`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`lock_io`
+       * :c:func:`unlock_io`
+
+ 
+.. c:function:: void gaussian_product(void)
+
+
+    File : :file:`utils/integration.irp.f`
+
+    .. code:: fortran
+
+        subroutine gaussian_product(a,xa,b,xb,k,p,xp)
+
+
+    Gaussian product in 1D.
+    e^{-a (x-x_A)^2} e^{-b (x-x_B)^2} = K_{ab}^x e^{-p (x-x_P)^2}
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`give_explicit_poly_and_gaussian`
+       * :c:func:`give_explicit_poly_and_gaussian_double`
+
+ 
+.. c:function:: void gaussian_product_v(void)
+
+
+    File : :file:`utils/integration.irp.f`
+
+    .. code:: fortran
+
+        subroutine gaussian_product_v(a, xa, LD_xa, b, xb, k, p, xp, n_points)
+
+
+    
+    Gaussian product in 1D.
+    e^{-a (x-x_A)^2} e^{-b (x-x_B)^2} = K_{ab}^x e^{-p (x-x_P)^2}
+    
+    Using multiple A centers
+    
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`give_explicit_poly_and_gaussian_v`
+
+ 
+.. c:function:: void gaussian_product_x(void)
+
+
+    File : :file:`utils/integration.irp.f`
+
+    .. code:: fortran
+
+        subroutine gaussian_product_x(a,xa,b,xb,k,p,xp)
+
+
+    Gaussian product in 1D.
+    e^{-a (x-x_A)^2} e^{-b (x-x_B)^2} = K_{ab}^x e^{-p (x-x_P)^2}
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`overlap_gaussian_xyz`
+
+ 
+.. c:function:: void gaussian_product_x_v(void)
+
+
+    File : :file:`utils/integration.irp.f`
+
+    .. code:: fortran
+
+        subroutine gaussian_product_x_v(a,xa,b,xb,k,p,xp,n_points)
+
+
+    Gaussian product in 1D with multiple xa
+    e^{-a (x-x_A)^2} e^{-b (x-x_B)^2} = K_{ab}^x e^{-p (x-x_P)^2}
+
+ 
+.. c:function:: void get_a_squared(void)
+
+
+    File : :file:`utils/linear_algebra.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_A_squared(A,n,A2)
+
+
+    A2 = A A where A is n x n matrix. Use the dgemm routine
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`exp_matrix`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dgemm`
+
+ 
+.. c:function:: void get_ab_prod(void)
+
+
+    File : :file:`utils/linear_algebra.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_AB_prod(A,n,m,B,l,AB)
+
+
+    AB = A B where A is n x m, B is m x l. Use the dgemm routine
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dgemm`
+
+ 
+.. c:function:: void get_inverse(void)
+
+
+    File : :file:`utils/linear_algebra.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_inverse(A,LDA,m,C,LDC)
+
+
+    Returns the inverse of the square matrix A
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_ortho_canonical_coef_inv`
+       * :c:data:`overlap_states`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dgetrf`
+       * :c:func:`dgetri`
+
+ 
+.. c:function:: void get_inverse_complex(void)
+
+
+    File : :file:`utils/linear_algebra.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_inverse_complex(A,LDA,m,C,LDC)
+
+
+    Returns the inverse of the square matrix A
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`zgetrf`
+       * :c:func:`zgetri`
+
+ 
+.. c:function:: void get_pseudo_inverse(void)
+
+
+    File : :file:`utils/linear_algebra.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_pseudo_inverse(A, LDA, m, n, C, LDC, cutoff)
+
+
+    Find C = A^-1: A(m,n), C(n,m)
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cart_to_sphe_inv`
+       * :c:data:`ao_cart_to_sphe_overlap_inv`
+       * :c:func:`extrapolate_data`
+       * :c:func:`find_rotation`
+       * :c:data:`s_inv`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dgemm`
+       * :c:func:`dgesvd`
+
+ 
+.. c:function:: void get_pseudo_inverse_complex(void)
+
+
+    File : :file:`utils/linear_algebra.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_pseudo_inverse_complex(A,LDA,m,n,C,LDC,cutoff)
+
+
+    Find C = A^-1
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`s_inv_complex`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`zgesvd`
+
+ 
+.. c:function:: void get_total_available_memory(void)
+
+
+    File : :file:`utils/memory.irp.f`
+
+    .. code:: fortran
+
+        integer function get_total_available_memory() result(res)
+
+
+    Returns the total available memory on the current machine
+
+ 
+.. c:function:: void give_degen(void)
+
+
+    File : :file:`utils/util.irp.f`
+
+    .. code:: fortran
+
+        subroutine give_degen(A, n, shift, list_degen, n_degen_list)
+
+
+    returns n_degen_list :: the number of degenerated SET of elements (i.e. with \|A(i)-A(i+1)\| below shift)
+    
+    for each of these sets, list_degen(1,i) = first degenerate element of the set i,
+    
+                            list_degen(2,i) = last degenerate element of the set i.
+
+ 
+.. c:function:: void give_degen_full_list(void)
+
+
+    File : :file:`utils/block_diag_degen.irp.f`
+
+    .. code:: fortran
+
+        subroutine give_degen_full_list(A, n, thr, list_degen, n_degen_list)
+
+
+    you enter with an array A(n) and spits out all the elements degenerated up to thr
+    
+    the elements of A(n) DON'T HAVE TO BE SORTED IN THE ENTRANCE: TOTALLY GENERAL
+    
+    list_degen(i,0) = number of degenerate entries
+    
+    list_degen(i,1) = index of the first degenerate entry
+    
+    list_degen(i,2:list_degen(i,0)) = list of all other dengenerate entries
+    
+    if list_degen(i,0) == 1 it means that there is no degeneracy for that element
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`diag_mat_per_fock_degen`
+
+ 
+.. c:function:: void give_degen_full_listcore(void)
+
+
+    File : :file:`utils/block_diag_degen_core.irp.f`
+
+    .. code:: fortran
+
+        subroutine give_degen_full_listcore(A, n, listcore, ncore, thr, list_degen, n_degen_list)
+
+
+    you enter with an array A(n) and spits out all the elements degenerated up to thr
+    
+    the elements of A(n) DON'T HAVE TO BE SORTED IN THE ENTRANCE: TOTALLY GENERAL
+    
+    list_degen(i,0) = number of degenerate entries
+    
+    list_degen(i,1) = index of the first degenerate entry
+    
+    list_degen(i,2:list_degen(i,0)) = list of all other dengenerate entries
+    
+    if list_degen(i,0) == 1 it means that there is no degeneracy for that element
+    
+    if list_degen(i,0) >= 1000 it means that it is core orbitals
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`diag_mat_per_fock_degen_core`
+
+ 
+.. c:function:: void give_explicit_cpoly_and_cgaussian(void)
 
 
     File : :file:`utils/cgtos_utils.irp.f`
@@ -232,7 +1806,7 @@ Providers
     .. code:: fortran
 
         subroutine give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_k, iorder, &
-               alpha, beta, a, b, Ae_center, Be_center, Ap_center, Bp_center, dim)
+                       alpha, beta, a, b, Ae_center, Be_center, Ap_center, Bp_center, dim)
 
 
     
@@ -271,7 +1845,7 @@ Providers
        * :c:func:`recentered_cpoly2`
 
  
-.. c:function:: give_explicit_cpoly_and_cgaussian_x:
+.. c:function:: void give_explicit_cpoly_and_cgaussian_x(void)
 
 
     File : :file:`utils/cgtos_utils.irp.f`
@@ -279,7 +1853,7 @@ Providers
     .. code:: fortran
 
         subroutine give_explicit_cpoly_and_cgaussian_x(P_new, P_center, p, fact_k, iorder, &
-                                               alpha, beta, a, b, Ae_center, Be_center, Ap_center, Bp_center, dim)
+                                                       alpha, beta, a, b, Ae_center, Be_center, Ap_center, Bp_center, dim)
 
 
     
@@ -308,1647 +1882,7 @@ Providers
        * :c:func:`recentered_cpoly2`
 
  
-.. c:var:: ha_to_ev
-
-
-    File : :file:`utils/units.irp.f`
-
-    .. code:: fortran
-
-        double precision	:: ha_to_ev	
-        double precision	:: au_to_d	
-        double precision	:: planck_cte	
-        double precision	:: light_speed	
-        double precision	:: ha_to_j	
-        double precision	:: ha_to_nm	
-
-
-    Some conversion between different units
-
-
- 
-.. c:var:: ha_to_j
-
-
-    File : :file:`utils/units.irp.f`
-
-    .. code:: fortran
-
-        double precision	:: ha_to_ev	
-        double precision	:: au_to_d	
-        double precision	:: planck_cte	
-        double precision	:: light_speed	
-        double precision	:: ha_to_j	
-        double precision	:: ha_to_nm	
-
-
-    Some conversion between different units
-
-
- 
-.. c:var:: ha_to_nm
-
-
-    File : :file:`utils/units.irp.f`
-
-    .. code:: fortran
-
-        double precision	:: ha_to_ev	
-        double precision	:: au_to_d	
-        double precision	:: planck_cte	
-        double precision	:: light_speed	
-        double precision	:: ha_to_j	
-        double precision	:: ha_to_nm	
-
-
-    Some conversion between different units
-
-
- 
-.. c:var:: inv_int
-
-
-    File : :file:`utils/util.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: inv_int	(128)
-
-
-    1/i
-
-
- 
-.. c:var:: light_speed
-
-
-    File : :file:`utils/units.irp.f`
-
-    .. code:: fortran
-
-        double precision	:: ha_to_ev	
-        double precision	:: au_to_d	
-        double precision	:: planck_cte	
-        double precision	:: light_speed	
-        double precision	:: ha_to_j	
-        double precision	:: ha_to_nm	
-
-
-    Some conversion between different units
-
-
- 
-.. c:var:: n_points_integration_angular_lebedev
-
-
-    File : :file:`utils/angular_integration.irp.f`
-
-    .. code:: fortran
-
-        integer	:: n_points_integration_angular_lebedev	
-
-
-    Number of points needed for the angular integral
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`degree_max_integration_lebedev`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`theta_angular_integration_lebedev`
-
- 
-.. c:var:: nproc
-
-
-    File : :file:`utils/util.irp.f`
-
-    .. code:: fortran
-
-        integer	:: nproc	
-
-
-    Number of current OpenMP threads
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_two_e_integrals_erf_in_map`
-       * :c:data:`ao_two_e_integrals_in_map`
-       * :c:data:`cholesky_ao_num`
-       * :c:data:`h_apply_buffer_allocated`
-       * :c:data:`n_det`
-       * :c:data:`nthreads_davidson`
-       * :c:data:`nthreads_pt2`
-
- 
-.. c:function:: overlap_cgaussian_xyz:
-
-
-    File : :file:`utils/cgtos_one_e.irp.f`
-
-    .. code:: fortran
-
-        subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
-                                 Ap_center, Bp_center, overlap_x, overlap_y, overlap_z, overlap, dim)
-
-
-    
-    S_x = \int (x - Ap_x)^{a_x} exp(-\alpha (x - Ae_x)^2)
-               (x - Bp_x)^{b_x} exp(-\beta  (x - Be_x)^2) dx
-    
-    S = S_x S_y S_z
-    
-    for  complex arguments
-    
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_coef_norm_cgtos`
-       * :c:data:`ao_deriv2_cgtos_x`
-       * :c:data:`ao_overlap_cgtos`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`give_explicit_cpoly_and_cgaussian`
-
- 
-.. c:var:: phi_angular_integration_lebedev
-
-
-    File : :file:`utils/angular_integration.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: theta_angular_integration_lebedev	(n_points_integration_angular_lebedev)
-        double precision, allocatable	:: phi_angular_integration_lebedev	(n_points_integration_angular_lebedev)
-        double precision, allocatable	:: weights_angular_integration_lebedev	(n_points_integration_angular_lebedev)
-
-
-    Theta phi values together with the weights values for the angular integration :
-    integral [dphi,dtheta] f(x,y,z) = 4 * pi * sum (1<i<n_points_integration_angular_lebedev) f(xi,yi,zi)
-    Note that theta and phi are in DEGREES !!
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`degree_max_integration_lebedev`
-       * :c:data:`n_points_integration_angular_lebedev`
-
-
- 
-.. c:var:: planck_cte
-
-
-    File : :file:`utils/units.irp.f`
-
-    .. code:: fortran
-
-        double precision	:: ha_to_ev	
-        double precision	:: au_to_d	
-        double precision	:: planck_cte	
-        double precision	:: light_speed	
-        double precision	:: ha_to_j	
-        double precision	:: ha_to_nm	
-
-
-    Some conversion between different units
-
-
- 
-.. c:var:: qp_max_mem
-
-
-    File : :file:`utils/memory.irp.f`
-
-    .. code:: fortran
-
-        integer	:: qp_max_mem	
-
-
-    Maximum memory in Gb
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`file_lock`
-       * :c:data:`mpi_master`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_two_e_integral_alpha_chol`
-       * :c:data:`cholesky_ao_num`
-       * :c:data:`mo_two_e_integrals_erf_in_map`
-       * :c:data:`mo_two_e_integrals_in_map`
-       * :c:data:`pt2_j`
-       * :c:data:`pt2_w`
-
- 
-.. c:var:: shiftfact_op5_inv
-
-
-    File : :file:`utils/util.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: shiftfact_op5_inv	(128)
-
-
-    
-    1 / Gamma(n + 0.5)
-    
-
-
- 
-.. c:var:: theta_angular_integration_lebedev
-
-
-    File : :file:`utils/angular_integration.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: theta_angular_integration_lebedev	(n_points_integration_angular_lebedev)
-        double precision, allocatable	:: phi_angular_integration_lebedev	(n_points_integration_angular_lebedev)
-        double precision, allocatable	:: weights_angular_integration_lebedev	(n_points_integration_angular_lebedev)
-
-
-    Theta phi values together with the weights values for the angular integration :
-    integral [dphi,dtheta] f(x,y,z) = 4 * pi * sum (1<i<n_points_integration_angular_lebedev) f(xi,yi,zi)
-    Note that theta and phi are in DEGREES !!
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`degree_max_integration_lebedev`
-       * :c:data:`n_points_integration_angular_lebedev`
-
-
- 
-.. c:function:: transpose:
-
-
-    File : :file:`utils/transpose.irp.f`
-
-    .. code:: fortran
-
-        recursive subroutine transpose(A,LDA,B,LDB,d1,d2)
-
-
-    Transpose input matrix A into output matrix B
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`transpose`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`transpose`
-
- 
-.. c:var:: weights_angular_integration_lebedev
-
-
-    File : :file:`utils/angular_integration.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: theta_angular_integration_lebedev	(n_points_integration_angular_lebedev)
-        double precision, allocatable	:: phi_angular_integration_lebedev	(n_points_integration_angular_lebedev)
-        double precision, allocatable	:: weights_angular_integration_lebedev	(n_points_integration_angular_lebedev)
-
-
-    Theta phi values together with the weights values for the angular integration :
-    integral [dphi,dtheta] f(x,y,z) = 4 * pi * sum (1<i<n_points_integration_angular_lebedev) f(xi,yi,zi)
-    Note that theta and phi are in DEGREES !!
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`degree_max_integration_lebedev`
-       * :c:data:`n_points_integration_angular_lebedev`
-
-
- 
- 
-Subroutines / functions 
------------------------ 
- 
-.. c:function:: add_cpoly:
-
-
-    File : :file:`utils/cgtos_utils.irp.f`
-
-    .. code:: fortran
-
-        subroutine add_cpoly(b, nb, c, nc, d, nd)
-
-
-    Add two complex polynomials
-    D(t) =! D(t) +( B(t) + C(t))
-
- 
-.. c:function:: add_cpoly_multiply:
-
-
-    File : :file:`utils/cgtos_utils.irp.f`
-
-    .. code:: fortran
-
-        subroutine add_cpoly_multiply(b, nb, cst, d, nd)
-
-
-    Add a complex polynomial multiplied by a complex constant
-    D(t) =! D(t) +( cst * B(t))
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`general_primitive_integral_cgtos`
-
- 
-.. c:function:: add_poly:
-
-
-    File : :file:`utils/integration.irp.f`
-
-    .. code:: fortran
-
-        subroutine add_poly(b,nb,c,nc,d,nd)
-
-
-    Add two polynomials
-    D(t) =! D(t) +( B(t)+C(t))
-
- 
-.. c:function:: add_poly_multiply:
-
-
-    File : :file:`utils/integration.irp.f`
-
-    .. code:: fortran
-
-        subroutine add_poly_multiply(b,nb,cst,d,nd)
-
-
-    Add a polynomial multiplied by a constant
-    D(t) =! D(t) +( cst * B(t))
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`general_primitive_integral`
-       * :c:func:`general_primitive_integral_erf`
-
- 
-.. c:function:: apply_rotation:
-
-
-    File : :file:`utils/linear_algebra.irp.f`
-
-    .. code:: fortran
-
-        subroutine apply_rotation(A,LDA,R,LDR,B,LDB,m,n)
-
-
-    Apply the rotation found by find_rotation
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`dgemm`
-
- 
-.. c:function:: approx_dble:
-
-
-    File : :file:`utils/util.irp.f`
-
-    .. code:: fortran
-
-        double precision function approx_dble(a,n)
-
-
-
- 
-.. c:function:: binom_func:
-
-
-    File : :file:`utils/util.irp.f`
-
-    .. code:: fortran
-
-        double precision function binom_func(i,j)
-
-
-    .. math                       ::
-    
-      \frac{i!}{j!(i-j)!}
-    
-
- 
-.. c:function:: cgaussian_product:
-
-
-    File : :file:`utils/cgtos_utils.irp.f`
-
-    .. code:: fortran
-
-        subroutine cgaussian_product(a, xa, b, xb, k, p, xp)
-
-
-    complex Gaussian product
-    e^{-a (r-r_A)^2} e^{-b (r-r_B)^2} = k e^{-p (r-r_P)^2}
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`give_explicit_cpoly_and_cgaussian`
-
- 
-.. c:function:: cgaussian_product_x:
-
-
-    File : :file:`utils/cgtos_utils.irp.f`
-
-    .. code:: fortran
-
-        subroutine cgaussian_product_x(a, xa, b, xb, k, p, xp)
-
-
-    complex Gaussian product in 1D.
-    e^{-a (x-x_A)^2} e^{-b (x-x_B)^2} = K e^{-p (x-x_P)^2}
-
- 
-.. c:function:: check_mem:
-
-
-    File : :file:`utils/memory.irp.f`
-
-    .. code:: fortran
-
-        subroutine check_mem(rss_in,routine)
-
-
-    Checks if n gigabytes can be allocated. If not, exit the run.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`qp_max_mem`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_two_e_integral_alpha_chol`
-       * :c:func:`create_selection_buffer`
-       * :c:func:`dav_double_dressed`
-       * :c:func:`davidson_diag_csf_hjj`
-       * :c:func:`davidson_diag_hjj`
-       * :c:func:`davidson_diag_hjj_sjj`
-       * :c:func:`davidson_diag_nonsym_hjj`
-       * :c:func:`davidson_general`
-       * :c:func:`davidson_general_diag_dressed_ext_rout_nonsym_b1space`
-       * :c:func:`davidson_general_ext_rout`
-       * :c:func:`davidson_general_ext_rout_diag_dressed`
-       * :c:func:`davidson_general_ext_rout_dressed`
-       * :c:func:`davidson_general_ext_rout_nonsym_b1space`
-       * :c:func:`make_selection_buffer_s2`
-       * :c:func:`pt2_collector`
-       * :c:data:`pt2_j`
-       * :c:data:`pt2_w`
-       * :c:func:`remove_duplicates_in_selection_buffer`
-       * :c:func:`run_cipsi`
-       * :c:func:`run_slave_main`
-       * :c:func:`run_stochastic_cipsi`
-       * :c:func:`selection_collector`
-       * :c:func:`testteethbuilding`
-       * :c:func:`zmq_pt2`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`print_memory_usage`
-       * :c:func:`resident_memory`
-
- 
-.. c:function:: check_sym:
-
-
-    File : :file:`utils/util.irp.f`
-
-    .. code:: fortran
-
-        subroutine check_sym(A, n)
-
-
-
- 
-.. c:function:: cpx_erf:
-
-
-    File : :file:`utils/cpx_erf.irp.f`
-
-    .. code:: fortran
-
-        complex*16 function cpx_erf(x, y)
-
-
-    
-    compute erf(z) for z = x + i y
-    
-    REF: Abramowitz and Stegun
-    
-
- 
-.. c:function:: cpx_erf_1:
-
-
-    File : :file:`utils/cpx_erf.irp.f`
-
-    .. code:: fortran
-
-        complex*16 function cpx_erf_1(x, y)
-
-
-    
-    compute erf(z) for z = x + i y
-    
-    REF: Abramowitz and Stegun
-    
-
- 
-.. c:function:: crint:
-
-
-    File : :file:`utils/cgtos_utils.irp.f`
-
-    .. code:: fortran
-
-        complex*16 function crint(n, rho)
-
-
-
- 
-.. c:function:: crint_1:
-
-
-    File : :file:`utils/cpx_boys.irp.f`
-
-    .. code:: fortran
-
-        complex*16 function crint_1(n, rho)
-
-
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`zboysfun00_1`
-
- 
-.. c:function:: crint_1_vec:
-
-
-    File : :file:`utils/cpx_boys.irp.f`
-
-    .. code:: fortran
-
-        subroutine crint_1_vec(n_max, rho, vals)
-
-
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`crint_sum`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`crint_smallz_vec`
-       * :c:func:`zboysfun00_1`
-
- 
-.. c:function:: crint_2:
-
-
-    File : :file:`utils/cpx_boys.irp.f`
-
-    .. code:: fortran
-
-        complex*16 function crint_2(n, rho)
-
-
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`zboysfun`
-       * :c:func:`zboysfunnrp`
-
- 
-.. c:function:: crint_2_vec:
-
-
-    File : :file:`utils/cpx_boys.irp.f`
-
-    .. code:: fortran
-
-        subroutine crint_2_vec(n_max, rho, vals)
-
-
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`crint_smallz_vec`
-       * :c:func:`zboysfun`
-       * :c:func:`zboysfunnrp`
-
- 
-.. c:function:: crint_quad_1:
-
-
-    File : :file:`utils/cpx_boys.irp.f`
-
-    .. code:: fortran
-
-        subroutine crint_quad_1(n, rho, n_quad, crint_quad)
-
-
-
- 
-.. c:function:: crint_quad_12:
-
-
-    File : :file:`utils/cpx_boys.irp.f`
-
-    .. code:: fortran
-
-        subroutine crint_quad_12(n, rho, n_quad, crint_quad)
-
-
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`crint_quad_12_vec`
-
- 
-.. c:function:: crint_quad_12_vec:
-
-
-    File : :file:`utils/cpx_boys.irp.f`
-
-    .. code:: fortran
-
-        subroutine crint_quad_12_vec(n_max, rho, vals)
-
-
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`crint_quad_12`
-
- 
-.. c:function:: crint_quad_2:
-
-
-    File : :file:`utils/cpx_boys.irp.f`
-
-    .. code:: fortran
-
-        subroutine crint_quad_2(n, rho, n_quad, crint_quad)
-
-
-
- 
-.. c:function:: crint_smallz:
-
-
-    File : :file:`utils/cpx_boys.irp.f`
-
-    .. code:: fortran
-
-        complex*16 function crint_smallz(n, rho)
-
-
-    Standard version of rint
-
- 
-.. c:function:: crint_smallz_vec:
-
-
-    File : :file:`utils/cpx_boys.irp.f`
-
-    .. code:: fortran
-
-        subroutine crint_smallz_vec(n_max, rho, vals)
-
-
-    Standard version of rint
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`crint_1_vec`
-       * :c:func:`crint_2_vec`
-
- 
-.. c:function:: crint_sum:
-
-
-    File : :file:`utils/cpx_boys.irp.f`
-
-    .. code:: fortran
-
-        complex*16 function crint_sum(n_pt_out, rho, d1)
-
-
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`crint_1_vec`
-
- 
-.. c:function:: dble_fact:
-
-
-    File : :file:`utils/util.irp.f`
-
-    .. code:: fortran
-
-        double precision function dble_fact(n)
-
-
-
- 
-.. c:function:: dble_fact_even:
-
-
-    File : :file:`utils/util.irp.f`
-
-    .. code:: fortran
-
-        double precision function dble_fact_even(n) result(fact2)
-
-
-    n!!
-
- 
-.. c:function:: dble_fact_odd:
-
-
-    File : :file:`utils/util.irp.f`
-
-    .. code:: fortran
-
-        double precision function dble_fact_odd(n) result(fact2)
-
-
-    n!!
-
- 
-.. c:function:: dble_logfact:
-
-
-    File : :file:`utils/util.irp.f`
-
-    .. code:: fortran
-
-        double precision function dble_logfact(n) result(logfact2)
-
-
-    n!!
-
- 
-.. c:function:: derf_mu_x:
-
-
-    File : :file:`utils/util.irp.f`
-
-    .. code:: fortran
-
-        double precision function derf_mu_x(mu,x)
-
-
-
- 
-.. c:function:: diag_mat_per_fock_degen:
-
-
-    File : :file:`utils/block_diag_degen.irp.f`
-
-    .. code:: fortran
-
-        subroutine diag_mat_per_fock_degen(fock_diag, mat_ref, n, thr_d, thr_nd, thr_deg, leigvec, reigvec, eigval)
-
-
-    
-    subroutine that diagonalizes a matrix mat_ref BY BLOCK
-    
-    the blocks are defined by the elements having the SAME DEGENERACIES in the entries "fock_diag"
-    
-    examples : all elements having degeneracy 1 in fock_diag (i.e. not being degenerated) will be treated together
-    
-             : all elements having degeneracy 2 in fock_diag (i.e. two elements are equal) will be treated together
-    
-             : all elements having degeneracy 3 in fock_diag (i.e. two elements are equal) will be treated together
-    
-    etc... the advantage is to guarentee no spurious mixing because of numerical problems.
-    
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`dsort`
-       * :c:func:`give_degen_full_list`
-       * :c:func:`isort`
-       * :c:func:`non_hrmt_bieig`
-
- 
-.. c:function:: diag_mat_per_fock_degen_core:
-
-
-    File : :file:`utils/block_diag_degen_core.irp.f`
-
-    .. code:: fortran
-
-        subroutine diag_mat_per_fock_degen_core(fock_diag, mat_ref, listcore,ncore, n, thr_d, thr_nd, thr_deg, leigvec, reigvec, eigval)
-
-
-    
-    subroutine that diagonalizes a matrix mat_ref BY BLOCK
-    
-    the blocks are defined by the elements having the SAME DEGENERACIES in the entries "fock_diag"
-    
-    the elements of listcore are untouched
-    
-    examples : all elements having degeneracy 1 in fock_diag (i.e. not being degenerated) will be treated together
-    
-             : all elements having degeneracy 2 in fock_diag (i.e. two elements are equal) will be treated together
-    
-             : all elements having degeneracy 3 in fock_diag (i.e. two elements are equal) will be treated together
-    
-    etc... the advantage is to guarentee no spurious mixing because of numerical problems.
-    
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`dsort`
-       * :c:func:`give_degen_full_listcore`
-       * :c:func:`isort`
-       * :c:func:`non_hrmt_bieig`
-
- 
-.. c:function:: diag_nonsym_right:
-
-
-    File : :file:`utils/linear_algebra.irp.f`
-
-    .. code:: fortran
-
-        subroutine diag_nonsym_right(n, A, A_ldim, V, V_ldim, energy, E_ldim)
-
-
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_diag_nonsym_hjj`
-       * :c:func:`davidson_general_diag_dressed_ext_rout_nonsym_b1space`
-       * :c:func:`davidson_general_ext_rout_nonsym_b1space`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`dgeevx`
-       * :c:func:`dsort`
-
- 
-.. c:function:: diagonalize_sym_matrix:
-
-
-    File : :file:`utils/util.irp.f`
-
-    .. code:: fortran
-
-        subroutine diagonalize_sym_matrix(N, A, e)
-
-
-    
-    Diagonalize a symmetric matrix
-    
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`dsyev`
-
- 
-.. c:function:: dset_order:
-
-
-    File : :file:`utils/sort.irp.f_template_90`
-
-    .. code:: fortran
-
-        subroutine dset_order(x,iorder,isize)
-
-
-    array A has already been sorted, and iorder has contains the new order of
-    elements of A. This subroutine changes the order of x to match the new order of A.
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_coef_norm_cgtos_ord`
-       * :c:data:`ao_coef_normalized_ordered`
-       * :c:func:`h_s2_u_0_nstates_openmp`
-       * :c:func:`h_s2_u_0_nstates_zmq`
-       * :c:func:`h_s2_u_0_two_e_nstates_openmp`
-       * :c:func:`h_u_0_nstates_openmp`
-       * :c:func:`h_u_0_nstates_zmq`
-       * :c:func:`orb_range_2_rdm_openmp`
-       * :c:func:`orb_range_2_rdm_state_av_openmp`
-       * :c:func:`orb_range_2_trans_rdm_openmp`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`psi_bilinear_matrix_values`
-       * :c:func:`restore_symmetry`
-
- 
-.. c:function:: dset_order_big:
-
-
-    File : :file:`utils/sort.irp.f_template_90`
-
-    .. code:: fortran
-
-        subroutine dset_order_big(x,iorder,isize)
-
-
-    array A has already been sorted, and iorder has contains the new order of
-    elements of A. This subroutine changes the order of x to match the new order of A.
-    This is a version for very large arrays where the indices need
-    to be in integer*8 format
-
- 
-.. c:function:: eigsvd:
-
-
-    File : :file:`utils/linear_algebra.irp.f`
-
-    .. code:: fortran
-
-        subroutine eigSVD(A,LDA,U,LDU,D,Vt,LDVt,m,n)
-
-
-    Algorithm 3 of https://arxiv.org/pdf/1810.06860.pdf
-    
-    A(m,n) = U(m,n) D(n) Vt(n,n) with m>n
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`dgemm`
-       * :c:func:`dscal`
-       * :c:func:`lapack_diagd`
-       * :c:func:`svd`
-
- 
-.. c:function:: erf_e:
-
-
-    File : :file:`utils/cpx_erf.irp.f`
-
-    .. code:: fortran
-
-        complex*16 function erf_E(x, yabs)
-
-
-
- 
-.. c:function:: erf_f:
-
-
-    File : :file:`utils/cpx_erf.irp.f`
-
-    .. code:: fortran
-
-        double precision function erf_F(x, yabs)
-
-
-
- 
-.. c:function:: erf_g:
-
-
-    File : :file:`utils/cpx_erf.irp.f`
-
-    .. code:: fortran
-
-        complex*16 function erf_G(x, yabs)
-
-
-
- 
-.. c:function:: erf_h:
-
-
-    File : :file:`utils/cpx_erf.irp.f`
-
-    .. code:: fortran
-
-        complex*16 function erf_H(x, yabs)
-
-
-
- 
-.. c:function:: exp_matrix:
-
-
-    File : :file:`utils/linear_algebra.irp.f`
-
-    .. code:: fortran
-
-        subroutine exp_matrix(X,n,exp_X)
-
-
-    exponential of the matrix X: X has to be ANTI HERMITIAN !!
-    
-    taken from Hellgaker, jorgensen, Olsen book
-    
-    section evaluation of matrix exponential (Eqs. 3.1.29 to 3.1.31)
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`dgemm`
-       * :c:func:`get_a_squared`
-       * :c:func:`lapack_diagd`
-
- 
-.. c:function:: exp_matrix_taylor:
-
-
-    File : :file:`utils/linear_algebra.irp.f`
-
-    .. code:: fortran
-
-        subroutine exp_matrix_taylor(X,n,exp_X,converged)
-
-
-    exponential of a general real matrix X using the Taylor expansion of exp(X)
-    
-    returns the logical converged which checks the convergence
-    exponential of X using Taylor expansion
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`umat`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`dgemm`
-
- 
-.. c:function:: extrapolate_data:
-
-
-    File : :file:`utils/extrapolation.irp.f`
-
-    .. code:: fortran
-
-        subroutine extrapolate_data(N_data, data, pt2, output)
-
-
-    Extrapolate the data to the FCI limit
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`increment_n_iter`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_pseudo_inverse`
-
- 
-.. c:function:: f_integral:
-
-
-    File : :file:`utils/integration.irp.f`
-
-    .. code:: fortran
-
-        double precision function F_integral(n,p)
-
-
-    function that calculates the following integral
-    \int_{\-infty}^{+\infty} x^n \exp(-p x^2) dx
-
- 
-.. c:function:: fact:
-
-
-    File : :file:`utils/util.irp.f`
-
-    .. code:: fortran
-
-        double precision function fact(n)
-
-
-    n!
-
- 
-.. c:function:: fc_integral:
-
-
-    File : :file:`utils/cgtos_utils.irp.f`
-
-    .. code:: fortran
-
-        complex*16 function Fc_integral(n, inv_sq_p)
-
-
-    function that calculates the following integral
-    \int_{\-infty}^{+\infty} x^n \exp(-p x^2) dx
-    for complex valued p
-
- 
-.. c:function:: find_rotation:
-
-
-    File : :file:`utils/linear_algebra.irp.f`
-
-    .. code:: fortran
-
-        subroutine find_rotation(A,LDA,B,m,C,n)
-
-
-    Find A.C = B
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`dgemm`
-       * :c:func:`get_pseudo_inverse`
-
- 
-.. c:function:: format_w_error:
-
-
-    File : :file:`utils/format_w_error.irp.f`
-
-    .. code:: fortran
-
-        subroutine format_w_error(value,error,size_nb,max_nb_digits,format_value,str_error)
-
-
-    Format for double precision, value(error)
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`pt2_collector`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`lock_io`
-       * :c:func:`unlock_io`
-
- 
-.. c:function:: gaussian_product:
-
-
-    File : :file:`utils/integration.irp.f`
-
-    .. code:: fortran
-
-        subroutine gaussian_product(a,xa,b,xb,k,p,xp)
-
-
-    Gaussian product in 1D.
-    e^{-a (x-x_A)^2} e^{-b (x-x_B)^2} = K_{ab}^x e^{-p (x-x_P)^2}
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`give_explicit_poly_and_gaussian`
-       * :c:func:`give_explicit_poly_and_gaussian_double`
-
- 
-.. c:function:: gaussian_product_v:
-
-
-    File : :file:`utils/integration.irp.f`
-
-    .. code:: fortran
-
-        subroutine gaussian_product_v(a, xa, LD_xa, b, xb, k, p, xp, n_points)
-
-
-    
-    Gaussian product in 1D.
-    e^{-a (x-x_A)^2} e^{-b (x-x_B)^2} = K_{ab}^x e^{-p (x-x_P)^2}
-    
-    Using multiple A centers
-    
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`give_explicit_poly_and_gaussian_v`
-
- 
-.. c:function:: gaussian_product_x:
-
-
-    File : :file:`utils/integration.irp.f`
-
-    .. code:: fortran
-
-        subroutine gaussian_product_x(a,xa,b,xb,k,p,xp)
-
-
-    Gaussian product in 1D.
-    e^{-a (x-x_A)^2} e^{-b (x-x_B)^2} = K_{ab}^x e^{-p (x-x_P)^2}
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`overlap_gaussian_xyz`
-
- 
-.. c:function:: gaussian_product_x_v:
-
-
-    File : :file:`utils/integration.irp.f`
-
-    .. code:: fortran
-
-        subroutine gaussian_product_x_v(a,xa,b,xb,k,p,xp,n_points)
-
-
-    Gaussian product in 1D with multiple xa
-    e^{-a (x-x_A)^2} e^{-b (x-x_B)^2} = K_{ab}^x e^{-p (x-x_P)^2}
-
- 
-.. c:function:: get_a_squared:
-
-
-    File : :file:`utils/linear_algebra.irp.f`
-
-    .. code:: fortran
-
-        subroutine get_A_squared(A,n,A2)
-
-
-    A2 = A A where A is n x n matrix. Use the dgemm routine
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`exp_matrix`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`dgemm`
-
- 
-.. c:function:: get_ab_prod:
-
-
-    File : :file:`utils/linear_algebra.irp.f`
-
-    .. code:: fortran
-
-        subroutine get_AB_prod(A,n,m,B,l,AB)
-
-
-    AB = A B where A is n x m, B is m x l. Use the dgemm routine
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`dgemm`
-
- 
-.. c:function:: get_inverse:
-
-
-    File : :file:`utils/linear_algebra.irp.f`
-
-    .. code:: fortran
-
-        subroutine get_inverse(A,LDA,m,C,LDC)
-
-
-    Returns the inverse of the square matrix A
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_ortho_canonical_coef_inv`
-       * :c:data:`overlap_states`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`dgetrf`
-       * :c:func:`dgetri`
-
- 
-.. c:function:: get_inverse_complex:
-
-
-    File : :file:`utils/linear_algebra.irp.f`
-
-    .. code:: fortran
-
-        subroutine get_inverse_complex(A,LDA,m,C,LDC)
-
-
-    Returns the inverse of the square matrix A
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`zgetrf`
-       * :c:func:`zgetri`
-
- 
-.. c:function:: get_pseudo_inverse:
-
-
-    File : :file:`utils/linear_algebra.irp.f`
-
-    .. code:: fortran
-
-        subroutine get_pseudo_inverse(A, LDA, m, n, C, LDC, cutoff)
-
-
-    Find C = A^-1
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_cart_to_sphe_inv`
-       * :c:func:`extrapolate_data`
-       * :c:func:`find_rotation`
-       * :c:data:`s_inv`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`dgemm`
-       * :c:func:`dgesvd`
-
- 
-.. c:function:: get_pseudo_inverse_complex:
-
-
-    File : :file:`utils/linear_algebra.irp.f`
-
-    .. code:: fortran
-
-        subroutine get_pseudo_inverse_complex(A,LDA,m,n,C,LDC,cutoff)
-
-
-    Find C = A^-1
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`s_inv_complex`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`zgesvd`
-
- 
-.. c:function:: get_total_available_memory:
-
-
-    File : :file:`utils/memory.irp.f`
-
-    .. code:: fortran
-
-        integer function get_total_available_memory() result(res)
-
-
-    Returns the total available memory on the current machine
-
- 
-.. c:function:: give_degen:
-
-
-    File : :file:`utils/util.irp.f`
-
-    .. code:: fortran
-
-        subroutine give_degen(A, n, shift, list_degen, n_degen_list)
-
-
-    returns n_degen_list :: the number of degenerated SET of elements (i.e. with |A(i)-A(i+1)| below shift)
-    
-    for each of these sets, list_degen(1,i) = first degenerate element of the set i,
-    
-                            list_degen(2,i) = last degenerate element of the set i.
-
- 
-.. c:function:: give_degen_full_list:
-
-
-    File : :file:`utils/block_diag_degen.irp.f`
-
-    .. code:: fortran
-
-        subroutine give_degen_full_list(A, n, thr, list_degen, n_degen_list)
-
-
-    you enter with an array A(n) and spits out all the elements degenerated up to thr
-    
-    the elements of A(n) DON'T HAVE TO BE SORTED IN THE ENTRANCE: TOTALLY GENERAL
-    
-    list_degen(i,0) = number of degenerate entries
-    
-    list_degen(i,1) = index of the first degenerate entry
-    
-    list_degen(i,2:list_degen(i,0)) = list of all other dengenerate entries
-    
-    if list_degen(i,0) == 1 it means that there is no degeneracy for that element
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`diag_mat_per_fock_degen`
-
- 
-.. c:function:: give_degen_full_listcore:
-
-
-    File : :file:`utils/block_diag_degen_core.irp.f`
-
-    .. code:: fortran
-
-        subroutine give_degen_full_listcore(A, n, listcore, ncore, thr, list_degen, n_degen_list)
-
-
-    you enter with an array A(n) and spits out all the elements degenerated up to thr
-    
-    the elements of A(n) DON'T HAVE TO BE SORTED IN THE ENTRANCE: TOTALLY GENERAL
-    
-    list_degen(i,0) = number of degenerate entries
-    
-    list_degen(i,1) = index of the first degenerate entry
-    
-    list_degen(i,2:list_degen(i,0)) = list of all other dengenerate entries
-    
-    if list_degen(i,0) == 1 it means that there is no degeneracy for that element
-    
-    if list_degen(i,0) >= 1000 it means that it is core orbitals
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`diag_mat_per_fock_degen_core`
-
- 
-.. c:function:: give_explicit_poly_and_gaussian:
+.. c:function:: void give_explicit_poly_and_gaussian(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -1974,8 +1908,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`ao_two_e_integral`
        * :c:func:`ao_two_e_integral_erf`
+       * :c:func:`ao_two_e_integral_general`
        * :c:func:`ao_two_e_integral_schwartz_accel`
        * :c:func:`ao_two_e_integral_schwartz_accel_erf`
        * :c:func:`give_explicit_poly_and_gaussian_double`
@@ -1991,7 +1925,7 @@ Subroutines / functions
        * :c:func:`recentered_poly2`
 
  
-.. c:function:: give_explicit_poly_and_gaussian_double:
+.. c:function:: void give_explicit_poly_and_gaussian_double(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2019,7 +1953,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian`
 
  
-.. c:function:: give_explicit_poly_and_gaussian_v:
+.. c:function:: void give_explicit_poly_and_gaussian_v(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2058,7 +1992,7 @@ Subroutines / functions
        * :c:func:`recentered_poly2_v0`
 
  
-.. c:function:: give_explicit_poly_and_gaussian_x:
+.. c:function:: void give_explicit_poly_and_gaussian_x(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2089,7 +2023,7 @@ Subroutines / functions
        * :c:func:`recentered_poly2`
 
  
-.. c:function:: give_pol_in_r:
+.. c:function:: void give_pol_in_r(void)
 
 
     File : :file:`utils/prim_in_r.irp.f`
@@ -2101,7 +2035,7 @@ Subroutines / functions
 
 
  
-.. c:function:: hermite:
+.. c:function:: void hermite(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2114,7 +2048,7 @@ Subroutines / functions
     Hermite polynomial
 
  
-.. c:function:: i2set_order:
+.. c:function:: void i2set_order(void)
 
 
     File : :file:`utils/sort.irp.f_template_90`
@@ -2128,7 +2062,7 @@ Subroutines / functions
     elements of A. This subroutine changes the order of x to match the new order of A.
 
  
-.. c:function:: i2set_order_big:
+.. c:function:: void i2set_order_big(void)
 
 
     File : :file:`utils/sort.irp.f_template_90`
@@ -2144,7 +2078,7 @@ Subroutines / functions
     to be in integer*8 format
 
  
-.. c:function:: i8set_order:
+.. c:function:: void i8set_order(void)
 
 
     File : :file:`utils/sort.irp.f_template_90`
@@ -2158,7 +2092,7 @@ Subroutines / functions
     elements of A. This subroutine changes the order of x to match the new order of A.
 
  
-.. c:function:: i8set_order_big:
+.. c:function:: void i8set_order_big(void)
 
 
     File : :file:`utils/sort.irp.f_template_90`
@@ -2174,7 +2108,7 @@ Subroutines / functions
     to be in integer*8 format
 
  
-.. c:function:: is_same_spin:
+.. c:function:: void is_same_spin(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -2189,7 +2123,7 @@ Subroutines / functions
     
 
  
-.. c:function:: iset_order:
+.. c:function:: void iset_order(void)
 
 
     File : :file:`utils/sort.irp.f_template_90`
@@ -2212,7 +2146,7 @@ Subroutines / functions
        * :c:func:`restore_symmetry`
 
  
-.. c:function:: iset_order_big:
+.. c:function:: void iset_order_big(void)
 
 
     File : :file:`utils/sort.irp.f_template_90`
@@ -2228,7 +2162,19 @@ Subroutines / functions
     to be in integer*8 format
 
  
-.. c:function:: kronecker_delta:
+.. c:function:: void isnan(void)
+
+
+    File : :file:`utils/util.irp.f`
+
+    .. code:: fortran
+
+        logical function isnan(x)
+
+
+
+ 
+.. c:function:: void kronecker_delta(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -2241,7 +2187,7 @@ Subroutines / functions
     Kronecker Delta
 
  
-.. c:function:: lapack_diag:
+.. c:function:: void lapack_diag(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2283,7 +2229,7 @@ Subroutines / functions
        * :c:func:`dsyev`
 
  
-.. c:function:: lapack_diag_complex:
+.. c:function:: void lapack_diag_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2310,7 +2256,7 @@ Subroutines / functions
        * :c:func:`zheev`
 
  
-.. c:function:: lapack_diagd:
+.. c:function:: void lapack_diagd(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2346,7 +2292,7 @@ Subroutines / functions
        * :c:func:`dsyevd`
 
  
-.. c:function:: lapack_diagd_complex:
+.. c:function:: void lapack_diagd_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2373,7 +2319,7 @@ Subroutines / functions
        * :c:func:`zheevd`
 
  
-.. c:function:: lapack_diagd_diag_complex:
+.. c:function:: void lapack_diagd_diag_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2401,7 +2347,7 @@ Subroutines / functions
        * :c:func:`zheevd`
 
  
-.. c:function:: lapack_diagd_diag_in_place_complex:
+.. c:function:: void lapack_diagd_diag_in_place_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2429,7 +2375,7 @@ Subroutines / functions
        * :c:func:`zheevd`
 
  
-.. c:function:: logfact:
+.. c:function:: void logfact(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -2442,7 +2388,7 @@ Subroutines / functions
     n!
 
  
-.. c:function:: lowercase:
+.. c:function:: void lowercase(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -2463,7 +2409,7 @@ Subroutines / functions
        * :c:func:`new_parallel_job`
 
  
-.. c:function:: map_load_from_disk:
+.. c:function:: void map_load_from_disk(void)
 
 
     File : :file:`utils/map_functions.irp.f`
@@ -2493,7 +2439,7 @@ Subroutines / functions
        * :c:func:`mmap`
 
  
-.. c:function:: map_save_to_disk:
+.. c:function:: void map_save_to_disk(void)
 
 
     File : :file:`utils/map_functions.irp.f`
@@ -2529,7 +2475,7 @@ Subroutines / functions
        * :c:func:`msync`
 
  
-.. c:function:: matrix_vector_product_complex:
+.. c:function:: void matrix_vector_product_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2549,7 +2495,7 @@ Subroutines / functions
        * :c:func:`zhemv`
 
  
-.. c:function:: memory_of_double:
+.. c:function:: void memory_of_double(void)
 
 
     File : :file:`utils/memory.irp.f`
@@ -2562,7 +2508,7 @@ Subroutines / functions
     Computes the memory required for n double precision elements in gigabytes.
 
  
-.. c:function:: memory_of_double8:
+.. c:function:: void memory_of_double8(void)
 
 
     File : :file:`utils/memory.irp.f`
@@ -2575,7 +2521,7 @@ Subroutines / functions
     Computes the memory required for n double precision elements in gigabytes.
 
  
-.. c:function:: memory_of_int:
+.. c:function:: void memory_of_int(void)
 
 
     File : :file:`utils/memory.irp.f`
@@ -2588,7 +2534,7 @@ Subroutines / functions
     Computes the memory required for n double precision elements in gigabytes.
 
  
-.. c:function:: memory_of_int8:
+.. c:function:: void memory_of_int8(void)
 
 
     File : :file:`utils/memory.irp.f`
@@ -2601,7 +2547,7 @@ Subroutines / functions
     Computes the memory required for n double precision elements in gigabytes.
 
  
-.. c:function:: multiply_cpoly:
+.. c:function:: void multiply_cpoly(void)
 
 
     File : :file:`utils/cgtos_utils.irp.f`
@@ -2631,7 +2577,7 @@ Subroutines / functions
        * :c:func:`i_x2_pol_mult_one_e_cgtos`
 
  
-.. c:function:: multiply_poly:
+.. c:function:: void multiply_poly(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2669,7 +2615,7 @@ Subroutines / functions
        * :c:func:`multiply_poly_c2`
 
  
-.. c:function:: multiply_poly_b0:
+.. c:function:: void multiply_poly_b0(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2690,7 +2636,7 @@ Subroutines / functions
        * :c:func:`multiply_poly`
 
  
-.. c:function:: multiply_poly_b1:
+.. c:function:: void multiply_poly_b1(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2711,7 +2657,7 @@ Subroutines / functions
        * :c:func:`multiply_poly`
 
  
-.. c:function:: multiply_poly_b2:
+.. c:function:: void multiply_poly_b2(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2732,7 +2678,7 @@ Subroutines / functions
        * :c:func:`multiply_poly`
 
  
-.. c:function:: multiply_poly_c0:
+.. c:function:: void multiply_poly_c0(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2753,7 +2699,7 @@ Subroutines / functions
        * :c:func:`multiply_poly`
 
  
-.. c:function:: multiply_poly_c1:
+.. c:function:: void multiply_poly_c1(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2774,7 +2720,7 @@ Subroutines / functions
        * :c:func:`multiply_poly`
 
  
-.. c:function:: multiply_poly_c2:
+.. c:function:: void multiply_poly_c2(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2797,7 +2743,7 @@ Subroutines / functions
        * :c:func:`multiply_poly`
 
  
-.. c:function:: multiply_poly_v:
+.. c:function:: void multiply_poly_v(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -2818,7 +2764,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian_v`
 
  
-.. c:function:: normalize:
+.. c:function:: void normalize(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -2838,7 +2784,6 @@ Subroutines / functions
        * :c:func:`copy_h_apply_buffer_to_wf`
        * :c:func:`dav_double_dressed`
        * :c:func:`davidson_diag_csf_hjj`
-       * :c:func:`davidson_diag_hjj`
        * :c:func:`davidson_diag_hjj_sjj`
        * :c:func:`davidson_diag_nonsym_hjj`
        * :c:func:`davidson_general`
@@ -2857,7 +2802,7 @@ Subroutines / functions
        * :c:func:`dscal`
 
  
-.. c:function:: nullify_small_elements:
+.. c:function:: void nullify_small_elements(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2876,7 +2821,6 @@ Subroutines / functions
        * :c:data:`ci_electronic_energy`
        * :c:func:`dav_double_dressed`
        * :c:func:`davidson_diag_csf_hjj`
-       * :c:func:`davidson_diag_hjj`
        * :c:func:`davidson_diag_hjj_sjj`
        * :c:func:`davidson_diag_nonsym_hjj`
        * :c:func:`davidson_general_ext_rout_dressed`
@@ -2888,7 +2832,7 @@ Subroutines / functions
        * :c:func:`save_wavefunction_truncated`
 
  
-.. c:function:: ortho_canonical:
+.. c:function:: void ortho_canonical(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2930,7 +2874,7 @@ Subroutines / functions
        * :c:func:`svd`
 
  
-.. c:function:: ortho_canonical_complex:
+.. c:function:: void ortho_canonical_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2965,7 +2909,7 @@ Subroutines / functions
        * :c:func:`zgemm`
 
  
-.. c:function:: ortho_lowdin:
+.. c:function:: void ortho_lowdin(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -2997,6 +2941,7 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_ortho_lowdin_coef`
+       * :c:data:`mo_sphe_coef`
        * :c:func:`orthonormalize_mos`
 
     Calls:
@@ -3008,7 +2953,7 @@ Subroutines / functions
        * :c:func:`svd`
 
  
-.. c:function:: ortho_lowdin_complex:
+.. c:function:: void ortho_lowdin_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -3043,7 +2988,7 @@ Subroutines / functions
        * :c:func:`zgemm`
 
  
-.. c:function:: ortho_qr:
+.. c:function:: void ortho_qr(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -3087,7 +3032,7 @@ Subroutines / functions
        * :c:func:`dorgqr`
 
  
-.. c:function:: ortho_qr_complex:
+.. c:function:: void ortho_qr_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -3117,7 +3062,7 @@ Subroutines / functions
        * :c:func:`zungqr`
 
  
-.. c:function:: ortho_qr_unblocked:
+.. c:function:: void ortho_qr_unblocked(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -3147,7 +3092,7 @@ Subroutines / functions
        * :c:func:`dorg2r`
 
  
-.. c:function:: ortho_qr_unblocked_complex:
+.. c:function:: void ortho_qr_unblocked_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -3169,7 +3114,7 @@ Subroutines / functions
     
 
  
-.. c:function:: ortho_svd:
+.. c:function:: void ortho_svd(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -3206,7 +3151,7 @@ Subroutines / functions
        * :c:func:`svd`
 
  
-.. c:function:: overlap_cgaussian_x:
+.. c:function:: void overlap_cgaussian_x(void)
 
 
     File : :file:`utils/cgtos_one_e.irp.f`
@@ -3230,7 +3175,44 @@ Subroutines / functions
        * :c:func:`give_explicit_cpoly_and_cgaussian_x`
 
  
-.. c:function:: overlap_gaussian_x:
+.. c:function:: void overlap_cgaussian_xyz(void)
+
+
+    File : :file:`utils/cgtos_one_e.irp.f`
+
+    .. code:: fortran
+
+        subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
+                                         Ap_center, Bp_center, overlap_x, overlap_y, overlap_z, overlap, dim)
+
+
+    
+    S_x = \int (x - Ap_x)^{a_x} exp(-\alpha (x - Ae_x)^2)
+               (x - Bp_x)^{b_x} exp(-\beta  (x - Be_x)^2) dx
+    
+    S = S_x S_y S_z
+    
+    for  complex arguments
+    
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos`
+       * :c:data:`ao_deriv2_cgtos_x`
+       * :c:data:`ao_overlap_cgtos`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`give_explicit_cpoly_and_cgaussian`
+
+ 
+.. c:function:: void overlap_gaussian_x(void)
 
 
     File : :file:`utils/one_e_integration.irp.f`
@@ -3253,7 +3235,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian_x`
 
  
-.. c:function:: overlap_gaussian_xyz:
+.. c:function:: void overlap_gaussian_xyz(void)
 
 
     File : :file:`utils/one_e_integration.irp.f`
@@ -3281,7 +3263,6 @@ Subroutines / functions
        * :c:data:`ao_overlap`
        * :c:data:`ao_spread_x`
        * :c:data:`prim_normalization_factor`
-       * :c:data:`shell_normalization_factor`
 
     Calls:
 
@@ -3292,7 +3273,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian`
 
  
-.. c:function:: overlap_gaussian_xyz_v:
+.. c:function:: void overlap_gaussian_xyz_v(void)
 
 
     File : :file:`utils/one_e_integration.irp.f`
@@ -3316,7 +3297,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian_v`
 
  
-.. c:function:: overlap_x_abs:
+.. c:function:: void overlap_x_abs(void)
 
 
     File : :file:`utils/one_e_integration.irp.f`
@@ -3339,7 +3320,7 @@ Subroutines / functions
        * :c:data:`ao_overlap_abs`
 
  
-.. c:function:: pivoted_cholesky:
+.. c:function:: void pivoted_cholesky(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -3365,7 +3346,7 @@ Subroutines / functions
        * :c:func:`dpstrf`
 
  
-.. c:function:: pol_modif_center:
+.. c:function:: void pol_modif_center(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -3390,7 +3371,7 @@ Subroutines / functions
        * :c:func:`pol_modif_center_x`
 
  
-.. c:function:: pol_modif_center_x:
+.. c:function:: void pol_modif_center_x(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -3418,7 +3399,7 @@ Subroutines / functions
        * :c:func:`pol_modif_center`
 
  
-.. c:function:: primitive_value_explicit:
+.. c:function:: void primitive_value_explicit(void)
 
 
     File : :file:`utils/prim_in_r.irp.f`
@@ -3434,7 +3415,7 @@ Subroutines / functions
     exp(-alpha * [(x - center_prim(1))**2 + (y - center_prim(2))**2 + (z - center_prim(3))**2] )
 
  
-.. c:function:: print_memory_usage:
+.. c:function:: void print_memory_usage(void)
 
 
     File : :file:`utils/memory.irp.f`
@@ -3453,6 +3434,8 @@ Subroutines / functions
 
        * :c:func:`check_mem`
        * :c:data:`cholesky_ao_num`
+       * :c:data:`final_grid_points`
+       * :c:data:`final_grid_points_extra`
        * :c:func:`write_time`
 
     Calls:
@@ -3464,7 +3447,40 @@ Subroutines / functions
        * :c:func:`total_memory`
 
  
-.. c:function:: randomized_svd:
+.. c:function:: void qp_bug(void)
+
+
+    File : :file:`utils/bug.irp.f`
+
+    .. code:: fortran
+
+        subroutine qp_bug(from, code, message)
+
+
+    This routine prints a bug report
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cart_to_sphe_coef`
+       * :c:data:`cholesky_mo_transp`
+       * :c:func:`davidson_diag_csf_hjj`
+       * :c:func:`davidson_diag_hjj_sjj`
+       * :c:func:`get_det_csf_transformation`
+       * :c:func:`get_index_in_psi_det_alpha_unique`
+       * :c:func:`get_index_in_psi_det_beta_unique`
+       * :c:func:`get_mo_two_e_integrals`
+       * :c:func:`get_mo_two_e_integrals_i1j1`
+       * :c:func:`get_mo_two_e_integrals_ij`
+       * :c:data:`gpu_num`
+       * :c:func:`h_s2_u_0_nstates_zmq`
+       * :c:data:`n_csf`
+       * :c:data:`psi_configuration_to_psi_det`
+
+ 
+.. c:function:: void randomized_svd(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -3497,7 +3513,7 @@ Subroutines / functions
        * :c:func:`svd`
 
  
-.. c:function:: recentered_cpoly2:
+.. c:function:: void recentered_cpoly2(void)
 
 
     File : :file:`utils/cgtos_utils.irp.f`
@@ -3528,7 +3544,7 @@ Subroutines / functions
        * :c:func:`give_explicit_cpoly_and_cgaussian_x`
 
  
-.. c:function:: recentered_poly2:
+.. c:function:: void recentered_poly2(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -3564,7 +3580,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian_x`
 
  
-.. c:function:: recentered_poly2_v:
+.. c:function:: void recentered_poly2_v(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -3591,7 +3607,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian_v`
 
  
-.. c:function:: recentered_poly2_v0:
+.. c:function:: void recentered_poly2_v0(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -3623,7 +3639,7 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian_v`
 
  
-.. c:function:: resident_memory:
+.. c:function:: void resident_memory(void)
 
 
     File : :file:`utils/memory.irp.f`
@@ -3645,7 +3661,6 @@ Subroutines / functions
        * :c:data:`cholesky_ao_num`
        * :c:func:`dav_double_dressed`
        * :c:func:`davidson_diag_csf_hjj`
-       * :c:func:`davidson_diag_hjj`
        * :c:func:`davidson_diag_hjj_sjj`
        * :c:func:`davidson_diag_nonsym_hjj`
        * :c:func:`davidson_general`
@@ -3668,7 +3683,7 @@ Subroutines / functions
        * :c:func:`usleep`
 
  
-.. c:function:: restore_symmetry:
+.. c:function:: void restore_symmetry(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -3703,7 +3718,7 @@ Subroutines / functions
        * :c:func:`iset_order`
 
  
-.. c:function:: rint:
+.. c:function:: void rint(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -3719,7 +3734,7 @@ Subroutines / functions
     
 
  
-.. c:function:: rint1:
+.. c:function:: void rint1(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -3740,7 +3755,7 @@ Subroutines / functions
        * :c:data:`inv_int`
 
  
-.. c:function:: rint_large_n:
+.. c:function:: void rint_large_n(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -3753,7 +3768,7 @@ Subroutines / functions
     Version of rint for large values of n
 
  
-.. c:function:: rint_sum:
+.. c:function:: void rint_sum(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -3766,43 +3781,7 @@ Subroutines / functions
     Needed for the calculation of two-electron integrals.
 
  
-.. c:function:: set_multiple_levels_omp:
-
-
-    File : :file:`utils/set_multiple_levels_omp.irp.f`
-
-    .. code:: fortran
-
-        subroutine set_multiple_levels_omp(activate)
-
-
-    If true, activate OpenMP nested parallelism. If false, deactivate.
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`add_integrals_to_map_cholesky`
-       * :c:data:`cholesky_ao_num`
-       * :c:data:`cholesky_mo`
-       * :c:func:`h_s2_u_0_nstates_zmq`
-       * :c:func:`h_u_0_nstates_zmq`
-       * :c:data:`mo_integrals_cache`
-       * :c:func:`run_slave_cipsi`
-       * :c:func:`run_slave_main`
-       * :c:func:`zmq_pt2`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`omp_set_max_active_levels`
-       * :c:func:`omp_set_nested`
-
- 
-.. c:function:: set_order:
+.. c:function:: void set_order(void)
 
 
     File : :file:`utils/sort.irp.f_template_90`
@@ -3816,7 +3795,7 @@ Subroutines / functions
     elements of A. This subroutine changes the order of x to match the new order of A.
 
  
-.. c:function:: set_order_big:
+.. c:function:: void set_order_big(void)
 
 
     File : :file:`utils/sort.irp.f_template_90`
@@ -3832,7 +3811,7 @@ Subroutines / functions
     to be in integer*8 format
 
  
-.. c:function:: shank:
+.. c:function:: void shank(void)
 
 
     File : :file:`utils/shank.irp.f`
@@ -3851,7 +3830,7 @@ Subroutines / functions
        * :c:func:`shank_general`
 
  
-.. c:function:: shank_function:
+.. c:function:: void shank_function(void)
 
 
     File : :file:`utils/shank.irp.f`
@@ -3863,7 +3842,7 @@ Subroutines / functions
 
 
  
-.. c:function:: shank_general:
+.. c:function:: void shank_general(void)
 
 
     File : :file:`utils/shank.irp.f`
@@ -3882,7 +3861,7 @@ Subroutines / functions
        * :c:func:`shank`
 
  
-.. c:function:: sorted_dnumber:
+.. c:function:: void sorted_dnumber(void)
 
 
     File : :file:`utils/sort.irp.f_template_32`
@@ -3895,7 +3874,7 @@ Subroutines / functions
     Returns the number of sorted elements
 
  
-.. c:function:: sorted_i2number:
+.. c:function:: void sorted_i2number(void)
 
 
     File : :file:`utils/sort.irp.f_template_32`
@@ -3908,7 +3887,7 @@ Subroutines / functions
     Returns the number of sorted elements
 
  
-.. c:function:: sorted_i8number:
+.. c:function:: void sorted_i8number(void)
 
 
     File : :file:`utils/sort.irp.f_template_32`
@@ -3921,7 +3900,7 @@ Subroutines / functions
     Returns the number of sorted elements
 
  
-.. c:function:: sorted_inumber:
+.. c:function:: void sorted_inumber(void)
 
 
     File : :file:`utils/sort.irp.f_template_32`
@@ -3934,7 +3913,7 @@ Subroutines / functions
     Returns the number of sorted elements
 
  
-.. c:function:: sorted_number:
+.. c:function:: void sorted_number(void)
 
 
     File : :file:`utils/sort.irp.f_template_32`
@@ -3947,7 +3926,7 @@ Subroutines / functions
     Returns the number of sorted elements
 
  
-.. c:function:: sub_a_at:
+.. c:function:: void sub_a_at(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -3959,7 +3938,7 @@ Subroutines / functions
 
 
  
-.. c:function:: sum_a_at:
+.. c:function:: void sum_a_at(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -3971,7 +3950,7 @@ Subroutines / functions
 
 
  
-.. c:function:: svd:
+.. c:function:: void svd(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -4010,10 +3989,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`dgesvd`
+       * :c:func:`dgesdd`
 
  
-.. c:function:: svd_complex:
+.. c:function:: void svd_complex(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -4047,7 +4026,7 @@ Subroutines / functions
        * :c:func:`zgesvd`
 
  
-.. c:function:: svd_symm:
+.. c:function:: void svd_symm(void)
 
 
     File : :file:`utils/linear_algebra.irp.f`
@@ -4074,7 +4053,7 @@ Subroutines / functions
        * :c:func:`restore_symmetry`
 
  
-.. c:function:: total_memory:
+.. c:function:: void total_memory(void)
 
 
     File : :file:`utils/memory.irp.f`
@@ -4102,7 +4081,7 @@ Subroutines / functions
        * :c:func:`unlock_io`
 
  
-.. c:function:: u_dot_u:
+.. c:function:: void u_dot_u(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -4115,7 +4094,7 @@ Subroutines / functions
     Compute <u|u>
 
  
-.. c:function:: u_dot_v:
+.. c:function:: void u_dot_v(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -4128,7 +4107,7 @@ Subroutines / functions
     Compute <u|v>
 
  
-.. c:function:: v2_over_x:
+.. c:function:: void v2_over_x(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -4140,7 +4119,7 @@ Subroutines / functions
 
 
  
-.. c:function:: v_phi:
+.. c:function:: void v_phi(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -4155,7 +4134,7 @@ Subroutines / functions
     $\int_{0}^{2 \pi} \cos(\phi)^n \sin(\phi)^m d\phi$.
 
  
-.. c:function:: v_theta:
+.. c:function:: void v_theta(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -4170,7 +4149,7 @@ Subroutines / functions
     $\int_{0}^{\pi} \cos(\theta)^n \sin(\theta)^m d\theta$
 
  
-.. c:function:: wall_time:
+.. c:function:: void wall_time(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -4210,6 +4189,8 @@ Subroutines / functions
        * :c:func:`diag_hessian_list_opt`
        * :c:func:`diag_hessian_opt`
        * :c:func:`diagonalization_hessian`
+       * :c:data:`final_grid_points`
+       * :c:data:`final_grid_points_extra`
        * :c:func:`first_diag_hessian_list_opt`
        * :c:func:`first_diag_hessian_opt`
        * :c:func:`first_hessian_list_opt`
@@ -4244,7 +4225,7 @@ Subroutines / functions
        * :c:func:`system_clock`
 
  
-.. c:function:: wallis:
+.. c:function:: void wallis(void)
 
 
     File : :file:`utils/integration.irp.f`
@@ -4259,7 +4240,7 @@ Subroutines / functions
     $\int_{0}^{\pi} \cos(\theta)^n d\theta$.
 
  
-.. c:function:: write_git_log:
+.. c:function:: void write_git_log(void)
 
 
     File : :file:`utils/util.irp.f`
@@ -4272,7 +4253,7 @@ Subroutines / functions
     Write the last git commit in file iunit.
 
  
-.. c:function:: zboysfun:
+.. c:function:: void zboysfun(void)
 
 
     File : :file:`utils/cpx_boys.irp.f`
@@ -4309,7 +4290,7 @@ Subroutines / functions
        * :c:func:`zboysfun00_2`
 
  
-.. c:function:: zboysfun00_1:
+.. c:function:: void zboysfun00_1(void)
 
 
     File : :file:`utils/cpx_erf.irp.f`
@@ -4329,7 +4310,7 @@ Subroutines / functions
        * :c:func:`crint_1_vec`
 
  
-.. c:function:: zboysfun00_2:
+.. c:function:: void zboysfun00_2(void)
 
 
     File : :file:`utils/cpx_erf.irp.f`
@@ -4358,7 +4339,7 @@ Subroutines / functions
        * :c:func:`zboysfun`
 
  
-.. c:function:: zboysfun00nrp:
+.. c:function:: void zboysfun00nrp(void)
 
 
     File : :file:`utils/cpx_erf.irp.f`
@@ -4388,7 +4369,7 @@ Subroutines / functions
        * :c:func:`zboysfunnrp`
 
  
-.. c:function:: zboysfunnrp:
+.. c:function:: void zboysfunnrp(void)
 
 
     File : :file:`utils/cpx_boys.irp.f`
@@ -4403,7 +4384,7 @@ Subroutines / functions
     (where F(n,z) are the Boys functions)
     for a complex valued argument WITH NEGATIVE REAL PART
     
-    Input: x  --- argument, complex *16 Re(x)<=0
+    Input: x  --- argument, complex \*16 Re(x)<=0
     Output: vals  --- values of e^z F(n,z), n = 0, 1, ..., n_max
     
     Beylkin & Sharma, J. Chem. Phys. 155, 174117 (2021)

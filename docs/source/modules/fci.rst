@@ -84,19 +84,72 @@ Programs
 -------- 
  
  * :ref:`fci` 
+ * :ref:`print` 
  * :ref:`pt2` 
+ 
+Providers 
+--------- 
+ 
+.. c:var:: bool do_ddci
+
+
+    File : :file:`class.irp.f`
+
+    .. code:: fortran
+
+        logical	:: do_only_1h1p	
+        logical	:: do_only_cas	
+        logical	:: do_ddci	
+
+
+    In the FCI case, all those are always false
+
+
+ 
+.. c:var:: bool do_only_1h1p
+
+
+    File : :file:`class.irp.f`
+
+    .. code:: fortran
+
+        logical	:: do_only_1h1p	
+        logical	:: do_only_cas	
+        logical	:: do_ddci	
+
+
+    In the FCI case, all those are always false
+
+
+ 
+.. c:var:: bool do_only_cas
+
+
+    File : :file:`class.irp.f`
+
+    .. code:: fortran
+
+        logical	:: do_only_1h1p	
+        logical	:: do_only_cas	
+        logical	:: do_ddci	
+
+
+    In the FCI case, all those are always false
+
+
+ 
  
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: write_c_ij_ab:
+.. c:function:: void run(void)
 
 
-    File : :file:`write_c_ij_ab.irp.f`
+    File : :file:`pt2.irp.f`
 
     .. code:: fortran
 
-        subroutine write_c_ij_ab
+        subroutine run
 
 
 
@@ -105,19 +158,83 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`read_wf`
+       * :c:data:`do_pt2`
+       * :c:data:`n_det`
+       * :c:data:`n_states`
+       * :c:data:`nuclear_repulsion`
+       * :c:data:`psi_configuration`
+       * :c:data:`psi_energy`
+       * :c:data:`psi_energy_with_nucl_rep`
+       * :c:data:`pt2_relative_error`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`print`
+       * :c:func:`pt2`
+       * :c:func:`scf`
 
     Calls:
 
     .. hlist::
        :columns: 3
 
-       * :c:func:`routine`
+       * :c:func:`print_summary`
+       * :c:func:`pt2_alloc`
+       * :c:func:`pt2_dealloc`
+       * :c:func:`save_energy`
+       * :c:func:`zmq_pt2`
+       * :c:func:`zmq_selection`
 
     Touches:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`read_wf`
+       * :c:data:`pt2_match_weight`
+       * :c:data:`pt2_overlap`
+       * :c:data:`pt2_stoch_istate`
+       * :c:data:`selection_weight`
+       * :c:data:`state_average_weight`
+       * :c:data:`threshold_davidson_pt2`
+       * :c:data:`variance_match_weight`
+
+ 
+.. c:function:: void save_energy(void)
+
+
+    File : :file:`save_energy.irp.f`
+
+    .. code:: fortran
+
+        subroutine save_energy(E,pt2)
+
+
+    Saves the energy in |EZFIO|.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_states`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`run`
+       * :c:func:`run_cipsi`
+       * :c:func:`run_stochastic_cipsi`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`ezfio_set_fci_energy`
+       * :c:func:`ezfio_set_fci_energy_pt2`
 

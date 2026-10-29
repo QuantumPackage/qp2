@@ -6,7 +6,7 @@ Introduction: what is a plugin, and what tutorial will be about ?
 =================================================================
 
 The |QP| is split into two kinds of routines/global variables (i.e. *providers*): 
- 1)  the **core modules** locatedin qp2/src/, which contains all the bulk of a quantum chemistry software (integrals, matrix elements between Slater determinants, linear algebra routines, DFT stuffs etc..)
+ 1)  the **core modules** located in qp2/src/, which contains all the bulk of a quantum chemistry software (integrals, matrix elements between Slater determinants, linear algebra routines, DFT, etc.)
  2) the **plugins** which are external routines/*providers* connected to the qp2/src/ routines/*providers*.
  
 More precisely, a **plugin** of the |QP| is a directory where you can create routines, 
@@ -33,13 +33,13 @@ This tuto is as follows:
 
  1)  you **READ THIS FILE UNTIL THE END** in order to get the big picture and vocabulary, 
 
- 2) you go to the directory :file:`qp2/plugins/tuto_plugins/` and you will find detailed tutorials for each of the 5 examples. 
+ 2) you go to the directory :file:`qp2/plugins/local/tuto_plugins/` and you will find detailed tutorials for each of the 5 examples.
 
 Creating a plugin: the basic
 ----------------------------
 
 The first thing to do is to be in the QPSH mode: you execute the qp2/bin/qpsh script that essentially loads all 
-the environement variables and allows for the completion of command lines in bash (that is an AMAZING feature :) 
+the environment variables and allows for the completion of command lines in bash (that is an AMAZING feature :) 
 
 Then, you need to known **where** you want to create your plugin, and what is the **name** of the plugin. 
 
@@ -79,9 +79,9 @@ Then, to create the plugin of your dreams, the two questions you need to answer 
    :file:`qp2/src/utils/linear_algebra.irp.f` 
    therefore it "belongs" to the module :ref:`module_utils`
 
-   The routine :c:func:`ao_to_mo` (which converts a given matrix A from the AO basis to the MO basis) is located in the file 
-   :file:`qp2/src/mo_one_e_ints/ao_to_mo.irp.f`
-   therefore it "belongs" to the module :ref:`module_mo_one_e_ints`
+   The routine :c:func:`ao_to_mo` (which converts a given matrix A from the AO basis to the MO basis) is located in the file
+   :file:`qp2/src/mo_basis/mos.irp.f`
+   therefore it "belongs" to the module :ref:`module_mo_basis`
 
    The provider :c:data:`ao_one_e_integrals` (which is the integrals of one-body part of H on the AO basis) is located in the file 
    :file:`qp2/src/ao_one_e_ints/ao_one_e_ints.irp.f` 

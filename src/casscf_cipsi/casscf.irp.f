@@ -57,6 +57,21 @@ subroutine run
      energy = eone+etwo+ecore
      pt2_max_before = pt2_max
 
+     if (nMonoEx == 0) then
+      print*,''
+      print*,'CASSCF: nMonoEx = 0 (no inactive->virtual or active->virtual'
+      print*,'excitations exist). Orbital optimization is not possible;'
+      print*,'the orbitals are kept fixed and the CIPSI energy above is'
+      print*,'the CASSCF energy.'
+      ! Persist the (fixed) MOs: CIPSI saved the determinants group with
+      ! mo_label "MCSCF", but without a save_mos the mo_basis label stays
+      ! "Canonical" and the N_det provider's label check falls back to a
+      ! 1-determinant reference wave function for every later program.
+      call save_mos
+      converged = .True.
+     endif
+
+     if (.not.converged) then
      call write_time(6)
      call write_int(6,iteration,'CAS-SCF iteration = ')
      call write_double(6,energy,'State-average CAS-SCF energy = ')
@@ -114,9 +129,10 @@ subroutine run
 
      mo_coef = NewOrbs
      mo_occ  = occnum
+     endif
      if(.not.converged)then
       call save_mos
-      call save_energy(Ev,E_PT2)
+      call save_energy(Ev,PT2)
       iteration += 1
       if(norm_grad_vec2.gt.0.01d0)then
        N_det = N_states
@@ -141,7 +157,7 @@ subroutine run
     endif
 
   enddo
-  call save_energy(Ev,E_PT2)
+  call save_energy(Ev,PT2)
   if(.True.)then
      integer :: i
     print*,'Converged CASSCF '

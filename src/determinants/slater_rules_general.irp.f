@@ -3,7 +3,7 @@ subroutine get_excitation_general(key_i,key_j, Nint,degree_array,holes_array, pa
  BEGIN_DOC
 ! returns the array, for each spin, of holes/particles between key_i and key_j 
 !
-! with the following convention: a^+_{particle} a_{hole}|key_i> = |key_j>
+! with the following convention: a^+_{particle} a_{hole}\|key_i> = \|key_j>
  END_DOC
   include 'utils/constants.include.F'
  implicit none
@@ -94,7 +94,7 @@ subroutine get_holes_general(key_i, key_j,Nint, holes_array)
  BEGIN_DOC
 ! returns the array, per spin, of holes between key_i and key_j 
 !
-! with the following convention: a_{hole}|key_i> --> |key_j>
+! with the following convention: a_{hole}\|key_i> --> \|key_j>
  END_DOC
  implicit none
  integer, intent(in)            :: Nint
@@ -128,7 +128,7 @@ subroutine get_particles_general(key_i, key_j,Nint,particles_array)
  BEGIN_DOC
 ! returns the array, per spin, of particles between key_i and key_j 
 !
-! with the following convention: a^dagger_{particle}|key_i> --> |key_j>
+! with the following convention: a^dagger_{particle}\|key_i> --> \|key_j>
  END_DOC
  implicit none
  integer, intent(in)            :: Nint

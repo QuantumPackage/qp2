@@ -24,9 +24,9 @@ four_idx_transform
  .. hlist:: 
     :columns: 3 
  
+    * :c:data:`all_mo_integrals` 
     * :c:data:`do_mo_cholesky` 
     * :c:data:`io_mo_two_e_integrals` 
-    * :c:data:`mo_two_e_integrals_in_map` 
  
  Touches: 
  
