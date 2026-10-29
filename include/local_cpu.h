@@ -4,17 +4,17 @@
 #if defined(__ARM_FEATURE_SVE)
 #  include <arm_sve.h>
 #  define USE_SVE
-#  pragma message("SVE detected")
+//  pragma message("SVE detected")
 #elif defined(__ARM_NEON)
 #  include <arm_neon.h>
 #  define USE_NEON
-#  pragma message("Neon detected")
+//  pragma message("Neon detected")
 #elif defined(__AVX512F__) && defined(__AVX512VPOPCNTDQ__)
 #  define USE_AVX512
-#  pragma message("AVX512 detected")
+//  pragma message("AVX512 detected")
 #elif defined(__AVX2__)
 #  define USE_AVX2
-#  pragma message("AVX2 detected")
+//  pragma message("AVX2 detected")
 #endif
 
 #ifdef USE_NEON
