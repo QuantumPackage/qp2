@@ -588,7 +588,7 @@ Index of Providers
     * :c:data:`index_final_points_extra` 
     * :c:data:`index_final_points_extra_reverse` 
     * :c:data:`index_final_points_per_atom` 
-    * :c:data:`index_final_points_per_atom_reverse` 
+    * :c:data:`index_final_pts_per_atom_rev` 
     * :c:data:`index_final_points_reverse` 
     * :c:data:`index_holes_bitmask` 
     * :c:data:`index_orb_swap` 
