@@ -182,31 +182,39 @@
  ! !!!!!! WARNING !!!!!! if no_core_density == .True. then all contributions from the core orbitals
  !
  ! in the one- and two-body density matrix are excluded
+ !
+ ! The average value of mu is set where the density is too low for the computation
+ ! to be accurate
  END_DOC
  integer :: ipoint,istate
- double precision :: wall0,wall1,f_psi,on_top,w_psi,sqpi
+ double precision :: wall0,wall1,f_psi,on_top,w_psi,sqpi, ave, count
  print*,'providing mu_of_r_psi_cas ...'
  call wall_time(wall0)
  sqpi = dsqrt(dacos(-1.d0))
 
  provide f_psi_cas_ab
- !$OMP PARALLEL DO &
- !$OMP DEFAULT (NONE)  &
- !$OMP PRIVATE (ipoint,f_psi,on_top,w_psi,istate) &
- !$OMP SHARED (n_points_final_grid,mu_of_r_psi_cas,f_psi_cas_ab,on_top_cas_mu_r,sqpi,N_states)
  do istate = 1, N_states
+  ave = 0.d0
+  count = 0.d0
   do ipoint = 1, n_points_final_grid
    f_psi  = f_psi_cas_ab(ipoint,istate)
    on_top = on_top_cas_mu_r(ipoint,istate)
-   if(on_top.le.1.d-12.or.f_psi.le.0.d0.or.f_psi * on_top.lt.0.d0)then
-     w_psi   = 1.d+10
+   if(on_top.le.1.d-6.or.f_psi.le.0.d0.or.f_psi * on_top.lt.0.d0)then
+     mu_of_r_psi_cas(ipoint,istate) = -1.d0
    else
      w_psi  = f_psi /  on_top
+     mu_of_r_psi_cas(ipoint,istate) = w_psi * sqpi * 0.5d0
+     ave = ave + mu_of_r_psi_cas(ipoint,istate) *final_weight_at_r_vector(ipoint)
+     count = count + final_weight_at_r_vector(ipoint)
    endif
-   mu_of_r_psi_cas(ipoint,istate) = w_psi * sqpi * 0.5d0
+  enddo
+  ave = ave/count
+  do ipoint = 1, n_points_final_grid
+    if (mu_of_r_psi_cas(ipoint,istate) < 0.d0) then
+      mu_of_r_psi_cas(ipoint,istate) = ave
+    endif
   enddo
  enddo
- !$OMP END PARALLEL DO
  call wall_time(wall1)
  print*,'Time to provide mu_of_r_psi_cas = ',wall1-wall0
  END_PROVIDER

@@ -152,13 +152,27 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
    enddo
    call omp_init_lock(lock_2rdm)
 
+   integer:: nthreads_davidson_local
+   nthreads_davidson_local = nthreads_davidson
+
+   double precision :: rss, mem
+   call resident_memory(rss)
+
+   mem = 8*N_states*dble(dim1)**4 & ! big_array_local
+       + 8*(4+$N_int)*maxab &
+       + 8*sze_buff*(4+n_st)
+   mem = mem / 1024.d0**3
+
+   nthreads_davidson_local = min(nthreads_davidson, int((qp_max_mem - rss) / mem))
+
+
    ! Prepare the array of all alpha single excitations
    ! -------------------------------------------------
 
    double precision, allocatable :: big_array_local(:,:,:,:,:)
 
    PROVIDE N_int nthreads_davidson elec_alpha_num
-    !$OMP PARALLEL DEFAULT(NONE) NUM_THREADS(nthreads_davidson)      &
+    !$OMP PARALLEL DEFAULT(NONE) NUM_THREADS(nthreads_davidson_local) &
             !$OMP   SHARED(psi_bilinear_matrix_rows, N_det,lock_2rdm,&
             !$OMP          psi_bilinear_matrix_columns,              &
             !$OMP          psi_det_alpha_unique, psi_det_beta_unique,&
