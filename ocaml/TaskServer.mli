@@ -24,6 +24,10 @@ val debug : string -> unit
 (** ZeroMQ context *)
 val zmq_context : Zmq.Context.t
 
+(** Error (if any) of the PUB socket bind. Always [None] when qp_run
+    pre-binds the PUB socket (the normal path). *)
+val pub_error : unit -> string option
+
 (** Bind a Zmq socket to a TCP port and to an IPC file /tmp/qp_run.<port> *)
 val bind_socket :
   socket_type:string -> socket:'a Zmq.Socket.t -> port:int -> unit
@@ -73,6 +77,20 @@ val terminate : t -> [> `Req ] Zmq.Socket.t -> t
 (** Reply an Error message *)
 val error : string -> t -> [> `Req ] Zmq.Socket.t -> t
 
-(** Run server *)
-val run : port:int -> unit
+(** Run server.
+    [rep_socket] / [pub_socket] are pre-bound sockets (the qp_run path,
+    [Some]); pass [None] to let the server create and bind them
+    (PUB on port+1). All arguments are mandatory: an optional argument
+    left out would make the call a partial application and the server
+    thread would never start.
+    [address] is the resolved TCP address for the "Task server running"
+    message; the caller builds it (forcing [ip_address] exactly once,
+    in the main thread) because a concurrent Lazy.force in the server
+    thread would race the main thread's force and could kill the
+    server thread (CamlinternalLazy.Undefined, issue #393). *)
+val run :
+  rep_socket:[`Rep] Zmq.Socket.t option ->
+  pub_socket:[`Pub] Zmq.Socket.t option ->
+  port:int ->
+  address:string -> unit
 

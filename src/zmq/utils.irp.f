@@ -369,10 +369,10 @@ function new_zmq_sub_socket()
      stop 'Unable to create zmq sub socket'
   endif
 
-!  rc = f77_zmq_setsockopt(new_zmq_sub_socket,ZMQ_RCVTIMEO,10000,4)
-!  if (rc /= 0) then
-!    stop 'Unable to set timeout in new_zmq_sub_socket'
-!  endif
+  rc = f77_zmq_setsockopt(new_zmq_sub_socket,ZMQ_RCVTIMEO,10000,4)
+  if (rc /= 0) then
+    stop 'Unable to set recv timeout in new_zmq_sub_socket'
+  endif
 
   rc = f77_zmq_setsockopt(new_zmq_sub_socket,ZMQ_CONFLATE,1,4)
   if (rc /= 0) then
