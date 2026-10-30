@@ -1,10 +1,20 @@
+#if defined(__linux__)
 #include <sys/syscall.h>   /* SYS_getcpu — defined for every Linux arch */
+#endif
 #include <unistd.h>        /* syscall()                                  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
 #include <limits.h>
+
+#define MAX_CPUS  8192
+
+static int        ngpus = 0;
+static int        cpu_to_gpu[MAX_CPUS];   /* zero-initialised by C runtime */
+static volatile int affinity_ready = 0;
+
+#if defined(__linux__)
 
 /* ── PCI vendor IDs ────────────────────────────────────────────────── */
 #define VENDOR_NVIDIA  0x10de
@@ -17,7 +27,6 @@
 #define CLASS_DISPLAY  0x0380   /* Display controller                   */
 
 #define MAX_GPUS  64
-#define MAX_CPUS  8192
 
 typedef struct {
     unsigned int domain, bus, slot, func;
@@ -26,9 +35,6 @@ typedef struct {
 } gpu_info_t;
 
 static gpu_info_t gpus[MAX_GPUS];
-static int        ngpus = 0;
-static int        cpu_to_gpu[MAX_CPUS];   /* zero-initialised by C runtime */
-static volatile int affinity_ready = 0;
 
 /* ── tiny helpers ──────────────────────────────────────────────────── */
 
@@ -225,13 +231,29 @@ void build_gpu_affinity_map_(void)
                gpus[g].numa_node);
 }
 
+#else
+
+/* Non-Linux (macOS): no /sys PCI or NUMA topology.  Map every CPU to
+   device 0 — on such platforms gpu_num is 0 (simple_gpu CPU emulation)
+   so the affinity map is inert. */
+void build_gpu_affinity_map_(void)
+{
+    affinity_ready = 1;
+}
+
+#endif /* defined(__linux__) */
+
 
 static int get_current_cpu(void)
 {
+#if defined(__linux__)
     unsigned int cpu, node;
     if (syscall(SYS_getcpu, &cpu, &node, NULL) == 0)
         return (int)cpu;
     return 0;   /* fallback: should never happen on Linux >= 2.6.19 */
+#else
+    return 0;   /* no getcpu() on macOS */
+#endif
 }
 
 /*
