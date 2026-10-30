@@ -18,34 +18,62 @@ let () =
 
 let run slave ?prefix exe ezfio_file =
 
-  (** Check availability of the ports *)
-  let port_number =
+  (** Port selection.
+
+      A window of 10 ports (P..P+9) is reserved up front:
+        - P        : bound by the pre-check socket, which becomes the
+                     real REP socket and stays bound for the whole
+                     life of the process;
+        - P+1      : bound by the pre-check socket, which becomes the
+                     real PUB socket;
+        - P+2..P+9 : probed (bound then released) to reject a window
+                     already used by another qp_run (the Fortran
+                     collector binds its PULL socket on P+2).
+
+      Because the pre-check sockets ARE the real sockets, the binds
+      cannot fail later: a concurrent qp_run that wants the same
+      window fails its own pre-check bind and re-scans, instead of
+      killing one of the two task servers (issue #393).
+      `tcp://*` (all interfaces) is used so TaskServer.stop can reach
+      the REP socket via tcp://localhost. *)
+  let (port_number, task_context, rep_socket, pub_socket) =
+    let exception Port_taken in
     let zmq_context =
       Zmq.Context.create ()
     in
-    let dummy_socket =
-      Zmq.Socket.create zmq_context Zmq.Socket.rep
-    in
     let rec try_new_port port_number =
+      let rep =
+        Zmq.Socket.create zmq_context Zmq.Socket.rep
+      and pub =
+        Zmq.Socket.create zmq_context Zmq.Socket.pub
+      in
       try
+        Zmq.Socket.bind rep (Printf.sprintf "tcp://*:%d" port_number);
+        Zmq.Socket.bind pub (Printf.sprintf "tcp://*:%d" (port_number + 1));
         List.iter (fun i ->
-            let address =
-              Printf.sprintf "tcp://%s:%d" (Lazy.force TaskServer.ip_address) (port_number+i)
+            let probe =
+              Zmq.Socket.create zmq_context Zmq.Socket.rep
             in
-            Zmq.Socket.bind dummy_socket address;
-            Zmq.Socket.unbind dummy_socket address;
-        ) [ 0;1;2;3;4;5;6;7;8;9 ] ;
-        port_number
+            (try
+               Zmq.Socket.bind probe (Printf.sprintf "tcp://*:%d" (port_number + i))
+             with
+             | Unix.Unix_error _ ->
+                 (Zmq.Socket.close probe; raise Port_taken));
+            Zmq.Socket.close probe
+          ) [ 2; 3; 4; 5; 6; 7; 8; 9 ];
+        (port_number, rep, pub)
       with
-      | Unix.Unix_error _ -> try_new_port (port_number+100)
+      | Port_taken | Unix.Unix_error _ ->
+          (Zmq.Socket.close rep;
+           Zmq.Socket.close pub;
+           try_new_port (port_number + 100))
     in
-    let result =
-      let port = 10*(Unix.getpid () mod 2823) + 32_769 in
-      try_new_port port
+    let (port_number, rep_socket, pub_socket) =
+      try_new_port (10 * (Unix.getpid () mod 2823) + 32_769)
     in
-    Zmq.Socket.close dummy_socket;
-    Zmq.Context.terminate zmq_context;
-    result
+    Zmq.Socket.set_linger_period rep_socket 1_000_000;
+    Zmq.Socket.set_linger_period pub_socket 1_000;
+    (port_number, zmq_context, rep_socket, pub_socket)
   in
 
   let time_start =
@@ -112,16 +140,35 @@ let run slave ?prefix exe ezfio_file =
       with Sys_error _ -> failwith "No master is not running"
   in
 
+  (** Resolve the task server address ONCE, in the main thread, before
+      the server thread is started: the server thread must not force
+      [TaskServer.ip_address] itself. Concurrent Lazy.force on a lazy
+      whose thunk is still evaluating is a race in the native runtime
+      (the second thread invokes the "raise_undefined" placeholder as
+      if it were the thunk, and the server thread dies with
+      CamlinternalLazy.Undefined before the main loop starts -- the
+      dead-server hang of issue #393). *)
+  let address =
+    Printf.sprintf "tcp://%s:%d" (Lazy.force TaskServer.ip_address) port_number
+  in
+
   (** Start task server *)
   let task_thread =
      let thread =
       Thread.create ( fun () ->
-         TaskServer.run ~port:port_number )
+         (* DIAGNOSTIC (issue #393): report the backtrace of any crash in
+            the task server thread instead of dying silently. *)
+         try
+           TaskServer.run ~port:port_number
+                           ~rep_socket:(Some rep_socket)
+                           ~pub_socket:(Some pub_socket)
+                           ~address:address
+         with e ->
+           (Printf.eprintf "TASK SERVER CRASH: %s\nBACKTRACE:\n%s\n%!"
+              (Printexc.to_string e) (Printexc.get_backtrace ());
+            raise e) )
      in
      thread ();
-  in
-  let address =
-    Printf.sprintf "tcp://%s:%d" (Lazy.force TaskServer.ip_address) port_number
   in
   Unix.putenv "QP_RUN_ADDRESS" address;
   let () =
@@ -150,8 +197,13 @@ let run slave ?prefix exe ezfio_file =
     | i -> (Printf.printf "Program exited with code %d.\n%!" i; i)
   in
 
-  TaskServer.stop ~port:port_number;
+  (try
+     TaskServer.stop ~port:port_number
+   with
+   | Failure msg ->
+       (Printf.eprintf "qp_run: %s\n%!" msg; exit 1));
   Thread.join task_thread;
+  Zmq.Context.terminate task_context;
   if (not slave) then
     Sys.remove qp_run_address_filename;
 
@@ -165,6 +217,14 @@ let run slave ?prefix exe ezfio_file =
   Unix.sleep 1;
   if (exit_code <> 0) then
     exit exit_code
+  else
+    (match TaskServer.pub_error () with
+     | None -> ()
+     | Some msg ->
+         (Printf.eprintf
+            "qp_run: %s -- the calculation finished, but the task server state channel was down\n%!"
+            msg;
+         exit 1))
 
 
 
