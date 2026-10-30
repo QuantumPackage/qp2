@@ -435,9 +435,9 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: final_grid_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        double precision, allocatable	:: final_weight_at_r_vector_per_atom	(n_pts_max_per_atom,nucl_num)
+        double precision, allocatable	:: final_weight_at_r_per_atom	(n_pts_max_per_atom,nucl_num)
         integer, allocatable	:: index_final_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        integer, allocatable	:: index_final_points_per_atom_reverse	(n_points_integration_angular,n_points_radial_grid,nucl_num)
+        integer, allocatable	:: index_final_pts_per_atom_rev	(n_points_integration_angular,n_points_radial_grid,nucl_num)
 
 
 
@@ -652,7 +652,7 @@ Providers
        * :c:data:`mos_in_r_array_extra_omp`
 
  
-.. c:var:: double final_weight_at_r_vector_per_atom
+.. c:var:: double final_weight_at_r_per_atom
 
 
     File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
@@ -660,9 +660,9 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: final_grid_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        double precision, allocatable	:: final_weight_at_r_vector_per_atom	(n_pts_max_per_atom,nucl_num)
+        double precision, allocatable	:: final_weight_at_r_per_atom	(n_pts_max_per_atom,nucl_num)
         integer, allocatable	:: index_final_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        integer, allocatable	:: index_final_points_per_atom_reverse	(n_points_integration_angular,n_points_radial_grid,nucl_num)
+        integer, allocatable	:: index_final_pts_per_atom_rev	(n_points_integration_angular,n_points_radial_grid,nucl_num)
 
 
 
@@ -995,9 +995,9 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: final_grid_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        double precision, allocatable	:: final_weight_at_r_vector_per_atom	(n_pts_max_per_atom,nucl_num)
+        double precision, allocatable	:: final_weight_at_r_per_atom	(n_pts_max_per_atom,nucl_num)
         integer, allocatable	:: index_final_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        integer, allocatable	:: index_final_points_per_atom_reverse	(n_points_integration_angular,n_points_radial_grid,nucl_num)
+        integer, allocatable	:: index_final_pts_per_atom_rev	(n_points_integration_angular,n_points_radial_grid,nucl_num)
 
 
 
@@ -1015,7 +1015,7 @@ Providers
 
 
  
-.. c:var:: int index_final_points_per_atom_reverse
+.. c:var:: int index_final_pts_per_atom_rev
 
 
     File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
@@ -1023,9 +1023,9 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: final_grid_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        double precision, allocatable	:: final_weight_at_r_vector_per_atom	(n_pts_max_per_atom,nucl_num)
+        double precision, allocatable	:: final_weight_at_r_per_atom	(n_pts_max_per_atom,nucl_num)
         integer, allocatable	:: index_final_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        integer, allocatable	:: index_final_points_per_atom_reverse	(n_points_integration_angular,n_points_radial_grid,nucl_num)
+        integer, allocatable	:: index_final_pts_per_atom_rev	(n_points_integration_angular,n_points_radial_grid,nucl_num)
 
 
 

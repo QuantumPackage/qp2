@@ -1707,7 +1707,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_aa_mo`
        * :c:data:`state_av_full_occ_2_rdm_ab_mo`
        * :c:data:`state_av_full_occ_2_rdm_bb_mo`
-       * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
+       * :c:data:`state_av_occ_2_rdm_spin_trace_mo`
 
  
 .. c:var:: double one_e_dm_mo_beta
@@ -1800,7 +1800,7 @@ Providers
        * :c:data:`state_av_full_occ_2_rdm_aa_mo`
        * :c:data:`state_av_full_occ_2_rdm_ab_mo`
        * :c:data:`state_av_full_occ_2_rdm_bb_mo`
-       * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
+       * :c:data:`state_av_occ_2_rdm_spin_trace_mo`
 
  
 .. c:var:: double one_e_dm_mo_diff

@@ -367,7 +367,7 @@ Providers
        :columns: 3
 
        * :c:data:`ao_one_e_integrals_from_mo`
-       * :c:data:`ao_ortho_canonical_nucl_elec_integrals`
+       * :c:data:`ao_canonical_nucl_elec_ints`
        * :c:data:`ao_ortho_lowdin_nucl_elec_integrals`
        * :c:data:`ao_sphe_one_e_integrals_from_mo`
        * :c:data:`attachment_numbers_sorted`
