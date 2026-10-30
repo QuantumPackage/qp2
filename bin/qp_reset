@@ -93,11 +93,11 @@ ezfio=$1
 qp set_file $ezfio
 
 if [[ $dets -eq 1 ]] ; then
-  rm --force -- ${ezfio}/determinants/n_det
-  rm --force -- ${ezfio}/determinants/psi_{det,coef}.gz
-  rm --force -- ${ezfio}/determinants/n_det_qp_edit
-  rm --force -- ${ezfio}/determinants/psi_{det,coef}_qp_edit.gz
-  rm --force -- ${ezfio}/tc_bi_ortho/psi_{l,r}_coef_bi_ortho.gz 
+  rm -f -- ${ezfio}/determinants/n_det
+  rm -f -- ${ezfio}/determinants/psi_{det,coef}.gz
+  rm -f -- ${ezfio}/determinants/n_det_qp_edit
+  rm -f -- ${ezfio}/determinants/psi_{det,coef}_qp_edit.gz
+  rm -f -- ${ezfio}/tc_bi_ortho/psi_{l,r}_coef_bi_ortho.gz 
 
 fi
 
@@ -106,9 +106,9 @@ if [[ $mos -eq 1 ]] ; then
         $(zcat ${ezfio}/mo_basis/mo_class.gz |grep Active | wc -l) ]] ; then
       echo "Warning: You will need to re-define the MO classes"
   fi
-  rm --recursive --force -- ${ezfio}/mo_basis
-  rm --recursive --force -- ${ezfio}/bi_ortho_mos
-  rm --recursive --force -- ${ezfio}/work/mo_ints_*
+  rm -Rf -- ${ezfio}/mo_basis
+  rm -Rf -- ${ezfio}/bi_ortho_mos
+  rm -Rf -- ${ezfio}/work/mo_ints_*
 fi
 
 qp_edit --check ${ezfio}
