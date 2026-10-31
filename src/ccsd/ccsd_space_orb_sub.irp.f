@@ -1015,15 +1015,16 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   ! H_oo, H_vv, H_vo, and the intermediates g_occ, g_vir, A1, B1
   ! (via compute_B1_gam), J1, K1.
   ! r2 is sign-flipped at the end for consistency with the spin-
-  ! orbital code; max_r2 is the largest element of r2.
-  ! TODO(doc): suspected bug, to be fixed in the code (author,
-  ! 2026-10-31): max_r2 is the largest element of r2 without dabs,
-  ! unlike max_r1 (dabs) and unlike the spin-orbital reference
+  ! orbital code; max_r2 is the largest absolute value of r2 over
+  ! its (i,j,a,b) indices, i.e. max_r2 = max |r2|, consistent with
+  ! max_r1 (dabs) and with the spin-orbital reference
   ! ccsd_spin_orb_sub.irp.f, which uses maxval(abs) for both
   ! residuals. Standard CC practice monitors a norm of the
   ! absolute residual (CFOUR keyword CC_CONV, Q-Chem keyword
-  ! CC_T_CONV), so the missing dabs can make max_r2 underestimate
-  ! the residual, or even be negative.
+  ! CC_T_CONV), which is what max_r2 does. The missing-dabs defect
+  ! that let max_r2 come out smaller than max |r2|, or even
+  ! negative, was fixed in issue #396 (2026-10-31): the dabs was
+  ! added to the accumulation.
   END_DOC
   ! in
   integer, intent(in)           :: nO, nV

@@ -453,10 +453,14 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
   ! vectors, using compute_A1_chol, compute_g_occ_chol,
   ! compute_g_vir_chol, compute_J1_chol and compute_K1_chol.
   ! r2 is sign-flipped at the end for consistency with the
-  ! spin-orbital code; max_r2 is the largest element of r2.
-  ! TODO(doc): same suspected bug as in compute_r2_space, to be
-  ! fixed in the code (author, 2026-10-31): max_r2 is computed
-  ! without dabs, unlike max_r1 (see the TODO in compute_r2_space).
+  ! spin-orbital code; max_r2 is the largest absolute value of r2
+  ! over its indices, i.e. max_r2 = max |r2|, consistent with
+  ! max_r1 (dabs) and with the spin-orbital reference. The
+  ! dabs is taken in the per-thread leaf max_r2_local (see
+  ! compute_r2_space), so it cannot be moved to the reduction:
+  ! max(|a|,|b|) != |max(a,b)|. The missing-dabs defect was fixed
+  ! in issue #396 (2026-10-31): the dabs was added to the leaf
+  ! accumulation.
   END_DOC
   use gpu
   implicit none
