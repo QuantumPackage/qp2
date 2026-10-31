@@ -219,13 +219,13 @@ BEGIN_PROVIDER [ double precision, f_hf_cholesky_sparse, (n_points_final_grid)]
  ! The factor 100 (and its sqrt) applied to
  ! ao_cholesky_threshold comes from empirical measurements
  ! (author, 2026-10-31).
- ! TODO(doc): does the open-shell branch match the open-shell
- ! f_hf_cholesky? They differ: the sparse branch computes
- ! 2 sum_A V2_A (V2_A + V_delta_A), with V_delta the sum over
- ! the alpha orbitals beyond the first n_occ(2), instead of the
- ! dense 2 sum_A V1_A V2_A; the two agree only if the first
- ! n_occ(2) alpha valence orbitals are the beta valence
- ! orbitals (the standard open-shell case).
+ ! The open-shell branch differs from f_hf_cholesky: the sparse
+ ! branch computes 2 sum_A V2_A (V2_A + V_delta_A), with V_delta
+ ! the sum over the alpha orbitals beyond the first n_occ(2),
+ ! instead of the dense 2 sum_A V1_A V2_A; the two agree if the
+ ! first n_occ(2) alpha valence orbitals are the beta valence
+ ! orbitals, which is the usual case in QP2 because there is no
+ ! UHF (author, 2026-10-31).
  END_DOC
  integer :: ipoint,m,mm,i,ii,p
  !!f(R) =  \sum_{I} \sum_{J} Phi_I(R) Phi_J(R) V_IJ

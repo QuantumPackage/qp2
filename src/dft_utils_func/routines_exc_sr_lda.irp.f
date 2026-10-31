@@ -318,7 +318,9 @@ end
       eta=19.0d0
       if(dabs(eta*a*a).lt.50.d0)then
        fak=2.540118935556d0*dexp(-eta*a*a)
-       ! TODO(doc): origin of the prefactor 2.540118935556 and of eta = 19: unknown to the author too; probably a value from a paper (author, 2026-10-31)
+       ! Origin of the prefactor 2.540118935556 and of eta = 19:
+       ! unknown to the author, probably a value from a paper
+       ! (author, 2026-10-31).
       else
        fak=0.d0
       endif
