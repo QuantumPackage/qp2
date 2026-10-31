@@ -1605,7 +1605,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
     do a = 1, nV
       do j = 1, nO
         do i = 1, nO
-          max_r2 = max(r2(i,j,a,b), max_r2)
+          max_r2 = max(dabs(r2(i,j,a,b)), max_r2)
         enddo
       enddo
     enddo

@@ -794,7 +794,7 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
     do a = 1, nV
       do j = 1, nO
         do i = 1, nO
-          max_r2_local = max(r2%f(i,j,a,b), max_r2_local)
+          max_r2_local = max(dabs(r2%f(i,j,a,b)), max_r2_local)
         enddo
       enddo
     enddo
