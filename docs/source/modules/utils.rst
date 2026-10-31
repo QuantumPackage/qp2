@@ -220,9 +220,6 @@ Providers
        * :c:func:`h_s2_u_0_two_e_nstates_openmp`
        * :c:func:`h_u_0_nstates_openmp`
        * :c:func:`h_u_0_nstates_zmq`
-       * :c:func:`orb_range_2_rdm_openmp`
-       * :c:func:`orb_range_2_rdm_state_av_openmp`
-       * :c:func:`orb_range_2_trans_rdm_openmp`
 
     Calls:
 
@@ -433,15 +430,12 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_two_e_integral_alpha_chol`
        * :c:data:`cholesky_ao_num`
        * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_tr_dm_mo`
        * :c:data:`psi_configuration_to_psi_det`
-       * :c:data:`pt2_j`
-       * :c:data:`pt2_w`
 
  
 .. c:var:: double shiftfact_op5_inv
@@ -662,6 +656,22 @@ Subroutines / functions
     
 
  
+.. c:function:: void cgaussian_pair_bound(void)
+
+
+    File : :file:`utils/cgtos_utils.irp.f`
+
+    .. code:: fortran
+
+        double precision function cgaussian_pair_bound(alpha, beta, Ap_center, Bp_center)
+
+
+    Upper bound of |g_A(r) g_B(r)| / |polynomials| for two primitive cGTOs
+    (x-Ap)^a exp(-alpha |r-Ap|^2 + plane wave) and (x-Bp)^b exp(-beta |r-Bp|^2 + plane wave):
+      exp( - Re(alpha) Re(beta) / (Re(alpha) + Re(beta)) |Ap - Bp|^2 )
+    It only depends on the real parts of the exponents and on the (real) nuclear centers.
+
+ 
 .. c:function:: void cgaussian_product(void)
 
 
@@ -721,30 +731,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_two_e_integral_alpha_chol`
-       * :c:func:`create_selection_buffer`
-       * :c:func:`dav_double_dressed`
        * :c:func:`davidson_diag_csf_hjj`
        * :c:func:`davidson_diag_hjj_sjj`
        * :c:func:`davidson_diag_nonsym_hjj`
-       * :c:func:`davidson_general`
-       * :c:func:`davidson_general_diag_dressed_ext_rout_nonsym_b1space`
-       * :c:func:`davidson_general_ext_rout`
-       * :c:func:`davidson_general_ext_rout_diag_dressed`
-       * :c:func:`davidson_general_ext_rout_dressed`
-       * :c:func:`davidson_general_ext_rout_nonsym_b1space`
-       * :c:func:`make_selection_buffer_s2`
        * :c:data:`psi_configuration_to_psi_det`
-       * :c:func:`pt2_collector`
-       * :c:data:`pt2_j`
-       * :c:data:`pt2_w`
-       * :c:func:`remove_duplicates_in_selection_buffer`
-       * :c:func:`run_cipsi`
-       * :c:func:`run_slave_main`
-       * :c:func:`run_stochastic_cipsi`
-       * :c:func:`selection_collector`
-       * :c:func:`testteethbuilding`
-       * :c:func:`zmq_pt2`
 
     Calls:
 
@@ -765,6 +755,10 @@ Subroutines / functions
         subroutine check_sym(A, n)
 
 
+    Print two diagnostics of the matrix A: the sum of squares
+    of A(j,i) - A(i,j) over i < j (printed as "deviation from
+    sym") and the sum of squares of A(j,i) over the same
+    positions (printed as "norm"). A is not modified.
 
  
 .. c:function:: void cpx_erf_1(void)
@@ -813,6 +807,12 @@ Subroutines / functions
         subroutine crint_1_vec(n_max, rho, vals)
 
 
+    Stores crint_1(n, rho) for n = 0, 1, ..., n_max in vals(0:n_max),
+    where crint_1(n, rho) = $\int_0^1 t^{2n} \exp(-\rho t^2) dt$ for
+    a complex argument rho. For |rho| < 0.35 a Taylor polynomial is
+    used, for 0.35 <= |rho| < 3.5 crint_smallz_vec, and for
+    |rho| >= 3.5 zboysfun00_1 plus the recurrence
+    $vals(n) = ((n - 0.5) vals(n-1) - 0.5 \exp(-\rho)) / \rho$.
 
     Called by:
 
@@ -860,6 +860,12 @@ Subroutines / functions
         subroutine crint_2_vec(n_max, rho, vals)
 
 
+    Stores crint_2(n, rho) for n = 0, 1, ..., n_max in vals(0:n_max),
+    where crint_2(n, rho) = $\int_0^1 t^{2n} \exp(-\rho t^2) dt$ for
+    a complex argument rho. For |rho| < 3.5 the same branches as
+    crint_1_vec are used; for |rho| >= 3.5, zboysfun if Re(rho) >= 0,
+    and zboysfunnrp (which returns $\exp(\rho)$ times the integral)
+    followed by the $\exp(-\rho)$ rescaling if Re(rho) < 0.
 
     Calls:
 
@@ -881,6 +887,10 @@ Subroutines / functions
         subroutine crint_quad_1(n, rho, n_quad, crint_quad)
 
 
+    Approximates crint_1(n, rho) with a fixed n_quad-point quadrature
+    of $\int_0^1 t^{2n} \exp(-\rho t^2) dt$: nodes t = i/n_quad,
+    weights cycling 32, 12, 32, 14 with period 4 (indexed by i mod 4),
+    weight 7 at the endpoint t = 1, factor 2/(45 n_quad).
 
  
 .. c:function:: void crint_quad_12(void)
@@ -893,6 +903,10 @@ Subroutines / functions
         subroutine crint_quad_12(n, rho, n_quad, crint_quad)
 
 
+    Approximates crint_1(n, rho) with a fixed n_quad-point quadrature:
+    the rule of crint_quad_1 (nodes t = i/n_quad for
+    $\int_0^1 t^{2n} \exp(-\rho t^2) dt$) is used for n = 0 and the
+    rule of crint_quad_2 for n >= 1.
 
     Called by:
 
@@ -912,6 +926,8 @@ Subroutines / functions
         subroutine crint_quad_12_vec(n_max, rho, vals)
 
 
+    Stores crint_quad_12(n, rho) for n = 0, 1, ..., n_max in
+    vals(0:n_max), with n_quad fixed to 10000000.
 
     Calls:
 
@@ -931,6 +947,11 @@ Subroutines / functions
         subroutine crint_quad_2(n, rho, n_quad, crint_quad)
 
 
+    Approximates crint_2(n, rho) with a fixed n_quad-point quadrature
+    of $\frac{1}{2}\int_0^1 t^{n-1/2} \exp(-\rho t) dt$, the form
+    obtained from the crint_2 integrand with the change of variable
+    t = s^2: nodes t = i/n_quad, weights cycling 32, 12, 32, 14 with
+    period 4, weight 7 at the endpoint t = 1, factor 1/(45 n_quad).
 
  
 .. c:function:: void crint_smallz(void)
@@ -1131,6 +1152,12 @@ Subroutines / functions
         subroutine diag_nonsym_right(n, A, A_ldim, V, V_ldim, energy, E_ldim)
 
 
+    Diagonalizes the nonsymmetric n by n matrix A (A(A_ldim, n)) with
+    LAPACK dgeevx (right eigenvectors, balancing). On exit, energy(i)
+    and V(:, i) (V(V_ldim, n)) hold the eigenvalues and eigenvectors,
+    sorted in increasing order of the stored eigenvalue; a complex
+    pair (|Im| > 1.d-7) is stored as two columns: (Re, Im) of the
+    eigenvalue and of the eigenvalue times the eigenvector.
 
     Called by:
 
@@ -1138,8 +1165,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`davidson_diag_nonsym_hjj`
-       * :c:func:`davidson_general_diag_dressed_ext_rout_nonsym_b1space`
-       * :c:func:`davidson_general_ext_rout_nonsym_b1space`
 
     Calls:
 
@@ -1197,9 +1222,6 @@ Subroutines / functions
        * :c:func:`h_s2_u_0_two_e_nstates_openmp`
        * :c:func:`h_u_0_nstates_openmp`
        * :c:func:`h_u_0_nstates_zmq`
-       * :c:func:`orb_range_2_rdm_openmp`
-       * :c:func:`orb_range_2_rdm_state_av_openmp`
-       * :c:func:`orb_range_2_trans_rdm_openmp`
        * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:func:`restore_symmetry`
@@ -1335,13 +1357,6 @@ Subroutines / functions
     returns the logical converged which checks the convergence
     exponential of X using Taylor expansion
 
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`umat`
-
     Calls:
 
     .. hlist::
@@ -1361,13 +1376,6 @@ Subroutines / functions
 
 
     Extrapolate the data to the FCI limit
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`increment_n_iter`
 
     Calls:
 
@@ -1451,13 +1459,6 @@ Subroutines / functions
 
 
     Format for double precision, value(error)
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`pt2_collector`
 
     Calls:
 
@@ -2172,6 +2173,7 @@ Subroutines / functions
         logical function isnan(x)
 
 
+    Return .true. if x is NaN (the test x /= x is true only for NaN).
 
  
 .. c:function:: void kronecker_delta(void)
@@ -2212,14 +2214,10 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ci_electronic_energy`
-       * :c:func:`davidson_general`
-       * :c:func:`davidson_general_ext_rout`
-       * :c:func:`davidson_general_ext_rout_diag_dressed`
        * :c:data:`difference_dm_eigvect`
        * :c:func:`mo_as_eigvectors_of_mo_matrix`
        * :c:data:`multi_s_x_dipole_moment_eigenvec`
        * :c:data:`psi_coef_cas_diagonalized`
-       * :c:data:`sxeigenvec`
 
     Calls:
 
@@ -2419,6 +2417,11 @@ Subroutines / functions
         subroutine map_load_from_disk(filename,map)
 
 
+    Loads a consolidated map from the three files written by
+    map_save_to_disk: the files are mapped read only with mmap and
+    the key and value arrays of each block become views into them.
+    The map is left in the consolidated state; the run stops if it
+    is already consolidated or if a key < 0 or a value > 1.e30.
 
     Called by:
 
@@ -2449,6 +2452,12 @@ Subroutines / functions
         subroutine map_save_to_disk(filename,map)
 
 
+    Consolidates the map and writes it to disk. After sorting each
+    block by key, the keys and values of all blocks are copied into
+    three new files (filename//'_consolidated_idx', '_key',
+    '_value') mapped with mmap, and the block arrays become views
+    into them. The map is left in the consolidated state. Stops if
+    the map is empty or already consolidated.
 
     Called by:
 
@@ -2782,16 +2791,9 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`copy_h_apply_buffer_to_wf`
-       * :c:func:`dav_double_dressed`
        * :c:func:`davidson_diag_csf_hjj`
        * :c:func:`davidson_diag_hjj_sjj`
        * :c:func:`davidson_diag_nonsym_hjj`
-       * :c:func:`davidson_general`
-       * :c:func:`davidson_general_diag_dressed_ext_rout_nonsym_b1space`
-       * :c:func:`davidson_general_ext_rout`
-       * :c:func:`davidson_general_ext_rout_diag_dressed`
-       * :c:func:`davidson_general_ext_rout_dressed`
-       * :c:func:`davidson_general_ext_rout_nonsym_b1space`
        * :c:func:`save_wavefunction_general`
 
     Calls:
@@ -2812,6 +2814,10 @@ Subroutines / functions
         subroutine nullify_small_elements(m,n,A,LDA,thresh)
 
 
+    Nullifies, in place, the small elements of the m by n matrix A
+    (stored as A(LDA, n)). An element is set to zero if |A(i,j)| <
+    1.d-99 or |A(i,j)| / amax < thresh, where amax is the largest
+    modulus of the elements of A. If amax = 0, A is left unchanged.
 
     Called by:
 
@@ -2819,12 +2825,9 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ci_electronic_energy`
-       * :c:func:`dav_double_dressed`
        * :c:func:`davidson_diag_csf_hjj`
        * :c:func:`davidson_diag_hjj_sjj`
        * :c:func:`davidson_diag_nonsym_hjj`
-       * :c:func:`davidson_general_ext_rout_dressed`
-       * :c:func:`hcore_guess`
        * :c:data:`mo_one_e_integrals`
        * :c:func:`save_natural_mos`
        * :c:func:`save_natural_mos_canon_label`
@@ -2940,7 +2943,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_ortho_lowdin_coef`
        * :c:data:`mo_sphe_coef`
        * :c:func:`orthonormalize_mos`
 
@@ -3015,12 +3017,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`davidson_diag_nonsym_hjj`
-       * :c:func:`davidson_general`
-       * :c:func:`davidson_general_diag_dressed_ext_rout_nonsym_b1space`
-       * :c:func:`davidson_general_ext_rout`
-       * :c:func:`davidson_general_ext_rout_diag_dressed`
-       * :c:func:`davidson_general_ext_rout_dressed`
-       * :c:func:`davidson_general_ext_rout_nonsym_b1space`
        * :c:func:`ortho_svd`
 
     Calls:
@@ -3330,13 +3326,12 @@ Subroutines / functions
         subroutine pivoted_cholesky( A, rank, tol, ndim, U)
 
 
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`roothaan_hall_scf`
+    Cholesky factorization with complete pivoting (LAPACK dpstrf).
+    On exit, A is destroyed and A = U * U**T, where U(ndim, 1:rank)
+    is the unpermuted (rows restored to the original order) factor.
+    
+    rank: on input, the number of columns of U; on output, the rank
+    found for the given tol (tol < 0: LAPACK default).
 
     Calls:
 
@@ -3656,22 +3651,12 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_two_e_integral_alpha_chol`
        * :c:func:`check_mem`
        * :c:data:`cholesky_ao_num`
-       * :c:func:`dav_double_dressed`
        * :c:func:`davidson_diag_csf_hjj`
        * :c:func:`davidson_diag_hjj_sjj`
        * :c:func:`davidson_diag_nonsym_hjj`
-       * :c:func:`davidson_general`
-       * :c:func:`davidson_general_diag_dressed_ext_rout_nonsym_b1space`
-       * :c:func:`davidson_general_ext_rout`
-       * :c:func:`davidson_general_ext_rout_diag_dressed`
-       * :c:func:`davidson_general_ext_rout_dressed`
-       * :c:func:`davidson_general_ext_rout_nonsym_b1space`
        * :c:func:`print_memory_usage`
-       * :c:func:`run_slave_main`
-       * :c:func:`zmq_pt2`
 
     Calls:
 
@@ -3703,9 +3688,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`ao_to_mo`
-       * :c:func:`create_guess`
-       * :c:func:`huckel_guess`
-       * :c:func:`roothaan_hall_scf`
        * :c:func:`svd_symm`
 
     Calls:
@@ -3781,6 +3763,27 @@ Subroutines / functions
     Needed for the calculation of two-electron integrals.
 
  
+.. c:function:: set_multiple_levels_omp:
+
+
+    File : :file:`utils/set_multiple_levels_omp.irp.f`
+
+    .. code:: fortran
+
+        subroutine set_multiple_levels_omp(activate)
+
+
+    If true, activate OpenMP nested parallelism. If false, deactivate.
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`omp_set_max_active_levels`
+       * :c:func:`omp_set_nested`
+
+ 
 .. c:function:: void set_order(void)
 
 
@@ -3821,6 +3824,12 @@ Subroutines / functions
         subroutine shank(array,n,nmax,shank1)
 
 
+    Applies one step of the Shanks transformation to the sequence of
+    partial sums array: for i = 1, ..., n-1,
+    
+    shank1(i-1) = array(i+1) - (array(i+1) - array(i))**2
+                  / (array(i+1) - 2*array(i) + array(i-1)),
+    or array(i+1) if the denominator is below 1.d-12 in modulus.
 
     Called by:
 
@@ -3936,6 +3945,11 @@ Subroutines / functions
         subroutine sub_A_At(A, N)
 
 
+    Subtract the transpose of A from A in place, without a
+    temporary matrix: for i >= j, A(i,j) is first replaced by
+    A(i,j) - A(j,i), which sets the diagonal to 0, then the
+    lower triangle is set to the negative of the corresponding
+    upper element. The loops are OpenMP-parallelized.
 
  
 .. c:function:: void sum_a_at(void)
@@ -3948,6 +3962,10 @@ Subroutines / functions
         subroutine sum_A_At(A, N)
 
 
+    Add the transpose of A to A in place, without a temporary
+    matrix: for i >= j, A(i,j) is first replaced by
+    A(i,j) + A(j,i), then the lower triangle is copied from the
+    upper one. The loops are OpenMP-parallelized.
 
  
 .. c:function:: void svd(void)
@@ -3976,7 +3994,6 @@ Subroutines / functions
        * :c:func:`mo_as_svd_vectors_of_mo_matrix`
        * :c:func:`mo_as_svd_vectors_of_mo_matrix_eig`
        * :c:func:`mo_coef_new_as_svd_vectors_of_mo_matrix_eig`
-       * :c:data:`natorbsci`
        * :c:func:`ortho_canonical`
        * :c:func:`ortho_lowdin`
        * :c:func:`ortho_svd`
@@ -4117,6 +4134,12 @@ Subroutines / functions
         subroutine v2_over_x(v,x,res)
 
 
+    Store in res the root of y**2 + x*y = v**2 with the sign of
+    x (res = 0 if v = 0); the value is finite at x = 0, where
+    it equals abs(v).
+    res is a regularized stand-in for v**2/x (author-confirmed
+    2026-10-31); it differs from v**2/x at finite x by design;
+    no caller in src/ today.
 
  
 .. c:function:: void v_phi(void)
@@ -4166,55 +4189,20 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`act_2_rdm_aa_mo`
-       * :c:data:`act_2_rdm_ab_mo`
-       * :c:data:`act_2_rdm_bb_mo`
-       * :c:data:`act_2_rdm_spin_trace_mo`
-       * :c:data:`act_2_rdm_trans_spin_trace_mo`
        * :c:func:`add_integrals_to_map`
        * :c:func:`add_integrals_to_map_erf`
        * :c:data:`ao_pseudo_integrals_local`
        * :c:data:`ao_pseudo_integrals_non_local`
        * :c:data:`ao_two_e_integrals_erf_in_map`
        * :c:data:`ao_two_e_integrals_in_map`
-       * :c:func:`apply_mo_rotation`
-       * :c:data:`bielecci`
-       * :c:data:`bielecci_no`
        * :c:data:`cholesky_ao_num`
        * :c:data:`cholesky_mo_transp`
-       * :c:data:`cholesky_no_1_idx_transp`
-       * :c:data:`cholesky_no_2_idx_transp`
-       * :c:data:`cholesky_no_total_transp`
        * :c:data:`cholesky_semi_mo_transp_simple`
-       * :c:func:`diag_hessian_list_opt`
-       * :c:func:`diag_hessian_opt`
-       * :c:func:`diagonalization_hessian`
        * :c:data:`final_grid_points`
        * :c:data:`final_grid_points_extra`
-       * :c:func:`first_diag_hessian_list_opt`
-       * :c:func:`first_diag_hessian_opt`
-       * :c:func:`first_hessian_list_opt`
-       * :c:func:`first_hessian_opt`
-       * :c:func:`gradient_list_opt`
-       * :c:func:`gradient_opt`
-       * :c:func:`hessian_list_opt`
-       * :c:func:`hessian_opt`
        * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`output_wall_time_0`
-       * :c:func:`pt2_collector`
-       * :c:func:`rotation_matrix`
-       * :c:func:`rotation_matrix_iterative`
-       * :c:func:`run_pt2_slave_large`
-       * :c:func:`run_pt2_slave_small`
-       * :c:func:`run_slave_main`
-       * :c:data:`state_av_act_2_rdm_aa_mo`
-       * :c:data:`state_av_act_2_rdm_ab_mo`
-       * :c:data:`state_av_act_2_rdm_bb_mo`
-       * :c:data:`state_av_act_2_rdm_spin_trace_mo`
-       * :c:func:`trust_region_expected_e`
-       * :c:func:`trust_region_optimal_lambda`
-       * :c:func:`trust_region_step`
        * :c:func:`write_time`
 
     Calls:
@@ -4300,6 +4288,12 @@ Subroutines / functions
         subroutine zboysfun00_1(rho, F0)
 
 
+    Computes 0.5 * sqrt(pi) * erf(sqrt(rho)) / sqrt(rho) for a complex
+    argument rho, using the principal square root and the complex
+    error function cpx_erf_1.
+    
+    This is the n = 0 value of crint_1, used as the starting value of
+    the recurrence in crint_1 and crint_1_vec for |rho| >= 3.5.
 
     Called by:
 

@@ -13,6 +13,13 @@ subroutine run_slave_cipsi
 end
 
 subroutine provide_everything
+  BEGIN_DOC
+! Collects the IRPF90 entities required by the slave CIPSI
+! process: the wave function (psi_det, psi_coef) and its
+! generator and selector determinants, the selection and PT2
+! parameters, and the ZeroMQ state. Called from run_slave_cipsi
+! before the qp_run address is switched to the master.
+  END_DOC
   PROVIDE H_apply_buffer_allocated all_mo_integrals psi_det_generators psi_coef_generators psi_det_sorted_bit psi_selectors n_det_generators n_states generators_bitmask zmq_context N_states_diag
   PROVIDE pt2_e0_denominator mo_num N_int ci_energy mpi_master zmq_state zmq_context
   PROVIDE psi_det psi_coef threshold_generators state_average_weight
@@ -23,6 +30,14 @@ subroutine run_slave_main
   use f77_zmq
 
   implicit none
+  BEGIN_DOC
+! Main loop of the slave process: the master rank waits for a
+! state change from qp_run and broadcasts it to the MPI
+! communicator. It then dispatches the matching step:
+! 'selection' runs run_selection_slave in every OpenMP thread,
+! 'davidson' runs davidson_slave_tcp, 'pt2' runs run_pt2_slave
+! in OpenMP threads (only when N_det > 100000). Stops on 'Stopped'.
+  END_DOC
   IRP_IF MPI
     include 'mpif.h'
   IRP_ENDIF

@@ -106,6 +106,12 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, basis_mos_in_r_array, (n_basis_orb,n_points_final_grid)]
  implicit none
+ BEGIN_DOC
+ ! Value of the MOs of list_basis on the grid points:
+ ! basis_mos_in_r_array(i,ipoint) = mos_in_r_array(list_basis(i),ipoint).
+ ! First index: position in list_basis (1..n_basis_orb),
+ ! second index: grid point (1..n_points_final_grid).
+ END_DOC
  integer :: ipoint,i,ii
  do ipoint = 1, n_points_final_grid
   do i = 1, n_basis_orb 

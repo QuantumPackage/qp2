@@ -270,6 +270,14 @@
 
 
  subroutine overlap_bourrin_dipole(A_center,B_center,alpha,beta,power_A,power_B,overlap_x,lower_exp_val,dx,nx)
+ BEGIN_DOC
+! 1D integral of (x-A)^power_A (x-B)^power_B exp(-alpha (x-A)^2
+! - beta (x-B)^2) x over the whole line, by a plain sum over nx
+! steps of width dx in the window of half-width sqrt(lower_exp_val/p)
+! around (alpha*A + beta*B)/(alpha+beta), times the prefactor
+! exp(-alpha*beta/(alpha+beta)*(A-B)^2); result in overlap_x, step
+! in dx; used by the ao_dipole_x/_y/_z providers.
+ END_DOC
 ! compute the following integral :
 !  int [-infty ; +infty] of [(x-A_center)^(power_A) * (x-B_center)^power_B * exp(-alpha(x-A_center)^2) * exp(-beta(x-B_center)^2) * x ]
 !  needed for the dipole and those things
@@ -317,6 +325,14 @@
  end
 
  subroutine overlap_bourrin_deriv_x(i_component,A_center,B_center,alpha,beta,power_A,power_B,dx,lower_exp_val,overlap_x,nx)
+ BEGIN_DOC
+! 1D overlap with the first derivative of the A gaussian applied
+! along coordinate i_component (1 = x, 2 = y, 3 = z):
+! overlap_x = a * I(a-1) - 2 alpha * I(a+1), where a =
+! power_A(i_component) and I(a) is the overlap_bourrin_x integral
+! with power a for A and power_B for B; dx is the quadrature step.
+! Used by the ao_deriv_1_x/_y/_z providers.
+ END_DOC
  implicit none
  integer :: i,j,k,l
  integer,intent(in) :: power_A(3),power_B(3),i_component
@@ -332,6 +348,14 @@
  end
 
  subroutine overlap_bourrin_x(A_center,B_center,alpha,beta,power_A,power_B,overlap_x,lower_exp_val,dx,nx)
+ BEGIN_DOC
+! 1D integral of (x-A)^power_A (x-B)^power_B exp(-alpha (x-A)^2
+! - beta (x-B)^2) over the whole line, by a plain sum over nx
+! steps of width dx in the window of half-width sqrt(lower_exp_val/p)
+! around (alpha*A + beta*B)/(alpha+beta), times the prefactor
+! exp(-alpha*beta/(alpha+beta)*(A-B)^2); result in overlap_x, step
+! in dx (zero if a power is negative or the prefactor is below 1.d-6).
+ END_DOC
  implicit none
 ! compute the following integral :
 !  int [-infty ; +infty] of [(x-A_center)^(power_A) * (x-B_center)^power_B * exp(-alpha(x-A_center)^2) * exp(-beta(x-B_center)^2) ]

@@ -1,6 +1,10 @@
 subroutine pt2_alloc(pt2_data,N)
   implicit none
   use selection_types
+  BEGIN_DOC
+! Allocates and zero-initializes the pt2, rpt2, variance and
+! overlap arrays of a pt2_type for N states.
+  END_DOC
   type(pt2_type), intent(inout) :: pt2_data
   integer, intent(in)           :: N
   integer :: k
@@ -21,6 +25,10 @@ end subroutine
 subroutine pt2_dealloc(pt2_data)
   implicit none
   use selection_types
+  BEGIN_DOC
+! Deallocates the pt2, rpt2, variance and overlap arrays of
+! a pt2_type.
+  END_DOC
   type(pt2_type), intent(inout) :: pt2_data
   deallocate(pt2_data % pt2         &
             ,pt2_data % variance    &
@@ -90,6 +98,11 @@ end subroutine
 subroutine pt2_serialize(pt2_data, n, x)
   implicit none
   use selection_types
+  BEGIN_DOC
+! Packs the first n entries of pt2, rpt2 and variance and
+! the n x n overlap matrix of a pt2_type into x, in that
+! order (3*n + n*n doubles).
+  END_DOC
   type(pt2_type), intent(in)    :: pt2_data
   integer, intent(in)           :: n
   double precision, intent(out) :: x(*)
@@ -110,6 +123,11 @@ end
 subroutine pt2_deserialize(pt2_data, n, x)
   implicit none
   use selection_types
+  BEGIN_DOC
+! Restores a pt2_type from the array x written by
+! pt2_serialize: n entries each of pt2, rpt2 and variance,
+! then the n x n overlap matrix.
+  END_DOC
   type(pt2_type), intent(inout) :: pt2_data
   integer, intent(in)           :: n
   double precision, intent(in)  :: x(*)

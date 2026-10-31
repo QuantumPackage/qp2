@@ -4,6 +4,11 @@ use f77_zmq
 
 subroutine davidson_slave_inproc()
   implicit none
+  BEGIN_DOC
+! In-process variant of the Davidson slave: starts the worker
+! in the current process with davidson_run_slave(1,1).
+! H_S2_u_0_nstates_zmq in this file starts it via pthread_create.
+  END_DOC
 
   call davidson_run_slave(1,1)
 end
@@ -11,6 +16,13 @@ end
 
 subroutine davidson_slave_tcp(i)
   implicit none
+  BEGIN_DOC
+! TCP variant of the Davidson slave: starts the worker with
+! davidson_run_slave(0,i); the in-process variant passes 1
+! instead of 0. Runs in a slave process: run_slave_main in
+! cipsi_utils calls it when the ZMQ state is 'davidson'. i is
+! forwarded to davidson_run_slave, which does not use iproc.
+  END_DOC
   integer, intent(in)            :: i
   call davidson_run_slave(0,i)
 end
@@ -80,6 +92,14 @@ end subroutine
 subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze, worker_id)
   use f77_zmq
   implicit none
+  BEGIN_DOC
+! Worker loop of the Davidson slave. Fetches the wavefunction
+! u_t from the qp_run scheduler, then takes tasks (imin, imax,
+! ishift, istep) from the task server and calls
+! H_S2_u_0_nstates_openmp_work to compute $H | u_t \rangle$ and
+! $S^2 | u_t \rangle$ on determinant columns imin+ishift to
+! imax, step istep, pushing the results to the master.
+  END_DOC
 
   integer(ZMQ_PTR),intent(in)   :: zmq_to_qp_run_socket
   integer(ZMQ_PTR),intent(in)   :: zmq_socket_push

@@ -627,12 +627,7 @@ Providers
        * :c:data:`ci_energy_no_diag`
        * :c:data:`core_energy`
        * :c:data:`core_energy_erf`
-       * :c:data:`energy_by_projection`
-       * :c:data:`etwo`
-       * :c:data:`hf_energy`
        * :c:data:`psi_energy_with_nucl_rep`
-       * :c:data:`pt2_e0_denominator`
-       * :c:data:`scf_energy`
 
  
 .. c:var:: double pt_chrg_interaction
@@ -792,6 +787,9 @@ Providers
         double precision, allocatable	:: slater_bragg_radii_per_atom	(nucl_num)
 
 
+    Slater-Bragg atomic radius in angstroms of each nucleus: for
+    i = 1 to nucl_num, the table value slater_bragg_radii(Z_i),
+    Z_i being int(nucl_charge(i)) floored at 1.
 
     Needs:
 
@@ -820,6 +818,8 @@ Providers
         double precision, allocatable	:: slater_bragg_radii_per_atom_ua	(nucl_num)
 
 
+    As slater_bragg_radii_per_atom, but with the radii in atomic
+    units (a0) taken from slater_bragg_radii_ua.
 
     Needs:
 
@@ -848,6 +848,9 @@ Providers
         double precision, allocatable	:: slater_bragg_radii_ua	(0:100)
 
 
+    The values of slater_bragg_radii converted from angstroms to
+    atomic units (a0), by a factor of 1.889725989.
+    As slater_bragg_radii, indexed by atomic number (1 to 100).
 
     Needs:
 
@@ -874,6 +877,18 @@ Providers
         double precision, allocatable	:: slater_bragg_type_inter_distance	(nucl_num,nucl_num)
 
 
+    For i < j, the entry is u / (u*u - 1), where u = (x - 1) /
+    (x + 1), x = slater_bragg_radii_per_atom(i) /
+    slater_bragg_radii_per_atom(j); other entries are zero.
+    Used in cell_function_becke of becke_numerical_grid (Becke
+    1988, JCP 88(4)).
+    This is the parameter a_ij of Eq. (A5) of A. D. Becke,
+    J. Chem. Phys. 88, 2547 (1988): in the coordinate change
+    nu_ij = mu_ij + a_ij (1 - mu_ij**2) (Eq. (A2)), it shifts
+    the fuzzy cell boundary off the perpendicular bisector, so
+    it crosses the internuclear axis where the distance ratio
+    to the two nuclei equals the Bragg-Slater radii ratio X
+    (Eqs. (A4)-(A6)).
 
     Needs:
 
@@ -895,6 +910,16 @@ Providers
         double precision, allocatable	:: slater_bragg_type_inter_distance_ua	(nucl_num,nucl_num)
 
 
+    As slater_bragg_type_inter_distance, but the ratio x is built
+    from the radii in atomic units (a0),
+    slater_bragg_radii_per_atom_ua, and each value is clipped to
+    the interval [-0.5, 0.5].
+    The limit 0.5 is the monotonicity bound |a_ij| < 1/2 of
+    Eq. (A3) of A. D. Becke, J. Chem. Phys. 88, 2547 (1988):
+    when the computed a_ij falls outside that range, the paper
+    prescribes assigning the endpoint value +/- 1/2 (this
+    happens when the Bragg-Slater radii differ by a factor
+    above about 2.4).
 
     Needs:
 

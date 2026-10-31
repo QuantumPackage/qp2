@@ -1,5 +1,13 @@
 
 subroutine give_all_stuffs_in_r_for_lyp_88(r,rho,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_2)
+ BEGIN_DOC
+ ! At the point r, gives the density and gradient quantities needed
+ ! by the LYP functional ec_lyp_88: the spin densities rho_a and
+ ! rho_b, the total density rho = rho_a + rho_b, the squared norms
+ ! of the gradients of the spin densities, and grad_rho_2, the
+ ! squared norm of the gradient of the total density. The arrays are
+ ! indexed by the state istate = 1..N_states.
+ END_DOC
  implicit none
  double precision, intent(in) :: r(3)
  double precision, intent(out) :: rho_a(N_states),rho_b(N_states),grad_rho_a_2(N_states),grad_rho_b_2(N_states),grad_rho_2(N_states),rho(N_states)

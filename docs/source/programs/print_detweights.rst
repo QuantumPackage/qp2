@@ -9,6 +9,9 @@ print_detweights
  
  
  
+ Reads the wave function from the |EZFIO| directory and writes 
+ the excitation degree of each determinant with respect to the 
+ first determinant to the file exc.dat. 
  
  Needs: 
  

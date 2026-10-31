@@ -1482,6 +1482,10 @@ Providers
         double precision, allocatable	:: cc_space_f_o	(cc_nOa)
 
 
+    Diagonal of the OO Fock block of the reference
+    determinant cc_ref: cc_space_f_o(i) = cc_space_f_oo(i,i)
+    for i = 1,cc_nOa, i.e. F(i,i) for the occupied MOs
+    (positions in cc_list_occ).
 
     Needs:
 
@@ -1503,6 +1507,10 @@ Providers
         double precision, allocatable	:: cc_space_f_oo	(cc_nOa,cc_nOa)
 
 
+    OO block of the alpha-spin Fock matrix of the reference
+    determinant cc_ref: cc_space_f_oo(i1,i2) is the element
+    F(idx1,idx2) with idx1 = cc_list_occ(i1) and idx2 =
+    cc_list_occ(i2), extracted by gen_f_space.
 
     Needs:
 
@@ -1534,6 +1542,10 @@ Providers
         double precision, allocatable	:: cc_space_f_ov	(cc_nOa,cc_nVa)
 
 
+    OV block of the alpha-spin Fock matrix of the reference
+    determinant cc_ref: cc_space_f_ov(i1,i2) is the element
+    F(idx1,idx2) with idx1 = cc_list_occ(i1) and idx2 =
+    cc_list_vir(i2), extracted by gen_f_space.
 
     Needs:
 
@@ -1559,6 +1571,10 @@ Providers
         double precision, allocatable	:: cc_space_f_v	(cc_nVa)
 
 
+    Diagonal of the VV Fock block of the reference
+    determinant cc_ref: cc_space_f_v(i) = cc_space_f_vv(i,i)
+    for i = 1,cc_nVa, i.e. F(i,i) for the virtual MOs
+    (positions in cc_list_vir).
 
     Needs:
 
@@ -1580,6 +1596,10 @@ Providers
         double precision, allocatable	:: cc_space_f_vo	(cc_nVa,cc_nOa)
 
 
+    VO block of the alpha-spin Fock matrix of the reference
+    determinant cc_ref: cc_space_f_vo(i1,i2) is the element
+    F(idx1,idx2) with idx1 = cc_list_vir(i1) and idx2 =
+    cc_list_occ(i2), extracted by gen_f_space.
 
     Needs:
 
@@ -1605,6 +1625,10 @@ Providers
         double precision, allocatable	:: cc_space_f_vv	(cc_nVa,cc_nVa)
 
 
+    VV block of the alpha-spin Fock matrix of the reference
+    determinant cc_ref: cc_space_f_vv(i1,i2) is the element
+    F(idx1,idx2) with idx1 = cc_list_vir(i1) and idx2 =
+    cc_list_vir(i2), extracted by gen_f_space.
 
     Needs:
 
@@ -1636,6 +1660,11 @@ Providers
         double precision, allocatable	:: cc_space_v	(mo_num,mo_num,mo_num,mo_num)
 
 
+    Two-electron MO integrals over the full MO space:
+    cc_space_v(i,j,k,l) = <ij|kl> in MOs, i,j,k,l = 1,mo_num.
+    If do_mo_cholesky is set, built from the Cholesky vectors
+    (cholesky_mo_transp) with dgemm, otherwise from
+    get_two_e_integral.
 
     Needs:
 
@@ -1835,6 +1864,10 @@ Providers
         double precision, allocatable	:: cc_space_v_oo_chol	(cholesky_mo_num,cc_nOa,cc_nOa)
 
 
+    Cholesky vectors of the OO block:
+    cc_space_v_oo_chol(k,i1,i2) = cholesky_mo_transp(k,idx1,idx2)
+    with idx1 = cc_list_occ(i1), idx2 = cc_list_occ(i2),
+    k = 1,cholesky_mo_num, filled by gen_v_space_chol.
 
     Needs:
 
@@ -1866,6 +1899,11 @@ Providers
         double precision, allocatable	:: cc_space_v_oooo	(cc_nOa,cc_nOa,cc_nOa,cc_nOa)
 
 
+    Two-electron MO integrals of the OOOO block:
+    cc_space_v_oooo(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+    i1..i4 positions in cc_list_occ (occupied MOs, core and
+    deleted ones excluded). If do_mo_cholesky is set, built from
+    cc_space_v_oo_chol with dgemm, otherwise by gen_v_space.
 
     Needs:
 
@@ -1898,6 +1936,13 @@ Providers
         double precision, allocatable	:: cc_space_v_ooov	(cc_nOa,cc_nOa,cc_nOa,cc_nVa)
 
 
+    OOOV block of two-electron MO integrals: cc_space_v_ooov
+    (i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs, i4 in cc_list_vir,
+    i1..i3 in cc_list_occ. Computed by gen_v_space, or copied
+    from cc_space_v_ovoo if do_mo_cholesky is set; the loop
+    bounds come from cc_space_v_ooov (once cc_space_v_oovo,
+    wrong when cc_nVa != cc_nOa: bug, author-confirmed
+    2026-10-31, now fixed).
 
     Needs:
 
@@ -1907,7 +1952,6 @@ Providers
        * :c:data:`all_mo_integrals`
        * :c:data:`cc_list_occ`
        * :c:data:`cc_no_m`
-       * :c:data:`cc_space_v_oovo`
        * :c:data:`cc_space_v_ovoo`
        * :c:data:`cholesky_mo_num`
        * :c:data:`do_mo_cholesky`
@@ -1925,6 +1969,11 @@ Providers
         double precision, allocatable	:: cc_space_v_oovo	(cc_nOa,cc_nOa,cc_nVa,cc_nOa)
 
 
+    Two-electron MO integrals of the OOVO block:
+    cc_space_v_oovo(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+    i3 in cc_list_vir, i1,i2,i4 in cc_list_occ. If
+    do_mo_cholesky is set, copied from cc_space_v_vooo,
+    otherwise computed by gen_v_space.
 
     Needs:
 
@@ -1939,12 +1988,6 @@ Providers
        * :c:data:`do_mo_cholesky`
        * :c:data:`mo_integrals_map`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`cc_space_v_ooov`
 
  
 .. c:var:: double cc_space_v_oovv
@@ -1957,6 +2000,12 @@ Providers
         double precision, allocatable	:: cc_space_v_oovv	(cc_nOa,cc_nOa,cc_nVa,cc_nVa)
 
 
+    Two-electron MO integrals of the OOVV block:
+    cc_space_v_oovv(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+    i1,i2 in cc_list_occ, i3,i4 in cc_list_vir. If
+    do_mo_cholesky is set, copied from
+    cc_space_v_vvoo(i3,i4,i1,i2), otherwise computed by
+    gen_v_space.
 
     Needs:
 
@@ -1989,6 +2038,10 @@ Providers
         double precision, allocatable	:: cc_space_v_ov_chol	(cholesky_mo_num,cc_nOa,cc_nVa)
 
 
+    Cholesky vectors of the OV block:
+    cc_space_v_ov_chol(k,i1,i2) = cholesky_mo_transp(k,idx1,idx2)
+    with idx1 = cc_list_occ(i1), idx2 = cc_list_vir(i2),
+    k = 1,cholesky_mo_num, filled by gen_v_space_chol.
 
     Needs:
 
@@ -2012,6 +2065,11 @@ Providers
         double precision, allocatable	:: cc_space_v_ovoo	(cc_nOa,cc_nVa,cc_nOa,cc_nOa)
 
 
+    Two-electron MO integrals of the OVOO block:
+    cc_space_v_ovoo(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+    i2 in cc_list_vir, i1,i3,i4 in cc_list_occ. If
+    do_mo_cholesky is set, copied from cc_space_v_vooo,
+    otherwise computed by gen_v_space.
 
     Needs:
 
@@ -2044,6 +2102,12 @@ Providers
         double precision, allocatable	:: cc_space_v_ovov	(cc_nOa,cc_nVa,cc_nOa,cc_nVa)
 
 
+    Two-electron MO integrals of the OVOV block:
+    cc_space_v_ovov(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+    i1,i3 in cc_list_occ, i2,i4 in cc_list_vir. If
+    do_mo_cholesky is set, copied from
+    cc_space_v_vovo(i2,i1,i4,i3), otherwise computed by
+    gen_v_space.
 
     Needs:
 
@@ -2076,6 +2140,17 @@ Providers
         double precision, allocatable	:: cc_space_v_ovvo	(cc_nOa,cc_nVa,cc_nVa,cc_nOa)
 
 
+    Two-electron MO integrals of the OVVO block:
+    cc_space_v_ovvo(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+    i2,i3 in cc_list_vir, i1,i4 in cc_list_occ. If
+    do_mo_cholesky is set, copied from
+    cc_space_v_vvoo(i3,i2,i1,i4), otherwise computed by
+    gen_v_space.
+    Verified numerically against the direct integrals (H2O,
+    cc-pVTZ, nOa=5, nVa=53, 1110 Cholesky vectors, 2026-10-31):
+    the copy agrees to ~3e-14 relative. In the code's physicist
+    convention <i1 i2 | i3 i4> = <i3 i2 | i1 i4> (8-fold
+    symmetry, indices (i1,i3) and (i2,i4) on electrons 1,2).
 
     Needs:
 
@@ -2108,6 +2183,10 @@ Providers
         double precision, allocatable	:: cc_space_v_ovvv	(cc_nOa,cc_nVa,cc_nVa,cc_nVa)
 
 
+    Two-electron MO integrals of the OVVV block:
+    cc_space_v_ovvv(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+    i2,i3,i4 in cc_list_vir, i1 in cc_list_occ. Computed
+    by gen_v_space.
 
     Needs:
 
@@ -2159,6 +2238,10 @@ Providers
         double precision, allocatable	:: cc_space_v_vo_chol	(cholesky_mo_num,cc_nVa,cc_nOa)
 
 
+    Cholesky vectors of the VO block:
+    cc_space_v_vo_chol(k,i1,i2) = cholesky_mo_transp(k,idx1,idx2)
+    with idx1 = cc_list_vir(i1), idx2 = cc_list_occ(i2),
+    k = 1,cholesky_mo_num, filled by gen_v_space_chol.
 
     Needs:
 
@@ -2189,6 +2272,11 @@ Providers
         double precision, allocatable	:: cc_space_v_vooo	(cc_nVa,cc_nOa,cc_nOa,cc_nOa)
 
 
+    Two-electron MO integrals of the VOOO block:
+    cc_space_v_vooo(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+    i1 in cc_list_vir, i2..i4 in cc_list_occ. If do_mo_cholesky
+    is set, built from cc_space_v_vo_chol and cc_space_v_oo_chol
+    with dgemm, otherwise by gen_v_space.
 
     Needs:
 
@@ -2223,6 +2311,17 @@ Providers
         double precision, allocatable	:: cc_space_v_voov	(cc_nVa,cc_nOa,cc_nOa,cc_nVa)
 
 
+    Two-electron MO integrals of the VOOV block:
+    cc_space_v_voov(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+    i1,i4 in cc_list_vir, i2,i3 in cc_list_occ. If
+    do_mo_cholesky is set, copied from
+    cc_space_v_vvoo(i1,i4,i3,i2), otherwise computed by
+    gen_v_space.
+    Verified numerically against the direct integrals (H2O,
+    cc-pVTZ, nOa=5, nVa=53, 1110 Cholesky vectors, 2026-10-31):
+    the copy agrees to ~3e-14 relative. In the code's physicist
+    convention <i1 i2 | i3 i4> = <i1 i4 | i3 i2> (8-fold
+    symmetry, indices (i1,i3) and (i2,i4) on electrons 1,2).
 
     Needs:
 
@@ -2255,6 +2354,18 @@ Providers
         double precision, allocatable	:: cc_space_v_vovo	(cc_nVa,cc_nOa,cc_nVa,cc_nOa)
 
 
+    Two-electron MO integrals of the VOVO block:
+    cc_space_v_vovo(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+    i1,i3 in cc_list_vir, i2,i4 in cc_list_occ. If
+    do_mo_cholesky is set, built from cc_space_v_vv_chol
+    and cc_space_v_oo_chol with dgemm, otherwise by
+    gen_v_space.
+    The dgemm contracts the Cholesky vectors over the
+    (list1,list3) and (list2,list4) orbital pairs, T(k,i1,i3)
+    and T(k,i2,i4), which reproduces <i1 i2 | i3 i4> in the
+    code's physicist convention (= (i1 i2 | i3 i4) in chemist
+    notation); the Cholesky branch agrees with the direct one,
+    up to the Cholesky threshold (author, 2026-10-31).
 
     Needs:
 
@@ -2288,6 +2399,10 @@ Providers
         double precision, allocatable	:: cc_space_v_vovv	(cc_nVa,cc_nOa,cc_nVa,cc_nVa)
 
 
+    Two-electron MO integrals of the VOVV block:
+    cc_space_v_vovv(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+    i1,i3,i4 in cc_list_vir, i2 in cc_list_occ. Computed
+    by gen_v_space.
 
     Needs:
 
@@ -2313,6 +2428,10 @@ Providers
         double precision, allocatable	:: cc_space_v_vv_chol	(cholesky_mo_num,cc_nVa,cc_nVa)
 
 
+    Cholesky vectors of the VV block:
+    cc_space_v_vv_chol(k,i1,i2) = cholesky_mo_transp(k,idx1,idx2)
+    with idx1 = cc_list_vir(i1), idx2 = cc_list_vir(i2),
+    k = 1,cholesky_mo_num, filled by gen_v_space_chol.
 
     Needs:
 
@@ -2342,6 +2461,11 @@ Providers
         double precision, allocatable	:: cc_space_v_vvoo	(cc_nVa,cc_nVa,cc_nOa,cc_nOa)
 
 
+    Two-electron MO integrals of the VVOO block:
+    cc_space_v_vvoo(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+    i1,i2 in cc_list_vir, i3,i4 in cc_list_occ. If
+    do_mo_cholesky is set, built from cc_space_v_vo_chol
+    with dgemm, otherwise by gen_v_space.
 
     Needs:
 
@@ -2377,6 +2501,10 @@ Providers
         double precision, allocatable	:: cc_space_v_vvov	(cc_nVa,cc_nVa,cc_nOa,cc_nVa)
 
 
+    Two-electron MO integrals of the VVOV block:
+    cc_space_v_vvov(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+    i1,i2,i4 in cc_list_vir, i3 in cc_list_occ. Computed
+    by gen_v_space.
 
     Needs:
 
@@ -2402,6 +2530,10 @@ Providers
         double precision, allocatable	:: cc_space_v_vvvo	(cc_nVa,cc_nVa,cc_nVa,cc_nOa)
 
 
+    Two-electron MO integrals of the VVVO block:
+    cc_space_v_vvvo(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+    i1,i2,i3 in cc_list_vir, i4 in cc_list_occ. Computed
+    by gen_v_space.
 
     Needs:
 
@@ -2427,6 +2559,9 @@ Providers
         double precision, allocatable	:: cc_space_v_vvvv	(cc_nVa,cc_nVa,cc_nVa,cc_nVa)
 
 
+    Two-electron MO integrals of the VVVV block:
+    cc_space_v_vvvv(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+    i1..i4 in cc_list_vir. Computed by gen_v_space.
 
     Needs:
 
@@ -2458,6 +2593,10 @@ Providers
         double precision, allocatable	:: cc_space_w_oovv	(cc_nOa,cc_nOa,cc_nVa,cc_nVa)
 
 
+    Antisymmetrized OOVV block: cc_space_w_oovv(i,j,a,b) =
+    2d0*<ij|ab> - <ji|ab>, antisymmetric in i,j. i,j are
+    positions in cc_list_occ, a,b in cc_list_vir; <pq|rs>
+    are the two-electron MO integrals from gen_v_space.
 
     Needs:
 
@@ -2483,6 +2622,10 @@ Providers
         double precision, allocatable	:: cc_space_w_vvoo	(cc_nVa,cc_nVa,cc_nOa,cc_nOa)
 
 
+    Antisymmetrized VVOO block: cc_space_w_vvoo(a,b,i,j) =
+    2d0*<ab|ij> - <ba|ij>, antisymmetric in a,b. a,b are
+    positions in cc_list_vir, i,j in cc_list_occ; <pq|rs>
+    are the two-electron MO integrals from gen_v_space.
 
     Needs:
 
@@ -2508,6 +2651,10 @@ Providers
         double precision, allocatable	:: cc_spin_f_oo	(cc_nOab,cc_nOab)
 
 
+    Spin-orbital OO block of the Fock matrix of the reference
+    determinant cc_ref: p,q over the occupied spin orbitals,
+    index order alpha then beta, cross-spin elements zero,
+    as built by gen_f_spin.
 
     Needs:
 
@@ -2535,6 +2682,10 @@ Providers
         double precision, allocatable	:: cc_spin_f_ov	(cc_nOab,cc_nVab)
 
 
+    Spin-orbital OV block of the Fock matrix of the reference
+    determinant cc_ref: p over the occupied and q over the
+    virtual spin orbitals, index order alpha then beta,
+    cross-spin elements zero, as built by gen_f_spin.
 
     Needs:
 
@@ -2562,6 +2713,10 @@ Providers
         double precision, allocatable	:: cc_spin_f_vv	(cc_nVab,cc_nVab)
 
 
+    Spin-orbital VV block of the Fock matrix of the reference
+    determinant cc_ref: p,q over the virtual spin orbitals,
+    index order alpha then beta, cross-spin elements zero,
+    as built by gen_f_spin.
 
     Needs:
 
@@ -2589,6 +2744,11 @@ Providers
         double precision, allocatable	:: cc_spin_v_oo_chol	(cholesky_mo_num,cc_nOab,cc_nOab)
 
 
+    Cholesky vectors of the OOOO block in spin orbitals:
+    cc_spin_v_oo_chol(k,i1,i2) = cholesky_mo_transp(k,idx1,
+    idx2) with idx1,idx2 positions in list_occ (occupied
+    spin orbitals, alpha then beta), k = 1,cholesky_mo_num,
+    filled by gen_v_space_chol.
 
     Needs:
 
@@ -2612,6 +2772,16 @@ Providers
         double precision, allocatable	:: cc_spin_v_oooo	(cc_nOab,cc_nOab,cc_nOab,cc_nOab)
 
 
+    Spin-orbital two-electron integrals of the OOOO block:
+    cc_spin_v_oooo(p,q,r,s) = <pq||rs> in spin orbitals,
+    p..s over the occupied spin orbitals, index order alpha
+    then beta (1..cc_nOab), as built by gen_v_spin.
+    The Cholesky path exists for open-shell CCSD as well: open-shell
+    references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+    whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+    (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+    do_mo_cholesky branch for all four spin combinations
+    (author-confirmed 2026-10-31).
 
     Needs:
 
@@ -2635,6 +2805,15 @@ Providers
         double precision, allocatable	:: cc_spin_v_ooov	(cc_nOab,cc_nOab,cc_nOab,cc_nVab)
 
 
+    Spin-orbital two-electron integrals of the OOOV block,
+    <pq||rs> in spin orbitals, p,r,s occupied, q virtual,
+    index order alpha then beta, as built by gen_v_spin.
+    The Cholesky path exists for open-shell CCSD as well: open-shell
+    references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+    whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+    (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+    do_mo_cholesky branch for all four spin combinations
+    (author-confirmed 2026-10-31).
 
     Needs:
 
@@ -2658,6 +2837,15 @@ Providers
         double precision, allocatable	:: cc_spin_v_oovo	(cc_nOab,cc_nOab,cc_nVab,cc_nOab)
 
 
+    Spin-orbital two-electron integrals of the OOVO block,
+    <pq||rs> in spin orbitals, p,r,s occupied, q virtual,
+    index order alpha then beta, as built by gen_v_spin.
+    The Cholesky path exists for open-shell CCSD as well: open-shell
+    references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+    whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+    (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+    do_mo_cholesky branch for all four spin combinations
+    (author-confirmed 2026-10-31).
 
     Needs:
 
@@ -2681,6 +2869,15 @@ Providers
         double precision, allocatable	:: cc_spin_v_oovv	(cc_nOab,cc_nOab,cc_nVab,cc_nVab)
 
 
+    Spin-orbital two-electron integrals of the OOVV block,
+    <pq||rs> in spin orbitals, p,r occupied, q,s virtual,
+    index order alpha then beta, as built by gen_v_spin.
+    The Cholesky path exists for open-shell CCSD as well: open-shell
+    references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+    whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+    (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+    do_mo_cholesky branch for all four spin combinations
+    (author-confirmed 2026-10-31).
 
     Needs:
 
@@ -2704,6 +2901,15 @@ Providers
         double precision, allocatable	:: cc_spin_v_ovoo	(cc_nOab,cc_nVab,cc_nOab,cc_nOab)
 
 
+    Spin-orbital two-electron integrals of the OVOO block,
+    <pq||rs> in spin orbitals, p,r,s occupied, q virtual,
+    index order alpha then beta, as built by gen_v_spin.
+    The Cholesky path exists for open-shell CCSD as well: open-shell
+    references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+    whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+    (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+    do_mo_cholesky branch for all four spin combinations
+    (author-confirmed 2026-10-31).
 
     Needs:
 
@@ -2727,6 +2933,15 @@ Providers
         double precision, allocatable	:: cc_spin_v_ovov	(cc_nOab,cc_nVab,cc_nOab,cc_nVab)
 
 
+    Spin-orbital two-electron integrals of the OVOV block,
+    <pq||rs> in spin orbitals, p,r occupied, q,s virtual,
+    index order alpha then beta, as built by gen_v_spin.
+    The Cholesky path exists for open-shell CCSD as well: open-shell
+    references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+    whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+    (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+    do_mo_cholesky branch for all four spin combinations
+    (author-confirmed 2026-10-31).
 
     Needs:
 
@@ -2750,6 +2965,15 @@ Providers
         double precision, allocatable	:: cc_spin_v_ovvo	(cc_nOab,cc_nVab,cc_nVab,cc_nOab)
 
 
+    Spin-orbital two-electron integrals of the OVVO block,
+    <pq||rs> in spin orbitals, p,s occupied, q,r virtual,
+    index order alpha then beta, as built by gen_v_spin.
+    The Cholesky path exists for open-shell CCSD as well: open-shell
+    references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+    whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+    (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+    do_mo_cholesky branch for all four spin combinations
+    (author-confirmed 2026-10-31).
 
     Needs:
 
@@ -2773,6 +2997,15 @@ Providers
         double precision, allocatable	:: cc_spin_v_vvoo	(cc_nVab,cc_nVab,cc_nOab,cc_nOab)
 
 
+    Spin-orbital two-electron integrals of the VVOO block,
+    <pq||rs> in spin orbitals, p,q virtual, r,s occupied,
+    index order alpha then beta, as built by gen_v_spin.
+    The Cholesky path exists for open-shell CCSD as well: open-shell
+    references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+    whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+    (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+    do_mo_cholesky branch for all four spin combinations
+    (author-confirmed 2026-10-31).
 
     Needs:
 
@@ -2857,6 +3090,8 @@ Subroutines / functions
         subroutine det_energy(det,energy)
 
 
+    Energy of the input determinant: the diagonal Hamiltonian matrix
+    element $\langle i|H|i \rangle$ plus the nuclear repulsion.
 
     Needs:
 
@@ -3018,6 +3253,10 @@ Subroutines / functions
         subroutine gen_f_space(det,n1,n2,list1,list2,f)
 
 
+    Extract a block of the Fock matrix of determinant det.
+    The alpha-spin Fock matrix is computed by
+    get_fock_matrix_spin, and f(i1,i2) is the element
+    F(list1(i1),list2(i2)) of it.
 
     Needs:
 
@@ -3096,6 +3335,12 @@ Subroutines / functions
         subroutine gen_v_space(n1,n2,n3,n4,list1,list2,list3,list4,v)
 
 
+    Extract two-electron MO integrals over four lists of MOs:
+    v(i1,i2,i3,i4) = <idx1 idx2 | idx3 idx4> in MOs, with
+    idx1 = list1(i1), idx2 = list2(i2), idx3 = list3(i3) and
+    idx4 = list4(i4). If do_mo_cholesky is set, the block is
+    built from the Cholesky vectors (gen_v_space_chol),
+    otherwise from get_two_e_integral.
 
     Needs:
 
@@ -3151,6 +3396,11 @@ Subroutines / functions
         subroutine gen_v_space_chol(n1,n3,list1,list3,v,ldv)
 
 
+    Fill a buffer with Cholesky vectors: v(k,i1,i3) =
+    cholesky_mo_transp(k,idx1,idx3), with idx1 = list1(i1),
+    idx3 = list3(i3) and k = 1,ldv. The Cholesky index k is
+    the first index (leading dimension ldv) so that the buffer
+    can be used directly in a dgemm call.
 
     Needs:
 
@@ -3328,6 +3578,12 @@ Subroutines / functions
         subroutine get_excitation_general(det1,det2,degree,n,list_anni,list_crea,phase,Nint)
 
 
+    Excitation that maps det1 onto det2. list_anni (list_crea) are
+    the 1-based orbital indices, increasing per spin, of the orbitals
+    occupied in det1 (det2) but not in det2 (det1). n and degree are
+    the excitation degrees per spin and total. phase is $(-1)^d$, d
+    the sum, per spin, of the distance between the i-th annihilation
+    and creation positions in the occupied lists of det1 (det2).
 
     Called by:
 
@@ -3394,6 +3650,11 @@ Subroutines / functions
         subroutine get_phase_general(det1,det2,phase,degree,Nint)
 
 
+    Phase and degree of the excitation that maps det1 onto det2.
+    Thin wrapper around get_excitation_general: the orbital lists
+    are discarded, only phase and degree are returned. det1 and
+    det2 must have the same number of electrons per spin,
+    otherwise the subroutine aborts.
 
     Needs:
 
@@ -3520,6 +3781,10 @@ Subroutines / functions
         subroutine print_wf_qp_edit_subroutine()
 
 
+    Prints the first n_det_qp_edit determinants of the wave
+    function stored in psi_coef and psi_det: for each determinant
+    its index, its coefficients psi_coef(i,:) and the determinant
+    itself, via print_det.
 
     Needs:
 
@@ -3600,6 +3865,25 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`guess_t2`
+
+ 
+.. c:function:: void report(void)
+
+
+    File : :file:`zz_test_chol_check.irp.f`
+
+    .. code:: fortran
+
+        subroutine report(name, direct, test, maxref, maxdiff)
+
+
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`zz_test_chol_check`
 
  
 .. c:function:: void shift_idx_spin(void)
@@ -3740,6 +4024,11 @@ Subroutines / functions
         subroutine update_t_ccsd(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err1,all_err2,all_t1,all_t2)
 
 
+    Update the CCSD amplitudes t1 and t2 in place from the residuals
+    r1 and r2. If cc_update_method is 'diis', t1 gets the standard
+    update and t2 is extrapolated with DIIS on the histories all_err2
+    and all_t2. If it is 'none', both get the standard update. Any
+    other value prints a message and leaves t1 and t2 unchanged.
 
     Needs:
 
@@ -3772,6 +4061,12 @@ Subroutines / functions
         subroutine update_t_ccsd_diis(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err1,all_err2,all_t1,all_t2)
 
 
+    Update the CCSD amplitudes t1 and t2 in place with a single DIIS
+    extrapolation on the concatenated t1/t2 amplitude vector. The
+    error vectors computed from r1 and r2, and the amplitudes, are
+    first appended to the per-amplitude histories all_err1, all_err2,
+    all_t1 and all_t2, then the combined histories are extrapolated
+    and the result is split back into t1 and t2.
 
     Needs:
 
@@ -3802,6 +4097,11 @@ Subroutines / functions
         subroutine update_t_ccsd_diis_v3(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err,all_t)
 
 
+    Update the CCSD amplitudes t1 and t2 in place with DIIS on the
+    concatenated t1/t2 amplitude vector, like update_t_ccsd_diis,
+    but with a single history buffer: all_err and all_t already hold
+    the combined t1/t2 errors and amplitudes, and t1 and t2 are flat
+    vectors.
 
     Needs:
 
@@ -3862,4 +4162,57 @@ Subroutines / functions
 
        * :c:data:`ezfio_filename`
        * :c:data:`read_amplitudes`
+
+ 
+.. c:function:: void zz_test_chol_check(void)
+
+
+    File : :file:`zz_test_chol_check.irp.f`
+
+    .. code:: fortran
+
+        subroutine zz_test_chol_check
+
+
+    Debug: Cholesky vs direct cc_space_v_* blocks (oovv, vovo, oovo,
+    ooov, voov, ovvo). The direct values come from gen_v_space with
+    do_mo_cholesky = .false., the Cholesky values from the providers
+    with do_mo_cholesky = .true. (same SCF orbitals).
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cholesky_threshold`
+       * :c:data:`cc_list_occ`
+       * :c:data:`cc_list_occ`
+       * :c:data:`cc_no_m`
+       * :c:data:`cc_no_m`
+       * :c:data:`cc_no_m`
+       * :c:data:`cc_space_v_ooov`
+       * :c:data:`cc_space_v_oovo`
+       * :c:data:`cc_space_v_oovv`
+       * :c:data:`cc_space_v_ovoo`
+       * :c:data:`cc_space_v_ovvo`
+       * :c:data:`cc_space_v_vooo`
+       * :c:data:`cc_space_v_voov`
+       * :c:data:`cc_space_v_vovo`
+       * :c:data:`cc_space_v_vvoo`
+       * :c:data:`cholesky_mo_num`
+       * :c:data:`do_mo_cholesky`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`gen_v_space`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`do_mo_cholesky`
 

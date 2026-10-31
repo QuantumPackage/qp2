@@ -291,6 +291,8 @@ Providers
         double precision, allocatable	:: fock_matrix_diag_mo	(mo_num)
 
 
+    Diagonal of the Fock matrix on the MO basis: element i
+    (1 <= i <= mo_num) is Fock_matrix_mo(i,i).
 
     Needs:
 
@@ -582,7 +584,6 @@ Providers
        * :c:data:`ao_two_e_integral_alpha_chol`
        * :c:data:`hf_energy`
        * :c:data:`hf_kinetic_energy`
-       * :c:data:`mcscf_fock_alpha_ao`
        * :c:data:`scf_density_matrix_ao`
        * :c:data:`scf_energy`
 
@@ -620,7 +621,6 @@ Providers
        * :c:data:`ao_two_e_integral_alpha_chol`
        * :c:data:`hf_energy`
        * :c:data:`hf_kinetic_energy`
-       * :c:data:`mcscf_fock_alpha_ao`
        * :c:data:`scf_density_matrix_ao`
        * :c:data:`scf_energy`
 
@@ -688,6 +688,16 @@ Subroutines / functions
         subroutine damping_SCF
 
 
+    Damped SCF iterations on the restricted alpha and beta density
+    matrices. Each step mixes the old and new densities with a
+    lambda from a line search: it starts at 0.5 and is halved
+    while the trial energy is above the current one; it is then
+    set from a quadratic fit of the trial energies. Stops when
+    the energy has decreased by less than thresh_scf or after
+    n_it_scf_max steps; on exit the lowest energy is stored in
+    the EZFIO database.
+    No in-tree caller; dead code (author, 2026-10-31); kept
+    because external plugins may use it.
 
     Needs:
 

@@ -9,6 +9,12 @@ debug_gradient_opt
  
  
  
+ Debug program for the orbital gradient, for all mo_num orbitals 
+ (n = mo_num*(mo_num-1)/2 rotation pairs). Compares the gradient 
+ of the energy with respect to orbital rotations computed by the 
+ current implementation (gradient_opt) with the original one 
+ (first_gradient_opt), and lists the elements whose difference 
+ exceeds the 1d-12 threshold. 
  
  Needs: 
  

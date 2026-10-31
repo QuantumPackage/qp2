@@ -206,6 +206,8 @@ Providers
         double precision, allocatable	:: one_e_dm_average_alpha_mo_for_dft	(mo_num,mo_num)
 
 
+    alpha density matrix in the MO basis used for DFT calculations, averaged
+    over the states with weights state_average_weight
 
     Needs:
 
@@ -235,6 +237,8 @@ Providers
         double precision, allocatable	:: one_e_dm_average_beta_mo_for_dft	(mo_num,mo_num)
 
 
+    beta density matrix in the MO basis used for DFT calculations, averaged
+    over the states with weights state_average_weight
 
     Needs:
 
@@ -264,6 +268,8 @@ Providers
         double precision, allocatable	:: one_e_dm_average_mo_for_dft	(mo_num,mo_num)
 
 
+    density matrix in the MO basis used for DFT calculations, averaged over
+    the states and summed over the alpha and beta spin components
 
     Needs:
 
@@ -499,6 +505,8 @@ Providers
         double precision, allocatable	:: one_e_dm_mo_for_dft	(mo_num,mo_num,N_states)
 
 
+    total density matrix in the MO basis used for DFT calculations, the sum
+    of the alpha and beta spin components
 
     Needs:
 

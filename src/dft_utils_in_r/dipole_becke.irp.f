@@ -2,6 +2,13 @@
 &BEGIN_PROVIDER [ double precision, mo_dipole_y_becke, (mo_num,mo_num)]
 &BEGIN_PROVIDER [ double precision, mo_dipole_z_becke, (mo_num,mo_num)]
  implicit none
+ BEGIN_DOC
+ ! mo_dipole_x_becke(i,j) = the x-component of the MO dipole matrix
+ ! element between MO i and MO j, evaluated by quadrature on the
+ ! Becke grid as sum over grid points of x * weight * MO_i * MO_j
+ !
+ ! mo_dipole_y_becke and mo_dipole_z_becke are the y and z components
+ END_DOC
  integer :: i,j,ipoint
  double precision :: r(3), weight
  mo_dipole_x_becke=0.d0

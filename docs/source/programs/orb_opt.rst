@@ -9,6 +9,11 @@ orb_opt
  
  
  
+ Orbital optimization for a fixed number of determinants: applies 
+ orbital rotations to the active orbitals (trust region algorithm 
+ in run_orb_opt_trust_v2) to lower the energy of the CI wave 
+ function, while the number of determinants is kept fixed. Sets 
+ read_wf so that the wave function is read from the EZFIO file. 
  
  Needs: 
  

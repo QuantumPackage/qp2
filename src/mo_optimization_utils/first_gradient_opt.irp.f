@@ -13,6 +13,13 @@ subroutine first_gradient_opt(n,v_grad)
   ! Check if read_wf = true, else :
   ! qp set determinant read_wf true
 
+  BEGIN_DOC
+  ! Gradient of the energy with respect to orbital rotations, for
+  ! all mo_num orbitals.
+  ! Original implementation; the debug program debug_gradient_opt
+  ! compares it with gradient_opt.
+  ! n is mo_num*(mo_num-1)/2 and v_grad(k) is the element for the
+  ! pair (p,q) given by vec_to_mat_index(k,p,q).
   END_DOC
 
   ! in

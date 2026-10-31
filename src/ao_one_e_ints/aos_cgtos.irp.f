@@ -6,6 +6,13 @@
 &BEGIN_PROVIDER [double precision, ao_overlap_cgtos_z, (ao_num, ao_num)]
 
   implicit none
+  BEGIN_DOC
+  ! Overlap integrals in the cgtos |AO| basis, evaluated on the fly by
+  ! the CGCOS scheme (primitive data in ao_expo_cgtos_ord).
+  ! $ao\_overlap\_cgtos(i,j) = \int \chi_i(r) \chi_j(r) dr$; the
+  ! _x/_y/_z arrays hold the x/y/z factors of the separated overlap,
+  ! copied to ao_overlap_x/_y/_z by the ao_overlap provider.
+  END_DOC
 
   integer          :: i, j, m, n, l, ii, jj, dim1, power_A(3), power_B(3)
   double precision :: c, overlap, overlap_x, overlap_y, overlap_z

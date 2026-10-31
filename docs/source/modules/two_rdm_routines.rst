@@ -24,6 +24,11 @@ Subroutines / functions
         logical function is_integer_in_string_local(orb,bitmask,Nint)
 
 
+    Returns .true. if the bit of orbital orb (1-based) is
+    set in bitmask(Nint). Each bitmask word is an
+    integer(bit_kind) holding bit_kind_size (64) orbitals.
+    Callers use it to test whether an orbital index belongs
+    to the orbital range represented by the bitmask.
 
  
 .. c:function:: void orb_range_2_rdm_openmp(void)
@@ -119,7 +124,7 @@ Subroutines / functions
 .. c:function:: void orb_range_2_rdm_openmp_work_1(void)
 
 
-    File : :file:`two_rdm_routines/davidson_like_2rdm.irp.f_template_572`
+    File : :file:`two_rdm_routines/davidson_like_2rdm.irp.f_template_586`
 
     .. code:: fortran
 
@@ -152,6 +157,7 @@ Subroutines / functions
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_beta_unique`
+       * :c:data:`qp_max_mem`
 
     Called by:
 
@@ -176,13 +182,14 @@ Subroutines / functions
        * :c:func:`orb_range_off_diag_single_to_all_states_aa_dm_buffer`
        * :c:func:`orb_range_off_diag_single_to_all_states_ab_dm_buffer`
        * :c:func:`orb_range_off_diag_single_to_all_states_bb_dm_buffer`
+       * :c:func:`resident_memory`
        * :c:func:`update_keys_values_n_states_local`
 
  
 .. c:function:: void orb_range_2_rdm_openmp_work_2(void)
 
 
-    File : :file:`two_rdm_routines/davidson_like_2rdm.irp.f_template_572`
+    File : :file:`two_rdm_routines/davidson_like_2rdm.irp.f_template_586`
 
     .. code:: fortran
 
@@ -215,6 +222,7 @@ Subroutines / functions
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_beta_unique`
+       * :c:data:`qp_max_mem`
 
     Called by:
 
@@ -239,13 +247,14 @@ Subroutines / functions
        * :c:func:`orb_range_off_diag_single_to_all_states_aa_dm_buffer`
        * :c:func:`orb_range_off_diag_single_to_all_states_ab_dm_buffer`
        * :c:func:`orb_range_off_diag_single_to_all_states_bb_dm_buffer`
+       * :c:func:`resident_memory`
        * :c:func:`update_keys_values_n_states_local`
 
  
 .. c:function:: void orb_range_2_rdm_openmp_work_3(void)
 
 
-    File : :file:`two_rdm_routines/davidson_like_2rdm.irp.f_template_572`
+    File : :file:`two_rdm_routines/davidson_like_2rdm.irp.f_template_586`
 
     .. code:: fortran
 
@@ -278,6 +287,7 @@ Subroutines / functions
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_beta_unique`
+       * :c:data:`qp_max_mem`
 
     Called by:
 
@@ -302,13 +312,14 @@ Subroutines / functions
        * :c:func:`orb_range_off_diag_single_to_all_states_aa_dm_buffer`
        * :c:func:`orb_range_off_diag_single_to_all_states_ab_dm_buffer`
        * :c:func:`orb_range_off_diag_single_to_all_states_bb_dm_buffer`
+       * :c:func:`resident_memory`
        * :c:func:`update_keys_values_n_states_local`
 
  
 .. c:function:: void orb_range_2_rdm_openmp_work_4(void)
 
 
-    File : :file:`two_rdm_routines/davidson_like_2rdm.irp.f_template_572`
+    File : :file:`two_rdm_routines/davidson_like_2rdm.irp.f_template_586`
 
     .. code:: fortran
 
@@ -341,6 +352,7 @@ Subroutines / functions
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_beta_unique`
+       * :c:data:`qp_max_mem`
 
     Called by:
 
@@ -365,13 +377,14 @@ Subroutines / functions
        * :c:func:`orb_range_off_diag_single_to_all_states_aa_dm_buffer`
        * :c:func:`orb_range_off_diag_single_to_all_states_ab_dm_buffer`
        * :c:func:`orb_range_off_diag_single_to_all_states_bb_dm_buffer`
+       * :c:func:`resident_memory`
        * :c:func:`update_keys_values_n_states_local`
 
  
 .. c:function:: void orb_range_2_rdm_openmp_work_n_int(void)
 
 
-    File : :file:`two_rdm_routines/davidson_like_2rdm.irp.f_template_572`
+    File : :file:`two_rdm_routines/davidson_like_2rdm.irp.f_template_586`
 
     .. code:: fortran
 
@@ -404,6 +417,7 @@ Subroutines / functions
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_beta_unique`
+       * :c:data:`qp_max_mem`
 
     Called by:
 
@@ -428,6 +442,7 @@ Subroutines / functions
        * :c:func:`orb_range_off_diag_single_to_all_states_aa_dm_buffer`
        * :c:func:`orb_range_off_diag_single_to_all_states_ab_dm_buffer`
        * :c:func:`orb_range_off_diag_single_to_all_states_bb_dm_buffer`
+       * :c:func:`resident_memory`
        * :c:func:`update_keys_values_n_states_local`
 
  
@@ -2415,6 +2430,10 @@ Subroutines / functions
         subroutine update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
 
 
+    Adds the buffered contributions to the two-rdm big_array:
+    keys(1:4,i) gives the orbital indices (h1,h2,p1,p2) of
+    the element, values(i) is added to big_array(h1,h2,p1,p2).
+    The updates are protected by the OpenMP lock lock_2rdm.
 
     Called by:
 
@@ -2446,6 +2465,13 @@ Subroutines / functions
         subroutine update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
 
 
+    Adds the buffered contributions to the two-rdm big_array
+    for all n_st states: keys(1:4,i) gives the orbital
+    indices (h1,h2,p1,p2) of the element, values(istate,i) is
+    added to big_array(h1,h2,p1,p2,istate) under lock_2rdm.
+    Every call site in this file is commented out and the
+    routine is superseded by update_keys_values_n_states_local
+    (author-confirmed 2026-10-31).
 
     Calls:
 
@@ -2467,6 +2493,12 @@ Subroutines / functions
         subroutine update_keys_values_n_states_local(keys,values,nkeys,dim1,n_st,big_array_local)
 
 
+    Adds the buffered contributions to the thread-private
+    two-rdm big_array_local: keys(1:4,i) gives the orbital
+    indices (h1,h2,p1,p2) of the element, values(istate,i)
+    is added to big_array_local(istate,h1,h2,p1,p2) for all
+    n_st states. No lock: the caller allocates one
+    big_array_local per OpenMP thread and merges them.
 
     Called by:
 
@@ -2490,6 +2522,12 @@ Subroutines / functions
         subroutine update_keys_values_n_states_trans(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
 
 
+    Adds the buffered contributions to the transition
+    two-rdm big_array: keys(1:4,i) gives the orbital
+    indices (h1,h2,p1,p2) of the element, and
+    values(istate,jstate,i) is added to
+    big_array(h1,h2,p1,p2,istate,jstate) for all pairs of
+    states, under the OpenMP lock lock_2rdm.
 
     Called by:
 

@@ -156,6 +156,12 @@ Subroutines / functions
         subroutine export_trexio_subroutine(update,full_path)
 
 
+    Writes the wave function and, per the export_*
+    providers, the basis, MOs, integrals and density
+    matrices to one TREXIO file per state, the first
+    named by trexio_filename. With update, existing
+    files are opened for update instead of rewritten;
+    full_path makes the path absolute.
 
     Needs:
 
@@ -163,7 +169,11 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`all_mo_integrals`
+       * :c:data:`ao_coef`
+       * :c:data:`ao_coef_norm_cgtos`
        * :c:data:`ao_coef_normalized`
+       * :c:data:`ao_expo_im`
+       * :c:data:`ao_expo_phase`
        * :c:data:`ao_first_of_shell`
        * :c:data:`ao_integrals_map`
        * :c:data:`ao_integrals_n_e`
@@ -247,6 +257,8 @@ Subroutines / functions
        * :c:data:`slater_r_power`
        * :c:data:`trexio_filename`
        * :c:data:`two_e_dm_mo`
+       * :c:data:`use_cgtos`
+       * :c:data:`use_pw`
 
     Called by:
 

@@ -5,6 +5,14 @@ use bitmasks
 subroutine alpha_callback(delta_ij_loc, i_generator, subset, csubset, iproc)
   use bitmasks
   implicit none
+  BEGIN_DOC
+! Adds the contribution of generator i_generator to the
+! local buffer delta_ij_loc (N_states, N_det, 2) by
+! calling generate_singles_and_doubles. The work is split
+! over the slave threads: only fragments k with
+! mod(k, csubset) == subset-1 are handled; iproc is the
+! OpenMP thread number.
+  END_DOC
   integer, intent(in)            :: i_generator, subset, csubset
   double precision,intent(inout) :: delta_ij_loc(N_states,N_det,2)
   integer, intent(in)            :: iproc
@@ -20,6 +28,13 @@ end subroutine
 
 BEGIN_PROVIDER [ integer, psi_from_sorted_gen, (N_det) ]
   implicit none
+  BEGIN_DOC
+! Inverse of psi_det_sorted_gen_order:
+! psi_from_sorted_gen(j) is the index i such that
+! psi_det_sorted_gen_order(i) == j. Both indices run from
+! 1 to N_det. Stops if psi_det_sorted_gen_order(i) is
+! not positive.
+  END_DOC
   integer :: i,inpsisor
 
   psi_from_sorted_gen = 0
@@ -366,6 +381,14 @@ end subroutine
 subroutine alpha_callback_mask(delta_ij_loc, i_gen, sp, mask, bannedOrb, banned, indexes, indexes_end, rabuf, siz, iproc)
   use bitmasks
   implicit none
+  BEGIN_DOC
+! Applies the excitation operator of the hole mask (two
+! holes; spin combination sp: 1 alpha, 2 beta, 3
+! alpha+beta) to the partners, updating delta_ij_loc via
+! dress_with_alpha_buffer. Partner indices are converted
+! with psi_from_sorted_gen and the per-orbital lists
+! merged into sorted lists, skipping banned entries.
+  END_DOC
 
   double precision,intent(inout) :: delta_ij_loc(N_states,N_det,2)
   integer, intent(in) :: sp, indexes(0:mo_num, 0:mo_num), siz, iproc, i_gen
@@ -495,6 +518,14 @@ end subroutine
 subroutine create_indexes(countedGlob, countedOrb, counted, indexes, siz)
   use bitmasks
   implicit none
+  BEGIN_DOC
+! Converts the per-group partner counts of count_pq into
+! starting offsets for the flat buffer: indexes(0,0) from
+! countedGlob, indexes(1:,0) and indexes(0,1:) from
+! countedOrb(:,1) and countedOrb(:,2), indexes(1:,1:)
+! from counted; siz is the total number of buffer
+! entries.
+  END_DOC
 
   integer, intent(in) :: countedGlob, countedOrb(mo_num,2), counted(mo_num, mo_num)
   integer, intent(out) :: indexes(0:mo_num, 0:mo_num), siz
@@ -523,6 +554,14 @@ end subroutine
 subroutine count_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, countedGlob, countedOrb, counted, interesting)
   use bitmasks
   implicit none
+  BEGIN_DOC
+! Fills the per-group partner counts countedGlob,
+! countedOrb and counted for the hole mask: each
+! interesting determinant moving at most 4 electrons is
+! counted with count_d2 (4 electrons outside the mask),
+! count_d1 (3) or countedGlob (fewer); determinants with
+! index lower than i_gen only update the ban arrays.
+  END_DOC
 
   integer, intent(in)            :: sp, i_gen, N_sel
   integer, intent(in)            :: interesting(0:N_sel)
@@ -623,6 +662,7 @@ subroutine count_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, countedGlob,
     end if
   end do
 
+  ! Zero the counts of banned orbitals and pairs.
   do i=1,mo_num
     if(bannedOrb(i,1)) countedOrb(i,1) = 0
     if(bannedOrb(i,2)) countedOrb(i,2) = 0
@@ -631,6 +671,7 @@ subroutine count_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, countedGlob,
     end do
   end do
 
+  ! Zero the counts of the other spin when sp is 1 or 2.
   if(sp /= 3) then
     countedOrb(:, mod(sp, 2)+1) = 0
   end if
@@ -641,6 +682,14 @@ end
 subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, indexes, abuf, interesting)
   use bitmasks
   implicit none
+  BEGIN_DOC
+! Fills the flat buffer abuf (sized by create_indexes)
+! with partner determinant indices, using the offsets in
+! indexes: for each interesting partner with index at
+! least i_gen moving at most 4 electrons, the index is
+! stored in the (0,0) group, or in a single-orbital group
+! via get_d1, or in an orbital-pair group via get_d2.
+  END_DOC
 
   integer, intent(in)            :: sp, i_gen, N_sel
   integer, intent(in)            :: interesting(0:N_sel)
@@ -711,6 +760,14 @@ end subroutine
 subroutine get_d2(i_gen, gen, banned, bannedOrb, indexes, abuf, mask, h, p, sp)
   use bitmasks
   implicit none
+  BEGIN_DOC
+! For each non-banned pair of movable orbitals (puti,putj)
+! considered for the given sp, stores the partner index
+! (argument i_gen, orbital list p, 4 movable electrons)
+! in the corresponding group of indexes/abuf. Only the
+! index is stored; the matrix element calls
+! (mo_two_e_integral, get_phase_bi) are commented out.
+  END_DOC
 
   integer(bit_kind), intent(in) :: mask(N_int, 2), gen(N_int, 2)
   integer, intent(inout) :: abuf(*)
@@ -740,6 +797,7 @@ subroutine get_d2(i_gen, gen, banned, bannedOrb, indexes, abuf, mask, h, p, sp)
   if(p(0,1) > p(0,2)) ma = 1
   if(p(0,1) < p(0,2)) ma = 2
   mi = mod(ma, 2) + 1
+  ! ma: spin with more movable electrons (sp when equal); mi: the other.
 
   if(sp == 3) then
     if(ma == 2) bant = 2
@@ -839,6 +897,14 @@ end
 subroutine get_d1(i_gen, gen, banned, bannedOrb, indexes, abuf, mask, h, p, sp)
   use bitmasks
   implicit none
+  BEGIN_DOC
+! For each non-banned orbital (puti or putj) considered
+! for the given sp, stores the partner index (argument
+! i_gen, orbital list p, 3 movable electrons) in the
+! corresponding single-orbital group indexes(0,*) or
+! indexes(*,0) of abuf. Only the index is stored; the
+! matrix element calls are commented out.
+  END_DOC
 
   integer(bit_kind), intent(in)  :: mask(N_int, 2), gen(N_int, 2)
   integer, intent(inout)         :: abuf(*)
@@ -876,6 +942,7 @@ subroutine get_d1(i_gen, gen, banned, bannedOrb, indexes, abuf, mask, h, p, sp)
   ma = 1
   if(p(0,2) >= 2) ma = 2
   mi = turn2(ma)
+  ! ma: spin holding at least 2 of the 3 movable electrons; mi: the other.
 
   bant = 1
 
@@ -1052,6 +1119,10 @@ end
 subroutine past_d1(bannedOrb, p)
   use bitmasks
   implicit none
+  BEGIN_DOC
+! Sets bannedOrb(p(i,s),s) to .true. for the p(0,s)
+! orbital indices of spin s listed in p (s = 1, 2).
+  END_DOC
 
   logical, intent(inout) :: bannedOrb(mo_num, 2)
   integer, intent(in) :: p(0:4, 2)
@@ -1068,6 +1139,12 @@ end
 subroutine past_d2(banned, p, sp)
   use bitmasks
   implicit none
+  BEGIN_DOC
+! Sets the banned orbital pairs among the movable orbitals
+! of p: for sp == 3, all alpha x beta combinations;
+! otherwise, all unordered pairs within spin sp (both
+! directions set).
+  END_DOC
 
   logical, intent(inout) :: banned(mo_num, mo_num)
   integer, intent(in) :: p(0:4, 2), sp
@@ -1093,6 +1170,10 @@ end
 subroutine count_d1(countedOrb, p)
   use bitmasks
   implicit none
+  BEGIN_DOC
+! Increments countedOrb(p(i,s),s) for the p(0,s) orbital
+! indices of spin s listed in p (s = 1, 2).
+  END_DOC
 
   integer, intent(inout) :: countedOrb(mo_num, 2)
   integer, intent(in) :: p(0:4, 2)
@@ -1109,6 +1190,11 @@ end
 subroutine count_d2(counted, p, sp)
   use bitmasks
   implicit none
+  BEGIN_DOC
+! Increments counted(p(i,1),p(j,2)) for all alpha/beta
+! combinations of the orbital lists of p when sp == 3,
+! or counted(p(j,sp),p(i,sp)) for pairs in spin sp.
+  END_DOC
 
   integer, intent(inout) :: counted(mo_num, mo_num)
   integer, intent(in) :: p(0:4, 2), sp
@@ -1134,6 +1220,14 @@ end
 subroutine spot_isinwf(mask, det, i_gen, N, banned, fullMatch, interesting)
   use bitmasks
   implicit none
+  BEGIN_DOC
+! Scans the interesting determinants for the hole mask: if a
+! determinant fully contains the mask and has index lower
+! than i_gen, sets fullMatch to .true. and returns;
+! otherwise, for each such determinant, marks as banned the
+! pair of orbitals (first of each spin) in which the
+! determinant lies outside the mask.
+  END_DOC
 
   integer, intent(in) :: i_gen, N
   integer, intent(in) :: interesting(0:N)

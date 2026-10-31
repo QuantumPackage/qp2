@@ -116,6 +116,12 @@ end
 
  BEGIN_PROVIDER [ double precision, average_on_top, (n_states)]
  implicit none
+ BEGIN_DOC
+ ! For each state istate, the weighted sum of
+ ! total_cas_on_top_density (the on-top pair density n2(r,r))
+ ! over the Becke grid, with weights final_weight_at_r_vector.
+ ! Printed as "Average on top pair density".
+ END_DOC
  integer :: i_point,istate
  double precision :: wall_0,wall_1,core_inact_dm,pure_act_on_top_of_r,weight
  average_on_top = 0.d0

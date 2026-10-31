@@ -78,6 +78,14 @@
 
 
 subroutine gradient_opt(n,v_grad,max_elem)
+  BEGIN_DOC
+  ! Gradient of the energy with respect to orbital rotations, for
+  ! all mo_num orbitals.
+  ! n is mo_num*(mo_num-1)/2 and v_grad(k) is the element for the
+  ! pair (p,q) given by vec_to_mat_index(k,p,q).
+  ! max_elem is the element of v_grad with the largest absolute
+  ! value (its sign is kept).
+  END_DOC
   use omp_lib
   include 'constants.h'
 

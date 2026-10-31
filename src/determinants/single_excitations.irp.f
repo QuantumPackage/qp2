@@ -1,6 +1,13 @@
   use bitmasks
 BEGIN_PROVIDER [integer(bit_kind), ref_closed_shell_bitmask, (N_int,2)]
  implicit none
+  BEGIN_DOC
+  ! Bitmask of the closed-shell part of the reference: a copy
+  ! of ref_bitmask in which the alpha orbitals numbered
+  ! elec_beta_num+1 to elec_alpha_num in the sorted alpha
+  ! list are cleared.
+  ! For a closed-shell reference it is equal to ref_bitmask.
+  END_DOC
  integer :: i,i0
  integer :: n_occ_ab(2)
  integer :: occ(N_int*bit_kind_size,2)
@@ -21,6 +28,14 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, fock_operator_closed_shell_ref_bitmask, (mo_num, mo_num) ]
  implicit none
+  BEGIN_DOC
+  ! Fock matrix of the closed-shell reference, for orbitals
+  ! i and j in the union of the occupied and virtual orbitals:
+  ! the two-electron part (see fock_wee_closed_shell) plus
+  ! the one-electron integrals mo_one_e_integrals(i,j).
+  ! Only the alpha orbitals are used to build the occupied
+  ! and virtual lists, as the reference is closed-shell.
+  END_DOC
  integer :: i0,j0,i,j,k0,k
  integer :: n_occ_ab(2)
  integer :: occ(N_int*bit_kind_size,2)
@@ -88,6 +103,25 @@ END_PROVIDER
 subroutine get_single_excitation_from_fock(det_1,det_2,h,p,spin,phase,hij)
  use bitmasks
  implicit none
+  BEGIN_DOC
+  ! For a determinant det_1 that differs from the closed-shell
+  ! reference (ref_closed_shell_bitmask), computes the
+  ! Hamiltonian matrix element <det_1|H|det_2>, where det_2
+  ! is the single excitation (h, p) of spin `spin` from det_1:
+  ! hij = fock_operator_closed_shell_ref_bitmask(h, p)
+  !       - Coulomb integrals of the holes
+  !       + exchange integrals of the same-spin holes
+  !       + Coulomb integrals of the particles
+  !       - exchange integrals of the same-spin particles,
+  ! times phase.
+  ! Holes are the spin orbitals occupied in the reference but
+  ! not in det_1, particles the opposite. det_2 is a single
+  ! excitation from det_1 (cf. its use in i_H_j_s2); it is not
+  ! used because the hole and particle are already given as
+  ! parameters (author-corrected 2026-10-31).
+  ! The (h, p) Coulomb and exchange integrals are preloaded
+  ! in local buffers.
+  END_DOC
  integer,intent(in) :: h,p,spin
  double precision, intent(in)  :: phase
  integer(bit_kind), intent(in) :: det_1(N_int,2), det_2(N_int,2)

@@ -159,6 +159,10 @@ Providers
         integer	:: max_exc_pert	
 
 
+    Constant integer provider, currently fixed to 0.
+    No code in the tree currently reads it.
+    No in-tree caller; probably unused (author, 2026-10-31); kept
+    because external plugins may use it.
 
 
  

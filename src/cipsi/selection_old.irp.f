@@ -5,6 +5,11 @@
 subroutine get_d0_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
   use bitmasks
   implicit none
+  BEGIN_DOC
+  ! Unoptimized reference version of get_d0, kept for
+  ! debugging: same contribution to mat(k, r, s), with
+  ! mo_two_e_integral called directly for every (r, s).
+  END_DOC
 
   integer(bit_kind), intent(in) :: gen(N_int, 2), mask(N_int, 2)
   integer(bit_kind), intent(in) :: phasemask(N_int,2)
@@ -65,6 +70,11 @@ end
 subroutine get_d1_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
   use bitmasks
   implicit none
+  BEGIN_DOC
+  ! Unoptimized reference version of get_d1, kept for
+  ! debugging: same contribution to mat(k, r, s), with
+  ! mo_two_e_integral called directly for every (r, s).
+  END_DOC
 
   integer(bit_kind), intent(in)  :: mask(N_int, 2), gen(N_int, 2)
   integer(bit_kind), intent(in)  :: phasemask(N_int,2)
@@ -234,6 +244,13 @@ end
 subroutine get_d2_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
   use bitmasks
   implicit none
+  BEGIN_DOC
+  ! Unoptimized reference version of get_d2, kept for
+  ! debugging: same contribution to mat(k, r, s), with
+  ! mo_two_e_integral called directly for every (r, s).
+  ! phasemask is declared (2, N_int) here, but should be
+  ! (N_int, 2) as in get_d2 - bug (author-confirmed 2026-10-31).
+  END_DOC
 
   integer(bit_kind), intent(in) :: mask(N_int, 2), gen(N_int, 2)
   integer(bit_kind), intent(in) :: phasemask(2,N_int)

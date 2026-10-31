@@ -13,6 +13,12 @@ end
 
 subroutine routine
  implicit none
+ BEGIN_DOC
+ ! Truncates the sorted wave function to the number of determinants
+ ! read from standard input, renormalizes the coefficients of each
+ ! state, and saves the result with save_wavefunction_general.
+ ! Called by the program when s2_eig is false.
+ END_DOC
  integer :: ndet_max
  print*, 'Max number of determinants ?'
  read(5,*) ndet_max
@@ -48,6 +54,14 @@ end
 
 subroutine routine_s2
  implicit none
+ BEGIN_DOC
+ ! Prints the configuration weights of the stored wave function,
+ ! reads a minimum weight from standard input, and keeps the
+ ! determinants whose configuration weight (maximal over the states)
+ ! is not below that minimum. Renormalizes each state and saves the
+ ! truncated wave function with save_wavefunction_general. Called
+ ! by the program when s2_eig is true.
+ END_DOC
  integer :: ndet_max
  double precision :: wmin
  integer(bit_kind), allocatable :: psi_det_tmp(:,:,:)

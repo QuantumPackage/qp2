@@ -1,5 +1,9 @@
 subroutine save_mos
   implicit none
+  BEGIN_DOC
+  ! Write the current MO basis to the EZFIO database: mo_num,
+  ! mo_label, ao_md5, mo_coef, mo_occ and mo_class.
+  END_DOC
   double precision, allocatable  :: buffer(:,:)
   integer                        :: i,j
 
@@ -23,6 +27,11 @@ end
 
 subroutine save_mos_no_occ
   implicit none
+  BEGIN_DOC
+  ! Write only mo_coef to the EZFIO database. mo_num, mo_label,
+  ! ao_md5, mo_occ and mo_class are not written (the
+  ! corresponding set calls are commented out).
+  END_DOC
   double precision, allocatable  :: buffer(:,:)
   integer                        :: i,j
 
@@ -44,6 +53,14 @@ end
 
 subroutine save_mos_truncated(n)
   implicit none
+  BEGIN_DOC
+  ! Write the first n MOs to the EZFIO database: mo_num is set
+  ! to n, and mo_label, ao_md5, mo_occ, mo_class and the first
+  ! n columns of mo_coef are stored.
+  ! mo_occ and mo_class are providers of the full mo_num size and
+  ! are written with that full size even when n < mo_num; this is
+  ! intended and does not matter (author, 2026-10-31).
+  END_DOC
   double precision, allocatable  :: buffer(:,:)
   integer                        :: i,j,n
 
@@ -68,6 +85,16 @@ end
 
 subroutine mo_as_eigvectors_of_mo_matrix(matrix,n,m,label,sign,output)
   implicit none
+  BEGIN_DOC
+  ! Set the MOs to the eigenvectors of matrix in the current MO
+  ! basis (mo_coef = mo_coef * eigvectors, via lapack_diag);
+  ! mo_label is set to label. m must equal mo_num. If
+  ! sign == -1, -matrix is diagonalized and the printed
+  ! eigenvalues are negated back; if output, they are printed.
+  ! The sign argument exists because diagonalization sorts the
+  ! eigenvalues; changing the sign is a trick to reverse the
+  ! sorting order when needed (author, 2026-10-31).
+  END_DOC
   integer,intent(in)             :: n,m, sign
   character*(64), intent(in)     :: label
   double precision, intent(in)   :: matrix(n,m)
@@ -129,6 +156,14 @@ end
 
 subroutine mo_as_svd_vectors_of_mo_matrix(matrix,lda,m,n,label)
   implicit none
+  BEGIN_DOC
+  ! Set the MOs to the left singular vectors of matrix in the
+  ! current MO basis: mo_coef is replaced by mo_coef times U,
+  ! U being the left singular vector matrix of matrix (svd,
+  ! LAPACK dgesdd). m must equal mo_num. A table of the
+  ! singular values and their cumulative sum is printed on
+  ! unit 6. mo_label is set to label.
+  END_DOC
   integer,intent(in)             :: lda,m,n
   character*(64), intent(in)     :: label
   double precision, intent(in)   :: matrix(lda,n)
@@ -181,6 +216,13 @@ end
 
 subroutine mo_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,eig,label)
   implicit none
+  BEGIN_DOC
+  ! Same as mo_as_svd_vectors_of_mo_matrix, plus eig(i)
+  ! receives the i-th singular value of matrix; singular
+  ! values at or below 1.d-20 are written as 0.d0.
+  ! 1.d-20 is a threshold for numerical noise (author-confirmed
+  ! 2026-10-31).
+  END_DOC
   integer,intent(in)             :: lda,m,n
   character*(64), intent(in)     :: label
   double precision, intent(in)   :: matrix(lda,n)

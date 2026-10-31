@@ -381,6 +381,8 @@ Subroutines / functions
         function factorial(n)
 
 
+    Compute the factorial n! of the integer n as the product
+    of the integers from 1 to n (0! is 1).
 
  
 .. c:function:: void mat_to_vec_index(void)
@@ -393,6 +395,10 @@ Subroutines / functions
         subroutine mat_to_vec_index(p,q,i)
 
 
+    Compute the index i of the element of the vector that
+    corresponds to the element (p,q) of the lower diagonal of
+    an antisymmetric matrix, where p is the row index, q the
+    column index (p > q), as i = q + (p-1)*(p-2)/2.
 
     Called by:
 
@@ -441,6 +447,12 @@ Subroutines / functions
         subroutine rotation_matrix_iterative(m,X,R)
 
 
+    Compute R as the power series R = sum_k X^k / k! (the
+    matrix exponential of X), the series being summed until
+    all the entries of R R^T - I are below 1d-12 in absolute
+    value, or until 1/k! is below 1d-15.
+    The subroutine is not functional: it ends with a message
+    and a call to abort.
 
     Calls:
 

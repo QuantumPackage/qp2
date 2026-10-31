@@ -1,4 +1,9 @@
 logical function is_the_hole_in_det(key_in,ispin,i_hole)
+ BEGIN_DOC
+ ! Returns .True. if the bit of orbital i_hole is not set in
+ ! key_in(:,ispin), i.e. if i_hole is unoccupied for spin ispin
+ ! (1: alpha, 2: beta) in the determinant key_in.
+ END_DOC
   use bitmasks
   ! returns true if the electron ispin is absent from i_hole
  implicit none
@@ -10,6 +15,7 @@ logical function is_the_hole_in_det(key_in,ispin,i_hole)
  do i = 1, N_int
   itest(i) = 0_bit_kind
  enddo
+ ! k and j are the block and the bit position of orbital i_hole
  k = shiftr(i_hole-1,bit_kind_shift)+1
  j = i_hole-shiftl(k-1,bit_kind_shift)-1
  itest(k) = ibset(itest(k),j)
@@ -27,6 +33,11 @@ logical function is_the_hole_in_det(key_in,ispin,i_hole)
 end
 
 logical function is_the_particl_in_det(key_in,ispin,i_particl)
+ BEGIN_DOC
+ ! Returns .True. if the bit of orbital i_particl is set in
+ ! key_in(:,ispin), i.e. if i_particl is occupied for spin ispin
+ ! (1: alpha, 2: beta) in the determinant key_in.
+ END_DOC
   use bitmasks
   ! returns true if the electron ispin is absent from i_particl
  implicit none
@@ -38,6 +49,7 @@ logical function is_the_particl_in_det(key_in,ispin,i_particl)
  do i = 1, N_int
   itest(i) = 0_bit_kind
  enddo
+ ! k and j are the block and the bit position of orbital i_particl
  k = shiftr(i_particl-1,bit_kind_shift)+1
  j = i_particl-shiftl(k-1,bit_kind_shift)-1
  itest(k) = ibset(itest(k),j)

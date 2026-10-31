@@ -12,6 +12,11 @@ END_PROVIDER
 &BEGIN_PROVIDER [integer, n_c_v_prov]
 &BEGIN_PROVIDER [integer, n_a_v_prov]
   implicit none
+  BEGIN_DOC
+  ! Numbers of the three classes of mono-excitations:
+  ! core/inactive to active (n_c_a_prov), core/inactive to virtual
+  ! (n_c_v_prov) and active to virtual (n_a_v_prov).
+  END_DOC
   n_c_a_prov = n_core_inact_orb * n_act_orb
   n_c_v_prov = n_core_inact_orb * n_virt_orb
   n_a_v_prov = n_act_orb * n_virt_orb

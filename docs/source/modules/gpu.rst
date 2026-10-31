@@ -14,9 +14,11 @@ architecture specific backend is selected by the LIB file of the
 tree and provides the CPU implementation of `simple_gpu`, used when
 no GPU is available.
 
-When a GPU is present (:c:data:`gpu_num` greater than 0), the provider
-:c:data:`blas_handle` creates the handle of the GPU BLAS library
-(cuBLAS or RocBLAS). :c:data:`gpu_default_stream` is the default
+The provider :c:data:`blas_handle` always creates a handle of the GPU
+BLAS library: cuBLAS or RocBLAS when a GPU is present (:c:data:`gpu_num`
+greater than 0), or the 1-byte CPU-emulation handle when no GPU is
+available, since the simple_gpu CPU backend fully emulates the GPU BLAS
+API on host memory. :c:data:`gpu_default_stream` is the default
 stream and :c:data:`gpu_mem` tracks the amount of GPU memory in use,
 released with :c:func:`gpu_free_memory`.
 
@@ -41,14 +43,9 @@ Providers
         type(gpu_blas)	:: blas_handle	
 
 
-    Handle for cuBLAS or RocBLAS
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`gpu_num`
+    Handle for cuBLAS/RocBLAS, or the 1-byte CPU-emulation handle when
+    gpu_num = 0 (the simple_gpu CPU backend fully emulates the GPU BLAS
+    API on host memory)
 
     Needed by:
 
@@ -88,10 +85,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`bielec_pqxx_array`
-       * :c:data:`bielec_pxxq_array`
        * :c:data:`big_array_coulomb_integrals`
-       * :c:data:`blas_handle`
        * :c:data:`cholesky_mo_transp`
        * :c:data:`cholesky_mo_transp_sp_d`
        * :c:data:`gpu_busy`
@@ -114,6 +108,14 @@ Providers
         integer	:: gpu_busy_max_dgemm	
 
 
+    Number of ongoing GPU operations, one entry per GPU,
+    indexed from 0 to gpu_num. gpu_set_busy and gpu_unset_busy
+    increment and decrement it (OpenMP atomic). Callers compare
+    it with the corresponding cap before a BLAS call. The caps
+    gpu_busy_max_ddot, gpu_busy_max_dgemv and gpu_busy_max_dgemm
+    are set when gpu_num > 0 to 0, 4 and nthreads_pt2/(gpu_num*2).
+    The three caps are set from empirical measurements
+    (author, 2026-10-31).
 
     Needs:
 
@@ -123,13 +125,6 @@ Providers
        * :c:data:`gpu_num`
        * :c:data:`nthreads_pt2`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`bielec_pqxx_array`
-       * :c:data:`bielec_pxxq_array`
 
  
 .. c:var:: int gpu_busy_max_ddot
@@ -145,6 +140,14 @@ Providers
         integer	:: gpu_busy_max_dgemm	
 
 
+    Number of ongoing GPU operations, one entry per GPU,
+    indexed from 0 to gpu_num. gpu_set_busy and gpu_unset_busy
+    increment and decrement it (OpenMP atomic). Callers compare
+    it with the corresponding cap before a BLAS call. The caps
+    gpu_busy_max_ddot, gpu_busy_max_dgemv and gpu_busy_max_dgemm
+    are set when gpu_num > 0 to 0, 4 and nthreads_pt2/(gpu_num*2).
+    The three caps are set from empirical measurements
+    (author, 2026-10-31).
 
     Needs:
 
@@ -154,13 +157,6 @@ Providers
        * :c:data:`gpu_num`
        * :c:data:`nthreads_pt2`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`bielec_pqxx_array`
-       * :c:data:`bielec_pxxq_array`
 
  
 .. c:var:: int gpu_busy_max_dgemm
@@ -176,6 +172,14 @@ Providers
         integer	:: gpu_busy_max_dgemm	
 
 
+    Number of ongoing GPU operations, one entry per GPU,
+    indexed from 0 to gpu_num. gpu_set_busy and gpu_unset_busy
+    increment and decrement it (OpenMP atomic). Callers compare
+    it with the corresponding cap before a BLAS call. The caps
+    gpu_busy_max_ddot, gpu_busy_max_dgemv and gpu_busy_max_dgemm
+    are set when gpu_num > 0 to 0, 4 and nthreads_pt2/(gpu_num*2).
+    The three caps are set from empirical measurements
+    (author, 2026-10-31).
 
     Needs:
 
@@ -185,13 +189,6 @@ Providers
        * :c:data:`gpu_num`
        * :c:data:`nthreads_pt2`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`bielec_pqxx_array`
-       * :c:data:`bielec_pxxq_array`
 
  
 .. c:var:: int gpu_busy_max_dgemv
@@ -207,6 +204,14 @@ Providers
         integer	:: gpu_busy_max_dgemm	
 
 
+    Number of ongoing GPU operations, one entry per GPU,
+    indexed from 0 to gpu_num. gpu_set_busy and gpu_unset_busy
+    increment and decrement it (OpenMP atomic). Callers compare
+    it with the corresponding cap before a BLAS call. The caps
+    gpu_busy_max_ddot, gpu_busy_max_dgemv and gpu_busy_max_dgemm
+    are set when gpu_num > 0 to 0, 4 and nthreads_pt2/(gpu_num*2).
+    The three caps are set from empirical measurements
+    (author, 2026-10-31).
 
     Needs:
 
@@ -216,13 +221,6 @@ Providers
        * :c:data:`gpu_num`
        * :c:data:`nthreads_pt2`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`bielec_pqxx_array`
-       * :c:data:`bielec_pxxq_array`
 
  
 .. c:var:: int gpu_default_stream
@@ -280,10 +278,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`bielec_pqxx_array`
-       * :c:data:`bielec_pxxq_array`
        * :c:data:`big_array_coulomb_integrals`
-       * :c:data:`blas_handle`
        * :c:data:`cholesky_mo_transp`
        * :c:data:`cholesky_mo_transp_sp_d`
        * :c:data:`gpu_busy`
@@ -320,10 +315,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`bielec_pqxx_array`
-       * :c:data:`bielec_pxxq_array`
        * :c:data:`big_array_coulomb_integrals`
-       * :c:data:`blas_handle`
        * :c:data:`cholesky_mo_transp`
        * :c:data:`cholesky_mo_transp_sp_d`
        * :c:data:`gpu_busy`

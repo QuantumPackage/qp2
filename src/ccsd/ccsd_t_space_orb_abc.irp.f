@@ -4,6 +4,15 @@ subroutine ccsd_par_t_space_v3(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
 
   implicit none
 
+  BEGIN_DOC
+  ! (T) correction to the CCSD energy (CCSD(T)), in spatial orbitals
+  ! (closed shell systems). Loops over the virtual triples: for each
+  ! a<b<c it calls ccsd_t_task_abc, and for each a<b it calls
+  ! ccsd_t_task_aba(a,b) and ccsd_t_task_aba(b,a) (two equal virtual
+  ! orbitals), OpenMP parallel over the triples. energy is the sum,
+  ! divided by 3.
+  END_DOC
+
   integer, intent(in)           :: nO,nV
   double precision, intent(in)  :: t1(nO,nV), f_o(nO), f_v(nV)
   double precision, intent(in)  :: t2(nO,nO,nV,nV)
@@ -233,6 +242,14 @@ subroutine form_w_abc(nO,nV,a,b,c,T_voov,T_oovv,X_vovv,X_ooov,W_abc,W_cba,W_bca,
 
   implicit none
 
+  BEGIN_DOC
+  ! Computes the six W(i,j,k) arrays, for the six virtual permutations
+  ! abc, cba, bca, cab, bac, acb, of one virtual triplet (a,b,c) of
+  ! the (T) correction, from the permuted T2 work arrays T_voov,
+  ! T_oovv and the integral work arrays X_vovv, X_ooov, using BLAS
+  ! dgemm.
+  END_DOC
+
   integer, intent(in)           :: nO,nV,a,b,c
   double precision, intent(in)  :: T_voov(nV,nO,nO,nV), T_oovv(nO,nO,nV,nV)
   double precision, intent(in)  :: X_vovv(nV,nO,nV,nV), X_ooov(nO,nO,nO,nV)
@@ -399,6 +416,15 @@ end
 subroutine form_v_abc(nO,nV,a,b,c,T_ov,X_oovv,W_abc,V_abc,W_cba,V_cba,W_bca,V_bca,W_cab,V_cab,W_bac,V_bac,W_acb,V_acb)
 
 implicit none
+
+  BEGIN_DOC
+  ! Computes the six V(i,j,k) arrays for the six virtual permutations
+  ! of one virtual triplet (a,b,c) of the (T) correction: each V is
+  ! the corresponding W plus three terms coupling T1 (T_ov) to the
+  ! vvoo integrals (X_oovv), e.g. V_abc(i,j,k) = W_abc(i,j,k) +
+  ! X_oovv(j,k,b,c)*T_ov(i,a) + X_oovv(i,k,a,c)*T_ov(j,b) +
+  ! X_oovv(i,j,a,b)*T_ov(k,c).
+  END_DOC
 
   integer, intent(in)           :: nO,nV,a,b,c
   double precision, intent(in)  :: T_ov(nO,nV)

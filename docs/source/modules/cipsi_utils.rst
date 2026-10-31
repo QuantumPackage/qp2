@@ -87,6 +87,12 @@ Providers
         integer, allocatable	:: pt2_n_0	(pt2_N_teeth+1)
 
 
+    Weights of the Monte Carlo comb of the stochastic PT2.
+    pt2_w(i): weight of norm-sorted generator i, rescaled so
+    that each of the pt2_N_teeth teeth holds the total weight
+    pt2_W_T. pt2_cW: cumulative sum of pt2_w. pt2_u_0: weight
+    of the first pt2_n_0(1) generators, always included in the
+    comb. pt2_n_0: index bounds of the teeth.
 
     Needs:
 
@@ -119,6 +125,12 @@ Providers
         integer	:: pt2_n_tasks_max	
 
 
+    pt2_F(i) is the number of Monte Carlo tasks (combs)
+    assigned to generator i (i indexes the norm-sorted
+    generator list):
+    pt2_n_tasks_max*pt2_min_parallel_tasks for the leading
+    (largest-norm) generators, pt2_min_parallel_tasks for a
+    middle range, and 1 for the rest.
 
     Needs:
 
@@ -205,6 +217,12 @@ Providers
         integer	:: pt2_mindetinfirstteeth	
 
 
+    pt2_N_teeth: number of comb teeth of the stochastic PT2
+    sampling: 1 if N_det_generators < 1024, otherwise the
+    largest N from 100 down to 2 for which
+    testTeethBuilding(pt2_minDetInFirstTeeth, N) is true.
+    pt2_minDetInFirstTeeth: minimum number of determinants
+    required in the first tooth (1 or min(5, N_det_generators)).
 
     Needs:
 
@@ -240,6 +258,12 @@ Providers
         integer, allocatable	:: pt2_n_0	(pt2_N_teeth+1)
 
 
+    Weights of the Monte Carlo comb of the stochastic PT2.
+    pt2_w(i): weight of norm-sorted generator i, rescaled so
+    that each of the pt2_N_teeth teeth holds the total weight
+    pt2_W_T. pt2_cW: cumulative sum of pt2_w. pt2_u_0: weight
+    of the first pt2_n_0(1) generators, always included in the
+    comb. pt2_n_0: index bounds of the teeth.
 
     Needs:
 
@@ -299,6 +323,12 @@ Providers
         integer	:: pt2_n_tasks_max	
 
 
+    pt2_F(i) is the number of Monte Carlo tasks (combs)
+    assigned to generator i (i indexes the norm-sorted
+    generator list):
+    pt2_n_tasks_max*pt2_min_parallel_tasks for the leading
+    (largest-norm) generators, pt2_min_parallel_tasks for a
+    middle range, and 1 for the rest.
 
     Needs:
 
@@ -327,6 +357,12 @@ Providers
         integer	:: pt2_mindetinfirstteeth	
 
 
+    pt2_N_teeth: number of comb teeth of the stochastic PT2
+    sampling: 1 if N_det_generators < 1024, otherwise the
+    largest N from 100 down to 2 for which
+    testTeethBuilding(pt2_minDetInFirstTeeth, N) is true.
+    pt2_minDetInFirstTeeth: minimum number of determinants
+    required in the first tooth (1 or min(5, N_det_generators)).
 
     Needs:
 
@@ -430,6 +466,9 @@ Providers
         double precision, allocatable	:: pt2_u	(N_det_generators)
 
 
+    Uniform random numbers in (0,1), one per Monte Carlo
+    sample (comb) of the stochastic PT2. The random generator
+    is seeded with (1, 2, ..., m) before being filled.
 
     Needs:
 
@@ -460,6 +499,12 @@ Providers
         integer, allocatable	:: pt2_n_0	(pt2_N_teeth+1)
 
 
+    Weights of the Monte Carlo comb of the stochastic PT2.
+    pt2_w(i): weight of norm-sorted generator i, rescaled so
+    that each of the pt2_N_teeth teeth holds the total weight
+    pt2_W_T. pt2_cW: cumulative sum of pt2_w. pt2_u_0: weight
+    of the first pt2_n_0(1) generators, always included in the
+    comb. pt2_n_0: index bounds of the teeth.
 
     Needs:
 
@@ -495,6 +540,12 @@ Providers
         integer, allocatable	:: pt2_n_0	(pt2_N_teeth+1)
 
 
+    Weights of the Monte Carlo comb of the stochastic PT2.
+    pt2_w(i): weight of norm-sorted generator i, rescaled so
+    that each of the pt2_N_teeth teeth holds the total weight
+    pt2_W_T. pt2_cW: cumulative sum of pt2_w. pt2_u_0: weight
+    of the first pt2_n_0(1) generators, always included in the
+    comb. pt2_n_0: index bounds of the teeth.
 
     Needs:
 
@@ -530,6 +581,12 @@ Providers
         integer, allocatable	:: pt2_n_0	(pt2_N_teeth+1)
 
 
+    Weights of the Monte Carlo comb of the stochastic PT2.
+    pt2_w(i): weight of norm-sorted generator i, rescaled so
+    that each of the pt2_N_teeth teeth holds the total weight
+    pt2_W_T. pt2_cW: cumulative sum of pt2_w. pt2_u_0: weight
+    of the first pt2_n_0(1) generators, always included in the
+    comb. pt2_n_0: index bounds of the teeth.
 
     Needs:
 
@@ -619,6 +676,11 @@ Subroutines / functions
         subroutine add_to_selection_buffer(b, det, val)
 
 
+    Adds the determinant det with weight val to the selection buffer
+    b, but only if b%N > 0 and val <= b%mini, where b%mini is the
+    current threshold of the buffer.
+    If adding det fills the storage, the buffer is sorted by
+    increasing val and the element with the largest val is dropped.
 
     Needs:
 
@@ -697,6 +759,8 @@ Subroutines / functions
         subroutine delete_selection_buffer(b)
 
 
+    Deallocates the storage of the selection buffer b (the det and
+    val pointers), and resets b%cur, b%mini and b%N to zero.
 
     Called by:
 
@@ -723,6 +787,12 @@ Subroutines / functions
         subroutine make_selection_buffer_s2(b)
 
 
+    Groups the determinants of the selection buffer b by
+    configuration (the bitwise exclusive-or and and of the alpha and
+    beta masks): duplicates are removed keeping the smallest val,
+    and the result is sorted by increasing val.
+    The configurations are then expanded back into determinants with
+    configuration_to_dets, at most the original b%cur of them.
 
     Needs:
 
@@ -789,6 +859,11 @@ Subroutines / functions
         subroutine provide_everything
 
 
+    Collects the IRPF90 entities required by the slave CIPSI
+    process: the wave function (psi_det, psi_coef) and its
+    generator and selector determinants, the selection and PT2
+    parameters, and the ZeroMQ state. Called from run_slave_cipsi
+    before the qp_run address is switched to the master.
 
     Needs:
 
@@ -881,6 +956,8 @@ Subroutines / functions
         subroutine pt2_alloc(pt2_data,N)
 
 
+    Allocates and zero-initializes the pt2, rpt2, variance and
+    overlap arrays of a pt2_type for N states.
 
     Called by:
 
@@ -906,6 +983,12 @@ Subroutines / functions
         subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_err, b, N_)
 
 
+    Master of the in-process stochastic PT2: pulls the partial
+    results of the slave tasks and accumulates them per
+    generator, maintaining the running averages of the PT2
+    energy, its variance and the state overlaps (printed every
+    second) until the relative error on the PT2 energy is
+    below relative_error; selected determinants are added to b.
 
     Needs:
 
@@ -959,6 +1042,8 @@ Subroutines / functions
         subroutine pt2_dealloc(pt2_data)
 
 
+    Deallocates the pt2, rpt2, variance and overlap arrays of
+    a pt2_type.
 
     Called by:
 
@@ -984,6 +1069,9 @@ Subroutines / functions
         subroutine pt2_deserialize(pt2_data, n, x)
 
 
+    Restores a pt2_type from the array x written by
+    pt2_serialize: n entries each of pt2, rpt2 and variance,
+    then the n x n overlap matrix.
 
     Called by:
 
@@ -1004,6 +1092,9 @@ Subroutines / functions
         integer function pt2_find_sample(v, w)
 
 
+    Returns the index where the cumulative weight w crosses v,
+    by calling pt2_find_sample_lr on the full range
+    0..N_det_generators.
 
     Needs:
 
@@ -1023,6 +1114,10 @@ Subroutines / functions
         integer function pt2_find_sample_lr(v, w, l_in, r_in)
 
 
+    Binary search on the cumulative weight array w for the
+    first index r such that w(r) >= v, within the range
+    l_in..r_in. If w is flat there (determinants of zero
+    weight), the last index of the flat run is returned.
 
     Needs:
 
@@ -1042,6 +1137,9 @@ Subroutines / functions
         subroutine pt2_serialize(pt2_data, n, x)
 
 
+    Packs the first n entries of pt2, rpt2 and variance and
+    the n x n overlap matrix of a pt2_type into x, in that
+    order (3*n + n*n doubles).
 
     Called by:
 
@@ -1062,6 +1160,9 @@ Subroutines / functions
         subroutine pt2_slave_inproc(i)
 
 
+    In-process slave of the stochastic PT2: OpenMP thread i
+    (the master is thread 0) processes its PT2 tasks through
+    run_pt2_slave, with in-process (inproc) ZeroMQ sockets.
 
     Needs:
 
@@ -1096,6 +1197,12 @@ Subroutines / functions
         subroutine pull_pt2_results(zmq_socket_pull, index, pt2_data, task_id, n_tasks, b)
 
 
+    Master-side counterpart of push_pt2_results: receives a batch
+    of slave results (n_tasks, index, pt2_data, task_id) and the
+    slave selection buffer content (b%cur, b%val and b%det when
+    non-empty). When the socket is a REP, replies 'ok' and the
+    current threshold b%mini. On communication error, sets
+    n_tasks = 1 and task_id(1) = 0.
 
     Needs:
 
@@ -1130,6 +1237,11 @@ Subroutines / functions
         subroutine pull_selection_results(zmq_socket_pull, pt2_data, val, det, N, task_id, ntasks)
 
 
+    Master-side counterpart of push_selection_results: receives the
+    partial PT2 data of a slave (deserialized into pt2_data) and
+    the content of its selection buffer (N, and val and det when
+    N > 0), followed by ntasks and the task_id list.
+    When the socket is a REP, replies 'ok'.
 
     Needs:
 
@@ -1164,6 +1276,11 @@ Subroutines / functions
         subroutine push_pt2_results(zmq_socket_push, index, pt2_data, b, task_id, n_tasks)
 
 
+    Sends to the master, over a ZeroMQ socket, the results of
+    n_tasks tasks: the generator indices index, the serialized
+    pt2_data, the task_id list, and the selection buffer content
+    (b%cur, and b%val and b%det when b%cur > 0).
+    The exchange is completed with push_pt2_results_async_recv.
 
     Called by:
 
@@ -1191,6 +1308,11 @@ Subroutines / functions
         subroutine push_pt2_results_async_recv(zmq_socket_push,mini,sending)
 
 
+    Completes the exchange started by push_pt2_results_async_send.
+    When the socket is a REQ, receives the 'ok' acknowledgment
+    and the current threshold mini of the master selection buffer.
+    Returns without action when sending is .false.; on exit
+    sending is .false.
 
     Called by:
 
@@ -1211,6 +1333,12 @@ Subroutines / functions
         subroutine push_pt2_results_async_send(zmq_socket_push, index, pt2_data, b, task_id, n_tasks, sending)
 
 
+    Sends to the master the results of n_tasks tasks (generator
+    indices, serialized pt2_data, task_id list, and the selection
+    buffer content when b%cur > 0) as a single ZeroMQ message.
+    Requires sending == .false. on entry and sets it to .true.;
+    the caller must call push_pt2_results_async_recv to complete
+    the exchange. Stops if sending is already .true.
 
     Needs:
 
@@ -1246,6 +1374,11 @@ Subroutines / functions
         subroutine push_selection_results(zmq_socket_push, pt2_data, b, task_id, ntasks)
 
 
+    Sends to the master, over a ZeroMQ socket, the partial PT2 data
+    of the slave (the serialized pt2_data) and the content of the
+    selection buffer b (b%cur, and b%val and b%det when b%cur > 0),
+    followed by ntasks and the task_id list.
+    When the socket is a REQ, waits for the 'ok' reply.
 
     Needs:
 
@@ -1280,6 +1413,11 @@ Subroutines / functions
         subroutine remove_duplicates_in_selection_buffer(b)
 
 
+    Removes duplicate determinants from the selection buffer b:
+    determinants are sorted with det_search_key, and within each
+    group of identical determinants all but one copy is dropped.
+    If duplicates are found, b is compacted in place and b%cur and
+    b%N are set to the resulting number of determinants.
 
     Needs:
 
@@ -1314,6 +1452,12 @@ Subroutines / functions
         subroutine run_pt2_slave(thread,iproc,energy)
 
 
+    Slave of the stochastic PT2 computation. Currently always
+    calls run_pt2_slave_large (the switch to
+    run_pt2_slave_small for small N_det is commented out).
+    energy: state energies, passed to select_connected.
+    thread: 1 uses in-process (inproc) ZeroMQ sockets, 0 uses TCP.
+    iproc: OpenMP thread number.
 
     Needs:
 
@@ -1348,6 +1492,12 @@ Subroutines / functions
         subroutine run_pt2_slave_large(thread,iproc,energy)
 
 
+    Slave of the stochastic PT2 computation that processes one
+    task at a time: for each task, select_connected accumulates
+    the PT2 contribution of the excitations of one generator
+    determinant. The local buffer is merged into the shared
+    global_selection_buffer; the thread with iproc == 1 sends the
+    merged buffer, the other threads send their local buffer.
 
     Needs:
 
@@ -1403,6 +1553,12 @@ Subroutines / functions
         subroutine run_pt2_slave_small(thread,iproc,energy)
 
 
+    Slave of the stochastic PT2 computation. Processes batches of
+    up to pt2_n_tasks_max tasks: for each task, select_connected
+    accumulates the PT2 contribution of the excitations of one
+    generator determinant. The batch results are sent to the
+    master in a single push_pt2_results message; the batch size is
+    adjusted to take about nproc/2 seconds.
 
     Needs:
 
@@ -1445,6 +1601,12 @@ Subroutines / functions
         subroutine run_selection_slave(thread,iproc,energy)
 
 
+    Slave of the CIPSI determinant selection: for each task received
+    from the task server, select_connected accumulates the PT2
+    contribution of the excitations of one generator determinant and
+    fills the local selection buffer, which is sent to the master
+    with push_selection_results after each task.
+    thread: 1 uses in-process (inproc) ZeroMQ sockets, 0 uses TCP.
 
     Needs:
 
@@ -1549,6 +1711,12 @@ Subroutines / functions
         subroutine run_slave_main
 
 
+    Main loop of the slave process: the master rank waits for a
+    state change from qp_run and broadcasts it to the MPI
+    communicator. It then dispatches the matching step:
+    'selection' runs run_selection_slave in every OpenMP thread,
+    'davidson' runs davidson_slave_tcp, 'pt2' runs run_pt2_slave
+    in OpenMP threads (only when N_det > 100000). Stops on 'Stopped'.
 
     Needs:
 
@@ -1643,6 +1811,12 @@ Subroutines / functions
         subroutine selection_collector(zmq_socket_pull, b, N, pt2_data)
 
 
+    Thread i == 0 of ZMQ_selection: pulls the results pushed by
+    the worker threads, accumulates their PT2 data in pt2_data and
+    adds their best determinants to b, deleting the done tasks
+    from the qp_run task server until it replies that no task is
+    left. Sorts b. zmq_socket_pull: pull socket of the workers.
+    N: buffer size. pt2_data: accumulated PT2 data (inout).
 
     Needs:
 
@@ -1686,6 +1860,10 @@ Subroutines / functions
         subroutine selection_slave_inproc(i)
 
 
+    In-process selection worker of ZMQ_selection: called by every
+    OpenMP thread with i > 0, it runs one selection slave with
+    in-process ZeroMQ sockets, passing i as the thread number to
+    run_selection_slave. Thread i == 0 runs selection_collector.
 
     Needs:
 
@@ -1719,6 +1897,10 @@ Subroutines / functions
         subroutine sort_selection_buffer(b)
 
 
+    Sorts the b%cur determinants of the selection buffer b by
+    increasing val, and keeps the first min(b%N, b%cur) of them.
+    b%mini is set to the smallest of its previous value and the
+    largest kept val, b%val(b%N).
 
     Needs:
 
@@ -1757,6 +1939,12 @@ Subroutines / functions
         logical function testTeethBuilding(minF, N)
 
 
+    Checks whether the comb can be built with N teeth so that
+    the first tooth holds at least minF determinants. Tries
+    leading offsets n0 of the norm-sorted generator list and
+    returns .true. if the first minF determinants after n0 fit
+    in one tooth of width Wt = (1 - u0)/N (u0: cumulative
+    weight before n0); .false. if Wt <= 1e-3 or no offset works.
 
     Needs:
 

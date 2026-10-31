@@ -11,6 +11,26 @@ END_PROVIDER
 &BEGIN_PROVIDER [ integer, pt2_n_tasks_max ]
 &BEGIN_PROVIDER [ integer, pt2_F, (N_det_generators) ]
   implicit none
+  BEGIN_DOC
+  ! pt2_N_teeth: number of "comb teeth" of the stochastic sampling
+  ! of the generators: 1 if N_det_generators < 128, otherwise the
+  ! largest N from 50 down to 2 for which
+  ! testTeethBuilding(pt2_minDetInFirstTeeth, N) is true.
+  ! pt2_minDetInFirstTeeth: minimum number of determinants required
+  ! in the first tooth: 1 if N_det_generators < 128, otherwise
+  ! min(5, N_det_generators).
+  ! pt2_F(i): number of task fragments of generator i: for
+  ! i <= min(10000, N_det_generators), 1 + int(pt2_n_tasks_max *
+  ! sqrt(max over states of |psi_coef_sorted_gen(i)|)); 1
+  ! otherwise.
+  ! pt2_n_tasks_max: 1 + min(e*(e-1)/2, int(sqrt(N_det_generators))/
+  ! 10), where e is the number of electrons outside the core.
+  ! The 128 and 10000 thresholds, and the e*(e-1)/2 and /10 terms
+  ! of pt2_n_tasks_max, are empirical values chosen to optimize
+  ! the speed (author, 2026-10-31). The fragmentation expression
+  ! is documented as an empirical choice in the thesis of
+  ! Y. Garniron (HAL tel-02089570), section "The basic algorithm".
+  END_DOC
   logical, external :: testTeethBuilding
   integer :: i
   integer :: e
@@ -35,6 +55,16 @@ END_PROVIDER
 
 
 logical function testTeethBuilding(minF, N)
+  BEGIN_DOC
+  ! Checks that the stochastic sampling can use N comb teeth.
+  ! Tries successively longer leading prefixes n0 of the
+  ! (norm-sorted) generator list and returns .true. if the first
+  ! minF determinants after the prefix fit in one tooth of width
+  ! Wt = (1 - cW(n0))/N, where cW is the cumulative normalized
+  ! weight (squared coefficients of state dress_stoch_istate).
+  ! Returns .false. if Wt drops below 1e-3 or if fewer than
+  ! minF*N determinants remain after the prefix.
+  END_DOC
   implicit none
   integer, intent(in) :: minF, N
   integer :: n0, i
@@ -85,12 +115,33 @@ logical function testTeethBuilding(minF, N)
 end function
 
 BEGIN_PROVIDER[ integer, dress_N_cp_max ]
+  BEGIN_DOC
+  ! Maximum number of checkpoints of the stochastic dressing.
+  ! Checkpoints are taken at doubling sample counts (see
+  ! dress_M_m); this value sizes the checkpoint arrays
+  ! (dress_M_m, dress_M_mi, dress_R1).
+  END_DOC
   dress_N_cp_max = 28
 END_PROVIDER
 
  BEGIN_PROVIDER[integer, pt2_J, (N_det_generators)]
 &BEGIN_PROVIDER [integer, dress_R1, (0:N_det_generators) ]
   implicit none
+  BEGIN_DOC
+  ! pt2_J: order in which the generators are processed. Copies
+  ! pt2_J_ (the stochastic sampling order) and, in each checkpoint
+  ! segment m (positions dress_R1(m-1)+1..dress_R1(m)), moves to
+  ! the end of the segment the generators that were never drawn
+  ! before checkpoint m (dress_M_mi(m, i) = 0) and that lie
+  ! beyond the drawn prefix (i > dress_dot_n_0(m)).
+  ! dress_R1(m): last position of segment m in pt2_J, adjusted so
+  ! that the moved generators come after it.
+  ! Moving the never-drawn generators to the end of their segment
+  ! separates them so that the drawn generators enter the
+  ! deterministic part while the never-drawn ones stay in the
+  ! stochastic part (author, 2026-10-31; see also "Tooth filling"
+  ! in the Garniron thesis, HAL tel-02089570).
+  END_DOC
   integer :: m,j
   integer :: l,nmov
   integer, allocatable :: iorder(:)
@@ -106,6 +157,7 @@ END_PROVIDER
     do j=l, dress_R1(m)
       if(dress_M_mi(m, pt2_J(j)) == 0 .and. pt2_J(j) > dress_dot_n_0(m)) then
         pt2_J(j) += N_det_generators
+        ! offset by N_det_generators so the isort sorts these last
         nmov += 1
       end if
     end do
@@ -127,6 +179,32 @@ END_PROVIDER
 &BEGIN_PROVIDER [ integer, dress_T, (N_det_generators) ]
 &BEGIN_PROVIDER [ integer, dress_N_cp ]
   implicit none
+  BEGIN_DOC
+  ! Stochastic sampling plan of the generator determinants.
+  ! pt2_J_: order in which the generators are visited: first the
+  ! leading pt2_n_0(1) of the (norm-sorted) list, then, at each
+  ! sample, one determinant drawn in each of the pt2_N_teeth teeth
+  ! (a "comb"), all teeth using the same random offset
+  ! pt2_u(N_c), in the order of first draw; the tail of the
+  ! current tooth is filled in index order.
+  ! dress_M_m(m): number of samples at which checkpoint m is
+  ! reached: 16, 32, 64, ... for m < dress_N_cp_max, and
+  ! N_det_generators+1 for the last entry.
+  ! dress_N_cp: number of checkpoints actually reached (>= 1);
+  ! dress_M_m(dress_N_cp) holds the actual total number of
+  ! samples.
+  ! dress_R1_(m): last position of segment m in pt2_J_, where
+  ! checkpoint m is reached.
+  ! dress_M_mi(m, i): number of times generator i was drawn by
+  ! the combs before checkpoint m (0: never drawn).
+  ! pt2_u(i): random offset in (0,1) of sample i, with a fixed
+  ! seed (1, 2, 3, ...).
+  ! dress_T(i): tooth of generator i in the sorted list: 0 for
+  ! the deterministic prefix, 1..pt2_N_teeth for the teeth.
+  ! The double RANDOM_NUMBER call is a copy/paste bug (author,
+  ! 2026-10-31); the second call simply overwrites the first, so
+  ! pt2_u is filled by the second call alone.
+  END_DOC
   integer :: N_c, N_j, U, t, i, m
   double precision :: v, dt
   double precision, allocatable :: tilde_M(:)
@@ -150,6 +228,7 @@ END_PROVIDER
 !  dress_M_m(dress_N_cp_max) = N_det_generators+1
   do i=1, dress_N_cp_max-1
     dress_M_m(i) = shiftl(1,i+3)
+    ! checkpoint after 2**(i+3) samples
   end do
   dress_M_m(dress_N_cp_max) = N_det_generators+1
 
@@ -234,6 +313,26 @@ subroutine ZMQ_dress(E, dress, delta_out, delta_s2_out, relative_error)
   use f77_zmq
 
   implicit none
+  BEGIN_DOC
+  ! Stochastic (Monte Carlo) evaluation of the dressing, one state
+  ! at a time (dress_stoch_istate). E: reference CI energies, as
+  ! passed by the caller (E_CI_before in dressing.irp.f). Starts
+  ! an in-process task server with two OpenMP threads: thread 0
+  ! runs dress_collector, thread 1 runs dress_slave_inproc. The
+  ! generators are distributed as tasks, one task per fragment of
+  ! pt2_F. relative_error: relative error criterion on the running
+  ! energy. dress(istate) receives E(istate) plus the stochastic
+  ! estimate of the generator contributions; delta_out and
+  ! delta_s2_out receive, per state and determinant, the
+  ! accumulated contributions and their second component, which the
+  ! caller stores in delta_ij and delta_ij_tmp (components 1 and 2).
+  ! The fixed 2-thread OpenMP section is intentional: one thread
+  ! runs the collector that waits for results, the other runs a
+  ! slave that is itself nested OpenMP and uses all the remaining
+  ! CPUs (author, 2026-10-31). The two components of delta_ij are
+  ! the contribution to the Hamiltonian (component 1) and the
+  ! contribution to $S^2$ (component 2) (author, 2026-10-31).
+  END_DOC
 
   integer(ZMQ_PTR)               :: zmq_to_qp_run_socket, zmq_socket_pull
   integer, external              :: omp_get_thread_num
@@ -379,6 +478,12 @@ end subroutine
 
 subroutine dress_slave_inproc(i)
   implicit none
+  BEGIN_DOC
+  ! In-process (OpenMP) slave of the stochastic dressing: called
+  ! by ZMQ_dress on the worker thread; i is the OpenMP thread
+  ! number. Calls run_dress_slave with the denominator energies
+  ! dress_e0_denominator provided by energy.irp.f.
+  END_DOC
   integer, intent(in)            :: i
 
   call run_dress_slave(1,i,dress_e0_denominator)
@@ -387,6 +492,13 @@ end
  BEGIN_PROVIDER [integer, dress_dot_F, (dress_N_cp)]
 &BEGIN_PROVIDER [ integer, dress_P, (N_det_generators) ]
   implicit none
+  BEGIN_DOC
+  ! dress_P(i): checkpoint of generator i in the pt2_J order: m
+  ! if i is in segment m (positions dress_R1(m-1)+1..dress_R1(m)
+  ! of pt2_J).
+  ! dress_dot_F(m): cumulative number of task fragments: the sum
+  ! of pt2_F over the generators of checkpoints 1..m.
+  END_DOC
   integer :: m,i
 
   do m=1,dress_N_cp
@@ -410,6 +522,18 @@ BEGIN_PROVIDER [double precision, dress_e, (N_det_generators, dress_N_cp)]
 &BEGIN_PROVIDER [integer, dress_dot_t, (0:dress_N_cp)]
 &BEGIN_PROVIDER [integer, dress_dot_n_0, (0:dress_N_cp)]
   implicit none
+  BEGIN_DOC
+  ! dress_e(i, m): total stochastic weight of generator i between
+  ! checkpoints m-1 and m: pt2_W_T times the number of draws of i
+  ! in that interval (difference of the cumulative counters
+  ! dress_M_mi) divided by pt2_w(i). The slaves multiply the
+  ! contribution of i by this factor for checkpoint m.
+  ! dress_dot_n_0(m): end of the longest prefix of the sorted
+  ! generator list entirely drawn at least once by checkpoint m;
+  ! the collector adds their contributions (edI) to the exact part
+  ! of the estimate.
+  ! dress_dot_t(m): number of teeth covered by that prefix.
+  END_DOC
 
   logical, allocatable :: d(:)
   integer :: U, m, t, i
@@ -457,6 +581,19 @@ subroutine dress_collector(zmq_socket_pull, E, relative_error, delta, delta_s2, 
   use f77_zmq
   use bitmasks
   implicit none
+  BEGIN_DOC
+  ! Collector of the in-process stochastic dressing: runs on
+  ! OpenMP thread 0 (called by ZMQ_dress). Pulls the results of
+  ! the slave from zmq_socket_pull, checkpoint by checkpoint. When
+  ! all the task fragments of checkpoint m are in, computes the
+  ! running estimate: E0, the sum of the contributions edI of the
+  ! determinants drawn so far, plus the stochastic average over
+  ! the comb samples, and prints the energy and its error. Sends
+  ! 'ending' to stop the slaves once relative_error is reached.
+  ! delta and delta_s2 receive the accumulated final
+  ! contributions; dress(istate) = E(istate) + E0 + avg with the
+  ! last values.
+  END_DOC
 
 
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_pull
@@ -623,6 +760,19 @@ end subroutine
 
 
 integer function dress_find_sample(v, w)
+  BEGIN_DOC
+  ! Binary search on the cumulative weight array
+  ! w(0:N_det_generators), assumed non-decreasing: returns the
+  ! index i such that w(i-1) < v <= w(i), i.e. the generator
+  ! selected by the sample value v. If several consecutive
+  ! cumulative values are equal (zero-width bin), the last index
+  ! of the run of equal values is returned.
+  ! Probably to avoid a division by zero or a zero-width bin
+  ! (author, 2026-10-31); the code shows the returned index is a
+  ! lookup key into the generator arrays (edI(i), pt2_w(i)) and
+  ! the selected weight pt2_w(i) is the divisor of the estimator
+  ! x += edI(i) * pt2_W_T / pt2_w(i).
+  END_DOC
   implicit none
   double precision, intent(in) :: v, w(0:N_det_generators)
   integer :: i,l,r
@@ -655,6 +805,22 @@ end function
 &BEGIN_PROVIDER [ double precision,     pt2_u_0 ]
 &BEGIN_PROVIDER [ integer,              pt2_n_0, (pt2_N_teeth+1) ]
   implicit none
+  BEGIN_DOC
+  ! Sampling weights of the generators, in the order of
+  ! psi_coef_sorted_gen.
+  ! pt2_n_0(1): number of leading generators treated exactly
+  ! (deterministic prefix): the smallest n0 such that the first
+  ! pt2_minDetInFirstTeeth determinants after the prefix fit in
+  ! one tooth of width (1 - cW(n0))/pt2_N_teeth. pt2_u_0 is the
+  ! cumulative weight at the end of the prefix, pt2_W_T the tooth
+  ! width.
+  ! pt2_n_0(t): last generator of tooth t (t = 2..pt2_N_teeth+1);
+  ! pt2_n_0(pt2_N_teeth+1) = N_det_generators.
+  ! pt2_w(i): for the prefix, the normalized weight
+  ! |psi_coef|^2 + 1e-20; in tooth t, the same weight rescaled so
+  ! that the tooth has total mass pt2_W_T.
+  ! pt2_cW: cumulative sum of pt2_w.
+  END_DOC
   integer :: i, t
   double precision, allocatable :: tilde_w(:), tilde_cW(:)
   double precision :: r, tooth_width

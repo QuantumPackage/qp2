@@ -163,6 +163,8 @@ Providers
         logical	:: bavard	
 
 
+    Verbose output flag of the casscf_cipsi module. When set to
+    .true., the routines of this module print additional diagnostics.
 
     Needed by:
 
@@ -197,6 +199,10 @@ Providers
         double precision	:: best_overlap_casscf	
 
 
+    Index of the eigenvector of the single-excitation matrix used for
+    the orbital update: among the eigenvectors with negative eigenvalue,
+    the one with the largest dabs(SXeigenvec(1,i)); best_overlap_casscf
+    is that maximum overlap. If no eigenvalue is negative, the index is 1.
 
     Needs:
 
@@ -228,6 +234,10 @@ Providers
         double precision	:: best_overlap_casscf	
 
 
+    Index of the eigenvector of the single-excitation matrix used for
+    the orbital update: among the eigenvectors with negative eigenvalue,
+    the one with the largest dabs(SXeigenvec(1,i)); best_overlap_casscf
+    is that maximum overlap. If no eigenvalue is negative, the index is 1.
 
     Needs:
 
@@ -631,6 +641,11 @@ Providers
         double precision, allocatable	:: d0tu_beta_ao	(ao_num,ao_num)
 
 
+    State-averaged first-order density matrices in the AO basis (alpha
+    and beta). In the MO basis the core/inactive orbitals are doubly
+    occupied, the active block is built from the one_e_dm_mo matrices
+    and the virtual orbitals are empty; the result is then transformed
+    to the AO basis with mo_to_ao_no_overlap.
 
     Needs:
 
@@ -665,6 +680,11 @@ Providers
         double precision, allocatable	:: d0tu_beta_ao	(ao_num,ao_num)
 
 
+    State-averaged first-order density matrices in the AO basis (alpha
+    and beta). In the MO basis the core/inactive orbitals are doubly
+    occupied, the active block is built from the one_e_dm_mo matrices
+    and the virtual orbitals are empty; the result is then transformed
+    to the AO basis with mo_to_ao_no_overlap.
 
     Needs:
 
@@ -700,6 +720,10 @@ Providers
         integer	:: dim_n_max_overlap	
 
 
+    Monoexcitations whose |SXvector_lowest| component is
+    above thresh_overlap_switch, ordered by decreasing
+    magnitude of that component. n_max_overlap is their
+    number; dim_n_max_overlap = max(1, n_max_overlap).
 
     Needs:
 
@@ -782,6 +806,12 @@ Providers
         real*8	:: ecore_bis	
 
 
+    Active-space two-electron energy: sum over active t,u,v,x
+    of P0tuvx(t,u,v,x)*bielec_PQxx(tt,uu,v3,x3). Also provides
+    eone, ecore (casscf.irp.f: energy = eone+etwo+ecore) and
+    the variants eone_bis, etwo_bis, etwo_ter, ecore_bis which
+    evaluate the integrals via bielec_PxxQ and bielecCI;
+    mismatches are printed with the tag "aie: ".
 
     Needs:
 
@@ -817,6 +847,12 @@ Providers
         real*8	:: ecore_bis	
 
 
+    Active-space two-electron energy: sum over active t,u,v,x
+    of P0tuvx(t,u,v,x)*bielec_PQxx(tt,uu,v3,x3). Also provides
+    eone, ecore (casscf.irp.f: energy = eone+etwo+ecore) and
+    the variants eone_bis, etwo_bis, etwo_ter, ecore_bis which
+    evaluate the integrals via bielec_PxxQ and bielecCI;
+    mismatches are printed with the tag "aie: ".
 
     Needs:
 
@@ -846,6 +882,10 @@ Providers
         real*8	:: energy_improvement	
 
 
+    Predicted energy improvement of the next orbital update, an
+    eigenvalue of the single-excitation matrix: the eigenvalue of
+    best_vector_ovrlp_casscf when state_following_casscf is set, the
+    lowest eigenvalue otherwise.
 
     Needs:
 
@@ -874,6 +914,12 @@ Providers
         real*8	:: ecore_bis	
 
 
+    Active-space two-electron energy: sum over active t,u,v,x
+    of P0tuvx(t,u,v,x)*bielec_PQxx(tt,uu,v3,x3). Also provides
+    eone, ecore (casscf.irp.f: energy = eone+etwo+ecore) and
+    the variants eone_bis, etwo_bis, etwo_ter, ecore_bis which
+    evaluate the integrals via bielec_PxxQ and bielecCI;
+    mismatches are printed with the tag "aie: ".
 
     Needs:
 
@@ -909,6 +955,12 @@ Providers
         real*8	:: ecore_bis	
 
 
+    Active-space two-electron energy: sum over active t,u,v,x
+    of P0tuvx(t,u,v,x)*bielec_PQxx(tt,uu,v3,x3). Also provides
+    eone, ecore (casscf.irp.f: energy = eone+etwo+ecore) and
+    the variants eone_bis, etwo_bis, etwo_ter, ecore_bis which
+    evaluate the integrals via bielec_PxxQ and bielecCI;
+    mismatches are printed with the tag "aie: ".
 
     Needs:
 
@@ -944,6 +996,12 @@ Providers
         real*8	:: ecore_bis	
 
 
+    Active-space two-electron energy: sum over active t,u,v,x
+    of P0tuvx(t,u,v,x)*bielec_PQxx(tt,uu,v3,x3). Also provides
+    eone, ecore (casscf.irp.f: energy = eone+etwo+ecore) and
+    the variants eone_bis, etwo_bis, etwo_ter, ecore_bis which
+    evaluate the integrals via bielec_PxxQ and bielecCI;
+    mismatches are printed with the tag "aie: ".
 
     Needs:
 
@@ -979,6 +1037,12 @@ Providers
         real*8	:: ecore_bis	
 
 
+    Active-space two-electron energy: sum over active t,u,v,x
+    of P0tuvx(t,u,v,x)*bielec_PQxx(tt,uu,v3,x3). Also provides
+    eone, ecore (casscf.irp.f: energy = eone+etwo+ecore) and
+    the variants eone_bis, etwo_bis, etwo_ter, ecore_bis which
+    evaluate the integrals via bielec_PxxQ and bielecCI;
+    mismatches are printed with the tag "aie: ".
 
     Needs:
 
@@ -1014,6 +1078,12 @@ Providers
         real*8	:: ecore_bis	
 
 
+    Active-space two-electron energy: sum over active t,u,v,x
+    of P0tuvx(t,u,v,x)*bielec_PQxx(tt,uu,v3,x3). Also provides
+    eone, ecore (casscf.irp.f: energy = eone+etwo+ecore) and
+    the variants eone_bis, etwo_bis, etwo_ter, ecore_bis which
+    evaluate the integrals via bielec_PxxQ and bielecCI;
+    mismatches are printed with the tag "aie: ".
 
     Needs:
 
@@ -1332,6 +1402,12 @@ Providers
         double precision, allocatable	:: hessmat	(nMonoEx,nMonoEx)
 
 
+    the orbital hessian, as a (nMonoEx,nMonoEx) matrix indexed
+    by the single excitations, in the order: core/inactive ->
+    active, core/inactive -> virtual, active -> virtual. The
+    matrix is symmetric. The core-virtual/core-virtual block is
+    only computed when hess_cv_cv is set; its elements remain
+    zero otherwise.
 
     Needs:
 
@@ -1450,6 +1526,12 @@ Providers
         integer	:: n_orb_swap	
 
 
+    Candidate orbital rotations, one per monoexcitation of
+    max_overlap with positive Hessian diagonal: core->active
+    ("c-a") and active->virtual ("a-v") pairs of orbitals.
+    orb_swap(1,i), orb_swap(2,i) are the two orbitals of
+    rotation i, index_orb_swap(i) its index, n_orb_swap the
+    count. Candidate pairs sharing an orbital are dropped.
 
     Needs:
 
@@ -1618,6 +1700,12 @@ Providers
         double precision, allocatable	:: lowest_super_ci_coef_mo	(mo_num,mo_num)
 
 
+    Coefficients of the lowest eigenvector of the single-excitation
+    matrix, in the MO basis. For each pair (p,q) of the table excit,
+    both entries are set to SXeigenvec(i+1,1). Entries are then
+    rescaled: (2 - occ_act)**(-0.5) for core/inactive-active pairs,
+    1/sqrt(2) for core/inactive-virtual pairs, occ_act**(-0.5) for
+    active-virtual pairs.
 
     Needs:
 
@@ -1830,6 +1918,10 @@ Providers
         integer	:: dim_n_max_overlap	
 
 
+    Monoexcitations whose |SXvector_lowest| component is
+    above thresh_overlap_switch, ordered by decreasing
+    magnitude of that component. n_max_overlap is their
+    number; dim_n_max_overlap = max(1, n_max_overlap).
 
     Needs:
 
@@ -2090,6 +2182,9 @@ Providers
         integer	:: n_a_v_prov	
 
 
+    Numbers of the three classes of mono-excitations:
+    core/inactive to active (n_c_a_prov), core/inactive to virtual
+    (n_c_v_prov) and active to virtual (n_a_v_prov).
 
     Needs:
 
@@ -2121,6 +2216,9 @@ Providers
         integer	:: n_a_v_prov	
 
 
+    Numbers of the three classes of mono-excitations:
+    core/inactive to active (n_c_a_prov), core/inactive to virtual
+    (n_c_v_prov) and active to virtual (n_a_v_prov).
 
     Needs:
 
@@ -2152,6 +2250,9 @@ Providers
         integer	:: n_a_v_prov	
 
 
+    Numbers of the three classes of mono-excitations:
+    core/inactive to active (n_c_a_prov), core/inactive to virtual
+    (n_c_v_prov) and active to virtual (n_a_v_prov).
 
     Needs:
 
@@ -2217,6 +2318,10 @@ Providers
         integer	:: dim_n_max_overlap	
 
 
+    Monoexcitations whose |SXvector_lowest| component is
+    above thresh_overlap_switch, ordered by decreasing
+    magnitude of that component. n_max_overlap is their
+    number; dim_n_max_overlap = max(1, n_max_overlap).
 
     Needs:
 
@@ -2247,6 +2352,12 @@ Providers
         integer	:: n_orb_swap	
 
 
+    Candidate orbital rotations, one per monoexcitation of
+    max_overlap with positive Hessian diagonal: core->active
+    ("c-a") and active->virtual ("a-v") pairs of orbitals.
+    orb_swap(1,i), orb_swap(2,i) are the two orbitals of
+    rotation i, index_orb_swap(i) its index, n_orb_swap the
+    count. Candidate pairs sharing an orbital are dropped.
 
     Needs:
 
@@ -2650,6 +2761,12 @@ Providers
         integer	:: n_orb_swap	
 
 
+    Candidate orbital rotations, one per monoexcitation of
+    max_overlap with positive Hessian diagonal: core->active
+    ("c-a") and active->virtual ("a-v") pairs of orbitals.
+    orb_swap(1,i), orb_swap(2,i) are the two orbitals of
+    rotation i, index_orb_swap(i) its index, n_orb_swap the
+    count. Candidate pairs sharing an orbital are dropped.
 
     Needs:
 
@@ -2886,6 +3003,10 @@ Providers
         double precision, allocatable	:: switch_mo_coef	(ao_num,mo_num)
 
 
+    FCI natural orbitals (NatOrbsFCI) with the columns of
+    the swapped orbital pairs of orb_swap exchanged. Used
+    as the NewOrbs guess in neworbs.irp.f when the lowest
+    single-excitation eigenvector is taken (n_orb_swap.ne.0).
 
     Needs:
 
@@ -3052,6 +3173,10 @@ Providers
         double precision, allocatable	:: sxvector_lowest	(nMonoEx)
 
 
+    Excitation components of the lowest eigenvector of the
+    single-excitation matrix (SXeigenvec, column 1).
+    SXvector_lowest(i-1) = SXeigenvec(i,1); the first
+    eigenvector component (SXeigenvec(1,1)) is omitted.
 
     Needs:
 
@@ -3079,6 +3204,12 @@ Providers
         double precision	:: thresh_overlap_switch	
 
 
+    Threshold on the absolute value of the components of
+    SXvector_lowest. The max_overlap provider lists the
+    monoexcitations with |SXvector_lowest(i)| above this
+    value. The value 0.5d0 is hard coded.
+    TODO(doc): probably an arbitrary choice (author not sure,
+    2026-10-31).
 
     Needed by:
 
@@ -3341,6 +3472,11 @@ Subroutines / functions
         subroutine davidson_diag_sx_mat(N_st, u_in, energies)
 
 
+    Davidson diagonalization of the SXmatrix (davidson_general).
+    H_jj is the diagonal of the SXmatrix, with element 1 set to zero.
+    N_st must equal the number of negative diagonal elements of the
+    SXmatrix; the initial guesses are unit vectors along those elements,
+    and u_in holds the eigenvectors on exit.
 
     Needs:
 
@@ -3515,6 +3651,7 @@ Subroutines / functions
         subroutine driver_optorb
 
 
+    Empty subroutine. It is not called by any other routine.
 
  
 .. c:function:: void gradvec_ia(void)
@@ -3781,6 +3918,9 @@ Subroutines / functions
         subroutine print_grad
 
 
+    Prints, for each mono-excitation i of the table excit, the component
+    gradvec2(i) of the orbital gradient and the orbital pair excit(:,i),
+    when dabs(gradvec2(i)) is greater than 1.d-5.
 
     Needs:
 
@@ -3876,6 +4016,12 @@ Subroutines / functions
         subroutine routine
 
 
+    Computes the active part of the bielectronic energy: sum over active
+    orbitals of the two-electron integrals weighted by the spin-traced
+    state-averaged active 2-RDM. The result is printed (accu(1)).
+    Not currently called (the only call in the get_energy program is
+    commented out); kept because it may need to be reactivated for
+    debugging (author, 2026-10-31).
 
     Needs:
 
@@ -3905,6 +4051,11 @@ Subroutines / functions
         subroutine routine_bielec_PQxx_no
 
 
+    Compares the Cholesky function bielec_PQxx_no with the
+    stored array bielec_PQxx_no_array for all MO pairs (P,Q)
+    and all core/inactive/active orbital pairs (x,y). Entries
+    with |reference| > 1.d-10 are printed, then the mean
+    absolute difference.
 
     Needs:
 
@@ -3927,6 +4078,11 @@ Subroutines / functions
         subroutine routine_bielec_PxxQ_no_array
 
 
+    Compares the Cholesky function bielec_PxxQ_no with the
+    stored array bielec_PxxQ_no_array for all MO pairs (P,Q)
+    and all core/inactive/active orbital pairs (x,y). Entries
+    with |reference| > 1.d-10 are printed, then the mean
+    absolute difference.
 
     Needs:
 
@@ -3985,6 +4141,12 @@ Subroutines / functions
         subroutine test_bielec_PQxx(i_mo, j_mo, i_ca, j_ca)
 
 
+    Compares the function bielec_PQxx with the stored array
+    bielec_PQxx_array for all MO pairs (P,Q) and all
+    core/inactive/active orbital pairs (x,y). The four
+    integer arguments are loop indices; their values are
+    ignored. Entries with |reference| > 1.d-10 are printed,
+    then the mean absolute difference.
 
     Needs:
 
@@ -4006,6 +4168,12 @@ Subroutines / functions
         subroutine test_bielec_PxxQ_chol(i_mo, i_ca, j_ca, j_mo)
 
 
+    Compares the function bielec_PxxQ with the stored array
+    bielec_PxxQ_array for all MO pairs (P,Q) and all
+    core/inactive/active orbital pairs (x,y). The four
+    integer arguments are loop indices; their values are
+    ignored. Entries with |reference| > 1.d-10 are printed,
+    then the mean absolute difference.
 
     Needs:
 

@@ -1,5 +1,10 @@
 program analyze_ccsd
  implicit none
+ BEGIN_DOC
+ ! Reads the T1 and T2 amplitudes from the work/T1 and work/T2
+ ! files of the |EZFIO| directory and prints the two largest
+ ! amplitudes of each type.
+ END_DOC
  io_amplitudes = "Read"
  touch io_amplitudes
  call routine
@@ -8,6 +13,13 @@ end
 
 subroutine routine
  implicit none
+ BEGIN_DOC
+ ! Reads the T1 and T2 amplitudes from disk, sorts them in
+ ! decreasing order of absolute value and prints the two largest
+ ! T2 amplitudes with their (i,j,a,b) indices and the two largest
+ ! T1 amplitudes with their (i,a) indices; i and j are shifted
+ ! by the number of core MOs (n_core_orb).
+ END_DOC
  double precision, allocatable :: t2(:,:,:,:),t1(:,:)
  integer, allocatable :: index_t2(:,:),index_t1(:,:)
  integer, allocatable :: iorder_t2(:),iorder_t1(:)

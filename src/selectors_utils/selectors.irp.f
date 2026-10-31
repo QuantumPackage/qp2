@@ -2,6 +2,10 @@ use bitmasks
 
 BEGIN_PROVIDER [ integer, psi_selectors_size ]
  implicit none
+ BEGIN_DOC
+ ! Number of determinants (selectors) in the wave function,
+ ! equal to psi_det_size.
+ END_DOC
  psi_selectors_size = psi_det_size
 END_PROVIDER
 

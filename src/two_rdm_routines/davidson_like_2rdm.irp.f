@@ -589,6 +589,15 @@ end
 subroutine update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
  use omp_lib
  implicit none
+ BEGIN_DOC
+ ! Adds the buffered contributions to the two-rdm big_array
+ ! for all n_st states: keys(1:4,i) gives the orbital
+ ! indices (h1,h2,p1,p2) of the element, values(istate,i) is
+ ! added to big_array(h1,h2,p1,p2,istate) under lock_2rdm.
+ ! Every call site in this file is commented out and the
+ ! routine is superseded by update_keys_values_n_states_local
+ ! (author-confirmed 2026-10-31).
+ END_DOC
  integer, intent(in) :: n_st,nkeys,dim1
  integer, intent(in) :: keys(4,nkeys)
  double precision, intent(in) :: values(n_st,nkeys)
@@ -641,6 +650,14 @@ end
 subroutine update_keys_values_n_states_local(keys,values,nkeys,dim1,n_st,big_array_local)
  use omp_lib
  implicit none
+ BEGIN_DOC
+ ! Adds the buffered contributions to the thread-private
+ ! two-rdm big_array_local: keys(1:4,i) gives the orbital
+ ! indices (h1,h2,p1,p2) of the element, values(istate,i)
+ ! is added to big_array_local(istate,h1,h2,p1,p2) for all
+ ! n_st states. No lock: the caller allocates one
+ ! big_array_local per OpenMP thread and merges them.
+ END_DOC
  integer, intent(in) :: n_st,nkeys,dim1
  integer, intent(in) :: keys(4,nkeys)
  double precision, intent(in) :: values(n_st,nkeys)

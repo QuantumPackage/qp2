@@ -3,6 +3,14 @@
 
 subroutine zboysfun00_1(rho, F0)
 
+  BEGIN_DOC
+  ! Computes 0.5 * sqrt(pi) * erf(sqrt(rho)) / sqrt(rho) for a complex
+  ! argument rho, using the principal square root and the complex
+  ! error function cpx_erf_1.
+  !
+  ! This is the n = 0 value of crint_1, used as the starting value of
+  ! the recurrence in crint_1 and crint_1_vec for |rho| >= 3.5.
+  END_DOC
   implicit none
 
   include 'constants.include.F'

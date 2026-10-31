@@ -9,6 +9,12 @@ fit_1s_basis
  
  
  
+ Fits the original AO basis onto an uncontracted s-only 
+ basis and writes the result to the extra_nuclei and 
+ ao_extra_basis EZFIO sections: each s primitive is kept, 
+ and each p primitive is replaced by two s functions 
+ displaced by ao_extra_center along the p axis. Stops 
+ when the original basis contains functions with l > 1. 
  
  Needs: 
  
