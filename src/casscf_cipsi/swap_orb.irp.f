@@ -19,8 +19,12 @@
  ! SXvector_lowest. The max_overlap provider lists the
  ! monoexcitations with |SXvector_lowest(i)| above this
  ! value. The value 0.5d0 is hard coded.
- ! TODO(doc): probably an arbitrary choice (author not sure,
- ! 2026-10-31).
+ ! Heuristic dominance threshold: the lowest SX eigenvector
+ ! is normalized, so |c| > 0.5 means the monoexcitation
+ ! carries >25 % of its norm (at most 4 can qualify). No
+ ! published justification found; the exact value is a
+ ! code-local convention (cf. the c0^2 vs 0.5 test in
+ ! neworbs.irp.f).
  END_DOC
  thresh_overlap_switch = 0.5d0
  END_PROVIDER 
