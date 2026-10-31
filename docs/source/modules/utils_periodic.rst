@@ -34,8 +34,8 @@ Subroutines / functions
     in mo_coef(i,j) and mo_coef_imag(i,j) (real and
     imaginary parts). Sets mo_label to "None" and writes
     the MO basis to the |EZFIO| database via save_mos.
-    TODO(doc): is mo_coef_imag stored in the database?
-    save_mos writes mo_coef but not mo_coef_imag.
+    mo_coef_imag is not stored by save_mos and this part can
+    be removed (author, 2026-10-31); candidate for removal.
 
     Needs:
 

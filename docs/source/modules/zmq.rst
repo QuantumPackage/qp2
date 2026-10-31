@@ -557,7 +557,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`wait_for_next_state`
        * :c:func:`wait_for_state`
        * :c:func:`wait_for_states`
 
@@ -922,29 +921,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`zmq_state`
-
- 
-.. c:function:: void wait_for_next_state(void)
-
-
-    File : :file:`zmq/utils.irp.f`
-
-    .. code:: fortran
-
-        subroutine wait_for_next_state(state)
-
-
-    Wait until a state different from 'Waiting' is received on the ZMQ
-    subscription socket, and return it in 'state'. On a receive
-    timeout, return 'Stopped'.
-    TODO(doc): no caller found in the tree; what is the intended use?
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`end_zmq_sub_socket`
 
  
 .. c:function:: void wait_for_state(void)

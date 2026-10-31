@@ -161,8 +161,8 @@ Providers
 
     Constant integer provider, currently fixed to 0.
     No code in the tree currently reads it.
-    TODO(doc): is this meant to limit the excitation degree of the
-    perturber determinants used in the perturbation?
+    No in-tree caller; probably unused (author, 2026-10-31); kept
+    because external plugins may use it.
 
 
  

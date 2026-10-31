@@ -1938,10 +1938,11 @@ Providers
 
     OOOV block of two-electron MO integrals: cc_space_v_ooov
     (i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs, i4 in cc_list_vir,
-    i1..i3 in cc_list_occ. Computed by gen_v_space, or from
-    cc_space_v_ovoo if do_mo_cholesky is set.
-    TODO(doc): verify the Cholesky branch (its loops are sized
-    from cc_space_v_oovo, which differs when cc_nVa != cc_nOa)
+    i1..i3 in cc_list_occ. Computed by gen_v_space, or copied
+    from cc_space_v_ovoo if do_mo_cholesky is set; the loop
+    bounds come from cc_space_v_ooov (once cc_space_v_oovo,
+    wrong when cc_nVa != cc_nOa: bug, author-confirmed
+    2026-10-31, now fixed).
 
     Needs:
 
@@ -1951,7 +1952,6 @@ Providers
        * :c:data:`all_mo_integrals`
        * :c:data:`cc_list_occ`
        * :c:data:`cc_no_m`
-       * :c:data:`cc_space_v_oovo`
        * :c:data:`cc_space_v_ovoo`
        * :c:data:`cholesky_mo_num`
        * :c:data:`do_mo_cholesky`
@@ -1988,12 +1988,6 @@ Providers
        * :c:data:`do_mo_cholesky`
        * :c:data:`mo_integrals_map`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`cc_space_v_ooov`
 
  
 .. c:var:: double cc_space_v_oovv
@@ -2152,8 +2146,11 @@ Providers
     do_mo_cholesky is set, copied from
     cc_space_v_vvoo(i3,i2,i1,i4), otherwise computed by
     gen_v_space.
-    TODO(doc): verify that cc_space_v_vvoo(i3,i2,i1,i4)
-    equals <i1 i2 | i3 i4> in the Cholesky branch
+    Verified numerically against the direct integrals (H2O,
+    cc-pVTZ, nOa=5, nVa=53, 1110 Cholesky vectors, 2026-10-31):
+    the copy agrees to ~3e-14 relative. In the code's physicist
+    convention <i1 i2 | i3 i4> = <i3 i2 | i1 i4> (8-fold
+    symmetry, indices (i1,i3) and (i2,i4) on electrons 1,2).
 
     Needs:
 
@@ -2320,8 +2317,11 @@ Providers
     do_mo_cholesky is set, copied from
     cc_space_v_vvoo(i1,i4,i3,i2), otherwise computed by
     gen_v_space.
-    TODO(doc): verify that cc_space_v_vvoo(i1,i4,i3,i2)
-    equals <i1 i2 | i3 i4> in the Cholesky branch
+    Verified numerically against the direct integrals (H2O,
+    cc-pVTZ, nOa=5, nVa=53, 1110 Cholesky vectors, 2026-10-31):
+    the copy agrees to ~3e-14 relative. In the code's physicist
+    convention <i1 i2 | i3 i4> = <i1 i4 | i3 i2> (8-fold
+    symmetry, indices (i1,i3) and (i2,i4) on electrons 1,2).
 
     Needs:
 
@@ -2360,9 +2360,12 @@ Providers
     do_mo_cholesky is set, built from cc_space_v_vv_chol
     and cc_space_v_oo_chol with dgemm, otherwise by
     gen_v_space.
-    TODO(doc): verify the Cholesky branch agrees with the
-    direct one (the dgemm uses Cholesky vectors over the
-    (list1,list3) and (list2,list4) orbital pairs)
+    The dgemm contracts the Cholesky vectors over the
+    (list1,list3) and (list2,list4) orbital pairs, T(k,i1,i3)
+    and T(k,i2,i4), which reproduces <i1 i2 | i3 i4> in the
+    code's physicist convention (= (i1 i2 | i3 i4) in chemist
+    notation); the Cholesky branch agrees with the direct one,
+    up to the Cholesky threshold (author, 2026-10-31).
 
     Needs:
 
@@ -2773,7 +2776,12 @@ Providers
     cc_spin_v_oooo(p,q,r,s) = <pq||rs> in spin orbitals,
     p..s over the occupied spin orbitals, index order alpha
     then beta (1..cc_nOab), as built by gen_v_spin.
-    TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+    The Cholesky path exists for open-shell CCSD as well: open-shell
+    references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+    whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+    (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+    do_mo_cholesky branch for all four spin combinations
+    (author-confirmed 2026-10-31).
 
     Needs:
 
@@ -2800,7 +2808,12 @@ Providers
     Spin-orbital two-electron integrals of the OOOV block,
     <pq||rs> in spin orbitals, p,r,s occupied, q virtual,
     index order alpha then beta, as built by gen_v_spin.
-    TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+    The Cholesky path exists for open-shell CCSD as well: open-shell
+    references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+    whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+    (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+    do_mo_cholesky branch for all four spin combinations
+    (author-confirmed 2026-10-31).
 
     Needs:
 
@@ -2827,7 +2840,12 @@ Providers
     Spin-orbital two-electron integrals of the OOVO block,
     <pq||rs> in spin orbitals, p,r,s occupied, q virtual,
     index order alpha then beta, as built by gen_v_spin.
-    TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+    The Cholesky path exists for open-shell CCSD as well: open-shell
+    references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+    whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+    (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+    do_mo_cholesky branch for all four spin combinations
+    (author-confirmed 2026-10-31).
 
     Needs:
 
@@ -2854,7 +2872,12 @@ Providers
     Spin-orbital two-electron integrals of the OOVV block,
     <pq||rs> in spin orbitals, p,r occupied, q,s virtual,
     index order alpha then beta, as built by gen_v_spin.
-    TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+    The Cholesky path exists for open-shell CCSD as well: open-shell
+    references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+    whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+    (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+    do_mo_cholesky branch for all four spin combinations
+    (author-confirmed 2026-10-31).
 
     Needs:
 
@@ -2881,7 +2904,12 @@ Providers
     Spin-orbital two-electron integrals of the OVOO block,
     <pq||rs> in spin orbitals, p,r,s occupied, q virtual,
     index order alpha then beta, as built by gen_v_spin.
-    TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+    The Cholesky path exists for open-shell CCSD as well: open-shell
+    references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+    whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+    (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+    do_mo_cholesky branch for all four spin combinations
+    (author-confirmed 2026-10-31).
 
     Needs:
 
@@ -2908,7 +2936,12 @@ Providers
     Spin-orbital two-electron integrals of the OVOV block,
     <pq||rs> in spin orbitals, p,r occupied, q,s virtual,
     index order alpha then beta, as built by gen_v_spin.
-    TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+    The Cholesky path exists for open-shell CCSD as well: open-shell
+    references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+    whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+    (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+    do_mo_cholesky branch for all four spin combinations
+    (author-confirmed 2026-10-31).
 
     Needs:
 
@@ -2935,7 +2968,12 @@ Providers
     Spin-orbital two-electron integrals of the OVVO block,
     <pq||rs> in spin orbitals, p,s occupied, q,r virtual,
     index order alpha then beta, as built by gen_v_spin.
-    TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+    The Cholesky path exists for open-shell CCSD as well: open-shell
+    references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+    whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+    (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+    do_mo_cholesky branch for all four spin combinations
+    (author-confirmed 2026-10-31).
 
     Needs:
 
@@ -2962,7 +3000,12 @@ Providers
     Spin-orbital two-electron integrals of the VVOO block,
     <pq||rs> in spin orbitals, p,q virtual, r,s occupied,
     index order alpha then beta, as built by gen_v_spin.
-    TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+    The Cholesky path exists for open-shell CCSD as well: open-shell
+    references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+    whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+    (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+    do_mo_cholesky branch for all four spin combinations
+    (author-confirmed 2026-10-31).
 
     Needs:
 
@@ -3824,6 +3867,25 @@ Subroutines / functions
        * :c:func:`guess_t2`
 
  
+.. c:function:: void report(void)
+
+
+    File : :file:`zz_test_chol_check.irp.f`
+
+    .. code:: fortran
+
+        subroutine report(name, direct, test, maxref, maxdiff)
+
+
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`zz_test_chol_check`
+
+ 
 .. c:function:: void shift_idx_spin(void)
 
 
@@ -4100,4 +4162,57 @@ Subroutines / functions
 
        * :c:data:`ezfio_filename`
        * :c:data:`read_amplitudes`
+
+ 
+.. c:function:: void zz_test_chol_check(void)
+
+
+    File : :file:`zz_test_chol_check.irp.f`
+
+    .. code:: fortran
+
+        subroutine zz_test_chol_check
+
+
+    Debug: Cholesky vs direct cc_space_v_* blocks (oovv, vovo, oovo,
+    ooov, voov, ovvo). The direct values come from gen_v_space with
+    do_mo_cholesky = .false., the Cholesky values from the providers
+    with do_mo_cholesky = .true. (same SCF orbitals).
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cholesky_threshold`
+       * :c:data:`cc_list_occ`
+       * :c:data:`cc_list_occ`
+       * :c:data:`cc_no_m`
+       * :c:data:`cc_no_m`
+       * :c:data:`cc_no_m`
+       * :c:data:`cc_space_v_ooov`
+       * :c:data:`cc_space_v_oovo`
+       * :c:data:`cc_space_v_oovv`
+       * :c:data:`cc_space_v_ovoo`
+       * :c:data:`cc_space_v_ovvo`
+       * :c:data:`cc_space_v_vooo`
+       * :c:data:`cc_space_v_voov`
+       * :c:data:`cc_space_v_vovo`
+       * :c:data:`cc_space_v_vvoo`
+       * :c:data:`cholesky_mo_num`
+       * :c:data:`do_mo_cholesky`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`gen_v_space`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`do_mo_cholesky`
 

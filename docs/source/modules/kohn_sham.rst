@@ -46,7 +46,6 @@ Programs
 -------- 
  
  * :ref:`ks_scf` 
- * :ref:`print_mos` 
  
 Providers 
 --------- 
@@ -663,9 +662,12 @@ Subroutines / functions
     ks_scf start-up check: stop with a diagnostic if
     exchange_functional or correlation_functional is "None" or
     contains the substring "short_range".
-    TODO(doc): the message matches kohn_sham_rs/rs_ks_scf.irp.f;
-    in-tree range separated functionals are named sr_*: what does
-    this check intend to reject?
+    TODO(doc): intent unknown to the author (author, 2026-10-31).
+    The code literally stops when a functional is "None" or
+    contains the substring "short_range"; in-tree functionals are
+    named sr_*, so the substring branch is dead for them, and the
+    diagnostic text is copy-pasted from
+    kohn_sham_rs/rs_ks_scf.irp.f (there the test is "sr").
 
     Needs:
 
@@ -732,30 +734,6 @@ Subroutines / functions
        * :c:data:`fock_matrix_ao_alpha`
        * :c:data:`mo_coef`
        * :c:data:`mo_label`
-
- 
-.. c:function:: void g(void)
-
-
-    File : :file:`print_mos.irp.f`
-
-    .. code:: fortran
-
-        double precision function g(x,alpha)
-
-
-
- 
-.. c:function:: void gtt(void)
-
-
-    File : :file:`print_mos.irp.f`
-
-    .. code:: fortran
-
-        double precision function gtt(x,alpha)
-
-
 
  
 .. c:function:: void run(void)

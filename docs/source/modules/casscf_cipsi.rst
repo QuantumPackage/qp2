@@ -3208,8 +3208,8 @@ Providers
     SXvector_lowest. The max_overlap provider lists the
     monoexcitations with |SXvector_lowest(i)| above this
     value. The value 0.5d0 is hard coded.
-    TODO(doc): is 0.5d0 a meaningful value or an arbitrary
-    choice?
+    TODO(doc): probably an arbitrary choice (author not sure,
+    2026-10-31).
 
     Needed by:
 
@@ -4019,8 +4019,9 @@ Subroutines / functions
     Computes the active part of the bielectronic energy: sum over active
     orbitals of the two-electron integrals weighted by the spin-traced
     state-averaged active 2-RDM. The result is printed (accu(1)).
-    TODO(doc): the only call in the get_energy program is commented out;
-    confirm whether this subroutine is still in use.
+    Not currently called (the only call in the get_energy program is
+    commented out); kept because it may need to be reactivated for
+    debugging (author, 2026-10-31).
 
     Needs:
 

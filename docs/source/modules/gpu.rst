@@ -114,7 +114,8 @@ Providers
     it with the corresponding cap before a BLAS call. The caps
     gpu_busy_max_ddot, gpu_busy_max_dgemv and gpu_busy_max_dgemm
     are set when gpu_num > 0 to 0, 4 and nthreads_pt2/(gpu_num*2).
-    TODO(doc): what determines the values of the three caps?
+    The three caps are set from empirical measurements
+    (author, 2026-10-31).
 
     Needs:
 
@@ -145,7 +146,8 @@ Providers
     it with the corresponding cap before a BLAS call. The caps
     gpu_busy_max_ddot, gpu_busy_max_dgemv and gpu_busy_max_dgemm
     are set when gpu_num > 0 to 0, 4 and nthreads_pt2/(gpu_num*2).
-    TODO(doc): what determines the values of the three caps?
+    The three caps are set from empirical measurements
+    (author, 2026-10-31).
 
     Needs:
 
@@ -176,7 +178,8 @@ Providers
     it with the corresponding cap before a BLAS call. The caps
     gpu_busy_max_ddot, gpu_busy_max_dgemv and gpu_busy_max_dgemm
     are set when gpu_num > 0 to 0, 4 and nthreads_pt2/(gpu_num*2).
-    TODO(doc): what determines the values of the three caps?
+    The three caps are set from empirical measurements
+    (author, 2026-10-31).
 
     Needs:
 
@@ -207,7 +210,8 @@ Providers
     it with the corresponding cap before a BLAS call. The caps
     gpu_busy_max_ddot, gpu_busy_max_dgemv and gpu_busy_max_dgemm
     are set when gpu_num > 0 to 0, 4 and nthreads_pt2/(gpu_num*2).
-    TODO(doc): what determines the values of the three caps?
+    The three caps are set from empirical measurements
+    (author, 2026-10-31).
 
     Needs:
 

@@ -2164,7 +2164,6 @@ Index of Subroutines/Functions
     * :c:func:`four_idx_novvvv2` 
     * :c:func:`four_idx_novvvv_old` 
     * :c:func:`four_idx_transform` 
-    * :c:func:`g` 
     * :c:func:`g0_dg0` 
     * :c:func:`g0_dg0_d2g0` 
     * :c:func:`g0_ueg_mu` 
@@ -2403,7 +2402,6 @@ Index of Subroutines/Functions
     * :c:func:`gradvec_ia` 
     * :c:func:`gradvec_it` 
     * :c:func:`gradvec_ta` 
-    * :c:func:`gtt` 
     * :c:func:`guess_t1` 
     * :c:func:`guess_t2` 
     * :c:func:`h_apply_cis` 
@@ -2860,7 +2858,6 @@ Index of Subroutines/Functions
     * :c:func:`print_he_tc_energy` 
     * :c:func:`print_memory_usage` 
     * :c:func:`print_mol_properties` 
-    * :c:func:`print_mos` 
     * :c:func:`print_oscillator_strength` 
     * :c:func:`print_overlap` 
     * :c:func:`print_sorted_wf_coef` 
@@ -2934,6 +2931,7 @@ Index of Subroutines/Functions
     * :c:func:`reorder_mo_max_overlap` 
     * :c:func:`reorder_orbitals_for_casscf` 
     * :c:func:`replace_wf` 
+    * :c:func:`report` 
     * :c:func:`reset_zmq_addresses` 
     * :c:func:`resident_memory` 
     * :c:func:`resize_h_apply_buffer` 
@@ -3221,7 +3219,6 @@ Index of Subroutines/Functions
     * :c:func:`vcorrlr` 
     * :c:func:`vec_to_mat_index` 
     * :c:func:`vec_to_mat_v2` 
-    * :c:func:`wait_for_next_state` 
     * :c:func:`wait_for_state` 
     * :c:func:`wait_for_states` 
     * :c:func:`wall_time` 
@@ -3315,4 +3312,5 @@ Index of Subroutines/Functions
     * :c:func:`zmq_put_psi_det_size` 
     * :c:func:`zmq_selection` 
     * :c:func:`zmq_set_running` 
+    * :c:func:`zz_test_chol_check` 
 

@@ -149,7 +149,8 @@ Providers
     R +/- ao_extra_center along the axis of the p power.
     The value is fixed to 0.01 and written to the EZFIO file
     by the program fit_1s_basis.
-    TODO(doc): what are the units of this fixed shift (0.01)
+    The fixed shift 0.01 is in atomic units (author-confirmed
+    2026-10-31).
 
     Needed by:
 

@@ -1617,8 +1617,9 @@ Providers
     For each spin and state, entry (j,j) = 1 - dm(j,j) and, for
     i > j, entries (i,j) and (j,i) = -dm(i,j), where dm is
     one_e_dm_mo_alpha (spin 1) or one_e_dm_mo_beta (spin 2).
-    TODO(doc): is this the complementary one-body density matrix,
-    and which method consumes it? No caller found in src/.
+    Complementary one-body density matrix (author's reading,
+    2026-10-31); no in-tree caller found, probably consumed by an
+    external plugin.
 
     Needs:
 
@@ -4978,8 +4979,10 @@ Subroutines / functions
     N_miniList is the total number of kept determinants.
     fullMatch is always returned as .false.; the statements
     that would set it to .true. are commented out.
-    TODO(doc): what was fullMatch meant to signal, and is the
-    commented-out assignment intentional?
+    TODO(doc): fullMatch was an optimization removed because
+    it was wrong (author, 2026-10-31); to be checked. The
+    commented-out lines predate the 2019-01-25 initial
+    import of this repository, so no commit records it.
 
  
 .. c:function:: void create_wf_of_psi_bilinear_matrix(void)
@@ -6627,8 +6630,9 @@ Subroutines / functions
     The same mask is built by get_mask_phase
     (cipsi/selection.irp.f), where it is used to compute the
     phase of double excitations (get_phase_bi).
-    TODO(doc): no caller of get_phasemask_bit found in the
-    tree; is it dead code?
+    No in-tree caller (the code is probably inlined at the
+    former call sites); kept at disposal if needed again
+    (author, 2026-10-31).
 
  
 .. c:function:: void get_s2(void)
@@ -6709,8 +6713,8 @@ Subroutines / functions
 
     For a determinant det_1 that differs from the closed-shell
     reference (ref_closed_shell_bitmask), computes the
-    Hamiltonian matrix element with the reference, for the
-    excitation (h, p) of spin `spin`:
+    Hamiltonian matrix element <det_1|H|det_2>, where det_2
+    is the single excitation (h, p) of spin `spin` from det_1:
     hij = fock_operator_closed_shell_ref_bitmask(h, p)
           - Coulomb integrals of the holes
           + exchange integrals of the same-spin holes
@@ -6718,13 +6722,12 @@ Subroutines / functions
           - exchange integrals of the same-spin particles,
     times phase.
     Holes are the spin orbitals occupied in the reference but
-    not in det_1, particles the opposite. det_2 is not used.
+    not in det_1, particles the opposite. det_2 is a single
+    excitation from det_1 (cf. its use in i_H_j_s2); it is not
+    used because the hole and particle are already given as
+    parameters (author-corrected 2026-10-31).
     The (h, p) Coulomb and exchange integrals are preloaded
     in local buffers.
-    TODO(doc): no caller found in the tree; is det_1 expected
-    to be a single excitation of the reference (the routine
-    was named get_mono_excitation_from_fock), and why is
-    det_2 unused?
 
     Needs:
 
@@ -8359,8 +8362,9 @@ Subroutines / functions
 
     For a determinant det_1 that differs from the closed-shell
     reference (ref_closed_shell_bitmask), computes the
-    two-electron part of the Hamiltonian matrix element with
-    the reference, for the excitation (h, p) of spin `spin`:
+    two-electron part of the Hamiltonian matrix element
+    <det_1|H|det_2>, where det_2 is the single excitation (h, p)
+    of spin `spin` from det_1:
     hij = fock_wee_closed_shell(h, p)
           - Coulomb integrals of the holes
           + exchange integrals of the same-spin holes
@@ -8368,10 +8372,10 @@ Subroutines / functions
           - exchange integrals of the same-spin particles,
     times phase.
     Holes are the spin orbitals occupied in the reference but
-    not in det_1, particles the opposite. det_2 is not used.
-    TODO(doc): no caller found in the tree; is det_1 expected
-    to be a single excitation of the reference (the routine
-    was named mono_excitation_wee), and why is det_2 unused?
+    not in det_1, particles the opposite. det_2 is a single
+    excitation from det_1 (cf. its use in i_H_j_s2); it is not
+    used because the hole and particle are already given as
+    parameters (author-corrected 2026-10-31).
 
     Needs:
 

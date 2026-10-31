@@ -201,7 +201,9 @@ Providers
     Read from the EZFIO database if the entry exists (master
     reads, then MPI broadcast), otherwise set to the :math:`S^{-1/2}` 
     canonical orthonormalized AOs (ao_ortho_canonical_coef).
-    TODO(doc): purpose of the aux basis; who writes it to EZFIO?
+    Auxiliary basis, probably to go beyond the basis set for
+    integral evaluation (author's reading, 2026-10-31); introduced
+    by AbdAmmar (commit 868d5a162, 2023-05-06, "jast 201 added").
 
     Needs:
 
@@ -817,7 +819,9 @@ Subroutines / functions
     mo_label is set to label. m must equal mo_num. If
     sign == -1, -matrix is diagonalized and the printed
     eigenvalues are negated back; if output, they are printed.
-    TODO(doc): purpose of the sign argument?
+    The sign argument exists because diagonalization sorts the
+    eigenvalues; changing the sign is a trick to reverse the
+    sorting order when needed (author, 2026-10-31).
 
     Needs:
 
@@ -889,7 +893,8 @@ Subroutines / functions
     Same as mo_as_svd_vectors_of_mo_matrix, plus eig(i)
     receives the i-th singular value of matrix; singular
     values at or below 1.d-20 are written as 0.d0.
-    TODO(doc): is 1.d-20 a threshold for numerical noise?
+    1.d-20 is a threshold for numerical noise (author-confirmed
+    2026-10-31).
 
     Needs:
 
@@ -1044,9 +1049,9 @@ Subroutines / functions
     Write the first n MOs to the EZFIO database: mo_num is set
     to n, and mo_label, ao_md5, mo_occ, mo_class and the first
     n columns of mo_coef are stored.
-    TODO(doc): mo_occ and mo_class are providers of the full
-    mo_num size; when n < mo_num they are written with the full
-    size while the stored mo_num is n. Is this intended?
+    mo_occ and mo_class are providers of the full mo_num size and
+    are written with that full size even when n < mo_num; this is
+    intended and does not matter (author, 2026-10-31).
 
     Needs:
 

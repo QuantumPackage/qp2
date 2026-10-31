@@ -621,8 +621,9 @@ Providers
     psi_configuration_to_psi_det(2,i) and sums, over orbitals, the
     popcnt of the AND of its alpha bit strings with the configuration's
     singly occupied mask.
-    TODO(doc): the loop writes the AND result to det_alpha(N_int) but
-    reads det_alpha(l), which is never initialized; is this a bug?
+    The loop writes det_alpha(N_int) but should write
+    det_alpha(l) = iand(det_tmp(l,1),psi_configuration(l,1,i)) -
+    bug (author, 2026-10-31).
 
     Needs:
 

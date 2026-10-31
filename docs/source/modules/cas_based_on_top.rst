@@ -1316,8 +1316,10 @@ Subroutines / functions
     statements compute (and print) total_cas_on_top_density and
     average_on_top. It then prints accu, the sum over active
     orbital pairs (i,j) of act_2_rdm_ab_mo(i,j,i,j,1).
-    TODO(doc): act_2_rdm_ab_mo is indexed 1..n_act_orb, but here
-    i,j are global MO numbers from list_act. Is that intended?
+    The intended sum is over the active-space indices i,j =
+    1..n_act_orb of act_2_rdm_ab_mo(i,j,i,j,1); the current code
+    uses the global MO numbers from list_act, a suspected bug
+    (author-confirmed 2026-10-31).
 
     Needs:
 

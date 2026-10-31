@@ -749,7 +749,9 @@ Subroutines / functions
     provider); saves the wave functions (save_wavefunction),
     stores the CISD energies (ezfio_set_cisd_energy) and prints
     the state and excitation energies.
-    TODO(doc): no caller of run_cisd in src/; is it an external entry point?
+    No caller in-tree; looks like dead code (author, 2026-10-31);
+    kept because external plugins may use it (author policy,
+    2026-10-31).
 
     Needs:
 

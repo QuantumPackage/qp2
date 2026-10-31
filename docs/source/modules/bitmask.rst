@@ -121,8 +121,9 @@ Providers
     For each spin, the bitwise OR of ref_bitmask and act_bitmask: the
     occupied MOs of the reference plus all active MOs are marked
     occupied.
-    TODO(doc): what is the intended use of this bitmask? No in-tree
-    caller was found.
+    No intended use (author, 2026-10-31); no in-tree caller;
+    kept because external plugins may use it (author policy,
+    2026-10-31).
 
     Needs:
 
@@ -178,8 +179,9 @@ Providers
     Each of the four slices is a copy of
     reunion_of_core_inact_act_bitmask, so the bits of the core,
     inactive and active MOs are set.
-    TODO(doc): what is the intended use of this bitmask? No in-tree
-    caller was found.
+    No intended use (author, 2026-10-31); no in-tree caller;
+    kept because external plugins may use it (author policy,
+    2026-10-31).
 
     Needs:
 
@@ -2004,8 +2006,9 @@ Providers
 
     Each of the four slices is a copy of virt_bitmask, so the bits of
     the virtual MOs are set.
-    TODO(doc): what is the intended use of this bitmask? No in-tree
-    caller was found.
+    No intended use (author, 2026-10-31); no in-tree caller;
+    kept because external plugins may use it (author policy,
+    2026-10-31).
 
     Needs:
 
@@ -2912,8 +2915,8 @@ Subroutines / functions
     alpha and beta bitstrings of generators_bitmask in '+-' notation
     via print_det.
     The print statements are currently commented out, so the subroutine
-    performs no action.
-    TODO(doc): is the commented-out printing intentional (debug only)?
+    performs no action; they are debug only and the commented-out
+    lines may be erased (author, 2026-10-31).
 
     Needs:
 

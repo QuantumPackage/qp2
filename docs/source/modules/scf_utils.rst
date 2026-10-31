@@ -696,7 +696,8 @@ Subroutines / functions
     the energy has decreased by less than thresh_scf or after
     n_it_scf_max steps; on exit the lowest energy is stored in
     the EZFIO database.
-    TODO(doc): no in-tree caller of damping_SCF was found.
+    No in-tree caller; dead code (author, 2026-10-31); kept
+    because external plugins may use it.
 
     Needs:
 

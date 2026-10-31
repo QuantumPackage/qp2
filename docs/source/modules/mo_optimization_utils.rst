@@ -802,7 +802,8 @@ Subroutines / functions
     coefficients of the eigenstates of the |CI| matrix
     (diagonalize_ci), and saves the wave function to the |EZFIO|
     file (save_wavefunction_unsorted).
-    TODO(doc): is this the final hook, or a template to extend (see header)?
+    This is a template to extend, not a final hook (author,
+    2026-10-31).
 
     Needs:
 
@@ -852,7 +853,8 @@ Subroutines / functions
     over the N_states |CI| states, ci_energy(i) weighted by
     state_average_weight(i) (normalized to sum to 1 by
     state_weight_normalization).
-    TODO(doc): only call (my_providers.org) is commented out; still in use?
+    TODO(doc): the only call (my_providers.org) is commented out
+    and the use is unknown to the author (author, 2026-10-31).
 
     Needs:
 
