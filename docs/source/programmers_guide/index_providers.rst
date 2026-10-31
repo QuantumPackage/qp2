@@ -119,7 +119,7 @@ Index of Providers
     * :c:data:`ao_one_e_integrals_tc_tot` 
     * :c:data:`ao_ortho_canonical_coef` 
     * :c:data:`ao_ortho_canonical_coef_inv` 
-    * :c:data:`ao_ortho_canonical_nucl_elec_integrals` 
+    * :c:data:`ao_canonical_nucl_elec_ints` 
     * :c:data:`ao_ortho_canonical_num` 
     * :c:data:`ao_ortho_canonical_overlap` 
     * :c:data:`ao_ortho_lowdin_coef` 
@@ -561,7 +561,7 @@ Index of Providers
     * :c:data:`final_weight_at_r_extra` 
     * :c:data:`final_weight_at_r_vector` 
     * :c:data:`final_weight_at_r_vector_extra` 
-    * :c:data:`final_weight_at_r_vector_per_atom` 
+    * :c:data:`final_weight_at_r_per_atom` 
     * :c:data:`fipq` 
     * :c:data:`fock_3_mat` 
     * :c:data:`fock_3_mat_a_op_sh` 
@@ -728,7 +728,7 @@ Index of Providers
     * :c:data:`index_final_points_extra` 
     * :c:data:`index_final_points_extra_reverse` 
     * :c:data:`index_final_points_per_atom` 
-    * :c:data:`index_final_points_per_atom_reverse` 
+    * :c:data:`index_final_pts_per_atom_rev` 
     * :c:data:`index_final_points_reverse` 
     * :c:data:`index_hf_psi_det` 
     * :c:data:`index_holes_bitmask` 
@@ -1512,7 +1512,7 @@ Index of Providers
     * :c:data:`state_av_full_occ_2_rdm_aa_mo` 
     * :c:data:`state_av_full_occ_2_rdm_ab_mo` 
     * :c:data:`state_av_full_occ_2_rdm_bb_mo` 
-    * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo` 
+    * :c:data:`state_av_occ_2_rdm_spin_trace_mo` 
     * :c:data:`state_average_weight` 
     * :c:data:`super_ci_dm` 
     * :c:data:`superci_nat_occ` 

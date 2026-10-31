@@ -17,5 +17,5 @@ attraction integrals in them, as a starting point for the |SCF|:
   for the Lowdin :math:`S^{-1/2}` orthonormalization of the |AOs|, and
   :c:data:`ao_ortho_lowdin_nucl_elec_integrals` for the nuclear
   attraction in that basis
-* :c:data:`ao_ortho_canonical_nucl_elec_integrals` for the nuclear
+* :c:data:`ao_canonical_nucl_elec_ints` for the nuclear
   attraction in the canonical orthonormalized |AO| basis

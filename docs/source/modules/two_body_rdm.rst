@@ -627,7 +627,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
+       * :c:data:`state_av_occ_2_rdm_spin_trace_mo`
 
  
 .. c:var:: double state_av_full_occ_2_rdm_aa_mo
@@ -750,14 +750,14 @@ Providers
 
 
  
-.. c:var:: double state_av_full_occ_2_rdm_spin_trace_mo
+.. c:var:: double state_av_occ_2_rdm_spin_trace_mo
 
 
     File : :file:`state_av_full_orb_2_rdm.irp.f`
 
     .. code:: fortran
 
-        double precision, allocatable	:: state_av_full_occ_2_rdm_spin_trace_mo	(n_core_inact_act_orb,n_core_inact_act_orb,n_core_inact_act_orb,n_core_inact_act_orb)
+        double precision, allocatable	:: state_av_occ_2_rdm_spin_trace_mo	(n_core_inact_act_orb,n_core_inact_act_orb,n_core_inact_act_orb,n_core_inact_act_orb)
 
 
     state_av_full_occ_2_rdm_bb_mo(i,j,k,l) =  STATE AVERAGE physicist notation for 2RDM of beta/beta electrons
@@ -827,7 +827,7 @@ Providers
        * :c:data:`list_core_inact_act`
        * :c:data:`mo_num`
        * :c:data:`n_core_inact_act_orb`
-       * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
+       * :c:data:`state_av_occ_2_rdm_spin_trace_mo`
 
 
  
@@ -1021,7 +1021,7 @@ Subroutines / functions
        * :c:data:`state_av_full_occ_2_rdm_aa_mo`
        * :c:data:`state_av_full_occ_2_rdm_ab_mo`
        * :c:data:`state_av_full_occ_2_rdm_bb_mo`
-       * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
+       * :c:data:`state_av_occ_2_rdm_spin_trace_mo`
        * :c:data:`state_average_weight`
 
     Called by:

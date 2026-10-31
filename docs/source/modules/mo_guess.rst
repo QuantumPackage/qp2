@@ -23,7 +23,7 @@ attraction integrals in them, as a starting point for the |SCF|:
   for the Lowdin :math:`S^{-1/2}` orthonormalization of the |AOs|, and
   :c:data:`ao_ortho_lowdin_nucl_elec_integrals` for the nuclear
   attraction in that basis
-* :c:data:`ao_ortho_canonical_nucl_elec_integrals` for the nuclear
+* :c:data:`ao_canonical_nucl_elec_ints` for the nuclear
   attraction in the canonical orthonormalized |AO| basis
  
  
@@ -31,14 +31,14 @@ attraction integrals in them, as a starting point for the |SCF|:
 Providers 
 --------- 
  
-.. c:var:: double ao_ortho_canonical_nucl_elec_integrals
+.. c:var:: double ao_canonical_nucl_elec_ints
 
 
     File : :file:`mo_guess/pot_mo_ortho_canonical_ints.irp.f`
 
     .. code:: fortran
 
-        double precision, allocatable	:: ao_ortho_canonical_nucl_elec_integrals	(mo_num,mo_num)
+        double precision, allocatable	:: ao_canonical_nucl_elec_ints	(mo_num,mo_num)
 
 
     Nuclear attraction (nucleus-electron) integrals in the canonical

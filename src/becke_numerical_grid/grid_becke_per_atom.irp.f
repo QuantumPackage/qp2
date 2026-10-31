@@ -21,9 +21,9 @@
 END_PROVIDER
 
  BEGIN_PROVIDER [double precision, final_grid_points_per_atom, (3,n_pts_max_per_atom,nucl_num)]
-&BEGIN_PROVIDER [double precision, final_weight_at_r_vector_per_atom, (n_pts_max_per_atom,nucl_num) ]
+&BEGIN_PROVIDER [double precision, final_weight_at_r_per_atom, (n_pts_max_per_atom,nucl_num) ]
 &BEGIN_PROVIDER [integer, index_final_points_per_atom, (3,n_pts_max_per_atom,nucl_num) ]
-&BEGIN_PROVIDER [integer, index_final_points_per_atom_reverse, (n_points_integration_angular,n_points_radial_grid,nucl_num) ]
+&BEGIN_PROVIDER [integer, index_final_pts_per_atom_rev, (n_points_integration_angular,n_points_radial_grid,nucl_num) ]
  implicit none
  BEGIN_DOC
  !  final_grid_points_per_atom(1:3,i,j) = x, y, z coordinates of the
@@ -57,11 +57,11 @@ END_PROVIDER
         final_grid_points_per_atom(1,i_count(j),j) = grid_points_per_atom(1,k,i,j)
         final_grid_points_per_atom(2,i_count(j),j) = grid_points_per_atom(2,k,i,j)
         final_grid_points_per_atom(3,i_count(j),j) = grid_points_per_atom(3,k,i,j)
-        final_weight_at_r_vector_per_atom(i_count(j),j) = final_weight_at_r(k,i,j)
+        final_weight_at_r_per_atom(i_count(j),j) = final_weight_at_r(k,i,j)
         index_final_points_per_atom(1,i_count(j),j) = k
         index_final_points_per_atom(2,i_count(j),j) = i
         index_final_points_per_atom(3,i_count(j),j) = j
-        index_final_points_per_atom_reverse(k,i,j) = i_count(j)
+        index_final_pts_per_atom_rev(k,i,j) = i_count(j)
       enddo
     enddo
   enddo
