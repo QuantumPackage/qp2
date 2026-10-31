@@ -433,10 +433,9 @@ subroutine v2_over_x(v,x,res)
   ! Store in res the root of y**2 + x*y = v**2 with the sign of
   ! x (res = 0 if v = 0); the value is finite at x = 0, where
   ! it equals abs(v).
-  ! TODO(doc): is res a regularized stand-in for v**2/x? The
-  ! in-code comment and the module README (crint_1/crint_2 line)
-  ! point that way, but res differs from v**2/x at finite x and
-  ! the routine has no caller in src/ today.
+  ! res is a regularized stand-in for v**2/x (author-confirmed
+  ! 2026-10-31); it differs from v**2/x at finite x by design;
+  ! no caller in src/ today.
   END_DOC
   !BEGIN_DOC
   ! Two by two diagonalization to avoid the divergence in v^2/x when x goes to 0

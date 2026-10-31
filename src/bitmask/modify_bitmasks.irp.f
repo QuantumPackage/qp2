@@ -140,8 +140,8 @@ subroutine print_generators_bitmasks_holes
  ! alpha and beta bitstrings of generators_bitmask in '+-' notation
  ! via print_det.
  ! The print statements are currently commented out, so the subroutine
- ! performs no action.
- ! TODO(doc): is the commented-out printing intentional (debug only)?
+ ! performs no action; they are debug only and the commented-out
+ ! lines may be erased (author, 2026-10-31).
  END_DOC
 
  allocate(key_tmp(N_int,2))

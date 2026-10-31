@@ -33,12 +33,12 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, ref_vhxc]
  implicit none
  BEGIN_DOC
- ! Sums 2*effective_one_e_potential(i,i,1) for i = 1..elec_beta_num,
- ! twice the diagonal of the effective one-electron potential (state 1)
- ! over the first elec_beta_num MOs; the second loop in the code
- ! (i = elec_beta_num+1 to elec_beta_num) is empty.
- ! TODO(doc): intended meaning of ref_vhxc; is the empty second loop
- ! intentional?
+ ! Sums effective_one_e_potential(i,i,1) (state 1) with weight 2
+ ! for the beta electrons (i = 1..elec_beta_num) and weight 1 for
+ ! the unpaired alpha electrons (i =
+ ! elec_beta_num+1..elec_alpha_num). The second loop originally
+ ! had an empty range (bug, author-fixed 2026-10-31); the code
+ ! assumes elec_alpha_num >= elec_beta_num.
  END_DOC
  integer :: i
  do i = 1, elec_beta_num

@@ -8,8 +8,10 @@ subroutine compute_H_oo_chol(nO,nV,tau_x,d_cc_space_f_oo, &
   ! run_ccsd_space_orb when do_mo_cholesky is set. H_oo is
   ! initialized to d_cc_space_f_oo and updated with tau_x
   ! contractions over d_cc_space_v_ov_chol and d_cc_space_v_vo_chol.
-  ! TODO(doc): confirm this equals the compute_H_oo formula
-  ! f_oo(u,i) + sum w_oovv(i,j,a,b) * tau(u,j,a,b).
+  ! The BLAS sequence reproduces the compute_H_oo formula
+  ! f_oo(u,i) + sum w_oovv(i,j,a,b) * tau(u,j,a,b), the
+  ! two-electron contraction formed through the Cholesky vectors
+  ! (author-confirmed 2026-10-31).
   END_DOC
   use gpu
   implicit none
@@ -85,8 +87,10 @@ subroutine compute_H_vv_chol(nO,nV,tau_x,d_cc_space_f_vv, &
   ! run_ccsd_space_orb when do_mo_cholesky is set. H_vv is
   ! initialized to d_cc_space_f_vv and updated with tau_x
   ! contractions over d_cc_space_v_ov_chol.
-  ! TODO(doc): confirm this equals the compute_H_vv formula
-  ! f_vv(a,beta) - sum w_vvoo(a,b,i,j) * tau(i,j,beta,b).
+  ! The BLAS sequence reproduces the compute_H_vv formula
+  ! f_vv(a,beta) - sum w_vvoo(a,b,i,j) * tau(i,j,beta,b), the
+  ! contraction formed through d_cc_space_v_ov_chol
+  ! (author-confirmed 2026-10-31).
   END_DOC
   use gpu
   implicit none
@@ -154,10 +158,11 @@ subroutine compute_H_vo_chol(nO,nV,t1,d_cc_space_f_vo, &
   ! run_ccsd_space_orb when do_mo_cholesky is set. H_vo is
   ! initialized to d_cc_space_f_vo and updated with t1
   ! contractions over d_cc_space_v_ov_chol and d_cc_space_v_vo_chol.
-  ! TODO(doc): confirm this equals the compute_H_vo formula
+  ! The BLAS sequence reproduces the compute_H_vo formula
   ! f_vo(a,i) + sum w_vvoo(a,b,i,j) * t1(j,b); the pre-GPU
-  ! transpose loop (commit fa6d1419~1) is now a gpu_dgeam
-  ! that copies each column in transposed order.
+  ! transpose loop (commit fa6d1419~1) is a gpu_dgeam that
+  ! copies each column in transposed order (author-confirmed
+  ! 2026-10-31).
   END_DOC
   use gpu
   implicit none
@@ -239,9 +244,10 @@ subroutine compute_r1_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1,d_cc_s
   ! v_ovov, v_oovo, and the Cholesky vectors v_vo_chol and
   ! v_vv_chol. r1 is sign-flipped at the end for consistency
   ! with the spin-orbital code; max_r1 is the largest |r1|.
-  ! TODO(doc): confirm this equals the non-cholesky r1 formula;
-  ! the pre-GPU X_voov expression (commit fa6d1419~1) is now
-  ! two gpu_dgeam calls on t2 and t1 slices.
+  ! The BLAS sequence reproduces the non-Cholesky r1 formula of
+  ! compute_r1_space; the pre-GPU X_voov expression (commit
+  ! fa6d1419~1) is two gpu_dgeam calls on t2 and t1 slices
+  ! (author-confirmed 2026-10-31).
   END_DOC
   use gpu
   implicit none
@@ -448,8 +454,9 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
   ! compute_g_vir_chol, compute_J1_chol and compute_K1_chol.
   ! r2 is sign-flipped at the end for consistency with the
   ! spin-orbital code; max_r2 is the largest element of r2.
-  ! TODO(doc): is max_r2 intentionally computed without dabs,
-  ! unlike max_r1, as in compute_r2_space?
+  ! TODO(doc): same suspected bug as in compute_r2_space, to be
+  ! fixed in the code (author, 2026-10-31): max_r2 is computed
+  ! without dabs, unlike max_r1 (see the TODO in compute_r2_space).
   END_DOC
   use gpu
   implicit none
@@ -874,8 +881,8 @@ subroutine compute_A1_chol(nO,nV,t1,t2,tau,d_cc_space_v_vooo, &
   ! and tau, as sketched in the in-code comments; the v_ovoo
   ! term of compute_A1 is formed from d_cc_space_v_vooo with a
   ! transposed index.
-  ! TODO(doc): confirm the BLAS formulation reproduces the
-  ! four-term formula of compute_A1.
+  ! The BLAS formulation reproduces the four-term formula of
+  ! compute_A1 (author-confirmed 2026-10-31).
   END_DOC
   use gpu
   implicit none
@@ -945,9 +952,10 @@ subroutine compute_g_occ_chol(nO,nV,t1,t2,H_oo, &
   ! t1 contraction over the Cholesky vectors d_cc_space_v_ov_chol
   ! and d_cc_space_v_oo_chol, and a d_cc_space_v_ovoo contraction
   ! with t1.
-  ! TODO(doc): confirm this equals the compute_g_occ formula
+  ! The BLAS sequence reproduces the compute_g_occ formula
   ! H_oo(u,i) + sum f_vo(a,i) * t1(u,a) + sum (2 *
-  ! v_ovoo(u,a,i,j) - v_ovoo(u,a,j,i)) * t1(j,a).
+  ! v_ovoo(u,a,i,j) - v_ovoo(u,a,j,i)) * t1(j,a)
+  ! (author-confirmed 2026-10-31).
   END_DOC
   use gpu
 
@@ -997,9 +1005,10 @@ subroutine compute_g_vir_chol(nO,nV,t1,t2,H_vv,d_cc_space_f_vo, &
   ! -d_cc_space_f_vo : t1, t1 contractions over the Cholesky
   ! vectors d_cc_space_v_ov_chol and d_cc_space_v_vv_chol, and
   ! H_vv.
-  ! TODO(doc): confirm this equals the compute_g_vir formula
+  ! The BLAS sequence reproduces the compute_g_vir formula
   ! (H_vv - f_vo : t1 + the v_vvvo terms); the pre-GPU signed
-  ! transpose of tmp_vo (commit fa6d1419~1) is now one gpu_dgeam.
+  ! transpose of tmp_vo (commit fa6d1419~1) is one gpu_dgeam
+  ! (author-confirmed 2026-10-31).
   END_DOC
   use gpu
 
@@ -1084,9 +1093,10 @@ subroutine compute_J1_chol(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvoo,d_cc_space_v_vo_chol
   ! and updated from d_cc_space_v_ovoo, d_cc_space_v_vvoo, t1,
   ! t2 and the Cholesky vectors d_cc_space_v_vo_chol and
   ! d_cc_space_v_vv_chol.
-  ! TODO(doc): confirm this equals the compute_J1 formula; the
+  ! The BLAS sequence reproduces the compute_J1 formula; the
   ! pre-GPU explicit expressions for Y_ovov and X_voov (commit
-  ! fa6d1419~1) are now gpu_dgeam calls on t2 and v_vvoo slices.
+  ! fa6d1419~1) are gpu_dgeam calls on t2 and v_vvoo slices
+  ! (author-confirmed 2026-10-31).
   END_DOC
   use gpu
   implicit none
@@ -1281,10 +1291,11 @@ subroutine compute_K1_chol(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov, &
   ! and updated from d_cc_space_v_ovoo, d_cc_space_v_vvoo, t1,
   ! t2 and the Cholesky vectors d_cc_space_v_ov_chol and
   ! d_cc_space_v_vv_chol.
-  ! TODO(doc): confirm this equals the compute_K1 formula; the
+  ! The BLAS sequence reproduces the compute_K1 formula; the
   ! pre-GPU explicit loops for Y and for the K1tmp accumulation
-  ! (commit fa6d1419~1) are now gpu_dgeam calls that a standard
-  ! BLAS reading of the arguments does not reproduce.
+  ! (commit fa6d1419~1) are gpu_dgeam calls that a standard
+  ! BLAS reading of the arguments does not reproduce
+  ! (author-confirmed 2026-10-31).
   END_DOC
   use gpu
 

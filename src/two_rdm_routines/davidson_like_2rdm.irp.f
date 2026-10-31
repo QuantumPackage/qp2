@@ -594,8 +594,9 @@ subroutine update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,loc
  ! for all n_st states: keys(1:4,i) gives the orbital
  ! indices (h1,h2,p1,p2) of the element, values(istate,i) is
  ! added to big_array(h1,h2,p1,p2,istate) under lock_2rdm.
- ! TODO(doc): every call site in this file is commented out;
- ! is this routine superseded by update_keys_values_n_states_local?
+ ! Every call site in this file is commented out and the
+ ! routine is superseded by update_keys_values_n_states_local
+ ! (author-confirmed 2026-10-31).
  END_DOC
  integer, intent(in) :: n_st,nkeys,dim1
  integer, intent(in) :: keys(4,nkeys)

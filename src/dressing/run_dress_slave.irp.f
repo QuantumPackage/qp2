@@ -11,7 +11,9 @@ subroutine run_dress_slave(thread,iproce,energy)
   ! each fragment's contribution via alpha_callback,
   ! accumulates it per tooth (delta_det) and per checkpoint
   ! (cp), and pushes the results with push_dress_results.
-  ! TODO(doc): role of thread, iproce and energy.
+  ! run_dress_slave is intended to be called in an OpenMP
+  ! environment, where thread corresponds to the ID of the current
+  ! thread; iproce and energy are unused (author, 2026-10-31).
   END_DOC
 
   double precision, intent(in)    :: energy(N_states_diag)

@@ -57,9 +57,9 @@ subroutine save_mos_truncated(n)
   ! Write the first n MOs to the EZFIO database: mo_num is set
   ! to n, and mo_label, ao_md5, mo_occ, mo_class and the first
   ! n columns of mo_coef are stored.
-  ! TODO(doc): mo_occ and mo_class are providers of the full
-  ! mo_num size; when n < mo_num they are written with the full
-  ! size while the stored mo_num is n. Is this intended?
+  ! mo_occ and mo_class are providers of the full mo_num size and
+  ! are written with that full size even when n < mo_num; this is
+  ! intended and does not matter (author, 2026-10-31).
   END_DOC
   double precision, allocatable  :: buffer(:,:)
   integer                        :: i,j,n
@@ -91,7 +91,9 @@ subroutine mo_as_eigvectors_of_mo_matrix(matrix,n,m,label,sign,output)
   ! mo_label is set to label. m must equal mo_num. If
   ! sign == -1, -matrix is diagonalized and the printed
   ! eigenvalues are negated back; if output, they are printed.
-  ! TODO(doc): purpose of the sign argument?
+  ! The sign argument exists because diagonalization sorts the
+  ! eigenvalues; changing the sign is a trick to reverse the
+  ! sorting order when needed (author, 2026-10-31).
   END_DOC
   integer,intent(in)             :: n,m, sign
   character*(64), intent(in)     :: label
@@ -218,7 +220,8 @@ subroutine mo_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,eig,label)
   ! Same as mo_as_svd_vectors_of_mo_matrix, plus eig(i)
   ! receives the i-th singular value of matrix; singular
   ! values at or below 1.d-20 are written as 0.d0.
-  ! TODO(doc): is 1.d-20 a threshold for numerical noise?
+  ! 1.d-20 is a threshold for numerical noise (author-confirmed
+  ! 2026-10-31).
   END_DOC
   integer,intent(in)             :: lda,m,n
   character*(64), intent(in)     :: label

@@ -248,8 +248,8 @@ subroutine get_d2_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, 
   ! Unoptimized reference version of get_d2, kept for
   ! debugging: same contribution to mat(k, r, s), with
   ! mo_two_e_integral called directly for every (r, s).
-  ! TODO(doc): phasemask is declared (2,N_int) here, unlike
-  ! the (N_int,2) of get_d2; is this a leftover?
+  ! phasemask is declared (2, N_int) here, but should be
+  ! (N_int, 2) as in get_d2 - bug (author-confirmed 2026-10-31).
   END_DOC
 
   integer(bit_kind), intent(in) :: mask(N_int, 2), gen(N_int, 2)

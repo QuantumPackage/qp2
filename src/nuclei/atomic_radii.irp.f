@@ -151,7 +151,13 @@ BEGIN_PROVIDER [double precision, slater_bragg_type_inter_distance, (nucl_num, n
  ! slater_bragg_radii_per_atom(j); other entries are zero.
  ! Used in cell_function_becke of becke_numerical_grid (Becke
  ! 1988, JCP 88(4)).
- ! TODO(doc): physical meaning of the u / (u*u - 1) factor?
+ ! This is the parameter a_ij of Eq. (A5) of A. D. Becke,
+ ! J. Chem. Phys. 88, 2547 (1988): in the coordinate change
+ ! nu_ij = mu_ij + a_ij (1 - mu_ij**2) (Eq. (A2)), it shifts
+ ! the fuzzy cell boundary off the perpendicular bisector, so
+ ! it crosses the internuclear axis where the distance ratio
+ ! to the two nuclei equals the Bragg-Slater radii ratio X
+ ! (Eqs. (A4)-(A6)).
  END_DOC
  integer :: i,j
  double precision :: xhi_tmp,u_ij
@@ -172,7 +178,12 @@ BEGIN_PROVIDER [double precision, slater_bragg_type_inter_distance_ua, (nucl_num
  ! from the radii in atomic units (a0),
  ! slater_bragg_radii_per_atom_ua, and each value is clipped to
  ! the interval [-0.5, 0.5].
- ! TODO(doc): why is the clipping limit 0.5?
+ ! The limit 0.5 is the monotonicity bound |a_ij| < 1/2 of
+ ! Eq. (A3) of A. D. Becke, J. Chem. Phys. 88, 2547 (1988):
+ ! when the computed a_ij falls outside that range, the paper
+ ! prescribes assigning the endpoint value +/- 1/2 (this
+ ! happens when the Bragg-Slater radii differ by a factor
+ ! above about 2.4).
  END_DOC
  integer :: i,j
  double precision :: xhi_tmp,u_ij

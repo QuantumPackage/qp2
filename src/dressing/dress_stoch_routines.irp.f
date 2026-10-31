@@ -25,8 +25,11 @@ END_PROVIDER
   ! otherwise.
   ! pt2_n_tasks_max: 1 + min(e*(e-1)/2, int(sqrt(N_det_generators))/
   ! 10), where e is the number of electrons outside the core.
-  ! TODO(doc): rationale of the 128 and 10000 thresholds and of
-  ! the e*(e-1)/2 and /10 terms of pt2_n_tasks_max.
+  ! The 128 and 10000 thresholds, and the e*(e-1)/2 and /10 terms
+  ! of pt2_n_tasks_max, are empirical values chosen to optimize
+  ! the speed (author, 2026-10-31). The fragmentation expression
+  ! is documented as an empirical choice in the thesis of
+  ! Y. Garniron (HAL tel-02089570), section "The basic algorithm".
   END_DOC
   logical, external :: testTeethBuilding
   integer :: i
@@ -133,8 +136,11 @@ END_PROVIDER
   ! beyond the drawn prefix (i > dress_dot_n_0(m)).
   ! dress_R1(m): last position of segment m in pt2_J, adjusted so
   ! that the moved generators come after it.
-  ! TODO(doc): purpose of moving the never-drawn generators to the
-  ! end of their segment: are they skipped by the slaves?
+  ! Moving the never-drawn generators to the end of their segment
+  ! separates them so that the drawn generators enter the
+  ! deterministic part while the never-drawn ones stay in the
+  ! stochastic part (author, 2026-10-31; see also "Tooth filling"
+  ! in the Garniron thesis, HAL tel-02089570).
   END_DOC
   integer :: m,j
   integer :: l,nmov
@@ -195,7 +201,9 @@ END_PROVIDER
   ! seed (1, 2, 3, ...).
   ! dress_T(i): tooth of generator i in the sorted list: 0 for
   ! the deterministic prefix, 1..pt2_N_teeth for the teeth.
-  ! TODO(doc): why is RANDOM_NUMBER called twice to fill pt2_u?
+  ! The double RANDOM_NUMBER call is a copy/paste bug (author,
+  ! 2026-10-31); the second call simply overwrites the first, so
+  ! pt2_u is filled by the second call alone.
   END_DOC
   integer :: N_c, N_j, U, t, i, m
   double precision :: v, dt
@@ -318,11 +326,12 @@ subroutine ZMQ_dress(E, dress, delta_out, delta_s2_out, relative_error)
   ! delta_s2_out receive, per state and determinant, the
   ! accumulated contributions and their second component, which the
   ! caller stores in delta_ij and delta_ij_tmp (components 1 and 2).
-  ! TODO(doc): the OMP section is fixed to 2 threads (NUM_THREADS
-  ! (2)); is the nproc_target computed from qp_max_mem supposed to
-  ! be used?
-  ! TODO(doc): what distinguishes the two components of delta_ij
-  ! (see the 'h' and 's' columns in dressing_vector.irp.f)?
+  ! The fixed 2-thread OpenMP section is intentional: one thread
+  ! runs the collector that waits for results, the other runs a
+  ! slave that is itself nested OpenMP and uses all the remaining
+  ! CPUs (author, 2026-10-31). The two components of delta_ij are
+  ! the contribution to the Hamiltonian (component 1) and the
+  ! contribution to $S^2$ (component 2) (author, 2026-10-31).
   END_DOC
 
   integer(ZMQ_PTR)               :: zmq_to_qp_run_socket, zmq_socket_pull
@@ -758,8 +767,11 @@ integer function dress_find_sample(v, w)
   ! selected by the sample value v. If several consecutive
   ! cumulative values are equal (zero-width bin), the last index
   ! of the run of equal values is returned.
-  ! TODO(doc): why does a zero-width bin map to the last index of
-  ! the run of equal cumulative values?
+  ! Probably to avoid a division by zero or a zero-width bin
+  ! (author, 2026-10-31); the code shows the returned index is a
+  ! lookup key into the generator arrays (edI(i), pt2_w(i)) and
+  ! the selected weight pt2_w(i) is the divisor of the estimator
+  ! x += edI(i) * pt2_W_T / pt2_w(i).
   END_DOC
   implicit none
   double precision, intent(in) :: v, w(0:N_det_generators)

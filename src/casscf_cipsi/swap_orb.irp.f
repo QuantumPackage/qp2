@@ -19,8 +19,8 @@
  ! SXvector_lowest. The max_overlap provider lists the
  ! monoexcitations with |SXvector_lowest(i)| above this
  ! value. The value 0.5d0 is hard coded.
- ! TODO(doc): is 0.5d0 a meaningful value or an arbitrary
- ! choice?
+ ! TODO(doc): probably an arbitrary choice (author not sure,
+ ! 2026-10-31).
  END_DOC
  thresh_overlap_switch = 0.5d0
  END_PROVIDER 

@@ -68,8 +68,9 @@ BEGIN_PROVIDER [ double precision, one_e_dm_dagger_mo_spin_index, (mo_num,mo_num
    ! For each spin and state, entry (j,j) = 1 - dm(j,j) and, for
    ! i > j, entries (i,j) and (j,i) = -dm(i,j), where dm is
    ! one_e_dm_mo_alpha (spin 1) or one_e_dm_mo_beta (spin 2).
-   ! TODO(doc): is this the complementary one-body density matrix,
-   ! and which method consumes it? No caller found in src/.
+   ! Complementary one-body density matrix (author's reading,
+   ! 2026-10-31); no in-tree caller found, probably consumed by an
+   ! external plugin.
    END_DOC
    integer                        :: i,j,ispin,istate
    ispin = 1

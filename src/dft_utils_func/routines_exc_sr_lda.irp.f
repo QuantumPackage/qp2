@@ -318,7 +318,7 @@ end
       eta=19.0d0
       if(dabs(eta*a*a).lt.50.d0)then
        fak=2.540118935556d0*dexp(-eta*a*a)
-       ! TODO(doc): origin of the prefactor 2.540118935556 and of eta = 19
+       ! TODO(doc): origin of the prefactor 2.540118935556 and of eta = 19: unknown to the author too; probably a value from a paper (author, 2026-10-31)
       else
        fak=0.d0
       endif
@@ -523,8 +523,9 @@ subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
  ! interaction, in Hartree: vclrup (spin-up) and vclrdown
  ! (spin-down) for given rs, z and mu. vclrupd and vclrdownd are
  ! built from d(eclr)/drs and d2(eclr)/dr2.
- ! TODO(doc): intended use of vclrupd and vclrdownd (no caller in
- ! this module reads them).
+ ! vclrupd and vclrdownd have no use (author, 2026-10-31); they
+ ! are kept because external plugins may use them (author
+ ! policy, 2026-10-31).
  END_DOC
 !SCF
 !cc Hartree atomic units used

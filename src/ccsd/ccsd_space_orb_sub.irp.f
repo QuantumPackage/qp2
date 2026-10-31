@@ -356,8 +356,11 @@ subroutine ccsd_energy_space_x(nO,nV,d_cc_space_v_oovv,d_cc_space_f_vo,tau_x,t1,
   ! f_vo and v_oovv the vo Fock block and oovv two-electron
   ! integrals, nO, nV the occupied and virtual spatial orbital
   ! counts. It is added to the reference determinant energy.
-  ! TODO(doc): is tau_x used instead of tau because v_oovv is
-  ! symmetric in (a, b)?
+  ! tau_x may be contracted with v_oovv in place of tau because
+  ! v_oovv(i,j,a,b) = <ij|ab> is symmetric in (a, b) and
+  ! update_tau_x_space computes tau_x(i,j,a,b) = 2 * tau(i,j,a,b)
+  ! - tau(i,j,b,a), so the contraction v_oovv : tau_x is exactly
+  ! equal to v_oovv : tau.
   END_DOC
   integer, intent(in)            :: nO, nV
   type(gpu_double4), intent(in)  :: tau_x, d_cc_space_v_oovv
@@ -1013,8 +1016,14 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   ! (via compute_B1_gam), J1, K1.
   ! r2 is sign-flipped at the end for consistency with the spin-
   ! orbital code; max_r2 is the largest element of r2.
-  ! TODO(doc): confirm that max_r2 is the max of r2 without dabs,
-  ! unlike max_r1.
+  ! TODO(doc): suspected bug, to be fixed in the code (author,
+  ! 2026-10-31): max_r2 is the largest element of r2 without dabs,
+  ! unlike max_r1 (dabs) and unlike the spin-orbital reference
+  ! ccsd_spin_orb_sub.irp.f, which uses maxval(abs) for both
+  ! residuals. Standard CC practice monitors a norm of the
+  ! absolute residual (CFOUR keyword CC_CONV, Q-Chem keyword
+  ! CC_T_CONV), so the missing dabs can make max_r2 underestimate
+  ! the residual, or even be negative.
   END_DOC
   ! in
   integer, intent(in)           :: nO, nV
@@ -1898,8 +1907,9 @@ subroutine compute_B1(nO,nV,t1,t2,B1)
   ! B1(a,b,beta,gam) = v_vvvv(a,b,beta,gam) - sum over i of
   ! v_vvvo(a,b,beta,i) * t1(i,gam)
   ! - sum over i of v_vvov(a,b,i,gam) * t1(i,beta).
-  ! TODO(doc): its only call in this file is commented out; is
-  ! this a legacy alternative to compute_B1_gam?
+  ! Legacy alternative to compute_B1_gam: its only call in this
+  ! file is commented out, and the subroutine is kept as
+  ! documentation (author, 2026-10-31).
   END_DOC
   integer, intent(in)           :: nO,nV
   double precision, intent(in)  :: t1(nO, nV)

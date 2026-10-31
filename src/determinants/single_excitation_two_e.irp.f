@@ -5,8 +5,9 @@ subroutine single_excitation_wee(det_1,det_2,h,p,spin,phase,hij)
   BEGIN_DOC
   ! For a determinant det_1 that differs from the closed-shell
   ! reference (ref_closed_shell_bitmask), computes the
-  ! two-electron part of the Hamiltonian matrix element with
-  ! the reference, for the excitation (h, p) of spin `spin`:
+  ! two-electron part of the Hamiltonian matrix element
+  ! <det_1|H|det_2>, where det_2 is the single excitation (h, p)
+  ! of spin `spin` from det_1:
   ! hij = fock_wee_closed_shell(h, p)
   !       - Coulomb integrals of the holes
   !       + exchange integrals of the same-spin holes
@@ -14,10 +15,10 @@ subroutine single_excitation_wee(det_1,det_2,h,p,spin,phase,hij)
   !       - exchange integrals of the same-spin particles,
   ! times phase.
   ! Holes are the spin orbitals occupied in the reference but
-  ! not in det_1, particles the opposite. det_2 is not used.
-  ! TODO(doc): no caller found in the tree; is det_1 expected
-  ! to be a single excitation of the reference (the routine
-  ! was named mono_excitation_wee), and why is det_2 unused?
+  ! not in det_1, particles the opposite. det_2 is a single
+  ! excitation from det_1 (cf. its use in i_H_j_s2); it is not
+  ! used because the hole and particle are already given as
+  ! parameters (author-corrected 2026-10-31).
   END_DOC
  integer,intent(in) :: h,p,spin
  double precision, intent(in)  :: phase

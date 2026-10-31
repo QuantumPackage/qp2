@@ -10,7 +10,9 @@ BEGIN_PROVIDER [double precision, mo_coef_aux, (ao_num,mo_num)]
   ! Read from the EZFIO database if the entry exists (master
   ! reads, then MPI broadcast), otherwise set to the $S^{-1/2}$
   ! canonical orthonormalized AOs (ao_ortho_canonical_coef).
-  ! TODO(doc): purpose of the aux basis; who writes it to EZFIO?
+  ! Auxiliary basis, probably to go beyond the basis set for
+  ! integral evaluation (author's reading, 2026-10-31); introduced
+  ! by AbdAmmar (commit 868d5a162, 2023-05-06, "jast 201 added").
   END_DOC
   integer                        :: i, j
   logical                        :: exists

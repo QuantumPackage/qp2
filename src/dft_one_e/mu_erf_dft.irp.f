@@ -88,7 +88,8 @@ BEGIN_PROVIDER [double precision, mu_of_r_dft_average]
  ! where mu_of_r_dft(i) > 1.d+3, divided by elec_alpha_num +
  ! elec_beta_num. The value is printed; no other in-tree provider
  ! uses it.
- ! TODO(doc): what is the 1.d+3 threshold for (a sentinel for unset points)?
+ ! The 1.d+3 threshold is a cutoff to avoid unphysical values of
+ ! mu_of_r_dft (author, 2026-10-31).
  END_DOC
  integer :: i
  double precision :: mu_rs_c,rho,r(3), dm_a, dm_b

@@ -34,8 +34,9 @@ subroutine routine
  ! Computes the active part of the bielectronic energy: sum over active
  ! orbitals of the two-electron integrals weighted by the spin-traced
  ! state-averaged active 2-RDM. The result is printed (accu(1)).
- ! TODO(doc): the only call in the get_energy program is commented out;
- ! confirm whether this subroutine is still in use.
+ ! Not currently called (the only call in the get_energy program is
+ ! commented out); kept because it may need to be reactivated for
+ ! debugging (author, 2026-10-31).
  END_DOC
  integer :: i,j,k,l
  integer :: ii,jj,kk,ll

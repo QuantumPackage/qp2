@@ -1,8 +1,8 @@
 program cisd
   implicit none
   BEGIN_DOC
-! Configuration Interaction with Single and Double excitations.
-!
+  ! Configuration Interaction with Single and Double excitations.
+  !
   ! This program takes a reference Slater determinant of ROHF-like occupancy,
   !
   ! and performs all single and double excitations on top of it, disregarding
@@ -58,7 +58,11 @@ subroutine run
   ! provider), saves wave functions and energies in the |EZFIO|
   ! file, and prints the state and excitation energies; with 4+
   ! electrons it also prints the "CISD+Q" energies cisdq(i).
-  ! TODO(doc): is cisdq the disconnected-quadruples correction of CISD?
+  ! cisdq(i) is the Davidson correction (CISD+Q(Davidson)):
+  ! CI_energy(i) + (CI_energy(i) - <D_k|H|D_k>) * (1 - c_k^2), k
+  ! the dominant determinant; it estimates the missing
+  ! disconnected-quadruples contribution (Jensen, Introduction to
+  ! Computational Chemistry, 2nd ed., sec. 4.10, eq. (4.70)).
   END_DOC
   integer                        :: i,k
   double precision               :: cisdq(N_states), delta_e

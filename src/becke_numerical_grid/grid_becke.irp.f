@@ -87,8 +87,18 @@ BEGIN_PROVIDER [double precision, R_gill]
   ! integration weight (factor $2 R_{gill}^3 N_r$) and is also used
   ! by the GILL branch of the extra grid (extra_grid.irp.f).
   !
-  ! TODO(doc): the value 3.0 is not explained anywhere in-tree; the
-  ! GILL branches only carry the comment "GILL & CHIEN, 2002".
+  ! TODO(doc): no paper prescribes R = 3.0; it is an in-tree
+  ! implementation choice (author, 2026-10-31). Checked Gill and
+  ! Chien, J. Comput. Chem. 24 (2003) 732, DOI 10.1002/jcc.10211,
+  ! whose footnote 7 (p. 740) states "the scale factor R is
+  ! arbitrary, but the best accuracy is achieved if R reflects the
+  ! domain of r over which f(r) is large", and Chien and Gill,
+  ! J. Comput. Chem. 27 (2006) 730, DOI 10.1002/jcc.20383, which
+  ! optimizes R per element (1.10 to 2.30 in their Table 1); 3.0
+  ! is larger, so the grid extends further out. The in-tree
+  ! comment "GILL & CHIEN, 2002" is off by one year: the paper was
+  ! received 30 August 2002 and published in 2003 (Gill and
+  ! Chien).
   END_DOC
   R_gill = 3.d0
 

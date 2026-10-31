@@ -4,8 +4,8 @@ subroutine dress_zmq()
   ! Entry point for the dressing: sets threshold_generators =
   ! 1d0 and read_wf = .True., copies CI_eigenvectors into
   ! psi_coef for the N_states states, and runs run_dressing.
-  ! TODO(doc): no caller of dress_zmq found in the tree; how is
-  ! it invoked?
+  ! No caller in-tree; probably legacy, kept because it can be
+  ! used by external plugins (author, 2026-10-31).
   END_DOC
   double precision, allocatable  :: energy(:)
   allocate (energy(N_states))

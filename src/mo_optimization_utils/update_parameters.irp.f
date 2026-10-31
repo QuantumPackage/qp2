@@ -12,7 +12,8 @@ subroutine update_parameters()
   ! coefficients of the eigenstates of the |CI| matrix
   ! (diagonalize_ci), and saves the wave function to the |EZFIO|
   ! file (save_wavefunction_unsorted).
-  ! TODO(doc): is this the final hook, or a template to extend (see header)?
+  ! This is a template to extend, not a final hook (author,
+  ! 2026-10-31).
   END_DOC
 
   implicit none

@@ -3,9 +3,8 @@ program import_mo_coef_periodic
   ! Imports the MO coefficients (real and imaginary parts)
   ! from the text file C.qp in the current directory into
   ! the |EZFIO| database named by ezfio_filename.
-  ! TODO(doc): mo_num, mo_occ, mo_class and ao_md5 are not
-  ! set in this program; are they read from the database by
-  ! save_mos?
+  ! This program comes from an unfinished merge of a fork;
+  ! parts are useful, some are never used (author, 2026-10-31).
   END_DOC
 
   PROVIDE ezfio_filename
@@ -20,8 +19,8 @@ subroutine run
   ! in mo_coef(i,j) and mo_coef_imag(i,j) (real and
   ! imaginary parts). Sets mo_label to "None" and writes
   ! the MO basis to the |EZFIO| database via save_mos.
-  ! TODO(doc): is mo_coef_imag stored in the database?
-  ! save_mos writes mo_coef but not mo_coef_imag.
+  ! mo_coef_imag is not stored by save_mos and this part can
+  ! be removed (author, 2026-10-31); candidate for removal.
   END_DOC
   
   integer :: iunit

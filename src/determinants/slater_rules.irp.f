@@ -347,8 +347,9 @@ subroutine get_phasemask_bit(det1, pm, Nint)
   ! The same mask is built by get_mask_phase
   ! (cipsi/selection.irp.f), where it is used to compute the
   ! phase of double excitations (get_phase_bi).
-  ! TODO(doc): no caller of get_phasemask_bit found in the
-  ! tree; is it dead code?
+  ! No in-tree caller (the code is probably inlined at the
+  ! former call sites); kept at disposal if needed again
+  ! (author, 2026-10-31).
   END_DOC
   integer, intent(in) :: Nint
   integer(bit_kind), intent(in) :: det1(Nint,2)
@@ -953,8 +954,10 @@ subroutine create_minilist_find_previous(key_mask, fullList, miniList, N_fullLis
   ! N_miniList is the total number of kept determinants.
   ! fullMatch is always returned as .false.; the statements
   ! that would set it to .true. are commented out.
-  ! TODO(doc): what was fullMatch meant to signal, and is the
-  ! commented-out assignment intentional?
+  ! TODO(doc): fullMatch was an optimization removed because
+  ! it was wrong (author, 2026-10-31); to be checked. The
+  ! commented-out lines predate the 2019-01-25 initial
+  ! import of this repository, so no commit records it.
   END_DOC
 
   integer, intent(in)                      :: N_fullList

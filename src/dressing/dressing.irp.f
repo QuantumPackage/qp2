@@ -18,8 +18,9 @@ BEGIN_PROVIDER [ double precision, delta_ij, (N_states, N_det, 2) ]
   ! determinant: the first N_det_delta_ij columns are copied
   ! from delta_ij_tmp, the remaining columns are zeroed.
   ! Component 1 feeds dressing_column_h, component 2
-  ! dressing_column_s.
-  ! TODO(doc): what distinguishes the two components?
+  ! dressing_column_s: the two components are a contribution to
+  ! the Hamiltonian (component 1) and a contribution to $S^2$
+  ! (component 2) (author, 2026-10-31).
   END_DOC
   if(.true.) then
     delta_ij(:,:N_det_delta_ij, :) = delta_ij_tmp(:,:,:)
@@ -35,8 +36,9 @@ BEGIN_PROVIDER [ double precision, delta_ij_tmp, (N_states,N_det_delta_ij,2) ]
   ! ZMQ_dress with reference energies
   ! dress_E0_denominator + nuclear_repulsion and relative error
   ! criterion dress_relative_error. Component 1 is del,
-  ! component 2 is del_s2.
-  ! TODO(doc): what distinguishes the two components?
+  ! component 2 is del_s2: a contribution to the Hamiltonian
+  ! (component 1) and a contribution to $S^2$ (component 2)
+  ! (author, 2026-10-31).
   END_DOC
 
   integer                        :: i,j,k

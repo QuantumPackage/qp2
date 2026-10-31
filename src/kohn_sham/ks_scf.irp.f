@@ -26,9 +26,12 @@ subroutine check_coherence_functional
   ! ks_scf start-up check: stop with a diagnostic if
   ! exchange_functional or correlation_functional is "None" or
   ! contains the substring "short_range".
-  ! TODO(doc): the message matches kohn_sham_rs/rs_ks_scf.irp.f;
-  ! in-tree range separated functionals are named sr_*: what does
-  ! this check intend to reject?
+  ! TODO(doc): intent unknown to the author (author, 2026-10-31).
+  ! The code literally stops when a functional is "None" or
+  ! contains the substring "short_range"; in-tree functionals are
+  ! named sr_*, so the substring branch is dead for them, and the
+  ! diagnostic text is copy-pasted from
+  ! kohn_sham_rs/rs_ks_scf.irp.f (there the test is "sr").
   END_DOC
  implicit none
  integer :: ifound_x,ifound_c
