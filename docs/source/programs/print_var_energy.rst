@@ -9,6 +9,9 @@ print_var_energy
  
  
  
+ Prints the energy of the wave function stored in the |EZFIO| 
+ directory, psi_energy(i) = $\langle \Psi_i | H | \Psi_i \rangle$ 
+ for each state. 
  
  Needs: 
  

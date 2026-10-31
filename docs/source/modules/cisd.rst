@@ -88,6 +88,12 @@ Providers
         double precision, allocatable	:: lccsd_energies	(N_states)
 
 
+    LCCSD coefficients of the N_states states (N_det x N_states):
+    Davidson diagonalization (davidson_general_ext_rout_diag_dressed)
+    with an iterated diagonal dressing Dress_jj(i) = ecorr =
+    lccsd_energies(1) - H_jj(1) for i > 1, determinants 1 and those
+    with H_jj(i) + ecorr < H_jj(1) not dressed; lccsd_energies(i)
+    are the eigenvalues of the last Davidson iteration.
 
     Needs:
 
@@ -124,6 +130,12 @@ Providers
         double precision, allocatable	:: lccsd_energies	(N_states)
 
 
+    LCCSD coefficients of the N_states states (N_det x N_states):
+    Davidson diagonalization (davidson_general_ext_rout_diag_dressed)
+    with an iterated diagonal dressing Dress_jj(i) = ecorr =
+    lccsd_energies(1) - H_jj(1) for i > 1, determinants 1 and those
+    with H_jj(i) + ecorr < H_jj(1) not dressed; lccsd_energies(i)
+    are the eigenvalues of the last Davidson iteration.
 
     Needs:
 
@@ -163,6 +175,11 @@ Subroutines / functions
         subroutine get_lccsd_2
 
 
+    Sets psi_coef to the LCCSD coefficients (lccsd_coef provider),
+    saves the wave functions (save_wavefunction_truncated), stores
+    the LCCSD energies in the |EZFIO| file
+    (ezfio_set_cisd_lcc_energy) and prints the state and
+    excitation energies.
 
     Needs:
 
@@ -279,6 +296,12 @@ Subroutines / functions
         subroutine H_apply_cisd_diexc(key_in, key_prev, hole_1,particl_1, hole_2, particl_2, fock_diag_tmp, i_generator, iproc_in  )
 
 
+    Generate the double excitations of key_in: each pair of distinct
+    occupied orbitals p1 and p2, one in hole_1 and the other in hole_2,
+    same spin or alpha and beta, is passed once to H_apply_cisd_diexcP,
+    which builds the excited determinants as two successive single
+    excitations (particles from particl_1 and particl_2) and hands the
+    keys to the call fill_H_apply_buffer_no_selection(key_idx,keys_out,N_int,iproc) codelet. key_prev is unused.
 
     Needs:
 
@@ -353,6 +376,12 @@ Subroutines / functions
         subroutine H_apply_cisd_diexcP(key_in, fs1, fh1, particl_1, fs2, fh2, particl_2, fock_diag_tmp, i_generator, iproc_in  )
 
 
+    Build, for the two holes (spins fs1, fs2, orbitals fh1, fh2) of
+    key_in, the single-bit masks p1_mask and p2_mask, and key_mask,
+    key_in with both hole orbitals cleared. fh1 and fh2 are 1-based
+    orbital indices in the whole bitstring. Calls H_apply_cisd_diexcOrg,
+    which generates the double-excited determinants and hands the keys
+    to the call fill_H_apply_buffer_no_selection(key_idx,keys_out,N_int,iproc) codelet.
 
     Needs:
 
@@ -497,6 +526,12 @@ Subroutines / functions
         subroutine H_apply_cisd_sym_diexc(key_in, key_prev, hole_1,particl_1, hole_2, particl_2, fock_diag_tmp, i_generator, iproc_in  )
 
 
+    Generate the double excitations of key_in: each pair of distinct
+    occupied orbitals p1 and p2, one in hole_1 and the other in hole_2,
+    same spin or alpha and beta, is passed once to H_apply_cisd_sym_diexcP,
+    which builds the excited determinants as two successive single
+    excitations (particles from particl_1 and particl_2) and hands the
+    keys to the call fill_H_apply_buffer_no_selection(key_idx,keys_out,N_int,iproc) codelet. key_prev is unused.
 
     Needs:
 
@@ -572,6 +607,12 @@ Subroutines / functions
         subroutine H_apply_cisd_sym_diexcP(key_in, fs1, fh1, particl_1, fs2, fh2, particl_2, fock_diag_tmp, i_generator, iproc_in  )
 
 
+    Build, for the two holes (spins fs1, fs2, orbitals fh1, fh2) of
+    key_in, the single-bit masks p1_mask and p2_mask, and key_mask,
+    key_in with both hole orbitals cleared. fh1 and fh2 are 1-based
+    orbital indices in the whole bitstring. Calls H_apply_cisd_sym_diexcOrg,
+    which generates the double-excited determinants and hands the keys
+    to the call fill_H_apply_buffer_no_selection(key_idx,keys_out,N_int,iproc) codelet.
 
     Needs:
 
@@ -647,6 +688,9 @@ Subroutines / functions
         subroutine run
 
 
+    Builds the CISD space (H_apply_cisd, or H_apply_cisd_sym when
+    pseudo_sym), then calls get_lccsd_2 to compute and print the
+    LCCSD energies.
 
     Needs:
 
@@ -700,6 +744,12 @@ Subroutines / functions
         subroutine run_cisd
 
 
+    Builds the CISD space (H_apply_cisd, or H_apply_cisd_sym when
+    pseudo_sym) and diagonalizes the CI matrix (CI_eigenvectors
+    provider); saves the wave functions (save_wavefunction),
+    stores the CISD energies (ezfio_set_cisd_energy) and prints
+    the state and excitation energies.
+    TODO(doc): no caller of run_cisd in src/; is it an external entry point?
 
     Needs:
 

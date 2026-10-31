@@ -197,6 +197,12 @@ Providers
         double precision, allocatable	:: mo_prop_dipole_z	(mo_num,mo_num)
 
 
+    mo_prop_dipole_x(i,j) = <MO_i | x | MO_j>, the MO dipole
+    matrix element between MO i and MO j; y and z components in
+    mo_prop_dipole_y and mo_prop_dipole_z. If dft_grid_mo_dipole
+    is true, the values are those of mo_dipole_x_becke (Becke
+    grid quadrature); otherwise those of mo_dipole_x (AO dipole
+    integrals transformed to the MO basis with ao_to_mo).
 
     Needs:
 
@@ -228,6 +234,12 @@ Providers
         double precision, allocatable	:: mo_prop_dipole_z	(mo_num,mo_num)
 
 
+    mo_prop_dipole_x(i,j) = <MO_i | x | MO_j>, the MO dipole
+    matrix element between MO i and MO j; y and z components in
+    mo_prop_dipole_y and mo_prop_dipole_z. If dft_grid_mo_dipole
+    is true, the values are those of mo_dipole_x_becke (Becke
+    grid quadrature); otherwise those of mo_dipole_x (AO dipole
+    integrals transformed to the MO basis with ao_to_mo).
 
     Needs:
 
@@ -259,6 +271,12 @@ Providers
         double precision, allocatable	:: mo_prop_dipole_z	(mo_num,mo_num)
 
 
+    mo_prop_dipole_x(i,j) = <MO_i | x | MO_j>, the MO dipole
+    matrix element between MO i and MO j; y and z components in
+    mo_prop_dipole_y and mo_prop_dipole_z. If dft_grid_mo_dipole
+    is true, the values are those of mo_dipole_x_becke (Becke
+    grid quadrature); otherwise those of mo_dipole_x (AO dipole
+    integrals transformed to the MO basis with ao_to_mo).
 
     Needs:
 
@@ -477,6 +495,12 @@ Providers
         double precision, allocatable	:: multi_s_z_dipole_moment_eigenval	(N_states)
 
 
+    Eigenvectors of the x dipole matrix multi_s_x_dipole_moment
+    (the <\Psi_m|\mu_x|\Psi_n> matrix): column j is eigenvector
+    j, eigenvector(i,j) = <i|psi_j>, with eigenvalue
+    multi_s_x_dipole_moment_eigenval(j), lowest to highest.
+    multi_s_y_dipole_moment_eigenvec and
+    multi_s_z_dipole_moment_eigenvec are the y and z components.
 
     Needs:
 
@@ -506,6 +530,12 @@ Providers
         double precision, allocatable	:: multi_s_z_dipole_moment_eigenval	(N_states)
 
 
+    Eigenvectors of the x dipole matrix multi_s_x_dipole_moment
+    (the <\Psi_m|\mu_x|\Psi_n> matrix): column j is eigenvector
+    j, eigenvector(i,j) = <i|psi_j>, with eigenvalue
+    multi_s_x_dipole_moment_eigenval(j), lowest to highest.
+    multi_s_y_dipole_moment_eigenvec and
+    multi_s_z_dipole_moment_eigenvec are the y and z components.
 
     Needs:
 
@@ -627,6 +657,12 @@ Providers
         double precision, allocatable	:: multi_s_z_dipole_moment_eigenval	(N_states)
 
 
+    Eigenvectors of the x dipole matrix multi_s_x_dipole_moment
+    (the <\Psi_m|\mu_x|\Psi_n> matrix): column j is eigenvector
+    j, eigenvector(i,j) = <i|psi_j>, with eigenvalue
+    multi_s_x_dipole_moment_eigenval(j), lowest to highest.
+    multi_s_y_dipole_moment_eigenvec and
+    multi_s_z_dipole_moment_eigenvec are the y and z components.
 
     Needs:
 
@@ -656,6 +692,12 @@ Providers
         double precision, allocatable	:: multi_s_z_dipole_moment_eigenval	(N_states)
 
 
+    Eigenvectors of the x dipole matrix multi_s_x_dipole_moment
+    (the <\Psi_m|\mu_x|\Psi_n> matrix): column j is eigenvector
+    j, eigenvector(i,j) = <i|psi_j>, with eigenvalue
+    multi_s_x_dipole_moment_eigenval(j), lowest to highest.
+    multi_s_y_dipole_moment_eigenvec and
+    multi_s_z_dipole_moment_eigenvec are the y and z components.
 
     Needs:
 
@@ -777,6 +819,12 @@ Providers
         double precision, allocatable	:: multi_s_z_dipole_moment_eigenval	(N_states)
 
 
+    Eigenvectors of the x dipole matrix multi_s_x_dipole_moment
+    (the <\Psi_m|\mu_x|\Psi_n> matrix): column j is eigenvector
+    j, eigenvector(i,j) = <i|psi_j>, with eigenvalue
+    multi_s_x_dipole_moment_eigenval(j), lowest to highest.
+    multi_s_y_dipole_moment_eigenvec and
+    multi_s_z_dipole_moment_eigenvec are the y and z components.
 
     Needs:
 
@@ -806,6 +854,12 @@ Providers
         double precision, allocatable	:: multi_s_z_dipole_moment_eigenval	(N_states)
 
 
+    Eigenvectors of the x dipole matrix multi_s_x_dipole_moment
+    (the <\Psi_m|\mu_x|\Psi_n> matrix): column j is eigenvector
+    j, eigenvector(i,j) = <i|psi_j>, with eigenvalue
+    multi_s_x_dipole_moment_eigenval(j), lowest to highest.
+    multi_s_y_dipole_moment_eigenvec and
+    multi_s_z_dipole_moment_eigenvec are the y and z components.
 
     Needs:
 

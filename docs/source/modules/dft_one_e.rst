@@ -39,7 +39,7 @@ In the core modules of the |QP|, two functionals are implemented:
 Providers 
 --------- 
  
-.. c:var:: double ao_effective_one_e_potential
+.. c:var:: ao_effective_one_e_potential
 
 
     File : :file:`dft_one_e/effective_pot.irp.f`
@@ -79,7 +79,7 @@ Providers
        * :c:data:`ao_effective_one_e_potential_sa`
 
  
-.. c:var:: double ao_effective_one_e_potential_sa
+.. c:var:: ao_effective_one_e_potential_sa
 
 
     File : :file:`dft_one_e/effective_pot.irp.f`
@@ -104,7 +104,7 @@ Providers
 
 
  
-.. c:var:: double ao_effective_one_e_potential_without_kin
+.. c:var:: ao_effective_one_e_potential_without_kin
 
 
     File : :file:`dft_one_e/effective_pot.irp.f`
@@ -144,7 +144,7 @@ Providers
        * :c:data:`ao_effective_one_e_potential_sa`
 
  
-.. c:var:: double ao_effective_one_e_potential_without_kin_sa
+.. c:var:: ao_effective_one_e_potential_without_kin_sa
 
 
     File : :file:`dft_one_e/effective_pot.irp.f`
@@ -169,7 +169,7 @@ Providers
 
 
  
-.. c:var:: double effective_one_e_potential
+.. c:var:: effective_one_e_potential
 
 
     File : :file:`dft_one_e/effective_pot.irp.f`
@@ -210,10 +210,9 @@ Providers
 
        * :c:data:`ao_effective_one_e_potential`
        * :c:data:`effective_one_e_potential_sa`
-       * :c:data:`ref_vhxc`
 
  
-.. c:var:: double effective_one_e_potential_sa
+.. c:var:: effective_one_e_potential_sa
 
 
     File : :file:`dft_one_e/effective_pot.irp.f`
@@ -238,7 +237,7 @@ Providers
 
 
  
-.. c:var:: double effective_one_e_potential_without_kin
+.. c:var:: effective_one_e_potential_without_kin
 
 
     File : :file:`dft_one_e/effective_pot.irp.f`
@@ -279,10 +278,9 @@ Providers
 
        * :c:data:`ao_effective_one_e_potential`
        * :c:data:`effective_one_e_potential_sa`
-       * :c:data:`ref_vhxc`
 
  
-.. c:var:: double effective_one_e_potential_without_kin_sa
+.. c:var:: effective_one_e_potential_without_kin_sa
 
 
     File : :file:`dft_one_e/effective_pot.irp.f`
@@ -307,7 +305,7 @@ Providers
 
 
  
-.. c:var:: double energy_c
+.. c:var:: energy_c
 
 
     File : :file:`dft_one_e/e_xc_general.irp.f`
@@ -332,15 +330,9 @@ Providers
        * :c:data:`energy_x_sr_pbe`
        * :c:data:`n_states`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`e_correlation_dft`
 
  
-.. c:var:: double energy_x
+.. c:var:: energy_x
 
 
     File : :file:`dft_one_e/e_xc_general.irp.f`
@@ -366,15 +358,9 @@ Providers
        * :c:data:`hf_exchange`
        * :c:data:`n_states`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`e_exchange_dft`
 
  
-.. c:var:: double mu_erf_dft
+.. c:var:: mu_erf_dft
 
 
     File : :file:`dft_one_e/mu_erf_dft.irp.f`
@@ -386,7 +372,7 @@ Providers
 
     range separation parameter used in RS-DFT.
     
-    It is set to mu_erf in order to be consistent with the module "hamiltonian"
+    It is set to mu_erf in order to be consistent with the module "ao_two_e_erf_ints"
 
     Needs:
 
@@ -403,7 +389,7 @@ Providers
        * :c:data:`mu_of_r_dft`
 
  
-.. c:var:: double mu_grad_rho
+.. c:var:: mu_grad_rho
 
 
     File : :file:`dft_one_e/mu_erf_dft.irp.f`
@@ -431,7 +417,7 @@ Providers
        * :c:data:`mu_of_r_dft`
 
  
-.. c:var:: double mu_of_r_dft
+.. c:var:: mu_of_r_dft
 
 
     File : :file:`dft_one_e/mu_erf_dft.irp.f`
@@ -469,7 +455,7 @@ Providers
        * :c:data:`mu_of_r_dft_average`
 
  
-.. c:var:: double mu_of_r_dft_average
+.. c:var:: mu_of_r_dft_average
 
 
     File : :file:`dft_one_e/mu_erf_dft.irp.f`
@@ -496,7 +482,7 @@ Providers
 
 
  
-.. c:var:: double mu_rsc_of_r
+.. c:var:: mu_rsc_of_r
 
 
     File : :file:`dft_one_e/mu_erf_dft.irp.f`
@@ -526,7 +512,7 @@ Providers
        * :c:data:`mu_of_r_dft`
 
  
-.. c:var:: double potential_c_alpha_ao
+.. c:var:: potential_c_alpha_ao
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -559,11 +545,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_potential_alpha_xc`
        * :c:data:`potential_c_alpha_mo`
 
  
-.. c:var:: double potential_c_alpha_mo
+.. c:var:: potential_c_alpha_mo
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -596,7 +581,7 @@ Providers
        * :c:data:`trace_v_xc`
 
  
-.. c:var:: double potential_c_beta_ao
+.. c:var:: potential_c_beta_ao
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -629,11 +614,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_potential_alpha_xc`
        * :c:data:`potential_c_alpha_mo`
 
  
-.. c:var:: double potential_c_beta_mo
+.. c:var:: potential_c_beta_mo
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -666,7 +650,7 @@ Providers
        * :c:data:`trace_v_xc`
 
  
-.. c:var:: double potential_x_alpha_ao
+.. c:var:: potential_x_alpha_ao
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -700,11 +684,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_potential_alpha_xc`
        * :c:data:`potential_x_alpha_mo`
 
  
-.. c:var:: double potential_x_alpha_mo
+.. c:var:: potential_x_alpha_mo
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -737,7 +720,7 @@ Providers
        * :c:data:`trace_v_xc`
 
  
-.. c:var:: double potential_x_beta_ao
+.. c:var:: potential_x_beta_ao
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -771,11 +754,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_potential_alpha_xc`
        * :c:data:`potential_x_alpha_mo`
 
  
-.. c:var:: double potential_x_beta_mo
+.. c:var:: potential_x_beta_mo
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -808,7 +790,7 @@ Providers
        * :c:data:`trace_v_xc`
 
  
-.. c:var:: double potential_xc_alpha_ao
+.. c:var:: potential_xc_alpha_ao
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -841,11 +823,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_potential_alpha_xc`
        * :c:data:`potential_xc_alpha_mo`
 
  
-.. c:var:: double potential_xc_alpha_mo
+.. c:var:: potential_xc_alpha_mo
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -876,7 +857,7 @@ Providers
        * :c:data:`trace_v_xc_new`
 
  
-.. c:var:: double potential_xc_beta_ao
+.. c:var:: potential_xc_beta_ao
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -909,11 +890,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_potential_alpha_xc`
        * :c:data:`potential_xc_alpha_mo`
 
  
-.. c:var:: double potential_xc_beta_mo
+.. c:var:: potential_xc_beta_mo
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -944,7 +924,7 @@ Providers
        * :c:data:`trace_v_xc_new`
 
  
-.. c:var:: double psi_dft_energy_h_core
+.. c:var:: psi_dft_energy_h_core
 
 
     File : :file:`dft_one_e/one_e_energy_dft.irp.f`
@@ -974,7 +954,7 @@ Providers
 
 
  
-.. c:var:: double psi_dft_energy_kinetic
+.. c:var:: psi_dft_energy_kinetic
 
 
     File : :file:`dft_one_e/one_e_energy_dft.irp.f`
@@ -1004,7 +984,7 @@ Providers
 
 
  
-.. c:var:: double psi_dft_energy_nuclear_elec
+.. c:var:: psi_dft_energy_nuclear_elec
 
 
     File : :file:`dft_one_e/one_e_energy_dft.irp.f`
@@ -1044,6 +1024,12 @@ Providers
         double precision	:: ref_vhxc	
 
 
+    Sums 2*effective_one_e_potential(i,i,1) for i = 1..elec_beta_num,
+    twice the diagonal of the effective one-electron potential (state 1)
+    over the first elec_beta_num MOs; the second loop in the code
+    (i = elec_beta_num+1 to elec_beta_num) is empty.
+    TODO(doc): intended meaning of ref_vhxc; is the empty second loop
+    intentional?
 
     Needs:
 
@@ -1055,7 +1041,7 @@ Providers
 
 
  
-.. c:var:: double regular_range_hartree
+.. c:var:: regular_range_hartree
 
 
     File : :file:`dft_one_e/sr_coulomb.irp.f`
@@ -1077,24 +1063,16 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`cholesky_mo_num`
-       * :c:data:`cholesky_mo_transp`
-       * :c:data:`do_mo_cholesky`
-       * :c:data:`gpu_busy`
-       * :c:data:`gpu_integral_buffer1`
-       * :c:data:`gpu_num`
-       * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_states`
-       * :c:data:`nproc_max`
        * :c:data:`one_e_dm_average_mo_for_dft`
        * :c:data:`one_e_dm_mo_for_dft`
 
 
  
-.. c:var:: double regular_range_hartree_operator
+.. c:var:: regular_range_hartree_operator
 
 
     File : :file:`dft_one_e/sr_coulomb.irp.f`
@@ -1116,24 +1094,16 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`cholesky_mo_num`
-       * :c:data:`cholesky_mo_transp`
-       * :c:data:`do_mo_cholesky`
-       * :c:data:`gpu_busy`
-       * :c:data:`gpu_integral_buffer1`
-       * :c:data:`gpu_num`
-       * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_states`
-       * :c:data:`nproc_max`
        * :c:data:`one_e_dm_average_mo_for_dft`
        * :c:data:`one_e_dm_mo_for_dft`
 
 
  
-.. c:var:: double short_range_hartree
+.. c:var:: short_range_hartree
 
 
     File : :file:`dft_one_e/sr_coulomb.irp.f`
@@ -1155,20 +1125,12 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`cholesky_mo_num`
-       * :c:data:`cholesky_mo_transp`
-       * :c:data:`do_mo_cholesky`
-       * :c:data:`gpu_busy`
-       * :c:data:`gpu_integral_buffer1`
-       * :c:data:`gpu_num`
-       * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_erf_map`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_states`
-       * :c:data:`nproc_max`
        * :c:data:`one_e_dm_average_mo_for_dft`
        * :c:data:`one_e_dm_mo_for_dft`
 
@@ -1181,7 +1143,7 @@ Providers
        * :c:data:`trace_v_xc`
 
  
-.. c:var:: double short_range_hartree_operator
+.. c:var:: short_range_hartree_operator
 
 
     File : :file:`dft_one_e/sr_coulomb.irp.f`
@@ -1203,20 +1165,12 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`cholesky_mo_num`
-       * :c:data:`cholesky_mo_transp`
-       * :c:data:`do_mo_cholesky`
-       * :c:data:`gpu_busy`
-       * :c:data:`gpu_integral_buffer1`
-       * :c:data:`gpu_num`
-       * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_erf_map`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_states`
-       * :c:data:`nproc_max`
        * :c:data:`one_e_dm_average_mo_for_dft`
        * :c:data:`one_e_dm_mo_for_dft`
 
@@ -1229,7 +1183,7 @@ Providers
        * :c:data:`trace_v_xc`
 
  
-.. c:var:: double trace_v_h
+.. c:var:: trace_v_h
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -1260,7 +1214,7 @@ Providers
 
 
  
-.. c:var:: double trace_v_hxc
+.. c:var:: trace_v_hxc
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -1291,7 +1245,7 @@ Providers
 
 
  
-.. c:var:: double trace_v_xc
+.. c:var:: trace_v_xc
 
 
     File : :file:`dft_one_e/pot_general.irp.f`
@@ -1322,7 +1276,7 @@ Providers
 
 
  
-.. c:var:: double trace_v_xc_new
+.. c:var:: trace_v_xc_new
 
 
     File : :file:`dft_one_e/pot_general.irp.f`

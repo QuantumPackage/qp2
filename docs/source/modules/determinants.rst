@@ -265,6 +265,9 @@ Providers
         double precision, allocatable	:: dettachment_numbers_sorted	(mo_num,N_states)
 
 
+    For each state (2..N_states), the difference_dm_eigval of the
+    dettachment and attachment orbitals, in the order of
+    list_dettachment and list_attachment.
 
     Needs:
 
@@ -289,6 +292,11 @@ Providers
         double precision, allocatable	:: dettachment_orbitals	(ao_num,mo_num,N_states)
 
 
+    For each state (2..N_states), the dettachment and attachment
+    orbitals of difference_dm expressed in the |AO| basis: column i
+    is the AO expansion (mo_coef) of the i-th orbital of
+    list_dettachment or list_attachment, not of MO
+    list_dettachment(i,istate) or list_attachment(i,istate).
 
     Needs:
 
@@ -326,12 +334,6 @@ Providers
        * :c:data:`n_states`
        * :c:data:`psi_coef`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pt2_e0_denominator`
 
  
 .. c:var:: double c0_weight
@@ -359,7 +361,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`selection_weight`
        * :c:data:`state_average_weight`
 
  
@@ -432,6 +433,9 @@ Providers
         double precision, allocatable	:: dettachment_numbers_sorted	(mo_num,N_states)
 
 
+    For each state (2..N_states), the difference_dm_eigval of the
+    dettachment and attachment orbitals, in the order of
+    list_dettachment and list_attachment.
 
     Needs:
 
@@ -456,6 +460,11 @@ Providers
         double precision, allocatable	:: dettachment_orbitals	(ao_num,mo_num,N_states)
 
 
+    For each state (2..N_states), the dettachment and attachment
+    orbitals of difference_dm expressed in the |AO| basis: column i
+    is the AO expansion (mo_coef) of the i-th orbital of
+    list_dettachment or list_attachment, not of MO
+    list_dettachment(i,istate) or list_attachment(i,istate).
 
     Needs:
 
@@ -695,6 +704,12 @@ Providers
         double precision, allocatable	:: fock_operator_closed_shell_ref_bitmask	(mo_num,mo_num)
 
 
+    Fock matrix of the closed-shell reference, for orbitals
+    i and j in the union of the occupied and virtual orbitals:
+    the two-electron part (see fock_wee_closed_shell) plus
+    the one-electron integrals mo_one_e_integrals(i,j).
+    Only the alpha orbitals are used to build the occupied
+    and virtual lists, as the reference is closed-shell.
 
     Needs:
 
@@ -720,6 +735,14 @@ Providers
         double precision, allocatable	:: fock_wee_closed_shell	(mo_num,mo_num)
 
 
+    Two-electron part of the Fock matrix of the closed-shell
+    reference, for orbitals i and j in the union of the
+    occupied and virtual orbitals:
+    fock_wee_closed_shell(i,j) = sum_k [ 2 (i j | k k) - (i k | j k) ]
+    with k running over the occupied orbitals.
+    Only the alpha orbitals are used to build the occupied
+    and virtual lists, as the reference is closed-shell.
+    Entries for other pairs of orbitals are not set.
 
     Needs:
 
@@ -829,6 +852,9 @@ Providers
         double precision, allocatable	:: h_matrix_cas	(N_det_cas,N_det_cas)
 
 
+    Hamiltonian matrix in the CAS determinant basis:
+    H_matrix_cas(i,j) is the matrix element
+    <psi_cas(i) | H | psi_cas(j)>, computed with i_H_j.
 
     Needs:
 
@@ -971,6 +997,11 @@ Providers
         integer, allocatable	:: list_dettachment	(mo_num,N_states)
 
 
+    For each state (2..N_states), number and list of the MOs whose
+    difference_dm eigenvalue (difference_dm_eigval) is negative
+    (dettachment) or non-negative (attachment). State 1 is left
+    untouched. list_dettachment is in ascending MO index order;
+    list_attachment is stored in the reverse order.
 
     Needs:
 
@@ -1003,6 +1034,11 @@ Providers
         integer, allocatable	:: list_dettachment	(mo_num,N_states)
 
 
+    For each state (2..N_states), number and list of the MOs whose
+    difference_dm eigenvalue (difference_dm_eigval) is negative
+    (dettachment) or non-negative (attachment). State 1 is left
+    untouched. list_dettachment is in ascending MO index order;
+    list_attachment is stored in the reverse order.
 
     Needs:
 
@@ -1060,6 +1096,11 @@ Providers
         integer, allocatable	:: list_dettachment	(mo_num,N_states)
 
 
+    For each state (2..N_states), number and list of the MOs whose
+    difference_dm eigenvalue (difference_dm_eigval) is negative
+    (dettachment) or non-negative (attachment). State 1 is left
+    untouched. list_dettachment is in ascending MO index order;
+    list_attachment is stored in the reverse order.
 
     Needs:
 
@@ -1107,11 +1148,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`act_2_rdm_aa_mo`
-       * :c:data:`act_2_rdm_ab_mo`
-       * :c:data:`act_2_rdm_bb_mo`
-       * :c:data:`act_2_rdm_spin_trace_mo`
-       * :c:data:`act_2_rdm_trans_spin_trace_mo`
        * :c:data:`barycentric_electronic_energy`
        * :c:data:`ci_electronic_energy`
        * :c:data:`ci_energy`
@@ -1123,23 +1159,17 @@ Providers
        * :c:data:`dominant_det`
        * :c:data:`dressed_column_idx`
        * :c:data:`dressing_column_h`
-       * :c:data:`energy_by_projection`
-       * :c:data:`gradvec_old`
        * :c:data:`h_apply_buffer_allocated`
        * :c:data:`h_matrix_all_dets`
        * :c:data:`h_matrix_diag_all_dets`
-       * :c:data:`hessmat_old`
        * :c:data:`max_degree_exc`
        * :c:data:`multi_s_dipole_moment`
        * :c:data:`n_csf`
-       * :c:data:`n_det_generators`
        * :c:data:`n_det_qp_edit`
-       * :c:data:`n_det_selectors`
        * :c:data:`one_e_dm_mo_alpha`
        * :c:data:`one_e_tr_dm_mo`
        * :c:data:`one_e_tr_dm_mo_alpha`
        * :c:data:`overlap_states`
-       * :c:data:`p0tuvx_peter`
        * :c:data:`pruned`
        * :c:data:`psi_average_norm_contrib`
        * :c:data:`psi_bilinear_matrix`
@@ -1160,7 +1190,6 @@ Providers
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_beta`
        * :c:data:`psi_det_beta_unique`
-       * :c:data:`psi_det_generators`
        * :c:data:`psi_det_hii`
        * :c:data:`psi_det_sorted`
        * :c:data:`psi_det_sorted_bit`
@@ -1170,9 +1199,6 @@ Providers
        * :c:data:`psi_non_cas`
        * :c:data:`s2_matrix_all_dets`
        * :c:data:`s2_values`
-       * :c:data:`state_av_act_2_rdm_aa_mo`
-       * :c:data:`state_av_act_2_rdm_ab_mo`
-       * :c:data:`state_av_act_2_rdm_bb_mo`
        * :c:data:`weight_configuration`
        * :c:data:`weight_configuration_average`
 
@@ -1378,6 +1404,11 @@ Providers
         integer, allocatable	:: list_dettachment	(mo_num,N_states)
 
 
+    For each state (2..N_states), number and list of the MOs whose
+    difference_dm eigenvalue (difference_dm_eigval) is negative
+    (dettachment) or non-negative (attachment). State 1 is left
+    untouched. list_dettachment is in ascending MO index order;
+    list_attachment is stored in the reverse order.
 
     Needs:
 
@@ -1583,6 +1614,11 @@ Providers
         double precision, allocatable	:: one_e_dm_dagger_mo_spin_index	(mo_num,mo_num,N_states,2)
 
 
+    For each spin and state, entry (j,j) = 1 - dm(j,j) and, for
+    i > j, entries (i,j) and (j,i) = -dm(i,j), where dm is
+    one_e_dm_mo_alpha (spin 1) or one_e_dm_mo_beta (spin 2).
+    TODO(doc): is this the complementary one-body density matrix,
+    and which method consumes it? No caller found in src/.
 
     Needs:
 
@@ -1653,10 +1689,6 @@ Providers
        :columns: 3
 
        * :c:data:`difference_dm`
-       * :c:data:`full_occ_2_rdm_aa_mo`
-       * :c:data:`full_occ_2_rdm_ab_mo`
-       * :c:data:`full_occ_2_rdm_bb_mo`
-       * :c:data:`full_occ_2_rdm_spin_trace_mo`
        * :c:data:`one_e_dm_ao_alpha_nstates`
        * :c:data:`one_e_dm_dagger_mo_spin_index`
        * :c:data:`one_e_dm_mo_alpha_average`
@@ -1697,17 +1729,11 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`d0tu`
-       * :c:data:`d0tu_alpha_ao`
        * :c:data:`one_e_dm_ao_alpha`
        * :c:data:`one_e_dm_mo`
        * :c:data:`one_e_dm_mo_alpha_for_dft`
        * :c:data:`one_e_dm_mo_beta_for_dft`
        * :c:data:`one_e_spin_density_mo`
-       * :c:data:`state_av_full_occ_2_rdm_aa_mo`
-       * :c:data:`state_av_full_occ_2_rdm_ab_mo`
-       * :c:data:`state_av_full_occ_2_rdm_bb_mo`
-       * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
 
  
 .. c:var:: double one_e_dm_mo_beta
@@ -1746,10 +1772,6 @@ Providers
        :columns: 3
 
        * :c:data:`difference_dm`
-       * :c:data:`full_occ_2_rdm_aa_mo`
-       * :c:data:`full_occ_2_rdm_ab_mo`
-       * :c:data:`full_occ_2_rdm_bb_mo`
-       * :c:data:`full_occ_2_rdm_spin_trace_mo`
        * :c:data:`one_e_dm_ao_alpha_nstates`
        * :c:data:`one_e_dm_dagger_mo_spin_index`
        * :c:data:`one_e_dm_mo_alpha_average`
@@ -1790,17 +1812,11 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`d0tu`
-       * :c:data:`d0tu_alpha_ao`
        * :c:data:`one_e_dm_ao_alpha`
        * :c:data:`one_e_dm_mo`
        * :c:data:`one_e_dm_mo_alpha_for_dft`
        * :c:data:`one_e_dm_mo_beta_for_dft`
        * :c:data:`one_e_spin_density_mo`
-       * :c:data:`state_av_full_occ_2_rdm_aa_mo`
-       * :c:data:`state_av_full_occ_2_rdm_ab_mo`
-       * :c:data:`state_av_full_occ_2_rdm_bb_mo`
-       * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo`
 
  
 .. c:var:: double one_e_dm_mo_diff
@@ -1836,6 +1852,9 @@ Providers
         double precision, allocatable	:: one_e_dm_mo_spin_index	(mo_num,mo_num,N_states,2)
 
 
+    Spin-indexed one-body density matrices for each state: the
+    fourth index 1 holds one_e_dm_mo_alpha, the fourth index 2 holds
+    one_e_dm_mo_beta.
 
     Needs:
 
@@ -2091,11 +2110,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_det_generators`
-       * :c:data:`n_det_selectors`
        * :c:data:`pruned`
-       * :c:data:`psi_det_generators`
-       * :c:data:`psi_selectors`
 
  
 .. c:var:: double psi_bilinear_matrix
@@ -2164,11 +2179,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`act_2_rdm_aa_mo`
-       * :c:data:`act_2_rdm_ab_mo`
-       * :c:data:`act_2_rdm_bb_mo`
-       * :c:data:`act_2_rdm_spin_trace_mo`
-       * :c:data:`act_2_rdm_trans_spin_trace_mo`
        * :c:data:`det_alpha_norm`
        * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
@@ -2178,9 +2188,6 @@ Providers
        * :c:data:`psi_bilinear_matrix_columns_loc`
        * :c:data:`psi_bilinear_matrix_order_reverse`
        * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`state_av_act_2_rdm_aa_mo`
-       * :c:data:`state_av_act_2_rdm_ab_mo`
-       * :c:data:`state_av_act_2_rdm_bb_mo`
 
  
 .. c:var:: int psi_bilinear_matrix_columns_loc
@@ -2251,11 +2258,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`act_2_rdm_aa_mo`
-       * :c:data:`act_2_rdm_ab_mo`
-       * :c:data:`act_2_rdm_bb_mo`
-       * :c:data:`act_2_rdm_spin_trace_mo`
-       * :c:data:`act_2_rdm_trans_spin_trace_mo`
        * :c:data:`det_alpha_norm`
        * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
@@ -2265,9 +2267,6 @@ Providers
        * :c:data:`psi_bilinear_matrix_columns_loc`
        * :c:data:`psi_bilinear_matrix_order_reverse`
        * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`state_av_act_2_rdm_aa_mo`
-       * :c:data:`state_av_act_2_rdm_ab_mo`
-       * :c:data:`state_av_act_2_rdm_bb_mo`
 
  
 .. c:var:: int psi_bilinear_matrix_order_reverse
@@ -2290,19 +2289,6 @@ Providers
        * :c:data:`n_det`
        * :c:data:`psi_bilinear_matrix_values`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`act_2_rdm_aa_mo`
-       * :c:data:`act_2_rdm_ab_mo`
-       * :c:data:`act_2_rdm_bb_mo`
-       * :c:data:`act_2_rdm_spin_trace_mo`
-       * :c:data:`act_2_rdm_trans_spin_trace_mo`
-       * :c:data:`state_av_act_2_rdm_aa_mo`
-       * :c:data:`state_av_act_2_rdm_ab_mo`
-       * :c:data:`state_av_act_2_rdm_bb_mo`
 
  
 .. c:var:: int psi_bilinear_matrix_order_transp_reverse
@@ -2367,11 +2353,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`act_2_rdm_aa_mo`
-       * :c:data:`act_2_rdm_ab_mo`
-       * :c:data:`act_2_rdm_bb_mo`
-       * :c:data:`act_2_rdm_spin_trace_mo`
-       * :c:data:`act_2_rdm_trans_spin_trace_mo`
        * :c:data:`det_alpha_norm`
        * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
@@ -2381,9 +2362,6 @@ Providers
        * :c:data:`psi_bilinear_matrix_columns_loc`
        * :c:data:`psi_bilinear_matrix_order_reverse`
        * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`state_av_act_2_rdm_aa_mo`
-       * :c:data:`state_av_act_2_rdm_ab_mo`
-       * :c:data:`state_av_act_2_rdm_bb_mo`
 
  
 .. c:var:: int psi_bilinear_matrix_transp_columns
@@ -2624,11 +2602,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`act_2_rdm_aa_mo`
-       * :c:data:`act_2_rdm_ab_mo`
-       * :c:data:`act_2_rdm_bb_mo`
-       * :c:data:`act_2_rdm_spin_trace_mo`
-       * :c:data:`act_2_rdm_trans_spin_trace_mo`
        * :c:data:`det_alpha_norm`
        * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
@@ -2638,9 +2611,6 @@ Providers
        * :c:data:`psi_bilinear_matrix_columns_loc`
        * :c:data:`psi_bilinear_matrix_order_reverse`
        * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`state_av_act_2_rdm_aa_mo`
-       * :c:data:`state_av_act_2_rdm_ab_mo`
-       * :c:data:`state_av_act_2_rdm_bb_mo`
 
  
 .. c:var:: int psi_cas
@@ -2791,6 +2761,12 @@ Providers
         double precision, allocatable	:: psi_cas_energy_diagonalized	(N_states)
 
 
+    Diagonalizes H_matrix_cas with lapack_diag (eigenvalues
+    sorted by increasing value).
+    For each state i (1..N_states):
+    psi_cas_energy_diagonalized(i) is the i-th eigenvalue and
+    psi_coef_cas_diagonalized(j,i) the j-th component of the
+    corresponding eigenvector in the CAS determinant basis.
 
     Needs:
 
@@ -2861,21 +2837,12 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`act_2_rdm_aa_mo`
-       * :c:data:`act_2_rdm_ab_mo`
-       * :c:data:`act_2_rdm_bb_mo`
-       * :c:data:`act_2_rdm_spin_trace_mo`
-       * :c:data:`act_2_rdm_trans_spin_trace_mo`
        * :c:data:`barycentric_electronic_energy`
        * :c:data:`c0_weight`
        * :c:data:`ci_electronic_energy`
        * :c:data:`dominant_det`
        * :c:data:`dressed_column_idx`
-       * :c:data:`energy_by_projection`
-       * :c:data:`gradvec_old`
-       * :c:data:`hessmat_old`
        * :c:data:`overlap_states`
-       * :c:data:`p0tuvx_peter`
        * :c:data:`psi_average_norm_contrib`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_cas`
@@ -2887,11 +2854,7 @@ Providers
        * :c:data:`psi_energy_two_e`
        * :c:data:`psi_energy_two_e_trans`
        * :c:data:`psi_non_cas`
-       * :c:data:`pt2_e0_denominator`
        * :c:data:`s2_values`
-       * :c:data:`state_av_act_2_rdm_aa_mo`
-       * :c:data:`state_av_act_2_rdm_ab_mo`
-       * :c:data:`state_av_act_2_rdm_bb_mo`
        * :c:data:`weight_configuration`
        * :c:data:`weight_configuration_average`
 
@@ -2907,6 +2870,12 @@ Providers
         double precision, allocatable	:: psi_cas_energy_diagonalized	(N_states)
 
 
+    Diagonalizes H_matrix_cas with lapack_diag (eigenvalues
+    sorted by increasing value).
+    For each state i (1..N_states):
+    psi_cas_energy_diagonalized(i) is the i-th eigenvalue and
+    psi_coef_cas_diagonalized(j,i) the j-th component of the
+    corresponding eigenvector in the CAS determinant basis.
 
     Needs:
 
@@ -3006,11 +2975,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_det_generators`
-       * :c:data:`n_det_selectors`
        * :c:data:`pruned`
-       * :c:data:`psi_det_generators`
-       * :c:data:`psi_selectors`
 
  
 .. c:var:: double psi_coef_sorted_bit
@@ -3125,16 +3090,12 @@ Providers
        * :c:data:`ci_electronic_energy`
        * :c:data:`det_to_configuration`
        * :c:data:`diagonal_h_matrix_on_psi_det`
-       * :c:data:`energy_by_projection`
-       * :c:data:`gradvec_old`
        * :c:data:`h_matrix_all_dets`
        * :c:data:`h_matrix_diag_all_dets`
-       * :c:data:`hessmat_old`
        * :c:data:`max_degree_exc`
        * :c:data:`n_csf`
        * :c:data:`n_elec_alpha_for_psi_configuration`
        * :c:data:`one_e_dm_mo_alpha`
-       * :c:data:`p0tuvx_peter`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_cas`
        * :c:data:`psi_coef`
@@ -3328,7 +3289,6 @@ Providers
        :columns: 3
 
        * :c:data:`psi_configuration_hii`
-       * :c:data:`pt2_e0_denominator`
 
  
 .. c:var:: int psi_det_size
@@ -3367,14 +3327,12 @@ Providers
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_beta`
        * :c:data:`psi_det_beta_unique`
-       * :c:data:`psi_det_generators`
        * :c:data:`psi_det_sorted`
        * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_energy`
        * :c:data:`psi_energy_two_e`
        * :c:data:`psi_non_cas`
        * :c:data:`psi_non_cas_sorted_bit`
-       * :c:data:`psi_selectors_size`
        * :c:data:`s2_values`
 
  
@@ -3413,11 +3371,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_det_generators`
-       * :c:data:`n_det_selectors`
        * :c:data:`pruned`
-       * :c:data:`psi_det_generators`
-       * :c:data:`psi_selectors`
 
  
 .. c:var:: int psi_det_sorted_bit
@@ -3493,11 +3447,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_det_generators`
-       * :c:data:`n_det_selectors`
        * :c:data:`pruned`
-       * :c:data:`psi_det_generators`
-       * :c:data:`psi_selectors`
 
  
 .. c:var:: double psi_energy_h_core
@@ -3684,10 +3634,8 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`coef_hf_selector`
        * :c:data:`diagonal_h_matrix_on_psi_det`
        * :c:data:`psi_det_hii`
-       * :c:data:`psi_selectors_diag_h_mat`
 
  
 .. c:var:: double ref_bitmask_energy_aa
@@ -3894,6 +3842,11 @@ Providers
         integer(bit_kind), allocatable	:: ref_closed_shell_bitmask	(N_int,2)
 
 
+    Bitmask of the closed-shell part of the reference: a copy
+    of ref_bitmask in which the alpha orbitals numbered
+    elec_beta_num+1 to elec_alpha_num in the sorted alpha
+    list are cleared.
+    For a closed-shell reference it is equal to ref_bitmask.
 
     Needs:
 
@@ -4322,11 +4275,6 @@ Providers
        * :c:data:`one_e_dm_average_beta_mo_for_dft`
        * :c:data:`one_e_dm_mo_alpha_average`
        * :c:data:`psi_average_norm_contrib`
-       * :c:data:`selection_weight`
-       * :c:data:`state_av_act_2_rdm_aa_mo`
-       * :c:data:`state_av_act_2_rdm_ab_mo`
-       * :c:data:`state_av_act_2_rdm_bb_mo`
-       * :c:data:`state_av_act_2_rdm_spin_trace_mo`
        * :c:data:`weight_configuration_average`
 
  
@@ -4599,6 +4547,12 @@ Subroutines / functions
         subroutine apply_excitation(det, exc, res, ok, Nint)
 
 
+    Applies to det the excitation described by exc and writes the
+    excited determinant in res. exc uses the same encoding as
+    get_excitation: exc(number, hole/particle, spin).
+    ok is .true. only if the excitation is valid, i.e. all holes are
+    occupied and all particles are virtual. res is not meaningful
+    when ok is .false.
 
  
 .. c:function:: void apply_hole(void)
@@ -4611,16 +4565,9 @@ Subroutines / functions
         subroutine apply_hole(det, s1, h1, res, ok, Nint)
 
 
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`fill_buffer_double`
-       * :c:func:`fill_buffer_single`
-       * :c:func:`select_singles`
-       * :c:func:`select_singles_and_doubles`
+    Removes from det the electron of the orbital h1 of spin s1 and
+    writes the result in res. ok is .true. only if h1 was occupied.
+    res is not meaningful when ok is .false.
 
  
 .. c:function:: void apply_holes(void)
@@ -4633,14 +4580,10 @@ Subroutines / functions
         subroutine apply_holes(det, s1, h1, s2, h2, res, ok, Nint)
 
 
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`fill_buffer_double`
-       * :c:func:`fill_buffer_single`
+    Removes from det the electrons of the orbitals h1 of spin s1
+    (skipped when h1 is 0) and h2 of spin s2, and writes the result
+    in res. ok is .true. only if the orbital(s) were occupied. res
+    is not meaningful when ok is .false.
 
  
 .. c:function:: void apply_particle(void)
@@ -4653,16 +4596,9 @@ Subroutines / functions
         subroutine apply_particle(det, s1, p1, res, ok, Nint)
 
 
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`fill_buffer_double`
-       * :c:func:`fill_buffer_single`
-       * :c:func:`get_m0`
-       * :c:func:`get_m1`
+    Adds the particle p1 of spin s1 to det and writes the result in
+    res. ok is .true. only if p1 was virtual. res is not meaningful
+    when ok is .false.
 
  
 .. c:function:: void apply_particles(void)
@@ -4675,18 +4611,10 @@ Subroutines / functions
         subroutine apply_particles(det, s1, p1, s2, p2, res, ok, Nint)
 
 
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`fill_buffer_double`
-       * :c:func:`fill_buffer_single`
-       * :c:func:`get_d0`
-       * :c:func:`get_d0_reference`
-       * :c:func:`get_d1`
-       * :c:func:`get_d1_reference`
+    Adds the particle p1 of spin s1 (skipped when p1 is 0) and the
+    particle p2 of spin s2 to det, and writes the result in res.
+    ok is .true. only if the orbital(s) were virtual. res is not
+    meaningful when ok is .false.
 
  
 .. c:function:: void bitstring_to_list_ab(void)
@@ -4728,21 +4656,7 @@ Subroutines / functions
        * :c:data:`one_e_dm_mo_alpha`
        * :c:data:`one_e_tr_dm_mo`
        * :c:data:`one_e_tr_dm_mo_alpha`
-       * :c:func:`orb_range_diag_to_all_2_rdm_dm_buffer`
-       * :c:func:`orb_range_diag_to_all_states_2_rdm_dm_buffer`
-       * :c:func:`orb_range_diag_to_all_states_2_rdm_trans_buffer`
-       * :c:func:`orb_range_off_diag_single_to_2_rdm_aa_dm_buffer`
-       * :c:func:`orb_range_off_diag_single_to_2_rdm_ab_dm_buffer`
-       * :c:func:`orb_range_off_diag_single_to_2_rdm_bb_dm_buffer`
-       * :c:func:`orb_range_off_diag_single_to_all_states_aa_dm_buffer`
-       * :c:func:`orb_range_off_diag_single_to_all_states_aa_trans_rdm_buffer`
-       * :c:func:`orb_range_off_diag_single_to_all_states_ab_dm_buffer`
-       * :c:func:`orb_range_off_diag_single_to_all_states_ab_trans_rdm_buffer`
-       * :c:func:`orb_range_off_diag_single_to_all_states_bb_dm_buffer`
-       * :c:func:`orb_range_off_diag_single_to_all_states_bb_trans_rdm_buffer`
        * :c:data:`ref_closed_shell_bitmask`
-       * :c:func:`select_singles`
-       * :c:func:`select_singles_and_doubles`
        * :c:func:`single_excitation_wee`
 
  
@@ -4770,13 +4684,6 @@ Subroutines / functions
        * :c:data:`mo_one_e_integrals`
        * :c:data:`mo_two_e_integrals_jj`
        * :c:data:`n_int`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`select_connected`
 
     Calls:
 
@@ -4830,6 +4737,16 @@ Subroutines / functions
         subroutine connected_to_hf(key_i,yes_no)
 
 
+    Tests whether the determinant key_i is connected to the
+    HF reference ref_bitmask, with the threshold thresh_sym:
+    - degree 0: yes_no is set to .true.
+    - degree 1: yes_no is set to .false. when the one-
+      electron integral mo_one_e_integrals(m,p) of the
+      excitation (m,p) is below thresh_sym in absolute value.
+    - degree 2: yes_no is set to .false. when the matrix
+      element <ref_bitmask | H | key_i> computed with i_H_j
+      is below thresh_sym in absolute value.
+    - other degrees: yes_no is left .true.
 
     Needs:
 
@@ -4938,8 +4855,6 @@ Subroutines / functions
        * :c:func:`generate_all_alpha_beta_det_products`
        * :c:func:`make_s2_eigenfunction`
        * :c:func:`replace_wf`
-       * :c:func:`run_cipsi`
-       * :c:func:`run_stochastic_cipsi`
 
     Calls:
 
@@ -4998,6 +4913,18 @@ Subroutines / functions
         subroutine create_microlist(minilist, N_minilist, key_mask, microlist, idx_microlist, N_microlist, ptr_microlist, Nint)
 
 
+    Splits the minilist into buckets indexed by the mobile
+    spin orbital of each determinant: the mobile spin
+    orbitals are the ones it occupies that key_mask does not.
+    Determinants with exactly four mobile spin orbitals are
+    copied once in the bucket of each of them. The others go
+    to bucket 0.
+    N_microlist(i) is the size of bucket i (i = 0, or
+    1..2*mo_num, beta orbitals offset by mo_num),
+    ptr_microlist(i) the start of bucket i in the flat
+    arrays, idx_microlist(n) the index in the original
+    minilist of the n-th entry, microlist(:, :, n) the
+    determinant itself.
 
     Needs:
 
@@ -5005,18 +4932,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`mo_num`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`perturb_buffer_dummy`
-       * :c:func:`perturb_buffer_epstein_nesbet`
-       * :c:func:`perturb_buffer_epstein_nesbet_2x2`
-       * :c:func:`perturb_buffer_epstein_nesbet_2x2_no_ci_diag`
-       * :c:func:`perturb_buffer_moller_plesset`
-       * :c:func:`perturb_buffer_qdpt`
 
     Calls:
 
@@ -5036,24 +4951,13 @@ Subroutines / functions
         subroutine create_minilist(key_mask, fullList, miniList, idx_miniList, N_fullList, N_miniList, Nint)
 
 
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`perturb_buffer_by_mono_dummy`
-       * :c:func:`perturb_buffer_by_mono_epstein_nesbet`
-       * :c:func:`perturb_buffer_by_mono_epstein_nesbet_2x2`
-       * :c:func:`perturb_buffer_by_mono_epstein_nesbet_2x2_no_ci_diag`
-       * :c:func:`perturb_buffer_by_mono_moller_plesset`
-       * :c:func:`perturb_buffer_by_mono_qdpt`
-       * :c:func:`perturb_buffer_dummy`
-       * :c:func:`perturb_buffer_epstein_nesbet`
-       * :c:func:`perturb_buffer_epstein_nesbet_2x2`
-       * :c:func:`perturb_buffer_epstein_nesbet_2x2_no_ci_diag`
-       * :c:func:`perturb_buffer_moller_plesset`
-       * :c:func:`perturb_buffer_qdpt`
+    Keeps, in miniList, the determinants of fullList for
+    which the number of spin orbitals occupied by key_mask
+    and not by the determinant is at most 2.
+    idx_miniList(i) is the index in fullList of the i-th kept
+    determinant, N_miniList their number.
+    If key_mask has no occupied orbital, fullList is copied
+    unchanged.
 
  
 .. c:function:: void create_minilist_find_previous(void)
@@ -5066,24 +4970,16 @@ Subroutines / functions
         subroutine create_minilist_find_previous(key_mask, fullList, miniList, N_fullList, N_miniList, fullMatch, Nint)
 
 
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`perturb_buffer_by_mono_dummy`
-       * :c:func:`perturb_buffer_by_mono_epstein_nesbet`
-       * :c:func:`perturb_buffer_by_mono_epstein_nesbet_2x2`
-       * :c:func:`perturb_buffer_by_mono_epstein_nesbet_2x2_no_ci_diag`
-       * :c:func:`perturb_buffer_by_mono_moller_plesset`
-       * :c:func:`perturb_buffer_by_mono_qdpt`
-       * :c:func:`perturb_buffer_dummy`
-       * :c:func:`perturb_buffer_epstein_nesbet`
-       * :c:func:`perturb_buffer_epstein_nesbet_2x2`
-       * :c:func:`perturb_buffer_epstein_nesbet_2x2_no_ci_diag`
-       * :c:func:`perturb_buffer_moller_plesset`
-       * :c:func:`perturb_buffer_qdpt`
+    Same filter as create_minilist, applied in reverse order
+    (from N_fullList down to 1): the determinants for which 0
+    or 1 spin orbitals of key_mask are not occupied are kept
+    first, the ones for which exactly 2 are not occupied are
+    appended at the end of miniList.
+    N_miniList is the total number of kept determinants.
+    fullMatch is always returned as .false.; the statements
+    that would set it to .true. are commented out.
+    TODO(doc): what was fullMatch meant to signal, and is the
+    commented-out assignment intentional?
 
  
 .. c:function:: void create_wf_of_psi_bilinear_matrix(void)
@@ -5149,7 +5045,6 @@ Subroutines / functions
 
        * :c:func:`diag_h_mat_elem_fock`
        * :c:func:`example_determinants`
-       * :c:func:`pt2_moller_plesset`
 
  
 .. c:function:: void decode_exc_spin(void)
@@ -5222,6 +5117,10 @@ Subroutines / functions
         integer function detCmp(a,b,Nint)
 
 
+    Returns 0, -1 or 1 if the determinants a and b are equal, and a
+    is smaller or greater than b. The alpha bitmask is compared from
+    the highest word index down, then the beta bitmask; within a
+    word the bitstrings are compared as integers.
 
  
 .. c:function:: void deteq(void)
@@ -5234,6 +5133,8 @@ Subroutines / functions
         logical function detEq(a,b,Nint)
 
 
+    Returns .true. if the determinants a and b (alpha and beta spin
+    bitmasks) are bit-for-bit equal over the Nint words.
 
  
 .. c:function:: void diag_h_mat_elem(void)
@@ -5400,7 +5301,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`build_singly_excited_wavefunction`
-       * :c:func:`do_signed_mono_excitation`
        * :c:func:`example_determinants`
        * :c:func:`get_excitation_general`
        * :c:func:`get_phase_general`
@@ -5505,8 +5405,6 @@ Subroutines / functions
        * :c:func:`generate_all_alpha_beta_det_products`
        * :c:func:`make_s2_eigenfunction`
        * :c:func:`replace_wf`
-       * :c:func:`zmq_pt2`
-       * :c:func:`zmq_selection`
 
     Calls:
 
@@ -5626,7 +5524,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`create_wf_of_psi_bilinear_matrix`
-       * :c:func:`generate_cas_space`
 
     Calls:
 
@@ -5680,11 +5577,14 @@ Subroutines / functions
        * :c:data:`n_act_orb`
        * :c:data:`n_core_inact_orb`
        * :c:data:`n_det`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_det_beta_unique`
        * :c:data:`n_int`
+       * :c:data:`n_states`
+       * :c:data:`psi_coef`
+       * :c:data:`psi_det`
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_beta_unique`
+       * :c:data:`psi_det_size`
+       * :c:data:`read_wf`
 
     Calls:
 
@@ -5692,8 +5592,8 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`bitstring_to_list`
-       * :c:func:`generate_all_alpha_beta_det_products`
        * :c:func:`list_to_bitstring`
+       * :c:func:`save_wavefunction_general`
 
     Touches:
 
@@ -5701,19 +5601,492 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`n_det`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`c0_weight`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_det_beta_unique`
        * :c:data:`psi_coef`
-       * :c:data:`psi_det_sorted_bit`
-       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_det`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_det_beta_unique`
        * :c:data:`psi_det_size`
-       * :c:data:`psi_det_sorted_bit`
+
+ 
+.. c:function:: get_all_spin_doubles:
+
+
+    File : :file:`determinants/spindeterminants.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_all_spin_doubles(buffer, idx, spindet, Nint, size_buffer, doubles, n_doubles)
+
+
+    
+    Returns the indices of all the double excitations in the list of
+    unique $\alpha$ determinants.
+    
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_int`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_all_spin_doubles_1`
+       * :c:func:`get_all_spin_doubles_2`
+       * :c:func:`get_all_spin_doubles_3`
+       * :c:func:`get_all_spin_doubles_4`
+       * :c:func:`get_all_spin_doubles_n_int`
+
+ 
+.. c:function:: get_all_spin_doubles_1:
+
+
+    File : :file:`determinants/spindeterminants.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_all_spin_doubles_1(buffer, idx, spindet, size_buffer, doubles, n_doubles)
+
+
+    
+    Returns the indices of all the double excitations in the list of
+    unique $\alpha$ determinants.
+    
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_all_spin_doubles`
+
+ 
+.. c:function:: get_all_spin_doubles_2:
+
+
+    File : :file:`determinants/spindeterminants.irp.f_template_1310`
+
+    .. code:: fortran
+
+        subroutine get_all_spin_doubles_2(buffer, idx, spindet, size_buffer, doubles, n_doubles)
+
+
+    
+    Returns the indices of all the double excitations in the list of
+    unique $lpha$ determinants.
+    
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_all_spin_doubles`
+
+ 
+.. c:function:: get_all_spin_doubles_3:
+
+
+    File : :file:`determinants/spindeterminants.irp.f_template_1310`
+
+    .. code:: fortran
+
+        subroutine get_all_spin_doubles_3(buffer, idx, spindet, size_buffer, doubles, n_doubles)
+
+
+    
+    Returns the indices of all the double excitations in the list of
+    unique $lpha$ determinants.
+    
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_all_spin_doubles`
+
+ 
+.. c:function:: get_all_spin_doubles_4:
+
+
+    File : :file:`determinants/spindeterminants.irp.f_template_1310`
+
+    .. code:: fortran
+
+        subroutine get_all_spin_doubles_4(buffer, idx, spindet, size_buffer, doubles, n_doubles)
+
+
+    
+    Returns the indices of all the double excitations in the list of
+    unique $lpha$ determinants.
+    
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_all_spin_doubles`
+
+ 
+.. c:function:: get_all_spin_doubles_n_int:
+
+
+    File : :file:`determinants/spindeterminants.irp.f_template_1310`
+
+    .. code:: fortran
+
+        subroutine get_all_spin_doubles_N_int(buffer, idx, spindet, size_buffer, doubles, n_doubles)
+
+
+    
+    Returns the indices of all the double excitations in the list of
+    unique $lpha$ determinants.
+    
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_int`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_all_spin_doubles`
+
+ 
+.. c:function:: get_all_spin_singles:
+
+
+    File : :file:`determinants/spindeterminants.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_all_spin_singles(buffer, idx, spindet, Nint, size_buffer, singles, n_singles)
+
+
+    
+    Returns the indices of all the single excitations in the list of
+    unique $\alpha$ determinants.
+    
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_int`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`singles_alpha_csc`
+       * :c:data:`singles_alpha_csc_idx`
+       * :c:data:`singles_beta_csc`
+       * :c:data:`singles_beta_csc_idx`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_all_spin_singles_1`
+       * :c:func:`get_all_spin_singles_2`
+       * :c:func:`get_all_spin_singles_3`
+       * :c:func:`get_all_spin_singles_4`
+       * :c:func:`get_all_spin_singles_n_int`
+
+ 
+.. c:function:: get_all_spin_singles_1:
+
+
+    File : :file:`determinants/spindeterminants.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_all_spin_singles_1(buffer, idx, spindet, size_buffer, singles, n_singles)
+
+
+    
+    Returns the indices of all the single excitations in the list of
+    unique $\alpha$ determinants.
+    
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_all_spin_singles`
+
+ 
+.. c:function:: get_all_spin_singles_2:
+
+
+    File : :file:`determinants/spindeterminants.irp.f_template_1310`
+
+    .. code:: fortran
+
+        subroutine get_all_spin_singles_2(buffer, idx, spindet, size_buffer, singles, n_singles)
+
+
+    
+    Returns the indices of all the single excitations in the list of
+    unique $lpha$ determinants.
+    
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_all_spin_singles`
+
+ 
+.. c:function:: get_all_spin_singles_3:
+
+
+    File : :file:`determinants/spindeterminants.irp.f_template_1310`
+
+    .. code:: fortran
+
+        subroutine get_all_spin_singles_3(buffer, idx, spindet, size_buffer, singles, n_singles)
+
+
+    
+    Returns the indices of all the single excitations in the list of
+    unique $lpha$ determinants.
+    
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_all_spin_singles`
+
+ 
+.. c:function:: get_all_spin_singles_4:
+
+
+    File : :file:`determinants/spindeterminants.irp.f_template_1310`
+
+    .. code:: fortran
+
+        subroutine get_all_spin_singles_4(buffer, idx, spindet, size_buffer, singles, n_singles)
+
+
+    
+    Returns the indices of all the single excitations in the list of
+    unique $lpha$ determinants.
+    
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_all_spin_singles`
+
+ 
+.. c:function:: get_all_spin_singles_and_doubles:
+
+
+    File : :file:`determinants/spindeterminants.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_all_spin_singles_and_doubles(buffer, idx, spindet, Nint, size_buffer, singles, doubles, n_singles, n_doubles)
+
+
+    
+    Returns the indices of all the single and double excitations in the list of
+    unique $\alpha$ determinants.
+    
+    Warning: The buffer is transposed.
+    
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_all_spin_singles_and_doubles_1`
+       * :c:func:`get_all_spin_singles_and_doubles_2`
+       * :c:func:`get_all_spin_singles_and_doubles_3`
+       * :c:func:`get_all_spin_singles_and_doubles_4`
+       * :c:func:`get_all_spin_singles_and_doubles_n_int`
+
+ 
+.. c:function:: get_all_spin_singles_and_doubles_1:
+
+
+    File : :file:`determinants/spindeterminants.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_all_spin_singles_and_doubles_1(buffer, idx, spindet, size_buffer, singles, doubles, n_singles, n_doubles)
+
+
+    
+    Returns the indices of all the single and double excitations in the list of
+    unique $\alpha$ determinants.
+    
+    /!\ : The buffer is transposed !
+    
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_all_spin_singles_and_doubles`
+
+ 
+.. c:function:: get_all_spin_singles_and_doubles_2:
+
+
+    File : :file:`determinants/spindeterminants.irp.f_template_1310`
+
+    .. code:: fortran
+
+        subroutine get_all_spin_singles_and_doubles_2(buffer, idx, spindet, size_buffer, singles, doubles, n_singles, n_doubles)
+
+
+    
+    Returns the indices of all the single and double excitations in the list of
+    unique $lpha$ determinants.
+    
+    /!\ : The buffer is transposed !
+    
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_all_spin_singles_and_doubles`
+
+ 
+.. c:function:: get_all_spin_singles_and_doubles_3:
+
+
+    File : :file:`determinants/spindeterminants.irp.f_template_1310`
+
+    .. code:: fortran
+
+        subroutine get_all_spin_singles_and_doubles_3(buffer, idx, spindet, size_buffer, singles, doubles, n_singles, n_doubles)
+
+
+    
+    Returns the indices of all the single and double excitations in the list of
+    unique $lpha$ determinants.
+    
+    /!\ : The buffer is transposed !
+    
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_all_spin_singles_and_doubles`
+
+ 
+.. c:function:: get_all_spin_singles_and_doubles_4:
+
+
+    File : :file:`determinants/spindeterminants.irp.f_template_1310`
+
+    .. code:: fortran
+
+        subroutine get_all_spin_singles_and_doubles_4(buffer, idx, spindet, size_buffer, singles, doubles, n_singles, n_doubles)
+
+
+    
+    Returns the indices of all the single and double excitations in the list of
+    unique $lpha$ determinants.
+    
+    /!\ : The buffer is transposed !
+    
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_all_spin_singles_and_doubles`
+
+ 
+.. c:function:: get_all_spin_singles_and_doubles_n_int:
+
+
+    File : :file:`determinants/spindeterminants.irp.f_template_1310`
+
+    .. code:: fortran
+
+        subroutine get_all_spin_singles_and_doubles_N_int(buffer, idx, spindet, size_buffer, singles, doubles, n_singles, n_doubles)
+
+
+    
+    Returns the indices of all the single and double excitations in the list of
+    unique $lpha$ determinants.
+    
+    /!\ : The buffer is transposed !
+    
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_int`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_all_spin_singles_and_doubles`
+
+ 
+.. c:function:: get_all_spin_singles_n_int:
+
+
+    File : :file:`determinants/spindeterminants.irp.f_template_1310`
+
+    .. code:: fortran
+
+        subroutine get_all_spin_singles_N_int(buffer, idx, spindet, size_buffer, singles, n_singles)
+
+
+    
+    Returns the indices of all the single excitations in the list of
+    unique $lpha$ determinants.
+    
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_int`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_all_spin_singles`
 
  
 .. c:function:: void get_double_excitation(void)
@@ -5740,9 +6113,6 @@ Subroutines / functions
        * :c:func:`i_h_j_s2`
        * :c:func:`i_h_j_two_e`
        * :c:func:`i_h_j_verbose`
-       * :c:func:`orb_range_off_diag_double_to_2_rdm_ab_dm_buffer`
-       * :c:func:`orb_range_off_diag_double_to_all_states_ab_dm_buffer`
-       * :c:func:`orb_range_off_diag_double_to_all_states_ab_trans_rdm_buffer`
 
  
 .. c:function:: void get_double_excitation_spin(void)
@@ -5770,12 +6140,6 @@ Subroutines / functions
        * :c:func:`h_s2_u_0_nstates_openmp_work_4_cholesky`
        * :c:func:`h_s2_u_0_nstates_openmp_work_n_int_cholesky`
        * :c:func:`i_h_j_double_spin`
-       * :c:func:`orb_range_off_diag_double_to_2_rdm_aa_dm_buffer`
-       * :c:func:`orb_range_off_diag_double_to_2_rdm_bb_dm_buffer`
-       * :c:func:`orb_range_off_diag_double_to_all_states_aa_dm_buffer`
-       * :c:func:`orb_range_off_diag_double_to_all_states_aa_trans_rdm_buffer`
-       * :c:func:`orb_range_off_diag_double_to_all_states_bb_dm_buffer`
-       * :c:func:`orb_range_off_diag_double_to_all_states_trans_rdm_bb_buffer`
 
  
 .. c:function:: void get_excitation(void)
@@ -5797,7 +6161,6 @@ Subroutines / functions
 
        * :c:func:`example_determinants`
        * :c:func:`get_phase`
-       * :c:func:`pt2_moller_plesset`
 
     Calls:
 
@@ -5829,9 +6192,6 @@ Subroutines / functions
        * :c:func:`connected_to_hf`
        * :c:func:`diag_h_mat_elem_fock`
        * :c:func:`example_determinants`
-       * :c:data:`exc_degree_per_selectors`
-       * :c:func:`fill_buffer_double`
-       * :c:func:`fill_buffer_single`
        * :c:func:`get_excitation`
        * :c:func:`get_s2`
        * :c:func:`i_h_j`
@@ -5842,7 +6202,6 @@ Subroutines / functions
        * :c:data:`max_degree_exc`
        * :c:data:`psi_configuration_to_psi_det`
        * :c:data:`psi_non_cas`
-       * :c:func:`pt2_qdpt`
 
     Calls:
 
@@ -5882,14 +6241,11 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`fill_buffer_double`
-       * :c:func:`fill_buffer_single`
        * :c:func:`get_excitation_spin`
        * :c:data:`multi_s_dipole_moment`
        * :c:data:`one_e_dm_mo_alpha`
        * :c:data:`one_e_tr_dm_mo`
        * :c:data:`one_e_tr_dm_mo_alpha`
-       * :c:func:`select_singles_and_doubles`
 
  
 .. c:function:: void get_excitation_degree_vector(void)
@@ -5909,7 +6265,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`energy_by_projection`
        * :c:func:`routine_example_psi_det`
 
  
@@ -6230,6 +6585,13 @@ Subroutines / functions
         subroutine get_phase_general(key_i,Nint,degree, holes_array, particles_array,phase)
 
 
+    Computes the phase of the excitation obtained by applying,
+    successively to the determinant key_i, the single
+    excitations holes_array(i,ispin) ->
+    particles_array(i,ispin) (i = 1..degree(ispin), ispin =
+    1,2), with the convention a^{dagger}_{particle}
+    a_{hole} | key_i > = | key_j > of get_excitation_general.
+    phase is the resulting fermionic phase.
 
     Needs:
 
@@ -6257,6 +6619,16 @@ Subroutines / functions
         subroutine get_phasemask_bit(det1, pm, Nint)
 
 
+    Computes the phase mask of the determinant det1: bit b of
+    pm(i,ispin) is 1 when the number of occupied spin orbitals
+    of spin ispin at or below bit b of word i is odd, i.e. the
+    running parity of the occupied bits, including the words
+    before i.
+    The same mask is built by get_mask_phase
+    (cipsi/selection.irp.f), where it is used to compute the
+    phase of double excitations (get_phase_bi).
+    TODO(doc): no caller of get_phasemask_bit found in the
+    tree; is it dead code?
 
  
 .. c:function:: void get_s2(void)
@@ -6315,7 +6687,6 @@ Subroutines / functions
 
        * :c:func:`connected_to_hf`
        * :c:func:`diag_h_mat_elem_fock`
-       * :c:func:`do_signed_mono_excitation`
        * :c:func:`get_excitation`
        * :c:func:`get_excitation_general`
        * :c:func:`get_phase_general`
@@ -6324,15 +6695,6 @@ Subroutines / functions
        * :c:func:`i_h_j_s2`
        * :c:func:`i_h_j_two_e`
        * :c:func:`i_h_j_verbose`
-       * :c:func:`orb_range_off_diag_single_to_2_rdm_aa_dm_buffer`
-       * :c:func:`orb_range_off_diag_single_to_2_rdm_ab_dm_buffer`
-       * :c:func:`orb_range_off_diag_single_to_2_rdm_bb_dm_buffer`
-       * :c:func:`orb_range_off_diag_single_to_all_states_aa_dm_buffer`
-       * :c:func:`orb_range_off_diag_single_to_all_states_aa_trans_rdm_buffer`
-       * :c:func:`orb_range_off_diag_single_to_all_states_ab_dm_buffer`
-       * :c:func:`orb_range_off_diag_single_to_all_states_ab_trans_rdm_buffer`
-       * :c:func:`orb_range_off_diag_single_to_all_states_bb_dm_buffer`
-       * :c:func:`orb_range_off_diag_single_to_all_states_bb_trans_rdm_buffer`
 
  
 .. c:function:: void get_single_excitation_from_fock(void)
@@ -6345,6 +6707,24 @@ Subroutines / functions
         subroutine get_single_excitation_from_fock(det_1,det_2,h,p,spin,phase,hij)
 
 
+    For a determinant det_1 that differs from the closed-shell
+    reference (ref_closed_shell_bitmask), computes the
+    Hamiltonian matrix element with the reference, for the
+    excitation (h, p) of spin `spin`:
+    hij = fock_operator_closed_shell_ref_bitmask(h, p)
+          - Coulomb integrals of the holes
+          + exchange integrals of the same-spin holes
+          + Coulomb integrals of the particles
+          - exchange integrals of the same-spin particles,
+    times phase.
+    Holes are the spin orbitals occupied in the reference but
+    not in det_1, particles the opposite. det_2 is not used.
+    The (h, p) Coulomb and exchange integrals are preloaded
+    in local buffers.
+    TODO(doc): no caller found in the tree; is det_1 expected
+    to be a single excitation of the reference (the routine
+    was named get_mono_excitation_from_fock), and why is
+    det_2 unused?
 
     Needs:
 
@@ -6448,6 +6828,14 @@ Subroutines / functions
         subroutine getMobiles(key,key_mask, mobiles,Nint)
 
 
+    Gives the two spin orbitals in which key and key_mask
+    differ (the "mobiles"), as 1-based spin-orbital
+    indices, beta offset by mo_num.
+    The alpha bits are taken first, then the beta ones. The
+    code assumes that key and key_mask differ by exactly two
+    spin orbitals.
+    In perturb_buffer_$PERT the mobiles are used to pick the
+    smaller of the two microlist buckets.
 
     Needs:
 
@@ -6455,18 +6843,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`mo_num`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`perturb_buffer_dummy`
-       * :c:func:`perturb_buffer_epstein_nesbet`
-       * :c:func:`perturb_buffer_epstein_nesbet_2x2`
-       * :c:func:`perturb_buffer_epstein_nesbet_2x2_no_ci_diag`
-       * :c:func:`perturb_buffer_moller_plesset`
-       * :c:func:`perturb_buffer_qdpt`
 
     Calls:
 
@@ -6502,23 +6878,13 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`calc_hess_elem`
-       * :c:data:`coef_hf_selector`
        * :c:func:`connected_to_hf`
-       * :c:data:`energy_by_projection`
        * :c:func:`example_determinants`
-       * :c:func:`get_d0`
-       * :c:func:`get_d0_reference`
-       * :c:func:`get_d1`
-       * :c:func:`get_d1_reference`
-       * :c:func:`get_m0`
-       * :c:func:`get_m1`
        * :c:data:`h_matrix_all_dets`
        * :c:data:`h_matrix_cas`
        * :c:data:`h_matrix_diag_all_dets`
        * :c:func:`i_h_psi`
        * :c:func:`i_h_psi_minilist`
-       * :c:func:`pt2_qdpt`
        * :c:func:`routine_example_psi_det`
 
     Calls:
@@ -6937,17 +7303,6 @@ Subroutines / functions
     The i_H_psi_minilist is much faster but requires to build the
     minilists.
 
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`calc_grad_elem`
-       * :c:func:`calc_hess_elem`
-       * :c:func:`pt2_epstein_nesbet_2x2`
-       * :c:func:`pt2_epstein_nesbet_2x2_no_ci_diag`
-       * :c:func:`remove_small_contributions`
-
     Calls:
 
     .. hlist::
@@ -6971,16 +7326,6 @@ Subroutines / functions
     
     Uses filter_connected_i_H_psi0 to get all the $|J \rangle$ to which $|i \rangle$
     is connected. The $|J\rangle$ are searched in short pre-computed lists.
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`pt2_dummy`
-       * :c:func:`pt2_epstein_nesbet`
-       * :c:func:`pt2_moller_plesset`
-       * :c:func:`pt2_qdpt`
 
     Calls:
 
@@ -7125,6 +7470,8 @@ Subroutines / functions
         subroutine print_dipole_moments
 
 
+    Prints a table with the x, y and z dipole moments of all states,
+    as provided by the x, y and z_dipole_moment providers.
 
     Needs:
 
@@ -7174,6 +7521,12 @@ Subroutines / functions
         subroutine read_spindeterminants
 
 
+    Reads the wave function from the spindeterminants node of the
+    |EZFIO| file: the unique alpha and beta determinants and the
+    sparse coefficient matrix (rows, columns, values) of the
+    bilinear form $D_\alpha^\dagger C D_\beta$, then calls
+    :c:func:`wf_of_psi_bilinear_matrix` to fill
+    :c:data:`psi_det` and :c:data:`psi_coef`.
 
     Needs:
 
@@ -7353,7 +7706,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`fill_h_apply_buffer_no_selection`
-       * :c:func:`fill_h_apply_buffer_selection`
 
     Calls:
 
@@ -7599,6 +7951,9 @@ Subroutines / functions
         subroutine save_ref_determinant
 
 
+    Saves the reference determinant (ref_bitmask, the Hartree-Fock
+    determinant) as a one-determinant wave function, with coefficient
+    1 for state 1, into the |EZFIO| file.
 
     Needs:
 
@@ -7639,14 +7994,6 @@ Subroutines / functions
        * :c:data:`psi_det_sorted`
        * :c:data:`read_wf`
 
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_cipsi`
-       * :c:func:`run_stochastic_cipsi`
-
     Calls:
 
     .. hlist::
@@ -7682,6 +8029,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`generate_cas_space`
        * :c:func:`save_ref_determinant`
        * :c:func:`save_wavefunction`
        * :c:func:`save_wavefunction_truncated`
@@ -7847,14 +8195,6 @@ Subroutines / functions
        * :c:data:`psi_coef`
        * :c:data:`psi_det`
 
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_orb_opt_trust_v2`
-       * :c:func:`update_parameters`
-
     Calls:
 
     .. hlist::
@@ -8017,6 +8357,21 @@ Subroutines / functions
         subroutine single_excitation_wee(det_1,det_2,h,p,spin,phase,hij)
 
 
+    For a determinant det_1 that differs from the closed-shell
+    reference (ref_closed_shell_bitmask), computes the
+    two-electron part of the Hamiltonian matrix element with
+    the reference, for the excitation (h, p) of spin `spin`:
+    hij = fock_wee_closed_shell(h, p)
+          - Coulomb integrals of the holes
+          + exchange integrals of the same-spin holes
+          + Coulomb integrals of the particles
+          - exchange integrals of the same-spin particles,
+    times phase.
+    Holes are the spin orbitals occupied in the reference but
+    not in det_1, particles the opposite. det_2 is not used.
+    TODO(doc): no caller found in the tree; is det_1 expected
+    to be a single excitation of the reference (the routine
+    was named mono_excitation_wee), and why is det_2 unused?
 
     Needs:
 
@@ -8183,6 +8538,11 @@ Subroutines / functions
         subroutine tamiser(key, idx, no, n, Nint, N_key)
 
 
+    Sift-down step of the heap sort used by sort_dets_ab and
+    sort_dets_ab_v: assuming that key(1:n) is a min-heap for
+    the det_inf ordering except possibly at position no, moves
+    the element at position no down to its correct position.
+    idx is swapped in parallel with key.
 
     Called by:
 
@@ -8330,6 +8690,11 @@ Subroutines / functions
         subroutine write_spindeterminants
 
 
+    Saves the wave function in the spindeterminants node of the
+    |EZFIO| file, in the independent alpha/beta form: the unique
+    alpha and beta determinants, and the sparse coefficient matrix
+    (rows, columns, values) of the bilinear form
+    $D_\alpha^\dagger C D_\beta$.
 
     Needs:
 

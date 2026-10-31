@@ -9,6 +9,9 @@ mp2
  
  
  
+ Computes the MP2 correlation energy on top of the reference 
+ determinant stored in the EZFIO database, and prints the total 
+ energy E_HF + E_MP2. 
  
  Calls: 
  

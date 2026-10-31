@@ -81,7 +81,6 @@ Providers
        * :c:data:`diagonal_h_matrix_on_psi_det`
        * :c:data:`ormas_max_e`
        * :c:data:`psi_det_hii`
-       * :c:data:`psi_selectors_diag_h_mat`
 
  
 .. c:var:: int elec_num_tab
@@ -116,5 +115,4 @@ Providers
        * :c:data:`diagonal_h_matrix_on_psi_det`
        * :c:data:`ormas_max_e`
        * :c:data:`psi_det_hii`
-       * :c:data:`psi_selectors_diag_h_mat`
 

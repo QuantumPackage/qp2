@@ -9,6 +9,9 @@ print_dipole
  
  
  
+ Prints the dipole moments of the wave function stored in the 
+ |EZFIO| directory: the x, y and z components for each of the 
+ N_states states. 
  
  Needs: 
  

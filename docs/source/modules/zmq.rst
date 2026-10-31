@@ -419,8 +419,6 @@ Subroutines / functions
 
        * :c:func:`h_s2_u_0_nstates_zmq`
        * :c:func:`h_u_0_nstates_zmq`
-       * :c:func:`zmq_pt2`
-       * :c:func:`zmq_selection`
 
     Calls:
 
@@ -525,9 +523,6 @@ Subroutines / functions
        * :c:func:`davidson_csf_run_slave`
        * :c:func:`davidson_nos2_run_slave`
        * :c:func:`davidson_run_slave`
-       * :c:func:`run_pt2_slave_large`
-       * :c:func:`run_pt2_slave_small`
-       * :c:func:`run_selection_slave`
 
     Calls:
 
@@ -596,11 +591,6 @@ Subroutines / functions
        * :c:func:`davidson_nos2_run_slave`
        * :c:func:`davidson_run_slave`
        * :c:func:`end_parallel_job`
-       * :c:func:`pt2_collector`
-       * :c:func:`run_pt2_slave_large`
-       * :c:func:`run_pt2_slave_small`
-       * :c:func:`run_selection_slave`
-       * :c:func:`selection_collector`
 
  
 .. c:function:: void get_task_from_taskserver(void)
@@ -678,8 +668,6 @@ Subroutines / functions
 
        * :c:func:`h_s2_u_0_nstates_zmq`
        * :c:func:`h_u_0_nstates_zmq`
-       * :c:func:`zmq_pt2`
-       * :c:func:`zmq_selection`
 
     Calls:
 
@@ -887,13 +875,6 @@ Subroutines / functions
        * :c:data:`is_zmq_slave`
        * :c:data:`qp_run_address`
 
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_slave_cipsi`
-
     Calls:
 
     .. hlist::
@@ -953,6 +934,10 @@ Subroutines / functions
         subroutine wait_for_next_state(state)
 
 
+    Wait until a state different from 'Waiting' is received on the ZMQ
+    subscription socket, and return it in 'state'. On a receive
+    timeout, return 'Stopped'.
+    TODO(doc): no caller found in the tree; what is the intended use?
 
     Calls:
 
@@ -993,13 +978,6 @@ Subroutines / functions
 
 
     Wait for the ZMQ state to be ready
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_slave_main`
 
     Calls:
 

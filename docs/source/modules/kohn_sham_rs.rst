@@ -74,6 +74,12 @@ Providers
         double precision, allocatable	:: ao_potential_beta_xc	(ao_num,ao_num)
 
 
+    AO-basis (ao_num x ao_num) exchange/correlation potential for
+    alpha and beta electrons (both provided in this block). If
+    same_xc_func, copies potential_xc_alpha_ao /
+    potential_xc_beta_ao at state index 1; otherwise sums
+    potential_c_*_ao and potential_x_*_ao. Added to the KS Fock
+    matrix in fock_matrix_rs_ks.irp.f.
 
     Needs:
 
@@ -106,6 +112,12 @@ Providers
         double precision, allocatable	:: ao_potential_beta_xc	(ao_num,ao_num)
 
 
+    AO-basis (ao_num x ao_num) exchange/correlation potential for
+    alpha and beta electrons (both provided in this block). If
+    same_xc_func, copies potential_xc_alpha_ao /
+    potential_xc_beta_ao at state index 1; otherwise sums
+    potential_c_*_ao and potential_x_*_ao. Added to the KS Fock
+    matrix in fock_matrix_rs_ks.irp.f.
 
     Needs:
 
@@ -207,6 +219,11 @@ Providers
         double precision	:: e_correlation_dft	
 
 
+    DFT correlation energy: energy_c(1), i.e. the correlation
+    energy at state index 1 for the functional named by
+    correlation_functional (general provider energy_c in
+    dft_one_e/e_xc_general.irp.f). Added to RS_KS_energy in
+    rs_ks_energy.irp.f.
 
     Needs:
 
@@ -234,6 +251,11 @@ Providers
         double precision	:: e_exchange_dft	
 
 
+    DFT exchange energy: energy_x(1), i.e. the exchange energy at
+    state index 1 for the functional named by exchange_functional,
+    scaled by (1 - HF_exchange) (general provider energy_x in
+    dft_one_e/e_xc_general.irp.f). Added to RS_KS_energy in
+    rs_ks_energy.irp.f.
 
     Needs:
 
@@ -626,6 +648,12 @@ Subroutines / functions
         subroutine check_coherence_functional
 
 
+    Start-up check: stop with a diagnostic if
+    exchange_functional or correlation_functional is neither
+    "None" nor contains the substring "sr", advising to use
+    range-separated functionals or to switch to the KS_SCF
+    program. The call from the rs_ks_scf program body is
+    currently commented out.
 
     Needs:
 

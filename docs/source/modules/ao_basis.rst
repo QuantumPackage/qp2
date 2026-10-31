@@ -238,6 +238,7 @@ Providers
         double precision, allocatable	:: ao_coef_cgtos_norm_ord_transp	(ao_prim_num_max,ao_num)
 
 
+    Transposed :c:data:`ao_coef_norm_cgtos_ord`
 
     Needs:
 
@@ -269,6 +270,12 @@ Providers
         double precision, allocatable	:: ao_coef_norm_cgtos	(ao_num,ao_prim_num_max)
 
 
+    Coefficients of the cGTO |AO|s, including the |AO|
+    normalization, as :c:data:`ao_coef_normalized` does for
+    real |AO|s. The self overlap of a primitive combines two
+    overlap_cgaussian_xyz integrals, one with the complex Gaussian
+    and one with its conjugate. The contracted |AO| is normalized
+    when ao_normalized is set.
 
     Needs:
 
@@ -280,6 +287,7 @@ Providers
        * :c:data:`ao_expo_im`
        * :c:data:`ao_expo_phase`
        * :c:data:`ao_expo_pw`
+       * :c:data:`ao_normalized`
        * :c:data:`ao_nucl`
        * :c:data:`ao_num`
        * :c:data:`ao_power`
@@ -309,6 +317,11 @@ Providers
         double precision, allocatable	:: ao_expo_phase_ord	(4,ao_num,ao_prim_num_max)
 
 
+    cGTO primitives of each |AO|, sorted by increasing real part
+    of the exponent. Gives the complex exponent (ao_expo +
+    i*ao_expo_im), the coefficients ao_coef_norm_cgtos, the plane
+    wave part and the phase; component 4 of the last two is the
+    squared norm of the plane wave part and the total phase.
 
     Needs:
 
@@ -484,7 +497,6 @@ Providers
        * :c:data:`ao_pseudo_integrals_local`
        * :c:data:`ao_pseudo_integrals_non_local`
        * :c:data:`ao_spread_x`
-       * :c:data:`ao_two_e_integral_alpha`
        * :c:data:`ao_two_e_integral_erf_schwartz`
        * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_erf_in_map`
@@ -502,6 +514,12 @@ Providers
         double precision, allocatable	:: ao_coef_normalized_ordered_transp_per_nucl	(ao_prim_num_max,N_AOs_max,nucl_num)
 
 
+    Coefficients including the |AO| normalization, sorted and
+    organized by atom. Index (l,j,i) is the coefficient of the
+    l-th primitive of the j-th |AO| of atom i, i.e.
+    ao_coef_normalized_ordered_transp(l,k) with k the global
+    index of the |AO| (see :c:data:`Nucl_Aos_transposed`).
+    Only j = 1 to :c:data:`Nucl_N_Aos`(i) is set.
 
     Needs:
 
@@ -540,6 +558,11 @@ Providers
         double precision, allocatable	:: ao_expo_phase_ord	(4,ao_num,ao_prim_num_max)
 
 
+    cGTO primitives of each |AO|, sorted by increasing real part
+    of the exponent. Gives the complex exponent (ao_expo +
+    i*ao_expo_im), the coefficients ao_coef_norm_cgtos, the plane
+    wave part and the phase; component 4 of the last two is the
+    squared norm of the plane wave part and the total phase.
 
     Needs:
 
@@ -576,6 +599,12 @@ Providers
         double precision, allocatable	:: ao_expo_phase_ord_transp	(4,ao_prim_num_max,ao_num)
 
 
+    Transposed, sorted cGTO primitive data.
+    ao_expo_cgtos_ord_transp(i,j) is the complex exponent of the
+    i-th primitive of the j-th |AO|. Components 1 to 3 of
+    ao_expo_pw_ord_transp are the plane wave part, component 4 its
+    squared norm; ao_expo_phase_ord_transp uses the same layout
+    for the phase and the total phase.
 
     Needs:
 
@@ -669,7 +698,6 @@ Providers
        * :c:data:`ao_pseudo_integrals_local`
        * :c:data:`ao_pseudo_integrals_non_local`
        * :c:data:`ao_spread_x`
-       * :c:data:`ao_two_e_integral_alpha`
        * :c:data:`ao_two_e_integral_erf_schwartz`
        * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_erf_in_map`
@@ -687,6 +715,12 @@ Providers
         double precision, allocatable	:: ao_expo_ordered_transp_per_nucl	(ao_prim_num_max,N_AOs_max,nucl_num)
 
 
+    Exponents of the |AO| primitives, sorted and organized by
+    atom. Index (l,j,i) is the exponent of the l-th primitive of
+    the j-th |AO| of atom i, i.e.
+    ao_expo_ordered_transp(l,k) with k the global index of the
+    |AO| (see :c:data:`Nucl_Aos_transposed`).
+    Only j = 1 to :c:data:`Nucl_N_Aos`(i) is set.
 
     Needs:
 
@@ -725,6 +759,11 @@ Providers
         double precision, allocatable	:: ao_expo_phase_ord	(4,ao_num,ao_prim_num_max)
 
 
+    cGTO primitives of each |AO|, sorted by increasing real part
+    of the exponent. Gives the complex exponent (ao_expo +
+    i*ao_expo_im), the coefficients ao_coef_norm_cgtos, the plane
+    wave part and the phase; component 4 of the last two is the
+    squared norm of the plane wave part and the total phase.
 
     Needs:
 
@@ -761,6 +800,12 @@ Providers
         double precision, allocatable	:: ao_expo_phase_ord_transp	(4,ao_prim_num_max,ao_num)
 
 
+    Transposed, sorted cGTO primitive data.
+    ao_expo_cgtos_ord_transp(i,j) is the complex exponent of the
+    i-th primitive of the j-th |AO|. Components 1 to 3 of
+    ao_expo_pw_ord_transp are the plane wave part, component 4 its
+    squared norm; ao_expo_phase_ord_transp uses the same layout
+    for the phase and the total phase.
 
     Needs:
 
@@ -796,6 +841,11 @@ Providers
         double precision, allocatable	:: ao_expo_phase_ord	(4,ao_num,ao_prim_num_max)
 
 
+    cGTO primitives of each |AO|, sorted by increasing real part
+    of the exponent. Gives the complex exponent (ao_expo +
+    i*ao_expo_im), the coefficients ao_coef_norm_cgtos, the plane
+    wave part and the phase; component 4 of the last two is the
+    squared norm of the plane wave part and the total phase.
 
     Needs:
 
@@ -832,6 +882,12 @@ Providers
         double precision, allocatable	:: ao_expo_phase_ord_transp	(4,ao_prim_num_max,ao_num)
 
 
+    Transposed, sorted cGTO primitive data.
+    ao_expo_cgtos_ord_transp(i,j) is the complex exponent of the
+    i-th primitive of the j-th |AO|. Components 1 to 3 of
+    ao_expo_pw_ord_transp are the plane wave part, component 4 its
+    squared norm; ao_expo_phase_ord_transp uses the same layout
+    for the phase and the total phase.
 
     Needs:
 
@@ -1008,6 +1064,12 @@ Providers
         integer, allocatable	:: ao_power_ordered_transp_per_nucl	(3,N_AOs_max,nucl_num)
 
 
+    Powers of x, y and z of the |AO|s, organized by atom.
+    Index (l,j,i) is the power of the l-th coordinate
+    (l = 1, 2, 3 for x, y, z) of the j-th |AO| of atom i, i.e.
+    ao_power(k,l) with k the global index of the |AO| (see
+    :c:data:`Nucl_Aos_transposed`).
+    Only j = 1 to :c:data:`Nucl_N_Aos`(i) is set.
 
     Needs:
 
@@ -1921,7 +1983,6 @@ Providers
        * :c:data:`ao_deriv2_x`
        * :c:data:`ao_integrals_n_e`
        * :c:data:`ao_overlap`
-       * :c:data:`ao_two_e_integral_alpha`
        * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:data:`cholesky_ao_num`
@@ -1937,6 +1998,11 @@ Providers
         logical	:: use_pw	
 
 
+    Flag set when the basis contains a plane wave part: the input
+    defines ao_expo_pw and at least one plane wave vector is
+    nonzero. The test checks component 4 of
+    ao_expo_pw_ord_transp, the squared norm of the plane wave
+    vector, against 1d-15.
 
     Needs:
 

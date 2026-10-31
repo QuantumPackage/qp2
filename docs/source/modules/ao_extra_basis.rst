@@ -144,6 +144,12 @@ Providers
         double precision	:: ao_extra_center	
 
 
+    ao_extra_center :: shift used when a p function is fitted:
+    each p primitive is replaced by two s functions centered at
+    R +/- ao_extra_center along the axis of the p power.
+    The value is fixed to 0.01 and written to the EZFIO file
+    by the program fit_1s_basis.
+    TODO(doc): what are the units of this fixed shift (0.01)
 
     Needed by:
 
@@ -192,6 +198,11 @@ Providers
         double precision, allocatable	:: ao_extra_center_1s_dist	(ao_extra_num,ao_extra_num)
 
 
+    Distance between the centers of the i-th and j-th
+    |ao_extra|: the euclidean distance between
+    ao_extra_center_1s(:,i) and ao_extra_center_1s(:,j),
+    i.e. the positions of the nuclei on which the two
+    |ao_extras| are centered.
 
     Needs:
 
@@ -353,6 +364,12 @@ Providers
         double precision, allocatable	:: ao_extra_coef_normalized_ordered_transp_per_nucl	(ao_extra_prim_num_max,N_ao_extras_max,nucl_num)
 
 
+    Normalized coefficients of the sorted primitives of each
+    |ao_extra|, regrouped per atom: entry (l,j,i) is
+    ao_extra_coef_normalized_ordered_transp(l,k) with k =
+    Nucl_ao_extras_transposed(j,i), the global index of the
+    j-th |ao_extra| attached to atom i
+    (j = 1..Nucl_N_ao_extras(i)); i runs over 1..nucl_num.
 
     Needs:
 
@@ -440,6 +457,12 @@ Providers
         double precision, allocatable	:: ao_extra_expo_ordered_transp_per_nucl	(ao_extra_prim_num_max,N_ao_extras_max,nucl_num)
 
 
+    Exponents of the sorted primitives of each |ao_extra|,
+    regrouped per atom: entry (l,j,i) is
+    ao_extra_expo_ordered_transp(l,k) with k =
+    Nucl_ao_extras_transposed(j,i), the global index of the
+    j-th |ao_extra| attached to atom i
+    (j = 1..Nucl_N_ao_extras(i)); i runs over 1..nucl_num.
 
     Needs:
 
@@ -630,6 +653,12 @@ Providers
         integer, allocatable	:: ao_extra_power_ordered_transp_per_nucl	(3,N_ao_extras_max,nucl_num)
 
 
+    Powers of x, y and z of each |ao_extra|, regrouped per
+    atom: entry (l,j,i) is ao_extra_power(k,l) with k =
+    Nucl_ao_extras_transposed(j,i), the global index of the
+    j-th |ao_extra| attached to atom i, and l = 1, 2, 3 the
+    power of x, y or z (j = 1..Nucl_N_ao_extras(i), i =
+    1..nucl_num).
 
     Needs:
 
@@ -776,6 +805,11 @@ Providers
         integer	:: extra_fictious_nucl	
 
 
+    extra_fictious_nucl :: number of fictitious nuclei added by
+    the fit: equal to n_2p_func_tot, i.e. two fictitious centers
+    per p primitive of the original basis.
+    Written to the EZFIO file as extra_nucl_fictious_num by the
+    program fit_1s_basis.
 
     Needs:
 
@@ -983,6 +1017,9 @@ Providers
         integer, allocatable	:: list_fict_nucl	(extra_fictious_nucl)
 
 
+    new_nucl_label_1s :: labels of the nuclei of the fitted
+    system. Entries 1 to nucl_num are the real atoms, with their
+    original labels; the fictitious atoms are all labelled "X".
 
     Needs:
 
@@ -1008,6 +1045,9 @@ Providers
         integer, allocatable	:: list_fict_nucl	(extra_fictious_nucl)
 
 
+    new_nucl_label_1s :: labels of the nuclei of the fitted
+    system. Entries 1 to nucl_num are the real atoms, with their
+    original labels; the fictitious atoms are all labelled "X".
 
     Needs:
 
@@ -1031,6 +1071,11 @@ Providers
         logical	:: lmax_too_big	
 
 
+    lmax_too_big :: true when the original basis contains
+    functions with l > 1 (ao_l_max > 1).
+    
+    The fit onto s functions is implemented for l <= 1 only, so
+    this provider prints a message and stops when lmax_too_big.
 
     Needs:
 
@@ -1188,6 +1233,8 @@ Providers
         integer	:: n_prim_tot_orig	
 
 
+    n_prim_tot_orig :: total number of primitives of the
+    original AO basis: sum of ao_prim_num over the ao_num AOs.
 
     Needs:
 
@@ -1277,6 +1324,10 @@ Providers
         integer, allocatable	:: new_ao_nucl_1s	(n_func_tot)
 
 
+    new_Nucl_N_Aos :: number of fitted s functions attached to
+    each nucleus of the fitted system. For a real atom (entries
+    1 to nucl_num), this is the number of primitives of its s
+    AOs; each fictitious atom carries exactly one s function.
 
     Needs:
 
@@ -1308,6 +1359,10 @@ Providers
         integer, allocatable	:: new_ao_nucl_1s	(n_func_tot)
 
 
+    new_Nucl_N_Aos :: number of fitted s functions attached to
+    each nucleus of the fitted system. For a real atom (entries
+    1 to nucl_num), this is the number of primitives of its s
+    AOs; each fictitious atom carries exactly one s function.
 
     Needs:
 
@@ -1336,6 +1391,9 @@ Providers
         integer, allocatable	:: new_ao_power_1s	(n_func_tot,3)
 
 
+    new_ao_power_1s :: powers of x, y, z of each fitted
+    function: all zeros, since the fitted basis contains s
+    functions only.
 
     Needs:
 
@@ -1356,6 +1414,8 @@ Providers
         integer, allocatable	:: new_ao_prim_num_1s	(n_func_tot)
 
 
+    new_ao_prim_num_1s :: number of primitives of each fitted
+    function: always 1, the fitted basis is uncontracted.
 
     Needs:
 
@@ -1376,6 +1436,10 @@ Providers
         integer	:: new_n_aos_max	
 
 
+    new_n_AOs_max :: upper bound on the number of fitted s
+    functions per atom: ao_prim_num_max times n_AOs_max (the
+    maximum number of AOs per atom of the original basis).
+    Sizes the first dimension of new_nucl_aos_transposed.
 
     Needs:
 
@@ -1406,6 +1470,10 @@ Providers
         integer, allocatable	:: new_ao_nucl_1s	(n_func_tot)
 
 
+    new_Nucl_N_Aos :: number of fitted s functions attached to
+    each nucleus of the fitted system. For a real atom (entries
+    1 to nucl_num), this is the number of primitives of its s
+    AOs; each fictitious atom carries exactly one s function.
 
     Needs:
 
@@ -1475,6 +1543,10 @@ Providers
         double precision, allocatable	:: new_nucl_coord_1s	(new_nucl_num,3)
 
 
+    new_nucl_coord_1s :: coordinates of the nuclei of the
+    fitted system, in the (atom, x, y, z) layout: entry i is
+    new_nucl_coord_1s_transp(1:3,i). The real atoms come first,
+    then the fictitious centers.
 
     Needs:
 
@@ -1539,6 +1611,9 @@ Providers
         integer, allocatable	:: list_fict_nucl	(extra_fictious_nucl)
 
 
+    new_nucl_label_1s :: labels of the nuclei of the fitted
+    system. Entries 1 to nucl_num are the real atoms, with their
+    original labels; the fictitious atoms are all labelled "X".
 
     Needs:
 
@@ -1565,6 +1640,10 @@ Providers
         integer, allocatable	:: new_ao_nucl_1s	(n_func_tot)
 
 
+    new_Nucl_N_Aos :: number of fitted s functions attached to
+    each nucleus of the fitted system. For a real atom (entries
+    1 to nucl_num), this is the number of primitives of its s
+    AOs; each fictitious atom carries exactly one s function.
 
     Needs:
 
@@ -1593,6 +1672,9 @@ Providers
         integer	:: new_nucl_num	
 
 
+    new_nucl_num :: number of nuclei of the fitted system: the
+    nucl_num real atoms plus n_2p_func_tot fictitious atoms,
+    one per s function fitted from a p primitive.
 
     Needs:
 
@@ -1946,6 +2028,10 @@ Subroutines / functions
         integer function return_xyz_int(power)
 
 
+    return_xyz_int :: maps the power of a p function to the
+    axis index of the corresponding displacement: 1 for x
+    (1,0,0), 2 for y (0,1,0), 3 for z (0,0,1); returns -1000
+    for any other power.
 
  
 .. c:function:: void rotate_nuclei(void)
@@ -1979,6 +2065,10 @@ Subroutines / functions
         subroutine routine
 
 
+    Forces the computation of final_grid_points_extra while
+    io_extra_grid is "Write", so that the extra grid is
+    written to the EZFIO file, then resets io_extra_grid to
+    "Read". Called by the program write_extra_grid_in_ezfio.
 
     Needs:
 

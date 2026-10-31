@@ -38,7 +38,7 @@ Exchange and correlation functionals of |DFT| and |RSDFT|.
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: void berf(void)
+.. c:function:: berf:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -50,7 +50,7 @@ Subroutines / functions
 
 
  
-.. c:function:: void beta_rs(void)
+.. c:function:: beta_rs:
 
 
     File : :file:`dft_utils_func/garbage_func.irp.f`
@@ -62,7 +62,7 @@ Subroutines / functions
 
 
  
-.. c:function:: void correction_to_on_top_from_ueg(void)
+.. c:function:: correction_to_on_top_from_ueg:
 
 
     File : :file:`dft_utils_func/on_top_from_ueg.irp.f`
@@ -88,7 +88,7 @@ Subroutines / functions
        * :c:func:`dm_dft_alpha_beta_at_r`
 
  
-.. c:function:: void dberfda(void)
+.. c:function:: dberfda:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -100,7 +100,7 @@ Subroutines / functions
 
 
  
-.. c:function:: void delta_lrsr_ldaerf(void)
+.. c:function:: delta_lrsr_ldaerf:
 
 
     File : :file:`dft_utils_func/ecmd_lda.irp.f`
@@ -119,7 +119,7 @@ Subroutines / functions
        * :c:func:`esrc_md_ldaerf`
 
  
-.. c:function:: void dpol(void)
+.. c:function:: dpol:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -131,7 +131,7 @@ Subroutines / functions
 
 
  
-.. c:function:: void dpold(void)
+.. c:function:: dpold:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -143,7 +143,7 @@ Subroutines / functions
 
 
  
-.. c:function:: void dpoldd(void)
+.. c:function:: dpoldd:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -155,7 +155,7 @@ Subroutines / functions
 
 
  
-.. c:function:: void ec_lda(void)
+.. c:function:: ec_lda:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -183,7 +183,7 @@ Subroutines / functions
        * :c:func:`ecpw`
 
  
-.. c:function:: void ec_lda_sr(void)
+.. c:function:: ec_lda_sr:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -217,7 +217,7 @@ Subroutines / functions
        * :c:func:`vcorrlr`
 
  
-.. c:function:: void ec_lyp2(void)
+.. c:function:: ec_lyp2:
 
 
     File : :file:`dft_utils_func/garbage_func.irp.f`
@@ -229,7 +229,7 @@ Subroutines / functions
 
 
  
-.. c:function:: void ec_lyp_88(void)
+.. c:function:: ec_lyp_88:
 
 
     File : :file:`dft_utils_func/garbage_func.irp.f`
@@ -243,7 +243,7 @@ Subroutines / functions
     The expression used is the one by Miehlich, Savin, Stoll, Preuss, CPL, 1989 which gets rid of the laplacian of the density
 
  
-.. c:function:: void ec_md_on_top_pbe_mu_corrected(void)
+.. c:function:: ec_md_on_top_pbe_mu_corrected:
 
 
     File : :file:`dft_utils_func/ecmd_pbe_on_top.irp.f`
@@ -278,7 +278,7 @@ Subroutines / functions
        * :c:func:`rho_ab_to_rho_oc`
 
  
-.. c:function:: void ec_md_pbe_on_top_general(void)
+.. c:function:: ec_md_pbe_on_top_general:
 
 
     File : :file:`dft_utils_func/ecmd_pbe_general.irp.f`
@@ -302,6 +302,17 @@ Subroutines / functions
     The form of the functional was originally introduced in JCP, 150, 084103 1-10 (2019)
     
 
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ecmd_pbe_on_top_mu_of_r`
+       * :c:data:`ecmd_pbe_on_top_no_extrap_su_mu_of_r`
+       * :c:data:`ecmd_pbe_on_top_su_mu_of_r`
+       * :c:data:`ecmd_pbe_ueg_eff_xi_mu_of_r`
+       * :c:data:`ecmd_pbe_ueg_mu_of_r`
+
     Calls:
 
     .. hlist::
@@ -312,7 +323,7 @@ Subroutines / functions
        * :c:func:`rho_ab_to_rho_oc`
 
  
-.. c:function:: void ec_only_lda_sr(void)
+.. c:function:: ec_only_lda_sr:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -340,7 +351,7 @@ Subroutines / functions
        * :c:func:`ecpw`
 
  
-.. c:function:: void ec_pbe_only(void)
+.. c:function:: ec_pbe_only:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_pbe.irp.f`
@@ -389,7 +400,7 @@ Subroutines / functions
        * :c:func:`ec_lda_sr`
 
  
-.. c:function:: void ec_pbe_sr(void)
+.. c:function:: ec_pbe_sr:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_pbe.irp.f`
@@ -445,7 +456,7 @@ Subroutines / functions
        * :c:func:`ec_lda_sr`
 
  
-.. c:function:: void ec_scan(void)
+.. c:function:: ec_scan:
 
 
     File : :file:`dft_utils_func/garbage_func.irp.f`
@@ -464,7 +475,7 @@ Subroutines / functions
        * :c:func:`ec_only_lda_sr`
 
  
-.. c:function:: void ecmd_pbe_ueg_at_r(void)
+.. c:function:: ecmd_pbe_ueg_at_r:
 
 
     File : :file:`dft_utils_func/ecmd_pbe_ueg.irp.f`
@@ -503,7 +514,7 @@ Subroutines / functions
        * :c:func:`rho_ab_to_rho_oc`
 
  
-.. c:function:: void ecorrlr(void)
+.. c:function:: ecorrlr:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -530,7 +541,7 @@ Subroutines / functions
        * :c:func:`ecpw`
 
  
-.. c:function:: void ecpw(void)
+.. c:function:: ecpw:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -560,7 +571,7 @@ Subroutines / functions
        * :c:func:`gpw`
 
  
-.. c:function:: void eps_c_md_pbe_at_grid_pt(void)
+.. c:function:: eps_c_md_pbe_at_grid_pt:
 
 
     File : :file:`dft_utils_func/ecmd_pbe_ueg.irp.f`
@@ -598,7 +609,7 @@ Subroutines / functions
        * :c:func:`ec_pbe_only`
 
  
-.. c:function:: void eps_c_md_pbe_from_density(void)
+.. c:function:: eps_c_md_pbe_from_density:
 
 
     File : :file:`dft_utils_func/ecmd_pbe_ueg.irp.f`
@@ -638,7 +649,7 @@ Subroutines / functions
        * :c:func:`rho_ab_to_rho_oc`
 
  
-.. c:function:: void esrc_md_ldaerf(void)
+.. c:function:: esrc_md_ldaerf:
 
 
     File : :file:`dft_utils_func/ecmd_lda.irp.f`
@@ -649,6 +660,14 @@ Subroutines / functions
 
 
 
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ecmd_lda_eff_xi_mu_of_r`
+       * :c:data:`ecmd_lda_mu_of_r`
+
     Calls:
 
     .. hlist::
@@ -658,7 +677,7 @@ Subroutines / functions
        * :c:func:`ec_only_lda_sr`
 
  
-.. c:function:: void ex_lda(void)
+.. c:function:: ex_lda:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -677,7 +696,7 @@ Subroutines / functions
        * :c:data:`energy_x_lda`
 
  
-.. c:function:: void ex_lda_sr(void)
+.. c:function:: ex_lda_sr:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -702,7 +721,7 @@ Subroutines / functions
        * :c:func:`ex_pbe_sr_only`
 
  
-.. c:function:: void ex_pbe_sr(void)
+.. c:function:: ex_pbe_sr:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_pbe.irp.f`
@@ -751,7 +770,7 @@ Subroutines / functions
        * :c:func:`ex_lda_sr`
 
  
-.. c:function:: void ex_pbe_sr_only(void)
+.. c:function:: ex_pbe_sr_only:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_pbe.irp.f`
@@ -781,7 +800,7 @@ Subroutines / functions
        * :c:func:`ex_lda_sr`
 
  
-.. c:function:: void g0_dg0(void)
+.. c:function:: g0_dg0:
 
 
     File : :file:`dft_utils_func/on_top_from_ueg.irp.f`
@@ -807,7 +826,7 @@ Subroutines / functions
     Give the on-top pair distribution function g0 second derivative according to rho d2g0drho2
 
  
-.. c:function:: void g0_ueg_mu(void)
+.. c:function:: g0_ueg_mu:
 
 
     File : :file:`dft_utils_func/on_top_from_ueg.irp.f`
@@ -822,7 +841,7 @@ Subroutines / functions
     Taken from P. Gori-Giorgi and A. Savin, Phys. Rev. A 73, 032506 (2006).
 
  
-.. c:function:: void g0_ueg_mu_inf(void)
+.. c:function:: g0_ueg_mu_inf:
 
 
     File : :file:`dft_utils_func/on_top_from_ueg.irp.f`
@@ -837,7 +856,7 @@ Subroutines / functions
     Taken from Eq. (46)  P. Gori-Giorgi and A. Savin, Phys. Rev. A 73, 032506 (2006).
 
  
-.. c:function:: void g0d(void)
+.. c:function:: g0d:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -849,7 +868,7 @@ Subroutines / functions
 
 
  
-.. c:function:: void g0dd(void)
+.. c:function:: g0dd:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -861,7 +880,7 @@ Subroutines / functions
 
 
  
-.. c:function:: void g0f(void)
+.. c:function:: g0f:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -873,7 +892,7 @@ Subroutines / functions
 
 
  
-.. c:function:: void g0s(void)
+.. c:function:: g0s:
 
 
     File : :file:`dft_utils_func/ecmd_lda.irp.f`
@@ -885,7 +904,7 @@ Subroutines / functions
 
 
  
-.. c:function:: void gga_sr_type_functionals(void)
+.. c:function:: gga_sr_type_functionals:
 
 
     File : :file:`dft_utils_func/utils.irp.f`
@@ -893,8 +912,8 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine GGA_sr_type_functionals(mu,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_a_b, &
-                                        ex,vx_rho_a,vx_rho_b,vx_grad_rho_a_2,vx_grad_rho_b_2,vx_grad_rho_a_b, &
-                                        ec,vc_rho_a,vc_rho_b,vc_grad_rho_a_2,vc_grad_rho_b_2,vc_grad_rho_a_b )
+                                ex,vx_rho_a,vx_rho_b,vx_grad_rho_a_2,vx_grad_rho_b_2,vx_grad_rho_a_b, &
+                                ec,vc_rho_a,vc_rho_b,vc_grad_rho_a_2,vc_grad_rho_b_2,vc_grad_rho_a_b )
 
 
     routine that helps in building the x/c potentials on the AO basis for a GGA functional with a short-range interaction
@@ -924,7 +943,7 @@ Subroutines / functions
        * :c:func:`v_rho_oc_to_v_rho_ab`
 
  
-.. c:function:: void give_all_stuffs_in_r_for_lyp_88(void)
+.. c:function:: give_all_stuffs_in_r_for_lyp_88:
 
 
     File : :file:`dft_utils_func/garbage_func.irp.f`
@@ -951,7 +970,7 @@ Subroutines / functions
        * :c:func:`density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r`
 
  
-.. c:function:: void gpw(void)
+.. c:function:: gpw:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -970,7 +989,7 @@ Subroutines / functions
        * :c:func:`ecpw`
 
  
-.. c:function:: void grad_rho_ab_to_grad_rho_oc(void)
+.. c:function:: grad_rho_ab_to_grad_rho_oc:
 
 
     File : :file:`dft_utils_func/rho_ab_to_rho_tot.irp.f`
@@ -998,7 +1017,7 @@ Subroutines / functions
        * :c:func:`gga_sr_type_functionals`
 
  
-.. c:function:: void h_func(void)
+.. c:function:: h_func:
 
 
     File : :file:`dft_utils_func/on_top_from_ueg.irp.f`
@@ -1010,7 +1029,7 @@ Subroutines / functions
 
 
  
-.. c:function:: void mu_correction_of_on_top(void)
+.. c:function:: mu_correction_of_on_top:
 
 
     File : :file:`dft_utils_func/ecmd_pbe_on_top.irp.f`
@@ -1027,7 +1046,7 @@ Subroutines / functions
     This is used in J. Chem. Phys.150, 084103 (2019); Eq. (29).
 
  
-.. c:function:: void mu_grad_rho_func(void)
+.. c:function:: mu_grad_rho_func:
 
 
     File : :file:`dft_utils_func/mu_of_r_dft.irp.f`
@@ -1053,7 +1072,7 @@ Subroutines / functions
        * :c:func:`density_and_grad_alpha_beta`
 
  
-.. c:function:: void mu_rs_c(void)
+.. c:function:: mu_rs_c:
 
 
     File : :file:`dft_utils_func/mu_of_r_dft.irp.f`
@@ -1065,7 +1084,7 @@ Subroutines / functions
 
 
  
-.. c:function:: void qrpa(void)
+.. c:function:: qrpa:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -1077,7 +1096,7 @@ Subroutines / functions
 
 
  
-.. c:function:: void qrpad(void)
+.. c:function:: qrpad:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -1089,7 +1108,7 @@ Subroutines / functions
 
 
  
-.. c:function:: void qrpadd(void)
+.. c:function:: qrpadd:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -1101,7 +1120,7 @@ Subroutines / functions
 
 
  
-.. c:function:: void rho_ab_to_rho_oc(void)
+.. c:function:: rho_ab_to_rho_oc:
 
 
     File : :file:`dft_utils_func/rho_ab_to_rho_tot.irp.f`
@@ -1127,7 +1146,7 @@ Subroutines / functions
        * :c:func:`gga_sr_type_functionals`
 
  
-.. c:function:: void rho_oc_to_rho_ab(void)
+.. c:function:: rho_oc_to_rho_ab:
 
 
     File : :file:`dft_utils_func/rho_ab_to_rho_tot.irp.f`
@@ -1142,7 +1161,7 @@ Subroutines / functions
     rho_c = total density, rho_o spin density
 
  
-.. c:function:: void step_f(void)
+.. c:function:: step_f:
 
 
     File : :file:`dft_utils_func/garbage_func.irp.f`
@@ -1154,7 +1173,7 @@ Subroutines / functions
 
 
  
-.. c:function:: void v_grad_rho_ab_to_v_grad_rho_oc(void)
+.. c:function:: v_grad_rho_ab_to_v_grad_rho_oc:
 
 
     File : :file:`dft_utils_func/rho_ab_to_rho_tot.irp.f`
@@ -1171,7 +1190,7 @@ Subroutines / functions
     rho_c = total density, rho_o spin density
 
  
-.. c:function:: void v_grad_rho_oc_to_v_grad_rho_ab(void)
+.. c:function:: v_grad_rho_oc_to_v_grad_rho_ab:
 
 
     File : :file:`dft_utils_func/rho_ab_to_rho_tot.irp.f`
@@ -1195,7 +1214,7 @@ Subroutines / functions
        * :c:func:`gga_sr_type_functionals`
 
  
-.. c:function:: void v_rho_ab_to_v_rho_oc(void)
+.. c:function:: v_rho_ab_to_v_rho_oc:
 
 
     File : :file:`dft_utils_func/rho_ab_to_rho_tot.irp.f`
@@ -1210,7 +1229,7 @@ Subroutines / functions
     rho_c = total density, rho_o spin density
 
  
-.. c:function:: void v_rho_oc_to_v_rho_ab(void)
+.. c:function:: v_rho_oc_to_v_rho_ab:
 
 
     File : :file:`dft_utils_func/rho_ab_to_rho_tot.irp.f`
@@ -1232,7 +1251,7 @@ Subroutines / functions
        * :c:func:`gga_sr_type_functionals`
 
  
-.. c:function:: void vcorrlr(void)
+.. c:function:: vcorrlr:
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`

@@ -117,6 +117,10 @@ Providers
         double precision, allocatable	:: average_on_top	(n_states)
 
 
+    For each state istate, the weighted sum of
+    total_cas_on_top_density (the on-top pair density n2(r,r))
+    over the Becke grid, with weights final_weight_at_r_vector.
+    Printed as "Average on top pair density".
 
     Needs:
 
@@ -174,6 +178,10 @@ Providers
         double precision, allocatable	:: core_inact_act_mos_grad_in_r_array	(3,n_core_inact_act_orb,n_points_final_grid)
 
 
+    gradients of the CORE, INACTIVE and ACTIVE MOs on the grid
+    points. index (l,i,k) is the l-th Cartesian component
+    (l=1 x, 2 y, 3 z) of the gradient of the i-th MO (order of
+    list_core_inact_act) at grid point k
 
     Needs:
 
@@ -204,6 +212,8 @@ Providers
         double precision, allocatable	:: core_inact_act_mos_in_r_array_transp	(n_points_final_grid,n_core_inact_act_orb)
 
 
+    all CORE, INACTIVE and ACTIVE MOs on the grid points,
+    arranged in two different ways
 
     Needs:
 
@@ -234,6 +244,8 @@ Providers
         double precision, allocatable	:: core_inact_act_mos_in_r_array_transp	(n_points_final_grid,n_core_inact_act_orb)
 
 
+    all CORE, INACTIVE and ACTIVE MOs on the grid points,
+    arranged in two different ways
 
     Needs:
 
@@ -1300,6 +1312,12 @@ Subroutines / functions
         subroutine routine
 
 
+    Example of the cas_based_on_top program. The PROVIDE
+    statements compute (and print) total_cas_on_top_density and
+    average_on_top. It then prints accu, the sum over active
+    orbital pairs (i,j) of act_2_rdm_ab_mo(i,j,i,j,1).
+    TODO(doc): act_2_rdm_ab_mo is indexed 1..n_act_orb, but here
+    i,j are global MO numbers from list_act. Is that intended?
 
     Needs:
 
@@ -1330,6 +1348,12 @@ Subroutines / functions
         subroutine routine_test_cas_based_density
 
 
+    Example of the cas_based_density program. For each state it
+    integrates the total CAS density over the Becke grid in two
+    ways and prints both: from the one_e_cas_total_density
+    provider (accu_n_elec) and from the give_cas_density_in_r
+    routine (accu_n_elec_2). Each gives the total number of
+    electrons of the state, so the two should agree.
 
     Needs:
 

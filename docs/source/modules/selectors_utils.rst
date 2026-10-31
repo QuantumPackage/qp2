@@ -547,6 +547,8 @@ Providers
         integer	:: psi_selectors_size	
 
 
+    Number of determinants (selectors) in the wave function,
+    equal to psi_det_size.
 
     Needs:
 

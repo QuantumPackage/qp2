@@ -348,7 +348,6 @@ Providers
 
        * :c:data:`ci_energy_no_diag`
        * :c:data:`psi_energy_with_nucl_rep`
-       * :c:data:`pt2_e0_denominator`
 
  
 .. c:var:: double psi_energy_two_e
@@ -468,7 +467,6 @@ Providers
 
        * :c:data:`ci_energy_no_diag`
        * :c:data:`psi_energy_with_nucl_rep`
-       * :c:data:`pt2_e0_denominator`
 
  
  
@@ -662,6 +660,11 @@ Subroutines / functions
         subroutine davidson_csf_slave_inproc(i)
 
 
+    In-process variant of the CSF Davidson slave: starts the
+    worker in the current process with davidson_csf_run_slave(1,i).
+    H_u_0_nstates_zmq in this file starts it as an OpenMP thread.
+    i is forwarded to davidson_csf_run_slave, which does not use
+    iproc.
 
     Calls:
 
@@ -681,6 +684,10 @@ Subroutines / functions
         subroutine davidson_csf_slave_tcp(i)
 
 
+    TCP variant of the CSF Davidson slave: starts the worker with
+    davidson_csf_run_slave(0,i); the in-process variant passes 1
+    instead of 0. i is forwarded to davidson_csf_run_slave, which
+    does not use iproc.
 
     Calls:
 
@@ -700,6 +707,12 @@ Subroutines / functions
         subroutine davidson_csf_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze, worker_id)
 
 
+    Worker loop of the CSF Davidson slave. Fetches the wavefunction
+    u_t from the qp_run scheduler, then takes tasks (imin, imax,
+    ishift, istep) from the task server and calls
+    H_u_0_nstates_openmp_work to compute $H | u_t \rangle$ on
+    determinant columns imin+ishift to imax, step istep, pushing
+    the results to the master.
 
     Needs:
 
@@ -832,6 +845,54 @@ Subroutines / functions
        * :c:data:`nthreads_davidson`
 
  
+.. c:function:: davidson_diag_h:
+
+
+    File : :file:`davidson/diagonalization_h_dressed.irp.f`
+
+    .. code:: fortran
+
+        subroutine davidson_diag_h(dets_in,u_in,dim_in,energies,sze,N_st,N_st_diag,Nint,dressing_state,converged)
+
+
+    Davidson diagonalization.
+    
+    dets_in : bitmasks corresponding to determinants
+    
+    u_in : guess coefficients on the various states. Overwritten
+      on exit
+    
+    dim_in : leftmost dimension of u_in
+    
+    sze : Number of determinants
+    
+    N_st : Number of eigenstates
+    
+    Initial guess vectors are not necessarily orthonormal
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`dressing_column_h`
+       * :c:data:`mo_two_e_integrals_in_map`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`davidson_diag_hjj`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`nthreads_davidson`
+
+ 
 .. c:function:: void davidson_diag_h_csf(void)
 
 
@@ -878,6 +939,99 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`davidson_diag_csf_hjj`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`nthreads_davidson`
+
+ 
+.. c:function:: davidson_diag_hjj:
+
+
+    File : :file:`davidson/diagonalization_h_dressed.irp.f`
+
+    .. code:: fortran
+
+        subroutine davidson_diag_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,Nint,dressing_state,converged)
+
+
+    Davidson diagonalization with specific diagonal elements of the H matrix
+    
+    H_jj : specific diagonal H matrix elements to diagonalize de Davidson
+    
+    dets_in : bitmasks corresponding to determinants
+    
+    u_in : guess coefficients on the various states. Overwritten
+      on exit
+    
+    dim_in : leftmost dimension of u_in
+    
+    sze : Number of determinants
+    
+    N_st : Number of eigenstates
+    
+    N_st_diag_in : Number of states in which H is diagonalized. Assumed > sze
+    
+    Initial guess vectors are not necessarily orthonormal
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`davidson_sze_max`
+       * :c:data:`disk_based_davidson`
+       * :c:data:`distributed_davidson`
+       * :c:data:`dressed_column_idx`
+       * :c:data:`dressing_column_h`
+       * :c:data:`expected_s2`
+       * :c:data:`ezfio_work_dir`
+       * :c:data:`n_det`
+       * :c:data:`n_int`
+       * :c:data:`nproc`
+       * :c:data:`nthreads_davidson`
+       * :c:data:`nuclear_repulsion`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_bilinear_matrix_order_reverse`
+       * :c:data:`psi_coef`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+       * :c:data:`qp_max_mem`
+       * :c:data:`state_following`
+       * :c:data:`threshold_davidson`
+       * :c:data:`threshold_davidson_from_pt2`
+       * :c:data:`threshold_davidson_pt2`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`davidson_diag_h`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`c_f_pointer`
+       * :c:func:`check_mem`
+       * :c:func:`dgemm`
+       * :c:func:`dsygv`
+       * :c:func:`h_u_0_nstates_openmp`
+       * :c:func:`h_u_0_nstates_zmq`
+       * :c:func:`mmap`
+       * :c:func:`munmap`
+       * :c:func:`normalize`
+       * :c:func:`nullify_small_elements`
+       * :c:func:`random_number`
+       * :c:func:`resident_memory`
+       * :c:func:`write_double`
+       * :c:func:`write_int`
+       * :c:func:`write_time`
 
     Touches:
 
@@ -1345,6 +1499,11 @@ Subroutines / functions
         subroutine davidson_nos2_slave_inproc(i)
 
 
+    In-process variant of the Davidson slave without the S^2
+    operator: starts the worker in the current process with
+    davidson_nos2_run_slave(1,i). H_u_0_nstates_zmq in this file
+    starts it as an OpenMP thread. i is forwarded to
+    davidson_nos2_run_slave, which does not use iproc.
 
     Called by:
 
@@ -1371,6 +1530,10 @@ Subroutines / functions
         subroutine davidson_nos2_slave_tcp(i)
 
 
+    TCP variant of the Davidson slave without the S^2 operator:
+    starts the worker with davidson_nos2_run_slave(0,i); the
+    in-process variant passes 1 instead of 0. i is forwarded to
+    davidson_nos2_run_slave, which does not use iproc.
 
     Calls:
 
@@ -1390,6 +1553,12 @@ Subroutines / functions
         subroutine davidson_nos2_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze, worker_id)
 
 
+    Worker loop of the Davidson slave without the S^2 operator.
+    Fetches the wavefunction u_t from the qp_run scheduler, then
+    takes tasks (imin, imax, ishift, istep) from the task server
+    and calls H_u_0_nstates_openmp_work, which computes
+    $H | u_t \rangle$ on determinant columns imin+ishift to imax,
+    step istep, pushing the results to the master.
 
     Needs:
 
@@ -1574,6 +1743,9 @@ Subroutines / functions
         subroutine davidson_slave_inproc()
 
 
+    In-process variant of the Davidson slave: starts the worker
+    in the current process with davidson_run_slave(1,1).
+    H_S2_u_0_nstates_zmq in this file starts it via pthread_create.
 
     Calls:
 
@@ -1593,13 +1765,11 @@ Subroutines / functions
         subroutine davidson_slave_tcp(i)
 
 
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_slave_main`
+    TCP variant of the Davidson slave: starts the worker with
+    davidson_run_slave(0,i); the in-process variant passes 1
+    instead of 0. Runs in a slave process: run_slave_main in
+    cipsi_utils calls it when the ZMQ state is 'davidson'. i is
+    forwarded to davidson_run_slave, which does not use iproc.
 
     Calls:
 
@@ -1619,6 +1789,12 @@ Subroutines / functions
         subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze, worker_id)
 
 
+    Worker loop of the Davidson slave. Fetches the wavefunction
+    u_t from the qp_run scheduler, then takes tasks (imin, imax,
+    ishift, istep) from the task server and calls
+    H_S2_u_0_nstates_openmp_work to compute $H | u_t \rangle$ and
+    $S^2 | u_t \rangle$ on determinant columns imin+ishift to
+    imax, step istep, pushing the results to the master.
 
     Needs:
 
@@ -1685,17 +1861,6 @@ Subroutines / functions
        * :c:data:`psi_coef`
        * :c:data:`psi_energy`
        * :c:data:`psi_energy`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`remove_small_contributions`
-       * :c:func:`run_cipsi`
-       * :c:func:`run_orb_opt_trust_v2`
-       * :c:func:`run_stochastic_cipsi`
-       * :c:func:`update_parameters`
 
     Touches:
 

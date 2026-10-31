@@ -69,6 +69,10 @@ Providers
         double precision, allocatable	:: basis_mos_in_r_array	(n_basis_orb,n_points_final_grid)
 
 
+    Value of the MOs of list_basis on the grid points:
+    basis_mos_in_r_array(i,ipoint) = mos_in_r_array(list_basis(i),ipoint).
+    First index: position in list_basis (1..n_basis_orb),
+    second index: grid point (1..n_points_final_grid).
 
     Needs:
 
@@ -130,6 +134,12 @@ Providers
         double precision, allocatable	:: f_hf_cholesky	(n_points_final_grid)
 
 
+    f(R) for an HF wave function, evaluated with the Cholesky
+    decomposition of the two-electron integrals:
+    :math:`f(R) = 2 \sum_A V_{A R}^2` , :math:`V_{A R} = \sum_I \Phi_I(R) V_{A I}` ,
+    :math:`\Phi_I(R) = \phi_i(R) \phi_b(R)` , i an occupied alpha valence
+    orbital, b in list_basis, R the grid point index. If the alpha
+    and beta electron numbers differ: :math:`f(R) = 2 \sum_A V^1_{A R} V^2_{A R}` .
 
     Needs:
 
@@ -161,6 +171,12 @@ Providers
         double precision, allocatable	:: f_hf_cholesky_sparse	(n_points_final_grid)
 
 
+    f(R) for an HF wave function, same expression as f_hf_cholesky
+    when the alpha and beta electron numbers are equal. The couple
+    (i,b) is skipped if |phi_i(R)| < sqrt(100*ao_cholesky_threshold)
+    or |phi_i(R)*phi_b(R)| < 100*ao_cholesky_threshold.
+    TODO(doc): why factor 100 (and its sqrt) on ao_cholesky_threshold?
+    TODO(doc): does the open-shell branch match the open-shell f_hf_cholesky?
 
     Needs:
 
@@ -197,6 +213,12 @@ Providers
         double precision, allocatable	:: f_hf_cholesky_sparse_bis	(n_points_final_grid)
 
 
+    Alternative implementation of f_hf_cholesky_sparse, compared
+    against it by the subroutine test of program test_proj_op.
+    When the alpha and beta electron numbers are equal, the loop
+    runs over the AOs (1..ao_num) and uses cholesky_semi_mo_transp_simple
+    instead of cholesky_mo_transp; otherwise the code is identical
+    to the one of f_hf_cholesky_sparse.
 
     Needs:
 
@@ -513,6 +535,10 @@ Providers
         integer, allocatable	:: list_couple_hf_orb_r1	(2,n_couple_orb_r1)
 
 
+    Couples (i,m): i an occupied alpha valence orbital of
+    list_valence_orb_for_hf(:,1), m an orbital of list_basis.
+    First index: 1 is i, 2 is m; second index: couple number
+    (1..n_couple_orb_r1).
 
     Needs:
 
@@ -537,6 +563,10 @@ Providers
         integer, allocatable	:: list_couple_hf_orb_r2	(2,n_couple_orb_r2)
 
 
+    Couples (i,m): i an occupied beta valence orbital of
+    list_valence_orb_for_hf(:,2), m an orbital of list_basis.
+    First index: 1 is i, 2 is m; second index: couple number
+    (1..n_couple_orb_r2).
 
     Needs:
 
@@ -1050,6 +1080,9 @@ Providers
     !!!!!! WARNING !!!!!! if no_core_density == .True. then all contributions from the core orbitals
     
     in the one- and two-body density matrix are excluded
+    
+    The average value of mu is set where the density is too low for the computation
+    to be accurate
 
     Needs:
 
@@ -1057,6 +1090,7 @@ Providers
        :columns: 3
 
        * :c:data:`f_psi_cas_ab`
+       * :c:data:`final_grid_points`
        * :c:data:`n_points_final_grid`
        * :c:data:`n_states`
 
@@ -1323,6 +1357,11 @@ Providers
         double precision, allocatable	:: on_top_hf_grid	(n_points_final_grid)
 
 
+    2 * (sum of phi_i(R)^2 over the occupied alpha valence orbitals)
+    * (sum of phi_j(R)^2 over the occupied beta valence orbitals),
+    i, j in list_valence_orb_for_hf(:,1), list_valence_orb_for_hf(:,2).
+    Index: grid point (1..n_points_final_grid).
+    Used by mu_of_r_hf and mu_of_r_hf_sparse.
 
     Needs:
 
@@ -1839,6 +1878,9 @@ Subroutines / functions
         subroutine test
 
 
+    Prints the sum over the grid points of
+    |f_hf_cholesky_sparse(R) - f_hf_cholesky_sparse_bis(R)|
+    times final_weight_at_r_vector(R), the grid weight.
 
     Needs:
 

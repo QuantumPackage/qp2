@@ -627,12 +627,7 @@ Providers
        * :c:data:`ci_energy_no_diag`
        * :c:data:`core_energy`
        * :c:data:`core_energy_erf`
-       * :c:data:`energy_by_projection`
-       * :c:data:`etwo`
-       * :c:data:`hf_energy`
        * :c:data:`psi_energy_with_nucl_rep`
-       * :c:data:`pt2_e0_denominator`
-       * :c:data:`scf_energy`
 
  
 .. c:var:: double pt_chrg_interaction
@@ -792,6 +787,9 @@ Providers
         double precision, allocatable	:: slater_bragg_radii_per_atom	(nucl_num)
 
 
+    Slater-Bragg atomic radius in angstroms of each nucleus: for
+    i = 1 to nucl_num, the table value slater_bragg_radii(Z_i),
+    Z_i being int(nucl_charge(i)) floored at 1.
 
     Needs:
 
@@ -820,6 +818,8 @@ Providers
         double precision, allocatable	:: slater_bragg_radii_per_atom_ua	(nucl_num)
 
 
+    As slater_bragg_radii_per_atom, but with the radii in atomic
+    units (a0) taken from slater_bragg_radii_ua.
 
     Needs:
 
@@ -848,6 +848,9 @@ Providers
         double precision, allocatable	:: slater_bragg_radii_ua	(0:100)
 
 
+    The values of slater_bragg_radii converted from angstroms to
+    atomic units (a0), by a factor of 1.889725989.
+    As slater_bragg_radii, indexed by atomic number (1 to 100).
 
     Needs:
 
@@ -874,6 +877,12 @@ Providers
         double precision, allocatable	:: slater_bragg_type_inter_distance	(nucl_num,nucl_num)
 
 
+    For i < j, the entry is u / (u*u - 1), where u = (x - 1) /
+    (x + 1), x = slater_bragg_radii_per_atom(i) /
+    slater_bragg_radii_per_atom(j); other entries are zero.
+    Used in cell_function_becke of becke_numerical_grid (Becke
+    1988, JCP 88(4)).
+    TODO(doc): physical meaning of the u / (u*u - 1) factor?
 
     Needs:
 
@@ -895,6 +904,11 @@ Providers
         double precision, allocatable	:: slater_bragg_type_inter_distance_ua	(nucl_num,nucl_num)
 
 
+    As slater_bragg_type_inter_distance, but the ratio x is built
+    from the radii in atomic units (a0),
+    slater_bragg_radii_per_atom_ua, and each value is clipped to
+    the interval [-0.5, 0.5].
+    TODO(doc): why is the clipping limit 0.5?
 
     Needs:
 

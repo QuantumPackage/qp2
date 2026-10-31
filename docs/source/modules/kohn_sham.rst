@@ -62,6 +62,12 @@ Providers
         double precision, allocatable	:: ao_potential_beta_xc	(ao_num,ao_num)
 
 
+    AO-basis (ao_num x ao_num) exchange/correlation potential for
+    alpha and beta electrons (both provided in this block); added to
+    the KS Fock matrix in fock_matrix_ks.irp.f. If same_xc_func,
+    copies potential_xc_alpha_ao / potential_xc_beta_ao at state
+    index 1; otherwise sums potential_x_*_ao and potential_c_*_ao
+    at state index 1.
 
     Needs:
 
@@ -94,6 +100,12 @@ Providers
         double precision, allocatable	:: ao_potential_beta_xc	(ao_num,ao_num)
 
 
+    AO-basis (ao_num x ao_num) exchange/correlation potential for
+    alpha and beta electrons (both provided in this block); added to
+    the KS Fock matrix in fock_matrix_ks.irp.f. If same_xc_func,
+    copies potential_xc_alpha_ao / potential_xc_beta_ao at state
+    index 1; otherwise sums potential_x_*_ao and potential_c_*_ao
+    at state index 1.
 
     Needs:
 
@@ -219,6 +231,11 @@ Providers
         double precision	:: e_correlation_dft	
 
 
+    DFT correlation energy: energy_c(1), i.e. the correlation
+    energy at state index 1 for the functional named by
+    correlation_functional (general provider energy_c in
+    dft_one_e/e_xc_general.irp.f). Added to KS_energy in
+    ks_enery.irp.f.
 
     Needs:
 
@@ -246,6 +263,11 @@ Providers
         double precision	:: e_exchange_dft	
 
 
+    DFT exchange energy: energy_x(1), i.e. the exchange energy at
+    state index 1 for the functional named by exchange_functional,
+    scaled by (1 - HF_exchange) (general provider energy_x in
+    dft_one_e/e_xc_general.irp.f). Added to KS_energy in
+    ks_enery.irp.f.
 
     Needs:
 
@@ -638,6 +660,12 @@ Subroutines / functions
         subroutine check_coherence_functional
 
 
+    ks_scf start-up check: stop with a diagnostic if
+    exchange_functional or correlation_functional is "None" or
+    contains the substring "short_range".
+    TODO(doc): the message matches kohn_sham_rs/rs_ks_scf.irp.f;
+    in-tree range separated functionals are named sr_*: what does
+    this check intend to reject?
 
     Needs:
 

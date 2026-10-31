@@ -46,6 +46,11 @@ Providers
         double precision, allocatable	:: beta_dens_kin_in_r	(n_points_final_grid)
 
 
+    alpha_dens_kin_in_r(i) = alpha kinetic energy density at the ith
+    grid point: 0.5 * sum over j = 1, elec_alpha_num of the squared
+    norm of the gradient of the jth MO
+    
+    beta_dens_kin_in_r(i) = same for j = 1, elec_beta_num
 
     Needs:
 
@@ -283,6 +288,10 @@ Providers
         double precision, allocatable	:: aos_grad_in_r_array_extra	(ao_num,n_points_extra_final_grid,3)
 
 
+    aos_grad_in_r_array_extra(i,j,k) = value of the kth component of the
+    gradient of the ith ao on the jth grid point of the EXTRA grid
+    
+    k = 1 : x, k = 2 : y, k = 3 : z
 
     Needs:
 
@@ -549,6 +558,10 @@ Providers
         double precision, allocatable	:: aos_lapl_in_r_array_transp	(ao_num,n_points_final_grid,3)
 
 
+    aos_lapl_in_r_array_transp(i,j,k) = value of the kth component of the
+    laplacian of the ith ao on the jth grid point
+    
+    k = 1 : x, k = 2 : y, k = 3 : z
 
     Needs:
 
@@ -578,6 +591,11 @@ Providers
         double precision, allocatable	:: beta_dens_kin_in_r	(n_points_final_grid)
 
 
+    alpha_dens_kin_in_r(i) = alpha kinetic energy density at the ith
+    grid point: 0.5 * sum over j = 1, elec_alpha_num of the squared
+    norm of the gradient of the jth MO
+    
+    beta_dens_kin_in_r(i) = same for j = 1, elec_beta_num
 
     Needs:
 
@@ -685,6 +703,10 @@ Providers
         double precision, allocatable	:: kinetic_density_generalized	(n_points_final_grid)
 
 
+    kinetic_density_generalized(p) = generalized kinetic energy density
+    at the pth grid point: 0.5 times the double sum over MOs (i,j) of
+    the MO density matrix element one_e_dm_mo_for_dft(j,i,1) (alpha +
+    beta, state 1) times the scalar product of the MO gradients
 
     Needs:
 
@@ -710,6 +732,11 @@ Providers
         double precision, allocatable	:: mo_dipole_z_becke	(mo_num,mo_num)
 
 
+    mo_dipole_x_becke(i,j) = the x-component of the MO dipole matrix
+    element between MO i and MO j, evaluated by quadrature on the
+    Becke grid as sum over grid points of x * weight * MO_i * MO_j
+    
+    mo_dipole_y_becke and mo_dipole_z_becke are the y and z components
 
     Needs:
 
@@ -741,6 +768,11 @@ Providers
         double precision, allocatable	:: mo_dipole_z_becke	(mo_num,mo_num)
 
 
+    mo_dipole_x_becke(i,j) = the x-component of the MO dipole matrix
+    element between MO i and MO j, evaluated by quadrature on the
+    Becke grid as sum over grid points of x * weight * MO_i * MO_j
+    
+    mo_dipole_y_becke and mo_dipole_z_becke are the y and z components
 
     Needs:
 
@@ -772,6 +804,11 @@ Providers
         double precision, allocatable	:: mo_dipole_z_becke	(mo_num,mo_num)
 
 
+    mo_dipole_x_becke(i,j) = the x-component of the MO dipole matrix
+    element between MO i and MO j, evaluated by quadrature on the
+    Becke grid as sum over grid points of x * weight * MO_i * MO_j
+    
+    mo_dipole_y_becke and mo_dipole_z_becke are the y and z components
 
     Needs:
 

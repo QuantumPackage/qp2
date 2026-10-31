@@ -45,28 +45,25 @@ Programs
  
  * :ref:`analyze_ccsd` 
  * :ref:`attachement_orb` 
- * :ref:`benchmark` 
  * :ref:`cas_complete` 
  * :ref:`check_orthonormality` 
  * :ref:`diagonalize_h` 
- * :ref:`fcidump` 
  * :ref:`fcidump_pyscf` 
+ * :ref:`fcidump` 
  * :ref:`four_idx_transform` 
  * :ref:`molden` 
- * :ref:`pouet` 
  * :ref:`print_ci_vectors` 
  * :ref:`print_detweights` 
  * :ref:`print_dipole` 
  * :ref:`print_energy` 
  * :ref:`print_hamiltonian` 
- * :ref:`print_hmat` 
  * :ref:`print_sorted_wf_coef` 
  * :ref:`print_var_energy` 
  * :ref:`print_wf` 
  * :ref:`rotate_mos` 
- * :ref:`save_natorb` 
  * :ref:`save_natorb_no_ov_rot` 
  * :ref:`save_natorb_no_ref` 
+ * :ref:`save_natorb` 
  * :ref:`save_one_e_dm` 
  * :ref:`save_ortho_mos` 
  * :ref:`sort_by_fock_energies` 
@@ -88,6 +85,10 @@ Subroutines / functions
         subroutine do_print
 
 
+    Accumulates the absolute values of the elements of the MO
+    overlap matrix mo_overlap and prints the deviation of the
+    average diagonal element from 1, and the average of the
+    absolute values of the off-diagonal elements.
 
     Needs:
 
@@ -115,6 +116,10 @@ Subroutines / functions
         subroutine main()
 
 
+    Computes the excitation degree of each determinant with
+    respect to the first determinant, sorts the coefficients of
+    the first state by decreasing magnitude and writes the
+    degrees and the sorted coefficients to the file coef.bin.
 
     Needs:
 
@@ -194,6 +199,9 @@ Subroutines / functions
         subroutine print_exc()
 
 
+    Computes the excitation degree of each determinant with
+    respect to the first determinant and writes them to the file
+    exc.dat, preceded by N_det.
 
     Needs:
 
@@ -229,6 +237,10 @@ Subroutines / functions
         subroutine routine
 
 
+    Saves the maps of the AO and MO range-separated (erf)
+    two-electron integrals to the |EZFIO| work directory
+    (work/ao_ints_erf and work/mo_ints_erf), so that they are read
+    back at the next run.
 
     Called by:
 
@@ -264,6 +276,12 @@ Subroutines / functions
         subroutine routine_s2
 
 
+    Prints the configuration weights of the stored wave function,
+    reads a minimum weight from standard input, and keeps the
+    determinants whose configuration weight (maximal over the states)
+    is not below that minimum. Renormalizes each state and saves the
+    truncated wave function with save_wavefunction_general. Called
+    by the program when s2_eig is true.
 
     Needs:
 
@@ -336,13 +354,16 @@ Subroutines / functions
 .. c:function:: void run(void)
 
 
-    File : :file:`print_hmat.irp.f`
+    File : :file:`print_hamiltonian.irp.f`
 
     .. code:: fortran
 
         subroutine run
 
 
+    Prints the Hamiltonian matrix elements H_ij between all
+    pairs of determinants stored in the |EZFIO| directory, only
+    for elements with absolute value greater than 1.d-20.
 
     Needs:
 
@@ -358,10 +379,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`print`
        * :c:func:`print_energy`
        * :c:func:`print_hamiltonian`
-       * :c:func:`print_hmat`
        * :c:func:`pt2`
        * :c:func:`scf`
 
@@ -370,6 +389,5 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`get_excitation_degree`
        * :c:func:`i_h_j`
 

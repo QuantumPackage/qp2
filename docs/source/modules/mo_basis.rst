@@ -157,12 +157,6 @@ Providers
 
        * :c:data:`attachment_orbitals`
        * :c:data:`cholesky_mo_transp`
-       * :c:data:`d0tu_alpha_ao`
-       * :c:data:`eigenvectors_fock_matrix_mo`
-       * :c:data:`fock_matrix_mo_alpha`
-       * :c:data:`fock_matrix_mo_beta`
-       * :c:data:`fps_spf_matrix_mo`
-       * :c:data:`mcscf_fock_alpha_mo`
        * :c:data:`mo_coef_in_ao_ortho_basis`
        * :c:data:`mo_coef_transp`
        * :c:data:`mo_deriv_1_x`
@@ -180,7 +174,6 @@ Providers
        * :c:data:`mo_two_e_int_erf_jj_from_ao`
        * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
-       * :c:data:`natorbsfci`
        * :c:data:`one_e_dm_alpha_ao_for_dft`
        * :c:data:`one_e_dm_alpha_ao_for_dft_no_core`
        * :c:data:`one_e_dm_ao_alpha`
@@ -191,8 +184,6 @@ Providers
        * :c:data:`psi_det`
        * :c:data:`s_mo_coef`
        * :c:data:`s_mo_sphe_coef`
-       * :c:data:`scf_density_matrix_ao_alpha`
-       * :c:data:`scf_density_matrix_ao_beta`
 
  
 .. c:var:: double mo_coef_aux
@@ -205,6 +196,12 @@ Providers
         double precision, allocatable	:: mo_coef_aux	(ao_num,mo_num)
 
 
+    Auxiliary MO coefficients, same (ao_num,mo_num) layout as
+    mo_coef: coefficient of the i-th AO on the j-th aux MO.
+    Read from the EZFIO database if the entry exists (master
+    reads, then MPI broadcast), otherwise set to the :math:`S^{-1/2}` 
+    canonical orthonormalized AOs (ao_ortho_canonical_coef).
+    TODO(doc): purpose of the aux basis; who writes it to EZFIO?
 
     Needs:
 
@@ -367,45 +364,25 @@ Providers
        :columns: 3
 
        * :c:data:`ao_one_e_integrals_from_mo`
-       * :c:data:`ao_ortho_canonical_nucl_elec_integrals`
-       * :c:data:`ao_ortho_lowdin_nucl_elec_integrals`
        * :c:data:`ao_sphe_one_e_integrals_from_mo`
        * :c:data:`attachment_numbers_sorted`
        * :c:data:`attachment_orbitals`
        * :c:data:`banned_excitation`
-       * :c:data:`bielec_pqxx_array`
-       * :c:data:`bielec_pqxx_no_array`
-       * :c:data:`bielec_pxxq_array`
-       * :c:data:`bielec_pxxq_no_array`
-       * :c:data:`bielecci`
-       * :c:data:`bielecci_no`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`cholesky_mo`
        * :c:data:`cholesky_mo_sp`
        * :c:data:`cholesky_mo_transp`
        * :c:data:`cholesky_mo_transp_sp`
        * :c:data:`cholesky_mo_transp_sp_d`
-       * :c:data:`cholesky_no_1_idx_transp`
-       * :c:data:`cholesky_no_total_transp`
        * :c:data:`cholesky_semi_mo_transp_simple`
        * :c:data:`core_fock_operator`
        * :c:data:`core_fock_operator_erf`
-       * :c:data:`d0tu_alpha_ao`
        * :c:data:`data_one_e_dm_alpha_mo`
        * :c:data:`data_one_e_dm_beta_mo`
        * :c:data:`difference_dm`
        * :c:data:`difference_dm_eigvect`
-       * :c:data:`eigenvectors_fock_matrix_mo`
-       * :c:data:`fapq`
-       * :c:data:`fipq`
-       * :c:data:`fock_matrix_ao`
-       * :c:data:`fock_matrix_diag_mo`
-       * :c:data:`fock_matrix_mo`
-       * :c:data:`fock_matrix_mo_alpha`
-       * :c:data:`fock_matrix_mo_beta`
        * :c:data:`fock_operator_closed_shell_ref_bitmask`
        * :c:data:`fock_wee_closed_shell`
-       * :c:data:`fps_spf_matrix_mo`
        * :c:data:`full_ijkl_bitmask`
        * :c:data:`gpu_integral_buffer1`
        * :c:data:`h_core_ri`
@@ -420,9 +397,6 @@ Providers
        * :c:data:`list_inact`
        * :c:data:`list_inact_act`
        * :c:data:`list_virt`
-       * :c:data:`lowest_super_ci_coef_mo`
-       * :c:data:`mcscf_fock_alpha_mo`
-       * :c:data:`mcscf_fock_mo`
        * :c:data:`mo_class`
        * :c:data:`mo_coef`
        * :c:data:`mo_coef_aux`
@@ -479,10 +453,6 @@ Providers
        * :c:data:`n_inact_orb`
        * :c:data:`n_int`
        * :c:data:`n_virt_orb`
-       * :c:data:`natorbsci_mos`
-       * :c:data:`natorbsfci`
-       * :c:data:`neworbs`
-       * :c:data:`occnum`
        * :c:data:`one_body_dm_mo_alpha_one_det`
        * :c:data:`one_e_dm_alpha_ao_for_dft`
        * :c:data:`one_e_dm_alpha_ao_for_dft_no_core`
@@ -506,19 +476,11 @@ Providers
        * :c:data:`one_e_spin_density_mo`
        * :c:data:`one_e_tr_dm_mo`
        * :c:data:`one_e_tr_dm_mo_alpha`
-       * :c:data:`one_ints_no`
        * :c:data:`ormas_n_orb`
        * :c:data:`partial_occupation`
        * :c:data:`psi_energy_h_core`
        * :c:data:`s_mo_coef`
        * :c:data:`s_mo_sphe_coef`
-       * :c:data:`scf_density_matrix_ao_alpha`
-       * :c:data:`scf_density_matrix_ao_beta`
-       * :c:data:`super_ci_dm`
-       * :c:data:`superci_natorb`
-       * :c:data:`switch_mo_coef`
-       * :c:data:`two_e_dm_mo`
-       * :c:data:`umat`
        * :c:data:`v_ne_psi_energy`
        * :c:data:`z_dipole_moment`
 
@@ -624,13 +586,6 @@ Providers
        * :c:data:`elec_beta_num`
        * :c:data:`mo_num`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`scf_density_matrix_ao_alpha`
-       * :c:data:`scf_density_matrix_ao_beta`
 
  
  
@@ -695,10 +650,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`fock_matrix_mo_alpha`
-       * :c:data:`fock_matrix_mo_beta`
-       * :c:data:`fps_spf_matrix_mo`
-       * :c:data:`mcscf_fock_alpha_mo`
        * :c:data:`mo_deriv_1_x`
        * :c:data:`mo_dipole_x`
        * :c:data:`mo_integrals_n_e`
@@ -731,6 +682,11 @@ Subroutines / functions
         subroutine give_all_mos_and_grad_and_lapl_at_r(r,mos_array,mos_grad_array,mos_lapl_array)
 
 
+    mos_array(j) = jth MO function evaluated at r
+    mos_grad_array(i,j) = derivative of the jth MO along axis i (x, y, z) at r
+    mos_lapl_array(i,j) = second derivative of the jth MO along axis i at r:
+    d2/dx2 for i=1, d2/dy2 for i=2, d2/dz2 for i=3; the three pure
+    second derivatives are stored separately, not their sum
 
     Needs:
 
@@ -759,6 +715,8 @@ Subroutines / functions
         subroutine give_all_mos_and_grad_at_r(r,mos_array,mos_grad_array)
 
 
+    mos_array(j) = jth MO function evaluated at r
+    mos_grad_array(i,j) = derivative of the jth MO along axis i (x, y, z) at r
 
     Needs:
 
@@ -854,6 +812,12 @@ Subroutines / functions
         subroutine mo_as_eigvectors_of_mo_matrix(matrix,n,m,label,sign,output)
 
 
+    Set the MOs to the eigenvectors of matrix in the current MO
+    basis (mo_coef = mo_coef * eigvectors, via lapack_diag);
+    mo_label is set to label. m must equal mo_num. If
+    sign == -1, -matrix is diagonalized and the printed
+    eigenvalues are negated back; if output, they are printed.
+    TODO(doc): purpose of the sign argument?
 
     Needs:
 
@@ -864,15 +828,6 @@ Subroutines / functions
        * :c:data:`mo_coef`
        * :c:data:`mo_label`
        * :c:data:`mo_num`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`create_guess`
-       * :c:func:`damping_scf`
-       * :c:func:`hcore_guess`
 
     Calls:
 
@@ -894,6 +849,12 @@ Subroutines / functions
         subroutine mo_as_svd_vectors_of_mo_matrix(matrix,lda,m,n,label)
 
 
+    Set the MOs to the left singular vectors of matrix in the
+    current MO basis: mo_coef is replaced by mo_coef times U,
+    U being the left singular vector matrix of matrix (svd,
+    LAPACK dgesdd). m must equal mo_num. A table of the
+    singular values and their cumulative sum is printed on
+    unit 6. mo_label is set to label.
 
     Needs:
 
@@ -925,6 +886,10 @@ Subroutines / functions
         subroutine mo_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,eig,label)
 
 
+    Same as mo_as_svd_vectors_of_mo_matrix, plus eig(i)
+    receives the i-th singular value of matrix; singular
+    values at or below 1.d-20 are written as 0.d0.
+    TODO(doc): is 1.d-20 a threshold for numerical noise?
 
     Needs:
 
@@ -997,6 +962,8 @@ Subroutines / functions
         subroutine save_mos
 
 
+    Write the current MO basis to the EZFIO database: mo_num,
+    mo_label, ao_md5, mo_coef, mo_occ and mo_class.
 
     Needs:
 
@@ -1016,11 +983,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`damping_scf`
-       * :c:func:`hcore_guess`
-       * :c:func:`huckel_guess`
-       * :c:func:`roothaan_hall_scf`
-       * :c:func:`run_orb_opt_trust_v2`
        * :c:func:`save_natural_mos`
        * :c:func:`save_natural_mos_canon_label`
        * :c:func:`save_natural_mos_no_ov_rot`
@@ -1048,6 +1010,9 @@ Subroutines / functions
         subroutine save_mos_no_occ
 
 
+    Write only mo_coef to the EZFIO database. mo_num, mo_label,
+    ao_md5, mo_occ and mo_class are not written (the
+    corresponding set calls are commented out).
 
     Needs:
 
@@ -1076,6 +1041,12 @@ Subroutines / functions
         subroutine save_mos_truncated(n)
 
 
+    Write the first n MOs to the EZFIO database: mo_num is set
+    to n, and mo_label, ao_md5, mo_occ, mo_class and the first
+    n columns of mo_coef are stored.
+    TODO(doc): mo_occ and mo_class are providers of the full
+    mo_num size; when n < mo_num they are written with the full
+    size while the stored mo_num is n. Is this intended?
 
     Needs:
 

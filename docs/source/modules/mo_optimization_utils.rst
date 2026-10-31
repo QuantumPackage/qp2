@@ -52,6 +52,10 @@ Subroutines / functions
         subroutine diag_hessian_list_opt(n, m, list, H)
 
 
+    Diagonal of the hessian of the energy with respect to orbital
+    rotations, restricted to the m orbitals given by list.
+    n is m*(m-1)/2 and H(k) is the diagonal element for the pair
+    (p,q) given by vec_to_mat_index(k,p,q).
 
     Needs:
 
@@ -92,6 +96,10 @@ Subroutines / functions
         subroutine diag_hessian_opt(n,H)
 
 
+    Diagonal of the hessian of the energy with respect to orbital
+    rotations, for all mo_num orbitals.
+    n is mo_num*(mo_num-1)/2 and H(k) is the diagonal element for
+    the pair (p,q) given by vec_to_mat_index(k,p,q).
 
     Needs:
 
@@ -125,6 +133,11 @@ Subroutines / functions
         subroutine diagonalization_hessian(n,H,e_val,w)
 
 
+    Diagonalization of the n by n hessian H of the energy with
+    respect to orbital rotations. For optimization_method ==
+    'full', LAPACK dsyev is used; for 'diag', the diagonal elements
+    are sorted and w is the corresponding permutation matrix.
+    e_val receives the eigenvalues and w the eigenvectors.
 
     Needs:
 
@@ -161,6 +174,12 @@ Subroutines / functions
         subroutine first_diag_hessian_list_opt(tmp_n,m,list,H)
 
 
+    Diagonal of the hessian of the energy with respect to orbital
+    rotations, restricted to the m orbitals given by list.
+    Original implementation; the debug program
+    debug_hessian_list_opt compares it with diag_hessian_list_opt.
+    n is m*(m-1)/2 and H(k) is the diagonal element for the pair
+    (p,q) given by vec_to_mat_index(k,p,q).
 
     Needs:
 
@@ -192,6 +211,12 @@ Subroutines / functions
         subroutine first_diag_hessian_opt(n,H, h_tmpr)
 
 
+    Diagonal of the hessian of the energy with respect to orbital
+    rotations, for all mo_num orbitals. Only the elements that
+    contribute to the diagonal are accumulated.
+    Original implementation; the debug program debug_hessian_opt
+    compares it with diag_hessian_opt. H is the n by n matrix with
+    the diagonal elements at (k,k).
 
     Needs:
 
@@ -223,6 +248,12 @@ Subroutines / functions
         subroutine first_gradient_list_opt(tmp_n,m,list,v_grad)
 
 
+    Gradient of the energy with respect to orbital rotations,
+    restricted to the m orbitals given by list.
+    Original implementation; the debug program
+    debug_gradient_list_opt compares it with gradient_list_opt.
+    n is m*(m-1)/2 and v_grad(k) is the element for the pair (p,q)
+    given by vec_to_mat_index(k,p,q).
 
     Needs:
 
@@ -253,6 +284,12 @@ Subroutines / functions
         subroutine first_gradient_opt(n,v_grad)
 
 
+    Gradient of the energy with respect to orbital rotations, for
+    all mo_num orbitals.
+    Original implementation; the debug program debug_gradient_opt
+    compares it with gradient_opt.
+    n is mo_num*(mo_num-1)/2 and v_grad(k) is the element for the
+    pair (p,q) given by vec_to_mat_index(k,p,q).
 
     Needs:
 
@@ -283,6 +320,12 @@ Subroutines / functions
         subroutine first_hessian_list_opt(tmp_n,m,list,H,h_tmpr)
 
 
+    Hessian of the energy with respect to orbital rotations,
+    restricted to the m orbitals given by list.
+    Original implementation; the debug program
+    debug_hessian_list_opt compares it with hessian_list_opt.
+    H is the n by n hessian, n is m*(m-1)/2, indexed by the pairs
+    (p,q) and (r,s) with p < q, r < s; h_tmpr is the 4D hessian.
 
     Needs:
 
@@ -314,6 +357,13 @@ Subroutines / functions
         subroutine first_hessian_opt(n,H,h_tmpr)
 
 
+    Hessian of the energy with respect to orbital rotations, for
+    all mo_num orbitals.
+    Original implementation; the debug program debug_hessian_opt
+    compares it with hessian_opt.
+    H is the n by n hessian, n is mo_num*(mo_num-1)/2, indexed by
+    the pairs (p,q) and (r,s) with p < q, r < s; h_tmpr is the
+    4D hessian.
 
     Needs:
 
@@ -345,6 +395,12 @@ Subroutines / functions
         subroutine gradient_list_opt(n,m,list,v_grad,max_elem,norm)
 
 
+    Gradient of the energy with respect to orbital rotations,
+    restricted to the m orbitals given by list.
+    n is m*(m-1)/2 and v_grad(k) is the element for the pair (p,q)
+    given by vec_to_mat_index(k,p,q).
+    max_elem is the element of v_grad with the largest absolute
+    value (its sign is kept) and norm is the 2-norm of v_grad.
 
     Needs:
 
@@ -385,6 +441,12 @@ Subroutines / functions
         subroutine gradient_opt(n,v_grad,max_elem)
 
 
+    Gradient of the energy with respect to orbital rotations, for
+    all mo_num orbitals.
+    n is mo_num*(mo_num-1)/2 and v_grad(k) is the element for the
+    pair (p,q) given by vec_to_mat_index(k,p,q).
+    max_elem is the element of v_grad with the largest absolute
+    value (its sign is kept).
 
     Needs:
 
@@ -418,6 +480,12 @@ Subroutines / functions
         subroutine hessian_list_opt(n,m,list,H,h_tmpr)
 
 
+    Hessian of the energy with respect to orbital rotations,
+    restricted to the m orbitals given by list.
+    H is the n by n hessian, n is m*(m-1)/2, indexed by the pairs
+    (p,q) and (r,s) with p < q, r < s (vec_to_mat_index).
+    h_tmpr is the 4D hessian after the permutations, kept for
+    debugging.
 
     Needs:
 
@@ -458,6 +526,12 @@ Subroutines / functions
         subroutine hessian_opt(n,H,h_tmpr)
 
 
+    Hessian of the energy with respect to orbital rotations, for
+    all mo_num orbitals.
+    H is the n by n hessian, n is mo_num*(mo_num-1)/2, indexed by
+    the pairs (p,q) and (r,s) with p < q, r < s (vec_to_mat_index).
+    h_tmpr is the 4D hessian after the permutations, kept for
+    debugging.
 
     Needs:
 
@@ -491,6 +565,12 @@ Subroutines / functions
         subroutine run_optimization_mos_CIPSI
 
 
+    Orbital optimization with a wave function that grows as the
+    optimization proceeds: each cycle runs a stochastic CIPSI step
+    (run_stochastic_cipsi) then an orbital optimization
+    (run_orb_opt_trust_v2), and doubles N_det_max. n_det, the
+    energy before and after each optimization and their difference
+    are appended to mo_optimization/result_opt in the EZFIO file.
 
     Needs:
 
@@ -643,6 +723,9 @@ Subroutines / functions
         subroutine state_average_energy(energy)
 
 
+    State average energy of the current wave function, from the MO
+    integrals and density matrices: nuclear repulsion, plus the
+    one-electron part, plus half of the two-electron part.
 
     Needs:
 
@@ -711,6 +794,15 @@ Subroutines / functions
         subroutine update_parameters()
 
 
+    Hook called by the trust-region algorithm (utils_trust_region)
+    after a step has been applied, to update the other parameters
+    of the orbital optimization. Clears the MO two-electron
+    integral map (clear_mo_map), marks mo_coef, psi_det and
+    psi_coef as modified, replaces the |CI| coefficients by the
+    coefficients of the eigenstates of the |CI| matrix
+    (diagonalize_ci), and saves the wave function to the |EZFIO|
+    file (save_wavefunction_unsorted).
+    TODO(doc): is this the final hook, or a template to extend (see header)?
 
     Needs:
 
@@ -756,6 +848,11 @@ Subroutines / functions
         subroutine update_st_av_ci_energy(energy)
 
 
+    State average of the |CI| energies: energy is the weighted sum
+    over the N_states |CI| states, ci_energy(i) weighted by
+    state_average_weight(i) (normalized to sum to 1 by
+    state_weight_normalization).
+    TODO(doc): only call (my_providers.org) is commented out; still in use?
 
     Needs:
 
