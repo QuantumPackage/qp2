@@ -274,6 +274,11 @@ integer function number_of_particles_verbose(key_in)
 end
 
 logical function is_a_1h1p(key_in)
+ BEGIN_DOC
+ ! Returns .True. if key_in has exactly 1 hole in the core/inactive
+ ! space and exactly 1 particle in the virtual space, i.e. belongs
+ ! to the 1h1p excitation class.
+ END_DOC
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
  integer :: number_of_particles, number_of_holes
@@ -283,6 +288,11 @@ logical function is_a_1h1p(key_in)
 end
 
 logical function is_a_1h2p(key_in)
+ BEGIN_DOC
+ ! Returns .True. if key_in has exactly 1 hole in the core/inactive
+ ! space and exactly 2 particles in the virtual space, i.e. belongs
+ ! to the 1h2p excitation class.
+ END_DOC
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
  integer :: number_of_particles, number_of_holes
@@ -292,6 +302,11 @@ logical function is_a_1h2p(key_in)
 end
 
 logical function is_a_2h1p(key_in)
+ BEGIN_DOC
+ ! Returns .True. if key_in has exactly 2 holes in the core/inactive
+ ! space and exactly 1 particle in the virtual space, i.e. belongs
+ ! to the 2h1p excitation class.
+ END_DOC
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
  integer :: number_of_particles, number_of_holes
@@ -301,6 +316,10 @@ logical function is_a_2h1p(key_in)
 end
 
 logical function is_a_1h(key_in)
+ BEGIN_DOC
+ ! Returns .True. if key_in has exactly 1 hole in the core/inactive
+ ! space and no particle in the virtual space.
+ END_DOC
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
  integer :: number_of_particles, number_of_holes
@@ -310,6 +329,10 @@ logical function is_a_1h(key_in)
 end
 
 logical function is_a_1p(key_in)
+ BEGIN_DOC
+ ! Returns .True. if key_in has exactly 1 particle in the virtual
+ ! space and no hole in the core/inactive space.
+ END_DOC
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
  integer :: number_of_particles, number_of_holes
@@ -319,6 +342,10 @@ logical function is_a_1p(key_in)
 end
 
 logical function is_a_2p(key_in)
+ BEGIN_DOC
+ ! Returns .True. if key_in has exactly 2 particles in the virtual
+ ! space and no hole in the core/inactive space.
+ END_DOC
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
  integer :: number_of_particles, number_of_holes
@@ -328,6 +355,10 @@ logical function is_a_2p(key_in)
 end
 
 logical function is_a_2h(key_in)
+ BEGIN_DOC
+ ! Returns .True. if key_in has exactly 2 holes in the core/inactive
+ ! space and no particle in the virtual space.
+ END_DOC
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
  integer :: number_of_particles, number_of_holes
@@ -337,6 +368,10 @@ logical function is_a_2h(key_in)
 end
 
 logical function is_i_in_virtual(i)
+ BEGIN_DOC
+ ! Returns .True. if the MO with 1-based index i belongs to the
+ ! virtual space, i.e. the bit of MO i is set in virt_bitmask.
+ END_DOC
  implicit none
  integer,intent(in) :: i
  integer(bit_kind), allocatable :: key(:)
@@ -359,6 +394,10 @@ logical function is_i_in_virtual(i)
 end
 
 logical function is_i_in_core(i)
+ BEGIN_DOC
+ ! Returns .True. if the MO with 1-based index i belongs to the core
+ ! space, i.e. the bit of MO i is set in core_bitmask.
+ END_DOC
  implicit none
  integer,intent(in) :: i
  integer(bit_kind), allocatable :: key(:)

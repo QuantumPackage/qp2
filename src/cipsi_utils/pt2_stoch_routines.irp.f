@@ -9,6 +9,14 @@ END_PROVIDER
  BEGIN_PROVIDER [ integer, pt2_F, (N_det_generators) ]
 &BEGIN_PROVIDER [ integer, pt2_n_tasks_max ]
   implicit none
+  BEGIN_DOC
+  ! pt2_F(i) is the number of Monte Carlo tasks (combs)
+  ! assigned to generator i (i indexes the norm-sorted
+  ! generator list):
+  ! pt2_n_tasks_max*pt2_min_parallel_tasks for the leading
+  ! (largest-norm) generators, pt2_min_parallel_tasks for a
+  ! middle range, and 1 for the rest.
+  END_DOC
   logical, external :: testTeethBuilding
   integer :: i,j
   pt2_n_tasks_max = elec_alpha_num*elec_alpha_num + elec_alpha_num*elec_beta_num  - n_core_orb*2
@@ -31,6 +39,14 @@ END_PROVIDER
  BEGIN_PROVIDER [ integer, pt2_N_teeth ]
 &BEGIN_PROVIDER [ integer, pt2_minDetInFirstTeeth ]
   implicit none
+  BEGIN_DOC
+  ! pt2_N_teeth: number of comb teeth of the stochastic PT2
+  ! sampling: 1 if N_det_generators < 1024, otherwise the
+  ! largest N from 100 down to 2 for which
+  ! testTeethBuilding(pt2_minDetInFirstTeeth, N) is true.
+  ! pt2_minDetInFirstTeeth: minimum number of determinants
+  ! required in the first tooth (1 or min(5, N_det_generators)).
+  END_DOC
   logical, external :: testTeethBuilding
 
   if(N_det_generators < 1024) then
@@ -48,6 +64,14 @@ END_PROVIDER
 
 logical function testTeethBuilding(minF, N)
   implicit none
+  BEGIN_DOC
+! Checks whether the comb can be built with N teeth so that
+! the first tooth holds at least minF determinants. Tries
+! leading offsets n0 of the norm-sorted generator list and
+! returns .true. if the first minF determinants after n0 fit
+! in one tooth of width Wt = (1 - u0)/N (u0: cumulative
+! weight before n0); .false. if Wt <= 1e-3 or no offset works.
+  END_DOC
   integer, intent(in) :: minF, N
   integer :: n0, i
   double precision :: u0, Wt, r
@@ -369,6 +393,11 @@ end subroutine
 
 subroutine pt2_slave_inproc(i)
   implicit none
+  BEGIN_DOC
+! In-process slave of the stochastic PT2: OpenMP thread i
+! (the master is thread 0) processes its PT2 tasks through
+! run_pt2_slave, with in-process (inproc) ZeroMQ sockets.
+  END_DOC
   integer, intent(in)            :: i
 
   PROVIDE global_selection_buffer
@@ -381,6 +410,14 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
   use selection_types
   use bitmasks
   implicit none
+  BEGIN_DOC
+! Master of the in-process stochastic PT2: pulls the partial
+! results of the slave tasks and accumulates them per
+! generator, maintaining the running averages of the PT2
+! energy, its variance and the state overlaps (printed every
+! second) until the relative error on the PT2 energy is
+! below relative_error; selected determinants are added to b.
+  END_DOC
 
 
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_pull
@@ -666,6 +703,11 @@ end subroutine
 
 integer function pt2_find_sample(v, w)
   implicit none
+  BEGIN_DOC
+! Returns the index where the cumulative weight w crosses v,
+! by calling pt2_find_sample_lr on the full range
+! 0..N_det_generators.
+  END_DOC
   double precision, intent(in) :: v, w(0:N_det_generators)
   integer, external :: pt2_find_sample_lr
 
@@ -675,6 +717,12 @@ end function
 
 integer function pt2_find_sample_lr(v, w, l_in, r_in)
   implicit none
+  BEGIN_DOC
+! Binary search on the cumulative weight array w for the
+! first index r such that w(r) >= v, within the range
+! l_in..r_in. If w is flat there (determinants of zero
+! weight), the last index of the flat run is returned.
+  END_DOC
   double precision, intent(in) :: v, w(0:N_det_generators)
   integer, intent(in) :: l_in,r_in
   integer :: i,l,r
@@ -710,6 +758,11 @@ END_PROVIDER
 
 BEGIN_PROVIDER[ double precision, pt2_u, (N_det_generators)]
   implicit none
+  BEGIN_DOC
+  ! Uniform random numbers in (0,1), one per Monte Carlo
+  ! sample (comb) of the stochastic PT2. The random generator
+  ! is seeded with (1, 2, ..., m) before being filled.
+  END_DOC
   integer, allocatable :: seed(:)
   integer :: m,i
   call random_seed(size=m)
@@ -824,6 +877,14 @@ END_PROVIDER
 &BEGIN_PROVIDER [ double precision, pt2_u_0 ]
 &BEGIN_PROVIDER [ integer,          pt2_n_0, (pt2_N_teeth+1) ]
    implicit none
+   BEGIN_DOC
+   ! Weights of the Monte Carlo comb of the stochastic PT2.
+   ! pt2_w(i): weight of norm-sorted generator i, rescaled so
+   ! that each of the pt2_N_teeth teeth holds the total weight
+   ! pt2_W_T. pt2_cW: cumulative sum of pt2_w. pt2_u_0: weight
+   ! of the first pt2_n_0(1) generators, always included in the
+   ! comb. pt2_n_0: index bounds of the teeth.
+   END_DOC
    integer                        :: i, t
    double precision, allocatable  :: tilde_w(:), tilde_cW(:)
    double precision               :: r, tooth_width

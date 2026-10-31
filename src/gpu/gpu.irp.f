@@ -17,6 +17,15 @@ END_PROVIDER
 &BEGIN_PROVIDER [ integer, gpu_busy_max_dgemv ]
 &BEGIN_PROVIDER [ integer, gpu_busy_max_dgemm ]
  implicit none
+ BEGIN_DOC
+ ! Number of ongoing GPU operations, one entry per GPU,
+ ! indexed from 0 to gpu_num. gpu_set_busy and gpu_unset_busy
+ ! increment and decrement it (OpenMP atomic). Callers compare
+ ! it with the corresponding cap before a BLAS call. The caps
+ ! gpu_busy_max_ddot, gpu_busy_max_dgemv and gpu_busy_max_dgemm
+ ! are set when gpu_num > 0 to 0, 4 and nthreads_pt2/(gpu_num*2).
+ ! TODO(doc): what determines the values of the three caps?
+ END_DOC
  gpu_busy = 0
  if (gpu_num > 0) then
    gpu_busy_max_ddot = 0

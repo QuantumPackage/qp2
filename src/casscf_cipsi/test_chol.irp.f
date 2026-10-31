@@ -1,4 +1,11 @@
 program test_chol
+ BEGIN_DOC
+ ! Standalone test driver for the two-electron integral
+ ! functions of this file (the Cholesky-based bielec_*_no
+ ! functions vs. the stored arrays). Sets read_wf so that
+ ! the wave function is read from the EZFIO file; the test
+ ! subroutine calls are all commented out.
+ END_DOC
  implicit none
  read_wf= .True.
  touch read_wf 
@@ -10,6 +17,13 @@ program test_chol
 end
 
 subroutine routine_bielec_PQxx_no
+ BEGIN_DOC
+ ! Compares the Cholesky function bielec_PQxx_no with the
+ ! stored array bielec_PQxx_no_array for all MO pairs (P,Q)
+ ! and all core/inactive/active orbital pairs (x,y). Entries
+ ! with |reference| > 1.d-10 are printed, then the mean
+ ! absolute difference.
+ END_DOC
  implicit none
  integer :: i_chol, i_act, ii_act, j_act, jj_act, i_core_inact, j_core_inact, ii_core_inact, jj_core_inact
  integer :: i_virt, ii_virt, j_virt, jj_virt, i_mo, j_mo
@@ -38,6 +52,13 @@ subroutine routine_bielec_PQxx_no
 end
 
 subroutine routine_bielec_PxxQ_no_array
+ BEGIN_DOC
+ ! Compares the Cholesky function bielec_PxxQ_no with the
+ ! stored array bielec_PxxQ_no_array for all MO pairs (P,Q)
+ ! and all core/inactive/active orbital pairs (x,y). Entries
+ ! with |reference| > 1.d-10 are printed, then the mean
+ ! absolute difference.
+ END_DOC
  implicit none
  integer :: i_chol, i_act, ii_act, j_act, jj_act, i_core_inact, j_core_inact, ii_core_inact, jj_core_inact
  integer :: i_virt, ii_virt, j_virt, jj_virt, i_mo, j_mo
@@ -67,6 +88,14 @@ subroutine routine_bielec_PxxQ_no_array
 end
 
 subroutine test_bielec_PQxx(i_mo, j_mo, i_ca, j_ca)
+ BEGIN_DOC
+ ! Compares the function bielec_PQxx with the stored array
+ ! bielec_PQxx_array for all MO pairs (P,Q) and all
+ ! core/inactive/active orbital pairs (x,y). The four
+ ! integer arguments are loop indices; their values are
+ ! ignored. Entries with |reference| > 1.d-10 are printed,
+ ! then the mean absolute difference.
+ END_DOC
  implicit none
  integer :: i_mo, j_mo, i_ca, j_ca 
  double precision :: exact, new, error, accu
@@ -92,6 +121,14 @@ subroutine test_bielec_PQxx(i_mo, j_mo, i_ca, j_ca)
 end
 
 subroutine test_bielec_PxxQ_chol(i_mo, i_ca, j_ca, j_mo)
+ BEGIN_DOC
+ ! Compares the function bielec_PxxQ with the stored array
+ ! bielec_PxxQ_array for all MO pairs (P,Q) and all
+ ! core/inactive/active orbital pairs (x,y). The four
+ ! integer arguments are loop indices; their values are
+ ! ignored. Entries with |reference| > 1.d-10 are printed,
+ ! then the mean absolute difference.
+ END_DOC
  implicit none
  integer :: i_mo, i_ca, j_ca, j_mo
  double precision :: exact, new, error, accu

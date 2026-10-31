@@ -1,4 +1,12 @@
 logical function ao_two_e_integral_zero(i,j,k,l)
+  BEGIN_DOC
+  ! Returns .True. if the AO integral $(ij|kl)$ can be taken as
+  ! zero. No screening when the integrals are read from the EZFIO
+  ! file, when $is\_periodic$, or for complex AOs ($use\_cgtos$).
+  ! Otherwise, zero if $ao\_overlap\_abs(i,k)\,ao\_overlap\_abs(j,l)$
+  ! or the Schwartz bound $\sqrt{(ii|kk)\,(jj|ll)}$ is below
+  ! $ao\_integrals\_threshold$.
+  END_DOC
   implicit none
   integer, intent(in) :: i,j,k,l
 

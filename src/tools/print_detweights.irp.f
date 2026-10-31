@@ -1,6 +1,11 @@
 program print_detweights
 
   implicit none
+  BEGIN_DOC
+  ! Reads the wave function from the |EZFIO| directory and writes
+  ! the excitation degree of each determinant with respect to the
+  ! first determinant to the file exc.dat.
+  END_DOC
 
   read_wf = .True.
   touch read_wf
@@ -15,6 +20,12 @@ end
 subroutine main()
 
   implicit none
+  BEGIN_DOC
+  ! Computes the excitation degree of each determinant with
+  ! respect to the first determinant, sorts the coefficients of
+  ! the first state by decreasing magnitude and writes the
+  ! degrees and the sorted coefficients to the file coef.bin.
+  END_DOC
   integer                       :: i
   integer                       :: degree
   integer                       :: ios
@@ -70,6 +81,11 @@ end
 subroutine print_exc()
 
   implicit none
+  BEGIN_DOC
+  ! Computes the excitation degree of each determinant with
+  ! respect to the first determinant and writes them to the file
+  ! exc.dat, preceded by N_det.
+  END_DOC
 
   integer              :: i
   integer, allocatable :: deg(:)

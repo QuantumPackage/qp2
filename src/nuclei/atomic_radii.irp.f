@@ -107,6 +107,11 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, slater_bragg_radii_ua, (0:100)]
  implicit none
+ BEGIN_DOC
+ ! The values of slater_bragg_radii converted from angstroms to
+ ! atomic units (a0), by a factor of 1.889725989.
+ ! As slater_bragg_radii, indexed by atomic number (1 to 100).
+ END_DOC
  integer :: i
  do i = 0, 100
   slater_bragg_radii_ua(i) = slater_bragg_radii(i) * 1.889725989d0
@@ -115,6 +120,11 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, slater_bragg_radii_per_atom, (nucl_num)]
  implicit none
+ BEGIN_DOC
+ ! Slater-Bragg atomic radius in angstroms of each nucleus: for
+ ! i = 1 to nucl_num, the table value slater_bragg_radii(Z_i),
+ ! Z_i being int(nucl_charge(i)) floored at 1.
+ END_DOC
  integer :: i
  do i = 1, nucl_num
   slater_bragg_radii_per_atom(i) = slater_bragg_radii(max(1,int(nucl_charge(i))))
@@ -123,6 +133,10 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, slater_bragg_radii_per_atom_ua, (nucl_num)]
  implicit none
+ BEGIN_DOC
+ ! As slater_bragg_radii_per_atom, but with the radii in atomic
+ ! units (a0) taken from slater_bragg_radii_ua.
+ END_DOC
  integer :: i
  do i = 1, nucl_num
   slater_bragg_radii_per_atom_ua(i) = slater_bragg_radii_ua(max(1,int(nucl_charge(i))))
@@ -131,6 +145,14 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, slater_bragg_type_inter_distance, (nucl_num, nucl_num)]
  implicit none
+ BEGIN_DOC
+ ! For i < j, the entry is u / (u*u - 1), where u = (x - 1) /
+ ! (x + 1), x = slater_bragg_radii_per_atom(i) /
+ ! slater_bragg_radii_per_atom(j); other entries are zero.
+ ! Used in cell_function_becke of becke_numerical_grid (Becke
+ ! 1988, JCP 88(4)).
+ ! TODO(doc): physical meaning of the u / (u*u - 1) factor?
+ END_DOC
  integer :: i,j
  double precision :: xhi_tmp,u_ij
  slater_bragg_type_inter_distance = 0.d0
@@ -145,6 +167,13 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, slater_bragg_type_inter_distance_ua, (nucl_num, nucl_num)]
  implicit none
+ BEGIN_DOC
+ ! As slater_bragg_type_inter_distance, but the ratio x is built
+ ! from the radii in atomic units (a0),
+ ! slater_bragg_radii_per_atom_ua, and each value is clipped to
+ ! the interval [-0.5, 0.5].
+ ! TODO(doc): why is the clipping limit 0.5?
+ END_DOC
  integer :: i,j
  double precision :: xhi_tmp,u_ij
  slater_bragg_type_inter_distance_ua = 0.d0

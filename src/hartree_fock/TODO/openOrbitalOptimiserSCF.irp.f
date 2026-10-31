@@ -1,4 +1,11 @@
 subroutine c_print_callback(handle)
+  BEGIN_DOC
+  ! Print one line to the standard output for each iteration of the
+  ! OpenOrbitalOptimizer SCF driver: iteration number, total energy,
+  ! energy difference, maximum DIIS error and DIIS history size, read
+  ! from the driver data handle, with a fixed 0. in the level shift
+  ! column of the scf program output.
+  END_DOC
   use OpenOrbitalOptimizer
   use iso_c_binding
   implicit none
@@ -75,6 +82,14 @@ end
 
 
 subroutine c_fock_builder(Norb, C, n, F, Etot)
+  BEGIN_DOC
+  ! Fock matrix callback of the OpenOrbitalOptimizer SCF driver,
+  ! stops if Norb is not mo_num. n is copied to the
+  ! partial_occupation provider. C holds the current MOs as a
+  ! transformation of the initial MOs: the AO-basis coefficients are
+  ! mo_coef_begin_iteration * C. F is the Fock matrix in the initial
+  ! MO basis, Etot is the Hartree-Fock energy with nuclear repulsion.
+  END_DOC
   use iso_c_binding
   implicit none
 
@@ -104,6 +119,14 @@ subroutine c_fock_builder(Norb, C, n, F, Etot)
 end
 
 subroutine OpenOrbitalOptimiserSCF
+  BEGIN_DOC
+  ! Run the restricted Hartree-Fock SCF with the OpenOrbitalOptimizer
+  ! package (external/OpenOrbitalOptimizer). The driver optimizes the
+  ! orbitals, initialized as the identity on mo_coef_begin_iteration,
+  ! and the occupations, with c_fock_builder and c_print_callback as
+  ! callbacks and dsqrt(thresh_SCF) as the DIIS error threshold. The
+  ! final MOs are saved with mo_label set to 'Canonical'.
+  END_DOC
   use iso_c_binding
   use OpenOrbitalOptimizer
   implicit none
@@ -132,6 +155,9 @@ subroutine OpenOrbitalOptimiserSCF
 
   cb = c_funloc(c_fock_builder)
   cc = c_funloc(c_print_callback)
+  ! *1_8: 64-bit integers, as expected by rhf_solve_nosym
+  ! dsqrt(thresh_SCF) is the value of threshold_DIIS_nonzero when
+  ! threshold_DIIS is 0
   energy = rhf_solve_nosym(cb, cc, mo_num*1_8, elec_num*1_8, C, partial_occupation, dsqrt(thresh_SCF))
 
   write(6,'(A4, 1X, A16, 1X, A16, 1X, A16, 1X, A16)')  &

@@ -22,6 +22,12 @@ end
 
 subroutine routine
  implicit none
+ BEGIN_DOC
+ ! Prints the energy components, then for each determinant of
+ ! the wave function its content in '+-' and hexadecimal
+ ! notation (debug_det) and its coefficients for all N_states
+ ! states.
+ END_DOC
  integer :: i,k
  integer :: degree
  call print_energy_components

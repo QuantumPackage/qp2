@@ -111,6 +111,14 @@ end
 
 subroutine crint_1_vec(n_max, rho, vals)
 
+  BEGIN_DOC
+  ! Stores crint_1(n, rho) for n = 0, 1, ..., n_max in vals(0:n_max),
+  ! where crint_1(n, rho) = $\int_0^1 t^{2n} \exp(-\rho t^2) dt$ for
+  ! a complex argument rho. For |rho| < 0.35 a Taylor polynomial is
+  ! used, for 0.35 <= |rho| < 3.5 crint_smallz_vec, and for
+  ! |rho| >= 3.5 zboysfun00_1 plus the recurrence
+  ! $vals(n) = ((n - 0.5) vals(n-1) - 0.5 \exp(-\rho)) / \rho$.
+  END_DOC
   implicit none
   include 'constants.include.F'
 
@@ -486,6 +494,14 @@ end
 
 subroutine crint_2_vec(n_max, rho, vals)
 
+  BEGIN_DOC
+  ! Stores crint_2(n, rho) for n = 0, 1, ..., n_max in vals(0:n_max),
+  ! where crint_2(n, rho) = $\int_0^1 t^{2n} \exp(-\rho t^2) dt$ for
+  ! a complex argument rho. For |rho| < 3.5 the same branches as
+  ! crint_1_vec are used; for |rho| >= 3.5, zboysfun if Re(rho) >= 0,
+  ! and zboysfunnrp (which returns $\exp(\rho)$ times the integral)
+  ! followed by the $\exp(-\rho)$ rescaling if Re(rho) < 0.
+  END_DOC
   implicit none
 
   integer,    intent(in)  :: n_max
@@ -664,6 +680,12 @@ end
 
 subroutine crint_quad_1(n, rho, n_quad, crint_quad)
 
+  BEGIN_DOC
+  ! Approximates crint_1(n, rho) with a fixed n_quad-point quadrature
+  ! of $\int_0^1 t^{2n} \exp(-\rho t^2) dt$: nodes t = i/n_quad,
+  ! weights cycling 32, 12, 32, 14 with period 4 (indexed by i mod 4),
+  ! weight 7 at the endpoint t = 1, factor 2/(45 n_quad).
+  END_DOC
   implicit none
 
   integer,    intent(in)  :: n, n_quad
@@ -737,6 +759,13 @@ end
 
 subroutine crint_quad_2(n, rho, n_quad, crint_quad)
 
+  BEGIN_DOC
+  ! Approximates crint_2(n, rho) with a fixed n_quad-point quadrature
+  ! of $\frac{1}{2}\int_0^1 t^{n-1/2} \exp(-\rho t) dt$, the form
+  ! obtained from the crint_2 integrand with the change of variable
+  ! t = s^2: nodes t = i/n_quad, weights cycling 32, 12, 32, 14 with
+  ! period 4, weight 7 at the endpoint t = 1, factor 1/(45 n_quad).
+  END_DOC
   implicit none
 
   integer,    intent(in)  :: n, n_quad
@@ -826,6 +855,12 @@ end
 
 subroutine crint_quad_12(n, rho, n_quad, crint_quad)
 
+  BEGIN_DOC
+  ! Approximates crint_1(n, rho) with a fixed n_quad-point quadrature:
+  ! the rule of crint_quad_1 (nodes t = i/n_quad for
+  ! $\int_0^1 t^{2n} \exp(-\rho t^2) dt$) is used for n = 0 and the
+  ! rule of crint_quad_2 for n >= 1.
+  END_DOC
   implicit none
 
   integer,    intent(in)  :: n, n_quad
@@ -908,6 +943,10 @@ end
 
 subroutine crint_quad_12_vec(n_max, rho, vals)
 
+  BEGIN_DOC
+  ! Stores crint_quad_12(n, rho) for n = 0, 1, ..., n_max in
+  ! vals(0:n_max), with n_quad fixed to 10000000.
+  END_DOC
   implicit none
 
   integer,    intent(in)  :: n_max

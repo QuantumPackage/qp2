@@ -14,6 +14,11 @@ end
 
 subroutine run
  implicit none
+ BEGIN_DOC
+ ! Prints the Hamiltonian matrix elements H_ij between all
+ ! pairs of determinants stored in the |EZFIO| directory, only
+ ! for elements with absolute value greater than 1.d-20.
+ END_DOC
  integer :: i, j
  double precision :: hij
 

@@ -1280,6 +1280,12 @@ end
 subroutine wait_for_next_state(state)
   use f77_zmq
   implicit none
+  BEGIN_DOC
+! Wait until a state different from 'Waiting' is received on the ZMQ
+! subscription socket, and return it in 'state'. On a receive
+! timeout, return 'Stopped'.
+! TODO(doc): no caller found in the tree; what is the intended use?
+  END_DOC
 
   character*(64), intent(out)    :: state
   integer(ZMQ_PTR)               :: zmq_socket_sub

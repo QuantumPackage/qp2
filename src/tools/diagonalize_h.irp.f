@@ -17,6 +17,12 @@ end
 
 subroutine routine
  implicit none
+ BEGIN_DOC
+ ! Replaces the coefficients of the CI states by the eigenstates
+ ! of the CI matrix (diagonalize_CI), saves the resulting
+ ! N_states wave functions into the |EZFIO| directory and prints
+ ! the molecular properties of the states.
+ END_DOC
  call diagonalize_CI
  print*,'N_det = ',N_det
  call save_wavefunction_general(N_det,N_states,psi_det_sorted,size(psi_coef_sorted,1),psi_coef_sorted)

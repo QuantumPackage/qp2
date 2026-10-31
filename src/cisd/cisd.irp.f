@@ -52,6 +52,14 @@ end
 
 subroutine run
   implicit none
+  BEGIN_DOC
+  ! Builds the CISD space (H_apply_cisd, or H_apply_cisd_sym when
+  ! pseudo_sym), diagonalizes the CI matrix (CI_eigenvectors
+  ! provider), saves wave functions and energies in the |EZFIO|
+  ! file, and prints the state and excitation energies; with 4+
+  ! electrons it also prints the "CISD+Q" energies cisdq(i).
+  ! TODO(doc): is cisdq the disconnected-quadruples correction of CISD?
+  END_DOC
   integer                        :: i,k
   double precision               :: cisdq(N_states), delta_e
   double precision,external      :: diag_h_mat_elem
@@ -68,6 +76,7 @@ subroutine run
 
   do i = 1,N_states
     k = maxloc(dabs(psi_coef_sorted(1:N_det,i)),dim=1)
+    ! delta_E: energy of state i minus the diagonal H element of k
     delta_E  = CI_electronic_energy(i) - diag_h_mat_elem(psi_det_sorted(1,1,k),N_int)
     if (elec_alpha_num + elec_beta_num >= 4) then
       cisdq(i) = CI_energy(i) + delta_E * (1.d0 - psi_coef_sorted(k,i)**2)

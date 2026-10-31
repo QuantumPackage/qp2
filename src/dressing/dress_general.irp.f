@@ -1,5 +1,12 @@
 subroutine run_dressing(N_st,energy)
   implicit none
+  BEGIN_DOC
+  ! Builds the dressed wavefunction of the N_st states by
+  ! iterating diagonalize_ci_dressed until the change of
+  ! the sum of psi_energy divided by N_states is below
+  ! thresh_dressed_ci, or after n_it_max_dressed_ci
+  ! iterations; energy(j) receives ci_energy_dressed(j).
+  END_DOC
 
   integer, intent(in) :: N_st
   double precision, intent(out) :: energy(N_st)
@@ -14,6 +21,7 @@ subroutine run_dressing(N_st,energy)
 
   thresh_dress = thresh_dressed_ci
   n_it_dress_max = n_it_max_dressed_ci
+  ! No iteration: psi_coef is taken from CI_eigenvectors_dressed
   if(n_it_dress_max == 1) then
     do j=1,N_states
       do i=1,N_det

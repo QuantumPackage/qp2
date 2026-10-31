@@ -162,6 +162,15 @@ end
 
 subroutine get_phase_general(key_i,Nint,degree, holes_array, particles_array,phase)
  implicit none
+ BEGIN_DOC
+ ! Computes the phase of the excitation obtained by applying,
+ ! successively to the determinant key_i, the single
+ ! excitations holes_array(i,ispin) ->
+ ! particles_array(i,ispin) (i = 1..degree(ispin), ispin =
+ ! 1,2), with the convention a^{dagger}_{particle}
+ ! a_{hole} | key_i > = | key_j > of get_excitation_general.
+ ! phase is the resulting fermionic phase.
+ END_DOC
  integer, intent(in)            :: degree(2), Nint
  integer(bit_kind), intent(in)  :: key_i(Nint,2)
  integer, intent(in)            :: holes_array(100,2),particles_array(100,2)

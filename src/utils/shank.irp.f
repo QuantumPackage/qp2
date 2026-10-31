@@ -26,6 +26,14 @@ end
 
 subroutine shank(array,n,nmax,shank1)
  implicit none
+  BEGIN_DOC
+  ! Applies one step of the Shanks transformation to the sequence of
+  ! partial sums array: for i = 1, ..., n-1,
+  !
+  ! shank1(i-1) = array(i+1) - (array(i+1) - array(i))**2
+  !               / (array(i+1) - 2*array(i) + array(i-1)),
+  ! or array(i+1) if the denominator is below 1.d-12 in modulus.
+  END_DOC
  integer, intent(in) :: n,nmax
  double precision, intent(in)  :: array(0:nmax)
  double precision, intent(out) :: shank1(0:nmax)

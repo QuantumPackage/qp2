@@ -6,6 +6,14 @@
 &BEGIN_PROVIDER [double precision, ao_deriv2_cgtos_z, (ao_num, ao_num)]
 
   implicit none
+  BEGIN_DOC
+  ! Second derivative matrix elements in the cgtos |AO| basis:
+  !
+  ! $\langle \chi_i | \frac{\partial^2}{\partial x^2} | \chi_j \rangle$
+  !
+  ! (and y, z analogously). The three arrays are combined in the
+  ! provider ao_kinetic_integrals_cgtos as -1/2 of their sum.
+  END_DOC
   integer          :: i, j, m, n, l, ii, jj, dim1, power_A(3), power_B(3)
   double precision :: c, deriv_tmp
   double precision :: KA2, phiA

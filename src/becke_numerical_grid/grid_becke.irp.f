@@ -76,6 +76,20 @@ BEGIN_PROVIDER [double precision, R_gill]
 
   implicit none
 
+  BEGIN_DOC
+  ! R_gill = scaling parameter of the radial coordinates of the GILL
+  ! radial grid (rad_grid_type = "GILL"), set to 3.0
+  !
+  ! The radial distance of the j-th point around a nucleus is
+  ! $r = R_{gill} (j-1)^2 / (N_r - j + 1)^2$
+  ! with $j = 1, \ldots, N_r-1$ and $N_r$ the number of radial
+  ! points per atom. The same parameter scales the GILL radial
+  ! integration weight (factor $2 R_{gill}^3 N_r$) and is also used
+  ! by the GILL branch of the extra grid (extra_grid.irp.f).
+  !
+  ! TODO(doc): the value 3.0 is not explained anywhere in-tree; the
+  ! GILL branches only carry the comment "GILL & CHIEN, 2002".
+  END_DOC
   R_gill = 3.d0
 
 END_PROVIDER

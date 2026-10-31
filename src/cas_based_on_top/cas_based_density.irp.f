@@ -14,6 +14,14 @@ program cas_based_density
 end
 
 subroutine routine_test_cas_based_density
+  BEGIN_DOC
+! Example of the cas_based_density program. For each state it
+! integrates the total CAS density over the Becke grid in two
+! ways and prints both: from the one_e_cas_total_density
+! provider (accu_n_elec) and from the give_cas_density_in_r
+! routine (accu_n_elec_2). Each gives the total number of
+! electrons of the state, so the two should agree.
+  END_DOC
  implicit none
  integer :: ipoint, istate
  double precision :: accu_n_elec(N_states),accu_n_elec_2(N_states)

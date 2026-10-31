@@ -417,6 +417,10 @@ END_PROVIDER
 
 BEGIN_PROVIDER [integer, n_all_but_del_orb]
  implicit none
+ BEGIN_DOC
+ ! Number of MOs whose mo_class is Core, Inactive, Active or
+ ! Virtual, i.e. the number of MOs that are not "Deleted".
+ END_DOC
  integer :: i
  n_all_but_del_orb = 0
  do i = 1, mo_num
@@ -431,6 +435,10 @@ END_PROVIDER
 
 BEGIN_PROVIDER [integer, list_all_but_del_orb, (n_all_but_del_orb)]
  implicit none
+ BEGIN_DOC
+ ! List of the indices of the MOs whose mo_class is Core,
+ ! Inactive, Active or Virtual, i.e. all MOs that are not "Deleted".
+ END_DOC
  integer :: i,j
  j = 0 
  do i = 1, mo_num

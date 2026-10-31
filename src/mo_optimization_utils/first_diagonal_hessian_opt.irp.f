@@ -1,4 +1,12 @@
 subroutine first_diag_hessian_opt(n,H, h_tmpr)
+  BEGIN_DOC
+  ! Diagonal of the hessian of the energy with respect to orbital
+  ! rotations, for all mo_num orbitals. Only the elements that
+  ! contribute to the diagonal are accumulated.
+  ! Original implementation; the debug program debug_hessian_opt
+  ! compares it with diag_hessian_opt. H is the n by n matrix with
+  ! the diagonal elements at (k,k).
+  END_DOC
 
   include 'constants.h' 
 

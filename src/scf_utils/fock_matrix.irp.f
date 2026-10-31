@@ -98,6 +98,10 @@ END_PROVIDER
 
  BEGIN_PROVIDER [ double precision, Fock_matrix_diag_mo, (mo_num)]
    implicit none
+   BEGIN_DOC
+   ! Diagonal of the Fock matrix on the MO basis: element i
+   ! (1 <= i <= mo_num) is Fock_matrix_mo(i,i).
+   END_DOC
    integer :: i
    do i = 1, mo_num
      Fock_matrix_diag_mo(i) = Fock_matrix_mo(i,i)

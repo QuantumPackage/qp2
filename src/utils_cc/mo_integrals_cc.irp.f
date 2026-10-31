@@ -3,6 +3,12 @@
 subroutine gen_f_space(det,n1,n2,list1,list2,f)
 
   implicit none
+  BEGIN_DOC
+  ! Extract a block of the Fock matrix of determinant det.
+  ! The alpha-spin Fock matrix is computed by
+  ! get_fock_matrix_spin, and f(i1,i2) is the element
+  ! F(list1(i1),list2(i2)) of it.
+  END_DOC
 
   integer, intent(in)           :: n1,n2
   integer, intent(in)           :: list1(n1),list2(n2)
@@ -40,6 +46,14 @@ end
 subroutine gen_v_space(n1,n2,n3,n4,list1,list2,list3,list4,v)
 
   implicit none
+  BEGIN_DOC
+  ! Extract two-electron MO integrals over four lists of MOs:
+  ! v(i1,i2,i3,i4) = <idx1 idx2 | idx3 idx4> in MOs, with
+  ! idx1 = list1(i1), idx2 = list2(i2), idx3 = list3(i3) and
+  ! idx4 = list4(i4). If do_mo_cholesky is set, the block is
+  ! built from the Cholesky vectors (gen_v_space_chol),
+  ! otherwise from get_two_e_integral.
+  END_DOC
 
   integer, intent(in)           :: n1,n2,n3,n4
   integer, intent(in)           :: list1(n1),list2(n2),list3(n3),list4(n4)
@@ -107,6 +121,13 @@ end
 subroutine gen_v_space_chol(n1,n3,list1,list3,v,ldv)
 
   implicit none
+  BEGIN_DOC
+  ! Fill a buffer with Cholesky vectors: v(k,i1,i3) =
+  ! cholesky_mo_transp(k,idx1,idx3), with idx1 = list1(i1),
+  ! idx3 = list3(i3) and k = 1,ldv. The Cholesky index k is
+  ! the first index (leading dimension ldv) so that the buffer
+  ! can be used directly in a dgemm call.
+  END_DOC
 
   integer, intent(in)           :: n1,n3,ldv
   integer, intent(in)           :: list1(n1),list3(n3)
@@ -132,6 +153,13 @@ end
 
 BEGIN_PROVIDER [double precision, cc_space_v, (mo_num,mo_num,mo_num,mo_num)]
   implicit none
+  BEGIN_DOC
+  ! Two-electron MO integrals over the full MO space:
+  ! cc_space_v(i,j,k,l) = <ij|kl> in MOs, i,j,k,l = 1,mo_num.
+  ! If do_mo_cholesky is set, built from the Cholesky vectors
+  ! (cholesky_mo_transp) with dgemm, otherwise from
+  ! get_two_e_integral.
+  END_DOC
   if (do_mo_cholesky) then
     integer                       :: i1,i2,i3,i4
     double precision, allocatable :: buffer(:,:,:)
@@ -188,6 +216,13 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_v_oooo, (cc_nOa, cc_nOa, cc_nOa, cc_nOa)]
 
   implicit none
+  BEGIN_DOC
+  ! Two-electron MO integrals of the OOOO block:
+  ! cc_space_v_oooo(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+  ! i1..i4 positions in cc_list_occ (occupied MOs, core and
+  ! deleted ones excluded). If do_mo_cholesky is set, built from
+  ! cc_space_v_oo_chol with dgemm, otherwise by gen_v_space.
+  END_DOC
 
   if (do_mo_cholesky) then
 
@@ -229,6 +264,13 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_spin_v_oooo, (cc_nOab, cc_nOab, cc_nOab, cc_nOab)]
 
   implicit none
+  BEGIN_DOC
+  ! Spin-orbital two-electron integrals of the OOOO block:
+  ! cc_spin_v_oooo(p,q,r,s) = <pq||rs> in spin orbitals,
+  ! p..s over the occupied spin orbitals, index order alpha
+  ! then beta (1..cc_nOab), as built by gen_v_spin.
+  ! TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+  END_DOC
 
   !TODO
   call gen_v_spin(cc_nO_m,cc_nO_m,cc_nO_m,cc_nO_m, &
@@ -244,6 +286,13 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_v_vooo, (cc_nVa, cc_nOa, cc_nOa, cc_nOa)]
 
   implicit none
+  BEGIN_DOC
+  ! Two-electron MO integrals of the VOOO block:
+  ! cc_space_v_vooo(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+  ! i1 in cc_list_vir, i2..i4 in cc_list_occ. If do_mo_cholesky
+  ! is set, built from cc_space_v_vo_chol and cc_space_v_oo_chol
+  ! with dgemm, otherwise by gen_v_space.
+  END_DOC
 
   if (do_mo_cholesky) then
 
@@ -287,6 +336,13 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_v_ovoo, (cc_nOa, cc_nVa, cc_nOa, cc_nOa)]
 
   implicit none
+  BEGIN_DOC
+  ! Two-electron MO integrals of the OVOO block:
+  ! cc_space_v_ovoo(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+  ! i2 in cc_list_vir, i1,i3,i4 in cc_list_occ. If
+  ! do_mo_cholesky is set, copied from cc_space_v_vooo,
+  ! otherwise computed by gen_v_space.
+  END_DOC
 
 
   if (do_mo_cholesky) then
@@ -319,6 +375,12 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, cc_spin_v_ovoo, (cc_nOab,cc_nVab,cc_nOab,cc_nOab)]
  implicit none
+ BEGIN_DOC
+ ! Spin-orbital two-electron integrals of the OVOO block,
+ ! <pq||rs> in spin orbitals, p,r,s occupied, q virtual,
+ ! index order alpha then beta, as built by gen_v_spin.
+ ! TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+ END_DOC
 
  call gen_v_spin(cc_nO_m,cc_nV_m,cc_nO_m,cc_nO_m, &
                  cc_nO_S,cc_nV_S,cc_nO_S,cc_nO_S, &
@@ -333,6 +395,13 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_v_oovo, (cc_nOa, cc_nOa, cc_nVa, cc_nOa)]
 
   implicit none
+  BEGIN_DOC
+  ! Two-electron MO integrals of the OOVO block:
+  ! cc_space_v_oovo(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+  ! i3 in cc_list_vir, i1,i2,i4 in cc_list_occ. If
+  ! do_mo_cholesky is set, copied from cc_space_v_vooo,
+  ! otherwise computed by gen_v_space.
+  END_DOC
 
   if (do_mo_cholesky) then
 
@@ -364,6 +433,12 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, cc_spin_v_oovo, (cc_nOab,cc_nOab,cc_nVab,cc_nOab)]
  implicit none
+ BEGIN_DOC
+ ! Spin-orbital two-electron integrals of the OOVO block,
+ ! <pq||rs> in spin orbitals, p,r,s occupied, q virtual,
+ ! index order alpha then beta, as built by gen_v_spin.
+ ! TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+ END_DOC
 
  call gen_v_spin(cc_nO_m,cc_nO_m,cc_nV_m,cc_nO_m, &
                  cc_nO_S,cc_nO_S,cc_nV_S,cc_nO_S, &
@@ -378,6 +453,14 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_v_ooov, (cc_nOa, cc_nOa, cc_nOa, cc_nVa)]
 
   implicit none
+  BEGIN_DOC
+  ! OOOV block of two-electron MO integrals: cc_space_v_ooov
+  ! (i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs, i4 in cc_list_vir,
+  ! i1..i3 in cc_list_occ. Computed by gen_v_space, or from
+  ! cc_space_v_ovoo if do_mo_cholesky is set.
+  ! TODO(doc): verify the Cholesky branch (its loops are sized
+  ! from cc_space_v_oovo, which differs when cc_nVa != cc_nOa)
+  END_DOC
 
   if (do_mo_cholesky) then
 
@@ -409,6 +492,12 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, cc_spin_v_ooov, (cc_nOab,cc_nOab,cc_nOab,cc_nVab)]
  implicit none
+ BEGIN_DOC
+ ! Spin-orbital two-electron integrals of the OOOV block,
+ ! <pq||rs> in spin orbitals, p,r,s occupied, q virtual,
+ ! index order alpha then beta, as built by gen_v_spin.
+ ! TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+ END_DOC
 
  call gen_v_spin(cc_nO_m,cc_nO_m,cc_nO_m,cc_nV_m, &
                  cc_nO_S,cc_nO_S,cc_nO_S,cc_nV_S, &
@@ -423,6 +512,13 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_v_vvoo, (cc_nVa, cc_nVa, cc_nOa, cc_nOa)]
 
   implicit none
+  BEGIN_DOC
+  ! Two-electron MO integrals of the VVOO block:
+  ! cc_space_v_vvoo(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+  ! i1,i2 in cc_list_vir, i3,i4 in cc_list_occ. If
+  ! do_mo_cholesky is set, built from cc_space_v_vo_chol
+  ! with dgemm, otherwise by gen_v_space.
+  END_DOC
 
   if (do_mo_cholesky) then
 
@@ -464,6 +560,12 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, cc_spin_v_vvoo, (cc_nVab,cc_nVab,cc_nOab,cc_nOab)]
  implicit none
+ BEGIN_DOC
+ ! Spin-orbital two-electron integrals of the VVOO block,
+ ! <pq||rs> in spin orbitals, p,q virtual, r,s occupied,
+ ! index order alpha then beta, as built by gen_v_spin.
+ ! TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+ END_DOC
 
  call gen_v_spin(cc_nV_m,cc_nV_m,cc_nO_m,cc_nO_m, &
                  cc_nV_S,cc_nV_S,cc_nO_S,cc_nO_S, &
@@ -478,6 +580,17 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_v_vovo, (cc_nVa, cc_nOa, cc_nVa, cc_nOa)]
 
   implicit none
+  BEGIN_DOC
+  ! Two-electron MO integrals of the VOVO block:
+  ! cc_space_v_vovo(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+  ! i1,i3 in cc_list_vir, i2,i4 in cc_list_occ. If
+  ! do_mo_cholesky is set, built from cc_space_v_vv_chol
+  ! and cc_space_v_oo_chol with dgemm, otherwise by
+  ! gen_v_space.
+  ! TODO(doc): verify the Cholesky branch agrees with the
+  ! direct one (the dgemm uses Cholesky vectors over the
+  ! (list1,list3) and (list2,list4) orbital pairs)
+  END_DOC
 
   if (do_mo_cholesky) then
 
@@ -521,6 +634,16 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_v_voov, (cc_nVa, cc_nOa, cc_nOa, cc_nVa)]
 
   implicit none
+  BEGIN_DOC
+  ! Two-electron MO integrals of the VOOV block:
+  ! cc_space_v_voov(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+  ! i1,i4 in cc_list_vir, i2,i3 in cc_list_occ. If
+  ! do_mo_cholesky is set, copied from
+  ! cc_space_v_vvoo(i1,i4,i3,i2), otherwise computed by
+  ! gen_v_space.
+  ! TODO(doc): verify that cc_space_v_vvoo(i1,i4,i3,i2)
+  ! equals <i1 i2 | i3 i4> in the Cholesky branch
+  END_DOC
 
   if (do_mo_cholesky) then
 
@@ -555,6 +678,16 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_v_ovvo, (cc_nOa, cc_nVa, cc_nVa, cc_nOa)]
 
   implicit none
+  BEGIN_DOC
+  ! Two-electron MO integrals of the OVVO block:
+  ! cc_space_v_ovvo(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+  ! i2,i3 in cc_list_vir, i1,i4 in cc_list_occ. If
+  ! do_mo_cholesky is set, copied from
+  ! cc_space_v_vvoo(i3,i2,i1,i4), otherwise computed by
+  ! gen_v_space.
+  ! TODO(doc): verify that cc_space_v_vvoo(i3,i2,i1,i4)
+  ! equals <i1 i2 | i3 i4> in the Cholesky branch
+  END_DOC
 
   if (do_mo_cholesky) then
 
@@ -586,6 +719,12 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, cc_spin_v_ovvo, (cc_nOab,cc_nVab,cc_nVab,cc_nOab) ]
  implicit none
+ BEGIN_DOC
+ ! Spin-orbital two-electron integrals of the OVVO block,
+ ! <pq||rs> in spin orbitals, p,s occupied, q,r virtual,
+ ! index order alpha then beta, as built by gen_v_spin.
+ ! TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+ END_DOC
 
  call gen_v_spin(cc_nO_m,cc_nV_m,cc_nV_m,cc_nO_m, &
                  cc_nO_S,cc_nV_S,cc_nV_S,cc_nO_S, &
@@ -599,6 +738,14 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_v_ovov, (cc_nOa, cc_nVa, cc_nOa, cc_nVa)]
 
   implicit none
+  BEGIN_DOC
+  ! Two-electron MO integrals of the OVOV block:
+  ! cc_space_v_ovov(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+  ! i1,i3 in cc_list_occ, i2,i4 in cc_list_vir. If
+  ! do_mo_cholesky is set, copied from
+  ! cc_space_v_vovo(i2,i1,i4,i3), otherwise computed by
+  ! gen_v_space.
+  END_DOC
 
   if (do_mo_cholesky) then
 
@@ -630,6 +777,12 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, cc_spin_v_ovov, (cc_nOab,cc_nVab,cc_nOab,cc_nVab) ]
  implicit none
+ BEGIN_DOC
+ ! Spin-orbital two-electron integrals of the OVOV block,
+ ! <pq||rs> in spin orbitals, p,r occupied, q,s virtual,
+ ! index order alpha then beta, as built by gen_v_spin.
+ ! TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+ END_DOC
 
  call gen_v_spin(cc_nO_m,cc_nV_m,cc_nO_m,cc_nV_m, &
                  cc_nO_S,cc_nV_S,cc_nO_S,cc_nV_S, &
@@ -643,6 +796,14 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_v_oovv, (cc_nOa, cc_nOa, cc_nVa, cc_nVa)]
 
   implicit none
+  BEGIN_DOC
+  ! Two-electron MO integrals of the OOVV block:
+  ! cc_space_v_oovv(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+  ! i1,i2 in cc_list_occ, i3,i4 in cc_list_vir. If
+  ! do_mo_cholesky is set, copied from
+  ! cc_space_v_vvoo(i3,i4,i1,i2), otherwise computed by
+  ! gen_v_space.
+  END_DOC
 
   if (do_mo_cholesky) then
 
@@ -674,6 +835,12 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, cc_spin_v_oovv, (cc_nOab,cc_nOab,cc_nVab,cc_nVab) ]
  implicit none
+ BEGIN_DOC
+ ! Spin-orbital two-electron integrals of the OOVV block,
+ ! <pq||rs> in spin orbitals, p,r occupied, q,s virtual,
+ ! index order alpha then beta, as built by gen_v_spin.
+ ! TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+ END_DOC
 
  call gen_v_spin(cc_nO_m,cc_nO_m,cc_nV_m,cc_nV_m, &
                  cc_nO_S,cc_nO_S,cc_nV_S,cc_nV_S, &
@@ -687,6 +854,12 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_v_vvvo, (cc_nVa, cc_nVa, cc_nVa, cc_nOa)]
 
   implicit none
+  BEGIN_DOC
+  ! Two-electron MO integrals of the VVVO block:
+  ! cc_space_v_vvvo(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+  ! i1,i2,i3 in cc_list_vir, i4 in cc_list_occ. Computed
+  ! by gen_v_space.
+  END_DOC
 
   call gen_v_space(cc_nVa,cc_nVa,cc_nVa,cc_nOa, cc_list_vir,cc_list_vir,cc_list_vir,cc_list_occ, cc_space_v_vvvo)
 
@@ -697,6 +870,12 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_v_vvov, (cc_nVa, cc_nVa, cc_nOa, cc_nVa)]
 
   implicit none
+  BEGIN_DOC
+  ! Two-electron MO integrals of the VVOV block:
+  ! cc_space_v_vvov(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+  ! i1,i2,i4 in cc_list_vir, i3 in cc_list_occ. Computed
+  ! by gen_v_space.
+  END_DOC
 
   call gen_v_space(cc_nVa,cc_nVa,cc_nOa,cc_nVa, cc_list_vir,cc_list_vir,cc_list_occ,cc_list_vir, cc_space_v_vvov)
 
@@ -707,6 +886,12 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_v_vovv, (cc_nVa, cc_nOa, cc_nVa, cc_nVa)]
 
   implicit none
+  BEGIN_DOC
+  ! Two-electron MO integrals of the VOVV block:
+  ! cc_space_v_vovv(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+  ! i1,i3,i4 in cc_list_vir, i2 in cc_list_occ. Computed
+  ! by gen_v_space.
+  END_DOC
 
   call gen_v_space(cc_nVa,cc_nOa,cc_nVa,cc_nVa, cc_list_vir,cc_list_occ,cc_list_vir,cc_list_vir, cc_space_v_vovv)
 
@@ -718,6 +903,12 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_v_ovvv, (cc_nOa, cc_nVa, cc_nVa, cc_nVa)]
 
   implicit none
+  BEGIN_DOC
+  ! Two-electron MO integrals of the OVVV block:
+  ! cc_space_v_ovvv(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+  ! i2,i3,i4 in cc_list_vir, i1 in cc_list_occ. Computed
+  ! by gen_v_space.
+  END_DOC
 
   call gen_v_space(cc_nOa,cc_nVa,cc_nVa,cc_nVa, cc_list_occ,cc_list_vir,cc_list_vir,cc_list_vir, cc_space_v_ovvv)
 
@@ -728,6 +919,11 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_v_vvvv, (cc_nVa, cc_nVa, cc_nVa, cc_nVa)]
 
   implicit none
+  BEGIN_DOC
+  ! Two-electron MO integrals of the VVVV block:
+  ! cc_space_v_vvvv(i1,i2,i3,i4) = <i1 i2 | i3 i4> in MOs,
+  ! i1..i4 in cc_list_vir. Computed by gen_v_space.
+  END_DOC
 
   call gen_v_space(cc_nVa,cc_nVa,cc_nVa,cc_nVa, cc_list_vir,cc_list_vir,cc_list_vir,cc_list_vir, cc_space_v_vvvv)
 
@@ -736,6 +932,12 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_v_vv_chol, (cholesky_mo_num, cc_nVa, cc_nVa)]
 
   implicit none
+  BEGIN_DOC
+  ! Cholesky vectors of the VV block:
+  ! cc_space_v_vv_chol(k,i1,i2) = cholesky_mo_transp(k,idx1,idx2)
+  ! with idx1 = cc_list_vir(i1), idx2 = cc_list_vir(i2),
+  ! k = 1,cholesky_mo_num, filled by gen_v_space_chol.
+  END_DOC
 
   call gen_v_space_chol(cc_nVa, cc_nVa, cc_list_vir, cc_list_vir, cc_space_v_vv_chol, cholesky_mo_num)
 
@@ -744,6 +946,12 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_v_vo_chol, (cholesky_mo_num, cc_nVa, cc_nOa)]
 
   implicit none
+  BEGIN_DOC
+  ! Cholesky vectors of the VO block:
+  ! cc_space_v_vo_chol(k,i1,i2) = cholesky_mo_transp(k,idx1,idx2)
+  ! with idx1 = cc_list_vir(i1), idx2 = cc_list_occ(i2),
+  ! k = 1,cholesky_mo_num, filled by gen_v_space_chol.
+  END_DOC
 
   call gen_v_space_chol(cc_nVa, cc_nOa, cc_list_vir, cc_list_occ, cc_space_v_vo_chol, cholesky_mo_num)
 
@@ -752,6 +960,12 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_v_ov_chol, (cholesky_mo_num, cc_nOa, cc_nVa)]
 
   implicit none
+  BEGIN_DOC
+  ! Cholesky vectors of the OV block:
+  ! cc_space_v_ov_chol(k,i1,i2) = cholesky_mo_transp(k,idx1,idx2)
+  ! with idx1 = cc_list_occ(i1), idx2 = cc_list_vir(i2),
+  ! k = 1,cholesky_mo_num, filled by gen_v_space_chol.
+  END_DOC
 
   call gen_v_space_chol(cc_nOa, cc_nVa, cc_list_occ, cc_list_vir, cc_space_v_ov_chol, cholesky_mo_num)
 
@@ -760,6 +974,12 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_v_oo_chol, (cholesky_mo_num, cc_nOa, cc_nOa)]
 
   implicit none
+  BEGIN_DOC
+  ! Cholesky vectors of the OO block:
+  ! cc_space_v_oo_chol(k,i1,i2) = cholesky_mo_transp(k,idx1,idx2)
+  ! with idx1 = cc_list_occ(i1), idx2 = cc_list_occ(i2),
+  ! k = 1,cholesky_mo_num, filled by gen_v_space_chol.
+  END_DOC
 
   call gen_v_space_chol(cc_nOa, cc_nOa, cc_list_occ, cc_list_occ, cc_space_v_oo_chol, cholesky_mo_num)
 
@@ -768,6 +988,13 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_spin_v_oo_chol, (cholesky_mo_num, cc_nOab, cc_nOab)]
 
   implicit none
+  BEGIN_DOC
+  ! Cholesky vectors of the OOOO block in spin orbitals:
+  ! cc_spin_v_oo_chol(k,i1,i2) = cholesky_mo_transp(k,idx1,
+  ! idx2) with idx1,idx2 positions in list_occ (occupied
+  ! spin orbitals, alpha then beta), k = 1,cholesky_mo_num,
+  ! filled by gen_v_space_chol.
+  END_DOC
   integer :: list_occ(cc_nOab)
 
   list_occ(1:cc_nOa) = cc_list_occ_spin(1:cc_nOa,1)
@@ -975,6 +1202,12 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_w_oovv, (cc_nOa, cc_nOa, cc_nVa, cc_nVa)]
 
   implicit none
+  BEGIN_DOC
+  ! Antisymmetrized OOVV block: cc_space_w_oovv(i,j,a,b) =
+  ! 2d0*<ij|ab> - <ji|ab>, antisymmetric in i,j. i,j are
+  ! positions in cc_list_occ, a,b in cc_list_vir; <pq|rs>
+  ! are the two-electron MO integrals from gen_v_space.
+  END_DOC
 
   double precision, allocatable :: tmp_v(:,:,:,:)
   integer :: i,j,a,b
@@ -1009,6 +1242,12 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_w_vvoo, (cc_nVa, cc_nVa, cc_nOa, cc_nOa)]
 
   implicit none
+  BEGIN_DOC
+  ! Antisymmetrized VVOO block: cc_space_w_vvoo(a,b,i,j) =
+  ! 2d0*<ab|ij> - <ba|ij>, antisymmetric in a,b. a,b are
+  ! positions in cc_list_vir, i,j in cc_list_occ; <pq|rs>
+  ! are the two-electron MO integrals from gen_v_space.
+  END_DOC
 
   double precision, allocatable :: tmp_v(:,:,:,:)
   integer :: i,j,a,b
@@ -1043,6 +1282,12 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_f_oo, (cc_nOa, cc_nOa)]
 
   implicit none
+  BEGIN_DOC
+  ! OO block of the alpha-spin Fock matrix of the reference
+  ! determinant cc_ref: cc_space_f_oo(i1,i2) is the element
+  ! F(idx1,idx2) with idx1 = cc_list_occ(i1) and idx2 =
+  ! cc_list_occ(i2), extracted by gen_f_space.
+  END_DOC
 
   call gen_f_space(psi_det(1,1,cc_ref), cc_nOa,cc_nOa, cc_list_occ,cc_list_occ, cc_space_f_oo)
 
@@ -1053,6 +1298,12 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_f_ov, (cc_nOa, cc_nVa)]
 
   implicit none
+  BEGIN_DOC
+  ! OV block of the alpha-spin Fock matrix of the reference
+  ! determinant cc_ref: cc_space_f_ov(i1,i2) is the element
+  ! F(idx1,idx2) with idx1 = cc_list_occ(i1) and idx2 =
+  ! cc_list_vir(i2), extracted by gen_f_space.
+  END_DOC
 
   call gen_f_space(psi_det(1,1,cc_ref), cc_nOa,cc_nVa, cc_list_occ,cc_list_vir, cc_space_f_ov)
 
@@ -1063,6 +1314,12 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_f_vo, (cc_nVa, cc_nOa)]
 
   implicit none
+  BEGIN_DOC
+  ! VO block of the alpha-spin Fock matrix of the reference
+  ! determinant cc_ref: cc_space_f_vo(i1,i2) is the element
+  ! F(idx1,idx2) with idx1 = cc_list_vir(i1) and idx2 =
+  ! cc_list_occ(i2), extracted by gen_f_space.
+  END_DOC
 
   call gen_f_space(psi_det(1,1,cc_ref), cc_nVa,cc_nOa, cc_list_vir,cc_list_occ, cc_space_f_vo)
 
@@ -1073,6 +1330,12 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_f_vv, (cc_nVa, cc_nVa)]
 
   implicit none
+  BEGIN_DOC
+  ! VV block of the alpha-spin Fock matrix of the reference
+  ! determinant cc_ref: cc_space_f_vv(i1,i2) is the element
+  ! F(idx1,idx2) with idx1 = cc_list_vir(i1) and idx2 =
+  ! cc_list_vir(i2), extracted by gen_f_space.
+  END_DOC
 
   call gen_f_space(psi_det(1,1,cc_ref), cc_nVa,cc_nVa, cc_list_vir,cc_list_vir, cc_space_f_vv)
 
@@ -1083,6 +1346,12 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_f_o, (cc_nOa)]
 
   implicit none
+  BEGIN_DOC
+  ! Diagonal of the OO Fock block of the reference
+  ! determinant cc_ref: cc_space_f_o(i) = cc_space_f_oo(i,i)
+  ! for i = 1,cc_nOa, i.e. F(i,i) for the occupied MOs
+  ! (positions in cc_list_occ).
+  END_DOC
 
   integer :: i
 
@@ -1097,6 +1366,12 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cc_space_f_v, (cc_nVa)]
 
   implicit none
+  BEGIN_DOC
+  ! Diagonal of the VV Fock block of the reference
+  ! determinant cc_ref: cc_space_f_v(i) = cc_space_f_vv(i,i)
+  ! for i = 1,cc_nVa, i.e. F(i,i) for the virtual MOs
+  ! (positions in cc_list_vir).
+  END_DOC
 
   integer :: i
 
@@ -1109,16 +1384,34 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, cc_spin_f_oo, (cc_nOab, cc_nOab)]
  implicit none
+ BEGIN_DOC
+ ! Spin-orbital OO block of the Fock matrix of the reference
+ ! determinant cc_ref: p,q over the occupied spin orbitals,
+ ! index order alpha then beta, cross-spin elements zero,
+ ! as built by gen_f_spin.
+ END_DOC
  call gen_f_spin(psi_det(1,1,cc_ref), cc_nO_m, cc_nO_m, cc_nO_S, cc_nO_S, cc_list_occ_spin, cc_list_occ_spin, cc_nOab, cc_nOab, cc_spin_f_oo)
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, cc_spin_f_ov, (cc_nOab, cc_nVab)]
  implicit none
+ BEGIN_DOC
+ ! Spin-orbital OV block of the Fock matrix of the reference
+ ! determinant cc_ref: p over the occupied and q over the
+ ! virtual spin orbitals, index order alpha then beta,
+ ! cross-spin elements zero, as built by gen_f_spin.
+ END_DOC
  call gen_f_spin(psi_det(1,1,cc_ref), cc_nO_m, cc_nV_m, cc_nO_S, cc_nV_S, cc_list_occ_spin, cc_list_vir_spin, cc_nOab, cc_nVab, cc_spin_f_ov)
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, cc_spin_f_vv, (cc_nVab, cc_nVab)]
  implicit none
+ BEGIN_DOC
+ ! Spin-orbital VV block of the Fock matrix of the reference
+ ! determinant cc_ref: p,q over the virtual spin orbitals,
+ ! index order alpha then beta, cross-spin elements zero,
+ ! as built by gen_f_spin.
+ END_DOC
  call gen_f_spin(psi_det(1,1,cc_ref), cc_nV_m, cc_nV_m, cc_nV_S, cc_nV_S, cc_list_vir_spin, cc_list_vir_spin, cc_nVab, cc_nVab, cc_spin_f_vv)
 END_PROVIDER
 

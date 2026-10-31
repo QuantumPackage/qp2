@@ -110,11 +110,19 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, one_e_dm_mo_for_dft, (mo_num,mo_num, N_states)]
  implicit none
+ BEGIN_DOC
+! total density matrix in the MO basis used for DFT calculations, the sum
+! of the alpha and beta spin components
+ END_DOC
  one_e_dm_mo_for_dft = one_e_dm_mo_beta_for_dft + one_e_dm_mo_alpha_for_dft
 END_PROVIDER
 
 BEGIN_PROVIDER [double precision, one_e_dm_average_mo_for_dft, (mo_num,mo_num)]
  implicit none
+ BEGIN_DOC
+! density matrix in the MO basis used for DFT calculations, averaged over
+! the states and summed over the alpha and beta spin components
+ END_DOC
  integer :: i
  one_e_dm_average_mo_for_dft = one_e_dm_average_alpha_mo_for_dft + one_e_dm_average_beta_mo_for_dft
 END_PROVIDER
@@ -122,6 +130,10 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, one_e_dm_average_alpha_mo_for_dft, (mo_num,mo_num)]
  implicit none
+ BEGIN_DOC
+! alpha density matrix in the MO basis used for DFT calculations, averaged
+! over the states with weights state_average_weight
+ END_DOC
  integer :: i
  one_e_dm_average_alpha_mo_for_dft = 0.d0
  do i = 1, N_states
@@ -132,6 +144,10 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, one_e_dm_average_beta_mo_for_dft, (mo_num,mo_num)]
  implicit none
+ BEGIN_DOC
+! beta density matrix in the MO basis used for DFT calculations, averaged
+! over the states with weights state_average_weight
+ END_DOC
  integer :: i
  one_e_dm_average_beta_mo_for_dft = 0.d0
  do i = 1, N_states

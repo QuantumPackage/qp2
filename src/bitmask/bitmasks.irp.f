@@ -35,6 +35,12 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ integer(bit_kind), full_ijkl_bitmask_4, (N_int,4) ]
   implicit none
+  BEGIN_DOC
+  ! Each of the four slices is a copy of full_ijkl_bitmask, so the
+  ! bits of all MOs are set. One slice is used per integral index
+  ! (i, j, k, l) when adding the MO two-electron integrals to the
+  ! MO map (add_integrals_to_map, add_integrals_to_map_erf).
+  END_DOC
   integer                        :: i
   do i=1,N_int
     full_ijkl_bitmask_4(i,1) = full_ijkl_bitmask(i)
@@ -46,6 +52,13 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ integer(bit_kind), core_inact_act_bitmask_4, (N_int,4) ]
   implicit none
+  BEGIN_DOC
+  ! Each of the four slices is a copy of
+  ! reunion_of_core_inact_act_bitmask, so the bits of the core,
+  ! inactive and active MOs are set.
+  ! TODO(doc): what is the intended use of this bitmask? No in-tree
+  ! caller was found.
+  END_DOC
   integer                        :: i
   do i=1,N_int
     core_inact_act_bitmask_4(i,1) = reunion_of_core_inact_act_bitmask(i,1)
@@ -57,6 +70,12 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ integer(bit_kind), virt_bitmask_4, (N_int,4) ]
   implicit none
+  BEGIN_DOC
+  ! Each of the four slices is a copy of virt_bitmask, so the bits of
+  ! the virtual MOs are set.
+  ! TODO(doc): what is the intended use of this bitmask? No in-tree
+  ! caller was found.
+  END_DOC
   integer                        :: i
   do i=1,N_int
     virt_bitmask_4(i,1) = virt_bitmask(i,1)
@@ -232,6 +251,13 @@ END_PROVIDER
 
 BEGIN_PROVIDER [integer(bit_kind), closed_shell_ref_bitmask, (N_int,2)]
   implicit none
+  BEGIN_DOC
+  ! For each spin, the bitwise OR of ref_bitmask and act_bitmask: the
+  ! occupied MOs of the reference plus all active MOs are marked
+  ! occupied.
+  ! TODO(doc): what is the intended use of this bitmask? No in-tree
+  ! caller was found.
+  END_DOC
   integer                        :: i,j
   do i = 1, N_int
     closed_shell_ref_bitmask(i,1) = ior(ref_bitmask(i,1),act_bitmask(i,1))

@@ -1,8 +1,20 @@
 program mp2
+ BEGIN_DOC
+ ! Computes the MP2 correlation energy on top of the reference
+ ! determinant stored in the EZFIO database, and prints the total
+ ! energy E_HF + E_MP2.
+ END_DOC
   call run
 end
 
 subroutine run
+  BEGIN_DOC
+  ! Computes the MP2 correlation energy on pt2(1) via compute_mp2
+  ! and prints N_det, N_states, the MP2 energy, the reference
+  ! energy HF_energy, and the total energy HF_energy + MP2.
+  ! pt2 is allocated for N_states entries but only pt2(1) is
+  ! filled.
+  END_DOC
   implicit none
   double precision, allocatable  :: pt2(:), norm_pert(:)
   double precision               :: H_pert_diag, E_old
@@ -25,6 +37,14 @@ end
 
 
 subroutine compute_mp2(emp2)
+  BEGIN_DOC
+  ! Computes the MP2 correlation energy, returned in emp2 as the
+  ! sum of the "aaaa", "bbbb", "abab" terms plus the "non-Brillouin
+  ! singles" term, each of which is also printed. The orbital
+  ! energies are the Fock matrix diagonals and the two-electron
+  ! integrals are taken from mo_two_e_integrals_in_map. Orbitals
+  ! listed in list_core_reverse or list_del_reverse are skipped.
+  END_DOC
   implicit none
   double precision, intent(out) :: emp2
   integer :: i,j,a,b, k, sze
@@ -100,6 +120,8 @@ subroutine compute_mp2(emp2)
           endif
           denom = 1.d0 / (ei + ej - ea - eb)
 
+          ! Antisymmetrized two-electron integral (difference of the
+          ! two index orderings)
           ijab_anti = ijab(i,a) - ijba(i,a)
 
           bbbb = bbbb + ijab_anti*ijab_anti * denom

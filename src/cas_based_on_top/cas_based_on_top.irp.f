@@ -14,6 +14,14 @@ program cas_based_on_top
 end
 
 subroutine routine
+  BEGIN_DOC
+! Example of the cas_based_on_top program. The PROVIDE
+! statements compute (and print) total_cas_on_top_density and
+! average_on_top. It then prints accu, the sum over active
+! orbital pairs (i,j) of act_2_rdm_ab_mo(i,j,i,j,1).
+! TODO(doc): act_2_rdm_ab_mo is indexed 1..n_act_orb, but here
+! i,j are global MO numbers from list_act. Is that intended?
+  END_DOC
  implicit none
  provide total_cas_on_top_density
  provide average_on_top

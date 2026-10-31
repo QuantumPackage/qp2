@@ -430,6 +430,13 @@ END_PROVIDER
 BEGIN_PROVIDER [ logical, use_pw ]
 
   implicit none
+  BEGIN_DOC
+  ! Flag set when the basis contains a plane wave part: the input
+  ! defines ao_expo_pw and at least one plane wave vector is
+  ! nonzero. The test checks component 4 of
+  ! ao_expo_pw_ord_transp, the squared norm of the plane wave
+  ! vector, against 1d-15.
+  END_DOC
 
   logical :: exist
 

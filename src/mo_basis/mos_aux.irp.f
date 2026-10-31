@@ -4,6 +4,14 @@
 BEGIN_PROVIDER [double precision, mo_coef_aux, (ao_num,mo_num)]
 
   implicit none
+  BEGIN_DOC
+  ! Auxiliary MO coefficients, same (ao_num,mo_num) layout as
+  ! mo_coef: coefficient of the i-th AO on the j-th aux MO.
+  ! Read from the EZFIO database if the entry exists (master
+  ! reads, then MPI broadcast), otherwise set to the $S^{-1/2}$
+  ! canonical orthonormalized AOs (ao_ortho_canonical_coef).
+  ! TODO(doc): purpose of the aux basis; who writes it to EZFIO?
+  END_DOC
   integer                        :: i, j
   logical                        :: exists
   double precision, allocatable  :: buffer(:,:)

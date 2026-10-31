@@ -3,6 +3,14 @@ subroutine run_ccsd_space_orb
 
   implicit none
 
+  BEGIN_DOC
+  ! Closed-shell CCSD in spatial orbitals (aborts otherwise), with
+  ! the amplitudes and the two-electron integrals on the GPU.
+  ! Iterates T1 and T2 with a DIIS or a simple update until the
+  ! largest residual element is below cc_thresh_conv, saves the
+  ! energies through save_energy, and evaluates the (T) correction
+  ! with ccsd_par_t_space_stoch when cc_par_t is set.
+  END_DOC
   integer :: i,j,k,l,a,b,c,d,tmp_a,tmp_b,tmp_c,tmp_d
   integer :: u,v,gam,beta,tmp_gam,tmp_beta
   integer :: nb_iter
@@ -343,6 +351,14 @@ subroutine ccsd_energy_space_x(nO,nV,d_cc_space_v_oovv,d_cc_space_f_vo,tau_x,t1,
   use gpu
   implicit none
 
+  BEGIN_DOC
+  ! CCSD energy: energy = tau_x : v_oovv + 2 * f_vo : t1, with
+  ! f_vo and v_oovv the vo Fock block and oovv two-electron
+  ! integrals, nO, nV the occupied and virtual spatial orbital
+  ! counts. It is added to the reference determinant energy.
+  ! TODO(doc): is tau_x used instead of tau because v_oovv is
+  ! symmetric in (a, b)?
+  END_DOC
   integer, intent(in)            :: nO, nV
   type(gpu_double4), intent(in)  :: tau_x, d_cc_space_v_oovv
   type(gpu_double2), intent(in)  :: t1, d_cc_space_f_vo
@@ -377,6 +393,10 @@ subroutine update_tau_space(nO,nV,h_t1,t1,t2,tau)
   use gpu
   implicit none
 
+  BEGIN_DOC
+  ! Computes tau(i,j,a,b) = t2(i,j,a,b) + h_t1(j,b) * t1(i,a),
+  ! with i, j occupied and a, b virtual spatial orbitals.
+  END_DOC
   ! in
   integer, intent(in)           :: nO, nV
   double precision, intent(in)  :: h_t1(nO,nV)
@@ -423,6 +443,9 @@ subroutine update_tau_x_space(nO,nV,tau,tau_x)
   use gpu
   implicit none
 
+  BEGIN_DOC
+  ! Computes tau_x(i,j,a,b) = 2 * tau(i,j,a,b) - tau(i,j,b,a).
+  END_DOC
   ! in
   integer, intent(in)         :: nO, nV
   type(gpu_double4), intent(in)  :: tau
@@ -472,6 +495,14 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
 
   implicit none
 
+  BEGIN_DOC
+  ! Computes the residual r1 of the T1 equation, from the Fock
+  ! blocks cc_space_f_ov, cc_space_f_vo, the two-electron
+  ! integrals (global cc_space_v_*), t1, t2, tau, and the blocks
+  ! H_oo, H_vv, H_vo.
+  ! r1 is sign-flipped at the end for consistency with the spin-
+  ! orbital code; max_r1 is the largest |r1| element.
+  END_DOC
   ! in
   integer, intent(in)           :: nO, nV
   double precision, intent(in)  :: t1(nO,nV), t2(nO,nO,nV,nV), tau(nO,nO,nV,nV)
@@ -645,6 +676,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   integer :: iblock, block_size, nVmax
   double precision, allocatable :: W_vvov(:,:,:,:), T_vvoo(:,:,:,:)
   block_size = 8
+  ! W_vvov holds only block_size beta values at a time
   allocate(W_vvov(nV,nV,nO,block_size), T_vvoo(nV,nV,nO,nO))
 
   !$omp parallel &
@@ -760,6 +792,11 @@ subroutine compute_H_oo(nO,nV,t1,t2,tau,H_oo)
 
   implicit none
 
+  BEGIN_DOC
+  ! Computes the block H_oo used in the T1 residual:
+  ! H_oo(u,i) = f_oo(u,i) + sum over (j, a, b) of
+  ! w_oovv(i,j,a,b) * tau(u,j,a,b).
+  END_DOC
   integer, intent(in)           :: nO,nV
   double precision, intent(in)  :: t1(nO, nV)
   double precision, intent(in)  :: t2(nO, nO, nV, nV)
@@ -816,6 +853,11 @@ subroutine compute_H_vv(nO,nV,t1,t2,tau,H_vv)
 
   implicit none
 
+  BEGIN_DOC
+  ! Computes the block H_vv used in the T1 residual:
+  ! H_vv(a,beta) = f_vv(a,beta) - sum over (i, j, b) of
+  ! w_vvoo(a,b,i,j) * tau(i,j,beta,b).
+  END_DOC
   integer, intent(in)           :: nO,nV
   double precision, intent(in)  :: t1(nO, nV)
   double precision, intent(in)  :: t2(nO, nO, nV, nV)
@@ -890,6 +932,11 @@ subroutine compute_H_vo(nO,nV,t1,t2,H_vo)
 
   implicit none
 
+  BEGIN_DOC
+  ! Computes the block H_vo used in the T1 residual:
+  ! H_vo(a,i) = f_vo(a,i) + sum over (j, b) of
+  ! w_vvoo(a,b,i,j) * t1(j,b).
+  END_DOC
   integer, intent(in)           :: nO,nV
   double precision, intent(in)  :: t1(nO, nV)
   double precision, intent(in)  :: t2(nO, nO, nV, nV)
@@ -960,6 +1007,15 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
 
   implicit none
 
+  BEGIN_DOC
+  ! Computes the residual r2 of the T2 equation, from t1, t2, tau,
+  ! H_oo, H_vv, H_vo, and the intermediates g_occ, g_vir, A1, B1
+  ! (via compute_B1_gam), J1, K1.
+  ! r2 is sign-flipped at the end for consistency with the spin-
+  ! orbital code; max_r2 is the largest element of r2.
+  ! TODO(doc): confirm that max_r2 is the max of r2 without dabs,
+  ! unlike max_r1.
+  END_DOC
   ! in
   integer, intent(in)           :: nO, nV
   double precision, intent(in)  :: t1(nO,nV), t2(nO,nO,nV,nV), tau(nO,nO,nV,nV)
@@ -1621,6 +1677,13 @@ subroutine compute_A1(nO,nV,t1,t2,tau,A1)
 
   implicit none
 
+  BEGIN_DOC
+  ! Computes A1(u,v,i,j), an intermediate of the T2 residual that
+  ! is contracted with tau over the occupied indices (i, j):
+  ! A1(u,v,i,j) = v_oooo(u,v,i,j) + sum over a of
+  ! v_ovoo(u,a,i,j) * t1(v,a) + sum over a of v_vooo(a,v,i,j)
+  ! * t1(u,a) + sum over (a, b) of v_vvoo(a,b,i,j) * tau(u,v,a,b).
+  END_DOC
   integer, intent(in)           :: nO,nV
   double precision, intent(in)  :: t1(nO, nV)
   double precision, intent(in)  :: t2(nO, nO, nV, nV)
@@ -1731,6 +1794,13 @@ subroutine compute_B1_gam(nO,nV,t1,t2,B1,gam)
 
   implicit none
 
+  BEGIN_DOC
+  ! Computes the slice at a fixed virtual index gam of the B1
+  ! intermediate of the T2 residual:
+  ! B1(a,b,beta) = v_vvvv(a,b,beta,gam) - sum over i of
+  ! v_vvvo(a,b,beta,i) * t1(i,gam)
+  ! - sum over i of v_vvov(a,b,i,gam) * t1(i,beta).
+  END_DOC
   integer, intent(in)           :: nO,nV,gam
   double precision, intent(in)  :: t1(nO, nV)
   double precision, intent(in)  :: t2(nO, nO, nV, nV)
@@ -1823,6 +1893,14 @@ subroutine compute_B1(nO,nV,t1,t2,B1)
 
   implicit none
 
+  BEGIN_DOC
+  ! Computes the full B1 intermediate of the T2 residual:
+  ! B1(a,b,beta,gam) = v_vvvv(a,b,beta,gam) - sum over i of
+  ! v_vvvo(a,b,beta,i) * t1(i,gam)
+  ! - sum over i of v_vvov(a,b,i,gam) * t1(i,beta).
+  ! TODO(doc): its only call in this file is commented out; is
+  ! this a legacy alternative to compute_B1_gam?
+  END_DOC
   integer, intent(in)           :: nO,nV
   double precision, intent(in)  :: t1(nO, nV)
   double precision, intent(in)  :: t2(nO, nO, nV, nV)
@@ -1921,6 +1999,13 @@ subroutine compute_g_occ(nO,nV,t1,t2,H_oo,g_occ)
 
   implicit none
 
+  BEGIN_DOC
+  ! Computes g_occ(u,i), an occupied-space intermediate of the T2
+  ! residual:
+  ! g_occ(u,i) = H_oo(u,i) + sum over a of f_vo(a,i) * t1(u,a)
+  ! + sum over (j, a) of (2 * v_ovoo(u,a,i,j) - v_ovoo(u,a,j,i))
+  ! * t1(j,a).
+  END_DOC
   integer, intent(in)           :: nO,nV
   double precision, intent(in)  :: t1(nO, nV), H_oo(nO, nO)
   double precision, intent(in)  :: t2(nO, nO, nV, nV)
@@ -1983,6 +2068,13 @@ subroutine compute_g_vir(nO,nV,t1,t2,H_vv,g_vir)
 
   implicit none
 
+  BEGIN_DOC
+  ! Computes g_vir(a,beta), a virtual-space intermediate of the
+  ! T2 residual:
+  ! g_vir(a,beta) = H_vv(a,beta) - sum over i of f_vo(a,i)
+  ! * t1(i,beta) + sum over (i, b) of
+  ! (2 * v_vvvo(a,b,beta,i) - v_vvvo(b,a,beta,i)) * t1(i,b).
+  END_DOC
   integer, intent(in)           :: nO,nV
   double precision, intent(in)  :: t1(nO, nV), H_vv(nV, nV)
   double precision, intent(in)  :: t2(nO, nO, nV, nV)
@@ -2045,6 +2137,12 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
 
   implicit none
 
+  BEGIN_DOC
+  ! Computes J1(u,a,beta,i), an intermediate of the T2 residual,
+  ! as a sum of five terms over v_ovvo, v_ovoo, v_vvvo and v_vvoo
+  ! contracted with t1 and t2; the full index structure is in the
+  ! commented reference loops at the top of the body.
+  END_DOC
   integer, intent(in)           :: nO,nV
   double precision, intent(in)  :: t1(nO, nV)
   double precision, intent(in)  :: t2(nO, nO, nV, nV)
@@ -2260,6 +2358,12 @@ subroutine compute_K1(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov,v_vvov,K1)
 
   implicit none
 
+  BEGIN_DOC
+  ! Computes K1(u,a,i,beta), an intermediate of the T2 residual,
+  ! as a sum of four terms over v_ovov, v_ovoo, v_vvov and v_vvoo
+  ! contracted with t1 and t2; the full index structure is in the
+  ! commented reference loops at the top of the body.
+  END_DOC
   integer, intent(in)           :: nO,nV
   double precision, intent(in)  :: t1(nO, nV)
   double precision, intent(in)  :: t2(nO, nO, nV, nV)

@@ -15,6 +15,11 @@ end
 
 subroutine run
  implicit none
+ BEGIN_DOC
+ ! Prints the molecular properties and the energy components
+ ! of the states, then the Hartree-Fock energy HF_energy and
+ ! the CI energy psi_energy + nuclear_repulsion for each state.
+ END_DOC
   call print_mol_properties
   call print_energy_components
  print *, 'E(HF) = ', HF_energy

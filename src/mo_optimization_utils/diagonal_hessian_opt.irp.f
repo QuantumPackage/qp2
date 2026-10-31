@@ -95,6 +95,12 @@
 
 
 subroutine diag_hessian_opt(n,H)!, h_tmpr)
+  BEGIN_DOC
+  ! Diagonal of the hessian of the energy with respect to orbital
+  ! rotations, for all mo_num orbitals.
+  ! n is mo_num*(mo_num-1)/2 and H(k) is the diagonal element for
+  ! the pair (p,q) given by vec_to_mat_index(k,p,q).
+  END_DOC
  
   use omp_lib
   

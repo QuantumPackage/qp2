@@ -1,6 +1,10 @@
 subroutine det_energy(det,energy)
 
   implicit none
+  BEGIN_DOC
+  ! Energy of the input determinant: the diagonal Hamiltonian matrix
+  ! element $\langle i|H|i \rangle$ plus the nuclear repulsion.
+  END_DOC
 
   integer(bit_kind), intent(in) :: det
 

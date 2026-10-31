@@ -10,6 +10,13 @@
 
 
 subroutine update_st_av_ci_energy(energy)
+  BEGIN_DOC
+  ! State average of the |CI| energies: energy is the weighted sum
+  ! over the N_states |CI| states, ci_energy(i) weighted by
+  ! state_average_weight(i) (normalized to sum to 1 by
+  ! state_weight_normalization).
+  ! TODO(doc): only call (my_providers.org) is commented out; still in use?
+  END_DOC
 
   implicit none
   

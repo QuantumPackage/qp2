@@ -78,6 +78,14 @@
 
 
 subroutine gradient_list_opt(n,m,list,v_grad,max_elem,norm)
+  BEGIN_DOC
+  ! Gradient of the energy with respect to orbital rotations,
+  ! restricted to the m orbitals given by list.
+  ! n is m*(m-1)/2 and v_grad(k) is the element for the pair (p,q)
+  ! given by vec_to_mat_index(k,p,q).
+  ! max_elem is the element of v_grad with the largest absolute
+  ! value (its sign is kept) and norm is the 2-norm of v_grad.
+  END_DOC
   use omp_lib
   include 'constants.h'
 
