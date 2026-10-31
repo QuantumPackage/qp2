@@ -411,7 +411,7 @@ EOF
 EOF
     elif [[ ${PACKAGE} = simple_gpu ]] ; then
 
-            VERSION=1.0.2
+            VERSION=1.0.3
             execute << EOF
               cd "\${QP_ROOT}"/external
               wget https://github.com/scemama/simple_gpu/releases/download/v${VERSION}/simple_gpu-${VERSION}.tar.gz
