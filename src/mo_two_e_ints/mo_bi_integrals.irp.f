@@ -97,6 +97,14 @@ END_PROVIDER
 
 subroutine four_idx_dgemm
   implicit none
+  BEGIN_DOC
+  ! Dense AO->MO transformation of the two-electron integrals by
+  ! four successive DGEMM multiplications by mo_coef. Integrals with
+  ! modulus at least mo_integrals_threshold are stored in
+  ! mo_integrals_map with the mo_two_e_integrals_index key (i<=k,
+  ! j<=l only). Called from the provider mo_two_e_integrals_in_map
+  ! when do_ao_cholesky is False and ao_num**4*32.d-9 < qp_max_mem.
+  END_DOC
   integer :: p,q,r,s,i,j,k,l
   double precision, allocatable :: a1(:,:,:,:)
   double precision, allocatable :: a2(:,:,:,:)

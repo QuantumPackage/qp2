@@ -3,6 +3,15 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
 
   implicit none
 
+  BEGIN_DOC
+  ! Stochastic (T) correction to the CCSD energy (CCSD(T)), in
+  ! spatial orbitals (closed shell systems). Virtual triplets are
+  ! sampled with probability proportional to 1/max(0.2,
+  ! f_v(a)+f_v(b)+f_v(c)). On entry energy is the CCSD total energy,
+  ! on exit the (T) correction; t_error is the statistical error bar
+  ! and the loop stops when it is below cc_par_t_stop.
+  END_DOC
+
   integer, intent(in)           :: nO,nV
   double precision, intent(in)  :: t1(nO,nV), f_o(nO), f_v(nV)
   double precision, intent(in)  :: t2(nO,nO,nV,nV)
@@ -115,6 +124,7 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   ! Prepare table of triplets (a,b,c)
 
   Nabc = (int(nV,8) * int(nV+1,8) * int(nV+2,8))/6_8 - nV
+  ! count of virtual triplets tabulated: a<b<c plus (a,b,a) and (b,a,b)
   allocate (memo(Nabc), sampled(Nabc), Pabc(Nabc), waccu(0:Nabc))
   allocate (abc(4,Nabc), iorder(Nabc)) !, lock(Nabc))
 

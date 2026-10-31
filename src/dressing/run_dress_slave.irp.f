@@ -5,9 +5,20 @@ subroutine run_dress_slave(thread,iproce,energy)
   use f77_zmq
   use omp_lib
   implicit none
+  BEGIN_DOC
+  ! Worker of the stochastic dressing, one per OpenMP thread:
+  ! fetches task fragments from the ZMQ task server, computes
+  ! each fragment's contribution via alpha_callback,
+  ! accumulates it per tooth (delta_det) and per checkpoint
+  ! (cp), and pushes the results with push_dress_results.
+  ! run_dress_slave is intended to be called in an OpenMP
+  ! environment, where thread corresponds to the ID of the current
+  ! thread; iproce and energy are unused (author, 2026-10-31).
+  END_DOC
 
   double precision, intent(in)    :: energy(N_states_diag)
   integer,  intent(in)            :: thread, iproce
+  ! iproce and energy are not used in this body
   integer                        :: rc, i, j, subset, i_generator
 
   integer                        :: worker_id, ctask, ltask
@@ -307,6 +318,14 @@ end subroutine
 subroutine push_dress_results(zmq_socket_push, m_task, f, edI_task, edI_index, breve_delta_m, task_id, n_tasks)
   use f77_zmq
   implicit none
+  BEGIN_DOC
+  ! Sends dressing results from a worker over the PUSH socket;
+  ! the first field m_task selects the message: m_task > 0,
+  ! checkpoint progress (n_tasks, f, edI_task, edI_index);
+  ! m_task = 0, completed task ids (n_tasks, task_id);
+  ! m_task < 0, final contribution for checkpoint -m_task
+  ! (f, breve_delta_m). When ZMQ_PUSH is off, reads an 'ok'.
+  END_DOC
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_push
   integer, intent(in) :: m_task, f, edI_index(n_tasks)
   double precision, intent(in) :: breve_delta_m(N_states, N_det, 2), edI_task(n_tasks)
@@ -351,6 +370,13 @@ end subroutine
 subroutine pull_dress_results(zmq_socket_pull, m_task, f, edI_task, edI_index, breve_delta_m, task_id, n_tasks)
   use f77_zmq
   implicit none
+  BEGIN_DOC
+  ! Counterpart of push_dress_results: reads a message from the
+  ! PULL socket. m_task > 0 fills n_tasks, f, edI_task and
+  ! edI_index; m_task = 0 fills n_tasks and task_id; m_task
+  ! < 0 fills f, breve_delta_m and task_id. When ZMQ_PUSH is
+  ! off, sends an 'ok' reply.
+  END_DOC
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_pull
   integer, intent(out) :: m_task, f, edI_index(N_det_generators)
   double precision, intent(out) :: breve_delta_m(N_states, N_det, 2), edI_task(N_det_generators)

@@ -1,4 +1,13 @@
 subroutine first_hessian_opt(n,H,h_tmpr)
+  BEGIN_DOC
+  ! Hessian of the energy with respect to orbital rotations, for
+  ! all mo_num orbitals.
+  ! Original implementation; the debug program debug_hessian_opt
+  ! compares it with hessian_opt.
+  ! H is the n by n hessian, n is mo_num*(mo_num-1)/2, indexed by
+  ! the pairs (p,q) and (r,s) with p < q, r < s; h_tmpr is the
+  ! 4D hessian.
+  END_DOC
 
   include 'constants.h' 
 

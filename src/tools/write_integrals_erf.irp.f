@@ -14,6 +14,12 @@ end
 
 subroutine routine
  implicit none
+ BEGIN_DOC
+ ! Saves the maps of the AO and MO range-separated (erf)
+ ! two-electron integrals to the |EZFIO| work directory
+ ! (work/ao_ints_erf and work/mo_ints_erf), so that they are read
+ ! back at the next run.
+ END_DOC
  call save_erf_two_e_integrals_ao
  call save_erf_two_e_integrals_mo
 

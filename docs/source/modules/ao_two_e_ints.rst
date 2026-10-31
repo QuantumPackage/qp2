@@ -355,7 +355,6 @@ Providers
 
        * :c:data:`ao_integrals_cache`
        * :c:data:`ao_integrals_cache_periodic`
-       * :c:data:`ao_two_e_integral_alpha`
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:data:`cholesky_ao_num`
 
@@ -427,7 +426,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_two_e_integral_alpha`
        * :c:data:`cholesky_ao_num`
 
  
@@ -515,7 +513,6 @@ Providers
 
        * :c:data:`ao_integrals_cache`
        * :c:data:`ao_integrals_cache_periodic`
-       * :c:data:`ao_two_e_integral_alpha`
        * :c:data:`cholesky_ao_num`
        * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
@@ -580,7 +577,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_two_e_integral_alpha_chol`
        * :c:data:`cholesky_ao_transp`
        * :c:data:`cholesky_mo_num`
        * :c:data:`cholesky_mo_transp`
@@ -645,7 +641,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_two_e_integral_alpha_chol`
        * :c:data:`cholesky_ao_transp`
        * :c:data:`cholesky_mo_num`
        * :c:data:`cholesky_mo_transp`
@@ -697,7 +692,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_two_e_integral_alpha`
        * :c:data:`cholesky_ao_num`
        * :c:data:`mo_two_e_int_erf_jj_from_ao`
 
@@ -1181,6 +1175,11 @@ Subroutines / functions
         subroutine ao_idx2_sq(i,j,ij)
 
 
+    Computes the square compound index $ij$ of the ordered pair of
+    AO indices $(i,j)$. For $i \neq j$, the indices of $(i,j)$ and
+    $(j,i)$ are different; for $i = j$, $ij = i^2$. For
+    $1 \le i,j \le ao\_num$, $ij$ runs over $1$ to $ao\_num^2$.
+    Reverse operation: ao_idx2_sq_rev.
 
     Called by:
 
@@ -1220,6 +1219,10 @@ Subroutines / functions
         subroutine ao_idx2_tri_key(i,j,ij)
 
 
+    Computes the triangular compound index of the pair of AO
+    indices $(i,j)$: $ij = \min(i,j) + (\max(i,j)^2 - \max(i,j))/2$.
+    The index is the same for $(i,j)$ and $(j,i)$, and $ij$ is a
+    key_kind integer.
 
     Called by:
 
@@ -1480,6 +1483,12 @@ Subroutines / functions
         logical function ao_two_e_integral_zero(i,j,k,l)
 
 
+    Returns .True. if the AO integral $(ij|kl)$ can be taken as
+    zero. No screening when the integrals are read from the EZFIO
+    file, when $is\_periodic$, or for complex AOs ($use\_cgtos$).
+    Otherwise, zero if $ao\_overlap\_abs(i,k)\,ao\_overlap\_abs(j,l)$
+    or the Schwartz bound $\sqrt{(ii|kk)\,(jj|ll)}$ is below
+    $ao\_integrals\_threshold$.
 
     Needs:
 
@@ -1492,6 +1501,128 @@ Subroutines / functions
        * :c:data:`is_periodic`
        * :c:data:`read_ao_two_e_integrals`
        * :c:data:`use_cgtos`
+
+ 
+.. c:function:: ao_two_e_integrals_in_map_collector:
+
+
+    File : :file:`ao_two_e_ints/integrals_in_map_slave.irp.f`
+
+    .. code:: fortran
+
+        subroutine ao_two_e_integrals_in_map_collector(zmq_socket_pull)
+
+
+    Collects results from the AO integral calculation
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_map`
+       * :c:data:`ao_num`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_two_e_integrals_in_map`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`end_zmq_to_qp_run_socket`
+       * :c:func:`insert_into_ao_integrals_map`
+
+ 
+.. c:function:: ao_two_e_integrals_in_map_slave:
+
+
+    File : :file:`ao_two_e_ints/integrals_in_map_slave.irp.f`
+
+    .. code:: fortran
+
+        subroutine ao_two_e_integrals_in_map_slave(thread,iproc)
+
+
+    Computes a buffer of integrals
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`ao_two_e_integrals_in_map_slave_inproc`
+       * :c:func:`ao_two_e_integrals_in_map_slave_tcp`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`compute_ao_integrals_jl`
+       * :c:func:`end_zmq_push_socket`
+       * :c:func:`end_zmq_to_qp_run_socket`
+       * :c:func:`push_integrals`
+       * :c:func:`sscanf_dd`
+
+ 
+.. c:function:: ao_two_e_integrals_in_map_slave_inproc:
+
+
+    File : :file:`ao_two_e_ints/integrals_in_map_slave.irp.f`
+
+    .. code:: fortran
+
+        subroutine ao_two_e_integrals_in_map_slave_inproc(i)
+
+
+    Computes a buffer of integrals. i is the ID of the current thread.
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_two_e_integrals_in_map`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`ao_two_e_integrals_in_map_slave`
+
+ 
+.. c:function:: ao_two_e_integrals_in_map_slave_tcp:
+
+
+    File : :file:`ao_two_e_ints/integrals_in_map_slave.irp.f`
+
+    .. code:: fortran
+
+        subroutine ao_two_e_integrals_in_map_slave_tcp(i)
+
+
+    Computes a buffer of integrals. i is the ID of the current thread.
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`ao_two_e_integrals_in_map_slave`
 
  
 .. c:function:: void clear_ao_erf_map(void)
@@ -2399,6 +2530,9 @@ Subroutines / functions
         subroutine idx2_tri_int(i,j,ij)
 
 
+    Computes the triangular compound index $ij$ of the pair of AO
+    indices $(i,j)$: $ij = \min(i,j) + (\max(i,j)^2 - \max(i,j))/2$.
+    The index is the same for $(i,j)$ and $(j,i)$.
 
  
 .. c:function:: void idx2_tri_rev_int(void)
@@ -2671,6 +2805,28 @@ Subroutines / functions
     $I_x(a_x,b_x,c_x,d_x) \, I_y(a_y,b_y,c_y,d_y) \, I_z(a_z,b_z,c_z,d_z)$
 
  
+.. c:function:: push_integrals:
+
+
+    File : :file:`ao_two_e_ints/integrals_in_map_slave.irp.f`
+
+    .. code:: fortran
+
+        subroutine push_integrals(zmq_socket_push, n_integrals, buffer_i, buffer_value, task_id)
+
+
+    Push integrals in the push socket
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`ao_tc_sym_two_e_pot_in_map_slave`
+       * :c:func:`ao_two_e_integrals_erf_in_map_slave`
+       * :c:func:`ao_two_e_integrals_in_map_slave`
+
+ 
 .. c:function:: void save_erf_two_e_integrals_ao(void)
 
 
@@ -2681,6 +2837,11 @@ Subroutines / functions
         subroutine save_erf_two_e_integrals_ao
 
 
+    Saves the map of the AO range-separated (erf) two-electron
+    integrals to the EZFIO file, in the work directory
+    (work/ao_ints_erf), marks the work directory as not empty, and
+    sets io_ao_two_e_integrals_erf to 'Read', so that the
+    integrals are read back from the file at the next run.
 
     Needs:
 
@@ -2711,6 +2872,12 @@ Subroutines / functions
         subroutine save_erf_two_e_ints_ao_into_ints_ao
 
 
+    Saves the map of the AO range-separated (erf) two-electron
+    integrals to the EZFIO file, but in the file of the regular AO
+    integrals (work/ao_ints), marks the work directory as not
+    empty, and sets io_ao_two_e_integrals and do_ao_cholesky to
+    'Read', so that at the next run the erf integrals are read as
+    the regular two-electron integrals.
 
     Needs:
 
@@ -2786,6 +2953,11 @@ Subroutines / functions
         subroutine two_e_integrals_index_2fold(i,j,k,l,i1)
 
 
+    Computes a unique index $i_1$ for the four AO indices
+    $i,j,k,l$, using only the symmetry of the two pairs $(i,k)$
+    and $(j,l)$: $(i,j,k,l) \leftrightarrow (j,i,l,k)$. The index
+    of each pair is the square compound index ao_idx2_sq, so the
+    order of the indices within a pair matters.
 
     Called by:
 
@@ -2824,13 +2996,6 @@ Subroutines / functions
     This rule is applied 3 times. First for the symmetry of the
     pairs (i,k) and (j,l), and then for the symmetry within each pair.
 
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_two_e_integral_alpha`
-
  
 .. c:function:: void two_e_integrals_index_reverse_2fold(void)
 
@@ -2842,6 +3007,11 @@ Subroutines / functions
         subroutine two_e_integrals_index_reverse_2fold(i,j,k,l,i1)
 
 
+    Computes the four AO indices $i,j,k,l$ from a unique index
+    $i_1$ produced by two_e_integrals_index_2fold. Two tuples are
+    returned: $(i(1),j(1),k(1),l(1))$ and the pair-swapped tuple
+    $(j(1),i(1),l(1),k(1))$. If the two tuples are identical,
+    $i(2)$ is set to 0.
 
     Calls:
 

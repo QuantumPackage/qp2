@@ -338,6 +338,19 @@ end
 subroutine get_phasemask_bit(det1, pm, Nint)
   use bitmasks
   implicit none
+  BEGIN_DOC
+  ! Computes the phase mask of the determinant det1: bit b of
+  ! pm(i,ispin) is 1 when the number of occupied spin orbitals
+  ! of spin ispin at or below bit b of word i is odd, i.e. the
+  ! running parity of the occupied bits, including the words
+  ! before i.
+  ! The same mask is built by get_mask_phase
+  ! (cipsi/selection.irp.f), where it is used to compute the
+  ! phase of double excitations (get_phase_bi).
+  ! No in-tree caller (the code is probably inlined at the
+  ! former call sites); kept at disposal if needed again
+  ! (author, 2026-10-31).
+  END_DOC
   integer, intent(in) :: Nint
   integer(bit_kind), intent(in) :: det1(Nint,2)
   integer(bit_kind), intent(out) :: pm(Nint,2)
@@ -353,6 +366,7 @@ subroutine get_phasemask_bit(det1, pm, Nint)
     pm(i,ispin) = xor(pm(i,ispin), shiftl(pm(i,ispin), 16))
     pm(i,ispin) = xor(pm(i,ispin), shiftl(pm(i,ispin), 32))
     pm(i,ispin) = xor(pm(i,ispin), tmp)
+    ! carry the parity of the occupied bits of the words before i
     if(iand(popcnt(det1(i,ispin)), 1) == 1) tmp = not(tmp)
   end do
   end do
@@ -860,6 +874,15 @@ end
 subroutine create_minilist(key_mask, fullList, miniList, idx_miniList, N_fullList, N_miniList, Nint)
   use bitmasks
   implicit none
+  BEGIN_DOC
+  ! Keeps, in miniList, the determinants of fullList for
+  ! which the number of spin orbitals occupied by key_mask
+  ! and not by the determinant is at most 2.
+  ! idx_miniList(i) is the index in fullList of the i-th kept
+  ! determinant, N_miniList their number.
+  ! If key_mask has no occupied orbital, fullList is copied
+  ! unchanged.
+  END_DOC
 
   integer, intent(in)                      :: N_fullList
   integer, intent(in)                      :: Nint
@@ -922,6 +945,20 @@ end subroutine
 subroutine create_minilist_find_previous(key_mask, fullList, miniList, N_fullList, N_miniList, fullMatch, Nint)
   use bitmasks
   implicit none
+  BEGIN_DOC
+  ! Same filter as create_minilist, applied in reverse order
+  ! (from N_fullList down to 1): the determinants for which 0
+  ! or 1 spin orbitals of key_mask are not occupied are kept
+  ! first, the ones for which exactly 2 are not occupied are
+  ! appended at the end of miniList.
+  ! N_miniList is the total number of kept determinants.
+  ! fullMatch is always returned as .false.; the statements
+  ! that would set it to .true. are commented out.
+  ! fullMatch was an optimization removed because it was wrong
+  ! (author, 2026-10-31). The commented-out lines predate the
+  ! 2019-01-25 initial import of this repository, so no commit
+  ! records it.
+  END_DOC
 
   integer, intent(in)                      :: N_fullList
   integer, intent(in)                      :: Nint
@@ -2436,6 +2473,18 @@ end
 
 subroutine connected_to_hf(key_i,yes_no)
  implicit none
+  BEGIN_DOC
+  ! Tests whether the determinant key_i is connected to the
+  ! HF reference ref_bitmask, with the threshold thresh_sym:
+  ! - degree 0: yes_no is set to .true.
+  ! - degree 1: yes_no is set to .false. when the one-
+  !   electron integral mo_one_e_integrals(m,p) of the
+  !   excitation (m,p) is below thresh_sym in absolute value.
+  ! - degree 2: yes_no is set to .false. when the matrix
+  !   element <ref_bitmask | H | key_i> computed with i_H_j
+  !   is below thresh_sym in absolute value.
+  ! - other degrees: yes_no is left .true.
+  END_DOC
  use bitmasks
  integer(bit_kind), intent(in)  :: key_i(N_int,2)
  logical , intent(out) :: yes_no

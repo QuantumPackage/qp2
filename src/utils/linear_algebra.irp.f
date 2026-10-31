@@ -1570,6 +1570,12 @@ end
 
 subroutine nullify_small_elements(m,n,A,LDA,thresh)
   implicit none
+  BEGIN_DOC
+  ! Nullifies, in place, the small elements of the m by n matrix A
+  ! (stored as A(LDA, n)). An element is set to zero if |A(i,j)| <
+  ! 1.d-99 or |A(i,j)| / amax < thresh, where amax is the largest
+  ! modulus of the elements of A. If amax = 0, A is left unchanged.
+  END_DOC
   integer, intent(in) :: m,n,LDA
   double precision, intent(inout) :: A(LDA,n)
   double precision, intent(in) :: thresh
@@ -1716,6 +1722,14 @@ end
 subroutine diag_nonsym_right(n, A, A_ldim, V, V_ldim, energy, E_ldim)
 
   implicit none
+  BEGIN_DOC
+  ! Diagonalizes the nonsymmetric n by n matrix A (A(A_ldim, n)) with
+  ! LAPACK dgeevx (right eigenvectors, balancing). On exit, energy(i)
+  ! and V(:, i) (V(V_ldim, n)) hold the eigenvalues and eigenvectors,
+  ! sorted in increasing order of the stored eigenvalue; a complex
+  ! pair (|Im| > 1.d-7) is stored as two columns: (Re, Im) of the
+  ! eigenvalue and of the eigenvalue times the eigenvector.
+  END_DOC
 
   integer,          intent(in)  :: n, A_ldim, V_ldim, E_ldim
   double precision, intent(in)  :: A(A_ldim,n)
@@ -1846,6 +1860,14 @@ end subroutine diag_nonsym_right
 
 
 subroutine pivoted_cholesky( A, rank, tol, ndim, U)
+BEGIN_DOC
+! Cholesky factorization with complete pivoting (LAPACK dpstrf).
+! On exit, A is destroyed and A = U * U**T, where U(ndim, 1:rank)
+! is the unpermuted (rows restored to the original order) factor.
+!
+! rank: on input, the number of columns of U; on output, the rank
+! found for the given tol (tol < 0: LAPACK default).
+END_DOC
 !
 ! A = U**T * U
 !

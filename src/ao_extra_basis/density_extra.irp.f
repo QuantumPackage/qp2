@@ -77,6 +77,13 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, ao_extra_center_1s_dist, (ao_extra_num,ao_extra_num)]
  implicit none
+  BEGIN_DOC
+  ! Distance between the centers of the i-th and j-th
+  ! |ao_extra|: the euclidean distance between
+  ! ao_extra_center_1s(:,i) and ao_extra_center_1s(:,j),
+  ! i.e. the positions of the nuclei on which the two
+  ! |ao_extras| are centered.
+  END_DOC
  integer :: i,j
  do i = 1, ao_extra_num
   do j = 1, ao_extra_num

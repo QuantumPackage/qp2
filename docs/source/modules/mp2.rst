@@ -39,6 +39,12 @@ Subroutines / functions
         subroutine compute_mp2(emp2)
 
 
+    Computes the MP2 correlation energy, returned in emp2 as the
+    sum of the "aaaa", "bbbb", "abab" terms plus the "non-Brillouin
+    singles" term, each of which is also printed. The orbital
+    energies are the Fock matrix diagonals and the two-electron
+    integrals are taken from mo_two_e_integrals_in_map. Orbitals
+    listed in list_core_reverse or list_del_reverse are skipped.
 
     Needs:
 
@@ -125,6 +131,16 @@ Subroutines / functions
         subroutine H_apply_mp2_diexc(key_in, key_prev, hole_1,particl_1, hole_2, particl_2, fock_diag_tmp, i_generator, iproc_in ,sum_e_2_pert_in,sum_norm_pert_in,sum_H_pert_diag_in,N_st,Nint )
 
 
+     Generate the double excitations of key_in: each pair of distinct
+     occupied orbitals p1 and p2, one in hole_1 and the other in hole_2,
+     same spin or alpha and beta, is passed once to H_apply_mp2_diexcP,
+     which builds the excited determinants as two successive single
+     excitations (particles from particl_1 and particl_2) and hands the
+     keys to the
+              if(check_double_excitation)then
+    call perturb_buffer_Moller_plesset(i_generator,keys_out,key_idx,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert, &
+             sum_norm_pert,sum_H_pert_diag,N_st,N_int,key_mask,fock_diag_tmp,CI_electronic_energy)
+    codelet. key_prev is unused.
 
     Needs:
 
@@ -204,6 +220,16 @@ Subroutines / functions
         subroutine H_apply_mp2_diexcP(key_in, fs1, fh1, particl_1, fs2, fh2, particl_2, fock_diag_tmp, i_generator, iproc_in ,sum_e_2_pert_in,sum_norm_pert_in,sum_H_pert_diag_in,N_st,Nint )
 
 
+     Build, for the two holes (spins fs1, fs2, orbitals fh1, fh2) of
+     key_in, the single-bit masks p1_mask and p2_mask, and key_mask,
+     key_in with both hole orbitals cleared. fh1 and fh2 are 1-based
+     orbital indices in the whole bitstring. Calls H_apply_mp2_diexcOrg,
+     which generates the double-excited determinants and hands the keys
+     to the
+              if(check_double_excitation)then
+    call perturb_buffer_Moller_plesset(i_generator,keys_out,key_idx,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert, &
+             sum_norm_pert,sum_H_pert_diag,N_st,N_int,key_mask,fock_diag_tmp,CI_electronic_energy)
+    codelet.
 
     Needs:
 
@@ -350,6 +376,20 @@ Subroutines / functions
         subroutine H_apply_mp2_selection_diexc(key_in, key_prev, hole_1,particl_1, hole_2, particl_2, fock_diag_tmp, i_generator, iproc_in ,sum_e_2_pert_in,sum_norm_pert_in,sum_H_pert_diag_in,N_st,Nint,select_max_out )
 
 
+     Generate the double excitations of key_in: each pair of distinct
+     occupied orbitals p1 and p2, one in hole_1 and the other in hole_2,
+     same spin or alpha and beta, is passed once to H_apply_mp2_selection_diexcP,
+     which builds the excited determinants as two successive single
+     excitations (particles from particl_1 and particl_2) and hands the
+     keys to the
+    e_2_pert_buffer = 0.d0
+    coef_pert_buffer = 0.d0
+              if(check_double_excitation)then
+    call perturb_buffer_Moller_Plesset(i_generator,keys_out,key_idx,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert, &
+             sum_norm_pert,sum_H_pert_diag,N_st,N_int,key_mask,fock_diag_tmp,CI_electronic_energy)
+    call fill_H_apply_buffer_selection(key_idx,keys_out,e_2_pert_buffer, &
+        coef_pert_buffer,N_st,N_int,iproc,select_max_out)
+    codelet. key_prev is unused.
 
     Needs:
 
@@ -430,6 +470,20 @@ Subroutines / functions
         subroutine H_apply_mp2_selection_diexcP(key_in, fs1, fh1, particl_1, fs2, fh2, particl_2, fock_diag_tmp, i_generator, iproc_in ,sum_e_2_pert_in,sum_norm_pert_in,sum_H_pert_diag_in,N_st,Nint,select_max_out )
 
 
+     Build, for the two holes (spins fs1, fs2, orbitals fh1, fh2) of
+     key_in, the single-bit masks p1_mask and p2_mask, and key_mask,
+     key_in with both hole orbitals cleared. fh1 and fh2 are 1-based
+     orbital indices in the whole bitstring. Calls H_apply_mp2_selection_diexcOrg,
+     which generates the double-excited determinants and hands the keys
+     to the
+    e_2_pert_buffer = 0.d0
+    coef_pert_buffer = 0.d0
+              if(check_double_excitation)then
+    call perturb_buffer_Moller_Plesset(i_generator,keys_out,key_idx,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert, &
+             sum_norm_pert,sum_H_pert_diag,N_st,N_int,key_mask,fock_diag_tmp,CI_electronic_energy)
+    call fill_H_apply_buffer_selection(key_idx,keys_out,e_2_pert_buffer, &
+        coef_pert_buffer,N_st,N_int,iproc,select_max_out)
+    codelet.
 
     Needs:
 
@@ -510,6 +564,11 @@ Subroutines / functions
         subroutine run
 
 
+    Computes the MP2 correlation energy on pt2(1) via compute_mp2
+    and prints N_det, N_states, the MP2 energy, the reference
+    energy HF_energy, and the total energy HF_energy + MP2.
+    pt2 is allocated for N_states entries but only pt2(1) is
+    filled.
 
     Needs:
 

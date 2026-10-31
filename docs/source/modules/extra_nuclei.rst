@@ -175,6 +175,9 @@ Providers
         double precision, allocatable	:: extra_nucl_dist	(extra_nucl_num,extra_nucl_num)
 
 
+    Pair distances between the extra nuclei, in Bohr (atomic units).
+    Element (j,i) is the distance between extra nuclei j and i,
+    from extra_nucl_coord; the matrix is symmetric, diagonal zero.
 
     Needs:
 

@@ -70,6 +70,15 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, norm_psi_ref, (N_states)]
 &BEGIN_PROVIDER [double precision, inv_norm_psi_ref, (N_states)]
   implicit none
+  BEGIN_DOC
+  ! norm_psi_ref(j) is the sum of psi_ref_coef(i,j)^2 over
+  ! i = 1..N_det_ref, for each state j = 1..N_states, i.e. the
+  ! squared norm of the reference coefficients of state j.
+  ! inv_norm_psi_ref(j) is 1/sqrt(norm_psi_ref(j)).
+  ! No in-tree caller; used by external plugins (author,
+  ! 2026-10-31); supplies the normalization factor of the
+  ! reference wave function coefficients.
+  END_DOC
   integer :: i,j
   norm_psi_ref = 0.d0
   do j = 1, N_states
@@ -84,6 +93,15 @@ END_PROVIDER
 
  BEGIN_PROVIDER [double precision, psi_ref_coef_interm_norm, (N_det_ref,N_states)]
   implicit none
+  BEGIN_DOC
+  ! Reference coefficients scaled per state j by inv_norm_psi_ref(j):
+  ! psi_ref_coef_interm_norm(i,j) = inv_norm_psi_ref(j) *
+  ! psi_ref_coef(i,j), for i = 1..N_det_ref, j = 1..N_states. With
+  ! this scaling the coefficients of state j have squared sum 1.
+  ! TODO(doc): no in-tree caller; the intended use of this
+  ! intermediate-normalization provider is unknown to the author
+  ! (author, 2026-10-31).
+  END_DOC
   integer :: i,j
   do j = 1, N_states
    do i = 1, N_det_ref
@@ -94,6 +112,15 @@ END_PROVIDER
 
  BEGIN_PROVIDER [double precision, psi_non_ref_coef_interm_norm, (N_det_non_ref,N_states)]
   implicit none
+  BEGIN_DOC
+  ! Non-reference coefficients scaled by the reference normalization
+  ! factor: psi_non_ref_coef_interm_norm(i,j) is
+  ! psi_non_ref_coef(i,j) * inv_norm_psi_ref(j), for i = 1..N_det_non_ref,
+  ! j = 1..N_states. The scaling factor comes from the reference part.
+  ! TODO(doc): no in-tree caller; the intended use of this
+  ! intermediate-normalization provider is unknown to the author
+  ! (author, 2026-10-31).
+  END_DOC
   integer :: i,j
   do j = 1, N_states
    do i = 1, N_det_non_ref

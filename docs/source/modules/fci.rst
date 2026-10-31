@@ -84,7 +84,6 @@ Programs
 -------- 
  
  * :ref:`fci` 
- * :ref:`print` 
  * :ref:`pt2` 
  
 Providers 
@@ -152,6 +151,12 @@ Subroutines / functions
         subroutine run
 
 
+    Main computation of the |pt2| program. Computes the |PT2|
+    correction of the :option:`determinants n_states` wave functions
+    stored in the |EZFIO| directory. If :option:`perturbation do_pt2`
+    is |true|, the stochastic |PT2| is computed; otherwise an
+    approximate value is obtained from a determinant selection. The
+    energies are printed and saved in the |EZFIO| directory.
 
     Needs:
 
@@ -172,7 +177,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`print`
        * :c:func:`pt2`
        * :c:func:`scf`
 

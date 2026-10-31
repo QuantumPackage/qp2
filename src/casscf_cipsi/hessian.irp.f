@@ -470,6 +470,14 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, hessmat, (nMonoEx,nMonoEx)]
  implicit none
+ BEGIN_DOC
+ ! the orbital hessian, as a (nMonoEx,nMonoEx) matrix indexed
+ ! by the single excitations, in the order: core/inactive ->
+ ! active, core/inactive -> virtual, active -> virtual. The
+ ! matrix is symmetric. The core-virtual/core-virtual block is
+ ! only computed when hess_cv_cv is set; its elements remain
+ ! zero otherwise.
+ END_DOC
  integer                        :: i,j,t,u,a,b
  integer                        :: indx,indx_tmp, jndx, jndx_tmp
  integer                        :: ustart,bstart

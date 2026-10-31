@@ -35,6 +35,11 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, one_e_dm_mo_spin_index, (mo_num,mo_num,N_states,2) ]
   implicit none
+  BEGIN_DOC
+  ! Spin-indexed one-body density matrices for each state: the
+  ! fourth index 1 holds one_e_dm_mo_alpha, the fourth index 2 holds
+  ! one_e_dm_mo_beta.
+  END_DOC
   integer                        :: i,j,ispin,istate
   ispin = 1
   do istate = 1, N_states
@@ -59,6 +64,14 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, one_e_dm_dagger_mo_spin_index, (mo_num,mo_num,N_states,2) ]
    implicit none
+   BEGIN_DOC
+   ! For each spin and state, entry (j,j) = 1 - dm(j,j) and, for
+   ! i > j, entries (i,j) and (j,i) = -dm(i,j), where dm is
+   ! one_e_dm_mo_alpha (spin 1) or one_e_dm_mo_beta (spin 2).
+   ! Complementary one-body density matrix (author's reading,
+   ! 2026-10-31); no in-tree caller found, probably consumed by an
+   ! external plugin.
+   END_DOC
    integer                        :: i,j,ispin,istate
    ispin = 1
    do istate = 1, N_states
@@ -557,6 +570,13 @@ END_PROVIDER
 &BEGIN_PROVIDER [ integer         , list_attachment,  (mo_num,N_states)]
 &BEGIN_PROVIDER [ integer         , list_dettachment, (mo_num,N_states)]
  implicit none
+ BEGIN_DOC
+ ! For each state (2..N_states), number and list of the MOs whose
+ ! difference_dm eigenvalue (difference_dm_eigval) is negative
+ ! (dettachment) or non-negative (attachment). State 1 is left
+ ! untouched. list_dettachment is in ascending MO index order;
+ ! list_attachment is stored in the reverse order.
+ END_DOC
  integer :: i,istate
  integer :: list_attachment_tmp(mo_num)
  n_attachment = 0
@@ -582,6 +602,11 @@ END_PROVIDER
  BEGIN_PROVIDER [ double precision,  attachment_numbers_sorted,  (mo_num, N_states)]
 &BEGIN_PROVIDER [ double precision,  dettachment_numbers_sorted, (mo_num, N_states)]
  implicit none
+ BEGIN_DOC
+ ! For each state (2..N_states), the difference_dm_eigval of the
+ ! dettachment and attachment orbitals, in the order of
+ ! list_dettachment and list_attachment.
+ END_DOC
  integer :: i,istate
  do istate = 2, N_states
   print*,'dettachment'
@@ -600,6 +625,13 @@ END_PROVIDER
  BEGIN_PROVIDER [ double precision,  attachment_orbitals, (ao_num, mo_num, N_states)]
 &BEGIN_PROVIDER [ double precision, dettachment_orbitals, (ao_num, mo_num, N_states)]
  implicit none
+ BEGIN_DOC
+ ! For each state (2..N_states), the dettachment and attachment
+ ! orbitals of difference_dm expressed in the |AO| basis: column i
+ ! is the AO expansion (mo_coef) of the i-th orbital of
+ ! list_dettachment or list_attachment, not of MO
+ ! list_dettachment(i,istate) or list_attachment(i,istate).
+ END_DOC
  integer :: i,j,k,istate
  attachment_orbitals = 0.d0
  dettachment_orbitals = 0.d0

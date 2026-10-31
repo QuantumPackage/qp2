@@ -159,6 +159,12 @@ end subroutine
 
 subroutine selection_slave_inproc(i)
   implicit none
+  BEGIN_DOC
+! In-process selection worker of ZMQ_selection: called by every
+! OpenMP thread with i > 0, it runs one selection slave with
+! in-process ZeroMQ sockets, passing i as the thread number to
+! run_selection_slave. Thread i == 0 runs selection_collector.
+  END_DOC
   integer, intent(in)            :: i
 
   call run_selection_slave(1,i,pt2_e0_denominator)
@@ -169,6 +175,14 @@ subroutine selection_collector(zmq_socket_pull, b, N, pt2_data)
   use selection_types
   use bitmasks
   implicit none
+  BEGIN_DOC
+! Thread i == 0 of ZMQ_selection: pulls the results pushed by
+! the worker threads, accumulates their PT2 data in pt2_data and
+! adds their best determinants to b, deleting the done tasks
+! from the qp_run task server until it replies that no task is
+! left. Sorts b. zmq_socket_pull: pull socket of the workers.
+! N: buffer size. pt2_data: accumulated PT2 data (inout).
+  END_DOC
 
 
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_pull

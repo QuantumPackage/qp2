@@ -493,6 +493,14 @@ END_PROVIDER
 
 subroutine make_s2_eigenfunction
   implicit none
+  BEGIN_DOC
+  ! Adds to the wavefunction the determinants missing from each of its
+  ! configurations: all determinants of each configuration in
+  ! psi_configuration are generated, and the missing ones are added
+  ! with zero coefficient through the H-apply buffer. Used by CIPSI
+  ! when s2_eig is true, so that the eigenstates of H can also be
+  ! eigenstates of S^2.
+  END_DOC
   integer                        :: i,j,k
   integer                        :: smax, s
   integer(bit_kind), allocatable :: d(:,:,:), det_buffer(:,:,:)
@@ -754,6 +762,16 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ integer, n_elec_alpha_for_psi_configuration, (N_configuration)]
  implicit none
+ BEGIN_DOC
+ ! Number of alpha electrons of configuration i (1..N_configuration),
+ ! per its name. The code takes the determinant of psi_det at index
+ ! psi_configuration_to_psi_det(2,i) and sums, over orbitals, the
+ ! popcnt of the AND of its alpha bit strings with the configuration's
+ ! singly occupied mask.
+ ! The loop writes det_alpha(N_int) but should write
+ ! det_alpha(l) = iand(det_tmp(l,1),psi_configuration(l,1,i)) -
+ ! bug (author, 2026-10-31).
+ END_DOC
  integer :: i,j,k,l
  integer(bit_kind) :: det_tmp(N_int,2),det_alpha(N_int)
  n_elec_alpha_for_psi_configuration = 0

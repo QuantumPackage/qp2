@@ -65,7 +65,6 @@ Programs
 -------- 
  
  * :ref:`cis` 
- * :ref:`cis_read` 
  
 Subroutines / functions 
 ----------------------- 
@@ -142,6 +141,12 @@ Subroutines / functions
         subroutine H_apply_cis_diexc(key_in, key_prev, hole_1,particl_1, hole_2, particl_2, fock_diag_tmp, i_generator, iproc_in  )
 
 
+    Generate the double excitations of key_in: each pair of distinct
+    occupied orbitals p1 and p2, one in hole_1 and the other in hole_2,
+    same spin or alpha and beta, is passed once to H_apply_cis_diexcP,
+    which builds the excited determinants as two successive single
+    excitations (particles from particl_1 and particl_2) and hands the
+    keys to the call fill_H_apply_buffer_no_selection(key_idx,keys_out,N_int,iproc) codelet. key_prev is unused.
 
     Needs:
 
@@ -216,6 +221,12 @@ Subroutines / functions
         subroutine H_apply_cis_diexcP(key_in, fs1, fh1, particl_1, fs2, fh2, particl_2, fock_diag_tmp, i_generator, iproc_in  )
 
 
+    Build, for the two holes (spins fs1, fs2, orbitals fh1, fh2) of
+    key_in, the single-bit masks p1_mask and p2_mask, and key_mask,
+    key_in with both hole orbitals cleared. fh1 and fh2 are 1-based
+    orbital indices in the whole bitstring. Calls H_apply_cis_diexcOrg,
+    which generates the double-excited determinants and hands the keys
+    to the call fill_H_apply_buffer_no_selection(key_idx,keys_out,N_int,iproc) codelet.
 
     Needs:
 
@@ -352,6 +363,12 @@ Subroutines / functions
         subroutine H_apply_cis_sym_diexc(key_in, key_prev, hole_1,particl_1, hole_2, particl_2, fock_diag_tmp, i_generator, iproc_in  )
 
 
+    Generate the double excitations of key_in: each pair of distinct
+    occupied orbitals p1 and p2, one in hole_1 and the other in hole_2,
+    same spin or alpha and beta, is passed once to H_apply_cis_sym_diexcP,
+    which builds the excited determinants as two successive single
+    excitations (particles from particl_1 and particl_2) and hands the
+    keys to the call fill_H_apply_buffer_no_selection(key_idx,keys_out,N_int,iproc) codelet. key_prev is unused.
 
     Needs:
 
@@ -427,6 +444,12 @@ Subroutines / functions
         subroutine H_apply_cis_sym_diexcP(key_in, fs1, fh1, particl_1, fs2, fh2, particl_2, fock_diag_tmp, i_generator, iproc_in  )
 
 
+    Build, for the two holes (spins fs1, fs2, orbitals fh1, fh2) of
+    key_in, the single-bit masks p1_mask and p2_mask, and key_mask,
+    key_in with both hole orbitals cleared. fh1 and fh2 are 1-based
+    orbital indices in the whole bitstring. Calls H_apply_cis_sym_diexcOrg,
+    which generates the double-excited determinants and hands the keys
+    to the call fill_H_apply_buffer_no_selection(key_idx,keys_out,N_int,iproc) codelet.
 
     Needs:
 

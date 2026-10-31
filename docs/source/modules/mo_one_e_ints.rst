@@ -378,10 +378,8 @@ Providers
        * :c:data:`ao_one_e_integrals_from_mo`
        * :c:data:`ao_sphe_one_e_integrals_from_mo`
        * :c:data:`core_energy`
-       * :c:data:`etwo`
        * :c:data:`fock_operator_closed_shell_ref_bitmask`
        * :c:data:`h_core_ri`
-       * :c:data:`one_ints_no`
        * :c:data:`psi_energy_h_core`
        * :c:data:`ref_bitmask_one_e_energy`
 
@@ -697,7 +695,6 @@ Providers
        :columns: 3
 
        * :c:data:`ao_one_e_integrals_from_mo`
-       * :c:data:`fock_matrix_ao`
        * :c:data:`s_mo_sphe_coef`
 
  
@@ -766,7 +763,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_one_e_integrals_from_mo`
-       * :c:data:`fock_matrix_ao`
 
     Calls:
 
@@ -802,7 +798,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`d0tu_alpha_ao`
        * :c:data:`one_e_dm_alpha_ao_for_dft`
        * :c:data:`one_e_dm_alpha_ao_for_dft_no_core`
 
@@ -891,6 +886,12 @@ Subroutines / functions
         subroutine orthonormalize_mos
 
 
+    Replace mo_coef in place by the Lowdin-orthogonalized
+    coefficients: $mo\_coef \leftarrow mo\_coef.S^{-1/2}$, $S$
+    being mo_overlap, so that the MOs are orthonormal with
+    respect to the AO overlap.
+    Linear dependencies of $S$ are dropped, controlled by
+    lin_dep_cutoff (see ortho_lowdin).
 
     Needs:
 
@@ -908,12 +909,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`huckel_guess`
-       * :c:func:`roothaan_hall_scf`
        * :c:func:`save_natural_mos`
        * :c:func:`save_natural_mos_canon_label`
        * :c:func:`save_natural_mos_no_ov_rot`
-       * :c:func:`scf`
 
     Calls:
 

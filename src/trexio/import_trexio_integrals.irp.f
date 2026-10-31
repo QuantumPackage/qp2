@@ -1,6 +1,14 @@
 program import_trexio_integrals
   use trexio
   implicit none
+  BEGIN_DOC
+  ! Reads the nuclear repulsion and the one- and
+  ! two-electron integrals (AO and MO) from the TREXIO
+  ! file named by the trexio_file option and stores
+  ! them in the |EZFIO| database. The two-electron
+  ! integrals may come as Cholesky vectors or as the
+  ! list of nonzero integrals.
+  END_DOC
   integer(trexio_t)              :: f ! TREXIO file handle
   integer(trexio_exit_code)      :: rc
 !  PROVIDE mo_num

@@ -191,6 +191,48 @@ Providers
        * :c:data:`ao_sphe_pseudo_integrals_non_local`
 
  
+.. c:var:: ao_cart_to_sphe_num
+
+
+    File : :file:`ao_one_e_ints/ao_ortho_canonical.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_cart_to_sphe_coef	(ao_num,ao_num)
+        integer	:: ao_cart_to_sphe_num	
+
+
+    Coefficients to go from cartesian to spherical coordinates in the current
+    basis set
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_l`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`cart_to_sphe_1`
+       * :c:data:`cart_to_sphe_2`
+       * :c:data:`cart_to_sphe_3`
+       * :c:data:`cart_to_sphe_4`
+       * :c:data:`cart_to_sphe_5`
+       * :c:data:`cart_to_sphe_6`
+       * :c:data:`cart_to_sphe_7`
+       * :c:data:`cart_to_sphe_8`
+       * :c:data:`cart_to_sphe_9`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_cart_to_sphe_inv`
+       * :c:data:`ao_cart_to_sphe_overlap`
+       * :c:data:`ao_ortho_canonical_coef`
+
+ 
 .. c:var:: double ao_cart_to_sphe_overlap
 
 
@@ -261,6 +303,12 @@ Providers
         double precision, allocatable	:: ao_deriv2_cgtos_z	(ao_num,ao_num)
 
 
+    Second derivative matrix elements in the cgtos |AO| basis:
+    
+    :math:`\langle \chi_i | \frac{\partial^2}{\partial x^2} | \chi_j \rangle` 
+    
+    (and y, z analogously). The three arrays are combined in the
+    provider ao_kinetic_integrals_cgtos as -1/2 of their sum.
 
     Needs:
 
@@ -296,6 +344,12 @@ Providers
         double precision, allocatable	:: ao_deriv2_cgtos_z	(ao_num,ao_num)
 
 
+    Second derivative matrix elements in the cgtos |AO| basis:
+    
+    :math:`\langle \chi_i | \frac{\partial^2}{\partial x^2} | \chi_j \rangle` 
+    
+    (and y, z analogously). The three arrays are combined in the
+    provider ao_kinetic_integrals_cgtos as -1/2 of their sum.
 
     Needs:
 
@@ -331,6 +385,12 @@ Providers
         double precision, allocatable	:: ao_deriv2_cgtos_z	(ao_num,ao_num)
 
 
+    Second derivative matrix elements in the cgtos |AO| basis:
+    
+    :math:`\langle \chi_i | \frac{\partial^2}{\partial x^2} | \chi_j \rangle` 
+    
+    (and y, z analogously). The three arrays are combined in the
+    provider ao_kinetic_integrals_cgtos as -1/2 of their sum.
 
     Needs:
 
@@ -762,10 +822,7 @@ Providers
        :columns: 3
 
        * :c:data:`ao_one_e_integrals`
-       * :c:data:`ao_canonical_nucl_elec_ints`
-       * :c:data:`ao_ortho_lowdin_nucl_elec_integrals`
        * :c:data:`ao_sphe_integrals_n_e`
-       * :c:data:`hf_kinetic_energy`
        * :c:data:`mo_integrals_n_e`
 
  
@@ -943,7 +1000,6 @@ Providers
 
        * :c:data:`ao_one_e_integrals`
        * :c:data:`ao_sphe_kinetic_integrals`
-       * :c:data:`hf_kinetic_energy`
        * :c:data:`mo_kinetic_integrals`
 
  
@@ -1026,10 +1082,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`fock_matrix_ao_alpha`
-       * :c:data:`hf_energy`
        * :c:data:`mo_one_e_integrals`
-       * :c:data:`scf_energy`
 
  
 .. c:var:: double ao_one_e_integrals_diag
@@ -1060,10 +1113,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`fock_matrix_ao_alpha`
-       * :c:data:`hf_energy`
        * :c:data:`mo_one_e_integrals`
-       * :c:data:`scf_energy`
 
  
 .. c:var:: double ao_one_e_integrals_imag
@@ -1123,7 +1173,6 @@ Providers
        :columns: 3
 
        * :c:data:`ao_ortho_canonical_coef_inv`
-       * :c:data:`ao_canonical_nucl_elec_ints`
        * :c:data:`ao_ortho_canonical_overlap`
        * :c:data:`mo_coef`
        * :c:data:`mo_coef_aux`
@@ -1193,7 +1242,6 @@ Providers
        :columns: 3
 
        * :c:data:`ao_ortho_canonical_coef_inv`
-       * :c:data:`ao_canonical_nucl_elec_ints`
        * :c:data:`ao_ortho_canonical_overlap`
        * :c:data:`mo_coef`
        * :c:data:`mo_coef_aux`
@@ -1265,11 +1313,8 @@ Providers
        * :c:data:`ao_cart_to_sphe_overlap`
        * :c:data:`ao_ortho_canonical_coef`
        * :c:data:`ao_ortho_canonical_overlap`
-       * :c:data:`ao_ortho_lowdin_coef`
-       * :c:data:`ao_ortho_lowdin_overlap`
        * :c:data:`ao_overlap_complex`
        * :c:data:`ao_sphe_overlap`
-       * :c:data:`fps_spf_matrix_ao`
        * :c:data:`mo_overlap`
        * :c:data:`s_half`
        * :c:data:`s_half_inv`
@@ -1312,7 +1357,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_two_e_integral_alpha`
        * :c:data:`cholesky_ao_num`
 
  
@@ -1329,6 +1373,11 @@ Providers
         double precision, allocatable	:: ao_overlap_cgtos_z	(ao_num,ao_num)
 
 
+    Overlap integrals in the cgtos |AO| basis, evaluated on the fly by
+    the CGCOS scheme (primitive data in ao_expo_cgtos_ord).
+    :math:`ao\_overlap\_cgtos(i,j) = \int \chi_i(r) \chi_j(r) dr` ; the
+    _x/_y/_z arrays hold the x/y/z factors of the separated overlap,
+    copied to ao_overlap_x/_y/_z by the ao_overlap provider.
 
     Needs:
 
@@ -1364,6 +1413,11 @@ Providers
         double precision, allocatable	:: ao_overlap_cgtos_z	(ao_num,ao_num)
 
 
+    Overlap integrals in the cgtos |AO| basis, evaluated on the fly by
+    the CGCOS scheme (primitive data in ao_expo_cgtos_ord).
+    :math:`ao\_overlap\_cgtos(i,j) = \int \chi_i(r) \chi_j(r) dr` ; the
+    _x/_y/_z arrays hold the x/y/z factors of the separated overlap,
+    copied to ao_overlap_x/_y/_z by the ao_overlap provider.
 
     Needs:
 
@@ -1399,6 +1453,11 @@ Providers
         double precision, allocatable	:: ao_overlap_cgtos_z	(ao_num,ao_num)
 
 
+    Overlap integrals in the cgtos |AO| basis, evaluated on the fly by
+    the CGCOS scheme (primitive data in ao_expo_cgtos_ord).
+    :math:`ao\_overlap\_cgtos(i,j) = \int \chi_i(r) \chi_j(r) dr` ; the
+    _x/_y/_z arrays hold the x/y/z factors of the separated overlap,
+    copied to ao_overlap_x/_y/_z by the ao_overlap provider.
 
     Needs:
 
@@ -1434,6 +1493,11 @@ Providers
         double precision, allocatable	:: ao_overlap_cgtos_z	(ao_num,ao_num)
 
 
+    Overlap integrals in the cgtos |AO| basis, evaluated on the fly by
+    the CGCOS scheme (primitive data in ao_expo_cgtos_ord).
+    :math:`ao\_overlap\_cgtos(i,j) = \int \chi_i(r) \chi_j(r) dr` ; the
+    _x/_y/_z arrays hold the x/y/z factors of the separated overlap,
+    copied to ao_overlap_x/_y/_z by the ao_overlap provider.
 
     Needs:
 
@@ -1554,11 +1618,8 @@ Providers
        * :c:data:`ao_cart_to_sphe_overlap`
        * :c:data:`ao_ortho_canonical_coef`
        * :c:data:`ao_ortho_canonical_overlap`
-       * :c:data:`ao_ortho_lowdin_coef`
-       * :c:data:`ao_ortho_lowdin_overlap`
        * :c:data:`ao_overlap_complex`
        * :c:data:`ao_sphe_overlap`
-       * :c:data:`fps_spf_matrix_ao`
        * :c:data:`mo_overlap`
        * :c:data:`s_half`
        * :c:data:`s_half_inv`
@@ -1608,11 +1669,8 @@ Providers
        * :c:data:`ao_cart_to_sphe_overlap`
        * :c:data:`ao_ortho_canonical_coef`
        * :c:data:`ao_ortho_canonical_overlap`
-       * :c:data:`ao_ortho_lowdin_coef`
-       * :c:data:`ao_ortho_lowdin_overlap`
        * :c:data:`ao_overlap_complex`
        * :c:data:`ao_sphe_overlap`
-       * :c:data:`fps_spf_matrix_ao`
        * :c:data:`mo_overlap`
        * :c:data:`s_half`
        * :c:data:`s_half_inv`
@@ -1662,11 +1720,8 @@ Providers
        * :c:data:`ao_cart_to_sphe_overlap`
        * :c:data:`ao_ortho_canonical_coef`
        * :c:data:`ao_ortho_canonical_overlap`
-       * :c:data:`ao_ortho_lowdin_coef`
-       * :c:data:`ao_ortho_lowdin_overlap`
        * :c:data:`ao_overlap_complex`
        * :c:data:`ao_sphe_overlap`
-       * :c:data:`fps_spf_matrix_ao`
        * :c:data:`mo_overlap`
        * :c:data:`s_half`
        * :c:data:`s_half_inv`
@@ -2496,12 +2551,6 @@ Providers
        * :c:data:`ao_num`
        * :c:data:`ao_overlap`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`eigenvalues_fock_matrix_ao`
 
  
 .. c:var:: double s_inv
@@ -2606,6 +2655,12 @@ Subroutines / functions
         logical function ao_one_e_integral_zero(i,k)
 
 
+    Returns .True. if the AO integrals between the |AO|s $i$ and
+    $k$ can be taken as zero. No screening when
+    $io\_ao\_integrals\_overlap$ is not 'None' (overlap integrals
+    read or written to the EZFIO file), when $is\_periodic$, or
+    for complex AOs ($use\_cgtos$). Otherwise, zero if
+    $ao\_overlap\_abs(i,k) < ao\_one\_e\_integrals\_threshold$.
 
     Needs:
 
@@ -2647,13 +2702,15 @@ Subroutines / functions
 
     .. code:: fortran
 
-        subroutine give_cpolynomial_mult_center_one_e(A_center, B_center, alpha, beta, &
+        subroutine give_cpolynomial_mult_center_one_e(A_center, B_center, P_center, alpha, beta, &
                                                       power_A, power_B, C_center, n_pt_in, d, n_pt_out)
 
 
     Returns the explicit polynomial in terms of the "t" variable of the following
     
     $I_{x1}(a_x, d_x,p,q) \times I_{x1}(a_y, d_y,p,q) \times I_{x1}(a_z, d_z,p,q)$.
+    
+    A_center, B_center: polynomial centres; P_center: centre of the Gaussian product
 
     Called by:
 
@@ -3011,6 +3068,12 @@ Subroutines / functions
         subroutine overlap_bourrin_deriv_x(i_component,A_center,B_center,alpha,beta,power_A,power_B,dx,lower_exp_val,overlap_x,nx)
 
 
+    1D overlap with the first derivative of the A gaussian applied
+    along coordinate i_component (1 = x, 2 = y, 3 = z):
+    overlap_x = a * I(a-1) - 2 alpha * I(a+1), where a =
+    power_A(i_component) and I(a) is the overlap_bourrin_x integral
+    with power a for A and power_B for B; dx is the quadrature step.
+    Used by the ao_deriv_1_x/_y/_z providers.
 
     Called by:
 
@@ -3037,6 +3100,12 @@ Subroutines / functions
         subroutine overlap_bourrin_dipole(A_center,B_center,alpha,beta,power_A,power_B,overlap_x,lower_exp_val,dx,nx)
 
 
+    1D integral of (x-A)^power_A (x-B)^power_B exp(-alpha (x-A)^2
+    - beta (x-B)^2) x over the whole line, by a plain sum over nx
+    steps of width dx in the window of half-width sqrt(lower_exp_val/p)
+    around (alpha*A + beta*B)/(alpha+beta), times the prefactor
+    exp(-alpha*beta/(alpha+beta)*(A-B)^2); result in overlap_x, step
+    in dx; used by the ao_dipole_x/_y/_z providers.
 
     Called by:
 
@@ -3078,6 +3147,12 @@ Subroutines / functions
         subroutine overlap_bourrin_x(A_center,B_center,alpha,beta,power_A,power_B,overlap_x,lower_exp_val,dx,nx)
 
 
+    1D integral of (x-A)^power_A (x-B)^power_B exp(-alpha (x-A)^2
+    - beta (x-B)^2) over the whole line, by a plain sum over nx
+    steps of width dx in the window of half-width sqrt(lower_exp_val/p)
+    around (alpha*A + beta*B)/(alpha+beta), times the prefactor
+    exp(-alpha*beta/(alpha+beta)*(A-B)^2); result in overlap_x, step
+    in dx (zero if a power is negative or the prefactor is below 1.d-6).
 
     Called by:
 

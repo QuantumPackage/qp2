@@ -19,6 +19,14 @@ program casscf
 end
 
 subroutine run
+  BEGIN_DOC
+  ! CASSCF iterations. Each iteration calls run_stochastic_cipsi and
+  ! then replaces the orbitals by NewOrbs (mo_label "MCSCF"). The
+  ! convergence is decided by criterion_casscf: "energy" compares
+  ! dabs(energy_improvement) with thresh_scf, "gradients" compares
+  ! norm_grad_vec2 with thresh_scf, "e_pt2" compares the variation of
+  ! the E+PT2 energies with thresh_casscf.
+  END_DOC
   implicit none
   double precision               :: energy_old, energy, pt2_max_before,delta_E
   logical                        :: converged,state_following_casscf_cipsi_save

@@ -43,6 +43,14 @@ END_PROVIDER
 &BEGIN_PROVIDER [double precision, ao_expo_phase_ord_transp, (4, ao_prim_num_max, ao_num)]
 
   implicit none
+  BEGIN_DOC
+  ! Transposed, sorted cGTO primitive data.
+  ! ao_expo_cgtos_ord_transp(i,j) is the complex exponent of the
+  ! i-th primitive of the j-th |AO|. Components 1 to 3 of
+  ! ao_expo_pw_ord_transp are the plane wave part, component 4 its
+  ! squared norm; ao_expo_phase_ord_transp uses the same layout
+  ! for the phase and the total phase.
+  END_DOC
 
   integer :: i, j, m
 
@@ -68,6 +76,13 @@ END_PROVIDER
 &BEGIN_PROVIDER [double precision, ao_expo_phase_ord, (4, ao_num, ao_prim_num_max)]
 
   implicit none
+  BEGIN_DOC
+  ! cGTO primitives of each |AO|, sorted by increasing real part
+  ! of the exponent. Gives the complex exponent (ao_expo +
+  ! i*ao_expo_im), the coefficients ao_coef_norm_cgtos, the plane
+  ! wave part and the phase; component 4 of the last two is the
+  ! squared norm of the plane wave part and the total phase.
+  END_DOC
 
   integer          :: i, j, m
   integer          :: iorder(ao_prim_num_max)
@@ -119,6 +134,9 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, ao_coef_cgtos_norm_ord_transp, (ao_prim_num_max, ao_num)]
 
   implicit none
+  BEGIN_DOC
+  ! Transposed :c:data:`ao_coef_norm_cgtos_ord`
+  END_DOC
 
   integer :: i, j
 
@@ -136,6 +154,14 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
 
   implicit none
+  BEGIN_DOC
+  ! Coefficients of the cGTO |AO|s, including the |AO|
+  ! normalization, as :c:data:`ao_coef_normalized` does for
+  ! real |AO|s. The self overlap of a primitive combines two
+  ! overlap_cgaussian_xyz integrals, one with the complex Gaussian
+  ! and one with its conjugate. The contracted |AO| is normalized
+  ! when ao_normalized is set.
+  END_DOC
 
   integer          :: i, j, k, ii, m, powA(3), nz
   double precision :: norm

@@ -419,8 +419,6 @@ Subroutines / functions
 
        * :c:func:`h_s2_u_0_nstates_zmq`
        * :c:func:`h_u_0_nstates_zmq`
-       * :c:func:`zmq_pt2`
-       * :c:func:`zmq_selection`
 
     Calls:
 
@@ -525,9 +523,6 @@ Subroutines / functions
        * :c:func:`davidson_csf_run_slave`
        * :c:func:`davidson_nos2_run_slave`
        * :c:func:`davidson_run_slave`
-       * :c:func:`run_pt2_slave_large`
-       * :c:func:`run_pt2_slave_small`
-       * :c:func:`run_selection_slave`
 
     Calls:
 
@@ -562,7 +557,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`wait_for_next_state`
        * :c:func:`wait_for_state`
        * :c:func:`wait_for_states`
 
@@ -596,11 +590,6 @@ Subroutines / functions
        * :c:func:`davidson_nos2_run_slave`
        * :c:func:`davidson_run_slave`
        * :c:func:`end_parallel_job`
-       * :c:func:`pt2_collector`
-       * :c:func:`run_pt2_slave_large`
-       * :c:func:`run_pt2_slave_small`
-       * :c:func:`run_selection_slave`
-       * :c:func:`selection_collector`
 
  
 .. c:function:: void get_task_from_taskserver(void)
@@ -678,8 +667,6 @@ Subroutines / functions
 
        * :c:func:`h_s2_u_0_nstates_zmq`
        * :c:func:`h_u_0_nstates_zmq`
-       * :c:func:`zmq_pt2`
-       * :c:func:`zmq_selection`
 
     Calls:
 
@@ -887,13 +874,6 @@ Subroutines / functions
        * :c:data:`is_zmq_slave`
        * :c:data:`qp_run_address`
 
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_slave_cipsi`
-
     Calls:
 
     .. hlist::
@@ -943,25 +923,6 @@ Subroutines / functions
        * :c:data:`zmq_state`
 
  
-.. c:function:: void wait_for_next_state(void)
-
-
-    File : :file:`zmq/utils.irp.f`
-
-    .. code:: fortran
-
-        subroutine wait_for_next_state(state)
-
-
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`end_zmq_sub_socket`
-
- 
 .. c:function:: void wait_for_state(void)
 
 
@@ -993,13 +954,6 @@ Subroutines / functions
 
 
     Wait for the ZMQ state to be ready
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_slave_main`
 
     Calls:
 

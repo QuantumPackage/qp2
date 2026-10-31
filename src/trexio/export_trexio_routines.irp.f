@@ -1,6 +1,14 @@
 subroutine export_trexio_subroutine(update,full_path)
   use trexio
   implicit none
+   BEGIN_DOC
+   ! Writes the wave function and, per the export_*
+   ! providers, the basis, MOs, integrals and density
+   ! matrices to one TREXIO file per state, the first
+   ! named by trexio_filename. With update, existing
+   ! files are opened for update instead of rewritten;
+   ! full_path makes the path absolute.
+   END_DOC
 
   logical, intent(in)            :: update, full_path
   integer(trexio_t), allocatable :: f(:) ! TREXIO file handle

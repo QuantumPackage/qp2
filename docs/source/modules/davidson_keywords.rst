@@ -131,7 +131,6 @@ Providers
        * :c:data:`ci_electronic_energy`
        * :c:data:`ci_energy`
        * :c:data:`psi_energy`
-       * :c:data:`sxeigenvec`
 
  
 .. c:var:: double threshold_davidson_pt2

@@ -4,6 +4,15 @@ subroutine ccsd_par_t_space(nO,nV,t1,t2,energy)
 
   implicit none
 
+  BEGIN_DOC
+  ! (T) correction to the CCSD energy (CCSD(T)), in spatial orbitals
+  ! (closed shell systems). form_w and form_v build the W and V
+  ! triples from T1 and T2, integrals and f_o, f_v from the
+  ! cc_space_* module providers. energy is the sum over i,j,k,a,b,c
+  ! of (4W(a,b,c)+W(b,c,a)+W(c,a,b))*(V(a,b,c)-V(c,b,a)) /
+  ! (f_o(i)+f_o(j)+f_o(k)-f_v(a)-f_v(b)-f_v(c)), divided by 3.
+  END_DOC
+
   integer, intent(in)           :: nO,nV
   double precision, intent(in)  :: t1(nO, nV)
   double precision, intent(in)  :: t2(nO, nO, nV, nV)
@@ -42,6 +51,14 @@ end
 subroutine form_w(nO,nV,t2,W)
 
   implicit none
+
+  BEGIN_DOC
+  ! Builds W(i,j,k,a,b,c) for the (T) correction: sums T2 amplitudes
+  ! against the vvvo integrals (d over virtuals, positive sign) and
+  ! against the vooo integrals (l over occupied orbitals, negative
+  ! sign), six index patterns each. Integrals from the cc_space_*
+  ! module providers.
+  END_DOC
 
   integer, intent(in)           :: nO,nV
   double precision, intent(in)  :: t2(nO, nO, nV, nV)
@@ -95,6 +112,13 @@ subroutine form_v(nO,nV,t1,w,v)
 
 implicit none
 
+  BEGIN_DOC
+  ! Builds V(i,j,k,a,b,c) for the (T) correction: W(i,j,k,a,b,c)
+  ! plus the three terms coupling T1 to the vvoo integrals,
+  ! v_vvoo(b,c,j,k)*t1(i,a) + v_vvoo(a,c,i,k)*t1(j,b) +
+  ! v_vvoo(a,b,i,j)*t1(k,c). Integrals from the cc_space_* providers.
+  END_DOC
+
   integer, intent(in)           :: nO,nV
   double precision, intent(in)  :: t1(nO, nV)
   double precision, intent(in)  :: W(nO, nO, nO, nV, nV, nV)
@@ -127,6 +151,15 @@ end
 subroutine ccsd_par_t_space_v2(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
 
   implicit none
+
+  BEGIN_DOC
+  ! (T) correction to the CCSD energy (CCSD(T)), in spatial orbitals
+  ! (closed shell systems), OpenMP version of ccsd_par_t_space. The
+  ! integrals and f_o, f_v are passed as arguments and permuted into
+  ! work arrays; the W and V slices for one (i,j,k) are built with
+  ! form_w_ijk and form_v_ijk. energy is the same (T) sum, divided
+  ! by 3.
+  END_DOC
 
   integer, intent(in)           :: nO,nV
   double precision, intent(in)  :: t1(nO,nV), f_o(nO), f_v(nV)
@@ -279,6 +312,13 @@ end
 subroutine form_w_ijk(nO,nV,i,j,k,T_vvoo,T_ovvo,X_vvvo,X_ovoo,W)
 
   implicit none
+
+  BEGIN_DOC
+  ! Computes the W(a,b,c) slice for one (i,j,k) ooo triple of the
+  ! (T) correction, i.e. W(i,j,k,::,::,::) of form_w, from the
+  ! permuted T2 work arrays T_vvoo, T_ovvo and the integral work
+  ! arrays X_vvvo, X_ovoo, using BLAS dgemm.
+  END_DOC
 
   integer, intent(in)           :: nO,nV,i,j,k
   !double precision, intent(in) :: t2(nO,nO,nV,nV)
@@ -468,6 +508,13 @@ end
 subroutine form_v_ijk(nO,nV,i,j,k,T_vo,X_vvoo,w,v)
 
 implicit none
+
+  BEGIN_DOC
+  ! Computes the V(a,b,c) slice for one (i,j,k) ooo triple of the
+  ! (T) correction: V(a,b,c) = W(a,b,c) + X_vvoo(b,c,k,j)*T_vo(a,i)
+  ! + X_vvoo(a,c,k,i)*T_vo(b,j) + X_vvoo(a,b,j,i)*T_vo(c,k), OpenMP
+  ! parallel over a,b,c.
+  END_DOC
 
   integer, intent(in)           :: nO,nV,i,j,k
   !double precision, intent(in)  :: t1(nO,nV)

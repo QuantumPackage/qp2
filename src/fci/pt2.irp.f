@@ -29,6 +29,14 @@ end program pt2
 
 subroutine run
   implicit none
+  BEGIN_DOC
+  ! Main computation of the |pt2| program. Computes the |PT2|
+  ! correction of the :option:`determinants n_states` wave functions
+  ! stored in the |EZFIO| directory. If :option:`perturbation do_pt2`
+  ! is |true|, the stochastic |PT2| is computed; otherwise an
+  ! approximate value is obtained from a determinant selection. The
+  ! energies are printed and saved in the |EZFIO| directory.
+  END_DOC
   use selection_types
   integer                        :: i,j,k
   logical, external              :: detEq

@@ -32,6 +32,14 @@
 
 
 program debug_hessian_list_opt
+  BEGIN_DOC
+  ! Debug program for the orbital hessian, restricted to the active
+  ! orbitals list_act (m = dim_list_act_orb orbitals, n =
+  ! m*(m-1)/2 rotation pairs). For optimization_method 'full' or
+  ! 'diag', compares the hessian computed by the current code
+  ! (hessian_list_opt or diag_hessian_list_opt) with the original
+  ! implementation (first_hessian_list_opt or first_diag_hessian_list_opt).
+  END_DOC
 
   implicit none
 

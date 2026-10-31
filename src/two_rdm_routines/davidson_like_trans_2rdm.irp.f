@@ -554,6 +554,14 @@ end
 subroutine update_keys_values_n_states_trans(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
  use omp_lib
  implicit none
+ BEGIN_DOC
+ ! Adds the buffered contributions to the transition
+ ! two-rdm big_array: keys(1:4,i) gives the orbital
+ ! indices (h1,h2,p1,p2) of the element, and
+ ! values(istate,jstate,i) is added to
+ ! big_array(h1,h2,p1,p2,istate,jstate) for all pairs of
+ ! states, under the OpenMP lock lock_2rdm.
+ END_DOC
  integer, intent(in) :: n_st,nkeys,dim1
  integer, intent(in) :: keys(4,nkeys)
  double precision, intent(in) :: values(n_st,n_st,nkeys)

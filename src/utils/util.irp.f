@@ -1,5 +1,8 @@
 logical function isnan(x)
   implicit none
+  BEGIN_DOC
+  ! Return .true. if x is NaN (the test x /= x is true only for NaN).
+  END_DOC
   double precision :: x
   isnan = x /= x
 end
@@ -426,6 +429,14 @@ end
 
 subroutine v2_over_x(v,x,res)
 
+  BEGIN_DOC
+  ! Store in res the root of y**2 + x*y = v**2 with the sign of
+  ! x (res = 0 if v = 0); the value is finite at x = 0, where
+  ! it equals abs(v).
+  ! res is a regularized stand-in for v**2/x (author-confirmed
+  ! 2026-10-31); it differs from v**2/x at finite x by design;
+  ! no caller in src/ today.
+  END_DOC
   !BEGIN_DOC
   ! Two by two diagonalization to avoid the divergence in v^2/x when x goes to 0
   !END_DOC
@@ -446,6 +457,7 @@ subroutine v2_over_x(v,x,res)
   if (delta_E < 0.d0) then
       tmp = -tmp
   endif
+  ! the sign of the square root follows the sign of x
   res = 0.5d0 * (tmp - delta_E)
 
 end
@@ -454,6 +466,12 @@ end
 
 subroutine check_sym(A, n)
 
+  BEGIN_DOC
+  ! Print two diagnostics of the matrix A: the sum of squares
+  ! of A(j,i) - A(i,j) over i < j (printed as "deviation from
+  ! sym") and the sum of squares of A(j,i) over the same
+  ! positions (printed as "norm"). A is not modified.
+  END_DOC
   implicit none
   integer,          intent(in)  :: n
   double precision, intent(in)  :: A(n,n)
@@ -479,6 +497,12 @@ end subroutine check_sym
 
 subroutine sum_A_At(A, N)
 
+  BEGIN_DOC
+  ! Add the transpose of A to A in place, without a temporary
+  ! matrix: for i >= j, A(i,j) is first replaced by
+  ! A(i,j) + A(j,i), then the lower triangle is copied from the
+  ! upper one. The loops are OpenMP-parallelized.
+  END_DOC
   !BEGIN_DOC
   ! add a tensor with its transpose without a temporary tensor
   !END_DOC
@@ -515,6 +539,13 @@ end
 
 subroutine sub_A_At(A, N)
 
+  BEGIN_DOC
+  ! Subtract the transpose of A from A in place, without a
+  ! temporary matrix: for i >= j, A(i,j) is first replaced by
+  ! A(i,j) - A(j,i), which sets the diagonal to 0, then the
+  ! lower triangle is set to the negative of the corresponding
+  ! upper element. The loops are OpenMP-parallelized.
+  END_DOC
   !BEGIN_DOC
   ! substruct a tensor with its transpose without a temporary tensor
   !END_DOC

@@ -9,6 +9,9 @@ sort_wf
  
  
  
+ Writes to the file <ezfio_filename>.wf_sorted the amplitudes 
+ |c_i/c_1| of the wave function sorted by contribution to the 
+ norm, read from the |EZFIO| directory, one line per determinant. 
  
  Needs: 
  

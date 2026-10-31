@@ -9,6 +9,11 @@ attachement_orb
  
  
  
+ Writes the dettachment and attachment orbitals of the second 
+ state, eigenvectors of the difference between the spin-summed 
+ one-electron density matrices of the first and second states, 
+ to the Molden file <ezfio_filename>.attachement.mol. The wave 
+ function of the states must be stored in the |EZFIO| directory. 
  
  Needs: 
  

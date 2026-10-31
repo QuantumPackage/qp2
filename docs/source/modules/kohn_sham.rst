@@ -46,7 +46,6 @@ Programs
 -------- 
  
  * :ref:`ks_scf` 
- * :ref:`print_mos` 
  
 Providers 
 --------- 
@@ -62,6 +61,12 @@ Providers
         double precision, allocatable	:: ao_potential_beta_xc	(ao_num,ao_num)
 
 
+    AO-basis (ao_num x ao_num) exchange/correlation potential for
+    alpha and beta electrons (both provided in this block); added to
+    the KS Fock matrix in fock_matrix_ks.irp.f. If same_xc_func,
+    copies potential_xc_alpha_ao / potential_xc_beta_ao at state
+    index 1; otherwise sums potential_x_*_ao and potential_c_*_ao
+    at state index 1.
 
     Needs:
 
@@ -94,6 +99,12 @@ Providers
         double precision, allocatable	:: ao_potential_beta_xc	(ao_num,ao_num)
 
 
+    AO-basis (ao_num x ao_num) exchange/correlation potential for
+    alpha and beta electrons (both provided in this block); added to
+    the KS Fock matrix in fock_matrix_ks.irp.f. If same_xc_func,
+    copies potential_xc_alpha_ao / potential_xc_beta_ao at state
+    index 1; otherwise sums potential_x_*_ao and potential_c_*_ao
+    at state index 1.
 
     Needs:
 
@@ -219,6 +230,11 @@ Providers
         double precision	:: e_correlation_dft	
 
 
+    DFT correlation energy: energy_c(1), i.e. the correlation
+    energy at state index 1 for the functional named by
+    correlation_functional (general provider energy_c in
+    dft_one_e/e_xc_general.irp.f). Added to KS_energy in
+    ks_enery.irp.f.
 
     Needs:
 
@@ -246,6 +262,11 @@ Providers
         double precision	:: e_exchange_dft	
 
 
+    DFT exchange energy: energy_x(1), i.e. the exchange energy at
+    state index 1 for the functional named by exchange_functional,
+    scaled by (1 - HF_exchange) (general provider energy_x in
+    dft_one_e/e_xc_general.irp.f). Added to KS_energy in
+    ks_enery.irp.f.
 
     Needs:
 
@@ -638,6 +659,15 @@ Subroutines / functions
         subroutine check_coherence_functional
 
 
+    ks_scf start-up check: stop with a diagnostic if
+    exchange_functional or correlation_functional is "None" or
+    contains the substring "short_range".
+    TODO(doc): intent unknown to the author (author, 2026-10-31).
+    The code literally stops when a functional is "None" or
+    contains the substring "short_range"; in-tree functionals are
+    named sr_*, so the substring branch is dead for them, and the
+    diagnostic text is copy-pasted from
+    kohn_sham_rs/rs_ks_scf.irp.f (there the test is "sr").
 
     Needs:
 
@@ -704,30 +734,6 @@ Subroutines / functions
        * :c:data:`fock_matrix_ao_alpha`
        * :c:data:`mo_coef`
        * :c:data:`mo_label`
-
- 
-.. c:function:: void g(void)
-
-
-    File : :file:`print_mos.irp.f`
-
-    .. code:: fortran
-
-        double precision function g(x,alpha)
-
-
-
- 
-.. c:function:: void gtt(void)
-
-
-    File : :file:`print_mos.irp.f`
-
-    .. code:: fortran
-
-        double precision function gtt(x,alpha)
-
-
 
  
 .. c:function:: void run(void)

@@ -262,6 +262,12 @@ subroutine compute_tau_spin(nO,nV,t1,t2,tau)
 
   implicit none
 
+  BEGIN_DOC
+  ! CCSD tau intermediate in spin orbitals:
+  ! tau(i,j,a,b) = t2(i,j,a,b) + t1(i,a)*t1(j,b)
+  !               - t1(i,b)*t1(j,a),
+  ! i,j occupied and a,b virtual spin orbitals.
+  END_DOC
   integer,intent(in)            :: nO,nV
   double precision,intent(in)   :: t1(nO,nV)
   double precision,intent(in)   :: t2(nO,nO,nV,nV)
@@ -296,6 +302,12 @@ subroutine compute_tau_t_spin(nO,nV,t1,t2,tau_t)
 
   implicit none
 
+  BEGIN_DOC
+  ! CCSD tau_t intermediate in spin orbitals:
+  ! tau_t(i,j,a,b) = t2(i,j,a,b) + 0.5*(t1(i,a)*t1(j,b)
+  !                  - t1(i,b)*t1(j,a)),
+  ! i,j occupied and a,b virtual spin orbitals.
+  END_DOC
   integer,intent(in)            :: nO,nV
   double precision,intent(in)   :: t1(nO,nV)
   double precision,intent(in)   :: t2(nO,nO,nV,nV)
@@ -330,6 +342,13 @@ subroutine compute_r1_spin(nO,nV,t1,t2,f_o,f_v,Fov,cF_oo,cF_ov,cF_vv,v_oovo,v_ov
 
   implicit none
 
+  BEGIN_DOC
+  ! CCSD spin-orbital residual r1(i,a) for the T1 amplitudes,
+  ! from t1, t2, the Fock matrix diagonal f_o, f_v, Fov and the
+  ! cF_oo, cF_ov, cF_vv intermediates. The result is
+  ! (f_o(i)-f_v(a))*t1(i,a) minus the accumulated terms,
+  ! which start from Fov(i,a).
+  END_DOC
   integer,intent(in)            :: nO,nV
   double precision,intent(in)   :: t1(nO,nV)
   double precision,intent(in)   :: t2(nO,nO,nV,nV)
@@ -513,6 +532,14 @@ subroutine compute_r2_spin(nO,nV,t1,t2,tau,f_o,f_v,cF_oo,cF_ov,cF_vv,cW_oooo,cW_
 
   implicit none
 
+  BEGIN_DOC
+  ! CCSD spin-orbital residual r2(i,j,a,b) for the T2
+  ! amplitudes, from t1, t2, tau, the Fock matrix diagonal f_o,
+  ! f_v and the cF_oo, cF_ov, cF_vv, cW_oooo and cW_ovvo
+  ! intermediates. The result is
+  ! (f_o(i)+f_o(j)-f_v(a)-f_v(b))*t2(i,j,a,b) minus the
+  ! accumulated terms, which start from v_oovv(i,j,a,b).
+  END_DOC
   integer,intent(in)            :: nO,nV
   double precision,intent(in)   :: cF_oo(nO,nO)
   double precision,intent(in)   :: cF_ov(nO,nV)
@@ -1071,6 +1098,13 @@ subroutine use_cF_oo(nO,nV,t1,t2,tau_t,F_oo,F_ov,v_ooov,v_oovv,r1,r2)
 
   implicit none
 
+  BEGIN_DOC
+  ! Apply the CCSD cF_oo intermediate to the spin-orbital
+  ! residuals r1 and r2, modified in place:
+  ! r1(i,a) -= sum_m cF_oo(m,i)*t1(m,a),
+  ! r2(i,j,a,b) += sum_m cF_oo(m,i)*t2(j,m,a,b)
+  !                 - cF_oo(m,j)*t2(i,m,a,b).
+  END_DOC
   integer,intent(in)              :: nO,nV
   double precision, intent(in)    :: t1(nO,nV), t2(nO,nO,nV,nV), tau_t(nO,nO,nV,nV)
   double precision, intent(in)    :: F_oo(nO,nV), F_ov(nO,nV)
@@ -1164,6 +1198,14 @@ subroutine use_cF_ov(nO,nV,t1,t2,F_ov,v_oovv,r1,r2)
 
   implicit none
 
+  BEGIN_DOC
+  ! Apply the CCSD cF_ov intermediate to the spin-orbital
+  ! residuals r1 and r2, modified in place:
+  ! r1(i,a) += sum t2(i,m,a,e)*cF_ov(m,e),
+  ! r2(i,j,a,b) -= 0.5*sum [t2(i,j,a,e)*t1(m,b)
+  !   - t2(i,j,b,e)*t1(m,a) + t2(i,m,a,b)*t1(j,e)
+  !   - t2(j,m,a,b)*t1(i,e)]*cF_ov(m,e).
+  END_DOC
   integer, intent(in)             :: nO,nV
   double precision, intent(in)    :: t1(nO,nV), t2(nO,nO,nV,nV)
   double precision, intent(in)    :: F_ov(nO,nV), v_oovv(nO,nO,nV,nV)
@@ -1317,6 +1359,11 @@ subroutine use_cF_vv(nO,nV,t1,t2,r1,r2)
 
   implicit none
 
+  BEGIN_DOC
+  ! Intended to apply the cF_vv intermediate to the
+  ! spin-orbital residuals r1 and r2. The compute_cF_vv
+  ! call is commented out, so r1 and r2 are left unchanged.
+  END_DOC
   integer, intent(in)             :: nO,nV
   double precision, intent(in)    :: t1(nO,nV), t2(nO,nO,nV,nV)
 
@@ -1339,6 +1386,13 @@ subroutine use_cW_vvvf(nO,nV,t1,t2,tau,v_oovv,r2)
 
   implicit none
 
+  BEGIN_DOC
+  ! Apply the CCSD cW_vvvv intermediate to the spin-orbital
+  ! residual r2, modified in place: for each f, the f-slice
+  ! cW_vvvf(a,b,e) = cW_vvvv(a,b,e,f) is built by
+  ! compute_cW_vvvf from the integral slices v_vvvf and v_vovf,
+  ! and r2(i,j,a,b) += 0.5*sum_e tau(i,j,e,f)*cW_vvvf(a,b,e).
+  END_DOC
   integer, intent(in)             :: nO,nV
   double precision, intent(in)    :: t1(nO,nV), t2(nO,nO,nV,nV), tau(nO,nO,nV,nV)
   double precision, intent(in)    :: v_oovv(nO,nO,nV,nV)
@@ -1437,6 +1491,13 @@ subroutine compute_cF_oo(nO,nV,t1,tau_t,Foo,Fov,v_ooov,v_oovv,cF_oo)
 
   implicit none
 
+  BEGIN_DOC
+  ! CCSD cF_oo intermediate in spin orbitals (i,m,n occupied,
+  ! e,f virtual spin orbitals):
+  ! cF_oo(m,i) = Foo(m,i) with zero diagonal, plus
+  ! sum_e t1(n,e)*v_ooov(m,n,i,e) + 0.5*sum_e Fov(m,e)*t1(i,e)
+  ! + 0.5*sum v_oovv(m,n,e,f)*tau_t(i,n,e,f).
+  END_DOC
   integer,intent(in)            :: nO,nV
   double precision,intent(in)   :: t1(nO,nV)
   double precision,intent(in)   :: tau_t(nO,nO,nV,nV)
@@ -1523,6 +1584,11 @@ subroutine compute_cF_ov(nO,nV,t1,Fov,v_oovv,cF_ov)
 
   implicit none
 
+  BEGIN_DOC
+  ! CCSD cF_ov intermediate in spin orbitals (m occupied,
+  ! e virtual spin orbital):
+  ! cF_ov(m,e) = Fov(m,e) + sum t1(n,f)*v_oovv(m,n,e,f).
+  END_DOC
   integer,intent(in)            :: nO,nV
   double precision,intent(in)   :: t1(nO,nV)
   double precision,intent(in)   :: Fov(nO,nV),v_oovv(nO,nO,nV,nV)
@@ -1561,6 +1627,12 @@ subroutine compute_cF_vv(nO,nV,t1,tau_t,Fov,Fvv,v_oovv,cF_vv)
 
   implicit none
 
+  BEGIN_DOC
+  ! CCSD cF_vv intermediate in spin orbitals (a,e virtual spin
+  ! orbitals): cF_vv(a,e) = Fvv(a,e) with zero diagonal, minus
+  ! 0.5*sum_m t1(m,a)*Fov(m,e), plus sum_m t1(m,f)*v_ovvv(m,a,f,e),
+  ! minus 0.5*sum tau_t(m,n,a,f)*v_oovv(m,n,e,f).
+  END_DOC
   integer,intent(in)            :: nO,nV
   double precision,intent(in)   :: t1(nO,nV)
   double precision,intent(in)   :: tau_t(nO,nO,nV,nV)
@@ -1670,6 +1742,13 @@ subroutine compute_cW_oooo(nO,nV,t1,t2,tau,v_oooo,v_ooov,v_oovv,cW_oooo)
 
   implicit none
 
+  BEGIN_DOC
+  ! CCSD cW_oooo intermediate in spin orbitals (i,j,m,n
+  ! occupied):
+  ! cW_oooo(m,n,i,j) = v_oooo(m,n,i,j)
+  !   + sum_e t1(j,e)*v_ooov(m,n,i,e) - t1(i,e)*v_ooov(m,n,j,e)
+  !   + 0.25*sum tau(i,j,e,f)*v_oovv(m,n,e,f).
+  END_DOC
   integer,intent(in)            :: nO,nV
   double precision,intent(in)   :: t1(nO,nV)
   double precision,intent(in)   :: t2(nO,nO,nV,nV)
@@ -1755,6 +1834,14 @@ subroutine compute_cW_ovvo(nO,nV,t1,t2,tau,v_ovvo,v_oovo,v_oovv,cW_ovvo)
 
   implicit none
 
+  BEGIN_DOC
+  ! CCSD cW_ovvo intermediate in spin orbitals (i,j occupied,
+  ! a,b virtual):
+  ! cW_ovvo(i,a,b,j) = v_ovvo(i,a,b,j)
+  !   + sum_f t1(j,f)*v_ovvv(i,a,b,f)
+  !   - sum_n t1(n,b)*v_oovo(i,n,a,j)
+  !   - sum (0.5*t2(j,n,f,b) + t1(j,f)*t1(n,b))*v_oovv(i,n,a,f).
+  END_DOC
   integer,intent(in)            :: nO,nV
   double precision,intent(in)   :: t1(nO,nV)
   double precision,intent(in)   :: t2(nO,nO,nV,nV)
@@ -1968,6 +2055,14 @@ subroutine compute_cW_vvvv(nO,nV,t1,t2,tau,v_vvvv,v_vovv,v_oovv,cW_vvvv)
 
   implicit none
 
+  BEGIN_DOC
+  ! CCSD cW_vvvv intermediate in spin orbitals (a,b,c,d virtual
+  ! spin orbitals). Not called by run_ccsd_spin_orb, whose
+  ! cW_vvvv contribution to r2 is applied through use_cW_vvvf.
+  ! cW_vvvv(a,b,c,d) = v_vvvv(a,b,c,d)
+  !   - sum_m t1(m,b)*v_vovv(a,m,c,d) + t1(m,a)*v_vovv(b,m,c,d)
+  !   + 0.25*sum tau(m,n,a,b)*v_oovv(m,n,c,d).
+  END_DOC
   integer,intent(in)            :: nO,nV
   double precision,intent(in)   :: t1(nO,nV)
   double precision,intent(in)   :: t2(nO,nO,nV,nV)
@@ -2078,6 +2173,13 @@ subroutine compute_cW_vvvf(nO,nV,t1,t2,tau,f,v_vvvf,v_vovf,v_oovv,cW_vvvf)
 
   implicit none
 
+  BEGIN_DOC
+  ! CCSD cW_vvvv intermediate in spin orbitals, restricted to a
+  ! fixed last index f (a,b,e virtual spin orbitals):
+  ! cW_vvvf(a,b,e) = v_vvvf(a,b,e)
+  !   - sum_m t1(m,b)*v_vovf(a,m,e) + t1(m,a)*v_vovf(b,m,e)
+  !   + 0.25*sum tau(m,n,a,b)*v_oovv(m,n,e,f).
+  END_DOC
   integer,intent(in)            :: nO,nV,f
   double precision,intent(in)   :: t1(nO,nV)
   double precision,intent(in)   :: t2(nO,nO,nV,nV)

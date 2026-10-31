@@ -467,6 +467,11 @@ subroutine read_dets(det,Nint,Ndet)
 end
 
 subroutine save_ref_determinant
+  BEGIN_DOC
+  ! Saves the reference determinant (ref_bitmask, the Hartree-Fock
+  ! determinant) as a one-determinant wave function, with coefficient
+  ! 1 for state 1, into the |EZFIO| file.
+  END_DOC
   implicit none
   use bitmasks
   double precision               :: buffer(1,N_states)
@@ -753,6 +758,10 @@ end
 
 
 logical function detEq(a,b,Nint)
+  BEGIN_DOC
+  ! Returns .true. if the determinants a and b (alpha and beta spin
+  ! bitmasks) are bit-for-bit equal over the Nint words.
+  END_DOC
   use bitmasks
   implicit none
   integer, intent(in)            :: Nint
@@ -770,6 +779,12 @@ end function
 
 
 integer function detCmp(a,b,Nint)
+  BEGIN_DOC
+  ! Returns 0, -1 or 1 if the determinants a and b are equal, and a
+  ! is smaller or greater than b. The alpha bitmask is compared from
+  ! the highest word index down, then the beta bitmask; within a
+  ! word the bitstrings are compared as integers.
+  END_DOC
   use bitmasks
   implicit none
   integer, intent(in)            :: Nint
@@ -794,6 +809,14 @@ end function
 
 
 subroutine apply_excitation(det, exc, res, ok, Nint)
+  BEGIN_DOC
+  ! Applies to det the excitation described by exc and writes the
+  ! excited determinant in res. exc uses the same encoding as
+  ! get_excitation: exc(number, hole/particle, spin).
+  ! ok is .true. only if the excitation is valid, i.e. all holes are
+  ! occupied and all particles are virtual. res is not meaningful
+  ! when ok is .false.
+  END_DOC
   use bitmasks
   implicit none
 
@@ -870,6 +893,7 @@ subroutine apply_excitation(det, exc, res, ok, Nint)
 
   ii = shiftr(h1-1,bit_kind_shift) + 1
   pos = h1-1-shiftl(ii-1,bit_kind_shift)
+  ! h1-1 (0-based orbital index) = word ii-1, bit pos within the word
   if(iand(det(ii, s1), ibset(0_bit_kind, pos)) == 0_8) return
   res(ii, s1) = ibclr(res(ii, s1), pos)
 
@@ -894,6 +918,12 @@ end subroutine
 
 
 subroutine apply_particles(det, s1, p1, s2, p2, res, ok, Nint)
+  BEGIN_DOC
+  ! Adds the particle p1 of spin s1 (skipped when p1 is 0) and the
+  ! particle p2 of spin s2 to det, and writes the result in res.
+  ! ok is .true. only if the orbital(s) were virtual. res is not
+  ! meaningful when ok is .false.
+  END_DOC
   use bitmasks
   implicit none
   integer, intent(in)            :: Nint
@@ -909,6 +939,7 @@ subroutine apply_particles(det, s1, p1, s2, p2, res, ok, Nint)
   if(p1 /= 0) then
     ii =shiftr(p1-1,bit_kind_shift) + 1
     pos = p1-1-shiftl(ii-1,bit_kind_shift)
+    ! p1-1 (0-based orbital index) = word ii-1, bit pos within the word
     if(iand(det(ii, s1), shiftl(1_bit_kind, pos)) /= 0_8) return
     res(ii, s1) = ibset(res(ii, s1), pos)
   end if
@@ -923,6 +954,12 @@ end subroutine
 
 
 subroutine apply_holes(det, s1, h1, s2, h2, res, ok, Nint)
+  BEGIN_DOC
+  ! Removes from det the electrons of the orbitals h1 of spin s1
+  ! (skipped when h1 is 0) and h2 of spin s2, and writes the result
+  ! in res. ok is .true. only if the orbital(s) were occupied. res
+  ! is not meaningful when ok is .false.
+  END_DOC
   use bitmasks
   implicit none
   integer, intent(in)            :: Nint
@@ -938,6 +975,7 @@ subroutine apply_holes(det, s1, h1, s2, h2, res, ok, Nint)
   if(h1 /= 0) then
     ii = shiftr(h1-1,bit_kind_shift) + 1
     pos = h1-1-shiftl(ii-1,bit_kind_shift)
+    ! h1-1 (0-based orbital index) = word ii-1, bit pos within the word
     if(iand(det(ii, s1), shiftl(1_bit_kind, pos)) == 0_8) return
     res(ii, s1) = ibclr(res(ii, s1), pos)
   end if
@@ -951,6 +989,11 @@ subroutine apply_holes(det, s1, h1, s2, h2, res, ok, Nint)
 end subroutine
 
 subroutine apply_particle(det, s1, p1, res, ok, Nint)
+  BEGIN_DOC
+  ! Adds the particle p1 of spin s1 to det and writes the result in
+  ! res. ok is .true. only if p1 was virtual. res is not meaningful
+  ! when ok is .false.
+  END_DOC
   use bitmasks
   implicit none
   integer, intent(in)            :: Nint
@@ -965,6 +1008,7 @@ subroutine apply_particle(det, s1, p1, res, ok, Nint)
 
   ii = shiftr(p1-1,bit_kind_shift) + 1
   pos = p1-1-shiftl(ii-1,bit_kind_shift)
+  ! p1-1 (0-based orbital index) = word ii-1, bit pos within the word
   if(iand(det(ii, s1), shiftl(1_bit_kind, pos)) /= 0_8) return
   res(ii, s1) = ibset(res(ii, s1), pos)
 
@@ -973,6 +1017,11 @@ end subroutine
 
 
 subroutine apply_hole(det, s1, h1, res, ok, Nint)
+  BEGIN_DOC
+  ! Removes from det the electron of the orbital h1 of spin s1 and
+  ! writes the result in res. ok is .true. only if h1 was occupied.
+  ! res is not meaningful when ok is .false.
+  END_DOC
   use bitmasks
   implicit none
   integer, intent(in)            :: Nint
@@ -987,6 +1036,7 @@ subroutine apply_hole(det, s1, h1, res, ok, Nint)
 
   ii = shiftr(h1-1,bit_kind_shift) + 1
   pos = h1-1-shiftl(ii-1,bit_kind_shift)
+  ! h1-1 (0-based orbital index) = word ii-1, bit pos within the word
   if(iand(det(ii, s1), shiftl(1_bit_kind, pos)) == 0_8) return
   res(ii, s1) = ibclr(res(ii, s1), pos)
 

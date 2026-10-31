@@ -25,6 +25,14 @@ end
 
 subroutine check_coherence_functional
  implicit none
+   BEGIN_DOC
+!   Start-up check: stop with a diagnostic if
+!   exchange_functional or correlation_functional is neither
+!   "None" nor contains the substring "sr", advising to use
+!   range-separated functionals or to switch to the KS_SCF
+!   program. The call from the rs_ks_scf program body is
+!   currently commented out.
+   END_DOC
  integer :: ifound_x,ifound_c
  if(exchange_functional.eq."None")then
   ifound_x = 1

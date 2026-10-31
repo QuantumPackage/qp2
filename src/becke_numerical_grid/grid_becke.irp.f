@@ -76,6 +76,30 @@ BEGIN_PROVIDER [double precision, R_gill]
 
   implicit none
 
+  BEGIN_DOC
+  ! R_gill = scaling parameter of the radial coordinates of the GILL
+  ! radial grid (rad_grid_type = "GILL"), set to 3.0
+  !
+  ! The radial distance of the j-th point around a nucleus is
+  ! $r = R_{gill} (j-1)^2 / (N_r - j + 1)^2$
+  ! with $j = 1, \ldots, N_r-1$ and $N_r$ the number of radial
+  ! points per atom. The same parameter scales the GILL radial
+  ! integration weight (factor $2 R_{gill}^3 N_r$) and is also used
+  ! by the GILL branch of the extra grid (extra_grid.irp.f).
+  !
+  ! No paper prescribes R = 3.0; it is an in-tree implementation
+  ! choice (author, 2026-10-31). Checked Gill and
+  ! Chien, J. Comput. Chem. 24 (2003) 732, DOI 10.1002/jcc.10211,
+  ! whose footnote 7 (p. 740) states "the scale factor R is
+  ! arbitrary, but the best accuracy is achieved if R reflects the
+  ! domain of r over which f(r) is large", and Chien and Gill,
+  ! J. Comput. Chem. 27 (2006) 730, DOI 10.1002/jcc.20383, which
+  ! optimizes R per element (1.10 to 2.30 in their Table 1); 3.0
+  ! is larger, so the grid extends further out. The in-tree
+  ! comment "GILL & CHIEN, 2002" is off by one year: the paper was
+  ! received 30 August 2002 and published in 2003 (Gill and
+  ! Chien).
+  END_DOC
   R_gill = 3.d0
 
 END_PROVIDER

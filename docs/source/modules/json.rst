@@ -779,6 +779,8 @@ Subroutines / functions
         subroutine json_close
 
 
+    Closes the JSON output file: writes the final closing brace,
+    closes the file on unit json_unit and frees json_unit.
 
     Needs:
 

@@ -153,6 +153,14 @@ END_PROVIDER
 
 subroutine get_det_csf_transformation(matrix, sze, i_cfg)
   implicit none
+  BEGIN_DOC
+  ! Fills matrix with the det-csf transformation matrix of
+  ! configuration i_cfg: column j (j = 1..ncsf) is the j-th CSF of the
+  ! configuration as a vector of ndet components, in the determinant
+  ! basis, the determinants being ordered as in
+  ! psi_configuration_to_psi_det_data. For a single-determinant
+  ! configuration, matrix(1,1) = 1. sze must be >= ndet and >= ncsf.
+  END_DOC
   integer, intent(in) :: sze, i_cfg
   double precision, intent(out) :: matrix(sze,sze)
 

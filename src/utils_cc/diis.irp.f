@@ -289,6 +289,13 @@ end
 subroutine update_t_ccsd(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err1,all_err2,all_t1,all_t2)
 
   implicit none
+  BEGIN_DOC
+  ! Update the CCSD amplitudes t1 and t2 in place from the residuals
+  ! r1 and r2. If cc_update_method is 'diis', t1 gets the standard
+  ! update and t2 is extrapolated with DIIS on the histories all_err2
+  ! and all_t2. If it is 'none', both get the standard update. Any
+  ! other value prints a message and leaves t1 and t2 unchanged.
+  END_DOC
 
   integer, intent(in)             :: nO,nV,nb_iter
   double precision, intent(in)    :: f_o(nO), f_v(nV)
@@ -355,6 +362,14 @@ end
 subroutine update_t_ccsd_diis(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err1,all_err2,all_t1,all_t2)
 
   implicit none
+  BEGIN_DOC
+  ! Update the CCSD amplitudes t1 and t2 in place with a single DIIS
+  ! extrapolation on the concatenated t1/t2 amplitude vector. The
+  ! error vectors computed from r1 and r2, and the amplitudes, are
+  ! first appended to the per-amplitude histories all_err1, all_err2,
+  ! all_t1 and all_t2, then the combined histories are extrapolated
+  ! and the result is split back into t1 and t2.
+  END_DOC
 
   integer, intent(in)             :: nO,nV,nb_iter
   double precision, intent(in)    :: f_o(nO), f_v(nV)
@@ -462,6 +477,13 @@ end
 subroutine update_t_ccsd_diis_v3(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err,all_t)
 
   implicit none
+  BEGIN_DOC
+  ! Update the CCSD amplitudes t1 and t2 in place with DIIS on the
+  ! concatenated t1/t2 amplitude vector, like update_t_ccsd_diis,
+  ! but with a single history buffer: all_err and all_t already hold
+  ! the combined t1/t2 errors and amplitudes, and t1 and t2 are flat
+  ! vectors.
+  END_DOC
 
   integer, intent(in)             :: nO,nV,nb_iter
   double precision, intent(in)    :: f_o(nO), f_v(nV)

@@ -1,6 +1,14 @@
 
 subroutine $subroutine_diexc(key_in, key_prev, hole_1,particl_1, hole_2, particl_2, fock_diag_tmp, i_generator, iproc_in $parameters )
   implicit none
+  BEGIN_DOC
+  ! Generate the double excitations of key_in: each pair of distinct
+  ! occupied orbitals p1 and p2, one in hole_1 and the other in hole_2,
+  ! same spin or alpha and beta, is passed once to $subroutine_diexcP,
+  ! which builds the excited determinants as two successive single
+  ! excitations (particles from particl_1 and particl_2) and hands the
+  ! keys to the $keys_work codelet. key_prev is unused.
+  END_DOC
   integer(bit_kind), intent(in)         :: key_in(N_int, 2), hole_1(N_int, 2), hole_2(N_int, 2)
   integer(bit_kind), intent(in)         :: particl_1(N_int, 2), particl_2(N_int, 2)
   integer(bit_kind)                     :: p1_mask(N_int, 2), p2_mask(N_int, 2), tmp
@@ -73,6 +81,14 @@ end subroutine
 
 subroutine $subroutine_diexcP(key_in, fs1, fh1, particl_1, fs2, fh2, particl_2, fock_diag_tmp, i_generator, iproc_in $parameters )
   implicit none
+  BEGIN_DOC
+  ! Build, for the two holes (spins fs1, fs2, orbitals fh1, fh2) of
+  ! key_in, the single-bit masks p1_mask and p2_mask, and key_mask,
+  ! key_in with both hole orbitals cleared. fh1 and fh2 are 1-based
+  ! orbital indices in the whole bitstring. Calls $subroutine_diexcOrg,
+  ! which generates the double-excited determinants and hands the keys
+  ! to the $keys_work codelet.
+  END_DOC
   integer(bit_kind), intent(in)         :: key_in(N_int, 2), particl_1(N_int, 2), particl_2(N_int, 2)
   double precision, intent(in)          :: fock_diag_tmp(2,mo_num+1)
   integer(bit_kind)                     :: p1_mask(N_int, 2), p2_mask(N_int, 2), key_mask(N_int, 2)
@@ -88,6 +104,7 @@ subroutine $subroutine_diexcP(key_in, fs1, fh1, particl_1, fs2, fh2, particl_2, 
     p2_mask(k,1) = 0_bit_kind
     p2_mask(k,2) = 0_bit_kind
   enddo
+  ! Decompose the 1-based orbital index (fh1, fh2) into word and bit position
   p1_mask(shiftr(fh1-1,bit_kind_shift) + 1, fs1) = shiftl(one,iand(fh1-1,bit_kind_size-1))
   p2_mask(shiftr(fh2-1,bit_kind_shift) + 1, fs2) = shiftl(one,iand(fh2-1,bit_kind_size-1))
 

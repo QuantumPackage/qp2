@@ -116,6 +116,12 @@ END_PROVIDER
 
  BEGIN_PROVIDER [double precision, aos_lapl_in_r_array_transp, (ao_num, n_points_final_grid,3)]
  implicit none
+ BEGIN_DOC
+ ! aos_lapl_in_r_array_transp(i,j,k) = value of the kth component of the
+ ! laplacian of the ith ao on the jth grid point
+ !
+ ! k = 1 : x, k = 2 : y, k = 3 : z
+ END_DOC
  integer :: i,j,m
  do i = 1, n_points_final_grid
   do j = 1, ao_num
@@ -247,6 +253,12 @@ END_PROVIDER
 BEGIN_PROVIDER[double precision, aos_grad_in_r_array_extra, (ao_num,n_points_extra_final_grid,3)]
 
   implicit none
+  BEGIN_DOC
+  ! aos_grad_in_r_array_extra(i,j,k) = value of the kth component of the
+  ! gradient of the ith ao on the jth grid point of the EXTRA grid
+  !
+  ! k = 1 : x, k = 2 : y, k = 3 : z
+  END_DOC
   integer          :: i, j, m
   double precision, allocatable :: aos_array(:), aos_grad_array(:,:)
 

@@ -643,6 +643,12 @@ Subroutines / functions
         subroutine routine
 
 
+    Example driver for the two non-dressed Davidson routines
+    of this module: h_mat is the provider H_matrix_all_dets
+    (|H| on the determinants of psi_det) with nuclear_repulsion
+    added to the diagonal; davidson_general is called with
+    h_mat, and davidson_general_ext_rout with hcalc_template
+    ($v = H u$). Prints the eigenvalues after each call.
 
     Needs:
 
@@ -689,6 +695,12 @@ Subroutines / functions
         subroutine test_dav_dress
 
 
+    Dressed variant of the test: H_jj is the diagonal of the
+    provider H_matrix_all_dets plus nuclear_repulsion, and
+    davidson_general_ext_rout_dressed is called with
+    hcalc_template ($v = H u$). dressing_state is 0, so the
+    zero dressing_vec does not enter H_jj in the called
+    routine. Prints the first computed energy.
 
     Needs:
 

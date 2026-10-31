@@ -321,6 +321,13 @@ end
 subroutine write_spindeterminants
   use bitmasks
   implicit none
+  BEGIN_DOC
+  ! Saves the wave function in the spindeterminants node of the
+  ! |EZFIO| file, in the independent alpha/beta form: the unique
+  ! alpha and beta determinants, and the sparse coefficient matrix
+  ! (rows, columns, values) of the bilinear form
+  ! $D_\alpha^\dagger C D_\beta$.
+  END_DOC
   integer(8), allocatable        :: tmpdet(:,:)
   integer                        :: N_int2
   integer                        :: i,j,k
@@ -369,6 +376,14 @@ end
 subroutine read_spindeterminants
   use bitmasks
   implicit none
+  BEGIN_DOC
+  ! Reads the wave function from the spindeterminants node of the
+  ! |EZFIO| file: the unique alpha and beta determinants and the
+  ! sparse coefficient matrix (rows, columns, values) of the
+  ! bilinear form $D_\alpha^\dagger C D_\beta$, then calls
+  ! :c:func:`wf_of_psi_bilinear_matrix` to fill
+  ! :c:data:`psi_det` and :c:data:`psi_coef`.
+  END_DOC
   integer                        :: k
 
   call ezfio_get_spindeterminants_n_det(N_det)
