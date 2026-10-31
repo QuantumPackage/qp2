@@ -63,6 +63,28 @@ module c_functions
     end function
   end interface
 
+! macOS memory probes (see c_funcs.c). The C implementations only exist on
+! macOS; the declarations are harmless elsewhere (never called there).
+! (c_long_long rather than c_int64: gfortran >= 16 fails to resolve
+!  c_int64 in interface bodies of a module.)
+interface
+    integer(c_long_long) function qp_phys_mem_bytes() bind(C)
+      use iso_c_binding
+    end function
+  end interface
+
+interface
+    integer(c_long_long) function qp_rss_bytes() bind(C)
+      use iso_c_binding
+    end function
+  end interface
+
+interface
+    integer(c_long_long) function qp_vsize_bytes() bind(C)
+      use iso_c_binding
+    end function
+  end interface
+
 contains
 
   integer function atoi(a)

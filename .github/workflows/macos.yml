@@ -1,0 +1,26 @@
+# macOS build check on the self-hosted runner (qp2-mini-m1, M1 Mac mini).
+# Build-only: all C/Fortran targets via `ninja all`. The OCaml tools target
+# is intentionally not built — the in-tree opampack (OCaml 4.12, 2023) is
+# stale on every platform; see ci/macos-ci.sh.
+name: QP macOS
+
+on:
+  push:
+    branches: [master, dev-stable]
+  pull_request:
+    branches: [master, dev-stable]
+
+concurrency:
+  group: macos-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: recursive
+      - name: Configure and build
+        run: bash ci/macos-ci.sh

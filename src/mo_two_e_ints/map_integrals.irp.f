@@ -278,8 +278,16 @@ double precision function get_two_e_integral(i,j,k,l,map)
 !            get_two_e_integral = res
 !          else
             real :: res
-            real, external :: sdot
-            get_two_e_integral = sdot(cholesky_mo_num, cholesky_mo_transp_sp(1,i,k), 1, cholesky_mo_transp_sp(1,j,l), 1)
+            integer :: isp
+            ! Explicit loop instead of BLAS sdot: the single-precision
+            ! Fortran-ABI sdot_ entry point is broken on arm64 macOS
+            ! (Accelerate returns 0.0), and the loop keeps this path free
+            ! of BLAS dependencies.
+            res = 0.0
+            do isp = 1, cholesky_mo_num
+               res = res + cholesky_mo_transp_sp(isp,i,k) * cholesky_mo_transp_sp(isp,j,l)
+            end do
+            get_two_e_integral = res
 !          endif
       endif
 

@@ -84,7 +84,7 @@ else
 fi
 
 if [[ -n ${c_opt} ]] ; then
-  rm --force  ${qpstopfile}
+  rm -f ${qpstopfile}
 elif [[ -n ${q_opt} ]] ; then
   if [[ -f ${qpstopfile} ]] ; then
     echo "${ezfio} was requested to stop"
