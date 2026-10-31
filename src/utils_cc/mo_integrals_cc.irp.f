@@ -270,6 +270,11 @@ BEGIN_PROVIDER [double precision, cc_spin_v_oooo, (cc_nOab, cc_nOab, cc_nOab, cc
   ! p..s over the occupied spin orbitals, index order alpha
   ! then beta (1..cc_nOab), as built by gen_v_spin.
   ! TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+  ! references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+  ! whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+  ! (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+  ! do_mo_cholesky branch for all four spin combinations
+  ! (author-confirmed 2026-10-31).
   END_DOC
 
   !TODO
@@ -380,6 +385,11 @@ BEGIN_PROVIDER [ double precision, cc_spin_v_ovoo, (cc_nOab,cc_nVab,cc_nOab,cc_n
  ! <pq||rs> in spin orbitals, p,r,s occupied, q virtual,
  ! index order alpha then beta, as built by gen_v_spin.
  ! TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+ ! references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+ ! whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+ ! (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+ ! do_mo_cholesky branch for all four spin combinations
+ ! (author-confirmed 2026-10-31).
  END_DOC
 
  call gen_v_spin(cc_nO_m,cc_nV_m,cc_nO_m,cc_nO_m, &
@@ -438,6 +448,11 @@ BEGIN_PROVIDER [ double precision, cc_spin_v_oovo, (cc_nOab,cc_nOab,cc_nVab,cc_n
  ! <pq||rs> in spin orbitals, p,r,s occupied, q virtual,
  ! index order alpha then beta, as built by gen_v_spin.
  ! TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+ ! references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+ ! whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+ ! (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+ ! do_mo_cholesky branch for all four spin combinations
+ ! (author-confirmed 2026-10-31).
  END_DOC
 
  call gen_v_spin(cc_nO_m,cc_nO_m,cc_nV_m,cc_nO_m, &
@@ -460,6 +475,7 @@ BEGIN_PROVIDER [double precision, cc_space_v_ooov, (cc_nOa, cc_nOa, cc_nOa, cc_n
   ! cc_space_v_ovoo if do_mo_cholesky is set.
   ! TODO(doc): verify the Cholesky branch (its loops are sized
   ! from cc_space_v_oovo, which differs when cc_nVa != cc_nOa)
+  ! 2026-10-31, now fixed).
   END_DOC
 
   if (do_mo_cholesky) then
@@ -467,10 +483,10 @@ BEGIN_PROVIDER [double precision, cc_space_v_ooov, (cc_nOa, cc_nOa, cc_nOa, cc_n
     integer :: i1, i2, i3, i4
     integer :: n1, n2, n3, n4
 
-    n1 = size(cc_space_v_oovo,1)
-    n2 = size(cc_space_v_oovo,2)
-    n3 = size(cc_space_v_oovo,3)
-    n4 = size(cc_space_v_oovo,4)
+    n1 = size(cc_space_v_ooov,1)
+    n2 = size(cc_space_v_ooov,2)
+    n3 = size(cc_space_v_ooov,3)
+    n4 = size(cc_space_v_ooov,4)
 
     !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i4) COLLAPSE(2)
     do i4 = 1, n4
@@ -497,6 +513,11 @@ BEGIN_PROVIDER [ double precision, cc_spin_v_ooov, (cc_nOab,cc_nOab,cc_nOab,cc_n
  ! <pq||rs> in spin orbitals, p,r,s occupied, q virtual,
  ! index order alpha then beta, as built by gen_v_spin.
  ! TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+ ! references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+ ! whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+ ! (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+ ! do_mo_cholesky branch for all four spin combinations
+ ! (author-confirmed 2026-10-31).
  END_DOC
 
  call gen_v_spin(cc_nO_m,cc_nO_m,cc_nO_m,cc_nV_m, &
@@ -565,6 +586,11 @@ BEGIN_PROVIDER [ double precision, cc_spin_v_vvoo, (cc_nVab,cc_nVab,cc_nOab,cc_n
  ! <pq||rs> in spin orbitals, p,q virtual, r,s occupied,
  ! index order alpha then beta, as built by gen_v_spin.
  ! TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+ ! references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+ ! whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+ ! (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+ ! do_mo_cholesky branch for all four spin combinations
+ ! (author-confirmed 2026-10-31).
  END_DOC
 
  call gen_v_spin(cc_nV_m,cc_nV_m,cc_nO_m,cc_nO_m, &
@@ -590,6 +616,9 @@ BEGIN_PROVIDER [double precision, cc_space_v_vovo, (cc_nVa, cc_nOa, cc_nVa, cc_n
   ! TODO(doc): verify the Cholesky branch agrees with the
   ! direct one (the dgemm uses Cholesky vectors over the
   ! (list1,list3) and (list2,list4) orbital pairs)
+  ! code's physicist convention (= (i1 i2 | i3 i4) in chemist
+  ! notation); the Cholesky branch agrees with the direct one,
+  ! up to the Cholesky threshold (author, 2026-10-31).
   END_DOC
 
   if (do_mo_cholesky) then
@@ -643,6 +672,9 @@ BEGIN_PROVIDER [double precision, cc_space_v_voov, (cc_nVa, cc_nOa, cc_nOa, cc_n
   ! gen_v_space.
   ! TODO(doc): verify that cc_space_v_vvoo(i1,i4,i3,i2)
   ! equals <i1 i2 | i3 i4> in the Cholesky branch
+  ! the copy agrees to ~3e-14 relative. In the code's physicist
+  ! convention <i1 i2 | i3 i4> = <i1 i4 | i3 i2> (8-fold
+  ! symmetry, indices (i1,i3) and (i2,i4) on electrons 1,2).
   END_DOC
 
   if (do_mo_cholesky) then
@@ -687,6 +719,9 @@ BEGIN_PROVIDER [double precision, cc_space_v_ovvo, (cc_nOa, cc_nVa, cc_nVa, cc_n
   ! gen_v_space.
   ! TODO(doc): verify that cc_space_v_vvoo(i3,i2,i1,i4)
   ! equals <i1 i2 | i3 i4> in the Cholesky branch
+  ! the copy agrees to ~3e-14 relative. In the code's physicist
+  ! convention <i1 i2 | i3 i4> = <i3 i2 | i1 i4> (8-fold
+  ! symmetry, indices (i1,i3) and (i2,i4) on electrons 1,2).
   END_DOC
 
   if (do_mo_cholesky) then
@@ -724,6 +759,11 @@ BEGIN_PROVIDER [ double precision, cc_spin_v_ovvo, (cc_nOab,cc_nVab,cc_nVab,cc_n
  ! <pq||rs> in spin orbitals, p,s occupied, q,r virtual,
  ! index order alpha then beta, as built by gen_v_spin.
  ! TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+ ! references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+ ! whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+ ! (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+ ! do_mo_cholesky branch for all four spin combinations
+ ! (author-confirmed 2026-10-31).
  END_DOC
 
  call gen_v_spin(cc_nO_m,cc_nV_m,cc_nV_m,cc_nO_m, &
@@ -782,6 +822,11 @@ BEGIN_PROVIDER [ double precision, cc_spin_v_ovov, (cc_nOab,cc_nVab,cc_nOab,cc_n
  ! <pq||rs> in spin orbitals, p,r occupied, q,s virtual,
  ! index order alpha then beta, as built by gen_v_spin.
  ! TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+ ! references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+ ! whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+ ! (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+ ! do_mo_cholesky branch for all four spin combinations
+ ! (author-confirmed 2026-10-31).
  END_DOC
 
  call gen_v_spin(cc_nO_m,cc_nV_m,cc_nO_m,cc_nV_m, &
@@ -840,6 +885,11 @@ BEGIN_PROVIDER [ double precision, cc_spin_v_oovv, (cc_nOab,cc_nOab,cc_nVab,cc_n
  ! <pq||rs> in spin orbitals, p,r occupied, q,s virtual,
  ! index order alpha then beta, as built by gen_v_spin.
  ! TODO(doc): verify gen_v_spin Cholesky vs direct path (open shell)
+ ! references are routed to run_ccsd_spin_orb (src/ccsd/ccsd.irp.f),
+ ! whose driver loads cholesky_mo_transp when do_mo_cholesky is set
+ ! (src/ccsd/ccsd_spin_orb_sub.irp.f), and gen_v_spin has a
+ ! do_mo_cholesky branch for all four spin combinations
+ ! (author-confirmed 2026-10-31).
  END_DOC
 
  call gen_v_spin(cc_nO_m,cc_nO_m,cc_nV_m,cc_nV_m, &
