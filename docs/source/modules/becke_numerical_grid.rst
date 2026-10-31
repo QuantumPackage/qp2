@@ -1580,8 +1580,8 @@ Providers
     integration weight (factor :math:`2 R_{gill}^3 N_r` ) and is also used
     by the GILL branch of the extra grid (extra_grid.irp.f).
     
-    TODO(doc): no paper prescribes R = 3.0; it is an in-tree
-    implementation choice (author, 2026-10-31). Checked Gill and
+    No paper prescribes R = 3.0; it is an in-tree implementation
+    choice (author, 2026-10-31). Checked Gill and
     Chien, J. Comput. Chem. 24 (2003) 732, DOI 10.1002/jcc.10211,
     whose footnote 7 (p. 740) states "the scale factor R is
     arbitrary, but the best accuracy is achieved if R reflects the

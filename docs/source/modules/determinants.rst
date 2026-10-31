@@ -4979,10 +4979,10 @@ Subroutines / functions
     N_miniList is the total number of kept determinants.
     fullMatch is always returned as .false.; the statements
     that would set it to .true. are commented out.
-    TODO(doc): fullMatch was an optimization removed because
-    it was wrong (author, 2026-10-31); to be checked. The
-    commented-out lines predate the 2019-01-25 initial
-    import of this repository, so no commit records it.
+    fullMatch was an optimization removed because it was wrong
+    (author, 2026-10-31). The commented-out lines predate the
+    2019-01-25 initial import of this repository, so no commit
+    records it.
 
  
 .. c:function:: void create_wf_of_psi_bilinear_matrix(void)
