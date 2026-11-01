@@ -1,6 +1,6 @@
  #!/usr/bin/env bash
  #
- # ci/macos-ci.sh — build QP2 on a macOS arm64 self-hosted runner (build only).
+ # ci/macos-ci.sh — build QP2 on a GitHub-hosted macOS arm64 runner (build only).
  #
  # Builds every C/Fortran target (`ninja all`). The OCaml tools target is NOT
  # built: the in-tree opampack ships OCaml 4.12 (2023) while the OCaml code
@@ -21,7 +21,7 @@
  # macOS-specific fixes applied here:
  #   1. qmckl: its autotools OpenMP check fails with Apple clang (the `gcc`
  #      that bare-CC resolves to on macOS). Run `./configure -i qmckl` with
- #      a PATH shim mapping gcc/g++ to Homebrew gcc-16/g++-16.
+ #      a PATH shim mapping gcc/g++ to the newest Homebrew gcc-NN/g++-NN.
  #   2. the `cmake` package downloads a nonexistent Darwin tarball (upstream
  #      404, non-fatal): find_exe picks up Homebrew's cmake instead.
  #
@@ -30,8 +30,9 @@
  # `make check` (8/8, incl. test_sdot_cpu against the system Accelerate)
  # passes on this platform, so the step completes through `make install`.
  #
- # Prerequisites on the runner (Homebrew): gfortran, gcc-16/g++-16, cmake,
- # wget, autoconf toolchain.
+ # Prerequisites: gfortran and a versioned Homebrew gcc (gcc-NN/g++-NN),
+ # installed by the workflow; cmake, wget and the autoconf toolchain ship
+ # with the GitHub runner image.
 
 set -euo pipefail
 
@@ -41,10 +42,12 @@ cd "$ROOT"
 export PATH=/opt/homebrew/bin:$PATH
 export QP_ROOT="$ROOT"
 
-echo "==> [1/4] qmckl with Homebrew gcc-16 (validation fails yet: deps not all installed)"
+echo "==> [1/4] qmckl with Homebrew gcc (validation fails yet: deps not all installed)"
+GCCC=$(ls -d /opt/homebrew/bin/gcc-* | sort -V | tail -1)
+GPPC=$(ls -d /opt/homebrew/bin/g++-* | sort -V | tail -1)
 SHIM=$(mktemp -d)
-ln -sf /opt/homebrew/bin/gcc-16 "$SHIM/gcc"
-ln -sf /opt/homebrew/bin/g++-16 "$SHIM/g++"
+ln -sf "$GCCC" "$SHIM/gcc"
+ln -sf "$GPPC" "$SHIM/g++"
 PATH="$SHIM:$PATH" ./configure -i qmckl || echo "expected: remaining dependencies not installed yet"
 rm -rf "$SHIM"
 
