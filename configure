@@ -302,12 +302,16 @@ EOF
 
     elif [[ ${PACKAGE} = gmp ]] ; then
 
+            # NOTE: computed here (outer shell), NOT in the heredoc below:
+            # the unquoted << EOF expands $GMP_TARGET at heredoc-read time,
+            # so an inner-shell assignment would never reach the command.
+            GMP_TARGET=""
+            [[ ${ARCHITECTURE} = arm64Darwin ]] && GMP_TARGET="--build=aarch64-apple-darwin --host=aarch64-apple-darwin"
+
             execute << EOF
               cd "\${QP_ROOT}"/external
               tar --bzip2 --extract --file qp2-dependencies/gmp-6.1.2.tar.bz2
               cd gmp-6.1.2
-              GMP_TARGET=""
-              [[ "${ARCHITECTURE}" = "arm64Darwin" ]] && GMP_TARGET="--build=aarch64-apple-darwin --host=aarch64-apple-darwin"
               ./configure --prefix=$QP_ROOT $GMP_TARGET && make -j 8
               make -j 8 install
 EOF
