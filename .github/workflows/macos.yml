@@ -24,6 +24,6 @@ jobs:
           submodules: recursive
       - name: Install toolchain
         run: |
-          brew install gfortran gcc
+          brew install gfortran gcc hdf5 pkg-config
       - name: Configure and build
         run: bash ci/macos-ci.sh
