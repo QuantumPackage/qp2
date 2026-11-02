@@ -364,6 +364,104 @@ end
 
 ! ---
 
+complex*16 function crint_sum_shift(n_pt_out, rho, d1, log_fact)
+
+  BEGIN_DOC
+  ! $e^{\rm log\_fact} \sum_{i\ \rm even} d_1(i) F_{i/2}(\rho)$, without
+  ! forming $e^{\rm log\_fact}$ and $F_n(\rho)$ separately: for
+  ! $\Re\rho < 0$ the scaled functions $e^{\rho} F_n(\rho)$ are multiplied
+  ! by $e^{{\rm log\_fact} - \rho}$. With complex exponents $\Re\rho$ can be
+  ! below $-709$, where $F_n(\rho)$ overflows and $e^{\rm log\_fact}$
+  ! underflows, although their product is moderate.
+  END_DOC
+
+  implicit none
+
+  integer,    intent(in)  :: n_pt_out
+  complex*16, intent(in)  :: rho, d1(0:n_pt_out), log_fact
+
+  integer                 :: i, n_max
+  complex*16              :: accu
+
+  complex*16, allocatable :: vals(:)
+
+  n_max = shiftr(n_pt_out, 1)
+  allocate(vals(0:n_max))
+
+  if(real(rho) >= 0.d0) then
+    call crint_1_vec(n_max, rho, vals)
+  else
+    call crint_1_vec_scaled(n_max, rho, vals)
+  endif
+
+  accu = d1(0) * vals(0)
+  do i = 2, n_pt_out, 2
+    accu += d1(i) * vals(shiftr(i, 1))
+  enddo
+
+  if(real(rho) >= 0.d0) then
+    crint_sum_shift = exp(log_fact) * accu
+  else
+    crint_sum_shift = exp(log_fact - rho) * accu
+  endif
+
+  deallocate(vals)
+
+  return
+end
+
+! ---
+
+subroutine crint_1_vec_scaled(n_max, rho, vals)
+
+  BEGIN_DOC
+  ! Scaled complex Boys functions $e^{\rho} F_n(\rho)$, $n = 0, \dots,
+  ! n_{max}$, for $\Re\rho < 0$ (then $|e^{\rho} F_n(\rho)| \le 1$).
+  !
+  ! $\Re\rho > -700$: crint_1_vec times $e^{\rho}$. Otherwise the asymptotic
+  ! series $e^{\rho} F_n(\rho) = -\frac{1}{2\rho} \sum_{k \ge 0}
+  ! \frac{(a-1)(a-2)\cdots(a-k)}{\rho^k}$, $a = n + 1/2$, which neglects
+  ! $e^{\rho}\Gamma(a)/(2\rho^a)$, below $10^{-300}$ there.
+  END_DOC
+
+  implicit none
+
+  integer,    intent(in)  :: n_max
+  complex*16, intent(in)  :: rho
+  complex*16, intent(out) :: vals(0:n_max)
+
+  integer                 :: n, k
+  double precision        :: a
+  double precision, parameter :: eps2 = 1.d-34
+  complex*16              :: rho_inv, term, accu
+
+  if(real(rho) > -700.d0) then
+
+    call crint_1_vec(n_max, rho, vals)
+    vals(0:n_max) = vals(0:n_max) * exp(rho)
+
+  else
+
+    rho_inv = (1.d0, 0.d0) / rho
+    do n = 0, n_max
+      a = dble(n) + 0.5d0
+      term = (1.d0, 0.d0)
+      accu = (1.d0, 0.d0)
+      do k = 1, 100
+        term = term * ((a - dble(k)) * rho_inv)
+        accu = accu + term
+        if(abs(term)**2 < eps2 * abs(accu)**2) exit
+      enddo
+      vals(n) = -0.5d0 * rho_inv * accu
+    enddo
+
+  endif
+
+  return
+end
+
+! ---
+
 subroutine crint_2_vec(n_max, rho, vals)
 
   BEGIN_DOC
