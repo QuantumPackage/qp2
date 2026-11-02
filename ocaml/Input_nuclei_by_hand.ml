@@ -175,9 +175,9 @@ nucl_coord       = %s
          nucl_num
        ) :: (
        List.init nucl_num (fun i->
-         Printf.sprintf "  %-3s  %3d %s"
+         Printf.sprintf "  %-3s  %3s %s"
           (b.nucl_label.(i)  |> Element.to_string)
-          (b.nucl_charge.(i) |> Charge.to_int )
+          (b.nucl_charge.(i) |> Charge.to_string )
           (b.nucl_coord.(i)  |> Point3d.to_string ~units:Units.Angstrom) )
       ) |> String.concat "\n"
      in
