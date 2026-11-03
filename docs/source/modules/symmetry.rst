@@ -187,10 +187,9 @@ The character table
 -------------------
 
 The group name is *the file name* of its character table. The file is read
-from ``$QP_ROOT/data/Symmetry/<name>``; :option:`pg_data_dir` overrides the
-directory. The first line of the file is ignored (some shipped files have a
-wrong first line) and the name comes from the file name. The number of
-irreps is read from the second line.
+from ``$QP_ROOT/data/Symmetry/<name>``. The first line of the file is ignored
+(some shipped files have a wrong first line) and the name comes from the
+file name. The number of irreps is read from the second line.
 
 A file column is not a geometric class. In ``C3`` there are two geometric
 classes (``C3`` and ``C3^2``) but one column; in ``T``, ``Td``, ``Oh`` and
@@ -321,19 +320,10 @@ Keywords
      - Weight threshold. An off-diagonal ``|X_g(j,i)|^2`` above it connects
        two MOs into one block; a projector weight above ``1 - pg_thresh``
        makes an MO or a determinant label definite.
-   * - :option:`pg_data_dir`
-     - empty
-     - Directory of the character tables. Empty or ``None`` means
-       ``$QP_ROOT/data/Symmetry``.
    * - :option:`auto_symmetry`
      - ``true``
      - Master switch. When false, no provider of the detection chain is
        built, the SCF/DFT report is silent, and nothing is labelled.
-   * - :option:`state_symmetry`
-     - ``true``
-     - Print the irrep of every CI state after diagonalization. It does not
-       disable :option:`irrep_states`: a printing switch must not silently
-       change a computation.
    * - :option:`irrep_states`
      - empty
      - Comma-, semicolon- or blank-separated list of irrep names to keep in
@@ -376,8 +366,9 @@ Cost
   determinant layer keeps ``pg_xg`` (0.8 MB for benzene in 6-31G, 66 MOs,
   ``|G| = 24``).
 * State table: one pass over the determinants per printed state, plus one
-  projector per family with more than one member. It is off for ``C1`` in
-  practice (one line) and can be switched off with ``state_symmetry``.
+  projector per family with more than one member. It is printed after every
+  CI run whose labels are usable; for ``C1`` every state is ``A``, so the
+  table only confirms that.
 
 Limits and failure modes
 ========================
@@ -451,21 +442,9 @@ EZFIO parameters
  
     Default: 1.e-6
  
-.. option:: pg_data_dir
- 
-    Directory holding the character tables. None (or empty) means $QP_ROOT/data/Symmetry.
- 
-    Default: None
- 
 .. option:: auto_symmetry
  
     If true, detect the molecular point group at the end of SCF/DFT and label the MOs.
- 
-    Default: True
- 
-.. option:: state_symmetry
- 
-    If true, print the irrep of each CI state after a CI calculation.
  
     Default: True
  
@@ -637,7 +616,6 @@ Providers
        :columns: 3
 
        * :c:data:`pg_class_size`
-       * :c:data:`pg_data_dir`
        * :c:data:`pg_detection_failed`
        * :c:data:`pg_elem_inv`
        * :c:data:`pg_group_name`
@@ -826,7 +804,6 @@ Providers
        :columns: 3
 
        * :c:data:`pg_class_size`
-       * :c:data:`pg_data_dir`
        * :c:data:`pg_detection_failed`
        * :c:data:`pg_elem_inv`
        * :c:data:`pg_group_name`
@@ -912,7 +889,6 @@ Providers
        :columns: 3
 
        * :c:data:`pg_class_size`
-       * :c:data:`pg_data_dir`
        * :c:data:`pg_detection_failed`
        * :c:data:`pg_elem_inv`
        * :c:data:`pg_group_name`
@@ -998,7 +974,6 @@ Providers
        :columns: 3
 
        * :c:data:`pg_class_size`
-       * :c:data:`pg_data_dir`
        * :c:data:`pg_detection_failed`
        * :c:data:`pg_elem_inv`
        * :c:data:`pg_group_name`
@@ -1018,35 +993,6 @@ Providers
        * :c:data:`pg_irrep_allowed`
        * :c:data:`pg_mo_weight`
        * :c:data:`pg_state_irrep_weight`
-
- 
-.. c:var:: char pg_data_dir
-
-
-    File : :file:`symmetry/settings.irp.f`
-
-    .. code:: fortran
-
-        character*(256)	:: pg_data_dir	
-
-
-    Directory holding the character tables. Empty or "None" means
-    ``QP_ROOT/data/Symmetry`` (see pg_data_dir_is_unset in chartab.irp.f).
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ezfio_filename`
-       * :c:data:`mpi_master`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pg_n_col`
 
  
 .. c:var:: char pg_data_sym
@@ -1113,7 +1059,6 @@ Providers
        :columns: 3
 
        * :c:data:`pg_class_size`
-       * :c:data:`pg_data_dir`
        * :c:data:`pg_detection_failed`
        * :c:data:`pg_elem_inv`
        * :c:data:`pg_group_name`
@@ -1728,7 +1673,6 @@ Providers
        :columns: 3
 
        * :c:data:`pg_class_size`
-       * :c:data:`pg_data_dir`
        * :c:data:`pg_detection_failed`
        * :c:data:`pg_elem_inv`
        * :c:data:`pg_group_name`
@@ -1848,7 +1792,6 @@ Providers
        :columns: 3
 
        * :c:data:`pg_class_size`
-       * :c:data:`pg_data_dir`
        * :c:data:`pg_detection_failed`
        * :c:data:`pg_elem_inv`
        * :c:data:`pg_group_name`
@@ -1934,7 +1877,6 @@ Providers
        :columns: 3
 
        * :c:data:`pg_class_size`
-       * :c:data:`pg_data_dir`
        * :c:data:`pg_detection_failed`
        * :c:data:`pg_elem_inv`
        * :c:data:`pg_group_name`
@@ -2172,7 +2114,6 @@ Providers
        :columns: 3
 
        * :c:data:`pg_class_size`
-       * :c:data:`pg_data_dir`
        * :c:data:`pg_detection_failed`
        * :c:data:`pg_elem_inv`
        * :c:data:`pg_group_name`
@@ -2305,7 +2246,6 @@ Providers
        :columns: 3
 
        * :c:data:`pg_class_size`
-       * :c:data:`pg_data_dir`
        * :c:data:`pg_detection_failed`
        * :c:data:`pg_elem_inv`
        * :c:data:`pg_group_name`
@@ -2704,29 +2644,6 @@ Providers
        * :c:data:`pg_rot_mat`
 
  
-.. c:var:: bool state_symmetry
-
-
-    File : :file:`symmetry/settings.irp.f`
-
-    .. code:: fortran
-
-        logical	:: state_symmetry	
-
-
-    When true, the irrep of each CI state is printed at the end of a CI
-    calculation. Default .true.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ezfio_filename`
-       * :c:data:`mpi_master`
-
-
- 
  
 Subroutines / functions 
 ----------------------- 
@@ -2862,16 +2779,9 @@ Subroutines / functions
         subroutine pg_character_table_path(group, path, ierr)
 
 
-    Build the full path of the character-table file of ``group`` and check that
-    it exists. ``ierr`` = 1 when QP_ROOT is not set and pg_data_dir is unset,
-    2 when the file does not exist. ``path`` is always the path that was tried.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pg_data_dir`
+    Build the full path ``$QP_ROOT/data/Symmetry/<group>`` and check that
+    it exists. ``ierr`` = 1 when QP_ROOT is not set, 2 when the file does
+    not exist. ``path`` is always the path that was tried.
 
     Called by:
 
@@ -2887,7 +2797,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`get_environment_variable`
-       * :c:func:`pg_data_dir_is_unset`
 
  
 .. c:function:: void pg_class_any_used(void)
@@ -3068,26 +2977,6 @@ Subroutines / functions
        * :c:func:`pg_build_candidates`
        * :c:func:`pg_elem_props`
        * :c:data:`pg_rot`
-
- 
-.. c:function:: void pg_data_dir_is_unset(void)
-
-
-    File : :file:`symmetry/chartab.irp.f`
-
-    .. code:: fortran
-
-        subroutine pg_data_dir_is_unset(dir, unset)
-
-
-    True when ``dir`` is empty or "none" in any case.
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`pg_character_table_path`
 
  
 .. c:function:: void pg_decode_kind(void)

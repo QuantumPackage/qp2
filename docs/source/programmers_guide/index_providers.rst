@@ -1246,7 +1246,6 @@ Index of Providers
     * :c:data:`pg_col_len` 
     * :c:data:`pg_col_member` 
     * :c:data:`pg_col_start` 
-    * :c:data:`pg_data_dir` 
     * :c:data:`pg_data_sym` 
     * :c:data:`pg_det_block` 
     * :c:data:`pg_det_family` 
@@ -1597,7 +1596,6 @@ Index of Providers
     * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo` 
     * :c:data:`state_av_occ_2_rdm_spin_trace_mo` 
     * :c:data:`state_average_weight` 
-    * :c:data:`state_symmetry` 
     * :c:data:`super_ci_dm` 
     * :c:data:`superci_nat_occ` 
     * :c:data:`superci_natorb` 
@@ -1988,6 +1986,7 @@ Index of Subroutines/Functions
     * :c:func:`create_wf_of_psi_bilinear_matrix` 
     * :c:func:`crint_1` 
     * :c:func:`crint_1_vec` 
+    * :c:func:`crint_1_vec_scaled` 
     * :c:func:`crint_2` 
     * :c:func:`crint_2_vec` 
     * :c:func:`crint_quad_1` 
@@ -1997,6 +1996,7 @@ Index of Subroutines/Functions
     * :c:func:`crint_smallz` 
     * :c:func:`crint_smallz_vec` 
     * :c:func:`crint_sum` 
+    * :c:func:`crint_sum_shift` 
     * :c:func:`cyclic_term_jim_bi_ortho` 
     * :c:func:`cyclic_term_mji_bi_ortho` 
     * :c:func:`d1_norm_inverse_trust_region` 
@@ -2439,6 +2439,7 @@ Index of Subroutines/Functions
     * :c:func:`give_degen_full_list` 
     * :c:func:`give_degen_full_listcore` 
     * :c:func:`give_explicit_cpoly_and_cgaussian` 
+    * :c:func:`give_explicit_cpoly_and_cgaussian_log` 
     * :c:func:`give_explicit_cpoly_and_cgaussian_x` 
     * :c:func:`give_explicit_poly_and_gaussian` 
     * :c:func:`give_explicit_poly_and_gaussian_double` 
@@ -2924,7 +2925,6 @@ Index of Subroutines/Functions
     * :c:func:`pg_col_fail` 
     * :c:func:`pg_count_tokens` 
     * :c:func:`pg_cross` 
-    * :c:func:`pg_data_dir_is_unset` 
     * :c:func:`pg_decode_kind` 
     * :c:func:`pg_det3` 
     * :c:func:`pg_det_counts` 

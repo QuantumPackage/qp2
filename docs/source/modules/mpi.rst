@@ -196,7 +196,6 @@ Providers
        * :c:data:`ormas_mstart`
        * :c:data:`ormas_n_space`
        * :c:data:`pg_ao_ok`
-       * :c:data:`pg_data_dir`
        * :c:data:`pg_det_irrep`
        * :c:data:`pg_irrep_allowed`
        * :c:data:`pg_irrep_filter`
@@ -244,7 +243,6 @@ Providers
        * :c:data:`shell_prim_num`
        * :c:data:`slater_r_power`
        * :c:data:`state_following`
-       * :c:data:`state_symmetry`
        * :c:data:`target_energy`
        * :c:data:`thresh_extra_grid`
        * :c:data:`thresh_grid`

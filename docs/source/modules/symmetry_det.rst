@@ -132,9 +132,10 @@ and :ref:`fci` after diagonalization. It prints one line per state::
     symmetry:    state      energy (Ha)       S^2  irrep   purity
     symmetry:         1    -76.1140581951    0.0000  A1   1.000
 
-and nothing when :option:`symmetry state_symmetry` is false or when the
-detection failed. The :math:`S^2` column is the caller's value, so a symmetry
-label and a spin label are always read together.
+and nothing when the detection failed or was not requested. The
+:math:`S^2` column is the caller's value, so a symmetry label and a spin
+label are always read together. There is no printing switch: the table is
+part of a CI run whose labels are usable.
 
 The table uses the exact weights above, with the projectors for the families
 of size greater than one. For a pure determinant the diagonal is a Kronecker
@@ -194,8 +195,6 @@ whose known irrep is in the list. The semantics are deliberately narrow:
   with several calls shows it several times;
 * every state whose known irrep is rejected prints
   ``symmetry: irrep filter: state <k> is <name>, not in irrep_states``;
-* :option:`symmetry state_symmetry` does not disable the filter: a printing switch
-  must not silently change a computation;
 * CSF-based Davidson (``csf_based = true``) cannot be filtered. It prints
   ``symmetry: irrep_states is ignored when csf_based is true`` and runs
   unchanged;
@@ -1838,10 +1837,10 @@ Subroutines / functions
     names ``N_det`` and the two stage-2 functions only, so a caller can test
     it before paying for anything.
     
-    It does not test :c:data:`state_symmetry`: that keyword means "print the
-    table", and a printing switch must not disable the irrep filter
-    (SPEC.md 9.4f A1). :c:data:`auto_symmetry` stays the master switch, through
-    :c:func:`pg_symmetry_ready`.
+    It has no printing switch to test: the state table is always printed
+    when the labels are usable, and a printing decision must not disable
+    the irrep filter (SPEC.md 9.4f A1). :c:data:`auto_symmetry` stays the
+    master switch, through :c:func:`pg_symmetry_ready`.
 
     Needs:
 
@@ -1861,12 +1860,13 @@ Subroutines / functions
         subroutine pg_print_state_irreps(energy, s2)
 
 
-    Prints the irrep of each CI state. Never stops. :c:data:`state_symmetry` = F
-    is silent; a failed detection has already printed its reason. A state
-    with no definite irrep is described by its irrep probabilities, which
-    are exact for the stored CI space even when the MO basis is not
-    symmetry adapted (NOTES section 10). ``energy`` and ``s2`` are the
-    caller's arrays, at least ``N_states`` long.
+    Prints the irrep of each CI state. Never stops. It is silent when the
+    detection was not requested or failed: :c:func:`pg_symmetry_ready` returns
+    .false. and the failure has already printed its reason. A state with no
+    definite irrep is described by its irrep probabilities, which are exact
+    for the stored CI space even when the MO basis is not symmetry adapted
+    (NOTES section 10). ``energy`` and ``s2`` are the caller's arrays, at
+    least ``N_states`` long.
 
     Needs:
 
@@ -1876,7 +1876,6 @@ Subroutines / functions
        * :c:data:`mo_num`
        * :c:data:`n_det`
        * :c:data:`n_states`
-       * :c:data:`state_symmetry`
 
     Calls:
 
