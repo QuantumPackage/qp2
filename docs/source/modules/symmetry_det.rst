@@ -128,7 +128,7 @@ The state table
 ``pg_print_state_irreps(energy, s2)`` is called by :ref:`cis`, :ref:`cisd`
 and :ref:`fci` after diagonalization. It prints one line per state::
 
-    symmetry: state irreps (N_det = 679)
+    symmetry: state irreps: group C2v, 4 irreps, N_det = 679
     symmetry:    state      energy (Ha)       S^2  irrep   purity
     symmetry:         1    -76.1140581951    0.0000  A1   1.000
 

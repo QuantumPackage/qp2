@@ -84,13 +84,29 @@ the mixed |MO| count
 per-irrep weights of every state and the gates D1-D6. Run it after a |CI|
 calculation to inspect a state in detail.
 
+Linear molecules
+----------------
+
+A collinear molecule takes a separate branch. Its group is not searched: every
+plane through the axis maps each nucleus to itself, so the element key used for
+the other groups cannot tell those operations apart, and the group is built
+analytically instead. ``Cinfv`` is modelled as ``C31v`` (62 elements, 17
+classes) and ``Dinfh`` as ``C31v x {E, sigma_h}`` (124, 34), renamed to the
+chemical group before the table is opened. The labels are the usual
+``Sigma_g+``, ``Sigma_u-``, ``Pi_g``, ``Delta_u``, ... because the sampled
+rotation order, 31, is the largest the detector scans: the continuous
+rotations act as the identity on a ``Sigma`` state and mix the two components
+of a degenerate pair. A state of angular momentum :math:`|\Lambda| \ge 16`
+would be indistinguishable from :math:`|\Lambda| = 15`; no basis set reaches
+it.
+
 The state table
 ---------------
 
 :ref:`cis`, :ref:`cisd` and :ref:`fci` print one line per state after the
 diagonalization::
 
-    symmetry: state irreps (N_det = 81)
+    symmetry: state irreps: group C2v, 4 irreps, N_det = 81
     symmetry:    state      energy (Ha)       S^2  irrep   purity
     symmetry:         1    -75.9839974693    0.0000  A1   1.000
     symmetry:         2    -75.6375290051    0.0000  B1   1.000
@@ -245,8 +261,6 @@ When the labels are unavailable
 
 The run continues in every one of these cases, and says why:
 
-* **the molecule is linear** -- ``Cinfv`` and ``Dinfh`` labelling is not
-  implemented. The detector reports it and labels nothing;
 * **the basis does not support the group** -- the |AOs| of an atom, or a
   shell, do not map onto themselves under the operations. The report names
   the atom, the shell and the element;
