@@ -486,6 +486,7 @@ Providers
        * :c:data:`pg_col_diag`
        * :c:data:`pg_det_irrep`
        * :c:data:`pg_mo_weight`
+       * :c:data:`pg_n_mo_mixed`
        * :c:data:`pg_xg`
        * :c:data:`psi_energy_h_core`
        * :c:data:`s_mo_coef`

@@ -1233,6 +1233,7 @@ Index of Providers
     * :c:data:`pg_ao_ok` 
     * :c:data:`pg_basis_ierr` 
     * :c:data:`pg_basis_msg` 
+    * :c:data:`pg_block_cap` 
     * :c:data:`pg_block_dim` 
     * :c:data:`pg_block_mo` 
     * :c:data:`pg_block_start` 
@@ -1291,6 +1292,7 @@ Index of Providers
     * :c:data:`pg_n_irrep_allowed` 
     * :c:data:`pg_n_max` 
     * :c:data:`pg_n_mo_block` 
+    * :c:data:`pg_n_mo_mixed` 
     * :c:data:`pg_n_sigma_h` 
     * :c:data:`pg_n_sigma_vtot` 
     * :c:data:`pg_perm` 
@@ -2929,6 +2931,7 @@ Index of Subroutines/Functions
     * :c:func:`pg_det_gates` 
     * :c:func:`pg_det_report` 
     * :c:func:`pg_det_state_labels` 
+    * :c:func:`pg_det_weights` 
     * :c:func:`pg_diag3` 
     * :c:func:`pg_elem_me` 
     * :c:func:`pg_elem_props` 
@@ -2946,6 +2949,7 @@ Index of Subroutines/Functions
     * :c:func:`pg_labels_usable` 
     * :c:func:`pg_maps_to_self` 
     * :c:func:`pg_mo_labels_ok` 
+    * :c:func:`pg_mo_top2` 
     * :c:func:`pg_monomial_rep` 
     * :c:func:`pg_orient_axis` 
     * :c:func:`pg_parse_symbol` 

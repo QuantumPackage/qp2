@@ -182,11 +182,37 @@ Mixed MOs
 
 A molecular orbital that is not symmetry adapted gets index 0 and purity
 below 1. This is not a bug in the labels: it means the SCF converged to a
-solution that breaks the point group (or that the geometry is not symmetric
-within :option:`symmetry pg_tol`). The report names the mixed MOs, the number of
-blocks and ``delta_MO`` so that the cause can be identified. The determinant
-layer and the state table are then deliberately silent, and the CI programs
-run without symmetry constraints.
+solution that breaks the point group, that the geometry is not symmetric
+within :option:`symmetry pg_tol`, or that the EZFIO database holds no
+``mo_basis/mo_coef`` and QP2 falls back to the orthonormalized atomic
+orbitals. The report names the mixed MOs with the two largest weights of
+each, the number of blocks and ``delta_MO``, so that the cause can be
+identified.
+
+The determinant and state layers keep working on such a basis. ``X_g`` is
+block diagonal on the blocks of this module by construction, so the
+per-block occupations of a determinant never change under the group: the
+family projector stays exact, and the irrep of a determinant or of a state
+is an exact probability for the stored determinant space.
+:ref:`module_symmetry_det` prints those probabilities. Only the label is
+lost, never the symmetry information.
+
+What a mixed basis does disable is everything that needs a label instead of
+a distribution: state following in Davidson and the :option:`irrep_states`
+filter are off, because they call ``pg_labels_usable``, which tests
+``pg_mo_labels_ok``; and ``mo_basis/mo_symmetry`` is not written. No program
+stops.
+
+``qp_run symmetry_mo`` is a diagnostic: on such a basis it prints the whole
+report and then exits 1, because gate G5 is precisely "the MO set is
+symmetry adapted". That exit code is the verdict on the MO set, and is
+expected on a fixture that is meant to exercise the mixed path. The CI
+programs and ``qp_run symmetry_det`` are unaffected; ``symmetry_det`` exits
+on its own gates.
+
+The cost of the mixed path is one diagonal projector per printed
+determinant, and the usual family projectors for the states; both are
+estimated in :ref:`module_symmetry_det`.
  
  
  
@@ -414,6 +440,12 @@ Providers
        * :c:data:`pg_n_elem`
        * :c:data:`pg_thresh`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`pg_n_mo_mixed`
 
  
 .. c:var:: int pg_mo_block
@@ -558,6 +590,12 @@ Providers
        * :c:data:`pg_n_elem`
        * :c:data:`pg_thresh`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`pg_n_mo_mixed`
 
  
 .. c:var:: double pg_mo_purity
@@ -598,6 +636,12 @@ Providers
        * :c:data:`pg_n_elem`
        * :c:data:`pg_thresh`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`pg_n_mo_mixed`
 
  
 .. c:var:: double pg_mo_weight
@@ -638,6 +682,12 @@ Providers
        * :c:data:`pg_n_elem`
        * :c:data:`pg_thresh`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`pg_n_mo_mixed`
 
  
 .. c:var:: int pg_n_mo_block
@@ -690,6 +740,35 @@ Providers
        :columns: 3
 
        * :c:data:`pg_mo_weight`
+
+ 
+.. c:var:: int pg_n_mo_mixed
+
+
+    File : :file:`mo_irrep.irp.f`
+
+    .. code:: fortran
+
+        integer	:: pg_n_mo_mixed	
+
+
+    Number of MOs with :c:data:`pg_mo_irrep` = 0, i.e. ``max_a p_a < 1 - pg_thresh``.
+    This is the single definition every report and the warning of the
+    determinant labelling use; it used to be recomputed in five places.
+    
+    It counts MOs, never blocks: the partners of a degenerate block of a
+    symmetry-adapted set all carry a label, so they contribute 0 here. A
+    nonzero count means that the basis is not symmetry adapted, and then
+    the determinant and state irreps are probabilities, not labels.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_num`
+       * :c:data:`pg_mo_weight`
+
 
  
 .. c:var:: int pg_shell_target
@@ -985,8 +1064,10 @@ Subroutines / functions
     :c:func:`pg_symmetry_ready` returned true, so the representation matrices are
     already built.
     
-    This is the guard that makes the ``stop 1`` statements of det_irrep.irp.f
-    unreachable from the CI entry points (section 9.3).
+    This is the guard that keeps a labelling of a basis that is not
+    symmetry adapted away from the Davidson fast path and from the
+    ``mo_symmetry`` write. The reports themselves accept such a basis and
+    print irrep probabilities instead (NOTES section 10).
 
     Needs:
 
@@ -995,6 +1076,38 @@ Subroutines / functions
 
        * :c:data:`mo_num`
        * :c:data:`pg_mo_weight`
+
+ 
+.. c:function:: void pg_mo_top2(void)
+
+
+    File : :file:`mo_irrep.irp.f`
+
+    .. code:: fortran
+
+        subroutine pg_mo_top2(i, a1, a2)
+
+
+    ``a1`` and ``a2`` are the indices of the two largest entries of
+    :c:data:`pg_mo_weight` on MO ``i``; ``a2 = 0`` when the group has a single
+    irrep. The reports use them to show the composition of a mixed MO
+    (``A1 0.9856 B2 0.0144``) in one line; nothing else depends on them.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_num`
+       * :c:data:`pg_mo_weight`
+       * :c:data:`pg_n_col`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pg_report_mo`
 
  
 .. c:function:: void pg_monomial_rep(void)
@@ -1322,6 +1435,7 @@ Subroutines / functions
        * :c:data:`pg_mo_weight`
        * :c:data:`pg_n_col`
        * :c:data:`pg_n_elem`
+       * :c:data:`pg_n_mo_mixed`
        * :c:data:`pg_shell_target`
 
     Called by:
@@ -1338,6 +1452,7 @@ Subroutines / functions
 
        * :c:func:`ezfio_has_ao_basis_ao_num`
        * :c:func:`pg_get_mo_rep`
+       * :c:func:`pg_mo_top2`
        * :c:func:`pg_write_mo_symmetry`
 
     Touches:
@@ -1417,6 +1532,7 @@ Subroutines / functions
        * :c:data:`pg_mo_weight`
        * :c:data:`pg_n_col`
        * :c:data:`pg_n_elem`
+       * :c:data:`pg_n_mo_mixed`
 
     Called by:
 
@@ -1571,9 +1687,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_num`
        * :c:data:`mo_symmetry`
        * :c:data:`pg_mo_weight`
+       * :c:data:`pg_n_mo_mixed`
 
     Called by:
 

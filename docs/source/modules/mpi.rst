@@ -197,6 +197,7 @@ Providers
        * :c:data:`ormas_n_space`
        * :c:data:`pg_ao_ok`
        * :c:data:`pg_data_dir`
+       * :c:data:`pg_det_irrep`
        * :c:data:`pg_irrep_allowed`
        * :c:data:`pg_irrep_filter`
        * :c:data:`pg_thresh`
