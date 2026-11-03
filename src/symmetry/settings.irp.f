@@ -1,16 +1,18 @@
 !-----------------------------------------------------------------------
 ! EZFIO settings and their defaults.
 !
-! :c:data:`pg_tol`, :c:data:`pg_thresh` and :c:data:`auto_symmetry` are
-! declared in EZFIO.cfg with interface "ezfio, ocaml": the EZFIO bindings
-! and the qp_edit default are generated, but no IRPF90 provider, because
-! ei_handler.py turns a missing keyword into "stop 1" -- its "default:"
-! line feeds the OCaml side only. Their defaults therefore live here, and
-! the EZFIO value wins whenever it is present. :c:data:`irrep_states` uses
-! interface "ezfio" only: the OCaml interface requires a "default:" line,
-! an empty default makes Qpackage.get_ezfio_default_in_file raise
-! Not_found, and any non-empty sentinel would be read back as an irrep
-! name. Its default is the empty string, written by its provider below.
+! :c:data:`pg_tol`, :c:data:`pg_thresh`, :c:data:`auto_symmetry` and
+! :c:data:`irrep_states` are declared in EZFIO.cfg with interface
+! "ezfio, ocaml": the EZFIO bindings and the qp_edit default are
+! generated, but no IRPF90 provider, because ei_handler.py turns a missing
+! keyword into "stop 1" -- its "default:" line feeds the OCaml side only.
+! Their defaults therefore live here, and the EZFIO value wins whenever it
+! is present.
+!
+! Qpackage.get_ezfio_default_in_file raises Not_found on a value-less
+! "default:" line, so an "empty" character keyword needs a token: QP2
+! writes "None" (the same token as trexio_file), and the provider below
+! turns it back into the empty string.
 !
 ! The character tables are not a keyword: they ship in
 ! ``$QP_ROOT/data/Symmetry`` and nothing else is supported.
@@ -112,10 +114,9 @@ BEGIN_PROVIDER [ character*(256), irrep_states ]
   implicit none
   BEGIN_DOC
   ! Comma-, semicolon- or blank-separated list of irrep names to keep in
-  ! the CI diagonalization (SPEC.md 9.4b). Empty means all irreps.
-  !
-  ! Declared in EZFIO.cfg with interface "ezfio" only (see the header):
-  ! the keyword is not exposed in qp_edit, write it with the ezfio tool.
+  ! the CI diagonalization (SPEC.md 9.4b). Empty means all irreps; the
+  ! qp_edit default is the token "None", which :c:func:`pg_normalize_irrep_states`
+  ! turns into the empty string.
   END_DOC
   logical :: has
   PROVIDE ezfio_filename
@@ -138,7 +139,35 @@ BEGIN_PROVIDER [ character*(256), irrep_states ]
       stop 'Unable to read irrep_states with MPI'
     endif
   IRP_ENDIF
+  call pg_normalize_irrep_states(irrep_states)
 END_PROVIDER
+
+!-----------------------------------------------------------------------
+! "None" is QP2's token for an unset character keyword (trexio_file uses
+! the same one): EZFIO cannot store a value-less default, so the OCaml
+! layer writes "None" as soon as qp_edit reads the keyword. Accept it in
+! any case, and accept blanks, as an empty list.
+!-----------------------------------------------------------------------
+subroutine pg_normalize_irrep_states(list)
+  implicit none
+  BEGIN_DOC
+  ! Empty ``list`` when it holds only the token "None" (any case).
+  END_DOC
+  character*(256), intent(inout) :: list
+  character*(64) :: low
+  integer :: i, n, ic
+
+  low = adjustl(list)
+  n = min(len_trim(low), 64)
+  if (n == 0) return
+  do i = 1, n
+    ic = ichar(low(i:i))
+    if (ic >= 65 .and. ic <= 90) ic = ic + 32
+    low(i:i) = char(ic)
+  enddo
+  if (low(1:n) == 'none') list = ''
+
+end subroutine pg_normalize_irrep_states
 
 BEGIN_PROVIDER [ integer, pg_n_irrep_allowed ]
   implicit none

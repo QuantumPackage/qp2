@@ -170,24 +170,19 @@ separated by commas, semicolons or blanks, matched without regard to case::
 
     "B1, A1"      "b1;a1"      "B1 A1"
 
-Empty, the default, keeps every irrep.
+Empty keeps every irrep. The default is the token ``None``, because |EZFIO|
+cannot store a value-less default: it means the same empty list, and the
+symmetry module turns it back into one. The keyword is part of the input
+that ``qp_edit`` shows and writes, under the ``Symmetry`` section::
 
-.. warning::
+    irrep_states = B1, A1
 
-   :option:`symmetry irrep_states` does not appear in ``qp_edit``: it is
-   declared as an |EZFIO| parameter only, without the OCaml interface that
-   ``qp_edit`` reads. It has to be written with the ``ezfio`` tool:
+The ``ezfio`` tool reaches the same field::
 
-   .. code:: bash
-
-       source $QP_ROOT/quantum_package.rc
-       ezfio set_file water.ezfio
-       ezfio set symmetry irrep_states "B1, A1"
-       qp_run cisd water.ezfio
-
-   ``ezfio get symmetry irrep_states`` reads the value back. A run that
-   creates the |EZFIO| database first (``qp_run scf``) is a convenient way to
-   have the directory, but any |EZFIO| directory works.
+    source $QP_ROOT/quantum_package.rc
+    ezfio set_file water.ezfio
+    ezfio set symmetry irrep_states "B1, A1"
+    qp_run cisd water.ezfio
 
 The filter is a *narrowing* of what the calculation already selected. It is
 applied after the |S^2| selection and, in Davidson, after state following:
@@ -276,9 +271,9 @@ Keywords
      - |true|
      - Master switch of the whole detection.
    * - :option:`symmetry irrep_states`
-     - empty
-     - Irreps to keep in the |CI| diagonalization; empty keeps all. Not
-       visible in ``qp_edit``, see above.
+     - ``None``
+     - Irreps to keep in the |CI| diagonalization; ``None`` or an empty
+       value keeps all.
    * - :option:`symmetry pg_tol`
      - ``1e-4``
      - Distance in bohr within which an atom maps onto another atom of the

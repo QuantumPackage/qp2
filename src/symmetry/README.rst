@@ -319,10 +319,11 @@ Keywords
      - Master switch. When false, no provider of the detection chain is
        built, the SCF/DFT report is silent, and nothing is labelled.
    * - :option:`irrep_states`
-     - empty
+     - ``None``
      - Comma-, semicolon- or blank-separated list of irrep names to keep in
-       the CI diagonalization, for example ``B1, A1``. Empty keeps every
-       irrep.
+       the CI diagonalization, for example ``B1, A1``. ``None`` (the
+       default) and the empty string both keep every irrep; the provider
+       turns ``None`` back into the empty list.
 
 .. note::
 
