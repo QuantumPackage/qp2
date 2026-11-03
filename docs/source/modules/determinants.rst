@@ -3017,7 +3017,6 @@ Providers
        :columns: 3
 
        * :c:data:`pg_det_irrep`
-       * :c:data:`pg_state_irrep_weight`
        * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`psi_bilinear_matrix_values`
 
@@ -3057,7 +3056,6 @@ Providers
        :columns: 3
 
        * :c:data:`pg_det_irrep`
-       * :c:data:`pg_state_irrep_weight`
        * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`psi_bilinear_matrix_values`
 
@@ -3105,7 +3103,6 @@ Providers
        * :c:data:`n_elec_alpha_for_psi_configuration`
        * :c:data:`one_e_dm_mo_alpha`
        * :c:data:`pg_det_irrep`
-       * :c:data:`pg_state_irrep_weight`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_cas`
        * :c:data:`psi_coef`
@@ -3419,7 +3416,6 @@ Providers
        :columns: 3
 
        * :c:data:`pg_det_irrep`
-       * :c:data:`pg_state_irrep_weight`
        * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`psi_bilinear_matrix_values`
 

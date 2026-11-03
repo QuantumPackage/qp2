@@ -1273,6 +1273,7 @@ Index of Providers
     * :c:data:`pg_irrep_mult` 
     * :c:data:`pg_irrep_name` 
     * :c:data:`pg_irrep_weight` 
+    * :c:data:`pg_is_linear` 
     * :c:data:`pg_is_planar` 
     * :c:data:`pg_label_ierr` 
     * :c:data:`pg_label_msg` 
@@ -2916,6 +2917,8 @@ Index of Subroutines/Functions
     * :c:func:`pg_axis_along` 
     * :c:func:`pg_binom` 
     * :c:func:`pg_build_candidates` 
+    * :c:func:`pg_build_group` 
+    * :c:func:`pg_build_linear` 
     * :c:func:`pg_character_table_path` 
     * :c:func:`pg_check_ao_factor` 
     * :c:func:`pg_class_any_used` 
@@ -2942,11 +2945,14 @@ Index of Subroutines/Functions
     * :c:func:`pg_family_index` 
     * :c:func:`pg_family_projector` 
     * :c:func:`pg_family_size` 
+    * :c:func:`pg_find_by_mat` 
     * :c:func:`pg_find_by_perm` 
     * :c:func:`pg_fix_sign` 
     * :c:func:`pg_g2_pair` 
     * :c:func:`pg_get_mo_rep` 
     * :c:func:`pg_labels_usable` 
+    * :c:func:`pg_linear_add` 
+    * :c:func:`pg_linear_to_input` 
     * :c:func:`pg_maps_to_self` 
     * :c:func:`pg_mo_labels_ok` 
     * :c:func:`pg_mo_top2` 
@@ -2977,7 +2983,9 @@ Index of Subroutines/Functions
     * :c:func:`pg_split_tab` 
     * :c:func:`pg_state_apply` 
     * :c:func:`pg_state_irreps_label` 
+    * :c:func:`pg_state_labels_exact` 
     * :c:func:`pg_state_warn_filtered` 
+    * :c:func:`pg_state_weight_matrix` 
     * :c:func:`pg_symmetry_ready` 
     * :c:func:`pg_unrank` 
     * :c:func:`pg_write_mo_symmetry` 

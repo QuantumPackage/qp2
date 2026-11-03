@@ -1495,7 +1495,6 @@ Providers
        * :c:data:`one_e_tr_dm_mo_alpha`
        * :c:data:`ormas_bitmask`
        * :c:data:`pg_det_irrep`
-       * :c:data:`pg_state_irrep_weight`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_cas`
        * :c:data:`psi_cas_sorted_bit`
