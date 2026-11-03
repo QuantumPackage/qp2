@@ -111,9 +111,12 @@ subroutine pg_state_apply(label, n, ok)
   ! Narrow ``ok(1:n)`` to the states whose known irrep is in :c:data:`irrep_states`.
   !
   ! ``label(k)`` = 0 means "unknown": such a state is kept, because a filter
-  ! must not drop a state it may not be subject to. It never widens, so it
-  ! composes with any earlier selection (the S^2 test and the state
-  ! following attribution mask in Davidson).
+  ! must not drop a state it may not be subject to.
+  !
+  ! Called once, after the diagonalization, on the states that were actually
+  ! computed: the filter reorders them, it does not steer the Davidson
+  ! iteration (a swap inside the loop made the iteration wander and, for some
+  ! fixtures, fail to converge).
   !
   ! :c:data:`pg_irrep_allowed` is provided here, not in the callers: IRPF90 hoists
   ! the explicit PROVIDE to the entry of this routine, so the mask and the
@@ -131,27 +134,3 @@ subroutine pg_state_apply(label, n, ok)
     endif
   enddo
 end subroutine pg_state_apply
-
-subroutine pg_state_warn_filtered(label, n)
-  implicit none
-  BEGIN_DOC
-  ! One line per state whose known irrep the filter rejects:
-  ! "symmetry: irrep filter: state <k> is <name>, not in irrep_states".
-  ! This is the honest message when the requested irreps are not among the
-  ! N_st kept states: raise n_states, or drop irrep_states.
-  END_DOC
-  integer, intent(in) :: label(*), n
-  integer :: k
-
-  PROVIDE pg_irrep_allowed
-  if (.not. mpi_master) return
-  do k = 1, n
-    if (label(k) >= 1) then
-      if (.not. pg_irrep_allowed(label(k))) then
-        write(6,'(A,I0,A,A,A)') 'symmetry: irrep filter: state ', k, &
-             ' is ', trim(adjustl(pg_irrep_name(label(k)))), &
-             ', not in irrep_states'
-      endif
-    endif
-  enddo
-end subroutine pg_state_warn_filtered

@@ -193,9 +193,13 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   endif
   overlap = 0.d0
 
+  ! Labels are needed inside the loop only by state following, which matches
+  ! a Ritz vector to the previous state of the same irrep. The irrep filter
+  ! runs after the diagonalization (see diagonalize_ci), so it costs nothing
+  ! here: enabling it must not add a labelling pass per iteration.
   use_sym = .false.
   lab_prev = 0
-  if (state_following .or. pg_irrep_filter) then
+  if (state_following) then
     if (pg_labels_usable()) use_sym = .true.
   endif
 
@@ -620,10 +624,6 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
         deallocate(overlp,ok)
       endif
 
-      if (use_sym .and. pg_irrep_filter) then
-        call pg_state_apply(lab, shift2, state_ok)
-      endif
-
       do k=1,shift2
         if (.not. state_ok(k)) then
           do l=k+1,shift2
@@ -755,9 +755,6 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
   if (use_sym) then
     call pg_det_state_labels(sze, u_in, dim_in, N_st, lab_prev, lab_pur, lab_mix)
-    if (pg_irrep_filter) then
-      call pg_state_warn_filtered(lab_prev, N_st)
-    endif
   endif
 
   do k=1,N_st_diag

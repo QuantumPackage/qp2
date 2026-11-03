@@ -48,14 +48,18 @@ subroutine pg_print_state_irreps_work(energy, s2)
   ! the purities and the norm in one provider block.
   END_DOC
   double precision, intent(in) :: energy(*), s2(*)
-  integer :: s, a, nw
-  double precision :: wsum
+  integer :: s, a, nw, nf
+  double precision :: wsum, s2v
   character*(8) :: lab
 
-  provide pg_state_irrep_weight
+  provide pg_state_irrep_weight pg_irrep_allowed
 
   if (.not. mpi_master) return
-  write(6,'(A,I0,A)') 'symmetry: state irreps (N_det = ', N_det, ')'
+  ! The group name is in the header so that a CI log kept on its own says
+  ! which irreps the symbols below belong to: the detection summary is printed
+  ! by the SCF program and by "qp_run symmetry_mo", not here.
+  write(6,'(A,A,A,I0,A,I0)') 'symmetry: state irreps: group ', &
+       trim(pg_group_name), ', ', pg_n_irrep, ' irreps, N_det = ', N_det
   if (pg_n_mo_mixed > 0) then
     write(6,'(A)') 'symmetry: the MO basis is not symmetry adapted: a state '// &
          'weight is its'
@@ -69,8 +73,13 @@ subroutine pg_print_state_irreps_work(energy, s2)
     else
       lab = '(none)'
     endif
+    ! S^2 is non-negative; a value a few 1e-16 negative is roundoff and F10.4
+    ! would print it as -0.0000. Clamp only what would print as a negative
+    ! zero, so a real negative value stays visible.
+    s2v = s2(s)
+    if (s2v < 0.d0 .and. s2v > -5.d-5) s2v = 0.d0
     write(6,'(A,I9,F18.10,F10.4,2X,A,1X,F7.3)',advance='no') 'symmetry: ', s, &
-         energy(s), s2(s), trim(lab), pg_state_purity(s)
+         energy(s), s2v, trim(lab), pg_state_purity(s)
     ! A labelled state needs no composition; an unlabelled one is described
     ! by the irreps that carry weight (at most four shown).
     nw = 0
@@ -88,6 +97,26 @@ subroutine pg_print_state_irreps_work(energy, s2)
     endif
     write(6,*)
   enddo
+  ! The filter only reorders states that were computed. In a Davidson run
+  ! that is the N_states that were converged, so a state may come out outside
+  ! irrep_states; with the full (Lapack) diagonalization every retained
+  ! eigenvector is exact and the selection can look further. Say it once,
+  ! where the labels are read, and name the remedy in the manual rather than
+  ! repeat it per state.
+  if (pg_irrep_filter) then
+    nf = 0
+    do s = 1, N_states
+      if (pg_state_irrep(s) > 0) then
+        if (.not. pg_irrep_allowed(pg_state_irrep(s))) nf = nf + 1
+      endif
+    enddo
+    if (nf > 0) then
+      write(6,'(A,I0,A,I0)') 'symmetry: states outside irrep_states: ', &
+           nf, ' of ', N_states
+      write(6,'(A)') 'symmetry: raise n_states, or n_det_max_full '// &
+           '(full diagonalization).'
+    endif
+  endif
   do s = 1, N_states
     wsum = 0.d0
     do a = 1, pg_n_irrep
