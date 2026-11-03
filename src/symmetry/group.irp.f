@@ -10,9 +10,10 @@
 !    section 4 step 3 to build pg_rot; they are therefore computed here as
 !    providers that do not depend on pg_rot. pg_rot uses a local scan with
 !    the same routine.
-!  * The linear-molecule test of section 5.9 lives in pg_inertia_eval
-!    (frame.irp.f): every consumer of the inertia tensor gives up there
-!    before any enumeration.
+!  * The linear-molecule branch of section 5.9 is analytic:
+!    pg_is_linear (frame.irp.f) flags it and pg_build_linear builds C31v or
+!    C31v x {E,sigma_h} directly, because the (permutation, determinant) key
+!    is blind to every rotation about a collinear axis.
 !  * pg_has_i, pg_n_sigma_h, pg_n_sigma_vtot, pg_n_c2_perp are providers so
 !    that the driver can report the measured invariants. There is no
 !    sigma_v/sigma_d split: it is a labelling device of section 6, decided
@@ -26,6 +27,233 @@
 ! as a provider declaration bound into the generated unit, where it clashes
 ! with this module-level copy.
 integer, parameter :: pg_n_elem_max = 160
+
+!-----------------------------------------------------------------------
+! Group construction: the linear molecules take an analytic branch.
+!-----------------------------------------------------------------------
+subroutine pg_build_group(nat, xyz, znum, ctr, evecs, frame, linear, tol, &
+     nmax, rot, perm, n_rot, ierr)
+  implicit none
+  BEGIN_DOC
+  ! Build the group of the molecule and store it as matrices in the INPUT
+  ! frame plus the induced atom permutations.
+  !
+  ! ``frame`` is :c:data:`pg_rot` (rows = canonical axes in the input frame),
+  ! used by the linear branch only. ``evecs`` is :c:data:`pg_inertia_evec`,
+  ! used by the generic branch only. This dispatcher exists because IRPF90
+  ! does not look inside a subroutine body: the two callers
+  ! (:c:data:`pg_n_elem`, :c:data:`pg_rot_mat`) name :c:data:`pg_is_linear` and
+  ! :c:data:`pg_rot` themselves so that the providers are ordered.
+  END_DOC
+  integer, intent(in) :: nat, nmax
+  double precision, intent(in) :: xyz(nat,3), ctr(3), evecs(3,3), frame(3,3), tol
+  integer, intent(in) :: znum(nat)
+  logical, intent(in) :: linear
+  double precision, intent(out) :: rot(3,3,nmax)
+  integer, intent(out) :: perm(nat,nmax)
+  integer, intent(out) :: n_rot, ierr
+
+  if (linear) then
+    call pg_build_linear(nat, xyz, znum, ctr, frame, tol, nmax, &
+         rot, perm, n_rot, ierr)
+  else
+    call pg_enumerate(nat, xyz, znum, ctr, evecs, tol, nmax, &
+         rot, perm, n_rot, ierr)
+  endif
+end subroutine pg_build_group
+
+!-----------------------------------------------------------------------
+! Canonical -> input frame: R = frame^T R_c frame.
+!-----------------------------------------------------------------------
+subroutine pg_linear_to_input(frame, rc, r)
+  implicit none
+  BEGIN_DOC
+  ! Rows of ``frame`` are the canonical axes expressed in the input frame,
+  ! so ``s = frame (x - center)`` are the canonical coordinates and the
+  ! input-frame matrix of a canonical operator ``R_c`` is
+  ! ``R = frame^T R_c frame``.
+  END_DOC
+  double precision, intent(in) :: frame(3,3), rc(3,3)
+  double precision, intent(out) :: r(3,3)
+
+  r(1:3,1:3) = matmul(transpose(frame(1:3,1:3)), matmul(rc(1:3,1:3), &
+       frame(1:3,1:3)))
+end subroutine pg_linear_to_input
+
+!-----------------------------------------------------------------------
+! Append one canonical element to the linear group.
+!-----------------------------------------------------------------------
+subroutine pg_linear_add(nat, xyz, znum, ctr, frame, rc, tol, nmax, &
+     rot, perm, n_rot, ierr)
+  implicit none
+  BEGIN_DOC
+  ! Transform ``rc`` to the input frame, check that it maps the molecule
+  ! onto itself, and append it. ``ierr`` = 1 when ``nmax`` is exhausted, 2
+  ! when the element does not realise a permutation.
+  END_DOC
+  integer, intent(in) :: nat, nmax
+  double precision, intent(in) :: xyz(nat,3), ctr(3), frame(3,3), rc(3,3), tol
+  integer, intent(in) :: znum(nat)
+  double precision, intent(inout) :: rot(3,3,nmax)
+  integer, intent(inout) :: perm(nat,nmax)
+  integer, intent(inout) :: n_rot, ierr
+  double precision :: r(3,3)
+  logical :: ok
+
+  if (n_rot >= nmax) then
+    ierr = 1
+    return
+  endif
+  call pg_linear_to_input(frame, rc, r)
+  call pg_maps_to_self(nat, xyz, znum, ctr, r, tol, perm(1,n_rot+1), ok)
+  if (.not. ok) then
+    ierr = 2
+    return
+  endif
+  n_rot = n_rot + 1
+  rot(1:3,1:3,n_rot) = r(1:3,1:3)
+end subroutine pg_linear_add
+
+!-----------------------------------------------------------------------
+! Group of a linear molecule, built analytically in the canonical frame.
+!-----------------------------------------------------------------------
+subroutine pg_build_linear(nat, xyz, znum, ctr, frame, tol, nmax, &
+     rot, perm, n_rot, ierr)
+  implicit none
+  BEGIN_DOC
+  ! The finite group used for a linear molecule is C31v, extended to
+  ! C31v x {E, sigma_h} when sigma_h maps the molecule onto itself. The
+  ! order is 62 or 124.
+  !
+  ! Why not enumerate: for a collinear geometry every rotation about the
+  ! axis and every reflection in a plane containing it induces the identity
+  ! permutation, so the (permutation, determinant) key of
+  ! :c:func:`pg_add_element` collapses the 31 sigma_v planes with sigma_h and
+  ! the enumeration keeps only {E, one sigma_v}. The matrices are therefore
+  ! built analytically from the canonical frame of :c:data:`pg_rot`: every
+  ! angle is an exact multiple of 2 pi / 31, so the inverse, product and
+  ! conjugation lookups by matrix (1e-8) are stable.
+  !
+  ! C31v, not Cinfv, and C31v x {E,sigma_h}, not C31v x Ci: the tables
+  ! shipped are C31v and D31h (D31h has S31^k symbols, while Ci would give
+  ! i C31^k = S62^{2k+31}, whose 2k+31 is not coprime with 62 and cannot be
+  ! written as a valid S_n^k symbol). The rows of the D31h table are the
+  ! restrictions of the Dinfh irreps to this group, so Sigma_g+, Pi_u, ...
+  ! keep their chemical meaning.
+  !
+  ! ``ierr`` = 1 when the group does not fit in ``nmax``, 2 when a built
+  ! element fails :c:func:`pg_maps_to_self`.
+  END_DOC
+  integer, intent(in) :: nat, nmax
+  double precision, intent(in) :: xyz(nat,3), ctr(3), frame(3,3), tol
+  integer, intent(in) :: znum(nat)
+  double precision, intent(out) :: rot(3,3,nmax)
+  integer, intent(out) :: perm(nat,nmax)
+  integer, intent(out) :: n_rot, ierr
+  double precision, parameter :: pi = 3.1415926535897932d0
+  integer, parameter :: n = 31
+  double precision :: rc(3,3), r(3,3), p(3), c, s, ang
+  integer :: k, j, i
+  logical :: ok, has_h
+
+  n_rot = 0
+  ierr = 0
+
+  ! Is there an inversion centre? sigma_h (z -> -z) is central in the point
+  ! group of a linear molecule, so it either maps the molecule onto itself
+  ! (Dinfh) or it does not (Cinfv). Tested once, on the exact matrix.
+  rc(1:3,1:3) = 0.d0
+  rc(1,1) = 1.d0
+  rc(2,2) = 1.d0
+  rc(3,3) = -1.d0
+  call pg_linear_to_input(frame, rc, r)
+  call pg_maps_to_self(nat, xyz, znum, ctr, r, tol, perm(1,1), ok)
+  has_h = ok
+
+  ! E, then C31^k.
+  rc(1:3,1:3) = 0.d0
+  rc(1,1) = 1.d0
+  rc(2,2) = 1.d0
+  rc(3,3) = 1.d0
+  call pg_linear_add(nat, xyz, znum, ctr, frame, rc, tol, nmax, &
+       rot, perm, n_rot, ierr)
+  if (ierr /= 0) return
+  do k = 1, n - 1
+    ang = 2.d0*pi*dble(k)/dble(n)
+    c = cos(ang)
+    s = sin(ang)
+    rc(1:3,1:3) = 0.d0
+    rc(1,1) = c
+    rc(1,2) = -s
+    rc(2,1) = s
+    rc(2,2) = c
+    rc(3,3) = 1.d0
+    call pg_linear_add(nat, xyz, znum, ctr, frame, rc, tol, nmax, &
+         rot, perm, n_rot, ierr)
+    if (ierr /= 0) return
+  enddo
+
+  ! sigma_v_j: the plane through z with normal p = z x m_j, where m_j is the
+  ! in-plane direction at 2 pi j / 31 from x. p = (-sin, cos, 0) and the
+  ! reflection is 1 - 2 p p^T.
+  do j = 0, n - 1
+    ang = 2.d0*pi*dble(j)/dble(n)
+    c = cos(ang)
+    s = sin(ang)
+    p(1) = -s
+    p(2) = c
+    p(3) = 0.d0
+    do i = 1, 3
+      do k = 1, 3
+        rc(i,k) = -2.d0*p(i)*p(k)
+      enddo
+      rc(i,i) = rc(i,i) + 1.d0
+    enddo
+    call pg_linear_add(nat, xyz, znum, ctr, frame, rc, tol, nmax, &
+         rot, perm, n_rot, ierr)
+    if (ierr /= 0) return
+  enddo
+  if (.not. has_h) return
+
+  ! sigma_h, S31^k = sigma_h C31^k, C2'_j = sigma_h sigma_v_j (a rotation
+  ! by pi about m_j: 2 m m^T - 1).
+  rc(1:3,1:3) = 0.d0
+  rc(1,1) = 1.d0
+  rc(2,2) = 1.d0
+  rc(3,3) = -1.d0
+  call pg_linear_add(nat, xyz, znum, ctr, frame, rc, tol, nmax, &
+       rot, perm, n_rot, ierr)
+  if (ierr /= 0) return
+  do k = 1, n - 1
+    ang = 2.d0*pi*dble(k)/dble(n)
+    c = cos(ang)
+    s = sin(ang)
+    rc(1:3,1:3) = 0.d0
+    rc(1,1) = c
+    rc(1,2) = -s
+    rc(2,1) = s
+    rc(2,2) = c
+    rc(3,3) = -1.d0
+    call pg_linear_add(nat, xyz, znum, ctr, frame, rc, tol, nmax, &
+         rot, perm, n_rot, ierr)
+    if (ierr /= 0) return
+  enddo
+  do j = 0, n - 1
+    ang = 2.d0*pi*dble(j)/dble(n)
+    p(1) = cos(ang)
+    p(2) = sin(ang)
+    p(3) = 0.d0
+    do i = 1, 3
+      do k = 1, 3
+        rc(i,k) = 2.d0*p(i)*p(k)
+      enddo
+      rc(i,i) = rc(i,i) - 1.d0
+    enddo
+    call pg_linear_add(nat, xyz, znum, ctr, frame, rc, tol, nmax, &
+         rot, perm, n_rot, ierr)
+    if (ierr /= 0) return
+  enddo
+end subroutine pg_build_linear
 
 !-----------------------------------------------------------------------
 ! Enumerate every group element.
@@ -536,7 +764,7 @@ end subroutine pg_read_int
   enddo
   call pg_proper_scan(nucl_num, nucl_coord, znum, pg_center, &
        pg_inertia_eval, pg_inertia_evec, pg_tol, 2000, &
-       nmax, naxes, axis, ierr)
+       nmax, naxes, axis, pg_is_linear, ierr)
   if (ierr /= 0) then
     if (.not. pg_detection_failed) then
       write(6,'(A)') 'symmetry: candidate-direction scan failed'
@@ -556,6 +784,8 @@ END_PROVIDER
   integer :: znum(nucl_num), ierr, i, n
   double precision, allocatable :: rot(:,:,:)
   integer, allocatable :: perm(:,:)
+  double precision :: frame(3,3)
+  logical :: linear
 
   ! :c:data:`pg_n_elem` keeps its 0 default unless the enumeration succeeded: the
   ! result goes to a local first, so a failed call cannot leave a
@@ -567,12 +797,24 @@ END_PROVIDER
   do i = 1, nucl_num
     znum(i) = nint(nucl_charge(i))
   enddo
-  call pg_enumerate(nucl_num, nucl_coord, znum, pg_center, &
-       pg_inertia_evec, pg_tol, pg_n_elem_max, rot, perm, n, ierr)
+  ! IRPF90 does not look inside pg_build_group: naming the two providers here
+  ! is what orders them before this provider.
+  linear = pg_is_linear
+  frame(1:3,1:3) = pg_rot(1:3,1:3)
+  call pg_build_group(nucl_num, nucl_coord, znum, pg_center, &
+       pg_inertia_evec, frame, linear, pg_tol, pg_n_elem_max, &
+       rot, perm, n, ierr)
   if (ierr == 1) then
     if (.not. pg_detection_failed) then
       write(6,'(A,I0,A)') 'symmetry: group order exceeds ', pg_n_elem_max, &
            ' (pg_n_elem_max)'
+      pg_detection_failed = .true.
+    endif
+    return
+  else if (ierr == 2 .and. linear) then
+    if (.not. pg_detection_failed) then
+      write(6,'(A)') 'symmetry: an element built for a linear molecule '// &
+           'does not map it onto itself'
       pg_detection_failed = .true.
     endif
     return
@@ -600,16 +842,20 @@ END_PROVIDER
   END_DOC
   integer :: znum(nucl_num), ierr, i, j, m, k
   double precision, allocatable :: rot(:,:,:)
-  double precision :: axis(3), v(3), d
+  double precision :: axis(3), v(3), d, frame(3,3)
   integer, allocatable :: perm(:,:)
   integer :: n
+  logical :: linear
 
   allocate(rot(3,3,pg_n_elem_max), perm(nucl_num,pg_n_elem_max))
   do i = 1, nucl_num
     znum(i) = nint(nucl_charge(i))
   enddo
-  call pg_enumerate(nucl_num, nucl_coord, znum, pg_center, &
-       pg_inertia_evec, pg_tol, pg_n_elem_max, rot, perm, n, ierr)
+  linear = pg_is_linear
+  frame(1:3,1:3) = pg_rot(1:3,1:3)
+  call pg_build_group(nucl_num, nucl_coord, znum, pg_center, &
+       pg_inertia_evec, frame, linear, pg_tol, pg_n_elem_max, &
+       rot, perm, n, ierr)
   if (ierr /= 0 .or. n /= pg_n_elem) then
     if (.not. pg_detection_failed) then
       write(6,'(A)') 'symmetry: inconsistent group enumeration'
@@ -710,7 +956,27 @@ END_PROVIDER
   ! the class {C3^2}), while a file column always is.
   END_DOC
   integer :: inv_perm(nucl_num), i, j
+  double precision :: rm(3,3)
   integer, external :: pg_find_by_perm
+  integer, external :: pg_find_by_mat
+
+  ! Linear molecules: the group was built analytically, so the matrices are
+  ! exact and the inverse is the transpose. The permutation route cannot be
+  ! used there: every element induces the identity permutation.
+  if (pg_is_linear) then
+    do i = 1, pg_n_elem
+      rm(1:3,1:3) = transpose(pg_rot_mat(1:3,1:3,i))
+      pg_elem_inv(i) = pg_find_by_mat(rm)
+      if (pg_elem_inv(i) == 0) then
+        if (.not. pg_detection_failed) then
+          write(6,'(A,I0)') 'symmetry: no inverse found for element ', i
+          pg_detection_failed = .true.
+        endif
+        return
+      endif
+    enddo
+    return
+  endif
 
   do i = 1, pg_n_elem
     do j = 1, nucl_num
@@ -750,15 +1016,26 @@ END_PROVIDER
   END_DOC
   integer :: g, h, k, pnew(nucl_num)
   logical :: seen(pg_n_elem)
+  double precision :: rm(3,3)
   integer, external :: pg_find_by_perm
+  integer, external :: pg_find_by_mat
 
   do g = 1, pg_n_elem
     do h = 1, pg_n_elem
-      do k = 1, nucl_num
-        pnew(k) = pg_perm(pg_perm(k,h), g)
-      enddo
-      pg_elem_mul(g,h) = pg_find_by_perm(pnew, &
-           pg_elem_det(g)*pg_elem_det(h))
+      if (pg_is_linear) then
+        ! The linear group is analytic: the product of two stored matrices
+        ! is within 1e-15 of a stored representative, so the lookup by
+        ! matrix is exact in practice. The permutation route cannot be used:
+        ! all the elements of a collinear geometry induce the identity.
+        rm(1:3,1:3) = matmul(pg_rot_mat(1:3,1:3,g), pg_rot_mat(1:3,1:3,h))
+        pg_elem_mul(g,h) = pg_find_by_mat(rm)
+      else
+        do k = 1, nucl_num
+          pnew(k) = pg_perm(pg_perm(k,h), g)
+        enddo
+        pg_elem_mul(g,h) = pg_find_by_perm(pnew, &
+             pg_elem_det(g)*pg_elem_det(h))
+      endif
       if (pg_elem_mul(g,h) == 0) then
         if (.not. pg_detection_failed) then
           write(6,'(A,I0,A,I0)') 'symmetry: no product element for g = ', g, &
@@ -823,6 +1100,32 @@ integer function pg_find_by_perm(p, det)
   enddo
 end function pg_find_by_perm
 
+!-----------------------------------------------------------------------
+! Look up a group element by its matrix.
+!-----------------------------------------------------------------------
+integer function pg_find_by_mat(r)
+  implicit none
+  BEGIN_DOC
+  ! Index of the stored element whose matrix equals ``r`` to 1e-8, or 0.
+  !
+  ! Only for the linear branch, where the matrices are analytic (angles are
+  ! exact multiples of 2 pi / 31) and a transpose or a product of two stored
+  ! matrices is within 1e-15 of a stored one. The generic branch must keep
+  ! :c:func:`pg_find_by_perm`: there the matrices carry the tilt of a candidate
+  ! direction, and a 1e-8 matrix comparison is a coin flip (SPEC.md 5.5).
+  END_DOC
+  double precision, intent(in) :: r(3,3)
+  integer :: j
+
+  pg_find_by_mat = 0
+  do j = 1, pg_n_elem
+    if (maxval(abs(pg_rot_mat(1:3,1:3,j) - r(1:3,1:3))) <= 1.d-8) then
+      pg_find_by_mat = j
+      return
+    endif
+  enddo
+end function pg_find_by_mat
+
  BEGIN_PROVIDER [ integer, pg_n_class ]
 &BEGIN_PROVIDER [ integer, pg_class, (pg_n_elem) ]
   implicit none
@@ -837,10 +1140,16 @@ end function pg_find_by_perm
   ! identity from the reflection in the molecular plane) is the exact
   ! invariant used by :c:func:`pg_add_element` too. Direct orbit enumeration,
   ! :math:`|G|` <= 128 so :math:`|G|^2` = 16384 comparisons.
+  !
+  ! Linear molecules are the exception: all their permutations are the
+  ! identity, so the conjugation is done on the analytic matrices there
+  ! (:c:func:`pg_find_by_mat`).
   END_DOC
   integer :: p(nucl_num)
   integer :: ih, c, g, k, i, j
   logical :: same
+  double precision :: rm(3,3)
+  integer, external :: pg_find_by_mat
 
   pg_n_class = 0
   if (pg_detection_failed) return
@@ -851,25 +1160,35 @@ end function pg_find_by_perm
     if (pg_class(g) /= 0) cycle
     c = c + 1
     do k = 1, pg_n_elem
-      ! p_h = p_k o p_g o p_{k^-1}
-      do i = 1, nucl_num
-        p(i) = pg_perm(pg_perm(pg_perm(i,pg_elem_inv(k)), g), k)
-      enddo
-      ih = 0
-      do i = 1, pg_n_elem
-        if (pg_elem_det(i) /= pg_elem_det(g)) cycle
-        same = .true.
-        do j = 1, nucl_num
-          if (pg_perm(j,i) /= p(j)) then
-            same = .false.
+      if (pg_is_linear) then
+        ! The permutation of every element of a collinear geometry is the
+        ! identity, so the class is the orbit of the matrix under
+        ! conjugation. The matrices are analytic: R_k R_g R_k^T is within
+        ! 1e-15 of a stored element.
+        rm(1:3,1:3) = matmul(matmul(pg_rot_mat(1:3,1:3,k), &
+             pg_rot_mat(1:3,1:3,g)), transpose(pg_rot_mat(1:3,1:3,k)))
+        ih = pg_find_by_mat(rm)
+      else
+        ! p_h = p_k o p_g o p_{k^-1}
+        do i = 1, nucl_num
+          p(i) = pg_perm(pg_perm(pg_perm(i,pg_elem_inv(k)), g), k)
+        enddo
+        ih = 0
+        do i = 1, pg_n_elem
+          if (pg_elem_det(i) /= pg_elem_det(g)) cycle
+          same = .true.
+          do j = 1, nucl_num
+            if (pg_perm(j,i) /= p(j)) then
+              same = .false.
+              exit
+            endif
+          enddo
+          if (same) then
+            ih = i
             exit
           endif
         enddo
-        if (same) then
-          ih = i
-          exit
-        endif
-      enddo
+      endif
       if (ih == 0) then
         if (.not. pg_detection_failed) then
           write(6,'(A)') 'symmetry: conjugation left the group'
@@ -1157,6 +1476,18 @@ END_PROVIDER
       pg_detection_failed = .true.
     endif
     return
+  endif
+
+  ! The measured group of a linear molecule is C31v or D31h (see
+  ! pg_build_linear), but the group it stands for is Cinfv or Dinfh. The
+  ! translation comes after the closed-form order check on purpose:
+  ! pg_expected_order has no "inf" arithmetic, and the symbols
+  ! C31v / D31h are exactly what the finite model is. pg_has_i must not be
+  ! used here: this group contains no inversion for Dinfh, and it must not.
+  if (trim(name) == 'C31v') then
+    name = 'Cinfv'
+  else if (trim(name) == 'D31h') then
+    name = 'Dinfh'
   endif
 
   pg_group_name = name

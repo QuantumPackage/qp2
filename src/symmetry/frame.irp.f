@@ -84,11 +84,9 @@ END_PROVIDER
 
   ! SPEC.md section 5.9: relative test, before any enumeration. SPEC.md
   ! writes maxval here, which can never fire: maxval >= sum/3 > 1e-6*sum
-  ! whenever sum > 0. The moment about the molecular axis is the *smallest*
-  ! eigenvalue (it is exactly zero for a collinear molecule), so the test
-  ! must use minval. Verified on CO2: maxval gives :math:`|G|` = 4 and n_max = 32
-  ! (every 2*pi/n about the axis maps the molecule onto itself), while
-  ! minval stops here as required.
+  ! whenever sum > 0. Only the "all nuclei at the centre" case is rejected
+  ! here; a linear molecule is legal and is detected by pg_is_linear, which
+  ! uses the same minval test on a local copy.
   if (sum(pg_inertia_eval) <= 0.d0) then
     if (.not. pg_detection_failed) then
       write(6,'(A)') 'symmetry: no nucleus, or all nuclei at the centre: '// &
@@ -97,15 +95,41 @@ END_PROVIDER
     endif
     return
   endif
-  if (minval(pg_inertia_eval) < 1.d-6*sum(pg_inertia_eval)) then
-    if (.not. pg_detection_failed) then
-      write(6,'(A)') 'symmetry: linear molecule: Cinfv/Dinfh labelling '// &
-           'is not implemented'
-      pg_detection_failed = .true.
-    endif
-    return
-  endif
 END_PROVIDER
+
+ BEGIN_PROVIDER [ logical, pg_is_linear ]
+  implicit none
+  BEGIN_DOC
+  ! .True. for a collinear molecule. Two tests, both needed: the moment
+  ! about the molecular axis is the *smallest* inertia eigenvalue and it is
+  ! exactly zero for a collinear geometry (SPEC.md section 5.9 writes maxval,
+  ! which can never fire), and every nucleus must sit within half pg_tol of
+  ! the line through pg_center along pg_inertia_evec(:,1).
+  !
+  ! Half pg_tol, not one pg_tol: the group of the molecule is built from
+  ! matrices that are exact in the canonical frame, so the only error is the
+  ! distance d of a nucleus from the axis, and a sigma_v moves it by 2d. A
+  ! nucleus at d = pg_tol would make every sigma_v fail pg_maps_to_self, and
+  ! the run would end on "element does not realise its permutation" instead
+  ! of being treated as linear.
+  END_DOC
+  integer :: i
+  double precision :: v(3), d, ax(3)
+
+  pg_is_linear = .false.
+  if (pg_detection_failed) return
+  if (sum(pg_inertia_eval) <= 0.d0) return
+  if (minval(pg_inertia_eval) >= 1.d-6*sum(pg_inertia_eval)) return
+
+  ax(1:3) = pg_inertia_evec(1:3,1)
+  do i = 1, nucl_num
+    v(1:3) = nucl_coord(i,1:3) - pg_center(1:3)
+    d = v(1)*ax(1) + v(2)*ax(2) + v(3)*ax(3)
+    d = (v(1)-d*ax(1))**2 + (v(2)-d*ax(2))**2 + (v(3)-d*ax(3))**2
+    if (sqrt(d) > 0.5d0*pg_tol) return
+  enddo
+  pg_is_linear = .true.
+ END_PROVIDER
 
  BEGIN_PROVIDER [ logical, pg_is_planar ]
   implicit none
@@ -165,7 +189,7 @@ END_PROVIDER
   ! Step 3-4: z.
   call pg_proper_scan(nucl_num, nucl_coord, znum, pg_center, &
        pg_inertia_eval, pg_inertia_evec, pg_tol, 2000, &
-       n_max, n_axes, zaxis, ierr)
+       n_max, n_axes, zaxis, pg_is_linear, ierr)
   if (ierr /= 0) then
     if (.not. pg_detection_failed) then
       write(6,'(A,I0,A)') 'symmetry: more than ', 2000, &
@@ -531,21 +555,26 @@ end subroutine pg_maps_to_self
 ! and the selected principal axis (SPEC.md section 4 step 3-4).
 !-----------------------------------------------------------------------
 subroutine pg_proper_scan(nat, xyz, znum, ctr, evals, evecs, tol, &
-     ncandmax, n_max, n_axes_max, axis, ierr)
+     ncandmax, n_max, n_axes_max, axis, linear, ierr)
   implicit none
   BEGIN_DOC
   ! Enumerate proper rotations of order 2..32 among the candidate
   ! directions, keep the highest order and select the principal axis.
   ! 32, not 12: C32 occurs in D32h/D32d, the largest groups of the data set.
+  ! A linear molecule is capped at 31: the improper elements of its group are
+  ! S_n^k and the column parser rejects an unreduced symbol (gcd(k,n) /= 1),
+  ! so n must be prime. 31 is the largest prime <= 32, and the tables
+  ! shipped are C31v and D31h.
   END_DOC
   integer, intent(in) :: nat, ncandmax
   double precision, intent(in) :: xyz(nat,3), ctr(3), evals(3), evecs(3,3), tol
   integer, intent(in) :: znum(nat)
+  logical, intent(in) :: linear
   integer, intent(out) :: n_max, n_axes_max, ierr
   double precision, intent(out) :: axis(3)
   double precision, parameter :: pi = 3.1415926535897932d0
   double precision :: cand(3,ncandmax), rot(3,3), v(3)
-  integer :: order(ncandmax), perm(nat)
+  integer :: order(ncandmax), perm(nat), ncap
   integer :: ncand, i, j, k, n, kbest, icount, ibest
   double precision :: d, dmetric, dbest, gap, gapbest
   logical :: ok
@@ -553,13 +582,15 @@ subroutine pg_proper_scan(nat, xyz, znum, ctr, evals, evecs, tol, &
   axis(1:3) = 0.d0
   n_max = 1
   n_axes_max = 0
+  ncap = 32
+  if (linear) ncap = 31
   call pg_build_candidates(nat, xyz, znum, ctr, evecs, ncandmax, &
        cand, ncand, ierr)
   if (ierr /= 0) return
 
   order(1:ncand) = 1
   do k = 1, ncand
-    do n = 32, 2, -1
+    do n = ncap, 2, -1
       call pg_rotation(cand(1,k), 2.d0*pi/dble(n), rot)
       call pg_maps_to_self(nat, xyz, znum, ctr, rot, tol, perm, ok)
       if (ok) then
