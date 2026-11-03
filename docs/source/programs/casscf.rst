@@ -47,5 +47,6 @@ casscf
     * :c:data:`list_virt` 
     * :c:data:`list_virt` 
     * :c:data:`mo_coef` 
+    * :c:data:`mo_symmetry` 
     * :c:data:`n_det_max_full` 
     * :c:data:`pt2_relative_error` 

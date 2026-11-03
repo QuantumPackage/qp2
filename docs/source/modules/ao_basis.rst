@@ -384,6 +384,7 @@ Providers
        :columns: 3
 
        * :c:data:`ao_coef_normalized_ordered`
+       * :c:data:`pg_shell_target`
 
  
 .. c:var:: double ao_coef_normalized
@@ -424,6 +425,7 @@ Providers
        :columns: 3
 
        * :c:data:`ao_coef_normalized_ordered`
+       * :c:data:`pg_shell_target`
 
  
 .. c:var:: double ao_coef_normalized_ordered
@@ -930,6 +932,12 @@ Providers
        * :c:data:`shell_ang_mom`
        * :c:data:`shell_num`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`pg_shell_target`
 
  
 .. c:var:: int ao_l
@@ -1132,6 +1140,7 @@ Providers
        * :c:data:`ao_expo_ordered_transp_per_nucl`
        * :c:data:`ao_expo_phase`
        * :c:data:`ao_expo_pw`
+       * :c:data:`pg_shell_target`
 
  
 .. c:var:: int ao_shell

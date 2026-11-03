@@ -57,6 +57,7 @@ Providers
        * :c:data:`dressing_column_h`
        * :c:data:`expected_s2`
        * :c:data:`h_matrix_all_dets`
+       * :c:data:`mpi_master`
        * :c:data:`n_csf`
        * :c:data:`n_det`
        * :c:data:`n_int`
@@ -64,6 +65,12 @@ Providers
        * :c:data:`n_states_diag`
        * :c:data:`nthreads_davidson`
        * :c:data:`only_expected_s2`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_irrep_allowed`
+       * :c:data:`pg_irrep_filter`
+       * :c:data:`pg_label_ierr`
+       * :c:data:`pg_n_col`
+       * :c:data:`pg_thresh`
        * :c:data:`psi_coef`
        * :c:data:`psi_det`
        * :c:data:`s2_eig`
@@ -105,6 +112,7 @@ Providers
        * :c:data:`dressing_column_h`
        * :c:data:`expected_s2`
        * :c:data:`h_matrix_all_dets`
+       * :c:data:`mpi_master`
        * :c:data:`n_csf`
        * :c:data:`n_det`
        * :c:data:`n_int`
@@ -112,6 +120,12 @@ Providers
        * :c:data:`n_states_diag`
        * :c:data:`nthreads_davidson`
        * :c:data:`only_expected_s2`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_irrep_allowed`
+       * :c:data:`pg_irrep_filter`
+       * :c:data:`pg_label_ierr`
+       * :c:data:`pg_n_col`
+       * :c:data:`pg_thresh`
        * :c:data:`psi_coef`
        * :c:data:`psi_det`
        * :c:data:`s2_eig`
@@ -181,6 +195,7 @@ Providers
        * :c:data:`dressing_column_h`
        * :c:data:`expected_s2`
        * :c:data:`h_matrix_all_dets`
+       * :c:data:`mpi_master`
        * :c:data:`n_csf`
        * :c:data:`n_det`
        * :c:data:`n_int`
@@ -188,6 +203,12 @@ Providers
        * :c:data:`n_states_diag`
        * :c:data:`nthreads_davidson`
        * :c:data:`only_expected_s2`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_irrep_allowed`
+       * :c:data:`pg_irrep_filter`
+       * :c:data:`pg_label_ierr`
+       * :c:data:`pg_n_col`
+       * :c:data:`pg_thresh`
        * :c:data:`psi_coef`
        * :c:data:`psi_det`
        * :c:data:`s2_eig`
@@ -1089,6 +1110,7 @@ Subroutines / functions
        * :c:data:`nthreads_davidson`
        * :c:data:`nuclear_repulsion`
        * :c:data:`only_expected_s2`
+       * :c:data:`pg_irrep_filter`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_bilinear_matrix_order_reverse`
        * :c:data:`psi_coef`
@@ -1123,6 +1145,9 @@ Subroutines / functions
        * :c:func:`mmap_destroy`
        * :c:func:`normalize`
        * :c:func:`nullify_small_elements`
+       * :c:func:`pg_det_state_labels`
+       * :c:func:`pg_state_apply`
+       * :c:func:`pg_state_warn_filtered`
        * :c:func:`qp_bug`
        * :c:func:`random_number`
        * :c:func:`resident_memory`

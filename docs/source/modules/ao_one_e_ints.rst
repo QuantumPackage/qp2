@@ -1316,6 +1316,8 @@ Providers
        * :c:data:`ao_overlap_complex`
        * :c:data:`ao_sphe_overlap`
        * :c:data:`mo_overlap`
+       * :c:data:`pg_col_diag`
+       * :c:data:`pg_xg`
        * :c:data:`s_half`
        * :c:data:`s_half_inv`
        * :c:data:`s_inv`
@@ -1621,6 +1623,8 @@ Providers
        * :c:data:`ao_overlap_complex`
        * :c:data:`ao_sphe_overlap`
        * :c:data:`mo_overlap`
+       * :c:data:`pg_col_diag`
+       * :c:data:`pg_xg`
        * :c:data:`s_half`
        * :c:data:`s_half_inv`
        * :c:data:`s_inv`
@@ -1672,6 +1676,8 @@ Providers
        * :c:data:`ao_overlap_complex`
        * :c:data:`ao_sphe_overlap`
        * :c:data:`mo_overlap`
+       * :c:data:`pg_col_diag`
+       * :c:data:`pg_xg`
        * :c:data:`s_half`
        * :c:data:`s_half_inv`
        * :c:data:`s_inv`
@@ -1723,6 +1729,8 @@ Providers
        * :c:data:`ao_overlap_complex`
        * :c:data:`ao_sphe_overlap`
        * :c:data:`mo_overlap`
+       * :c:data:`pg_col_diag`
+       * :c:data:`pg_xg`
        * :c:data:`s_half`
        * :c:data:`s_half_inv`
        * :c:data:`s_inv`

@@ -90,6 +90,7 @@ Providers
        * :c:data:`ao_prim_num`
        * :c:data:`ao_two_e_integrals_erf_in_map`
        * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`auto_symmetry`
        * :c:data:`basis`
        * :c:data:`basis_nucleus_index`
        * :c:data:`basis_type`
@@ -144,6 +145,7 @@ Providers
        * :c:data:`io_mo_two_e_integrals`
        * :c:data:`io_mo_two_e_integrals_erf`
        * :c:data:`io_nuclear_repulsion`
+       * :c:data:`irrep_states`
        * :c:data:`is_periodic`
        * :c:data:`lin_dep_cutoff`
        * :c:data:`mo_cholesky_double`
@@ -187,6 +189,9 @@ Providers
        * :c:data:`ormas_min_e`
        * :c:data:`ormas_mstart`
        * :c:data:`ormas_n_space`
+       * :c:data:`pg_data_dir`
+       * :c:data:`pg_thresh`
+       * :c:data:`pg_tol`
        * :c:data:`point_charges`
        * :c:data:`prim_coef`
        * :c:data:`prim_expo`
@@ -225,6 +230,7 @@ Providers
        * :c:data:`shell_prim_num`
        * :c:data:`slater_r_power`
        * :c:data:`state_following`
+       * :c:data:`state_symmetry`
        * :c:data:`target_energy`
        * :c:data:`thresh_extra_grid`
        * :c:data:`thresh_grid`

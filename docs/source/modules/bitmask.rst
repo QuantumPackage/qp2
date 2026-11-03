@@ -1494,6 +1494,8 @@ Providers
        * :c:data:`one_e_tr_dm_mo`
        * :c:data:`one_e_tr_dm_mo_alpha`
        * :c:data:`ormas_bitmask`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_state_irrep_weight`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_cas`
        * :c:data:`psi_cas_sorted_bit`
@@ -2629,6 +2631,7 @@ Subroutines / functions
        * :c:data:`hf_bitmask`
        * :c:data:`inact_bitmask`
        * :c:data:`ormas_bitmask`
+       * :c:func:`pg_family_index`
        * :c:data:`virt_bitmask`
 
  
