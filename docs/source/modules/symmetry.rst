@@ -325,10 +325,11 @@ Keywords
      - Master switch. When false, no provider of the detection chain is
        built, the SCF/DFT report is silent, and nothing is labelled.
    * - :option:`irrep_states`
-     - empty
+     - ``None``
      - Comma-, semicolon- or blank-separated list of irrep names to keep in
-       the CI diagonalization, for example ``B1, A1``. Empty keeps every
-       irrep.
+       the CI diagonalization, for example ``B1, A1``. ``None`` (the
+       default) and the empty string both keep every irrep; the provider
+       turns ``None`` back into the empty list.
 
 .. note::
 
@@ -450,8 +451,9 @@ EZFIO parameters
  
 .. option:: irrep_states
  
-    Comma-, semicolon- or blank-separated list of irrep names to keep in the CI diagonalization, for example "A1,B1". An empty string keeps all irreps.
+    Comma-, semicolon- or blank-separated list of irrep names to keep in the CI diagonalization, for example "A1,B1". The token None, the default, keeps all irreps.
  
+    Default: None
  
  
 Providers 
@@ -498,10 +500,9 @@ Providers
 
 
     Comma-, semicolon- or blank-separated list of irrep names to keep in
-    the CI diagonalization (SPEC.md 9.4b). Empty means all irreps.
-    
-    Declared in EZFIO.cfg with interface "ezfio" only (see the header):
-    the keyword is not exposed in qp_edit, write it with the ezfio tool.
+    the CI diagonalization (SPEC.md 9.4b). Empty means all irreps; the
+    qp_edit default is the token "None", which :c:func:`pg_normalize_irrep_states`
+    turns into the empty string.
 
     Needs:
 
@@ -3235,6 +3236,26 @@ Subroutines / functions
        * :c:func:`pg_enumerate`
        * :c:func:`pg_proper_scan`
        * :c:func:`pg_select_x`
+
+ 
+.. c:function:: void pg_normalize_irrep_states(void)
+
+
+    File : :file:`symmetry/settings.irp.f`
+
+    .. code:: fortran
+
+        subroutine pg_normalize_irrep_states(list)
+
+
+    Empty ``list`` when it holds only the token "None" (any case).
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`irrep_states`
 
  
 .. c:function:: void pg_orient_axis(void)

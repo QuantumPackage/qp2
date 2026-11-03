@@ -2951,6 +2951,7 @@ Index of Subroutines/Functions
     * :c:func:`pg_mo_labels_ok` 
     * :c:func:`pg_mo_top2` 
     * :c:func:`pg_monomial_rep` 
+    * :c:func:`pg_normalize_irrep_states` 
     * :c:func:`pg_orient_axis` 
     * :c:func:`pg_parse_symbol` 
     * :c:func:`pg_parse_table` 
