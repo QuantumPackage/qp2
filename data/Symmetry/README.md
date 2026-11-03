@@ -4,8 +4,9 @@ Character tables of the point groups
 One file per point group, read by the ``symmetry`` module
 (``src/symmetry/chartab.irp.f``). The file name **is** the group name: the
 detector identifies a group by its measured invariants, builds a name, and
-opens ``$QP_ROOT/data/Symmetry/<name>``. ``pg_data_dir`` overrides the
-directory; ``None`` or empty means ``$QP_ROOT/data/Symmetry``.
+opens ``$QP_ROOT/data/Symmetry/<name>``. There is no override: the directory
+is the one of the installation that runs the code, and ``QP_ROOT`` must be set
+when the module is loaded.
 
 Provenance
 ==========
@@ -98,5 +99,22 @@ two standard names collapse onto one group. The naming tree produces the
 surviving name (``Cs``, ``Cs``, ``C2``, ``C2h``, ``C2v``), so these five files
 are never opened. ``Cinfv`` and ``Dinfh`` are linear-molecule groups:
 detection refuses a linear molecule before any table is read, so they are
-never opened either. They are kept for completeness of the family set.
+never opened either. They are kept for completeness of the family set, and
+both carry a defect that must be fixed before anyone tries to use them:
+
+* ``Cinfv`` is a correct ``C31v`` table (62 elements, 17 classes) whose rows
+  are renamed ``Sigma+``, ``Sigma-``, ``Pi``, ``Delta``, ``Phi``, ``Gamma``,
+  ``E5`` ... ``E15``. Those names are right for the 31 sampled rotations, so
+  the body is usable as is.
+* ``Dinfh`` is **not** a ``Dinfh`` table. Its body is the ``D32h`` body --
+  identical to the file ``D32h``, down to the ``Group`` line, which says
+  ``D32h`` -- with some rows renamed. Rows 3, 4, 22 and 23 keep the ``D32h``
+  names ``B1g``, ``B2g``, ``B1u``, ``B2u``, which do not exist in any
+  ``Dinfh`` character table: their characters are defined on the ``C2'`` and
+  ``C2"`` columns, two classes that ``Dinfh`` does not have (all its
+  perpendicular two-fold axes are one class). Reading a ``Dinfh`` label off
+  them duplicates ``Sigma_g+`` and ``Sigma_g-``. A finite model of ``Dinfh``
+  with only valid labels is ``D31h`` = ``C31v`` x ``Ci`` (34 irreps). Neither
+  file has ever been checked against the reference implementation, which skips
+  both.
 

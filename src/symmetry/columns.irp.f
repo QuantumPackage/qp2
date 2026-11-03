@@ -131,8 +131,8 @@
              'directory is unknown'
       else
         write(6,'(A,A)') 'symmetry:   not found: ', trim(path)
-        write(6,'(A)') 'symmetry:   run "make install" in the symmetry '// &
-             'module to populate $(QP_ROOT)/data/Symmetry'
+        write(6,'(A)') 'symmetry:   the tables are tracked in git under '// &
+             '$(QP_ROOT)/data/Symmetry; this source tree is incomplete'
       endif
       pg_detection_failed = .true.
     endif
