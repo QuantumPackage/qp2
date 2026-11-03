@@ -39,6 +39,11 @@ END_PROVIDER
    double precision, allocatable  :: s2_eigvalues(:)
    double precision, allocatable  :: e_array(:)
    integer, allocatable           :: iorder(:)
+   integer                        :: nslot, iord, n_allowed
+   integer, allocatable           :: lab(:)
+   double precision, allocatable  :: lab_pur(:), lab_mix(:), eig_tmp(:,:), s2_tmp(:)
+   logical, allocatable           :: allowed(:)
+   logical, external              :: pg_labels_usable
    logical                        :: converged
    logical                        :: do_csf
 
@@ -59,6 +64,12 @@ END_PROVIDER
    do_csf = s2_eig .and. only_expected_s2 .and. csf_based
 
    if (diag_algorithm == "Davidson") then
+
+     if (do_csf .and. diag_algorithm == "Davidson" .and. pg_irrep_filter) then
+       if (mpi_master) then
+         write(6,'(A)') 'symmetry: irrep_states is ignored when csf_based is true'
+       endif
+     endif
 
      if (do_csf) then
        call davidson_diag_H_csf(psi_det,CI_eigenvectors, &
@@ -326,6 +337,49 @@ END_PROVIDER
          enddo
        enddo
      enddo
+
+     if (pg_irrep_filter) then
+       if (pg_labels_usable()) then
+         nslot = min(N_det, N_states_diag)
+         allocate(lab(nslot), lab_pur(nslot), lab_mix(nslot), allowed(nslot))
+         allocate(iorder(nslot), e_array(nslot), s2_tmp(nslot))
+         call pg_det_state_labels(N_det, CI_eigenvectors, size(CI_eigenvectors,1), &
+              nslot, lab, lab_pur, lab_mix)
+         allowed(:) = .true.
+         call pg_state_apply(lab, nslot, allowed)
+         iord = 0
+         do j = 1, nslot
+           if (allowed(j)) then
+             iord += 1
+             iorder(iord) = j
+           endif
+         enddo
+         n_allowed = iord
+         do j = 1, nslot
+           if (.not. allowed(j)) then
+             iord += 1
+             iorder(iord) = j
+           endif
+         enddo
+         allocate(eig_tmp(N_det,nslot))
+         do j = 1, nslot
+           eig_tmp(:,j) = CI_eigenvectors(:,iorder(j))
+           e_array(j) = CI_electronic_energy(iorder(j))
+           s2_tmp(j) = CI_s2(iorder(j))
+         enddo
+         do j = 1, nslot
+           CI_eigenvectors(:,j) = eig_tmp(:,j)
+           CI_electronic_energy(j) = e_array(j)
+           CI_s2(j) = s2_tmp(j)
+         enddo
+         deallocate(eig_tmp, s2_tmp, e_array, iorder, allowed, lab, lab_pur, lab_mix)
+         if (nslot >= N_states .and. n_allowed < N_states) then
+           if (mpi_master) write(6,'(A,I0,A,I0)') &
+             'symmetry: irrep filter: only ', n_allowed, &
+             ' state(s) in irrep_states for n_states = ', N_states
+         endif
+       endif
+     endif
 
      deallocate(eigenvectors,eigenvalues)
    endif
