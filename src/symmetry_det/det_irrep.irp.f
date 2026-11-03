@@ -24,6 +24,24 @@
 ! the same permutation to both, and its sign squared is 1.
 !-----------------------------------------------------------------------
 
+BEGIN_PROVIDER [ integer, pg_label_ierr ]
+&BEGIN_PROVIDER [ character*(512), pg_label_msg ]
+  implicit none
+  BEGIN_DOC
+  ! 0 when the last labelling attempt succeeded; otherwise
+  !   1  there is no determinant to label
+  !   2  there is no MO or no symmetry block
+  !   3  the MO basis is not block diagonal
+  !   4  a determinant family is larger than pg_family_cap
+  !   5  the family enumeration is inconsistent
+  !   6  one symmetry block holds more than 12 occupied MOs
+  ! |pg_label_msg| is the one-sentence reason. Reporting is left to the
+  ! caller: a provider that stops cannot be reported on.
+  END_DOC
+  pg_label_ierr = 0
+  pg_label_msg = ''
+END_PROVIDER
+
 BEGIN_PROVIDER [ integer, pg_family_cap ]
   implicit none
   BEGIN_DOC
@@ -325,7 +343,11 @@ subroutine pg_family_fill(nsel, np, mask)
   if (mtot /= np) then
     write(6,'(A,I0,A,I0,A)') 'symmetry_det: family enumeration produced ', &
          mtot, ' members where the size was ', np, ' (internal inconsistency)'
-    stop 1
+    write(pg_label_msg,'(A,I0,A,I0,A)') 'family enumeration produced ', mtot, &
+         ' members where the size was ', np, ' (internal inconsistency)'
+    pg_label_ierr = 5
+    mask(1:2,1:pg_n_mo_block,1:np) = 0
+    return
   endif
 
   mask(1:2,1:pg_n_mo_block,1:np) = 0
@@ -442,7 +464,11 @@ subroutine pg_elem_me(ig, np, mask, ip, jp, val)
              ii, ' occupied MOs; family enumeration supports at most 12.'
         write(6,'(A)') '  A block is an irrep space and never exceeds d_a; '// &
              'the MO basis is not symmetry adapted.'
-        stop 1
+        write(pg_label_msg,'(A,I0,A)') 'one symmetry block holds ', ii, &
+             ' occupied MOs (at most 12 supported)'
+        pg_label_ierr = 6
+        val = 0.d0
+        return
       endif
       n = ii
       ! <D_ip|U(g)|D_jp> restricted to this block: det( X_g[A',A] ).
@@ -492,6 +518,7 @@ subroutine pg_family_projector(np, mask, t)
     do jp = 1, np
       do ip = 1, np
         call pg_elem_me(ig, np, mask, ip, jp, val)
+        if (pg_label_ierr /= 0) return
         if (val == 0.d0) cycle
         do a = 1, pg_n_irrep
           t(ip,jp,a) = t(ip,jp,a) + coef(a)*pg_char(a,c)*val
@@ -542,6 +569,8 @@ BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
   double precision :: pmax
 
   pg_n_family = 0
+  pg_label_ierr = 0
+  pg_label_msg = ''
   if (N_det > 0) then
     pg_family_first(1:N_det) = 0
     pg_det_irrep(1:N_det) = 0
@@ -555,11 +584,15 @@ BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
   !---------------------------------------------------------------------
   if (N_det <= 0) then
     write(6,'(A)') 'symmetry_det: N_det = 0: there is no determinant to label.'
-    stop 1
+    pg_label_ierr = 1
+    pg_label_msg = 'N_det = 0: there is no determinant to label.'
+    return
   endif
   if (mo_num == 0 .or. pg_n_mo_block == 0) then
     write(6,'(A)') 'symmetry_det: no MO or no symmetry block: nothing to label.'
-    stop 1
+    pg_label_ierr = 2
+    pg_label_msg = 'no MO or no symmetry block: nothing to label.'
+    return
   endif
   n_mixed = 0
   do i = 1, mo_num
@@ -574,7 +607,10 @@ BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
     write(6,*)
     write(6,'(A)') '  The MO basis is not block diagonal: <D''|U(g)|D> is '// &
          'wrong for every determinant, and a number would be worse than no number.'
-    stop 1
+    write(pg_label_msg,'(A,I0,A,I0,A)') 'the MO basis is not block diagonal: ', &
+         n_mixed, ' of ', mo_num, ' MOs have no definite irrep'
+    pg_label_ierr = 3
+    return
   endif
 
   !---------------------------------------------------------------------
@@ -591,10 +627,17 @@ BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
            pg_family_cap, '.'
       write(6,'(A)') '  Too many partially occupied degenerate shells to '// &
            'enumerate the projector exactly; no number is better than a wrong one.'
-      stop 1
+      write(pg_label_msg,'(A,I0,A)') 'a determinant family has more than pg_family_cap = ', &
+           pg_family_cap, ' members'
+      pg_label_ierr = 4
+      return
     endif
     allocate(mask(2,pg_n_mo_block,np), idx(np), t(np,np,pg_n_irrep))
     call pg_family_fill(nsel, np, mask)
+    if (pg_label_ierr /= 0) then
+      deallocate(mask, idx, t)
+      return
+    endif
     call pg_family_index(np, mask, idx, imin)
     if (imin /= i) then
       deallocate(mask, idx, t)
@@ -604,6 +647,10 @@ BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
     ifam = ifam + 1
     pg_family_first(ifam) = i
     call pg_family_projector(np, mask, t)
+    if (pg_label_ierr /= 0) then
+      deallocate(mask, idx, t)
+      return
+    endif
     do ip = 1, np
       j = idx(ip)
       if (j == 0) cycle

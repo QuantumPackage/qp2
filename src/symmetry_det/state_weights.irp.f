@@ -100,6 +100,10 @@ BEGIN_PROVIDER [ double precision, pg_state_irrep_weight, (pg_n_irrep,N_states) 
     allocate(mask(2,pg_n_mo_block,np), idx(np), c(np,N_states))
     allocate(t(np,np,pg_n_irrep))
     call pg_family_fill(nsel, np, mask)
+    if (pg_label_ierr /= 0) then
+      deallocate(mask, idx, c, t)
+      return
+    endif
     call pg_family_index(np, mask, idx, imin)
     c(1:np,1:N_states) = 0.d0
     do ip = 1, np
@@ -109,6 +113,10 @@ BEGIN_PROVIDER [ double precision, pg_state_irrep_weight, (pg_n_irrep,N_states) 
       enddo
     enddo
     call pg_family_projector(np, mask, t)
+    if (pg_label_ierr /= 0) then
+      deallocate(mask, idx, c, t)
+      return
+    endif
     do a = 1, pg_n_irrep
       do s = 1, N_states
         q = 0.d0

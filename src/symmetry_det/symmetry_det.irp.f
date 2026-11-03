@@ -40,6 +40,11 @@ subroutine pg_det_report
   logical :: failed
   logical, external :: pg_det_gates
 
+  if (pg_detection_failed) then
+    write(6,'(A)') 'symmetry_det: point-group detection failed'
+    stop 1
+  endif
+
   write(6,'(A)') '============================================================'
   write(6,'(A)') ' symmetry_det driver: determinant and state symmetry'
   write(6,'(A)') '============================================================'
@@ -59,6 +64,11 @@ subroutine pg_det_report
   write(6,'(A,I0,A,I0,A,I0)') 'families        : ', pg_n_family, &
                           '    largest family: ', nmax, &
                           '    pg_family_cap: ', pg_family_cap
+
+  if (pg_label_ierr /= 0) then
+    write(6,'(A,A)') 'symmetry_det: labelling failed: ', trim(pg_label_msg)
+    stop 1
+  endif
 
   !---------------------------------------------------------------------
   ! Determinant table.
