@@ -10,17 +10,17 @@
 subroutine pg_print_state_irreps(energy, s2)
   implicit none
   BEGIN_DOC
-  ! Prints the irrep of each CI state. Never stops. :c:data:`state_symmetry` = F
-  ! is silent; a failed detection has already printed its reason. A state
-  ! with no definite irrep is described by its irrep probabilities, which
-  ! are exact for the stored CI space even when the MO basis is not
-  ! symmetry adapted (NOTES section 10). ``energy`` and ``s2`` are the
-  ! caller's arrays, at least ``N_states`` long.
+  ! Prints the irrep of each CI state. Never stops. It is silent when the
+  ! detection was not requested or failed: :c:func:`pg_symmetry_ready` returns
+  ! .false. and the failure has already printed its reason. A state with no
+  ! definite irrep is described by its irrep probabilities, which are exact
+  ! for the stored CI space even when the MO basis is not symmetry adapted
+  ! (NOTES section 10). ``energy`` and ``s2`` are the caller's arrays, at
+  ! least ``N_states`` long.
   END_DOC
   double precision, intent(in) :: energy(*), s2(*)
   logical, external :: pg_symmetry_ready
 
-  if (.not. state_symmetry) return
   if (.not. pg_symmetry_ready()) return
   if (mo_num < 1) return
   if (N_det < 1 .or. N_states < 1) return

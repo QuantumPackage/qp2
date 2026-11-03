@@ -129,7 +129,7 @@ subroutine pg_report(write_mo)
          trim(pg_group_name)
     write(6,'(A,A)') 'searched        : ', trim(path)
     if (ierr == 1) then
-      write(6,'(A)') 'QP_ROOT is not set and pg_data_dir is unset'
+      write(6,'(A)') 'QP_ROOT is not set, so the data directory is unknown'
     endif
     write(6,'(A)') 'install it with: make -C $QP_ROOT/src/symmetry install'
     return

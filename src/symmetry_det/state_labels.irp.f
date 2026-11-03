@@ -22,10 +22,10 @@ logical function pg_labels_usable()
   ! names ``N_det`` and the two stage-2 functions only, so a caller can test
   ! it before paying for anything.
   !
-  ! It does not test :c:data:`state_symmetry`: that keyword means "print the
-  ! table", and a printing switch must not disable the irrep filter
-  ! (SPEC.md 9.4f A1). :c:data:`auto_symmetry` stays the master switch, through
-  ! :c:func:`pg_symmetry_ready`.
+  ! It has no printing switch to test: the state table is always printed
+  ! when the labels are usable, and a printing decision must not disable
+  ! the irrep filter (SPEC.md 9.4f A1). :c:data:`auto_symmetry` stays the
+  ! master switch, through :c:func:`pg_symmetry_ready`.
   END_DOC
   logical, external :: pg_symmetry_ready
   logical, external :: pg_mo_labels_ok

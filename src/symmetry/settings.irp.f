@@ -1,17 +1,19 @@
 !-----------------------------------------------------------------------
 ! EZFIO settings and their defaults.
 !
-! :c:data:`pg_tol`, :c:data:`pg_thresh`, :c:data:`pg_data_dir`, :c:data:`auto_symmetry`, :c:data:`state_symmetry`
-! and :c:data:`irrep_states` are declared in EZFIO.cfg. The first five use
-! interface "ezfio, ocaml": the EZFIO bindings and the qp_edit default are
-! generated, but no IRPF90 provider, because ei_handler.py turns a missing
-! keyword into "stop 1" -- its "default:" line feeds the OCaml side only.
-! The five defaults therefore live here, and the EZFIO value wins whenever
-! it is present. :c:data:`irrep_states` uses interface "ezfio" only: the OCaml
-! interface requires a "default:" line, an empty default makes
-! Qpackage.get_ezfio_default_in_file raise Not_found, and any non-empty
-! sentinel would be read back as an irrep name. Its default is the empty
-! string, written by its provider below.
+! :c:data:`pg_tol`, :c:data:`pg_thresh` and :c:data:`auto_symmetry` are
+! declared in EZFIO.cfg with interface "ezfio, ocaml": the EZFIO bindings
+! and the qp_edit default are generated, but no IRPF90 provider, because
+! ei_handler.py turns a missing keyword into "stop 1" -- its "default:"
+! line feeds the OCaml side only. Their defaults therefore live here, and
+! the EZFIO value wins whenever it is present. :c:data:`irrep_states` uses
+! interface "ezfio" only: the OCaml interface requires a "default:" line,
+! an empty default makes Qpackage.get_ezfio_default_in_file raise
+! Not_found, and any non-empty sentinel would be read back as an irrep
+! name. Its default is the empty string, written by its provider below.
+!
+! The character tables are not a keyword: they ship in
+! ``$QP_ROOT/data/Symmetry`` and nothing else is supported.
 !
 ! This file must stay a plain .irp.f: ezfio_interface.irp.f is regenerated
 ! at build time and any edit there is lost.
@@ -76,35 +78,6 @@ BEGIN_PROVIDER [ double precision, pg_thresh ]
   IRP_ENDIF
 END_PROVIDER
 
-BEGIN_PROVIDER [ character*(256), pg_data_dir ]
-  implicit none
-  BEGIN_DOC
-  ! Directory holding the character tables. Empty or "None" means
-  ! ``QP_ROOT/data/Symmetry`` (see pg_data_dir_is_unset in chartab.irp.f).
-  END_DOC
-  logical :: has
-  PROVIDE ezfio_filename
-  pg_data_dir = ''
-  if (mpi_master) then
-    call ezfio_has_symmetry_pg_data_dir(has)
-    if (has) then
-      call ezfio_get_symmetry_pg_data_dir(pg_data_dir)
-    endif
-  endif
-  IRP_IF MPI_DEBUG
-    print *, irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST( pg_data_dir, 256, MPI_CHARACTER, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read pg_data_dir with MPI'
-    endif
-  IRP_ENDIF
-END_PROVIDER
-
 BEGIN_PROVIDER [ logical, auto_symmetry ]
   implicit none
   BEGIN_DOC
@@ -131,35 +104,6 @@ BEGIN_PROVIDER [ logical, auto_symmetry ]
     call MPI_BCAST( auto_symmetry, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
     if (ierr /= MPI_SUCCESS) then
       stop 'Unable to read auto_symmetry with MPI'
-    endif
-  IRP_ENDIF
-END_PROVIDER
-
-BEGIN_PROVIDER [ logical, state_symmetry ]
-  implicit none
-  BEGIN_DOC
-  ! When true, the irrep of each CI state is printed at the end of a CI
-  ! calculation. Default .true.
-  END_DOC
-  logical :: has
-  PROVIDE ezfio_filename
-  state_symmetry = .true.
-  if (mpi_master) then
-    call ezfio_has_symmetry_state_symmetry(has)
-    if (has) then
-      call ezfio_get_symmetry_state_symmetry(state_symmetry)
-    endif
-  endif
-  IRP_IF MPI_DEBUG
-    print *, irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST( state_symmetry, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read state_symmetry with MPI'
     endif
   IRP_ENDIF
 END_PROVIDER

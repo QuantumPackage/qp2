@@ -104,9 +104,9 @@ in the irrep column is that same statement written out. The |S^2| column is
 the value computed by the |CI| program, so a symmetry label and a spin label
 are always read together.
 
-The table is printed when :option:`symmetry state_symmetry` is |true| (the
-default). Turning it off changes no number: it is a printing switch, and in
-particular it does **not** disable the irrep filter.
+The table is printed after every |CI| run whose labels are usable. There is
+no printing switch; in particular the presence of the table never changes a
+number.
 
 .. _symmetry-mixed-mos:
 
@@ -258,9 +258,8 @@ The run continues in every one of these cases, and says why:
 * **an |MO| is not symmetry adapted** -- the reports switch to irrep
   probabilities, see :ref:`symmetry-mixed-mos`;
 * **no character table** -- the message gives the path that was tried. The
-  tables live in ``$QP_ROOT/data/Symmetry``, one file per group, and
-  :option:`symmetry pg_data_dir` selects another directory. A damaged file is
-  reported and rejected, never partially used;
+  tables live in ``$QP_ROOT/data/Symmetry``, one file per group. A damaged
+  file is reported and rejected, never partially used;
 * **``C1``** -- a legitimate group with a one-row table. One irrep, ``A1``,
   one line per report, and the filter accepts ``A1`` only.
 
@@ -276,9 +275,6 @@ Keywords
    * - :option:`symmetry auto_symmetry`
      - |true|
      - Master switch of the whole detection.
-   * - :option:`symmetry state_symmetry`
-     - |true|
-     - Print the irrep of each |CI| state. Does not disable the filter.
    * - :option:`symmetry irrep_states`
      - empty
      - Irreps to keep in the |CI| diagonalization; empty keeps all. Not
@@ -291,10 +287,6 @@ Keywords
      - ``1e-6``
      - Weight threshold for the |MO| blocks, the determinant labels and the
        state purities.
-   * - :option:`symmetry pg_data_dir`
-     - empty
-     - Directory of the character tables; empty means
-       ``$QP_ROOT/data/Symmetry``.
 
 Cost
 ----
@@ -323,5 +315,5 @@ the number of determinants:
   row, :math:`|G| |F| \sum_b n_b^3/3` operations, for at most 50 rows. The
   state weights are unchanged.
 
-Nothing runs for ``C1`` beyond one line; everything can be switched off with
-:option:`symmetry auto_symmetry` and :option:`symmetry state_symmetry`.
+Nothing runs for ``C1`` beyond the one-row report; everything can be
+switched off with :option:`symmetry auto_symmetry`.

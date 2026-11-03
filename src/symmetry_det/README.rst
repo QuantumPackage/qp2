@@ -126,9 +126,10 @@ and :ref:`fci` after diagonalization. It prints one line per state::
     symmetry:    state      energy (Ha)       S^2  irrep   purity
     symmetry:         1    -76.1140581951    0.0000  A1   1.000
 
-and nothing when :option:`symmetry state_symmetry` is false or when the
-detection failed. The :math:`S^2` column is the caller's value, so a symmetry
-label and a spin label are always read together.
+and nothing when the detection failed or was not requested. The
+:math:`S^2` column is the caller's value, so a symmetry label and a spin
+label are always read together. There is no printing switch: the table is
+part of a CI run whose labels are usable.
 
 The table uses the exact weights above, with the projectors for the families
 of size greater than one. For a pure determinant the diagonal is a Kronecker
@@ -188,8 +189,6 @@ whose known irrep is in the list. The semantics are deliberately narrow:
   with several calls shows it several times;
 * every state whose known irrep is rejected prints
   ``symmetry: irrep filter: state <k> is <name>, not in irrep_states``;
-* :option:`symmetry state_symmetry` does not disable the filter: a printing switch
-  must not silently change a computation;
 * CSF-based Davidson (``csf_based = true``) cannot be filtered. It prints
   ``symmetry: irrep_states is ignored when csf_based is true`` and runs
   unchanged;

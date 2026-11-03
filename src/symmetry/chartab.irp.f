@@ -323,71 +323,35 @@ subroutine pg_count_tokens(line, ntok)
 end subroutine pg_count_tokens
 
 !-----------------------------------------------------------------------
-! Locate a character table. pg_data_dir (EZFIO) wins when it names a
-! directory, otherwise $QP_ROOT/data/Symmetry (SPEC.md section 3).
+! Locate a character table in $QP_ROOT/data/Symmetry (SPEC.md section 3).
 !-----------------------------------------------------------------------
 subroutine pg_character_table_path(group, path, ierr)
   implicit none
   BEGIN_DOC
-  ! Build the full path of the character-table file of ``group`` and check that
-  ! it exists. ``ierr`` = 1 when QP_ROOT is not set and pg_data_dir is unset,
-  ! 2 when the file does not exist. ``path`` is always the path that was tried.
+  ! Build the full path ``$QP_ROOT/data/Symmetry/<group>`` and check that
+  ! it exists. ``ierr`` = 1 when QP_ROOT is not set, 2 when the file does
+  ! not exist. ``path`` is always the path that was tried.
   END_DOC
   character*(*), intent(in) :: group
   character*(*), intent(out) :: path
   integer, intent(out) :: ierr
   character*(256) :: root
-  character*(256) :: dir
   integer :: lroot, status
   logical :: exists
-  logical :: unset
 
   ierr = 0
-  call pg_data_dir_is_unset(pg_data_dir, unset)
-  if (.not. unset) then
-    dir = trim(adjustl(pg_data_dir))
-  else
-    root = ''
-    lroot = 0
-    status = 0
-    call get_environment_variable('QP_ROOT', root, lroot, status)
-    if (status /= 0 .or. lroot == 0) then
-      path = trim(group)
-      ierr = 1
-      return
-    endif
-    dir = trim(root(1:lroot))//'/data/Symmetry'
+  root = ''
+  lroot = 0
+  status = 0
+  call get_environment_variable('QP_ROOT', root, lroot, status)
+  if (status /= 0 .or. lroot == 0) then
+    path = trim(group)
+    ierr = 1
+    return
   endif
-  path = trim(dir)//'/'//trim(group)
+  path = trim(root(1:lroot))//'/data/Symmetry/'//trim(group)
   inquire(file=trim(path), exist=exists)
   if (.not. exists) ierr = 2
 
 end subroutine pg_character_table_path
 
-!-----------------------------------------------------------------------
-! True when pg_data_dir designates the default directory. QP2 cannot
-! store an empty character default (its default-file reader raises
-! Not_found on a value-less line), so EZFIO.cfg uses the same "None"
-! token as trexio_file, and the empty string is accepted too.
-!-----------------------------------------------------------------------
-subroutine pg_data_dir_is_unset(dir, unset)
-  implicit none
-  BEGIN_DOC
-  ! True when ``dir`` is empty or "none" in any case.
-  END_DOC
-  character*(*), intent(in) :: dir
-  logical, intent(out) :: unset
-  character*(64) :: low
-  integer :: i, n, ic
-
-  n = min(len_trim(dir), 64)
-  low = ''
-  do i = 1, n
-    ic = ichar(dir(i:i))
-    if (ic >= 65 .and. ic <= 90) ic = ic + 32
-    low(i:i) = char(ic)
-  enddo
-  unset = .true.
-  if (n > 0) unset = low(1:n) == 'none'
-
-end subroutine pg_data_dir_is_unset

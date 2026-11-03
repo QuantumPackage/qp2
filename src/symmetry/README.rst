@@ -181,10 +181,9 @@ The character table
 -------------------
 
 The group name is *the file name* of its character table. The file is read
-from ``$QP_ROOT/data/Symmetry/<name>``; :option:`pg_data_dir` overrides the
-directory. The first line of the file is ignored (some shipped files have a
-wrong first line) and the name comes from the file name. The number of
-irreps is read from the second line.
+from ``$QP_ROOT/data/Symmetry/<name>``. The first line of the file is ignored
+(some shipped files have a wrong first line) and the name comes from the
+file name. The number of irreps is read from the second line.
 
 A file column is not a geometric class. In ``C3`` there are two geometric
 classes (``C3`` and ``C3^2``) but one column; in ``T``, ``Td``, ``Oh`` and
@@ -315,19 +314,10 @@ Keywords
      - Weight threshold. An off-diagonal ``|X_g(j,i)|^2`` above it connects
        two MOs into one block; a projector weight above ``1 - pg_thresh``
        makes an MO or a determinant label definite.
-   * - :option:`pg_data_dir`
-     - empty
-     - Directory of the character tables. Empty or ``None`` means
-       ``$QP_ROOT/data/Symmetry``.
    * - :option:`auto_symmetry`
      - ``true``
      - Master switch. When false, no provider of the detection chain is
        built, the SCF/DFT report is silent, and nothing is labelled.
-   * - :option:`state_symmetry`
-     - ``true``
-     - Print the irrep of every CI state after diagonalization. It does not
-       disable :option:`irrep_states`: a printing switch must not silently
-       change a computation.
    * - :option:`irrep_states`
      - empty
      - Comma-, semicolon- or blank-separated list of irrep names to keep in
@@ -370,8 +360,9 @@ Cost
   determinant layer keeps ``pg_xg`` (0.8 MB for benzene in 6-31G, 66 MOs,
   ``|G| = 24``).
 * State table: one pass over the determinants per printed state, plus one
-  projector per family with more than one member. It is off for ``C1`` in
-  practice (one line) and can be switched off with ``state_symmetry``.
+  projector per family with more than one member. It is printed after every
+  CI run whose labels are usable; for ``C1`` every state is ``A``, so the
+  table only confirms that.
 
 Limits and failure modes
 ========================

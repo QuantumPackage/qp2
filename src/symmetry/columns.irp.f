@@ -127,12 +127,12 @@
       write(6,'(A,A,A)') 'symmetry: no character table for group ', &
            trim(pg_group_name), ': '
       if (ierr == 1) then
-        write(6,'(A)') 'symmetry:   neither pg_data_dir (EZFIO) nor '// &
-             'QP_ROOT is set, so the table directory is unknown'
+        write(6,'(A)') 'symmetry:   QP_ROOT is not set, so the table '// &
+             'directory is unknown'
       else
         write(6,'(A,A)') 'symmetry:   not found: ', trim(path)
         write(6,'(A)') 'symmetry:   run "make install" in the symmetry '// &
-             'module to populate $(QP_ROOT)/data/Symmetry, or set pg_data_dir'
+             'module to populate $(QP_ROOT)/data/Symmetry'
       endif
       pg_detection_failed = .true.
     endif
