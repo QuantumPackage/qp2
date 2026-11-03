@@ -64,8 +64,12 @@ A worked example, ``C2v``::
 The column of a class is found by **parsing its symbol**, not by its
 position, so a table may list the classes in any order as long as the
 symbols are the ones the detector emits: ``E``, ``Cn``, ``Cn^k``, ``S n``,
-``i``, ``s`` (plane ``yz``), ``sv`` (plane ``xz``), ``sd``/``sh`` (plane
-``xy``), ``C2'``, ``C2"``.
+``i``, ``sv`` (plane ``xz``, normal ``y``), ``sd`` and ``s`` (plane ``yz``,
+normal ``x``; ``sd`` is the other vertical class when ``sv`` is taken),
+``sh`` (plane ``xy``, normal ``z``), ``C2'`` (the class through ``x``),
+``C2"`` (the remaining one). When a group has a single vertical reflection
+class, ``s``/``sv``/``sd`` all select it: only two or more classes force the
+symbol to be resolved.
 
 Validation
 ==========
@@ -77,11 +81,14 @@ follows the last row.
 
 The content is then checked against the **enumerated** group, not against
 itself (``columns.irp.f``): every class must match exactly one column symbol,
-the characters must satisfy $\sum_c |c|\,\chi_a(c)\chi_b(c) = |G|\,\delta_{ab}$,
-the dimensions must satisfy $\sum_a d_a^2 = |G|$, and they must be
-multiplicative over direct products. A table failing one of these is reported
-with the relation that failed and the run continues without symmetry labels
-instead of aborting.
+the characters must satisfy $\sum_c |c|\,\chi_a(c)\chi_b(c) = |G|\,m_a\,
+\delta_{ab}$, the dimensions must satisfy $\sum_a d_a^2/m_a = |G|$, and they
+must be multiplicative over direct products. A table failing one of these is
+reported with the relation that failed and the run continues without symmetry
+labels instead of aborting. ``|c|`` is the number of elements of the class,
+``d_a = chi_a(E)`` and ``m_a`` is 2 when the table row is the sum of a
+complex-conjugate pair of irreps (``C3``, ``C10``, ...) and 1 otherwise; that
+is why the ``E`` irrep of ``C3`` enters as ``d^2/m = 4/2``.
 
 Files present but never selected
 ================================
