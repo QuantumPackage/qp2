@@ -135,11 +135,13 @@ subroutine pg_build_linear(nat, xyz, znum, ctr, frame, tol, nmax, &
   ! conjugation lookups by matrix (1e-8) are stable.
   !
   ! C31v, not Cinfv, and C31v x {E,sigma_h}, not C31v x Ci: the tables
-  ! shipped are C31v and D31h (D31h has S31^k symbols, while Ci would give
-  ! i C31^k = S62^{2k+31}, whose 2k+31 is not coprime with 62 and cannot be
-  ! written as a valid S_n^k symbol). The rows of the D31h table are the
-  ! restrictions of the Dinfh irreps to this group, so Sigma_g+, Pi_u, ...
-  ! keep their chemical meaning.
+  ! shipped are C31v and D31h. With the inversion the improper elements
+  ! would be i C31^k = S62^{31+2k}, k = 1..15: fifteen columns named
+  ! S62^33 .. S62^61, a notation no other table uses, and the inversion
+  ! itself would be S62^31, an unreduced symbol (gcd(31,62) = 31) that the
+  ! column parser rejects. The horizontal plane keeps sigma_h and S31^k.
+  ! The rows of the D31h table are the restrictions of the Dinfh irreps to
+  ! this group, so Sigma_g+, Pi_u, ... keep their chemical meaning.
   !
   ! ``ierr`` = 1 when the group does not fit in ``nmax``, 2 when a built
   ! element fails :c:func:`pg_maps_to_self`.

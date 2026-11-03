@@ -561,10 +561,13 @@ subroutine pg_proper_scan(nat, xyz, znum, ctr, evals, evecs, tol, &
   ! Enumerate proper rotations of order 2..32 among the candidate
   ! directions, keep the highest order and select the principal axis.
   ! 32, not 12: C32 occurs in D32h/D32d, the largest groups of the data set.
-  ! A linear molecule is capped at 31: the improper elements of its group are
-  ! S_n^k and the column parser rejects an unreduced symbol (gcd(k,n) /= 1),
-  ! so n must be prime. 31 is the largest prime <= 32, and the tables
-  ! shipped are C31v and D31h.
+  ! A linear molecule is capped at 31: its improper elements are S_n^k and
+  ! the shipped file names the 15 improper columns S31^k, k = 1..15. A
+  ! composite order would not keep that scheme -- some powers are not S_n^k
+  ! at all but reduce to a lower order (S25^5 = S5), so the columns would
+  ! mix orders and "one column per power of S_n" would no longer hold.
+  ! 31 is the largest odd order <= 32, and 4*31 = 124 still fits the
+  ! 160-element arrays; the tables shipped are C31v and D31h.
   END_DOC
   integer, intent(in) :: nat, ncandmax
   double precision, intent(in) :: xyz(nat,3), ctr(3), evals(3), evecs(3,3), tol
