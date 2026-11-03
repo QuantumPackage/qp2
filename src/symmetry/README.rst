@@ -280,6 +280,13 @@ The short version:
   energy, the :math:`S^2` and the label of every state after a CI
   calculation.
 
+On a basis that is not symmetry adapted the projectors still close exactly
+on the stored determinant space, because ``X_g`` is block diagonal on the
+blocks found from the MOs themselves. The labels then become probabilities:
+the determinant and state reports print the weight of every irrep, and state
+following and the :option:`irrep_states` filter stay off. See
+:ref:`module_symmetry_det`.
+
 The CI programs use the same labels twice. In Davidson, the labels of the
 current vectors are compared with the labels of the previous wave function
 so that state following does not jump between irreps. The

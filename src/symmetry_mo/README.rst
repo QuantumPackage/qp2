@@ -176,8 +176,34 @@ Mixed MOs
 
 A molecular orbital that is not symmetry adapted gets index 0 and purity
 below 1. This is not a bug in the labels: it means the SCF converged to a
-solution that breaks the point group (or that the geometry is not symmetric
-within :option:`symmetry pg_tol`). The report names the mixed MOs, the number of
-blocks and ``delta_MO`` so that the cause can be identified. The determinant
-layer and the state table are then deliberately silent, and the CI programs
-run without symmetry constraints.
+solution that breaks the point group, that the geometry is not symmetric
+within :option:`symmetry pg_tol`, or that the EZFIO database holds no
+``mo_basis/mo_coef`` and QP2 falls back to the orthonormalized atomic
+orbitals. The report names the mixed MOs with the two largest weights of
+each, the number of blocks and ``delta_MO``, so that the cause can be
+identified.
+
+The determinant and state layers keep working on such a basis. ``X_g`` is
+block diagonal on the blocks of this module by construction, so the
+per-block occupations of a determinant never change under the group: the
+family projector stays exact, and the irrep of a determinant or of a state
+is an exact probability for the stored determinant space.
+:ref:`module_symmetry_det` prints those probabilities. Only the label is
+lost, never the symmetry information.
+
+What a mixed basis does disable is everything that needs a label instead of
+a distribution: state following in Davidson and the :option:`irrep_states`
+filter are off, because they call ``pg_labels_usable``, which tests
+``pg_mo_labels_ok``; and ``mo_basis/mo_symmetry`` is not written. No program
+stops.
+
+``qp_run symmetry_mo`` is a diagnostic: on such a basis it prints the whole
+report and then exits 1, because gate G5 is precisely "the MO set is
+symmetry adapted". That exit code is the verdict on the MO set, and is
+expected on a fixture that is meant to exercise the mixed path. The CI
+programs and ``qp_run symmetry_det`` are unaffected; ``symmetry_det`` exits
+on its own gates.
+
+The cost of the mixed path is one diagonal projector per printed
+determinant, and the usual family projectors for the states; both are
+estimated in :ref:`module_symmetry_det`.

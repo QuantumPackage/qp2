@@ -50,20 +50,49 @@ The projector on irrep :math:`a` is the same formula as everywhere else:
 restricted to the family. ``pg_det_irrep(D)`` is the argmax of
 :math:`T^a_{DD}` over :math:`a`; it is 0 when
 :math:`\max_a T^a_{DD} < 1 -` :option:`symmetry pg_thresh`. ``pg_det_purity(D)`` is
-that maximum, 1 for a pure determinant and :math:`1/d_a` for one member of
-an open degenerate shell.
+that maximum, the weight of the largest isotypic component of the
+determinant.
 
-A determinant is pure **if and only if its family has one member**: a family
-of size greater than one exists only because some block holds between 1 and
-:math:`d_b - 1` electrons, and every member then shares that partial
-occupation. ``pg_det_block`` is the family size, ``pg_det_family`` the
-family id, and ``pg_family_first`` the ``psi_det`` index of the
-representative the module enumerates.
+A determinant that fills whole blocks is an eigenvector of every
+:math:`U(g)`, with eigenvalue :math:`\prod_b \det X_g[\mathrm{occ}_b,
+\mathrm{occ}_b]`: its family has one member and its purity is 1. A family
+of size greater than one exists because some block holds between 1 and
+:math:`d_b - 1` electrons of one spin, and every member then shares that
+partial occupation. A purity below 1 means that the determinant is a
+superposition of irreps: the closed-shell occupation of a degenerate shell
+gives 0.5 for one :math:`e^2` determinant of :math:`C_{3v}`, for instance.
+The converse deserves a sentence: a one-electron determinant in a
+degenerate shell has a family of size :math:`d_b` but purity 1, because it
+lies wholly inside that isotypic component; it is a component of the
+multiplet, not an eigenvector, and any state built from it carries the
+irrep. ``pg_det_block`` is the family size, ``pg_det_family`` the family id,
+and ``pg_family_first`` the ``psi_det`` index of the representative the
+module enumerates.
 
 A truncated CI space is handled exactly: a family member that is not in
 ``psi_det`` has coefficient 0, so the missing part of the projector
 contributes nothing. The label of a determinant never depends on which
 other members happen to be selected.
+
+``pg_det_weights(D, w)`` returns the whole distribution ``w`` of one
+determinant, and the report prints it for every determinant without a
+label, up to four weights and at most 50 determinants::
+
+    determinants with no definite irrep (probability of each irrep):
+        det  family  |F|   purity  composition
+          8       8    4  0.793412   A1 0.793412  B2 0.206588
+
+It evaluates only the diagonal of the family projector, :math:`|G| \times
+|F|` matrix elements instead of :math:`|G| \times |F|^2`, which is what
+makes one call per printed row affordable. The report cross-checks
+``max_a w_a`` against ``pg_det_purity``, which comes from the full matrix,
+and prints a bookkeeping line when the two differ by more than ``1e-8``.
+
+When the MO basis is not symmetry adapted, the module prints a warning
+instead of stopping, and everything above still holds. The blocks are
+connected components of ``X_g``, so ``X_g`` is block diagonal on them by
+construction, the families stay invariant, and :math:`T^a_{DD}` is the exact
+probability that determinant :math:`D` carries irrep :math:`a`.
 
 CI states
 =========
@@ -97,16 +126,32 @@ and :ref:`fci` after diagonalization. It prints one line per state::
     symmetry:    state      energy (Ha)       S^2  irrep   purity
     symmetry:         1    -76.1140581951    0.0000  A1   1.000
 
-and nothing when :option:`symmetry state_symmetry` is false, when the detection
-failed, or when the MO basis has mixed orbitals (one line says so). The
-:math:`S^2` column is the caller's value, so a symmetry label and a spin
-label are always read together.
+and nothing when :option:`symmetry state_symmetry` is false or when the
+detection failed. The :math:`S^2` column is the caller's value, so a symmetry
+label and a spin label are always read together.
 
 The table uses the exact weights above, with the projectors for the families
 of size greater than one. For a pure determinant the diagonal is a Kronecker
 delta and the contribution is taken from the label, which is why the cost is
 one pass over the determinants per state plus one projector per multi-member
 family.
+
+When the MO basis is not symmetry adapted the table gains two notice lines
+before the header::
+
+    symmetry: the MO basis is not symmetry adapted: a state weight is its
+    symmetry: exact irrep probability for the stored CI space (not a guess).
+
+and a state without a definite irrep ends its line with up to four
+``name weight`` pairs, the irreps that carry its weight.
+
+The weights stay exact for the stored determinant space. ``pg_mo_block`` is
+built from ``X_g`` itself, so ``X_g`` is block diagonal on the blocks
+whether or not the MOs are eigenvectors of the projectors: a family keeps its
+per-block occupations under every group element, and the projectors close on
+the stored space. What is lost is the right to call a weight a label, which
+is why state following and the :option:`irrep_states` filter are off on such
+a basis (``pg_labels_usable`` tests ``pg_mo_labels_ok``).
 
 Fast labels for Davidson
 ------------------------
@@ -226,8 +271,14 @@ Limits
 
 * a determinant family is enumerated only up to ``pg_family_cap`` (1000)
   members;
-* a symmetry block may hold at most 12 occupied MOs in the determinant
-  projector;
+* one symmetry block may hold at most ``pg_block_cap`` (30) MOs, because the
+  occupation of a block has to fit in one integer bit mask;
+* the projector refuses a block with more than 12 occupied MOs in a family;
 * when a limit is hit, ``pg_label_ierr`` and ``pg_label_msg`` say which
   determinant was refused, and the CI programs run without symmetry labels.
   Nothing hangs and nothing is silently truncated.
+
+The first two limits are unreachable on a symmetry-adapted basis: a block is
+then one irrep, with at most five MOs. They bound the mixed-basis path, where
+a block is a connected component of ``X_g`` and can be as wide as the number
+of MOs that mixing touches.

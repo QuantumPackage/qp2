@@ -75,8 +75,9 @@ the mixed |MO| count
     |MOs| with no definite irrep. A non-zero count means the |SCF| converged
     to a solution that breaks the point group, or that the geometry is not
     symmetric within :option:`symmetry pg_tol`, or that the basis does not
-    support the group. The determinant and state layers are then deliberately
-    silent, and the |CI| programs run without symmetry.
+    support the group, or that the database held no |MOs| at all. The
+    determinant and state layers then print probabilities instead of labels;
+    see :ref:`symmetry-mixed-mos` below.
 
 ``qp_run symmetry_det`` does the same for the wave function stored in the
 |EZFIO| database: families of determinants, every determinant label, the
@@ -106,6 +107,59 @@ are always read together.
 The table is printed when :option:`symmetry state_symmetry` is |true| (the
 default). Turning it off changes no number: it is a printing switch, and in
 particular it does **not** disable the irrep filter.
+
+.. _symmetry-mixed-mos:
+
+Mixed orbitals: probabilities instead of labels
+-----------------------------------------------
+
+An |MO| basis can fail to be symmetry adapted. Three common causes: the
+|SCF| converged to a solution that breaks the group, the geometry is
+symmetric only within :option:`symmetry pg_tol`, or the |EZFIO| database
+carries no ``mo_basis/mo_coef``, in which case QP2 falls back to the
+orthonormalized |AOs|. Those |MOs| get index 0 in the |MO| report.
+
+The determinant and state layers keep working, with a different reading:
+where a label is not defined, they print the probability of each irrep. The
+probabilities are exact for the determinant space that is stored. ``X_g`` is
+block diagonal on the blocks found from the |MOs| themselves, so a family of
+determinants keeps its per-block occupations under every group element; only
+the one-line label is lost.
+
+For example, a database without stored |MOs| (water, 6-31G*)::
+
+    MO basis        : 18 MOs in 17 symmetry blocks, 2 without a definite irrep
+      A mixed MO is a superposition: its two largest irrep weights are
+        MO 8: A2  0.985564  B1  0.014436
+        MO 9: B1  0.985564  A2  0.014436
+      Determinant and state irreps below are probabilities wherever they are not 1.
+
+A determinant that leaves a block partially occupied is printed with its
+composition (this line comes from a fixture with a deliberately rotated
+|MO| pair)::
+
+    determinants with no definite irrep (probability of each irrep):
+        det  family  |F|   purity  composition
+          8       8    4  0.793412   A1 0.793412  B2 0.206588
+
+Up to four weights above ``1e-4`` are shown per line, for at most 50
+determinants. An unlabelled state gets the same treatment in the state
+table, after the purity column.
+
+On such a basis:
+
+* state following in Davidson and :option:`symmetry irrep_states` are off:
+  both need a label, and a distribution is not a label;
+* ``qp_run symmetry_mo`` prints its full report and exits 1, because gate G5
+  is "the |MO| set is symmetry adapted". That exit code is a verdict on the
+  |MO| set, not a failure of the calculation;
+* ``qp_run symmetry_det`` prints the probability tables and exits on its own
+  gates.
+
+The extra cost is bounded: the determinant table calls the diagonal of the
+family projector, :math:`|G| \times |F|` matrix elements, for at most 50
+rows. The state weights are the same exact projectors that are computed for
+any other basis.
 
 Keeping only some irreps
 ------------------------
@@ -201,8 +255,8 @@ The run continues in every one of these cases, and says why:
 * **the basis does not support the group** -- the |AOs| of an atom, or a
   shell, do not map onto themselves under the operations. The report names
   the atom, the shell and the element;
-* **an |MO| is not symmetry adapted** -- see above; the state table is
-  replaced by one line saying so;
+* **an |MO| is not symmetry adapted** -- the reports switch to irrep
+  probabilities, see :ref:`symmetry-mixed-mos`;
 * **no character table** -- the message gives the path that was tried. The
   tables live in ``$QP_ROOT/data/Symmetry``, one file per group, and
   :option:`symmetry pg_data_dir` selects another directory. A damaged file is
@@ -246,8 +300,28 @@ Cost
 ----
 
 The detection is a few dozen candidate directions and at most 128 group
-elements: it is negligible next to one |SCF| cycle. The |MO| labels cost one
-|AO| transformation per element, and the state table one pass over the
-determinants per printed state. Both are off for ``C1`` in practice (one line)
-and can be switched off with :option:`symmetry auto_symmetry` and
-:option:`symmetry state_symmetry`.
+elements: it is negligible next to one |SCF| cycle.
+
+The remaining costs grow with the group, with the number of |MOs| and with
+the number of determinants:
+
+* |MO| labels: one matrix product ``C^T S M_g C`` per element, of order
+  :math:`2 n_{MO} n_{AO}^2 + n_{MO}^2 n_{AO}` floating-point operations, plus
+  a cache of :math:`|G| n_{MO}^2` doubles (0.80 MB for benzene in 6-31G, 24
+  elements and 66 |MOs|). The |MO| report adds a few
+  :math:`n_{irrep} n_{MO}` sums;
+* determinant labels: one scan of the determinant list, then one projector
+  per family of size greater than one, of order
+  :math:`|G| |F|^2 \sum_b n_b^3/3` operations. For a symmetry-adapted basis
+  the families are small and this is one pass over the list;
+* state weights: those family projectors once, plus
+  :math:`N_{states} \sum_F |F|^2 n_{irrep}` contractions. This is the exact
+  table printed after a |CI| calculation. It never runs inside the |CI| loop:
+  Davidson uses the cheap ``pg_det_state_labels``, which is one pass over the
+  determinants per call;
+* mixed basis: the determinant report adds one diagonal projector per printed
+  row, :math:`|G| |F| \sum_b n_b^3/3` operations, for at most 50 rows. The
+  state weights are unchanged.
+
+Nothing runs for ``C1`` beyond one line; everything can be switched off with
+:option:`symmetry auto_symmetry` and :option:`symmetry state_symmetry`.
