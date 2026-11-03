@@ -37,8 +37,8 @@
 ! All the arrays below are dimensioned by pg_n_elem rather than by
 ! pg_n_col/pg_n_irrep: a static dimension keeps every array allocated once,
 ! it removes any dependency ordering between providers, and both counts are
-! bounded by |G| (the number of real irreps of a finite group never exceeds
-! its number of classes, which never exceeds |G|). The largest table of the
+! bounded by :math:`|G|` (the number of real irreps of a finite group never exceeds
+! its number of classes, which never exceeds :math:`|G|`). The largest table of the
 ! data set has 38 rows and the largest group 128 elements: 128*128 doubles
 ! is 128 kB, the price of not carrying allocatable providers.
 
@@ -54,30 +54,39 @@
 &BEGIN_PROVIDER [ integer, pg_irrep_mult, (pg_n_elem) ]
   implicit none
   BEGIN_DOC
-  ! Character table of |pg_group_name|, with every file column matched to the
-  ! set of group elements it stands for, and validated.
+  ! Character table of :c:data:`pg_group_name`, with every file column
+  ! matched to the set of group elements it stands for, and validated.
   !
   ! Main outputs, for section 8:
   !
-  !   pg_irrep_name(a)     name of irrep a, as in the file (A1, B2u, T1g, E')
-  !   pg_irrep_dim(a)      chi_a(E) = nint(pg_char(a,1))
-  !   pg_irrep_mult(a)     1 for a genuine real irrep, 2 when the row is the
-  !                        sum of a complex-conjugate pair (C3, C10, ...).
-  !                        The projector of section 8 is then
-  !                        (d_a/mult_a) sum_col chi_a(col) U_col.
-  !   pg_char(a,c)         characters. Column c is file column c: the
-  !                        matching does not permute anything, so this is the
-  !                        parsed matrix verbatim.
-  !   pg_col_len(c)        number of ELEMENTS of column c. This replaces the
-  !                        prototype's pg_class_size everywhere.
-  !   pg_col_member(...)   the element indices, columns concatenated;
-  !                        column c is pg_col_member(pg_col_start(c) : ...).
+  ! ``pg_irrep_name(a)``
+  !     name of irrep a, as in the file (A1, B2u, T1g, E')
+  !
+  ! ``pg_irrep_dim(a)``
+  !     chi_a(E) = nint(pg_char(a,1))
+  !
+  ! ``pg_irrep_mult(a)``
+  !     1 for a genuine real irrep, 2 when the row is the sum of a
+  !     complex-conjugate pair (C3, C10, ...). The projector of section 8 is
+  !     then (d_a/mult_a) sum_col chi_a(col) U_col.
+  !
+  ! ``pg_char(a,c)``
+  !     characters. Column c is file column c: the matching does not permute
+  !     anything, so this is the parsed matrix verbatim.
+  !
+  ! ``pg_col_len(c)``
+  !     number of ELEMENTS of column c. This replaces the prototype's
+  !     pg_class_size everywhere.
+  !
+  ! ``pg_col_member(...)``
+  !     the element indices, columns concatenated; column c is
+  !     pg_col_member(pg_col_start(c) : ...).
   !
   ! Validation: the columns partition the group, the first column is the
   ! identity, chi_a(E) is a positive integer, mult_a is 1 or 2,
-  ! orthogonality sum_c |col| chi_a chi_b = |G| mult_a delta_ab, and
-  ! sum_a d_a^2/mult_a = |G|. A failed check prints its reason once and sets
-  ! |pg_detection_failed|: the caller of this provider must give up.
+  ! orthogonality sum_c ``col`` chi_a chi_b = :math:`|G|` mult_a delta_ab, and
+  ! sum_a d_a^2/mult_a = :math:`|G|`. A failed check prints its reason once and sets
+  ! :c:data:`pg_detection_failed`: the caller of this provider must give up.
   !
   ! These identities do NOT detect a swap of two columns that have equal
   ! sizes in an Abelian group (swapping sv and sd in C2v keeps every sum
@@ -140,7 +149,7 @@
     return
   endif
 
-  ! A group of order |G| has at most |G| classes, hence at most |G| real
+  ! A group of order :math:`|G|` has at most :math:`|G|` classes, hence at most :math:`|G|` real
   ! irreps, so n_file <= pg_n_elem holds for any consistent data file.
   if (n_file < 1 .or. n_file > pg_n_elem) then
     if (.not. pg_detection_failed) then
@@ -413,7 +422,7 @@
   !---------------------------------------------------------------------
   ! 5. Validate the table against the group. Tolerances: the files carry 3 to
   !    5 decimals (1.61800 for 2 cos(pi/5)), so the identities hold only to
-  !    ~1e-4. 5e-3 still separates mult 1 from mult 2, 1e-2|G| is the
+  !    ~1e-4. 5e-3 still separates mult 1 from mult 2, 1e-2:math:`|G|` is the
   !    orthogonality scale. 1e-6 fails on the icosahedral groups.
   !---------------------------------------------------------------------
   do a = 1, n_file
@@ -508,7 +517,7 @@ END_PROVIDER
 logical function pg_class_has_key(cl, key)
   implicit none
   BEGIN_DOC
-  ! True when some member of class |cl| has the encoded key |key|.
+  ! True when some member of class ``cl`` has the encoded key ``key``.
   END_DOC
   integer, intent(in) :: cl, key
   integer :: g
@@ -525,8 +534,8 @@ end function pg_class_has_key
 logical function pg_class_kset_subset(cl, ka, kb)
   implicit none
   BEGIN_DOC
-  ! True when every key of class |cl| is |ka| or |kb| (the key set is a subset
-  ! of {|ka|,|kb|}). Membership of |ka| itself is a separate test.
+  ! True when every key of class ``cl`` is ``ka`` or ``kb`` (the key set is a subset
+  ! of {``ka``,``kb``}). Membership of ``ka`` itself is a separate test.
   END_DOC
   integer, intent(in) :: cl, ka, kb
   integer :: g
@@ -544,10 +553,10 @@ end function pg_class_kset_subset
 logical function pg_class_has_axis(cl, k)
   implicit none
   BEGIN_DOC
-  ! True when some member of class |cl| has its axis along canonical axis |k|
+  ! True when some member of class ``cl`` has its axis along canonical axis ``k``
   ! (1 = x, 2 = y, 3 = z). For a reflection the "axis" is the plane normal,
-  ! so this is exactly "the plane contains z" when |k| = 2 and "the plane is
-  ! vertical" when |k| = 3.
+  ! so this is exactly "the plane contains z" when ``k`` = 2 and "the plane is
+  ! vertical" when ``k`` = 3.
   END_DOC
   integer, intent(in) :: cl, k
   integer :: g
@@ -567,7 +576,7 @@ end function pg_class_has_axis
 logical function pg_class_any_used(cl, used)
   implicit none
   BEGIN_DOC
-  ! True when some member of class |cl| has already been taken by a column.
+  ! True when some member of class ``cl`` has already been taken by a column.
   END_DOC
   integer, intent(in) :: cl
   logical, intent(in) :: used(pg_n_elem)
@@ -586,8 +595,8 @@ subroutine pg_parse_symbol(s, det, m, k, ierr)
   implicit none
   BEGIN_DOC
   ! Split a generic column symbol. Accepted forms: C<n>, C<n>^<k>, S<n>,
-  ! S<n>^<k>. Returns det = +1 for C, -1 for S, the order |m| (2..64) and the
-  ! power |k| reduced modulo |m|. |ierr| = 1 on any other form, 2 when
+  ! S<n>^<k>. Returns det = +1 for C, -1 for S, the order ``m`` (2..64) and the
+  ! power ``k`` reduced modulo ``m``. ``ierr`` = 1 on any other form, 2 when
   ! gcd(k,m) /= 1 (an unreduced symbol such as C6^2: the data set never has
   ! one, and matching it would select the wrong classes).
   END_DOC
@@ -648,7 +657,7 @@ subroutine pg_col_fail(reason, s, n, syms)
   BEGIN_DOC
   ! Error of the column matcher. Prints the reason, the failing symbol, the
   ! symbol order of the file, and the class table with the key set and the
-  ! axis flags of every class, then sets |pg_detection_failed| and returns:
+  ! axis flags of every class, then sets :c:data:`pg_detection_failed` and returns:
   ! the caller must give up at once.
   !
   ! Only variables of group.irp.f are read here: everything of the

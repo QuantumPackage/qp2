@@ -36,19 +36,19 @@ subroutine pg_parse_table(file, group_name, n_irrep, n_class, &
   implicit none
   BEGIN_DOC
   ! Parse one character-table file. Pure: no EZFIO keyword, no provider, no
-  ! module-level state, nothing printed. Returns |ierr| /= 0 on any structural
+  ! module-level state, nothing printed. Returns ``ierr`` /= 0 on any structural
   ! or I/O error.
   !
   ! :file:       path of the file to parse
   ! :group_name: group name, taken from the file name (line 1 is ignored)
   ! :n_irrep:    number of irreps (rows) read from line 2
   ! :n_class:    number of table columns (the file format calls them
-  !              classes; it is == |n_irrep| in the data set). This is NOT
+  !              classes; it is == ``n_irrep`` in the data set). This is NOT
   !              the geometric class count of SPEC.md section 5: C3 has two
   !              columns and three classes (SPEC.md section 6).
-  ! :irrep_name: irrep names, first |n_irrep| entries set
+  ! :irrep_name: irrep names, first ``n_irrep`` entries set
   ! :sym:        class symbols as found in the file
-  ! :char:       characters, |char(a,c)| = chi_a(C_c)
+  ! :char:       characters, ``char(a,c)`` = chi_a(C_c)
   ! :ierr:       0 on success, > 0 otherwise
   END_DOC
   integer, parameter :: pg_table_nmax = 64
@@ -268,7 +268,7 @@ end subroutine pg_parse_table
 subroutine pg_split_tab(line, nmax, nf, fld)
   implicit none
   BEGIN_DOC
-  ! Split |line| on TAB and store at most |nmax| left-padded fields in |fld|.
+  ! Split ``line`` on TAB and store at most ``nmax`` left-padded fields in ``fld``.
   END_DOC
   character*(*), intent(in) :: line
   integer, intent(in) :: nmax
@@ -302,7 +302,7 @@ end subroutine pg_split_tab
 subroutine pg_count_tokens(line, ntok)
   implicit none
   BEGIN_DOC
-  ! Count the blank- or TAB-separated fields of |line|.
+  ! Count the blank- or TAB-separated fields of ``line``.
   END_DOC
   character*(*), intent(in) :: line
   integer, intent(out) :: ntok
@@ -329,9 +329,9 @@ end subroutine pg_count_tokens
 subroutine pg_character_table_path(group, path, ierr)
   implicit none
   BEGIN_DOC
-  ! Build the full path of the character-table file of |group| and check that
-  ! it exists. |ierr| = 1 when QP_ROOT is not set and pg_data_dir is unset,
-  ! 2 when the file does not exist. |path| is always the path that was tried.
+  ! Build the full path of the character-table file of ``group`` and check that
+  ! it exists. ``ierr`` = 1 when QP_ROOT is not set and pg_data_dir is unset,
+  ! 2 when the file does not exist. ``path`` is always the path that was tried.
   END_DOC
   character*(*), intent(in) :: group
   character*(*), intent(out) :: path
@@ -373,7 +373,7 @@ end subroutine pg_character_table_path
 subroutine pg_data_dir_is_unset(dir, unset)
   implicit none
   BEGIN_DOC
-  ! True when |dir| is empty or "none" in any case.
+  ! True when ``dir`` is empty or "none" in any case.
   END_DOC
   character*(*), intent(in) :: dir
   logical, intent(out) :: unset

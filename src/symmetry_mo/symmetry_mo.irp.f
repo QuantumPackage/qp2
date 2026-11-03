@@ -4,17 +4,17 @@ program symmetry
   ! Step-2 driver of the symmetry module.
   !
   ! Reads the nuclei from the EZFIO directory given on the command line
-  ! (through the standard |ezfio_filename| provider), builds the canonical
+  ! (through the standard :c:data:`ezfio_filename` provider), builds the canonical
   ! frame, enumerates the point group, names it, prints the classes, and
-  ! prints the character table shipped in $QP_ROOT/data/Symmetry.
+  ! prints the character table shipped in ``QP_ROOT/data/Symmetry``.
   !
-  ! The |EZFIO| directory is the first command-line argument, as for every
+  ! The EZFIO directory is the first command-line argument, as for every
   ! other QP2 program.
   !
-  ! An optional environment variable |PG_WRITE_MO_SYMMETRY=1| writes the
-  ! labels into |mo_basis/mo_symmetry| (SPEC.md section 11). Nothing is
+  ! An optional environment variable ``PG_WRITE_MO_SYMMETRY=1`` writes the
+  ! labels into ``mo_basis/mo_symmetry`` (SPEC.md section 11). Nothing is
   ! written when a gate fails, so a written field is always a checked one.
-  ! An environment variable is used because |ezfio_filename| stops unless the
+  ! An environment variable is used because :c:data:`ezfio_filename` stops unless the
   ! command line has exactly one argument.
   END_DOC
   character*(256) :: arg
@@ -34,7 +34,7 @@ subroutine pg_report(write_mo)
   implicit none
   BEGIN_DOC
   ! Prints the canonical frame, the group, its classes and the table.
-  ! |write_mo| forwards the "-w" request of the driver to |pg_report_mo|.
+  ! ``write_mo`` forwards the "-w" request of the driver to :c:func:`pg_report_mo`.
   END_DOC
   logical, intent(in) :: write_mo
   character*(1024) :: path
@@ -162,9 +162,9 @@ subroutine pg_report(write_mo)
   enddo
 
   write(6,'(A)') ''
-  write(6,'(A)') 'columns (a column is NOT a geometric class: it may be the '// &
-       'union of several'
-  write(6,'(A)') 'classes and of their inverse classes, cf. SPEC.md section 6)'
+  write(6,'(A)') 'columns (a column is NOT a geometric class: it may be the union of'
+  write(6,'(A)') 'several classes and of their inverse classes; the symmetry module page'
+  write(6,'(A)') 'explains how a table column is matched to group elements)'
   write(6,'(A6,A10,A10,A)') 'col', 'symbol', 'elements', '  element indices'
   do c = 1, pg_n_col
     write(6,'(I6,3X,A8,I8,4X)',advance='no') c, &
@@ -177,7 +177,7 @@ subroutine pg_report(write_mo)
 
   ! Invariants of the matched table, printed so that a wrong match is visible
   ! without a debugger: the columns partition the group, and
-  ! sum_a d_a^2/mult_a = |G| (never sum_a d_a^2).
+  ! sum_a d_a^2/mult_a = :math:`|G|` (never sum_a d_a^2).
   n_mem = 0
   do c = 1, pg_n_col
     n_mem = n_mem + pg_col_len(c)
@@ -205,7 +205,7 @@ end subroutine pg_report
 subroutine pg_perm_string(perm, nat, s)
   implicit none
   BEGIN_DOC
-  ! Comma-free list of |perm(1:nat)| in |s|; truncated with "..." when |s|
+  ! Comma-free list of ``perm(1:nat)`` in ``s``; truncated with "..." when ``s``
   ! is too short.
   END_DOC
   integer, intent(in) :: nat, perm(nat)
@@ -235,23 +235,27 @@ subroutine pg_report_ao(delta_mo)
   BEGIN_DOC
   ! Prints the AO basis summary, then the gates:
   !
-  !   G-iso  M_g^T S M_g = S   (authoritative test of the AO transform, with S
-  !                             the RAW ao_overlap of the EZFIO, tolerance
-  !                             1e-7; needs no MOs, so it runs on a
-  !                             nuclei+AO EZFIO)
-  !   G1     C^T S C     = 1   (orthonormality of the MO set in the AO metric;
-  !                             no group element enters it, and it runs
-  !                             whether or not the MO space is complete)
-  !   G2     X_g X_h = X_gh    (only meaningful when mo_num == ao_num)
+  ! ``G-iso``
+  !     M_g^T S M_g = S. Authoritative test of the AO transform, with S the
+  !     RAW ao_overlap of the EZFIO, tolerance 1e-7; needs no MOs, so it
+  !     runs on a nuclei+AO EZFIO.
   !
-  !   delta_MO = max_g |X_g^T X_g - 1| is printed and NOT gated: it is G-iso
-  !   transported into the MO metric (see the identity at the measurement).
+  ! ``G1``
+  !     C^T S C = 1. Orthonormality of the MO set in the AO metric; no group
+  !     element enters it, and it runs whether or not the MO space is
+  !     complete.
+  !
+  ! ``G2``
+  !     X_g X_h = X_gh. Only meaningful when mo_num == ao_num.
+  !
+  ! delta_MO = max_g ``X_g^T X_g - 1`` is printed and NOT gated: it is G-iso
+  ! transported into the MO metric (see the identity at the measurement).
   !
   ! Each gate prints the measured deviation and stops on failure. The 1e-7
-  ! bound of G-iso is not machine precision: |ao_overlap| itself is only
+  ! bound of G-iso is not machine precision: :c:data:`ao_overlap` itself is only
   ! group symmetric to ~3e-9 (see the comment at the measurement below).
   !
-  ! |delta_mo| is returned so that the MO report can size its G5 window
+  ! ``delta_mo`` is returned so that the MO report can size its G5 window
   ! (SPEC.md 8.5): it is the accuracy floor of every purity in chapter 8.
   END_DOC
   logical :: has_ao
@@ -284,9 +288,9 @@ subroutine pg_report_ao(delta_mo)
   ! B_p/B_q rescaling, and it needs no MOs.
   !
   ! Its floor is NOT machine precision but the symmetry-breaking noise of
-  ! QP2's own overlap integrals: |S| is only group symmetric to ~3e-9
+  ! QP2's own overlap integrals: :math:`|S|` is only group symmetric to ~3e-9
   ! (formaldehyde: the C 1s / O 2p_x element that must vanish is 3.2e-9),
-  ! and |M_g^T S M_g - S| inherits that one for one. The gate is 1e-7 on
+  ! and ``M_g^T S M_g - S`` inherits that one for one. The gate is 1e-7 on
   ! purpose: a wrong monomial representation, a wrong normalization factor
   ! or a wrong power ordering is O(1) here, three orders of magnitude above
   ! the noise, while the noise itself is not a property of the transform.
@@ -341,7 +345,7 @@ subroutine pg_report_ao(delta_mo)
   endif
 
   !---------------------------------------------------------------------
-  ! ||C||_2^2 = sigma_max(C)^2 = largest eigenvalue of C^T C (mo_num x
+  ! :math:`||C||`_2^2 = sigma_max(C)^2 = largest eigenvalue of C^T C (mo_num x
   ! mo_num), by power iteration from v = 1: deterministic, and no LAPACK.
   ! It is the amplification factor of the identity below.
   !---------------------------------------------------------------------
@@ -363,7 +367,7 @@ subroutine pg_report_ao(delta_mo)
   ! C^T S C = 1 one has C C^T = S^{-1}, hence EXACTLY
   !     X_g^T X_g - 1 = C^T (M_g^T S M_g - S) C = C^T deltaS_g C ,
   ! i.e. G-iso transported into the MO metric and amplified by at most
-  ! ||C||_2^2. It is therefore 1 for ANY orthonormal MO set, localized or
+  ! :math:`||C||`_2^2. It is therefore 1 for ANY orthonormal MO set, localized or
   ! not, and it is not a symmetry-adaptation test. An absolute threshold on
   ! it is meaningless: benzene 6-31G measures 2.7e-7 at G-iso = 4.0e-9 on a
   ! geometry symmetric to 2.2e-15 bohr. What it does measure is the
@@ -399,14 +403,14 @@ subroutine pg_report_ao(delta_mo)
 
   ! G2: X_g X_h = X_{gh}. All pairs when the group is small; otherwise the 8
   ! first elements (which generate every group of the data set) plus 100
-  ! fixed pseudo-random pairs: |G|^2 dgemms at |G| = 128 is not a test, it
+  ! fixed pseudo-random pairs: :math:`|G|^2 dgemms at :math:`|G|` = 128 is not a test, it
   ! is a benchmark.
   !
   ! The bound is 1e-7, not 1e-12, for two independent reasons, both larger
   ! than machine precision and neither of them a property of X:
   !   * the same integral noise that floors G-iso and delta_MO (~3e-9);
-  !   * the group itself is known only to |pg_tol|. A stored element is a
-  !     representative whose matrix is accurate to |pg_tol| / lever arm
+  !   * the group itself is known only to :c:data:`pg_tol`. A stored element is a
+  !     representative whose matrix is accurate to :c:data:`pg_tol` / lever arm
   !     (~1e-8; measured 4.9e-9 on the C3 axis of NH3), so R_g R_h differs
   !     from the stored R_gh by that much, and X = C^T S M C inherits it one
   !     for one. The *table* is exact (products come from the permutations,
@@ -466,13 +470,13 @@ subroutine pg_report_ao(delta_mo)
 end subroutine pg_report_ao
 
 !-----------------------------------------------------------------------
-! |X_g X_h - X_{gh}| for one pair, computed from scratch.
+! ``X_g X_h - X_{gh}`` for one pair, computed from scratch.
 !-----------------------------------------------------------------------
 subroutine pg_g2_pair(g, h, dev)
   implicit none
   BEGIN_DOC
-  ! |dev| = max |X_g X_h - X_{gh}| for one pair. The product element comes
-  ! from |pg_elem_mul|, which is built from the permutations: no matrix is
+  ! ``dev`` = max ``X_g X_h - X_{gh}`` for one pair. The product element comes
+  ! from :c:data:`pg_elem_mul`, which is built from the permutations: no matrix is
   ! ever matched (SPEC.md section 5.5).
   END_DOC
   integer, intent(in) :: g, h
@@ -503,20 +507,27 @@ subroutine pg_report_mo(delta_mo, write_mo)
   BEGIN_DOC
   ! Prints the label of every MO and the last four gates of SPEC.md 8.5:
   !
-  !   G3  every tr P^a is an integer (1e-6) and a multiple of d_a, i.e. n_a
-  !       copies of irrep a. Authoritative test of the column matching of
-  !       section 6: a sv/sd swap in an Abelian group changes n_a and is
-  !       invisible to every earlier test.
-  !   G4  sum_a tr P^a = mo_num (1e-6).
-  !   G5  0 <= p_a(i) <= 1 (w5), sum_a p_a(i) = 1 (1e-6) and
-  !       max_a p_a(i) = 1 (w5), with w5 = max(1e-8, 10*delta_MO). The last
-  !       one is the MO-set-is-symmetry-adapted test.
-  !   G6  P^a P^a v = P^a v and sum_a P^a v = v (1e-6) for a fixed
-  !       pseudo-random v: one pass over the group to build P^a v, then a
-  !       second pass for P^a(P^a v). One X_g per element, never stored.
-  !       For an irrep with w_a = 0 the ratio is pure representation noise,
-  !       so the deviation of that projector is tested absolutely against
-  !       the same 1e-6 (stricter than the ratio).
+  ! ``G3``
+  !     every tr P^a is an integer (1e-6) and a multiple of d_a, i.e. n_a
+  !     copies of irrep a. Authoritative test of the column matching of
+  !     section 6: a sv/sd swap in an Abelian group changes n_a and is
+  !     invisible to every earlier test.
+  !
+  ! ``G4``
+  !     sum_a tr P^a = mo_num (1e-6).
+  !
+  ! ``G5``
+  !     0 <= p_a(i) <= 1 (w5), sum_a p_a(i) = 1 (1e-6) and
+  !     max_a p_a(i) = 1 (w5), with w5 = max(1e-8, 10*delta_MO). The last
+  !     one is the MO-set-is-symmetry-adapted test.
+  !
+  ! ``G6``
+  !     P^a P^a v = P^a v and sum_a P^a v = v (1e-6) for a fixed
+  !     pseudo-random v: one pass over the group to build P^a v, then a
+  !     second pass for P^a(P^a v). One X_g per element, never stored.
+  !     For an irrep with w_a = 0 the ratio is pure representation noise,
+  !     so the deviation of that projector is tested absolutely against
+  !     the same 1e-6 (stricter than the ratio).
   !
   ! Every gate prints its measured value; a failing gate prints FAILED and
   ! the subroutine keeps going, so that one run shows every number. It stops
@@ -526,12 +537,12 @@ subroutine pg_report_mo(delta_mo, write_mo)
   ! X_g is built from the stored *representative* of an element, which is
   ! only as good as the geometry tolerance (measured: 2.3e-8 on X_g X_gh for
   ! the C3 axis of NH3 at pg_tol = 1e-4 bohr), and P^a is a linear
-  ! combination of X_g, so ||P^2 - P|| grows as (d_a/mult_a)^2 times that
+  ! combination of X_g, so :math:`||P^2 - P||` grows as (d_a/mult_a)^2 times that
   ! floor (SPEC.md 8.5). A wrong column matching, a wrong mult_a or a
   ! missing irrep is O(1) in these gates.
   !
-  ! |delta_mo| is the representation floor measured by the AO report (the
-  ! diagnostic max_g |X_g^T X_g - 1|, implied by G-iso). It sizes the G5
+  ! ``delta_mo`` is the representation floor measured by the AO report (the
+  ! diagnostic max_g ``X_g^T X_g - 1``, implied by G-iso). It sizes the G5
   ! window, so that a well-conditioned but wide basis cannot fail G5 on
   ! integral noise alone.
   END_DOC
@@ -692,7 +703,7 @@ subroutine pg_report_mo(delta_mo, write_mo)
   pvnorm = sqrt(pvnorm)
   v(1:mo_num) = v(1:mo_num)/pvnorm
 
-  ! First pass: P^a v = (d_a/(mult_a*|G|)) sum_c chi_a(c) sum_{g in c} X_g v.
+  ! First pass: P^a v = (d_a/(mult_a*:math:`|G|`)) sum_c chi_a(c) sum_{g in c} X_g v.
   ! One build of X_g per element; the n_irrep accumulation of X_g v is done
   ! on the single vector y = X_g v, which is the same sum for less work.
   pv(1:mo_num,1:pg_n_irrep) = 0.d0
@@ -765,9 +776,9 @@ subroutine pg_report_mo(delta_mo, write_mo)
     ! independent noise vectors of that size and their ratio is 1 whatever
     ! the transform does: the relative clause of G6 would test the noise.
     ! For those irreps the SAME 1e-6 bound is applied to the absolute
-    ! deviation, which is at least as strict because ||P^a v|| <= ||v|| = 1.
+    ! deviation, which is at least as strict because :math:`||P^a v||` <= :math:`||v||` = 1.
     ! The test is selected by w_a, the projected rank printed above, not by
-    ! ||P^a v||: a populated irrep whose image happens to be small must not
+    ! :math:`||P^a v||`: a populated irrep whose image happens to be small must not
     ! escape the relative test.
     if (abs(wraw(a)) <= 1.d-6) then
       dev_g6e = max(dev_g6e, dev)
@@ -778,7 +789,7 @@ subroutine pg_report_mo(delta_mo, write_mo)
     endif
   enddo
   deallocate(wraw)
-  ! ||v|| = 1 by construction, so the denominator below is 1.
+  ! :math:`||v||` = 1 by construction, so the denominator below is 1.
   dev = 0.d0
   do i = 1, mo_num
     s = 0.d0

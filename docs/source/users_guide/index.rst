@@ -17,6 +17,7 @@ Guides
    :maxdepth: 1
 
    cipsi
+   symmetry
    parallelism
 
 

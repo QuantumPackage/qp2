@@ -3,7 +3,7 @@ program symmetry_det
   BEGIN_DOC
   ! Determinant and state symmetry driver (SPEC.md sections 9 and 10).
   !
-  ! Reads the wave function stored in the |EZFIO| directory given on the
+  ! Reads the wave function stored in the EZFIO directory given on the
   ! command line, labels every determinant with the irrep of the
   ! projector of section 8, and projects every CI state on the irreps.
   !
@@ -213,15 +213,26 @@ logical function pg_det_gates()
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! D1  sum_a T^a = 1 on every family (validates chi, mult_a and the
+  ! ``D1``
+  !     sum_a T^a = 1 on every family (validates chi, mult_a and the
   !     family structure at once).
-  ! D2  (T^a)^2 = T^a and T^a Hermitian, every family, every a.
-  ! D3  -1e-8 <= purity <= 1+1e-8 for every determinant.
-  ! D4  |sum_a w_a(s) - sum_D c_D(s)^2| <= 1e-8: the accumulation loop
+  !
+  ! ``D2``
+  !     (T^a)^2 = T^a and T^a Hermitian, every family, every a.
+  !
+  ! ``D3``
+  !     -1e-8 <= purity <= 1+1e-8 for every determinant.
+  !
+  ! ``D4``
+  !     ``sum_a w_a(s) - sum_D c_D(s)^2`` <= 1e-8: the accumulation loop
   !     reproduces the sum rule of section 10.2.
-  ! D5  every labelled state has w_max >= 1-1e-6, and the mixed
+  !
+  ! ``D5``
+  !     every labelled state has w_max >= 1-1e-6, and the mixed
   !     determinant fraction is reported.
-  ! D6  the dominant determinant of state 1 has irrep 1 for a closed-shell
+  !
+  ! ``D6``
+  !     the dominant determinant of state 1 has irrep 1 for a closed-shell
   !     Hartree-Fock wave function (the cross-check that section 9 and
   !     section 8 live in the same labelling). Gated only when the
   !     determinant's family has one member: a block that is partially
@@ -312,7 +323,7 @@ logical function pg_det_gates()
   endif
 
   write(6,'(A)') ''
-  write(6,'(A)') ' gates (SPEC.md 9.6 and 10):'
+  write(6,'(A)') ' gates:'
   ok = d1 <= 1.d-8
   write(6,'(A,ES12.4,A,L1)') '  D1  max_{F,D,D''} |sum_a T^a - 1|          = ', &
        d1, '   <= 1e-8   ', ok

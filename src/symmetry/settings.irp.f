@@ -1,13 +1,13 @@
 !-----------------------------------------------------------------------
 ! EZFIO settings and their defaults.
 !
-! |pg_tol|, |pg_thresh|, |pg_data_dir|, |auto_symmetry|, |state_symmetry|
-! and |irrep_states| are declared in EZFIO.cfg. The first five use
+! :c:data:`pg_tol`, :c:data:`pg_thresh`, :c:data:`pg_data_dir`, :c:data:`auto_symmetry`, :c:data:`state_symmetry`
+! and :c:data:`irrep_states` are declared in EZFIO.cfg. The first five use
 ! interface "ezfio, ocaml": the EZFIO bindings and the qp_edit default are
 ! generated, but no IRPF90 provider, because ei_handler.py turns a missing
 ! keyword into "stop 1" -- its "default:" line feeds the OCaml side only.
 ! The five defaults therefore live here, and the EZFIO value wins whenever
-! it is present. |irrep_states| uses interface "ezfio" only: the OCaml
+! it is present. :c:data:`irrep_states` uses interface "ezfio" only: the OCaml
 ! interface requires a "default:" line, an empty default makes
 ! Qpackage.get_ezfio_default_in_file raise Not_found, and any non-empty
 ! sentinel would be read back as an irrep name. Its default is the empty
@@ -80,7 +80,7 @@ BEGIN_PROVIDER [ character*(256), pg_data_dir ]
   implicit none
   BEGIN_DOC
   ! Directory holding the character tables. Empty or "None" means
-  ! $QP_ROOT/data/Symmetry (see pg_data_dir_is_unset in chartab.irp.f).
+  ! ``QP_ROOT/data/Symmetry`` (see pg_data_dir_is_unset in chartab.irp.f).
   END_DOC
   logical :: has
   PROVIDE ezfio_filename
@@ -109,7 +109,7 @@ BEGIN_PROVIDER [ logical, auto_symmetry ]
   implicit none
   BEGIN_DOC
   ! When true, the molecular point group is detected at the end of SCF/DFT,
-  ! the MOs are labelled and |mo_basis/mo_symmetry| is written. Default
+  ! the MOs are labelled and ``mo_basis/mo_symmetry`` is written. Default
   ! .true.
   END_DOC
   logical :: has
@@ -199,7 +199,7 @@ END_PROVIDER
 BEGIN_PROVIDER [ integer, pg_n_irrep_allowed ]
   implicit none
   BEGIN_DOC
-  ! Number of tokens in |irrep_states| (separators: comma, semicolon,
+  ! Number of tokens in :c:data:`irrep_states` (separators: comma, semicolon,
   ! blank, tab). Zero when the list is empty. No group knowledge, so this
   ! provider does not build the detection chain.
   END_DOC
@@ -220,10 +220,10 @@ END_PROVIDER
 BEGIN_PROVIDER [ logical, pg_irrep_filter ]
   implicit none
   BEGIN_DOC
-  ! True when |irrep_states| is non-empty and the symmetry machinery can
-  ! honour it. Off when |auto_symmetry| is off (the master switch) or when
+  ! True when :c:data:`irrep_states` is non-empty and the symmetry machinery can
+  ! honour it. Off when :c:data:`auto_symmetry` is off (the master switch) or when
   ! the point-group detection failed. It deliberately does not name
-  ! |pg_symmetry_ready|, which lives in symmetry_mo: that would make module
+  ! :c:func:`pg_symmetry_ready`, which lives in symmetry_mo: that would make module
   ! symmetry depend on symmetry_mo. The two tests are written out here.
   END_DOC
   pg_irrep_filter = .false.
@@ -246,8 +246,8 @@ END_PROVIDER
 BEGIN_PROVIDER [ logical, pg_irrep_allowed, (pg_n_irrep) ]
   implicit none
   BEGIN_DOC
-  ! |pg_irrep_allowed(a)| is true when irrep |a| is in |irrep_states|.
-  ! The whole list is allowed when |irrep_states| is empty. Names are
+  ! ``pg_irrep_allowed(a)`` is true when irrep ``a`` is in :c:data:`irrep_states`.
+  ! The whole list is allowed when :c:data:`irrep_states` is empty. Names are
   ! compared case-insensitively; an unknown name prints the available
   ! names and stops: malformed user input is the one case where stopping
   ! is allowed (section 9.0).

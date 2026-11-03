@@ -10,10 +10,10 @@
 subroutine pg_print_state_irreps(energy, s2)
   implicit none
   BEGIN_DOC
-  ! Prints the irrep of each CI state. Never stops. |state_symmetry| = F
+  ! Prints the irrep of each CI state. Never stops. :c:data:`state_symmetry` = F
   ! is silent; a failed detection has already printed its reason; a mixed
-  ! MO basis is reported in one line. |energy| and |s2| are the caller's
-  ! arrays, at least |N_states| long.
+  ! MO basis is reported in one line. ``energy`` and ``s2`` are the caller's
+  ! arrays, at least ``N_states`` long.
   END_DOC
   double precision, intent(in) :: energy(*), s2(*)
   logical, external :: pg_symmetry_ready
@@ -36,7 +36,7 @@ subroutine pg_state_irreps_label(energy, s2)
   implicit none
   BEGIN_DOC
   ! Forces the determinant labelling and gates the report on
-  ! |pg_label_ierr|. Separate from the dispatcher because IRPF90 hoists
+  ! :c:data:`pg_label_ierr`. Separate from the dispatcher because IRPF90 hoists
   ! both the implicit needs and an explicit PROVIDE to the procedure
   ! entry: a body holding the PROVIDE would label before the guards.
   END_DOC
@@ -49,7 +49,7 @@ end subroutine pg_state_irreps_label
 subroutine pg_print_state_irreps_work(energy, s2)
   implicit none
   BEGIN_DOC
-  ! The table. |pg_state_irrep_weight| delivers the weights, the labels,
+  ! The table. :c:data:`pg_state_irrep_weight` delivers the weights, the labels,
   ! the purities and the norm in one provider block.
   END_DOC
   double precision, intent(in) :: energy(*), s2(*)

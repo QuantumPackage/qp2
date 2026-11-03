@@ -86,7 +86,7 @@ END_PROVIDER
   ! writes maxval here, which can never fire: maxval >= sum/3 > 1e-6*sum
   ! whenever sum > 0. The moment about the molecular axis is the *smallest*
   ! eigenvalue (it is exactly zero for a collinear molecule), so the test
-  ! must use minval. Verified on CO2: maxval gives |G| = 4 and n_max = 32
+  ! must use minval. Verified on CO2: maxval gives :math:`|G|` = 4 and n_max = 32
   ! (every 2*pi/n about the axis maps the molecule onto itself), while
   ! minval stops here as required.
   if (sum(pg_inertia_eval) <= 0.d0) then
@@ -231,7 +231,7 @@ END_PROVIDER
 subroutine pg_diag3(a, e)
   implicit none
   BEGIN_DOC
-  ! dsyev wrapper for a 3x3 symmetric matrix (destroys |a|).
+  ! dsyev wrapper for a 3x3 symmetric matrix (destroys ``a``).
   END_DOC
   double precision, intent(inout) :: a(3,3)
   double precision, intent(out) :: e(3)
@@ -388,7 +388,7 @@ subroutine pg_build_candidates(nat, xyz, znum, ctr, evecs, ncandmax, &
   implicit none
   BEGIN_DOC
   ! Build the list of candidate symmetry axes / plane normals.
-  ! |ierr| = 1 when the list overflows |ncandmax|.
+  ! ``ierr`` = 1 when the list overflows ``ncandmax``.
   END_DOC
   integer, intent(in) :: nat, ncandmax
   double precision, intent(in) :: xyz(nat,3), ctr(3), evecs(3,3)
@@ -445,14 +445,14 @@ subroutine pg_build_candidates(nat, xyz, znum, ctr, evecs, ncandmax, &
     if (ierr /= 0) return
   enddo
 
-  ! Cheap consistency check: |ncand| > 0 for any molecule with >= 2 atoms.
+  ! Cheap consistency check: ``ncand`` > 0 for any molecule with >= 2 atoms.
   if (ncand == 0) ierr = 2
 
 end subroutine pg_build_candidates
 
 !-----------------------------------------------------------------------
 ! Normalise v and append it to list if no stored direction is parallel or
-! antiparallel to it (tolerance 1e-8 on |cos|). Silently skips |v| ~ 0.
+! antiparallel to it (tolerance 1e-8 on ``cos``). Silently skips ``v`` ~ 0.
 !-----------------------------------------------------------------------
 subroutine pg_add_direction(v, nmax, list, n, ierr)
   implicit none
@@ -591,7 +591,7 @@ subroutine pg_proper_scan(nat, xyz, znum, ctr, evals, evecs, tol, &
     endif
   enddo
 
-  ! Selection: most nuclei on the axis, then largest |axis.W(:,kbest)|,
+  ! Selection: most nuclei on the axis, then largest ``axis.W(:,kbest)``,
   ! then lowest candidate index (strict comparisons keep the first).
   ibest = 0
   icount = -1

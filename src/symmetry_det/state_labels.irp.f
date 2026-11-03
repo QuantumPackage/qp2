@@ -1,16 +1,16 @@
 !-----------------------------------------------------------------------
 ! Irrep labels of arbitrary CI vectors (SPEC.md 9.4a).
 !
-! The stage-3 report labels the CI states through |pg_state_irrep_weight|,
+! The stage-3 report labels the CI states through :c:data:`pg_state_irrep_weight`,
 ! which enumerates every determinant family and adds the off-diagonal
 ! family terms: exact, and much too expensive for a Davidson inner
 ! iteration. The routines here are the fast path used for state following
-! and for the irrep filter: they only sum |coef|^2 over the determinants,
+! and for the irrep filter: they only sum :math:`(coef)^2`2 over the determinants,
 ! so a state whose weight sits on multi-member families gets label 0 and
 ! must not be constrained. The report keeps the exact value; the stage-4
 ! tests compare the two.
 !
-! Call |pg_labels_usable| before anything here: it is the cheap guard.
+! Call :c:func:`pg_labels_usable` before anything here: it is the cheap guard.
 !-----------------------------------------------------------------------
 
 logical function pg_labels_usable()
@@ -19,13 +19,13 @@ logical function pg_labels_usable()
   ! Cheap guard for the stage-4 symmetry work: true when there is a
   ! determinant, the point group was detected and the MOs carry definite
   ! irreps. Never stops and never builds the determinant labelling: it
-  ! names |N_det| and the two stage-2 functions only, so a caller can test
+  ! names ``N_det`` and the two stage-2 functions only, so a caller can test
   ! it before paying for anything.
   !
-  ! It does not test |state_symmetry|: that keyword means "print the
+  ! It does not test :c:data:`state_symmetry`: that keyword means "print the
   ! table", and a printing switch must not disable the irrep filter
-  ! (SPEC.md 9.4f A1). |auto_symmetry| stays the master switch, through
-  ! |pg_symmetry_ready|.
+  ! (SPEC.md 9.4f A1). :c:data:`auto_symmetry` stays the master switch, through
+  ! :c:func:`pg_symmetry_ready`.
   END_DOC
   logical, external :: pg_symmetry_ready
   logical, external :: pg_mo_labels_ok
@@ -40,15 +40,15 @@ end function pg_labels_usable
 subroutine pg_det_state_labels(ndet, coef, lda, nst, label, purity, mixed)
   implicit none
   BEGIN_DOC
-  ! Fast irrep labels of |nst| CI vectors stored in |coef|.
+  ! Fast irrep labels of ``nst`` CI vectors stored in ``coef``.
   !
-  ! For each column k: |purity(k)| = wmax/tot, |mixed(k)| = wmix/tot and
-  ! |label(k)| = argmax when wmax >= (1 - pg_thresh)*tot, else 0, where
+  ! For each column k: ``purity(k)`` = wmax/tot, ``mixed(k)`` = wmix/tot and
+  ! ``label(k)`` = argmax when wmax >= (1 - pg_thresh)*tot, else 0, where
   ! w(a) sums coef(i,k)**2 over the determinants of irrep a, and wmix sums
-  ! the determinants whose |pg_det_irrep| is 0 (mixed families).
+  ! the determinants whose :c:data:`pg_det_irrep` is 0 (mixed families).
   !
   ! Everything is a ratio: the callers hand in vectors that are not
-  ! normalized (Davidson's in-loop |u_in| is W*y), so an absolute test
+  ! normalized (Davidson's in-loop ``u_in`` is W*y), so an absolute test
   ! would label nothing. A zero column gives label 0, purity 0, mixed 0.
   !
   ! The output arrays are intent(inout), not intent(out): they are
@@ -58,7 +58,7 @@ subroutine pg_det_state_labels(ndet, coef, lda, nst, label, purity, mixed)
   !
   ! Fast path, not the exact formula: a state whose weight sits on
   ! multi-member determinant families gets label 0 and is not constrained.
-  ! |pg_state_irrep_weight| (stage 3) stays the exact value, off-diagonal
+  ! :c:data:`pg_state_irrep_weight` (stage 3) stays the exact value, off-diagonal
   ! family terms included, and is what the report prints.
   END_DOC
   integer, intent(in) :: ndet, lda, nst
@@ -108,14 +108,14 @@ end subroutine pg_det_state_labels
 subroutine pg_state_apply(label, n, ok)
   implicit none
   BEGIN_DOC
-  ! Narrow |ok(1:n)| to the states whose known irrep is in |irrep_states|.
+  ! Narrow ``ok(1:n)`` to the states whose known irrep is in :c:data:`irrep_states`.
   !
-  ! |label(k)| = 0 means "unknown": such a state is kept, because a filter
+  ! ``label(k)`` = 0 means "unknown": such a state is kept, because a filter
   ! must not drop a state it may not be subject to. It never widens, so it
   ! composes with any earlier selection (the S^2 test and the state
   ! following attribution mask in Davidson).
   !
-  ! |pg_irrep_allowed| is provided here, not in the callers: IRPF90 hoists
+  ! :c:data:`pg_irrep_allowed` is provided here, not in the callers: IRPF90 hoists
   ! the explicit PROVIDE to the entry of this routine, so the mask and the
   ! detection chain are built at the first filtered call and by no
   ! caller's entry block.

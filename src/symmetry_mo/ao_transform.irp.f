@@ -2,27 +2,27 @@
 ! Exact AO and MO representation matrices (SPEC.md section 7).
 !
 ! The only data that exists is the group elements' rotation matrices in the
-! *input* frame (|pg_rot_mat|), the atom permutation (|pg_perm|) and the AO
+! *input* frame (:c:data:`pg_rot_mat`), the atom permutation (:c:data:`pg_perm`) and the AO
 ! basis as EZFIO stores it. Everything else is rebuilt on demand:
 !
 !   M_g[q,p] = T_g[q,p] * B_p/B_q     (AO basis, block diagonal by shell)
 !   X_g      = C^T S M_g C            (MO basis)
 !
 ! with T_g = Sym^l(R_g) on the Cartesian monomials of the shell and B_p the
-! AO factor of SPEC.md section 7, |ao_coef_normalized(p,j) = A_j B_p|. B_p
-! is read from |ao_coef_normalized| itself (|pg_ao_ratio|), never from
-! |ao_coef_normalization_factor|: the two agree in the modern EZFIO
+! AO factor of SPEC.md section 7, ``ao_coef_normalized(p,j) = A_j B_p``. B_p
+! is read from :c:data:`ao_coef_normalized` itself (:c:func:`pg_ao_ratio`), never from
+! :c:data:`ao_coef_normalization_factor`: the two agree in the modern EZFIO
 ! convention but not in the pre-2025 one, where the primitive factor also
-! depends on the powers and |ao_coef_normalization_factor| is only the last
+! depends on the powers and :c:data:`ao_coef_normalization_factor` is only the last
 ! of the two multiplicative pieces. No matrix is stored across calls:
-! |G| can be 128 and ao_num 500, which would be 256 MB of dense matrices.
+! :math:`|G|` can be 128 and ao_num 500, which would be 256 MB of dense matrices.
 !
 ! Section 7 of SPEC.md derives M_g[q,p] = T_g[q,p] B_p/B_q from
 !   chi_p = sum_j A_j B_p v_p g_j ,  A_j = ao_coef(p,j)*prim_normalization(j)
 ! which holds exactly in the modern and in the legacy EZFIO conventions but
 ! *not* in the pre-2025 GAMESS one (there A_j depends on the AO powers and
-! a d shell is not rotation covariant at all). |pg_basis_ierr| records that
-! case, and the j-independence test of |pg_check_ao_factor| is what detects
+! a d shell is not rotation covariant at all). :c:data:`pg_basis_ierr` records that
+! case, and the j-independence test of :c:func:`pg_check_ao_factor` is what detects
 ! it: it uses ao_coef_normalized ratios only, never ao_coef/ao_coef_normalized.
 !
 ! The authoritative test of all of this is G-iso, M_g^T S M_g = S, which
@@ -34,15 +34,15 @@ BEGIN_PROVIDER [ integer, pg_shell_target, (shell_num, pg_n_elem) ]
 &BEGIN_PROVIDER [ character*(512), pg_basis_msg ]
   implicit none
   BEGIN_DOC
-  ! |pg_shell_target(s,g)| is the unique shell on the atom
-  ! |pg_perm(basis_nucleus_index(s),g)| whose contraction equals the one of
-  ! shell |s|. |pg_basis_ierr| is 0 when the AO basis is invariant under the
+  ! ``pg_shell_target(s,g)`` is the unique shell on the atom
+  ! ``pg_perm(basis_nucleus_index(s),g)`` whose contraction equals the one of
+  ! shell ``s``. :c:data:`pg_basis_ierr` is 0 when the AO basis is invariant under the
   ! point group and the AO coefficients factorize as A_j*B_p inside every
   ! shell; otherwise it is 1 (no unique image shell), 2 (ambiguous image
   ! shell) or 3 (the primitive factor depends on the AO powers) and
-  ! |pg_basis_msg| says which atom, shell, angular momentum and element.
+  ! :c:data:`pg_basis_msg` says which atom, shell, angular momentum and element.
   !
-  ! Reporting is left to the caller (|pg_ao_ok| and the gate report): a
+  ! Reporting is left to the caller (:c:data:`pg_ao_ok` and the gate report): a
   ! provider that stops cannot be reported on.
   END_DOC
   integer :: s, sp, g, a, ap, n_match, s_match
@@ -98,8 +98,8 @@ subroutine pg_check_ao_factor(ierr, msg)
   implicit none
   BEGIN_DOC
   ! Verifies, for every shell, that the ratios
-  ! |ao_coef_normalized(p,j)/ao_coef_normalized(p0,j)| are independent of the
-  ! primitive |j| (|p0| = first AO of the shell). Cross-multiplied so that a
+  ! ``ao_coef_normalized(p,j)/ao_coef_normalized(p0,j)`` are independent of the
+  ! primitive ``j`` (``p0`` = first AO of the shell). Cross-multiplied so that a
   ! zero coefficient needs no special case. This is the j-independence test
   ! of SPEC.md section 7: no double factorial, no hardcoded convention.
   END_DOC
@@ -160,7 +160,7 @@ logical function pg_shell_same(s1, s2)
   ! True when the two shells have the same angular momentum and the same
   ! contraction: same number of primitives, same *sorted* exponents and the
   ! primitive coefficients that go with them, to 1e-10 (SPEC.md section 7).
-  ! |ao_coef| (raw), never |ao_coef_normalized|: the latter legitimately
+  ! ``ao_coef`` (raw), never :c:data:`ao_coef_normalized`: the latter legitimately
   ! differs between AOs of the same shell when their powers differ.
   END_DOC
   integer, intent(in) :: s1, s2
@@ -188,7 +188,7 @@ end function pg_shell_same
 subroutine pg_sorted_contraction(s, ex, cf, n)
   implicit none
   BEGIN_DOC
-  ! Exponents of shell |s| in increasing order, each with its own raw
+  ! Exponents of shell ``s`` in increasing order, each with its own raw
   ! coefficient. The pair must be sorted together: a basis that lists its
   ! primitives in another order is still the same contraction.
   END_DOC
@@ -227,8 +227,8 @@ end subroutine pg_sorted_contraction
 subroutine pg_ao_rep(ig, m)
   implicit none
   BEGIN_DOC
-  ! |m| = M_g in the AO basis, a dense (ao_num x ao_num) matrix, block
-  ! diagonal by shell: shell |s| maps onto |pg_shell_target(s,g)| and its
+  ! ``m`` = M_g in the AO basis, a dense (ao_num x ao_num) matrix, block
+  ! diagonal by shell: shell ``s`` maps onto ``pg_shell_target(s,g)`` and its
   ! block is Sym^l(R_g) rescaled by B_p/B_q (SPEC.md section 7).
   END_DOC
   integer, intent(in) :: ig
@@ -242,14 +242,14 @@ end subroutine pg_ao_rep
 double precision function pg_ao_ratio(p, q)
   implicit none
   BEGIN_DOC
-  ! |B_p/B_q| from |ao_coef_normalized(p,j) = A_j B_p|: the |j| dependence
-  ! cancels, so any primitive gives the same number. |jref| is the primitive
-  ! carrying the largest |ao_coef_normalized(q,j)| so that the division is by
-  ! the largest coefficient available (|pg_check_ao_factor| has already
-  ! proved that the ratio does not depend on |j|).
+  ! ``B_p/B_q`` from ``ao_coef_normalized(p,j) = A_j B_p``: the ``j`` dependence
+  ! cancels, so any primitive gives the same number. ``jref`` is the primitive
+  ! carrying the largest ``ao_coef_normalized(q,j)`` so that the division is by
+  ! the largest coefficient available (:c:func:`pg_check_ao_factor` has already
+  ! proved that the ratio does not depend on ``j``).
   !
   ! This is exact in both EZFIO conventions. In the pre-2025 one
-  ! |ao_coef_normalization_factor| is NOT B_p: the primitive factor there
+  ! :c:data:`ao_coef_normalization_factor` is NOT B_p: the primitive factor there
   ! carries a power-dependent part, so using it would make a d shell not
   ! rotation covariant by an O(1) factor (found by G-iso on ammonia/6-31G*).
   END_DOC
@@ -265,7 +265,7 @@ double precision function pg_ao_ratio(p, q)
   den = ao_coef_normalized(q,jref)
   if (den == 0.d0) then
     ! Identically zero AO: cannot happen in a basis EZFIO stores. Return 0 so
-    ! that the block vanishes and G-iso fails loudly in |pg_report_ao|.
+    ! that the block vanishes and G-iso fails loudly in :c:func:`pg_report_ao`.
     pg_ao_ratio = 0.d0
   else
     pg_ao_ratio = ao_coef_normalized(p,jref)/den
@@ -273,13 +273,13 @@ double precision function pg_ao_ratio(p, q)
 end function pg_ao_ratio
 
 !-----------------------------------------------------------------------
-! Builder of the AO representation matrix (see |pg_ao_rep| above).
+! Builder of the AO representation matrix (see :c:func:`pg_ao_rep` above).
 !-----------------------------------------------------------------------
 subroutine pg_ao_rep_ex(ig, m)
   implicit none
   BEGIN_DOC
-  ! Block-diagonal builder: the block of shell |s| is Sym^l(R_g) rescaled by
-  ! B_p/B_q and written at the rows of shell |pg_shell_target(s,g)|.
+  ! Block-diagonal builder: the block of shell ``s`` is Sym^l(R_g) rescaled by
+  ! B_p/B_q and written at the rows of shell ``pg_shell_target(s,g)``.
   END_DOC
   integer, intent(in) :: ig
   double precision, intent(out) :: m(ao_num,ao_num)
@@ -289,7 +289,7 @@ subroutine pg_ao_rep_ex(ig, m)
   integer :: powp(3, (lmax+1)*(lmax+2)/2), powq(3, (lmax+1)*(lmax+2)/2)
   double precision :: t((lmax+1)*(lmax+2)/2, (lmax+1)*(lmax+2)/2)
 
-  ! |m| is intent(out) and zeroed first, so an early return still leaves a
+  ! ``m`` is intent(out) and zeroed first, so an early return still leaves a
   ! defined matrix behind.
   m(1:ao_num,1:ao_num) = 0.d0
 
@@ -339,22 +339,22 @@ end subroutine pg_ao_rep_ex
 subroutine pg_monomial_rep(l, r, np, powp, nq, powq, t)
   implicit none
   BEGIN_DOC
-  ! Builds |t| such that |U_g v_p = sum_q t(q,p) v_q| with
-  ! |v_p(r) = r_x^a r_y^b r_z^c| and |U_g f(r) = f(R^-1 r)| (SPEC.md section
-  ! 7). |R(j,i)| appears with the *row* index running over x,y,z: expanding
-  ! |(sum_j R(j,i) r_j)^p_i|, the coefficient of |r_j| is |R(j,i)|.
+  ! Builds ``t`` such that ``U_g v_p = sum_q t(q,p) v_q`` with
+  ! ``v_p(r) = r_x^a r_y^b r_z^c`` and ``U_g f(r) = f(R^-1 r)`` (SPEC.md section
+  ! 7). ``R(j,i)`` appears with the *row* index running over x,y,z: expanding
+  ! ``(sum_j R(j,i) r_j)^p_i``, the coefficient of ``r_j`` is ``R(j,i)``.
   !
   ! The product is accumulated as p_i successive multiplications by the
-  ! linear form |sum_j R(j,i) r_j|, which needs no factorials and no
+  ! linear form ``sum_j R(j,i) r_j``, which needs no factorials and no
   ! hardcoded degree: it is the same expansion as the multinomial formula,
   ! only cheaper to get right.
   !
-  ! |powp|, |powq| and |t| are declared with their *full* extent (nmax = 55
+  ! ``powp``, ``powq`` and ``t`` are declared with their *full* extent (nmax = 55
   ! monomials for lmax = 9), not with (3,np) and (nq,np): Fortran associates
   ! an explicit-shape dummy with the actual argument by sequence, so a dummy
   ! (3,np) would stride by np while the caller's array strides by nmax, and
   ! every column above the first would land at the wrong offset. The extents
-  ! here must stay equal to those of |pg_ao_rep|.
+  ! here must stay equal to those of :c:func:`pg_ao_rep`.
   END_DOC
   integer, parameter :: nmax = 55
   integer, intent(in) :: l, np, nq
@@ -397,11 +397,11 @@ end subroutine pg_monomial_rep
 subroutine pg_get_mo_rep(ig, x)
   implicit none
   BEGIN_DOC
-  ! |x| = C^T S M_g C, the matrix of group element |ig| in the MO basis
+  ! ``x`` = C^T S M_g C, the matrix of group element ``ig`` in the MO basis
   ! (SPEC.md section 7). Nothing is kept between calls: the caller loops on
-  ! the elements and holds one |x| at a time.
+  ! the elements and holds one ``x`` at a time.
   !
-  ! |matmul|, not |dgemm|: the matrices are at most a few hundred wide in
+  ! ``matmul``, not ``dgemm``: the matrices are at most a few hundred wide in
   ! practice and correctness matters more than the constant. Three dgemms
   ! replace it verbatim if a production run ever makes this the hot spot.
   END_DOC

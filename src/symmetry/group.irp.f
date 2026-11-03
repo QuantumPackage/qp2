@@ -3,7 +3,7 @@
 ! The whole finite set is named: 204 groups, checked one by one against the
 ! closed-form construction of the reference oracle (refsym2.py + ident.py,
 ! 204/204). There is no Abelian-only shortcut: the enumeration, the classes
-! and the identification are general, |G| <= 128.
+! and the identification are general, :math:`|G|` <= 128.
 !
 ! Placement notes versus SPEC.md:
 !  * pg_n_max and pg_n_axes_max are listed in section 5 but are needed by
@@ -18,7 +18,7 @@
 !    sigma_v/sigma_d split: it is a labelling device of section 6, decided
 !    there from the axis slot, and it is not needed to name a group.
 
-! Largest group order in the data set. D32d and D32h have |G| = 128
+! Largest group order in the data set. D32d and D32h have :math:`|G|` = 128
 ! (checked over the 211 files; Ih is 120), so the prototype's 120 silently
 ! truncates two groups. This is the module-interface constant of SPEC.md
 ! section 5; the providers size their scratch arrays with allocate() rather
@@ -38,7 +38,7 @@ subroutine pg_enumerate(nat, xyz, znum, ctr, evecs, tol, nmax, &
      rot, perm, n_rot, ierr)
   implicit none
   BEGIN_DOC
-  ! Build the full group from the geometry. |ierr| = 1 when |nmax| is too
+  ! Build the full group from the geometry. ``ierr`` = 1 when ``nmax`` is too
   ! small, 2 when the candidate list overflows, 3 on a non-orthogonal
   ! product (should never happen).
   END_DOC
@@ -168,8 +168,8 @@ subroutine pg_add_element(r, p, nat, nmax, rot, perm, n_rot, ierr)
   ! rejected before enumeration (SPEC.md section 5.9).
   !
   ! The permutation test is required, not an optimisation: a candidate
-  ! direction read off a geometry that is symmetric only to |pg_tol| is
-  ! tilted by O(|pg_tol| / lever arm), so a product of two accepted
+  ! direction read off a geometry that is symmetric only to :c:data:`pg_tol` is
+  ! tilted by O(:c:data:`pg_tol` / lever arm), so a product of two accepted
   ! elements differs from the stored element by far more than 1e-8 and
   ! would be appended again, without bound, until the array overflows.
   END_DOC
@@ -316,22 +316,22 @@ end subroutine pg_elem_props
 logical function pg_axis_along(axis, k)
   implicit none
   BEGIN_DOC
-  ! True when the unit vector |axis| (INPUT frame) lies on the |k|-th
-  ! canonical axis (|k| = 1, 2, 3 for x, y, z). The canonical direction in
-  ! the input frame is row |k| of pg_rot (section 4), so this is a dot
+  ! True when the unit vector ``axis`` (INPUT frame) lies on the ``k``-th
+  ! canonical axis (``k`` = 1, 2, 3 for x, y, z). The canonical direction in
+  ! the input frame is row ``k`` of pg_rot (section 4), so this is a dot
   ! product, exactly as the 5.8 invariants do it with row 3.
   !
   ! This is a LABELLING test and it is deliberately tight (1e-4, 0.8
   ! degree): it must answer "is this element one of the cartesian axes",
   ! not "is it roughly aligned". The closest non-axis direction in the data
   ! set is the sigma_d normal of D32d at pi/(2*32) = 2.8 degrees from x,
-  ! |cos| = 0.9988, while an element that IS an axis has |cos| = 1 up to the
+  ! ``cos`` = 0.9988, while an element that IS an axis has ``cos`` = 1 up to the
   ! tilt between two candidate directions built from the same geometry: for
   ! a geometry symmetric to 1e-12 that tilt is 1e-9, and it stays below 1e-7
-  ! for any |pg_tol| up to 1e-2.
+  ! for any :c:data:`pg_tol` up to 1e-2.
   !
   ! The invariants of section 5.8 use 1/2 instead: they must survive a
-  ! geometry that is symmetric only within |pg_tol|.
+  ! geometry that is symmetric only within :c:data:`pg_tol`.
   END_DOC
   double precision, intent(in) :: axis(3)
   integer, intent(in) :: k
@@ -348,7 +348,7 @@ end function pg_axis_along
 subroutine pg_reduce_angle(angle, m, k, ierr)
   implicit none
   BEGIN_DOC
-  ! Rational reduction of an angle: |angle - 2 pi k/m| < 1e-6.
+  ! Rational reduction of an angle: ``angle - 2 pi k/m`` < 1e-6.
   ! With this convention a reflection is (m=1,k=0) and the inversion is
   ! (m=2,k=1) (S1 = sigma, S2 = i).
   END_DOC
@@ -418,9 +418,9 @@ end subroutine pg_decode_kind
 subroutine pg_expected_order(name, order, ierr)
   implicit none
   BEGIN_DOC
-  ! |C_n| = n, |C_nv| = |C_nh| = 2n, |S_n| = n, |D_n| = 2n,
-  ! |D_nh| = |D_nd| = 4n, |T| = 12, |Th| = |Td| = |O| = 24,
-  ! |Oh| = 48, |I| = 60, |Ih| = 120.
+  ! ``C_n`` = n, ``C_nv`` = ``C_nh`` = 2n, ``S_n`` = n, ``D_n`` = 2n,
+  ! ``D_nh`` = ``D_nd`` = 4n, :math:`|T|` = 12, ``Th`` = ``Td`` = :math:`|O|` = 24,
+  ! ``Oh`` = 48, :math:`|I|` = 60, ``Ih`` = 120.
   END_DOC
   character*(*), intent(in) :: name
   integer, intent(out) :: order, ierr
@@ -557,7 +557,7 @@ END_PROVIDER
   double precision, allocatable :: rot(:,:,:)
   integer, allocatable :: perm(:,:)
 
-  ! |pg_n_elem| keeps its 0 default unless the enumeration succeeded: the
+  ! :c:data:`pg_n_elem` keeps its 0 default unless the enumeration succeeded: the
   ! result goes to a local first, so a failed call cannot leave a
   ! half-enumerated order behind.
   pg_n_elem = 0
@@ -674,7 +674,7 @@ END_PROVIDER
   implicit none
   BEGIN_DOC
   ! max over the elements g and the atoms i of
-  ! |R_g (r_i - center) + center - r_{pg_perm(i,g)}|, in bohr.
+  ! ``R_g (r_i - center) + center - r_{pg_perm(i,g)}``, in bohr.
   END_DOC
   integer :: ig, i
   double precision :: v(3), e(3)
@@ -701,8 +701,8 @@ END_PROVIDER
   implicit none
   BEGIN_DOC
   ! Index of the inverse of every element: the inverse atom permutation with
-  ! the same determinant. Exact, no tolerance: |h| is the inverse of |g| iff
-  ! its permutation is the inverse one and |det| agrees, and the enumeration
+  ! the same determinant. Exact, no tolerance: ``h`` is the inverse of ``g`` iff
+  ! its permutation is the inverse one and ``det`` agrees, and the enumeration
   ! stores permutations, never re-matches matrices (5.5).
   !
   ! Section 6 needs it to close a column under inversion: a geometric class
@@ -730,21 +730,21 @@ END_PROVIDER
  BEGIN_PROVIDER [ integer, pg_elem_mul, (pg_n_elem,pg_n_elem) ]
   implicit none
   BEGIN_DOC
-  ! Multiplication table: |pg_elem_mul(g,h)| is the index of R_g R_h.
+  ! Multiplication table: ``pg_elem_mul(g,h)`` is the index of R_g R_h.
   !
   ! Built from the atom permutations and the determinants, never from the
   ! matrices. A stored element is only a *representative* of a symmetry
-  ! operation known to |pg_tol|: a candidate direction read off the geometry
-  ! is accepted when the atoms move by less than |pg_tol|, which for a
+  ! operation known to :c:data:`pg_tol`: a candidate direction read off the geometry
+  ! is accepted when the atoms move by less than :c:data:`pg_tol`, which for a
   ! rotation about a slightly tilted axis means a matrix accurate to
-  ! |pg_tol| / lever arm ~ 1e-8, and a product of two such matrices differs
+  ! :c:data:`pg_tol` / lever arm ~ 1e-8, and a product of two such matrices differs
   ! from the stored representative by the same order. A matrix comparison
   ! with a 1e-8 threshold is then a coin flip (measured on NH3: the C3 axis
   ! is tilted by 4.9e-9, 18 of the 36 products miss). The (permutation,
   ! determinant) key is exact and is the identity criterion the enumeration
   ! itself uses (5.5).
   !
-  ! The table is |G|^2 integers: 64 kB at the worst case |G| = 128. Today the
+  ! The table is :math:`|G|^2 integers: 64 kB at the worst case :math:`|G|` = 128. Today the
   ! only consumer is gate G2; it is also what a product of two irreps will
   ! need once the module is in the core.
   END_DOC
@@ -796,9 +796,9 @@ END_PROVIDER
 integer function pg_find_by_perm(p, det)
   implicit none
   BEGIN_DOC
-  ! Index of the unique element that induces the atom permutation |p| and has
-  ! determinant |det|, or 0. This is the enumeration's own identity
-  ! criterion (|pg_add_element|): two orthogonal maps that permute the atoms
+  ! Index of the unique element that induces the atom permutation ``p`` and has
+  ! determinant ``det``, or 0. This is the enumeration's own identity
+  ! criterion (:c:func:`pg_add_element`): two orthogonal maps that permute the atoms
   ! identically and share their determinant are the same element. No matrix
   ! is ever compared (SPEC.md section 5.5).
   END_DOC
@@ -828,15 +828,15 @@ end function pg_find_by_perm
   implicit none
   BEGIN_DOC
   ! Classes by conjugation. Element 1 is the identity, so class 1 is the
-  ! identity class. Direct orbit enumeration (|G| <= 120).
+  ! identity class. Direct orbit enumeration (:math:`|G|` <= 120).
   !
   ! The conjugation is done on the atom permutations, not on the
-  ! matrices: the stored matrices carry the |pg_tol|-sized tilt of the
+  ! matrices: the stored matrices carry the :c:data:`pg_tol`-sized tilt of the
   ! candidate directions, so a conjugated matrix is not within 1e-8 of any
   ! stored one. The permutation (with the determinant, to separate the
   ! identity from the reflection in the molecular plane) is the exact
-  ! invariant used by |pg_add_element| too. Direct orbit enumeration,
-  ! |G| <= 128 so |G|^2 = 16384 comparisons.
+  ! invariant used by :c:func:`pg_add_element` too. Direct orbit enumeration,
+  ! :math:`|G|` <= 128 so :math:`|G|^2` = 16384 comparisons.
   END_DOC
   integer :: p(nucl_num)
   integer :: ih, c, g, k, i, j
@@ -938,14 +938,14 @@ END_PROVIDER
   ! "Parallel" and "perpendicular" to the principal axis are decided on the
   ! cosine with a threshold of 1/2 (45 degrees), not with a 1e-6
   ! tolerance. The elements are accepted when the geometry maps onto
-  ! itself within |pg_tol|, so their axes carry a tilt of the order of the
+  ! itself within :c:data:`pg_tol`, so their axes carry a tilt of the order of the
   ! geometric asymmetry: a reflection of a planar water whose H is moved by
   ! 1e-2 bohr has a normal at 0.26 degrees from the molecular plane, which
   ! a 1e-6 test rejects while the geometry still satisfies
-  ! |pg_tol| = 1e-4. In the groups of interest a line is either parallel or
+  ! :c:data:`pg_tol` = 1e-4. In the groups of interest a line is either parallel or
   ! perpendicular to z, 90 degrees apart, so 45 degrees is the widest
   ! possible margin and no intermediate case can be misassigned.
-  ! (|pg_has_i| keeps the 1e-8 test: the inversion is tested as the exact
+  ! (:c:data:`pg_has_i` keeps the 1e-8 test: the inversion is tested as the exact
   ! matrix -1, never built from a candidate direction.)
   double precision, parameter :: pg_axis_cos = 0.5d0
 
@@ -964,7 +964,7 @@ END_PROVIDER
     if (d <= 1.d-8) pg_has_i = .true.
 
     call pg_decode_kind(pg_elem_kind(i), det, m, k)
-    ! |d| is the cosine between the element axis (plane normal for a
+    ! ``d`` is the cosine between the element axis (plane normal for a
     ! reflection) and the canonical z, i.e. row 3 of pg_rot.
     d = pg_elem_axis(1,i)*pg_rot(3,1) + pg_elem_axis(2,i)*pg_rot(3,2) &
       + pg_elem_axis(3,i)*pg_rot(3,3)
@@ -1005,7 +1005,7 @@ END_PROVIDER
   !    have order 2) and cannot be mistaken for a cubic group;
   !  * in the n_max = 1 branch the orientation of the single mirror is not
   !    usable: z is the molecular plane normal for a planar molecule but an
-  !    inertia axis otherwise, so C1/Ci/Cs are decided by |G| and by
+  !    inertia axis otherwise, so C1/Ci/Cs are decided by :math:`|G|` and by
   !    "there is exactly one reflection".
   END_DOC
   character*(16) :: name
@@ -1045,7 +1045,7 @@ END_PROVIDER
     endif
   else if (pg_n_max <= 1) then
     ! No proper rotation: C1 (nothing), Ci (S2, the inversion), Cs (S1, one
-    ! plane). Nothing else can have |G| <= 2.
+    ! plane). Nothing else can have :math:`|G|` <= 2.
     if (pg_n_elem == 1) then
       name = 'C1'
     else if (pg_has_i) then
@@ -1072,7 +1072,7 @@ END_PROVIDER
       write(name,'(A,I0,A)') 'C', pg_n_max, 'v'
     endif
   else if (pg_n_elem == pg_n_max) then
-    ! No plane, no inversion (|G| = n_max excludes i, which would double the
+    ! No plane, no inversion (:math:`|G|` = n_max excludes i, which would double the
     ! order): the cyclic group C<n>.
     write(name,'(A,I0)') 'C', pg_n_max
   else if (pg_n_elem == 2*pg_n_max) then
@@ -1134,9 +1134,9 @@ END_PROVIDER
   endif
 
   ! Classes partition the group. This is the only class property step 2 can
-  ! assert without the character table: the Abelian identity n_class = |G|
+  ! assert without the character table: the Abelian identity n_class = :math:`|G|`
   ! is NOT one of them, and the table-dependent checks live in
-  ! |columns.irp.f| (columns partition the group, orthogonality, sum of
+  ! ``columns.irp.f`` (columns partition the group, orthogonality, sum of
   ! d^2/mult).
   n_size = 0
   do i = 1, pg_n_class

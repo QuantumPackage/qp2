@@ -6,7 +6,7 @@
 ! that knows nothing about symmetry. Two constraints follow:
 !
 !  * a detection failure is never fatal: the provider that gives up
-!    prints its reason once and sets |pg_detection_failed|, and every
+!    prints its reason once and sets :c:data:`pg_detection_failed`, and every
 !    entry point below turns that into a silent .false.;
 !  * IRPF90 hoists the build of every provider a procedure names to the
 !    ENTRY of that procedure (section 9.2b), so an early return cannot
@@ -15,10 +15,10 @@
 !    names the chain: the guard sits in the caller, the work in the
 !    callee.
 !
-! |pg_symmetry_ready| names |auto_symmetry| and |pg_detection_failed|
-! only (section 9.2b, R4): with |auto_symmetry| = F not one provider of
+! :c:func:`pg_symmetry_ready` names :c:data:`auto_symmetry` and :c:data:`pg_detection_failed`
+! only (section 9.2b, R4): with :c:data:`auto_symmetry` = F not one provider of
 ! the chain is built. The chain itself is entered by
-! |pg_ready_detection| then |pg_ready_columns|, and |pg_detection_failed|
+! :c:func:`pg_ready_detection` then :c:func:`pg_ready_columns`, and :c:data:`pg_detection_failed`
 ! is forced first so that the flag exists before a chain provider can
 ! run.
 !-----------------------------------------------------------------------
@@ -31,9 +31,9 @@ logical function pg_symmetry_ready()
   BEGIN_DOC
   ! True when the point group was detected, its character table is
   ! usable and the AO basis supports the group: the MOs can be labelled
-  ! and |mo_basis/mo_symmetry| written.
+  ! and ``mo_basis/mo_symmetry`` written.
   !
-  ! Never stops. |auto_symmetry| = F is silent; a failed detection has
+  ! Never stops. :c:data:`auto_symmetry` = F is silent; a failed detection has
   ! already printed its reason.
   END_DOC
   logical :: ok
@@ -53,9 +53,9 @@ end function pg_symmetry_ready
 subroutine pg_ready_detection(ok)
   implicit none
   BEGIN_DOC
-  ! |ok| is true when a group name could be measured. Never stops.
+  ! ``ok`` is true when a group name could be measured. Never stops.
   !
-  ! |pg_inertia_eval| comes first: it rejects the geometry before any
+  ! :c:data:`pg_inertia_eval` comes first: it rejects the geometry before any
   ! enumeration (no nucleus, a linear molecule, since Cinfv/Dinfh
   ! labelling is not implemented, or a failed diagonalization). The
   ! group name is a second step because a geometry that only looks
@@ -84,11 +84,11 @@ BEGIN_PROVIDER [ logical, pg_ao_ok ]
   ! True when the AO basis is invariant under the detected point group
   ! and every shell's coefficients factorize as A_j*B_p, i.e. when the
   ! MO representation matrices of ao_transform.irp.f are exact
-  ! (|pg_basis_ierr| = 0).
+  ! (:c:data:`pg_basis_ierr` = 0).
   !
-  ! |pg_basis_ierr| is the full test: |pg_check_ao_factor| alone would
+  ! :c:data:`pg_basis_ierr` is the full test: :c:func:`pg_check_ao_factor` alone would
   ! miss the shell-to-shell matching failures (ierr 1 and 2), which only
-  ! |pg_ao_rep_ex| would turn into a zero matrix, later and with a second
+  ! :c:func:`pg_ao_rep_ex` would turn into a zero matrix, later and with a second
   ! message.
   !
   ! Being a provider, the diagnostic is printed once per process: an early
@@ -110,11 +110,11 @@ END_PROVIDER
 subroutine pg_ready_columns(ok)
   implicit none
   BEGIN_DOC
-  ! |ok| is true when the AO basis supports the group and the character
-  ! table of |pg_group_name| could be parsed and validated. Never stops.
+  ! ``ok`` is true when the AO basis supports the group and the character
+  ! table of :c:data:`pg_group_name` could be parsed and validated. Never stops.
   !
-  ! |pg_n_irrep| prints the missing-table diagnostic itself, and a table
-  ! that fails a validation check sets |pg_detection_failed| and leaves
+  ! :c:data:`pg_n_irrep` prints the missing-table diagnostic itself, and a table
+  ! that fails a validation check sets :c:data:`pg_detection_failed` and leaves
   ! the count at 0.
   END_DOC
   logical, intent(out) :: ok
@@ -134,11 +134,11 @@ logical function pg_mo_labels_ok()
   implicit none
   BEGIN_DOC
   ! True when every MO carries a definite irrep, i.e. when
-  ! |pg_mo_irrep(i)| is positive for all i. Called only after
-  ! |pg_symmetry_ready| returned true, so the representation matrices are
+  ! ``pg_mo_irrep(i)`` is positive for all i. Called only after
+  ! :c:func:`pg_symmetry_ready` returned true, so the representation matrices are
   ! already built.
   !
-  ! This is the guard that makes the |stop 1|s of det_irrep.irp.f
+  ! This is the guard that makes the ``stop 1`` statements of det_irrep.irp.f
   ! unreachable from the CI entry points (section 9.3).
   END_DOC
   pg_mo_labels_ok = .false.
@@ -153,11 +153,11 @@ subroutine pg_report_mo_symmetry()
   implicit none
   BEGIN_DOC
   ! Called at the end of SCF/DFT: prints the point group and the number of
-  ! MOs per irrep, and writes |mo_basis/mo_symmetry| when every MO has a
-  ! definite irrep. Never stops, prints nothing when |auto_symmetry| is
+  ! MOs per irrep, and writes ``mo_basis/mo_symmetry`` when every MO has a
+  ! definite irrep. Never stops, prints nothing when :c:data:`auto_symmetry` is
   ! false.
   !
-  ! This body names |pg_symmetry_ready| only, so the guard runs before any
+  ! This body names :c:func:`pg_symmetry_ready` only, so the guard runs before any
   ! provider of the chain is entered (section 9.2b, R1).
   END_DOC
   ! IRPF90 does not emit the declaration of a function for its callers.
@@ -170,19 +170,19 @@ end subroutine pg_report_mo_symmetry
 subroutine pg_report_mo_symmetry_work()
   implicit none
   BEGIN_DOC
-  ! Worker of |pg_report_mo_symmetry|: names the chain, so it may only be
-  ! called once |pg_symmetry_ready| returned true.
+  ! Worker of :c:func:`pg_report_mo_symmetry`: names the chain, so it may only be
+  ! called once :c:func:`pg_symmetry_ready` returned true.
   !
-  ! The count printed per irrep is |pg_irrep_weight|, the row sum of the
+  ! The count printed per irrep is :c:data:`pg_irrep_weight`, the row sum of the
   ! projector weights: it is the very number the gates test, and for a
   ! symmetry-adapted set it equals the number of MOs carrying the label.
   !
-  ! A mixed MO has |pg_mo_irrep| = 0 and nothing is written: |mo_symmetry|
+  ! A mixed MO has :c:data:`pg_mo_irrep` = 0 and nothing is written: :c:data:`mo_symmetry`
   ! only carries "same integer = same irrep", so writing 0 would declare
   ! all the mixed MOs to be one single irrep.
   !
   ! The mixed count runs on every rank; only the printing and the EZFIO
-  ! write are under |mpi_master|, as in save_wavefunction_general.
+  ! write are under :c:data:`mpi_master`, as in save_wavefunction_general.
   END_DOC
   integer :: a, i, n_mixed
   character*(8) :: lab

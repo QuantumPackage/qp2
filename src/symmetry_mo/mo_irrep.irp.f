@@ -5,35 +5,35 @@
 ! the geometric classes. A column may be the union of several classes and of
 ! their inverse classes (C3 has two classes and one column; T has eight C3 in
 ! two classes of four and one column; Td has six S4 in two classes and one
-! column), and |pg_char(a,c)| is constant on a column by construction
+! column), and ``pg_char(a,c)`` is constant on a column by construction
 ! (columns.irp.f). Grouping the elements by column is only a partition of
 ! the group, so the projector is unchanged -- but a loop over classes would
 ! use the wrong multiplicity and silently mislabel every degenerate row.
 !
-!   P^a = (d_a/(mult_a*|G|)) * sum_c chi_a(c) * U_c ,
+!   P^a = (d_a/(mult_a*:math:`|G|`)) * sum_c chi_a(c) * U_c ,
 !   U_c = sum_{g in column c} X_g
 !
-! |mult_a| is not cosmetic: a row with mult_a = 2 is the sum of a
+! ``mult_a`` is not cosmetic: a row with mult_a = 2 is the sum of a
 ! complex-conjugate pair, chi_a + chi_abar = 2 Re chi_a, so the real stored
-! row needs the factor 2 in the denominator. This is why sum_a d_a^2 = |G|
-! is false for C3 (1 + 4 = 5) while sum_a d_a^2/mult_a = |G| holds.
+! row needs the factor 2 in the denominator. This is why sum_a d_a^2 = :math:`|G|`
+! is false for C3 (1 + 4 = 5) while sum_a d_a^2/mult_a = :math:`|G|` holds.
 !
 ! Everything is built from ONE pass over the group elements. X_g is produced
-! by |pg_get_mo_rep|, used, and thrown away: storing the |G| dense matrices
-! would be 256 MB at |G| = 128 and mo_num = 500, while only the diagonal of
+! by :c:func:`pg_get_mo_rep`, used, and thrown away: storing the :math:`|G|` dense matrices
+! would be 256 MB at :math:`|G|` = 128 and mo_num = 500, while only the diagonal of
 ! each X_g is needed for the weights and only its off-diagonal entries above
-! |pg_thresh| are needed for the blocks.
+! :c:data:`pg_thresh` are needed for the blocks.
 !
 ! For a symmetry-adapted MO set, p_a(i) = 1 for exactly one a and 0 for all
 ! the others -- including inside a degenerate block, where P^a is the
 ! d_a x d_a identity and therefore every partner has p_a = 1. The members of
 ! a degenerate block thus SHARE one label and have no individual label; the
-! block is what |pg_mo_block| reports.
+! block is what :c:data:`pg_mo_block` reports.
 !
 ! An MO that is not an eigenvector of the projectors has 0 < max_a p_a < 1.
 ! That is the only signature of a non-symmetry-adapted MO set: tr P^a is
 ! basis independent, so a rotation mixing two irreps leaves the traces (and
-! gates G3, G4) untouched. Such an MO gets |pg_mo_irrep| = 0: a best guess
+! gates G3, G4) untouched. Such an MO gets :c:data:`pg_mo_irrep` = 0: a best guess
 ! would be a lie.
 !-----------------------------------------------------------------------
 
@@ -43,20 +43,20 @@ BEGIN_PROVIDER [ double precision, pg_col_diag, (mo_num,pg_n_col) ]
 &BEGIN_PROVIDER [ integer, pg_mo_block_dim, (mo_num) ]
   implicit none
   BEGIN_DOC
-  ! |pg_col_diag(i,c)| = sum over the ELEMENTS of column |c| of X_g(i,i), and
+  ! ``pg_col_diag(i,c)`` = sum over the ELEMENTS of column ``c`` of X_g(i,i), and
   ! the symmetry blocks of the MO set.
   !
   ! A block is a connected component of the graph on the MOs with an edge
-  ! (i,j), i /= j, when |X_g(j,i)|^2 > pg_thresh for SOME element g. The edge
+  ! (i,j), i /= j, when :math:`|X_g(j,i)|^2` > pg_thresh for SOME element g. The edge
   ! test is on a WEIGHT, the same number and the same units as the label cut:
   ! the assembly defect delta_MO is a weight defect, so the spurious amplitude
   ! between two MOs of different irreps is sqrt(delta_MO) (SPEC.md 8.1). A
   ! block is an irrep space: two different copies of the same irrep stay
   ! separate because X_g is block diagonal in the symmetry-adapted basis.
   !
-  ! |pg_mo_block(i)| is the component id, renumbered 1..|pg_n_mo_block| in
+  ! ``pg_mo_block(i)`` is the component id, renumbered 1..:c:data:`pg_n_mo_block` in
   ! order of first appearance so that the report is deterministic;
-  ! |pg_mo_block_dim(i)| is the size of the block of i.
+  ! ``pg_mo_block_dim(i)`` is the size of the block of i.
   !
   ! Nothing here is stored across the group: one X_g at a time, one pass.
   ! The guard on mo_num == 0 keeps a nuclei-only EZFIO (no ao_basis, hence no
@@ -70,8 +70,8 @@ BEGIN_PROVIDER [ double precision, pg_col_diag, (mo_num,pg_n_col) ]
   pg_n_mo_block = 0
   if (mo_num == 0) return
 
-  ! |pg_mo_block| and |pg_mo_block_dim| are dimensioned by |mo_num| alone and
-  ! are safe to fill. |pg_col_diag| also has |pg_n_col| as a dimension, and
+  ! :c:data:`pg_mo_block` and :c:data:`pg_mo_block_dim` are dimensioned by :c:data:`mo_num` alone and
+  ! are safe to fill. :c:data:`pg_col_diag` also has :c:data:`pg_n_col` as a dimension, and
   ! IRPF90 does not allocate an array with a zero extent: the guard comes
   ! before the assignment, so a failed detection never writes to it.
   pg_mo_block(1:mo_num) = 0
@@ -166,16 +166,16 @@ BEGIN_PROVIDER [ double precision, pg_mo_weight, (mo_num,pg_n_irrep) ]
 &BEGIN_PROVIDER [ integer, pg_irrep_weight, (pg_n_irrep) ]
   implicit none
   BEGIN_DOC
-  ! |pg_mo_weight(i,a)| = p_a(i) = (d_a/(mult_a*|G|)) * sum_c chi_a(c)
+  ! ``pg_mo_weight(i,a)`` = p_a(i) = (d_a/(mult_a*:math:`|G|`)) * sum_c chi_a(c)
   ! pg_col_diag(i,c), the expectation value of the projector P^a on MO i.
   !
-  ! |pg_mo_irrep(i)| = argmax_a p_a(i), or 0 when max_a p_a(i) <
+  ! ``pg_mo_irrep(i)`` = argmax_a p_a(i), or 0 when max_a p_a(i) <
   ! 1 - pg_thresh: a mixed MO must not get a best-guess label (SPEC.md 8.4).
-  ! |pg_mo_purity(i)| = max_a p_a(i), 1 for a symmetry-adapted MO and 1 for
+  ! ``pg_mo_purity(i)`` = max_a p_a(i), 1 for a symmetry-adapted MO and 1 for
   ! every partner of a degenerate block (P^a is the identity there).
   !
-  ! |pg_irrep_weight(a)| = nint(sum_i p_a(i)) = tr P^a, the number of times
-  ! irrep a appears. It is the SUM OF THE ROWS OF |pg_mo_weight|, never a
+  ! ``pg_irrep_weight(a)`` = nint(sum_i p_a(i)) = tr P^a, the number of times
+  ! irrep a appears. It is the SUM OF THE ROWS OF :c:data:`pg_mo_weight`, never a
   ! second trace formula built from the characters: two mathematically equal
   ! expressions would only ever disagree through a bug in one of them, and
   ! gates G3/G4 must test the very numbers the report prints.
@@ -185,7 +185,7 @@ BEGIN_PROVIDER [ double precision, pg_mo_weight, (mo_num,pg_n_irrep) ]
 
   ! IRPF90 does not allocate the arrays when a dimension is 0, so nothing of
   ! this provider is touched: return before the first array reference.
-  ! |pg_mo_irrep| is dimensioned by |mo_num| alone and is zeroed by the second
+  ! :c:data:`pg_mo_irrep` is dimensioned by :c:data:`mo_num` alone and is zeroed by the second
   ! guard, so a failed detection leaves ``no definite irrep'' behind instead
   ! of an unbuilt provider.
   if (mo_num == 0) return
@@ -245,20 +245,20 @@ END_PROVIDER
 subroutine pg_write_mo_symmetry()
   implicit none
   BEGIN_DOC
-  ! Writes |pg_mo_irrep| into |mo_basis/mo_symmetry| of the EZFIO.
+  ! Writes :c:data:`pg_mo_irrep` into ``mo_basis/mo_symmetry`` of the EZFIO.
   !
-  ! |mo_symmetry| is an existing QP2 provider (src/mo_basis/mo_class.irp.f)
+  ! :c:data:`mo_symmetry` is an existing QP2 provider (src/mo_basis/mo_class.irp.f)
   ! and IRPF90 forbids filling it from another module, so it cannot be a
   ! provider of this one. The user's program must call
-  ! |call pg_write_mo_symmetry()| explicitly; no provider writes EZFIO.
+  ! ``call pg_write_mo_symmetry()`` explicitly; no provider writes EZFIO.
   !
-  ! A mixed MO has |pg_mo_irrep = 0|, and |mo_symmetry| only carries "same
+  ! A mixed MO has ``pg_mo_irrep = 0``, and :c:data:`mo_symmetry` only carries "same
   ! integer = same irrep": writing 0 would silently declare all mixed MOs to
   ! be one irrep. Nothing is written in that case, and the count is printed.
   !
-  ! |mo_symmetry| is usually built (all-1 default) before this point, so the
+  ! :c:data:`mo_symmetry` is usually built (all-1 default) before this point, so the
   ! EZFIO write alone would leave the in-memory provider stale: the
-  ! |soft_touch| invalidates it without building it when it is not built.
+  ! ``soft_touch`` invalidates it without building it when it is not built.
   END_DOC
   integer :: i, n_mixed
 

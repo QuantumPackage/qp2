@@ -2,10 +2,10 @@
 ! Determinant irreps (SPEC.md section 9).
 !
 ! A determinant is D = (A,B), the ascending alpha and beta occupation
-! lists. X_g is block diagonal on the symmetry blocks of |pg_mo_block|,
+! lists. X_g is block diagonal on the symmetry blocks of :c:data:`pg_mo_block`,
 ! and the determinant matrix element of the group element is
 !
-!   <D'|U(g)|D> = prod_b det( X_g[A'_b,A_b] ) * prod_b det( X_g[B'_b,B_b] )
+!   :math:`<D'|U(g)|D>` = prod_b det( X_g[A'_b,A_b] ) * prod_b det( X_g[B'_b,B_b] )
 !
 ! which is zero unless D and D' have the same number of alpha (resp.
 ! beta) electrons in EVERY block. That count vector is the family
@@ -14,9 +14,9 @@
 !
 ! The projector is the one and only formula of section 8.2,
 !
-!   T^a = (d_a/(mult_a*|G|)) sum_g chi_a(col(g)) <.|U(g)|.>
+!   T^a = (d_a/(mult_a*:math:`|G|`)) sum_g chi_a(col(g)) :math:`<.|U(g)|.>`
 !
-! so |pg_det_irrep| and |pg_mo_irrep| are the diagonal of one operator
+! so :c:data:`pg_det_irrep` and :c:data:`pg_mo_irrep` are the diagonal of one operator
 ! written in two bases: no second formula, no second tolerance.
 !
 ! Sign: the product of block determinants carries no sign. The N-electron
@@ -29,13 +29,26 @@ BEGIN_PROVIDER [ integer, pg_label_ierr ]
   implicit none
   BEGIN_DOC
   ! 0 when the last labelling attempt succeeded; otherwise
-  !   1  there is no determinant to label
-  !   2  there is no MO or no symmetry block
-  !   3  the MO basis is not block diagonal
-  !   4  a determinant family is larger than pg_family_cap
-  !   5  the family enumeration is inconsistent
-  !   6  one symmetry block holds more than 12 occupied MOs
-  ! |pg_label_msg| is the one-sentence reason. Reporting is left to the
+  !
+  ! ``1``
+  !     there is no determinant to label
+  !
+  ! ``2``
+  !     there is no MO or no symmetry block
+  !
+  ! ``3``
+  !     the MO basis is not block diagonal
+  !
+  ! ``4``
+  !     a determinant family is larger than pg_family_cap
+  !
+  ! ``5``
+  !     the family enumeration is inconsistent
+  !
+  ! ``6``
+  !     one symmetry block holds more than 12 occupied MOs
+  !
+  ! :c:data:`pg_label_msg` is the one-sentence reason. Reporting is left to the
   ! caller: a provider that stops cannot be reported on.
   END_DOC
   pg_label_ierr = 0
@@ -46,7 +59,7 @@ BEGIN_PROVIDER [ integer, pg_family_cap ]
   implicit none
   BEGIN_DOC
   ! Largest family the module agrees to enumerate. A family has
-  ! |prod_b C(d_b,n_b)| members per spin, so a determinant with several
+  ! ``prod_b C(d_b,n_b)`` members per spin, so a determinant with several
   ! partially occupied degenerate shells grows combinatorially. Above
   ! this size the module stops and says which determinant it was,
   ! instead of hanging or silently truncating the projector.
@@ -62,14 +75,14 @@ BEGIN_PROVIDER [ integer, pg_block_start, (pg_n_mo_block) ]
 &BEGIN_PROVIDER [ integer, pg_block_dim, (pg_n_mo_block) ]
   implicit none
   BEGIN_DOC
-  ! |pg_block_mo(pg_block_start(b) : pg_block_start(b)+pg_block_dim(b)-1)|
-  ! holds the MOs of symmetry block |b| in ascending MO order.
+  ! ``pg_block_mo(pg_block_start(b) : pg_block_start(b)+pg_block_dim(b)-1)``
+  ! holds the MOs of symmetry block ``b`` in ascending MO order.
   !
   ! The MOs of one block are NOT contiguous in the MO list (the same
   ! irrep can appear at several energies: the A1g MOs of benzene are
   ! spread over the whole spectrum), which is why the family enumeration
   ! of section 9.2 goes through this indirection and never through
-  ! |pg_mo_block(i)| arithmetic.
+  ! ``pg_mo_block(i)`` arithmetic.
   END_DOC
   integer :: i, b, k
   integer :: pos(pg_n_mo_block)
@@ -100,8 +113,8 @@ END_PROVIDER
 BEGIN_PROVIDER [ integer, pg_elem_col, (pg_n_elem) ]
   implicit none
   BEGIN_DOC
-  ! Inverse of |pg_col_member|: |pg_elem_col(g)| is the file column that
-  ! element |g| belongs to. |pg_char| is indexed by column and both
+  ! Inverse of :c:data:`pg_col_member`: ``pg_elem_col(g)`` is the file column that
+  ! element ``g`` belongs to. :c:data:`pg_char` is indexed by column and both
   ! projectors sum over elements, so this is the map between the two.
   !
   ! A column can stand for several geometric classes (T, Td, Oh, Ih have
@@ -123,17 +136,17 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, pg_xg, (mo_num,mo_num,pg_n_elem) ]
   implicit none
   BEGIN_DOC
-  ! |pg_xg(:,:,g)| = C^T S M_g C, the matrix of group element |g| in the
+  ! ``pg_xg(:,:,g)`` = C^T S M_g C, the matrix of group element ``g`` in the
   ! MO basis (SPEC.md section 7), built once.
   !
   ! SPEC.md 9.4 asked for one scratch matrix at a time, but the
   ! determinant projectors need every element for every family, and a
-  ! rebuild is a full AO transform (three matmuls over ao_num). |G| is at
+  ! rebuild is a full AO transform (three matmuls over ao_num). :math:`|G|` is at
   ! most 120 and the MO basis of a plugin-sized system a few hundred
-  ! wide, so the set costs 8*|G|*mo_num^2 bytes: 0.8 MB for benzene in
+  ! wide, so the set costs :math:`8|G|N_{MO}^2` bytes: 0.8 MB for benzene in
   ! 6-31G. The report prints the number. A production version can keep
   ! only the rows and columns of the partially occupied blocks; nothing
-  ! below cares, because |pg_elem_me| is the only reader.
+  ! below cares, because :c:func:`pg_elem_me` is the only reader.
   END_DOC
   integer :: g
   double precision :: x(mo_num,mo_num)
@@ -170,16 +183,16 @@ integer function pg_binom(dim, n)
 end function pg_binom
 
 !-----------------------------------------------------------------------
-! Unranking of a combination: the |rank|-th subset of size |n| of a
-! |dim|-element set, as a bit mask (bit k <-> element k, 0-based).
+! Unranking of a combination: the ``rank``-th subset of size ``n`` of a
+! ``dim``-element set, as a bit mask (bit k <-> element k, 0-based).
 ! Colex order, so that rank 0..C(dim,n)-1 covers the subsets once each.
 !-----------------------------------------------------------------------
 integer function pg_unrank(dim, n, rank)
   implicit none
   BEGIN_DOC
-  ! Bit mask of the |rank|-th |n|-subset of {0,...,dim-1}. |dim| <= 30
+  ! Bit mask of the ``rank``-th ``n``-subset of {0,...,dim-1}. ``dim`` <= 30
   ! (a symmetry block is an irrep space and has d_a <= 5 elements; the
-  ! guard is in |pg_elem_me|).
+  ! guard is in :c:func:`pg_elem_me`).
   END_DOC
   integer, intent(in) :: dim, n, rank
   integer :: k, j, r
@@ -206,13 +219,13 @@ end function pg_unrank
 
 !-----------------------------------------------------------------------
 ! Determinant of a small dense matrix, Gaussian elimination with partial
-! pivoting. |n| <= 12 (a block never has more than d_a <= 5 occupied
-! MOs; the guard is in |pg_elem_me|).
+! pivoting. ``n`` <= 12 (a block never has more than d_a <= 5 occupied
+! MOs; the guard is in :c:func:`pg_elem_me`).
 !-----------------------------------------------------------------------
 double precision function pg_small_det(a, n)
   implicit none
   BEGIN_DOC
-  ! det(a(1:n,1:n)), |a| untouched, exact zero returns exactly 0.
+  ! det(a(1:n,1:n)), ``a`` untouched, exact zero returns exactly 0.
   END_DOC
   integer, parameter :: nmax = 12
   integer, intent(in) :: n
@@ -260,9 +273,9 @@ subroutine pg_det_counts(idet, nsel)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! |nsel(s,b)| = number of spin-|s| electrons of determinant |idet| in
-  ! symmetry block |b|. Two determinants are in the same family if and
-  ! only if their |nsel| agree (SPEC.md 9.2).
+  ! ``nsel(s,b)`` = number of spin-``s`` electrons of determinant ``idet`` in
+  ! symmetry block ``b``. Two determinants are in the same family if and
+  ! only if their ``nsel`` agree (SPEC.md 9.2).
   END_DOC
   integer, intent(in) :: idet
   integer, intent(out) :: nsel(2,pg_n_mo_block)
@@ -285,10 +298,10 @@ end subroutine pg_det_counts
 subroutine pg_family_size(nsel, np)
   implicit none
   BEGIN_DOC
-  ! |np| = prod_{s,b} C(d_b, nsel(s,b)), the number of determinants with
+  ! ``np`` = prod_{s,b} C(d_b, nsel(s,b)), the number of determinants with
   ! the same per-block spin counts. A block that is empty or full
   ! contributes one choice; the product is cut as soon as it exceeds
-  ! |pg_family_cap| so that the caller reports instead of overflowing.
+  ! :c:data:`pg_family_cap` so that the caller reports instead of overflowing.
   END_DOC
   integer, intent(in) :: nsel(2,pg_n_mo_block)
   integer, intent(out) :: np
@@ -313,11 +326,11 @@ end subroutine pg_family_size
 subroutine pg_family_fill(nsel, np, mask)
   implicit none
   BEGIN_DOC
-  ! |mask(s,b,ip)| is the bit mask of the MOs of block |b| occupied with
-  ! spin |s| by family member |ip|, bit |k| standing for the
-  ! MO |pg_block_mo(pg_block_start(b)+k)|.
+  ! ``mask(s,b,ip)`` is the bit mask of the MOs of block ``b`` occupied with
+  ! spin ``s`` by family member ``ip``, bit ``k`` standing for the
+  ! MO ``pg_block_mo(pg_block_start(b)+k)``.
   !
-  ! An odometer over the per-(spin,block) combination ranks: |scalar|
+  ! An odometer over the per-(spin,block) combination ranks: ``scalar``
   ! index q in [0,np-1] decomposed in mixed radix, each digit unranked to
   ! a subset. Cost np * sum_b d_b, paid once per family.
   END_DOC
@@ -372,13 +385,13 @@ subroutine pg_family_index(np, mask, idx, imin)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! |idx(ip)| is the index in |psi_det| of family member |ip|,
+  ! ``idx(ip)`` is the index in :c:data:`psi_det` of family member ``ip``,
   ! or 0 when that member is not in the wave function (a truncated CI
   ! space: the missing member simply has coefficient 0, SPEC.md 10.2).
-  ! |imin| is the smallest nonzero index.
+  ! ``imin`` is the smallest nonzero index.
   !
-  ! The lookup is QP2's own binary search on |psi_det_sorted_bit|, which
-  ! is why the members are built as bit strings through |list_to_bitstring|
+  ! The lookup is QP2's own binary search on :c:data:`psi_det_sorted_bit`, which
+  ! is why the members are built as bit strings through :c:func:`list_to_bitstring`
   ! and not compared determinantal by determinantal.
   END_DOC
   integer, intent(in) :: np, mask(2,pg_n_mo_block,np)
@@ -417,12 +430,12 @@ subroutine pg_family_index(np, mask, idx, imin)
 end subroutine pg_family_index
 
 !-----------------------------------------------------------------------
-! <D'|U(g)|D>.
+! :math:`<D'|U(g)|D>`.
 !-----------------------------------------------------------------------
 subroutine pg_elem_me(ig, np, mask, ip, jp, val)
   implicit none
   BEGIN_DOC
-  ! |val| = <D_ip|U(g_ig)|D_jp> = prod_b det( X_g[A'_b,A_b] ) * prod_b det( X_g[B'_b,B_b] ).
+  ! ``val`` = :math:`<D_ip|U(g_ig)|D_jp>` = prod_b det( X_g[A'_b,A_b] ) * prod_b det( X_g[B'_b,B_b] ).
   !
   ! Every block contributes a square submatrix because the family has
   ! the same count in every block. The counts are computed first and the
@@ -471,7 +484,7 @@ subroutine pg_elem_me(ig, np, mask, ip, jp, val)
         return
       endif
       n = ii
-      ! <D_ip|U(g)|D_jp> restricted to this block: det( X_g[A',A] ).
+      ! :math:`<D_ip|U(g)|D_jp>` restricted to this block: det( X_g[A',A] ).
       ii = 0
       do k1 = 0, nd-1
         if (.not. btest(mask(s,b,ip),k1)) cycle
@@ -496,10 +509,10 @@ end subroutine pg_elem_me
 subroutine pg_family_projector(np, mask, t)
   implicit none
   BEGIN_DOC
-  ! |t(ip,jp,a)| = T^a_{ip,jp} = (d_a/(mult_a*|G|)) sum_g chi_a(col(g)) <D_ip|U(g)|D_jp>.
+  ! ``t(ip,jp,a)`` = T^a_{ip,jp} = (d_a/(mult_a*:math:`|G|`)) sum_g chi_a(col(g)) :math:`<D_ip|U(g)|D_jp>`.
   !
   ! This is SPEC.md 9.1 verbatim: the same coefficients, the same
-  ! characters, the same |mult_a| as |pg_mo_weight|. T^a is a Hermitian
+  ! characters, the same ``mult_a`` as :c:data:`pg_mo_weight`. T^a is a Hermitian
   ! projector on the family (gates D1/D2), and its diagonal gives the
   ! determinant labels.
   END_DOC
@@ -539,18 +552,18 @@ BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
 &BEGIN_PROVIDER [ integer, pg_family_first, (N_det) ]
   implicit none
   BEGIN_DOC
-  ! |pg_det_irrep(D)| = argmax_a T^a_{DD}, or 0 when max_a T^a_{DD} <
+  ! ``pg_det_irrep(D)`` = argmax_a T^a_{DD}, or 0 when max_a T^a_{DD} <
   ! 1 - pg_thresh: a determinant with one electron in a degenerate block
-  ! (|e_x>, |e_y>) is not an eigenfunction of the projectors and must not
+  ! (:math:`|e_x>`, :math:`|e_y>`) is not an eigenfunction of the projectors and must not
   ! get a best-guess label (SPEC.md 9.3).
   !
-  ! |pg_det_purity(D)| = max_a T^a_{DD} = sum_{D'} |T^a_{D'D}|^2 at the
+  ! ``pg_det_purity(D)`` = max_a T^a_{DD} = sum_{D'} :math:`(T^a_{D'D})^2` at the
   ! argmax, 1 for a pure determinant and 1/d_a for one member of an open
   ! degenerate shell.
   !
-  ! |pg_det_block(D)| = |F|, the dimension of the family of D;
-  ! |pg_det_family(D)| = its family id, in order of first appearance;
-  ! |pg_family_first(f)| = the psi_det index of the first member of
+  ! ``pg_det_block(D)`` = :math:`|F|`, the dimension of the family of D;
+  ! ``pg_det_family(D)`` = its family id, in order of first appearance;
+  ! ``pg_family_first(f)`` = the psi_det index of the first member of
   ! family f, i.e. the representative the other modules enumerate.
   !
   ! A determinant is pure if and only if its family has size 1: a family
@@ -558,7 +571,7 @@ BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
   ! every member shares that partial occupation. The state weights of
   ! section 10 use this to skip the projectors for pure determinants.
   !
-  ! |pg_n_family| <= N_det. A determinant whose family is handled by an
+  ! :c:data:`pg_n_family` <= N_det. A determinant whose family is handled by an
   ! earlier member costs one enumeration and one binary search per member
   ! and nothing else.
   END_DOC
