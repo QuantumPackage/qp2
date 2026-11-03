@@ -93,6 +93,8 @@ subroutine run
   call json_close
 
   call ezfio_set_hartree_fock_energy(SCF_energy)
+
+  call pg_report_mo_symmetry()
 end
 
 

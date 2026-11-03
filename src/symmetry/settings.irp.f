@@ -1,13 +1,14 @@
 !-----------------------------------------------------------------------
 ! EZFIO settings and their defaults.
 !
-! |pg_tol|, |pg_thresh| and |pg_data_dir| are declared in EZFIO.cfg with
-! interface "ezfio, ocaml": the EZFIO bindings and the qp_edit default are
-! generated, but no IRPF90 provider, because ei_handler.py turns a missing
-! keyword into "stop 1" -- its "default:" line feeds the OCaml side only.
-! The three defaults therefore live here, and the EZFIO value wins whenever
-! it is present. This file must stay a plain .irp.f: ezfio_interface.irp.f
-! is regenerated at build time and any edit there is lost.
+! |pg_tol|, |pg_thresh|, |pg_data_dir| and |auto_symmetry| are declared in
+! EZFIO.cfg with interface "ezfio, ocaml": the EZFIO bindings and the qp_edit
+! default are generated, but no IRPF90 provider, because ei_handler.py turns a
+! missing keyword into "stop 1" -- its "default:" line feeds the OCaml side
+! only. The four defaults therefore live here, and the EZFIO value wins
+! whenever it is present. This file must stay a plain .irp.f:
+! ezfio_interface.irp.f is regenerated at build time and any edit there is
+! lost.
 !-----------------------------------------------------------------------
 
 BEGIN_PROVIDER [ double precision, pg_tol ]
@@ -96,4 +97,43 @@ BEGIN_PROVIDER [ character*(256), pg_data_dir ]
       stop 'Unable to read pg_data_dir with MPI'
     endif
   IRP_ENDIF
+END_PROVIDER
+
+BEGIN_PROVIDER [ logical, auto_symmetry ]
+  implicit none
+  BEGIN_DOC
+  ! When true, the molecular point group is detected at the end of SCF/DFT,
+  ! the MOs are labelled and |mo_basis/mo_symmetry| is written. Default
+  ! .true.
+  END_DOC
+  logical :: has
+  PROVIDE ezfio_filename
+  auto_symmetry = .true.
+  if (mpi_master) then
+    call ezfio_has_symmetry_auto_symmetry(has)
+    if (has) then
+      call ezfio_get_symmetry_auto_symmetry(auto_symmetry)
+    endif
+  endif
+  IRP_IF MPI_DEBUG
+    print *, irp_here, mpi_rank
+    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
+  IRP_ENDIF
+  IRP_IF MPI
+    include 'mpif.h'
+    integer :: ierr
+    call MPI_BCAST( auto_symmetry, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
+    if (ierr /= MPI_SUCCESS) then
+      stop 'Unable to read auto_symmetry with MPI'
+    endif
+  IRP_ENDIF
+END_PROVIDER
+
+BEGIN_PROVIDER [ logical, pg_detection_failed ]
+  implicit none
+  BEGIN_DOC
+  ! Set when the point-group detection gave up. Monotonic: only ever set,
+  ! never cleared, so a second attempt cannot pretend it succeeded.
+  END_DOC
+  pg_detection_failed = .false.
 END_PROVIDER

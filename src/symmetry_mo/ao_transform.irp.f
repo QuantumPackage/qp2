@@ -42,7 +42,7 @@ BEGIN_PROVIDER [ integer, pg_shell_target, (shell_num, pg_n_elem) ]
   ! shell) or 3 (the primitive factor depends on the AO powers) and
   ! |pg_basis_msg| says which atom, shell, angular momentum and element.
   !
-  ! Stopping is left to the caller (|pg_ao_rep| and the gate report): a
+  ! Reporting is left to the caller (|pg_ao_ok| and the gate report): a
   ! provider that stops cannot be reported on.
   END_DOC
   integer :: s, sp, g, a, ap, n_match, s_match
@@ -289,21 +289,30 @@ subroutine pg_ao_rep_ex(ig, m)
   integer :: powp(3, (lmax+1)*(lmax+2)/2), powq(3, (lmax+1)*(lmax+2)/2)
   double precision :: t((lmax+1)*(lmax+2)/2, (lmax+1)*(lmax+2)/2)
 
+  ! |m| is intent(out) and zeroed first, so an early return still leaves a
+  ! defined matrix behind.
+  m(1:ao_num,1:ao_num) = 0.d0
+
   if (pg_basis_ierr /= 0) then
-    write(6,'(A,A)') 'symmetry: the AO basis is not symmetric: ', &
-         trim(pg_basis_msg)
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A,A)') 'symmetry: the AO basis is not symmetric: ', &
+           trim(pg_basis_msg)
+      pg_detection_failed = .true.
+    endif
+    return
   endif
 
-  m(1:ao_num,1:ao_num) = 0.d0
   do s = 1, shell_num
     sp = pg_shell_target(s,ig)
     if (sp == 0) cycle
     l = shell_ang_mom(s)
     if (l > lmax) then
-      write(6,'(A,I0,A,I0)') 'symmetry: shell ', s, &
-           ' has angular momentum above the supported maximum ', lmax
-      stop 1
+      if (.not. pg_detection_failed) then
+        write(6,'(A,I0,A,I0)') 'symmetry: shell ', s, &
+             ' has angular momentum above the supported maximum ', lmax
+        pg_detection_failed = .true.
+      endif
+      return
     endif
     np = (l+1)*(l+2)/2
     nq = np

@@ -70,9 +70,14 @@ BEGIN_PROVIDER [ double precision, pg_col_diag, (mo_num,pg_n_col) ]
   pg_n_mo_block = 0
   if (mo_num == 0) return
 
-  pg_col_diag(1:mo_num,1:pg_n_col) = 0.d0
+  ! |pg_mo_block| and |pg_mo_block_dim| are dimensioned by |mo_num| alone and
+  ! are safe to fill. |pg_col_diag| also has |pg_n_col| as a dimension, and
+  ! IRPF90 does not allocate an array with a zero extent: the guard comes
+  ! before the assignment, so a failed detection never writes to it.
   pg_mo_block(1:mo_num) = 0
   pg_mo_block_dim(1:mo_num) = 1
+  if (pg_n_col < 1) return
+  pg_col_diag(1:mo_num,1:pg_n_col) = 0.d0
 
   ! Union-find with union by size, inline: a function of this file used
   ! before its definition is not declared automatically by IRPF90, and the
@@ -180,7 +185,14 @@ BEGIN_PROVIDER [ double precision, pg_mo_weight, (mo_num,pg_n_irrep) ]
 
   ! IRPF90 does not allocate the arrays when a dimension is 0, so nothing of
   ! this provider is touched: return before the first array reference.
+  ! |pg_mo_irrep| is dimensioned by |mo_num| alone and is zeroed by the second
+  ! guard, so a failed detection leaves ``no definite irrep'' behind instead
+  ! of an unbuilt provider.
   if (mo_num == 0) return
+  if (pg_n_irrep < 1) then
+    pg_mo_irrep(1:mo_num) = 0
+    return
+  endif
 
   pg_mo_weight(1:mo_num,1:pg_n_irrep) = 0.d0
   pg_mo_irrep(1:mo_num) = 0
@@ -243,6 +255,10 @@ subroutine pg_write_mo_symmetry()
   ! A mixed MO has |pg_mo_irrep = 0|, and |mo_symmetry| only carries "same
   ! integer = same irrep": writing 0 would silently declare all mixed MOs to
   ! be one irrep. Nothing is written in that case, and the count is printed.
+  !
+  ! |mo_symmetry| is usually built (all-1 default) before this point, so the
+  ! EZFIO write alone would leave the in-memory provider stale: the
+  ! |soft_touch| invalidates it without building it when it is not built.
   END_DOC
   integer :: i, n_mixed
 
@@ -256,4 +272,5 @@ subroutine pg_write_mo_symmetry()
     return
   endif
   call ezfio_set_mo_basis_mo_symmetry(pg_mo_irrep)
+  soft_touch mo_symmetry
 end subroutine pg_write_mo_symmetry

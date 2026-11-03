@@ -52,6 +52,14 @@ END_PROVIDER
   integer :: i
   double precision :: tensor(3,3), v(3), m
 
+  ! Defaults first: IRPF90 sets the built flag after the body returns, so
+  ! an early return caches whatever was written. A failed dsyev must hand
+  ! its callers a zero block rather than an uninitialized one, and the zero
+  ! block is permanent until a TOUCH.
+  pg_inertia_eval(1:3) = 0.d0
+  pg_inertia_evec(1:3,1:3) = 0.d0
+  if (pg_detection_failed) return
+
   tensor(1:3,1:3) = 0.d0
   do i = 1, nucl_num
     m = element_mass(int(nucl_charge(i)))
@@ -68,6 +76,7 @@ END_PROVIDER
   tensor(3,2) = tensor(2,3)
 
   call pg_diag3(tensor, pg_inertia_eval)
+  if (pg_detection_failed) return
   pg_inertia_evec(1:3,1:3) = tensor(1:3,1:3)
   do i = 1, 3
     call pg_fix_sign(pg_inertia_evec(1:3,i))
@@ -81,12 +90,20 @@ END_PROVIDER
   ! (every 2*pi/n about the axis maps the molecule onto itself), while
   ! minval stops here as required.
   if (sum(pg_inertia_eval) <= 0.d0) then
-    write(6,'(A)') 'symmetry: no nucleus, or all nuclei at the centre: unsupported'
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A)') 'symmetry: no nucleus, or all nuclei at the centre: '// &
+           'unsupported'
+      pg_detection_failed = .true.
+    endif
+    return
   endif
   if (minval(pg_inertia_eval) < 1.d-6*sum(pg_inertia_eval)) then
-    write(6,'(A)') 'symmetry: linear molecule: Cinfv/Dinfh labelling is not implemented'
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A)') 'symmetry: linear molecule: Cinfv/Dinfh labelling '// &
+           'is not implemented'
+      pg_detection_failed = .true.
+    endif
+    return
   endif
 END_PROVIDER
 
@@ -150,9 +167,12 @@ END_PROVIDER
        pg_inertia_eval, pg_inertia_evec, pg_tol, 2000, &
        n_max, n_axes, zaxis, ierr)
   if (ierr /= 0) then
-    write(6,'(A,I0,A)') 'symmetry: more than ', 2000, &
-         ' candidate directions: increase pg_cand_max'
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A,I0,A)') 'symmetry: more than ', 2000, &
+           ' candidate directions: increase pg_cand_max'
+      pg_detection_failed = .true.
+    endif
+    return
   endif
 
   if (n_max >= 2) then
@@ -172,9 +192,12 @@ END_PROVIDER
        pg_inertia_evec, pg_tol, 2000, zaxis, pg_is_planar, &
        pg_plane_normal, xaxis, ierr)
   if (ierr /= 0) then
-    write(6,'(A,I0,A)') 'symmetry: more than ', 2000, &
-         ' candidate directions: increase pg_cand_max'
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A,I0,A)') 'symmetry: more than ', 2000, &
+           ' candidate directions: increase pg_cand_max'
+      pg_detection_failed = .true.
+    endif
+    return
   endif
 
   ! Orthonormalise x against z, then y = z cross x.
@@ -182,8 +205,11 @@ END_PROVIDER
   xaxis(1:3) = xaxis(1:3) - d*zaxis(1:3)
   d = sqrt(xaxis(1)**2 + xaxis(2)**2 + xaxis(3)**2)
   if (d < 1.d-10) then
-    write(6,'(A)') 'symmetry: cannot build a canonical x axis'
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A)') 'symmetry: cannot build a canonical x axis'
+      pg_detection_failed = .true.
+    endif
+    return
   endif
   xaxis(1:3) = xaxis(1:3)/d
   call pg_cross(zaxis, xaxis, yaxis)
@@ -216,16 +242,22 @@ subroutine pg_diag3(a, e)
   lwork = -1
   call dsyev('V', 'U', 3, a, 3, e, work, lwork, info)
   if (info /= 0) then
-    write(6,'(A)') 'symmetry: dsyev workspace query failed'
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A)') 'symmetry: dsyev workspace query failed'
+      pg_detection_failed = .true.
+    endif
+    return
   endif
   lwork = int(work(1))
   allocate(w(lwork))
   call dsyev('V', 'U', 3, a, 3, e, w, lwork, info)
   deallocate(w)
   if (info /= 0) then
-    write(6,'(A)') 'symmetry: dsyev failed in the inertia tensor'
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A)') 'symmetry: dsyev failed in the inertia tensor'
+      pg_detection_failed = .true.
+    endif
+    return
   endif
 end subroutine pg_diag3
 

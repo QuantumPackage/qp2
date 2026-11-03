@@ -73,10 +73,11 @@
   !   pg_col_member(...)   the element indices, columns concatenated;
   !                        column c is pg_col_member(pg_col_start(c) : ...).
   !
-  ! Validation, all fatal: the columns partition the group, the first column
-  ! is the identity, chi_a(E) is a positive integer, mult_a is 1 or 2,
+  ! Validation: the columns partition the group, the first column is the
+  ! identity, chi_a(E) is a positive integer, mult_a is 1 or 2,
   ! orthogonality sum_c |col| chi_a chi_b = |G| mult_a delta_ab, and
-  ! sum_a d_a^2/mult_a = |G|.
+  ! sum_a d_a^2/mult_a = |G|. A failed check prints its reason once and sets
+  ! |pg_detection_failed|: the caller of this provider must give up.
   !
   ! These identities do NOT detect a swap of two columns that have equal
   ! sizes in an Abelian group (swapping sv and sd in C2v keeps every sum
@@ -101,45 +102,63 @@
   character*(16) :: s
   logical :: used(pg_n_elem), mark(pg_n_elem)
 
+  ! Defaults before the first return: an early return still sets the built
+  ! flag, so both counts are cached at 0 until a TOUCH.
+  pg_n_col = 0
+  pg_n_irrep = 0
+  if (pg_detection_failed) return
+
   !---------------------------------------------------------------------
   ! 1. Parse the table of this group. Nothing here depends on the
   !    geometry: chartab.irp.f is a pure parser (section 3).
   !---------------------------------------------------------------------
   call pg_character_table_path(pg_group_name, path, ierr)
   if (ierr /= 0) then
-    write(6,'(A,A,A)') 'symmetry: no character table for group ', &
-         trim(pg_group_name), ': '
-    if (ierr == 1) then
-      write(6,'(A)') 'symmetry:   neither pg_data_dir (EZFIO) nor QP_ROOT '// &
-           'is set, so the table directory is unknown'
-    else
-      write(6,'(A,A)') 'symmetry:   not found: ', trim(path)
-      write(6,'(A)') 'symmetry:   run "make install" in the symmetry module '// &
-           'to populate $(QP_ROOT)/data/Symmetry, or set pg_data_dir'
+    if (.not. pg_detection_failed) then
+      write(6,'(A,A,A)') 'symmetry: no character table for group ', &
+           trim(pg_group_name), ': '
+      if (ierr == 1) then
+        write(6,'(A)') 'symmetry:   neither pg_data_dir (EZFIO) nor '// &
+             'QP_ROOT is set, so the table directory is unknown'
+      else
+        write(6,'(A,A)') 'symmetry:   not found: ', trim(path)
+        write(6,'(A)') 'symmetry:   run "make install" in the symmetry '// &
+             'module to populate $(QP_ROOT)/data/Symmetry, or set pg_data_dir'
+      endif
+      pg_detection_failed = .true.
     endif
-    stop 1
+    return
   endif
   call pg_parse_table(path, fname, n_file, n_class_file, iname, fsym, &
        fchar, ierr)
   if (ierr /= 0) then
-    write(6,'(A,A,A,I0)') 'symmetry: cannot parse the character table ', &
-         trim(path), ' (ierr = ', ierr, ')'
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A,A,A,I0)') 'symmetry: cannot parse the character table ', &
+           trim(path), ' (ierr = ', ierr, ')'
+      pg_detection_failed = .true.
+    endif
+    return
   endif
 
   ! A group of order |G| has at most |G| classes, hence at most |G| real
   ! irreps, so n_file <= pg_n_elem holds for any consistent data file.
   if (n_file < 1 .or. n_file > pg_n_elem) then
-    write(6,'(A,A,A,I0,A,I0)') 'symmetry: table ', trim(path), ': n = ', &
-         n_file, ' but |G| = ', pg_n_elem
-    write(6,'(A)') 'symmetry: a data file of this group is inconsistent '// &
-         'with its name, or the name is wrong'
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A,A,A,I0,A,I0)') 'symmetry: table ', trim(path), ': n = ', &
+           n_file, ' but |G| = ', pg_n_elem
+      write(6,'(A)') 'symmetry: a data file of this group is inconsistent '// &
+           'with its name, or the name is wrong'
+      pg_detection_failed = .true.
+    endif
+    return
   endif
   if (n_class_file /= n_file) then
-    write(6,'(A,I0,A,I0)') 'symmetry: table is not square: n_irrep = ', &
-         n_file, ', n_col = ', n_class_file
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A,I0,A,I0)') 'symmetry: table is not square: n_irrep = ', &
+           n_file, ', n_col = ', n_class_file
+      pg_detection_failed = .true.
+    endif
+    return
   endif
 
   pg_n_col = n_file
@@ -148,16 +167,22 @@
   do i = 1, n_file
     pg_irrep_name(i) = iname(i)
     if (len_trim(fsym(i)) > 8) then
-      write(6,'(A,A,A)') 'symmetry: column symbol too long: ', trim(fsym(i)), &
-           ' (8 characters max)'
-      stop 1
+      if (.not. pg_detection_failed) then
+        write(6,'(A,A,A)') 'symmetry: column symbol too long: ', &
+             trim(fsym(i)), ' (8 characters max)'
+        pg_detection_failed = .true.
+      endif
+      return
     endif
     pg_data_sym(i) = trim(adjustl(fsym(i)))
   enddo
   if (trim(pg_data_sym(1)) /= 'E') then
-    write(6,'(A,A,A)') 'symmetry: table ', trim(path), ': the first column is '// &
-         'not E'
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A,A,A)') 'symmetry: table ', trim(path), &
+           ': the first column is '//'not E'
+      pg_detection_failed = .true.
+    endif
+    return
   endif
 
   !---------------------------------------------------------------------
@@ -257,6 +282,7 @@
              'classes, expected 1 or 2'
         call pg_col_fail('a group has at most two vertical reflection '// &
              'classes (sv and sd)', s, n_file, fsym)
+        if (pg_detection_failed) return
       endif
 
     else if (s == "C2'" .or. s == 'C2"') then
@@ -291,6 +317,7 @@
       if (ierr /= 0) then
         call pg_col_fail('this symbol is not E, i, sh, sv, sd, s, '// &
              'C2'', C2" or C<n>^k / S<n>^k', s, n_file, fsym)
+        if (pg_detection_failed) return
       endif
       call pg_encode_kind(det, m, kk, kkey)
       call pg_encode_kind(det, m, mod(m-kk, m), kinv)
@@ -319,6 +346,7 @@
     if (ncand == 0) then
       call pg_col_fail('no geometric class matches this symbol', s, &
            n_file, fsym)
+      if (pg_detection_failed) return
     endif
 
     ! The column is the union of the candidate classes and of the classes of
@@ -345,12 +373,17 @@
              'element ', g
         call pg_col_fail('the columns of this file are not disjoint', s, &
              n_file, fsym)
+        if (pg_detection_failed) return
       endif
       used(g) = .true.
       n_mem = n_mem + 1
       if (n_mem > pg_n_elem) then
-        write(6,'(A)') 'symmetry: the columns hold more elements than the group'
-        stop 1
+        if (.not. pg_detection_failed) then
+          write(6,'(A)') 'symmetry: the columns hold more elements '// &
+               'than the group'
+          pg_detection_failed = .true.
+        endif
+        return
       endif
       pg_col_member(n_mem) = g
       ncand = ncand + 1
@@ -365,12 +398,16 @@
     if (.not. used(g)) then
       call pg_col_fail('element of the group that no column covers', '', &
            n_file, fsym)
+      if (pg_detection_failed) return
     endif
   enddo
   if (n_mem /= pg_n_elem) then
-    write(6,'(A,I0,A,I0)') 'symmetry: the columns hold ', n_mem, &
-         ' elements but |G| = ', pg_n_elem
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A,I0,A,I0)') 'symmetry: the columns hold ', n_mem, &
+           ' elements but |G| = ', pg_n_elem
+      pg_detection_failed = .true.
+    endif
+    return
   endif
 
   !---------------------------------------------------------------------
@@ -383,9 +420,12 @@
     d = pg_char(a,1)
     pg_irrep_dim(a) = nint(d)
     if (abs(d - dble(pg_irrep_dim(a))) > 5.d-3 .or. pg_irrep_dim(a) < 1) then
-      write(6,'(A,A,A,E12.4)') 'symmetry: irrep ', trim(pg_irrep_name(a)), &
-           ': chi(E) is not a positive integer: ', d
-      stop 1
+      if (.not. pg_detection_failed) then
+        write(6,'(A,A,A,E12.4)') 'symmetry: irrep ', trim(pg_irrep_name(a)), &
+             ': chi(E) is not a positive integer: ', d
+        pg_detection_failed = .true.
+      endif
+      return
     endif
   enddo
   ! Row 1 must be the totally symmetric irrep: every character is 1. The
@@ -393,10 +433,13 @@
   ! the one property of the row order that the files always satisfy.
   do c = 1, n_file
     if (abs(pg_char(1,c) - 1.d0) > 5.d-3) then
-      write(6,'(A,A,A,E12.4)') 'symmetry: the first row of the table (', &
-           trim(pg_irrep_name(1)), ') is not the totally symmetric irrep:'
-      write(6,'(A,E12.4)') 'symmetry:   chi at column 1: ', pg_char(1,c)
-      stop 1
+      if (.not. pg_detection_failed) then
+        write(6,'(A,A,A,E12.4)') 'symmetry: the first row of the table (', &
+             trim(pg_irrep_name(1)), ') is not the totally symmetric irrep:'
+        write(6,'(A,E12.4)') 'symmetry:   chi at column 1: ', pg_char(1,c)
+        pg_detection_failed = .true.
+      endif
+      return
     endif
   enddo
 
@@ -408,9 +451,12 @@
     r = r / dble(pg_n_elem)
     m = nint(r)
     if (abs(r - dble(m)) > 5.d-3 .or. (m /= 1 .and. m /= 2)) then
-      write(6,'(A,A,A,E12.4)') 'symmetry: irrep ', trim(pg_irrep_name(a)), &
-           ': multiplicity is not 1 or 2: ', r
-      stop 1
+      if (.not. pg_detection_failed) then
+        write(6,'(A,A,A,E12.4)') 'symmetry: irrep ', trim(pg_irrep_name(a)), &
+             ': multiplicity is not 1 or 2: ', r
+        pg_detection_failed = .true.
+      endif
+      return
     endif
     pg_irrep_mult(a) = m
   enddo
@@ -428,10 +474,13 @@
         d = 0.d0
       endif
       if (abs(r - d) > s_abs) then
-        write(6,'(A,A,A,A,A,E12.4)') 'symmetry: irreps ', &
-             trim(pg_irrep_name(a)), ' and ', trim(pg_irrep_name(b)), &
-             ' are not orthogonal: ', r
-        stop 1
+        if (.not. pg_detection_failed) then
+          write(6,'(A,A,A,A,A,E12.4)') 'symmetry: irreps ', &
+               trim(pg_irrep_name(a)), ' and ', trim(pg_irrep_name(b)), &
+               ' are not orthogonal: ', r
+          pg_detection_failed = .true.
+        endif
+        return
       endif
     enddo
   enddo
@@ -441,11 +490,14 @@
     d = d + dble(pg_irrep_dim(a))**2 / dble(pg_irrep_mult(a))
   enddo
   if (abs(d - dble(pg_n_elem)) > 1.d-2) then
-    write(6,'(A,F12.4,A,I0)') 'symmetry: sum_a d_a^2/mult_a = ', d, &
-         ' but |G| = ', pg_n_elem
-    write(6,'(A)') 'symmetry: this cannot happen for a valid table; the file '// &
-         'is corrupt'
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A,F12.4,A,I0)') 'symmetry: sum_a d_a^2/mult_a = ', d, &
+           ' but |G| = ', pg_n_elem
+      write(6,'(A)') 'symmetry: this cannot happen for a valid '// &
+           'table; the file is corrupt'
+      pg_detection_failed = .true.
+    endif
+    return
   endif
 END_PROVIDER
 
@@ -594,9 +646,10 @@ end subroutine pg_parse_symbol
 subroutine pg_col_fail(reason, s, n, syms)
   implicit none
   BEGIN_DOC
-  ! Fatal error of the column matcher. Prints the reason, the failing symbol,
-  ! the symbol order of the file, and the class table with the key set and the
-  ! axis flags of every class, then stops.
+  ! Error of the column matcher. Prints the reason, the failing symbol, the
+  ! symbol order of the file, and the class table with the key set and the
+  ! axis flags of every class, then sets |pg_detection_failed| and returns:
+  ! the caller must give up at once.
   !
   ! Only variables of group.irp.f are read here: everything of the
   ! pg_n_col provider block (pg_data_sym included) must be passed in, or
@@ -613,6 +666,8 @@ subroutine pg_col_fail(reason, s, n, syms)
   character*(1) :: ax(3)
   logical :: found
   logical, external :: pg_class_has_axis
+
+  if (pg_detection_failed) return
 
   write(6,'(A)') 'symmetry: cannot match the character table to the group:'
   write(6,'(A,A)') 'symmetry:   ', reason
@@ -652,5 +707,5 @@ subroutine pg_col_fail(reason, s, n, syms)
     write(6,'(A,3(1X,A1),I8,2X,A)') ' ', (ax(i), i=1,3), &
          pg_class_rep(c), '   (axis = plane normal for a reflection)'
   enddo
-  stop 1
+  pg_detection_failed = .true.
 end subroutine pg_col_fail

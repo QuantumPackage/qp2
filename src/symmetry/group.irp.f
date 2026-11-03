@@ -10,9 +10,9 @@
 !    section 4 step 3 to build pg_rot; they are therefore computed here as
 !    providers that do not depend on pg_rot. pg_rot uses a local scan with
 !    the same routine.
-!  * The linear-molecule stop of section 5.9 lives in pg_inertia_eval
-!    (frame.irp.f): every consumer of the inertia tensor stops there before
-!    any enumeration.
+!  * The linear-molecule test of section 5.9 lives in pg_inertia_eval
+!    (frame.irp.f): every consumer of the inertia tensor gives up there
+!    before any enumeration.
 !  * pg_has_i, pg_n_sigma_h, pg_n_sigma_vtot, pg_n_c2_perp are providers so
 !    that the driver can report the measured invariants. There is no
 !    sigma_v/sigma_d split: it is a labelling device of section 6, decided
@@ -523,17 +523,29 @@ end subroutine pg_read_int
   END_DOC
   integer :: znum(nucl_num), ierr, i
   double precision :: axis(3)
+  integer :: nmax, naxes
+
+  ! Defaults before the first return: an early return still sets the built
+  ! flag, so what is written here is cached until a TOUCH.
+  pg_n_max = 0
+  pg_n_axes_max = 0
+  if (pg_detection_failed) return
 
   do i = 1, nucl_num
     znum(i) = nint(nucl_charge(i))
   enddo
   call pg_proper_scan(nucl_num, nucl_coord, znum, pg_center, &
        pg_inertia_eval, pg_inertia_evec, pg_tol, 2000, &
-       pg_n_max, pg_n_axes_max, axis, ierr)
+       nmax, naxes, axis, ierr)
   if (ierr /= 0) then
-    write(6,'(A)') 'symmetry: candidate-direction scan failed'
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A)') 'symmetry: candidate-direction scan failed'
+      pg_detection_failed = .true.
+    endif
+    return
   endif
+  pg_n_max = nmax
+  pg_n_axes_max = naxes
 END_PROVIDER
 
  BEGIN_PROVIDER [ integer, pg_n_elem ]
@@ -541,24 +553,37 @@ END_PROVIDER
   BEGIN_DOC
   ! Order of the molecular point group.
   END_DOC
-  integer :: znum(nucl_num), ierr, i
+  integer :: znum(nucl_num), ierr, i, n
   double precision, allocatable :: rot(:,:,:)
   integer, allocatable :: perm(:,:)
+
+  ! |pg_n_elem| keeps its 0 default unless the enumeration succeeded: the
+  ! result goes to a local first, so a failed call cannot leave a
+  ! half-enumerated order behind.
+  pg_n_elem = 0
+  if (pg_detection_failed) return
 
   allocate(rot(3,3,pg_n_elem_max), perm(nucl_num,pg_n_elem_max))
   do i = 1, nucl_num
     znum(i) = nint(nucl_charge(i))
   enddo
   call pg_enumerate(nucl_num, nucl_coord, znum, pg_center, &
-       pg_inertia_evec, pg_tol, pg_n_elem_max, rot, perm, pg_n_elem, ierr)
+       pg_inertia_evec, pg_tol, pg_n_elem_max, rot, perm, n, ierr)
   if (ierr == 1) then
-    write(6,'(A,I0,A)') 'symmetry: group order exceeds ', pg_n_elem_max, &
-         ' (pg_n_elem_max)'
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A,I0,A)') 'symmetry: group order exceeds ', pg_n_elem_max, &
+           ' (pg_n_elem_max)'
+      pg_detection_failed = .true.
+    endif
+    return
   else if (ierr /= 0) then
-    write(6,'(A)') 'symmetry: group enumeration failed'
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A)') 'symmetry: group enumeration failed'
+      pg_detection_failed = .true.
+    endif
+    return
   endif
+  pg_n_elem = n
 END_PROVIDER
 
  BEGIN_PROVIDER [ double precision, pg_rot_mat, (3,3,pg_n_elem) ]
@@ -586,8 +611,11 @@ END_PROVIDER
   call pg_enumerate(nucl_num, nucl_coord, znum, pg_center, &
        pg_inertia_evec, pg_tol, pg_n_elem_max, rot, perm, n, ierr)
   if (ierr /= 0 .or. n /= pg_n_elem) then
-    write(6,'(A)') 'symmetry: inconsistent group enumeration'
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A)') 'symmetry: inconsistent group enumeration'
+      pg_detection_failed = .true.
+    endif
+    return
   endif
 
   do i = 1, n
@@ -605,9 +633,12 @@ END_PROVIDER
         + (rot(3,1,i)*v(1) + rot(3,2,i)*v(2) + rot(3,3,i)*v(3) &
            + pg_center(3) - nucl_coord(perm(j,i),3))**2
       if (sqrt(d) > 10.d0*pg_tol) then
-        write(6,'(A,I0,A,I0)') 'symmetry: element ', i, &
-             ' does not realise its permutation (atom ', j, ')'
-        stop 1
+        if (.not. pg_detection_failed) then
+          write(6,'(A,I0,A,I0)') 'symmetry: element ', i, &
+               ' does not realise its permutation (atom ', j, ')'
+          pg_detection_failed = .true.
+        endif
+        return
       endif
     enddo
 
@@ -620,9 +651,12 @@ END_PROVIDER
     pg_elem_axis(1:3,i) = axis(1:3)
     call pg_reduce_angle(pg_elem_angle(i), m, k, ierr)
     if (ierr /= 0) then
-      write(6,'(A,F14.8)') 'symmetry: cannot rationalise element angle ', &
-           pg_elem_angle(i)
-      stop 1
+      if (.not. pg_detection_failed) then
+        write(6,'(A,F14.8)') 'symmetry: cannot rationalise element angle ', &
+             pg_elem_angle(i)
+        pg_detection_failed = .true.
+      endif
+      return
     endif
     call pg_encode_kind(pg_elem_det(i), m, k, pg_elem_kind(i))
   enddo
@@ -684,8 +718,11 @@ END_PROVIDER
     enddo
     pg_elem_inv(i) = pg_find_by_perm(inv_perm, pg_elem_det(i))
     if (pg_elem_inv(i) == 0) then
-      write(6,'(A)') 'symmetry: no inverse found in the group'
-      stop 1
+      if (.not. pg_detection_failed) then
+        write(6,'(A)') 'symmetry: no inverse found in the group'
+        pg_detection_failed = .true.
+      endif
+      return
     endif
   enddo
  END_PROVIDER
@@ -723,9 +760,12 @@ END_PROVIDER
       pg_elem_mul(g,h) = pg_find_by_perm(pnew, &
            pg_elem_det(g)*pg_elem_det(h))
       if (pg_elem_mul(g,h) == 0) then
-        write(6,'(A,I0,A,I0)') 'symmetry: no product element for g = ', g, &
-             ', h = ', h
-        stop 1
+        if (.not. pg_detection_failed) then
+          write(6,'(A,I0,A,I0)') 'symmetry: no product element for g = ', g, &
+               ', h = ', h
+          pg_detection_failed = .true.
+        endif
+        return
       endif
     enddo
   enddo
@@ -738,8 +778,12 @@ END_PROVIDER
     seen(1:pg_n_elem) = .false.
     do h = 1, pg_n_elem
       if (seen(pg_elem_mul(g,h))) then
-        write(6,'(A,I0)') 'symmetry: product table is not a Latin square (g = ', g
-        stop 1
+        if (.not. pg_detection_failed) then
+          write(6,'(A,I0)') 'symmetry: product table is not a Latin '// &
+               'square (g = ', g
+          pg_detection_failed = .true.
+        endif
+        return
       endif
       seen(pg_elem_mul(g,h)) = .true.
     enddo
@@ -798,6 +842,9 @@ end function pg_find_by_perm
   integer :: ih, c, g, k, i, j
   logical :: same
 
+  pg_n_class = 0
+  if (pg_detection_failed) return
+
   pg_class(1:pg_n_elem) = 0
   c = 0
   do g = 1, pg_n_elem
@@ -824,8 +871,11 @@ end function pg_find_by_perm
         endif
       enddo
       if (ih == 0) then
-        write(6,'(A)') 'symmetry: conjugation left the group'
-        stop 1
+        if (.not. pg_detection_failed) then
+          write(6,'(A)') 'symmetry: conjugation left the group'
+          pg_detection_failed = .true.
+        endif
+        return
       endif
       pg_class(ih) = c
     enddo
@@ -834,8 +884,11 @@ end function pg_find_by_perm
 
   do i = 1, pg_n_elem
     if (pg_class(i) == 0) then
-      write(6,'(A)') 'symmetry: an element was left without a class'
-      stop 1
+      if (.not. pg_detection_failed) then
+        write(6,'(A)') 'symmetry: an element was left without a class'
+        pg_detection_failed = .true.
+      endif
+      return
     endif
   enddo
 END_PROVIDER
@@ -848,6 +901,7 @@ END_PROVIDER
   END_DOC
   integer :: i, c
 
+  if (pg_n_class < 1) return
   pg_class_size(1:pg_n_class) = 0
   pg_class_rep(1:pg_n_class) = 0
   do i = 1, pg_n_elem
@@ -934,8 +988,8 @@ END_PROVIDER
   implicit none
   BEGIN_DOC
   ! Name of the point group from the measured invariants (section 5.8).
-  ! Covers all 204 finite groups of the data set; stops instead of guessing
-  ! on inconsistent invariants.
+  ! Covers all 204 finite groups of the data set; gives up instead of
+  ! guessing on inconsistent invariants.
   !
   ! Verified against all 209 finite files with the closed-form construction
   ! of the reference oracle (refsym2.py + ident.py): the tree returns the
@@ -956,6 +1010,9 @@ END_PROVIDER
   END_DOC
   character*(16) :: name
   integer :: i, order, ierr, n_size
+
+  pg_group_name = ''
+  if (pg_detection_failed) return
 
   ! Cubic and icosahedral groups first: more than one axis of order n_max.
   if (pg_n_max >= 3 .and. pg_n_axes_max >= 2) then
@@ -978,10 +1035,13 @@ END_PROVIDER
       name = 'Ih'
     endif
     if (len_trim(name) == 0) then
-      write(6,'(A,A,I0,A,I0,A,I0)') 'symmetry: cubic/icosahedral candidate: ', &
-           '|G| = ', pg_n_elem, ', n_max = ', pg_n_max, ', n_axes_max = ', &
-           pg_n_axes_max
-      stop 1
+      if (.not. pg_detection_failed) then
+        write(6,'(A,A,I0,A,I0,A,I0)') 'symmetry: cubic/icosahedral '// &
+             'candidate: ', '|G| = ', pg_n_elem, ', n_max = ', pg_n_max, &
+             ', n_axes_max = ', pg_n_axes_max
+        pg_detection_failed = .true.
+      endif
+      return
     endif
   else if (pg_n_max <= 1) then
     ! No proper rotation: C1 (nothing), Ci (S2, the inversion), Cs (S1, one
@@ -1029,38 +1089,48 @@ END_PROVIDER
   endif
 
   if (len_trim(name) == 0) then
-    write(6,'(A,I0,A,I0,A,I0,A,I0,A,I0,A,I0,A,I0)') &
-         'symmetry: cannot name the group: |G| = ', pg_n_elem, &
-         ', n_max = ', pg_n_max, ', n_axes_max = ', pg_n_axes_max, &
-         ', has_i = ', merge(1, 0, pg_has_i), ', n_sigma_h = ', &
-         pg_n_sigma_h, ', n_sigma_vtot = ', pg_n_sigma_vtot, &
-         ', n_C2_perp = ', pg_n_c2_perp
-    write(6,'(A)') 'symmetry: these invariants do not match any point group; '// &
-         'this is a bug, please report it with the line above.'
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A,I0,A,I0,A,I0,A,I0,A,I0,A,I0,A,I0)') &
+           'symmetry: cannot name the group: |G| = ', pg_n_elem, &
+           ', n_max = ', pg_n_max, ', n_axes_max = ', pg_n_axes_max, &
+           ', has_i = ', merge(1, 0, pg_has_i), ', n_sigma_h = ', &
+           pg_n_sigma_h, ', n_sigma_vtot = ', pg_n_sigma_vtot, &
+           ', n_C2_perp = ', pg_n_c2_perp
+      write(6,'(A)') 'symmetry: these invariants do not match any '// &
+           'point group; this is a bug, please report it with the line above.'
+      pg_detection_failed = .true.
+    endif
+    return
   endif
 
   ! Closed-form order cross-check. Never guess.
   call pg_expected_order(name, order, ierr)
   if (ierr /= 0) then
-    write(6,'(A,A)') 'symmetry: cannot compute the order of ', trim(name)
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A,A)') 'symmetry: cannot compute the order of ', trim(name)
+      pg_detection_failed = .true.
+    endif
+    return
   endif
   if (order /= pg_n_elem) then
-    write(6,'(A,A,A,A,I0,A,I0)') 'symmetry: ', trim(name), ': closed-form ', &
-         'order ', order, ' but |G| = ', pg_n_elem
-    write(6,'(A,I0,A,I0,A,I0,A,I0,A,I0,A,I0)') '  invariants: n_max = ', &
-         pg_n_max, ', n_axes_max = ', pg_n_axes_max, ', n_sigma_h = ', &
-         pg_n_sigma_h, ', n_sigma_vtot = ', pg_n_sigma_vtot, &
-         ', n_C2_perp = ', pg_n_c2_perp
-    write(6,'(A)') 'symmetry: the accepted elements do not close to a group '// &
-         'of this geometry within pg_tol. Elements are accepted one at a '// &
-         'time (SPEC.md 5.2) and products are not re-matched (5.5), so a '// &
-         'product of two elements accepted at pg_tol is only a symmetry to '// &
-         '2*pg_tol. This happens for a geometry that is symmetric to within '// &
-         'a few pg_tol only; lower pg_tol (fewer elements accepted) or '// &
-         'raise it above the residual.'
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A,A,A,A,I0,A,I0)') 'symmetry: ', trim(name), ': closed-form ', &
+           'order ', order, ' but |G| = ', pg_n_elem
+      write(6,'(A,I0,A,I0,A,I0,A,I0,A,I0,A,I0)') '  invariants: n_max = ', &
+           pg_n_max, ', n_axes_max = ', pg_n_axes_max, ', n_sigma_h = ', &
+           pg_n_sigma_h, ', n_sigma_vtot = ', pg_n_sigma_vtot, &
+           ', n_C2_perp = ', pg_n_c2_perp
+      write(6,'(A)') 'symmetry: the accepted elements do not close to '// &
+           'a group of this geometry within pg_tol. Elements are '// &
+           'accepted one at a time (SPEC.md 5.2) and products are not '// &
+           're-matched (5.5), so a product of two elements accepted at '// &
+           'pg_tol is only a symmetry to 2*pg_tol. This happens for a '// &
+           'geometry that is symmetric to within a few pg_tol only; '// &
+           'lower pg_tol (fewer elements accepted) or raise it above '// &
+           'the residual.'
+      pg_detection_failed = .true.
+    endif
+    return
   endif
 
   ! Classes partition the group. This is the only class property step 2 can
@@ -1071,16 +1141,22 @@ END_PROVIDER
   n_size = 0
   do i = 1, pg_n_class
     if (pg_class_size(i) < 1) then
-      write(6,'(A,A,A,I0,A)') 'symmetry: ', trim(name), ': class ', i, &
-           ' is empty'
-      stop 1
+      if (.not. pg_detection_failed) then
+        write(6,'(A,A,A,I0,A)') 'symmetry: ', trim(name), ': class ', i, &
+             ' is empty'
+        pg_detection_failed = .true.
+      endif
+      return
     endif
     n_size = n_size + pg_class_size(i)
   enddo
   if (n_size /= pg_n_elem) then
-    write(6,'(A,A,A,I0,A,I0)') 'symmetry: ', trim(name), &
-         ': classes cover ', n_size, ' elements, |G| = ', pg_n_elem
-    stop 1
+    if (.not. pg_detection_failed) then
+      write(6,'(A,A,A,I0,A,I0)') 'symmetry: ', trim(name), &
+           ': classes cover ', n_size, ' elements, |G| = ', pg_n_elem
+      pg_detection_failed = .true.
+    endif
+    return
   endif
 
   pg_group_name = name
