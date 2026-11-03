@@ -34,9 +34,10 @@ subroutine pg_det_report
   integer, parameter :: ntmax = 200
   character*(256) :: soa, sob
   character*(8) :: lab
-  integer :: i, a, s, k, ipos, nlab, nunl, jmax, nmax
+  integer :: i, a, s, k, ipos, nlab, nunl, jmax, nmax, nshow, a1, a2, nw
   integer :: list(N_int*bit_kind_size,2), n_el(2)
   double precision :: c, cmax, q, cache_mb
+  double precision :: w(pg_n_irrep)
   logical :: failed
   logical, external :: pg_det_gates
 
@@ -52,8 +53,36 @@ subroutine pg_det_report
   write(6,'(A,A)')        'point group     : ', trim(pg_group_name)
   write(6,'(A,I0,A,I0)')  '|G|             : ', pg_n_elem, &
                           '    irreps: ', pg_n_irrep
-  write(6,'(A,I0,A,I0,A)') 'MO basis        : ', mo_num, ' MOs in ', &
-                          pg_n_mo_block, ' symmetry blocks, all labelled'
+  if (pg_n_mo_mixed == 0) then
+    write(6,'(A,I0,A,I0,A)') 'MO basis        : ', mo_num, ' MOs in ', &
+                            pg_n_mo_block, ' symmetry blocks, all labelled'
+  else
+    write(6,'(A,I0,A,I0,A,I0,A)') 'MO basis        : ', mo_num, ' MOs in ', &
+                            pg_n_mo_block, ' symmetry blocks, ', &
+                            pg_n_mo_mixed, ' without a definite irrep'
+    write(6,'(A)') '  A mixed MO is a superposition: its two largest '// &
+                   'irrep weights are'
+    nshow = 0
+    do i = 1, mo_num
+      if (pg_mo_irrep(i) /= 0) cycle
+      if (nshow >= 10) then
+        write(6,'(A,I0,A)') '    ... (', pg_n_mo_mixed - 10, ' more)'
+        exit
+      endif
+      call pg_mo_top2(i, a1, a2)
+      if (a2 == 0) then
+        write(6,'(A,I0,A,A,1X,F9.6)') '    MO ', i, ': ', &
+             trim(pg_irrep_name(a1)), pg_mo_weight(i,a1)
+      else
+        write(6,'(A,I0,A,A,1X,F9.6,2X,A,1X,F9.6)') '    MO ', i, ': ', &
+             trim(pg_irrep_name(a1)), pg_mo_weight(i,a1), &
+             trim(pg_irrep_name(a2)), pg_mo_weight(i,a2)
+      endif
+      nshow = nshow + 1
+    enddo
+    write(6,'(A)') '  Determinant and state irreps below are '// &
+                   'probabilities wherever they are not 1.'
+  endif
   cache_mb = 8.d0*dble(mo_num)*dble(mo_num)*dble(pg_n_elem)/1048576.d0
   write(6,'(A,I0,A,I0,A,I0,A,F8.2,A)') 'X_g cache       : ', mo_num, ' x ', &
                           mo_num, ' x ', pg_n_elem, ' = ', cache_mb, ' MB'
@@ -128,20 +157,42 @@ subroutine pg_det_report
          ' determinants hidden: N_det = ', N_det, '; the summary below is complete)'
   endif
   if (nunl > 0) then
-    write(6,'(A)') ' determinants with no definite irrep:'
+    write(6,'(A)') ' determinants with no definite irrep (probability of each irrep):'
+    write(6,'(A)') '    det  family  |F|   purity  composition'
     nunl = 0
     do i = 1, N_det
       if (pg_det_irrep(i) /= 0) cycle
-      if (nunl >= 20) then
+      if (nunl >= 50) then
         write(6,'(A)') '   ...'
         exit
       endif
-      write(6,'(I8,F10.6)',advance='no') i, pg_det_purity(i)
+      call pg_det_weights(i, w)
+      ! Self-check: pg_det_purity comes from the full family projector,
+      ! w from its diagonal.
+      if (abs(maxval(w(1:pg_n_irrep)) - pg_det_purity(i)) > 1.d-8) then
+        write(6,'(A,I0,A,ES12.4)') '   (bookkeeping) determinant ', i, &
+             ': diagonal and full projector differ by ', &
+             abs(maxval(w(1:pg_n_irrep)) - pg_det_purity(i))
+      endif
+      write(6,'(I7,I8,I5,1X,F9.6,3X)',advance='no') i, pg_det_family(i), &
+           pg_det_block(i), pg_det_purity(i)
+      nw = 0
+      do a = 1, pg_n_irrep
+        if (w(a) < 1.d-4) cycle
+        if (nw >= 4) then
+          write(6,'(A)',advance='no') ' ...'
+          exit
+        endif
+        write(6,'(A,1X,F8.6,2X)',advance='no') trim(pg_irrep_name(a)), w(a)
+        nw = nw + 1
+      enddo
+      write(6,*)
       nunl = nunl + 1
     enddo
-    write(6,*)
-    write(6,'(A)') '   (index, purity). An open degenerate shell has no '// &
-         'one-determinant irrep; its label lives in the state weights below.'
+    write(6,'(A)') '   (weights below 1e-4 omitted, at most 4 shown). A '// &
+         'determinant that does not fill'
+    write(6,'(A)') '   whole blocks is a superposition of irreps; the '// &
+         'distribution is the honest description.'
   endif
 
   !---------------------------------------------------------------------

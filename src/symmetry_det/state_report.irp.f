@@ -11,23 +11,18 @@ subroutine pg_print_state_irreps(energy, s2)
   implicit none
   BEGIN_DOC
   ! Prints the irrep of each CI state. Never stops. :c:data:`state_symmetry` = F
-  ! is silent; a failed detection has already printed its reason; a mixed
-  ! MO basis is reported in one line. ``energy`` and ``s2`` are the caller's
-  ! arrays, at least ``N_states`` long.
+  ! is silent; a failed detection has already printed its reason. A state
+  ! with no definite irrep is described by its irrep probabilities, which
+  ! are exact for the stored CI space even when the MO basis is not
+  ! symmetry adapted (NOTES section 10). ``energy`` and ``s2`` are the
+  ! caller's arrays, at least ``N_states`` long.
   END_DOC
   double precision, intent(in) :: energy(*), s2(*)
   logical, external :: pg_symmetry_ready
-  logical, external :: pg_mo_labels_ok
 
   if (.not. state_symmetry) return
   if (.not. pg_symmetry_ready()) return
   if (mo_num < 1) return
-  if (.not. pg_mo_labels_ok()) then
-    if (mpi_master) then
-      write(6,'(A)') 'symmetry: state irreps not printed: the MO basis has no definite irrep'
-    endif
-    return
-  endif
   if (N_det < 1 .or. N_states < 1) return
   call pg_state_irreps_label(energy, s2)
 end subroutine pg_print_state_irreps
@@ -53,7 +48,7 @@ subroutine pg_print_state_irreps_work(energy, s2)
   ! the purities and the norm in one provider block.
   END_DOC
   double precision, intent(in) :: energy(*), s2(*)
-  integer :: s, a
+  integer :: s, a, nw
   double precision :: wsum
   character*(8) :: lab
 
@@ -61,6 +56,12 @@ subroutine pg_print_state_irreps_work(energy, s2)
 
   if (.not. mpi_master) return
   write(6,'(A,I0,A)') 'symmetry: state irreps (N_det = ', N_det, ')'
+  if (pg_n_mo_mixed > 0) then
+    write(6,'(A)') 'symmetry: the MO basis is not symmetry adapted: a state '// &
+         'weight is its'
+    write(6,'(A)') 'symmetry: exact irrep probability for the stored CI '// &
+         'space (not a guess).'
+  endif
   write(6,'(A)') 'symmetry:    state      energy (Ha)       S^2  irrep   purity'
   do s = 1, N_states
     if (pg_state_irrep(s) > 0) then
@@ -68,8 +69,24 @@ subroutine pg_print_state_irreps_work(energy, s2)
     else
       lab = '(none)'
     endif
-    write(6,'(A,I9,F18.10,F10.4,2X,A,1X,F7.3)') 'symmetry: ', s, &
+    write(6,'(A,I9,F18.10,F10.4,2X,A,1X,F7.3)',advance='no') 'symmetry: ', s, &
          energy(s), s2(s), trim(lab), pg_state_purity(s)
+    ! A labelled state needs no composition; an unlabelled one is described
+    ! by the irreps that carry weight (at most four shown).
+    nw = 0
+    if (pg_state_irrep(s) == 0) then
+      do a = 1, pg_n_irrep
+        if (pg_state_irrep_weight(a,s) < 1.d-4) cycle
+        if (nw >= 4) then
+          write(6,'(A)',advance='no') ' ...'
+          exit
+        endif
+        write(6,'(1X,A,1X,F6.4)',advance='no') trim(pg_irrep_name(a)), &
+             pg_state_irrep_weight(a,s)
+        nw = nw + 1
+      enddo
+    endif
+    write(6,*)
   enddo
   do s = 1, N_states
     wsum = 0.d0

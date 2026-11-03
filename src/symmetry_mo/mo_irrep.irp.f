@@ -240,6 +240,64 @@ BEGIN_PROVIDER [ double precision, pg_mo_weight, (mo_num,pg_n_irrep) ]
 END_PROVIDER
 
 !-----------------------------------------------------------------------
+! How many MOs have no definite irrep?
+!-----------------------------------------------------------------------
+BEGIN_PROVIDER [ integer, pg_n_mo_mixed ]
+  implicit none
+  BEGIN_DOC
+  ! Number of MOs with :c:data:`pg_mo_irrep` = 0, i.e. ``max_a p_a < 1 - pg_thresh``.
+  ! This is the single definition every report and the warning of the
+  ! determinant labelling use; it used to be recomputed in five places.
+  !
+  ! It counts MOs, never blocks: the partners of a degenerate block of a
+  ! symmetry-adapted set all carry a label, so they contribute 0 here. A
+  ! nonzero count means that the basis is not symmetry adapted, and then
+  ! the determinant and state irreps are probabilities, not labels.
+  END_DOC
+  integer :: i
+
+  pg_n_mo_mixed = 0
+  if (mo_num < 1) return
+  do i = 1, mo_num
+    if (pg_mo_irrep(i) == 0) pg_n_mo_mixed = pg_n_mo_mixed + 1
+  enddo
+END_PROVIDER
+
+!-----------------------------------------------------------------------
+! The two largest weights of an MO, for the reports.
+!-----------------------------------------------------------------------
+subroutine pg_mo_top2(i, a1, a2)
+  implicit none
+  BEGIN_DOC
+  ! ``a1`` and ``a2`` are the indices of the two largest entries of
+  ! :c:data:`pg_mo_weight` on MO ``i``; ``a2 = 0`` when the group has a single
+  ! irrep. The reports use them to show the composition of a mixed MO
+  ! (``A1 0.9856 B2 0.0144``) in one line; nothing else depends on them.
+  END_DOC
+  integer, intent(in) :: i
+  integer, intent(out) :: a1, a2
+  integer :: a
+
+  a1 = 0
+  a2 = 0
+  if (i < 1 .or. i > mo_num) return
+  ! No ".or." on an index that may still be 0: Fortran does not guarantee
+  ! short-circuit evaluation, and pg_mo_weight(i,0) is out of bounds.
+  do a = 1, pg_n_irrep
+    if (a1 == 0) then
+      a1 = a
+    elseif (pg_mo_weight(i,a) > pg_mo_weight(i,a1)) then
+      a2 = a1
+      a1 = a
+    elseif (a2 == 0) then
+      a2 = a
+    elseif (pg_mo_weight(i,a) > pg_mo_weight(i,a2)) then
+      a2 = a
+    endif
+  enddo
+end subroutine pg_mo_top2
+
+!-----------------------------------------------------------------------
 ! Persistence (SPEC.md section 11).
 !-----------------------------------------------------------------------
 subroutine pg_write_mo_symmetry()
@@ -260,12 +318,9 @@ subroutine pg_write_mo_symmetry()
   ! EZFIO write alone would leave the in-memory provider stale: the
   ! ``soft_touch`` invalidates it without building it when it is not built.
   END_DOC
-  integer :: i, n_mixed
+  integer :: n_mixed
 
-  n_mixed = 0
-  do i = 1, mo_num
-    if (pg_mo_irrep(i) == 0) n_mixed = n_mixed + 1
-  enddo
+  n_mixed = pg_n_mo_mixed
   if (n_mixed /= 0) then
     write(6,'(A,I0,A)') 'pg_write_mo_symmetry: ', n_mixed, ' MO(s) have '// &
          'no definite irrep; mo_basis/mo_symmetry not written.'

@@ -547,7 +547,7 @@ subroutine pg_report_mo(delta_mo, write_mo)
   ! integral noise alone.
   END_DOC
   logical :: has_ao, failed
-  integer :: a, c, g, i, j, m, n_mixed
+  integer :: a, c, g, i, j, m, n_mixed, a1, a2
   integer :: b, a0, nb, n_imp, n_bad, sdn
   double precision, intent(in) :: delta_mo
   logical, intent(in) :: write_mo
@@ -827,14 +827,23 @@ subroutine pg_report_mo(delta_mo, write_mo)
   write(6,'(A)') ''
   write(6,'(A)') '  MO labels: i, irrep index (0 = no definite irrep), irrep '// &
        'name,'
-  write(6,'(A)') '  symmetry block, block dimension, purity max_a p_a(i)'
+  write(6,'(A)') '  symmetry block, block dimension, purity max_a p_a(i); a '// &
+       'mixed MO adds'
+  write(6,'(A)') '  its two largest irrep weights p_a(i).'
   write(6,'(A)') '      i  a  irrep       block  dim     purity'
-  n_mixed = 0
+  n_mixed = pg_n_mo_mixed
   do i = 1, mo_num
     if (pg_mo_irrep(i) == 0) then
-      n_mixed = n_mixed + 1
-      write(6,'(I7,I3,2X,A8,I6,I5,F11.6)') i, 0, 'mixed', &
-           pg_mo_block(i), pg_mo_block_dim(i), pg_mo_purity(i)
+      call pg_mo_top2(i, a1, a2)
+      if (a2 > 0) then
+        write(6,'(I7,I3,2X,A8,I6,I5,F11.6,2X,A,1X,F8.6,1X,A,1X,F8.6)') i, &
+             0, 'mixed', pg_mo_block(i), pg_mo_block_dim(i), &
+             pg_mo_purity(i), trim(pg_irrep_name(a1)), pg_mo_weight(i,a1), &
+             trim(pg_irrep_name(a2)), pg_mo_weight(i,a2)
+      else
+        write(6,'(I7,I3,2X,A8,I6,I5,F11.6)') i, 0, 'mixed', &
+             pg_mo_block(i), pg_mo_block_dim(i), pg_mo_purity(i)
+      endif
     else
       write(6,'(I7,I3,2X,A8,I6,I5,F11.6)') i, pg_mo_irrep(i), &
            trim(adjustl(pg_irrep_name(pg_mo_irrep(i)))), pg_mo_block(i), &

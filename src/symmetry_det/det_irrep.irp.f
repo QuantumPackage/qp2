@@ -37,7 +37,7 @@ BEGIN_PROVIDER [ integer, pg_label_ierr ]
   !     there is no MO or no symmetry block
   !
   ! ``3``
-  !     the MO basis is not block diagonal
+  !     one symmetry block is wider than :c:data:`pg_block_cap` MOs
   !
   ! ``4``
   !     a determinant family is larger than pg_family_cap
@@ -65,6 +65,18 @@ BEGIN_PROVIDER [ integer, pg_family_cap ]
   ! instead of hanging or silently truncating the projector.
   END_DOC
   pg_family_cap = 1000
+END_PROVIDER
+
+BEGIN_PROVIDER [ integer, pg_block_cap ]
+  implicit none
+  BEGIN_DOC
+  ! Widest symmetry block the family enumeration can represent. The
+  ! occupation of a block is a bit mask, so a block wider than the bits of
+  ! a default integer cannot be unranked. Blocks are irrep spaces
+  ! (``d_a`` <= 5) unless the MO basis is not symmetry adapted, which this
+  ! module now accepts: the cap is what keeps that acceptance bounded.
+  END_DOC
+  pg_block_cap = 30
 END_PROVIDER
 
 !-----------------------------------------------------------------------
@@ -300,22 +312,34 @@ subroutine pg_family_size(nsel, np)
   BEGIN_DOC
   ! ``np`` = prod_{s,b} C(d_b, nsel(s,b)), the number of determinants with
   ! the same per-block spin counts. A block that is empty or full
-  ! contributes one choice; the product is cut as soon as it exceeds
-  ! :c:data:`pg_family_cap` so that the caller reports instead of overflowing.
+  ! contributes one choice. The product is cut before any multiplication
+  ! that could overflow, so the cap test of the caller is reliable, and
+  ! ``np`` is left negative when a block is wider than
+  ! :c:data:`pg_block_cap` -- the caller reports that case with its own
+  ! message.
   END_DOC
   integer, intent(in) :: nsel(2,pg_n_mo_block)
   integer, intent(out) :: np
-  integer :: s, b, n, nd
+  integer :: s, b, n, nd, bc
   integer, external :: pg_binom
 
   np = 1
   do s = 1, 2
     do b = 1, pg_n_mo_block
-      n = nsel(s,b)
       nd = pg_block_dim(b)
+      if (nd > pg_block_cap) then
+        np = -1
+        return
+      endif
+      n = nsel(s,b)
       if (n <= 0 .or. n >= nd) cycle
-      np = np*pg_binom(nd,n)
-      if (np > pg_family_cap) return
+      bc = pg_binom(nd,n)
+      ! Divide, never multiply, the two factors that could overflow.
+      if (bc > pg_family_cap/np) then
+        np = pg_family_cap + 1
+        return
+      endif
+      np = np*bc
     enddo
   enddo
 end subroutine pg_family_size
@@ -475,8 +499,10 @@ subroutine pg_elem_me(ig, np, mask, ip, jp, val)
       if (ii > nmax) then
         write(6,'(A,I0,A)') 'symmetry_det: one symmetry block contributes ', &
              ii, ' occupied MOs; family enumeration supports at most 12.'
-        write(6,'(A)') '  A block is an irrep space and never exceeds d_a; '// &
-             'the MO basis is not symmetry adapted.'
+        write(6,'(A)') '  A block is one irrep (at most 5 MOs) unless the MO '// &
+             'basis is not symmetry adapted;'
+        write(6,'(A)') '  the mixed-basis path accepts such a block, but not '// &
+             'more than 12 occupied MOs in it.'
         write(pg_label_msg,'(A,I0,A)') 'one symmetry block holds ', ii, &
              ' occupied MOs (at most 12 supported)'
         pg_label_ierr = 6
@@ -575,7 +601,7 @@ BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
   ! earlier member costs one enumeration and one binary search per member
   ! and nothing else.
   END_DOC
-  integer :: i, a, np, ip, j, ifam, imin, amax, n_mixed
+  integer :: i, a, np, ip, j, ifam, imin, amax
   integer :: nsel(2,pg_n_mo_block)
   integer, allocatable :: mask(:,:,:), idx(:)
   double precision, allocatable :: t(:,:,:)
@@ -607,23 +633,32 @@ BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
     pg_label_msg = 'no MO or no symmetry block: nothing to label.'
     return
   endif
-  n_mixed = 0
-  do i = 1, mo_num
-    if (pg_mo_irrep(i) == 0) n_mixed = n_mixed + 1
-  enddo
-  if (n_mixed > 0) then
-    write(6,'(A,I0,A,I0,A)') 'symmetry_det: ', n_mixed, ' of the ', mo_num, &
-         ' MOs have no definite irrep:'
-    do i = 1, mo_num
-      if (pg_mo_irrep(i) == 0) write(6,'(I6)',advance='no') i
-    enddo
-    write(6,*)
-    write(6,'(A)') '  The MO basis is not block diagonal: <D''|U(g)|D> is '// &
-         'wrong for every determinant, and a number would be worse than no number.'
-    write(pg_label_msg,'(A,I0,A,I0,A)') 'the MO basis is not block diagonal: ', &
-         n_mixed, ' of ', mo_num, ' MOs have no definite irrep'
-    pg_label_ierr = 3
-    return
+  !---------------------------------------------------------------------
+  ! A basis that is not symmetry adapted is ACCEPTED (NOTES section 10).
+  !
+  ! What the family decomposition needs is that X_g is block diagonal on
+  ! the blocks, and that is true by construction (a block is a connected
+  ! component of the |X_g| graph). The MO labels are needed only to
+  ! interpret a block as one irrep: with a mixed basis a block is a direct
+  ! sum of irreps, a determinant that occupies it partially is a
+  ! superposition, and its T^a_DD are probabilities whose sum is 1. The
+  ! reports print them; pg_det_irrep(i) stays 0, which is the honest
+  ! value for "no definite irrep".
+  !---------------------------------------------------------------------
+  if (pg_n_mo_mixed > 0 .and. pg_n_irrep >= 1) then
+    if (mpi_master) then
+      write(6,'(A,I0,A,I0,A)') 'symmetry_det: ', pg_n_mo_mixed, ' of the ', &
+           mo_num, ' MOs have no definite irrep:'
+      do i = 1, mo_num
+        if (pg_mo_irrep(i) == 0) write(6,'(I6)',advance='no') i
+      enddo
+      write(6,*)
+      write(6,'(A)') '  The MO basis is not symmetry adapted: <D''|U(g)|D> '// &
+           'stays exact, because X_g'
+      write(6,'(A)') '  is block diagonal on the blocks, but the '// &
+           'determinant and state irreps below'
+      write(6,'(A)') '  are probabilities, printed wherever they are not 1.'
+    endif
   endif
 
   !---------------------------------------------------------------------
@@ -634,6 +669,20 @@ BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
   do i = 1, N_det
     call pg_det_counts(i, nsel)
     call pg_family_size(nsel, np)
+    if (np < 0) then
+      ! Global property of the MO set, reported on the first determinant.
+      write(6,'(A,I0,A)') 'symmetry_det: a symmetry block is wider than '// &
+           'pg_block_cap = ', pg_block_cap, ' MOs;'
+      write(6,'(A)') '  its occupation cannot be packed in a bit mask, so the '// &
+           'family cannot be enumerated.'
+      write(6,'(A)') '  A block is one irrep (at most 5 MOs) unless the MO '// &
+           'basis is not symmetry adapted;'
+      write(6,'(A)') '  the mixed-basis path is bounded by this cap.'
+      write(pg_label_msg,'(A,I0,A)') 'a symmetry block is wider than '// &
+           'pg_block_cap = ', pg_block_cap, ' MOs'
+      pg_label_ierr = 3
+      return
+    endif
     if (np > pg_family_cap) then
       write(6,'(A,I0,A,I0,A,I0,A)') 'symmetry_det: determinant ', i, &
            ' has a family of ', np, ' members, above pg_family_cap = ', &
@@ -688,3 +737,75 @@ BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
   enddo
   pg_n_family = ifam
 END_PROVIDER
+
+!-----------------------------------------------------------------------
+! The irrep probability distribution of one determinant.
+!-----------------------------------------------------------------------
+subroutine pg_det_weights(idet, w)
+  implicit none
+  BEGIN_DOC
+  ! ``w(a)`` = T^a_{DD} = <D|P^a|D> for determinant ``idet``: the probability
+  ! that D carries irrep ``a``. Sums to 1 over ``a`` (gate D1's identity on
+  ! the diagonal), so a determinant with no definite irrep is described by
+  ! a distribution, not by a label.
+  !
+  ! This is the diagonal of :c:func:`pg_family_projector` at one member, not
+  ! the whole matrix: |G|*|F| element matrix elements instead of |G|*|F|^2,
+  ! which is what makes it affordable to call once per printed row of the
+  ! report. The coefficients are the ones of the projector; the caller can
+  ! check ``max_a w(a)`` against :c:data:`pg_det_purity`, computed from the full
+  ! matrix, and the driver does exactly that.
+  !
+  ! ``w`` is left at 0 when the determinant is outside 1:N_det, when the
+  ! labelling failed, or when its family exceeds :c:data:`pg_family_cap`; the
+  ! caller decides what to print. Call it only after :c:data:`pg_det_irrep` is
+  ! built: it re-enumerates the family and does not relabel anything.
+  END_DOC
+  integer, intent(in) :: idet
+  double precision, intent(out) :: w(pg_n_irrep)
+  integer :: ip, jp, imin, np, ig, c, a
+  integer :: nsel(2,pg_n_mo_block)
+  integer, allocatable :: mask(:,:,:), idx(:)
+  double precision :: coef(pg_n_irrep), val
+
+  w(1:pg_n_irrep) = 0.d0
+  if (pg_n_irrep < 1 .or. pg_n_mo_block < 1) return
+  if (idet < 1 .or. idet > N_det) return
+  if (pg_label_ierr /= 0) return
+  call pg_det_counts(idet, nsel)
+  call pg_family_size(nsel, np)
+  if (np < 1 .or. np > pg_family_cap) return
+  allocate(mask(2,pg_n_mo_block,np), idx(np))
+  call pg_family_fill(nsel, np, mask)
+  if (pg_label_ierr /= 0) then
+    deallocate(mask, idx)
+    return
+  endif
+  call pg_family_index(np, mask, idx, imin)
+  ip = 0
+  do jp = 1, np
+    if (idx(jp) == idet) ip = jp
+  enddo
+  if (ip == 0) then
+    deallocate(mask, idx)
+    return
+  endif
+  do a = 1, pg_n_irrep
+    coef(a) = dble(pg_irrep_dim(a)) &
+         /(dble(pg_irrep_mult(a))*dble(pg_n_elem))
+  enddo
+  do ig = 1, pg_n_elem
+    c = pg_elem_col(ig)
+    call pg_elem_me(ig, np, mask, ip, ip, val)
+    if (pg_label_ierr /= 0) then
+      w(1:pg_n_irrep) = 0.d0
+      deallocate(mask, idx)
+      return
+    endif
+    if (val == 0.d0) cycle
+    do a = 1, pg_n_irrep
+      w(a) = w(a) + coef(a)*pg_char(a,c)*val
+    enddo
+  enddo
+  deallocate(mask, idx)
+end subroutine pg_det_weights

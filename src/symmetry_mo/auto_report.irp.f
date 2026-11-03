@@ -138,8 +138,10 @@ logical function pg_mo_labels_ok()
   ! :c:func:`pg_symmetry_ready` returned true, so the representation matrices are
   ! already built.
   !
-  ! This is the guard that makes the ``stop 1`` statements of det_irrep.irp.f
-  ! unreachable from the CI entry points (section 9.3).
+  ! This is the guard that keeps a labelling of a basis that is not
+  ! symmetry adapted away from the Davidson fast path and from the
+  ! ``mo_symmetry`` write. The reports themselves accept such a basis and
+  ! print irrep probabilities instead (NOTES section 10).
   END_DOC
   pg_mo_labels_ok = .false.
   if (mo_num < 1) return
@@ -184,16 +186,13 @@ subroutine pg_report_mo_symmetry_work()
   ! The mixed count runs on every rank; only the printing and the EZFIO
   ! write are under :c:data:`mpi_master`, as in save_wavefunction_general.
   END_DOC
-  integer :: a, i, n_mixed
+  integer :: a, n_mixed
   character*(8) :: lab
   logical, external :: pg_mo_labels_ok
 
   if (mo_num < 1) return
   if (.not. pg_mo_labels_ok()) then
-    n_mixed = 0
-    do i = 1, mo_num
-      if (pg_mo_irrep(i) == 0) n_mixed = n_mixed + 1
-    enddo
+    n_mixed = pg_n_mo_mixed
     if (mpi_master) then
       write(6,'(A,I0,A,I0,A)') 'symmetry:   ', n_mixed, ' of ', mo_num, &
            ' MOs have no definite irrep,'
