@@ -55,9 +55,8 @@ subroutine pg_ready_detection(ok)
   BEGIN_DOC
   ! ``ok`` is true when a group name could be measured. Never stops.
   !
-  ! :c:data:`pg_inertia_eval` comes first: it rejects the geometry before any
-  ! enumeration (no nucleus, a linear molecule, since Cinfv/Dinfh
-  ! labelling is not implemented, or a failed diagonalization). The
+  ! :c:data:`pg_inertia_eval` comes first: it rejects a geometry with no
+  ! nucleus, or all nuclei at the centre, before any enumeration. The
   ! group name is a second step because a geometry that only looks
   ! symmetric gives up later, in the invariants, and an empty name must
   ! not be reported as ready.

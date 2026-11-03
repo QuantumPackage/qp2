@@ -3,8 +3,8 @@
 ! The layout below was measured on all 211 files of Symmetry/ (and is the
 ! one documented in SPEC.md section 3):
 !
-!   Group<TAB><name>                     line 1   (the name may lie: Dinfh
-!                                                  says "Group D32h")
+!   Group<TAB><name>                     line 1   (informational only: the
+!                                                  group name is the file name)
 !   n<TAB><N>                            line 2   (N irreps == N classes)
 !   <blank>                              line 3
 !   <blank><TAB>Irred<TAB>Operation      line 4
@@ -27,8 +27,8 @@
 !    never be written with a list-directed WRITE;
 !  * characters are written as floats with 5 decimals, so a list-directed
 !    READ of a numeric row is safe;
-!  * the group name is taken from the FILE NAME: 'Dinfh' claims D32h on line 1;
-!  * N runs from 1 (C1) to 38 (Dinfh), not "up to 32" as SPEC.md section 3
+!  * the group name is taken from the FILE NAME, never from line 1;
+!  * N runs from 1 (C1) to 38 (D32h), not "up to 32" as SPEC.md section 3
 !    states, so the parser accepts up to pg_table_nmax = 64.
 
 subroutine pg_parse_table(file, group_name, n_irrep, n_class, &
@@ -103,7 +103,7 @@ subroutine pg_parse_table(file, group_name, n_irrep, n_class, &
 
   iunit = getUnitAndOpen(trim(path), 'r')
 
-  ! Line 1: "Group" TAB name. Informational only (Dinfh lies).
+  ! Line 1: "Group" TAB name. Informational only: the name is the file name.
   read(iunit, '(A)', iostat=ios) line
   if (ios /= 0) then
     ierr = 4
