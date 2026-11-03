@@ -36,7 +36,7 @@ subroutine pg_det_report
   character*(8) :: lab
   integer :: i, a, s, k, ipos, nlab, nunl, jmax, nmax, nshow, a1, a2, nw
   integer :: list(N_int*bit_kind_size,2), n_el(2)
-  double precision :: c, cmax, q, cache_mb
+  double precision :: c, cmax, q, cache_mb, wv
   double precision :: w(pg_n_irrep)
   logical :: failed
   logical, external :: pg_det_gates
@@ -236,8 +236,13 @@ subroutine pg_det_report
          '   mixed determinant fraction =', pg_det_mixed_frac(s)
     ipos = 0
     do a = 1, pg_n_irrep
+      ! A projector weight is non-negative; a value that would print as
+      ! -0.000000 is roundoff below the resolution of the line. Clamp only
+      ! that, so a real negative weight is still visible.
+      wv = pg_state_irrep_weight(a,s)
+      if (wv < 0.d0 .and. wv > -5.d-7) wv = 0.d0
       write(6,'(A,A,A,F9.6,A)',advance='no') '    ', trim(pg_irrep_name(a)), &
-           ':', pg_state_irrep_weight(a,s), '  '
+           ':', wv, '  '
       ipos = ipos + 1
       if (mod(ipos,4) == 0 .and. a < pg_n_irrep) write(6,'(A)') ''
     enddo
