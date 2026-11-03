@@ -1,11 +1,11 @@
 program symmetry_det
   implicit none
   BEGIN_DOC
-  ! Determinant and state symmetry driver (SPEC.md sections 9 and 10).
+  ! Determinant and state symmetry driver.
   !
   ! Reads the wave function stored in the EZFIO directory given on the
   ! command line, labels every determinant with the irrep of the
-  ! projector of section 8, and projects every CI state on the irreps.
+  ! MO projector, and projects every CI state on the irreps.
   !
   ! Prints the determinant table, the per-irrep counts, the per-state
   ! weight vectors, and runs the gates D1-D6. Exits 1 if a gate fails, 0
@@ -263,7 +263,7 @@ subroutine pg_det_report
 end subroutine pg_det_report
 
 !-----------------------------------------------------------------------
-! Gates D1-D6 (SPEC.md 9.6), plus the state gates of section 10.
+! Gates D1-D6, plus the state gates.
 !-----------------------------------------------------------------------
 logical function pg_det_gates()
   use bitmasks
@@ -281,7 +281,7 @@ logical function pg_det_gates()
   !
   ! ``D4``
   !     ``sum_a w_a(s) - sum_D c_D(s)^2`` <= 1e-8: the accumulation loop
-  !     reproduces the sum rule of section 10.2.
+  !     reproduces the sum rule of the state weights.
   !
   ! ``D5``
   !     every labelled state has w_max >= 1-1e-6, and the mixed
@@ -289,8 +289,8 @@ logical function pg_det_gates()
   !
   ! ``D6``
   !     the dominant determinant of state 1 has irrep 1 for a closed-shell
-  !     Hartree-Fock wave function (the cross-check that section 9 and
-  !     section 8 live in the same labelling). Gated only when the
+  !     Hartree-Fock wave function (the cross-check that the determinant
+  !     and MO labellings agree). Gated only when the
   !     determinant's family has one member: a block that is partially
   !     filled makes even a closed-shell occupation a mixture, so such a
   !     configuration has no one-determinant irrep to compare with. That

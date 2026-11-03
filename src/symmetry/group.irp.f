@@ -1,28 +1,28 @@
-! Group elements, classes and identification (SPEC.md section 5).
+! Group elements, classes and identification.
 !
 ! The whole finite set is named: 204 groups, checked one by one against the
 ! closed-form construction of the reference oracle (refsym2.py + ident.py,
 ! 204/204). There is no Abelian-only shortcut: the enumeration, the classes
 ! and the identification are general, :math:`|G|` <= 128.
 !
-! Placement notes versus SPEC.md:
-!  * pg_n_max and pg_n_axes_max are listed in section 5 but are needed by
-!    section 4 step 3 to build pg_rot; they are therefore computed here as
-!    providers that do not depend on pg_rot. pg_rot uses a local scan with
-!    the same routine.
-!  * The linear-molecule branch of section 5.9 is analytic:
-!    pg_is_linear (frame.irp.f) flags it and pg_build_linear builds C31v or
-!    C31v x {E,sigma_h} directly, because the (permutation, determinant) key
-!    is blind to every rotation about a collinear axis.
-!  * pg_has_i, pg_n_sigma_h, pg_n_sigma_vtot, pg_n_c2_perp are providers so
-!    that the driver can report the measured invariants. There is no
-!    sigma_v/sigma_d split: it is a labelling device of section 6, decided
-!    there from the axis slot, and it is not needed to name a group.
+! Placement notes:
+!  * pg_n_max and pg_n_axes_max belong to the group description but are
+!    needed to build pg_rot, so they are computed here as providers that
+!    do not depend on pg_rot. pg_rot uses a local scan with the same
+!    routine.
+!  * The linear-molecule branch is analytic: pg_is_linear (frame.irp.f)
+!    flags it and pg_build_linear builds C31v or C31v x {E,sigma_h}
+!    directly, because the (permutation, determinant) key is blind to
+!    every rotation about a collinear axis.
+!  * pg_has_i, pg_n_sigma_h, pg_n_sigma_vtot, pg_n_c2_perp are providers
+!    so that the driver can report the measured invariants. There is no
+!    sigma_v/sigma_d split: it is a labelling device decided from the
+!    axis slot in columns.irp.f, and it is not needed to name a group.
 
 ! Largest group order in the data set. D32d and D32h have :math:`|G|` = 128
 ! (checked over the 211 files; Ih is 120), so the prototype's 120 silently
-! truncates two groups. This is the module-interface constant of SPEC.md
-! section 5; the providers size their scratch arrays with allocate() rather
+! truncates two groups. This is the module-interface bound; the providers
+! size their scratch arrays with allocate() rather
 ! than an explicit bound, because IRPF90 copies a file-scope parameter used
 ! as a provider declaration bound into the generated unit, where it clashes
 ! with this module-level copy.
@@ -260,7 +260,7 @@ end subroutine pg_build_linear
 !-----------------------------------------------------------------------
 ! Enumerate every group element.
 !  * identity is element 1
-!  * candidate directions: SPEC.md section 5.1
+!  * candidate directions: the axes measured in frame.irp.f
 !  * proper rotations of order 32..2, reflections, inversion
 !  * closure under matrix multiplication, permutations composed
 !-----------------------------------------------------------------------
@@ -335,7 +335,7 @@ subroutine pg_enumerate(nat, xyz, znum, ctr, evecs, tol, nmax, &
   endif
 
   ! Closure. Products are composed from the stored permutations, never
-  ! re-matched against the geometry (SPEC.md section 5.5).
+  ! re-matched against the geometry.
   changed = .true.
   do while (changed)
     changed = .false.
@@ -395,7 +395,7 @@ subroutine pg_add_element(r, p, nat, nmax, rot, perm, n_rot, ierr)
   ! which case it is the reflection in the molecular plane (the only
   ! orthogonal map fixing a whole plane pointwise), which differs by its
   ! determinant. Linear molecules, the other degenerate case, are
-  ! rejected before enumeration (SPEC.md section 5.9).
+  ! rejected before enumeration.
   !
   ! The permutation test is required, not an optimisation: a candidate
   ! direction read off a geometry that is symmetric only to :c:data:`pg_tol` is
@@ -445,7 +445,7 @@ end subroutine pg_add_element
 subroutine pg_elem_props(r, angle, axis, det)
   implicit none
   BEGIN_DOC
-  ! Angle and axis following SPEC.md section 5.7: for an improper element
+  ! Angle and axis: for an improper element
   ! the angle is theta_p - pi, where theta_p is the angle of -r. The
   ! oriented angle is obtained from atan2 of the antisymmetric part, not
   ! from acos, which is why S4 gives theta_p = 3pi/2 and theta = pi/2.
@@ -548,8 +548,8 @@ logical function pg_axis_along(axis, k)
   BEGIN_DOC
   ! True when the unit vector ``axis`` (INPUT frame) lies on the ``k``-th
   ! canonical axis (``k`` = 1, 2, 3 for x, y, z). The canonical direction in
-  ! the input frame is row ``k`` of pg_rot (section 4), so this is a dot
-  ! product, exactly as the 5.8 invariants do it with row 3.
+  ! the input frame is row ``k`` of pg_rot, so this is a dot
+  ! product, exactly as the identification invariants do it with row 3.
   !
   ! This is a LABELLING test and it is deliberately tight (1e-4, 0.8
   ! degree): it must answer "is this element one of the cartesian axes",
@@ -560,7 +560,7 @@ logical function pg_axis_along(axis, k)
   ! a geometry symmetric to 1e-12 that tilt is 1e-9, and it stays below 1e-7
   ! for any :c:data:`pg_tol` up to 1e-2.
   !
-  ! The invariants of section 5.8 use 1/2 instead: they must survive a
+  ! The identification invariants use 1/2 instead: they must survive a
   ! geometry that is symmetric only within :c:data:`pg_tol`.
   END_DOC
   double precision, intent(in) :: axis(3)
@@ -643,7 +643,7 @@ subroutine pg_decode_kind(kind, det, m, k)
 end subroutine pg_decode_kind
 
 !-----------------------------------------------------------------------
-! Closed-form group order of a name (SPEC.md section 5.8 cross-check).
+! Closed-form group order of a name, used as a cross-check.
 !-----------------------------------------------------------------------
 subroutine pg_expected_order(name, order, ierr)
   implicit none
@@ -749,7 +749,7 @@ end subroutine pg_read_int
   implicit none
   BEGIN_DOC
   ! Highest proper-rotation order, and number of distinct lines carrying an
-  ! axis of that order (SPEC.md sections 5 and 5.8).
+  ! axis of that order.
   END_DOC
   integer :: znum(nucl_num), ierr, i
   double precision :: axis(3)
@@ -891,11 +891,11 @@ END_PROVIDER
     enddo
 
     call pg_elem_props(rot(1:3,1:3,i), pg_elem_angle(i), axis, pg_elem_det(i))
-    ! SPEC.md section 5.7 defines the axis as the eigenvector of the stored
-    ! matrix, and section 5 declares pg_rot_mat to be in the input frame:
-    ! keep pg_elem_axis in that same frame. Section 5.8 then compares it
-    ! with pg_rot(3,:) (the canonical z expressed in the input frame);
-    ! sections 6 and 8 must apply pg_rot if they want canonical components.
+    ! pg_elem_axis is the eigenvector of the stored matrix, and pg_rot_mat
+    ! is in the input frame: keep pg_elem_axis in that same frame. The
+    ! identification then compares it with pg_rot(3,:) (the canonical z
+    ! expressed in the input frame); the column matching and the MO
+    ! projectors must apply pg_rot if they want canonical components.
     pg_elem_axis(1:3,i) = axis(1:3)
     call pg_reduce_angle(pg_elem_angle(i), m, k, ierr)
     if (ierr /= 0) then
@@ -911,12 +911,12 @@ END_PROVIDER
 END_PROVIDER
 
 !-----------------------------------------------------------------------
-! Measured symmetry breaking of the stored geometry (SPEC.md section 5).
+! Measured symmetry breaking of the stored geometry.
 ! Uses the stored matrices and permutations: no rotation is rebuilt here
 ! and pg_maps_to_self is not consulted, so the number reports the input,
 ! not the matching. It is what tells a G1 failure apart: residual ~1e-16
-! with a large G1 is a code bug, residual ~1e-8 is the fixture (section
-! 8.5). Units are bohr, like nucl_coord.
+! with a large G1 is a code bug, residual ~1e-8 is the fixture.
+! Units are bohr, like nucl_coord.
 !-----------------------------------------------------------------------
  BEGIN_PROVIDER [ double precision, pg_geom_residual ]
   implicit none
@@ -951,11 +951,11 @@ END_PROVIDER
   ! Index of the inverse of every element: the inverse atom permutation with
   ! the same determinant. Exact, no tolerance: ``h`` is the inverse of ``g`` iff
   ! its permutation is the inverse one and ``det`` agrees, and the enumeration
-  ! stores permutations, never re-matches matrices (5.5).
+  ! stores permutations, never re-matches matrices.
   !
-  ! Section 6 needs it to close a column under inversion: a geometric class
-  ! is not closed under inversion (in C3 the class {C3} has its inverse in
-  ! the class {C3^2}), while a file column always is.
+  ! The column matching needs it to close a column under inversion: a
+  ! geometric class is not closed under inversion (in C3 the class {C3}
+  ! has its inverse in the class {C3^2}), while a file column always is.
   END_DOC
   integer :: inv_perm(nucl_num), i, j
   double precision :: rm(3,3)
@@ -1010,7 +1010,7 @@ END_PROVIDER
   ! with a 1e-8 threshold is then a coin flip (measured on NH3: the C3 axis
   ! is tilted by 4.9e-9, 18 of the 36 products miss). The (permutation,
   ! determinant) key is exact and is the identity criterion the enumeration
-  ! itself uses (5.5).
+  ! itself uses.
   !
   ! The table is :math:`|G|^2 integers: 64 kB at the worst case :math:`|G|` = 128. Today the
   ! only consumer is gate G2; it is also what a product of two irreps will
@@ -1079,7 +1079,7 @@ integer function pg_find_by_perm(p, det)
   ! determinant ``det``, or 0. This is the enumeration's own identity
   ! criterion (:c:func:`pg_add_element`): two orthogonal maps that permute the atoms
   ! identically and share their determinant are the same element. No matrix
-  ! is ever compared (SPEC.md section 5.5).
+  ! is ever compared.
   END_DOC
   integer, intent(in) :: p(nucl_num), det
   integer :: j, k
@@ -1114,7 +1114,7 @@ integer function pg_find_by_mat(r)
   ! exact multiples of 2 pi / 31) and a transpose or a product of two stored
   ! matrices is within 1e-15 of a stored one. The generic branch must keep
   ! :c:func:`pg_find_by_perm`: there the matrices carry the tilt of a candidate
-  ! direction, and a 1e-8 matrix comparison is a coin flip (SPEC.md 5.5).
+  ! direction, and a 1e-8 matrix comparison is a coin flip.
   END_DOC
   double precision, intent(in) :: r(3,3)
   integer :: j
@@ -1241,13 +1241,13 @@ END_PROVIDER
 &BEGIN_PROVIDER [ integer, pg_n_c2_perp ]
   implicit none
   BEGIN_DOC
-  ! section 5.8 invariants.
+  ! Measured invariants used by the identification.
   !
   ! pg_n_sigma_vtot counts *all* vertical reflections, i.e. the planes whose
   ! normal is not along z. It equals n_max in both D_nh and D_nd, which is
   ! all the tree needs (n_sigma_h is tested first, so the two never
   ! conflict). There is no sigma_v/sigma_d split here: the split is a
-  ! labelling device, it is decided in section 6 from the plane normal, and
+  ! labelling device, it is decided from the plane normal in columns.irp.f, and
   ! it cannot be derived reliably from the geometry alone (the prototype's
   ! bisector test was inverted and still "worked" because both counts were
   ! only ever summed).
@@ -1303,12 +1303,12 @@ END_PROVIDER
 END_PROVIDER
 
 !-----------------------------------------------------------------------
-! Identification (SPEC.md section 5.8), restricted to the step-2 groups.
+! Identification, restricted to the step-2 groups.
 !-----------------------------------------------------------------------
  BEGIN_PROVIDER [ character*(16), pg_group_name ]
   implicit none
   BEGIN_DOC
-  ! Name of the point group from the measured invariants (section 5.8).
+  ! Name of the point group from the measured invariants.
   ! Covers all 204 finite groups of the data set; gives up instead of
   ! guessing on inconsistent invariants.
   !
@@ -1385,8 +1385,8 @@ END_PROVIDER
     endif
   else if (pg_n_sigma_vtot >= 1) then
     ! Vertical planes only. There is no sigma_v/sigma_d split here: the
-    ! count is the same in D<n>d and D<n>h and the split is decided in
-    ! section 6 from the plane normal.
+    ! count is the same in D<n>d and D<n>h and the split is decided from
+    ! the plane normal in columns.irp.f.
     if (pg_n_c2_perp > 0) then
       write(name,'(A,I0,A)') 'D', pg_n_max, 'd'
     else
@@ -1443,8 +1443,8 @@ END_PROVIDER
            ', n_C2_perp = ', pg_n_c2_perp
       write(6,'(A)') 'symmetry: the accepted elements do not close to '// &
            'a group of this geometry within pg_tol. Elements are '// &
-           'accepted one at a time (SPEC.md 5.2) and products are not '// &
-           're-matched (5.5), so a product of two elements accepted at '// &
+           'accepted one at a time and products are not re-matched, so a '// &
+           'product of two elements accepted at '// &
            'pg_tol is only a symmetry to 2*pg_tol. This happens for a '// &
            'geometry that is symmetric to within a few pg_tol only; '// &
            'lower pg_tol (fewer elements accepted) or raise it above '// &

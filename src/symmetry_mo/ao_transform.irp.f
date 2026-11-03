@@ -1,5 +1,5 @@
 !-----------------------------------------------------------------------
-! Exact AO and MO representation matrices (SPEC.md section 7).
+! Exact AO and MO representation matrices.
 !
 ! The only data that exists is the group elements' rotation matrices in the
 ! *input* frame (:c:data:`pg_rot_mat`), the atom permutation (:c:data:`pg_perm`) and the AO
@@ -9,7 +9,7 @@
 !   X_g      = C^T S M_g C            (MO basis)
 !
 ! with T_g = Sym^l(R_g) on the Cartesian monomials of the shell and B_p the
-! AO factor of SPEC.md section 7, ``ao_coef_normalized(p,j) = A_j B_p``. B_p
+! AO factor, ``ao_coef_normalized(p,j) = A_j B_p``. B_p
 ! is read from :c:data:`ao_coef_normalized` itself (:c:func:`pg_ao_ratio`), never from
 ! :c:data:`ao_coef_normalization_factor`: the two agree in the modern EZFIO
 ! convention but not in the pre-2025 one, where the primitive factor also
@@ -17,7 +17,7 @@
 ! of the two multiplicative pieces. No matrix is stored across calls:
 ! :math:`|G|` can be 128 and ao_num 500, which would be 256 MB of dense matrices.
 !
-! Section 7 of SPEC.md derives M_g[q,p] = T_g[q,p] B_p/B_q from
+! The exact representation is M_g[q,p] = T_g[q,p] B_p/B_q, derived from
 !   chi_p = sum_j A_j B_p v_p g_j ,  A_j = ao_coef(p,j)*prim_normalization(j)
 ! which holds exactly in the modern and in the legacy EZFIO conventions but
 ! *not* in the pre-2025 GAMESS one (there A_j depends on the AO powers and
@@ -26,7 +26,7 @@
 ! it: it uses ao_coef_normalized ratios only, never ao_coef/ao_coef_normalized.
 !
 ! The authoritative test of all of this is G-iso, M_g^T S M_g = S, which
-! needs no MOs (SPEC.md section 8).
+! needs no MOs.
 !-----------------------------------------------------------------------
 
 BEGIN_PROVIDER [ integer, pg_shell_target, (shell_num, pg_n_elem) ]
@@ -101,7 +101,7 @@ subroutine pg_check_ao_factor(ierr, msg)
   ! ``ao_coef_normalized(p,j)/ao_coef_normalized(p0,j)`` are independent of the
   ! primitive ``j`` (``p0`` = first AO of the shell). Cross-multiplied so that a
   ! zero coefficient needs no special case. This is the j-independence test
-  ! of SPEC.md section 7: no double factorial, no hardcoded convention.
+  ! of the representation: no double factorial, no hardcoded convention.
   END_DOC
   integer, intent(out) :: ierr
   character*(512), intent(out) :: msg
@@ -159,7 +159,7 @@ logical function pg_shell_same(s1, s2)
   BEGIN_DOC
   ! True when the two shells have the same angular momentum and the same
   ! contraction: same number of primitives, same *sorted* exponents and the
-  ! primitive coefficients that go with them, to 1e-10 (SPEC.md section 7).
+  ! primitive coefficients that go with them, to 1e-10.
   ! ``ao_coef`` (raw), never :c:data:`ao_coef_normalized`: the latter legitimately
   ! differs between AOs of the same shell when their powers differ.
   END_DOC
@@ -229,7 +229,7 @@ subroutine pg_ao_rep(ig, m)
   BEGIN_DOC
   ! ``m`` = M_g in the AO basis, a dense (ao_num x ao_num) matrix, block
   ! diagonal by shell: shell ``s`` maps onto ``pg_shell_target(s,g)`` and its
-  ! block is Sym^l(R_g) rescaled by B_p/B_q (SPEC.md section 7).
+  ! block is Sym^l(R_g) rescaled by B_p/B_q.
   END_DOC
   integer, intent(in) :: ig
   double precision, intent(out) :: m(ao_num,ao_num)
@@ -237,7 +237,7 @@ subroutine pg_ao_rep(ig, m)
 end subroutine pg_ao_rep
 
 !-----------------------------------------------------------------------
-! AO factor ratio B_p/B_q (SPEC.md section 7).
+! AO factor ratio B_p/B_q.
 !-----------------------------------------------------------------------
 double precision function pg_ao_ratio(p, q)
   implicit none
@@ -340,8 +340,8 @@ subroutine pg_monomial_rep(l, r, np, powp, nq, powq, t)
   implicit none
   BEGIN_DOC
   ! Builds ``t`` such that ``U_g v_p = sum_q t(q,p) v_q`` with
-  ! ``v_p(r) = r_x^a r_y^b r_z^c`` and ``U_g f(r) = f(R^-1 r)`` (SPEC.md section
-  ! 7). ``R(j,i)`` appears with the *row* index running over x,y,z: expanding
+  ! ``v_p(r) = r_x^a r_y^b r_z^c`` and ``U_g f(r) = f(R^-1 r)``.
+  ! ``R(j,i)`` appears with the *row* index running over x,y,z: expanding
   ! ``(sum_j R(j,i) r_j)^p_i``, the coefficient of ``r_j`` is ``R(j,i)``.
   !
   ! The product is accumulated as p_i successive multiplications by the
@@ -397,8 +397,8 @@ end subroutine pg_monomial_rep
 subroutine pg_get_mo_rep(ig, x)
   implicit none
   BEGIN_DOC
-  ! ``x`` = C^T S M_g C, the matrix of group element ``ig`` in the MO basis
-  ! (SPEC.md section 7). Nothing is kept between calls: the caller loops on
+  ! ``x`` = C^T S M_g C, the matrix of group element ``ig`` in the MO basis.
+  ! Nothing is kept between calls: the caller loops on
   ! the elements and holds one ``x`` at a time.
   !
   ! ``matmul``, not ``dgemm``: the matrices are at most a few hundred wide in

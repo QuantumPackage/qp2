@@ -370,7 +370,7 @@ Providers
     (i,j), i /= j, when :math:`|X_g(j,i)|^2` > pg_thresh for SOME element g. The edge
     test is on a WEIGHT, the same number and the same units as the label cut:
     the assembly defect delta_MO is a weight defect, so the spurious amplitude
-    between two MOs of different irreps is sqrt(delta_MO) (SPEC.md 8.1). A
+    between two MOs of different irreps is sqrt(delta_MO). A
     block is an irrep space: two different copies of the same irrep stay
     separate because X_g is block diagonal in the symmetry-adapted basis.
     
@@ -419,7 +419,7 @@ Providers
     pg_col_diag(i,c), the expectation value of the projector P^a on MO i.
     
     ``pg_mo_irrep(i)`` = argmax_a p_a(i), or 0 when max_a p_a(i) <
-    1 - pg_thresh: a mixed MO must not get a best-guess label (SPEC.md 8.4).
+    1 - pg_thresh: a mixed MO must not get a best-guess label.
     ``pg_mo_purity(i)`` = max_a p_a(i), 1 for a symmetry-adapted MO and 1 for
     every partner of a degenerate block (P^a is the identity there).
     
@@ -468,7 +468,7 @@ Providers
     (i,j), i /= j, when :math:`|X_g(j,i)|^2` > pg_thresh for SOME element g. The edge
     test is on a WEIGHT, the same number and the same units as the label cut:
     the assembly defect delta_MO is a weight defect, so the spurious amplitude
-    between two MOs of different irreps is sqrt(delta_MO) (SPEC.md 8.1). A
+    between two MOs of different irreps is sqrt(delta_MO). A
     block is an irrep space: two different copies of the same irrep stay
     separate because X_g is block diagonal in the symmetry-adapted basis.
     
@@ -520,7 +520,7 @@ Providers
     (i,j), i /= j, when :math:`|X_g(j,i)|^2` > pg_thresh for SOME element g. The edge
     test is on a WEIGHT, the same number and the same units as the label cut:
     the assembly defect delta_MO is a weight defect, so the spurious amplitude
-    between two MOs of different irreps is sqrt(delta_MO) (SPEC.md 8.1). A
+    between two MOs of different irreps is sqrt(delta_MO). A
     block is an irrep space: two different copies of the same irrep stay
     separate because X_g is block diagonal in the symmetry-adapted basis.
     
@@ -569,7 +569,7 @@ Providers
     pg_col_diag(i,c), the expectation value of the projector P^a on MO i.
     
     ``pg_mo_irrep(i)`` = argmax_a p_a(i), or 0 when max_a p_a(i) <
-    1 - pg_thresh: a mixed MO must not get a best-guess label (SPEC.md 8.4).
+    1 - pg_thresh: a mixed MO must not get a best-guess label.
     ``pg_mo_purity(i)`` = max_a p_a(i), 1 for a symmetry-adapted MO and 1 for
     every partner of a degenerate block (P^a is the identity there).
     
@@ -615,7 +615,7 @@ Providers
     pg_col_diag(i,c), the expectation value of the projector P^a on MO i.
     
     ``pg_mo_irrep(i)`` = argmax_a p_a(i), or 0 when max_a p_a(i) <
-    1 - pg_thresh: a mixed MO must not get a best-guess label (SPEC.md 8.4).
+    1 - pg_thresh: a mixed MO must not get a best-guess label.
     ``pg_mo_purity(i)`` = max_a p_a(i), 1 for a symmetry-adapted MO and 1 for
     every partner of a degenerate block (P^a is the identity there).
     
@@ -661,7 +661,7 @@ Providers
     pg_col_diag(i,c), the expectation value of the projector P^a on MO i.
     
     ``pg_mo_irrep(i)`` = argmax_a p_a(i), or 0 when max_a p_a(i) <
-    1 - pg_thresh: a mixed MO must not get a best-guess label (SPEC.md 8.4).
+    1 - pg_thresh: a mixed MO must not get a best-guess label.
     ``pg_mo_purity(i)`` = max_a p_a(i), 1 for a symmetry-adapted MO and 1 for
     every partner of a degenerate block (P^a is the identity there).
     
@@ -710,7 +710,7 @@ Providers
     (i,j), i /= j, when :math:`|X_g(j,i)|^2` > pg_thresh for SOME element g. The edge
     test is on a WEIGHT, the same number and the same units as the label cut:
     the assembly defect delta_MO is a weight defect, so the spurious amplitude
-    between two MOs of different irreps is sqrt(delta_MO) (SPEC.md 8.1). A
+    between two MOs of different irreps is sqrt(delta_MO). A
     block is an irrep space: two different copies of the same irrep stay
     separate because X_g is block diagonal in the symmetry-adapted basis.
     
@@ -863,7 +863,7 @@ Subroutines / functions
 
     ``m`` = M_g in the AO basis, a dense (ao_num x ao_num) matrix, block
     diagonal by shell: shell ``s`` maps onto ``pg_shell_target(s,g)`` and its
-    block is Sym^l(R_g) rescaled by B_p/B_q (SPEC.md section 7).
+    block is Sym^l(R_g) rescaled by B_p/B_q.
 
     Needs:
 
@@ -944,7 +944,7 @@ Subroutines / functions
     ``ao_coef_normalized(p,j)/ao_coef_normalized(p0,j)`` are independent of the
     primitive ``j`` (``p0`` = first AO of the shell). Cross-multiplied so that a
     zero coefficient needs no special case. This is the j-independence test
-    of SPEC.md section 7: no double factorial, no hardcoded convention.
+    of the representation: no double factorial, no hardcoded convention.
 
     Needs:
 
@@ -978,7 +978,7 @@ Subroutines / functions
 
     ``dev`` = max ``X_g X_h - X_{gh}`` for one pair. The product element comes
     from :c:data:`pg_elem_mul`, which is built from the permutations: no matrix is
-    ever matched (SPEC.md section 5.5).
+    ever matched.
 
     Needs:
 
@@ -1013,8 +1013,8 @@ Subroutines / functions
         subroutine pg_get_mo_rep(ig, x)
 
 
-    ``x`` = C^T S M_g C, the matrix of group element ``ig`` in the MO basis
-    (SPEC.md section 7). Nothing is kept between calls: the caller loops on
+    ``x`` = C^T S M_g C, the matrix of group element ``ig`` in the MO basis.
+    Nothing is kept between calls: the caller loops on
     the elements and holds one ``x`` at a time.
     
     ``matmul``, not ``dgemm``: the matrices are at most a few hundred wide in
@@ -1067,7 +1067,7 @@ Subroutines / functions
     This is the guard that keeps a labelling of a basis that is not
     symmetry adapted away from the Davidson fast path and from the
     ``mo_symmetry`` write. The reports themselves accept such a basis and
-    print irrep probabilities instead (NOTES section 10).
+    print irrep probabilities instead.
 
     Needs:
 
@@ -1121,8 +1121,8 @@ Subroutines / functions
 
 
     Builds ``t`` such that ``U_g v_p = sum_q t(q,p) v_q`` with
-    ``v_p(r) = r_x^a r_y^b r_z^c`` and ``U_g f(r) = f(R^-1 r)`` (SPEC.md section
-    7). ``R(j,i)`` appears with the *row* index running over x,y,z: expanding
+    ``v_p(r) = r_x^a r_y^b r_z^c`` and ``U_g f(r) = f(R^-1 r)``.
+    ``R(j,i)`` appears with the *row* index running over x,y,z: expanding
     ``(sum_j R(j,i) r_j)^p_i``, the coefficient of ``r_j`` is ``R(j,i)``.
     
     The product is accumulated as p_i successive multiplications by the
@@ -1213,9 +1213,8 @@ Subroutines / functions
 
     ``ok`` is true when a group name could be measured. Never stops.
     
-    :c:data:`pg_inertia_eval` comes first: it rejects the geometry before any
-    enumeration (no nucleus, a linear molecule, since Cinfv/Dinfh
-    labelling is not implemented, or a failed diagonalization). The
+    :c:data:`pg_inertia_eval` comes first: it rejects a geometry with no
+    nucleus, or all nuclei at the centre, before any enumeration. The
     group name is a second step because a geometry that only looks
     symmetric gives up later, in the invariants, and an empty name must
     not be reported as ready.
@@ -1336,8 +1335,8 @@ Subroutines / functions
     bound of G-iso is not machine precision: :c:data:`ao_overlap` itself is only
     group symmetric to ~3e-9 (see the comment at the measurement below).
     
-    ``delta_mo`` is returned so that the MO report can size its G5 window
-    (SPEC.md 8.5): it is the accuracy floor of every purity in chapter 8.
+    ``delta_mo`` is returned so that the MO report can size its G5 window:
+    it is the accuracy floor of every MO purity.
 
     Needs:
 
@@ -1384,13 +1383,13 @@ Subroutines / functions
         subroutine pg_report_mo(delta_mo, write_mo)
 
 
-    Prints the label of every MO and the last four gates of SPEC.md 8.5:
+    Prints the label of every MO and the last four MO purity gates:
     
     ``G3``
         every tr P^a is an integer (1e-6) and a multiple of d_a, i.e. n_a
-        copies of irrep a. Authoritative test of the column matching of
-        section 6: a sv/sd swap in an Abelian group changes n_a and is
-        invisible to every earlier test.
+        copies of irrep a. Authoritative test of the column matching:
+        a sv/sd swap in an Abelian group changes n_a and is invisible to
+        every earlier test.
     
     ``G4``
         sum_a tr P^a = mo_num (1e-6).
@@ -1417,7 +1416,7 @@ Subroutines / functions
     only as good as the geometry tolerance (measured: 2.3e-8 on X_g X_gh for
     the C3 axis of NH3 at pg_tol = 1e-4 bohr), and P^a is a linear
     combination of X_g, so :math:`||P^2 - P||` grows as (d_a/mult_a)^2 times that
-    floor (SPEC.md 8.5). A wrong column matching, a wrong mult_a or a
+    floor. A wrong column matching, a wrong mult_a or a
     missing irrep is O(1) in these gates.
     
     ``delta_mo`` is the representation floor measured by the AO report (the
@@ -1479,7 +1478,7 @@ Subroutines / functions
     false.
     
     This body names :c:func:`pg_symmetry_ready` only, so the guard runs before any
-    provider of the chain is entered (section 9.2b, R1).
+    provider of the chain is entered.
 
     Calls:
 
@@ -1568,7 +1567,7 @@ Subroutines / functions
 
     True when the two shells have the same angular momentum and the same
     contraction: same number of primitives, same *sorted* exponents and the
-    primitive coefficients that go with them, to 1e-10 (SPEC.md section 7).
+    primitive coefficients that go with them, to 1e-10.
     ``ao_coef`` (raw), never :c:data:`ao_coef_normalized`: the latter legitimately
     differs between AOs of the same shell when their powers differ.
 

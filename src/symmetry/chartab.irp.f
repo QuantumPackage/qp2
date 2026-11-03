@@ -1,7 +1,6 @@
-! Character tables: pure parser (SPEC.md section 3).
+! Character tables: pure parser.
 !
-! The layout below was measured on all 211 files of Symmetry/ (and is the
-! one documented in SPEC.md section 3):
+! The layout below was measured on all 211 files of Symmetry/:
 !
 !   Group<TAB><name>                     line 1   (informational only: the
 !                                                  group name is the file name)
@@ -28,8 +27,8 @@
 !  * characters are written as floats with 5 decimals, so a list-directed
 !    READ of a numeric row is safe;
 !  * the group name is taken from the FILE NAME, never from line 1;
-!  * N runs from 1 (C1) to 38 (D32h), not "up to 32" as SPEC.md section 3
-!    states, so the parser accepts up to pg_table_nmax = 64.
+!  * N runs from 1 (C1) to 38 (D32h), not "up to 32", so the parser
+!    accepts up to pg_table_nmax = 64.
 
 subroutine pg_parse_table(file, group_name, n_irrep, n_class, &
      irrep_name, sym, char, ierr)
@@ -44,8 +43,8 @@ subroutine pg_parse_table(file, group_name, n_irrep, n_class, &
   ! :n_irrep:    number of irreps (rows) read from line 2
   ! :n_class:    number of table columns (the file format calls them
   !              classes; it is == ``n_irrep`` in the data set). This is NOT
-  !              the geometric class count of SPEC.md section 5: C3 has two
-  !              columns and three classes (SPEC.md section 6).
+  !              the geometric class count: C3 has two columns and
+  !              three classes.
   ! :irrep_name: irrep names, first ``n_irrep`` entries set
   ! :sym:        class symbols as found in the file
   ! :char:       characters, ``char(a,c)`` = chi_a(C_c)
@@ -323,7 +322,7 @@ subroutine pg_count_tokens(line, ntok)
 end subroutine pg_count_tokens
 
 !-----------------------------------------------------------------------
-! Locate a character table in $QP_ROOT/data/Symmetry (SPEC.md section 3).
+! Locate a character table in $QP_ROOT/data/Symmetry.
 !-----------------------------------------------------------------------
 subroutine pg_character_table_path(group, path, ierr)
   implicit none

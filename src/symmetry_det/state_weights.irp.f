@@ -1,5 +1,5 @@
 !-----------------------------------------------------------------------
-! State symmetry weights (SPEC.md section 10).
+! State symmetry weights.
 !
 ! w_a(s) = :math:`<Psi_s|P^a|Psi_s>`, with the SAME projector P^a as the MO and
 ! determinant labels. On a family of size np,
@@ -31,7 +31,7 @@ BEGIN_PROVIDER [ double precision, pg_state_irrep_weight, (pg_n_irrep,N_states) 
   implicit none
   BEGIN_DOC
   ! ``pg_state_irrep_weight(a,s)`` = w_a(s), the weight of irrep ``a`` in
-  ! state ``s``: the diagonal matrix element of the projector of section 8
+  ! state ``s``: the diagonal matrix element of the MO projector
   ! in the state, not an occupation-number guess. Computed by
   ! :c:func:`pg_state_weight_matrix`, which the irrep filter also calls.
   !
@@ -45,7 +45,7 @@ BEGIN_PROVIDER [ double precision, pg_state_irrep_weight, (pg_n_irrep,N_states) 
   ! that belong to no symmetry group on their own.
   !
   ! ``pg_state_norm(s)`` = sum_D c_D(s)^2, the exact value of
-  ! sum_a w_a(s) (SPEC.md 10.2). A deficit means psi_coef is not
+  ! sum_a w_a(s). A deficit means psi_coef is not
   ! normalized in the determinant basis; it never means that the CI space
   ! is not group invariant.
   END_DOC

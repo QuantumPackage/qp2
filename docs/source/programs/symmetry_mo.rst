@@ -20,7 +20,7 @@ symmetry_mo
  other QP2 program. 
   
  An optional environment variable ``PG_WRITE_MO_SYMMETRY=1`` writes the 
- labels into ``mo_basis/mo_symmetry`` (SPEC.md section 11). Nothing is 
+ labels into ``mo_basis/mo_symmetry``. Nothing is 
  written when a gate fails, so a written field is always a checked one. 
  An environment variable is used because :c:data:`ezfio_filename` stops unless the 
  command line has exactly one argument. 

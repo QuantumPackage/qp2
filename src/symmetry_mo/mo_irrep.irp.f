@@ -1,5 +1,5 @@
 !-----------------------------------------------------------------------
-! MO irrep labels (SPEC.md section 8).
+! MO irrep labels.
 !
 ! Every sum below runs over the COLUMNS of the character table, never over
 ! the geometric classes. A column may be the union of several classes and of
@@ -50,7 +50,7 @@ BEGIN_PROVIDER [ double precision, pg_col_diag, (mo_num,pg_n_col) ]
   ! (i,j), i /= j, when :math:`|X_g(j,i)|^2` > pg_thresh for SOME element g. The edge
   ! test is on a WEIGHT, the same number and the same units as the label cut:
   ! the assembly defect delta_MO is a weight defect, so the spurious amplitude
-  ! between two MOs of different irreps is sqrt(delta_MO) (SPEC.md 8.1). A
+  ! between two MOs of different irreps is sqrt(delta_MO). A
   ! block is an irrep space: two different copies of the same irrep stay
   ! separate because X_g is block diagonal in the symmetry-adapted basis.
   !
@@ -88,7 +88,7 @@ BEGIN_PROVIDER [ double precision, pg_col_diag, (mo_num,pg_n_col) ]
   enddo
 
   !---------------------------------------------------------------------
-  ! One pass over the group, column by column (SPEC.md section 8.1).
+  ! One pass over the group, column by column.
   !---------------------------------------------------------------------
   do c = 1, pg_n_col
     do m = pg_col_start(c), pg_col_start(c) + pg_col_len(c) - 1
@@ -170,7 +170,7 @@ BEGIN_PROVIDER [ double precision, pg_mo_weight, (mo_num,pg_n_irrep) ]
   ! pg_col_diag(i,c), the expectation value of the projector P^a on MO i.
   !
   ! ``pg_mo_irrep(i)`` = argmax_a p_a(i), or 0 when max_a p_a(i) <
-  ! 1 - pg_thresh: a mixed MO must not get a best-guess label (SPEC.md 8.4).
+  ! 1 - pg_thresh: a mixed MO must not get a best-guess label.
   ! ``pg_mo_purity(i)`` = max_a p_a(i), 1 for a symmetry-adapted MO and 1 for
   ! every partner of a degenerate block (P^a is the identity there).
   !
@@ -201,7 +201,7 @@ BEGIN_PROVIDER [ double precision, pg_mo_weight, (mo_num,pg_n_irrep) ]
 
   do a = 1, pg_n_irrep
     ! d_a/mult_a, not d_a: the stored row of a complex-conjugate pair is
-    ! twice the real part of a single row (SPEC.md 8.2).
+    ! twice the real part of a single row.
     norm = dble(pg_irrep_dim(a)) &
          / (dble(pg_irrep_mult(a))*dble(pg_n_elem))
     do i = 1, mo_num
@@ -298,7 +298,7 @@ subroutine pg_mo_top2(i, a1, a2)
 end subroutine pg_mo_top2
 
 !-----------------------------------------------------------------------
-! Persistence (SPEC.md section 11).
+! Persistence.
 !-----------------------------------------------------------------------
 subroutine pg_write_mo_symmetry()
   implicit none

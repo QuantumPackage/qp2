@@ -12,7 +12,7 @@ program symmetry
   ! other QP2 program.
   !
   ! An optional environment variable ``PG_WRITE_MO_SYMMETRY=1`` writes the
-  ! labels into ``mo_basis/mo_symmetry`` (SPEC.md section 11). Nothing is
+  ! labels into ``mo_basis/mo_symmetry``. Nothing is
   ! written when a gate fails, so a written field is always a checked one.
   ! An environment variable is used because :c:data:`ezfio_filename` stops unless the
   ! command line has exactly one argument.
@@ -55,7 +55,7 @@ subroutine pg_report(write_mo)
   write(6,'(A,3(1X,F16.8))') 'centre of mass (bohr):', pg_center(1:3)
 
   !---------------------------------------------------------------------
-  ! Canonical frame (SPEC.md section 4).
+  ! Canonical frame.
   !---------------------------------------------------------------------
   write(6,'(A)') ''
   write(6,'(A)') 'canonical frame (rows of pg_rot, in the input frame):'
@@ -75,7 +75,7 @@ subroutine pg_report(write_mo)
   enddo
 
   !---------------------------------------------------------------------
-  ! Group and classes (SPEC.md section 5).
+  ! Group and classes.
   !---------------------------------------------------------------------
   write(6,'(A)') ''
   write(6,'(A,A)') 'point group     : ', trim(pg_group_name)
@@ -83,7 +83,7 @@ subroutine pg_report(write_mo)
   write(6,'(A,I0)') 'n_max           : ', pg_n_max
   write(6,'(A,I0)') 'n_axes_max      : ', pg_n_axes_max
   write(6,'(A,I0)') 'classes         : ', pg_n_class
-  ! Measured symmetry breaking of the stored geometry (SPEC.md section 5).
+  ! Measured symmetry breaking of the stored geometry.
   write(6,'(A,ES12.4,A,ES12.4,A)') 'geometry residual : ', pg_geom_residual, &
        '  bohr  (max |R r - r_perm|; pg_tol = ', pg_tol, ')'
 
@@ -115,13 +115,13 @@ subroutine pg_report(write_mo)
        pg_n_sigma_vtot, '  n_C2_perp=', pg_n_c2_perp
 
   !---------------------------------------------------------------------
-  ! AO/MO representation matrices and gates (SPEC.md sections 7 and 8).
+  ! AO/MO representation matrices and gates.
   !---------------------------------------------------------------------
   write(6,'(A)') ''
   call pg_report_ao(delta_mo)
 
   !---------------------------------------------------------------------
-  ! Character table (SPEC.md section 6), from the installed data.
+  ! Character table, from the installed data.
   !---------------------------------------------------------------------
   call pg_character_table_path(pg_group_name, path, ierr)
   if (ierr /= 0) then
@@ -137,7 +137,7 @@ subroutine pg_report(write_mo)
 
   ! The table is reported through the providers of columns.irp.f, not by
   ! re-parsing the file here: this is what makes the driver a test of the
-  ! column matcher (SPEC.md section 6) and not only of the parser.
+  ! column matcher and not only of the parser.
   write(6,'(A,A)') 'character table : ', trim(path)
   write(6,'(A,A,A,I4,A,I4,A,I4)') 'group           : ', &
        trim(adjustl(pg_group_name)), '   |G| = ', pg_n_elem, &
@@ -193,7 +193,7 @@ subroutine pg_report(write_mo)
        pg_n_elem
 
   !---------------------------------------------------------------------
-  ! MO irrep labels and gates G3..G6 (SPEC.md sections 8.3-8.5).
+  ! MO irrep labels and gates G3..G6.
   !---------------------------------------------------------------------
   call pg_report_mo(delta_mo, write_mo)
 end subroutine pg_report
@@ -228,7 +228,7 @@ end subroutine pg_perm_string
 
 
 !-----------------------------------------------------------------------
-! AO representation matrices, and gates G-iso, G1, G2 (SPEC.md 7, 8).
+! AO representation matrices, and gates G-iso, G1, G2.
 !-----------------------------------------------------------------------
 subroutine pg_report_ao(delta_mo)
   implicit none
@@ -255,8 +255,8 @@ subroutine pg_report_ao(delta_mo)
   ! bound of G-iso is not machine precision: :c:data:`ao_overlap` itself is only
   ! group symmetric to ~3e-9 (see the comment at the measurement below).
   !
-  ! ``delta_mo`` is returned so that the MO report can size its G5 window
-  ! (SPEC.md 8.5): it is the accuracy floor of every purity in chapter 8.
+  ! ``delta_mo`` is returned so that the MO report can size its G5 window:
+  ! it is the accuracy floor of every MO purity.
   END_DOC
   logical :: has_ao
   integer :: g, h, k, n_pair, ne, g_worst, h_worst, iw, jw, loc(2)
@@ -327,7 +327,7 @@ subroutine pg_report_ao(delta_mo)
   endif
 
   !---------------------------------------------------------------------
-  ! G1: the MO set is orthonormal in the AO metric (SPEC.md 8.5). No group
+  ! G1: the MO set is orthonormal in the AO metric. No group
   ! element enters this test, it is well conditioned, and it must run whether
   ! or not the MO space is complete, so it comes first in the MO part.
   !---------------------------------------------------------------------
@@ -363,7 +363,7 @@ subroutine pg_report_ao(delta_mo)
   deallocate(cv, cw, csc)
 
   !---------------------------------------------------------------------
-  ! delta_MO: DIAGNOSTIC, never a gate (SPEC.md 8.5). For square C with
+  ! delta_MO: DIAGNOSTIC, never a gate. For square C with
   ! C^T S C = 1 one has C C^T = S^{-1}, hence EXACTLY
   !     X_g^T X_g - 1 = C^T (M_g^T S M_g - S) C = C^T deltaS_g C ,
   ! i.e. G-iso transported into the MO metric and amplified by at most
@@ -371,8 +371,8 @@ subroutine pg_report_ao(delta_mo)
   ! not, and it is not a symmetry-adaptation test. An absolute threshold on
   ! it is meaningless: benzene 6-31G measures 2.7e-7 at G-iso = 4.0e-9 on a
   ! geometry symmetric to 2.2e-15 bohr. What it does measure is the
-  ! representation floor of chapter 8, so the report prints it and the MO
-  ! report sizes its G5 window with it.
+  ! representation floor of the MO purity gates, so the report prints it and
+  ! uses it to size its G5 window.
   !---------------------------------------------------------------------
   allocate(x(mo_num,mo_num), y(mo_num,mo_num))
   delta_mo = 0.d0
@@ -477,7 +477,7 @@ subroutine pg_g2_pair(g, h, dev)
   BEGIN_DOC
   ! ``dev`` = max ``X_g X_h - X_{gh}`` for one pair. The product element comes
   ! from :c:data:`pg_elem_mul`, which is built from the permutations: no matrix is
-  ! ever matched (SPEC.md section 5.5).
+  ! ever matched.
   END_DOC
   integer, intent(in) :: g, h
   double precision, intent(out) :: dev
@@ -500,18 +500,18 @@ subroutine pg_g2_pair(g, h, dev)
 end subroutine pg_g2_pair
 
 !-----------------------------------------------------------------------
-! MO irrep labels, and gates G3..G6 (SPEC.md sections 8.3-8.5).
+! MO irrep labels, and gates G3..G6.
 !-----------------------------------------------------------------------
 subroutine pg_report_mo(delta_mo, write_mo)
   implicit none
   BEGIN_DOC
-  ! Prints the label of every MO and the last four gates of SPEC.md 8.5:
+  ! Prints the label of every MO and the last four MO purity gates:
   !
   ! ``G3``
   !     every tr P^a is an integer (1e-6) and a multiple of d_a, i.e. n_a
-  !     copies of irrep a. Authoritative test of the column matching of
-  !     section 6: a sv/sd swap in an Abelian group changes n_a and is
-  !     invisible to every earlier test.
+  !     copies of irrep a. Authoritative test of the column matching:
+  !     a sv/sd swap in an Abelian group changes n_a and is invisible to
+  !     every earlier test.
   !
   ! ``G4``
   !     sum_a tr P^a = mo_num (1e-6).
@@ -538,7 +538,7 @@ subroutine pg_report_mo(delta_mo, write_mo)
   ! only as good as the geometry tolerance (measured: 2.3e-8 on X_g X_gh for
   ! the C3 axis of NH3 at pg_tol = 1e-4 bohr), and P^a is a linear
   ! combination of X_g, so :math:`||P^2 - P||` grows as (d_a/mult_a)^2 times that
-  ! floor (SPEC.md 8.5). A wrong column matching, a wrong mult_a or a
+  ! floor. A wrong column matching, a wrong mult_a or a
   ! missing irrep is O(1) in these gates.
   !
   ! ``delta_mo`` is the representation floor measured by the AO report (the
@@ -652,7 +652,7 @@ subroutine pg_report_mo(delta_mo, write_mo)
   !---------------------------------------------------------------------
   ! G5: bounds, trace and completeness of the diagonal of the projectors.
   ! The window of the two purity clauses is w5 = max(1e-8, 10*delta_MO):
-  ! delta_MO is the measured floor of the representation (SPEC.md 8.5), so a
+  ! delta_MO is the measured floor of the representation, so a
   ! well-conditioned but wide basis cannot fail G5 on integral noise alone.
   ! The 1e-6 of the sum rule is an identity of the characters, not a
   ! representation quantity, and stays absolute.
@@ -861,7 +861,7 @@ subroutine pg_report_mo(delta_mo, write_mo)
        'members.'
 
   !---------------------------------------------------------------------
-  ! The invariant that catches a wrong block partition (SPEC.md 8.1). It is
+  ! The invariant that catches a wrong block partition. It is
   ! a property of the BLOCKS, not of the labels: the label test acts on the
   ! weights, so it stays correct (every purity 1.000000) while the block
   ! structure is wrong. A block is one irrep space, and its size is a
@@ -925,7 +925,7 @@ subroutine pg_report_mo(delta_mo, write_mo)
   endif
 
   !---------------------------------------------------------------------
-  ! Persistence (SPEC.md section 11). Only a checked labelling is written.
+  ! Persistence. Only a checked labelling is written.
   !---------------------------------------------------------------------
   if (write_mo) then
     if (n_mixed /= 0) then

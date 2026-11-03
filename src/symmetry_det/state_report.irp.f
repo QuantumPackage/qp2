@@ -1,5 +1,5 @@
 !-----------------------------------------------------------------------
-! State irreps after diagonalization (SPEC.md sections 9 and 10).
+! State irreps after diagonalization.
 !
 ! Printed once at the end of a CI program, never inside the CIPSI loop.
 ! The energies and S^2 values are arguments: they live in module
@@ -14,8 +14,8 @@ subroutine pg_print_state_irreps(energy, s2)
   ! detection was not requested or failed: :c:func:`pg_symmetry_ready` returns
   ! .false. and the failure has already printed its reason. A state with no
   ! definite irrep is described by its irrep probabilities, which are exact
-  ! for the stored CI space even when the MO basis is not symmetry adapted
-  ! (NOTES section 10). ``energy`` and ``s2`` are the caller's arrays, at
+  ! for the stored CI space even when the MO basis is not symmetry adapted.
+  ! ``energy`` and ``s2`` are the caller's arrays, at
   ! least ``N_states`` long.
   END_DOC
   double precision, intent(in) :: energy(*), s2(*)

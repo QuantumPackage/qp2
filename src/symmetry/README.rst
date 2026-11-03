@@ -417,14 +417,13 @@ The set is fixed data: it is extended by adding a file, never regenerated.
 Every file is parsed and validated at use, so a damaged file is reported
 and rejected instead of being used.
 
-The development specification
-=============================
+Conventions and design notes
+============================
 
-The comments in the sources cite sections of ``SPEC.md``, the implementation
-specification of the module: the equations, the gates and the measurements
-behind each choice. It is a development document and is not shipped with the
-core. The pages below restate what is needed to read and use the code; where a
-comment gives a section number, the subject is the algorithm on this page.
+The comments in the sources carry the design rationale: the equations, the
+gates and the measurements behind each choice. They are the reference for
+anyone changing the module. The pages below restate what is needed to read
+and use the code.
 
 How to check the machinery
 ==========================

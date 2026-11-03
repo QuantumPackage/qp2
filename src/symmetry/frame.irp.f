@@ -1,4 +1,4 @@
-! Canonical frame (SPEC.md section 4).
+! Canonical frame.
 !
 ! Conventions fixed here (all geometric vectors are stored in the INPUT frame,
 ! the frame of nucl_coord; pg_rot maps input coordinates to the canonical
@@ -11,19 +11,19 @@
 !   pg_plane_normal unit normal of that plane, INPUT frame, valid when
 !                   pg_is_planar; oriented deterministically
 !
-! SPEC.md writes "pg_plane_normal (3) in the standard frame", but every other
-! vector of the module (candidate directions, rotation matrices) lives in the
-! input frame and pg_rot is the only object that maps between the two. A
-! normal expressed in the standard frame would be the constant (0,0,1), which
-! carries no information, so the only coherent reading is "input frame".
-! SPEC.md section 4 has been corrected to say so.
+! pg_plane_normal is given in the INPUT frame. Every other vector of the
+! module (candidate directions, rotation matrices) lives in the input
+! frame and pg_rot is the only object that maps between the two. A normal
+! expressed in the standard frame would be the constant (0,0,1), which
+! carries no information.
 !
 ! Trap: the inertia tensor uses element_mass(int(nucl_charge(i))). There is no
 ! nucl_mass provider in QP2 (checked): that is what nuclei/inertia.irp.f and
-! center_of_mass use, and SPEC.md section 4 has been corrected accordingly.
+! center_of_mass use.
 !
-! Axis convention (Cotton/Mulliken, decided in section 4 and used by every
-! symbol predicate of section 6): for a planar molecule with z in the plane,
+! Axis convention (Cotton/Mulliken, decided by the canonical frame and used
+! by every symbol predicate of the column matching): for a planar molecule
+! with z in the plane,
 ! x is the plane normal and the molecular plane is yz. Hence sv = plane xz
 ! (normal y) and sd = plane yz (normal x); getting these two backwards swaps
 ! B2/B3 in every Abelian group.
@@ -38,8 +38,8 @@ END_PROVIDER
 
 !-----------------------------------------------------------------------
 ! Principal moments of inertia, ascending, and their eigenvectors
-! (columns of pg_inertia_evec). Recomputed with dsyev as required by
-! SPEC.md section 4 step 2; do not reuse inertia_tensor_eigenvectors.
+! (columns of pg_inertia_evec). Recomputed with dsyev on the fly; do not
+! reuse inertia_tensor_eigenvectors.
 !-----------------------------------------------------------------------
  BEGIN_PROVIDER [ double precision, pg_inertia_eval, (3) ]
 &BEGIN_PROVIDER [ double precision, pg_inertia_evec, (3,3) ]
@@ -82,10 +82,10 @@ END_PROVIDER
     call pg_fix_sign(pg_inertia_evec(1:3,i))
   enddo
 
-  ! SPEC.md section 5.9: relative test, before any enumeration. SPEC.md
-  ! writes maxval here, which can never fire: maxval >= sum/3 > 1e-6*sum
-  ! whenever sum > 0. Only the "all nuclei at the centre" case is rejected
-  ! here; a linear molecule is legal and is detected by pg_is_linear, which
+  ! Relative test, before any enumeration. A maxval test can never fire:
+  ! maxval >= sum/3 > 1e-6*sum whenever sum > 0. Only the "all nuclei at
+  ! the centre" case is rejected here; a linear molecule is legal and is
+  ! detected by pg_is_linear, which
   ! uses the same minval test on a local copy.
   if (sum(pg_inertia_eval) <= 0.d0) then
     if (.not. pg_detection_failed) then
@@ -102,9 +102,9 @@ END_PROVIDER
   BEGIN_DOC
   ! .True. for a collinear molecule. Two tests, both needed: the moment
   ! about the molecular axis is the *smallest* inertia eigenvalue and it is
-  ! exactly zero for a collinear geometry (SPEC.md section 5.9 writes maxval,
-  ! which can never fire), and every nucleus must sit within half pg_tol of
-  ! the line through pg_center along pg_inertia_evec(:,1).
+  ! exactly zero for a collinear geometry (a maxval test can never fire),
+  ! and every nucleus must sit within half pg_tol of the line through
+  ! pg_center along pg_inertia_evec(:,1).
   !
   ! Half pg_tol, not one pg_tol: the group of the molecule is built from
   ! matrices that are exact in the canonical frame, so the only error is the
@@ -172,10 +172,9 @@ END_PROVIDER
   ! Rows are the canonical x, y, z unit vectors, in the INPUT frame.
   ! Standard coordinates of a point r are pg_rot . (r - pg_center).
   !
-  ! SPEC.md section 4 steps 3-5, including the tie-breaks. Cubic and
+  ! Orientation follows the steps below, including the tie-breaks. Cubic and
   ! icosahedral labels are invariant under relabelling of their equivalent
-  ! axes, so no attempt is made to impose a "standard cube orientation"
-  ! (SPEC.md section 4 step 6).
+  ! axes, so no attempt is made to impose a "standard cube orientation".
   END_DOC
   integer :: znum(nucl_num), ierr, n_max, n_axes
   integer :: i
@@ -382,7 +381,7 @@ end subroutine pg_reflection
 subroutine pg_orient_axis(nat, xyz, ctr, tol, axis)
   implicit none
   BEGIN_DOC
-  ! Deterministic orientation of an axis (SPEC.md section 4 step 4).
+  ! Deterministic orientation of an axis.
   END_DOC
   integer, intent(in) :: nat
   double precision, intent(in) :: xyz(nat,3), ctr(3), tol
@@ -403,7 +402,7 @@ end subroutine pg_orient_axis
 
 !-----------------------------------------------------------------------
 ! Candidate directions, standard frame, deduplicated up to sign
-! (SPEC.md section 5.1): r_i - centre, (r_i + r_j)/2 - centre for pairs of
+! Candidate points: r_i - centre, (r_i + r_j)/2 - centre for pairs of
 ! equal Z, the three inertia eigenvectors, and every pairwise cross
 ! product of those.
 !-----------------------------------------------------------------------
@@ -514,7 +513,7 @@ end subroutine pg_add_direction
 subroutine pg_maps_to_self(nat, xyz, znum, ctr, rot, tol, perm, ok)
   implicit none
   BEGIN_DOC
-  ! Test rot r_i == r_{perm(i)} for every atom (SPEC.md section 5.3).
+  ! Test rot r_i == r_{perm(i)} for every atom.
   END_DOC
   integer, intent(in) :: nat
   double precision, intent(in) :: xyz(nat,3), ctr(3), rot(3,3), tol
@@ -552,7 +551,7 @@ end subroutine pg_maps_to_self
 
 !-----------------------------------------------------------------------
 ! Highest proper-rotation order, number of distinct axes carrying it,
-! and the selected principal axis (SPEC.md section 4 step 3-4).
+! and the selected principal axis.
 !-----------------------------------------------------------------------
 subroutine pg_proper_scan(nat, xyz, znum, ctr, evals, evecs, tol, &
      ncandmax, n_max, n_axes_max, axis, linear, ierr)
@@ -611,7 +610,7 @@ subroutine pg_proper_scan(nat, xyz, znum, ctr, evals, evecs, tol, &
   enddo
 
   ! Index of the inertia eigenvalue that is the most distinct from the
-  ! other two: used by the tie-break of SPEC.md section 4 step 4.
+  ! other two: used by the axis tie-break below.
   kbest = 1
   gapbest = -1.d0
   do k = 1, 3
@@ -658,13 +657,13 @@ subroutine pg_proper_scan(nat, xyz, znum, ctr, evals, evecs, tol, &
 end subroutine pg_proper_scan
 
 !-----------------------------------------------------------------------
-! Canonical x axis (SPEC.md section 4 step 5).
+! Canonical x axis.
 !-----------------------------------------------------------------------
 subroutine pg_select_x(nat, xyz, znum, ctr, evecs, tol, ncandmax, &
      zaxis, planar, pnormal, xaxis, ierr)
   implicit none
   BEGIN_DOC
-  ! Choose the canonical x from the branches of SPEC.md section 4 step 5.
+  ! Choose the canonical x from the branches below.
   END_DOC
   integer, intent(in) :: nat, ncandmax
   double precision, intent(in) :: xyz(nat,3), ctr(3), evecs(3,3), tol

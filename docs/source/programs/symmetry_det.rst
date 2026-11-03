@@ -9,11 +9,11 @@ symmetry_det
  
  
  
- Determinant and state symmetry driver (SPEC.md sections 9 and 10). 
+ Determinant and state symmetry driver. 
   
  Reads the wave function stored in the EZFIO directory given on the 
  command line, labels every determinant with the irrep of the 
- projector of section 8, and projects every CI state on the irreps. 
+ MO projector, and projects every CI state on the irreps. 
   
  Prints the determinant table, the per-irrep counts, the per-state 
  weight vectors, and runs the gates D1-D6. Exits 1 if a gate fails, 0 

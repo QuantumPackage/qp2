@@ -1,6 +1,5 @@
 !-----------------------------------------------------------------------
-! Automatic point-group report at the end of SCF/DFT (stage 2 of
-! NOTES-core-integration.md, section 9.2).
+! Automatic point-group report at the end of SCF/DFT.
 !
 ! The detection chain is forced from a core hook, i.e. from a program
 ! that knows nothing about symmetry. Two constraints follow:
@@ -9,14 +8,14 @@
 !    prints its reason once and sets :c:data:`pg_detection_failed`, and every
 !    entry point below turns that into a silent .false.;
 !  * IRPF90 hoists the build of every provider a procedure names to the
-!    ENTRY of that procedure (section 9.2b), so an early return cannot
+!    ENTRY of that procedure, so an early return cannot
 !    protect a provider of the same body. Every entry point is therefore
 !    a thin dispatcher that names only cheap scalars, and a worker that
 !    names the chain: the guard sits in the caller, the work in the
 !    callee.
 !
 ! :c:func:`pg_symmetry_ready` names :c:data:`auto_symmetry` and :c:data:`pg_detection_failed`
-! only (section 9.2b, R4): with :c:data:`auto_symmetry` = F not one provider of
+! only: with :c:data:`auto_symmetry` = F not one provider of
 ! the chain is built. The chain itself is entered by
 ! :c:func:`pg_ready_detection` then :c:func:`pg_ready_columns`, and :c:data:`pg_detection_failed`
 ! is forced first so that the flag exists before a chain provider can
@@ -140,7 +139,7 @@ logical function pg_mo_labels_ok()
   ! This is the guard that keeps a labelling of a basis that is not
   ! symmetry adapted away from the Davidson fast path and from the
   ! ``mo_symmetry`` write. The reports themselves accept such a basis and
-  ! print irrep probabilities instead (NOTES section 10).
+  ! print irrep probabilities instead.
   END_DOC
   pg_mo_labels_ok = .false.
   if (mo_num < 1) return
@@ -159,7 +158,7 @@ subroutine pg_report_mo_symmetry()
   ! false.
   !
   ! This body names :c:func:`pg_symmetry_ready` only, so the guard runs before any
-  ! provider of the chain is entered (section 9.2b, R1).
+  ! provider of the chain is entered.
   END_DOC
   ! IRPF90 does not emit the declaration of a function for its callers.
   logical, external :: pg_symmetry_ready

@@ -1,5 +1,5 @@
 !-----------------------------------------------------------------------
-! Determinant irreps (SPEC.md section 9).
+! Determinant irreps.
 !
 ! A determinant is D = (A,B), the ascending alpha and beta occupation
 ! lists. X_g is block diagonal on the symmetry blocks of :c:data:`pg_mo_block`,
@@ -8,11 +8,11 @@
 !   :math:`<D'|U(g)|D>` = prod_b det( X_g[A'_b,A_b] ) * prod_b det( X_g[B'_b,B_b] )
 !
 ! which is zero unless D and D' have the same number of alpha (resp.
-! beta) electrons in EVERY block. That count vector is the family
-! (SPEC.md 9.2): the set of determinants on which the projectors of
-! section 8 act without leaving the set.
+! beta) electrons in EVERY block. That count vector is the family.
+! The set of determinants on which the projectors of
+! mo_irrep.irp.f act without leaving the set.
 !
-! The projector is the one and only formula of section 8.2,
+! The projector is the one and only MO projector formula,
 !
 !   T^a = (d_a/(mult_a*:math:`|G|`)) sum_g chi_a(col(g)) :math:`<.|U(g)|.>`
 !
@@ -93,7 +93,7 @@ BEGIN_PROVIDER [ integer, pg_block_start, (pg_n_mo_block) ]
   ! The MOs of one block are NOT contiguous in the MO list (the same
   ! irrep can appear at several energies: the A1g MOs of benzene are
   ! spread over the whole spectrum), which is why the family enumeration
-  ! of section 9.2 goes through this indirection and never through
+  ! of the family goes through this indirection and never through
   ! ``pg_mo_block(i)`` arithmetic.
   END_DOC
   integer :: i, b, k
@@ -131,7 +131,8 @@ BEGIN_PROVIDER [ integer, pg_elem_col, (pg_n_elem) ]
   !
   ! A column can stand for several geometric classes (T, Td, Oh, Ih have
   ! classes of 4, 6, 8, ... elements); the character is constant on the
-  ! column, which is why section 8 sums over columns and not over classes.
+  ! column, which is why the MO projectors sum over columns, not over
+  ! classes.
   END_DOC
   integer :: c, m, g
   do c = 1, pg_n_col
@@ -149,9 +150,9 @@ BEGIN_PROVIDER [ double precision, pg_xg, (mo_num,mo_num,pg_n_elem) ]
   implicit none
   BEGIN_DOC
   ! ``pg_xg(:,:,g)`` = C^T S M_g C, the matrix of group element ``g`` in the
-  ! MO basis (SPEC.md section 7), built once.
+  ! MO basis, built once.
   !
-  ! SPEC.md 9.4 asked for one scratch matrix at a time, but the
+  ! One scratch matrix at a time was the first plan, but the
   ! determinant projectors need every element for every family, and a
   ! rebuild is a full AO transform (three matmuls over ao_num). :math:`|G|` is at
   ! most 120 and the MO basis of a plugin-sized system a few hundred
@@ -287,7 +288,7 @@ subroutine pg_det_counts(idet, nsel)
   BEGIN_DOC
   ! ``nsel(s,b)`` = number of spin-``s`` electrons of determinant ``idet`` in
   ! symmetry block ``b``. Two determinants are in the same family if and
-  ! only if their ``nsel`` agree (SPEC.md 9.2).
+  ! only if their ``nsel`` agree.
   END_DOC
   integer, intent(in) :: idet
   integer, intent(out) :: nsel(2,pg_n_mo_block)
@@ -411,7 +412,7 @@ subroutine pg_family_index(np, mask, idx, imin)
   BEGIN_DOC
   ! ``idx(ip)`` is the index in :c:data:`psi_det` of family member ``ip``,
   ! or 0 when that member is not in the wave function (a truncated CI
-  ! space: the missing member simply has coefficient 0, SPEC.md 10.2).
+  ! space: the missing member simply has coefficient 0).
   ! ``imin`` is the smallest nonzero index.
   !
   ! The lookup is QP2's own binary search on :c:data:`psi_det_sorted_bit`, which
@@ -530,15 +531,16 @@ subroutine pg_elem_me(ig, np, mask, ip, jp, val)
 end subroutine pg_elem_me
 
 !-----------------------------------------------------------------------
-! The projector of section 8 on one family.
+! The MO projector applied to one family.
 !-----------------------------------------------------------------------
 subroutine pg_family_projector(np, mask, t)
   implicit none
   BEGIN_DOC
   ! ``t(ip,jp,a)`` = T^a_{ip,jp} = (d_a/(mult_a*:math:`|G|`)) sum_g chi_a(col(g)) :math:`<D_ip|U(g)|D_jp>`.
   !
-  ! This is SPEC.md 9.1 verbatim: the same coefficients, the same
-  ! characters, the same ``mult_a`` as :c:data:`pg_mo_weight`. T^a is a Hermitian
+  ! This is the determinant version of the MO projector: the same
+  ! coefficients, the same characters, the same ``mult_a`` as
+  ! :c:data:`pg_mo_weight`. T^a is a Hermitian
   ! projector on the family (gates D1/D2), and its diagonal gives the
   ! determinant labels.
   END_DOC
@@ -581,7 +583,7 @@ BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
   ! ``pg_det_irrep(D)`` = argmax_a T^a_{DD}, or 0 when max_a T^a_{DD} <
   ! 1 - pg_thresh: a determinant with one electron in a degenerate block
   ! (:math:`|e_x>`, :math:`|e_y>`) is not an eigenfunction of the projectors and must not
-  ! get a best-guess label (SPEC.md 9.3).
+  ! get a best-guess label.
   !
   ! ``pg_det_purity(D)`` = max_a T^a_{DD} = sum_{D'} :math:`(T^a_{D'D})^2` at the
   ! argmax, 1 for a pure determinant and 1/d_a for one member of an open
@@ -594,8 +596,8 @@ BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
   !
   ! A determinant is pure if and only if its family has size 1: a family
   ! of size > 1 exists only because a block has 1 <= n <= d_b-1, and then
-  ! every member shares that partial occupation. The state weights of
-  ! section 10 use this to skip the projectors for pure determinants.
+  ! every member shares that partial occupation. The state weights use
+  ! this to skip the projectors for pure determinants.
   !
   ! :c:data:`pg_n_family` <= N_det. A determinant whose family is handled by an
   ! earlier member costs one enumeration and one binary search per member
@@ -619,7 +621,7 @@ BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
   endif
 
   !---------------------------------------------------------------------
-  ! Preconditions (SPEC.md 9.5).
+  ! Preconditions.
   !---------------------------------------------------------------------
   if (N_det <= 0) then
     write(6,'(A)') 'symmetry_det: N_det = 0: there is no determinant to label.'
@@ -634,7 +636,7 @@ BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
     return
   endif
   !---------------------------------------------------------------------
-  ! A basis that is not symmetry adapted is ACCEPTED (NOTES section 10).
+  ! A basis that is not symmetry adapted is ACCEPTED.
   !
   ! What the family decomposition needs is that X_g is block diagonal on
   ! the blocks, and that is true by construction (a block is a connected

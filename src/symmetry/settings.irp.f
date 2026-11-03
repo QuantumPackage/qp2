@@ -55,7 +55,7 @@ BEGIN_PROVIDER [ double precision, pg_thresh ]
   BEGIN_DOC
   ! Threshold on representation-matrix elements used to decide whether an MO
   ! belongs to a symmetry block and whether a determinant has a definite
-  ! irrep. Default 1e-6 (a weight: SPEC.md 8.1).
+  ! irrep. Default 1e-6 (a weight).
   END_DOC
   logical :: has
   PROVIDE ezfio_filename
@@ -114,7 +114,7 @@ BEGIN_PROVIDER [ character*(256), irrep_states ]
   implicit none
   BEGIN_DOC
   ! Comma-, semicolon- or blank-separated list of irrep names to keep in
-  ! the CI diagonalization (SPEC.md 9.4b). Empty means all irreps; the
+  ! the CI diagonalization. Empty means all irreps; the
   ! qp_edit default is the token "None", which :c:func:`pg_normalize_irrep_states`
   ! turns into the empty string.
   END_DOC
@@ -223,7 +223,7 @@ BEGIN_PROVIDER [ logical, pg_irrep_allowed, (pg_n_irrep) ]
   ! The whole list is allowed when :c:data:`irrep_states` is empty. Names are
   ! compared case-insensitively; an unknown name prints the available
   ! names and stops: malformed user input is the one case where stopping
-  ! is allowed (section 9.0).
+  ! is allowed.
   END_DOC
   integer :: a, i, istart, iend
   character*(32) :: tok, name

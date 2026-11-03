@@ -1,5 +1,5 @@
 !-----------------------------------------------------------------------
-! Irrep labels of arbitrary CI vectors (SPEC.md 9.4a).
+! Irrep labels of arbitrary CI vectors.
 !
 ! The stage-3 report labels the CI states through :c:data:`pg_state_irrep_weight`,
 ! which enumerates every determinant family and adds the off-diagonal
@@ -24,7 +24,7 @@ logical function pg_labels_usable()
   !
   ! It has no printing switch to test: the state table is always printed
   ! when the labels are usable, and a printing decision must not disable
-  ! the irrep filter (SPEC.md 9.4f A1). :c:data:`auto_symmetry` stays the
+  ! the irrep filter. :c:data:`auto_symmetry` stays the
   ! master switch, through :c:func:`pg_symmetry_ready`.
   END_DOC
   logical, external :: pg_symmetry_ready

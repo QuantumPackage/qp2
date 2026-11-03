@@ -340,7 +340,7 @@ Providers
     The MOs of one block are NOT contiguous in the MO list (the same
     irrep can appear at several energies: the A1g MOs of benzene are
     spread over the whole spectrum), which is why the family enumeration
-    of section 9.2 goes through this indirection and never through
+    of the family goes through this indirection and never through
     ``pg_mo_block(i)`` arithmetic.
 
     Needs:
@@ -357,7 +357,6 @@ Providers
        :columns: 3
 
        * :c:data:`pg_det_irrep`
-       * :c:data:`pg_state_irrep_weight`
 
  
 .. c:var:: int pg_block_mo
@@ -378,7 +377,7 @@ Providers
     The MOs of one block are NOT contiguous in the MO list (the same
     irrep can appear at several energies: the A1g MOs of benzene are
     spread over the whole spectrum), which is why the family enumeration
-    of section 9.2 goes through this indirection and never through
+    of the family goes through this indirection and never through
     ``pg_mo_block(i)`` arithmetic.
 
     Needs:
@@ -395,7 +394,6 @@ Providers
        :columns: 3
 
        * :c:data:`pg_det_irrep`
-       * :c:data:`pg_state_irrep_weight`
 
  
 .. c:var:: int pg_block_start
@@ -416,7 +414,7 @@ Providers
     The MOs of one block are NOT contiguous in the MO list (the same
     irrep can appear at several energies: the A1g MOs of benzene are
     spread over the whole spectrum), which is why the family enumeration
-    of section 9.2 goes through this indirection and never through
+    of the family goes through this indirection and never through
     ``pg_mo_block(i)`` arithmetic.
 
     Needs:
@@ -433,7 +431,6 @@ Providers
        :columns: 3
 
        * :c:data:`pg_det_irrep`
-       * :c:data:`pg_state_irrep_weight`
 
  
 .. c:var:: int pg_det_block
@@ -454,7 +451,7 @@ Providers
     ``pg_det_irrep(D)`` = argmax_a T^a_{DD}, or 0 when max_a T^a_{DD} <
     1 - pg_thresh: a determinant with one electron in a degenerate block
     (:math:`|e_x>`, :math:`|e_y>`) is not an eigenfunction of the projectors and must not
-    get a best-guess label (SPEC.md 9.3).
+    get a best-guess label.
     
     ``pg_det_purity(D)`` = max_a T^a_{DD} = sum_{D'} :math:`(T^a_{D'D})^2` at the
     argmax, 1 for a pure determinant and 1/d_a for one member of an open
@@ -467,8 +464,8 @@ Providers
     
     A determinant is pure if and only if its family has size 1: a family
     of size > 1 exists only because a block has 1 <= n <= d_b-1, and then
-    every member shares that partial occupation. The state weights of
-    section 10 use this to skip the projectors for pure determinants.
+    every member shares that partial occupation. The state weights use
+    this to skip the projectors for pure determinants.
     
     :c:data:`pg_n_family` <= N_det. A determinant whose family is handled by an
     earlier member costs one enumeration and one binary search per member
@@ -523,7 +520,7 @@ Providers
     ``pg_det_irrep(D)`` = argmax_a T^a_{DD}, or 0 when max_a T^a_{DD} <
     1 - pg_thresh: a determinant with one electron in a degenerate block
     (:math:`|e_x>`, :math:`|e_y>`) is not an eigenfunction of the projectors and must not
-    get a best-guess label (SPEC.md 9.3).
+    get a best-guess label.
     
     ``pg_det_purity(D)`` = max_a T^a_{DD} = sum_{D'} :math:`(T^a_{D'D})^2` at the
     argmax, 1 for a pure determinant and 1/d_a for one member of an open
@@ -536,8 +533,8 @@ Providers
     
     A determinant is pure if and only if its family has size 1: a family
     of size > 1 exists only because a block has 1 <= n <= d_b-1, and then
-    every member shares that partial occupation. The state weights of
-    section 10 use this to skip the projectors for pure determinants.
+    every member shares that partial occupation. The state weights use
+    this to skip the projectors for pure determinants.
     
     :c:data:`pg_n_family` <= N_det. A determinant whose family is handled by an
     earlier member costs one enumeration and one binary search per member
@@ -592,7 +589,7 @@ Providers
     ``pg_det_irrep(D)`` = argmax_a T^a_{DD}, or 0 when max_a T^a_{DD} <
     1 - pg_thresh: a determinant with one electron in a degenerate block
     (:math:`|e_x>`, :math:`|e_y>`) is not an eigenfunction of the projectors and must not
-    get a best-guess label (SPEC.md 9.3).
+    get a best-guess label.
     
     ``pg_det_purity(D)`` = max_a T^a_{DD} = sum_{D'} :math:`(T^a_{D'D})^2` at the
     argmax, 1 for a pure determinant and 1/d_a for one member of an open
@@ -605,8 +602,8 @@ Providers
     
     A determinant is pure if and only if its family has size 1: a family
     of size > 1 exists only because a block has 1 <= n <= d_b-1, and then
-    every member shares that partial occupation. The state weights of
-    section 10 use this to skip the projectors for pure determinants.
+    every member shares that partial occupation. The state weights use
+    this to skip the projectors for pure determinants.
     
     :c:data:`pg_n_family` <= N_det. A determinant whose family is handled by an
     earlier member costs one enumeration and one binary search per member
@@ -658,8 +655,9 @@ Providers
 
 
     ``pg_state_irrep_weight(a,s)`` = w_a(s), the weight of irrep ``a`` in
-    state ``s``: the diagonal matrix element of the projector of section 8
-    in the state, not an occupation-number guess.
+    state ``s``: the diagonal matrix element of the MO projector
+    in the state, not an occupation-number guess. Computed by
+    :c:func:`pg_state_weight_matrix`, which the irrep filter also calls.
     
     ``pg_state_irrep(s)`` = argmax_a w_a(s), or 0 when the state has no
     definite irrep (spin contamination, an incomplete family, a broken
@@ -671,15 +669,9 @@ Providers
     that belong to no symmetry group on their own.
     
     ``pg_state_norm(s)`` = sum_D c_D(s)^2, the exact value of
-    sum_a w_a(s) (SPEC.md 10.2). A deficit means psi_coef is not
+    sum_a w_a(s). A deficit means psi_coef is not
     normalized in the determinant basis; it never means that the CI space
     is not group invariant.
-    
-    A determinant with :c:data:`pg_det_block` = 1 is pure and its family is
-    itself, so T^a_{DD} = delta_{a,pg_det_irrep(D)} exactly: those
-    determinants are accumulated from the label, and the projectors are
-    built only for the families of size > 1 (which are exactly the
-    determinants with no definite irrep).
 
     Needs:
 
@@ -687,19 +679,18 @@ Providers
        :columns: 3
 
        * :c:data:`n_det`
-       * :c:data:`n_int`
        * :c:data:`n_states`
-       * :c:data:`pg_block_start`
        * :c:data:`pg_col_diag`
        * :c:data:`pg_det_irrep`
-       * :c:data:`pg_elem_col`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_det_irrep`
        * :c:data:`pg_label_ierr`
        * :c:data:`pg_n_col`
-       * :c:data:`pg_n_elem`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_n_col`
+       * :c:data:`pg_col_diag`
        * :c:data:`pg_thresh`
        * :c:data:`psi_coef`
-       * :c:data:`psi_det`
-       * :c:data:`psi_det_sorted_bit`
 
 
  
@@ -721,7 +712,7 @@ Providers
     ``pg_det_irrep(D)`` = argmax_a T^a_{DD}, or 0 when max_a T^a_{DD} <
     1 - pg_thresh: a determinant with one electron in a degenerate block
     (:math:`|e_x>`, :math:`|e_y>`) is not an eigenfunction of the projectors and must not
-    get a best-guess label (SPEC.md 9.3).
+    get a best-guess label.
     
     ``pg_det_purity(D)`` = max_a T^a_{DD} = sum_{D'} :math:`(T^a_{D'D})^2` at the
     argmax, 1 for a pure determinant and 1/d_a for one member of an open
@@ -734,8 +725,8 @@ Providers
     
     A determinant is pure if and only if its family has size 1: a family
     of size > 1 exists only because a block has 1 <= n <= d_b-1, and then
-    every member shares that partial occupation. The state weights of
-    section 10 use this to skip the projectors for pure determinants.
+    every member shares that partial occupation. The state weights use
+    this to skip the projectors for pure determinants.
     
     :c:data:`pg_n_family` <= N_det. A determinant whose family is handled by an
     earlier member costs one enumeration and one binary search per member
@@ -788,7 +779,8 @@ Providers
     
     A column can stand for several geometric classes (T, Td, Oh, Ih have
     classes of 4, 6, 8, ... elements); the character is constant on the
-    column, which is why section 8 sums over columns and not over classes.
+    column, which is why the MO projectors sum over columns, not over
+    classes.
 
     Needs:
 
@@ -804,7 +796,6 @@ Providers
        :columns: 3
 
        * :c:data:`pg_det_irrep`
-       * :c:data:`pg_state_irrep_weight`
 
  
 .. c:var:: int pg_family_cap
@@ -849,7 +840,7 @@ Providers
     ``pg_det_irrep(D)`` = argmax_a T^a_{DD}, or 0 when max_a T^a_{DD} <
     1 - pg_thresh: a determinant with one electron in a degenerate block
     (:math:`|e_x>`, :math:`|e_y>`) is not an eigenfunction of the projectors and must not
-    get a best-guess label (SPEC.md 9.3).
+    get a best-guess label.
     
     ``pg_det_purity(D)`` = max_a T^a_{DD} = sum_{D'} :math:`(T^a_{D'D})^2` at the
     argmax, 1 for a pure determinant and 1/d_a for one member of an open
@@ -862,8 +853,8 @@ Providers
     
     A determinant is pure if and only if its family has size 1: a family
     of size > 1 exists only because a block has 1 <= n <= d_b-1, and then
-    every member shares that partial occupation. The state weights of
-    section 10 use this to skip the projectors for pure determinants.
+    every member shares that partial occupation. The state weights use
+    this to skip the projectors for pure determinants.
     
     :c:data:`pg_n_family` <= N_det. A determinant whose family is handled by an
     earlier member costs one enumeration and one binary search per member
@@ -1004,7 +995,7 @@ Providers
     ``pg_det_irrep(D)`` = argmax_a T^a_{DD}, or 0 when max_a T^a_{DD} <
     1 - pg_thresh: a determinant with one electron in a degenerate block
     (:math:`|e_x>`, :math:`|e_y>`) is not an eigenfunction of the projectors and must not
-    get a best-guess label (SPEC.md 9.3).
+    get a best-guess label.
     
     ``pg_det_purity(D)`` = max_a T^a_{DD} = sum_{D'} :math:`(T^a_{D'D})^2` at the
     argmax, 1 for a pure determinant and 1/d_a for one member of an open
@@ -1017,8 +1008,8 @@ Providers
     
     A determinant is pure if and only if its family has size 1: a family
     of size > 1 exists only because a block has 1 <= n <= d_b-1, and then
-    every member shares that partial occupation. The state weights of
-    section 10 use this to skip the projectors for pure determinants.
+    every member shares that partial occupation. The state weights use
+    this to skip the projectors for pure determinants.
     
     :c:data:`pg_n_family` <= N_det. A determinant whose family is handled by an
     earlier member costs one enumeration and one binary search per member
@@ -1070,8 +1061,9 @@ Providers
 
 
     ``pg_state_irrep_weight(a,s)`` = w_a(s), the weight of irrep ``a`` in
-    state ``s``: the diagonal matrix element of the projector of section 8
-    in the state, not an occupation-number guess.
+    state ``s``: the diagonal matrix element of the MO projector
+    in the state, not an occupation-number guess. Computed by
+    :c:func:`pg_state_weight_matrix`, which the irrep filter also calls.
     
     ``pg_state_irrep(s)`` = argmax_a w_a(s), or 0 when the state has no
     definite irrep (spin contamination, an incomplete family, a broken
@@ -1083,15 +1075,9 @@ Providers
     that belong to no symmetry group on their own.
     
     ``pg_state_norm(s)`` = sum_D c_D(s)^2, the exact value of
-    sum_a w_a(s) (SPEC.md 10.2). A deficit means psi_coef is not
+    sum_a w_a(s). A deficit means psi_coef is not
     normalized in the determinant basis; it never means that the CI space
     is not group invariant.
-    
-    A determinant with :c:data:`pg_det_block` = 1 is pure and its family is
-    itself, so T^a_{DD} = delta_{a,pg_det_irrep(D)} exactly: those
-    determinants are accumulated from the label, and the projectors are
-    built only for the families of size > 1 (which are exactly the
-    determinants with no definite irrep).
 
     Needs:
 
@@ -1099,19 +1085,18 @@ Providers
        :columns: 3
 
        * :c:data:`n_det`
-       * :c:data:`n_int`
        * :c:data:`n_states`
-       * :c:data:`pg_block_start`
        * :c:data:`pg_col_diag`
        * :c:data:`pg_det_irrep`
-       * :c:data:`pg_elem_col`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_det_irrep`
        * :c:data:`pg_label_ierr`
        * :c:data:`pg_n_col`
-       * :c:data:`pg_n_elem`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_n_col`
+       * :c:data:`pg_col_diag`
        * :c:data:`pg_thresh`
        * :c:data:`psi_coef`
-       * :c:data:`psi_det`
-       * :c:data:`psi_det_sorted_bit`
 
 
  
@@ -1130,8 +1115,9 @@ Providers
 
 
     ``pg_state_irrep_weight(a,s)`` = w_a(s), the weight of irrep ``a`` in
-    state ``s``: the diagonal matrix element of the projector of section 8
-    in the state, not an occupation-number guess.
+    state ``s``: the diagonal matrix element of the MO projector
+    in the state, not an occupation-number guess. Computed by
+    :c:func:`pg_state_weight_matrix`, which the irrep filter also calls.
     
     ``pg_state_irrep(s)`` = argmax_a w_a(s), or 0 when the state has no
     definite irrep (spin contamination, an incomplete family, a broken
@@ -1143,15 +1129,9 @@ Providers
     that belong to no symmetry group on their own.
     
     ``pg_state_norm(s)`` = sum_D c_D(s)^2, the exact value of
-    sum_a w_a(s) (SPEC.md 10.2). A deficit means psi_coef is not
+    sum_a w_a(s). A deficit means psi_coef is not
     normalized in the determinant basis; it never means that the CI space
     is not group invariant.
-    
-    A determinant with :c:data:`pg_det_block` = 1 is pure and its family is
-    itself, so T^a_{DD} = delta_{a,pg_det_irrep(D)} exactly: those
-    determinants are accumulated from the label, and the projectors are
-    built only for the families of size > 1 (which are exactly the
-    determinants with no definite irrep).
 
     Needs:
 
@@ -1159,19 +1139,18 @@ Providers
        :columns: 3
 
        * :c:data:`n_det`
-       * :c:data:`n_int`
        * :c:data:`n_states`
-       * :c:data:`pg_block_start`
        * :c:data:`pg_col_diag`
        * :c:data:`pg_det_irrep`
-       * :c:data:`pg_elem_col`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_det_irrep`
        * :c:data:`pg_label_ierr`
        * :c:data:`pg_n_col`
-       * :c:data:`pg_n_elem`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_n_col`
+       * :c:data:`pg_col_diag`
        * :c:data:`pg_thresh`
        * :c:data:`psi_coef`
-       * :c:data:`psi_det`
-       * :c:data:`psi_det_sorted_bit`
 
 
  
@@ -1190,8 +1169,9 @@ Providers
 
 
     ``pg_state_irrep_weight(a,s)`` = w_a(s), the weight of irrep ``a`` in
-    state ``s``: the diagonal matrix element of the projector of section 8
-    in the state, not an occupation-number guess.
+    state ``s``: the diagonal matrix element of the MO projector
+    in the state, not an occupation-number guess. Computed by
+    :c:func:`pg_state_weight_matrix`, which the irrep filter also calls.
     
     ``pg_state_irrep(s)`` = argmax_a w_a(s), or 0 when the state has no
     definite irrep (spin contamination, an incomplete family, a broken
@@ -1203,15 +1183,9 @@ Providers
     that belong to no symmetry group on their own.
     
     ``pg_state_norm(s)`` = sum_D c_D(s)^2, the exact value of
-    sum_a w_a(s) (SPEC.md 10.2). A deficit means psi_coef is not
+    sum_a w_a(s). A deficit means psi_coef is not
     normalized in the determinant basis; it never means that the CI space
     is not group invariant.
-    
-    A determinant with :c:data:`pg_det_block` = 1 is pure and its family is
-    itself, so T^a_{DD} = delta_{a,pg_det_irrep(D)} exactly: those
-    determinants are accumulated from the label, and the projectors are
-    built only for the families of size > 1 (which are exactly the
-    determinants with no definite irrep).
 
     Needs:
 
@@ -1219,19 +1193,18 @@ Providers
        :columns: 3
 
        * :c:data:`n_det`
-       * :c:data:`n_int`
        * :c:data:`n_states`
-       * :c:data:`pg_block_start`
        * :c:data:`pg_col_diag`
        * :c:data:`pg_det_irrep`
-       * :c:data:`pg_elem_col`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_det_irrep`
        * :c:data:`pg_label_ierr`
        * :c:data:`pg_n_col`
-       * :c:data:`pg_n_elem`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_n_col`
+       * :c:data:`pg_col_diag`
        * :c:data:`pg_thresh`
        * :c:data:`psi_coef`
-       * :c:data:`psi_det`
-       * :c:data:`psi_det_sorted_bit`
 
 
  
@@ -1250,8 +1223,9 @@ Providers
 
 
     ``pg_state_irrep_weight(a,s)`` = w_a(s), the weight of irrep ``a`` in
-    state ``s``: the diagonal matrix element of the projector of section 8
-    in the state, not an occupation-number guess.
+    state ``s``: the diagonal matrix element of the MO projector
+    in the state, not an occupation-number guess. Computed by
+    :c:func:`pg_state_weight_matrix`, which the irrep filter also calls.
     
     ``pg_state_irrep(s)`` = argmax_a w_a(s), or 0 when the state has no
     definite irrep (spin contamination, an incomplete family, a broken
@@ -1263,15 +1237,9 @@ Providers
     that belong to no symmetry group on their own.
     
     ``pg_state_norm(s)`` = sum_D c_D(s)^2, the exact value of
-    sum_a w_a(s) (SPEC.md 10.2). A deficit means psi_coef is not
+    sum_a w_a(s). A deficit means psi_coef is not
     normalized in the determinant basis; it never means that the CI space
     is not group invariant.
-    
-    A determinant with :c:data:`pg_det_block` = 1 is pure and its family is
-    itself, so T^a_{DD} = delta_{a,pg_det_irrep(D)} exactly: those
-    determinants are accumulated from the label, and the projectors are
-    built only for the families of size > 1 (which are exactly the
-    determinants with no definite irrep).
 
     Needs:
 
@@ -1279,19 +1247,18 @@ Providers
        :columns: 3
 
        * :c:data:`n_det`
-       * :c:data:`n_int`
        * :c:data:`n_states`
-       * :c:data:`pg_block_start`
        * :c:data:`pg_col_diag`
        * :c:data:`pg_det_irrep`
-       * :c:data:`pg_elem_col`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_det_irrep`
        * :c:data:`pg_label_ierr`
        * :c:data:`pg_n_col`
-       * :c:data:`pg_n_elem`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_n_col`
+       * :c:data:`pg_col_diag`
        * :c:data:`pg_thresh`
        * :c:data:`psi_coef`
-       * :c:data:`psi_det`
-       * :c:data:`psi_det_sorted_bit`
 
 
  
@@ -1306,9 +1273,9 @@ Providers
 
 
     ``pg_xg(:,:,g)`` = C^T S M_g C, the matrix of group element ``g`` in the
-    MO basis (SPEC.md section 7), built once.
+    MO basis, built once.
     
-    SPEC.md 9.4 asked for one scratch matrix at a time, but the
+    One scratch matrix at a time was the first plan, but the
     determinant projectors need every element for every family, and a
     rebuild is a full AO transform (three matmuls over ao_num). :math:`|G|` is at
     most 120 and the MO basis of a plugin-sized system a few hundred
@@ -1362,7 +1329,7 @@ Subroutines / functions
 
     ``nsel(s,b)`` = number of spin-``s`` electrons of determinant ``idet`` in
     symmetry block ``b``. Two determinants are in the same family if and
-    only if their ``nsel`` agree (SPEC.md 9.2).
+    only if their ``nsel`` agree.
 
     Needs:
 
@@ -1381,7 +1348,7 @@ Subroutines / functions
        * :c:func:`pg_det_gates`
        * :c:data:`pg_det_irrep`
        * :c:func:`pg_det_weights`
-       * :c:data:`pg_state_irrep_weight`
+       * :c:func:`pg_state_weight_matrix`
 
     Calls:
 
@@ -1413,7 +1380,7 @@ Subroutines / functions
     
     ``D4``
         ``sum_a w_a(s) - sum_D c_D(s)^2`` <= 1e-8: the accumulation loop
-        reproduces the sum rule of section 10.2.
+        reproduces the sum rule of the state weights.
     
     ``D5``
         every labelled state has w_max >= 1-1e-6, and the mixed
@@ -1421,8 +1388,8 @@ Subroutines / functions
     
     ``D6``
         the dominant determinant of state 1 has irrep 1 for a closed-shell
-        Hartree-Fock wave function (the cross-check that section 9 and
-        section 8 live in the same labelling). Gated only when the
+        Hartree-Fock wave function (the cross-check that the determinant
+        and MO labellings agree). Gated only when the
         determinant's family has one member: a block that is partially
         filled makes even a closed-shell occupation a mixture, so such a
         configuration has no one-determinant irrep to compare with. That
@@ -1690,7 +1657,7 @@ Subroutines / functions
        * :c:func:`pg_det_gates`
        * :c:data:`pg_det_irrep`
        * :c:func:`pg_det_weights`
-       * :c:data:`pg_state_irrep_weight`
+       * :c:func:`pg_state_weight_matrix`
 
  
 .. c:function:: void pg_family_index(void)
@@ -1705,7 +1672,7 @@ Subroutines / functions
 
     ``idx(ip)`` is the index in :c:data:`psi_det` of family member ``ip``,
     or 0 when that member is not in the wave function (a truncated CI
-    space: the missing member simply has coefficient 0, SPEC.md 10.2).
+    space: the missing member simply has coefficient 0).
     ``imin`` is the smallest nonzero index.
     
     The lookup is QP2's own binary search on :c:data:`psi_det_sorted_bit`, which
@@ -1729,7 +1696,7 @@ Subroutines / functions
 
        * :c:data:`pg_det_irrep`
        * :c:func:`pg_det_weights`
-       * :c:data:`pg_state_irrep_weight`
+       * :c:func:`pg_state_weight_matrix`
 
     Calls:
 
@@ -1751,8 +1718,9 @@ Subroutines / functions
 
     ``t(ip,jp,a)`` = T^a_{ip,jp} = (d_a/(mult_a*:math:`|G|`)) sum_g chi_a(col(g)) :math:`<D_ip|U(g)|D_jp>`.
     
-    This is SPEC.md 9.1 verbatim: the same coefficients, the same
-    characters, the same ``mult_a`` as :c:data:`pg_mo_weight`. T^a is a Hermitian
+    This is the determinant version of the MO projector: the same
+    coefficients, the same characters, the same ``mult_a`` as
+    :c:data:`pg_mo_weight`. T^a is a Hermitian
     projector on the family (gates D1/D2), and its diagonal gives the
     determinant labels.
 
@@ -1774,7 +1742,7 @@ Subroutines / functions
 
        * :c:func:`pg_det_gates`
        * :c:data:`pg_det_irrep`
-       * :c:data:`pg_state_irrep_weight`
+       * :c:func:`pg_state_weight_matrix`
 
     Calls:
 
@@ -1839,7 +1807,7 @@ Subroutines / functions
     
     It has no printing switch to test: the state table is always printed
     when the labels are usable, and a printing decision must not disable
-    the irrep filter (SPEC.md 9.4f A1). :c:data:`auto_symmetry` stays the
+    the irrep filter. :c:data:`auto_symmetry` stays the
     master switch, through :c:func:`pg_symmetry_ready`.
 
     Needs:
@@ -1864,8 +1832,8 @@ Subroutines / functions
     detection was not requested or failed: :c:func:`pg_symmetry_ready` returns
     .false. and the failure has already printed its reason. A state with no
     definite irrep is described by its irrep probabilities, which are exact
-    for the stored CI space even when the MO basis is not symmetry adapted
-    (NOTES section 10). ``energy`` and ``s2`` are the caller's arrays, at
+    for the stored CI space even when the MO basis is not symmetry adapted.
+    ``energy`` and ``s2`` are the caller's arrays, at
     least ``N_states`` long.
 
     Needs:
@@ -1906,6 +1874,9 @@ Subroutines / functions
        * :c:data:`mpi_master`
        * :c:data:`n_det`
        * :c:data:`n_states`
+       * :c:data:`pg_group_name`
+       * :c:data:`pg_irrep_allowed`
+       * :c:data:`pg_irrep_filter`
        * :c:data:`pg_n_col`
        * :c:data:`pg_n_mo_mixed`
        * :c:data:`pg_state_irrep_weight`
@@ -1945,9 +1916,12 @@ Subroutines / functions
     Narrow ``ok(1:n)`` to the states whose known irrep is in :c:data:`irrep_states`.
     
     ``label(k)`` = 0 means "unknown": such a state is kept, because a filter
-    must not drop a state it may not be subject to. It never widens, so it
-    composes with any earlier selection (the S^2 test and the state
-    following attribution mask in Davidson).
+    must not drop a state it may not be subject to.
+    
+    Called once, after the diagonalization, on the states that were actually
+    computed: the filter reorders them, it does not steer the Davidson
+    iteration (a swap inside the loop made the iteration wander and, for some
+    fixtures, fail to converge).
     
     :c:data:`pg_irrep_allowed` is provided here, not in the callers: IRPF90 hoists
     the explicit PROVIDE to the entry of this routine, so the mask and the
@@ -2000,6 +1974,46 @@ Subroutines / functions
        * :c:func:`pg_print_state_irreps_work`
 
  
+.. c:function:: void pg_state_labels_exact(void)
+
+
+    File : :file:`state_weights.irp.f`
+
+    .. code:: fortran
+
+        subroutine pg_state_labels_exact(ndet, coef, lda, nst, label, purity)
+
+
+    Exact irrep labels of ``nst`` CI vectors, for the irrep filter.
+    
+    ``label(k)`` = argmax_a w_a(k) when that maximum is at least
+    1 - :c:data:`pg_thresh`, else 0 ("no definite irrep": the filter must
+    not constrain such a state). Same rule as :c:data:`pg_state_irrep`,
+    because it is the same weight matrix: the state that is selected and
+    the state that is printed carry the same label.
+    
+    Not for the Davidson loop: this enumerates the families. The loop uses
+    :c:func:`pg_det_state_labels`, which only sums coef^2 by determinant
+    label and is deliberately allowed to answer 0.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`pg_label_ierr`
+       * :c:data:`pg_n_col`
+       * :c:data:`pg_n_col`
+       * :c:data:`pg_thresh`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pg_state_weight_matrix`
+
+ 
 .. c:function:: void pg_state_warn_filtered(void)
 
 
@@ -2023,6 +2037,67 @@ Subroutines / functions
        * :c:data:`mpi_master`
        * :c:data:`pg_irrep_allowed`
        * :c:data:`pg_n_col`
+
+ 
+.. c:function:: void pg_state_weight_matrix(void)
+
+
+    File : :file:`state_weights.irp.f`
+
+    .. code:: fortran
+
+        subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
+
+
+    Exact irrep weights of ``nst`` CI vectors stored in ``coef(lda,*)``.
+    
+    ``w(a,k)`` = weight of irrep ``a`` in column ``k``, ``norm(k)`` = sum_D
+    coef_D^2 and ``dmix(k)`` = the part of ``norm(k)`` carried by
+    determinants with :c:data:`pg_det_irrep` = 0.
+    
+    A determinant with :c:data:`pg_det_block` = 1 is pure and its family is
+    itself, so T^a_{DD} = delta_{a,pg_det_irrep(D)} exactly: those
+    determinants are accumulated from the label, and the projectors are
+    built only for the families of size > 1 (which are exactly the
+    determinants with no definite irrep). This is the O(n_irrep nst
+    sum_F |F|^2) algorithm of the report, not the O(n_irrep nst ndet)
+    diagonal-only approximation of :c:func:`pg_det_state_labels`.
+    
+    ``coef`` is assumed-size: the caller passes ``psi_coef`` or
+    ``CI_eigenvectors``, both stored as (ndet, nst).
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`pg_col_diag`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_label_ierr`
+       * :c:data:`pg_n_col`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_n_col`
+       * :c:data:`pg_col_diag`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`pg_state_irrep_weight`
+       * :c:func:`pg_state_labels_exact`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pg_det_counts`
+       * :c:func:`pg_family_fill`
+       * :c:func:`pg_family_index`
+       * :c:func:`pg_family_projector`
 
  
 .. c:function:: void pg_unrank(void)

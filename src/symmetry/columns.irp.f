@@ -1,4 +1,4 @@
-! Character-table columns (SPEC.md section 6).
+! Character-table columns.
 !
 ! A column of a data file is NOT a geometric class, and this file is where
 ! that difference is implemented. Measured on the 211 files of the data set:
@@ -24,11 +24,11 @@
 !    KEY SET is contained in {K, K^-1} and contains K. This also makes the
 !    result independent of the sign convention of the axis (a sign flip turns
 !    k into m-k, and a class key set is closed under that whenever it matters).
-!  * The axis predicates use the canonical frame of section 4 through
+!  * The axis predicates use the canonical frame of frame.irp.f through
 !    pg_axis_along (a dot product with pg_rot). pg_elem_axis is in the INPUT
 !    frame: never index it directly.
 !
-! Axis predicates (cotton's convention, section 4 -- the reason the labels
+! Axis predicates (cotton's convention, frame.irp.f -- the reason the labels
 ! match the literature):
 !   z (k=3)  principal axis; sh means "plane normal along z"
 !   y (k=2)  sv: plane xz, normal along y
@@ -57,7 +57,7 @@
   ! Character table of :c:data:`pg_group_name`, with every file column
   ! matched to the set of group elements it stands for, and validated.
   !
-  ! Main outputs, for section 8:
+  ! Main outputs, for mo_irrep.irp.f:
   !
   ! ``pg_irrep_name(a)``
   !     name of irrep a, as in the file (A1, B2u, T1g, E')
@@ -67,7 +67,7 @@
   !
   ! ``pg_irrep_mult(a)``
   !     1 for a genuine real irrep, 2 when the row is the sum of a
-  !     complex-conjugate pair (C3, C10, ...). The projector of section 8 is
+  !     complex-conjugate pair (C3, C10, ...). The MO projector is
   !     then (d_a/mult_a) sum_col chi_a(col) U_col.
   !
   ! ``pg_char(a,c)``
@@ -91,7 +91,7 @@
   ! These identities do NOT detect a swap of two columns that have equal
   ! sizes in an Abelian group (swapping sv and sd in C2v keeps every sum
   ! intact): the authoritative gate for the column *labelling* is the
-  ! projector trace test G3 of section 8, which uses the actual matrices.
+  ! projector trace test G3 of mo_irrep.irp.f, which uses the actual matrices.
   END_DOC
   integer, parameter :: pg_table_nmax = 64
   logical, external :: pg_class_has_key, pg_class_kset_subset, &
@@ -119,7 +119,7 @@
 
   !---------------------------------------------------------------------
   ! 1. Parse the table of this group. Nothing here depends on the
-  !    geometry: chartab.irp.f is a pure parser (section 3).
+  !    geometry: chartab.irp.f is a pure parser.
   !---------------------------------------------------------------------
   call pg_character_table_path(pg_group_name, path, ierr)
   if (ierr /= 0) then
@@ -438,7 +438,7 @@
     endif
   enddo
   ! Row 1 must be the totally symmetric irrep: every character is 1. The
-  ! whole set of names and the projectors of section 8 assume it, and it is
+  ! whole set of names and the MO projectors assume it, and it is
   ! the one property of the row order that the files always satisfy.
   do c = 1, n_file
     if (abs(pg_char(1,c) - 1.d0) > 5.d-3) then
