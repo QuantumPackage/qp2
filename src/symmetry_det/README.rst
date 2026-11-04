@@ -122,14 +122,20 @@ The state table
 ``pg_print_state_irreps(energy, s2)`` is called by :ref:`cis`, :ref:`cisd`
 and :ref:`fci` after diagonalization. It prints one line per state::
 
-    symmetry: state irreps: group C2v, 4 irreps, N_det = 679
-    symmetry:    state      energy (Ha)       S^2  irrep   purity
-    symmetry:         1    -76.1140581951    0.0000  A1   1.000
+    State irreps: group C2v, 4 irreps, N_det = 679
+
+     ========= ================= ========= ============ ======
+         State       Energy (Ha)       S^2 Irrep        Purity
+     ========= ================= ========= ============ ======
+             1    -76.1140581951    0.0000 A1            1.000
+     ========= ================= ========= ============ ======
 
 and nothing when the detection failed or was not requested. The
 :math:`S^2` column is the caller's value, so a symmetry label and a spin
 label are always read together. There is no printing switch: the table is
-part of a CI run whose labels are usable.
+part of a CI run whose labels are usable. The irrep is left-justified in a
+fixed 12-character column, so ``(none)`` and a short label line up with a
+long one.
 
 The table uses the exact weights above, with the projectors for the families
 of size greater than one. For a pure determinant the diagonal is a Kronecker
@@ -140,11 +146,13 @@ family.
 When the MO basis is not symmetry adapted the table gains two notice lines
 before the header::
 
-    symmetry: the MO basis is not symmetry adapted: a state weight is its
-    symmetry: exact irrep probability for the stored CI space (not a guess).
+    The MO basis is not symmetry adapted: a state weight is its
+    exact irrep probability for the stored CI space (not a guess).
 
-and a state without a definite irrep ends its line with up to four
-``name weight`` pairs, the irreps that carry its weight.
+and a state without a definite irrep shows ``(none)`` in the irrep column
+and gets one indented ``composition:`` line with up to four ``name weight``
+pairs, the irreps that carry its weight. The composition is not appended to
+the table row: it would run past the closing rule.
 
 The weights stay exact for the stored determinant space. ``pg_mo_block`` is
 built from ``X_g`` itself, so ``X_g`` is block diagonal on the blocks

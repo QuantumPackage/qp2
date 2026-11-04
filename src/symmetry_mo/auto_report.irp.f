@@ -239,11 +239,23 @@ subroutine pg_print_mo_energies_labelled(e, n)
     call pg_print_mo_energies_plain(e, n)
     return
   endif
-  print *, ''
-  print *, 'MO energies and irreps'
-  print *, '----------------------'
-  print *, ''
-  print *, '======== ================ ============'
+  ! write, not print: a list-directed print adds a leading blank, which
+  ! shifts the rule and the header one column to the right of the data
+  ! written with an explicit format.
+  ! write, not print: a list-directed print adds a leading blank. The
+  ! historical Eigenvalues table is indented by that one column, so every
+  ! line of this table carries it explicitly, data rows included; the rule
+  ! then spans exactly the columns its text occupies.
+  write(6,'(A)') ''
+  write(6,'(A)') ' MO energies and irreps'
+  write(6,'(A)') ' ----------------------'
+  write(6,'(A)') ''
+  write(6,'(A)') ' ======== ================ ============'
+  ! Header literal: an A12 descriptor right-justifies a shorter literal,
+  ! and "Irrep" must sit on the left edge of its column, over the
+  ! left-justified labels.
+  write(6,'(A)') '       MO      Energy (Ha) Irrep'
+  write(6,'(A)') ' ======== ================ ============'
   do i = 1, n
     lab = ' '
     col = ' '
@@ -253,9 +265,9 @@ subroutine pg_print_mo_energies_labelled(e, n)
       lab = trim(adjustl(pg_irrep_name(pg_mo_irrep(i))))
       write (col,'(A)') trim(lab)
     endif
-    write (6,'(I8,1X,F16.10,4X,A12)') i, e(i), col
+    write (6,'(1X,I8,1X,F16.10,1X,A12)') i, e(i), col
   enddo
-  print *, '======== ================ ============'
+  write(6,'(A)') ' ======== ================ ============'
 end subroutine pg_print_mo_energies_labelled
 
 !-----------------------------------------------------------------------
@@ -323,6 +335,7 @@ subroutine pg_report_mo_symmetry_work()
   if (mpi_master) then
     linear = trim(pg_group_name) == 'Cinfv' .or. &
              trim(pg_group_name) == 'Dinfh'
+    write(6,'(A)') ''
     write(6,'(A,A,A,I0,A,ES8.1,A)') 'Point group ', &
          trim(pg_group_name), ', |G| = ', pg_n_elem, &
          ', geometry residual', pg_geom_residual, ' bohr'

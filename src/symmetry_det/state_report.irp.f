@@ -51,6 +51,9 @@ subroutine pg_print_state_irreps_work(energy, s2)
   integer :: s, a, nw, nf
   double precision :: wsum, s2v
   character*(8) :: lab
+  ! Fixed-width irrep column, so that "(none)" and a short label line up
+  ! with a long one whatever the padding of pg_irrep_name.
+  character*(12) :: col
 
   provide pg_state_irrep_weight pg_irrep_allowed
 
@@ -58,34 +61,54 @@ subroutine pg_print_state_irreps_work(energy, s2)
   ! The group name is in the header so that a CI log kept on its own says
   ! which irreps the symbols below belong to: the detection summary is printed
   ! by the SCF program and by "qp_run symmetry_mo", not here.
-  write(6,'(A,A,A,I0,A,I0)') 'symmetry: state irreps: group ', &
+  write(6,*)
+  write(6,'(A,A,A,I0,A,I0)') 'State irreps: group ', &
        trim(pg_group_name), ', ', pg_n_irrep, ' irreps, N_det = ', N_det
   if (pg_n_mo_mixed > 0) then
-    write(6,'(A)') 'symmetry: the MO basis is not symmetry adapted: a state '// &
+    write(6,'(A)') 'The MO basis is not symmetry adapted: a state '// &
          'weight is its'
-    write(6,'(A)') 'symmetry: exact irrep probability for the stored CI '// &
+    write(6,'(A)') 'exact irrep probability for the stored CI '// &
          'space (not a guess).'
   endif
-  write(6,'(A)') 'symmetry:    state      energy (Ha)       S^2  irrep   purity'
+  write(6,*)
+  ! One blank between every pair of columns, so the rule above a column
+  ! starts and ends exactly where that column does. The whole table keeps
+  ! the one-column indent of the historical tables (the leading blank of
+  ! list-directed output), data rows included. The literal is split to
+  ! keep the source line readable; the concatenation is 58 characters.
+  write(6,'(A)') ' ========= ================= ========= '// &
+       '============ ======'
+  ! Header written as a literal: an A12 edit descriptor right-justifies a
+  ! shorter literal, and "Irrep" must sit on the left edge of its column,
+  ! over the left-justified labels.
+  write(6,'(A)') '     State       Energy (Ha)       S^2 '// &
+       'Irrep        Purity'
+  write(6,'(A)') ' ========= ================= ========= '// &
+       '============ ======'
   do s = 1, N_states
+    col = ' '
     if (pg_state_irrep(s) > 0) then
       lab = trim(adjustl(pg_irrep_name(pg_state_irrep(s))))
     else
       lab = '(none)'
     endif
-    ! S^2 is non-negative; a value a few 1e-16 negative is roundoff and F10.4
+    write (col,'(A)') trim(lab)
+    ! S^2 is non-negative; a value a few 1e-16 negative is roundoff and F9.4
     ! would print it as -0.0000. Clamp only what would print as a negative
     ! zero, so a real negative value stays visible.
     s2v = s2(s)
     if (s2v < 0.d0 .and. s2v > -5.d-5) s2v = 0.d0
-    write(6,'(A,I9,F18.10,F10.4,2X,A,1X,F7.3)',advance='no') 'symmetry: ', s, &
-         energy(s), s2v, trim(lab), pg_state_purity(s)
+    write(6,'(1X,I9,1X,F17.10,1X,F9.4,1X,A12,1X,F6.3)') s, &
+         energy(s), s2v, col, pg_state_purity(s)
     ! A labelled state needs no composition; an unlabelled one is described
-    ! by the irreps that carry weight (at most four shown).
-    nw = 0
+    ! by the irreps that carry weight (at most four shown). It goes on its
+    ! own indented line: appending it to the row would run past the closing
+    ! rule and break the table's right edge.
     if (pg_state_irrep(s) == 0) then
+      nw = 0
       do a = 1, pg_n_irrep
         if (pg_state_irrep_weight(a,s) < 1.d-4) cycle
+        if (nw == 0) write(6,'(A)',advance='no') '  composition:'
         if (nw >= 4) then
           write(6,'(A)',advance='no') ' ...'
           exit
@@ -94,9 +117,11 @@ subroutine pg_print_state_irreps_work(energy, s2)
              pg_state_irrep_weight(a,s)
         nw = nw + 1
       enddo
+      if (nw > 0) write(6,*)
     endif
-    write(6,*)
   enddo
+  write(6,'(A)') ' ========= ================= ========= '// &
+       '============ ======'
   ! The filter only reorders states that were computed. In a Davidson run
   ! that is the N_states that were converged, so a state may come out outside
   ! irrep_states; with the full (Lapack) diagonalization every retained
@@ -111,9 +136,9 @@ subroutine pg_print_state_irreps_work(energy, s2)
       endif
     enddo
     if (nf > 0) then
-      write(6,'(A,I0,A,I0)') 'symmetry: states outside irrep_states: ', &
+      write(6,'(A,I0,A,I0)') 'States outside irrep_states: ', &
            nf, ' of ', N_states
-      write(6,'(A)') 'symmetry: raise n_states, or n_det_max_full '// &
+      write(6,'(A)') 'Raise n_states, or n_det_max_full '// &
            '(full diagonalization).'
     endif
   endif
@@ -123,7 +148,7 @@ subroutine pg_print_state_irreps_work(energy, s2)
       wsum = wsum + pg_state_irrep_weight(a,s)
     enddo
     if (abs(wsum - pg_state_norm(s)) > pg_thresh) then
-      write(6,'(A,I0,A,ES12.4,A,ES12.4,A)') 'symmetry:   state ', s, &
+      write(6,'(A,I0,A,ES12.4,A,ES12.4,A)') 'State ', s, &
            ': irrep weights sum to ', wsum, ', norm is ', &
            pg_state_norm(s), ' (bookkeeping)'
     endif
