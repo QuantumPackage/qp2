@@ -1170,6 +1170,8 @@ Providers
        * :c:data:`one_e_tr_dm_mo`
        * :c:data:`one_e_tr_dm_mo_alpha`
        * :c:data:`overlap_states`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_state_irrep_weight`
        * :c:data:`pruned`
        * :c:data:`psi_average_norm_contrib`
        * :c:data:`psi_bilinear_matrix`
@@ -2844,6 +2846,7 @@ Providers
        * :c:data:`dominant_det`
        * :c:data:`dressed_column_idx`
        * :c:data:`overlap_states`
+       * :c:data:`pg_state_irrep_weight`
        * :c:data:`psi_average_norm_contrib`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_cas`
@@ -3013,6 +3016,7 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`pg_det_irrep`
        * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`psi_bilinear_matrix_values`
 
@@ -3051,6 +3055,7 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`pg_det_irrep`
        * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`psi_bilinear_matrix_values`
 
@@ -3097,6 +3102,7 @@ Providers
        * :c:data:`n_csf`
        * :c:data:`n_elec_alpha_for_psi_configuration`
        * :c:data:`one_e_dm_mo_alpha`
+       * :c:data:`pg_det_irrep`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_cas`
        * :c:data:`psi_coef`
@@ -3409,6 +3415,7 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`pg_det_irrep`
        * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`psi_bilinear_matrix_values`
 
@@ -4657,6 +4664,8 @@ Subroutines / functions
        * :c:data:`one_e_dm_mo_alpha`
        * :c:data:`one_e_tr_dm_mo`
        * :c:data:`one_e_tr_dm_mo_alpha`
+       * :c:func:`pg_det_counts`
+       * :c:func:`pg_det_report`
        * :c:data:`ref_closed_shell_bitmask`
        * :c:func:`single_excitation_wee`
 

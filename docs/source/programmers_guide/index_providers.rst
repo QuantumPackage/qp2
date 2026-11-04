@@ -27,6 +27,7 @@ Index of Providers
     * :c:data:`ao_abs_comb_b3_j1b` 
     * :c:data:`ao_abs_int_grid` 
     * :c:data:`ao_basis_prod_threshold` 
+    * :c:data:`ao_canonical_nucl_elec_ints` 
     * :c:data:`ao_cart_to_sphe_coef` 
     * :c:data:`ao_cart_to_sphe_coef_transp` 
     * :c:data:`ao_cart_to_sphe_inv` 
@@ -119,7 +120,7 @@ Index of Providers
     * :c:data:`ao_one_e_integrals_tc_tot` 
     * :c:data:`ao_ortho_canonical_coef` 
     * :c:data:`ao_ortho_canonical_coef_inv` 
-    * :c:data:`ao_canonical_nucl_elec_ints` 
+    * :c:data:`ao_ortho_canonical_nucl_elec_integrals` 
     * :c:data:`ao_ortho_canonical_num` 
     * :c:data:`ao_ortho_canonical_overlap` 
     * :c:data:`ao_ortho_lowdin_coef` 
@@ -233,6 +234,7 @@ Index of Providers
     * :c:data:`attachment_numbers_sorted` 
     * :c:data:`attachment_orbitals` 
     * :c:data:`au_to_d` 
+    * :c:data:`auto_symmetry` 
     * :c:data:`average_on_top` 
     * :c:data:`banned_excitation` 
     * :c:data:`barycentric_electronic_energy` 
@@ -559,9 +561,10 @@ Index of Providers
     * :c:data:`final_grid_points_transp` 
     * :c:data:`final_weight_at_r` 
     * :c:data:`final_weight_at_r_extra` 
+    * :c:data:`final_weight_at_r_per_atom` 
     * :c:data:`final_weight_at_r_vector` 
     * :c:data:`final_weight_at_r_vector_extra` 
-    * :c:data:`final_weight_at_r_per_atom` 
+    * :c:data:`final_weight_at_r_vector_per_atom` 
     * :c:data:`fipq` 
     * :c:data:`fock_3_mat` 
     * :c:data:`fock_3_mat_a_op_sh` 
@@ -728,8 +731,9 @@ Index of Providers
     * :c:data:`index_final_points_extra` 
     * :c:data:`index_final_points_extra_reverse` 
     * :c:data:`index_final_points_per_atom` 
-    * :c:data:`index_final_pts_per_atom_rev` 
+    * :c:data:`index_final_points_per_atom_reverse` 
     * :c:data:`index_final_points_reverse` 
+    * :c:data:`index_final_pts_per_atom_rev` 
     * :c:data:`index_hf_psi_det` 
     * :c:data:`index_holes_bitmask` 
     * :c:data:`index_orb_swap` 
@@ -761,6 +765,7 @@ Index of Providers
     * :c:data:`inv_pi_gamma_pq_3_2_ao_extra` 
     * :c:data:`inv_selectors_coef_hf` 
     * :c:data:`inv_selectors_coef_hf_squared` 
+    * :c:data:`irrep_states` 
     * :c:data:`is_zmq_slave` 
     * :c:data:`j1b_coeff` 
     * :c:data:`j1b_gauss_hermi` 
@@ -1225,6 +1230,83 @@ Index of Providers
     * :c:data:`p0tuvx_no` 
     * :c:data:`p0tuvx_peter` 
     * :c:data:`partial_occupation` 
+    * :c:data:`pg_ao_ok` 
+    * :c:data:`pg_basis_ierr` 
+    * :c:data:`pg_basis_msg` 
+    * :c:data:`pg_block_cap` 
+    * :c:data:`pg_block_dim` 
+    * :c:data:`pg_block_mo` 
+    * :c:data:`pg_block_start` 
+    * :c:data:`pg_center` 
+    * :c:data:`pg_char` 
+    * :c:data:`pg_class` 
+    * :c:data:`pg_class_rep` 
+    * :c:data:`pg_class_size` 
+    * :c:data:`pg_col_diag` 
+    * :c:data:`pg_col_len` 
+    * :c:data:`pg_col_member` 
+    * :c:data:`pg_col_start` 
+    * :c:data:`pg_data_sym` 
+    * :c:data:`pg_det_block` 
+    * :c:data:`pg_det_family` 
+    * :c:data:`pg_det_irrep` 
+    * :c:data:`pg_det_mixed_frac` 
+    * :c:data:`pg_det_purity` 
+    * :c:data:`pg_detection_failed` 
+    * :c:data:`pg_elem_angle` 
+    * :c:data:`pg_elem_axis` 
+    * :c:data:`pg_elem_col` 
+    * :c:data:`pg_elem_det` 
+    * :c:data:`pg_elem_inv` 
+    * :c:data:`pg_elem_kind` 
+    * :c:data:`pg_elem_mul` 
+    * :c:data:`pg_family_cap` 
+    * :c:data:`pg_family_first` 
+    * :c:data:`pg_geom_residual` 
+    * :c:data:`pg_group_name` 
+    * :c:data:`pg_has_i` 
+    * :c:data:`pg_inertia_eval` 
+    * :c:data:`pg_inertia_evec` 
+    * :c:data:`pg_irrep_allowed` 
+    * :c:data:`pg_irrep_dim` 
+    * :c:data:`pg_irrep_filter` 
+    * :c:data:`pg_irrep_mult` 
+    * :c:data:`pg_irrep_name` 
+    * :c:data:`pg_irrep_weight` 
+    * :c:data:`pg_is_linear` 
+    * :c:data:`pg_is_planar` 
+    * :c:data:`pg_label_ierr` 
+    * :c:data:`pg_label_msg` 
+    * :c:data:`pg_mo_block` 
+    * :c:data:`pg_mo_block_dim` 
+    * :c:data:`pg_mo_irrep` 
+    * :c:data:`pg_mo_purity` 
+    * :c:data:`pg_mo_weight` 
+    * :c:data:`pg_n_axes_max` 
+    * :c:data:`pg_n_c2_perp` 
+    * :c:data:`pg_n_class` 
+    * :c:data:`pg_n_col` 
+    * :c:data:`pg_n_elem` 
+    * :c:data:`pg_n_family` 
+    * :c:data:`pg_n_irrep` 
+    * :c:data:`pg_n_irrep_allowed` 
+    * :c:data:`pg_n_max` 
+    * :c:data:`pg_n_mo_block` 
+    * :c:data:`pg_n_mo_mixed` 
+    * :c:data:`pg_n_sigma_h` 
+    * :c:data:`pg_n_sigma_vtot` 
+    * :c:data:`pg_perm` 
+    * :c:data:`pg_plane_normal` 
+    * :c:data:`pg_rot` 
+    * :c:data:`pg_rot_mat` 
+    * :c:data:`pg_shell_target` 
+    * :c:data:`pg_state_irrep` 
+    * :c:data:`pg_state_irrep_weight` 
+    * :c:data:`pg_state_norm` 
+    * :c:data:`pg_state_purity` 
+    * :c:data:`pg_thresh` 
+    * :c:data:`pg_tol` 
+    * :c:data:`pg_xg` 
     * :c:data:`phi_angular_integration_lebedev` 
     * :c:data:`planck_cte` 
     * :c:data:`pot_grad_c_alpha_ao_pbe` 
@@ -1512,6 +1594,7 @@ Index of Providers
     * :c:data:`state_av_full_occ_2_rdm_aa_mo` 
     * :c:data:`state_av_full_occ_2_rdm_ab_mo` 
     * :c:data:`state_av_full_occ_2_rdm_bb_mo` 
+    * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo` 
     * :c:data:`state_av_occ_2_rdm_spin_trace_mo` 
     * :c:data:`state_average_weight` 
     * :c:data:`super_ci_dm` 
@@ -1904,6 +1987,7 @@ Index of Subroutines/Functions
     * :c:func:`create_wf_of_psi_bilinear_matrix` 
     * :c:func:`crint_1` 
     * :c:func:`crint_1_vec` 
+    * :c:func:`crint_1_vec_scaled` 
     * :c:func:`crint_2` 
     * :c:func:`crint_2_vec` 
     * :c:func:`crint_quad_1` 
@@ -1913,6 +1997,7 @@ Index of Subroutines/Functions
     * :c:func:`crint_smallz` 
     * :c:func:`crint_smallz_vec` 
     * :c:func:`crint_sum` 
+    * :c:func:`crint_sum_shift` 
     * :c:func:`cyclic_term_jim_bi_ortho` 
     * :c:func:`cyclic_term_mji_bi_ortho` 
     * :c:func:`d1_norm_inverse_trust_region` 
@@ -2355,6 +2440,7 @@ Index of Subroutines/Functions
     * :c:func:`give_degen_full_list` 
     * :c:func:`give_degen_full_listcore` 
     * :c:func:`give_explicit_cpoly_and_cgaussian` 
+    * :c:func:`give_explicit_cpoly_and_cgaussian_log` 
     * :c:func:`give_explicit_cpoly_and_cgaussian_x` 
     * :c:func:`give_explicit_poly_and_gaussian` 
     * :c:func:`give_explicit_poly_and_gaussian_double` 
@@ -2823,6 +2909,86 @@ Index of Subroutines/Functions
     * :c:func:`perturb_buffer_epstein_nesbet_2x2_no_ci_diag` 
     * :c:func:`perturb_buffer_moller_plesset` 
     * :c:func:`perturb_buffer_qdpt` 
+    * :c:func:`pg_add_direction` 
+    * :c:func:`pg_add_element` 
+    * :c:func:`pg_ao_ratio` 
+    * :c:func:`pg_ao_rep` 
+    * :c:func:`pg_ao_rep_ex` 
+    * :c:func:`pg_axis_along` 
+    * :c:func:`pg_binom` 
+    * :c:func:`pg_build_candidates` 
+    * :c:func:`pg_build_group` 
+    * :c:func:`pg_build_linear` 
+    * :c:func:`pg_character_table_path` 
+    * :c:func:`pg_check_ao_factor` 
+    * :c:func:`pg_class_any_used` 
+    * :c:func:`pg_class_has_axis` 
+    * :c:func:`pg_class_has_key` 
+    * :c:func:`pg_class_kset_subset` 
+    * :c:func:`pg_col_fail` 
+    * :c:func:`pg_count_tokens` 
+    * :c:func:`pg_cross` 
+    * :c:func:`pg_decode_kind` 
+    * :c:func:`pg_det3` 
+    * :c:func:`pg_det_counts` 
+    * :c:func:`pg_det_gates` 
+    * :c:func:`pg_det_report` 
+    * :c:func:`pg_det_state_labels` 
+    * :c:func:`pg_det_weights` 
+    * :c:func:`pg_diag3` 
+    * :c:func:`pg_elem_me` 
+    * :c:func:`pg_elem_props` 
+    * :c:func:`pg_encode_kind` 
+    * :c:func:`pg_enumerate` 
+    * :c:func:`pg_expected_order` 
+    * :c:func:`pg_family_fill` 
+    * :c:func:`pg_family_index` 
+    * :c:func:`pg_family_projector` 
+    * :c:func:`pg_family_size` 
+    * :c:func:`pg_find_by_mat` 
+    * :c:func:`pg_find_by_perm` 
+    * :c:func:`pg_fix_sign` 
+    * :c:func:`pg_g2_pair` 
+    * :c:func:`pg_get_mo_rep` 
+    * :c:func:`pg_labels_usable` 
+    * :c:func:`pg_linear_add` 
+    * :c:func:`pg_linear_to_input` 
+    * :c:func:`pg_maps_to_self` 
+    * :c:func:`pg_mo_labels_ok` 
+    * :c:func:`pg_mo_top2` 
+    * :c:func:`pg_monomial_rep` 
+    * :c:func:`pg_normalize_irrep_states` 
+    * :c:func:`pg_orient_axis` 
+    * :c:func:`pg_parse_symbol` 
+    * :c:func:`pg_parse_table` 
+    * :c:func:`pg_perm_string` 
+    * :c:func:`pg_print_state_irreps` 
+    * :c:func:`pg_print_state_irreps_work` 
+    * :c:func:`pg_proper_scan` 
+    * :c:func:`pg_read_int` 
+    * :c:func:`pg_ready_columns` 
+    * :c:func:`pg_ready_detection` 
+    * :c:func:`pg_reduce_angle` 
+    * :c:func:`pg_reflection` 
+    * :c:func:`pg_report` 
+    * :c:func:`pg_report_ao` 
+    * :c:func:`pg_report_mo` 
+    * :c:func:`pg_report_mo_symmetry` 
+    * :c:func:`pg_report_mo_symmetry_work` 
+    * :c:func:`pg_rotation` 
+    * :c:func:`pg_select_x` 
+    * :c:func:`pg_shell_same` 
+    * :c:func:`pg_small_det` 
+    * :c:func:`pg_sorted_contraction` 
+    * :c:func:`pg_split_tab` 
+    * :c:func:`pg_state_apply` 
+    * :c:func:`pg_state_irreps_label` 
+    * :c:func:`pg_state_labels_exact` 
+    * :c:func:`pg_state_warn_filtered` 
+    * :c:func:`pg_state_weight_matrix` 
+    * :c:func:`pg_symmetry_ready` 
+    * :c:func:`pg_unrank` 
+    * :c:func:`pg_write_mo_symmetry` 
     * :c:func:`phi_j_erf_mu_r_dxyz_phi` 
     * :c:func:`phi_j_erf_mu_r_dxyz_phi_bis` 
     * :c:func:`phi_j_erf_mu_r_phi` 
@@ -2931,7 +3097,6 @@ Index of Subroutines/Functions
     * :c:func:`reorder_mo_max_overlap` 
     * :c:func:`reorder_orbitals_for_casscf` 
     * :c:func:`replace_wf` 
-    * :c:func:`report` 
     * :c:func:`reset_zmq_addresses` 
     * :c:func:`resident_memory` 
     * :c:func:`resize_h_apply_buffer` 
@@ -3087,6 +3252,8 @@ Index of Subroutines/Functions
     * :c:func:`swap_mos` 
     * :c:func:`switch_qp_run_to_master` 
     * :c:func:`sym_3_e_int_from_6_idx_tensor` 
+    * :c:func:`symmetry` 
+    * :c:func:`symmetry_det` 
     * :c:func:`tamiser` 
     * :c:func:`task_done_to_taskserver` 
     * :c:func:`tasks_done_to_taskserver` 
@@ -3312,5 +3479,4 @@ Index of Subroutines/Functions
     * :c:func:`zmq_put_psi_det_size` 
     * :c:func:`zmq_selection` 
     * :c:func:`zmq_set_running` 
-    * :c:func:`zz_test_chol_check` 
 

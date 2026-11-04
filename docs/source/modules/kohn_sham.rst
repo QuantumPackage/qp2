@@ -770,6 +770,7 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`json_close`
+       * :c:func:`pg_report_mo_symmetry`
        * :c:func:`roothaan_hall_scf`
 
     Touches:
@@ -782,4 +783,5 @@ Subroutines / functions
        * :c:data:`mo_coef`
        * :c:data:`level_shift`
        * :c:data:`mo_coef`
+       * :c:data:`mo_symmetry`
 

@@ -107,6 +107,7 @@ subroutine run
 
   call json_close
 
+  call pg_report_mo_symmetry()
 end
 
 

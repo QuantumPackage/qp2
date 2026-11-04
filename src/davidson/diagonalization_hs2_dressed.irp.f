@@ -156,6 +156,13 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   real, pointer                  :: S(:,:)
   logical                        :: disk_based
   double precision               :: energy_shift(N_st_diag_in*davidson_sze_max)
+  logical                        :: use_sym
+  integer                        :: lab(N_st_diag_in*davidson_sze_max)
+  integer                        :: lab_prev(N_st)
+  double precision               :: lab_pur(N_st_diag_in*davidson_sze_max)
+  double precision               :: lab_mix(N_st_diag_in*davidson_sze_max)
+  integer                        :: n_col
+  logical, external              :: pg_labels_usable
 
   include 'constants.include.F'
 
@@ -185,6 +192,16 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
     allocate(overlap(1,1))  ! avoid 'if' for deallocate
   endif
   overlap = 0.d0
+
+  ! Labels are needed inside the loop only by state following, which matches
+  ! a Ritz vector to the previous state of the same irrep. The irrep filter
+  ! runs after the diagonalization (see diagonalize_ci), so it costs nothing
+  ! here: enabling it must not add a labelling pass per iteration.
+  use_sym = .false.
+  lab_prev = 0
+  if (state_following) then
+    if (pg_labels_usable()) use_sym = .true.
+  endif
 
   PROVIDE nuclear_repulsion expected_s2 psi_bilinear_matrix_order psi_bilinear_matrix_order_reverse threshold_davidson_pt2 threshold_davidson_from_pt2
 
@@ -505,6 +522,17 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
         s2(k) = s_(k,k)
       enddo
 
+      if (use_sym) then
+        lab = 0
+        do j = 1, shift2, N_st_diag
+          n_col = min(N_st_diag, shift2-j+1)
+          call dgemm('N','N', sze, n_col, shift2, 1.d0, U, size(U,1), &
+               y(1,j), size(y,1), 0.d0, U(1,shift2+1), size(U,1))
+          call pg_det_state_labels(sze, U(1,shift2+1), size(U,1), n_col, &
+               lab(j), lab_pur(j), lab_mix(j))
+        enddo
+      endif
+
       if (only_expected_s2) then
           do k=1,shift2
             state_ok(k) = (dabs(s2(k)-expected_s2) < 0.6d0)
@@ -517,7 +545,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
       if (state_following) then
 
-        integer ::  state(N_st), idx
+        integer ::  state(N_st), idx, ipass
         double precision :: omax
         logical :: used
         logical, allocatable :: ok(:)
@@ -547,26 +575,30 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
         state = 0
         do l = 1, N_st
-
-          omax = 0d0
-          idx = 0
-          do k = 1, shift2
-
-            ! Already used ?
-            used = .False.
-            do i = 1, N_st
-              if (state(i) == k) then
-                used = .True.
+          do ipass = 1, 2
+            omax = 0d0
+            idx = 0
+            do k = 1, shift2
+              ! Already used ?
+              used = .False.
+              do i = 1, N_st
+                if (state(i) == k) then
+                  used = .True.
+                endif
+              enddo
+              if (ipass == 1) then
+                if (.not. use_sym) cycle
+                if (lab_prev(l) < 1) cycle
+                if (lab(k) /= lab_prev(l)) cycle
+              endif
+              ! Maximum overlap
+              if ((dabs(overlp(k,l)) > omax) .and. (.not. used) .and. state_ok(k)) then
+                omax = dabs(overlp(k,l))
+                idx = k
               endif
             enddo
-
-            ! Maximum overlap
-            if ((dabs(overlp(k,l)) > omax) .and. (.not. used) .and. state_ok(k)) then
-              omax = dabs(overlp(k,l))
-              idx = k
-            endif
+            if (idx /= 0) exit
           enddo
-
           state(l) = idx
         enddo
 
@@ -622,6 +654,11 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       y_s(:,:) = real(y(:,:))
       call sgemm('N','N', sze, N_st_diag, shift2,                    &
           1., S, size(S,1), y_s, size(y_s,1), 0., S(:,shift2+1:shift2+N_st_diag), size(S,1))
+
+      if (use_sym) then
+        call pg_det_state_labels(sze, U(1,shift2+1), size(U,1), N_st, &
+             lab_prev, lab_pur, lab_mix)
+      endif
 
       ! Compute residual vector and davidson step
       ! -----------------------------------------
@@ -715,6 +752,10 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       u_in(i,k) = U(i,k)
     enddo
   enddo
+
+  if (use_sym) then
+    call pg_det_state_labels(sze, u_in, dim_in, N_st, lab_prev, lab_pur, lab_mix)
+  endif
 
   do k=1,N_st_diag
     energies(k) = lambda(k)

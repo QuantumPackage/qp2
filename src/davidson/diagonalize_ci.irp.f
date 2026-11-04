@@ -39,6 +39,11 @@ END_PROVIDER
    double precision, allocatable  :: s2_eigvalues(:)
    double precision, allocatable  :: e_array(:)
    integer, allocatable           :: iorder(:)
+   integer                        :: nslot, iord
+   integer, allocatable           :: lab(:)
+   double precision, allocatable  :: lab_pur(:), eig_tmp(:,:), s2_tmp(:)
+   logical, allocatable           :: allowed(:)
+   logical, external              :: pg_labels_usable
    logical                        :: converged
    logical                        :: do_csf
 
@@ -58,9 +63,19 @@ END_PROVIDER
 
    do_csf = s2_eig .and. only_expected_s2 .and. csf_based
 
+   ! The CSF solver returns no S^2 and its own idea of the state order; the
+   ! selection is not defined for it, and one line says so. It is checked here,
+   ! before the branch, so the Lapack path cannot quietly select without the
+   ! message.
+   if (pg_irrep_filter .and. do_csf) then
+     if (mpi_master) then
+       write(6,'(A)') 'symmetry: irrep_states is ignored when csf_based is true'
+     endif
+   endif
+
    if (diag_algorithm == "Davidson") then
 
-     if (do_csf) then
+    if (do_csf) then
        call davidson_diag_H_csf(psi_det,CI_eigenvectors, &
          size(CI_eigenvectors,1),CI_electronic_energy,               &
          N_det,N_csf,min(N_det,N_states),min(N_det,N_states_diag),N_int,0,converged)
@@ -328,6 +343,57 @@ END_PROVIDER
      enddo
 
      deallocate(eigenvectors,eigenvalues)
+   endif
+
+   ! Irrep selection: one pass over the computed states, in both branches.
+   ! It only permutes columns that were diagonalized, so it cannot change the
+   ! convergence of the Davidson iteration or the states themselves.
+   if (pg_irrep_filter .and. .not. do_csf) then
+     if (pg_labels_usable()) then
+       ! Lapack returns exact eigenvectors for every retained column, so the
+       ! selection may look past the N_states requested. Davidson converges
+       ! only those N_states; the columns beyond are unconverged Ritz vectors
+       ! and selecting one is a bug, not a filter.
+       if (diag_algorithm == "Lapack") then
+         nslot = min(N_det, N_states_diag)
+       else
+         nslot = min(N_det, N_states)
+       endif
+       allocate(lab(nslot), lab_pur(nslot), allowed(nslot))
+       allocate(iorder(nslot), e_array(nslot), s2_tmp(nslot))
+       ! Exact labels, the same weights the report prints: a state of a
+       ! degenerate irrep is selected on its projector weight, not on a
+       ! determinant sum that would answer 0 for it.
+       call pg_state_labels_exact(N_det, CI_eigenvectors, &
+            size(CI_eigenvectors,1), nslot, lab, lab_pur)
+       allowed(:) = .true.
+       call pg_state_apply(lab, nslot, allowed)
+       iord = 0
+       do j = 1, nslot
+         if (allowed(j)) then
+           iord += 1
+           iorder(iord) = j
+         endif
+       enddo
+       do j = 1, nslot
+         if (.not. allowed(j)) then
+           iord += 1
+           iorder(iord) = j
+         endif
+       enddo
+       allocate(eig_tmp(N_det,nslot))
+       do j = 1, nslot
+         eig_tmp(:,j) = CI_eigenvectors(:,iorder(j))
+         e_array(j) = CI_electronic_energy(iorder(j))
+         s2_tmp(j) = CI_s2(iorder(j))
+       enddo
+       do j = 1, nslot
+         CI_eigenvectors(:,j) = eig_tmp(:,j)
+         CI_electronic_energy(j) = e_array(j)
+         CI_s2(j) = s2_tmp(j)
+       enddo
+       deallocate(eig_tmp, s2_tmp, e_array, iorder, allowed, lab, lab_pur)
+     endif
    endif
 
 !    ! Dominant determinants for each states

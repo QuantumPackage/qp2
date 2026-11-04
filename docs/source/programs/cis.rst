@@ -80,4 +80,5 @@ cis
     * :c:data:`mo_coef` 
     * :c:data:`level_shift` 
     * :c:data:`mo_coef` 
+    * :c:data:`mo_symmetry` 
     * :c:data:`read_wf` 

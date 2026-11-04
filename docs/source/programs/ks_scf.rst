@@ -50,3 +50,4 @@ ks_scf
     * :c:data:`level_shift` 
     * :c:data:`mo_coef` 
     * :c:data:`mo_label` 
+    * :c:data:`mo_symmetry` 

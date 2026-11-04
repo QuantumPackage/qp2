@@ -130,6 +130,8 @@ Providers
        :columns: 3
 
        * :c:data:`inertia_tensor`
+       * :c:data:`pg_center`
+       * :c:data:`pg_inertia_eval`
 
  
 .. c:var:: double element_mass
@@ -159,6 +161,7 @@ Providers
 
        * :c:data:`center_of_mass`
        * :c:data:`inertia_tensor`
+       * :c:data:`pg_inertia_eval`
 
  
 .. c:var:: char element_name
@@ -188,6 +191,7 @@ Providers
 
        * :c:data:`center_of_mass`
        * :c:data:`inertia_tensor`
+       * :c:data:`pg_inertia_eval`
 
  
 .. c:var:: double inertia_tensor
@@ -360,6 +364,14 @@ Providers
        * :c:data:`nucl_coord_transp`
        * :c:data:`nucl_dist_2`
        * :c:data:`nuclear_repulsion`
+       * :c:data:`pg_geom_residual`
+       * :c:data:`pg_inertia_eval`
+       * :c:data:`pg_is_linear`
+       * :c:data:`pg_is_planar`
+       * :c:data:`pg_n_elem`
+       * :c:data:`pg_n_max`
+       * :c:data:`pg_rot`
+       * :c:data:`pg_rot_mat`
        * :c:data:`pt_chrg_nuclei_interaction`
        * :c:data:`z_dipole_moment`
 

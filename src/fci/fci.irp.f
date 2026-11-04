@@ -50,6 +50,8 @@ program fci
       call run_cipsi
     endif
 
+    call pg_print_state_irreps(psi_energy_with_nucl_rep, psi_s2)
+
     write(json_unit,json_dict_uopen_fmt)
     write(json_unit,json_dict_close_fmtx)
     write(json_unit,json_array_close_fmtx)

@@ -1,0 +1,12 @@
+Group	C3 
+n	2
+
+     	Irred     	Operation
+   1 	 A          	 E         
+   2 	 E          	 C3        
+
+Table
+         1         2      
+   1   1.00000   1.00000  
+   2   2.00000  -1.00000  
+

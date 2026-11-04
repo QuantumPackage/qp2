@@ -132,4 +132,6 @@ subroutine run
     endif
   endif
 
+  call pg_print_state_irreps(CI_energy, CI_s2)
+
 end

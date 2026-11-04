@@ -3867,25 +3867,6 @@ Subroutines / functions
        * :c:func:`guess_t2`
 
  
-.. c:function:: void report(void)
-
-
-    File : :file:`zz_test_chol_check.irp.f`
-
-    .. code:: fortran
-
-        subroutine report(name, direct, test, maxref, maxdiff)
-
-
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`zz_test_chol_check`
-
- 
 .. c:function:: void shift_idx_spin(void)
 
 
@@ -4162,57 +4143,4 @@ Subroutines / functions
 
        * :c:data:`ezfio_filename`
        * :c:data:`read_amplitudes`
-
- 
-.. c:function:: void zz_test_chol_check(void)
-
-
-    File : :file:`zz_test_chol_check.irp.f`
-
-    .. code:: fortran
-
-        subroutine zz_test_chol_check
-
-
-    Debug: Cholesky vs direct cc_space_v_* blocks (oovv, vovo, oovo,
-    ooov, voov, ovvo). The direct values come from gen_v_space with
-    do_mo_cholesky = .false., the Cholesky values from the providers
-    with do_mo_cholesky = .true. (same SCF orbitals).
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_cholesky_threshold`
-       * :c:data:`cc_list_occ`
-       * :c:data:`cc_list_occ`
-       * :c:data:`cc_no_m`
-       * :c:data:`cc_no_m`
-       * :c:data:`cc_no_m`
-       * :c:data:`cc_space_v_ooov`
-       * :c:data:`cc_space_v_oovo`
-       * :c:data:`cc_space_v_oovv`
-       * :c:data:`cc_space_v_ovoo`
-       * :c:data:`cc_space_v_ovvo`
-       * :c:data:`cc_space_v_vooo`
-       * :c:data:`cc_space_v_voov`
-       * :c:data:`cc_space_v_vovo`
-       * :c:data:`cc_space_v_vvoo`
-       * :c:data:`cholesky_mo_num`
-       * :c:data:`do_mo_cholesky`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`gen_v_space`
-
-    Touches:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`do_mo_cholesky`
 
