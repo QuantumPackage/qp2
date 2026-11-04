@@ -185,8 +185,12 @@ BEGIN_PROVIDER [ double precision, pg_xg, (pg_n_elem,mo_num,mo_num) ]
   BEGIN_DOC
   ! ``pg_xg(g,:,:)`` = C^T S M_g C, the matrix of group element ``g`` in the
   ! MO basis, built once. The element index is the leading one, so the
-  ! submatrix the determinant kernels read for one element is a
-  ! contiguous ``mo_num x mo_num`` plane.
+  ! ``mo_num x mo_num`` matrix of one element is STRIDED: element
+  ! ``(g,i,j)`` sits at 1-based offset ``g + (i-1)*pg_n_elem +
+  ! (j-1)*pg_n_elem*mo_num`` of the flat array. The determinant kernels
+  ! therefore address it flat, through the ``xrow``/``xcol`` tables of
+  ! :c:func:`pg_fam_setup`; :c:func:`pg_elem_me` keeps the readable
+  ! ``pg_xg(g,i,j)`` form it always had.
   !
   ! One scratch matrix at a time was the first plan, but the
   ! determinant projectors need every element for every family, and a
@@ -559,7 +563,7 @@ end subroutine pg_family_index
 !-----------------------------------------------------------------------
 ! Sector classification of a family, and its occupied-MO table.
 !-----------------------------------------------------------------------
-subroutine pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos)
+subroutine pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow, xcol)
   implicit none
   BEGIN_DOC
   ! Classifies the sectors of one family once, independently of the group
@@ -581,17 +585,29 @@ subroutine pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos)
   ! bit scans of :c:func:`pg_elem_me`. Ascending order is what makes the
   ! submatrix ordering identical to the reference kernel.
   !
-  ! The table is transient, one family at a time: ``12*np*2*nblock``
-  ! integers at the deepest call. ``npart = -1`` means the family was
+  ! ``xrow(k,ip,p)`` and ``xcol(k,ip,p)`` are that same MO written as the
+  ! two flat offsets of :c:data:`pg_xg`, which is
+  ! ``(pg_n_elem,mo_num,mo_num)``: element ``(g,i,j)`` is at 1-based
+  ! offset ``g + (i-1)*pg_n_elem + (j-1)*pg_n_elem*mo_num``. Both products
+  ! depend only on the MO, so hoisting them here turns every access of
+  ! :c:func:`pg_fam_pair` and :c:func:`pg_fam_diag` into two integer adds
+  ! and two loads instead of two multiplications.
+  !
+  ! The tables are transient, one family at a time: ``12*np*2*nblock``
+  ! integers each at the deepest call. ``npart = -1`` means the family was
   ! refused because a block holds more than :c:data:`pg_det_nmax`
   ! occupied MOs; :c:data:`pg_label_ierr` then carries the reason and no
-  ! caller reads ``pos``.
+  ! caller reads ``pos`` or the offsets. The flat offsets require
+  ! ``pg_n_elem*mo_num**2`` to fit in a default integer, which is implied
+  ! by the size of :c:data:`pg_xg` itself.
   END_DOC
   integer, intent(in) :: np, nsel(2,pg_n_mo_block), mask(2,pg_n_mo_block,np)
   integer, intent(out) :: npart, nfull, pn(2*pg_n_mo_block)
   integer, intent(out) :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
   integer, intent(out) :: pos(pg_det_nmax,np,2*pg_n_mo_block)
-  integer :: s, b, nd, n, p, ip, k, k1
+  integer, intent(out) :: xrow(pg_det_nmax,np,2*pg_n_mo_block)
+  integer, intent(out) :: xcol(pg_det_nmax,np,2*pg_n_mo_block)
+  integer :: s, b, nd, n, p, ip, k, k1, m, ne, nen
 
   npart = 0
   nfull = 0
@@ -626,6 +642,8 @@ subroutine pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos)
     enddo
   enddo
 
+  ne = pg_n_elem
+  nen = pg_n_elem*mo_num
   do p = 1, npart
     s = psec(1,p)
     b = psec(2,p)
@@ -635,7 +653,10 @@ subroutine pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos)
       do k1 = 0, nd-1
         if (btest(mask(s,b,ip),k1)) then
           k = k + 1
-          pos(k,ip,p) = pg_block_mo(pg_block_start(b)+k1)
+          m = pg_block_mo(pg_block_start(b)+k1)
+          pos(k,ip,p) = m
+          xrow(k,ip,p) = (m-1)*ne
+          xcol(k,ip,p) = (m-1)*nen
         endif
       enddo
     enddo
@@ -669,7 +690,7 @@ end function pg_fam_cfac
 !-----------------------------------------------------------------------
 ! :math:`<D'|U(g)|D>` restricted to the partial sectors.
 !-----------------------------------------------------------------------
-double precision function pg_fam_pair(g, np, npart, psec, pn, pos, ip, jp)
+double precision function pg_fam_pair(g, np, npart, psec, pn, pos, xrow, xcol, xgf, ip, jp)
   implicit none
   BEGIN_DOC
   ! :math:`<D_{ip}|U(g)|D_{jp}>` restricted to the partly occupied sectors,
@@ -684,13 +705,27 @@ double precision function pg_fam_pair(g, np, npart, psec, pn, pos, ip, jp)
   ! Sectors with 1 or 2 occupied MOs are inlined products: they get the
   ! same expression as the explicit ``pg_small_det`` branches, without the
   ! call and the pivoted copy.
+  !
+  ! ``xgf`` is :c:data:`pg_xg` seen as one flat array (a sequence
+  ! association on ``pg_xg(1,1,1)``), and ``xrow``/``xcol`` are the flat
+  ! offsets of the two MOs, precomputed per family by
+  ! :c:func:`pg_fam_setup`. Each access is then ``xgf(g + row + col)``:
+  ! the two multiplications of the address computation are gone. ``pos``
+  ! is kept in the interface (and is still the documented occupied-MO
+  ! table) although the offsets carry all the addressing information.
   END_DOC
   integer, intent(in) :: g, np, npart
+  ! Local alias, as in :c:func:`pg_small_det`: only the declarations need
+  ! it, and IRPF90 emits the module ``use`` only for a body that reads a
+  ! module entity -- this one no longer does.
+  integer, parameter :: nmax = 12
   integer, intent(in) :: psec(2,2*pg_n_mo_block), pn(2*pg_n_mo_block)
-  integer, intent(in) :: pos(pg_det_nmax,np,*)
+  integer, intent(in) :: pos(nmax,np,*)
+  integer, intent(in) :: xrow(nmax,np,*), xcol(nmax,np,*)
+  double precision, intent(in) :: xgf(*)
   integer, intent(in) :: ip, jp
   integer :: p, n, i1, i2, j1, j2, ii, jj
-  double precision :: sub(pg_det_nmax,pg_det_nmax), v
+  double precision :: sub(nmax,nmax), v
   double precision, external :: pg_small_det
 
   v = 1.d0
@@ -698,17 +733,17 @@ double precision function pg_fam_pair(g, np, npart, psec, pn, pos, ip, jp)
     n = pn(p)
     select case (n)
     case (1)
-      v = v*pg_xg(g, pos(1,ip,p), pos(1,jp,p))
+      v = v*xgf(g + xrow(1,ip,p) + xcol(1,jp,p))
     case (2)
-      i1 = pos(1,ip,p)
-      i2 = pos(2,ip,p)
-      j1 = pos(1,jp,p)
-      j2 = pos(2,jp,p)
-      v = v*(pg_xg(g,i1,j1)*pg_xg(g,i2,j2) - pg_xg(g,i1,j2)*pg_xg(g,i2,j1))
+      i1 = xrow(1,ip,p)
+      i2 = xrow(2,ip,p)
+      j1 = xcol(1,jp,p)
+      j2 = xcol(2,jp,p)
+      v = v*(xgf(g+i1+j1)*xgf(g+i2+j2) - xgf(g+i1+j2)*xgf(g+i2+j1))
     case default
       do jj = 1, n
         do ii = 1, n
-          sub(ii,jj) = pg_xg(g, pos(ii,ip,p), pos(jj,jp,p))
+          sub(ii,jj) = xgf(g + xrow(ii,ip,p) + xcol(jj,jp,p))
         enddo
       enddo
       v = v*pg_small_det(sub, n)
@@ -805,7 +840,7 @@ end subroutine pg_elem_me
 !-----------------------------------------------------------------------
 ! The matrix of one group element on one family.
 !-----------------------------------------------------------------------
-subroutine pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, v)
+subroutine pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, xcol, xgf, v)
   implicit none
   BEGIN_DOC
   ! ``v(ip,jp)`` = :math:`<D_{ip}|U(g)|D_{jp}>` on the family, i.e. the
@@ -818,6 +853,10 @@ subroutine pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, v)
   ! :c:func:`pg_family_projector` sums it over the elements for gates
   ! D1/D2. No caller assumes ``v`` symmetric, which is what keeps gate D2b
   ! meaningful.
+  !
+  ! ``xgf``, ``xrow`` and ``xcol`` are the flat addressing of
+  ! :c:data:`pg_xg` built by :c:func:`pg_fam_setup`; they are passed
+  ! through untouched so that the per-pair kernel does no address work.
   END_DOC
   integer, intent(in) :: g, np, nfull, npart
   ! Local alias, as in :c:func:`pg_small_det`: only the declaration needs it.
@@ -825,6 +864,9 @@ subroutine pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, v)
   integer, intent(in) :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
   integer, intent(in) :: pn(2*pg_n_mo_block)
   integer, intent(in) :: pos(nmax,np,2*pg_n_mo_block)
+  integer, intent(in) :: xrow(nmax,np,2*pg_n_mo_block)
+  integer, intent(in) :: xcol(nmax,np,2*pg_n_mo_block)
+  double precision, intent(in) :: xgf(*)
   double precision, intent(out) :: v(np,np)
   integer :: ip, jp
   double precision :: cfac
@@ -835,10 +877,87 @@ subroutine pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, v)
   if (cfac == 0.d0) return
   do jp = 1, np
     do ip = 1, np
-      v(ip,jp) = cfac*pg_fam_pair(g, np, npart, psec, pn, pos, ip, jp)
+      v(ip,jp) = cfac*pg_fam_pair(g, np, npart, psec, pn, pos, xrow, xcol, xgf, ip, jp)
     enddo
   enddo
 end subroutine pg_family_vg
+
+!-----------------------------------------------------------------------
+! Diagonal kernel: :math:`<D_{ip}|U(g)|D_{ip}>` and its accumulation.
+!-----------------------------------------------------------------------
+subroutine pg_family_diag_acc(np, nfull, fsec, npart, psec, pn, xrow, xcol, xgf, acc)
+  implicit none
+  BEGIN_DOC
+  ! Adds ``pg_proj_w(a,g) * <D_ip|U(g)|D_ip>`` to ``acc(ip,a)`` for every
+  ! element ``g`` and every member ``ip`` of the family.
+  !
+  ! This is the diagonal-only kernel of :c:func:`pg_family_labels`. It
+  ! computes exactly what that routine obtained by calling
+  ! :c:func:`pg_fam_pair` once per (element, member): the sector loop is
+  ! copied from :c:func:`pg_fam_pair` with ``jp = ip``, in the same order,
+  ! with the same partial product starting at 1.d0, the same exact-zero
+  ! short circuit and the same ``acc`` accumulation. The two sector
+  ! blocks MUST stay identical, character for character; that identity is
+  ! what makes the labels bit-identical. What changes is only the cost:
+  ! one call per family instead of ``|G|*np`` calls, and the offsets stay
+  ! in registers.
+  !
+  ! ``g`` is the outer loop and ``ip`` inner, i.e. the order in which the
+  ! labels have always been accumulated, so each ``acc(ip,a)`` receives
+  ! the same summands in the same order as before.
+  !
+  ! No ``pos``: the offsets carry all the addressing, and the occupied-MO
+  ! table is not read here.
+  END_DOC
+  integer, intent(in) :: np, nfull, npart
+  ! Local alias, as in :c:func:`pg_small_det`: only the declarations need
+  ! it, and IRPF90 emits the module ``use`` only for a body that reads a
+  ! module entity -- this one does (the element and irrep counts).
+  integer, parameter :: nmax = 12
+  integer, intent(in) :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
+  integer, intent(in) :: pn(2*pg_n_mo_block)
+  integer, intent(in) :: xrow(nmax,np,2*pg_n_mo_block)
+  integer, intent(in) :: xcol(nmax,np,2*pg_n_mo_block)
+  double precision, intent(in) :: xgf(*)
+  double precision, intent(inout) :: acc(np,pg_n_irrep)
+  integer :: g, a, ip, p, n, i1, i2, j1, j2, ii, jj
+  double precision :: cfac, d, sub(nmax,nmax)
+  double precision, external :: pg_fam_cfac, pg_small_det
+
+  do g = 1, pg_n_elem
+    cfac = pg_fam_cfac(g, nfull, fsec)
+    if (cfac == 0.d0) cycle
+    do ip = 1, np
+      d = 1.d0
+      do p = 1, npart
+        n = pn(p)
+        select case (n)
+        case (1)
+          d = d*xgf(g + xrow(1,ip,p) + xcol(1,ip,p))
+        case (2)
+          i1 = xrow(1,ip,p)
+          i2 = xrow(2,ip,p)
+          j1 = xcol(1,ip,p)
+          j2 = xcol(2,ip,p)
+          d = d*(xgf(g+i1+j1)*xgf(g+i2+j2) - xgf(g+i1+j2)*xgf(g+i2+j1))
+        case default
+          do jj = 1, n
+            do ii = 1, n
+              sub(ii,jj) = xgf(g + xrow(ii,ip,p) + xcol(jj,ip,p))
+            enddo
+          enddo
+          d = d*pg_small_det(sub, n)
+        end select
+        if (d == 0.d0) exit
+      enddo
+      d = cfac*d
+      if (d == 0.d0) cycle
+      do a = 1, pg_n_irrep
+        acc(ip,a) = acc(ip,a) + pg_proj_w(a,g)*d
+      enddo
+    enddo
+  enddo
+end subroutine pg_family_diag_acc
 
 !-----------------------------------------------------------------------
 ! Diagonal of the projector on one family: the determinant labels.
@@ -856,37 +975,31 @@ subroutine pg_family_labels(np, nsel, mask, lab, pur)
   !
   ! The accumulation is per (member, irrep): the irrep loop is inside the
   ! element loop but outside the pair loop, and the (irrep, element)
-  ! weight is read from :c:data:`pg_proj_w`.
+  ! weight is read from :c:data:`pg_proj_w`. It is done by
+  ! :c:func:`pg_family_diag_acc`, the diagonal kernel: one call per
+  ! family instead of one :c:func:`pg_fam_pair` call per (element,
+  ! member), with the same sector order and the same accumulation order.
   END_DOC
   integer, intent(in) :: np, nsel(2,pg_n_mo_block), mask(2,pg_n_mo_block,np)
   integer, intent(out) :: lab(np)
   double precision, intent(out) :: pur(np)
-  integer :: g, a, ip, amax, npart, nfull
+  integer :: ip, a, amax, npart, nfull
   integer :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
   integer :: pn(2*pg_n_mo_block)
   integer :: pos(pg_det_nmax,np,2*pg_n_mo_block)
+  integer :: xrow(pg_det_nmax,np,2*pg_n_mo_block)
+  integer :: xcol(pg_det_nmax,np,2*pg_n_mo_block)
   double precision, allocatable :: acc(:,:)
-  double precision :: v, d, pmax
-  double precision, external :: pg_fam_cfac, pg_fam_pair
+  double precision :: pmax
 
   lab(1:np) = 0
   pur(1:np) = 0.d0
   if (pg_n_irrep < 1 .or. np < 1) return
-  call pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos)
+  call pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow, xcol)
   if (pg_label_ierr /= 0) return
   allocate(acc(np,pg_n_irrep))
   acc(1:np,1:pg_n_irrep) = 0.d0
-  do g = 1, pg_n_elem
-    v = pg_fam_cfac(g, nfull, fsec)
-    if (v == 0.d0) cycle
-    do ip = 1, np
-      d = v*pg_fam_pair(g, np, npart, psec, pn, pos, ip, ip)
-      if (d == 0.d0) cycle
-      do a = 1, pg_n_irrep
-        acc(ip,a) = acc(ip,a) + pg_proj_w(a,g)*d
-      enddo
-    enddo
-  enddo
+  call pg_family_diag_acc(np, nfull, fsec, npart, psec, pn, xrow, xcol, pg_xg(1,1,1), acc)
   do ip = 1, np
     amax = 1
     pmax = acc(ip,1)
@@ -931,15 +1044,17 @@ subroutine pg_family_wadd(np, nsel, mask, c, nst, w)
   integer :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
   integer :: pn(2*pg_n_mo_block)
   integer :: pos(pg_det_nmax,np,2*pg_n_mo_block)
+  integer :: xrow(pg_det_nmax,np,2*pg_n_mo_block)
+  integer :: xcol(pg_det_nmax,np,2*pg_n_mo_block)
   double precision, allocatable :: vv(:,:)
   double precision :: q(nst)
 
   if (pg_n_irrep < 1 .or. np < 1 .or. nst < 1) return
-  call pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos)
+  call pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow, xcol)
   if (pg_label_ierr /= 0) return
   allocate(vv(np,np))
   do g = 1, pg_n_elem
-    call pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, vv)
+    call pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, xcol, pg_xg(1,1,1), vv)
     q(1:nst) = 0.d0
     do jp = 1, np
       do ip = 1, np
@@ -985,15 +1100,17 @@ subroutine pg_family_projector(np, nsel, mask, t)
   integer :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
   integer :: pn(2*pg_n_mo_block)
   integer :: pos(pg_det_nmax,np,2*pg_n_mo_block)
+  integer :: xrow(pg_det_nmax,np,2*pg_n_mo_block)
+  integer :: xcol(pg_det_nmax,np,2*pg_n_mo_block)
   double precision, allocatable :: vv(:,:)
 
   if (pg_n_irrep < 1 .or. np < 1) return
   t(1:np,1:np,1:pg_n_irrep) = 0.d0
-  call pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos)
+  call pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow, xcol)
   if (pg_label_ierr /= 0) return
   allocate(vv(np,np))
   do g = 1, pg_n_elem
-    call pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, vv)
+    call pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, xcol, pg_xg(1,1,1), vv)
     do a = 1, pg_n_irrep
       if (pg_proj_w(a,g) == 0.d0) cycle
       do jp = 1, np
