@@ -87,11 +87,25 @@ per irrep, and writes ``mo_symmetry`` when every MO has a definite irrep.
 It never stops and prints nothing when :option:`symmetry auto_symmetry` is false.
 
 ``pg_write_mo_symmetry`` writes ``mo_basis/mo_symmetry``: the integer irrep
-index of each MO, with the convention "same integer = same irrep". A mixed
-MO has index 0 and nothing is written in that case, because writing 0 would
-declare all mixed MOs to belong to one irrep. The in-memory provider is
-invalidated with ``soft_touch`` after the write, so the current process and
-the EZFIO agree.
+index of each MO, with the convention "same integer = same irrep", and
+``mo_basis/mo_symmetry_name``: the irrep name of each MO, so that
+:ref:`qp_edit` can label the MOs without rebuilding the character table. A
+mixed MO has index 0 and nothing is written in that case, because writing 0
+would declare all mixed MOs to belong to one irrep. The in-memory provider
+is invalidated with ``soft_touch`` after the write, so the current process
+and the EZFIO agree.
+
+``pg_print_mo_energies(e, n)`` is called by the SCF, KS and range-separated
+KS programs, at the program level because ``scf_utils`` must not depend on
+this module. It prints the orbital energies in the order of the MOs, with the
+irrep label of each MO in a third column. When :option:`symmetry
+auto_symmetry` is false, when the detection gave up, or when some MO has no
+definite irrep, it prints the historical ``Eigenvalues`` table instead, with
+no irrep column and no extra message: ``pg_report_mo_symmetry`` prints the
+reason right after. ``scf_utils`` stores the same numbers in
+``mo_basis/mo_energy`` at the end of the SCF, in the order in which
+``save_mos`` writes the MOs; that array is a snapshot and becomes stale if
+the MOs are rotated afterwards.
 
 Guards
 ------

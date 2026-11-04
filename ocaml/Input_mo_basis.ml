@@ -228,7 +228,53 @@ end = struct
     create_list [] 0 |> String.concat "\n\n"
 
 
+  (* MO energies and irrep labels are written by the SCF programs, not by
+     qp_edit: they are displayed only. Reading them here, rather than
+     adding fields to the [Mo_basis.t] record, keeps the sexp
+     serialisation and the Mo basis parser untouched. *)
+  let mo_energy_to_string mo_num =
+    if not (Ezfio.has_mo_basis_mo_energy ()) then ""
+    else
+      let energies =
+        Ezfio.get_mo_basis_mo_energy ()
+        |> Ezfio.flattened_ezfio
+      in
+      let labels =
+        if Ezfio.has_mo_basis_mo_symmetry_name ()
+        then Ezfio.get_mo_basis_mo_symmetry_name ()
+             |> Ezfio.flattened_ezfio
+        else [||]
+      in
+      let n = min mo_num (Array.length energies) in
+      if n = 0 then ""
+      else
+        let line i =
+          let lab =
+            if i < Array.length labels then String.trim labels.(i) else ""
+          in
+          if lab = "" then Printf.sprintf "  %3d %18.10f" (i+1) energies.(i)
+          else Printf.sprintf "  %3d %18.10f   %s" (i+1) energies.(i) lab
+        in
+        let header =
+          if Array.length labels = 0
+          then Printf.sprintf "%5s %18s" "MO" "Energy (Ha)"
+          else Printf.sprintf "%5s %18s   %s" "MO" "Energy (Ha)" "Irrep"
+        in
+        header ^ "\n" ^ (List.init n line |> String.concat "\n")
+
+
   let to_rst b =
+    let energy_block =
+      match mo_energy_to_string (MO_number.to_int b.mo_num) with
+      | "" -> ""
+      | s ->
+          let title =
+            if Ezfio.has_mo_basis_mo_symmetry_name ()
+            then "MO energies and irreps (read-only) ::"
+            else "MO energies (read-only) ::"
+          in
+          Printf.sprintf "\n%s\n\n%s\n" title s
+    in
     Printf.sprintf "
 Label of the molecular orbitals ::
 
@@ -237,13 +283,14 @@ Label of the molecular orbitals ::
 Total number of MOs ::
 
   mo_num = %s
-
+%s
 MO coefficients ::
 
 %s
 "
       (MO_label.to_string b.mo_label)
-      (MO_number.to_string b.mo_num)
+      (MO_number.to_int b.mo_num |> string_of_int)
+      energy_block
       (mo_coef_to_string b.mo_coef)
     |> Rst_string.of_string
 

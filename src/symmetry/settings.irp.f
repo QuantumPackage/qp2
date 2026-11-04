@@ -115,8 +115,8 @@ BEGIN_PROVIDER [ character*(256), irrep_states ]
   BEGIN_DOC
   ! Comma-, semicolon- or blank-separated list of irrep names to keep in
   ! the CI diagonalization. Empty means all irreps; the
-  ! qp_edit default is the token "None", which :c:func:`pg_normalize_irrep_states`
-  ! turns into the empty string.
+  ! qp_edit default is the token "All", and the legacy token "None", which
+  ! :c:func:`pg_normalize_irrep_states` both turn into the empty string.
   END_DOC
   logical :: has
   PROVIDE ezfio_filename
@@ -143,15 +143,20 @@ BEGIN_PROVIDER [ character*(256), irrep_states ]
 END_PROVIDER
 
 !-----------------------------------------------------------------------
-! "None" is QP2's token for an unset character keyword (trexio_file uses
-! the same one): EZFIO cannot store a value-less default, so the OCaml
-! layer writes "None" as soon as qp_edit reads the keyword. Accept it in
-! any case, and accept blanks, as an empty list.
+! "All" and "None" are the two tokens QP2 uses for an unset character
+! keyword (trexio_file uses "None" the same way): EZFIO cannot store a
+! value-less default, so the OCaml layer writes the token as soon as
+! qp_edit reads the keyword. Accept either one in any case, and accept
+! blanks, as an empty list.
+!
+! "All" is what qp_edit shows by default; "None" was the default before
+! and is still accepted so that EZFIO files written by an older version
+! keep working.
 !-----------------------------------------------------------------------
 subroutine pg_normalize_irrep_states(list)
   implicit none
   BEGIN_DOC
-  ! Empty ``list`` when it holds only the token "None" (any case).
+  ! Empty ``list`` when it holds only the token "All" or "None" (any case).
   END_DOC
   character*(256), intent(inout) :: list
   character*(64) :: low
@@ -165,7 +170,9 @@ subroutine pg_normalize_irrep_states(list)
     if (ic >= 65 .and. ic <= 90) ic = ic + 32
     low(i:i) = char(ic)
   enddo
-  if (low(1:n) == 'none') list = ''
+  ! Both tokens mean "no filter". Keep this list in sync with the default
+  ! of symmetry/irrep_states in EZFIO.cfg.
+  if (low(1:n) == 'none' .or. low(1:n) == 'all') list = ''
 
 end subroutine pg_normalize_irrep_states
 

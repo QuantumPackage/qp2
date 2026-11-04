@@ -96,7 +96,7 @@ BEGIN_PROVIDER [ logical, pg_ao_ok ]
   pg_ao_ok = (pg_basis_ierr == 0)
   if (.not. pg_ao_ok) then
     if (mpi_master) then
-      write(6,'(A,A)') 'symmetry: the AO basis is not symmetric, '// &
+      write(6,'(A,A)') 'the AO basis is not symmetric, '// &
            'MO labels skipped: ', trim(pg_basis_msg)
     endif
   endif
@@ -147,6 +147,118 @@ logical function pg_mo_labels_ok()
 end function pg_mo_labels_ok
 
 !-----------------------------------------------------------------------
+! MO energies with their irrep.
+!-----------------------------------------------------------------------
+subroutine pg_print_mo_energies(e, n)
+  implicit none
+  BEGIN_DOC
+  ! Prints the MO energies, with the irrep label of each MO next to the
+  ! value, in the order of the MOs.
+  !
+  ! ``e(1:n)`` are the MO energies; :c:data:`mo_num` is not used here, so a
+  ! program may print the eigenvalues of any MO set of size ``n`` with the
+  ! tables it already has.
+  !
+  ! Same two-step guard as :c:func:`pg_report_mo_symmetry`: this body names
+  ! only :c:func:`pg_symmetry_ready`, so with :c:data:`auto_symmetry` = F not one
+  ! provider of the detection chain is built and the table falls back to
+  ! the plain energy-only form. That fallback keeps the output a
+  ! pre-symmetry version of QP2 produced, byte for byte.
+  !
+  ! Printed by the master rank only: the table is a report, and every
+  ! rank runs the same SCF.
+  END_DOC
+  integer, intent(in) :: n
+  double precision, intent(in) :: e(n)
+  logical, external :: pg_symmetry_ready
+
+  if (n < 1) return
+  if (.not. pg_symmetry_ready()) then
+    call pg_print_mo_energies_plain(e, n)
+    return
+  endif
+  call pg_print_mo_energies_labelled(e, n)
+end subroutine pg_print_mo_energies
+
+!-----------------------------------------------------------------------
+subroutine pg_print_mo_energies_plain(e, n)
+  implicit none
+  BEGIN_DOC
+  ! The historical ``Eigenvalues`` table, without any irrep. Used when
+  ! the symmetry machinery is off or gave up.
+  END_DOC
+  integer, intent(in) :: n
+  double precision, intent(in) :: e(n)
+  integer :: i
+
+  if (.not. mpi_master) return
+  print *, ''
+  print *, 'Eigenvalues'
+  print *, '-----------'
+  print *, ''
+  print *, '======== ================'
+  do i = 1, n
+    write (6,'(I8,1X,F16.10)') i, e(i)
+  enddo
+  print *, '======== ================'
+end subroutine pg_print_mo_energies_plain
+
+!-----------------------------------------------------------------------
+subroutine pg_print_mo_energies_labelled(e, n)
+  implicit none
+  BEGIN_DOC
+  ! ``Eigenvalues`` plus one irrep label per MO.
+  !
+  ! Entered only after :c:func:`pg_symmetry_ready` returned true, so naming
+  ! :c:data:`pg_mo_irrep` and :c:data:`pg_irrep_name` here is safe: IRPF90 hoists
+  ! their build to the ENTRY of this procedure, that is, after the guard.
+  !
+  ! Falls back to the plain table when the MO labels are incomplete (a
+  ! basis that is not symmetry adapted): :c:func:`pg_report_mo_symmetry`
+  ! prints the reason right after, so this routine stays silent. Also
+  ! falls back when ``n`` does not describe the MO set of the EZFIO, since
+  ! the labels are indexed by MO number.
+  END_DOC
+  integer, intent(in) :: n
+  double precision, intent(in) :: e(n)
+  integer :: i
+  character*(32) :: lab
+  ! The irrep column is a fixed 12-character field filled by an internal
+  ! write: this pads and truncates deterministically, whatever the storage
+  ! convention of :c:data:`pg_irrep_name` (its entries may be blank-padded on
+  ! either side).
+  character*(12) :: col
+  logical, external :: pg_mo_labels_ok
+
+  if (.not. mpi_master) return
+  if (n /= mo_num) then
+    call pg_print_mo_energies_plain(e, n)
+    return
+  endif
+  if (.not. pg_mo_labels_ok()) then
+    call pg_print_mo_energies_plain(e, n)
+    return
+  endif
+  print *, ''
+  print *, 'MO energies and irreps'
+  print *, '----------------------'
+  print *, ''
+  print *, '======== ================ ============'
+  do i = 1, n
+    lab = ' '
+    col = ' '
+    ! Defensive: pg_mo_labels_ok guarantees a positive index, but an
+    ! out-of-bounds pg_irrep_name(0) must not be reachable from here.
+    if (pg_mo_irrep(i) > 0) then
+      lab = trim(adjustl(pg_irrep_name(pg_mo_irrep(i))))
+      write (col,'(A)') trim(lab)
+    endif
+    write (6,'(I8,1X,F16.10,4X,A12)') i, e(i), col
+  enddo
+  print *, '======== ================ ============'
+end subroutine pg_print_mo_energies_labelled
+
+!-----------------------------------------------------------------------
 ! Report.
 !-----------------------------------------------------------------------
 subroutine pg_report_mo_symmetry()
@@ -183,32 +295,45 @@ subroutine pg_report_mo_symmetry_work()
   !
   ! The mixed count runs on every rank; only the printing and the EZFIO
   ! write are under :c:data:`mpi_master`, as in save_wavefunction_general.
+  !
+  ! The two linear groups are finite models (C31v, D31h): their tables
+  ! carry 17 and 34 irreps, and an angular momentum above Gamma, which
+  ! no basis set reaches in practice, would print with a generic
+  ! ``E5`` ... ``E15`` label. For those groups only the populated
+  ! irreps are printed. The finite groups keep one row per irrep (zeros
+  ! included): there a row is a standard chemical label and the zero is
+  ! information.
   END_DOC
-  integer :: a, n_mixed
+  integer :: a, n_mixed, n_shown
   character*(8) :: lab
+  logical :: linear
   logical, external :: pg_mo_labels_ok
 
   if (mo_num < 1) return
   if (.not. pg_mo_labels_ok()) then
     n_mixed = pg_n_mo_mixed
     if (mpi_master) then
-      write(6,'(A,I0,A,I0,A)') 'symmetry:   ', n_mixed, ' of ', mo_num, &
+      write(6,'(A,I0,A,I0,A)') '  ', n_mixed, ' of ', mo_num, &
            ' MOs have no definite irrep,'
-      write(6,'(A)') 'symmetry:   mo_basis/mo_symmetry not written '// &
+      write(6,'(A)') '  mo_basis/mo_symmetry not written '// &
            '(run "qp_run symmetry_mo" for the detail)'
     endif
     return
   endif
   if (mpi_master) then
-    write(6,'(A,A,A,I0,A,ES8.1,A)') 'symmetry: point group ', &
+    linear = trim(pg_group_name) == 'Cinfv' .or. &
+             trim(pg_group_name) == 'Dinfh'
+    write(6,'(A,A,A,I0,A,ES8.1,A)') 'Point group ', &
          trim(pg_group_name), ', |G| = ', pg_n_elem, &
          ', geometry residual', pg_geom_residual, ' bohr'
+    n_shown = 0
     do a = 1, pg_n_irrep
+      if (linear .and. pg_irrep_weight(a) == 0) cycle
       lab = trim(adjustl(pg_irrep_name(a)))
-      write(6,'(A,A8,I6,A)') 'symmetry:   ', lab, pg_irrep_weight(a), &
-           ' MOs'
+      write(6,'(A,A8,I6,A)') '  ', lab, pg_irrep_weight(a), ' MOs'
+      n_shown = n_shown + 1
     enddo
-    write(6,'(A,I0,A,I0,A)') 'symmetry:   ', pg_n_irrep, ' irreps, ', &
+    write(6,'(A,I0,A,I0,A)') '  ', n_shown, ' irreps, ', &
          mo_num, ' MOs, mo_basis/mo_symmetry written'
     call pg_write_mo_symmetry()
   endif

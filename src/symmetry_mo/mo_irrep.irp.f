@@ -303,7 +303,9 @@ end subroutine pg_mo_top2
 subroutine pg_write_mo_symmetry()
   implicit none
   BEGIN_DOC
-  ! Writes :c:data:`pg_mo_irrep` into ``mo_basis/mo_symmetry`` of the EZFIO.
+  ! Writes :c:data:`pg_mo_irrep` into ``mo_basis/mo_symmetry`` of the EZFIO,
+  ! and the irrep names into ``mo_basis/mo_symmetry_name``, so that
+  ! :ref:`qp_edit` can label the MOs without rebuilding the character table.
   !
   ! :c:data:`mo_symmetry` is an existing QP2 provider (src/mo_basis/mo_class.irp.f)
   ! and IRPF90 forbids filling it from another module, so it cannot be a
@@ -318,14 +320,23 @@ subroutine pg_write_mo_symmetry()
   ! EZFIO write alone would leave the in-memory provider stale: the
   ! ``soft_touch`` invalidates it without building it when it is not built.
   END_DOC
-  integer :: n_mixed
+  integer :: i, n_mixed
+  character*(32) :: names(mo_num)
 
+  ! A zero-size character array would still reach ezfio_write_array_ch.
+  if (mo_num < 1) return
   n_mixed = pg_n_mo_mixed
   if (n_mixed /= 0) then
     write(6,'(A,I0,A)') 'pg_write_mo_symmetry: ', n_mixed, ' MO(s) have '// &
          'no definite irrep; mo_basis/mo_symmetry not written.'
     return
   endif
+  ! Inside the guard every pg_mo_irrep(i) is positive, so this cannot index
+  ! pg_irrep_name(0).
+  do i = 1, mo_num
+    names(i) = trim(adjustl(pg_irrep_name(pg_mo_irrep(i))))
+  enddo
   call ezfio_set_mo_basis_mo_symmetry(pg_mo_irrep)
+  call ezfio_set_mo_basis_mo_symmetry_name(names)
   soft_touch mo_symmetry
 end subroutine pg_write_mo_symmetry

@@ -328,16 +328,18 @@ Keywords
      - Master switch. When false, no provider of the detection chain is
        built, the SCF/DFT report is silent, and nothing is labelled.
    * - :option:`irrep_states`
-     - ``None``
+     - ``All``
      - Comma-, semicolon- or blank-separated list of irrep names to keep in
-       the CI diagonalization, for example ``B1, A1``. ``None`` (the
-       default) and the empty string both keep every irrep; the provider
-       turns ``None`` back into the empty list.
+       the CI diagonalization, for example ``B1, A1``. ``All`` (the
+       default), the legacy token ``None`` and the empty string all keep
+       every irrep; the provider turns those tokens back into the empty
+       list.
 
 .. note::
 
-   :option:`irrep_states` is declared with ``interface: ezfio`` only, so it
-   does **not** appear in ``qp_edit``. Write it with the ``ezfio`` tool::
+   :option:`irrep_states` appears in ``qp_edit``, in the ``Symmetry`` block,
+   and is shown there as ``irrep_states = All`` by default. It can also be
+   written with the ``ezfio`` tool::
 
        source $QP_ROOT/quantum_package.rc
        qp_run scf water.ezfio            # or any run that creates the EZFIO

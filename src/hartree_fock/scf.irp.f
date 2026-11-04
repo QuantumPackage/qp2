@@ -94,6 +94,7 @@ subroutine run
 
   call ezfio_set_hartree_fock_energy(SCF_energy)
 
+  call pg_print_mo_energies(Fock_matrix_diag_mo, mo_num)
   call pg_report_mo_symmetry()
 end
 
