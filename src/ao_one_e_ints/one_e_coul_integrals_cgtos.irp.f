@@ -126,14 +126,13 @@ complex*16 function NAI_pol_mult_cgtos(Ae_center, Be_center, power_A, power_B, a
 
   integer                      :: i, n_pt, n_pt_out
   double precision             :: dist_AB, dist_AC
-  complex*16                   :: p, p_inv, rho, dist, dist_integral, const, const_factor, coeff, factor
+  complex*16                   :: p, p_inv, rho, dist, dist_integral, const, const_factor, coeff
   complex*16                   :: P_center(3)
-  complex*16                   :: d(0:n_pt_in)
+  complex*16                   :: d(0:n_pt_in), d_one(0:0)
 
   double precision, external   :: cgaussian_pair_bound
   complex*16, external         :: V_n_e_cgtos
-  complex*16, external         :: crint_sum
-  complex*16, external         :: crint_1
+  complex*16, external         :: crint_sum_shift
 
 
 
@@ -182,12 +181,14 @@ complex*16 function NAI_pol_mult_cgtos(Ae_center, Be_center, power_A, power_B, a
                 + (P_center(3) - C_center(3)) * (P_center(3) - C_center(3))
 
   const = p * dist_integral
-  factor = exp(-const_factor)
-  coeff = dtwo_pi * factor * p_inv
+  ! exp(-const_factor) and the Boys function are combined in crint_sum_shift:
+  ! separately they can underflow and overflow (Re const << 0)
+  coeff = dtwo_pi * p_inv
 
   n_pt = 2 * ((power_A(1) + power_B(1)) + (power_A(2) + power_B(2)) + (power_A(3) + power_B(3)))
   if(n_pt == 0) then
-    NAI_pol_mult_cgtos = coeff * crint_1(0, const)
+    d_one(0) = (1.d0, 0.d0)
+    NAI_pol_mult_cgtos = coeff * crint_sum_shift(0, const, d_one, -const_factor)
     return
   endif
 
@@ -201,7 +202,7 @@ complex*16 function NAI_pol_mult_cgtos(Ae_center, Be_center, power_A, power_B, a
     return
   endif
 
-  NAI_pol_mult_cgtos = coeff * crint_sum(n_pt_out, const, d)
+  NAI_pol_mult_cgtos = coeff * crint_sum_shift(n_pt_out, const, d, -const_factor)
 
   return
 end

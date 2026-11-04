@@ -302,11 +302,28 @@ EOF
 
     elif [[ ${PACKAGE} = gmp ]] ; then
 
+            # NOTE: computed here (outer shell), NOT in the heredoc below:
+            # the unquoted << EOF expands $GMP_TARGET at heredoc-read time,
+            # so an inner-shell assignment would never reach the command.
+            #
+            # arm64Darwin needs both options:
+            #  - the explicit triplet: GMP 6.1.2's configfsf.guess does not
+            #    know Apple Silicon and guesses arm-apple-darwin (32-bit
+            #    abilist) => "Oops, mp_limb_t is 64 bits".
+            #  - --disable-assembly: mpn/arm64/invert_limb.asm uses
+            #    non-GOT-relative adrp/:lo12: references to approx_tab,
+            #    which current Apple assemblers reject ("ADR/ADRP
+            #    relocations must be GOT relative"). The generic C mpn code
+            #    builds and is functionally identical; this GMP is only a
+            #    build-time link dependency (OCaml zarith).
+            GMP_TARGET=""
+            [[ ${ARCHITECTURE} = arm64Darwin ]] && GMP_TARGET="--build=aarch64-apple-darwin --host=aarch64-apple-darwin --disable-assembly"
+
             execute << EOF
               cd "\${QP_ROOT}"/external
               tar --bzip2 --extract --file qp2-dependencies/gmp-6.1.2.tar.bz2
               cd gmp-6.1.2
-              ./configure --prefix=$QP_ROOT && make -j 8
+              ./configure --prefix=$QP_ROOT $GMP_TARGET && make -j 8
               make -j 8 install
 EOF
 

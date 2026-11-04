@@ -154,7 +154,6 @@ def process_module_ninja_files(module_path=None):
         ninja_file = os.path.join(module_path, 'IRPF90_temp', 'build.ninja')
         if os.path.exists(ninja_file):
             if fix_ninja_file(ninja_file):
-                print(f"Fixed: {ninja_file}")
                 return 0
             else:
                 # File exists but didn't need fixing

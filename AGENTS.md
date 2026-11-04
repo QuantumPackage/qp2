@@ -344,3 +344,37 @@ Compute programs are run through `qp_run <name> <ezfio>`:
   it gives wrong or stale values, not a compile error.
 - `TOUCH` is for values assigned by side effect; using it in an iteration
   without a convergence test silently produces stale dynamics.
+
+## 12. Code-model RAG (`ninja rag` / `qp rag`)
+
+`ninja rag` (repo root) builds a machine-readable model of the whole
+source tree — one `irpf90 -J` dump per build edge of `config/build.ninja`
+(22 modules, run with the exact `$IRPF90_FLAGS`) — merged into one
+corpus with a SQLite FTS5/BM25 index. It lands in
+`$QP_ROOT/share/rag/` (gitignored): `per-module/<M>.json` × 22,
+`qp2.json` (merged model), `qp2_rag.db` (index), `merge-report.json`
+(counts, collisions, applied renames). It is not part of the default
+build; ninja rebuilds it automatically when any module source or the
+tool changes, and a rebuild takes a few minutes.
+
+Requirement: an irpf90 with `-J` (≥ 2.3.3) — the in-tree
+`external/irpf90` pin carries it (it is on `$PATH` through
+`etc/irpf90.rc`, so `ninja rag` just works). `RAG_IRPF90=/path/to/bin/irpf90`
+is a dev override to run the RAG against a different irpf90; with an
+irpf90 that lacks `-J` the target fails with a clear error.
+
+Interrogation (read-only, works in a `qpsh` shell):
+
+```bash
+qp rag query "PT2 selection" -k 5
+qp rag query "bitmask" --kind routine
+qp rag graph <entity> --depth 3
+qp rag stats
+qp rag build                    # == ninja rag (explicit rebuild)
+```
+
+Underneath, `qp rag …` calls `bin/qp_rag` →
+`python3 scripts/rag/qp_rag.py …` (bin/ is gitignored; `git add -f` when
+committing). Names that collide across modules are suffixed `__<module>`
+in the corpus (e.g. `run__fci`); the `file` field of each record is the
+ground truth for where it lives.

@@ -753,7 +753,30 @@ def save_subninja_file(path_module):
         f.write("\n".join(l_string))
 
 
-def create_build_ninja_global():
+def get_rag_inputs(l_module, d_irp):
+    """
+    Inputs of the `rag` target (root build.ninja): the sorted deduped
+    union of the inputs of all the build_irpf90.ninja module edges,
+    plus the RAG tool and this generator, so that the corpus is
+    rebuilt when any source (or the tool) changes.
+    """
+    rag_inputs = set()
+
+    for module in l_module:
+        if module.rel == "dummy":
+            continue
+
+        for f in d_irp[module]["l_depend"] + d_irp[module]["l_template"]:
+            rag_inputs.add(comp_path(f))
+
+    rag_inputs.add(comp_path(join(QP_ROOT, "scripts", "rag", "qp_rag.py")))
+    rag_inputs.add(comp_path(join(QP_ROOT, "scripts", "compilation",
+                                  "qp_create_ninja")))
+
+    return sorted(rag_inputs)
+
+
+def create_build_ninja_global(l_rag_inputs):
     l_string = ["builddir = {0}".format(os.path.dirname(ROOT_BUILD_NINJA)),
                 ""]
 
@@ -780,6 +803,21 @@ def create_build_ninja_global():
                  "  description = Compiling OCaml tools",
                  ""]
 
+    # The `rag` target: rebuilds the code-model corpus in the
+    # gitignored $QP_ROOT/share/rag. The real output is the merged
+    # model file (so the edge is up-to-date trackable); `rag` is a
+    # phony alias on top of it. Not part of `all`/the default target.
+    l_rag_out = comp_path(join(QP_ROOT, "share", "rag", "qp2.json"))
+    l_string += ["rule rag",
+                 "  command = bash -c \"cd $QP_ROOT && source quantum_package.rc"
+                 " && source etc/paths.rc && python3 scripts/rag/qp_rag.py build\"",
+                 "  pool = console",
+                 "  description = Building the RAG code-model corpus"
+                 " (22 irpf90 -J dumps + FTS5 index)",
+                 "",
+                 "build {0}: rag {1}".format(l_rag_out, " ".join(l_rag_inputs)),
+                 "build rag: phony {0}".format(l_rag_out),
+                 ""]
 
     l_string += ["build dummy_target: update_build_ninja_root",
                  "build ocaml_target: make_ocaml all",
@@ -887,10 +925,16 @@ if __name__ == "__main__":
 
 
     # ~#~#~#~#~#~#~#~#~#~#~#~ #
+    # R A G   T A R G E T #
+    # ~#~#~#~#~#~#~#~#~#~#~#~ #
+
+    l_rag_inputs = get_rag_inputs(l_module, d_irp)
+
+    # ~#~#~#~#~#~#~#~#~#~#~#~ #
     # G l o b a l _ b u i l d #
     # ~#~#~#~#~#~#~#~#~#~#~#~ #
 
-    create_build_ninja_global()
+    create_build_ninja_global(l_rag_inputs)
 
     # ~#~#~#~#~#~#~#~#~#~#~#~ #
     # C r e a t e _ r u l e s #

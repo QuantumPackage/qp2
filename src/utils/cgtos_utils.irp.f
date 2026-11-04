@@ -164,6 +164,40 @@ end
 
 ! ---
 
+subroutine give_explicit_cpoly_and_cgaussian_log(P_new, P_center, p, log_fact_k, iorder, &
+               alpha, beta, a, b, Ae_center, Be_center, Ap_center, Bp_center, dim)
+
+  BEGIN_DOC
+  ! Same as give_explicit_cpoly_and_cgaussian, but returns the exponent
+  ! log_fact_k $= -\alpha\beta/(\alpha+\beta)\,(A_e-B_e)^2$ instead of
+  ! fact_k $= e^{\rm log\_fact\_k}$, which can underflow although the
+  ! integrals of the pair do not vanish (complex exponents). Negligible pairs
+  ! are returned as in give_explicit_cpoly_and_cgaussian ($p = 10^{14}$, zero
+  ! polynomial).
+  END_DOC
+
+  implicit none
+  include 'constants.include.F'
+
+  integer,    intent(in)  :: dim, a(3), b(3)
+  complex*16, intent(in)  :: alpha, Ae_center(3), Ap_center(3)
+  complex*16, intent(in)  :: beta, Be_center(3), Bp_center(3)
+  integer,    intent(out) :: iorder(3)
+  complex*16, intent(out) :: p, P_center(3), log_fact_k, P_new(0:max_dim,3)
+
+  complex*16              :: fact_k, xab(3)
+
+  call give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_k, iorder, &
+         alpha, beta, a, b, Ae_center, Be_center, Ap_center, Bp_center, dim)
+
+  xab(1:3) = Ae_center(1:3) - Be_center(1:3)
+  log_fact_k = -alpha * beta / (alpha + beta) &
+             * (xab(1)*xab(1) + xab(2)*xab(2) + xab(3)*xab(3))
+
+end
+
+! ---
+
 subroutine cgaussian_product(a, xa, b, xb, k, p, xp)
 
   BEGIN_DOC

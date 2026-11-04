@@ -273,7 +273,7 @@ END_PROVIDER
              CI_eigenvectors(i,i_state+i_other_state) = eigenvectors(i,j)
            enddo
            CI_electronic_energy(i_state+i_other_state) = eigenvalues(j)
-           CI_s2(i_state+i_other_state) = s2_eigvalues(i_state+i_other_state)
+           CI_s2(i_state+i_other_state) = s2_eigvalues(j)
          enddo
 
        else

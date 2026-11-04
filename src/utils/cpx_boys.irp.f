@@ -3,94 +3,31 @@
 
 complex*16 function crint_1(n, rho)
 
+  BEGIN_DOC
+  ! Complex Boys function $F_n(\rho) = \int_0^1 t^{2n} e^{-\rho t^2} dt$.
+  !
+  ! Series (crint_smallz) if $|\rho| < 3.5$ or $n > |\rho|$ (no cancellation
+  ! there), else $F_0$ from erf and upward recursion (stable for
+  ! $n \le |\rho|$).
+  END_DOC
+
   implicit none
   include 'constants.include.F'
 
   integer,    intent(in) :: n
   complex*16, intent(in) :: rho
 
-  integer                :: i, mmax
+  integer                :: i
   double precision       :: rho_mod
-  double precision       :: tmp
   complex*16             :: rho_inv, rho_exp
 
   complex*16             :: crint_smallz
 
   rho_mod = abs(rho)
 
-  if(rho_mod < 3.5d0) then
+  if((rho_mod < 3.5d0) .or. (dble(n) > rho_mod)) then
 
-    if(rho_mod .lt. 0.35d0) then
-
-      select case(n)
-      case(0)
-        crint_1 = (((((((((1.3122532963802805073d-08 * rho &
-                - 1.450385222315046877d-07) * rho &
-                + 1.458916900093370682d-06) * rho &
-                - 0.132275132275132275d-04) * rho &
-                + 0.106837606837606838d-03) * rho &
-                - 0.757575757575757576d-03) * rho &
-                + 0.462962962962962963d-02) * rho &
-                - 0.238095238095238095d-01) * rho &
-                + 0.10000000000000000000d0) * rho &
-                - 0.33333333333333333333d0) * rho &
-                + 1.0d0
-      case(1)
-        crint_1 = (((((((((1.198144314086343d-08 * rho &
-                - 1.312253296380281d-07) * rho &
-                + 1.305346700083542d-06) * rho &
-                - 1.167133520074696d-05) * rho &
-                + 9.259259259259259d-05) * rho &
-                - 6.410256410256410d-04) * rho &
-                + 3.787878787878788d-03) * rho &
-                - 1.851851851851852d-02) * rho &
-                + 7.142857142857142d-02) * rho &
-                - 2.000000000000000d-01) * rho &
-                + 3.333333333333333d-01
-      case(2)
-        crint_1 = (((((((((1.102292768959436d-08 * rho &
-                - 1.198144314086343d-07) * rho &
-                + 1.181027966742252d-06) * rho &
-                - 1.044277360066834d-05) * rho &
-                + 8.169934640522875d-05) * rho &
-                - 5.555555555555556d-04) * rho &
-                + 3.205128205128205d-03) * rho &
-                - 1.515151515151515d-02) * rho &
-                + 5.555555555555555d-02) * rho &
-                - 1.428571428571428d-01) * rho &
-                + 2.000000000000000d-01 
-      case(3)
-        crint_1 = (((((((((1.020641452740218d-08 * rho &
-                - 1.102292768959436d-07) * rho &
-                + 1.078329882677709d-06) * rho &
-                - 9.448223733938020d-06) * rho &
-                + 7.309941520467836d-05) * rho &
-                - 4.901960784313725d-04) * rho &
-                + 2.777777777777778d-03) * rho &
-                - 1.282051282051282d-02) * rho &
-                + 4.545454545454546d-02) * rho &
-                - 1.111111111111111d-01) * rho &
-                + 1.428571428571428d-01 
-      case default
-        tmp = dble(n + n + 1)
-        crint_1 = (((((((((2.755731922398589d-07 * rho / (tmp + 20.d0) &
-                - 2.755731922398589d-06 / (tmp + 18.d0)) * rho &
-                + 2.480158730158730d-05 / (tmp + 16.d0)) * rho &
-                - 1.984126984126984d-04 / (tmp + 14.d0)) * rho &
-                + 1.388888888888889d-03 / (tmp + 12.d0)) * rho &
-                - 8.333333333333333d-03 / (tmp + 10.d0)) * rho &
-                + 4.166666666666666d-02 / (tmp +  8.d0)) * rho &
-                - 1.666666666666667d-01 / (tmp +  6.d0)) * rho &
-                + 5.000000000000000d-01 / (tmp +  4.d0)) * rho &
-                - 1.000000000000000d+00 / (tmp +  2.d0)) * rho &
-                + 1.0d0 / tmp
-      end select 
-
-    else
-
-      crint_1 = crint_smallz(n, rho)
-
-    endif
+    crint_1 = crint_smallz(n, rho)
 
   else
 
@@ -114,11 +51,15 @@ subroutine crint_1_vec(n_max, rho, vals)
   BEGIN_DOC
   ! Stores crint_1(n, rho) for n = 0, 1, ..., n_max in vals(0:n_max),
   ! where crint_1(n, rho) = $\int_0^1 t^{2n} \exp(-\rho t^2) dt$ for
-  ! a complex argument rho. For |rho| < 0.35 a Taylor polynomial is
-  ! used, for 0.35 <= |rho| < 3.5 crint_smallz_vec, and for
-  ! |rho| >= 3.5 zboysfun00_1 plus the recurrence
-  ! $vals(n) = ((n - 0.5) vals(n-1) - 0.5 \exp(-\rho)) / \rho$.
+  ! a complex argument rho.
+  !
+  ! $|\rho| < 3.5$: series for $F_{n_{max}}$ and downward recursion
+  ! (crint_smallz_vec). Otherwise: $F_0$ from erf and upward recursion for
+  ! $n \le |\rho|$, and for $|\rho| < n \le n_{max}$ the series for
+  ! $F_{n_{max}}$ and downward recursion. Each recursion is used only where it
+  ! is stable, and the series only where its terms decrease from the start.
   END_DOC
+
   implicit none
   include 'constants.include.F'
 
@@ -126,107 +67,36 @@ subroutine crint_1_vec(n_max, rho, vals)
   complex*16, intent(in)  :: rho
   complex*16, intent(out) :: vals(0:n_max)
 
-  integer                :: n
-  double precision       :: rho_mod
-  double precision       :: tmp
-  complex*16             :: rho_inv, rho_exp
+  integer                 :: n, n_up
+  double precision        :: rho_mod
+  complex*16              :: rho_inv, rho_exp
 
-  complex*16             :: crint_smallz
+  complex*16              :: crint_smallz
 
   rho_mod = abs(rho)
 
   if(rho_mod < 3.5d0) then
 
-    if(rho_mod .lt. 0.35d0) then
-
-      vals(0) = (((((((((1.3122532963802805073d-08 * rho &
-              - 1.450385222315046877d-07) * rho &
-              + 1.458916900093370682d-06) * rho &
-              - 0.132275132275132275d-04) * rho &
-              + 0.106837606837606838d-03) * rho &
-              - 0.757575757575757576d-03) * rho &
-              + 0.462962962962962963d-02) * rho &
-              - 0.238095238095238095d-01) * rho &
-              + 0.10000000000000000000d0) * rho &
-              - 0.33333333333333333333d0) * rho &
-              + 1.0d0
-
-      if(n_max > 0) then
-
-        vals(1) = (((((((((1.198144314086343d-08 * rho &
-                - 1.312253296380281d-07) * rho &
-                + 1.305346700083542d-06) * rho &
-                - 1.167133520074696d-05) * rho &
-                + 9.259259259259259d-05) * rho &
-                - 6.410256410256410d-04) * rho &
-                + 3.787878787878788d-03) * rho &
-                - 1.851851851851852d-02) * rho &
-                + 7.142857142857142d-02) * rho &
-                - 2.000000000000000d-01) * rho &
-                + 3.333333333333333d-01
-
-        if(n_max > 1) then
-
-          vals(2) = (((((((((1.102292768959436d-08 * rho &
-                  - 1.198144314086343d-07) * rho &
-                  + 1.181027966742252d-06) * rho &
-                  - 1.044277360066834d-05) * rho &
-                  + 8.169934640522875d-05) * rho &
-                  - 5.555555555555556d-04) * rho &
-                  + 3.205128205128205d-03) * rho &
-                  - 1.515151515151515d-02) * rho &
-                  + 5.555555555555555d-02) * rho &
-                  - 1.428571428571428d-01) * rho &
-                  + 2.000000000000000d-01 
-
-          if(n_max > 2) then
-
-            vals(3) = (((((((((1.020641452740218d-08 * rho &
-                    - 1.102292768959436d-07) * rho &
-                    + 1.078329882677709d-06) * rho &
-                    - 9.448223733938020d-06) * rho &
-                    + 7.309941520467836d-05) * rho &
-                    - 4.901960784313725d-04) * rho &
-                    + 2.777777777777778d-03) * rho &
-                    - 1.282051282051282d-02) * rho &
-                    + 4.545454545454546d-02) * rho &
-                    - 1.111111111111111d-01) * rho &
-                    + 1.428571428571428d-01 
-
-            do n = 4, n_max
-              tmp = dble(n + n + 1)
-              vals(n) = (((((((((2.755731922398589d-07 * rho / (tmp + 20.d0) &
-                      - 2.755731922398589d-06 / (tmp + 18.d0)) * rho &
-                      + 2.480158730158730d-05 / (tmp + 16.d0)) * rho &
-                      - 1.984126984126984d-04 / (tmp + 14.d0)) * rho &
-                      + 1.388888888888889d-03 / (tmp + 12.d0)) * rho &
-                      - 8.333333333333333d-03 / (tmp + 10.d0)) * rho &
-                      + 4.166666666666666d-02 / (tmp +  8.d0)) * rho &
-                      - 1.666666666666667d-01 / (tmp +  6.d0)) * rho &
-                      + 5.000000000000000d-01 / (tmp +  4.d0)) * rho &
-                      - 1.000000000000000d+00 / (tmp +  2.d0)) * rho &
-                      + 1.0d0 / tmp
-            enddo
-
-          endif ! n_max > 2
-        endif ! n_max > 1
-      endif ! n_max > 0
-
-    else
-
-      call crint_smallz_vec(n_max, rho, vals)
-
-    endif
+    call crint_smallz_vec(n_max, rho, vals)
 
   else
 
     rho_exp = 0.5d0 * exp(-rho)
     rho_inv = (1.d0, 0.d0) / rho
 
+    n_up = min(n_max, int(rho_mod))
+
     call zboysfun00_1(rho, vals(0))
-    do n = 1, n_max
+    do n = 1, n_up
       vals(n) = ((dble(n) - 0.5d0) * vals(n-1) - rho_exp) * rho_inv
     enddo
+
+    if(n_up < n_max) then
+      vals(n_max) = crint_smallz(n_max, rho)
+      do n = n_max, n_up + 2, -1
+        vals(n-1) = (2.d0 * (rho * vals(n) + rho_exp)) / dble(n + n - 1)
+      enddo
+    endif
 
   endif
 
@@ -238,41 +108,43 @@ end
 complex*16 function crint_smallz(n, rho)
 
   BEGIN_DOC
-  ! Standard version of rint
+  ! Complex Boys function by the series
+  ! $F_n(\rho) = e^{-\rho} \sum_{k \ge 0}
+  !   \frac{(2\rho)^k}{(2n+1)(2n+3)\cdots(2n+2k+1)}$.
+  ! Accurate when $|\rho| < 3.5$ or $n > |\rho|$.
   END_DOC
 
   implicit none
   integer,    intent(in)      :: n
   complex*16, intent(in)      :: rho
 
-  integer,          parameter :: kmax = 100
-  double precision, parameter :: eps = 1.d-17
+  integer,          parameter :: kmax = 200
+  double precision, parameter :: eps2 = 1.d-34 ! (relative tolerance 1e-17)^2
 
   integer                     :: k
-  double precision            :: delta_mod
-  complex*16                  :: rho_k, ct, delta_k
+  double precision            :: d2, s2
+  complex*16                  :: rho2, delta_k
 
-  ct           = 0.5d0 * exp(-rho) * gamma(dble(n) + 0.5d0)
-  crint_smallz = ct / gamma(dble(n) + 1.5d0)
+  rho2         = rho + rho
+  delta_k      = (1.d0, 0.d0) / dble(n + n + 1)
+  crint_smallz = delta_k
 
-  rho_k = (1.d0, 0.d0)
   do k = 1, kmax
-
-    rho_k        = rho_k * rho
-    delta_k      = ct * rho_k / gamma(dble(n+k) + 1.5d0)
+    delta_k      = delta_k * (rho2 * (1.d0 / dble(n + n + k + k + 1)))
     crint_smallz = crint_smallz + delta_k
-
-    delta_mod = abs(delta_k)
-    if(delta_mod .lt. eps * abs(crint_smallz)) return
+    d2 = real(delta_k)**2 + aimag(delta_k)**2
+    s2 = real(crint_smallz)**2 + aimag(crint_smallz)**2
+    if(d2 < eps2 * s2) exit
   enddo
 
-  if(delta_mod > eps * abs(crint_smallz)) then
+  if(d2 >= eps2 * s2) then
     write(*,*) ' pb in crint_smallz !'
     write(*,*) ' n, rho = ', n, rho
     write(*,*) ' value = ', crint_smallz
-    write(*,*) ' delta_mod = ', delta_mod
-    !stop 1
+    write(*,*) ' |delta_k| = ', abs(delta_k)
   endif
+
+  crint_smallz = crint_smallz * exp(-rho)
 
 end
 
@@ -492,13 +364,112 @@ end
 
 ! ---
 
+complex*16 function crint_sum_shift(n_pt_out, rho, d1, log_fact)
+
+  BEGIN_DOC
+  ! $e^{\rm log\_fact} \sum_{i\ \rm even} d_1(i) F_{i/2}(\rho)$, without
+  ! forming $e^{\rm log\_fact}$ and $F_n(\rho)$ separately: for
+  ! $\Re\rho < 0$ the scaled functions $e^{\rho} F_n(\rho)$ are multiplied
+  ! by $e^{{\rm log\_fact} - \rho}$. With complex exponents $\Re\rho$ can be
+  ! below $-709$, where $F_n(\rho)$ overflows and $e^{\rm log\_fact}$
+  ! underflows, although their product is moderate.
+  END_DOC
+
+  implicit none
+
+  integer,    intent(in)  :: n_pt_out
+  complex*16, intent(in)  :: rho, d1(0:n_pt_out), log_fact
+
+  integer                 :: i, n_max
+  complex*16              :: accu
+
+  complex*16, allocatable :: vals(:)
+
+  n_max = shiftr(n_pt_out, 1)
+  allocate(vals(0:n_max))
+
+  if(real(rho) >= 0.d0) then
+    call crint_1_vec(n_max, rho, vals)
+  else
+    call crint_1_vec_scaled(n_max, rho, vals)
+  endif
+
+  accu = d1(0) * vals(0)
+  do i = 2, n_pt_out, 2
+    accu += d1(i) * vals(shiftr(i, 1))
+  enddo
+
+  if(real(rho) >= 0.d0) then
+    crint_sum_shift = exp(log_fact) * accu
+  else
+    crint_sum_shift = exp(log_fact - rho) * accu
+  endif
+
+  deallocate(vals)
+
+  return
+end
+
+! ---
+
+subroutine crint_1_vec_scaled(n_max, rho, vals)
+
+  BEGIN_DOC
+  ! Scaled complex Boys functions $e^{\rho} F_n(\rho)$, $n = 0, \dots,
+  ! n_{max}$, for $\Re\rho < 0$ (then $|e^{\rho} F_n(\rho)| \le 1$).
+  !
+  ! $\Re\rho > -700$: crint_1_vec times $e^{\rho}$. Otherwise the asymptotic
+  ! series $e^{\rho} F_n(\rho) = -\frac{1}{2\rho} \sum_{k \ge 0}
+  ! \frac{(a-1)(a-2)\cdots(a-k)}{\rho^k}$, $a = n + 1/2$, which neglects
+  ! $e^{\rho}\Gamma(a)/(2\rho^a)$, below $10^{-300}$ there.
+  END_DOC
+
+  implicit none
+
+  integer,    intent(in)  :: n_max
+  complex*16, intent(in)  :: rho
+  complex*16, intent(out) :: vals(0:n_max)
+
+  integer                 :: n, k
+  double precision        :: a
+  double precision, parameter :: eps2 = 1.d-34
+  complex*16              :: rho_inv, term, accu
+
+  if(real(rho) > -700.d0) then
+
+    call crint_1_vec(n_max, rho, vals)
+    vals(0:n_max) = vals(0:n_max) * exp(rho)
+
+  else
+
+    rho_inv = (1.d0, 0.d0) / rho
+    do n = 0, n_max
+      a = dble(n) + 0.5d0
+      term = (1.d0, 0.d0)
+      accu = (1.d0, 0.d0)
+      do k = 1, 100
+        term = term * ((a - dble(k)) * rho_inv)
+        accu = accu + term
+        if(abs(term)**2 < eps2 * abs(accu)**2) exit
+      enddo
+      vals(n) = -0.5d0 * rho_inv * accu
+    enddo
+
+  endif
+
+  return
+end
+
+! ---
+
 subroutine crint_2_vec(n_max, rho, vals)
 
   BEGIN_DOC
   ! Stores crint_2(n, rho) for n = 0, 1, ..., n_max in vals(0:n_max),
   ! where crint_2(n, rho) = $\int_0^1 t^{2n} \exp(-\rho t^2) dt$ for
-  ! a complex argument rho. For |rho| < 3.5 the same branches as
-  ! crint_1_vec are used; for |rho| >= 3.5, zboysfun if Re(rho) >= 0,
+  ! a complex argument rho. For |rho| < 0.35 a Taylor polynomial is
+  ! used, for 0.35 <= |rho| < 3.5 crint_smallz_vec; for |rho| >= 3.5,
+  ! zboysfun if Re(rho) >= 0,
   ! and zboysfunnrp (which returns $\exp(\rho)$ times the integral)
   ! followed by the $\exp(-\rho)$ rescaling if Re(rho) < 0.
   END_DOC
@@ -624,7 +595,10 @@ end
 subroutine crint_smallz_vec(n_max, rho, vals)
 
   BEGIN_DOC
-  ! Standard version of rint
+  ! Complex Boys functions $F_n(\rho)$, $n = 0, \dots, n_{max}$, for
+  ! $|\rho| < 3.5$: series for $F_{n_{max}}$ (crint_smallz) and downward
+  ! recursion
+  ! $F_{n-1} = (2 \rho F_n + e^{-\rho}) / (2n-1)$.
   END_DOC
 
   implicit none
@@ -632,46 +606,18 @@ subroutine crint_smallz_vec(n_max, rho, vals)
   complex*16, intent(in)      :: rho
   complex*16, intent(out)     :: vals(0:n_max)
 
-  integer,          parameter :: kmax = 100
-  double precision, parameter :: eps = 1.d-17
+  integer                     :: n
+  complex*16                  :: rho2, rhoe
 
-  integer                     :: k, n
-  complex*16                  :: ct, delta_k
-  complex*16                  :: rhoe
-  complex*16, allocatable     :: rho_k(:)
+  complex*16                  :: crint_smallz
 
+  rho2 = rho + rho
+  rhoe = exp(-rho)
 
-  allocate(rho_k(0:kmax))
-
-  rho_k(0) = (1.d0, 0.d0)
-  do k = 1, kmax
-    rho_k(k) = rho_k(k-1) * rho
+  vals(n_max) = crint_smallz(n_max, rho)
+  do n = n_max, 1, -1
+    vals(n-1) = (rho2 * vals(n) + rhoe) / dble(n + n - 1)
   enddo
-
-  rhoe = 0.5d0 * exp(-rho)
-
-  do n = 0, n_max
-
-    ct = rhoe * gamma(dble(n) + 0.5d0)
-    vals(n) = ct / gamma(dble(n) + 1.5d0)
-  
-    do k = 1, kmax
-      delta_k = ct * rho_k(k) / gamma(dble(n+k) + 1.5d0)
-      vals(n) += delta_k
-      if(abs(delta_k) .lt. eps * abs(vals(n))) then
-        exit
-      endif
-    enddo
-  
-    if(abs(delta_k) > eps * abs(vals(n))) then
-      write(*,*) ' pb in crint_smallz_vec !'
-      write(*,*) ' n, rho = ', n, rho
-      write(*,*) ' value = ', vals(n)
-      write(*,*) ' |delta_k| = ', abs(delta_k)
-    endif
-  enddo
-
-  deallocate(rho_k)
 
   return
 end
