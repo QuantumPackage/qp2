@@ -106,6 +106,8 @@ matrix element of the projector in the state,
 
 off-diagonal family terms included. ``pg_state_irrep(s)`` is the argmax, or
 0 when no weight reaches ``1 - pg_thresh``;
+``pg_state_dom(s)`` is the same argmax without that condition -- the most
+probable irrep, printed when no definite one exists;
 ``pg_state_purity(s)`` is the maximum. ``pg_det_mixed_frac(s)`` is the
 weight of the state carried by determinants with no definite irrep, and
 ``pg_state_norm(s) = sum_D c_D(s)^2``.
@@ -134,8 +136,12 @@ and nothing when the detection failed or was not requested. The
 :math:`S^2` column is the caller's value, so a symmetry label and a spin
 label are always read together. There is no printing switch: the table is
 part of a CI run whose labels are usable. The irrep is left-justified in a
-fixed 12-character column, so ``(none)`` and a short label line up with a
-long one.
+fixed 12-character column, so short labels line up with long ones. When a
+state has no *definite* irrep, the column shows its most probable one
+(``pg_state_dom``), and the ``Purity`` column next to it says how far the
+state is from a pure symmetry: a truncated CIPSI state prints
+``Sigma_g+`` with purity ``0.998`` instead of ``(none)``. ``(none)`` remains
+for a state whose irrep weights are all negligible.
 
 The table uses the exact weights above, with the projectors for the families
 of size greater than one. For a pure determinant the diagonal is a Kronecker
@@ -149,10 +155,10 @@ before the header::
     The MO basis is not symmetry adapted: a state weight is its
     exact irrep probability for the stored CI space (not a guess).
 
-and a state without a definite irrep shows ``(none)`` in the irrep column
-and gets one indented ``composition:`` line with up to four ``name weight``
-pairs, the irreps that carry its weight. The composition is not appended to
-the table row: it would run past the closing rule.
+and a state without a definite irrep shows its most probable one in the
+irrep column and gets one indented ``composition:`` line with up to four
+``name weight`` pairs, the irreps that carry its weight. The composition is
+not appended to the table row: it would run past the closing rule.
 
 The weights stay exact for the stored determinant space. ``pg_mo_block`` is
 built from ``X_g`` itself, so ``X_g`` is block diagonal on the blocks
@@ -161,6 +167,85 @@ per-block occupations under every group element, and the projectors close on
 the stored space. What is lost is the right to call a weight a label, which
 is why state following and the :option:`irrep_states` filter are off on such
 a basis (``pg_labels_usable`` tests ``pg_mo_labels_ok``).
+
+Exact zeros in the saved vectors
+--------------------------------
+
+The CI diagonalization leaves a coefficient that the MO point group forbids
+at roundoff (:math:`10^{-12}` to :math:`10^{-15}`), not at zero, and every
+later quantity that reads the wave function inherits that noise: the 1-RDM,
+the natural orbitals, a perturbative correction. :ref:`cis`, :ref:`cisd` and
+:ref:`fci` call ``pg_zero_state_irreps()`` before their last save:
+``psi_coef(i,s)`` is set to zero when the determinant ``i`` and the state
+``s`` both carry a definite irrep and the two differ. A label 0 means
+"unknown" -- a determinant of a degenerate family, a state that mixes
+irreps -- and such a row or a column is never touched, because a best guess
+would destroy amplitude the labels do not justify.
+
+The rule is the one that already produced the labels: same projectors, same
+``pg_thresh``, so no new |EZFIO| option and no new tolerance. Nothing
+printed changes -- what is removed is below the printed precision -- but the
+stored vector carries exact zeros, and the empty blocks of a natural-orbital
+run then have occupations that are exactly ``0.0``. A plain run
+(``auto_symmetry = false``) never calls it.
+
+State irreps in a CIPSI run
+---------------------------
+
+A CIPSI run prints the state labels at three points beyond the final table:
+the ``# Irrep`` row of the "Summary at N_det" table, the per-state headings
+of the extrapolation block, and one ``Irrep of state`` line after every
+diagonalization. All three read the **exact** weights, through
+``pg_state_irreps_psi`` (labels of :c:data:`psi_coef`) and
+``pg_state_irreps_vec`` (labels of the vectors that were just diagonalized).
+A state can therefore never be selected on one definition of its symmetry
+and printed on another, and the end-of-run table is the reference the other
+three agree with.
+
+Each entry point is a thin dispatcher that tests ``pg_labels_usable()`` and
+nothing else, then calls a worker that names the providers. The split is
+required by IRPF90, which hoists the build of every provider named by a
+procedure to that procedure's entry: a guard and a ``PROVIDE`` cannot share
+a body. With ``auto_symmetry = false``, or when the detection fails or the
+MO basis is not symmetry adapted, the dispatcher returns before a single
+provider of the chain is built and the run prints exactly what it printed
+before the feature existed.
+
+``# Irrep`` is a row of the summary table, between the second rule and the
+``# E`` row, with one 30-character field per state (the width of the numeric
+columns above and below it), left-justified like the table's other labels::
+
+    # ============ ============================= =============================
+                         State      1                  State      2
+    # ============ ============================= =============================
+    # Irrep       A1                            B2
+    # E             -76.11405819                  -75.47913080
+
+It prints the label, and a purity row directly below it when at least one
+state has no definite irrep: a truncated CIPSI state whose purity is below
+:math:`1 - \text{pg\_thresh}` still shows its most probable irrep, with the
+weight fraction that supports it::
+
+    # ============ ============================= =============================
+                         State      1                  State      2
+    # ============ ============================= =============================
+    # Irrep       A1                            B2
+    # Purity              0.9977                        0.8109
+
+The purity row is omitted when every state is definite, so a pure run keeps
+the historical summary. The extrapolation block appends the label, and its
+purity when the label is not definite, to the heading:
+``State 2   Irrep: B2 (purity 0.8109)``.
+
+After each diagonalization the :c:data:`CI_energy` provider prints
+``Irrep of state 2     Sigma_g+ (purity 0.9921)``: the most probable irrep
+with the purity, because that is where a state may still be contaminated by
+the selection. The labels of that line come from ``CI_eigenvectors``, not
+from :c:data:`psi_coef`: inside the provider :c:data:`psi_coef` still holds
+the previous iteration's vectors and is overwritten only once the provider
+has been built. A CIPSI state with a few-percent contamination therefore
+shows the same dominant irrep and the same purity at every stage of the run
+and in the final table.
 
 Fast labels for Davidson
 ------------------------

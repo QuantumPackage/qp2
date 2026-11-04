@@ -226,6 +226,10 @@ subroutine pg_det_report
     enddo
     if (pg_state_irrep(s) /= 0) then
       lab = pg_irrep_name(pg_state_irrep(s))
+    else if (pg_state_dom(s) > 0) then
+      ! No definite irrep: name the most probable one; w_max below says how
+      ! much of the state it carries.
+      lab = pg_irrep_name(pg_state_dom(s))
     else
       lab = 'none'
     endif

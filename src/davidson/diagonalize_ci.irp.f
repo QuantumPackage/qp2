@@ -5,17 +5,32 @@ BEGIN_PROVIDER [ double precision, CI_energy, (N_states_diag) ]
   END_DOC
   PROVIDE distributed_davidson
 
-  integer                        :: j
+  integer                        :: j, nirr
+  integer, allocatable           :: irlab(:), irdom(:)
+  double precision, allocatable  :: irpur(:)
+  logical                        :: have_irr
+  logical, external              :: pg_state_irreps_vec
   character*(8)                  :: st
   call write_time(6)
   do j=1,min(N_det,N_states_diag)
     CI_energy(j) = CI_electronic_energy(j) + nuclear_repulsion
   enddo
+  ! Labels of the vectors just diagonalized: psi_coef is still the previous
+  ! iteration's, it is overwritten only by diagonalize_CI once this provider
+  ! has been built.
+  nirr = min(N_det, N_states)
+  allocate(irlab(nirr), irdom(nirr), irpur(nirr))
+  have_irr = pg_state_irreps_vec(nirr, CI_eigenvectors, &
+       size(CI_eigenvectors,1), irlab, irdom, irpur)
   do j=1,min(N_det,N_states)
     write(st,'(I4)') j
     call write_double(6,CI_energy(j),'Energy of state '//trim(st))
     call write_double(6,CI_s2(j),'S^2 of state '//trim(st))
+    if (have_irr) then
+      call pg_write_state_irrep(6, j, irlab(j), irdom(j), irpur(j))
+    endif
   enddo
+  deallocate(irlab, irdom, irpur)
 
 END_PROVIDER
 
@@ -40,7 +55,7 @@ END_PROVIDER
    double precision, allocatable  :: e_array(:)
    integer, allocatable           :: iorder(:)
    integer                        :: nslot, iord
-   integer, allocatable           :: lab(:)
+   integer, allocatable           :: lab(:), lab_dom(:)
    double precision, allocatable  :: lab_pur(:), eig_tmp(:,:), s2_tmp(:)
    logical, allocatable           :: allowed(:)
    logical, external              :: pg_labels_usable
@@ -359,13 +374,13 @@ END_PROVIDER
        else
          nslot = min(N_det, N_states)
        endif
-       allocate(lab(nslot), lab_pur(nslot), allowed(nslot))
+       allocate(lab(nslot), lab_dom(nslot), lab_pur(nslot), allowed(nslot))
        allocate(iorder(nslot), e_array(nslot), s2_tmp(nslot))
        ! Exact labels, the same weights the report prints: a state of a
        ! degenerate irrep is selected on its projector weight, not on a
        ! determinant sum that would answer 0 for it.
        call pg_state_labels_exact(N_det, CI_eigenvectors, &
-            size(CI_eigenvectors,1), nslot, lab, lab_pur)
+            size(CI_eigenvectors,1), nslot, lab, lab_dom, lab_pur)
        allowed(:) = .true.
        call pg_state_apply(lab, nslot, allowed)
        iord = 0
@@ -392,7 +407,7 @@ END_PROVIDER
          CI_electronic_energy(j) = e_array(j)
          CI_s2(j) = s2_tmp(j)
        enddo
-       deallocate(eig_tmp, s2_tmp, e_array, iorder, allowed, lab, lab_pur)
+       deallocate(eig_tmp, s2_tmp, e_array, iorder, allowed, lab, lab_dom, lab_pur)
      endif
    endif
 

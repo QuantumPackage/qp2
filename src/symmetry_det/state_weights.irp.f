@@ -25,6 +25,7 @@
 
 BEGIN_PROVIDER [ double precision, pg_state_irrep_weight, (pg_n_irrep,N_states) ]
 &BEGIN_PROVIDER [ integer, pg_state_irrep, (N_states) ]
+&BEGIN_PROVIDER [ integer, pg_state_dom, (N_states) ]
 &BEGIN_PROVIDER [ double precision, pg_state_purity, (N_states) ]
 &BEGIN_PROVIDER [ double precision, pg_det_mixed_frac, (N_states) ]
 &BEGIN_PROVIDER [ double precision, pg_state_norm, (N_states) ]
@@ -37,7 +38,12 @@ BEGIN_PROVIDER [ double precision, pg_state_irrep_weight, (pg_n_irrep,N_states) 
   !
   ! ``pg_state_irrep(s)`` = argmax_a w_a(s), or 0 when the state has no
   ! definite irrep (spin contamination, an incomplete family, a broken
-  ! MO basis): a best guess would be a lie.
+  ! MO basis): a best guess must not drive the filter or the zeroing.
+  ! ``pg_state_dom(s)`` = the same argmax without that condition: the most
+  ! probable irrep, 0 only when every weight is below :c:data:`pg_thresh`.
+  ! It is for the printed report, which names the dominant irrep together
+  ! with its purity instead of saying "none"; nothing may constrain a state
+  ! on it.
   ! ``pg_state_purity(s)`` = max_a w_a(s).
   !
   ! ``pg_det_mixed_frac(s)`` = sum of c_D(s)^2 over the determinants whose
@@ -54,6 +60,7 @@ BEGIN_PROVIDER [ double precision, pg_state_irrep_weight, (pg_n_irrep,N_states) 
 
   pg_state_irrep_weight(1:pg_n_irrep,1:N_states) = 0.d0
   pg_state_irrep(1:N_states) = 0
+  pg_state_dom(1:N_states) = 0
   pg_state_purity(1:N_states) = 0.d0
   pg_det_mixed_frac(1:N_states) = 0.d0
   pg_state_norm(1:N_states) = 0.d0
@@ -77,6 +84,7 @@ BEGIN_PROVIDER [ double precision, pg_state_irrep_weight, (pg_n_irrep,N_states) 
       endif
     enddo
     pg_state_purity(s) = pmax
+    if (pmax > pg_thresh) pg_state_dom(s) = abest
     if (pmax >= 1.d0 - pg_thresh) then
       pg_state_irrep(s) = abest
     else
@@ -191,7 +199,7 @@ subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
 
 end subroutine pg_state_weight_matrix
 
-subroutine pg_state_labels_exact(ndet, coef, lda, nst, label, purity)
+subroutine pg_state_labels_exact(ndet, coef, lda, nst, label, dom, purity)
   implicit none
   BEGIN_DOC
   ! Exact irrep labels of ``nst`` CI vectors, for the irrep filter.
@@ -202,13 +210,17 @@ subroutine pg_state_labels_exact(ndet, coef, lda, nst, label, purity)
   ! because it is the same weight matrix: the state that is selected and
   ! the state that is printed carry the same label.
   !
+  ! ``dom(k)`` = the same argmax without the purity condition: the most
+  ! probable irrep, for the report only (0 when every weight is below
+  ! :c:data:`pg_thresh`). ``purity(k)`` = max_a w_a(k)/norm(k).
+  !
   ! Not for the Davidson loop: this enumerates the families. The loop uses
   ! :c:func:`pg_det_state_labels`, which only sums coef^2 by determinant
   ! label and is deliberately allowed to answer 0.
   END_DOC
   integer, intent(in) :: ndet, lda, nst
   double precision, intent(in) :: coef(lda,*)
-  integer, intent(out) :: label(*)
+  integer, intent(out) :: label(*), dom(*)
   double precision, intent(out) :: purity(*)
   integer :: k, a, abest
   double precision :: pmax
@@ -216,10 +228,18 @@ subroutine pg_state_labels_exact(ndet, coef, lda, nst, label, purity)
 
   PROVIDE pg_n_irrep pg_thresh
 
+  if (pg_n_irrep < 1) then
+    label(1:nst) = 0
+    dom(1:nst) = 0
+    purity(1:nst) = 0.d0
+    return
+  endif
+
   allocate(w(pg_n_irrep,nst), norm(nst), dmix(nst))
   call pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
   do k = 1, nst
     label(k) = 0
+    dom(k) = 0
     purity(k) = 0.d0
     if (pg_label_ierr /= 0) cycle
     if (norm(k) <= 0.d0) cycle
@@ -235,6 +255,7 @@ subroutine pg_state_labels_exact(ndet, coef, lda, nst, label, purity)
     ! still labelled: the solver normalizes its vectors, the filter should not
     ! depend on it.
     purity(k) = pmax/norm(k)
+    if (purity(k) > pg_thresh) dom(k) = abest
     if (purity(k) >= 1.d0 - pg_thresh) label(k) = abest
   enddo
   deallocate(w, norm, dmix)

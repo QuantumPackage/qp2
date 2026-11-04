@@ -7,6 +7,41 @@
 ! NEED symmetry_det).
 !-----------------------------------------------------------------------
 
+subroutine pg_write_state_irrep(iunit, istate, label, dom, purity)
+  implicit none
+  BEGIN_DOC
+  ! One line giving the irrep of state ``istate``, for the block printed
+  ! by the :c:data:`CI_energy` provider after a diagonalization. Aligned on
+  ! the ``A50`` label column of :c:func:`write_double`, so it sits under
+  ! "Energy of state" and "S^2 of state".
+  !
+  ! ``label`` = 0 means no definite irrep: the line then names the most
+  ! probable irrep ``dom`` and gives ``purity``, the dominant weight
+  ! fraction, rather than inventing a definite label. It says ``none`` only
+  ! when every irrep weight is negligible. Never stops. Called only after
+  ! the labels were computed.
+  END_DOC
+  integer, intent(in) :: iunit, istate, label, dom
+  double precision, intent(in) :: purity
+  character*(8)  :: st
+  character*(50) :: lab
+  character*(64) :: val
+
+  if (.not. mpi_master) return
+  write(st,'(I8)') istate
+  lab = 'Irrep of state '//trim(adjustl(st))
+  if (label > 0) then
+    write(iunit,'(A50,A)') lab, trim(adjustl(pg_irrep_name(label)))
+  else if (dom > 0) then
+    write(val,'(A,F7.4,A)') trim(adjustl(pg_irrep_name(dom)))// &
+         ' (purity ', purity, ')'
+    write(iunit,'(A50,A)') lab, trim(val)
+  else
+    write(val,'(A,F7.4,A)') 'none (purity ', purity, ')'
+    write(iunit,'(A50,A)') lab, trim(val)
+  endif
+end subroutine pg_write_state_irrep
+
 subroutine pg_print_state_irreps(energy, s2)
   implicit none
   BEGIN_DOC
@@ -55,7 +90,7 @@ subroutine pg_print_state_irreps_work(energy, s2)
   ! with a long one whatever the padding of pg_irrep_name.
   character*(12) :: col
 
-  provide pg_state_irrep_weight pg_irrep_allowed
+  provide pg_state_irrep_weight pg_state_dom pg_irrep_allowed
 
   if (.not. mpi_master) return
   ! The group name is in the header so that a CI log kept on its own says
@@ -89,6 +124,10 @@ subroutine pg_print_state_irreps_work(energy, s2)
     col = ' '
     if (pg_state_irrep(s) > 0) then
       lab = trim(adjustl(pg_irrep_name(pg_state_irrep(s))))
+    else if (pg_state_dom(s) > 0) then
+      ! No definite irrep, but a dominant one: the Purity column next to it
+      ! says how far the state is from a pure symmetry.
+      lab = trim(adjustl(pg_irrep_name(pg_state_dom(s))))
     else
       lab = '(none)'
     endif

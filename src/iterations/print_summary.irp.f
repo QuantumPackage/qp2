@@ -10,8 +10,14 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_configuration_,n_st,s
   type(pt2_type)  , intent(in)   :: pt2_data, pt2_data_err
   integer                        :: i, k
   integer                        :: N_states_p
+  integer, allocatable           :: irlab(:), irdom(:)
+  double precision, allocatable  :: irpur(:)
+  logical                        :: have_irr, impure
+  logical, external              :: pg_state_irreps_psi
   character*(9)                  :: pt2_string
   character*(512)                :: fmt
+  character*(13)                 :: raw13
+  character*(14)                 :: clab
 
   if (do_pt2) then
     pt2_string = '        '
@@ -20,6 +26,15 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_configuration_,n_st,s
   endif
 
   N_states_p = min(N_det_,n_st)
+
+  allocate(irlab(N_states_p), irdom(N_states_p), irpur(N_states_p))
+  have_irr = pg_state_irreps_psi(N_states_p, irlab, irdom, irpur)
+  impure = .false.
+  if (have_irr) then
+    do k = 1, N_states_p
+      if (irlab(k) == 0) impure = .true.
+    enddo
+  endif
 
   print *, ''
   print '(A,I12)',  'Summary at N_det = ', N_det_
@@ -32,6 +47,36 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_configuration_,n_st,s
   write(*,fmt) ('State',k, k=1,N_states_p)
   write(fmt,*) '(''# ============'',', N_states_p, '(1X,''=============================''))'
   write(*,fmt)
+  if (have_irr) then
+    ! One 30-wide field per state, the width of the numeric columns above
+    ! and below it. Both strings go through a full-length buffer: an Aw
+    ! edit descriptor right-justifies a shorter literal, and the label
+    ! must sit on the left edge of its field.
+    raw13 = '# Irrep'
+    write(*,'(A13)',advance='no') raw13
+    do k = 1, N_states_p
+      clab = ' '
+      if (irlab(k) > 0) then
+        clab = trim(adjustl(pg_irrep_name(irlab(k))))
+      else if (irdom(k) > 0) then
+        clab = trim(adjustl(pg_irrep_name(irdom(k))))
+      endif
+      write(*,'(1X,A14,15X)',advance='no') clab
+    enddo
+    write(*,*)
+    ! When a state has no definite irrep, name its dominant one above and
+    ! say here how much weight it carries. Pure states keep the historical
+    ! single row.
+    if (impure) then
+      raw13 = '# Purity'
+      write(*,'(A13)',advance='no') raw13
+      do k = 1, N_states_p
+        write(clab,'(F14.4)') irpur(k)
+        write(*,'(1X,A14,15X)',advance='no') clab
+      enddo
+      write(*,*)
+    endif
+  endif
   write(fmt,*) '(A13,', N_states_p, '(1X,F14.8,15X))'
   write(*,fmt) '# E          ', e_(1:N_states_p)
   if (N_states_p > 1) then
@@ -101,6 +146,8 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_configuration_,n_st,s
   endif
 
 !  call print_energy_components()
+
+  deallocate(irlab, irdom, irpur)
 
 end subroutine
 
