@@ -79,6 +79,13 @@ BEGIN_PROVIDER [ integer, pg_block_cap ]
   pg_block_cap = 30
 END_PROVIDER
 
+! Widest block occupation the determinant kernels represent, and the
+! dimension of their small dense matrices. A block is one irrep (d_a <= 5)
+! unless the MO basis is not symmetry adapted; this is the bound the
+! mixed-basis path accepts, and :c:func:`pg_fam_setup` refuses a wider
+! family rather than overflowing it.
+integer, parameter :: pg_det_nmax = 12
+
 !-----------------------------------------------------------------------
 ! MOs grouped by symmetry block.
 !-----------------------------------------------------------------------
@@ -144,13 +151,42 @@ BEGIN_PROVIDER [ integer, pg_elem_col, (pg_n_elem) ]
 END_PROVIDER
 
 !-----------------------------------------------------------------------
-! The group in the MO basis, kept for the whole module.
+! The normalised character of one element, the hot-loop table.
 !-----------------------------------------------------------------------
-BEGIN_PROVIDER [ double precision, pg_xg, (mo_num,mo_num,pg_n_elem) ]
+BEGIN_PROVIDER [ double precision, pg_proj_w, (pg_n_irrep,pg_n_elem) ]
   implicit none
   BEGIN_DOC
-  ! ``pg_xg(:,:,g)`` = C^T S M_g C, the matrix of group element ``g`` in the
-  ! MO basis, built once.
+  ! ``pg_proj_w(a,g)`` = :math:`(d_a/(m_a |G|)) \chi_a(col(g))`, the weight
+  ! of element ``g`` in the projector on irrep ``a``.
+  !
+  ! This is the ONLY character lookup of the determinant and state
+  ! kernels: the pair loop of :c:func:`pg_family_labels`,
+  ! :c:func:`pg_family_vg` and :c:func:`pg_family_wadd` reads it once per
+  ! (element, irrep) instead of going back to :c:data:`pg_char` through
+  ! :c:data:`pg_elem_col` for every determinant pair.
+  END_DOC
+  integer :: a, g
+
+  ! IRPF90 does not allocate a zero-size array: return before the first
+  ! array reference.
+  if (pg_n_irrep < 1 .or. pg_n_elem < 1) return
+  do g = 1, pg_n_elem
+    do a = 1, pg_n_irrep
+      pg_proj_w(a,g) = pg_proj_coef(a)*pg_char(a,pg_elem_col(g))
+    enddo
+  enddo
+END_PROVIDER
+
+!-----------------------------------------------------------------------
+! The group in the MO basis, kept for the whole module.
+!-----------------------------------------------------------------------
+BEGIN_PROVIDER [ double precision, pg_xg, (pg_n_elem,mo_num,mo_num) ]
+  implicit none
+  BEGIN_DOC
+  ! ``pg_xg(g,:,:)`` = C^T S M_g C, the matrix of group element ``g`` in the
+  ! MO basis, built once. The element index is the leading one, so the
+  ! submatrix the determinant kernels read for one element is a
+  ! contiguous ``mo_num x mo_num`` plane.
   !
   ! One scratch matrix at a time was the first plan, but the
   ! determinant projectors need every element for every family, and a
@@ -159,14 +195,61 @@ BEGIN_PROVIDER [ double precision, pg_xg, (mo_num,mo_num,pg_n_elem) ]
   ! wide, so the set costs :math:`8|G|N_{MO}^2` bytes: 0.8 MB for benzene in
   ! 6-31G. The report prints the number. A production version can keep
   ! only the rows and columns of the partially occupied blocks; nothing
-  ! below cares, because :c:func:`pg_elem_me` is the only reader.
+  ! below cares, because the only readers are :c:func:`pg_elem_me` (the
+  ! reference oracle), :c:data:`pg_detfull` and :c:func:`pg_fam_pair`.
   END_DOC
   integer :: g
   double precision :: x(mo_num,mo_num)
   if (mo_num == 0) return
   do g = 1, pg_n_elem
     call pg_get_mo_rep(g, x)
-    pg_xg(1:mo_num,1:mo_num,g) = x
+    pg_xg(g,1:mo_num,1:mo_num) = x
+  enddo
+END_PROVIDER
+
+!-----------------------------------------------------------------------
+! The determinant of a fully occupied block, per element.
+!-----------------------------------------------------------------------
+BEGIN_PROVIDER [ double precision, pg_detfull, (pg_n_mo_block,pg_n_elem) ]
+  implicit none
+  BEGIN_DOC
+  ! ``pg_detfull(b,g)`` = det( X_g[occ_b, occ_b] ) for a block ``b`` that is
+  ! entirely occupied: the block determinant of element ``g``, the factor
+  ! every determinant of the family shares.
+  !
+  ! A sector that is full has a block determinant that does not depend on
+  ! the determinant: it is read once per (block, element) here instead of
+  ! being recomputed for every pair. The family descriptor of
+  ! :c:func:`pg_fam_setup` sends a block with more than
+  ! :c:data:`pg_det_nmax` occupied MOs to the overflow branch before any
+  ! of this is read, so the 0.d0 written for such a block is never used:
+  ! it keeps the array defined, nothing more.
+  !
+  ! Cost ``nblock*|G|`` small determinants, built once.
+  END_DOC
+  integer :: b, g, nd, i, j
+  double precision :: sub(pg_det_nmax,pg_det_nmax)
+  double precision, external :: pg_small_det
+
+  ! IRPF90 does not allocate a zero-size array: return before the first
+  ! array reference.
+  if (pg_n_mo_block < 1 .or. pg_n_elem < 1) return
+  do b = 1, pg_n_mo_block
+    nd = pg_block_dim(b)
+    do g = 1, pg_n_elem
+      if (nd > pg_det_nmax) then
+        ! Rejected by pg_fam_setup first: never read.
+        pg_detfull(b,g) = 0.d0
+        cycle
+      endif
+      do j = 1, nd
+        do i = 1, nd
+          sub(i,j) = pg_xg(g, pg_block_mo(pg_block_start(b)+i-1), &
+                              pg_block_mo(pg_block_start(b)+j-1))
+        enddo
+      enddo
+      pg_detfull(b,g) = pg_small_det(sub, nd)
+    enddo
   enddo
 END_PROVIDER
 
@@ -205,7 +288,7 @@ integer function pg_unrank(dim, n, rank)
   BEGIN_DOC
   ! Bit mask of the ``rank``-th ``n``-subset of {0,...,dim-1}. ``dim`` <= 30
   ! (a symmetry block is an irrep space and has d_a <= 5 elements; the
-  ! guard is in :c:func:`pg_elem_me`).
+  ! guard is in :c:func:`pg_fam_setup`).
   END_DOC
   integer, intent(in) :: dim, n, rank
   integer :: k, j, r
@@ -231,20 +314,39 @@ integer function pg_unrank(dim, n, rank)
 end function pg_unrank
 
 !-----------------------------------------------------------------------
-! Determinant of a small dense matrix, Gaussian elimination with partial
-! pivoting. ``n`` <= 12 (a block never has more than d_a <= 5 occupied
-! MOs; the guard is in :c:func:`pg_elem_me`).
+! Determinant of a small dense matrix.
 !-----------------------------------------------------------------------
 double precision function pg_small_det(a, n)
   implicit none
   BEGIN_DOC
-  ! det(a(1:n,1:n)), ``a`` untouched, exact zero returns exactly 0.
+  ! det(a(1:n,1:n)), ``a`` untouched. ``n`` <= :c:data:`pg_det_nmax` (a
+  ! block never has more than d_a <= 5 occupied MOs; the guard is in
+  ! :c:func:`pg_fam_setup`).
+  !
+  ! The function returns exactly 0 whenever the computed determinant is
+  ! exactly 0. The ``n = 1`` and ``n = 2`` branches are explicit products
+  ! (a 2x2 product detects the cancellation of ``ad - bc`` that the
+  ! pivoted elimination does not see), the general case is Gaussian
+  ! elimination with partial pivoting. The two forms can differ by one
+  ! ulp, never more.
   END_DOC
-  integer, parameter :: nmax = 12
   integer, intent(in) :: n
+  ! Local alias: IRPF90 does not emit the module ``use`` for a procedure
+  ! that only needs the parameter in a declaration, so the file-scope
+  ! :c:data:`pg_det_nmax` is not visible here.
+  integer, parameter :: nmax = 12
   double precision, intent(in) :: a(nmax,nmax)
   double precision :: b(nmax,nmax), t, piv
   integer :: i, j, k, p
+
+  if (n == 1) then
+    pg_small_det = a(1,1)
+    return
+  endif
+  if (n == 2) then
+    pg_small_det = a(1,1)*a(2,2) - a(1,2)*a(2,1)
+    return
+  endif
 
   b(1:n,1:n) = a(1:n,1:n)
   pg_small_det = 1.d0
@@ -455,6 +557,171 @@ subroutine pg_family_index(np, mask, idx, imin)
 end subroutine pg_family_index
 
 !-----------------------------------------------------------------------
+! Sector classification of a family, and its occupied-MO table.
+!-----------------------------------------------------------------------
+subroutine pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos)
+  implicit none
+  BEGIN_DOC
+  ! Classifies the sectors of one family once, independently of the group
+  ! element and of the determinant pair.
+  !
+  ! A sector is one (spin, block) pair. The family has the same count in
+  ! every block, so a sector is either
+  !
+  ! * empty: nothing to multiply;
+  ! * full: all its MOs are occupied, its block determinant is the same
+  !   for every member and every pair, and it is folded into
+  !   :c:data:`pg_detfull` (``fsec``);
+  ! * partial: the only sectors the pair kernel has to look at (``psec``,
+  !   with ``pn(p)`` the number of occupied MOs).
+  !
+  ! ``pos(k,ip,p)`` is the MO of the ``k``-th occupied orbital of the
+  ! partial sector ``p`` for family member ``ip``, in ascending MO order:
+  ! the precomputed occupied-MO table that replaces the per-(g,pair,sector)
+  ! bit scans of :c:func:`pg_elem_me`. Ascending order is what makes the
+  ! submatrix ordering identical to the reference kernel.
+  !
+  ! The table is transient, one family at a time: ``12*np*2*nblock``
+  ! integers at the deepest call. ``npart = -1`` means the family was
+  ! refused because a block holds more than :c:data:`pg_det_nmax`
+  ! occupied MOs; :c:data:`pg_label_ierr` then carries the reason and no
+  ! caller reads ``pos``.
+  END_DOC
+  integer, intent(in) :: np, nsel(2,pg_n_mo_block), mask(2,pg_n_mo_block,np)
+  integer, intent(out) :: npart, nfull, pn(2*pg_n_mo_block)
+  integer, intent(out) :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
+  integer, intent(out) :: pos(pg_det_nmax,np,2*pg_n_mo_block)
+  integer :: s, b, nd, n, p, ip, k, k1
+
+  npart = 0
+  nfull = 0
+  do s = 1, 2
+    do b = 1, pg_n_mo_block
+      nd = pg_block_dim(b)
+      n = nsel(s,b)
+      if (n == 0) cycle
+      if (n > pg_det_nmax) then
+        write(6,'(A,I0,A)') 'symmetry_det: one symmetry block contributes ', &
+             n, ' occupied MOs; family enumeration supports at most 12.'
+        write(6,'(A)') '  A block is one irrep (at most 5 MOs) unless the MO '// &
+             'basis is not symmetry adapted;'
+        write(6,'(A)') '  the mixed-basis path accepts such a block, but not '// &
+             'more than 12 occupied MOs in it.'
+        write(pg_label_msg,'(A,I0,A)') 'one symmetry block holds ', n, &
+             ' occupied MOs (at most 12 supported)'
+        pg_label_ierr = 6
+        npart = -1
+        return
+      endif
+      if (n == nd) then
+        nfull = nfull + 1
+        fsec(1,nfull) = s
+        fsec(2,nfull) = b
+      else
+        npart = npart + 1
+        psec(1,npart) = s
+        psec(2,npart) = b
+        pn(npart) = n
+      endif
+    enddo
+  enddo
+
+  do p = 1, npart
+    s = psec(1,p)
+    b = psec(2,p)
+    nd = pg_block_dim(b)
+    do ip = 1, np
+      k = 0
+      do k1 = 0, nd-1
+        if (btest(mask(s,b,ip),k1)) then
+          k = k + 1
+          pos(k,ip,p) = pg_block_mo(pg_block_start(b)+k1)
+        endif
+      enddo
+    enddo
+  enddo
+end subroutine pg_fam_setup
+
+!-----------------------------------------------------------------------
+! Block-determinant factor of the full sectors.
+!-----------------------------------------------------------------------
+double precision function pg_fam_cfac(g, nfull, fsec)
+  implicit none
+  BEGIN_DOC
+  ! Product of the block determinants of the full sectors of element ``g``:
+  ! the factor common to every pair of the family. 1.d0 when no sector is
+  ! full, exactly 0.d0 as soon as one factor is 0 (the whole family is
+  ! annihilated by that element, and an exact zero is propagated exactly).
+  END_DOC
+  integer, intent(in) :: g, nfull, fsec(2,2*pg_n_mo_block)
+  integer :: f
+
+  pg_fam_cfac = 1.d0
+  do f = 1, nfull
+    pg_fam_cfac = pg_fam_cfac*pg_detfull(fsec(2,f),g)
+    if (pg_fam_cfac == 0.d0) then
+      pg_fam_cfac = 0.d0
+      return
+    endif
+  enddo
+end function pg_fam_cfac
+
+!-----------------------------------------------------------------------
+! :math:`<D'|U(g)|D>` restricted to the partial sectors.
+!-----------------------------------------------------------------------
+double precision function pg_fam_pair(g, np, npart, psec, pn, pos, ip, jp)
+  implicit none
+  BEGIN_DOC
+  ! :math:`<D_{ip}|U(g)|D_{jp}>` restricted to the partly occupied sectors,
+  ! i.e. the product of their block determinants.
+  !
+  ! It is ORDERED: ``ip`` indexes the bra, ``jp`` the ket, and nothing is
+  ! assumed about the symmetry of the result. 1.d0 when nothing is
+  ! partial. The submatrix of a sector is filled in the ascending order of
+  ! ``pos``, identical to the ordering of :c:func:`pg_elem_me`, so the two
+  ! kernels see the same determinant.
+  !
+  ! Sectors with 1 or 2 occupied MOs are inlined products: they get the
+  ! same expression as the explicit ``pg_small_det`` branches, without the
+  ! call and the pivoted copy.
+  END_DOC
+  integer, intent(in) :: g, np, npart
+  integer, intent(in) :: psec(2,2*pg_n_mo_block), pn(2*pg_n_mo_block)
+  integer, intent(in) :: pos(pg_det_nmax,np,*)
+  integer, intent(in) :: ip, jp
+  integer :: p, n, i1, i2, j1, j2, ii, jj
+  double precision :: sub(pg_det_nmax,pg_det_nmax), v
+  double precision, external :: pg_small_det
+
+  v = 1.d0
+  do p = 1, npart
+    n = pn(p)
+    select case (n)
+    case (1)
+      v = v*pg_xg(g, pos(1,ip,p), pos(1,jp,p))
+    case (2)
+      i1 = pos(1,ip,p)
+      i2 = pos(2,ip,p)
+      j1 = pos(1,jp,p)
+      j2 = pos(2,jp,p)
+      v = v*(pg_xg(g,i1,j1)*pg_xg(g,i2,j2) - pg_xg(g,i1,j2)*pg_xg(g,i2,j1))
+    case default
+      do jj = 1, n
+        do ii = 1, n
+          sub(ii,jj) = pg_xg(g, pos(ii,ip,p), pos(jj,jp,p))
+        enddo
+      enddo
+      v = v*pg_small_det(sub, n)
+    end select
+    if (v == 0.d0) then
+      pg_fam_pair = 0.d0
+      return
+    endif
+  enddo
+  pg_fam_pair = v
+end function pg_fam_pair
+
+!-----------------------------------------------------------------------
 ! :math:`<D'|U(g)|D>`.
 !-----------------------------------------------------------------------
 subroutine pg_elem_me(ig, np, mask, ip, jp, val)
@@ -470,13 +737,18 @@ subroutine pg_elem_me(ig, np, mask, ip, jp, val)
   ! An over-full or inconsistent pair returns exactly 0 rather than a
   ! number, and an exact zero is propagated exactly, so the caller may
   ! skip the accumulation of that pair.
+  !
+  ! Kept as the independent reference used by :c:func:`pg_det_weights`;
+  ! no hot path calls it (the labels use :c:func:`pg_family_labels`, the
+  ! state weights :c:func:`pg_family_wadd`).
   END_DOC
-  integer, parameter :: nmax = 12
+  ! The file-scope pg_det_nmax is visible here: the body uses module
+  ! entities, so IRPF90 emits the module ``use`` for this procedure.
   integer, intent(in) :: ig, np, ip, jp
   integer, intent(in) :: mask(2,pg_n_mo_block,np)
   double precision, intent(out) :: val
   integer :: s, b, nd, k1, k2, n, ii, jj
-  double precision :: sub(nmax,nmax)
+  double precision :: sub(pg_det_nmax,pg_det_nmax)
   double precision, external :: pg_small_det
 
   val = 1.d0
@@ -497,7 +769,7 @@ subroutine pg_elem_me(ig, np, mask, ip, jp, val)
         return
       endif
       if (ii == 0) cycle
-      if (ii > nmax) then
+      if (ii > pg_det_nmax) then
         write(6,'(A,I0,A)') 'symmetry_det: one symmetry block contributes ', &
              ii, ' occupied MOs; family enumeration supports at most 12.'
         write(6,'(A)') '  A block is one irrep (at most 5 MOs) unless the MO '// &
@@ -520,8 +792,8 @@ subroutine pg_elem_me(ig, np, mask, ip, jp, val)
         do k2 = 0, nd-1
           if (.not. btest(mask(s,b,jp),k2)) cycle
           jj = jj + 1
-          sub(ii,jj) = pg_xg(pg_block_mo(pg_block_start(b)+k1), &
-                             pg_block_mo(pg_block_start(b)+k2), ig)
+          sub(ii,jj) = pg_xg(ig, pg_block_mo(pg_block_start(b)+k1), &
+                                 pg_block_mo(pg_block_start(b)+k2))
         enddo
       enddo
       val = val*pg_small_det(sub, n)
@@ -531,9 +803,165 @@ subroutine pg_elem_me(ig, np, mask, ip, jp, val)
 end subroutine pg_elem_me
 
 !-----------------------------------------------------------------------
+! The matrix of one group element on one family.
+!-----------------------------------------------------------------------
+subroutine pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, v)
+  implicit none
+  BEGIN_DOC
+  ! ``v(ip,jp)`` = :math:`<D_{ip}|U(g)|D_{jp}>` on the family, i.e. the
+  ! N-electron matrix of ONE group element: the factor of the full sectors
+  ! times the partial-sector product.
+  !
+  ! This is the production element kernel. All ordered pairs are computed:
+  ! :c:func:`pg_family_labels` reads only its diagonal,
+  ! :c:func:`pg_family_wadd` forms the scalar :math:`c^T v c`, and
+  ! :c:func:`pg_family_projector` sums it over the elements for gates
+  ! D1/D2. No caller assumes ``v`` symmetric, which is what keeps gate D2b
+  ! meaningful.
+  END_DOC
+  integer, intent(in) :: g, np, nfull, npart
+  ! Local alias, as in :c:func:`pg_small_det`: only the declaration needs it.
+  integer, parameter :: nmax = 12
+  integer, intent(in) :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
+  integer, intent(in) :: pn(2*pg_n_mo_block)
+  integer, intent(in) :: pos(nmax,np,2*pg_n_mo_block)
+  double precision, intent(out) :: v(np,np)
+  integer :: ip, jp
+  double precision :: cfac
+  double precision, external :: pg_fam_cfac, pg_fam_pair
+
+  v(1:np,1:np) = 0.d0
+  cfac = pg_fam_cfac(g, nfull, fsec)
+  if (cfac == 0.d0) return
+  do jp = 1, np
+    do ip = 1, np
+      v(ip,jp) = cfac*pg_fam_pair(g, np, npart, psec, pn, pos, ip, jp)
+    enddo
+  enddo
+end subroutine pg_family_vg
+
+!-----------------------------------------------------------------------
+! Diagonal of the projector on one family: the determinant labels.
+!-----------------------------------------------------------------------
+subroutine pg_family_labels(np, nsel, mask, lab, pur)
+  implicit none
+  BEGIN_DOC
+  ! ``pur(ip)`` = max_a T^a_{ip,ip} and ``lab(ip)`` = the argmax when it
+  ! reaches 1 - :option:`symmetry pg_thresh`, else 0.
+  !
+  ! :math:`T^a_{DD}` needs only the DIAGONAL of the family: ``|G|*np``
+  ! matrix elements instead of ``|G|*np^2``. ``pur`` is what
+  ! :c:data:`pg_det_purity` was, and ``lab`` follows the same
+  ! ``1 - pg_thresh`` rule as :c:data:`pg_det_irrep`.
+  !
+  ! The accumulation is per (member, irrep): the irrep loop is inside the
+  ! element loop but outside the pair loop, and the (irrep, element)
+  ! weight is read from :c:data:`pg_proj_w`.
+  END_DOC
+  integer, intent(in) :: np, nsel(2,pg_n_mo_block), mask(2,pg_n_mo_block,np)
+  integer, intent(out) :: lab(np)
+  double precision, intent(out) :: pur(np)
+  integer :: g, a, ip, amax, npart, nfull
+  integer :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
+  integer :: pn(2*pg_n_mo_block)
+  integer :: pos(pg_det_nmax,np,2*pg_n_mo_block)
+  double precision, allocatable :: acc(:,:)
+  double precision :: v, d, pmax
+  double precision, external :: pg_fam_cfac, pg_fam_pair
+
+  lab(1:np) = 0
+  pur(1:np) = 0.d0
+  if (pg_n_irrep < 1 .or. np < 1) return
+  call pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos)
+  if (pg_label_ierr /= 0) return
+  allocate(acc(np,pg_n_irrep))
+  acc(1:np,1:pg_n_irrep) = 0.d0
+  do g = 1, pg_n_elem
+    v = pg_fam_cfac(g, nfull, fsec)
+    if (v == 0.d0) cycle
+    do ip = 1, np
+      d = v*pg_fam_pair(g, np, npart, psec, pn, pos, ip, ip)
+      if (d == 0.d0) cycle
+      do a = 1, pg_n_irrep
+        acc(ip,a) = acc(ip,a) + pg_proj_w(a,g)*d
+      enddo
+    enddo
+  enddo
+  do ip = 1, np
+    amax = 1
+    pmax = acc(ip,1)
+    do a = 2, pg_n_irrep
+      if (acc(ip,a) > pmax) then
+        pmax = acc(ip,a)
+        amax = a
+      endif
+    enddo
+    pur(ip) = pmax
+    if (pmax >= 1.d0 - pg_thresh) then
+      lab(ip) = amax
+    else
+      lab(ip) = 0
+    endif
+  enddo
+  deallocate(acc)
+end subroutine pg_family_labels
+
+!-----------------------------------------------------------------------
+! State irrep weights of one family.
+!-----------------------------------------------------------------------
+subroutine pg_family_wadd(np, nsel, mask, c, nst, w)
+  implicit none
+  BEGIN_DOC
+  ! ``w(a,s) += c^T T^a c`` for the ``nst`` CI columns ``c`` on this
+  ! family, accumulated as ``sum_g pg_proj_w(a,g) * (c^T V_g c)``.
+  !
+  ! The scalar :math:`q(g,s) = c^T V_g c` needs the full ``V_g`` but only
+  ! one number per (element, state): the irrep loop is OUTSIDE the pair
+  ! loop, so the cost per element is ``n_irrep*nst`` instead of
+  ! ``n_irrep*nst*np^2``. Ordered pairs are used, with no reliance on the
+  ! symmetry of :math:`T^a`.
+  !
+  ! ``c`` is indexed by family member, not by determinant: the caller
+  ! gathers it, and a missing member is a zero column contribution.
+  END_DOC
+  integer, intent(in) :: np, nst, nsel(2,pg_n_mo_block), mask(2,pg_n_mo_block,np)
+  double precision, intent(in) :: c(np,nst)
+  double precision, intent(inout) :: w(pg_n_irrep,nst)
+  integer :: g, a, s, ip, jp, npart, nfull
+  integer :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
+  integer :: pn(2*pg_n_mo_block)
+  integer :: pos(pg_det_nmax,np,2*pg_n_mo_block)
+  double precision, allocatable :: vv(:,:)
+  double precision :: q(nst)
+
+  if (pg_n_irrep < 1 .or. np < 1 .or. nst < 1) return
+  call pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos)
+  if (pg_label_ierr /= 0) return
+  allocate(vv(np,np))
+  do g = 1, pg_n_elem
+    call pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, vv)
+    q(1:nst) = 0.d0
+    do jp = 1, np
+      do ip = 1, np
+        do s = 1, nst
+          q(s) = q(s) + c(ip,s)*vv(ip,jp)*c(jp,s)
+        enddo
+      enddo
+    enddo
+    do a = 1, pg_n_irrep
+      if (pg_proj_w(a,g) == 0.d0) cycle
+      do s = 1, nst
+        w(a,s) = w(a,s) + pg_proj_w(a,g)*q(s)
+      enddo
+    enddo
+  enddo
+  deallocate(vv)
+end subroutine pg_family_wadd
+
+!-----------------------------------------------------------------------
 ! The MO projector applied to one family.
 !-----------------------------------------------------------------------
-subroutine pg_family_projector(np, mask, t)
+subroutine pg_family_projector(np, nsel, mask, t)
   implicit none
   BEGIN_DOC
   ! ``t(ip,jp,a)`` = T^a_{ip,jp} = (d_a/(mult_a*:math:`|G|`)) sum_g chi_a(col(g)) :math:`<D_ip|U(g)|D_jp>`.
@@ -543,30 +971,39 @@ subroutine pg_family_projector(np, mask, t)
   ! :c:data:`pg_mo_weight`. T^a is a Hermitian
   ! projector on the family (gates D1/D2), and its diagonal gives the
   ! determinant labels.
+  !
+  ! The REFERENCE full matrix, kept for gates D1/D2 only: the labels read
+  ! the diagonal through :c:func:`pg_family_labels` and the state weights
+  ! the scalar :math:`q(g,s)` through :c:func:`pg_family_wadd`. Ordered
+  ! pairs are summed, so gate D2b (symmetry of :math:`T^a`) stays
+  ! meaningful. Skipping an exactly zero character is exact: it would add
+  ! a product whose first factor is 0.
   END_DOC
-  integer, intent(in) :: np, mask(2,pg_n_mo_block,np)
+  integer, intent(in) :: np, nsel(2,pg_n_mo_block), mask(2,pg_n_mo_block,np)
   double precision, intent(out) :: t(np,np,pg_n_irrep)
-  integer :: ig, c, a, ip, jp
-  double precision :: coef(pg_n_irrep), val
+  integer :: g, a, ip, jp, npart, nfull
+  integer :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
+  integer :: pn(2*pg_n_mo_block)
+  integer :: pos(pg_det_nmax,np,2*pg_n_mo_block)
+  double precision, allocatable :: vv(:,:)
 
-  do a = 1, pg_n_irrep
-    coef(a) = dble(pg_irrep_dim(a)) &
-         /(dble(pg_irrep_mult(a))*dble(pg_n_elem))
-  enddo
+  if (pg_n_irrep < 1 .or. np < 1) return
   t(1:np,1:np,1:pg_n_irrep) = 0.d0
-  do ig = 1, pg_n_elem
-    c = pg_elem_col(ig)
-    do jp = 1, np
-      do ip = 1, np
-        call pg_elem_me(ig, np, mask, ip, jp, val)
-        if (pg_label_ierr /= 0) return
-        if (val == 0.d0) cycle
-        do a = 1, pg_n_irrep
-          t(ip,jp,a) = t(ip,jp,a) + coef(a)*pg_char(a,c)*val
+  call pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos)
+  if (pg_label_ierr /= 0) return
+  allocate(vv(np,np))
+  do g = 1, pg_n_elem
+    call pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, vv)
+    do a = 1, pg_n_irrep
+      if (pg_proj_w(a,g) == 0.d0) cycle
+      do jp = 1, np
+        do ip = 1, np
+          t(ip,jp,a) = t(ip,jp,a) + pg_proj_w(a,g)*vv(ip,jp)
         enddo
       enddo
     enddo
   enddo
+  deallocate(vv)
 end subroutine pg_family_projector
 
 !-----------------------------------------------------------------------
@@ -599,15 +1036,18 @@ BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
   ! every member shares that partial occupation. The state weights use
   ! this to skip the projectors for pure determinants.
   !
-  ! :c:data:`pg_n_family` <= N_det. A determinant whose family is handled by an
-  ! earlier member costs one enumeration and one binary search per member
-  ! and nothing else.
+  ! :c:data:`pg_n_family` <= N_det. A family is enumerated once, at
+  ! ``pg_family_first(f)``, the smallest psi_det index of the family: the
+  ! loop skips every determinant that this representative already
+  ! labelled (``pg_det_family /= 0``), so a member costs nothing beyond
+  ! the copy of its label. The labelling itself is
+  ! :c:func:`pg_family_labels`, whose working set is ``np*pg_n_irrep``
+  ! instead of ``np^2*pg_n_irrep``.
   END_DOC
-  integer :: i, a, np, ip, j, ifam, imin, amax
+  integer :: i, np, ip, j, ifam, imin
   integer :: nsel(2,pg_n_mo_block)
-  integer, allocatable :: mask(:,:,:), idx(:)
-  double precision, allocatable :: t(:,:,:)
-  double precision :: pmax
+  integer, allocatable :: mask(:,:,:), idx(:), lab(:)
+  double precision, allocatable :: pur(:)
 
   pg_n_family = 0
   pg_label_ierr = 0
@@ -669,6 +1109,9 @@ BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
   !---------------------------------------------------------------------
   ifam = 0
   do i = 1, N_det
+    ! A representative sets pg_det_family for every present member, so a
+    ! member reaching this line is already labelled.
+    if (pg_det_family(i) /= 0) cycle
     call pg_det_counts(i, nsel)
     call pg_family_size(nsel, np)
     if (np < 0) then
@@ -696,23 +1139,19 @@ BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
       pg_label_ierr = 4
       return
     endif
-    allocate(mask(2,pg_n_mo_block,np), idx(np), t(np,np,pg_n_irrep))
+    allocate(mask(2,pg_n_mo_block,np), idx(np), lab(np), pur(np))
     call pg_family_fill(nsel, np, mask)
     if (pg_label_ierr /= 0) then
-      deallocate(mask, idx, t)
+      deallocate(mask, idx, lab, pur)
       return
     endif
     call pg_family_index(np, mask, idx, imin)
-    if (imin /= i) then
-      deallocate(mask, idx, t)
-      cycle
-    endif
 
     ifam = ifam + 1
     pg_family_first(ifam) = i
-    call pg_family_projector(np, mask, t)
+    call pg_family_labels(np, nsel, mask, lab, pur)
     if (pg_label_ierr /= 0) then
-      deallocate(mask, idx, t)
+      deallocate(mask, idx, lab, pur)
       return
     endif
     do ip = 1, np
@@ -720,22 +1159,10 @@ BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
       if (j == 0) cycle
       pg_det_family(j) = ifam
       pg_det_block(j) = np
-      amax = 1
-      pmax = t(ip,ip,1)
-      do a = 2, pg_n_irrep
-        if (t(ip,ip,a) > pmax) then
-          pmax = t(ip,ip,a)
-          amax = a
-        endif
-      enddo
-      pg_det_purity(j) = pmax
-      if (pmax >= 1.d0 - pg_thresh) then
-        pg_det_irrep(j) = amax
-      else
-        pg_det_irrep(j) = 0
-      endif
+      pg_det_purity(j) = pur(ip)
+      pg_det_irrep(j) = lab(ip)
     enddo
-    deallocate(mask, idx, t)
+    deallocate(mask, idx, lab, pur)
   enddo
   pg_n_family = ifam
 END_PROVIDER

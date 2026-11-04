@@ -53,6 +53,33 @@ restricted to the family. ``pg_det_irrep(D)`` is the argmax of
 that maximum, the weight of the largest isotypic component of the
 determinant.
 
+Three consumers read three different objects of that one formula, and that
+is what keeps the cost down:
+
+* the **determinant labels** need only the diagonal :math:`T^a_{DD}` of a
+  family: :math:`|G| \times |F|` matrix elements instead of
+  :math:`|G| \times |F|^2`, and no :math:`|F|^2` projector storage;
+* the **state weights** need the full :math:`U_g` matrix, but only the
+  scalars :math:`q(g,s) = c^T U_g c`, one number per element and per state.
+  The matrix of an element is built once and contracted with every column,
+  and only then multiplied by the projector weight, so the irrep loop sits
+  outside the pair loop: :math:`n_a n_{st}` operations per element, not
+  :math:`n_a n_{st} |F|^2`;
+* the **gates** are the only place that builds the full :math:`T^a`.
+
+Families are enumerated once, at their representative
+(``pg_family_first(f)``, the smallest ``psi_det`` index of the family);
+every other member is copied from that pass. Inside a family, the
+classification of the sectors (one sector is one spin and one block) does
+not depend on the group element nor on the pair: an empty sector is
+nothing, a full sector has the same block determinant for every member, and
+only a partly occupied sector costs per-pair work. The occupied MO lists of
+the partial sectors are computed once per family, and the block determinant
+of a full sector is read from a table built once per (block, element).
+``pg_xg(g,:,:)`` stores the matrix of one element as a contiguous plane,
+which is the layout those reads want, and it is the only place the MO
+matrices are kept.
+
 A determinant that fills whole blocks is an eigenvector of every
 :math:`U(g)`, with eigenvalue :math:`\prod_b \det X_g[\mathrm{occ}_b,
 \mathrm{occ}_b]`: its family has one member and its purity is 1. A family
@@ -84,9 +111,12 @@ label, up to four weights and at most 50 determinants::
 
 It evaluates only the diagonal of the family projector, :math:`|G| \times
 |F|` matrix elements instead of :math:`|G| \times |F|^2`, which is what
-makes one call per printed row affordable. The report cross-checks
-``max_a w_a`` against ``pg_det_purity``, which comes from the full matrix,
-and prints a bookkeeping line when the two differ by more than ``1e-8``.
+makes one call per printed row affordable. This routine is the reference
+oracle: it is the only remaining caller of ``pg_elem_me``, the literal
+per-pair kernel, and the label and state-weight passes never call it. The
+report cross-checks ``max_a w_a`` against ``pg_det_purity``, which comes
+from the full matrix, and prints a bookkeeping line when the two differ by
+more than ``1e-8``.
 
 When the MO basis is not symmetry adapted, the module prints a warning
 instead of stopping, and everything above still holds. The blocks are
@@ -145,9 +175,12 @@ for a state whose irrep weights are all negligible.
 
 The table uses the exact weights above, with the projectors for the families
 of size greater than one. For a pure determinant the diagonal is a Kronecker
-delta and the contribution is taken from the label, which is why the cost is
-one pass over the determinants per state plus one projector per multi-member
-family.
+delta and the contribution is taken from the label, so those determinants
+cost one pass over the coefficients per state. For a multi-member family the
+matrix of one group element is built once and contracted with every state
+column before the irrep loop, so the extra cost is one :math:`|F|^2` matrix
+per element and family plus one scalar product per element and state, not
+one projector per state.
 
 When the MO basis is not symmetry adapted the table gains two notice lines
 before the header::

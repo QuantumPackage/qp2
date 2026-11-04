@@ -107,9 +107,18 @@ subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
   ! itself, so T^a_{DD} = delta_{a,pg_det_irrep(D)} exactly: those
   ! determinants are accumulated from the label, and the projectors are
   ! built only for the families of size > 1 (which are exactly the
-  ! determinants with no definite irrep). This is the O(n_irrep nst
-  ! sum_F |F|^2) algorithm of the report, not the O(n_irrep nst ndet)
-  ! diagonal-only approximation of :c:func:`pg_det_state_labels`.
+  ! determinants with no definite irrep). The cost is
+  ! O(|G| sum_F np^2 + |G| n_irrep nst sum_F 1) instead of
+  ! O(n_irrep nst sum_F np^2): the matrix of one group element is built
+  ! once per family, contracted with every column (one scalar per element
+  ! and state), and only then multiplied by the projector weight, so the
+  ! irrep loop is outside the pair loop. This is not the O(n_irrep nst
+  ! ndet) diagonal-only approximation of :c:func:`pg_det_state_labels`.
+  !
+  ! The weights may differ from the previous implementation at the 1e-15
+  ! relative level (summation order); the ``1 - pg_thresh`` rule and the
+  ! printed precision are unaffected. :c:func:`pg_det_state_labels`
+  ! remains the fast approximation.
   !
   ! ``coef`` is assumed-size: the caller passes ``psi_coef`` or
   ! ``CI_eigenvectors``, both stored as (ndet, nst).
@@ -117,11 +126,10 @@ subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
   integer, intent(in) :: ndet, lda, nst
   double precision, intent(in) :: coef(lda,*)
   double precision, intent(out) :: w(pg_n_irrep,nst), norm(nst), dmix(nst)
-  integer :: i, s, a, ifam, i0, np, imin, ip, jp
+  integer :: i, s, a, ifam, i0, np, imin, ip
   integer :: nsel(2,pg_n_mo_block)
   integer, allocatable :: mask(:,:,:), idx(:)
-  double precision, allocatable :: t(:,:,:), c(:,:)
-  double precision :: q
+  double precision, allocatable :: c(:,:)
 
   PROVIDE pg_det_irrep pg_det_block pg_n_family pg_family_first pg_n_irrep pg_n_mo_block
 
@@ -163,10 +171,9 @@ subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
     if (np <= 1) cycle
     call pg_det_counts(i0, nsel)
     allocate(mask(2,pg_n_mo_block,np), idx(np), c(np,nst))
-    allocate(t(np,np,pg_n_irrep))
     call pg_family_fill(nsel, np, mask)
     if (pg_label_ierr /= 0) then
-      deallocate(mask, idx, c, t)
+      deallocate(mask, idx, c)
       return
     endif
     call pg_family_index(np, mask, idx, imin)
@@ -177,24 +184,9 @@ subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
         c(ip,s) = coef(idx(ip),s)
       enddo
     enddo
-    call pg_family_projector(np, mask, t)
-    if (pg_label_ierr /= 0) then
-      deallocate(mask, idx, c, t)
-      return
-    endif
-    do a = 1, pg_n_irrep
-      do s = 1, nst
-        q = 0.d0
-        do jp = 1, np
-          if (c(jp,s) == 0.d0) cycle
-          do ip = 1, np
-            q = q + c(ip,s)*t(ip,jp,a)*c(jp,s)
-          enddo
-        enddo
-        w(a,s) = w(a,s) + q
-      enddo
-    enddo
-    deallocate(mask, idx, c, t)
+    call pg_family_wadd(np, nsel, mask, c, nst, w)
+    deallocate(mask, idx, c)
+    if (pg_label_ierr /= 0) return
   enddo
 
 end subroutine pg_state_weight_matrix

@@ -158,6 +158,32 @@ BEGIN_PROVIDER [ double precision, pg_col_diag, (mo_num,pg_n_col) ]
 END_PROVIDER
 
 !-----------------------------------------------------------------------
+! Projector normalisation.
+!-----------------------------------------------------------------------
+BEGIN_PROVIDER [ double precision, pg_proj_coef, (pg_n_irrep) ]
+  implicit none
+  BEGIN_DOC
+  ! ``pg_proj_coef(a)`` = :math:`d_a/(m_a |G|)`, the normalisation of the
+  ! projector on irrep ``a``: ONE definition, shared by
+  ! :c:data:`pg_mo_weight`, the determinant/state projector and
+  ! :c:data:`pg_proj_w`.
+  !
+  ! It is :math:`d_a/m_a` and not :math:`d_a`: the stored row of a
+  ! complex-conjugate pair is twice the real part of a single row, so the
+  ! factor 2 belongs to ``mult_a``.
+  END_DOC
+  integer :: a
+
+  ! IRPF90 does not allocate a zero-size array: return before the first
+  ! array reference.
+  if (pg_n_irrep < 1) return
+  do a = 1, pg_n_irrep
+    pg_proj_coef(a) = dble(pg_irrep_dim(a)) &
+         /(dble(pg_irrep_mult(a))*dble(pg_n_elem))
+  enddo
+END_PROVIDER
+
+!-----------------------------------------------------------------------
 ! Projector diagonal, purity and labels.
 !-----------------------------------------------------------------------
 BEGIN_PROVIDER [ double precision, pg_mo_weight, (mo_num,pg_n_irrep) ]
@@ -200,10 +226,10 @@ BEGIN_PROVIDER [ double precision, pg_mo_weight, (mo_num,pg_n_irrep) ]
   pg_irrep_weight(1:pg_n_irrep) = 0
 
   do a = 1, pg_n_irrep
-    ! d_a/mult_a, not d_a: the stored row of a complex-conjugate pair is
-    ! twice the real part of a single row.
-    norm = dble(pg_irrep_dim(a)) &
-         / (dble(pg_irrep_mult(a))*dble(pg_n_elem))
+    ! The normalisation is defined once, in :c:data:`pg_proj_coef`:
+    ! d_a/mult_a, not d_a, because the stored row of a complex-conjugate
+    ! pair is twice the real part of a single row.
+    norm = pg_proj_coef(a)
     do i = 1, mo_num
       rowsum = 0.d0
       do c = 1, pg_n_col

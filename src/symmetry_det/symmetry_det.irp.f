@@ -280,6 +280,12 @@ logical function pg_det_gates()
   ! ``D2``
   !     (T^a)^2 = T^a and T^a Hermitian, every family, every a.
   !
+  ! D2b tests the production element kernel (:c:func:`pg_family_vg`, which
+  ! computes the ordered pairs), while the diagonal used for labels and
+  ! purity is independently cross-checked against :c:func:`pg_det_weights`
+  ! -- which still runs on :c:func:`pg_elem_me` -- by the report's
+  ! self-check.
+  !
   ! ``D3``
   !     -1e-8 <= purity <= 1+1e-8 for every determinant.
   !
@@ -324,7 +330,7 @@ logical function pg_det_gates()
     allocate(mask(2,pg_n_mo_block,np), t(np,np,pg_n_irrep))
     allocate(tt(np,np))
     call pg_family_fill(nsel, np, mask)
-    call pg_family_projector(np, mask, t)
+    call pg_family_projector(np, nsel, mask, t)
     do jp = 1, np
       do ip = 1, np
         v = 0.d0

@@ -65,7 +65,11 @@ module:
 with :math:`d_a` the dimension (``pg_irrep_dim``), :math:`m_a` 2 when the
 table row is the sum of a complex-conjugate pair and 1 otherwise
 (``pg_irrep_mult``), and :math:`\chi_a(c)` the characters of the file column
-:math:`c`. The weight of irrep :math:`a` in MO :math:`i` is
+:math:`c`. The normalisation :math:`d_a/(m_a |G|)` is stored once, in
+``pg_proj_coef(a)``: the MO weights, the determinant and state projector,
+and the determinant diagonal kernel all read that array instead of
+recomputing the ratio, so the convention cannot drift between them.
+The weight of irrep :math:`a` in MO :math:`i` is
 ``pg_mo_weight(i,a) = p_a(i) = <i|P^a|i>``. Then
 
 * ``pg_mo_irrep(i)`` is the argmax of :math:`p_a(i)`;
