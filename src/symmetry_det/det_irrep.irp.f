@@ -48,6 +48,11 @@ BEGIN_PROVIDER [ integer, pg_label_ierr ]
   ! ``6``
   !     one symmetry block holds more than 12 occupied MOs
   !
+  ! ``7``
+  !     the per-sector radices do not decompose the family (internal
+  !     inconsistency between :c:func:`pg_fam_setup` and the odometer of
+  !     :c:func:`pg_family_fill`)
+  !
   ! :c:data:`pg_label_msg` is the one-sentence reason. Reporting is left to the
   ! caller: a provider that stops cannot be reported on.
   END_DOC
@@ -567,7 +572,8 @@ end subroutine pg_family_index
 !-----------------------------------------------------------------------
 ! Sector classification of a family, and its occupied-MO table.
 !-----------------------------------------------------------------------
-subroutine pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow, xcol)
+subroutine pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow, xcol, &
+                        mrad, strd, rep, aoff, si)
   implicit none
   BEGIN_DOC
   ! Classifies the sectors of one family once, independently of the group
@@ -597,8 +603,39 @@ subroutine pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow,
   ! :c:func:`pg_family_vg` and :c:func:`pg_fam_diag` into two integer adds
   ! and two loads instead of two multiplications.
   !
+  ! The family enumeration (:c:func:`pg_family_fill`) is an odometer over
+  ! the partial sectors: member ``ip`` carries one digit per sector, and
+  ! the sector submatrix depends only on that digit. This routine also
+  ! returns that mixed-radix description:
+  !
+  ! * ``mrad(p)`` = C(d_b, pn(p)), the number of occupations of the
+  !   partial sector ``p``;
+  ! * ``strd(p)`` = the stride of the sector in the odometer of
+  !   :c:func:`pg_family_fill`, i.e. the product of the radices of the
+  !   (spin, block) slots that precede it in that enumeration;
+  ! * ``si(ip,p)`` = ``mod((ip-1)/strd(p), mrad(p)) + 1``, the digit of
+  !   member ``ip`` in sector ``p``, computed once here and never in a
+  !   loop over pairs;
+  ! * ``rep(p,i)`` = the first member whose digit in sector ``p`` is
+  !   ``i``. Every member with that digit occupies the same MOs of the
+  !   sector (the digit is the rank of the subset, and the unranking is
+  !   injective), so ``xrow``/``xcol`` read at ``rep(p,i)`` are the
+  !   subset of the digit: the sector matrix of :c:func:`pg_family_vg`
+  !   reuses the occupied-MO tables without a second unranking;
+  ! * ``aoff(p)`` = the 1-based offset of entry ``(1,1)`` of sector ``p``
+  !   in the flat sector-matrix buffer of :c:func:`pg_family_vg`, whose
+  !   length is :c:func:`pg_fam_amat_size`.
+  !
+  ! ``psec`` is ordered ``s`` outer / ``b`` inner while the odometer is
+  ! ``b`` outer / ``s`` inner. ``psec`` is NOT reordered (the product over
+  ! sectors in :c:func:`pg_family_vg` follows it, and the multiplication
+  ! order is part of the result); the strides are looked up in the
+  ! odometer order. ``prod_p mrad(p) == np`` is asserted here, the same
+  ! invariant as the ``mtot /= np`` test of :c:func:`pg_family_fill`.
+  !
   ! The tables are transient, one family at a time: ``12*np*2*nblock``
-  ! integers each at the deepest call. ``npart = -1`` means the family was
+  ! integers each at the deepest call, plus ``np*2*nblock`` integers for
+  ! each of ``si`` and ``rep``. ``npart = -1`` means the family was
   ! refused because a block holds more than :c:data:`pg_det_nmax`
   ! occupied MOs; :c:data:`pg_label_ierr` then carries the reason and no
   ! caller reads ``pos`` or the offsets. The flat offsets require
@@ -611,7 +648,12 @@ subroutine pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow,
   integer, intent(out) :: pos(pg_det_nmax,np,2*pg_n_mo_block)
   integer, intent(out) :: xrow(pg_det_nmax,np,2*pg_n_mo_block)
   integer, intent(out) :: xcol(pg_det_nmax,np,2*pg_n_mo_block)
+  integer, intent(out) :: mrad(2*pg_n_mo_block), strd(2*pg_n_mo_block)
+  integer, intent(out) :: aoff(2*pg_n_mo_block)
+  integer, intent(out) :: rep(2*pg_n_mo_block,np), si(np,2*pg_n_mo_block)
   integer :: s, b, nd, n, p, ip, k, k1, m, ne, nen
+  integer :: mm, msum, odo, nfound, i, koff
+  integer, external :: pg_binom
 
   npart = 0
   nfull = 0
@@ -650,6 +692,86 @@ subroutine pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow,
     enddo
   enddo
 
+  !---------------------------------------------------------------------
+  ! Mixed-radix description of the family enumeration.
+  !
+  ! The odometer of pg_family_fill walks (b,s) with b outer and s inner,
+  ! so the stride of a slot is the product of the radices of the slots
+  ! before it in THAT order. psec is s outer / b inner and keeps that
+  ! order (it fixes the product order of pg_family_vg); only the strides
+  ! are looked up in the odometer order.
+  !---------------------------------------------------------------------
+  msum = 1
+  do p = 1, npart
+    mm = pg_binom(pg_block_dim(psec(2,p)), pn(p))
+    mrad(p) = mm
+    ! Divide, never multiply: the product must not overflow, and np/mm
+    ! with mm > 0 tests mtot*mm <= np exactly.
+    if (mm <= 0) then
+      msum = np + 1
+    else if (msum > np/mm) then
+      msum = np + 1
+    else
+      msum = msum*mm
+    endif
+  enddo
+  do p = 1, npart
+    strd(p) = 0
+  enddo
+  odo = 1
+  nfound = 0
+  do b = 1, pg_n_mo_block
+    do s = 1, 2
+      do p = 1, npart
+        if (psec(1,p) == s .and. psec(2,p) == b) then
+          strd(p) = odo
+          odo = odo*mrad(p)
+          nfound = nfound + 1
+          exit
+        endif
+      enddo
+    enddo
+  enddo
+  if (msum /= np .or. nfound /= npart) then
+    ! Called from a parallel region: one writer at a time for the two
+    ! lines and the shared error flag.
+    !$OMP CRITICAL(pg_label_msg)
+    write(6,'(A,I0,A)') 'symmetry_det: the sector radices do not '// &
+         'decompose a family of ', np, ' members (internal inconsistency)'
+    write(pg_label_msg,'(A,I0,A)') 'the sector radices do not decompose '// &
+         'a family of ', np, ' members (internal inconsistency)'
+    pg_label_ierr = 7
+    !$OMP END CRITICAL(pg_label_msg)
+    npart = -1
+    return
+  endif
+
+  ! Digit of every member in every sector, once per family: no division
+  ! in the pair loop of pg_family_vg.
+  do ip = 1, np
+    do p = 1, npart
+      si(ip,p) = mod((ip-1)/strd(p), mrad(p)) + 1
+    enddo
+  enddo
+  ! Representative member of every digit, in one ascending pass.
+  do p = 1, npart
+    do i = 1, mrad(p)
+      rep(p,i) = 0
+    enddo
+  enddo
+  do ip = 1, np
+    do p = 1, npart
+      i = si(ip,p)
+      if (rep(p,i) == 0) rep(p,i) = ip
+    enddo
+  enddo
+  ! Offsets of the sector blocks in the flat sector-matrix buffer.
+  koff = 1
+  do p = 1, npart
+    aoff(p) = koff
+    koff = koff + mrad(p)*mrad(p)
+  enddo
+
   ne = pg_n_elem
   nen = pg_n_elem*mo_num
   do p = 1, npart
@@ -670,6 +792,27 @@ subroutine pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow,
     enddo
   enddo
 end subroutine pg_fam_setup
+
+!-----------------------------------------------------------------------
+! Length of the sector-matrix buffer.
+!-----------------------------------------------------------------------
+integer function pg_fam_amat_size(npart, mrad)
+  implicit none
+  BEGIN_DOC
+  ! Number of entries of the flat sector-matrix buffer of
+  ! :c:func:`pg_family_vg`: ``sum_p mrad(p)**2``. The radices multiply to
+  ! the family size ``np``, so this is at most ``np**2``: the buffer never
+  ! needs more memory than the ``v(np,np)`` matrix it feeds. The caller
+  ! allocates it once per family, never per group element.
+  END_DOC
+  integer, intent(in) :: npart, mrad(2*pg_n_mo_block)
+  integer :: p
+
+  pg_fam_amat_size = 0
+  do p = 1, npart
+    pg_fam_amat_size = pg_fam_amat_size + mrad(p)*mrad(p)
+  enddo
+end function pg_fam_amat_size
 
 !-----------------------------------------------------------------------
 ! Block-determinant factor of the full sectors.
@@ -779,7 +922,8 @@ end subroutine pg_elem_me
 !-----------------------------------------------------------------------
 ! The matrix of one group element on one family.
 !-----------------------------------------------------------------------
-subroutine pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, xcol, xgf, v)
+subroutine pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, xcol, &
+                        mrad, rep, aoff, si, amat, xgf, v)
   implicit none
   BEGIN_DOC
   ! ``v(ip,jp)`` = :math:`<D_{ip}|U(g)|D_{jp}>` on the family, i.e. the
@@ -793,15 +937,32 @@ subroutine pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, xcol, xg
   ! D1/D2. No caller assumes ``v`` symmetric, which is what keeps gate D2b
   ! meaningful.
   !
-  ! The partial-sector product used to be the out-of-line ``pg_fam_pair``;
-  ! it is inlined here because this routine is its only caller and the
-  ! call, its ``sub`` frame and its three 3-D index chains cost more than
-  ! the arithmetic. The ARITHMETIC is unchanged:
-  ! ``val`` starts at 1.d0, the sectors multiply it in ascending ``p``, an
-  ! exact zero exits the sector loop, and ``cfac`` is applied LAST, so
-  ! ``v = cfac*(((1*d1)*d2)*...)`` and not ``((cfac*d1)*d2)*...``. Sectors
-  ! with 1 or 2 occupied MOs keep their inlined 1- and 2-term expressions;
-  ! only the ``n >= 3`` case keeps the ``pg_small_det`` call.
+  ! FACTORISATION. The family enumeration is an odometer, so member ``ip``
+  ! carries one digit ``si(ip,p)`` per partial sector and the sector
+  ! submatrix depends only on the two digits:
+  !
+  !   :math:`V(ip,jp) = cfac * prod_p A_p(si(ip,p), si(jp,p))`,
+  !   :math:`A_p(i,j) = det X_g[subset_i, subset_j]`.
+  !
+  ! ``A_p`` is built once per (family, g) into the caller-owned ``amat``:
+  ! ``sum_p mrad(p)**2`` sector determinants instead of ``np**2`` for
+  ! every element, and the pair loop is then one load and one multiply per
+  ! (pair, sector). The four tables come from :c:func:`pg_fam_setup`, so
+  ! the digit of a member is a load, not a division.
+  !
+  ! BIT-IDENTITY with the per-pair kernel of W1. Every ``A_p(i,j)`` is
+  ! computed by the same expression, from the same ``xgf`` entries, as the
+  ! pair ``(ip,jp)`` carrying those digits: ``rep(p,i)`` is a member that
+  ! occupies the same MOs of the sector, so ``xrow``/``xcol`` read at it
+  ! are the same integers. ``val`` starts at 1.d0, the sectors multiply it
+  ! in ascending ``p`` (``psec`` order, which this routine must not
+  ! reorder), an exact zero exits the sector loop, and ``cfac`` is applied
+  ! LAST, so ``v = cfac*(((1*d1)*d2)*...)`` exactly as before. All sector
+  ! entries are built even when another sector is exactly zero: the pair
+  ! product still exits at the same sector and never reads the unused
+  ! entries, so no value moves. ``xgf`` holds finite representation
+  ! matrices, so building an entry W1 would have skipped reads a finite
+  ! number and computes nothing else.
   !
   ! ``xgf`` is :c:data:`pg_xg` seen as one flat array (a sequence
   ! association on ``pg_xg(1,1,1)``), and ``xrow``/``xcol`` are the flat
@@ -809,13 +970,13 @@ subroutine pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, xcol, xg
   ! :c:func:`pg_fam_setup`. Each access is then ``xgf(g + row + col)``:
   ! the two multiplications of the address computation are gone.
   !
-  ! ``xrow`` does not depend on ``jp`` and ``xcol`` does not depend on
-  ! ``ip``, so the offsets of the 1- and 2-MO sectors are hoisted once per
-  ! (sector, member) into ``r1``/``c1``/``r2``/``c2`` instead of being
-  ! rebuilt per pair; ``r2``/``c2`` are read only when ``pn(p) >= 2``.
-  ! ``pos`` is kept in the interface (and is still the documented
-  ! occupied-MO table) although the offsets carry all the addressing
-  ! information.
+  ! ``amat`` is scratch: its first :c:func:`pg_fam_amat_size` entries are
+  ! overwritten for the current ``g``. It is caller-owned and allocated
+  ! once per family, next to ``v``, and never inside the ``do g`` loop:
+  ! ``np**2`` doubles is 1.28 MB at ``np = 400``, which must not be an
+  ! automatic array inside an OpenMP region. ``pos`` is kept in the
+  ! interface (and is still the documented occupied-MO table) although the
+  ! offsets carry all the addressing information.
   END_DOC
   integer, intent(in) :: g, np, nfull, npart
   ! Local alias, as in :c:func:`pg_small_det`: only the declaration needs it.
@@ -825,15 +986,13 @@ subroutine pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, xcol, xg
   integer, intent(in) :: pos(nmax,np,2*pg_n_mo_block)
   integer, intent(in) :: xrow(nmax,np,2*pg_n_mo_block)
   integer, intent(in) :: xcol(nmax,np,2*pg_n_mo_block)
+  integer, intent(in) :: mrad(2*pg_n_mo_block), aoff(2*pg_n_mo_block)
+  integer, intent(in) :: rep(2*pg_n_mo_block,np)
+  integer, intent(in) :: si(np,2*pg_n_mo_block)
+  double precision, intent(inout) :: amat(*)
   double precision, intent(in) :: xgf(*)
   double precision, intent(out) :: v(np,np)
-  integer :: ip, jp, p, n, ii, jj
-  ! Hoisted offsets, indexed (sector, member). The first dimension is the
-  ! bound already used by ``psec``/``pn`` (a family has at most one sector
-  ! per (spin, block)), so the declaration stays well defined when
-  ! ``npart == 0``, i.e. when every sector is empty or full.
-  integer :: r1(2*pg_n_mo_block,np), c1(2*pg_n_mo_block,np)
-  integer :: r2(2*pg_n_mo_block,np), c2(2*pg_n_mo_block,np)
+  integer :: ip, jp, p, n, m, i, j, ir, jr, i1, i2, j1, j2, ii, jj
   double precision :: cfac, val
   double precision :: sub(nmax,nmax)
   double precision, external :: pg_fam_cfac, pg_small_det
@@ -841,35 +1000,57 @@ subroutine pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, xcol, xg
   v(1:np,1:np) = 0.d0
   cfac = pg_fam_cfac(g, nfull, fsec)
   if (cfac == 0.d0) return
+
+  ! Sector determinants of this element: one entry per pair of digits, by
+  ! the same three expressions the pair loop used per pair.
   do p = 1, npart
-    do ip = 1, np
-      r1(p,ip) = xrow(1,ip,p)
-      c1(p,ip) = xcol(1,ip,p)
-      if (pn(p) >= 2) then
-        r2(p,ip) = xrow(2,ip,p)
-        c2(p,ip) = xcol(2,ip,p)
-      endif
-    enddo
+    n = pn(p)
+    m = mrad(p)
+    select case (n)
+    case (1)
+      do j = 1, m
+        jr = rep(p,j)
+        j1 = xcol(1,jr,p)
+        do i = 1, m
+          ir = rep(p,i)
+          amat(aoff(p) + (i-1)*m + (j-1)) = xgf(g + xrow(1,ir,p) + j1)
+        enddo
+      enddo
+    case (2)
+      do j = 1, m
+        jr = rep(p,j)
+        j1 = xcol(1,jr,p)
+        j2 = xcol(2,jr,p)
+        do i = 1, m
+          ir = rep(p,i)
+          i1 = xrow(1,ir,p)
+          i2 = xrow(2,ir,p)
+          amat(aoff(p) + (i-1)*m + (j-1)) = &
+               xgf(g + i1 + j1)*xgf(g + i2 + j2) &
+             - xgf(g + i1 + j2)*xgf(g + i2 + j1)
+        enddo
+      enddo
+    case default
+      do j = 1, m
+        jr = rep(p,j)
+        do i = 1, m
+          ir = rep(p,i)
+          do jj = 1, n
+            do ii = 1, n
+              sub(ii,jj) = xgf(g + xrow(ii,ir,p) + xcol(jj,jr,p))
+            enddo
+          enddo
+          amat(aoff(p) + (i-1)*m + (j-1)) = pg_small_det(sub, n)
+        enddo
+      enddo
+    end select
   enddo
+
   do jp = 1, np
     do ip = 1, np
       val = 1.d0
       do p = 1, npart
-        n = pn(p)
-        select case (n)
-        case (1)
-          val = val*xgf(g + r1(p,ip) + c1(p,jp))
-        case (2)
-          val = val*(xgf(g + r1(p,ip) + c1(p,jp))*xgf(g + r2(p,ip) + c2(p,jp)) &
-                   - xgf(g + r1(p,ip) + c2(p,jp))*xgf(g + r2(p,ip) + c1(p,jp)))
-        case default
-          do jj = 1, n
-            do ii = 1, n
-              sub(ii,jj) = xgf(g + xrow(ii,ip,p) + xcol(jj,jp,p))
-            enddo
-          enddo
-          val = val*pg_small_det(sub, n)
-        end select
+        val = val*amat(aoff(p) + (si(ip,p)-1)*mrad(p) + si(jp,p)-1)
         if (val == 0.d0) exit
       enddo
       v(ip,jp) = cfac*val
@@ -887,13 +1068,14 @@ subroutine pg_family_diag_acc(np, nfull, fsec, npart, psec, pn, xrow, xcol, xgf,
   ! element ``g`` and every member ``ip`` of the family.
   !
   ! This is the diagonal-only kernel of :c:func:`pg_family_labels`. It
-  ! computes exactly what that routine obtained by calling
-  ! :c:func:`pg_family_vg` per pair: the sector loop is
-  ! copied from :c:func:`pg_family_vg` with ``jp = ip``, in the same order,
-  ! with the same partial product starting at 1.d0, the same exact-zero
-  ! short circuit and the same ``acc`` accumulation. The two sector
-  ! blocks MUST stay identical, character for character; that identity is
-  ! what makes the labels bit-identical. What changes is only the cost:
+  ! computes exactly the per-pair product that :c:func:`pg_family_vg`
+  ! obtained before the sector matrices were factored out, with
+  ! ``jp = ip``: the same 1-term / 2-term / ``pg_small_det`` expressions
+  ! (which now also build the entries of every ``A_p``), the same partial
+  ! product starting at 1.d0, the same exact-zero short circuit and the
+  ! same ``acc`` accumulation. The EXPRESSIONS and the multiplication
+  ! order MUST stay identical; that identity is what makes the labels
+  ! bit-identical to the pre-W2 reference. What changes is only the cost:
   ! one call per family instead of ``|G|*np`` calls, and the offsets stay
   ! in registers.
   !
@@ -984,13 +1166,22 @@ subroutine pg_family_labels(np, nsel, mask, lab, pur)
   integer :: pos(pg_det_nmax,np,2*pg_n_mo_block)
   integer :: xrow(pg_det_nmax,np,2*pg_n_mo_block)
   integer :: xcol(pg_det_nmax,np,2*pg_n_mo_block)
+  ! The mixed-radix tables of pg_fam_setup are part of its interface; the
+  ! diagonal kernel does not read them (it keeps the per-member sector
+  ! loop, which is bit-identical by construction), but the setup builds
+  ! them once per family and splitting the routine to avoid them would
+  ! cost more code than the O(np*npart) it would save.
+  integer :: mrad(2*pg_n_mo_block), strd(2*pg_n_mo_block)
+  integer :: aoff(2*pg_n_mo_block)
+  integer :: rep(2*pg_n_mo_block,np), si(np,2*pg_n_mo_block)
   double precision, allocatable :: acc(:,:)
   double precision :: pmax
 
   lab(1:np) = 0
   pur(1:np) = 0.d0
   if (pg_n_irrep < 1 .or. np < 1) return
-  call pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow, xcol)
+  call pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow, xcol, &
+                    mrad, strd, rep, aoff, si)
   if (pg_label_ierr /= 0) return
   allocate(acc(np,pg_n_irrep))
   acc(1:np,1:pg_n_irrep) = 0.d0
@@ -1035,6 +1226,11 @@ subroutine pg_family_wadd(np, nsel, mask, c, ldc, nst, w)
   ! the caller keeps one buffer per thread and reuses it for families of
   ! different size, which an exact ``c(np,nst)`` shape would forbid (the
   ! leading extent is the one that enters the address).
+  !
+  ! ``si`` and the sector-matrix buffer are built ONCE per family, before
+  ! the ``do g`` loop; the buffer is ``sum_p mrad(p)**2`` doubles
+  ! (:c:func:`pg_fam_amat_size`), i.e. never more than ``np**2``, and is
+  ! overwritten for every element.
   END_DOC
   integer, intent(in) :: np, ldc, nst, nsel(2,pg_n_mo_block), mask(2,pg_n_mo_block,np)
   double precision, intent(in) :: c(ldc,nst)
@@ -1045,15 +1241,24 @@ subroutine pg_family_wadd(np, nsel, mask, c, ldc, nst, w)
   integer :: pos(pg_det_nmax,np,2*pg_n_mo_block)
   integer :: xrow(pg_det_nmax,np,2*pg_n_mo_block)
   integer :: xcol(pg_det_nmax,np,2*pg_n_mo_block)
-  double precision, allocatable :: vv(:,:)
+  integer :: mrad(2*pg_n_mo_block), strd(2*pg_n_mo_block)
+  integer :: aoff(2*pg_n_mo_block)
+  integer :: rep(2*pg_n_mo_block,np), si(np,2*pg_n_mo_block)
+  double precision, allocatable :: vv(:,:), amat(:)
   double precision :: q(nst)
+  integer, external :: pg_fam_amat_size
 
   if (pg_n_irrep < 1 .or. np < 1 .or. nst < 1) return
-  call pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow, xcol)
+  call pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow, xcol, &
+                    mrad, strd, rep, aoff, si)
   if (pg_label_ierr /= 0) return
-  allocate(vv(np,np))
+  ! One allocation statement for both buffers, so the family pays one
+  ! malloc: vv is the element matrix, amat the sector matrices of the
+  ! current element. max(1,...) keeps amat nonempty when npart = 0.
+  allocate(vv(np,np), amat(max(1, pg_fam_amat_size(npart, mrad))))
   do g = 1, pg_n_elem
-    call pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, xcol, pg_xg(1,1,1), vv)
+    call pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, xcol, &
+                      mrad, rep, aoff, si, amat, pg_xg(1,1,1), vv)
     q(1:nst) = 0.d0
     do jp = 1, np
       do ip = 1, np
@@ -1069,7 +1274,7 @@ subroutine pg_family_wadd(np, nsel, mask, c, ldc, nst, w)
       enddo
     enddo
   enddo
-  deallocate(vv)
+  deallocate(vv, amat)
 end subroutine pg_family_wadd
 
 !-----------------------------------------------------------------------
@@ -1092,6 +1297,10 @@ subroutine pg_family_projector(np, nsel, mask, t)
   ! pairs are summed, so gate D2b (symmetry of :math:`T^a`) stays
   ! meaningful. Skipping an exactly zero character is exact: it would add
   ! a product whose first factor is 0.
+  !
+  ! The mixed-radix tables and the sector-matrix buffer of
+  ! :c:func:`pg_family_vg` are built once here, before the ``do g`` loop,
+  ! exactly as in :c:func:`pg_family_wadd`.
   END_DOC
   integer, intent(in) :: np, nsel(2,pg_n_mo_block), mask(2,pg_n_mo_block,np)
   double precision, intent(out) :: t(np,np,pg_n_irrep)
@@ -1101,15 +1310,21 @@ subroutine pg_family_projector(np, nsel, mask, t)
   integer :: pos(pg_det_nmax,np,2*pg_n_mo_block)
   integer :: xrow(pg_det_nmax,np,2*pg_n_mo_block)
   integer :: xcol(pg_det_nmax,np,2*pg_n_mo_block)
-  double precision, allocatable :: vv(:,:)
+  integer :: mrad(2*pg_n_mo_block), strd(2*pg_n_mo_block)
+  integer :: aoff(2*pg_n_mo_block)
+  integer :: rep(2*pg_n_mo_block,np), si(np,2*pg_n_mo_block)
+  double precision, allocatable :: vv(:,:), amat(:)
+  integer, external :: pg_fam_amat_size
 
   if (pg_n_irrep < 1 .or. np < 1) return
   t(1:np,1:np,1:pg_n_irrep) = 0.d0
-  call pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow, xcol)
+  call pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow, xcol, &
+                    mrad, strd, rep, aoff, si)
   if (pg_label_ierr /= 0) return
-  allocate(vv(np,np))
+  allocate(vv(np,np), amat(max(1, pg_fam_amat_size(npart, mrad))))
   do g = 1, pg_n_elem
-    call pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, xcol, pg_xg(1,1,1), vv)
+    call pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, xcol, &
+                      mrad, rep, aoff, si, amat, pg_xg(1,1,1), vv)
     do a = 1, pg_n_irrep
       if (pg_proj_w(a,g) == 0.d0) cycle
       do jp = 1, np
@@ -1119,7 +1334,7 @@ subroutine pg_family_projector(np, nsel, mask, t)
       enddo
     enddo
   enddo
-  deallocate(vv)
+  deallocate(vv, amat)
 end subroutine pg_family_projector
 
 !-----------------------------------------------------------------------
