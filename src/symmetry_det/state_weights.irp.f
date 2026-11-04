@@ -95,6 +95,7 @@ BEGIN_PROVIDER [ double precision, pg_state_irrep_weight, (pg_n_irrep,N_states) 
 END_PROVIDER
 
 subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
+  use omp_lib
   implicit none
   BEGIN_DOC
   ! Exact irrep weights of ``nst`` CI vectors stored in ``coef(lda,*)``.
@@ -122,16 +123,41 @@ subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
   !
   ! ``coef`` is assumed-size: the caller passes ``psi_coef`` or
   ! ``CI_eigenvectors``, both stored as (ndet, nst).
+  !
+  ! The family loop is the part that parallelizes: each thread owns one
+  ! contiguous block of :c:data:`pg_n_family` (``SCHEDULE(STATIC)``, so the
+  ! partition is fixed by the family count and the thread count) and sums
+  ! its families into its own ``wc(:,:,ic)`` slice, in the serial family
+  ! order. The slices are added afterwards in chunk order. One chunk (one
+  ! thread, or a call already inside a parallel region) is therefore
+  ! bit-identical to the serial loop: chunk 1 starts from the
+  ! pure-determinant weight and every family adds into it in ascending
+  ! order. With more chunks the same sum is reassociated by chunk,
+  ! ``((p + q_1) + q_2)`` instead of one running sum: last-bit differences
+  ! only, reproducible for a fixed thread count, and eleven orders of
+  ! magnitude below the ``1 - pg_thresh`` label rule. ``reduction(+:)`` is
+  ! not used: its association is not specified, so two runs would not
+  ! agree.
   END_DOC
   integer, intent(in) :: ndet, lda, nst
   double precision, intent(in) :: coef(lda,*)
   double precision, intent(out) :: w(pg_n_irrep,nst), norm(nst), dmix(nst)
-  integer :: i, s, a, ifam, i0, np, imin, ip
+  integer :: i, s, a, ifam, i0, np, imin, ip, ic, nchunk, np_max
   integer :: nsel(2,pg_n_mo_block)
-  integer, allocatable :: mask(:,:,:), idx(:)
-  double precision, allocatable :: c(:,:)
+  integer, allocatable :: mask(:,:,:), idx(:), err(:)
+  double precision, allocatable :: c(:,:), wc(:,:,:)
 
   PROVIDE pg_det_irrep pg_det_block pg_n_family pg_family_first pg_n_irrep pg_n_mo_block
+  ! Everything the family loop reads has to be built here, not by the first
+  ! thread that reaches it: IRPF90 puts the provider check at the entry of
+  ! the routine that reads the variable, and the callees below run inside
+  ! the parallel region. A provide executed there would run under the
+  ! IRPF90 lock with other threads in the team. pg_n_col also builds
+  ! pg_n_irrep, pg_col_diag also builds pg_n_mo_block, and pg_block_start
+  ! also builds pg_block_dim/pg_block_mo.
+  PROVIDE n_int psi_det psi_det_sorted_bit mo_num pg_label_ierr
+  PROVIDE pg_block_start pg_col_diag pg_n_col pg_n_elem
+  PROVIDE pg_detfull pg_proj_w pg_xg
 
   w(1:pg_n_irrep,1:nst) = 0.d0
   norm(1:nst) = 0.d0
@@ -165,16 +191,67 @@ subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
   !---------------------------------------------------------------------
   ! Families of size > 1: the full projector.
   !---------------------------------------------------------------------
+  ! Nothing to accumulate without an irrep or a family: pg_family_wadd
+  ! returns immediately in that case, and wc would have a zero extent, so
+  ! wc(1,1,ic) would be an out-of-range subscript even though the callee
+  ! never reads it.
+  if (pg_n_irrep < 1 .or. pg_n_family < 1) return
+
+  ! Largest family, for the per-thread buffers: one allocation per thread
+  ! and per call, reused by every family that thread handles. Sizing the
+  ! buffers per family would put a malloc in the hot path, and sizing them
+  ! exactly would defeat the reuse.
+  np_max = 1
   do ifam = 1, pg_n_family
+    np = pg_det_block(pg_family_first(ifam))
+    if (np > np_max) np_max = np
+  enddo
+
+  ! One chunk per thread, never more than one per family. omp_get_max_threads
+  ! and not nthreads_davidson: davidson depends on this module, the back
+  ! dependency would be circular.
+  nchunk = omp_get_max_threads()
+  if (omp_in_parallel()) nchunk = 1
+  nchunk = max(1, min(nchunk, pg_n_family))
+
+  allocate(wc(pg_n_irrep,nst,nchunk), err(nchunk))
+  wc(1:pg_n_irrep,1:nst,1:nchunk) = 0.d0
+  ! Chunk 1 starts from the pure-determinant weight, so a single chunk
+  ! reproduces the serial accumulation order exactly.
+  wc(1:pg_n_irrep,1:nst,1) = w(1:pg_n_irrep,1:nst)
+  err(1:nchunk) = 0
+
+  !$OMP PARALLEL DEFAULT(SHARED) NUM_THREADS(nchunk)                      &
+  !$OMP PRIVATE(ifam,i0,np,imin,ip,s,ic,nsel,mask,idx,c)
+  ! Per-thread buffers. PRIVATE makes the descriptors private, but a
+  ! private allocatable starts unallocated, so the allocation belongs here
+  ! and not before the region.
+  allocate(mask(2,pg_n_mo_block,np_max), idx(np_max), c(np_max,nst))
+  ! The chunk is the thread, not a function of ifam:
+  ! 1 + (ifam-1)*nchunk/pg_n_family maps two threads to the same slice at
+  ! the block boundaries (N = 6, T = 4: families 3-4 and 5 both land in
+  ! slice 3) and races on it. Under SCHEDULE(STATIC) a thread owns exactly
+  ! one contiguous family range; with OMP_DYNAMIC the unused slices stay
+  ! zero and adding them is exact.
+  ic = omp_get_thread_num() + 1
+  !$OMP DO SCHEDULE(STATIC)
+  do ifam = 1, pg_n_family
+    ! A failure on another thread makes every weight meaningless; skipping
+    ! the work is safe because the caller discards w. The flag is written
+    ! by the error paths below, so its read here is only a shortcut.
+    if (pg_label_ierr /= 0) cycle
     i0 = pg_family_first(ifam)
     np = pg_det_block(i0)
     if (np <= 1) cycle
     call pg_det_counts(i0, nsel)
-    allocate(mask(2,pg_n_mo_block,np), idx(np), c(np,nst))
+    ! mask has a larger third extent than the callee's dummy and the two
+    ! leading extents agree, so sequence association maps (s,b,ip) to the
+    ! same element. c does not have that property (its leading extent is
+    ! the one that differs), which is why pg_family_wadd takes ldc.
     call pg_family_fill(nsel, np, mask)
     if (pg_label_ierr /= 0) then
-      deallocate(mask, idx, c)
-      return
+      err(ic) = pg_label_ierr
+      cycle
     endif
     call pg_family_index(np, mask, idx, imin)
     c(1:np,1:nst) = 0.d0
@@ -184,10 +261,34 @@ subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
         c(ip,s) = coef(idx(ip),s)
       enddo
     enddo
-    call pg_family_wadd(np, nsel, mask, c, nst, w)
-    deallocate(mask, idx, c)
-    if (pg_label_ierr /= 0) return
+    call pg_family_wadd(np, nsel, mask, c, np_max, nst, wc(1,1,ic))
+    if (pg_label_ierr /= 0) err(ic) = pg_label_ierr
   enddo
+  !$OMP END DO
+  deallocate(mask, idx, c)
+  !$OMP END PARALLEL
+
+  ! The implicit flush at END PARALLEL makes a flag written by any thread
+  ! visible here. err() names the lowest failing chunk, so the reported
+  ! code does not depend on which thread lost the race; the weights are
+  ! meaningless either way and the caller returns on any nonzero code.
+  do ic = 1, nchunk
+    if (err(ic) /= 0) then
+      pg_label_ierr = err(ic)
+      exit
+    endif
+  enddo
+  if (pg_label_ierr /= 0) then
+    deallocate(wc, err)
+    return
+  endif
+
+  ! Chunk order, so the result is reproducible for a fixed thread count.
+  w(1:pg_n_irrep,1:nst) = wc(1:pg_n_irrep,1:nst,1)
+  do ic = 2, nchunk
+    w(1:pg_n_irrep,1:nst) = w(1:pg_n_irrep,1:nst) + wc(1:pg_n_irrep,1:nst,ic)
+  enddo
+  deallocate(wc, err)
 
 end subroutine pg_state_weight_matrix
 

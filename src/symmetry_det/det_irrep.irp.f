@@ -200,7 +200,7 @@ BEGIN_PROVIDER [ double precision, pg_xg, (pg_n_elem,mo_num,mo_num) ]
   ! 6-31G. The report prints the number. A production version can keep
   ! only the rows and columns of the partially occupied blocks; nothing
   ! below cares, because the only readers are :c:func:`pg_elem_me` (the
-  ! reference oracle), :c:data:`pg_detfull` and :c:func:`pg_fam_pair`.
+  ! reference oracle), :c:data:`pg_detfull` and :c:func:`pg_family_vg`.
   END_DOC
   integer :: g
   double precision :: x(mo_num,mo_num)
@@ -485,11 +485,15 @@ subroutine pg_family_fill(nsel, np, mask)
     enddo
   enddo
   if (mtot /= np) then
+    ! Called from a parallel region: one writer at a time for the two
+    ! messages and the shared error flag.
+    !$OMP CRITICAL(pg_label_msg)
     write(6,'(A,I0,A,I0,A)') 'symmetry_det: family enumeration produced ', &
          mtot, ' members where the size was ', np, ' (internal inconsistency)'
     write(pg_label_msg,'(A,I0,A,I0,A)') 'family enumeration produced ', mtot, &
          ' members where the size was ', np, ' (internal inconsistency)'
     pg_label_ierr = 5
+    !$OMP END CRITICAL(pg_label_msg)
     mask(1:2,1:pg_n_mo_block,1:np) = 0
     return
   endif
@@ -590,7 +594,7 @@ subroutine pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow,
   ! ``(pg_n_elem,mo_num,mo_num)``: element ``(g,i,j)`` is at 1-based
   ! offset ``g + (i-1)*pg_n_elem + (j-1)*pg_n_elem*mo_num``. Both products
   ! depend only on the MO, so hoisting them here turns every access of
-  ! :c:func:`pg_fam_pair` and :c:func:`pg_fam_diag` into two integer adds
+  ! :c:func:`pg_family_vg` and :c:func:`pg_fam_diag` into two integer adds
   ! and two loads instead of two multiplications.
   !
   ! The tables are transient, one family at a time: ``12*np*2*nblock``
@@ -617,6 +621,9 @@ subroutine pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow,
       n = nsel(s,b)
       if (n == 0) cycle
       if (n > pg_det_nmax) then
+        ! Called from a parallel region: one writer at a time for the four
+        ! lines and the shared error flag.
+        !$OMP CRITICAL(pg_label_msg)
         write(6,'(A,I0,A)') 'symmetry_det: one symmetry block contributes ', &
              n, ' occupied MOs; family enumeration supports at most 12.'
         write(6,'(A)') '  A block is one irrep (at most 5 MOs) unless the MO '// &
@@ -626,6 +633,7 @@ subroutine pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow,
         write(pg_label_msg,'(A,I0,A)') 'one symmetry block holds ', n, &
              ' occupied MOs (at most 12 supported)'
         pg_label_ierr = 6
+        !$OMP END CRITICAL(pg_label_msg)
         npart = -1
         return
       endif
@@ -686,75 +694,6 @@ double precision function pg_fam_cfac(g, nfull, fsec)
     endif
   enddo
 end function pg_fam_cfac
-
-!-----------------------------------------------------------------------
-! :math:`<D'|U(g)|D>` restricted to the partial sectors.
-!-----------------------------------------------------------------------
-double precision function pg_fam_pair(g, np, npart, psec, pn, pos, xrow, xcol, xgf, ip, jp)
-  implicit none
-  BEGIN_DOC
-  ! :math:`<D_{ip}|U(g)|D_{jp}>` restricted to the partly occupied sectors,
-  ! i.e. the product of their block determinants.
-  !
-  ! It is ORDERED: ``ip`` indexes the bra, ``jp`` the ket, and nothing is
-  ! assumed about the symmetry of the result. 1.d0 when nothing is
-  ! partial. The submatrix of a sector is filled in the ascending order of
-  ! ``pos``, identical to the ordering of :c:func:`pg_elem_me`, so the two
-  ! kernels see the same determinant.
-  !
-  ! Sectors with 1 or 2 occupied MOs are inlined products: they get the
-  ! same expression as the explicit ``pg_small_det`` branches, without the
-  ! call and the pivoted copy.
-  !
-  ! ``xgf`` is :c:data:`pg_xg` seen as one flat array (a sequence
-  ! association on ``pg_xg(1,1,1)``), and ``xrow``/``xcol`` are the flat
-  ! offsets of the two MOs, precomputed per family by
-  ! :c:func:`pg_fam_setup`. Each access is then ``xgf(g + row + col)``:
-  ! the two multiplications of the address computation are gone. ``pos``
-  ! is kept in the interface (and is still the documented occupied-MO
-  ! table) although the offsets carry all the addressing information.
-  END_DOC
-  integer, intent(in) :: g, np, npart
-  ! Local alias, as in :c:func:`pg_small_det`: only the declarations need
-  ! it, and IRPF90 emits the module ``use`` only for a body that reads a
-  ! module entity -- this one no longer does.
-  integer, parameter :: nmax = 12
-  integer, intent(in) :: psec(2,2*pg_n_mo_block), pn(2*pg_n_mo_block)
-  integer, intent(in) :: pos(nmax,np,*)
-  integer, intent(in) :: xrow(nmax,np,*), xcol(nmax,np,*)
-  double precision, intent(in) :: xgf(*)
-  integer, intent(in) :: ip, jp
-  integer :: p, n, i1, i2, j1, j2, ii, jj
-  double precision :: sub(nmax,nmax), v
-  double precision, external :: pg_small_det
-
-  v = 1.d0
-  do p = 1, npart
-    n = pn(p)
-    select case (n)
-    case (1)
-      v = v*xgf(g + xrow(1,ip,p) + xcol(1,jp,p))
-    case (2)
-      i1 = xrow(1,ip,p)
-      i2 = xrow(2,ip,p)
-      j1 = xcol(1,jp,p)
-      j2 = xcol(2,jp,p)
-      v = v*(xgf(g+i1+j1)*xgf(g+i2+j2) - xgf(g+i1+j2)*xgf(g+i2+j1))
-    case default
-      do jj = 1, n
-        do ii = 1, n
-          sub(ii,jj) = xgf(g + xrow(ii,ip,p) + xcol(jj,jp,p))
-        enddo
-      enddo
-      v = v*pg_small_det(sub, n)
-    end select
-    if (v == 0.d0) then
-      pg_fam_pair = 0.d0
-      return
-    endif
-  enddo
-  pg_fam_pair = v
-end function pg_fam_pair
 
 !-----------------------------------------------------------------------
 ! :math:`<D'|U(g)|D>`.
@@ -854,9 +793,29 @@ subroutine pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, xcol, xg
   ! D1/D2. No caller assumes ``v`` symmetric, which is what keeps gate D2b
   ! meaningful.
   !
-  ! ``xgf``, ``xrow`` and ``xcol`` are the flat addressing of
-  ! :c:data:`pg_xg` built by :c:func:`pg_fam_setup`; they are passed
-  ! through untouched so that the per-pair kernel does no address work.
+  ! The partial-sector product used to be the out-of-line ``pg_fam_pair``;
+  ! it is inlined here because this routine is its only caller and the
+  ! call, its ``sub`` frame and its three 3-D index chains cost more than
+  ! the arithmetic. The ARITHMETIC is unchanged:
+  ! ``val`` starts at 1.d0, the sectors multiply it in ascending ``p``, an
+  ! exact zero exits the sector loop, and ``cfac`` is applied LAST, so
+  ! ``v = cfac*(((1*d1)*d2)*...)`` and not ``((cfac*d1)*d2)*...``. Sectors
+  ! with 1 or 2 occupied MOs keep their inlined 1- and 2-term expressions;
+  ! only the ``n >= 3`` case keeps the ``pg_small_det`` call.
+  !
+  ! ``xgf`` is :c:data:`pg_xg` seen as one flat array (a sequence
+  ! association on ``pg_xg(1,1,1)``), and ``xrow``/``xcol`` are the flat
+  ! offsets of the two MOs, precomputed per family by
+  ! :c:func:`pg_fam_setup`. Each access is then ``xgf(g + row + col)``:
+  ! the two multiplications of the address computation are gone.
+  !
+  ! ``xrow`` does not depend on ``jp`` and ``xcol`` does not depend on
+  ! ``ip``, so the offsets of the 1- and 2-MO sectors are hoisted once per
+  ! (sector, member) into ``r1``/``c1``/``r2``/``c2`` instead of being
+  ! rebuilt per pair; ``r2``/``c2`` are read only when ``pn(p) >= 2``.
+  ! ``pos`` is kept in the interface (and is still the documented
+  ! occupied-MO table) although the offsets carry all the addressing
+  ! information.
   END_DOC
   integer, intent(in) :: g, np, nfull, npart
   ! Local alias, as in :c:func:`pg_small_det`: only the declaration needs it.
@@ -868,16 +827,52 @@ subroutine pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, xcol, xg
   integer, intent(in) :: xcol(nmax,np,2*pg_n_mo_block)
   double precision, intent(in) :: xgf(*)
   double precision, intent(out) :: v(np,np)
-  integer :: ip, jp
-  double precision :: cfac
-  double precision, external :: pg_fam_cfac, pg_fam_pair
+  integer :: ip, jp, p, n, ii, jj
+  ! Hoisted offsets, indexed (sector, member). The first dimension is the
+  ! bound already used by ``psec``/``pn`` (a family has at most one sector
+  ! per (spin, block)), so the declaration stays well defined when
+  ! ``npart == 0``, i.e. when every sector is empty or full.
+  integer :: r1(2*pg_n_mo_block,np), c1(2*pg_n_mo_block,np)
+  integer :: r2(2*pg_n_mo_block,np), c2(2*pg_n_mo_block,np)
+  double precision :: cfac, val
+  double precision :: sub(nmax,nmax)
+  double precision, external :: pg_fam_cfac, pg_small_det
 
   v(1:np,1:np) = 0.d0
   cfac = pg_fam_cfac(g, nfull, fsec)
   if (cfac == 0.d0) return
+  do p = 1, npart
+    do ip = 1, np
+      r1(p,ip) = xrow(1,ip,p)
+      c1(p,ip) = xcol(1,ip,p)
+      if (pn(p) >= 2) then
+        r2(p,ip) = xrow(2,ip,p)
+        c2(p,ip) = xcol(2,ip,p)
+      endif
+    enddo
+  enddo
   do jp = 1, np
     do ip = 1, np
-      v(ip,jp) = cfac*pg_fam_pair(g, np, npart, psec, pn, pos, xrow, xcol, xgf, ip, jp)
+      val = 1.d0
+      do p = 1, npart
+        n = pn(p)
+        select case (n)
+        case (1)
+          val = val*xgf(g + r1(p,ip) + c1(p,jp))
+        case (2)
+          val = val*(xgf(g + r1(p,ip) + c1(p,jp))*xgf(g + r2(p,ip) + c2(p,jp)) &
+                   - xgf(g + r1(p,ip) + c2(p,jp))*xgf(g + r2(p,ip) + c1(p,jp)))
+        case default
+          do jj = 1, n
+            do ii = 1, n
+              sub(ii,jj) = xgf(g + xrow(ii,ip,p) + xcol(jj,jp,p))
+            enddo
+          enddo
+          val = val*pg_small_det(sub, n)
+        end select
+        if (val == 0.d0) exit
+      enddo
+      v(ip,jp) = cfac*val
     enddo
   enddo
 end subroutine pg_family_vg
@@ -893,8 +888,8 @@ subroutine pg_family_diag_acc(np, nfull, fsec, npart, psec, pn, xrow, xcol, xgf,
   !
   ! This is the diagonal-only kernel of :c:func:`pg_family_labels`. It
   ! computes exactly what that routine obtained by calling
-  ! :c:func:`pg_fam_pair` once per (element, member): the sector loop is
-  ! copied from :c:func:`pg_fam_pair` with ``jp = ip``, in the same order,
+  ! :c:func:`pg_family_vg` per pair: the sector loop is
+  ! copied from :c:func:`pg_family_vg` with ``jp = ip``, in the same order,
   ! with the same partial product starting at 1.d0, the same exact-zero
   ! short circuit and the same ``acc`` accumulation. The two sector
   ! blocks MUST stay identical, character for character; that identity is
@@ -977,7 +972,7 @@ subroutine pg_family_labels(np, nsel, mask, lab, pur)
   ! element loop but outside the pair loop, and the (irrep, element)
   ! weight is read from :c:data:`pg_proj_w`. It is done by
   ! :c:func:`pg_family_diag_acc`, the diagonal kernel: one call per
-  ! family instead of one :c:func:`pg_fam_pair` call per (element,
+  ! family instead of one :c:func:`pg_family_vg` call per (element,
   ! member), with the same sector order and the same accumulation order.
   END_DOC
   integer, intent(in) :: np, nsel(2,pg_n_mo_block), mask(2,pg_n_mo_block,np)
@@ -1022,7 +1017,7 @@ end subroutine pg_family_labels
 !-----------------------------------------------------------------------
 ! State irrep weights of one family.
 !-----------------------------------------------------------------------
-subroutine pg_family_wadd(np, nsel, mask, c, nst, w)
+subroutine pg_family_wadd(np, nsel, mask, c, ldc, nst, w)
   implicit none
   BEGIN_DOC
   ! ``w(a,s) += c^T T^a c`` for the ``nst`` CI columns ``c`` on this
@@ -1036,9 +1031,13 @@ subroutine pg_family_wadd(np, nsel, mask, c, nst, w)
   !
   ! ``c`` is indexed by family member, not by determinant: the caller
   ! gathers it, and a missing member is a zero column contribution.
+  ! ``c(ldc,nst)`` holds the family in its first ``np`` rows, ``ldc >= np``:
+  ! the caller keeps one buffer per thread and reuses it for families of
+  ! different size, which an exact ``c(np,nst)`` shape would forbid (the
+  ! leading extent is the one that enters the address).
   END_DOC
-  integer, intent(in) :: np, nst, nsel(2,pg_n_mo_block), mask(2,pg_n_mo_block,np)
-  double precision, intent(in) :: c(np,nst)
+  integer, intent(in) :: np, ldc, nst, nsel(2,pg_n_mo_block), mask(2,pg_n_mo_block,np)
+  double precision, intent(in) :: c(ldc,nst)
   double precision, intent(inout) :: w(pg_n_irrep,nst)
   integer :: g, a, s, ip, jp, npart, nfull
   integer :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
