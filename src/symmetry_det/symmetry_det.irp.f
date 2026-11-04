@@ -8,7 +8,7 @@ program symmetry_det
   ! MO projector, and projects every CI state on the irreps.
   !
   ! Prints the determinant table, the per-irrep counts, the per-state
-  ! weight vectors, and runs the gates D1-D6. Exits 1 if a gate fails, 0
+  ! weight vectors, and runs the gates D1-D7. Exits 1 if a gate fails, 0
   ! otherwise, so that it can be chained in a test script.
   END_DOC
 
@@ -267,7 +267,7 @@ subroutine pg_det_report
 end subroutine pg_det_report
 
 !-----------------------------------------------------------------------
-! Gates D1-D6, plus the state gates.
+! Gates D1-D7, plus the state gates.
 !-----------------------------------------------------------------------
 logical function pg_det_gates()
   use bitmasks
@@ -308,6 +308,20 @@ logical function pg_det_gates()
   !
   ! Families of size 1 are skipped by D1/D2: there T^a = delta is exact
   ! by construction, and the label already comes from that diagonal.
+  !
+  ! ``D7``
+  !     the tensor contraction of :c:func:`pg_family_wadd` against the
+  !     reference double sum ``sum_{ip,jp} c(ip,s) V_g(ip,jp) c(jp,s)``
+  !     built from :c:func:`pg_family_vg`, on a deterministic sample of
+  !     families. This is the gate that makes the W3 rewrite honest: the
+  !     contraction is a reassociation of that sum, so it may differ in
+  !     the last bits but nowhere else. At most ``d7_nfam`` families with
+  !     ``np > 1`` are sampled (the first ones, so the sample is a fixed
+  !     function of the wave function), and each family is checked on
+  !     ``max(2, min(|G|, d7_pairs/np**2))`` evenly strided elements --
+  !     g = 1 and at least one non-identity element are always included.
+  !     The relative measure is ``max|q_contract - q_ref| / max|q_ref|``
+  !     over the sample, gated at 1e-13.
   END_DOC
   integer :: ifam, i0, np, ip, jp, a, i, s, idom, jmax
   integer :: nsel(2,pg_n_mo_block)
@@ -317,6 +331,32 @@ logical function pg_det_gates()
   double precision :: cmax, c
   logical :: closed, ok
   character*(32) :: nm
+  ! D7: the production contraction against the reference kernel.
+  ! At most this many families are sampled, and each family gets enough
+  ! group elements that its reference costs about ``d7_pairs`` pairs
+  ! (at least 2, so a non-identity element is always included, at most
+  ! the whole group). Measured at 1 thread with callgrind:
+  !   cisd_base      44.8M Ir =  6.7% of the 668.0M driver (200 families,
+  !                  52,480 reference pairs; 82.5% of the cost is q_new)
+  !   n2_rot_small   1.55G Ir =  4.3% of the 36.38G driver (101 families,
+  !                  3,962,500 reference pairs; 1.27G of it is q_new,
+  !                  because the contraction always runs all |G| elements
+  !                  while only ng = 2 of them are compared)
+  ! The plan's "first 200 families, all elements" would cost 245.7M
+  ! reference pairs on n2_rot_small, about 16.5G Ir and +1.6 s there.
+  ! D7 is reached only from :c:func:`pg_det_gates`, so ``cisd`` never
+  ! pays for it.
+  integer, parameter :: d7_nfam = 200, d7_pairs = 256
+  integer :: nsam, ng, g, k, imin, npart, nfull
+  integer :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
+  integer :: pn(2*pg_n_mo_block)
+  integer :: mrad(2*pg_n_mo_block), strd(2*pg_n_mo_block)
+  integer :: aoff(2*pg_n_mo_block)
+  integer, allocatable :: pos(:,:,:), xrow(:,:,:), xcol(:,:,:), idx(:)
+  integer, allocatable :: rep(:,:), si(:,:)
+  double precision, allocatable :: vv(:,:), amat(:), qtot(:,:), cc(:,:)
+  double precision :: d7, d7ref, d7rel, qref
+  integer, external :: pg_fam_amat_size
 
   pg_det_gates = .true.
   d1 = 0.d0
@@ -388,6 +428,69 @@ logical function pg_det_gates()
     enddo
   endif
 
+  !---------------------------------------------------------------------
+  ! D7: the production contraction against the reference element kernel.
+  !---------------------------------------------------------------------
+  d7 = 0.d0
+  d7ref = 0.d0
+  nsam = 0
+  if (N_states >= 1) then
+    do ifam = 1, pg_n_family
+      if (nsam >= d7_nfam) exit
+      i0 = pg_family_first(ifam)
+      np = pg_det_block(i0)
+      if (np <= 1) cycle
+      call pg_det_counts(i0, nsel)
+      allocate(mask(2,pg_n_mo_block,np), idx(np), rep(2*pg_n_mo_block,np), &
+               si(np,2*pg_n_mo_block), &
+               pos(pg_det_nmax,np,2*pg_n_mo_block), &
+               xrow(pg_det_nmax,np,2*pg_n_mo_block), &
+               xcol(pg_det_nmax,np,2*pg_n_mo_block))
+      call pg_family_fill(nsel, np, mask)
+      if (pg_label_ierr /= 0) then
+        deallocate(mask, idx, rep, si, pos, xrow, xcol)
+        exit
+      endif
+      call pg_family_index(np, mask, idx, imin)
+      call pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, &
+                        xrow, xcol, mrad, strd, rep, aoff, si)
+      if (pg_label_ierr /= 0) then
+        deallocate(mask, idx, rep, si, pos, xrow, xcol)
+        exit
+      endif
+      allocate(cc(np,N_states), qtot(pg_n_elem,N_states), vv(np,np), &
+               amat(max(1, pg_fam_amat_size(npart, mrad))))
+      cc(1:np,1:N_states) = 0.d0
+      do s = 1, N_states
+        do ip = 1, np
+          if (idx(ip) > 0) cc(ip,s) = psi_coef(idx(ip),s)
+        enddo
+      enddo
+      qtot(1:pg_n_elem,1:N_states) = 0.d0
+      call pg_family_wadd(np, nsel, mask, cc, np, N_states, pg_xg(1,1,1), qtot)
+      ! Reference on an evenly strided subset of the group: k = 1 gives
+      ! g = 1, k = 2 already gives a non-identity element because ng <= |G|.
+      ng = min(pg_n_elem, max(2, d7_pairs/(np*np)))
+      do k = 1, ng
+        g = 1 + (k-1)*pg_n_elem/ng
+        call pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, &
+                          xcol, mrad, rep, aoff, si, amat, pg_xg(1,1,1), vv)
+        do s = 1, N_states
+          qref = 0.d0
+          do jp = 1, np
+            do ip = 1, np
+              qref = qref + cc(ip,s)*vv(ip,jp)*cc(jp,s)
+            enddo
+          enddo
+          d7 = max(d7, abs(qtot(g,s) - qref))
+          d7ref = max(d7ref, abs(qref))
+        enddo
+      enddo
+      deallocate(mask, idx, rep, si, pos, xrow, xcol, cc, qtot, vv, amat)
+      nsam = nsam + 1
+    enddo
+  endif
+
   write(6,'(A)') ''
   write(6,'(A)') ' gates:'
   ok = d1 <= 1.d-8
@@ -450,6 +553,23 @@ logical function pg_det_gates()
     write(6,'(A,I0,A,A)') '  D6  dominant determinant of state 1: irrep = ', &
          pg_det_irrep(idom), '  (not a closed-shell N_det=1 wave function: '// &
          'reported, not gated)'
+  endif
+
+  if (nsam == 0) then
+    write(6,'(A)') '  D7  no family with more than one member: nothing to check'
+  else
+    ! d7ref is the largest |c^T V c| in the sample: the natural scale of the
+    ! quantity. A vanishing reference reports the absolute deviation, which
+    ! is the honest measure when there is no scale to divide by.
+    if (d7ref > 0.d0) then
+      d7rel = d7/d7ref
+    else
+      d7rel = d7
+    endif
+    ok = d7rel <= 1.d-13
+    write(6,'(A,ES12.4,A,L1)') '  D7  max |q_contract - q_reference|/max|q_ref| = ', &
+         d7rel, '   <= 1e-13   ', ok
+    pg_det_gates = pg_det_gates .and. ok
   endif
 
   if (N_det > 1) then

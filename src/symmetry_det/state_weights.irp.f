@@ -109,17 +109,38 @@ subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
   ! determinants are accumulated from the label, and the projectors are
   ! built only for the families of size > 1 (which are exactly the
   ! determinants with no definite irrep). The cost is
-  ! O(|G| sum_F np^2 + |G| n_irrep nst sum_F 1) instead of
-  ! O(n_irrep nst sum_F np^2): the matrix of one group element is built
-  ! once per family, contracted with every column (one scalar per element
-  ! and state), and only then multiplied by the projector weight, so the
-  ! irrep loop is outside the pair loop. This is not the O(n_irrep nst
-  ! ndet) diagonal-only approximation of :c:func:`pg_det_state_labels`.
+  !
+  !   O( sum_F [ |G| * (nst*sum_p np*mrad(p) + sum_p mrad(p)^2 + nst*np) ]
+  !      + nst*n_irrep*|G| )
+  !
+  ! instead of O(n_irrep nst sum_F np^2) or O(|G| nst sum_F np^2 npart):
+  ! the matrix of one group element is never formed, the coefficient
+  ! tensor is contracted mode by mode (:c:func:`pg_family_wadd`), one
+  ! scalar per (element, state) is kept, and the irrep projector is
+  ! applied once over the families, because
+  !
+  !   sum_F sum_g pmw(a,g) q_F(g,s) = sum_g pmw(a,g) (sum_F q_F(g,s)).
+  !
+  ! This is not the O(n_irrep nst ndet) diagonal-only approximation of
+  ! :c:func:`pg_det_state_labels`.
   !
   ! The weights may differ from the previous implementation at the 1e-15
-  ! relative level (summation order); the ``1 - pg_thresh`` rule and the
-  ! printed precision are unaffected. :c:func:`pg_det_state_labels`
-  ! remains the fast approximation.
+  ! relative level. Three reassociations, all below the ``1 - pg_thresh``
+  ! rule (1-1e-6) by at least six orders of magnitude:
+  !
+  ! * the inner ``jp`` sum of ``c^T V_g c`` is done mode by mode inside
+  !   :c:func:`pg_family_wadd` (see there);
+  ! * ``q_F(g,s)`` is summed over the families BEFORE the projector
+  !   weight is applied, instead of applying ``pmw`` to every family and
+  !   accumulating the products. The summands are the same, grouped by
+  !   ``g``; the relative change is O(n_family*eps) of the group sum;
+  ! * the pure-determinant weight stays the seed of ``w`` (below, before
+  !   the family loop) and the whole projector contribution is added to
+  !   it as ONE grouped sum at the end, where it used to be interleaved
+  !   with the pure term family by family. Same addends, one grouping
+  !   change.
+  !
+  ! The printed precision and the label rule are unaffected.
   !
   ! ``coef`` is assumed-size: the caller passes ``psi_coef`` or
   ! ``CI_eigenvectors``, both stored as (ndet, nst).
@@ -127,25 +148,30 @@ subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
   ! The family loop is the part that parallelizes: each thread owns one
   ! contiguous block of :c:data:`pg_n_family` (``SCHEDULE(STATIC)``, so the
   ! partition is fixed by the family count and the thread count) and sums
-  ! its families into its own ``wc(:,:,ic)`` slice, in the serial family
-  ! order. The slices are added afterwards in chunk order. One chunk (one
-  ! thread, or a call already inside a parallel region) is therefore
-  ! bit-identical to the serial loop: chunk 1 starts from the
-  ! pure-determinant weight and every family adds into it in ascending
-  ! order. With more chunks the same sum is reassociated by chunk,
-  ! ``((p + q_1) + q_2)`` instead of one running sum: last-bit differences
-  ! only, reproducible for a fixed thread count, and eleven orders of
-  ! magnitude below the ``1 - pg_thresh`` label rule. ``reduction(+:)`` is
-  ! not used: its association is not specified, so two runs would not
-  ! agree.
+  ! its families into its own ``qtot_c(:,:,ic)`` slice, in the serial
+  ! family order. The slices are added afterwards in chunk order. With one
+  ! chunk the group-element sums are accumulated in exactly the serial
+  ! family order; with more chunks the same sum is reassociated by chunk,
+  ! ``((q_1 + q_2) + q_3)`` instead of one running sum: last-bit
+  ! differences only, reproducible for a fixed thread count, and eleven
+  ! orders of magnitude below the ``1 - pg_thresh`` label rule.
+  ! ``reduction(+:)`` is not used: its association is not specified, so
+  ! two runs would not agree.
+  !
+  ! ``qtot_c`` replaces the former weight slice ``wc``: it holds
+  ! ``sum_F q_F(g,s)`` per element and state (``pg_n_elem*nst`` doubles
+  ! per chunk, ~31 kB at |G| = 124, nst = 4, 8 chunks), not a weight. The
+  ! pure-determinant seed stays in ``w`` and the irrep epilogue is applied
+  ! to it once, after the merge.
   END_DOC
   integer, intent(in) :: ndet, lda, nst
   double precision, intent(in) :: coef(lda,*)
   double precision, intent(out) :: w(pg_n_irrep,nst), norm(nst), dmix(nst)
-  integer :: i, s, a, ifam, i0, np, imin, ip, ic, nchunk, np_max
+  integer :: i, s, a, g, ifam, i0, np, imin, ip, ic, nchunk, np_max
   integer :: nsel(2,pg_n_mo_block)
   integer, allocatable :: mask(:,:,:), idx(:), err(:)
-  double precision, allocatable :: c(:,:), wc(:,:,:)
+  double precision, allocatable :: c(:,:), qtot_c(:,:,:), qtot(:,:)
+  double precision :: pmw
 
   PROVIDE pg_det_irrep pg_det_block pg_n_family pg_family_first pg_n_irrep pg_n_mo_block
   ! Everything the family loop reads has to be built here, not by the first
@@ -192,9 +218,9 @@ subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
   ! Families of size > 1: the full projector.
   !---------------------------------------------------------------------
   ! Nothing to accumulate without an irrep or a family: pg_family_wadd
-  ! returns immediately in that case, and wc would have a zero extent, so
-  ! wc(1,1,ic) would be an out-of-range subscript even though the callee
-  ! never reads it.
+  ! returns immediately in that case, and qtot_c would have a zero extent,
+  ! so qtot_c(1,1,ic) would be an out-of-range subscript even though the
+  ! callee never reads it.
   if (pg_n_irrep < 1 .or. pg_n_family < 1) return
 
   ! Largest family, for the per-thread buffers: one allocation per thread
@@ -214,11 +240,11 @@ subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
   if (omp_in_parallel()) nchunk = 1
   nchunk = max(1, min(nchunk, pg_n_family))
 
-  allocate(wc(pg_n_irrep,nst,nchunk), err(nchunk))
-  wc(1:pg_n_irrep,1:nst,1:nchunk) = 0.d0
-  ! Chunk 1 starts from the pure-determinant weight, so a single chunk
-  ! reproduces the serial accumulation order exactly.
-  wc(1:pg_n_irrep,1:nst,1) = w(1:pg_n_irrep,1:nst)
+  allocate(qtot_c(pg_n_elem,nst,nchunk), qtot(pg_n_elem,nst), err(nchunk))
+  qtot_c(1:pg_n_elem,1:nst,1:nchunk) = 0.d0
+  ! No seed here: qtot_c holds group-element sums, not weights. The
+  ! pure-determinant weight is already in w and the epilogue below adds
+  ! the projector contribution to it once.
   err(1:nchunk) = 0
 
   !$OMP PARALLEL DEFAULT(SHARED) NUM_THREADS(nchunk)                      &
@@ -261,7 +287,8 @@ subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
         c(ip,s) = coef(idx(ip),s)
       enddo
     enddo
-    call pg_family_wadd(np, nsel, mask, c, np_max, nst, wc(1,1,ic))
+    call pg_family_wadd(np, nsel, mask, c, np_max, nst, pg_xg(1,1,1), &
+                        qtot_c(1,1,ic))
     if (pg_label_ierr /= 0) err(ic) = pg_label_ierr
   enddo
   !$OMP END DO
@@ -279,16 +306,33 @@ subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
     endif
   enddo
   if (pg_label_ierr /= 0) then
-    deallocate(wc, err)
+    deallocate(qtot_c, qtot, err)
     return
   endif
 
   ! Chunk order, so the result is reproducible for a fixed thread count.
-  w(1:pg_n_irrep,1:nst) = wc(1:pg_n_irrep,1:nst,1)
+  qtot(1:pg_n_elem,1:nst) = qtot_c(1:pg_n_elem,1:nst,1)
   do ic = 2, nchunk
-    w(1:pg_n_irrep,1:nst) = w(1:pg_n_irrep,1:nst) + wc(1:pg_n_irrep,1:nst,ic)
+    qtot(1:pg_n_elem,1:nst) = qtot(1:pg_n_elem,1:nst) + qtot_c(1:pg_n_elem,1:nst,ic)
   enddo
-  deallocate(wc, err)
+  deallocate(qtot_c, err)
+
+  !---------------------------------------------------------------------
+  ! Irrep epilogue, once per detection. sum_F sum_g pmw*q_F = sum_g
+  ! pmw*(sum_F q_F): nst*n_irrep*|G| additions to w instead of
+  ! nst*n_irrep*n_family*|G|. The skip of an exactly zero projector
+  ! weight is exact (it would add a product whose first factor is 0).
+  !---------------------------------------------------------------------
+  do g = 1, pg_n_elem
+    do a = 1, pg_n_irrep
+      pmw = pg_proj_w(a,g)
+      if (pmw == 0.d0) cycle
+      do s = 1, nst
+        w(a,s) = w(a,s) + pmw*qtot(g,s)
+      enddo
+    enddo
+  enddo
+  deallocate(qtot)
 
 end subroutine pg_state_weight_matrix
 

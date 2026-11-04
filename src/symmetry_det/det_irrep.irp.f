@@ -930,11 +930,11 @@ subroutine pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, xcol, &
   ! N-electron matrix of ONE group element: the factor of the full sectors
   ! times the partial-sector product.
   !
-  ! This is the production element kernel. All ordered pairs are computed:
-  ! :c:func:`pg_family_labels` reads only its diagonal,
-  ! :c:func:`pg_family_wadd` forms the scalar :math:`c^T v c`, and
-  ! :c:func:`pg_family_projector` sums it over the elements for gates
-  ! D1/D2. No caller assumes ``v`` symmetric, which is what keeps gate D2b
+  ! This is the reference element kernel, no longer on the production
+  ! path: :c:func:`pg_family_projector` sums it over the elements for
+  ! gates D1/D2, and gate D7 compares it with the tensor contraction of
+  ! :c:func:`pg_family_wadd`. All ordered pairs are computed by both, and
+  ! no caller assumes ``v`` symmetric, which is what keeps gate D2b
   ! meaningful.
   !
   ! FACTORISATION. The family enumeration is an odometer, so member ``ip``
@@ -1208,17 +1208,52 @@ end subroutine pg_family_labels
 !-----------------------------------------------------------------------
 ! State irrep weights of one family.
 !-----------------------------------------------------------------------
-subroutine pg_family_wadd(np, nsel, mask, c, ldc, nst, w)
+subroutine pg_family_wadd(np, nsel, mask, c, ldc, nst, xgf, qtot)
   implicit none
   BEGIN_DOC
-  ! ``w(a,s) += c^T T^a c`` for the ``nst`` CI columns ``c`` on this
-  ! family, accumulated as ``sum_g pg_proj_w(a,g) * (c^T V_g c)``.
+  ! ``qtot(g,s) += c^T V_g c`` for the ``nst`` CI columns ``c`` on this
+  ! family. The irrep weight is NOT applied here: the caller sums
+  ! ``qtot`` over the families and applies :c:data:`pg_proj_w` once per
+  ! element,
   !
-  ! The scalar :math:`q(g,s) = c^T V_g c` needs the full ``V_g`` but only
-  ! one number per (element, state): the irrep loop is OUTSIDE the pair
-  ! loop, so the cost per element is ``n_irrep*nst`` instead of
-  ! ``n_irrep*nst*np^2``. Ordered pairs are used, with no reliance on the
-  ! symmetry of :math:`T^a`.
+  !   sum_F sum_g pmw(a,g) q_F(g,s) = sum_g pmw(a,g) (sum_F q_F(g,s)),
+  !
+  ! so the number of additions to the weight vector drops from
+  ! ``nst*n_irrep*n_family*|G|`` to ``nst*n_irrep*|G|``. The epilogue
+  ! lives in :c:func:`pg_state_weight_matrix`.
+  !
+  ! CONTRACTION, not the element matrix. With
+  ! :math:`V_g(ip,jp) = cfac * prod_p A_p(si(ip,p),si(jp,p))`, the ket
+  ! digit of each partial sector is contracted in turn:
+  !
+  !   u <- c ;  for p:  u'(i,rest,s) = sum_q A_p(i,q) u(q,rest,s)
+  !
+  ! and :math:`q(s) = cfac * sum_ip c(ip,s) u(ip,s)`. The odometer is
+  ! mixed radix, so the members that share the digits of every sector
+  ! other than ``p`` form the block
+  ! ``{j0 + l + (k-1)*strd(p), k=1..mrad(p)}``, enumerated by ``h``
+  ! (higher digits) and ``l`` (lower digits). Cost per (family, g):
+  ! ``nst*sum_p np*mrad(p)`` multiplies plus ``sum_p mrad(p)**2`` sector
+  ! determinants and ``nst*np`` for the final dot, instead of
+  ! ``nst*np**2*npart`` pair products on the full ``np**2`` matrix.
+  !
+  ! REASSOCIATIONS relative to the ``c^T V c`` double sum, all named here
+  ! because this routine is allowed to differ from W1/W2 in the last
+  ! bits and nowhere else:
+  !
+  ! * the ``jp`` sum is performed mode by mode instead of per pair. The
+  !   exact sum is the same; rounding differs by O(npart*max_p mrad(p)*eps)
+  !   relative, i.e. at most ~1e-12 for the largest sector the family
+  !   enumeration supports (C(12,6) = 924), six orders of magnitude below
+  !   the ``1 - pg_thresh`` = 1-1e-6 label rule that consumes these
+  !   weights;
+  ! * ``cfac`` is applied once to ``q(s)`` instead of once per pair
+  !   (``c*(cfac*v)*c`` -> ``cfac*(c*u)``): a rescaling by a common
+  !   factor, same argument, one rounding per state instead of np**2;
+  ! * an exactly zero ``A_p`` zeroes ``u`` exactly, so an element that
+  !   annihilates the family still contributes exactly 0; the old
+  !   ``val == 0`` short circuit is not needed and would not change a
+  !   value.
   !
   ! ``c`` is indexed by family member, not by determinant: the caller
   ! gathers it, and a missing member is a zero column contribution.
@@ -1227,15 +1262,29 @@ subroutine pg_family_wadd(np, nsel, mask, c, ldc, nst, w)
   ! different size, which an exact ``c(np,nst)`` shape would forbid (the
   ! leading extent is the one that enters the address).
   !
-  ! ``si`` and the sector-matrix buffer are built ONCE per family, before
-  ! the ``do g`` loop; the buffer is ``sum_p mrad(p)**2`` doubles
-  ! (:c:func:`pg_fam_amat_size`), i.e. never more than ``np**2``, and is
-  ! overwritten for every element.
+  ! ``xgf`` is :c:data:`pg_xg` seen as one flat array (a sequence
+  ! association on ``pg_xg(1,1,1)``, as in :c:func:`pg_family_vg`), so the
+  ! sector build reads ``xgf(g + row + col)`` and pays no multiplication
+  ! for the address.
+  !
+  ! The sector-matrix buffer is built ONCE per family, before the
+  ! ``do g`` loop, and overwritten for every element; it is
+  ! ``sum_p mrad(p)**2`` doubles (:c:func:`pg_fam_amat_size`), i.e. never
+  ! more than ``np**2``. ``u``, ``un`` and ``amat`` are allocated in one
+  ! statement per family, never inside the ``do g`` loop. ``si`` and
+  ! ``pos`` are still returned by :c:func:`pg_fam_setup` but the
+  ! contraction addresses members by the odometer block structure and
+  ! does not read them.
+  !
+  ! :c:func:`pg_family_vg` is no longer called here: it stays as the
+  ! independent reference for gates D2b and D7.
   END_DOC
   integer, intent(in) :: np, ldc, nst, nsel(2,pg_n_mo_block), mask(2,pg_n_mo_block,np)
-  double precision, intent(in) :: c(ldc,nst)
-  double precision, intent(inout) :: w(pg_n_irrep,nst)
-  integer :: g, a, s, ip, jp, npart, nfull
+  ! Local alias, as in :c:func:`pg_family_vg`: only the declarations need it.
+  integer, parameter :: nmax = 12
+  double precision, intent(in) :: c(ldc,nst), xgf(*)
+  double precision, intent(inout) :: qtot(pg_n_elem,nst)
+  integer :: g, s, ip, p, n, m, k, l, qq, h, j0, sp, npart, nfull
   integer :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
   integer :: pn(2*pg_n_mo_block)
   integer :: pos(pg_det_nmax,np,2*pg_n_mo_block)
@@ -1244,37 +1293,110 @@ subroutine pg_family_wadd(np, nsel, mask, c, ldc, nst, w)
   integer :: mrad(2*pg_n_mo_block), strd(2*pg_n_mo_block)
   integer :: aoff(2*pg_n_mo_block)
   integer :: rep(2*pg_n_mo_block,np), si(np,2*pg_n_mo_block)
-  double precision, allocatable :: vv(:,:), amat(:)
-  double precision :: q(nst)
+  integer :: i, j, ir, jr, i1, i2, j1, j2, ii, jj
+  double precision, allocatable :: u(:,:), un(:,:), utmp(:,:), amat(:)
+  double precision :: q(nst), cfac, acc
+  double precision :: sub(nmax,nmax)
+  double precision, external :: pg_fam_cfac, pg_small_det
   integer, external :: pg_fam_amat_size
 
-  if (pg_n_irrep < 1 .or. np < 1 .or. nst < 1) return
+  if (np < 1 .or. nst < 1) return
   call pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow, xcol, &
                     mrad, strd, rep, aoff, si)
   if (pg_label_ierr /= 0) return
-  ! One allocation statement for both buffers, so the family pays one
-  ! malloc: vv is the element matrix, amat the sector matrices of the
-  ! current element. max(1,...) keeps amat nonempty when npart = 0.
-  allocate(vv(np,np), amat(max(1, pg_fam_amat_size(npart, mrad))))
+  ! One allocation statement, so the family pays one malloc: u is the
+  ! current coefficient tensor, un the next one, amat the sector matrices
+  ! of the current element. max(1,...) keeps amat nonempty when npart = 0.
+  allocate(u(np,nst), un(np,nst), amat(max(1, pg_fam_amat_size(npart, mrad))))
   do g = 1, pg_n_elem
-    call pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, xcol, &
-                      mrad, rep, aoff, si, amat, pg_xg(1,1,1), vv)
-    q(1:nst) = 0.d0
-    do jp = 1, np
-      do ip = 1, np
-        do s = 1, nst
-          q(s) = q(s) + c(ip,s)*vv(ip,jp)*c(jp,s)
+    cfac = pg_fam_cfac(g, nfull, fsec)
+    if (cfac == 0.d0) cycle
+
+    ! Sector determinants of this element, by the same three expressions
+    ! the reference kernel uses per pair.
+    do p = 1, npart
+      n = pn(p)
+      m = mrad(p)
+      select case (n)
+      case (1)
+        do j = 1, m
+          jr = rep(p,j)
+          j1 = xcol(1,jr,p)
+          do i = 1, m
+            ir = rep(p,i)
+            amat(aoff(p) + (i-1)*m + (j-1)) = &
+                 xgf(g + xrow(1,ir,p) + j1)
+          enddo
+        enddo
+      case (2)
+        do j = 1, m
+          jr = rep(p,j)
+          j1 = xcol(1,jr,p)
+          j2 = xcol(2,jr,p)
+          do i = 1, m
+            ir = rep(p,i)
+            i1 = xrow(1,ir,p)
+            i2 = xrow(2,ir,p)
+            amat(aoff(p) + (i-1)*m + (j-1)) = &
+                 xgf(g + i1 + j1)*xgf(g + i2 + j2) &
+               - xgf(g + i1 + j2)*xgf(g + i2 + j1)
+          enddo
+        enddo
+      case default
+        do j = 1, m
+          jr = rep(p,j)
+          do i = 1, m
+            ir = rep(p,i)
+            do jj = 1, n
+              do ii = 1, n
+                sub(ii,jj) = xgf(g + xrow(ii,ir,p) + xcol(jj,jr,p))
+              enddo
+            enddo
+            amat(aoff(p) + (i-1)*m + (j-1)) = pg_small_det(sub, n)
+          enddo
+        enddo
+      end select
+    enddo
+
+    ! Contract the ket digit of every partial sector, in ascending p (the
+    ! order of psec, which this routine must not reorder).
+    u(1:np,1:nst) = c(1:np,1:nst)
+    do p = 1, npart
+      m = mrad(p)
+      sp = strd(p)
+      do h = 0, np/(m*sp) - 1
+        do l = 0, sp - 1
+          j0 = 1 + l + h*m*sp
+          do s = 1, nst
+            do k = 1, m
+              acc = 0.d0
+              do qq = 1, m
+                acc = acc + amat(aoff(p)+(k-1)*m+(qq-1))*u(j0+(qq-1)*sp,s)
+              enddo
+              un(j0+(k-1)*sp,s) = acc
+            enddo
+          enddo
         enddo
       enddo
+      ! u holds the tensor contracted over sectors 1..p. The descriptor
+      ! swap is O(1) and keeps the two buffers distinct for the compiler,
+      ! so the inner loop above is not aliased.
+      call move_alloc(u, utmp)
+      call move_alloc(un, u)
+      call move_alloc(utmp, un)
     enddo
-    do a = 1, pg_n_irrep
-      if (pg_proj_w(a,g) == 0.d0) cycle
+
+    q(1:nst) = 0.d0
+    do ip = 1, np
       do s = 1, nst
-        w(a,s) = w(a,s) + pg_proj_w(a,g)*q(s)
+        q(s) = q(s) + c(ip,s)*u(ip,s)
       enddo
     enddo
+    do s = 1, nst
+      qtot(g,s) = qtot(g,s) + cfac*q(s)
+    enddo
   enddo
-  deallocate(vv, amat)
+  deallocate(u, un, amat)
 end subroutine pg_family_wadd
 
 !-----------------------------------------------------------------------
