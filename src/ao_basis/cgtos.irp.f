@@ -214,6 +214,19 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
 
         norm = 2.d0 * real(integ1 + integ2)
 
+        ! <g+g*|g+g*> = 2 Re(g|g) + 2 (g*|g) vanishes for a sin-type primitive (phase -pi/2)
+        ! with b = 0, and loses about 2 log10(a/|b|) digits by cancellation when |b| << a
+        if((norm <= 0.d0) .or. (norm /= norm)) then
+          print *, 'Error: cGTO AO ', i, ' primitive ', j, ' has <g+g*|g+g*> = ', norm
+          print *, '(a sin-type primitive, ao_expo_phase = -pi/2, needs ao_expo_im /= 0)'
+          stop 1
+        endif
+        if(2.d0 * (abs(real(integ1)) + abs(real(integ2))) > 1.d6 * norm) then
+          print *, 'Warning: cGTO AO ', i, ' primitive ', j, ': cancellation in <g+g*|g+g*>, ', &
+                   'about ', int(log10(2.d0 * (abs(real(integ1)) + abs(real(integ2))) / norm)), &
+                   ' digits lost in all its integrals (sin-type with |b| << a ?)'
+        endif
+
         !ao_coef_norm_cgtos(i,j) = 1.d0 / dsqrt(norm)
         ao_coef_norm_cgtos(i,j) = ao_coef(i,j) / dsqrt(norm)
       enddo
@@ -266,6 +279,10 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
                       * 2.d0 * real(integ1 + integ2)
         enddo
       enddo
+      if((norm <= 0.d0) .or. (norm /= norm)) then
+        print *, 'Error: contracted cGTO AO ', i, ' has <chi|chi> = ', norm
+        stop 1
+      endif
       do j = 1, ao_prim_num(i)
         ao_coef_norm_cgtos(i,j) = ao_coef_norm_cgtos(i,j) / dsqrt(norm)
       enddo
