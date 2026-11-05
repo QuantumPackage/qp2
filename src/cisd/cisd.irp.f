@@ -77,6 +77,12 @@ subroutine run
   SOFT_TOUCH psi_coef
   call save_wavefunction_truncated(save_threshold)
   call ezfio_set_cisd_energy(CI_energy)
+  ! Replace the symmetry-forbidden roundoff by exact zeros and save again,
+  ! so the EZFIO vector is exact; the state report at the end describes
+  ! the cleaned vector.
+  call pg_zero_state_irreps()
+  SOFT_TOUCH psi_coef
+  call save_wavefunction_truncated(save_threshold)
 
   do i = 1,N_states
     k = maxloc(dabs(psi_coef_sorted(1:N_det,i)),dim=1)
@@ -131,5 +137,7 @@ subroutine run
       enddo
     endif
   endif
+
+  call pg_print_state_irreps(CI_energy, CI_s2)
 
 end

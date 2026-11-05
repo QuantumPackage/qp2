@@ -107,6 +107,9 @@ subroutine run
   call json_close
   call ezfio_set_kohn_sham_rs_energy(SCF_energy)
 
+  call pg_print_mo_energies(Fock_matrix_diag_mo, mo_num)
+  call pg_report_mo_symmetry()
+
  write(*, '(A22,X,F16.10)') 'one_e_energy = ',one_e_energy
  write(*, '(A22,X,F16.10)') 'two_e_energy = ',two_e_energy
  write(*, '(A22,X,F16.10)') 'e_exchange_dft      = ',e_exchange_dft

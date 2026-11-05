@@ -251,15 +251,13 @@ END_DOC
   endif
   TOUCH mo_coef
 
-  print *, ''
-  print *, 'Eigenvalues'
-  print *, '-----------'
-  print *, ''
-  print *, '======== ================'
-  do i=1,mo_num
-   write (6,'(I8,1X,F16.10)')  i, Fock_matrix_diag_mo(i)
-  enddo
-  print *, '======== ================'
+  ! The table is printed by the program, which knows the point group
+  ! (scf_utils must not depend on symmetry_mo). Fock_matrix_diag_mo is
+  ! named after TOUCH mo_coef, exactly as the old print loop was, so the
+  ! rebuild cost is unchanged. The energies are kept in the EZFIO, in the
+  ! order of the MOs that save_mos writes just below, so that qp_edit can
+  ! show them next to the irrep.
+  call ezfio_set_mo_basis_mo_energy(Fock_matrix_diag_mo)
 
 
   call save_mos

@@ -181,6 +181,8 @@ Providers
        * :c:data:`one_e_dm_mo_alpha_for_dft`
        * :c:data:`one_e_dm_mo_beta_for_dft`
        * :c:data:`one_e_spin_density_ao`
+       * :c:data:`pg_col_diag`
+       * :c:data:`pg_xg`
        * :c:data:`psi_det`
        * :c:data:`s_mo_coef`
        * :c:data:`s_mo_sphe_coef`
@@ -480,6 +482,12 @@ Providers
        * :c:data:`one_e_tr_dm_mo_alpha`
        * :c:data:`ormas_n_orb`
        * :c:data:`partial_occupation`
+       * :c:data:`pg_block_start`
+       * :c:data:`pg_col_diag`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_mo_weight`
+       * :c:data:`pg_n_mo_mixed`
+       * :c:data:`pg_xg`
        * :c:data:`psi_energy_h_core`
        * :c:data:`s_mo_coef`
        * :c:data:`s_mo_sphe_coef`

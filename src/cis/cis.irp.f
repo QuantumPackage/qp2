@@ -89,6 +89,10 @@ subroutine run
 
   call ezfio_set_cis_energy(CI_energy)
   psi_coef = ci_eigenvectors
+  ! Report first, on the vector as diagonalized; then replace the
+  ! symmetry-forbidden roundoff by exact zeros before saving.
+  call pg_print_state_irreps(CI_energy, CI_s2)
+  call pg_zero_state_irreps()
   SOFT_TOUCH psi_coef
   call save_wavefunction_truncated(save_threshold)
 

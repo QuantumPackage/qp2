@@ -2405,6 +2405,7 @@ Subroutines / functions
 
        * :c:func:`end_parallel_job`
        * :c:func:`new_parallel_job`
+       * :c:data:`pg_irrep_allowed`
 
  
 .. c:function:: void map_load_from_disk(void)

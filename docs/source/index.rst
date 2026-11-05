@@ -25,6 +25,7 @@
    users_guide/interfaces
    users_guide/excited_states
    users_guide/natural_orbitals
+   users_guide/symmetry
    users_guide/printing
    users_guide/plugins
    users_guide/index

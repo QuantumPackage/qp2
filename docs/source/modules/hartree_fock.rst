@@ -542,6 +542,7 @@ Subroutines / functions
 
        * :c:func:`ezfio_set_hartree_fock_energy`
        * :c:func:`json_close`
+       * :c:func:`pg_report_mo_symmetry`
        * :c:func:`roothaan_hall_scf`
 
     Touches:
@@ -554,4 +555,5 @@ Subroutines / functions
        * :c:data:`mo_coef`
        * :c:data:`level_shift`
        * :c:data:`mo_coef`
+       * :c:data:`mo_symmetry`
 

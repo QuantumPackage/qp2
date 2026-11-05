@@ -570,6 +570,51 @@ Providers
        * :c:data:`n_points_extra_final_grid`
 
  
+.. c:var:: double final_weight_at_r_per_atom
+
+
+    File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: final_grid_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
+        double precision, allocatable	:: final_weight_at_r_per_atom	(n_pts_max_per_atom,nucl_num)
+        integer, allocatable	:: index_final_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
+        integer, allocatable	:: index_final_pts_per_atom_rev	(n_points_integration_angular,n_points_radial_grid,nucl_num)
+
+
+     final_grid_points_per_atom(1:3,i,j) = x, y, z coordinates of the
+     i-th grid point kept for atom j. Points whose weight satisfies
+     |w| < thresh_grid are discarded. Kept points are stored in loop
+     order (radial index, then angular index); only the first
+     n_pts_per_atom(j) entries of the second dimension are set, whose
+     length is n_pts_max_per_atom.
+    
+    final_weight_at_r_vector_per_atom(i,j) = total weight at the i-th
+    kept grid point of atom j (the value of final_weight_at_r at that
+    point)
+    
+    index_final_points_per_atom(1:3,i,j) = angular, radial and atomic
+    indices of the i-th kept grid point of atom j
+    
+    index_final_points_per_atom_reverse(k,i,j) = position in the
+    per-atom list of kept points of the point with angular index k
+    and radial index i around atom j (assigned only for kept points)
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`final_weight_at_r`
+       * :c:data:`grid_points_per_atom`
+       * :c:data:`n_points_radial_grid`
+       * :c:data:`n_pts_per_atom`
+       * :c:data:`nucl_num`
+       * :c:data:`thresh_grid`
+
+
+ 
 .. c:var:: double final_weight_at_r_vector
 
 
@@ -669,7 +714,7 @@ Providers
        * :c:data:`mos_in_r_array_extra_omp`
 
  
-.. c:var:: double final_weight_at_r_per_atom
+.. c:var:: final_weight_at_r_vector_per_atom
 
 
     File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
@@ -677,28 +722,11 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: final_grid_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        double precision, allocatable	:: final_weight_at_r_per_atom	(n_pts_max_per_atom,nucl_num)
+        double precision, allocatable	:: final_weight_at_r_vector_per_atom	(n_pts_max_per_atom,nucl_num)
         integer, allocatable	:: index_final_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        integer, allocatable	:: index_final_pts_per_atom_rev	(n_points_integration_angular,n_points_radial_grid,nucl_num)
+        integer, allocatable	:: index_final_points_per_atom_reverse	(n_points_integration_angular,n_points_radial_grid,nucl_num)
 
 
-     final_grid_points_per_atom(1:3,i,j) = x, y, z coordinates of the
-     i-th grid point kept for atom j. Points whose weight satisfies
-     |w| < thresh_grid are discarded. Kept points are stored in loop
-     order (radial index, then angular index); only the first
-     n_pts_per_atom(j) entries of the second dimension are set, whose
-     length is n_pts_max_per_atom.
-    
-    final_weight_at_r_vector_per_atom(i,j) = total weight at the i-th
-    kept grid point of atom j (the value of final_weight_at_r at that
-    point)
-    
-    index_final_points_per_atom(1:3,i,j) = angular, radial and atomic
-    indices of the i-th kept grid point of atom j
-    
-    index_final_points_per_atom_reverse(k,i,j) = position in the
-    per-atom list of kept points of the point with angular index k
-    and radial index i around atom j (assigned only for kept points)
 
     Needs:
 
@@ -1066,7 +1094,7 @@ Providers
 
 
  
-.. c:var:: int index_final_pts_per_atom_rev
+.. c:var:: index_final_points_per_atom_reverse
 
 
     File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
@@ -1074,28 +1102,11 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: final_grid_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        double precision, allocatable	:: final_weight_at_r_per_atom	(n_pts_max_per_atom,nucl_num)
+        double precision, allocatable	:: final_weight_at_r_vector_per_atom	(n_pts_max_per_atom,nucl_num)
         integer, allocatable	:: index_final_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        integer, allocatable	:: index_final_pts_per_atom_rev	(n_points_integration_angular,n_points_radial_grid,nucl_num)
+        integer, allocatable	:: index_final_points_per_atom_reverse	(n_points_integration_angular,n_points_radial_grid,nucl_num)
 
 
-     final_grid_points_per_atom(1:3,i,j) = x, y, z coordinates of the
-     i-th grid point kept for atom j. Points whose weight satisfies
-     |w| < thresh_grid are discarded. Kept points are stored in loop
-     order (radial index, then angular index); only the first
-     n_pts_per_atom(j) entries of the second dimension are set, whose
-     length is n_pts_max_per_atom.
-    
-    final_weight_at_r_vector_per_atom(i,j) = total weight at the i-th
-    kept grid point of atom j (the value of final_weight_at_r at that
-    point)
-    
-    index_final_points_per_atom(1:3,i,j) = angular, radial and atomic
-    indices of the i-th kept grid point of atom j
-    
-    index_final_points_per_atom_reverse(k,i,j) = position in the
-    per-atom list of kept points of the point with angular index k
-    and radial index i around atom j (assigned only for kept points)
 
     Needs:
 
@@ -1164,6 +1175,51 @@ Providers
        * :c:data:`mos_in_r_array`
        * :c:data:`mos_in_r_array_omp`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
+
+ 
+.. c:var:: int index_final_pts_per_atom_rev
+
+
+    File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: final_grid_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
+        double precision, allocatable	:: final_weight_at_r_per_atom	(n_pts_max_per_atom,nucl_num)
+        integer, allocatable	:: index_final_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
+        integer, allocatable	:: index_final_pts_per_atom_rev	(n_points_integration_angular,n_points_radial_grid,nucl_num)
+
+
+     final_grid_points_per_atom(1:3,i,j) = x, y, z coordinates of the
+     i-th grid point kept for atom j. Points whose weight satisfies
+     |w| < thresh_grid are discarded. Kept points are stored in loop
+     order (radial index, then angular index); only the first
+     n_pts_per_atom(j) entries of the second dimension are set, whose
+     length is n_pts_max_per_atom.
+    
+    final_weight_at_r_vector_per_atom(i,j) = total weight at the i-th
+    kept grid point of atom j (the value of final_weight_at_r at that
+    point)
+    
+    index_final_points_per_atom(1:3,i,j) = angular, radial and atomic
+    indices of the i-th kept grid point of atom j
+    
+    index_final_points_per_atom_reverse(k,i,j) = position in the
+    per-atom list of kept points of the point with angular index k
+    and radial index i around atom j (assigned only for kept points)
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`final_weight_at_r`
+       * :c:data:`grid_points_per_atom`
+       * :c:data:`n_points_radial_grid`
+       * :c:data:`n_pts_per_atom`
+       * :c:data:`nucl_num`
+       * :c:data:`thresh_grid`
+
 
  
 .. c:var:: int m_knowles

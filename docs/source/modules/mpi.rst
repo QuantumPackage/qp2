@@ -87,6 +87,7 @@ Providers
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`auto_symmetry`
        * :c:data:`basis`
        * :c:data:`basis_nucleus_index`
        * :c:data:`basis_type`
@@ -94,6 +95,7 @@ Providers
        * :c:data:`calc_energy_components`
        * :c:data:`calc_osc_str`
        * :c:data:`calc_tr_dipole_moment`
+       * :c:data:`ci_electronic_energy`
        * :c:data:`ci_energy`
        * :c:data:`correlation_functional`
        * :c:data:`csf_based`
@@ -140,6 +142,7 @@ Providers
        * :c:data:`io_mo_two_e_integrals`
        * :c:data:`io_mo_two_e_integrals_erf`
        * :c:data:`io_nuclear_repulsion`
+       * :c:data:`irrep_states`
        * :c:data:`is_periodic`
        * :c:data:`lin_dep_cutoff`
        * :c:data:`mo_cholesky_double`
@@ -192,6 +195,12 @@ Providers
        * :c:data:`ormas_min_e`
        * :c:data:`ormas_mstart`
        * :c:data:`ormas_n_space`
+       * :c:data:`pg_ao_ok`
+       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_irrep_allowed`
+       * :c:data:`pg_irrep_filter`
+       * :c:data:`pg_thresh`
+       * :c:data:`pg_tol`
        * :c:data:`point_charges`
        * :c:data:`prim_coef`
        * :c:data:`prim_expo`

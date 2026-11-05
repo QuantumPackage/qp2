@@ -56,6 +56,8 @@ fci
     * :c:data:`n_states` 
     * :c:data:`psi_coef` 
     * :c:data:`psi_det` 
+    * :c:data:`psi_energy` 
+    * :c:data:`psi_energy_with_nucl_rep` 
     * :c:data:`pt2_min_parallel_tasks` 
  
  Calls: 
@@ -64,6 +66,7 @@ fci
     :columns: 3 
  
     * :c:func:`json_close` 
+    * :c:func:`pg_print_state_irreps` 
     * :c:func:`run_cipsi` 
     * :c:func:`run_slave_cipsi` 
     * :c:func:`run_stochastic_cipsi` 
