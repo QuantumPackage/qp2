@@ -59,6 +59,114 @@ END_PROVIDER
 
 ! ---
 
+BEGIN_PROVIDER [double precision, ao_expo_im, (ao_num, ao_prim_num_max)]
+
+  implicit none
+
+  BEGIN_DOC
+  ! Imaginary part $b$ of the exponents $a + i b$ of the cGTO primitives.
+  ! Zero if absent from the EZFIO file.
+  END_DOC
+
+  logical                        :: has
+  PROVIDE ezfio_filename
+  ao_expo_im = 0.d0
+  if (mpi_master) then
+    call ezfio_has_ao_basis_ao_expo_im(has)
+    if (has) then
+      call ezfio_get_ao_basis_ao_expo_im(ao_expo_im)
+    endif
+  endif
+  IRP_IF MPI_DEBUG
+    print *,  irp_here, mpi_rank
+    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
+  IRP_ENDIF
+  IRP_IF MPI
+    include 'mpif.h'
+    integer :: ierr
+    call MPI_BCAST( ao_expo_im, ao_num*ao_prim_num_max,               &
+        MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+    if (ierr /= MPI_SUCCESS) then
+      stop 'Unable to read ao_expo_im with MPI'
+    endif
+  IRP_ENDIF
+
+END_PROVIDER
+
+! ---
+
+BEGIN_PROVIDER [double precision, ao_expo_pw, (3, ao_num, ao_prim_num_max)]
+
+  implicit none
+
+  BEGIN_DOC
+  ! Plane-wave vector $\mathbf{k}$ of the cGTO primitives.
+  ! Zero (no plane wave) if absent from the EZFIO file.
+  END_DOC
+
+  logical                        :: has
+  PROVIDE ezfio_filename
+  ao_expo_pw = 0.d0
+  if (mpi_master) then
+    call ezfio_has_ao_basis_ao_expo_pw(has)
+    if (has) then
+      call ezfio_get_ao_basis_ao_expo_pw(ao_expo_pw)
+    endif
+  endif
+  IRP_IF MPI_DEBUG
+    print *,  irp_here, mpi_rank
+    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
+  IRP_ENDIF
+  IRP_IF MPI
+    include 'mpif.h'
+    integer :: ierr
+    call MPI_BCAST( ao_expo_pw, 3*ao_num*ao_prim_num_max,             &
+        MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+    if (ierr /= MPI_SUCCESS) then
+      stop 'Unable to read ao_expo_pw with MPI'
+    endif
+  IRP_ENDIF
+
+END_PROVIDER
+
+! ---
+
+BEGIN_PROVIDER [double precision, ao_expo_phase, (3, ao_num, ao_prim_num_max)]
+
+  implicit none
+
+  BEGIN_DOC
+  ! Phase $\varphi$ (per direction) of the cGTO primitives.
+  ! Zero if absent from the EZFIO file.
+  END_DOC
+
+  logical                        :: has
+  PROVIDE ezfio_filename
+  ao_expo_phase = 0.d0
+  if (mpi_master) then
+    call ezfio_has_ao_basis_ao_expo_phase(has)
+    if (has) then
+      call ezfio_get_ao_basis_ao_expo_phase(ao_expo_phase)
+    endif
+  endif
+  IRP_IF MPI_DEBUG
+    print *,  irp_here, mpi_rank
+    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
+  IRP_ENDIF
+  IRP_IF MPI
+    include 'mpif.h'
+    integer :: ierr
+    call MPI_BCAST( ao_expo_phase, 3*ao_num*ao_prim_num_max,          &
+        MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+    if (ierr /= MPI_SUCCESS) then
+      stop 'Unable to read ao_expo_phase with MPI'
+    endif
+  IRP_ENDIF
+
+END_PROVIDER
+
+! ---
+
  BEGIN_PROVIDER [complex*16, ao_expo_cgtos_ord_transp, (ao_prim_num_max, ao_num)]
 &BEGIN_PROVIDER [double precision, ao_expo_pw_ord_transp, (4, ao_prim_num_max, ao_num)]
 &BEGIN_PROVIDER [double precision, ao_expo_phase_ord_transp, (4, ao_prim_num_max, ao_num)]
