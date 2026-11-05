@@ -79,7 +79,12 @@ subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, pow
   call give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_p, iorder_p, &
            alpha, beta, power_A, power_B, Ae_center, Be_center, Ap_center, Bp_center, dim)
 
-  if(abs(fact_p) .lt. 1.d-14) then
+  ! Negligible pairs are flagged by give_explicit_cpoly_and_cgaussian with fact_p = 0 (bound
+  ! cgaussian_pair_bound, built from the real parts of the exponents). |fact_p| itself is NOT a
+  ! bound of the overlap: with complex centres the recentred polynomial (P-A)^i (P-B)^j can be
+  ! much larger than 1 (|P-A| ~ (b/2a) R), so a cut |fact_p| < 1e-14 drops non-negligible
+  ! overlaps of p, d, f, g functions with large b/a (relative errors up to 1e-4 for g, b/a = 10).
+  if(fact_p == (0.d0, 0.d0)) then
     overlap_x = (0.d0, 0.d0)
     overlap_y = (0.d0, 0.d0)
     overlap_z = (0.d0, 0.d0)
@@ -97,7 +102,7 @@ subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, pow
 
   arg = ab * (Ae_center(1) - Be_center(1)) &
            * (Ae_center(1) - Be_center(1))
-  if(real(arg) > 40.d0) then
+  if(real(arg) > 700.d0) then
     overlap_x = (0.d0, 0.d0)
   else
     overlap_x = P_new(0,1) * F_integral_tab(0)
@@ -109,7 +114,7 @@ subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, pow
 
   arg = ab * (Ae_center(2) - Be_center(2)) &
            * (Ae_center(2) - Be_center(2))
-  if(real(arg) > 40.d0) then
+  if(real(arg) > 700.d0) then
     overlap_y = (0.d0, 0.d0)
   else
     overlap_y = P_new(0,2) * F_integral_tab(0)
@@ -121,7 +126,7 @@ subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, pow
 
   arg = ab * (Ae_center(3) - Be_center(3)) &
            * (Ae_center(3) - Be_center(3))
-  if(real(arg) > 40.d0) then
+  if(real(arg) > 700.d0) then
     overlap_z = (0.d0, 0.d0)
   else
     overlap_z = P_new(0,3) * F_integral_tab(0)
