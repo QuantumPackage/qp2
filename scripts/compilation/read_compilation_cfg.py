@@ -23,10 +23,7 @@ def get_compilation_option(pwd_cfg, flag_name):
     config = configparser.ConfigParser(inline_comment_prefixes=(';','#'))
     config.read(pwd_cfg)
 
-    if flag_name == "FC" and config.getboolean("OPTION","CACHE"):
-        l = ["cache_compile.py"]
-    else:
-        l = []
+    l = []
 
     l_option_section = get_l_option_section(config)
 
