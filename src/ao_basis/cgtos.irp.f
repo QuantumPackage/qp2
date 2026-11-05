@@ -109,6 +109,14 @@ END_PROVIDER
   integer          :: iorder(ao_prim_num_max)
   double precision :: d(ao_prim_num_max,11)
 
+  ! entries j > ao_prim_num(i) are padding: set them to zero. They were left
+  ! uninitialized, and use_pw takes the maxval of ao_expo_pw_ord_transp(4,:,:)
+  ! over the whole array (a garbage value switches use_pw on)
+  ao_coef_norm_cgtos_ord = 0.d0
+  ao_expo_cgtos_ord      = (0.d0, 0.d0)
+  ao_expo_pw_ord         = 0.d0
+  ao_expo_phase_ord      = 0.d0
+
   d = 0.d0
 
   do i = 1, ao_num
