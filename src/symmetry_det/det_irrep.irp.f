@@ -1208,7 +1208,7 @@ end subroutine pg_family_labels
 !-----------------------------------------------------------------------
 ! State irrep weights of one family.
 !-----------------------------------------------------------------------
-subroutine pg_family_wadd(np, nsel, mask, c, ldc, nst, xgf, qtot)
+subroutine pg_family_wadd(np, nsel, mask, c, ldc, nst, xgf, gsel, qtot)
   implicit none
   BEGIN_DOC
   ! ``qtot(g,s) += c^T V_g c`` for the ``nst`` CI columns ``c`` on this
@@ -1278,8 +1278,18 @@ subroutine pg_family_wadd(np, nsel, mask, c, ldc, nst, xgf, qtot)
   !
   ! :c:func:`pg_family_vg` is no longer called here: it stays as the
   ! independent reference for gates D2b and D7.
+  !
+  ! ``gsel(g)`` selects the group elements to contract. It is a
+  ! gate/instrumentation hook, not a physics switch: the production caller
+  ! passes an all-true mask, so the result is unchanged, and the only other
+  ! caller is D7, which selects the elements it can afford to check. An
+  ! unselected element is skipped by the first statement of the ``do g``
+  ! loop, before :c:func:`pg_fam_cfac`, so it costs one logical test and
+  ! nothing else; ``qtot`` keeps its incoming value for that element, which
+  ! is exactly what a caller that never reads it expects.
   END_DOC
   integer, intent(in) :: np, ldc, nst, nsel(2,pg_n_mo_block), mask(2,pg_n_mo_block,np)
+  logical, intent(in) :: gsel(pg_n_elem)
   ! Local alias, as in :c:func:`pg_family_vg`: only the declarations need it.
   integer, parameter :: nmax = 12
   double precision, intent(in) :: c(ldc,nst), xgf(*)
@@ -1309,6 +1319,7 @@ subroutine pg_family_wadd(np, nsel, mask, c, ldc, nst, xgf, qtot)
   ! of the current element. max(1,...) keeps amat nonempty when npart = 0.
   allocate(u(np,nst), un(np,nst), amat(max(1, pg_fam_amat_size(npart, mrad))))
   do g = 1, pg_n_elem
+    if (.not. gsel(g)) cycle
     cfac = pg_fam_cfac(g, nfull, fsec)
     if (cfac == 0.d0) cycle
 

@@ -172,6 +172,11 @@ subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
   integer, allocatable :: mask(:,:,:), idx(:), err(:)
   double precision, allocatable :: c(:,:), qtot_c(:,:,:), qtot(:,:)
   double precision :: pmw
+  ! Element selection passed to pg_family_wadd. The production path wants
+  ! every element: it is set to .true. once per thread inside the parallel
+  ! region (a private automatic array enters the region undefined), and
+  ! never touched again.
+  logical :: gsel(pg_n_elem)
 
   PROVIDE pg_det_irrep pg_det_block pg_n_family pg_family_first pg_n_irrep pg_n_mo_block
   ! Everything the family loop reads has to be built here, not by the first
@@ -248,11 +253,15 @@ subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
   err(1:nchunk) = 0
 
   !$OMP PARALLEL DEFAULT(SHARED) NUM_THREADS(nchunk)                      &
-  !$OMP PRIVATE(ifam,i0,np,imin,ip,s,ic,nsel,mask,idx,c)
+  !$OMP PRIVATE(ifam,i0,np,imin,ip,s,ic,nsel,mask,idx,c,gsel)
   ! Per-thread buffers. PRIVATE makes the descriptors private, but a
   ! private allocatable starts unallocated, so the allocation belongs here
   ! and not before the region.
   allocate(mask(2,pg_n_mo_block,np_max), idx(np_max), c(np_max,nst))
+  ! All elements selected, once per thread: gsel is in the PRIVATE clause
+  ! (an automatic array of the enclosing routine is shared by default under
+  ! DEFAULT(SHARED)), so its value on entry to the region is undefined.
+  gsel = .true.
   ! The chunk is the thread, not a function of ifam:
   ! 1 + (ifam-1)*nchunk/pg_n_family maps two threads to the same slice at
   ! the block boundaries (N = 6, T = 4: families 3-4 and 5 both land in
@@ -288,7 +297,7 @@ subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
       enddo
     enddo
     call pg_family_wadd(np, nsel, mask, c, np_max, nst, pg_xg(1,1,1), &
-                        qtot_c(1,1,ic))
+                        gsel, qtot_c(1,1,ic))
     if (pg_label_ierr /= 0) err(ic) = pg_label_ierr
   enddo
   !$OMP END DO

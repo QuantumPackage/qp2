@@ -355,6 +355,7 @@ logical function pg_det_gates()
   integer, allocatable :: pos(:,:,:), xrow(:,:,:), xcol(:,:,:), idx(:)
   integer, allocatable :: rep(:,:), si(:,:)
   double precision, allocatable :: vv(:,:), amat(:), qtot(:,:), cc(:,:)
+  logical, allocatable :: gsel(:)
   double precision :: d7, d7ref, d7rel, qref
   integer, external :: pg_fam_amat_size
 
@@ -459,6 +460,7 @@ logical function pg_det_gates()
         exit
       endif
       allocate(cc(np,N_states), qtot(pg_n_elem,N_states), vv(np,np), &
+               gsel(pg_n_elem), &
                amat(max(1, pg_fam_amat_size(npart, mrad))))
       cc(1:np,1:N_states) = 0.d0
       do s = 1, N_states
@@ -467,10 +469,19 @@ logical function pg_det_gates()
         enddo
       enddo
       qtot(1:pg_n_elem,1:N_states) = 0.d0
-      call pg_family_wadd(np, nsel, mask, cc, np, N_states, pg_xg(1,1,1), qtot)
       ! Reference on an evenly strided subset of the group: k = 1 gives
       ! g = 1, k = 2 already gives a non-identity element because ng <= |G|.
+      ! The mask is filled with the same g expression as the reference loop
+      ! below, so the elements the contraction computes and the elements
+      ! the kernel checks cannot drift apart; everything else is skipped.
       ng = min(pg_n_elem, max(2, d7_pairs/(np*np)))
+      gsel(1:pg_n_elem) = .false.
+      do k = 1, ng
+        g = 1 + (k-1)*pg_n_elem/ng
+        gsel(g) = .true.
+      enddo
+      call pg_family_wadd(np, nsel, mask, cc, np, N_states, pg_xg(1,1,1), &
+                          gsel, qtot)
       do k = 1, ng
         g = 1 + (k-1)*pg_n_elem/ng
         call pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, &
@@ -486,7 +497,7 @@ logical function pg_det_gates()
           d7ref = max(d7ref, abs(qref))
         enddo
       enddo
-      deallocate(mask, idx, rep, si, pos, xrow, xcol, cc, qtot, vv, amat)
+      deallocate(mask, idx, rep, si, pos, xrow, xcol, cc, qtot, vv, amat, gsel)
       nsam = nsam + 1
     enddo
   endif
