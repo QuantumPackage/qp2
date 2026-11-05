@@ -300,8 +300,9 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
   ! when ao_normalized is set.
   END_DOC
 
-  integer          :: i, j, k, ii, m, powA(3), nz
-  double precision :: norm
+  integer          :: i, j, k, ii, m, powA(3), kprim, nz
+  double precision :: norm, norm_real, ov_rx, ov_ry, ov_rz
+  double precision :: C_R(3)
   double precision :: kA2, phiA, KB2, phiB
   complex*16       :: expo, expo_inv, C_Ae(3), C_Ap(3)
   complex*16       :: expo_k, expo_k_inv, C_Be(3)
@@ -309,6 +310,7 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
   complex*16       :: integ1, integ2, lC1(3), lC2(3)
 
   nz = 100
+  C_R(1:3) = 0.d0
 
   ao_coef_norm_cgtos = 0.d0
 
@@ -321,7 +323,19 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
  
     if(primitives_normalized) then
 
-      ! Normalization of the primitives
+      ! Normalization of the primitives. Each Cartesian component is normalized with its
+      ! own powers (this defines the shape of a contracted cGTO). For ezfio_convention >=
+      ! 20250211 the factor is scaled by prim_normalization_factor * N_real^-1 (real
+      ! Gaussian, same powers), so that at b = 0 the AO is the one of ao_coef_normalized
+      ! also when ao_normalized is false or the factors are read from the file (TREXIO);
+      ! with the default factors this is a constant per component.
+      if(ezfio_convention >= 20250211) then
+        kprim = 1
+        do while(kprim <= prim_num .and. shell_index(kprim) /= ao_shell(i))
+          kprim = kprim + 1
+        enddo
+      endif
+
       do j = 1, ao_prim_num(i)
 
         expo = ao_expo(i,j) + (0.d0, 1.d0) * ao_expo_im(i,j)
@@ -364,8 +378,14 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
                    ' digits lost in all its integrals (sin-type with |b| << a ?)'
         endif
 
-        !ao_coef_norm_cgtos(i,j) = 1.d0 / dsqrt(norm)
-        ao_coef_norm_cgtos(i,j) = ao_coef(i,j) / dsqrt(norm)
+        if(ezfio_convention >= 20250211) then
+          call overlap_gaussian_xyz(C_R, C_R, ao_expo(i,j), ao_expo(i,j), powA, powA, &
+                                    ov_rx, ov_ry, ov_rz, norm_real, nz)
+          ao_coef_norm_cgtos(i,j) = ao_coef(i,j) * prim_normalization_factor(kprim+j-1) &
+                                  * dsqrt(norm_real / norm)
+        else
+          ao_coef_norm_cgtos(i,j) = ao_coef(i,j) / dsqrt(norm)
+        endif
       enddo
 
     else
