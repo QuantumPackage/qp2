@@ -1,4 +1,25 @@
 
+subroutine cgtos_not_implemented(feature)
+
+  implicit none
+  BEGIN_DOC
+  ! Stops if use_cgtos is set: feature is computed with the real-Gaussian code
+  ! (real parts of the exponents only, real normalization), which would silently
+  ! give wrong results for cGTO AOs.
+  END_DOC
+  character*(*), intent(in) :: feature
+
+  if (use_cgtos) then
+    print *, ''
+    print *, 'Error: '//trim(feature)//' is not implemented for cGTO AOs (ao_basis/use_cgtos = True).'
+    print *, 'The real-Gaussian code would use the real parts of the exponents only.'
+    stop 1
+  endif
+
+end
+
+! ---
+
 BEGIN_PROVIDER [logical, use_cgtos]
 
   implicit none

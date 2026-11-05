@@ -18,6 +18,8 @@ double precision function ao_two_e_integral_erf(i,j,k,l)
   
   provide mu_erf
 
+  if (use_cgtos) call cgtos_not_implemented('ao_two_e_integral_erf')
+
    if (ao_prim_num(i) * ao_prim_num(j) * ao_prim_num(k) * ao_prim_num(l) > 1024 ) then
      ao_two_e_integral_erf = ao_two_e_integral_schwartz_accel_erf(i,j,k,l)
      return
