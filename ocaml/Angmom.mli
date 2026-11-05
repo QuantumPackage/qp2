@@ -33,6 +33,10 @@ module Xyz :
     (** Returns the symmetry corresponding to the XYZ powers *)
     val to_symmetry : t -> st
 
+    (** Angular-momentum symbol and monomial: `s`, `p(x)`, `d(xy)`, …
+        The (0,0,0) shell prints the bare `s`. *)
+    val to_symbol_monomial : t -> string
+
 end
 
 

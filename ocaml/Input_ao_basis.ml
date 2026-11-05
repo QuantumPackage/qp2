@@ -401,8 +401,8 @@ end = struct
       let rec do_work = function
       | [] -> []
       | (i,n,x)::tail  ->
-          (Printf.sprintf " %5d  %6d     %-8s\n" i (Nucl_number.to_int n)
-            (Angmom.Xyz.to_string x)
+          (Printf.sprintf " %5d  %6d     %-9s\n" i (Nucl_number.to_int n)
+            (Angmom.Xyz.to_symbol_monomial x)
           )::(do_work tail)
       in do_work l
       |> String.concat ""
@@ -423,11 +423,11 @@ Basis set (read-only) ::
 %s
 
 
-======= ========= ===========
- Basis   Nucleus   Symmetries
-======= ========= ===========
+======= ========= ===================
+ Basis   Nucleus   Cartesian function
+======= ========= ===================
 %s
-======= ========= ===========
+======= ========= ===================
 
 "   (AO_basis_name.to_string b.ao_basis)
     (string_of_bool b.ao_cartesian)

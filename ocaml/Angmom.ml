@@ -181,6 +181,21 @@ module Xyz = struct
  (** Returns the angular momentum corresponding to the XYZ triplet *)
  let to_symmetry sym = of_l (get_l sym)
 
+
+ (** Angular-momentum symbol and monomial: `s`, `p(x)`, `d(xy)`, …
+     The (0,0,0) shell prints the bare `s`.
+     Placed after [get_l] and [to_symmetry], which it calls.  The letter
+     is matched on the top-level [Angmom.t] because the *outer*
+     [to_string] is shadowed here by [Xyz.to_string] (the monomial). *)
+ let to_symbol_monomial t =
+   if (Positive_int.to_int (get_l t) = 0) then "s"
+   else
+     let letter = match to_symmetry t with
+     | S -> "s" | P -> "p" | D -> "d" | F -> "f" | G -> "g"
+     | H -> "h" | I -> "i" | J -> "j" | K -> "k" | L -> "l"
+     in
+     letter ^ "(" ^ (to_string t) ^ ")"
+
 end
 
 module Spd = struct
