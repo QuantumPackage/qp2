@@ -169,7 +169,7 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
   complex*16       :: expo, expo_inv, C_Ae(3), C_Ap(3)
   complex*16       :: expo_k, expo_k_inv, C_Be(3)
   complex*16       :: overlap_x, overlap_y, overlap_z
-  complex*16       :: integ1, integ2, C1, C2
+  complex*16       :: integ1, integ2, lC1(3), lC2(3)
 
   nz = 100
 
@@ -198,16 +198,21 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
             + ao_expo_pw(2,i,j) * ao_expo_pw(2,i,j) &
             + ao_expo_pw(3,i,j) * ao_expo_pw(3,i,j)
 
-        C1 = exp(-(0.d0, 2.d0) * phiA - 0.5d0 * expo_inv * KA2)
-        C2 = exp(-(0.5d0, 0.d0) * real(expo_inv) * KA2)
+        ! logarithms of the plane-wave / phase prefactors of g g and g^* g, per direction,
+        ! combined with the Gaussian-product factor before exponentiation (with plane
+        ! waves both overflow / underflow separately when k^2 Re(1/zeta)/2 > 709)
+        do m = 1, 3
+          lC1(m) = -(0.d0, 2.d0) * ao_expo_phase(m,i,j) - 0.5d0 * expo_inv * ao_expo_pw(m,i,j)**2
+          lC2(m) = -(0.5d0, 0.d0) * real(expo_inv) * ao_expo_pw(m,i,j)**2
+        enddo
 
-        call overlap_cgaussian_xyz(C_Ae, C_Ae, expo, expo, powA, powA, &
-                                   C_Ap, C_Ap, overlap_x, overlap_y, overlap_z, integ1, nz)
+        call overlap_cgaussian_xyz_lpref(C_Ae, C_Ae, expo, expo, powA, powA, &
+                                         C_Ap, C_Ap, lC1, overlap_x, overlap_y, overlap_z, integ1, nz)
 
-        call overlap_cgaussian_xyz(conjg(C_Ae), C_Ae, conjg(expo), expo, powA, powA, &
-                                   conjg(C_Ap), C_Ap, overlap_x, overlap_y, overlap_z, integ2, nz)
+        call overlap_cgaussian_xyz_lpref(conjg(C_Ae), C_Ae, conjg(expo), expo, powA, powA, &
+                                         conjg(C_Ap), C_Ap, lC2, overlap_x, overlap_y, overlap_z, integ2, nz)
 
-        norm = 2.d0 * real(C1 * integ1 + C2 * integ2)
+        norm = 2.d0 * real(integ1 + integ2)
 
         !ao_coef_norm_cgtos(i,j) = 1.d0 / dsqrt(norm)
         ao_coef_norm_cgtos(i,j) = ao_coef(i,j) / dsqrt(norm)
@@ -247,14 +252,18 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
           KB2 = ao_expo_pw(1,i,k) * ao_expo_pw(1,i,k) &
               + ao_expo_pw(2,i,k) * ao_expo_pw(2,i,k) &
               + ao_expo_pw(3,i,k) * ao_expo_pw(3,i,k)
-          C1 = exp(-(0.d0, 1.d0) * (phiA + phiB) - 0.25d0 * (expo_inv * KA2 + expo_k_inv * KB2))
-          C2 = exp( (0.d0, 1.d0) * (phiA - phiB) - 0.25d0 * (conjg(expo_inv) * KA2 + expo_k_inv * KB2))
-          call overlap_cgaussian_xyz(C_Ae, C_Be, expo, expo_k, powA, powA, &
-                                     C_Ap, C_Ap, overlap_x, overlap_y, overlap_z, integ1, nz)
-          call overlap_cgaussian_xyz(conjg(C_Ae), C_Be, conjg(expo), expo_k, powA, powA, &
-                                     conjg(C_Ap), C_Ap, overlap_x, overlap_y, overlap_z, integ2, nz)
+          do m = 1, 3
+            lC1(m) = -(0.d0, 1.d0) * (ao_expo_phase(m,i,j) + ao_expo_phase(m,i,k))   &
+                   - 0.25d0 * (expo_inv * ao_expo_pw(m,i,j)**2 + expo_k_inv * ao_expo_pw(m,i,k)**2)
+            lC2(m) =  (0.d0, 1.d0) * (ao_expo_phase(m,i,j) - ao_expo_phase(m,i,k))   &
+                   - 0.25d0 * (conjg(expo_inv) * ao_expo_pw(m,i,j)**2 + expo_k_inv * ao_expo_pw(m,i,k)**2)
+          enddo
+          call overlap_cgaussian_xyz_lpref(C_Ae, C_Be, expo, expo_k, powA, powA, &
+                                           C_Ap, C_Ap, lC1, overlap_x, overlap_y, overlap_z, integ1, nz)
+          call overlap_cgaussian_xyz_lpref(conjg(C_Ae), C_Be, conjg(expo), expo_k, powA, powA, &
+                                           conjg(C_Ap), C_Ap, lC2, overlap_x, overlap_y, overlap_z, integ2, nz)
           norm = norm + ao_coef_norm_cgtos(i,j) * ao_coef_norm_cgtos(i,k) &
-                      * 2.d0 * real(C1 * integ1 + C2 * integ2)
+                      * 2.d0 * real(integ1 + integ2)
         enddo
       enddo
       do j = 1, ao_prim_num(i)

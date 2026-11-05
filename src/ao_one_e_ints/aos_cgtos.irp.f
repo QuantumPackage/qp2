@@ -20,7 +20,7 @@
   double precision :: KB2(3), phiB(3)
   complex*16       :: alpha, alpha_inv, Ae_center(3), Ap_center(3)
   complex*16       :: beta, beta_inv, Be_center(3), Bp_center(3)
-  complex*16       :: C1(1:4), C2(1:4)
+  complex*16       :: lC1(1:3), lC2(1:3)
   complex*16       :: overlap1, overlap_x1, overlap_y1, overlap_z1
   complex*16       :: overlap2, overlap_x2, overlap_y2, overlap_z2
 
@@ -33,7 +33,7 @@
 
  !$OMP PARALLEL DO SCHEDULE(GUIDED)                                        &
  !$OMP DEFAULT(NONE)                                                       &
- !$OMP PRIVATE(i, j, m, n, l, ii, jj, c, C1, C2,                           &
+ !$OMP PRIVATE(i, j, m, n, l, ii, jj, c, lC1, lC2,                         &
  !$OMP         alpha, alpha_inv, Ae_center, Ap_center, power_A, KA2, phiA, &
  !$OMP         beta, beta_inv, Be_center, Bp_center, power_B, KB2, phiB,   &
  !$OMP         overlap_x , overlap_y , overlap_z , overlap,                &
@@ -83,26 +83,23 @@
 
           c = ao_coef_cgtos_norm_ord_transp(n,j) * ao_coef_cgtos_norm_ord_transp(l,i)
 
-          C1(1) = exp((0.d0, 1.d0) * (-phiA(1) - phiB(1)) - 0.25d0 * (alpha_inv * KA2(1) + beta_inv * KB2(1)))
-          C1(2) = exp((0.d0, 1.d0) * (-phiA(2) - phiB(2)) - 0.25d0 * (alpha_inv * KA2(2) + beta_inv * KB2(2)))
-          C1(3) = exp((0.d0, 1.d0) * (-phiA(3) - phiB(3)) - 0.25d0 * (alpha_inv * KA2(3) + beta_inv * KB2(3)))
-          C1(4) = C1(1) * C1(2) * C1(3)
+          ! logarithms of the plane-wave / phase prefactors, per direction; they are
+          ! combined with the Gaussian-product factor in overlap_cgaussian_xyz_lpref
+          do m = 1, 3
+            lC1(m) = (0.d0, 1.d0) * (-phiA(m) - phiB(m)) - 0.25d0 * (alpha_inv        * KA2(m) + beta_inv * KB2(m))
+            lC2(m) = (0.d0, 1.d0) * ( phiA(m) - phiB(m)) - 0.25d0 * (conjg(alpha_inv) * KA2(m) + beta_inv * KB2(m))
+          enddo
 
-          C2(1) = exp((0.d0, 1.d0) * (phiA(1) - phiB(1)) - 0.25d0 * (conjg(alpha_inv) * KA2(1) + beta_inv * KB2(1)))
-          C2(2) = exp((0.d0, 1.d0) * (phiA(2) - phiB(2)) - 0.25d0 * (conjg(alpha_inv) * KA2(2) + beta_inv * KB2(2)))
-          C2(3) = exp((0.d0, 1.d0) * (phiA(3) - phiB(3)) - 0.25d0 * (conjg(alpha_inv) * KA2(3) + beta_inv * KB2(3)))
-          C2(4) = C2(1) * C2(2) * C2(3)
+          call overlap_cgaussian_xyz_lpref(Ae_center, Be_center, alpha, beta, power_A, power_B, &
+                                           Ap_center, Bp_center, lC1, overlap_x1, overlap_y1, overlap_z1, overlap1, dim1)
 
-          call overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
-                                     Ap_center, Bp_center, overlap_x1, overlap_y1, overlap_z1, overlap1, dim1)
+          call overlap_cgaussian_xyz_lpref(conjg(Ae_center), Be_center, conjg(alpha), beta, power_A, power_B, &
+                                           conjg(Ap_center), Bp_center, lC2, overlap_x2, overlap_y2, overlap_z2, overlap2, dim1)
 
-          call overlap_cgaussian_xyz(conjg(Ae_center), Be_center, conjg(alpha), beta, power_A, power_B, &
-                                     conjg(Ap_center), Bp_center, overlap_x2, overlap_y2, overlap_z2, overlap2, dim1)
-
-          overlap_x = 2.d0 * real(C1(1) * overlap_x1 + C2(1) * overlap_x2)
-          overlap_y = 2.d0 * real(C1(2) * overlap_y1 + C2(2) * overlap_y2)
-          overlap_z = 2.d0 * real(C1(3) * overlap_z1 + C2(3) * overlap_z2)
-          overlap   = 2.d0 * real(C1(4) * overlap1   + C2(4) * overlap2  )
+          overlap_x = 2.d0 * real(overlap_x1 + overlap_x2)
+          overlap_y = 2.d0 * real(overlap_y1 + overlap_y2)
+          overlap_z = 2.d0 * real(overlap_z1 + overlap_z2)
+          overlap   = 2.d0 * real(overlap1   + overlap2  )
 
           ao_overlap_cgtos(i,j) = ao_overlap_cgtos(i,j) + c * overlap
 

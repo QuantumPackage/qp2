@@ -62,11 +62,46 @@ subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, pow
   END_DOC
 
   implicit none
+
+  integer,    intent(in)  :: dim, power_A(3), power_B(3)
+  complex*16, intent(in)  :: Ae_center(3), alpha, Ap_center(3)
+  complex*16, intent(in)  :: Be_center(3), beta, Bp_center(3)
+  complex*16, intent(out) :: overlap_x, overlap_y, overlap_z, overlap
+
+  complex*16              :: lpref(3)
+
+  lpref(1:3) = (0.d0, 0.d0)
+  call overlap_cgaussian_xyz_lpref(Ae_center, Be_center, alpha, beta, power_A, power_B, &
+                                   Ap_center, Bp_center, lpref, overlap_x, overlap_y, overlap_z, overlap, dim)
+
+end
+
+! ---
+
+subroutine overlap_cgaussian_xyz_lpref(Ae_center, Be_center, alpha, beta, power_A, power_B, &
+                                       Ap_center, Bp_center, lpref, overlap_x, overlap_y, overlap_z, overlap, dim)
+
+  BEGIN_DOC
+  !
+  ! Same as overlap_cgaussian_xyz, each 1D factor multiplied by exp(lpref(x)):
+  !
+  !   S_x = exp(lpref(x)) \int (x - Ap_x)^{a_x} exp(-\alpha (x - Ae_x)^2)
+  !                             (x - Bp_x)^{b_x} exp(-\beta  (x - Be_x)^2) dx
+  !
+  ! lpref is the logarithm of the plane-wave / phase prefactor of the pair,
+  ! i(-phi_A -phi_B) - (k_{A,x}^2/alpha + k_{B,x}^2/beta)/4 per direction. It is added
+  ! to the exponent of the Gaussian-product factor before exponentiation: with plane
+  ! waves the two factors overflow / underflow separately (k^2 Re(1/zeta)/2 > 709).
+  !
+  END_DOC
+
+  implicit none
   include 'constants.include.F'
 
   integer,    intent(in)  :: dim, power_A(3), power_B(3)
   complex*16, intent(in)  :: Ae_center(3), alpha, Ap_center(3)
   complex*16, intent(in)  :: Be_center(3), beta, Bp_center(3)
+  complex*16, intent(in)  :: lpref(3)
   complex*16, intent(out) :: overlap_x, overlap_y, overlap_z, overlap
 
   integer                 :: i, nmax, iorder_p(3)
@@ -101,7 +136,7 @@ subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, pow
   ab = alpha * beta * inv_sq_p * inv_sq_p
 
   arg = ab * (Ae_center(1) - Be_center(1)) &
-           * (Ae_center(1) - Be_center(1))
+           * (Ae_center(1) - Be_center(1)) - lpref(1)
   if(real(arg) > 700.d0) then
     overlap_x = (0.d0, 0.d0)
   else
@@ -113,7 +148,7 @@ subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, pow
   endif
 
   arg = ab * (Ae_center(2) - Be_center(2)) &
-           * (Ae_center(2) - Be_center(2))
+           * (Ae_center(2) - Be_center(2)) - lpref(2)
   if(real(arg) > 700.d0) then
     overlap_y = (0.d0, 0.d0)
   else
@@ -125,7 +160,7 @@ subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, pow
   endif
 
   arg = ab * (Ae_center(3) - Be_center(3)) &
-           * (Ae_center(3) - Be_center(3))
+           * (Ae_center(3) - Be_center(3)) - lpref(3)
   if(real(arg) > 700.d0) then
     overlap_z = (0.d0, 0.d0)
   else

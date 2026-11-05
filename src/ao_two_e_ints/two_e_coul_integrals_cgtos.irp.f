@@ -32,6 +32,7 @@ double precision function ao_two_e_integral_cgtos(i, j, k, l)
   complex*16                 :: int1, int2, int3, int4
   complex*16                 :: int5, int6, int7, int8
   complex*16                 :: C1, C2, C3, C4, C5, C6, C7, C8
+  complex*16                 :: lC1, lC2, lC3, lC4, lC5, lC6, lC7, lC8
   complex*16                 :: int_tot
 
   double precision, external :: ao_2e_cgtos_schwartz_accel
@@ -134,56 +135,56 @@ double precision function ao_two_e_integral_cgtos(i, j, k, l)
 
             q2_inv = (1.d0, 0.d0) / qq2
 
-            C1 = exp((0.d0, 1.d0) * (-phiI - phiJ - phiK - phiL) &
+            lC1 = ((0.d0, 1.d0) * (-phiI - phiJ - phiK - phiL) &
                      - 0.25d0 * (expo1_inv * KI2 + expo2_inv * KJ2 + expo3_inv * KK2 + expo4_inv * KL2))
-            C2 = exp((0.d0, 1.d0) * (-phiI - phiJ + phiK - phiL) &
+            lC2 = ((0.d0, 1.d0) * (-phiI - phiJ + phiK - phiL) &
                      - 0.25d0 * (expo1_inv * KI2 + expo2_inv * KJ2 + conjg(expo3_inv) * KK2 + expo4_inv * KL2))
-            C3 = exp((0.d0, 1.d0) * ( phiI - phiJ - phiK - phiL) &
+            lC3 = ((0.d0, 1.d0) * ( phiI - phiJ - phiK - phiL) &
                      - 0.25d0 * (conjg(expo1_inv) * KI2 + expo2_inv * KJ2 + expo3_inv * KK2 + expo4_inv * KL2))
-            C4 = exp((0.d0, 1.d0) * ( phiI - phiJ + phiK - phiL) &
+            lC4 = ((0.d0, 1.d0) * ( phiI - phiJ + phiK - phiL) &
                      - 0.25d0 * (conjg(expo1_inv) * KI2 + expo2_inv * KJ2 + conjg(expo3_inv) * KK2 + expo4_inv * KL2))
-            C5 = exp((0.d0, 1.d0) * (-phiI + phiJ - phiK - phiL) &
+            lC5 = ((0.d0, 1.d0) * (-phiI + phiJ - phiK - phiL) &
                      - 0.25d0 * (expo1_inv * KI2 + conjg(expo2_inv) * KJ2 + expo3_inv * KK2 + expo4_inv * KL2))
-            C6 = exp((0.d0, 1.d0) * (-phiI + phiJ + phiK - phiL) &
+            lC6 = ((0.d0, 1.d0) * (-phiI + phiJ + phiK - phiL) &
                      - 0.25d0 * (expo1_inv * KI2 + conjg(expo2_inv) * KJ2 + conjg(expo3_inv) * KK2 + expo4_inv * KL2))
-            C7 = exp((0.d0, 1.d0) * ( phiI + phiJ - phiK - phiL) &
+            lC7 = ((0.d0, 1.d0) * ( phiI + phiJ - phiK - phiL) &
                      - 0.25d0 * (conjg(expo1_inv) * KI2 + conjg(expo2_inv) * KJ2 + expo3_inv * KK2 + expo4_inv * KL2))
-            C8 = exp((0.d0, 1.d0) * ( phiI + phiJ + phiK - phiL) &
+            lC8 = ((0.d0, 1.d0) * ( phiI + phiJ + phiK - phiL) &
                      - 0.25d0 * (conjg(expo1_inv) * KI2 + conjg(expo2_inv) * KJ2 + conjg(expo3_inv) * KK2 + expo4_inv * KL2))
 
             int1 = general_primitive_integral_cgtos(dim1,                &
                      P1_new, P1_center, lfact_p1, pp1, p1_inv, iorder_p1, &
-                     Q1_new, Q1_center, lfact_q1, qq1, q1_inv, iorder_q1)
+                     Q1_new, Q1_center, lfact_q1 + lC1, qq1, q1_inv, iorder_q1)
 
             int2 = general_primitive_integral_cgtos(dim1,                &
                      P1_new, P1_center, lfact_p1, pp1, p1_inv, iorder_p1, &
-                     Q2_new, Q2_center, lfact_q2, qq2, q2_inv, iorder_q2)
+                     Q2_new, Q2_center, lfact_q2 + lC2, qq2, q2_inv, iorder_q2)
 
             int3 = general_primitive_integral_cgtos(dim1,                &
                      P2_new, P2_center, lfact_p2, pp2, p2_inv, iorder_p2, &
-                     Q1_new, Q1_center, lfact_q1, qq1, q1_inv, iorder_q1)
+                     Q1_new, Q1_center, lfact_q1 + lC3, qq1, q1_inv, iorder_q1)
 
             int4 = general_primitive_integral_cgtos(dim1,                &
                      P2_new, P2_center, lfact_p2, pp2, p2_inv, iorder_p2, &
-                     Q2_new, Q2_center, lfact_q2, qq2, q2_inv, iorder_q2)
+                     Q2_new, Q2_center, lfact_q2 + lC4, qq2, q2_inv, iorder_q2)
 
             int5 = general_primitive_integral_cgtos(dim1,                                                   &
                      conjg(P2_new), conjg(P2_center), conjg(lfact_p2), conjg(pp2), conjg(p2_inv), iorder_p2, &
-                     Q1_new, Q1_center, lfact_q1, qq1, q1_inv, iorder_q1)
+                     Q1_new, Q1_center, lfact_q1 + lC5, qq1, q1_inv, iorder_q1)
 
             int6 = general_primitive_integral_cgtos(dim1,                                                   &
                      conjg(P2_new), conjg(P2_center), conjg(lfact_p2), conjg(pp2), conjg(p2_inv), iorder_p2, &
-                     Q2_new, Q2_center, lfact_q2, qq2, q2_inv, iorder_q2)
+                     Q2_new, Q2_center, lfact_q2 + lC6, qq2, q2_inv, iorder_q2)
 
             int7 = general_primitive_integral_cgtos(dim1,                                                   &
                      conjg(P1_new), conjg(P1_center), conjg(lfact_p1), conjg(pp1), conjg(p1_inv), iorder_p1, &
-                     Q1_new, Q1_center, lfact_q1, qq1, q1_inv, iorder_q1)
+                     Q1_new, Q1_center, lfact_q1 + lC7, qq1, q1_inv, iorder_q1)
 
             int8 = general_primitive_integral_cgtos(dim1,                                                   &
                      conjg(P1_new), conjg(P1_center), conjg(lfact_p1), conjg(pp1), conjg(p1_inv), iorder_p1, &
-                     Q2_new, Q2_center, lfact_q2, qq2, q2_inv, iorder_q2)
+                     Q2_new, Q2_center, lfact_q2 + lC8, qq2, q2_inv, iorder_q2)
 
-            int_tot = C1 * int1 + C2 * int2 + C3 * int3 + C4 * int4 + C5 * int5 + C6 * int6 + C7 * int7 + C8 * int8
+            int_tot = int1 + int2 + int3 + int4 + int5 + int6 + int7 + int8
 
             ao_two_e_integral_cgtos = ao_two_e_integral_cgtos + coef4 * 2.d0 * real(int_tot)
           enddo ! s
@@ -312,6 +313,7 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
   complex*16                    :: int1, int2, int3, int4
   complex*16                    :: int5, int6, int7, int8
   complex*16                    :: C1, C2, C3, C4, C5, C6, C7, C8
+  complex*16                    :: lC1, lC2, lC3, lC4, lC5, lC6, lC7, lC8
   complex*16                    :: int_tot
 
   double precision, allocatable :: schwartz_kl(:,:)
@@ -380,22 +382,22 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
 
         p2_inv = (1.d0, 0.d0) / pp2
 
-        C1 = exp(-(0.d0, 2.d0) * (phiK + phiL) - 0.5d0 * (expo1_inv * KK2 + expo2_inv * KL2))
-        C2 = exp(-(0.d0, 2.d0) * phiL - 0.5d0 * (real(expo1_inv) * KK2 + expo2_inv * KL2))
+        lC1 = (-(0.d0, 2.d0) * (phiK + phiL) - 0.5d0 * (expo1_inv * KK2 + expo2_inv * KL2))
+        lC2 = (-(0.d0, 2.d0) * phiL - 0.5d0 * (real(expo1_inv) * KK2 + expo2_inv * KL2))
         !C3 = C2
-        C4 = exp((0.d0, 2.d0) * (phiK - phiL) - 0.5d0 * (conjg(expo1_inv) * KK2 + expo2_inv * KL2))
-        C5 = exp(-(0.d0, 2.d0) * phiK - 0.5d0 * (expo1_inv * KK2 + real(expo2_inv) * KL2))
-        C6 = exp(-(0.5d0, 0.d0) * (real(expo1_inv) * KK2 + real(expo2_inv) * KL2))
+        lC4 = ((0.d0, 2.d0) * (phiK - phiL) - 0.5d0 * (conjg(expo1_inv) * KK2 + expo2_inv * KL2))
+        lC5 = (-(0.d0, 2.d0) * phiK - 0.5d0 * (expo1_inv * KK2 + real(expo2_inv) * KL2))
+        lC6 = (-(0.5d0, 0.d0) * (real(expo1_inv) * KK2 + real(expo2_inv) * KL2))
         !C7 = C6
         !C8 = conjg(C5)
 
         int1 = general_primitive_integral_cgtos(dim1,                &
                  P1_new, P1_center, lfact_p1, pp1, p1_inv, iorder_p1, &
-                 P1_new, P1_center, lfact_p1, pp1, p1_inv, iorder_p1)
+                 P1_new, P1_center, lfact_p1 + lC1, pp1, p1_inv, iorder_p1)
 
         int2 = general_primitive_integral_cgtos(dim1,                &
                  P1_new, P1_center, lfact_p1, pp1, p1_inv, iorder_p1, &
-                 P2_new, P2_center, lfact_p2, pp2, p2_inv, iorder_p2)
+                 P2_new, P2_center, lfact_p2 + lC2, pp2, p2_inv, iorder_p2)
 
         ! int3 = int2
         !int3 = general_primitive_integral_cgtos(dim1,                &
@@ -404,19 +406,19 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
 
         int4 = general_primitive_integral_cgtos(dim1,                &
                  P2_new, P2_center, lfact_p2, pp2, p2_inv, iorder_p2, &
-                 P2_new, P2_center, lfact_p2, pp2, p2_inv, iorder_p2)
+                 P2_new, P2_center, lfact_p2 + lC4, pp2, p2_inv, iorder_p2)
 
         int5 = general_primitive_integral_cgtos(dim1,                                                   &
                  conjg(P2_new), conjg(P2_center), conjg(lfact_p2), conjg(pp2), conjg(p2_inv), iorder_p2, &
-                 P1_new, P1_center, lfact_p1, pp1, p1_inv, iorder_p1)
+                 P1_new, P1_center, lfact_p1 + lC5, pp1, p1_inv, iorder_p1)
 
         int6 = general_primitive_integral_cgtos(dim1,                                                   &
                  conjg(P2_new), conjg(P2_center), conjg(lfact_p2), conjg(pp2), conjg(p2_inv), iorder_p2, &
-                 P2_new, P2_center, lfact_p2, pp2, p2_inv, iorder_p2)
+                 P2_new, P2_center, lfact_p2 + lC6, pp2, p2_inv, iorder_p2)
 
         int7 = general_primitive_integral_cgtos(dim1,                                                   &
                  conjg(P1_new), conjg(P1_center), conjg(lfact_p1), conjg(pp1), conjg(p1_inv), iorder_p1, &
-                 P1_new, P1_center, lfact_p1, pp1, p1_inv, iorder_p1)
+                 P1_new, P1_center, lfact_p1 + lC6, pp1, p1_inv, iorder_p1)
 
         !int8 = conjg(int5)
         !int8 = general_primitive_integral_cgtos(dim1,                                                   &
@@ -424,7 +426,7 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
         !         P2_new, P2_center, lfact_p2, pp2, p2_inv, iorder_p2)
 
         !int_tot = C1 * int1 + C2 * int2 + C3 * int3 + C4 * int4 + C5 * int5 + C6 * int6 + C7 * int7 + C8 * int8
-        int_tot = C1 * int1 + 2.d0 * C2 * int2 + C4 * int4 + 2.d0 * real(C5 * int5) + C6 * (int6 + int7)
+        int_tot = int1 + 2.d0 * int2 + int4 + 2.d0 * real(int5) + int6 + int7
 
         schwartz_kl(s,r) = coef2 * 2.d0 * real(int_tot)
 
@@ -468,22 +470,22 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
                  conjg(expo1), expo2, I_power, J_power, conjg(Ie_center), Je_center, conjg(Ip_center), Jp_center, dim1)
         p2_inv = (1.d0, 0.d0) / pp2
 
-        C1 = exp(-(0.d0, 2.d0) * (phiI + phiJ) - 0.5d0 * (expo1_inv * KI2 + expo2_inv * KJ2))
-        C2 = exp(-(0.d0, 2.d0) * phiJ - 0.5d0 * (real(expo1_inv) * KI2 + expo2_inv * KJ2))
+        lC1 = (-(0.d0, 2.d0) * (phiI + phiJ) - 0.5d0 * (expo1_inv * KI2 + expo2_inv * KJ2))
+        lC2 = (-(0.d0, 2.d0) * phiJ - 0.5d0 * (real(expo1_inv) * KI2 + expo2_inv * KJ2))
         !C3 = C2
-        C4 = exp((0.d0, 2.d0) * (phiI - phiJ) - 0.5d0 * (conjg(expo1_inv) * KI2 + expo2_inv * KJ2))
-        C5 = exp(-(0.d0, 2.d0) * phiI - 0.5d0 * (expo1_inv * KI2 + real(expo2_inv) * KJ2))
-        C6 = exp(-(0.5d0, 0.d0) * (real(expo1_inv) * KI2 + real(expo2_inv) * KJ2))
+        lC4 = ((0.d0, 2.d0) * (phiI - phiJ) - 0.5d0 * (conjg(expo1_inv) * KI2 + expo2_inv * KJ2))
+        lC5 = (-(0.d0, 2.d0) * phiI - 0.5d0 * (expo1_inv * KI2 + real(expo2_inv) * KJ2))
+        lC6 = (-(0.5d0, 0.d0) * (real(expo1_inv) * KI2 + real(expo2_inv) * KJ2))
         !C7 = C6
         !C8 = conjg(C5)
 
         int1 = general_primitive_integral_cgtos(dim1,                &
                  P1_new, P1_center, lfact_p1, pp1, p1_inv, iorder_p1, &
-                 P1_new, P1_center, lfact_p1, pp1, p1_inv, iorder_p1)
+                 P1_new, P1_center, lfact_p1 + lC1, pp1, p1_inv, iorder_p1)
 
         int2 = general_primitive_integral_cgtos(dim1,                &
                  P1_new, P1_center, lfact_p1, pp1, p1_inv, iorder_p1, &
-                 P2_new, P2_center, lfact_p2, pp2, p2_inv, iorder_p2)
+                 P2_new, P2_center, lfact_p2 + lC2, pp2, p2_inv, iorder_p2)
 
         !int3 = int1
         !int3 = general_primitive_integral_cgtos(dim1,                &
@@ -492,19 +494,19 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
 
         int4 = general_primitive_integral_cgtos(dim1,                &
                  P2_new, P2_center, lfact_p2, pp2, p2_inv, iorder_p2, &
-                 P2_new, P2_center, lfact_p2, pp2, p2_inv, iorder_p2)
+                 P2_new, P2_center, lfact_p2 + lC4, pp2, p2_inv, iorder_p2)
 
         int5 = general_primitive_integral_cgtos(dim1,                                                   &
                  conjg(P2_new), conjg(P2_center), conjg(lfact_p2), conjg(pp2), conjg(p2_inv), iorder_p2, &
-                 P1_new, P1_center, lfact_p1, pp1, p1_inv, iorder_p1)
+                 P1_new, P1_center, lfact_p1 + lC5, pp1, p1_inv, iorder_p1)
 
         int6 = general_primitive_integral_cgtos(dim1,                                                   &
                  conjg(P2_new), conjg(P2_center), conjg(lfact_p2), conjg(pp2), conjg(p2_inv), iorder_p2, &
-                 P2_new, P2_center, lfact_p2, pp2, p2_inv, iorder_p2)
+                 P2_new, P2_center, lfact_p2 + lC6, pp2, p2_inv, iorder_p2)
 
         int7 = general_primitive_integral_cgtos(dim1,                                                   &
                  conjg(P1_new), conjg(P1_center), conjg(lfact_p1), conjg(pp1), conjg(p1_inv), iorder_p1, &
-                 P1_new, P1_center, lfact_p1, pp1, p1_inv, iorder_p1)
+                 P1_new, P1_center, lfact_p1 + lC6, pp1, p1_inv, iorder_p1)
 
         !int8 = conjg(I5)
         !int8 = general_primitive_integral_cgtos(dim1,                                                   &
@@ -512,7 +514,7 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
         !         P2_new, P2_center, lfact_p2, pp2, p2_inv, iorder_p2)
 
         !int_tot = C1 * int1 + C2 * int2 + C3 * int3 + C4 * int4 + C5 * int5 + C6 * int6 + C7 * int7 + C8 * int8
-        int_tot = C1 * int1 + 2.d0 * C2 * int2 + C4 * int4 + 2.d0 * real(C5 * int5) + C6 * (int6 + int7)
+        int_tot = int1 + 2.d0 * int2 + int4 + 2.d0 * real(int5) + int6 + int7
 
         schwartz_ij = coef2 * coef2 * 2.d0 * real(int_tot)
 
@@ -554,56 +556,56 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
 
             q2_inv = (1.d0, 0.d0) / qq2
 
-            C1 = exp((0.d0, 1.d0) * (-phiI - phiJ - phiK - phiL) &
+            lC1 = ((0.d0, 1.d0) * (-phiI - phiJ - phiK - phiL) &
                      - 0.25d0 * (expo1_inv * KI2 + expo2_inv * KJ2 + expo3_inv * KK2 + expo4_inv * KL2))
-            C2 = exp((0.d0, 1.d0) * (-phiI - phiJ + phiK - phiL) &
+            lC2 = ((0.d0, 1.d0) * (-phiI - phiJ + phiK - phiL) &
                      - 0.25d0 * (expo1_inv * KI2 + expo2_inv * KJ2 + conjg(expo3_inv) * KK2 + expo4_inv * KL2))
-            C3 = exp((0.d0, 1.d0) * ( phiI - phiJ - phiK - phiL) &
+            lC3 = ((0.d0, 1.d0) * ( phiI - phiJ - phiK - phiL) &
                      - 0.25d0 * (conjg(expo1_inv) * KI2 + expo2_inv * KJ2 + expo3_inv * KK2 + expo4_inv * KL2))
-            C4 = exp((0.d0, 1.d0) * ( phiI - phiJ + phiK - phiL) &
+            lC4 = ((0.d0, 1.d0) * ( phiI - phiJ + phiK - phiL) &
                      - 0.25d0 * (conjg(expo1_inv) * KI2 + expo2_inv * KJ2 + conjg(expo3_inv) * KK2 + expo4_inv * KL2))
-            C5 = exp((0.d0, 1.d0) * (-phiI + phiJ - phiK - phiL) &
+            lC5 = ((0.d0, 1.d0) * (-phiI + phiJ - phiK - phiL) &
                      - 0.25d0 * (expo1_inv * KI2 + conjg(expo2_inv) * KJ2 + expo3_inv * KK2 + expo4_inv * KL2))
-            C6 = exp((0.d0, 1.d0) * (-phiI + phiJ + phiK - phiL) &
+            lC6 = ((0.d0, 1.d0) * (-phiI + phiJ + phiK - phiL) &
                      - 0.25d0 * (expo1_inv * KI2 + conjg(expo2_inv) * KJ2 + conjg(expo3_inv) * KK2 + expo4_inv * KL2))
-            C7 = exp((0.d0, 1.d0) * ( phiI + phiJ - phiK - phiL) &
+            lC7 = ((0.d0, 1.d0) * ( phiI + phiJ - phiK - phiL) &
                      - 0.25d0 * (conjg(expo1_inv) * KI2 + conjg(expo2_inv) * KJ2 + expo3_inv * KK2 + expo4_inv * KL2))
-            C8 = exp((0.d0, 1.d0) * ( phiI + phiJ + phiK - phiL) &
+            lC8 = ((0.d0, 1.d0) * ( phiI + phiJ + phiK - phiL) &
                      - 0.25d0 * (conjg(expo1_inv) * KI2 + conjg(expo2_inv) * KJ2 + conjg(expo3_inv) * KK2 + expo4_inv * KL2))
 
             int1 = general_primitive_integral_cgtos(dim1,                &
                      P1_new, P1_center, lfact_p1, pp1, p1_inv, iorder_p1, &
-                     Q1_new, Q1_center, lfact_q1, qq1, q1_inv, iorder_q1)
+                     Q1_new, Q1_center, lfact_q1 + lC1, qq1, q1_inv, iorder_q1)
 
             int2 = general_primitive_integral_cgtos(dim1,                &
                      P1_new, P1_center, lfact_p1, pp1, p1_inv, iorder_p1, &
-                     Q2_new, Q2_center, lfact_q2, qq2, q2_inv, iorder_q2)
+                     Q2_new, Q2_center, lfact_q2 + lC2, qq2, q2_inv, iorder_q2)
 
             int3 = general_primitive_integral_cgtos(dim1,                &
                      P2_new, P2_center, lfact_p2, pp2, p2_inv, iorder_p2, &
-                     Q1_new, Q1_center, lfact_q1, qq1, q1_inv, iorder_q1)
+                     Q1_new, Q1_center, lfact_q1 + lC3, qq1, q1_inv, iorder_q1)
 
             int4 = general_primitive_integral_cgtos(dim1,                &
                      P2_new, P2_center, lfact_p2, pp2, p2_inv, iorder_p2, &
-                     Q2_new, Q2_center, lfact_q2, qq2, q2_inv, iorder_q2)
+                     Q2_new, Q2_center, lfact_q2 + lC4, qq2, q2_inv, iorder_q2)
 
             int5 = general_primitive_integral_cgtos(dim1,                                                   &
                      conjg(P2_new), conjg(P2_center), conjg(lfact_p2), conjg(pp2), conjg(p2_inv), iorder_p2, &
-                     Q1_new, Q1_center, lfact_q1, qq1, q1_inv, iorder_q1)
+                     Q1_new, Q1_center, lfact_q1 + lC5, qq1, q1_inv, iorder_q1)
 
             int6 = general_primitive_integral_cgtos(dim1,                                                   &
                      conjg(P2_new), conjg(P2_center), conjg(lfact_p2), conjg(pp2), conjg(p2_inv), iorder_p2, &
-                     Q2_new, Q2_center, lfact_q2, qq2, q2_inv, iorder_q2)
+                     Q2_new, Q2_center, lfact_q2 + lC6, qq2, q2_inv, iorder_q2)
 
             int7 = general_primitive_integral_cgtos(dim1,                                                   &
                      conjg(P1_new), conjg(P1_center), conjg(lfact_p1), conjg(pp1), conjg(p1_inv), iorder_p1, &
-                     Q1_new, Q1_center, lfact_q1, qq1, q1_inv, iorder_q1)
+                     Q1_new, Q1_center, lfact_q1 + lC7, qq1, q1_inv, iorder_q1)
 
             int8 = general_primitive_integral_cgtos(dim1,                                                   &
                      conjg(P1_new), conjg(P1_center), conjg(lfact_p1), conjg(pp1), conjg(p1_inv), iorder_p1, &
-                     Q2_new, Q2_center, lfact_q2, qq2, q2_inv, iorder_q2)
+                     Q2_new, Q2_center, lfact_q2 + lC8, qq2, q2_inv, iorder_q2)
 
-            int_tot = C1 * int1 + C2 * int2 + C3 * int3 + C4 * int4 + C5 * int5 + C6 * int6 + C7 * int7 + C8 * int8
+            int_tot = int1 + int2 + int3 + int4 + int5 + int6 + int7 + int8
 
             ao_2e_cgtos_schwartz_accel = ao_2e_cgtos_schwartz_accel + coef4 * 2.d0 * real(int_tot)
           enddo ! s
@@ -873,7 +875,11 @@ complex*16 function general_primitive_integral_cgtos(dim, P_new, P_center, lfact
   !
   ! lfact_p, lfact_q: exponents of the Gaussian-product factors (see
   ! give_explicit_cpoly_and_cgaussian_log), combined with the Boys function in
-  ! crint_sum_shift. Negligible pairs are marked by Re(p) or Re(q) = 1e14.
+  ! crint_sum_shift. The callers add to lfact_q the logarithm of the plane-wave
+  ! and phase prefactor, exp(-i sum phi - sum k^2/(4 zeta)): with plane waves
+  ! exp(lfact) and this prefactor overflow / underflow separately (e.g. Re lfact
+  ! = k^2 Re(1/zeta) for the diagonal of a primitive), their product does not.
+  ! Negligible pairs are marked by Re(p) or Re(q) = 1e14.
   !
   END_DOC
 
