@@ -9,10 +9,14 @@ on:
     branches: [master, dev-stable]
   pull_request:
     branches: [master, dev-stable]
+  workflow_dispatch:
 
 concurrency:
   group: macos-${{ github.ref }}
-  cancel-in-progress: true
+  # A cancelled run on a merge commit is indistinguishable from a broken
+  # build, so push runs always finish. PR runs still supersede their own
+  # previous run: a 35-minute build of a stale commit is worthless.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
