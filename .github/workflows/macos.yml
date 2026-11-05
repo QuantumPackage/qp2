@@ -9,10 +9,14 @@ on:
     branches: [master, dev-stable]
   pull_request:
     branches: [master, dev-stable]
+  workflow_dispatch:
 
 concurrency:
   group: macos-${{ github.ref }}
-  cancel-in-progress: true
+  # A cancelled run on a merge commit is indistinguishable from a broken
+  # build, so push runs always finish. PR runs still supersede their own
+  # previous run: a 35-minute build of a stale commit is worthless.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
@@ -24,6 +28,28 @@ jobs:
           submodules: recursive
       - name: Install toolchain
         run: |
-          brew install gfortran gcc hdf5 pkg-config
+          brew install gfortran gcc hdf5 pkg-config ocaml
+      # Dependency install prefix, as cached on x86 by configuration.yml
+      # (qp2-config). `configure -i` always rebuilds and never looks at what
+      # is installed, so ci/macos-ci.sh skips the whole install stage when
+      # lib/.qp2-ci-deps-ok is present -- that marker is written only after a
+      # complete install, and it is part of the cached tree, so a run that
+      # dies half-way leaves a cache the next run refuses to trust.
+      # Keyed on the two files that pin dependency versions, build flags and
+      # the package list. Deliberately no restore-keys: a partial match could
+      # restore an older install *with* its marker and pass the gate with
+      # stale libraries.
+      # Bump the vN suffix when the DEPS list in ci/macos-ci.sh changes.
+      - name: Restore dependency cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            lib/
+            include/
+            bin/
+            share/
+            libexec/
+            external/Python/
+          key: qp2-macos-deps-v1-${{ hashFiles('configure', 'ci/macos-ci.sh') }}
       - name: Configure and build
         run: bash ci/macos-ci.sh

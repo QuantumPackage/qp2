@@ -4,14 +4,19 @@
 #
 # Builds every C/Fortran target (`ninja all`). The OCaml tools target is NOT
 # built: the in-tree opampack ships OCaml 4.12 (2023) while the OCaml code
-# needs >= 5.0, so a fresh `./configure -i all` OCaml build fails on EVERY
-# platform (upstream gap, independent of macOS). `ocaml` is installed anyway
-# (via -i all) because configure's validation block requires `find_exe ocamlc`.
+# needs >= 5.0, so a fresh OCaml build from opampack fails on EVERY platform
+# (upstream gap, independent of macOS). `ocamlc` must still exist, because
+# configure's validation block requires `find_exe ocamlc`: the workflow gets
+# it from a Homebrew bottle instead of `-i ocaml` (298 s of source build).
 #
 # How `./configure` behaves (matters for this script):
-#   - `-i` takes a SINGLE argument; `-i all` is the canonical package list
+#   - `-i` takes a single string that is split on spaces; `-i all` expands to
 #     (cmake zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats
-#     trexio armadillo openorb simple_gpu). qmckl is NOT in `all`.
+#     trexio armadillo openorb simple_gpu). qmckl is NOT in `all`, and this
+#     script passes that list explicitly to omit `ocaml`.
+#   - `-i <pkg>` always reinstalls; it never checks whether the library is
+#     already present. That is why a cache hit has to skip this stage
+#     entirely rather than rely on the installed tree being seen.
 #   - A failing package step is NON-fatal: the executed command list ends
 #     in `set +x`, which masks the failure; the final validation block
 #     (find_lib / find_exe / find_python_lib) is the real gate.
@@ -29,19 +34,19 @@
 #      "C compiler cannot create executables"). The shim must stay global:
 #      it is needed by the zlib/zeromq/gmp/trexio/qmckl builds AND by the
 #      gate's find_lib link tests, which invoke bare `gcc`.
-#   2. qmckl is built AFTER `-i all`, not before: it links against trexio
-#      (AC_CHECK_LIB trexio_open), which `-i all` installs.
+#   2. qmckl is built AFTER the dependency list, not before: it links against
+#      trexio (AC_CHECK_LIB trexio_open), which that stage installs.
 #   3. The `cmake` package downloads a nonexistent Darwin tarball (upstream
 #      404, non-fatal): find_exe picks up Homebrew's cmake instead.
 #
-# simple_gpu: installed by `-i all` from the v1.0.3 release, which carries
+# simple_gpu: installed from the v1.0.3 release, which carries
 # the Apple Accelerate sdot fix (scemama/simple_gpu#16). Its own
 # `make check` (8/8, incl. test_sdot_cpu against the system Accelerate)
 # passes on this platform, so the step completes through `make install`.
 #
-# Prerequisites: gfortran, a versioned Homebrew gcc (gcc-NN/g++-NN), hdf5 and
-# pkg-config, installed by the workflow; cmake, wget and the autoconf
-# toolchain ship with the GitHub runner image.
+# Prerequisites: gfortran, a versioned Homebrew gcc (gcc-NN/g++-NN), hdf5,
+# pkg-config and ocaml, installed by the workflow; cmake, wget and the
+# autoconf toolchain ship with the GitHub runner image.
 
 set -euo pipefail
 
@@ -65,11 +70,34 @@ export PATH="$SHIM:$PATH"
 # expected to fail: tolerate it. The real gate is the one at the end of [2/4],
 # where every dependency exists.
 
-echo "==> [1/4] all in-tree dependencies (gate fails yet: qmckl not built)"
-./configure -i all || :
+# `configure -i all` minus `ocaml`: the OCaml toolchain is only needed so that
+# configure's validation gate finds `ocamlc` (the OCaml tools target is not
+# part of `ninja all`), and the workflow installs it from a Homebrew bottle.
+# The in-tree opampack instead wipes external/opampack and builds OCaml from
+# source, which measured 298 s of the 598 s dependency stage on the hosted
+# runner (run 42005019655, 2026-11-05).
+DEPS="cmake zlib ninja zeromq f77zmq gmp docopt resultsFile bats trexio armadillo openorb simple_gpu"
 
-echo "==> [2/4] qmckl (needs trexio from [1/4]); its trailing gate must pass"
-./configure -i qmckl
+# Everything the installs produce lives in $QP_ROOT/{lib,include,bin,share,
+# libexec} plus external/Python (where docopt and resultsFile are copied).
+# The workflow caches exactly those paths; this marker, saved inside the
+# cached tree, records that the install stage ran to completion. A run that
+# dies half-way saves a cache without it, so the next run reinstalls instead
+# of trusting a partial tree. `configure -i` always rebuilds, so the cache is
+# only worth anything if this stage is skipped on a hit.
+DEPS_MARKER="$QP_ROOT/lib/.qp2-ci-deps-ok"
+
+if [[ -f "$DEPS_MARKER" ]]; then
+    echo "==> [1/4] dependencies restored from the Actions cache; skipping installs"
+else
+    echo "==> [1/4] all in-tree dependencies (gate fails yet: qmckl not built)"
+    ./configure -i "$DEPS" || :
+
+    echo "==> [2/4] qmckl (needs trexio from [1/4]); its trailing gate must pass"
+    ./configure -i qmckl
+
+    touch "$DEPS_MARKER"
+fi
 
 echo "==> [3/4] final configuration"
 ./configure -c config/gfortran_macos.cfg
