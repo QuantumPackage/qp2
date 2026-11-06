@@ -33,12 +33,14 @@ jobs:
         run: |
           # The Rust tools are pinned by rust/rust-toolchain.toml; installing
           # the matching toolchain up front keeps the build offline-safe.
+          # The runner image ships rustup on PATH (not necessarily in
+          # $HOME/.cargo); install it only when it is missing.
           if ! command -v rustup >/dev/null; then
-            brew install rustup
+            brew install --cask rustup
             rustup-init -y --profile minimal --default-toolchain none --no-modify-path
+            export PATH="$HOME/.cargo/bin:$PATH"
           fi
-          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
-          "$HOME/.cargo/bin/rustup" toolchain install 1.92.0 --profile minimal
+          rustup toolchain install 1.92.0 --profile minimal
       # Dependency install prefix, as cached on x86 by configuration.yml
       # (qp2-config). `configure -i` always rebuilds and never looks at what
       # is installed, so ci/macos-ci.sh skips the whole install stage when
