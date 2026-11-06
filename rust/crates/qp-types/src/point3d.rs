@@ -185,6 +185,31 @@ impl Point3d {
         )
     }
 
+    /// `to_string` with each component right-aligned in a fixed-width field
+    /// of `width` characters (no padding below the content: a component
+    /// longer than `width` is printed verbatim, never truncated).
+    ///
+    /// The component *content* is byte-identical to [`Point3d::to_string`]
+    /// (the same `format_g(.., 17, false)` per component), so the
+    /// `to_string`/`of_string` round-trip property is unaffected; only
+    /// whitespace is added, and the parser is whitespace-tolerant.
+    ///
+    /// Used for the fixed-width Molecule block (w10, DEVIATIONS C4);
+    /// [`Point3d::to_string`] keeps the reference layout for the parity call
+    /// sites.
+    pub fn to_string_width(units: Units, p: &Point3d, width: usize) -> String {
+        let f = match units {
+            Units::Bohr => 1.0,
+            Units::Angstrom => units::BOHR_TO_ANGSTROM,
+        };
+        [p.x, p.y, p.z]
+            .iter()
+            .map(|v| format_g(*v * f, 17, false))
+            .map(|s| format!("{:>width$}", s, width = width))
+            .collect::<Vec<_>>()
+            .join(" ")
+    }
+
     /// The derived `sexp_of_t`: `((x 1)(y 2)(z 3))` in bohr.
     ///
     /// Component order is `x`, `y`, `z` because that is the field
@@ -219,6 +244,73 @@ mod tests {
         let q = Point3d::of_string(Units::Angstrom, &Point3d::to_string(Units::Angstrom, &p))
             .expect("own output parses");
         assert_eq!(q, p);
+    }
+
+    #[test]
+    fn to_string_width_pads_components_without_truncating() {
+        // Zero, short and long components (bohr, no conversion): the
+        // padded fields carry the `to_string` content, each with length
+        // `max(20, content)`.
+        let p = Point3d::of_tuple(Units::Bohr, (0.0, 1.5, -1234567.0));
+        let plain = Point3d::to_string(Units::Bohr, &p);
+        let components = plain.split(' ').collect::<Vec<_>>();
+        assert_eq!(components.len(), 3);
+        for component in &components {
+            assert_eq!(format!("{:>20}", *component).len(), 20.max(component.len()));
+        }
+        assert_eq!(
+            Point3d::to_string_width(Units::Bohr, &p, 20),
+            format!(
+                "{:>20} {:>20} {:>20}",
+                components[0], components[1], components[2]
+            )
+        );
+    }
+
+    #[test]
+    fn to_string_width_prints_long_components_verbatim() {
+        // An exponent form whose `%.17g` string is longer than the width:
+        // printed verbatim, never truncated.  The expected string is built
+        // from `format_g` itself (the content source of `to_string`).
+        let v = 1e-5 * 1.234567890123456;
+        let cx = format_g(v, 17, false);
+        let cy = format_g(0.0, 17, false);
+        let cz = format_g(-v, 17, false);
+        assert!(
+            cx.len() > 20 && cz.len() > 20,
+            "fixture must exceed the width"
+        );
+        let p = Point3d::of_tuple(Units::Bohr, (v, 0.0, -v));
+        let s = Point3d::to_string_width(Units::Bohr, &p, 20);
+        assert_eq!(s, format!("{:>20} {:>20} {:>20}", cx, cy, cz));
+        for content in [cx.as_str(), cy.as_str(), cz.as_str()] {
+            assert!(s.contains(content), "content {content:?} truncated");
+        }
+    }
+
+    #[test]
+    fn to_string_width_keeps_the_sign_inside_the_field() {
+        // A negative component keeps its sign inside the right-aligned
+        // field: the padding sits to the left of the minus.
+        let p = Point3d::of_tuple(Units::Bohr, (-2.5, 0.0, -7.0));
+        let s = Point3d::to_string_width(Units::Bohr, &p, 20);
+        let first = &s[..20];
+        assert_eq!(first, format!("{:>20}", "-2.5"));
+        assert!(first.starts_with(' ') && first.ends_with("-2.5"));
+        assert_eq!(&s[21..], format!("{:>20} {:>20}", "0", "-7"));
+    }
+
+    #[test]
+    fn to_string_width_round_trips_through_of_string() {
+        // The parser ignores the padding, so the round trip of the Angstrom
+        // fixture value is unaffected by the fixed width.
+        let p = Point3d::of_string(Units::Angstrom, "0.54386314 0.00000000 -3.78645152")
+            .expect("fixture parses");
+        let s = Point3d::to_string_width(Units::Angstrom, &p, 20);
+        assert_eq!(
+            Point3d::of_string(Units::Angstrom, &s).expect("padded form parses"),
+            p
+        );
     }
 
     #[test]

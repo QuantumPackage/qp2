@@ -21,9 +21,10 @@
 //!
 //! # The `"\n  "` in the rendered block
 //!
-//! `to_rst` emits `"  <nucl_num>\n  "` followed by the atom lines, so the text
-//! between the `nucl_num` line and the first atom is a line holding two
-//! spaces.  `of_rst` skips exactly one line for the block title
+//! `to_rst` emits `"  <nucl_num>\n  "` followed by the atom lines (fixed-width
+//! coordinate fields, see [`to_rst`]), so the text between the `nucl_num`
+//! line and the first atom is a line holding two spaces.  `of_rst` skips
+//! exactly one line for the block title
 //! (`_ :: nucl_num :: title :: lines`), so the two are inverse of each other.
 //! Do not "clean up" that line: the parse would then read it as an atom.
 
@@ -40,6 +41,12 @@ use crate::engine::make_header;
 
 /// The EZFIO group this handler owns.
 const GROUP: &str = "nuclei";
+
+/// The fixed width of each coordinate field in the xyz block (w10, user
+/// request; DEVIATIONS C4).  20 fits every physically realistic coordinate
+/// (longest plain `%.17g` form: 17 significant digits + decimal point +
+/// sign = 19 chars).
+const COORD_FIELD_WIDTH: usize = 20;
 
 /// One molecule, as stored in `nuclei`.
 ///
@@ -174,13 +181,15 @@ pub(crate) fn write(ezfio: &EzFio, record: &NucleiByHand) -> Result<()> {
 
 /// `to_rst`: the xyz block, without the section header.
 ///
-/// Layout (`Input_nuclei_by_hand.ml:197`):
+/// Layout (`Input_nuclei_by_hand.ml:197` for the symbol/charge prefix; the
+/// coordinate fields are the w10 fixed-width deviation, DEVIATIONS C4):
 ///
 /// ```text
 /// \nNuclear coordinates in xyz format (Angstroms) ::\n\n
 ///   <nucl_num>\n
 ///   \n
-///   <sym padded to 3>  <charge right-justified in 3> <x y z in angstrom>
+///   <sym padded to 3>  <charge right-justified in 3> <x y z in angstrom,
+///   each component right-aligned in a 20-character field (COORD_FIELD_WIDTH)>
 ///   ...
 /// \n\n
 /// ```
@@ -200,13 +209,15 @@ pub(crate) fn to_rst(record: &NucleiByHand) -> String {
         // `Printf.sprintf "  %-3s  %3s %s"`: left-justify the symbol to 3,
         // right-justify the charge string to 3.  `Charge` writes through
         // `f.write_str`, which ignores the formatter width, so the charge is
-        // rendered first and the *string* is padded.
+        // rendered first and the *string* is padded.  The coordinates are
+        // the w10 fixed-width block (DEVIATIONS C4): each component in a
+        // 20-character field, single-spaced.
         let charge = charge.to_string();
         lines.push(format!(
             "  {:<3}  {:>3} {}",
             element::to_string(*label),
             charge,
-            Point3d::to_string(Units::Angstrom, coord)
+            Point3d::to_string_width(Units::Angstrom, coord, COORD_FIELD_WIDTH)
         ));
     }
     let text = format!("  {}\n  \n{}", record.nucl_num, lines.join("\n"));
@@ -376,15 +387,34 @@ mod tests {
     }
 
     #[test]
-    fn to_rst_matches_the_reference_layout() {
+    fn to_rst_uses_fixed_width_coordinate_fields() {
         let (_dir, ezfio) = hcn_like();
         let record = read(&ezfio).expect("read").expect("some");
+        // Each coordinate sits in a 20-character field
+        // (`COORD_FIELD_WIDTH`), right-aligned: the zeros are 19 spaces +
+        // `0`, and the 19/18/19-char z values of C/H/N take 1/2/1 padding
+        // spaces, so every line is 73 columns and the z column lines up.
         assert_eq!(
             to_rst(&record),
             "\nNuclear coordinates in xyz format (Angstroms) ::\n\n  3\n  \n  \
-             C      6 0 0 -1.0583544213424201\n  \
-             H      1 0 0 1.0583544213424201\n  \
-             N      7 0 0 0.52917721067121004\n\n"
+             C      6                    0                    0  -1.0583544213424201\n  \
+             H      1                    0                    0   1.0583544213424201\n  \
+             N      7                    0                    0  0.52917721067121004\n\n"
+        );
+        // A ragged user-edited line (coordinate fields shorter than the
+        // rendered width) still parses inside a fixed-width document; the
+        // `interactive.rs` awk tests rely on it.
+        let ragged = "\nNuclear coordinates in xyz format (Angstroms) ::\n\n  1\n  \n  \
+                      C      6 0.01 0 0\n\n";
+        let parsed = of_rst(&ezfio, ragged)
+            .expect("ragged line parses")
+            .expect("some");
+        assert_eq!(parsed.nucl_num, 1);
+        assert_eq!(parsed.nucl_label, vec![Element::C]);
+        assert_eq!(parsed.nucl_charge, vec![Charge::of_int(6)]);
+        assert_eq!(
+            parsed.nucl_coord,
+            vec![Point3d::of_tuple(Units::Angstrom, (0.01, 0.0, 0.0))]
         );
     }
 

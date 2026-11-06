@@ -35,9 +35,14 @@ const NO_OP: &str = r#"{ print }"#;
 
 /// Turn on periodic boundary conditions and move the first atom by 0.01
 /// Angstrom along x (the `hcn` fixture's carbon sits at the origin).
+///
+/// The match is the fixed-width all-zero line (w10, DEVIATIONS C4): one or
+/// more spaces between every token.  The replacement line stays ragged on
+/// purpose: it pins that a ragged user edit parses inside a fixed-width
+/// document.
 const MOVE_AND_SET_PERIODIC: &str = r#"
 /is_periodic = false/ { print "     is_periodic = true"; next }
-/^  C +6 0 0 0$/      { print "  C      6 0.01 0 0"; next }
+/^  C +6 +0 +0 +0$/ { print "  C      6 0.01 0 0"; next }
 { print }
 "#;
 
@@ -45,8 +50,11 @@ const MOVE_AND_SET_PERIODIC: &str = r#"
 /// `nuclei_by_hand` is the first task and `nuclei` a much later one, so the
 /// moved coordinate is written before the failure and has to be rolled back
 /// by the backup.
+///
+/// The match is the fixed-width all-zero line (w10, DEVIATIONS C4); the
+/// replacement line stays ragged on purpose (see `MOVE_AND_SET_PERIODIC`).
 const MOVE_AND_BREAK_NUCLEI: &str = r#"
-/^  C +6 0 0 0$/              { print "  C      6 0.01 0 0"; next }
+/^  C +6 +0 +0 +0$/ { print "  C      6 0.01 0 0"; next }
 /io_nuclear_repulsion = None/ { print "     io_nuclear_repulsion = Bogus"; next }
 { print }
 "#;

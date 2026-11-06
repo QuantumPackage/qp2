@@ -11,7 +11,9 @@
 //! 3. repair an unordered AO / AO-extra basis (the only EZFIO write that
 //!    check mode allows, contract C2);
 //! 4. apply `-n` (truncate the wavefunction) and `-s` (extract states);
-//! 5. render every section to one RST document, in `tasks` order;
+//! 5. render every section to one RST document, in display order
+//!    (`display_order`): Molecule first, the rest alphabetical by title,
+//!    `Determinants_by_hand` last;
 //! 6. run `$EDITOR` on it (interactive runs only — there is no line REPL;
 //!    "interactive" means the external editor);
 //! 7. read the document back and `set` every section, with `apply` false in
@@ -45,11 +47,12 @@ use qp_types::command_line::{EXIT_FAILURE, EXIT_USAGE, EditArgs, EditConfig};
 /// The sections the editor visits, in the reference's `tasks` order
 /// (`ocaml/qp_edit.ml`, post-fix tree).
 ///
-/// The order is load-bearing.  The document is a concatenation, and
-/// `determinants_by_hand` must come **last**: its `of_rst` locates its own
-/// section and then consumes the rest of the document, which is only the
-/// determinant body when nothing follows it.  The registry order is
-/// alphabetical and must never be used here.
+/// `TASKS` is the reference's canonical **presence** list: which sections
+/// exist in a run (`qmcchem` being the plugin entry), not their order in
+/// the document.  The **document** order is no longer the `tasks` order but
+/// [`display_order`] (w10, user request; DEVIATIONS C5), whose doc carries
+/// the `determinants_by_hand`-must-come-last rationale.  The registry order
+/// is alphabetical and must never be used for the document order.
 ///
 /// `qmcchem` is a *plugin* section: it is listed here because the reference
 /// lists it, but only a configuration built with the plugin has it.  The run
@@ -95,6 +98,62 @@ const TASKS: [&str; 38] = [
     "mo_basis",
     "determinants_by_hand",
 ];
+
+/// The order the sections appear in the editing document (w10, user
+/// request; DEVIATIONS C5).
+///
+/// The `Molecule` section (`nuclei_by_hand`) first, then every other
+/// section **alphabetically by title, case-insensitively** (stable sort;
+/// titles are ASCII, so a plain `to_lowercase` key is deterministic),
+/// and `Determinants_by_hand` **last**: its `of_rst` consumes its
+/// section body to the end of the document, which is only its own
+/// section when nothing follows it (see the `TASKS` doc).
+fn display_order(engine: &Engine) -> Vec<&str> {
+    let order = engine.visit_order(&TASKS);
+    sort_sections(&order, |name| {
+        engine
+            .config()
+            .module(name)
+            .expect("visit_order only yields sections of the configuration")
+            .title
+            .as_str()
+    })
+}
+
+/// The section-ordering policy (w10): `nuclei_by_hand` first, the rest
+/// sorted by `(title.to_lowercase(), title)` (stable), `determinants_by_hand` last.
+///
+/// The title may borrow from a configuration (`'t`), not only from `names`:
+/// the driver's [`display_order`] passes the config titles, while the unit
+/// tests pass a pure literal table.
+pub(crate) fn sort_sections<'a, 't>(
+    names: &[&'a str],
+    title_of: impl Fn(&'a str) -> &'t str,
+) -> Vec<&'a str> {
+    let mut molecule = None;
+    let mut determinants = None;
+    let mut rest: Vec<&'a str> = Vec::with_capacity(names.len());
+    for name in names {
+        match *name {
+            // The two pinned sections, matched by module name (the stable
+            // identifier): the sections titled `Molecule` /
+            // `Determinants_by_hand`.
+            "nuclei_by_hand" => molecule = Some(*name),
+            "determinants_by_hand" => determinants = Some(*name),
+            _ => rest.push(*name),
+        }
+    }
+    rest.sort_by_key(|name| (title_of(name).to_lowercase(), title_of(name).to_string()));
+    let mut order = Vec::with_capacity(names.len());
+    if let Some(name) = molecule {
+        order.push(name);
+    }
+    order.extend(rest);
+    if let Some(name) = determinants {
+        order.push(name);
+    }
+    order
+}
 
 /// The `=-` rule `qp_edit.ml` prints around every fatal message (40 copies of
 /// `=-`, i.e. 80 columns).
@@ -357,12 +416,12 @@ fn prepare_document(engine: &Engine, ezfio: &EzFio, config: &EditConfig) -> Resu
     }
 }
 
-/// Render every visited section, one getter call each, in the order
-/// [`Engine::visit_order`] derives from [`TASKS`] and the loaded
-/// configuration.
+/// Render every visited section, one getter call each, in [`display_order`]:
+/// `Molecule` first, the rest alphabetically by title,
+/// `Determinants_by_hand` last (w10, DEVIATIONS C5).
 fn render_document(engine: &Engine, ezfio: &EzFio, filename: &str) -> Result<String> {
     let mut text = file_header(filename);
-    for name in engine.visit_order(&TASKS) {
+    for name in display_order(engine) {
         text.push('\n');
         text.push_str(&engine.get(ezfio, name)?);
     }
@@ -386,9 +445,9 @@ fn launch_editor(path: &Path) {
 fn read_back(engine: &Engine, ezfio: &EzFio, config: &EditConfig, path: &Path) -> Result<()> {
     let text = fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
     let text = text.strip_suffix('\n').unwrap_or(&text);
-    // The same order as the rendering: every getter of this run has run
-    // before, so the configuration has not changed under us.
-    for name in engine.visit_order(&TASKS) {
+    // The same order as the rendering (`display_order`): every getter of
+    // this run has run before, so the configuration has not changed under us.
+    for name in display_order(engine) {
         engine.set(ezfio, name, text, !config.check)?;
     }
     Ok(())
@@ -497,6 +556,105 @@ mod tests {
                 .count(),
             1
         );
+    }
+
+    /// The small title table of the `sort_sections` tests: titles that
+    /// exercise case-insensitivity (`AO x` vs `Ao y` vs `Bbb`) plus the two
+    /// pinned sections.
+    fn test_title(name: &str) -> &str {
+        match name {
+            "nuclei_by_hand" => "Molecule",
+            "determinants_by_hand" => "Determinants_by_hand",
+            "aaa" => "Ao y",
+            "MMM" => "AO x",
+            "Nnn" => "ao X",
+            "zzz" => "Bbb",
+            other => other,
+        }
+    }
+
+    #[test]
+    fn sort_sections_pins_molecule_first_and_determinants_last() {
+        let names = [
+            "zzz",
+            "nuclei_by_hand",
+            "aaa",
+            "determinants_by_hand",
+            "MMM",
+        ];
+        let order = sort_sections(&names, test_title);
+        assert_eq!(order.first().copied(), Some("nuclei_by_hand"));
+        assert_eq!(order.last().copied(), Some("determinants_by_hand"));
+        // Each pinned section is present exactly once.
+        assert_eq!(order.iter().filter(|n| **n == "nuclei_by_hand").count(), 1);
+        assert_eq!(
+            order
+                .iter()
+                .filter(|n| **n == "determinants_by_hand")
+                .count(),
+            1
+        );
+    }
+
+    #[test]
+    fn sort_sections_sorts_the_rest_case_insensitively() {
+        // `Ao y` sorts before `Bbb`; `AO x` comes before `Ao y` on the
+        // lowercase key (`ao x` < `ao y`).
+        let names = [
+            "zzz",
+            "nuclei_by_hand",
+            "aaa",
+            "determinants_by_hand",
+            "MMM",
+        ];
+        let order = sort_sections(&names, test_title);
+        assert_eq!(
+            order,
+            [
+                "nuclei_by_hand",       // "Molecule"
+                "MMM",                  // "AO x"
+                "aaa",                  // "Ao y"
+                "zzz",                  // "Bbb"
+                "determinants_by_hand", // "Determinants_by_hand"
+            ]
+        );
+        // A tie on the lowercase key (`ao x` for both) is broken by the
+        // original title: in ASCII, "AO x" < "ao X".
+        let order = sort_sections(&["MMM", "Nnn"], test_title);
+        assert_eq!(order, ["MMM", "Nnn"]);
+    }
+
+    #[test]
+    fn sort_sections_is_total_and_deterministic() {
+        let names = [
+            "zzz",
+            "nuclei_by_hand",
+            "aaa",
+            "determinants_by_hand",
+            "MMM",
+        ];
+        let first = sort_sections(&names, test_title);
+        let second = sort_sections(&names, test_title);
+        assert_eq!(first, second, "two calls must agree");
+        // Every input name appears exactly once.
+        let mut obtained = first;
+        obtained.sort_unstable();
+        let mut expected = names.to_vec();
+        expected.sort_unstable();
+        assert_eq!(obtained, expected);
+    }
+
+    #[test]
+    fn sort_sections_without_the_pinned_names() {
+        // Neither pinned section: no panic, the rest sorted.
+        let order = sort_sections(&["zzz", "aaa", "MMM"], test_title);
+        assert_eq!(order, ["MMM", "aaa", "zzz"]);
+        // Only `nuclei_by_hand` present: still first.
+        let order = sort_sections(&["zzz", "nuclei_by_hand", "aaa"], test_title);
+        assert_eq!(order, ["nuclei_by_hand", "aaa", "zzz"]);
+        // Only `determinants_by_hand` present: still last.
+        let order = sort_sections(&["zzz", "determinants_by_hand", "aaa"], test_title);
+        assert_eq!(order, ["aaa", "zzz", "determinants_by_hand"]);
     }
 
     #[test]
