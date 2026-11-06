@@ -1,0 +1,9 @@
+# Minimal valid registry used by the hermetic tests.
+# One generic (config-driven) section, no handler.
+
+schema_version = 1
+
+[[module]]
+name = "electrons"
+file = "electrons.toml"
+section = true

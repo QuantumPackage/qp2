@@ -1,0 +1,20 @@
+# Minimal handler-owned module used by the hermetic tests.
+# Every field of a handler section is non-editable: the handler owns it.
+
+schema_version = 1
+name = "bitmasks"
+title = ""
+section = false
+handler = "bitmasks"
+source_cfg = "src/bitmask/EZFIO.cfg"
+ezfio_dir = ["bitmask"]
+
+[[field]]
+provider = "do_ormas"
+ezfio_name = "do_ormas"
+type = "logical"
+interfaces = ["ezfio", "ocaml", "provider"]
+doc = "if |true| restrict selection based on ORMAS rules"
+size = "1"
+default = "false"
+editable = false

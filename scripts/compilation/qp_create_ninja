@@ -735,7 +735,7 @@ def save_subninja_file(path_module):
 
     l_string += ["rule executables",
             "  command = make -C {0} executables .gitignore qp_edit.native qp_run.native".format(join("$QP_ROOT","ocaml")),
-                 "  description = Updating OCaml executables",
+                 "  description = Updating the executables",
                  ""]
 
     l_string += ["build dummy_target: update_build_ninja_root", "",
@@ -797,10 +797,10 @@ def create_build_ninja_global(l_rag_inputs):
                  "  command = module_handler.py tidy --all",
                  "  description = Cleaning all modules", ""]
 
-    l_string += ["rule make_ocaml",
+    l_string += ["rule make_rust",
                  "  command = make -C {0}/ocaml".format("$QP_ROOT"),
                  "  pool = console",
-                 "  description = Compiling OCaml tools",
+                 "  description = Compiling the Rust tools",
                  ""]
 
     # The `rag` target: rebuilds the code-model corpus in the
@@ -820,10 +820,10 @@ def create_build_ninja_global(l_rag_inputs):
                  ""]
 
     l_string += ["build dummy_target: update_build_ninja_root",
-                 "build ocaml_target: make_ocaml all",
+                 "build rust_target: make_rust all",
                  "",
                  "build all: make_all dummy_target",
-                 "default ocaml_target",
+                 "default rust_target",
                  "",
                  "build clean: make_clean dummy_target",
                  "",

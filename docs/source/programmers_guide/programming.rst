@@ -82,11 +82,11 @@ Build
 The build is driven by the |Ninja| build system and is fully automated,
 such that the programmer never has to touch a build file by hand.
 Running :command:`ninja` at the root of the repository builds all the
-modules and then the |OCaml| command-line tools, while running
+modules and then the Rust command-line tools, while running
 :command:`ninja` inside a module directory builds only that module (and
-the |OCaml| tools). Every build first re-runs the build-graph generator,
-so new files, new modules and modified :file:`NEED` files are picked up
-automatically.
+refreshes the tools). Every build first re-runs the build-graph
+generator, so new files, new modules and modified :file:`NEED` files are
+picked up automatically.
 
 Files that the build creates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -101,9 +101,11 @@ simply disappear and reappear when the sources change:
   code, and a :file:`build.ninja` file;
 * at the root of the repository: the :file:`build.ninja` and
   :file:`config/build.ninja` files, :file:`data/executables` (the list
-  of the built programs), the generated |OCaml| files
-  (``ocaml/qp_edit.ml``, ``ocaml/Input_*.ml``, ``ocaml/Qptypes.ml``,
-  ``ocaml/ezfio.ml`` and their compiled ``.native`` versions), and the
+  of the built programs), :file:`data/qp_edit_config/` and
+  :file:`data/ezfio_defaults/` (the descriptions of the editable
+  parameters, generated from the :file:`EZFIO.cfg` files, see
+  :ref:`rust_tooling`), the Rust build tree :file:`rust/target/` and
+  the symbolic links in :file:`ocaml/` that publish the tools, and the
   content of the :file:`lib/`, :file:`include/` and :file:`share/`
   directories.
 

@@ -1,0 +1,9 @@
+[package]
+name = "qp-zmq"
+description = "QP2 ZMQ message protocol and task server (Rust)"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+zmq = { workspace = true }

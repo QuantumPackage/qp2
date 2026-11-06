@@ -85,6 +85,8 @@ from os.path import isdir, join, exists
 
 from qp_path import QP_ROOT, QP_SRC, QP_OCAML, QP_EZFIO
 
+import qp_edit_config
+
 Type = namedtuple('Type', 'fancy ocaml fortran')
 Module = namedtuple('Module', 'path lower')
 
@@ -255,6 +257,10 @@ def get_dict_config_file(module_obj):
             sys.exit(1)
         else:
             d[pvd]["type"] = type_dict[type_]
+            # Keep the declared spelling (e.g. "Threshold" vs "float"): the
+            # qp_edit TOML config stores it verbatim so that the Rust type
+            # table, not the generator, decides how a value is parsed.
+            d[pvd]["type_raw"] = type_
 
         # Fill the dict with REQUIRED information
         try:
@@ -774,6 +780,14 @@ def code_generation(arguments, dict_ezfio_cfg, m):
         str_ezfio_default = create_ezfio_default(dict_ezfio_cfg)
         save_ezfio_default(module_lower, str_ezfio_default)
 
+        # ~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~# #
+        # q p _ e d i t   c o n f i g   (d u a l   e m i s s i o n)         #
+        # ~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~# #
+        # Build artifact: `data/qp_edit_config/<module>.toml`.  Nothing is
+        # written when the module is neither a handler module nor an
+        # `ocaml`-interface module.
+        qp_edit_config.emit_module(m.path, module_lower, dict_ezfio_cfg)
+
 if __name__ == "__main__":
     arguments = docopt(__doc__)
     # ___
@@ -796,6 +810,9 @@ if __name__ == "__main__":
         str_ocaml_qp_edit, str_ocaml_input_auto = create_ocaml_input_global(l_module)
         save_ocaml_input_auto(str_ocaml_input_auto)
         save_ocaml_qp_edit(str_ocaml_qp_edit)
+
+        # Ordered module list for the Rust editor (build artifact).
+        qp_edit_config.save_registry(qp_edit_config.registry_text(l_module))
         sys.exit(0)
 
     # ~#~#~#~#~#~#~#~#~#~#~#~#~#~# #

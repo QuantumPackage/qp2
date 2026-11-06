@@ -1,0 +1,11 @@
+[package]
+name = "qp-types"
+description = "Physics-adjacent data types for the QP2 Rust tool layer"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true }
+md5 = { workspace = true }
+serde = { workspace = true }

@@ -1,0 +1,14 @@
+[package]
+name = "qp_set_mo_class"
+description = "QP2 qp_set_mo_class — Rust port (P4)"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+qp-ezfio = { path = "../../crates/qp-ezfio" }
+qp-input = { path = "../../crates/qp-input" }
+qp-types = { path = "../../crates/qp-types" }
+
+[dev-dependencies]
+tempfile = { workspace = true }

@@ -1,0 +1,4 @@
+# The repository-wide `bin/` rule (QP2 build directories) would hide this
+# crate's binary source (`src/bin/qp_edit.rs`); re-include it.  Tracked files
+# are never ignored, but this keeps `git status` honest before the first add.
+!bin/

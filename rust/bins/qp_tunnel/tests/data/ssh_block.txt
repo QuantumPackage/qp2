@@ -1,0 +1,5 @@
+
+On remote hosts, create ssh tunnel using:
+ ssh -L 43000:130.120.229.225:42379 -L 43001:130.120.229.225:42380 -L 43002:130.120.229.225:42381 -L 43009:130.120.229.225:42388 lcpqsv225.univ-tlse3.fr &
+Or from this host connect to clients using:
+ ssh -R 43000:localhost:42379 -R 43001:localhost:42380 -R 43002:localhost:42381 -R 43009:localhost:42388 <host> &

@@ -37,7 +37,6 @@ jobs:
            key: qp2-config
            fail-on-cache-miss: true
            path: |
-             external/opampack/
              include/
              lib/
              lib64/
@@ -47,6 +46,8 @@ jobs:
          run: |
            sudo apt update
            sudo apt install -y --fix-missing --no-install-recommends  gfortran gcc liblapack-dev libblas-dev wget python3 make m4 pkg-config
+       - name: Install Rust toolchain
+         run: rustup toolchain install 1.92.0 --profile minimal --component rustfmt,clippy
        - name: Configuration
          run: |
               ./configure -i ninja || :

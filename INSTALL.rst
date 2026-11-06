@@ -59,7 +59,7 @@ Requirements
 - `Zlib`_
 - |ZeroMQ| : networking library
 - `GMP <https://gmplib.org/>`_ : Gnu Multiple Precision Arithmetic Library
-- |OCaml| compiler with |OPAM| package manager
+- Rust toolchain (:command:`cargo`, edition 2024) : https://rustup.rs
 - |Ninja| : a parallel build system
 - |pkg-config| : a tool which returns information about installed libraries
 
@@ -91,16 +91,18 @@ The command is to be used as follows:
 
 The following packages are supported by the :command:`configure` installer:
 
+* cmake
 * zlib
 * ninja
 * zeromq
 * f77zmq
 * gmp
-* ocaml  (:math:`\approx` 5 minutes)
 * docopt
 * resultsFile
 * bats
 * trexio
+* armadillo
+* openorb
 * simple_gpu
 * bse (adds the Basis Set Exchange CLI)
 
@@ -256,63 +258,36 @@ With Debian or Ubuntu, you can use
 
 
 
-OCaml
------
+Rust
+----
 
-*OCaml* is a general purpose programming language with an emphasis on expressiveness and safety.
+*Rust* is the language of the command-line tools of |qp| (:command:`qp
+create_ezfio`, :command:`qp edit`, :command:`qp run`, :command:`qp
+set_mo_class`, :command:`qp tunnel`, :command:`qp print_basis` and
+:command:`element_create_db`).  The Fortran/IRPF90 modules are built with
+the Fortran compiler, as before; only the tools need Rust.
 
-* The following packages are required (Debian or Ubuntu):
-
-  .. code:: bash
-
-    sudo apt install libncurses5-dev pkg-config libgmp3-dev m4
-
-
-* Download the installer of the OPAM package manager here :
-  `<https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh>`_
-  and move it in the :file:`${QP_ROOT}/external` directory
-
-* If you use OCaml only with |qp|, you can install the OPAM directory
-  containing the compiler and all the installed libraries in the
-  :file:`${QP_ROOT}/external` directory as
+* Install `rustup <https://rustup.rs>`_:
 
   .. code:: bash
 
-     export OPAMROOT=${QP_ROOT}/external/opam
+     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
-
-* Run the installer
-
-  .. code:: bash
-
-     echo ${QP_ROOT}/bin
-     ${QP_ROOT}/external/opam_installer.sh --no-backup --fresh
-
-  The :command:`opam` command can be installed in the :file:`${QP_ROOT}/bin`
-  directory. To do this, take the output of ``echo ${QP_ROOT}/bin`` and
-  use it as an answer to where :command:`opam` should be installed.
-
-
-* Install the OCaml compiler (the prebuilt opam pack installed by
-  :command:`configure -i ocaml` ships 4.14.1):
+  The version of the compiler is pinned by
+  :file:`${QP_ROOT}/rust/rust-toolchain.toml`; :command:`cargo` downloads
+  the pinned toolchain automatically on the first build.  To install it
+  explicitly:
 
   .. code:: bash
 
-      opam init --comp=4.14.1
-      eval `${QP_ROOT}/bin/opam env`
+     rustup toolchain install 1.92.0
 
-  If the installation fails because of bwrap, you can initialize opam using:
+  The toolchain needs network access the first time it is used.  On a
+  machine without network access, install the toolchain before copying
+  |qp|.
 
-  .. code:: bash
-
-      opam init --disable-sandboxing --comp=4.14.1
-      eval `${QP_ROOT}/bin/opam env`
-
-* Install the required external OCaml libraries
-
-  .. code:: bash
-
-      opam install ocamlbuild zmq sexplib ppx_sexp_conv ppx_deriving getopt
+* Check that :command:`cargo` is visible in the :envvar:`PATH`.  The
+  :command:`configure` script stops with an error message if it is not.
 
 
 Docopt

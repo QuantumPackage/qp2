@@ -1,0 +1,28 @@
+# QP2 Rust tool layer — workspace.
+# Design docs: rust/README.md, rust/CONTRACTS.md, rust/DEVIATIONS.md.
+#
+# Third-party dependencies are declared once in [workspace.dependencies];
+# crates reference them with `workspace = true`.
+
+[workspace]
+resolver = "2"
+members = ["crates/*", "bins/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+
+[workspace.dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+flate2 = "1"
+md5 = "0.7"
+zmq = "0.9"
+libc = "0.2"
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
+toml = "0.8"
+tempfile = "3"
+
+[profile.release]
+lto = "thin"

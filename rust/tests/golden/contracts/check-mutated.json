@@ -1,0 +1,39 @@
+{
+  "format": 1,
+  "command": ["qp_edit", "-c", "ezfio"],
+  "description": "Files that `qp_edit -c` creates in an EZFIO directory, per fixture. Paths are EZFIO paths (.gz kept). Both lists were transcribed from the source, not observed: post-fix is the Rust target (commit 32c9899d, 15e725aa on origin/qp-edit-fix); pre-fix is what the reference OCaml build at be4b71c1 does and is kept as evidence. The prose contract is contracts/check-mode.md.",
+  "post-fix": {
+    "h2": [],
+    "h3": [],
+    "c2h2": [],
+    "b2": [],
+    "h2g": [],
+    "hcn": [
+      "determinants/bit_kind",
+      "determinants/expected_s2",
+      "determinants/mo_label",
+      "determinants/n_int",
+      "determinants/psi_coef.gz",
+      "determinants/psi_det.gz",
+      "determinants/state_average_weight.gz"
+    ]
+  },
+  "pre-fix": {
+    "h2": [],
+    "h3": [],
+    "c2h2": [],
+    "b2": [],
+    "h2g": [],
+    "hcn": [
+      "determinants/bit_kind",
+      "determinants/expected_s2",
+      "determinants/mo_label",
+      "determinants/n_int",
+      "determinants/psi_coef.gz",
+      "determinants/psi_coef_qp_edit.gz",
+      "determinants/psi_det.gz",
+      "determinants/psi_det_qp_edit.gz",
+      "determinants/state_average_weight.gz"
+    ]
+  }
+}

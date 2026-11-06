@@ -1,7 +1,7 @@
 # macOS build check on a GitHub-hosted ARM64 runner (macos-15).
-# Build-only: all C/Fortran targets via `ninja all`. The OCaml tools target
-# is intentionally not built — the in-tree opampack (OCaml 4.12, 2023) is
-# stale on every platform; see ci/macos-ci.sh.
+# Build-only: all C/Fortran targets via `ninja all`, plus the Rust tool layer
+# through the default `rust_target` (the OCaml tools were replaced by the
+# workspace in `rust/`). See ci/macos-ci.sh.
 name: QP macOS
 
 on:
@@ -28,7 +28,17 @@ jobs:
           submodules: recursive
       - name: Install toolchain
         run: |
-          brew install gfortran gcc hdf5 pkg-config ocaml
+          brew install gfortran gcc hdf5 pkg-config
+      - name: Install Rust toolchain
+        run: |
+          # The Rust tools are pinned by rust/rust-toolchain.toml; installing
+          # the matching toolchain up front keeps the build offline-safe.
+          if ! command -v rustup >/dev/null; then
+            brew install rustup
+            rustup-init -y --profile minimal --default-toolchain none --no-modify-path
+          fi
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          "$HOME/.cargo/bin/rustup" toolchain install 1.92.0 --profile minimal
       # Dependency install prefix, as cached on x86 by configuration.yml
       # (qp2-config). `configure -i` always rebuilds and never looks at what
       # is installed, so ci/macos-ci.sh skips the whole install stage when

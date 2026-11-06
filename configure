@@ -223,7 +223,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="cmake zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats trexio armadillo openorb simple_gpu"
+        PACKAGES="cmake zlib ninja zeromq f77zmq gmp docopt resultsFile bats trexio armadillo openorb simple_gpu"
 fi
 
 
@@ -353,19 +353,6 @@ EOF
               make && make check && make install
 EOF
 
-
-    elif [[ ${PACKAGE} = ocaml ]] ; then
-
-         execute <<EOF
-            source "${QP_ROOT}"/quantum_package.rc
-            rm -rf "${QP_ROOT}"/external/opampack
-            cd "${QP_ROOT}"/external/
-            tar --gunzip --extract --file qp2-dependencies/${ARCHITECTURE}/opampack.tar.gz
-            cd "${QP_ROOT}"/external/opampack
-            ./install.sh
-            export OPAMROOT="${QP_ROOT}"/external/opampack/opamroot
-            eval \$("${QP_ROOT}"/external/opampack/opam env)
-EOF
 
     elif [[ ${PACKAGE} = bse ]] ; then
 
@@ -509,9 +496,9 @@ if [[ ${GMP} = $(not_found) ]] ; then
         fail
 fi
 
-OCAML=$(find_exe ocamlc)
-if [[ ${OCAML} = $(not_found) ]] ; then
-        error "OCaml (ocaml) compiler is not installed."
+CARGO=$(find_exe cargo)
+if [[ ${CARGO} = $(not_found) ]] ; then
+        error "The Rust toolchain (cargo) is not installed. Install it from https://rustup.rs (the workspace uses edition 2024)."
         fail
 fi
 
