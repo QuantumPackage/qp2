@@ -89,9 +89,9 @@ keeps full precision, so none of these rows changes an EZFIO value.
   `ocaml/Makefile` dropped the `Input_auto_generated.ml` rule, which was
   also what wrote `data/qp_edit_config/registry.toml`: a fresh `ninja`
   produced the per-module tables but no registry, and `qp_edit` failed to
-  start. The Makefile now regenerates the registry with the same
-  `ei_handler.py ocaml_global` call (and ignores the two obsolete OCaml
-  files it still emits). `etc/paths.rc` also exports `QP_EDIT_CONFIG`,
+  start. The Makefile now regenerates the registry with the
+  `ei_handler.py generate_registry` call (w11 removed the OCaml emission
+  it used to share; see the plan). `etc/paths.rc` also exports `QP_EDIT_CONFIG`,
   because the binary's `<exe_dir>/../data` fallback holds on macOS, where
   `current_exe` keeps the `ocaml/qp_edit` symlink path, but not on Linux,
   where `/proc/self/exe` resolves it into `rust/target/release/`.

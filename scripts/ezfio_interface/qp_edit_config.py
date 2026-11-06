@@ -5,7 +5,7 @@
 The Rust `qp_edit` is a *fixed* binary: it loads a declarative description of
 every editable EZFIO section from ``$QP_ROOT/data/qp_edit_config/``.  Those
 files are **build artifacts** generated from the same ``EZFIO.cfg`` inputs that
-already drive the Fortran/OCaml generators, so editing an ``EZFIO.cfg``
+already drive the Fortran generator, so editing an ``EZFIO.cfg``
 regenerates the configuration without recompiling anything.
 
 Layout produced here (see ``rust/DESIGN-qp_edit-config.md``)::
@@ -13,9 +13,9 @@ Layout produced here (see ``rust/DESIGN-qp_edit-config.md``)::
     data/qp_edit_config/registry.toml     # ordered list of modules
     data/qp_edit_config/<module>.toml     # one declarative table per module
 
-``ei_handler.py`` keeps emitting the OCaml files byte-for-byte as before; this
-module only *adds* files.  ``scripts/ezfio_interface/test_dual_emission.py``
-checks that the OCaml side did not move.
+``ei_handler.py`` used to emit the OCaml files byte-for-byte alongside these;
+this module only *adds* files.  The OCaml emission and the dual-emission test
+that checked the OCaml side did not move were removed in w11.
 
 Config-vs-code split
 --------------------
@@ -29,13 +29,13 @@ Config-vs-code split
   must match ``crates/qp-input/src/handlers.rs``.
 
 The handler table below is the only duplicated knowledge: the section titles
-are the ``keyword_to_string`` strings hard-coded in ``qp_edit_template``, and
-``check_template_consistency`` (used by the test script) asserts that the two
-agree so that the duplication cannot drift silently.
+must equal the titles compiled into the Rust ``qp_edit`` binary (the
+``TASKS``/registry).  The cross-check that used to parse the
+``qp_edit_template`` file to assert that the two agree was removed in w11
+with the template.
 """
 
 import os
-import re
 
 from qp_path import QP_ROOT
 
@@ -56,15 +56,15 @@ CONFIG_DIR = "data/qp_edit_config"
 #: * ``module_id``  -- name of the ``<module_id>.toml`` file and of the section
 #:   in the registry;
 #: * ``title``      -- the RST header printed by ``qp_edit``; must equal the
-#:   ``keyword_to_string`` string in ``qp_edit_template`` (checked by
-#:   :func:`check_template_consistency`); empty when the module is not a
-#:   section;
+#:   title compiled into the Rust ``qp_edit`` binary (``TASKS``/registry); the
+#:   cross-check that used to parse ``qp_edit_template`` was removed in w11
+#:   with the template; empty when the module is not a section;
 #: * ``handler``    -- handler name compiled into the Rust binary;
 #: * ``is_section`` -- whether ``qp_edit`` visits it as an editable section.
 #:
-#: ``bitmask`` maps to ``bitmasks`` (plural) because that is the name of the
-#: tracked ``ocaml/Input_bitmasks.ml``; the module is *not* a section: today it
-#: is included by ``Input.ml`` but never called by ``qp_edit``.  Its logic
+#: ``bitmask`` maps to ``bitmasks`` (plural) because the name is the historical
+#: name of the removed OCaml module (``ocaml/Input_bitmasks.ml``); the module
+#: is *not* a section: it is never visited by ``qp_edit``.  Its logic
 #: (deriving ``n_int`` from ``mo_num`` and ``bit_kind`` from the build
 #: configuration) is a dependency of the determinants handler.
 #:
@@ -86,7 +86,8 @@ HANDLER_MODULES = {
 }
 
 #: Sections visited by ``qp_edit`` before the generated modules, in the order
-#: of the ``tasks`` list of ``qp_edit_template``.
+#: of the ``tasks`` list of the removed ``qp_edit_template`` (now the ``TASKS``
+#: list of the Rust binary).
 SECTION_HEAD = ["nuclei_by_hand", "ao_basis", "ao_extra_basis", "electrons"]
 
 #: Sections visited after the generated modules (same source).
@@ -259,7 +260,7 @@ def registry_text(l_module_lower):
     """Render ``registry.toml`` from the list of generated modules.
 
     *l_module_lower* is the list returned by
-    :func:`ei_handler.get_l_module_with_auto_generate_ocaml_lower`.
+    :func:`ei_handler.get_l_registry_modules`.
 
     Order: the handler sections that ``qp_edit`` visits first, then the
     generated modules **sorted by name**, then the handler sections visited
@@ -403,64 +404,3 @@ def emit_module(module_path, module_lower, dict_ezfio_cfg):
         written.append(save_module_config(module_id, text))
 
     return written
-
-
-# ------------------------------------------------------------------------- #
-# Consistency check against qp_edit_template                                #
-# ------------------------------------------------------------------------- #
-
-_KEYWORD_RE = re.compile(r'^\|\s*(\w+)\s*->\s*"([^"]*)"\s*$')
-
-
-def template_titles(template_path=None):
-    """Return ``{Lower_camel_keyword: title}`` read from ``qp_edit_template``.
-
-    The template hard-codes the titles of the handler sections
-    (``keyword_to_string``); this function parses them so that
-    :func:`check_template_consistency` can detect drift instead of relying on
-    review.
-    """
-    if template_path is None:
-        template_path = os.path.join(
-            QP_ROOT, "scripts", "ezfio_interface", "qp_edit_template"
-        )
-    titles = {}
-    with open(template_path, "r") as f:
-        for line in f:
-            match = _KEYWORD_RE.match(line.rstrip("\n"))
-            if match:
-                titles[match.group(1)] = match.group(2)
-    return titles
-
-
-def check_template_consistency(template_path=None):
-    """Raise ``ValueError`` if the handler titles differ from the template.
-
-    Returns the number of checked titles.
-    """
-    titles = template_titles(template_path)
-    # OCaml constructor names are `String.capitalize`d module ids: `Ao_basis`.
-    expected_by_keyword = {}
-    for entries in HANDLER_MODULES.values():
-        for module_id, title, _, is_section in entries:
-            if is_section:
-                expected_by_keyword[module_id.capitalize()] = title
-    checked = 0
-    for keyword, title in expected_by_keyword.items():
-        if keyword not in titles:
-            raise ValueError(
-                "handler section {0} is missing from qp_edit_template".format(keyword)
-            )
-        if titles[keyword] != title:
-            raise ValueError(
-                "title mismatch for {0}: qp_edit_template has {1!r}, "
-                "qp_edit_config.py has {2!r}".format(keyword, titles[keyword], title)
-            )
-        checked += 1
-    for keyword, title in titles.items():
-        if keyword not in expected_by_keyword:
-            raise ValueError(
-                "qp_edit_template section {0} ({1!r}) has no handler in "
-                "qp_edit_config.py".format(keyword, title)
-            )
-    return checked

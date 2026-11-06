@@ -206,9 +206,10 @@ the owning handler (or the Fortran side) must supply the value.
 | `editable` | handler dispatch and behaviour |
 
 The only duplicated knowledge is the seven handler names and their section
-titles.  The generator keeps the titles in `qp_edit_config.HANDLER_MODULES`,
-and `check_template_consistency()` parses the `keyword_to_string` table of
-`qp_edit_template` to assert equality; `test_dual_emission.py` runs it.  The
+titles.  The generator keeps the titles in `qp_edit_config.HANDLER_MODULES`;
+`check_template_consistency()` used to parse the `keyword_to_string` table of
+`qp_edit_template` to assert equality (run by `test_dual_emission.py`) — both
+were removed in w11 with the template.  The
 names are checked by the Rust unit test `handlers::tests` and by the loader
 (unknown handler, handler/module id mismatch, handler/section mismatch).
 
@@ -250,16 +251,16 @@ edition 2024 and because precedence is then unit-testable.
 
 ## Emission and the build
 
-`ei_handler.py --ocaml` calls `qp_edit_config.emit_module(...)` after the
-existing OCaml/default writers.  The call sits **outside** the
-`try: create_ocaml_input() except ValueError` guard: `ao_basis`,
-`electrons` and `mo_basis` have no `ocaml`-interface field (so the OCaml
-writer raises and skips them) but they still own handler sections.
-`ei_handler.py ocaml_global` calls `qp_edit_config.save_registry(...)` after
-writing `qp_edit.ml` and `Input_auto_generated.ml`.
+Per-module generation (`--path_module`, or `--ezfio_default` alone) calls
+`qp_edit_config.emit_module(...)` in the default / `--ezfio_default` branch
+of `code_generation`, for every module (the `try/except ValueError` guard
+that used to protect the OCaml writer is gone with it).  `ei_handler.py
+generate_registry` (formerly `ocaml_global`) calls
+`qp_edit_config.save_registry(...)`.  The OCaml writers, the `--ocaml`
+option and the `ocaml/` sources were removed in w11.
 
 Emission is never triggered by the plain Fortran targets: the call is inside
-the `--ocaml` / default-all branch of `code_generation`.
+the `--ezfio_default` / default-all branch of `code_generation`.
 
 P5 adds the ninja rule.  The intended shape (not implemented in P2) is:
 
@@ -270,7 +271,7 @@ rule qp_edit_config
 
 # one build edge per EZFIO.cfg, plus the registry edge:
 build $root/data/qp_edit_config/registry.toml: qp_edit_config_registry
-  # runs `ei_handler.py ocaml_global` from $root/ocaml
+  # runs `ei_handler.py generate_registry` from $root/ocaml
 ```
 
 with each module edge declaring `$root/data/qp_edit_config/<module>.toml` as
@@ -288,7 +289,7 @@ gitignored.
 3. P5: ninja builds the config and installs the binary under `$QP_ROOT/bin`.
 4. After the OCaml `qp_edit` is removed, `qp_edit_template` and the hard-coded
    `keyword_to_string` table disappear; the title duplication noted above
-   goes away with them.
+   goes away with them. — done in w11.
 
 Because the config is a build artifact, nothing is committed and no generated
 TOML can go stale: a clean build always regenerates it from the checked-in
@@ -304,7 +305,7 @@ TOML can go stale: a clean build always regenerates it from the checked-in
   `$QP_ROOT` trees (modified, pristine, reverse creation order), runs the
   generator for all 43 `src/*/EZFIO.cfg` modules plus `ocaml_global`, diffs
   every generated OCaml/EZFIO/default file, validates all 38 config files,
-  and runs `--check-config`.
+  and runs `--check-config`. (removed in w11 with the OCaml emission)
 
 Complexity: loading is O(number of fields) with one binary search per field
 over a 52-entry table; memory is the parsed config (353 field tables today).

@@ -50,7 +50,7 @@ jobs:
          run: rustup toolchain install 1.92.0 --profile minimal --component rustfmt,clippy
        - name: Configuration
          run: |
-              # zlib, zeromq, f77zmq and gmp normally come from the
+              # zlib, zeromq and f77zmq normally come from the
               # qp2-config cache, written by the QP Configuration workflow
               # (which runs on master only, so PRs against dev-stable can
               # miss it). If the cache was not restored, install them here.
@@ -58,7 +58,6 @@ jobs:
                 ./configure -i zlib || :
                 ./configure -i zeromq || :
                 ./configure -i f77zmq || :
-                ./configure -i gmp || :
               fi
               ./configure -i ninja || :
               ./configure -i docopt || :

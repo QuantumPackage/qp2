@@ -1,8 +1,7 @@
 # Build wrapper for the Rust tool layer.
 #
-# The OCaml sources in this directory are kept as the reference
-# implementation; they are no longer compiled.
-# This Makefile keeps the entry points the build already calls
+# The OCaml sources of the old tool layer were removed in w11 (see git
+# history).  This Makefile keeps the entry points the build already calls
 #
 #     make -C $QP_ROOT/ocaml executables .gitignore qp_edit.native qp_run.native
 #
@@ -40,10 +39,9 @@ BINARIES := element_create_db qp_create_ezfio qp_edit qp_print_basis qp_run \
 LINKS := $(BINARIES) qp_edit.native qp_run.native element_create_db.byte
 
 # The ordered list of modules read by `qp_edit` (`data/qp_edit_config/`
-# is a build artifact, like the per-module tables).  This replaces the
-# `Input_auto_generated.ml`/`qp_edit.ml` edge of the OCaml build: the
-# same generator call still emits those two obsolete files, which the
-# `.gitignore` rule below keeps out of `git status`.
+# is a build artifact, like the per-module tables).  This used to be a
+# by-product of the OCaml build's `Input_auto_generated.ml` rule; it is
+# now the only thing the generator call emits.
 REGISTRY := $(QP_ROOT)/data/qp_edit_config/registry.toml
 
 .PHONY: default rust executables clean .gitignore
@@ -71,7 +69,7 @@ $(LINKS): rust
 $(REGISTRY): $(QP_ROOT)/scripts/ezfio_interface/ei_handler.py \
              $(QP_ROOT)/scripts/ezfio_interface/qp_edit_config.py \
              $(wildcard $(QP_ROOT)/src/*/EZFIO.cfg)
-	cd $(QP_ROOT) && ei_handler.py ocaml_global
+	cd $(QP_ROOT) && ei_handler.py generate_registry
 
 # `data/executables` maps every Fortran binary to its path; the Rust tools are
 # reached through PATH, not through this file.  Regenerated on every call
@@ -84,14 +82,12 @@ executables: $(LINKS) $(REGISTRY)
 
 # The build asks for this goal by name.  The generated file ignores itself
 # and the published symlinks (the `*.byte`/`*.native` globs also cover the
-# stale artifacts of an old OCaml build), plus the two files that
-# `ei_handler.py ocaml_global` still writes.
+# stale artifacts of an old OCaml build).
 .gitignore:
-	@for i in .gitignore *.byte *.native _build $(LINKS) element_create_db \
-	           Input_*.ml qp_edit.ml Input_auto_generated.ml ; \
+	@for i in .gitignore *.byte *.native $(LINKS) element_create_db ; \
 	do \
 	   echo $$i ; \
 	done | sort | uniq > .gitignore
 
 clean:
-	rm -rf _build $(LINKS)
+	rm -rf $(LINKS)

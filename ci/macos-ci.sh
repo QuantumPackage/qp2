@@ -12,7 +12,7 @@
 #
 # How `./configure` behaves (matters for this script):
 #   - `-i` takes a single string that is split on spaces; `-i all` expands to
-#     (cmake zlib ninja zeromq f77zmq gmp docopt resultsFile bats
+#     (cmake zlib ninja zeromq f77zmq docopt resultsFile bats
 #     trexio armadillo openorb simple_gpu). qmckl is NOT in `all`, and this
 #     script passes that list explicitly. There is no `ocaml` package any
 #     more: the Rust tool layer replaced the OCaml tools.
@@ -34,7 +34,7 @@
 #      gcc-ranlib-NN: with a plain `gcc-*` glob, sort -V picks gcc-ranlib-NN,
 #      which "compiles" conftests as a silent no-op (autotools then report
 #      "C compiler cannot create executables"). The shim must stay global:
-#      it is needed by the zlib/zeromq/gmp/trexio/qmckl builds AND by the
+#      it is needed by the zlib/zeromq/trexio/qmckl builds AND by the
 #      gate's find_lib link tests, which invoke bare `gcc`.
 #   2. qmckl is built AFTER the dependency list, not before: it links against
 #      trexio (AC_CHECK_LIB trexio_open), which that stage installs.
@@ -77,7 +77,7 @@ export PATH="$SHIM:$PATH"
 # `configure -i all`, since the Rust tool layer replaced the OCaml tools and
 # there is no `ocaml` package any more (the workflow installs the Rust
 # toolchain; configure's gate now requires `cargo`, not `ocamlc`).
-DEPS="cmake zlib ninja zeromq f77zmq gmp docopt resultsFile bats trexio armadillo openorb simple_gpu"
+DEPS="cmake zlib ninja zeromq f77zmq docopt resultsFile bats trexio armadillo openorb simple_gpu"
 
 # Everything the installs produce lives in $QP_ROOT/{lib,include,bin,share,
 # libexec} plus external/Python (where docopt and resultsFile are copied).

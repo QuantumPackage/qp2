@@ -58,7 +58,6 @@ Requirements
 - TREXIO : library to import and export TREXIO format files
 - `Zlib`_
 - |ZeroMQ| : networking library
-- `GMP <https://gmplib.org/>`_ : Gnu Multiple Precision Arithmetic Library
 - Rust toolchain (:command:`cargo`, edition 2024) : https://rustup.rs
 - |Ninja| : a parallel build system
 - |pkg-config| : a tool which returns information about installed libraries
@@ -96,7 +95,6 @@ The following packages are supported by the :command:`configure` installer:
 * ninja
 * zeromq
 * f77zmq
-* gmp
 * docopt
 * resultsFile
 * bats
@@ -230,32 +228,6 @@ With Debian or Ubuntu, you can use
 .. code:: bash
 
    sudo apt install zlib1g-dev
-
-GMP
----
-
-GMP is the GNU Multiple Precision Arithmetic Library.
-
-* Download the latest version of gmp here:
-  `<ftp://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2>`_
-  and move it in the :file:`${QP_ROOT}/external` directory
-
-* Extract the archive, go into the :file:`gmp-*` directory and run
-  the following commands
-
-.. code:: bash
-
-   ./configure --prefix=${QP_ROOT}
-   make
-   make install
-
-With Debian or Ubuntu, you can use
-
-.. code:: bash
-
-   sudo apt install libgmp-dev
-
-
 
 
 Rust
