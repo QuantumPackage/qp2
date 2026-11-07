@@ -223,7 +223,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="cmake zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats trexio armadillo openorb simple_gpu"
+        PACKAGES="cmake zlib ninja zeromq f77zmq docopt resultsFile bats trexio armadillo openorb simple_gpu"
 fi
 
 
@@ -300,33 +300,6 @@ EOF
 EOF
  
 
-    elif [[ ${PACKAGE} = gmp ]] ; then
-
-            # NOTE: computed here (outer shell), NOT in the heredoc below:
-            # the unquoted << EOF expands $GMP_TARGET at heredoc-read time,
-            # so an inner-shell assignment would never reach the command.
-            #
-            # arm64Darwin needs both options:
-            #  - the explicit triplet: GMP 6.1.2's configfsf.guess does not
-            #    know Apple Silicon and guesses arm-apple-darwin (32-bit
-            #    abilist) => "Oops, mp_limb_t is 64 bits".
-            #  - --disable-assembly: mpn/arm64/invert_limb.asm uses
-            #    non-GOT-relative adrp/:lo12: references to approx_tab,
-            #    which current Apple assemblers reject ("ADR/ADRP
-            #    relocations must be GOT relative"). The generic C mpn code
-            #    builds and is functionally identical; this GMP is only a
-            #    build-time link dependency (OCaml zarith).
-            GMP_TARGET=""
-            [[ ${ARCHITECTURE} = arm64Darwin ]] && GMP_TARGET="--build=aarch64-apple-darwin --host=aarch64-apple-darwin --disable-assembly"
-
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              tar --bzip2 --extract --file qp2-dependencies/gmp-6.1.2.tar.bz2
-              cd gmp-6.1.2
-              ./configure --prefix=$QP_ROOT $GMP_TARGET && make -j 8
-              make -j 8 install
-EOF
-
     elif [[ ${PACKAGE} = zeromq ]] ; then
 
             execute << EOF
@@ -353,19 +326,6 @@ EOF
               make && make check && make install
 EOF
 
-
-    elif [[ ${PACKAGE} = ocaml ]] ; then
-
-         execute <<EOF
-            source "${QP_ROOT}"/quantum_package.rc
-            rm -rf "${QP_ROOT}"/external/opampack
-            cd "${QP_ROOT}"/external/
-            tar --gunzip --extract --file qp2-dependencies/${ARCHITECTURE}/opampack.tar.gz
-            cd "${QP_ROOT}"/external/opampack
-            ./install.sh
-            export OPAMROOT="${QP_ROOT}"/external/opampack/opamroot
-            eval \$("${QP_ROOT}"/external/opampack/opam env)
-EOF
 
     elif [[ ${PACKAGE} = bse ]] ; then
 
@@ -503,15 +463,9 @@ if [[ ${F77ZMQ} = $(not_found) ]] ; then
         fail
 fi
 
-GMP=$(find_lib -lgmp)
-if [[ ${GMP} = $(not_found) ]] ; then
-        error "GMP (gmp) is not installed."
-        fail
-fi
-
-OCAML=$(find_exe ocamlc)
-if [[ ${OCAML} = $(not_found) ]] ; then
-        error "OCaml (ocaml) compiler is not installed."
+CARGO=$(find_exe cargo)
+if [[ ${CARGO} = $(not_found) ]] ; then
+        error "The Rust toolchain (cargo) is not installed. Install it from https://rustup.rs (the workspace uses edition 2024)."
         fail
 fi
 

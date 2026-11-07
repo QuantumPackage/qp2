@@ -1,0 +1,13 @@
+[package]
+name = "qp_create_ezfio"
+description = "QP2 qp_create_ezfio — Rust port (P4)"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+qp-ezfio = { path = "../../crates/qp-ezfio" }
+qp-types = { path = "../../crates/qp-types" }
+
+[dev-dependencies]
+tempfile = { workspace = true }

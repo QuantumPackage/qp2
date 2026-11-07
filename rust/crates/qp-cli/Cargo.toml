@@ -1,0 +1,13 @@
+[package]
+name = "qp-cli"
+description = "Shared CLI plumbing for the QP2 Rust tools (program lookup, QP_ROOT, job launching, SIGUSR1)"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+libc = { workspace = true }
+qp-ezfio = { path = "../qp-ezfio" }
+qp-zmq = { path = "../qp-zmq" }
+
+[dev-dependencies]
+tempfile = { workspace = true }

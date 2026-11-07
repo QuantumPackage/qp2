@@ -1,0 +1,20 @@
+Pre-fix qp_edit -c coordinate quantisation (evidence, not target).
+
+Source: the H2 fixture.  One coordinate (nuclei/nucl_coord,
+dims (2,3), value index 4) is shifted by +5e-9 bohr, then
+`qp_edit -c` is run with the reference build (be4b71c1, i.e.
+before commit 32c9899d).
+
+command: qp_edit -c ezfio
+exit: 0
+stdout: b''
+stderr: b''
+
+before:    -1.398397327835595 bohr
+predicted: -1.3983973328355952 bohr   (bohr -> Angstrom -0.74000000 -> bohr)
+after:     -1.398397332835595 bohr
+drift:     -5e-09 bohr
+
+The value written back is the prediction of the %16.8f Angstrom
+round trip, not the value that was put in: checking the input
+rewrote it.  32c9899d removes that write (and prints %.17g).

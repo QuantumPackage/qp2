@@ -1,0 +1,9 @@
++ determinants/bit_kind
++ determinants/expected_s2
++ determinants/mo_label
++ determinants/n_int
++ determinants/psi_coef.gz
++ determinants/psi_coef_qp_edit.gz
++ determinants/psi_det.gz
++ determinants/psi_det_qp_edit.gz
++ determinants/state_average_weight.gz

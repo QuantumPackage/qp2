@@ -37,7 +37,6 @@ jobs:
            key: qp2-config
            fail-on-cache-miss: true
            path: |
-             external/opampack/
              include/
              lib/
              lib64/
@@ -47,8 +46,19 @@ jobs:
          run: |
            sudo apt update
            sudo apt install -y --fix-missing --no-install-recommends  gfortran gcc liblapack-dev libblas-dev wget python3 make m4 pkg-config
+       - name: Install Rust toolchain
+         run: rustup toolchain install 1.92.0 --profile minimal --component rustfmt,clippy
        - name: Configuration
          run: |
+              # zlib, zeromq and f77zmq normally come from the
+              # qp2-config cache, written by the QP Configuration workflow
+              # (which runs on master only, so PRs against dev-stable can
+              # miss it). If the cache was not restored, install them here.
+              if ! ls lib/libzmq.so* >/dev/null 2>&1; then
+                ./configure -i zlib || :
+                ./configure -i zeromq || :
+                ./configure -i f77zmq || :
+              fi
               ./configure -i ninja || :
               ./configure -i docopt || :
               ./configure -i resultsFile || :

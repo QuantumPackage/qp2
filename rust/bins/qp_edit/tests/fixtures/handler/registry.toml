@@ -1,0 +1,10 @@
+# Minimal handler-owned registry used by the hermetic tests.
+# `bitmasks` is the only handler whose module is not an editable section.
+
+schema_version = 1
+
+[[module]]
+name = "bitmasks"
+file = "bitmasks.toml"
+section = false
+handler = "bitmasks"
