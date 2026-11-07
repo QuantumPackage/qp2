@@ -89,13 +89,54 @@ def real_join(*args):
 # |_ ._           _. ._ o  _. |_  |  _   _
 # |_ | | \/   \/ (_| |  | (_| |_) | (/_ _>
 #
-def ninja_create_env_variable(pwd_config_file):
+def _positive_int_from_env(name, default):
+    """
+    Return the positive integer held by the environment variable `name`.
+
+    Unset, empty or malformed values return `default`: a typo in a build knob
+    must not break the build (this is also how IRPF90_NTHREADS behaves).
+    """
+    value = os.getenv(name)
+    if value is None or not value.strip():
+        return default
+    try:
+        number = int(value)
+    except ValueError:
+        number = 0
+    if number <= 0:
+        print("Warning: ignoring {0}={1!r}, using {2}".format(name, value,
+                                                              default))
+        return default
+    return number
+
+
+def build_parallelism():
+    """
+    Return (jobs, modules, jobs_per_module) for the build pools.
+
+    jobs            : QP_BUILD_JOBS, the total process budget
+    modules         : QP_BUILD_MODULES, modules built concurrently
+    jobs_per_module : IRPF90_NTHREADS, IRPF90 workers and nested-ninja jobs
+                      of one module
+    """
+    jobs = _positive_int_from_env("QP_BUILD_JOBS", os.cpu_count() or 1)
+    modules = _positive_int_from_env("QP_BUILD_MODULES",
+                                     max(1, min(8, jobs // 8)))
+    modules = min(modules, jobs)
+    per_module = _positive_int_from_env("IRPF90_NTHREADS",
+                                        max(1, jobs // modules))
+    return jobs, modules, per_module
+
+
+def ninja_create_env_variable(pwd_config_file, jobs, modules, per_module):
     """
     Return some ninja variable with the env variable expanded
     FC, CC, FCFLAGS, CFLAGS, IRPF90, IRPF90_FLAGS
     The env variable is useful for the generation of EZFIO, and IRPF90
     """
     l_string = ["builddir = {0}".format(os.path.dirname(ROOT_BUILD_NINJA)),
+                "# QP_BUILD_JOBS={0}: {1} modules x {2} jobs".format(
+                    jobs, modules, per_module),
                 ""]
 
 
@@ -341,7 +382,9 @@ def ninja_symlink_rule():
     """
     Return the command to create for the symlink
     """
-    return ["rule build_symlink", "   command =  rm -f $out ; ln -sf $in $out", ""]
+    # $source, not $in: the source is an order-only dependency (see
+    # ninja_symlink_build), so it is absent from $in.
+    return ["rule build_symlink", "   command =  rm -f $out ; ln -sf $source $out", ""]
 
 
 def ninja_symlink_build(path_module, l_symlink):
@@ -360,7 +403,17 @@ def ninja_symlink_build(path_module, l_symlink):
                 ""]
 
     for symlink in sorted(l_symlink, key=lambda x: x.source+x.destination):
-        l_string += ["build {0}: build_symlink {1}".format(*list(map(comp_path,(symlink.destination, symlink.source)))), ""]
+        destination, source = map(comp_path, (symlink.destination,
+                                              symlink.source))
+        # `||`, not `|`: only `||` is order-only (`|` is *implicit* and is
+        # still compared against the output mtime). ninja stats through a
+        # symlink, so a normal dependency would dirty the link whenever the
+        # build writes into the target directory (`tags`, the BEGIN_SHELL
+        # script) and re-run IRPF90 for every module on every build. `$source`
+        # is needed because `$in` excludes order-only dependencies.
+        l_string += ["build {0}: build_symlink || {1}".format(destination,
+                                                              source),
+                     "   source = {0}".format(source), ""]
 
     return l_string
 
@@ -469,7 +522,7 @@ def get_file_dependency(d_info_module):
     return d_irp
 
 
-def ninja_irpf90_make_rule():
+def ninja_irpf90_make_rule(modules, per_module):
     """
     The rule for creating the irpf90.make
     Export the flag and compile
@@ -482,6 +535,7 @@ def ninja_irpf90_make_rule():
     for flag in ["FC", "FCFLAGS", "CC", "CFLAGS", "LIB", "SRC", "OBJ"]:
         str_ = "export {0}='${0}'".format(flag)
         l_flag.append(str_)
+    l_flag.append("export IRPF90_NTHREADS='{0}'".format(per_module))
 
     # ~#~#~ #
     # c m d #
@@ -500,9 +554,15 @@ def ninja_irpf90_make_rule():
     # s t r i n g #
     # ~#~#~#~#~#~ #
 
-    l_string = ["pool irp_pool", "   depth = 1", "", "rule build_irpf90.ninja",
+    # module_pool is also used by build_binaries (ninja_binaries_rule): ninja
+    # requires a pool to be declared before the rule that names it, and
+    # duplicate declarations are a fatal error.
+    l_string = ["pool module_pool",
+                "   depth = {0}".format(modules),
+                "",
+                "rule build_irpf90.ninja",
                 "   command = {0}".format(" && ".join(l_cmd)),
-                "   pool = irp_pool",
+                "   pool = module_pool",
                 "   description = Running IRPF90 for $module_rel", ""]
 
     return l_string
@@ -639,7 +699,7 @@ def get_dict_binaries(l_module, mode="production"):
     return d_binaries
 
 
-def ninja_binaries_rule():
+def ninja_binaries_rule(per_module):
     """
     Rule for creating the binaries
     """
@@ -648,15 +708,18 @@ def ninja_binaries_rule():
     # c m d #
     # ~#~#~ #
 
-    l_cmd = ["cd $module_abs/IRPF90_temp", "ninja $out && for i in $out ; do [ -x $$i ] && touch $$i ; done"]
+    l_cmd = ["cd $module_abs/IRPF90_temp",
+             "ninja -j {0} $out && for i in $out ; do [ -x $$i ] && touch $$i ; done".format(per_module)]
 
     # ~#~#~#~#~#~ #
     # s t r i n g #
     # ~#~#~#~#~#~ #
 
+    # module_pool is declared by ninja_irpf90_make_rule(); declaring it again
+    # here is a fatal ninja error.
     l_string = ["rule build_binaries",
                 "   command = {0}".format(" ; ".join(l_cmd)),
-                "   pool = console",
+                "   pool = module_pool",
                 "   description = Create all the binaries from $module_rel",
                 ""]
 
@@ -738,9 +801,11 @@ def save_subninja_file(path_module):
                  "  description = Updating the executables",
                  ""]
 
+    # dummy_target rewrites the manifests that make_all_binaries/local read, so
+    # it must complete first (order-only: it does not make `all` dirty).
     l_string += ["build dummy_target: update_build_ninja_root", "",
-                 "build all: make_all_binaries dummy_target", "",
-                 "build local: make_local_binaries dummy_target", "",
+                 "build all: make_all_binaries | dummy_target", "",
+                 "build local: make_local_binaries | dummy_target", "",
                  "build executables: executables local dummy_target", "",
                  "default executables", "", "build clean: make_clean dummy_target",
                  "", "build tidy: make_tidy dummy_target",
@@ -822,7 +887,7 @@ def create_build_ninja_global(l_rag_inputs):
     l_string += ["build dummy_target: update_build_ninja_root",
                  "build rust_target: make_rust all",
                  "",
-                 "build all: make_all dummy_target",
+                 "build all: make_all | dummy_target",
                  "default rust_target",
                  "",
                  "build clean: make_clean dummy_target",
@@ -867,7 +932,10 @@ if __name__ == "__main__":
     # |_ | | \/   \/ (_| |  | (_| |_) | (/_ _>
     #
 
-    l_string = ninja_create_env_variable(pwd_config_file)
+    jobs, modules, per_module = build_parallelism()
+
+    l_string = ninja_create_env_variable(pwd_config_file, jobs, modules,
+                                         per_module)
 
     #  _
     # |_)     |  _
@@ -877,10 +945,10 @@ if __name__ == "__main__":
 
     l_string += ninja_symlink_rule()
 
-    l_string += ninja_irpf90_make_rule()
+    l_string += ninja_irpf90_make_rule(modules, per_module)
     l_string += ninja_gitignore_rule()
 
-    l_string += ninja_binaries_rule()
+    l_string += ninja_binaries_rule(per_module)
 
     l_string += ninja_ezfio_config_rule()
     l_string += ninja_ezfio_rule()
