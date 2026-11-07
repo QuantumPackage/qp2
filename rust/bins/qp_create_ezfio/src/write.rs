@@ -233,6 +233,13 @@ fn write_file(
     ezfio
         .set_array::<f64>("nuclei", "nucl_charge", &charge_array)
         .map_err(app)?;
+    // The reference never quantizes at the write site; its trailing
+    // `qp_edit -c` (master `qp_create_ezfio.ml:694`, a shell-out whose exit
+    // is ignored, ported as `run_qp_edit`) applied the parsed master-format
+    // values, and since w12 that write-back quantizes the nuclei section.
+    // The write path stays byte-identical to the reference's write path
+    // (contract C3); the quantization is the tail's job (w12 review,
+    // 2026-11-07: the spec's write-site grid application is retracted).
     let coords: Vec<(f64, f64, f64)> = nuclei
         .iter()
         .map(|atom| (atom.coord.x, atom.coord.y, atom.coord.z))

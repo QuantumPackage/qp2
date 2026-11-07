@@ -207,6 +207,18 @@ impl Handler {
         !matches!(self, Handler::Bitmasks)
     }
 
+    /// Whether check mode (`-c`) applies this section's parsed record to the
+    /// EZFIO.
+    ///
+    /// Contract C2: the default is that nothing is written in check mode, so
+    /// the flag is `false` everywhere except one override — user decision
+    /// w12: the nuclei section is written back in check mode so the file is a
+    /// fixed point of the master-format print, "for reproducibility"; master
+    /// achieved this with the pre-15e725aa check mode.
+    pub const fn applies_in_check(self) -> bool {
+        matches!(self, Handler::NucleiByHand)
+    }
+
     /// Parse a handler name from the TOML config.
     pub fn from_name(name: &str) -> Option<Handler> {
         Handler::ALL.iter().copied().find(|h| h.name() == name)
@@ -382,5 +394,15 @@ mod tests {
             .map(|h| h.name())
             .collect();
         assert_eq!(non_sections, ["bitmasks"]);
+    }
+
+    #[test]
+    fn only_nuclei_applies_in_check_mode() {
+        let applying: Vec<&str> = Handler::ALL
+            .iter()
+            .filter(|h| h.applies_in_check())
+            .map(|h| h.name())
+            .collect();
+        assert_eq!(applying, ["nuclei_by_hand"]);
     }
 }

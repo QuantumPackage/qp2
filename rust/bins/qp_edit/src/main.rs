@@ -8,8 +8,8 @@
 //!
 //! 1. open the EZFIO directory and make sure `work/` exists;
 //! 2. clear `work/qpstop` and `work/qpkill`;
-//! 3. repair an unordered AO / AO-extra basis (the only EZFIO write that
-//!    check mode allows, contract C2);
+//! 3. repair an unordered AO / AO-extra basis (a write check mode allows,
+//!    contract C2 — since w12 the nuclei section is the other one);
 //! 4. apply `-n` (truncate the wavefunction) and `-s` (extract states);
 //! 5. render every section to one RST document, in display order
 //!    (`display_order`): Molecule first, the rest alphabetical by title,
@@ -17,8 +17,8 @@
 //! 6. run `$EDITOR` on it (interactive runs only — there is no line REPL;
 //!    "interactive" means the external editor);
 //! 7. read the document back and `set` every section, with `apply` false in
-//!    check mode, so malformed input is still reported but nothing is
-//!    written (contract C7).
+//!    check mode (except the nuclei section, since w12), so malformed input
+//!    is still reported (contract C7).
 //!
 //! Non-check runs wrap steps 4–7 in a `work/backup.tar` backup, restored
 //! when the run fails.  Failures print the reference's 80-column `=-` banner:
@@ -343,9 +343,10 @@ fn edit(engine: &Engine, config: &EditConfig) -> Result<()> {
         }
     }
 
-    // Contract C2: the only write check mode allows is repairing an
-    // unordered basis.  Both helpers return without writing when the
-    // ordering is already sorted.
+    // Contract C2: the only writes check mode allows are repairing an
+    // unordered basis **and** (since w12) the nuclei section, applied by
+    // `read_back` through `Engine::section_applies_in_check`.  Both helpers
+    // return without writing when the ordering is already sorted.
     reorder_ao_basis(&ezfio)?;
     reorder_ao_extra_basis(&ezfio)?;
 
@@ -441,14 +442,23 @@ fn launch_editor(path: &Path) {
 ///
 /// `input_lines` + `String.concat "\n"` drops exactly one final newline, so
 /// the body handed to `set` never ends with one.  `apply` is false in check
-/// mode: the sections are still parsed (contract C7), nothing is written.
+/// mode for every section whose handler does not opt in
+/// ([`Engine::section_applies_in_check`]; since w12 that is only the nuclei
+/// section): the sections are still parsed (contract C7), and the only thing
+/// check mode writes besides the unordered-basis repairs is the nuclei
+/// record.
 fn read_back(engine: &Engine, ezfio: &EzFio, config: &EditConfig, path: &Path) -> Result<()> {
     let text = fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
     let text = text.strip_suffix('\n').unwrap_or(&text);
     // The same order as the rendering (`display_order`): every getter of
     // this run has run before, so the configuration has not changed under us.
     for name in display_order(engine) {
-        engine.set(ezfio, name, text, !config.check)?;
+        engine.set(
+            ezfio,
+            name,
+            text,
+            !config.check || engine.section_applies_in_check(name),
+        )?;
     }
     Ok(())
 }

@@ -163,6 +163,28 @@ impl Engine {
         }
     }
 
+    /// Whether check mode (`-c`) applies this section's parsed record to the
+    /// EZFIO: the per-section flag of the owning handler,
+    /// [`crate::handlers::Handler::applies_in_check`].
+    ///
+    /// The default is `false` (contract C2: nothing is written in check
+    /// mode); since w12 the only section that answers `true` is the nuclei
+    /// one.  An unknown or non-section module, and a section without a
+    /// handler (generic modules have no such flag), answer `false`: `set`
+    /// would reject or skip it anyway.  Resolves the handler the same way
+    /// [`Engine::set`] does; the loader rejects unknown handler names, so a
+    /// failure is an internal inconsistency that the `false` default
+    /// absorbs.
+    pub fn section_applies_in_check(&self, name: &str) -> bool {
+        let Ok(module) = self.section(name) else {
+            return false;
+        };
+        let Some(handler_name) = &module.handler else {
+            return false;
+        };
+        handler_of(module, handler_name).is_ok_and(|handler| handler.applies_in_check())
+    }
+
     /// The sections a run visits, given the reference's canonical task list.
     ///
     /// The canonical list fixes the document order (`qp_edit.ml`'s `tasks`),

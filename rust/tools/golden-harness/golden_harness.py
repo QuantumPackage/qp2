@@ -30,10 +30,22 @@ contract that the Rust port must reproduce.  This tool pins that contract:
 ``verify``
     Replays the requested scenarios (``--only create,check`` by default)
     and gates them against the corpus.  ``create`` must reproduce
-    ``fixtures/`` byte for byte; ``check`` must reproduce its transcript
-    and obey ``contracts/check-mutated.json`` (``--contract post-fix``,
-    the Rust target, or ``--contract pre-fix``, what the reference OCaml
-    build does).
+    ``fixtures/`` byte for byte, and ``check`` must reproduce its
+    transcript and obey ``contracts/check-mutated.json``
+    (``--contract post-fix``, the Rust target, or ``--contract pre-fix``,
+    what the reference OCaml build does).  The contract's
+    ``post-fix-changed`` list is a **one-way allowance** for the w12
+    one-time ``nucl_coord`` normalisation of c2h2/b2: a toolset that
+    applies the normalisation must produce exactly the stored expected
+    payload in both scenarios (a difference outside the list, or a
+    difference of the wrong bytes, is a failure); a toolset that does
+    not apply it (the reference OCaml build, whose multiply pipeline is
+    the corpus's own fixed point, as run by CI) leaves the file
+    untouched and passes.  The negative side -- that the port does
+    apply the normalisation -- is enforced by the port's own test suite
+    (``qp_edit`` integration test
+    ``c2_no_pre_existing_file_is_rewritten``, which also asserts the
+    change is real), not by this tool.
 
 Why the corpus is normalised
 ----------------------------
@@ -439,10 +451,11 @@ def check_transcript(fixture_tree: dict, work: str,
                      tools: str, env: dict) -> dict:
     """Run ``qp_edit -c`` on a copy and report what it changed.
 
-    Returns ``{"stdout", "stderr", "exit", "mutated", "added"}`` where
-    *mutated* lists ``"~ path"`` / ``"- path"`` / ``"+ path"`` entries
-    computed on decompressed content, and *added* maps the ``"+ path"``
-    entries (``.gz`` suffix kept) to their decompressed payload.
+    Returns ``{"stdout", "stderr", "exit", "mutated", "added", "changed"}``
+    where *mutated* lists ``"~ path"`` / ``"- path"`` / ``"+ path"``
+    entries computed on decompressed content, *added* maps the ``"+ path"``
+    entries (``.gz`` suffix kept) to their decompressed payload, and
+    *changed* maps the ``"~ path"`` entries to their after payload.
     """
     dst = os.path.join(work, "ezfio")
     write_tree(fixture_tree, dst)
@@ -451,6 +464,7 @@ def check_transcript(fixture_tree: dict, work: str,
     before = fixture_tree
     mutated = []
     added = {}
+    changed = {}
     for rel in sorted(set(before) | set(after)):
         if rel not in after:
             mutated.append("- " + rel)
@@ -459,9 +473,11 @@ def check_transcript(fixture_tree: dict, work: str,
             added[rel] = after[rel]
         elif before[rel] != after[rel]:
             mutated.append("~ " + rel)
+            changed[rel] = after[rel]
     shutil.rmtree(dst)
     return {"stdout": r["stdout"], "stderr": r["stderr"],
-            "exit": r["exit"], "mutated": mutated, "added": added}
+            "exit": r["exit"], "mutated": mutated, "added": added,
+            "changed": changed}
 
 
 def quantisation_probe(h2_tree: dict, work: str,
@@ -904,6 +920,15 @@ def load_contract(corpus: str) -> dict:
     It is hand-written, not generated: it is the *target* the Rust port
     must meet, transcribed from the source changes of commit 32c9899d
     (``15e725aa`` on ``origin/qp-edit-fix``), not observed behaviour.
+    Besides the created-file lists (``post-fix`` / ``pre-fix``), the
+    ``post-fix-changed`` list names the existing files the w12 one-time
+    ``nucl_coord`` normalisation of c2h2/b2 may change (see the file's
+    ``description``); the expected decompressed payloads live in
+    ``transcripts/<name>/changed/``.  The key is a format contract (its
+    absence is a load error), but the pin itself is a **one-way
+    allowance**: a run that touches one of the listed files must match
+    the stored payload; a run that leaves it untouched passes (see
+    ``verify``).
     """
     p = os.path.join(corpus, "contracts", "check-mutated.json")
     if not os.path.isfile(p):
@@ -915,28 +940,73 @@ def load_contract(corpus: str) -> dict:
         if mode not in contract:
             raise SystemExit("golden_harness: %s has no %r contract"
                              % (p, mode))
+    if "post-fix-changed" not in contract:
+        raise SystemExit("golden_harness: %s has no 'post-fix-changed' "
+                         "list (the pinned normalisation)" % p)
     return contract
 
 
+def expected_payload(tdir: str, rel: str, subdir: str):
+    """The stored expected payload for *rel* under ``<tdir>/<subdir>/``,
+    or ``None`` when nothing is stored there.
+
+    The storage convention (both ``added/`` and ``changed/``): the
+    decompressed payload, ``.gz`` suffix stripped.
+    """
+    rel_path = rel[:-3] if rel.endswith(".gz") else rel
+    p = os.path.join(tdir, subdir, *rel_path.split("/"))
+    return p if os.path.isfile(p) else None
+
+
 def verify_create(corpus: str, fx: dict, work: str,
-                  tools: str, env: dict) -> int:
-    """Replay a ``create`` scenario and compare with ``fixtures/<name>``."""
+                  tools: str, env: dict, contract: dict) -> int:
+    """Replay a ``create`` scenario and compare with ``fixtures/<name>``.
+
+    The create output must equal the committed fixture, with the one-way
+    allowance of ``contract["post-fix-changed"][<name>]`` (the w12
+    one-time ``nucl_coord`` normalisation, c2h2/b2): when the
+    normalisation is applied (the port's create tail runs the same
+    divide-by-K pipeline as ``-c``), the difference must be in exactly
+    those files and their produced payload must equal the stored
+    expected file (``transcripts/<name>/changed/``); a toolset that does
+    not apply it (the reference build in CI, whose multiply pipeline is
+    the corpus's fixed point) produces the fixture bytes and passes.
+    Any other difference is a failure.  The negative side -- that the
+    port's create does apply the normalisation -- is enforced by the
+    port's own test suite, not by this tool.
+    """
     name = fx["name"]
     produced = create_fixture(fx, os.path.join(corpus, "inputs"),
                               work, tools, env)
     expected = read_tree(os.path.join(corpus, "fixtures", name))
-    if produced == expected:
-        print("%-6s create  ok  %4d files  %s"
-              % (name, len(produced), hash_tree(produced)[:16]))
-        return 0
-    print("%-6s create  FAILED" % name)
+    tdir = os.path.join(corpus, "transcripts", name)
+    pinned = {}
+    for rel in contract["post-fix-changed"].get(name, []):
+        p = expected_payload(tdir, rel, "changed")
+        pinned[rel] = read_bytes(p) if p else None
+    failures = 0
+    pinned_verified = 0
     for rel in sorted(set(expected) | set(produced)):
         if rel not in produced:
+            failures += 1
             print("%s: missing from replay" % rel)
         elif rel not in expected:
+            failures += 1
             print("%s: not in committed fixture" % rel)
         elif expected[rel] != produced[rel]:
+            if pinned.get(rel) is not None and produced[rel] == pinned[rel]:
+                pinned_verified += 1
+                continue
+            failures += 1
             print("%s: %s" % (rel, first_diff(expected[rel], produced[rel])))
+    if not failures:
+        line = "%-6s create  ok  %4d files  %s" \
+               % (name, len(produced), hash_tree(produced)[:16])
+        if pinned_verified:
+            line += ", %d changed as pinned" % pinned_verified
+        print(line)
+        return 0
+    print("%-6s create  FAILED" % name)
     return 1
 
 
@@ -944,17 +1014,27 @@ def verify_check(corpus: str, fx: dict, work: str, tools: str,
                  env: dict, contract: dict, mode: str) -> int:
     """Replay ``qp_edit -c`` and compare it with the transcript and contract.
 
-    Three things are checked, all on decompressed content:
+    Four things are checked, all on decompressed content:
 
     * stdout, stderr and the exit status against ``transcripts/<name>/``
       (the reference build's transcript);
     * the set of files created, against ``contract[mode][<name>]``;
     * the content of every created file for which
-      ``transcripts/<name>/added/`` holds the reference payload.
-
-    A file that existed before and whose content changed (``~``) or that
-    was deleted (``-``) is always a failure: check mode must not rewrite
-    the directory.
+      ``transcripts/<name>/added/`` holds the reference payload;
+    * the existing files that were touched: in ``post-fix`` mode a
+      touched file is a failure unless it is in
+      ``contract["post-fix-changed"][<name>]`` (the w12 one-time
+      ``nucl_coord`` normalisation) with its payload equal to the stored
+      expected file (``transcripts/<name>/changed/``, when one is
+      stored).  The pin is a **one-way allowance**: a toolset that does
+      not apply the normalisation (the reference build in CI, whose
+      multiply pipeline is the corpus's own fixed point) touches nothing
+      and passes -- the pin is not a requirement to change the file.
+      The negative side (that the port does change it) is enforced by
+      the port's own test suite
+      (``c2_no_pre_existing_file_is_rewritten``, which also asserts the
+      change is real).  In ``pre-fix`` mode, and for deletions, any
+      touch is a failure.
     """
     name = fx["name"]
     before = read_tree(os.path.join(corpus, "fixtures", name))
@@ -984,17 +1064,41 @@ def verify_check(corpus: str, fx: dict, work: str, tools: str,
         failures += 1
         print("%s: created, but not in the %s contract: %s"
               % (name, mode, rel))
+
+    # The pinned one-time normalisation (w12) is a one-way allowance: in
+    # post-fix mode a "~" touch is allowed exactly for the files of
+    # contract["post-fix-changed"][<name>], with the stored expected
+    # payload (when one is stored).  An unexpected touch, a deletion or
+    # an unexpected payload is a failure; a toolset that does not apply
+    # the normalisation (the reference build in CI, whose multiply
+    # pipeline is the corpus's own fixed point) touches nothing and
+    # passes.  The negative side -- that the port DOES apply it -- is
+    # enforced by the port's own test suite
+    # (c2_no_pre_existing_file_is_rewritten), not by this tool.
+    pinned = (contract["post-fix-changed"].get(name, [])
+              if mode == "post-fix" else [])
+    pinned_verified = 0
     for entry in touched:
-        failures += 1
-        print("%s: check mode touched an existing file: %s" % (name, entry))
+        if not entry.startswith("~ ") or entry[2:] not in pinned:
+            failures += 1
+            print("%s: check mode touched an existing file: %s"
+                  % (name, entry))
+            continue
+        rel = entry[2:]
+        p = expected_payload(tdir, rel, "changed")
+        if p is not None and tr["changed"].get(rel) != read_bytes(p):
+            failures += 1
+            print("%s: %s differs from the pinned payload: %s"
+                  % (name, rel,
+                     first_diff(read_bytes(p), tr["changed"].get(rel, b""))))
+        else:
+            pinned_verified += 1
 
     # Content of the created files, where the reference payload is known.
-    added_dir = os.path.join(tdir, "added")
     compared = 0
     for rel in sorted(expected):
-        rel_path = rel[:-3] if rel.endswith(".gz") else rel
-        p = os.path.join(added_dir, *rel_path.split("/"))
-        if not os.path.isfile(p):
+        p = expected_payload(tdir, rel, "added")
+        if p is None:
             continue
         want = read_bytes(p)
         if tr["added"].get(rel) != want:
@@ -1004,8 +1108,11 @@ def verify_check(corpus: str, fx: dict, work: str, tools: str,
         compared += 1
 
     if not failures:
-        print("%-6s check   ok  %d created, %d compared byte for byte"
-              % (name, len(expected), compared))
+        line = "%-6s check   ok  %d created, %d compared byte for byte" \
+               % (name, len(expected), compared)
+        if pinned_verified:
+            line += ", %d changed as pinned" % pinned_verified
+        print(line)
     else:
         print("%-6s check   FAILED (%s contract)" % (name, mode))
     return 1 if failures else 0
@@ -1022,7 +1129,10 @@ def cmd_verify(args) -> int:
     if unknown:
         raise SystemExit("golden_harness: unknown scenario(s) %s"
                          % ", ".join(sorted(unknown)))
-    contract = load_contract(corpus) if "check" in scenarios else None
+    # The contract gates both scenarios: ``check`` against the created
+    # and the pinned changed files, ``create`` against the same pinned
+    # changed files (create's tail runs the same normalisation).
+    contract = load_contract(corpus) if scenarios else None
     failures = 0
     with tempfile.TemporaryDirectory(prefix="qp-verify-") as tmp:
         for fx in manifest["fixtures"]:
@@ -1032,7 +1142,8 @@ def cmd_verify(args) -> int:
                 work = os.path.join(tmp, "%s-%s" % (fx["name"], scenario))
                 os.makedirs(work)
                 if scenario == "create":
-                    failures += verify_create(corpus, fx, work, tools, env)
+                    failures += verify_create(corpus, fx, work, tools, env,
+                                              contract)
                 else:
                     failures += verify_check(corpus, fx, work, tools, env,
                                              contract, args.contract)

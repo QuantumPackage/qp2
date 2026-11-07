@@ -43,15 +43,17 @@ that build, run side by side with the port.
 ## C. `qp_edit` document text (`-w`, `$EDITOR`)
 
 The document is user-facing text; the parse-back ignores descriptions and
-keeps full precision, so none of these rows changes an EZFIO value.
+keeps full precision, so none of these rows changes an EZFIO value — except
+C6, which since w12 writes the nuclei section back in check mode.
 
 | # | Item | Ref | Port | Why | Impact |
 |---|---|---|---|---|---|
-| C1 | nuclei block | `%16.8f %16.8f %16.8f` Angstrom, padded | `%.17g` Angstrom, single-spaced | contract C5: `%16.8f` is a 1.9e-8 bohr grid that does not round-trip | `-w` bytes differ; a `+5e-9` bohr perturbation now survives `-c` |
+| C1 | nuclei block (display) | master `%16.8f %16.8f %16.8f` Angstrom, padded, integer charge (`%3d`) | **restored to the master form in w12** (user decision 2026-11-06): the section prints the master `%16.8f` Angstrom coordinates with the unsigned integer charge (`Charge::to_int`). The w9-era no-quantisation `%.17g` display (reference `15e725aa`) is retracted for the nuclei print | master's quantising display is the reproducibility target: the display quantises, so `-c`'s write-back (C6) is a fixed point | the `-w` nuclei block matches master; `%.17g` remains in `Point3d::to_string` / `Charge::to_string` for the non-display paths (e.g. `Atom`) |
 | C2 | descriptions containing an RST-escaped vertical bar | the OCaml unescape pass drops the backslash before emitting `Input_*.ml`, so the document shows a bare vertical bar | prints the two characters backslash + bar, as carried by the `EZFIO.cfg` doc string | the P2 config emitter does not run the OCaml unescape pass that the `Input_*.ml` emitter does | document text only; the parse-back drops descriptions; the fix belongs to the emitter |
 | C3 | section tail | every section block ends with a line of three spaces | no whitespace-only line | the port trims the block separator | `-w` is 172 bytes shorter on the fresh tree; trailing whitespace only |
-| C4 | Molecule xyz block | `%16.8f %16.8f %16.8f` (width 16, 8 decimals) | each coordinate right-aligned in a fixed-width field of 20; the content is the `%.17g` shortest round-trip string (C1), padded with spaces | user request for aligned columns; the reference's fixed width is the quantising `%16.8f` that C1 rejects, so the port pads the `%.17g` content instead | document text only; parse-back is whitespace-tolerant, values identical |
+| C4 | Molecule xyz block — **retracted in w12** | `%16.8f %16.8f %16.8f` (width 16, 8 decimals) | (superseded) the master `%16.8f` form since w12 (C1); the w10 fixed-width field of 20 padding the `%.17g` content is retracted | user request for aligned columns, later retracted in favour of master's quantising display | retraction recorded; row kept for the record, not deleted |
 | C5 | section order of the editing document | the reference's internal `tasks` list order | `Molecule` first, the rest alphabetically by title (case-insensitive), `Determinants_by_hand` last | user request; `Determinants_by_hand` stays last because its `of_rst` consumes the rest of its section body | document text only; `set` locates sections by header, so old-order documents (including reference-generated ones) still apply |
+| C6 | check-mode nuclei write-back | (reference `15e725aa`) check mode writes nothing but materialised defaults (C3) | check mode applies the nuclei section: the parsed master-format record (grid coordinates, the truncated integer charge, label/num as parsed) is written back | user decision w12 "for reproducibility": `-c` should leave the file a fixed point of the master-format print; the reference master (pre-`15e725aa`) achieved this in check mode | the four `nuclei` files are re-emitted by `-c` (the `.gz` containers re-encoded with the port's own gzip); the determinants scratch pair is still not written (B9 stands) |
 
 ## D. TaskServer and the wire
 

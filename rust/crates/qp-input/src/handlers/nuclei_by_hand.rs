@@ -21,12 +21,13 @@
 //!
 //! # The `"\n  "` in the rendered block
 //!
-//! `to_rst` emits `"  <nucl_num>\n  "` followed by the atom lines (fixed-width
-//! coordinate fields, see [`to_rst`]), so the text between the `nucl_num`
-//! line and the first atom is a line holding two spaces.  `of_rst` skips
-//! exactly one line for the block title
-//! (`_ :: nucl_num :: title :: lines`), so the two are inverse of each other.
-//! Do not "clean up" that line: the parse would then read it as an atom.
+//! `to_rst` emits `"  <nucl_num>\n  "` followed by the atom lines (the
+//! master `%16.8f` coordinate fields, see [`to_rst`]), so the text between
+//! the `nucl_num` line and the first atom is a line holding two spaces.
+//! `of_rst` skips exactly one line for the block title
+//! (`_ :: nucl_num :: title :: lines`), so the two are inverse of each other
+//! for records at the master-display grid (see [`to_rst`]).  Do not "clean
+//! up" that line: the parse would then read it as an atom.
 
 use anyhow::{Context, Result};
 use qp_ezfio::EzFio;
@@ -41,12 +42,6 @@ use crate::engine::make_header;
 
 /// The EZFIO group this handler owns.
 const GROUP: &str = "nuclei";
-
-/// The fixed width of each coordinate field in the xyz block (w10, user
-/// request; DEVIATIONS C4).  20 fits every physically realistic coordinate
-/// (longest plain `%.17g` form: 17 significant digits + decimal point +
-/// sign = 19 chars).
-const COORD_FIELD_WIDTH: usize = 20;
 
 /// One molecule, as stored in `nuclei`.
 ///
@@ -181,15 +176,28 @@ pub(crate) fn write(ezfio: &EzFio, record: &NucleiByHand) -> Result<()> {
 
 /// `to_rst`: the xyz block, without the section header.
 ///
-/// Layout (`Input_nuclei_by_hand.ml:197` for the symbol/charge prefix; the
-/// coordinate fields are the w10 fixed-width deviation, DEVIATIONS C4):
+/// Layout: the master `Input_nuclei_by_hand.ml` `to_rst`
+/// (`Printf.sprintf "  %-3s  %3d %s"`) is the target, restored by the w12
+/// user decision (2026-11-06): the w10 fixed-width `%.17g` print and the
+/// w9-era no-quantisation display (reference commit `15e725aa`) are both
+/// retracted for the nuclei display.  The charge is `Charge.to_int`
+/// (`%3d`, unsigned, no `+`); the coordinates are the master
+/// `Point3d.to_string ~units:Units.Angstrom` form `%16.8f %16.8f %16.8f`
+/// (the quantising display, DEVIATIONS C1 as rewritten in w12).
+/// `Charge.to_string` / `Point3d::to_string` (`%.17g`) remain the
+/// non-display form, e.g. in [`qp_types::atom::Atom`].
+///
+/// Because the display quantises, `to_rst`/`of_rst` are inverse of each
+/// other for records at the master-display grid
+/// ([`Point3d::to_master_grid`]); an off-grid record reads back as its grid
+/// value (that is the check-mode write-back, contract C2's nuclei
+/// exception, and the survival clause of contract C5 as rewritten in w12).
 ///
 /// ```text
 /// \nNuclear coordinates in xyz format (Angstroms) ::\n\n
 ///   <nucl_num>\n
 ///   \n
-///   <sym padded to 3>  <charge right-justified in 3> <x y z in angstrom,
-///   each component right-aligned in a 20-character field (COORD_FIELD_WIDTH)>
+///   <sym padded to 3>  <charge %3d> <x y z in angstrom, %16.8f each>
 ///   ...
 /// \n\n
 /// ```
@@ -206,18 +214,14 @@ pub(crate) fn to_rst(record: &NucleiByHand) -> String {
             lines.push(String::new());
             continue;
         };
-        // `Printf.sprintf "  %-3s  %3s %s"`: left-justify the symbol to 3,
-        // right-justify the charge string to 3.  `Charge` writes through
-        // `f.write_str`, which ignores the formatter width, so the charge is
-        // rendered first and the *string* is padded.  The coordinates are
-        // the w10 fixed-width block (DEVIATIONS C4): each component in a
-        // 20-character field, single-spaced.
-        let charge = charge.to_string();
+        // `Printf.sprintf "  %-3s  %3d %s"`: left-justify the symbol to 3,
+        // right-justify the integer charge to 3, and the coordinates in the
+        // master `%16.8f %16.8f %16.8f` Angstrom form (w12 user decision).
         lines.push(format!(
             "  {:<3}  {:>3} {}",
             element::to_string(*label),
-            charge,
-            Point3d::to_string_width(Units::Angstrom, coord, COORD_FIELD_WIDTH)
+            charge.to_int(),
+            Point3d::to_string_master(Units::Angstrom, coord)
         ));
     }
     let text = format!("  {}\n  \n{}", record.nucl_num, lines.join("\n"));
@@ -312,8 +316,24 @@ fn usize_of(value: i64) -> Result<usize> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use qp_types::point3d::units;
+    use std::path::Path;
+
+    use crate::handlers::test_support;
 
     /// The `hcn` fixture: C at the origin, H and N on the z axis.
+    ///
+    /// The z values are 8-decimal angstrom readings converted back to bohr
+    /// by division (`a / K`).  Each value is a fixed point of both round
+    /// trips the tests exercise: the master display (`%16.8f` angstrom, the
+    /// w12 grid: `to_rst`/`of_rst` are the identity) and the EZFIO array
+    /// storage (`%24.15e`, 16 significant digits: `set_array`/`get_array`
+    /// are the identity, so a read-back equals the written `a / K`).
+    /// `2 * K` rounds to `1.05835442`, whose bohr double
+    /// (`1.9999999974631935`) has 17 significant digits and loses 1 ulp in
+    /// storage; `1.05835443` (one grid step over, `2.000000016360455`
+    /// bohr) is the nearest 8-decimal value that survives both.
+    /// `0.52917721` (`0.9999999987315967` bohr) already does.
     fn hcn_like() -> (tempfile::TempDir, EzFio) {
         let dir = tempfile::tempdir().expect("temp dir");
         let ezfio = EzFio::create(dir.path().join("ezfio")).expect("create EZFIO");
@@ -334,8 +354,21 @@ mod tests {
                 &ezfio_array_of_list(vec![3], charges.to_vec()).expect("charges"),
             )
             .expect("nucl_charge");
-        // Column major: x1 x2 x3 y1 y2 y3 z1 z2 z3.
-        let coord = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -2.0, 2.0, 1.0];
+        // Column major: x1 x2 x3 y1 y2 y3 z1 z2 z3.  The 8-decimal angstrom
+        // values divided by K (fixed points of the master display and of the
+        // `%24.15e` storage; see the `hcn_like` docs).
+        let k = units::BOHR_TO_ANGSTROM;
+        let coord = [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.05835443 / k,
+            1.05835443 / k,
+            0.52917721 / k,
+        ];
         ezfio
             .set_array::<f64>(
                 GROUP,
@@ -353,12 +386,15 @@ mod tests {
         assert_eq!(record.nucl_num, 3);
         assert_eq!(record.nucl_label, vec![Element::C, Element::H, Element::N]);
         assert_eq!(record.nucl_charge[2], Charge::of_int(7));
+        // The z values are the grid values: the 8-decimal angstrom readings
+        // converted back by division (storage-stable, so the read-back
+        // equals the written value).
         assert_eq!(
             record.nucl_coord[0],
             Point3d {
                 x: 0.0,
                 y: 0.0,
-                z: -2.0
+                z: -1.05835443 / units::BOHR_TO_ANGSTROM
             }
         );
         assert_eq!(
@@ -366,7 +402,7 @@ mod tests {
             Point3d {
                 x: 0.0,
                 y: 0.0,
-                z: 2.0
+                z: 1.05835443 / units::BOHR_TO_ANGSTROM
             }
         );
         assert_eq!(
@@ -374,7 +410,7 @@ mod tests {
             Point3d {
                 x: 0.0,
                 y: 0.0,
-                z: 1.0
+                z: 0.52917721 / units::BOHR_TO_ANGSTROM
             }
         );
     }
@@ -387,23 +423,25 @@ mod tests {
     }
 
     #[test]
-    fn to_rst_uses_fixed_width_coordinate_fields() {
+    fn to_rst_uses_the_master_atom_line() {
         let (_dir, ezfio) = hcn_like();
         let record = read(&ezfio).expect("read").expect("some");
-        // Each coordinate sits in a 20-character field
-        // (`COORD_FIELD_WIDTH`), right-aligned: the zeros are 19 spaces +
-        // `0`, and the 19/18/19-char z values of C/H/N take 1/2/1 padding
-        // spaces, so every line is 73 columns and the z column lines up.
+        // The master form (w12): `  %-3s  %3d` plus `%16.8f` Angstrom
+        // coordinates.  The literal is the independent Python
+        // reconstruction (`$HOME/OpenCode/tmp/w12-nuclei/rust_literals.py`):
+        // K read from `point3d.rs`, `f"{v * K:16.8f}"` per coordinate,
+        // `f"{charge:>3d}"` (unsigned integer charge), diffed byte for byte
+        // against this literal.
         assert_eq!(
             to_rst(&record),
             "\nNuclear coordinates in xyz format (Angstroms) ::\n\n  3\n  \n  \
-             C      6                    0                    0  -1.0583544213424201\n  \
-             H      1                    0                    0   1.0583544213424201\n  \
-             N      7                    0                    0  0.52917721067121004\n\n"
+             C      6       0.00000000       0.00000000      -1.05835443\n  \
+             H      1       0.00000000       0.00000000       1.05835443\n  \
+             N      7       0.00000000       0.00000000       0.52917721\n\n"
         );
         // A ragged user-edited line (coordinate fields shorter than the
-        // rendered width) still parses inside a fixed-width document; the
-        // `interactive.rs` awk tests rely on it.
+        // rendered width) still parses: the parser is unchanged (w12), and
+        // the `interactive.rs` awk tests rely on it.
         let ragged = "\nNuclear coordinates in xyz format (Angstroms) ::\n\n  1\n  \n  \
                       C      6 0.01 0 0\n\n";
         let parsed = of_rst(&ezfio, ragged)
@@ -418,8 +456,83 @@ mod tests {
         );
     }
 
+    /// Gate B (w12): for every corpus fixture, the rendered block is
+    /// byte-identical to the independent Python reconstruction of the
+    /// master form (`$HOME/OpenCode/tmp/w12-nuclei/rust_literals.py`, with
+    /// K read from `point3d.rs`, `f"{v * K:16.8f}"` per coordinate,
+    /// `f"{charge:>3d}"`, the `  <n>\n  ` count prefix and the `::`
+    /// header).  Block byte counts: h2 183, h3 245, c2h2 307, b2 183,
+    /// h2g 245, hcn 245.
+    #[test]
+    fn to_rst_matches_the_independent_master_reconstruction_for_every_fixture() {
+        for (name, expected) in [
+            (
+                "h2",
+                "\nNuclear coordinates in xyz format (Angstroms) ::\n\n  2\n  \n  \
+                    H      1       0.00000000       0.00000000      -0.74000000\n  \
+                    H      1       0.00000000       0.00000000       0.74000000\n\n",
+            ),
+            (
+                "h3",
+                "\nNuclear coordinates in xyz format (Angstroms) ::\n\n  3\n  \n  \
+                    H      1       0.00000000       0.00000000      -0.74000000\n  \
+                    H      1       0.00000000       0.00000000       0.74000000\n  \
+                    H      1       0.00000000       0.00000000       0.00000000\n\n",
+            ),
+            (
+                "c2h2",
+                "\nNuclear coordinates in xyz format (Angstroms) ::\n\n  4\n  \n  \
+                    C      4       0.00000000       0.00000000       0.60130000\n  \
+                    C      4       0.00000000       0.00000000      -0.60130000\n  \
+                    H      1       0.00000000       0.00000000       1.66440000\n  \
+                    H      1       0.00000000       0.00000000      -1.66440000\n\n",
+            ),
+            (
+                "b2",
+                "\nNuclear coordinates in xyz format (Angstroms) ::\n\n  2\n  \n  \
+                    B      5       0.00000000       0.00000000       0.00000000\n  \
+                    B      5       0.00000000       0.00000000       3.00000000\n\n",
+            ),
+            (
+                "h2g",
+                "\nNuclear coordinates in xyz format (Angstroms) ::\n\n  3\n  \n  \
+                    H      1       0.00000000       0.00000000      -0.74000000\n  \
+                    H      1       0.00000000       0.00000000       0.74000000\n  \
+                    X      0       0.00000000       0.00000000       0.00000000\n\n",
+            ),
+            (
+                "hcn",
+                "\nNuclear coordinates in xyz format (Angstroms) ::\n\n  3\n  \n  \
+                    C      6       0.00000000       0.00000000       0.00000000\n  \
+                    H      1       0.00000000       0.00000000       1.06400000\n  \
+                    N      7       0.00000000       0.00000000      -1.15600000\n\n",
+            ),
+        ] {
+            let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("../../tests/golden/fixtures")
+                .join(name);
+            let dir = tempfile::tempdir().expect("temp dir");
+            let root = dir.path().join("ezfio");
+            test_support::copy_tree(&source, &root);
+            let ezfio = EzFio::open(&root).expect("open the fixture");
+            let record = read(&ezfio).expect("read").expect("some");
+            assert_eq!(
+                to_rst(&record),
+                expected,
+                "{name}: the master-form block differs from the independent \
+                 reconstruction"
+            );
+        }
+    }
+
     #[test]
     fn to_rst_round_trips_through_of_rst() {
+        // The `hcn_like` record sits at the master-display grid **and**
+        // survives the `%24.15e` storage (see `hcn_like`), so the round
+        // trip is exact: this test pins the grid fixed point
+        // (`of_rst(to_rst(record)) == record` for such a record).
+        // Off-grid records read back as their grid value (contract C5 as
+        // rewritten in w12; see `to_master_grid`).
         let (_dir, ezfio) = hcn_like();
         let record = read(&ezfio).expect("read").expect("some");
         let text = to_rst(&record);

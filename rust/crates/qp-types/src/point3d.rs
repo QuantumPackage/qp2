@@ -26,6 +26,14 @@
 //! The conversion to the requested unit happens *before* printing, so a
 //! Bohr coordinate is printed unscaled and an Angstrom one is multiplied
 //! by `bohr_to_angstrom`.
+//!
+//! [`Point3d::to_string_master`] is the reference's (master,
+//! pre-`15e725aa`) `%16.8f %16.8f %16.8f` form, restored by the w12 user
+//! decision as the display of the nuclei section; [`Point3d::to_master_grid`]
+//! is the fixed point of that display (the grid a `-c` run writes back).
+//! `to_string` / `to_string_master` keep their separate roles: `%.17g`
+//! for the non-display paths (e.g. [`crate::atom::Atom`]), `%16.8f` for
+//! the nuclei print.
 
 use anyhow::{Context, Result, bail};
 
@@ -102,6 +110,18 @@ fn to_bohr(units: Units, x: f64) -> f64 {
         Units::Bohr => x,
         Units::Angstrom => x / units::BOHR_TO_ANGSTROM,
     }
+}
+
+/// One component of [`Point3d::to_master_grid`]: bohr → Ångström
+/// (`* BOHR_TO_ANGSTROM`), 8-decimal rounding, parse back — the same
+/// `str::parse::<f64>` the document parser uses in
+/// [`Point3d::of_string`] — then Ångström → bohr (`/ BOHR_TO_ANGSTROM`,
+/// the post-`15e725aa` division).
+fn master_grid_component(v: f64) -> f64 {
+    let angstrom = format!("{:.8}", v * units::BOHR_TO_ANGSTROM)
+        .parse::<f64>()
+        .expect("internal invariant: a {:.8} rendering always parses");
+    angstrom / units::BOHR_TO_ANGSTROM
 }
 
 impl Point3d {
@@ -185,29 +205,53 @@ impl Point3d {
         )
     }
 
-    /// `to_string` with each component right-aligned in a fixed-width field
-    /// of `width` characters (no padding below the content: a component
-    /// longer than `width` is printed verbatim, never truncated).
+    /// The reference's (master, pre-`15e725aa`) `%16.8f %16.8f %16.8f`
+    /// form; the quantising display of the nuclei section since w12
+    /// (user decision 2026-11-06: the w10 fixed-width `%.17g` print of
+    /// DEVIATIONS C1/C4 is retracted for the nuclei display).
     ///
-    /// The component *content* is byte-identical to [`Point3d::to_string`]
-    /// (the same `format_g(.., 17, false)` per component), so the
-    /// `to_string`/`of_string` round-trip property is unaffected; only
-    /// whitespace is added, and the parser is whitespace-tolerant.
+    /// The components are converted with the same factor as
+    /// [`Point3d::to_string`] (`* 1.0` for Bohr, `* BOHR_TO_ANGSTROM` for
+    /// Angstrom) and rendered with `{:16.8}` each: 8 decimals,
+    /// right-aligned in a 16-character field, the sign inside the field,
+    /// single-spaced. A component whose 8-decimal rendering exceeds 16
+    /// characters is printed in full (never truncated), as `%16.8f` does.
     ///
-    /// Used for the fixed-width Molecule block (w10, DEVIATIONS C4);
-    /// [`Point3d::to_string`] keeps the reference layout for the parity call
-    /// sites.
-    pub fn to_string_width(units: Units, p: &Point3d, width: usize) -> String {
+    /// The width is padding only: `{:16.8}` and `{:.8}` emit identical
+    /// digits, so [`Point3d::to_master_grid`] (the value of this display)
+    /// does not depend on it.
+    pub fn to_string_master(units: Units, p: &Point3d) -> String {
         let f = match units {
             Units::Bohr => 1.0,
             Units::Angstrom => units::BOHR_TO_ANGSTROM,
         };
-        [p.x, p.y, p.z]
-            .iter()
-            .map(|v| format_g(*v * f, 17, false))
-            .map(|s| format!("{:>width$}", s, width = width))
-            .collect::<Vec<_>>()
-            .join(" ")
+        format!("{:16.8} {:16.8} {:16.8}", p.x * f, p.y * f, p.z * f)
+    }
+
+    /// The fixed point of the Angstrom master display, per component:
+    ///
+    /// ```text
+    /// a = v * BOHR_TO_ANGSTROM;   s = format!("{:.8}", a);
+    /// a' = parse(s);               v' = a' / BOHR_TO_ANGSTROM
+    /// ```
+    ///
+    /// i.e. a value on the grid (≈1.8897e-8 bohr steps) satisfies
+    /// `to_master_grid(v) == v`. Multiplication going to Ångström,
+    /// **division** coming back — the post-`15e725aa` conversion, the same
+    /// one [`Point3d::of_string`] applies.
+    ///
+    /// `parse` is the same float parse the document path uses: the nuclei
+    /// `of_rst` reads each atom through `Atom::of_string` →
+    /// [`Point3d::of_string`], which parses each coordinate token with
+    /// `str::parse::<f64>`; this is that same call. A `{:8}` rendering of
+    /// a finite `f64` is always such a parseable token, so the round trip
+    /// `to_string_master` → `of_string` returns exactly this value.
+    pub fn to_master_grid(bohr: &Point3d) -> Point3d {
+        Point3d {
+            x: master_grid_component(bohr.x),
+            y: master_grid_component(bohr.y),
+            z: master_grid_component(bohr.z),
+        }
     }
 
     /// The derived `sexp_of_t`: `((x 1)(y 2)(z 3))` in bohr.
@@ -247,70 +291,62 @@ mod tests {
     }
 
     #[test]
-    fn to_string_width_pads_components_without_truncating() {
-        // Zero, short and long components (bohr, no conversion): the
-        // padded fields carry the `to_string` content, each with length
-        // `max(20, content)`.
-        let p = Point3d::of_tuple(Units::Bohr, (0.0, 1.5, -1234567.0));
-        let plain = Point3d::to_string(Units::Bohr, &p);
-        let components = plain.split(' ').collect::<Vec<_>>();
-        assert_eq!(components.len(), 3);
-        for component in &components {
-            assert_eq!(format!("{:>20}", *component).len(), 20.max(component.len()));
-        }
+    fn to_string_master_is_the_reference_sixteen_eight_form() {
+        // 8 decimals, right-aligned in 16 columns, the sign inside the
+        // field (bohr: no conversion).
+        let p = Point3d::of_tuple(Units::Bohr, (0.0, -2.5, 1.0));
         assert_eq!(
-            Point3d::to_string_width(Units::Bohr, &p, 20),
-            format!(
-                "{:>20} {:>20} {:>20}",
-                components[0], components[1], components[2]
-            )
+            Point3d::to_string_master(Units::Bohr, &p),
+            "      0.00000000      -2.50000000       1.00000000"
         );
-    }
-
-    #[test]
-    fn to_string_width_prints_long_components_verbatim() {
-        // An exponent form whose `%.17g` string is longer than the width:
-        // printed verbatim, never truncated.  The expected string is built
-        // from `format_g` itself (the content source of `to_string`).
-        let v = 1e-5 * 1.234567890123456;
-        let cx = format_g(v, 17, false);
-        let cy = format_g(0.0, 17, false);
-        let cz = format_g(-v, 17, false);
-        assert!(
-            cx.len() > 20 && cz.len() > 20,
-            "fixture must exceed the width"
-        );
-        let p = Point3d::of_tuple(Units::Bohr, (v, 0.0, -v));
-        let s = Point3d::to_string_width(Units::Bohr, &p, 20);
-        assert_eq!(s, format!("{:>20} {:>20} {:>20}", cx, cy, cz));
-        for content in [cx.as_str(), cy.as_str(), cz.as_str()] {
-            assert!(s.contains(content), "content {content:?} truncated");
-        }
-    }
-
-    #[test]
-    fn to_string_width_keeps_the_sign_inside_the_field() {
-        // A negative component keeps its sign inside the right-aligned
-        // field: the padding sits to the left of the minus.
-        let p = Point3d::of_tuple(Units::Bohr, (-2.5, 0.0, -7.0));
-        let s = Point3d::to_string_width(Units::Bohr, &p, 20);
-        let first = &s[..20];
-        assert_eq!(first, format!("{:>20}", "-2.5"));
-        assert!(first.starts_with(' ') && first.ends_with("-2.5"));
-        assert_eq!(&s[21..], format!("{:>20} {:>20}", "0", "-7"));
-    }
-
-    #[test]
-    fn to_string_width_round_trips_through_of_string() {
-        // The parser ignores the padding, so the round trip of the Angstrom
-        // fixture value is unaffected by the fixed width.
-        let p = Point3d::of_string(Units::Angstrom, "0.54386314 0.00000000 -3.78645152")
-            .expect("fixture parses");
-        let s = Point3d::to_string_width(Units::Angstrom, &p, 20);
+        // A component whose 8-decimal rendering exceeds 16 columns is
+        // printed in full, never truncated: the field grows.
+        let big = Point3d::of_tuple(Units::Bohr, (123456789.5, 0.0, 0.0));
         assert_eq!(
-            Point3d::of_string(Units::Angstrom, &s).expect("padded form parses"),
-            p
+            Point3d::to_string_master(Units::Bohr, &big),
+            "123456789.50000000       0.00000000       0.00000000"
         );
+        // Angstrom applies the same factor as `to_string`: 1 bohr displays
+        // as its 8-decimal angstrom value.
+        let a = Point3d::of_tuple(Units::Bohr, (1.0, 0.0, 0.0));
+        assert_eq!(
+            Point3d::to_string_master(Units::Angstrom, &a),
+            "      0.52917721       0.00000000       0.00000000"
+        );
+    }
+
+    #[test]
+    fn to_master_grid_is_the_fixed_point_of_the_master_display() {
+        // A full-precision input: not on the grid (its x angstrom rendering
+        // carries more than 8 decimals).
+        let v = Point3d::of_tuple(Units::Bohr, (0.12345678912345678, -2.5, 1.0));
+        let g = Point3d::to_master_grid(&v);
+
+        // Idempotence: the grid is its own fixed point.
+        assert_eq!(Point3d::to_master_grid(&g), g);
+
+        // A full-precision input lands on the grid: the master display
+        // already carries only 8-decimal angstrom digits, so reading it back
+        // through the document parser's path gives the grid value.
+        let text = Point3d::to_string_master(Units::Angstrom, &v);
+        assert_eq!(
+            text,
+            Point3d::to_string_master(Units::Angstrom, &g),
+            "the display quantised the input"
+        );
+        let back = Point3d::of_string(Units::Angstrom, &text).expect("master form parses");
+        assert_eq!(back, g, "of_string(to_string_master(v)) is the grid value");
+
+        // A hand-computable grid value: 2 bohr displays as 1.05835442
+        // angstrom (8 decimals), and the grid value is that reading back
+        // through the division.
+        let two = Point3d::of_tuple(Units::Bohr, (2.0, 0.0, 0.0));
+        let g2 = Point3d::to_master_grid(&two);
+        assert_eq!(
+            Point3d::to_string_master(Units::Angstrom, &g2),
+            format!("{:16.8} {:16.8} {:16.8}", 1.05835442, 0.0, 0.0)
+        );
+        assert_eq!(g2.x, 1.05835442 / units::BOHR_TO_ANGSTROM);
     }
 
     #[test]
