@@ -390,7 +390,9 @@ def _store_stub(store_dir, stub_hash, data):
     destination = os.path.join(store_dir, 'src', stub_hash + '.F90')
     if os.path.exists(destination):
         return
-    temporary = destination + '.tmp'
+    # The pid keeps two modules' manifest generators apart: they run
+    # concurrently, and a shared temporary name would interleave their bytes.
+    temporary = destination + '.tmp' + str(os.getpid())
     with open(temporary, 'wb') as f:
         f.write(data)
     os.replace(temporary, destination)
@@ -470,6 +472,10 @@ def _rewrite_stub_edge(match, var_items, ninja_file_path, t_dir, stub_rule,
         f'compile_shared {shared_src}\n'
         f'{indent}src = {shared_src}\n'
         f'{indent}moddir = {moddir}\n'
+        # The .mod publish loop of the rule reads $shared_mod, i.e. the exact
+        # implicit outputs declared just above: no glob, and a missing .mod
+        # fails the edge instead of being silently skipped.
+        f'{indent}shared_mod = {" ".join(shared_mods)}\n'
         + kept_text
     )
 
@@ -500,8 +506,16 @@ def _shared_rules_text(fc, flags):
     """Return the two rule definitions the rewritten edges use."""
     return (
         'rule compile_shared\n'
-        f'  command = {fc} -I . {" ".join(flags)} '
-        f'-c $src -o $out -J $moddir\n'
+        # Ninja turns `$$` into one literal `$`, so `$$$$` here reaches the
+        # shell as `$$`, the pid of this edge's own shell.
+        f'  command = mkdir -p $moddir.$$$$ && {fc} -I . {" ".join(flags)} '
+        f'-c $src -o $out.$$$$ -J $moddir.$$$$ '
+        f'&& if [ -e $out ] ; then rm -f $out.$$$$ ; '
+        f'else mv -f $out.$$$$ $out ; fi '
+        f'&& for m in $shared_mod ; do b=$$(basename $$m) ; '
+        f'if [ -e $moddir/$$b ] ; then rm -f $moddir.$$$$/$$b ; '
+        f'else mv -f $moddir.$$$$/$$b $moddir ; fi ; done '
+        f'&& rm -rf $moddir.$$$$\n'
         '  description = F*  : $short_in\n'
         '  generator = 1\n'
         '\n'
