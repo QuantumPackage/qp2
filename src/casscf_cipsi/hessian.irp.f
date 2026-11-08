@@ -245,9 +245,15 @@ real*8 function hessmat_taub(t,a,u,b)
   real*8                         :: term,t1,t2,t3, tmp
   double precision :: bielec_pqxx_no,bielec_pxxq_no
 
-  double precision, allocatable :: tmp1(:), tmp2(:,:)
-  allocate(tmp1(n_act_orb))
-  allocate(tmp2(n_act_orb,n_act_orb))
+  ! No local array and no BLAS call here.  This function is called from
+  ! inside the !$OMP regions that fill the active-active block of hessmat
+  ! and the corresponding part of hessdiag.  With BLAS entered from a
+  ! parallel region its value is not reproducible at fixed input: the block
+  ! changed by a factor 6.6 between two builds of the same iteration, which
+  ! then set the level shift of the orbital step.  The six dgemv/dgemm calls
+  ! are replaced by explicit loops over the Cholesky index, contiguous in
+  ! both operands, so the arithmetic and the memory traffic are those of the
+  ! BLAS calls they replace.
 
   tt=list_act(t)
   aa=list_virt(a)
@@ -272,12 +278,14 @@ real*8 function hessmat_taub(t,a,u,b)
 
       do x=1,n_act_orb
         x3=x+n_core_inact_orb
-        call dgemv('T', cholesky_mo_num, n_act_orb, 2.d0, &
-                 cholesky_no_total_transp(1,n_core_inact_orb+1,x3), cholesky_mo_num, &
-                 cholesky_no_total_transp(1,aa,aa), 1, 0.d0, &
-                 tmp1, 1)
         do v=1,n_act_orb
-          t2 = t2 + P0tuvx_no(t,t,v,x)*tmp1(v)
+          v3=v+n_core_inact_orb
+          tmp = 0.D0
+          do ichol=1,cholesky_mo_num
+            tmp = tmp + cholesky_no_total_transp(ichol,aa,aa) &
+                      * cholesky_no_total_transp(ichol,v3,x3)
+          enddo
+          t2 = t2 + 2.D0*P0tuvx_no(t,t,v,x)*tmp
         enddo
       enddo
 !      do v=1,n_act_orb
@@ -291,13 +299,16 @@ real*8 function hessmat_taub(t,a,u,b)
 !          t2 = t2 + 2.d0*(P0tuvx_no(t,x,v,t)+P0tuvx_no(t,x,t,v))*tmp
 !        end do
 !      end do
-      call dgemm('T','N', n_act_orb, n_act_orb, cholesky_mo_num, 2.d0, &
-                 cholesky_no_total_transp(1,n_core_inact_orb+1,aa), cholesky_mo_num, &
-                 cholesky_no_total_transp(1,n_core_inact_orb+1,aa), cholesky_mo_num, 0.d0, &
-                 tmp2, n_act_orb)
       do v=1,n_act_orb
+        v3=v+n_core_inact_orb
         do x=1,n_act_orb
-          t2 = t2 + P0tuvx_no(t,x,v,t)*tmp2(x,v) + P0tuvx_no(t,x,t,v)*tmp2(x,v)
+          x3=x+n_core_inact_orb
+          tmp = 0.D0
+          do ichol=1,cholesky_mo_num
+            tmp = tmp + cholesky_no_total_transp(ichol,x3,aa) &
+                      * cholesky_no_total_transp(ichol,v3,aa)
+          enddo
+          t2 = t2 + 2.D0*(P0tuvx_no(t,x,v,t)+P0tuvx_no(t,x,t,v))*tmp
         enddo
       enddo
 
@@ -328,12 +339,14 @@ real*8 function hessmat_taub(t,a,u,b)
 !      end do
       do x=1,n_act_orb
         x3=x+n_core_inact_orb
-        call dgemv('T', cholesky_mo_num, n_act_orb, 2.d0, &
-                 cholesky_no_total_transp(1,n_core_inact_orb+1,x3), cholesky_mo_num, &
-                 cholesky_no_total_transp(1,aa,bb), 1, 0.d0, &
-                 tmp1, 1)
         do v=1,n_act_orb
-          term = term + P0tuvx_no(t,t,v,x)*tmp1(v)
+          v3=v+n_core_inact_orb
+          tmp = 0.D0
+          do ichol=1,cholesky_mo_num
+            tmp = tmp + cholesky_no_total_transp(ichol,aa,bb) &
+                      * cholesky_no_total_transp(ichol,v3,x3)
+          enddo
+          term = term + 2.D0*P0tuvx_no(t,t,v,x)*tmp
         enddo
       enddo
 
@@ -346,13 +359,16 @@ real*8 function hessmat_taub(t,a,u,b)
 !          term+=2.d0*(P0tuvx_no(t,x,v,t)+P0tuvx_no(t,x,t,v))*bielec_pxxq_no(aa,x3,v3,bb)
 !        end do
 !      end do
-      call dgemm('T','N', n_act_orb, n_act_orb, cholesky_mo_num, 2.d0, &
-                 cholesky_no_total_transp(1,n_core_inact_orb+1,aa), cholesky_mo_num, &
-                 cholesky_no_total_transp(1,n_core_inact_orb+1,bb), cholesky_mo_num, 0.d0, &
-                 tmp2, n_act_orb)
       do v=1,n_act_orb
+        v3=v+n_core_inact_orb
         do x=1,n_act_orb
-          term = term + P0tuvx_no(t,x,v,t)*tmp2(x,v) + P0tuvx_no(t,x,t,v)*tmp2(x,v)
+          x3=x+n_core_inact_orb
+          tmp = 0.D0
+          do ichol=1,cholesky_mo_num
+            tmp = tmp + cholesky_no_total_transp(ichol,x3,aa) &
+                      * cholesky_no_total_transp(ichol,v3,bb)
+          enddo
+          term = term + 2.D0*(P0tuvx_no(t,x,v,t)+P0tuvx_no(t,x,t,v))*tmp
         enddo
       enddo
 
@@ -376,12 +392,14 @@ real*8 function hessmat_taub(t,a,u,b)
 !    end do
     do x=1,n_act_orb
       x3=x+n_core_inact_orb
-      call dgemv('T', cholesky_mo_num, n_act_orb, 2.d0, &
-               cholesky_no_total_transp(1,n_core_inact_orb+1,x3), cholesky_mo_num, &
-               cholesky_no_total_transp(1,aa,bb), 1, 0.d0, &
-               tmp1, 1)
       do v=1,n_act_orb
-        term = term + P0tuvx_no(t,u,v,x)*tmp1(v)
+        v3=v+n_core_inact_orb
+        tmp = 0.D0
+        do ichol=1,cholesky_mo_num
+          tmp = tmp + cholesky_no_total_transp(ichol,aa,bb) &
+                    * cholesky_no_total_transp(ichol,v3,x3)
+        enddo
+        term = term + 2.D0*P0tuvx_no(t,u,v,x)*tmp
       enddo
     enddo
 
@@ -394,13 +412,16 @@ real*8 function hessmat_taub(t,a,u,b)
 !        term+=2.D0*(P0tuvx_no(t,x,v,u)+P0tuvx_no(t,x,u,v))*bielec_pxxq_no(aa,x3,v3,bb)
 !      end do
 !    end do
-    call dgemm('T','N', n_act_orb, n_act_orb, cholesky_mo_num, 2.d0, &
-                 cholesky_no_total_transp(1,n_core_inact_orb+1,aa), cholesky_mo_num, &
-                 cholesky_no_total_transp(1,n_core_inact_orb+1,bb), cholesky_mo_num, 0.d0, &
-                 tmp2, n_act_orb)
     do v=1,n_act_orb
+      v3=v+n_core_inact_orb
       do x=1,n_act_orb
-        term = term + P0tuvx_no(t,x,v,u)*tmp2(x,v)+P0tuvx_no(t,x,u,v)*tmp2(x,v)
+        x3=x+n_core_inact_orb
+        tmp = 0.D0
+        do ichol=1,cholesky_mo_num
+          tmp = tmp + cholesky_no_total_transp(ichol,x3,aa) &
+                    * cholesky_no_total_transp(ichol,v3,bb)
+        enddo
+        term = term + 2.D0*(P0tuvx_no(t,x,v,u)+P0tuvx_no(t,x,u,v))*tmp
       enddo
     enddo
 
@@ -508,7 +529,7 @@ BEGIN_PROVIDER [double precision, hessmat, (nMonoEx,nMonoEx)]
   i    = list_idx_c_a(2,indx_tmp)
   t    = list_idx_c_a(3,indx_tmp)
   ! Core-active excitations
-  do j = 1, n_core_inact_orb
+  do j = i, n_core_inact_orb
    if (i.eq.j) then
      ustart=t
    else
@@ -584,7 +605,7 @@ BEGIN_PROVIDER [double precision, hessmat, (nMonoEx,nMonoEx)]
    i    = list_idx_c_v(2,indx_tmp)
    a    = list_idx_c_v(3,indx_tmp)
    ! Core-VIRTUAL excitations
-   do j = 1, n_core_inact_orb
+   do j = i, n_core_inact_orb
     if (i.eq.j) then
       bstart=a
     else
