@@ -447,44 +447,21 @@ end function hessmat_taub
 BEGIN_PROVIDER [real*8, hessdiag, (nMonoEx)]
   BEGIN_DOC
   ! the diagonal of the Hessian, needed for the Davidson procedure
+  !
+  ! This is a view of hessmat, not a second evaluation of the same
+  ! block formulas. Recomputing the diagonal through the block
+  ! functions duplicated the physics, and IRPF90 cannot see the
+  ! dependencies hidden behind a function call, so the copy could be
+  ! built once and then silently describe older orbitals.
   END_DOC
   implicit none
-  integer                        :: i,t,a,indx,indx_shift
-  real*8                         :: hessmat_itju,hessmat_iajb,hessmat_taub
+  integer                        :: i
 
-  !$OMP PARALLEL DEFAULT(NONE) &
-  !$OMP SHARED(hessdiag,n_core_inact_orb,n_act_orb,n_virt_orb,nMonoEx) &
-  !$OMP PRIVATE(i,indx,t,a,indx_shift)
+  provide hessmat
 
-  !$OMP DO
-  do i=1,n_core_inact_orb
-    do t=1,n_act_orb
-      indx = t + (i-1)*n_act_orb
-      hessdiag(indx)=hessmat_itju(i,t,i,t)
-    end do
+  do i = 1, nMonoEx
+    hessdiag(i) = hessmat(i,i)
   end do
-  !$OMP END DO NOWAIT
-
-  indx_shift = n_core_inact_orb*n_act_orb
-  !$OMP DO
-  do a=1,n_virt_orb
-    do i=1,n_core_inact_orb
-      indx = a + (i-1)*n_virt_orb + indx_shift
-      hessdiag(indx)=hessmat_iajb(i,a,i,a)
-    end do
-  end do
-  !$OMP END DO NOWAIT
-
-  indx_shift += n_core_inact_orb*n_virt_orb
-  !$OMP DO
-  do a=1,n_virt_orb
-    do t=1,n_act_orb
-      indx = a + (t-1)*n_virt_orb + indx_shift
-      hessdiag(indx)=hessmat_taub(t,a,t,a)
-    end do
-  end do
-  !$OMP END DO
-  !$OMP END PARALLEL
 
 END_PROVIDER
 
