@@ -643,8 +643,6 @@ Index of Providers
     * :c:data:`gauleg_t2` 
     * :c:data:`gauleg_w` 
     * :c:data:`generators_bitmask` 
-    * :c:data:`global_selection_buffer` 
-    * :c:data:`global_selection_buffer_lock` 
     * :c:data:`good_hermit_tc_fock_mat` 
     * :c:data:`gpu_busy` 
     * :c:data:`gpu_busy_max_ddot` 
@@ -3044,12 +3042,10 @@ Index of Subroutines/Functions
     * :c:func:`provide_all_three_ints_bi_ortho` 
     * :c:func:`provide_everything` 
     * :c:func:`provide_for_selection_slave` 
-    * :c:func:`provide_for_zmq_pt2` 
     * :c:func:`pt2` 
     * :c:func:`pt2_add` 
     * :c:func:`pt2_add2` 
     * :c:func:`pt2_alloc` 
-    * :c:func:`pt2_collector` 
     * :c:func:`pt2_dealloc` 
     * :c:func:`pt2_deserialize` 
     * :c:func:`pt2_dummy` 
@@ -3059,16 +3055,19 @@ Index of Subroutines/Functions
     * :c:func:`pt2_find_sample` 
     * :c:func:`pt2_find_sample_lr` 
     * :c:func:`pt2_moller_plesset` 
+    * :c:func:`pt2_omp_lt` 
+    * :c:func:`pt2_omp_merge` 
+    * :c:func:`pt2_omp_sift_down` 
+    * :c:func:`pt2_omp_sift_up` 
+    * :c:func:`pt2_omp_sort` 
+    * :c:func:`pt2_omp_task` 
+    * :c:func:`pt2_omp_walk` 
     * :c:func:`pt2_qdpt` 
     * :c:func:`pt2_serialize` 
-    * :c:func:`pt2_slave_inproc` 
+    * :c:func:`pt2_stochastic` 
     * :c:func:`pt2_tc_bi_ortho` 
-    * :c:func:`pull_pt2_results` 
     * :c:func:`pull_selection_results` 
     * :c:func:`push_integrals` 
-    * :c:func:`push_pt2_results` 
-    * :c:func:`push_pt2_results_async_recv` 
-    * :c:func:`push_pt2_results_async_send` 
     * :c:func:`push_selection_results` 
     * :c:func:`qp_bug` 
     * :c:func:`qp_stop` 
@@ -3156,9 +3155,6 @@ Index of Subroutines/Functions
     * :c:func:`run_cisd` 
     * :c:func:`run_optimization_mos_cipsi` 
     * :c:func:`run_orb_opt_trust_v2` 
-    * :c:func:`run_pt2_slave` 
-    * :c:func:`run_pt2_slave_large` 
-    * :c:func:`run_pt2_slave_small` 
     * :c:func:`run_selection_slave` 
     * :c:func:`run_slave_cipsi` 
     * :c:func:`run_slave_main` 
@@ -3450,7 +3446,6 @@ Index of Subroutines/Functions
     * :c:func:`zmq_get_psi_det_size` 
     * :c:func:`zmq_get_psi_notouch` 
     * :c:func:`zmq_port` 
-    * :c:func:`zmq_pt2` 
     * :c:func:`zmq_put8_dvector` 
     * :c:func:`zmq_put8_ivector` 
     * :c:func:`zmq_put_dmatrix` 

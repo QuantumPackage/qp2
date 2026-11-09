@@ -805,40 +805,402 @@ Subroutines / functions
        * :c:func:`run_selection_slave`
 
  
-.. c:function:: void provide_for_zmq_pt2(void)
+.. c:function:: void pt2_omp_lt(void)
 
 
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
+    File : :file:`cipsi/pt2_omp.irp.f`
 
     .. code:: fortran
 
-        subroutine provide_for_zmq_pt2
+        logical function pt2_omp_lt(b1, i1, b2, i2)
 
 
-    Provides, beyond the values listed in the caller, the
-    values used by the stochastic PT2 slaves: the
-    norm-sorted wave function (psi_det_sorted,
-    psi_det_sorted_order), the transposed coefficients of
-    the selected determinants (psi_selectors_coef_transp),
-    and the diagonal of H in the determinant basis (psi_det_hii).
+    Total order used by the selection heap:
+      (v1,d1) < (v2,d2)  iff  v1 < v2, or (v1 == v2 and d1 <lex d2),
+    where lex compares the (N_int,2) bit patterns integer by integer,
+    spin by spin (column-major order of b%det), the first difference
+    deciding.  Signed comparison of the integer(8) patterns is a valid
+    total order, and that is all the heap needs.  Ties are real
+    (symmetry-equivalent determinants carry bit-identical weights), so
+    this is what makes the retained set independent of the merge order.
+    
+    Entry i1 of buffer b1 is compared with entry i2 of buffer b2; the
+    heap routines pass the same buffer twice.  (A single-buffer dummy
+    cannot express the cross-buffer comparison that pt2_omp_merge needs.)
 
     Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_det_hii`
-       * :c:data:`psi_det_sorted`
-       * :c:data:`psi_det_sorted`
-       * :c:data:`psi_selectors_coef_transp`
+       * :c:data:`n_int`
+
+ 
+.. c:function:: void pt2_omp_merge(void)
+
+
+    File : :file:`cipsi/pt2_omp.irp.f`
+
+    .. code:: fortran
+
+        subroutine pt2_omp_merge(src, dst)
+
+
+    Merge one local selection buffer into the shared max-heap, keeping
+    the dst%N best candidates under the total order of pt2_omp_lt.
+    No sort of src is needed and its order is irrelevant (lemma 3).
+    
+    Invariant on entry and exit: positions 1..dst%cur form a max-heap
+    under pt2_omp_lt (the root is the worst kept candidate), and
+    dst%mini = dst%val(1) when the buffer is full, 0 otherwise.
+    
+    (i) A rejected entry is not better than the current worst kept, so it
+    cannot belong to the final dst%N smallest.  (ii) Replacing the root
+    and sifting down restores the heap.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_int`
 
     Called by:
 
     .. hlist::
        :columns: 3
 
-       * :c:func:`run_slave_main`
-       * :c:func:`zmq_pt2`
+       * :c:func:`pt2_omp_task`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pt2_omp_sift_down`
+       * :c:func:`pt2_omp_sift_up`
+
+ 
+.. c:function:: void pt2_omp_sift_down(void)
+
+
+    File : :file:`cipsi/pt2_omp.irp.f`
+
+    .. code:: fortran
+
+        subroutine pt2_omp_sift_down(b, i)
+
+
+    Restore the max-heap invariant of b after the element at position i
+    has been replaced (or decreased).  The heap is positions 1..b%cur;
+    b%cur is therefore the heap size, which pt2_omp_sort shrinks as it
+    grows the sorted suffix.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_int`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pt2_omp_merge`
+       * :c:func:`pt2_omp_sort`
+
+ 
+.. c:function:: void pt2_omp_sift_up(void)
+
+
+    File : :file:`cipsi/pt2_omp.irp.f`
+
+    .. code:: fortran
+
+        subroutine pt2_omp_sift_up(b, i)
+
+
+    Restore the max-heap invariant of b (positions 1..b%cur) after the
+    element at position i has been appended or increased.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_int`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pt2_omp_merge`
+
+ 
+.. c:function:: void pt2_omp_sort(void)
+
+
+    File : :file:`cipsi/pt2_omp.irp.f`
+
+    .. code:: fortran
+
+        subroutine pt2_omp_sort(b)
+
+
+    In-place heapsort of the b%cur entries of b by increasing order of
+    pt2_omp_lt (ascending weight, ties ordered by determinant).  This is
+    the replacement of sort_selection_buffer, which cannot be used on
+    this buffer because it reads b%val(b%N) unguarded.
+    
+    b%cur is used as the live heap size: it is shrunk as the sorted
+    suffix grows, and restored to its entry value before returning.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_int`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pt2_stochastic`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pt2_omp_sift_down`
+
+ 
+.. c:function:: void pt2_omp_task(void)
+
+
+    File : :file:`cipsi/pt2_omp.irp.f`
+
+    .. code:: fortran
+
+        subroutine pt2_omp_task(pos, b_workers, b, pt2_data_I)
+
+
+    One task = one walk position: evaluate all pt2_F(g) subsets of the
+    generator g = pt2_J(pos) into pt2_data_I(g), then merge the local
+    selection buffer into the shared one under the single named critical
+    region.  All subsets are accumulated in the same slot in the fixed
+    order j = 1..pt2_F(g): the sums are bit-identical for any schedule
+    (lemma 2).  `b_t%mini' is reset at task entry so that the candidates
+    offered by a task do not depend on which thread ran it (lemma 3).
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_det_generators`
+       * :c:data:`nthreads_pt2`
+       * :c:data:`pt2_e0_denominator`
+       * :c:data:`pt2_f`
+       * :c:data:`pt2_j`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pt2_omp_walk`
+       * :c:func:`pt2_stochastic`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pt2_omp_merge`
+       * :c:func:`select_connected`
+
+ 
+.. c:function:: void pt2_omp_walk(void)
+
+
+    File : :file:`cipsi/pt2_omp.irp.f`
+
+    .. code:: fortran
+
+        subroutine pt2_omp_walk(E, relative_error, pt2_data, pt2_data_err, b, b_workers, &
+                                pt2_data_I, pt2_data_S, pt2_data_S2, pos_warm)
+
+
+    The walk: the legacy collector's body minus every ZeroMQ/arrival
+    branch.
+    Runs on a single thread, spawns one task per walk position for a
+    window of pt2_omp_window positions, waits for the window with a
+    TASKGROUP, then consumes the positions of the window in order.
+    
+    `E' is the total CI energy of the current state; `pos_warm' is the
+    position already computed by the serial warm-up (skipped here).
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_det_generators`
+       * :c:data:`n_states`
+       * :c:data:`nthreads_pt2`
+       * :c:data:`pt2_j`
+       * :c:data:`pt2_n_teeth`
+       * :c:data:`pt2_stoch_istate`
+       * :c:data:`pt2_u`
+       * :c:data:`pt2_w`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pt2_stochastic`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`format_w_error`
+       * :c:func:`pt2_add`
+       * :c:func:`pt2_add2`
+       * :c:func:`pt2_alloc`
+       * :c:func:`pt2_dealloc`
+       * :c:func:`pt2_omp_task`
+       * :c:func:`wall_time`
+
+ 
+.. c:function:: void pt2_stochastic(void)
+
+
+    File : :file:`cipsi/pt2_omp.irp.f`
+
+    .. code:: fortran
+
+        subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
+
+
+    Stochastic |PT2| on OpenMP tasks: the only implementation (see the
+    header of this file for the algorithm).  Loops over the states,
+    allocates the per-state storage, runs the serial warm-up and the
+    parallel region, then does the per-state epilogue and the final
+    selection epilogue.
+    
+    `E' is the total CI energy of each state (psi_energy_with_nucl_rep);
+    `relative_error' is the target relative stochastic error on PT2;
+    `N_in' is the number of determinants to select (0 for qp_run pt2).
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`all_mo_integrals`
+       * :c:data:`banned_excitation`
+       * :c:data:`det_to_configuration`
+       * :c:data:`elec_alpha_num`
+       * :c:data:`excitation_alpha_max`
+       * :c:data:`excitation_beta_max`
+       * :c:data:`excitation_max`
+       * :c:data:`generators_bitmask`
+       * :c:data:`h0_type`
+       * :c:data:`mo_integrals_map`
+       * :c:data:`mo_integrals_threshold`
+       * :c:data:`mo_num`
+       * :c:data:`mo_one_e_integrals`
+       * :c:data:`n_act_orb`
+       * :c:data:`n_core_orb`
+       * :c:data:`n_del_orb`
+       * :c:data:`n_det`
+       * :c:data:`n_det_generators`
+       * :c:data:`n_inact_orb`
+       * :c:data:`n_int`
+       * :c:data:`n_states`
+       * :c:data:`n_virt_orb`
+       * :c:data:`nproc`
+       * :c:data:`nthreads_pt2`
+       * :c:data:`pseudo_sym`
+       * :c:data:`psi_bilinear_matrix_columns_loc`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
+       * :c:data:`psi_configuration_hii`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+       * :c:data:`psi_det_hii`
+       * :c:data:`psi_det_sorted`
+       * :c:data:`psi_det_sorted`
+       * :c:data:`psi_selectors`
+       * :c:data:`psi_selectors_coef_transp`
+       * :c:data:`pt2_f`
+       * :c:data:`pt2_j`
+       * :c:data:`pt2_n_teeth`
+       * :c:data:`pt2_overlap`
+       * :c:data:`pt2_j`
+       * :c:data:`pt2_stoch_istate`
+       * :c:data:`pt2_u`
+       * :c:data:`pt2_w`
+       * :c:data:`qp_max_mem`
+       * :c:data:`s2_eig`
+       * :c:data:`selection_weight`
+       * :c:data:`seniority_max`
+       * :c:data:`state_average_weight`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`run_cipsi`
+       * :c:func:`run_stochastic_cipsi`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`check_mem`
+       * :c:func:`create_selection_buffer`
+       * :c:func:`delete_selection_buffer`
+       * :c:func:`fill_h_apply_buffer_no_selection`
+       * :c:func:`make_selection_buffer_s2`
+       * :c:func:`pt2_alloc`
+       * :c:func:`pt2_dealloc`
+       * :c:func:`pt2_omp_sort`
+       * :c:func:`pt2_omp_task`
+       * :c:func:`pt2_omp_walk`
+       * :c:func:`remove_duplicates_in_selection_buffer`
+       * :c:func:`resident_memory`
+       * :c:func:`update_pt2_and_variance_weights`
+       * :c:func:`write_double`
+       * :c:func:`write_int`
+       * :c:func:`zmq_selection`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`pt2_match_weight`
+       * :c:data:`pt2_overlap`
+       * :c:data:`pt2_stoch_istate`
+       * :c:data:`selection_weight`
+       * :c:data:`state_average_weight`
+       * :c:data:`threshold_davidson_pt2`
+       * :c:data:`variance_match_weight`
 
  
 .. c:function:: void run_cipsi(void)
@@ -898,11 +1260,11 @@ Subroutines / functions
        * :c:func:`print_summary`
        * :c:func:`pt2_alloc`
        * :c:func:`pt2_dealloc`
+       * :c:func:`pt2_stochastic`
        * :c:func:`save_energy`
        * :c:func:`save_wavefunction`
        * :c:func:`write_cipsi_json`
        * :c:func:`write_double`
-       * :c:func:`zmq_pt2`
        * :c:func:`zmq_selection`
 
     Touches:
@@ -1000,11 +1362,11 @@ Subroutines / functions
        * :c:func:`print_summary`
        * :c:func:`pt2_alloc`
        * :c:func:`pt2_dealloc`
+       * :c:func:`pt2_stochastic`
        * :c:func:`save_energy`
        * :c:func:`save_wavefunction`
        * :c:func:`write_cipsi_json`
        * :c:func:`write_double`
-       * :c:func:`zmq_pt2`
 
     Touches:
 
@@ -1070,8 +1432,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`run_pt2_slave_large`
-       * :c:func:`run_pt2_slave_small`
+       * :c:func:`pt2_omp_task`
        * :c:func:`run_selection_slave`
 
     Calls:
