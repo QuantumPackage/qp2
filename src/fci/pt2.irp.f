@@ -57,7 +57,7 @@ subroutine run
   relative_error=PT2_relative_error
 
   if (do_pt2) then
-     call ZMQ_pt2(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, relative_error, 0) ! Stochastic PT2
+     call pt2_stochastic(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, relative_error, 0) ! Stochastic PT2
   else
      call ZMQ_selection(0, pt2_data)
   endif
