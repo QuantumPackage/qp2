@@ -98,7 +98,8 @@ subroutine run_cipsi
       threshold_generators_save = threshold_generators
       threshold_generators = 1.d0
       SOFT_TOUCH threshold_generators
-      call ZMQ_pt2(E_denom, pt2_data, pt2_data_err, relative_error,to_select) ! Stochastic PT2 and selection
+      call provide_for_tc_pt2
+      call pt2_stochastic(E_denom, pt2_data, pt2_data_err, relative_error,to_select) ! Stochastic PT2 and selection
       threshold_generators = threshold_generators_save
       SOFT_TOUCH threshold_generators
     else
@@ -130,7 +131,8 @@ subroutine run_cipsi
   call pt2_dealloc(pt2_data_err)
   call pt2_alloc(pt2_data, N_states)
   call pt2_alloc(pt2_data_err, N_states)
-  call ZMQ_pt2(E_tc, pt2_data, pt2_data_err, relative_error,0) ! Stochastic PT2 and selection
+  call provide_for_tc_pt2
+  call pt2_stochastic(E_tc, pt2_data, pt2_data_err, relative_error,0) ! Stochastic PT2 and selection
   call diagonalize_CI_tc_bi_ortho(ndet, E_tc,norm,pt2_data,print_pt2)
 
 end
