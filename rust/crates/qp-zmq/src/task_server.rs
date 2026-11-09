@@ -5,9 +5,11 @@
 //! (`Waiting`, the job's state name, or `Stopped`), and an in-process PAIR
 //! that feeds the PUB thread. Task payloads live in a [`QueuingSystem`]; the
 //! handlers here are a direct port of the reference dispatch, including its
-//! arm order (`ocaml/TaskServer.ml:920-941`), its exact `error` replies, and
-//! its functional-update discipline (a failed request leaves the whole
-//! program state untouched).
+//! arm order (`ocaml/TaskServer.ml:920-941`) and its exact `error` replies.
+//! A recoverable failure leaves the program state untouched, as the
+//! reference's functional update does: the queue's batch methods pre-validate
+//! every identifier before mutating, and the other handlers mutate only on
+//! the path that ends in a reply.
 //!
 //! # What the caller owns
 //!
@@ -21,15 +23,11 @@
 //! [`resolve_address_from_env`], but the single-force discipline is the
 //! caller's.
 //!
-//! The `None` socket arguments are the reference's legacy path (bind with a
-//! 60 × 1 s retry); `qp_run` always passes `Some`.
-//!
 //! # Timing
 //!
-//! Reference defaults are kept: 60 bind retries one second apart, a 1 s poll
-//! timeout in the main loop and in the PUB thread, and a 30 s deadline for
-//! [`stop`]. Unit tests override them through the private `Timing` value so
-//! the suite stays fast; the error strings do not change.
+//! Reference defaults are kept: a 1 s poll timeout in the main loop and in
+//! the PUB thread, and a 30 s deadline for [`stop`]. Unit tests override
+//! them through the private `Timing` value so the suite stays fast.
 //!
 //! # Deviations (documented, not hidden)
 //!
@@ -58,8 +56,9 @@
 //!   receive, the two strings are identical; they differ only for reply
 //!   kinds, which fall into the `Invalid message` arm.
 //! * An unparseable frame is fatal, exactly as `Message.of_string` is called
-//!   outside the reference's error handler. The exception is returned as
-//!   [`ServerError::Parse`] instead of killing the thread.
+//!   outside the reference's error handler. The parse error is returned as
+//!   [`ServerError`] instead of killing the thread; its message is the codec's
+//!   documented [`crate::message::ParseError`] display, kept verbatim.
 //! * `Assert_failure` sites are spelled `TaskServer.ml:<line>:<column>` (the
 //!   same basename convention as `queuing_system.rs`). The reference embeds
 //!   the path its compiler saw, which differs between build trees.
@@ -238,58 +237,48 @@ pub fn resolve_address_from_env<L: HostLookup + ?Sized>(
     resolve_address(lookup, nic.as_deref())
 }
 
-/// A fatal task-server failure: the reference exception that would have
-/// escaped `TaskServer.run`.
+/// A fatal task-server failure: the plain message of the reference
+/// exception that would have escaped `TaskServer.run`.
+///
+/// The reference distinguishes `Failure`, `ZMQ_exception` and `Sys_error`
+/// classes only to render them; the server stops either way and the caller
+/// prints one line. The port therefore carries no class, just the message.
 #[derive(Debug)]
-pub enum ServerError {
-    /// A `Failure msg` (`failwith`); the display form is the OCaml
-    /// exception rendering `Failure("msg")`.
-    Failure(String),
-    /// A frame that the reference lexer / message constructor rejected.
-    Parse(ParseError),
-    /// A 0MQ call failed.
-    Zmq(zmq::Error),
-    /// A `stdout`/`stderr` write failed (the reference's `Sys_error`).
-    Io(io::Error),
+pub struct ServerError(String);
+
+impl ServerError {
+    /// Wrap a failure message.
+    #[must_use]
+    pub fn new(message: impl Into<String>) -> Self {
+        Self(message.into())
+    }
 }
 
 impl fmt::Display for ServerError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Failure(message) => write!(f, "Failure({message:?})"),
-            Self::Parse(error) => error.fmt(f),
-            Self::Zmq(error) => write!(f, "ZMQ_exception({error:?}, {:?})", error.to_string()),
-            Self::Io(error) => write!(f, "Sys_error({:?})", error.to_string()),
-        }
+        f.write_str(&self.0)
     }
 }
 
-impl std::error::Error for ServerError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Parse(error) => Some(error),
-            Self::Zmq(error) => Some(error),
-            Self::Io(error) => Some(error),
-            Self::Failure(_) => None,
-        }
-    }
-}
+impl std::error::Error for ServerError {}
 
 impl From<ParseError> for ServerError {
+    /// The codec's display is its documented contract, so the message keeps
+    /// it verbatim (no observable change on the parse-failure paths).
     fn from(error: ParseError) -> Self {
-        Self::Parse(error)
+        Self(error.to_string())
     }
 }
 
 impl From<zmq::Error> for ServerError {
     fn from(error: zmq::Error) -> Self {
-        Self::Zmq(error)
+        Self(error.to_string())
     }
 }
 
 impl From<io::Error> for ServerError {
     fn from(error: io::Error) -> Self {
-        Self::Io(error)
+        Self(error.to_string())
     }
 }
 
@@ -306,10 +295,6 @@ pub struct RunOutcome {
 /// Reference timing constants, overridable by unit tests.
 #[derive(Clone, Copy, Debug)]
 struct Timing {
-    /// `bind_socket` attempts before giving up (`TaskServer.ml:84`).
-    bind_retries: u32,
-    /// Delay between bind attempts (`Unix.sleep 1`).
-    bind_delay: Duration,
     /// Main-loop `Zmq.Poll.poll ~timeout` in milliseconds.
     loop_poll_ms: i64,
     /// PUB-thread `Zmq.Poll.poll ~timeout` in milliseconds.
@@ -323,46 +308,10 @@ struct Timing {
 impl Default for Timing {
     fn default() -> Self {
         Self {
-            bind_retries: 60,
-            bind_delay: Duration::from_secs(1),
             loop_poll_ms: 1_000,
             pub_poll_ms: 1_000,
             stop_deadline: Duration::from_secs(30),
             stop_poll_ms: 1_000,
-        }
-    }
-}
-
-/// Bind `socket` to `tcp://*:<port>`, retrying `retries` times with
-/// `delay` between attempts (`TaskServer.bind_socket`).
-///
-/// On exhaustion the message is the reference's, including its trailing
-/// space: `Unable to bind the <type> socket to port : <port> `.
-///
-/// The reference retries every `Unix.Unix_error` and re-raises other
-/// exceptions; `zmq::Error` does not expose that distinction, so every bind
-/// error is retried here.
-fn bind_socket(
-    socket: &Socket,
-    socket_type: &str,
-    port: u32,
-    retries: u32,
-    delay: Duration,
-) -> Result<(), String> {
-    let endpoint = format!("tcp://*:{port}");
-    let mut remaining = retries;
-    loop {
-        if remaining == 0 {
-            return Err(format!(
-                "Unable to bind the {socket_type} socket to port : {port} "
-            ));
-        }
-        match socket.bind(&endpoint) {
-            Ok(()) => return Ok(()),
-            Err(_) => {
-                thread::sleep(delay);
-                remaining -= 1;
-            }
         }
     }
 }
@@ -395,10 +344,9 @@ impl Drop for LingerReset<'_> {
 ///
 /// # Errors
 ///
-/// [`ServerError::Failure`] with
-/// `TaskServer: no answer to the Terminate request (the task server thread is dead)`
-/// when the deadline expires, `Problem in termination` for a non-`ok`
-/// answer, or a transport/parse error.
+/// [`ServerError`] with `TaskServer: no answer to the Terminate request
+/// (the task server thread is dead)` when the deadline expires, `Problem in
+/// termination` for a non-`ok` answer, or a transport/parse error.
 pub fn stop(port: u32) -> Result<(), ServerError> {
     let timing = Timing::default();
     stop_with(port, timing.stop_deadline, timing.stop_poll_ms)
@@ -428,18 +376,15 @@ fn stop_with(port: u32, deadline: Duration, poll_ms: i64) -> Result<(), ServerEr
             break req_socket.recv_bytes(0)?;
         }
         if Instant::now() > deadline_at {
-            return Err(ServerError::Failure(
-                "TaskServer: no answer to the Terminate request (the task server thread is dead)"
-                    .to_string(),
+            return Err(ServerError::new(
+                "TaskServer: no answer to the Terminate request (the task server thread is dead)",
             ));
         }
     };
 
     match Message::parse(&reply)? {
         Message::Ok => {}
-        _ => {
-            return Err(ServerError::Failure("Problem in termination".to_string()));
-        }
+        _ => return Err(ServerError::new("Problem in termination")),
     }
 
     // Reference: `set_linger_period req_socket 1_000` before close. The
@@ -490,32 +435,30 @@ impl ProgramState {
 /// Failure of one request, classified like the reference's exception
 /// handlers.
 enum ReplyError {
-    /// `Failure msg`; the server replies `<msg> : <raw request>`.
-    Failure(String),
-    /// `Assert_failure`; the server replies `<site> : <raw request>`.
-    Assert(&'static str),
+    /// A recoverable failure: the reference's `Failure` payload or
+    /// `Assert_failure` site, sent back as `error <message> : <raw request>`;
+    /// the server keeps running. The reply shape is the same for both
+    /// reference classes, so the message is carried without a class.
+    Error(String),
     /// The server cannot continue (socket or I/O error).
     Fatal(ServerError),
 }
 
 impl From<QueueError> for ReplyError {
     fn from(error: QueueError) -> Self {
-        match error {
-            QueueError::Failure(message) => Self::Failure(message),
-            QueueError::AssertFailure(site) => Self::Assert(site),
-        }
+        Self::Error(error.to_string())
     }
 }
 
 impl From<zmq::Error> for ReplyError {
     fn from(error: zmq::Error) -> Self {
-        Self::Fatal(ServerError::Zmq(error))
+        Self::Fatal(error.into())
     }
 }
 
 impl From<io::Error> for ReplyError {
     fn from(error: io::Error) -> Self {
-        Self::Fatal(ServerError::Io(error))
+        Self::Fatal(error.into())
     }
 }
 
@@ -665,7 +608,7 @@ fn change_pub_state(
         PubChange::Running => match program.state.as_deref() {
             Some(state) => PubState::Running(state.to_string()),
             None => {
-                return Err(ReplyError::Failure(
+                return Err(ReplyError::Error(
                     "Trying to change pub state while no job is ready".to_string(),
                 ));
             }
@@ -738,13 +681,13 @@ fn connect(
         ConnectType::Tcp => program
             .address_tcp
             .clone()
-            .ok_or_else(|| ReplyError::Failure("Error: No TCP address".to_string()))?,
+            .ok_or_else(|| ReplyError::Error("Error: No TCP address".to_string()))?,
         ConnectType::Inproc => program
             .address_inproc
             .clone()
-            .ok_or_else(|| ReplyError::Failure("Error: No inproc address".to_string()))?,
+            .ok_or_else(|| ReplyError::Error("Error: No inproc address".to_string()))?,
         // `TaskServer.ml:312:46` (`| Message.Connect_msg.Ipc -> assert false`).
-        ConnectType::Ipc => return Err(ReplyError::Assert("TaskServer.ml:312:46")),
+        ConnectType::Ipc => return Err(ReplyError::Error("TaskServer.ml:312:46".to_string())),
     };
     let client_id = program.queue.add_client();
     send_message(
@@ -868,7 +811,7 @@ fn get_tasks(
         return reply_wrong_state(rep_socket);
     }
     if !program.queue.has_client(client_id) {
-        return Err(QueueError::AssertFailure("Queuing_system.ml:68:2").into());
+        return Err(QueueError::new("Queuing_system.ml:68:2").into());
     }
 
     let mut result = Vec::new();
@@ -937,13 +880,13 @@ fn put_data(
     rep_socket: &Socket,
 ) -> Result<(), ReplyError> {
     let [value] = rest_of_msg else {
-        return Err(ReplyError::Failure(
+        return Err(ReplyError::Error(
             "Badly formed put_data message".to_string(),
         ));
     };
     match program.state.as_deref() {
         // `TaskServer.ml:646:14`.
-        None => Err(ReplyError::Assert("TaskServer.ml:646:14")),
+        None => Err(ReplyError::Error("TaskServer.ml:646:14".to_string())),
         Some(state) if state != msg_state => reply_wrong_state(rep_socket),
         Some(_) => {
             program.data.insert(key.to_string(), value.clone());
@@ -963,7 +906,7 @@ fn get_data(
 ) -> Result<(), ReplyError> {
     match program.state.as_deref() {
         // `TaskServer.ml:678:14`.
-        None => Err(ReplyError::Assert("TaskServer.ml:678:14")),
+        None => Err(ReplyError::Error("TaskServer.ml:678:14".to_string())),
         Some(state) if state != msg_state => reply_wrong_state(rep_socket),
         Some(_) => {
             let value = program.data.get(key).cloned().unwrap_or_else(|| vec![0]);
@@ -974,13 +917,16 @@ fn get_data(
 
 /// Discard every queued task (`TaskServer.abort`).
 ///
-/// Unlike [`QueuingSystem::abort`] (which discards one task), the reference
-/// adds a throwaway client, pops the queue until it is empty, marks every
-/// popped task finished, deletes it, and removes the client. The whole
-/// operation is done on a clone and committed only on success, matching the
-/// reference's functional update.
+/// The reference adds a throwaway client, pops the queue until it is empty,
+/// marks every popped task finished, deletes it, and removes the client, all
+/// on a functional clone. The port performs the same operations in place:
+/// the drain client is the one just added and every popped task is running
+/// under it, so `pop_task` and `end_task` cannot fail. The one corner where
+/// the clone mattered — a payload deleted while its id was still queued
+/// makes the `del_task` step fail — answers the same `error` reply; the
+/// post-failure state differs (recorded in `implementation.md`, wave S3).
 fn abort(program: &mut ProgramState, rep_socket: &Socket) -> Result<(), ReplyError> {
-    let mut queue = program.queue.clone();
+    let queue = &mut program.queue;
     let client_id = queue.add_client();
 
     let mut tasks = Vec::new();
@@ -1009,10 +955,8 @@ fn abort(program: &mut ProgramState, rep_socket: &Socket) -> Result<(), ReplyErr
     }
     queue.del_client(client_id)?;
 
-    reply_ok(rep_socket)?;
-    program.queue = queue;
     program.accepting_clients = false;
-    Ok(())
+    reply_ok(rep_socket)
 }
 
 /// Stop the main loop (`TaskServer.terminate`).
@@ -1124,8 +1068,10 @@ fn dispatch(
 
 /// Body of the PUB thread (`TaskServer.start_pub_thread`).
 ///
-/// Connects its PAIR socket, binds the PUB socket on `port` when the caller
-/// did not pre-bind it, then republishes the last state received:
+/// Connects its PAIR socket, then republishes the last state received on
+/// the pre-bound PUB socket (the `qp_run` window binding; the reference's
+/// in-server `bind_socket` retry and its "state channel unavailable" path
+/// are the caller's job):
 ///
 /// 1. publish the state (initial `Waiting`);
 /// 2. poll for the next state for `pub_poll_ms`;
@@ -1135,50 +1081,13 @@ fn dispatch(
 ///
 /// Any infrastructure error is returned as a `String`, recorded by the
 /// caller in the liveness flag and in the outcome.
-fn pub_thread_main(
-    context: &Context,
-    pub_socket: Option<Socket>,
-    port: u32,
-    timing: Timing,
-    alive: &AtomicBool,
-    pub_error: &OnceLock<String>,
-) -> Result<(), String> {
+fn pub_thread_main(context: &Context, pub_socket: Socket, timing: Timing) -> Result<(), String> {
     let pair_socket = context
         .socket(SocketType::PAIR)
         .map_err(|error| error.to_string())?;
     pair_socket
         .connect(PAIR_ENDPOINT)
         .map_err(|error| error.to_string())?;
-
-    let pre_bound = pub_socket.is_some();
-    let pub_socket = match pub_socket {
-        Some(socket) => socket,
-        None => context
-            .socket(SocketType::PUB)
-            .map_err(|error| error.to_string())?,
-    };
-
-    if !pre_bound
-        && let Err(message) = bind_socket(
-            &pub_socket,
-            "PUB",
-            port,
-            timing.bind_retries,
-            timing.bind_delay,
-        )
-    {
-        // The reference marks the channel dead, records the message and
-        // reports it on stderr; the calculation keeps running.
-        alive.store(false, Ordering::Relaxed);
-        let _ = pub_error.set(message.clone());
-        let _ = writeln!(
-            io::stderr(),
-            "TaskServer: {message} -- the state channel is unavailable; the calculation continues, qp_run will exit with an error."
-        );
-        let _ = pair_socket.set_linger(0);
-        let _ = pub_socket.set_linger(0);
-        return Ok(());
-    }
 
     let mut state = PubState::Waiting;
     loop {
@@ -1212,8 +1121,7 @@ fn pub_thread_main(
 /// Start the PUB thread and report its failure through the shared flags.
 fn spawn_pub_thread(
     context: &Context,
-    pub_socket: Option<Socket>,
-    port: u32,
+    pub_socket: Socket,
     timing: Timing,
     alive: Arc<AtomicBool>,
     pub_error: Arc<OnceLock<String>>,
@@ -1222,7 +1130,7 @@ fn spawn_pub_thread(
     thread::Builder::new()
         .name("task-server-pub".to_string())
         .spawn(move || {
-            let result = pub_thread_main(&context, pub_socket, port, timing, &alive, &pub_error);
+            let result = pub_thread_main(&context, pub_socket, timing);
             if let Err(message) = result {
                 alive.store(false, Ordering::Relaxed);
                 let _ = pub_error.set(message);
@@ -1254,7 +1162,7 @@ fn main_loop(
         let frames = rep_socket.recv_multipart(0)?;
         let (raw, rest) = frames
             .split_first()
-            .ok_or_else(|| ServerError::Failure("Badly formed message".to_string()))?;
+            .ok_or_else(|| ServerError::new("Badly formed message"))?;
         let message = Message::parse(raw)?;
 
         if debug {
@@ -1264,8 +1172,7 @@ fn main_loop(
         match dispatch(program, &message, rest, rep_socket, pub_channel, debug) {
             Ok(()) => {}
             Err(ReplyError::Fatal(error)) => return Err(error),
-            Err(ReplyError::Failure(text)) => reply_failure(rep_socket, &text, raw)?,
-            Err(ReplyError::Assert(site)) => reply_failure(rep_socket, site, raw)?,
+            Err(ReplyError::Error(text)) => reply_failure(rep_socket, &text, raw)?,
         }
     }
     Ok(())
@@ -1274,8 +1181,7 @@ fn main_loop(
 /// Run the task server (`TaskServer.run`).
 ///
 /// `rep_socket` and `pub_socket` are the sockets `qp_run` pre-bound on `P`
-/// and `P+1`; passing `None` selects the reference's legacy bind path, which
-/// binds its own socket with the 60 × 1 s retry. `address` is the resolved
+/// and `P+1`. `address` is the resolved
 /// `tcp://<ip>:<port>` string printed at startup; the caller must resolve it
 /// once before the first server thread starts (issue #393), which is why
 /// [`run`] never calls [`resolve_address`] itself.
@@ -1289,19 +1195,21 @@ fn main_loop(
 /// parse failure is fatal, exactly as `Message.of_string` is outside the
 /// reference's error handler.
 pub fn run(
-    rep_socket: Option<Socket>,
-    pub_socket: Option<Socket>,
-    port: u32,
+    rep_socket: Socket,
+    pub_socket: Socket,
     address: &str,
 ) -> Result<RunOutcome, ServerError> {
-    run_with(rep_socket, pub_socket, port, address, Timing::default())
+    run_with(rep_socket, pub_socket, address, Timing::default())
 }
 
 /// [`run`] with explicit timing, for unit tests.
+///
+/// Both sockets are pre-bound by the caller (the `qp_run` window binding):
+/// the reference's in-server `bind_socket` retry loop and its failure path
+/// are the caller's job, exactly as in `ocaml/qp_run.ml`.
 fn run_with(
-    rep_socket: Option<Socket>,
-    pub_socket: Option<Socket>,
-    port: u32,
+    rep_socket: Socket,
+    pub_socket: Socket,
     address: &str,
     timing: Timing,
 ) -> Result<RunOutcome, ServerError> {
@@ -1311,26 +1219,13 @@ fn run_with(
     let pair_socket = context.socket(SocketType::PAIR)?;
     pair_socket.bind(PAIR_ENDPOINT)?;
 
-    // The reference starts the PUB thread before binding the REP socket.
-    // Binding REP first is unobservable and lets a REP failure return
-    // without leaving a live PUB thread behind.
-    let rep_socket = match rep_socket {
-        Some(socket) => socket,
-        None => {
-            let socket = context.socket(SocketType::REP)?;
-            socket.set_linger(1_000_000)?;
-            bind_socket(&socket, "REP", port, timing.bind_retries, timing.bind_delay)
-                .map_err(ServerError::Failure)?;
-            socket
-        }
-    };
-
+    // The reference starts the PUB thread before serving the first REP
+    // request, so a late failure cannot leave the REP loop behind.
     let alive = Arc::new(AtomicBool::new(true));
     let pub_error = Arc::new(OnceLock::new());
     let pub_thread = spawn_pub_thread(
         &context,
         pub_socket,
-        port + 1,
         timing,
         Arc::clone(&alive),
         Arc::clone(&pub_error),
@@ -1387,8 +1282,6 @@ mod tests {
     /// down, never a different algorithm.
     fn test_timing() -> Timing {
         Timing {
-            bind_retries: 1,
-            bind_delay: Duration::from_millis(1),
             loop_poll_ms: 10,
             pub_poll_ms: 10,
             stop_deadline: Duration::from_secs(5),
@@ -1443,13 +1336,11 @@ mod tests {
         let context = Context::new();
         let rep = context.socket(SocketType::REP).unwrap();
         rep.bind("tcp://127.0.0.1:*").unwrap();
-        let (endpoint, port) = endpoint_port(&rep);
+        let (endpoint, _) = endpoint_port(&rep);
         let pub_socket = context.socket(SocketType::PUB).unwrap();
         pub_socket.bind("tcp://127.0.0.1:*").unwrap();
         let address = endpoint.clone();
-        let handle = thread::spawn(move || {
-            run_with(Some(rep), Some(pub_socket), port, &address, test_timing())
-        });
+        let handle = thread::spawn(move || run_with(rep, pub_socket, &address, test_timing()));
         (endpoint, handle)
     }
 
@@ -1815,7 +1706,7 @@ mod tests {
         let context = Context::new();
         let rep = context.socket(SocketType::REP).unwrap();
         rep.bind("tcp://127.0.0.1:*").unwrap();
-        let (endpoint, port) = endpoint_port(&rep);
+        let (endpoint, _) = endpoint_port(&rep);
         let pub_socket = context.socket(SocketType::PUB).unwrap();
         pub_socket.bind("tcp://127.0.0.1:*").unwrap();
         let (pub_endpoint, _) = endpoint_port(&pub_socket);
@@ -1829,9 +1720,7 @@ mod tests {
         thread::sleep(Duration::from_millis(100));
 
         let address = endpoint.clone();
-        let handle = thread::spawn(move || {
-            run_with(Some(rep), Some(pub_socket), port, &address, test_timing())
-        });
+        let handle = thread::spawn(move || run_with(rep, pub_socket, &address, test_timing()));
         let client = TestClient::connect(&context, &endpoint);
 
         let mut states = Vec::new();
@@ -1867,9 +1756,12 @@ mod tests {
         let (_, port) = endpoint_port(&rep);
 
         let error = stop_with(port, Duration::from_millis(100), 10).unwrap_err();
+        // The class split of the old `ServerError::Failure` is gone; the
+        // scenario (deadline expired against a dead server) is pinned by the
+        // plain message the caller prints.
         assert_eq!(
             error.to_string(),
-            "Failure(\"TaskServer: no answer to the Terminate request (the task server thread is dead)\")"
+            "TaskServer: no answer to the Terminate request (the task server thread is dead)"
         );
     }
 
@@ -1888,51 +1780,6 @@ mod tests {
         );
     }
 
-    /// `bind_socket` gives up after its retry budget with the reference's
-    /// message (trailing space included). Two wildcard sockets cannot share
-    /// a port, so the failure is immediate.
-    #[test]
-    fn bind_failure_message_matches_reference() {
-        let context = Context::new();
-        let blocker = context.socket(SocketType::REP).unwrap();
-        blocker.bind("tcp://*:0").unwrap();
-        let (_, port) = endpoint_port(&blocker);
-
-        let socket = context.socket(SocketType::REP).unwrap();
-        socket.set_linger(0).unwrap();
-        let error = bind_socket(&socket, "REP", port, 1, Duration::from_millis(1)).unwrap_err();
-        assert_eq!(
-            error,
-            format!("Unable to bind the REP socket to port : {port} ")
-        );
-    }
-
-    /// A PUB bind failure is not fatal: the calculation continues, the
-    /// message is recorded in the outcome, and the server still answers
-    /// `terminate` (`TaskServer.ml:765-793`).
-    #[test]
-    fn pub_bind_failure_is_reported_but_not_fatal() {
-        let context = Context::new();
-        let rep = context.socket(SocketType::REP).unwrap();
-        rep.bind("tcp://127.0.0.1:*").unwrap();
-        let (endpoint, _) = endpoint_port(&rep);
-        // Occupy the wildcard port the PUB thread is about to bind.
-        let blocker = context.socket(SocketType::PUB).unwrap();
-        blocker.bind("tcp://*:0").unwrap();
-        let (_, blocked_port) = endpoint_port(&blocker);
-        let port = blocked_port - 1;
-
-        let address = endpoint.clone();
-        let handle =
-            thread::spawn(move || run_with(Some(rep), None, port, &address, test_timing()));
-        let client = TestClient::connect(&context, &endpoint);
-        client.send("terminate");
-        assert_eq!(client.recv(), "ok");
-        let outcome = handle.join().unwrap().unwrap();
-        let expected = format!("Unable to bind the PUB socket to port : {blocked_port} ");
-        assert_eq!(outcome.pub_error.as_deref(), Some(expected.as_str()));
-    }
-
     /// `stop` drives a live server to a clean shutdown.
     #[test]
     fn stop_terminates_running_server() {
@@ -1943,7 +1790,7 @@ mod tests {
     }
 
     /// An unparseable request is fatal, like `Message.of_string` outside the
-    /// reference's `try`.
+    /// reference's `try`: the server thread returns the parse error.
     #[test]
     fn malformed_request_is_fatal() {
         let (endpoint, handle) = spawn_server();
@@ -1951,6 +1798,8 @@ mod tests {
         let client = TestClient::connect(&context, &endpoint);
         client.send("garbage");
         let error = handle.join().unwrap().unwrap_err();
-        assert!(matches!(error, ServerError::Parse(_)), "{error}");
+        // "garbage" carries no keyword: the lexer's empty-token failure,
+        // carried as the codec's documented display.
+        assert!(error.to_string().contains("lexing: empty token"), "{error}");
     }
 }

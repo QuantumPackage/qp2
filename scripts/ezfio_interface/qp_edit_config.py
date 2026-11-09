@@ -62,12 +62,6 @@ CONFIG_DIR = "data/qp_edit_config"
 #: * ``handler``    -- handler name compiled into the Rust binary;
 #: * ``is_section`` -- whether ``qp_edit`` visits it as an editable section.
 #:
-#: ``bitmask`` maps to ``bitmasks`` (plural) because the name is the historical
-#: name of the removed OCaml module (``ocaml/Input_bitmasks.ml``); the module
-#: is *not* a section: it is never visited by ``qp_edit``.  Its logic
-#: (deriving ``n_int`` from ``mo_num`` and ``bit_kind`` from the build
-#: configuration) is a dependency of the determinants handler.
-#:
 #: One module directory can own several handlers: ``src/ao_basis/EZFIO.cfg``
 #: declares both the ``ao_basis_*`` and the ``ao_extra_basis_*`` keys, so it
 #: yields ``ao_basis.toml`` and ``ao_extra_basis.toml``.
@@ -82,7 +76,6 @@ HANDLER_MODULES = {
     "determinants": [
         ("determinants_by_hand", "Determinants_by_hand", "determinants_by_hand", True)
     ],
-    "bitmask": [("bitmasks", "", "bitmasks", False)],
 }
 
 #: Sections visited by ``qp_edit`` before the generated modules, in the order
@@ -264,7 +257,7 @@ def registry_text(l_module_lower):
 
     Order: the handler sections that ``qp_edit`` visits first, then the
     generated modules **sorted by name**, then the handler sections visited
-    last, then the derived handlers (``bitmasks``).  The OCaml generator emits
+    last.  The OCaml generator emits
     the generated modules in ``os.listdir`` order, which is not reproducible
     across machines; sorting here makes the build artifact deterministic.
     Section order is not semantically significant -- sections are located by
@@ -299,7 +292,7 @@ def registry_text(l_module_lower):
     for module_id, is_section in order:
         if module_id in seen:
             # A handler module that is also a generated module (nuclei,
-            # determinants, bitmask) appears twice: once as the handler-owned
+            # determinants) appears twice: once as the handler-owned
             # section coerced above, once from `generated`.  They have
             # different ids (`nuclei_by_hand` vs `nuclei`), so a duplicate
             # here is a bug in this function, not a legitimate case.

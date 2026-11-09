@@ -1,33 +1,39 @@
-//! End-to-end tests for the `qp_create_ezfio` front end.
+//! End-to-end tests for the `qp_create_ezfio` front end (wave S2: clap +
+//! the shared `ToolError`).
 //!
 //! These run the real binary, so they cover what the unit tests cannot:
-//! `QP_ROOT` handling, stdout/stderr routing, the exit status, the
-//! `argv[0]` substitution in the help block, and the non-UTF-8 argument
-//! guard. Every expected string was measured against the reference build
-//! (`~/qp2/ocaml/qp_create_ezfio.native`), except the non-UTF-8 message,
-//! which has no reference counterpart (documented in `main.rs`).
+//! `QP_ROOT` handling, stdout/stderr routing, the exit status, the clap
+//! grammar, and the manual check order. Every failure case keeps the
+//! reference's scenario (same argv, same fixture mutation), asserts the
+//! exit code (2), and pins at most one stable substring — named in the
+//! test — on the streams. No exact-stderr pins, no help-byte pins.
 
+#[cfg(unix)]
+use std::os::unix::process::CommandExt;
 use std::process::{Command, Output};
 
-/// The reference help capture, produced with `argv[0] = "qp_create_ezfio"`.
-const HELP: &str = include_str!("data/help_bare.txt");
-
-/// A hydrogen basis fixture; absolute so the action finds it regardless of
-/// the working directory.
+/// The hydrogen basis fixture; absolute so the action finds it regardless
+/// of the working directory.
 const H_BASIS: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/data/h.basis");
 /// Two hydrogens 0.7 angstrom apart.
 const H2_XYZ: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/data/h2.xyz");
 
+/// The tool name of the one-line standard-error error.
+const TOOL: &str = "qp_create_ezfio";
+
 /// A command whose `QP_ROOT` is set (to a value that need not exist) and
 /// whose trailing `qp_edit` is the `true` seam (the tests must not depend
-/// on a host `qp_edit`; the reference's `Sys.command` runs it through
-/// `/bin/sh` and would print the shell's `command not found` on stderr).
+/// on a host `qp_edit`).
 fn command(args: &[&str]) -> Command {
     let mut command = Command::new(env!("CARGO_BIN_EXE_qp_create_ezfio"));
     command
         .env("QP_ROOT", "/nonexistent")
         .env("QP_EDIT", "true")
         .args(args);
+    // The usage line of the help is checked through `argv[0]`; `arg0`
+    // keeps it the bare program name.
+    #[cfg(unix)]
+    command.arg0(TOOL);
     command
 }
 
@@ -45,17 +51,38 @@ fn stderr(output: &Output) -> String {
 
 #[cfg(unix)]
 #[test]
-fn help_matches_the_reference_byte_for_byte() {
-    use std::os::unix::process::CommandExt;
-
-    let output = command(&["-h"])
-        .arg0("qp_create_ezfio")
-        .output()
-        .expect("the compiled test binary must be runnable");
-    assert_eq!(output.status.code(), Some(2));
-    assert_eq!(output.stdout, HELP.as_bytes());
-    // `-h` prints the help and parsing continues; with no FILE it then fails.
-    assert_eq!(stderr(&output), "qp_create_ezfio: input file is missing\n");
+fn the_help_flag_prints_help_and_exits_zero() {
+    for flag in ["-h", "--help"] {
+        let output = run(&[flag]);
+        assert_eq!(output.status.code(), Some(0), "flag {flag}");
+        let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
+        assert!(stdout.contains("Usage:"), "flag {flag}; stdout: {stdout}");
+        // Every option of the reference's table is documented.
+        for name in [
+            "-o",
+            "--output",
+            "-b",
+            "--basis",
+            "-a",
+            "--au",
+            "-c",
+            "--charge",
+            "-g",
+            "--ghost",
+            "-m",
+            "--multiplicity",
+            "-p",
+            "--pseudo",
+            "-q",
+            "--qmc",
+            "-x",
+            "--cartesian",
+            "<FILE>",
+        ] {
+            assert!(stdout.contains(name), "flag {flag} missing {name}");
+        }
+        assert_eq!(stderr(&output), "", "flag {flag}");
+    }
 }
 
 #[test]
@@ -72,12 +99,12 @@ fn missing_qp_root_fails_before_parsing() {
     );
     assert_eq!(
         stderr(&output),
-        "Fatal error: exception Failure(\"QP_ROOT environment variable is not set.\\nPlease source the quantum_package.rc file.\")\n"
+        format!("{TOOL}: QP_ROOT is not set (source quantum_package.rc)\n")
     );
 }
 
 #[test]
-fn empty_qp_root_is_accepted() {
+fn an_empty_qp_root_is_accepted() {
     // An empty root is a valid presence check result. Both inputs are
     // absolute local files, so the empty root never has to resolve a
     // database name.
@@ -98,45 +125,94 @@ fn empty_qp_root_is_accepted() {
 }
 
 #[test]
-fn front_end_failures_match_the_reference() {
+fn front_end_failures_exit_two() {
+    // (args, the stable substring named by the test, the stream it is on).
     let cases: &[(&[&str], &str)] = &[
-        (&[], "qp_create_ezfio: --basis option is missing.\n"),
-        (&["-b", "x"], "qp_create_ezfio: input file is missing\n"),
+        // clap: the `FILE` positional is required.
+        (&[], "the following required arguments were not provided"),
         (
-            &["-Z"],
-            "Fatal error: exception Getopt.Error(\"Unknown option -Z\")\n",
+            &["-b", "x"],
+            "the following required arguments were not provided",
         ),
         (
-            &["--basis"],
-            "Fatal error: exception Getopt.Error(\"Option --basis must have an argument\")\n",
+            &["-b", "x", "a.xyz", "b.xyz"],
+            "unexpected argument 'b.xyz' found",
         ),
-        (
-            &["--au=x"],
-            "Fatal error: exception Getopt.Error(\"Option --au does not accept argument\")\n",
-        ),
-        (
-            &["-b", ""],
-            "Fatal error: exception Invalid_argument(\"index out of bounds\")\n",
-        ),
+        // clap: unknown options.
+        (&["-Z"], "unexpected argument '-Z' found"),
+        (&["--nosuch"], "unexpected argument '--nosuch' found"),
+        // clap: a value-taking option without a value.
+        (&["-b"], "a value is required for '--basis"),
+        // clap: a flag given a value.
+        (&["--au=x"], "unexpected value 'x' for '--au'"),
+        // manual: the mandatory `--basis` check.
+        (&["-c", "0", "f.xyz"], "--basis option is missing"),
+        // manual: the conversions, charge → ghost → multiplicity,
+        // decimal-only (wave S2.3).
         (
             &["-b", "x", "-c", "abc", "f.xyz"],
-            "qp_create_ezfio: int_of_string\n",
+            "invalid integer 'abc' in charge",
+        ),
+        (
+            &["-b", "x", "--charge=", "f.xyz"],
+            "invalid integer '' in charge",
+        ),
+        (
+            &["-b", "x", "-c", "0x10", "f.xyz"],
+            "invalid integer '0x10' in charge",
+        ),
+        (
+            &["-b", "x", "-g", "x", "f.xyz"],
+            "invalid float 'x' in ghost threshold",
         ),
         (
             &["-b", "x", "--ghost=", "f.xyz"],
-            "qp_create_ezfio: float_of_string\n",
+            "invalid float '' in ghost threshold",
+        ),
+        (
+            &["-b", "x", "-m", "y", "f.xyz"],
+            "invalid integer 'y' in multiplicity",
+        ),
+        (
+            &["-b", "x", "-m", "0x2", "f.xyz"],
+            "invalid integer '0x2' in multiplicity",
         ),
     ];
-    for (args, expected) in cases {
+    for (args, needle) in cases {
         let output = run(args);
         assert_eq!(output.status.code(), Some(2), "args {args:?}");
-        assert_eq!(stderr(&output), *expected, "args {args:?}");
+        assert!(
+            stderr(&output).contains(needle),
+            "args {args:?}; stderr: {}",
+            stderr(&output)
+        );
         assert!(output.stdout.is_empty(), "args {args:?}");
     }
 }
 
 #[test]
-fn valid_invocation_writes_the_default_named_ezfio() {
+fn the_mandatory_basis_check_comes_before_the_conversions() {
+    // No `--basis`: the mandatory check wins over the bad charge.
+    let output = run(&["-c", "abc", "f.xyz"]);
+    assert_eq!(output.status.code(), Some(2));
+    assert!(
+        stderr(&output).contains("--basis option is missing"),
+        "stderr: {}",
+        stderr(&output)
+    );
+    // With `--basis`: the charge conversion fails before the multiplicity
+    // one.
+    let output = run(&["-b", "x", "-c", "abc", "-m", "yy", "f.xyz"]);
+    assert_eq!(output.status.code(), Some(2));
+    assert!(
+        stderr(&output).contains("invalid integer 'abc' in charge"),
+        "stderr: {}",
+        stderr(&output)
+    );
+}
+
+#[test]
+fn a_valid_invocation_writes_the_default_named_ezfio() {
     // Without `-o`, the directory name comes from the input: the last
     // `.xyz` extension is replaced by `.ezfio`.
     let work = tempfile::tempdir().expect("tempdir");
@@ -157,9 +233,9 @@ fn valid_invocation_writes_the_default_named_ezfio() {
 }
 
 #[test]
-fn terminator_makes_a_later_dash_h_a_file_name() {
-    // A real file named `-h` in the working directory: after `--` it must be
-    // opened as the input, not consumed as the help flag.
+fn the_terminator_makes_a_later_dash_h_a_file_name() {
+    // A real file named `-h` in the working directory: after `--` it must
+    // be opened as the input, not consumed as the help flag.
     let work = tempfile::tempdir().expect("tempdir");
     std::fs::write(work.path().join("-h"), "2\nh2\nH 0 0 0\nH 0 0 0.7\n").expect("write fixture");
     std::fs::copy(H_BASIS, work.path().join("h.basis")).expect("copy fixture");
@@ -180,39 +256,22 @@ fn terminator_makes_a_later_dash_h_a_file_name() {
 
 #[cfg(unix)]
 #[test]
-fn help_is_printed_before_the_action() {
-    use std::os::unix::process::CommandExt;
-
-    // `-h` prints the help and parsing continues: the action still runs,
-    // and the directory line follows the help block on stdout.
-    let work = tempfile::tempdir().expect("tempdir");
-    let out = work.path().join("h2.ezfio");
-    let output = command(&["-h", "-b", H_BASIS, "-o", &out.to_string_lossy(), H2_XYZ])
-        .arg0("qp_create_ezfio")
-        .output()
-        .expect("the compiled test binary must be runnable");
-    assert_eq!(output.status.code(), Some(0), "stderr: {}", stderr(&output));
-    assert_eq!(
-        output.stdout,
-        format!("{HELP}{}\n", out.display()).into_bytes()
-    );
-    assert!(output.stderr.is_empty());
-}
-
-#[cfg(unix)]
-#[test]
-fn non_utf8_argument_is_rejected_without_panicking() {
+fn a_non_utf8_argument_is_rejected_without_panicking() {
     use std::ffi::OsString;
     use std::os::unix::ffi::OsStringExt;
 
+    // clap rejects a non-UTF-8 `argv` byte sequence with its own plain
+    // diagnostic (wave S2 deviation; the reference walked raw bytes and
+    // rejected it with its own message).
     let output = command(&["-b", "x"])
         .arg(OsString::from_vec(vec![0xff, b'.', b'x', b'y', b'z']))
         .output()
         .expect("the compiled test binary must be runnable");
     assert_eq!(output.status.code(), Some(2));
     assert!(output.stdout.is_empty());
-    assert_eq!(
-        stderr(&output),
-        "qp_create_ezfio: command line argument 3 is not valid UTF-8\n"
+    assert!(
+        stderr(&output).contains("invalid UTF-8"),
+        "stderr: {}",
+        stderr(&output)
     );
 }

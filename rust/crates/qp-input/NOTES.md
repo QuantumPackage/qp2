@@ -18,11 +18,10 @@ reference for behaviour.
 | `schema.rs`, `loader.rs` | generated TOML format, validation, discovery |
 | `types.rs` | declared-type table, `Value`, domain checks |
 | `sexp.rs` | sexplib-subset reader and the `(key value)` record reader |
-| `ocaml_compat.rs` | OCaml printers: `string_of_float`, `valid_float_lexem`, `Range.to_string`, `MO_label` |
+| `ocaml_compat.rs` | OCaml printers: `string_of_float`, `valid_float_lexem`, `MO_label` |
 | `engine.rs` | `get`/`set`, section bounding, the retry path, `--check-config` helpers |
 | `handlers/{ao,ao_extra,mo}_basis.rs` | the three basis sections |
 | `handlers/{electrons,nuclei_by_hand,determinants_by_hand}.rs` | the three small sections |
-| `handlers/bitmasks.rs` | derived `n_int`/`bit_kind` (not a section) |
 | `handlers/qptypes.rs` | local port of `Qptypes.ml` validation (`MO_number`, `Nucl_number`, …) |
 | `bins/qp_edit/src/main.rs` | driver: `TASKS`, editor, backup, banner, exit codes |
 | `bins/qp_edit/src/inspect.rs` | `--list` / `--describe` / `--check-config` (not in the reference) |
@@ -46,11 +45,6 @@ consumer):
   `ao_basis` fields. `Input_ao_extra_basis.ml` uses the **`ao_extra_basis`
   group with `ao_extra_*` keys** (`Ezfio.get_ao_extra_basis_ao_extra_num`,
   etc.). The Rust handler uses the correct group/keys, not the TOML ones.
-* `bitmasks.toml` is generated from `src/bitmask/EZFIO.cfg` (group `bitmask`,
-  fields `n_act_orb`/`do_ormas`/`ormas_*`), while `Input_bitmasks.ml` uses
-  `bitmasks/n_int` and `bitmasks/bit_kind`. The module is `section = false`
-  and the handler never reads the TOML, so only a generic consumer would see
-  the mismatch.
 
 ## Driver semantics (`ocaml/qp_edit.ml` post-fix)
 
@@ -68,6 +62,8 @@ document); `""` plus `Info: <Sys_error>` on stderr when the read raises
 4. `Rst_string.of_string` then the section's `of_rst`;
 5. on any exception: print `Info: Read error in <title>`, call `of_rst` a
    second time and **ignore the result**; a second exception escapes (C7);
+   (wave S2.4: the port's retry is silent — no `Info:` line — and the
+   second escape is printed as `qp_edit: <title>: <message>`, exit 1);
 6. write only when `apply`; check mode passes `apply:false`.
 
 `run` order: directory-exists check (`<dir> does not exists`, typo
@@ -111,8 +107,12 @@ spelling from the type table, arrays are Fortran (column-major) order.
 `set` parses the section body as a sexp of `(key value)` pairs (every line
 containing `=`, `=` replaced by a space, each line parenthesised), checks the
 domain with `types::TypeSpec`, and writes with `ByteLayout::Ocaml`. A
-sexplib-style conversion failure prints `Error:  (...)` and yields `None`
-(section skipped, exit 0); anything else takes the `Info:` retry path above.
+conversion failure (the sexplib `Error:  (...)` of the reference) yields
+`None` (section skipped, exit 0); anything else takes the retry path above.
+Wave S2.4: the port prints the conversion failure as
+`qp_edit: parse error in <section>: <message>` (exit 0) and the second
+escape as `qp_edit: <section>: <message>` (exit 1) — plain text, no
+sexplib reporter, no `Info:` line.
 
 **The read path never writes the `*_md5` stamps** (D4/C2). The OCaml
 `Input_ao_basis.read` writes the computed stamp on success and `md5("None")`
@@ -152,13 +152,6 @@ absent (C3); `read_mo_occ` is gated on `has_mo_basis_mo_label`, not on
 Multiplicity from `Multiplicity.of_alpha_beta`, one line
 `"Spin multiplicity is %s."`. `elec_num` comes from the formula default; the
 handler supplies `alpha + beta`.
-
-### `bitmasks`
-
-Not a section (`section = false`), never visited by the editor; it is dead
-code for `qp_edit` and is kept because the determinants handler shares the
-same derivation (`n_int = (mo_num - 1)/64 + 1`, `bit_kind` = 8 on this
-build). Users looking for it in `--list` will not find it.
 
 ### `nuclei_by_hand`
 
@@ -248,20 +241,22 @@ calls; field order is the materialisation order (`n_det_qp_edit`, `n_det`,
   and all bytes `< b'g'`.
 * `MO_label.of_string` prints the rejected string to stdout before failing
   (multi-line `Failure` payload).
-* sexplib's `Error:  (...)` messages are approximated, not byte-identical:
-  the snippets and the two-space prefix are reproduced, the type-path
-  wording is not. C7-A only pins the prefix and the exit code.
+* (pre-S2) sexplib's `Error:  (...)` messages were approximated, not
+  byte-identical: the snippets and the two-space prefix were reproduced,
+  the type-path wording was not. Wave S2.4 deleted the reporter: the
+  messages are plain Rust text and C7-A pins the full line.
 * A section whose header was deleted by the user is a silent no-op.
 
 ## Tests and gate
 
-* `crates/qp-input`: 112 unit tests (printers against independently computed
+* `crates/qp-input`: 119 unit tests (printers against independently computed
   reference strings, sexp reader, every handler's `get`, the `set` retry
-  path).
-* `bins/qp_edit`: 4 unit tests (`TASKS` order, help byte count, banner,
-  inspection dispatch), 19 config tests, 8 C1–C7 contract tests, 3
-  interactive tests (no-op editor, edit reaches EZFIO, failed read-back
-  restores the backup). 381 workspace tests in total.
+  path; the sexp `fail_msg`/`snippet` tests are gone since wave S2.4).
+* `bins/qp_edit`: 7 unit tests (wave S2: the help byte count and banner
+  tests are gone — the help is clap-generated), 17 C1–C7 contract tests
+  (including the S2.4 exact-line pins), 19 config tests, 3 interactive
+  tests (no-op editor, edit reaches EZFIO, failed read-back
+  restores the backup). 655 workspace tests in total.
 * Gate (debug binary copied to `$FAKE/ocaml/qp_edit`):
 
   ```
@@ -280,6 +275,3 @@ calls; field order is the materialisation order (`n_det_qp_edit`, `n_det`,
   interactive editor therefore does nothing; the sections are read-only.
 * The config-artifact bugs above are not fixed: they need a change in
   `scripts/ezfio_interface/`, not in this crate.
-* `cargo fmt --all --check` fails on the pre-existing
-  `crates/qp-types/src/lib.rs` at `cf292172`; only `qp-input` and `qp_edit`
-  are formatted by this branch.

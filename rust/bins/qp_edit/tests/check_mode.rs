@@ -737,12 +737,11 @@ fn c7_a_sexplib_failure_is_reported_and_check_still_succeeds() {
     let output = qp_edit(directory.path(), &["-c", "-r", "broken.rst", "ezfio"]);
     assert_eq!(output.status.code(), Some(0), "{output:?}");
     assert!(output.stdout.is_empty(), "{output:?}");
-    let stderr = String::from_utf8(output.stderr).expect("utf-8 stderr");
-    assert!(stderr.contains("Error:  ("), "{stderr}");
-    assert!(stderr.contains("missing field: elec_alpha_num"), "{stderr}");
-    assert!(
-        !stderr.contains("Info: Read error"),
-        "a reported sexplib failure must not take the exception path: {stderr}"
+    // Wave S2.4: one plain line on stderr, the section is skipped, the check
+    // still exits 0 (the sexplib reporter and its snippet are gone).
+    assert_eq!(
+        String::from_utf8(output.stderr).expect("utf-8 stderr"),
+        "qp_edit: parse error in Electrons: record_of_sexp: missing field: elec_alpha_num\n"
     );
 }
 
@@ -752,9 +751,10 @@ fn c7_b_an_escaped_error_still_fails_the_check() {
     let root = directory.path().join("ezfio");
 
     // `Atom.of_string` rejects the element symbol, and `Nuclei_by_hand.of_rst`
-    // lets that exception escape: the driver retries the parse once, prints
-    // `Info: Read error in <title>`, and the second failure reaches the
-    // banner.
+    // lets that exception escape: the driver retries the parse once, silently
+    // (the `Info: Read error in <title>` line is gone), and the second escape
+    // is wrapped with the section title (wave S2.4: the `=-` banner is gone,
+    // the driver prints `qp_edit: {error:#}`).
     let engine = engine();
     let title = engine
         .section("nuclei_by_hand")
@@ -773,14 +773,9 @@ fn c7_b_an_escaped_error_still_fails_the_check() {
     let output = qp_edit(directory.path(), &["-c", "-r", "broken.rst", "ezfio"]);
     assert_eq!(output.status.code(), Some(1), "{output:?}");
     assert!(output.stdout.is_empty(), "{output:?}");
-    let stderr = String::from_utf8(output.stderr).expect("utf-8 stderr");
-    assert!(
-        stderr.contains(&format!("Info: Read error in {title}")),
-        "{stderr}"
-    );
-    assert!(
-        stderr.contains("=-=-=-=-"),
-        "the banner is missing: {stderr}"
+    assert_eq!(
+        String::from_utf8(output.stderr).expect("utf-8 stderr"),
+        format!("qp_edit: {title}: Atom.of_string: Element Xx unknown\n")
     );
 }
 

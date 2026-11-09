@@ -1,9 +1,21 @@
 # P4 tools — dual-run gate recipe (`qp_set_mo_class`)
 
-**Status (2026-11-05):** the port is implemented and the gate below is green —
+**Status (2026-11-09, wave S2):** the help/error byte contract documented
+below is **retired** — user-visible text is now Rust-native (user decision
+2026-11-09; the hand-rolled `getopt` port in `src/cli.rs` — including
+`wrap_usage` — is deleted, the CLI is clap derive). The contract that
+survives is the exit codes (0/1/2), the EZFIO payloads and the data gates
+(DEVIATIONS.md A4/A11; `steps/012-simplify-tool-layer/implementation.md`
+S2). The byte-comparison recipe below is kept as historical evidence of
+the **reference** behaviour; claims in it about the port matching the
+reference byte-for-byte are pre-S2 and no longer hold.
+
+**Status (2026-11-05, historical):** the port is implemented and the gate
+below is green —
 71 compared cases byte-identical on `(exit code, stdout, stderr)`, plus the
 decompressed `mo_basis/mo_class` payload and the materialised `mo_label`
-where relevant. This file is the recipe the parent re-runs after merging; the
+where relevant. This file was the recipe the parent re-runs after merging;
+the
 gate script is self-contained and uses only files in the repository (the
 fixtures) plus a fake `QP_ROOT` the script creates in its own scratch.
 
@@ -36,7 +48,8 @@ OCaml `Format` `hov` box and re-wraps the usage line with the actual name
 (measured rule: a word is kept on a line only when its separator space is at
 column ≤ 68 **and** it ends at column ≤ 77; on a wrap the space stays as a
 trailing space only when the word would have fit the 77 margin — see the
-Gotcha below; the port reproduces this in `cli.rs::wrap_usage`). The four help cases
+Gotcha below; pre-S2 the port reproduced this in `cli.rs::wrap_usage`,
+since deleted — the help is clap-generated and not byte-compared). The four help cases
 (`cli-noargs`, `cli-h`, `cli-two-anon`, `cli-h-ezfio`) therefore cannot be
 compared with each side invoked by its own path: the gate's `gcase_help`
 execs the **port** through
@@ -79,10 +92,11 @@ table above is the family-by-family summary.
   shared `qp_ezfio` writer contract, documented at T4.1). The gate does not
   compare the stamp files.
 * **Non-UTF-8 argv.** The reference (OCaml) accepts arbitrary bytes in
-  `argv`; the port decodes with `String::from_utf8_lossy` (replacement
-  character), so a non-UTF-8 option value yields a different `Failure`
-  payload than the reference's byte-faithful one. Inherited from
-  `qp_create_ezfio` (T4.1); not exercised by the gate.
+  `argv`; the port (clap, since wave S2) rejects a non-UTF-8 argument
+  with its own `error: invalid UTF-8 was detected in one or more
+  arguments` diagnostic, exit 2 (DEVIATIONS A1/A2). The pre-S2
+  `String::from_utf8_lossy` behaviour is gone; not exercised by the
+  gate.
 * **`mo_class` shape validation.** The Rust `qp-ezfio` `StaticRegistry`
   rejects an array whose on-disk dimensions differ from the declared spec
   (defence for the array-heavy `qp_create_ezfio`). The reference client has
@@ -105,11 +119,12 @@ table above is the family-by-family summary.
   ending at column 73 wraps *with* a trailing space, while a 12-char word
   ending at column 77 fits — a single greedy margin cannot produce both).
   Derived from an argv0-length sweep (15–89) against renamed copies of the
-  reference binary; the port matches the reference byte-for-byte at all 75
-  lengths. The port implements the rule (`wrap_usage` in `cli.rs`) and
-  pins it with three captures taken from *renamed copies* of the reference
+  reference binary; the pre-S2 port matched the reference byte-for-byte at
+  all 75 lengths. It implemented the rule (`wrap_usage` in `cli.rs`, since
+  deleted in wave S2.1) and
+  pinned it with three captures taken from *renamed copies* of the reference
   binary (name lengths 15/31/65): `tests/data/help_bare.txt` (639 B),
-  `help_medium.txt` (657 B), `help_long.txt` (697 B).
+  `help_medium.txt` (657 B), `help_long.txt` (697 B) (since deleted).
 * **`has` checks the file, not just the group.** `ezfio.ml:54-66`:
   `has g k` = `exists(g)` **and** `Sys.file_exists(g/k)`. A group whose
   `.version` exists but the file does not is `Absent` (the `n_int` fallback

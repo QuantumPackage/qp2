@@ -21,12 +21,15 @@
 //!    is still reported (contract C7).
 //!
 //! Non-check runs wrap steps 4–7 in a `work/backup.tar` backup, restored
-//! when the run fails.  Failures print the reference's 80-column `=-` banner:
-//! `Failure`/`Invalid_argument` classes exit 1, an OCaml `Assert_failure`
-//! exits 2, exactly as the reference's top-level handler.
+//! when the run fails.  Failures print `qp_edit: <error chain>` on stderr
+//! (wave S2: the reference's 80-column `=-` banner is gone): every class
+//! except an OCaml `Assert_failure` exits 1, an assert exits 2, exactly as
+//! the reference's top-level handler classifies them.  Check-mode parse
+//! failures are reported per section as `qp_edit: parse error in <title>:
+//! <message>` and leave the exit status at 0 (contract C7).
 //!
 //! Units: none.  Values are rendered by the OCaml-compatible printers in
-//! `qp_input::ocaml_compat` (`%.12g` floats, `Range` strings, `MO_label`).
+//! `qp_input::ocaml_compat` (`%.12g` floats, `MO_label`).
 
 mod inspect;
 
@@ -155,48 +158,9 @@ pub(crate) fn sort_sections<'a, 't>(
     order
 }
 
-/// The `=-` rule `qp_edit.ml` prints around every fatal message (40 copies of
-/// `=-`, i.e. 80 columns).
-const BANNER: &str =
-    "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-";
-
 /// Exit code of an OCaml `Assert_failure` (`qp_edit.ml` exits 2; every other
 /// caught class exits 1).
 const EXIT_ASSERT: u8 = 2;
-
-/// The reference help text, with `{program}` standing for `argv[0]`.
-///
-/// Captured from the reference binary (`qp_edit -h`, 717 bytes for
-/// `argv[0] = "qp_edit"`).  The OCaml `Format` printer re-wraps the usage
-/// line for a longer `argv[0]`; this port keeps the reference layout and
-/// prints `argv[0]` verbatim, a documented deviation (no test or golden
-/// transcript exercises `-h`).
-const HELP: &str = r#"{program} - quantum_package command 
-
-Usage:
-  
-  {program} [-c] [-h] [-n <int>] [-r <string>] [-s <range>] [-w <string>] 
-      [--] EZFIO_DIR
-  
-Arguments:
-  
-  EZFIO_DIR             EZFIO directory 
-  
-Options:
-  
-  -c  --check           Checks the input data 
-  -h  --help            Prints the help message. 
-  -n  --ndet=<int>      Truncates the wavefunction to the target number 
-                        of determinants 
-  -r  --read=<string>   Reads the file and applies it to the EZFIO" 
-  -s  --state=<range>   Extracts selected states, for example "[1,3-5]" 
-  -w  --write=<string>  Writes the qp_edit file to a file" 
-  
-Description:
-  
-  Opens a text editor to edit the parameters of an EZFIO directory. 
-  
-"#;
 
 fn main() -> ExitCode {
     let argv: Vec<OsString> = std::env::args_os().collect();
@@ -204,32 +168,16 @@ fn main() -> ExitCode {
         return inspect::run(argv);
     }
 
-    // `EditArgs` reproduces the reference option grammar.  clap prints its
-    // own diagnostics for an unknown option and exits 2, which is the
-    // reference's usage exit code; the text differs and is documented.
-    let cli = EditArgs::parse_from(argv.clone());
-    let program = argv
-        .first()
-        .map(|arg| arg.to_string_lossy().into_owned())
-        .unwrap_or_else(|| String::from("qp_edit"));
-
-    // The reference `-h` prints the help in `set_specs` and then *continues*
-    // with the normal argument checks; it does not exit.
-    if cli.help {
-        print!("{}", help_text(&program));
-    }
+    // `clap` owns the command line (wave S2.1): `-h`/`--help` prints its
+    // help once and exits 0; a usage error (unknown option, missing or
+    // doubled `EZFIO_DIR`) prints its own plain diagnostic and exits 2,
+    // the reference's usage exit code.
+    let cli = EditArgs::parse_from(argv);
 
     let config = match cli.validate() {
         Ok(config) => config,
         Err(error) => {
-            // The reference calls `Command_line.help ()` again before
-            // failing on a missing anonymous argument (measured: `-h`
-            // prints the 717-byte help twice), and fails the `-n`/`-s`
-            // conversions before that check, without help.
-            if error.message() == "EZFIO_DIR is missing" {
-                print!("{}", help_text(&program));
-            }
-            eprintln!("Fatal error: exception Failure({:?})", error.message());
+            eprintln!("qp_edit: {error}");
             return ExitCode::from(EXIT_USAGE as u8);
         }
     };
@@ -237,7 +185,7 @@ fn main() -> ExitCode {
     match execute(&config) {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
-            print_banner(&format!("{error:#}"));
+            eprintln!("qp_edit: {error:#}");
             if ocaml_compat::is_assert_failure(&error) {
                 ExitCode::from(EXIT_ASSERT)
             } else {
@@ -258,16 +206,6 @@ fn is_inspection(argv: &[OsString]) -> bool {
             Some("--list" | "--describe" | "--check-config")
         )
     })
-}
-
-/// The help text for `program` (see [`HELP`] for the layout caveat).
-fn help_text(program: &str) -> String {
-    HELP.replace("{program}", program)
-}
-
-/// Print the reference's banner-wrapped fatal message on stderr.
-fn print_banner(message: &str) {
-    eprint!("{BANNER}\n\n{message}\n\n{BANNER}\n\n");
 }
 
 /// Load the configuration, create the backup when needed, then edit.
@@ -668,20 +606,22 @@ mod tests {
     }
 
     #[test]
-    fn banner_is_the_reference_rule() {
-        assert_eq!(BANNER.len(), 80);
-        assert!(BANNER.starts_with("=-"));
-        assert!(BANNER.ends_with("=-"));
-        assert!(BANNER.bytes().all(|b| b == b'=' || b == b'-'));
-    }
-
-    #[test]
-    fn help_text_has_the_reference_byte_count() {
-        // 717 bytes is the measured `qp_edit -h` output with
-        // `argv[0] = "qp_edit"` (the reference prints it twice when
-        // EZFIO_DIR is missing, 1434 bytes).
-        assert_eq!(help_text("qp_edit").len(), 717);
-        assert!(help_text("qp_edit").contains("qp_edit [-c] [-h]"));
+    fn help_is_clap_generated_and_mentions_every_option() {
+        // Wave S2.1: the 717-byte reference help is gone; `clap` renders the
+        // help and the binary prints it once on `-h`/`--help` (exit 0).
+        use clap::CommandFactory;
+        let help = EditArgs::command().render_help().to_string();
+        for option in [
+            "--check",
+            "--help",
+            "--ndet",
+            "--read",
+            "--state",
+            "--write",
+            "EZFIO_DIR",
+        ] {
+            assert!(help.contains(option), "help misses {option}:\n{help}");
+        }
     }
 
     #[test]

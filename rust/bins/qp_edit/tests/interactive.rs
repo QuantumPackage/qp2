@@ -189,11 +189,14 @@ fn a_failed_read_back_restores_the_backup() {
     let (output, _) = run(directory.path(), MOVE_AND_BREAK_NUCLEI);
     assert_eq!(output.status.code(), Some(1), "{output:?}");
     assert!(output.stdout.is_empty(), "{output:?}");
+    // Wave S2.4: the domain violation (`Bogus` is not a `Disk_access` choice)
+    // escapes the parse, the silent retry escapes again, and the driver
+    // prints the error wrapped with the section title — no `Info:` line, no
+    // `=-` banner.
     let stderr = String::from_utf8(output.stderr).expect("utf-8 stderr");
-    assert!(stderr.contains("Info: Read error in Nuclei"), "{stderr}");
-    assert!(
-        stderr.contains("=-=-=-=-\n"),
-        "the banner is missing: {stderr}"
+    assert_eq!(
+        stderr,
+        "qp_edit: Nuclei: value \"Bogus\" is outside the domain of type \"Disk_access\" (one of Read|Write|None)\n"
     );
 
     // `nuclei_by_hand` ran before `nuclei` and wrote the moved coordinate;

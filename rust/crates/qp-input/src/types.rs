@@ -105,11 +105,6 @@ pub struct TypeSpec {
 }
 
 impl TypeSpec {
-    /// The spelling used in `EZFIO.cfg` and stored in the TOML `type` key.
-    pub const fn declared(&self) -> &'static str {
-        self.declared
-    }
-
     /// Primitive kind used to parse and print one element.
     pub const fn value(&self) -> ValueKind {
         self.value
@@ -724,8 +719,8 @@ mod tests {
     fn lookup_finds_every_entry() {
         for spec in TYPES {
             assert_eq!(
-                lookup_type(spec.declared()).map(TypeSpec::declared),
-                Some(spec.declared())
+                lookup_type(spec.declared).map(|found| found.declared),
+                Some(spec.declared)
             );
         }
         assert!(lookup_type("no_such_type").is_none());

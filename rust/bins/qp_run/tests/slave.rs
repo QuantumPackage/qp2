@@ -62,7 +62,7 @@ fn a_slave_reads_the_master_and_keeps_the_file() {
     );
 }
 
-/// No address file: `failwith "No master is not running"`, exit 2, before any
+/// No address file: the missing-master failure, exit 2, before any
 /// server or job.
 #[test]
 fn a_slave_without_an_address_file_fails() {
@@ -71,7 +71,10 @@ fn a_slave_without_an_address_file_fails() {
     std::fs::create_dir_all(fixture.work()).expect("create work/");
     let outcome = fixture.run(&["-s", "report", fixture.ezfio_str()]);
     assert_eq!(outcome.code(), 2, "{outcome}");
-    assert_eq!(outcome.stderr, "qp_run: No master is not running\n");
+    assert_eq!(
+        outcome.stderr,
+        "qp_run: no master is running (work/qp_run_address missing or empty)\n"
+    );
     assert!(
         !fixture.work().join("observed").exists(),
         "the job must not run\n{outcome}"
@@ -90,5 +93,8 @@ fn an_empty_address_file_is_no_master() {
     std::fs::write(fixture.work().join("qp_run_address"), "").expect("write an empty file");
     let outcome = fixture.run(&["-s", "report", fixture.ezfio_str()]);
     assert_eq!(outcome.code(), 2, "{outcome}");
-    assert_eq!(outcome.stderr, "qp_run: No master is not running\n");
+    assert_eq!(
+        outcome.stderr,
+        "qp_run: no master is running (work/qp_run_address missing or empty)\n"
+    );
 }

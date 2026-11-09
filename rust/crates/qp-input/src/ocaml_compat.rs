@@ -3,8 +3,8 @@
 //! `qp_edit` must reproduce the OCaml tool's text byte for byte (the golden
 //! transcripts compare stdout, stderr and every written EZFIO file).  Three
 //! pieces of the renderer have no counterpart in `qp-types`, so they are
-//! ported here from the OCaml standard library and from `ocaml/Range.ml` and
-//! `ocaml/MO_label.ml`, keeping their exact behaviour.
+//! ported here from the OCaml standard library and from `ocaml/MO_label.ml`,
+//! keeping their exact behaviour.
 //!
 //! Units: none.  [`string_of_float`] is the exception worth remembering: it
 //! renders twelve *significant* digits (`%.12g`), not a shortest round-trip
@@ -42,24 +42,6 @@ pub fn valid_float_lexem(s: &str) -> String {
 #[must_use]
 pub fn string_of_float(x: f64) -> String {
     valid_float_lexem(&sexplib_compat::format_g(x, 12, false))
-}
-
-/// OCaml's `Range.to_string`: `"[1,2,3]"` with no spaces, `"[]"` when empty.
-///
-/// The slice is expected to be already sorted and deduplicated, as produced
-/// by `qp_types::command_line::parse_state_range`; this function preserves
-/// the given order and does not deduplicate.
-#[must_use]
-pub fn range_to_string(states: &[i64]) -> String {
-    let mut out = String::from("[");
-    for (index, state) in states.iter().enumerate() {
-        if index > 0 {
-            out.push(',');
-        }
-        out.push_str(&state.to_string());
-    }
-    out.push(']');
-    out
 }
 
 /// Rejected-label message of `MO_label.of_string`, verbatim.
@@ -113,13 +95,15 @@ impl MoLabel {
     /// Parse a label, case-insensitively and ignoring surrounding whitespace.
     ///
     /// Mirrors `MO_label.of_string`, including its quirk: on failure the
-    /// rejected string is echoed to **stdout**, untrimmed and followed by a
-    /// newline, before the error is returned.  The caller must not print it
-    /// again (the OCaml tool, and therefore the golden transcripts, print it
-    /// exactly once).
+    /// rejected string is echoed, untrimmed and followed by a newline,
+    /// before the error is returned.  Wave S2.4: the echo is a diagnostic,
+    /// so it goes to **standard error** (the reference's stdout echo is
+    /// gone; no golden transcript contains it).  The caller must not print
+    /// it again.
     ///
     /// The error message is [`MO_LABEL_EXPECTED`], the OCaml `Failure`
-    /// payload, so the CLI can print it verbatim behind the `qp_edit` banner.
+    /// payload, so the CLI can print it verbatim behind the `qp_edit`
+    /// prefix.
     ///
     /// # Errors
     ///
@@ -136,7 +120,9 @@ impl MoLabel {
             "none" => Ok(MoLabel::None),
             _ => {
                 // Preserved quirk: `print_endline s` before `failwith`.
-                println!("{s}");
+                // Wave S2: the echo is a diagnostic, so it goes to standard
+                // error (no golden transcript contains it).
+                eprintln!("{s}");
                 Err(Error::msg(MO_LABEL_EXPECTED))
             }
         }
@@ -259,14 +245,6 @@ mod tests {
         assert_eq!(valid_float_lexem("inf"), "inf");
         // Edge case: OCaml appends the dot to the empty string too.
         assert_eq!(valid_float_lexem(""), ".");
-    }
-
-    #[test]
-    fn range_to_string_has_no_spaces() {
-        assert_eq!(range_to_string(&[]), "[]");
-        assert_eq!(range_to_string(&[1]), "[1]");
-        assert_eq!(range_to_string(&[2, 3, 5]), "[2,3,5]");
-        assert_eq!(range_to_string(&[-1, 0]), "[-1,0]");
     }
 
     #[test]

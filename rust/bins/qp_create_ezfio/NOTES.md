@@ -231,7 +231,11 @@ six decimals as OCaml `Printf "%f"`, so the Z-matrix round trip through
 
 ## Corrections after the front-end port (2026-11-05, session 4)
 
-The front end (`src/error.rs`, `src/ocaml_num.rs`, `src/cli.rs`, `src/main.rs`)
+The front end (pre-S2: `src/error.rs`, `src/cli.rs`, `src/main.rs`; the
+shared
+numeric parser was `qp_types::num` — since deleted in wave S2: the CLI is
+clap derive, errors are `qp_types::error::ToolError`, numeric parsing is
+Rust `FromStr`)
 is implemented and was differentially tested against
 `~/qp2/ocaml/qp_create_ezfio.native`: 30 argv cases, 0 differences over
 (exit status, stdout bytes, stderr bytes). Script:

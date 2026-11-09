@@ -25,48 +25,39 @@
 //!
 //! # Failure semantics
 //!
-//! The reference raises `Failure` or trips an `assert`, and the task server
-//! turns that into an `error <message> : <raw request>` reply. The batch
+//! A failure carries one plain message: the reference's `Failure` payload or
+//! its `file:line:column` assertion site. The task server puts that message
+//! in its `error <message> : <raw request>` reply; the reply shape is the
+//! same for every failure, so the queue does not classify them. The batch
 //! methods ([`QueuingSystem::del_tasks`], [`QueuingSystem::end_tasks`])
 //! pre-validate every identifier before mutating the queue, reproducing the
 //! reference's functional fold: a failure leaves the whole queue untouched.
-//! [`QueuingSystem::abort`] clones the queue for the same reason (it is
-//! called once per job).
 
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::fmt;
 
 use crate::message::Id;
 
-/// A failure raised while updating the queue.
+/// A failure of a queue operation.
 ///
-/// [`QueueError::message`] is the text the task server prepends to the raw
-/// request in its `error` reply (`<message> : <raw>`), so it is the
-/// reference's `Failure` payload or its `file:line:column` assertion site,
-/// not the [`std::fmt::Display`] rendering of an OCaml exception.
+/// The message is the text the task server prepends to the raw request in
+/// its `error` reply (`<message> : <raw>`): the reference's `Failure`
+/// payload or its `file:line:column` assertion site. The reply shape is the
+/// same either way, so the queue carries no exception class.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub enum QueueError {
-    /// A `Failure msg` raised by the reference.
-    Failure(String),
-    /// An `Assert_failure (file, line, column)` raised by the reference; the
-    /// string is `file:line:column`.
-    AssertFailure(&'static str),
-}
+pub struct QueueError(String);
 
 impl QueueError {
-    /// The text used by the task server's `error` reply.
+    /// Wrap a failure message.
     #[must_use]
-    pub fn message(&self) -> String {
-        match self {
-            Self::Failure(message) => message.clone(),
-            Self::AssertFailure(site) => (*site).to_string(),
-        }
+    pub fn new(message: impl Into<String>) -> Self {
+        Self(message.into())
     }
 }
 
 impl fmt::Display for QueueError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.message())
+        f.write_str(&self.0)
     }
 }
 
@@ -83,9 +74,7 @@ pub struct PoppedTask {
 }
 
 /// The task queue, with the reference's two-list / map / set layout.
-///
-/// The type is `Clone`; the server clones it in `abort` only.
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct QueuingSystem {
     /// Oldest task first, so the reference's `queued_front` head (newest) is
     /// the last element here.
@@ -188,11 +177,10 @@ impl QueuingSystem {
     ///
     /// # Errors
     ///
-    /// [`QueueError::AssertFailure`] with the reference site when the client
-    /// is unknown.
+    /// The reference's assert site when the client is unknown.
     pub fn pop_task(&mut self, client_id: Id) -> Result<PoppedTask, QueueError> {
         if !self.clients.contains(&client_id) {
-            return Err(QueueError::AssertFailure("Queuing_system.ml:68:2"));
+            return Err(QueueError::new("Queuing_system.ml:68:2"));
         }
         if self.queued_back.is_empty() {
             // `List.rev queued_front` becomes the new back list. The
@@ -224,7 +212,7 @@ impl QueuingSystem {
     /// (`Queuing_system.ml:92:2`).
     pub fn del_client(&mut self, client_id: Id) -> Result<(), QueueError> {
         if !self.clients.remove(&client_id) {
-            return Err(QueueError::AssertFailure("Queuing_system.ml:92:2"));
+            return Err(QueueError::new("Queuing_system.ml:92:2"));
         }
         Ok(())
     }
@@ -239,13 +227,11 @@ impl QueuingSystem {
     /// (`Queuing_system.ml:109:4`).
     pub fn end_task(&mut self, task_id: Id, client_id: Id) -> Result<(), QueueError> {
         if !self.clients.contains(&client_id) {
-            return Err(QueueError::AssertFailure("Queuing_system.ml:103:2"));
+            return Err(QueueError::new("Queuing_system.ml:103:2"));
         }
         match self.running.get(&task_id) {
-            None => Err(QueueError::Failure("Task already finished".to_string())),
-            Some(&owner) if owner != client_id => {
-                Err(QueueError::AssertFailure("Queuing_system.ml:109:4"))
-            }
+            None => Err(QueueError::new("Task already finished")),
+            Some(&owner) if owner != client_id => Err(QueueError::new("Queuing_system.ml:109:4")),
             Some(_) => {
                 self.running.remove(&task_id);
                 Ok(())
@@ -269,18 +255,23 @@ impl QueuingSystem {
     /// Delete a batch of task payloads, as the reference's `List.fold_left`
     /// does.
     ///
-    /// Identifiers are validated in order before any mutation: a repeated
-    /// identifier fails on its second occurrence, exactly like the fold.
+    /// All-or-nothing, like the reference: `TaskServer.del_task` folds the
+    /// *pure* `Queuing_system.del_task` over the identifier list
+    /// (`ocaml/TaskServer.ml:376-378`), so a failure at the k-th identifier
+    /// escapes before any part of the fold is committed. The mutable port
+    /// reproduces that by validating every identifier before removing any.
+    /// A repeated identifier fails on its second occurrence: the fold's
+    /// first occurrence would have removed it already.
     ///
     /// # Errors
     ///
-    /// `Failure "Task <id> is already deleted"` for the first identifier
-    /// that is absent, or that appears twice.
+    /// `Task <id> is already deleted` for the first identifier that is
+    /// absent, or that appears twice.
     pub fn del_tasks(&mut self, task_ids: &[Id]) -> Result<(), QueueError> {
         let mut seen = HashSet::with_capacity(task_ids.len());
         for &task_id in task_ids {
             if !self.tasks.contains_key(&task_id) || !seen.insert(task_id) {
-                return Err(QueueError::Failure(format!(
+                return Err(QueueError::new(format!(
                     "Task {} is already deleted",
                     task_id.get()
                 )));
@@ -295,25 +286,30 @@ impl QueuingSystem {
     /// Mark a batch of running tasks as finished, as the reference's
     /// `List.fold_left` does.
     ///
+    /// All-or-nothing, for the same reason as [`QueuingSystem::del_tasks`]:
+    /// the reference's `TaskServer.task_done` folds the pure
+    /// `Queuing_system.end_task` (`ocaml/TaskServer.ml:587-590`), so the
+    /// identifiers are validated here before any mutation.
+    ///
     /// # Errors
     ///
     /// The same errors as [`QueuingSystem::end_task`], in the fold's order;
     /// a repeated identifier fails on its second occurrence with
-    /// `Failure "Task already finished"`.
+    /// `Task already finished`.
     pub fn end_tasks(&mut self, task_ids: &[Id], client_id: Id) -> Result<(), QueueError> {
         if !self.clients.contains(&client_id) {
-            return Err(QueueError::AssertFailure("Queuing_system.ml:103:2"));
+            return Err(QueueError::new("Queuing_system.ml:103:2"));
         }
         let mut seen = HashSet::with_capacity(task_ids.len());
         for &task_id in task_ids {
             match self.running.get(&task_id) {
-                None => return Err(QueueError::Failure("Task already finished".to_string())),
+                None => return Err(QueueError::new("Task already finished")),
                 Some(&owner) if owner != client_id => {
-                    return Err(QueueError::AssertFailure("Queuing_system.ml:109:4"));
+                    return Err(QueueError::new("Queuing_system.ml:109:4"));
                 }
                 Some(_) if !seen.insert(task_id) => {
                     // The fold would have removed it on the first occurrence.
-                    return Err(QueueError::Failure("Task already finished".to_string()));
+                    return Err(QueueError::new("Task already finished"));
                 }
                 Some(_) => {}
             }
@@ -321,31 +317,6 @@ impl QueuingSystem {
         for &task_id in task_ids {
             self.running.remove(&task_id);
         }
-        Ok(())
-    }
-
-    /// Discard the queued tasks (`TaskServer.abort` semantics):
-    /// add a throwaway client, pop one task, finish it, delete it, and
-    /// remove the client.
-    ///
-    /// The operation is performed on a clone and committed only on success,
-    /// mirroring the reference's functional update.
-    ///
-    /// # Errors
-    ///
-    /// Only the queue's own failures; with a freshly added client they are
-    /// reachable when the popped task's payload was already deleted (the
-    /// reference then fails in `del_task`).
-    pub fn abort(&mut self) -> Result<(), QueueError> {
-        let mut queue = self.clone();
-        let client_id = queue.add_client();
-        let popped = queue.pop_task(client_id)?;
-        if let Some(task_id) = popped.task_id {
-            queue.end_task(task_id, client_id)?;
-            queue.del_task(task_id)?;
-        }
-        queue.del_client(client_id)?;
-        *self = queue;
         Ok(())
     }
 
@@ -503,7 +474,7 @@ mod tests {
         assert_eq!(q.number_of_running(), 1);
         assert_eq!(
             q.del_task(task_id),
-            Err(QueueError::Failure("Task 1 is already deleted".into()))
+            Err(QueueError::new("Task 1 is already deleted"))
         );
     }
 
@@ -513,7 +484,7 @@ mod tests {
         let task_id = q.add_task("x");
         assert_eq!(
             q.del_tasks(&[task_id, task_id]),
-            Err(QueueError::Failure("Task 1 is already deleted".into()))
+            Err(QueueError::new("Task 1 is already deleted"))
         );
         // Nothing was deleted: the fold's first step is not committed.
         assert_eq!(q.number_of_tasks(), 1);
@@ -528,21 +499,21 @@ mod tests {
         q.pop_task(client).unwrap();
         assert_eq!(
             q.end_task(task_id, other),
-            Err(QueueError::AssertFailure("Queuing_system.ml:109:4"))
+            Err(QueueError::new("Queuing_system.ml:109:4"))
         );
         assert_eq!(
             q.end_tasks(&[task_id, task_id], client),
-            Err(QueueError::Failure("Task already finished".into()))
+            Err(QueueError::new("Task already finished"))
         );
         assert_eq!(q.number_of_running(), 1);
         q.end_task(task_id, client).unwrap();
         assert_eq!(
             q.end_task(task_id, client),
-            Err(QueueError::Failure("Task already finished".into()))
+            Err(QueueError::new("Task already finished"))
         );
         assert_eq!(
             q.end_task(task_id, Id::new(99)),
-            Err(QueueError::AssertFailure("Queuing_system.ml:103:2"))
+            Err(QueueError::new("Queuing_system.ml:103:2"))
         );
     }
 
@@ -551,23 +522,7 @@ mod tests {
         let mut q = QueuingSystem::new();
         assert_eq!(
             q.pop_task(Id::new(1)),
-            Err(QueueError::AssertFailure("Queuing_system.ml:68:2"))
+            Err(QueueError::new("Queuing_system.ml:68:2"))
         );
-    }
-
-    #[test]
-    fn abort_discards_one_task_and_removes_its_client() {
-        let mut q = QueuingSystem::new();
-        q.add_task("a");
-        q.add_task("b");
-        q.abort().unwrap();
-        assert_eq!(q.number_of_queued(), 1);
-        assert_eq!(q.number_of_tasks(), 1);
-        assert_eq!(q.number_of_running(), 0);
-        assert_eq!(q.number_of_clients(), 0);
-        let client = q.add_client();
-        let popped = q.pop_task(client).unwrap();
-        assert_eq!(popped.task_id, Some(Id::new(2)));
-        assert_eq!(popped.task.as_deref(), Some("b"));
     }
 }

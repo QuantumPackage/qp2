@@ -20,7 +20,7 @@
 //! `P+1`, `P+2`, `P+9`) on `127.0.0.1` with std `TcpListener`s; the window is
 //! released before it is returned, so a concurrent process can still steal it
 //! (the same race the reference has). The local window is discovered by the
-//! binary itself and read back from its `Connect to:` banner.
+//! binary itself and read back from its tunnel-address announcement.
 #![allow(dead_code)] // each test binary uses a different subset of the helpers
 
 use std::fs;
@@ -33,9 +33,6 @@ use std::time::{Duration, Instant};
 
 /// The binary under test, as built by Cargo for this test run.
 pub const BIN: &str = env!("CARGO_BIN_EXE_qp_tunnel");
-
-/// The captured reference help, 481 bytes for `argv[0] = "qp_tunnel"`.
-pub const HELP: &str = include_str!("../data/help_qp_tunnel.txt");
 
 /// Deadline for a child that is expected to run or fail quickly.
 pub const TIMEOUT: Duration = Duration::from_secs(20);
@@ -147,9 +144,9 @@ impl Running {
         }
     }
 
-    /// Wait for `Ready` (printed once the input thread is in its loop).
+    /// Wait for `ready` (printed once the input thread is in its loop).
     pub fn wait_ready(&mut self) {
-        self.wait_for_output("\nReady\n");
+        self.wait_for_output("\nready\n");
     }
 
     /// Send one signal with `/bin/kill` (no `libc` in the tests).
@@ -253,16 +250,19 @@ pub fn make_ezfio(directory: &Path, address: &str) -> PathBuf {
     directory.to_path_buf()
 }
 
-/// Extract the local port from the `Connect to:\ntcp://<ip>:<port>\n` banner.
+/// Extract the local port from the
+/// `Connect to the tunnel with: tcp://<ip>:<port>\n` announcement.
 ///
 /// # Panics
 ///
-/// When the banner is missing or its endpoint has no colon.
+/// When the announcement is missing or its endpoint has no colon.
 pub fn parse_local_port(announcements: &str) -> u32 {
-    let banner = announcements
-        .strip_prefix("Connect to:\n")
-        .expect("the first announcement is the Connect to banner");
-    let endpoint = banner.lines().next().expect("banner endpoint");
+    let endpoint = announcements
+        .strip_prefix("Connect to the tunnel with: ")
+        .expect("the first announcement is the tunnel address")
+        .lines()
+        .next()
+        .expect("announcement line");
     let port = endpoint.rsplit(':').next().expect("endpoint has a colon");
     port.parse().expect("the local port is decimal")
 }

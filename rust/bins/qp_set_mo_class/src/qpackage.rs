@@ -4,7 +4,8 @@
 //!   reference fails on it from a **module initialiser** (the
 //!   `Input_electrons` module of the program's closure references
 //!   `Qpackage` at top level), so the driver checks it before parsing;
-//!   this module keeps the same failure for the fallback path.
+//!   this module keeps the same failure for the fallback path (the main
+//!   guard already ran, so it is only reachable for an *empty* root).
 //! * `bit_kind_size` (`Qpackage.ml:13-44`): a lazy read of
 //!   `<QP_ROOT>/src/bitmask/bitmasks_module.f90`. Each line is cut at the
 //!   first `!`, then split at the **last** `:`; the suffix is split on
@@ -21,37 +22,35 @@
 
 use std::fs;
 
-use crate::error::{AppError, OcamlException, QP_ROOT_MISSING};
-use crate::ocaml_num;
+use qp_types::error::ToolError;
 
-/// `Qpackage.root`: the `QP_ROOT` environment variable, or the uncaught
-/// `Failure` (module-initialiser semantics).
+use crate::TOOL;
+
+/// `Qpackage.root`: the `QP_ROOT` environment variable, or the plain
+/// not-set failure (module-initialiser semantics).
 ///
 /// # Errors
 ///
-/// `Failure(<QP_ROOT_MISSING>)` when the variable is unset.
-pub fn root() -> Result<String, AppError> {
+/// The not-set message when the variable is unset.
+pub fn root() -> Result<String, ToolError> {
     std::env::var("QP_ROOT")
-        .map_err(|_| AppError(OcamlException::Failure(QP_ROOT_MISSING.to_owned())))
+        .map_err(|_| ToolError::new(TOOL, "QP_ROOT is not set (source quantum_package.rc)"))
 }
 
 /// `Lazy.force Qpackage.bit_kind_size`.
 ///
 /// # Errors
 ///
-/// * `Failure("File <path> not found")` — the bitmask file is absent;
-/// * `Failure("bit_kind_size not found in <path>")` — no line matches;
-/// * `Failure("int_of_string")` — the value is not an OCaml int;
-/// * `Invalid_argument("Bit_kind_size should be (8|16|32|64).")`.
-pub fn bit_kind_size(root: &str) -> Result<i64, AppError> {
+/// * `File <path> not found` — the bitmask file is absent;
+/// * `bit_kind_size not found in <path>` — no line matches;
+/// * `invalid integer '<s>' in bit_kind_size` — the value is not a
+///   decimal integer (wave S2);
+/// * `Bit_kind_size should be (8|16|32|64).`
+pub fn bit_kind_size(root: &str) -> Result<i64, ToolError> {
     let filename = format!("{root}/src/bitmask/bitmasks_module.f90");
     let text = match fs::read(&filename) {
         Ok(bytes) => String::from_utf8_lossy(&bytes).into_owned(),
-        Err(_) => {
-            return Err(AppError(OcamlException::Failure(format!(
-                "File {filename} not found"
-            ))));
-        }
+        Err(_) => return Err(ToolError::new(TOOL, format!("File {filename} not found"))),
     };
     for line in text.lines() {
         // `String_ext.split ~on:'!' line |> List.hd`: the part before the
@@ -68,19 +67,25 @@ pub fn bit_kind_size(root: &str) -> Result<i64, AppError> {
         // `String_ext.split ~on:'=' buffer |> list_map String.trim`.
         let parts: Vec<&str> = buffer.split('=').map(str::trim).collect();
         if parts.len() == 2 && parts[0] == "bit_kind_size" {
-            let value = ocaml_num::int_of_string(parts[1])
-                .map_err(|_| AppError(OcamlException::Failure("int_of_string".into())))?;
+            let value = parts[1].parse::<i64>().map_err(|_| {
+                ToolError::new(
+                    TOOL,
+                    format!("invalid integer '{}' in bit_kind_size", parts[1]),
+                )
+            })?;
             return match value {
                 8 | 16 | 32 | 64 => Ok(value),
-                _ => Err(AppError(OcamlException::InvalidArgument(
-                    "Bit_kind_size should be (8|16|32|64).".into(),
-                ))),
+                _ => Err(ToolError::new(
+                    TOOL,
+                    "Bit_kind_size should be (8|16|32|64).",
+                )),
             };
         }
     }
-    Err(AppError(OcamlException::Failure(format!(
-        "bit_kind_size not found in {filename}"
-    ))))
+    Err(ToolError::new(
+        TOOL,
+        format!("bit_kind_size not found in {filename}"),
+    ))
 }
 
 #[cfg(test)]
@@ -102,6 +107,10 @@ mod tests {
 
     const REAL_LINE: &str = "  integer, parameter             :: bit_kind_size = 64\n";
 
+    fn message(result: Result<i64, ToolError>) -> String {
+        result.unwrap_err().message().to_owned()
+    }
+
     #[test]
     fn the_reference_line_parses_to_64() {
         let tmp = tempfile::tempdir().unwrap();
@@ -114,10 +123,8 @@ mod tests {
         let tmp = tempfile::tempdir().unwrap();
         let root = fake_root(tmp.path(), Some(":: bit_kind_size = 42\n"));
         assert_eq!(
-            bit_kind_size(&root),
-            Err(AppError(OcamlException::InvalidArgument(
-                "Bit_kind_size should be (8|16|32|64).".into()
-            )))
+            message(bit_kind_size(&root)),
+            "Bit_kind_size should be (8|16|32|64)."
         );
     }
 
@@ -125,12 +132,11 @@ mod tests {
     fn a_missing_file_is_a_failure_with_the_full_path() {
         let tmp = tempfile::tempdir().unwrap();
         let root = fake_root(tmp.path(), None);
-        let err = bit_kind_size(&root).unwrap_err().0;
         let expected = format!(
             "File {} not found",
             tmp.path().join("src/bitmask/bitmasks_module.f90").display()
         );
-        assert_eq!(err, OcamlException::Failure(expected));
+        assert_eq!(message(bit_kind_size(&root)), expected);
     }
 
     #[test]
@@ -145,21 +151,20 @@ mod tests {
     fn no_matching_line_is_a_failure_with_the_full_path() {
         let tmp = tempfile::tempdir().unwrap();
         let root = fake_root(tmp.path(), Some("nothing here\n"));
-        let err = bit_kind_size(&root).unwrap_err().0;
         let expected = format!(
             "bit_kind_size not found in {}",
             tmp.path().join("src/bitmask/bitmasks_module.f90").display()
         );
-        assert_eq!(err, OcamlException::Failure(expected));
+        assert_eq!(message(bit_kind_size(&root)), expected);
     }
 
     #[test]
-    fn a_non_integer_value_is_int_of_string() {
+    fn a_non_integer_value_is_an_invalid_integer() {
         let tmp = tempfile::tempdir().unwrap();
         let root = fake_root(tmp.path(), Some(":: bit_kind_size = abc\n"));
         assert_eq!(
-            bit_kind_size(&root),
-            Err(AppError(OcamlException::Failure("int_of_string".into())))
+            message(bit_kind_size(&root)),
+            "invalid integer 'abc' in bit_kind_size"
         );
     }
 

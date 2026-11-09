@@ -44,7 +44,8 @@ use qp_types::md5::MD5_OF_NONE;
 
 use super::ao_basis;
 use super::qptypes;
-use crate::engine::make_header;
+use super::usize_of;
+use crate::engine::{make_header, materialise_when_absent};
 use crate::ocaml_compat::{MoLabel, assertion};
 
 /// The EZFIO group this handler owns.
@@ -156,10 +157,13 @@ fn read_mo_num(ezfio: &EzFio) -> Result<i64> {
 /// The write is contract C3 (a defaulted attribute is created); it is not an
 /// MD5 restamp.  `MO_label.of_string` echoes a rejected spelling to stdout.
 fn read_mo_label(ezfio: &EzFio) -> Result<MoLabel> {
-    if !ezfio.has(GROUP, "mo_label")? {
-        ezfio.set::<String>(GROUP, "mo_label", &"None".to_owned())?;
-    }
-    MoLabel::of_string(&ezfio.get::<String>(GROUP, "mo_label")?)
+    materialise_when_absent(
+        ezfio,
+        GROUP,
+        "mo_label",
+        || Ok(ezfio.set::<String>(GROUP, "mo_label", &"None".to_string())?),
+        || MoLabel::of_string(&ezfio.get::<String>(GROUP, "mo_label")?),
+    )
 }
 
 /// `read_mo_class`: materialise one `"Active"` per MO when the key is absent,
@@ -444,11 +448,6 @@ pub(crate) fn get(ezfio: &EzFio, title: &str) -> Result<String> {
         Some(record) => Ok(make_header(title) + &to_rst(&record)?),
         None => Ok(String::new()),
     }
-}
-
-/// A negative count is a corrupt file, not a panic.
-fn usize_of(value: i64) -> Result<usize> {
-    usize::try_from(value).map_err(|_| anyhow!("negative dimension or index: {value}"))
 }
 
 #[cfg(test)]

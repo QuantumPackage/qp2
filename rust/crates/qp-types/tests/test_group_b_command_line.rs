@@ -1,35 +1,35 @@
-//! CLI parity tests for the three `Command_line` specifications that the
-//! executables parse with `clap`.
+//! CLI parity tests for the two `Command_line` specifications that the
+//! executables parse with `clap`: `qp_edit` and `qp_run`.
 //!
 //! The expected messages are transcribed from the reference sources:
-//! `ocaml/qp_create_ezfio.ml:700–825`, `scripts/ezfio_interface/qp_edit_template`
-//! (the generated `qp_edit`), `ocaml/qp_run.ml:232–270`, and
-//! `ocaml/Command_line.ml:161–199`. `qp_set_mo_class` and `qp_tunnel` are not
-//! here: their binaries parse with a statement-by-statement `getopt` port
-//! (P4) and pin that parser against renamed reference copies instead.
+//! `scripts/ezfio_interface/qp_edit_template` (the generated `qp_edit`) and
+//! `ocaml/qp_run.ml:232–270`. `qp_create_ezfio`, `qp_set_mo_class` and
+//! `qp_tunnel` are not here: their binaries parse with a
+//! statement-by-statement `getopt` port (P4) and pin that parser against
+//! renamed reference copies instead.
 //!
 //! The parsing rules were checked against the vendored `getopt`
 //! (`~/qp2/external/opampack/.../lib/getopt/getopt.ml`) with a standalone
-//! OCaml program (`$HOME/OpenCode/tmp/w2b/getopt_oracle/`). It established the
-//! forms asserted below: `-bcc-pvdz` (value attached to a short option),
-//! `-axq` (clustered argument-less shorts), `--basis=` (empty value through
-//! `=`), `--` (end of options), `-` and `""` (anonymous arguments), and
-//! `-c -1` (`Option -c must have an argument`: a next argv element starting
-//! with `-` is never consumed as a value). Where `clap` cannot reproduce a
-//! `getopt` behaviour, the deviation is asserted and named.
+//! OCaml program (`$HOME/OpenCode/tmp/w2b/getopt_oracle/`). It established
+//! the `clap` forms asserted below: `-n5` (value attached to a short
+//! option), `--ndet=5` (long option through `=`), `--` (end of options),
+//! `""` (anonymous argument), and `-n -x` (a next argv element starting
+//! with `-` is never consumed as a value).
+//!
+//! Wave S2.1 (text release): the hand-written help, the `EZFIO_DIR is
+//! missing`/`Inconsistent command line` messages and the print-then-
+//! continue `-h` behavior are gone. `clap` now owns the positional count
+//! (its own diagnostics, exit 2) and the help flag (`DisplayHelp`, exit
+//! 0, no continuation into the argument checks). The value-conversion
+//! messages (`[-n|--ndet] expects an integer`, `[-s|--state] expects a
+//! range`) are unchanged.
 
 use clap::Parser;
 use clap::error::ErrorKind;
 use qp_types::command_line::{
-    CreateArgs, CreateConfig, EXIT_FAILURE, EXIT_USAGE, EditArgs, EditConfig, RunArgs, RunConfig,
-    UsageError, parse_state_range,
+    EXIT_FAILURE, EXIT_USAGE, EditArgs, EditConfig, RunArgs, RunConfig, UsageError,
+    parse_state_range,
 };
-
-fn create(argv: &[&str]) -> Result<CreateConfig, UsageError> {
-    CreateArgs::try_parse_from(argv)
-        .map_err(|error| UsageError::new(error.to_string()))?
-        .validate()
-}
 
 fn edit(argv: &[&str]) -> Result<EditConfig, UsageError> {
     EditArgs::try_parse_from(argv)
@@ -39,182 +39,39 @@ fn edit(argv: &[&str]) -> Result<EditConfig, UsageError> {
 
 fn run(argv: &[&str]) -> Result<RunConfig, UsageError> {
     RunArgs::try_parse_from(argv)
-        .map_err(|error| UsageError::new(error.to_string()))?
-        .validate()
-}
-
-/// `clap` exit code for a raw parse of `argv`, as the executable would get it.
-fn clap_exit(argv: &[&str]) -> i32 {
-    match CreateArgs::try_parse_from(argv) {
-        Ok(_) => 0,
-        Err(error) => error.exit_code(),
-    }
-}
-
-#[test]
-fn create_messages_and_values_match_the_reference() {
-    assert_eq!(
-        create(&["qp_create_ezfio"]),
-        Err(UsageError::new("--basis option is missing."))
-    );
-    assert_eq!(
-        create(&["qp_create_ezfio", "-b", "cc-pvdz"]),
-        Err(UsageError::new("input file is missing"))
-    );
-    assert_eq!(
-        create(&["qp_create_ezfio", "-b", "x", "-c", "x", "f"]),
-        Err(UsageError::new("int_of_string"))
-    );
-    assert_eq!(
-        create(&["qp_create_ezfio", "-b", "x", "-g", "x", "f"]),
-        Err(UsageError::new("float_of_string"))
-    );
-    assert_eq!(
-        create(&["qp_create_ezfio", "-b", "x", "-m", "x", "f"]),
-        Err(UsageError::new("int_of_string"))
-    );
-
-    // Every option at once; the second anonymous argument is ignored
-    // (`anon_args ()` matches `x :: _`).
-    let config = create(&[
-        "qp_create_ezfio",
-        "-o",
-        "out",
-        "--basis",
-        "cc-pvdz",
-        "-a",
-        "--charge",
-        "m1",
-        "-g",
-        "1.5",
-        "-m",
-        "3",
-        "-p",
-        "bfd",
-        "-q",
-        "-x",
-        "mol.xyz",
-        "ignored.xyz",
-    ])
-    .expect("valid create command line");
-    assert_eq!(
-        config,
-        CreateConfig {
-            output: Some("out".to_owned()),
-            basis: "cc-pvdz".to_owned(),
-            au: true,
-            charge: -1,
-            ghost: 1.5,
-            multiplicity: 3,
-            pseudo: Some("bfd".to_owned()),
-            qmc: true,
-            cartesian: true,
-            file: "mol.xyz".to_owned(),
-        }
-    );
-
-    // Defaults: charge 0, ghost 0.0, multiplicity 1, no pseudo/output.
-    let defaults = create(&["qp_create_ezfio", "-b", "x", "f"]).expect("defaults");
-    assert_eq!(defaults.output, None);
-    assert_eq!(defaults.charge, 0);
-    assert_eq!(defaults.ghost, 0.0);
-    assert_eq!(defaults.multiplicity, 1);
-    assert_eq!(defaults.pseudo, None);
-    assert!(!defaults.au && !defaults.qmc && !defaults.cartesian);
-}
-
-#[test]
-fn create_accepts_the_getopt_option_spellings() {
-    // `-bcc-pvdz`: value attached to the short option.
-    assert_eq!(
-        create(&["qp_create_ezfio", "-bcc-pvdz", "f"])
-            .expect("attached value")
-            .basis,
-        "cc-pvdz"
-    );
-    // `--basis=cc-pvdz`: empty/attached value through `=`.
-    assert_eq!(
-        create(&["qp_create_ezfio", "--basis=cc-pvdz", "f"])
-            .expect("long =value")
-            .basis,
-        "cc-pvdz"
-    );
-    // `--basis=`: the `=` form accepts an empty value (see the deviation test
-    // for `-b ""`, which crashes the reference getopt).
-    assert_eq!(
-        create(&["qp_create_ezfio", "--basis=", "f"])
-            .expect("empty basis")
-            .basis,
-        ""
-    );
-    // `-axq`: argument-less shorts concatenate.
-    let flags = create(&["qp_create_ezfio", "-b", "x", "-axq", "f"]).expect("clustered");
-    assert!(flags.au && flags.cartesian && flags.qmc);
-    // Options may follow the anonymous argument.
-    assert_eq!(
-        create(&["qp_create_ezfio", "f", "-b", "x"])
-            .expect("option after file")
-            .file,
-        "f"
-    );
-    // `--` ends option parsing, so a leading dash is a file name.
-    assert_eq!(
-        create(&["qp_create_ezfio", "-b", "x", "--", "-weird.xyz"])
-            .expect("-- file")
-            .file,
-        "-weird.xyz"
-    );
-    // A lone `-` is an anonymous argument, not an option.
-    assert_eq!(
-        create(&["qp_create_ezfio", "-b", "x", "-"])
-            .expect("dash file")
-            .file,
-        "-"
-    );
-    // Charge syntax: `m` is the minus sign, `m0` is zero.
-    for (text, expected) in [("0", 0), ("7", 7), ("m1", -1), ("m0", 0), ("m13", -13)] {
-        assert_eq!(
-            create(&["qp_create_ezfio", "-b", "x", "-c", text, "f"])
-                .expect("charge form")
-                .charge,
-            expected,
-            "charge {text}"
-        );
-    }
-}
-
-#[test]
-fn create_help_skips_the_mandatory_option_check() {
-    // `qp_create_ezfio -h` prints the help, `set_specs` skips the mandatory
-    // `-b` check, and the anonymous check then fails: CONTRACTS §2.4.
-    let args = CreateArgs::try_parse_from(["qp_create_ezfio", "-h"]).expect("-h parses");
-    assert!(args.help);
-    assert_eq!(
-        args.validate(),
-        Err(UsageError::new("input file is missing"))
-    );
-    // With a file the tool would go on and run with an empty basis.
-    let config = create(&["qp_create_ezfio", "-h", "mol.xyz"]).expect("help + file");
-    assert_eq!(config.basis, "");
-    assert_eq!(config.file, "mol.xyz");
-    // `--help` is the same option.
-    assert!(
-        CreateArgs::try_parse_from(["qp_create_ezfio", "--help"])
-            .expect("--help")
-            .help
-    );
+        .map(RunArgs::validate)
+        .map_err(|error| UsageError::new(error.to_string()))
 }
 
 #[test]
 fn edit_messages_and_option_spellings() {
-    assert_eq!(
-        edit(&["qp_edit"]),
-        Err(UsageError::new("EZFIO_DIR is missing"))
+    // A missing or doubled `EZFIO_DIR` is now `clap`'s own required-
+    // argument error (exit 2), not `EZFIO_DIR is missing`.
+    let missing = EditArgs::try_parse_from(["qp_edit"]).unwrap_err();
+    assert_eq!(missing.kind(), ErrorKind::MissingRequiredArgument);
+    assert_eq!(missing.exit_code(), EXIT_USAGE);
+    assert!(
+        missing.to_string().contains("<EZFIO_DIR>"),
+        "{}",
+        missing.to_string()
+    );
+
+    let extra = edit(&["qp_edit", "dir", "extra"]).expect_err("extra positional");
+    assert!(
+        extra
+            .message()
+            .contains("unexpected argument 'extra' found"),
+        "{}",
+        extra.message()
     );
     assert_eq!(
-        edit(&["qp_edit", "dir", "extra"]),
-        Err(UsageError::new("EZFIO_DIR is missing"))
+        EditArgs::try_parse_from(["qp_edit", "dir", "extra"])
+            .unwrap_err()
+            .kind(),
+        ErrorKind::UnknownArgument
     );
+
+    // The value-conversion messages are unchanged from the reference.
     assert_eq!(
         edit(&["qp_edit", "-n", "x", "dir"]),
         Err(UsageError::new("[-n|--ndet] expects an integer"))
@@ -268,18 +125,32 @@ fn edit_messages_and_option_spellings() {
 
 #[test]
 fn run_matches_the_reference() {
-    assert_eq!(
-        run(&["qp_run"]),
-        Err(UsageError::new("Inconsistent command line"))
+    // A wrong positional count is now `clap`'s required-argument error
+    // (exit 2), not `Inconsistent command line`.
+    let missing_program = RunArgs::try_parse_from(["qp_run"]).unwrap_err();
+    assert_eq!(missing_program.kind(), ErrorKind::MissingRequiredArgument);
+    assert_eq!(missing_program.exit_code(), EXIT_USAGE);
+    assert!(
+        missing_program.to_string().contains("<PROGRAM>"),
+        "{}",
+        missing_program.to_string()
     );
-    assert_eq!(
-        run(&["qp_run", "scf"]),
-        Err(UsageError::new("Inconsistent command line"))
+
+    let missing_dir = run(&["qp_run", "scf"]).expect_err("missing EZFIO_DIR");
+    assert!(
+        missing_dir.message().contains("<EZFIO_DIR>"),
+        "{}",
+        missing_dir.message()
     );
-    assert_eq!(
-        run(&["qp_run", "scf", "dir", "extra"]),
-        Err(UsageError::new("Inconsistent command line"))
+    let extra = run(&["qp_run", "scf", "dir", "extra"]).expect_err("extra positional");
+    assert!(
+        extra
+            .message()
+            .contains("unexpected argument 'extra' found"),
+        "{}",
+        extra.message()
     );
+
     assert_eq!(
         run(&["qp_run", "scf", "dir"]).expect("two arguments"),
         RunConfig {
@@ -302,27 +173,32 @@ fn run_matches_the_reference() {
 }
 
 #[test]
-fn every_tool_recognises_help_and_still_checks_anonymous_arguments() {
-    // `set_specs` prepends `-h` to every spec list; the anonymous check still
-    // runs, which is why the reference prints the help twice and exits 2.
-    assert!(
-        EditArgs::try_parse_from(["qp_edit", "-h"])
-            .expect("-h")
-            .help
-    );
-    assert!(
-        RunArgs::try_parse_from(["qp_run", "--help"])
-            .expect("-h")
-            .help
-    );
-    assert_eq!(
-        edit(&["qp_edit", "-h"]),
-        Err(UsageError::new("EZFIO_DIR is missing"))
-    );
-    assert_eq!(
-        run(&["qp_run", "-h"]),
-        Err(UsageError::new("Inconsistent command line"))
-    );
+fn help_is_the_clap_built_in_and_stops_the_program() {
+    // `-h`/`--help` is `clap`'s `DisplayHelp`: the binary prints the help
+    // once and exits 0. The reference printed its own help and *continued*
+    // into the argument checks (most tools then printed the help a second
+    // time and exited 2); the continuation is a deliberate S2 break.
+    for (label, error) in [
+        (
+            "edit -h",
+            EditArgs::try_parse_from(["qp_edit", "-h"]).unwrap_err(),
+        ),
+        (
+            "edit --help",
+            EditArgs::try_parse_from(["qp_edit", "--help"]).unwrap_err(),
+        ),
+        (
+            "run -h",
+            RunArgs::try_parse_from(["qp_run", "-h"]).unwrap_err(),
+        ),
+        (
+            "run --help",
+            RunArgs::try_parse_from(["qp_run", "--help"]).unwrap_err(),
+        ),
+    ] {
+        assert_eq!(error.kind(), ErrorKind::DisplayHelp, "{label}");
+        assert_eq!(error.exit_code(), 0, "{label}");
+    }
 }
 
 #[test]
@@ -330,44 +206,21 @@ fn usage_errors_exit_2_as_measured() {
     assert_eq!(EXIT_USAGE, 2);
     assert_eq!(EXIT_FAILURE, 1);
 
-    // Unknown long option: the reference raises an uncaught
-    // `Getopt.Error("Unknown option --nope")`, exit 2.
-    let error =
-        CreateArgs::try_parse_from(["qp_create_ezfio", "--nope"]).expect_err("--nope must fail");
-    assert_eq!(error.exit_code(), EXIT_USAGE);
-    assert_eq!(error.kind(), ErrorKind::UnknownArgument);
+    // Unknown option: the reference raises an uncaught
+    // `Getopt.Error("Unknown option -Z")`, exit 2.
     let error = EditArgs::try_parse_from(["qp_edit", "-Z", "dir"]).expect_err("-Z must fail");
     assert_eq!(error.exit_code(), EXIT_USAGE);
+    assert_eq!(error.kind(), ErrorKind::UnknownArgument);
     // A value-taking option at the end of argv: the reference raises
-    // `Getopt.Error("Option basis must have an argument")`, exit 2.
-    let error = CreateArgs::try_parse_from(["qp_create_ezfio", "--basis"])
-        .expect_err("--basis needs a value");
-    assert_eq!(error.exit_code(), EXIT_USAGE);
+    // `Getopt.Error("Option ndet must have an argument")`, exit 2.
     let error = EditArgs::try_parse_from(["qp_edit", "-n"]).expect_err("-n needs a value");
     assert_eq!(error.exit_code(), EXIT_USAGE);
-    // `-c -1` is rejected by both parsers (getopt: "Option -c must have an
-    // argument"); only the text differs.
-    let error = CreateArgs::try_parse_from(["qp_create_ezfio", "-b", "x", "-c", "-1", "f"])
-        .expect_err("-c -1 must fail");
-    assert_eq!(error.exit_code(), EXIT_USAGE);
-    assert_eq!(clap_exit(&["qp_create_ezfio", "--", "-b"]), 0);
-}
-
-#[test]
-fn getopt_deviations_are_the_documented_ones() {
-    // (1) The reference `getopt` evaluates `args.(no+1).[0]`, so an empty
-    // *next* argv element after a value-taking option raises
-    // `Invalid_argument("index out of bounds")` before any tool code runs.
-    // `clap` accepts it as an empty value; this is the port's deviation.
-    let config = create(&["qp_create_ezfio", "-b", "", "mol.xyz"]).expect("empty -b value");
-    assert_eq!(config.basis, "");
-    assert_eq!(config.file, "mol.xyz");
-    // (2) Empty `--charge=`: `getopt` stores "", then qp_create_ezfio's
-    // `x.[0]` raises `Invalid_argument` (uncaught). The port reports the
-    // `int_of_string` message instead; same exit code 2.
+    // `--` ends option parsing, so a dash-leading directory name parses.
     assert_eq!(
-        create(&["qp_create_ezfio", "-b", "x", "--charge=", "f"]),
-        Err(UsageError::new("int_of_string"))
+        run(&["qp_run", "scf", "--", "-dir"])
+            .expect("-- dir")
+            .ezfio_dir,
+        "-dir"
     );
 }
 

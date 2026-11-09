@@ -8,28 +8,31 @@
 //!
 //! # Errors
 //!
-//! * the `Sys.file_exists` failure (`"<path> already exists"`, exit 2) is
+//! One [`ToolError`] per failure (wave S2; the reference's caught vs
+//! uncaught split had the same exit code and is collapsed):
+//!
+//! * the `Sys.file_exists` failure (`"<path> already exists"`) is
 //!   reported by [`check_output_available`];
-//! * a `Unix.mkdir` failure of the directory creation escapes as the
-//!   uncaught `Unix.Unix_error(Unix.ENOENT, "mkdir", "<path>")`;
-//! * a malformed pseudopotential block is the OCaml `failwith` (caught →
-//!   prefixed), except the element lookup, which escapes unprefixed as
-//!   `Element.ElementError`;
+//! * a `mkdir` failure of the directory creation is the plain
+//!   `cannot create <path>: <io error>`;
+//! * a malformed pseudopotential block keeps the crate's plain text;
 //! * any other failure of the write sequence removes the partial
 //!   directory (best effort) and re-raises.
 
 use std::fs;
+use std::io;
 use std::io::Write;
 use std::path::Path;
 
 use qp_ezfio::{Array, ByteLayout, EzFio};
 use qp_types::basis::{self, Basis, LongBasis};
 use qp_types::element;
-use qp_types::pseudo::{ElementSymbol, Pseudo, PseudoError};
+use qp_types::error::ToolError;
+use qp_types::pseudo::Pseudo;
 
+use crate::Options;
+use crate::TOOL;
 use crate::basis_read::{AtomBasis, PseudoTable};
-use crate::cli::Options;
-use crate::error::{AppError, OcamlException, UnixErrno};
 use crate::geometry::Geometry;
 use crate::specs;
 
@@ -41,13 +44,14 @@ use crate::specs;
 ///
 /// # Errors
 ///
-/// [`AppError::fail`] with the measured message when the path exists (a
-/// file or a directory, like `Sys.file_exists`).
-pub fn check_output_available(ezfio_file: &Path) -> Result<(), AppError> {
+/// The plain `<path> already exists` message when the path exists (a file
+/// or a directory, like `Sys.file_exists`).
+pub fn check_output_available(ezfio_file: &Path) -> Result<(), ToolError> {
     if ezfio_file.symlink_metadata().is_ok() {
-        return Err(AppError::fail(specs::exists_message(
-            &ezfio_file.to_string_lossy(),
-        )));
+        return Err(ToolError::new(
+            TOOL,
+            specs::exists_message(&ezfio_file.to_string_lossy()),
+        ));
     }
     Ok(())
 }
@@ -66,7 +70,7 @@ pub fn write(
     geometry: &Geometry,
     bases: &[AtomBasis],
     pseudo_table: &PseudoTable,
-) -> Result<(), AppError> {
+) -> Result<(), ToolError> {
     // The cross-module invariant the writer relies on: one `AtomBasis` per
     // nucleus, and `AtomBasis::nucleus` is the 1-based position in
     // `geometry.nuclei` (ghosts included).
@@ -83,32 +87,28 @@ pub fn write(
     let ezfio_file = &options.output;
     // The reference's `Ezfio.set_file` (ezfio.ml:426) runs `mkdir
     // ezfio_file` (ezfio.ml:69), a *single-level* `Unix.mkdir`: a missing
-    // parent directory raises the uncaught
-    // `Unix.Unix_error(Unix.ENOENT, "mkdir", path)`.
+    // parent directory is the plain `cannot create` failure (wave S2).
     if let Some(parent) = ezfio_file.parent()
         && !parent.as_os_str().is_empty()
         && !parent.exists()
     {
-        return Err(AppError::uncaught(OcamlException::UnixError {
-            errno: UnixErrno::Enoent,
-            function: "mkdir".to_owned(),
-            argument: ezfio_file.to_string_lossy().into_owned(),
-        }));
+        // Raw errno 2 (`ENOENT`), the same value on Linux and macOS.
+        let error = io::Error::from_raw_os_error(2);
+        return Err(ToolError::new(
+            TOOL,
+            format!("cannot create {}: {error}", ezfio_file.display()),
+        ));
     }
-    let ezfio = match EzFio::create(ezfio_file) {
-        Ok(ezfio) => ezfio,
-        Err(_) => {
-            // The pre-check above covers the measured ENOENT case; the
-            // remaining create failures (e.g. a parent that is a file,
-            // ENOTDIR in the reference) are also rendered as ENOENT — a
-            // documented deviation.
-            return Err(AppError::uncaught(OcamlException::UnixError {
-                errno: UnixErrno::Enoent,
-                function: "mkdir".to_owned(),
-                argument: ezfio_file.to_string_lossy().into_owned(),
-            }));
-        }
-    };
+    let ezfio = EzFio::create(ezfio_file).map_err(|error| {
+        // The pre-check above covers the measured ENOENT case; the remaining
+        // create failures (e.g. a parent that is a file) keep their own
+        // display (the reference rendered every one of them as ENOENT — a
+        // documented deviation).
+        ToolError::new(
+            TOOL,
+            format!("cannot create {}: {error}", ezfio_file.display()),
+        )
+    })?;
     let ezfio = ezfio.with_layout(ByteLayout::Ocaml);
     // `set_file` also runs `mkdir (Filename.concat filename "ezfio")` —
     // the `ezfio` group exists with its `.version` marker even when it
@@ -150,7 +150,7 @@ fn write_file(
     geometry: &Geometry,
     bases: &[AtomBasis],
     pseudo_table: &PseudoTable,
-) -> Result<(), AppError> {
+) -> Result<(), ToolError> {
     let nuclei = &geometry.nuclei;
     let nucl_num = nuclei.len();
 
@@ -169,25 +169,16 @@ fn write_file(
     // -- Pseudo (287–485).
     let pseudo: Vec<Pseudo> = nuclei
         .iter()
-        .map(|atom| -> Result<Pseudo, AppError> {
-            let symbol = element_symbol(atom.element)?;
+        .map(|atom| -> Result<Pseudo, ToolError> {
+            let symbol = atom.element;
             let pseudo = match pseudo_table.text(atom.element) {
-                Some(text) => Pseudo::read_element(text, symbol).map_err(|error| {
-                    // OCaml `Pseudo.read_element`: an element lookup raises
-                    // `Element.ElementError` (uncaught); every other parse
-                    // failure is a `failwith` (caught, prefixed).
-                    match error {
-                        PseudoError::Element(element_error) => AppError::uncaught(
-                            OcamlException::ElementError(element_error.to_string()),
-                        ),
-                        other => AppError::fail(other.to_string()),
-                    }
-                })?,
+                Some(text) => Pseudo::read_element(text, symbol)
+                    .map_err(|error| ToolError::new(TOOL, error.to_string()))?,
                 None => Pseudo::empty(symbol),
             };
             Ok(pseudo)
         })
-        .collect::<Result<_, AppError>>()?;
+        .collect::<Result<_, ToolError>>()?;
 
     let z_core: Vec<f64> = pseudo.iter().map(|p| removed(p) as f64).collect();
     let nucl_charge_remove = Array::new(vec![nucl_num], z_core).map_err(app)?;
@@ -372,7 +363,7 @@ fn write_basis(
     nucl_num: usize,
     short: &Basis,
     long: &LongBasis,
-) -> Result<(), AppError> {
+) -> Result<(), ToolError> {
     let ao_num = long.len();
     ezfio
         .set::<i64>("ao_basis", "ao_num", &(ao_num as i64))
@@ -434,11 +425,12 @@ fn write_basis(
     let shell_num = short.len();
     let lc: Vec<&Vec<(qp_types::GaussianPrimitive, f64)>> =
         short.iter().map(|(gto, _)| &gto.lc).collect();
+    // `Angmom.to_l` (`S` → 0 … `L` → 9).
     let ang_mom: Vec<i64> = lc
         .iter()
         .map(|l| {
             let sym = l.first().expect("a shell has at least one primitive").0.sym;
-            angmom_l(sym)
+            i64::try_from(sym.to_l()).expect("to_l is 0..=9")
         })
         .collect();
     let mut expo: Vec<f64> = Vec::new();
@@ -527,8 +519,8 @@ fn run_qp_edit(ezfio_file: &Path) {
 }
 
 /// `qp_ezfio` errors are port bugs, not reference failure classes.
-fn app(error: qp_ezfio::Error) -> AppError {
-    AppError::fail(format!("internal EZFIO error: {error}"))
+fn app(error: qp_ezfio::Error) -> ToolError {
+    ToolError::new(TOOL, format!("internal EZFIO error: {error}"))
 }
 
 /// The three `set_file` stamps (ezfio.ml:431-434), written after the
@@ -540,20 +532,20 @@ fn app(error: qp_ezfio::Error) -> AppError {
 /// echo <library> > <file>/ezfio/library
 /// ```
 ///
-/// The reference folds them into one shell command and raises
-/// `Failure("Unable to create new ezfio file:\n"^filename)` when it
-/// fails; the port runs `date` directly (the reference's sprintf'd
-/// command would misparse a path with spaces) and renders the same
-/// caught `Failure`. `creation` must exist: the Fortran consumers of a
-/// created tree (e.g. `scf`, `ezfio.irp.f:30`) probe for it and `stop
-/// 1` without it. All three are VOLATILE in the golden harness, so
-/// their content is machine state.
-fn write_stamps(ezfio_file: &Path) -> Result<(), AppError> {
+/// The reference folds them into one shell command and fails with a
+/// `Failure` naming the file when it fails; the port runs `date`
+/// directly (the reference's sprintf'd command would misparse a path
+/// with spaces) and reports the plain one-line failure. `creation` must
+/// exist: the Fortran consumers of a created tree (e.g. `scf`,
+/// `ezfio.irp.f:30`) probe for it and `stop 1` without it. All three
+/// are VOLATILE in the golden harness, so their content is machine
+/// state.
+fn write_stamps(ezfio_file: &Path) -> Result<(), ToolError> {
     let failure = || {
-        AppError::fail(format!(
-            "Unable to create new ezfio file:\n{}",
-            ezfio_file.display()
-        ))
+        ToolError::new(
+            TOOL,
+            format!("cannot write the ezfio stamps in {}", ezfio_file.display()),
+        )
     };
     let dir = ezfio_file.join("ezfio");
     // `LANG= date`: the local time in the C locale.
@@ -581,44 +573,19 @@ fn write_stamps(ezfio_file: &Path) -> Result<(), AppError> {
 }
 
 /// Rank-1 `i64` array write (dim = data length).
-fn set_1d(ezfio: &EzFio, group: &str, key: &str, data: &[i64]) -> Result<(), AppError> {
+fn set_1d(ezfio: &EzFio, group: &str, key: &str, data: &[i64]) -> Result<(), ToolError> {
     let array = Array::new(vec![data.len()], data.to_vec()).map_err(app)?;
     ezfio.set_array::<i64>(group, key, &array).map_err(app)
 }
 
 /// Rank-1 `f64` array write (dim = data length).
-fn set_1d_f64(ezfio: &EzFio, group: &str, key: &str, data: &[f64]) -> Result<(), AppError> {
+fn set_1d_f64(ezfio: &EzFio, group: &str, key: &str, data: &[f64]) -> Result<(), ToolError> {
     let array = Array::new(vec![data.len()], data.to_vec()).map_err(app)?;
     ezfio.set_array::<f64>(group, key, &array).map_err(app)
-}
-
-/// `Element → ElementSymbol`: the symbol table lookup OCaml's
-/// `Pseudo.read_element` performs on the atom's element.
-fn element_symbol(element: element::Element) -> Result<ElementSymbol, AppError> {
-    ElementSymbol::of_string(element::to_string(element))
-        .map_err(|error| AppError::uncaught(OcamlException::ElementError(error.to_string())))
 }
 
 /// `Positive_int.to_int x.Pseudo.n_elec`: the removed electron count as a
 /// signed integer (a count, realistically ≤ 118).
 fn removed(p: &Pseudo) -> i64 {
     i64::try_from(p.n_elec).unwrap_or(i64::MAX)
-}
-
-/// `Angmom.to_l` (`S` → 0 … `L` → 9), ported: `qp_types::Angmom` (the
-/// `gto` type `Gto.sym` carries) has no such method — the deduplicated
-/// `angmom` module is P3.5 work.
-fn angmom_l(sym: qp_types::Angmom) -> i64 {
-    match sym {
-        qp_types::Angmom::S => 0,
-        qp_types::Angmom::P => 1,
-        qp_types::Angmom::D => 2,
-        qp_types::Angmom::F => 3,
-        qp_types::Angmom::G => 4,
-        qp_types::Angmom::H => 5,
-        qp_types::Angmom::I => 6,
-        qp_types::Angmom::J => 7,
-        qp_types::Angmom::K => 8,
-        qp_types::Angmom::L => 9,
-    }
 }

@@ -19,6 +19,11 @@ sandbox). The OCaml reference is the port worktree (`ocaml/`, contract commit
 | `src/gaussian_primitive.rs` | `GaussianPrimitive.ml` + `ocaml_fmt` | 313 | 6 |
 | `src/command_line.rs` | `Command_line.ml` + 5 tool specs | 776 | 8 |
 
+Wave w13 S1 (2026-11-09) removed `src/excitation.rs` (test-only, no
+production reference) and `src/gamess.rs` (no production reference), and
+shrank the other rows by the P3.5 de-duplication onto `angmom` /
+`gaussian_primitive` / `element`.
+
 Integration tests (16):
 
 | File | Tests | What it pins |
@@ -87,7 +92,8 @@ visible from `excitation`.
 the rest of the transcript is byte-identical.
 
 **M4 — dependencies.** `rust/crates/qp-types/Cargo.toml` gained
-`md5 = { workspace = true }` (task requirement: `Pseudo::to_md5`) and
+`md5 = { workspace = true }` (the original task requirement, `Pseudo::to_md5`,
+was removed in wave w13 S1; the dependency is still used by `md5.rs`) and
 `clap = { workspace = true }` (`Command_line`; the task mandated clap
 derive while saying "no other new dependencies" — this is the one
 conflict, flagged here). Both workspace entries already existed; only
@@ -124,7 +130,7 @@ before the alpha/beta electron counts, in that order, with the reference
 messages. `to_string`/`Display` ignores the MO count exactly as the
 reference's unused `~mo_num` argument did.
 
-**Excitation / MO classes.** The particle-in-inactive check prints
+**Excitation / MO classes.** *(module removed in wave w13 S1 — test-only, no production reference; the following documents reference behaviour)* The particle-in-inactive check prints
 `"Particles can not be in virtual MOs"` (reference bug). `Display` pads
 the class name to nine characters only when the list is non-empty
 (`"Core     : (1, 2)"` vs `"Core"`). The check order is core-hole,
@@ -135,13 +141,12 @@ treats `""` as nothing, and requires `start <= finish`.
 **Angmom.** `Xyz::of_string` feeds every non-`xyz` character to
 `int_of_string`, even before any letter: `"12"` is the zero triplet,
 `"a"` fails. The `Null` state means `"-2"` alone does not fail while
-`"x-2"` does. `Spd::of_string` splits on the first space only.
+`"x-2"` does. (The reference's `Spd` shell representation was removed in wave w13 S1: no production reference.)
 
 **Zmatrix.** `in_range` only adds/subtracts (NaN unchanged, infinite
 input loops); angles wrap to `(-180, 180]`, dihedrals to `(-360, 360]`.
 A negative bond length is parsed as a *label* (the reference catches every
-exception). `center_of_mass` prints `"%f %f %f\n"` as a debug trace.
-Two-token lines split on `' '` only, and a two-token line is always a
+exception). Two-token lines split on `' '` only, and a two-token line is always a
 label (`Coord`). A three-token `Second` line ignores its middle id token.
 `line_of_string` returns tokens in reference order (1,3,5,7,2).
 `to_xyz`/`to_xyz_string` place atom 1 at the origin, atom 2 on `+z`, with

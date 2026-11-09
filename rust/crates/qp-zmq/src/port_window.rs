@@ -59,19 +59,6 @@ pub fn first_port(pid: u32) -> u32 {
     WINDOW_SIZE * (pid % PORT_SLOTS) + BASE_PORT
 }
 
-/// The ten ports of the window that starts at `port`, in ascending order.
-///
-/// The caller binds `[0]`, binds `[1]`, and probes `[2..]`; see the module
-/// documentation for why.
-#[must_use]
-pub fn window(port: u32) -> [u32; WINDOW_SIZE as usize] {
-    let mut ports = [0; WINDOW_SIZE as usize];
-    for (offset, slot) in ports.iter_mut().enumerate() {
-        *slot = port + u32::try_from(offset).unwrap_or(0);
-    }
-    ports
-}
-
 /// Iterator over the candidate first ports of the window.
 ///
 /// The reference retries forever (`try_new_port (port + 100)`); this
@@ -141,15 +128,9 @@ mod tests {
         assert_eq!(ports.next(), Some(32_979));
     }
 
-    /// The window is `P..P+9` and the probes are `P+2..P+9`.
+    /// The probes are `P+2..P+9` (`ocaml/qp_run.ml:63`).
     #[test]
-    fn window_layout() {
-        let ports = window(32_769);
-        assert_eq!(ports[0], 32_769);
-        assert_eq!(ports[9], 32_778);
-        for (offset, port) in ports.iter().enumerate() {
-            assert_eq!(*port, 32_769 + u32::try_from(offset).unwrap());
-        }
+    fn probe_offsets() {
         let probes: Vec<u32> = PROBE_OFFSETS.iter().map(|o| 32_769 + o).collect();
         assert_eq!(
             probes,

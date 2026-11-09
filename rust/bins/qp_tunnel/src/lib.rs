@@ -28,9 +28,10 @@
 //! # Units and conventions
 //!
 //! Ports are `u32`; 0MQ timeouts are milliseconds. Messages are raw bytes
-//! (OCaml strings are byte strings). Every user-visible string is the
-//! reference's, byte for byte, except where a doc comment or the list below
-//! says otherwise.
+//! (OCaml strings are byte strings). The user-visible strings are
+//! Rust-native (wave S2); the functional data — the two `ssh` command lines,
+//! the `work/qp_run_address` file, the input-protocol replies — is the
+//! reference's.
 //!
 //! # Deviations from the reference (all measured; see
 //! `NOTES.md` in this directory)
@@ -41,10 +42,10 @@
 //!   host field keeps the `//`, and the rebuilt endpoint is well formed).
 //!   This is the reference's own behaviour, not a port choice.
 //! * The reference leaks a socket when `create_socket` fails and then hangs
-//!   in `zmq_ctx_term`; this port closes every socket and exits 2. A thread
-//!   failure prints the reference's `Thread <id> killed on uncaught
-//!   exception <e>` lines, but the final `Fatal error: exception` line is the
-//!   lowest-id failing thread's exception instead of the reference's
+//!   in `zmq_ctx_term`; this port closes every socket and exits 2. A failing
+//!   thread prints `proxy thread <id> stopped: <reason>` on standard error,
+//!   and the final standard-error line is the lowest-id failing thread's
+//!   reason instead of the reference's
 //!   `Unix.Unix_error(Unix.EINTR, "zmq_ctx_term", "")`.
 //! * Linger is 0 on every socket, so shutdown takes at most one poll timeout
 //!   and queued messages are dropped. The reference keeps the default
@@ -72,7 +73,6 @@
 #![deny(missing_docs)]
 
 mod error;
-mod ocaml_num;
 
 use std::fs;
 use std::io::{self, Write as _};
@@ -87,7 +87,7 @@ use qp_zmq::task_server::resolve_address_from_env;
 use tempfile::NamedTempFile;
 use zmq::{Context, Socket, SocketType};
 
-pub use error::{EXIT_FATAL, OcamlException};
+pub use error::OcamlException;
 
 /// First candidate port of the local ten-port window (`qp_tunnel.ml:7`).
 pub const DEFAULT_LOCAL_PORT: u32 = 42379;
@@ -169,9 +169,10 @@ impl Tunnel {
     /// Resolve the advertised IPv4 address (the ported `TaskServer.ip_address`,
     /// including `QP_NIC`) and start the tunnel.
     ///
-    /// `announce` receives the text blocks the reference prints, in order:
-    /// `Connect to:` on the calling thread, then `Communication [ … ]`, the
-    /// `-g` block, the ssh instructions and `Ready` on the input thread.
+    /// `announce` receives the tunnel's announcements, in order: the tunnel
+    /// address on the calling thread, then the `communication: …` line, the
+    /// `downloading input …` line, the ssh instructions and `ready` on the
+    /// input thread.
     ///
     /// # Errors
     ///
@@ -221,8 +222,9 @@ impl Tunnel {
         let (sender, errors) = mpsc::channel();
         let mut threads: [Option<JoinHandle<()>>; 4] = [None, None, None, None];
 
-        // Thread 1 (the OCaml channel) starts before the banner, exactly as in
-        // the reference, so its `bind` failure is reported after `Connect to:`.
+        // Thread 1 (the OCaml channel) starts before the tunnel-address
+        // announcement, exactly as in the reference, so its `connect`
+        // failure is reported after it.
         threads[0] = Some(spawn_relay(
             1,
             &context,
@@ -238,7 +240,9 @@ impl Tunnel {
         ));
 
         let mut announce = announce;
-        if let Err(error) = announce(&format!("Connect to:\ntcp://{ip}:{local_port}\n")) {
+        if let Err(error) = announce(&format!(
+            "Connect to the tunnel with: tcp://{ip}:{local_port}\n"
+        )) {
             request_stop();
             join_all(&mut threads);
             return Err(error);
@@ -302,7 +306,7 @@ impl Tunnel {
     /// lowest-id failure, if any.
     ///
     /// Reference order: input (4), fortran (2), pub (3), ocaml (1). A failing
-    /// thread has already printed its `Thread <id> killed …` line.
+    /// thread has already printed its `proxy thread <id> stopped: …` line.
     ///
     /// # Errors
     ///
@@ -360,14 +364,15 @@ pub fn emit(text: &str) -> Result<(), OcamlException> {
         .map_err(|error| OcamlException::SysError(error.to_string()))
 }
 
-/// The ssh instructions block printed by the input thread before `Ready`.
+/// The ssh instructions block printed by the input thread before `ready`.
 ///
-/// `hostname` is `Unix.gethostname ()` (first `ssh -L` line only; the second
-/// line ends with the literal `<host>`, as measured), `ip` and `local_port`
+/// `hostname` is the local machine's hostname (first `ssh -L` line only;
+/// the second line ends with the literal `<host>`), `ip` and `local_port`
 /// describe the local side, and `remote_port` is the remote window's first
-/// port (an OCaml `int`, rendered in decimal, sign included). The result
-/// starts with a newline, indents both `ssh` lines by one space, and ends
-/// each line with ` &`.
+/// port (rendered in decimal, sign included). The two `ssh` command lines
+/// are the reference's; only the two prose lines are Rust wording (wave
+/// S2). The result starts with a newline, indents both `ssh` lines by one
+/// space, and ends each line with ` &`.
 #[must_use]
 pub fn ssh_instructions(hostname: &str, ip: &str, remote_port: i64, local_port: u32) -> String {
     let r0 = remote_port;
@@ -379,7 +384,7 @@ pub fn ssh_instructions(hostname: &str, ip: &str, remote_port: i64, local_port: 
     let l2 = local_port + 2;
     let l9 = local_port + INPUT_OFFSET;
     format!(
-        "\nOn remote hosts, create ssh tunnel using:\n ssh -L {r0}:{ip}:{l0} -L {r1}:{ip}:{l1} -L {r2}:{ip}:{l2} -L {r9}:{ip}:{l9} {hostname} &\nOr from this host connect to clients using:\n ssh -R {r0}:localhost:{l0} -R {r1}:localhost:{l1} -R {r2}:localhost:{l2} -R {r9}:localhost:{l9} <host> &\n"
+        "\nTo reach the tunnel from a remote host, run there:\n ssh -L {r0}:{ip}:{l0} -L {r1}:{ip}:{l1} -L {r2}:{ip}:{l2} -L {r9}:{ip}:{l9} {hostname} &\nOr from this host, let clients connect through the tunnel:\n ssh -R {r0}:localhost:{l0} -R {r1}:localhost:{l1} -R {r2}:localhost:{l2} -R {r9}:localhost:{l9} <host> &\n"
     )
 }
 
@@ -453,7 +458,7 @@ fn window_is_free(context: &Context, ip: &str, base: u32) -> Result<bool, OcamlE
         let port = base.saturating_add(offset);
         let endpoint = format!("tcp://{ip}:{port}");
         let socket = context.socket(SocketType::REP).map_err(|error| {
-            OcamlException::SysError(format!("Unable to create a REP socket: {error}"))
+            OcamlException::SysError(format!("cannot probe port {port}: {error}"))
         })?;
         socket.set_linger(0).map_err(zmq_exception)?;
         let bound = socket.bind(&endpoint);
@@ -471,10 +476,10 @@ fn window_is_free(context: &Context, ip: &str, base: u32) -> Result<bool, OcamlE
 struct Remote {
     /// Host field of the split address, verbatim.
     host: String,
-    /// First port of the remote window, an OCaml `int` (`i64`): the
-    /// reference's `int_of_string` accepts any value in `[-2^62, 2^62-1]`,
-    /// and the endpoints render it in decimal (a negative port is printed
-    /// with its sign, measured).
+    /// First port of the remote window, a decimal `i64` (wave S2: the
+    /// reference's `int_of_string` also accepted `0x`/`0o`/`0b` and `_`
+    /// separators and bounded the value at `2^62 - 1`); the endpoints
+    /// render it in decimal (a negative port is printed with its sign).
     port: i64,
 }
 
@@ -486,18 +491,20 @@ impl Remote {
     }
 }
 
-/// Split `proto:host:port` and parse the port as the reference's
-/// `int_of_string` (full OCaml semantics: `0x`/`0o`/`0b`, `_` separators,
-/// a leading sign, and the `[-2^62, 2^62 - 1]` bound).
+/// Split `proto:host:port` and parse the port as a decimal `i64`
+/// (wave S2: plain `i64::from_str`, a leading sign included).
 fn parse_address(long_address: &str) -> Result<Remote, OcamlException> {
     let parts: Vec<&str> = long_address.split(':').collect();
     let [_, host, port] = parts.as_slice() else {
         return Err(OcamlException::Failure(format!(
-            "{long_address} : Malformed address"
+            "malformed address {long_address} (expected proto:host:port)"
         )));
     };
-    let port = ocaml_num::int_of_string(port)
-        .map_err(|_| OcamlException::Failure(String::from("int_of_string")))?;
+    let port: i64 = port.parse().map_err(|_| {
+        OcamlException::Failure(format!(
+            "invalid integer '{port}' in the port of {long_address}"
+        ))
+    })?;
     Ok(Remote {
         host: (*host).to_string(),
         port,
@@ -677,8 +684,8 @@ where
     if let Err(error) = body() {
         let _ = writeln!(
             io::stderr(),
-            "Thread {id} killed on uncaught exception {}",
-            error.render()
+            "proxy thread {id} stopped: {}",
+            error.message()
         );
         let _ = errors.send((id, error));
         request_stop();
@@ -744,7 +751,7 @@ fn input_body(
     if let Some(socket) = &session.socket_out {
         let reply = request(socket, b"test")?;
         announce(&format!(
-            "Communication [ {} ]\n",
+            "communication: {}\n",
             String::from_utf8_lossy(&reply)
         ))
         .map_err(InputError::Fatal)?;
@@ -764,7 +771,7 @@ fn input_body(
         setup.local_port,
     ))
     .map_err(InputError::Fatal)?;
-    announce("Ready\n").map_err(InputError::Fatal)?;
+    announce("ready\n").map_err(InputError::Fatal)?;
 
     loop {
         if stop_requested() {
@@ -857,11 +864,8 @@ impl InputSession<'_> {
         }
     }
 
-    /// The `-g` block: download, unpack, write `work/qp_run_address`.
-    ///
-    /// The printed order is the reference's, including the missing newline
-    /// between `Getting input... ` and the directory name and the space before
-    /// `...done`.
+    /// The `-g` block: download, unpack, write `work/qp_run_address`, then
+    /// announce one line `downloading input <name> ... done`.
     ///
     /// # Errors
     ///
@@ -871,10 +875,8 @@ impl InputSession<'_> {
         &self,
         announce: &mut (dyn FnMut(&str) -> Result<(), OcamlException> + '_),
     ) -> Result<(), InputError> {
-        announce("Getting input... ").map_err(InputError::Fatal)?;
         let filename = self.get_ezfio_filename()?;
         let name = String::from_utf8_lossy(&filename);
-        announce(&name).map_err(InputError::Fatal)?;
         let tarball = self.get_input()?;
         let temp_path = self.temp.path().to_path_buf();
         fs::write(&temp_path, &tarball)
@@ -891,7 +893,7 @@ impl InputSession<'_> {
             format!("tcp://{}:{}\n", self.setup.ip, self.setup.local_port),
         )
         .map_err(|error| InputError::Fatal(error::sys_error(&address_path, &error)))?;
-        announce(" ...done\n").map_err(InputError::Fatal)?;
+        announce(&format!("downloading input {name} ... done\n")).map_err(InputError::Fatal)?;
         Ok(())
     }
 }
@@ -917,9 +919,9 @@ fn create_socket(
     Ok(socket)
 }
 
-/// `Failure("Unable to establish connection to <endpoint>.")`.
+/// The setup failure of one relay or of the input channel.
 fn connection_failure(endpoint: &str) -> OcamlException {
-    OcamlException::Failure(format!("Unable to establish connection to {endpoint}."))
+    OcamlException::Failure(format!("cannot connect to {endpoint}"))
 }
 
 /// A 0MQ error outside `create_socket`: surfaced as a `Sys_error`.
@@ -1008,21 +1010,18 @@ fn recv_interruptible(socket: &Socket) -> Result<Vec<u8>, InputError> {
 mod tests {
     use super::*;
 
-    /// The ssh block must be the captured reference text.
+    /// The ssh block: the two command lines are the reference's, the two
+    /// prose lines are the Rust wording (wave S2).
     #[test]
-    fn ssh_block_matches_the_reference_capture() {
-        let capture = include_str!("../tests/data/ssh_block.txt");
+    fn ssh_block_is_the_generated_text() {
         assert_eq!(
             ssh_instructions("lcpqsv225.univ-tlse3.fr", "130.120.229.225", 43000, 42379),
-            capture
+            "\nTo reach the tunnel from a remote host, run there:\n ssh -L 43000:130.120.229.225:42379 -L 43001:130.120.229.225:42380 -L 43002:130.120.229.225:42381 -L 43009:130.120.229.225:42388 lcpqsv225.univ-tlse3.fr &\nOr from this host, let clients connect through the tunnel:\n ssh -R 43000:localhost:42379 -R 43001:localhost:42380 -R 43002:localhost:42381 -R 43009:localhost:42388 <host> &\n"
         );
-        assert_eq!(capture.len(), 356);
-        // The second line really ends with the literal `<host>`.
-        assert!(capture.ends_with("-R 43009:localhost:42388 <host> &\n"));
     }
 
     #[test]
-    fn address_parsing_matches_the_reference() {
+    fn address_parsing_is_decimal_i64() {
         assert_eq!(
             parse_address("tcp://127.0.0.1:43000"),
             Ok(Remote {
@@ -1037,7 +1036,11 @@ mod tests {
                 port: 1,
             })
         );
-        let malformed = |text: &str| OcamlException::Failure(format!("{text} : Malformed address"));
+        let malformed = |text: &str| {
+            OcamlException::Failure(format!(
+                "malformed address {text} (expected proto:host:port)"
+            ))
+        };
         assert_eq!(parse_address("tcp:1.2.3.4"), Err(malformed("tcp:1.2.3.4")));
         assert_eq!(
             parse_address("notanaddress"),
@@ -1045,24 +1048,39 @@ mod tests {
         );
         assert_eq!(parse_address("a:b:c:d"), Err(malformed("a:b:c:d")));
         assert_eq!(parse_address(""), Err(malformed("")));
-        let int_of_string = || OcamlException::Failure("int_of_string".into());
-        assert_eq!(parse_address("tcp:host:notaport"), Err(int_of_string()));
-        assert_eq!(parse_address("tcp:host:"), Err(int_of_string()));
-        // Above the OCaml `int` bound (`2^62 - 1`), measured:
+        let bad_port = |port: &str, address: &str| {
+            OcamlException::Failure(format!("invalid integer '{port}' in the port of {address}"))
+        };
         assert_eq!(
-            parse_address("tcp:host:4611686018427387904"),
-            Err(int_of_string())
+            parse_address("tcp:host:notaport"),
+            Err(bad_port("notaport", "tcp:host:notaport"))
         );
-        // The full OCaml `int_of_string` grammar is accepted (measured:
-        // `0x10` is port 16, `-5` is port -5), and the port is an OCaml
-        // `int`, so no port-range rejection exists.
-        assert_eq!(parse_address("tcp:host:0x10").map(|r| r.port), Ok(16));
+        assert_eq!(parse_address("tcp:host:"), Err(bad_port("", "tcp:host:")));
+        // Above the `i64` bound:
+        assert_eq!(
+            parse_address("tcp:host:9223372036854775808"),
+            Err(bad_port(
+                "9223372036854775808",
+                "tcp:host:9223372036854775808"
+            ))
+        );
+        // A leading sign is accepted:
         assert_eq!(parse_address("tcp:host:-5").map(|r| r.port), Ok(-5));
         assert_eq!(parse_address("tcp:host:+1").map(|r| r.port), Ok(1));
-        assert_eq!(parse_address("tcp:host:1_000").map(|r| r.port), Ok(1000));
+        // The `i64` bound, not the reference's OCaml `int` bound:
         assert_eq!(
-            parse_address("tcp:host:4611686018427387903").map(|r| r.port),
-            Ok(4611686018427387903)
+            parse_address("tcp:host:4611686018427387904").map(|r| r.port),
+            Ok(4611686018427387904)
+        );
+        // Decimal only (wave S2: the reference's `int_of_string` also
+        // accepted `0x`/`0o`/`0b` and `_` separators):
+        assert_eq!(
+            parse_address("tcp:host:0x10"),
+            Err(bad_port("0x10", "tcp:host:0x10"))
+        );
+        assert_eq!(
+            parse_address("tcp:host:1_000"),
+            Err(bad_port("1_000", "tcp:host:1_000"))
         );
     }
 

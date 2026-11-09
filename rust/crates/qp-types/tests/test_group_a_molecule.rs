@@ -6,17 +6,14 @@
 //! lines read `C   +6.000000         0.52917721 …`; the current OCaml
 //! sources (which are what this port follows) print 17 significant
 //! digits. The *coordinates and names* are the same in both builds, and
-//! the molecule md5 (`89145e94e76523adf6fbaa1ad612c9a3`) is pinned in
-//! the crate's unit tests.
+//! the molecule sexp is pinned in the crate's unit tests.
 //!
 //! The distance reference values were computed independently from the
 //! fixture with IEEE doubles: `sqrt(dx² + dz²)` with the coordinates
 //! first divided by `bohr_to_angstrom` (the fixture is in Angstrom).
 
-use std::path::{Path, PathBuf};
-
 use qp_types::element;
-use qp_types::molecule::{MultiplicityError, XyzError};
+use qp_types::molecule::MultiplicityError;
 use qp_types::point3d::units::BOHR_TO_ANGSTROM;
 use qp_types::{Atom, Charge, Molecule, Multiplicity, Units};
 
@@ -78,7 +75,7 @@ fn an_impossible_multiplicity_is_the_reference_error() {
     let err = Molecule::of_xyz_string_with(
         WATER_WITH_CHARGES,
         Charge::of_int(0),
-        Multiplicity::of_int(2).expect("2 is positive"),
+        Multiplicity::of_alpha_beta(5, 4),
         Units::Angstrom,
     )
     .expect_err("water has 10 electrons, a doublet is impossible");
@@ -96,15 +93,21 @@ fn an_impossible_multiplicity_is_the_reference_error() {
 
 #[test]
 fn the_three_water_names_match_the_reference() {
-    let neutral = Molecule::of_xyz_string(WATER_WITH_CHARGES).expect("neutral water");
-    assert_eq!(neutral.get_nucl_num(), 3);
+    let neutral = Molecule::of_xyz_string_with(
+        WATER_WITH_CHARGES,
+        Charge::of_int(0),
+        Multiplicity::SINGLET,
+        Units::Angstrom,
+    )
+    .expect("neutral water");
+    assert_eq!(neutral.nuclei.len(), 3);
     assert_eq!((neutral.elec_alpha, neutral.elec_beta), (5, 5));
     assert_eq!(neutral.name(), "OH2, Singlet");
 
     let cation = Molecule::of_xyz_string_with(
         WATER_WITH_CHARGES,
         Charge::of_int(1),
-        Multiplicity::of_int(2).expect("2 is positive"),
+        Multiplicity::of_alpha_beta(5, 4),
         Units::Angstrom,
     )
     .expect("cation");
@@ -184,42 +187,11 @@ fn distance_matrix_is_in_bohr_and_independently_checked() {
 }
 
 // ---------------------------------------------------------------------
-// File input: xyz with CRLF and tabs
+// Output round trip
 // ---------------------------------------------------------------------
 
-/// `CARGO_TARGET_TMPDIR` (created by Cargo for integration tests).
-fn tmp_path(name: &str) -> PathBuf {
-    Path::new(env!("CARGO_TARGET_TMPDIR")).join(name)
-}
-
 #[test]
-fn of_xyz_file_accepts_crlf_and_tabs() {
-    // `Molecule.ml:145-175` deletes every `\r` and turns every tab into a
-    // space before splitting. A file written by Windows must still parse.
-    let path = tmp_path("test_group_a_water_crlf.xyz");
-    let text = "3\r\n\
-                water, CRLF and tabs\r\n\
-                H\t0.54386314\t0.00000000\t-3.78645152\r\n\
-                O\t1.65102147\t0.00000000\t-2.35602344\r\n\
-                H\t0.54386314\t0.00000000\t-0.92559535\r\n";
-    std::fs::write(&path, text).expect("write the fixture copy");
-
-    let from_file = Molecule::of_xyz_file(&path).expect("the CRLF file parses");
-    let from_string = Molecule::of_xyz_string_with(
-        WATER_PLAIN,
-        Charge::of_int(0),
-        Multiplicity::SINGLET,
-        Units::Angstrom,
-    )
-    .expect("the same molecule from a string");
-    assert_eq!(from_file, from_string);
-    assert_eq!(from_file.name(), "OH2, Singlet");
-    // The title line is ignored, not parsed as an atom.
-    assert_eq!(from_file.get_nucl_num(), 3);
-}
-
-#[test]
-fn to_xyz_round_trips_through_of_xyz_file() {
+fn to_xyz_atom_lines_round_trip_through_the_parser() {
     let anion = Molecule::of_xyz_string_with(
         WATER_PLAIN,
         Charge::of_int(-2),
@@ -228,56 +200,28 @@ fn to_xyz_round_trips_through_of_xyz_file() {
     )
     .expect("anion");
 
-    let path = tmp_path("test_group_a_water_roundtrip.xyz");
-    std::fs::write(&path, anion.to_xyz()).expect("write the xyz output");
-    let back = Molecule::of_xyz_file(&path).expect("our own output parses");
-
-    // The electron counts are recomputed from the default charge 0, so
-    // `back` is the neutral molecule and its name (the title line) is not
-    // the anion's. The nuclei match exactly: the Angstrom round trip is a
-    // fixed point because the conversion divides.
+    // Our own `to_xyz` atom lines (the header is dropped: the string
+    // reader takes one atom per line, no count and no title) parse back
+    // to the same nuclei — the Angstrom round trip is a fixed point
+    // because the conversion divides.
+    let atom_lines = anion
+        .to_xyz()
+        .lines()
+        .skip(2)
+        .collect::<Vec<_>>()
+        .join("\n");
+    let back = Molecule::of_xyz_string_with(
+        &atom_lines,
+        Charge::of_int(0),
+        Multiplicity::SINGLET,
+        Units::Angstrom,
+    )
+    .expect("our own output parses");
     assert_eq!(back.nuclei, anion.nuclei);
+    // The electron counts are recomputed from the default charge 0, so
+    // `back` is the neutral molecule, not the anion.
     assert_eq!(back.name(), "OH2, Singlet");
     assert_ne!(back.name(), anion.name());
-    let atom_lines =
-        |m: &Molecule| -> Vec<String> { m.to_xyz().lines().skip(2).map(str::to_owned).collect() };
-    assert_eq!(atom_lines(&back), atom_lines(&anion));
-}
-
-#[test]
-fn malformed_xyz_files_are_typed_errors() {
-    let cases: [(&str, &str, &str); 3] = [
-        (
-            "test_group_a_bad_count.xyz",
-            "not-a-number\nx\n",
-            "not-a-number",
-        ),
-        ("test_group_a_zero_atoms.xyz", "0\n\n", "not positive"),
-        (
-            "test_group_a_short.xyz",
-            "3\ntitle\nH 0 0 0\n",
-            "announced 3 atoms",
-        ),
-    ];
-    for (name, text, needle) in cases {
-        let path = tmp_path(name);
-        std::fs::write(&path, text).expect("write the malformed fixture");
-        let err = Molecule::of_xyz_file(&path).expect_err("the fixture is malformed");
-        assert!(
-            err.to_string().contains(needle),
-            "{name}: {err} should mention {needle:?}"
-        );
-        assert!(
-            err.downcast_ref::<XyzError>().is_some(),
-            "{name}: {err} should be an XyzError"
-        );
-    }
-
-    // A one-line file has no atom-count line at all.
-    let path = tmp_path("test_group_a_one_line.xyz");
-    std::fs::write(&path, "3").expect("write the one-line fixture");
-    let err = Molecule::of_xyz_file(&path).expect_err("no atom-count line");
-    assert!(err.downcast_ref::<XyzError>().is_some(), "{err}");
 }
 
 #[test]

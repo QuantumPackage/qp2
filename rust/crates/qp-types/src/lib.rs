@@ -11,23 +11,21 @@
 //! |---|---|---|
 //! | [`atom`] | `Atom.ml` | a nucleus (element + coordinates) |
 //! | [`basis`] | `Basis.ml`, `Long_basis.ml` | the md5-canonical basis type |
-//! | [`basis_library`] | (packaging) | the `qp_create_ezfio` + `Input_ao_basis.read` sequence |
 //! | [`bitlist`] | `Bitlist.ml` | fixed-width bit strings, 64 bits per word |
 //! | [`charge`] | `Charge.ml` | charge states |
 //! | [`command_line`] | `Command_line.ml` | CLI argument structs and usage errors |
 //! | [`determinant`] | `Determinant.ml` | an alpha/beta pair of [`bitlist::Bitlist`] |
 //! | [`element`] | `Element.ml` | the 119-element periodic table |
-//! | [`excitation`] | `MO_class.ml`, `Range.ml`, `Excitation.ml` | MO classes and excitations |
-//! | [`gto`] | `Gto.ml` | Gaussian shells (local `Angmom.Xyz`/`GaussianPrimitive` shims — see P3.5) |
+//! | [`error`] | — | the shared one-line user-facing error of the tools |
+//! | [`gto`] | `Gto.ml` | Gaussian shells (re-exports the canonical [`angmom`]/[`gaussian_primitive`] types) |
 //! | [`md5`] | `To_md5.ml` | the digest helper (`MD5_OF_NONE`) |
 //! | [`molecule`] | `Molecule.ml`, `Multiplicity.ml` | molecule + spin multiplicity |
 //! | [`point3d`] | `Point3d.ml`, `Units.ml` | coordinates + the unit boundary |
 //! | [`sexplib_compat`] | sexplib0 | `Sexp.to_string` + float rules (the md5 contract) |
-//! | [`angmom`] | `Angmom.ml` | shell labels `S..L`, Cartesian powers, `Spd` |
+//! | [`angmom`] | `Angmom.ml` | shell labels `S..L`, Cartesian powers |
 //! | [`gaussian_primitive`] | `GaussianPrimitive.ml` | one `(sym, expo)` Gaussian + `ocaml_fmt` |
-//! | [`pseudo`] | `Pseudo.ml` | GAMESS-format pseudopotentials and their md5 |
+//! | [`pseudo`] | `Pseudo.ml` | GAMESS-format pseudopotentials |
 //! | [`zmatrix`] | `Zmatrix.ml` | Z-matrix parsing and Cartesian reconstruction |
-//! | [`gamess`] | `Gamess.ml` | GAMESS input-deck writers (dead in QP2 — no callers) |
 //!
 //! # What this crate guarantees
 //!
@@ -62,30 +60,17 @@
 //! `point3d::units::BOHR_TO_ANGSTROM` (the reference's post-fix behaviour:
 //! division is a fixed point of the Angstrom round trip).
 //!
-//! # Known duplication (P3.5 cleanup)
-//!
-//! Both wave-2 groups landed independently: [`gto`] embeds local
-//! `Angmom`/`AngmomXyz`/`GaussianPrimitive` definitions (what `Gto.ml`
-//! needs) alongside the canonical [`angmom`]/[`gaussian_primitive`]
-//! modules, and [`pseudo`] defines a local `ElementSymbol` table (119
-//! elements) alongside [`element::Element`]. The duplicates are
-//! behaviour-identical and isolated; P3.5 rewires `gto` and
-//! `pseudo`/`zmatrix`/`gamess` onto the canonical modules and deletes the
-//! copies.
-
 #![deny(missing_docs)]
 
 pub mod angmom;
 pub mod atom;
 pub mod basis;
-pub mod basis_library;
 pub mod bitlist;
 pub mod charge;
 pub mod command_line;
 pub mod determinant;
 pub mod element;
-pub mod excitation;
-pub mod gamess;
+pub mod error;
 pub mod gaussian_primitive;
 pub mod gto;
 pub mod md5;
@@ -97,11 +82,10 @@ pub mod zmatrix;
 
 pub use atom::Atom;
 pub use basis::{Basis, LongBasis, NuclNumber};
-pub use basis_library::{LibraryBasis, ezfio_round_trip};
 pub use charge::Charge;
 pub use element::{Element, ElementError};
 pub use gto::{Angmom, AngmomXyz, Fmt, GaussianPrimitive, Gto, GtoError};
 pub use md5::MD5_OF_NONE;
-pub use molecule::{Molecule, Multiplicity, MultiplicityError, XyzError};
+pub use molecule::{Molecule, Multiplicity, MultiplicityError};
 pub use point3d::{Point3d, Units};
 pub use sexplib_compat::Sexp;

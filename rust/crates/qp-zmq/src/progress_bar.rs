@@ -118,7 +118,14 @@ impl ProgressBar {
         }
     }
 
-    /// Replace the current value and mark the bar dirty.
+    /// Replace the current value and mark the bar dirty
+    /// (`Progress_bar.update`, `ocaml/Progress_bar.ml:17`).
+    ///
+    /// The reference defines it but never calls it; the task server uses
+    /// [`ProgressBar::increment_cur`]/[`ProgressBar::increment_end`] only.
+    /// Kept for API parity and used by the unit tests to set arbitrary
+    /// progress values that the incrementors cannot express.
+    #[allow(dead_code)]
     pub fn update(&mut self, cur_value: f64) {
         self.cur_value = cur_value;
         self.dirty = true;

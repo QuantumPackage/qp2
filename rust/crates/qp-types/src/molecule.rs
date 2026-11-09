@@ -25,14 +25,11 @@
 //! `of_zmt_file` / `of_file` need `Zmatrix` (group B). `of_file`'s
 //! fallback logic is the only caller of `of_zmt_file`, so neither is here.
 
-use std::path::Path;
-
 use anyhow::{Context, Result, bail};
 
 use crate::atom::Atom;
 use crate::charge::Charge;
 use crate::element::{self, Element};
-use crate::md5::md5_hex;
 use crate::point3d::{Point3d, Units};
 use crate::sexplib_compat::Sexp;
 
@@ -62,21 +59,6 @@ impl std::fmt::Display for MultiplicityError {
 
 impl std::error::Error for MultiplicityError {}
 
-/// `Molecule.XYZError`: the file is not a well-formed xyz file.
-///
-/// The reference exception carries no payload; the string here is the
-/// diagnostic and is not compared against anything.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct XyzError(pub String);
-
-impl std::fmt::Display for XyzError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "XYZError: {}", self.0)
-    }
-}
-
-impl std::error::Error for XyzError {}
-
 /// A spin multiplicity, `2S + 1`, always `>= 1`
 /// (`Multiplicity.t = Strictly_positive_int.t`).
 ///
@@ -87,18 +69,9 @@ impl std::error::Error for XyzError {}
 pub struct Multiplicity(i32);
 
 impl Multiplicity {
-    /// The singlet, `2S + 1 = 1`. The default for
-    /// [`Molecule::of_xyz_string`].
+    /// The singlet, `2S + 1 = 1`. The default multiplicity of the
+    /// reference xyz readers.
     pub const SINGLET: Multiplicity = Multiplicity(1);
-
-    /// `Multiplicity.of_int = Strictly_positive_int.of_int`: `None` when
-    /// `i < 1`.
-    ///
-    /// OCaml raises `Failure` here; the caller decides the message, so
-    /// this returns `Option`.
-    pub fn of_int(i: i32) -> Option<Multiplicity> {
-        if i >= 1 { Some(Multiplicity(i)) } else { None }
-    }
 
     /// `Multiplicity.to_int`.
     pub fn to_int(self) -> i32 {
@@ -200,15 +173,6 @@ impl Molecule {
         Multiplicity::of_alpha_beta(self.elec_alpha, self.elec_beta)
     }
 
-    /// `Molecule.get_nucl_num`: the number of nuclei.
-    ///
-    /// OCaml wraps this in `Nucl_number.of_int ~max:nmax`, whose upper
-    /// bound is `max` itself, i.e. always satisfied; `Nucl_number` is a
-    /// plain `int`, so this returns `i32`.
-    pub fn get_nucl_num(&self) -> i32 {
-        i32::try_from(self.nuclei.len()).expect("invariant violated: more than i32::MAX nuclei")
-    }
-
     /// `Molecule.name`: `"OH2, Singlet"` and friends.
     ///
     /// See the module docs for the (deliberately reversed) element order.
@@ -277,12 +241,6 @@ impl Molecule {
         self.to_string_general(Atom::to_xyz)
     }
 
-    /// `Molecule.of_xyz_string s`: defaults of the reference — charge 0,
-    /// multiplicity 1, Angstrom.
-    pub fn of_xyz_string(s: &str) -> Result<Molecule> {
-        Molecule::of_xyz_string_with(s, Charge::of_int(0), Multiplicity::SINGLET, Units::Angstrom)
-    }
-
     /// `Molecule.of_xyz_string ?charge ?multiplicity ?units s`: parse one
     /// atom per non-empty line and derive the electron counts.
     ///
@@ -335,59 +293,6 @@ impl Molecule {
         Ok(result)
     }
 
-    /// `Molecule.of_xyz_file filename`: the defaults of the reference.
-    pub fn of_xyz_file(filename: &Path) -> Result<Molecule> {
-        Molecule::of_xyz_file_with(
-            filename,
-            Charge::of_int(0),
-            Multiplicity::SINGLET,
-            Units::Angstrom,
-        )
-    }
-
-    /// `Molecule.of_xyz_file ?charge ?multiplicity ?units filename`.
-    ///
-    /// The file is read as text, every `\r` is removed and every tab
-    /// becomes a space *before* splitting on `\n` (`Molecule.ml:145-175`),
-    /// which is what lets a CRLF file parse. The first line must be a
-    /// positive atom count, the second is the title (ignored), and the
-    /// next `natoms` lines are the atoms.
-    ///
-    /// Errors with [`XyzError`] for a bad or non-positive count and for a
-    /// file with fewer atom lines than announced (OCaml's `Array.sub`
-    /// would raise `Invalid_argument`).
-    pub fn of_xyz_file_with(
-        filename: &Path,
-        charge: Charge,
-        multiplicity: Multiplicity,
-        units: Units,
-    ) -> Result<Molecule> {
-        let raw = std::fs::read_to_string(filename)
-            .with_context(|| format!("Molecule: cannot read {}", filename.display()))?;
-        let text = raw.replace('\r', "").replace('\t', " ");
-        let lines: Vec<&str> = text.split('\n').collect();
-        if lines.len() < 2 {
-            return Err(XyzError("file has no atom-count line".to_owned()).into());
-        }
-        let natoms = lines[0]
-            .trim()
-            .parse::<i64>()
-            .map_err(|_| XyzError(format!("bad atom count {:?}", lines[0])))?;
-        if natoms <= 0 {
-            return Err(XyzError(format!("atom count {natoms} is not positive")).into());
-        }
-        let natoms = usize::try_from(natoms).expect("invariant violated: checked positive above");
-        let rest = &lines[2..];
-        if rest.len() < natoms {
-            return Err(XyzError(format!(
-                "announced {natoms} atoms, found {} lines",
-                rest.len()
-            ))
-            .into());
-        }
-        Molecule::of_xyz_string_with(&rest[..natoms].join("\n"), charge, multiplicity, units)
-    }
-
     /// `Molecule.distance_matrix`: `d[i][j] = distance(nucleus i, nucleus j)`,
     /// in bohr, row-major, `n × n`.
     ///
@@ -423,11 +328,6 @@ impl Molecule {
             ),
         ])
     }
-
-    /// `Molecule.to_md5`: the MD5 of [`Molecule::to_sexp`]'s printed form.
-    pub fn to_md5(&self) -> String {
-        md5_hex(&self.to_sexp().to_string())
-    }
 }
 
 impl std::fmt::Display for Molecule {
@@ -455,8 +355,9 @@ mod tests {
 
     #[test]
     fn multiplicity_names_cover_the_reference_table() {
+        // Multiplicities m = 1..=10 built from `(alpha, beta) = (m - 1, 0)`.
         let names: Vec<String> = (1..=10)
-            .map(|i| Multiplicity::of_int(i).expect("positive").to_string())
+            .map(|m| Multiplicity::of_alpha_beta(m - 1, 0).to_string())
             .collect();
         assert_eq!(
             names,
@@ -465,8 +366,6 @@ mod tests {
                 "Nonet", "10-et"
             ]
         );
-        assert!(Multiplicity::of_int(0).is_none());
-        assert!(Multiplicity::of_int(-2).is_none());
     }
 
     #[test]
@@ -478,13 +377,13 @@ mod tests {
         );
         // 10 electrons, triplet -> beta = (10-3+1)/2 = 4, alpha = 6, and
         // 1 + 6 - 4 = 3.
-        let (a, b) = Multiplicity::to_alpha_beta(10, Multiplicity::of_int(3).expect("positive"));
+        let (a, b) = Multiplicity::to_alpha_beta(10, Multiplicity::of_alpha_beta(6, 4));
         assert_eq!((a, b), (6, 4));
         assert_eq!(Multiplicity::of_alpha_beta(a, b).to_int(), 3);
         // One electron, doublet -> beta = 0 (OCaml's (-1)/2 truncates to
         // zero, unlike a floor division).
         assert_eq!(
-            Multiplicity::to_alpha_beta(1, Multiplicity::of_int(2).expect("positive")),
+            Multiplicity::to_alpha_beta(1, Multiplicity::of_alpha_beta(1, 0)),
             (1, 0)
         );
     }
@@ -498,7 +397,7 @@ mod tests {
             Units::Bohr,
         )
         .expect("water parses");
-        assert_eq!(m.get_nucl_num(), 3);
+        assert_eq!(m.nuclei.len(), 3);
         assert_eq!(m.elec_alpha, 5);
         assert_eq!(m.elec_beta, 5);
         assert_eq!(m.get_charge().to_int(), 0);
@@ -512,7 +411,7 @@ mod tests {
         let cation = Molecule::of_xyz_string_with(
             WATER_BOHR,
             Charge::of_int(1),
-            Multiplicity::of_int(2).expect("positive"),
+            Multiplicity::of_alpha_beta(5, 4),
             Units::Bohr,
         )
         .expect("cation parses");
@@ -533,7 +432,7 @@ mod tests {
         let err = Molecule::of_xyz_string_with(
             WATER_BOHR,
             Charge::of_int(0),
-            Multiplicity::of_int(2).expect("positive"),
+            Multiplicity::of_alpha_beta(5, 4),
             Units::Bohr,
         )
         .expect_err("10 electrons cannot be a doublet");
@@ -547,7 +446,7 @@ mod tests {
     }
 
     #[test]
-    fn water_sexp_and_md5_match_the_oracle() {
+    fn water_sexp_matches_the_oracle() {
         let m = Molecule::of_xyz_string_with(
             WATER_BOHR,
             Charge::of_int(0),
@@ -562,8 +461,6 @@ mod tests {
              -4.4522390467488435))))((element H)(charge 1)(coord((x 1.0277523843291783)(y 0)(z \
              -1.7491217144932829))))))(elec_alpha 5)(elec_beta 5))"
         );
-        // Oracle `md5_0`, measured on the reference build.
-        assert_eq!(m.to_md5(), "89145e94e76523adf6fbaa1ad612c9a3");
     }
 
     #[test]
@@ -600,7 +497,19 @@ mod tests {
     fn empty_input_has_no_nuclei_and_no_electrons() {
         // The reference would assert (`0 > 0` fails), so an empty molecule
         // is an error here too.
-        assert!(Molecule::of_xyz_string("").is_err());
-        assert!(Molecule::of_xyz_string("\n\n").is_err());
+        let err = Molecule::of_xyz_string_with(
+            "",
+            Charge::of_int(0),
+            Multiplicity::SINGLET,
+            Units::Angstrom,
+        );
+        assert!(err.is_err());
+        let err = Molecule::of_xyz_string_with(
+            "\n\n",
+            Charge::of_int(0),
+            Multiplicity::SINGLET,
+            Units::Angstrom,
+        );
+        assert!(err.is_err());
     }
 }

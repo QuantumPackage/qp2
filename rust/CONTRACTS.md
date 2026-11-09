@@ -263,6 +263,17 @@ failing. `QP_ROOT` unset → `Qpackage.root` fails
 | `qp_print_basis <dir with MOs>` | basis + MO RST | — | 0 |
 | `element_create_db` | — | — | 0 |
 
+**Wave S2 note (2026-11-09).** The table above stays the reference
+measurement. The port no longer reproduces its help behaviour or its
+`Fatal error: exception` stderr lines: `-h`/`--help` is clap's built-in
+(prints the help once to stdout and exits 0, no continuation into the
+argument checks), a missing or doubled positional is a clap
+required-argument / unexpected-argument diagnostic (exit 2), and every
+error/notice string is plain Rust text (`<tool>: <message>`). The byte
+counts and the `Fatal error: exception` first lines are reference
+evidence only; the port contract is the exit column (DEVIATIONS.md
+A4/A9/A10/A11).
+
 ### 2.5 Man-page drift (the man pages are wrong; do not copy them)
 
 | man page | drift vs source |
@@ -456,12 +467,15 @@ against the right one.
 Verified on the Rust port (2026-11-05, `w3/p4-qp-edit` merged): the
 post-fix target holds — a check-mode run creates 7 files for `hcn`,
 all 7 byte-identical; the other five fixtures create 0. Additional
-measured facts: `-h` is not an exit — it prints the help on stdout and
-continues; without `EZFIO_DIR` the help is printed twice (1434 B) and
-the process exits 2 with `Fatal error: exception Failure("EZFIO_DIR is
-missing")`. `Input_bitmasks` is `section = false`: the driver never
-visits it (its handler exists only because the determinants handler
-shares its derivation). The reference's `at_exit` removes
+measured facts (reference build): `-h` is not an exit — it prints the
+help on stdout and continues; without `EZFIO_DIR` the help is printed
+twice (1434 B) and the process exits 2 with `Fatal error: exception
+Failure("EZFIO_DIR is missing")` (wave S2: the port's `-h` is clap's
+built-in — exit 0, no continuation — and the missing-`EZFIO_DIR` error
+is clap's diagnostic). The reference's `Input_bitmasks` is `section = false` and the
+driver never visits it; the port does not model it as a handler at all (the
+determinants handler carries the shared derivation itself). The
+reference's `at_exit` removes
 `work/backup.tar` unconditionally (a pre-existing archive is deleted
 even by `-c`); the port skips both create and remove in check mode
 ("check writes nothing") — documented deviation. The check-mode engine

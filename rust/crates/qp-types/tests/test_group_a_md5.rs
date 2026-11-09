@@ -8,7 +8,7 @@
 //! is the two-nucleus corpus `qp_create_ezfio` produces: the element's shells
 //! read twice, tagged `Nucl_number` 1 then 2, with every exponent and
 //! coefficient put through the EZFIO `%24.15e` → `float_of_string` round trip
-//! ([`qp_types::LibraryBasis`] does all of that). `ao_md5` is
+//! ([`corpus_basis`] does all of that). `ao_md5` is
 //! `Basis.to_md5` of that object; `n_ao` is its Cartesian function count;
 //! `ao_extra_md5` is `MD5("None")` because the corpus has no extra basis.
 //!
@@ -31,7 +31,7 @@ use std::io::BufReader;
 use std::path::{Path, PathBuf};
 
 use qp_types::gto::{Angmom, Gto};
-use qp_types::{Basis, Element, Fmt, LibraryBasis, LongBasis, MD5_OF_NONE, basis, element};
+use qp_types::{Basis, Element, Fmt, LongBasis, MD5_OF_NONE, basis, element};
 
 // ---------------------------------------------------------------------
 // Locating the corpus and the basis library
@@ -311,6 +311,37 @@ fn element_of(row: &Row) -> Element {
         .unwrap_or_else(|e| panic!("row {}/{}: {e}", row.basis, row.element))
 }
 
+/// `float_of_string (Printf.sprintf "%24.15e" x)`: the EZFIO real-array
+/// round trip every `ao_expo`/`ao_coef` went through before it was hashed.
+fn ezfio_round_trip(x: f64) -> f64 {
+    format!("{x:.15e}")
+        .parse::<f64>()
+        .expect("internal invariant: Rust's `e` format always re-parses")
+}
+
+/// The `qp_create_ezfio` sequence the corpus digest is taken over: the
+/// element's section read twice (nucleus 1 then nucleus 2, the stream
+/// rewound by [`basis::find`] between the reads) with every exponent and
+/// coefficient put through the EZFIO `%24.15e` → `float_of_string` round
+/// trip.
+fn corpus_basis(path: &Path, element: Element) -> anyhow::Result<Basis> {
+    let file = File::open(path).map_err(|e| anyhow::anyhow!("opening {}: {e}", path.display()))?;
+    let mut r = BufReader::new(file);
+    let mut b = basis::read_element(&mut r, 1, element)
+        .map_err(|e| anyhow::anyhow!("reading basis section {element}: {e:#}"))?;
+    b.extend(
+        basis::read_element(&mut r, 2, element)
+            .map_err(|e| anyhow::anyhow!("reading basis section {element}: {e:#}"))?,
+    );
+    for (gto, _) in &mut b {
+        for (primitive, coef) in &mut gto.lc {
+            primitive.expo = ezfio_round_trip(primitive.expo);
+            *coef = ezfio_round_trip(*coef);
+        }
+    }
+    Ok(b)
+}
+
 // ---------------------------------------------------------------------
 // The golden test
 // ---------------------------------------------------------------------
@@ -325,27 +356,25 @@ fn every_golden_row_reproduces_ao_md5_and_n_ao() {
     for row in &rows {
         let element = element_of(row);
         let path = dir.join(&row.basis);
-        let lib = match LibraryBasis::from_path(&path, element) {
-            Ok(lib) => lib,
+        let b = match corpus_basis(&path, element) {
+            Ok(b) => b,
             Err(e) => {
                 failures.push(format!("{}/{}: {e:#}", row.basis, row.element));
                 continue;
             }
         };
-        let md5 = lib.md5();
+        let md5 = basis::to_md5(&b);
         if md5 != row.ao_md5 {
             failures.push(format!(
                 "{}/{}: ao_md5 {md5} != {}",
                 row.basis, row.element, row.ao_md5
             ));
         }
-        if lib.n_ao() != row.n_ao {
+        let n_ao = LongBasis::of_basis(&b).len();
+        if n_ao != row.n_ao {
             failures.push(format!(
                 "{}/{}: n_ao {} != {}",
-                row.basis,
-                row.element,
-                lib.n_ao(),
-                row.n_ao
+                row.basis, row.element, n_ao, row.n_ao
             ));
         }
         // Corpus property, not a computation of ours: no row carries an
@@ -379,9 +408,9 @@ fn the_two_documented_collisions_hold_on_the_computed_digests() {
         (Element::Rn, "def2-svp", "def2-tzvpp"),
     ] {
         let read = |basis: &str| {
-            LibraryBasis::from_path(&dir.join(basis), element)
-                .unwrap_or_else(|e| panic!("{basis}/{element}: {e:#}"))
-                .md5()
+            let b = corpus_basis(&dir.join(basis), element)
+                .unwrap_or_else(|e| panic!("{basis}/{element}: {e:#}"));
+            qp_types::basis::to_md5(&b)
         };
         let ma = read(a);
         let mb = read(b);

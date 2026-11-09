@@ -124,61 +124,37 @@ pub(crate) fn of_rst(body: &str) -> ParseResult<Electrons> {
     let names = ["elec_alpha_num", "elec_beta_num"];
     let node = match sexp::parse(&source) {
         Ok(node) => node,
-        Err(error) => {
-            sexp::fail_msg(&source, &error);
-            return Ok(None);
-        }
+        Err(error) => return ParseResult::Reported(error.message),
     };
     let pairs = match sexp::record_fields(&node, &names) {
         Ok(pairs) => pairs,
-        Err(error) => {
-            sexp::fail_msg(&source, &error);
-            return Ok(None);
-        }
+        Err(error) => return ParseResult::Reported(error.message),
     };
 
     let mut values = [0_i64; 2];
     for (slot, name) in values.iter_mut().zip(names) {
         // `record_fields` proved completeness.
-        let Some((_, pair, value_node)) = pairs.iter().find(|(seen, _, _)| *seen == name) else {
+        let Some((_, _, value_node)) = pairs.iter().find(|(seen, _, _)| *seen == name) else {
             unreachable!("record_fields returned an incomplete record")
         };
         let Some(text) = value_node.atom() else {
-            let (start, end) = pair.span();
-            sexp::fail_msg(
-                &source,
-                &sexp::SexpError {
-                    message: "int_of_sexp: expected an atom".to_string(),
-                    start,
-                    end,
-                },
-            );
-            return Ok(None);
+            return ParseResult::Reported("int_of_sexp: expected an atom".to_string());
         };
         match text.parse::<i64>() {
             Ok(value) => *slot = value,
             Err(_) => {
-                let (start, end) = pair.span();
-                sexp::fail_msg(
-                    &source,
-                    &sexp::SexpError {
-                        message: format!("int_of_sexp: invalid integer {text:?}"),
-                        start,
-                        end,
-                    },
-                );
-                return Ok(None);
+                return ParseResult::Reported(format!("int_of_sexp: invalid integer {text:?}"));
             }
         }
     }
-    Ok(Some(Electrons {
+    ParseResult::Parsed(Electrons {
         elec_alpha_num: values[0],
         elec_beta_num: values[1],
-    }))
+    })
 }
 
 /// `set` for the section: parse the body and, when `write_back` is true,
-/// write it.  The `Info: Read error in <title>` retry of `qp_edit.set` is in
+/// write it.  The silent retry of `qp_edit.set` (wave S2.4) is in
 /// [`super::apply_parsed`].
 pub(crate) fn set(ezfio: &EzFio, title: &str, body: &str, write_back: bool) -> Result<()> {
     apply_parsed(title, body, write_back, of_rst, |data| write(ezfio, data))
@@ -254,18 +230,25 @@ mod tests {
             elec_beta_num: 3,
         };
         let body = to_rst(&data).expect("render");
-        assert_eq!(of_rst(&body).expect("parse"), Some(data));
+        assert!(
+            matches!(of_rst(&body), ParseResult::Parsed(parsed) if parsed == data),
+            "expected Parsed({data:?})"
+        );
     }
 
     #[test]
     fn of_rst_reports_a_malformed_value_instead_of_parsing_it() {
-        assert_eq!(
-            of_rst("  elec_alpha_num = seven\n  elec_beta_num = 7\n").expect("reported"),
-            None
+        // Wave S2.4: `of_rst` no longer prints; the driver reports the
+        // `Reported` message as `qp_edit: parse error in <title>: <msg>`.
+        let malformed = of_rst("  elec_alpha_num = seven\n  elec_beta_num = 7\n");
+        assert!(
+            matches!(&malformed, ParseResult::Reported(message) if message.contains("int_of_sexp: invalid integer")),
+            "{malformed:?}"
         );
-        assert_eq!(
-            of_rst("  elec_alpha_num = 7\n").expect("missing field is reported"),
-            None
+        let missing = of_rst("  elec_alpha_num = 7\n");
+        assert!(
+            matches!(&missing, ParseResult::Reported(message) if message.contains("missing field: elec_beta_num")),
+            "{missing:?}"
         );
     }
 

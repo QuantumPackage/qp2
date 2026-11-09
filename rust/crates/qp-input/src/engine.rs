@@ -26,6 +26,7 @@
 use anyhow::{Context, Result, bail};
 use qp_ezfio::EzFio;
 
+use crate::handlers::{ParseResult, apply_parsed};
 use crate::loader::Config;
 use crate::ocaml_compat::string_of_float;
 use crate::schema::{Field, ModuleConfig};
@@ -288,17 +289,20 @@ impl Engine {
     /// `ao_basis`, `ao_extra_basis` and `mo_basis` parse nothing because the
     /// OCaml `set` has a `()` arm for them.
     ///
-    /// A conversion failure that sexplib reports as a `Failure` is printed to
-    /// stderr as `Error:  (...)` and the section is skipped: the OCaml tool
-    /// returns `None` from `of_rst` in that case.
+    /// A conversion failure that sexplib reports as a `Failure` is printed
+    /// to stderr as `qp_edit: parse error in <title>: <message>` (wave
+    /// S2.4; the reference's `Error:  (...)` + `##` snippet is gone) and the
+    /// section is skipped: the OCaml tool returns `None` from `of_rst` in
+    /// that case.
     ///
     /// Any other failure — a domain check such as a negative `Threshold`
     /// (OCaml `Invalid_argument`), or a write error — takes the reference's
-    /// retry path: `Info: Read error in <title>` is printed, the section is
-    /// parsed a second time without writing, and only a failure of that
-    /// second parse is returned (the driver turns it into the `=-` banner).
-    /// The retry's own `Error:  (...)` is printed when it is a reported
-    /// sexplib failure, exactly as the generated `of_rst` does.
+    /// retry path: the section is parsed a second time without writing,
+    /// silently (the reference's `Info: Read error in <title>` line is gone),
+    /// and only a failure of that second parse is returned, wrapped with the
+    /// section title (the driver turns it into `qp_edit: <title>: <message>`).
+    /// The retry's own reported sexplib failure is printed, exactly as the
+    /// generated `of_rst` does.
     pub fn set(&self, ezfio: &EzFio, name: &str, text: &str, apply: bool) -> Result<()> {
         let module = self.section(name)?;
         let header = make_header(&module.title);
@@ -323,37 +327,25 @@ impl Engine {
             return handler_of(module, handler_name)?.set(ezfio, &module.title, body, apply);
         }
 
-        let outcome = match parse_body(module, body) {
-            Ok(values) => {
-                if apply {
-                    let dir = ezfio_dir(module)?;
-                    for (field, value) in values {
-                        let spec = spec_of(field)?;
-                        write_value(ezfio, dir, field, spec, &value)?;
-                    }
+        // The shared one-retry idiom ([`apply_parsed`], the handler sections'
+        // `set` path): the reference's `try ... with _ ->` covers both
+        // `of_rst` and the write, and retries with a parse-only call whose
+        // value is ignored.  Wave S2.4: the retry is silent, and a second
+        // escape is wrapped with the section title.
+        apply_parsed(
+            &module.title,
+            body,
+            apply,
+            |body| parse_body(module, body),
+            |values| {
+                let dir = ezfio_dir(module)?;
+                for (field, value) in values {
+                    let spec = spec_of(field)?;
+                    write_value(ezfio, dir, field, spec, value)?;
                 }
                 Ok(())
-            }
-            Err(RstFailure::Reported { message, snippet }) => {
-                eprint!("Error:  ({message})\n\n  {snippet}\n\n");
-                return Ok(());
-            }
-            Err(RstFailure::Fatal(error)) => Err(error),
-        };
-        if outcome.is_ok() {
-            return Ok(());
-        }
-        // The reference's `try ... with _ ->` covers both `of_rst` and the
-        // write, and retries with a parse-only call whose value is ignored.
-        eprintln!("Info: Read error in {}", module.title);
-        match parse_body(module, body) {
-            Ok(_) => Ok(()),
-            Err(RstFailure::Reported { message, snippet }) => {
-                eprint!("Error:  ({message})\n\n  {snippet}\n\n");
-                Ok(())
-            }
-            Err(RstFailure::Fatal(error)) => Err(error),
-        }
+            },
+        )
     }
 }
 
@@ -474,10 +466,13 @@ fn generic_body(ezfio: &EzFio, module: &ModuleConfig) -> Result<String> {
     let mut out = String::new();
     for field in ocaml_fields(module) {
         let spec = spec_of(field)?;
-        if !ezfio.has(dir, &field.ezfio_name)? {
-            materialise_default(ezfio, module, dir, field, spec)?;
-        }
-        let value = read_value(ezfio, dir, field, spec)?;
+        let value = materialise_when_absent(
+            ezfio,
+            dir,
+            &field.ezfio_name,
+            || materialise_default(ezfio, module, dir, field, spec),
+            || read_value(ezfio, dir, field, spec),
+        )?;
         out.push_str(&format!(
             "\n   {} ::\n   \n     {} = {}\n   ",
             field.doc,
@@ -486,6 +481,28 @@ fn generic_body(ezfio: &EzFio, module: &ModuleConfig) -> Result<String> {
         ));
     }
     Ok(out)
+}
+
+/// Read `group/key`, materialising a default first when the key is absent
+/// (contract C3: the editor may create defaulted attributes that were
+/// absent).
+///
+/// The two halves are closures because the default computation is a side
+/// effect that must not run when the key is present: the engine's
+/// [`materialise_default`] and the handlers' strict default parses
+/// (e.g. `bool_of_string`) fail on values the read path would never see.
+/// The read validates whatever is stored, default or not.
+pub(crate) fn materialise_when_absent<T>(
+    ezfio: &EzFio,
+    group: &str,
+    key: &str,
+    write_default: impl FnOnce() -> Result<()>,
+    read: impl FnOnce() -> Result<T>,
+) -> Result<T> {
+    if !ezfio.has(group, key)? {
+        write_default()?;
+    }
+    read()
 }
 
 /// Write the default of an absent key, the way `read_<f>` does:
@@ -574,31 +591,17 @@ fn write_value(
     result.with_context(|| format!("writing EZFIO attribute {dir}/{key}"))
 }
 
-/// Why parsing one section failed.
-enum RstFailure {
-    /// sexplib would report this as a `Failure` inside `of_rst`: the message
-    /// and snippet are printed and the section is skipped.
-    Reported {
-        /// Text printed after `Error:  (`.
-        message: String,
-        /// `##`-marked excerpt, see [`crate::sexp::snippet`].
-        snippet: String,
-    },
-    /// A conversion exception that `fail_msg` re-raises (`Invalid_argument`
-    /// from a domain check): the driver prints `Info:` and retries.
-    Fatal(anyhow::Error),
-}
-
 /// Parse a section body into `(field, value)` pairs in record order.
 ///
 /// The filter is the generated `of_rst`: keep every line containing `=`,
 /// replace `=` with a space, wrap each line in parentheses, concatenate and
 /// wrap the result once more.  The resulting sexp is a list of
 /// `(name value)` pairs, one per `ocaml` field.
-fn parse_body<'a>(
-    module: &'a ModuleConfig,
-    body: &str,
-) -> std::result::Result<Vec<(&'a Field, Value)>, RstFailure> {
+///
+/// Failures follow [`ParseResult`]: a sexplib `Failure` (malformed sexp,
+/// missing field, rejected value) is `Reported`; a domain check that escapes
+/// (`Invalid_argument` from the fancy `of_*`) is `Escaped`.
+fn parse_body<'a>(module: &'a ModuleConfig, body: &str) -> ParseResult<Vec<(&'a Field, Value)>> {
     let names: Vec<&str> = ocaml_fields(module)
         .map(|field| field.ezfio_name.as_str())
         .collect();
@@ -610,51 +613,47 @@ fn parse_body<'a>(
     }
     source.push(')');
 
-    let node = sexp::parse(&source).map_err(|error| RstFailure::Reported {
-        message: error.message,
-        snippet: sexp::snippet(&source, error.start, error.end),
-    })?;
-    let pairs = sexp::record_fields(&node, &names).map_err(|error| RstFailure::Reported {
-        message: error.message,
-        snippet: sexp::snippet(&source, error.start, error.end),
-    })?;
+    let node = match sexp::parse(&source) {
+        Ok(node) => node,
+        Err(error) => return ParseResult::Reported(error.message),
+    };
+    let pairs = match sexp::record_fields(&node, &names) {
+        Ok(pairs) => pairs,
+        Err(error) => return ParseResult::Reported(error.message),
+    };
 
     let mut values = Vec::with_capacity(names.len());
     for field in ocaml_fields(module) {
-        let Some((_, pair, value_node)) =
-            pairs.iter().find(|(name, _, _)| *name == field.ezfio_name)
+        let Some((_, _, value_node)) = pairs.iter().find(|(name, _, _)| *name == field.ezfio_name)
         else {
             // `record_fields` checked completeness; a miss here is a bug.
-            return Err(RstFailure::Fatal(anyhow::anyhow!(
+            return ParseResult::Escaped(anyhow::anyhow!(
                 "internal error: field `{}` disappeared from the parsed record",
                 field.ezfio_name
-            )));
+            ));
         };
-        values.push((field, convert_field(field, pair, value_node, &source)?));
+        let value = match convert_field(field, value_node) {
+            ParseResult::Parsed(value) => value,
+            ParseResult::Reported(message) => return ParseResult::Reported(message),
+            ParseResult::Escaped(error) => return ParseResult::Escaped(error),
+        };
+        values.push((field, value));
     }
-    Ok(values)
+    ParseResult::Parsed(values)
 }
 
 /// Convert one value node with the field's declared type.
 ///
 /// The primitive parse is done first so that a syntax error can be reported
-/// by `fail_msg` (OCaml `Failure`) while a domain violation takes the
-/// exception path (OCaml `Invalid_argument` from the fancy `of_*`).
-fn convert_field(
-    field: &Field,
-    pair: &sexp::Sexp,
-    node: &sexp::Sexp,
-    source: &str,
-) -> std::result::Result<Value, RstFailure> {
-    let spec = spec_of(field).map_err(RstFailure::Fatal)?;
+/// as a sexplib `Failure` while a domain violation takes the exception path
+/// (OCaml `Invalid_argument` from the fancy `of_*`).
+fn convert_field(field: &Field, node: &sexp::Sexp) -> ParseResult<Value> {
+    let spec = match spec_of(field) {
+        Ok(spec) => spec,
+        Err(error) => return ParseResult::Escaped(error),
+    };
     let Some(text) = node.atom() else {
-        return Err(RstFailure::Reported {
-            message: format!("{}_of_sexp: expected an atom", spec.value().name()),
-            snippet: {
-                let (start, end) = pair.span();
-                sexp::snippet(source, start, end)
-            },
-        });
+        return ParseResult::Reported(format!("{}_of_sexp: expected an atom", spec.value().name()));
     };
     let syntax_ok = match spec.value() {
         ValueKind::Int => text.parse::<i64>().is_ok(),
@@ -663,18 +662,17 @@ fn convert_field(
         ValueKind::String => true,
     };
     if !syntax_ok {
-        let (start, end) = pair.span();
-        return Err(RstFailure::Reported {
-            message: format!(
-                "{}_of_sexp: invalid {} {:?}",
-                spec.value().name(),
-                spec.value().name(),
-                text
-            ),
-            snippet: sexp::snippet(source, start, end),
-        });
+        return ParseResult::Reported(format!(
+            "{}_of_sexp: invalid {} {:?}",
+            spec.value().name(),
+            spec.value().name(),
+            text
+        ));
     }
-    spec.parse_scalar(text).map_err(RstFailure::Fatal)
+    match spec.parse_scalar(text) {
+        Ok(value) => ParseResult::Parsed(value),
+        Err(error) => ParseResult::Escaped(error),
+    }
 }
 
 /// Render one module table.
@@ -1058,10 +1056,11 @@ mod tests {
         let error = engine
             .set(&ezfio, "alpha", &edited, true)
             .expect_err("invalid_argument path");
-        assert!(
-            error.to_string().contains("Strictly_positive_int"),
-            "{error}"
-        );
+        // Wave S2.4: the retry's escape is wrapped with the section title,
+        // so the full chain (`{:#}`) carries both the title and the inner
+        // domain message.
+        let chain = format!("{error:#}");
+        assert!(chain.contains("Strictly_positive_int"), "{chain}");
         assert_eq!(ezfio.get::<i64>("alpha", "n").expect("n"), 7);
     }
 
@@ -1141,9 +1140,9 @@ mod tests {
         let engine = Engine::new(named_config(&[
             ("aaa", true),
             ("ccc", true),
-            ("bitmasks", false),
+            ("derived", false),
         ]));
-        let canonical = ["aaa", "bbb", "ccc", "bitmasks"];
+        let canonical = ["aaa", "bbb", "ccc", "derived"];
         assert_eq!(engine.visit_order(&canonical), vec!["aaa", "ccc"]);
     }
 

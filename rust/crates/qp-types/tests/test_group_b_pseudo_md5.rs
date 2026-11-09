@@ -5,7 +5,7 @@
 //! * **The reference parser.** `ocaml/Pseudo.ml` was transcribed with real
 //!   OCaml `Printf` and `sexplib` derivation (`$HOME/OpenCode/tmp/w2b/
 //!   pseudo_oracle_dune/`) and run on `data/pseudo/bfd` and `data/pseudo/
-//!   ccecp`. Every `display`, `sexp` and `md5` literal below is that
+//!   ccecp`. Every `display` and `sexp` literal below is that
 //!   program's output, byte for byte, including `%20f` rounding and
 //!   `%G`-style float fields.
 //! * **The reference EZFIO arrays.** `tests/fixtures/pseudo/c2h2/` holds the
@@ -20,8 +20,9 @@
 //! Note on `ao_extra_md5`: this is **not** the md5 that ends up in
 //! `basis-md5.jsonl`. `Input_ao_extra_basis.read` hashes the literal string
 //! `"None"` and never consults `Pseudo`, so all 27 rows of the corpus carry
-//! `6adf97f83acf6453d4a6a4b1070f3754`. The values pinned here are the ones
-//! `Pseudo.to_md5` really produces; see `NOTES-group-b.md`.
+//! `6adf97f83acf6453d4a6a4b1070f3754`. The `Pseudo.to_md5` digest itself is
+//! not pinned here: no code in the OCaml tree calls it (it came from
+//! `include To_md5`), and the port dropped it in wave S1.
 
 use qp_types::pseudo::{ElementSymbol, Pseudo};
 
@@ -38,10 +39,8 @@ struct Golden {
     n_elec: u64,
     /// `Pseudo.to_string`, without the newline `print_endline` adds.
     display: &'static str,
-    /// `Sexp.to_string (sexp_of_t t)`: the string whose digest is `md5`.
+    /// `Sexp.to_string (sexp_of_t t)`.
     sexp: &'static str,
-    /// `Digest.to_hex (Digest.string sexp)`, the value stored in EZFIO.
-    md5: &'static str,
 }
 
 const GOLDEN: &[Golden] = &[
@@ -51,7 +50,6 @@ const GOLDEN: &[Golden] = &[
         n_elec: 0,
         display: "H   0 electrons removed\nLocal component:\n              Coeff.      r^n                 Exp.\n            1.000000       -1             4.476924\n            4.476924        1             2.976365\n           -4.321123        0             3.018416",
         sexp: "((element H)(n_elec 0)(local((((expo 4.4769241)(r_power -1))1)(((expo 2.97636451)(r_power 1))4.4769241)(((expo 3.01841596)(r_power 0))-4.3211234)))(non_local()))",
-        md5: "6db102f4312533980cca7bb54ff8dafb",
     },
     Golden {
         element: "He",
@@ -59,7 +57,6 @@ const GOLDEN: &[Golden] = &[
         n_elec: 0,
         display: "He   0 electrons removed\nLocal component:\n              Coeff.      r^n                 Exp.\n            2.000000       -1             9.843688\n           19.687376        1            10.945162\n          -17.205703        0            12.037153",
         sexp: "((element He)(n_elec 0)(local((((expo 9.84368811)(r_power -1))2)(((expo 10.94516233)(r_power 1))19.68737622)(((expo 12.03715264)(r_power 0))-17.20570338)))(non_local()))",
-        md5: "b9ea355a55af1007569a8ef99d3f539f",
     },
     Golden {
         element: "C",
@@ -67,7 +64,6 @@ const GOLDEN: &[Golden] = &[
         n_elec: 2,
         display: "C   2 electrons removed\nLocal component:\n              Coeff.      r^n                 Exp.\n            4.000000       -1             8.359738\n           33.438953        1             4.483619\n          -19.175373        0             3.938313\nNon-local component:\n              Coeff.      r^n                 Exp.     Proj\n           22.551642        0             5.029916   |0><0|",
         sexp: "((element C)(n_elec 2)(local((((expo 8.35973821)(r_power -1))4)(((expo 4.48361888)(r_power 1))33.43895285)(((expo 3.93831258)(r_power 0))-19.17537323)))(non_local((((expo 5.02991637)(r_power 0)(proj 0))22.55164191))))",
-        md5: "0597b7fc1faaf3cd8fd14d166dfa2cdc",
     },
     Golden {
         element: "Cu",
@@ -75,7 +71,6 @@ const GOLDEN: &[Golden] = &[
         n_elec: 10,
         display: "Cu   10 electrons removed\nLocal component:\n              Coeff.      r^n                 Exp.\n           19.000000       -1             6.251496\n          118.778429        1             6.727253\n         -105.899824        0             6.610246\nNon-local component:\n              Coeff.      r^n                 Exp.     Proj\n          127.350694        0            12.365687   |0><0|\n           71.229849        0            11.160729   |1><1|",
         sexp: "((element Cu)(n_elec 10)(local((((expo 6.25149628)(r_power -1))19)(((expo 6.72725326)(r_power 1))118.7784294)(((expo 6.61024592)(r_power 0))-105.89982403)))(non_local((((expo 12.36568715)(r_power 0)(proj 0))127.35069424)(((expo 11.16072939)(r_power 0)(proj 1))71.229849))))",
-        md5: "524ec2d54625d52a022866cbf4c5436e",
     },
     Golden {
         element: "Mg",
@@ -83,7 +78,6 @@ const GOLDEN: &[Golden] = &[
         n_elec: 10,
         display: "Mg   10 electrons removed\nLocal component:\n              Coeff.      r^n                 Exp.\n            2.000000       -1             6.048538\n           12.097075        1             2.796989\n          -17.108313        0             2.547408\nNon-local component:\n              Coeff.      r^n                 Exp.     Proj\n            6.428631        0             5.936017   |0><0|\n           14.195491        0             1.592891   |0><0|\n            3.315069        0             1.583969   |1><1|\n            4.403025        0             1.077297   |1><1|",
         sexp: "((element Mg)(n_elec 10)(local((((expo 6.048538)(r_power -1))2)(((expo 2.796989)(r_power 1))12.097075)(((expo 2.547408)(r_power 0))-17.108313)))(non_local((((expo 5.936017)(r_power 0)(proj 0))6.428631)(((expo 1.592891)(r_power 0)(proj 0))14.195491)(((expo 1.583969)(r_power 0)(proj 1))3.315069)(((expo 1.077297)(r_power 0)(proj 1))4.403025))))",
-        md5: "a1f192d2ca123bc6655d2c82fb2d27ac",
     },
 ];
 
@@ -106,7 +100,6 @@ fn reference_blocks_match_display_sexp_and_md5() {
             golden.element
         );
         assert_eq!(pseudo.to_sexp(), golden.sexp, "{}: sexp", golden.element);
-        assert_eq!(pseudo.to_md5(), golden.md5, "{}: md5", golden.element);
     }
 }
 
@@ -114,17 +107,9 @@ fn reference_blocks_match_display_sexp_and_md5() {
 fn empty_pseudo_matches_the_reference_renderings() {
     // `Pseudo.empty (Element X)` and `Pseudo.empty (Element H)`, as produced
     // by the same OCaml oracle.
-    for (element, md5, sexp) in [
-        (
-            "X",
-            "201bdb5b0e8d7950ef2be710b83f4503",
-            "((element X)(n_elec 0)(local())(non_local()))",
-        ),
-        (
-            "H",
-            "0087fa8e946abf5bbb7ed2227b435200",
-            "((element H)(n_elec 0)(local())(non_local()))",
-        ),
+    for (element, sexp) in [
+        ("X", "((element X)(n_elec 0)(local())(non_local()))"),
+        ("H", "((element H)(n_elec 0)(local())(non_local()))"),
     ] {
         let symbol = ElementSymbol::of_string(element).expect("known element");
         let pseudo = Pseudo::empty(symbol);
@@ -133,7 +118,6 @@ fn empty_pseudo_matches_the_reference_renderings() {
             format!("{element}   0 electrons removed")
         );
         assert_eq!(pseudo.to_sexp(), sexp);
-        assert_eq!(pseudo.to_md5(), md5);
     }
     // A missing element is a valid, empty potential, not an error.
     let ghost = Pseudo::read_element(BFD, ElementSymbol::of_string("X").expect("X"))

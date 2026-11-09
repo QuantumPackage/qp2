@@ -42,11 +42,13 @@
 
 use anyhow::{Context, Result, anyhow, bail};
 use qp_ezfio::EzFio;
+use qp_types::angmom::AngmomError;
 use qp_types::basis::{self, LongBasis};
 use qp_types::gto::{AngmomXyz, Fmt, GaussianPrimitive, Gto, GtoError};
 
 use super::qptypes;
-use crate::engine::make_header;
+use super::usize_of;
+use crate::engine::{make_header, materialise_when_absent};
 use crate::ocaml_compat::assertion;
 
 /// The EZFIO group this handler owns.
@@ -302,14 +304,20 @@ pub(crate) fn read_logical(
     key: &str,
     fallback: bool,
 ) -> Result<bool> {
-    if !ezfio.has(group, key)? {
-        let default = match crate::defaults::lookup(module, key) {
-            Some(text) => bool_of_string(&text)?,
-            None => fallback,
-        };
-        ezfio.set::<bool>(group, key, &default)?;
-    }
-    Ok(ezfio.get::<bool>(group, key)?)
+    materialise_when_absent(
+        ezfio,
+        group,
+        key,
+        || {
+            let default = match crate::defaults::lookup(module, key) {
+                Some(text) => bool_of_string(&text)?,
+                None => fallback,
+            };
+            ezfio.set::<bool>(group, key, &default)?;
+            Ok(())
+        },
+        || Ok(ezfio.get::<bool>(group, key)?),
+    )
 }
 
 /// `bool_of_string`: exactly `"true"` and `"false"`, as in the OCaml stdlib.
@@ -376,7 +384,12 @@ pub(crate) fn to_long_basis(b: &impl Shells) -> Result<LongBasis> {
             .power()
             .get(i)
             .context("Invalid_argument: ao_power index out of bounds")?;
-        let sym = xyz.to_symmetry().map_err(gto_error)?;
+        let sym = xyz.to_angmom().map_err(|error| match error {
+            // `Xyz.to_symmetry` fails only when the total power exceeds the
+            // `Angmom` domain; the reference payload is the `l`.
+            AngmomError::UnknownAngmomL { l } => GtoError::BadAngmom(l.to_string()),
+            other => GtoError::BadAngmom(other.to_string()),
+        })?;
         let prim_num = usize_of(
             *b.prim_num()
                 .get(i)
@@ -393,7 +406,11 @@ pub(crate) fn to_long_basis(b: &impl Shells) -> Result<LongBasis> {
                 .coef()
                 .get(index)
                 .context("Invalid_argument: ao_coef index out of bounds")?;
-            primitives.push((GaussianPrimitive::of_sym_expo(sym, expo), coef));
+            // The reference `Gto.ml` builds the primitive without the
+            // `AO_expo` check (its local copy of the module), so a negative
+            // exponent is not rejected here; `read_expo` is the one place
+            // that enforces it.
+            primitives.push((GaussianPrimitive { sym, expo }, coef));
         }
         shells.push(Gto::of_prim_coef_list(primitives).map_err(gto_error)?);
     }
@@ -569,10 +586,28 @@ pub(crate) fn write(ezfio: &EzFio, b: &AoBasis) -> Result<()> {
     let nucl = super::ezfio_array_of_list(vec![ao_num], b.ao_nucl.clone())?;
     ezfio.set_array::<i64>(GROUP, "ao_nucl", &nucl)?;
 
+    // Fortran column-major: the whole `x` column, then `y`, then `z` —
+    // `read_power` reconstructs from `data[i]`, `data[dim + i]`,
+    // `data[2*dim + i]`.
     let mut power = Vec::with_capacity(3 * b.ao_power.len());
-    power.extend(b.ao_power.iter().map(|xyz| i64::from(xyz.x)));
-    power.extend(b.ao_power.iter().map(|xyz| i64::from(xyz.y)));
-    power.extend(b.ao_power.iter().map(|xyz| i64::from(xyz.z)));
+    power.extend(
+        b.ao_power
+            .iter()
+            .map(|xyz| power_component(xyz.x))
+            .collect::<Result<Vec<_>>>()?,
+    );
+    power.extend(
+        b.ao_power
+            .iter()
+            .map(|xyz| power_component(xyz.y))
+            .collect::<Result<Vec<_>>>()?,
+    );
+    power.extend(
+        b.ao_power
+            .iter()
+            .map(|xyz| power_component(xyz.z))
+            .collect::<Result<Vec<_>>>()?,
+    );
     let power = super::ezfio_array_of_list(vec![ao_num, 3], power)?;
     ezfio.set_array::<i64>(GROUP, "ao_power", &power)?;
 
@@ -651,9 +686,11 @@ pub(crate) fn gto_error(error: GtoError) -> anyhow::Error {
     }
 }
 
-/// A negative count is a corrupt file, not a panic.
-pub(crate) fn usize_of(value: i64) -> Result<usize> {
-    usize::try_from(value).map_err(|_| anyhow!("negative dimension or index: {value}"))
+/// One `ao_power` component written back to the EZFIO array: the `usize`
+/// monomial power of the deduplicated `angmom::Xyz`, exact in `i64` for
+/// every value the reference can produce.
+pub(crate) fn power_component(value: usize) -> Result<i64> {
+    i64::try_from(value).map_err(|_| anyhow!("ao_power component out of range: {value}"))
 }
 
 #[cfg(test)]

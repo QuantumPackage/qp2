@@ -3,16 +3,15 @@
 //! A fake remote REP on `P+9` answers the input protocol: `test` → `OK`,
 //! `get_ezfio_filename` → `testdir`, `get_input` → the captured
 //! `no_work.tar.gz` fixture. The child is a real process, so the whole
-//! reference sequence is checked byte for byte:
+//! sequence (wave S2 wording) is checked:
 //!
 //! ```text
-//! Connect to:
-//! tcp://127.0.0.1:<lp>
-//! Communication [ OK ]
-//! Getting input... testdir ...done
+//! Connect to the tunnel with: tcp://127.0.0.1:<lp>
+//! communication: OK
+//! downloading input testdir ... done
 //! <ssh block>
-//! Ready
-//! qp_tunnel exited properly.
+//! ready
+//! qp_tunnel: exited cleanly
 //! ```
 //!
 //! The fixture has no `testdir/work/`: the reference fails there with
@@ -107,17 +106,15 @@ fn get_input_downloads_unpacks_and_writes_the_address() {
 
     let local = parse_local_port(&child.stdout());
 
-    // The reference's exact -g block: no newline between the message and the
-    // directory name, one space before `...done`.
     assert!(
-        child.stdout().contains("Communication [ OK ]\n"),
+        child.stdout().contains("communication: OK\n"),
         "stdout:\n{}",
         child.stdout()
     );
     assert!(
         child
             .stdout()
-            .contains("Getting input... testdir ...done\n"),
+            .contains("downloading input testdir ... done\n"),
         "stdout:\n{}",
         child.stdout()
     );
@@ -137,13 +134,13 @@ fn get_input_downloads_unpacks_and_writes_the_address() {
         format!("tcp://127.0.0.1:{local}\n")
     );
 
-    // The whole stdout before the signal, against the reference layout.
+    // The whole stdout before the signal, in the S2 layout.
     let hostname = qp_cli::ffi::hostname().expect("hostname");
     let ssh = ssh_instructions(&hostname, "127.0.0.1", i64::from(remote), local);
     // `ssh_instructions` starts with a blank line and ends after the second
-    // ` &`, so `Ready` follows it directly, as in the measured capture.
+    // ` &`, so `ready` follows it directly.
     let expected_running = format!(
-        "Connect to:\ntcp://127.0.0.1:{local}\nCommunication [ OK ]\nGetting input... testdir ...done\n{ssh}Ready\n"
+        "Connect to the tunnel with: tcp://127.0.0.1:{local}\ncommunication: OK\ndownloading input testdir ... done\n{ssh}ready\n"
     );
     assert_eq!(child.stdout(), expected_running);
 
@@ -154,7 +151,7 @@ fn get_input_downloads_unpacks_and_writes_the_address() {
 /// Give `install_signal_handlers` time to run, send SIGUSR1, check the exit.
 ///
 /// The 300 ms sleep closes the documented post-spawn/pre-install window: the
-/// child prints `Ready` from its input thread, which may run before `main`
+/// child prints `ready` from its input thread, which may run before `main`
 /// reaches `install_signal_handlers`.
 fn stop_and_check(child: &mut Running, expected_running: String) {
     thread::sleep(Duration::from_millis(300));
@@ -163,7 +160,7 @@ fn stop_and_check(child: &mut Running, expected_running: String) {
     assert_eq!(status.code(), Some(0), "stderr:\n{}", child.stderr());
     assert_eq!(
         child.stdout(),
-        format!("{expected_running}qp_tunnel exited properly.\n")
+        format!("{expected_running}qp_tunnel: exited cleanly\n")
     );
     assert_eq!(child.stderr(), "");
 }

@@ -6,6 +6,7 @@ edition.workspace = true
 
 [dependencies]
 anyhow = { workspace = true }
+clap = { workspace = true }
 libc = { workspace = true }
 qp-cli = { path = "../../crates/qp-cli" }
 qp-ezfio = { path = "../../crates/qp-ezfio" }

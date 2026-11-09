@@ -252,23 +252,6 @@ impl LongBasis {
         result
     }
 
-    /// The derived `sexp_of_t` of `Long_basis.t`.
-    pub fn to_sexp(&self) -> Sexp {
-        Sexp::list(
-            self.0
-                .iter()
-                .map(|(xyz, g, n)| {
-                    Sexp::list(vec![xyz.to_sexp(), g.to_sexp(), Sexp::atom(n.to_string())])
-                })
-                .collect(),
-        )
-    }
-
-    /// `Long_basis.to_md5`: the md5 of [`LongBasis::to_sexp`].
-    pub fn to_md5(&self) -> String {
-        md5_hex(&self.to_sexp().to_string())
-    }
-
     /// The number of Cartesian functions, i.e. the `ao_num` of the basis.
     pub fn len(&self) -> usize {
         self.0.len()
@@ -277,26 +260,6 @@ impl LongBasis {
     /// `true` for an empty long basis (no shells at all).
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
-    }
-}
-
-impl std::fmt::Display for LongBasis {
-    /// `Long_basis.to_string`: `"(( 1, s, S   9\n  … ),\n( 1, x, P   4\n … ))"`.
-    ///
-    /// Entries are joined by `",\n"` and each is `"( <n>, <xyz>, <gto> )"`;
-    /// the whole is wrapped in parentheses, no trailing newline.
-    ///
-    /// Implemented on `Display` (an inherent `to_string` would shadow it,
-    /// `clippy::inherent_to_string_shadow_display`); call `.to_string()`.
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str("(")?;
-        for (i, (xyz, g, n)) in self.0.iter().enumerate() {
-            if i > 0 {
-                f.write_str(",\n")?;
-            }
-            write!(f, "( {n}, {xyz}, {} )", g.to_string_gamess())?;
-        }
-        f.write_str(")")
     }
 }
 
@@ -419,15 +382,5 @@ P   1
         assert!(text.starts_with("F\nS   1   1.00\n"), "{text}");
         assert!(text.contains("\n****\nF\n"), "{text}");
         assert!(text.ends_with("\n****"), "{text}");
-    }
-
-    #[test]
-    fn long_basis_to_string_shape() {
-        let b = vec![(shell(Angmom::S, 1.0, 1.0), 1)];
-        let long = LongBasis::of_basis(&b);
-        assert_eq!(
-            long.to_string(),
-            "(( 1, s, S   1\n  1         1.000000          1.000000 ))"
-        );
     }
 }

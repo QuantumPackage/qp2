@@ -169,15 +169,22 @@ creates nothing new and changes nothing.
 
 **C7 — malformed input is still reported.** Parsing is not skipped by
 `apply=false`. There are two measured failure classes: (a) a sexplib
-conversion failure (a value the fancy type rejects) prints
-`Error:  (...)` on stderr (two-space prefix, value snippet; the
-type-path wording is approximated) and the exit status stays **0** —
-there is no `Info:` line; (b) an escaped `Invalid_argument` (e.g. an
-out-of-range index) prints an `Info:` line, the retry raises again, and
-the driver banners and exits **1**. Not exercised by this corpus (all
-fixtures are valid); the Rust suite pins it (C7-A/C7-B, prefix and exit
-status only). The original wording here claimed `Info: Read error in
-<section>` + exit 0 for any bad section: wrong (see CONTRACTS §6).
+conversion failure (a value the fancy type rejects) is reported on
+stderr as `qp_edit: parse error in <section>: <message>` — the
+reference's `Error:  (...)` + `##`-snippet reporter
+(`Generic_input_of_rst.fail_msg`) is gone (wave S2) — and the exit
+status stays **0**; there is no `Info:` line. (b) An escaped
+`Invalid_argument` (e.g. an out-of-range index) is retried once,
+silently — the reference's `Info: Read error in <section>` line is
+gone — and the second escape is reported as `qp_edit: <section>:
+<message>` (the error wrapped with the section title; the reference's
+`=-` banner is gone) with exit **1**. The OCaml description in
+parentheses is kept as evidence of the reference behaviour; the
+normative wording is the port's. Not exercised by this corpus (all
+fixtures are valid); the Rust suite pins it (C7-A/C7-B, the reported
+line and the exit status). The original wording here claimed
+`Info: Read error in <section>` + exit 0 for any bad section: wrong
+(see CONTRACTS §6).
 
 ## How the corpus gates this
 

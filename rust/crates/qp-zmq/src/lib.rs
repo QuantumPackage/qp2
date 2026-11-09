@@ -30,8 +30,9 @@
 
 #![deny(missing_docs)]
 
-pub mod message;
 pub mod port_window;
-pub mod progress_bar;
-pub mod queuing_system;
 pub mod task_server;
+
+pub(crate) mod message;
+pub(crate) mod progress_bar;
+pub(crate) mod queuing_system;

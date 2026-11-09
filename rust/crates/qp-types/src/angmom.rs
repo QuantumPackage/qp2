@@ -2,8 +2,7 @@
 //!
 //! [`Angmom`] is the shell label `S..L` (`l = 0..9`). [`Xyz`] is a triplet of
 //! non-negative powers `(x, y, z)` such that `x + y + z = l`, which names one
-//! Cartesian component of a shell. [`Spd`] is the `(l, m)` pair used by the
-//! spherical-harmonic code.
+//! Cartesian component of a shell.
 //!
 //! # Conventions
 //!
@@ -27,8 +26,6 @@
 //! * That `int_of_string` call also happens in the `Null` state, so a negative
 //!   number on its own (`"-2"`) does **not** raise, while `"x-2"` does, with
 //!   the `Positive_int` message for the resulting sum.
-//! * `Spd.of_string` splits on the **first** space only, so `"S 1 2"` fails in
-//!   the integer parser rather than in a shape check.
 //! * OCaml `int_of_string` also accepts `0x`/`0o`/`0b` prefixes; this port
 //!   accepts decimal digits with optional sign and `_` separators. QP2 input
 //!   uses plain decimal.
@@ -37,8 +34,8 @@ use std::fmt;
 
 /// Failure modes of the angular-momentum parsers.
 ///
-/// [`AngmomError::UnknownAngmom`], [`AngmomError::UnknownAngmomChar`] and
-/// [`AngmomError::InvalidSpd`] display the exact reference `failwith` text.
+/// [`AngmomError::UnknownAngmom`] and [`AngmomError::UnknownAngmomChar`]
+/// display the exact reference `failwith` text.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AngmomError {
     /// `Angmom.of_string` got a string that is not one of the ten labels. The
@@ -71,12 +68,6 @@ pub enum AngmomError {
         /// The offending component value.
         number: i128,
     },
-    /// `Spd.of_string` had no space. The display text is
-    /// `"Invalid Spd: <text>"`.
-    InvalidSpd {
-        /// The rejected text.
-        text: String,
-    },
 }
 
 impl fmt::Display for AngmomError {
@@ -94,7 +85,6 @@ impl fmt::Display for AngmomError {
             Self::NegativePower { number } => {
                 write!(f, "Positive_int : (x >= 0) : x={number}")
             }
-            Self::InvalidSpd { text } => write!(f, "Invalid Spd: {text}"),
         }
     }
 }
@@ -462,92 +452,6 @@ fn flush_power(state: XyzState, mut accu: Xyz, number: &str) -> Result<Xyz, Angm
     Ok(accu)
 }
 
-/// A spherical component `(l, m)` (`ocaml/Angmom.ml`, module `Spd`).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Spd {
-    /// The shell label.
-    pub l: Angmom,
-    /// The magnetic quantum number, `-l <= m <= l` for a physical component.
-    /// The type does not enforce the bound.
-    pub m: i32,
-}
-
-impl Spd {
-    /// Parse a component such as `"D +1"` (OCaml `Spd.of_string`).
-    ///
-    /// The string is split on its **first** space; the left part is an
-    /// [`Angmom`] label, the right part an integer.
-    ///
-    /// # Errors
-    ///
-    /// [`AngmomError::InvalidSpd`] when there is no space,
-    /// [`AngmomError::UnknownAngmom`] for a bad label, or
-    /// [`AngmomError::InvalidInteger`] for a bad `m`.
-    pub fn of_string(s: &str) -> Result<Self, AngmomError> {
-        match s.split_once(' ') {
-            Some((l, m)) => Ok(Self {
-                l: Angmom::of_string(l)?,
-                m: parse_i32(m)?,
-            }),
-            None => Err(AngmomError::InvalidSpd { text: s.to_owned() }),
-        }
-    }
-
-    /// Render as `"<L> <+/-><m>"` (OCaml `Spd.to_string`).
-    ///
-    /// A positive `m` is written with an explicit `+`; zero and negative
-    /// values have no sign. The same text is produced by the `Display` impl,
-    /// so `spd.to_string()` is equivalent.
-    fn render(&self) -> String {
-        format!("{} {}{}", self.l, if self.m > 0 { "+" } else { "" }, self.m)
-    }
-
-    /// The `l` quantum number (OCaml `Spd.get_l`).
-    #[must_use]
-    pub fn get_l(&self) -> usize {
-        self.l.to_l()
-    }
-
-    /// The shell label of this component (OCaml `Spd.to_symmetry`).
-    #[must_use]
-    pub fn to_angmom(&self) -> Angmom {
-        self.l
-    }
-
-    /// The `2l+1` components of a shell, `m` from `-l` to `+l` (OCaml
-    /// `Spd.of_angmom`).
-    #[must_use]
-    pub fn of_angmom(sym: Angmom) -> Vec<Self> {
-        let l = sym.to_l();
-        let mut result = Vec::with_capacity(2 * l + 1);
-        for i in 0..2 * l + 1 {
-            result.push(Self {
-                l: sym,
-                // `i - l` with `i <= 2l`, so the magnitude is at most `l <= 9`.
-                m: i as i32 - l as i32,
-            });
-        }
-        result
-    }
-}
-
-impl fmt::Display for Spd {
-    /// OCaml `Spd.to_string`.
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.render())
-    }
-}
-
-/// Parse a signed decimal integer with optional `_` separators.
-fn parse_i32(text: &str) -> Result<i32, AngmomError> {
-    let cleaned: String = text.chars().filter(|&c| c != '_').collect();
-    cleaned
-        .parse::<i32>()
-        .map_err(|_| AngmomError::InvalidInteger {
-            text: text.to_owned(),
-        })
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -682,52 +586,5 @@ mod tests {
             assert!(!components[i + 1..].contains(a));
         }
         assert_eq!(Xyz::new(1, 2, 3).to_angmom(), Ok(Angmom::I));
-    }
-
-    #[test]
-    fn spd_round_trip() {
-        assert_eq!(Spd::of_string("D +1"), Ok(Spd { l: Angmom::D, m: 1 }));
-        assert_eq!(Spd::of_string("D 1"), Ok(Spd { l: Angmom::D, m: 1 }));
-        assert_eq!(
-            Spd::of_string("d -2"),
-            Ok(Spd {
-                l: Angmom::D,
-                m: -2
-            })
-        );
-        assert_eq!(Spd { l: Angmom::D, m: 1 }.to_string(), "D +1");
-        assert_eq!(Spd { l: Angmom::D, m: 0 }.to_string(), "D 0");
-        assert_eq!(
-            Spd {
-                l: Angmom::D,
-                m: -1
-            }
-            .to_string(),
-            "D -1"
-        );
-        assert_eq!(Spd { l: Angmom::P, m: 1 }.get_l(), 1);
-        assert_eq!(Spd { l: Angmom::P, m: 1 }.to_angmom(), Angmom::P);
-    }
-
-    #[test]
-    fn spd_of_angmom_and_errors() {
-        let components = Spd::of_angmom(Angmom::P);
-        assert_eq!(
-            components.iter().map(Spd::to_string).collect::<Vec<_>>(),
-            vec!["P -1", "P 0", "P +1"]
-        );
-        assert_eq!(Spd::of_angmom(Angmom::L).len(), 19);
-        assert_eq!(
-            Spd::of_string("S").expect_err("no space").to_string(),
-            "Invalid Spd: S"
-        );
-        assert!(matches!(
-            Spd::of_string("S 1 2"),
-            Err(AngmomError::InvalidInteger { .. })
-        ));
-        assert!(matches!(
-            Spd::of_string("Q 0"),
-            Err(AngmomError::UnknownAngmom { .. })
-        ));
     }
 }

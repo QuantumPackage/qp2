@@ -24,15 +24,10 @@
 //! then `$QP_ROOT/data/{basis,pseudo}/<name>`; `Sys.file_exists` is true for
 //! a directory, and `open_in`/`File::open` accepts one, so a directory is
 //! opened successfully and only fails on the first read. Basis reads run the
-//! reference's three-attempt chain (see [`read_basis`]), whose error classes
-//! are *not* interchangeable: attempt 2 swallows every exception, attempt 1
-//! and 3 let `End_of_file` out to a handler that turns it into
-//! `Element <E> not found in basis set.`, and everything else escapes with
-//! its OCaml class (`Gto.GTO_Read_Failure` unprefixed, `Failure` prefixed).
-//! The classification was measured against the reference build; the
-//! `qb_types` errors do not carry the OCaml payloads, so
-//! [`classify_read_error`] rebuilds them (`String.sub / Bytes.sub`, `hd`,
-//! `int_of_string`, `Failed in of_prim_coef_list`, …).
+//! reference's three-attempt chain (see [`read_basis`]): attempt 2 swallows
+//! every failure, attempts 1 and 3 turn `End_of_file` into
+//! `Element <E> not found in basis set.`, and everything else fails with
+//! the plain detail text (wave S2).
 //!
 //! Pseudopotentials are stored as the **text of the library file** bound to
 //! each element, because `Pseudo.read_element` takes a channel in OCaml and
@@ -56,16 +51,14 @@ use std::io::{self, BufReader, Read, Write};
 use std::path::{Path, PathBuf};
 
 use qp_types::basis::{self, Basis, NuclNumber};
+use qp_types::error::ToolError;
 use qp_types::gto::GtoError;
 use qp_types::{Atom, Element, element};
 
-use crate::error::{AppError, OcamlException};
-use crate::geometry::strerror;
-use crate::ocaml_num;
+use crate::TOOL;
 
-/// `Nucl_number.get_max ()` above this count: `Nucl_number.of_int` prints
-/// `More than 10_000 nuclei` on stdout (`Qptypes.ml:2` defines `warning` as
-/// `print_string`, so there is no newline).
+/// `Nucl_number.get_max ()` above this count: the reference prints
+/// `More than 10_000 nuclei` (wave S2: on standard error, one line).
 const NUCL_WARNING_THRESHOLD: i64 = 10_000;
 
 /// The `max` `Nucl_number.get_max ()` returns while no EZFIO file is open,
@@ -105,8 +98,8 @@ enum ReadFailure {
     /// `End_of_file`: the element is absent from the file, or the file ends
     /// inside a shell.
     EndOfFile,
-    /// Anything else, already classified for the terminal.
-    Fatal(AppError),
+    /// Anything else, already ready for the terminal.
+    Fatal(ToolError),
 }
 
 impl BasisTable {
@@ -143,17 +136,17 @@ impl BasisTable {
 ///
 /// # Errors
 ///
-/// * [`AppError::Prefixed`] for `Failure`: `Basis <name> not found`,
-///   `Expected format is int,Element:basis`, `int_of_string`, a glyph that
-///   is not a nucl number.
-/// * [`AppError::Uncaught`] for `Element.ElementError` on an auxiliary key,
-///   the `Qptypes.ml:537` assertion for a non-positive nucleus index,
-///   `Invalid_argument("Nucl_number: <n>")` above [`NUCL_DEFAULT_MAX`], and
-///   `Sys_error` when a name exists but cannot be opened.
+/// `Basis <name> not found` for a missing name, the auxiliary-key grammar
+/// errors, the nucleus-index checks of [`nucl_number_of_int`], and
+/// `cannot open <path>: …` when a name exists but cannot be opened.
 ///
 /// The file is opened at fetch time, unconditionally: a spec whose file is
 /// missing fails even when every key it would add is already bound.
-pub fn build_basis_table(spec: &str, nuclei: &[Atom], root: &Path) -> Result<BasisTable, AppError> {
+pub fn build_basis_table(
+    spec: &str,
+    nuclei: &[Atom],
+    root: &Path,
+) -> Result<BasisTable, ToolError> {
     let mut table = BasisTable {
         files: Vec::new(),
         by_key: HashMap::new(),
@@ -201,13 +194,8 @@ pub fn build_basis_table(spec: &str, nuclei: &[Atom], root: &Path) -> Result<Bas
 ///    `Element X not found in basis set.`, a missing key is the fallback
 ///    failure.
 ///
-/// After all three, `Failure "Basis not found for atom <i> (<Element>)"`.
-///
-/// # Errors
-///
-/// See above; errors from attempts 1 and 3 keep their measured class
-/// (`GTO_Read_Failure` and `Sys_error` unprefixed, `Failure` prefixed).
-pub fn read_basis(table: &mut BasisTable, nuclei: &[Atom]) -> Result<Vec<AtomBasis>, AppError> {
+/// After all three, `Basis not found for atom <i> (<Element>)`.
+pub fn read_basis(table: &mut BasisTable, nuclei: &[Atom]) -> Result<Vec<AtomBasis>, ToolError> {
     // `Nucl_number.get_max ()` now reads the EZFIO file, whose `nucl_num`
     // the writer sets to the nucleus count before this loop.
     let max = i64::try_from(nuclei.len()).unwrap_or(i64::MAX);
@@ -228,7 +216,7 @@ fn read_one_nucleus(
     table: &mut BasisTable,
     nucleus: NuclNumber,
     wanted: Element,
-) -> Result<Basis, AppError> {
+) -> Result<Basis, ToolError> {
     let symbol = element::to_string(wanted);
     // Attempt 1: the per-nucleus key.
     match table.read(&format!("{nucleus},{symbol}"), nucleus, wanted) {
@@ -252,17 +240,21 @@ fn read_one_nucleus(
             Err(ReadFailure::NotFound) => {}
         }
     }
-    Err(AppError::fail(format!(
-        "Basis not found for atom {nucleus} ({symbol})"
-    )))
+    Err(ToolError::new(
+        TOOL,
+        format!("Basis not found for atom {nucleus} ({symbol})"),
+    ))
 }
 
-/// `Failure ("Element " ^ Element.to_string e ^ " not found in basis set.")`.
-fn element_not_found(element: Element) -> AppError {
-    AppError::fail(format!(
-        "Element {} not found in basis set.",
-        element::to_string(element)
-    ))
+/// `Element <E> not found in basis set.`
+fn element_not_found(element: Element) -> ToolError {
+    ToolError::new(
+        TOOL,
+        format!(
+            "Element {} not found in basis set.",
+            element::to_string(element)
+        ),
+    )
 }
 
 /// Parse and canonicalise the `key` of an auxiliary spec entry.
@@ -278,20 +270,26 @@ fn element_not_found(element: Element) -> AppError {
 /// ```
 ///
 /// so the element form is tried first and only an `ElementError` falls back
-/// to the `i,Element` form. The returned key is `Element.to_string` or
+/// to the `i,Element` form (wave S2.3: the index is decimal-only
+/// `i64::from_str`). The returned key is `Element.to_string` or
 /// `"<i>,<Element>"`, exactly what `basis_channel` looks up.
-fn auxiliary_key(key: &str) -> Result<String, AppError> {
+fn auxiliary_key(key: &str) -> Result<String, ToolError> {
     if let Ok(element) = element::of_string(key) {
         return Ok(element::to_string(element).to_owned());
     }
     let mut parts = key.split(',');
     let (Some(index), Some(symbol), None) = (parts.next(), parts.next(), parts.next()) else {
-        return Err(AppError::fail("Expected format is int,Element:basis"));
+        return Err(ToolError::new(TOOL, "Expected format is int,Element:basis"));
     };
-    let index = ocaml_num::int_of_string(index).map_err(|_| AppError::fail("int_of_string"))?;
+    let index = index.parse::<i64>().map_err(|_| {
+        ToolError::new(
+            TOOL,
+            format!("invalid integer '{index}' in the auxiliary key '{key}'"),
+        )
+    })?;
     let nucleus = nucl_number_of_int(index, NUCL_DEFAULT_MAX)?;
-    let element = element::of_string(symbol)
-        .map_err(|error| AppError::uncaught(OcamlException::ElementError(error.to_string())))?;
+    let element =
+        element::of_string(symbol).map_err(|error| ToolError::new(TOOL, error.to_string()))?;
     Ok(format!("{nucleus},{}", element::to_string(element)))
 }
 
@@ -302,58 +300,51 @@ fn auxiliary_key(key: &str) -> Result<String, AppError> {
 ///   file is open, the nucleus count once `nuclei/nucl_num` is written.
 ///   The reference skips the upper check when `max = 1`.
 ///
-/// The assertion `x >= 1` is `Qptypes.ml:537, characters 6-12`; above
-/// [`NUCL_WARNING_THRESHOLD`] the warning goes to **stdout** with no
-/// newline (`warning = print_string`), and an index above `max` is an
-/// unprefixed `Invalid_argument("Nucl_number: <x>")`.
-fn nucl_number_of_int(x: i64, max: i64) -> Result<NuclNumber, AppError> {
+/// The `x >= 1` check, the `More than 10_000 nuclei` warning (wave S2:
+/// standard error) and the `x <= max` check, in the reference's order.
+fn nucl_number_of_int(x: i64, max: i64) -> Result<NuclNumber, ToolError> {
     if x < 1 {
-        return Err(AppError::uncaught(OcamlException::Assert {
-            file: "Qptypes.ml".to_owned(),
-            line: 537,
-            start: 6,
-            end: 12,
-        }));
+        return Err(ToolError::new(
+            TOOL,
+            format!("nucleus index {x} must be at least 1"),
+        ));
     }
     if x > NUCL_WARNING_THRESHOLD {
-        // A closed stdout is the only failure; the reference's `print_string`
-        // would raise `Sys_error` there, which no reachable call site hits.
-        let _ = io::stdout().write_all(b"More than 10_000 nuclei");
+        // The reference's `print_string` (stdout, no newline) moved to
+        // standard error as one line (wave S2).
+        let _ = writeln!(io::stderr(), "More than 10_000 nuclei");
     }
     if max != 1 && x > max {
-        return Err(nucl_out_of_range(x));
+        return Err(nucl_out_of_range(x, max));
     }
     // `NuclNumber` is an `i32` while the reference's `int` is 63-bit. Every
     // reachable value is at most `max` or at most 10 000, so the conversion
     // succeeds; keep the failure instead of panicking if that ever changes.
-    NuclNumber::try_from(x).map_err(|_| nucl_out_of_range(x))
+    NuclNumber::try_from(x).map_err(|_| nucl_out_of_range(x, max))
 }
 
-/// `Invalid_argument ("Nucl_number: " ^ string_of_int x)`.
-fn nucl_out_of_range(x: i64) -> AppError {
-    AppError::uncaught(OcamlException::InvalidArgument(format!("Nucl_number: {x}")))
+/// The index above `max`.
+fn nucl_out_of_range(x: i64, max: i64) -> ToolError {
+    ToolError::new(
+        TOOL,
+        format!("nucleus index {x} is above the maximum of {max}"),
+    )
 }
 
-/// Map a `basis::read_element` error to the reference's exception class.
+/// Map a `basis::read_element` error to the failure the reference reports.
 ///
-/// Measured against `~/qp2/ocaml/qp_create_ezfio.native` with an auxiliary
-/// entry so that attempt 1 reports the error:
-///
-/// | library error | reference |
-/// | --- | --- |
-/// | element absent / EOF inside a shell | `End_of_file` (handled by the chain) |
-/// | malformed primitive line | `Gto.GTO_Read_Failure("<line>")`, unprefixed |
-/// | shell line shorter than two bytes | `Invalid_argument("String.sub / Bytes.sub")` |
-/// | unknown angular momentum | `Failure("Angmom should be …")`, prefixed |
-/// | non-numeric shell size | `Failure("int_of_string")`, prefixed |
-/// | empty primitive list | `Failure("hd")`, prefixed |
-/// | mixed symmetries | `Failure("Failed in of_prim_coef_list")`, prefixed |
-/// | I/O error with an errno | `Sys_error("<strerror>")`, unprefixed |
+/// The classification of the three-attempt chain is unchanged: `End_of_file`
+/// (element absent, or the file ends inside a shell) is handled by the
+/// chain; everything else carries the crate's plain detail text (wave S2
+/// replaces the OCaml exception classes) — `GTO read failure: "<line>"` for
+/// a malformed primitive line, `Shell line too short: …`, `Angmom should be
+/// …`, `Bad shell size in …`, `Empty primitive list` — and the standard
+/// `io::Error` display for a read error (`Is a directory (os error 21)`).
 ///
 /// The mixed-symmetry arm is unreachable through `Gto::read_one` (one shell
 /// line has one angular momentum) and is kept for exhaustiveness. A
 /// non-UTF-8 line has no OCaml counterpart — the reference carries bytes —
-/// and becomes the prefixed `Display` text of the `io::Error`.
+/// and becomes the `io::Error` display of the invalid-data error.
 fn classify_read_error(error: anyhow::Error) -> ReadFailure {
     if let Some(error) = error.downcast_ref::<io::Error>() {
         return classify_io_error(error);
@@ -363,46 +354,23 @@ fn classify_read_error(error: anyhow::Error) -> ReadFailure {
             // `Basis.read` never returns it; `find` reports its own EOF.
             GtoError::EndOfBasis => ReadFailure::EndOfFile,
             GtoError::Io(io) => classify_io_error(io),
-            GtoError::ReadFailure(line) => ReadFailure::Fatal(AppError::uncaught(
-                OcamlException::GtoReadFailure(line.clone()),
-            )),
-            // `String.sub buffer 0 2` on a one-byte line (`Gto.ml:48`).
-            GtoError::ShortLine(_) => ReadFailure::Fatal(AppError::uncaught(
-                OcamlException::InvalidArgument("String.sub / Bytes.sub".to_owned()),
-            )),
-            // `Display` is the OCaml `Failure` payload for this variant.
-            GtoError::BadAngmom(_) => ReadFailure::Fatal(AppError::fail(error.to_string())),
-            // `int_of_string (String_ext.strip n_str)` (`Gto.ml:51`).
-            GtoError::BadShellSize(_) => ReadFailure::Fatal(AppError::fail("int_of_string")),
-            // `List.hd []` in `Gto.of_prim_coef_list` (`Gto.ml:18`).
-            GtoError::EmptyPrimitiveList => ReadFailure::Fatal(AppError::fail("hd")),
-            GtoError::MixedSymmetry => {
-                ReadFailure::Fatal(AppError::fail("Failed in of_prim_coef_list"))
-            }
-            // Only `Angmom.Xyz::of_string` produces it; not reachable here.
-            GtoError::BadXyz(_) => ReadFailure::Fatal(AppError::fail(error.to_string())),
+            other => ReadFailure::Fatal(ToolError::new(TOOL, other.to_string())),
         };
     }
-    ReadFailure::Fatal(AppError::fail(error.to_string()))
+    ReadFailure::Fatal(ToolError::new(TOOL, error.to_string()))
 }
 
 /// Classify an `io::Error` raised while reading a basis channel.
 ///
 /// `UnexpectedEof` is `End_of_file` — both `Basis.find` (element absent)
 /// and `Gto::read_one` (file ends inside a shell) report it that way. Any
-/// other error with an errno is the reference's `Sys_error`; `input_line`
-/// carries no path, so the payload is the bare `strerror` text (measured:
-/// `Sys_error("Is a directory")`).
+/// other error keeps the standard display, bare (the reference's
+/// `input_line` carried no path).
 fn classify_io_error(error: &io::Error) -> ReadFailure {
     if error.kind() == io::ErrorKind::UnexpectedEof {
         return ReadFailure::EndOfFile;
     }
-    match error.raw_os_error() {
-        Some(code) => {
-            ReadFailure::Fatal(AppError::uncaught(OcamlException::SysError(strerror(code))))
-        }
-        None => ReadFailure::Fatal(AppError::fail(error.to_string())),
-    }
+    ReadFailure::Fatal(ToolError::new(TOOL, error.to_string()))
 }
 
 /// Which `$QP_ROOT/data` subdirectory a name is resolved against.
@@ -428,9 +396,9 @@ impl Library {
 ///
 /// `Sys.file_exists` is true for a directory, and both `open_in` and
 /// `File::open` succeed on one; the failure then surfaces on the first read
-/// (a `Sys_error` for a basis, an empty library for a pseudo). Opening is
-/// what fails here, and `Sys_error("<path>: <strerror>")` is unprefixed.
-fn fetch(library: Library, name: &str, root: &Path) -> Result<File, AppError> {
+/// (an `Is a directory` text for a basis, an empty library for a pseudo).
+/// Opening is what fails here, with the standard `io::Error` display.
+fn fetch(library: Library, name: &str, root: &Path) -> Result<File, ToolError> {
     let local = Path::new(name);
     let remote = long_path(library, name, root);
     let path = if local.exists() {
@@ -438,18 +406,16 @@ fn fetch(library: Library, name: &str, root: &Path) -> Result<File, AppError> {
     } else if remote.exists() {
         remote.as_path()
     } else {
-        return Err(AppError::fail(match library {
-            Library::Basis => format!("Basis {name} not found"),
-            Library::Pseudo => format!("Pseudo file {name} not found."),
-        }));
+        return Err(ToolError::new(
+            TOOL,
+            match library {
+                Library::Basis => format!("Basis {name} not found"),
+                Library::Pseudo => format!("Pseudo file {name} not found."),
+            },
+        ));
     };
-    File::open(path).map_err(|error| {
-        let detail = match error.raw_os_error() {
-            Some(code) => format!("{}: {}", path.display(), strerror(code)),
-            None => format!("{}: {error}", path.display()),
-        };
-        AppError::uncaught(OcamlException::SysError(detail))
-    })
+    File::open(path)
+        .map_err(|error| ToolError::new(TOOL, format!("cannot open {}: {error}", path.display())))
 }
 
 /// `Qpackage.root ^ "/data/" ^ dir ^ "/" ^ name`, byte for byte.
@@ -504,20 +470,13 @@ impl PseudoTable {
 /// entries use `Hashtbl.add` unconditionally so the leftmost wins for
 /// pseudo), with two differences: a principal name is used **raw**, while an
 /// auxiliary name is ASCII-lowercased; and the auxiliary key must be an
-/// element — the `int,Element` form is not accepted here, so `1,H:…` raises
-/// `Element.ElementError("Element 1,h unknown")` before the fetch.
-///
-/// # Errors
-///
-/// * [`AppError::Prefixed`] for `Failure("Pseudo file <name> not found.")`
-///   (note the trailing dot and the lowercased auxiliary name).
-/// * [`AppError::Uncaught`] for the auxiliary key's `Element.ElementError`
-///   and for `Sys_error` when a name exists but cannot be opened.
+/// element — the `int,Element` form is not accepted here, so `1,H:…` fails
+/// with the plain `Element 1,h unknown` before the fetch.
 pub fn read_pseudo(
     spec: Option<&str>,
     nuclei: &[Atom],
     root: &Path,
-) -> Result<PseudoTable, AppError> {
+) -> Result<PseudoTable, ToolError> {
     let mut table = PseudoTable::default();
     let Some(spec) = spec else {
         return Ok(table);
@@ -532,9 +491,8 @@ pub fn read_pseudo(
             }
             Some((key, name)) => {
                 // `Element.of_string key` is not guarded: `1,H` lands here.
-                let element = element::of_string(key).map_err(|error| {
-                    AppError::uncaught(OcamlException::ElementError(error.to_string()))
-                })?;
+                let element = element::of_string(key)
+                    .map_err(|error| ToolError::new(TOOL, error.to_string()))?;
                 // `String.lowercase_ascii pseudo`, then the fetch.
                 let index = table.push(read_library_text(
                     Library::Pseudo,
@@ -560,7 +518,7 @@ pub fn read_pseudo(
 /// `""`. Two deviations: a non-UTF-8 file loses its bytes where OCaml would
 /// parse them, and a mid-file I/O error keeps the bytes already read where
 /// the reference's `input_line` would raise `End_of_file` at that point.
-fn read_library_text(library: Library, name: &str, root: &Path) -> Result<String, AppError> {
+fn read_library_text(library: Library, name: &str, root: &Path) -> Result<String, ToolError> {
     let mut file = fetch(library, name, root)?;
     let mut text = String::new();
     let _ = file.read_to_string(&mut text);
@@ -620,7 +578,7 @@ mod tests {
     }
 
     /// The action's two phases, in the reference's order.
-    fn read_all(spec: &str, nuclei: &[Atom], root: &Path) -> Result<Vec<AtomBasis>, AppError> {
+    fn read_all(spec: &str, nuclei: &[Atom], root: &Path) -> Result<Vec<AtomBasis>, ToolError> {
         let mut table = build_basis_table(spec, nuclei, root)?;
         read_basis(&mut table, nuclei)
     }
@@ -638,7 +596,7 @@ mod tests {
     const HE_ONLY: &str = "He\nS 1\n1 2.0 1.0\n\n";
 
     #[test]
-    fn principal_basis_is_read_for_every_nucleus() {
+    fn a_principal_basis_is_read_for_every_nucleus() {
         let (_dir, path) = scratch("hhe.basis", HHE);
         let spec = path.display().to_string();
         let result = read_all(&spec, &h_he(), Path::new("")).expect("principal basis");
@@ -654,14 +612,14 @@ mod tests {
     }
 
     #[test]
-    fn principal_basis_is_found_in_the_database() {
+    fn a_principal_basis_is_found_in_the_database() {
         let (_dir, root) = fake_root("basis", "mylib.basis", H_ONLY);
         let result = read_all("mylib.basis", &atoms(&["H"]), &root).expect("database");
         assert_eq!(result[0].basis.len(), 1);
     }
 
     #[test]
-    fn rightmost_principal_spec_wins() {
+    fn the_rightmost_principal_spec_wins() {
         // `a` covers H, `b` does not. Processed right to left, `b` binds H
         // first and `a` skips it, so the run fails: the rightmost wins.
         let (_a, a) = scratch("a.basis", H_ONLY);
@@ -669,8 +627,8 @@ mod tests {
         let spec = format!("{}|{}", a.display(), b.display());
         let error = read_all(&spec, &atoms(&["H"]), Path::new("")).expect_err("b wins");
         assert_eq!(
-            error.render(),
-            "qp_create_ezfio: Basis not found for atom 1 (H)\n"
+            error.to_string(),
+            "qp_create_ezfio: Basis not found for atom 1 (H)"
         );
         // The other order succeeds, which proves the file really was `a`.
         let spec = format!("{}|{}", b.display(), a.display());
@@ -678,7 +636,7 @@ mod tests {
     }
 
     #[test]
-    fn auxiliary_spec_overrides_one_nucleus() {
+    fn an_auxiliary_spec_overrides_one_nucleus() {
         // Nucleus 1 takes the auxiliary file's hydrogen (exponent 3), the
         // principal file's (exponent 1) covers the rest.
         let (_dir, aux) = scratch("aux.basis", "H\nS 1\n1 3.0 1.0\n\n");
@@ -690,7 +648,7 @@ mod tests {
     }
 
     #[test]
-    fn leftmost_auxiliary_spec_wins() {
+    fn the_leftmost_auxiliary_spec_wins() {
         let (_a, a) = scratch("a.basis", "H\nS 1\n1 3.0 1.0\n\n");
         let (_b, b) = scratch("b.basis", "H\nS 1\n1 4.0 1.0\n\n");
         let spec = format!("1,H:{}|1,H:{}", a.display(), b.display());
@@ -701,47 +659,47 @@ mod tests {
     #[test]
     fn a_malformed_section_in_attempt_two_is_swallowed() {
         // Principal entry: attempt 2 reads it and `with _` hides the
-        // GTO_Read_Failure, so the reported failure is the fallback one.
+        // GTO read failure, so the reported failure is the fallback one.
         let (_dir, path) = scratch("bad.basis", "H\nS 1\n1 1.0\n\n");
         let spec = path.display().to_string();
         let error = read_all(&spec, &atoms(&["H"]), Path::new("")).expect_err("swallowed");
         assert_eq!(
-            error.render(),
-            "qp_create_ezfio: Basis not found for atom 1 (H)\n"
+            error.to_string(),
+            "qp_create_ezfio: Basis not found for atom 1 (H)"
         );
     }
 
     #[test]
-    fn a_malformed_section_in_attempt_one_is_unprefixed() {
+    fn a_malformed_section_in_attempt_one_is_a_gto_read_failure() {
         // Auxiliary entry: attempt 1 reads it, and the error escapes.
         let (_dir, path) = scratch("bad.basis", "H\nS 1\n1 1.0\n\n");
         let spec = format!("1,H:{}", path.display());
         let error = read_all(&spec, &atoms(&["H"]), Path::new("")).expect_err("gto");
         assert_eq!(
-            error.render(),
-            "Fatal error: exception Gto.GTO_Read_Failure(\"1 1.0\")\n"
+            error.to_string(),
+            "qp_create_ezfio: GTO read failure: \"1 1.0\""
         );
     }
 
     #[test]
-    fn eof_in_attempt_one_is_element_not_found() {
+    fn an_eof_in_attempt_one_is_element_not_found() {
         let (_dir, path) = scratch("eof.basis", "H\nS 2\n1 1.0 1.0\n");
         let spec = format!("1,H:{}", path.display());
         let error = read_all(&spec, &atoms(&["H"]), Path::new("")).expect_err("eof");
         assert_eq!(
-            error.render(),
-            "qp_create_ezfio: Element H not found in basis set.\n"
+            error.to_string(),
+            "qp_create_ezfio: Element H not found in basis set."
         );
     }
 
     #[test]
-    fn eof_in_attempt_two_is_basis_not_found() {
+    fn an_eof_in_attempt_two_is_basis_not_found() {
         let (_dir, path) = scratch("eof.basis", "H\nS 2\n1 1.0 1.0\n");
         let spec = path.display().to_string();
         let error = read_all(&spec, &atoms(&["H"]), Path::new("")).expect_err("eof");
         assert_eq!(
-            error.render(),
-            "qp_create_ezfio: Basis not found for atom 1 (H)\n"
+            error.to_string(),
+            "qp_create_ezfio: Basis not found for atom 1 (H)"
         );
     }
 
@@ -764,18 +722,18 @@ mod tests {
         let spec = path.display().to_string();
         let error = read_all(&spec, &atoms(&["X"]), Path::new("")).expect_err("no H");
         assert_eq!(
-            error.render(),
-            "qp_create_ezfio: Element X not found in basis set.\n"
+            error.to_string(),
+            "qp_create_ezfio: Element X not found in basis set."
         );
     }
 
     #[test]
-    fn a_missing_basis_file_is_prefixed() {
+    fn a_missing_basis_file_is_reported() {
         let error = read_all("nosuchbasis", &atoms(&["H"]), Path::new("/nonexistent"))
             .expect_err("missing");
         assert_eq!(
-            error.render(),
-            "qp_create_ezfio: Basis nosuchbasis not found\n"
+            error.to_string(),
+            "qp_create_ezfio: Basis nosuchbasis not found"
         );
     }
 
@@ -784,36 +742,51 @@ mod tests {
         let error = build_basis_table("1,H,extra:x.basis", &atoms(&["H"]), Path::new(""))
             .expect_err("shape");
         assert_eq!(
-            error.render(),
-            "qp_create_ezfio: Expected format is int,Element:basis\n"
+            error.to_string(),
+            "qp_create_ezfio: Expected format is int,Element:basis"
         );
     }
 
     #[test]
-    fn a_zero_nucleus_index_is_the_qptypes_assertion() {
+    fn a_zero_nucleus_index_is_rejected() {
         let error = build_basis_table("0,H:x.basis", &atoms(&["H"]), Path::new(""))
             .expect_err("zero index");
         assert_eq!(
-            error.render(),
-            "Fatal error: exception File \"Qptypes.ml\", line 537, characters 6-12: Assertion failed\n"
+            error.to_string(),
+            "qp_create_ezfio: nucleus index 0 must be at least 1"
         );
     }
 
     #[test]
-    fn a_nucleus_index_above_ten_thousand_is_invalid_argument() {
+    fn a_nucleus_index_above_ten_thousand_is_above_the_maximum() {
         let error = build_basis_table("10001,H:x.basis", &atoms(&["H"]), Path::new(""))
             .expect_err("big index");
         assert_eq!(
-            error.render(),
-            "Fatal error: exception Invalid_argument(\"Nucl_number: 10001\")\n"
+            error.to_string(),
+            "qp_create_ezfio: nucleus index 10001 is above the maximum of 10000"
         );
     }
 
     #[test]
-    fn a_non_numeric_nucleus_index_is_int_of_string() {
+    fn a_non_numeric_nucleus_index_is_an_invalid_integer() {
         let error = build_basis_table("zz,H:x.basis", &atoms(&["H"]), Path::new(""))
             .expect_err("not an int");
-        assert_eq!(error.render(), "qp_create_ezfio: int_of_string\n");
+        assert_eq!(
+            error.to_string(),
+            "qp_create_ezfio: invalid integer 'zz' in the auxiliary key 'zz,H'"
+        );
+    }
+
+    #[test]
+    fn a_hex_nucleus_index_is_an_invalid_integer() {
+        // Wave S2.3: decimal-only (the reference's `int_of_string` would
+        // have parsed `0x10` as 16).
+        let error = build_basis_table("0x10,H:x.basis", &atoms(&["H"]), Path::new(""))
+            .expect_err("hex index");
+        assert_eq!(
+            error.to_string(),
+            "qp_create_ezfio: invalid integer '0x10' in the auxiliary key '0x10,H'"
+        );
     }
 
     #[test]
@@ -823,88 +796,87 @@ mod tests {
         let error = build_basis_table("Q:x.basis", &atoms(&["H"]), Path::new(""))
             .expect_err("unknown element");
         assert_eq!(
-            error.render(),
-            "qp_create_ezfio: Expected format is int,Element:basis\n"
+            error.to_string(),
+            "qp_create_ezfio: Expected format is int,Element:basis"
         );
     }
 
     #[test]
-    fn an_unknown_auxiliary_element_is_unprefixed() {
-        // `1,Q`: the shape matches, `int_of_string` succeeds, and the
-        // element lookup is *outside* the `try`, so its `ElementError`
-        // escapes.
+    fn an_unknown_auxiliary_element_is_reported() {
+        // `1,Q`: the shape matches, the index parses, and the element lookup
+        // fails with its plain text.
         let error = build_basis_table("1,Q:x.basis", &atoms(&["H"]), Path::new(""))
             .expect_err("unknown element");
-        assert_eq!(
-            error.render(),
-            "Fatal error: exception Element.ElementError(\"Element Q unknown\")\n"
-        );
+        assert_eq!(error.to_string(), "qp_create_ezfio: Element Q unknown");
     }
 
     #[test]
     fn an_empty_basis_name_opens_the_database_directory() {
         // `--basis=` → the name is `""`; the local path does not exist but
         // `$QP_ROOT/data/basis/` does, so the directory is opened and its
-        // first read fails with EISDIR, swallowed by attempt 2.
+        // first read fails with `Is a directory`, swallowed by attempt 2.
         let dir = tempdir().expect("tempdir");
         let data = dir.path().join("data").join("basis");
         fs::create_dir_all(&data).expect("create data dir");
         let error = read_all("", &atoms(&["H"]), dir.path()).expect_err("directory");
         assert_eq!(
-            error.render(),
-            "qp_create_ezfio: Basis not found for atom 1 (H)\n"
+            error.to_string(),
+            "qp_create_ezfio: Basis not found for atom 1 (H)"
         );
     }
 
     #[test]
-    fn a_directory_in_attempt_one_is_an_unprefixed_sys_error() {
+    fn a_directory_in_attempt_one_is_a_plain_io_error() {
         let dir = tempdir().expect("tempdir");
         let spec = format!("1,H:{}", dir.path().display());
         let error = read_all(&spec, &atoms(&["H"]), Path::new("")).expect_err("directory");
         assert_eq!(
-            error.render(),
-            "Fatal error: exception Sys_error(\"Is a directory\")\n"
+            error.to_string(),
+            "qp_create_ezfio: Is a directory (os error 21)"
         );
     }
 
     #[test]
-    fn a_short_shell_line_is_the_string_sub_failure() {
+    fn a_short_shell_line_is_reported() {
         let (_dir, path) = scratch("short.basis", "H\nZ\n\n");
         let spec = format!("1,H:{}", path.display());
         let error = read_all(&spec, &atoms(&["H"]), Path::new("")).expect_err("short line");
         assert_eq!(
-            error.render(),
-            "Fatal error: exception Invalid_argument(\"String.sub / Bytes.sub\")\n"
+            error.to_string(),
+            "qp_create_ezfio: Shell line too short: \"Z\""
         );
     }
 
     #[test]
-    fn a_bad_angular_momentum_is_prefixed() {
+    fn a_bad_angular_momentum_is_reported() {
         let (_dir, path) = scratch("ang.basis", "H\nX 1\n1 1.0 1.0\n\n");
         let spec = format!("1,H:{}", path.display());
         let error = read_all(&spec, &atoms(&["H"]), Path::new("")).expect_err("angmom");
         assert_eq!(
-            error.render(),
-            "qp_create_ezfio: Angmom should be S|P|D|F|G|H|I|J|K|L, not X.\n"
+            error.to_string(),
+            "qp_create_ezfio: Angmom should be S|P|D|F|G|H|I|J|K|L, not X."
         );
     }
 
     #[test]
-    fn a_non_numeric_shell_size_is_int_of_string() {
+    fn a_non_numeric_shell_size_is_reported() {
         let (_dir, path) = scratch("size.basis", "H\nS x\n1 1.0 1.0\n\n");
         let spec = format!("1,H:{}", path.display());
         let error = read_all(&spec, &atoms(&["H"]), Path::new("")).expect_err("shell size");
-        assert_eq!(error.render(), "qp_create_ezfio: int_of_string\n");
+        assert_eq!(
+            error.to_string(),
+            "qp_create_ezfio: Bad shell size in \"S x\""
+        );
     }
 
     #[test]
-    fn an_empty_primitive_list_is_hd() {
+    fn an_empty_primitive_list_is_reported() {
         // `S 0` reads no primitive, so `Gto.of_prim_coef_list` hits
-        // `List.hd []`. Measured.
+        // `List.hd []` in the reference.
         let (_dir, path) = scratch("empty.basis", "H\nS 0\n\n");
         let spec = format!("1,H:{}", path.display());
         let error = read_all(&spec, &atoms(&["H"]), Path::new("")).expect_err("no primitive");
-        assert_eq!(error.render(), "qp_create_ezfio: hd\n");
+        assert_eq!(error.to_string(), "qp_create_ezfio: Empty primitive list");
     }
 
     #[test]
@@ -914,7 +886,7 @@ mod tests {
     }
 
     #[test]
-    fn principal_pseudo_covers_every_nucleus() {
+    fn a_principal_pseudo_covers_every_nucleus() {
         let (_dir, path) = scratch("lib.pseudo", "H GEN 1 0\n0\n\n");
         let spec = path.display().to_string();
         let table = read_pseudo(Some(&spec), &h_he(), Path::new("")).expect("principal");
@@ -938,10 +910,7 @@ mod tests {
     fn an_auxiliary_pseudo_key_must_be_an_element() {
         let error = read_pseudo(Some("1,H:bfd"), &atoms(&["H"]), Path::new(""))
             .expect_err("int,Element rejected");
-        assert_eq!(
-            error.render(),
-            "Fatal error: exception Element.ElementError(\"Element 1,h unknown\")\n"
-        );
+        assert_eq!(error.to_string(), "qp_create_ezfio: Element 1,h unknown");
     }
 
     #[test]
@@ -949,13 +918,13 @@ mod tests {
         let error =
             read_pseudo(Some("nosuchpseudo"), &atoms(&["H"]), Path::new("")).expect_err("missing");
         assert_eq!(
-            error.render(),
-            "qp_create_ezfio: Pseudo file nosuchpseudo not found.\n"
+            error.to_string(),
+            "qp_create_ezfio: Pseudo file nosuchpseudo not found."
         );
     }
 
     #[test]
-    fn leftmost_pseudo_spec_wins() {
+    fn the_leftmost_pseudo_spec_wins() {
         let (_a, a) = scratch("a.pseudo", "H GEN 1 0\n0\n\n");
         let (_b, b) = scratch("b.pseudo", "H GEN 2 0\n0\n\n");
         let spec = format!("H:{}|H:{}", a.display(), b.display());
@@ -987,7 +956,7 @@ mod tests {
         let (_dir, path) = scratch("h.basis", H_ONLY);
         let spec = format!("nosuch|{}", path.display());
         let error = read_all(&spec, &atoms(&["H"]), Path::new("")).expect_err("unused");
-        assert_eq!(error.render(), "qp_create_ezfio: Basis nosuch not found\n");
+        assert_eq!(error.to_string(), "qp_create_ezfio: Basis nosuch not found");
     }
 
     #[test]

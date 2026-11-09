@@ -43,9 +43,6 @@ pub const BIN: &str = env!("CARGO_BIN_EXE_qp_run");
 /// is a failed assertion after seconds, never a hung test.
 pub const TIMEOUT: Duration = Duration::from_secs(30);
 
-/// Text rendered once per help block; tests count the renderings with it.
-pub const HELP_MARKER: &str = "Executes a Quantum Package binary file among these:";
-
 /// Name of the loopback interface for `QP_NIC`.
 ///
 /// Pinning it makes `TaskServer.ip_address` return `127.0.0.1` without a

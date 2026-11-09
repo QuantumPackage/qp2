@@ -43,313 +43,14 @@
 use std::fmt;
 use std::io::{self, BufRead};
 
+use crate::angmom::AngmomError;
 use crate::sexplib_compat::{Sexp, float_to_sexp, format_f};
 
-/// `Angmom.t`: the shell angular momentum, `S` (l = 0) to `L` (l = 9).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum Angmom {
-    /// l = 0.
-    S,
-    /// l = 1.
-    P,
-    /// l = 2.
-    D,
-    /// l = 3.
-    F,
-    /// l = 4.
-    G,
-    /// l = 5.
-    H,
-    /// l = 6.
-    I,
-    /// l = 7.
-    J,
-    /// l = 8.
-    K,
-    /// l = 9.
-    L,
-}
-
-/// `Angmom.to_string`: the uppercase symbol, one character.
-pub fn angmom_to_string(a: Angmom) -> &'static str {
-    match a {
-        Angmom::S => "S",
-        Angmom::P => "P",
-        Angmom::D => "D",
-        Angmom::F => "F",
-        Angmom::G => "G",
-        Angmom::H => "H",
-        Angmom::I => "I",
-        Angmom::J => "J",
-        Angmom::K => "K",
-        Angmom::L => "L",
-    }
-}
-
-/// `Angmom.of_string`: accepts either case, one character.
-///
-/// OCaml raises `Failure "Angmom should be S|P|D|F|G|H|I|J|K|L, not X."`;
-/// the same text is produced here as the error payload.
-pub fn angmom_of_string(x: &str) -> Result<Angmom, GtoError> {
-    match x {
-        "S" | "s" => Ok(Angmom::S),
-        "P" | "p" => Ok(Angmom::P),
-        "D" | "d" => Ok(Angmom::D),
-        "F" | "f" => Ok(Angmom::F),
-        "G" | "g" => Ok(Angmom::G),
-        "H" | "h" => Ok(Angmom::H),
-        "I" | "i" => Ok(Angmom::I),
-        "J" | "j" => Ok(Angmom::J),
-        "K" | "k" => Ok(Angmom::K),
-        "L" | "l" => Ok(Angmom::L),
-        _ => Err(GtoError::BadAngmom(x.to_owned())),
-    }
-}
-
-/// `Angmom.to_l`: the angular momentum quantum number, `0..=9`.
-pub fn angmom_to_l(a: Angmom) -> u32 {
-    match a {
-        Angmom::S => 0,
-        Angmom::P => 1,
-        Angmom::D => 2,
-        Angmom::F => 3,
-        Angmom::G => 4,
-        Angmom::H => 5,
-        Angmom::I => 6,
-        Angmom::J => 7,
-        Angmom::K => 8,
-        Angmom::L => 9,
-    }
-}
-
-/// `Angmom.of_l`: the inverse of [`angmom_to_l`].
-///
-/// OCaml raises `Failure` outside `0..=9`; [`GtoError::BadAngmom`] here.
-pub fn angmom_of_l(l: u32) -> Result<Angmom, GtoError> {
-    match l {
-        0 => Ok(Angmom::S),
-        1 => Ok(Angmom::P),
-        2 => Ok(Angmom::D),
-        3 => Ok(Angmom::F),
-        4 => Ok(Angmom::G),
-        5 => Ok(Angmom::H),
-        6 => Ok(Angmom::I),
-        7 => Ok(Angmom::J),
-        8 => Ok(Angmom::K),
-        9 => Ok(Angmom::L),
-        _ => Err(GtoError::BadAngmom(l.to_string())),
-    }
-}
-
-impl Angmom {
-    /// Same as [`angmom_to_string`].
-    pub fn symbol(self) -> &'static str {
-        angmom_to_string(self)
-    }
-
-    /// Same as [`angmom_to_l`].
-    pub fn l(self) -> u32 {
-        angmom_to_l(self)
-    }
-}
-
-impl fmt::Display for Angmom {
-    /// Same as [`angmom_to_string`].
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(angmom_to_string(*self))
-    }
-}
-
-/// `Angmom.Xyz.t`: the Cartesian exponents `(x, y, z)` of one monomial of
-/// a shell, so `x + y + z = l`.
-///
-/// All three are non-negative (`Positive_int.t` in the reference).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct AngmomXyz {
-    /// Power of `x`.
-    pub x: u32,
-    /// Power of `y`.
-    pub y: u32,
-    /// Power of `z`.
-    pub z: u32,
-}
-
-impl AngmomXyz {
-    /// Build a triplet. The caller is responsible for `x + y + z` being
-    /// the shell's `l`; [`AngmomXyz::of_angmom`] is the only constructor
-    /// that guarantees it.
-    pub fn new(x: u32, y: u32, z: u32) -> AngmomXyz {
-        AngmomXyz { x, y, z }
-    }
-
-    /// `Angmom.Xyz.of_string`: parse a string like `"x2z3"` into
-    /// exponents.
-    ///
-    /// A letter with no number counts as 1 (`flush` uses
-    /// `if number = "" then 1`), letters are case-insensitive, and a
-    /// repeated letter *adds* (`Molecule`'s `flush` adds `n` to the
-    /// current exponent), so `"xx"` is `x2`. Characters that are neither
-    /// `x`, `y`, `z` nor digits end up in the number field and make
-    /// `int_of_string` fail in the reference; that is an error here.
-    pub fn of_string(s: &str) -> Result<AngmomXyz, GtoError> {
-        let mut accu = AngmomXyz::default();
-        let mut state = None::<char>;
-        let mut number = String::new();
-        let flush =
-            |state: Option<char>, accu: &mut AngmomXyz, number: &str| -> Result<(), GtoError> {
-                let n: u32 = if number.is_empty() {
-                    1
-                } else {
-                    number.parse().map_err(|_| GtoError::BadXyz(s.to_owned()))?
-                };
-                match state {
-                    Some('x') => accu.x += n,
-                    Some('y') => accu.y += n,
-                    Some('z') => accu.z += n,
-                    _ => {}
-                }
-                Ok(())
-            };
-        for c in s.chars() {
-            match c {
-                'X' | 'x' => {
-                    flush(state, &mut accu, &number)?;
-                    state = Some('x');
-                    number.clear();
-                }
-                'Y' | 'y' => {
-                    flush(state, &mut accu, &number)?;
-                    state = Some('y');
-                    number.clear();
-                }
-                'Z' | 'z' => {
-                    flush(state, &mut accu, &number)?;
-                    state = Some('z');
-                    number.clear();
-                }
-                other => number.push(other),
-            }
-        }
-        flush(state, &mut accu, &number)?;
-        Ok(accu)
-    }
-
-    /// `Angmom.Xyz.get_l`: `x + y + z`.
-    pub fn get_l(self) -> u32 {
-        self.x + self.y + self.z
-    }
-
-    /// `Angmom.Xyz.to_symmetry`: the shell angular momentum of this
-    /// monomial.
-    pub fn to_symmetry(self) -> Result<Angmom, GtoError> {
-        angmom_of_l(self.get_l())
-    }
-
-    /// `Angmom.Xyz.of_angmom`: the `(l+1)(l+2)/2` Cartesian monomials of
-    /// a shell, in the reference's order.
-    ///
-    /// The reference builds them with two mutually recursive helpers that
-    /// cons onto an accumulator and finally `List.rev`s, which yields:
-    /// `x` from `l` down to 0, and for each `x`, `y` from `l - x` down to
-    /// 0, with `z = l - x - y` recomputed at each step. That is exactly
-    /// the double loop below (verified against the reference build for
-    /// `S`, `P`, `D`, `F` and `G`; see the tests).
-    ///
-    /// `O((l+1)²)` time and memory; at most 55 monomials (`L`).
-    pub fn of_angmom(sym: Angmom) -> Vec<AngmomXyz> {
-        let l = angmom_to_l(sym);
-        let mut result = Vec::with_capacity(((l + 1) * (l + 2) / 2) as usize);
-        for x in (0..=l).rev() {
-            for y in (0..=(l - x)).rev() {
-                result.push(AngmomXyz { x, y, z: l - x - y });
-            }
-        }
-        result
-    }
-
-    /// `Angmom.Xyz.to_symbol_monomial`: the shell letter and the monomial in
-    /// parentheses — `s`, `p(x)`, `d(xy)`, … — the third column of the
-    /// `ao_basis`/`ao_extra_basis` summary table. The `(0,0,0)` monomial
-    /// prints the bare `"s"`.
-    ///
-    /// Delegates to [`crate::angmom::Xyz::to_symbol_monomial`], the canonical
-    /// implementation; this type is the P3.5 `Gto`-embedded duplicate of
-    /// `Angmom.Xyz.t` (`ocaml/Gto.ml` copies the module) and keeps the same
-    /// `u32` exponents. Widening to `usize` is exact on every supported
-    /// target (32- or 64-bit).
-    ///
-    /// # Panics
-    ///
-    /// If the total power exceeds 9, the domain of [`Angmom`]; see
-    /// [`crate::angmom::Xyz::to_symbol_monomial`].
-    pub fn to_symbol_monomial(self) -> String {
-        crate::angmom::Xyz::new(self.x as usize, self.y as usize, self.z as usize)
-            .to_symbol_monomial()
-    }
-
-    /// The derived `sexp_of_t`: `((x 2)(y 0)(z 0))`.
-    pub fn to_sexp(self) -> Sexp {
-        Sexp::list(vec![
-            Sexp::pair(Sexp::atom("x"), Sexp::atom(self.x.to_string())),
-            Sexp::pair(Sexp::atom("y"), Sexp::atom(self.y.to_string())),
-            Sexp::pair(Sexp::atom("z"), Sexp::atom(self.z.to_string())),
-        ])
-    }
-}
-
-impl fmt::Display for AngmomXyz {
-    /// `Angmom.Xyz.to_string`: `"x2z3"`, with exponent 1 omitted and the
-    /// empty monomial printed as `"s"`.
-    ///
-    /// Implemented on `Display` (an inherent `to_string` would shadow it,
-    /// `clippy::inherent_to_string_shadow_display`); call `.to_string()`.
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let part = |l: u32, name: &str| -> String {
-            match l {
-                0 => String::new(),
-                1 => name.to_owned(),
-                i => format!("{name}{i}"),
-            }
-        };
-        let result = format!(
-            "{}{}{}",
-            part(self.x, "x"),
-            part(self.y, "y"),
-            part(self.z, "z")
-        );
-        if result.is_empty() {
-            f.write_str("s")
-        } else {
-            f.write_str(&result)
-        }
-    }
-}
-
-/// `GaussianPrimitive.t`: one Gaussian exponent, tagged with the shell
-/// angular momentum so that the derived S-expression is self-describing.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct GaussianPrimitive {
-    /// The shell angular momentum; identical for every primitive of a
-    /// shell (checked by [`Gto::of_prim_coef_list`]).
-    pub sym: Angmom,
-    /// The exponent `α`, in bohr⁻².
-    pub expo: f64,
-}
-
-impl GaussianPrimitive {
-    /// `GaussianPrimitive.of_sym_expo`.
-    pub fn of_sym_expo(sym: Angmom, expo: f64) -> GaussianPrimitive {
-        GaussianPrimitive { sym, expo }
-    }
-
-    /// The derived `sexp_of_t`: `((sym S)(expo 14710))`.
-    pub fn to_sexp(self) -> Sexp {
-        Sexp::list(vec![
-            Sexp::pair(Sexp::atom("sym"), Sexp::atom(angmom_to_string(self.sym))),
-            Sexp::pair(Sexp::atom("expo"), float_to_sexp(self.expo)),
-        ])
-    }
-}
+/// The shell label `S..L` and the Cartesian powers `(x, y, z)`
+/// (`ocaml/Angmom.ml`); the P3.5 `Gto`-embedded duplicates of the
+/// canonical types are deduplicated by re-export (wave S1).
+pub use crate::angmom::{Angmom, Xyz as AngmomXyz};
+pub use crate::gaussian_primitive::GaussianPrimitive;
 
 /// The output format of [`Gto::to_string`] (`Gto.fmt`).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -397,7 +98,7 @@ impl Gto {
     /// are contract.
     pub fn to_sexp(&self) -> Sexp {
         Sexp::list(vec![
-            Sexp::pair(Sexp::atom("sym"), Sexp::atom(angmom_to_string(self.sym))),
+            Sexp::pair(Sexp::atom("sym"), Sexp::atom(self.sym.to_string_label())),
             Sexp::pair(
                 Sexp::atom("lc"),
                 Sexp::list(
@@ -421,7 +122,7 @@ impl Gto {
         let mut lines = Vec::with_capacity(self.lc.len() + 1);
         lines.push(format!(
             "{} {:3}",
-            angmom_to_string(self.sym),
+            self.sym.to_string_label(),
             self.lc.len()
         ));
         for (i, (p, c)) in self.lc.iter().enumerate() {
@@ -441,7 +142,7 @@ impl Gto {
         let mut lines = Vec::with_capacity(self.lc.len() + 1);
         lines.push(format!(
             "{} {:3}   1.00",
-            angmom_to_string(self.sym),
+            self.sym.to_string_label(),
             self.lc.len()
         ));
         for (p, c) in &self.lc {
@@ -494,7 +195,13 @@ impl Gto {
         let (sym_str, n_str) = buffer
             .split_at_checked(2)
             .ok_or_else(|| GtoError::ShortLine(buffer.clone()))?;
-        let sym = angmom_of_string(strip(sym_str))?;
+        let sym = match Angmom::of_string(strip(sym_str)) {
+            Ok(sym) => sym,
+            // Same one-letter match as the reference; the error text is the
+            // `AngmomError::UnknownAngmom` payload.
+            Err(AngmomError::UnknownAngmom { text }) => return Err(GtoError::BadAngmom(text)),
+            Err(other) => return Err(GtoError::BadAngmom(other.to_string())),
+        };
         let n: usize = strip(n_str)
             .parse()
             .map_err(|_| GtoError::BadShellSize(buffer.clone()))?;
@@ -542,8 +249,6 @@ pub enum GtoError {
     BadAngmom(String),
     /// The shell-size field is not an integer.
     BadShellSize(String),
-    /// `Angmom.Xyz.of_string` was given a non-numeric exponent.
-    BadXyz(String),
     /// The shell line is shorter than the two-byte symbol field.
     ShortLine(String),
     /// `of_prim_coef_list` on an empty list.
@@ -561,7 +266,6 @@ impl fmt::Display for GtoError {
             GtoError::ReadFailure(line) => write!(f, "GTO read failure: {line:?}"),
             GtoError::BadAngmom(s) => write!(f, "Angmom should be S|P|D|F|G|H|I|J|K|L, not {s}."),
             GtoError::BadShellSize(line) => write!(f, "Bad shell size in {line:?}"),
-            GtoError::BadXyz(s) => write!(f, "Bad XYZ powers {s:?}"),
             GtoError::ShortLine(line) => write!(f, "Shell line too short: {line:?}"),
             GtoError::EmptyPrimitiveList => f.write_str("Empty primitive list"),
             GtoError::MixedSymmetry => f.write_str("Failed in of_prim_coef_list"),
@@ -655,14 +359,13 @@ mod tests {
         .into_iter()
         .enumerate()
         {
-            let l = l as u32;
             let xyz = AngmomXyz::of_angmom(a);
-            assert_eq!(xyz.len() as u32, (l + 1) * (l + 2) / 2);
+            assert_eq!(xyz.len(), (l + 1) * (l + 2) / 2);
             // Each monomial has the shell's l, and they are distinct.
             let mut seen = std::collections::HashSet::new();
             for p in &xyz {
                 assert_eq!(p.get_l(), l);
-                assert_eq!(p.to_symmetry().expect("l <= 9"), a);
+                assert_eq!(p.to_angmom().expect("l <= 9"), a);
                 assert!(seen.insert(*p), "duplicate monomial {p:?} for {a:?}");
             }
         }
@@ -698,41 +401,19 @@ mod tests {
         );
     }
 
-    /// The `Gto`-embedded duplicate must print the same letter+monomial as
-    /// the canonical `angmom::Xyz` (P3.5 dedup is still open).
-    #[test]
-    fn xyz_symbol_monomial_delegates_to_angmom() {
-        for (x, y, z) in [
-            (0, 0, 0),
-            (1, 0, 0),
-            (0, 1, 0),
-            (0, 0, 1),
-            (2, 0, 0),
-            (1, 1, 0),
-        ] {
-            let shim = AngmomXyz::new(x, y, z);
-            let canonical = crate::angmom::Xyz::new(x as usize, y as usize, z as usize);
-            assert_eq!(shim.to_symbol_monomial(), canonical.to_symbol_monomial());
-        }
-        assert_eq!(AngmomXyz::new(0, 0, 0).to_symbol_monomial(), "s");
-        assert_eq!(AngmomXyz::new(1, 0, 0).to_symbol_monomial(), "p(x)");
-        assert_eq!(AngmomXyz::new(2, 0, 0).to_symbol_monomial(), "d(x2)");
-        assert_eq!(AngmomXyz::new(1, 1, 0).to_symbol_monomial(), "d(xy)");
-    }
-
     #[test]
     fn angmom_round_trip_and_rejects() {
-        for l in 0..=9u32 {
-            let a = angmom_of_l(l).expect("in range");
-            assert_eq!(angmom_to_l(a), l);
+        for l in 0..=9usize {
+            let a = Angmom::of_l(l).expect("in range");
+            assert_eq!(a.to_l(), l);
             assert_eq!(
-                angmom_of_string(angmom_to_string(a).to_lowercase().as_str()).expect("lower"),
+                Angmom::of_string(a.to_string_label().to_lowercase().as_str()).expect("lower"),
                 a
             );
         }
-        assert!(angmom_of_l(10).is_err());
-        assert!(angmom_of_string("Q").is_err());
-        assert!(angmom_of_string("SS").is_err());
+        assert!(Angmom::of_l(10).is_err());
+        assert!(Angmom::of_string("Q").is_err());
+        assert!(Angmom::of_string("SS").is_err());
     }
 
     /// The first shell of `cc-pvdz` fluorine, from the reference build's
@@ -865,8 +546,8 @@ mod tests {
             Gto::of_prim_coef_list(vec![]),
             Err(GtoError::EmptyPrimitiveList)
         ));
-        let p = GaussianPrimitive::of_sym_expo(Angmom::S, 1.0);
-        let q = GaussianPrimitive::of_sym_expo(Angmom::P, 1.0);
+        let p = GaussianPrimitive::of_sym_expo(Angmom::S, 1.0).expect("S primitive");
+        let q = GaussianPrimitive::of_sym_expo(Angmom::P, 1.0).expect("P primitive");
         assert!(matches!(
             Gto::of_prim_coef_list(vec![(p, 1.0), (q, 1.0)]),
             Err(GtoError::MixedSymmetry)

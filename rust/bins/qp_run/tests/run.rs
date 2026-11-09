@@ -91,8 +91,8 @@ fn the_job_exit_code_is_propagated() {
     assert!(!fixture.work().join("qp_run_address").exists());
 }
 
-/// A failing `qp_edit -c` is `Error: Input inconsistent`, exit 2, and nothing
-/// else runs: no server, no job, no address file.
+/// A failing `qp_edit -c` is `the input is inconsistent (qp_edit -c failed)`,
+/// exit 2, and nothing else runs: no server, no job, no address file.
 #[test]
 fn a_failing_input_check_stops_the_run() {
     let fixture = Fixture::new();
@@ -110,10 +110,8 @@ fn a_failing_input_check_stops_the_run() {
     let outcome = Running::spawn(command, &fixture.logs()).wait(TIMEOUT);
 
     assert_eq!(outcome.code(), 2, "{outcome}");
-    assert!(
-        outcome
-            .stderr
-            .starts_with("qp_run: Error: Input inconsistent"),
+    assert_eq!(
+        outcome.stderr, "qp_run: the input is inconsistent (qp_edit -c failed)\n",
         "{outcome}"
     );
     // The pre-check is `"<editor> -c <ezfio>"`, like `Sys.command`.
@@ -140,12 +138,15 @@ fn a_missing_ezfio_directory_is_reported() {
     assert_eq!(outcome.code(), 2, "{outcome}");
     assert_eq!(
         outcome.stderr,
-        format!("qp_run: EZFIO directory {} not found\n", missing.display())
+        format!(
+            "qp_run: the EZFIO directory does not exist: {}\n",
+            missing.display()
+        )
     );
 }
 
-/// An unknown program prints the visible choices on standard output and fails
-/// with the reference message, exit 2, before the banner.
+/// An unknown program prints the visible choices on standard output and
+/// fails with the S2.5 wording, exit 2, before the banner.
 #[test]
 fn an_unknown_program_lists_the_choices() {
     let fixture = Fixture::new();
@@ -154,6 +155,9 @@ fn an_unknown_program_lists_the_choices() {
     assert_eq!(outcome.code(), 2, "{outcome}");
     assert!(outcome.stdout.contains("Possible choices:"), "{outcome}");
     assert!(outcome.stdout.contains("* scf"), "{outcome}");
-    assert_eq!(outcome.stderr, "qp_run: Executable nope not found\n");
+    assert_eq!(
+        outcome.stderr,
+        "qp_run: program not found in data/executables: nope\n"
+    );
     assert!(!outcome.stdout.contains("Quantum Package"), "{outcome}");
 }

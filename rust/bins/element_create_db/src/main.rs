@@ -21,21 +21,26 @@
 //!
 //! # Flow (order is observable)
 //!
-//! 1. `Qpackage.root`: `$QP_ROOT` from the environment, else
-//!    `Failure("QP_ROOT environment variable is not set.\nPlease source the
-//!    quantum_package.rc file.")`, exit 2. Unlike `qp_run`, this port does
-//!    **not** fall back to deriving the root from the executable path: the
-//!    reference has no such fallback here, and deriving one for a tool that
-//!    *writes* into `$QP_ROOT/data` would silently pick a directory the
-//!    caller never named.
+//! 1. `Qpackage.root`: `$QP_ROOT` from the environment; when it is unset
+//!    the tool fails before anything is opened, exit 2. Unlike `qp_run`,
+//!    this port does **not** fall back to deriving the root from the
+//!    executable path: the reference has no such fallback here, and
+//!    deriving one for a tool that *writes* into `$QP_ROOT/data` would
+//!    silently pick a directory the caller never named.
 //! 2. Build the whole text in memory (`Array.init … |> String.concat ""`).
-//! 3. Write `$QP_ROOT/data/list_element.txt`, truncating it. A failure is
-//!    `Sys_error("<path>: <strerror>")`, exit 2.
+//! 3. Write `$QP_ROOT/data/list_element.txt`, truncating it. A failure is a
+//!    plain `io::Error` line, exit 2.
 //!
 //! The path is the reference's byte concatenation `root ^ "/data/…"`, so an
 //! empty `QP_ROOT` addresses `/data/list_element.txt` and a trailing slash is
 //! kept — a `Path::join` would normalise both away, and the path also appears
 //! in the error message.
+//!
+//! # Errors (wave S2)
+//!
+//! One line on standard error, `element_create_db: <message>`, exit 2:
+//! `QP_ROOT is not set (source quantum_package.rc)` for the guard, and
+//! `cannot write <path>: <io error>` for the write.
 //!
 //! # Units
 //!
@@ -49,21 +54,14 @@
 //! cargo test -j4 -p element_create_db
 //! ```
 
-mod error;
-
 use std::ffi::{OsStr, OsString};
 use std::fs;
-use std::io::{self, Write};
 use std::process::ExitCode;
 
 use qp_types::element;
+use qp_types::error::ToolError;
 
-use crate::error::{EXIT_CODE, OcamlException};
-
-/// The payload of the uncaught `Failure` the reference raises when `QP_ROOT`
-/// is unset (`ocaml/Qpackage.ml:6`).
-const QP_ROOT_MISSING: &str =
-    "QP_ROOT environment variable is not set.\nPlease source the quantum_package.rc file.";
+const TOOL: &str = "element_create_db";
 
 /// Number of lines: `Array.init 110` in the reference, i.e. `0..=109`.
 const COUNT: i32 = 110;
@@ -71,19 +69,20 @@ const COUNT: i32 = 110;
 fn main() -> ExitCode {
     match run() {
         Ok(()) => ExitCode::SUCCESS,
-        Err(exception) => {
-            let _ = io::stderr().write_all(exception.line().as_bytes());
-            ExitCode::from(EXIT_CODE)
+        Err(error) => {
+            eprintln!("{error}");
+            ExitCode::from(2)
         }
     }
 }
 
-/// The reference's `let () = …`.
-fn run() -> Result<(), OcamlException> {
+/// The reference's `let () = …`: guard, build, write.
+fn run() -> Result<(), ToolError> {
     let root = std::env::var_os("QP_ROOT")
-        .ok_or_else(|| OcamlException::Failure(QP_ROOT_MISSING.to_owned()))?;
+        .ok_or_else(|| ToolError::new(TOOL, "QP_ROOT is not set (source quantum_package.rc)"))?;
     let path = output_path(&root);
-    fs::write(&path, database()).map_err(|error| error::sys_error(path.as_encoded_bytes(), &error))
+    fs::write(&path, database())
+        .map_err(|error| ToolError::new(TOOL, format!("cannot write {path:?}: {error}")))
 }
 
 /// One table line, or `""` when the charge has no element.
@@ -127,6 +126,7 @@ fn output_path(root: &OsStr) -> OsString {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::io;
 
     /// The spec's explicit check: charge 0 is the ghost atom.
     #[test]
@@ -181,5 +181,31 @@ mod tests {
             output_path(OsStr::new("/root/")),
             OsString::from("/root//data/list_element.txt")
         );
+    }
+
+    /// The guard message is plain and names the variable (wave S2: no
+    /// OCaml `Failure` rendering).
+    #[test]
+    fn the_qp_root_error_is_plain() {
+        let error = ToolError::new(TOOL, "QP_ROOT is not set (source quantum_package.rc)");
+        assert_eq!(
+            error.to_string(),
+            "element_create_db: QP_ROOT is not set (source quantum_package.rc)"
+        );
+    }
+
+    /// A write failure carries the path and the standard io text.
+    #[test]
+    fn the_write_error_names_the_path() {
+        let source = io::Error::new(io::ErrorKind::NotFound, "the file");
+        let error = ToolError::new(
+            TOOL,
+            format!("cannot write \"/x/data/list_element.txt\": {source}"),
+        );
+        assert!(
+            error.to_string().contains("/x/data/list_element.txt"),
+            "{error}"
+        );
+        assert!(error.to_string().contains("the file"), "{error}");
     }
 }

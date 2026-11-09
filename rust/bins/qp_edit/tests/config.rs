@@ -143,16 +143,17 @@ fn warnings_name_formula_defaults() {
 }
 
 #[test]
-fn handler_section_is_not_visited() {
+fn derived_module_is_not_visited() {
     let dir = TempDir::new("handler");
     dir.copy_fixture("handler");
     let config = dir.load().expect("handler fixture is valid");
-    let module = config.module("bitmasks").expect("module present");
+    let module = config.module("derived").expect("module present");
     assert!(!module.section);
-    assert_eq!(module.handler.as_deref(), Some("bitmasks"));
+    assert_eq!(module.handler, None);
     let engine = Engine::new(config);
-    assert!(engine.section("bitmasks").is_err());
-    assert_eq!(engine.stats().sections, 0);
+    assert!(engine.section("derived").is_err());
+    // the fixture's handler-owned `electrons` section is visited instead
+    assert_eq!(engine.stats().sections, 1);
 }
 
 #[test]
@@ -213,10 +214,10 @@ fn editable_field_must_declare_ocaml_interface() {
 fn editable_field_is_rejected_inside_handler_section() {
     let dir = TempDir::new("editable-handler");
     dir.copy_fixture("handler");
-    dir.replace("bitmasks.toml", "editable = false", "editable = true");
+    dir.replace("electrons.toml", "editable = false", "editable = true");
     let error = dir.load_error();
     assert!(error.contains("handler-owned section"), "{error}");
-    assert!(error.contains("bitmasks"), "{error}");
+    assert!(error.contains("electrons"), "{error}");
 }
 
 #[test]

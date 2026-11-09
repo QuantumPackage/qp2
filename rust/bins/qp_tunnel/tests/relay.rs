@@ -193,24 +193,26 @@ fn relays_every_channel_and_serves_the_input_protocol() {
     )
     .expect("the tunnel starts");
 
-    let text = wait_for_announcement(&announcements, "\nReady\n");
+    let text = wait_for_announcement(&announcements, "\nready\n");
     let local = parse_local_port(&text);
     assert!(
-        text.starts_with(&format!("Connect to:\ntcp://127.0.0.1:{local}\n")),
+        text.starts_with(&format!(
+            "Connect to the tunnel with: tcp://127.0.0.1:{local}\n"
+        )),
         "announcements:\n{text}"
     );
     assert!(
-        !text.contains("Getting input..."),
+        !text.contains("downloading input"),
         "`-g` must be a no-op in EZFIO mode:\n{text}"
     );
     assert!(
-        !text.contains("Communication ["),
+        !text.contains("communication:"),
         "EZFIO mode has no remote input socket:\n{text}"
     );
     let hostname = qp_cli::ffi::hostname().expect("hostname");
     let ssh = ssh_instructions(&hostname, "127.0.0.1", i64::from(remote), local);
     assert!(text.contains(&ssh), "announcements:\n{text}\nssh:\n{ssh}");
-    assert!(text.ends_with("Ready\n"));
+    assert!(text.ends_with("ready\n"));
 
     let context = Context::new();
     let ocaml = connect(

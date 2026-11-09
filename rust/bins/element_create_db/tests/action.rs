@@ -6,12 +6,16 @@
 //! ```text
 //! mkdir -p $FAKE/data
 //! QP_ROOT=$FAKE ~/qp2/ocaml/element_create_db.byte      # exit 0, file below
-//! env -u QP_ROOT ~/qp2/ocaml/element_create_db.byte     # the Failure line
-//! QP_ROOT=$EMPTY ~/qp2/ocaml/element_create_db.byte     # the Sys_error line
+//! env -u QP_ROOT ~/qp2/ocaml/element_create_db.byte     # the QP_ROOT line
+//! QP_ROOT=$EMPTY ~/qp2/ocaml/element_create_db.byte     # the write error
 //! ```
 //!
 //! `tests/data/list_element.txt` is that first capture, complete (2987 bytes,
 //! 110 lines); the dual-run gate diffs it against a fresh reference run.
+//!
+//! Wave S2: the error text is Rust-native; the failure tests assert the exit
+//! code and at most one stable substring (named in the test name), never the
+//! exact line.
 
 use std::fs;
 use std::path::Path;
@@ -21,10 +25,6 @@ use tempfile::TempDir;
 
 /// The complete reference table.
 const GOLDEN: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/data/list_element.txt");
-
-/// The payload of the reference's uncaught `Failure` when `QP_ROOT` is unset.
-const QP_ROOT_MISSING: &str = "Fatal error: exception Failure(\"QP_ROOT environment variable is not set.\\n\
-     Please source the quantum_package.rc file.\")\n";
 
 /// Run the binary with `QP_ROOT` set to `root` (`None` = unset).
 fn run(root: Option<&Path>) -> Output {
@@ -68,29 +68,28 @@ fn writes_the_reference_table() {
     assert_eq!(lines[109], "109  Mt Meitnerium 278.000000");
 }
 
-/// `Qpackage.root` fails before anything is opened: no file, no stdout.
+/// The QP_ROOT guard fails before anything is opened: exit 2, no file, no
+/// stdout; the one stable substring is the variable name.
 #[test]
-fn unset_qp_root_is_the_package_failure() {
+fn unset_qp_root_is_the_guard_failure() {
     let output = run(None);
     assert_eq!(output.status.code(), Some(2), "{output:?}");
     assert!(output.stdout.is_empty(), "{output:?}");
-    assert_eq!(stderr(&output), QP_ROOT_MISSING);
+    assert!(stderr(&output).contains("QP_ROOT"), "{}", stderr(&output));
 }
 
-/// `open_out` on `$QP_ROOT/data/…` with no `data/` directory.
+/// Writing to `$QP_ROOT/data/…` with no `data/` directory: exit 2, and the
+/// one stable substring is the standard `No such file or directory` text.
 #[test]
-fn missing_data_directory_is_a_sys_error() {
+fn missing_data_directory_is_a_write_error() {
     let root = TempDir::new().expect("tempdir");
     let output = run(Some(root.path()));
     assert_eq!(output.status.code(), Some(2), "{output:?}");
     assert!(output.stdout.is_empty(), "{output:?}");
-    assert_eq!(
-        stderr(&output),
-        format!(
-            "Fatal error: exception Sys_error(\"{}/data/list_element.txt: \
-             No such file or directory\")\n",
-            root.path().display()
-        )
+    assert!(
+        stderr(&output).contains("No such file or directory"),
+        "{}",
+        stderr(&output)
     );
 }
 

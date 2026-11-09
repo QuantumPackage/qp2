@@ -17,15 +17,18 @@
 //!
 //! 1. `QP_ROOT` (environment, else derived from the executable path —
 //!    [`qp_cli::root`]; issue #224 forbids baked paths) → `data/executables`.
-//! 2. Command line ([`qp_types::command_line::RunArgs`]); `-h` prints the help
-//!    and *continues* (the reference's `set_specs` prints and goes on), a wrong
-//!    number of anonymous arguments prints the help again and exits 2.
+//!    Resolved before the command line, as the reference's `Qpackage.root`
+//!    module initialiser runs.
+//! 2. Command line ([`qp_types::command_line::RunArgs`]); `-h`/`--help` is
+//!    `clap`'s built-in (help once, exit 0), a wrong number of positionals
+//!    is a `clap` usage error (exit 2).
 //! 3. Port window (before any check, as in `qp_run.ml:79`).
-//! 4. EZFIO directory exists (`EZFIO directory <d> not found`).
+//! 4. EZFIO directory exists (`the EZFIO directory does not exist: <d>`).
 //! 5. SIGUSR1 handler (→ `qp_stop`, see [`qp_cli::signal`]).
 //! 6. Program in `data/executables`, else `Possible choices:` + failure.
 //! 7. Banner: `Date:` (local time), Quantum Package, Git stamp, EZFIO dir.
-//! 8. `qp_edit -c <dir>` unless `-s`; non-zero → `Error: Input inconsistent`.
+//! 8. `qp_edit -c <dir>` unless `-s`; non-zero → `the input is inconsistent
+//!    (qp_edit -c failed)`.
 //! 9. Task server address resolved **once** in the main thread (issue #393),
 //!    then the server thread starts.
 //! 10. `<work>/qp_run_address` written (master) or read (slave).
@@ -85,7 +88,7 @@ use std::io::Write;
 use std::path::Path;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use clap::{CommandFactory, Parser};
+use clap::Parser;
 use qp_cli::host::SystemHost;
 use qp_cli::{GitStamp, Programs, launch, signal};
 use qp_types::command_line::{EXIT_USAGE, RunArgs, RunConfig};
@@ -119,12 +122,14 @@ const ADDRESS_VAR: &str = "QP_RUN_ADDRESS";
 /// (`qp_run.ml:138`).
 const MASTER_VAR: &str = "QP_RUN_ADDRESS_MASTER";
 
-/// `failwith "No master is not running"` (`qp_run.ml:140`).
-const NO_MASTER: &str = "No master is not running";
+/// The slave's missing/empty master address (`qp_run.ml:140`, reference
+/// `failwith "No master is not running"`; wave S2.5 wording).
+const NO_MASTER: &str = "no master is running (work/qp_run_address missing or empty)";
 
-/// `failwith "Error: Input inconsistent\n"` (`qp_run.ml:124`); the newline is
-/// part of the reference message.
-const INCONSISTENT_INPUT: &str = "Error: Input inconsistent\n";
+/// The master's failed `qp_edit -c` pre-check (`qp_run.ml:123`, reference
+/// `failwith "Error: Input inconsistent\n"`; wave S2.5 wording, the
+/// trailing-newline quirk goes).
+const INCONSISTENT_INPUT: &str = "the input is inconsistent (qp_edit -c failed)";
 
 /// Pause after the `Wall time:` line (`Unix.sleep 1`, `qp_run.ml:216`), so a
 /// terminal that launched `qp_run` shows the final output before the prompt.
@@ -191,34 +196,19 @@ fn main() {
 /// Returns the exit status of the whole process: the executable's status, or
 /// `0`/`1` from the task-server outcome.
 fn run() -> Result<i32, Fatal> {
-    let args = match RunArgs::try_parse() {
-        Ok(args) => args,
-        Err(error) => {
-            // `clap` prints its own diagnostics (documented divergence from
-            // `Getopt.Error`) and exits 2, like the uncaught reference
-            // exception. `-h` is a field of `RunArgs`, so this is always a
-            // usage error.
-            error.exit();
-        }
-    };
-
-    // `QP_ROOT` is needed before the command line is validated: the help text
-    // lists the programs, exactly like `qp_run.ml`'s description document.
+    // `QP_ROOT` is resolved before the command line is parsed: the reference's
+    // `Qpackage.root` runs from a module initialiser, so a missing root
+    // fails even when the command line is also bad (both are exit 2, the
+    // root message wins — wave S2.1).
     let root = qp_cli::root()?;
     let programs = Programs::load(&root)?;
 
-    if args.help {
-        print_help(&programs)?;
-    }
-    let config = match args.validate() {
-        Ok(config) => config,
-        Err(error) => {
-            // The reference prints the help again and then fails the anonymous
-            // argument check (`qp_run.ml:268`), so `-h` shows it twice.
-            print_help(&programs)?;
-            return Err(Fatal::failure(error.message().to_string()));
-        }
-    };
+    // `clap` owns the command line (wave S2.1): `-h`/`--help` prints its
+    // help once and exits 0; a usage error (unknown option, missing or
+    // extra positional) prints its own plain diagnostic and exits 2. The
+    // reference's double-print of the help on a bad argument count is gone.
+    let args = RunArgs::parse();
+    let config = args.validate();
     drive(&config, &programs)
 }
 
@@ -236,7 +226,9 @@ fn drive(config: &RunConfig, programs: &Programs) -> Result<i32, Fatal> {
     // 2. The EZFIO directory must exist.
     let ezfio = config.ezfio_dir.as_str();
     if !Path::new(ezfio).exists() {
-        return Err(Fatal::failure(format!("EZFIO directory {ezfio} not found")));
+        return Err(Fatal::failure(format!(
+            "the EZFIO directory does not exist: {ezfio}"
+        )));
     }
 
     // 3. SIGUSR1 → qp_stop, before the job can be interrupted.
@@ -251,7 +243,7 @@ fn drive(config: &RunConfig, programs: &Programs) -> Result<i32, Fatal> {
         // Keep stdout ahead of the error on a terminal (`%!` in the reference).
         let _ = std::io::stdout().flush();
         return Err(Fatal::failure(format!(
-            "Executable {} not found",
+            "program not found in data/executables: {}",
             config.program
         )));
     };
@@ -289,16 +281,12 @@ fn drive(config: &RunConfig, programs: &Programs) -> Result<i32, Fatal> {
     let server = std::thread::Builder::new()
         .name("task_server".to_string())
         .spawn(move || {
-            let result = task_server::run(
-                Some(window.rep),
-                Some(window.pub_socket),
-                port,
-                &server_address,
-            );
+            let result = task_server::run(window.rep, window.pub_socket, &server_address);
             if let Err(error) = &result {
                 // The reference prints the exception and its backtrace, then
                 // re-raises; `stop` reports the dead server (issue #393).
-                eprintln!("TASK SERVER CRASH: {error}");
+                // Wave S2.5: plain one-line form.
+                eprintln!("qp_run: the task server stopped: {error}");
             }
             result
         })?;
@@ -357,9 +345,20 @@ fn join_server(
     match handle.join() {
         Ok(Ok(outcome)) => Ok(outcome),
         Ok(Err(error)) => Err(Fatal::failure(error.to_string())),
-        Err(_panic) => Err(Fatal::failure(
-            "the task server thread panicked (Failure(\"thread panicked\"))",
-        )),
+        Err(panic) => {
+            let payload = panic
+                .downcast_ref::<String>()
+                .cloned()
+                .or_else(|| {
+                    panic
+                        .downcast_ref::<&str>()
+                        .map(|payload| payload.to_string())
+                })
+                .unwrap_or_else(|| "non-string payload".to_string());
+            Err(Fatal::failure(format!(
+                "the task server thread panicked: {payload}"
+            )))
+        }
     }
 }
 
@@ -391,37 +390,6 @@ fn max_scans_from_env() -> Result<Option<u32>, Fatal> {
             .map(Some)
             .map_err(|_| Fatal::failure(format!("{MAX_SCANS_VAR} is not a port count: {text:?}"))),
     }
-}
-
-/// Print the help: the reference's description (with the program list) and
-/// `clap`'s rendering of the options.
-///
-/// `set_specs` prepends `-h` and, when it is seen, prints the help once; the
-/// anonymous-argument check prints it again before failing, so `qp_run -h`
-/// shows it twice. The text is `clap`'s, not the OCaml `Format` output
-/// (`CONTRACTS.md` §2.4), and the program list is printed as a preamble
-/// because `clap`'s `about` only takes `&'static str` here.
-///
-/// # Errors
-///
-/// [`Fatal`] when the help cannot be written.
-fn print_help(programs: &Programs) -> Result<(), Fatal> {
-    let tool = std::env::args()
-        .next()
-        .unwrap_or_else(|| "qp_run".to_string());
-    println!("{tool} - Quantum Package command");
-    println!();
-    println!("Executes a Quantum Package binary file among these:");
-    println!();
-    for name in programs.visible() {
-        println!(" * {name}");
-    }
-    println!();
-    RunArgs::command()
-        .print_help()
-        .map_err(|error| Fatal::failure(format!("Sys_error({error:?})")))?;
-    println!();
-    Ok(())
 }
 
 /// Print the startup block (`qp_run.ml:106-118`).

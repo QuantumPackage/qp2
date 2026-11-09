@@ -57,7 +57,7 @@ use qp_types::bitlist::Bitlist;
 use qp_types::determinant::Determinant;
 
 use super::qptypes;
-use super::{ParseResult, apply_parsed, ezfio_array_of_list};
+use super::{ParseResult, apply_parsed, ezfio_array_of_list, usize_of};
 use crate::engine::make_header;
 use crate::ocaml_compat::{assertion, string_of_float};
 use crate::sexp::{self, Sexp, SexpError};
@@ -546,11 +546,26 @@ pub(crate) fn to_rst(ezfio: &EzFio, record: &DeterminantsByHand) -> Result<Strin
 
 /// `of_rst`: rebuild the record from the edited section.
 ///
-/// Returns `Ok(None)` after printing the sexplib `Error:  (...)` when the
-/// generated S-expression does not match the record; returns `Err` when an
-/// EZFIO read or a `Qptypes.of_*` validation raises, which the driver answers
-/// with `Info: Read error in <title>` and one retry.
+/// Wave S2.4: returns [`ParseResult::Reported`] with the conversion message
+/// when the generated S-expression does not match the record (the reference
+/// printed `Error:  (...)` here); returns [`ParseResult::Escaped`] when an
+/// EZFIO read or a `Qptypes.of_*` validation raises, which the driver
+/// retries once, silently.
 pub(crate) fn of_rst(ezfio: &EzFio, body: &str) -> ParseResult<DeterminantsByHand> {
+    // The EZFIO reads and `Qptypes` checks can escape (`Escaped`); the sexp
+    // conversion is a reported failure (`Reported`, exit stays 0).
+    match sexp_source_from(ezfio, body) {
+        Ok(sexp_source) => match convert(&sexp_source) {
+            Ok(record) => ParseResult::Parsed(record),
+            Err(error) => ParseResult::Reported(error.message),
+        },
+        Err(error) => ParseResult::Escaped(error),
+    }
+}
+
+/// The escape-prone half of [`of_rst`]: the EZFIO reads and the `Qptypes`
+/// checks, in the reference's order, up to the wrapped sexp source string.
+fn sexp_source_from(ezfio: &EzFio, body: &str) -> Result<String, anyhow::Error> {
     let Some(idx) = body.find("\nDeterminants") else {
         // OCaml `assert false`.
         return Err(assertion(
@@ -589,18 +604,9 @@ pub(crate) fn of_rst(ezfio: &EzFio, body: &str) -> ParseResult<DeterminantsByHan
         read_n_states(ezfio)?,
         read_n_det_qp_edit(ezfio)?,
     );
-    // `Generic_input_of_rst.evaluate_sexp` builds `"(" ^ s ^ ")"` and uses
-    // that *wrapped* string both for the parse and for `fail_msg`, so the
-    // `##` snippet offsets are relative to it.
-    let sexp_source = format!("({source})");
-
-    match convert(&sexp_source) {
-        Ok(record) => Ok(Some(record)),
-        Err(error) => {
-            sexp::fail_msg(&sexp_source, &error);
-            Ok(None)
-        }
-    }
+    // `Generic_input_of_rst.evaluate_sexp` builds `"(" ^ s ^ ")"` and parses
+    // that *wrapped* string.
+    Ok(format!("({source})"))
 }
 
 /// The `read_coefs` half of `of_rst`: one `Vec<f64>` per determinant.
@@ -909,12 +915,6 @@ fn parse_ocaml_float(text: &str) -> Option<f64> {
     text.parse::<f64>().ok()
 }
 
-/// `ezfio_array_of_list` needs a dimension; a negative one is a bug in the
-/// data, not a panic.
-fn usize_of(value: i64) -> Result<usize> {
-    usize::try_from(value).map_err(|_| anyhow::anyhow!("negative dimension or index: {value}"))
-}
-
 // ---------------------------------------------------------------------
 // Section hooks
 // ---------------------------------------------------------------------
@@ -1056,6 +1056,22 @@ fn format_range(states: &[i64]) -> String {
 mod tests {
     use super::*;
 
+    /// Unwrap a [`ParseResult::Parsed`], panicking with the result otherwise.
+    fn parsed<T: std::fmt::Debug>(result: ParseResult<T>) -> T {
+        match result {
+            ParseResult::Parsed(value) => value,
+            other => panic!("expected Parsed, got {other:?}"),
+        }
+    }
+
+    /// Unwrap a [`ParseResult::Escaped`], panicking with the result otherwise.
+    fn escaped<T: std::fmt::Debug>(result: ParseResult<T>) -> anyhow::Error {
+        match result {
+            ParseResult::Escaped(error) => error,
+            other => panic!("expected Escaped, got {other:?}"),
+        }
+    }
+
     /// The body captured from the reference for the `hcn` fixture (388 bytes).
     const HCN_BODY: &str = "\nForce the selected wave function to be an eigenfunction of S^2.\nIf true, input the expected value of S^2 ::\n\n  expected_s2 = 0.\n\nNumber of determinants ::\n\n  n_det = 1\n\nState average weights ::\n\n  state_average_weight = (1.)\n\nDeterminants ::\n\n  1.\n    +++++++---------------------------------------------------------\n    +++++++---------------------------------------------------------\n\n";
 
@@ -1154,7 +1170,7 @@ mod tests {
         let record = read(&ezfio, false).expect("read").expect("some");
         // `set` hands `of_rst` the text with one trailing newline removed.
         let body = HCN_BODY.strip_suffix('\n').expect("one newline");
-        let parsed = of_rst(&ezfio, body).expect("parse").expect("some");
+        let parsed = parsed(of_rst(&ezfio, body));
         assert_eq!(parsed.n_int, record.n_int);
         assert_eq!(parsed.bit_kind, record.bit_kind);
         assert_eq!(parsed.n_det, record.n_det);
@@ -1170,27 +1186,30 @@ mod tests {
     fn of_rst_takes_the_header_values_from_the_edited_text() {
         let (_dir, ezfio) = hcn_like();
         let body = HCN_BODY.replace("  expected_s2 = 0.", "  expected_s2 = 2.5");
-        let parsed = of_rst(&ezfio, &body).expect("parse").expect("some");
+        let parsed = parsed(of_rst(&ezfio, &body));
         assert_eq!(parsed.expected_s2, 2.5);
     }
 
     #[test]
-    fn of_rst_reports_a_missing_determinants_header_and_returns_none() {
+    fn of_rst_escapes_on_a_missing_determinants_header() {
         let (_dir, ezfio) = hcn_like();
-        let error = of_rst(&ezfio, "expected_s2 = 0.\n").expect_err("assertion escapes");
+        let error = escaped(of_rst(&ezfio, "expected_s2 = 0.\n"));
         assert!(crate::ocaml_compat::is_assert_failure(&error));
     }
 
     #[test]
-    fn of_rst_reports_a_duplicate_field_and_writes_nothing() {
+    fn of_rst_reports_a_duplicate_field() {
         let (_dir, ezfio) = hcn_like();
         // The header filter keeps the second `expected_s2` line too, and the
-        // record reader rejects the duplicate.
+        // record reader rejects the duplicate: a reported sexplib failure.
         let body = HCN_BODY.replace(
             "  expected_s2 = 0.",
             "  expected_s2 = 0.\n  expected_s2 = 1.",
         );
-        assert!(of_rst(&ezfio, &body).expect("reported").is_none());
+        assert!(matches!(
+            of_rst(&ezfio, &body),
+            ParseResult::Reported(message) if message.contains("duplicate field name")
+        ),);
     }
 
     /// `write(force:false)` with `n_det <= n_det_qp_edit` writes the scratch

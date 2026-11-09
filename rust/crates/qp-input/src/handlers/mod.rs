@@ -1,4 +1,4 @@
-//! The seven sections whose edit logic is hand-written.
+//! The six sections whose edit logic is hand-written.
 //!
 //! Decision D3 keeps the generic engine declarative and moves the behaviours
 //! that cannot be expressed as a field table into named handlers ported from
@@ -10,43 +10,47 @@
 //! | `ao_extra_basis` | `ocaml/Input_ao_extra_basis.ml` | yes |
 //! | `mo_basis` | `ocaml/Input_mo_basis.ml` | yes |
 //! | `electrons` | `ocaml/Input_electrons.ml` | yes |
-//! | `bitmasks` | `ocaml/Input_bitmasks.ml` | no |
 //! | `nuclei_by_hand` | `ocaml/Input_nuclei_by_hand.ml` | yes |
 //! | `determinants_by_hand` | `ocaml/Input_determinants_by_hand.ml` | yes |
-//!
-//! `bitmasks` is not a `qp_edit` section: it is included by `Input.ml` and its
-//! logic (deriving `n_int` from `mo_num`, `bit_kind` from the build
-//! configuration) is a dependency of the determinants handler.  The generator
-//! emits it as `section = false` so the editor never visits it.
 //!
 //! The names here are the contract between
 //! `scripts/ezfio_interface/qp_edit_config.py` (which writes `handler = ...`)
 //! and the binary.  The loader rejects an unknown name and a name that does
 //! not match the module id it is attached to.
 //!
-//! Status: P4 ports the seven handlers that `qp_edit` dispatches to; see the
+//! Status: P4 ports the six handlers that `qp_edit` dispatches to; see the
 //! module table above for the file that holds each one.
 
-use anyhow::{Result, bail};
+use anyhow::{Result, anyhow, bail};
 use qp_ezfio::{Array, EzFio};
 
 pub mod ao_basis;
 mod ao_extra_basis;
-mod bitmasks;
 mod determinants_by_hand;
 mod electrons;
 pub mod mo_basis;
 mod nuclei_by_hand;
 mod qptypes;
 
-/// One handler's `of_rst` result.
+/// One handler's `of_rst` result (wave S2.4: the OCaml `string -> t option`
+/// plus its exception class, without the `Error:  (...)` print side effect).
 ///
-/// `Ok(None)` is the OCaml `None`: the conversion error was reported with
-/// `Error:  (...)` and the section must be skipped.  `Err` is an exception
-/// that escaped `of_rst` (a fancy `of_int` rejecting a value, or an EZFIO
-/// read failing inside the converter); `qp_edit.set` answers it with
-/// `Info: Read error in <title>` and one retry.
-pub(crate) type ParseResult<T> = std::result::Result<Option<T>, anyhow::Error>;
+/// `Parsed` is the OCaml `Some data`.  `Reported` is a sexplib `Failure`
+/// (a value the fancy type rejects): the driver reports it as `qp_edit:
+/// parse error in <title>: <message>` and skips the section, so the check
+/// still exits 0.  `Escaped` is an exception that escaped `of_rst` (a fancy
+/// `of_int` rejecting a value, or an EZFIO read failing inside the
+/// converter): the driver retries once, silently, and only a second escape
+/// propagates, wrapped with the section title.
+#[derive(Debug)]
+pub(crate) enum ParseResult<T> {
+    /// The OCaml `Some data`: parsed, applied when writing back.
+    Parsed(T),
+    /// A reported sexplib `Failure`; `message` is the conversion error text.
+    Reported(String),
+    /// An exception that escaped `of_rst`.
+    Escaped(anyhow::Error),
+}
 
 /// The OCaml `Ezfio.ezfio_array_of_list`: build an array from a flat list of
 /// elements in Fortran (column-major) order.
@@ -82,6 +86,14 @@ pub(crate) fn ezfio_array_of_list<T>(dims: Vec<usize>, mut data: Vec<T>) -> Resu
     Ok(Array::new(dims, data)?)
 }
 
+/// A negative count is a corrupt file, not a panic.
+///
+/// The four basis/section handlers used to carry an identical private copy;
+/// they now share this one.
+pub(crate) fn usize_of(value: i64) -> Result<usize> {
+    usize::try_from(value).map_err(|_| anyhow!("negative dimension or index: {value}"))
+}
+
 /// Reproduce the write wrapper of `qp_edit.set` for one section.
 ///
 /// OCaml:
@@ -92,13 +104,19 @@ pub(crate) fn ezfio_array_of_list<T>(dims: Vec<usize>, mut data: Vec<T>) -> Resu
 ///   | Some data -> if apply then w data
 ///   | None -> ()
 /// with _ ->
-///   eprintf "Info: Read error in %s\n";
 ///   ignore (of_rst str)
 /// ```
 ///
-/// The `try` covers the write too, so a write failure also prints `Info:`
-/// and is swallowed when the retry parses.  The retry's value is never
-/// written; only a second exception escapes.
+/// Wave S2.4 wording: a reported sexplib failure prints `qp_edit: parse
+/// error in <title>: <message>` (the reference's `Error:  (...)` + snippet
+/// is gone) and the section is skipped; the reference's
+/// `Info: Read error in <title>` line is gone too — the retry is silent,
+/// and only a second escape propagates, wrapped with the section title so
+/// the driver's `qp_edit: {error:#}` reads `qp_edit: <title>: <message>`.
+///
+/// The `try` covers the write too, so a write failure is swallowed when the
+/// retry parses.  The retry's value is never written; only a second escape
+/// escapes.
 pub(crate) fn apply_parsed<T>(
     title: &str,
     body: &str,
@@ -107,15 +125,25 @@ pub(crate) fn apply_parsed<T>(
     write: impl Fn(&T) -> Result<()>,
 ) -> Result<()> {
     let outcome = match parse(body) {
-        Ok(Some(data)) if write_back => write(&data),
-        Ok(_) => Ok(()),
-        Err(error) => Err(error),
+        ParseResult::Parsed(data) if write_back => write(&data),
+        ParseResult::Parsed(_) => Ok(()),
+        ParseResult::Reported(message) => {
+            eprintln!("qp_edit: parse error in {title}: {message}");
+            Ok(())
+        }
+        ParseResult::Escaped(error) => Err(error),
     };
     if outcome.is_ok() {
         return Ok(());
     }
-    eprintln!("Info: Read error in {title}");
-    parse(body).map(|_| ())
+    match parse(body) {
+        ParseResult::Parsed(_) => Ok(()),
+        ParseResult::Reported(message) => {
+            eprintln!("qp_edit: parse error in {title}: {message}");
+            Ok(())
+        }
+        ParseResult::Escaped(error) => Err(error.context(title.to_string())),
+    }
 }
 
 /// Fixtures shared by the handler tests.
@@ -167,8 +195,6 @@ pub enum Handler {
     MoBasis,
     /// Electron counts, spin, and derived occupation.
     Electrons,
-    /// Bit-mask dimensions derived from the MO basis.
-    Bitmasks,
     /// Molecule definition parsed from RST.
     NucleiByHand,
     /// Determinant list parsed from RST and sexp.
@@ -182,7 +208,6 @@ impl Handler {
         Handler::AoExtraBasis,
         Handler::MoBasis,
         Handler::Electrons,
-        Handler::Bitmasks,
         Handler::NucleiByHand,
         Handler::DeterminantsByHand,
     ];
@@ -194,17 +219,14 @@ impl Handler {
             Handler::AoExtraBasis => "ao_extra_basis",
             Handler::MoBasis => "mo_basis",
             Handler::Electrons => "electrons",
-            Handler::Bitmasks => "bitmasks",
             Handler::NucleiByHand => "nuclei_by_hand",
             Handler::DeterminantsByHand => "determinants_by_hand",
         }
     }
 
     /// Whether `qp_edit` visits the module as an editable section.
-    ///
-    /// `bitmasks` is the only handler that is not a section.
     pub const fn is_section(self) -> bool {
-        !matches!(self, Handler::Bitmasks)
+        true
     }
 
     /// Whether check mode (`-c`) applies this section's parsed record to the
@@ -238,13 +260,6 @@ impl Handler {
             Handler::Electrons => electrons::get(ezfio, title),
             Handler::NucleiByHand => nuclei_by_hand::get(ezfio, title),
             Handler::DeterminantsByHand => determinants_by_hand::get(ezfio, title),
-            // `bitmasks` has no `to_rst` in the reference and `is_section`
-            // keeps it out of the document; reaching this arm means the
-            // engine dispatched a non-section, which is an internal bug.
-            Handler::Bitmasks => anyhow::bail!(
-                "assertion (handler {:?} is not a section) failed in get(\"{title}\")",
-                self.name()
-            ),
         }
     }
 
@@ -267,9 +282,6 @@ impl Handler {
                 determinants_by_hand::set(ezfio, title, body, write_back)
             }
             Handler::AoBasis | Handler::AoExtraBasis | Handler::MoBasis => Ok(()),
-            // `bitmasks` is not a section and has no `of_rst`; `Engine::set`
-            // rejects it before dispatch.
-            Handler::Bitmasks => Ok(()),
         }
     }
 }
@@ -382,18 +394,8 @@ mod tests {
         for handler in Handler::ALL {
             assert_eq!(Handler::from_name(handler.name()), Some(*handler));
         }
-        assert_eq!(Handler::ALL.len(), 7);
+        assert_eq!(Handler::ALL.len(), 6);
         assert_eq!(Handler::from_name("no_such_handler"), None);
-    }
-
-    #[test]
-    fn only_bitmasks_is_not_a_section() {
-        let non_sections: Vec<&str> = Handler::ALL
-            .iter()
-            .filter(|h| !h.is_section())
-            .map(|h| h.name())
-            .collect();
-        assert_eq!(non_sections, ["bitmasks"]);
     }
 
     #[test]

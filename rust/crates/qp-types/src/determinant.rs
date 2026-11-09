@@ -131,12 +131,6 @@ impl Determinant {
         &self.words
     }
 
-    /// Consume the determinant and return its flat word array.
-    #[must_use]
-    pub fn into_words(self) -> Vec<u64> {
-        self.words
-    }
-
     /// Build a determinant from a flat word array **without validation**.
     ///
     /// This mirrors the fact that the OCaml `type t = int64 array` is public:

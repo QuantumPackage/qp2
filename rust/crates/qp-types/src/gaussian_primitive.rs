@@ -30,6 +30,7 @@
 use std::fmt;
 
 use crate::angmom::Angmom;
+use crate::sexplib_compat::{Sexp, float_to_sexp};
 
 /// OCaml/C `printf`-compatible number formatting.
 ///
@@ -198,6 +199,20 @@ impl GaussianPrimitive {
     #[must_use]
     pub fn render(&self) -> String {
         format!("({}, {})", self.sym, ocaml_fmt::format_e(self.expo, 22))
+    }
+
+    /// The derived `sexp_of_t`: `((sym S)(expo 14710))`.
+    ///
+    /// The shell label is the upper-case [`Angmom::to_string_label`]; the
+    /// exponent uses the sexplib float rule. This is the byte string
+    /// [`crate::gto::Gto::to_sexp`] embeds per primitive, so it is the md5
+    /// contract.
+    #[must_use]
+    pub fn to_sexp(self) -> Sexp {
+        Sexp::list(vec![
+            Sexp::pair(Sexp::atom("sym"), Sexp::atom(self.sym.to_string_label())),
+            Sexp::pair(Sexp::atom("expo"), float_to_sexp(self.expo)),
+        ])
     }
 }
 

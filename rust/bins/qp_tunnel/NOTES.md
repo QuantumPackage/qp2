@@ -1,10 +1,21 @@
 # `qp_tunnel` — dual-run gate recipe (reference vs Rust)
 
-**Status (2026-11-05):** reworked to the plan — the CLI is a bin-local
-statement-by-statement port of the reference's `Command_line.ml` +
-`Getopt.parse_cmdline` (opam `getopt` 20120615) in `src/cli.rs`, replacing
-the earlier clap-based parse. All 51 tests are green and the gates below
-pass byte-identical. The three clap deviations are closed:
+**Status (2026-11-09, wave S2):** the help/error byte contracts documented
+below are **retired** — user-visible text (help, errors, notices, the
+`ssh` instructions) is now Rust-native (user decision 2026-11-09; the CLI
+is clap derive again, `src/cli.rs` and `qp_types::num` are deleted, port
+parsing is decimal-only `i64::from_str`). The contract that survives is
+the exit codes (0/1/2), the ZMQ wire format and the data gates
+(DEVIATIONS.md A4/A11/A12; `steps/012-simplify-tool-layer/implementation.md`
+S2). The byte-comparison recipe below is kept as historical evidence of
+the **reference** behaviour; claims in it about the port matching the
+reference byte-for-byte are pre-S2 and no longer hold.
+
+**Status (2026-11-05, historical):** reworked to the plan — the CLI was a
+bin-local statement-by-statement port of the reference's `Command_line.ml`
++ `Getopt.parse_cmdline` (opam `getopt` 20120615) in `src/cli.rs`, replacing
+the earlier clap-based parse. All 51 tests were green and the gates below
+passed byte-identical. The three clap deviations were closed:
 
 * the help usage line now **re-wraps with `argv[0]`** (the reference's
   `Format` `@[<hov 4>` box; measured rule below);
@@ -45,10 +56,10 @@ name). All cases exit 2:
 `QP_ROOT` is checked **before** parsing (`env -u QP_ROOT` fails even for
 `-h`); `QP_ROOT=` (empty) is accepted and reaches the parser.
 
-The same matrix is pinned in `tests/cli.rs` (18 e2e cases, spawned with
-`CommandExt::arg0`); the dead-remote cases compare the four `Thread …`
-lines as a set (thread-scheduling race in both implementations) plus the
-lowest-id fatal line.
+The same matrix is pinned in `tests/cli.rs` (rewritten in wave S2: exit
+code + at most one stable substring; `argv[0]` no longer matters because
+the help is clap-generated); the dead-remote cases pin the exit code and
+the plain `proxy thread …` / `qp_tunnel: …` wording.
 
 ## 2. The usage-line re-wrap rule
 
@@ -69,18 +80,21 @@ reference byte-for-byte at all 72 lengths):
   that starts past column 69 — e.g. a 4-char option word ending at column
   73 wraps with a trailing space).
 
-`wrap_usage` in `src/cli.rs` implements exactly this and is pinned against
-three bare-invocation captures of renamed reference copies
+(pre-S2) `wrap_usage` in `src/cli.rs` implemented exactly this and was
+pinned against three bare-invocation captures of renamed reference copies
 (`tests/data/help_qp_tunnel.txt` 481 B / `help_medium.txt` 499 B /
-`help_long.txt` 540 B). The re-wrap sweep recipe (port vs reference,
-identical `argv[0]` per side) is the one used on 2026-11-05 in
-`$HOME/OpenCode/tmp/w3-p4-tools/tunnel/sweep2/`.
+`help_long.txt` 540 B, since deleted). Wave S2.1 deleted `cli.rs` and the
+captures: the help is clap-generated and is not byte-compared. The re-wrap
+sweep recipe (port vs reference, identical `argv[0]` per side) is the one
+used on 2026-11-05 in `$HOME/OpenCode/tmp/w3-p4-tools/tunnel/sweep2/`.
 
 ## 3. Port parsing
 
-`parse_address` splits `proto:host:port` on `:` (exactly three fields) and
-parses the port with the bin-local `src/ocaml_num.rs`
-(OCaml `int_of_string`). Measured reference behaviour, all pinned:
+`parse_address` splits `proto:host:port` on `:` (exactly three fields).
+The reference parses the port with OCaml `int_of_string`; wave S2.3: the
+port parses it with `i64::from_str` — decimal-only, so the
+`0x10`/`1_000` spellings below are now parse errors (DEVIATIONS A12).
+Measured reference behaviour (evidence):
 
 * `0x10` → 16, `-5` → -5, `+1` → 1, `1_000` → 1000;
 * above `2^62 - 1` → `Failure("int_of_string")`, exit 2;
@@ -93,8 +107,9 @@ parses the port with the bin-local `src/ocaml_num.rs`
 
 The reference prints the four `Thread … killed on uncaught exception
 Failure("Unable to establish connection to …")` lines and then hangs in
-`zmq_ctx_term` (`EINTR`). The port prints the same four lines (compared as
-a set), the lowest-id failure as `Fatal error: exception …`, and exits 2.
+`zmq_ctx_term` (`EINTR`). The port (wave S2) prints
+`proxy thread <id> stopped: <message>` for each failing thread and
+`qp_tunnel: <message>` for the lowest-id failure, and exits 2.
 
 ## 5. Live banner and relay round trip
 
@@ -106,7 +121,10 @@ sequentially** with different remote bases — both tunnels want the local
 remote base (perl `\b`-based substitution, not BSD `sed`). Both transcripts
 were byte-identical on 2026-11-05 (live: banner, `Communication [ OK ]`,
 ssh block, `Ready`, clean exit 0; relay: the full message matrix in the
-driver output, `qp_tunnel exited properly.`).
+driver output, `qp_tunnel exited properly.`) — pre-S2; since wave S2.5 the
+`ssh` block and the status lines are plain Rust text and the transcripts
+are no longer byte-compared (the drivers' exit-code and channel checks
+remain the contract).
 
 ## 6. `-g`
 
@@ -129,16 +147,19 @@ path against the reference).
 
 ## Gotchas that cost time
 
-* **The wrap rule is not greedy.** A plain "pack to column 77/78" model
+* **The wrap rule is not greedy (pre-S2, reference evidence).** A plain
+  "pack to column 77/78" model
   fails at exactly the trailing-space configurations (a 4-char word
   ending at column 73 wraps; a 12-char word ending at 77 fits). The two
   constants are `s ≤ 68` (commit) and `e ≤ 77` (margin + trailing space);
   they were pinned at their boundaries by the sweeps. `qp_set_mo_class`'s
-  `wrap_usage` has the same fixed rule (its 75-length sweep is also
-  byte-identical).
-* **`-h` prints the help once and parsing continues** (`set_specs`); the
-  driver prints it a second time when the anonymous argument is missing,
-  so `-h` alone shows two blocks.
+  `wrap_usage` had the same fixed rule (both implementations and both
+  sweeps are gone since wave S2.1).
+* **`-h` prints the help once and parsing continues** (pre-S2 reference
+  behaviour, `set_specs`); the
+  driver printed it a second time when the anonymous argument was missing,
+  so `-h` alone showed two blocks. Wave S2: the port's `-h` is clap's
+  built-in — one block, exit 0.
 * **`--` is consumed**, not an anonymous argument; a single `-` and an
   empty string **are** anonymous arguments.
 * **`timeout` does not exist on macOS zsh** — use the python drivers or a

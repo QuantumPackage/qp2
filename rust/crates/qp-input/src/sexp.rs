@@ -11,10 +11,9 @@
 //!
 //! * Atoms, quoted atoms (`"..."` with the OCaml escapes), lists, and `;`
 //!   comments to end of line.
-//! * Byte spans for every node.  The OCaml `fail_msg` reports the
-//!   offending sub-expression by slicing the source string, so the spans
-//!   must refer to the string that was parsed (the `"(" ^ s ^ ")"` wrapper
-//!   in the caller), not to an unescaped copy.
+//! * Byte spans for every node: the spans must refer to the string that was
+//!   parsed (the `"(" ^ s ^ ")"` wrapper in the caller), not to an
+//!   unescaped copy.
 //! * `ppx_sexp_conv`'s record rules: a list of two-element lists, known
 //!   names only, no duplicates, every field present, `()` rejected.
 //!
@@ -23,8 +22,9 @@
 //! * Error *messages* are not sexplib's.  Sexplib's converter exceptions
 //!   are phrased by the generated code (`t_of_sexp`, `int_of_sexp`, ...) and
 //!   are not part of the byte contract (the C1–C7 gate never triggers
-//!   them; only `-r` on malformed text does).  The *snippet* that follows
-//!   the message is reproduced by [`snippet`] exactly.
+//!   them; only `-r` on malformed text does).  Wave S2.4: the reference's
+//!   `Error:  (...)` reporter and its `##`-marked snippet are gone; the
+//!   driver prints `qp_edit: parse error in <title>: <message>`.
 //! * `\x` escapes are accepted on input; sexplib only produces them.
 //!
 //! Units: none.
@@ -33,7 +33,8 @@
 /// in the parsed string.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct SexpError {
-    /// Human-readable description, printed after `Error:  (`.
+    /// Human-readable description, reported by the driver as `qp_edit:
+    /// parse error in <title>: <message>` (wave S2.4).
     pub message: String,
     /// Start byte offset of the offending sub-expression (inclusive).
     pub start: usize,
@@ -354,9 +355,8 @@ impl Parser<'_> {
 
 /// One accepted record field: `(name, pair, value)`.
 ///
-/// `pair` is the whole `(name value)` node, whose span is what a value
-/// conversion error reports in `fail_msg`; `value` is the value node the
-/// converter reads.
+/// `pair` is the whole `(name value)` node (kept for the span, which the
+/// reader still reproduces); `value` is the value node the converter reads.
 pub(crate) type RecordField<'a> = (&'a str, &'a Sexp, &'a Sexp);
 
 /// Check a parsed node against a record schema and return its fields.
@@ -429,44 +429,6 @@ pub(crate) fn record_fields<'a>(
         }
     }
     Ok(pairs)
-}
-
-/// Reproduce `Generic_input_of_rst.fail_msg`: print the conversion error and
-/// its `##`-marked excerpt to stderr.
-///
-/// The format string is the OCaml one, `"Error:  (%s)\n\n  %s\n\n"`;
-/// `source` is the string handed to [`parse`], so the snippet's byte spans
-/// are valid.
-pub(crate) fn fail_msg(source: &str, error: &SexpError) {
-    eprint!(
-        "Error:  ({})\n\n  {}\n\n",
-        error.message,
-        snippet(source, error.start, error.end)
-    );
-}
-
-/// Reproduce `Generic_input_of_rst.fail_msg`'s snippet.
-///
-/// `source` is the exact string handed to [`parse`] (including the
-/// enclosing parentheses); `start..end` is the failing sub-expression.
-/// OCaml marks it with `##`, replaces every `(` with a space, splits on
-/// `)`, trims each piece, keeps the pieces that contain `##`, and joins
-/// them with newlines.  The result is the text printed after
-/// `Error:  (<message>)` and two spaces of indentation.
-pub(crate) fn snippet(source: &str, start: usize, end: usize) -> String {
-    let marked = format!(
-        "{} ## {} ## {}",
-        &source[..start],
-        &source[start..end],
-        &source[end..]
-    );
-    let replaced = marked.replace('(', " ");
-    replaced
-        .split(')')
-        .map(str::trim)
-        .filter(|piece| piece.contains("##"))
-        .collect::<Vec<_>>()
-        .join("\n")
 }
 
 #[cfg(test)]
@@ -559,22 +521,5 @@ mod tests {
         assert!(parse("(a 1))").is_err());
         assert!(parse("").is_err());
         assert!(parse("(a) (b)").is_err());
-    }
-
-    /// Worked by hand from `Generic_input_of_rst.fail_msg` for the source
-    /// `((a 1)(b 2))` and the range of `(b 2)`.
-    #[test]
-    fn snippet_marks_the_offending_pair() {
-        let source = "((a 1)(b 2))";
-        assert_eq!(snippet(source, 6, 11), "##  b 2\n##");
-    }
-
-    /// Whole-record range: `"("`→`" "` turns the two opening parentheses
-    /// into two spaces, which follow the single space of the leading
-    /// `" ## "` marker.
-    #[test]
-    fn snippet_of_the_whole_record_is_one_marked_line() {
-        let source = "((a 1)(b 2))";
-        assert_eq!(snippet(source, 0, source.len()), "##   a 1\n##");
     }
 }

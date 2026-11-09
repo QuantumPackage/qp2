@@ -3,7 +3,7 @@
 //! The child is a real process in EZFIO mode whose remote address is
 //! `tcp://127.0.0.1:1` (well formed, nothing listening). All three remote
 //! `connect` calls are asynchronous and succeed, so every thread reaches its
-//! poll loop and `Ready` is printed. Both signals are checked in one test so
+//! poll loop and `ready` is printed. Both signals are checked in one test so
 //! the two children never race for the same local port window.
 
 mod support;
@@ -26,9 +26,13 @@ fn signals_end_the_tunnel_cleanly() {
             Some("/nonexistent"),
         );
         child.wait_ready();
-        assert!(child.stdout().starts_with("Connect to:\ntcp://127.0.0.1:"));
+        assert!(
+            child
+                .stdout()
+                .starts_with("Connect to the tunnel with: tcp://127.0.0.1:")
+        );
 
-        // `Ready` is printed by the input thread; `main` may not have reached
+        // `ready` is printed by the input thread; `main` may not have reached
         // `install_signal_handlers` yet (documented window). Give it time.
         std::thread::sleep(Duration::from_millis(300));
         child.signal(signal);
@@ -43,7 +47,7 @@ fn signals_end_the_tunnel_cleanly() {
         assert!(
             child
                 .stdout()
-                .ends_with("Ready\nqp_tunnel exited properly.\n"),
+                .ends_with("ready\nqp_tunnel: exited cleanly\n"),
             "signal {signal}: stdout:\n{}",
             child.stdout()
         );

@@ -37,7 +37,7 @@ use qp_types::element::{self, Element};
 use qp_types::point3d::{Point3d, Units};
 
 use super::qptypes;
-use super::{ParseResult, apply_parsed, ezfio_array_of_list};
+use super::{ParseResult, apply_parsed, ezfio_array_of_list, usize_of};
 use crate::engine::make_header;
 
 /// The EZFIO group this handler owns.
@@ -234,16 +234,21 @@ pub(crate) fn to_rst(record: &NucleiByHand) -> String {
 /// three characters and ends in `"::"`; the line after the next one is skipped
 /// (`_ :: nucl_num :: title :: lines`, see the module docs).
 ///
-/// # Errors
-///
-/// * `Err` when no `"::"` line exists (the reference's `Not_found`) or when
-///   `nucl_num` does not parse as an integer (its `Failure`): both escape
-///   `of_rst` and make the driver print `Info: Read error in <title>`, retry,
-///   then fail;
-/// * `Ok(None)`? — never: this handler reports all its failures as
-///   exceptions, so it has no "already printed" path.  The return type is the
-///   shared [`ParseResult`] for uniformity with the other handlers.
+/// This handler has no reported path: every failure — no `"::"` line
+/// (the reference's `Not_found`), a `nucl_num` that does not parse as an
+/// integer (its `Failure`), an `Atom.of_string` rejection, a `Qptypes`
+/// assertion — is an [`ParseResult::Escaped`] that the driver retries once,
+/// silently (wave S2.4: the `Info: Read error in <title>` line is gone).
 pub(crate) fn of_rst(ezfio: &EzFio, body: &str) -> ParseResult<NucleiByHand> {
+    match record_from(ezfio, body) {
+        Ok(record) => ParseResult::Parsed(record),
+        Err(error) => ParseResult::Escaped(error),
+    }
+}
+
+/// The escape-prone body of [`of_rst`] (the reference's `try` covers all of
+/// it).
+fn record_from(ezfio: &EzFio, body: &str) -> Result<NucleiByHand, anyhow::Error> {
     let lines: Vec<&str> = body.split('\n').collect();
 
     let mut start = None;
@@ -279,14 +284,14 @@ pub(crate) fn of_rst(ezfio: &EzFio, body: &str) -> ParseResult<NucleiByHand> {
         atoms.push(Atom::of_string(Units::Angstrom, line).context("Atom.of_string")?);
     }
 
-    Ok(Some(NucleiByHand {
+    Ok(NucleiByHand {
         // `List.length atom_list |> Nucl_number.of_int ~max:nmax`, i.e. the
         // count of atoms actually parsed, which is `nucl_num` here.
         nucl_num: qptypes::nucl_number_of_int_max(atoms.len() as i64, nmax)?,
         nucl_label: atoms.iter().map(|atom| atom.element).collect(),
         nucl_charge: atoms.iter().map(|atom| atom.charge).collect(),
         nucl_coord: atoms.iter().map(|atom| atom.coord).collect(),
-    }))
+    })
 }
 
 /// `get` for this section: `None` renders as `""`.
@@ -308,11 +313,6 @@ pub(crate) fn set(ezfio: &EzFio, title: &str, body: &str, write_back: bool) -> R
     )
 }
 
-/// A negative `nucl_num` is a corrupt file, not a panic.
-fn usize_of(value: i64) -> Result<usize> {
-    usize::try_from(value).map_err(|_| anyhow::anyhow!("negative dimension or index: {value}"))
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -320,6 +320,22 @@ mod tests {
     use std::path::Path;
 
     use crate::handlers::test_support;
+
+    /// Unwrap a [`ParseResult::Parsed`], panicking with the result otherwise.
+    fn parsed<T: std::fmt::Debug>(result: ParseResult<T>) -> T {
+        match result {
+            ParseResult::Parsed(value) => value,
+            other => panic!("expected Parsed, got {other:?}"),
+        }
+    }
+
+    /// Unwrap a [`ParseResult::Escaped`], panicking with the result otherwise.
+    fn escaped<T: std::fmt::Debug>(result: ParseResult<T>) -> anyhow::Error {
+        match result {
+            ParseResult::Escaped(error) => error,
+            other => panic!("expected Escaped, got {other:?}"),
+        }
+    }
 
     /// The `hcn` fixture: C at the origin, H and N on the z axis.
     ///
@@ -444,9 +460,7 @@ mod tests {
         // the `interactive.rs` awk tests rely on it.
         let ragged = "\nNuclear coordinates in xyz format (Angstroms) ::\n\n  1\n  \n  \
                       C      6 0.01 0 0\n\n";
-        let parsed = of_rst(&ezfio, ragged)
-            .expect("ragged line parses")
-            .expect("some");
+        let parsed = parsed(of_rst(&ezfio, ragged));
         assert_eq!(parsed.nucl_num, 1);
         assert_eq!(parsed.nucl_label, vec![Element::C]);
         assert_eq!(parsed.nucl_charge, vec![Charge::of_int(6)]);
@@ -536,7 +550,7 @@ mod tests {
         let (_dir, ezfio) = hcn_like();
         let record = read(&ezfio).expect("read").expect("some");
         let text = to_rst(&record);
-        let parsed = of_rst(&ezfio, &text).expect("parse").expect("some");
+        let parsed = parsed(of_rst(&ezfio, &text));
         assert_eq!(parsed, record);
     }
 
@@ -547,7 +561,7 @@ mod tests {
                     2\n  \n  \
                     O 0. 0. 1.2\n  \
                     H 0. 0. 0.\n\n";
-        let parsed = of_rst(&ezfio, body).expect("parse").expect("some");
+        let parsed = parsed(of_rst(&ezfio, body));
         assert_eq!(parsed.nucl_num, 2);
         assert_eq!(parsed.nucl_label, vec![Element::O, Element::H]);
         assert_eq!(
@@ -559,14 +573,14 @@ mod tests {
     #[test]
     fn of_rst_fails_without_a_marker_line() {
         let (_dir, ezfio) = hcn_like();
-        let error = of_rst(&ezfio, "1\nC 0 0 0\n").expect_err("error");
+        let error = escaped(of_rst(&ezfio, "1\nC 0 0 0\n"));
         assert_eq!(error.to_string(), "Not_found");
     }
 
     #[test]
     fn of_rst_reports_the_xyz_message_when_the_block_is_too_short() {
         let (_dir, ezfio) = hcn_like();
-        let error = of_rst(&ezfio, "\nCoordinates ::\n\n").expect_err("error");
+        let error = escaped(of_rst(&ezfio, "\nCoordinates ::\n\n"));
         assert_eq!(error.to_string(), "Error in xyz format");
     }
 }

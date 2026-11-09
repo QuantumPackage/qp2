@@ -1,6 +1,6 @@
 //! End-to-end tests for `qp_print_basis`.
 //!
-//! Every expectation below is a capture of the reference build
+//! The success expectations are captures of the reference build
 //! (`~/qp2/ocaml/qp_print_basis.native`, `QP_ROOT=~/qp2`), byte for byte:
 //!
 //! ```text
@@ -21,6 +21,11 @@
 //! `tests/data/hcn_basis_prefix.rst` is the first 200 bytes of the `hcn`
 //! stdout. The full `hcn` document is byte-compared by the parent's dual-run
 //! gate, not here.
+//!
+//! Wave S2: the error text is Rust-native, so the failure cases assert the
+//! exit code and at most one stable substring (named in the test name),
+//! never the exact line; the stdout of the frozen data path stays
+//! byte-pinned.
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -40,7 +45,7 @@ const HCN_LEN: usize = 62_782;
 
 /// Copy `rust/tests/golden/fixtures/<name>` under `<temporary>/ezfio`.
 ///
-/// The fixture root *is* an EZFIO directory; the returned handle owns the copy.
+/// The fixture root *is* an EZFIIO directory; the returned handle owns the copy.
 fn fixture(name: &str) -> TempDir {
     let source = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../../tests/golden/fixtures")
@@ -77,57 +82,58 @@ fn stderr(output: &Output) -> String {
     String::from_utf8(output.stderr.clone()).expect("stderr is valid UTF-8")
 }
 
-/// The reference's `Fatal error: exception Failure("…")` line.
-fn failure(message: &str) -> String {
-    format!("Fatal error: exception Failure(\"{message}\")\n")
-}
-
 /// Read the file at `path` as bytes.
 fn bytes(path: &str) -> Vec<u8> {
     fs::read(path).unwrap_or_else(|error| panic!("read {path}: {error}"))
 }
 
+/// The reference dies on `Sys.argv.(1)`; the port says the argument is
+/// missing. Stable substring: `argument is missing`.
 #[test]
-fn no_argument_is_the_ocaml_index_error() {
+fn no_argument_is_the_missing_argument_error() {
     let output = run(&[]);
     assert_eq!(output.status.code(), Some(2), "{output:?}");
     assert!(output.stdout.is_empty(), "{output:?}");
-    assert_eq!(
-        stderr(&output),
-        "Fatal error: exception Invalid_argument(\"index out of bounds\")\n"
+    assert!(
+        stderr(&output).contains("argument is missing"),
+        "{}",
+        stderr(&output)
     );
 }
 
+/// The one stable substring is `EZFIIO` (the message names the file form).
 #[test]
 fn nonexistent_path_is_the_ezfio_file_failure() {
     let output = run(&["/nonexistent"]);
     assert_eq!(output.status.code(), Some(2), "{output:?}");
     assert!(output.stdout.is_empty(), "{output:?}");
-    assert_eq!(stderr(&output), failure("Error reading EZFIO file"));
+    assert!(stderr(&output).contains("EZFIIO"), "{}", stderr(&output));
 }
 
-/// `Sys.file_exists ""` is false, like the reference's (measured).
+/// `Path::exists("")` is false, like the reference's `Sys.file_exists ""`
+/// (measured). Stable substring: `EZFIIO`.
 #[test]
 fn empty_argument_is_the_ezfio_file_failure() {
     let output = run(&[""]);
     assert_eq!(output.status.code(), Some(2), "{output:?}");
     assert!(output.stdout.is_empty(), "{output:?}");
-    assert_eq!(stderr(&output), failure("Error reading EZFIO file"));
+    assert!(stderr(&output).contains("EZFIIO"), "{}", stderr(&output));
 }
 
-/// An existing path that is not an EZFIO tree: `Ezfio.set_file` calls
-/// `mkdir`, which returns `EEXIST` (measured with both a directory and a
-/// regular file).
+/// An existing path that is not an EZFIIO tree (measured with both a
+/// directory and a regular file). Stable substring: `not an EZFIIO
+/// directory`.
 #[test]
-fn existing_directory_without_marker_is_mkdir_eexist() {
+fn existing_directory_without_marker_is_not_an_ezfio() {
     let directory = TempDir::new().expect("tempdir");
     let path = directory.path().to_str().expect("UTF-8 tempdir").to_owned();
     let output = run(&[&path]);
     assert_eq!(output.status.code(), Some(2), "{output:?}");
     assert!(output.stdout.is_empty(), "{output:?}");
-    assert_eq!(
-        stderr(&output),
-        format!("Fatal error: exception Unix.Unix_error(Unix.EEXIST, \"mkdir\", \"{path}\")\n")
+    assert!(
+        stderr(&output).contains("not an EZFIIO directory"),
+        "{}",
+        stderr(&output)
     );
 }
 
@@ -139,7 +145,8 @@ fn h2_prints_the_basis_then_fails_on_the_missing_mos() {
     assert_eq!(output.status.code(), Some(2), "{output:?}");
     // The basis block is already on stdout when the MO read fails.
     assert_eq!(output.stdout, bytes(H2_BASIS), "h2 basis block");
-    assert_eq!(stderr(&output), failure("Error reading the mo set"));
+    // Stable substring: `mo set`.
+    assert!(stderr(&output).contains("mo set"), "{}", stderr(&output));
 }
 
 #[test]

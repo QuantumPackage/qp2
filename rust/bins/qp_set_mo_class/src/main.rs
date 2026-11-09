@@ -1,16 +1,17 @@
 //! `qp_set_mo_class` — Rust port of `ocaml/qp_set_mo_class.ml` (P4, wave 3).
 //!
 //! The reference driver (`let ()` at the end of the file) has **no** `with`
-//! handler: every exception escapes to the OCaml runtime, which prints
-//! `Fatal error: exception <exception>` on stderr and exits 2. The flow is
-//! the reference's statement order:
+//! handler: every exception escaped to the OCaml runtime, which printed
+//! `Fatal error: exception <exception>` on stderr and exited 2. Wave S2
+//! replaces that with one plain line, `qp_set_mo_class: <message>` on
+//! standard error, exit 2. The flow is the reference's statement order:
 //!
 //! 1. the `QP_ROOT` guard, raised by a module initialiser in the
-//!    reference (before the option parser runs — even a bare invocation
-//!    dies here, measured);
-//! 2. the `Getopt`/`Command_line` parse ([`cli`], a statement-by-statement
-//!    port including its quirks), the `-h` help, and the mandatory
-//!    anonymous `EZFIO_DIR`;
+//!    reference (before the option parser runs — even a bare invocation,
+//!    and even `-h`, dies here);
+//! 2. the clap parse: the five range options `-c`/`-i`/`-a`/`-v`/`-d`,
+//!    `-q`, and the mandatory single positional `EZFIO_DIR`; `-h`/`--help`
+//!    print the help once and exit 0;
 //! 3. `Ezfio.set_file` (create the tree when absent: `mkdir`, the `ezfio`
 //!    group, the `creation`/`user`/`library` stamps);
 //! 4. `has mo_basis/mo_num`, then [`set_with`] or [`get`] (the `-q` path:
@@ -19,23 +20,38 @@
 //!
 //! `build_mask` (`qp_set_mo_class.ml:9-28`) is dead code in the reference
 //! and is not ported.
+//!
+//! # stdout (functional, kept byte for byte)
+//!
+//! The five debug lines, the `Electrons:`/`MO  :`/`n_int:` summary, the
+//! `check` wrapper's `Number of MOs: {n}` line, the raw `N_int > 128`
+//! warning and the `More than 10_000 MOs` warning of the shared `Mo_basis`
+//! reader. Only the `More than 10_000 MOs` warning of
+//! [`range::create_class`] moved to standard error (wave S2).
+//!
+//! # Deviations
+//!
+//! A non-UTF-8 `argv` byte sequence is rejected by clap with its own
+//! plain diagnostic (the reference walked raw bytes and rejected it with
+//! its own message).
 
-mod cli;
-mod error;
-mod ocaml_num;
 mod qpackage;
 mod range;
 
 use std::fs;
-use std::io::{self, Write};
+use std::io;
+use std::io::Write;
 use std::path::Path;
 use std::process::ExitCode;
 
+use clap::Parser;
 use qp_ezfio::{Array, EzFio};
 use qp_input::handlers;
 use qp_input::handlers::mo_basis::MoClass;
+use qp_types::error::ToolError;
 
-use crate::error::{AppError, EXIT_CODE, OcamlException, QP_ROOT_MISSING};
+/// The tool name in the `qp_set_mo_class: <message>` error line.
+pub(crate) const TOOL: &str = "qp_set_mo_class";
 
 /// The five class keywords, in the reference's print order
 /// (core, inact, act, virt, del) — the bare `MO_class.to_string` forms.
@@ -51,74 +67,71 @@ const LABELS: [&str; 5] = [
     "Deleted  ",
 ];
 
+/// The command line: the five class ranges, `-q` and `EZFIO_DIR`.
+#[derive(Parser)]
+struct Args {
+    /// The core orbital range.
+    #[arg(short = 'c', long = "core")]
+    core: Option<String>,
+    /// The inactive orbital range.
+    #[arg(short = 'i', long = "inact")]
+    inact: Option<String>,
+    /// The active orbital range.
+    #[arg(short = 'a', long = "act")]
+    act: Option<String>,
+    /// The virtual orbital range.
+    #[arg(short = 'v', long = "virt")]
+    virt: Option<String>,
+    /// The deleted orbital range.
+    #[arg(short = 'd', long = "del")]
+    del: Option<String>,
+    /// Query mode: read the current classes and re-write them.
+    #[arg(short = 'q', long = "query")]
+    query: bool,
+    /// The EZFIO directory (created when absent).
+    ezfio_dir: String,
+}
+
 fn main() -> ExitCode {
-    let mut stdout = io::stdout();
-    let result = run(&mut stdout);
-    // The reference writes help/warnings to stdout and the fatal line to
-    // stderr; flush stdout first so the order holds when both go to one
-    // terminal.
-    let _ = stdout.flush();
-    match result {
+    // Module-initialiser semantics: the reference's `Qpackage.root` guard
+    // runs before the parser, so even a bare invocation (and even `-h`)
+    // dies here. Presence is what is checked: `QP_ROOT=` is accepted.
+    if std::env::var_os("QP_ROOT").is_none() {
+        let error = ToolError::new(TOOL, "QP_ROOT is not set (source quantum_package.rc)");
+        eprintln!("{error}");
+        return ExitCode::from(2);
+    }
+
+    let args = Args::parse();
+    match run_action(&args.ezfio_dir, &args) {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
-            let _ = io::stderr().write_all(error.render().as_bytes());
-            ExitCode::from(EXIT_CODE)
+            eprintln!("{error}");
+            ExitCode::from(2)
         }
     }
 }
 
-/// The reference's top-level flow: guard, parse, act.
-fn run(out: &mut dyn Write) -> Result<(), AppError> {
-    // Module-initialiser semantics: the failure precedes the parse and any
-    // output (measured: bare invocation, no help, empty stdout).
-    if std::env::var_os("QP_ROOT").is_none() {
-        return Err(AppError(OcamlException::Failure(
-            QP_ROOT_MISSING.to_owned(),
-        )));
-    }
-    let argv = collect_argv()?;
-    let parsed = cli::parse(&argv)?;
-    parsed.after_specs(&argv[0], out)?;
-    let dir = cli::require_one_anonymous(&parsed, &argv[0], out)?;
-    run_action(&dir, &parsed)
-}
-
-/// Collect `argv` (including `argv[0]`) as owned `String`s.
-///
-/// The reference sees raw bytes. This port's parser is `String`-based, so
-/// a non-UTF-8 argument is rejected instead of panicking; that message is
-/// a deviation with no reference counterpart (argument 0 is included, so
-/// the index is the `argv` index).
-fn collect_argv() -> Result<Vec<String>, AppError> {
-    std::env::args_os()
-        .enumerate()
-        .map(|(index, argument)| {
-            argument.into_string().map_err(|_| {
-                AppError(OcamlException::SysError(format!(
-                    "command line argument {index} is not valid UTF-8"
-                )))
-            })
-        })
-        .collect()
-}
-
 /// `run` (`qp_set_mo_class.ml:176-185`): `set_file`, the `mo_num` guard,
 /// then `get` or `set`.
-fn run_action(dir: &str, p: &cli::Parsed) -> Result<(), AppError> {
+fn run_action(dir: &str, args: &Args) -> Result<(), ToolError> {
     let ezfio = set_file(dir)?;
-    if !ezfio.has("mo_basis", "mo_num").map_err(app)? {
-        return Err(failure("mo_basis/mo_num not found"));
+    if !ezfio
+        .has("mo_basis", "mo_num")
+        .map_err(|error| tool(&error))?
+    {
+        return Err(ToolError::new(TOOL, "mo_basis/mo_num not found"));
     }
-    if p.query {
+    if args.query {
         get(&ezfio)
     } else {
         set_with(
             &ezfio,
-            p.core.as_deref().unwrap_or("[]"),
-            p.inact.as_deref().unwrap_or("[]"),
-            p.act.as_deref().unwrap_or("[]"),
-            p.virt.as_deref().unwrap_or("[]"),
-            p.del.as_deref().unwrap_or("[]"),
+            args.core.as_deref().unwrap_or("[]"),
+            args.inact.as_deref().unwrap_or("[]"),
+            args.act.as_deref().unwrap_or("[]"),
+            args.virt.as_deref().unwrap_or("[]"),
+            args.del.as_deref().unwrap_or("[]"),
         )
     }
 }
@@ -150,54 +163,61 @@ impl qp_ezfio::Registry for NoRegistry {
 /// `Ezfio.set_file` (`ezfio.ml:426-439`): open the tree when
 /// `<dir>/.version` exists; otherwise `mkdir` it (single level), `mkdir`
 /// the `ezfio` group, and stamp it.
-fn set_file(dir: &str) -> Result<EzFio, AppError> {
+///
+/// The reference's `mkdir` is a single-level `Unix.mkdir`: a missing
+/// parent is `ENOENT`, an existing path (file, or a directory without the
+/// `.version` marker) is `EEXIST`. Wave S2: plain `io::Error` text.
+fn set_file(dir: &str) -> Result<EzFio, ToolError> {
     let no_registry = || Box::new(NoRegistry) as Box<dyn qp_ezfio::Registry>;
     let root = Path::new(dir);
     if root.join(".version").exists() {
         return EzFio::open(root)
-            .map_err(app)
+            .map_err(|error| ToolError::new(TOOL, format!("cannot open {dir}: {error}")))
             .map(|ezfio| ezfio.with_registry(no_registry()));
     }
-    // The reference's `mkdir` is a single-level `Unix.mkdir`: a missing
-    // parent is `ENOENT`, an existing path (file, or a directory without
-    // the `.version` marker) is `EEXIST`.
-    let mkdir_error = |errno: error::UnixErrno| {
-        AppError(OcamlException::UnixError {
-            errno,
-            function: "mkdir",
-            argument: dir.to_owned(),
-        })
-    };
     if let Some(parent) = root.parent()
         && !parent.as_os_str().is_empty()
         && !parent.exists()
     {
-        return Err(mkdir_error(error::UnixErrno::Enoent));
+        // Raw errno 2 (`ENOENT`), the same value on Linux and macOS.
+        let error = io::Error::from_raw_os_error(2);
+        return Err(ToolError::new(
+            TOOL,
+            format!("cannot create {dir}: {error}"),
+        ));
     }
     if root.exists() {
-        return Err(mkdir_error(error::UnixErrno::Eexist));
+        // Raw errno 17 (`EEXIST`), the same value on Linux and macOS.
+        let error = io::Error::from_raw_os_error(17);
+        return Err(ToolError::new(
+            TOOL,
+            format!("cannot create {dir}: {error}"),
+        ));
     }
     let ezfio = EzFio::create(root)
-        .map_err(|_| mkdir_error(error::UnixErrno::Eexist))?
+        .map_err(|error| ToolError::new(TOOL, format!("cannot create {dir}: {error}")))?
         .with_registry(no_registry());
     // The reference leaves a partial tree on a later failure (no cleanup).
-    if let Err(error) = ezfio.create_group("ezfio") {
-        return Err(app(error));
-    }
+    ezfio.create_group("ezfio").map_err(|error| {
+        ToolError::new(
+            TOOL,
+            format!("cannot create the ezfio group in {dir}: {error}"),
+        )
+    })?;
     write_stamps(root)?;
     Ok(ezfio)
 }
 
 /// The `ezfio/{creation,user,library}` stamps of `Ezfio.set_file`
 /// (`ezfio.ml:431-434`), the `qp_create_ezfio` pattern.
-fn write_stamps(ezfio_file: &Path) -> Result<(), AppError> {
-    let failure = || {
-        AppError(OcamlException::Failure(format!(
-            "Unable to create new ezfio file:\n{}",
-            ezfio_file.display()
-        )))
-    };
+fn write_stamps(ezfio_file: &Path) -> Result<(), ToolError> {
     let dir = ezfio_file.join("ezfio");
+    let failure = || {
+        ToolError::new(
+            TOOL,
+            format!("cannot write the ezfio stamps in {}", ezfio_file.display()),
+        )
+    };
     // `LANG= date`: the local time in the C locale.
     let date = std::process::Command::new("date")
         .env_remove("LANG")
@@ -224,8 +244,8 @@ fn write_stamps(ezfio_file: &Path) -> Result<(), AppError> {
 
 /// `set` (`qp_set_mo_class.ml:36-112`): read `mo_num` raw, parse the five
 /// ranges in order (first failure wins, through the `check` wrapper),
-/// apply them (duplicate → `Failure`), require full coverage, print the
-/// five debug lines, write `mo_basis/mo_class`.
+/// apply them (duplicate → error), require full coverage, print the five
+/// debug lines, write `mo_basis/mo_class`.
 fn set_with(
     ezfio: &EzFio,
     core: &str,
@@ -233,19 +253,18 @@ fn set_with(
     act: &str,
     virt: &str,
     del: &str,
-) -> Result<(), AppError> {
+) -> Result<(), ToolError> {
     let mo_num = read_int_scalar(ezfio, "mo_basis", "mo_num")?;
-    // `Array.init mo_num`: a negative count is the uncaught
-    // `Invalid_argument("Array.init")` before any range is read.
+    // `Array.init mo_num`: a negative count fails before any range is read.
     if mo_num < 0 {
-        return Err(AppError(OcamlException::InvalidArgument(
-            "Array.init".into(),
-        )));
+        return Err(ToolError::new(
+            TOOL,
+            format!("mo_num must be non-negative: {mo_num}"),
+        ));
     }
     let mo_num_us = mo_num as usize;
 
-    // Parse in the reference's order; `check` (inside `range::create_class`)
-    // catches only `Invalid_argument`.
+    // Parse in the reference's order; the first failure wins.
     let core = range::create_class(core, mo_num)?;
     let inact = range::create_class(inact, mo_num)?;
     let act = range::create_class(act, mo_num)?;
@@ -257,22 +276,26 @@ fn set_with(
     let mut assigned: Vec<Option<u8>> = vec![None; mo_num_us];
     for (kind, list) in [(0u8, &core), (1, &inact), (2, &act), (3, &virt), (4, &del)] {
         for &i in list {
-            // `mo_class.(i-1)`: array indexing is `Invalid_argument`
-            // out of bounds. Reachable only when `mo_num = 1` (the
-            // `max = 1` maximum-check skip) — measured.
+            // `mo_class.(i-1)`: array indexing is out of bounds.
+            // Reachable only when `mo_num = 1` (the `max = 1`
+            // maximum-check skip) — measured.
             if i < 1 || i as usize > mo_num_us {
-                return Err(AppError(OcamlException::InvalidArgument(
-                    "index out of bounds".into(),
-                )));
+                return Err(ToolError::new(
+                    TOOL,
+                    format!("orbital index out of bounds: {i}"),
+                ));
             }
             let idx = i as usize - 1;
             match assigned[idx] {
                 None => assigned[idx] = Some(kind),
                 Some(prev) => {
-                    return Err(failure(format!(
-                        "Orbital {i} is defined both in the {} and {} spaces",
-                        KEYWORDS[prev as usize], KEYWORDS[kind as usize]
-                    )));
+                    return Err(ToolError::new(
+                        TOOL,
+                        format!(
+                            "Orbital {i} is defined both in the {} and {} spaces",
+                            KEYWORDS[prev as usize], KEYWORDS[kind as usize]
+                        ),
+                    ));
                 }
             }
         }
@@ -280,15 +303,15 @@ fn set_with(
 
     for (idx, slot) in assigned.iter().enumerate() {
         if slot.is_none() {
-            return Err(failure(format!(
-                "Orbital {} is not specified (mo_num = {mo_num})",
-                idx + 1,
-            )));
+            return Err(ToolError::new(
+                TOOL,
+                format!("Orbital {} is not specified (mo_num = {mo_num})", idx + 1),
+            ));
         }
     }
 
     // Debug output, in the reference's order, full `MO_class.to_string`.
-    let mut out = io::stdout();
+    let mut out = io::stdout().lock();
     for (kind, list) in [(0u8, &core), (1, &inact), (2, &act), (3, &virt), (4, &del)] {
         let line = if list.is_empty() {
             KEYWORDS[kind as usize].to_owned()
@@ -303,8 +326,9 @@ fn set_with(
                     .join(", ")
             )
         };
-        writeln!(out, "{line}").map_err(io_error)?;
+        writeln!(out, "{line}").map_err(|error| tool(&error))?;
     }
+    drop(out);
 
     let data: Vec<String> = assigned
         .iter()
@@ -313,58 +337,72 @@ fn set_with(
             None => unreachable!("full coverage checked above"),
         })
         .collect();
-    let array = Array::new(vec![mo_num_us], data).map_err(app)?;
+    let array = Array::new(vec![mo_num_us], data).map_err(|error| {
+        ToolError::new(TOOL, format!("cannot build the mo_class array: {error}"))
+    })?;
     ezfio
         .set_array::<String>("mo_basis", "mo_class", &array)
-        .map_err(app)
+        .map_err(|error| ToolError::new(TOOL, format!("cannot write mo_basis/mo_class: {error}")))
 }
 
 /// `get` (`qp_set_mo_class.ml:116-172`, the `-q` path): read the electrons
 /// and the MOs, resolve `n_int`, print the three summary lines, then call
 /// `set` on the current classes (which re-parses, re-prints and re-writes
 /// `mo_basis/mo_class`).
-fn get(ezfio: &EzFio) -> Result<(), AppError> {
+fn get(ezfio: &EzFio) -> Result<(), ToolError> {
     // `Input.Electrons.read`: `None` only when `elec_alpha_num` is absent;
     // a read failure of the *present* alpha propagates, as does the beta
     // read (which is not `has`-guarded).
-    if !ezfio.has("electrons", "elec_alpha_num").map_err(app)? {
-        return Err(failure("Unable to read electrons"));
+    if !ezfio
+        .has("electrons", "elec_alpha_num")
+        .map_err(|error| tool(&error))?
+    {
+        return Err(ToolError::new(TOOL, "Unable to read electrons"));
     }
     let alpha = read_int_scalar(ezfio, "electrons", "elec_alpha_num")?;
     let beta = read_int_scalar(ezfio, "electrons", "elec_beta_num")?;
     // `Elec_alpha_number.of_int` / `Elec_beta_number.of_int` asserts.
     if alpha <= 0 {
-        return Err(AppError(OcamlException::ELEC_ALPHA_MIN));
+        return Err(ToolError::new(
+            TOOL,
+            format!("alpha electron count {alpha} must be positive"),
+        ));
     }
     if beta < 0 {
-        return Err(AppError(OcamlException::ELEC_BETA_MIN));
+        return Err(ToolError::new(
+            TOOL,
+            format!("beta electron count {beta} must be non-negative"),
+        ));
     }
 
-    // `Input.Mo_basis.read`: classify the `mo_num` read ourselves (the
-    // reference's `read_int` failures are uncaught here), then let the
-    // shared handler do the reference's field reads — the `mo_label` and
-    // `mo_class` materialisation, the `More alpha electrons than MOs`
+    // `Input.Mo_basis.read`: classify the `mo_num` read ourselves, then let
+    // the shared handler do the reference's field reads — the `mo_label`
+    // and `mo_class` materialisation, the `More alpha electrons than MOs`
     // guard, the `MO_number` conversion (its `More than 10_000 MOs`
-    // warning included), the `ao_md5` check.
-    if !ezfio.has("mo_basis", "mo_num").map_err(app)? {
-        return Err(failure("Unable to read MOs"));
+    // warning included, still on stdout), the `ao_md5` check.
+    if !ezfio
+        .has("mo_basis", "mo_num")
+        .map_err(|error| tool(&error))?
+    {
+        return Err(ToolError::new(TOOL, "Unable to read MOs"));
     }
     read_int_scalar(ezfio, "mo_basis", "mo_num")?;
     let mo = match handlers::mo_basis::read(ezfio) {
         // Unreachable after the `has` guard above; the reference's
         // `failwith "Unable to read MOs"` covers it.
-        Ok(None) => return Err(failure("Unable to read MOs")),
+        Ok(None) => return Err(ToolError::new(TOOL, "Unable to read MOs")),
         Ok(Some(mo)) => mo,
-        Err(error) => return Err(AppError(OcamlException::Failure(error.to_string()))),
+        Err(error) => return Err(tool(&error)),
     };
     let mo_num = mo.mo_num;
 
     let n_int = resolve_n_int(ezfio, mo_num)?;
 
-    let mut out = io::stdout();
-    writeln!(out, "Electrons: {alpha} {beta}").map_err(io_error)?;
-    writeln!(out, "MO  : {mo_num}").map_err(io_error)?;
-    writeln!(out, "n_int: {n_int}").map_err(io_error)?;
+    let mut out = io::stdout().lock();
+    writeln!(out, "Electrons: {alpha} {beta}").map_err(|error| tool(&error))?;
+    writeln!(out, "MO  : {mo_num}").map_err(|error| tool(&error))?;
+    writeln!(out, "n_int: {n_int}").map_err(|error| tool(&error))?;
+    drop(out);
 
     // `work`: per-class accumulators starting at `"["`, one `,<i>` per
     // orbital (1-based), closed by `"]"` — the empty class is `"[]"`, a
@@ -399,20 +437,22 @@ fn get(ezfio: &EzFio) -> Result<(), AppError> {
 ///
 /// Measured subtleties reproduced:
 /// * the `try` catches **everything** the direct path raises (missing
-///   file, `int_of_string`, the `x >= 1` assert) and takes the fallback;
-/// * the fallback's own `N_int_number.of_int` re-evaluates its `max`
+///   file, a non-integer value, the `x >= 1` check) and takes the
+///   fallback;
+/// * the fallback's own `N_int_number` re-evaluates its `max`
 ///   default (`get_max`), which *re-reads* the file — a garbage value
-///   there raises the **uncaught** `Failure("int_of_string")`;
+///   there is the uncaught failure;
 /// * `n_int = 0` (or negative) takes the fallback and then fails the
-///   maximum check against the re-read value (`N_int_number: <x>`);
-/// * the `N_int > 128` warning is a raw `print_string` on both paths;
+///   maximum check against the re-read value;
+/// * the `N_int > 128` warning is a raw `print_string` on both paths
+///   (stdout, functional);
 /// * the fallback forces `Qpackage.bit_kind_size` (see [`qpackage`]).
-fn resolve_n_int(ezfio: &EzFio, mo_num: i64) -> Result<i64, AppError> {
+fn resolve_n_int(ezfio: &EzFio, mo_num: i64) -> Result<i64, ToolError> {
     // The direct path.
     match read_n_int(ezfio) {
         Direct::Value(v) if v >= 1 => {
             // `N_int_number.of_int v` with `max = v`: the only possible
-            // failure was the `x >= 1` assert (caught → fallback), so a
+            // failure was the `x >= 1` check (caught → fallback), so a
             // surviving value only warns.
             if v > 128 {
                 print!("N_int > 128");
@@ -436,9 +476,10 @@ fn resolve_n_int(ezfio: &EzFio, mo_num: i64) -> Result<i64, AppError> {
         print!("N_int > 128");
     }
     if max != 1 && x > max {
-        return Err(AppError(OcamlException::InvalidArgument(format!(
-            "N_int_number: {x}"
-        ))));
+        return Err(ToolError::new(
+            TOOL,
+            format!("n_int {x} is above the maximum of {max}"),
+        ));
     }
     Ok(x)
 }
@@ -449,7 +490,7 @@ enum Direct {
     Absent,
     /// The file exists but does not parse: the direct call raises (caught
     /// by the `try`), the fallback's `max` re-read raises (uncaught).
-    Garbage(AppError),
+    Garbage(ToolError),
     /// A parsed value.
     Value(i64),
 }
@@ -465,58 +506,27 @@ fn read_n_int(ezfio: &EzFio) -> Direct {
 }
 
 /// `Ezfio.read_int` (`ezfio.ml:138-142,160`): `open_in`, first line,
-/// `String.trim`, OCaml `int_of_string`. The failures are uncaught
-/// wherever the reference does not wrap them:
-/// * missing file → `Sys_error("<path>: No such file or directory")`;
-/// * empty file → `End_of_file`;
-/// * non-integer first line → `Failure("int_of_string")`.
-fn read_int_scalar(ezfio: &EzFio, group: &str, key: &str) -> Result<i64, AppError> {
+/// `String.trim`, `int_of_string`. Wave S2: plain messages, decimal-only
+/// `i64::from_str`.
+fn read_int_scalar(ezfio: &EzFio, group: &str, key: &str) -> Result<i64, ToolError> {
     let path = ezfio.root().join(group).join(key);
-    let text = match fs::read(&path) {
-        Ok(bytes) => String::from_utf8_lossy(&bytes).into_owned(),
-        Err(error) => {
-            let detail = match error.raw_os_error() {
-                Some(code) => format!("{}: {}", path.display(), strerror(code)),
-                None => error.to_string(),
-            };
-            return Err(AppError(OcamlException::SysError(detail)));
-        }
-    };
-    match text.lines().next() {
-        None => Err(AppError(OcamlException::EndOfFile)),
-        Some(line) => ocaml_num::int_of_string(line.trim())
-            .map_err(|_| AppError(OcamlException::Failure("int_of_string".into()))),
+    let bytes = fs::read(&path).map_err(|error| {
+        ToolError::new(TOOL, format!("cannot read {}: {error}", path.display()))
+    })?;
+    let text = String::from_utf8_lossy(&bytes).into_owned();
+    let line = text.lines().next().unwrap_or("").trim();
+    if line.is_empty() {
+        return Err(ToolError::new(
+            TOOL,
+            format!("cannot read {}: the file is empty", path.display()),
+        ));
     }
+    line.parse::<i64>()
+        .map_err(|_| ToolError::new(TOOL, format!("invalid integer '{line}' in {group}/{key}")))
 }
 
-/// The C library's `strerror` text for the errnos a scalar read can hit
-/// (the `qp_create_ezfio` table).
-fn strerror(code: i32) -> String {
-    match code {
-        1 => "Operation not permitted".to_owned(),
-        2 => "No such file or directory".to_owned(),
-        13 => "Permission denied".to_owned(),
-        20 => "Not a directory".to_owned(),
-        21 => "Is a directory".to_owned(),
-        40 => "Too many levels of symbolic links".to_owned(),
-        other => format!("os error {other}"),
-    }
-}
-
-fn failure(message: impl Into<String>) -> AppError {
-    AppError(OcamlException::Failure(message.into()))
-}
-
-fn io_error(error: io::Error) -> AppError {
-    AppError(OcamlException::SysError(error.to_string()))
-}
-
-/// An `qp-ezfio` IO failure, rendered as the closest uncaught `Sys_error`.
-///
-/// The reference's write path wraps `gzip` in `open_process_out` and
-/// raises `Failure("Failed writing compressed file …")` on a nonzero exit;
-/// nothing in the test matrix reaches those paths, so the message text is
-/// not pinned by a gate.
-fn app(error: impl std::fmt::Display) -> AppError {
-    AppError(OcamlException::SysError(error.to_string()))
+/// A failure that carries a displayable reason (0MQ/EZFIO/anyhow), kept
+/// in its own text.
+fn tool(error: &impl std::fmt::Display) -> ToolError {
+    ToolError::new(TOOL, error.to_string())
 }

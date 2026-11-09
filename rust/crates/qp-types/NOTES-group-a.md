@@ -19,7 +19,6 @@ no binary.
 | `src/molecule.rs` | 606 | `ocaml/Molecule.ml`, `ocaml/Multiplicity.ml` |
 | `src/gto.rs` | 851 | `ocaml/Gto.ml`, `ocaml/Angmom.ml` (`Xyz` part), `ocaml/GaussianPrimitive.ml` |
 | `src/basis.rs` | 433 | `ocaml/Basis.ml`, `ocaml/Long_basis.ml` |
-| `src/basis_library.rs` | 255 | no OCaml counterpart: the `qp_create_ezfio` + `Input_ao_basis.read` sequence packaged as one call |
 | `src/sexplib_compat.rs` | 348 | sexplib0's `Sexp.to_string` / float printing (not in this repo; reversed from sexplib0 and checked against an oracle) |
 | `src/md5.rs` | 56 | `ocaml/To_md5.ml`, `ocaml/MD5.ml` |
 
@@ -40,7 +39,8 @@ with group B and the merge decides.
 
 * the hashed object is the section read **twice**, tagged `Nucl_number` 1 and
   2, with every exponent and coefficient put through the EZFIO
-  `%24.15e` → `float_of_string` round trip (`LibraryBasis`);
+  `%24.15e` → `float_of_string` round trip (the `LibraryBasis` helper,
+  inlined as `corpus_basis` in `tests/test_group_a_md5.rs` in wave w13 S1);
 * sibling **lists** print with no separator, sibling **atoms** with one space;
 * a float atom prints `%.15G` and falls back to `%.17G` only when the short
   form does not parse back to the same `f64`;
@@ -81,8 +81,9 @@ Last run on 2026-11-05 (Apple M1, rustc 1.92.0):
 | md5 test binary, debug | 4 tests in **0.70 s** |
 
 The release number includes reading the 27 basis-library files twice each
-(`LibraryBasis` calls `read_element` twice, and each call rewinds and scans
-from offset 0). Total object hashed over the 27 rows: **178 076 bytes**; the
+(the `corpus_basis` test helper calls `read_element` twice, and each call
+rewinds and scans from offset 0). Total object hashed over the 27 rows:
+**178 076 bytes**; the
 largest row is `ano-rcc/CURIUM`, 64 118 bytes of S-expression for 608
 Cartesian functions. Sum of `n_ao` over the corpus: 2856.
 
@@ -115,8 +116,8 @@ are detected.
   `cc-pvdz` fluorine reference value; deterministic re-read.
 * **molecule**: port of `test_molecule.ml` (`test_atom`, the three water
   names and their errors), the post-fix `%.17g` `to_string` block, the
-  distance matrix against an independently computed `sqrt`, a CRLF+tab xyz
-  file, `to_xyz` → `of_xyz_file` round trip, typed `XyzError` cases.
+  distance matrix against an independently computed `sqrt`, a `to_xyz` →
+  atom-line parser round trip.
 * **sexp**: printer spacing, the `must_escape` predicate (including
   `"a#b|c"` staying unquoted and non-ASCII becoming decimal escapes), `%e`
   with a two-digit exponent, `%f`, `%G` trailing-zero removal, the
@@ -137,9 +138,8 @@ behaviour; each is documented at the item.
 2. `Gto::read_one` returns `GtoError::ShortLine` where OCaml's `String.sub`
    raises `Invalid_argument` on a line shorter than two bytes.
 3. `GtoError::Io` where OCaml lets `End_of_file` escape from inside a shell.
-4. `Molecule::of_xyz_string*` and `of_xyz_file*` return
-   `anyhow::Result`, `MultiplicityError`/`XyzError` where OCaml raises
-   (`assert`, `failwith`, `Invalid_argument`).
+4. `Molecule::of_xyz_string_with` returns `anyhow::Result`,
+   `MultiplicityError` where OCaml raises (`assert`, `failwith`).
 5. `Multiplicity::of_int` returns `Option`, so an impossible value is
    rejected at construction.
 6. `Element::of_charge` takes the already-truncated `i32`
@@ -173,7 +173,8 @@ behaviour; each is documented at the item.
   `Element` radii **multiply** by `angstrom_to_bohr`. Both are post-fix
   behaviour and deliberately not unified.
 * `Molecule.to_xyz` writes the molecule name as the title line;
-  `of_xyz_file` ignores that line, as the reference does.
+  the XYZ file reader in `bins/qp_create_ezfio` ignores that line, as the
+  reference does.
 * Coordinates are printed with `%.17g`, charges with `%.17g`, Gamess blocks
   with `%3d`/`%16f` and a blank line between nuclei.
 * `AngmomXyz::of_string("s")` returns the zero monomial (the empty
@@ -182,11 +183,15 @@ behaviour; each is documented at the item.
 ## Not done, and why
 
 * `Molecule::of_zmt_file` / `Molecule::of_file` — they need `Zmatrix`, which
-  is group B's module. `of_xyz_string*` / `of_xyz_file*` are complete.
-* `Pseudo` (group B) and the `Spd` shell representation: out of scope for
-  group A, and this crate compiles without them.
-* EZFIO input/output: `LibraryBasis` models the `ao_expo`/`ao_coef` round
-  trip but no file is read or written; that belongs to the EZFIO layer.
+  is group B's module; file reading (the `of_file` XYZ→Z-matrix fallback
+  included) lives in `bins/qp_create_ezfio/src/geometry.rs`.
+* `Pseudo` (group B): out of scope for group A, and this crate compiles
+  without it. (The reference's `Spd` shell representation was removed in
+  wave w13 S1: no production reference.)
+* EZFIO input/output: the `ao_expo`/`ao_coef` round trip is pinned by
+  `tests/test_group_a_md5.rs` (the `LibraryBasis` helper was removed in
+  wave w13 S1 and inlined there); no file is read or written here, that
+  belongs to the EZFIO layer.
 * SHA-256 verification of `basis_file_sha256`, and `pseudo`-aware digests:
   no dependency, and the corpus rows do not need it (the prototype that
   generated the corpus reproduces the four ECP rows without the pseudo).

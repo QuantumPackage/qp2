@@ -1,16 +1,18 @@
-//! End-to-end matrix for `qp_set_mo_class`, pinned against the reference
-//! binary's measured outputs (2026-11-05; scratch
-//! `$HOME/OpenCode/tmp/w3-p4-tools/set-mo-class/runs*`).
+//! End-to-end matrix for `qp_set_mo_class` (wave S2: clap + the shared
+//! `ToolError`).
 //!
-//! Every case asserts the exit code, the exact stdout bytes and the exact
-//! stderr line. Write cases additionally check the decompressed
-//! `mo_basis/mo_class` payload through `qp_ezfio` (the `.gz` bytes are not
-//! comparable across gzip implementations; the decompressed payload is).
+//! Every failure case keeps the reference's scenario (same argv, same
+//! fixture mutation) and asserts the exit code (2) plus the one new
+//! `qp_set_mo_class: <message>` line on standard error; the success cases
+//! keep the functional stdout byte for byte. Write cases additionally
+//! check the decompressed `mo_basis/mo_class` payload through
+//! `qp_ezfio` (the `.gz` bytes are not comparable across gzip
+//! implementations; the decompressed payload is).
 //!
 //! Fixtures are copied from `rust/tests/golden/fixtures` into per-test
-//! temp dirs and never mutated in place. `QP_ROOT` is a per-test fake root
-//! (the `src/bitmask/bitmasks_module.f90` file is created where the `-q`
-//! fallback path forces `Qpackage.bit_kind_size`).
+//! temp dirs and never mutated in place. `QP_ROOT` is a per-test fake
+//! root (the `src/bitmask/bitmasks_module.f90` file is created where the
+//! `-q` fallback path forces `Qpackage.bit_kind_size`).
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -23,11 +25,11 @@ use qp_ezfio::EzFio;
 
 const FIXTURES: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../tests/golden/fixtures");
 
-/// The reference help capture for `argv[0] = "qp_set_mo_class"` (639 B).
-const HELP: &str = include_str!("data/help_bare.txt");
+/// The tool name of the one-line standard-error error.
+const TOOL: &str = "qp_set_mo_class";
 
 /// The golden `-q` stdout on the `hcn` fixture with the `bit_kind_size = 64`
-/// fallback (the fixture has no `determinants/n_int`): measured `runs/q-hcn`.
+/// fallback (the fixture has no `determinants/n_int`).
 const GOLDEN_Q: &str = "Electrons: 7 7\n\
                          MO  : 55\n\
                          n_int: 1\n\
@@ -37,14 +39,6 @@ const GOLDEN_Q: &str = "Electrons: 7 7\n\
                          Virtual\n\
                          Deleted\n";
 
-/// The reference's assertion renderings (reference build locations).
-const RANGE_REVERSED: &str = "File \"Range.ml\", line 26, characters 8-14: Assertion failed";
-const RANGE_FIRST: &str = "File \"Range.ml\", line 45, characters 4-10: Assertion failed";
-const RANGE_LAST: &str = "File \"Range.ml\", line 46, characters 4-10: Assertion failed";
-const MO_NUM_MIN: &str = "File \"Qptypes.ml\", line 471, characters 6-12: Assertion failed";
-const ELEC_ALPHA_MIN: &str = "File \"Qptypes.ml\", line 83, characters 20-26: Assertion failed";
-const ELEC_BETA_MIN: &str = "File \"Qptypes.ml\", line 70, characters 20-26: Assertion failed";
-
 /// The `bit_kind_size` line of the reference's bitmask module (64/16).
 const BK64: &str = "  integer, parameter             :: bit_kind_size = 64\n";
 const BK16: &str = "  integer, parameter             :: bit_kind_size = 16\n";
@@ -52,10 +46,6 @@ const BK16: &str = "  integer, parameter             :: bit_kind_size = 16\n";
 // -------------------------------------------------------------------
 // Helpers
 // -------------------------------------------------------------------
-
-fn fatal(message: &str) -> String {
-    format!("Fatal error: exception {message}\n")
-}
 
 fn fixture(name: &str) -> PathBuf {
     Path::new(FIXTURES).join(name)
@@ -106,10 +96,10 @@ struct Outcome {
 fn run(root: &Path, work: &Path, args: &[&str]) -> Outcome {
     let mut command = Command::new(env!("CARGO_BIN_EXE_qp_set_mo_class"));
     command.env("QP_ROOT", root).current_dir(work).args(args);
-    // The reference captures were taken with the bare program name
-    // (invocation through PATH); `arg0` reproduces that `argv[0]`.
+    // The usage line of the help is checked through `argv[0]`; `arg0`
+    // keeps it the bare program name.
     #[cfg(unix)]
-    command.arg0("qp_set_mo_class");
+    command.arg0(TOOL);
     let output = command
         .output()
         .expect("the compiled binary must be runnable");
@@ -125,7 +115,7 @@ fn run_no_root(work: &Path, args: &[&str]) -> Outcome {
     let mut command = Command::new(env!("CARGO_BIN_EXE_qp_set_mo_class"));
     command.env_remove("QP_ROOT").current_dir(work).args(args);
     #[cfg(unix)]
-    command.arg0("qp_set_mo_class");
+    command.arg0(TOOL);
     let output = command
         .output()
         .expect("the compiled binary must be runnable");
@@ -168,10 +158,27 @@ fn dims(work: &Path) -> Vec<usize> {
     array.dims().to_vec()
 }
 
-fn assert_fatal(outcome: &Outcome, exception: &str) {
-    let expected = format!("Fatal error: exception {exception}\n");
-    assert_eq!(outcome.exit, 2, "exit code (stderr: {})", outcome.stderr);
-    assert_eq!(outcome.stderr, expected);
+/// Every failure: exit 2, and the single line
+/// `qp_set_mo_class: <message>` on standard error (the message is the
+/// stable string named by each test).
+fn assert_fatal(outcome: &Outcome, message: &str) {
+    assert_eq!(outcome.exit, 2, "stderr: {}", outcome.stderr);
+    assert_eq!(
+        outcome.stderr,
+        format!("{TOOL}: {message}\n"),
+        "the one standard-error line"
+    );
+}
+
+/// Exit 2 with a clap diagnostic containing `needle` (the stable string
+/// named by the test).
+fn assert_clap(outcome: &Outcome, needle: &str) {
+    assert_eq!(outcome.exit, 2, "stderr: {}", outcome.stderr);
+    assert!(
+        outcome.stderr.contains(needle),
+        "stderr:\n{} was expected to contain {needle:?}",
+        outcome.stderr
+    );
 }
 
 // -------------------------------------------------------------------
@@ -187,138 +194,111 @@ fn qp_root_unset_fails_before_anything() {
     assert!(outcome.stdout.is_empty(), "no help, no output");
     assert_eq!(
         outcome.stderr,
-        fatal(
-            "Failure(\"QP_ROOT environment variable is not set.\\nPlease source the quantum_package.rc file.\")"
-        )
+        format!("{TOOL}: QP_ROOT is not set (source quantum_package.rc)\n")
     );
 }
 
 // -------------------------------------------------------------------
-// CLI: parse errors and the help / anonymous-argument flow
+// CLI: clap grammar, the help flag and the anonymous argument
 // -------------------------------------------------------------------
 
 #[test]
-fn no_argument_prints_help_then_fails() {
+fn no_argument_fails_with_the_clap_usage() {
     let work = workdir();
     let root = fake_root(work.path(), None);
     let outcome = run(&root, work.path(), &[]);
-    assert_eq!(outcome.exit, 2);
-    assert_eq!(outcome.stdout, HELP.as_bytes());
-    assert_fatal(&outcome, "Failure(\"EZFIO_FILE is missing\")");
-}
-
-#[test]
-fn h_flag_prints_help_twice() {
-    let work = workdir();
-    let root = fake_root(work.path(), None);
-    let outcome = run(&root, work.path(), &["-h"]);
-    assert_eq!(outcome.exit, 2);
-    assert_eq!(outcome.stdout, format!("{HELP}{HELP}").as_bytes());
-    assert_fatal(&outcome, "Failure(\"EZFIO_FILE is missing\")");
-}
-
-#[test]
-fn two_anonymous_arguments_fail_with_help() {
-    let work = workdir();
-    let root = fake_root(work.path(), None);
-    let outcome = run(&root, work.path(), &["a", "b"]);
-    assert_eq!(outcome.exit, 2);
-    assert_eq!(outcome.stdout, HELP.as_bytes());
-    assert_fatal(&outcome, "Failure(\"EZFIO_FILE is missing\")");
-}
-
-#[test]
-fn h_with_a_directory_continues_the_run() {
-    let work = workdir();
-    ezfio(work.path(), "hcn");
-    let root = fake_root(work.path(), None);
-    let outcome = run(&root, work.path(), &["-h", "ezfio"]);
-    assert_eq!(outcome.exit, 2);
-    assert_eq!(outcome.stdout, HELP.as_bytes());
-    assert_fatal(
+    assert_clap(
         &outcome,
-        "Failure(\"Orbital 1 is not specified (mo_num = 55)\")",
+        "the following required arguments were not provided",
     );
-}
-
-#[test]
-fn unknown_short_option_is_a_getopt_error() {
-    let work = workdir();
-    let root = fake_root(work.path(), None);
-    let outcome = run(&root, work.path(), &["-z", "ezfio"]);
     assert_eq!(outcome.stdout, b""[..]);
-    assert_fatal(&outcome, "Getopt.Error(\"Unknown option -z\")");
 }
 
 #[test]
-fn unknown_long_option_is_a_getopt_error() {
+fn the_help_flag_prints_help_and_exits_zero() {
     let work = workdir();
     let root = fake_root(work.path(), None);
-    let outcome = run(&root, work.path(), &["--nosuch", "ezfio"]);
-    assert_fatal(&outcome, "Getopt.Error(\"Unknown option --nosuch\")");
-}
-
-#[test]
-fn a_parse_error_suppresses_the_help() {
-    // `-h` was seen, but the parse fails before the `set_specs` help
-    // decision (measured: no help in stdout).
-    let work = workdir();
-    let root = fake_root(work.path(), None);
-    let outcome = run(&root, work.path(), &["-h", "-z", "ezfio"]);
-    assert_eq!(outcome.stdout, b""[..]);
-    assert_fatal(&outcome, "Getopt.Error(\"Unknown option -z\")");
-}
-
-#[test]
-fn missing_value_messages_name_the_option_form() {
-    let work = workdir();
-    let root = fake_root(work.path(), None);
-    for (args, message) in [
-        (vec!["-c"], "Option -c must have an argument"),
-        (vec!["--core"], "Option --core must have an argument"),
-        (vec!["-c", "-q", "ezfio"], "Option -c must have an argument"),
-    ] {
-        let outcome = run(&root, work.path(), &args);
-        assert_fatal(&outcome, &format!("Getopt.Error(\"{message}\")"));
+    for flag in ["-h", "--help"] {
+        let outcome = run(&root, work.path(), &[flag]);
+        assert_eq!(outcome.exit, 0, "flag {flag}");
+        assert!(
+            outcome
+                .stdout
+                .windows(b"Usage:".len())
+                .any(|w| w == b"Usage:"),
+            "flag {flag}; stdout: {}",
+            String::from_utf8_lossy(&outcome.stdout)
+        );
+        assert_eq!(outcome.stderr, "", "flag {flag}");
     }
 }
 
 #[test]
-fn an_empty_next_argument_raises_index_out_of_bounds() {
-    // `-c ""`: the reference's `args.(no+1).[0]` lookahead indexes the
-    // empty token (measured; no `Number of MOs:` line — the failure is
-    // before the `check` wrapper).
+fn two_positionals_are_rejected() {
+    let work = workdir();
+    let root = fake_root(work.path(), None);
+    let outcome = run(&root, work.path(), &["a", "b"]);
+    assert_clap(&outcome, "unexpected argument 'b' found");
+}
+
+#[test]
+fn unknown_options_are_rejected() {
+    let work = workdir();
+    let root = fake_root(work.path(), None);
+    let outcome = run(&root, work.path(), &["-z", "ezfio"]);
+    assert_clap(&outcome, "unexpected argument '-z' found");
+    let outcome = run(&root, work.path(), &["--nosuch", "ezfio"]);
+    assert_clap(&outcome, "unexpected argument '--nosuch' found");
+}
+
+#[test]
+fn a_missing_value_names_the_option() {
+    let work = workdir();
+    let root = fake_root(work.path(), None);
+    let outcome = run(&root, work.path(), &["-c"]);
+    assert_clap(&outcome, "a value is required for '--core");
+}
+
+#[test]
+fn an_empty_range_is_rejected() {
+    // `-c ""`: clap passes the empty value through; the range grammar
+    // rejects it before any `Number of MOs:` line.
     let work = workdir();
     ezfio(work.path(), "hcn");
     let root = fake_root(work.path(), None);
     let outcome = run(&root, work.path(), &["-c", "", "ezfio"]);
     assert_eq!(outcome.stdout, b""[..]);
-    assert_fatal(&outcome, "Invalid_argument(\"index out of bounds\")");
+    assert_fatal(&outcome, "invalid range: empty string");
 }
 
 #[test]
-fn only_no_argument_options_can_be_concatenated() {
+fn short_option_forms_follow_the_clap_grammar() {
+    // clap: `-c=1` and `-c3` both give the value `1`/`3` (the reference
+    // had no `=` syntax for short options).
     let work = workdir();
+    ezfio(work.path(), "hcn");
     let root = fake_root(work.path(), None);
-    let outcome = run(&root, work.path(), &["-qc", "1", "ezfio"]);
-    assert_fatal(
-        &outcome,
-        "Getopt.Error(\"Only non-argument short-options can be concatenated (error with option c in -qc)\")",
-    );
-    // An unknown character in the tail is the lookup's own error.
+    let outcome = run(&root, work.path(), &["-c=1", "ezfio"]);
+    assert_fatal(&outcome, "Orbital 2 is not specified (mo_num = 55)");
+    let outcome = run(&root, work.path(), &["-c3", "ezfio"]);
+    assert_fatal(&outcome, "Orbital 1 is not specified (mo_num = 55)");
+    let outcome = run(&root, work.path(), &["--core=5", "ezfio"]);
+    assert_fatal(&outcome, "Orbital 1 is not specified (mo_num = 55)");
     let outcome = run(&root, work.path(), &["-qz", "ezfio"]);
-    assert_fatal(&outcome, "Getopt.Error(\"Unknown option -z\")");
+    assert_clap(&outcome, "unexpected argument '-z' found");
 }
 
 #[test]
-fn long_options_reject_values_and_take_eq_values() {
+fn the_qc_cluster_is_accepted_by_clap() {
+    // The reference's Getopt rejected `-qc` (a value-taking option in a
+    // cluster); clap accepts it, takes the next token as the `-c` value
+    // and runs the query (the value is then ignored in `-q` mode).
     let work = workdir();
-    let root = fake_root(work.path(), None);
-    let outcome = run(&root, work.path(), &["--help=1"]);
-    assert_fatal(
-        &outcome,
-        "Getopt.Error(\"Option --help does not accept argument\")",
-    );
+    ezfio(work.path(), "hcn");
+    let root = fake_root(work.path(), Some(BK64));
+    let outcome = run(&root, work.path(), &["-qc", "1", "ezfio"]);
+    assert_eq!(outcome.exit, 0, "stderr: {}", outcome.stderr);
+    assert_eq!(outcome.stdout, GOLDEN_Q.as_bytes());
 }
 
 #[test]
@@ -326,37 +306,11 @@ fn double_dash_switches_everything_to_anonymous() {
     let work = workdir();
     ezfio(work.path(), "hcn");
     let root = fake_root(work.path(), None);
-    // `-- ezfio`: one anonymous argument, the run proceeds with all
-    // classes defaulting to `[]` (measured `runs/cli-dashdash`).
+    // `-- ezfio`: one positional, the run proceeds with all classes
+    // defaulting to `[]`.
     let outcome = run(&root, work.path(), &["--", "ezfio"]);
     assert_eq!(outcome.stdout, b""[..]);
-    assert_fatal(
-        &outcome,
-        "Failure(\"Orbital 1 is not specified (mo_num = 55)\")",
-    );
-}
-
-#[test]
-fn short_options_have_no_eq_syntax() {
-    let work = workdir();
-    ezfio(work.path(), "hcn");
-    let root = fake_root(work.path(), None);
-    // `-c=1`: the value is literally `=1` → not a digit, not `[` → the
-    // first-character assertion (measured `runs2/c-eq`).
-    let outcome = run(&root, work.path(), &["-c=1", "ezfio"]);
-    assert_fatal(&outcome, RANGE_FIRST);
-    // `-c3`: the value is `3` → orbital 3 classified, 1 is not.
-    let outcome = run(&root, work.path(), &["-c3", "ezfio"]);
-    assert_fatal(
-        &outcome,
-        "Failure(\"Orbital 1 is not specified (mo_num = 55)\")",
-    );
-    // `--core=5`: the value is `5` (the long form has `=` syntax).
-    let outcome = run(&root, work.path(), &["--core=5", "ezfio"]);
-    assert_fatal(
-        &outcome,
-        "Failure(\"Orbital 1 is not specified (mo_num = 55)\")",
-    );
+    assert_fatal(&outcome, "Orbital 1 is not specified (mo_num = 55)");
 }
 
 // -------------------------------------------------------------------
@@ -366,23 +320,25 @@ fn short_options_have_no_eq_syntax() {
 #[test]
 fn range_error_classes() {
     let cases = [
-        ("x", RANGE_FIRST),
-        ("]", RANGE_FIRST),
-        ("[1", RANGE_LAST),
-        ("[3-1]", RANGE_REVERSED),
-        ("0", MO_NUM_MIN),
-        ("2a", "Failure(\"int_of_string\")"),
-        ("[-1]", "Failure(\"int_of_string\")"),
-        ("[1-2,a]", "Failure(\"int_of_string\")"),
-        ("[a,1-2]", "Failure(\"int_of_string\")"),
+        ("x", "invalid range 'x': expected a digit or '['"),
+        ("]", "invalid range ']': expected a digit or '['"),
+        ("[1", "invalid range '[1': missing ']'"),
+        ("[3-1]", "range 3-1 is reversed"),
+        ("0", "orbital number 0 must be at least 1"),
+        ("2a", "invalid integer '2a' in range '2a'"),
+        // `-1` splits at its `-` into `("", "-1")`: the empty start piece
+        // fails first, as in the reference.
+        ("[-1]", "invalid integer '' in range '[-1]'"),
+        ("[1-2,a]", "invalid integer 'a' in range '[1-2,a]'"),
+        ("[a,1-2]", "invalid integer 'a' in range '[a,1-2]'"),
     ];
-    for (range_value, stderr) in cases {
+    for (range_value, message) in cases {
         let work = workdir();
         ezfio(work.path(), "hcn");
         let root = fake_root(work.path(), None);
         let outcome = run(&root, work.path(), &["-c", range_value, "ezfio"]);
         assert_eq!(outcome.stdout, b""[..], "range value {range_value}");
-        assert_fatal(&outcome, stderr);
+        assert_fatal(&outcome, message);
     }
 }
 
@@ -392,15 +348,9 @@ fn an_unspecified_orbital_is_reported_in_order() {
     ezfio(work.path(), "hcn");
     let root = fake_root(work.path(), None);
     let outcome = run(&root, work.path(), &["-c", "[]", "ezfio"]);
-    assert_fatal(
-        &outcome,
-        "Failure(\"Orbital 1 is not specified (mo_num = 55)\")",
-    );
+    assert_fatal(&outcome, "Orbital 1 is not specified (mo_num = 55)");
     let outcome = run(&root, work.path(), &["-c", "[1,2,]", "ezfio"]);
-    assert_fatal(
-        &outcome,
-        "Failure(\"Orbital 3 is not specified (mo_num = 55)\")",
-    );
+    assert_fatal(&outcome, "Orbital 3 is not specified (mo_num = 55)");
 }
 
 #[test]
@@ -410,7 +360,7 @@ fn the_maximum_check_prints_the_mo_count_first() {
     let root = fake_root(work.path(), None);
     let outcome = run(&root, work.path(), &["-c", "[56]", "ezfio"]);
     assert_eq!(outcome.stdout, b"Number of MOs: 55\n");
-    assert_fatal(&outcome, "Invalid_argument(\"MO_number: 56\")");
+    assert_fatal(&outcome, "orbital 56 is above mo_num = 55");
 }
 
 #[test]
@@ -421,29 +371,28 @@ fn a_duplicate_orbital_names_both_spaces() {
     let outcome = run(&root, work.path(), &["-c", "[1]", "-a", "[1]", "ezfio"]);
     assert_fatal(
         &outcome,
-        "Failure(\"Orbital 1 is defined both in the Core and Active spaces\")",
+        "Orbital 1 is defined both in the Core and Active spaces",
     );
     let outcome = run(&root, work.path(), &["-c", "[1-55]", "-a", "[55]", "ezfio"]);
     assert_fatal(
         &outcome,
-        "Failure(\"Orbital 55 is defined both in the Core and Active spaces\")",
+        "Orbital 55 is defined both in the Core and Active spaces",
     );
 }
 
 #[test]
-fn the_ten_thousand_warning_is_raw_stdout() {
-    // `mo_num = 10001`: `MO_number.of_int(10001)` prints the warning
-    // (no newline) before the `not specified` failure (measured
-    // `runs/e-warn`).
+fn the_ten_thousand_warning_goes_to_standard_error() {
+    // `mo_num = 10001`: `MO_number.of_int(10001)` warns (standard error,
+    // wave S2) before the `not specified` failure.
     let work = workdir();
     ezfio(work.path(), "hcn");
     set_scalar(work.path(), "mo_basis/mo_num", &format!("{:20}", 10001));
     let root = fake_root(work.path(), None);
     let outcome = run(&root, work.path(), &["-c", "[10001]", "ezfio"]);
-    assert_eq!(outcome.stdout, b"More than 10_000 MOs");
-    assert_fatal(
-        &outcome,
-        "Failure(\"Orbital 1 is not specified (mo_num = 10001)\")",
+    assert_eq!(outcome.stdout, b""[..]);
+    assert_eq!(
+        outcome.stderr,
+        format!("More than 10_000 MOs\n{TOOL}: Orbital 1 is not specified (mo_num = 10001)\n")
     );
 }
 
@@ -454,10 +403,10 @@ fn mo_num_one_skips_the_maximum_check() {
     set_scalar(work.path(), "mo_basis/mo_num", &format!("{:20}", 1));
     let root = fake_root(work.path(), None);
     // `max = 1` skips the check; `apply_class` then indexes a
-    // one-element array (measured `runs/e-max1`).
+    // one-element array.
     let outcome = run(&root, work.path(), &["-c", "[2]", "ezfio"]);
     assert_eq!(outcome.stdout, b""[..]);
-    assert_fatal(&outcome, "Invalid_argument(\"index out of bounds\")");
+    assert_fatal(&outcome, "orbital index out of bounds: 2");
     // The valid case classifies the single MO.
     let outcome = run(&root, work.path(), &["-c", "[1]", "ezfio"]);
     assert_eq!(outcome.exit, 0);
@@ -487,24 +436,24 @@ fn mo_num_zero_writes_an_empty_array() {
 }
 
 #[test]
-fn a_negative_mo_num_is_array_init() {
-    // `Array.init mo_num` on a negative count (measured).
+fn a_negative_mo_num_is_rejected() {
+    // The reference's `Array.init mo_num` on a negative count.
     let work = workdir();
     ezfio(work.path(), "hcn");
     set_scalar(work.path(), "mo_basis/mo_num", "-3");
     let root = fake_root(work.path(), None);
     let outcome = run(&root, work.path(), &["-c", "[1]", "ezfio"]);
-    assert_fatal(&outcome, "Invalid_argument(\"Array.init\")");
+    assert_fatal(&outcome, "mo_num must be non-negative: -3");
 }
 
 #[test]
-fn a_non_numeric_mo_num_is_int_of_string() {
+fn a_non_numeric_mo_num_is_rejected() {
     let work = workdir();
     ezfio(work.path(), "hcn");
     set_scalar(work.path(), "mo_basis/mo_num", "abc\n");
     let root = fake_root(work.path(), None);
     let outcome = run(&root, work.path(), &["-c", "[1]", "ezfio"]);
-    assert_fatal(&outcome, "Failure(\"int_of_string\")");
+    assert_fatal(&outcome, "invalid integer 'abc' in mo_basis/mo_num");
 }
 
 // -------------------------------------------------------------------
@@ -517,7 +466,7 @@ fn a_tree_without_mo_num_fails_the_guard() {
     ezfio(work.path(), "h2");
     let root = fake_root(work.path(), None);
     let outcome = run(&root, work.path(), &["-c", "[1]", "ezfio"]);
-    assert_fatal(&outcome, "Failure(\"mo_basis/mo_num not found\")");
+    assert_fatal(&outcome, "mo_basis/mo_num not found");
 }
 
 #[test]
@@ -525,7 +474,7 @@ fn a_missing_directory_is_created_then_guarded() {
     let work = workdir();
     let root = fake_root(work.path(), None);
     let outcome = run(&root, work.path(), &["-c", "[1]", "nosuch"]);
-    assert_fatal(&outcome, "Failure(\"mo_basis/mo_num not found\")");
+    assert_fatal(&outcome, "mo_basis/mo_num not found");
     // Side effect of `Ezfio.set_file`: the directory and the `ezfio`
     // group were created before the guard failed.
     assert!(work.path().join("nosuch/.version").exists());
@@ -536,25 +485,22 @@ fn a_missing_directory_is_created_then_guarded() {
 }
 
 #[test]
-fn an_existing_regular_file_is_mkdir_eexist() {
+fn an_existing_regular_file_cannot_be_created() {
     let work = workdir();
     fs::write(work.path().join("ezfio"), b"").unwrap();
     let root = fake_root(work.path(), None);
     let outcome = run(&root, work.path(), &["-c", "[1]", "ezfio"]);
-    assert_fatal(
-        &outcome,
-        "Unix.Unix_error(Unix.EEXIST, \"mkdir\", \"ezfio\")",
-    );
+    assert_fatal(&outcome, "cannot create ezfio: File exists (os error 17)");
 }
 
 #[test]
-fn a_missing_parent_is_mkdir_enoent() {
+fn a_missing_parent_cannot_be_created() {
     let work = workdir();
     let root = fake_root(work.path(), None);
     let outcome = run(&root, work.path(), &["ezfio/sub"]);
     assert_fatal(
         &outcome,
-        "Unix.Unix_error(Unix.ENOENT, \"mkdir\", \"ezfio/sub\")",
+        "cannot create ezfio/sub: No such file or directory (os error 2)",
     );
 }
 
@@ -604,8 +550,7 @@ fn a_valid_partition_writes_the_bare_keywords() {
 #[test]
 fn re_specifying_the_current_classes_keeps_the_tree_content() {
     // `hcn` is all `Active`: re-specifying that partition writes the same
-    // class per MO (the stored bytes become the bare keyword, as the
-    // reference's `write_string_array` does — measured `runs/v-current`).
+    // class per MO (the stored bytes become the bare keyword).
     let work = workdir();
     ezfio(work.path(), "hcn");
     let root = fake_root(work.path(), None);
@@ -638,7 +583,7 @@ fn q_on_hcn_is_the_golden_stdout() {
     assert_eq!(outcome.exit, 0);
     assert_eq!(outcome.stdout, GOLDEN_Q.as_bytes());
     assert_eq!(outcome.stderr, "");
-    // The run re-writes the array (bare keywords, as the reference).
+    // The run re-writes the array (bare keywords).
     assert_eq!(payload(work.path()), vec!["Active".to_owned(); 55]);
 }
 
@@ -685,8 +630,7 @@ fn q_without_n_int_uses_the_bit_kind_size_fallback() {
 
 #[test]
 fn q_with_a_large_mo_num_warns_and_fails_the_maximum() {
-    // `mo_num = 9000`, no `n_int`, `bk = 64`: fallback `n_int = 141`
-    // (measured `runs3/qmo9000`).
+    // `mo_num = 9000`, no `n_int`, `bk = 64`: fallback `n_int = 141`.
     let work = workdir();
     ezfio(work.path(), "hcn");
     set_scalar(work.path(), "mo_basis/mo_num", &format!("{:20}", 9000));
@@ -694,41 +638,42 @@ fn q_with_a_large_mo_num_warns_and_fails_the_maximum() {
     let outcome = run(&root, work.path(), &["-q", "ezfio"]);
     assert_eq!(outcome.exit, 2);
     assert_eq!(outcome.stdout, b"N_int > 128");
-    assert_fatal(&outcome, "Invalid_argument(\"N_int_number: 141\")");
+    assert_fatal(&outcome, "n_int 141 is above the maximum of 128");
 }
 
 #[test]
 fn q_with_a_zero_or_negative_n_int_re_fails_the_maximum() {
-    // `n_int = 0` (or negative): the direct assert is caught by the
-    // `try`, the fallback's `max` re-read is the bad value, and
-    // `x = 1 > max` (measured `runs4/nint0`, `runs4/nintneg`).
+    // `n_int = 0` (or negative): the direct check takes the fallback,
+    // the fallback's `max` re-read is the bad value, and `x = 1 > max`.
     for value in ["0", "-5"] {
         let work = workdir();
         ezfio(work.path(), "hcn");
         set_scalar(work.path(), "determinants/n_int", &format!("{:20}", value));
         let root = fake_root(work.path(), Some(BK64));
         let outcome = run(&root, work.path(), &["-q", "ezfio"]);
-        assert_eq!(outcome.exit, 2, "n_int {value}");
-        assert_eq!(outcome.stdout, b""[..]);
-        assert_fatal(&outcome, "Invalid_argument(\"N_int_number: 1\")");
+        assert_eq!(outcome.stdout, b""[..], "n_int {value}");
+        assert_fatal(
+            &outcome,
+            &format!("n_int 1 is above the maximum of {value}"),
+        );
     }
 }
 
 #[test]
-fn q_with_a_garbage_n_int_reraises_uncaught() {
-    // The fallback's `max` default re-reads the file: `int_of_string`
-    // there is outside the `try` (measured `runs4/nintabc`).
+fn q_with_a_garbage_n_int_reraises() {
+    // The fallback's `max` default re-reads the file: the bad value is
+    // outside the caught `try`.
     let work = workdir();
     ezfio(work.path(), "hcn");
     set_scalar(work.path(), "determinants/n_int", "abc\n");
     let root = fake_root(work.path(), Some(BK64));
     let outcome = run(&root, work.path(), &["-q", "ezfio"]);
-    assert_fatal(&outcome, "Failure(\"int_of_string\")");
+    assert_fatal(&outcome, "invalid integer 'abc' in determinants/n_int");
 }
 
 #[test]
 fn q_fallback_errors_from_the_bitmask_file() {
-    // Bad value: the `Bit_kind_size` validation (measured `runs7/bkbad2`).
+    // Bad value: the `Bit_kind_size` validation.
     let work = workdir();
     ezfio(work.path(), "hcn");
     let root = fake_root(
@@ -736,27 +681,24 @@ fn q_fallback_errors_from_the_bitmask_file() {
         Some("  integer, parameter :: bit_kind_size = 42\n"),
     );
     let outcome = run(&root, work.path(), &["-q", "ezfio"]);
-    assert_fatal(
-        &outcome,
-        "Invalid_argument(\"Bit_kind_size should be (8|16|32|64).\")",
-    );
-    // Missing file (measured `runs7/bkmissing`).
+    assert_fatal(&outcome, "Bit_kind_size should be (8|16|32|64).");
+    // Missing file.
     let work = workdir();
     ezfio(work.path(), "hcn");
     let root = fake_root(work.path(), None);
     let outcome = run(&root, work.path(), &["-q", "ezfio"]);
     let expected = format!(
-        "Failure(\"File {} not found\")",
+        "File {} not found",
         root.join("src/bitmask/bitmasks_module.f90").display()
     );
     assert_fatal(&outcome, &expected);
-    // Present but no matching line (measured `runs7/bknoline`).
+    // Present but no matching line.
     let work = workdir();
     ezfio(work.path(), "hcn");
     let root = fake_root(work.path(), Some("  integer :: other = 16\n"));
     let outcome = run(&root, work.path(), &["-q", "ezfio"]);
     let expected = format!(
-        "Failure(\"bit_kind_size not found in {}\")",
+        "bit_kind_size not found in {}",
         root.join("src/bitmask/bitmasks_module.f90").display()
     );
     assert_fatal(&outcome, &expected);
@@ -764,34 +706,37 @@ fn q_fallback_errors_from_the_bitmask_file() {
 
 #[test]
 fn q_electrons_edge_cases() {
-    // Missing `elec_alpha_num`: the section is `None` (measured
-    // `runs6/ealphamissing`).
+    // Missing `elec_alpha_num`: the section is `None`.
     let work = workdir();
     ezfio(work.path(), "hcn");
     remove(work.path(), "electrons");
     let root = fake_root(work.path(), Some(BK64));
     let outcome = run(&root, work.path(), &["-q", "ezfio"]);
-    assert_fatal(&outcome, "Failure(\"Unable to read electrons\")");
+    assert_fatal(&outcome, "Unable to read electrons");
 
-    // A present-but-empty alpha file: `input_line` → `End_of_file`
-    // (measured `runs8/eempty`).
+    // A present-but-empty alpha file.
     let work = workdir();
     ezfio(work.path(), "hcn");
     set_scalar(work.path(), "electrons/elec_alpha_num", "");
     let root = fake_root(work.path(), Some(BK64));
     let outcome = run(&root, work.path(), &["-q", "ezfio"]);
-    assert_fatal(&outcome, "End_of_file");
+    assert_fatal(
+        &outcome,
+        "cannot read ezfio/electrons/elec_alpha_num: the file is empty",
+    );
 
-    // A garbage alpha file: `int_of_string` (measured `runs8/eabc`).
+    // A garbage alpha file.
     let work = workdir();
     ezfio(work.path(), "hcn");
     set_scalar(work.path(), "electrons/elec_alpha_num", "abc\n");
     let root = fake_root(work.path(), Some(BK64));
     let outcome = run(&root, work.path(), &["-q", "ezfio"]);
-    assert_fatal(&outcome, "Failure(\"int_of_string\")");
+    assert_fatal(
+        &outcome,
+        "invalid integer 'abc' in electrons/elec_alpha_num",
+    );
 
-    // `elec_alpha_num = 0`: the positivity assert (measured
-    // `runs6/ealpha0`).
+    // `elec_alpha_num = 0`: the positivity check.
     let work = workdir();
     ezfio(work.path(), "hcn");
     set_scalar(
@@ -801,10 +746,9 @@ fn q_electrons_edge_cases() {
     );
     let root = fake_root(work.path(), Some(BK64));
     let outcome = run(&root, work.path(), &["-q", "ezfio"]);
-    assert_fatal(&outcome, ELEC_ALPHA_MIN);
+    assert_fatal(&outcome, "alpha electron count 0 must be positive");
 
-    // A missing beta file: `open_in` on the not `has`-guarded key
-    // (measured `runs6/ebetamissing`).
+    // A missing beta file: the read is not `has`-guarded.
     let work = workdir();
     ezfio(work.path(), "hcn");
     remove(work.path(), "electrons/elec_beta_num");
@@ -812,10 +756,10 @@ fn q_electrons_edge_cases() {
     let outcome = run(&root, work.path(), &["-q", "ezfio"]);
     assert_fatal(
         &outcome,
-        "Sys_error(\"ezfio/electrons/elec_beta_num: No such file or directory\")",
+        "cannot read ezfio/electrons/elec_beta_num: No such file or directory (os error 2)",
     );
 
-    // A negative beta: the `x >= 0` assert (measured `runs6/ebetaneg`).
+    // A negative beta: the `x >= 0` check.
     let work = workdir();
     ezfio(work.path(), "hcn");
     set_scalar(
@@ -825,9 +769,9 @@ fn q_electrons_edge_cases() {
     );
     let root = fake_root(work.path(), Some(BK64));
     let outcome = run(&root, work.path(), &["-q", "ezfio"]);
-    assert_fatal(&outcome, ELEC_BETA_MIN);
+    assert_fatal(&outcome, "beta electron count -1 must be non-negative");
 
-    // Beta zero is valid (measured `runs6/ebetazero`).
+    // Beta zero is valid.
     let work = workdir();
     ezfio(work.path(), "hcn");
     set_scalar(work.path(), "electrons/elec_beta_num", &format!("{:20}", 0));
@@ -843,42 +787,47 @@ fn q_electrons_edge_cases() {
 
 #[test]
 fn q_mo_edge_cases() {
-    // `mo_num = 0` with 7 alpha electrons: the shared handler's guard
-    // (measured `runs6/qmo0`).
+    // `mo_num = 0` with 7 alpha electrons: the shared handler's guard.
     let work = workdir();
     ezfio(work.path(), "hcn");
     set_scalar(work.path(), "mo_basis/mo_num", &format!("{:20}", 0));
     let root = fake_root(work.path(), Some(BK64));
     let outcome = run(&root, work.path(), &["-q", "ezfio"]);
-    assert_fatal(&outcome, "Failure(\"More alpha electrons than MOs\")");
+    assert_fatal(&outcome, "More alpha electrons than MOs");
 
-    // A non-numeric `mo_num`: the driver's own scalar read classifies it
-    // (measured `runs3/qbadnum`).
+    // A non-numeric `mo_num`: the driver's own scalar read classifies it.
     let work = workdir();
     ezfio(work.path(), "hcn");
     set_scalar(work.path(), "mo_basis/mo_num", "abc\n");
     let root = fake_root(work.path(), Some(BK64));
     let outcome = run(&root, work.path(), &["-q", "ezfio"]);
-    assert_fatal(&outcome, "Failure(\"int_of_string\")");
+    assert_fatal(&outcome, "invalid integer 'abc' in mo_basis/mo_num");
 
-    // A rejected `mo_label` spelling is echoed to stdout, then fails
-    // (measured `runs6/qlabelbad`).
+    // A rejected `mo_label` spelling: the echo moved to standard error
+    // (wave S2), then the failure.
     let work = workdir();
     ezfio(work.path(), "hcn");
     set_scalar(work.path(), "mo_basis/mo_label", "bogus\n");
     let root = fake_root(work.path(), Some(BK64));
     let outcome = run(&root, work.path(), &["-q", "ezfio"]);
-    assert_eq!(outcome.stdout, b"bogus\n");
-    assert_fatal(
-        &outcome,
-        "Failure(\"MO_label should be one of:\\nGuess | Orthonormalized | Canonical | Natural | Localized | MCSCF | MOM | None.\")",
+    assert_eq!(outcome.exit, 2);
+    assert_eq!(outcome.stdout, b""[..], "the echo no longer goes to stdout");
+    assert!(
+        outcome.stderr.starts_with("bogus\n"),
+        "stderr:\n{}",
+        outcome.stderr
+    );
+    assert!(
+        outcome.stderr.contains("MO_label should be one of:"),
+        "stderr:\n{}",
+        outcome.stderr
     );
 }
 
 #[test]
 fn q_with_a_missing_mo_class_materializes_the_default() {
     // The reference's read materialises `Active` per MO (and rewrites the
-    // file), then `set` re-writes it (measured `runs3/qnoclass`).
+    // file), then `set` re-writes it.
     let work = workdir();
     ezfio(work.path(), "hcn");
     remove(work.path(), "mo_basis/mo_class.gz");
@@ -891,10 +840,10 @@ fn q_with_a_missing_mo_class_materializes_the_default() {
 
 #[test]
 fn q_with_mo_num_over_ten_thousand_warns_per_conversion() {
-    // Each `MO_number.of_int` conversion inside `Mo_basis.read` warns
-    // (measured: the warning is printed *twice*), and the `n_int`
-    // fallback (157 with `bk = 64`) warns again before its
-    // maximum-check failure.
+    // Each `MO_number.of_int` conversion inside the shared `Mo_basis`
+    // reader warns (stdout, kept) *twice*, and the `n_int` fallback
+    // (157 with `bk = 64`) warns again (`N_int > 128`, stdout, kept)
+    // before its maximum-check failure.
     let work = workdir();
     ezfio(work.path(), "hcn");
     set_scalar(work.path(), "mo_basis/mo_num", &format!("{:20}", 10001));
@@ -905,5 +854,5 @@ fn q_with_mo_num_over_ten_thousand_warns_per_conversion() {
         outcome.stdout,
         b"More than 10_000 MOsMore than 10_000 MOsN_int > 128"
     );
-    assert_fatal(&outcome, "Invalid_argument(\"N_int_number: 157\")");
+    assert_fatal(&outcome, "n_int 157 is above the maximum of 128");
 }

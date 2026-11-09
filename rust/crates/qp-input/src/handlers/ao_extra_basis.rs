@@ -57,6 +57,7 @@ use qp_types::gto::{AngmomXyz, Fmt};
 use qp_types::md5::MD5_OF_NONE;
 
 use super::ao_basis::{self, Shells};
+use super::usize_of;
 use crate::engine::make_header;
 
 /// The EZFIO group this handler owns.
@@ -227,8 +228,8 @@ pub(crate) fn reorder(b: &AoExtraBasis) -> Result<AoExtraBasis> {
 /// The three logicals are written before the matrices, between `power` and
 /// `coef`, exactly as in the reference.
 pub(crate) fn write(ezfio: &EzFio, b: &AoExtraBasis) -> Result<()> {
-    let num = ao_basis::usize_of(b.ao_extra_num)?;
-    let prim_num_max = ao_basis::usize_of(b.ao_extra_prim_num_max)?;
+    let num = usize_of(b.ao_extra_num)?;
+    let prim_num_max = usize_of(b.ao_extra_prim_num_max)?;
 
     ezfio.set::<String>(GROUP, "ao_extra_md5", &to_md5(b)?)?;
     ezfio.set::<String>(GROUP, "ao_extra_basis", &b.ao_extra_basis)?;
@@ -239,10 +240,26 @@ pub(crate) fn write(ezfio: &EzFio, b: &AoExtraBasis) -> Result<()> {
     let nucl = super::ezfio_array_of_list(vec![num], b.ao_extra_nucl.clone())?;
     ezfio.set_array::<i64>(GROUP, "ao_extra_nucl", &nucl)?;
 
+    // Fortran column-major: the whole `x` column, then `y`, then `z`.
     let mut power = Vec::with_capacity(3 * b.ao_extra_power.len());
-    power.extend(b.ao_extra_power.iter().map(|xyz| i64::from(xyz.x)));
-    power.extend(b.ao_extra_power.iter().map(|xyz| i64::from(xyz.y)));
-    power.extend(b.ao_extra_power.iter().map(|xyz| i64::from(xyz.z)));
+    power.extend(
+        b.ao_extra_power
+            .iter()
+            .map(|xyz| ao_basis::power_component(xyz.x))
+            .collect::<Result<Vec<_>>>()?,
+    );
+    power.extend(
+        b.ao_extra_power
+            .iter()
+            .map(|xyz| ao_basis::power_component(xyz.y))
+            .collect::<Result<Vec<_>>>()?,
+    );
+    power.extend(
+        b.ao_extra_power
+            .iter()
+            .map(|xyz| ao_basis::power_component(xyz.z))
+            .collect::<Result<Vec<_>>>()?,
+    );
     let power = super::ezfio_array_of_list(vec![num, 3], power)?;
     ezfio.set_array::<i64>(GROUP, "ao_extra_power", &power)?;
 

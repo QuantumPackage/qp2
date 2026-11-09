@@ -14,7 +14,7 @@ use std::collections::BTreeSet;
 use qp_types::Element;
 use qp_types::element::{
     self, ALL, ElementError, covalent_radius, mass, of_charge, of_string, to_charge,
-    to_long_string, to_string, vdw_radius,
+    to_long_string, to_string,
 };
 use qp_types::point3d::units::ANGSTROM_TO_BOHR;
 
@@ -80,6 +80,9 @@ fn of_string_normalises_then_matches_exactly() {
     assert_eq!(of_string("NeOn").expect("neon"), Element::Ne);
     assert_eq!(of_string("n").expect("nitrogen"), Element::N);
     assert_eq!(of_string("NITROGEN").expect("nitrogen"), Element::N);
+    // A lower-case symbol is capitalised, not rejected.
+    assert_eq!(of_string("h").expect("hydrogen"), Element::H);
+    assert_eq!(of_string("he").expect("helium"), Element::He);
 
     // `Ghost` is the long name of `X` (`Element.ml:8`).
     assert_eq!(of_string("GHOST").expect("ghost"), Element::X);
@@ -155,17 +158,38 @@ fn covalent_radii_are_the_reference_values_in_bohr() {
 }
 
 #[test]
-fn vdw_radii_are_optional_and_in_bohr() {
-    // Be has no van der Waals radius in the reference table.
-    assert_eq!(vdw_radius(Element::Be), None);
-    assert_eq!(vdw_radius(Element::B), None);
-    assert_eq!(vdw_radius(Element::Og), None);
-
-    // H 1.2 A = 2.2676713505442083 bohr (element.tsv); X is tabulated
-    // as zero, not absent, because its arm comes first in the match.
-    assert_eq!(vdw_radius(Element::H), Some(2.2676713505442083));
-    assert_eq!(vdw_radius(Element::H), Some(ANGSTROM_TO_BOHR * 1.2));
-    assert_eq!(vdw_radius(Element::X), Some(0.0));
+fn the_undefined_covalent_radii_are_exactly_the_twenty_two_reference_omissions() {
+    // The reference table has no arm for these 22 elements (the `Element.ml`
+    // radius table ends at Cm); every other element is tabulated, X
+    // included (0.0). This pins the whole set before the five match
+    // cascades became the `ELEMENTS` data table.
+    let undefined: [Element; 22] = [
+        Element::Bk,
+        Element::Cf,
+        Element::Es,
+        Element::Fm,
+        Element::Md,
+        Element::No,
+        Element::Lr,
+        Element::Rf,
+        Element::Db,
+        Element::Sg,
+        Element::Bh,
+        Element::Hs,
+        Element::Mt,
+        Element::Ds,
+        Element::Rg,
+        Element::Cn,
+        Element::Nh,
+        Element::Fl,
+        Element::Mc,
+        Element::Lv,
+        Element::Ts,
+        Element::Og,
+    ];
+    for &e in ALL.iter() {
+        assert_eq!(covalent_radius(e).is_err(), undefined.contains(&e), "{e:?}");
+    }
 }
 
 #[test]

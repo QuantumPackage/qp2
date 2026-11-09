@@ -176,6 +176,11 @@ pub enum Message {
         tasks: Vec<String>,
     },
     /// `add_task_reply <task_id>` (reply only).
+    ///
+    /// Part of the reference's union (`Message.ml:489`) and encoded here,
+    /// but never constructed: the reference builds it nowhere either, and
+    /// the server never sends it. Kept for wire-grammar parity.
+    #[allow(dead_code)]
     AddTaskReply {
         /// Identifier the server assigned to the last added task.
         task_id: Id,

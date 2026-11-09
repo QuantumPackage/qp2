@@ -99,7 +99,7 @@ pub struct Field {
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub default_is_formula: bool,
     /// Whether the editor may change this field.  Always false for a module
-    /// owned by a [`crate::Handler`]: the handler owns the whole section.
+    /// owned by a [`crate::handlers::Handler`]: the handler owns the whole section.
     pub editable: bool,
 }
 

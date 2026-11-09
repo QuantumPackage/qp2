@@ -40,8 +40,6 @@
 //! * `distance_of_string` catches *every* exception of the reference, so a
 //!   negative number is **not** an error: it becomes a label (`"-1.0"`) and
 //!   is looked up in the map. Reproduced by [`distance_of_string`].
-//! * [`center_of_mass`] prints `"%f %f %f\n"` to standard output before
-//!   returning, exactly like the reference (which uses it as a debug trace).
 //! * Two-token lines split on spaces only (`"C  1.0"` works, `"C\t1.0"` does
 //!   not); a tab-separated coordinate line is a syntax error.
 //! * The reference indexes its result array without a bounds check; an atom
@@ -50,8 +48,6 @@
 //! * OCaml `int_of_string`/`float_of_string` accept hexadecimal literals,
 //!   `_` separators and (for floats) hexadecimal floats; this port uses the
 //!   decimal Rust parsers. Z-matrix files use plain decimals.
-//! * `Zmatrix.to_string` does not exist in the reference either: lines are
-//!   rendered by [`string_of_line`], which needs the label map.
 
 use std::collections::BTreeMap;
 use std::fmt;
@@ -430,65 +426,6 @@ pub fn float_of_dihedral(
     }
 }
 
-/// `int_of_atom_id`: the identity, kept for symmetry with the reference.
-#[must_use]
-pub fn int_of_atom_id(atom: AtomId) -> AtomId {
-    atom
-}
-
-/// Render one line with the reference formats.
-///
-/// * `First` is `"%-3s"` (element symbol left-padded to three columns),
-/// * `Second`/`Third`/`Other` use `%5d` for the ids and `%f` for the values,
-/// * `Coord` is `"%s  %f"` (two spaces, no padding).
-///
-/// # Errors
-///
-/// Propagates the label-resolution errors of [`float_of_distance`],
-/// [`float_of_angle`] and [`float_of_dihedral`].
-pub fn string_of_line(labels: &BTreeMap<String, f64>, line: &Line) -> Result<String, ZmatrixError> {
-    match line {
-        Line::First(element) => Ok(format!("{:<3}", element.symbol())),
-        Line::Second(element, distance) => {
-            let distance = float_of_distance(labels, distance)?;
-            Ok(format!(
-                "{:<3} {:>5} {}",
-                element.symbol(),
-                1,
-                format_f(distance, 0)
-            ))
-        }
-        Line::Third(element, i, distance, j, angle) => {
-            let distance = float_of_distance(labels, distance)?;
-            let angle = float_of_angle(labels, angle)?;
-            Ok(format!(
-                "{:<3} {:>5} {} {:>5} {}",
-                element.symbol(),
-                int_of_atom_id(*i),
-                format_f(distance, 0),
-                int_of_atom_id(*j),
-                format_f(angle, 0)
-            ))
-        }
-        Line::Other(element, i, distance, j, angle, k, dihedral) => {
-            let distance = float_of_distance(labels, distance)?;
-            let angle = float_of_angle(labels, angle)?;
-            let dihedral = float_of_dihedral(labels, dihedral)?;
-            Ok(format!(
-                "{:<3} {:>5} {} {:>5} {} {:>5} {}",
-                element.symbol(),
-                int_of_atom_id(*i),
-                format_f(distance, 0),
-                int_of_atom_id(*j),
-                format_f(angle, 0),
-                int_of_atom_id(*k),
-                format_f(dihedral, 0)
-            ))
-        }
-        Line::Coord(name, value) => Ok(format!("{name}  {}", format_f(*value, 0))),
-    }
-}
-
 /// `line_of_string`: split one line on spaces and classify it.
 ///
 /// The token count decides the variant; a two-token line is always a
@@ -599,7 +536,8 @@ impl Zmatrix {
     ///
     /// # Errors
     ///
-    /// The resolution errors of [`string_of_line`], the reference messages
+    /// The label-resolution errors of [`float_of_distance`],
+    /// [`float_of_angle`] and [`float_of_dihedral`], the reference messages
     /// [`ZmatrixError::AtomInFuture`] and [`ZmatrixError::AtomNotDefined`],
     /// and [`ZmatrixError::AtomOutOfBounds`] where the reference aborts.
     pub fn to_xyz(&self) -> Result<Vec<Atom>, ZmatrixError> {
@@ -775,31 +713,6 @@ pub fn apply_rotation_matrix(rot: &RotationMatrix, u: Vector) -> Vector {
         rot[1][0] * u.0 + rot[1][1] * u.1 + rot[1][2] * u.2,
         rot[2][0] * u.0 + rot[2][1] * u.1 + rot[2][2] * u.2,
     )
-}
-
-/// Centre of mass of `atoms`, in the reference units (u for the mass, Bohr
-/// for the coordinates).
-///
-/// **Prints** `"%f %f %f\n"` for the centre to standard output, as the
-/// reference does; the return value is the same triplet. A zero total mass
-/// (only ghost atoms) gives infinities, as in the reference.
-#[must_use]
-pub fn center_of_mass(atoms: &[Atom]) -> Vector {
-    let mut sum_mass = 0.0;
-    let mut center = (0.0, 0.0, 0.0);
-    for (element, x, y, z) in atoms {
-        let mass = element.mass();
-        sum_mass += mass;
-        center = add(scale(mass, (*x, *y, *z)), center);
-    }
-    let center = scale(1.0 / sum_mass, center);
-    println!(
-        "{} {} {}",
-        format_f(center.0, 0),
-        format_f(center.1, 0),
-        format_f(center.2, 0)
-    );
-    center
 }
 
 /// `pi / 180`, with `pi = acos(-1)` as in the reference.
@@ -983,23 +896,6 @@ mod tests {
                 Distance::Label("r".to_owned())
             )
         );
-        assert_eq!(
-            string_of_line(&zmatrix.labels, &zmatrix.lines[1]),
-            Ok("H       1 0.960000".to_owned())
-        );
-        assert_eq!(
-            string_of_line(&zmatrix.labels, &zmatrix.lines[2]),
-            Ok("H       1 0.960000     2 104.500000".to_owned())
-        );
-        assert_eq!(
-            string_of_line(&zmatrix.labels, &Line::Coord("x".to_owned(), -1.5)),
-            Ok("x  -1.500000".to_owned())
-        );
-        // The first atom pads its symbol to three columns.
-        assert_eq!(
-            string_of_line(&zmatrix.labels, &zmatrix.lines[0]),
-            Ok("O  ".to_owned())
-        );
         let xyz = zmatrix.to_xyz().unwrap();
         assert!(close(xyz[2].3, 0.96 * 104.5_f64.to_radians().cos()));
     }
@@ -1087,16 +983,5 @@ mod tests {
             zmatrix.to_xyz_string(),
             Ok("O 0.000000 0.000000 0.000000\n\nH 0.000000 0.000000 0.960000\n".to_owned())
         );
-    }
-
-    #[test]
-    fn center_of_mass_averages_by_mass() {
-        let h = ElementSymbol::of_string("H").unwrap();
-        let o = ElementSymbol::of_string("O").unwrap();
-        let atoms = [(o, 0.0, 0.0, 0.0), (h, 0.0, 0.0, 1.0), (h, 0.0, 0.0, -1.0)];
-        let com = center_of_mass(&atoms);
-        assert!(close(com.0, 0.0));
-        assert!(close(com.1, 0.0));
-        assert!(close(com.2, 0.0));
     }
 }

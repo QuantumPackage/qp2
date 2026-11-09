@@ -1,12 +1,14 @@
 # Known deviations from the OCaml tool layer
 
 The Rust tools are ports, not rewrites: the EZFIO on-disk format, the ZMQ
-wire protocol, the help text of `qp_set_mo_class`/`qp_tunnel`, the
-`qp_edit -c` contract (C1–C7), the `qp_create_ezfio` output on the six
-corpus fixtures and the fresh-tree `qp_edit -c` file set (275 files vs 275)
-are byte-identical to the reference. This file lists **everything that is
-not**, one row per difference a user can observe, with the reason and the
-pointer to the detailed note. Anything not listed here is a bug.
+wire protocol, the `qp_edit -c` contract (C1–C7), the `qp_create_ezfio`
+output on the six corpus fixtures and the fresh-tree `qp_edit -c` file set
+(275 files vs 275) are byte-identical to the reference. User-visible text
+(help, errors, notices, tunnel instructions) has been Rust-native since
+wave S2 (user decision 2026-11-09, A11): the exit codes, the data gates
+and the corpus stay, the text does not. This file lists **everything that
+is not**, one row per difference a user can observe, with the reason and
+the pointer to the detailed note. Anything not listed here is a bug.
 
 Reference: `~/qp2` at `be4b71c1` (the read-only oracle). "Ref" below means
 that build, run side by side with the port.
@@ -15,16 +17,18 @@ that build, run side by side with the port.
 
 | # | Tool(s) | Ref | Port | Why | Impact |
 |---|---|---|---|---|---|
-| A1 | `qp_create_ezfio` | takes `argv` as bytes | rejects the argument: `<tool>: command line argument <n> is not valid UTF-8` (argument 0 included) | `String::from_utf8` instead of a byte parser; chose an error over a panic or a silent loss | only non-UTF-8 command lines, which no QP2 caller produces |
-| A2 | `qp_edit`, `qp_run`, `qp_set_mo_class`, `qp_print_basis`, `qp_tunnel` | takes `argv` as bytes | `String::from_utf8_lossy` (U+FFFD for each invalid byte) | same | a non-UTF-8 option value reaches the tool with replacement characters |
-| A3 | `qp_create_ezfio` | `Unknown option -<byte>` prints the first **raw byte** of an unknown short option | `Unknown option -<char>` prints the decoded **character** | UTF-8 parser | unreachable through a typo, since no `set_specs` entry is non-ASCII |
-| A4 | `qp_create_ezfio`, `qp_edit`, `qp_run` | `Fatal error: exception Getopt.Error("Unknown option --nope")` | clap diagnostics (`error: unexpected argument '--nope' found`) | clap parses these three; the other two use a `getopt` port | text differs, **exit code 2 identical** |
+| A1 | `qp_create_ezfio` | takes `argv` as bytes | clap: an invalid UTF-8 argument is rejected with clap's own `error: invalid UTF-8 was detected in one or more arguments` (exit 2); the pre-S2 `<tool>: command line argument <n> is not valid UTF-8` message is gone with the hand-rolled parser (wave S2.1) | clap derive over `OsString` argv | only non-UTF-8 command lines, which no QP2 caller produces |
+| A2 | `qp_edit`, `qp_run`, `qp_set_mo_class`, `qp_tunnel` | takes `argv` as bytes | the same clap UTF-8 diagnostic as A1 (exit 2); the pre-S2 `String::from_utf8_lossy` behaviour is gone (wave S2.1). `qp_print_basis` is no longer a deviation: its `argv[1]` is an `OsString` passed straight to the file API (no conversion, even more permissive than the reference) | clap derive over `OsString` argv | a non-UTF-8 option value is a parse error (exit 2), not a replacement character |
+| A3 | `qp_create_ezfio` | `Unknown option -<byte>` prints the first **raw byte** of an unknown short option | no raw-byte message: a non-UTF-8 `argv` is rejected before parsing (A1); a UTF-8 unknown option gets the same clap message as any other tool (A4) | clap derive over a `String::from_utf8` `argv` (wave S2.1) | only non-UTF-8 command lines, which no QP2 caller produces |
+| A4 | all five tools | `Fatal error: exception Getopt.Error("Unknown option --nope")` (an uncaught `Failure` for a missing mandatory option) | clap diagnostics (`error: unexpected argument '--nope' found`); wave S2.1: all five tools parse with clap derive (the two hand-rolled `getopt` ports and the `Getopt.Error` string machinery are gone) | clap; the hand-written help, `wrap_usage` and the `HELP` consts were deleted | text differs, **exit code 2 identical**; `-h`/`--help` is clap's built-in (prints once, exit 0, no continuation) — see A11 |
 | A5 | `qp_print_basis` | dies of `SIGPIPE` (exit 141, empty stderr) when stdout closes | ignores `SIGPIPE`, reports `Fatal error: exception Sys_error("Broken pipe (os error 32)")`, exit 2 | Rust starts with `SIGPIPE` ignored | `... \| head -c 1` only; file/terminal stdout is identical |
 | A6 | `qp_run` | banner prints the git stamp baked into `Git.ml` at build time | prints `unknown` unless `QP_GIT_SHA1`/`QP_GIT_DATE`/`QP_GIT_MESSAGE` are exported | baking the commit into a binary makes the build non-reproducible and a copied binary lie | banner text only |
 | A7 | `qp_run` | `Sys.command` → `system(3)`: a shell killed by a signal is 255 | `/bin/sh -c` with inherited streams: a shell killed by a signal is 128+n | `std::process::Command` | `qp_run` only tests `status = 0`; invisible to every job flow |
 | A8 | `qp_run` (`qp_stop`) | signal handler runs immediately | `SIGUSR1` polled: `qp_stop` starts 0–200 ms later, two signals in one interval collapse, a signal after job exit is dropped | no async-signal-safe path to the ZMQ doorbell | job teardown latency ≤ 200 ms; `qp_stop` is idempotent |
-| A9 | `qp_edit` | an uncaught exception prints `Assert error in file $QP_ROOT/ocaml/<file>, line <n>, character <c>` | prints `Assert error: <message>` | Rust cannot recover an OCaml source location | banner text only; **exit code 2 preserved** |
-| A10 | `qp_edit` | sexplib `Error:  (...)` prints the full type path | two-space prefix, value snippet and exit status reproduced; type-path wording approximated | no sexplib in Rust | only malformed-input messages (C7-A) |
+| A9 | `qp_edit` | an uncaught exception prints `Assert error in file $QP_ROOT/ocaml/<file>, line <n>, character <c>` | no `Assert error` marker: a plain `qp_edit: <message>` (exit 2); the assert class survives internally as the exit-code classification | Rust cannot recover an OCaml source location; error text is Rust-native (user decision 2026-11-09) | banner text only; **exit code 2 preserved** |
+| A10 | `qp_edit` | sexplib `Error:  (...)` prints the full type path, a value snippet and a `##`-marked source snippet | plain text: `qp_edit: parse error in <section>: <message>` (exit 0, the check continues) and `qp_edit: <section>: <message>` (exit 1 after the silent retry); no snippet, no type path, no two-space prefix | no sexplib in Rust; error text is Rust-native (wave S2.4) | only malformed-input messages (C7-A); the exit classes are preserved |
+| A11 | all tools | help, error and notice text is OCaml-rendered (`Format` help templates, `Printexc`, the sexplib reporter, the `ssh` instructions) | Rust-native text: clap-generated help, plain Rust error/notice strings, generated `ssh` instructions | user decision 2026-11-09 (wave S2): user-visible text becomes Rust-native; the data gates and the corpus are untouched | the text differs everywhere; exit codes 0/1/2 preserved; the old byte contracts are retired (CONTRACTS.md §2.4 note, `bins/*/NOTES.md`) |
+| A12 | `qp_edit` (input fields, `-n`, `-s`), `qp_tunnel` (port) | OCaml `int_of_string`/`float_of_string` also accept underscores, `0x`/`0o`/`0b` integers and hex floats | decimal-only via Rust `FromStr`; other spellings are parse errors with a plain message | wave S2.3: the merged `ocaml_num` and the 172-LOC hex-float `C-strtod` machinery are deleted | no golden input exercises the difference |
 
 ## B. EZFIO tree
 
@@ -32,7 +36,7 @@ that build, run side by side with the port.
 |---|---|---|---|---|---|
 | B1 | all EZFIO users | opening a directory that is not EZFIO mostly no-ops (`Sys.file_exists` only) | `<dir>/.version` must be a regular file, else `not an EZFIO directory` | fail loudly instead of silently ignoring a wrong path | a typo'd directory is an error, not a no-op |
 | B2 | all EZFIO writers | `library` stamp = the configure-time ezfio library path | `library` = `qp-ezfio` | a static pure-Rust build has no such path; nothing reads the file back | machine stamp, stripped as VOLATILE by the golden harness |
-| B3 | `qp_create_ezfio` | a create failure other than a missing parent is reported as the `Unix.Unix_error` it is (e.g. `ENOTDIR`) | always the `ENOENT` message | single pre-check of the parent | wrong `Unix_error` name on exotic failures |
+| B3 | `qp_create_ezfio` | a create failure other than a missing parent is reported as the `Unix.Unix_error` it is (e.g. `ENOTDIR`) | always the `ENOENT` message; the wording itself is Rust-native since wave S2 (`<tool>: cannot create <path>: <os error>`, A11) | single pre-check of the parent | wrong `Unix_error` name on exotic failures |
 | B4 | `qp_print_basis` | `Input_ao_basis.read` writes `ao_basis/ao_md5` and `ao_cartesian` when absent | reads them, never writes them | the print path does not open the section for writing | only the opened tree (a missing file); stdout/stderr/exit identical |
 | B5 | `qp_edit -c` | `at_exit remove_backup` deletes `work/backup.tar` even in check mode | check mode creates no backup and deletes nothing | "check writes nothing" is the honest reading | a stray pre-existing `work/backup.tar` survives |
 | B6 | `qp_edit` | backup written as `./.backup.tar` then `mv`-ed into `work/`; a failed `mv` leaves the temp file in the cwd | tar built in a temp file outside the tree and copied in | avoid littering the caller's cwd | no observable difference on success |
@@ -104,13 +108,9 @@ C6, which since w12 writes the nuclei section back in check mode.
   the committed hcn fixture; `qp_edit -c` on the six corpus fixtures
   (C1–C7) and on hcn (293 common files identical, 2 machine stamps
   skipped, plus the C4-only `*_qp_edit` pair).
-* Help text of `qp_set_mo_class` (75 argv0 lengths) and `qp_tunnel`
-  (72 lengths), including the `Format @<[<hov 4>` re-wrap rule, and the
-  `-h` double print when the anonymous argument is missing.
 * The ZMQ wire format (18 message kinds) against a live server and relay.
-* `data/executables` and the `.native` names; the `-h` text of the five
-  Rust tools matches the reference (argv[0] and line-wrap width aside).
-  The 12 `qp_*.1` man pages are discussed in E4.
+* `data/executables` and the `.native` names. The 12 `qp_*.1` man pages
+  are discussed in E4.
 
 ## Where the details live
 

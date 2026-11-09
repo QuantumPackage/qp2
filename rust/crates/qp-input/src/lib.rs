@@ -4,7 +4,7 @@
 //! a **fixed binary**.  It loads a declarative description of every editable
 //! EZFIO section from TOML files generated at build time from the `EZFIO.cfg`
 //! inputs; editing an `EZFIO.cfg` regenerates the config without recompiling
-//! the binary.  Imperative special logic (the seven hand-written `Input_*`
+//! the binary.  Imperative special logic (the six hand-written `Input_*`
 //! behaviours) lives in [`handlers`].
 //!
 //! The on-disk format is described in `rust/DESIGN-qp_edit-config.md`:
@@ -24,7 +24,7 @@
 //! Status: P4 complete.  [`schema`] and [`loader`] implement the generated
 //! format; [`engine`] renders a section from EZFIO (`get`), parses an edited
 //! RST document back into values and applies them (`set`), and keeps the
-//! configuration inspection helpers used by the `qp_edit` binary.  The seven
+//! configuration inspection helpers used by the `qp_edit` binary.  The six
 //! hand-written sections are in [`handlers`].
 //!
 //! Byte compatibility with the reference OCaml tool is the point of the
@@ -47,11 +47,9 @@ pub mod types;
 /// S-expression reader used by the RST parse-back path (`qp_edit` only).
 mod sexp;
 
-pub use engine::{Engine, Stats};
-pub use handlers::Handler;
+pub use engine::Engine;
 pub use loader::Config;
-pub use schema::{Field, ModuleConfig, ModuleRef, Registry};
-pub use types::{Domain, TypeSpec, Value, ValueKind, lookup_type};
+pub use schema::{ModuleConfig, Registry};
 
 /// Version of the on-disk configuration format understood by this crate.
 ///

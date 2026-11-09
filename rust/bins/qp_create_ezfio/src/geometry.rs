@@ -1,29 +1,25 @@
 //! Geometry input: the XYZ reader, its Z-matrix fallback, and ghost centres.
 //!
 //! `ocaml/qp_create_ezfio.ml` reads the molecule with
+//! `Molecule.of_file`, which is `try of_xyz_file with XYZError ->
+//! of_zmt_file`: a file with fewer than two lines, a non-numeric or
+//! non-positive atom count is `XYZError` and the *same file* is re-parsed
+//! as a Z-matrix (that parse then fails, e.g. with an unknown element),
+//! while fewer atom lines than the announced count is an `Array.sub` in
+//! the XYZ reader that the reference does not catch. This port keeps the
+//! same split: the count/line-count failures fall back, the missing-lines
+//! failure is fatal.
 //!
-//! ```text
-//! try Molecule.of_file file ~charge ~multiplicity ~units
-//! with Failure msg -> failwith ("cannot parse geometry from %s: ... (parse error: %s)" ...)
-//!    | Sys_error msg -> failwith ("cannot parse geometry from %s: ... (%s)" ...)
-//! ```
+//! The reference reader's `input_line` semantics are replicated with the
+//! private [`input_lines`] helper (a trailing newline does not create an
+//! empty last line) and the `Array.sub a 0 natoms` crash when the atom
+//! lines run out early; the extracted atom lines are handed to
+//! [`Atom::of_string`].
 //!
-//! and `Molecule.of_file` is `try of_xyz_file with XYZError -> of_zmt_file`.
-//! The two XYZ failures are **not** interchangeable and this module keeps them
-//! apart:
-//!
-//! * a file with fewer than two lines, a non-numeric or non-positive atom
-//!   count is `XYZError` → caught → the *same file* is re-parsed as a
-//!   Z-matrix (that parse then fails, e.g. with `Element … unknown`);
-//! * fewer atom lines than the announced count is the `Array.sub` in the XYZ
-//!   reader, an `Invalid_argument`, which `of_file` does not catch. It must
-//!   escape to the runtime as
-//!   `Fatal error: exception Invalid_argument("Array.sub")`.
-//!
-//! `qp_types::molecule::of_xyz_file_with` maps the second case to its own
-//! `XyzError`, so the file is read here with `input_line` semantics (a
-//! trailing newline does not create an empty last line) and only the
-//! extracted atom lines are handed to [`Atom::of_string`].
+//! Wave S2: every failure is one plain line,
+//! `qp_create_ezfio: <message>` on standard error (exit 2); the two
+//! reference classes (caught `Failure`/`Sys_error` vs uncaught
+//! exceptions) had the same exit code and are collapsed.
 //!
 //! # Units
 //!
@@ -38,27 +34,22 @@
 //!
 //! # Ghost centres
 //!
-//! For every pair `i > j` closer than `(r_i + r_j) * threshold`, where `r` is
-//! the covalent radius in bohr, one ghost `Element::X` of charge 0 is placed
-//! at `x_i + (x_j - x_i) * r_i / (r_i + r_j)` — weighted by the radii, not
-//! the midpoint. Ghosts are appended after the nuclei, in `i` then `j`
-//! ascending order. A zero or negative threshold disables them.
+//! For every pair `i > j` closer than `(r_i + r_j) * threshold`, where `r`
+//! is the covalent radius in bohr, one ghost `Element::X` of charge 0 is
+//! placed at `x_i + (x_j - x_i) * r_i / (r_i + r_j)` — weighted by the
+//! radii, not the midpoint. Ghosts are appended after the nuclei, in `i`
+//! then `j` ascending order. A zero or negative threshold disables them.
 
 use std::path::Path;
 
+use qp_types::error::ToolError;
 use qp_types::molecule::{Molecule, MultiplicityError};
 use qp_types::point3d::Units;
 use qp_types::point3d::units::ANGSTROM_TO_BOHR;
 use qp_types::zmatrix::{Zmatrix, ZmatrixError};
 use qp_types::{Atom, Charge, Element, ElementError, Point3d, element};
 
-use crate::error::{AppError, OcamlException};
-use crate::ocaml_num;
-
-/// The fixed middle of every geometry diagnostic (`Molecule.of_file`'s
-/// caller prefixes it with the file name and appends the detail).
-const EXPECTED: &str =
-    "expected xyz (atom count on line 1, then 'Element x y z' lines) or a Gaussian z-matrix";
+use crate::TOOL;
 
 /// The geometry as the reference's `run` holds it after ghost insertion.
 #[derive(Debug, Clone)]
@@ -67,8 +58,8 @@ pub struct Geometry {
     /// derived from them. [`Molecule::name`] and the electron keys use this.
     pub molecule: Molecule,
     /// `molecule.nuclei @ ghost`: the list every later stage iterates.
-    /// Real nuclei keep their order; ghost centres follow, `Element::X` and
-    /// charge 0.
+    /// Real nuclei keep their order; ghost centres follow, `Element::X`
+    /// and charge 0.
     pub nuclei: Vec<Atom>,
 }
 
@@ -85,21 +76,15 @@ pub struct Geometry {
 ///
 /// # Errors
 ///
-/// * [`AppError::Uncaught`] for the exceptions the reference does not catch:
-///   `Invalid_argument("Strictly_positive_int : (x > 0) : x=…")`,
-///   `Invalid_argument("Array.sub")`, `Element.ElementError`,
-///   `Atom.AtomError`, the `Qptypes.ml` assertion sites and
-///   `Molecule.MultiplicityError`.
-/// * [`AppError::Prefixed`] for the two caught classes, wrapped as
-///   `cannot parse geometry from <input>: … (parse error: <msg>)` and
-///   `… (<input>: <errno text>)`.
+/// One [`ToolError`] per failure; the message names the input file for
+/// every parse failure and carries the plain detail.
 pub fn read(
     input: &Path,
     au: bool,
     charge: i64,
     multiplicity: i64,
     ghost_threshold: f64,
-) -> Result<Geometry, AppError> {
+) -> Result<Geometry, ToolError> {
     let multiplicity = check_multiplicity(multiplicity)?;
     // `Charge.t` is a transparent float in OCaml; `Charge::of_int` takes an
     // `i32`, so go through the float directly rather than truncating.
@@ -122,71 +107,34 @@ pub fn read(
 ///
 /// The reference stores the value in a 63-bit `int`; this returns it
 /// unchanged so the later electron arithmetic cannot overflow.
-fn check_multiplicity(multiplicity: i64) -> Result<i64, AppError> {
+fn check_multiplicity(multiplicity: i64) -> Result<i64, ToolError> {
     if multiplicity >= 1 {
         Ok(multiplicity)
     } else {
-        // Measured: `qp_create_ezfio -b x -m 0 mol.xyz` →
-        // `Fatal error: exception Invalid_argument("Strictly_positive_int :
-        // (x > 0) : x=0")`.
-        Err(AppError::uncaught(OcamlException::InvalidArgument(
-            format!("Strictly_positive_int : (x > 0) : x={multiplicity}"),
-        )))
+        Err(ToolError::new(
+            TOOL,
+            format!("multiplicity {multiplicity} must be at least 1"),
+        ))
     }
 }
 
-/// Read the file as text, turning an I/O failure into the prefixed
-/// `Sys_error` form of the geometry wrapper.
-///
-/// The reference calls `open_in`, so the detail is `<path>: <strerror>`.
-/// Only `ENOENT` is measured; the other strings in [`strerror`] use the C
-/// locale's wording.
-fn read_text(input: &Path) -> Result<String, AppError> {
+/// Read the file as text, turning an I/O failure into the geometry wrapper
+/// with the standard `io::Error` display.
+fn read_text(input: &Path) -> Result<String, ToolError> {
     std::fs::read_to_string(input).map_err(|error| {
-        let detail = match error.raw_os_error() {
-            Some(code) => format!("{}: {}", input.display(), strerror(code)),
-            // No errno: the only such failure `read_to_string` reports is
-            // invalid UTF-8, which the reference would have read as bytes.
-            None => format!("{}: {error}", input.display()),
-        };
-        wrapper(input, &detail)
+        ToolError::new(
+            TOOL,
+            format!("cannot parse geometry {}: {error}", input.display()),
+        )
     })
-}
-
-/// The C library's `strerror` text for the errnos a geometry read can hit.
-///
-/// The reference prints `Sys_error`'s payload directly; Rust keeps the
-/// message behind `Display`, which appends `(os error N)`. This table keeps
-/// the four messages a user is likely to see exact.
-///
-/// `pub(crate)` because [`crate::basis_read`] needs the same wording for the
-/// `Sys_error` an unreadable basis channel raises.
-pub(crate) fn strerror(code: i32) -> String {
-    match code {
-        1 => "Operation not permitted".to_owned(),
-        2 => "No such file or directory".to_owned(),
-        13 => "Permission denied".to_owned(),
-        20 => "Not a directory".to_owned(),
-        21 => "Is a directory".to_owned(),
-        40 => "Too many levels of symbolic links".to_owned(),
-        other => format!("os error {other}"),
-    }
-}
-
-/// The prefixed wrapper around a caught `Failure`/`Sys_error`.
-fn wrapper(input: &Path, detail: &str) -> AppError {
-    AppError::fail(format!(
-        "cannot parse geometry from {}: {EXPECTED} ({detail})",
-        input.display()
-    ))
 }
 
 /// Why the XYZ parse did not produce a molecule.
 enum XyzFailure {
     /// The reference's `XYZError`: fall back to the Z-matrix reader.
     NotXyz,
-    /// Anything the reference would not have caught, already classified.
-    Fatal(AppError),
+    /// Anything the reference would not have caught.
+    Fatal(ToolError),
 }
 
 /// `Molecule.of_file`: XYZ first, Z-matrix on `XYZError` only.
@@ -196,7 +144,7 @@ fn parse_molecule(
     charge: Charge,
     multiplicity: i64,
     units: Units,
-) -> Result<Molecule, AppError> {
+) -> Result<Molecule, ToolError> {
     match parse_xyz(text, input, charge, multiplicity, units) {
         Ok(molecule) => Ok(molecule),
         Err(XyzFailure::Fatal(error)) => Err(error),
@@ -215,9 +163,6 @@ fn parse_molecule(
 }
 
 /// `Molecule.of_xyz_file`: the `natoms :: title :: rest` match.
-///
-/// `input` is only used by [`atom_error`]; the atom lines themselves carry
-/// no file name.
 fn parse_xyz(
     text: &str,
     input: &Path,
@@ -229,7 +174,10 @@ fn parse_xyz(
     if lines.len() < 2 {
         return Err(XyzFailure::NotXyz);
     }
-    let Ok(natoms) = ocaml_num::int_of_string(lines[0]) else {
+    // Wave S2.3: decimal-only `i64::from_str` (the reference's
+    // `int_of_string` also accepted hex and underscores; no golden input
+    // exercises the difference).
+    let Ok(natoms) = lines[0].parse::<i64>() else {
         return Err(XyzFailure::NotXyz);
     };
     if natoms <= 0 {
@@ -239,8 +187,13 @@ fn parse_xyz(
     // `Array.sub a 0 natoms` with `natoms > Array.length a` is an
     // `Invalid_argument`, not an `XYZError`; `of_file` does not catch it.
     if i64::try_from(rest.len()).unwrap_or(i64::MAX) < natoms {
-        return Err(XyzFailure::Fatal(AppError::uncaught(
-            OcamlException::InvalidArgument("Array.sub".to_owned()),
+        return Err(XyzFailure::Fatal(ToolError::new(
+            TOOL,
+            format!(
+                "too few atom lines in {}: {} lines for {natoms} announced atoms",
+                input.display(),
+                rest.len()
+            ),
         )));
     }
     let natoms = usize::try_from(natoms).unwrap_or(usize::MAX);
@@ -252,9 +205,9 @@ fn parse_xyz(
 /// newline leaves behind.
 ///
 /// The distinction matters: `3\nt\nH\nH\n` has **two** atom lines for the
-/// reference (whose `input_line` never returns the empty tail), so it is the
-/// `Array.sub` crash. A plain `split('\n')` would see a third, empty line
-/// and silently parse two atoms instead.
+/// reference (whose `input_line` never returns the empty tail), so it is
+/// the missing-lines failure. A plain `split('\n')` would see a third,
+/// empty line and silently parse two atoms instead.
 fn input_lines(text: &str) -> Vec<&str> {
     let mut lines: Vec<&str> = text.split('\n').collect();
     if text.ends_with('\n') {
@@ -266,34 +219,37 @@ fn input_lines(text: &str) -> Vec<&str> {
 /// `Molecule.of_xyz_string`: one atom per non-empty line, then the electron
 /// bookkeeping of `Qptypes` and `Molecule.ml:25-88`.
 ///
-/// The four failure payloads are the measured ones:
+/// The failure messages, in the reference's evaluation order:
 ///
-/// * `n_elec <= 0` → `Qptypes.ml:57:20-26` assertion (`Elec_number (x > 0)`);
-/// * `elec_beta < 0` → `Qptypes.ml:70:20-26` (`Elec_beta (x >= 0)`) — this
-///   fires before the alpha assert because OCaml evaluates the tuple
-///   right-to-left;
-/// * `elec_alpha < 1` → `Qptypes.ml:83:20-26` (`Elec_alpha (x > 0)`);
-/// * the implied multiplicity differs → `Molecule.MultiplicityError`.
+/// * a line with neither four nor five tokens is a malformed atom line;
+/// * `n_elec <= 0` — the electron count the nuclei imply (minus the
+///   charge) must be positive;
+/// * `elec_beta < 0` — the multiplicity is too large for the electron
+///   count (checked before the alpha one because OCaml evaluates the
+///   tuple right-to-left);
+/// * `elec_alpha < 1` — at least one alpha electron;
+/// * the implied multiplicity differs — [`MultiplicityError`].
 fn parse_atoms(
     text: &str,
     input: &Path,
     charge: Charge,
     multiplicity: i64,
     units: Units,
-) -> Result<Molecule, AppError> {
+) -> Result<Molecule, ToolError> {
     let mut nuclei = Vec::new();
     for line in text.split('\n') {
         if line.is_empty() {
             continue;
         }
-        // `Atom.of_string` matches a four- or five-token line and raises
-        // `AtomError s` on anything else; check the shape first so the
-        // payload is the reference's untrimmed line.
+        // `Atom.of_string` matches a four- or five-token line and fails on
+        // anything else; check the shape first so the message is the
+        // reference's untrimmed line.
         let tokens: Vec<&str> = line.split(' ').filter(|token| !token.is_empty()).collect();
         if tokens.len() != 4 && tokens.len() != 5 {
-            return Err(AppError::uncaught(OcamlException::AtomError(
-                line.to_owned(),
-            )));
+            return Err(ToolError::new(
+                TOOL,
+                format!("malformed atom line {line:?}"),
+            ));
         }
         nuclei.push(Atom::of_string(units, line).map_err(|error| atom_error(&error, input))?);
     }
@@ -306,42 +262,37 @@ fn parse_atoms(
     }
     let ne = Charge::of_float(sum - 1.0).to_int() + 1 - charge.to_int();
     if ne <= 0 {
-        return Err(AppError::uncaught(OcamlException::Assert {
-            file: "Qptypes.ml".to_owned(),
-            line: 57,
-            start: 20,
-            end: 26,
-        }));
+        return Err(ToolError::new(
+            TOOL,
+            format!("the molecule has {ne} electrons (must be at least 1)"),
+        ));
     }
     // `Multiplicity.to_alpha_beta` in 64-bit arithmetic: the reference's
     // `int` is 63-bit, so `-m` values past `i32` must not wrap here.
     let beta = (i64::from(ne) - multiplicity + 1) / 2;
     if beta < 0 {
-        return Err(AppError::uncaught(OcamlException::Assert {
-            file: "Qptypes.ml".to_owned(),
-            line: 70,
-            start: 20,
-            end: 26,
-        }));
+        return Err(ToolError::new(
+            TOOL,
+            format!("multiplicity {multiplicity} is too large for {ne} electrons"),
+        ));
     }
     let beta = i32::try_from(beta).expect("invariant violated: 0 <= beta <= n_elec");
     let alpha = ne - beta;
     if alpha < 1 {
-        return Err(AppError::uncaught(OcamlException::Assert {
-            file: "Qptypes.ml".to_owned(),
-            line: 83,
-            start: 20,
-            end: 26,
-        }));
+        return Err(ToolError::new(
+            TOOL,
+            format!("the molecule has {alpha} alpha electrons (must be at least 1)"),
+        ));
     }
     if 1 + alpha - beta != i32::try_from(multiplicity).unwrap_or(i32::MAX) {
-        return Err(AppError::uncaught(OcamlException::MultiplicityError(
+        return Err(ToolError::new(
+            TOOL,
             MultiplicityError {
                 electrons: ne,
                 multiplicity: i32::try_from(multiplicity).unwrap_or(i32::MAX),
             }
             .to_string(),
-        )));
+        ));
     }
     Ok(Molecule {
         nuclei,
@@ -350,88 +301,67 @@ fn parse_atoms(
     })
 }
 
-/// Classify an `Atom::of_string` failure.
+/// Classify an `Atom::of_string` failure into the geometry wrapper.
 ///
-/// An unknown element stays an unprefixed `Element.ElementError`; a
-/// coordinate or charge that does not parse is OCaml's
-/// `Failure("float_of_string")` under the wrapper's `parse error:` detail.
-/// The reference additionally prints `Bad string: …` / `name = …`
-/// diagnostics from `Point3d.of_string`/`Atom.of_string`, which the crate's
-/// parser does not; that is a known deviation (see `NOTES.md`).
-fn atom_error(error: &anyhow::Error, input: &Path) -> AppError {
-    if let Some(element) = error.downcast_ref::<ElementError>() {
-        return AppError::uncaught(OcamlException::ElementError(element.to_string()));
-    }
-    if error
+/// An unknown element keeps its plain `Element … unknown` text; a
+/// coordinate or charge that does not parse says so; anything else
+/// carries the innermost message of the anyhow chain.
+fn atom_error(error: &anyhow::Error, input: &Path) -> ToolError {
+    let detail = if let Some(element) = error.downcast_ref::<ElementError>() {
+        element.to_string()
+    } else if error
         .chain()
         .any(|cause| cause.downcast_ref::<std::num::ParseFloatError>().is_some())
     {
-        return wrapper(input, "parse error: float_of_string");
-    }
-    let message = error
-        .chain()
-        .last()
-        .map_or_else(|| error.to_string(), ToString::to_string);
-    wrapper(input, &format!("parse error: {message}"))
+        "a coordinate or charge is not a number".to_owned()
+    } else {
+        error
+            .chain()
+            .last()
+            .map_or_else(|| error.to_string(), ToString::to_string)
+    };
+    ToolError::new(
+        TOOL,
+        format!("cannot parse geometry {}: {detail}", input.display()),
+    )
 }
 
-/// Map a Z-matrix failure to the exception the reference raises.
-///
-/// Measured: `Q.zmt` with an unknown element prints
-/// `Fatal error: exception Element.ElementError("Element Q unknown")`, and a
-/// malformed line prints the prefixed
-/// `… or a Gaussian z-matrix (parse error: Syntax error: H 0 0 0)`.
-fn zmatrix_error(input: &Path, error: ZmatrixError) -> AppError {
-    match error {
-        ZmatrixError::Element(element) => {
-            AppError::uncaught(OcamlException::ElementError(element.to_string()))
-        }
-        // `assert (x > 0)` in `atom_id_of_int`, `Zmatrix.ml:22:13-19`.
-        ZmatrixError::NonPositiveAtomId { .. } => AppError::uncaught(OcamlException::Assert {
-            file: "Zmatrix.ml".to_owned(),
-            line: 22,
-            start: 13,
-            end: 19,
-        }),
-        // The reference indexes past the end of its array and aborts with
-        // OCaml's own `Invalid_argument("index out of bounds")`.
-        ZmatrixError::AtomOutOfBounds { .. } => AppError::uncaught(
-            OcamlException::InvalidArgument("index out of bounds".to_owned()),
-        ),
-        // `Failure` messages, which `run`'s first handler catches. The
-        // `NegativeDistance` arm is unreachable through `Zmatrix::of_string`
-        // (the string parser turns a negative number into a label).
-        other => wrapper(input, &format!("parse error: {other}")),
-    }
+/// Wrap a Z-matrix failure with the input file; the [`ZmatrixError`]
+/// `Display` texts are already plain (the `Element` arm renders
+/// `Element … unknown`).
+fn zmatrix_error(input: &Path, error: ZmatrixError) -> ToolError {
+    ToolError::new(
+        TOOL,
+        format!("cannot parse geometry {}: {error}", input.display()),
+    )
 }
 
 /// `Element.covalent_radius` in **bohr**.
 ///
 /// The crate returns angstrom; the reference's radii are bohr, so this
 /// multiplies by `ANGSTROM_TO_BOHR` (it does not divide). Elements from
-/// berkelium on have no radius and the reference raises
-/// `Element.ElementError` — unprefixed, because the ghost pass is outside
-/// the geometry `try`.
-fn covalent_radius(element: Element) -> Result<f64, AppError> {
+/// berkelium on have no radius; the error keeps the crate's plain text
+/// (the reference raised it from outside the geometry `try`).
+fn covalent_radius(element: Element) -> Result<f64, ToolError> {
     element::covalent_radius(element)
         .map(|angstrom| angstrom * ANGSTROM_TO_BOHR)
-        .map_err(|error| AppError::uncaught(OcamlException::ElementError(error.to_string())))
+        .map_err(|error| ToolError::new(TOOL, error.to_string()))
 }
 
 /// `ghost_centers`: bond-centred ghost atoms.
 ///
 /// The reference walks `(i, j)` with `i` from `n-1` down to 1 and `j` from
 /// `i-1` down to 0, prepending each match; the result is therefore ordered
-/// by `i` then `j` ascending, which is what this function returns after the
-/// explicit reverse.
+/// by `i` then `j` ascending, which is what this function returns after
+/// the explicit reverse.
 ///
 /// # Cost
 ///
 /// `O(n²)` time and — through [`Molecule::distance_matrix`] — `O(n²)`
-/// memory, exactly like the reference. The radius lookups happen inside the
-/// pair loop, so a nucleus without a covalent radius reports the highest
-/// `(i, j)` pair first, as the reference does.
-fn ghost_centers(molecule: &Molecule, threshold: f64) -> Result<Vec<Atom>, AppError> {
+/// memory, exactly like the reference. The radius lookups happen inside
+/// the pair loop, so a nucleus without a covalent radius reports the
+/// highest `(i, j)` pair first, as the reference does.
+fn ghost_centers(molecule: &Molecule, threshold: f64) -> Result<Vec<Atom>, ToolError> {
     let distances = molecule.distance_matrix();
     let nuclei = &molecule.nuclei;
     let n = nuclei.len();
@@ -491,7 +421,7 @@ mod tests {
 
     /// `read` with the defaults the reference uses (`-a` off, charge 0,
     /// singlet, no ghosts).
-    fn read_default(path: &Path) -> Result<Geometry, AppError> {
+    fn read_default(path: &Path) -> Result<Geometry, ToolError> {
         read(path, false, 0, 1, 0.0)
     }
 
@@ -519,86 +449,118 @@ mod tests {
     }
 
     #[test]
-    fn short_xyz_is_the_uncaught_array_sub() {
+    fn a_short_xyz_fails_on_the_missing_atom_lines() {
         // Three announced atoms, two printed, trailing newline: `input_line`
-        // yields exactly two atom lines, so `Array.sub` raises.
+        // yields exactly two atom lines, so the missing-lines failure fires.
         let (_dir, path) = scratch("short.xyz", "3\nshort\nH 0 0 0\nH 0 0 0.7\n");
         let error = read_default(&path).expect_err("short xyz");
         assert_eq!(
-            error.render(),
-            "Fatal error: exception Invalid_argument(\"Array.sub\")\n"
+            error.to_string(),
+            format!(
+                "qp_create_ezfio: too few atom lines in {}: 2 lines for 3 announced atoms",
+                path.display()
+            )
         );
     }
 
     #[test]
-    fn short_xyz_without_trailing_newline_is_the_same_crash() {
+    fn a_short_xyz_without_trailing_newline_is_the_same_failure() {
         let (_dir, path) = scratch("short.xyz", "3\nshort\nH 0 0 0\nH 0 0 0.7");
         let error = read_default(&path).expect_err("short xyz");
         assert_eq!(
-            error.render(),
-            "Fatal error: exception Invalid_argument(\"Array.sub\")\n"
+            error.to_string(),
+            format!(
+                "qp_create_ezfio: too few atom lines in {}: 2 lines for 3 announced atoms",
+                path.display()
+            )
         );
     }
 
     #[test]
-    fn garbage_count_falls_back_to_the_zmatrix_reader() {
+    fn a_garbage_count_falls_back_to_the_zmatrix_reader() {
         // `zzz` is not an atom count, so the file is re-read as a Z-matrix;
-        // its first line is then an element name. Measured against the
-        // reference.
+        // its first line is then an element name.
         let (_dir, path) = scratch("zzz.xyz", "zzz\nH 0 0 0\n");
         let error = read_default(&path).expect_err("garbage count");
         assert_eq!(
-            error.render(),
-            "Fatal error: exception Element.ElementError(\"Element Zzz unknown\")\n"
+            error.to_string(),
+            format!(
+                "qp_create_ezfio: cannot parse geometry {}: Element Zzz unknown",
+                path.display()
+            )
         );
     }
 
     #[test]
-    fn non_positive_count_falls_back_to_the_zmatrix_reader() {
+    fn a_non_positive_count_falls_back_to_the_zmatrix_reader() {
         let (_dir, path) = scratch("zero.xyz", "0\nH 0 0 0\n");
         let error = read_default(&path).expect_err("zero count");
         assert_eq!(
-            error.render(),
-            "Fatal error: exception Element.ElementError(\"Element 0 unknown\")\n"
+            error.to_string(),
+            format!(
+                "qp_create_ezfio: cannot parse geometry {}: Element 0 unknown",
+                path.display()
+            )
         );
     }
 
     #[test]
-    fn one_line_file_falls_back_and_reports_the_zmatrix_shape_error() {
+    fn a_hex_count_falls_back_to_the_zmatrix_reader() {
+        // Wave S2.3: the count is decimal-only, so `0x2` is not a count and
+        // the file is re-read as a Z-matrix (the reference's
+        // `int_of_string` would have parsed it as 2).
+        let (_dir, path) = scratch("hex.xyz", "0x2\nH 0 0 0\nH 0 0 0.7\n");
+        let error = read_default(&path).expect_err("hex count");
+        assert!(
+            error
+                .to_string()
+                .starts_with("qp_create_ezfio: cannot parse geometry "),
+            "{error}"
+        );
+    }
+
+    #[test]
+    fn a_one_line_file_falls_back_and_reports_the_zmatrix_shape_error() {
         let (_dir, path) = scratch("empty.zmt", "");
         let error = read_default(&path).expect_err("empty file");
         assert_eq!(
-            error.render(),
-            "qp_create_ezfio: cannot parse geometry from {}: expected xyz (atom count on line 1, then 'Element x y z' lines) or a Gaussian z-matrix (parse error: Syntax error)\n"
-                .replace("{}", &path.display().to_string())
+            error.to_string(),
+            format!(
+                "qp_create_ezfio: cannot parse geometry {}: Syntax error",
+                path.display()
+            )
         );
     }
 
     #[test]
-    fn malformed_zmatrix_line_is_a_prefixed_failure() {
+    fn a_malformed_zmatrix_line_is_reported() {
         let (_dir, path) = scratch("bad4.zmt", "H 0 0 0\n");
         let error = read_default(&path).expect_err("malformed zmatrix");
         assert_eq!(
-            error.render(),
-            "qp_create_ezfio: cannot parse geometry from {}: expected xyz (atom count on line 1, then 'Element x y z' lines) or a Gaussian z-matrix (parse error: Syntax error: H 0 0 0)\n"
-                .replace("{}", &path.display().to_string())
+            error.to_string(),
+            format!(
+                "qp_create_ezfio: cannot parse geometry {}: Syntax error: H 0 0 0",
+                path.display()
+            )
         );
     }
 
     #[test]
-    fn missing_file_matches_the_measured_bytes() {
+    fn a_missing_file_is_reported_with_the_io_text() {
         let dir = tempdir().expect("tempdir");
         let path = dir.path().join("missing.xyz");
         let error = read_default(&path).expect_err("missing file");
         assert_eq!(
-            error.render(),
-            "qp_create_ezfio: cannot parse geometry from {}: expected xyz (atom count on line 1, then 'Element x y z' lines) or a Gaussian z-matrix ({}: No such file or directory)\n"
-                .replace("{}", &path.display().to_string())
+            error.to_string(),
+            format!(
+                "qp_create_ezfio: cannot parse geometry {}: No such file or directory (os error 2)",
+                path.display()
+            )
         );
     }
 
     #[test]
-    fn zmatrix_is_converted_to_cartesian_bohr() {
+    fn a_zmatrix_is_converted_to_cartesian_bohr() {
         // The b2 fixture: two borons 3.0 angstrom apart, read as a Z-matrix.
         // The reference's to_xyz_string then of_xyz_string divides by
         // 0.52917721067121 exactly once (`15e725aa`).
@@ -610,28 +572,31 @@ mod tests {
     }
 
     #[test]
-    fn zmatrix_unknown_element_escapes_unprefixed() {
+    fn a_zmatrix_unknown_element_is_reported() {
         let (_dir, path) = scratch("Q.zmt", "Q\nH 1 0.7\n");
         let error = read_default(&path).expect_err("unknown element");
         assert_eq!(
-            error.render(),
-            "Fatal error: exception Element.ElementError(\"Element Q unknown\")\n"
+            error.to_string(),
+            format!(
+                "qp_create_ezfio: cannot parse geometry {}: Element Q unknown",
+                path.display()
+            )
         );
     }
 
     #[test]
-    fn zero_multiplicity_fails_before_the_file_is_opened() {
+    fn a_zero_multiplicity_fails_before_the_file_is_opened() {
         let dir = tempdir().expect("tempdir");
         let path = dir.path().join("does-not-exist.xyz");
         let error = read(&path, false, 0, 0, 0.0).expect_err("m=0");
         assert_eq!(
-            error.render(),
-            "Fatal error: exception Invalid_argument(\"Strictly_positive_int : (x > 0) : x=0\")\n"
+            error.to_string(),
+            "qp_create_ezfio: multiplicity 0 must be at least 1"
         );
     }
 
     #[test]
-    fn ghost_centre_is_r_weighted_and_between_the_nuclei() {
+    fn a_ghost_centre_is_r_weighted_and_between_the_nuclei() {
         // H2 at 0.7 angstrom: both radii are equal, so f = 1/2 and the ghost
         // sits at the midpoint. -g 5.0 is the h2g fixture's threshold.
         let (_dir, path) = scratch("h2.xyz", "2\nh2\nH 0 0 0\nH 0 0 0.7\n");
@@ -646,14 +611,14 @@ mod tests {
     }
 
     #[test]
-    fn zero_threshold_disables_ghosts() {
+    fn a_zero_threshold_disables_ghosts() {
         let (_dir, path) = scratch("h2.xyz", "2\nh2\nH 0 0 0\nH 0 0 0.7\n");
-        let geometry = read(&path, false, 0, 1, 0.0).expect("valid xyz");
+        let geometry = read_default(&path).expect("valid xyz");
         assert_eq!(geometry.nuclei.len(), 2);
     }
 
     #[test]
-    fn ghost_pair_order_is_i_then_j_ascending() {
+    fn a_ghost_pair_order_is_i_then_j_ascending() {
         // Three hydrogens equally spaced on a line; all pairs are within the
         // threshold, so the order (1,0), (2,0), (2,1) is observable.
         let (_dir, path) = scratch("h3.xyz", "3\nh3\nH 0 0 0\nH 0 0 0.7\nH 0 0 1.4\n");
@@ -671,27 +636,25 @@ mod tests {
     }
 
     #[test]
-    fn atom_error_is_unprefixed() {
+    fn an_atom_line_with_the_wrong_token_count_is_malformed() {
         let (_dir, path) = scratch("bad.xyz", "1\nt\nH 0 0\n");
         let error = read_default(&path).expect_err("three tokens");
         assert_eq!(
-            error.render(),
-            "Fatal error: exception Atom.AtomError(\"H 0 0\")\n"
+            error.to_string(),
+            "qp_create_ezfio: malformed atom line \"H 0 0\""
         );
     }
 
     #[test]
-    fn bad_coordinate_is_a_prefixed_float_of_string() {
-        // Measured: the reference also prints `Bad string: "a"` and the
-        // `name = …`/`xyz = …` diagnostics before this line; the crate has
-        // no such diagnostics (deviation), but the final failure is this
-        // one and it names the input file.
+    fn a_bad_coordinate_is_reported_as_not_a_number() {
         let (_dir, path) = scratch("bad.xyz", "2\nt\nH 0 0 0\nH a 0 0\n");
         let error = read_default(&path).expect_err("bad coordinate");
         assert_eq!(
-            error.render(),
-            "qp_create_ezfio: cannot parse geometry from {}: expected xyz (atom count on line 1, then 'Element x y z' lines) or a Gaussian z-matrix (parse error: float_of_string)\n"
-                .replace("{}", &path.display().to_string())
+            error.to_string(),
+            format!(
+                "qp_create_ezfio: cannot parse geometry {}: a coordinate or charge is not a number",
+                path.display()
+            )
         );
     }
 }
