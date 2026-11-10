@@ -18,18 +18,25 @@ Sources: the frozen spec (section 1 below), decisions D4 and D6,
 
 ## 1. EZFIO on-disk format
 
+The format is implemented once, by `ezfio-core` (`external/ezfio`
+submodule, the ezfio-rs implementation); `qp-ezfio` is the QP API layer
+the Rust tools link. Citations below marked *historical C
+implementation* refer to the Fortran client deleted by the ezfio-rs
+switch (`external/ezfio/src/libezfio_util.irp.f`); they are kept only to
+explain corpus bytes that no current writer produces.
+
 One directory per EZFIO **group**; a key is the file inside the group.
 There is no index or manifest: presence of a file is the presence of a
 key. A group *exists* iff `group/.version` exists
-(`external/ezfio/Ocaml/ezfio.ml:54–57`, Fortran `ezfio_exists`,
-`external/ezfio/src/libezfio_util.irp.f:40–54`). A group directory
+(`external/ezfio/Ocaml/ezfio.ml:54–57`; the same rule is
+`fs.rs:340` `group_exists` in `ezfio-core`). A group directory
 without `.version` is invalid: the OCaml writer's `create_group` →
 `mkdir` calls `Unix.mkdir` on it and fails `EEXIST`
 (`ezfio.ml:69–83`). Both writers create `.version` first.
 
 ### 1.1 Scalars (plain text, one value, one line)
 
-| type | OCaml writer (`Ocaml/ezfio.ml:166–170`) | Fortran writer (`f_types.py`, generated `IRPF90_temp/libezfio_util.irp.F90`) |
+| type | OCaml writer (`Ocaml/ezfio.ml:166–170`) | Fortran writer (historical C implementation, superseded by `ezfio-core`) |
 |---|---|---|
 | int / int64 | `%20d\n` → 21 B, e.g. `h2/nuclei/nucl_num` | `'(I20)'` → 20 chars + `\n`, 21 B |
 | real / double | `%24.15e\n` → 25 B, lowercase `e`, one digit before the point: `   1.000000000000000e-15\n` | `'(E24.15)'` → 25 B, uppercase `E`, zero before the point: `  -0.928871749993754E+02\n` |
@@ -47,11 +54,12 @@ line, `trim`, then parse: `i64::from_str`, `f64::from_str`, `T`/`t`/
 `F`/`f` for booleans, the rest for strings. Do **not** assume field
 widths (20/24/32 vary by writer); do not reject `F\n\n` or `F\n`.
 String arrays: the OCaml reader trims each element
-(`ezfio.ml:363–377`), the Fortran reader reads the line into a fixed
-`character*(32)` buffer then the declared width
-(`ezfio_read_array_ch`, `IRPF90_temp/libezfio_util.irp.F90:1011–1023`)
-— so trailing blanks are padding, never data, and a line longer than
-32 chars is silently truncated by Fortran.
+(`ezfio.ml:363–377`), the original C reader read the line into a fixed
+`character*(32)` buffer then the declared width (`ezfio_read_array_ch`,
+historical C implementation) — so blanks are padding, never data, and a
+line longer than 32 chars is silently truncated by Fortran. `ezfio-core`,
+the implementation the port links, trims each character record on both
+ends, which is what the OCaml reader did.
 
 ### 1.2 Arrays (gzip-compressed, `group/key.gz`)
 
@@ -78,10 +86,10 @@ lines 3+: one element per line, column-major order (first index fastest)
 
 | type | OCaml | Fortran |
 |---|---|---|
-| int / int64 | 20 chars + `\n` (`%20d`) | 25 B: 24-char `I20` field + `\n` (`write(buffer(i)(1:24),'(I20)')`, `libezfio_util.irp.f` template) |
+| int / int64 | 20 chars + `\n` (`%20d`) | 25 B: 24-char `I20` field + `\n` (`write(buffer(i)(1:24),'(I20)')`, historical C implementation template) |
 | real | 24 chars + `\n` (`%24.15e`) | 25 B: 24-char `E24.15` field + `\n` |
 | logical | `"T\n"\n` | 25 B: 24-char `L1` field + `\n` (absent from corpus) |
-| string | raw + `\n` | declared `len(dat(1))` chars + `\n` (`ezfio_write_array_ch`, `IRPF90_temp/libezfio_util.irp.F90:1075–1092`) |
+| string | raw + `\n` | declared `len(dat(1))` chars + `\n` (`ezfio_write_array_ch` in the historical C implementation) |
 
 Observed over the whole corpus: body line lengths {20: 1247, 24: 6194,
 1: 17 (`nucl_label`, declared width 1), 32: 55 (`mo_class`, declared
@@ -111,9 +119,9 @@ width 32)}; dims line lengths {42, 21, 63: OCaml; 20, 41: Fortran}.
 * `determinants/psi_det` is an `integer*8` array
   (`src/determinants/EZFIO.cfg:86–90`), not sexp text.
 * **Writer determinism:** the OCaml writer pipes through a shell
-  `gzip` (`ezfio.ml:405–426`), the Fortran writer through a
-  `.<name><PID>.gz` FIFO + `gzip` + `rename`
-  (`libezfio_util.irp.f:61–95, 140–230`). The port must emit
+  `gzip` (`ezfio.ml:405–426`), the original C writer through a
+  `.<name><PID>.gz` FIFO + `gzip` + `rename` (historical C
+  implementation, superseded by `ezfio-core`). The port must emit
   **deterministic** gzip (mtime 0); container bytes are never compared.
 
 ### 1.3 `.version`

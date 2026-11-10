@@ -13,7 +13,7 @@ Every user-visible difference from the OCaml tools, with the reason, is in
 
 | Crate | Role | Phase |
 |---|---|---|
-| `qp-ezfio` | Native EZFIO on-disk format I/O (flate2) + typed registry | P1 |
+| `qp-ezfio` | QP2 tool layer over `ezfio-core` (the ezfio-rs on-disk format implementation) + typed registry | P1 |
 | `qp-input` | `qp_edit` config schema + loader + generic engine + 7 handlers | P2/P4 |
 | `qp-types` | Physics-adjacent data types (Atom, Molecule, Gto, Basis, …) | P3 |
 | `qp-zmq` | Message protocol + TaskServer | P4 |

@@ -1,14 +1,17 @@
 [package]
 name = "qp-ezfio"
-description = "Native Rust implementation of the EZFIO on-disk format (QP2)"
+description = "QP2 tool-layer API over ezfio-core (the ezfio-rs EZFIO on-disk format implementation)"
 version.workspace = true
 edition.workspace = true
 
 [dependencies]
 anyhow = { workspace = true }
-flate2 = { workspace = true }
+ezfio-core = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
-# `NamedTempFile` backs the atomic write path (temp file + rename) for both
-# scalar and gzip-array writes.
+
+[dev-dependencies]
+# Tests and the doc example only: the payload compression and the atomic
+# write path now live in `ezfio-core`.
+flate2 = { workspace = true }
 tempfile = { workspace = true }

@@ -20,7 +20,7 @@ use std::path::{Path, PathBuf};
 use flate2::Compression;
 use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;
-use qp_ezfio::{Array, ByteLayout, EzFio};
+use qp_ezfio::{Array, EzFio};
 use tempfile::TempDir;
 
 /// Root of the committed fixture corpus.
@@ -41,14 +41,6 @@ impl Producer {
         match self {
             Producer::Fortran => "fortran",
             Producer::Ocaml => "ocaml",
-        }
-    }
-
-    /// Byte layout the crate must emit to reproduce this producer.
-    pub fn layout(self) -> ByteLayout {
-        match self {
-            Producer::Fortran => ByteLayout::Fortran,
-            Producer::Ocaml => ByteLayout::Ocaml,
         }
     }
 }

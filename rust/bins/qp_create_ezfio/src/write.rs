@@ -24,7 +24,7 @@ use std::io;
 use std::io::Write;
 use std::path::Path;
 
-use qp_ezfio::{Array, ByteLayout, EzFio};
+use qp_ezfio::{Array, EzFio};
 use qp_types::basis::{self, Basis, LongBasis};
 use qp_types::element;
 use qp_types::error::ToolError;
@@ -109,7 +109,6 @@ pub fn write(
             format!("cannot create {}: {error}", ezfio_file.display()),
         )
     })?;
-    let ezfio = ezfio.with_layout(ByteLayout::Ocaml);
     // `set_file` also runs `mkdir (Filename.concat filename "ezfio")` —
     // the `ezfio` group exists with its `.version` marker even when it
     // holds no key.

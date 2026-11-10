@@ -1,14 +1,19 @@
 //! The EZFIO directory handle: groups, scalars, gzip arrays.
 //!
-//! The on-disk contract implemented here is the one pinned by
-//! `rust/CONTRACTS.md` and measured against both reference
-//! producers (see [`crate::layout`] for the byte-level differences). Two
-//! invariants drive the code:
+//! This module is the QP2 tool layer of the EZFIO format. **No byte is
+//! formatted or parsed here**: every payload is read and written by
+//! [`ezfio_core::ops`], the implementation of the on-disk format that the
+//! Fortran, Python and OCaml layers of this build also use. What remains is
+//! the handle ([`EzFio`]), the registry checks, and the directory-level
+//! operations the core does not have (listing, removal).
+//!
+//! Two invariants drive the code:
 //!
 //! * **Presence is the filesystem.** An attribute exists iff its payload file
 //!   exists; there is no index to keep in sync. Writes therefore create the
-//!   group directory on demand, and writes are atomic so that a concurrent
-//!   reader sees either the old or the new payload, never a partial one.
+//!   group directory on demand, and `ezfio_core` installs them with a rename,
+//!   so that a concurrent reader sees either the old or the new payload,
+//!   never a partial one.
 //! * **Reading is dynamic.** Neither reference client consults a schema before
 //!   reading, so a key that the registry does not know (a plugin's attribute)
 //!   must still be readable and writable. [`crate::Registry`] checks are
@@ -16,54 +21,84 @@
 //!   both paths, and the declared **shape** is checked on writes only: a tree
 //!   whose scalars moved after the arrays were written stays readable, as it
 //!   does under the reference getters.
+//!
+//! # Writer dialect
+//!
+//! `ezfio_core` exposes two byte dialects for its writers. This crate always
+//! passes [`WriterDialect::Ocaml`] (the private `WRITE_DIALECT`): it replaces
+//! the reference OCaml tool layer, and the golden harness compares EZFIO state
+//! reference-vs-Rust byte for byte. The dialect never leaks through [`EzFio`]:
+//! there is one writer, and it is not configurable.
+//!
+//! # Costs
+//!
+//! * [`EzFio::get_array`] decompresses the payload **twice**: once in
+//!   `ops::array_info` for the shape (the core exposes shape and data as two
+//!   calls, and its `array_info` decompresses the whole stream to parse the
+//!   two header lines) and once in `ops::read_array` for the elements. Peak
+//!   memory is one array plus the decompressed text buffer of one call,
+//!   because the text is dropped before the second call starts. A concurrent
+//!   write between the two calls makes the shapes disagree and the read fails
+//!   with the core's `BadDims` (no tool writes an attribute it is reading).
+//! * [`EzFio::set_array`] copies the elements once into the owned
+//!   [`ezfio_core::ArrayData`] the core takes, and the core materialises the
+//!   whole decompressed payload as a `String` before compressing it, so peak
+//!   memory is about twice the array plus the text image (roughly 25 bytes
+//!   per real element, 21 per integer).
+//! * [`EzFio::get`]/[`EzFio::get_array`]/[`DimResolver::resolve`] open the
+//!   payload once to surface an OS-level failure as [`Error::Io`] (the core
+//!   folds "cannot open" and "cannot parse" into one error and drops the
+//!   `io::Error`); the core re-opens it.
 
 use std::fs::{self, File};
-use std::io::{BufRead, BufReader, BufWriter, ErrorKind, Write};
+use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 
-use flate2::Compression;
-use flate2::GzBuilder;
-use flate2::read::GzDecoder;
-use tempfile::NamedTempFile;
+use ezfio_core::ops;
+use ezfio_core::{EzfioError, WriterDialect};
 
 use crate::array::Array;
 use crate::error::{Error, IoContext, Result};
-use crate::layout::{ByteLayout, Element, ElementType, FieldKind};
+use crate::layout::{Element, ElementType};
 use crate::registry::{DimResolver, KeySpec, Registry, StaticRegistry, resolve_dims};
 
 /// Version written into every `.version` file.
 ///
-/// This is the version of the reference clients this crate is byte-compatible
-/// with (`ocaml/ezfio.ml`, `libezfio_util.irp.f`). Readers do not enforce it;
-/// the file is only a marker that a directory belongs to an EZFIO tree.
-pub const EZFIO_VERSION: &str = "2.0.8";
+/// Re-exported from `ezfio_core`, so the marker this crate writes and the one
+/// the rest of the build writes cannot drift. Readers do not enforce it; the
+/// file is only a marker that a directory belongs to an EZFIO tree.
+pub const EZFIO_VERSION: &str = ezfio_core::VERSION;
 
-/// Maximum number of array dimensions the format can express.
+/// Maximum number of array dimensions.
 ///
-/// The dimension line is read with `30(I20,X)`, and the reference readers
-/// reject a larger rank, so the writer refuses to produce one.
-pub const MAX_RANK: usize = 30;
+/// This is `ezfio_core`'s limit (the Fortran wrapper's `dims(10)`): a payload
+/// with a larger rank cannot be returned by `ops::array_info`, so a writer
+/// that produced one would emit an array this crate cannot read back. The
+/// reference readers accept it; the core does not, and this crate matches the
+/// core it links.
+pub const MAX_RANK: usize = 10;
 
 /// Name of the marker file at the root of the tree and in every group.
 const VERSION_FILE: &str = ".version";
 
-/// I/O buffer size for gzip payloads, in bytes.
+/// Byte dialect of every write.
 ///
-/// One 64 KiB buffer each way: the payload is streamed, so peak memory is the
-/// array itself plus these two buffers, never the encoded text.
-const IO_BUFFER: usize = 64 * 1024;
+/// [`WriterDialect::Ocaml`] reproduces the reference client this crate
+/// replaces: lower-case `e` exponents, characters written verbatim (blanks
+/// are data), and the doubled newline of a logical scalar (`T\n\n`), which
+/// every OCaml-client-written tree of the golden corpus carries. The dialect
+/// is an implementation detail of this module, not a property of the handle.
+const WRITE_DIALECT: WriterDialect = WriterDialect::Ocaml;
 
 /// A handle on one EZFIO directory tree.
 ///
-/// The handle is lightweight: it holds the root path, the writer layout and a
-/// registry. All state lives in the filesystem, so two handles opened on the
-/// same directory see each other's writes immediately.
+/// The handle is lightweight: it holds the root path and a registry. All
+/// state lives in the filesystem, so two handles opened on the same directory
+/// see each other's writes immediately.
 #[derive(Debug)]
 pub struct EzFio {
     /// Root directory, i.e. the one holding `.version`.
     root: PathBuf,
-    /// Byte convention reproduced by the write methods.
-    layout: ByteLayout,
     /// Declared attributes, consulted by the typed accessors when the key is
     /// known. Boxed so that a code-generated registry can replace the static
     /// one without making [`EzFio`] generic.
@@ -74,11 +109,12 @@ impl EzFio {
     /// True when `path` is the root of an EZFIO tree.
     ///
     /// That is exactly the presence of `<path>/.version`, which is also what
-    /// the reference clients test. `false` is returned for a missing path or a
-    /// directory without the marker, including on permission errors (the
-    /// predicate is a cheap probe, not a diagnosis).
+    /// the reference clients test (`ezfio_core::ops::group_exists`). `false`
+    /// is returned for a missing path or a directory without the marker,
+    /// including on permission errors (the predicate is a cheap probe, not a
+    /// diagnosis).
     pub fn is_ezfio_dir(path: &Path) -> bool {
-        path.join(VERSION_FILE).is_file()
+        ops::group_exists(path)
     }
 
     /// Open an existing EZFIO tree.
@@ -94,7 +130,6 @@ impl EzFio {
         }
         Ok(Self {
             root,
-            layout: ByteLayout::default(),
             registry: Box::new(StaticRegistry::new()),
         })
     }
@@ -103,24 +138,23 @@ impl EzFio {
     ///
     /// - `root`: directory to create (parents are created too).
     ///
-    /// The root and its `.version` file are the only things written. The
-    /// `ezfio` group stamps (`ezfio/creation`, `ezfio/user`, `ezfio/library`)
-    /// are *attributes*, not format metadata: both reference clients set them
-    /// in their creation path, so a caller that wants a byte-identical
-    /// directory writes them with [`EzFio::set`] (`library` is the caller's
-    /// basis library, which this crate cannot know).
+    /// Delegates to `ezfio_core::ops::mkdir`, which creates the directory
+    /// (`create_dir_all`) and stamps it with `.version` unless the stamp is
+    /// already there. The `ezfio` group stamps (`ezfio/creation`,
+    /// `ezfio/user`, `ezfio/library`) are *attributes*, not format metadata:
+    /// both reference clients set them in their creation path, so a caller
+    /// that wants a byte-identical directory writes them with [`EzFio::set`]
+    /// (`library` is the caller's basis library, which this crate cannot
+    /// know).
+    ///
+    /// On failure the error is [`Error::Core`]: the core reports
+    /// `Unable to create directory <path>` and, unlike the previous local
+    /// implementation, does not carry the underlying `io::Error`.
     pub fn create(root: impl Into<PathBuf>) -> Result<Self> {
         let root = root.into();
-        fs::create_dir_all(&root).at(&root)?;
-        if !Self::is_ezfio_dir(&root) {
-            write_atomic(
-                &root.join(VERSION_FILE),
-                format!("{EZFIO_VERSION}\n").as_bytes(),
-            )?;
-        }
+        ops::mkdir(&root).map_err(core_error)?;
         Ok(Self {
             root,
-            layout: ByteLayout::default(),
             registry: Box::new(StaticRegistry::new()),
         })
     }
@@ -135,23 +169,9 @@ impl EzFio {
         self
     }
 
-    /// Select the writer's byte convention (builder style).
-    ///
-    /// - `layout`: [`ByteLayout::Ocaml`] (default) or [`ByteLayout::Fortran`].
-    ///   Reading is unaffected; both conventions are accepted.
-    pub fn with_layout(mut self, layout: ByteLayout) -> Self {
-        self.layout = layout;
-        self
-    }
-
     /// The root directory this handle was opened on.
     pub fn root(&self) -> &Path {
         &self.root
-    }
-
-    /// The writer's byte convention.
-    pub fn layout(&self) -> ByteLayout {
-        self.layout
     }
 
     /// The version string stored in the root `.version` file, trimmed.
@@ -161,7 +181,7 @@ impl EzFio {
     pub fn version(&self) -> Result<String> {
         let path = self.root.join(VERSION_FILE);
         let text = fs::read_to_string(&path).at(&path)?;
-        Ok(first_line(&text).trim().to_string())
+        Ok(text.lines().next().unwrap_or("").trim().to_string())
     }
 
     /// List the groups of the tree, sorted by name.
@@ -194,9 +214,9 @@ impl EzFio {
     ///
     /// Both scalars (`<key>`) and arrays (`<key>.gz`) are listed under `key`;
     /// an attribute present in both forms appears once. Files whose name starts
-    /// with `.` (the `.version` marker, leftover temporary files) are skipped.
-    /// A missing group directory yields an empty list, like the reference
-    /// `Sys.file_exists`-based probes.
+    /// with `.` (the `.version` marker, the core's leftover temporary files)
+    /// are skipped. A missing group directory yields an empty list, like the
+    /// reference `Sys.file_exists`-based probes.
     pub fn keys(&self, group: &str) -> Result<Vec<String>> {
         Self::check_name("group", group)?;
         let dir = self.root.join(group);
@@ -225,12 +245,15 @@ impl EzFio {
         Ok(keys)
     }
 
-    /// True when `group/key` is set, in either scalar or array form.
+    /// True when `group/key` is set.
     ///
     /// Mirrors the reference client: the group directory must carry its
-    /// `.version` marker, and the payload file must exist. Errors are reserved
-    /// for invalid names; filesystem probes treat "not accessible" as "absent",
-    /// exactly like `Sys.file_exists`.
+    /// `.version` marker, and the payload file must exist. When the registry
+    /// declares the key, only the declared form is probed (`<key>` for a
+    /// scalar, `<key>.gz` for an array, `ezfio_core::ops::attr_exists`); a
+    /// registry-unknown key, like a plugin attribute, is present in either
+    /// form. Errors are reserved for invalid names; filesystem probes treat
+    /// "not accessible" as "absent", exactly like `Sys.file_exists`.
     pub fn has(&self, group: &str, key: &str) -> Result<bool> {
         Self::check_name("group", group)?;
         Self::check_name("attribute", key)?;
@@ -238,16 +261,20 @@ impl EzFio {
         if !Self::is_ezfio_dir(&dir) {
             return Ok(false);
         }
-        Ok(dir.join(key).is_file() || dir.join(format!("{key}.gz")).is_file())
+        match self.registry.lookup(group, key) {
+            Some(spec) => Ok(ops::attr_exists(&dir, key, spec.is_array())),
+            None => Ok(dir.join(key).is_file() || dir.join(format!("{key}.gz")).is_file()),
+        }
     }
 
     /// Remove `group/key`, in scalar and/or array form.
     ///
     /// Returns `true` if at least one file was removed. A missing attribute is
     /// not an error, matching the reference clients' `rm -f` / no-op delete;
-    /// the group directory itself is kept. The `.version` markers cannot be
-    /// removed through this method because names starting with `.` are
-    /// rejected.
+    /// the group directory itself is kept. `ezfio_core` has no removal
+    /// operation (the C ABI does not expose one), so the two `remove_file`
+    /// calls stay here. The `.version` markers cannot be removed through this
+    /// method because names starting with `.` are rejected.
     pub fn remove(&self, group: &str, key: &str) -> Result<bool> {
         Self::check_name("group", group)?;
         Self::check_name("attribute", key)?;
@@ -267,30 +294,12 @@ impl EzFio {
     ///
     /// Called automatically by [`EzFio::set`] and [`EzFio::set_array`], like
     /// the reference OCaml `create_group`; a group directory that exists
-    /// without a marker gets one, like the Fortran `ezfio_mkdir`.
+    /// without a marker gets one, like the Fortran `ezfio_mkdir`. Delegates to
+    /// `ezfio_core::ops::mkdir`: idempotent, and a no-op (`stat` only) when
+    /// the marker is already present.
     pub fn create_group(&self, group: &str) -> Result<()> {
         Self::check_name("group", group)?;
-        let dir = self.root.join(group);
-        match fs::create_dir(&dir) {
-            Ok(()) => {}
-            Err(e) if e.kind() == ErrorKind::AlreadyExists => {
-                if !dir.is_dir() {
-                    return Err(Error::io(
-                        &dir,
-                        std::io::Error::new(
-                            ErrorKind::NotADirectory,
-                            "exists but is not a directory",
-                        ),
-                    ));
-                }
-            }
-            Err(e) => return Err(Error::io(&dir, e)),
-        }
-        let marker = dir.join(VERSION_FILE);
-        if !marker.is_file() {
-            write_atomic(&marker, format!("{EZFIO_VERSION}\n").as_bytes())?;
-        }
-        Ok(())
+        ops::mkdir(&self.root.join(group)).map_err(core_error)
     }
 
     /// Read the scalar `group/key` as `T`.
@@ -299,165 +308,110 @@ impl EzFio {
     ///
     /// The file is read dynamically: its on-disk kind wins over the registry,
     /// so a plugin key or a scalar written by either reference client is read
-    /// the same way. Only the first line is used, and it is trimmed with the
-    /// reference clients' whitespace set (`String.trim`), which makes padded
-    /// Fortran payloads and OCaml payloads equivalent.
+    /// the same way. `ezfio_core` reads the first line and trims it with the
+    /// reference clients' whitespace set, so padded Fortran payloads and OCaml
+    /// payloads are equivalent.
     ///
     /// Fails with [`Error::NotSet`] when neither a scalar nor an array exists,
     /// with [`Error::Kind`] when only the array form exists, with
     /// [`Error::TypeMismatch`] when the registry declares another element type,
-    /// and with [`Error::Malformed`] when the field does not parse.
+    /// with [`Error::Io`] when the file exists but cannot be opened, and with
+    /// [`Error::Core`] when the value does not parse (the core reports that as
+    /// `Error reading data in <path>.`, without a line number).
     pub fn get<T: Element>(&self, group: &str, key: &str) -> Result<T> {
         Self::check_name("group", group)?;
         Self::check_name("attribute", key)?;
         self.check_scalar_spec::<T>(group, key)?;
         let dir = self.root.join(group);
         let path = dir.join(key);
-        let text = match fs::read_to_string(&path) {
-            Ok(text) => text,
-            Err(e) if e.kind() == ErrorKind::NotFound => {
-                return Err(self.not_set_or_kind(group, key, false));
-            }
-            Err(e) => return Err(Error::io(&path, e)),
-        };
-        let field = trim_reference(first_line(&text));
-        if field.is_empty() {
-            return Err(Error::malformed(&path, "empty scalar file"));
+        if !path.is_file() {
+            return Err(self.not_set_or_kind(group, key, false));
         }
-        T::parse(field).map_err(|detail| Error::malformed(&path, detail))
+        probe_readable(&path)?;
+        let value = ops::read_scalar(&dir, key, T::TYPE.to_core_ty()).map_err(core_error)?;
+        T::from_scalar(value).ok_or_else(|| core_value_mismatch::<T>(&path))
     }
 
     /// Write the scalar `group/key` with value `value`.
     ///
     /// - `group`, `key`: EZFIO names; the group is created on demand.
-    /// - `value`: formatted with the handle's [`ByteLayout`].
+    /// - `value`: handed to `ezfio_core`, which formats it with the OCaml
+    ///   dialect (see the module note on the writer dialect) and installs
+    ///   `<field>\n` atomically.
     ///
-    /// The payload is `<formatted value>\n`, written atomically. Character
-    /// scalars are written verbatim (the OCaml convention) even under
-    /// [`ByteLayout::Fortran`]: Fortran pads a scalar to the variable's
-    /// declared length, but readers trim, so the padding carries no
-    /// information and the crate does not reproduce it.
+    /// Character scalars are written verbatim: the reference OCaml client
+    /// does not pad a scalar, and padding carries no information because every
+    /// reader trims.
     ///
-    /// Fails with [`Error::Kind`] when the registry declares an array, and
-    /// with [`Error::TypeMismatch`] when it declares another element type.
+    /// Fails with [`Error::Kind`] when the registry declares an array, with
+    /// [`Error::TypeMismatch`] when it declares another element type, and with
+    /// [`Error::Core`] when the core cannot create the group or write the
+    /// file (`Unable to create directory <path>` / `Unable to write <path>`).
     pub fn set<T: Element>(&self, group: &str, key: &str, value: &T) -> Result<()> {
         Self::check_name("group", group)?;
         Self::check_name("attribute", key)?;
         self.check_scalar_spec::<T>(group, key)?;
         self.create_group(group)?;
-        let path = self.root.join(group).join(key);
-        let mut payload = String::new();
-        value.write_field(&mut payload, self.layout, 0, FieldKind::Scalar);
-        payload.push('\n');
-        write_atomic(&path, payload.as_bytes())
+        let dir = self.root.join(group);
+        let scalar = value.to_scalar();
+        ops::write_scalar(&dir, key, T::TYPE.to_core_ty(), &scalar, WRITE_DIALECT)
+            .map_err(core_error)
     }
 
     /// Read the gzip array `group/key` as `T`.
     ///
-    /// The payload is streamed: only the parsed elements and the two 64 KiB
-    /// I/O buffers are held in memory. Dimensions are read from the file,
-    /// **never from the registry**: the reference getters (`read_float_array`,
-    /// `read_int64_array`, …) do not consult the declared `size:` either, so a
-    /// stale or truncated tree stays readable, and a section reader that needs
-    /// a shape carries its own check or repair (e.g. the `determinants` record
-    /// reader and its `state_average_weight` re-materialisation).
+    /// The dimensions are read from the file, **never from the registry**: the
+    /// reference getters (`read_float_array`, `read_int64_array`, …) do not
+    /// consult the declared `size:` either, so a stale or truncated tree stays
+    /// readable, and a section reader that needs a shape carries its own check
+    /// or repair (e.g. the `determinants` record reader and its
+    /// `state_average_weight` re-materialisation).
     ///
-    /// The reader accepts both reference layouts, and tolerates trailing blank
-    /// lines while rejecting any non-blank trailing data. A zero extent is
-    /// legal and yields an empty [`Array`].
+    /// The shape comes from `ops::array_info` and the elements from
+    /// `ops::read_array`, so the payload is decompressed twice (see the module
+    /// docs). The reader accepts every spelling the historical writers
+    /// produced, ignores records past the declared element count, and treats a
+    /// zero extent as legal, yielding an empty [`Array`].
     ///
     /// Fails with [`Error::NotSet`] when no payload exists, [`Error::Kind`]
     /// when the attribute exists only as a scalar, [`Error::TypeMismatch`]
-    /// when the registry declares another element type, and
-    /// [`Error::Malformed`] on a corrupt header or an unparseable element
-    /// (with its line number).
+    /// when the registry declares another element type, [`Error::Io`] when the
+    /// file exists but cannot be opened, [`Error::Malformed`] when the header
+    /// declares rank 0 (the core accepts it, the format does not), and
+    /// [`Error::Core`] on a corrupt header or an unparseable element (the core
+    /// reports both as `Error reading data in <path>.`, without a line
+    /// number).
     pub fn get_array<T: Element>(&self, group: &str, key: &str) -> Result<Array<T>> {
         Self::check_name("group", group)?;
         Self::check_name("attribute", key)?;
         // Kind and element type only: the declared extents are not resolved
         // on this path (see [`EzFio::set_array`] for the shape guard).
-        self.check_array_spec::<T>(group, key)?;
-        let path = self.root.join(group).join(format!("{key}.gz"));
+        let _ = self.check_array_spec::<T>(group, key)?;
+        let dir = self.root.join(group);
+        let path = dir.join(format!("{key}.gz"));
         if !path.is_file() {
             return Err(self.not_set_or_kind(group, key, true));
         }
-        let file = File::open(&path).at(&path)?;
-        let mut reader = BufReader::with_capacity(IO_BUFFER, GzDecoder::new(file));
-        let mut line = String::new();
+        probe_readable(&path)?;
 
-        read_line(&mut reader, &mut line, &path, "rank")?;
-        let rank_text = line.trim();
-        let rank: usize = rank_text
-            .parse()
-            .map_err(|_| Error::malformed(&path, format!("line 1: invalid rank {rank_text:?}")))?;
-        if rank == 0 || rank > MAX_RANK {
-            return Err(Error::malformed(
-                &path,
-                format!("line 1: rank {rank} is outside 1..={MAX_RANK}"),
-            ));
+        let stored = ops::array_info(&dir, key).map_err(core_error)?;
+        // A `%3d` rank of 0 parses in the core (`prod([]) == 1`), but no
+        // writer produces one and the reference getters reject it.
+        if stored.is_empty() {
+            return Err(Error::malformed(&path, "rank 0 is outside 1..=10"));
         }
-
-        read_line(&mut reader, &mut line, &path, "dimensions")?;
-        let mut dims = Vec::with_capacity(rank);
-        for token in line.split_whitespace() {
-            if dims.len() == rank {
-                // The reference reader only consumes `rank` fields; extra
-                // fields on the dimension line are ignored.
-                break;
-            }
-            let extent: usize = token.parse().map_err(|_| {
-                Error::malformed(&path, format!("line 2: invalid dimension {token:?}"))
-            })?;
-            dims.push(extent);
+        let mut dims = Vec::with_capacity(stored.len());
+        for &extent in &stored {
+            // `array_info` only returns shapes whose product exists, and
+            // `prod` rejects negative extents, so this cannot fire; the
+            // checked conversion is kept rather than an unchecked cast.
+            dims.push(usize::try_from(extent).map_err(|_| {
+                Error::malformed(&path, format!("negative extent {extent} in the header"))
+            })?);
         }
-        if dims.len() < rank {
-            return Err(Error::malformed(
-                &path,
-                format!("line 2: {rank} dimensions expected, {} found", dims.len()),
-            ));
-        }
-        let total = dims
-            .iter()
-            .try_fold(1usize, |acc, &d| acc.checked_mul(d))
-            .ok_or_else(|| {
-                Error::malformed(&path, format!("dimensions {dims:?} overflow usize"))
-            })?;
-
-        let mut data = Vec::new();
-        data.try_reserve_exact(total).map_err(|e| {
-            Error::malformed(&path, format!("cannot allocate {total} elements: {e}"))
-        })?;
-        for index in 0..total {
-            read_line(&mut reader, &mut line, &path, "element")?;
-            let field = line.trim_end_matches(['\n', '\r']);
-            let value = T::parse(field).map_err(|detail| {
-                Error::malformed(&path, format!("line {}: {detail}", 3 + index))
-            })?;
-            data.push(value);
-        }
-
-        let mut extra = 0usize;
-        loop {
-            line.clear();
-            let read = reader
-                .read_line(&mut line)
-                .map_err(|e| Error::io(&path, e))?;
-            if read == 0 {
-                break;
-            }
-            extra += 1;
-            if !line.trim().is_empty() {
-                return Err(Error::malformed(
-                    &path,
-                    format!(
-                        "line {}: unexpected trailing data after {total} elements",
-                        2 + total + extra
-                    ),
-                ));
-            }
-        }
-
-        Array::new(dims, data)
+        let data = ops::read_array(&dir, key, T::TYPE.to_core_ty(), &stored).map_err(core_error)?;
+        let values = T::from_array_data(data).ok_or_else(|| core_value_mismatch::<T>(&path))?;
+        Array::new(dims, values)
     }
 
     /// Write the gzip array `group/key`.
@@ -467,11 +421,12 @@ impl EzFio {
     ///
     /// The dimensions are checked against the registry when they resolve (the
     /// read path never checks them: see [`EzFio::get_array`]), the rank must be
-    /// `1..=30`, every extent must fit in an `I20` field, and the declared
-    /// element type must accept `T`. Character fields are blank-padded to the
-    /// declared `character*(n)` length under [`ByteLayout::Fortran`]; under
-    /// [`ByteLayout::Ocaml`], and for keys the registry does not know, they
-    /// are written verbatim.
+    /// `1..=10` ([`MAX_RANK`], the core's limit), and every extent must fit in
+    /// an `I20` field. The declared element type must accept `T`. `ezfio_core`
+    /// writes the header and the records with the OCaml dialect (the private
+    /// `WRITE_DIALECT`), which stores characters verbatim: the padding the
+    /// Fortran writer applies to a declared `character*(n)` element is not
+    /// reproduced.
     ///
     /// The gzip stream is deterministic (`mtime` 0, no embedded file name) and
     /// the file is installed with a rename, so two writes of the same array
@@ -486,44 +441,28 @@ impl EzFio {
         if rank == 0 || rank > MAX_RANK {
             return Err(Error::Rank { rank });
         }
+        let mut dims = Vec::with_capacity(rank);
         for (index, &extent) in value.dims().iter().enumerate() {
-            if extent > i64::MAX as usize {
-                return Err(Error::DimensionTooLarge {
-                    index,
-                    value: extent,
-                });
-            }
+            let extent = i64::try_from(extent).map_err(|_| Error::DimensionTooLarge {
+                index,
+                value: extent,
+            })?;
+            dims.push(extent);
         }
 
         self.create_group(group)?;
-        let dir = self.root.join(group);
-        let path = dir.join(format!("{key}.gz"));
-        let field_width = match self.layout {
-            ByteLayout::Ocaml => 0,
-            ByteLayout::Fortran => spec.map_or(0, |spec| spec.char_len),
-        };
-
-        let mut tmp = NamedTempFile::new_in(&dir).map_err(|e| Error::io(&dir, e))?;
-        {
-            let encoder = GzBuilder::new()
-                .mtime(0)
-                .write(&mut tmp, Compression::default());
-            let mut out = BufWriter::with_capacity(IO_BUFFER, encoder);
-            write_header(&mut out, self.layout, value.dims()).at(&path)?;
-            let mut line = String::new();
-            for element in value.iter() {
-                line.clear();
-                element.write_field(&mut line, self.layout, field_width, FieldKind::ArrayElement);
-                line.push('\n');
-                out.write_all(line.as_bytes()).at(&path)?;
-            }
-            let encoder = out
-                .into_inner()
-                .map_err(|e| Error::io(&path, e.into_error()))?;
-            encoder.finish().at(&path)?;
-        }
-        tmp.persist(&path).map_err(|e| Error::io(&path, e.error))?;
-        Ok(())
+        // `ArrayData` owns its elements, so this copies the array once; the
+        // core takes no borrowed payload (see the module docs).
+        let data = T::to_array_data(value.data());
+        ops::write_array(
+            &self.root.join(group),
+            key,
+            T::TYPE.to_core_ty(),
+            &dims,
+            &data,
+            WRITE_DIALECT,
+        )
+        .map_err(core_error)
     }
 
     /// Registry check for a scalar access.
@@ -541,8 +480,8 @@ impl EzFio {
         check_element_type::<T>(group, key, spec)
     }
 
-    /// Registry check for an array access; returns the spec, whose character
-    /// width and declared extents the write path needs.
+    /// Registry check for an array access; returns the spec, whose declared
+    /// extents the write path needs.
     fn check_array_spec<T: Element>(&self, group: &str, key: &str) -> Result<Option<KeySpec>> {
         let Some(spec) = self.registry.lookup(group, key) else {
             return Ok(None);
@@ -696,109 +635,76 @@ fn check_element_type<T: Element>(group: &str, key: &str, spec: KeySpec) -> Resu
     })
 }
 
+/// Turn an `ezfio_core` failure into the crate's error type.
+///
+/// The core reports the failing ABI entry point (`where_`) and a message that
+/// already names the file (`Error reading data in <path>.`); only the message
+/// is user-facing here, so only it is kept. The underlying `io::Error` and the
+/// line number of a malformed payload are not available from the core.
+fn core_error(error: EzfioError) -> Error {
+    Error::Core(error.txt)
+}
+
+/// The error for a value the core returned with an unexpected variant.
+///
+/// [`Element::from_scalar`] and [`Element::from_array_data`] return `None` when
+/// the core answers with another value type. Unreachable: the crate asks the
+/// core for [`Element::TYPE`]'s core type, and the core parses exactly that
+/// type. Returned rather than panicked so that a future core change surfaces
+/// as an error.
+fn core_value_mismatch<T: Element>(path: &Path) -> Error {
+    Error::Core(format!(
+        "ezfio-core returned another value type for the {} request on {}",
+        T::TYPE,
+        path.display()
+    ))
+}
+
+/// Surface the OS error a delegated read would otherwise hide.
+///
+/// `ezfio_core::ops` folds "cannot open" and "cannot parse" into one
+/// `Rc::IoError` and discards the `io::Error`, so a file that exists but
+/// cannot be opened (permissions) would look like a malformed payload. One
+/// `open` keeps [`Error::Io`] for the case the caller can act on; the handle
+/// is closed at once and the core re-opens the file.
+fn probe_readable(path: &Path) -> Result<()> {
+    File::open(path).at(path)?;
+    Ok(())
+}
+
 impl DimResolver for EzFio {
     /// Read `group/key` as a scalar integer, or `Ok(None)` if it is not set.
     ///
-    /// Used while evaluating the dimension expressions of the registry. A
-    /// reference to an array (no plain file) is therefore unresolved, which is
-    /// the conservative answer: the shape check is skipped rather than guessed.
+    /// Used while evaluating the dimension expressions of the registry; the
+    /// integer is parsed by `ezfio_core`, with the same tolerance as any other
+    /// scalar read. A reference to an array (no plain file) is therefore
+    /// unresolved, which is the conservative answer: the shape check is
+    /// skipped rather than guessed.
     fn resolve(&self, group: &str, key: &str) -> Result<Option<i64>> {
-        let path = self.root.join(group).join(key);
-        let text = match fs::read_to_string(&path) {
-            Ok(text) => text,
-            Err(e) if e.kind() == ErrorKind::NotFound => return Ok(None),
-            Err(e) => return Err(Error::io(&path, e)),
-        };
-        let field = trim_reference(first_line(&text));
-        if field.is_empty() {
-            return Err(Error::malformed(
-                &path,
-                format!("dimension reference {group}/{key} is empty"),
-            ));
+        let dir = self.root.join(group);
+        let path = dir.join(key);
+        if !path.is_file() {
+            return Ok(None);
         }
-        field.parse::<i64>().map(Some).map_err(|_| {
-            Error::malformed(
-                &path,
-                format!("dimension reference {group}/{key} does not hold an integer: {field:?}"),
-            )
-        })
+        probe_readable(&path)?;
+        let value =
+            ops::read_scalar(&dir, key, <i64 as Element>::TYPE.to_core_ty()).map_err(|error| {
+                Error::Core(format!("dimension reference {group}/{key}: {}", error.txt))
+            })?;
+        <i64 as Element>::from_scalar(value)
+            .map(Some)
+            .ok_or_else(|| core_value_mismatch::<i64>(&path))
     }
-}
-
-/// First line of `text`, without its line terminator.
-fn first_line(text: &str) -> &str {
-    text.split_once('\n').map_or(text, |(line, _)| line)
-}
-
-/// Trim the characters OCaml's `String.trim` removes.
-///
-/// Exactly `' '`, `'\t'`, `'\n'`, `'\r'` and `'\x0c'` (form feed): the set used
-/// by both the reference OCaml reader and its `String.trim` calls on dimension
-/// lines. Rust's `str::trim` would also remove Unicode spaces, which would make
-/// a byte-level difference on weird payloads.
-fn trim_reference(s: &str) -> &str {
-    s.trim_matches(|c| matches!(c, ' ' | '\t' | '\n' | '\r' | '\x0c'))
-}
-
-/// Read one line, mapping EOF to a malformed-file error.
-fn read_line(reader: &mut impl BufRead, buf: &mut String, path: &Path, what: &str) -> Result<()> {
-    buf.clear();
-    let read = reader.read_line(buf).map_err(|e| Error::io(path, e))?;
-    if read == 0 {
-        return Err(Error::malformed(
-            path,
-            format!("unexpected end of file while reading the {what}"),
-        ));
-    }
-    Ok(())
-}
-
-/// Write the two header lines of an array payload.
-///
-/// Both layouts use `I3` for the rank. The OCaml client writes each extent with
-/// `%20d ` including a trailing blank; the Fortran client writes
-/// `30(I20,X)`, which separates the extents with one blank and puts none after
-/// the last one. Measured, not guessed: see `tests/fixtures/README.md`.
-fn write_header<W: Write>(out: &mut W, layout: ByteLayout, dims: &[usize]) -> std::io::Result<()> {
-    writeln!(out, "{:>3}", dims.len())?;
-    match layout {
-        ByteLayout::Ocaml => {
-            for &extent in dims {
-                write!(out, "{extent:>20} ")?;
-            }
-            out.write_all(b"\n")
-        }
-        ByteLayout::Fortran => {
-            for (index, &extent) in dims.iter().enumerate() {
-                if index > 0 {
-                    out.write_all(b" ")?;
-                }
-                write!(out, "{extent:>20}")?;
-            }
-            out.write_all(b"\n")
-        }
-    }
-}
-
-/// Write `bytes` to `path` atomically: temp file in the same directory, then
-/// `rename`.
-///
-/// Rename is atomic on POSIX filesystems, so a concurrent reader sees either
-/// the previous file or the complete new one. The temporary file is created by
-/// [`NamedTempFile`] with a name starting with `.`, which [`EzFio::keys`]
-/// ignores if a crash leaves one behind. The data is not `fsync`ed: the
-/// guarantee is against torn reads, not against power loss.
-fn write_atomic(path: &Path, bytes: &[u8]) -> Result<()> {
-    let dir = path.parent().unwrap_or_else(|| Path::new("."));
-    let mut tmp = NamedTempFile::new_in(dir).map_err(|e| Error::io(dir, e))?;
-    tmp.write_all(bytes).at(path)?;
-    tmp.persist(path).map_err(|e| Error::io(path, e.error))?;
-    Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use std::io::{Read, Write};
+
+    use flate2::read::GzDecoder;
+    use flate2::{Compression, GzBuilder};
 
     /// Create a fresh EZFIO tree in a temporary directory.
     fn tree() -> (tempfile::TempDir, EzFio) {
@@ -818,7 +724,14 @@ mod tests {
         text
     }
 
-    use std::io::Read;
+    /// gzip a byte slice with the deterministic settings the core uses.
+    fn gzip(bytes: &[u8]) -> Vec<u8> {
+        let mut encoder = GzBuilder::new()
+            .mtime(0)
+            .write(Vec::new(), Compression::default());
+        encoder.write_all(bytes).unwrap();
+        encoder.finish().unwrap()
+    }
 
     #[test]
     fn create_writes_the_version_marker() {
@@ -875,7 +788,8 @@ mod tests {
         assert_eq!(ezfio.get::<i64>("g", "i").unwrap(), -42);
         assert_eq!(ezfio.get::<f64>("g", "f").unwrap(), -1.25e-3);
         assert!(!ezfio.get::<bool>("g", "b").unwrap());
-        // `String.trim` on read drops the trailing blank (OCaml parity).
+        // The core trims both ends on read (`String.trim`), so the trailing
+        // blank is dropped (OCaml parity) — and so would a leading one be.
         assert_eq!(ezfio.get::<String>("g", "s").unwrap(), "a b");
     }
 
@@ -884,12 +798,25 @@ mod tests {
         let (_dir, ezfio) = tree();
         ezfio.set("g", "x", &0i64).unwrap();
         let path = ezfio.root().join("g/x");
+        // Fortran implied exponent (`E24.15` without the `E`).
         fs::write(&path, "   0.100000000000000+101\n").unwrap();
         assert_eq!(ezfio.get::<f64>("g", "x").unwrap(), 1.0e100);
         fs::write(&path, "  .TRUE.\n").unwrap();
         assert!(ezfio.get::<bool>("g", "x").unwrap());
         fs::write(&path, "  1.307093214000000e+02   \n").unwrap();
         assert_eq!(ezfio.get::<f64>("g", "x").unwrap(), 130.7093214);
+    }
+
+    #[test]
+    fn empty_scalar_file_is_a_data_error() {
+        let (_dir, ezfio) = tree();
+        ezfio.set("g", "x", &0i64).unwrap();
+        fs::write(ezfio.root().join("g/x"), "").unwrap();
+        // The previous local parser called this `Malformed("empty scalar
+        // file")`; the core folds it into its single data-error message.
+        let err = ezfio.get::<i64>("g", "x").unwrap_err();
+        assert!(matches!(err, Error::Core(_)), "{err}");
+        assert!(format!("{err}").contains("Error reading data in"), "{err}");
     }
 
     #[test]
@@ -915,10 +842,12 @@ mod tests {
         assert_eq!(back, value);
     }
 
+    /// The one array dialect this crate writes: `%20d ` dimensions (one
+    /// trailing blank), `%20d` integers, `%24.15e` reals, `T`/`F` logicals,
+    /// characters verbatim.
     #[test]
-    fn fortran_layout_bytes_for_every_element_type() {
+    fn ocaml_array_bytes_for_every_element_type() {
         let (_dir, ezfio) = tree();
-        let ezfio = ezfio.with_layout(ByteLayout::Fortran);
         ezfio
             .set_array("g", "i", &Array::from_vec(vec![1i64, -2]))
             .unwrap();
@@ -935,41 +864,38 @@ mod tests {
             payload(&ezfio, "g", "i"),
             concat!(
                 "  1\n",
-                "                   2\n",
-                "                   1    \n",
-                "                  -2    \n",
+                "                   2 \n",
+                "                   1\n",
+                "                  -2\n",
             )
         );
         assert_eq!(
             payload(&ezfio, "g", "r"),
             concat!(
                 "  1\n",
-                "                   2\n",
-                "   0.100000000000000E+01\n",
-                "  -0.500000000000000E+00\n",
+                "                   2 \n",
+                "   1.000000000000000e+00\n",
+                // `{:.15E}` normalises to one digit before the point, so
+                // -0.5 is `-5.000…e-01`, right-aligned in 24 columns.
+                "  -5.000000000000000e-01\n",
             )
         );
         assert_eq!(
             payload(&ezfio, "g", "l"),
-            concat!(
-                "  1\n",
-                "                   2\n",
-                "T                       \n",
-                "F                       \n",
-            )
+            concat!("  1\n", "                   2 \n", "T\n", "F\n")
         );
-        // `nuclei/nucl_label` is declared `character*(32)`; an unknown key is
-        // written verbatim.
         assert_eq!(
             payload(&ezfio, "g", "c"),
-            concat!("  1\n", "                   1\n", "abc\n",)
+            concat!("  1\n", "                   1 \n", "abc\n")
         );
     }
 
+    /// `nuclei/nucl_label` is declared `character*(32)`; the delegated writer
+    /// stores characters verbatim, so the declared width does not pad them
+    /// (deviation E5: the Fortran padder is gone).
     #[test]
-    fn fortran_layout_pads_declared_characters() {
+    fn declared_characters_are_written_verbatim() {
         let (_dir, ezfio) = tree();
-        let ezfio = ezfio.with_layout(ByteLayout::Fortran);
         ezfio
             .set_array(
                 "nuclei",
@@ -977,10 +903,9 @@ mod tests {
                 &Array::from_vec(vec!["H".to_string()]),
             )
             .unwrap();
-        let text = payload(&ezfio, "nuclei", "nucl_label");
-        assert!(
-            text.ends_with(&format!("H{}\n", " ".repeat(31))),
-            "{text:?}"
+        assert_eq!(
+            payload(&ezfio, "nuclei", "nucl_label"),
+            concat!("  1\n", "                   1 \n", "H\n")
         );
     }
 
@@ -1021,15 +946,6 @@ mod tests {
         assert_eq!(array.data(), &[1.0, 2.0, 3.0, 4.0]);
     }
 
-    /// gzip a byte slice with the crate's deterministic settings.
-    fn gzip(bytes: &[u8]) -> Vec<u8> {
-        let mut encoder = GzBuilder::new()
-            .mtime(0)
-            .write(Vec::new(), Compression::default());
-        encoder.write_all(bytes).unwrap();
-        encoder.finish().unwrap()
-    }
-
     #[test]
     fn array_reader_rejects_malformed_payloads() {
         let (_dir, ezfio) = tree();
@@ -1039,29 +955,37 @@ mod tests {
             fs::write(&path, gzip(payload.as_bytes())).unwrap();
             ezfio.get_array::<i64>("g", "a").unwrap_err()
         };
-        // Rank 0 and rank 31 are outside the format.
+        // Rank 0 is outside the format (the core parses it, this layer
+        // rejects it).
         assert!(matches!(check("  0\n\n"), Error::Malformed { .. }));
-        assert!(matches!(
-            check(" 31\n 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1\n"),
-            Error::Malformed { .. }
-        ));
+        // The core accepts at most 10 dimensions; the header parses, the
+        // limit check fires.
+        let rank11 = format!(" 11\n{}\n", "1 ".repeat(11));
+        let err = check(&rank11);
+        assert!(
+            format!("{err}").contains("exceeds the maximum of 10"),
+            "{err}"
+        );
         // Fewer dimensions than the rank announces.
-        assert!(matches!(
-            check("  2\n                   1 \n"),
-            Error::Malformed { .. }
-        ));
-        // Non-blank trailing data after the last element.
-        assert!(matches!(
-            check("  1\n                   1 \n                   7\n                   8\n"),
-            Error::Malformed { .. }
-        ));
-        // A non-numeric element reports its line.
+        let err = check("  2\n                   1 \n");
+        assert!(matches!(err, Error::Core(_)), "{err}");
+        assert!(format!("{err}").contains("Error reading data in"), "{err}");
+        // A non-numeric element: the core reports the file but not the line.
         let err = check("  1\n                   1 \nx\n");
-        assert!(format!("{err}").contains("line 3"));
+        assert!(matches!(err, Error::Core(_)), "{err}");
+        assert!(format!("{err}").contains("Error reading data in"), "{err}");
         // Blank trailing lines are tolerated.
         fs::write(
             &path,
             gzip(b"  1\n                   1 \n                   7\n\n\n"),
+        )
+        .unwrap();
+        assert_eq!(ezfio.get_array::<i64>("g", "a").unwrap().data(), &[7]);
+        // Records past the declared count are ignored (the core stops after
+        // `prod(dims)` elements; the previous local reader rejected them).
+        fs::write(
+            &path,
+            gzip(b"  1\n                   1 \n                   7\n                   8\n"),
         )
         .unwrap();
         assert_eq!(ezfio.get_array::<i64>("g", "a").unwrap().data(), &[7]);
@@ -1194,6 +1118,25 @@ mod tests {
         assert!(ezfio.remove("a", ".version").is_err());
     }
 
+    /// A declared key is probed in its declared form only; a registry-unknown
+    /// key probes both forms (plugin attributes).
+    #[test]
+    fn has_follows_the_declared_kind() {
+        let (_dir, ezfio) = tree();
+        ezfio.set("nuclei", "nucl_num", &1i64).unwrap();
+        assert!(ezfio.has("nuclei", "nucl_num").unwrap());
+        ezfio
+            .set_array(
+                "nuclei",
+                "nucl_coord",
+                &Array::new(vec![1, 3], vec![0.0; 3]).unwrap(),
+            )
+            .unwrap();
+        assert!(ezfio.has("nuclei", "nucl_coord").unwrap());
+        ezfio.set("plugin", "x", &1i64).unwrap();
+        assert!(ezfio.has("plugin", "x").unwrap());
+    }
+
     #[test]
     fn names_cannot_escape_the_tree() {
         let (_dir, ezfio) = tree();
@@ -1240,7 +1183,7 @@ mod tests {
 
     #[test]
     fn invalid_rank_is_rejected_on_write() {
-        // `Array` cannot hold rank 0, so only the > 30 side is reachable.
+        // `Array` cannot hold rank 0, so only the > 10 side is reachable.
         let (_dir, ezfio) = tree();
         let dims = vec![1usize; MAX_RANK + 1];
         let value = Array::new(dims, vec![0i64; 1]).unwrap();

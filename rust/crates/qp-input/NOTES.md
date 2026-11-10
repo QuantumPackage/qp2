@@ -106,9 +106,11 @@ spelling from the type table, arrays are Fortran (column-major) order.
 
 `set` parses the section body as a sexp of `(key value)` pairs (every line
 containing `=`, `=` replaced by a space, each line parenthesised), checks the
-domain with `types::TypeSpec`, and writes with `ByteLayout::Ocaml`. A
-conversion failure (the sexplib `Error:  (...)` of the reference) yields
-`None` (section skipped, exit 0); anything else takes the retry path above.
+domain with `types::TypeSpec`, and writes through `qp-ezfio` (whose single
+writer emits the reference OCaml client's bytes, `ezfio_core`'s
+`WriterDialect::Ocaml`). A conversion failure (the sexplib `Error:  (...)` of
+the reference) yields `None` (section skipped, exit 0); anything else takes the
+retry path above.
 Wave S2.4: the port prints the conversion failure as
 `qp_edit: parse error in <section>: <message>` (exit 0) and the second
 escape as `qp_edit: <section>: <message>` (exit 1) — plain text, no

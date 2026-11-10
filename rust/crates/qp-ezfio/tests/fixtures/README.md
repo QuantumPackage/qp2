@@ -16,7 +16,7 @@ through the crate's writer.
 
 | directory | producer | version | format |
 |---|---|---|---|
-| `fortran/` | `external/ezfio/src/libezfio_util.irp.f` (IRPF90), linked into `libezfio_irp.a` | GNU Fortran (Homebrew GCC) **16.2.0** | `I20`, `E24.15`, `L1`, `A` |
+| `fortran/` | `libezfio_util.irp.f` (IRPF90) of the original C implementation, deleted from `external/ezfio` by the ezfio-rs switch; the fixtures come from an `~/qp2` build that still had it (`libezfio_irp.a`) | GNU Fortran (Homebrew GCC) **16.2.0** | `I20`, `E24.15`, `L1`, `A` |
 | `ocaml/` | `external/ezfio/Ocaml/ezfio.ml` | OCaml **5.3.0** (`~/qp2/external/opampack/opamroot/qp2-ocaml5`) | `%20d`, `%24.15e`, raw strings |
 
 Both were built from `~/qp2` @ `be4b71c1` (`symmetry`). The OCaml object files
@@ -54,7 +54,7 @@ the versions above: **all 29 payloads matched byte for byte**.
 ## Layout
 
 ```
-fortran/                # bytes from libezfio_util.irp.f
+fortran/                # bytes from the original C implementation
   nuclei/nucl_label     # registry-known character*(32), dims (nucl_num)
   oracle/...            # one key per element type / shape
   oracle3/short_padded  # padded scalar, read-only case
@@ -77,7 +77,7 @@ Array keys under `oracle/` (dims follow the rank line):
 | `i3d` | `integer` | `(1,2,3)` | rank 3 |
 | `i8s` | `integer*8` | `(3)` | values beyond 32 bits |
 | `logicals` | `logical` | `(3)` | `L1` in the 24-column array slot |
-| `chars` | `character*(8)` | `(3)` | blank padding; leading blanks are data |
+| `chars` | `character*(8)` | `(3)` | blank padding; read trimmed on both ends |
 | `empty` | `double` | `(3,0)` | zero extent, header only |
 | `rscalar`, `iscalar`, `lscalar`, `cscalar` | scalars | | plain text, one field |
 | `nuclei/nucl_label` | `character*(32)` | `(3)` | registry-known width |
@@ -86,6 +86,12 @@ Array keys under `oracle/` (dims follow the rank line):
 ## Deviations between the two writers (and from plan §4)
 
 Measured, not inferred; each is pinned by a test.
+
+The crate has one writer, the OCaml client's bytes (`ezfio_core`'s
+`WriterDialect::Ocaml`): the Fortran-layout writer was removed with
+`ByteLayout`. The `fortran/` payloads below therefore guard the **reader**;
+where `tests/golden.rs` asserts written bytes for a Fortran attribute it
+compares them with the `ocaml/` twin of the same attribute.
 
 1. **`real` is lossy and the two writers lose different digits.** `%24.15e`
    keeps 16 significant digits; `E24.15` keeps 15. `1234567.8901234567`
@@ -98,15 +104,16 @@ Measured, not inferred; each is pinned by a test.
    `ezfio_write_in` / `_do` / `_lo` / `_ch` write `I20`, `E24.15`, `L1` and `A`
    only; the array writers first fill `buffer(i)(1:24)`, which leaves four
    blanks after an `I20` integer and 23 after an `L1` logical. Plan §4's
-   "every element in a 24-character field" describes arrays only. The crate
-   models this with `FieldKind::{Scalar, ArrayElement}`.
+   "every element in a 24-character field" describes arrays only. The single
+   writer reproduces the two forms separately: array elements fill the
+   24-column slot, scalars do not.
 3. **Characters are not padded/truncated to 24.** The OCaml client writes the
    string verbatim; the Fortran client pads/truncates to the declared
    `character*(n)` length (8 or 32 here), which the *variable* knows and the
-   file does not. The crate pads to the registry width under
-   `ByteLayout::Fortran` and only for registry-known keys; unknown keys are
-   written raw under both layouts, so `fortran/oracle/chars` is read but its
-   padding is not reproduced (the test pins our raw bytes explicitly).
+   file does not. The crate writes characters verbatim (OCaml behaviour), so
+   `fortran/oracle/chars` and `fortran/oracle3/short_padded` are read but
+   their padding is not reproduced; the golden tests compare our bytes with
+   the `ocaml/` payload and pin the unpadded form explicitly.
 4. **The OCaml logical array writer is broken.** `print_bool` writes `"T\n"`
    through a `%s\n` format, so every element is followed by a blank line:
    `T\n\nF\n\nT\n\n`. The reference reader itself fails on the second element
@@ -118,10 +125,15 @@ Measured, not inferred; each is pinned by a test.
    `%20d`; the OCaml client terminates each extent with a space (line ends in
    `"6 \n"`), the Fortran `30(I20,X)` does not (`"...0"` then newline). There
    is **no extra blank line** after the dims line in either layout — the
-   `\n` before the first element is the one that ends the dims line.
-6. **Logicals in the reference bug file are the only non-layout difference**
-   listed here; when read normally (Fortran payloads, or our own writes) a
-   logical is one field per line, `T`/`F`, padded on the right to the slot.
+   `\n` before the first element is the one that ends the dims line. The
+   single writer emits the OCaml form; the reader accepts both.
+6. **Logicals: array elements and scalars have different bytes.** The Fortran
+   array writer fills the 24-column slot (`T` + 23 blanks, trimmed on read);
+   the OCaml client emits one bare `T`/`F` per line for an array, and
+   `T\n\n`/`F\n\n` for a scalar. The crate's writer emits the OCaml form for
+   both. The Fortran logical array has no OCaml twin to compare with (deviation
+   4), so that write is pinned by a hand-derived byte string in
+   `tests/golden.rs`; the reader accepts every form.
 
 ## Known reference-only attributes
 
