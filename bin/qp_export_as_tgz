@@ -203,6 +203,7 @@ cp --recursive -- ${QP_ROOT}/external/Python ${QPACKAGE_STATIC}/external/
 mkdir ${QPACKAGE_STATIC}/external/ezfio
 cp --recursive -- ${QP_ROOT}/external/ezfio/Python ${QPACKAGE_STATIC}/external/ezfio/
 cp --recursive -- ${QP_ROOT}/external/ezfio/Bash   ${QPACKAGE_STATIC}/external/ezfio/
+cp -- ${QP_ROOT}/external/ezfio/lib/libezfio.* ${QPACKAGE_STATIC}/lib/
 cp --recursive -- ${QP_ROOT}/man/*   ${QPACKAGE_STATIC}/man/
 
 
@@ -213,6 +214,7 @@ cp ${QP_ROOT}/quantum_package.rc ${QPACKAGE_STATIC}/
 cp ${QP_ROOT}/etc/* ${QPACKAGE_STATIC}/etc/
 cat << EOF > ${QPACKAGE_STATIC}/etc/00.qp_root.rc
 export QP_ROOT="\$( cd \$(dirname \\\${BASH_SOURCE}) ; cd .. ; pwd -P )"
+export EZFIO_LIBRARY="\$QP_ROOT/lib"
 EOF
 
 
