@@ -1,12 +1,12 @@
 //! Round-trip, interop, and runtime-dimension tests for `qp-ezfio`.
 //!
-//! These tests do not compare against reference bytes (that is
+//! These tests do not compare against whole reference files (that is
 //! `tests/golden.rs`); they check the properties the crate promises:
 //!
-//! * every element type survives write -> read in both byte layouts, including
-//!   rank 1/2/3, single-element and zero-extent arrays;
-//! * a payload written by one reference client, read by the crate, and
-//!   rewritten in the *other* layout reproduces the other client's fixture,
+//! * every element type survives write -> read, including rank 1/2/3,
+//!   single-element and zero-extent arrays;
+//! * a Fortran-produced payload, read by the crate and rewritten, reproduces
+//!   the OCaml producer's fixture (the crate has one writer, deviation E5),
 //!   except for the digits the lossy `real` format cannot carry across (see
 //!   `fortran_payload_rewritten_as_ocaml_is_exact_except_lost_real_digits`);
 //! * the registry's dimension expressions are resolved at call time from the
@@ -15,133 +15,101 @@
 mod common;
 
 use common::*;
-use qp_ezfio::{Array, ByteLayout, Error, EzFio};
+use qp_ezfio::{Array, Error};
 
 /// Write `value`, read it back, and return the reread array.
-fn roundtrip<T: qp_ezfio::Element>(
-    layout: ByteLayout,
-    group: &str,
-    key: &str,
-    value: &Array<T>,
-) -> Array<T> {
+fn roundtrip<T: qp_ezfio::Element>(group: &str, key: &str, value: &Array<T>) -> Array<T> {
     let (_dir, ezfio) = tree();
-    let ezfio = ezfio.with_layout(layout);
     ezfio.set_array(group, key, value).unwrap();
     ezfio.get_array::<T>(group, key).unwrap()
 }
 
 #[test]
-fn roundtrip_every_type_and_layout() {
-    for layout in [ByteLayout::Ocaml, ByteLayout::Fortran] {
-        // Real, rank 1 and rank 2, including both signed zeros.
-        let reals = array(&[2, 3], &[1.0f64, -0.5, 1.0e-3, 0.0, -0.0, 1.0e300]);
-        let got = roundtrip(layout, "g", "reals", &reals);
-        assert_eq!(got.dims(), &[2, 3]);
-        assert_eq!(got.data(), reals.data());
-        assert!(got.data()[4].is_sign_negative());
+fn roundtrip_every_type() {
+    // Real, rank 1 and rank 2, including both signed zeros.
+    let reals = array(&[2, 3], &[1.0f64, -0.5, 1.0e-3, 0.0, -0.0, 1.0e300]);
+    let got = roundtrip("g", "reals", &reals);
+    assert_eq!(got.dims(), &[2, 3]);
+    assert_eq!(got.data(), reals.data());
+    assert!(got.data()[4].is_sign_negative());
 
-        // Integer, rank 3 with a leading extent of 1.
-        let ints = array(&[1, 2, 3], &[1i64, -42, 1000000, 0, i64::MAX, i64::MIN]);
-        let got = roundtrip(layout, "g", "ints", &ints);
-        assert_eq!(got.dims(), &[1, 2, 3]);
-        assert_eq!(got.data(), ints.data());
+    // Integer, rank 3 with a leading extent of 1.
+    let ints = array(&[1, 2, 3], &[1i64, -42, 1000000, 0, i64::MAX, i64::MIN]);
+    let got = roundtrip("g", "ints", &ints);
+    assert_eq!(got.dims(), &[1, 2, 3]);
+    assert_eq!(got.data(), ints.data());
 
-        // Logical.
-        let logicals = array(&[3], &[true, false, true]);
-        let got = roundtrip(layout, "g", "logicals", &logicals);
-        assert_eq!(got.data(), logicals.data());
+    // Logical.
+    let logicals = array(&[3], &[true, false, true]);
+    let got = roundtrip("g", "logicals", &logicals);
+    assert_eq!(got.data(), logicals.data());
 
-        // Character: leading blanks are data, trailing blanks are padding.
-        let chars: Array<String> = array(
-            &[3],
-            &["abc".to_string(), "  spaced".to_string(), "x".to_string()],
-        );
-        let got = roundtrip(layout, "g", "chars", &chars);
-        assert_eq!(got.data(), chars.data());
+    // Character.
+    let chars: Array<String> = array(
+        &[3],
+        &["abc".to_string(), "spaced".to_string(), "x".to_string()],
+    );
+    let got = roundtrip("g", "chars", &chars);
+    assert_eq!(got.data(), chars.data());
 
-        // Single element and zero extent.
-        let one = array(&[1], &[42.0f64]);
-        assert_eq!(roundtrip(layout, "g", "one", &one).data(), one.data());
-        let empty: Array<f64> = array(&[3, 0], &[]);
-        let got = roundtrip(layout, "g", "empty", &empty);
-        assert_eq!(got.dims(), &[3, 0]);
-        assert!(got.is_empty());
-    }
+    // Single element and zero extent.
+    let one = array(&[1], &[42.0f64]);
+    assert_eq!(roundtrip("g", "one", &one).data(), one.data());
+    let empty: Array<f64> = array(&[3, 0], &[]);
+    let got = roundtrip("g", "empty", &empty);
+    assert_eq!(got.dims(), &[3, 0]);
+    assert!(got.is_empty());
 }
 
-#[test]
-fn roundtrip_scalars_every_type_and_layout() {
-    for layout in [ByteLayout::Ocaml, ByteLayout::Fortran] {
-        let (_dir, ezfio) = tree();
-        let ezfio = ezfio.with_layout(layout);
-        ezfio.set("g", "r", &2.5f64).unwrap();
-        ezfio.set("g", "i", &-7i64).unwrap();
-        ezfio.set("g", "l", &true).unwrap();
-        ezfio.set("g", "c", &"hello".to_string()).unwrap();
-        assert_eq!(ezfio.get::<f64>("g", "r").unwrap(), 2.5);
-        assert_eq!(ezfio.get::<i64>("g", "i").unwrap(), -7);
-        assert!(ezfio.get::<bool>("g", "l").unwrap());
-        assert_eq!(ezfio.get::<String>("g", "c").unwrap(), "hello");
-    }
-}
-
-/// Read the OCaml fixture, write it with the Fortran layout, and compare with
-/// the Fortran fixture. The values are the same for both producers, so this is
-/// a byte-exact cross-producer conversion, three-digit exponents included.
-#[test]
-fn ocaml_payload_rewritten_as_fortran_matches_fortran_fixture() {
-    let (_dir, base) = tree();
-    // One handle for reading (the reader is layout-agnostic) and one for the
-    // Fortran-layout writer; `with_layout` consumes, so the second handle must
-    // be opened from the same root rather than derived from the first.
-    let fortran = EzFio::open(base.root())
-        .unwrap()
-        .with_layout(ByteLayout::Fortran);
-    for (key, dims, payload) in [
-        (
-            "reals",
-            vec![6],
-            fixture(Producer::Ocaml, "oracle", "reals"),
-        ),
-        (
-            "redge",
-            vec![6],
-            fixture(Producer::Ocaml, "oracle", "redge"),
-        ),
-        ("r2d", vec![2, 3], fixture(Producer::Ocaml, "oracle", "r2d")),
-        (
-            "empty",
-            vec![3, 0],
-            fixture(Producer::Ocaml, "oracle", "empty"),
-        ),
-    ] {
-        install_array(&base, "oracle", key, &payload);
-        let read = base.get_array::<f64>("oracle", key).unwrap();
-        assert_eq!(read.dims(), dims.as_slice(), "{key}");
-        fortran.set_array("oracle", key, &read).unwrap();
-        assert_eq!(
-            written_array(&base, "oracle", key),
-            fixture(Producer::Fortran, "oracle", key),
-            "{key}: OCaml -> Fortran conversion is not byte-identical"
-        );
-    }
-}
-
-/// Same conversion in the other direction: read the Fortran bytes, rewrite with
-/// the OCaml layout, compare with the OCaml fixture.
+/// Character payloads are written verbatim and read trimmed.
 ///
-/// This direction cannot be byte-identical for `real` data. The Fortran
-/// `E24.15` payload carries 15 significant digits and the OCaml `%24.15e`
-/// writer emits 16: the digit the Fortran client rounded away is gone, so a
-/// value written from a 16-digit literal (`1234567.8901234567`, `pi`) cannot
-/// come back. Every other line must still match the OCaml fixture exactly, and
-/// exactly one line per payload is allowed to differ.
+/// `ezfio_core`'s writer keeps the blanks of `"  spaced"` (leading blanks are
+/// data, reference OCaml semantics), but its reader applies `String.trim` on
+/// both ends. The previous local reader kept the leading blanks; this is a
+/// documented read delta.
+#[test]
+fn character_leading_blanks_are_written_but_trimmed_on_read() {
+    let (_dir, ezfio) = tree();
+    let chars: Array<String> = array(&[2], &["  spaced".to_string(), "trail  ".to_string()]);
+    ezfio.set_array("g", "chars", &chars).unwrap();
+    assert_eq!(
+        String::from_utf8(written_array(&ezfio, "g", "chars")).unwrap(),
+        "  1\n                   2 \n  spaced\ntrail  \n"
+    );
+    assert_eq!(
+        ezfio.get_array::<String>("g", "chars").unwrap().data(),
+        &["spaced".to_string(), "trail".to_string()]
+    );
+}
+
+#[test]
+fn roundtrip_scalars_every_type() {
+    let (_dir, ezfio) = tree();
+    ezfio.set("g", "r", &2.5f64).unwrap();
+    ezfio.set("g", "i", &-7i64).unwrap();
+    ezfio.set("g", "l", &true).unwrap();
+    ezfio.set("g", "c", &"hello".to_string()).unwrap();
+    assert_eq!(ezfio.get::<f64>("g", "r").unwrap(), 2.5);
+    assert_eq!(ezfio.get::<i64>("g", "i").unwrap(), -7);
+    assert!(ezfio.get::<bool>("g", "l").unwrap());
+    assert_eq!(ezfio.get::<String>("g", "c").unwrap(), "hello");
+}
+
+/// Read the Fortran fixture, rewrite it with the crate's writer (the OCaml
+/// dialect of `ezfio_core`, deviation E5), and compare with the OCaml fixture.
+///
+/// This cannot be byte-identical for `real` data. The Fortran `E24.15` payload
+/// carries 15 significant digits and the OCaml `%24.15e` writer emits 16: the
+/// digit the Fortran client rounded away is gone, so a value written from a
+/// 16-digit literal (`1234567.8901234567`, `pi`) cannot come back. Every other
+/// line must still match the OCaml fixture exactly, and exactly one line per
+/// payload is allowed to differ.
+///
+/// (The opposite direction, OCaml bytes rewritten as Fortran, has no test by
+/// design: the Fortran-layout writer was removed with `ByteLayout`.)
 #[test]
 fn fortran_payload_rewritten_as_ocaml_is_exact_except_lost_real_digits() {
     let (_dir, base) = tree();
-    let ocaml = EzFio::open(base.root())
-        .unwrap()
-        .with_layout(ByteLayout::Ocaml);
 
     // Values that both layouts hold exactly: byte-identical conversion.
     for (key, dims) in [("r2d", vec![2, 3]), ("empty", vec![3, 0])] {
@@ -149,7 +117,7 @@ fn fortran_payload_rewritten_as_ocaml_is_exact_except_lost_real_digits() {
         install_array(&base, "oracle", key, &payload);
         let read = base.get_array::<f64>("oracle", key).unwrap();
         assert_eq!(read.dims(), dims.as_slice(), "{key}");
-        ocaml.set_array("oracle", key, &read).unwrap();
+        base.set_array("oracle", key, &read).unwrap();
         assert_eq!(
             written_array(&base, "oracle", key),
             fixture(Producer::Ocaml, "oracle", key),
@@ -163,7 +131,7 @@ fn fortran_payload_rewritten_as_ocaml_is_exact_except_lost_real_digits() {
         let payload = fixture(Producer::Fortran, "oracle", key);
         install_array(&base, "oracle", key, &payload);
         let read = base.get_array::<f64>("oracle", key).unwrap();
-        ocaml.set_array("oracle", key, &read).unwrap();
+        base.set_array("oracle", key, &read).unwrap();
 
         let written = written_array(&base, "oracle", key);
         let reference = fixture(Producer::Ocaml, "oracle", key);
@@ -185,7 +153,7 @@ fn fortran_payload_rewritten_as_ocaml_is_exact_except_lost_real_digits() {
     let payload = fixture(Producer::Fortran, "oracle", "ints");
     install_array(&base, "oracle", "ints", &payload);
     let read = base.get_array::<i64>("oracle", "ints").unwrap();
-    ocaml.set_array("oracle", "ints", &read).unwrap();
+    base.set_array("oracle", "ints", &read).unwrap();
     assert_eq!(
         written_array(&base, "oracle", "ints"),
         fixture(Producer::Ocaml, "oracle", "ints")

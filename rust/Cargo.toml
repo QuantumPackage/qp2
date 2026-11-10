@@ -15,6 +15,9 @@ edition = "2024"
 [workspace.dependencies]
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
+# The EZFIO on-disk format lives in the ezfio-rs crate of the `external/ezfio`
+# submodule, the same implementation the Fortran/Python/OCaml layers link.
+ezfio-core = { path = "../external/ezfio/crates/ezfio-core" }
 flate2 = "1"
 md5 = "0.7"
 zmq = "0.9"

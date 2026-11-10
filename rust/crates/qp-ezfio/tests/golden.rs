@@ -1,4 +1,4 @@
-//! Golden byte tests against payloads produced by the reference clients.
+//! Golden tests against payloads produced by the reference clients.
 //!
 //! Every case below is checked twice, in both directions:
 //!
@@ -6,17 +6,20 @@
 //!    temporary tree (gzipped for arrays), then read through the public API and
 //!    compared with hand-written expected values.
 //! 2. **Write**: the same values are written through [`EzFio::set_array`] /
-//!    [`EzFio::set`] with the producer's [`ByteLayout`], the resulting file is
-//!    decompressed, and compared **byte for byte** with the fixture.
+//!    [`EzFio::set`]. The crate has one writer, the OCaml dialect of
+//!    `ezfio_core` (deviation E5), and the resulting file is decompressed and
+//!    compared **byte for byte** with the fixture: the producer's own file
+//!    when that producer is the OCaml client, and the OCaml client's file for
+//!    the same attribute when it is not (the Fortran-layout writer is gone).
 //!
 //! The expected values are the literals the fixture generators were given
 //! (`tests/fixtures/src/gen_fortran.f90`, `gen_ocaml.ml`); they do not depend
 //! on the formatting code under test.
 //!
 //! Cases the crate deliberately does not reproduce are marked
-//! `reproduced: false` and pinned by a hand-derived byte string in the test
-//! that owns them, so a silent change of the deviation is still a failure.
-//! `tests/fixtures/README.md` lists the deviations.
+//! `reproduced: false` and, where the bytes matter, pinned by a hand-derived
+//! byte string in the test that owns them, so a silent change of the deviation
+//! is still a failure. `tests/fixtures/README.md` lists the deviations.
 
 mod common;
 
@@ -36,7 +39,12 @@ struct ArrayCase<T> {
     /// Differs from [`Self::values`] only where the format is lossy: `real`
     /// fields carry 15 (Fortran) or 16 (OCaml) significant digits.
     decoded: Vec<T>,
-    /// Whether `set_array` must reproduce the reference bytes exactly.
+    /// Whether the fixture came from the client whose layout the crate writes
+    /// (the OCaml one).
+    ///
+    /// False for the Fortran-produced payloads: their writer is gone
+    /// (deviation E5), so the crate writes the OCaml twin of the same
+    /// attribute instead, and that is what the byte assertion compares with.
     reproduced: bool,
 }
 
@@ -82,6 +90,40 @@ fn scalar_case<T>(
     }
 }
 
+/// Mark an array case as one whose fixture was not produced by the client the
+/// crate writes: the write side is compared with the OCaml twin of the same
+/// attribute (deviation E5), not with this fixture.
+fn decode_only<T>(case: ArrayCase<T>) -> ArrayCase<T> {
+    ArrayCase {
+        reproduced: false,
+        ..case
+    }
+}
+
+/// Mark a scalar case as one whose fixture came from the other client, for the
+/// same reason as [`decode_only`].
+fn scalar_decode_only<T>(case: ScalarCase<T>) -> ScalarCase<T> {
+    ScalarCase {
+        reproduced: false,
+        ..case
+    }
+}
+
+/// Fixture the crate's writer must reproduce byte for byte.
+///
+/// The crate has one writer, the OCaml dialect of `ezfio_core` (deviation E5),
+/// so a Fortran-produced case is checked against the OCaml client's copy of
+/// the same attribute; every Fortran fixture used through [`check_arrays`] /
+/// [`check_scalars`] has one.
+fn expected_fixture<T>(case: &ArrayCase<T>) -> Vec<u8> {
+    let producer = if case.reproduced {
+        case.producer
+    } else {
+        Producer::Ocaml
+    };
+    fixture(producer, case.group, case.key)
+}
+
 /// Install the reference payload, read it back, and compare dims and values.
 fn read_array_case<T: Element>(case: &ArrayCase<T>) -> Array<T> {
     let payload = fixture(case.producer, case.group, case.key);
@@ -106,10 +148,9 @@ fn read_array_case<T: Element>(case: &ArrayCase<T>) -> Array<T> {
     got
 }
 
-/// Write the case with its producer's layout and return the decompressed bytes.
+/// Write the case through the crate's writer and return the decompressed bytes.
 fn write_array_case<T: Element>(case: &ArrayCase<T>) -> Vec<u8> {
     let (_dir, ezfio) = tree();
-    let ezfio = ezfio.with_layout(case.producer.layout());
     let value = array(case.dims, &case.values);
     ezfio
         .set_array(case.group, case.key, &value)
@@ -120,15 +161,15 @@ fn write_array_case<T: Element>(case: &ArrayCase<T>) -> Vec<u8> {
 fn check_arrays<T: Element>(cases: &[ArrayCase<T>]) {
     for case in cases {
         read_array_case(case);
-        if case.reproduced {
-            let written = write_array_case(case);
-            let expected = fixture(case.producer, case.group, case.key);
-            assert_eq!(
-                written, expected,
-                "{}:{} ({:?}) bytes differ from the reference payload",
-                case.group, case.key, case.producer
-            );
-        }
+        let written = write_array_case(case);
+        assert_eq!(
+            written,
+            expected_fixture(case),
+            "{}:{} ({:?}) bytes differ from the reference payload we write",
+            case.group,
+            case.key,
+            case.producer
+        );
     }
 }
 
@@ -143,7 +184,6 @@ fn read_scalar_case<T: Element>(case: &ScalarCase<T>) -> T {
 
 fn write_scalar_case<T: Element>(case: &ScalarCase<T>) -> Vec<u8> {
     let (_dir, ezfio) = tree();
-    let ezfio = ezfio.with_layout(case.producer.layout());
     ezfio
         .set(case.group, case.key, &case.value)
         .unwrap_or_else(|e| panic!("write {}:{}: {e}", case.group, case.key));
@@ -154,15 +194,17 @@ fn check_scalars<T: Element>(cases: &[ScalarCase<T>]) {
     for case in cases {
         let got = read_scalar_case(case);
         assert_eq!(got, case.value, "{}:{} value", case.group, case.key);
-        if case.reproduced {
-            let written = write_scalar_case(case);
-            let expected = fixture(case.producer, case.group, case.key);
-            assert_eq!(
-                written, expected,
-                "{}:{} ({:?}) bytes differ from the reference payload",
-                case.group, case.key, case.producer
-            );
-        }
+        let written = write_scalar_case(case);
+        let expected = if case.reproduced {
+            fixture(case.producer, case.group, case.key)
+        } else {
+            fixture(Producer::Ocaml, case.group, case.key)
+        };
+        assert_eq!(
+            written, expected,
+            "{}:{} ({:?}) bytes differ from the reference payload we write",
+            case.group, case.key, case.producer
+        );
     }
 }
 
@@ -204,7 +246,7 @@ fn real_cases(producer: Producer) -> Vec<ArrayCase<f64>> {
         // OCaml payload).
         decoded_edge[3] = "3.14159265358979".parse().expect("decimal literal");
     }
-    vec![
+    let cases = vec![
         ArrayCase {
             decoded,
             ..array_case(producer, "oracle", "reals", &[6], real_values())
@@ -221,11 +263,18 @@ fn real_cases(producer: Producer) -> Vec<ArrayCase<f64>> {
             vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
         ),
         array_case(producer, "oracle", "empty", &[3, 0], vec![]),
-    ]
+    ];
+    // The Fortran-layout writer was removed (deviation E5): its fixtures are
+    // read-only value guards, while the OCaml ones stay byte-exact.
+    if producer == Producer::Fortran {
+        cases.into_iter().map(decode_only).collect()
+    } else {
+        cases
+    }
 }
 
 #[test]
-fn fortran_real_arrays_match_reference_bytes() {
+fn fortran_real_arrays_decode() {
     let cases = real_cases(Producer::Fortran);
     check_arrays(&cases);
     // `assert_eq!` on f64 treats -0.0 == 0.0; the reference writes the sign,
@@ -257,7 +306,7 @@ fn ocaml_real_arrays_match_reference_bytes() {
 /// Both producers write `integer` and `integer*8` with the same `I20` field;
 /// the Rust side stores both in `i64`.
 fn integer_cases(producer: Producer) -> Vec<ArrayCase<i64>> {
-    vec![
+    let cases = vec![
         array_case(producer, "oracle", "ints", &[4], vec![1, -42, 1000000, 0]),
         array_case(
             producer,
@@ -273,11 +322,16 @@ fn integer_cases(producer: Producer) -> Vec<ArrayCase<i64>> {
             &[3],
             vec![1, -9007199254740993, 123456789012345],
         ),
-    ]
+    ];
+    if producer == Producer::Fortran {
+        cases.into_iter().map(decode_only).collect()
+    } else {
+        cases
+    }
 }
 
 #[test]
-fn fortran_integer_arrays_match_reference_bytes() {
+fn fortran_integer_arrays_decode() {
     check_arrays(&integer_cases(Producer::Fortran));
 }
 
@@ -288,6 +342,8 @@ fn ocaml_integer_arrays_match_reference_bytes() {
 
 #[test]
 fn integer_scalars_match_reference_bytes() {
+    // Both producers emit `%20d\n` for a scalar integer, so both fixtures stay
+    // byte-exact under the single writer.
     check_scalars(&[scalar_case(Producer::Fortran, "oracle", "iscalar", 7i64)]);
     check_scalars(&[scalar_case(Producer::Ocaml, "oracle", "iscalar", 7i64)]);
 }
@@ -297,15 +353,32 @@ fn integer_scalars_match_reference_bytes() {
 // ---------------------------------------------------------------------------
 
 #[test]
-fn fortran_logical_arrays_match_reference_bytes() {
-    check_arrays(&[array_case(
+fn fortran_logical_arrays_decode() {
+    // Fortran packs each `L1` field in a 24-column slot. There is no OCaml
+    // logical-array fixture to compare the write side with: the reference
+    // OCaml `write_bool_array` is broken (see
+    // `reference_ocaml_logical_array_is_rejected`), so the crate writes one
+    // field per line and that byte string is pinned here.
+    let case = decode_only(array_case(
         Producer::Fortran,
         "oracle",
         "logicals",
         &[3],
         vec![true, false, true],
-    )]);
-    check_scalars(&[scalar_case(Producer::Fortran, "oracle", "lscalar", true)]);
+    ));
+    read_array_case(&case);
+    assert_eq!(
+        String::from_utf8(write_array_case(&case)).unwrap(),
+        "  1\n                   3 \nT\nF\nT\n"
+    );
+
+    // The scalar has an OCaml twin: `T\n\n` is the reference OCaml spelling.
+    check_scalars(&[scalar_decode_only(scalar_case(
+        Producer::Fortran,
+        "oracle",
+        "lscalar",
+        true,
+    ))]);
 }
 
 #[test]
@@ -329,41 +402,55 @@ fn char_values() -> Vec<String> {
     vec!["abc".to_string(), "  spaced".to_string(), "x".to_string()]
 }
 
-#[test]
-fn fortran_character_arrays_match_reference_bytes() {
-    // `nuclei/nucl_label` is declared `character*(32)`, so the crate knows the
-    // field width and must reproduce the blank padding exactly.
-    check_arrays(&[array_case(
-        Producer::Fortran,
-        "nuclei",
-        "nucl_label",
-        &[3],
-        vec!["H".to_string(), "O".to_string(), "O".to_string()],
-    )]);
+/// What the reader returns for [`char_values`].
+///
+/// `ezfio_core` trims character records on both ends (the reference OCaml
+/// client's `String.trim`), so the leading blanks of `"  spaced"` are dropped.
+/// This is a documented read delta against the previous local reader, which
+/// kept them.
+fn char_decoded() -> Vec<String> {
+    vec!["abc".to_string(), "spaced".to_string(), "x".to_string()]
+}
 
-    // `oracle/chars` was written from a `character*(8)` variable, but the key
-    // is unknown to the registry, so the crate writes it raw (field width 0)
-    // and cannot reproduce the padding. Read it, and pin our bytes.
-    let case = ArrayCase {
-        reproduced: false,
-        ..array_case(Producer::Fortran, "oracle", "chars", &[3], char_values())
-    };
-    read_array_case(&case);
-    let written = write_array_case(&case);
-    let expected = concat!(
-        "  1\n",
-        "                   3\n",
-        "abc\n",
-        "  spaced\n",
-        "x\n",
-    );
-    assert_eq!(String::from_utf8(written).unwrap(), expected);
+#[test]
+fn fortran_character_arrays_decode() {
+    // `nuclei/nucl_label` is declared `character*(32)`, so the Fortran fixture
+    // pads every label to 32 columns. The crate's writer stores characters
+    // verbatim (deviation E5): it reproduces the *OCaml* producer's bytes for
+    // the same attribute, which is what `check_arrays` compares against.
+    //
+    // `oracle/chars`: the Fortran producer stores `"  spaced"` verbatim, and
+    // `ezfio_core` trims character records on both ends (the reference OCaml
+    // reader's `String.trim`), which is why `decoded` differs from `values`.
+    // The previous local reader kept the leading blanks (documented delta).
+    check_arrays(&[
+        decode_only(array_case(
+            Producer::Fortran,
+            "nuclei",
+            "nucl_label",
+            &[3],
+            vec!["H".to_string(), "O".to_string(), "O".to_string()],
+        )),
+        ArrayCase {
+            decoded: char_decoded(),
+            ..decode_only(array_case(
+                Producer::Fortran,
+                "oracle",
+                "chars",
+                &[3],
+                char_values(),
+            ))
+        },
+    ]);
 }
 
 #[test]
 fn ocaml_character_arrays_match_reference_bytes() {
     check_arrays(&[
-        array_case(Producer::Ocaml, "oracle", "chars", &[3], char_values()),
+        ArrayCase {
+            decoded: char_decoded(),
+            ..array_case(Producer::Ocaml, "oracle", "chars", &[3], char_values())
+        },
         array_case(
             Producer::Ocaml,
             "nuclei",
@@ -385,17 +472,15 @@ fn ocaml_character_arrays_match_reference_bytes() {
 #[test]
 fn fortran_padded_character_scalar_is_read_but_not_reproduced() {
     // `character*(32)` scalar: `short` + 27 blanks. The reference reader trims;
-    // so does ours. The crate writes scalars verbatim, so the padding is not
-    // reproduced (it is a property of the Fortran variable, not of the key).
-    let case = ScalarCase {
-        reproduced: false,
-        ..scalar_case(
-            Producer::Fortran,
-            "oracle3",
-            "short_padded",
-            "short".to_string(),
-        )
-    };
+    // so does `ezfio_core`. The crate writes scalars verbatim, so the padding
+    // is not reproduced (it is a property of the Fortran variable, not of the
+    // key).
+    let case = scalar_decode_only(scalar_case(
+        Producer::Fortran,
+        "oracle3",
+        "short_padded",
+        "short".to_string(),
+    ));
     assert_eq!(read_scalar_case(&case), "short");
     assert_eq!(write_scalar_case(&case), b"short\n");
 
@@ -413,8 +498,20 @@ fn fortran_padded_character_scalar_is_read_but_not_reproduced() {
 // ---------------------------------------------------------------------------
 
 #[test]
-fn real_scalars_match_reference_bytes() {
-    check_scalars(&[scalar_case(Producer::Fortran, "oracle", "rscalar", 2.5f64)]);
+fn fortran_real_scalar_decodes() {
+    // `E24.15` prints `0.250000000000000E+01` (normalised mantissa, upper-case
+    // exponent); the single writer emits `2.500000000000000e+00` (deviation
+    // E5), so this fixture is a value guard only.
+    check_scalars(&[scalar_decode_only(scalar_case(
+        Producer::Fortran,
+        "oracle",
+        "rscalar",
+        2.5f64,
+    ))]);
+}
+
+#[test]
+fn ocaml_real_scalar_matches_reference_bytes() {
     check_scalars(&[scalar_case(Producer::Ocaml, "oracle", "rscalar", 2.5f64)]);
 }
 
@@ -437,11 +534,14 @@ fn reference_ocaml_logical_array_is_rejected() {
     let err = ezfio
         .get_array::<bool>("oracle", "logicals")
         .expect_err("a blank line is not a logical field");
+    // The core folds every parse failure into one data error and does not
+    // report the offending line number (documented delta: the previous local
+    // reader said `Malformed` with `line 4`).
     assert!(
-        matches!(err, qp_ezfio::Error::Malformed { .. }),
+        matches!(err, qp_ezfio::Error::Core(_)),
         "unexpected error: {err}"
     );
-    assert!(format!("{err}").contains("line 4"), "{err}");
+    assert!(format!("{err}").contains("Error reading data in"), "{err}");
 }
 
 #[test]
@@ -464,7 +564,6 @@ fn our_ocaml_logical_array_writes_one_field_per_line() {
     );
     // And it round-trips through our own reader.
     let (_dir, ezfio) = tree();
-    let ezfio = ezfio.with_layout(qp_ezfio::ByteLayout::Ocaml);
     ezfio
         .set_array("oracle", "logicals", &array(&[3], &[true, false, true]))
         .unwrap();

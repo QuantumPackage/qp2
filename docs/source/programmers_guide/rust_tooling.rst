@@ -37,8 +37,9 @@ Crates
 The workspace lives in :file:`rust/` and is split so that a change to
 one tool does not rebuild the others:
 
-* ``qp-ezfio`` — native |EZFIO| on-disk format I/O (gzipped scalar and
-  array files) and the typed registry.
+* ``qp-ezfio`` — the QP tool layer over ``ezfio-core`` (the |EZFIO|
+  on-disk format implementation shared with the Fortran, Python and
+  OCaml layers): gzipped scalar and array I/O plus the typed registry.
 * ``qp-types`` — physics-adjacent data types (atoms, molecules, basis
   functions, point group, ...).
 * ``qp-input`` — the declarative configuration, the generic ``qp edit``

@@ -22,6 +22,17 @@ pub enum Error {
         source: std::io::Error,
     },
 
+    /// A delegated `ezfio_core` operation failed.
+    ///
+    /// The string is the core's own message (`Error reading data in
+    /// <path>.`, `Unable to create directory <path>`, `Unable to write
+    /// <path>`). The core folds the underlying `io::Error` and the line
+    /// number of a malformed payload into that text, so no structured source
+    /// is available here; a caller that needs the OS error gets
+    /// [`Error::Io`] from one of the crate's own filesystem probes.
+    #[error("{0}")]
+    Core(String),
+
     /// The directory is not an EZFIO directory.
     #[error("{path} is not an EZFIO directory (no .version file)")]
     NotEzFio {
@@ -49,12 +60,17 @@ pub enum Error {
         detail: String,
     },
 
-    /// A compressed payload does not follow the EZFIO array layout.
+    /// A payload has a shape this crate cannot represent.
+    ///
+    /// `ezfio_core` reports its own parse failures through [`Error::Core`];
+    /// this variant is the crate-level guard on a shape the core returned but
+    /// that is outside the format (a negative array extent). The core's
+    /// parser rejects negative extents too, so the branch is defensive.
     #[error("{path}: {detail}")]
     Malformed {
         /// File being parsed.
         path: PathBuf,
-        /// What is wrong, including the line number when relevant.
+        /// What is wrong.
         detail: String,
     },
 
@@ -122,10 +138,11 @@ pub enum Error {
 
     /// An array rank cannot be stored in the EZFIO header.
     ///
-    /// The header writes the rank with `I3` and the dimension line with
-    /// `30(I20,X)`, so only ranks `1..=30` round-trip through the reference
-    /// readers.
-    #[error("EZFIO array rank {rank} is not supported (the format allows 1..=30)")]
+    /// The header writes the rank with `I3`, but [`crate::MAX_RANK`] (10) is
+    /// the rank `ezfio_core` accepts: its Fortran wrapper hands the caller a
+    /// fixed `dims(10)` output buffer, so a deeper array could be written but
+    /// never read back through this layer.
+    #[error("EZFIO array rank {rank} is not supported (the limit is 1..=10)")]
     Rank {
         /// The offending rank (number of dimensions).
         rank: usize,

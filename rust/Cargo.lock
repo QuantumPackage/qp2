@@ -169,6 +169,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9435d864e017c3c6afeac1654189b06cdb491cf2ff73dbf0d73b0f292f42ff8"
 
 [[package]]
+name = "ezfio-core"
+version = "2.0.8"
+dependencies = [
+ "flate2",
+ "libc",
+]
+
+[[package]]
 name = "fastrand"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -317,6 +325,7 @@ name = "qp-ezfio"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "ezfio-core",
  "flate2",
  "serde",
  "tempfile",
