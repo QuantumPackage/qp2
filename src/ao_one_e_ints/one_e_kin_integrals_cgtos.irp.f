@@ -19,8 +19,9 @@
   double precision :: KA2, phiA
   double precision :: KB2, phiB
   double precision :: aa
-  complex*16       :: alpha, alpha_inv, Ae_center(3), Ap_center(3), C1
-  complex*16       :: beta, beta_inv, Be_center(3), Bp_center(3), C2
+  complex*16       :: alpha, alpha_inv, Ae_center(3), Ap_center(3)
+  complex*16       :: beta, beta_inv, Be_center(3), Bp_center(3)
+  complex*16       :: lC1(3), lC2(3)
   complex*16       :: xa
   complex*16       :: overlap_x, overlap_y, overlap_z, overlap
   complex*16       :: overlap_x0_1, overlap_y0_1, overlap_z0_1
@@ -49,7 +50,7 @@
 
   !$OMP PARALLEL                                                            &
   !$OMP DEFAULT(NONE)                                                       &
-  !$OMP PRIVATE(i, j, m, n, l, ii, jj, c, aa, xa, C1, C2,                   &
+  !$OMP PRIVATE(i, j, m, n, l, ii, jj, c, aa, xa, lC1, lC2,                 &
   !$OMP         Ae_center, power_A, alpha, alpha_inv, KA2, phiA, Ap_center, &
   !$OMP         Be_center, power_B, beta, beta_inv, KB2, phiB, Bp_center,   &
   !$OMP         deriv_tmp, deriv_tmp_1, deriv_tmp_2,                        &
@@ -105,28 +106,37 @@
 
           c = ao_coef_cgtos_norm_ord_transp(n,j) * ao_coef_cgtos_norm_ord_transp(l,i)
 
-          C1 = exp((0.d0, 1.d0) * (-phiA - phiB) - 0.25d0 * (alpha_inv * KA2 + beta_inv        * KB2))
-          C2 = exp((0.d0, 1.d0) * (-phiA + phiB) - 0.25d0 * (alpha_inv * KA2 + conjg(beta_inv) * KB2))
+          ! logarithms of the plane-wave / phase prefactors, per direction (pairs g_A g_B
+          ! and g_A g_B^*); combined with the Gaussian-product factor in
+          ! overlap_cgaussian_xyz_lpref, so that each 1D factor below includes them
+          do m = 1, 3
+            lC1(m) = (0.d0, 1.d0) * (-ao_expo_phase_ord_transp(m,n,j) - ao_expo_phase_ord_transp(m,l,i))  &
+                   - 0.25d0 * ( alpha_inv * ao_expo_pw_ord_transp(m,n,j) * ao_expo_pw_ord_transp(m,n,j)   &
+                              + beta_inv  * ao_expo_pw_ord_transp(m,l,i) * ao_expo_pw_ord_transp(m,l,i) )
+            lC2(m) = (0.d0, 1.d0) * (-ao_expo_phase_ord_transp(m,n,j) + ao_expo_phase_ord_transp(m,l,i))  &
+                   - 0.25d0 * ( alpha_inv * ao_expo_pw_ord_transp(m,n,j) * ao_expo_pw_ord_transp(m,n,j)   &
+                              + conjg(beta_inv) * ao_expo_pw_ord_transp(m,l,i) * ao_expo_pw_ord_transp(m,l,i) )
+          enddo
 
-          call overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
-                                     Ap_center, Bp_center, overlap_x0_1, overlap_y0_1, overlap_z0_1, overlap, dim1)
-          call overlap_cgaussian_xyz(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
-                                     Ap_center, conjg(Bp_center), overlap_x0_2, overlap_y0_2, overlap_z0_2, overlap, dim1)
+          call overlap_cgaussian_xyz_lpref(Ae_center, Be_center, alpha, beta, power_A, power_B, &
+                                           Ap_center, Bp_center, lC1, overlap_x0_1, overlap_y0_1, overlap_z0_1, overlap, dim1)
+          call overlap_cgaussian_xyz_lpref(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
+                                           Ap_center, conjg(Bp_center), lC2, overlap_x0_2, overlap_y0_2, overlap_z0_2, overlap, dim1)
 
           ! ---
 
           power_A(1) = power_A(1) - 1
           if(power_A(1) > -1) then
-            call overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
-                                       Ap_center, Bp_center, overlap_m1_1, overlap_y, overlap_z, overlap, dim1)
-            call overlap_cgaussian_xyz(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
-                                       Ap_center, conjg(Bp_center), overlap_m1_2, overlap_y, overlap_z, overlap, dim1)
+            call overlap_cgaussian_xyz_lpref(Ae_center, Be_center, alpha, beta, power_A, power_B, &
+                                             Ap_center, Bp_center, lC1, overlap_m1_1, overlap_y, overlap_z, overlap, dim1)
+            call overlap_cgaussian_xyz_lpref(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
+                                             Ap_center, conjg(Bp_center), lC2, overlap_m1_2, overlap_y, overlap_z, overlap, dim1)
             power_A(1) = power_A(1) - 1
             if(power_A(1) > -1) then
-              call overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
-                                         Ap_center, Bp_center, overlap_m2_1, overlap_y, overlap_z, overlap, dim1)
-              call overlap_cgaussian_xyz(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
-                                         Ap_center, conjg(Bp_center), overlap_m2_2, overlap_y, overlap_z, overlap, dim1)
+              call overlap_cgaussian_xyz_lpref(Ae_center, Be_center, alpha, beta, power_A, power_B, &
+                                               Ap_center, Bp_center, lC1, overlap_m2_1, overlap_y, overlap_z, overlap, dim1)
+              call overlap_cgaussian_xyz_lpref(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
+                                               Ap_center, conjg(Bp_center), lC2, overlap_m2_2, overlap_y, overlap_z, overlap, dim1)
             else
               overlap_m2_1 = (0.d0, 0.d0)
               overlap_m2_2 = (0.d0, 0.d0)
@@ -141,15 +151,15 @@
           power_A(1) = power_A(1) + 1
 
           power_A(1) = power_A(1) + 1
-          call overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
-                                     Ap_center, Bp_center, overlap_p1_1, overlap_y, overlap_z, overlap, dim1)
-          call overlap_cgaussian_xyz(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
-                                     Ap_center, conjg(Bp_center), overlap_p1_2, overlap_y, overlap_z, overlap, dim1)
+          call overlap_cgaussian_xyz_lpref(Ae_center, Be_center, alpha, beta, power_A, power_B, &
+                                           Ap_center, Bp_center, lC1, overlap_p1_1, overlap_y, overlap_z, overlap, dim1)
+          call overlap_cgaussian_xyz_lpref(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
+                                           Ap_center, conjg(Bp_center), lC2, overlap_p1_2, overlap_y, overlap_z, overlap, dim1)
           power_A(1) = power_A(1) + 1
-          call overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
-                                     Ap_center, Bp_center, overlap_p2_1, overlap_y, overlap_z, overlap, dim1)
-          call overlap_cgaussian_xyz(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
-                                     Ap_center, conjg(Bp_center), overlap_p2_2, overlap_y, overlap_z, overlap, dim1)
+          call overlap_cgaussian_xyz_lpref(Ae_center, Be_center, alpha, beta, power_A, power_B, &
+                                           Ap_center, Bp_center, lC1, overlap_p2_1, overlap_y, overlap_z, overlap, dim1)
+          call overlap_cgaussian_xyz_lpref(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
+                                           Ap_center, conjg(Bp_center), lC2, overlap_p2_2, overlap_y, overlap_z, overlap, dim1)
           power_A(1) = power_A(1) - 2
 
           aa = dble(power_A(1))
@@ -165,7 +175,7 @@
                       + 8.d0 * alpha * alpha * (xa * overlap_p1_2 + 0.5d0 * overlap_p2_2)
           deriv_tmp_2 = deriv_tmp_2 * overlap_y0_2 * overlap_z0_2
 
-          deriv_tmp = 2.d0 * real(C1 * deriv_tmp_1 + C2 * deriv_tmp_2)
+          deriv_tmp = 2.d0 * real(deriv_tmp_1 + deriv_tmp_2)
 
           ao_deriv2_cgtos_x(i,j) += c * deriv_tmp
 
@@ -173,16 +183,16 @@
 
           power_A(2) = power_A(2) - 1
           if(power_A(2) > -1) then
-            call overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
-                                       Ap_center, Bp_center, overlap_x, overlap_m1_1, overlap_z, overlap, dim1)
-            call overlap_cgaussian_xyz(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
-                                       Ap_center, conjg(Bp_center), overlap_x, overlap_m1_2, overlap_z, overlap, dim1)
+            call overlap_cgaussian_xyz_lpref(Ae_center, Be_center, alpha, beta, power_A, power_B, &
+                                             Ap_center, Bp_center, lC1, overlap_x, overlap_m1_1, overlap_z, overlap, dim1)
+            call overlap_cgaussian_xyz_lpref(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
+                                             Ap_center, conjg(Bp_center), lC2, overlap_x, overlap_m1_2, overlap_z, overlap, dim1)
             power_A(2) = power_A(2) - 1
             if(power_A(2) > -1) then
-              call overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
-                                         Ap_center, Bp_center, overlap_x, overlap_m2_1, overlap_z, overlap, dim1)
-              call overlap_cgaussian_xyz(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
-                                         Ap_center, conjg(Bp_center), overlap_x, overlap_m2_2, overlap_z, overlap, dim1)
+              call overlap_cgaussian_xyz_lpref(Ae_center, Be_center, alpha, beta, power_A, power_B, &
+                                               Ap_center, Bp_center, lC1, overlap_x, overlap_m2_1, overlap_z, overlap, dim1)
+              call overlap_cgaussian_xyz_lpref(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
+                                               Ap_center, conjg(Bp_center), lC2, overlap_x, overlap_m2_2, overlap_z, overlap, dim1)
             else
               overlap_m2_1 = (0.d0, 0.d0)
               overlap_m2_2 = (0.d0, 0.d0)
@@ -197,15 +207,15 @@
           power_A(2) = power_A(2) + 1
 
           power_A(2) = power_A(2) + 1
-          call overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
-                                     Ap_center, Bp_center, overlap_x, overlap_p1_1, overlap_z, overlap, dim1)
-          call overlap_cgaussian_xyz(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
-                                     Ap_center, conjg(Bp_center), overlap_x, overlap_p1_2, overlap_z, overlap, dim1)
+          call overlap_cgaussian_xyz_lpref(Ae_center, Be_center, alpha, beta, power_A, power_B, &
+                                           Ap_center, Bp_center, lC1, overlap_x, overlap_p1_1, overlap_z, overlap, dim1)
+          call overlap_cgaussian_xyz_lpref(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
+                                           Ap_center, conjg(Bp_center), lC2, overlap_x, overlap_p1_2, overlap_z, overlap, dim1)
           power_A(2) = power_A(2) + 1
-          call overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
-                                     Ap_center, Bp_center, overlap_x, overlap_p2_1, overlap_z, overlap, dim1)
-          call overlap_cgaussian_xyz(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
-                                     Ap_center, conjg(Bp_center), overlap_x, overlap_p2_2, overlap_z, overlap, dim1)
+          call overlap_cgaussian_xyz_lpref(Ae_center, Be_center, alpha, beta, power_A, power_B, &
+                                           Ap_center, Bp_center, lC1, overlap_x, overlap_p2_1, overlap_z, overlap, dim1)
+          call overlap_cgaussian_xyz_lpref(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
+                                           Ap_center, conjg(Bp_center), lC2, overlap_x, overlap_p2_2, overlap_z, overlap, dim1)
           power_A(2) = power_A(2) - 2
 
           aa = dble(power_A(2))
@@ -221,7 +231,7 @@
                       + 8.d0 * alpha * alpha * (xa * overlap_p1_2 + 0.5d0 * overlap_p2_2)
           deriv_tmp_2 = deriv_tmp_2 * overlap_x0_2 * overlap_z0_2
 
-          deriv_tmp = 2.d0 * real(C1 * deriv_tmp_1 + C2 * deriv_tmp_2)
+          deriv_tmp = 2.d0 * real(deriv_tmp_1 + deriv_tmp_2)
 
           ao_deriv2_cgtos_y(i,j) += c * deriv_tmp
 
@@ -229,16 +239,16 @@
 
           power_A(3) = power_A(3) - 1
           if(power_A(3) > -1) then
-            call overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
-                                       Ap_center, Bp_center, overlap_x, overlap_y, overlap_m1_1, overlap, dim1)
-            call overlap_cgaussian_xyz(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
-                                       Ap_center, conjg(Bp_center), overlap_x, overlap_y, overlap_m1_2, overlap, dim1)
+            call overlap_cgaussian_xyz_lpref(Ae_center, Be_center, alpha, beta, power_A, power_B, &
+                                             Ap_center, Bp_center, lC1, overlap_x, overlap_y, overlap_m1_1, overlap, dim1)
+            call overlap_cgaussian_xyz_lpref(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
+                                             Ap_center, conjg(Bp_center), lC2, overlap_x, overlap_y, overlap_m1_2, overlap, dim1)
             power_A(3) = power_A(3) - 1
             if(power_A(3) > -1) then
-              call overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
-                                         Ap_center, Bp_center, overlap_x, overlap_y, overlap_m2_1, overlap, dim1)
-              call overlap_cgaussian_xyz(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
-                                         Ap_center, conjg(Bp_center), overlap_x, overlap_y, overlap_m2_2, overlap, dim1)
+              call overlap_cgaussian_xyz_lpref(Ae_center, Be_center, alpha, beta, power_A, power_B, &
+                                               Ap_center, Bp_center, lC1, overlap_x, overlap_y, overlap_m2_1, overlap, dim1)
+              call overlap_cgaussian_xyz_lpref(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
+                                               Ap_center, conjg(Bp_center), lC2, overlap_x, overlap_y, overlap_m2_2, overlap, dim1)
             else
               overlap_m2_1 = (0.d0, 0.d0)
               overlap_m2_2 = (0.d0, 0.d0)
@@ -253,15 +263,15 @@
           power_A(3) = power_A(3) + 1
 
           power_A(3) = power_A(3) + 1
-          call overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
-                                     Ap_center, Bp_center, overlap_x, overlap_y, overlap_p1_1, overlap, dim1)
-          call overlap_cgaussian_xyz(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
-                                     Ap_center, conjg(Bp_center), overlap_x, overlap_y, overlap_p1_2, overlap, dim1)
+          call overlap_cgaussian_xyz_lpref(Ae_center, Be_center, alpha, beta, power_A, power_B, &
+                                           Ap_center, Bp_center, lC1, overlap_x, overlap_y, overlap_p1_1, overlap, dim1)
+          call overlap_cgaussian_xyz_lpref(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
+                                           Ap_center, conjg(Bp_center), lC2, overlap_x, overlap_y, overlap_p1_2, overlap, dim1)
           power_A(3) = power_A(3) + 1
-          call overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
-                                     Ap_center, Bp_center, overlap_x, overlap_y, overlap_p2_1, overlap, dim1)
-          call overlap_cgaussian_xyz(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
-                                     Ap_center, conjg(Bp_center), overlap_x, overlap_y, overlap_p2_2, overlap, dim1)
+          call overlap_cgaussian_xyz_lpref(Ae_center, Be_center, alpha, beta, power_A, power_B, &
+                                           Ap_center, Bp_center, lC1, overlap_x, overlap_y, overlap_p2_1, overlap, dim1)
+          call overlap_cgaussian_xyz_lpref(Ae_center, conjg(Be_center), alpha, conjg(beta), power_A, power_B, &
+                                           Ap_center, conjg(Bp_center), lC2, overlap_x, overlap_y, overlap_p2_2, overlap, dim1)
           power_A(3) = power_A(3) - 2
 
           aa = dble(power_A(3))
@@ -277,7 +287,7 @@
                       + 8.d0 * alpha * alpha * (xa * overlap_p1_2 + 0.5d0 * overlap_p2_2)
           deriv_tmp_2 = deriv_tmp_2 * overlap_x0_2 * overlap_y0_2
 
-          deriv_tmp = 2.d0 * real(C1 * deriv_tmp_1 + C2 * deriv_tmp_2)
+          deriv_tmp = 2.d0 * real(deriv_tmp_1 + deriv_tmp_2)
 
           ao_deriv2_cgtos_z(i,j) += c * deriv_tmp
 

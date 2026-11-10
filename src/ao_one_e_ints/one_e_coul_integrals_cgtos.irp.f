@@ -20,9 +20,9 @@ BEGIN_PROVIDER [double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
   double precision     :: phiB, KB2
   complex*16           :: alpha, alpha_inv, Ae_center(3), Ap_center(3)
   complex*16           :: beta, beta_inv, Be_center(3), Bp_center(3)
-  complex*16           :: C1, C2, I1, I2
+  complex*16           :: lC1, lC2, I1, I2
 
-  complex*16, external :: NAI_pol_mult_cgtos
+  complex*16, external :: NAI_pol_mult_cgtos_lpref
 
 
 
@@ -30,7 +30,7 @@ BEGIN_PROVIDER [double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
 
   !$OMP PARALLEL                                                             &
   !$OMP DEFAULT (NONE)                                                       &
-  !$OMP PRIVATE (i, j, k, l, m, n, ii, jj, C_center, Z, c, C1, C2, I1, I2,   &
+  !$OMP PRIVATE (i, j, k, l, m, n, ii, jj, C_center, Z, c, lC1, lC2, I1, I2, &
   !$OMP          alpha, alpha_inv, Ae_center, Ap_center, phiA, KA2, power_A, &
   !$OMP          beta, beta_inv, Be_center, Bp_center, phiB, KB2, power_B)   &
   !$OMP SHARED (ao_num, ao_prim_num, ao_nucl, nucl_coord,                    &
@@ -72,8 +72,11 @@ BEGIN_PROVIDER [double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
           phiB = ao_expo_phase_ord_transp(4,l,i)
           KB2 = ao_expo_pw_ord_transp(4,l,i)
 
-          C1 = exp((0.d0, 1.d0) * (-phiA - phiB) - 0.25d0 * (alpha_inv        * KA2 + beta_inv * KB2))
-          C2 = exp((0.d0, 1.d0) * ( phiA - phiB) - 0.25d0 * (conjg(alpha_inv) * KA2 + beta_inv * KB2))
+          ! logarithms of the plane-wave / phase prefactors; they are combined with the
+          ! Gaussian-product factor before exponentiation (separately they can overflow
+          ! and underflow, e.g. -k^2 Re(1/zeta)/2 for the diagonal of a primitive)
+          lC1 = (0.d0, 1.d0) * (-phiA - phiB) - 0.25d0 * (alpha_inv        * KA2 + beta_inv * KB2)
+          lC2 = (0.d0, 1.d0) * ( phiA - phiB) - 0.25d0 * (conjg(alpha_inv) * KA2 + beta_inv * KB2)
 
           c = 0.d0
           do k = 1, nucl_num
@@ -82,13 +85,13 @@ BEGIN_PROVIDER [double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
 
             C_center(1:3) = nucl_coord(k,1:3)
 
-            I1 = NAI_pol_mult_cgtos(Ae_center, Be_center, power_A, power_B, alpha, beta, &
-                                    Ap_center, Bp_center, C_center, n_pt_max_integrals)
+            I1 = NAI_pol_mult_cgtos_lpref(Ae_center, Be_center, power_A, power_B, alpha, beta, &
+                                          Ap_center, Bp_center, C_center, n_pt_max_integrals, lC1)
 
-            I2 = NAI_pol_mult_cgtos(conjg(Ae_center), Be_center, power_A, power_B, conjg(alpha), beta, &
-                                    conjg(Ap_center), Bp_center, C_center, n_pt_max_integrals)
+            I2 = NAI_pol_mult_cgtos_lpref(conjg(Ae_center), Be_center, power_A, power_B, conjg(alpha), beta, &
+                                          conjg(Ap_center), Bp_center, C_center, n_pt_max_integrals, lC2)
 
-            c = c - Z * 2.d0 * real(C1 * I1 + C2 * I2)
+            c = c - Z * 2.d0 * real(I1 + I2)
           enddo
 
           ao_integrals_n_e_cgtos(i,j) += c * ao_coef_cgtos_norm_ord_transp(n,j) &
@@ -117,12 +120,40 @@ complex*16 function NAI_pol_mult_cgtos(Ae_center, Be_center, power_A, power_B, a
   END_DOC
 
   implicit none
+
+  integer,          intent(in) :: n_pt_in, power_A(3), power_B(3)
+  double precision, intent(in) :: C_center(3)
+  complex*16,       intent(in) :: alpha, Ae_center(3), Ap_center(3)
+  complex*16,       intent(in) :: beta, Be_center(3), Bp_center(3)
+
+  complex*16, external         :: NAI_pol_mult_cgtos_lpref
+
+  NAI_pol_mult_cgtos = NAI_pol_mult_cgtos_lpref(Ae_center, Be_center, power_A, power_B, alpha, beta, &
+                                                Ap_center, Bp_center, C_center, n_pt_in, (0.d0, 0.d0))
+
+end
+
+! ---
+
+complex*16 function NAI_pol_mult_cgtos_lpref(Ae_center, Be_center, power_A, power_B, alpha, beta, &
+                                             Ap_center, Bp_center, C_center, n_pt_in, lpref)
+
+  BEGIN_DOC
+  !
+  ! $e^{\rm lpref} \langle g_i | \frac{1}{|r-R_c|} | g_j \rangle$ for two primitive cGTOs.
+  ! lpref (the logarithm of the plane-wave / phase prefactor) is added to the exponent of
+  ! the Gaussian-product factor before exponentiation, in crint_sum_shift.
+  !
+  END_DOC
+
+  implicit none
   include 'utils/constants.include.F'
 
   integer,          intent(in) :: n_pt_in, power_A(3), power_B(3)
   double precision, intent(in) :: C_center(3)
   complex*16,       intent(in) :: alpha, Ae_center(3), Ap_center(3)
   complex*16,       intent(in) :: beta, Be_center(3), Bp_center(3)
+  complex*16,       intent(in) :: lpref
 
   integer                      :: i, n_pt, n_pt_out
   double precision             :: dist_AB, dist_AC
@@ -149,9 +180,10 @@ complex*16 function NAI_pol_mult_cgtos(Ae_center, Be_center, power_A, power_B, a
 
   else
 
-    NAI_pol_mult_cgtos = V_n_e_cgtos(power_A(1), power_A(2), power_A(3), &
-                                     power_B(1), power_B(2), power_B(3), &
-                                     alpha, beta)
+    ! same centre, no plane wave: lpref is a pure phase
+    NAI_pol_mult_cgtos_lpref = exp(lpref) * V_n_e_cgtos(power_A(1), power_A(2), power_A(3), &
+                                                        power_B(1), power_B(2), power_B(3), &
+                                                        alpha, beta)
     return
 
   endif
@@ -168,7 +200,7 @@ complex*16 function NAI_pol_mult_cgtos(Ae_center, Be_center, power_A, power_B, a
   ! exp(-const_factor) is not a bound of the integral (Re of the Boys argument can be << 0),
   ! use the bound of the pair modulus instead (see cgaussian_pair_bound)
   if(cgaussian_pair_bound(alpha, beta, Ap_center, Bp_center) < 1d-35) then
-    NAI_pol_mult_cgtos = (0.d0, 0.d0)
+    NAI_pol_mult_cgtos_lpref = (0.d0, 0.d0)
     return
   endif
 
@@ -188,7 +220,7 @@ complex*16 function NAI_pol_mult_cgtos(Ae_center, Be_center, power_A, power_B, a
   n_pt = 2 * ((power_A(1) + power_B(1)) + (power_A(2) + power_B(2)) + (power_A(3) + power_B(3)))
   if(n_pt == 0) then
     d_one(0) = (1.d0, 0.d0)
-    NAI_pol_mult_cgtos = coeff * crint_sum_shift(0, const, d_one, -const_factor)
+    NAI_pol_mult_cgtos_lpref = coeff * crint_sum_shift(0, const, d_one, lpref - const_factor)
     return
   endif
 
@@ -198,11 +230,11 @@ complex*16 function NAI_pol_mult_cgtos(Ae_center, Be_center, power_A, power_B, a
                                           power_A, power_B, C_center, n_pt_in, d, n_pt_out)
 
   if(n_pt_out < 0) then
-    NAI_pol_mult_cgtos = (0.d0, 0.d0)
+    NAI_pol_mult_cgtos_lpref = (0.d0, 0.d0)
     return
   endif
 
-  NAI_pol_mult_cgtos = coeff * crint_sum_shift(n_pt_out, const, d, -const_factor)
+  NAI_pol_mult_cgtos_lpref = coeff * crint_sum_shift(n_pt_out, const, d, lpref - const_factor)
 
   return
 end

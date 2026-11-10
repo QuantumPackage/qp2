@@ -142,6 +142,14 @@ def write_ezfio(trexio_filename, filename):
 
     print("Basis\t\t...\t", end=' ')
 
+    # Oscillating Gaussians (basis.oscillation_kind, e.g. "Cos2" written by export_trexio for cGTOs)
+    # are not imported: refuse instead of silently creating non-oscillating Gaussians.
+    if trexio.has_basis_oscillation_kind(trexio_file):
+        osc_kind = trexio.read_basis_oscillation_kind(trexio_file).strip()
+        if osc_kind not in ("", "None"):
+            print(f"\nError: basis.oscillation_kind = {osc_kind} is not supported by qp_import_trexio")
+            sys.exit(1)
+
     shell_num = 0
     try:
         basis_type = trexio.read_basis_type(trexio_file)

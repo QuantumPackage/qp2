@@ -17,6 +17,8 @@ double precision function ao_value(i, r)
   double precision :: beta
   double precision :: accu, dx, dy, dz, r2
 
+  if (use_cgtos) call cgtos_not_implemented('ao_value (AO values on a grid)')
+
   num_ao = ao_nucl(i)
   power_ao(1:3) = ao_power(i,1:3)
   center_ao(1:3) = nucl_coord(num_ao,1:3)
@@ -96,6 +98,8 @@ subroutine give_all_aos_at_r(r, tmp_array)
   double precision              :: c_ao(3)
   double precision              :: beta
 
+  if (use_cgtos) call cgtos_not_implemented('give_all_aos_at_r (AO values on a grid, DFT)')
+
   do i = 1, nucl_num
 
     c_ao(1:3) = nucl_coord(i,1:3)
@@ -154,6 +158,8 @@ subroutine give_all_aos_and_grad_at_r(r, aos_array, aos_grad_array)
   double precision              :: dx2, dy2, dz2
   double precision              :: center_ao(3)
   double precision              :: beta, accu_1, accu_2, contrib
+
+  if (use_cgtos) call cgtos_not_implemented('give_all_aos_and_grad_at_r (AO values on a grid, DFT)')
 
   do i = 1, nucl_num
 
@@ -243,6 +249,8 @@ subroutine give_all_aos_and_grad_and_lapl_at_r(r, aos_array, aos_grad_array, aos
   double precision              :: dx5, dy5, dz5
   double precision              :: center_ao(3)
   double precision              :: beta, accu_1, accu_2, accu_3, contrib
+
+  if (use_cgtos) call cgtos_not_implemented('give_all_aos_and_grad_and_lapl_at_r (AO values on a grid, DFT)')
 
   do i = 1, nucl_num
 

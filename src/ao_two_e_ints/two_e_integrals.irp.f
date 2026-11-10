@@ -48,6 +48,7 @@ double precision function ao_two_e_integral(i, j, k, l)
 
   if(use_cgtos) then
 
+    if (use_only_lr) call cgtos_not_implemented('long-range (erf) two-electron integrals (use_only_lr)')
     ao_two_e_integral = ao_two_e_integral_cgtos(i, j, k, l)
     return
 

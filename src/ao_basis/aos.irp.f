@@ -439,13 +439,19 @@ BEGIN_PROVIDER [ logical, use_pw ]
   END_DOC
 
   logical :: exist
+  integer :: i, j
 
   use_pw = .false.
 
   call ezfio_has_ao_basis_ao_expo_pw(exist)
   if(exist) then
     PROVIDE ao_expo_pw_ord_transp
-    if(maxval(dabs(ao_expo_pw_ord_transp(4,:,:))) .gt. 1d-15) use_pw = .true.
+    ! explicit loops: a 2D section in maxval creates a temporary array
+    do j = 1, ao_num
+      do i = 1, ao_prim_num_max
+        if(dabs(ao_expo_pw_ord_transp(4,i,j)) .gt. 1d-15) use_pw = .true.
+      enddo
+    enddo
   endif
 
 END_PROVIDER

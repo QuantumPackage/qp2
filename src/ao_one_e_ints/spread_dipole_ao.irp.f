@@ -17,6 +17,7 @@
   double precision :: A_center(3), B_center(3)
   integer :: power_A(3), power_B(3)
   double precision :: lower_exp_val, dx, c,accu_x,accu_y,accu_z
+  call cgtos_not_implemented('ao_spread_x/y/z')
   dim1=500
   lower_exp_val = 40.d0
   ao_spread_x= 0.d0
@@ -90,6 +91,7 @@
   double precision :: A_center(3), B_center(3)
   integer :: power_A(3), power_B(3)
   double precision :: lower_exp_val, dx, c
+  call cgtos_not_implemented('ao_dipole_x/y/z (use the cgtos_dipole plugin)')
   dim1=500
   lower_exp_val = 40.d0
   ao_dipole_x= 0.d0
