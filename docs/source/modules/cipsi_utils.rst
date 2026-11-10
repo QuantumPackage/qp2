@@ -1206,12 +1206,13 @@ Subroutines / functions
 
 
     One task = one walk position: evaluate all pt2_F(g) subsets of the
-    generator g = pt2_J(pos) into pt2_data_I(g), then merge the local
-    selection buffer into the shared one under the single named critical
-    region.  All subsets are accumulated in the same slot in the fixed
-    order j = 1..pt2_F(g): the sums are bit-identical for any schedule
-    (lemma 2).  `b_t%mini' is reset at task entry so that the candidates
-    offered by a task do not depend on which thread ran it (lemma 3).
+    generator g = pt2_J(pos) into pt2_data_I(g), and merge the local
+    selection buffer into the shared one after every subset, under the
+    named critical region.  All subsets are accumulated in the same slot
+    in the fixed order j = 1..pt2_F(g): the sums are bit-identical for any
+    schedule (lemma 2).  The local buffer is empty at the start of every
+    subset, so what a subset offers does not depend on which thread ran it
+    nor on the previous subsets (lemma 3).
 
     Needs:
 
