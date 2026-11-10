@@ -1,5 +1,23 @@
 #+TITLE: Quantum Package Release notes
 
+* Unreleased
+
+** Changes
+
+  - The command-line tools are now written in Rust: ~qp_create_ezfio~,
+    ~qp_edit~, ~qp_run~ (with the task server), ~qp_set_mo_class~,
+    ~qp_tunnel~, ~qp_print_basis~ and ~element_create_db~.  OCaml and
+    OPAM are no longer needed to build or run QP; the Rust toolchain
+    is required instead.
+  - ~configure~ checks ~cargo~ instead of ~ocamlc~, and ~-i ocaml~ is
+    gone.
+  - The ~ninja~ target that builds the tools is now ~rust_target~; the
+    binaries are published under their historical names in ~ocaml/~.
+  - ~qp_edit~ reads the description of the editable parameters from
+    ~data/qp_edit_config/~, generated from the ~EZFIO.cfg~ files at
+    build time.
+  - ~etc/ocaml.rc~ was removed; ~quantum_package.rc~ no longer needs it.
+
 * Version 2.3
 
 ** Changes

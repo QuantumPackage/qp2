@@ -1,0 +1,14 @@
+[package]
+name = "qp-ezfio"
+description = "Native Rust implementation of the EZFIO on-disk format (QP2)"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+flate2 = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+# `NamedTempFile` backs the atomic write path (temp file + rename) for both
+# scalar and gzip-array writes.
+tempfile = { workspace = true }

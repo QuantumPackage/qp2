@@ -1,0 +1,22 @@
+[package]
+name = "qp-input"
+description = "qp_edit config schema, loader, generic engine and handlers (QP2)"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+qp-ezfio = { path = "../qp-ezfio" }
+qp-types = { path = "../qp-types" }
+serde = { workspace = true }
+toml = { workspace = true }
+
+[dev-dependencies]
+# Every use is in a `#[cfg(test)]` module (scratch EZFIO directories); the
+# loader and the handlers never create temporary files at run time.
+tempfile = { workspace = true }
+# The C3 contract is about the *bytes* of each file `read` materialises, and
+# EZFIO stores every array gzipped, so the tests decompress before comparing.
+# `flate2` is already a workspace dependency (qp-ezfio parses those same
+# streams); this adds no crate to the build.
+flate2 = { workspace = true }

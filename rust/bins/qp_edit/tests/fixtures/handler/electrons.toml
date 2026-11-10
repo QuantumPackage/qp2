@@ -1,0 +1,20 @@
+# Minimal handler-owned module used by the hermetic tests.
+# Every field of a handler section is non-editable: the handler owns it.
+
+schema_version = 1
+name = "electrons"
+title = "Electrons"
+section = true
+handler = "electrons"
+source_cfg = "src/electrons/EZFIO.cfg"
+ezfio_dir = ["electrons"]
+
+[[field]]
+provider = "elec_num"
+ezfio_name = "elec_num"
+type = "int"
+interfaces = ["ezfio", "ocaml", "provider"]
+doc = "total number of electrons"
+size = "1"
+default = "1"
+editable = false

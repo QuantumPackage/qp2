@@ -8,10 +8,9 @@ Usage:
     ei_handler.py [--path_module=<module>]
                   [--irpf90]
                   [--ezfio_config]
-                  [--ocaml]
                   [--ezfio_default]
     ei_handler.py list_supported_types
-    ei_handler.py ocaml_global
+    ei_handler.py generate_registry
 
 By default all the option are executed.
 
@@ -21,22 +20,22 @@ Options:
                          which contains all the providers needed
     --ezfio_config  Create the `<module_lower>_ezfio_interface_config` in
                           `${QP_EZFIO}/config/`
-    --ocaml         Create all the stuff needed by *qp_edit*:
-                             -`Input_<module_lower>.ml` and
-                             - <module_lower>_ezfio_interface_default`
-    ocaml_global    Create the *qp_edit*
+    --ezfio_default  Create the `<module_lower>_ezfio_interface_default`
+    generate_registry  Regenerate `data/qp_edit_config/registry.toml`,
+                           the ordered module list the Rust `qp_edit` loads
+                           (build artifact)
 
 Format specification :
 
 Required:
     [<provider_name>]   The name of the provider in irp.f90 and in the EZFIO lib
     doc:<str>           The plain text documentation
-    type:<str>          A Fancy_type supported by the ocaml.
+    type:<str>          A Fancy_type supported by the generator.
                             type `ei_handler.py get_supported_type` for a list
     interface:<str>     The interface is list of string sepeared by ","  which can contain :
                           - ezfio (if you only whant the ezfiolib)
                           - provider (if you want the provider)
-                          - ocaml (if you want the ocaml gestion)
+                          - ocaml (marks the field as editable in `qp_edit`)
 Optional:
     default: <str>      The default value needed,
                             if 'ocaml' is in interface list.
@@ -83,7 +82,9 @@ from os import listdir
 from os.path import isdir, join, exists
 
 
-from qp_path import QP_ROOT, QP_SRC, QP_OCAML, QP_EZFIO
+from qp_path import QP_ROOT, QP_SRC, QP_EZFIO
+
+import qp_edit_config
 
 Type = namedtuple('Type', 'fancy ocaml fortran')
 Module = namedtuple('Module', 'path lower')
@@ -102,11 +103,62 @@ def is_bool(str_):
         raise TypeError
 
 
+#: The `q_ptypes` entries: formerly parsed from
+#: `ocaml/qptypes_generator.ml` (removed in w11 — see git history).  Values
+#: are the `(ocaml, fortran)` pairs that parser produced from that file's
+#: `input_data`, `input_ezfio` and `untouched` sections, verbatim.
+QP_TYPES = {
+    "%s": ("string", "character*(32)"),
+    "AO_basis_name": ("string", "character*32"),
+    "AO_coef": ("float", "double precision"),
+    "AO_expo": ("float", "double precision"),
+    "AO_number": ("int", "integer"),
+    "AO_prim_number": ("int", "integer"),
+    "Bit_kind": ("int", "integer"),
+    "Bit_kind_size": ("int", "integer"),
+    "Det_coef": ("float", "double precision"),
+    "Det_number": ("int", "integer"),
+    "Det_number_max": ("int", "integer"),
+    "Disk_access": ("string", "character*(32)"),
+    "Elec_alpha_number": ("int", "integer"),
+    "Elec_beta_number": ("int", "integer"),
+    "Elec_number": ("int", "integer"),
+    "Energy": ("float", "double precision"),
+    "MD5": ("string", "character*32"),
+    "MO_coef": ("float", "double precision"),
+    "MO_guess": ("string", "character*(32)"),
+    "MO_number": ("int", "integer"),
+    "MO_occ": ("float", "double precision"),
+    "N_int_number": ("int", "integer"),
+    "Negative_float": ("float", "double precision"),
+    "Negative_int": ("int", "integer"),
+    "Non_empty_string": ("string", "character*32"),
+    "Normalized_float": ("float", "double precision"),
+    "Nucl_number": ("int", "integer"),
+    "PT2_energy": ("float", "double precision"),
+    "Perturbation": ("string", "character*(32)"),
+    "Positive_float": ("float", "double precision"),
+    "Positive_int": ("int", "integer"),
+    "Positive_int64": ("int64", "integer*8"),
+    "R_power": ("int", "integer"),
+    "Rst_string": ("string", "character*32"),
+    "S2": ("float", "double precision"),
+    "States_number": ("int", "integer"),
+    "Strictly_negative_float": ("float", "double precision"),
+    "Strictly_negative_int": ("int", "integer"),
+    "Strictly_positive_float": ("float", "double precision"),
+    "Strictly_positive_int": ("int", "integer"),
+    "Threshold": ("float", "double precision"),
+}
+
+
 @cache
 def get_type_dict():
     """
     This function makes the correspondance between the type of value read in
     EZFIO.cfg into the f90 and OCaml type.
+    The fancy-type table now lives in the module-level QP_TYPES literal
+    (provenance: the removed `ocaml/qptypes_generator.ml`).
     return fancy_type[fancy_type] = namedtuple('Type', 'ocaml fortran')
     For example fancy_type['Ndet'].fortran = integer
                                   .ocaml   = int
@@ -142,46 +194,8 @@ def get_type_dict():
     # q p _ t y p e s #
     # ~#~#~#~#~#~#~#~ #
 
-    # Dict to change ocaml LowLevel type into FortranLowLevel type
-    ocaml_to_fortran = {"int": "integer",
-                        "int64": "integer*8",
-                        "float": "double precision",
-                        "logical": "logical",
-                        "string": "character*32"}
-
-    # Read and parse qptype generate
-    src = join(QP_OCAML, "qptypes_generator.ml")
-
-    with open(src, "r") as f:
-        r = f.read()
-
-        # Generate
-        l_gen = [i for i in r.splitlines() if i.strip().startswith("*")]
-
-        # Untouch
-        b = r.find('let untouched = "')
-        e = r.find('let parse_input', b)
-
-        l_un = [i for i in r[b:e].splitlines() if i.strip().startswith("module")]
-
-    # ~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~ #
-    # q p _ t y p e s _ g e n e r a t e #
-    # ~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~ #
-
-    # Read the fancy_type, the ocaml. and convert the ocaml to the fortran
-    for i in l_gen + l_un:
-        str_fancy_type = i.split()[1].strip()
-        str_ocaml_type = i.split()[3]
-
-        if str_ocaml_type != 'sig':
-            str_fortran_type = ocaml_to_fortran[str_ocaml_type]
-        else:
-            str_fortran_type = 'character*(32)'
-            str_ocaml_type = 'string'
-
-        fancy_type[str_fancy_type] = Type(str_fancy_type,
-                                          str_ocaml_type,
-                                          str_fortran_type)
+    for name, (ocaml, fortran) in QP_TYPES.items():
+        fancy_type[name] = Type(name, ocaml, fortran)
 
     fancy_type["MO_class"] = Type("MO_class", "MO_class", "character*(32)")
 
@@ -255,6 +269,10 @@ def get_dict_config_file(module_obj):
             sys.exit(1)
         else:
             d[pvd]["type"] = type_dict[type_]
+            # Keep the declared spelling (e.g. "Threshold" vs "float"): the
+            # qp_edit TOML config stores it verbatim so that the Rust type
+            # table, not the generator, decides how a value is parsed.
+            d[pvd]["type_raw"] = type_
 
         # Fill the dict with REQUIRED information
         try:
@@ -520,127 +538,10 @@ def save_ezfio_default(module_lower, str_ezfio_default):
         f.write(str_ezfio_default)
 
 
-def create_ocaml_input(dict_ezfio_cfg, module_lower):
-
-    # ~#~#~#~# #
-    #  I n i t #
-    # ~#~#~#~# #
-
-    from ezfio_generate_ocaml import EZFIO_ocaml
-
-    l_ezfio_name = []
-    l_type = []
-    l_doc = []
-
-    for k, v in dict_ezfio_cfg.items():
-        if "ocaml" in v['interface']:
-            l_ezfio_name.append(v['ezfio_name'])
-            l_type.append(v["type"])
-            l_doc.append(v["doc"])
-
-    if not l_ezfio_name:
-        raise ValueError
-
-    e_glob = EZFIO_ocaml(l_ezfio_name=l_ezfio_name,
-                         l_type=l_type,
-                         l_doc=l_doc)
-
-    # ~#~#~#~#~#~#~#~# #
-    #  C r e a t i o n #
-    # ~#~#~#~#~#~#~#~# #
-
-    template = ['(* =~=~ *)',
-                '(* Init *)',
-                '(* =~=~ *)',
-                ""]
-
-    template += ["open Qptypes;;",
-                 "open Qputils;;",
-                 "open Sexplib.Std;;",
-                 "",
-                 "module {0} : sig".format(module_lower.capitalize())]
-
-    template += [e_glob.create_type()]
-
-    template += ["  val read  : unit -> t option",
-                 "  val write : t-> unit",
-                 "  val to_string : t -> string",
-                 "  val to_rst : t -> Rst_string.t",
-                 "  val of_rst : Rst_string.t -> t option",
-                 "end = struct"]
-
-    template += [e_glob.create_type()]
-
-    template += ['',
-                 '  let get_default = Qpackage.get_ezfio_default "{0}";;'.format(module_lower),
-                 '']
-
-    template += ['(* =~=~=~=~=~=~==~=~=~=~=~=~ *)',
-                 '(* Generate Special Function *)',
-                 '(* =~=~=~==~=~~=~=~=~=~=~=~=~ *)',
-                 ""]
-
-    for provider_name, d_val in sorted(dict_ezfio_cfg.items()):
-
-        if 'default' not in d_val:
-            continue
-
-        ezfio_dir = d_val["ezfio_dir"]
-        ezfio_name = d_val["ezfio_name"]
-
-        e = EZFIO_ocaml(ezfio_dir=ezfio_dir,
-                        ezfio_name=ezfio_name,
-                        type=d_val["type"])
-
-        template += [e.create_read(),
-                     e.create_write(),
-                     ""]
-
-    template += ['(* =~=~=~=~=~=~=~=~=~=~=~=~ *)',
-                 '(* Generate Global Function *)',
-                 '(* =~=~=~=~=~=~=~=~=~=~=~=~ *)',
-                 ""]
-
-    template += [e_glob.create_read_global(),
-                 e_glob.create_write_global(),
-                 e_glob.create_to_string(),
-                 e_glob.create_to_rst()]
-
-    template += ["  include Generic_input_of_rst;;",
-                 "  let of_rst = of_rst t_of_sexp;;",
-                 "",
-                 "end"]
-
-    result = "\n".join(template)
-    result = result.replace("String.of_string","string_of_string")
-    result = result.replace("String.to_string","string_of_string")
-    result = result.replace("Int.of_string","int_of_string")
-    result = result.replace("Int.to_string","string_of_int")
-    result = result.replace("Float.of_string","float_of_string")
-    result = result.replace("Float.to_string","string_of_float")
-    result = result.replace("Bool.of_string","bool_of_string")
-    result = result.replace("Bool.to_string","string_of_bool")
-    return result
-
-
-def save_ocaml_input(module_lower, str_ocaml_input):
+def get_l_registry_modules():
     """
-    Write the str_ocaml_input in
-    qp_path.QP_OCAML/Input_{0}.ml".format(module_lower)
-    """
-
-    name = "Input_{0}.ml".format(module_lower)
-
-    path = join(QP_OCAML, name)
-
-    with open(path, "w+") as f:
-        f.write(str_ocaml_input)
-
-
-def get_l_module_with_auto_generate_ocaml_lower():
-    """
-    Get all modules which have EZFIO.cfg with OCaml data
-        (NB `search` in all the lines and `match` only in one)
+    The modules the registry lists: every `src/<module>` whose `EZFIO.cfg`
+    declares the `ocaml` interface token (i.e. has `qp_edit`-editable fields).
     """
 
     # ~#~#~#~#~#~#~#~ #
@@ -671,61 +572,6 @@ def get_l_module_with_auto_generate_ocaml_lower():
     return l_module_lower
 
 
-def create_ocaml_input_global(l_module_with_auto_generate_ocaml_lower):
-    """
-    Create the Input_auto_generated.ml and qp_edit.ml str
-    """
-
-    # ~#~#~#~#~#~#~#~# #
-    #  C r e a t i o n #
-    # ~#~#~#~#~#~#~#~# #
-
-    from ezfio_generate_ocaml import EZFIO_ocaml
-
-    path = QP_ROOT + "/scripts/ezfio_interface/qp_edit_template"
-
-    with open(path, "r") as f:
-        template_raw = f.read()
-
-    e = EZFIO_ocaml(l_module_lower=l_module_with_auto_generate_ocaml_lower)
-
-    template = template_raw.format(keywords=e.create_qp_keywords(),
-                                   keywords_to_string=e.create_qp_keywords_to_string(),
-                                   section_to_rst=e.create_qp_section_to_rst(),
-                                   write=e.create_qp_write(),
-                                   tasks=e.create_qp_tasks())
-
-    input_auto = e.create_input_auto_generated()
-
-    return (template, input_auto)
-
-
-def save_ocaml_input_auto(str_ocaml_input_global):
-    """
-    Write the str_ocaml_input in
-    qp_path.QP_OCAML/Input_auto_generated.ml
-    """
-
-    name = "Input_auto_generated.ml"
-    path = join(QP_OCAML, name)
-
-    with open(path, "w+") as f:
-        f.write(str_ocaml_input_global)
-
-
-def save_ocaml_qp_edit(str_ocaml_qp_edit):
-    """
-    Write the str_ocaml_qp_edit in
-    qp_path.QP_OCAML/qp_edit.ml
-    """
-
-    name = "qp_edit.ml"
-    path = join(QP_OCAML, name)
-
-    with open(path, "w+") as f:
-        f.write(str_ocaml_qp_edit)
-
-
 def code_generation(arguments, dict_ezfio_cfg, m):
 
     module_lower = m.lower
@@ -736,7 +582,6 @@ def code_generation(arguments, dict_ezfio_cfg, m):
     # ~#~#~#~#~#~#~#~#~#~ #
     if any([arguments[i] for i in ["--irpf90",
                                    "--ezfio_config",
-                                   "--ocaml",
                                    "--ezfio_default"]]):
         # User changer somme argument, do what he want
         do_all = False
@@ -761,18 +606,19 @@ def code_generation(arguments, dict_ezfio_cfg, m):
         save_ezfio_config(module_lower, str_ezfio_config)
 
     # ~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~ #
-    # O c a m l & e z f i o _ d e f a u l t #
+    # E z f i o _ d e f a u l t #
     # ~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~ #
-    if do_all or arguments["--ocaml"]:
-        try:
-            str_ocaml_input = create_ocaml_input(dict_ezfio_cfg, module_lower)
-        except ValueError:
-            pass
-        else:
-            save_ocaml_input(module_lower, str_ocaml_input)
-
+    if do_all or arguments["--ezfio_default"]:
         str_ezfio_default = create_ezfio_default(dict_ezfio_cfg)
         save_ezfio_default(module_lower, str_ezfio_default)
+
+        # ~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~# #
+        # q p _ e d i t   c o n f i g   (d u a l   e m i s s i o n)         #
+        # ~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~# #
+        # Build artifact: `data/qp_edit_config/<module>.toml`.  Nothing is
+        # written when the module is neither a handler module nor an
+        # `ocaml`-interface module.
+        qp_edit_config.emit_module(m.path, module_lower, dict_ezfio_cfg)
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)
@@ -785,17 +631,16 @@ if __name__ == "__main__":
             print(i)
         sys.exit(0)
 
-    if arguments["ocaml_global"]:
+    if arguments["generate_registry"]:
 
         # ~#~#~#~# #
         #  I n i t #
         # ~#~#~#~# #
 
-        l_module = get_l_module_with_auto_generate_ocaml_lower()
+        l_module = get_l_registry_modules()
 
-        str_ocaml_qp_edit, str_ocaml_input_auto = create_ocaml_input_global(l_module)
-        save_ocaml_input_auto(str_ocaml_input_auto)
-        save_ocaml_qp_edit(str_ocaml_qp_edit)
+        # Ordered module list for the Rust editor (build artifact).
+        qp_edit_config.save_registry(qp_edit_config.registry_text(l_module))
         sys.exit(0)
 
     # ~#~#~#~#~#~#~#~#~#~#~#~#~#~# #

@@ -2,7 +2,7 @@
 
 Repo root = this directory. `VERSION` = 2.3.1. Determinant-driven
 quantum-chemistry suite: **Fortran + IRPF90** code generation for the compute
-part, **OCaml** for the CLI / EZFIO bindings / ZMQ task server, **EZFIO** for
+part, **Rust** for the CLI / EZFIO bindings / ZMQ task server, **EZFIO** for
 the data model, **Ninja** for the build.
 
 Authoritative in-tree references (prefer them over guessing):
@@ -34,7 +34,6 @@ Online: <https://quantum-package.readthedocs.io> (manual) and
    Edit the source, then build; never patch generated output.
 4. Never edit generated files: root `build.ninja`, `config/build.ninja`,
    `config/qp_create_ninja.pickle`, `data/executables`, `ocaml/*.native`,
-   `ocaml/qp_edit.ml`, `ocaml/Input_*.ml`, `ocaml/Qptypes.ml`, `ocaml/ezfio.ml`,
    `lib/`, `share/`.
 5. **Ask the user before any git commit.**
 6. Match `conventions.rst`: no tabs, ≤80 columns, single-quoted Fortran
@@ -46,10 +45,10 @@ Online: <https://quantum-package.readthedocs.io> (manual) and
 ```
 src/<module>/          75 core modules (see §4 for the anatomy)
 plugins/local/<name>/  28 in-tree plugins; installed = symlinked into src/
-ocaml/                 OCaml: qp_run, qp_create_ezfio, qp_edit, TaskServer, EZFIO bindings
+ocaml/                 Makefile: the Rust tool-layer build wrapper (binary symlinks, `data/qp_edit_config` registry)
 scripts/compilation/   qp_create_ninja (build graph), qp_path.py, read_compilation_cfg.py
 scripts/module/        module_handler.py (NEED genealogy, clean/tidy), create_executables_list.sh
-scripts/ezfio_interface/ ei_handler.py, qp_edit_template
+scripts/ezfio_interface/ ei_handler.py, qp_edit_config.py
 scripts/utility/       qp_path.py and misc
 bin/                   hand-written qp_* commands — NOTE: `bin/` is in .gitignore,
                        a new file there needs `git add -f`
@@ -70,8 +69,8 @@ external/              git submodules: ezfio, irpf90, qp2-dependencies
 
 ```bash
 source quantum_package.rc      # or: ./bin/qpsh   (interactive QP shell)
-ninja                          # root: build every module, then the OCaml tools
-ninja                          # inside a module dir: build that module + OCaml tools
+ninja                          # root: build every module, then the Rust tool layer
+ninja                          # inside a module dir: build that module + Rust tool layer
 ninja -f $QP_ROOT/config/build.ninja module_<name>   # build one module from anywhere
 make                           # == source quantum_package.rc; ninja
 ```
@@ -80,15 +79,14 @@ make                           # == source quantum_package.rc; ninja
   `build.ninja`, `config/build.ninja`, `etc/00.qp_root.rc`, and the
   `src/gpu_arch` symlink. Only run it when the user asks.
 - Before all that, `configure` checks: `irpf90`, `ninja`, `cmake`, ZeroMQ
-  (`-lzmq`) + f77zmq, TREXIO (`-ltrexio`), GMP, zlib, `ocamlc`, the python
+  (`-lzmq`) + f77zmq, TREXIO (`-ltrexio`), zlib, the python
   packages `docopt` and `resultsFile`, SimpleGPU (`-lsimple_gpu-cpu`), and
   BLAS/LAPACK through the compilation config. Missing dependencies are
   installed with `./configure -i <pkg>` (or `-i all`), where `<pkg>` is one of:
-  armadillo, bats, bse, cmake, docopt, f77zmq, gmp, libcint, ninja, ocaml,
-  openorb, qmckl, simple_gpu, trexio, zeromq, zlib (plus the variants
-  `trexio-nohdf5` and `qmckl-intel`). `irpf90` and `ezfio` are *submodules*,
-  not `-i` targets — the tab-completion in `etc/configure.rc` misleadingly
-  lists them.
+  armadillo, bats, bse, cmake, docopt, f77zmq, libcint, ninja, openorb,
+  qmckl, simple_gpu, trexio, zeromq, zlib (plus the variants `trexio-nohdf5`
+  and `qmckl-intel`). `irpf90` and `ezfio` are *submodules*, not `-i` targets —
+  the tab-completion in `etc/configure.rc` misleadingly lists them.
   (Note: INSTALL.rst no longer offers the `conda env create -f qp2.yml` path,
   since `qp2.yml` is not tracked in the repo.)
 - **Intel `ifx` is not recommended** (verified by the maintainer,
@@ -116,7 +114,8 @@ A module is a directory in `src/` containing:
   (so grep inside a module can show code from other modules: use `git grep`).
 - `README.rst` — included in the Sphinx docs.
 - `EZFIO.cfg` — control parameters (see §6); generates
-  `ezfio_interface.irp.f` and the OCaml bindings.
+  `ezfio_interface.irp.f`, the EZFIO config/default tables, and the
+  `data/qp_edit_config/` editor entries.
 - `*.irp.f` — IRPF90 sources, including `program` blocks. File basename ==
   executable name, so `program fci` must live in `fci.irp.f`.
 - `*.template.f`, `*.include.f` — IRPF90 codelet templates (see §5).
@@ -195,10 +194,11 @@ size: (determinants.n_det)        # arrays only; note the dot: module.value
 
 - `interface` may be `ezfio` (Fortran I/O API `ezfio_get_<module>_<param>` /
   `ezfio_set_…`), `provider` (an IRPF90 provider with the parameter name),
-  `ocaml` (bindings + `default:` required for scalars).
-- Types come from the OCaml side; list them with `ei_handler.py list_supported_types`.
+  `ocaml` (editable in `qp_edit`; `default:` required for scalars).
+- Types are the generator's fancy types (historically OCaml's); list them
+  with `ei_handler.py list_supported_types`.
 - Adding a parameter and building is enough: `ezfio_interface.irp.f` and the
-  `qp_edit`/`Input_*` OCaml files are regenerated. Never commit them.
+  `data/qp_edit_config/` tables are regenerated. Never commit them.
 
 Command line: `qp set <module> <param> <value>`, `qp get …`, `qp has …`,
 `qp set_file <dir>`, `qp edit <dir>` (interactive editor), `qp reset`.
@@ -280,7 +280,7 @@ Compute programs are run through `qp_run <name> <ezfio>`:
   (`mol_properties`: dipole, spin density, …).
 - Interfacing: `fcidump`, `fcidump_pyscf`, `molden`, `export_trexio_*`,
   `import_trexio_*`, `qp_convert_output_to_ezfio`.
-- Parallelism: `qp_run` starts an OCaml `TaskServer`; masters spawn
+- Parallelism: `qp_run` starts the ZMQ `TaskServer`; masters spawn
   in-process slaves and accept remote ones (`qp_run -s`, `qp_tunnel`).
   The ZMQ address is `$EZFIO/work/qp_run_address`; slave code paths are
   selected by `is_zmq_slave`. MPI builds use `config/gfortran_mpi.cfg`

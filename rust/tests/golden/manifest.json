@@ -1,0 +1,219 @@
+{
+  "format": 1,
+  "generator": "rust/tools/golden-harness/golden_harness.py",
+  "reference": {
+    "git_commit": "be4b71c1f2dca9046453638a7c48232bac8eb1a0",
+    "git_dirty_paths": [
+      " M external/ezfio",
+      " M external/irpf90",
+      " M src/cipsi/NEED",
+      " M src/cipsi/stochastic_cipsi.irp.f",
+      " M src/cipsi_utils/pt2_stoch_routines.irp.f",
+      " M src/cipsi_utils/zmq_selection.irp.f",
+      "?? etc/00.qp_root.rc",
+      "?? etc/kw.log",
+      "?? plugins/qp_plugins_scemama/",
+      "?? src/cipsi_utils/selection_census.irp.f",
+      "?? src/rydberg_diag/",
+      "?? src/rydberg_scan/",
+      "?? tests/input/b2_stretched.ezfio/",
+      "?? tmp/"
+    ],
+    "ezfio_version": "2.0.8"
+  },
+  "env": {
+    "OMP_NUM_THREADS": "1"
+  },
+  "normalisation": {
+    "excluded_paths": [
+      "ezfio/creation",
+      "ezfio/user",
+      "ezfio/library"
+    ],
+    "snapshot_skipped_dirs": [
+      "work"
+    ],
+    "gzip": "recompressed with mtime=0, level=9; the decompressed payload is the oracle",
+    "output_noise_patterns": [
+      "^Date: ",
+      "^Wall time: ",
+      "^Git (Commit|Date  |SHA1  ): ",
+      "^Task server running : ",
+      "^\\.\\. >>>>> \\[ ",
+      "^\\* Total available memory \\(GB\\)",
+      "^\\* Target maximum memory \\(GB\\)",
+      "^\\s*Time to provide "
+    ]
+  },
+  "fixtures": [
+    {
+      "name": "h2",
+      "notes": "H2, cc-pvdz, singlet; the smallest possible directory.",
+      "inputs": [
+        "h2_1.xyz"
+      ],
+      "create": [
+        "qp_create_ezfio",
+        "-b",
+        "cc-pvdz",
+        "-o",
+        "ezfio",
+        "h2_1.xyz"
+      ],
+      "post": [],
+      "scenarios": [
+        "create",
+        "check"
+      ]
+    },
+    {
+      "name": "h3",
+      "notes": "H3, cc-pvdz, multiplicity 2 (open shell, 3 electrons).",
+      "inputs": [
+        "h3_2.xyz"
+      ],
+      "create": [
+        "qp_create_ezfio",
+        "-b",
+        "cc-pvdz",
+        "-m",
+        "2",
+        "-o",
+        "ezfio",
+        "h3_2.xyz"
+      ],
+      "post": [],
+      "scenarios": [
+        "create",
+        "check"
+      ]
+    },
+    {
+      "name": "c2h2",
+      "notes": "C2H2, cc-pvdz_ecp_bfd with the bfd pseudopotential.",
+      "inputs": [
+        "c2h2.xyz"
+      ],
+      "create": [
+        "qp_create_ezfio",
+        "-b",
+        "cc-pvdz_ecp_bfd",
+        "-p",
+        "bfd",
+        "-o",
+        "ezfio",
+        "c2h2.xyz"
+      ],
+      "post": [],
+      "scenarios": [
+        "create",
+        "check"
+      ]
+    },
+    {
+      "name": "b2",
+      "notes": "B2 at 3.0 Angstrom, 6-31g, from a Gaussian Z-matrix (the Z-matrix input path).",
+      "inputs": [
+        "b2_stretched.zmt"
+      ],
+      "create": [
+        "qp_create_ezfio",
+        "-b",
+        "6-31g",
+        "-o",
+        "ezfio",
+        "b2_stretched.zmt"
+      ],
+      "post": [],
+      "scenarios": [
+        "create",
+        "check"
+      ]
+    },
+    {
+      "name": "h2g",
+      "notes": "H2, cc-pvdz, one ghost atom X at the bond midpoint (-g 5.0); exercises zero nuclear charge.",
+      "inputs": [
+        "h2_1.xyz"
+      ],
+      "create": [
+        "qp_create_ezfio",
+        "-b",
+        "cc-pvdz",
+        "-g",
+        "5.0",
+        "-o",
+        "ezfio",
+        "h2_1.xyz"
+      ],
+      "post": [],
+      "scenarios": [
+        "create",
+        "check"
+      ]
+    },
+    {
+      "name": "hcn",
+      "notes": "HCN, aug-cc-pvdz, converged SCF MOs.  Carries the ao_md5 / mo_basis/ao_md5 pair of the D4 contract.",
+      "inputs": [
+        "hcn.xyz"
+      ],
+      "create": [
+        "qp_create_ezfio",
+        "-b",
+        "aug-cc-pvdz",
+        "-o",
+        "ezfio",
+        "hcn.xyz"
+      ],
+      "post": [
+        [
+          "qp_run",
+          "scf",
+          "ezfio"
+        ]
+      ],
+      "scenarios": [
+        "create",
+        "check"
+      ]
+    }
+  ],
+  "contracts": {
+    "check_mode": "contracts/check-mode.md",
+    "check_mutated": "contracts/check-mutated.json"
+  },
+  "md5": {
+    "file": "md5/basis-md5.jsonl",
+    "bases": [
+      "sto-3g",
+      "3-21g",
+      "6-31g",
+      "6-31g_star",
+      "6-31g_star_star",
+      "6-31+g_star",
+      "6-311g",
+      "6-311G_star",
+      "6-311++g_3df_3pd",
+      "m6-31g",
+      "cc-pvdz",
+      "cc-pvtz",
+      "cc-pvqz",
+      "aug-cc-pvdz",
+      "aug-cc-pvtz",
+      "d-aug-cc-pvdz",
+      "cc-pcvdz",
+      "cc-pwcvdz",
+      "ano-rcc",
+      "def2-svp",
+      "def2-tzvpp",
+      "lanl08",
+      "lanl08+",
+      "cc-pvdz_ecp_bfd",
+      "cc-pvdz_ecp_ccecp",
+      "aug-cc-pvtz_ecp_bfd",
+      "aug-cc-pvtz_ecp_ccecp"
+    ],
+    "count": 27
+  }
+}

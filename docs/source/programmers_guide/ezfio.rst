@@ -79,8 +79,10 @@ Required
 
   * ``ezfio``: the parameter is stored in the |EZFIO| directory;
   * ``provider``: an |IRPF90| provider is generated;
-  * ``ocaml``: the parameter is bound to the |OCaml| tools
-    (in particular :command:`qp edit`).
+  * ``ocaml``: the parameter is bound to the command-line tools
+    (in particular :command:`qp edit`); the name is historical.  This
+    is what makes the parameter appear in the configuration read by
+    :command:`qp edit` (see :ref:`rust_tooling`).
 
 Optional
 --------
@@ -113,9 +115,12 @@ When a module is compiled, the build system runs the generator
 * the :file:`<module>.ezfio_interface_config` file in the |EZFIO|
   configuration directory (:file:`$QP_ROOT/external/ezfio/config/`),
   which tells the |EZFIO| library which parameters the group holds;
-* the :file:`ocaml/Input_<module>.ml` file and the default value file
+* the :file:`ocaml/Input_<module>.ml` file, which the generator still
+  emits but which the build no longer uses;
+* the :file:`data/qp_edit_config/<module>.toml` file and the default
+  value file
   (:file:`$QP_ROOT/data/ezfio_defaults/<module>.ezfio_interface_default`)
-  that feed :command:`qp edit`.
+  that feed :command:`qp edit` (see :ref:`rust_tooling`).
 
 These files are never edited by hand: they are regenerated at each
 build, so any manual edit is simply lost. The way to change the

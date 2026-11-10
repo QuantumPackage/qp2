@@ -1,0 +1,31 @@
+# Minimal valid module used by the hermetic tests.
+# `elec_alpha_num` is editable (it declares the `ocaml` interface);
+# `elec_num` is not (it has no `ocaml` interface and a formula default).
+
+schema_version = 1
+name = "electrons"
+title = "Electrons"
+section = true
+source_cfg = "src/electrons/EZFIO.cfg"
+ezfio_dir = ["electrons"]
+
+[[field]]
+provider = "elec_alpha_num"
+ezfio_name = "elec_alpha_num"
+type = "Positive_int"
+interfaces = ["ezfio", "ocaml", "provider"]
+doc = "Numbers of electrons alpha (\"up\")"
+size = "1"
+default = "0"
+editable = true
+
+[[field]]
+provider = "elec_num"
+ezfio_name = "elec_num"
+type = "Positive_int"
+interfaces = ["ezfio"]
+doc = "Numbers total of electrons (alpha + beta)"
+size = "1"
+default = "= electrons.elec_alpha_num + electrons.elec_beta_num"
+default_is_formula = true
+editable = false
