@@ -1,0 +1,84 @@
+# QP2 bats suite + Rust workspace tests (plan D7 / T0.7).
+#
+# Today no GHA workflow runs the bats suite: compilation.yml only
+# configures and compiles, and configuration.yml builds the cache this
+# job restores. .drone.yml runs `TRAVIS=1 qp_test -a` but its liveness is
+# unverified. This is the first workflow to run the acceptance gate;
+# keep the golden-harness step as a permanent CI stage after cutover
+# (plan §8: qp_test is thin, the fixture-diff harness is load-bearing).
+
+name: QP Test
+
+on:
+  push:
+    branches:
+    - rust-rewrite
+    - "rust-rewrite-*"
+  pull_request:
+    branches:
+    - rust-rewrite
+    - "rust-rewrite-*"
+
+jobs:
+
+  cargo-test:
+    name: Rust workspace
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Rust (pinned by rust/rust-toolchain.toml)
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: cargo test
+        run: cargo test --workspace
+      - name: cargo clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+  qp-test:
+    name: Full build + qp_test -a
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Restore configuration (built by the configuration.yml workflow)
+        uses: actions/cache@v3
+        continue-on-error: false
+        with:
+          key: qp2-config
+          fail-on-cache-miss: true
+          path: |
+            include/
+            lib/
+            lib64/
+            libexec/
+          restore-keys: qp2-
+      - name: install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y --fix-missing --no-install-recommends  gfortran gcc liblapack-dev libblas-dev wget python3 make m4 pkg-config
+      - name: Install Rust toolchain
+        run: rustup toolchain install 1.92.0 --profile minimal --component rustfmt,clippy
+      - name: Configuration
+        run: |
+             ./configure -i ninja || :
+             ./configure -i docopt || :
+             ./configure -i resultsFile || :
+             ./configure -i bats || :
+             ./configure -i trexio-nohdf5 || :
+             ./configure -i qmckl || :
+             ./configure -i simple_gpu || :
+             ./configure -c ./config/gfortran_debug.cfg
+      - name: Compilation
+        run: |
+             bash -c "source quantum_package.rc ; exec ninja"
+      - name: bats suite (qp_test -a)
+        run: |
+             bash -c "source quantum_package.rc ; TRAVIS=1 exec qp_test -a"
+      - name: Golden corpus self-verify (fresh build vs corpus)
+        run: |
+             bash -c "source quantum_package.rc ; \
+                      exec python3 rust/tools/golden-harness/golden_harness.py \
+                        verify --qp-root \$PWD"

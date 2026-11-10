@@ -37,12 +37,6 @@ jobs:
        - name: f77zmq
          run: |
               ./configure -i f77zmq || echo OK
-       - name: gmp
-         run: |
-              ./configure -i gmp || echo OK
-       - name: ocaml
-         run: |
-              ./configure -i ocaml || echo OK
        - name: docopt
          run: |
               ./configure -i docopt || echo OK
@@ -69,7 +63,6 @@ jobs:
          with:
            key: qp2-config
            path: |
-             external/opampack/
              include/
              lib/
              lib64/

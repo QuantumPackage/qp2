@@ -1,0 +1,51 @@
+{
+  "format": 1,
+  "command": ["qp_edit", "-c", "ezfio"],
+  "description": "Files that `qp_edit -c` creates in an EZFIO directory, per fixture. Paths are EZFIO paths (.gz kept). Both lists were transcribed from the source, not observed: post-fix is the Rust target (commit 32c9899d, 15e725aa on origin/qp-edit-fix); pre-fix is what the reference OCaml build at be4b71c1 does and is kept as evidence. The prose contract is contracts/check-mode.md. post-fix-changed is a one-way allowance for that normalisation, listing the existing files the port's post-fix build may change: since w12, `qp_edit -c` applies the nuclei section, and the committed c2h2/b2 `nuclei/nucl_coord` payloads -- produced by the reference pre-15e725aa multiply-by-reciprocal Angstrom-to-bohr conversion -- are 1 ulp off the port's divide-by-K form (the 15e725aa fix, in the port since w9) at the 16th significant digit, exposed by the %24.15e storage text (display-invisible at the 8-decimal Angstrom print, one-time, idempotent). The pin is one-way: a toolset that applies the normalisation must produce exactly the stored payload (transcripts/<name>/changed/, storage convention of transcripts/<name>/added/: decompressed, .gz suffix stripped) in both the check and the create scenarios; a toolset that does not apply it (the reference build in CI, whose multiply pipeline is the corpus's own fixed point) leaves the files untouched and passes. The negative side (that the port does apply it) is enforced by the port's own test suite (check_mode.rs c2, which also asserts the change is real), not by the harness. The fixtures are deliberately NOT regenerated: the CI golden step runs the reference build against this corpus, and regenerating at the port's divide values would fail the reference's own create self-verify.",
+  "post-fix": {
+    "h2": [],
+    "h3": [],
+    "c2h2": [],
+    "b2": [],
+    "h2g": [],
+    "hcn": [
+      "determinants/bit_kind",
+      "determinants/expected_s2",
+      "determinants/mo_label",
+      "determinants/n_int",
+      "determinants/psi_coef.gz",
+      "determinants/psi_det.gz",
+      "determinants/state_average_weight.gz"
+    ]
+  },
+  "pre-fix": {
+    "h2": [],
+    "h3": [],
+    "c2h2": [],
+    "b2": [],
+    "h2g": [],
+    "hcn": [
+      "determinants/bit_kind",
+      "determinants/expected_s2",
+      "determinants/mo_label",
+      "determinants/n_int",
+      "determinants/psi_coef.gz",
+      "determinants/psi_coef_qp_edit.gz",
+      "determinants/psi_det.gz",
+      "determinants/psi_det_qp_edit.gz",
+      "determinants/state_average_weight.gz"
+    ]
+  },
+  "post-fix-changed": {
+    "h2": [],
+    "h3": [],
+    "c2h2": [
+      "nuclei/nucl_coord.gz"
+    ],
+    "b2": [
+      "nuclei/nucl_coord.gz"
+    ],
+    "h2g": [],
+    "hcn": []
+  }
+}

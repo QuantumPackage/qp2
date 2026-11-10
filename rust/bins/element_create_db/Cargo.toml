@@ -1,0 +1,12 @@
+[package]
+name = "element_create_db"
+description = "QP2 element_create_db — Rust port (P4)"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+qp-types = { path = "../../crates/qp-types" }
+
+[dev-dependencies]
+tempfile = { workspace = true }

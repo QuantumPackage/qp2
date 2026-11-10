@@ -1,0 +1,110 @@
+  0   X Ghost 0.000000
+  1   H Hydrogen 1.007900
+  2  He Helium 4.002602
+  3  Li Lithium 6.941000
+  4  Be Beryllium 9.012183
+  5   B Boron 10.810000
+  6   C Carbon 12.011000
+  7   N Nitrogen 14.006700
+  8   O Oxygen 15.999400
+  9   F Fluorine 18.998403
+ 10  Ne Neon 20.179700
+ 11  Na Sodium 22.989769
+ 12  Mg Magnesium 24.305000
+ 13  Al Aluminum 26.981538
+ 14  Si Silicon 28.085500
+ 15   P Phosphorus 30.973762
+ 16   S Sulfur 32.060000
+ 17  Cl Chlorine 35.453000
+ 18  Ar Argon 39.948000
+ 19   K Potassium 39.098300
+ 20  Ca Calcium 40.078000
+ 21  Sc Scandium 44.955908
+ 22  Ti Titanium 47.867000
+ 23   V Vanadium 50.941500
+ 24  Cr Chromium 51.996100
+ 25  Mn Manganese 54.938044
+ 26  Fe Iron 55.845000
+ 27  Co Cobalt 58.933194
+ 28  Ni Nickel 58.693400
+ 29  Cu Copper 63.546000
+ 30  Zn Zinc 65.380000
+ 31  Ga Gallium 69.723000
+ 32  Ge Germanium 72.630000
+ 33  As Arsenic 74.921595
+ 34  Se Selenium 78.971000
+ 35  Br Bromine 79.904000
+ 36  Kr Krypton 83.798000
+ 37  Rb Rubidium 85.467800
+ 38  Sr Strontium 87.620000
+ 39   Y Yttrium 88.905840
+ 40  Zr Zirconium 91.224000
+ 41  Nb Niobium 92.906370
+ 42  Mo Molybdenum 95.950000
+ 43  Tc Technetium 98.000000
+ 44  Ru Ruthenium 101.070000
+ 45  Rh Rhodium 102.905500
+ 46  Pd Palladium 106.420000
+ 47  Ag Silver 107.868200
+ 48  Cd Cadmium 112.414000
+ 49  In Indium 114.818000
+ 50  Sn Tin 118.710000
+ 51  Sb Antimony 121.760000
+ 52  Te Tellurium 127.600000
+ 53   I Iodine 126.904470
+ 54  Xe Xenon 131.293000
+ 55  Cs Cesium 132.905452
+ 56  Ba Barium 137.327000
+ 57  La Lanthanum 138.905470
+ 58  Ce Cerium 140.116000
+ 59  Pr Praseodymium 140.907660
+ 60  Nd Neodymium 144.242000
+ 61  Pm Promethium 145.000000
+ 62  Sm Samarium 150.360000
+ 63  Eu Europium 151.964000
+ 64  Gd Gadolinium 157.250000
+ 65  Tb Terbium 158.925350
+ 66  Dy Dysprosium 162.500000
+ 67  Ho Holmium 164.930330
+ 68  Er Erbium 167.259000
+ 69  Tm Thulium 168.934220
+ 70  Yb Ytterbium 173.045000
+ 71  Lu Lutetium 174.966800
+ 72  Hf Hafnium 178.490000
+ 73  Ta Tantalum 180.947880
+ 74   W Tungsten 183.840000
+ 75  Re Rhenium 186.207000
+ 76  Os Osmium 190.230000
+ 77  Ir Iridium 192.217000
+ 78  Pt Platinum 195.084000
+ 79  Au Gold 196.966569
+ 80  Hg Mercury 200.592000
+ 81  Tl Thallium 204.380000
+ 82  Pb Lead 207.200000
+ 83  Bi Bismuth 208.980400
+ 84  Po Polonium 209.000000
+ 85  At Astatine 210.000000
+ 86  Rn Radon 222.000000
+ 87  Fr Francium 223.000000
+ 88  Ra Radium 226.000000
+ 89  Ac Actinium 227.000000
+ 90  Th Thorium 232.037700
+ 91  Pa Protactinium 231.035880
+ 92   U Uranium 238.028910
+ 93  Np Neptunium 237.000000
+ 94  Pu Plutonium 244.000000
+ 95  Am Americium 243.000000
+ 96  Cm Curium 247.000000
+ 97  Bk Berkelium 247.000000
+ 98  Cf Californium 251.000000
+ 99  Es Einsteinium 252.000000
+100  Fm Fermium 257.000000
+101  Md Mendelevium 258.000000
+102  No Nobelium 259.000000
+103  Lr Lawrencium 262.000000
+104  Rf Rutherfordium 267.000000
+105  Db Dubnium 270.000000
+106  Sg Seaborgium 269.000000
+107  Bh Bohrium 270.000000
+108  Hs Hassium 270.000000
+109  Mt Meitnerium 278.000000

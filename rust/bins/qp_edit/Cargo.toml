@@ -1,0 +1,21 @@
+[package]
+name = "qp_edit"
+description = "QP2 qp_edit — Rust port (P4)"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true }
+qp-ezfio = { path = "../../crates/qp-ezfio" }
+qp-input = { path = "../../crates/qp-input" }
+qp-types = { path = "../../crates/qp-types" }
+tempfile = { workspace = true }
+
+[dev-dependencies]
+# The config tests round-trip the serde model through TOML, and the C3
+# contract compares the *decompressed* bytes of the files a read
+# materialises.  Both crates are already workspace dependencies (qp-input
+# and qp-ezfio use them), so this adds nothing to the build.
+flate2 = { workspace = true }
+toml = { workspace = true }

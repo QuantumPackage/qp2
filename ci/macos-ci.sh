@@ -2,18 +2,20 @@
 #
 # ci/macos-ci.sh — build QP2 on a GitHub-hosted macOS arm64 runner (build only).
 #
-# Builds every C/Fortran target (`ninja all`). The OCaml tools target is NOT
-# built: the in-tree opampack ships OCaml 4.12 (2023) while the OCaml code
-# needs >= 5.0, so a fresh OCaml build from opampack fails on EVERY platform
-# (upstream gap, independent of macOS). `ocamlc` must still exist, because
-# configure's validation block requires `find_exe ocamlc`: the workflow gets
-# it from a Homebrew bottle instead of `-i ocaml` (298 s of source build).
+# Builds every C/Fortran target (`ninja all`) and the Rust tool layer
+# (`ninja rust_target`), which replaced the OCaml tools. `ninja rust_target`
+# runs `make -C ocaml`, i.e. `cargo build --release` plus the symlinks under
+# the historical names (`qp_run.native`, ...) and the `data/executables`
+# table. The Rust toolchain is installed by the workflow (rustup 1.92.0,
+# pinned by `rust/rust-toolchain.toml`); configure's validation block
+# requires `cargo`.
 #
 # How `./configure` behaves (matters for this script):
 #   - `-i` takes a single string that is split on spaces; `-i all` expands to
-#     (cmake zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats
+#     (cmake zlib ninja zeromq f77zmq docopt resultsFile bats
 #     trexio armadillo openorb simple_gpu). qmckl is NOT in `all`, and this
-#     script passes that list explicitly to omit `ocaml`.
+#     script passes that list explicitly. There is no `ocaml` package any
+#     more: the Rust tool layer replaced the OCaml tools.
 #   - `-i <pkg>` always reinstalls; it never checks whether the library is
 #     already present. That is why a cache hit has to skip this stage
 #     entirely rather than rely on the installed tree being seen.
@@ -32,7 +34,7 @@
 #      gcc-ranlib-NN: with a plain `gcc-*` glob, sort -V picks gcc-ranlib-NN,
 #      which "compiles" conftests as a silent no-op (autotools then report
 #      "C compiler cannot create executables"). The shim must stay global:
-#      it is needed by the zlib/zeromq/gmp/trexio/qmckl builds AND by the
+#      it is needed by the zlib/zeromq/trexio/qmckl builds AND by the
 #      gate's find_lib link tests, which invoke bare `gcc`.
 #   2. qmckl is built AFTER the dependency list, not before: it links against
 #      trexio (AC_CHECK_LIB trexio_open), which that stage installs.
@@ -45,8 +47,8 @@
 # passes on this platform, so the step completes through `make install`.
 #
 # Prerequisites: gfortran, a versioned Homebrew gcc (gcc-NN/g++-NN), hdf5,
-# pkg-config and ocaml, installed by the workflow; cmake, wget and the
-# autoconf toolchain ship with the GitHub runner image.
+# pkg-config and the Rust toolchain, installed by the workflow; cmake, wget and
+# the autoconf toolchain ship with the GitHub runner image.
 
 set -euo pipefail
 
@@ -54,6 +56,7 @@ ROOT=$(cd "$(dirname "$0")/.." && pwd)
 cd "$ROOT"
 
 export PATH=/opt/homebrew/bin:$PATH
+export PATH="$HOME/.cargo/bin:$PATH"
 export QP_ROOT="$ROOT"
 
 # Global gcc/g++ shim (see header, item 1).
@@ -70,13 +73,11 @@ export PATH="$SHIM:$PATH"
 # expected to fail: tolerate it. The real gate is the one at the end of [2/4],
 # where every dependency exists.
 
-# `configure -i all` minus `ocaml`: the OCaml toolchain is only needed so that
-# configure's validation gate finds `ocamlc` (the OCaml tools target is not
-# part of `ninja all`), and the workflow installs it from a Homebrew bottle.
-# The in-tree opampack instead wipes external/opampack and builds OCaml from
-# source, which measured 298 s of the 598 s dependency stage on the hosted
-# runner (run 42005019655, 2026-11-05).
-DEPS="cmake zlib ninja zeromq f77zmq gmp docopt resultsFile bats trexio armadillo openorb simple_gpu"
+# All the in-tree dependencies, passed explicitly: this is exactly
+# `configure -i all`, since the Rust tool layer replaced the OCaml tools and
+# there is no `ocaml` package any more (the workflow installs the Rust
+# toolchain; configure's gate now requires `cargo`, not `ocamlc`).
+DEPS="cmake zlib ninja zeromq f77zmq docopt resultsFile bats trexio armadillo openorb simple_gpu"
 
 # Everything the installs produce lives in $QP_ROOT/{lib,include,bin,share,
 # libexec} plus external/Python (where docopt and resultsFile are copied).
@@ -102,7 +103,7 @@ fi
 echo "==> [3/4] final configuration"
 ./configure -c config/gfortran_macos.cfg
 
-echo "==> [4/4] C/Fortran build (ninja all)"
-bash -c 'source quantum_package.rc && ninja all'
+echo "==> [4/4] C/Fortran and Rust build (ninja all rust_target)"
+bash -c 'source quantum_package.rc && ninja all rust_target'
 
 echo "==> macOS build OK"

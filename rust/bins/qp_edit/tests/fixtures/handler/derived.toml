@@ -1,0 +1,19 @@
+# Minimal derived module used by the hermetic tests: non-section, no
+# handler. It is loaded and validated but never visited by the editor.
+
+schema_version = 1
+name = "derived"
+title = ""
+section = false
+source_cfg = "src/derived/EZFIO.cfg"
+ezfio_dir = ["derived"]
+
+[[field]]
+provider = "flag"
+ezfio_name = "flag"
+type = "logical"
+interfaces = ["ezfio", "ocaml", "provider"]
+doc = "a derived value"
+size = "1"
+default = "false"
+editable = true
