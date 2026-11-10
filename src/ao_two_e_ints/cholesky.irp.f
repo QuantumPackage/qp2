@@ -580,7 +580,7 @@ END_PROVIDER
 
      cholesky_ao_num = rank
 
-     if (write_ao_cholesky) then
+     if (write_ao_cholesky.and.mpi_master) then
        print *,  'Writing Cholesky AO vectors to disk...'
        iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_ao', 'W')
        write(iunit) rank

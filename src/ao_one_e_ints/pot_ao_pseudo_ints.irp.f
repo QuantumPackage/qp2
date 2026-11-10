@@ -4,6 +4,8 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals, (ao_num,ao_num)]
   ! Pseudo-potential integrals in the |AO| basis set.
   END_DOC
 
+  if (do_pseudo) call cgtos_not_implemented('pseudopotential integrals (do_pseudo)')
+
   if (read_ao_integrals_pseudo) then
     call ezfio_get_ao_one_e_ints_ao_integrals_pseudo(ao_pseudo_integrals)
     print *,  'AO pseudopotential integrals read from disk'

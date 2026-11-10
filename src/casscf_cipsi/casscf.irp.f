@@ -22,10 +22,10 @@ subroutine run
   BEGIN_DOC
   ! CASSCF iterations. Each iteration calls run_stochastic_cipsi and
   ! then replaces the orbitals by NewOrbs (mo_label "MCSCF"). The
-  ! convergence is decided by criterion_casscf: "energy" compares
-  ! dabs(energy_improvement) with thresh_scf, "gradients" compares
-  ! norm_grad_vec2 with thresh_scf, "e_pt2" compares the variation of
-  ! the E+PT2 energies with thresh_casscf.
+  ! convergence is decided by criterion_casscf: "energy" compares the
+  ! change of the state-average energy with thresh_scf, "gradients"
+  ! compares norm_grad_vec2 with thresh_scf, "e_pt2" compares the
+  ! variation of the E+PT2 energies with thresh_casscf.
   END_DOC
   implicit none
   double precision               :: energy_old, energy, pt2_max_before,delta_E
@@ -112,7 +112,7 @@ subroutine run
      call write_double(6,energy_improvement, 'Predicted energy improvement = ')
 
      if(criterion_casscf == "energy")then
-      converged = dabs(energy_improvement) < thresh_scf
+      converged = dabs(energy - energy_old) < thresh_scf
      else if (criterion_casscf == "gradients")then
       converged = norm_grad_vec2 < thresh_scf
      else if (criterion_casscf == "e_pt2")then

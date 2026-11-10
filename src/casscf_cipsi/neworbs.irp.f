@@ -138,19 +138,161 @@ END_PROVIDER
   endif
  END_PROVIDER
 
+ BEGIN_PROVIDER [double precision, tr_mu_casscf ]
+  implicit none
+  BEGIN_DOC
+  ! Level shift (Ha/rad^2) of the trust-region orbital step. Carried from
+  ! one CAS-SCF iteration to the next as the starting point of the bracket
+  ! that enforces ||SXvector|| <= 0.25 rad.
+  END_DOC
+  tr_mu_casscf = 0.d0
+ END_PROVIDER
+
  BEGIN_PROVIDER [double precision, SXvector, (nMonoEx+1)]
   implicit none
   BEGIN_DOC
-  ! Best eigenvector of the single-excitation matrix
+  ! Orbital rotation applied by Umat.
+  !
+  ! It is the trust-region shifted Newton step: the solution s of
+  !     (hessmat + mu I) s = -gradvec2
+  ! for the smallest mu >= 0 such that hessmat + mu I is positive definite
+  ! and ||s|| <= 0.25 rad. Positive definiteness gives g^T s < 0, so the
+  ! step is a descent direction; the norm bound keeps it where the
+  ! quadratic model can be trusted.
+  !
+  ! This replaces the super-CI eigenvector y/c0 of the bordered matrix
+  ! [hessmat g ; g^T 0]. Both are the same family: the bordered eigenvector
+  ! of eigenvalue lam satisfies (hessmat - lam I)(y/c0) = -g, that is the
+  ! shifted solve with mu = -lam. Taking mu from the step norm removes the
+  ! c0 ~ 0 roots, whose eigenvectors are combinations of the exact
+  ! zero-curvature rotations between orbitals of equal occupation; dividing
+  ! those by c0 gives rotations of 100 rad and more with no predicted
+  ! curvature, and the iteration diverges.
   END_DOC
-  integer           :: i
-  double precision  :: c0
-  c0=SXeigenvec(1,best_vector_ovrlp_casscf)
-  if (c0*c0 < 0.5d0) c0 = 1.d0
-  do i=1,nMonoEx+1
-    SXvector(i)=SXeigenvec(i,best_vector_ovrlp_casscf)/c0
-  end do
+  integer                        :: k, n, n_try
+  double precision               :: mu, mu_lo, mu_hi, m, ny, scale
+  double precision               :: mu_floor, mu_cap
+  double precision, parameter    :: tr_max_rot = 0.25d0
+  double precision, allocatable  :: A(:,:), s(:)
+
+  SXvector(1) = 1.d0
+  SXvector(2:nMonoEx+1) = 0.d0
+  n = nMonoEx
+  if (n < 1) return
+
+  allocate(A(n,n), s(n))
+
+  scale = max(dabs(maxval(hessmat)), dabs(minval(hessmat)))
+  if (scale <= 0.d0) scale = 1.d0
+  mu_floor = 1.d-10 * scale
+  mu_cap   = 1.d3   * scale
+
+  mu = tr_mu_casscf
+  if (mu /= mu) mu = 0.d0
+  if (mu <= 0.d0) mu = 1.d-2 * scale
+  mu = max(mu, mu_floor)
+  mu = min(mu, mu_cap)
+
+  mu_lo = -1.d0
+  mu_hi = -1.d0
+  n_try = 0
+
+  call tr_try_step(n, hessmat, gradvec2, mu, A, s, ny)
+  n_try = n_try + 1
+
+  if (ny <= tr_max_rot) then
+    ! acceptable: try to grow the step by lowering mu
+    mu_hi = mu
+    do k = 1, 8
+      m = max(mu_hi*0.25d0, mu_floor)
+      if (m >= mu_hi) exit
+      call tr_try_step(n, hessmat, gradvec2, m, A, s, ny)
+      n_try = n_try + 1
+      if (ny <= tr_max_rot) then
+        mu_hi = m
+      else
+        mu_lo = m
+        exit
+      endif
+    enddo
+  else
+    ! too long, or not positive definite: raise mu
+    mu_lo = mu
+    do k = 1, 40
+      m = min(mu_lo*4.d0, mu_cap)
+      call tr_try_step(n, hessmat, gradvec2, m, A, s, ny)
+      n_try = n_try + 1
+      if (ny <= tr_max_rot) then
+        mu_hi = m
+        exit
+      endif
+      mu_lo = m
+      if (m >= mu_cap) exit
+    enddo
+  endif
+
+  ! refine the bracket, keeping the largest acceptable step
+  if (mu_hi > 0.d0 .and. mu_lo > 0.d0) then
+    do k = 1, 6
+      m = dsqrt(mu_lo*mu_hi)
+      if (m <= mu_lo .or. m >= mu_hi) exit
+      call tr_try_step(n, hessmat, gradvec2, m, A, s, ny)
+      n_try = n_try + 1
+      if (ny <= tr_max_rot) then
+        mu_hi = m
+      else
+        mu_lo = m
+      endif
+      if (mu_hi/mu_lo < 1.05d0) exit
+    enddo
+  endif
+
+  ! every trial overwrites s: recompute the step at the accepted shift
+  mu = mu_hi
+  if (mu > 0.d0) then
+    call tr_try_step(n, hessmat, gradvec2, mu, A, s, ny)
+    n_try = n_try + 1
+  endif
+
+  if (mu <= 0.d0 .or. ny > tr_max_rot) then
+    ! last resort: steepest descent scaled to the trust radius
+    mu = mu_cap
+    ny = dsqrt(dot_product(gradvec2,gradvec2))
+    if (ny > 0.d0) then
+      s = -gradvec2 * (tr_max_rot/ny)
+    else
+      s = 0.d0
+    endif
+    ny = dsqrt(dot_product(s,s))
+  endif
+
+  SXvector(2:nMonoEx+1) = s(1:n)
+  tr_mu_casscf = mu
+
+  deallocate(A, s)
  END_PROVIDER
+
+ subroutine tr_try_step(n, H, g, mu, A, s, ny)
+   implicit none
+   integer, intent(in)             :: n
+   double precision, intent(in)    :: H(n,n), g(n), mu
+   double precision, intent(inout) :: A(n,n)
+   double precision, intent(out)   :: s(n), ny
+   integer :: i, info
+   A = H
+   do i = 1, n
+     A(i,i) = A(i,i) + mu
+   enddo
+   s = -g
+   call dposv('U', n, 1, A, n, s, n, info)
+   if (info == 0) then
+     ny = dsqrt(dot_product(s,s))
+     if (ny /= ny) ny = 1.d30
+   else
+     s  = 0.d0
+     ny = 1.d30
+   endif
+ end
 
 
 BEGIN_PROVIDER [double precision, NewOrbs, (ao_num,mo_num) ]

@@ -306,15 +306,21 @@ subroutine export_trexio_subroutine(update,full_path)
 
     allocate(factor(prim_num))
     if (use_cgtos) then
-      ! cGTO AOs:  chi = poly sum_k c_k n_k [ g_k + g_k^* ] = poly sum_k c_k (2 n_k) exp(-a_k r^2) cos(b_k r^2)
-      ! with g_k = exp(-(a_k + i b_k) r^2).  This is the TREXIO oscillating Gaussian of kind "Cos2"
-      ! with oscillation_arg = b_k and prim_factor = 2 n_k (n_k of the first AO of the shell; the
-      ! other Cartesian components are handled by ao_normalization).
+      ! cGTO AOs:  chi = poly sum_k c_k n_k [ g_k + g_k^* ] = poly sum_k c_k (2 n_k) exp(-a_k r^2) cos(b_k r^2 + phi_k)
+      ! with g_k = exp(-(a_k + i b_k) r^2 - i phi_k).  For phi_k = 0 or pi this is the TREXIO oscillating
+      ! Gaussian of kind "Cos2" with oscillation_arg = b_k and prim_factor = cos(phi_k) 2 n_k (n_k of the
+      ! first AO of the shell; the other Cartesian components are handled by ao_normalization).
+      ! Plane waves, other phases (e.g. sin-type functions, phi = -pi/2) and shells whose Cartesian
+      ! components differ in b or phi cannot be represented. The integrals are still exported, but the
+      ! basis is then tagged with a non-standard oscillation_kind, so that readers (QMCkl,
+      ! qp_import_trexio) refuse it instead of silently evaluating wrong AOs.
       double precision, allocatable :: osc_arg(:)
-      integer :: s_prev, j_in_shell, l_first
-      if (use_pw .or. (maxval(dabs(ao_expo_phase)) > 0.d0)) then
-        print *, 'Warning: plane-wave / phase parts of the cGTOs cannot be exported to TREXIO'
-      endif
+      integer :: s_prev, j_in_shell, l_first, l_ao, n_cart, m
+      double precision :: phi, phi_l
+      logical :: representable
+      ! plane waves are tested component by component below (not with use_pw,
+      ! which ignores |k|^2 <= 1e-15, still significant for diffuse primitives)
+      representable = .True.
       allocate(osc_arg(prim_num))
       s_prev = -1
       j_in_shell = 0
@@ -325,14 +331,42 @@ subroutine export_trexio_subroutine(update,full_path)
         endif
         j_in_shell += 1
         l_first = ao_first_of_shell(shell_index(i))
+        n_cart  = ((shell_ang_mom(shell_index(i))+1)*(shell_ang_mom(shell_index(i))+2))/2
         osc_arg(i) = ao_expo_im(l_first,j_in_shell)
-        if (primitives_normalized .and. (ao_coef(l_first,j_in_shell) /= 0.d0)) then
-          factor(i) = 2.d0 * ao_coef_norm_cgtos(l_first,j_in_shell) / ao_coef(l_first,j_in_shell)
+        phi = ao_expo_phase(1,l_first,j_in_shell) + ao_expo_phase(2,l_first,j_in_shell) &
+            + ao_expo_phase(3,l_first,j_in_shell)
+        ! cos(b r^2 + phi) = cos(phi) cos(b r^2) only if sin(phi) = 0
+        if (dabs(dsin(phi)) > 1.d-12) representable = .False.
+        ! all the Cartesian components of the shell must share b and phi (one oscillation_arg per primitive)
+        do l_ao = l_first, l_first + n_cart - 1
+          phi_l = ao_expo_phase(1,l_ao,j_in_shell) + ao_expo_phase(2,l_ao,j_in_shell) &
+                + ao_expo_phase(3,l_ao,j_in_shell)
+          if (dabs(ao_expo_im(l_ao,j_in_shell) - osc_arg(i)) > 1.d-14 * max(1.d0, dabs(osc_arg(i)))) &
+            representable = .False.
+          if (dabs(phi_l - phi) > 1.d-12) representable = .False.
+          do m = 1, 3
+            if (ao_expo_pw(m,l_ao,j_in_shell) /= 0.d0) representable = .False.
+          enddo
+        enddo
+        ! ao_coef_norm_cgtos includes the primitive and (if ao_normalized) the contraction
+        ! normalization, whatever primitives_normalized is
+        if (ao_coef(l_first,j_in_shell) /= 0.d0) then
+          factor(i) = dcos(phi) * 2.d0 * ao_coef_norm_cgtos(l_first,j_in_shell) / ao_coef(l_first,j_in_shell)
         else
-          factor(i) = 2.d0
+          factor(i) = dcos(phi) * 2.d0
         endif
       enddo
-      rc = trexio_write_basis_oscillation_kind(f(1), 'Cos2', 4)
+      if (representable) then
+        rc = trexio_write_basis_oscillation_kind(f(1), 'Cos2', 4)
+      else
+        print *, '**********************************************************************'
+        print *, 'Warning: these cGTOs (plane waves, phases other than 0 or pi, e.g.'
+        print *, 'sin-type functions, or shells whose components differ in b or phi)'
+        print *, 'cannot be written as TREXIO "Cos2" oscillating Gaussians. The integrals'
+        print *, 'are exported, the basis is tagged oscillation_kind = "QP2_cGTO_unsupported".'
+        print *, '**********************************************************************'
+        rc = trexio_write_basis_oscillation_kind(f(1), 'QP2_cGTO_unsupported', 20)
+      endif
       call trexio_assert(rc, TREXIO_SUCCESS)
       rc = trexio_write_basis_oscillation_arg(f(1), osc_arg)
       call trexio_assert(rc, TREXIO_SUCCESS)

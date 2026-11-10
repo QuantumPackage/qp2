@@ -230,6 +230,10 @@ subroutine cgaussian_product(a, xa, b, xb, k, p, xp)
   ! no screening here: a small |k| does not mean a negligible pair (see
   ! give_explicit_cpoly_and_cgaussian); exp underflows gracefully to 0
   k = ab * (xab(1)*xab(1) + xab(2)*xab(2) + xab(3)*xab(3))
+  ! with plane waves Re(k) can be << 0 (k is then compensated by the plane-wave
+  ! prefactor, combined in log form by the callers). k is only used as a flag of
+  ! negligible pairs and is not used numerically: avoid the overflow (FPE trap)
+  if(real(k) < -700.d0) k = dcmplx(-700.d0, aimag(k))
   k = exp(-k)
   xp(1) = (a * xa(1) + b * xb(1)) * p_inv
   xp(2) = (a * xa(2) + b * xb(2)) * p_inv
