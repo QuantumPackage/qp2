@@ -5,9 +5,9 @@
 //! to deriving the root from [`std::env::current_exe`] so that a copied binary
 //! works without a wrapper script and without a path baked at compile time
 //! (issue #224). The derived root is the first ancestor of the executable's
-//! directory that contains `data/executables`, which covers both the OCaml
-//! layout (`$QP_ROOT/ocaml/_build/qp_run.native`, `$QP_ROOT/ocaml/qp_run`) and
-//! the `$QP_ROOT/bin` layout.
+//! directory that contains `data/executables`, which covers the build layout
+//! (`$QP_ROOT/rust/target/release`, four levels up) and the `$QP_ROOT/bin`
+//! layout of the exported static package.
 //!
 //! No path from the build machine is ever embedded in the binary: the only
 //! absolute path in this module is the one passed to
@@ -20,8 +20,8 @@ use crate::Result;
 /// Directory levels searched above the executable, inclusive of its own
 /// directory.
 ///
-/// Four covers `$QP_ROOT/bin`, `$QP_ROOT/ocaml` and
-/// `$QP_ROOT/ocaml/_build` with one level to spare.
+/// Four covers the build layout `$QP_ROOT/rust/target/release` exactly,
+/// plus `$QP_ROOT/bin` with two levels to spare.
 pub const SEARCH_DEPTH: usize = 4;
 
 /// The directory containing `data/executables`, if any ancestor of `exe` is a
@@ -78,27 +78,24 @@ pub fn root() -> Result<PathBuf> {
 mod tests {
     use super::*;
 
-    /// Build `<tmp>/root/{data/executables,ocaml/_build/qp_run.native}`.
+    /// Build `<tmp>/root/{data/executables,rust/target/release/qp_run}`.
     fn fake_root() -> (tempfile::TempDir, PathBuf, PathBuf) {
         let dir = tempfile::tempdir().expect("tempdir");
         let root = dir.path().join("root");
         std::fs::create_dir_all(root.join("data")).expect("data");
-        std::fs::create_dir_all(root.join("ocaml").join("_build")).expect("ocaml");
+        let release = root.join("rust").join("target").join("release");
+        std::fs::create_dir_all(&release).expect("release");
         std::fs::write(root.join("data").join("executables"), "scf /x/scf\n").expect("write");
-        let exe = root.join("ocaml").join("_build").join("qp_run.native");
+        let exe = release.join("qp_run");
         (dir, root, exe)
     }
 
-    /// Both reference layouts resolve: `ocaml/_build/` (3 levels up) and
-    /// `ocaml/` (2 levels up).
+    /// Both current layouts resolve: the build layout `rust/target/release/`
+    /// (4 levels up) and the package layout `bin/` (1 level up).
     #[test]
     fn derive_from_both_layouts() {
         let (_dir, root, exe) = fake_root();
         assert_eq!(derive_root(&exe), Some(root.clone()));
-        assert_eq!(
-            derive_root(&root.join("ocaml").join("qp_run")),
-            Some(root.clone())
-        );
         assert_eq!(
             derive_root(&root.join("bin").join("qp_run")),
             Some(root.clone())

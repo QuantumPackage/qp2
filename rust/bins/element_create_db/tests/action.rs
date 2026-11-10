@@ -5,9 +5,9 @@
 //!
 //! ```text
 //! mkdir -p $FAKE/data
-//! QP_ROOT=$FAKE ~/qp2/ocaml/element_create_db.byte      # exit 0, file below
-//! env -u QP_ROOT ~/qp2/ocaml/element_create_db.byte     # the QP_ROOT line
-//! QP_ROOT=$EMPTY ~/qp2/ocaml/element_create_db.byte     # the write error
+//! QP_ROOT=$FAKE ~/qp2/rust/target/release/element_create_db      # exit 0, file below
+//! env -u QP_ROOT ~/qp2/rust/target/release/element_create_db     # the QP_ROOT line
+//! QP_ROOT=$EMPTY ~/qp2/rust/target/release/element_create_db     # the write error
 //! ```
 //!
 //! `tests/data/list_element.txt` is that first capture, complete (2987 bytes,

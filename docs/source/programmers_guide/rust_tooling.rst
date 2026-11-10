@@ -66,13 +66,14 @@ The normal way is the |Ninja| build: at the root of the repository,
    ninja
 
 builds the modules and then the tools.  The ``rust_target`` rule runs
-``make -C $QP_ROOT/ocaml``, which compiles the workspace in release mode
-into :file:`rust/target/` and publishes the results as symbolic links in
-:file:`ocaml/`, under both the plain names and the historical
-``qp_edit.native`` / ``qp_run.native`` / ``element_create_db.byte``
-spellings that :file:`bin/qp_export_as_tgz` still collects.  The
-directory :file:`ocaml/` is on the :envvar:`PATH` after sourcing
-:file:`quantum_package.rc`.
+:file:`scripts/compilation/build_rust_tools.sh`, which compiles the
+workspace in release mode into :file:`rust/target/` and regenerates the
+derived artifacts (:file:`data/qp_edit_config/registry.toml`,
+:file:`data/executables`, :file:`data/list_element.txt`).  The directory
+:file:`rust/target/release/` is on the :envvar:`PATH` after sourcing
+:file:`quantum_package.rc`, and
+:file:`bin/qp_export_as_tgz` copies the release binaries into the static
+package.
 
 To build and test the tools alone, without the Fortran modules:
 

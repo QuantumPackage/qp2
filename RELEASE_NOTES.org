@@ -12,7 +12,8 @@
   - ~configure~ checks ~cargo~ instead of ~ocamlc~, and ~-i ocaml~ is
     gone.
   - The ~ninja~ target that builds the tools is now ~rust_target~; the
-    binaries are published under their historical names in ~ocaml/~.
+    binaries are in ~rust/target/release/~, which ~quantum_package.rc~
+    puts on ~PATH~.
   - ~qp_edit~ reads the description of the editable parameters from
     ~data/qp_edit_config/~, generated from the ~EZFIO.cfg~ files at
     build time.

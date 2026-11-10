@@ -155,11 +155,11 @@ gzip container bytes, file mtimes, directory entry order,
 ### 2.1 Binaries, PATH, program lookup
 
 Seven executables: `qp_run`, `qp_edit`, `qp_create_ezfio`,
-`qp_tunnel`, `qp_set_mo_class`, `qp_print_basis`
-(`ocaml/Makefile:21` `ALL_EXE`, each `qp_x` is a symlink to
-`qp_x.native`) and `element_create_db` (symlink to
-`element_create_db.byte`, built outside `ALL_EXE`). PATH after
-sourcing: `$QP_ROOT/bin:$QP_ROOT/ocaml` (`etc/paths.rc:42`).
+`qp_tunnel`, `qp_set_mo_class`, `qp_print_basis` and
+`element_create_db`, built by
+`scripts/compilation/build_rust_tools.sh` into
+`rust/target/release/`. PATH after sourcing:
+`$QP_ROOT/bin:$QP_ROOT/rust/target/release` (`etc/paths.rc`).
 `qp_run` resolves PROGRAM through `data/executables` — 113 lines
 `name $QP_ROOT/path`, `$QP_ROOT` substituted, sorted by name
 (`Qpackage.ml:52–73`) — and prints a `Possible choices:` list before

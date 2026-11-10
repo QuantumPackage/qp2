@@ -39,7 +39,7 @@ function qp_append_export () {
 
 export PYTHONPATH=$(qp_prepend_export "PYTHONPATH" "${QP_EZFIO}/Python":"${QP_PYTHON}")
 
-export PATH=$(qp_prepend_export "PATH" "${QP_PYTHON}":"${QP_ROOT}"/bin:"${QP_ROOT}"/ocaml)
+export PATH=$(qp_prepend_export "PATH" "${QP_PYTHON}":"${QP_ROOT}"/bin:"${QP_ROOT}"/rust/target/release)
 
 export LD_LIBRARY_PATH=$(qp_prepend_export "LD_LIBRARY_PATH" "${QP_ROOT}"/lib:"${QP_ROOT}"/lib64)
 
@@ -50,9 +50,9 @@ export C_INCLUDE_PATH=$(qp_prepend_export "C_INCLUDE_PATH" "${QP_ROOT}"/include)
 export CPATH=$(qp_prepend_export "CPATH" "${QP_ROOT}"/include)
 
 # The generated configuration read by `qp_edit` (a build artifact).  The
-# binary would also look in the `data/` directory next to itself, but the
-# build publishes it as a symlink into `rust/target/release/`, and
-# `current_exe` resolves that symlink on Linux.
+# binary's fallback is the `data/` directory one level above itself
+# (`<exe_dir>/../data/qp_edit_config`), which does not hold for the build
+# layout `rust/target/release/`; the variable is exported explicitly.
 export QP_EDIT_CONFIG=${QP_EDIT_CONFIG:-${QP_ROOT}/data/qp_edit_config}
 
 
