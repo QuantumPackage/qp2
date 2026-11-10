@@ -69,8 +69,13 @@ BEGIN_PROVIDER [double precision, ao_expo_im, (ao_num, ao_prim_num_max)]
   END_DOC
 
   logical                        :: has
+  integer                        :: i, j
   PROVIDE ezfio_filename
-  ao_expo_im = 0.d0
+  do j = 1, ao_prim_num_max
+    do i = 1, ao_num
+      ao_expo_im(i,j) = 0.d0
+    enddo
+  enddo
   if (mpi_master) then
     call ezfio_has_ao_basis_ao_expo_im(has)
     if (has) then
@@ -105,8 +110,15 @@ BEGIN_PROVIDER [double precision, ao_expo_pw, (3, ao_num, ao_prim_num_max)]
   END_DOC
 
   logical                        :: has
+  integer                        :: i, j, m
   PROVIDE ezfio_filename
-  ao_expo_pw = 0.d0
+  do j = 1, ao_prim_num_max
+    do i = 1, ao_num
+      do m = 1, 3
+        ao_expo_pw(m,i,j) = 0.d0
+      enddo
+    enddo
+  enddo
   if (mpi_master) then
     call ezfio_has_ao_basis_ao_expo_pw(has)
     if (has) then
@@ -141,8 +153,15 @@ BEGIN_PROVIDER [double precision, ao_expo_phase, (3, ao_num, ao_prim_num_max)]
   END_DOC
 
   logical                        :: has
+  integer                        :: i, j, m
   PROVIDE ezfio_filename
-  ao_expo_phase = 0.d0
+  do j = 1, ao_prim_num_max
+    do i = 1, ao_num
+      do m = 1, 3
+        ao_expo_phase(m,i,j) = 0.d0
+      enddo
+    enddo
+  enddo
   if (mpi_master) then
     call ezfio_has_ao_basis_ao_expo_phase(has)
     if (has) then
@@ -220,10 +239,16 @@ END_PROVIDER
   ! entries j > ao_prim_num(i) are padding: set them to zero. They were left
   ! uninitialized, and use_pw takes the maxval of ao_expo_pw_ord_transp(4,:,:)
   ! over the whole array (a garbage value switches use_pw on)
-  ao_coef_norm_cgtos_ord = 0.d0
-  ao_expo_cgtos_ord      = (0.d0, 0.d0)
-  ao_expo_pw_ord         = 0.d0
-  ao_expo_phase_ord      = 0.d0
+  do j = 1, ao_prim_num_max
+    do i = 1, ao_num
+      ao_coef_norm_cgtos_ord(i,j) = 0.d0
+      ao_expo_cgtos_ord(i,j)      = (0.d0, 0.d0)
+      do m = 1, 4
+        ao_expo_pw_ord(m,i,j)    = 0.d0
+        ao_expo_phase_ord(m,i,j) = 0.d0
+      enddo
+    enddo
+  enddo
 
   d = 0.d0
 

@@ -315,10 +315,12 @@ subroutine export_trexio_subroutine(update,full_path)
       ! basis is then tagged with a non-standard oscillation_kind, so that readers (QMCkl,
       ! qp_import_trexio) refuse it instead of silently evaluating wrong AOs.
       double precision, allocatable :: osc_arg(:)
-      integer :: s_prev, j_in_shell, l_first, l_ao, n_cart
+      integer :: s_prev, j_in_shell, l_first, l_ao, n_cart, m
       double precision :: phi, phi_l
       logical :: representable
-      representable = .not.use_pw
+      ! plane waves are tested component by component below (not with use_pw,
+      ! which ignores |k|^2 <= 1e-15, still significant for diffuse primitives)
+      representable = .True.
       allocate(osc_arg(prim_num))
       s_prev = -1
       j_in_shell = 0
@@ -342,6 +344,9 @@ subroutine export_trexio_subroutine(update,full_path)
           if (dabs(ao_expo_im(l_ao,j_in_shell) - osc_arg(i)) > 1.d-14 * max(1.d0, dabs(osc_arg(i)))) &
             representable = .False.
           if (dabs(phi_l - phi) > 1.d-12) representable = .False.
+          do m = 1, 3
+            if (ao_expo_pw(m,l_ao,j_in_shell) /= 0.d0) representable = .False.
+          enddo
         enddo
         ! ao_coef_norm_cgtos includes the primitive and (if ao_normalized) the contraction
         ! normalization, whatever primitives_normalized is
