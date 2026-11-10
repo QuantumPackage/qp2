@@ -177,6 +177,16 @@ end module libcint_interface
 !> requires `THREADPRIVATE` in the specification part of the routine, while
 !> IRPF90 inserts the calls that provide the tables above any directive
 !> found in the body.
+!>
+!> Lifetime: the block buffer is allocated by the first quartet a thread
+!> computes and only grows, up to `(2*lmax+1)^4` doubles per thread (80 kB
+!> for `lmax = 4`). It is deliberately not freed during the run, because the
+!> next quartet reuses it: OpenMP frees the storage of a `THREADPRIVATE`
+!> copy like that of a static variable of the base language, at an
+!> unspecified point (OpenMP 5.0, 2.19.2), so an explicit `deallocate` would
+!> only release it early and make the next quartet allocate again. If a
+!> runtime ever reinitialises a thread's copy between parallel regions, the
+!> zero-initialised `cache_shls` misses and the block is recomputed.
 module libcint_block_cache
 
   use iso_c_binding

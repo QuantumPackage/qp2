@@ -490,6 +490,38 @@ It is wrapped by three named subroutines, `libcint_ao_overlap(mat)`,
 providers call: the `LIB_OP_*` constants then never leave
 `libcint_ao_integrals`.
 
+The three operators share the shell-pair loop but not the call: the
+`select case (op)` sits before the loops, and each branch contains its own
+copy of the loop, calling `cint1e_ovlp_cart`, `cint1e_kin_cart` or
+`cint1e_nuc_cart` directly. Nothing is tested per shell pair, and the
+duplication is confined to the twenty-line loop body.
+
+```fortran
+select case (op)
+case (LIB_OP_OVLP)
+  !$OMP PARALLEL ...
+  do sj = 1, shell_num
+    do si = 1, sj
+      info = cint1e_ovlp_cart(blk, shls, atm, natm, bas, nbas, &
+          env, c_null_ptr)
+      ...
+    enddo
+  enddo
+  !$OMP END PARALLEL
+case (LIB_OP_KIN)
+  ! same loop, cint1e_kin_cart
+case (LIB_OP_NUC)
+  ! same loop, cint1e_nuc_cart
+case default
+  stop 'libcint_ao_one_e: unknown operator'
+end select
+```
+
+(An earlier draft bound the entry point to a procedure pointer, but IRPF90's
+declaration parser does not recognise `procedure(...)`: the pointer is left
+implicitly typed and the call does not compile, so the pointer would have to
+live in a separate `.f90` module. Duplicating the loop is simpler.)
+
 Loop over `sj = 1..shell_num`, `si = 1..sj` (the three operators are
 symmetric), OpenMP over `sj`. The block buffer is allocated once per thread
 (`ncart(lmax)**2` doubles) inside the parallel region and declared
@@ -497,11 +529,10 @@ symmetric), OpenMP over `sj`. The block buffer is allocated once per thread
 block
 
 ```
-call cint1e_ovlp_cart(blk, shls, atm, natm, bas, nbas, env)
+info = cint1e_ovlp_cart(blk, shls, atm, natm, bas, nbas, env, c_null_ptr)
 ```
 
-(`cint1e_kin_cart`, `cint1e_nuc_cart` for the other two; the `FINT` return
-value is ignored), then
+(the `FINT` return value is ignored), then
 
 ```
 mat(i,j) = r_i*r_j*blk(ip + jp*ni)      ! i = ao_first_of_shell(si)+ip-1
@@ -653,6 +684,15 @@ The block size is `ncart(l_si)*ncart(l_sj)*ncart(l_sk)*ncart(l_sl)`; the
 buffer grows to the largest block ever requested by that thread, so the
 worst-case memory is `(2*lmax+1)^4` doubles per thread (1296 doubles = 10 kB
 for `lmax = 2`, 10000 doubles = 80 kB for `lmax = 4`).
+
+Lifetime: the buffer is allocated by the first quartet a thread computes and
+is never freed during the run, because the next quartet reuses it. OpenMP
+frees the storage of a `THREADPRIVATE` copy like that of a static variable
+of the base language, at an unspecified point (OpenMP 5.0, §2.19.2), so an
+explicit `deallocate` would only release it early and force the next quartet
+to allocate again. Nothing has to be reset between parallel regions either:
+`cache_shls` starts zeroed on a fresh thread copy, which matches no shell
+index, so the first call misses and recomputes.
 
 `SAVE` + `!$OMP THREADPRIVATE` on an allocatable module variable was
 validated with gfortran `-fopenmp` (the `tp.f90` probe in
