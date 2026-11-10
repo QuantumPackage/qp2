@@ -223,7 +223,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="cmake zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats trexio armadillo openorb simple_gpu"
+        PACKAGES="cmake zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats trexio armadillo openorb simple_gpu libcint"
 fi
 
 
@@ -438,6 +438,15 @@ EOF
               ./configure --prefix=\${QP_ROOT} 
               (make -j 8 || make) && make check && make install
 EOF
+    elif [[ ${PACKAGE} = libcint ]] ; then
+
+            # Static, 32-bit FINT, cint2 interface: see src/libcint_ao_integrals
+            execute << EOF
+              cd "\${QP_ROOT}"/external/libcint
+              rm -rf build && mkdir build && cd build
+              cmake -DCMAKE_INSTALL_PREFIX="\${QP_ROOT}" -DBUILD_SHARED_LIBS=OFF -DENABLE_STATIC=ON -DWITH_CINT2_INTERFACE=ON -DI8=off -DCMAKE_DISABLE_FIND_PACKAGE_QUADMATH=ON -DCMAKE_BUILD_TYPE=Release ..
+              (cmake --build . -j 8 || cmake --build .) && cmake --build . --target install
+EOF
     else
         error "${PACKAGE} unknown."
         fail
@@ -494,6 +503,12 @@ fi
 QMCKL=$(find_lib -lqmckl)
 if [[ ${QMCKL} = $(not_found) ]] ; then
         error "QMCkl (qmckl | qmckl-intel) is not installed."
+        fail
+fi
+
+LIBCINT=$(find_lib -L"${QP_ROOT}"/lib -lcint -lm)
+if [[ ${LIBCINT} = $(not_found) ]] ; then
+        error "libcint (libcint) is not installed."
         fail
 fi
 

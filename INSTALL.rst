@@ -102,6 +102,7 @@ The following packages are supported by the :command:`configure` installer:
 * bats
 * trexio
 * simple_gpu
+* libcint
 * bse (adds the Basis Set Exchange CLI)
 
 Example:

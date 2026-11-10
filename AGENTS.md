@@ -84,10 +84,11 @@ make                           # == source quantum_package.rc; ninja
   packages `docopt` and `resultsFile`, SimpleGPU (`-lsimple_gpu-cpu`), and
   BLAS/LAPACK through the compilation config. Missing dependencies are
   installed with `./configure -i <pkg>` (or `-i all`), where `<pkg>` is one of:
-  armadillo, bats, bse, cmake, docopt, f77zmq, gmp, ninja, ocaml, openorb,
-  qmckl, simple_gpu, trexio, zeromq, zlib (plus the variants `trexio-nohdf5`
-  and `qmckl-intel`). `irpf90` and `ezfio` are *submodules*, not `-i` targets —
-  the tab-completion in `etc/configure.rc` misleadingly lists them.
+  armadillo, bats, bse, cmake, docopt, f77zmq, gmp, libcint, ninja, ocaml,
+  openorb, qmckl, simple_gpu, trexio, zeromq, zlib (plus the variants
+  `trexio-nohdf5` and `qmckl-intel`). `irpf90` and `ezfio` are *submodules*,
+  not `-i` targets — the tab-completion in `etc/configure.rc` misleadingly
+  lists them.
   (Note: INSTALL.rst no longer offers the `conda env create -f qp2.yml` path,
   since `qp2.yml` is not tracked in the repo.)
 - **Intel `ifx` is not recommended** (verified by the maintainer,

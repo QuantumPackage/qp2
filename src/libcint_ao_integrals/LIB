@@ -1,0 +1,1 @@
+-L$QP_ROOT/lib -lcint -lm

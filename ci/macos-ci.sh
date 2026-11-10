@@ -12,8 +12,8 @@
 # How `./configure` behaves (matters for this script):
 #   - `-i` takes a single string that is split on spaces; `-i all` expands to
 #     (cmake zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats
-#     trexio armadillo openorb simple_gpu). qmckl is NOT in `all`, and this
-#     script passes that list explicitly to omit `ocaml`.
+#     trexio armadillo openorb simple_gpu libcint). qmckl is NOT in `all`,
+#     and this script passes that list explicitly to omit `ocaml`.
 #   - `-i <pkg>` always reinstalls; it never checks whether the library is
 #     already present. That is why a cache hit has to skip this stage
 #     entirely rather than rely on the installed tree being seen.
@@ -76,7 +76,7 @@ export PATH="$SHIM:$PATH"
 # The in-tree opampack instead wipes external/opampack and builds OCaml from
 # source, which measured 298 s of the 598 s dependency stage on the hosted
 # runner (run 42005019655, 2026-11-05).
-DEPS="cmake zlib ninja zeromq f77zmq gmp docopt resultsFile bats trexio armadillo openorb simple_gpu"
+DEPS="cmake zlib ninja zeromq f77zmq gmp docopt resultsFile bats trexio armadillo openorb simple_gpu libcint"
 
 # Everything the installs produce lives in $QP_ROOT/{lib,include,bin,share,
 # libexec} plus external/Python (where docopt and resultsFile are copied).
