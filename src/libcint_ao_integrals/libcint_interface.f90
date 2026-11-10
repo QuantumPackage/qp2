@@ -251,7 +251,9 @@ contains
     nsz = ni*nj*nk*nl
 
     if (allocated(cache_blk)) then
-      if (size(cache_blk) /= nsz) then
+      ! keep the capacity: mixed s/p/d bases alternate between block sizes
+      ! on every quartet, and a larger buffer already holds a smaller block
+      if (size(cache_blk) < nsz) then
         deallocate(cache_blk)
         allocate(cache_blk(nsz))
       endif

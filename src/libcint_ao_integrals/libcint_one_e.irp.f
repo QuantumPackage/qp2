@@ -42,7 +42,7 @@ subroutine libcint_ao_one_e(op, mat)
 
   case (LIB_OP_OVLP)
 
-    !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(si,sj,ni,nj,ip,jp,i,j,shls,blk)
+    !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(si,sj,ni,nj,ip,jp,i,j,shls,blk,info)
     allocate(blk(libcint_ncart(ao_l_max)**2))
     !$OMP DO SCHEDULE(DYNAMIC)
     do sj = 1, shell_num
@@ -73,7 +73,7 @@ subroutine libcint_ao_one_e(op, mat)
 
   case (LIB_OP_KIN)
 
-    !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(si,sj,ni,nj,ip,jp,i,j,shls,blk)
+    !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(si,sj,ni,nj,ip,jp,i,j,shls,blk,info)
     allocate(blk(libcint_ncart(ao_l_max)**2))
     !$OMP DO SCHEDULE(DYNAMIC)
     do sj = 1, shell_num
@@ -104,7 +104,7 @@ subroutine libcint_ao_one_e(op, mat)
 
   case (LIB_OP_NUC)
 
-    !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(si,sj,ni,nj,ip,jp,i,j,shls,blk)
+    !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(si,sj,ni,nj,ip,jp,i,j,shls,blk,info)
     allocate(blk(libcint_ncart(ao_l_max)**2))
     !$OMP DO SCHEDULE(DYNAMIC)
     do sj = 1, shell_num

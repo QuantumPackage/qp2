@@ -28,8 +28,14 @@ master rank:
   (|QP| normalizes each |AO| separately, libcint has one coefficient set
   per shell). This rejects files written with the legacy GAMESS
   convention, `ezfio_convention < 20250211`;
-* non-integer nuclear charges, for the nucleus-electron operator only:
-  the two-electron integrals stay on libcint.
+* a basis in which an |AO| is not on the shell's center, or whose
+  Cartesian powers are not in libcint's order (x, y, z, xx, xy, ...).
+  Both are stored per |AO|, so libcint would silently return permuted
+  blocks;
+* non-integer or negative nuclear charges, for the nucleus-electron
+  operator only: the two-electron integrals stay on libcint. libcint
+  replaces the charge by :math:`-|\text{charge}|`, so a negative charge
+  would change sign.
 
 Coefficient convention
 ======================

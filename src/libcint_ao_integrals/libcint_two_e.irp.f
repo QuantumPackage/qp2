@@ -8,7 +8,9 @@
 !>
 !> `lr` selects the long-range operator :math:`\mathrm{erf}(\mu r_{12})/r_{12}`
 !> instead of :math:`1/r_{12}`; it is passed by the dispatcher so that this
-!> module does not need to depend on the :file:`ao_two_e_ints` module.
+!> module does not need to depend on the :file:`ao_two_e_ints` module. An
+!> `lr` request with `mu_erf = 0` returns zero, since libcint reads a zero
+!> `PTR_RANGE_OMEGA` as the plain Coulomb operator.
 !>
 !> The result is multiplied by :f:func:`libcint_scale` on the four indices,
 !> which carries the per-|AO| normalization that libcint cannot represent.
@@ -33,6 +35,14 @@ double precision function libcint_ao_two_e_integral(i, j, k, l, lr)
   PROVIDE ao_shell ao_first_of_shell
   PROVIDE libcint_atm libcint_bas libcint_env libcint_env_lr
   PROVIDE libcint_scale libcint_natm libcint_nbas
+  PROVIDE mu_erf
+
+  ! libcint reads PTR_RANGE_OMEGA = 0 as the plain Coulomb operator, while
+  ! the QP long-range kernel erf(mu*r12)/r12 is exactly zero at mu = 0.
+  if (lr .and. mu_erf == 0.d0) then
+    libcint_ao_two_e_integral = 0.d0
+    return
+  endif
 
   si = ao_shell(i)
   sj = ao_shell(j)

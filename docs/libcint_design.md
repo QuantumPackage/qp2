@@ -247,12 +247,14 @@ and `env(ptr+1:ptr+3) = nucl_coord(i,:)`.
 `CINTg1e_nuc` multiplies by `-abs(atm[CHARGE_OF])` (`g1e.c:233`), so the
 attractive sign is automatic, and `CINTnuc_mod` only reads `PTR_ZETA` for
 `GAUSSIAN_NUC`: `POINT_NUC` is the explicit point-charge model and gives
-the same kernel as the default `NUC_MOD_OF = 0`. libcint v6.2.1 also
-supports `FRAC_CHARGE_NUC`; that would be the clean way to support
-non-integer `nucl_charge`, but PR1 takes the simpler route: if any
-`abs(nucl_charge - nint(nucl_charge)) > 1e-12`, the NAI operator falls back
-to QP2 with a warning (2e integrals do not depend on the charges, so they
-stay on libcint).
+the same kernel as the default `NUC_MOD_OF = 0`. The `abs` is also why a
+negative `nucl_charge` cannot go to libcint: QP multiplies by
+`-nucl_charge(i)`, so the charge would turn from repulsive to attractive.
+libcint v6.2.1 also supports `FRAC_CHARGE_NUC`; that would be the clean way
+to support non-integer `nucl_charge`, but PR1 takes the simpler route: if
+any charge is negative or `abs(nucl_charge - nint(nucl_charge)) > 1e-12`,
+the NAI operator falls back to QP2 with a warning (2e integrals do not
+depend on the charges, so they stay on libcint).
 
 ### 7.3 `bas`: one entry per QP2 shell
 
@@ -443,11 +445,15 @@ this into a runtime check rather than a version test.
 * `use_cgtos` is true (complex AOs);
 * `is_periodic` is true (periodic path is out of scope);
 * any shell is not "well formed": for every shell `s`, every AO `i` in `s`
-  must satisfy `ao_prim_num(i) == shell_prim_num(s)`, the same
-  `ao_expo_ordered(i,1:np)`, and the same
+  must be centered on `basis_nucleus_index(s)` (`ao_nucl(i)`), carry the
+  Cartesian powers libcint expects at that position (`ao_power(i,:)`, whose
+  `ao_power_index` must be `i - ao_first_of_shell(s) + 1`, and whose powers
+  must add up to `l`), satisfy `ao_prim_num(i) == shell_prim_num(s)`, have
+  the same `ao_expo_ordered(i,1:np)`, and the same
   `ao_coef_normalized_ordered(i,j)/ao_coef_normalization_factor(i)`
   (relative tolerance 1e-12). A failure here is what catches the legacy
-  `ezfio_convention < 20250211` files;
+  `ezfio_convention < 20250211` files, and any file whose centers or
+  component order would permute the libcint blocks;
 * `ao_l_max > 12` (libcint's Rys-quadrature limit);
 * the basis is empty (`ao_num`, `shell_num` or `nucl_num` below 1), the
   `shell_prim_num` do not add up to `prim_num`, or the shells do not add
@@ -460,11 +466,12 @@ this into a runtime check rather than a version test.
 is not the default `integer` or `double precision` kind; it cannot see an
 `I8=on` library (§15).
 
-`ao_integrals_n_e` additionally falls back when a nuclear charge is not an
-integer (§7.2): that test is the separate provider `libcint_nuc_available`,
-which is `libcint_available` plus "every `nucl_charge` is integral", so the
-two-electron integrals stay on libcint for fractional charges. Everything
-else falls back wholesale by testing a single logical:
+`ao_integrals_n_e` additionally falls back when a nuclear charge is negative
+or not an integer (§7.2): that test is the separate provider
+`libcint_nuc_available`, which is `libcint_available` plus "every
+`nucl_charge` is integral and non-negative", so the two-electron integrals
+stay on libcint for fractional charges. Everything else falls back wholesale
+by testing a single logical:
 
 ```
 use_libcint_effective = use_libcint .and. libcint_available
@@ -725,6 +732,13 @@ to `libcint_ao_two_e_integral(i,j,k,l,use_only_lr)`, which picks
 dispatch. The cache key includes the flag, so the two operators cannot be
 confused.
 
+`mu_erf = 0` is special: libcint reads `PTR_RANGE_OMEGA = 0` as "no range
+separation", i.e. the plain Coulomb operator (`g2e.c:4443-4455`), whereas
+`erf(0*r12)/r12` is zero. `libcint_ao_two_e_integral` therefore returns
+zero before touching the cache when `lr` is set and `mu_erf = 0`, which
+covers both `ao_two_e_integral_erf` and `ao_two_e_integral` with
+`use_only_lr`.
+
 Nothing else changes: `ao_two_e_integral_erf_schwartz` is built from
 `ao_two_e_integral_erf`, so it follows the same engine, and
 `ao_two_e_integral_schwartz_accel_erf` keeps the QP2 code (the latter is
@@ -768,7 +782,7 @@ Summary of the paths:
 | `read_ao_integrals_*` | disk | disk | disk | — |
 | `use_cgtos` | QP2 (cGTO) | QP2 (cGTO) | QP2 (cGTO) | QP2 (cGTO) |
 | `use_libcint` + available | libcint | libcint | libcint | libcint |
-| non-integer charges | libcint | libcint | **QP2** | libcint |
+| non-integer or negative charges | libcint | libcint | **QP2** | libcint |
 | `use_libcint` + unavailable | QP2 | QP2 | QP2 | QP2 |
 | `use_libcint = False` | QP2 | QP2 | QP2 | QP2 |
 
@@ -793,6 +807,9 @@ map builder and Cholesky drivers.
 * The 2e cache key and block are both `THREADPRIVATE`, so two threads never
   share a block, and a cached block cannot be returned to the wrong
   quartet.
+* The libcint return status (`info`) is unused, but it is in the `PRIVATE`
+  list of every parallel region in `libcint_ao_one_e`: under
+  `DEFAULT(SHARED)` the assignment would be a write/write race.
 * No `CINTOpt` is shared or built in PR1, so there is no hidden mutable
   state to protect.
 * The `use_libcint` provider is called outside any parallel region

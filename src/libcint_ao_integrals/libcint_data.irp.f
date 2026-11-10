@@ -165,6 +165,7 @@ BEGIN_PROVIDER [ logical, libcint_available ]
   END_DOC
 
   integer          :: i, j, ip, s, l, np, i0, ncart_total
+  integer, external :: ao_power_index
   double precision :: ref, tol
   logical          :: ok
 
@@ -172,7 +173,7 @@ BEGIN_PROVIDER [ logical, libcint_available ]
   PROVIDE prim_num shell_prim_num shell_ang_mom basis_nucleus_index
   PROVIDE ao_first_of_shell ao_prim_num ao_prim_num_max
   PROVIDE ao_expo_ordered ao_coef_normalized_ordered
-  PROVIDE ao_coef_normalization_factor
+  PROVIDE ao_coef_normalization_factor ao_power ao_nucl
 
   call libcint_check_abi()
 
@@ -227,6 +228,23 @@ BEGIN_PROVIDER [ logical, libcint_available ]
           ok = .False.
           exit
         endif
+        ! libcint finds the center through bas(ATOM_OF) and enumerates the
+        ! components in its own order (x, y, z, xx, xy, ...). QP stores both
+        ! per AO, so a file whose centers or powers disagree with the shell
+        ! would give permuted blocks without any error.
+        if (ao_nucl(i) /= basis_nucleus_index(s)) then
+          ok = .False.
+          exit
+        endif
+        if (ao_power(i,1) + ao_power(i,2) + ao_power(i,3) /= l) then
+          ok = .False.
+          exit
+        endif
+        if (ao_power_index(ao_power(i,1), ao_power(i,2), &
+                ao_power(i,3)) /= ip + 1) then
+          ok = .False.
+          exit
+        endif
         if (ao_prim_num(i) /= np) then
           ok = .False.
           exit
@@ -272,9 +290,9 @@ END_PROVIDER
 !> True when the nucleus-electron operator can be computed with libcint.
 !>
 !> libcint has a point-charge model and a fractional-charge model; the
-!> latter is not wired yet, so a non-integer nuclear charge sends this
-!> operator back to the built-in code. The two-electron integrals do not
-!> depend on the charges and stay on libcint.
+!> latter is not wired yet, so a non-integer or negative nuclear charge
+!> sends this operator back to the built-in code. The two-electron
+!> integrals do not depend on the charges and stay on libcint.
 BEGIN_PROVIDER [ logical, libcint_nuc_available ]
   implicit none
   integer :: i
@@ -286,6 +304,16 @@ BEGIN_PROVIDER [ logical, libcint_nuc_available ]
   endif
   if (libcint_nuc_available) then
     do i = 1, nucl_num
+      ! libcint replaces the charge by -abs(CHARGE_OF) (g1e.c:233), so a
+      ! negative charge would attract where the built-in kernel repels.
+      if (nucl_charge(i) < 0.d0) then
+        libcint_nuc_available = .False.
+        if (mpi_master) then
+          write(6,'(A)') ' libcint: negative nuclear charge, '// &
+                         'using the built-in nucleus-electron integrals'
+        endif
+        exit
+      endif
       if (abs(nucl_charge(i) - dble(nint(nucl_charge(i)))) > 1.d-12) then
         libcint_nuc_available = .False.
         if (mpi_master) then

@@ -28,6 +28,12 @@ function compare_engines() {
 
   qp set ao_basis use_libcint true
   qp run test_libcint > libcint_${LABEL}_true.out
+
+  # Without this, a silent fallback would compare QP against itself
+  grep -qE '^INFO use_libcint +T$' libcint_${LABEL}_true.out
+  grep -qE '^INFO libcint_avail +T$' libcint_${LABEL}_true.out
+  grep -qE '^INFO libcint_nuc_avail +T$' libcint_${LABEL}_true.out
+
   grep -E '^(OVLP|KIN|NAI|ERI|ERF) ' libcint_${LABEL}_true.out \
     > libcint_${LABEL}_true.dat
 
