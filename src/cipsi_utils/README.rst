@@ -19,6 +19,6 @@ computation.
   and :c:data:`pt2_mindetinfirstteeth`, :c:data:`pt2_n_tasks`,
   :c:data:`pt2_n_tasks_max` and :c:data:`pt2_r` describe the comb used
   to sample the generators
-* the |PT2| driver itself is :c:func:`pt2_stochastic`, in
-  :ref:`module_cipsi`: it samples the walk positions with OpenMP tasks
-  in the master process, and no longer uses a |ZeroMQ| slave
+* the |PT2| driver itself is :c:func:`pt2_stochastic`, in this module:
+  it samples the walk positions with OpenMP tasks in the master process,
+  and no longer uses a |ZeroMQ| slave
