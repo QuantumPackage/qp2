@@ -16,7 +16,7 @@ _configure_Complete()
         return 0
         ;;
     -i)
-        COMPREPLY=( $(compgen -W "bats docopt ezfio f77zmq irpf90 ninja\
+        COMPREPLY=( $(compgen -W "bats docopt ezfio f77zmq irpf90 libcint ninja\
               ocaml resultsFile zeromq" -- $cur ) )
         return 0
         ;;

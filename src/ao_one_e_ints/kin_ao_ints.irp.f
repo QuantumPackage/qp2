@@ -151,6 +151,8 @@ BEGIN_PROVIDER [double precision, ao_kinetic_integrals, (ao_num,ao_num)]
   if (read_ao_integrals_kinetic) then
     call ezfio_get_ao_one_e_ints_ao_integrals_kinetic(ao_kinetic_integrals)
     print *,  'AO kinetic integrals read from disk'
+  else if (use_libcint_effective) then
+    call libcint_ao_kinetic(ao_kinetic_integrals)
   else
     !$OMP PARALLEL DO DEFAULT(NONE) &
     !$OMP  PRIVATE(i,j) &

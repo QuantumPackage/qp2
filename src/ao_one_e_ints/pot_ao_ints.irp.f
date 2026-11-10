@@ -35,6 +35,10 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
         enddo
       enddo
 
+    else if (libcint_nuc_available) then
+
+      call libcint_ao_nuc(ao_integrals_n_e)
+
     else
 
       !$OMP PARALLEL                                                   &

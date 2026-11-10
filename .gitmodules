@@ -16,3 +16,6 @@
 [submodule "external/simple_gpu"]
 	path = external/simple_gpu
 	url = https://github.com/scemama/simple_gpu.git
+[submodule "external/libcint"]
+	path = external/libcint
+	url = https://github.com/sunqm/libcint.git

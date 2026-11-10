@@ -12,7 +12,7 @@
 #
 # How `./configure` behaves (matters for this script):
 #   - `-i` takes a single string that is split on spaces; `-i all` expands to
-#     (cmake zlib ninja zeromq f77zmq docopt resultsFile bats
+#     (cmake zlib ninja zeromq f77zmq docopt resultsFile bats libcint
 #     trexio armadillo openorb simple_gpu). qmckl is NOT in `all`, and this
 #     script passes that list explicitly. There is no `ocaml` package any
 #     more: the Rust tool layer replaced the OCaml tools.
@@ -77,7 +77,7 @@ export PATH="$SHIM:$PATH"
 # `configure -i all`, since the Rust tool layer replaced the OCaml tools and
 # there is no `ocaml` package any more (the workflow installs the Rust
 # toolchain; configure's gate now requires `cargo`, not `ocamlc`).
-DEPS="cmake zlib ninja zeromq f77zmq docopt resultsFile bats trexio armadillo openorb simple_gpu"
+DEPS="cmake zlib ninja zeromq f77zmq docopt resultsFile bats trexio armadillo openorb libcint simple_gpu"
 
 # Everything the installs produce lives in $QP_ROOT/{lib,include,bin,share,
 # libexec} plus external/Python (where docopt and resultsFile are copied).

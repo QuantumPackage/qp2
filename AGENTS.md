@@ -83,7 +83,7 @@ make                           # == source quantum_package.rc; ninja
   packages `docopt` and `resultsFile`, SimpleGPU (`-lsimple_gpu-cpu`), and
   BLAS/LAPACK through the compilation config. Missing dependencies are
   installed with `./configure -i <pkg>` (or `-i all`), where `<pkg>` is one of:
-  armadillo, bats, bse, cmake, docopt, f77zmq, ninja, openorb,
+  armadillo, bats, bse, cmake, docopt, f77zmq, libcint, ninja, openorb,
   qmckl, simple_gpu, trexio, zeromq, zlib (plus the variants `trexio-nohdf5`
   and `qmckl-intel`). `irpf90` and `ezfio` are *submodules*, not `-i` targets —
   the tab-completion in `etc/configure.rc` misleadingly lists them.

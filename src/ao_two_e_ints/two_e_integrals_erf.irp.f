@@ -15,15 +15,21 @@ double precision function ao_two_e_integral_erf(i,j,k,l)
   double precision               :: Q_new(0:max_dim,3),Q_center(3),fact_q,qq
   integer                        :: iorder_p(3), iorder_q(3)
   double precision               :: ao_two_e_integral_schwartz_accel_erf
+  double precision, external     :: libcint_ao_two_e_integral
   
   provide mu_erf
 
   if (use_cgtos) call cgtos_not_implemented('ao_two_e_integral_erf')
+  
+  if (use_libcint_effective) then
+    ao_two_e_integral_erf = libcint_ao_two_e_integral(i,j,k,l,.True.)
+    return
+  endif
 
-   if (ao_prim_num(i) * ao_prim_num(j) * ao_prim_num(k) * ao_prim_num(l) > 1024 ) then
-     ao_two_e_integral_erf = ao_two_e_integral_schwartz_accel_erf(i,j,k,l)
-     return
-   endif
+  if (ao_prim_num(i) * ao_prim_num(j) * ao_prim_num(k) * ao_prim_num(l) > 1024 ) then
+    ao_two_e_integral_erf = ao_two_e_integral_schwartz_accel_erf(i,j,k,l)
+    return
+  endif
 
   dim1 = n_pt_max_integrals
 

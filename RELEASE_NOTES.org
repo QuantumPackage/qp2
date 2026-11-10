@@ -22,6 +22,10 @@
 
 ** Changes
 
+  - AO integrals can now be computed with libcint instead of the built-in
+    code; the engine is selected by the new ~use_libcint~ EZFIO keyword
+    of the ~ao_basis~ group, which defaults to ~True~ (install the library
+    with ~./configure -i libcint~)
   - Introduced DFT-based basis set correction
   - Use OpamPack for OCaml
   - Configure adapted for ARM
