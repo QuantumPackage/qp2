@@ -38,7 +38,7 @@ def comp_path(path):
 
 from qp_path import QP_ROOT, QP_SRC, QP_EZFIO
 
-LIB = " -lz"
+LIB = " -lz -lpthread -ldl -lm"
 EZFIO_LIB = join("$QP_ROOT", "lib", "libezfio_irp.a")
 ROOT_BUILD_NINJA = join("$QP_ROOT", "config", "build.ninja")
 ROOT_BUILD_NINJA_EXP =  join(QP_ROOT, "config", "build.ninja")
@@ -797,8 +797,8 @@ def save_subninja_file(path_module):
                  ""]
 
     l_string += ["rule executables",
-            "  command = make -C {0} executables .gitignore qp_edit.native qp_run.native".format(join("$QP_ROOT","ocaml")),
-                 "  description = Updating the executables",
+            "  command = {0}/scripts/compilation/build_rust_tools.sh".format("$QP_ROOT"),
+                 "  description = Building the Rust tools and derived artifacts",
                  ""]
 
     # dummy_target rewrites the manifests that make_all_binaries/local read, so
@@ -863,7 +863,7 @@ def create_build_ninja_global(l_rag_inputs):
                  "  description = Cleaning all modules", ""]
 
     l_string += ["rule make_rust",
-                 "  command = make -C {0}/ocaml".format("$QP_ROOT"),
+                 "  command = {0}/scripts/compilation/build_rust_tools.sh".format("$QP_ROOT"),
                  "  pool = console",
                  "  description = Compiling the Rust tools",
                  ""]

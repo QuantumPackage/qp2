@@ -26,7 +26,8 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 
 # Rust toolchain for the tool layer (`rust/`, pinned in
 # rust/rust-toolchain.toml). `./configure` only checks that `cargo` exists;
-# the build itself runs `cargo build --release` through `make -C ocaml`.
+# the build itself runs `cargo build --release` through
+# scripts/compilation/build_rust_tools.sh (the `rust_target` rule).
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
     PATH=/usr/local/cargo/bin:$PATH

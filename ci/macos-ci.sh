@@ -4,11 +4,12 @@
 #
 # Builds every C/Fortran target (`ninja all`) and the Rust tool layer
 # (`ninja rust_target`), which replaced the OCaml tools. `ninja rust_target`
-# runs `make -C ocaml`, i.e. `cargo build --release` plus the symlinks under
-# the historical names (`qp_run.native`, ...) and the `data/executables`
-# table. The Rust toolchain is installed by the workflow (rustup 1.92.0,
-# pinned by `rust/rust-toolchain.toml`); configure's validation block
-# requires `cargo`.
+# runs `scripts/compilation/build_rust_tools.sh`: `cargo build --release`
+# into `rust/target/release/` (on PATH) plus the derived artifacts
+# (`data/qp_edit_config/registry.toml`, `data/executables`,
+# `data/list_element.txt`). The Rust toolchain is installed by the workflow
+# (rustup 1.92.0, pinned by `rust/rust-toolchain.toml`); configure's
+# validation block requires `cargo`.
 #
 # How `./configure` behaves (matters for this script):
 #   - `-i` takes a single string that is split on spaces; `-i all` expands to

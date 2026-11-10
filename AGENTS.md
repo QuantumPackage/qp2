@@ -33,8 +33,9 @@ Online: <https://quantum-package.readthedocs.io> (manual) and
    `ezfio_interface.irp.f`, `IRPF90_temp/`, `build.ninja` — is generated.
    Edit the source, then build; never patch generated output.
 4. Never edit generated files: root `build.ninja`, `config/build.ninja`,
-   `config/qp_create_ninja.pickle`, `data/executables`, `ocaml/*.native`,
-   `lib/`, `share/`.
+   `config/qp_create_ninja.pickle`, `data/executables`,
+   `data/qp_edit_config/`, `data/list_element.txt`, `rust/target/`, `lib/`,
+   `share/`.
 5. **Ask the user before any git commit.**
 6. Match `conventions.rst`: no tabs, ≤80 columns, single-quoted Fortran
    strings, `BEGIN_DOC`/`END_DOC` on every provider/subroutine/function,
@@ -45,8 +46,10 @@ Online: <https://quantum-package.readthedocs.io> (manual) and
 ```
 src/<module>/          75 core modules (see §4 for the anatomy)
 plugins/local/<name>/  28 in-tree plugins; installed = symlinked into src/
-ocaml/                 Makefile: the Rust tool-layer build wrapper (binary symlinks, `data/qp_edit_config` registry)
-scripts/compilation/   qp_create_ninja (build graph), qp_path.py, read_compilation_cfg.py
+rust/                  the Rust tool layer (seven binaries, built into
+                       `rust/target/release/` on PATH);
+                       `scripts/compilation/build_rust_tools.sh` drives it
+scripts/compilation/   qp_create_ninja (build graph), build_rust_tools.sh, qp_path.py, read_compilation_cfg.py
 scripts/module/        module_handler.py (NEED genealogy, clean/tidy), create_executables_list.sh
 scripts/ezfio_interface/ ei_handler.py, qp_edit_config.py
 scripts/utility/       qp_path.py and misc

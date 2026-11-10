@@ -126,12 +126,12 @@ Three things the fake root must provide, each learned the hard way:
 cd <port-checkout>
 cargo build -j4 -p qp_create_ezfio          # from rust/
 FAKE=$HOME/OpenCode/tmp/w3-create-ezfio/qproot
-rm -rf $FAKE && mkdir -p $FAKE/ocaml
+rm -rf $FAKE && mkdir -p $FAKE/rust/target/release
 ln -sfn ~/qp2/data $FAKE/data
 ln -sfn ~/qp2/src  $FAKE/src                # hcn: qp_run scf
-ln -sf ~/qp2/ocaml/qp_edit $FAKE/ocaml/qp_edit
-ln -sf ~/qp2/ocaml/qp_run  $FAKE/ocaml/qp_run
-cp rust/target/debug/qp_create_ezfio $FAKE/ocaml/qp_create_ezfio
+cp ~/qp2/rust/target/release/qp_edit $FAKE/rust/target/release/
+cp ~/qp2/rust/target/release/qp_run  $FAKE/rust/target/release/
+cp rust/target/debug/qp_create_ezfio $FAKE/rust/target/release/
 python3 rust/tools/golden-harness/golden_harness.py verify \
     --qp-root $FAKE --corpus rust/tests/golden --only create
 ```

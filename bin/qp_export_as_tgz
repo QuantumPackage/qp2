@@ -9,8 +9,7 @@ function help() {
   cat << EOF
 In some HPC facilities, the access to the internet is limited for security
 reasons.  In such an environment, the installation of QP is sometimes very
-painful because the OCaml compiler and the libraries can't be installed by a
-non-root user.
+painful because the libraries can't be installed by a non-root user.
 
 This command creates a self-contained binary distribution in the form of a
 tar.gz file that can be copied on another machine.
@@ -68,7 +67,7 @@ if [[ -f quantum_package.rc \
    && -d etc  \
    && -d man  \
    && -d bin  \
-   && -d ocaml \
+   && -d rust \
    && -d external \
    && -d scripts ]] ; then
   : # OK, this is a quantum_package directory
@@ -127,24 +126,23 @@ if [[ -z $FORTRAN_EXEC ]] ; then
   exit 1
 fi
 
-OCAML_EXEC=$(find_exec ocaml | grep .native )
-if [[ -z $OCAML_EXEC ]] ; then
-  error 'No ocaml binaries found.'
+# The Rust tool binaries, built by `ninja` above into `rust/target/release/`
+# under their plain names.
+RUST_EXEC=""
+for i in element_create_db qp_create_ezfio qp_edit qp_print_basis qp_run \
+         qp_set_mo_class qp_tunnel ; do
+  RUST_EXEC="${RUST_EXEC} ${QP_ROOT}/rust/target/release/$i"
+done
+if [[ ! -x ${QP_ROOT}/rust/target/release/qp_run ]] ; then
+  error 'Rust tool binaries not found (run ninja first).'
   exit 1
 fi
 
-cp -- ${FORTRAN_EXEC} ${OCAML_EXEC} ${QPACKAGE_STATIC}/bin
+cp -- ${FORTRAN_EXEC} ${RUST_EXEC} ${QPACKAGE_STATIC}/bin
 if [[ $? -ne 0 ]] ; then
-  error "Error in cp -- ${FORTRAN_EXEC} ${OCAML_EXEC} ${QPACKAGE_STATIC}/bin"
+  error "Error in cp -- ${FORTRAN_EXEC} ${RUST_EXEC} ${QPACKAGE_STATIC}/bin"
   exit 1
 fi
-
-(
-cd ${QPACKAGE_STATIC}/bin
-  for i in *.native ; do
-    mv "$i" $(basename "$i" .native)
-  done
-)
 
 cp ${QP_ROOT}/bin/qp_* ${QPACKAGE_STATIC}/bin
 cp ${QP_ROOT}/bin/qpsh ${QPACKAGE_STATIC}/bin
@@ -171,7 +169,7 @@ then
   MKL_LIBS=$(ls ${MKL_LIBS}/libmkl_{def,avx,avx2}.so)
 fi
 
-ALL_LIBS=$(find_libs ${OCAML_EXEC} ${FORTRAN_EXEC})
+ALL_LIBS=$(find_libs ${RUST_EXEC} ${FORTRAN_EXEC})
 for i in ${ALL_LIBS} ${MKL_LIBS} ; do
   cp -- ${i} ${QPACKAGE_STATIC}/extra_lib
 done
@@ -203,6 +201,7 @@ cp --recursive -- ${QP_ROOT}/external/Python ${QPACKAGE_STATIC}/external/
 mkdir ${QPACKAGE_STATIC}/external/ezfio
 cp --recursive -- ${QP_ROOT}/external/ezfio/Python ${QPACKAGE_STATIC}/external/ezfio/
 cp --recursive -- ${QP_ROOT}/external/ezfio/Bash   ${QPACKAGE_STATIC}/external/ezfio/
+cp -- ${QP_ROOT}/external/ezfio/lib/libezfio.* ${QPACKAGE_STATIC}/lib/
 cp --recursive -- ${QP_ROOT}/man/*   ${QPACKAGE_STATIC}/man/
 
 
@@ -213,6 +212,7 @@ cp ${QP_ROOT}/quantum_package.rc ${QPACKAGE_STATIC}/
 cp ${QP_ROOT}/etc/* ${QPACKAGE_STATIC}/etc/
 cat << EOF > ${QPACKAGE_STATIC}/etc/00.qp_root.rc
 export QP_ROOT="\$( cd \$(dirname \\\${BASH_SOURCE}) ; cd .. ; pwd -P )"
+export EZFIO_LIBRARY="\$QP_ROOT/lib"
 EOF
 
 

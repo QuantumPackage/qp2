@@ -94,8 +94,9 @@ Usage
                                        --contract pre-fix
 
 ``--qp-root`` may be any build tree: the reference OCaml build (binaries
-in ``$QP_ROOT/ocaml``) or a future Rust build (``$QP_ROOT/ocaml`` or
-``$QP_ROOT/bin``).  ``--qp-bin`` overrides the search.
+in ``$QP_ROOT/ocaml``), the Rust build (``$QP_ROOT/rust/target/release``)
+or the exported static package (``$QP_ROOT/bin``).  ``--qp-bin`` overrides
+the search.
 """
 
 from __future__ import annotations
@@ -225,13 +226,15 @@ PSEUDO_RE = re.compile(r"_ecp_([a-z0-9]+)$")
 def find_tools(qp_root: str, qp_bin: str | None) -> str:
     """Return the directory holding the ``qp_*`` executables.
 
-    Search order: ``--qp-bin``, then ``$QP_ROOT/ocaml`` (the OCaml build
-    and the current Rust install target), then ``$QP_ROOT/bin``.  A
-    directory qualifies when it has ``qp_create_ezfio`` or
+    Search order: ``--qp-bin``, then ``$QP_ROOT/ocaml`` (the reference
+    OCaml build), then ``$QP_ROOT/rust/target/release`` (the Rust build),
+    then ``$QP_ROOT/bin`` (the exported static package).  A directory
+    qualifies when it has ``qp_create_ezfio`` or
     ``qp_create_ezfio.native``.
     """
     candidates = [qp_bin] if qp_bin else [
         os.path.join(qp_root, "ocaml"),
+        os.path.join(qp_root, "rust", "target", "release"),
         os.path.join(qp_root, "bin"),
     ]
     for d in candidates:

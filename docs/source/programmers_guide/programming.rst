@@ -104,10 +104,9 @@ simply disappear and reappear when the sources change:
   of the built programs), :file:`data/qp_edit_config/` and
   :file:`data/ezfio_defaults/` (the descriptions of the editable
   parameters, generated from the :file:`EZFIO.cfg` files, see
-  :ref:`rust_tooling`), the Rust build tree :file:`rust/target/` and
-  the symbolic links in :file:`ocaml/` that publish the tools, and the
-  content of the :file:`lib/`, :file:`include/` and :file:`share/`
-  directories.
+  :ref:`rust_tooling`), the Rust build tree :file:`rust/target/` that
+  holds the tool binaries, and the content of the :file:`lib/`,
+  :file:`include/` and :file:`share/` directories.
 
 The rule is: edit the sources, then build; never patch the generated
 output.

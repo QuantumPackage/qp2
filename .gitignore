@@ -12,3 +12,4 @@ src/*/.gitignore
 ezfio_interface.irp.f
 share
 *.swp
+__pycache__/
