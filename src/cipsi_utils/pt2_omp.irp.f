@@ -363,6 +363,7 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
     call write_int(6,nproc_target,'Number of threads for PT2')
     call write_double(6,mem,'Memory (Gb)')
 
+    PROVIDE pt2_e0_denominator
     print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
     print '(A)', ' Samples           Energy             PT2            Variance          Norm^2       Convergence    Seconds'
     print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
