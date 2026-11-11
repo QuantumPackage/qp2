@@ -1,5 +1,22 @@
 ! -*- mode: f90 -*-
 !=======================================================================
+! Window size of the OpenMP PT2 walk
+!=======================================================================
+
+BEGIN_PROVIDER [ integer, pt2_omp_window ]
+  implicit none
+  BEGIN_DOC
+! Number of walk positions computed in one parallel region.  THIS IS
+! PART OF THE DEFINITION OF THE RESULT: it must never depend on the
+! thread count, otherwise the set of positions computed before a stop
+! would change with the number of threads and the PT2 would stop being
+! reproducible.  It is a provider only so that the memory budget in
+! pt2_stochastic can charge the per-window scratch.
+  END_DOC
+  pt2_omp_window = 256
+END_PROVIDER
+
+!=======================================================================
 ! Stochastic second-order perturbation theory on OpenMP tasks
 !=======================================================================
 !
@@ -8,7 +25,8 @@
 ! `run_pt2_slave' + `pt2_collector'), removed together with its EZFIO
 ! switch.  The estimator, the Monte Carlo sampling and the selection
 ! are unchanged; only the distribution of the work changes: one thread
-! walks the comb and spawns one OpenMP task per walk position.
+! walks the comb and computes each window with an OpenMP team, one
+! (position, subset) per iteration of a parallel-do.
 !
 ! References.
 !   * Estimator and comb sampling: Garniron, Scemama, Loos, Caffarel,
@@ -103,7 +121,7 @@
 ! N_det_generators >= 1024; the guard is defensive.
 !
 !-----------------------------------------------------------------------
-! 2. New design: one walk thread, one task per walk position
+! 2. New design: one walk thread, one task per (position, subset)
 !-----------------------------------------------------------------------
 !
 ! The legacy master/slave split existed only because the work crossed a
@@ -117,11 +135,15 @@
 !     threads in the legacy path (pt2_slave_inproc ran nproc_target
 !     slaves), so select_connected is thread-safe.
 !
-! So: one thread runs the walk, spawns one OpenMP task per walk
-! position for a fixed-size window, waits for the window, then consumes
-! it.  Results land in fixed slots.  There is no flag to poll, no
-! result message, no result buffer, no pt2_data_task, and nothing
-! equivalent to f()/pt2_J result bookkeeping.
+! So: the walk thread enumerates each fixed-size window as a flat task
+! list -- position n contributes pt2_F(pt2_J(n)) entries, one per
+! subset -- and the window is computed by a single parallel-do over
+! that list: SCHEDULE(DYNAMIC,1) spreads the very uneven per-subset
+! cost, and because the list is a plain array no OpenMP tasking
+! construct is involved.  Results land in per-(position, subset)
+! slots, then the walk consumes the window in position order.  There
+! is no flag to poll, no result message, no pt2_data_task, and nothing
+! equivalent to the legacy arrival-order bookkeeping.
 !
 ! Lemma 1 (locality).  Every sample index i read by the comb of
 ! position n has walk position < n.  Proof: pt2_J/pt2_R are built by
@@ -139,11 +161,13 @@
 ! the walk only ever moves forward.  Data-race freedom and determinism
 ! come from the same fact.
 !
-! Lemma 2 (bit-identical partial sums).  pt2_data_I(g) is written by
-! exactly one task, in the fixed order j = 1..pt2_F(g).  Its pt2,
-! variance and overlap sums are therefore bit-identical for any thread
-! count and any schedule.  That is what deletes pt2_data_task and the
-! arrival-order accumulation of the legacy collector.
+! Lemma 2 (bit-identical partial sums).  Each (position, subset) slot
+! is written by exactly one task, and the consume phase folds the
+! slots of position n into pt2_data_I(pt2_J(n)) serially, in the fixed
+! order j = 1..pt2_F(pt2_J(n)).  The pt2, variance and overlap sums
+! are therefore bit-identical for any thread count and any schedule.
+! That is what deletes pt2_data_task and the arrival-order
+! accumulation of the legacy collector.
 !
 ! Lemma 3 (order-insensitive selection).  The shared buffer holds the
 ! N smallest (val,det) pairs of the offered set under the total order
@@ -157,7 +181,7 @@
 ! (local buffer reset after every merge, fixed candidate order inside
 ! select_connected); the walk trajectory (lemma 1 + lemma 2 + the
 ! wall-clock gate removed from the convergence test); the computed
-! position set (pt2_omp_window is a compile-time constant, never a
+! position set (pt2_omp_window is a fixed provider, never a
 ! function of the thread count); the selected determinants (lemma 3 and
 ! the fixed offered set).
 !
@@ -171,9 +195,10 @@
 ! threshold.
 !
 ! Cost.  Let P = N_det_generators (>= 1024 in this path), W =
-! pt2_omp_window and T = nproc_target, the size of the OpenMP team
-! (member 0 walks and helps at the barriers, members 1..T-1 run tasks).
-! The walk is O(P) positions,
+! pt2_omp_window and T = nproc_target, the size of the OpenMP team.
+! The walk runs on the calling thread, which is itself a member of
+! each window's team, and there is no dedicated worker pool.  The walk
+! is O(P) positions,
 ! O(pt2_N_teeth) arithmetic plus O(pt2_N_teeth log P) binary searches
 ! per sampling position; the tasks cost sum_g pt2_F(g) calls to
 ! select_connected, which dominates by orders of magnitude, and as many
@@ -190,10 +215,10 @@
 !
 !=======================================================================
 
-! The window size `pt2_omp_window' is a compile-time constant local to
-! `pt2_omp_walk' (its only user): it MUST NOT depend on the thread
-! count, because a thread-dependent window would change the computed
-! position set, and therefore the selected determinants.
+! The window size `pt2_omp_window' is a fixed provider (256), charged
+! to the memory budget: it MUST NOT depend on the thread count, because
+! a thread-dependent window would change the computed position set, and
+! therefore the selected determinants.
 
 
 subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
@@ -220,13 +245,28 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
   type(pt2_type), allocatable         :: pt2_data_I(:), pt2_data_S(:), pt2_data_S2(:)
 
   integer                         :: i, j, k, N, bsize, nproc_target, pos_warm, ii
+  integer                         :: g_warm, maxF
   double precision                :: state_average_weight_save(N_states), mem, rss, &
                                      mem_shared, mem_worker
 
-  PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
-  PROVIDE psi_bilinear_matrix_rows psi_bilinear_matrix_order
-  PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
-  PROVIDE psi_bilinear_matrix_transp_order
+  ! The unique spin determinants (psi_det_{alpha,beta}_unique) MUST be
+  ! built in this pre-loop block, and the psi_bilinear_matrix_* providers
+  ! must NOT be provided here (they are provided in the per-state loop
+  ! below).
+  !
+  ! The psi_bilinear_matrix_values provider contains a `!$OMP PARALLEL
+  ! DO' whose threads call get_index_in_psi_det_*_unique.  Those functions
+  ! carry IRPF90's lazy-build guard, a non-atomic check-then-act: if the
+  ! unique arrays are not already built when the parallel region runs,
+  ! several threads build them at the same time, corrupting the array and
+  ! N_det_*_unique and aborting (qp_bug) at OMP_NUM_THREADS >= 2.
+  ! IRPF90 reorders the PROVIDEs inside a block (it builds the parallel
+  ! bilinear-matrix provider BEFORE the unique arrays), so listing the
+  ! unique arrays earlier in the same block does not make them build
+  ! first.  Building them here, in the pre-loop block, guarantees they
+  ! exist before the bilinear-matrix providers are built in the loop, so
+  ! the lazy-build guards are no-ops for every worker.
+  PROVIDE psi_det_alpha_unique psi_det_beta_unique
   PROVIDE psi_det_hii selection_weight pseudo_sym
   PROVIDE n_act_orb n_inact_orb n_core_orb n_virt_orb n_del_orb seniority_max
   PROVIDE excitation_beta_max  excitation_alpha_max excitation_max
@@ -266,7 +306,7 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
     state_average_weight(pt2_stoch_istate) = 1.d0
     TOUCH state_average_weight pt2_stoch_istate selection_weight
 
-    PROVIDE nproc pt2_F all_mo_integrals mo_one_e_integrals pt2_w
+    PROVIDE nproc pt2_omp_window pt2_F all_mo_integrals mo_one_e_integrals pt2_w
     PROVIDE psi_selectors pt2_u pt2_J pt2_R
     ! Every provider that select_connected (and its callees) PROVIDEs must
     ! be built HERE, before the parallel region.  A provider built lazily
@@ -276,8 +316,12 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
     ! of PROVIDE statements executed under select_singles_and_doubles
     ! (selection.irp.f:200-204, 960, 1090, 1266, 1531) plus the bitmask
     ! providers it reads.
-    PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
+    ! The unique spin determinants are already built (pre-loop block), so
+    ! the lazy-build guards inside the parallel bilinear-matrix provider
+    ! are no-ops here.  They are listed again for clarity/robustness.
+    PROVIDE psi_det_alpha_unique psi_det_beta_unique
     PROVIDE psi_bilinear_matrix_rows psi_bilinear_matrix_order psi_bilinear_matrix_transp_order
+    PROVIDE psi_bilinear_matrix_columns_loc
     PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
     PROVIDE psi_selectors_coef_transp psi_det_sorted_order psi_det_sorted
     PROVIDE banned_excitation mo_integrals_threshold mo_integrals_map
@@ -296,6 +340,10 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
       call pt2_alloc(pt2_data_S(i),N_states)
       call pt2_alloc(pt2_data_S2(i),N_states)
     enddo
+
+    ! Largest number of subsets of a generator: sizes the per-window
+    ! scratch and the task list.
+    maxF = maxval(pt2_F(1:N_det_generators))
 
     pt2_data % pt2(pt2_stoch_istate) = -huge(1.)
     pt2_data_err % pt2(pt2_stoch_istate) = huge(1.)
@@ -317,6 +365,8 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
           +    3.d0*(pt2_N_teeth+1)                 & ! S, S2, pt2_data_teeth
           ) * pt2_type_size(N_states)               & ! doubles per pt2_type
           + 2.d0*(N_int*2.d0*N + N)                 & ! shared buffer, 2*N capacity
+          + 2.d0*(pt2_omp_window*maxF)              & ! tpos, tsub: 4-byte integers
+          + pt2_omp_window*maxF*pt2_type_size(N_states) & ! per-(position,subset) scratch
           ) / 1024.d0**3
 
     ii = min(N_det, (elec_alpha_num*(mo_num-elec_alpha_num))**2)
@@ -336,10 +386,11 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
           + 1.0d0*(N_states*mo_num*mo_num)          & ! mat
           ) / 1024.d0**3
 
-    ! nproc_target is the size of the OpenMP team: member 0 runs the walk
-    ! and takes a task whenever it waits at a taskgroup barrier, the
-    ! others run tasks only.  Each member owns one worker buffer.  The
-    ! guard is defensive: nthreads_pt2 defaults to nproc >= 1.
+    ! nproc_target is the size of the OpenMP team that computes each
+    ! window; the walk thread calls the parallel-do and is a member of
+    ! the team like the others.  Each member owns one worker buffer
+    ! (b_workers(omp_get_thread_num()+1)).  The guard is defensive:
+    ! nthreads_pt2 defaults to nproc >= 1.
     nproc_target = max(nthreads_pt2, 1)
 
     do
@@ -369,8 +420,9 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
     print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
 
     ! One worker buffer per member of the team.  Member t (OpenMP thread
-    ! number t-1) owns slot t; slot 1 is also the serial warm-up slot,
-    ! because omp_get_thread_num() is 0 outside a parallel region.  The
+    ! number t-1) owns slot t; slot 1 is also the serial warm-up slot:
+    ! pt2_omp_task clamps the -1 returned by omp_get_thread_num()
+    ! outside a parallel region to 0, so the warm-up uses slot 1.  The
     ! array is dimensioned by nthreads_pt2 so that its shape matches the
     ! dummy arguments; slots beyond nproc_target are never created nor
     ! touched.
@@ -385,22 +437,19 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
     ! The cheapest position is deterministic, and it is skipped in the
     ! spawn loop because its slot is already final.
     pos_warm = minloc(pt2_F(pt2_J(1:N_det_generators)), dim=1)
-    call pt2_omp_task(pos_warm, b_workers, b, pt2_data_I)
+    g_warm = pt2_J(pos_warm)
+    do j = 1, pt2_F(g_warm)
+      call pt2_omp_task(pos_warm, j, b_workers, b, pt2_data_I(g_warm))
+    enddo
 
-    ! The walk runs in a SINGLE construct, on member 0.  Members waiting
-    ! at its implicit barrier are at a task scheduling point, so they
-    ! execute the tasks of the window (libgomp:
-    ! gomp_barrier_handle_tasks); member 0 does the same whenever it
-    ! blocks at the taskgroup, so the team is exactly nproc_target
-    ! threads and there is no extra worker beyond the requested count.
-    ! No PRIVATE clause is needed: the walk's state are locals of
-    ! pt2_omp_walk.
-    !$OMP PARALLEL DEFAULT(SHARED) NUM_THREADS(nproc_target)
-    !$OMP SINGLE
-       call pt2_omp_walk(E(pt2_stoch_istate), relative_error, pt2_data, pt2_data_err, &
-                         b, b_workers, pt2_data_I, pt2_data_S, pt2_data_S2, pos_warm)
-    !$OMP END SINGLE
-    !$OMP END PARALLEL
+    ! The walk is plain serial code.  It opens one parallel-do region
+    ! per window of pt2_omp_window positions (see pt2_omp_walk), so the
+    ! team is exactly nproc_target threads, the walking thread included,
+    ! and there is no worker beyond the requested count.  The walk's
+    ! state stays in pt2_omp_walk's local variables, which is only
+    ! possible because the walk is not itself inside a parallel region.
+    call pt2_omp_walk(E(pt2_stoch_istate), relative_error, pt2_data, pt2_data_err, &
+                      b, b_workers, pt2_data_I, pt2_data_S, pt2_data_S2, pos_warm, nproc_target)
 
 
     pt2_data % rpt2(pt2_stoch_istate) =  &
@@ -476,18 +525,19 @@ end subroutine
 
 
 subroutine pt2_omp_walk(E, relative_error, pt2_data, pt2_data_err, b, b_workers, &
-                        pt2_data_I, pt2_data_S, pt2_data_S2, pos_warm)
+                        pt2_data_I, pt2_data_S, pt2_data_S2, pos_warm, nproc_target)
   use selection_types
   implicit none
   BEGIN_DOC
 ! The walk: the legacy collector's body minus every ZeroMQ/arrival
 ! branch.
-! Runs on a single thread, spawns one task per walk position for a
-! window of pt2_omp_window positions, waits for the window with a
-! TASKGROUP, then consumes the positions of the window in order.
+! Runs on a single thread, computes a window of pt2_omp_window
+! positions in one parallel-do region, then consumes the positions of
+! the window in order.
 !
 ! `E' is the total CI energy of the current state; `pos_warm' is the
-! position already computed by the serial warm-up (skipped here).
+! position already computed by the serial warm-up (skipped here);
+! `nproc_target' is the size of the team, the walking thread included.
   END_DOC
 
   double precision, intent(in)            :: E, relative_error
@@ -498,21 +548,17 @@ subroutine pt2_omp_walk(E, relative_error, pt2_data, pt2_data_err, b, b_workers,
   type(pt2_type), intent(inout)           :: pt2_data_S(pt2_N_teeth+1)
   type(pt2_type), intent(inout)           :: pt2_data_S2(pt2_N_teeth+1)
   integer, intent(in)                     :: pos_warm
-
-  ! Size of the window of walk positions spawned as OpenMP tasks at
-  ! once.  Compile-time constant: it MUST NOT depend on the thread
-  ! count, because a thread-dependent window would change the computed
-  ! position set, and therefore the selected determinants.  If it
-  ! proves too small at high core counts, raise the constant; never
-  ! make it a function of nproc.
-  integer, parameter             :: pt2_omp_window = 256
+  integer, intent(in)                     :: nproc_target
 
   type(pt2_type)                 :: pt2_data_teeth
   integer                        :: n, i, p, c, t, U, pos, hi, j, g
+  integer                        :: maxF, ntask, k, ioff, itask
   double precision               :: v, avg, avg2, avg3(N_states), eqt, E0, v0, n0(N_states)
   double precision               :: eqta(N_states)
   double precision               :: time, time1, time0
   logical, allocatable           :: d(:)
+  integer, allocatable           :: tpos(:), tsub(:)
+  type(pt2_type), allocatable    :: pt2_sub(:,:)
   logical                        :: do_exit, stop_now, walk_stop
   logical, external              :: qp_stop
   integer, external              :: pt2_find_sample_lr
@@ -532,6 +578,20 @@ subroutine pt2_omp_walk(E, relative_error, pt2_data, pt2_data_err, b, b_workers,
   call pt2_alloc(pt2_data_teeth, N_states)
   allocate(d(N_det_generators+1))
 
+  ! Per-(position, subset) accumulators of one window, and the task list
+  ! that enumerates them.  pt2_sub(i,j) collects the contribution of
+  ! subset j of the i-th position of the window; the consume phase folds
+  ! them into pt2_data_I in the fixed order j = 1..pt2_F(g), which is
+  ! what makes the result independent of the schedule.
+  maxF = maxval(pt2_F(1:N_det_generators))
+  allocate(tpos(pt2_omp_window*maxF), tsub(pt2_omp_window*maxF))
+  allocate(pt2_sub(pt2_omp_window, maxF))
+  do j = 1, maxF
+    do i = 1, pt2_omp_window
+      call pt2_alloc(pt2_sub(i,j), N_states)
+    enddo
+  enddo
+
   E0 = E
   v0 = 0.d0
   n0(:) = 0.d0
@@ -548,23 +608,50 @@ subroutine pt2_omp_walk(E, relative_error, pt2_data, pt2_data_err, b, b_workers,
   do while (pos <= N_det_generators)
     hi = min(pos + pt2_omp_window - 1, N_det_generators)
 
-    ! Spawn the window.  The results are in fixed slots by construction
-    ! of the taskgroup; no polling and no bookkeeping.
-    !
-    ! The SHARED clause restates what DEFAULT(SHARED) already implies
-    ! for these dummy arguments; it is written explicitly because
-    ! gfortran 16.2.0 crashes with an internal compiler error in
-    ! expand_expr_real_1 when it tries to build the implicit private
+    ! Enumerate the window: one task per (position, subset).  The
+    ! subset granularity is the legacy granularity (one ZMQ task was one
+    ! subset) and it is what keeps one expensive generator from becoming
+    ! a tail: the pt2_F(g) subtasks of a position run concurrently with
+    ! the rest of the window instead of forming a single long task.  The
+    ! list is built in position order and does not depend on the thread
+    ! count.
+    ntask = 0
+    do n = pos, hi
+      if (n == pos_warm) cycle
+      do j = 1, pt2_F(pt2_J(n))
+        ntask = ntask + 1
+        tpos(ntask) = n
+        tsub(ntask) = j
+      enddo
+    enddo
+
+    ! Zero the accumulators of this window: each one is written by
+    ! exactly one task and folded in the consume phase.
+    do itask = 1, ntask
+      ioff = tpos(itask) - pos + 1
+      j = tsub(itask)
+      pt2_sub(ioff,j) % pt2(:)       = 0.d0
+      pt2_sub(ioff,j) % rpt2(:)      = 0.d0
+      pt2_sub(ioff,j) % variance(:)  = 0.d0
+      pt2_sub(ioff,j) % overlap(:,:) = 0.d0
+    enddo
+
+    ! One iteration per task, dealt to the members of a fresh team.
+    ! The task list is a plain array, so a parallel-do loop is all we
+    ! need and no tasking construct is involved.
+    ! SCHEDULE(DYNAMIC,1) spreads the very uneven per-subset cost, and
+    ! the single-unit chunk keeps the tail small.  The SHARED clause
+    ! restates what DEFAULT(SHARED) already implies for these dummy
+    ! arguments; gfortran 16.2.0 needs it to avoid an internal compiler
+    ! error in expand_expr_real_1 while building an implicit private
     ! copy of the pt2_type array pt2_data_I.  It also documents that
     ! `b' (the merge target) and the worker buffers are shared.
-    !$OMP TASKGROUP
-    do j = pos, hi
-      if (j == pos_warm) cycle
-      !$OMP TASK FIRSTPRIVATE(j) SHARED(b_workers, b, pt2_data_I)
-         call pt2_omp_task(j, b_workers, b, pt2_data_I)
-      !$OMP END TASK
+    !$OMP PARALLEL DO DEFAULT(SHARED) NUM_THREADS(nproc_target) SCHEDULE(DYNAMIC,1) SHARED(b_workers, b, pt2_data_I, pt2_sub, tpos, tsub)
+    do k = 1, ntask
+      call pt2_omp_task(tpos(k), tsub(k), b_workers, b, &
+                        pt2_sub(tpos(k)-pos+1, tsub(k)))
     end do
-    !$OMP END TASKGROUP
+    !$OMP END PARALLEL DO
 
     ! Consume the window in position order.  Lemma 1 guarantees that
     ! every sample read here belongs to a position < n, i.e. to this
@@ -572,6 +659,20 @@ subroutine pt2_omp_walk(E, relative_error, pt2_data, pt2_data_err, b, b_workers,
     do n = pos, hi
 
       g = pt2_J(n)
+
+      ! Fold the partial sums of this position into its slot, in the
+      ! fixed order j = 1..pt2_F(g).  The association is the legacy
+      ! slave/collector one (one partial sum per subset, added in a
+      ! fixed order), so the value of pt2_data_I(g) is a function of the
+      ! generator only, never of the schedule or of the thread count.
+      ! The warm-up position already wrote its slot directly.
+      if (n /= pos_warm) then
+        ioff = n - pos + 1
+        do j = 1, pt2_F(g)
+          call pt2_add(pt2_data_I(g), 1.d0, pt2_sub(ioff,j))
+        enddo
+      endif
+
       d(g) = .true.
       do while (d(U+1))
         U = U + 1
@@ -710,31 +811,47 @@ subroutine pt2_omp_walk(E, relative_error, pt2_data, pt2_data_err, b, b_workers,
 
   call pt2_dealloc(pt2_data_teeth)
   deallocate(d)
+  do j = 1, maxF
+    do i = 1, pt2_omp_window
+      call pt2_dealloc(pt2_sub(i,j))
+    enddo
+  enddo
+  deallocate(pt2_sub, tpos, tsub)
 
 end subroutine
 
 
-subroutine pt2_omp_task(pos, b_workers, b, pt2_data_I)
+subroutine pt2_omp_task(pos, j, b_workers, b, pt2_out)
   use omp_lib
   use selection_types
   implicit none
   BEGIN_DOC
-! One task = one walk position: evaluate all pt2_F(g) subsets of the
-! generator g = pt2_J(pos) into pt2_data_I(g), and merge the local
-! selection buffer into the shared one after every subset, under the
-! named critical region.  All subsets are accumulated in the same slot
-! in the fixed order j = 1..pt2_F(g): the sums are bit-identical for any
-! schedule (lemma 2).  The local buffer is empty at the start of every
-! subset, so what a subset offers does not depend on which thread ran it
-! nor on the previous subsets (lemma 3).
+! One task = one (walk position, subset) pair: evaluate subset `j' of
+! the generator g = pt2_J(pos) into the caller-provided accumulator
+! `pt2_out', and merge the local selection buffer into the shared one
+! under the named critical region.
+!
+! `pt2_out' is either the generator's own slot (serial warm-up, running
+! accumulation, exactly the sequential reference) or a private
+! per-(position,subset) accumulator that the consume phase folds into
+! the generator's slot in the fixed order 1..pt2_F(g).  The subset
+! never sees the accumulator of another subset, and it starts from a
+! zeroed accumulator, so its value depends on (g, j) only.
+!
+! The local buffer is reset at the start and at the end of every
+! subset: what a subset offers must not depend on which thread ran it
+! nor on the previous subsets (add_to_selection_buffer drops the entry
+! with the largest kept weight when its storage fills, so a buffer that
+! outlives a subset could discard a candidate the shared heap would
+! have kept).
   END_DOC
 
-  integer, intent(in)                     :: pos
+  integer, intent(in)                     :: pos, j
   type(selection_buffer), intent(inout)   :: b_workers(nthreads_pt2+1)
   type(selection_buffer), intent(inout)   :: b
-  type(pt2_type), intent(inout)           :: pt2_data_I(N_det_generators)
+  type(pt2_type), intent(inout)           :: pt2_out
 
-  integer :: g, j, it
+  integer :: g, it
 
   g = pt2_J(pos)
 
@@ -746,41 +863,39 @@ subroutine pt2_omp_task(pos, b_workers, b, pt2_data_I)
     stop 'bug in selection'
   endif
 
-  it = omp_get_thread_num() + 1
+  ! omp_get_thread_num() is -1 outside a parallel region (the serial
+  ! warm-up); clamp to 0 so the warm-up uses slot 1, never b_workers(0).
+  ! Writing b_workers(0) lands one element before the allocatable and
+  ! corrupts the heap headers of the adjacent chunk: the warm-up
+  ! clobbered 12 bytes (cur, mini) into the chunk size fields around
+  ! b_workers, and which allocation was clobbered depended on the
+  ! run-dependent heap layout at the start of the walk. That was the
+  ! source of the ~1e-10 run-to-run rPT2 differences at fixed thread
+  ! count (observed 2026-11-11 on Ampere: three discrete rPT2 values
+  ! across (48,48) repeats).
+  it = max(omp_get_thread_num(), 0) + 1
 
   b_workers(it) % cur  = 0
   b_workers(it) % mini = 0.d0
 
   ! [gpu-candidate] select_connected: single/double excitation sampling
-  ! and PT2 weight accumulation, called pt2_F(g) times per walk position.
-  ! Bitmask- and gather-bound (low arithmetic intensity), so a per-position
-  ! launch is hopeless; it would only pay as a batched kernel over many
-  ! positions, at >= ~10^6 candidate excitations per launch (the fixture
-  ! produces ~10^2-10^3 per position).
-  do j = 1, pt2_F(g)
-    call select_connected(g, pt2_e0_denominator, pt2_data_I(g), b_workers(it), j, pt2_F(g))
+  ! and PT2 weight accumulation, called sum_g pt2_F(g) times, i.e. once
+  ! per task.  Bitmask- and gather-bound (low arithmetic intensity), so
+  ! a per-task launch is hopeless; it would only pay as a batched kernel
+  ! over many subsets, at >= ~10^6 candidate excitations per launch (the
+  ! fixture produces ~10^2-10^3 per subset).
+  call select_connected(g, pt2_e0_denominator, pt2_out, b_workers(it), j, pt2_F(g))
 
-    ! Merge after every subset and reset the buffer, as the legacy slave
-    ! did (one ZMQ task was one subset, and it restarted from b%cur = 0).
-    ! add_to_selection_buffer drops the entry with the largest kept val
-    ! when its storage fills (selection_buffer.irp.f:72-74), i.e. the
-    ! candidate that defines the new threshold, so a buffer that outlives
-    ! a subset can discard a candidate the shared heap would have kept.
-    ! One subset per buffer bounds that to the exposure the legacy slave
-    ! had, and costs one lock acquisition per subset, which is nothing
-    ! next to the select_connected call that precedes it.
-    if (b_workers(it) % cur > 0) then
-      !$OMP CRITICAL(pt2_omp_merge)
-         call pt2_omp_merge(b_workers(it), b)
-      !$OMP END CRITICAL(pt2_omp_merge)
-    endif
+  if (b_workers(it) % cur > 0) then
+    !$OMP CRITICAL(pt2_omp_merge)
+       call pt2_omp_merge(b_workers(it), b)
+    !$OMP END CRITICAL(pt2_omp_merge)
+  endif
 
-    ! mini back to 0 so that the next subset offers all of its
-    ! candidates: the pruning is the shared heap's job, and what a subset
-    ! offers must not depend on what the previous subsets offered.
-    b_workers(it) % cur  = 0
-    b_workers(it) % mini = 0.d0
-  enddo
+  ! mini back to 0 so that the next subset offers all of its candidates:
+  ! the pruning is the shared heap's job.
+  b_workers(it) % cur  = 0
+  b_workers(it) % mini = 0.d0
 
 end subroutine
 

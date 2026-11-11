@@ -463,6 +463,18 @@ END_PROVIDER
 
   PROVIDE psi_coef_sorted_bit
 
+  ! The parallel loop below calls get_index_in_psi_det_{alpha,beta}_unique,
+  ! which carry IRPF90's lazy-build guard (a non-atomic check-then-act).
+  ! IRPF90 auto-detects the dependency on psi_det_alpha_unique (via the
+  ! N_det_alpha_unique reference in to_sort) but NOT on psi_det_beta_unique
+  ! (N_det_beta_unique appears only in an ASSERT, which the static analysis
+  ! ignores).  If psi_det_beta_unique is not already built when the parallel
+  ! region runs, several threads build it at the same time: a data race that
+  ! corrupts the array and N_det_beta_unique and aborts (qp_bug) at
+  ! OMP_NUM_THREADS >= 2.  Build both explicitly, serially, here so the
+  ! guards are no-ops for every worker.
+  PROVIDE psi_det_alpha_unique psi_det_beta_unique
+
   integer*8, allocatable         :: to_sort(:)
   integer, external              :: get_index_in_psi_det_alpha_unique
   integer, external              :: get_index_in_psi_det_beta_unique

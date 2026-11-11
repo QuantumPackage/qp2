@@ -355,9 +355,16 @@ subroutine select_singles_and_doubles(i_generator, hole_mask, particle_mask, foc
         enddo
         if(s1 /= s2) monoBdo = .false.
       enddo
-
-      if (.not.found) cycle
+      ! The pre-scan's monoBdo side effect must not survive a skipped
+      ! row (latent bug when csubset is large enough for an s1 row to
+      ! have no pair in this subset).  Only monoBdo is restored before
+      ! the cycle: the maskInd restore must stay after it, because a
+      ! skipped row must still leave its n_R increments in maskInd
+      ! (a kept row's real loop re-advances the same amount), which is
+      ! what makes maskInd the global pair index and the subset
+      ! partition exact.
       monoBdo = monoBdo_save
+      if (.not.found) cycle
       maskInd = maskInd_save
 
       h1 = hole_list(i1,s1)
@@ -1668,9 +1675,3 @@ subroutine bitstring_to_list_in_selection( string, list, n_elements, Nint)
   enddo
 
 end
-!
-
-
-
-
-
