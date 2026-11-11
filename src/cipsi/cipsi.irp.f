@@ -88,7 +88,7 @@ subroutine run_cipsi
       threshold_generators_save = threshold_generators
       threshold_generators = 1.d0
       SOFT_TOUCH threshold_generators
-      call ZMQ_pt2(psi_energy_with_nucl_rep,pt2_data,pt2_data_err,relative_error, 0) ! Stochastic PT2
+      call pt2_stochastic(psi_energy_with_nucl_rep,pt2_data,pt2_data_err,relative_error, 0) ! Stochastic PT2
       threshold_generators = threshold_generators_save
       SOFT_TOUCH threshold_generators
     else
@@ -145,7 +145,7 @@ subroutine run_cipsi
       call pt2_alloc(pt2_data_err, N_states)
       threshold_generators = 1d0
       SOFT_TOUCH threshold_generators
-      call ZMQ_pt2(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, relative_error, 0) ! Stochastic PT2
+      call pt2_stochastic(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, relative_error, 0) ! Stochastic PT2
       SOFT_TOUCH threshold_generators
     endif
     print *,  'N_det             = ', N_det

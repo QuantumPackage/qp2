@@ -38,6 +38,19 @@ subroutine format_w_error(value,error,size_nb,max_nb_digits,format_value,str_err
   ! size_nb = Size of the double: X (FX.Y)
   write(str_size,'(I3)') size_nb
 
+  ! A NaN error (a corrupted stochastic accumulator, e.g. the
+  ! out-of-bounds b_workers(0) before its fix) makes gfortran print
+  ! "NaN" in the ES20.0 field below, so the exponent read of
+  ! characters 19:20 aborts with an obscure I/O error.  Report it
+  ! instead.  gfortran prints an infinite error as "1.+300" (which
+  ! parses), but the same guard covers other compilers.
+  if (error /= error .or. dabs(error) >= huge(error)) then
+    str_error = 'N'
+    format_value = 'F'//trim(adjustl(str_size))//'.0'
+    call unlock_io()
+    return
+  endif
+
   ! Error
   write(str_exp,'(ES20.0)') error
   str_error = trim(adjustl(str_exp))

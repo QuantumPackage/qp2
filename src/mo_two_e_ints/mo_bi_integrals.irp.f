@@ -721,11 +721,13 @@ end
     !$OMP PARALLEL DO  PRIVATE(i,j)
     do j=1,mo_num
       do i=1,mo_num
+          ! The sixth argument used to be the current element of the array
+          ! being written, i.e. uninitialised memory.  Initialise it at zero.
           mo_two_e_integrals_jj_exchange(i,j) = &
           ddot(cholesky_mo_num, &
              cholesky_mo_transp(1,i,j), 1, &
              cholesky_mo_transp(1,j,i), 1, &
-             mo_two_e_integrals_jj_exchange(i,j))
+             0.d0)
       enddo
     enddo
     !$OMP END PARALLEL DO

@@ -9,69 +9,30 @@ cipsi_utils
 ===========
 
 Shared routines of the |CIPSI| selection and of the stochastic |PT2|
-computation, for the master process and for the |ZeroMQ| slave
-processes.
+computation.
 
 * the selection buffer: :c:func:`create_selection_buffer`,
   :c:func:`add_to_selection_buffer`, :c:func:`merge_selection_buffers`
   and :c:func:`sort_selection_buffer` manage the determinants
   selected by the slaves, and :c:func:`push_selection_results` /
   :c:func:`pull_selection_results` exchange them with the master
-* the stochastic |PT2|: the `pt2_*` routines build the samples and
-  accumulate the stochastic estimate of the |PT2| energy on the
-  slaves (:c:func:`run_pt2_slave`), and
-  :c:func:`push_pt2_results` / :c:func:`pull_pt2_results` exchange
-  the partial results with the master
 * :c:func:`run_slave_cipsi` and :c:func:`run_slave_main` are the main
-  programs of the slave processes
+  programs of the selection slaves
+* the |PT2| bookkeeping: :c:func:`pt2_alloc`, :c:func:`pt2_add`,
+  :c:func:`pt2_add2` and :c:func:`pt2_dealloc` accumulate the energy,
+  variance, |rPT2| and overlap of each state (:c:func:`pt2_serialize`
+  and :c:func:`pt2_deserialize` carry them to the selection slaves),
+  and :c:data:`pt2_mindetinfirstteeth`, :c:data:`pt2_n_tasks`,
+  :c:data:`pt2_n_tasks_max` and :c:data:`pt2_r` describe the comb used
+  to sample the generators
+* the |PT2| driver itself is :c:func:`pt2_stochastic`, in this module:
+  it samples the walk positions with OpenMP tasks in the master process,
+  and no longer uses a |ZeroMQ| slave
  
  
  
 Providers 
 --------- 
- 
-.. c:var:: int global_selection_buffer
-
-
-    File : :file:`cipsi_utils/run_pt2_slave.irp.f`
-
-    .. code:: fortran
-
-        type(selection_buffer)	:: global_selection_buffer	
-
-
-    Global buffer for the OpenMP selection
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`global_selection_buffer_lock`
-       * :c:data:`n_det_generators`
-       * :c:data:`n_int`
-
-
- 
-.. c:var:: int global_selection_buffer_lock
-
-
-    File : :file:`cipsi_utils/run_pt2_slave.irp.f`
-
-    .. code:: fortran
-
-        integer(omp_lock_kind)	:: global_selection_buffer_lock	
-
-
-    Global buffer for the OpenMP selection
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`global_selection_buffer`
-
  
 .. c:var:: double pt2_cw
 
@@ -100,7 +61,7 @@ Providers
        :columns: 3
 
        * :c:data:`n_det_generators`
-       * :c:data:`psi_det_generators`
+       * :c:data:`psi_det_sorted_gen`
        * :c:data:`pt2_n_teeth`
        * :c:data:`pt2_stoch_istate`
        * :c:data:`qp_max_mem`
@@ -218,8 +179,13 @@ Providers
 
 
     pt2_N_teeth: number of comb teeth of the stochastic PT2
-    sampling: 1 if N_det_generators < 1024, otherwise the
-    largest N from 100 down to 2 for which
+    sampling.  1 means "no comb": the caller must then fall back
+    to the deterministic selection (ZMQ_selection), because a
+    one-tooth comb samples one generator per comb and costs as
+    much as the exact pass while adding noise.  This happens when
+    N_det_generators < 1024, or when no comb can be built (a
+    warning is printed in that case).
+    Otherwise: the largest N from 100 down to 2 for which
     testTeethBuilding(pt2_minDetInFirstTeeth, N) is true.
     pt2_minDetInFirstTeeth: minimum number of determinants
     required in the first tooth (1 or min(5, N_det_generators)).
@@ -231,7 +197,7 @@ Providers
 
        * :c:data:`mpi_master`
        * :c:data:`n_det_generators`
-       * :c:data:`psi_det_generators`
+       * :c:data:`psi_det_sorted_gen`
        * :c:data:`pt2_stoch_istate`
 
     Needed by:
@@ -271,7 +237,7 @@ Providers
        :columns: 3
 
        * :c:data:`n_det_generators`
-       * :c:data:`psi_det_generators`
+       * :c:data:`psi_det_sorted_gen`
        * :c:data:`pt2_n_teeth`
        * :c:data:`pt2_stoch_istate`
        * :c:data:`qp_max_mem`
@@ -358,8 +324,13 @@ Providers
 
 
     pt2_N_teeth: number of comb teeth of the stochastic PT2
-    sampling: 1 if N_det_generators < 1024, otherwise the
-    largest N from 100 down to 2 for which
+    sampling.  1 means "no comb": the caller must then fall back
+    to the deterministic selection (ZMQ_selection), because a
+    one-tooth comb samples one generator per comb and costs as
+    much as the exact pass while adding noise.  This happens when
+    N_det_generators < 1024, or when no comb can be built (a
+    warning is printed in that case).
+    Otherwise: the largest N from 100 down to 2 for which
     testTeethBuilding(pt2_minDetInFirstTeeth, N) is true.
     pt2_minDetInFirstTeeth: minimum number of determinants
     required in the first tooth (1 or min(5, N_det_generators)).
@@ -371,7 +342,7 @@ Providers
 
        * :c:data:`mpi_master`
        * :c:data:`n_det_generators`
-       * :c:data:`psi_det_generators`
+       * :c:data:`psi_det_sorted_gen`
        * :c:data:`pt2_stoch_istate`
 
     Needed by:
@@ -512,7 +483,7 @@ Providers
        :columns: 3
 
        * :c:data:`n_det_generators`
-       * :c:data:`psi_det_generators`
+       * :c:data:`psi_det_sorted_gen`
        * :c:data:`pt2_n_teeth`
        * :c:data:`pt2_stoch_istate`
        * :c:data:`qp_max_mem`
@@ -553,7 +524,7 @@ Providers
        :columns: 3
 
        * :c:data:`n_det_generators`
-       * :c:data:`psi_det_generators`
+       * :c:data:`psi_det_sorted_gen`
        * :c:data:`pt2_n_teeth`
        * :c:data:`pt2_stoch_istate`
        * :c:data:`qp_max_mem`
@@ -594,7 +565,7 @@ Providers
        :columns: 3
 
        * :c:data:`n_det_generators`
-       * :c:data:`psi_det_generators`
+       * :c:data:`psi_det_sorted_gen`
        * :c:data:`pt2_n_teeth`
        * :c:data:`pt2_stoch_istate`
        * :c:data:`qp_max_mem`
@@ -696,7 +667,6 @@ Subroutines / functions
 
        * :c:func:`fill_buffer_double`
        * :c:func:`fill_buffer_single`
-       * :c:func:`pt2_collector`
        * :c:func:`selection_collector`
 
     Calls:
@@ -732,13 +702,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`global_selection_buffer`
-       * :c:func:`pt2_collector`
-       * :c:func:`run_pt2_slave_large`
-       * :c:func:`run_pt2_slave_small`
+       * :c:func:`pt2_stochastic`
        * :c:func:`run_selection_slave`
        * :c:func:`selection_collector`
-       * :c:func:`zmq_pt2`
        * :c:func:`zmq_selection`
 
     Calls:
@@ -767,13 +733,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`global_selection_buffer`
-       * :c:func:`pt2_collector`
-       * :c:func:`run_pt2_slave_large`
-       * :c:func:`run_pt2_slave_small`
+       * :c:func:`pt2_stochastic`
        * :c:func:`run_selection_slave`
        * :c:func:`selection_collector`
-       * :c:func:`zmq_pt2`
        * :c:func:`zmq_selection`
 
  
@@ -807,7 +769,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`zmq_pt2`
+       * :c:func:`pt2_stochastic`
        * :c:func:`zmq_selection`
 
     Calls:
@@ -840,13 +802,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`n_int`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_pt2_slave_large`
 
  
 .. c:function:: void provide_everything(void)
@@ -922,7 +877,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`pt2_collector`
+       * :c:func:`pt2_omp_walk`
        * :c:func:`selection_collector`
 
  
@@ -943,7 +898,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`pt2_collector`
+       * :c:func:`pt2_omp_walk`
 
  
 .. c:function:: void pt2_alloc(void)
@@ -964,72 +919,12 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`pt2_collector`
+       * :c:func:`pt2_omp_walk`
+       * :c:func:`pt2_stochastic`
        * :c:func:`run_cipsi`
-       * :c:func:`run_pt2_slave_large`
-       * :c:func:`run_pt2_slave_small`
        * :c:func:`run_selection_slave`
        * :c:func:`run_stochastic_cipsi`
        * :c:func:`selection_collector`
-
- 
-.. c:function:: void pt2_collector(void)
-
-
-    File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_err, b, N_)
-
-
-    Master of the in-process stochastic PT2: pulls the partial
-    results of the slave tasks and accumulates them per
-    generator, maintaining the running averages of the PT2
-    energy, its variance and the state overlaps (printed every
-    second) until the relative error on the PT2 energy is
-    below relative_error; selected determinants are added to b.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det_generators`
-       * :c:data:`n_states`
-       * :c:data:`pt2_f`
-       * :c:data:`pt2_j`
-       * :c:data:`pt2_n_teeth`
-       * :c:data:`pt2_stoch_istate`
-       * :c:data:`pt2_u`
-       * :c:data:`pt2_w`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`zmq_pt2`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`add_to_selection_buffer`
-       * :c:func:`check_mem`
-       * :c:func:`create_selection_buffer`
-       * :c:func:`delete_selection_buffer`
-       * :c:func:`end_zmq_to_qp_run_socket`
-       * :c:func:`format_w_error`
-       * :c:func:`pt2_add`
-       * :c:func:`pt2_add2`
-       * :c:func:`pt2_alloc`
-       * :c:func:`pt2_dealloc`
-       * :c:func:`pull_pt2_results`
-       * :c:func:`sleep`
-       * :c:func:`sort_selection_buffer`
-       * :c:func:`wall_time`
 
  
 .. c:function:: void pt2_dealloc(void)
@@ -1050,10 +945,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`pt2_collector`
+       * :c:func:`pt2_omp_walk`
+       * :c:func:`pt2_stochastic`
        * :c:func:`run_cipsi`
-       * :c:func:`run_pt2_slave_large`
-       * :c:func:`run_pt2_slave_small`
        * :c:func:`run_selection_slave`
        * :c:func:`run_stochastic_cipsi`
        * :c:func:`selection_collector`
@@ -1078,7 +972,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`pull_pt2_results`
        * :c:func:`pull_selection_results`
 
  
@@ -1127,6 +1020,283 @@ Subroutines / functions
        * :c:data:`n_det_generators`
 
  
+.. c:function:: void pt2_omp_lt(void)
+
+
+    File : :file:`cipsi_utils/pt2_omp.irp.f`
+
+    .. code:: fortran
+
+        logical function pt2_omp_lt(b1, i1, b2, i2)
+
+
+    Total order used by the selection heap:
+      (v1,d1) < (v2,d2)  iff  v1 < v2, or (v1 == v2 and d1 <lex d2),
+    where lex compares the (N_int,2) bit patterns integer by integer,
+    spin by spin (column-major order of b%det), the first difference
+    deciding.  Signed comparison of the integer(8) patterns is a valid
+    total order, and that is all the heap needs.  Ties are real
+    (symmetry-equivalent determinants carry bit-identical weights), so
+    this is what makes the retained set independent of the merge order.
+    
+    Entry i1 of buffer b1 is compared with entry i2 of buffer b2; the
+    heap routines pass the same buffer twice.  (A single-buffer dummy
+    cannot express the cross-buffer comparison that pt2_omp_merge needs.)
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_int`
+
+ 
+.. c:function:: void pt2_omp_merge(void)
+
+
+    File : :file:`cipsi_utils/pt2_omp.irp.f`
+
+    .. code:: fortran
+
+        subroutine pt2_omp_merge(src, dst)
+
+
+    Merge one local selection buffer into the shared max-heap, keeping
+    the dst%N best candidates under the total order of pt2_omp_lt.
+    No sort of src is needed and its order is irrelevant (lemma 3).
+    
+    Invariant on entry and exit: positions 1..dst%cur form a max-heap
+    under pt2_omp_lt (the root is the worst kept candidate), and
+    dst%mini = dst%val(1) when the buffer is full, 0 otherwise.
+    
+    (i) A rejected entry is not better than the current worst kept, so it
+    cannot belong to the final dst%N smallest.  (ii) Replacing the root
+    and sifting down restores the heap.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_int`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pt2_omp_task`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pt2_omp_sift_down`
+       * :c:func:`pt2_omp_sift_up`
+
+ 
+.. c:function:: void pt2_omp_sift_down(void)
+
+
+    File : :file:`cipsi_utils/pt2_omp.irp.f`
+
+    .. code:: fortran
+
+        subroutine pt2_omp_sift_down(b, i)
+
+
+    Restore the max-heap invariant of b after the element at position i
+    has been replaced (or decreased).  The heap is positions 1..b%cur;
+    b%cur is therefore the heap size, which pt2_omp_sort shrinks as it
+    grows the sorted suffix.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_int`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pt2_omp_merge`
+       * :c:func:`pt2_omp_sort`
+
+ 
+.. c:function:: void pt2_omp_sift_up(void)
+
+
+    File : :file:`cipsi_utils/pt2_omp.irp.f`
+
+    .. code:: fortran
+
+        subroutine pt2_omp_sift_up(b, i)
+
+
+    Restore the max-heap invariant of b (positions 1..b%cur) after the
+    element at position i has been appended or increased.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_int`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pt2_omp_merge`
+
+ 
+.. c:function:: void pt2_omp_sort(void)
+
+
+    File : :file:`cipsi_utils/pt2_omp.irp.f`
+
+    .. code:: fortran
+
+        subroutine pt2_omp_sort(b)
+
+
+    In-place heapsort of the b%cur entries of b by increasing order of
+    pt2_omp_lt (ascending weight, ties ordered by determinant).  This is
+    the replacement of sort_selection_buffer, which cannot be used on
+    this buffer because it reads b%val(b%N) unguarded.
+    
+    b%cur is used as the live heap size: it is shrunk as the sorted
+    suffix grows, and restored to its entry value before returning.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_int`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pt2_stochastic`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pt2_omp_sift_down`
+
+ 
+.. c:function:: void pt2_omp_task(void)
+
+
+    File : :file:`cipsi_utils/pt2_omp.irp.f`
+
+    .. code:: fortran
+
+        subroutine pt2_omp_task(pos, b_workers, b, pt2_data_I)
+
+
+    One task = one walk position: evaluate all pt2_F(g) subsets of the
+    generator g = pt2_J(pos) into pt2_data_I(g), and merge the local
+    selection buffer into the shared one after every subset, under the
+    named critical region.  All subsets are accumulated in the same slot
+    in the fixed order j = 1..pt2_F(g): the sums are bit-identical for any
+    schedule (lemma 2).  The local buffer is empty at the start of every
+    subset, so what a subset offers does not depend on which thread ran it
+    nor on the previous subsets (lemma 3).
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_det_generators`
+       * :c:data:`nthreads_pt2`
+       * :c:data:`pt2_e0_denominator`
+       * :c:data:`pt2_f`
+       * :c:data:`pt2_j`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pt2_omp_walk`
+       * :c:func:`pt2_stochastic`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pt2_omp_merge`
+       * :c:func:`select_connected`
+
+ 
+.. c:function:: void pt2_omp_walk(void)
+
+
+    File : :file:`cipsi_utils/pt2_omp.irp.f`
+
+    .. code:: fortran
+
+        subroutine pt2_omp_walk(E, relative_error, pt2_data, pt2_data_err, b, b_workers, &
+                                pt2_data_I, pt2_data_S, pt2_data_S2, pos_warm)
+
+
+    The walk: the legacy collector's body minus every ZeroMQ/arrival
+    branch.
+    Runs on a single thread, spawns one task per walk position for a
+    window of pt2_omp_window positions, waits for the window with a
+    TASKGROUP, then consumes the positions of the window in order.
+    
+    `E' is the total CI energy of the current state; `pos_warm' is the
+    position already computed by the serial warm-up (skipped here).
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_det_generators`
+       * :c:data:`n_states`
+       * :c:data:`nthreads_pt2`
+       * :c:data:`pt2_j`
+       * :c:data:`pt2_n_teeth`
+       * :c:data:`pt2_stoch_istate`
+       * :c:data:`pt2_u`
+       * :c:data:`pt2_w`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pt2_stochastic`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`format_w_error`
+       * :c:func:`pt2_add`
+       * :c:func:`pt2_add2`
+       * :c:func:`pt2_alloc`
+       * :c:func:`pt2_dealloc`
+       * :c:func:`pt2_omp_task`
+       * :c:func:`wall_time`
+
+ 
 .. c:function:: void pt2_serialize(void)
 
 
@@ -1146,85 +1316,130 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`push_pt2_results_async_send`
        * :c:func:`push_selection_results`
 
  
-.. c:function:: void pt2_slave_inproc(void)
+.. c:function:: void pt2_stochastic(void)
 
 
-    File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
+    File : :file:`cipsi_utils/pt2_omp.irp.f`
 
     .. code:: fortran
 
-        subroutine pt2_slave_inproc(i)
+        subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
 
 
-    In-process slave of the stochastic PT2: OpenMP thread i
-    (the master is thread 0) processes its PT2 tasks through
-    run_pt2_slave, with in-process (inproc) ZeroMQ sockets.
+    Stochastic |PT2| on OpenMP tasks: the only implementation (see the
+    header of this file for the algorithm).  Loops over the states,
+    allocates the per-state storage, runs the serial warm-up and the
+    parallel region, then does the per-state epilogue and the final
+    selection epilogue.
+    
+    `E' is the total CI energy of each state (psi_energy_with_nucl_rep);
+    `relative_error' is the target relative stochastic error on PT2;
+    `N_in' is the number of determinants to select (0 for qp_run pt2).
 
     Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`global_selection_buffer`
-       * :c:data:`pt2_e0_denominator`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`zmq_pt2`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_pt2_slave`
-
- 
-.. c:function:: void pull_pt2_results(void)
-
-
-    File : :file:`cipsi_utils/run_pt2_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine pull_pt2_results(zmq_socket_pull, index, pt2_data, task_id, n_tasks, b)
-
-
-    Master-side counterpart of push_pt2_results: receives a batch
-    of slave results (n_tasks, index, pt2_data, task_id) and the
-    slave selection buffer content (b%cur, b%val and b%det when
-    non-empty). When the socket is a REP, replies 'ok' and the
-    current threshold b%mini. On communication error, sets
-    n_tasks = 1 and task_id(1) = 0.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
+       * :c:data:`all_mo_integrals`
+       * :c:data:`banned_excitation`
+       * :c:data:`det_to_configuration`
+       * :c:data:`elec_alpha_num`
+       * :c:data:`excitation_alpha_max`
+       * :c:data:`excitation_beta_max`
+       * :c:data:`excitation_max`
+       * :c:data:`generators_bitmask`
+       * :c:data:`h0_type`
+       * :c:data:`mo_integrals_map`
+       * :c:data:`mo_integrals_threshold`
+       * :c:data:`mo_num`
+       * :c:data:`mo_one_e_integrals`
+       * :c:data:`n_act_orb`
+       * :c:data:`n_core_orb`
+       * :c:data:`n_del_orb`
+       * :c:data:`n_det`
+       * :c:data:`n_det_generators`
+       * :c:data:`n_inact_orb`
        * :c:data:`n_int`
        * :c:data:`n_states`
+       * :c:data:`n_virt_orb`
+       * :c:data:`nproc`
+       * :c:data:`nthreads_pt2`
+       * :c:data:`pseudo_sym`
+       * :c:data:`psi_bilinear_matrix_columns_loc`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
+       * :c:data:`psi_configuration_hii`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+       * :c:data:`psi_det_hii`
+       * :c:data:`psi_det_sorted`
+       * :c:data:`psi_det_sorted`
+       * :c:data:`psi_selectors`
+       * :c:data:`psi_selectors_coef_transp`
+       * :c:data:`pt2_f`
+       * :c:data:`pt2_j`
+       * :c:data:`pt2_n_teeth`
+       * :c:data:`pt2_overlap`
+       * :c:data:`pt2_j`
+       * :c:data:`pt2_stoch_istate`
+       * :c:data:`pt2_u`
+       * :c:data:`pt2_w`
+       * :c:data:`qp_max_mem`
+       * :c:data:`s2_eig`
+       * :c:data:`selection_weight`
+       * :c:data:`seniority_max`
+       * :c:data:`state_average_weight`
 
     Called by:
 
     .. hlist::
        :columns: 3
 
-       * :c:func:`pt2_collector`
+       * :c:func:`run`
+       * :c:func:`run_cipsi`
+       * :c:func:`run_stochastic_cipsi`
 
     Calls:
 
     .. hlist::
        :columns: 3
 
-       * :c:func:`pt2_deserialize`
+       * :c:func:`check_mem`
+       * :c:func:`create_selection_buffer`
+       * :c:func:`delete_selection_buffer`
+       * :c:func:`fill_h_apply_buffer_no_selection`
+       * :c:func:`make_selection_buffer_s2`
+       * :c:func:`pt2_alloc`
+       * :c:func:`pt2_dealloc`
+       * :c:func:`pt2_omp_sort`
+       * :c:func:`pt2_omp_task`
+       * :c:func:`pt2_omp_walk`
+       * :c:func:`remove_duplicates_in_selection_buffer`
+       * :c:func:`resident_memory`
+       * :c:func:`update_pt2_and_variance_weights`
+       * :c:func:`write_double`
+       * :c:func:`write_int`
+       * :c:func:`zmq_selection`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`pt2_match_weight`
+       * :c:data:`pt2_overlap`
+       * :c:data:`pt2_stoch_istate`
+       * :c:data:`selection_weight`
+       * :c:data:`state_average_weight`
+       * :c:data:`threshold_davidson_pt2`
+       * :c:data:`variance_match_weight`
 
  
 .. c:function:: void pull_selection_results(void)
@@ -1264,104 +1479,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`pt2_deserialize`
-
- 
-.. c:function:: void push_pt2_results(void)
-
-
-    File : :file:`cipsi_utils/run_pt2_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine push_pt2_results(zmq_socket_push, index, pt2_data, b, task_id, n_tasks)
-
-
-    Sends to the master, over a ZeroMQ socket, the results of
-    n_tasks tasks: the generator indices index, the serialized
-    pt2_data, the task_id list, and the selection buffer content
-    (b%cur, and b%val and b%det when b%cur > 0).
-    The exchange is completed with push_pt2_results_async_recv.
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_pt2_slave_small`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`push_pt2_results_async_recv`
-       * :c:func:`push_pt2_results_async_send`
-
- 
-.. c:function:: void push_pt2_results_async_recv(void)
-
-
-    File : :file:`cipsi_utils/run_pt2_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine push_pt2_results_async_recv(zmq_socket_push,mini,sending)
-
-
-    Completes the exchange started by push_pt2_results_async_send.
-    When the socket is a REQ, receives the 'ok' acknowledgment
-    and the current threshold mini of the master selection buffer.
-    Returns without action when sending is .false.; on exit
-    sending is .false.
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`push_pt2_results`
-       * :c:func:`run_pt2_slave_large`
-
- 
-.. c:function:: void push_pt2_results_async_send(void)
-
-
-    File : :file:`cipsi_utils/run_pt2_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine push_pt2_results_async_send(zmq_socket_push, index, pt2_data, b, task_id, n_tasks, sending)
-
-
-    Sends to the master the results of n_tasks tasks (generator
-    indices, serialized pt2_data, task_id list, and the selection
-    buffer content when b%cur > 0) as a single ZeroMQ message.
-    Requires sending == .false. on entry and sets it to .true.;
-    the caller must call push_pt2_results_async_recv to complete
-    the exchange. Stops if sending is already .true.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_int`
-       * :c:data:`n_states`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`push_pt2_results`
-       * :c:func:`run_pt2_slave_large`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`pt2_serialize`
 
  
 .. c:function:: void push_selection_results(void)
@@ -1431,7 +1548,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`zmq_pt2`
+       * :c:func:`pt2_stochastic`
 
     Calls:
 
@@ -1440,155 +1557,6 @@ Subroutines / functions
 
        * :c:func:`check_mem`
        * :c:func:`i8sort`
-
- 
-.. c:function:: void run_pt2_slave(void)
-
-
-    File : :file:`cipsi_utils/run_pt2_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine run_pt2_slave(thread,iproc,energy)
-
-
-    Slave of the stochastic PT2 computation. Currently always
-    calls run_pt2_slave_large (the switch to
-    run_pt2_slave_small for small N_det is commented out).
-    energy: state energies, passed to select_connected.
-    thread: 1 uses in-process (inproc) ZeroMQ sockets, 0 uses TCP.
-    iproc: OpenMP thread number.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_states_diag`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`pt2_slave_inproc`
-       * :c:func:`run_slave_main`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_pt2_slave_large`
-
- 
-.. c:function:: void run_pt2_slave_large(void)
-
-
-    File : :file:`cipsi_utils/run_pt2_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine run_pt2_slave_large(thread,iproc,energy)
-
-
-    Slave of the stochastic PT2 computation that processes one
-    task at a time: for each task, select_connected accumulates
-    the PT2 contribution of the excitations of one generator
-    determinant. The local buffer is merged into the shared
-    global_selection_buffer; the thread with iproc == 1 sends the
-    merged buffer, the other threads send their local buffer.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`elec_alpha_num`
-       * :c:data:`global_selection_buffer`
-       * :c:data:`global_selection_buffer_lock`
-       * :c:data:`mo_num`
-       * :c:data:`n_det`
-       * :c:data:`n_states`
-       * :c:data:`n_states_diag`
-       * :c:data:`pt2_f`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_pt2_slave`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`create_selection_buffer`
-       * :c:func:`delete_selection_buffer`
-       * :c:func:`end_zmq_push_socket`
-       * :c:func:`end_zmq_to_qp_run_socket`
-       * :c:func:`merge_selection_buffers`
-       * :c:func:`omp_set_lock`
-       * :c:func:`omp_unset_lock`
-       * :c:func:`pt2_alloc`
-       * :c:func:`pt2_dealloc`
-       * :c:func:`push_pt2_results_async_recv`
-       * :c:func:`push_pt2_results_async_send`
-       * :c:func:`select_connected`
-       * :c:func:`sleep`
-       * :c:func:`sort_selection_buffer`
-       * :c:func:`sscanf_ddd`
-       * :c:func:`wall_time`
-
- 
-.. c:function:: void run_pt2_slave_small(void)
-
-
-    File : :file:`cipsi_utils/run_pt2_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine run_pt2_slave_small(thread,iproc,energy)
-
-
-    Slave of the stochastic PT2 computation. Processes batches of
-    up to pt2_n_tasks_max tasks: for each task, select_connected
-    accumulates the PT2 contribution of the excitations of one
-    generator determinant. The batch results are sent to the
-    master in a single push_pt2_results message; the batch size is
-    adjusted to take about nproc/2 seconds.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`elec_alpha_num`
-       * :c:data:`mo_num`
-       * :c:data:`n_states`
-       * :c:data:`n_states_diag`
-       * :c:data:`nproc`
-       * :c:data:`pt2_f`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`create_selection_buffer`
-       * :c:func:`delete_selection_buffer`
-       * :c:func:`end_zmq_push_socket`
-       * :c:func:`end_zmq_to_qp_run_socket`
-       * :c:func:`pt2_alloc`
-       * :c:func:`pt2_dealloc`
-       * :c:func:`push_pt2_results`
-       * :c:func:`select_connected`
-       * :c:func:`sort_selection_buffer`
-       * :c:func:`sscanf_ddd`
-       * :c:func:`usleep`
-       * :c:func:`wall_time`
 
  
 .. c:function:: void run_selection_slave(void)
@@ -1674,6 +1642,14 @@ Subroutines / functions
        * :c:data:`distributed_davidson`
        * :c:data:`read_wf`
 
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`fci`
+       * :c:func:`pt2`
+
     Calls:
 
     .. hlist::
@@ -1688,13 +1664,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_det_generators`
-       * :c:data:`n_det_selectors`
        * :c:data:`distributed_davidson`
        * :c:data:`psi_coef`
        * :c:data:`psi_det`
        * :c:data:`pt2_e0_denominator`
-       * :c:data:`pt2_stoch_istate`
        * :c:data:`read_wf`
        * :c:data:`selection_weight`
        * :c:data:`state_average_weight`
@@ -1715,46 +1688,26 @@ Subroutines / functions
     state change from qp_run and broadcasts it to the MPI
     communicator. It then dispatches the matching step:
     'selection' runs run_selection_slave in every OpenMP thread,
-    'davidson' runs davidson_slave_tcp, 'pt2' runs run_pt2_slave
-    in OpenMP threads (only when N_det > 100000). Stops on 'Stopped'.
+    'davidson' runs davidson_slave_tcp.  The stochastic PT2 has no
+    slave state any more: it runs in process on OpenMP tasks (see
+    pt2_omp.irp.f).  Stops on 'Stopped'.
 
     Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`det_to_configuration`
-       * :c:data:`elec_alpha_num`
-       * :c:data:`global_selection_buffer`
-       * :c:data:`h0_type`
-       * :c:data:`mo_num`
        * :c:data:`mpi_master`
        * :c:data:`mpi_rank`
        * :c:data:`n_det`
        * :c:data:`n_det_generators`
        * :c:data:`n_det_selectors`
-       * :c:data:`n_int`
        * :c:data:`n_states`
        * :c:data:`n_states_diag`
-       * :c:data:`nthreads_pt2`
-       * :c:data:`pseudo_sym`
-       * :c:data:`psi_bilinear_matrix_columns_loc`
-       * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
        * :c:data:`psi_coef`
        * :c:data:`psi_det`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`psi_selectors_coef_transp`
        * :c:data:`pt2_e0_denominator`
-       * :c:data:`pt2_f`
-       * :c:data:`pt2_min_parallel_tasks`
-       * :c:data:`pt2_n_teeth`
        * :c:data:`pt2_stoch_istate`
-       * :c:data:`qp_max_mem`
        * :c:data:`selection_weight`
        * :c:data:`state_average_weight`
        * :c:data:`threshold_generators`
@@ -1773,12 +1726,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`check_mem`
        * :c:func:`davidson_slave_tcp`
        * :c:func:`mpi_print`
-       * :c:func:`provide_for_zmq_pt2`
-       * :c:func:`resident_memory`
-       * :c:func:`run_pt2_slave`
        * :c:func:`run_selection_slave`
        * :c:func:`usleep`
        * :c:func:`wait_for_states`
@@ -1790,12 +1739,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_det_generators`
-       * :c:data:`n_det_selectors`
        * :c:data:`psi_coef`
        * :c:data:`psi_det`
        * :c:data:`pt2_e0_denominator`
-       * :c:data:`pt2_stoch_istate`
        * :c:data:`selection_weight`
        * :c:data:`state_average_weight`
        * :c:data:`threshold_generators`
@@ -1915,9 +1861,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`add_to_selection_buffer`
-       * :c:func:`pt2_collector`
-       * :c:func:`run_pt2_slave_large`
-       * :c:func:`run_pt2_slave_small`
        * :c:func:`run_selection_slave`
        * :c:func:`selection_collector`
 
@@ -1952,7 +1895,7 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`n_det_generators`
-       * :c:data:`psi_det_generators`
+       * :c:data:`psi_det_sorted_gen`
        * :c:data:`pt2_stoch_istate`
 
     Calls:
@@ -1993,7 +1936,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`zmq_pt2`
+       * :c:func:`pt2_stochastic`
        * :c:func:`zmq_selection`
 
     Touches:
@@ -2002,116 +1945,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`pt2_match_weight`
-       * :c:data:`threshold_davidson_pt2`
-       * :c:data:`variance_match_weight`
-
- 
-.. c:function:: void zmq_pt2(void)
-
-
-    File : :file:`cipsi_utils/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
-
-
-    Computes the PT2 energy using ZMQ
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`all_mo_integrals`
-       * :c:data:`det_to_configuration`
-       * :c:data:`elec_alpha_num`
-       * :c:data:`excitation_alpha_max`
-       * :c:data:`excitation_beta_max`
-       * :c:data:`excitation_max`
-       * :c:data:`global_selection_buffer`
-       * :c:data:`h0_type`
-       * :c:data:`mo_num`
-       * :c:data:`mo_one_e_integrals`
-       * :c:data:`n_act_orb`
-       * :c:data:`n_core_orb`
-       * :c:data:`n_del_orb`
-       * :c:data:`n_det`
-       * :c:data:`n_det_generators`
-       * :c:data:`n_inact_orb`
-       * :c:data:`n_int`
-       * :c:data:`n_states`
-       * :c:data:`n_virt_orb`
-       * :c:data:`nproc`
-       * :c:data:`nthreads_pt2`
-       * :c:data:`pseudo_sym`
-       * :c:data:`psi_bilinear_matrix_columns_loc`
-       * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
-       * :c:data:`psi_configuration_hii`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`psi_det_hii`
-       * :c:data:`psi_selectors`
-       * :c:data:`pt2_e0_denominator`
-       * :c:data:`pt2_f`
-       * :c:data:`pt2_j`
-       * :c:data:`pt2_n_teeth`
-       * :c:data:`pt2_overlap`
-       * :c:data:`pt2_j`
-       * :c:data:`pt2_stoch_istate`
-       * :c:data:`pt2_u`
-       * :c:data:`pt2_w`
-       * :c:data:`qp_max_mem`
-       * :c:data:`s2_eig`
-       * :c:data:`selection_weight`
-       * :c:data:`seniority_max`
-       * :c:data:`state_average_weight`
-       * :c:data:`threshold_generators`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_cipsi`
-       * :c:func:`run_stochastic_cipsi`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`check_mem`
-       * :c:func:`create_selection_buffer`
-       * :c:func:`delete_selection_buffer`
-       * :c:func:`end_parallel_job`
-       * :c:func:`fill_h_apply_buffer_no_selection`
-       * :c:func:`make_selection_buffer_s2`
-       * :c:func:`new_parallel_job`
-       * :c:func:`provide_for_zmq_pt2`
-       * :c:func:`pt2_collector`
-       * :c:func:`pt2_slave_inproc`
-       * :c:func:`remove_duplicates_in_selection_buffer`
-       * :c:func:`resident_memory`
-       * :c:func:`update_pt2_and_variance_weights`
-       * :c:func:`write_double`
-       * :c:func:`write_int`
-       * :c:func:`zmq_selection`
-
-    Touches:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pt2_match_weight`
-       * :c:data:`pt2_overlap`
-       * :c:data:`pt2_stoch_istate`
-       * :c:data:`selection_weight`
-       * :c:data:`state_average_weight`
        * :c:data:`threshold_davidson_pt2`
        * :c:data:`variance_match_weight`
 
@@ -2177,8 +2010,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`pt2_stochastic`
        * :c:func:`run_cipsi`
-       * :c:func:`zmq_pt2`
 
     Calls:
 

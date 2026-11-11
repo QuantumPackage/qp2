@@ -302,19 +302,59 @@ subroutine cache_map_unique(map)
   use map_module
   implicit none
   type (cache_map_type), intent(inout) :: map
-  integer(cache_key_kind)        :: prev_key
-  integer(cache_map_size_kind)   :: i, j
+
+  ! Several integral builders append the same key more than once: the index
+  ! of a two-electron integral is symmetric under the exchange of the two
+  ! orbital pairs, so (i,j|k,l) and (k,l|i,j) are computed by two different
+  ! dgemm calls and land on the same key with values that differ by a few
+  ! ulps.  Keeping the first element of the run of equal keys makes the
+  ! value stored in the map depend on the order in which the OpenMP threads
+  ! happened to append, i.e. on the run: everything read from the map
+  ! (integrals, Fock, Hii, CI coefficients) then wobbles in the last bits.
+  !
+  ! We keep instead a representative that depends only on the *set* of
+  ! duplicate values: the largest modulus (the evaluation least damaged by
+  ! cancellation), ties broken on the bit pattern so that the choice is a
+  ! total order.  The content of the map becomes a pure function of the
+  ! multiset of appended (key,value) pairs, not of their arrival order.
+  integer(cache_map_size_kind) :: i, j, iend, k
+  real(integral_kind)          :: v, vbest
+  integer(integral_kind)       :: vbits, vbest_bits
 
   call cache_map_sort(map)
-  prev_key = -1_8
-  j=0
-  do i=1,map%n_elements
-    if (map%key(i) /= prev_key) then
-      j = j+1
-      map%value(j) = map%value(i)
-      map%key(j) = map%key(i)
-      prev_key = map%key(i)
-    endif
+
+  j = 0
+  i = 1
+  do while (i <= map%n_elements)
+
+    ! Run of equal keys: [i, iend-1]
+    iend = i + 1
+    do while (iend <= map%n_elements)
+      if (map%key(iend) /= map%key(i)) exit
+      iend = iend + 1
+    enddo
+
+    vbest = map%value(i)
+    vbest_bits = transfer(vbest, vbest_bits)
+    do k = i+1, iend-1
+      v = map%value(k)
+      if (abs(v) > abs(vbest)) then
+        vbest = v
+        vbest_bits = transfer(v, vbest_bits)
+      else if (abs(v) == abs(vbest)) then
+        vbits = transfer(v, vbits)
+        if (vbits > vbest_bits) then
+          vbest = v
+          vbest_bits = vbits
+        endif
+      endif
+    enddo
+
+    j = j + 1
+    map%key(j)   = map%key(i)
+    map%value(j) = vbest
+    i = iend
+
   enddo
   map%n_elements = j
 

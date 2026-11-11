@@ -805,42 +805,6 @@ Subroutines / functions
        * :c:func:`run_selection_slave`
 
  
-.. c:function:: void provide_for_zmq_pt2(void)
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        subroutine provide_for_zmq_pt2
-
-
-    Provides, beyond the values listed in the caller, the
-    values used by the stochastic PT2 slaves: the
-    norm-sorted wave function (psi_det_sorted,
-    psi_det_sorted_order), the transposed coefficients of
-    the selected determinants (psi_selectors_coef_transp),
-    and the diagonal of H in the determinant basis (psi_det_hii).
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`psi_det_hii`
-       * :c:data:`psi_det_sorted`
-       * :c:data:`psi_det_sorted`
-       * :c:data:`psi_selectors_coef_transp`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_slave_main`
-       * :c:func:`zmq_pt2`
-
- 
 .. c:function:: void run_cipsi(void)
 
 
@@ -881,6 +845,13 @@ Subroutines / functions
        * :c:data:`threshold_generators`
        * :c:data:`variance_max`
 
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`fci`
+
     Calls:
 
     .. hlist::
@@ -898,11 +869,11 @@ Subroutines / functions
        * :c:func:`print_summary`
        * :c:func:`pt2_alloc`
        * :c:func:`pt2_dealloc`
+       * :c:func:`pt2_stochastic`
        * :c:func:`save_energy`
        * :c:func:`save_wavefunction`
        * :c:func:`write_cipsi_json`
        * :c:func:`write_double`
-       * :c:func:`zmq_pt2`
        * :c:func:`zmq_selection`
 
     Touches:
@@ -981,7 +952,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`run_optimization_mos_cipsi`
+       * :c:func:`fci`
 
     Calls:
 
@@ -1000,11 +971,11 @@ Subroutines / functions
        * :c:func:`print_summary`
        * :c:func:`pt2_alloc`
        * :c:func:`pt2_dealloc`
+       * :c:func:`pt2_stochastic`
        * :c:func:`save_energy`
        * :c:func:`save_wavefunction`
        * :c:func:`write_cipsi_json`
        * :c:func:`write_double`
-       * :c:func:`zmq_pt2`
 
     Touches:
 
@@ -1070,8 +1041,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`run_pt2_slave_large`
-       * :c:func:`run_pt2_slave_small`
+       * :c:func:`pt2_omp_task`
        * :c:func:`run_selection_slave`
 
     Calls:
