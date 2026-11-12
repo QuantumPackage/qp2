@@ -8,7 +8,7 @@ corpus:
   1. picks the irpf90 binary ($RAG_IRPF90 or external/irpf90/bin/irpf90)
      and requires the `-J` capability (irpf90 >= 2.3.3);
   2. reads config/build.ninja for the (module, include_dir) build edges
-     (22) and the exact $IRPF90_FLAGS of the build (-J output depends on
+     (25) and the exact $IRPF90_FLAGS of the build (-J output depends on
      the flags, so the verbatim build set is used);
   3. runs `irpf90 <include_dir> <IRPF90_FLAGS> -J` in each
      $QP_ROOT/src/<module> with the build environment (QP_ROOT, QP_EZFIO

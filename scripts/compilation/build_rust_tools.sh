@@ -6,7 +6,7 @@
 # quantum_package.rc first).
 #
 # Artifacts:
-#   rust/target/release/*                the seven tool binaries (on PATH
+#   rust/target/release/*                the six tool binaries (on PATH
 #                                        through etc/paths.rc)
 #   data/qp_edit_config/registry.toml    the ordered module list read by
 #                                        qp_edit
