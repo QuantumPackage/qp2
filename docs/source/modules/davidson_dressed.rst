@@ -10,9 +10,9 @@ davidson_dressed
 
 Davidson diagonalization of the dressed Hamiltonian.
 
-In the |CIPSI| iteration, the Hamiltonian is dressed (see the
-:ref:`module_dressing` module) to bring its spectrum in the selected
-space closer to the spectrum of the full Hamiltonian. This module
+In the |CIPSI| iteration, the Hamiltonian is dressed to bring its
+spectrum in the selected space closer to the spectrum of the full
+Hamiltonian. This module
 diagonalizes the dressed Hamiltonian with the Davidson algorithm and
 provides the dressed CI energies `CI_energy_dressed`, the electronic
 energies `CI_electronic_energy_dressed`, the eigenvectors

@@ -94,7 +94,7 @@ The old `ZMQ_selection` was **not a fixed point**:
 
 1. Each worker's local selection buffer ratchets its threshold
    (`buf%mini`) across tasks and is *never reset* after a push
-   (`run_selection_slave` sets only `buf%cur = 0`, `selection_buffer.irp.f`
+   (`run_selection_slave` sets only `buf%cur = 0`, `run_selection_slave.irp.f`
    line 100; `select_connected` filters on `w <= buf%mini`). Task k+1 on a
    worker was therefore filtered by task k's N-th weight.
 2. Task-to-worker assignment was a race over ZMQ inproc pulls

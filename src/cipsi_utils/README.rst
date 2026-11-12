@@ -8,10 +8,10 @@ computation.
 * the selection buffer: :c:func:`create_selection_buffer`,
   :c:func:`add_to_selection_buffer`, :c:func:`merge_selection_buffers`
   and :c:func:`sort_selection_buffer` manage the determinants offered by
-  the selection; :c:func:`omp_selection` is the in-process, fixed-order
-  OpenMP driver (one task per generator/subset pair, a shared max-heap
-  merged under a critical section), with :c:func:`omp_selection_task`
-  as its per-task workhorse
+  the selection; :c:func:`omp_selection` is the in-process OpenMP driver
+  (one task per generator/subset pair, a shared max-heap whose merge
+  under a critical section is order-independent), with
+  :c:func:`omp_selection_task` as its per-task workhorse
 * the |PT2| bookkeeping: :c:func:`pt2_alloc`, :c:func:`pt2_add`,
   :c:func:`pt2_add2` and :c:func:`pt2_dealloc` accumulate the energy,
   variance, |rPT2| and overlap of each state (:c:func:`pt2_serialize`

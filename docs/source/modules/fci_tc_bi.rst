@@ -926,7 +926,6 @@ Subroutines / functions
        * :c:data:`mo_bi_ortho_tc_two_e`
        * :c:data:`psi_coef`
        * :c:data:`psi_det`
-       * :c:data:`pt2_min_parallel_tasks`
        * :c:data:`three_body_h_tc`
 
     Called by:
@@ -943,7 +942,6 @@ Subroutines / functions
 
        * :c:func:`provide_all_three_ints_bi_ortho`
        * :c:func:`run_cipsi`
-       * :c:func:`run_slave_cipsi`
        * :c:func:`run_stochastic_cipsi`
 
     Touches:

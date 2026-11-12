@@ -20,9 +20,8 @@ matrix, with two ways to provide the matrix-vector product:
 
 Both have dressed variants, :c:func:`davidson_general_ext_rout_dressed`
 and :c:func:`davidson_general_ext_rout_diag_dressed`, that add the
-dressing operator of the :ref:`module_dressing` module, as used in
-the |CIPSI| iteration, and non symmetric variants that do not assume
-the symmetry of the matrix.
+dressing operator, as used in the |CIPSI| iteration, and non symmetric
+variants that do not assume the symmetry of the matrix.
 
 The program :ref:`test_dav` is a small example of the use of these
 routines (see :file:`test_dav.irp.f`).

@@ -8,7 +8,7 @@ BEGIN_PROVIDER [double precision, mo_coef_aux, (ao_num,mo_num)]
   ! Auxiliary MO coefficients, same (ao_num,mo_num) layout as
   ! mo_coef: coefficient of the i-th AO on the j-th aux MO.
   ! Read from the EZFIO database if the entry exists (master
-  ! reads, then MPI broadcast), otherwise set to the $S^{-1/2}$
+  ! reads), otherwise set to the $S^{-1/2}$
   ! canonical orthonormalized AOs (ao_ortho_canonical_coef).
   ! Auxiliary basis, probably to go beyond the basis set for
   ! integral evaluation (author's reading, 2026-10-31); introduced
