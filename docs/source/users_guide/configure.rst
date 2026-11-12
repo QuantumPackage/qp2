@@ -92,7 +92,6 @@ x86-64 Linux, OpenBLAS instead of the system BLAS           gfortran_openblas.cf
 x86-64 Linux, AVX2 and OpenBLAS                             gfortran_avx2_openblas.cfg
 Intel MKL installed, recommended (set MKLROOT)              gfortran_mkl.cfg
 Intel MKL installed, debug build (set MKLROOT)              gfortran_debug_mkl.cfg
-MPI-parallel build (mpif90)                                 gfortran_mpi.cfg
 Debug build (MODE: DEBUG)                                   gfortran_debug.cfg
 Pinned to gfortran-10, debug build                          gfortran10.cfg
 macOS (Homebrew gfortran), alpha                            gfortran_macos.cfg
@@ -107,12 +106,12 @@ Bull clusters                                               bull.cfg
 Continuous integration only (not for users)                 travis.cfg
 
 The file names follow the pattern
-``<compiler>[_<instruction-set>][_<blas>][_mpi][_debug]``:
+``<compiler>[_<instruction-set>][_<blas>][_debug]``:
 :file:`gfortran_avx2_openblas.cfg` uses gfortran with AVX2 and OpenBLAS,
 and the ifort files carry the compiler year and the node instruction set
 (:file:`ifort_2021_rome.cfg` is ifort 2021 tuned for AMD Rome nodes).
-The :samp:`_mpi` variants use the MPI wrappers, the :samp:`_debug`
-variants set :samp:`MODE : DEBUG`, and the :samp:`_notz` variants define
+The :samp:`_debug` variants set :samp:`MODE : DEBUG`, and the
+:samp:`_notz` variants define
 ``WITHOUT_TRAILZ`` and ``WITHOUT_SHIFTRL``, which disable the code paths
 based on those instructions. All the ifort configurations
 link Intel MKL.

@@ -27,7 +27,7 @@ Usage
 
 .. code:: bash
 
-  qp_run [-h] [-p <string>] [-s] [--] PROGRAM EZFIO_DIR
+  qp_run [-h] [-p <string>] [--] PROGRAM EZFIO_DIR
 
 ``PROGRAM`` is the name of the |QP| program to be run, and ``EZFIO_DIR``
 is the name of the |EZFIO| directory containing the data.
@@ -44,19 +44,11 @@ is the name of the |EZFIO| directory containing the data.
    programs like like gdb or valgrind.
 
 
-.. option:: -s, --slave
-
-   This option needs to be set to run a slave job for ``PROGRAM``, to
-   accelerate another running instance of the |qp|.
-
-
 Example
 -------
 
 .. code:: bash
 
-   qp_run fci h2o.ezfio &
-   srun qp_run --slave fci h2o.ezfio
-   wait
+   qp_run fci h2o.ezfio
 
 

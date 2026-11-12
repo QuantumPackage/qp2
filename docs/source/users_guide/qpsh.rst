@@ -105,10 +105,9 @@ Running programs
 
    .. code:: bash
 
-     qp (run|srun|mpirun) [options] <program>
+     qp run [options] <program>
 
-   Runs :ref:`qp_run`, :command:`qp_srun`, or :command:`qp_mpirun` using the
-   current |EZFIO| directory.
+   Runs :ref:`qp_run` using the current |EZFIO| directory.
 
 .. option:: stop
 

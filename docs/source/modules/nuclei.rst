@@ -341,9 +341,9 @@ Providers
        * :c:data:`ao_integrals_n_e_cgtos`
        * :c:data:`ao_integrals_n_e_per_atom`
        * :c:data:`ao_integrals_pt_chrg`
-       * :c:data:`ao_overlap`
        * :c:data:`ao_overlap_abs`
        * :c:data:`ao_overlap_cgtos`
+       * :c:data:`ao_overlap_qp2`
        * :c:data:`ao_pseudo_integrals_local`
        * :c:data:`ao_pseudo_integrals_non_local`
        * :c:data:`ao_spread_x`
@@ -359,6 +359,7 @@ Providers
        * :c:data:`grid_points_extra_per_atom`
        * :c:data:`grid_points_per_atom`
        * :c:data:`inertia_tensor`
+       * :c:data:`libcint_atm`
        * :c:data:`multi_s_deriv_1`
        * :c:data:`multi_s_dipole_moment`
        * :c:data:`nucl_coord_transp`

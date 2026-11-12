@@ -174,6 +174,7 @@ Subroutines / functions
        * :c:data:`ao_coef_normalized`
        * :c:data:`ao_expo_im`
        * :c:data:`ao_expo_phase`
+       * :c:data:`ao_expo_pw`
        * :c:data:`ao_first_of_shell`
        * :c:data:`ao_integrals_map`
        * :c:data:`ao_integrals_n_e`
@@ -258,7 +259,6 @@ Subroutines / functions
        * :c:data:`trexio_filename`
        * :c:data:`two_e_dm_mo`
        * :c:data:`use_cgtos`
-       * :c:data:`use_pw`
 
     Called by:
 

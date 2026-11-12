@@ -185,12 +185,12 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`omp_selection`
        * :c:func:`print_summary`
        * :c:func:`pt2_alloc`
        * :c:func:`pt2_dealloc`
+       * :c:func:`pt2_stochastic`
        * :c:func:`save_energy`
-       * :c:func:`zmq_pt2`
-       * :c:func:`zmq_selection`
 
     Touches:
 

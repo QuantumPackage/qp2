@@ -143,35 +143,6 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`ao_coef_norm_cgtos`
        * :c:data:`ao_coef_normalized`
-
- 
-.. c:var:: shell_normalization_factor
-
-
-    File : :file:`basis/basis.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: shell_normalization_factor	(shell_num)
-
-
-    Number of primitives per |AO|
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ezfio_filename`
-       * :c:data:`mpi_master`
-       * :c:data:`output_wall_time_0`
-       * :c:data:`prim_coef`
-       * :c:data:`prim_expo`
-       * :c:data:`prim_normalization_factor`
-       * :c:data:`prim_num`
-       * :c:data:`shell_ang_mom`
-       * :c:data:`shell_index`
-       * :c:data:`shell_num`
-
 

@@ -2,8 +2,8 @@
 
 Repo root = this directory. `VERSION` = 2.3.1. Determinant-driven
 quantum-chemistry suite: **Fortran + IRPF90** code generation for the compute
-part, **Rust** for the CLI / EZFIO bindings / ZMQ task server, **EZFIO** for
-the data model, **Ninja** for the build.
+part, **Rust** for the CLI / EZFIO bindings, **EZFIO** for the data model,
+**Ninja** for the build.
 
 Authoritative in-tree references (prefer them over guessing):
 
@@ -81,13 +81,13 @@ make                           # == source quantum_package.rc; ninja
 - `./configure -c config/<cfg> [-g nvidia|intel|none]` writes the root
   `build.ninja`, `config/build.ninja`, `etc/00.qp_root.rc`, and the
   `src/gpu_arch` symlink. Only run it when the user asks.
-- Before all that, `configure` checks: `irpf90`, `ninja`, `cmake`, ZeroMQ
-  (`-lzmq`) + f77zmq, TREXIO (`-ltrexio`), zlib, the python
+- Before all that, `configure` checks: `irpf90`, `ninja`, `cmake`,
+  TREXIO (`-ltrexio`), zlib, the python
   packages `docopt` and `resultsFile`, SimpleGPU (`-lsimple_gpu-cpu`), and
   BLAS/LAPACK through the compilation config. Missing dependencies are
   installed with `./configure -i <pkg>` (or `-i all`), where `<pkg>` is one of:
-  armadillo, bats, bse, cmake, docopt, f77zmq, libcint, ninja, openorb,
-  qmckl, simple_gpu, trexio, zeromq, zlib (plus the variants `trexio-nohdf5`
+  armadillo, bats, bse, cmake, docopt, libcint, ninja, openorb,
+  qmckl, simple_gpu, trexio, zlib (plus the variants `trexio-nohdf5`
   and `qmckl-intel`). `irpf90` and `ezfio` are *submodules*, not `-i` targets —
   the tab-completion in `etc/configure.rc` misleadingly lists them.
   (Note: INSTALL.rst no longer offers the `conda env create -f qp2.yml` path,
@@ -105,8 +105,7 @@ make                           # == source quantum_package.rc; ninja
   `src/m/IRPF90_temp/foo`; `data/executables` maps `foo` → that path, and
   `qp_run foo <dir.ezfio>` resolves it there.
 - Run one program: `qp_run <program> <ezfio_dir>`; in `qpsh` the argument
-  is omitted (current file). `qp_run -s <program> <ezfio>` starts a remote
-  slave; `USR1` triggers a clean stop (`qp_stop`).
+  is omitted (current file). `USR1` triggers a clean stop (`qp_stop`).
 
 ## 4. Anatomy of a module
 
@@ -125,7 +124,7 @@ A module is a directory in `src/` containing:
 - `*.ezfio_config` — hand-written EZFIO group description (arrays with
   computed shape, e.g. `src/determinants/spindeterminants.ezfio_config`).
 - `FC`, `FCFLAGS`, `LIB` — optional extra compiler/linker flags for this
-  module (e.g. `src/zmq/LIB` = `-lf77zmq -lzmq`, `src/trexio/LIB` = `-ltrexio`).
+  module (e.g. `src/trexio/LIB` = `-ltrexio`).
 
 Root modules — nothing NEEDs them, they are the build entry points:
 `dummy` (aggregates all the core modules, used for a development build),
@@ -160,9 +159,9 @@ END_PROVIDER
 - `FREE x` releases the memory of a provider (used for big buffers).
 - `ASSERT(cond)` is only compiled in if `irpf90 -a` is passed (i.e. if the
   compilation config has `--assert`); otherwise it is silently dropped.
-- `IRP_IF MPI` / `IRP_ELSE` / `IRP_ENDIF`, `IRP_IF MPI_DEBUG`, `IRP_IF ZMQ_PUSH`,
-  `IRP_IF MACOS` are the conditional blocks in use (older branches also use
-  `IRP_IF SET_NESTED`).
+- `IRP_IF MACOS` is the conditional block in use (older branches also use
+  `IRP_IF SET_NESTED`; the MPI conditional blocks existed until the
+  2026-11 single-node cleanup).
 - `BEGIN_TEMPLATE … SUBST [ A, B ]` + `a1; b1 ;;` lines + `END_TEMPLATE`
   unrolls a block with `$A`/`$B` substituted (see `src/cipsi/selection.irp.f`).
   Separately, a `*.template.f` file is a codelet template whose `$subroutine`
@@ -269,7 +268,7 @@ Compute programs are run through `qp_run <name> <ezfio>`:
   (recipe in `src/README.rst` + `programmers_guide/new_ks.rst`).
 - `fci` = selected CI / CIPSI driver: `run_cipsi` (deterministic PT2) or
   `run_stochastic_cipsi` when `do_pt2` with stochastic PT2; selection is
-  distributed over ZMQ tasks, stopping on `n_det_max`, `pt2_max`,
+  parallelized over OpenMP tasks, stopping on `n_det_max`, `pt2_max`,
   `variance_max`, `correlation_energy_ratio_max`. `pt2` recomputes PT2 on a
   stored wave function; `dressing`/`davidson_dressed` add the dressed
   (PT2-renormalized) Hamiltonian; variants for CSF and TC (bi-orthogonal)
@@ -283,12 +282,13 @@ Compute programs are run through `qp_run <name> <ezfio>`:
   (`mol_properties`: dipole, spin density, …).
 - Interfacing: `fcidump`, `fcidump_pyscf`, `molden`, `export_trexio_*`,
   `import_trexio_*`, `qp_convert_output_to_ezfio`.
-- Parallelism: `qp_run` starts the ZMQ `TaskServer`; masters spawn
-  in-process slaves and accept remote ones (`qp_run -s`, `qp_tunnel`).
-  The ZMQ address is `$EZFIO/work/qp_run_address`; slave code paths are
-  selected by `is_zmq_slave`. MPI builds use `config/gfortran_mpi.cfg`
-  (`-DMPI`) plus `qp_mpirun` / `qp_srun`. Thread counts come from `etc/local.rc`
-  (`QP_NTHREADS_DAVIDSON`, `QP_NTHREADS_PT2`, `OMP_NUM_THREADS`, `QP_NIC`).
+- Parallelism: single machine only, OpenMP threads inside each
+  executable. The distributed layer (task server, in-process and remote
+  slaves, `qp_run -s`, `qp_tunnel`, the `is_*_slave` provider) and the
+  multi-node build configurations and cluster launchers were removed in
+  2026-11; `mpi_rank` / `mpi_size` / `mpi_master` survive as constants
+  in `src/mpi/`. Thread counts come from `etc/local.rc`
+  (`QP_NTHREADS_DAVIDSON`, `QP_NTHREADS_PT2`, `OMP_NUM_THREADS`).
 
 ## 9. Recipes
 

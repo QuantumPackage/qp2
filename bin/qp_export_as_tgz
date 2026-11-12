@@ -130,7 +130,7 @@ fi
 # under their plain names.
 RUST_EXEC=""
 for i in element_create_db qp_create_ezfio qp_edit qp_print_basis qp_run \
-         qp_set_mo_class qp_tunnel ; do
+         qp_set_mo_class ; do
   RUST_EXEC="${RUST_EXEC} ${QP_ROOT}/rust/target/release/$i"
 done
 if [[ ! -x ${QP_ROOT}/rust/target/release/qp_run ]] ; then

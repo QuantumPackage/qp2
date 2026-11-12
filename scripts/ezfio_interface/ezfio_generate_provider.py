@@ -59,18 +59,6 @@ BEGIN_PROVIDER [ %(type)s, %(name)s %(size)s ]
       stop 1
     endif
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST( %(name)s, %(size_mpi)s, %(type_mpi)s, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read %(name)s with MPI'
-    endif
-  IRP_ENDIF
 %(write)s
 END_PROVIDER
 """.strip()
@@ -78,14 +66,6 @@ END_PROVIDER
     write_correspondance = {"integer": "write_int",
                             "logical": "write_bool",
                             "double precision": "write_double"}
-
-    mpi_correspondance   = {"integer": "MPI_INTEGER",
-                            "integer*8": "MPI_INTEGER8",
-                            "character*(32)": "MPI_CHARACTER",
-                            "character*(64)": "MPI_CHARACTER",
-                            "character*(256)": "MPI_CHARACTER",
-                            "logical": "MPI_LOGICAL",
-                            "double precision": "MPI_DOUBLE_PRECISION"}
 
     def __init__(self):
         self.values = "type doc name ezfio_dir ezfio_name write output".split()
@@ -121,7 +101,6 @@ END_PROVIDER
                    ""]
 
         self.write = "\n".join(l_write) % locals()
-        self.type_mpi = self.mpi_correspondance[self.type]
         if "size" in self.__dict__:
             return
         else:
@@ -153,9 +132,6 @@ END_PROVIDER
         self.output = t
 
     def set_size(self, t):
-        self.size_mpi = t.replace(',',')*(').replace('0:','1+')
-        if (self.type == "character*(32)"):
-            self.size_mpi += "*32"
         if t != "1":
             self.size = ", " + t
         else:

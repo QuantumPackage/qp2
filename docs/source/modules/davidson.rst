@@ -65,10 +65,10 @@ Providers
        * :c:data:`n_states_diag`
        * :c:data:`nthreads_davidson`
        * :c:data:`only_expected_s2`
-       * :c:data:`pg_det_irrep`
        * :c:data:`pg_irrep_allowed`
        * :c:data:`pg_irrep_filter`
        * :c:data:`pg_label_ierr`
+       * :c:data:`pg_n_col`
        * :c:data:`pg_n_col`
        * :c:data:`pg_thresh`
        * :c:data:`psi_coef`
@@ -120,10 +120,10 @@ Providers
        * :c:data:`n_states_diag`
        * :c:data:`nthreads_davidson`
        * :c:data:`only_expected_s2`
-       * :c:data:`pg_det_irrep`
        * :c:data:`pg_irrep_allowed`
        * :c:data:`pg_irrep_filter`
        * :c:data:`pg_label_ierr`
+       * :c:data:`pg_n_col`
        * :c:data:`pg_n_col`
        * :c:data:`pg_thresh`
        * :c:data:`psi_coef`
@@ -166,6 +166,7 @@ Providers
        * :c:data:`n_states_diag`
        * :c:data:`nuclear_repulsion`
        * :c:data:`output_wall_time_0`
+       * :c:data:`pg_n_col`
 
 
  
@@ -203,10 +204,10 @@ Providers
        * :c:data:`n_states_diag`
        * :c:data:`nthreads_davidson`
        * :c:data:`only_expected_s2`
-       * :c:data:`pg_det_irrep`
        * :c:data:`pg_irrep_allowed`
        * :c:data:`pg_irrep_filter`
        * :c:data:`pg_label_ierr`
+       * :c:data:`pg_n_col`
        * :c:data:`pg_n_col`
        * :c:data:`pg_thresh`
        * :c:data:`psi_coef`
@@ -494,282 +495,6 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: void davidson_collector(void)
-
-
-    File : :file:`davidson/davidson_parallel.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_collector(zmq_to_qp_run_socket, zmq_socket_pull, v0, s0, sze, N_st)
-
-
-    Routine collecting the results of the workers in Davidson's algorithm.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`h_s2_u_0_nstates_zmq`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_pull_results`
-
- 
-.. c:function:: void davidson_csf_collector(void)
-
-
-    File : :file:`davidson/davidson_parallel_csf.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_csf_collector(zmq_to_qp_run_socket, zmq_socket_pull, v0, sze, N_st)
-
-
-    Routine collecting the results of the workers in Davidson's algorithm.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_csf_pull_results`
-
- 
-.. c:function:: void davidson_csf_pull_results(void)
-
-
-    File : :file:`davidson/davidson_parallel_csf.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_csf_pull_results(zmq_socket_pull, v_t, imin, imax, task_id)
-
-
-    Pull the results of $H | U \rangle$ on the master.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det`
-       * :c:data:`n_states_diag`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_csf_collector`
-
- 
-.. c:function:: void davidson_csf_push_results(void)
-
-
-    File : :file:`davidson/davidson_parallel_csf.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_csf_push_results(zmq_socket_push, v_t, imin, imax, task_id)
-
-
-    Push the results of $H | U \rangle$ from a worker to the master.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det`
-       * :c:data:`n_states_diag`
-
- 
-.. c:function:: void davidson_csf_push_results_async_send(void)
-
-
-    File : :file:`davidson/davidson_parallel_csf.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_csf_push_results_async_send(zmq_socket_push, v_t, imin, imax, task_id,sending)
-
-
-    Push the results of $H | U \rangle$ from a worker to the master.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det`
-       * :c:data:`n_states_diag`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_csf_slave_work`
-
- 
-.. c:function:: void davidson_csf_run_slave(void)
-
-
-    File : :file:`davidson/davidson_parallel_csf.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_csf_run_slave(thread,iproc)
-
-
-    Slave routine for Davidson's diagonalization.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det`
-       * :c:data:`n_states_diag`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_csf_slave_inproc`
-       * :c:func:`davidson_csf_slave_tcp`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_csf_slave_work`
-       * :c:func:`end_zmq_push_socket`
-       * :c:func:`end_zmq_to_qp_run_socket`
-       * :c:func:`sleep`
-
- 
-.. c:function:: void davidson_csf_slave_inproc(void)
-
-
-    File : :file:`davidson/davidson_parallel_csf.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_csf_slave_inproc(i)
-
-
-    In-process variant of the CSF Davidson slave: starts the
-    worker in the current process with davidson_csf_run_slave(1,i).
-    H_u_0_nstates_zmq in this file starts it as an OpenMP thread.
-    i is forwarded to davidson_csf_run_slave, which does not use
-    iproc.
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_csf_run_slave`
-
- 
-.. c:function:: void davidson_csf_slave_tcp(void)
-
-
-    File : :file:`davidson/davidson_parallel_csf.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_csf_slave_tcp(i)
-
-
-    TCP variant of the CSF Davidson slave: starts the worker with
-    davidson_csf_run_slave(0,i); the in-process variant passes 1
-    instead of 0. i is forwarded to davidson_csf_run_slave, which
-    does not use iproc.
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_csf_run_slave`
-
- 
-.. c:function:: void davidson_csf_slave_work(void)
-
-
-    File : :file:`davidson/davidson_parallel_csf.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_csf_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze, worker_id)
-
-
-    Worker loop of the CSF Davidson slave. Fetches the wavefunction
-    u_t from the qp_run scheduler, then takes tasks (imin, imax,
-    ishift, istep) from the task server and calls
-    H_u_0_nstates_openmp_work to compute $H | u_t \rangle$ on
-    determinant columns imin+ishift to imax, step istep, pushing
-    the results to the master.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mpi_initialized`
-       * :c:data:`mpi_rank`
-       * :c:data:`n_det`
-       * :c:data:`n_states_diag`
-       * :c:data:`nproc`
-       * :c:data:`psi_bilinear_matrix_columns_loc`
-       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`ref_bitmask_energy`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_csf_run_slave`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_csf_push_results_async_send`
-       * :c:func:`davidson_push_results_async_recv`
-       * :c:func:`h_u_0_nstates_openmp_work`
-
- 
 .. c:function:: void davidson_diag_csf_hjj(void)
 
 
@@ -845,8 +570,8 @@ Subroutines / functions
        * :c:func:`dgemm`
        * :c:func:`dswap`
        * :c:func:`dsygv`
+       * :c:func:`h_u_0_nstates`
        * :c:func:`h_u_0_nstates_openmp`
-       * :c:func:`h_u_0_nstates_zmq`
        * :c:func:`mmap_create_d`
        * :c:func:`mmap_destroy`
        * :c:func:`normalize`
@@ -857,54 +582,6 @@ Subroutines / functions
        * :c:func:`write_double`
        * :c:func:`write_int`
        * :c:func:`write_time`
-
-    Touches:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`nthreads_davidson`
-
- 
-.. c:function:: davidson_diag_h:
-
-
-    File : :file:`davidson/diagonalization_h_dressed.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_diag_h(dets_in,u_in,dim_in,energies,sze,N_st,N_st_diag,Nint,dressing_state,converged)
-
-
-    Davidson diagonalization.
-    
-    dets_in : bitmasks corresponding to determinants
-    
-    u_in : guess coefficients on the various states. Overwritten
-      on exit
-    
-    dim_in : leftmost dimension of u_in
-    
-    sze : Number of determinants
-    
-    N_st : Number of eigenstates
-    
-    Initial guess vectors are not necessarily orthonormal
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`dressing_column_h`
-       * :c:data:`mo_two_e_integrals_in_map`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_diag_hjj`
 
     Touches:
 
@@ -969,99 +646,6 @@ Subroutines / functions
        * :c:data:`nthreads_davidson`
 
  
-.. c:function:: davidson_diag_hjj:
-
-
-    File : :file:`davidson/diagonalization_h_dressed.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_diag_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,Nint,dressing_state,converged)
-
-
-    Davidson diagonalization with specific diagonal elements of the H matrix
-    
-    H_jj : specific diagonal H matrix elements to diagonalize de Davidson
-    
-    dets_in : bitmasks corresponding to determinants
-    
-    u_in : guess coefficients on the various states. Overwritten
-      on exit
-    
-    dim_in : leftmost dimension of u_in
-    
-    sze : Number of determinants
-    
-    N_st : Number of eigenstates
-    
-    N_st_diag_in : Number of states in which H is diagonalized. Assumed > sze
-    
-    Initial guess vectors are not necessarily orthonormal
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`davidson_sze_max`
-       * :c:data:`disk_based_davidson`
-       * :c:data:`distributed_davidson`
-       * :c:data:`dressed_column_idx`
-       * :c:data:`dressing_column_h`
-       * :c:data:`expected_s2`
-       * :c:data:`ezfio_work_dir`
-       * :c:data:`n_det`
-       * :c:data:`n_int`
-       * :c:data:`nproc`
-       * :c:data:`nthreads_davidson`
-       * :c:data:`nuclear_repulsion`
-       * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`psi_bilinear_matrix_order_reverse`
-       * :c:data:`psi_coef`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`qp_max_mem`
-       * :c:data:`state_following`
-       * :c:data:`threshold_davidson`
-       * :c:data:`threshold_davidson_from_pt2`
-       * :c:data:`threshold_davidson_pt2`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_diag_h`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`c_f_pointer`
-       * :c:func:`check_mem`
-       * :c:func:`dgemm`
-       * :c:func:`dsygv`
-       * :c:func:`h_u_0_nstates_openmp`
-       * :c:func:`h_u_0_nstates_zmq`
-       * :c:func:`mmap`
-       * :c:func:`munmap`
-       * :c:func:`normalize`
-       * :c:func:`nullify_small_elements`
-       * :c:func:`random_number`
-       * :c:func:`resident_memory`
-       * :c:func:`write_double`
-       * :c:func:`write_int`
-       * :c:func:`write_time`
-
-    Touches:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`nthreads_davidson`
-
- 
 .. c:function:: void davidson_diag_hjj_sjj(void)
 
 
@@ -1110,7 +694,6 @@ Subroutines / functions
        * :c:data:`nthreads_davidson`
        * :c:data:`nuclear_repulsion`
        * :c:data:`only_expected_s2`
-       * :c:data:`pg_irrep_filter`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_bilinear_matrix_order_reverse`
        * :c:data:`psi_coef`
@@ -1138,16 +721,14 @@ Subroutines / functions
        * :c:func:`dgemm`
        * :c:func:`dswap`
        * :c:func:`dsygv`
+       * :c:func:`h_s2_u_0_nstates`
        * :c:func:`h_s2_u_0_nstates_openmp`
-       * :c:func:`h_s2_u_0_nstates_zmq`
        * :c:func:`mmap_create_d`
        * :c:func:`mmap_create_s`
        * :c:func:`mmap_destroy`
        * :c:func:`normalize`
        * :c:func:`nullify_small_elements`
        * :c:func:`pg_det_state_labels`
-       * :c:func:`pg_state_apply`
-       * :c:func:`pg_state_warn_filtered`
        * :c:func:`qp_bug`
        * :c:func:`random_number`
        * :c:func:`resident_memory`
@@ -1310,7 +891,6 @@ Subroutines / functions
        * :c:data:`dressing_column_h`
        * :c:data:`expected_s2`
        * :c:data:`ezfio_work_dir`
-       * :c:data:`n_det`
        * :c:data:`n_int`
        * :c:data:`nproc`
        * :c:data:`nthreads_davidson`
@@ -1343,8 +923,8 @@ Subroutines / functions
        * :c:func:`check_mem`
        * :c:func:`dgemm`
        * :c:func:`diag_nonsym_right`
+       * :c:func:`h_u_0_nstates`
        * :c:func:`h_u_0_nstates_openmp`
-       * :c:func:`h_u_0_nstates_zmq`
        * :c:func:`mmap`
        * :c:func:`munmap`
        * :c:func:`normalize`
@@ -1362,500 +942,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`nthreads_davidson`
-
- 
-.. c:function:: void davidson_nos2_collector(void)
-
-
-    File : :file:`davidson/davidson_parallel_nos2.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_nos2_collector(zmq_to_qp_run_socket, zmq_socket_pull, v0, sze, N_st)
-
-
-    Routine collecting the results of the workers in Davidson's algorithm.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`h_u_0_nstates_zmq`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_nos2_pull_results`
-
- 
-.. c:function:: void davidson_nos2_pull_results(void)
-
-
-    File : :file:`davidson/davidson_parallel_nos2.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_nos2_pull_results(zmq_socket_pull, v_t, imin, imax, task_id)
-
-
-    Pull the results of $H | U \rangle$ on the master.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det`
-       * :c:data:`n_states_diag`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_nos2_collector`
-
- 
-.. c:function:: void davidson_nos2_push_results(void)
-
-
-    File : :file:`davidson/davidson_parallel_nos2.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_nos2_push_results(zmq_socket_push, v_t, imin, imax, task_id)
-
-
-    Push the results of $H | U \rangle$ from a worker to the master.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det`
-       * :c:data:`n_states_diag`
-
- 
-.. c:function:: void davidson_nos2_push_results_async_send(void)
-
-
-    File : :file:`davidson/davidson_parallel_nos2.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_nos2_push_results_async_send(zmq_socket_push, v_t, imin, imax, task_id,sending)
-
-
-    Push the results of $H | U \rangle$ from a worker to the master.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det`
-       * :c:data:`n_states_diag`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_nos2_slave_work`
-
- 
-.. c:function:: void davidson_nos2_run_slave(void)
-
-
-    File : :file:`davidson/davidson_parallel_nos2.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_nos2_run_slave(thread,iproc)
-
-
-    Slave routine for Davidson's diagonalization.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det`
-       * :c:data:`n_states_diag`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_nos2_slave_inproc`
-       * :c:func:`davidson_nos2_slave_tcp`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_nos2_slave_work`
-       * :c:func:`end_zmq_push_socket`
-       * :c:func:`end_zmq_to_qp_run_socket`
-       * :c:func:`sleep`
-
- 
-.. c:function:: void davidson_nos2_slave_inproc(void)
-
-
-    File : :file:`davidson/davidson_parallel_nos2.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_nos2_slave_inproc(i)
-
-
-    In-process variant of the Davidson slave without the S^2
-    operator: starts the worker in the current process with
-    davidson_nos2_run_slave(1,i). H_u_0_nstates_zmq in this file
-    starts it as an OpenMP thread. i is forwarded to
-    davidson_nos2_run_slave, which does not use iproc.
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`h_u_0_nstates_zmq`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_nos2_run_slave`
-
- 
-.. c:function:: void davidson_nos2_slave_tcp(void)
-
-
-    File : :file:`davidson/davidson_parallel_nos2.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_nos2_slave_tcp(i)
-
-
-    TCP variant of the Davidson slave without the S^2 operator:
-    starts the worker with davidson_nos2_run_slave(0,i); the
-    in-process variant passes 1 instead of 0. i is forwarded to
-    davidson_nos2_run_slave, which does not use iproc.
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_nos2_run_slave`
-
- 
-.. c:function:: void davidson_nos2_slave_work(void)
-
-
-    File : :file:`davidson/davidson_parallel_nos2.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_nos2_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze, worker_id)
-
-
-    Worker loop of the Davidson slave without the S^2 operator.
-    Fetches the wavefunction u_t from the qp_run scheduler, then
-    takes tasks (imin, imax, ishift, istep) from the task server
-    and calls H_u_0_nstates_openmp_work, which computes
-    $H | u_t \rangle$ on determinant columns imin+ishift to imax,
-    step istep, pushing the results to the master.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mpi_initialized`
-       * :c:data:`mpi_rank`
-       * :c:data:`n_det`
-       * :c:data:`n_states_diag`
-       * :c:data:`nproc`
-       * :c:data:`psi_bilinear_matrix_columns_loc`
-       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`ref_bitmask_energy`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_nos2_run_slave`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_nos2_push_results_async_send`
-       * :c:func:`davidson_push_results_async_recv`
-       * :c:func:`h_u_0_nstates_openmp_work`
-
- 
-.. c:function:: void davidson_pull_results(void)
-
-
-    File : :file:`davidson/davidson_parallel.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_pull_results(zmq_socket_pull, v_t, s_t, imin, imax, task_id)
-
-
-    Pull the results of $H | U \rangle$ on the master.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det`
-       * :c:data:`n_states_diag`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_collector`
-
- 
-.. c:function:: void davidson_push_results(void)
-
-
-    File : :file:`davidson/davidson_parallel.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_push_results(zmq_socket_push, v_t, s_t, imin, imax, task_id)
-
-
-    Push the results of $H | U \rangle$ from a worker to the master.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det`
-       * :c:data:`n_states_diag`
-
- 
-.. c:function:: void davidson_push_results_async_recv(void)
-
-
-    File : :file:`davidson/davidson_parallel.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_push_results_async_recv(zmq_socket_push,sending)
-
-
-    Push the results of $H | U \rangle$ from a worker to the master.
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_csf_slave_work`
-       * :c:func:`davidson_nos2_slave_work`
-       * :c:func:`davidson_slave_work`
-
- 
-.. c:function:: void davidson_push_results_async_send(void)
-
-
-    File : :file:`davidson/davidson_parallel.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_push_results_async_send(zmq_socket_push, v_t, s_t, imin, imax, task_id,sending)
-
-
-    Push the results of $H | U \rangle$ from a worker to the master.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det`
-       * :c:data:`n_states_diag`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_slave_work`
-
- 
-.. c:function:: void davidson_run_slave(void)
-
-
-    File : :file:`davidson/davidson_parallel.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_run_slave(thread,iproc)
-
-
-    Slave routine for Davidson's diagonalization.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det`
-       * :c:data:`n_states_diag`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_slave_inproc`
-       * :c:func:`davidson_slave_tcp`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_slave_work`
-       * :c:func:`end_zmq_push_socket`
-       * :c:func:`end_zmq_to_qp_run_socket`
-       * :c:func:`sleep`
-
- 
-.. c:function:: void davidson_slave_inproc(void)
-
-
-    File : :file:`davidson/davidson_parallel.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_slave_inproc()
-
-
-    In-process variant of the Davidson slave: starts the worker
-    in the current process with davidson_run_slave(1,1).
-    H_S2_u_0_nstates_zmq in this file starts it via pthread_create.
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_run_slave`
-
- 
-.. c:function:: void davidson_slave_tcp(void)
-
-
-    File : :file:`davidson/davidson_parallel.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_slave_tcp(i)
-
-
-    TCP variant of the Davidson slave: starts the worker with
-    davidson_run_slave(0,i); the in-process variant passes 1
-    instead of 0. Runs in a slave process: run_slave_main in
-    cipsi_utils calls it when the ZMQ state is 'davidson'. i is
-    forwarded to davidson_run_slave, which does not use iproc.
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_run_slave`
-
- 
-.. c:function:: void davidson_slave_work(void)
-
-
-    File : :file:`davidson/davidson_parallel.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze, worker_id)
-
-
-    Worker loop of the Davidson slave. Fetches the wavefunction
-    u_t from the qp_run scheduler, then takes tasks (imin, imax,
-    ishift, istep) from the task server and calls
-    H_S2_u_0_nstates_openmp_work to compute $H | u_t \rangle$ and
-    $S^2 | u_t \rangle$ on determinant columns imin+ishift to
-    imax, step istep, pushing the results to the master.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mpi_initialized`
-       * :c:data:`mpi_rank`
-       * :c:data:`n_det`
-       * :c:data:`n_states_diag`
-       * :c:data:`nproc`
-       * :c:data:`psi_bilinear_matrix_columns_loc`
-       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`ref_bitmask_energy`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_run_slave`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_push_results_async_recv`
-       * :c:func:`davidson_push_results_async_send`
-       * :c:func:`h_s2_u_0_nstates_openmp_work`
-       * :c:func:`lock_io`
-       * :c:func:`unlock_io`
 
  
 .. c:function:: void diagonalize_ci(void)
@@ -1901,6 +987,74 @@ Subroutines / functions
        * :c:data:`psi_energy`
 
  
+.. c:function:: void h_s2_u_0_nstates(void)
+
+
+    File : :file:`davidson/davidson_parallel.irp.f`
+
+    .. code:: fortran
+
+        subroutine H_S2_u_0_nstates(v_0,s_0,u_0,N_st,sze)
+
+
+    Computes $v_0 = H | u_0\rangle$ and $s_0 = S^2  | u_0\rangle$
+    
+    n : number of determinants
+    
+    H_jj : array of $\langle j | H | j \rangle$
+    
+    S2_jj : array of $\langle j | S^2 | j \rangle$
+    
+    In-process port of the former distributed variant of
+    `H_S2_u_0_nstates' (the task server was removed, 2026-11-12): the
+    work is the
+    same stream of (imin, imax, ishift, istep) column chunks (tasksize
+    20000, istep = 2 on the first half of the determinant space) that
+    the single in-process worker consumed from the task server; each
+    chunk is computed by `H_S2_u_0_nstates_openmp_work', which carries
+    its own `NUM_THREADS(nthreads_davidson)' OpenMP team - the
+    parallelism the former layer only mediated. The chunks touch
+    disjoint columns, so the accumulation is order-independent: the
+    result is bit-identical for any thread count. The outputs are
+    zeroed over the full (sze, N_st) block first, exactly as the former
+    collector did before accumulating the worker results (the callers,
+    e.g. u0_hs2_u0, pass freshly allocated, not pre-zeroed arrays).
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mpi_initialized`
+       * :c:data:`n_det`
+       * :c:data:`nproc`
+       * :c:data:`psi_bilinear_matrix_columns_loc`
+       * :c:data:`psi_bilinear_matrix_order_reverse`
+       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+       * :c:data:`ref_bitmask_energy`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`davidson_diag_hjj_sjj`
+       * :c:func:`u_0_hs2_u_0`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dset_order`
+       * :c:func:`dtranspose`
+       * :c:func:`h_s2_u_0_nstates_openmp_work`
+
+ 
 .. c:function:: void h_s2_u_0_nstates_openmp(void)
 
 
@@ -1915,7 +1069,7 @@ Subroutines / functions
     
     Assumes that the determinants are in psi_det
     
-    istart, iend, ishift, istep are used in ZMQ parallelization.
+    istart, iend, ishift, istep split the work between the OpenMP threads.
 
     Needs:
 
@@ -1973,7 +1127,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`davidson_slave_work`
+       * :c:func:`h_s2_u_0_nstates`
        * :c:func:`h_s2_u_0_nstates_openmp`
 
     Calls:
@@ -2548,62 +1702,6 @@ Subroutines / functions
        * :c:func:`i_h_j_single_spin`
 
  
-.. c:function:: void h_s2_u_0_nstates_zmq(void)
-
-
-    File : :file:`davidson/davidson_parallel.irp.f`
-
-    .. code:: fortran
-
-        subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
-
-
-    Computes $v_0 = H | u_0\rangle$ and $s_0 = S^2  | u_0\rangle$
-    
-    n : number of determinants
-    
-    H_jj : array of $\langle j | H | j \rangle$
-    
-    S2_jj : array of $\langle j | S^2 | j \rangle$
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mpi_initialized`
-       * :c:data:`n_det`
-       * :c:data:`nproc`
-       * :c:data:`psi_bilinear_matrix_columns_loc`
-       * :c:data:`psi_bilinear_matrix_order_reverse`
-       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`ref_bitmask_energy`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_diag_hjj_sjj`
-       * :c:func:`u_0_hs2_u_0`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_collector`
-       * :c:func:`dset_order`
-       * :c:func:`dtranspose`
-       * :c:func:`end_parallel_job`
-       * :c:func:`new_parallel_job`
-       * :c:func:`qp_bug`
-
- 
 .. c:function:: void h_s2_u_0_two_e_nstates_openmp(void)
 
 
@@ -2618,7 +1716,7 @@ Subroutines / functions
     
     Assumes that the determinants are in psi_det
     
-    istart, iend, ishift, istep are used in ZMQ parallelization.
+    istart, iend, ishift, istep split the work between the OpenMP threads.
 
     Needs:
 
@@ -2938,6 +2036,72 @@ Subroutines / functions
        * :c:func:`i_wee_j_single`
 
  
+.. c:function:: void h_u_0_nstates(void)
+
+
+    File : :file:`davidson/davidson_parallel_nos2.irp.f`
+
+    .. code:: fortran
+
+        subroutine H_u_0_nstates(v_0,u_0,N_st,sze)
+
+
+    Computes $v_0 = H | u_0\rangle$
+    
+    n : number of determinants
+    
+    H_jj : array of $\langle j | H | j \rangle$
+    
+    In-process port of the former distributed variant of
+    `H_u_0_nstates' (the task server was removed, 2026-11-12): the
+    work is the
+    same stream of (imin, imax, ishift, istep) column chunks (tasksize
+    20000, istep = 2 only on the first chunk) that the single in-process
+    worker consumed from the task server; each chunk is computed by
+    `H_u_0_nstates_openmp_work', which carries its own
+    `NUM_THREADS(nthreads_davidson)' OpenMP team - the parallelism the
+    former layer only mediated. The chunks touch disjoint columns, so
+    the accumulation is order-independent: the result is bit-identical
+    for any thread count. The output is zeroed over the full (sze,
+    N_st) block first, exactly as the former collector did before
+    accumulating the worker results.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mpi_initialized`
+       * :c:data:`n_det`
+       * :c:data:`nproc`
+       * :c:data:`psi_bilinear_matrix_columns_loc`
+       * :c:data:`psi_bilinear_matrix_order_reverse`
+       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+       * :c:data:`ref_bitmask_energy`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`davidson_diag_csf_hjj`
+       * :c:func:`davidson_diag_nonsym_hjj`
+       * :c:func:`u_0_h_u_0`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dset_order`
+       * :c:func:`dtranspose`
+       * :c:func:`h_u_0_nstates_openmp_work`
+
+ 
 .. c:function:: void h_u_0_nstates_openmp(void)
 
 
@@ -2952,7 +2116,7 @@ Subroutines / functions
     
     Assumes that the determinants are in psi_det
     
-    istart, iend, ishift, istep are used in ZMQ parallelization.
+    istart, iend, ishift, istep split the work between the OpenMP threads.
 
     Needs:
 
@@ -3010,8 +2174,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`davidson_csf_slave_work`
-       * :c:func:`davidson_nos2_slave_work`
+       * :c:func:`h_u_0_nstates`
        * :c:func:`h_u_0_nstates_openmp`
 
     Calls:
@@ -3291,61 +2454,6 @@ Subroutines / functions
        * :c:func:`i_h_j_single_spin`
 
  
-.. c:function:: void h_u_0_nstates_zmq(void)
-
-
-    File : :file:`davidson/davidson_parallel_nos2.irp.f`
-
-    .. code:: fortran
-
-        subroutine H_u_0_nstates_zmq(v_0,u_0,N_st,sze)
-
-
-    Computes $v_0 = H | u_0\rangle$
-    
-    n : number of determinants
-    
-    H_jj : array of $\langle j | H | j \rangle$
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mpi_initialized`
-       * :c:data:`n_det`
-       * :c:data:`nproc`
-       * :c:data:`psi_bilinear_matrix_columns_loc`
-       * :c:data:`psi_bilinear_matrix_order_reverse`
-       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`ref_bitmask_energy`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_diag_csf_hjj`
-       * :c:func:`davidson_diag_nonsym_hjj`
-       * :c:func:`u_0_h_u_0`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_nos2_collector`
-       * :c:func:`davidson_nos2_slave_inproc`
-       * :c:func:`dset_order`
-       * :c:func:`dtranspose`
-       * :c:func:`end_parallel_job`
-       * :c:func:`new_parallel_job`
-
- 
 .. c:function:: void u_0_h_u_0(void)
 
 
@@ -3376,8 +2484,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`h_u_0_nstates`
        * :c:func:`h_u_0_nstates_openmp`
-       * :c:func:`h_u_0_nstates_zmq`
 
  
 .. c:function:: void u_0_h_u_0_two_e(void)
@@ -3450,56 +2558,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`h_s2_u_0_nstates`
        * :c:func:`h_s2_u_0_nstates_openmp`
-       * :c:func:`h_s2_u_0_nstates_zmq`
-
- 
-.. c:function:: void zmq_get_n_states_diag(void)
-
-
-    File : :file:`davidson/davidson_parallel.irp.f`
-
-    .. code:: fortran
-
-        integer function zmq_get_N_states_diag(zmq_to_qp_run_socket, worker_id)
-
-
-    Get N_states_diag from the qp_run scheduler
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mpi_master`
-       * :c:data:`n_states_diag`
-       * :c:data:`zmq_state`
-
-    Touches:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_states_diag`
-
- 
-.. c:function:: void zmq_put_n_states_diag(void)
-
-
-    File : :file:`davidson/davidson_parallel.irp.f`
-
-    .. code:: fortran
-
-        integer function zmq_put_N_states_diag(zmq_to_qp_run_socket,worker_id)
-
-
-    Put N_states_diag on the qp_run scheduler
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_states_diag`
-       * :c:data:`zmq_state`
 

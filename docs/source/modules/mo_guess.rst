@@ -61,29 +61,6 @@ Providers
 
 
  
-.. c:var:: ao_ortho_canonical_nucl_elec_integrals
-
-
-    File : :file:`mo_guess/pot_mo_ortho_canonical_ints.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: ao_ortho_canonical_nucl_elec_integrals	(mo_num,mo_num)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_integrals_n_e`
-       * :c:data:`ao_num`
-       * :c:data:`ao_ortho_canonical_coef`
-       * :c:data:`mo_num`
-
-
- 
 .. c:var:: double ao_ortho_lowdin_coef
 
 

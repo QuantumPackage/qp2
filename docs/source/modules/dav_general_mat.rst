@@ -78,7 +78,6 @@ Subroutines / functions
 
        * :c:data:`davidson_sze_max`
        * :c:data:`disk_based_davidson`
-       * :c:data:`n_det`
        * :c:data:`n_int`
        * :c:data:`nproc`
        * :c:data:`nthreads_davidson`
@@ -148,7 +147,6 @@ Subroutines / functions
 
        * :c:data:`davidson_sze_max`
        * :c:data:`disk_based_davidson`
-       * :c:data:`n_det`
        * :c:data:`n_int`
        * :c:data:`nproc`
        * :c:data:`nthreads_davidson`
@@ -221,7 +219,6 @@ Subroutines / functions
 
        * :c:data:`davidson_sze_max`
        * :c:data:`disk_based_davidson`
-       * :c:data:`n_det`
        * :c:data:`n_int`
        * :c:data:`nproc`
        * :c:data:`nthreads_davidson`
@@ -289,7 +286,6 @@ Subroutines / functions
 
        * :c:data:`davidson_sze_max`
        * :c:data:`disk_based_davidson`
-       * :c:data:`n_det`
        * :c:data:`n_int`
        * :c:data:`nproc`
        * :c:data:`nthreads_davidson`
@@ -366,7 +362,6 @@ Subroutines / functions
 
        * :c:data:`davidson_sze_max`
        * :c:data:`disk_based_davidson`
-       * :c:data:`n_det`
        * :c:data:`n_int`
        * :c:data:`nproc`
        * :c:data:`nthreads_davidson`
@@ -430,7 +425,6 @@ Subroutines / functions
 
        * :c:data:`davidson_sze_max`
        * :c:data:`disk_based_davidson`
-       * :c:data:`n_det`
        * :c:data:`n_int`
        * :c:data:`nproc`
        * :c:data:`nthreads_davidson`
@@ -504,7 +498,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`davidson_sze_max`
-       * :c:data:`n_det`
        * :c:data:`n_int`
        * :c:data:`nproc`
        * :c:data:`nthreads_davidson`

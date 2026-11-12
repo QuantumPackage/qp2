@@ -162,6 +162,7 @@ Providers
        * :c:data:`scf_density_matrix_ao_alpha`
        * :c:data:`scf_density_matrix_ao_beta`
        * :c:data:`use_cgtos`
+       * :c:data:`use_libcint_effective`
        * :c:data:`use_only_lr`
 
     Needed by:
@@ -209,6 +210,7 @@ Providers
        * :c:data:`scf_density_matrix_ao_alpha`
        * :c:data:`scf_density_matrix_ao_beta`
        * :c:data:`use_cgtos`
+       * :c:data:`use_libcint_effective`
        * :c:data:`use_only_lr`
 
     Needed by:
@@ -753,9 +755,11 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`fock_matrix_diag_mo`
        * :c:data:`json_unit`
        * :c:data:`ks_energy`
        * :c:data:`mo_label`
+       * :c:data:`mo_num`
 
     Called by:
 
@@ -770,6 +774,7 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`json_close`
+       * :c:func:`pg_print_mo_energies`
        * :c:func:`pg_report_mo_symmetry`
        * :c:func:`roothaan_hall_scf`
 

@@ -922,7 +922,6 @@ Subroutines / functions
        * :c:data:`do_pt2`
        * :c:data:`elec_alpha_num`
        * :c:data:`elec_beta_num`
-       * :c:data:`is_zmq_slave`
        * :c:data:`mo_bi_ortho_tc_one_e`
        * :c:data:`mo_bi_ortho_tc_two_e`
        * :c:data:`psi_coef`
@@ -1012,90 +1011,3 @@ Subroutines / functions
 
        * :c:func:`ezfio_set_fci_tc_energy`
        * :c:func:`ezfio_set_fci_tc_energy_pt2`
-
- 
-.. c:function:: zmq_get_n_det_generators:
-
-
-    File : :file:`zmq.irp.f_template_102`
-
-    .. code:: fortran
-
-        integer function zmq_get_N_det_generators(zmq_to_qp_run_socket, worker_id)
-
-
-    Get N_det_generators from the qp_run scheduler
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mpi_master`
-       * :c:data:`n_det_generators`
-       * :c:data:`zmq_state`
-
- 
-.. c:function:: zmq_get_n_det_selectors:
-
-
-    File : :file:`zmq.irp.f_template_102`
-
-    .. code:: fortran
-
-        integer function zmq_get_N_det_selectors(zmq_to_qp_run_socket, worker_id)
-
-
-    Get N_det_selectors from the qp_run scheduler
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mpi_master`
-       * :c:data:`n_det_selectors`
-       * :c:data:`zmq_state`
-
- 
-.. c:function:: zmq_put_n_det_generators:
-
-
-    File : :file:`zmq.irp.f_template_102`
-
-    .. code:: fortran
-
-        integer function zmq_put_N_det_generators(zmq_to_qp_run_socket,worker_id)
-
-
-    Put N_det_generators on the qp_run scheduler
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det_generators`
-       * :c:data:`zmq_state`
-
- 
-.. c:function:: zmq_put_n_det_selectors:
-
-
-    File : :file:`zmq.irp.f_template_102`
-
-    .. code:: fortran
-
-        integer function zmq_put_N_det_selectors(zmq_to_qp_run_socket,worker_id)
-
-
-    Put N_det_selectors on the qp_run scheduler
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det_selectors`
-       * :c:data:`zmq_state`
-

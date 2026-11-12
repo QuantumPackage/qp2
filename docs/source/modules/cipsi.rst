@@ -261,7 +261,7 @@ Subroutines / functions
 .. c:function:: void fill_buffer_double(void)
 
 
-    File : :file:`cipsi/selection.irp.f_template_939`
+    File : :file:`cipsi/selection.irp.f_template_946`
 
     .. code:: fortran
 
@@ -333,7 +333,7 @@ Subroutines / functions
 .. c:function:: void fill_buffer_single(void)
 
 
-    File : :file:`cipsi/selection.irp.f_template_939`
+    File : :file:`cipsi/selection.irp.f_template_946`
 
     .. code:: fortran
 
@@ -771,40 +771,6 @@ Subroutines / functions
 
 
  
-.. c:function:: void provide_for_selection_slave(void)
-
-
-    File : :file:`cipsi/run_selection_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine provide_for_selection_slave
-
-
-    Provides, beyond the values listed in the caller, the
-    values used by the CIPSI selection slaves: the
-    norm-sorted wave function (psi_det_sorted,
-    psi_det_sorted_order) and the transposed coefficients
-    of the selected determinants
-    (psi_selectors_coef_transp).
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`psi_det_sorted`
-       * :c:data:`psi_det_sorted`
-       * :c:data:`psi_selectors_coef_transp`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_selection_slave`
-
- 
 .. c:function:: void run_cipsi(void)
 
 
@@ -845,13 +811,6 @@ Subroutines / functions
        * :c:data:`threshold_generators`
        * :c:data:`variance_max`
 
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`fci`
-
     Calls:
 
     .. hlist::
@@ -864,6 +823,7 @@ Subroutines / functions
        * :c:func:`ezfio_has_hartree_fock_energy`
        * :c:func:`increment_n_iter`
        * :c:func:`make_s2_eigenfunction`
+       * :c:func:`omp_selection`
        * :c:func:`print_extrapolated_energy`
        * :c:func:`print_mol_properties`
        * :c:func:`print_summary`
@@ -874,7 +834,6 @@ Subroutines / functions
        * :c:func:`save_wavefunction`
        * :c:func:`write_cipsi_json`
        * :c:func:`write_double`
-       * :c:func:`zmq_selection`
 
     Touches:
 
@@ -952,7 +911,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`fci`
+       * :c:func:`run_optimization_mos_cipsi`
 
     Calls:
 
@@ -1041,8 +1000,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`omp_selection_task`
        * :c:func:`pt2_omp_task`
-       * :c:func:`run_selection_slave`
 
     Calls:
 

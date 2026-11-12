@@ -38,7 +38,7 @@ Exchange and correlation functionals of |DFT| and |RSDFT|.
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: berf:
+.. c:function:: void berf(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -48,9 +48,14 @@ Subroutines / functions
         function berf(a)
 
 
+    Second-order exchange gradient expansion coefficient for the erf
+    interaction, as a function of a = mu / (2 kF). The value is
+    multiplied by the damping factor 2.540118935556 * exp(-19 a**2);
+    series for a < 0.075 and for a > 50, exact expression (with
+    derf) in between.
 
  
-.. c:function:: beta_rs:
+.. c:function:: void beta_rs(void)
 
 
     File : :file:`dft_utils_func/garbage_func.irp.f`
@@ -62,7 +67,7 @@ Subroutines / functions
 
 
  
-.. c:function:: correction_to_on_top_from_ueg:
+.. c:function:: void correction_to_on_top_from_ueg(void)
 
 
     File : :file:`dft_utils_func/on_top_from_ueg.irp.f`
@@ -88,7 +93,7 @@ Subroutines / functions
        * :c:func:`dm_dft_alpha_beta_at_r`
 
  
-.. c:function:: dberfda:
+.. c:function:: void dberfda(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -98,9 +103,12 @@ Subroutines / functions
         function dberfda(a)
 
 
+    Derivative with respect to a = mu / (2 kF) of the coefficient
+    berf for the erf interaction. Same branches and damping factor
+    as berf.
 
  
-.. c:function:: delta_lrsr_ldaerf:
+.. c:function:: void delta_lrsr_ldaerf(void)
 
 
     File : :file:`dft_utils_func/ecmd_lda.irp.f`
@@ -110,6 +118,11 @@ Subroutines / functions
         subroutine DELTA_LRSR_LDAERF (rhot,rhos,mu,dospin,e)
 
 
+    LDA approximation of the Delta_(LR-SR) term of the
+    multideterminant short-range LDA correlation. rhot is the total
+    density, rhos the spin density, mu the range-separation
+    parameter. If dospin is false, z = 0. e is the contribution to
+    the energy density (delta * rhot). Not tested for z != 0.
 
     Called by:
 
@@ -119,7 +132,7 @@ Subroutines / functions
        * :c:func:`esrc_md_ldaerf`
 
  
-.. c:function:: dpol:
+.. c:function:: void dpol(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -131,7 +144,7 @@ Subroutines / functions
 
 
  
-.. c:function:: dpold:
+.. c:function:: void dpold(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -143,7 +156,7 @@ Subroutines / functions
 
 
  
-.. c:function:: dpoldd:
+.. c:function:: void dpoldd(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -155,7 +168,7 @@ Subroutines / functions
 
 
  
-.. c:function:: ec_lda:
+.. c:function:: void ec_lda(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -165,6 +178,11 @@ Subroutines / functions
         subroutine ec_lda(rho_a,rho_b,ec,vc_a,vc_b)
 
 
+    LDA correlation: energy density ec and potentials vc_a, vc_b
+    computed from the alpha and beta spin densities. The correlation
+    per particle is taken from ecPW (uniform gas, Coulomb
+    interaction); ec is that value times rho = rho_a + rho_b. For
+    total densities below 1.d-10 the outputs are set to 1.d-15.
 
     Called by:
 
@@ -183,7 +201,7 @@ Subroutines / functions
        * :c:func:`ecpw`
 
  
-.. c:function:: ec_lda_sr:
+.. c:function:: void ec_lda_sr(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -193,6 +211,12 @@ Subroutines / functions
         subroutine ec_lda_sr(mu,rho_a,rho_b,ec,vc_a,vc_b)
 
 
+    Short-range LDA correlation: energy density ec and potentials
+    vc_a, vc_b for the spin densities, with range-separation
+    parameter mu. Each quantity is the full LDA value minus the
+    long-range part: ec from ecPW and ecorrlr, vc_a and vc_b from
+    the LDA correlation potential and vcorrlr. ec is multiplied by
+    rho = rho_a + rho_b.
 
     Called by:
 
@@ -217,7 +241,7 @@ Subroutines / functions
        * :c:func:`vcorrlr`
 
  
-.. c:function:: ec_lyp2:
+.. c:function:: void ec_lyp2(void)
 
 
     File : :file:`dft_utils_func/garbage_func.irp.f`
@@ -229,7 +253,7 @@ Subroutines / functions
 
 
  
-.. c:function:: ec_lyp_88:
+.. c:function:: void ec_lyp_88(void)
 
 
     File : :file:`dft_utils_func/garbage_func.irp.f`
@@ -243,7 +267,7 @@ Subroutines / functions
     The expression used is the one by Miehlich, Savin, Stoll, Preuss, CPL, 1989 which gets rid of the laplacian of the density
 
  
-.. c:function:: ec_md_on_top_pbe_mu_corrected:
+.. c:function:: void ec_md_on_top_pbe_mu_corrected(void)
 
 
     File : :file:`dft_utils_func/ecmd_pbe_on_top.irp.f`
@@ -278,7 +302,7 @@ Subroutines / functions
        * :c:func:`rho_ab_to_rho_oc`
 
  
-.. c:function:: ec_md_pbe_on_top_general:
+.. c:function:: void ec_md_pbe_on_top_general(void)
 
 
     File : :file:`dft_utils_func/ecmd_pbe_general.irp.f`
@@ -302,17 +326,6 @@ Subroutines / functions
     The form of the functional was originally introduced in JCP, 150, 084103 1-10 (2019)
     
 
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ecmd_pbe_on_top_mu_of_r`
-       * :c:data:`ecmd_pbe_on_top_no_extrap_su_mu_of_r`
-       * :c:data:`ecmd_pbe_on_top_su_mu_of_r`
-       * :c:data:`ecmd_pbe_ueg_eff_xi_mu_of_r`
-       * :c:data:`ecmd_pbe_ueg_mu_of_r`
-
     Calls:
 
     .. hlist::
@@ -323,7 +336,7 @@ Subroutines / functions
        * :c:func:`rho_ab_to_rho_oc`
 
  
-.. c:function:: ec_only_lda_sr:
+.. c:function:: void ec_only_lda_sr(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -333,6 +346,11 @@ Subroutines / functions
         subroutine ec_only_lda_sr(mu,rho_a,rho_b,ec)
 
 
+    Short-range LDA correlation energy density only (no potentials),
+    for the spin densities rho_a and rho_b with range-separation
+    parameter mu: the full LDA correlation (ecPW) minus the
+    long-range part (ecorrlr), times rho = rho_a + rho_b. ec is 0
+    for total densities below 1.d-12.
 
     Called by:
 
@@ -351,7 +369,7 @@ Subroutines / functions
        * :c:func:`ecpw`
 
  
-.. c:function:: ec_pbe_only:
+.. c:function:: void ec_pbe_only(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_pbe.irp.f`
@@ -400,7 +418,7 @@ Subroutines / functions
        * :c:func:`ec_lda_sr`
 
  
-.. c:function:: ec_pbe_sr:
+.. c:function:: void ec_pbe_sr(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_pbe.irp.f`
@@ -456,7 +474,7 @@ Subroutines / functions
        * :c:func:`ec_lda_sr`
 
  
-.. c:function:: ec_scan:
+.. c:function:: void ec_scan(void)
 
 
     File : :file:`dft_utils_func/garbage_func.irp.f`
@@ -475,7 +493,7 @@ Subroutines / functions
        * :c:func:`ec_only_lda_sr`
 
  
-.. c:function:: ecmd_pbe_ueg_at_r:
+.. c:function:: void ecmd_pbe_ueg_at_r(void)
 
 
     File : :file:`dft_utils_func/ecmd_pbe_ueg.irp.f`
@@ -514,7 +532,7 @@ Subroutines / functions
        * :c:func:`rho_ab_to_rho_oc`
 
  
-.. c:function:: ecorrlr:
+.. c:function:: void ecorrlr(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -524,6 +542,12 @@ Subroutines / functions
         subroutine ecorrlr(rs,z,mu,eclr)
 
 
+    Long-range LDA correlation energy per particle of the uniform
+    gas for the screened interaction, in Hartree, given rs (density
+    parameter), z (spin polarization) and mu (range-separation
+    parameter). The Coulomb part comes from ecPW, the screened part
+    from Qrpa evaluated at x = mu * sqrt(rs) / phi. eclr is the
+    result.
 
     Called by:
 
@@ -541,7 +565,7 @@ Subroutines / functions
        * :c:func:`ecpw`
 
  
-.. c:function:: ecpw:
+.. c:function:: void ecpw(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -551,6 +575,11 @@ Subroutines / functions
         subroutine ecPW(x,y,ec,ecd,ecz,ecdd,eczd)
 
 
+    Correlation energy per particle of the uniform gas in the limit
+    mu = infinity, in Hartree: ec = ec(rs, zeta) with x -> rs and
+    y -> zeta. ecd and ecz are the first derivatives with respect
+    to rs and zeta, ecdd the second derivative with respect to rs,
+    eczd is set to 0.
 
     Called by:
 
@@ -571,7 +600,7 @@ Subroutines / functions
        * :c:func:`gpw`
 
  
-.. c:function:: eps_c_md_pbe_at_grid_pt:
+.. c:function:: void eps_c_md_pbe_at_grid_pt(void)
 
 
     File : :file:`dft_utils_func/ecmd_pbe_ueg.irp.f`
@@ -609,7 +638,7 @@ Subroutines / functions
        * :c:func:`ec_pbe_only`
 
  
-.. c:function:: eps_c_md_pbe_from_density:
+.. c:function:: void eps_c_md_pbe_from_density(void)
 
 
     File : :file:`dft_utils_func/ecmd_pbe_ueg.irp.f`
@@ -649,7 +678,7 @@ Subroutines / functions
        * :c:func:`rho_ab_to_rho_oc`
 
  
-.. c:function:: esrc_md_ldaerf:
+.. c:function:: void esrc_md_ldaerf(void)
 
 
     File : :file:`dft_utils_func/ecmd_lda.irp.f`
@@ -659,14 +688,12 @@ Subroutines / functions
         subroutine ESRC_MD_LDAERF (mu,rho_a,rho_b,dospin,e)
 
 
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ecmd_lda_eff_xi_mu_of_r`
-       * :c:data:`ecmd_lda_mu_of_r`
+    Short-range spin-dependent LDA correlation energy density with a
+    multideterminant reference, for OEP calculations. e is the sum of
+    ec_only_lda_sr and the multideterminant correction
+    DELTA_LRSR_LDAERF. mu is the range-separation parameter; rho_a and
+    rho_b are the spin densities. If dospin is false, the Delta term is
+    evaluated at zero spin polarization.
 
     Calls:
 
@@ -677,7 +704,7 @@ Subroutines / functions
        * :c:func:`ec_only_lda_sr`
 
  
-.. c:function:: ex_lda:
+.. c:function:: void ex_lda(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -687,6 +714,11 @@ Subroutines / functions
         subroutine ex_lda(rho_a,rho_b,ex,vx_a,vx_b)
 
 
+    LDA exchange: energy density ex and potentials vx_a, vx_b
+    computed from the alpha and beta spin densities rho_a and rho_b.
+    ex is the sum of the cst_lda * rho**(4/3) terms for the two
+    spins, and vx_a and vx_b are its derivatives with respect to
+    rho_a and rho_b.
 
     Called by:
 
@@ -696,7 +728,7 @@ Subroutines / functions
        * :c:data:`energy_x_lda`
 
  
-.. c:function:: ex_lda_sr:
+.. c:function:: void ex_lda_sr(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -706,6 +738,12 @@ Subroutines / functions
         subroutine ex_lda_sr(mu,rho_a,rho_b,ex,vx_a,vx_b)
 
 
+    Short-range LDA exchange: energy density ex and potentials
+    vx_a, vx_b for the spin densities, with range-separation
+    parameter mu. For each spin the expression branches on
+    a = mu / (2 kF), kF = (6 pi**2 rho_s)**(1/3) from the spin
+    density rho_s: small-a limit, exact expression, large-a
+    expansion. ex is half of the sum of the two spin contributions.
 
     Called by:
 
@@ -721,7 +759,7 @@ Subroutines / functions
        * :c:func:`ex_pbe_sr_only`
 
  
-.. c:function:: ex_pbe_sr:
+.. c:function:: void ex_pbe_sr(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_pbe.irp.f`
@@ -770,7 +808,7 @@ Subroutines / functions
        * :c:func:`ex_lda_sr`
 
  
-.. c:function:: ex_pbe_sr_only:
+.. c:function:: void ex_pbe_sr_only(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_pbe.irp.f`
@@ -800,7 +838,7 @@ Subroutines / functions
        * :c:func:`ex_lda_sr`
 
  
-.. c:function:: g0_dg0:
+.. c:function:: void g0_dg0(void)
 
 
     File : :file:`dft_utils_func/on_top_from_ueg.irp.f`
@@ -826,7 +864,7 @@ Subroutines / functions
     Give the on-top pair distribution function g0 second derivative according to rho d2g0drho2
 
  
-.. c:function:: g0_ueg_mu:
+.. c:function:: void g0_ueg_mu(void)
 
 
     File : :file:`dft_utils_func/on_top_from_ueg.irp.f`
@@ -841,7 +879,7 @@ Subroutines / functions
     Taken from P. Gori-Giorgi and A. Savin, Phys. Rev. A 73, 032506 (2006).
 
  
-.. c:function:: g0_ueg_mu_inf:
+.. c:function:: void g0_ueg_mu_inf(void)
 
 
     File : :file:`dft_utils_func/on_top_from_ueg.irp.f`
@@ -856,7 +894,7 @@ Subroutines / functions
     Taken from Eq. (46)  P. Gori-Giorgi and A. Savin, Phys. Rev. A 73, 032506 (2006).
 
  
-.. c:function:: g0d:
+.. c:function:: void g0d(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -868,7 +906,7 @@ Subroutines / functions
 
 
  
-.. c:function:: g0dd:
+.. c:function:: void g0dd(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -880,7 +918,7 @@ Subroutines / functions
 
 
  
-.. c:function:: g0f:
+.. c:function:: void g0f(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -892,7 +930,7 @@ Subroutines / functions
 
 
  
-.. c:function:: g0s:
+.. c:function:: void g0s(void)
 
 
     File : :file:`dft_utils_func/ecmd_lda.irp.f`
@@ -904,7 +942,7 @@ Subroutines / functions
 
 
  
-.. c:function:: gga_sr_type_functionals:
+.. c:function:: void gga_sr_type_functionals(void)
 
 
     File : :file:`dft_utils_func/utils.irp.f`
@@ -912,8 +950,8 @@ Subroutines / functions
     .. code:: fortran
 
         subroutine GGA_sr_type_functionals(mu,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_a_b, &
-                                ex,vx_rho_a,vx_rho_b,vx_grad_rho_a_2,vx_grad_rho_b_2,vx_grad_rho_a_b, &
-                                ec,vc_rho_a,vc_rho_b,vc_grad_rho_a_2,vc_grad_rho_b_2,vc_grad_rho_a_b )
+                                        ex,vx_rho_a,vx_rho_b,vx_grad_rho_a_2,vx_grad_rho_b_2,vx_grad_rho_a_b, &
+                                        ec,vc_rho_a,vc_rho_b,vc_grad_rho_a_2,vc_grad_rho_b_2,vc_grad_rho_a_b )
 
 
     routine that helps in building the x/c potentials on the AO basis for a GGA functional with a short-range interaction
@@ -943,7 +981,7 @@ Subroutines / functions
        * :c:func:`v_rho_oc_to_v_rho_ab`
 
  
-.. c:function:: give_all_stuffs_in_r_for_lyp_88:
+.. c:function:: void give_all_stuffs_in_r_for_lyp_88(void)
 
 
     File : :file:`dft_utils_func/garbage_func.irp.f`
@@ -953,6 +991,12 @@ Subroutines / functions
         subroutine give_all_stuffs_in_r_for_lyp_88(r,rho,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_2)
 
 
+    At the point r, gives the density and gradient quantities needed
+    by the LYP functional ec_lyp_88: the spin densities rho_a and
+    rho_b, the total density rho = rho_a + rho_b, the squared norms
+    of the gradients of the spin densities, and grad_rho_2, the
+    squared norm of the gradient of the total density. The arrays are
+    indexed by the state istate = 1..N_states.
 
     Needs:
 
@@ -970,7 +1014,7 @@ Subroutines / functions
        * :c:func:`density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r`
 
  
-.. c:function:: gpw:
+.. c:function:: void gpw(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -980,6 +1024,10 @@ Subroutines / functions
         subroutine GPW(x,Ac,alfa1,beta1,beta2,beta3,beta4,G,Gd,Gdd)
 
 
+    Fit form G(x) used by ecPW, with x -> rs:
+    G = -2 Ac (1 + alfa1 x) log(1 + 1/(2 Ac A(x))), where
+    A(x) = beta1 x**0.5 + beta2 x + beta3 x**1.5 + beta4 x**2.
+    Gd is dG/dx, Gdd is d2G/dx**2.
 
     Called by:
 
@@ -989,7 +1037,7 @@ Subroutines / functions
        * :c:func:`ecpw`
 
  
-.. c:function:: grad_rho_ab_to_grad_rho_oc:
+.. c:function:: void grad_rho_ab_to_grad_rho_oc(void)
 
 
     File : :file:`dft_utils_func/rho_ab_to_rho_tot.irp.f`
@@ -1017,7 +1065,7 @@ Subroutines / functions
        * :c:func:`gga_sr_type_functionals`
 
  
-.. c:function:: h_func:
+.. c:function:: void h_func(void)
 
 
     File : :file:`dft_utils_func/on_top_from_ueg.irp.f`
@@ -1029,7 +1077,7 @@ Subroutines / functions
 
 
  
-.. c:function:: mu_correction_of_on_top:
+.. c:function:: void mu_correction_of_on_top(void)
 
 
     File : :file:`dft_utils_func/ecmd_pbe_on_top.irp.f`
@@ -1046,7 +1094,7 @@ Subroutines / functions
     This is used in J. Chem. Phys.150, 084103 (2019); Eq. (29).
 
  
-.. c:function:: mu_grad_rho_func:
+.. c:function:: void mu_grad_rho_func(void)
 
 
     File : :file:`dft_utils_func/mu_of_r_dft.irp.f`
@@ -1072,7 +1120,7 @@ Subroutines / functions
        * :c:func:`density_and_grad_alpha_beta`
 
  
-.. c:function:: mu_rs_c:
+.. c:function:: void mu_rs_c(void)
 
 
     File : :file:`dft_utils_func/mu_of_r_dft.irp.f`
@@ -1084,7 +1132,7 @@ Subroutines / functions
 
 
  
-.. c:function:: qrpa:
+.. c:function:: void qrpa(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -1096,7 +1144,7 @@ Subroutines / functions
 
 
  
-.. c:function:: qrpad:
+.. c:function:: void qrpad(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -1108,7 +1156,7 @@ Subroutines / functions
 
 
  
-.. c:function:: qrpadd:
+.. c:function:: void qrpadd(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -1120,7 +1168,7 @@ Subroutines / functions
 
 
  
-.. c:function:: rho_ab_to_rho_oc:
+.. c:function:: void rho_ab_to_rho_oc(void)
 
 
     File : :file:`dft_utils_func/rho_ab_to_rho_tot.irp.f`
@@ -1146,7 +1194,7 @@ Subroutines / functions
        * :c:func:`gga_sr_type_functionals`
 
  
-.. c:function:: rho_oc_to_rho_ab:
+.. c:function:: void rho_oc_to_rho_ab(void)
 
 
     File : :file:`dft_utils_func/rho_ab_to_rho_tot.irp.f`
@@ -1161,7 +1209,7 @@ Subroutines / functions
     rho_c = total density, rho_o spin density
 
  
-.. c:function:: step_f:
+.. c:function:: void step_f(void)
 
 
     File : :file:`dft_utils_func/garbage_func.irp.f`
@@ -1173,7 +1221,7 @@ Subroutines / functions
 
 
  
-.. c:function:: v_grad_rho_ab_to_v_grad_rho_oc:
+.. c:function:: void v_grad_rho_ab_to_v_grad_rho_oc(void)
 
 
     File : :file:`dft_utils_func/rho_ab_to_rho_tot.irp.f`
@@ -1190,7 +1238,7 @@ Subroutines / functions
     rho_c = total density, rho_o spin density
 
  
-.. c:function:: v_grad_rho_oc_to_v_grad_rho_ab:
+.. c:function:: void v_grad_rho_oc_to_v_grad_rho_ab(void)
 
 
     File : :file:`dft_utils_func/rho_ab_to_rho_tot.irp.f`
@@ -1214,7 +1262,7 @@ Subroutines / functions
        * :c:func:`gga_sr_type_functionals`
 
  
-.. c:function:: v_rho_ab_to_v_rho_oc:
+.. c:function:: void v_rho_ab_to_v_rho_oc(void)
 
 
     File : :file:`dft_utils_func/rho_ab_to_rho_tot.irp.f`
@@ -1229,7 +1277,7 @@ Subroutines / functions
     rho_c = total density, rho_o spin density
 
  
-.. c:function:: v_rho_oc_to_v_rho_ab:
+.. c:function:: void v_rho_oc_to_v_rho_ab(void)
 
 
     File : :file:`dft_utils_func/rho_ab_to_rho_tot.irp.f`
@@ -1251,7 +1299,7 @@ Subroutines / functions
        * :c:func:`gga_sr_type_functionals`
 
  
-.. c:function:: vcorrlr:
+.. c:function:: void vcorrlr(void)
 
 
     File : :file:`dft_utils_func/routines_exc_sr_lda.irp.f`
@@ -1261,6 +1309,13 @@ Subroutines / functions
         subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
 
 
+    Long-range LDA correlation potentials for the screened
+    interaction, in Hartree: vclrup (spin-up) and vclrdown
+    (spin-down) for given rs, z and mu. vclrupd and vclrdownd are
+    built from d(eclr)/drs and d2(eclr)/dr2.
+    vclrupd and vclrdownd have no use (author, 2026-10-31); they
+    are kept because external plugins may use them (author
+    policy, 2026-10-31).
 
     Called by:
 

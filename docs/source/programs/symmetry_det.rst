@@ -16,7 +16,7 @@ symmetry_det
  MO projector, and projects every CI state on the irreps. 
   
  Prints the determinant table, the per-irrep counts, the per-state 
- weight vectors, and runs the gates D1-D6. Exits 1 if a gate fails, 0 
+ weight vectors, and runs the gates D1-D7. Exits 1 if a gate fails, 0 
  otherwise, so that it can be chained in a test script. 
  
  Needs: 

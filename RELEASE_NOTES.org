@@ -5,10 +5,9 @@
 ** Changes
 
   - The command-line tools are now written in Rust: ~qp_create_ezfio~,
-    ~qp_edit~, ~qp_run~ (with the task server), ~qp_set_mo_class~,
-    ~qp_tunnel~, ~qp_print_basis~ and ~element_create_db~.  OCaml and
-    OPAM are no longer needed to build or run QP; the Rust toolchain
-    is required instead.
+    ~qp_edit~, ~qp_run~, ~qp_set_mo_class~, ~qp_print_basis~ and
+    ~element_create_db~.  OCaml and OPAM are no longer needed to build
+    or run QP; the Rust toolchain is required instead.
   - ~configure~ checks ~cargo~ instead of ~ocamlc~, and ~-i ocaml~ is
     gone.
   - The ~ninja~ target that builds the tools is now ~rust_target~; the
@@ -18,6 +17,19 @@
     ~data/qp_edit_config/~, generated from the ~EZFIO.cfg~ files at
     build time.
   - ~etc/ocaml.rc~ was removed; ~quantum_package.rc~ no longer needs it.
+  - ZeroMQ and MPI were removed: calculations now run on a single
+    machine, and the in-process parallelism is OpenMP threads.
+    ~qp_run~ is a thin launcher; the slave and task-server modes are
+    gone, along with the ~qp_tunnel~, ~qp_srun~ and ~qp_mpirun~
+    launchers and the MPI build configurations.
+  - The CIPSI/MRCI selected spaces at the default threshold may differ
+    from the pre-removal release: the old distributed selection merged
+    the worker contributions in arrival order, so its result was
+    run-dependent.  The selection is now deterministic; on the LiH
+    sto-3g test case the converged energy shifts by -2.24 uHa toward
+    the strict FCI value.  At strict tolerance (~pt2_max 1e-8~) both
+    releases converge to the same 69-determinant space
+    (E = -7.882324392913223).
 
 * Version 2.3
 

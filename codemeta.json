@@ -34,9 +34,7 @@
     "operatingSystem": [
         "Linux"
     ],
-    "softwareRequirements": [
-        "ZeroMQ"
-    ],
+    "softwareRequirements": [],
     "author": [
         {
             "@type": "Person",

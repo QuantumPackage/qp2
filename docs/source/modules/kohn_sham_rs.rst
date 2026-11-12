@@ -734,9 +734,11 @@ Subroutines / functions
 
        * :c:data:`e_correlation_dft`
        * :c:data:`e_exchange_dft`
+       * :c:data:`fock_matrix_diag_mo`
        * :c:data:`json_unit`
        * :c:data:`level_shift`
        * :c:data:`mo_label`
+       * :c:data:`mo_num`
        * :c:data:`rs_ks_energy`
        * :c:data:`scf_energy`
 
@@ -754,6 +756,8 @@ Subroutines / functions
 
        * :c:func:`ezfio_set_kohn_sham_rs_energy`
        * :c:func:`json_close`
+       * :c:func:`pg_print_mo_energies`
+       * :c:func:`pg_report_mo_symmetry`
        * :c:func:`roothaan_hall_scf`
 
     Touches:
@@ -766,4 +770,5 @@ Subroutines / functions
        * :c:data:`mo_coef`
        * :c:data:`level_shift`
        * :c:data:`mo_coef`
+       * :c:data:`mo_symmetry`
 

@@ -32,7 +32,7 @@ Usage:
 
   Running programs:
 
-    qp (run|srun|mpirun) <program>
+    qp run <program>
     qp stop
 
   Getting help:
@@ -319,7 +319,7 @@ _qp_Complete()
     esac
 
     case "${first}" in
-      run|srun|mpirun)
+      run)
         COMPREPLY=( $(compgen -W "-h $(cat ${QP_ROOT}/data/executables | cut -d ' ' -f 1)" -- $cur ) )
         return 0
         ;;
@@ -345,7 +345,7 @@ _qp_Complete()
         ;;
       *)
         COMPREPLY+=( $(compgen -W 'has get set edit \
-                                  run srun mpirun set_frozen_core \
+                                  run set_frozen_core \
                                   reset set_mo_class ' \
                                   -- $cur ) )
         return 0

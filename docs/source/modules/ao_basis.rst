@@ -113,19 +113,25 @@ EZFIO parameters
  
     Default: False
  
+.. option:: use_libcint
+ 
+    If true, compute the AO integrals with libcint
+ 
+    Default: True
+ 
 .. option:: ao_expo_im
  
-    imag part for Exponents for each primitive of each cGTOs |AO|
+    imaginary part of the exponents of each primitive of each cGTO |AO| (zero if absent)
  
  
 .. option:: ao_expo_pw
  
-    plane wave part for each primitive GTOs |AO|
+    plane-wave vector of each cGTO primitive (zero if absent)
  
  
 .. option:: ao_expo_phase
  
-    phase shift for each primitive GTOs |AO|
+    phase of each cGTO primitive (zero if absent)
  
  
  
@@ -293,8 +299,13 @@ Providers
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`ao_prim_num_max`
+       * :c:data:`ao_shell`
+       * :c:data:`ezfio_convention`
        * :c:data:`nucl_coord`
+       * :c:data:`prim_normalization_factor`
+       * :c:data:`prim_num`
        * :c:data:`primitives_normalized`
+       * :c:data:`shell_index`
 
     Needed by:
 
@@ -384,6 +395,9 @@ Providers
        :columns: 3
 
        * :c:data:`ao_coef_normalized_ordered`
+       * :c:data:`libcint_atm`
+       * :c:data:`libcint_available`
+       * :c:data:`libcint_scale`
        * :c:data:`pg_shell_target`
 
  
@@ -425,6 +439,9 @@ Providers
        :columns: 3
 
        * :c:data:`ao_coef_normalized_ordered`
+       * :c:data:`libcint_atm`
+       * :c:data:`libcint_available`
+       * :c:data:`libcint_scale`
        * :c:data:`pg_shell_target`
 
  
@@ -459,6 +476,8 @@ Providers
 
        * :c:data:`ao_coef_normalized_ordered_transp`
        * :c:data:`ao_expo_ordered_transp`
+       * :c:data:`libcint_atm`
+       * :c:data:`libcint_available`
 
  
 .. c:var:: double ao_coef_normalized_ordered_transp
@@ -494,8 +513,8 @@ Providers
        * :c:data:`ao_integrals_n_e`
        * :c:data:`ao_integrals_n_e_per_atom`
        * :c:data:`ao_integrals_pt_chrg`
-       * :c:data:`ao_overlap`
        * :c:data:`ao_overlap_abs`
+       * :c:data:`ao_overlap_qp2`
        * :c:data:`ao_pseudo_integrals_local`
        * :c:data:`ao_pseudo_integrals_non_local`
        * :c:data:`ao_spread_x`
@@ -629,6 +648,38 @@ Providers
        * :c:data:`use_pw`
 
  
+.. c:var:: double ao_expo_im
+
+
+    File : :file:`ao_basis/cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_expo_im	(ao_num,ao_prim_num_max)
+
+
+    Imaginary part :math:`b`  of the exponents :math:`a + i b`  of the cGTO primitives.
+    Zero if absent from the EZFIO file.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num_max`
+       * :c:data:`ezfio_filename`
+       * :c:data:`mpi_master`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos`
+       * :c:data:`ao_coef_norm_cgtos_ord`
+
+ 
 .. c:var:: double ao_expo_ordered
 
 
@@ -660,6 +711,8 @@ Providers
 
        * :c:data:`ao_coef_normalized_ordered_transp`
        * :c:data:`ao_expo_ordered_transp`
+       * :c:data:`libcint_atm`
+       * :c:data:`libcint_available`
 
  
 .. c:var:: double ao_expo_ordered_transp
@@ -695,8 +748,8 @@ Providers
        * :c:data:`ao_integrals_n_e`
        * :c:data:`ao_integrals_n_e_per_atom`
        * :c:data:`ao_integrals_pt_chrg`
-       * :c:data:`ao_overlap`
        * :c:data:`ao_overlap_abs`
+       * :c:data:`ao_overlap_qp2`
        * :c:data:`ao_pseudo_integrals_local`
        * :c:data:`ao_pseudo_integrals_non_local`
        * :c:data:`ao_spread_x`
@@ -746,6 +799,38 @@ Providers
        * :c:data:`aos_in_r_array`
        * :c:data:`aos_in_r_array_extra`
        * :c:data:`aos_lapl_in_r_array`
+
+ 
+.. c:var:: double ao_expo_phase
+
+
+    File : :file:`ao_basis/cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_expo_phase	(3,ao_num,ao_prim_num_max)
+
+
+    Phase :math:`\varphi`  (per direction) of the cGTO primitives.
+    Zero if absent from the EZFIO file.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num_max`
+       * :c:data:`ezfio_filename`
+       * :c:data:`mpi_master`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos`
+       * :c:data:`ao_coef_norm_cgtos_ord`
 
  
 .. c:var:: double ao_expo_phase_ord
@@ -828,6 +913,38 @@ Providers
        * :c:data:`ao_integrals_n_e_cgtos`
        * :c:data:`ao_overlap_cgtos`
        * :c:data:`use_pw`
+
+ 
+.. c:var:: double ao_expo_pw
+
+
+    File : :file:`ao_basis/cgtos.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_expo_pw	(3,ao_num,ao_prim_num_max)
+
+
+    Plane-wave vector :math:`\mathbf{k}`  of the cGTO primitives.
+    Zero (no plane wave) if absent from the EZFIO file.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num_max`
+       * :c:data:`ezfio_filename`
+       * :c:data:`mpi_master`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_norm_cgtos`
+       * :c:data:`ao_coef_norm_cgtos_ord`
 
  
 .. c:var:: double ao_expo_pw_ord
@@ -937,6 +1054,9 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`libcint_atm`
+       * :c:data:`libcint_available`
+       * :c:data:`libcint_scale`
        * :c:data:`pg_shell_target`
 
  
@@ -970,6 +1090,7 @@ Providers
 
        * :c:data:`ao_cart_to_sphe_coef`
        * :c:data:`ao_l_char_space`
+       * :c:data:`libcint_available`
        * :c:data:`nucl_list_shell_aos`
 
  
@@ -1003,6 +1124,7 @@ Providers
 
        * :c:data:`ao_cart_to_sphe_coef`
        * :c:data:`ao_l_char_space`
+       * :c:data:`libcint_available`
        * :c:data:`nucl_list_shell_aos`
 
  
@@ -1059,6 +1181,7 @@ Providers
 
        * :c:data:`ao_cart_to_sphe_coef`
        * :c:data:`ao_l_char_space`
+       * :c:data:`libcint_available`
        * :c:data:`nucl_list_shell_aos`
 
  
@@ -1140,7 +1263,9 @@ Providers
        * :c:data:`ao_expo_ordered_transp_per_nucl`
        * :c:data:`ao_expo_phase`
        * :c:data:`ao_expo_pw`
+       * :c:data:`libcint_available`
        * :c:data:`pg_shell_target`
+       * :c:data:`use_pw`
 
  
 .. c:var:: int ao_shell
@@ -1169,7 +1294,9 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`ao_coef_norm_cgtos`
        * :c:data:`ao_coef_normalized`
+       * :c:data:`libcint_scale`
 
  
 .. c:var:: double ao_sphe_coef_normalization_factor
@@ -1990,11 +2117,55 @@ Providers
        :columns: 3
 
        * :c:data:`ao_deriv2_x`
+       * :c:data:`ao_dipole_x`
        * :c:data:`ao_integrals_n_e`
-       * :c:data:`ao_overlap`
+       * :c:data:`ao_overlap_qp2`
+       * :c:data:`ao_pseudo_integrals`
+       * :c:data:`ao_spread_x`
+       * :c:data:`ao_two_e_integral_erf_schwartz`
        * :c:data:`ao_two_e_integral_schwartz`
+       * :c:data:`ao_two_e_integrals_erf_in_map`
        * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`aos_grad_in_r_array`
+       * :c:data:`aos_grad_in_r_array_extra`
+       * :c:data:`aos_in_r_array`
+       * :c:data:`aos_in_r_array_extra`
+       * :c:data:`aos_lapl_in_r_array`
        * :c:data:`cholesky_ao_num`
+       * :c:data:`libcint_available`
+
+ 
+.. c:var:: bool use_libcint
+
+
+    File : :file:`ao_basis/libcint.irp.f`
+
+    .. code:: fortran
+
+        logical	:: use_libcint	
+
+
+    If true, compute the AO integrals with libcint.
+    
+    The request is only a preference: it is ignored when the basis or the
+    Hamiltonian cannot be represented in libcint, see
+    :c:data:`use_libcint_effective`.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ezfio_filename`
+       * :c:data:`mpi_master`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`libcint_nuc_available`
+       * :c:data:`use_libcint_effective`
 
  
 .. c:var:: bool use_pw
@@ -2020,6 +2191,8 @@ Providers
 
        * :c:data:`ao_expo_cgtos_ord_transp`
        * :c:data:`ao_expo_cgtos_ord_transp`
+       * :c:data:`ao_num`
+       * :c:data:`ao_prim_num_max`
 
     Needed by:
 
@@ -2072,6 +2245,52 @@ Subroutines / functions
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
+       * :c:data:`use_cgtos`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`cgtos_not_implemented`
+
+ 
+.. c:function:: void cgtos_not_implemented(void)
+
+
+    File : :file:`ao_basis/cgtos.irp.f`
+
+    .. code:: fortran
+
+        subroutine cgtos_not_implemented(feature)
+
+
+    Stops if use_cgtos is set: feature is computed with the real-Gaussian code
+    (real parts of the exponents only, real normalization), which would silently
+    give wrong results for cGTO AOs.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`use_cgtos`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_dipole_x`
+       * :c:data:`ao_integrals_n_e`
+       * :c:data:`ao_pseudo_integrals`
+       * :c:data:`ao_spread_x`
+       * :c:func:`ao_two_e_integral`
+       * :c:func:`ao_two_e_integral_erf`
+       * :c:func:`ao_value`
+       * :c:func:`give_all_aos_and_grad_and_lapl_at_r`
+       * :c:func:`give_all_aos_and_grad_at_r`
+       * :c:func:`give_all_aos_at_r`
 
  
 .. c:function:: void give_all_aos_and_grad_and_lapl_at_r(void)
@@ -2107,6 +2326,7 @@ Subroutines / functions
        * :c:data:`nucl_coord`
        * :c:data:`nucl_n_aos`
        * :c:data:`nucl_num`
+       * :c:data:`use_cgtos`
 
     Called by:
 
@@ -2116,6 +2336,13 @@ Subroutines / functions
        * :c:data:`aos_lapl_in_r_array`
        * :c:func:`density_and_grad_lapl_alpha_beta_and_all_aos_and_grad_aos_at_r`
        * :c:func:`give_all_mos_and_grad_and_lapl_at_r`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`cgtos_not_implemented`
 
  
 .. c:function:: void give_all_aos_and_grad_at_r(void)
@@ -2151,6 +2378,7 @@ Subroutines / functions
        * :c:data:`nucl_coord`
        * :c:data:`nucl_n_aos`
        * :c:data:`nucl_num`
+       * :c:data:`use_cgtos`
 
     Called by:
 
@@ -2163,6 +2391,13 @@ Subroutines / functions
        * :c:func:`density_and_grad_alpha_beta`
        * :c:func:`density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r`
        * :c:func:`give_all_mos_and_grad_at_r`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`cgtos_not_implemented`
 
  
 .. c:function:: void give_all_aos_at_r(void)
@@ -2195,6 +2430,7 @@ Subroutines / functions
        * :c:data:`nucl_coord`
        * :c:data:`nucl_n_aos`
        * :c:data:`nucl_num`
+       * :c:data:`use_cgtos`
 
     Called by:
 
@@ -2207,6 +2443,13 @@ Subroutines / functions
        * :c:func:`dm_dft_alpha_beta_at_r`
        * :c:func:`dm_dft_alpha_beta_no_core_at_r`
        * :c:func:`give_all_mos_at_r`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`cgtos_not_implemented`
 
  
 .. c:function:: void primitive_value(void)

@@ -931,6 +931,7 @@ Subroutines / functions
 
        * :c:func:`dgemm`
        * :c:func:`extrapolate_fock_matrix`
+       * :c:func:`ezfio_set_mo_basis_mo_energy`
        * :c:func:`initialize_mo_coef_begin_iteration`
        * :c:func:`lock_io`
        * :c:func:`orthonormalize_mos`

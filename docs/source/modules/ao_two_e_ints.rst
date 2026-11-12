@@ -77,13 +77,18 @@ EZFIO parameters
     Default: False
  
  
+Programs 
+-------- 
+ 
+ * :ref:`test_libcint` 
+ 
 Providers 
 --------- 
  
 .. c:var:: double ao_2e_cgtos_schwartz
 
 
-    File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
+    File : :file:`two_e_coul_integrals_cgtos.irp.f`
 
     .. code:: fortran
 
@@ -112,7 +117,7 @@ Providers
 .. c:var:: double ao_integrals_cache
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -141,7 +146,7 @@ Providers
 .. c:var:: int ao_integrals_cache_max
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -171,7 +176,7 @@ Providers
 .. c:var:: int ao_integrals_cache_min
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -201,7 +206,7 @@ Providers
 .. c:var:: double _Complex ao_integrals_cache_periodic
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -224,7 +229,7 @@ Providers
 .. c:var:: double ao_integrals_erf_cache
 
 
-    File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
+    File : :file:`map_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -247,7 +252,7 @@ Providers
 .. c:var:: int ao_integrals_erf_cache_max
 
 
-    File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
+    File : :file:`map_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -275,7 +280,7 @@ Providers
 .. c:var:: int ao_integrals_erf_cache_min
 
 
-    File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
+    File : :file:`map_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -303,7 +308,7 @@ Providers
 .. c:var:: int ao_integrals_erf_map
 
 
-    File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
+    File : :file:`map_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -326,13 +331,12 @@ Providers
 
        * :c:data:`ao_integrals_erf_cache`
        * :c:data:`ao_two_e_integrals_erf_in_map`
-       * :c:data:`mo_two_e_int_erf_jj_from_ao`
 
  
 .. c:var:: int ao_integrals_map
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -362,7 +366,7 @@ Providers
 .. c:var:: double ao_two_e_integral_erf_schwartz
 
 
-    File : :file:`ao_two_e_ints/providers_ao_erf.irp.f`
+    File : :file:`providers_ao_erf.irp.f`
 
     .. code:: fortran
 
@@ -385,6 +389,8 @@ Providers
        * :c:data:`mu_erf`
        * :c:data:`n_pt_max_integrals`
        * :c:data:`nucl_coord`
+       * :c:data:`use_cgtos`
+       * :c:data:`use_libcint_effective`
 
     Needed by:
 
@@ -392,13 +398,12 @@ Providers
        :columns: 3
 
        * :c:data:`ao_two_e_integrals_erf_in_map`
-       * :c:data:`mo_two_e_int_erf_jj_from_ao`
 
  
 .. c:var:: double ao_two_e_integral_schwartz
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -419,6 +424,7 @@ Providers
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`use_cgtos`
+       * :c:data:`use_libcint_effective`
        * :c:data:`use_only_lr`
 
     Needed by:
@@ -432,7 +438,7 @@ Providers
 .. c:var:: bool ao_two_e_integrals_erf_in_map
 
 
-    File : :file:`ao_two_e_ints/providers_ao_erf.irp.f`
+    File : :file:`providers_ao_erf.irp.f`
 
     .. code:: fortran
 
@@ -462,6 +468,8 @@ Providers
        * :c:data:`n_pt_max_integrals`
        * :c:data:`nucl_coord`
        * :c:data:`read_ao_two_e_integrals_erf`
+       * :c:data:`use_cgtos`
+       * :c:data:`use_libcint_effective`
 
     Needed by:
 
@@ -469,14 +477,12 @@ Providers
        :columns: 3
 
        * :c:data:`ao_integrals_erf_cache`
-       * :c:data:`mo_two_e_int_erf_jj_from_ao`
-       * :c:data:`mo_two_e_integrals_erf_in_map`
 
  
 .. c:var:: bool ao_two_e_integrals_in_map
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -504,6 +510,7 @@ Providers
        * :c:data:`mpi_master`
        * :c:data:`read_ao_two_e_integrals`
        * :c:data:`use_cgtos`
+       * :c:data:`use_libcint_effective`
        * :c:data:`use_only_lr`
 
     Needed by:
@@ -514,14 +521,12 @@ Providers
        * :c:data:`ao_integrals_cache`
        * :c:data:`ao_integrals_cache_periodic`
        * :c:data:`cholesky_ao_num`
-       * :c:data:`mo_two_e_integrals_erf_in_map`
-       * :c:data:`mo_two_e_integrals_in_map`
 
  
 .. c:var:: double cholesky_ao
 
 
-    File : :file:`ao_two_e_ints/cholesky.irp.f`
+    File : :file:`cholesky.irp.f`
 
     .. code:: fortran
 
@@ -564,12 +569,14 @@ Providers
        * :c:data:`elec_num`
        * :c:data:`ezfio_work_dir`
        * :c:data:`is_periodic`
+       * :c:data:`mpi_master`
        * :c:data:`nproc`
        * :c:data:`nucl_coord`
        * :c:data:`qp_max_mem`
        * :c:data:`read_ao_cholesky`
        * :c:data:`read_ao_two_e_integrals`
        * :c:data:`use_cgtos`
+       * :c:data:`use_libcint_effective`
        * :c:data:`use_only_lr`
 
     Needed by:
@@ -578,14 +585,12 @@ Providers
        :columns: 3
 
        * :c:data:`cholesky_ao_transp`
-       * :c:data:`cholesky_mo_num`
-       * :c:data:`cholesky_mo_transp`
 
  
 .. c:var:: int cholesky_ao_num
 
 
-    File : :file:`ao_two_e_ints/cholesky.irp.f`
+    File : :file:`cholesky.irp.f`
 
     .. code:: fortran
 
@@ -628,12 +633,14 @@ Providers
        * :c:data:`elec_num`
        * :c:data:`ezfio_work_dir`
        * :c:data:`is_periodic`
+       * :c:data:`mpi_master`
        * :c:data:`nproc`
        * :c:data:`nucl_coord`
        * :c:data:`qp_max_mem`
        * :c:data:`read_ao_cholesky`
        * :c:data:`read_ao_two_e_integrals`
        * :c:data:`use_cgtos`
+       * :c:data:`use_libcint_effective`
        * :c:data:`use_only_lr`
 
     Needed by:
@@ -642,14 +649,12 @@ Providers
        :columns: 3
 
        * :c:data:`cholesky_ao_transp`
-       * :c:data:`cholesky_mo_num`
-       * :c:data:`cholesky_mo_transp`
 
  
 .. c:var:: double cholesky_ao_transp
 
 
-    File : :file:`ao_two_e_ints/cholesky.irp.f`
+    File : :file:`cholesky.irp.f`
 
     .. code:: fortran
 
@@ -671,7 +676,7 @@ Providers
 .. c:var:: bool do_direct_integrals
 
 
-    File : :file:`ao_two_e_ints/direct.irp.f`
+    File : :file:`direct.irp.f`
 
     .. code:: fortran
 
@@ -693,13 +698,12 @@ Providers
        :columns: 3
 
        * :c:data:`cholesky_ao_num`
-       * :c:data:`mo_two_e_int_erf_jj_from_ao`
 
  
 .. c:var:: double gauleg_t2
 
 
-    File : :file:`ao_two_e_ints/gauss_legendre.irp.f`
+    File : :file:`gauss_legendre.irp.f`
 
     .. code:: fortran
 
@@ -722,7 +726,7 @@ Providers
 .. c:var:: double gauleg_w
 
 
-    File : :file:`ao_two_e_ints/gauss_legendre.irp.f`
+    File : :file:`gauss_legendre.irp.f`
 
     .. code:: fortran
 
@@ -745,7 +749,7 @@ Providers
 .. c:function:: void i_x1_new(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -783,7 +787,7 @@ Providers
 .. c:function:: void i_x1_new_cgtos(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
+    File : :file:`two_e_coul_integrals_cgtos.irp.f`
 
     .. code:: fortran
 
@@ -820,7 +824,7 @@ Providers
 .. c:function:: void i_x1_pol_mult_a1(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -849,7 +853,7 @@ Providers
 .. c:function:: void i_x1_pol_mult_a1_cgtos(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
+    File : :file:`two_e_coul_integrals_cgtos.irp.f`
 
     .. code:: fortran
 
@@ -879,7 +883,7 @@ Providers
 .. c:function:: void i_x1_pol_mult_a2(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -908,7 +912,7 @@ Providers
 .. c:function:: void i_x1_pol_mult_a2_cgtos(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
+    File : :file:`two_e_coul_integrals_cgtos.irp.f`
 
     .. code:: fortran
 
@@ -938,7 +942,7 @@ Providers
 .. c:function:: void i_x1_pol_mult_recurs(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -968,7 +972,7 @@ Providers
 .. c:function:: void i_x1_pol_mult_recurs_cgtos(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
+    File : :file:`two_e_coul_integrals_cgtos.irp.f`
 
     .. code:: fortran
 
@@ -999,7 +1003,7 @@ Providers
 .. c:function:: void i_x2_new(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -1033,7 +1037,7 @@ Providers
 .. c:function:: void i_x2_new_cgtos(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
+    File : :file:`two_e_coul_integrals_cgtos.irp.f`
 
     .. code:: fortran
 
@@ -1067,7 +1071,7 @@ Providers
 .. c:function:: void i_x2_pol_mult(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -1097,7 +1101,7 @@ Providers
 .. c:function:: void i_x2_pol_mult_cgtos(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
+    File : :file:`two_e_coul_integrals_cgtos.irp.f`
 
     .. code:: fortran
 
@@ -1132,7 +1136,7 @@ Subroutines / functions
 .. c:function:: void ao_2e_cgtos_schwartz_accel(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
+    File : :file:`two_e_coul_integrals_cgtos.irp.f`
 
     .. code:: fortran
 
@@ -1162,13 +1166,13 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`give_explicit_cpoly_and_cgaussian`
+       * :c:func:`give_explicit_cpoly_and_cgaussian_log`
 
  
 .. c:function:: void ao_idx2_sq(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -1192,7 +1196,7 @@ Subroutines / functions
 .. c:function:: void ao_idx2_sq_rev(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -1212,7 +1216,7 @@ Subroutines / functions
 .. c:function:: void ao_idx2_tri_key(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -1235,7 +1239,7 @@ Subroutines / functions
 .. c:function:: void ao_idx2_tri_rev_key(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -1255,7 +1259,7 @@ Subroutines / functions
 .. c:function:: void ao_l4(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -1275,7 +1279,7 @@ Subroutines / functions
 .. c:function:: void ao_two_e_integral(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -1296,13 +1300,21 @@ Subroutines / functions
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`use_cgtos`
+       * :c:data:`use_libcint_effective`
        * :c:data:`use_only_lr`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`cgtos_not_implemented`
 
  
 .. c:function:: void ao_two_e_integral_cgtos(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
+    File : :file:`two_e_coul_integrals_cgtos.irp.f`
 
     .. code:: fortran
 
@@ -1331,13 +1343,13 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`give_explicit_cpoly_and_cgaussian`
+       * :c:func:`give_explicit_cpoly_and_cgaussian_log`
 
  
 .. c:function:: void ao_two_e_integral_erf(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals_erf.irp.f`
+    File : :file:`two_e_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -1360,19 +1372,22 @@ Subroutines / functions
        * :c:data:`mu_erf`
        * :c:data:`n_pt_max_integrals`
        * :c:data:`nucl_coord`
+       * :c:data:`use_cgtos`
+       * :c:data:`use_libcint_effective`
 
     Calls:
 
     .. hlist::
        :columns: 3
 
+       * :c:func:`cgtos_not_implemented`
        * :c:func:`give_explicit_poly_and_gaussian`
 
  
 .. c:function:: void ao_two_e_integral_general(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -1406,7 +1421,7 @@ Subroutines / functions
 .. c:function:: void ao_two_e_integral_schwartz_accel(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -1441,7 +1456,7 @@ Subroutines / functions
 .. c:function:: void ao_two_e_integral_schwartz_accel_erf(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals_erf.irp.f`
+    File : :file:`two_e_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -1476,7 +1491,7 @@ Subroutines / functions
 .. c:function:: void ao_two_e_integral_zero(void)
 
 
-    File : :file:`ao_two_e_ints/screening.irp.f`
+    File : :file:`screening.irp.f`
 
     .. code:: fortran
 
@@ -1503,132 +1518,10 @@ Subroutines / functions
        * :c:data:`use_cgtos`
 
  
-.. c:function:: ao_two_e_integrals_in_map_collector:
-
-
-    File : :file:`ao_two_e_ints/integrals_in_map_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine ao_two_e_integrals_in_map_collector(zmq_socket_pull)
-
-
-    Collects results from the AO integral calculation
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_integrals_map`
-       * :c:data:`ao_num`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_two_e_integrals_in_map`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`end_zmq_to_qp_run_socket`
-       * :c:func:`insert_into_ao_integrals_map`
-
- 
-.. c:function:: ao_two_e_integrals_in_map_slave:
-
-
-    File : :file:`ao_two_e_ints/integrals_in_map_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine ao_two_e_integrals_in_map_slave(thread,iproc)
-
-
-    Computes a buffer of integrals
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_num`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`ao_two_e_integrals_in_map_slave_inproc`
-       * :c:func:`ao_two_e_integrals_in_map_slave_tcp`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`compute_ao_integrals_jl`
-       * :c:func:`end_zmq_push_socket`
-       * :c:func:`end_zmq_to_qp_run_socket`
-       * :c:func:`push_integrals`
-       * :c:func:`sscanf_dd`
-
- 
-.. c:function:: ao_two_e_integrals_in_map_slave_inproc:
-
-
-    File : :file:`ao_two_e_ints/integrals_in_map_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine ao_two_e_integrals_in_map_slave_inproc(i)
-
-
-    Computes a buffer of integrals. i is the ID of the current thread.
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_two_e_integrals_in_map`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`ao_two_e_integrals_in_map_slave`
-
- 
-.. c:function:: ao_two_e_integrals_in_map_slave_tcp:
-
-
-    File : :file:`ao_two_e_ints/integrals_in_map_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine ao_two_e_integrals_in_map_slave_tcp(i)
-
-
-    Computes a buffer of integrals. i is the ID of the current thread.
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`ao_two_e_integrals_in_map_slave`
-
- 
 .. c:function:: void clear_ao_erf_map(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
+    File : :file:`map_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -1655,7 +1548,7 @@ Subroutines / functions
 .. c:function:: void clear_ao_map(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -1682,7 +1575,7 @@ Subroutines / functions
 .. c:function:: void compute_ao_integrals_erf_jl(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals_erf.irp.f`
+    File : :file:`two_e_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -1718,7 +1611,7 @@ Subroutines / functions
 .. c:function:: void compute_ao_integrals_jl(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -1753,7 +1646,7 @@ Subroutines / functions
 .. c:function:: void compute_ao_two_e_integrals(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -1773,7 +1666,7 @@ Subroutines / functions
 .. c:function:: void compute_ao_two_e_integrals_erf(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals_erf.irp.f`
+    File : :file:`two_e_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -1790,18 +1683,11 @@ Subroutines / functions
        * :c:data:`ao_num`
        * :c:data:`ao_two_e_integral_erf_schwartz`
 
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mo_two_e_int_erf_jj_from_ao`
-
  
 .. c:function:: void do_schwartz_accel(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -1822,7 +1708,7 @@ Subroutines / functions
 .. c:function:: void dump_ao_integrals_erf(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
+    File : :file:`map_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -1849,7 +1735,7 @@ Subroutines / functions
 .. c:function:: void eri(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -1873,7 +1759,7 @@ Subroutines / functions
 .. c:function:: void eri_cgtos(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
+    File : :file:`two_e_coul_integrals_cgtos.irp.f`
 
     .. code:: fortran
 
@@ -1897,7 +1783,7 @@ Subroutines / functions
 .. c:function:: void eri_erf(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals_erf.irp.f`
+    File : :file:`two_e_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -1930,7 +1816,7 @@ Subroutines / functions
 .. c:function:: void gauleg(void)
 
 
-    File : :file:`ao_two_e_ints/gauss_legendre.irp.f`
+    File : :file:`gauss_legendre.irp.f`
 
     .. code:: fortran
 
@@ -1950,7 +1836,7 @@ Subroutines / functions
 .. c:function:: void general_primitive_integral(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -1973,16 +1859,24 @@ Subroutines / functions
 .. c:function:: void general_primitive_integral_cgtos(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
+    File : :file:`two_e_coul_integrals_cgtos.irp.f`
 
     .. code:: fortran
 
-        complex*16 function general_primitive_integral_cgtos(dim, P_new, P_center, fact_p, p, p_inv, iorder_p, &
-                                                                  Q_new, Q_center, fact_q, q, q_inv, iorder_q)
+        complex*16 function general_primitive_integral_cgtos(dim, P_new, P_center, lfact_p, p, p_inv, iorder_p, &
+                                                                  Q_new, Q_center, lfact_q, q, q_inv, iorder_q)
 
 
     
     Computes the integral <pq|rs> where p,q,r,s are cos-cGTOS primitives
+    
+    lfact_p, lfact_q: exponents of the Gaussian-product factors (see
+    give_explicit_cpoly_and_cgaussian_log), combined with the Boys function in
+    crint_sum_shift. The callers add to lfact_q the logarithm of the plane-wave
+    and phase prefactor, exp(-i sum phi - sum k^2/(4 zeta)): with plane waves
+    exp(lfact) and this prefactor overflow / underflow separately (e.g. Re lfact
+    = k^2 Re(1/zeta) for the diagonal of a primitive), their product does not.
+    Negligible pairs are marked by Re(p) or Re(q) = 1e14.
     
 
     Calls:
@@ -1998,7 +1892,7 @@ Subroutines / functions
 .. c:function:: void general_primitive_integral_erf(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals_erf.irp.f`
+    File : :file:`two_e_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -2029,7 +1923,7 @@ Subroutines / functions
 .. c:function:: void get_ao_erf_map_size(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
+    File : :file:`map_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -2049,7 +1943,7 @@ Subroutines / functions
 .. c:function:: void get_ao_integ_chol(void)
 
 
-    File : :file:`ao_two_e_ints/cholesky.irp.f`
+    File : :file:`cholesky.irp.f`
 
     .. code:: fortran
 
@@ -2071,7 +1965,7 @@ Subroutines / functions
 .. c:function:: void get_ao_map_size(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -2091,7 +1985,7 @@ Subroutines / functions
 .. c:function:: void get_ao_two_e_integral(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -2123,7 +2017,7 @@ Subroutines / functions
 .. c:function:: void get_ao_two_e_integral_erf(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
+    File : :file:`map_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -2155,7 +2049,7 @@ Subroutines / functions
 .. c:function:: void get_ao_two_e_integral_periodic(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -2186,7 +2080,7 @@ Subroutines / functions
 .. c:function:: void get_ao_two_e_integrals(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -2205,19 +2099,11 @@ Subroutines / functions
        * :c:data:`ao_integrals_map`
        * :c:data:`ao_two_e_integrals_in_map`
 
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`add_integrals_to_map`
-       * :c:func:`four_idx_dgemm`
-
  
 .. c:function:: void get_ao_two_e_integrals_erf(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
+    File : :file:`map_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -2236,19 +2122,11 @@ Subroutines / functions
        * :c:data:`ao_integrals_threshold`
        * :c:data:`ao_two_e_integrals_erf_in_map`
 
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`add_integrals_to_map_erf`
-       * :c:func:`four_idx_dgemm_erf`
-
  
 .. c:function:: void get_ao_two_e_integrals_erf_non_zero(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
+    File : :file:`map_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -2268,13 +2146,6 @@ Subroutines / functions
        * :c:data:`ao_two_e_integral_erf_schwartz`
        * :c:data:`ao_two_e_integrals_erf_in_map`
 
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mo_two_e_int_erf_jj_from_ao`
-
     Calls:
 
     .. hlist::
@@ -2287,7 +2158,7 @@ Subroutines / functions
 .. c:function:: void get_ao_two_e_integrals_non_zero(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -2318,7 +2189,7 @@ Subroutines / functions
 .. c:function:: void get_ao_two_e_integrals_non_zero_jl(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -2348,7 +2219,7 @@ Subroutines / functions
 .. c:function:: void get_ao_two_e_integrals_non_zero_jl_from_list(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -2378,7 +2249,7 @@ Subroutines / functions
 .. c:function:: void get_ao_two_e_integrals_periodic(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -2401,7 +2272,7 @@ Subroutines / functions
 .. c:function:: void give_cpolynom_mult_center_x(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
+    File : :file:`two_e_coul_integrals_cgtos.irp.f`
 
     .. code:: fortran
 
@@ -2432,7 +2303,7 @@ Subroutines / functions
 .. c:function:: void give_polynom_mult_center_x(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -2463,7 +2334,7 @@ Subroutines / functions
 .. c:function:: void i_x1_pol_mult(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -2493,7 +2364,7 @@ Subroutines / functions
 .. c:function:: void i_x1_pol_mult_cgtos(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
+    File : :file:`two_e_coul_integrals_cgtos.irp.f`
 
     .. code:: fortran
 
@@ -2523,7 +2394,7 @@ Subroutines / functions
 .. c:function:: void idx2_tri_int(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -2538,7 +2409,7 @@ Subroutines / functions
 .. c:function:: void idx2_tri_rev_int(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -2551,7 +2422,7 @@ Subroutines / functions
 .. c:function:: void insert_into_ao_integrals_erf_map(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
+    File : :file:`map_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -2585,7 +2456,7 @@ Subroutines / functions
 .. c:function:: void insert_into_ao_integrals_map(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -2619,7 +2490,7 @@ Subroutines / functions
 .. c:function:: void integrale_new(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -2657,7 +2528,7 @@ Subroutines / functions
 .. c:function:: void integrale_new_cgtos(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_coul_integrals_cgtos.irp.f`
+    File : :file:`two_e_coul_integrals_cgtos.irp.f`
 
     .. code:: fortran
 
@@ -2695,7 +2566,7 @@ Subroutines / functions
 .. c:function:: void integrale_new_erf(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals_erf.irp.f`
+    File : :file:`two_e_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -2735,7 +2606,7 @@ Subroutines / functions
 .. c:function:: void load_ao_integrals_erf(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals_erf.irp.f`
+    File : :file:`map_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -2764,7 +2635,7 @@ Subroutines / functions
 .. c:function:: void multiply_poly_c2_inline_2e(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -2778,7 +2649,7 @@ Subroutines / functions
 .. c:function:: void multiply_poly_local(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -2792,7 +2663,7 @@ Subroutines / functions
 .. c:function:: void n_pt_sup(void)
 
 
-    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+    File : :file:`two_e_integrals.irp.f`
 
     .. code:: fortran
 
@@ -2805,32 +2676,10 @@ Subroutines / functions
     $I_x(a_x,b_x,c_x,d_x) \, I_y(a_y,b_y,c_y,d_y) \, I_z(a_z,b_z,c_z,d_z)$
 
  
-.. c:function:: push_integrals:
-
-
-    File : :file:`ao_two_e_ints/integrals_in_map_slave.irp.f`
-
-    .. code:: fortran
-
-        subroutine push_integrals(zmq_socket_push, n_integrals, buffer_i, buffer_value, task_id)
-
-
-    Push integrals in the push socket
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`ao_tc_sym_two_e_pot_in_map_slave`
-       * :c:func:`ao_two_e_integrals_erf_in_map_slave`
-       * :c:func:`ao_two_e_integrals_in_map_slave`
-
- 
 .. c:function:: void save_erf_two_e_integrals_ao(void)
 
 
-    File : :file:`ao_two_e_ints/routines_save_integrals_erf.irp.f`
+    File : :file:`routines_save_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -2865,7 +2714,7 @@ Subroutines / functions
 .. c:function:: void save_erf_two_e_ints_ao_into_ints_ao(void)
 
 
-    File : :file:`ao_two_e_ints/routines_save_integrals_erf.irp.f`
+    File : :file:`routines_save_integrals_erf.irp.f`
 
     .. code:: fortran
 
@@ -2902,7 +2751,7 @@ Subroutines / functions
 .. c:function:: void two_e_integrals_index(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -2921,7 +2770,6 @@ Subroutines / functions
        * :c:data:`ao_integrals_erf_cache`
        * :c:data:`ao_integrals_erf_map`
        * :c:data:`ao_integrals_map`
-       * :c:data:`big_array_coulomb_integrals`
        * :c:func:`compute_ao_integrals_erf_jl`
        * :c:func:`compute_ao_integrals_jl`
        * :c:func:`get_ao_two_e_integral`
@@ -2930,23 +2778,12 @@ Subroutines / functions
        * :c:func:`get_ao_two_e_integrals_non_zero`
        * :c:func:`get_ao_two_e_integrals_non_zero_jl`
        * :c:func:`get_ao_two_e_integrals_non_zero_jl_from_list`
-       * :c:func:`get_mo_two_e_integral_erf`
-       * :c:func:`get_mo_two_e_integrals_erf`
-       * :c:func:`get_mo_two_e_integrals_erf_coulomb_ii`
-       * :c:func:`get_mo_two_e_integrals_erf_exch_ii`
-       * :c:func:`get_mo_two_e_integrals_erf_i1j1`
-       * :c:func:`get_mo_two_e_integrals_erf_ij`
-       * :c:func:`get_two_e_integral`
-       * :c:data:`mo_integrals_cache`
-       * :c:data:`mo_integrals_erf_cache`
-       * :c:data:`mo_integrals_erf_map`
-       * :c:data:`mo_integrals_map`
 
  
 .. c:function:: void two_e_integrals_index_2fold(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -2979,7 +2816,7 @@ Subroutines / functions
 .. c:function:: void two_e_integrals_index_reverse(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 
@@ -3000,7 +2837,7 @@ Subroutines / functions
 .. c:function:: void two_e_integrals_index_reverse_2fold(void)
 
 
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+    File : :file:`map_integrals.irp.f`
 
     .. code:: fortran
 

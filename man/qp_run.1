@@ -77,21 +77,13 @@ Displays the list of available \fIQuantum Package\fP programs.
 Prefix before running the program. This option is used to run
 programs like like gdb or valgrind.
 .UNINDENT
-.INDENT 0.0
-.TP
-.B \-s, \-\-slave
-This option needs to be set to run a slave job for \fBPROGRAM\fP, to
-accelerate another running instance of the \fIQuantum Package\fP\&.
-.UNINDENT
 .SH EXAMPLE
 .INDENT 0.0
 .INDENT 3.5
 .sp
 .nf
 .ft C
-qp_run fci h2o.ezfio &
-srun qp_run \-\-slave fci h2o.ezfio
-wait
+qp_run fci h2o.ezfio
 .ft P
 .fi
 .UNINDENT

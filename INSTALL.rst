@@ -57,7 +57,6 @@ Requirements
 - cmake
 - TREXIO : library to import and export TREXIO format files
 - `Zlib`_
-- |ZeroMQ| : networking library
 - Rust toolchain (:command:`cargo`, edition 2024) : https://rustup.rs
 - |Ninja| : a parallel build system
 - |pkg-config| : a tool which returns information about installed libraries
@@ -93,8 +92,6 @@ The following packages are supported by the :command:`configure` installer:
 * cmake
 * zlib
 * ninja
-* zeromq
-* f77zmq
 * docopt
 * resultsFile
 * bats
@@ -162,47 +159,6 @@ Otherwise,
     The :envvar:`IRPF90_PATH` variable may need to be updated in the configuration
     file :file:`${QP_ROOT}/etc/irpf90.rc`.
 
-
-
-ZeroMQ and its Fortran binding
-------------------------------
-
-*ZeroMQ* is a high-performance asynchronous messaging library.
-
-* Download the latest stable version of ZeroMQ
-  here : `<https://github.com/zeromq/libzmq/releases/latest>`_ and move the
-  downloaded archive in the :file:`${QP_ROOT}/external` directory
-
-* Extract the archive, go into the :file:`zeromq-*` directory and run
-  the following commands
-
-.. code:: bash
-
-   ./configure --prefix="${QP_ROOT}" --without-libsodium
-   make
-   make install
-
-
-* Download the Fortran binding
-  here : `<https://github.com/zeromq/f77_zmq/releases/latest>`_ and move
-  the downloaded archive in the :file:`${QP_ROOT}/external` directory
-
-* Extract the archive, go into the :file:`f77_zmq-*` directory and run
-  the following commands
-
-.. code:: bash
-
-   export ZMQ_H=${QP_ROOT}/include/zmq.h
-   make
-   cp libf77zmq.a ${QP_ROOT}/lib
-   cp libf77zmq.so ${QP_ROOT}/lib
-
-
-* Copy the :file:`f77_zmq_free.h` file in the ``ZMQ`` module as follows:
-
-.. code:: bash
-
-   cp f77_zmq_free.h ${QP_ROOT}/src/zmq/f77_zmq.h
 
 
 Zlib
