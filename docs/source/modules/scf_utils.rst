@@ -121,13 +121,6 @@ EZFIO parameters
  
     Default: Roothaan
  
-.. option:: use_optimal_damping
- 
-    If true, use optimal damping algorithm
- 
-    Default: False
- 
- 
 Providers 
 --------- 
  
@@ -571,9 +564,6 @@ Providers
        * :c:data:`ao_num`
        * :c:data:`elec_alpha_num`
        * :c:data:`mo_coef`
-       * :c:data:`mo_num`
-       * :c:data:`partial_occupation`
-       * :c:data:`use_optimal_damping`
 
     Needed by:
 
@@ -608,9 +598,6 @@ Providers
        * :c:data:`ao_num`
        * :c:data:`elec_beta_num`
        * :c:data:`mo_coef`
-       * :c:data:`mo_num`
-       * :c:data:`partial_occupation`
-       * :c:data:`use_optimal_damping`
 
     Needed by:
 

@@ -521,12 +521,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`all_shells_closed`
        * :c:data:`json_int_fmt`
        * :c:data:`json_unit`
        * :c:data:`mo_label`
        * :c:data:`scf_energy`
-       * :c:data:`use_optimal_damping`
 
     Called by:
 
