@@ -12,7 +12,10 @@ END_DOC
 
   integer                        :: iteration_SCF,dim_DIIS,index_dim_DIIS
 
-  logical                        :: converged
+  ! Maximum number of level-shift retries of one SCF step
+  integer                        :: n_level_shift_try
+
+  logical                        :: converged,ok_DIIS
   integer                        :: i,j,m
   logical, external              :: qp_stop
   double precision, allocatable :: mo_coef_save(:,:), S(:,:)
@@ -43,7 +46,9 @@ END_DOC
   Delta_energy_SCF    = 1.d0
   iteration_SCF       = 0
   dim_DIIS            = 0
+  index_dim_DIIS      = 0
   max_error_DIIS      = 1.d0
+  n_level_shift_try   = 5
 
 
 !
@@ -66,16 +71,20 @@ END_DOC
      call initialize_mo_coef_begin_iteration
     endif
 
-! Current size of the DIIS space
-
-    dim_DIIS = min(dim_DIIS+1,max_dim_DIIS)
+! DIIS: store the Fock and error matrices of this iteration in a ring buffer.
+! dim_DIIS counts the stored pairs and index_dim_DIIS is the slot of the most
+! recent one, so both advance together: the increment is inside the branch,
+! and the slot follows its own counter instead of iteration_SCF, so the
+! stored pairs are always contiguous in the ring.
 
     if ( (scf_algorithm == 'DIIS').and.(dabs(Delta_energy_SCF) > 1.d-10) )  then
+
+      dim_DIIS = min(dim_DIIS+1,max_dim_DIIS)
+      index_dim_DIIS = mod(index_dim_DIIS,max_dim_DIIS)+1
 
       ! Store Fock and error matrices at each iteration
       do j=1,ao_num
         do i=1,ao_num
-          index_dim_DIIS = mod(dim_DIIS-1,max_dim_DIIS)+1
           Fock_matrix_DIIS (i,j,index_dim_DIIS) = Fock_matrix_AO(i,j)
           error_matrix_DIIS(i,j,index_dim_DIIS) = FPS_SPF_matrix_AO(i,j)
         enddo
@@ -86,14 +95,27 @@ END_DOC
       call extrapolate_Fock_matrix(                                    &
           error_matrix_DIIS,Fock_matrix_DIIS,                          &
           Fock_matrix_AO,size(Fock_matrix_AO,1),                       &
-          iteration_SCF,dim_DIIS                                       &
+          index_dim_DIIS,dim_DIIS,ok_DIIS                              &
           )
 
-      Fock_matrix_AO_alpha = Fock_matrix_AO*0.5d0
-      Fock_matrix_AO_beta  = Fock_matrix_AO*0.5d0
-      TOUCH Fock_matrix_AO_alpha Fock_matrix_AO_beta
+      if (ok_DIIS) then
+        Fock_matrix_AO_alpha = Fock_matrix_AO*0.5d0
+        Fock_matrix_AO_beta  = Fock_matrix_AO*0.5d0
+        TOUCH Fock_matrix_AO_alpha Fock_matrix_AO_beta
+      else
+        ! Singular DIIS system: drop the history and keep the Fock matrix of
+        ! this iteration, which extrapolate_Fock_matrix left untouched.
+        dim_DIIS = 0
+        index_dim_DIIS = 0
+        Fock_matrix_DIIS  = 0.d0
+        error_matrix_DIIS = 0.d0
+      endif
 
    endif
+!   Keep the MOs of the previous iteration: the level-shift retry below
+!   restarts from that density, not from the uphill one.
+
+    mo_coef_save(1:ao_num,1:mo_num) = mo_coef(1:ao_num,1:mo_num)
     MO_coef = eigenvectors_Fock_matrix_MO
     if(do_mom)then
        call reorder_mo_max_overlap
@@ -112,18 +134,19 @@ END_DOC
 
     energy_SCF = SCF_energy
     Delta_Energy_SCF = energy_SCF - energy_SCF_previous
-    if ( (SCF_algorithm == 'DIIS').and.(Delta_Energy_SCF > 0.d0).and.(.not.do_mom) ) then
-      Fock_matrix_AO(1:ao_num,1:ao_num) = Fock_matrix_DIIS (1:ao_num,1:ao_num,index_dim_DIIS)
-      Fock_matrix_AO_alpha = Fock_matrix_AO*0.5d0
-      Fock_matrix_AO_beta  = Fock_matrix_AO*0.5d0
-      TOUCH Fock_matrix_AO_alpha Fock_matrix_AO_beta
-    endif
+
+!   If the step raised the energy, retry it from the same density with a
+!   temporary level shift, increasing the shift until the step is downhill
+!   again. The shift is a trial device: it is restored to its input value
+!   before leaving the block, so it never perturbs the converged MOs.
 
     if (.not.do_mom) then
        double precision :: level_shift_save
+       integer          :: n_retry
        level_shift_save = level_shift
-       mo_coef_save(1:ao_num,1:mo_num) = mo_coef(1:ao_num,1:mo_num)
-       do while (Delta_energy_SCF > 0.d0)
+       n_retry = 0
+       do while (Delta_energy_SCF > 0.d0 .and. n_retry < n_level_shift_try)
+          n_retry = n_retry + 1
           mo_coef(1:ao_num,1:mo_num) = mo_coef_save
           if (level_shift <= .1d0) then
              level_shift = 1.d0
@@ -137,17 +160,18 @@ END_DOC
              call initialize_mo_coef_begin_iteration
           endif
           TOUCH mo_coef
-          Delta_Energy_SCF = SCF_energy - energy_SCF_previous
           energy_SCF = SCF_energy
-          if (level_shift-level_shift_save > 40.d0) then
-             level_shift = level_shift_save * 4.d0
-             SOFT_TOUCH level_shift
-             exit
-          endif
-          dim_DIIS=0
+          Delta_Energy_SCF = energy_SCF - energy_SCF_previous
+          max_error_DIIS = maxval(Abs(FPS_SPF_Matrix_MO))
        enddo
-       level_shift = level_shift * 0.5d0
-       SOFT_TOUCH level_shift
+       if (n_retry == n_level_shift_try .and. Delta_Energy_SCF > 0.d0) then
+          write(6,'(A,I2,A)') ' Level shift: no downhill step after ', &
+             n_retry, ' tries, keeping the last one'
+       endif
+       if (n_retry > 0) then
+          level_shift = level_shift_save
+          SOFT_TOUCH level_shift
+       endif
     endif
     energy_SCF_previous = energy_SCF
 
@@ -271,28 +295,38 @@ end
 subroutine extrapolate_Fock_matrix(               &
            error_matrix_DIIS,Fock_matrix_DIIS,    &
            Fock_matrix_AO_,size_Fock_matrix_AO,   &
-           iteration_SCF,dim_DIIS                 &
+           index_dim_DIIS,dim_DIIS,ok_DIIS        &
            )
 
 BEGIN_DOC
-! Compute the extrapolated Fock matrix using the DIIS procedure
+! Compute the extrapolated Fock matrix using the DIIS procedure.
+!
+! The `dim_DIIS` stored pairs live in a ring buffer of size `max_dim_diis`
+! whose most recent slot is `index_dim_DIIS`. On return `ok_DIIS` is true and
+! `Fock_matrix_AO_` holds the extrapolated Fock matrix, or `ok_DIIS` is false
+! and `Fock_matrix_AO_` is left untouched because the DIIS linear system is
+! singular.
 END_DOC
 
   implicit none
 
-  integer,intent(inout)         :: dim_DIIS
-  double precision,intent(in)   :: Fock_matrix_DIIS(ao_num,ao_num,dim_DIIS),error_matrix_DIIS(ao_num,ao_num,dim_DIIS)
-  integer,intent(in)            :: iteration_SCF, size_Fock_matrix_AO
+  integer,intent(in)            :: index_dim_DIIS, dim_DIIS, size_Fock_matrix_AO
+  double precision,intent(in)   :: Fock_matrix_DIIS(ao_num,ao_num,max_dim_diis), &
+                                   error_matrix_DIIS(ao_num,ao_num,max_dim_diis)
   double precision,intent(inout):: Fock_matrix_AO_(size_Fock_matrix_AO,ao_num)
+  logical,intent(out)           :: ok_DIIS
 
   double precision,allocatable  :: B_matrix_DIIS(:,:),X_vector_DIIS(:)
-  double precision,allocatable  :: C_vector_DIIS(:)
-
+  double precision,allocatable  :: C_vector_DIIS(:), AF(:,:)
   double precision,allocatable  :: scratch(:,:)
-  integer                       :: i,j,k,l,i_DIIS,j_DIIS
-  double precision :: rcond, ferr, berr
-  integer, allocatable :: iwork(:)
-  integer :: lwork
+  integer, allocatable          :: iwork(:), ipiv(:)
+  integer                       :: slot_DIIS(max_dim_diis)
+  integer                       :: i,j,k,l,ks,i_DIIS,j_DIIS
+  double precision              :: rcond, anorm
+  double precision, external    :: dlange
+  integer                       :: lwork, info
+
+  ok_DIIS = .false.
 
   if (dim_DIIS < 1) then
     return
@@ -302,16 +336,27 @@ END_DOC
     B_matrix_DIIS(dim_DIIS+1,dim_DIIS+1), &
     X_vector_DIIS(dim_DIIS+1),            &
     C_vector_DIIS(dim_DIIS+1),            &
-    scratch(ao_num,ao_num)                &
+    AF(dim_DIIS+1,dim_DIIS+1),            &
+    ipiv(dim_DIIS+1),                     &
+    iwork(2*(dim_DIIS+1))                 &
   )
+
+! Slot of the k-th most recent stored pair in the ring buffer (k=1 is the
+! most recent one). The B matrix and the extrapolation below both use this
+! mapping, so a coefficient is always paired with the Fock matrix whose
+! error vector produced it.
+
+  do ks=1,dim_DIIS
+    slot_DIIS(ks) = mod(index_dim_DIIS-ks,max_dim_diis)+1
+  enddo
 
   ! Compute the matrices B and X
   B_matrix_DIIS(:,:) = 0.d0
   do j=1,dim_DIIS
-    j_DIIS = min(dim_DIIS,mod(iteration_SCF-j,max_dim_DIIS)+1)
+    j_DIIS = slot_DIIS(j)
 
     do i=1,dim_DIIS
-      i_DIIS = min(dim_DIIS,mod(iteration_SCF-i,max_dim_DIIS)+1)
+      i_DIIS = slot_DIIS(i)
 
       ! Compute product of two errors vectors
       do l=1,ao_num
@@ -333,18 +378,9 @@ END_DOC
   enddo
   C_vector_DIIS(dim_DIIS+1) = -1.d0
 
-  deallocate(scratch)
-
 ! Estimate condition number of B
-  double precision :: anorm
-  integer              :: info
-  integer,allocatable  :: ipiv(:)
-  double precision, allocatable :: AF(:,:)
-  double precision, external :: dlange
 
   lwork = max((dim_DIIS+1)**2, (dim_DIIS+1)*5)
-  allocate(AF(dim_DIIS+1,dim_DIIS+1))
-  allocate(ipiv(2*(dim_DIIS+1)), iwork(2*(dim_DIIS+1)) )
   allocate(scratch(lwork,1))
   scratch(:,1) = 0.d0
 
@@ -354,19 +390,19 @@ END_DOC
   AF(:,:) = B_matrix_DIIS(:,:)
   call dgetrf(dim_DIIS+1,dim_DIIS+1,AF,size(AF,1),ipiv,info)
   if (info /= 0) then
-    dim_DIIS = 0
+    deallocate(B_matrix_DIIS,X_vector_DIIS,C_vector_DIIS,AF,ipiv,iwork,scratch)
     return
   endif
 
   call dgecon( '1', dim_DIIS+1, AF, &
     size(AF,1), anorm, rcond, scratch, iwork, info )
   if (info /= 0) then
-    dim_DIIS = 0
+    deallocate(B_matrix_DIIS,X_vector_DIIS,C_vector_DIIS,AF,ipiv,iwork,scratch)
     return
   endif
 
  if (rcond < 1.d-14) then
-   dim_DIIS = 0
+   deallocate(B_matrix_DIIS,X_vector_DIIS,C_vector_DIIS,AF,ipiv,iwork,scratch)
    return
  endif
 
@@ -376,14 +412,12 @@ END_DOC
   call dgesv ( dim_DIIS+1 , 1, B_matrix_DIIS, size(B_matrix_DIIS,1), &
       ipiv , X_vector_DIIS , size(X_vector_DIIS,1), info)
 
-  deallocate(scratch,AF,iwork)
-
   if(info < 0) then
+    deallocate(B_matrix_DIIS,X_vector_DIIS,C_vector_DIIS,AF,ipiv,iwork,scratch)
     stop 'bug in DIIS'
   endif
 
   ! Compute extrapolated Fock matrix
-
 
   !$OMP PARALLEL DO PRIVATE(i,j,k) DEFAULT(SHARED) if (ao_num > 200)
   do j=1,ao_num
@@ -395,11 +429,14 @@ END_DOC
       do i=1,ao_num
         ! FPE here
         Fock_matrix_AO_(i,j) = Fock_matrix_AO_(i,j) +            &
-            X_vector_DIIS(k)*Fock_matrix_DIIS(i,j,dim_DIIS-k+1)
+            X_vector_DIIS(k)*Fock_matrix_DIIS(i,j,slot_DIIS(k))
       enddo
     enddo
   enddo
   !$OMP END PARALLEL DO
 
-end
+  deallocate(B_matrix_DIIS,X_vector_DIIS,C_vector_DIIS,AF,ipiv,iwork,scratch)
 
+  ok_DIIS = .true.
+
+end
