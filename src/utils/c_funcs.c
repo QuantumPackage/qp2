@@ -15,10 +15,13 @@
  * builds where OPENBLAS_NUM_THREADS is the lever; on the Ampere
  * nodes it is inert (the env vars are read at dlopen, before this
  * constructor). */
-int openblas_set_num_threads(int num_threads);
+/* Not exported by reference BLAS, MKL or Accelerate.  Declared weak so
+ * the link succeeds against any BLAS; the call is skipped when absent. */
+extern void openblas_set_num_threads(int) __attribute__((weak));
 static void qp_blas_pin_pool(void)
 {
-  openblas_set_num_threads(1);
+  if (openblas_set_num_threads != NULL)
+    openblas_set_num_threads(1);
 }
 /* Bit-reproducibility of the pt2 stochastic walk across thread
  * counts: every integral-table build (one_e AO->MO transform, jj
