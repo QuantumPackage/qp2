@@ -7,12 +7,6 @@
 [submodule "external/qp2-dependencies"]
 	path = external/qp2-dependencies
 	url = https://github.com/QuantumPackage/qp2-dependencies.git
-[submodule "external/OpenOrbitalOptimizer"]
-	path = external/OpenOrbitalOptimizer
-	url = https://github.com/susilehtola/OpenOrbitalOptimizer.git
-[submodule "external/armadillo-code"]
-	path = external/armadillo-code
-	url = https://gitlab.com/conradsnicta/armadillo-code.git
 [submodule "external/simple_gpu"]
 	path = external/simple_gpu
 	url = https://github.com/scemama/simple_gpu.git

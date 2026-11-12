@@ -223,7 +223,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="cmake zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats trexio armadillo openorb simple_gpu"
+        PACKAGES="cmake zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats trexio simple_gpu"
 fi
 
 
@@ -411,21 +411,6 @@ EOF
               ( cd bats-core-1.7.0/ ; ./install.sh \${QP_ROOT})
 EOF
 
-    elif [[ ${PACKAGE} = armadillo ]] ; then
-
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              cd armadillo-code
-              #TODO
-EOF
-
-    elif [[ ${PACKAGE} = openorb ]] ; then
-
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              cd OpenOrbitalOptimizer
-              #TODO
-EOF
     elif [[ ${PACKAGE} = simple_gpu ]] ; then
 
             VERSION=1.0.3
