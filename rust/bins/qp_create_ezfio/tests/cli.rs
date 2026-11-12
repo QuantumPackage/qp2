@@ -73,8 +73,6 @@ fn the_help_flag_prints_help_and_exits_zero() {
             "--multiplicity",
             "-p",
             "--pseudo",
-            "-q",
-            "--qmc",
             "-x",
             "--cartesian",
             "<FILE>",

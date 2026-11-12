@@ -158,7 +158,7 @@ fn write_file(
         .set::<i64>(
             "ezfio_files",
             "ezfio_convention",
-            &specs::convention(options.qmc),
+            &specs::CONVENTION,
         )
         .map_err(app)?;
     ezfio

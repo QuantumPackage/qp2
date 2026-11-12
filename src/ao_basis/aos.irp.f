@@ -87,35 +87,18 @@ END_PROVIDER
 
   if (primitives_normalized) then
 
-    if (ezfio_convention >= 20250211) then
-      ! Same primitive normalization factors for all AOs of the same shell, or read from trexio file
+    if (ezfio_convention < 20250211) error stop 'legacy ezfio convention (< 20250211) is no longer supported; recreate the input file with qp_create_ezfio'
 
-      do i=1,ao_num
-        k=1
-        do while (k<=prim_num .and. shell_index(k) /= ao_shell(i))
-          k = k+1
-        end do
-        do j=1,ao_prim_num(i)
-          ao_coef_normalized(i,j) = ao_coef(i,j)*prim_normalization_factor(k+j-1)
-        enddo
+    ! Same primitive normalization factors for all AOs of the same shell, or read from trexio file
+    do i=1,ao_num
+      k=1
+      do while (k<=prim_num .and. shell_index(k) /= ao_shell(i))
+        k = k+1
+      end do
+      do j=1,ao_prim_num(i)
+        ao_coef_normalized(i,j) = ao_coef(i,j)*prim_normalization_factor(k+j-1)
       enddo
-
-    else
-        ! GAMESS convention for primitive factors
-
-      do i=1,ao_num
-        powA(1) = ao_power(i,1)
-        powA(2) = ao_power(i,2)
-        powA(3) = ao_power(i,3)
-
-        do j=1,ao_prim_num(i)
-          call overlap_gaussian_xyz(C_A,C_A,ao_expo(i,j),ao_expo(i,j), &
-             powA,powA,overlap_x,overlap_y,overlap_z,norm,nz)
-          ao_coef_normalized(i,j) = ao_coef(i,j)/dsqrt(norm)
-        enddo
-      enddo
-
-    endif
+    enddo
 
   else
 

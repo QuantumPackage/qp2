@@ -201,9 +201,9 @@ BEGIN_PROVIDER [ logical, libcint_available ]
 
   ! Every component of a shell must share the same contraction: |QP|
   ! stores the coefficients per |AO|, libcint has one set per shell. This
-  ! is what rejects files written with the legacy GAMESS convention
-  ! (`ezfio_convention < 20250211`), where the primitive normalization
-  ! depends on the powers of the component.
+  ! rejects a basis whose primitive normalization depends on the powers of
+  ! the component (e.g. a TREXIO file written by a code that normalizes
+  ! each Cartesian component separately).
   if (ok) then
     do s = 1, shell_num
       l  = shell_ang_mom(s)

@@ -429,13 +429,14 @@ components of a shell, i.e. when
 ao_coef_normalized(i,j) / ao_coef_normalization_factor(i)
 ```
 
-is independent of the component `i` inside a shell. That holds for
-`ezfio_convention >= 20250211`, where `prim_normalization_factor` depends on
-`l` only (`basis.irp.f:32-44`, `powA = (l,0,0)`), and for
-`primitives_normalized = False`. It does **not** hold for the legacy GAMESS
-convention (`ezfio_convention < 20250211`), where the primitive norm is
-computed with the component's own powers (`aos.irp.f:103-118`). §7.8 turns
-this into a runtime check rather than a version test.
+is independent of the component `i` inside a shell. That holds when
+`prim_normalization_factor` depends on `l` only (`basis.irp.f:32-44`,
+`powA = (l,0,0)`; the only supported convention, 20250211) and for
+`primitives_normalized = False`. It does **not** hold for a basis whose
+primitive normalization is computed per component with the powers of that
+component (a TREXIO file written by such a code; the old GAMESS EZFIO
+convention did this and is now rejected in `aos.irp.f`). §7.8 turns this
+into a runtime check rather than a version test.
 
 ### 7.8 Validity checks
 
@@ -451,9 +452,9 @@ this into a runtime check rather than a version test.
   must add up to `l`), satisfy `ao_prim_num(i) == shell_prim_num(s)`, have
   the same `ao_expo_ordered(i,1:np)`, and the same
   `ao_coef_normalized_ordered(i,j)/ao_coef_normalization_factor(i)`
-  (relative tolerance 1e-12). A failure here is what catches the legacy
-  `ezfio_convention < 20250211` files, and any file whose centers or
-  component order would permute the libcint blocks;
+  (relative tolerance 1e-12). A failure here catches any file whose
+  per-component normalization factors, centers or component order would
+  permute the libcint blocks;
 * `ao_l_max > 12` (libcint's Rys-quadrature limit);
 * the basis is empty (`ao_num`, `shell_num` or `nucl_num` below 1), the
   `shell_prim_num` do not add up to `prim_num`, or the shells do not add

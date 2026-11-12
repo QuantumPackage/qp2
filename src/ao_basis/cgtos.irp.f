@@ -348,18 +348,18 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
  
     if(primitives_normalized) then
 
+      if (ezfio_convention < 20250211) error stop 'legacy ezfio convention (< 20250211) is no longer supported; recreate the input file with qp_create_ezfio'
+
       ! Normalization of the primitives. Each Cartesian component is normalized with its
-      ! own powers (this defines the shape of a contracted cGTO). For ezfio_convention >=
-      ! 20250211 the factor is scaled by prim_normalization_factor * N_real^-1 (real
-      ! Gaussian, same powers), so that at b = 0 the AO is the one of ao_coef_normalized
-      ! also when ao_normalized is false or the factors are read from the file (TREXIO);
-      ! with the default factors this is a constant per component.
-      if(ezfio_convention >= 20250211) then
-        kprim = 1
-        do while(kprim <= prim_num .and. shell_index(kprim) /= ao_shell(i))
-          kprim = kprim + 1
-        enddo
-      endif
+      ! own powers (this defines the shape of a contracted cGTO). The factor is scaled by
+      ! prim_normalization_factor * N_real^-1 (real Gaussian, same powers), so that at
+      ! b = 0 the AO is the one of ao_coef_normalized also when ao_normalized is false
+      ! or the factors are read from the file (TREXIO); with the default factors this
+      ! is a constant per component.
+      kprim = 1
+      do while(kprim <= prim_num .and. shell_index(kprim) /= ao_shell(i))
+        kprim = kprim + 1
+      enddo
 
       do j = 1, ao_prim_num(i)
 
@@ -403,14 +403,10 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
                    ' digits lost in all its integrals (sin-type with |b| << a ?)'
         endif
 
-        if(ezfio_convention >= 20250211) then
-          call overlap_gaussian_xyz(C_R, C_R, ao_expo(i,j), ao_expo(i,j), powA, powA, &
-                                    ov_rx, ov_ry, ov_rz, norm_real, nz)
-          ao_coef_norm_cgtos(i,j) = ao_coef(i,j) * prim_normalization_factor(kprim+j-1) &
-                                  * dsqrt(norm_real / norm)
-        else
-          ao_coef_norm_cgtos(i,j) = ao_coef(i,j) / dsqrt(norm)
-        endif
+        call overlap_gaussian_xyz(C_R, C_R, ao_expo(i,j), ao_expo(i,j), powA, powA, &
+                                  ov_rx, ov_ry, ov_rz, norm_real, nz)
+        ao_coef_norm_cgtos(i,j) = ao_coef(i,j) * prim_normalization_factor(kprim+j-1) &
+                                * dsqrt(norm_real / norm)
       enddo
 
     else

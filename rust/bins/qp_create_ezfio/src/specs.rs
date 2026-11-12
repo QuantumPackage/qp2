@@ -10,12 +10,12 @@
 //! (row-major over the built matrices, which is column-major over the
 //! stored `dim` — first index fastest).
 
-/// `Ezfio.set_ezfio_files_ezfio_convention`: `if qmc then 20210101 else
-/// 20250211`.
-#[must_use]
-pub const fn convention(qmc: bool) -> i64 {
-    if qmc { 20210101 } else { 20250211 }
-}
+/// `Ezfio.set_ezfio_files_ezfio_convention`: the only supported convention.
+///
+/// The legacy 20210101 (GAMESS) convention was retired with the `-q/--qmc`
+/// option: AO primitive normalization now always follows the 20250211
+/// convention (factors on the AOs, TREXIO-compatible).
+pub const CONVENTION: i64 = 20250211;
 
 /// The `"<path> already exists"` payload of the `Sys.file_exists` check
 /// (`qp_create_ezfio.ml:273`).
@@ -182,9 +182,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn the_convention_follows_the_qmc_flag() {
-        assert_eq!(convention(false), 20250211);
-        assert_eq!(convention(true), 20210101);
+    fn the_convention_is_the_20250211_one() {
+        assert_eq!(CONVENTION, 20250211);
     }
 
     #[test]
