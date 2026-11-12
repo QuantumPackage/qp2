@@ -19,7 +19,7 @@ subroutine H_S2_u_0_two_e_nstates_openmp(v_0,s_0,u_0,N_st,sze)
   !
   ! Assumes that the determinants are in psi_det
   !
-  ! istart, iend, ishift, istep are used in ZMQ parallelization.
+  ! istart, iend, ishift, istep split the work between the OpenMP threads.
   END_DOC
   integer, intent(in)            :: N_st,sze
   double precision, intent(inout)  :: v_0(sze,N_st), s_0(sze,N_st), u_0(sze,N_st)

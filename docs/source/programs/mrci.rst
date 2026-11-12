@@ -50,13 +50,11 @@ mrci
  
     * :c:data:`all_mo_integrals` 
     * :c:data:`do_pt2` 
-    * :c:data:`is_zmq_slave` 
     * :c:data:`json_int_fmt` 
     * :c:data:`json_unit` 
     * :c:data:`n_states` 
     * :c:data:`psi_coef` 
     * :c:data:`psi_det` 
-    * :c:data:`pt2_min_parallel_tasks` 
  
  Calls: 
  
@@ -65,7 +63,6 @@ mrci
  
     * :c:func:`json_close` 
     * :c:func:`run_cipsi` 
-    * :c:func:`run_slave_cipsi` 
     * :c:func:`run_stochastic_cipsi` 
  
  Touches: 
@@ -79,10 +76,7 @@ mrci
     * :c:data:`ci_electronic_energy` 
     * :c:data:`psi_configuration` 
     * :c:data:`n_det` 
-    * :c:data:`n_det_generators` 
-    * :c:data:`n_det_selectors` 
     * :c:data:`c0_weight` 
-    * :c:data:`distributed_davidson` 
     * :c:data:`psi_coef` 
     * :c:data:`psi_det_sorted_bit` 
     * :c:data:`psi_det_sorted_bit` 
@@ -92,11 +86,9 @@ mrci
     * :c:data:`psi_det_sorted_bit` 
     * :c:data:`psi_energy` 
     * :c:data:`psi_energy` 
-    * :c:data:`pt2_e0_denominator` 
     * :c:data:`pt2_match_weight` 
     * :c:data:`pt2_overlap` 
     * :c:data:`pt2_stoch_istate` 
-    * :c:data:`read_wf` 
     * :c:data:`selection_weight` 
     * :c:data:`state_average_weight` 
     * :c:data:`threshold_davidson_pt2` 

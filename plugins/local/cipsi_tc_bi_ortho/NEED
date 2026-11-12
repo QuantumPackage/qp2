@@ -2,7 +2,6 @@ cipsi_utils
 json
 mpi
 perturbation
-zmq
 iterations
 csf
 tc_bi_ortho

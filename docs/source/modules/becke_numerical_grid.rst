@@ -714,34 +714,6 @@ Providers
        * :c:data:`mos_in_r_array_extra_omp`
 
  
-.. c:var:: final_weight_at_r_vector_per_atom
-
-
-    File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: final_grid_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        double precision, allocatable	:: final_weight_at_r_vector_per_atom	(n_pts_max_per_atom,nucl_num)
-        integer, allocatable	:: index_final_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        integer, allocatable	:: index_final_points_per_atom_reverse	(n_points_integration_angular,n_points_radial_grid,nucl_num)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`final_weight_at_r`
-       * :c:data:`grid_points_per_atom`
-       * :c:data:`n_points_radial_grid`
-       * :c:data:`n_pts_per_atom`
-       * :c:data:`nucl_num`
-       * :c:data:`thresh_grid`
-
-
- 
 .. c:var:: int grid_atomic_number
 
 
@@ -1079,34 +1051,6 @@ Providers
     index_final_points_per_atom_reverse(k,i,j) = position in the
     per-atom list of kept points of the point with angular index k
     and radial index i around atom j (assigned only for kept points)
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`final_weight_at_r`
-       * :c:data:`grid_points_per_atom`
-       * :c:data:`n_points_radial_grid`
-       * :c:data:`n_pts_per_atom`
-       * :c:data:`nucl_num`
-       * :c:data:`thresh_grid`
-
-
- 
-.. c:var:: index_final_points_per_atom_reverse
-
-
-    File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: final_grid_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        double precision, allocatable	:: final_weight_at_r_vector_per_atom	(n_pts_max_per_atom,nucl_num)
-        integer, allocatable	:: index_final_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        integer, allocatable	:: index_final_points_per_atom_reverse	(n_points_integration_angular,n_points_radial_grid,nucl_num)
-
-
 
     Needs:
 

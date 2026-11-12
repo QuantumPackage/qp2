@@ -183,9 +183,8 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
          + 3.0d0*(N_st_diag*itermax)**2           &! h,y,s_tmp
          + 1.d0*(N_st_diag*itermax)               &! lambda
          + 1.d0*(N_st_diag)                       &! residual_norm
-                                                   ! In H_u_0_nstates_zmq
-         + 2.d0*(N_st_diag*N_det)                 &! u_t, v_t, on collector
-         + 2.d0*(N_st_diag*N_det)                 &! u_t, v_t, on slave
+                                                   ! In H_u_0_nstates
+         + 2.d0*(N_st_diag*N_det)                 &! u_t, v_t in H_u_0_nstates
          + 0.5d0*maxab                            &! idx0 in H_u_0_nstates_openmp_work_*
          + nproc_target *                         &! In OMP section
            ( 1.d0*(N_int*maxab)                   &! buffer
@@ -327,7 +326,7 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
         ! -----------------------------------
 
         if( (sze > 100000) .and. distributed_davidson ) then
-          call H_u_0_nstates_zmq   (W(1,shift+1), U(1,shift+1), N_st_diag, sze)
+          call H_u_0_nstates   (W(1,shift+1), U(1,shift+1), N_st_diag, sze)
         else
           call H_u_0_nstates_openmp(W(1,shift+1), U(1,shift+1), N_st_diag, sze)
         endif

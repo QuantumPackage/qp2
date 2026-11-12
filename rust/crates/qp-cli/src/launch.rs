@@ -45,9 +45,10 @@ pub fn job_command(prefix: Option<&str>, program: &str, ezfio: &str) -> String {
 /// Spawn `command` through `/bin/sh -c`, inheriting the standard streams.
 ///
 /// `env` pairs are added to the child's environment only; the parent's
-/// environment is inherited and untouched. This is how `qp_run` passes
-/// `QP_RUN_ADDRESS` (`Unix.putenv` in the reference, which would need
-/// `unsafe` in edition 2024 and would race the SIGUSR1 handler).
+/// environment is inherited and untouched. The reference used the same
+/// mechanism for `QP_RUN_ADDRESS`, with `Unix.putenv` on the parent,
+/// which would need `unsafe` in edition 2024 and would race the
+/// SIGUSR1 handler; the thin launcher passes no env pairs.
 ///
 /// # Errors
 ///

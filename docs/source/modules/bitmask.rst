@@ -1163,20 +1163,6 @@ Providers
 
 
  
-.. c:var:: int mpi_bit_kind
-
-
-    File : :file:`bitmask/mpi.irp.f`
-
-    .. code:: fortran
-
-        integer	:: mpi_bit_kind	
-
-
-    MPI bit kind type
-
-
- 
 .. c:var:: int n_act_orb
 
 
@@ -1495,6 +1481,7 @@ Providers
        * :c:data:`one_e_tr_dm_mo_alpha`
        * :c:data:`ormas_bitmask`
        * :c:data:`pg_det_irrep`
+       * :c:data:`pg_state_irrep_weight`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_cas`
        * :c:data:`psi_cas_sorted_bit`
@@ -2107,19 +2094,6 @@ Subroutines / functions
        * :c:func:`print_det`
        * :c:func:`print_det_one_dimension`
        * :c:func:`print_spindet`
-
- 
-.. c:function:: void broadcast_chunks_bit_kind(void)
-
-
-    File : :file:`bitmask/mpi.irp.f`
-
-    .. code:: fortran
-
-        subroutine broadcast_chunks_bit_kind(A, LDA)
-
-
-    Broadcast with chunks of ~2GB
 
  
 .. c:function:: void clear_bit_to_integer(void)

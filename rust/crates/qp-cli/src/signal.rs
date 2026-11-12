@@ -8,10 +8,9 @@
 //! # Why the handler only sets a flag (documented deviation)
 //!
 //! The reference runs `Sys.command ("qp_stop "^ezfio)` *inside* the handler.
-//! `system(3)`/`fork(3)` are not async-signal-safe, and `qp_run` keeps several
-//! threads alive (the task server, its PUB thread, the 0MQ I/O threads), so a
-//! handler that allocates and forks can deadlock on the allocator or on the
-//! 0MQ internal locks. Here the handler does one relaxed atomic store
+//! `system(3)`/`fork(3)` are not async-signal-safe, so a handler that
+//! allocates and forks can deadlock on the allocator or on an internal
+//! lock. Here the handler does one relaxed atomic store
 //! ([`crate::ffi`]) and the main thread polls it every [`POLL_INTERVAL`] while
 //! it waits for the job, then runs `qp_stop` from normal code.
 //!

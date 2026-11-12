@@ -334,16 +334,18 @@ Keywords
      - Master switch. When false, no provider of the detection chain is
        built, the SCF/DFT report is silent, and nothing is labelled.
    * - :option:`irrep_states`
-     - ``None``
+     - ``All``
      - Comma-, semicolon- or blank-separated list of irrep names to keep in
-       the CI diagonalization, for example ``B1, A1``. ``None`` (the
-       default) and the empty string both keep every irrep; the provider
-       turns ``None`` back into the empty list.
+       the CI diagonalization, for example ``B1, A1``. ``All`` (the
+       default), the legacy token ``None`` and the empty string all keep
+       every irrep; the provider turns those tokens back into the empty
+       list.
 
 .. note::
 
-   :option:`irrep_states` is declared with ``interface: ezfio`` only, so it
-   does **not** appear in ``qp_edit``. Write it with the ``ezfio`` tool::
+   :option:`irrep_states` appears in ``qp_edit``, in the ``Symmetry`` block,
+   and is shown there as ``irrep_states = All`` by default. It can also be
+   written with the ``ezfio`` tool::
 
        source $QP_ROOT/quantum_package.rc
        qp_run scf water.ezfio            # or any run that creates the EZFIO
@@ -466,9 +468,9 @@ EZFIO parameters
  
 .. option:: irrep_states
  
-    Comma-, semicolon- or blank-separated list of irrep names to keep in the CI diagonalization, for example "A1,B1". The token None, the default, keeps all irreps.
+    Comma-, semicolon- or blank-separated list of irrep names to keep in the CI diagonalization, for example "A1,B1". The token All, the default, keeps all irreps; the token None is also accepted for compatibility.
  
-    Default: None
+    Default: All
  
  
 Providers 
@@ -516,8 +518,8 @@ Providers
 
     Comma-, semicolon- or blank-separated list of irrep names to keep in
     the CI diagonalization. Empty means all irreps; the
-    qp_edit default is the token "None", which :c:func:`pg_normalize_irrep_states`
-    turns into the empty string.
+    qp_edit default is the token "All", and the legacy token "None", which
+    :c:func:`pg_normalize_irrep_states` both turn into the empty string.
 
     Needs:
 
@@ -646,11 +648,14 @@ Providers
        :columns: 3
 
        * :c:data:`ci_electronic_energy`
+       * :c:data:`ci_energy`
        * :c:data:`pg_col_diag`
        * :c:data:`pg_det_irrep`
        * :c:data:`pg_elem_col`
        * :c:data:`pg_irrep_allowed`
        * :c:data:`pg_mo_weight`
+       * :c:data:`pg_proj_coef`
+       * :c:data:`pg_proj_w`
        * :c:data:`pg_state_irrep_weight`
 
  
@@ -839,11 +844,14 @@ Providers
        :columns: 3
 
        * :c:data:`ci_electronic_energy`
+       * :c:data:`ci_energy`
        * :c:data:`pg_col_diag`
        * :c:data:`pg_det_irrep`
        * :c:data:`pg_elem_col`
        * :c:data:`pg_irrep_allowed`
        * :c:data:`pg_mo_weight`
+       * :c:data:`pg_proj_coef`
+       * :c:data:`pg_proj_w`
        * :c:data:`pg_state_irrep_weight`
 
  
@@ -924,11 +932,14 @@ Providers
        :columns: 3
 
        * :c:data:`ci_electronic_energy`
+       * :c:data:`ci_energy`
        * :c:data:`pg_col_diag`
        * :c:data:`pg_det_irrep`
        * :c:data:`pg_elem_col`
        * :c:data:`pg_irrep_allowed`
        * :c:data:`pg_mo_weight`
+       * :c:data:`pg_proj_coef`
+       * :c:data:`pg_proj_w`
        * :c:data:`pg_state_irrep_weight`
 
  
@@ -1009,11 +1020,14 @@ Providers
        :columns: 3
 
        * :c:data:`ci_electronic_energy`
+       * :c:data:`ci_energy`
        * :c:data:`pg_col_diag`
        * :c:data:`pg_det_irrep`
        * :c:data:`pg_elem_col`
        * :c:data:`pg_irrep_allowed`
        * :c:data:`pg_mo_weight`
+       * :c:data:`pg_proj_coef`
+       * :c:data:`pg_proj_w`
        * :c:data:`pg_state_irrep_weight`
 
  
@@ -1094,11 +1108,14 @@ Providers
        :columns: 3
 
        * :c:data:`ci_electronic_energy`
+       * :c:data:`ci_energy`
        * :c:data:`pg_col_diag`
        * :c:data:`pg_det_irrep`
        * :c:data:`pg_elem_col`
        * :c:data:`pg_irrep_allowed`
        * :c:data:`pg_mo_weight`
+       * :c:data:`pg_proj_coef`
+       * :c:data:`pg_proj_w`
        * :c:data:`pg_state_irrep_weight`
 
  
@@ -1721,11 +1738,14 @@ Providers
        :columns: 3
 
        * :c:data:`ci_electronic_energy`
+       * :c:data:`ci_energy`
        * :c:data:`pg_col_diag`
        * :c:data:`pg_det_irrep`
        * :c:data:`pg_elem_col`
        * :c:data:`pg_irrep_allowed`
        * :c:data:`pg_mo_weight`
+       * :c:data:`pg_proj_coef`
+       * :c:data:`pg_proj_w`
        * :c:data:`pg_state_irrep_weight`
 
  
@@ -1840,11 +1860,14 @@ Providers
        :columns: 3
 
        * :c:data:`ci_electronic_energy`
+       * :c:data:`ci_energy`
        * :c:data:`pg_col_diag`
        * :c:data:`pg_det_irrep`
        * :c:data:`pg_elem_col`
        * :c:data:`pg_irrep_allowed`
        * :c:data:`pg_mo_weight`
+       * :c:data:`pg_proj_coef`
+       * :c:data:`pg_proj_w`
        * :c:data:`pg_state_irrep_weight`
 
  
@@ -1925,11 +1948,14 @@ Providers
        :columns: 3
 
        * :c:data:`ci_electronic_energy`
+       * :c:data:`ci_energy`
        * :c:data:`pg_col_diag`
        * :c:data:`pg_det_irrep`
        * :c:data:`pg_elem_col`
        * :c:data:`pg_irrep_allowed`
        * :c:data:`pg_mo_weight`
+       * :c:data:`pg_proj_coef`
+       * :c:data:`pg_proj_w`
        * :c:data:`pg_state_irrep_weight`
 
  
@@ -2217,11 +2243,14 @@ Providers
        :columns: 3
 
        * :c:data:`ci_electronic_energy`
+       * :c:data:`ci_energy`
        * :c:data:`pg_col_diag`
        * :c:data:`pg_det_irrep`
        * :c:data:`pg_elem_col`
        * :c:data:`pg_irrep_allowed`
        * :c:data:`pg_mo_weight`
+       * :c:data:`pg_proj_coef`
+       * :c:data:`pg_proj_w`
        * :c:data:`pg_state_irrep_weight`
 
  
@@ -2258,18 +2287,20 @@ Providers
        :columns: 3
 
        * :c:data:`pg_class_size`
-       * :c:data:`pg_det_irrep`
+       * :c:data:`pg_detfull`
        * :c:data:`pg_elem_col`
        * :c:data:`pg_elem_inv`
        * :c:data:`pg_elem_mul`
        * :c:data:`pg_geom_residual`
        * :c:data:`pg_group_name`
        * :c:data:`pg_has_i`
-       * :c:data:`pg_mo_weight`
        * :c:data:`pg_n_class`
        * :c:data:`pg_n_col`
+       * :c:data:`pg_proj_coef`
+       * :c:data:`pg_proj_w`
        * :c:data:`pg_rot_mat`
        * :c:data:`pg_shell_target`
+       * :c:data:`pg_state_irrep_weight`
        * :c:data:`pg_xg`
 
  
@@ -2350,11 +2381,14 @@ Providers
        :columns: 3
 
        * :c:data:`ci_electronic_energy`
+       * :c:data:`ci_energy`
        * :c:data:`pg_col_diag`
        * :c:data:`pg_det_irrep`
        * :c:data:`pg_elem_col`
        * :c:data:`pg_irrep_allowed`
        * :c:data:`pg_mo_weight`
+       * :c:data:`pg_proj_coef`
+       * :c:data:`pg_proj_w`
        * :c:data:`pg_state_irrep_weight`
 
  
@@ -3520,7 +3554,7 @@ Subroutines / functions
         subroutine pg_normalize_irrep_states(list)
 
 
-    Empty ``list`` when it holds only the token "None" (any case).
+    Empty ``list`` when it holds only the token "All" or "None" (any case).
 
     Called by:
 

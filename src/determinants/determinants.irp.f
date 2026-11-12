@@ -28,18 +28,6 @@ BEGIN_PROVIDER [ integer, N_det ]
     endif
     call write_int(6,N_det,'Number of determinants')
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer                        :: ierr
-    call MPI_BCAST( N_det, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read N_det with MPI'
-    endif
-  IRP_ENDIF
 
   ASSERT (N_det > 0)
 END_PROVIDER
@@ -89,18 +77,6 @@ BEGIN_PROVIDER [ integer, psi_det_size ]
       endif
       call write_int(6,psi_det_size,'Dimension of the psi arrays')
     endif
-    IRP_IF MPI_DEBUG
-      print *,  irp_here, mpi_rank
-      call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-    IRP_ENDIF
-    IRP_IF MPI
-      include 'mpif.h'
-      integer                        :: ierr
-      call MPI_BCAST( psi_det_size, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-      if (ierr /= MPI_SUCCESS) then
-        stop 'Unable to read psi_det_size with MPI'
-      endif
-    IRP_ENDIF
   endif
 
 END_PROVIDER
@@ -158,18 +134,6 @@ BEGIN_PROVIDER [ integer(bit_kind), psi_det, (N_int,2,psi_det_size) ]
       enddo
     endif
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer                        :: ierr
-    call     MPI_BCAST( psi_det, N_int*2*N_det, MPI_BIT_KIND, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read psi_det with MPI'
-    endif
-  IRP_ENDIF
 
 
 END_PROVIDER
@@ -224,18 +188,6 @@ BEGIN_PROVIDER [ double precision, psi_coef, (psi_det_size,N_states) ]
       endif
     endif
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer                        :: ierr
-    call     MPI_BCAST( psi_coef, size(psi_coef), MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read psi_coef with MPI'
-    endif
-  IRP_ENDIF
 
 
 

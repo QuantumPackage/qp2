@@ -9,30 +9,12 @@ BEGIN_PROVIDER [ integer, mo_num ]
   if (mpi_master) then
     call ezfio_has_mo_basis_mo_num(has)
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer                        :: ierr
-    call MPI_BCAST( has, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read mo_num with MPI'
-    endif
-  IRP_ENDIF
   if (.not.has) then
     mo_num = ao_ortho_canonical_num
   else
     if (mpi_master) then
       call ezfio_get_mo_basis_mo_num(mo_num)
     endif
-    IRP_IF MPI
-      call MPI_BCAST( mo_num, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-      if (ierr /= MPI_SUCCESS) then
-        stop 'Unable to read mo_num with MPI'
-      endif
-    IRP_ENDIF
   endif
   call write_int(6,mo_num,'mo_num')
   ASSERT (mo_num > 0)
@@ -57,30 +39,12 @@ BEGIN_PROVIDER [ double precision, mo_coef, (ao_num,mo_num) ]
     ! Coefs
     call ezfio_has_mo_basis_mo_coef(exists)
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST(exists, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read mo_coef with MPI'
-    endif
-  IRP_ENDIF
 
   if (exists) then
     if (mpi_master) then
       call ezfio_get_mo_basis_mo_coef(mo_coef)
       write(*,*) 'Read  mo_coef'
     endif
-    IRP_IF MPI
-      call MPI_BCAST( mo_coef, mo_num*ao_num, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-      if (ierr /= MPI_SUCCESS) then
-        stop 'Unable to read mo_coef with MPI'
-      endif
-    IRP_ENDIF
   else
     ! Orthonormalized AO basis
     do i=1,mo_num
@@ -108,30 +72,12 @@ BEGIN_PROVIDER [ double precision, mo_coef_imag, (ao_num,mo_num) ]
     ! Coefs
     call ezfio_has_mo_basis_mo_coef_imag(exists)
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST(exists, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read mo_coef_imag with MPI'
-    endif
-  IRP_ENDIF
 
   if (exists) then
     if (mpi_master) then
       call ezfio_get_mo_basis_mo_coef_imag(mo_coef_imag)
       write(*,*) 'Read  mo_coef_imag'
     endif
-    IRP_IF MPI
-      call MPI_BCAST( mo_coef_imag, mo_num*ao_num, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-      if (ierr /= MPI_SUCCESS) then
-        stop 'Unable to read mo_coef_imag with MPI'
-      endif
-    IRP_ENDIF
   else
     ! Orthonormalized AO basis
     do i=1,mo_num
@@ -176,18 +122,6 @@ BEGIN_PROVIDER [ character*(64), mo_label ]
     endif
     write(*,*) '* mo_label          ', trim(mo_label)
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST( mo_label, 64, MPI_CHARACTER, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read mo_label with MPI'
-    endif
-  IRP_ENDIF
 
 END_PROVIDER
 
@@ -230,18 +164,6 @@ BEGIN_PROVIDER [ double precision, mo_occ, (mo_num) ]
     endif
     write(*,*) 'Read mo_occ'
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST( mo_occ, mo_num, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read mo_occ with MPI'
-    endif
-  IRP_ENDIF
 
 END_PROVIDER
 

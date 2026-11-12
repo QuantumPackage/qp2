@@ -75,63 +75,38 @@ subroutine run_cipsi_tc()
 
   implicit none
 
-  if (.not. is_zmq_slave) then
 
-    if(.True.)then! DO NOT REMOVE THE IF(.TRUE.) !! 
-     ! this has to be provided before mo_bi_ortho_tc_two_e to avoid twice the computation of ao_two_e_tc_tot
-     PROVIDE Fock_matrix_tc_mo_tot 
-     ! because Fock_matrix_tc_mo_tot depends on ao_two_e_tc_tot 
-     ! and that mo_bi_ortho_tc_two_e erase ao_two_e_tc_tot after being provided 
-    endif
-    if(.True.)then ! DO NOT REMOVE THE IF(.TRUE.) !! 
-     PROVIDE psi_det psi_coef mo_bi_ortho_tc_two_e mo_bi_ortho_tc_one_e 
-    endif
-
-    if((elec_alpha_num+elec_beta_num) .ge. 3) then
-      if(three_body_h_tc) then
-        call provide_all_three_ints_bi_ortho()
-      endif
-    endif
-
-    FREE int2_grad1_u12_ao int2_grad1_u12_ao_t int2_grad1_u12_ao_transp
-    FREE int2_grad1_u12_bimo_transp 
-
-    write(json_unit,json_array_open_fmt) 'fci_tc'
-
-    if(do_pt2) then
-      call run_stochastic_cipsi()
-    else
-      call run_cipsi()
-    endif
-
-    write(json_unit,json_dict_uopen_fmt)
-    write(json_unit,json_dict_close_fmtx)
-    write(json_unit,json_array_close_fmtx)
-    call json_close
-
-  else
-    if(.True.)then! DO NOT REMOVE THE IF(.TRUE.) !! 
-     ! this has to be provided before mo_bi_ortho_tc_two_e to avoid twice the computation of ao_two_e_tc_tot
-     PROVIDE Fock_matrix_tc_mo_tot 
-     ! because Fock_matrix_tc_mo_tot depends on ao_two_e_tc_tot 
-     ! and that mo_bi_ortho_tc_two_e erase ao_two_e_tc_tot after being provided 
-    endif
-
-    if(.True.)then! DO NOT REMOVE THE IF(.TRUE.) !! 
-     PROVIDE mo_bi_ortho_tc_one_e mo_bi_ortho_tc_two_e pt2_min_parallel_tasks
-    endif
-
-    if((elec_alpha_num+elec_beta_num) .ge. 3) then
-      if(three_body_h_tc) then
-        call provide_all_three_ints_bi_ortho()
-      endif
-    endif
-
-    FREE int2_grad1_u12_ao int2_grad1_u12_ao_t int2_grad1_u12_ao_transp
-    FREE int2_grad1_u12_bimo_transp 
-
-    call run_slave_cipsi
-
+  if(.True.)then! DO NOT REMOVE THE IF(.TRUE.) !! 
+   ! this has to be provided before mo_bi_ortho_tc_two_e to avoid twice the computation of ao_two_e_tc_tot
+   PROVIDE Fock_matrix_tc_mo_tot 
+   ! because Fock_matrix_tc_mo_tot depends on ao_two_e_tc_tot 
+   ! and that mo_bi_ortho_tc_two_e erase ao_two_e_tc_tot after being provided 
   endif
+  if(.True.)then ! DO NOT REMOVE THE IF(.TRUE.) !! 
+   PROVIDE psi_det psi_coef mo_bi_ortho_tc_two_e mo_bi_ortho_tc_one_e 
+  endif
+
+  if((elec_alpha_num+elec_beta_num) .ge. 3) then
+    if(three_body_h_tc) then
+      call provide_all_three_ints_bi_ortho()
+    endif
+  endif
+
+  FREE int2_grad1_u12_ao int2_grad1_u12_ao_t int2_grad1_u12_ao_transp
+  FREE int2_grad1_u12_bimo_transp 
+
+  write(json_unit,json_array_open_fmt) 'fci_tc'
+
+  if(do_pt2) then
+    call run_stochastic_cipsi()
+  else
+    call run_cipsi()
+  endif
+
+  write(json_unit,json_dict_uopen_fmt)
+  write(json_unit,json_dict_close_fmtx)
+  write(json_unit,json_array_close_fmtx)
+  call json_close
+
 
 end

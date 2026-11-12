@@ -25,7 +25,6 @@ dft_keywords
 dft_utils_in_r
 dft_utils_one_e
 dft_utils_two_body
-dressing
 dummy
 electrons
 ezfio_files
@@ -56,4 +55,3 @@ single_ref_method
 slave
 tools
 utils
-zmq

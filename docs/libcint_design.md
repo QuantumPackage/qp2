@@ -187,9 +187,10 @@ New module `src/libcint_ao_integrals/`:
 | `src/ao_two_e_ints/10.libcint.bats` | engine-vs-engine regression test (§13) |
 
 `src/ao_basis/libcint.irp.f` holds the `use_libcint` provider (copy of the
-`use_cgtos` provider including the `MPI_BCAST` block). It lives in `ao_basis`
-because that is where the EZFIO variable is declared, and because both
-integral modules already NEED `ao_basis`.
+`use_cgtos` provider; the `MPI_BCAST` block that followed the master read at
+the base was removed with the multi-node layer, 2026-11). It lives in
+`ao_basis` because that is where the EZFIO variable is declared, and because
+both integral modules already NEED `ao_basis`.
 
 ### NEED graph
 
@@ -815,7 +816,8 @@ map builder and Cholesky drivers.
   state to protect.
 * The `use_libcint` provider is called outside any parallel region
   (providers are evaluated lazily at first use, from serial code in practice;
-  the `MPI_BCAST` pattern of `use_cgtos` is copied verbatim).
+  the master-read pattern of `use_cgtos` is copied verbatim, the `MPI_BCAST`
+  that followed it removed with the multi-node layer, 2026-11).
 
 ## 12. Exact edit list
 

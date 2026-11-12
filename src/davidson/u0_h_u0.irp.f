@@ -20,7 +20,7 @@ subroutine u_0_H_u_0(e_0,u_0,n,keys_tmp,Nint,N_st,sze)
     allocate (v_0(n,N_states_diag), u_1(n,N_states_diag))
     u_1(:,:) = 0.d0
     u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
-    call H_u_0_nstates_zmq(v_0,u_1,N_states_diag,n)
+    call H_u_0_nstates(v_0,u_1,N_states_diag,n)
   else if (n < n_det_max_full) then
     allocate (v_0(n,N_st), u_1(n,N_st))
     v_0(:,:) = 0.d0
@@ -67,7 +67,7 @@ subroutine H_u_0_nstates_openmp(v_0,u_0,N_st,sze)
   !
   ! Assumes that the determinants are in psi_det
   !
-  ! istart, iend, ishift, istep are used in ZMQ parallelization.
+  ! istart, iend, ishift, istep split the work between the OpenMP threads.
   END_DOC
   integer, intent(in)            :: N_st,sze
   double precision, intent(inout)  :: v_0(sze,N_st), u_0(sze,N_st)

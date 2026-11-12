@@ -24,7 +24,6 @@
 .. _QMCPack: https://qmcpack.org
 .. _resultsFile: http://gitlab.com/scemama/resultsFile
 .. _SLURM: https://slurm.schedmd.com/
-.. _ZeroMQ: http://zeromq.org/
 .. _Zlib: http://zlib.net
 
 
@@ -45,7 +44,6 @@
 .. |QPSH| replace:: |qpsh|
 .. |resultsFile| replace:: `resultsFile`_
 .. |SLURM| replace:: `SLURM`_
-.. |ZeroMQ| replace:: `ZeroMQ`_
 
 .. |AO| replace:: :abbr:`AO (Atomic Orbital)`
 .. |AOs| replace:: :abbr:`AOs (Atomic Orbitals)`

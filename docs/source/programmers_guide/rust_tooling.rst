@@ -20,12 +20,9 @@ The seven tools
   z-matrix.
 * ``qp_edit`` — read the parameters as an RST document, let the user
   modify them, write them back; ``-c`` checks the input instead.
-* ``qp_run`` — run a |qp| binary on an |EZFIO| directory; ``-s`` is the
-  slave mode of a distributed calculation, and the same binary hosts the
-  task server.
+* ``qp_run`` — run a |qp| binary on an |EZFIO| directory.
 * ``qp_set_mo_class`` — assign the core, active, inactive, virtual and
   deleted classes of the MOs.
-* ``qp_tunnel`` — open an ssh tunnel for slave mode.
 * ``qp_print_basis`` — print the AO and MO bases of an |EZFIO| directory
   as RST.
 * ``element_create_db`` — generate the element database used by
@@ -44,9 +41,8 @@ one tool does not rebuild the others:
   functions, point group, ...).
 * ``qp-input`` — the declarative configuration, the generic ``qp edit``
   engine and the seven hand-written section handlers.
-* ``qp-zmq`` — the plain-text message protocol and the task server
-  shared with the Fortran workers.
-* ``qp-cli`` — program lookup and ``$QP_ROOT`` resolution.
+* ``qp-cli`` — program lookup, ``$QP_ROOT`` resolution, job launch and
+  SIGUSR1 handling.
 
 Each binary has its own crate under :file:`rust/bins/`; the binary name
 is the crate name (``qp_run``, ``qp_edit``, ...).

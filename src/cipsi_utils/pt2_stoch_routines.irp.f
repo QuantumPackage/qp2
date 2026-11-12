@@ -42,7 +42,7 @@ END_PROVIDER
   BEGIN_DOC
   ! pt2_N_teeth: number of comb teeth of the stochastic PT2
   ! sampling.  1 means "no comb": the caller must then fall back
-  ! to the deterministic selection (ZMQ_selection), because a
+  ! to the deterministic selection (omp_selection), because a
   ! one-tooth comb samples one generator per comb and costs as
   ! much as the exact pass while adding noise.  This happens when
   ! N_det_generators < 1024, or when no comb can be built (a

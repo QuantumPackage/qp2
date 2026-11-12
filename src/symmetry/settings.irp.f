@@ -36,18 +36,6 @@ BEGIN_PROVIDER [ double precision, pg_tol ]
       call ezfio_get_symmetry_pg_tol(pg_tol)
     endif
   endif
-  IRP_IF MPI_DEBUG
-    print *, irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST( pg_tol, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read pg_tol with MPI'
-    endif
-  IRP_ENDIF
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, pg_thresh ]
@@ -66,18 +54,6 @@ BEGIN_PROVIDER [ double precision, pg_thresh ]
       call ezfio_get_symmetry_pg_thresh(pg_thresh)
     endif
   endif
-  IRP_IF MPI_DEBUG
-    print *, irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST( pg_thresh, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read pg_thresh with MPI'
-    endif
-  IRP_ENDIF
 END_PROVIDER
 
 BEGIN_PROVIDER [ logical, auto_symmetry ]
@@ -96,18 +72,6 @@ BEGIN_PROVIDER [ logical, auto_symmetry ]
       call ezfio_get_symmetry_auto_symmetry(auto_symmetry)
     endif
   endif
-  IRP_IF MPI_DEBUG
-    print *, irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST( auto_symmetry, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read auto_symmetry with MPI'
-    endif
-  IRP_ENDIF
 END_PROVIDER
 
 BEGIN_PROVIDER [ character*(256), irrep_states ]
@@ -127,18 +91,6 @@ BEGIN_PROVIDER [ character*(256), irrep_states ]
       call ezfio_get_symmetry_irrep_states(irrep_states)
     endif
   endif
-  IRP_IF MPI_DEBUG
-    print *, irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST( irrep_states, 256, MPI_CHARACTER, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read irrep_states with MPI'
-    endif
-  IRP_ENDIF
   call pg_normalize_irrep_states(irrep_states)
 END_PROVIDER
 

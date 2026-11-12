@@ -1,19 +1,13 @@
-//! The four `unsafe` libc blocks `qp_run` needs and `std` cannot provide.
+//! The two `unsafe` libc blocks `qp_run` needs and `std` cannot provide.
 //!
-//! PI decision (wave 3, 2026-11-05): these four calls are allowed **here and
+//! PI decision (wave 3, 2026-11-05): these calls are allowed **here and
 //! nowhere else** in the workspace, each in its own `// SAFETY:`-documented
 //! block:
 //!
 //! | function | reference site | why `std` cannot do it |
 //! |---|---|---|
 //! | [`local_time`] | `Unix.localtime` (`qp_run.ml:102`) | `std` has no local-time conversion (`chrono` is not a dependency) |
-//! | [`hostname`] | `Unix.gethostname` (`TaskServer.ml:99`) | `std` exposes no host name |
-//! | [`ipv4_for_interface`] | `get_ipv4_address_for_interface` C stub (`QP_NIC`) | `std` enumerates no interfaces |
 //! | [`install_sigusr1`] | `Sys.set_signal Sys.sigusr1` (`qp_run.ml:88`) | `std` has no signal API |
-//!
-//! Everything else in this module is safe code: the IPv4 lookup of a *host
-//! name* uses [`std::net::ToSocketAddrs`], so the resolver never needs
-//! `unsafe`.
 //!
 //! # Signal safety
 //!
@@ -21,12 +15,10 @@
 //! in a [`std::sync::atomic::AtomicBool`] (async-signal-safe). The reference
 //! runs `Sys.command ("qp_stop "^ezfio)` *inside* its handler; here the
 //! caller polls [`take_sigusr1`] and runs the command from a normal
-//! thread, because `system(3)` is not async-signal-safe and the task server
-//! keeps other threads alive (see [`crate::signal`]).
+//! thread, because `system(3)` is not async-signal-safe (see
+//! [`crate::signal`]).
 
-use std::ffi::CStr;
 use std::fmt;
-use std::net::Ipv4Addr;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 /// A failed OS call (`Unix.Unix_error` in the reference).
@@ -111,88 +103,6 @@ pub fn local_time(epoch_secs: i64) -> Result<Tm, Error> {
     })
 }
 
-/// The machine's host name (`Unix.gethostname`).
-///
-/// # Errors
-///
-/// [`Error`] when `gethostname` fails, or when the name is not UTF-8.
-pub fn hostname() -> Result<String, Error> {
-    // `HOST_NAME_MAX` is 255 on Linux and 255 on macOS; one extra byte for the
-    // terminator so a truncated name is still a C string.
-    let mut buffer = [0_i8; 256];
-    // SAFETY: `buffer` is a 256-byte writable array and the length passed is
-    // its exact size, so `gethostname` writes at most that many bytes and only
-    // through that pointer. POSIX does not say whether a truncated name is
-    // terminated, so the terminator is forced below before any C-string read.
-    let result = unsafe { libc::gethostname(buffer.as_mut_ptr(), buffer.len()) };
-    if result != 0 {
-        return Err(Error::new("gethostname", last_os_error()));
-    }
-    // A host name is at most `HOST_NAME_MAX` (255) bytes, so the last byte is
-    // normally the terminator already; forcing it keeps the invariant true for
-    // a pathologically long name too.
-    buffer[buffer.len() - 1] = 0;
-    // SAFETY: the array is NUL-terminated (see above) and lives until the end
-    // of the statement; `CStr::from_ptr` only scans for the terminator.
-    let name = unsafe { CStr::from_ptr(buffer.as_ptr()) };
-    name.to_str()
-        .map(str::to_owned)
-        .map_err(|error| Error::new("gethostname", error))
-}
-
-/// First IPv4 address of the interface called `interface`
-/// (`get_ipv4_address_for_interface`, the `QP_NIC` path of
-/// `TaskServer.ml:106`).
-///
-/// The reference C stub returns a string starting with `"error"` on failure
-/// and the dotted quad on success; [`crate::host::SystemHost`] keeps that
-/// convention, so the error is reported as a string here and not as [`Error`].
-#[must_use]
-pub fn ipv4_for_interface(interface: &str) -> String {
-    match find_ipv4(interface) {
-        Ok(Some(address)) => address.to_string(),
-        Ok(None) => format!("error: no IPv4 address on interface {interface}"),
-        Err(error) => format!("error: {error}"),
-    }
-}
-
-/// Walk the interface list for the first IPv4 address of `interface`.
-fn find_ipv4(interface: &str) -> Result<Option<Ipv4Addr>, Error> {
-    // SAFETY: `getifaddrs` returns a null-terminated linked list owned by the
-    // C library, or a null pointer on failure (checked). Every node is only
-    // read, `ifa_addr` is null-checked before it is dereferenced, and
-    // `ifa_addr` is reinterpreted as `sockaddr_in` only after `sa_family` says
-    // so, which is the layout contract of `getifaddrs(3)`. The list is
-    // released with `freeifaddrs` on every path, exactly once.
-    unsafe {
-        let mut head: *mut libc::ifaddrs = std::ptr::null_mut();
-        if libc::getifaddrs(&mut head) != 0 {
-            return Err(Error::new("getifaddrs", last_os_error()));
-        }
-        let mut found = None;
-        let mut node = head;
-        while !node.is_null() {
-            let entry = &*node;
-            if !entry.ifa_addr.is_null()
-                && (*entry.ifa_addr).sa_family as i32 == libc::AF_INET
-                && !entry.ifa_name.is_null()
-                && CStr::from_ptr(entry.ifa_name)
-                    .to_str()
-                    .is_ok_and(|name| name == interface)
-            {
-                let address = &*(entry.ifa_addr as *const libc::sockaddr_in);
-                // `s_addr` is stored in network byte order; `to_ne_bytes`
-                // returns the four bytes in memory order, i.e. a.b.c.d.
-                found = Some(Ipv4Addr::from(address.sin_addr.s_addr.to_ne_bytes()));
-                break;
-            }
-            node = entry.ifa_next;
-        }
-        libc::freeifaddrs(head);
-        Ok(found)
-    }
-}
-
 /// Set by the SIGUSR1 handler; see [`install_sigusr1`].
 static SIGUSR1_RECEIVED: AtomicBool = AtomicBool::new(false);
 
@@ -271,42 +181,12 @@ mod tests {
         );
     }
 
-    /// The host name is non-empty and agrees with `hostname(1)`.
-    #[test]
-    fn hostname_matches_the_command() {
-        let name = hostname().expect("gethostname");
-        assert!(!name.is_empty());
-        let expected = std::process::Command::new("hostname")
-            .output()
-            .expect("hostname");
-        assert_eq!(name, String::from_utf8_lossy(&expected.stdout).trim());
-    }
-
-    /// A non-existent interface is an error string starting with `"error"`,
-    /// as the reference C stub produces.
-    #[test]
-    fn unknown_interface_is_an_error_string() {
-        let result = ipv4_for_interface("qpnosuchif0");
-        assert!(result.starts_with("error"), "result = {result}");
-    }
-
-    /// `lo0`/`lo` carries 127.0.0.1 on every platform QP2 builds on.
-    #[test]
-    fn loopback_interface_has_the_loopback_address() {
-        let name = if cfg!(target_os = "macos") {
-            "lo0"
-        } else {
-            "lo"
-        };
-        assert_eq!(ipv4_for_interface(name), "127.0.0.1");
-    }
-
     /// Installing the handler and receiving the signal sets the flag;
     /// consuming it resets the flag. The process is not killed, which is the
     /// point of installing the handler.
     ///
     /// The signal is sent by `kill(1)` rather than by an `unsafe` `raise`, so
-    /// this module stays inside the four approved libc areas.
+    /// this module stays inside the approved libc areas.
     #[test]
     fn sigusr1_sets_the_flag() {
         install_sigusr1().expect("sigaction");

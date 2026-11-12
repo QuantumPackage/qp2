@@ -266,6 +266,7 @@ Providers
        * :c:data:`nucl_coord`
        * :c:data:`nucl_n_aos`
        * :c:data:`nucl_num`
+       * :c:data:`use_cgtos`
 
     Needed by:
 
@@ -309,6 +310,7 @@ Providers
        * :c:data:`nucl_coord`
        * :c:data:`nucl_n_aos`
        * :c:data:`nucl_num`
+       * :c:data:`use_cgtos`
 
 
  
@@ -413,6 +415,7 @@ Providers
        * :c:data:`nucl_coord`
        * :c:data:`nucl_n_aos`
        * :c:data:`nucl_num`
+       * :c:data:`use_cgtos`
 
     Needed by:
 
@@ -454,6 +457,7 @@ Providers
        * :c:data:`nucl_coord`
        * :c:data:`nucl_n_aos`
        * :c:data:`nucl_num`
+       * :c:data:`use_cgtos`
 
     Needed by:
 
@@ -539,6 +543,7 @@ Providers
        * :c:data:`nucl_coord`
        * :c:data:`nucl_n_aos`
        * :c:data:`nucl_num`
+       * :c:data:`use_cgtos`
 
     Needed by:
 

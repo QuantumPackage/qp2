@@ -238,6 +238,7 @@ Providers
        * :c:data:`threshold_generators`
        * :c:data:`threshold_nonsym_davidson`
        * :c:data:`use_cgtos`
+       * :c:data:`use_libcint`
        * :c:data:`use_only_lr`
        * :c:data:`weight_one_e_dm`
        * :c:data:`weight_selection`
@@ -612,7 +613,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`davidson_slave_work`
        * :c:func:`format_w_error`
        * :c:func:`load_mo_integrals`
        * :c:data:`nthreads_davidson`
@@ -674,7 +674,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`davidson_slave_work`
        * :c:func:`format_w_error`
        * :c:func:`load_mo_integrals`
        * :c:data:`nthreads_davidson`

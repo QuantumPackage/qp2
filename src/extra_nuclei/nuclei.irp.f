@@ -70,18 +70,6 @@ BEGIN_PROVIDER [ double precision, extra_nucl_coord,  (extra_nucl_num,3) ]
 
    endif
 
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-   IRP_IF MPI
-     include 'mpif.h'
-     integer                        :: ierr
-     call MPI_BCAST( extra_nucl_coord, 3*extra_nucl_num, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-     if (ierr /= MPI_SUCCESS) then
-       stop 'Unable to read nucl_coord with MPI'
-     endif
-   IRP_ENDIF
 
 END_PROVIDER
 

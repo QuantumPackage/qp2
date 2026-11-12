@@ -3722,7 +3722,7 @@ Subroutines / functions
     
     Assumes that the determinants are in psi_det
     
-    istart, iend, ishift, istep are used in ZMQ parallelization.
+    istart, iend, ishift, istep split the work between the OpenMP threads.
 
     Calls:
 
@@ -3746,7 +3746,7 @@ Subroutines / functions
     
     Assumes that the determinants are in psi_det
     
-    istart, iend, ishift, istep are used in ZMQ parallelization.
+    istart, iend, ishift, istep split the work between the OpenMP threads.
     
     if do_right == True then you compute H_TC |Psi>, else H_TC^T |Psi>
 
@@ -4097,7 +4097,7 @@ Subroutines / functions
     
     Assumes that the determinants are in psi_det
     
-    istart, iend, ishift, istep are used in ZMQ parallelization.
+    istart, iend, ishift, istep split the work between the OpenMP threads.
 
     Calls:
 

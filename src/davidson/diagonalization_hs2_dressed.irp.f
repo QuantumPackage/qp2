@@ -230,9 +230,8 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
          + 4.5d0*(N_st_diag*itermax)**2           &! h,y,y_s,s_,s_tmp
          + 2.d0*(N_st_diag*itermax)               &! s2,lambda
          + 1.d0*(N_st_diag)                       &! residual_norm
-                                                   ! In H_S2_u_0_nstates_zmq
-         + 3.d0*(N_st_diag*N_det)                 &! u_t, v_t, s_t on collector
-         + 3.d0*(N_st_diag*N_det)                 &! u_t, v_t, s_t on slave
+                                                   ! In H_S2_u_0_nstates
+         + 3.d0*(N_st_diag*N_det)                 &! u_t, v_t, s_t in H_S2_u_0_nstates
          + 0.5d0*maxab                            &! idx0 in H_S2_u_0_nstates_openmp_work_*
          + nproc_target *                         &! In OMP section
            ( 1.d0*(N_int*maxab)                   &! buffer
@@ -380,7 +379,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
         ! -----------------------------------
 
         if ((sze > 100000).and.distributed_davidson) then
-            call H_S2_u_0_nstates_zmq   (W(1:sze,shift+1:shift2),S_d,U(1,shift+1),N_st_diag,sze)
+            call H_S2_u_0_nstates   (W(1:sze,shift+1:shift2),S_d,U(1,shift+1),N_st_diag,sze)
         else
             call H_S2_u_0_nstates_openmp(W(1:sze,shift+1:shift2),S_d,U(1,shift+1),N_st_diag,sze)
         endif

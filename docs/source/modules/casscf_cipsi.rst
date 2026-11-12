@@ -220,7 +220,6 @@ Providers
 
        * :c:data:`energy_improvement`
        * :c:data:`neworbs`
-       * :c:data:`sxvector`
 
  
 .. c:var:: int best_vector_ovrlp_casscf
@@ -255,7 +254,6 @@ Providers
 
        * :c:data:`energy_improvement`
        * :c:data:`neworbs`
-       * :c:data:`sxvector`
 
  
 .. c:var:: double bielec_pqxx_array
@@ -488,7 +486,6 @@ Providers
        :columns: 3
 
        * :c:data:`gradvec2`
-       * :c:data:`hessdiag`
        * :c:data:`hessmat`
        * :c:data:`hessmat_peter`
 
@@ -594,7 +591,6 @@ Providers
        * :c:data:`fapq`
        * :c:data:`fipq`
        * :c:data:`gradvec2`
-       * :c:data:`hessdiag`
        * :c:data:`hessmat`
        * :c:data:`hessmat_peter`
 
@@ -1232,7 +1228,6 @@ Providers
        :columns: 3
 
        * :c:data:`gradvec2`
-       * :c:data:`hessdiag`
        * :c:data:`hessmat`
        * :c:data:`hessmat_peter`
 
@@ -1269,7 +1264,6 @@ Providers
 
        * :c:data:`fapq`
        * :c:data:`gradvec2`
-       * :c:data:`hessdiag`
        * :c:data:`hessmat`
        * :c:data:`hessmat_peter`
 
@@ -1317,6 +1311,7 @@ Providers
        :columns: 3
 
        * :c:data:`sxmatrix`
+       * :c:data:`sxvector`
 
  
 .. c:var:: double gradvec_old
@@ -1363,26 +1358,20 @@ Providers
 
 
     the diagonal of the Hessian, needed for the Davidson procedure
+    
+    This is a view of hessmat, not a second evaluation of the same
+    block formulas. Recomputing the diagonal through the block
+    functions duplicated the physics, and IRPF90 cannot see the
+    dependencies hidden behind a function call, so the copy could be
+    built once and then silently describe older orbitals.
 
     Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`bielecci_no`
-       * :c:data:`cholesky_mo_num`
-       * :c:data:`cholesky_no_total_transp`
-       * :c:data:`fapq`
-       * :c:data:`fipq`
-       * :c:data:`list_act`
-       * :c:data:`list_core_inact`
-       * :c:data:`list_virt`
-       * :c:data:`n_act_orb`
-       * :c:data:`n_core_inact_orb`
-       * :c:data:`n_virt_orb`
+       * :c:data:`hessmat`
        * :c:data:`nmonoex`
-       * :c:data:`occnum`
-       * :c:data:`p0tuvx_no`
 
     Needed by:
 
@@ -1438,8 +1427,10 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`hessdiag`
        * :c:data:`orb_swap`
        * :c:data:`sxmatrix`
+       * :c:data:`sxvector`
 
  
 .. c:var:: double hessmat_old
@@ -2594,6 +2585,7 @@ Providers
        :columns: 3
 
        * :c:data:`sxmatrix`
+       * :c:data:`sxvector`
 
  
 .. c:var:: double norm_grad_vec2_tab
@@ -2639,6 +2631,7 @@ Providers
        :columns: 3
 
        * :c:data:`sxmatrix`
+       * :c:data:`sxvector`
 
  
 .. c:var:: double occ_act
@@ -2713,7 +2706,6 @@ Providers
 
        * :c:data:`fapq`
        * :c:data:`gradvec2`
-       * :c:data:`hessdiag`
        * :c:data:`hessmat`
        * :c:data:`hessmat_peter`
 
@@ -2856,7 +2848,6 @@ Providers
        :columns: 3
 
        * :c:data:`gradvec2`
-       * :c:data:`hessdiag`
        * :c:data:`hessmat`
        * :c:data:`hessmat_peter`
        * :c:data:`super_ci_dm`
@@ -3059,7 +3050,6 @@ Providers
        * :c:data:`energy_improvement`
        * :c:data:`lowest_super_ci_coef_mo`
        * :c:data:`super_ci_dm`
-       * :c:data:`sxvector`
        * :c:data:`sxvector_lowest`
 
  
@@ -3096,7 +3086,6 @@ Providers
        * :c:data:`energy_improvement`
        * :c:data:`lowest_super_ci_coef_mo`
        * :c:data:`super_ci_dm`
-       * :c:data:`sxvector`
        * :c:data:`sxvector_lowest`
 
  
@@ -3144,16 +3133,33 @@ Providers
         double precision, allocatable	:: sxvector	(nMonoEx+1)
 
 
-    Best eigenvector of the single-excitation matrix
+    Orbital rotation applied by Umat.
+    
+    It is the trust-region shifted Newton step: the solution s of
+        (hessmat + mu I) s = -gradvec2
+    for the smallest mu >= 0 such that hessmat + mu I is positive definite
+    and ||s|| <= 0.25 rad. Positive definiteness gives g^T s < 0, so the
+    step is a descent direction; the norm bound keeps it where the
+    quadratic model can be trusted.
+    
+    This replaces the super-CI eigenvector y/c0 of the bordered matrix
+    [hessmat g ; g^T 0]. Both are the same family: the bordered eigenvector
+    of eigenvalue lam satisfies (hessmat - lam I)(y/c0) = -g, that is the
+    shifted solve with mu = -lam. Taking mu from the step norm removes the
+    c0 ~ 0 roots, whose eigenvectors are combinations of the exact
+    zero-curvature rotations between orbitals of equal occupation; dividing
+    those by c0 gives rotations of 100 rad and more with no predicted
+    curvature, and the iteration diverges.
 
     Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`best_vector_ovrlp_casscf`
+       * :c:data:`gradvec2`
+       * :c:data:`hessmat`
        * :c:data:`nmonoex`
-       * :c:data:`sxeigenvec`
+       * :c:data:`tr_mu_casscf`
 
     Needed by:
 
@@ -3221,6 +3227,28 @@ Providers
        :columns: 3
 
        * :c:data:`max_overlap`
+
+ 
+.. c:var:: double tr_mu_casscf
+
+
+    File : :file:`neworbs.irp.f`
+
+    .. code:: fortran
+
+        double precision	:: tr_mu_casscf	
+
+
+    Level shift (Ha/rad^2) of the trust-region orbital step. Carried from
+    one CAS-SCF iteration to the next as the starting point of the bracket
+    that enforces ||SXvector|| <= 0.25 rad.
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`sxvector`
 
  
 .. c:var:: double umat
@@ -3903,14 +3931,6 @@ Subroutines / functions
        * :c:data:`occnum`
        * :c:data:`p0tuvx_no`
 
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`dgemm`
-       * :c:func:`dgemv`
-
  
 .. c:function:: void print_grad(void)
 
@@ -4187,4 +4207,30 @@ Subroutines / functions
        * :c:data:`bielec_pxxq_array`
        * :c:data:`mo_num`
        * :c:data:`n_core_inact_act_orb`
+
+ 
+.. c:function:: void tr_try_step(void)
+
+
+    File : :file:`neworbs.irp.f`
+
+    .. code:: fortran
+
+        subroutine tr_try_step(n, H, g, mu, A, s, ny)
+
+
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`sxvector`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dposv`
 

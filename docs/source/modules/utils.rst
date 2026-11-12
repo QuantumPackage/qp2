@@ -215,11 +215,11 @@ Providers
        :columns: 3
 
        * :c:func:`dtranspose`
+       * :c:func:`h_s2_u_0_nstates`
        * :c:func:`h_s2_u_0_nstates_openmp`
-       * :c:func:`h_s2_u_0_nstates_zmq`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp`
+       * :c:func:`h_u_0_nstates`
        * :c:func:`h_u_0_nstates_openmp`
-       * :c:func:`h_u_0_nstates_zmq`
 
     Calls:
 
@@ -788,6 +788,11 @@ Subroutines / functions
         complex*16 function crint_1(n, rho)
 
 
+    Complex Boys function $F_n(\rho) = \int_0^1 t^{2n} e^{-\rho t^2} dt$.
+    
+    Series (crint_smallz) if $|\rho| < 3.5$ or $n > |\rho|$ (no cancellation
+    there), else $F_0$ from erf and upward recursion (stable for
+    $n \le |\rho|$).
 
     Calls:
 
@@ -809,17 +814,22 @@ Subroutines / functions
 
     Stores crint_1(n, rho) for n = 0, 1, ..., n_max in vals(0:n_max),
     where crint_1(n, rho) = $\int_0^1 t^{2n} \exp(-\rho t^2) dt$ for
-    a complex argument rho. For |rho| < 0.35 a Taylor polynomial is
-    used, for 0.35 <= |rho| < 3.5 crint_smallz_vec, and for
-    |rho| >= 3.5 zboysfun00_1 plus the recurrence
-    $vals(n) = ((n - 0.5) vals(n-1) - 0.5 \exp(-\rho)) / \rho$.
+    a complex argument rho.
+    
+    $|\rho| < 3.5$: series for $F_{n_{max}}$ and downward recursion
+    (crint_smallz_vec). Otherwise: $F_0$ from erf and upward recursion for
+    $n \le |\rho|$, and for $|\rho| < n \le n_{max}$ the series for
+    $F_{n_{max}}$ and downward recursion. Each recursion is used only where it
+    is stable, and the series only where its terms decrease from the start.
 
     Called by:
 
     .. hlist::
        :columns: 3
 
+       * :c:func:`crint_1_vec_scaled`
        * :c:func:`crint_sum`
+       * :c:func:`crint_sum_shift`
 
     Calls:
 
@@ -828,6 +838,39 @@ Subroutines / functions
 
        * :c:func:`crint_smallz_vec`
        * :c:func:`zboysfun00_1`
+
+ 
+.. c:function:: void crint_1_vec_scaled(void)
+
+
+    File : :file:`utils/cpx_boys.irp.f`
+
+    .. code:: fortran
+
+        subroutine crint_1_vec_scaled(n_max, rho, vals)
+
+
+    Scaled complex Boys functions $e^{\rho} F_n(\rho)$, $n = 0, \dots,
+    n_{max}$, for $\Re\rho < 0$ (then $|e^{\rho} F_n(\rho)| \le 1$).
+    
+    $\Re\rho > -700$: crint_1_vec times $e^{\rho}$. Otherwise the asymptotic
+    series $e^{\rho} F_n(\rho) = -\frac{1}{2\rho} \sum_{k \ge 0}
+    \frac{(a-1)(a-2)\cdots(a-k)}{\rho^k}$, $a = n + 1/2$, which neglects
+    $e^{\rho}\Gamma(a)/(2\rho^a)$, below $10^{-300}$ there.
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`crint_sum_shift`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`crint_1_vec`
 
  
 .. c:function:: void crint_2(void)
@@ -862,8 +905,9 @@ Subroutines / functions
 
     Stores crint_2(n, rho) for n = 0, 1, ..., n_max in vals(0:n_max),
     where crint_2(n, rho) = $\int_0^1 t^{2n} \exp(-\rho t^2) dt$ for
-    a complex argument rho. For |rho| < 3.5 the same branches as
-    crint_1_vec are used; for |rho| >= 3.5, zboysfun if Re(rho) >= 0,
+    a complex argument rho. For |rho| < 0.35 a Taylor polynomial is
+    used, for 0.35 <= |rho| < 3.5 crint_smallz_vec; for |rho| >= 3.5,
+    zboysfun if Re(rho) >= 0,
     and zboysfunnrp (which returns $\exp(\rho)$ times the integral)
     followed by the $\exp(-\rho)$ rescaling if Re(rho) < 0.
 
@@ -964,7 +1008,10 @@ Subroutines / functions
         complex*16 function crint_smallz(n, rho)
 
 
-    Standard version of rint
+    Complex Boys function by the series
+    $F_n(\rho) = e^{-\rho} \sum_{k \ge 0}
+      \frac{(2\rho)^k}{(2n+1)(2n+3)\cdots(2n+2k+1)}$.
+    Accurate when $|\rho| < 3.5$ or $n > |\rho|$.
 
  
 .. c:function:: void crint_smallz_vec(void)
@@ -977,7 +1024,10 @@ Subroutines / functions
         subroutine crint_smallz_vec(n_max, rho, vals)
 
 
-    Standard version of rint
+    Complex Boys functions $F_n(\rho)$, $n = 0, \dots, n_{max}$, for
+    $|\rho| < 3.5$: series for $F_{n_{max}}$ (crint_smallz) and downward
+    recursion
+    $F_{n-1} = (2 \rho F_n + e^{-\rho}) / (2n-1)$.
 
     Called by:
 
@@ -1005,6 +1055,32 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`crint_1_vec`
+
+ 
+.. c:function:: void crint_sum_shift(void)
+
+
+    File : :file:`utils/cpx_boys.irp.f`
+
+    .. code:: fortran
+
+        complex*16 function crint_sum_shift(n_pt_out, rho, d1, log_fact)
+
+
+    $e^{\rm log\_fact} \sum_{i\ \rm even} d_1(i) F_{i/2}(\rho)$, without
+    forming $e^{\rm log\_fact}$ and $F_n(\rho)$ separately: for
+    $\Re\rho < 0$ the scaled functions $e^{\rho} F_n(\rho)$ are multiplied
+    by $e^{{\rm log\_fact} - \rho}$. With complex exponents $\Re\rho$ can be
+    below $-709$, where $F_n(\rho)$ overflows and $e^{\rm log\_fact}$
+    underflows, although their product is moderate.
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`crint_1_vec`
+       * :c:func:`crint_1_vec_scaled`
 
  
 .. c:function:: void dble_fact(void)
@@ -1217,11 +1293,11 @@ Subroutines / functions
 
        * :c:data:`ao_coef_norm_cgtos_ord`
        * :c:data:`ao_coef_normalized_ordered`
+       * :c:func:`h_s2_u_0_nstates`
        * :c:func:`h_s2_u_0_nstates_openmp`
-       * :c:func:`h_s2_u_0_nstates_zmq`
        * :c:func:`h_s2_u_0_two_e_nstates_openmp`
+       * :c:func:`h_u_0_nstates`
        * :c:func:`h_u_0_nstates_openmp`
-       * :c:func:`h_u_0_nstates_zmq`
        * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:func:`restore_symmetry`
@@ -1832,9 +1908,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`ao_2e_cgtos_schwartz_accel`
-       * :c:func:`ao_two_e_integral_cgtos`
-       * :c:func:`overlap_cgaussian_xyz`
+       * :c:func:`give_explicit_cpoly_and_cgaussian_log`
+       * :c:func:`overlap_cgaussian_xyz_lpref`
 
     Calls:
 
@@ -1844,6 +1919,40 @@ Subroutines / functions
        * :c:func:`cgaussian_product`
        * :c:func:`multiply_cpoly`
        * :c:func:`recentered_cpoly2`
+
+ 
+.. c:function:: void give_explicit_cpoly_and_cgaussian_log(void)
+
+
+    File : :file:`utils/cgtos_utils.irp.f`
+
+    .. code:: fortran
+
+        subroutine give_explicit_cpoly_and_cgaussian_log(P_new, P_center, p, log_fact_k, iorder, &
+                       alpha, beta, a, b, Ae_center, Be_center, Ap_center, Bp_center, dim)
+
+
+    Same as give_explicit_cpoly_and_cgaussian, but returns the exponent
+    log_fact_k $= -\alpha\beta/(\alpha+\beta)\,(A_e-B_e)^2$ instead of
+    fact_k $= e^{\rm log\_fact\_k}$, which can underflow although the
+    integrals of the pair do not vanish (complex exponents). Negligible pairs
+    are returned as in give_explicit_cpoly_and_cgaussian ($p = 10^{14}$, zero
+    polynomial).
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`ao_2e_cgtos_schwartz_accel`
+       * :c:func:`ao_two_e_integral_cgtos`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`give_explicit_cpoly_and_cgaussian`
 
  
 .. c:function:: void give_explicit_cpoly_and_cgaussian_x(void)
@@ -2403,8 +2512,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`end_parallel_job`
-       * :c:func:`new_parallel_job`
        * :c:data:`pg_irrep_allowed`
 
  
@@ -3197,9 +3304,48 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`ao_deriv2_cgtos_x`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`overlap_cgaussian_xyz_lpref`
+
+ 
+.. c:function:: void overlap_cgaussian_xyz_lpref(void)
+
+
+    File : :file:`utils/cgtos_one_e.irp.f`
+
+    .. code:: fortran
+
+        subroutine overlap_cgaussian_xyz_lpref(Ae_center, Be_center, alpha, beta, power_A, power_B, &
+                                               Ap_center, Bp_center, lpref, overlap_x, overlap_y, overlap_z, overlap, dim)
+
+
+    
+    Same as overlap_cgaussian_xyz, each 1D factor multiplied by exp(lpref(x)):
+    
+      S_x = exp(lpref(x)) \int (x - Ap_x)^{a_x} exp(-\alpha (x - Ae_x)^2)
+                                (x - Bp_x)^{b_x} exp(-\beta  (x - Be_x)^2) dx
+    
+    lpref is the logarithm of the plane-wave / phase prefactor of the pair,
+    i(-phi_A -phi_B) - (k_{A,x}^2/alpha + k_{B,x}^2/beta)/4 per direction. It is added
+    to the exponent of the Gaussian-product factor before exponentiation: with plane
+    waves the two factors overflow / underflow separately (k^2 Re(1/zeta)/2 > 709).
+    
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
        * :c:data:`ao_coef_norm_cgtos`
        * :c:data:`ao_deriv2_cgtos_x`
        * :c:data:`ao_overlap_cgtos`
+       * :c:func:`overlap_cgaussian_xyz`
 
     Calls:
 
@@ -3253,11 +3399,12 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`ao_coef_norm_cgtos`
        * :c:data:`ao_coef_normalized`
        * :c:data:`ao_deriv2_x`
        * :c:data:`ao_deriv_1_x`
        * :c:data:`ao_dipole_x`
-       * :c:data:`ao_overlap`
+       * :c:data:`ao_overlap_qp2`
        * :c:data:`ao_spread_x`
        * :c:data:`prim_normalization_factor`
 
@@ -3471,7 +3618,6 @@ Subroutines / functions
        * :c:func:`get_mo_two_e_integrals_i1j1`
        * :c:func:`get_mo_two_e_integrals_ij`
        * :c:data:`gpu_num`
-       * :c:func:`h_s2_u_0_nstates_zmq`
        * :c:data:`n_csf`
        * :c:data:`psi_configuration_to_psi_det`
 
@@ -3762,27 +3908,6 @@ Subroutines / functions
 
 
     Needed for the calculation of two-electron integrals.
-
- 
-.. c:function:: set_multiple_levels_omp:
-
-
-    File : :file:`utils/set_multiple_levels_omp.irp.f`
-
-    .. code:: fortran
-
-        subroutine set_multiple_levels_omp(activate)
-
-
-    If true, activate OpenMP nested parallelism. If false, deactivate.
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`omp_set_max_active_levels`
-       * :c:func:`omp_set_nested`
 
  
 .. c:function:: void set_order(void)

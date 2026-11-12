@@ -1,64 +1,52 @@
-//! The master-mode body of `qp_run` (`ocaml/qp_run.ml:19-227`): the address
-//! the job inherits, the address file's lifetime, the job's exit status, the
-//! `qp_edit -c` pre-check and the two early failures (missing EZFIO directory,
-//! unknown program).
+//! The launcher body of `qp_run`: program resolution, the banner, the
+//! `qp_edit -c` pre-check, the job's exit status, and the two early failures
+//! (missing EZFIO directory, unknown program). The job inherits the
+//! environment: no task-server address variables, no address file, no
+//! launcher-created `work/`.
 
 mod common;
 
-use common::{Fixture, Running, TIMEOUT, observe_script, observed};
+use common::{Fixture, observe_script, observed};
 
-/// The port the task server advertises, from its startup line.
-fn advertised_port(stdout: &str) -> u32 {
-    let line = stdout
-        .lines()
-        .find(|line| line.starts_with("Task server running : "))
-        .unwrap_or_else(|| panic!("no task-server line in:\n{stdout}"));
-    line.rsplit(':')
-        .next()
-        .expect("the address ends with a port")
-        .parse()
-        .expect("numeric port")
-}
-
-/// The job sees `QP_RUN_ADDRESS`, the address file exists and matches it
-/// during the run, and both are gone afterwards; the banner and the wall time
-/// are printed.
+/// The job sees the EZFIO directory as its first argument and none of the
+/// task-server environment; the launcher creates no `work/` and no address
+/// file; the banner and the wall time are printed.
 #[test]
-fn the_job_inherits_the_advertised_address() {
+fn the_job_inherits_no_task_server_environment() {
     let fixture = Fixture::new();
     fixture.program("scf", &observe_script("exit 0"));
     let outcome = fixture.run(&["scf", fixture.ezfio_str()]);
     assert_eq!(outcome.code(), 0, "{outcome}");
 
-    let address = format!("tcp://127.0.0.1:{}", advertised_port(&outcome.stdout));
     let seen = observed(&fixture.work());
-    assert_eq!(
-        seen.get("address").map(String::as_str),
-        Some(address.as_str()),
-        "{outcome}"
-    );
     assert_eq!(
         seen.get("arg1").map(String::as_str),
         Some(fixture.ezfio_str()),
         "the job's first argument is the EZFIO directory"
     );
     assert_eq!(
+        seen.get("address").map(String::as_str),
+        Some("UNSET"),
+        "QP_RUN_ADDRESS is not set for the job\n{outcome}"
+    );
+    assert_eq!(
         seen.get("master").map(String::as_str),
-        Some(""),
-        "master mode sets no QP_RUN_ADDRESS_MASTER"
+        Some("UNSET"),
+        "QP_RUN_ADDRESS_MASTER is not set for the job\n{outcome}"
     );
     assert_eq!(
         seen.get("file").map(String::as_str),
-        Some(address.as_str()),
-        "work/qp_run_address holds the advertised address while the job runs"
+        Some("absent"),
+        "work/qp_run_address is never created\n{outcome}"
+    );
+    assert_eq!(
+        seen.get("workdir").map(String::as_str),
+        Some("absent"),
+        "qp_run creates no work/; the Fortran executable does\n{outcome}"
     );
     assert!(
         !fixture.work().join("qp_run_address").exists(),
-        "the address file is removed when the run ends"
-    );
-    assert!(
-        fixture.work().join("empty").exists(),
-        "ezfio_work created the work/ marker"
+        "the address file is absent after the run"
     );
 
     assert!(outcome.stdout.contains("Date: "), "{outcome}");
@@ -72,8 +60,8 @@ fn the_job_inherits_the_advertised_address() {
     assert!(outcome.stdout.contains("Wall time: "), "{outcome}");
 }
 
-/// A non-zero job status is reported and becomes the tool's status, after the
-/// server stopped and the wall time was printed.
+/// A non-zero job status is reported and becomes the tool's status, after
+/// the wall time was printed.
 #[test]
 fn the_job_exit_code_is_propagated() {
     let fixture = Fixture::new();
@@ -92,7 +80,7 @@ fn the_job_exit_code_is_propagated() {
 }
 
 /// A failing `qp_edit -c` is `the input is inconsistent (qp_edit -c failed)`,
-/// exit 2, and nothing else runs: no server, no job, no address file.
+/// exit 2, and nothing else runs: no job, no `work/`, no address file.
 #[test]
 fn a_failing_input_check_stops_the_run() {
     let fixture = Fixture::new();
@@ -107,7 +95,7 @@ fn a_failing_input_check_stops_the_run() {
         "QP_RUN_QP_EDIT",
         fixture.root().join("bin").join("qp_edit_fail"),
     );
-    let outcome = Running::spawn(command, &fixture.logs()).wait(TIMEOUT);
+    let outcome = common::Running::spawn(command, &fixture.logs()).wait(common::TIMEOUT);
 
     assert_eq!(outcome.code(), 2, "{outcome}");
     assert_eq!(
@@ -126,7 +114,6 @@ fn a_failing_input_check_stops_the_run() {
         "the job must not run\n{outcome}"
     );
     assert!(!fixture.work().join("qp_run_address").exists());
-    assert!(!outcome.stdout.contains("Task server running"), "{outcome}");
 }
 
 /// A directory that does not exist fails before any other check.
@@ -145,8 +132,59 @@ fn a_missing_ezfio_directory_is_reported() {
     );
 }
 
+/// `-p/--prefix` runs the job through the prefix, end to end: the prefix
+/// command receives exactly the program path and the EZFIO directory, and
+/// the job still runs with the EZFIO directory as its first argument.
+/// (The `gdb` special case of `qp_cli::launch::job_command` — `gdb --args `
+/// — has no real `gdb` on every test machine; the mapping itself is unit
+/// tested there.)
+#[test]
+fn the_prefix_is_run_before_the_job() {
+    let fixture = Fixture::new();
+    let seen = fixture.dir().join("prefix_seen");
+    fixture.shim(
+        "prefixer",
+        &format!("printf '%s\\n' \"$@\" > {}\nexec \"$@\"", seen.display()),
+    );
+    let prefix = fixture.root().join("bin").join("prefixer");
+    let program = fixture.program("scf", &observe_script("exit 0"));
+    let outcome = fixture.run(&[
+        "-p",
+        prefix.to_str().expect("UTF-8 path"),
+        "scf",
+        fixture.ezfio_str(),
+    ]);
+    assert_eq!(outcome.code(), 0, "{outcome}");
+
+    let prefix_args = std::fs::read_to_string(&seen).expect("the prefix ran");
+    let mut lines = prefix_args.lines();
+    assert_eq!(
+        lines.next(),
+        Some(program.to_str().expect("UTF-8 path")),
+        "the prefix receives the program path"
+    );
+    assert_eq!(
+        lines.next(),
+        Some(fixture.ezfio_str()),
+        "the prefix receives the EZFIO directory"
+    );
+    assert_eq!(
+        lines.next(),
+        None,
+        "the prefix receives exactly two arguments"
+    );
+
+    let observed = observed(&fixture.work());
+    assert_eq!(
+        observed.get("arg1").map(String::as_str),
+        Some(fixture.ezfio_str()),
+        "the job ran through the prefix with the EZFIO directory as $1"
+    );
+}
+
 /// An unknown program prints the visible choices on standard output and
-/// fails with the S2.5 wording, exit 2, before the banner.
+/// fails with the message `program not found in data/executables`, exit 2,
+/// before the banner.
 #[test]
 fn an_unknown_program_lists_the_choices() {
     let fixture = Fixture::new();

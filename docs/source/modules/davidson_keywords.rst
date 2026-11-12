@@ -20,8 +20,8 @@ database:
   :math:`E_{\text{rPT2}} \times` `threshold_davidson_from_pt2`
 * `disk_based_davidson`: when |true|, a memory-mapped file may be
   used to store the Davidson vectors if not enough RAM is available
-* `distributed_davidson`: when |true|, the distributed algorithm is
-  used; set it before running multi-node calculations
+* `distributed_davidson`: when |true|, the chunked in-process H·vec is
+  used for large determinant spaces
 * `davidson_sze_max`: the number of micro-iterations before
   re-contracting
 * `state_following`, `only_expected_s2`, `csf_based`,
@@ -82,7 +82,7 @@ EZFIO parameters
  
 .. option:: distributed_davidson
  
-    If |true|, use the distributed algorithm. If you plan to run multi-node calculations, set this to true before running.
+    If |true|, use the chunked in-process H·vec for large determinant spaces.
  
     Default: False
  

@@ -69,6 +69,16 @@ EZFIO parameters
     MOs with the same integer belong to the same irrep.
  
  
+.. option:: mo_symmetry_name
+ 
+    Irrep name of each |MO|, in the order of the |MOs|. Written together with :c:data:`mo_symmetry`.
+ 
+ 
+.. option:: mo_energy
+ 
+    |MO| energies, in the order of the |MOs| (the canonical orbital energies of a converged |SCF|). Written at the end of the |SCF|; stale after any later rotation of the |MOs|.
+ 
+ 
 .. option:: mo_class
  
     [ Core | Inactive | Active | Virtual | Deleted ], as defined by :ref:`qp_set_mo_class`
@@ -201,7 +211,7 @@ Providers
     Auxiliary MO coefficients, same (ao_num,mo_num) layout as
     mo_coef: coefficient of the i-th AO on the j-th aux MO.
     Read from the EZFIO database if the entry exists (master
-    reads, then MPI broadcast), otherwise set to the :math:`S^{-1/2}` 
+    reads), otherwise set to the :math:`S^{-1/2}` 
     canonical orthonormalized AOs (ao_ortho_canonical_coef).
     Auxiliary basis, probably to go beyond the basis set for
     integral evaluation (author's reading, 2026-10-31); introduced
@@ -487,6 +497,7 @@ Providers
        * :c:data:`pg_det_irrep`
        * :c:data:`pg_mo_weight`
        * :c:data:`pg_n_mo_mixed`
+       * :c:data:`pg_state_irrep_weight`
        * :c:data:`pg_xg`
        * :c:data:`psi_energy_h_core`
        * :c:data:`s_mo_coef`

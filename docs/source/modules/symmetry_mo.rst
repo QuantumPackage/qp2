@@ -71,7 +71,11 @@ module:
 with :math:`d_a` the dimension (``pg_irrep_dim``), :math:`m_a` 2 when the
 table row is the sum of a complex-conjugate pair and 1 otherwise
 (``pg_irrep_mult``), and :math:`\chi_a(c)` the characters of the file column
-:math:`c`. The weight of irrep :math:`a` in MO :math:`i` is
+:math:`c`. The normalisation :math:`d_a/(m_a |G|)` is stored once, in
+``pg_proj_coef(a)``: the MO weights, the determinant and state projector,
+and the determinant diagonal kernel all read that array instead of
+recomputing the ratio, so the convention cannot drift between them.
+The weight of irrep :math:`a` in MO :math:`i` is
 ``pg_mo_weight(i,a) = p_a(i) = <i|P^a|i>``. Then
 
 * ``pg_mo_irrep(i)`` is the argmax of :math:`p_a(i)`;
@@ -93,11 +97,25 @@ per irrep, and writes ``mo_symmetry`` when every MO has a definite irrep.
 It never stops and prints nothing when :option:`symmetry auto_symmetry` is false.
 
 ``pg_write_mo_symmetry`` writes ``mo_basis/mo_symmetry``: the integer irrep
-index of each MO, with the convention "same integer = same irrep". A mixed
-MO has index 0 and nothing is written in that case, because writing 0 would
-declare all mixed MOs to belong to one irrep. The in-memory provider is
-invalidated with ``soft_touch`` after the write, so the current process and
-the EZFIO agree.
+index of each MO, with the convention "same integer = same irrep", and
+``mo_basis/mo_symmetry_name``: the irrep name of each MO, so that
+:ref:`qp_edit` can label the MOs without rebuilding the character table. A
+mixed MO has index 0 and nothing is written in that case, because writing 0
+would declare all mixed MOs to belong to one irrep. The in-memory provider
+is invalidated with ``soft_touch`` after the write, so the current process
+and the EZFIO agree.
+
+``pg_print_mo_energies(e, n)`` is called by the SCF, KS and range-separated
+KS programs, at the program level because ``scf_utils`` must not depend on
+this module. It prints the orbital energies in the order of the MOs, with the
+irrep label of each MO in a third column. When :option:`symmetry
+auto_symmetry` is false, when the detection gave up, or when some MO has no
+definite irrep, it prints the historical ``Eigenvalues`` table instead, with
+no irrep column and no extra message: ``pg_report_mo_symmetry`` prints the
+reason right after. ``scf_utils`` stores the same numbers in
+``mo_basis/mo_energy`` at the end of the SCF, in the order in which
+``save_mos`` writes the MOs; that array is a snapshot and becomes stale if
+the MOs are rotated afterwards.
 
 Guards
 ------
@@ -437,7 +455,7 @@ Providers
        * :c:data:`mo_num`
        * :c:data:`pg_col_diag`
        * :c:data:`pg_n_col`
-       * :c:data:`pg_n_elem`
+       * :c:data:`pg_proj_coef`
        * :c:data:`pg_thresh`
 
     Needed by:
@@ -587,7 +605,7 @@ Providers
        * :c:data:`mo_num`
        * :c:data:`pg_col_diag`
        * :c:data:`pg_n_col`
-       * :c:data:`pg_n_elem`
+       * :c:data:`pg_proj_coef`
        * :c:data:`pg_thresh`
 
     Needed by:
@@ -633,7 +651,7 @@ Providers
        * :c:data:`mo_num`
        * :c:data:`pg_col_diag`
        * :c:data:`pg_n_col`
-       * :c:data:`pg_n_elem`
+       * :c:data:`pg_proj_coef`
        * :c:data:`pg_thresh`
 
     Needed by:
@@ -679,7 +697,7 @@ Providers
        * :c:data:`mo_num`
        * :c:data:`pg_col_diag`
        * :c:data:`pg_n_col`
-       * :c:data:`pg_n_elem`
+       * :c:data:`pg_proj_coef`
        * :c:data:`pg_thresh`
 
     Needed by:
@@ -769,6 +787,41 @@ Providers
        * :c:data:`mo_num`
        * :c:data:`pg_mo_weight`
 
+
+ 
+.. c:var:: double pg_proj_coef
+
+
+    File : :file:`mo_irrep.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: pg_proj_coef	(pg_n_irrep)
+
+
+    ``pg_proj_coef(a)`` = :math:`d_a/(m_a |G|)`, the normalisation of the
+    projector on irrep ``a``: ONE definition, shared by
+    :c:data:`pg_mo_weight`, the determinant/state projector and
+    :c:data:`pg_proj_w`.
+    
+    It is :math:`d_a/m_a` and not :math:`d_a`: the stored row of a
+    complex-conjugate pair is twice the real part of a single row, so the
+    factor 2 belongs to ``mult_a``.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`pg_n_col`
+       * :c:data:`pg_n_elem`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`pg_mo_weight`
 
  
 .. c:var:: int pg_shell_target
@@ -1166,6 +1219,117 @@ Subroutines / functions
        * :c:func:`pg_report`
 
  
+.. c:function:: void pg_print_mo_energies(void)
+
+
+    File : :file:`auto_report.irp.f`
+
+    .. code:: fortran
+
+        subroutine pg_print_mo_energies(e, n)
+
+
+    Prints the MO energies, with the irrep label of each MO next to the
+    value, in the order of the MOs.
+    
+    ``e(1:n)`` are the MO energies; :c:data:`mo_num` is not used here, so a
+    program may print the eigenvalues of any MO set of size ``n`` with the
+    tables it already has.
+    
+    Same two-step guard as :c:func:`pg_report_mo_symmetry`: this body names
+    only :c:func:`pg_symmetry_ready`, so with :c:data:`auto_symmetry` = F not one
+    provider of the detection chain is built and the table falls back to
+    the plain energy-only form. That fallback keeps the output a
+    pre-symmetry version of QP2 produced, byte for byte.
+    
+    Printed by the master rank only: the table is a report, and every
+    rank runs the same SCF.
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pg_print_mo_energies_labelled`
+       * :c:func:`pg_print_mo_energies_plain`
+
+ 
+.. c:function:: void pg_print_mo_energies_labelled(void)
+
+
+    File : :file:`auto_report.irp.f`
+
+    .. code:: fortran
+
+        subroutine pg_print_mo_energies_labelled(e, n)
+
+
+    ``Eigenvalues`` plus one irrep label per MO.
+    
+    Entered only after :c:func:`pg_symmetry_ready` returned true, so naming
+    :c:data:`pg_mo_irrep` and :c:data:`pg_irrep_name` here is safe: IRPF90 hoists
+    their build to the ENTRY of this procedure, that is, after the guard.
+    
+    Falls back to the plain table when the MO labels are incomplete (a
+    basis that is not symmetry adapted): :c:func:`pg_report_mo_symmetry`
+    prints the reason right after, so this routine stays silent. Also
+    falls back when ``n`` does not describe the MO set of the EZFIO, since
+    the labels are indexed by MO number.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_num`
+       * :c:data:`mpi_master`
+       * :c:data:`pg_mo_weight`
+       * :c:data:`pg_n_col`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pg_print_mo_energies`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pg_print_mo_energies_plain`
+
+ 
+.. c:function:: void pg_print_mo_energies_plain(void)
+
+
+    File : :file:`auto_report.irp.f`
+
+    .. code:: fortran
+
+        subroutine pg_print_mo_energies_plain(e, n)
+
+
+    The historical ``Eigenvalues`` table, without any irrep. Used when
+    the symmetry machinery is off or gave up.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mpi_master`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pg_print_mo_energies`
+       * :c:func:`pg_print_mo_energies_labelled`
+
+ 
 .. c:function:: void pg_ready_columns(void)
 
 
@@ -1518,6 +1682,14 @@ Subroutines / functions
     
     The mixed count runs on every rank; only the printing and the EZFIO
     write are under :c:data:`mpi_master`, as in save_wavefunction_general.
+    
+    The two linear groups are finite models (C31v, D31h): their tables
+    carry 17 and 34 irreps, and an angular momentum above Gamma, which
+    no basis set reaches in practice, would print with a generic
+    ``E5`` ... ``E15`` label. For those groups only the populated
+    irreps are printed. The finite groups keep one row per irrep (zeros
+    included): there a row is a standard chemical label and the zero is
+    information.
 
     Needs:
 
@@ -1666,7 +1838,9 @@ Subroutines / functions
         subroutine pg_write_mo_symmetry()
 
 
-    Writes :c:data:`pg_mo_irrep` into ``mo_basis/mo_symmetry`` of the EZFIO.
+    Writes :c:data:`pg_mo_irrep` into ``mo_basis/mo_symmetry`` of the EZFIO,
+    and the irrep names into ``mo_basis/mo_symmetry_name``, so that
+    :ref:`qp_edit` can label the MOs without rebuilding the character table.
     
     :c:data:`mo_symmetry` is an existing QP2 provider (src/mo_basis/mo_class.irp.f)
     and IRPF90 forbids filling it from another module, so it cannot be a
@@ -1686,8 +1860,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`mo_num`
        * :c:data:`mo_symmetry`
        * :c:data:`pg_mo_weight`
+       * :c:data:`pg_n_col`
        * :c:data:`pg_n_mo_mixed`
 
     Called by:
@@ -1704,6 +1880,7 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`ezfio_set_mo_basis_mo_symmetry`
+       * :c:func:`ezfio_set_mo_basis_mo_symmetry_name`
 
     Touches:
 

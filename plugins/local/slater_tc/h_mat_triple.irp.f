@@ -4,7 +4,7 @@ subroutine H_tc_s2_u_0_with_pure_three(v_0, s_0, u_0, N_st, sze)
   !
   ! Assumes that the determinants are in psi_det
   !
-  ! istart, iend, ishift, istep are used in ZMQ parallelization.
+  ! istart, iend, ishift, istep split the work between the OpenMP threads.
   END_DOC
 
   use bitmasks
@@ -34,7 +34,7 @@ subroutine H_tc_s2_u_0_with_pure_three_omp(v_0, s_0, u_0, N_st, sze)
   !
   ! Assumes that the determinants are in psi_det
   !
-  ! istart, iend, ishift, istep are used in ZMQ parallelization.
+  ! istart, iend, ishift, istep split the work between the OpenMP threads.
   END_DOC
 
   use bitmasks
@@ -70,7 +70,7 @@ subroutine H_tc_s2_dagger_u_0_with_pure_three(v_0, s_0, u_0, N_st, sze)
   !
   ! Assumes that the determinants are in psi_det
   !
-  ! istart, iend, ishift, istep are used in ZMQ parallelization.
+  ! istart, iend, ishift, istep split the work between the OpenMP threads.
   END_DOC
 
   use bitmasks
@@ -100,7 +100,7 @@ subroutine H_tc_s2_dagger_u_0_with_pure_three_omp(v_0, s_0, u_0, N_st, sze)
   !
   ! Assumes that the determinants are in psi_det
   !
-  ! istart, iend, ishift, istep are used in ZMQ parallelization.
+  ! istart, iend, ishift, istep split the work between the OpenMP threads.
   END_DOC
 
   use bitmasks

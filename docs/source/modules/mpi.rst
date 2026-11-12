@@ -8,18 +8,15 @@
 mpi
 ===
 
-Initialization and basic routines for the parallelization with |MPI|.
+Single-node placeholders that used to wrap |MPI|.
 
-The provider :c:data:`mpi_initialized` starts |MPI|. The providers
-:c:data:`mpi_rank`, :c:data:`mpi_size` and :c:data:`mpi_master` give
-the rank of the process, the number of processes, and the boolean that
-is |true| only on the master rank.
-
-:c:func:`mpi_print` prints a string only on the master rank. The
-subroutines :c:func:`broadcast_chunks_double`,
-:c:func:`broadcast_chunks_integer` and
-:c:func:`broadcast_chunks_integer8` broadcast an array from the master
-rank in chunks of about 2 GB.
+Multi-node parallelism (|MPI| and the distributed task server) was removed
+in 2026-11; the code is now single-node, with in-process OpenMP
+parallelism inside each executable. The providers
+:c:data:`mpi_rank`, :c:data:`mpi_size` and :c:data:`mpi_master`
+survive as constants (``0``, ``1`` and ``.True.``) because a large part
+of the code base guards master-only I/O and file writes with
+``mpi_master``. :c:data:`mpi_initialized` is always ``.True.``.
  
  
  
@@ -95,6 +92,7 @@ Providers
        * :c:data:`calc_energy_components`
        * :c:data:`calc_osc_str`
        * :c:data:`calc_tr_dipole_moment`
+       * :c:data:`cholesky_ao_num`
        * :c:data:`ci_electronic_energy`
        * :c:data:`ci_energy`
        * :c:data:`correlation_functional`
@@ -144,6 +142,8 @@ Providers
        * :c:data:`io_nuclear_repulsion`
        * :c:data:`irrep_states`
        * :c:data:`is_periodic`
+       * :c:data:`libcint_available`
+       * :c:data:`libcint_nuc_available`
        * :c:data:`lin_dep_cutoff`
        * :c:data:`mo_cholesky_double`
        * :c:data:`mo_class`
@@ -252,6 +252,7 @@ Providers
        * :c:data:`threshold_generators`
        * :c:data:`threshold_nonsym_davidson`
        * :c:data:`use_cgtos`
+       * :c:data:`use_libcint`
        * :c:data:`use_only_lr`
        * :c:data:`weight_one_e_dm`
        * :c:data:`weight_selection`
@@ -292,69 +293,6 @@ Providers
     Rank of MPI process and number of MPI processes
 
     Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mpi_master`
-
- 
- 
-Subroutines / functions 
------------------------ 
- 
-.. c:function:: void broadcast_chunks_double(void)
-
-
-    File : :file:`mpi/mpi.irp.f_template_97`
-
-    .. code:: fortran
-
-        subroutine broadcast_chunks_double(A, LDA)
-
-
-    Broadcast with chunks of ~2GB
-
- 
-.. c:function:: void broadcast_chunks_integer(void)
-
-
-    File : :file:`mpi/mpi.irp.f_template_97`
-
-    .. code:: fortran
-
-        subroutine broadcast_chunks_integer(A, LDA)
-
-
-    Broadcast with chunks of ~2GB
-
- 
-.. c:function:: void broadcast_chunks_integer8(void)
-
-
-    File : :file:`mpi/mpi.irp.f_template_97`
-
-    .. code:: fortran
-
-        subroutine broadcast_chunks_integer8(A, LDA)
-
-
-    Broadcast with chunks of ~2GB
-
- 
-.. c:function:: void mpi_print(void)
-
-
-    File : :file:`mpi/mpi.irp.f`
-
-    .. code:: fortran
-
-        subroutine mpi_print(string)
-
-
-    Print string to stdout if the MPI rank is zero.
-
-    Needs:
 
     .. hlist::
        :columns: 3

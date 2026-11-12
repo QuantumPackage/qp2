@@ -31,12 +31,6 @@ jobs:
        - name: ninja
          run: |
               ./configure -i ninja || echo OK
-       - name: zeromq
-         run: |
-              ./configure -i zeromq || echo OK
-       - name: f77zmq
-         run: |
-              ./configure -i f77zmq || echo OK
        - name: docopt
          run: |
               ./configure -i docopt || echo OK

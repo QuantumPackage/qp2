@@ -953,30 +953,6 @@ Providers
 
 
  
-.. c:var:: mo_coef_novirt
-
-
-    File : :file:`mo_two_e_ints/four_idx_novvvv.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: mo_coef_novirt	(ao_num,n_core_inact_act_orb)
-
-
-    MO coefficients without virtual MOs
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_num`
-       * :c:data:`list_core_inact_act`
-       * :c:data:`mo_coef`
-       * :c:data:`n_core_inact_act_orb`
-
-
- 
 .. c:var:: double mo_integrals_cache
 
 
@@ -1047,40 +1023,6 @@ Providers
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: mo_integrals_cache_max_8
-
-
-    File : :file:`mo_two_e_ints/map_integrals.irp.f`
-
-    .. code:: fortran
-
-        integer*4	:: mo_integrals_cache_min	
-        integer*4	:: mo_integrals_cache_max	
-        integer*8	:: mo_integrals_cache_min_8	
-        integer*8	:: mo_integrals_cache_max_8	
-
-
-    Min and max values of the MOs for which the integrals are in the cache
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`elec_alpha_num`
-       * :c:data:`mo_num`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`big_array_coulomb_integrals`
-       * :c:data:`core_fock_operator`
-       * :c:data:`mo_integrals_cache`
-       * :c:data:`mo_two_e_integrals_jj`
-
- 
 .. c:var:: int mo_integrals_cache_min
 
 
@@ -1110,40 +1052,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`core_fock_operator`
-       * :c:data:`mo_integrals_cache`
-       * :c:data:`mo_two_e_integrals_jj`
-
- 
-.. c:var:: mo_integrals_cache_min_8
-
-
-    File : :file:`mo_two_e_ints/map_integrals.irp.f`
-
-    .. code:: fortran
-
-        integer*4	:: mo_integrals_cache_min	
-        integer*4	:: mo_integrals_cache_max	
-        integer*8	:: mo_integrals_cache_min_8	
-        integer*8	:: mo_integrals_cache_max_8	
-
-
-    Min and max values of the MOs for which the integrals are in the cache
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`elec_alpha_num`
-       * :c:data:`mo_num`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`big_array_coulomb_integrals`
        * :c:data:`core_fock_operator`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_two_e_integrals_jj`
@@ -1582,38 +1490,6 @@ Providers
 
 
  
-.. c:var:: mo_two_e_integral_jj_from_ao
-
-
-    File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: mo_two_e_integral_jj_from_ao	(mo_num,mo_num)
-        double precision, allocatable	:: mo_two_e_integrals_jj_exchange_from_ao	(mo_num,mo_num)
-        double precision, allocatable	:: mo_two_e_integrals_jj_anti_from_ao	(mo_num,mo_num)
-
-
-    mo_two_e_integral_jj_from_ao(i,j) = J_ij
-    mo_two_e_integrals_jj_exchange_from_ao(i,j) = J_ij
-    mo_two_e_integrals_jj_anti_from_ao(i,j) = J_ij - K_ij
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_integrals_map`
-       * :c:data:`ao_integrals_threshold`
-       * :c:data:`ao_num`
-       * :c:data:`ao_two_e_integrals_in_map`
-       * :c:data:`do_direct_integrals`
-       * :c:data:`mo_coef`
-       * :c:data:`mo_coef_transp`
-       * :c:data:`mo_num`
-
-
- 
 .. c:var:: bool mo_two_e_integrals_erf_in_map
 
 
@@ -1805,38 +1681,6 @@ Providers
        * :c:data:`ref_bitmask_two_e_energy`
 
  
-.. c:var:: mo_two_e_integrals_jj_anti_from_ao
-
-
-    File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: mo_two_e_integral_jj_from_ao	(mo_num,mo_num)
-        double precision, allocatable	:: mo_two_e_integrals_jj_exchange_from_ao	(mo_num,mo_num)
-        double precision, allocatable	:: mo_two_e_integrals_jj_anti_from_ao	(mo_num,mo_num)
-
-
-    mo_two_e_integral_jj_from_ao(i,j) = J_ij
-    mo_two_e_integrals_jj_exchange_from_ao(i,j) = J_ij
-    mo_two_e_integrals_jj_anti_from_ao(i,j) = J_ij - K_ij
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_integrals_map`
-       * :c:data:`ao_integrals_threshold`
-       * :c:data:`ao_num`
-       * :c:data:`ao_two_e_integrals_in_map`
-       * :c:data:`do_direct_integrals`
-       * :c:data:`mo_coef`
-       * :c:data:`mo_coef_transp`
-       * :c:data:`mo_num`
-
-
- 
 .. c:var:: double mo_two_e_integrals_jj_exchange
 
 
@@ -1883,143 +1727,6 @@ Providers
        * :c:data:`core_energy`
        * :c:data:`ref_bitmask_energy_ab`
        * :c:data:`ref_bitmask_two_e_energy`
-
- 
-.. c:var:: mo_two_e_integrals_jj_exchange_from_ao
-
-
-    File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: mo_two_e_integral_jj_from_ao	(mo_num,mo_num)
-        double precision, allocatable	:: mo_two_e_integrals_jj_exchange_from_ao	(mo_num,mo_num)
-        double precision, allocatable	:: mo_two_e_integrals_jj_anti_from_ao	(mo_num,mo_num)
-
-
-    mo_two_e_integral_jj_from_ao(i,j) = J_ij
-    mo_two_e_integrals_jj_exchange_from_ao(i,j) = J_ij
-    mo_two_e_integrals_jj_anti_from_ao(i,j) = J_ij - K_ij
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_integrals_map`
-       * :c:data:`ao_integrals_threshold`
-       * :c:data:`ao_num`
-       * :c:data:`ao_two_e_integrals_in_map`
-       * :c:data:`do_direct_integrals`
-       * :c:data:`mo_coef`
-       * :c:data:`mo_coef_transp`
-       * :c:data:`mo_num`
-
-
- 
-.. c:var:: mo_two_e_integrals_vv_anti_from_ao
-
-
-    File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: mo_two_e_integrals_vv_from_ao	(mo_num,mo_num)
-        double precision, allocatable	:: mo_two_e_integrals_vv_exchange_from_ao	(mo_num,mo_num)
-        double precision, allocatable	:: mo_two_e_integrals_vv_anti_from_ao	(mo_num,mo_num)
-
-
-    mo_two_e_integrals_vv_from_ao(i,j) = J_ij
-    mo_two_e_integrals_vv_exchange_from_ao(i,j) = J_ij
-    mo_two_e_integrals_vv_anti_from_ao(i,j) = J_ij - K_ij
-    but only for the virtual orbitals
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_integrals_map`
-       * :c:data:`ao_integrals_threshold`
-       * :c:data:`ao_num`
-       * :c:data:`ao_two_e_integrals_in_map`
-       * :c:data:`do_direct_integrals`
-       * :c:data:`list_virt`
-       * :c:data:`mo_coef`
-       * :c:data:`mo_coef_transp`
-       * :c:data:`mo_num`
-       * :c:data:`n_virt_orb`
-
-
- 
-.. c:var:: mo_two_e_integrals_vv_exchange_from_ao
-
-
-    File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: mo_two_e_integrals_vv_from_ao	(mo_num,mo_num)
-        double precision, allocatable	:: mo_two_e_integrals_vv_exchange_from_ao	(mo_num,mo_num)
-        double precision, allocatable	:: mo_two_e_integrals_vv_anti_from_ao	(mo_num,mo_num)
-
-
-    mo_two_e_integrals_vv_from_ao(i,j) = J_ij
-    mo_two_e_integrals_vv_exchange_from_ao(i,j) = J_ij
-    mo_two_e_integrals_vv_anti_from_ao(i,j) = J_ij - K_ij
-    but only for the virtual orbitals
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_integrals_map`
-       * :c:data:`ao_integrals_threshold`
-       * :c:data:`ao_num`
-       * :c:data:`ao_two_e_integrals_in_map`
-       * :c:data:`do_direct_integrals`
-       * :c:data:`list_virt`
-       * :c:data:`mo_coef`
-       * :c:data:`mo_coef_transp`
-       * :c:data:`mo_num`
-       * :c:data:`n_virt_orb`
-
-
- 
-.. c:var:: mo_two_e_integrals_vv_from_ao
-
-
-    File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: mo_two_e_integrals_vv_from_ao	(mo_num,mo_num)
-        double precision, allocatable	:: mo_two_e_integrals_vv_exchange_from_ao	(mo_num,mo_num)
-        double precision, allocatable	:: mo_two_e_integrals_vv_anti_from_ao	(mo_num,mo_num)
-
-
-    mo_two_e_integrals_vv_from_ao(i,j) = J_ij
-    mo_two_e_integrals_vv_exchange_from_ao(i,j) = J_ij
-    mo_two_e_integrals_vv_anti_from_ao(i,j) = J_ij - K_ij
-    but only for the virtual orbitals
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_integrals_map`
-       * :c:data:`ao_integrals_threshold`
-       * :c:data:`ao_num`
-       * :c:data:`ao_two_e_integrals_in_map`
-       * :c:data:`do_direct_integrals`
-       * :c:data:`list_virt`
-       * :c:data:`mo_coef`
-       * :c:data:`mo_coef_transp`
-       * :c:data:`mo_num`
-       * :c:data:`n_virt_orb`
-
 
  
 .. c:var:: bool use_banned_excitation
@@ -2251,138 +1958,6 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:function:: add_integrals_to_map_no_exit_34:
-
-
-    File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
-
-    .. code:: fortran
-
-        subroutine add_integrals_to_map_no_exit_34(mask_ijkl)
-
-
-    Adds integrals to tha MO map according to some bitmask
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_num`
-       * :c:data:`ao_two_e_integrals_in_map`
-       * :c:data:`mo_coef`
-       * :c:data:`mo_coef_transp`
-       * :c:data:`mo_integrals_map`
-       * :c:data:`mo_integrals_threshold`
-       * :c:data:`mo_num`
-       * :c:data:`n_int`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`four_idx_novvvv_old`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`bitstring_to_list`
-       * :c:func:`cpu_time`
-       * :c:func:`get_ao_two_e_integrals`
-       * :c:func:`insert_into_mo_integrals_map`
-       * :c:func:`map_merge`
-       * :c:func:`mo_two_e_integrals_index`
-       * :c:func:`wall_time`
-
- 
-.. c:function:: add_integrals_to_map_three_indices:
-
-
-    File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
-
-    .. code:: fortran
-
-        subroutine add_integrals_to_map_three_indices(mask_ijk)
-
-
-    Adds integrals to tha MO map according to some bitmask
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_num`
-       * :c:data:`ao_two_e_integrals_in_map`
-       * :c:data:`mo_coef`
-       * :c:data:`mo_coef_transp`
-       * :c:data:`mo_integrals_map`
-       * :c:data:`mo_integrals_threshold`
-       * :c:data:`mo_num`
-       * :c:data:`n_int`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`four_idx_novvvv_old`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`bitstring_to_list`
-       * :c:func:`cpu_time`
-       * :c:func:`get_ao_two_e_integrals`
-       * :c:func:`insert_into_mo_integrals_map`
-       * :c:func:`map_merge`
-       * :c:func:`mo_two_e_integrals_index`
-       * :c:func:`wall_time`
-
- 
-.. c:function:: ao_to_mo_novirt:
-
-
-    File : :file:`mo_two_e_ints/four_idx_novvvv.irp.f`
-
-    .. code:: fortran
-
-        subroutine ao_to_mo_novirt(A_ao,LDA_ao,A_mo,LDA_mo)
-
-
-    Transform A from the |AO| basis to the |MO| basis excluding virtuals
-    
-    $C^\dagger.A_{ao}.C$
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_num`
-       * :c:data:`mo_coef_novirt`
-       * :c:data:`n_core_inact_act_orb`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`four_idx_novvvv`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`dgemm`
-
- 
 .. c:function:: void clear_mo_erf_map(void)
 
 
@@ -2562,112 +2137,6 @@ Subroutines / functions
        * :c:func:`mo_two_e_integrals_index`
 
  
-.. c:function:: four_idx_novvvv:
-
-
-    File : :file:`mo_two_e_ints/four_idx_novvvv.irp.f`
-
-    .. code:: fortran
-
-        subroutine four_idx_novvvv
-
-
-    Retransform MO integrals for next CAS-SCF step
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_integrals_map`
-       * :c:data:`ao_num`
-       * :c:data:`list_core_inact_act`
-       * :c:data:`mo_integrals_map`
-       * :c:data:`mo_integrals_threshold`
-       * :c:data:`mo_num`
-       * :c:data:`n_core_inact_act_orb`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`ao_to_mo`
-       * :c:func:`ao_to_mo_novirt`
-       * :c:func:`map_append`
-       * :c:func:`map_shrink`
-       * :c:func:`map_sort`
-       * :c:func:`map_unique`
-       * :c:func:`two_e_integrals_index`
-
- 
-.. c:function:: four_idx_novvvv2:
-
-
-    File : :file:`mo_two_e_ints/four_idx_novvvv.irp.f`
-
-    .. code:: fortran
-
-        subroutine four_idx_novvvv2
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`core_inact_act_bitmask_4`
-       * :c:data:`full_ijkl_bitmask_4`
-       * :c:data:`n_int`
-       * :c:data:`virt_bitmask`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`add_integrals_to_map`
-
- 
-.. c:function:: four_idx_novvvv_old:
-
-
-    File : :file:`mo_two_e_ints/no_vvvv.irp.f`
-
-    .. code:: fortran
-
-        subroutine four_idx_novvvv_old
-
-
-    Retransform MO integrals for next CAS-SCF step
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`core_inact_act_bitmask_4`
-       * :c:data:`n_int`
-       * :c:data:`virt_bitmask`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mo_two_e_integrals_in_map`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`add_integrals_to_map`
-       * :c:func:`add_integrals_to_map_no_exit_34`
-       * :c:func:`add_integrals_to_map_three_indices`
-
- 
 .. c:function:: void get_mo_erf_map_size(void)
 
 
@@ -2831,36 +2300,6 @@ Subroutines / functions
        * :c:func:`get_mo_two_e_integrals_ij`
 
  
-.. c:function:: get_mo_two_e_integrals_coulomb_ii:
-
-
-    File : :file:`mo_two_e_ints/map_integrals.irp.f`
-
-    .. code:: fortran
-
-        subroutine get_mo_two_e_integrals_coulomb_ii(k,l,sze,out_val,map)
-
-
-    Returns multiple integrals <ki|li>
-    k(1)i(2) 1/r12 l(1)i(2) :: out_val(i1)
-    for k,l fixed.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mo_two_e_integrals_in_map`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`fock_operator_closed_shell_ref_bitmask`
-       * :c:data:`fock_wee_closed_shell`
-
- 
 .. c:function:: void get_mo_two_e_integrals_erf(void)
 
 
@@ -3018,36 +2457,6 @@ Subroutines / functions
        * :c:func:`isort`
        * :c:func:`map_get_many`
        * :c:func:`two_e_integrals_index`
-
- 
-.. c:function:: get_mo_two_e_integrals_exch_ii:
-
-
-    File : :file:`mo_two_e_ints/map_integrals.irp.f`
-
-    .. code:: fortran
-
-        subroutine get_mo_two_e_integrals_exch_ii(k,l,sze,out_val,map)
-
-
-    Returns multiple integrals <ki|il>
-    k(1)i(2) 1/r12 i(1)l(2) :: out_val(i1)
-    for k,l fixed.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mo_two_e_integrals_in_map`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`fock_operator_closed_shell_ref_bitmask`
-       * :c:data:`fock_wee_closed_shell`
 
  
 .. c:function:: void get_mo_two_e_integrals_i1j1(void)

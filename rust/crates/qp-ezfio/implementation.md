@@ -75,8 +75,7 @@ Results (2026-11-11, rustc/cargo 1.92.0, laptop):
   failed**, ~0.2 s of test time (the pre-swap count was 59: the eight
   `tests/parity.rs` cases are gone, the golden suite gained one);
 - clippy `-D warnings`: clean; `cargo fmt --check`: clean;
-- `cargo test --workspace`: green (qp-cli, qp-input, qp-types, qp-zmq
-  unaffected).
+- `cargo test --workspace`: green (qp-cli, qp-input, qp-types unaffected).
 
 Fixture provenance was re-verified before the swap: rebuilding both corpora
 from `tests/fixtures/src` with gfortran 16.2.0 and OCaml 5.3.0 reproduced

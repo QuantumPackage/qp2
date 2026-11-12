@@ -54,18 +54,6 @@ BEGIN_PROVIDER [ double precision, psi_l_coef_bi_ortho, (N_det,N_states) ]
       endif
     endif
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer                        :: ierr
-    call     MPI_BCAST( psi_l_coef_bi_ortho, size(psi_l_coef_bi_ortho), MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read psi_l_coef_bi_ortho with MPI'
-    endif
-  IRP_ENDIF
 END_PROVIDER
 
 
@@ -123,18 +111,6 @@ BEGIN_PROVIDER [ double precision, psi_r_coef_bi_ortho, (N_det,N_states) ]
       endif
     endif
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer                        :: ierr
-    call     MPI_BCAST( psi_r_coef_bi_ortho, size(psi_r_coef_bi_ortho), MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read psi_r_coef_bi_ortho with MPI'
-    endif
-  IRP_ENDIF
 END_PROVIDER
 
 

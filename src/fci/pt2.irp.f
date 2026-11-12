@@ -53,15 +53,11 @@ program pt2
   ! Building them here, serially, makes every guard a no-op for the
   ! rest of the program.
   PROVIDE mo_two_e_integrals_jj
-  if (.not. is_zmq_slave) then
-     read_wf = .True.
-     threshold_generators = 1.d0
-     SOFT_TOUCH read_wf threshold_generators
-     PROVIDE psi_energy
-     call run
-  else
-     call run_slave_cipsi
-  endif
+  read_wf = .True.
+  threshold_generators = 1.d0
+  SOFT_TOUCH read_wf threshold_generators
+  PROVIDE psi_energy
+  call run
 end program pt2
 
 subroutine run
@@ -96,7 +92,7 @@ subroutine run
   if (do_pt2) then
      call pt2_stochastic(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, relative_error, 0) ! Stochastic PT2
   else
-     call ZMQ_selection(0, pt2_data)
+     call omp_selection(0, pt2_data)
   endif
 
   call print_summary(psi_energy_with_nucl_rep(1:N_states), &

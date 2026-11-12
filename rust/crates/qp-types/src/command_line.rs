@@ -12,10 +12,9 @@
 //! layer is therefore not ported.
 //!
 //! Only `qp_edit` ([`EditArgs`]) and `qp_run` ([`RunArgs`]) keep their
-//! `clap` structs in this shared crate; `qp_create_ezfio`,
-//! `qp_set_mo_class` and `qp_tunnel` carry their own structs in their
-//! binaries (wave S2.1), since their manual validation order is
-//! tool-specific.
+//! `clap` structs in this shared crate; `qp_create_ezfio` and
+//! `qp_set_mo_class` carry their own structs in their binaries (wave
+//! S2.1), since their manual validation order is tool-specific.
 //!
 //! # Exit codes
 //!
@@ -177,9 +176,6 @@ impl EditArgs {
 #[derive(Debug, Clone, Parser)]
 #[command(name = "qp_run", disable_version_flag = true)]
 pub struct RunArgs {
-    /// Slave mode (read `work/qp_run_address`).
-    #[arg(short = 's', long = "slave", action = ArgAction::SetTrue)]
-    pub slave: bool,
     /// Prefix before the program, e.g. `gdb` or `valgrind`.
     #[arg(short = 'p', long = "prefix", value_name = "<string>")]
     pub prefix: Option<String>,
@@ -194,8 +190,6 @@ pub struct RunArgs {
 /// Validated `qp_run` arguments.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RunConfig {
-    /// `-s`.
-    pub slave: bool,
     /// `-p`.
     pub prefix: Option<String>,
     /// The program name (first anonymous argument).
@@ -213,7 +207,6 @@ impl RunArgs {
     /// before any work.
     pub fn validate(self) -> RunConfig {
         RunConfig {
-            slave: self.slave,
             prefix: self.prefix,
             program: self.program,
             ezfio_dir: self.ezfio_dir,
@@ -330,8 +323,7 @@ mod tests {
             extra.contains("unexpected argument 'extra' found"),
             "{extra}"
         );
-        let config = run(&["qp_run", "-s", "-p", "gdb", "scf", "dir"]).unwrap();
-        assert!(config.slave);
+        let config = run(&["qp_run", "-p", "gdb", "scf", "dir"]).unwrap();
         assert_eq!(config.prefix.as_deref(), Some("gdb"));
         assert_eq!(config.program, "scf");
         assert_eq!(config.ezfio_dir, "dir");

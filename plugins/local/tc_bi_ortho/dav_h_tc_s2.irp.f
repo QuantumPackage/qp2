@@ -119,9 +119,7 @@ subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N
          + 4.5d0*(N_st_diag*itermax)**2           &! h,y,y_s,s_, s_tmp
          + 2.d0*(N_st_diag*itermax)               &! s2,lambda
          + 1.d0*(N_st_diag)                       &! residual_norm
-                                                   ! In H_S2_u_0_nstates_zmq
-         + 3.d0*(N_st_diag*N_det)                 &! u_t, v_t, s_t on collector
-         + 3.d0*(N_st_diag*N_det)                 &! u_t, v_t, s_t on slave
+         + 3.d0*(N_st_diag*N_det)                 &! u_t, v_t, s_t in H_S2_u_0_nstates
          + 0.5d0*maxab                            &! idx0 in H_S2_u_0_nstates_openmp_work_*
          + nproc_target *                         &! In OMP section
            ( 1.d0*(N_int*maxab)                   &! buffer

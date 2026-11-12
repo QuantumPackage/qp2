@@ -28,7 +28,7 @@ pt2
     :columns: 3 
  
     * :c:data:`all_mo_integrals` 
-    * :c:data:`is_zmq_slave` 
+    * :c:data:`mo_two_e_integrals_jj` 
     * :c:data:`psi_energy` 
     * :c:data:`read_wf` 
     * :c:data:`threshold_generators` 
@@ -39,19 +39,12 @@ pt2
     :columns: 3 
  
     * :c:func:`run` 
-    * :c:func:`run_slave_cipsi` 
  
  Touches: 
  
  .. hlist:: 
     :columns: 3 
  
-    * :c:data:`n_det_generators` 
-    * :c:data:`n_det_selectors` 
-    * :c:data:`distributed_davidson` 
-    * :c:data:`psi_coef` 
-    * :c:data:`psi_det` 
-    * :c:data:`pt2_e0_denominator` 
     * :c:data:`pt2_match_weight` 
     * :c:data:`pt2_overlap` 
     * :c:data:`pt2_stoch_istate` 

@@ -12,8 +12,7 @@
 //! and runs the binary Cargo built (`CARGO_BIN_EXE_qp_run`) with `QP_ROOT`
 //! pointing at it. The environment is built from scratch — every variable the
 //! tool reads is set or removed explicitly — so the developer's shell cannot
-//! influence a test, and `QP_NIC` is pinned to the loopback interface so the
-//! advertised address is always `tcp://127.0.0.1:<port>`.
+//! influence a test.
 //!
 //! # Why the output goes to files, not pipes
 //!
@@ -42,19 +41,6 @@ pub const BIN: &str = env!("CARGO_BIN_EXE_qp_run");
 /// else in a fixture run is milliseconds. The deadline exists so a regression
 /// is a failed assertion after seconds, never a hung test.
 pub const TIMEOUT: Duration = Duration::from_secs(30);
-
-/// Name of the loopback interface for `QP_NIC`.
-///
-/// Pinning it makes `TaskServer.ip_address` return `127.0.0.1` without a
-/// resolver call, so the advertised address is deterministic and the tests do
-/// not depend on the machine's host name resolving.
-pub fn loopback_interface() -> &'static str {
-    if cfg!(target_os = "macos") {
-        "lo0"
-    } else {
-        "lo"
-    }
-}
 
 /// Counter that keeps the captured-output file names unique in one process.
 static LOG_NUMBER: AtomicU64 = AtomicU64::new(0);
@@ -166,26 +152,6 @@ impl Fixture {
         command
     }
 
-    /// Like [`Self::command`], but the child reads one line of standard input
-    /// and then `exec`s the binary.
-    ///
-    /// `exec` keeps the pid, so [`Running::id`] is the pid the port window is
-    /// computed from; the test can therefore bind a candidate port *before*
-    /// the binary computes its window (issue #393 tests). The child cannot
-    /// reach the binary before [`Running::release_gate`] is called.
-    pub fn gated_command(&self, args: &[&str]) -> Command {
-        let mut command = Command::new("/bin/sh");
-        command
-            .arg("-c")
-            .arg("read x || exit 1; exec \"$@\"")
-            .arg("sh")
-            .arg(BIN)
-            .args(args)
-            .stdin(Stdio::piped());
-        self.apply_env(&mut command);
-        command
-    }
-
     /// Run the binary once and wait up to [`TIMEOUT`].
     pub fn run(&self, args: &[&str]) -> Outcome {
         Running::spawn(self.command(args), &self.logs()).wait(TIMEOUT)
@@ -204,16 +170,13 @@ impl Fixture {
         };
         command
             .env("QP_ROOT", &self.root)
-            .env("QP_NIC", loopback_interface())
             .env("QP_GIT_SHA1", "0000000")
             .env("QP_GIT_DATE", "1970-01-01")
             .env("QP_GIT_MESSAGE", "integration test")
             .env("QP_RUN_QP_EDIT", self.root.join("bin").join("qp_edit_ok"))
             .env("PATH", path)
             .env_remove("QP_RUN_ADDRESS")
-            .env_remove("QP_RUN_ADDRESS_MASTER")
-            .env_remove("QP_RUN_MAX_SCANS")
-            .env_remove("QP_TASK_DEBUG");
+            .env_remove("QP_RUN_ADDRESS_MASTER");
     }
 }
 
@@ -230,9 +193,6 @@ pub struct Running {
 impl Running {
     /// Spawn `command`, redirecting its standard output and error to
     /// `logs/<n>.out` and `logs/<n>.err`.
-    ///
-    /// The caller keeps ownership of standard input: [`Self::release_gate`]
-    /// uses it for [`Fixture::gated_command`].
     pub fn spawn(mut command: Command, logs: &Path) -> Self {
         std::fs::create_dir_all(logs).expect("create logs/");
         let number = LOG_NUMBER.fetch_add(1, Ordering::Relaxed);
@@ -252,22 +212,6 @@ impl Running {
     /// Pid of the launcher, also after the gating shell `exec`s it.
     pub fn id(&self) -> u32 {
         self.child.id()
-    }
-
-    /// Let a [`Fixture::gated_command`] proceed: send one line on its standard
-    /// input and close the pipe.
-    ///
-    /// # Panics
-    ///
-    /// When the command was not built by [`Fixture::gated_command`].
-    pub fn release_gate(&mut self) {
-        let mut stdin = self
-            .child
-            .stdin
-            .take()
-            .expect("release_gate needs a gated_command");
-        stdin.write_all(b"\n").expect("write the gate line");
-        // Dropping `stdin` closes the pipe, so the exec'd binary sees EOF.
     }
 
     /// Wait for the process to exit, at most `timeout`.
@@ -377,28 +321,33 @@ pub fn observed(work: &Path) -> std::collections::BTreeMap<String, String> {
 /// The keys are:
 ///
 /// * `arg1` — the job's first argument, which must be the EZFIO directory;
-/// * `address` — `QP_RUN_ADDRESS` as the job sees it in its own environment;
-/// * `master` — `QP_RUN_ADDRESS_MASTER`, empty in master mode;
-/// * `file` — the content of `<work>/qp_run_address` *while* the job runs, so
-///   the test can compare it with the advertised address before `qp_run`
-///   removes it.
+/// * `address` — `QP_RUN_ADDRESS` as the job sees it; `UNSET` is expected
+///   (the task-server environment is gone);
+/// * `master` — `QP_RUN_ADDRESS_MASTER`; `UNSET` is expected;
+/// * `file` — whether `<work>/qp_run_address` exists *while* the job runs;
+///   `absent` is expected;
+/// * `workdir` — whether `<ezfio>/work` existed before the job created it;
+///   `absent` proves the launcher creates no `work/` (the Fortran
+///   executable does).
 pub fn observe_script(extra: &str) -> String {
     format!(
         "\
 dir=\"$1\"
+workdir=$([ -d \"$dir/work\" ] && echo present || echo absent)
+file=absent
+[ -f \"$dir/work/qp_run_address\" ] && file=present
+mkdir -p \"$dir/work\"
 {{
-printf 'arg1=%s\\n' \"$1\"
-printf 'address=%s\\n' \"${{QP_RUN_ADDRESS-}}\"
-printf 'master=%s\\n' \"${{QP_RUN_ADDRESS_MASTER-}}\"
-if [ -f \"$dir/work/qp_run_address\" ]; then
-  printf 'file=%s\\n' \"$(cat \"$dir/work/qp_run_address\")\"
-fi
+printf 'arg1=%s\n' \"$1\"
+printf 'address=%s\n' \"${{QP_RUN_ADDRESS-UNSET}}\"
+printf 'master=%s\n' \"${{QP_RUN_ADDRESS_MASTER-UNSET}}\"
+printf 'file=%s\n' \"$file\"
+printf 'workdir=%s\n' \"$workdir\"
 }} > \"$dir/work/observed\"
 {extra}"
     )
 }
 
-/// Read a captured file, substituting a description when it is missing.
 fn read_or_empty(path: &Path) -> String {
     std::fs::read_to_string(path)
         .unwrap_or_else(|error| format!("<unreadable {}: {error}>\n", path.display()))

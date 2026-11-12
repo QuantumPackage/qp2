@@ -48,7 +48,7 @@ Subroutines / functions
     
     Assumes that the determinants are in psi_det
     
-    istart, iend, ishift, istep are used in ZMQ parallelization.
+    istart, iend, ishift, istep split the work between the OpenMP threads.
 
     Needs:
 
@@ -463,7 +463,7 @@ Subroutines / functions
     
     Assumes that the determinants are in psi_det
     
-    istart, iend, ishift, istep are used in ZMQ parallelization.
+    istart, iend, ishift, istep split the work between the OpenMP threads.
 
     Needs:
 
@@ -874,7 +874,7 @@ Subroutines / functions
     THE DIAGONAL PART IS THE USUAL ONE FOR A GIVEN STATE
     Assumes that the determinants are in psi_det
     
-    istart, iend, ishift, istep are used in ZMQ parallelization.
+    istart, iend, ishift, istep split the work between the OpenMP threads.
 
     Needs:
 

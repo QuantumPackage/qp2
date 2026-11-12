@@ -131,7 +131,6 @@ NOISE = (
     r"^Date: ",
     r"^Wall time: ",
     r"^Git (Commit|Date  |SHA1  ): ",
-    r"^Task server running : ",
     r"^\.\. >>>>> \[ ",
     r"^\* Total available memory \(GB\)",
     r"^\* Target maximum memory \(GB\)",

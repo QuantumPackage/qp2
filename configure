@@ -223,7 +223,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="cmake zlib ninja zeromq f77zmq docopt resultsFile bats trexio armadillo openorb simple_gpu libcint"
+        PACKAGES="cmake zlib ninja docopt resultsFile bats trexio armadillo openorb simple_gpu libcint"
 fi
 
 
@@ -299,33 +299,6 @@ EOF
               (make -j 8 || make) && make check && make install
 EOF
  
-
-    elif [[ ${PACKAGE} = zeromq ]] ; then
-
-            execute << EOF
-              export CC=gcc
-              export CXX=g++
-              cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file qp2-dependencies/zeromq-4.2.5.tar.gz
-              cd zeromq-*
-              [[ "${SYSTEM}" = "Darwin" ]] && ./autogen.sh
-              ./configure --prefix="\$QP_ROOT" --without-libsodium --enable-libunwind=no
-              make -j 8
-              make install
-EOF
-
-
-    elif [[ ${PACKAGE} = f77zmq ]] ; then
-
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file qp2-dependencies/f77-zmq-4.3.?.tar.gz
-              cd f77-zmq-*
-              ./configure --prefix=\$QP_ROOT
-              export ZMQ_H="\$QP_ROOT"/include/zmq.h
-              make && make check && make install
-EOF
-
 
     elif [[ ${PACKAGE} = bse ]] ; then
 
@@ -429,31 +402,6 @@ if [[ ${NINJA} = $(not_found) ]] ; then
         fail
 fi
 
-ZEROMQ=$(find_lib -lzmq)
-if [[ ${ZEROMQ} = $(not_found) ]] ; then
-
-        MAKE=$(find_exe make)
-        if [[ ${MAKE} = $(not_found) ]] ; then
-                error "make is not installed."
-                fail
-        fi
-
-        M4=$(find_exe autoreconf)
-        if [[ ${M4} = $(not_found) ]] ; then
-                error "autoreconf is not installed."
-                fail
-        fi
-
-        M4=$(find_exe m4)
-        if [[ ${M4} = $(not_found) ]] ; then
-                error "m4 preprocesssor is not installed."
-                fail
-        fi
-
-        error "ZeroMQ (zeromq) is not installed."
-        fail
-fi
-
 TREXIO=$(find_lib -ltrexio)
 if [[ ${TREXIO} = $(not_found) ]] ; then
         error "TREXIO (trexio | trexio-nohdf5) is not installed. If you don't have HDF5, use trexio-nohdf5"
@@ -469,12 +417,6 @@ fi
 LIBCINT=$(find_lib -L"${QP_ROOT}"/lib -lcint -lm)
 if [[ ${LIBCINT} = $(not_found) ]] ; then
         error "libcint (libcint) is not installed."
-        fail
-fi
-
-F77ZMQ=$(find_lib -lzmq -lf77zmq -lpthread)
-if [[ ${F77ZMQ} = $(not_found) ]] ; then
-        error "Fortran binding of ZeroMQ (f77zmq) is not installed."
         fail
 fi
 

@@ -315,7 +315,6 @@ Subroutines / functions
        * :c:func:`make_s2_eigenfunction`
        * :c:func:`pt2_alloc`
        * :c:func:`pt2_dealloc`
-       * :c:func:`zmq_pt2`
 
     Touches:
 

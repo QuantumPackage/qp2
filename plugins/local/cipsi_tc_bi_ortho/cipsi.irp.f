@@ -105,7 +105,8 @@ subroutine run_cipsi
     else
       call pt2_dealloc(pt2_data)
       call pt2_alloc(pt2_data, N_states)
-      call ZMQ_selection(to_select, pt2_data)
+      call provide_for_tc_pt2
+      call omp_selection(to_select, pt2_data)
     endif
 
     N_iter += 1

@@ -1,7 +1,7 @@
 # PT2 on native OpenMP: benchmark and reproducibility contract
 
 Benchmark of the in-process OpenMP `pt2_stochastic` (the only PT2 path
-in this branch; the legacy ZeroMQ collector/slave is removed) on the
+in this branch; the legacy distributed collector/slave is removed) on the
 benzene fixture (Cholesky-reduced 2e integrals, 114 MOs, ~26 440
 determinants, 24 comb teeth).
 

@@ -19,7 +19,11 @@ stored in :c:data:`energy_iterations` (the variational energies) and
 limit, computed and printed by :c:func:`print_extrapolated_energy`,
 and the summary of the calculation is printed by
 :c:func:`print_summary` (or :c:func:`print_summary_tc` for the
-transcorrelated variant).
+transcorrelated variant). Both printers take the state irrep labels from
+:ref:`module_symmetry_det` when they are usable (a ``# Irrep`` row, with a
+``# Purity`` row when a state has no definite irrep, in the summary table;
+an ``Irrep:`` field in the extrapolation headings) and are unchanged
+otherwise; see the ``symmetry_det`` documentation.
  
  
  
@@ -205,6 +209,13 @@ Subroutines / functions
        * :c:func:`run_cipsi`
        * :c:func:`run_stochastic_cipsi`
 
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`pg_state_irrep_head`
+
  
 .. c:function:: void print_summary(void)
 
@@ -226,6 +237,7 @@ Subroutines / functions
        * :c:data:`csf_based`
        * :c:data:`do_pt2`
        * :c:data:`n_csf`
+       * :c:data:`pg_n_col`
        * :c:data:`s2_eig`
 
     Called by:

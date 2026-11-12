@@ -124,8 +124,6 @@ the implementation of:
 * The CIPSI selection (module :ref:`module_cipsi`)
 * The hybrid stochastic/deterministic PT2 correction (module
   :ref:`module_cipsi`)
-* The hybrid stochastic/deterministic matrix dressing (module
-  :ref:`module_dressing`)
 
 
 Extracting results for use with other codes

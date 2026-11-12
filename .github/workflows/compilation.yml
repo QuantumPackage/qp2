@@ -50,14 +50,12 @@ jobs:
          run: rustup toolchain install 1.92.0 --profile minimal --component rustfmt,clippy
        - name: Configuration
          run: |
-              # zlib, zeromq and f77zmq normally come from the
-              # qp2-config cache, written by the QP Configuration workflow
-              # (which runs on master only, so PRs against dev-stable can
-              # miss it). If the cache was not restored, install them here.
-              if ! ls lib/libzmq.so* >/dev/null 2>&1; then
+              # zlib normally comes from the qp2-config cache, written by
+              # the QP Configuration workflow (which runs on master only,
+              # so PRs against dev-stable can miss it). If the cache was
+              # not restored, install it here.
+              if ! ls lib/libz.* >/dev/null 2>&1; then
                 ./configure -i zlib || :
-                ./configure -i zeromq || :
-                ./configure -i f77zmq || :
               fi
               ./configure -i ninja || :
               ./configure -i docopt || :
@@ -71,6 +69,32 @@ jobs:
        - name: Compilation
          run: |
               bash -c "source quantum_package.rc ; exec ninja"
+       - name: Documentation no-diff (generated pages track the Fortran sources)
+         # Regenerates docs/source/modules, docs/source/programs and the
+         # provider index from the freshly built IRPF90_man pages and
+         # fails if the committed pages do not match: a Fortran change
+         # that moves a dependency must carry its docs regeneration.
+         run: |
+           # docopt is imported by scripts/module/module_handler.py; the
+           # runner's system python3 does not ship it.
+           python3 -c "import docopt" 2>/dev/null || \
+             sudo apt-get install -y --no-install-recommends python3-docopt
+           source quantum_package.rc
+           cd docs/source
+           PYTHONPATH="$QP_ROOT/scripts/module:$QP_ROOT/scripts/utility" \
+             python3 auto_generate.py
+           cd "$QP_ROOT"
+           # Installed plugins are symlinked into src/ and the generator
+           # deliberately skips symlinks, so the tracked plugin pages are
+           # pruned on a bare checkout; restore them (they are maintained
+           # outside the core-tree generator).
+           git ls-files --deleted -- docs/source/ | xargs -r git checkout --
+           out="$(git status --porcelain --untracked-files=all -- docs/source/)"
+           test -z "$out" || {
+             echo "docs/source is out of sync with the Fortran sources:"
+             echo "$out"
+             exit 1
+           }
 
 
 

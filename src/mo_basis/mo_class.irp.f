@@ -17,18 +17,6 @@ BEGIN_PROVIDER [ character*(32), mo_class , (mo_num) ]
       mo_class(:) = 'Active'
     endif
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST( mo_class, (mo_num)*32, MPI_CHARACTER, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read mo_class with MPI'
-    endif
-  IRP_ENDIF
 
 END_PROVIDER
 
@@ -54,18 +42,6 @@ BEGIN_PROVIDER [ integer, mo_symmetry , (mo_num) ]
       call ezfio_set_mo_basis_mo_symmetry(mo_symmetry)
     endif
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST( mo_symmetry, (mo_num), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read mo_symmetry with MPI'
-    endif
-  IRP_ENDIF
 
 !  call write_time(6)
 

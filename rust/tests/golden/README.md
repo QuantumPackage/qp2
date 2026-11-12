@@ -68,7 +68,7 @@ stdout, stderr, exit and the decompressed tree per
 - gzip containers: decompressed payload is the oracle (plan D6); the
   corpus and snapshots store it with mtime=0 level 9, snapshots as text.
 - Machine lines from tool output (see `NOISE` in the harness): `Date:`,
-  `Wall time:`, Git stamps, task-server address, memory budget, progress.
+  `Wall time:`, Git stamps, memory budget, progress.
 - `work/` scratch directory excluded from snapshots.
 - `OMP_NUM_THREADS=1` for every run (threaded BLAS reductions are not
   bit-reproducible).

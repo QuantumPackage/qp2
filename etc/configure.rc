@@ -16,8 +16,8 @@ _configure_Complete()
         return 0
         ;;
     -i)
-        COMPREPLY=( $(compgen -W "bats docopt ezfio f77zmq irpf90 libcint ninja\
-              resultsFile zeromq" -- $cur ) )
+        COMPREPLY=( $(compgen -W "bats docopt ezfio irpf90 libcint ninja\
+              resultsFile" -- $cur ) )
         return 0
         ;;
     -c)

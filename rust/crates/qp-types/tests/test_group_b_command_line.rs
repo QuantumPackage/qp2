@@ -3,10 +3,9 @@
 //!
 //! The expected messages are transcribed from the reference sources:
 //! `scripts/ezfio_interface/qp_edit_template` (the generated `qp_edit`) and
-//! `ocaml/qp_run.ml:232–270`. `qp_create_ezfio`, `qp_set_mo_class` and
-//! `qp_tunnel` are not here: their binaries parse with a
-//! statement-by-statement `getopt` port (P4) and pin that parser against
-//! renamed reference copies instead.
+//! `ocaml/qp_run.ml:232–270`. `qp_create_ezfio` and `qp_set_mo_class` are
+//! not here: their binaries parse with a statement-by-statement `getopt`
+//! port (P4) and pin that parser against renamed reference copies instead.
 //!
 //! The parsing rules were checked against the vendored `getopt`
 //! (`~/qp2/external/opampack/.../lib/getopt/getopt.ml`) with a standalone
@@ -154,14 +153,12 @@ fn run_matches_the_reference() {
     assert_eq!(
         run(&["qp_run", "scf", "dir"]).expect("two arguments"),
         RunConfig {
-            slave: false,
             prefix: None,
             program: "scf".to_owned(),
             ezfio_dir: "dir".to_owned(),
         }
     );
-    let config = run(&["qp_run", "-s", "-p", "gdb", "scf", "dir"]).expect("slave + prefix");
-    assert!(config.slave);
+    let config = run(&["qp_run", "-p", "gdb", "scf", "dir"]).expect("prefix");
     assert_eq!(config.prefix.as_deref(), Some("gdb"));
     assert_eq!(
         run(&["qp_run", "--prefix=valgrind", "scf", "dir"])

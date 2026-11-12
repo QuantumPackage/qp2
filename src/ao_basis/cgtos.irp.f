@@ -40,18 +40,6 @@ BEGIN_PROVIDER [logical, use_cgtos]
       call ezfio_set_ao_basis_use_cgtos(use_cgtos)
     endif
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST( use_cgtos, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read use_cgtos with MPI'
-    endif
-  IRP_ENDIF
 
 !  call write_time(6)
 
@@ -82,19 +70,6 @@ BEGIN_PROVIDER [double precision, ao_expo_im, (ao_num, ao_prim_num_max)]
       call ezfio_get_ao_basis_ao_expo_im(ao_expo_im)
     endif
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST( ao_expo_im, ao_num*ao_prim_num_max,               &
-        MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read ao_expo_im with MPI'
-    endif
-  IRP_ENDIF
 
 END_PROVIDER
 
@@ -125,19 +100,6 @@ BEGIN_PROVIDER [double precision, ao_expo_pw, (3, ao_num, ao_prim_num_max)]
       call ezfio_get_ao_basis_ao_expo_pw(ao_expo_pw)
     endif
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST( ao_expo_pw, 3*ao_num*ao_prim_num_max,             &
-        MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read ao_expo_pw with MPI'
-    endif
-  IRP_ENDIF
 
 END_PROVIDER
 
@@ -168,19 +130,6 @@ BEGIN_PROVIDER [double precision, ao_expo_phase, (3, ao_num, ao_prim_num_max)]
       call ezfio_get_ao_basis_ao_expo_phase(ao_expo_phase)
     endif
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST( ao_expo_phase, 3*ao_num*ao_prim_num_max,          &
-        MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read ao_expo_phase with MPI'
-    endif
-  IRP_ENDIF
 
 END_PROVIDER
 

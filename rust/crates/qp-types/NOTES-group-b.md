@@ -175,8 +175,7 @@ Integer division truncates toward zero.
 (exit 2) and the other tools print the help twice. `qp_create_ezfio`
 takes only the first anonymous argument. `qp_edit` requires exactly one
 and reports `"EZFIO_DIR is missing"` otherwise; `qp_set_mo_class` says
-`"EZFIO_FILE is missing"` (reference wording), `qp_tunnel` says
-`"EZFIO_FILE or ADDRESS is missing"`, `qp_run` says
+`"EZFIO_FILE is missing"` (reference wording), `qp_run` says
 `"Inconsistent command line"`. `-c m1` is -1. `qp_edit -s` uses
 `Range.of_string` with no 10 000 cap.
 

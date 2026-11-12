@@ -9,7 +9,7 @@ subroutine orb_range_2_rdm_state_av_openmp(big_array,dim1,norb,list_orb,state_we
    !
    ! Assumes that the determinants are in psi_det
    !
-   ! istart, iend, ishift, istep are used in ZMQ parallelization.
+   ! istart, iend, ishift, istep split the work between the OpenMP threads.
    END_DOC
    integer, intent(in)             :: N_st,sze
    integer, intent(in)             :: dim1,norb,list_orb(norb),ispin

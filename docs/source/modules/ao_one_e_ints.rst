@@ -191,48 +191,6 @@ Providers
        * :c:data:`ao_sphe_pseudo_integrals_non_local`
 
  
-.. c:var:: ao_cart_to_sphe_num
-
-
-    File : :file:`ao_one_e_ints/ao_ortho_canonical.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: ao_cart_to_sphe_coef	(ao_num,ao_num)
-        integer	:: ao_cart_to_sphe_num	
-
-
-    Coefficients to go from cartesian to spherical coordinates in the current
-    basis set
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_l`
-       * :c:data:`ao_num`
-       * :c:data:`ao_power`
-       * :c:data:`cart_to_sphe_1`
-       * :c:data:`cart_to_sphe_2`
-       * :c:data:`cart_to_sphe_3`
-       * :c:data:`cart_to_sphe_4`
-       * :c:data:`cart_to_sphe_5`
-       * :c:data:`cart_to_sphe_6`
-       * :c:data:`cart_to_sphe_7`
-       * :c:data:`cart_to_sphe_8`
-       * :c:data:`cart_to_sphe_9`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_cart_to_sphe_inv`
-       * :c:data:`ao_cart_to_sphe_overlap`
-       * :c:data:`ao_ortho_canonical_coef`
-
- 
 .. c:var:: double ao_cart_to_sphe_overlap
 
 
@@ -690,6 +648,7 @@ Providers
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
+       * :c:data:`use_cgtos`
 
     Needed by:
 
@@ -729,6 +688,7 @@ Providers
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
+       * :c:data:`use_cgtos`
 
     Needed by:
 
@@ -768,6 +728,7 @@ Providers
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
+       * :c:data:`use_cgtos`
 
     Needed by:
 
@@ -808,6 +769,7 @@ Providers
        * :c:data:`ao_prim_num`
        * :c:data:`ao_pseudo_integrals`
        * :c:data:`do_pseudo`
+       * :c:data:`libcint_nuc_available`
        * :c:data:`n_pt_max_integrals`
        * :c:data:`nucl_charge`
        * :c:data:`nucl_coord`
@@ -992,6 +954,7 @@ Providers
        * :c:data:`ao_deriv2_x`
        * :c:data:`ao_num`
        * :c:data:`read_ao_integrals_kinetic`
+       * :c:data:`use_libcint_effective`
 
     Needed by:
 
@@ -1280,30 +1243,25 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: ao_overlap	(ao_num,ao_num)
-        double precision, allocatable	:: ao_overlap_x	(ao_num,ao_num)
-        double precision, allocatable	:: ao_overlap_y	(ao_num,ao_num)
-        double precision, allocatable	:: ao_overlap_z	(ao_num,ao_num)
 
 
     Overlap between atomic basis functions:
     
     :math:`\int \chi_i(r) \chi_j(r) dr`
+    
+    Read from disk if asked, otherwise computed by libcint when
+    :c:data:`use_libcint_effective` is true, and by the built-in code
+    otherwise.
 
     Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_coef_normalized_ordered_transp`
-       * :c:data:`ao_expo_ordered_transp`
-       * :c:data:`ao_nucl`
        * :c:data:`ao_num`
-       * :c:data:`ao_overlap_cgtos`
-       * :c:data:`ao_power`
-       * :c:data:`ao_prim_num`
-       * :c:data:`nucl_coord`
+       * :c:data:`ao_overlap_qp2`
        * :c:data:`read_ao_integrals_overlap`
-       * :c:data:`use_cgtos`
+       * :c:data:`use_libcint_effective`
 
     Needed by:
 
@@ -1399,7 +1357,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_overlap`
+       * :c:data:`ao_overlap_qp2`
 
  
 .. c:var:: double ao_overlap_cgtos_x
@@ -1439,7 +1397,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_overlap`
+       * :c:data:`ao_overlap_qp2`
 
  
 .. c:var:: double ao_overlap_cgtos_y
@@ -1479,7 +1437,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_overlap`
+       * :c:data:`ao_overlap_qp2`
 
  
 .. c:var:: double ao_overlap_cgtos_z
@@ -1519,7 +1477,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_overlap`
+       * :c:data:`ao_overlap_qp2`
 
  
 .. c:var:: double _Complex ao_overlap_complex
@@ -1579,22 +1537,26 @@ Providers
        * :c:data:`ao_overlap_complex`
 
  
-.. c:var:: double ao_overlap_x
+.. c:var:: double ao_overlap_qp2
 
 
     File : :file:`ao_one_e_ints/ao_overlap.irp.f`
 
     .. code:: fortran
 
-        double precision, allocatable	:: ao_overlap	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_qp2	(ao_num,ao_num)
         double precision, allocatable	:: ao_overlap_x	(ao_num,ao_num)
         double precision, allocatable	:: ao_overlap_y	(ao_num,ao_num)
         double precision, allocatable	:: ao_overlap_z	(ao_num,ao_num)
 
 
-    Overlap between atomic basis functions:
+    Overlap between atomic basis functions, computed by the built-in code:
     
     :math:`\int \chi_i(r) \chi_j(r) dr`
+    
+    Kept separate from :c:data:`ao_overlap` because the libcint engine does
+    not need it, and because the derivatives along :math:`x` , :math:`y`  and :math:`z`  are
+    only produced here.
 
     Needs:
 
@@ -1609,7 +1571,6 @@ Providers
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
-       * :c:data:`read_ao_integrals_overlap`
        * :c:data:`use_cgtos`
 
     Needed by:
@@ -1617,19 +1578,51 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_cart_to_sphe_overlap`
-       * :c:data:`ao_ortho_canonical_coef`
-       * :c:data:`ao_ortho_canonical_overlap`
-       * :c:data:`ao_overlap_complex`
-       * :c:data:`ao_sphe_overlap`
-       * :c:data:`mo_overlap`
-       * :c:data:`pg_col_diag`
-       * :c:data:`pg_xg`
-       * :c:data:`s_half`
-       * :c:data:`s_half_inv`
-       * :c:data:`s_inv`
-       * :c:data:`s_mo_coef`
-       * :c:data:`s_mo_sphe_coef`
+       * :c:data:`ao_overlap`
+
+ 
+.. c:var:: double ao_overlap_x
+
+
+    File : :file:`ao_one_e_ints/ao_overlap.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_overlap_qp2	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_x	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_y	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_z	(ao_num,ao_num)
+
+
+    Overlap between atomic basis functions, computed by the built-in code:
+    
+    :math:`\int \chi_i(r) \chi_j(r) dr`
+    
+    Kept separate from :c:data:`ao_overlap` because the libcint engine does
+    not need it, and because the derivatives along :math:`x` , :math:`y`  and :math:`z`  are
+    only produced here.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_normalized_ordered_transp`
+       * :c:data:`ao_expo_ordered_transp`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_overlap_cgtos`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`nucl_coord`
+       * :c:data:`use_cgtos`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_overlap`
 
  
 .. c:var:: double ao_overlap_y
@@ -1639,15 +1632,19 @@ Providers
 
     .. code:: fortran
 
-        double precision, allocatable	:: ao_overlap	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_qp2	(ao_num,ao_num)
         double precision, allocatable	:: ao_overlap_x	(ao_num,ao_num)
         double precision, allocatable	:: ao_overlap_y	(ao_num,ao_num)
         double precision, allocatable	:: ao_overlap_z	(ao_num,ao_num)
 
 
-    Overlap between atomic basis functions:
+    Overlap between atomic basis functions, computed by the built-in code:
     
     :math:`\int \chi_i(r) \chi_j(r) dr`
+    
+    Kept separate from :c:data:`ao_overlap` because the libcint engine does
+    not need it, and because the derivatives along :math:`x` , :math:`y`  and :math:`z`  are
+    only produced here.
 
     Needs:
 
@@ -1662,7 +1659,6 @@ Providers
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
-       * :c:data:`read_ao_integrals_overlap`
        * :c:data:`use_cgtos`
 
     Needed by:
@@ -1670,19 +1666,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_cart_to_sphe_overlap`
-       * :c:data:`ao_ortho_canonical_coef`
-       * :c:data:`ao_ortho_canonical_overlap`
-       * :c:data:`ao_overlap_complex`
-       * :c:data:`ao_sphe_overlap`
-       * :c:data:`mo_overlap`
-       * :c:data:`pg_col_diag`
-       * :c:data:`pg_xg`
-       * :c:data:`s_half`
-       * :c:data:`s_half_inv`
-       * :c:data:`s_inv`
-       * :c:data:`s_mo_coef`
-       * :c:data:`s_mo_sphe_coef`
+       * :c:data:`ao_overlap`
 
  
 .. c:var:: double ao_overlap_z
@@ -1692,15 +1676,19 @@ Providers
 
     .. code:: fortran
 
-        double precision, allocatable	:: ao_overlap	(ao_num,ao_num)
+        double precision, allocatable	:: ao_overlap_qp2	(ao_num,ao_num)
         double precision, allocatable	:: ao_overlap_x	(ao_num,ao_num)
         double precision, allocatable	:: ao_overlap_y	(ao_num,ao_num)
         double precision, allocatable	:: ao_overlap_z	(ao_num,ao_num)
 
 
-    Overlap between atomic basis functions:
+    Overlap between atomic basis functions, computed by the built-in code:
     
     :math:`\int \chi_i(r) \chi_j(r) dr`
+    
+    Kept separate from :c:data:`ao_overlap` because the libcint engine does
+    not need it, and because the derivatives along :math:`x` , :math:`y`  and :math:`z`  are
+    only produced here.
 
     Needs:
 
@@ -1715,7 +1703,6 @@ Providers
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
-       * :c:data:`read_ao_integrals_overlap`
        * :c:data:`use_cgtos`
 
     Needed by:
@@ -1723,19 +1710,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_cart_to_sphe_overlap`
-       * :c:data:`ao_ortho_canonical_coef`
-       * :c:data:`ao_ortho_canonical_overlap`
-       * :c:data:`ao_overlap_complex`
-       * :c:data:`ao_sphe_overlap`
-       * :c:data:`mo_overlap`
-       * :c:data:`pg_col_diag`
-       * :c:data:`pg_xg`
-       * :c:data:`s_half`
-       * :c:data:`s_half_inv`
-       * :c:data:`s_inv`
-       * :c:data:`s_mo_coef`
-       * :c:data:`s_mo_sphe_coef`
+       * :c:data:`ao_overlap`
 
  
 .. c:var:: double ao_pseudo_integrals
@@ -1762,6 +1737,7 @@ Providers
        * :c:data:`pseudo_klocmax`
        * :c:data:`pseudo_kmax`
        * :c:data:`read_ao_integrals_pseudo`
+       * :c:data:`use_cgtos`
 
     Needed by:
 
@@ -2109,6 +2085,7 @@ Providers
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
+       * :c:data:`use_cgtos`
 
     Needed by:
 
@@ -2148,6 +2125,7 @@ Providers
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
+       * :c:data:`use_cgtos`
 
     Needed by:
 
@@ -2187,6 +2165,7 @@ Providers
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
+       * :c:data:`use_cgtos`
 
     Needed by:
 
@@ -2725,7 +2704,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`nai_pol_mult_cgtos`
+       * :c:func:`nai_pol_mult_cgtos_lpref`
 
     Calls:
 
@@ -2876,6 +2855,24 @@ Subroutines / functions
     Computes the electron-nucleus attraction with two primitves cgtos.
     
     :math:`\langle g_i | \frac{1}{|r-R_c|} | g_j \rangle`
+    
+
+ 
+.. c:function:: void nai_pol_mult_cgtos_lpref(void)
+
+
+    File : :file:`ao_one_e_ints/one_e_coul_integrals_cgtos.irp.f`
+
+    .. code:: fortran
+
+        complex*16 function NAI_pol_mult_cgtos_lpref(Ae_center, Be_center, power_A, power_B, alpha, beta, &
+                                                     Ap_center, Bp_center, C_center, n_pt_in, lpref)
+
+
+    
+    $e^{\rm lpref} \langle g_i | \frac{1}{|r-R_c|} | g_j \rangle$ for two primitive cGTOs.
+    lpref (the logarithm of the plane-wave / phase prefactor) is added to the exponent of
+    the Gaussian-product factor before exponentiation, in crint_sum_shift.
     
 
     Needs:

@@ -878,7 +878,7 @@ def create_build_ninja_global(l_rag_inputs):
                  " && source etc/paths.rc && python3 scripts/rag/qp_rag.py build\"",
                  "  pool = console",
                  "  description = Building the RAG code-model corpus"
-                 " (22 irpf90 -J dumps + FTS5 index)",
+                 " (25 irpf90 -J dumps + FTS5 index)",
                  "",
                  "build {0}: rag {1}".format(l_rag_out, " ".join(l_rag_inputs)),
                  "build rag: phony {0}".format(l_rag_out),
