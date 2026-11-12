@@ -1,7 +1,6 @@
 cipsi_utils
 json
 perturbation
-zmq
 mpi
 iterations
 csf

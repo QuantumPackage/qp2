@@ -66,7 +66,7 @@ class H_apply(object):
     file = open(os.environ["QP_ROOT"]+'/src/determinants/h_apply.template.f','r')
     self.template = file.read()
     file.close()
-    file = open(os.environ["QP_ROOT"]+'/src/determinants/h_apply_nozmq.template.f','r')
+    file = open(os.environ["QP_ROOT"]+'/src/determinants/h_apply_extra.template.f','r')
     self.template += file.read()
     file.close()
 
@@ -445,46 +445,3 @@ class H_apply(object):
     for k in keywords:
       if k.startswith("omp_"):
         self[k] = ""
-
-
-class H_apply_zmq(H_apply):
-
-  def read_template(self):
-    file = open(os.environ["QP_ROOT"]+'/src/determinants/h_apply.template.f','r')
-    self.template = file.read()
-    file.close()
-    file = open(os.environ["QP_ROOT"]+'/src/determinants/h_apply_zmq.template.f','r')
-    self.template += file.read()
-    file.close()
-
-  def set_perturbation(self,pert):
-     H_apply.set_perturbation(self,pert)
-     self.data["printout_now"] = ""
-     self.data["printout_always"] = ""
-     self.data["decls_main"] = """  integer, intent(in)            :: N_st
-  double precision, intent(inout):: pt2(N_st)
-  double precision, intent(inout):: norm_pert(N_st)
-  double precision, intent(inout):: H_pert_diag(N_st)
-  double precision               :: delta_pt2(N_st), norm_psi(N_st), pt2_old(N_st)
-  PROVIDE N_det_generators
-  do k=1,N_st
-    pt2(k) = 0.d0
-    norm_pert(k) = 0.d0
-    H_pert_diag(k) = 0.d0
-    norm_psi(k) = 0.d0
-    energy(k) = %s(k)
-  enddo
-     """ % (self.energy)
-     self.data["copy_buffer"] = """
-    do i=1,N_det_generators
-      do k=1,N_st
-        pt2(k) = pt2(k) + pt2_generators(k,i)
-        norm_pert(k) = norm_pert(k) + norm_pert_generators(k,i)
-        H_pert_diag(k) = H_pert_diag(k) + H_pert_diag_generators(k,i)
-      enddo
-    enddo
-     """
-
-  def set_selection_pt2(self,pert):
-     H_apply.set_selection_pt2(self,pert)
-
