@@ -132,6 +132,56 @@ fn a_missing_ezfio_directory_is_reported() {
     );
 }
 
+/// `-p/--prefix` runs the job through the prefix, end to end: the prefix
+/// command receives exactly the program path and the EZFIO directory, and
+/// the job still runs with the EZFIO directory as its first argument.
+/// (The `gdb` special case of `qp_cli::launch::job_command` — `gdb --args `
+/// — has no real `gdb` on every test machine; the mapping itself is unit
+/// tested there.)
+#[test]
+fn the_prefix_is_run_before_the_job() {
+    let fixture = Fixture::new();
+    let seen = fixture.dir().join("prefix_seen");
+    fixture.shim(
+        "prefixer",
+        &format!("printf '%s\\n' \"$@\" > {}\nexec \"$@\"", seen.display()),
+    );
+    let prefix = fixture.root().join("bin").join("prefixer");
+    let program = fixture.program("scf", &observe_script("exit 0"));
+    let outcome = fixture.run(&[
+        "-p",
+        prefix.to_str().expect("UTF-8 path"),
+        "scf",
+        fixture.ezfio_str(),
+    ]);
+    assert_eq!(outcome.code(), 0, "{outcome}");
+
+    let prefix_args = std::fs::read_to_string(&seen).expect("the prefix ran");
+    let mut lines = prefix_args.lines();
+    assert_eq!(
+        lines.next(),
+        Some(program.to_str().expect("UTF-8 path")),
+        "the prefix receives the program path"
+    );
+    assert_eq!(
+        lines.next(),
+        Some(fixture.ezfio_str()),
+        "the prefix receives the EZFIO directory"
+    );
+    assert_eq!(
+        lines.next(),
+        None,
+        "the prefix receives exactly two arguments"
+    );
+
+    let observed = observed(&fixture.work());
+    assert_eq!(
+        observed.get("arg1").map(String::as_str),
+        Some(fixture.ezfio_str()),
+        "the job ran through the prefix with the EZFIO directory as $1"
+    );
+}
+
 /// An unknown program prints the visible choices on standard output and
 /// fails with the message `program not found in data/executables`, exit 2,
 /// before the banner.
