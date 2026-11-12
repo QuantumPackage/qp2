@@ -322,8 +322,9 @@ def _write(relative_path, text):
     """Write *text* to ``$QP_ROOT/<relative_path>``, creating directories."""
     path = os.path.join(QP_ROOT, relative_path)
     directory = os.path.dirname(path)
-    if not os.path.isdir(directory):
-        os.makedirs(directory)
+    # One `ei_handler.py` runs per module as a parallel ninja edge; all of
+    # them create this directory, so creation must be race-free.
+    os.makedirs(directory, exist_ok=True)
     with open(path, "w+") as f:
         f.write(text)
     return path
