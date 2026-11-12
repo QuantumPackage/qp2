@@ -11,10 +11,34 @@ No README.rst in this module; the providers and
 subroutines below are documented from the irpf90 man pages. 
  
  
+EZFIO parameters 
+---------------- 
+ 
+.. option:: mo_r_coef
+ 
+    right-coefficient of the i-th |AO| on the j-th |MO|
+ 
+ 
+.. option:: mo_l_coef
+ 
+    right-coefficient of the i-th |AO| on the j-th |MO|
+ 
+ 
+.. option:: mo_r_coef_read
+ 
+    right-coefficient of the i-th |AO| on the j-th |MO|
+ 
+ 
+.. option:: mo_l_coef_read
+ 
+    right-coefficient of the i-th |AO| on the j-th |MO|
+ 
+ 
+ 
 Providers 
 --------- 
  
-.. c:var:: angle_left_right
+.. c:var:: double angle_left_right
 
 
     File : :file:`bi_ortho_mos/overlap.irp.f`
@@ -38,7 +62,7 @@ Providers
 
 
  
-.. c:var:: max_angle_left_right
+.. c:var:: double max_angle_left_right
 
 
     File : :file:`bi_ortho_mos/overlap.irp.f`
@@ -62,7 +86,7 @@ Providers
 
 
  
-.. c:var:: mo_l_coef
+.. c:var:: double mo_l_coef
 
 
     File : :file:`bi_ortho_mos/mos_rl.irp.f`
@@ -92,11 +116,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_two_e_vartc_tot`
-       * :c:data:`diag_three_elem_hf`
-       * :c:data:`fock_3e_uhf_mo_a`
-       * :c:data:`fock_3e_uhf_mo_b`
-       * :c:data:`fock_3e_uhf_mo_cs`
+       * :c:data:`fock_3e_mo_a`
+       * :c:data:`fock_3e_mo_a_os`
+       * :c:data:`fock_3e_mo_b`
+       * :c:data:`fock_3e_mo_cs`
        * :c:data:`fock_a_tmp1_bi_ortho`
        * :c:data:`fock_a_tmp2_bi_ortho`
        * :c:data:`fock_a_tot_3e_bi_orth`
@@ -104,24 +127,38 @@ Providers
        * :c:data:`fock_b_tmp2_bi_ortho`
        * :c:data:`fock_b_tot_3e_bi_orth`
        * :c:data:`fock_cs_3e_bi_orth`
+       * :c:data:`fock_matrix_alpha_tc_mo_valence_eri`
+       * :c:data:`fock_matrix_beta_tc_mo_valence_eri`
        * :c:data:`fock_matrix_tc_ao_tot`
        * :c:data:`fock_matrix_tc_mo_alpha`
        * :c:data:`fock_matrix_tc_mo_beta`
-       * :c:data:`fock_matrix_vartc_ao_tot`
-       * :c:data:`fock_matrix_vartc_mo_alpha`
-       * :c:data:`fock_matrix_vartc_mo_beta`
+       * :c:data:`fock_matrix_tc_mo_core_eri`
        * :c:data:`fock_tc_reigvec_ao`
        * :c:data:`fqs_sqf_mo`
+       * :c:data:`int2_grad1_u12_bimo_t`
+       * :c:data:`int2_grad1_u12_bimo_t_old`
        * :c:data:`int2_grad1_u12_bimo_transp`
        * :c:data:`mo_bi_orth_bipole_x`
+       * :c:data:`mo_bi_ortho_eri_two_e_chemist`
        * :c:data:`mo_bi_ortho_one_e`
        * :c:data:`mo_bi_ortho_tc_one_e`
+       * :c:data:`mo_bi_ortho_tc_two_e_chemist`
        * :c:data:`mo_l_coef_transp`
+       * :c:data:`mo_l_core_coef`
+       * :c:data:`mo_l_valence_coef`
        * :c:data:`mo_v_ki_bi_ortho_erf_rk_cst_mu`
        * :c:data:`mo_x_v_ki_bi_ortho_erf_rk_cst_mu`
+       * :c:data:`mos_l_in_r_array_transp`
+       * :c:data:`nol_0e_naive`
+       * :c:data:`nol_0e_v0`
+       * :c:data:`nol_1e_naive`
+       * :c:data:`nol_1e_v0`
+       * :c:data:`nol_2e_naive`
+       * :c:data:`nol_2e_v0`
        * :c:data:`overlap_bi_ortho`
        * :c:data:`overlap_mo_r`
        * :c:data:`overlap_mo_r_mo`
+       * :c:data:`overlap_mo_read_r`
        * :c:data:`q_alpha`
        * :c:data:`q_beta`
        * :c:data:`tc_hf_energy`
@@ -130,9 +167,31 @@ Providers
        * :c:data:`tcscf_bi_ort_dm_ao_beta`
        * :c:data:`tcscf_density_matrix_ao_alpha`
        * :c:data:`tcscf_density_matrix_ao_beta`
+       * :c:data:`three_body_ints_bi_ort`
+       * :c:data:`three_e_3_idx_cycle_1_bi_ort`
+       * :c:data:`three_e_3_idx_cycle_2_bi_ort`
+       * :c:data:`three_e_3_idx_direct_bi_ort`
+       * :c:data:`three_e_3_idx_exch12_bi_ort`
+       * :c:data:`three_e_3_idx_exch12_bi_ort_new`
+       * :c:data:`three_e_3_idx_exch13_bi_ort`
+       * :c:data:`three_e_3_idx_exch23_bi_ort`
+       * :c:data:`three_e_4_idx_cycle_1_bi_ort_old`
+       * :c:data:`three_e_4_idx_cycle_2_bi_ort_old`
+       * :c:data:`three_e_4_idx_direct_bi_ort_old`
+       * :c:data:`three_e_4_idx_exch12_bi_ort_old`
+       * :c:data:`three_e_4_idx_exch13_bi_ort_old`
+       * :c:data:`three_e_4_idx_exch23_bi_ort_old`
+       * :c:data:`three_e_5_idx_cycle_1_bi_ort_old`
+       * :c:data:`three_e_5_idx_cycle_2_bi_ort_old`
+       * :c:data:`three_e_5_idx_direct_bi_ort`
+       * :c:data:`three_e_5_idx_direct_bi_ort_old`
+       * :c:data:`three_e_5_idx_exch12_bi_ort_old`
+       * :c:data:`three_e_5_idx_exch13_bi_ort_old`
+       * :c:data:`three_e_5_idx_exch23_bi_ort_old`
+       * :c:data:`two_e_tc_integral_alpha`
 
  
-.. c:var:: mo_l_coef_transp
+.. c:var:: double mo_l_coef_transp
 
 
     File : :file:`bi_ortho_mos/mos_rl.irp.f`
@@ -158,11 +217,75 @@ Providers
        :columns: 3
 
        * :c:data:`mo_bi_ortho_coul_e_chemist`
-       * :c:data:`mo_bi_ortho_tc_two_e_chemist`
        * :c:data:`mos_l_in_r_array`
 
  
-.. c:var:: mo_r_coef
+.. c:var:: double mo_l_core_coef
+
+
+    File : :file:`bi_ortho_mos/mos_rl.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_l_core_coef	(ao_num,mo_num)
+
+
+    mo_l_core_coef(i,j) = coefficient of the jth right MO on the ith AO
+    
+    BUT ONLY FOR THE n_core_orb FIRST ORBITALS
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`mo_l_coef`
+       * :c:data:`mo_num`
+       * :c:data:`n_core_orb`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`tcscf_bi_ort_core_dm_ao`
+
+ 
+.. c:var:: double mo_l_valence_coef
+
+
+    File : :file:`bi_ortho_mos/mos_rl.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_l_valence_coef	(ao_num,mo_num)
+
+
+    mo_l_valence_coef(i,j) = coefficient of the jth right MO on the ith AO
+    
+    BUT WHERE THE FIRST n_core_orb COLUMNS ARE ZERO
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`mo_l_coef`
+       * :c:data:`mo_num`
+       * :c:data:`n_core_orb`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`tcscf_bi_ort_valence_dm_ao_alpha`
+       * :c:data:`tcscf_bi_ort_valence_dm_ao_beta`
+
+ 
+.. c:var:: double mo_r_coef
 
 
     File : :file:`bi_ortho_mos/mos_rl.irp.f`
@@ -192,11 +315,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_two_e_vartc_tot`
-       * :c:data:`diag_three_elem_hf`
-       * :c:data:`fock_3e_uhf_mo_a`
-       * :c:data:`fock_3e_uhf_mo_b`
-       * :c:data:`fock_3e_uhf_mo_cs`
+       * :c:data:`fock_3e_mo_a`
+       * :c:data:`fock_3e_mo_a_os`
+       * :c:data:`fock_3e_mo_b`
+       * :c:data:`fock_3e_mo_cs`
        * :c:data:`fock_a_tmp1_bi_ortho`
        * :c:data:`fock_a_tmp2_bi_ortho`
        * :c:data:`fock_a_tot_3e_bi_orth`
@@ -204,26 +326,38 @@ Providers
        * :c:data:`fock_b_tmp2_bi_ortho`
        * :c:data:`fock_b_tot_3e_bi_orth`
        * :c:data:`fock_cs_3e_bi_orth`
+       * :c:data:`fock_matrix_alpha_tc_mo_valence_eri`
+       * :c:data:`fock_matrix_beta_tc_mo_valence_eri`
        * :c:data:`fock_matrix_tc_ao_tot`
        * :c:data:`fock_matrix_tc_mo_alpha`
        * :c:data:`fock_matrix_tc_mo_beta`
-       * :c:data:`fock_matrix_vartc_ao_tot`
-       * :c:data:`fock_matrix_vartc_mo_alpha`
-       * :c:data:`fock_matrix_vartc_mo_beta`
+       * :c:data:`fock_matrix_tc_mo_core_eri`
        * :c:data:`fock_tc_reigvec_ao`
-       * :c:data:`fock_vartc_eigvec_ao`
-       * :c:data:`fock_vartc_eigvec_mo`
        * :c:data:`fqs_sqf_mo`
+       * :c:data:`int2_grad1_u12_bimo_t`
+       * :c:data:`int2_grad1_u12_bimo_t_old`
        * :c:data:`int2_grad1_u12_bimo_transp`
        * :c:data:`mo_bi_orth_bipole_x`
+       * :c:data:`mo_bi_ortho_eri_two_e_chemist`
        * :c:data:`mo_bi_ortho_one_e`
        * :c:data:`mo_bi_ortho_tc_one_e`
+       * :c:data:`mo_bi_ortho_tc_two_e_chemist`
        * :c:data:`mo_r_coef_transp`
+       * :c:data:`mo_r_core_coef`
+       * :c:data:`mo_r_valence_coef`
        * :c:data:`mo_v_ki_bi_ortho_erf_rk_cst_mu`
        * :c:data:`mo_x_v_ki_bi_ortho_erf_rk_cst_mu`
+       * :c:data:`mos_l_in_r_array_transp`
+       * :c:data:`nol_0e_naive`
+       * :c:data:`nol_0e_v0`
+       * :c:data:`nol_1e_naive`
+       * :c:data:`nol_1e_v0`
+       * :c:data:`nol_2e_naive`
+       * :c:data:`nol_2e_v0`
        * :c:data:`overlap_bi_ortho`
        * :c:data:`overlap_mo_r`
        * :c:data:`overlap_mo_r_mo`
+       * :c:data:`overlap_mo_read_r`
        * :c:data:`q_alpha`
        * :c:data:`q_beta`
        * :c:data:`tc_hf_energy`
@@ -232,10 +366,31 @@ Providers
        * :c:data:`tcscf_bi_ort_dm_ao_beta`
        * :c:data:`tcscf_density_matrix_ao_alpha`
        * :c:data:`tcscf_density_matrix_ao_beta`
-       * :c:data:`vartc_hf_energy`
+       * :c:data:`three_body_ints_bi_ort`
+       * :c:data:`three_e_3_idx_cycle_1_bi_ort`
+       * :c:data:`three_e_3_idx_cycle_2_bi_ort`
+       * :c:data:`three_e_3_idx_direct_bi_ort`
+       * :c:data:`three_e_3_idx_exch12_bi_ort`
+       * :c:data:`three_e_3_idx_exch12_bi_ort_new`
+       * :c:data:`three_e_3_idx_exch13_bi_ort`
+       * :c:data:`three_e_3_idx_exch23_bi_ort`
+       * :c:data:`three_e_4_idx_cycle_1_bi_ort_old`
+       * :c:data:`three_e_4_idx_cycle_2_bi_ort_old`
+       * :c:data:`three_e_4_idx_direct_bi_ort_old`
+       * :c:data:`three_e_4_idx_exch12_bi_ort_old`
+       * :c:data:`three_e_4_idx_exch13_bi_ort_old`
+       * :c:data:`three_e_4_idx_exch23_bi_ort_old`
+       * :c:data:`three_e_5_idx_cycle_1_bi_ort_old`
+       * :c:data:`three_e_5_idx_cycle_2_bi_ort_old`
+       * :c:data:`three_e_5_idx_direct_bi_ort`
+       * :c:data:`three_e_5_idx_direct_bi_ort_old`
+       * :c:data:`three_e_5_idx_exch12_bi_ort_old`
+       * :c:data:`three_e_5_idx_exch13_bi_ort_old`
+       * :c:data:`three_e_5_idx_exch23_bi_ort_old`
+       * :c:data:`two_e_tc_integral_alpha`
 
  
-.. c:var:: mo_r_coef_transp
+.. c:var:: double mo_r_coef_transp
 
 
     File : :file:`bi_ortho_mos/mos_rl.irp.f`
@@ -261,13 +416,77 @@ Providers
        :columns: 3
 
        * :c:data:`mo_bi_ortho_coul_e_chemist`
-       * :c:data:`mo_bi_ortho_tc_two_e_chemist`
        * :c:data:`mos_l_grad_in_r_array`
        * :c:data:`mos_r_grad_in_r_array`
        * :c:data:`mos_r_in_r_array`
 
  
-.. c:var:: mos_l_grad_in_r_array
+.. c:var:: double mo_r_core_coef
+
+
+    File : :file:`bi_ortho_mos/mos_rl.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_r_core_coef	(ao_num,mo_num)
+
+
+    mo_r_core_coef(i,j) = coefficient of the jth right MO on the ith AO
+    
+    BUT ONLY FOR THE n_core_orb FIRST ORBITALS
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`mo_num`
+       * :c:data:`mo_r_coef`
+       * :c:data:`n_core_orb`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`tcscf_bi_ort_core_dm_ao`
+
+ 
+.. c:var:: double mo_r_valence_coef
+
+
+    File : :file:`bi_ortho_mos/mos_rl.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_r_valence_coef	(ao_num,mo_num)
+
+
+    mo_r_valence_coef(i,j) = coefficient of the jth right MO on the ith AO
+    
+    BUT WHERE THE FIRST n_core_orb COLUMNS ARE ZERO
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`mo_num`
+       * :c:data:`mo_r_coef`
+       * :c:data:`n_core_orb`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`tcscf_bi_ort_valence_dm_ao_alpha`
+       * :c:data:`tcscf_bi_ort_valence_dm_ao_beta`
+
+ 
+.. c:var:: double mos_l_grad_in_r_array
 
 
     File : :file:`bi_ortho_mos/grad_bi_ort_mos_in_r.irp.f`
@@ -301,7 +520,7 @@ Providers
        * :c:data:`mos_l_grad_in_r_array_transp_bis`
 
  
-.. c:var:: mos_l_grad_in_r_array_transp
+.. c:var:: double mos_l_grad_in_r_array_transp
 
 
     File : :file:`bi_ortho_mos/grad_bi_ort_mos_in_r.irp.f`
@@ -326,7 +545,7 @@ Providers
 
 
  
-.. c:var:: mos_l_grad_in_r_array_transp_bis
+.. c:var:: double mos_l_grad_in_r_array_transp_bis
 
 
     File : :file:`bi_ortho_mos/grad_bi_ort_mos_in_r.irp.f`
@@ -349,10 +568,10 @@ Providers
 
 
  
-.. c:var:: mos_l_in_r_array
+.. c:var:: double mos_l_in_r_array
 
 
-    File : :file:`bi_ortho_mos/bi_ort_mos_in_r.irp.f`
+    File : :file:`bi_ortho_mos/bi_ort_mos_in_r_old.irp.f`
 
     .. code:: fortran
 
@@ -377,11 +596,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`mos_l_in_r_array_transp`
-       * :c:data:`tc_scf_dm_in_r`
+       * :c:data:`mos_l_in_r_array_transp_old`
 
  
-.. c:var:: mos_l_in_r_array_transp
+.. c:var:: double mos_l_in_r_array_transp
 
 
     File : :file:`bi_ortho_mos/bi_ort_mos_in_r.irp.f`
@@ -389,9 +607,91 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: mos_l_in_r_array_transp	(n_points_final_grid,mo_num)
+        double precision, allocatable	:: mos_r_in_r_array_transp	(n_points_final_grid,mo_num)
 
 
-    mos_l_in_r_array_transp(i,j) = value of the jth mo on the ith grid point
+    
+    mos_l_in_r_array_transp(i,j) = value of the jth left-mo  on the ith grid point
+    mos_r_in_r_array_transp(i,j) = value of the jth right-mo on the ith grid point
+    
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_normalized_ordered_transp_per_nucl`
+       * :c:data:`ao_expo_ordered_transp_per_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power_ordered_transp_per_nucl`
+       * :c:data:`ao_prim_num`
+       * :c:data:`final_grid_points`
+       * :c:data:`mo_l_coef`
+       * :c:data:`mo_num`
+       * :c:data:`mo_r_coef`
+       * :c:data:`n_points_final_grid`
+       * :c:data:`nucl_aos_transposed`
+       * :c:data:`nucl_coord`
+       * :c:data:`nucl_n_aos`
+       * :c:data:`nucl_num`
+       * :c:data:`use_cgtos`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`fock_3e_mo_a_os`
+       * :c:data:`fock_3e_mo_cs`
+       * :c:data:`fock_a_tmp1_bi_ortho`
+       * :c:data:`fock_b_tmp1_bi_ortho`
+       * :c:data:`fock_cs_3e_bi_orth`
+       * :c:data:`nol_0e`
+       * :c:data:`nol_0e_naive`
+       * :c:data:`nol_0e_v0`
+       * :c:data:`nol_1e`
+       * :c:data:`nol_1e_naive`
+       * :c:data:`nol_1e_v0`
+       * :c:data:`nol_2e`
+       * :c:data:`nol_2e_naive`
+       * :c:data:`nol_2e_v0`
+       * :c:data:`three_body_ints_bi_ort`
+       * :c:data:`three_e_3_idx_cycle_1_bi_ort`
+       * :c:data:`three_e_3_idx_cycle_2_bi_ort`
+       * :c:data:`three_e_3_idx_direct_bi_ort`
+       * :c:data:`three_e_3_idx_exch12_bi_ort`
+       * :c:data:`three_e_3_idx_exch12_bi_ort_new`
+       * :c:data:`three_e_3_idx_exch13_bi_ort`
+       * :c:data:`three_e_3_idx_exch23_bi_ort`
+       * :c:data:`three_e_4_idx_cycle_1_bi_ort_old`
+       * :c:data:`three_e_4_idx_cycle_2_bi_ort_old`
+       * :c:data:`three_e_4_idx_direct_bi_ort`
+       * :c:data:`three_e_4_idx_direct_bi_ort_n4`
+       * :c:data:`three_e_4_idx_direct_bi_ort_old`
+       * :c:data:`three_e_4_idx_exch12_bi_ort_old`
+       * :c:data:`three_e_4_idx_exch13_bi_ort_old`
+       * :c:data:`three_e_4_idx_exch23_bi_ort_n4`
+       * :c:data:`three_e_4_idx_exch23_bi_ort_old`
+       * :c:data:`three_e_5_idx_cycle_1_bi_ort_old`
+       * :c:data:`three_e_5_idx_cycle_2_bi_ort_old`
+       * :c:data:`three_e_5_idx_direct_bi_ort`
+       * :c:data:`three_e_5_idx_direct_bi_ort_old`
+       * :c:data:`three_e_5_idx_exch12_bi_ort_old`
+       * :c:data:`three_e_5_idx_exch13_bi_ort_old`
+       * :c:data:`three_e_5_idx_exch23_bi_ort_old`
+
+ 
+.. c:var:: double mos_l_in_r_array_transp_old
+
+
+    File : :file:`bi_ortho_mos/bi_ort_mos_in_r_old.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mos_l_in_r_array_transp_old	(n_points_final_grid,mo_num)
+
+
+    mos_l_in_r_array_transp_old(i,j) = value of the jth mo on the ith grid point
 
     Needs:
 
@@ -402,42 +702,9 @@ Providers
        * :c:data:`mos_l_in_r_array`
        * :c:data:`n_points_final_grid`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`fock_3e_uhf_mo_a`
-       * :c:data:`fock_3e_uhf_mo_b`
-       * :c:data:`fock_3e_uhf_mo_cs`
-       * :c:data:`fock_a_tmp1_bi_ortho`
-       * :c:data:`fock_b_tmp1_bi_ortho`
-       * :c:data:`fock_cs_3e_bi_orth`
-       * :c:data:`three_body_ints_bi_ort`
-       * :c:data:`three_e_3_idx_cycle_1_bi_ort`
-       * :c:data:`three_e_3_idx_cycle_2_bi_ort`
-       * :c:data:`three_e_3_idx_direct_bi_ort`
-       * :c:data:`three_e_3_idx_exch12_bi_ort`
-       * :c:data:`three_e_3_idx_exch12_bi_ort_new`
-       * :c:data:`three_e_3_idx_exch13_bi_ort`
-       * :c:data:`three_e_3_idx_exch23_bi_ort`
-       * :c:data:`three_e_4_idx_cycle_1_bi_ort`
-       * :c:data:`three_e_4_idx_cycle_2_bi_ort`
-       * :c:data:`three_e_4_idx_direct_bi_ort`
-       * :c:data:`three_e_4_idx_exch12_bi_ort`
-       * :c:data:`three_e_4_idx_exch13_bi_ort`
-       * :c:data:`three_e_4_idx_exch23_bi_ort`
-       * :c:data:`three_e_5_idx_cycle_1_bi_ort`
-       * :c:data:`three_e_5_idx_cycle_2_bi_ort`
-       * :c:data:`three_e_5_idx_direct_bi_ort`
-       * :c:data:`three_e_5_idx_exch12_bi_ort`
-       * :c:data:`three_e_5_idx_exch13_bi_ort`
-       * :c:data:`three_e_5_idx_exch23_bi_ort`
-       * :c:data:`w1_diag_in_r`
-       * :c:data:`w1_l_in_r`
 
  
-.. c:var:: mos_r_grad_in_r_array
+.. c:var:: double mos_r_grad_in_r_array
 
 
     File : :file:`bi_ortho_mos/grad_bi_ort_mos_in_r.irp.f`
@@ -471,7 +738,7 @@ Providers
        * :c:data:`mos_r_grad_in_r_array_transp_bis`
 
  
-.. c:var:: mos_r_grad_in_r_array_transp
+.. c:var:: double mos_r_grad_in_r_array_transp
 
 
     File : :file:`bi_ortho_mos/grad_bi_ort_mos_in_r.irp.f`
@@ -496,7 +763,7 @@ Providers
 
 
  
-.. c:var:: mos_r_grad_in_r_array_transp_bis
+.. c:var:: double mos_r_grad_in_r_array_transp_bis
 
 
     File : :file:`bi_ortho_mos/grad_bi_ort_mos_in_r.irp.f`
@@ -519,10 +786,10 @@ Providers
 
 
  
-.. c:var:: mos_r_in_r_array
+.. c:var:: double mos_r_in_r_array
 
 
-    File : :file:`bi_ortho_mos/bi_ort_mos_in_r.irp.f`
+    File : :file:`bi_ortho_mos/bi_ort_mos_in_r_old.irp.f`
 
     .. code:: fortran
 
@@ -547,21 +814,102 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`mos_r_in_r_array_transp`
-       * :c:data:`tc_scf_dm_in_r`
+       * :c:data:`mos_r_in_r_array_transp_old`
 
  
-.. c:var:: mos_r_in_r_array_transp
+.. c:var:: double mos_r_in_r_array_transp
 
 
     File : :file:`bi_ortho_mos/bi_ort_mos_in_r.irp.f`
 
     .. code:: fortran
 
+        double precision, allocatable	:: mos_l_in_r_array_transp	(n_points_final_grid,mo_num)
         double precision, allocatable	:: mos_r_in_r_array_transp	(n_points_final_grid,mo_num)
 
 
-    mos_r_in_r_array_transp(i,j) = value of the jth mo on the ith grid point
+    
+    mos_l_in_r_array_transp(i,j) = value of the jth left-mo  on the ith grid point
+    mos_r_in_r_array_transp(i,j) = value of the jth right-mo on the ith grid point
+    
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_normalized_ordered_transp_per_nucl`
+       * :c:data:`ao_expo_ordered_transp_per_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power_ordered_transp_per_nucl`
+       * :c:data:`ao_prim_num`
+       * :c:data:`final_grid_points`
+       * :c:data:`mo_l_coef`
+       * :c:data:`mo_num`
+       * :c:data:`mo_r_coef`
+       * :c:data:`n_points_final_grid`
+       * :c:data:`nucl_aos_transposed`
+       * :c:data:`nucl_coord`
+       * :c:data:`nucl_n_aos`
+       * :c:data:`nucl_num`
+       * :c:data:`use_cgtos`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`fock_3e_mo_a_os`
+       * :c:data:`fock_3e_mo_cs`
+       * :c:data:`fock_a_tmp1_bi_ortho`
+       * :c:data:`fock_b_tmp1_bi_ortho`
+       * :c:data:`fock_cs_3e_bi_orth`
+       * :c:data:`nol_0e`
+       * :c:data:`nol_0e_naive`
+       * :c:data:`nol_0e_v0`
+       * :c:data:`nol_1e`
+       * :c:data:`nol_1e_naive`
+       * :c:data:`nol_1e_v0`
+       * :c:data:`nol_2e`
+       * :c:data:`nol_2e_naive`
+       * :c:data:`nol_2e_v0`
+       * :c:data:`three_body_ints_bi_ort`
+       * :c:data:`three_e_3_idx_cycle_1_bi_ort`
+       * :c:data:`three_e_3_idx_cycle_2_bi_ort`
+       * :c:data:`three_e_3_idx_direct_bi_ort`
+       * :c:data:`three_e_3_idx_exch12_bi_ort`
+       * :c:data:`three_e_3_idx_exch12_bi_ort_new`
+       * :c:data:`three_e_3_idx_exch13_bi_ort`
+       * :c:data:`three_e_3_idx_exch23_bi_ort`
+       * :c:data:`three_e_4_idx_cycle_1_bi_ort_old`
+       * :c:data:`three_e_4_idx_cycle_2_bi_ort_old`
+       * :c:data:`three_e_4_idx_direct_bi_ort`
+       * :c:data:`three_e_4_idx_direct_bi_ort_n4`
+       * :c:data:`three_e_4_idx_direct_bi_ort_old`
+       * :c:data:`three_e_4_idx_exch12_bi_ort_old`
+       * :c:data:`three_e_4_idx_exch13_bi_ort_old`
+       * :c:data:`three_e_4_idx_exch23_bi_ort_n4`
+       * :c:data:`three_e_4_idx_exch23_bi_ort_old`
+       * :c:data:`three_e_5_idx_cycle_1_bi_ort_old`
+       * :c:data:`three_e_5_idx_cycle_2_bi_ort_old`
+       * :c:data:`three_e_5_idx_direct_bi_ort`
+       * :c:data:`three_e_5_idx_direct_bi_ort_old`
+       * :c:data:`three_e_5_idx_exch12_bi_ort_old`
+       * :c:data:`three_e_5_idx_exch13_bi_ort_old`
+       * :c:data:`three_e_5_idx_exch23_bi_ort_old`
+
+ 
+.. c:var:: double mos_r_in_r_array_transp_old
+
+
+    File : :file:`bi_ortho_mos/bi_ort_mos_in_r_old.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mos_r_in_r_array_transp_old	(n_points_final_grid,mo_num)
+
+
+    mos_r_in_r_array_transp_old(i,j) = value of the jth mo on the ith grid point
 
     Needs:
 
@@ -572,43 +920,9 @@ Providers
        * :c:data:`mos_r_in_r_array`
        * :c:data:`n_points_final_grid`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`fock_3e_uhf_mo_a`
-       * :c:data:`fock_3e_uhf_mo_b`
-       * :c:data:`fock_3e_uhf_mo_cs`
-       * :c:data:`fock_a_tmp1_bi_ortho`
-       * :c:data:`fock_b_tmp1_bi_ortho`
-       * :c:data:`fock_cs_3e_bi_orth`
-       * :c:data:`three_body_ints_bi_ort`
-       * :c:data:`three_e_3_idx_cycle_1_bi_ort`
-       * :c:data:`three_e_3_idx_cycle_2_bi_ort`
-       * :c:data:`three_e_3_idx_direct_bi_ort`
-       * :c:data:`three_e_3_idx_exch12_bi_ort`
-       * :c:data:`three_e_3_idx_exch12_bi_ort_new`
-       * :c:data:`three_e_3_idx_exch13_bi_ort`
-       * :c:data:`three_e_3_idx_exch23_bi_ort`
-       * :c:data:`three_e_4_idx_cycle_1_bi_ort`
-       * :c:data:`three_e_4_idx_cycle_2_bi_ort`
-       * :c:data:`three_e_4_idx_direct_bi_ort`
-       * :c:data:`three_e_4_idx_exch12_bi_ort`
-       * :c:data:`three_e_4_idx_exch13_bi_ort`
-       * :c:data:`three_e_4_idx_exch23_bi_ort`
-       * :c:data:`three_e_5_idx_cycle_1_bi_ort`
-       * :c:data:`three_e_5_idx_cycle_2_bi_ort`
-       * :c:data:`three_e_5_idx_direct_bi_ort`
-       * :c:data:`three_e_5_idx_exch12_bi_ort`
-       * :c:data:`three_e_5_idx_exch13_bi_ort`
-       * :c:data:`three_e_5_idx_exch23_bi_ort`
-       * :c:data:`w1_diag_in_r`
-       * :c:data:`w1_in_r`
-       * :c:data:`w1_r_in_r`
 
  
-.. c:var:: overlap_bi_ortho
+.. c:var:: double overlap_bi_ortho
 
 
     File : :file:`bi_ortho_mos/overlap.irp.f`
@@ -640,7 +954,7 @@ Providers
        * :c:data:`angle_left_right`
 
  
-.. c:var:: overlap_diag_bi_ortho
+.. c:var:: double overlap_diag_bi_ortho
 
 
     File : :file:`bi_ortho_mos/overlap.irp.f`
@@ -672,7 +986,7 @@ Providers
        * :c:data:`angle_left_right`
 
  
-.. c:var:: overlap_mo_l
+.. c:var:: double overlap_mo_l
 
 
     File : :file:`bi_ortho_mos/overlap.irp.f`
@@ -702,9 +1016,12 @@ Providers
        :columns: 3
 
        * :c:data:`angle_left_right`
+       * :c:data:`fock_tc_reigvec_mo`
+       * :c:data:`overlap_mo_r_read_read`
+       * :c:data:`overlap_mo_read_r`
 
  
-.. c:var:: overlap_mo_l_mo
+.. c:var:: double overlap_mo_l_mo
 
 
     File : :file:`bi_ortho_mos/overlap.irp.f`
@@ -731,7 +1048,40 @@ Providers
 
 
  
-.. c:var:: overlap_mo_r
+.. c:var:: double overlap_mo_l_read_read
+
+
+    File : :file:`bi_ortho_mos/overlap.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: overlap_mo_r_read_read	(mo_num,mo_num)
+        double precision, allocatable	:: overlap_mo_l_read_read	(mo_num,mo_num)
+
+
+    overlap_mo_r_mo(j,i) = <MO_i|MO_R_j> over between reads
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`ao_overlap`
+       * :c:data:`mo_l_coef_read`
+       * :c:data:`mo_num`
+       * :c:data:`mo_r_coef_read`
+       * :c:data:`overlap_mo_r`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`overlap_mo_read_r`
+
+ 
+.. c:var:: double overlap_mo_r
 
 
     File : :file:`bi_ortho_mos/overlap.irp.f`
@@ -761,9 +1111,12 @@ Providers
        :columns: 3
 
        * :c:data:`angle_left_right`
+       * :c:data:`fock_tc_reigvec_mo`
+       * :c:data:`overlap_mo_r_read_read`
+       * :c:data:`overlap_mo_read_r`
 
  
-.. c:var:: overlap_mo_r_mo
+.. c:var:: double overlap_mo_r_mo
 
 
     File : :file:`bi_ortho_mos/overlap.irp.f`
@@ -790,7 +1143,136 @@ Providers
 
 
  
-.. c:var:: tcscf_bi_ort_dm_ao
+.. c:var:: double overlap_mo_r_read_read
+
+
+    File : :file:`bi_ortho_mos/overlap.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: overlap_mo_r_read_read	(mo_num,mo_num)
+        double precision, allocatable	:: overlap_mo_l_read_read	(mo_num,mo_num)
+
+
+    overlap_mo_r_mo(j,i) = <MO_i|MO_R_j> over between reads
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`ao_overlap`
+       * :c:data:`mo_l_coef_read`
+       * :c:data:`mo_num`
+       * :c:data:`mo_r_coef_read`
+       * :c:data:`overlap_mo_r`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`overlap_mo_read_r`
+
+ 
+.. c:var:: double overlap_mo_read_l
+
+
+    File : :file:`bi_ortho_mos/overlap.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: overlap_mo_read_r	(mo_num,mo_num)
+        double precision, allocatable	:: overlap_mo_read_l	(mo_num,mo_num)
+
+
+    overlap_mo_read_r_mo(j,i) = <MO_i|MO_R_j>
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`ao_overlap`
+       * :c:data:`mo_l_coef`
+       * :c:data:`mo_l_coef_read`
+       * :c:data:`mo_num`
+       * :c:data:`mo_r_coef`
+       * :c:data:`mo_r_coef_read`
+       * :c:data:`overlap_mo_r`
+       * :c:data:`overlap_mo_r_read_read`
+
+
+ 
+.. c:var:: double overlap_mo_read_r
+
+
+    File : :file:`bi_ortho_mos/overlap.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: overlap_mo_read_r	(mo_num,mo_num)
+        double precision, allocatable	:: overlap_mo_read_l	(mo_num,mo_num)
+
+
+    overlap_mo_read_r_mo(j,i) = <MO_i|MO_R_j>
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`ao_overlap`
+       * :c:data:`mo_l_coef`
+       * :c:data:`mo_l_coef_read`
+       * :c:data:`mo_num`
+       * :c:data:`mo_r_coef`
+       * :c:data:`mo_r_coef_read`
+       * :c:data:`overlap_mo_r`
+       * :c:data:`overlap_mo_r_read_read`
+
+
+ 
+.. c:var:: double tcscf_bi_ort_core_dm_ao
+
+
+    File : :file:`bi_ortho_mos/bi_density.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: tcscf_bi_ort_core_dm_ao	(ao_num,ao_num)
+
+
+    
+    core density matrix = density matrix built with only the doubly occupied core orbitals
+    
+    contains both alpha and beta electrons
+    
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`mo_l_core_coef`
+       * :c:data:`mo_r_core_coef`
+       * :c:data:`n_core_orb`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_two_e_core_integral`
+       * :c:data:`ao_two_e_core_integral_chol`
+       * :c:data:`tc_hf_energy`
+
+ 
+.. c:var:: double tcscf_bi_ort_dm_ao
 
 
     File : :file:`bi_ortho_mos/bi_density.irp.f`
@@ -819,7 +1301,7 @@ Providers
 
 
  
-.. c:var:: tcscf_bi_ort_dm_ao_alpha
+.. c:var:: double tcscf_bi_ort_dm_ao_alpha
 
 
     File : :file:`bi_ortho_mos/bi_density.irp.f`
@@ -832,6 +1314,8 @@ Providers
     TCSCF_bi_ort_dm_ao_alpha(i,j) = <Chi_0| a^dagger_i,alpha a_j,alpha |Phi_0> where i,j are AO basis.
     
     This is the equivalent of the alpha density of the HF Slater determinant, but with a couple of bi-orthonormal Slater determinant |Chi_0> and |Phi_0>
+    
+    WARNING : if core_tc_op then only the valence orbitals are considered
 
     Needs:
 
@@ -839,22 +1323,22 @@ Providers
        :columns: 3
 
        * :c:data:`ao_num`
+       * :c:data:`core_tc_op`
        * :c:data:`elec_alpha_num`
        * :c:data:`mo_l_coef`
        * :c:data:`mo_r_coef`
+       * :c:data:`tcscf_bi_ort_valence_dm_ao_alpha`
 
     Needed by:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`fock_3e_uhf_ao_a`
-       * :c:data:`fock_3e_uhf_ao_b`
        * :c:data:`tcscf_bi_ort_dm_ao`
        * :c:data:`tcscf_density_matrix_ao_alpha`
 
  
-.. c:var:: tcscf_bi_ort_dm_ao_beta
+.. c:var:: double tcscf_bi_ort_dm_ao_beta
 
 
     File : :file:`bi_ortho_mos/bi_density.irp.f`
@@ -867,6 +1351,78 @@ Providers
     TCSCF_bi_ort_dm_ao_beta(i,j) = <Chi_0| a^dagger_i,beta a_j,beta |Phi_0> where i,j are AO basis.
     
     This is the equivalent of the beta density of the HF Slater determinant, but with a couple of bi-orthonormal Slater determinant |Chi_0> and |Phi_0>
+    
+    WARNING : if core_tc_op then only the valence orbitals are considered
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`core_tc_op`
+       * :c:data:`elec_beta_num`
+       * :c:data:`mo_l_coef`
+       * :c:data:`mo_r_coef`
+       * :c:data:`tcscf_bi_ort_valence_dm_ao_beta`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`tcscf_bi_ort_dm_ao`
+       * :c:data:`tcscf_density_matrix_ao_beta`
+
+ 
+.. c:var:: double tcscf_bi_ort_valence_dm_ao_alpha
+
+
+    File : :file:`bi_ortho_mos/bi_density.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: tcscf_bi_ort_valence_dm_ao_alpha	(ao_num,ao_num)
+
+
+    
+    VALENCE ONLY alpha density matrix = density matrix built with only the NOT CORE ALPHA occupied orbitals
+    
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`elec_alpha_num`
+       * :c:data:`mo_l_valence_coef`
+       * :c:data:`mo_r_valence_coef`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_two_e_valence_integral_alpha`
+       * :c:data:`ao_two_e_valence_integral_alpha_chol`
+       * :c:data:`tcscf_bi_ort_dm_ao_alpha`
+       * :c:data:`tcscf_bi_ort_valence_dm_ao_full`
+
+ 
+.. c:var:: double tcscf_bi_ort_valence_dm_ao_beta
+
+
+    File : :file:`bi_ortho_mos/bi_density.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: tcscf_bi_ort_valence_dm_ao_beta	(ao_num,ao_num)
+
+
+    
+    VALENCE ONLY beta density matrix = density matrix built with only the NOT CORE BETA occupied orbitals
+    
 
     Needs:
 
@@ -875,25 +1431,56 @@ Providers
 
        * :c:data:`ao_num`
        * :c:data:`elec_beta_num`
-       * :c:data:`mo_l_coef`
-       * :c:data:`mo_r_coef`
+       * :c:data:`mo_l_valence_coef`
+       * :c:data:`mo_r_valence_coef`
 
     Needed by:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`fock_3e_uhf_ao_a`
-       * :c:data:`fock_3e_uhf_ao_b`
-       * :c:data:`tcscf_bi_ort_dm_ao`
-       * :c:data:`tcscf_density_matrix_ao_beta`
+       * :c:data:`ao_two_e_valence_integral_alpha`
+       * :c:data:`ao_two_e_valence_integral_alpha_chol`
+       * :c:data:`tcscf_bi_ort_dm_ao_beta`
+       * :c:data:`tcscf_bi_ort_valence_dm_ao_full`
+
+ 
+.. c:var:: double tcscf_bi_ort_valence_dm_ao_full
+
+
+    File : :file:`bi_ortho_mos/bi_density.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: tcscf_bi_ort_valence_dm_ao_full	(ao_num,ao_num)
+
+
+    
+    VALENCE ONLY alpha+beta density matrix = density matrix built with only the NOT CORE ALPHA+BETA occupied orbitals
+    
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`tcscf_bi_ort_valence_dm_ao_alpha`
+       * :c:data:`tcscf_bi_ort_valence_dm_ao_beta`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_two_e_valence_integral_alpha_chol`
 
  
  
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: ao_to_mo_bi_ortho:
+.. c:function:: void ao_to_mo_bi_ortho(void)
 
 
     File : :file:`bi_ortho_mos/mos_rl.irp.f`
@@ -924,11 +1511,13 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`fock_matrix_alpha_tc_mo_valence_eri`
+       * :c:data:`fock_matrix_beta_tc_mo_valence_eri`
        * :c:data:`fock_matrix_tc_mo_alpha`
        * :c:data:`fock_matrix_tc_mo_beta`
-       * :c:data:`fock_matrix_vartc_mo_alpha`
-       * :c:data:`fock_matrix_vartc_mo_beta`
+       * :c:data:`fock_matrix_tc_mo_core_eri`
        * :c:data:`fqs_sqf_mo`
+       * :c:data:`int2_grad1_u12_bimo_t`
        * :c:data:`int2_grad1_u12_bimo_transp`
        * :c:data:`mo_bi_orth_bipole_x`
        * :c:data:`mo_bi_ortho_one_e`
@@ -936,7 +1525,6 @@ Subroutines / functions
        * :c:data:`mo_v_ki_bi_ortho_erf_rk_cst_mu`
        * :c:data:`mo_x_v_ki_bi_ortho_erf_rk_cst_mu`
        * :c:func:`rh_tcscf_diis`
-       * :c:func:`test_fock_3e_uhf_ao`
 
     Calls:
 
@@ -946,10 +1534,10 @@ Subroutines / functions
        * :c:func:`dgemm`
 
  
-.. c:function:: give_all_mos_l_at_r:
+.. c:function:: void give_all_mos_l_at_r(void)
 
 
-    File : :file:`bi_ortho_mos/bi_ort_mos_in_r.irp.f`
+    File : :file:`bi_ortho_mos/bi_ort_mos_in_r_old.irp.f`
 
     .. code:: fortran
 
@@ -983,10 +1571,10 @@ Subroutines / functions
        * :c:func:`give_all_aos_at_r`
 
  
-.. c:function:: give_all_mos_r_at_r:
+.. c:function:: void give_all_mos_r_at_r(void)
 
 
-    File : :file:`bi_ortho_mos/bi_ort_mos_in_r.irp.f`
+    File : :file:`bi_ortho_mos/bi_ort_mos_in_r_old.irp.f`
 
     .. code:: fortran
 
@@ -1020,7 +1608,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_at_r`
 
  
-.. c:function:: mo_to_ao_bi_ortho:
+.. c:function:: void mo_to_ao_bi_ortho(void)
 
 
     File : :file:`bi_ortho_mos/mos_rl.irp.f`
@@ -1054,7 +1642,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`fock_matrix_tc_ao_tot`
-       * :c:data:`fock_matrix_vartc_ao_tot`
 
     Calls:
 
