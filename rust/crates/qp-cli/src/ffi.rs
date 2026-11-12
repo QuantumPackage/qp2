@@ -18,7 +18,6 @@
 //! thread, because `system(3)` is not async-signal-safe (see
 //! [`crate::signal`]).
 
-
 use std::fmt;
 use std::sync::atomic::{AtomicBool, Ordering};
 

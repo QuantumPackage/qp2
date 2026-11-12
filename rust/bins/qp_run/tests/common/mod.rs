@@ -193,9 +193,6 @@ pub struct Running {
 impl Running {
     /// Spawn `command`, redirecting its standard output and error to
     /// `logs/<n>.out` and `logs/<n>.err`.
-    ///
-    /// The caller keeps ownership of standard input: [`Self::release_gate`]
-    /// uses it for [`Fixture::gated_command`].
     pub fn spawn(mut command: Command, logs: &Path) -> Self {
         std::fs::create_dir_all(logs).expect("create logs/");
         let number = LOG_NUMBER.fetch_add(1, Ordering::Relaxed);

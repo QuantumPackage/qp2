@@ -35,7 +35,7 @@
 
 use std::fmt;
 use std::io;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 pub mod executables;
 pub mod ffi;
@@ -120,65 +120,9 @@ impl From<qp_ezfio::Error> for Error {
 /// Result type of this crate.
 pub type Result<T> = std::result::Result<T, Error>;
 
-/// The `<ezfio>/work` directory, created (with `work/empty = false`) when
-/// absent (`Qpackage.ezfio_work`, `ocaml/Qpackage.ml:137`).
-///
-/// The reference calls `Ezfio.set_work_empty false` through the external
-/// EZFIO library, which writes `F\n\n` (3 bytes, measured). This port writes
-/// `work/empty` through [`qp_ezfio::EzFio::set`], which writes `F\n`
-/// (2 bytes) until the logical-scalar writer is aligned with the reference
-/// (`qp-ezfio` branch note, commit `d5439a70`); the value is the same and
-/// every QP2 reader trims. Nothing else is written.
-///
-/// # Errors
-///
-/// [`Error::EzFio`] when `ezfio` is not an EZFIO tree (no `.version`) or the
-/// write fails.
-pub fn ezfio_work(ezfio: &Path) -> Result<PathBuf> {
-    let work = ezfio.join("work");
-    if !work.exists() {
-        let tree = qp_ezfio::EzFio::open(ezfio)?;
-        tree.set::<bool>("work", "empty", &false)?;
-    }
-    Ok(work)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    /// `ezfio_work` creates `work/` and the `empty` marker of an EZFIO tree.
-    #[test]
-    fn ezfio_work_creates_the_marker() {
-        let dir = tempfile::tempdir().expect("tempdir");
-        let ezfio = dir.path().join("h2.ezfio");
-        let tree = qp_ezfio::EzFio::create(&ezfio).expect("create");
-        drop(tree);
-        let work = ezfio_work(&ezfio).expect("work");
-        assert_eq!(work, ezfio.join("work"));
-        let marker = std::fs::read_to_string(work.join("empty")).expect("empty");
-        // The reference writes `F\n\n`; this port writes `F\n` until the
-        // qp-ezfio logical writer is aligned (see the function docs).
-        assert!(marker.starts_with('F'), "marker = {marker:?}");
-        // A second call is a no-op and keeps the existing marker.
-        std::fs::write(work.join("empty"), "F\n\n").expect("write");
-        let again = ezfio_work(&ezfio).expect("work again");
-        assert_eq!(again, work);
-        assert_eq!(
-            std::fs::read_to_string(work.join("empty")).expect("empty"),
-            "F\n\n"
-        );
-    }
-
-    /// A directory that is not an EZFIO tree is reported, not created.
-    #[test]
-    fn ezfio_work_rejects_a_non_ezfio_directory() {
-        let dir = tempfile::tempdir().expect("tempdir");
-        let ezfio = dir.path().join("plain");
-        std::fs::create_dir(&ezfio).expect("mkdir");
-        assert!(matches!(ezfio_work(&ezfio), Err(Error::EzFio(_))));
-        assert!(!ezfio.join("work").exists());
-    }
 
     /// The root failure text is the reference's, including its second line.
     #[test]
