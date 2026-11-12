@@ -131,30 +131,12 @@ BEGIN_PROVIDER [ double precision, mo_r_coef, (ao_num, mo_num) ]
   if (mpi_master) then
     call ezfio_has_bi_ortho_mos_mo_r_coef(exists)
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST(exists, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read mo_r_coef with MPI'
-    endif
-  IRP_ENDIF
 
   if (exists) then
     if (mpi_master) then
       call ezfio_get_bi_ortho_mos_mo_r_coef(mo_r_coef)
       write(*,*) 'Read mo_r_coef'
     endif
-    IRP_IF MPI
-      call MPI_BCAST(mo_r_coef, mo_num*ao_num, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-      if (ierr /= MPI_SUCCESS) then
-        stop 'Unable to read mo_r_coef with MPI'
-      endif
-    IRP_ENDIF
   else
 
     print*, 'mo_r_coef are mo_coef'
@@ -216,30 +198,12 @@ BEGIN_PROVIDER [ double precision, mo_l_coef, (ao_num, mo_num) ]
   if (mpi_master) then
     call ezfio_has_bi_ortho_mos_mo_l_coef(exists)
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST(exists, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read mo_l_coef with MPI'
-    endif
-  IRP_ENDIF
 
   if (exists) then
     if (mpi_master) then
       call ezfio_get_bi_ortho_mos_mo_l_coef(mo_l_coef)
       write(*,*) 'Read mo_l_coef'
     endif
-    IRP_IF MPI
-      call MPI_BCAST(mo_l_coef, mo_num*ao_num, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-      if (ierr /= MPI_SUCCESS) then
-        stop 'Unable to read mo_l_coef with MPI'
-      endif
-    IRP_ENDIF
   else
 
     print*, 'mo_l_coef are mo_coef'

@@ -47,7 +47,7 @@ subroutine H_tc_u_0_opt(v_0,u_0,N_st,sze)
   !
   ! Assumes that the determinants are in psi_det
   !
-  ! istart, iend, ishift, istep are used in ZMQ parallelization.
+  ! istart, iend, ishift, istep split the work between the OpenMP threads.
   END_DOC
   integer, intent(in)            :: N_st,sze
   double precision, intent(inout)  :: v_0(sze,N_st), u_0(sze,N_st)
@@ -64,7 +64,7 @@ subroutine H_tc_dagger_u_0_opt(v_0,u_0,N_st,sze)
   !
   ! Assumes that the determinants are in psi_det
   !
-  ! istart, iend, ishift, istep are used in ZMQ parallelization.
+  ! istart, iend, ishift, istep split the work between the OpenMP threads.
   END_DOC
   integer, intent(in)            :: N_st,sze
   double precision, intent(inout)  :: v_0(sze,N_st), u_0(sze,N_st)
@@ -82,7 +82,7 @@ subroutine H_tc_u_0_nstates_openmp(v_0,u_0,N_st,sze, do_right)
   !
   ! Assumes that the determinants are in psi_det
   !
-  ! istart, iend, ishift, istep are used in ZMQ parallelization.
+  ! istart, iend, ishift, istep split the work between the OpenMP threads.
   !
   ! if do_right == True then you compute H_TC |Psi>, else H_TC^T |Psi>
   END_DOC

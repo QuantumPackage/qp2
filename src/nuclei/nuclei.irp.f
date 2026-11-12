@@ -70,18 +70,6 @@ BEGIN_PROVIDER [ double precision, nucl_coord,  (nucl_num,3) ]
 
    endif
 
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-   IRP_IF MPI
-     include 'mpif.h'
-     integer                        :: ierr
-     call MPI_BCAST( nucl_coord, 3*nucl_num, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-     if (ierr /= MPI_SUCCESS) then
-       stop 'Unable to read nucl_coord with MPI'
-     endif
-   IRP_ENDIF
 
 END_PROVIDER
 
@@ -172,18 +160,6 @@ BEGIN_PROVIDER [ double precision, nuclear_repulsion ]
        endif
        print*, 'Read nuclear_repulsion'
      endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-     IRP_IF MPI
-      include 'mpif.h'
-      integer                        :: ierr
-      call MPI_BCAST( nuclear_repulsion, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-      if (ierr /= MPI_SUCCESS) then
-        stop 'Unable to read nuclear_repulsion with MPI'
-      endif
-     IRP_ENDIF
 
 
    else
@@ -257,22 +233,6 @@ END_PROVIDER
      close(10)
    endif
 
- IRP_IF MPI_DEBUG
-   print *,  irp_here, mpi_rank
-   call MPI_BARRIER(MPI_COMM_WORLD, ierr)
- IRP_ENDIF
- IRP_IF MPI
-  include 'mpif.h'
-  integer                        :: ierr
-  call MPI_BCAST( element_name, 128*4, MPI_CHARACTER, 0, MPI_COMM_WORLD, ierr)
-  if (ierr /= MPI_SUCCESS) then
-    stop 'Unable to read element_name with MPI'
-  endif
-  call MPI_BCAST( element_mass, 128, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-  if (ierr /= MPI_SUCCESS) then
-    stop 'Unable to read element_name with MPI'
-  endif
- IRP_ENDIF
 
 END_PROVIDER
 

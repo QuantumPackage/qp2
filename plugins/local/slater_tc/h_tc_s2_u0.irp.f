@@ -8,7 +8,7 @@ subroutine get_H_tc_s2_l0_r0(l_0, r_0, N_st, sze, energies, s2)
   !
   ! Assumes that the determinants are in psi_det
   !
-  ! istart, iend, ishift, istep are used in ZMQ parallelization.
+  ! istart, iend, ishift, istep split the work between the OpenMP threads.
   END_DOC
 
   use bitmasks
@@ -43,7 +43,7 @@ subroutine H_tc_s2_u_0_opt(v_0, s_0, u_0, N_st, sze)
   !
   ! Assumes that the determinants are in psi_det
   !
-  ! istart, iend, ishift, istep are used in ZMQ parallelization.
+  ! istart, iend, ishift, istep split the work between the OpenMP threads.
   END_DOC
 
   use bitmasks
@@ -68,7 +68,7 @@ subroutine H_tc_s2_dagger_u_0_opt(v_0, s_0, u_0, N_st, sze)
   !
   ! Assumes that the determinants are in psi_det
   !
-  ! istart, iend, ishift, istep are used in ZMQ parallelization.
+  ! istart, iend, ishift, istep split the work between the OpenMP threads.
   END_DOC
 
   use bitmasks
@@ -92,7 +92,7 @@ subroutine H_tc_s2_u_0_nstates_openmp(v_0, s_0, u_0, N_st, sze, do_right)
   !
   ! Assumes that the determinants are in psi_det
   !
-  ! istart, iend, ishift, istep are used in ZMQ parallelization.
+  ! istart, iend, ishift, istep split the work between the OpenMP threads.
   !
   ! if do_right == True then you compute H_TC |Psi>, else H_TC^T |Psi>
   END_DOC

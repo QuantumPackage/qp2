@@ -179,27 +179,10 @@ END_PROVIDER
     if(mpi_master) then
       call ezfio_has_jastrow_j1e_coef_ao2(exists)
     endif 
-    IRP_IF MPI_DEBUG
-      print *,  irp_here, mpi_rank
-      call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-    IRP_ENDIF
-    IRP_IF MPI
-      include 'mpif.h'
-      call MPI_BCAST(coef_fit2, (ao_num*ao_num), MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-      if (ierr /= MPI_SUCCESS) then
-        stop 'Unable to read j1e_coef_ao2 with MPI'
-      endif
-    IRP_ENDIF
     if(exists) then
       if(mpi_master) then
         write(6,'(A)') '.. >>>>> [ IO READ: j1e_coef_ao2 ] <<<<< ..'
         call ezfio_get_jastrow_j1e_coef_ao2(coef_fit2)
-        IRP_IF MPI
-          call MPI_BCAST(coef_fit2, (ao_num*ao_num), MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-          if (ierr /= MPI_SUCCESS) then
-            stop 'Unable to read j1e_coef_ao2 with MPI'
-          endif
-        IRP_ENDIF
       endif
     else
       call get_j1e_coef_fit_ao2(ao_num, coef_fit2)

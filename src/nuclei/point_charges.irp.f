@@ -20,18 +20,6 @@ BEGIN_PROVIDER [ integer, n_pts_charge  ]
       stop 1
     endif
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST( n_pts_charge, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read n_pts_charge with MPI'
-    endif
-  IRP_ENDIF
 
   call write_time(6)
 
@@ -52,31 +40,13 @@ BEGIN_PROVIDER [ double precision, pts_charge_z, (n_pts_charge) ]
     call ezfio_has_nuclei_pts_charge_z(exists)
   endif
 
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
 
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST(pts_charge_z, (n_pts_charge), MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read pts_charge_z with MPI'
-    endif
-  IRP_ENDIF
 
   if (exists) then
 
     if (mpi_master) then
       write(6,'(A)') '.. >>>>> [ IO READ: pts_charge_z ] <<<<< ..'
       call ezfio_get_nuclei_pts_charge_z(pts_charge_z)
-      IRP_IF MPI
-        call MPI_BCAST(pts_charge_z, (n_pts_charge), MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-        if (ierr /= MPI_SUCCESS) then
-          stop 'Unable to read pts_charge_z with MPI'
-        endif
-      IRP_ENDIF
     endif
 
   else
@@ -110,19 +80,7 @@ BEGIN_PROVIDER [ double precision, pts_charge_coord, (n_pts_charge,3) ]
     call ezfio_has_nuclei_pts_charge_coord(exists)
   endif
 
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
 
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST(pts_charge_coord, (n_pts_charge), MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read pts_charge_coord with MPI'
-    endif
-  IRP_ENDIF
 
   if (exists) then
 
@@ -138,12 +96,6 @@ BEGIN_PROVIDER [ double precision, pts_charge_coord, (n_pts_charge,3) ]
         enddo
       enddo
      deallocate(buffer)
-      IRP_IF MPI
-        call MPI_BCAST(pts_charge_coord, (n_pts_charge), MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-        if (ierr /= MPI_SUCCESS) then
-          stop 'Unable to read pts_charge_coord with MPI'
-        endif
-      IRP_ENDIF
     endif
 
   else
