@@ -14,7 +14,7 @@ Usage
 .. code:: bash
 
    qp_create_ezfio [-a] -b <string> [-c <int>] [-g <float>] [-h]
-      [-m <int>] [-o EZFIO_DIR] [-p <string>] [-q] [-x] [--] FILE
+      [-m <int>] [-o EZFIO_DIR] [-p <string>] [-x] [--] FILE
 
 
 .. option:: -a, --au
@@ -69,12 +69,6 @@ Usage
 .. option:: -p <string>, --pseudo=<string>
 
    Name of the pseudo-potential. Follows the same conventions as the basis set.
-
-
-.. option:: -q, --qmc
-
-   Write the |EZFIO| directory with the old conventions, for compatibility
-   with `QMC=Chem`_ and `QMCPack`_.
 
 
 .. option:: -x, --cartesian

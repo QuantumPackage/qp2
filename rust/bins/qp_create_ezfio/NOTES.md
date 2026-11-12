@@ -69,7 +69,7 @@ guessed:
    on `PATH` for the fake QP root, not just `qp_create_ezfio`.
 2. **`-h` prints the usage block with `argv[0]`** as invoked and exits 0. The
    usage line lists options in the order `[-a] -b <string> [-c <int>] [-g
-   <float>] [-h] [-m <int>] [-o EZFIO_DIR] [-p <string>] [-q] [-x] [--] FILE`.
+   <float>] [-h] [-m <int>] [-o EZFIO_DIR] [-p <string>] [-x] [--] FILE`.
 3. **Bad Z-matrix atom indices are tolerated**: `H` then `H 9 0.7` is accepted
    (all-zero geometry, no diagnostic), because `Atom.create` on a missing
    neighbour is not reached. Only syntax and unknown elements fail.

@@ -416,17 +416,8 @@ subroutine export_trexio_subroutine(update,full_path)
           enddo
           rc = trexio_write_ao_normalization(f(1), factor)
           deallocate(factor)
-        else if (ezfio_convention >= 20250211) then
-          rc = trexio_write_ao_normalization(f(1), ao_coef_normalization_factor)
         else
-
-          allocate(factor(ao_num))
-          do i=1,ao_num
-            l = ao_first_of_shell(ao_shell(i))
-            factor(i) = (ao_coef_normalized(i,1)+tiny(1.d0))/(ao_coef_normalized(l,1)+tiny(1.d0))
-          enddo
-          rc = trexio_write_ao_normalization(f(1), factor)
-          deallocate(factor)
+          rc = trexio_write_ao_normalization(f(1), ao_coef_normalization_factor)
         endif
 
         call trexio_assert(rc, TREXIO_SUCCESS)

@@ -14,7 +14,7 @@
 //! # Flow
 //!
 //! 1. the `QP_ROOT` guard, before any parsing;
-//! 2. the clap parse: `-o`/`-b`/`-c`/`-g`/`-m`/`-p`/`-q`/`-x`/`-a` plus the
+//! 2. the clap parse: `-o`/`-b`/`-c`/`-g`/`-m`/`-p`/`-x`/`-a` plus the
 //!    required single positional `FILE`; `-h`/`--help` print the help once
 //!    and exit 0 (the reference printed a captured block and continued);
 //! 3. the manual checks, in the reference's order (first failure wins):
@@ -88,9 +88,6 @@ struct Args {
     /// The pseudopotential specification.
     #[arg(short = 'p', long = "pseudo")]
     pseudo: Option<String>,
-    /// Use the 20210101 EZFIO convention.
-    #[arg(short = 'q', long = "qmc")]
-    qmc: bool,
     /// Request Cartesian AOs.
     #[arg(short = 'x', long = "cartesian")]
     cartesian: bool,
@@ -116,8 +113,6 @@ pub struct Options {
     pub multiplicity: i64,
     /// Pseudopotential specification (`-p`), if any.
     pub pseudo: Option<String>,
-    /// Use the 20210101 EZFIO convention (`-q`).
-    pub qmc: bool,
     /// Request Cartesian AOs (`-x`).
     pub cartesian: bool,
     /// Input XYZ or Z-matrix file (the `FILE` positional).
@@ -189,7 +184,6 @@ fn validate(args: &Args) -> Result<Options, ToolError> {
         ghost,
         multiplicity,
         pseudo: args.pseudo.clone(),
-        qmc: args.qmc,
         cartesian: args.cartesian,
         input: PathBuf::from(&args.file),
     })
@@ -315,7 +309,6 @@ mod tests {
             ghost: None,
             multiplicity: None,
             pseudo: None,
-            qmc: false,
             cartesian: false,
             file: "f.xyz".to_owned(),
         };

@@ -153,8 +153,8 @@ before any key of the group (section order above).
 
 gzip container bytes, file mtimes, directory entry order,
 `ezfio/{creation,user,library}`, `work/` content, and the
-`ezfio_files/ezfio_convention` int (20250211 default, 20210101 with
-`-q`; its value *is* part of the `create` fixture).
+`ezfio_files/ezfio_convention` int (fixed at 20250211; its value *is*
+part of the `create` fixture).
 
 ---
 
@@ -209,7 +209,7 @@ failing. `QP_ROOT` unset → `Qpackage.root` fails
   `-b <basis>` (mandatory; may be `base | Elem:base | i,Elem:base`,
   per-atom), `-a` (input in bohr), `-c <int>` (charge; negative written
   `m1`), `-g <float>` (ghost atoms), `-m <int>` (multiplicity, def 1),
-  `-p <pseudo>`, `-q` (old 20210101 conventions), `-x` (cartesian, 6d),
+  `-p <pseudo>`, `-x` (cartesian, 6d),
   anonymous `FILE` (mandatory). Default output name: the input with
   `.xyz`/`.zmt` → `.ezfio`, else `<file>.ezfio`. Refuses an existing
   directory (`<dir> already exists`), takes the **first** anonymous
@@ -286,7 +286,7 @@ A4/A9/A10/A11).
 
 | man page | drift vs source |
 |---|---|
-| `qp_create_ezfio.1` | documents `-d/--dummy=<float>` (source: `-g/--ghost`); documents `-x/--cart` (source: `--cartesian`); omits `-q/--qmc` |
+| `qp_create_ezfio.1` | documents `-d/--dummy=<float>` (source: `-g/--ghost`); documents `-x/--cart` (source: `--cartesian`) |
 | `qp_edit.1` | omits `-w`, `-r`, `-n`, `-s` |
 | `qp_print_basis.1` | **does not exist** |
 | `element_create_db.1` | **does not exist** |

@@ -26,8 +26,8 @@ master rank:
 * angular momenta above 12;
 * a basis in which the |AOs| of a shell do not share the same contraction
   (|QP| normalizes each |AO| separately, libcint has one coefficient set
-  per shell). This rejects files written with the legacy GAMESS
-  convention, `ezfio_convention < 20250211`;
+  per shell). This rejects a TREXIO file whose primitive normalization
+  depends on the AO powers (per-component normalization);
 * a basis in which an |AO| is not on the shell's center, or whose
   Cartesian powers are not in libcint's order (x, y, z, xx, xy, ...).
   Both are stored per |AO|, so libcint would silently return permuted

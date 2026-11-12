@@ -37,9 +37,9 @@ EZFIO parameters
  
 .. option:: ezfio_convention
  
-    Version of the EZFIO conventions
+    Version of the EZFIO conventions (20250211 is the only supported version; input files with an older convention are rejected at runtime, recreate them with qp_create_ezfio)
  
-    Default: 20210101
+    Default: 20250211
  
  
 Providers 
