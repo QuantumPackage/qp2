@@ -989,7 +989,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`nthreads_pt2`
        * :c:data:`pt2_e0_denominator`
        * :c:data:`pt2_f`
 

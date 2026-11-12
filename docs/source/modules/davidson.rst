@@ -891,6 +891,7 @@ Subroutines / functions
        * :c:data:`dressing_column_h`
        * :c:data:`expected_s2`
        * :c:data:`ezfio_work_dir`
+       * :c:data:`n_det`
        * :c:data:`n_int`
        * :c:data:`nproc`
        * :c:data:`nthreads_davidson`
