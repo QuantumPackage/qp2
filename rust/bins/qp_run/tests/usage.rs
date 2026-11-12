@@ -42,8 +42,10 @@ fn help_flag_prints_the_help_once_and_exits_zero() {
     assert_eq!(outcome.code(), 0, "{outcome}");
     assert!(outcome.stderr.is_empty(), "{outcome}");
     assert_eq!(outcome.stdout.matches("Usage:").count(), 1, "{outcome}");
-    // `clap`'s option rendering lists the reference's options.
-    assert!(outcome.stdout.contains("--slave"), "{outcome}");
+    // `clap`'s option rendering lists the launcher's options. The
+    // task-server flags (`-s/--slave` and friends) are gone with the task server.
+    assert!(!outcome.stdout.contains("--slave"), "{outcome}");
+    assert!(!outcome.stdout.contains("qp_run_address"), "{outcome}");
     assert!(outcome.stdout.contains("--prefix"), "{outcome}");
     assert!(outcome.stdout.contains("PROGRAM"), "{outcome}");
     assert!(outcome.stdout.contains("EZFIO_DIR"), "{outcome}");

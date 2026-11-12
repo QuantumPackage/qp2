@@ -4,9 +4,9 @@
 //! touches `<ezfio>/work/qpkill`; the running Fortran executable polls that
 //! file and stops. The script is not ported (its `qpkill`/`qpstop` file
 //! protocol belongs to the Fortran half), so [`qp_stop`] runs the shell
-//! command [`qp_zmq::port_window::qp_stop_command`] builds — a bare `qp_stop`
-//! resolved through `PATH`, with the EZFIO directory concatenated without
-//! quoting, exactly like the reference.
+//! command [`qp_stop_command`] — a bare `qp_stop` resolved through `PATH`,
+//! with the EZFIO directory concatenated without quoting, exactly like the
+//! reference.
 //!
 //! # Exit status
 //!
@@ -36,6 +36,13 @@ use crate::launch;
 /// [`crate::Error::Io`] when `/bin/sh` cannot be spawned; the script's exit
 /// status is deliberately ignored, as in the reference.
 pub fn qp_stop(ezfio: &str) -> Result<()> {
-    let command = qp_zmq::port_window::qp_stop_command(ezfio);
-    launch::run_command(&command, &[]).map(|_status| ())
+    launch::run_command(&qp_stop_command(ezfio), &[]).map(|_status| ())
+}
+
+/// The reference's `Sys.command ("qp_stop "^ezfio)`: a bare `qp_stop`
+/// resolved through `PATH`, the EZFIO directory concatenated verbatim,
+/// without quoting, exactly like the reference.
+#[must_use]
+pub fn qp_stop_command(ezfio: &str) -> String {
+    format!("qp_stop {ezfio}")
 }

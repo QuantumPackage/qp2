@@ -8,8 +8,6 @@ edition.workspace = true
 clap = { workspace = true }
 qp-cli = { path = "../../crates/qp-cli" }
 qp-types = { path = "../../crates/qp-types" }
-qp-zmq = { path = "../../crates/qp-zmq" }
-zmq = { workspace = true }
 
 [dev-dependencies]
 qp-ezfio = { path = "../../crates/qp-ezfio" }

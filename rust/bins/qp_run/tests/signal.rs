@@ -18,8 +18,10 @@ use std::time::Duration;
 use common::{Fixture, Running, TIMEOUT, wait_for_file};
 
 /// Job body: announce that it runs, then wait for the test's `go` file (with
-/// a bounded loop, so a broken test cannot leave it forever).
+/// a bounded loop, so a broken test cannot leave it forever). The launcher
+/// creates no `work/`; the job makes its own, as the Fortran programs do.
 const SLOW_JOB: &str = "\
+mkdir -p \"$1/work\"
 printf 'ready\\n' > \"$1/work/ready\"
 i=0
 while [ ! -f \"$1/work/go\" ] && [ \"$i\" -lt 600 ]; do

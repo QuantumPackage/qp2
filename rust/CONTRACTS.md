@@ -143,8 +143,8 @@ before any key of the group (section order above).
   must still write all three on create**: Fortran refuses to run on a
   directory without `ezfio/creation`
   (`src/ezfio_files/ezfio.irp.f:28–33`, `stop 1`).
-* `work/` is scratch (`qp_run_address`, `qpstop`, `qpkill`,
-  `qp_edit`'s `backup.tar`); excluded from snapshots.
+* `work/` is scratch (`qpstop`, `qpkill`, `qp_edit`'s
+  `backup.tar`); excluded from snapshots.
 * **Units:** coordinates are bohr (`qp_create_ezfio` converts
   Angstrom→bohr; `-a` means the input is already bohr).
 * **Ordering:** arrays are column-major (first index fastest).
@@ -162,8 +162,8 @@ gzip container bytes, file mtimes, directory entry order,
 
 ### 2.1 Binaries, PATH, program lookup
 
-Seven executables: `qp_run`, `qp_edit`, `qp_create_ezfio`,
-`qp_tunnel`, `qp_set_mo_class`, `qp_print_basis` and
+Six executables: `qp_run`, `qp_edit`, `qp_create_ezfio`,
+`qp_set_mo_class`, `qp_print_basis` and
 `element_create_db`, built by
 `scripts/compilation/build_rust_tools.sh` into
 `rust/target/release/`. PATH after sourcing:
@@ -221,23 +221,22 @@ failing. `QP_ROOT` unset → `Qpackage.root` fails
   incompatible`), `-n <int>`, `-s <range>`, anonymous `EZFIO_DIR`
   (exactly one). Non-`-c` runs write `work/backup.tar` first and
   restore it on failure.
-* **`qp_run`** (`qp_run.ml:232–270`): `-s` (slave), `-p <prefix>`
+* **`qp_run`** (thin launcher, single-node): `-p <prefix>`
   (`gdb` → `gdb --args `), anonymous `PROGRAM EZFIO_DIR` (exactly
   two). Order of checks: EZFIO dir exists
-  (`EZFIO directory <d> not found`) → program in `data/executables`
-  (else `Possible choices:` + `Executable <p> not found`) → prints
-  `Date:`, banner, `Git Commit/Date/SHA1`, `EZFIO Dir` → `qp_edit -c`
-  (unless `-s`; non-zero → `Error: Input inconsistent`) → task server
-  → `Sys.command(program)`; non-zero job exit prints
+  (`the EZFIO directory does not exist: <d>`) → program in
+  `data/executables` (else `Possible choices:` + `program not found in
+  data/executables: <p>`) → prints `Date:`, banner, `Git Commit/Date/
+  SHA1`, `EZFIO Dir` → `qp_edit -c` (non-zero → `the input is
+  inconsistent (qp_edit -c failed)`) → run the program with the
+  inherited environment; non-zero job exit prints
   `Program exited with code %d.` and **propagates the code**; finally
-  `Wall time:`. Slave mode reads `work/qp_run_address`; missing →
-  `No master is not running`. SIGUSR1 → `qp_stop`.
+  `Wall time:`. SIGUSR1 → `qp_stop`. The launcher creates no
+  `work/` entries and sets no environment variables for the job
+  (multi-node removed 2026-11-12).
 * **`qp_set_mo_class`** (`qp_set_mo_class.ml:189–240`):
   `-c <range>` core, `-i` inact, `-a` act, `-v` virt, `-d` del,
   `-q` query, anonymous `EZFIO_DIR`.
-* **`qp_tunnel`** (`qp_tunnel.ml:14–45`): `-g` (get-input), anonymous
-  `(EZFIO_DIR|ADDRESS)` — an existing *directory* is treated as
-  EZFIO, anything else as an address; local port 42379.
 * **`qp_print_basis`** (`qp_print_basis.ml`): **no** `Command_line`,
   reads `Sys.argv.(1)` directly — no `-h`, no options, extra args
   ignored. Prints the basis RST, then the MO RST; either missing →
@@ -264,7 +263,6 @@ failing. `QP_ROOT` unset → `Qpackage.root` fails
 | `qp_run scf <bad input>` | — | (job output) | job's exit code, after `Program exited with code %d.` |
 | `qp_set_mo_class` | 639 B help | `Fatal error: exception Failure("EZFIO_FILE is missing")` | 2 |
 | `qp_set_mo_class -h` | 1278 B | same | 2 |
-| `qp_tunnel` | 481 B help | `Fatal error: exception Failure("EZFIO_FILE or ADDRESS is missing")` | 2 |
 | `qp_print_basis` | — | `Fatal error: exception Invalid_argument("index out of bounds")` | 2 |
 | `qp_print_basis /nonexistent` | — | `Fatal error: exception Failure("Error reading EZFIO file")` | 2 |
 | `qp_print_basis <dir without MOs>` | basis RST | `Fatal error: exception Failure("Error reading the mo set")` | 2 |
@@ -290,7 +288,6 @@ A4/A9/A10/A11).
 | `qp_edit.1` | omits `-w`, `-r`, `-n`, `-s` |
 | `qp_print_basis.1` | **does not exist** |
 | `element_create_db.1` | **does not exist** |
-| `qp_tunnel.1` | usage order `(ADDRESS|EZFIO_DIR)` vs source `(EZFIO_DIR|ADDRESS)` |
 | `qp_run.1`, `qp_set_mo_class.1` | consistent with source |
 
 ---
@@ -370,99 +367,7 @@ default.
 
 ---
 
-## 4. ZMQ device protocol census (T0.4)
-
-Plain-text protocol, one message per ZMQ frame, space-separated,
-`|`-joined lists. Lexed by `Message_lexer.mll`; the wire strings are
-the `to_string` of `Message.ml` (the `Message.to_string` at
-`Message.ml:535` is debug-only and must not be emitted).
-
-### 4.1 The 18 keywords (`Message_lexer.mll:82–101`)
-
-| keyword | wire grammar (`Message.ml`) |
-|---|---|
-| `new_job` | `new_job <state> <tcp> <inproc>` (:37) |
-| `end_job` | `end_job <state>` (:57); Fortran may append ` force` |
-| `connect` | `connect <inproc|tcp>` (Fortran, `utils.irp.f:646,652`) |
-| `connect_reply` | `connect_reply <state> <client_id> <push_address>` (:101), e.g. `connect_reply scf 3 tcp://host:43211` |
-| `disconnect` | `disconnect <state> <client_id>` (:124) |
-| `disconnect_reply` | `disconnect_reply <state>` (:144) |
-| `add_task` | `add_task <state> <t1\|t2\|…>` (:165) |
-| `add_task_reply` | `add_task_reply <task_id>` (:178) |
-| `del_task` | `del_task <state> <id\|id…>` (:200) |
-| `del_task_reply` | `del_task_reply <more\|done> <id>\|<id…>` (:222), e.g. `del_task_reply more 1|2` |
-| `get_task` | `get_task <state> <client_id>` (:244) |
-| `get_task_reply` | `get_task_reply <task_id> <task>` or `get_task_reply 0` (:263–265) |
-| `get_tasks` | `get_tasks <state> <client_id> <n>` (:288) |
-| `get_tasks_reply` | `get_tasks_reply ok` then one `<id> <task>` line per task, `0 terminate` if the client's queue is exhausted (:309–310) |
-| `put_data` | `put_data <state> <client_id> <key>` (:334) |
-| `put_data_reply` | `put_data_reply ok` (:347) |
-| `get_data` | `get_data <state> <client_id> <key>` (:370) |
-| `get_data_reply` | `get_data_reply <client_id> <key…>` or `get_data_reply <client_id>` (:385–388) |
-| `task_done` | `task_done <state> <client_id> <id\|id…>` (:416) |
-| `terminate`, `abort`, `ok`, `error <text…>` | (:430, :441, :452, `String.concat " "`) |
-| `set_stopped`, `set_running`, `set_waiting` | bare keywords |
-
-### 4.2 Dispatch (`TaskServer.ml:920–941`)
-
-State machine on `program_state.state`:
-
-* unconditional: `terminate`, `abort`, `put_data`, `get_data`;
-* `None, Newjob` → start; `_ , Newjob` → error `A job is already running`;
-* `Some _, Endjob`, `Some _, SetRunning`;
-* `_, SetWaiting`, `_, SetStopped`;
-* `None, _` (any other message) → error `No job is running`;
-* `Some _, {Connect, Disconnect, AddTask, DelTask, GetTask, GetTasks, TaskDone}`;
-* fallback → error `Invalid message : <Message.to_string>`.
-
-A handler raising `Failure f` → `error <f> : <raw_message>`;
-`Assert_failure` → `%s:%d:%d : <raw_message>`. Replies are sent by the
-handler before the next loop; `reply_ok`/`reply_wrong_state`/`error`
-at `TaskServer.ml:132–141, 739`; state changes are published on the PUB
-socket (`pub_send`, `change_pub_state`, :58, :213).
-
-### 4.3 Producers / consumers
-
-OCaml producers: the TaskServer handlers (reply formats above).
-Fortran producers (`src/zmq/utils.irp.f`): `new_job :529`,
-`set_running :558`, `end_job :600` (+` force :611`), `connect :646,652`,
-`disconnect :714`, `add_task :760`, `abort :793`, `task_done :837,874`,
-`get_task :918`, `get_tasks :981`, `del_task :1083,1125,1186,1235`.
-Fortran producers (`src/zmq/put_get.irp.f`): `put_data :17,123,225,341,463,565,719,845`,
-`get_data :60,166,271,395,506,606,670,773,899`.
-Fortran consumers: `utils.irp.f :538,567,602,669,739,770,811,848,892,936,947,997`;
-`put_get.irp.f :32,70,138,175,242,281,358,407,478,515,580,615,679,736,782,862,909`.
-
-**Never produced:** `set_stopped` and `set_waiting` have no producer in
-any tracked OCaml or Fortran file (only the lexer/printer know them);
-`set_running` has a Fortran producer only. The port must still *accept*
-all three (state-machine arms exist).
-
-### 4.4 Port window and sockets (measured, wave 3)
-
-There is **no `$QP_PORT`** (an earlier plan statement was wrong). The
-window is derived from the pid: base `10 * (pid mod 2823) + 32769`
-(`qp_run.ml:72`), retry stride `+100`, unbounded. Window `P..P+9`:
-REP binds `P`, PUB binds `P+1`, `P+2..P+9` are probed (bind-then-release);
-the Fortran collector binds its PULL on `P+2`. All binds are `tcp://*`.
-The pre-check sockets ARE the real sockets, so a concurrent `qp_run`
-wants the same window fails its own pre-check bind and re-scans instead
-of killing a live server (issue #393; design comment `qp_run.ml:23–40`).
-`bind_socket` retries every error, 60 × 1 s budget. Linger values are
-milliseconds 1:1 with `ZMQ_LINGER`: REP `1 000 000`, PUB `1 000`,
-`stop`'s REQ `1 000 000` then `1 000`. `stop` connects to
-`tcp://localhost:P` with a 30 s deadline; failure strings verbatim:
-`TaskServer: no answer to the Terminate request (the task server thread
-is dead)` and `Problem in termination`.
-
-Documented deviation (wave 3): `TaskServer.ml` sets the context to 16
-IO threads; `zmq` 0.9.2 exposes no `ctx_set`, so the port runs with the
-default. Revisit before the Ampere multi-node gate if throughput
-matters. `QP_NIC` is read via `Sys.getenv` at `TaskServer.ml:106`.
-
----
-
-## 5. Check-mode contract (T0.3)
+## 4. Check-mode contract (T0.3)
 
 Normative target: `tests/golden/contracts/check-mode.md` (rules C1–C7:
 exit 0, no rewrite, missing defaults materialised — 7 files for `hcn`,
@@ -493,7 +398,7 @@ following section's title line would leak into its tail parse.
 
 ---
 
-## 6. What the plan got wrong (corrections)
+## 5. What the plan got wrong (corrections)
 
 * §4 "character padded/truncated to **24**" holds for the **OCaml**
   writer only; Fortran uses the declared `character*(N)` width (1 for

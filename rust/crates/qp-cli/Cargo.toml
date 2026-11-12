@@ -7,7 +7,6 @@ edition.workspace = true
 [dependencies]
 libc = { workspace = true }
 qp-ezfio = { path = "../qp-ezfio" }
-qp-zmq = { path = "../qp-zmq" }
 
 [dev-dependencies]
 tempfile = { workspace = true }

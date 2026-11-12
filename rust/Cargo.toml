@@ -20,7 +20,6 @@ clap = { version = "4", features = ["derive"] }
 ezfio-core = { path = "../external/ezfio/crates/ezfio-core" }
 flate2 = "1"
 md5 = "0.7"
-zmq = "0.9"
 libc = "0.2"
 serde = { version = "1", features = ["derive"] }
 thiserror = "2"

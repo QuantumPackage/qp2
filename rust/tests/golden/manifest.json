@@ -9,7 +9,6 @@
       " M src/cipsi/NEED",
       " M src/cipsi/stochastic_cipsi.irp.f",
       " M src/cipsi_utils/pt2_stoch_routines.irp.f",
-      " M src/cipsi_utils/zmq_selection.irp.f",
       "?? etc/00.qp_root.rc",
       "?? etc/kw.log",
       "?? plugins/qp_plugins_scemama/",

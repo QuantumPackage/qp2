@@ -1,7 +1,7 @@
 # qp-cli — notes for the next agent (P4, wave 3)
 
 Status of this crate, 2026-11-05. It exists because `qp_run` needs the four
-pieces of the OCaml tools that are not `qp-zmq`:
+pieces of the OCaml tools that `qp_run` shared with no other crate:
 
 | module | state | tests |
 |---|---|---|
@@ -21,10 +21,9 @@ covers them end to end (`signal.rs`, 2 tests, a real child and a `qp_stop`
 shim).
 
 The `qp_run` binary itself is **not here**: it lives in
-`rust/bins/qp_run` (main flow, `ports` module, 17 integration tests). This
-crate holds only what a second tool (`qp_edit`, `qp_create_ezfio`, …) will
-also need. Nothing in `qp-cli` knows the port window, the task server or the
-command line.
+`rust/bins/qp_run` (main flow, 12 integration tests). This crate holds
+only what a second tool (`qp_edit`, `qp_create_ezfio`, …) will also need.
+Nothing in `qp-cli` knows the job-launch details or the command line.
 
 Build and test what exists:
 
@@ -78,10 +77,9 @@ Invariants each block relies on:
 **Signal safety.** The handler does exactly one relaxed `AtomicBool::store`
 and nothing else (async-signal-safe). The reference runs
 `Sys.command ("qp_stop "^ezfio)` *inside* its handler; `system(3)`/`fork(3)`
-are not async-signal-safe and `qp_run` keeps the task server, its PUB thread
-and the 0MQ I/O threads alive, so a handler that allocates can deadlock. The
-main thread polls `take_sigusr1()` every 200 ms and runs `qp_stop` from normal
-code. `take_sigusr1` is a `swap`, so a signal arriving between "read" and
+are not async-signal-safe, so a handler that allocates and forks can
+deadlock on the allocator or on an internal lock. The main thread polls
+`take_sigusr1()` every 200 ms and runs `qp_stop` from normal code. `take_sigusr1` is a `swap`, so a signal arriving between "read" and
 "clear" is not lost.
 
 ## Deviations from the reference (all deliberate)
@@ -107,8 +105,7 @@ code. `take_sigusr1` is a `swap`, so a signal arriving between "read" and
    `putenv` leaks the variable to the parent, which nothing observes after
    the job (`qp_run` exits next).
 4. **`work/empty` is 2 bytes, not 3.** `Qpackage.ezfio_work` calls the
-   external EZFIO library, which writes `F\n\n` (measured, see
-   `qp-zmq/NOTES.md`). `ezfio_work` writes the logical through
+   external EZFIO library, which writes `F\n\n` (measured against the reference build). `ezfio_work` writes the logical through
    `qp_ezfio::EzFio::set`. **Resolved 2026-11-05:** the qp-ezfio logical
    writer is aligned (commit `d5439a70`, now on the integration branch), so
    `ezfio_work` writes `F\n\n` like the reference; this deviation is moot on
@@ -174,9 +171,6 @@ deadline that kills and reaps the child with its output attached.
   executable through `Sys.command`, so a program with a space in its path
   works on both sides only because the `data/executables` path is
   concatenated unquoted.
-- `TaskServer.ml:68` sets 16 IO threads; the `zmq` 0.9.2 crate exposes no
-  `ctx_set`, so the port keeps libzmq's default (1). Documented in
-  `qp-zmq/NOTES.md`; do not chase it.
 - `qp_stop` is `$QP_ROOT/bin/qp_stop`, a bash script touching
   `<ezfio>/work/qpkill`; it is not ported (the file protocol belongs to the
   Fortran half), so `stop::qp_stop` runs the bare name through `PATH` and
@@ -212,7 +206,8 @@ Do not patch `~/qp2`.
 
 - The P4 brief says `qp_run` uses `$QP_PORT` (default 43210). There is no
   `$QP_PORT`; the window is `10 * (pid mod 2823) + 32769`, `+100` per retry.
-  Verified in `qp_run.ml` and in `qp-zmq/NOTES.md`.
+  Verified in `qp_run.ml`. (The port window itself is gone with the
+  multi-node layer, 2026-11-12; this section stays as plan history.)
 - The brief said the modulus is 2821; the OCaml is 2823.
 - The #393 test wording ("pre-bind the window, assert a *fail-fast* with an
   unbounded scan") is self-contradictory: an unbounded scanner retries

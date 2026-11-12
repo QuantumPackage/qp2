@@ -3,7 +3,7 @@
 //! Direct ports of the `Qptypes`-level OCaml sources in `ocaml/`, one
 //! module per source file (plus a few packagings). The contract is the
 //! reference's output bytes, not its internal representation. This is a
-//! **pure data** crate: no EZFIO I/O, no ZMQ, no `unsafe`.
+//! **pure data** crate: no EZFIO I/O, no `unsafe`.
 //!
 //! # Modules
 //!

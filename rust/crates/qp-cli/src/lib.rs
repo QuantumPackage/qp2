@@ -22,16 +22,14 @@
 //!
 //! * Times are Unix epoch seconds (`i64`, like `Unix.time`) unless a
 //!   [`std::time::Duration`] says otherwise.
-//! * Ports are `u32`, as in [`qp_zmq::port_window`].
 //! * Every user-visible message returned by [`Error`] is the reference's
 //!   text, except the ones documented on the variant.
 //!
 //! # `unsafe`
 //!
-//! Four OS calls have no `std` equivalent and are the only `unsafe` code in
-//! the workspace: `localtime_r`, `gethostname`, `getifaddrs` and `sigaction`.
-//! They live in [`ffi`], one `// SAFETY:`-documented block each (PI decision,
-//! wave 3).
+//! Two OS calls have no `std` equivalent and are the only `unsafe` code in
+//! the workspace: `localtime_r` and `sigaction`. They live in [`ffi`], one
+//! `// SAFETY:`-documented block each (PI decision, wave 3).
 
 #![deny(missing_docs)]
 
@@ -42,7 +40,6 @@ use std::path::{Path, PathBuf};
 pub mod executables;
 pub mod ffi;
 pub mod git;
-pub mod host;
 pub mod launch;
 pub mod root;
 pub mod signal;
