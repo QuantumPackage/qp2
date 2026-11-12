@@ -61,6 +61,9 @@ jobs:
        - name: qmckl
          run: |
               ./configure -i qmckl || echo OK
+       - name: simple_gpu
+         run: |
+              ./configure -i simple_gpu || echo OK
        - name: Final check
          run: |
               ./configure -c config/gfortran_debug.cfg
