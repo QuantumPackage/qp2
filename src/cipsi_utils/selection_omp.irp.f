@@ -119,9 +119,12 @@ subroutine omp_selection(N_in, pt2_data)
   ASSERT (associated(b%det))
   ASSERT (associated(b%val))
 
-  ! Number of worker threads (unchanged from the former distributed
-  ! selection; the max
-  ! is defensive, as in pt2_stochastic).
+  ! Number of worker threads.  The legacy formula predates OpenMP:
+  ! the legacy team was nproc_target+1, with a dedicated collector
+  ! thread, and nproc counted the MPI ranks, which self-capped the
+  ! small-space branch.  In process there is no collector: the team
+  ! is the workers only, and its size is capped by nthreads_pt2
+  ! (below).  The max is defensive, as in pt2_stochastic.
   if (N_det < 3*nproc) then
     nproc_target = N_det/4
   else
@@ -134,6 +137,11 @@ subroutine omp_selection(N_in, pt2_data)
     nproc_target = max(1,int(dble(qp_max_mem)/(0.1d0 + mem)))
     nproc_target = min(nproc_target,nproc)
   endif
+  ! The OpenMP team has no collector thread (the legacy one carried
+  ! a dedicated collector as its last member), so the worker count is
+  ! capped by the user knob nthreads_pt2; the max(1,…) guards a
+  ! user-set QP_NTHREADS_PT2=0, as in pt2_omp.irp.f.
+  nproc_target = max(1, min(nproc_target, nthreads_pt2))
 
   ! Zero the accumulated PT2 data, as the legacy collector did before
   ! adding the worker results.
@@ -165,8 +173,11 @@ subroutine omp_selection(N_in, pt2_data)
     enddo
   enddo
 
-  ! One worker buffer per member of the team, as in pt2_stochastic.
-  allocate(b_workers(nthreads_pt2+1))
+  ! One worker buffer per member of the team, as in pt2_stochastic:
+  ! the OpenMP team has no collector thread, and the serial warm-up
+  ! shares slot 1 with thread 0 (omp_get_thread_num() is clamped to
+  ! 0 outside a parallel region).
+  allocate(b_workers(nproc_target))
   do k = 1, nproc_target
     call create_selection_buffer(N, N*2, b_workers(k))
   enddo
@@ -300,7 +311,7 @@ subroutine omp_selection_task(g, j, b_workers, b, pt2_out)
   END_DOC
 
   integer, intent(in)                     :: g, j
-  type(selection_buffer), intent(inout)   :: b_workers(nthreads_pt2+1)
+  type(selection_buffer), intent(inout)   :: b_workers(*)
   type(selection_buffer), intent(inout)   :: b
   type(pt2_type), intent(inout)           :: pt2_out
 
