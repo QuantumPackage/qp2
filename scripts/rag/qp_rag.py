@@ -17,7 +17,8 @@ corpus:
      share/rag/per-module/<module>.json;
   4. merges the per-module views into one tree-wide model (list fields
      are sorted unions, the view-dependent touched/freed/read/written
-     flags are OR-merged, the identity fields must agree across views,
+     flags are OR-merged, the identity fields must agree across views
+     (source texts after canonicalizing view-relative include markers),
      file paths are tree-relative) and writes share/rag/qp2.json;
   5. disambiguates cross-module name collisions: the colliding records
      only are renamed name -> name__<module> (module = the dir of the
@@ -68,6 +69,18 @@ PROJECT = "qp2"
 # identity fields must agree across views (a mismatch is a hard error);
 # list fields are sorted unions; the view-dependent lifecycle flags are
 # OR-merged (monotone w.r.t. visible-set inclusion, 1.2M run-pair check).
+# EXCEPTION (found on the 25-view qp3 tree, 2026-11-12): the `source`
+# text is the preprocessed body, in which irpf90 leaves a
+# `! include '<path>'` marker whose path is relative to the VIEW
+# directory (own view: bare path; consumer views: symlink prefix).
+# Sources are compared after canonicalizing those markers, and the
+# shortest (bare-path) variant is kept.
+INC_MARK = re.compile(r"^(\s*!\s*include\s+')[^']*(')$", re.M)
+
+
+def norm_source(src):
+    """Canonicalize view-relative include marker paths in -J source."""
+    return INC_MARK.sub(r"\1<...>\2", src or "")
 ENTITY_NONLIST = ["same_as", "type", "dims", "is_main", "doc"]
 ENTITY_LISTS = ["needs", "needed_by", "calls"]
 ENTITY_VIEWFLAGS = ["touched", "freed", "read", "written"]
@@ -134,8 +147,10 @@ def parse_build_ninja(path):
         die("config/build.ninja: no IRPF90_FLAGS variable")
     if not edges:
         die("config/build.ninja: no build_irpf90.ninja edges found")
-    if len(edges) != 22:
-        print("warning: expected 22 irpf90 edges, found %d" % len(edges),
+    if len(edges) != 25:
+        # calibrated on the qp3 root modules (2026-11-12); update when a
+        # root module is added or removed
+        print("warning: expected 25 irpf90 edges, found %d" % len(edges),
               file=sys.stderr)
     return edges, flags.split()
 
@@ -301,9 +316,15 @@ def merge_models(modules, docs, version):
                     n_viewflag_or += 1
                 rec[f] = rec[f] or e[f]
             if rec.get("source") != e.get("source"):
-                ent_mismatch.append(("entity-source", "%s:%s:%s" % key,
-                                     "source", len(rec.get("source") or ""),
-                                     len(e.get("source") or ""), m))
+                if norm_source(rec.get("source")) != norm_source(e.get("source")):
+                    ent_mismatch.append(("entity-source", "%s:%s:%s" % key,
+                                         "source",
+                                         len(rec.get("source") or ""),
+                                         len(e.get("source") or ""), m))
+                elif (rec["source"] is not None and e["source"] is not None
+                      and len(e["source"]) < len(rec["source"])):
+                    # view-relative include markers: keep the bare path
+                    rec["source"] = e["source"]
             for f in ENTITY_LISTS:
                 rec[f] = sorted(set(rec[f]) | set(e[f]))
             rec["__runs"].append(m)
@@ -323,9 +344,15 @@ def merge_models(modules, docs, version):
                                         repr(rec[f])[:80], repr(r[f])[:80],
                                         m))
             if rec.get("source") != r.get("source"):
-                rt_mismatch.append(("routine-source", "%s:%s:%s" % key,
-                                    "source", len(rec.get("source") or ""),
-                                    len(r.get("source") or ""), m))
+                if norm_source(rec.get("source")) != norm_source(r.get("source")):
+                    rt_mismatch.append(("routine-source", "%s:%s:%s" % key,
+                                        "source",
+                                        len(rec.get("source") or ""),
+                                        len(r.get("source") or ""), m))
+                elif (rec["source"] is not None and r["source"] is not None
+                      and len(r["source"]) < len(rec["source"])):
+                    # view-relative include markers: keep the bare path
+                    rec["source"] = r["source"]
             for f in ROUTINE_LISTS:
                 rec[f] = sorted(set(rec[f]) | set(r[f]))
             rec["__runs"].append(m)
