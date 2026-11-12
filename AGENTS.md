@@ -44,9 +44,9 @@ Online: <https://quantum-package.readthedocs.io> (manual) and
 ## 2. Layout
 
 ```
-src/<module>/          75 core modules (see §4 for the anatomy)
-plugins/local/<name>/  28 in-tree plugins; installed = symlinked into src/
-rust/                  the Rust tool layer (seven binaries, built into
+src/<module>/          77 core modules (see §4 for the anatomy)
+plugins/local/<name>/  29 in-tree plugins; installed = symlinked into src/
+rust/                  the Rust tool layer (six binaries, built into
                        `rust/target/release/` on PATH);
                        `scripts/compilation/build_rust_tools.sh` drives it
 scripts/compilation/   qp_create_ninja (build graph), build_rust_tools.sh, qp_path.py, read_compilation_cfg.py
@@ -57,9 +57,9 @@ bin/                   hand-written qp_* commands — NOTE: `bin/` is in .gitign
                        a new file there needs `git add -f`
 data/                  basis sets, pseudos; generated `data/executables` (name → binary path)
 etc/*.rc               fragments sourced by the tracked `quantum_package.rc`
-config/*.cfg           compiler/build configs: gfortran (+_mpi, _mkl, _openblas,
+config/*.cfg           compiler/build configs: gfortran (+_mkl, _openblas,
                        _armpl, _avx, _avx2, _macos, _debug), ifort 2019/2021
-                       (avx/avx2/sse4/rome/xHost/debug/_mpi), nvfortran,
+                       (avx/avx2/sse4/rome/xHost/debug), nvfortran,
                        cray_{gfortran,intel}, bull, flang, travis
 tests/                 bats suite (`tests/bats/`, inputs in `tests/input/`)
 docs/, man/            Sphinx sources, man pages
@@ -169,9 +169,9 @@ END_PROVIDER
   (see `src/determinants/h_apply.template.f`).
 - IRPF90 is invoked by ninja (pool `depth = 1`, i.e. serialized) as
   `irpf90 -I <needed modules> $IRPF90_FLAGS`; **`IRPF90_FLAGS` comes from the
-  compilation config** (`config/*.cfg`): `--ninja --align=32` there, plus
-  `-DMPI` for `gfortran_mpi.cfg`, while `*debug*.cfg` / `travis.cfg` add
-  `--assert`. Don't hardcode the flags: read the config in use.
+  compilation config** (`config/*.cfg`): `--ninja --align=32` there, while
+  `*debug*.cfg` / `travis.cfg` add `--assert`. Don't hardcode the flags:
+  read the config in use.
   Useful tools inside a module:
   `irpf90_entities` (table `file : type :: name (dims)`), `irpman <entity>`,
   `irpf90 -t <entity>` (what breaks when it is touched), `tags`.
@@ -353,9 +353,9 @@ Compute programs are run through `qp_run <name> <ezfio>`:
 
 `ninja rag` (repo root) builds a machine-readable model of the whole
 source tree — one `irpf90 -J` dump per build edge of `config/build.ninja`
-(22 modules, run with the exact `$IRPF90_FLAGS`) — merged into one
+(25 modules, run with the exact `$IRPF90_FLAGS`) — merged into one
 corpus with a SQLite FTS5/BM25 index. It lands in
-`$QP_ROOT/share/rag/` (gitignored): `per-module/<M>.json` × 22,
+`$QP_ROOT/share/rag/` (gitignored): `per-module/<M>.json` × 25,
 `qp2.json` (merged model), `qp2_rag.db` (index), `merge-report.json`
 (counts, collisions, applied renames). It is not part of the default
 build; ninja rebuilds it automatically when any module source or the
