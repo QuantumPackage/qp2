@@ -106,7 +106,8 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
          + 2.d0*(N_st_diag*itermax)               &! s2,lambda
          + 1.d0*(N_st_diag)                       &! residual_norm
                                                    ! In H_S2_u_0_nstates
-                           + 0.5d0*maxab                            &! idx0 in H_S2_u_0_nstates_openmp_work_*
+         + 3.d0*(N_st_diag*N_det)                 &! u_t, v_t, s_t in H_S2_u_0_nstates
+         + 0.5d0*maxab                            &! idx0 in H_S2_u_0_nstates_openmp_work_*
          + nproc_target *                         &! In OMP section
            ( 1.d0*(N_int*maxab)                   &! buffer
            + 3.5d0*(maxab) )                      &! singles_a, singles_b, doubles, idx

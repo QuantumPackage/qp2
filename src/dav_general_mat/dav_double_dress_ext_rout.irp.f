@@ -125,7 +125,8 @@ subroutine dav_double_dressed(u_in,H_jj,Dress_jj,Dressing_vec,idx_dress,energies
          + 1.d0*(N_st_diag_in*itermax)               &! lambda
          + 1.d0*(N_st_diag_in)                       &! residual_norm
                                                    ! In H_u_0_nstates
-                           + 0.5d0*maxab                            &! idx0 in H_u_0_nstates_openmp_work_*
+         + 2.d0*(N_st_diag_in*N_det)              &! u_t, v_t in H_u_0_nstates
+         + 0.5d0*maxab                            &! idx0 in H_u_0_nstates_openmp_work_*
          + nproc_target *                         &! In OMP section
            ( 1.d0*(N_int*maxab)                   &! buffer
            + 3.5d0*(maxab) )                      &! singles_a, singles_b, doubles, idx
