@@ -37,7 +37,6 @@
       "^Date: ",
       "^Wall time: ",
       "^Git (Commit|Date  |SHA1  ): ",
-      "^Task server running : ",
       "^\\.\\. >>>>> \\[ ",
       "^\\* Total available memory \\(GB\\)",
       "^\\* Target maximum memory \\(GB\\)",
