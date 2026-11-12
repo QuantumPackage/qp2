@@ -177,10 +177,8 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
          + 3.0d0*(N_st_diag*itermax)**2           &! h,y,s_tmp
          + 1.d0*(N_st_diag*itermax)               &! lambda
          + 1.d0*(N_st_diag)                       &! residual_norm
-                                                   ! In H_u_0_nstates_zmq
-         + 2.d0*(N_st_diag*N_det)                 &! u_t, v_t, on collector
-         + 2.d0*(N_st_diag*N_det)                 &! u_t, v_t, on slave
-         + 0.5d0*maxab                            &! idx0 in H_u_0_nstates_openmp_work_*
+                                                   ! In H_u_0_nstates
+                           + 0.5d0*maxab                            &! idx0 in H_u_0_nstates_openmp_work_*
          + nproc_target *                         &! In OMP section
            ( 1.d0*(N_int*maxab)                   &! buffer
            + 3.5d0*(maxab) )                      &! singles_a, singles_b, doubles, idx
@@ -335,7 +333,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
         call convertWFfromCSFtoDET(N_st_diag,U_csf(1:sze_csf,shift+1:shift2),U(1:sze,1:N_st_diag))
 
         if ((sze > 100000).and.distributed_davidson) then
-            call H_u_0_nstates_zmq   (W,U,N_st_diag,sze)
+            call H_u_0_nstates   (W,U,N_st_diag,sze)
         else
             call H_u_0_nstates_openmp(W,U,N_st_diag,sze)
         endif

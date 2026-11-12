@@ -37,34 +37,27 @@ program fci
   END_DOC
 
   PROVIDE all_mo_integrals
-  if (.not.is_zmq_slave) then
-    PROVIDE psi_det psi_coef
+  PROVIDE psi_det psi_coef
 
-    write(json_unit,json_array_open_fmt) 'fci'
+  write(json_unit,json_array_open_fmt) 'fci'
 
-    double precision, allocatable :: Ev(:),PT2(:)
-    allocate(Ev(N_states), PT2(N_states))
-    if (do_pt2) then
-      call run_stochastic_cipsi(Ev,PT2)
-    else
-      call run_cipsi
-    endif
-
-    ! run_*_cipsi has already saved the vector as diagonalized; zero the
-    ! symmetry-forbidden roundoff and save once more, then report.
-    call pg_zero_state_irreps()
-    call save_wavefunction
-    call pg_print_state_irreps(psi_energy_with_nucl_rep, psi_s2)
-
-    write(json_unit,json_dict_uopen_fmt)
-    write(json_unit,json_dict_close_fmtx)
-    write(json_unit,json_array_close_fmtx)
-    call json_close
-
+  double precision, allocatable :: Ev(:),PT2(:)
+  allocate(Ev(N_states), PT2(N_states))
+  if (do_pt2) then
+    call run_stochastic_cipsi(Ev,PT2)
   else
-    PROVIDE pt2_min_parallel_tasks
-
-    call run_slave_cipsi
-
+    call run_cipsi
   endif
+
+  ! run_*_cipsi has already saved the vector as diagonalized; zero the
+  ! symmetry-forbidden roundoff and save once more, then report.
+  call pg_zero_state_irreps()
+  call save_wavefunction
+  call pg_print_state_irreps(psi_energy_with_nucl_rep, psi_s2)
+
+  write(json_unit,json_dict_uopen_fmt)
+  write(json_unit,json_dict_close_fmtx)
+  write(json_unit,json_array_close_fmtx)
+  call json_close
+
 end

@@ -15,7 +15,6 @@ determinants
 dft_keywords
 dft_utils_in_r
 dft_utils_func
-dressing
 electrons
 ezfio_files
 fci
@@ -44,4 +43,3 @@ selectors_utils
 single_ref_method
 tools
 utils
-zmq

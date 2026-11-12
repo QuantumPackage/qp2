@@ -21,8 +21,8 @@ END_PROVIDER
 !=======================================================================
 !
 ! This file is the only implementation of `pt2_stochastic'.  It
-! replaces the former ZeroMQ PT2 path (`ZMQ_pt2' + `pt2_slave_inproc' +
-! `run_pt2_slave' + `pt2_collector'), removed together with its EZFIO
+! replaces the former distributed PT2 path (a slave-side provider, an
+! in-process worker and a collector), removed together with its EZFIO
 ! switch.  The estimator, the Monte Carlo sampling and the selection
 ! are unchanged; only the distribution of the work changes: one thread
 ! walks the comb and computes each window with an OpenMP team, one
@@ -60,7 +60,7 @@ END_PROVIDER
 ! the Monte Carlo is only over which generators the teeth sample.
 !
 ! The loop below is the legacy collector (pt2_collector, removed with
-! the ZeroMQ path), verbatim:
+! the distributed task server), verbatim:
 !
 !   E0=E; v0=0; n0=0; t=0; U=0; n=1;  f(:)=pt2_F(:); d(:)=.false.
 !   do while (n <= N_det_generators)
@@ -110,10 +110,10 @@ END_PROVIDER
 ! val <= b%mini and tightening b%mini when the storage fills: the
 ! legacy collector did the same with the buffers it received.
 !
-! Fallback (kept: ZMQ_selection is the deterministic, ZMQ-based
-! selection and does not belong to this file):
+! Fallback (kept: omp_selection is the deterministic selection and
+! does not belong to this file):
 !   if (N_det <= max(4,N_states) .or. pt2_N_teeth < 2)
-!      call ZMQ_selection(N_in, pt2_data)
+!      call omp_selection(N_in, pt2_data)
 ! pt2_N_teeth < 2 means "no comb" (N_det_generators < 1024, or no comb
 ! could be built): a one-tooth comb samples one generator per comb and
 ! costs as much as the exact pass while adding noise, so the exact pass
@@ -125,7 +125,8 @@ END_PROVIDER
 !-----------------------------------------------------------------------
 !
 ! The legacy master/slave split existed only because the work crossed a
-! ZeroMQ boundary.  In process there are two kinds of work:
+! process boundary (the removed distributed task server).  In process
+! there are two kinds of work:
 !
 !   * the walk: the collector loop.  Sequential by nature (it decides
 !     the stopping point), cheap (a few hundred flops per position),
@@ -185,7 +186,7 @@ END_PROVIDER
 ! function of the thread count); the selected determinants (lemma 3 and
 ! the fixed offered set).
 !
-! Bit-identity with the old ZeroMQ results is *not* expected: the old
+! Bit-identity with the pre-removal results is *not* expected: the old
 ! code accumulated a generator's pt2_F partial sums in arrival order,
 ! this code in j order (about 1e-16 relative difference).  Bit-identity
 ! across thread counts *is* claimed for pt2_data_I, and is what lemma 2
@@ -276,9 +277,9 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
   endif
 
   if (N_det <= max(4,N_states) .or. pt2_N_teeth < 2) then
-    ! Deterministic fallback: see the header.  ZMQ_selection is the
-    ! ZMQ-based deterministic selection and is kept as is.
-    call ZMQ_selection(N_in, pt2_data)
+    ! Deterministic fallback: see the header.  omp_selection is the
+    ! in-process OpenMP deterministic selection and is kept as is.
+    call omp_selection(N_in, pt2_data)
     return
   endif
 
@@ -529,8 +530,8 @@ subroutine pt2_omp_walk(E, relative_error, pt2_data, pt2_data_err, b, b_workers,
   use selection_types
   implicit none
   BEGIN_DOC
-! The walk: the legacy collector's body minus every ZeroMQ/arrival
-! branch.
+! The walk: the legacy collector's body minus every task-transport
+! (arrival-order) branch.
 ! Runs on a single thread, computes a window of pt2_omp_window
 ! positions in one parallel-do region, then consumes the positions of
 ! the window in order.
@@ -609,7 +610,8 @@ subroutine pt2_omp_walk(E, relative_error, pt2_data, pt2_data_err, b, b_workers,
     hi = min(pos + pt2_omp_window - 1, N_det_generators)
 
     ! Enumerate the window: one task per (position, subset).  The
-    ! subset granularity is the legacy granularity (one ZMQ task was one
+    ! subset granularity is the legacy granularity (one distributed
+    ! task was one
     ! subset) and it is what keeps one expensive generator from becoming
     ! a tail: the pt2_F(g) subtasks of a position run concurrently with
     ! the rest of the window instead of forming a single long task.  The
