@@ -78,12 +78,12 @@ make                           # == source quantum_package.rc; ninja
 - `./configure -c config/<cfg> [-g nvidia|intel|none]` writes the root
   `build.ninja`, `config/build.ninja`, `etc/00.qp_root.rc`, and the
   `src/gpu_arch` symlink. Only run it when the user asks.
-- Before all that, `configure` checks: `irpf90`, `ninja`, `cmake`, ZeroMQ
+- Before all that, `configure` checks: `irpf90`, `ninja`, ZeroMQ
   (`-lzmq`) + f77zmq, TREXIO (`-ltrexio`), GMP, zlib, `ocamlc`, the python
   packages `docopt` and `resultsFile`, SimpleGPU (`-lsimple_gpu-cpu`), and
   BLAS/LAPACK through the compilation config. Missing dependencies are
   installed with `./configure -i <pkg>` (or `-i all`), where `<pkg>` is one of:
-  bats, bse, cmake, docopt, f77zmq, gmp, ninja, ocaml, qmckl, simple_gpu,
+  bats, bse, docopt, f77zmq, gmp, ninja, ocaml, qmckl, simple_gpu,
   trexio, zeromq, zlib (plus the variants `trexio-nohdf5` and `qmckl-intel`).
   `irpf90` and `ezfio` are *submodules*, not `-i` targets —
   the tab-completion in `etc/configure.rc` misleadingly lists them.

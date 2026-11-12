@@ -54,7 +54,6 @@ Requirements
 - |IRPF90| : Fortran code generator
 - |EZFIO| : Easy Fortran Input/Output library generator
 - |BLAS| and |LAPACK|
-- cmake
 - TREXIO : library to import and export TREXIO format files
 - `Zlib`_
 - |ZeroMQ| : networking library
