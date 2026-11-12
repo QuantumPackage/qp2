@@ -6,12 +6,13 @@ Driver: `baseline.sh` (each run rc=0; raw logs in `baseline/`).
 These are the pre-removal references. After Phases 1-2 the same runs must
 reproduce these values, except:
 
-- CIPSI-det (and anything that goes through `ZMQ_selection`): the
-  selection is ported to `omp_selection` (deterministic top-N under a
-  total order instead of arrival-order buffer merging), so boundary
-  determinants at the buffer threshold may differ at the tolerance
-  level; the converged energy must match to ~1e-12 (see spec risk R1).
-- Everything else (SCF, CISD, MRCI, stochastic PT2, the fci/pt2
+- CIPSI (det and stoch) and MRCI (anything that goes through
+  `ZMQ_selection`): the selection is ported to `omp_selection`
+  (deterministic top-N under a total order instead of arrival-order
+  buffer merging), so boundary determinants at the buffer threshold may
+  differ at the tolerance level; the converged energy must match to
+  ~1e-12 (see spec risk R1).
+- Everything else (SCF, CISD, stochastic PT2, the fci/pt2
   deterministic contract) must be bit-identical.
 
 ## SCF
@@ -77,16 +78,32 @@ Same commands as `baseline.sh` on `~/qp3-nozmq` (`replay.sh`, logs in
 
 ### FCI anchor (strict CIPSI, `pt2_max 1e-8`, `n_det_max 300`)
 
+Paired fresh runs, 2026-11-12 16:39-16:42 (`anchor2/anchor2.sh`,
+`anchor2/anchor2.log`), one fresh ezfio per tree:
+
 | tree | N_det | final CI energy |
 |---|---|---|
 | pristine `~/qp3` (ZMQ selection) | 69 | -7.882324392913223 |
-| worktree `~/qp3-nozmq` (omp_selection) | 69 | -7.882324392913223 |
+| worktree `~/qp3-nozmq` (omp_selection) | 69 | -7.882324392913227 |
 
-**Bit-identical across the removed-code boundary** — the strongest
-verification of the selection port: at strict tolerance both
-implementations converge to the same 69-determinant space and energy.
-Corollum: the baseline table's "N_det = 38 = FCI" was wrong; 38 is where
-the *default* `pt2_max` stops the run, not the exact space (69 dets).
+**Same 69-determinant space across the removed-code boundary** — the
+strongest verification of the selection port: at strict tolerance both
+implementations converge to the same 69-determinant *set* (the sorted
+`psi_det.gz` lists are byte-identical, md5 060a2680…), and the final CI
+energies agree to 13 digits (Δ 4e-15 at the 14th). Each tree's energy
+is reproducible run-to-run on this machine: worktree …227 in all three
+of its runs (01:44 pre-fix, 14:53 post-fix, 16:41 today; saved
+`psi_det.gz` byte-identical across the three, md5 a3709db3…), pristine
+…223 in both of its (01:44, 16:42; md5 3722c129…). The 14th-digit
+tree difference is consistent with the assembled H-matrix following the
+two trees' different saved determinant orders (ZMQ arrival order vs the
+new deterministic order): same order in a tree, same last digit.
+Correction to the earlier table: its worktree entry (…223) was a
+misread of `fci-ref.log` — line 1082's …243 is the *pristine* run's
+in-iteration energy at 69 dets (it recurs in today's pristine run),
+while the worktree's final energy was …227 in every run. Corollum: the
+baseline table's "N_det = 38 = FCI" was wrong; 38 is where the
+*default* `pt2_max` stops the run, not the exact space (69 dets).
 
 ### R1 resolution (accepted 2026-11-12)
 
@@ -120,7 +137,8 @@ Consequences, all confirmed:
   selection, so the spec's R1 expectation ("converged energy matches to
   ~1e-12") rested on a false premise. The honest contract is: each tree
   deterministic within itself, and agreement with the pre-removal release
-  only at strict tolerance (proved above: 69 dets, bit-identical).
+  only at strict tolerance (proved above: same 69-determinant set,
+  energies to ~1e-14).
 - The new `omp_selection` resets the per-task threshold (`mini = 0`) and
   merges each task's full local top-N into a shared heap under a named
   critical, so it offers strictly more candidates and is deterministic.
@@ -133,4 +151,5 @@ differ from the pre-removal release (run-dependent arrival-order merge
 replaced by a deterministic selection); on LiH/sto-3g the converged
 energy shifts -2.24 uHa toward the strict-FCI anchor, and strict
 (`pt2_max 1e-8`) runs of both releases converge to the same 69-determinant
-space, E = -7.882324392913223."
+space (E = -7.8823243929132 to 13 digits; the 14th depends on the
+release's saved determinant order)."

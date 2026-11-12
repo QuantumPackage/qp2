@@ -29,7 +29,8 @@
     sto-3g test case the converged energy shifts by -2.24 uHa toward
     the strict FCI value.  At strict tolerance (~pt2_max 1e-8~) both
     releases converge to the same 69-determinant space
-    (E = -7.882324392913223).
+    (E = -7.8823243929132 to 13 digits; the 14th depends on the
+    release's saved determinant order).
 
 * Version 2.3
 
