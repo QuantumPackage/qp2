@@ -63,7 +63,6 @@ tests/                 bats suite (`tests/bats/`, inputs in `tests/input/`)
 docs/, man/            Sphinx sources, man pages
 lib/, include/, share/ tracked but empty placeholders that the build fills
 external/              git submodules: ezfio, irpf90, qp2-dependencies
-                       (dev-stable also carries armadillo-code, OpenOrbitalOptimizer)
 ```
 
 ## 3. Build and run
@@ -79,14 +78,14 @@ make                           # == source quantum_package.rc; ninja
 - `./configure -c config/<cfg> [-g nvidia|intel|none]` writes the root
   `build.ninja`, `config/build.ninja`, `etc/00.qp_root.rc`, and the
   `src/gpu_arch` symlink. Only run it when the user asks.
-- Before all that, `configure` checks: `irpf90`, `ninja`, `cmake`, ZeroMQ
+- Before all that, `configure` checks: `irpf90`, `ninja`, ZeroMQ
   (`-lzmq`) + f77zmq, TREXIO (`-ltrexio`), GMP, zlib, `ocamlc`, the python
   packages `docopt` and `resultsFile`, SimpleGPU (`-lsimple_gpu-cpu`), and
   BLAS/LAPACK through the compilation config. Missing dependencies are
   installed with `./configure -i <pkg>` (or `-i all`), where `<pkg>` is one of:
-  armadillo, bats, bse, cmake, docopt, f77zmq, gmp, ninja, ocaml, openorb,
-  qmckl, simple_gpu, trexio, zeromq, zlib (plus the variants `trexio-nohdf5`
-  and `qmckl-intel`). `irpf90` and `ezfio` are *submodules*, not `-i` targets —
+  bats, bse, docopt, f77zmq, gmp, ninja, ocaml, qmckl, simple_gpu,
+  trexio, zeromq, zlib (plus the variants `trexio-nohdf5` and `qmckl-intel`).
+  `irpf90` and `ezfio` are *submodules*, not `-i` targets —
   the tab-completion in `etc/configure.rc` misleadingly lists them.
   (Note: INSTALL.rst no longer offers the `conda env create -f qp2.yml` path,
   since `qp2.yml` is not tracked in the repo.)

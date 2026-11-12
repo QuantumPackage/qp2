@@ -223,7 +223,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="cmake zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats trexio armadillo openorb simple_gpu"
+        PACKAGES="zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats trexio simple_gpu"
 fi
 
 
@@ -235,17 +235,6 @@ for PACKAGE in ${PACKAGES} ; do
               rm -f "\${QP_ROOT}"/bin/ninja
               tar -zxvf "\${QP_ROOT}"/external/qp2-dependencies/${ARCHITECTURE}/ninja.tar.gz 
               mv ninja "\${QP_ROOT}"/bin/
-EOF
-
-    elif [[ ${PACKAGE} = cmake ]] ; then
-
-            VERSION=3.31.10
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              rm -f cmake-${VERSION}-linux-${ARCHITECTURE}.sh
-              wget https://github.com/Kitware/CMake/releases/download/v${VERSION}/cmake-${VERSION}-linux-${ARCHITECTURE}.sh
-              chmod +x cmake-${VERSION}-linux-${ARCHITECTURE}.sh
-              ./cmake-${VERSION}-linux-${ARCHITECTURE}.sh --prefix=$QP_ROOT --skip-license
 EOF
 
     elif [[ ${PACKAGE} = trexio-nohdf5 ]] ; then
@@ -411,21 +400,6 @@ EOF
               ( cd bats-core-1.7.0/ ; ./install.sh \${QP_ROOT})
 EOF
 
-    elif [[ ${PACKAGE} = armadillo ]] ; then
-
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              cd armadillo-code
-              #TODO
-EOF
-
-    elif [[ ${PACKAGE} = openorb ]] ; then
-
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              cd OpenOrbitalOptimizer
-              #TODO
-EOF
     elif [[ ${PACKAGE} = simple_gpu ]] ; then
 
             VERSION=1.0.3
@@ -447,12 +421,6 @@ EOF
 done
 
 source ${QP_ROOT}/quantum_package.rc
-
-CMAKE=$(find_exe cmake)
-if [[ ${CMAKE} = $(not_found) ]] ; then
-        error "cmake (cmake) is not installed."
-        fail
-fi
 
 NINJA=$(find_exe ninja)
 if [[ ${NINJA} = $(not_found) ]] ; then

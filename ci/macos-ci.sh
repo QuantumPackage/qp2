@@ -11,8 +11,8 @@
 #
 # How `./configure` behaves (matters for this script):
 #   - `-i` takes a single string that is split on spaces; `-i all` expands to
-#     (cmake zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats
-#     trexio armadillo openorb simple_gpu). qmckl is NOT in `all`, and this
+#     (zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats
+#     trexio simple_gpu). qmckl is NOT in `all`, and this
 #     script passes that list explicitly to omit `ocaml`.
 #   - `-i <pkg>` always reinstalls; it never checks whether the library is
 #     already present. That is why a cache hit has to skip this stage
@@ -36,8 +36,6 @@
 #      gate's find_lib link tests, which invoke bare `gcc`.
 #   2. qmckl is built AFTER the dependency list, not before: it links against
 #      trexio (AC_CHECK_LIB trexio_open), which that stage installs.
-#   3. The `cmake` package downloads a nonexistent Darwin tarball (upstream
-#      404, non-fatal): find_exe picks up Homebrew's cmake instead.
 #
 # simple_gpu: installed from the v1.0.3 release, which carries
 # the Apple Accelerate sdot fix (scemama/simple_gpu#16). Its own
@@ -45,7 +43,7 @@
 # passes on this platform, so the step completes through `make install`.
 #
 # Prerequisites: gfortran, a versioned Homebrew gcc (gcc-NN/g++-NN), hdf5,
-# pkg-config and ocaml, installed by the workflow; cmake, wget and the
+# pkg-config and ocaml, installed by the workflow; wget and the
 # autoconf toolchain ship with the GitHub runner image.
 
 set -euo pipefail
@@ -76,7 +74,7 @@ export PATH="$SHIM:$PATH"
 # The in-tree opampack instead wipes external/opampack and builds OCaml from
 # source, which measured 298 s of the 598 s dependency stage on the hosted
 # runner (run 42005019655, 2026-11-05).
-DEPS="cmake zlib ninja zeromq f77zmq gmp docopt resultsFile bats trexio armadillo openorb simple_gpu"
+DEPS="zlib ninja zeromq f77zmq gmp docopt resultsFile bats trexio simple_gpu"
 
 # Everything the installs produce lives in $QP_ROOT/{lib,include,bin,share,
 # libexec} plus external/Python (where docopt and resultsFile are copied).
