@@ -8,23 +8,34 @@ corpus:
   1. picks the irpf90 binary ($RAG_IRPF90 or external/irpf90/bin/irpf90)
      and requires the `-J` capability (irpf90 >= 2.3.3);
   2. reads config/build.ninja for the (module, include_dir) build edges
-     (22) and the exact $IRPF90_FLAGS of the build (-J output depends on
-     the flags, so the verbatim build set is used);
-  3. runs `irpf90 <include_dir> <IRPF90_FLAGS> -J` in each
-     $QP_ROOT/src/<module> with the build environment (QP_ROOT, QP_EZFIO
-     and the PYTHONPATH of etc/paths.rc, needed by the embedded
-     `! shell` blocks) and stores the dump in
-     share/rag/per-module/<module>.json;
+     (one per build_irpf90.ninja edge, core modules under src/ and
+     plugin modules under plugins/ alike) and the exact $IRPF90_FLAGS of
+     the build (-J output depends on the flags, so the verbatim build
+     set is used);
+  3. runs `irpf90 <include_dir> <IRPF90_FLAGS> -J` in each module
+     directory with the build environment (QP_ROOT, QP_EZFIO and the
+     PYTHONPATH of etc/paths.rc, needed by the embedded `! shell`
+     blocks) and stores the dump in share/rag/per-module/<module>.json.
+     The -I paths are resolved to absolute directories through the
+     build's own build_symlink targets: a module directory's dependency
+     symlinks are generated build state and can be stale (they may still
+     point at a previous QP_ROOT), so they are not trusted;
   4. merges the per-module views into one tree-wide model (list fields
      are sorted unions, the view-dependent touched/freed/read/written
      flags are OR-merged, the identity fields must agree across views,
-     file paths are tree-relative) and writes share/rag/qp2.json;
+     file paths are tree-relative) and writes share/rag/qp2.json. A
+     source that embeds a BEGIN_SHELL block is expanded in each module
+     directory, so it legitimately differs between views; the copy from
+     the module owning the file is kept;
   5. disambiguates cross-module name collisions: the colliding records
      only are renamed name -> name__<module> (module = the dir of the
      record's own file); the rename table goes to the report;
   6. indexes the model in the SQLite FTS5/BM25 database
      share/rag/qp2_rag.db (one chunk per record + one project overview,
      doc_id = qp2:<kind>:<name>) and writes share/rag/merge-report.json.
+
+`build --no-plugins` restricts the corpus to the core src/ modules (the
+pre-plugin reference corpus).
 
 `query`, `graph` and `stats` only read share/rag: query is BM25 over the
 index, graph is a BFS over the entity needs/needed_by edges, stats gives
@@ -64,7 +75,7 @@ DB = RAGDIR / "qp2_rag.db"
 REPORT = RAGDIR / "merge-report.json"
 PROJECT = "qp2"
 
-# Merge semantics (verified over the 22-view QP2 corpus, 2026-10-31):
+# Merge semantics (verified over the QP2 corpus, 2026-10-31):
 # identity fields must agree across views (a mismatch is a hard error);
 # list fields are sorted unions; the view-dependent lifecycle flags are
 # OR-merged (monotone w.r.t. visible-set inclusion, 1.2M run-pair check).
@@ -90,54 +101,112 @@ def die(msg, code=1):
 # ~#~#~#~#~#~ #
 
 def parse_build_ninja(path):
-    """Return (edges, flags) from config/build.ninja: one
-    (module, include_dir) pair per build_irpf90.ninja edge and the
-    verbatim $IRPF90_FLAGS value."""
+    """Return (edges, dirmap, flags) from config/build.ninja.
+
+    edges: one dict per build_irpf90.ninja edge with "key" (the module
+    directory relative to $QP_ROOT, e.g. 'src/determinants' or
+    'plugins/local/tc_bi_ortho'), "name" (its basename) and "dirs" (the
+    -I entries as (alias, tree_dir) pairs, alias being the include-dir
+    basename irpf90 sees and tree_dir the $QP_ROOT-relative directory it
+    really stands for). Core and plugin modules are the same kind of
+    edge; only the $QP_ROOT-relative prefix differs.
+
+    dirmap: include-dir alias -> $QP_ROOT-relative directory, from the
+    build_symlink edges (the authoritative resolution, e.g.
+    'gpu_arch' -> 'plugins/local/gpu_nvidia'). flags is the verbatim
+    $IRPF90_FLAGS value."""
+    # `build $QP_ROOT/<module>/irpf90_entities $QP_ROOT/<module>/tags
+    #  $QP_ROOT/<module>/IRPF90_temp/build.ninja: build_irpf90.ninja`
     edge_re = re.compile(
-        r"^build\s+\$QP_ROOT/src/(\w+)/irpf90_entities\s+\$QP_ROOT/src/\w+/tags\s+"
-        r"\$QP_ROOT/src/\w+/IRPF90_temp/build\.ninja:\s+build_irpf90\.ninja\s")
+        r"^build\s+\$QP_ROOT/(\S+)/irpf90_entities\s+"
+        r"\$QP_ROOT/(\S+)/tags\s+"
+        r"\$QP_ROOT/(\S+)/IRPF90_temp/build\.ninja:\s+build_irpf90\.ninja\s")
+    symlink_re = re.compile(
+        r"^build\s+\$QP_ROOT/\S+/(\w+):\s+build_symlink\s+\|\|\s+"
+        r"\$QP_ROOT/(\S+)\s*$")
     with open(path, encoding="utf-8") as f:
         lines = f.readlines()
     flags = None
+    dirmap = {}
     edges = []
     for i, line in enumerate(lines):
         m = re.match(r"^IRPF90_FLAGS\s*=\s*(\S.*)$", line)
         if m:
             flags = m.group(1).strip()
             continue
+        m = symlink_re.match(line)
+        if m:
+            alias, target = m.group(1), m.group(2)
+            if dirmap.setdefault(alias, target) != target:
+                die("include dir %r resolves to both %r and %r"
+                    % (alias, dirmap[alias], target))
+            continue
         m = edge_re.match(line)
         if not m:
             continue
-        module = m.group(1)
+        key = m.group(1)
+        if not (m.group(2) == key and m.group(3) == key):
+            die("edge %s: inconsistent irpf90_entities/tags/IRPF90_temp "
+                "prefixes (%s, %s)" % (key, m.group(2), m.group(3)))
+        if not key.startswith(("src/", "plugins/")):
+            die("edge %s: neither a src/ nor a plugins/ module" % key)
+        name = key.rsplit("/", 1)[-1]
         vars_ = {}
         for j in range(1, 6):
             idx = i + j
             if idx >= len(lines):
-                die("edge %s: missing variable line %d" % (module, j))
+                die("edge %s: missing variable line %d" % (key, j))
             vm = re.match(r"^   +(\w+) = (.*)$", lines[idx])
             if not vm:
                 die("edge %s: line %d is not an indented variable: %r"
-                    % (module, idx + 1, lines[idx]))
+                    % (key, idx + 1, lines[idx]))
             vars_[vm.group(1)] = vm.group(2).strip()
         if list(vars_.keys()) != ["module_abs", "module_rel", "SRC",
                                   "OBJ", "include_dir"]:
             die("edge %s: unexpected variable order %s"
-                % (module, list(vars_.keys())))
-        if vars_["module_rel"] != module or \
-                vars_["module_abs"] != "$QP_ROOT/src/" + module:
-            die("edge %s: inconsistent module_abs/module_rel" % module)
-        include_dir = vars_["include_dir"].replace("$QP_ROOT", str(QP_ROOT))
-        if not (QP_ROOT / "src" / module).is_dir():
-            die("edge %s: module directory src/%s missing" % (module, module))
-        edges.append({"module": module, "include_dir": include_dir})
+                % (key, list(vars_.keys())))
+        if vars_["module_abs"] != "$QP_ROOT/" + key or \
+                vars_["module_rel"] != name:
+            die("edge %s: inconsistent module_abs/module_rel" % key)
+        if not (QP_ROOT / key).is_dir():
+            die("edge %s: module directory %s missing" % (key, key))
+        toks = vars_["include_dir"].split()
+        dirs = []
+        for j, t in enumerate(toks):
+            if t == "-I" and j + 1 < len(toks):
+                dirs.append(toks[j + 1])
+            elif t.startswith("-I") and len(t) > 2:
+                dirs.append(t[2:])
+        pairs = []
+        for d in dirs:
+            tree_dir = resolve_dir(d, dirmap)
+            # one alias per tree dir in the reverse direction: the first
+            # -I entry wins, which is also irpf90's own search order
+            dirmap.setdefault(d, tree_dir)
+            pairs.append((d, tree_dir))
+        edges.append({"key": key, "name": name, "dirs": pairs})
+    names = Counter(e["name"] for e in edges)
+    for e in edges:
+        e["dump"] = (e["name"] if names[e["name"]] == 1
+                     else e["key"].replace("/", "__"))
     if not flags:
         die("config/build.ninja: no IRPF90_FLAGS variable")
     if not edges:
         die("config/build.ninja: no build_irpf90.ninja edges found")
-    if len(edges) != 22:
-        print("warning: expected 22 irpf90 edges, found %d" % len(edges),
-              file=sys.stderr)
-    return edges, flags.split()
+    return edges, dirmap, flags.split()
+
+
+def resolve_dir(alias, dirmap):
+    """$QP_ROOT-relative directory an include-dir alias stands for: the
+    build_symlink target when there is one, else a plain source dir."""
+    if alias in dirmap:
+        return dirmap[alias]
+    for base in ("src", "plugins/*", "plugins/*/*"):
+        for p in sorted(QP_ROOT.glob(base + "/" + alias)):
+            if p.is_dir():
+                return str(p.relative_to(QP_ROOT))
+    die("include dir %r matches no build_symlink target and no source "
+        "directory; cannot resolve it to a tree path" % alias)
 
 
 def find_irpf90():
@@ -184,7 +253,8 @@ def parse_env():
 def shell_leftovers():
     """The transient <file>_shell_<N> files irpf90 writes next to an
     embedded `! shell` block (removed by irpf90 itself on success)."""
-    return sorted(p for p in (QP_ROOT / "src").rglob("*_shell_*")
+    return sorted(p for base in ("src", "plugins")
+                  for p in (QP_ROOT / base).rglob("*_shell_*")
                   if p.is_file())
 
 
@@ -197,65 +267,144 @@ def _cleanup_shell_leftovers(before):
 
 
 def run_module(irpf90, edge, flags, env):
-    """One `irpf90 <include_dir> <IRPF90_FLAGS> -J` in src/<module>;
-    the dump goes to per-module/<module>.json."""
-    m = edge["module"]
-    out = PER_MODULE / (m + ".json")
-    args = [irpf90] + edge["include_dir"].split() + flags + ["-J", str(out)]
+    """One `irpf90 <include_dirs> <IRPF90_FLAGS> -J` in the module
+    directory; the dump goes to per-module/<dump>.json.
+
+    The -I entries are passed as absolute directories taken from the
+    build_symlink map, never through the module's own dependency
+    symlinks (generated build state, possibly stale). irpf90 then
+    reports dependency files as absolute paths; they are rewritten back
+    to the '<alias>/<file>' form in the dump so that the merge keeps its
+    relative, corpus-level view."""
+    key = edge["key"]
+    out = PER_MODULE / (edge["dump"] + ".json")
+    args = [irpf90]
+    for _, tree_dir in edge["dirs"]:
+        args += ["-I", str(QP_ROOT / tree_dir)]
+    args += flags + ["-J", str(out)]
     before = set(shell_leftovers())
     try:
-        p = subprocess.run(args, cwd=str(QP_ROOT / "src" / m), env=env,
+        p = subprocess.run(args, cwd=str(QP_ROOT / key), env=env,
                            capture_output=True, text=True, timeout=600)
     except subprocess.TimeoutExpired:
         _cleanup_shell_leftovers(before)
-        die("module %s: irpf90 -J timed out (600 s)" % m)
+        die("module %s: irpf90 -J timed out (600 s)" % key)
     if p.returncode != 0:
-        with open(PER_MODULE / (m + ".stderr"), "w", encoding="utf-8") as fh:
+        with open(PER_MODULE / (edge["dump"] + ".stderr"), "w",
+                  encoding="utf-8") as fh:
             fh.write(p.stderr)
         _cleanup_shell_leftovers(before)
         tail = (p.stderr or "").strip().splitlines()[-20:]
         die("module %s: irpf90 -J failed (rc=%d)\n%s"
-            % (m, p.returncode, "\n".join(tail)))
+            % (key, p.returncode, "\n".join(tail)))
     with open(out, encoding="utf-8") as fh:
         d = json.load(fh)
+    _unalias_dump(d, edge)
+    with open(out, "w", encoding="utf-8") as fh:
+        json.dump(d, fh, ensure_ascii=False, indent=1)
     print("  %s: %d files, %d entities, %d routines"
-          % (m, len(d.get("files") or []), len(d.get("entities") or []),
+          % (key, len(d.get("files") or []), len(d.get("entities") or []),
              len(d.get("routines") or [])))
 
 
+def _unalias_dump(d, edge):
+    """Rewrite the absolute dependency paths of one dump to the
+    '<alias>/<file>' form: longest -I prefix first, and the first alias
+    wins when two aliases name the same directory (that is the order
+    irpf90 itself searches in)."""
+    prefixes = []
+    seen = set()
+    for alias, tree_dir in edge["dirs"]:
+        pref = str(QP_ROOT / tree_dir) + "/"
+        if pref not in seen:
+            seen.add(pref)
+            prefixes.append((pref, alias + "/"))
+    prefixes.sort(key=lambda x: -len(x[0]))
+
+    def fix(path):
+        if not path.startswith("/"):
+            return path
+        for pref, alias in prefixes:
+            if path.startswith(pref):
+                return alias + path[len(pref):]
+        die("module %s: dependency file %r lies under none of its -I "
+            "directories (stale symlinks in the module dir?)"
+            % (edge["key"], path))
+
+    d["files"] = [fix(f) for f in d.get("files") or []]
+    for kind in ("entities", "routines"):
+        for rec in d.get(kind) or []:
+            rec["file"] = fix(rec["file"])
+
+
 def mangle(rel):
-    """irpf90 fmodule formula applied to a path relative to src/
-    (i.e. '<module>/<file>')."""
+    """irpf90 fmodule formula applied to a path relative to the module's
+    parent tree directory (i.e. '<module>/<file>')."""
     return (rel.replace("/", "__").split(".irp.f")[0]
             .replace(".", "Dot") + "_mod")
 
 
-def norm_file(run_module, entry):
-    """Tree-relative path for a per-run files entry (entries are
-    relative to src/<run_module>: own files are bare names, dep files
-    carry their dir component)."""
-    if "/" in entry:
-        dep, f = entry.split("/", 1)
-        return "src/%s/%s" % (dep, f)
-    return "src/%s/%s" % (run_module, entry)
+def module_dir(rel, keys):
+    """Module directory of a tree-relative file path: the longest build
+    edge key that prefixes it, else the file's own directory (include-only
+    directories such as src/ao_basis have no irpf90 edge but are still the
+    module a file belongs to)."""
+    best = None
+    for k in keys:
+        if rel.startswith(k + "/") and (best is None or len(k) > len(best)):
+            best = k
+    if best is not None:
+        return best
+    if "/" in rel:
+        return rel.rsplit("/", 1)[0]
+    die("%r is not a <tree>/<module>/<file> path" % rel)
 
 
-def module_of(rel):
-    """Owning module dir of a tree-relative 'src/<module>/<file>' path."""
-    parts = rel.split("/")
-    if len(parts) >= 2 and parts[0] == "src":
-        return parts[1]
-    return None
+def run_rel(rel, keys):
+    """The '<module>/<file>' form irpf90 mangles its fmodule from: the
+    path as irpf90 sees it from the module directory it was run in."""
+    d = module_dir(rel, keys)
+    return d.rsplit("/", 1)[-1] + "/" + rel[len(d) + 1:]
 
 
-def rename_collisions(store, coll, kind):
+def module_label(rel, keys):
+    """Unique label of the module owning a file: its directory basename
+    when that is unique in the build, else the flattened module key (plugin
+    repos hold several modules named alike, e.g. .../stable and .../devel
+    both nest modules of the same name)."""
+    d = module_dir(rel, keys)
+    base = d.rsplit("/", 1)[-1]
+    same = sum(1 for k in keys if k.rsplit("/", 1)[-1] == base)
+    return d.replace("/", "__") if same > 1 else base
+
+
+def norm_file(module_key, entry, dirmap):
+    """Tree-relative path of a per-run files entry. Entries are relative
+    to the module directory: own files are bare names, dependency files
+    carry their include-dir alias as first component."""
+    if "/" not in entry:
+        return module_key + "/" + entry
+    head, f = entry.split("/", 1)
+    # a dependency comes first: module dirs also hold one symlink per
+    # dependency directory, so the tree test alone would misattribute
+    # every dependency to the running module
+    if head in dirmap:
+        return dirmap[head] + "/" + f
+    if (QP_ROOT / module_key / head).is_dir():
+        return module_key + "/" + entry
+    die("unknown dependency directory %r in %r (module %s)"
+        % (head, entry, module_key))
+
+
+def rename_collisions(store, coll, kind, keys):
     """Cross-module name collisions (user rule, 2026-10-31): the
     colliding records only are renamed name -> name__<module>, module =
-    the dir of the record's own file. Returns {(name, file, line): new}."""
+    the module dir basename of the record's own file. Returns
+    {(name, file, line): new}."""
     renames = {}
     for name, locs in sorted(coll.items()):
         for (file, line) in locs:
-            mod = module_of(file)
+            mod = module_label(file, keys)
             if mod is None:
                 die("cannot disambiguate %s %r: no module dir in %r"
                     % (kind, name, file))
@@ -271,25 +420,32 @@ def rename_collisions(store, coll, kind):
     return renames
 
 
-def merge_models(modules, docs, version):
+def owns_file(rel, module_key):
+    """True when a tree-relative file path lives in the given module."""
+    return rel.startswith(module_key + "/")
+
+
+def merge_models(modules, docs, version, dirmap):
     """Merge the per-module views into the tree-wide model; return
-    (doc, report)."""
+    (doc, report). `modules` are the module keys of the build."""
     warnings = []
+    view_src = []
 
     files = set()
     for m in modules:
         for entry in docs[m].get("files") or []:
-            files.add(norm_file(m, entry))
+            files.add(norm_file(m, entry, dirmap))
 
     ents, ent_mismatch = {}, []
     n_viewflag_or = 0
     for m in modules:
         for e in docs[m].get("entities") or []:
-            key = (e["name"], norm_file(m, e["file"]), e["line"])
+            key = (e["name"], norm_file(m, e["file"], dirmap), e["line"])
             rec = ents.get(key)
             if rec is None:
                 ents[key] = dict(e)
                 ents[key]["__runs"] = [m]
+                ents[key]["__src_owner"] = owns_file(key[1], m)
                 continue
             for f in ENTITY_NONLIST:
                 if rec[f] != e[f]:
@@ -301,9 +457,10 @@ def merge_models(modules, docs, version):
                     n_viewflag_or += 1
                 rec[f] = rec[f] or e[f]
             if rec.get("source") != e.get("source"):
-                ent_mismatch.append(("entity-source", "%s:%s:%s" % key,
-                                     "source", len(rec.get("source") or ""),
-                                     len(e.get("source") or ""), m))
+                view_src.append(("entity", "%s:%s:%s" % key, m))
+                if owns_file(key[1], m) and not rec["__src_owner"]:
+                    rec["source"] = e.get("source")
+                    rec["__src_owner"] = True
             for f in ENTITY_LISTS:
                 rec[f] = sorted(set(rec[f]) | set(e[f]))
             rec["__runs"].append(m)
@@ -311,11 +468,12 @@ def merge_models(modules, docs, version):
     rts, rt_mismatch = {}, []
     for m in modules:
         for r in docs[m].get("routines") or []:
-            key = (r["name"], norm_file(m, r["file"]), r["line"])
+            key = (r["name"], norm_file(m, r["file"], dirmap), r["line"])
             rec = rts.get(key)
             if rec is None:
                 rts[key] = dict(r)
                 rts[key]["__runs"] = [m]
+                rts[key]["__src_owner"] = owns_file(key[1], m)
                 continue
             for f in ROUTINE_NONLIST:
                 if rec[f] != r[f]:
@@ -323,12 +481,20 @@ def merge_models(modules, docs, version):
                                         repr(rec[f])[:80], repr(r[f])[:80],
                                         m))
             if rec.get("source") != r.get("source"):
-                rt_mismatch.append(("routine-source", "%s:%s:%s" % key,
-                                    "source", len(rec.get("source") or ""),
-                                    len(r.get("source") or ""), m))
+                view_src.append(("routine", "%s:%s:%s" % key, m))
+                if owns_file(key[1], m) and not rec["__src_owner"]:
+                    rec["source"] = r.get("source")
+                    rec["__src_owner"] = True
             for f in ROUTINE_LISTS:
                 rec[f] = sorted(set(rec[f]) | set(r[f]))
             rec["__runs"].append(m)
+
+    if view_src:
+        warnings.append(
+            "%d record(s) have a view-dependent source (an embedded"
+            " BEGIN_SHELL block is expanded in each module directory, e.g."
+            " write_git_log's `git log -1`): the copy from the module that"
+            " owns the file is kept" % len({x[1] for x in view_src}))
 
     if ent_mismatch or rt_mismatch:
         for x in (ent_mismatch + rt_mismatch)[:10]:
@@ -352,9 +518,9 @@ def merge_models(modules, docs, version):
     # irpf90's own formula (the per-run value is mangled from the
     # run-relative filename, which legitimately differs)
     for key, rec in ents.items():
-        rec["module"] = mangle(key[1][4:])
+        rec["module"] = mangle(run_rel(key[1], modules))
     for key, rec in rts.items():
-        rec["module"] = mangle(key[1][4:])
+        rec["module"] = mangle(run_rel(key[1], modules))
 
     def collisions(store):
         byname = {}
@@ -365,8 +531,8 @@ def merge_models(modules, docs, version):
     ent_coll = collisions(ents)
     rt_coll = collisions(rts)
 
-    ent_renames = rename_collisions(ents, ent_coll, "entity")
-    rt_renames = rename_collisions(rts, rt_coll, "routine")
+    ent_renames = rename_collisions(ents, ent_coll, "entity", modules)
+    rt_renames = rename_collisions(rts, rt_coll, "routine", modules)
     if ent_renames or rt_renames:
         warnings.append(
             "renamed records keep their pre-rename names in the edge lists"
@@ -377,6 +543,7 @@ def merge_models(modules, docs, version):
     for key in sorted(ents):
         rec = ents[key]
         rec["seen_in_runs"] = sorted(set(rec.pop("__runs")))
+        rec.pop("__src_owner")
         for f in ENTITY_LISTS:
             rec[f] = sorted(set(rec[f]))
         if key in ent_renames:
@@ -387,6 +554,7 @@ def merge_models(modules, docs, version):
     for key in sorted(rts):
         rec = rts[key]
         rec["seen_in_runs"] = sorted(set(rec.pop("__runs")))
+        rec.pop("__src_owner")
         for f in ROUTINE_LISTS:
             rec[f] = sorted(set(rec[f]))
         if key in rt_renames:
@@ -424,19 +592,23 @@ def merge_models(modules, docs, version):
         "routine_renames": renames_report(rt_renames),
         "external_calls_pruned_from_in_tree_names": pruned,
         "entity_viewflag_or_merges": n_viewflag_or,
+        "view_dependent_sources": view_src,
         "warnings": warnings,
     }
     return doc, report
 
 
-def cmd_build():
+def cmd_build(no_plugins=False):
     # share/rag is a pure derived artifact: wipe and recreate
     if RAGDIR.exists():
         shutil.rmtree(RAGDIR)
     PER_MODULE.mkdir(parents=True)
 
     irpf90 = find_irpf90()
-    edges, flags = parse_build_ninja(QP_ROOT / "config" / "build.ninja")
+    edges, dirmap, flags = parse_build_ninja(
+        QP_ROOT / "config" / "build.ninja")
+    if no_plugins:
+        edges = [e for e in edges if not e["key"].startswith("plugins/")]
     env = parse_env()
 
     print("irpf90: %s" % irpf90)
@@ -445,10 +617,11 @@ def cmd_build():
     for e in edges:
         run_module(irpf90, e, flags, env)
 
-    modules = [e["module"] for e in edges]
+    modules = [e["key"] for e in edges]
+    dumps = {e["key"]: e["dump"] for e in edges}
     docs = {}
     for m in modules:
-        with open(PER_MODULE / (m + ".json"), encoding="utf-8") as fh:
+        with open(PER_MODULE / (dumps[m] + ".json"), encoding="utf-8") as fh:
             docs[m] = json.load(fh)
     versions = {d.get("irpf90_version") for d in docs.values()}
     if len(versions) != 1:
@@ -456,7 +629,7 @@ def cmd_build():
             % sorted(versions))
     version = versions.pop()
 
-    doc, report = merge_models(modules, docs, version)
+    doc, report = merge_models(modules, docs, version, dirmap)
     with open(MODEL, "w", encoding="utf-8") as fh:
         json.dump(doc, fh, ensure_ascii=False, indent=1)
 
@@ -744,8 +917,10 @@ def main():
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("build",
-                   help="wipe and rebuild the RAG corpus in share/rag")
+    p = sub.add_parser("build",
+                       help="wipe and rebuild the RAG corpus in share/rag")
+    p.add_argument("--no-plugins", action="store_true",
+                   help="core src/ modules only (reference corpus)")
     p = sub.add_parser("query",
                        help="BM25 full-text search over the indexed corpus")
     p.add_argument("text")
@@ -764,7 +939,7 @@ def main():
                    help="counts, doc coverage, external API surface")
     a = ap.parse_args()
     if a.cmd == "build":
-        cmd_build()
+        cmd_build(no_plugins=a.no_plugins)
     elif a.cmd == "query":
         cmd_query(a.text, a.k, a.kind, a.json)
     elif a.cmd == "graph":
