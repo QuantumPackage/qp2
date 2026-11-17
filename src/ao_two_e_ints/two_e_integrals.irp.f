@@ -498,9 +498,36 @@ BEGIN_PROVIDER [ double precision, ao_two_e_integral_schwartz, (ao_num, ao_num) 
       !$OMP SCHEDULE(dynamic)
   do i=ao_num,1,-1
     do k=1,i
-      ! dabs: a vanishing diagonal integral can be negative by rounding (cGTOs)
-      ao_two_e_integral_schwartz(i,k) = dsqrt(dabs(ao_two_e_integral(i,i,k,k)))
+      ao_two_e_integral_schwartz(i,k) = dsqrt(ao_two_e_integral(i,i,k,k))
       ao_two_e_integral_schwartz(k,i) = ao_two_e_integral_schwartz(i,k)
+    enddo
+  enddo
+  !$OMP END PARALLEL DO
+
+END_PROVIDER
+
+! ---
+
+BEGIN_PROVIDER [ double precision, ao_two_e_integral_schwartz_cgtos, (ao_num, ao_num) ]
+
+  BEGIN_DOC
+  !  sqrt( (ik|ik) ): Cauchy-Schwarz factors |(ik|jl)| <= sqrt( (ik|ik) (jl|jl) ),
+  !  used for the screening of the cGTO integrals.
+  !  dabs: a vanishing diagonal integral can be negative by rounding.
+  END_DOC
+
+  implicit none
+  integer          :: i, k
+  double precision :: ao_two_e_integral
+
+  !$OMP PARALLEL DO PRIVATE(i,k)                                     &
+      !$OMP DEFAULT(NONE)                                            &
+      !$OMP SHARED (ao_num,ao_two_e_integral_schwartz_cgtos)        &
+      !$OMP SCHEDULE(dynamic)
+  do i=ao_num,1,-1
+    do k=1,i
+      ao_two_e_integral_schwartz_cgtos(i,k) = dsqrt(dabs(ao_two_e_integral(i,k,i,k)))
+      ao_two_e_integral_schwartz_cgtos(k,i) = ao_two_e_integral_schwartz_cgtos(i,k)
     enddo
   enddo
   !$OMP END PARALLEL DO
