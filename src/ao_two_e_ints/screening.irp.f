@@ -6,9 +6,10 @@ logical function ao_two_e_integral_zero(i,j,k,l)
   ! Otherwise, zero if $ao\_overlap\_abs(i,k)\,ao\_overlap\_abs(j,l)$
   ! or the Schwartz bound $\sqrt{(ii|kk)\,(jj|ll)}$ is below
   ! $ao\_integrals\_threshold$.
-  ! For cGTOs ($use\_cgtos$) only the Schwartz bound is used: the AOs are
-  ! real, so the bound is rigorous, but the overlap of two oscillating
-  ! functions can vanish while their integrals do not.
+  ! For cGTOs ($use\_cgtos$) the overlap test is not used (the overlap of
+  ! two oscillating functions can vanish while their integrals do not);
+  ! the test is the Cauchy-Schwarz bound $\sqrt{(ik|ik)\,(jl|jl)}$,
+  ! rigorous for the real cGTO AOs ($ao\_two\_e\_integral\_schwartz\_cgtos$).
   END_DOC
   implicit none
   integer, intent(in) :: i,j,k,l
@@ -21,7 +22,12 @@ logical function ao_two_e_integral_zero(i,j,k,l)
         return
       endif
     endif
-    if (ao_two_e_integral_schwartz(j,l)*ao_two_e_integral_schwartz(i,k)  < ao_integrals_threshold) then
+    if (use_cgtos) then
+      ! Cauchy-Schwarz bound |(ik|jl)| <= sqrt( (ik|ik) (jl|jl) ), rigorous for real AOs
+      if (ao_two_e_integral_schwartz_cgtos(j,l)*ao_two_e_integral_schwartz_cgtos(i,k)  < ao_integrals_threshold) then
+        ao_two_e_integral_zero = .True.
+      endif
+    else if (ao_two_e_integral_schwartz(j,l)*ao_two_e_integral_schwartz(i,k)  < ao_integrals_threshold) then
         ao_two_e_integral_zero = .True.
     endif
   endif
