@@ -1,52 +1,6 @@
 
 ! ---
 
-complex*16 function overlap_cgaussian_x(Ae_center, Be_center, alpha, beta, power_A, power_B, Ap_center, Bp_center, dim)
-
-  BEGIN_DOC
-  !
-  ! \int_{-infty}^{+infty} (x - Ap_x)^ax (x - Bp_x)^bx exp(-alpha (x - Ae_x)^2) exp(-beta (x - Be_X)^2) dx
-  !
-  ! with complex arguments
-  !
-  END_DOC
-
-  implicit none
-  include 'constants.include.F'
-
-  integer,    intent(in) :: dim, power_A, power_B 
-  complex*16, intent(in) :: Ae_center, alpha, Ap_center
-  complex*16, intent(in) :: Be_center, beta, Bp_center
-
-  integer                :: i, iorder_p
-  complex*16             :: P_new(0:max_dim), P_center, fact_p, p, inv_sq_p
-
-  complex*16, external   :: Fc_integral
-
-
-  call give_explicit_cpoly_and_cgaussian_x(P_new, P_center, p, fact_p, iorder_p, &
-                                           alpha, beta, power_A, power_B, Ae_center, Be_center, Ap_center, Bp_center, dim)
- 
-  if(abs(fact_p) .lt. 1.d-14) then
-    overlap_cgaussian_x = (0.d0, 0.d0)
-    return
-  endif
-
-
-  inv_sq_p = (1.d0, 0.d0) / sqrt(p)
-
-  overlap_cgaussian_x = (0.d0, 0.d0)
-  do i = 0, iorder_p
-    overlap_cgaussian_x = overlap_cgaussian_x + P_new(i) * Fc_integral(i, inv_sq_p)
-  enddo
-
-  overlap_cgaussian_x = overlap_cgaussian_x * fact_p
-
-  return
-end
-
-! ---
-
 subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
                                  Ap_center, Bp_center, overlap_x, overlap_y, overlap_z, overlap, dim)
 
