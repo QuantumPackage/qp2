@@ -67,6 +67,7 @@ END_PROVIDER
    logical, external              :: ao_two_e_integral_zero
 
    double precision, external     :: ao_two_e_integral
+   double precision, external     :: ao_two_e_integral_cgtos_prim
    integer                        :: block_size, iblock
 
    double precision               :: mem, mem0
@@ -141,7 +142,16 @@ END_PROVIDER
        enddo
      enddo
 
-     if (do_direct_integrals) then
+     if (do_direct_integrals.and.use_cgtos) then
+       ! cGTOs: all primitive quartets (the primitive Schwarz skip of
+       ! ao_2e_cgtos_schwartz_accel would set small diagonals to zero)
+       !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i8) SCHEDULE(dynamic,21)
+       do i8=ndim8-1,1,-1
+         D(i8) = ao_two_e_integral_cgtos_prim(addr1(i8), addr2(i8),   &
+             addr1(i8), addr2(i8))
+       enddo
+       !$OMP END PARALLEL DO
+     else if (do_direct_integrals) then
        !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i8) SCHEDULE(dynamic,21)
        do i8=ndim8-1,1,-1
          D(i8) = ao_two_e_integral(addr1(i8), addr2(i8),              &

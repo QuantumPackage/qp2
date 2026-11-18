@@ -1,71 +1,6 @@
 
 ! ---
 
-subroutine give_explicit_cpoly_and_cgaussian_x(P_new, P_center, p, fact_k, iorder, &
-                                               alpha, beta, a, b, Ae_center, Be_center, Ap_center, Bp_center, dim)
-
-  BEGIN_DOC
-  !
-  ! Transform the product of
-  !
-  !     (x - x_Ap)^a (x - x_Bp)^b exp(-alpha (r - Ae)^2) exp(-beta (r - Be)^2)
-  !
-  ! into
-  !
-  !     fact_k \sum_{i=0}^{iorder} (x - x_P)^i exp(-p (r - P)^2)
-  !
-  END_DOC
-
-  implicit none
-  include 'constants.include.F'
-
-  integer,    intent(in)  :: dim
-  integer,    intent(in)  :: a, b 
-  complex*16, intent(in)  :: alpha, Ae_center, Ap_center
-  complex*16, intent(in)  :: beta, Be_center, Bp_center
-  integer,    intent(out) :: iorder            
-  complex*16, intent(out) :: p, P_center, fact_k          
-  complex*16, intent(out) :: P_new(0:max_dim)  
-
-  integer                 :: n_new, i, j
-  complex*16              :: P_a(0:max_dim), P_b(0:max_dim)
-  complex*16              :: p_inv, ab, d_AB, tmp
-
-  !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: P_a, P_b
-
-  P_new = (0.d0, 0.d0)
-
-  ! new exponent
-  p = alpha + beta
-
-  ! new center
-  p_inv    = (1.d0, 0.d0) / p
-  ab       = alpha * beta
-  P_center = (alpha * Ae_center + beta * Be_center) * p_inv
-
-  ! get the factor
-  d_AB = (Ae_center - Be_center) * (Ae_center - Be_center)
-  tmp = ab * p_inv * d_AB
-  ! |exp(-tmp)| = exp(-Re(tmp)): test the real part, not |tmp|
-  if(real(tmp) .lt. 50.d0) then
-    fact_k = exp(-tmp)
-  else
-    fact_k = (0.d0, 0.d0)
-  endif
-
-  ! Recenter the polynomials P_a and P_b on P_center
-  !DIR$ FORCEINLINE
-  call recentered_cpoly2(P_a(0), Ap_center, P_center, a, P_b(0), Bp_center, P_center, b)
-  n_new = 0
-
-  !DIR$ FORCEINLINE
-  call multiply_cpoly(P_a(0), a, P_b(0), b, P_new(0), n_new)
-  iorder = a + b
-
-end
-
-! ---
-
 subroutine give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_k, iorder, &
                alpha, beta, a, b, Ae_center, Be_center, Ap_center, Bp_center, dim)
 
@@ -266,46 +201,6 @@ double precision function cgaussian_pair_bound(alpha, beta, Ap_center, Bp_center
      + abs(Ap_center(3) - Bp_center(3))**2
 
   cgaussian_pair_bound = exp(-a * b / (a + b) * d2)
-
-end
-
-! ---
-
-subroutine cgaussian_product_x(a, xa, b, xb, k, p, xp)
-
-  BEGIN_DOC
-  ! complex Gaussian product in 1D.
-  ! e^{-a (x-x_A)^2} e^{-b (x-x_B)^2} = K e^{-p (x-x_P)^2}
-  END_DOC
-
-  implicit none
-
-  complex*16, intent(in)  :: a, b, xa, xb
-  complex*16, intent(out) :: p, k, xp
-
-  complex*16              :: p_inv
-  complex*16              :: xab, ab
-
-  ASSERT (real(a) > 0.)
-  ASSERT (real(b) > 0.)
-
-  ! new center
-  p = a + b
-
-  xab = xa - xb
-
-  p_inv = (1.d0, 0.d0) / p
-  ab    = a * b * p_inv
-
-  k = ab * xab * xab
-  if(real(k) > 40.d0) then
-    k  = (0.d0, 0.d0)
-    xp = (0.d0, 0.d0)
-    return
-  endif
-
-  k  = exp(-k)
-  xp = (a*xa + b*xb) * p_inv
 
 end
 

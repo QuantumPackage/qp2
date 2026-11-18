@@ -508,6 +508,38 @@ END_PROVIDER
 
 ! ---
 
+BEGIN_PROVIDER [ double precision, ao_two_e_integral_schwartz_cgtos, (ao_num, ao_num) ]
+
+  BEGIN_DOC
+  !  sqrt( (ik|ik) ): Cauchy-Schwarz factors |(ik|jl)| <= sqrt( (ik|ik) (jl|jl) ),
+  !  used for the screening of the cGTO integrals.
+  !  The diagonal integrals are summed over all primitive quartets: the
+  !  primitive Schwarz skip of ao_2e_cgtos_schwartz_accel uses an absolute
+  !  threshold and would set the small (ik|ik) to zero.
+  !  dabs: a vanishing diagonal integral can be negative by rounding.
+  END_DOC
+
+  implicit none
+  integer          :: i, k
+  double precision, external :: ao_two_e_integral_cgtos_prim
+
+  !$OMP PARALLEL DO PRIVATE(i,k)                                     &
+      !$OMP DEFAULT(NONE)                                            &
+      !$OMP SHARED (ao_num,ao_two_e_integral_schwartz_cgtos)        &
+      !$OMP SCHEDULE(dynamic)
+  do i=ao_num,1,-1
+    do k=1,i
+      ao_two_e_integral_schwartz_cgtos(i,k) = dsqrt(dabs(                &
+          ao_two_e_integral_cgtos_prim(i,k,i,k)))
+      ao_two_e_integral_schwartz_cgtos(k,i) = ao_two_e_integral_schwartz_cgtos(i,k)
+    enddo
+  enddo
+  !$OMP END PARALLEL DO
+
+END_PROVIDER
+
+! ---
+
 double precision function general_primitive_integral(dim,            &
       P_new,P_center,fact_p,p,p_inv,iorder_p,                        &
       Q_new,Q_center,fact_q,q,q_inv,iorder_q)
