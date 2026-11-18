@@ -1,4 +1,3 @@
-
 ! ---
 
 double precision function ao_two_e_integral_cgtos(i, j, k, l)
@@ -6,6 +5,33 @@ double precision function ao_two_e_integral_cgtos(i, j, k, l)
   BEGIN_DOC
   !  integral of the AO basis <ik|jl> or (ij|kl)
   !     i(r1) j(r1) 1/r12 k(r2) l(r2)
+  !  Above 1024 primitive quartets, the primitive Schwarz skip of
+  !  ao_2e_cgtos_schwartz_accel is used.
+  END_DOC
+
+  implicit none
+  integer, intent(in)        :: i, j, k, l
+  double precision, external :: ao_2e_cgtos_schwartz_accel
+  double precision, external :: ao_two_e_integral_cgtos_prim
+
+  if(ao_prim_num(i) * ao_prim_num(j) * ao_prim_num(k) * ao_prim_num(l) > 1024) then
+    ao_two_e_integral_cgtos = ao_2e_cgtos_schwartz_accel(i, j, k, l)
+  else
+    ao_two_e_integral_cgtos = ao_two_e_integral_cgtos_prim(i, j, k, l)
+  endif
+
+end
+
+
+! ---
+
+double precision function ao_two_e_integral_cgtos_prim(i, j, k, l)
+
+  BEGIN_DOC
+  !  integral of the AO basis <ik|jl> or (ij|kl)
+  !     i(r1) j(r1) 1/r12 k(r2) l(r2)
+  !  Sum over all primitive quartets, without the primitive Schwarz skip of
+  !  ao_2e_cgtos_schwartz_accel: used for the AO Schwarz factors (ik|ik).
   END_DOC
 
   implicit none
@@ -35,18 +61,10 @@ double precision function ao_two_e_integral_cgtos(i, j, k, l)
   complex*16                 :: lC1, lC2, lC3, lC4, lC5, lC6, lC7, lC8
   complex*16                 :: int_tot
 
-  double precision, external :: ao_2e_cgtos_schwartz_accel
   complex*16, external       :: ERI_cgtos
   complex*16, external       :: general_primitive_integral_cgtos
 
 
-
-  if(ao_prim_num(i) * ao_prim_num(j) * ao_prim_num(k) * ao_prim_num(l) > 1024) then
-
-    ao_two_e_integral_cgtos = ao_2e_cgtos_schwartz_accel(i, j, k, l)
-
-    return
-  endif
 
   dim1 = n_pt_max_integrals
 
@@ -63,7 +81,7 @@ double precision function ao_two_e_integral_cgtos(i, j, k, l)
   enddo
 
 
-  ao_two_e_integral_cgtos = 0.d0
+  ao_two_e_integral_cgtos_prim = 0.d0
 
   if(use_pw .or. ii /= jj .or. kk /= ll .or. jj /= kk) then
 
@@ -186,7 +204,7 @@ double precision function ao_two_e_integral_cgtos(i, j, k, l)
 
             int_tot = int1 + int2 + int3 + int4 + int5 + int6 + int7 + int8
 
-            ao_two_e_integral_cgtos = ao_two_e_integral_cgtos + coef4 * 2.d0 * real(int_tot)
+            ao_two_e_integral_cgtos_prim = ao_two_e_integral_cgtos_prim + coef4 * 2.d0 * real(int_tot)
           enddo ! s
         enddo ! r
       enddo ! q
@@ -270,7 +288,7 @@ double precision function ao_two_e_integral_cgtos(i, j, k, l)
             int_tot = C1 * int1 + C2 * int2 + C3 * int3 + C4 * int4 &
                     + C5 * int5 + C6 * int6 + C7 * int7 + C8 * int8
 
-            ao_two_e_integral_cgtos = ao_two_e_integral_cgtos + coef4 * 2.d0 * real(int_tot)
+            ao_two_e_integral_cgtos_prim = ao_two_e_integral_cgtos_prim + coef4 * 2.d0 * real(int_tot)
           enddo ! s
         enddo ! r
       enddo ! q
