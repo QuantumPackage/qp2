@@ -57,11 +57,14 @@ subroutine overlap_gaussian_xyz(A_center, B_center, alpha, beta, power_A, power_
   double precision               :: F_integral
 
   call give_explicit_poly_and_gaussian(P_new, P_center, p, fact_p, iorder_p, alpha, beta, power_A, power_B, A_center, B_center, dim)
+  ! negligible product gaussian (far apart primitives): iorder_p is -1,
+  ! the F_integral_tab loop below is skipped, so F_integral_tab must not
+  ! be read; the integral is zero to double precision (issue #418)
   if(fact_p.lt.1d-20)then
-    overlap_x = 1.d-10
-    overlap_y = 1.d-10
-    overlap_z = 1.d-10
-    overlap = 1.d-10
+    overlap_x = 0.d0
+    overlap_y = 0.d0
+    overlap_z = 0.d0
+    overlap = 0.d0
     return
   endif
 
@@ -197,7 +200,7 @@ subroutine overlap_gaussian_xyz_v(A_center, B_center, alpha, beta, power_A, powe
   do ipoint = 1, n_points
 
     if(fact_p(ipoint) .lt. 1d-20) then
-      overlap(ipoint) = 1.d-10
+      overlap(ipoint) = 0.d0  ! negligible product gaussian (issue #418)
       cycle
     endif
 
