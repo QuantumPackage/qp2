@@ -17,6 +17,20 @@ function run() {
   eq $energy $2 $thresh
 }
 
+# run SCF with a given ao_integrals_threshold and check the energy
+function run_thr() {
+  thresh=1.e-5
+  test_exe scf || skip
+  qp set_file $1
+  qp edit --check
+  qp reset --mos
+  qp set scf_utils n_it_scf_max 50
+  qp set ao_two_e_ints threshold_ao $2
+  qp run scf
+  energy="$(ezfio get hartree_fock energy)"
+  eq $energy $3 $thresh
+}
+
 
 function run_pt_charges() {
   thresh=1.e-5
@@ -88,6 +102,13 @@ rm -rf $EZFIO
 
 @test "B-B" { # 3s
   run b2_stretched.ezfio -48.9950585434279
+}
+
+@test "B-B_screening" { # issue #419: same-side schwartz bound sqrt((ik|ik))
+  # with ao_integrals_threshold = 1e-8, the screened SCF must stay within
+  # 1e-5 a.u. of the unscreened reference (the bound is a rigorous
+  # Cauchy-Schwarz bound, so screening cannot zero integrals above thr)
+  run_thr b2_stretched.ezfio 1.0e-8 -48.9950585434279
 }
 
 @test "LiF" { # 3 s
