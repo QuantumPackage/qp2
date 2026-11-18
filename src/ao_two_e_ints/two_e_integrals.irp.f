@@ -498,7 +498,14 @@ BEGIN_PROVIDER [ double precision, ao_two_e_integral_schwartz, (ao_num, ao_num) 
       !$OMP SCHEDULE(dynamic)
   do i=ao_num,1,-1
     do k=1,i
-      ao_two_e_integral_schwartz(i,k) = dsqrt(ao_two_e_integral(i,i,k,k))
+      ! Schwartz factor sqrt((ik|ik)): (ik|ik) is the self-energy of
+      ! the product gaussian i*k, so sqrt((ik|ik)*(jl|jl)) is the
+      ! rigorous Cauchy-Schwarz bound on |(ik|jl)|, the integral
+      ! screened by ao_two_e_integral_zero. Same factor as in the
+      ! erf matrix (providers_ao_erf.irp.f); the former cross
+      ! pairing sqrt((ii|kk)*(jj|ll)) decays as 1/R and never
+      ! triggers at ao_integrals_threshold = 1e-15.
+      ao_two_e_integral_schwartz(i,k) = dsqrt(ao_two_e_integral(i,k,i,k))
       ao_two_e_integral_schwartz(k,i) = ao_two_e_integral_schwartz(i,k)
     enddo
   enddo
