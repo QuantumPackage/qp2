@@ -140,6 +140,10 @@ function run {
   run n2h4.zmt 1 0 cc-pvdz
 }
 
+@test "H2O4_chain" {
+  run h2o4_chain.xyz 1 0 cc-pvdz
+}
+
 @test "OH" {
   run oh.xyz 2 0 aug-ano-pvdz_roos
 }

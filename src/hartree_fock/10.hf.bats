@@ -111,6 +111,35 @@ rm -rf $EZFIO
   run_thr b2_stretched.ezfio 1.0e-8 -48.9950585434279
 }
 
+@test "B-B_screening_map" { # issue #419: exact (ik|ik) Schwartz diagonals on the map path
+  # do_ao_cholesky = F routes ao_two_e_integral to the primitive-accelerated
+  # path, whose absolute threshold (ao_integrals_threshold**2) zeroes small
+  # (ik|ik) diagonals; the CS screening then dropped integrals far above the
+  # threshold. With the exact diagonal, the map stores exactly the integrals
+  # >= threshold that pass the rigorous CS bound: the count is
+  # deterministic, so it is the gate.
+  # io_ao_two_e_integrals None: the "Write" mode of the 00.create fixture
+  # flips to "Read" after the first map dump, and the read path prints no
+  # count; None keeps the map computed on the fly on every run (the mode
+  # the N1/E1 constants below were recorded in).
+  # N1/E1: (H2O)4 chain (tests/input/h2o4_chain.xyz), cc-pVDZ, threshold
+  # 1e-15, do_ao_cholesky False, recorded 2026-11-19 on an Apple-Silicon
+  # macmini (gfortran) after the overlap-test removal.
+  test_exe scf || skip
+  qp set_file h2o4_chain.ezfio
+  qp edit --check
+  qp reset --mos
+  qp set scf_utils n_it_scf_max 50
+  qp set ao_two_e_ints do_ao_cholesky False
+  qp set ao_two_e_ints threshold_ao 1.0e-15
+  qp set ao_two_e_ints io_ao_two_e_integrals None
+  qp run scf > h2o4_map.out
+  n_int="$(grep 'Number of AO integrals' h2o4_map.out | awk '{print $NF}')"
+  [ "$n_int" = "3916331" ] || { echo "map count: got $n_int, want 3916331"; exit 1; }
+  energy="$(ezfio get hartree_fock energy)"
+  eq $energy -304.12427863337 1.e-8
+}
+
 @test "LiF" { # 3 s
   run lif.ezfio -106.9801081911955
 }

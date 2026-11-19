@@ -369,7 +369,18 @@ Providers
         double precision, allocatable	:: ao_two_e_integral_erf_schwartz	(ao_num,ao_num)
 
 
-    Needed to compute Schwartz inequalities
+    Schwartz screening factors sqrt( (pq|pq) ) for the long-range
+    (erf) integrals: the rigorous Cauchy-Schwarz bound
+    |(pq|rs)| <= sqrt( (pq|pq) (rs|rs) ), used for the screening
+    of the AO erf integrals. The diagonal (pq|pq) is summed over
+    ALL primitive quartets (ao_two_e_integral_erf_full): the
+    dispatcher routes (pq|pq) to
+    ao_two_e_integral_schwartz_accel_erf whenever the product of
+    the primitive counts exceeds 1024, and that accelerator
+    zeroes the small diagonals with its absolute threshold
+    ao_integrals_threshold**2, so the CS screening would then
+    drop integrals far above the threshold (issue #419).
+    dabs: a vanishing diagonal can be negative by rounding.
 
     Needs:
 
@@ -405,7 +416,18 @@ Providers
         double precision, allocatable	:: ao_two_e_integral_schwartz	(ao_num,ao_num)
 
 
-    Needed to compute Schwartz inequalities
+    Schwartz screening factors sqrt( (pq|pq) ): the rigorous
+    Cauchy-Schwarz bound |(pq|rs)| <= sqrt( (pq|pq) (rs|rs) ),
+    used for the screening of the AO integrals (see
+    ao_two_e_integral_zero). The diagonal (pq|pq) is summed over
+    ALL primitive quartets (ao_two_e_integral_full): on the map
+    path the dispatcher may route (pq|pq) to
+    ao_two_e_integral_schwartz_accel, whose absolute primitive
+    threshold zeroes the small diagonals (43/5050 zeroed factors
+    measured on the (H2O)4 chain, cc-pVDZ, threshold 1e-15, issue
+    #419), and the CS screening would then drop integrals far
+    above the threshold. dabs: a vanishing diagonal can be
+    negative by rounding (as in the cGTO provider).
 
     Needs:
 
@@ -420,6 +442,46 @@ Providers
        * :c:data:`ao_prim_num`
        * :c:data:`use_cgtos`
        * :c:data:`use_only_lr`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`cholesky_ao_num`
+
+ 
+.. c:var:: double ao_two_e_integral_schwartz_cgtos
+
+
+    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_two_e_integral_schwartz_cgtos	(ao_num,ao_num)
+
+
+    sqrt( (ik|ik) ): Cauchy-Schwarz factors |(ik|jl)| <= sqrt( (ik|ik) (jl|jl) ),
+    used for the screening of the cGTO integrals.
+    The diagonal integrals are summed over all primitive quartets: the
+    primitive Schwarz skip of ao_2e_cgtos_schwartz_accel uses an absolute
+    threshold and would set the small (ik|ik) to zero.
+    dabs: a vanishing diagonal integral can be negative by rounding.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_cgtos_norm_ord_transp`
+       * :c:data:`ao_expo_cgtos_ord_transp`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`n_pt_max_integrals`
+       * :c:data:`nucl_coord`
+       * :c:data:`use_pw`
 
     Needed by:
 
@@ -1369,6 +1431,90 @@ Subroutines / functions
        * :c:func:`give_explicit_poly_and_gaussian`
 
  
+.. c:function:: void ao_two_e_integral_erf_full(void)
+
+
+    File : :file:`ao_two_e_ints/two_e_integrals_erf.irp.f`
+
+    .. code:: fortran
+
+        double precision function ao_two_e_integral_erf_full(i,j,k,l)
+
+
+    Full sum of the long-range (erf) AO integral <ik|jl> or (ij|kl)
+    over all primitive quartets: i(r1) j(r1) erf(r12/mu)/r12
+    k(r2) l(r2). This is the body of the dispatcher
+    ao_two_e_integral_erf, moved verbatim. Why it exists: the
+    dispatcher routes to ao_two_e_integral_schwartz_accel_erf
+    whenever the product of the primitive counts exceeds 1024, and
+    that accelerator skips primitive quartets with the absolute
+    threshold ao_integrals_threshold**2. The Schwartz screening
+    factors ao_two_e_integral_erf_schwartz must use this full sum
+    for the (ik|ik) diagonals: the accelerated value zeroes the
+    small diagonals, and the CS screening would then drop
+    integrals far above the threshold (issue #419). This function
+    does not call the dispatcher (no re-entrancy).
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_normalized_ordered_transp`
+       * :c:data:`ao_expo_ordered_transp`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`mu_erf`
+       * :c:data:`n_pt_max_integrals`
+       * :c:data:`nucl_coord`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`give_explicit_poly_and_gaussian`
+
+ 
+.. c:function:: void ao_two_e_integral_full(void)
+
+
+    File : :file:`ao_two_e_ints/two_e_integrals.irp.f`
+
+    .. code:: fortran
+
+        double precision function ao_two_e_integral_full(i, j, k, l)
+
+
+    Full sum of the AO integral <ik|jl> or (ij|kl) over all primitive
+    quartets: i(r1) j(r1) 1/r12 k(r2) l(r2). This is the body of the
+    last branch of the dispatcher ao_two_e_integral, moved verbatim.
+    Why it exists: on the map path (do_ao_cholesky = F) the dispatcher
+    routes to ao_two_e_integral_schwartz_accel when the product of the
+    primitive counts exceeds 1024, and that accelerator skips primitive
+    quartets with the absolute threshold ao_integrals_threshold**2.
+    The Schwartz screening factors must use this full sum for the
+    (ik|ik) diagonals: the accelerated value zeroes the small diagonals
+    (43/5050 zeroed factors measured on the (H2O)4 chain, cc-pVDZ,
+    threshold 1e-15, issue #419), and the CS screening then drops
+    integrals far above the threshold. The Cholesky diagonals
+    effectively use this sum (do_schwartz_accel is false when
+    do_ao_cholesky). This function does not call the dispatcher
+    (no re-entrancy).
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_normalized_ordered_transp`
+       * :c:data:`ao_expo_ordered_transp`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+
+ 
 .. c:function:: void ao_two_e_integral_general(void)
 
 
@@ -1483,12 +1629,20 @@ Subroutines / functions
         logical function ao_two_e_integral_zero(i,j,k,l)
 
 
-    Returns .True. if the AO integral $(ij|kl)$ can be taken as
-    zero. No screening when the integrals are read from the EZFIO
-    file, when $is\_periodic$, or for complex AOs ($use\_cgtos$).
-    Otherwise, zero if $ao\_overlap\_abs(i,k)\,ao\_overlap\_abs(j,l)$
-    or the Schwartz bound $\sqrt{(ii|kk)\,(jj|ll)}$ is below
-    $ao\_integrals\_threshold$.
+    Returns .True. if the AO integral $(ik|jl)$ can be taken as
+    zero: the 1st and 3rd arguments form the pair on electron 1,
+    the 2nd and 4th the pair on electron 2, i.e. the integral is
+    $ao\_two\_e\_integral(i,k,j,l)$. No screening when the
+    integrals are read from the EZFIO file or when $is\_periodic$.
+    For real GTOs the test is the rigorous Cauchy-Schwarz bound
+    $\sqrt{(ik|ik)\,(jl|jl)}$, with
+    $ao\_two\_e\_integral\_schwartz(p,q) = \sqrt{(pq|pq)}$ and the
+    diagonals summed over all primitive quartets; for cGTOs
+    ($use\_cgtos$) the same bound via
+    $ao\_two\_e\_integral\_schwartz\_cgtos$ (the overlap of two
+    oscillating functions can vanish while their integrals do
+    not). The bound is rigorous, so no integral above
+    $ao\_integrals\_threshold$ is screened.
 
     Needs:
 
@@ -1496,8 +1650,8 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_integrals_threshold`
-       * :c:data:`ao_overlap_abs`
        * :c:data:`ao_two_e_integral_schwartz`
+       * :c:data:`ao_two_e_integral_schwartz_cgtos`
        * :c:data:`is_periodic`
        * :c:data:`read_ao_two_e_integrals`
        * :c:data:`use_cgtos`
