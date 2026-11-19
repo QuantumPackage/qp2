@@ -29,22 +29,12 @@ double precision function ao_two_e_integral(i, j, k, l)
 
   integer, intent(in)            :: i, j, k, l
 
-  integer                        :: p, q, r, s
-  integer                        :: num_i,num_j,num_k,num_l,dim1,I_power(3),J_power(3),K_power(3),L_power(3)
-  integer                        :: iorder_p(3), iorder_q(3)
-  double precision               :: I_center(3), J_center(3), K_center(3), L_center(3)
-  double precision               :: integral
-  double precision               :: P_new(0:max_dim,3),P_center(3),fact_p,pp
-  double precision               :: Q_new(0:max_dim,3),Q_center(3),fact_q,qq
-
   double precision, external     :: ao_two_e_integral_erf
   double precision, external     :: ao_two_e_integral_cgtos
   double precision, external     :: ao_two_e_integral_schwartz_accel
-  double precision, external     :: ao_two_e_integral_general
-  double precision, external     :: general_primitive_integral
+  double precision, external     :: ao_two_e_integral_full
 
   logical, external :: do_schwartz_accel
-  double precision               :: coef1, coef2, coef3, coef4
 
   if(use_cgtos) then
 
@@ -63,46 +53,85 @@ double precision function ao_two_e_integral(i, j, k, l)
 
   else
 
-    num_i = ao_nucl(i)
-    num_j = ao_nucl(j)
-    num_k = ao_nucl(k)
-    num_l = ao_nucl(l)
-    ao_two_e_integral = 0.d0
+    ao_two_e_integral = ao_two_e_integral_full(i,j,k,l)
 
-    if (num_i /= num_j .or. num_k /= num_l .or. num_j /= num_k) then
+  endif
 
-      ao_two_e_integral = ao_two_e_integral_general(i,j,k,l,general_primitive_integral)
+end
 
-    else
+! ---
 
-      do p = 1, 3
-        I_power(p) = ao_power(i,p)
-        J_power(p) = ao_power(j,p)
-        K_power(p) = ao_power(k,p)
-        L_power(p) = ao_power(l,p)
-      enddo
-      double  precision              :: ERI
+double precision function ao_two_e_integral_full(i, j, k, l)
 
-      do p = 1, ao_prim_num(i)
-        coef1 = ao_coef_normalized_ordered_transp(p,i)
-        do q = 1, ao_prim_num(j)
-          coef2 = coef1*ao_coef_normalized_ordered_transp(q,j)
-          do r = 1, ao_prim_num(k)
-            coef3 = coef2*ao_coef_normalized_ordered_transp(r,k)
-            do s = 1, ao_prim_num(l)
-              coef4 = coef3*ao_coef_normalized_ordered_transp(s,l)
-              integral = ERI(                                          &
-                  ao_expo_ordered_transp(p,i),ao_expo_ordered_transp(q,j),ao_expo_ordered_transp(r,k),ao_expo_ordered_transp(s,l),&
-                  I_power(1),J_power(1),K_power(1),L_power(1),         &
-                  I_power(2),J_power(2),K_power(2),L_power(2),         &
-                  I_power(3),J_power(3),K_power(3),L_power(3))
-              ao_two_e_integral = ao_two_e_integral + coef4 * integral
-            enddo ! s
-          enddo  ! r
-        enddo   ! q
-      enddo    ! p
+  BEGIN_DOC
+  !  Full sum of the AO integral <ik|jl> or (ij|kl) over all primitive
+  !  quartets: i(r1) j(r1) 1/r12 k(r2) l(r2). This is the body of the
+  !  last branch of the dispatcher ao_two_e_integral, moved verbatim.
+  !  Why it exists: on the map path (do_ao_cholesky = F) the dispatcher
+  !  routes to ao_two_e_integral_schwartz_accel when the product of the
+  !  primitive counts exceeds 1024, and that accelerator skips primitive
+  !  quartets with the absolute threshold ao_integrals_threshold**2.
+  !  The Schwartz screening factors must use this full sum for the
+  !  (ik|ik) diagonals: the accelerated value zeroes the small diagonals
+  !  (43/5050 zeroed factors measured on the (H2O)4 chain, cc-pVDZ,
+  !  threshold 1e-15, issue #419), and the CS screening then drops
+  !  integrals far above the threshold. The Cholesky diagonals
+  !  effectively use this sum (do_schwartz_accel is false when
+  !  do_ao_cholesky). This function does not call the dispatcher
+  !  (no re-entrancy).
+  END_DOC
 
-    endif
+  implicit none
+  include 'utils/constants.include.F'
+
+  integer, intent(in)            :: i, j, k, l
+
+  integer                        :: p, q, r, s
+  integer                        :: num_i,num_j,num_k,num_l,I_power(3),J_power(3),K_power(3),L_power(3)
+  double precision               :: integral
+  double precision               :: coef1, coef2, coef3, coef4
+
+  double precision, external     :: ao_two_e_integral_general
+  double precision, external     :: general_primitive_integral
+
+  num_i = ao_nucl(i)
+  num_j = ao_nucl(j)
+  num_k = ao_nucl(k)
+  num_l = ao_nucl(l)
+  ao_two_e_integral_full = 0.d0
+
+  if (num_i /= num_j .or. num_k /= num_l .or. num_j /= num_k) then
+
+    ao_two_e_integral_full = ao_two_e_integral_general(i,j,k,l,general_primitive_integral)
+
+  else
+
+    do p = 1, 3
+      I_power(p) = ao_power(i,p)
+      J_power(p) = ao_power(j,p)
+      K_power(p) = ao_power(k,p)
+      L_power(p) = ao_power(l,p)
+    enddo
+    double  precision              :: ERI
+
+    do p = 1, ao_prim_num(i)
+      coef1 = ao_coef_normalized_ordered_transp(p,i)
+      do q = 1, ao_prim_num(j)
+        coef2 = coef1*ao_coef_normalized_ordered_transp(q,j)
+        do r = 1, ao_prim_num(k)
+          coef3 = coef2*ao_coef_normalized_ordered_transp(r,k)
+          do s = 1, ao_prim_num(l)
+            coef4 = coef3*ao_coef_normalized_ordered_transp(s,l)
+            integral = ERI(                                          &
+                ao_expo_ordered_transp(p,i),ao_expo_ordered_transp(q,j),ao_expo_ordered_transp(r,k),ao_expo_ordered_transp(s,l),&
+                I_power(1),J_power(1),K_power(1),L_power(1),         &
+                I_power(2),J_power(2),K_power(2),L_power(2),         &
+                I_power(3),J_power(3),K_power(3),L_power(3))
+            ao_two_e_integral_full = ao_two_e_integral_full + coef4 * integral
+          enddo ! s
+        enddo  ! r
+      enddo   ! q
+    enddo    ! p
 
   endif
 
@@ -484,28 +513,36 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, ao_two_e_integral_schwartz, (ao_num, ao_num) ]
 
   BEGIN_DOC
-  !  Needed to compute Schwartz inequalities
+  !  Schwartz screening factors sqrt( (pq|pq) ): the rigorous
+  !  Cauchy-Schwarz bound |(pq|rs)| <= sqrt( (pq|pq) (rs|rs) ),
+  !  used for the screening of the AO integrals (see
+  !  ao_two_e_integral_zero). The diagonal (pq|pq) is summed over
+  !  ALL primitive quartets (ao_two_e_integral_full): on the map
+  !  path the dispatcher may route (pq|pq) to
+  !  ao_two_e_integral_schwartz_accel, whose absolute primitive
+  !  threshold zeroes the small diagonals (43/5050 zeroed factors
+  !  measured on the (H2O)4 chain, cc-pVDZ, threshold 1e-15, issue
+  !  #419), and the CS screening would then drop integrals far
+  !  above the threshold. dabs: a vanishing diagonal can be
+  !  negative by rounding (as in the cGTO provider).
   END_DOC
 
   implicit none
   integer          :: i, k
-  double precision :: ao_two_e_integral,cpu_1,cpu_2, wall_1, wall_2
+  double precision, external :: ao_two_e_integral_full
 
-  ao_two_e_integral_schwartz(1,1) = ao_two_e_integral(1,1,1,1)
+  ao_two_e_integral_schwartz(1,1) = ao_two_e_integral_full(1,1,1,1)
   !$OMP PARALLEL DO PRIVATE(i,k)                                     &
       !$OMP DEFAULT(NONE)                                            &
       !$OMP SHARED (ao_num,ao_two_e_integral_schwartz)              &
       !$OMP SCHEDULE(dynamic)
   do i=ao_num,1,-1
     do k=1,i
-      ! Schwartz factor sqrt((ik|ik)): (ik|ik) is the self-energy of
-      ! the product gaussian i*k, so sqrt((ik|ik)*(jl|jl)) is the
-      ! rigorous Cauchy-Schwarz bound on |(ik|jl)|, the integral
-      ! screened by ao_two_e_integral_zero. Same factor as in the
-      ! erf matrix (providers_ao_erf.irp.f); the former cross
-      ! pairing sqrt((ii|kk)*(jj|ll)) decays as 1/R and never
-      ! triggers at ao_integrals_threshold = 1e-15.
-      ao_two_e_integral_schwartz(i,k) = dsqrt(ao_two_e_integral(i,k,i,k))
+      ! The factor is the rigorous Cauchy-Schwarz bound on
+      ! |(ik|jl)|: the diagonal (ik|ik) is the full primitive sum
+      ! (see the BEGIN_DOC); the accelerated value would zero the
+      ! small diagonals on the map path.
+      ao_two_e_integral_schwartz(i,k) = dsqrt(dabs(ao_two_e_integral_full(i,k,i,k)))
       ao_two_e_integral_schwartz(k,i) = ao_two_e_integral_schwartz(i,k)
     enddo
   enddo

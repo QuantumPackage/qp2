@@ -6,16 +6,10 @@ double precision function ao_two_e_integral_erf(i,j,k,l)
   END_DOC
 
   integer,intent(in)             :: i,j,k,l
-  integer                        :: p,q,r,s
-  double precision               :: I_center(3),J_center(3),K_center(3),L_center(3)
-  integer                        :: num_i,num_j,num_k,num_l,dim1,I_power(3),J_power(3),K_power(3),L_power(3)
-  double precision               :: integral
   include 'utils/constants.include.F'
-  double precision               :: P_new(0:max_dim,3),P_center(3),fact_p,pp
-  double precision               :: Q_new(0:max_dim,3),Q_center(3),fact_q,qq
-  integer                        :: iorder_p(3), iorder_q(3)
   double precision               :: ao_two_e_integral_schwartz_accel_erf
-  
+  double precision               :: ao_two_e_integral_erf_full
+
   provide mu_erf
 
   if (use_cgtos) call cgtos_not_implemented('ao_two_e_integral_erf')
@@ -25,13 +19,47 @@ double precision function ao_two_e_integral_erf(i,j,k,l)
      return
    endif
 
+  ao_two_e_integral_erf = ao_two_e_integral_erf_full(i,j,k,l)
+
+end
+
+double precision function ao_two_e_integral_erf_full(i,j,k,l)
+  implicit none
+  BEGIN_DOC
+  !  Full sum of the long-range (erf) AO integral <ik|jl> or (ij|kl)
+  !  over all primitive quartets: i(r1) j(r1) erf(r12/mu)/r12
+  !  k(r2) l(r2). This is the body of the dispatcher
+  !  ao_two_e_integral_erf, moved verbatim. Why it exists: the
+  !  dispatcher routes to ao_two_e_integral_schwartz_accel_erf
+  !  whenever the product of the primitive counts exceeds 1024, and
+  !  that accelerator skips primitive quartets with the absolute
+  !  threshold ao_integrals_threshold**2. The Schwartz screening
+  !  factors ao_two_e_integral_erf_schwartz must use this full sum
+  !  for the (ik|ik) diagonals: the accelerated value zeroes the
+  !  small diagonals, and the CS screening would then drop
+  !  integrals far above the threshold (issue #419). This function
+  !  does not call the dispatcher (no re-entrancy).
+  END_DOC
+
+  integer,intent(in)             :: i,j,k,l
+  integer                        :: p,q,r,s
+  double precision               :: I_center(3),J_center(3),K_center(3),L_center(3)
+  integer                        :: num_i,num_j,num_k,num_l,dim1,I_power(3),J_power(3),K_power(3),L_power(3)
+  double precision               :: integral
+  include 'utils/constants.include.F'
+  double precision               :: P_new(0:max_dim,3),P_center(3),fact_p,pp
+  double precision               :: Q_new(0:max_dim,3),Q_center(3),fact_q,qq
+  integer                        :: iorder_p(3), iorder_q(3)
+
+  provide mu_erf
+
   dim1 = n_pt_max_integrals
 
   num_i = ao_nucl(i)
   num_j = ao_nucl(j)
   num_k = ao_nucl(k)
   num_l = ao_nucl(l)
-  ao_two_e_integral_erf = 0.d0
+  ao_two_e_integral_erf_full = 0.d0
 
   if (num_i /= num_j .or. num_k /= num_l .or. num_j /= num_k)then
     do p = 1, 3
@@ -68,7 +96,7 @@ double precision function ao_two_e_integral_erf(i,j,k,l)
             integral = general_primitive_integral_erf(dim1,              &
                 P_new,P_center,fact_p,pp,p_inv,iorder_p,             &
                 Q_new,Q_center,fact_q,qq,q_inv,iorder_q)
-            ao_two_e_integral_erf = ao_two_e_integral_erf +  coef4 * integral
+            ao_two_e_integral_erf_full = ao_two_e_integral_erf_full +  coef4 * integral
           enddo ! s
         enddo  ! r
       enddo   ! q
@@ -97,7 +125,7 @@ double precision function ao_two_e_integral_erf(i,j,k,l)
                 I_power(1),J_power(1),K_power(1),L_power(1),         &
                 I_power(2),J_power(2),K_power(2),L_power(2),         &
                 I_power(3),J_power(3),K_power(3),L_power(3))
-            ao_two_e_integral_erf = ao_two_e_integral_erf + coef4 * integral
+            ao_two_e_integral_erf_full = ao_two_e_integral_erf_full + coef4 * integral
           enddo ! s
         enddo  ! r
       enddo   ! q
