@@ -88,20 +88,35 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, ao_two_e_integral_erf_schwartz,(ao_num,ao_num)  ]
   implicit none
   BEGIN_DOC
-  !  Needed to compute Schwartz inequalities
+  !  Schwartz screening factors sqrt( (pq|pq) ) for the long-range
+  !  (erf) integrals: the rigorous Cauchy-Schwarz bound
+  !  |(pq|rs)| <= sqrt( (pq|pq) (rs|rs) ), used for the screening
+  !  of the AO erf integrals. The diagonal (pq|pq) is summed over
+  !  ALL primitive quartets (ao_two_e_integral_erf_full): the
+  !  dispatcher routes (pq|pq) to
+  !  ao_two_e_integral_schwartz_accel_erf whenever the product of
+  !  the primitive counts exceeds 1024, and that accelerator
+  !  zeroes the small diagonals with its absolute threshold
+  !  ao_integrals_threshold**2, so the CS screening would then
+  !  drop integrals far above the threshold (issue #419).
+  !  dabs: a vanishing diagonal can be negative by rounding.
   END_DOC
 
   integer                        :: i,k
-  double precision               :: ao_two_e_integral_erf,cpu_1,cpu_2, wall_1, wall_2
+  double precision, external     :: ao_two_e_integral_erf_full
 
-  ao_two_e_integral_erf_schwartz(1,1) = ao_two_e_integral_erf(1,1,1,1)
+  ao_two_e_integral_erf_schwartz(1,1) = ao_two_e_integral_erf_full(1,1,1,1)
   !$OMP PARALLEL DO PRIVATE(i,k)                                     &
       !$OMP DEFAULT(NONE)                                            &
       !$OMP SHARED (ao_num,ao_two_e_integral_erf_schwartz)              &
       !$OMP SCHEDULE(dynamic)
   do i=1,ao_num
     do k=1,i
-      ao_two_e_integral_erf_schwartz(i,k) = dsqrt(ao_two_e_integral_erf(i,k,i,k))
+      ! The factor is the rigorous Cauchy-Schwarz bound on
+      ! |(ik|jl)|: the diagonal (ik|ik) is the full primitive sum
+      ! (see the BEGIN_DOC); the accelerated value would zero the
+      ! small diagonals on this path.
+      ao_two_e_integral_erf_schwartz(i,k) = dsqrt(dabs(ao_two_e_integral_erf_full(i,k,i,k)))
       ao_two_e_integral_erf_schwartz(k,i) = ao_two_e_integral_erf_schwartz(i,k)
     enddo
   enddo
