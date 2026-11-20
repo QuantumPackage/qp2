@@ -306,6 +306,7 @@ end
 
 subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
   use map_module
+  use pair_block_stats_mod
   implicit none
   BEGIN_DOC
   ! Returns multiple integrals <ij|kl> in the MO basis, all
@@ -323,12 +324,22 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
   real, allocatable :: out_val_sp(:)
 
   integer :: iproc
+  logical          :: stat_timed
+  double precision :: stat_t0, stat_t1
 
   PROVIDE mo_two_e_integrals_in_map mo_integrals_cache 
 
   if (banned_excitation(j,l)) then
       out_val(1:sze) = 0.d0
       return
+  endif
+
+  ! Stage 0 of PAIR_BLOCK_CACHE.md: time the whole column request.  Column j
+  ! of the block (k,l) is exactly what this returns, so the two entry points
+  ! share the (k,l) key and the cache is sized on both.
+  stat_timed = pair_block_stats_on .and. do_mo_cholesky
+  if (stat_timed) then
+    call wall_time(stat_t0)
   endif
 
   ii = l-mo_integrals_cache_min
@@ -603,6 +614,11 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 
   endif
 
+  if (stat_timed) then
+    call wall_time(stat_t1)
+    call pair_block_stats_add_col(k,l,stat_t1-stat_t0)
+  endif
+
 end
 
 double precision function mo_two_e_integral(i,j,k,l)
@@ -643,6 +659,7 @@ end
 
 subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
   use map_module
+  use pair_block_stats_mod
   implicit none
   BEGIN_DOC
   ! Returns multiple integrals <ij|kl> in the MO basis, all
@@ -654,6 +671,7 @@ subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
   type(map_type), intent(inout)  :: map
   integer                        :: i,j
   integer :: iproc
+  double precision :: t_block0, t_block1
 
   if (sze /= mo_num) then
     call qp_bug(irp_here, sze, 'sze /= mo_num')
@@ -663,6 +681,10 @@ subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
 
     if (do_mo_cholesky) then
 
+      ! Stage 0 of PAIR_BLOCK_CACHE.md: measures the cost and the (k,l)
+      ! multiplicity of this block.  No-op unless QP_PAIRBLOCK_STATS=1, and
+      ! it touches no arithmetic.
+      call wall_time(t_block0)
       iproc = omp_get_thread_num()
       if (iproc >= nproc_max) then
         call qp_bug(irp_here,iproc,'iproc >= nproc_max')
@@ -731,6 +753,9 @@ subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
         deallocate(out_array_sp)
 
       endif
+
+      call wall_time(t_block1)
+      call pair_block_stats_add(k,l,cholesky_mo_num,t_block1-t_block0)
 
     else
 
