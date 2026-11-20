@@ -586,7 +586,12 @@ subroutine fill_buffer_$DOUBLE(i_generator, sp, h1, h2, bannedOrb, banned, fock_
   double precision, external :: diag_H_mat_elem_fock
   double precision :: E_shift
   double precision :: s_weight(N_states,N_states)
+  logical :: is_cfg
   PROVIDE dominant_dets_of_cfgs N_dominant_dets_of_cfgs thresh_sym excitation_ref hf_bitmask elec_alpha_num
+  ! Hoisted out of the candidate loops.  A character comparison in the inner
+  ! loops compiles to a call to _gfortran_compare_string per (p1,p2) pair and
+  ! was ~5% of the PT2 walk on the benzene fixture.
+  is_cfg = (h0_type == 'CFG')
   do jstate=1,N_states
     do istate=1,N_states
       s_weight(istate,jstate) = dsqrt(selection_weight(istate)*selection_weight(jstate))
@@ -616,7 +621,7 @@ subroutine fill_buffer_$DOUBLE(i_generator, sp, h1, h2, bannedOrb, banned, fock_
   endif
   E_shift = 0.d0
 
-  if (h0_type == 'CFG') then
+  if (is_cfg) then
     j = det_to_configuration(i_generator)
     E_shift = psi_det_Hii(i_generator) - psi_configuration_Hii(j)
   endif
@@ -861,7 +866,7 @@ subroutine fill_buffer_$DOUBLE(i_generator, sp, h1, h2, bannedOrb, banned, fock_
 
           case(5)
             ! Variance selection
-            if (h0_type == 'CFG') then
+            if (is_cfg) then
               w = min(w, - alpha_h_psi * alpha_h_psi * s_weight(istate,istate)) &
                 / c0_weight(istate)
             else
@@ -869,7 +874,7 @@ subroutine fill_buffer_$DOUBLE(i_generator, sp, h1, h2, bannedOrb, banned, fock_
             endif
 
           case(6)
-            if (h0_type == 'CFG') then
+            if (is_cfg) then
               w = min(w,- coef(istate) * coef(istate) * s_weight(istate,istate)) &
                 / c0_weight(istate)
             else
@@ -878,7 +883,7 @@ subroutine fill_buffer_$DOUBLE(i_generator, sp, h1, h2, bannedOrb, banned, fock_
 
           case default
             ! Energy selection
-            if (h0_type == 'CFG') then
+            if (is_cfg) then
               w = min(w, e_pert(istate) * s_weight(istate,istate)) / c0_weight(istate)
             else
 !              if(dabs(e_pert(istate) * s_weight(istate,istate)).gt.1.d-5)then
@@ -915,7 +920,7 @@ subroutine fill_buffer_$DOUBLE(i_generator, sp, h1, h2, bannedOrb, banned, fock_
 !!!END_DEBUG
 
       integer(bit_kind) :: occ(N_int,2), n
-      if (h0_type == 'CFG') then
+      if (is_cfg) then
         do k=1,N_int
           occ(k,1) = ieor(det(k,1),det(k,2))
           occ(k,2) = iand(det(k,1),det(k,2))
