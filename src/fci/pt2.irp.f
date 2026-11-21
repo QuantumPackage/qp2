@@ -1,5 +1,6 @@
 ! -*- mode: f90 -*-
 program pt2
+  use pair_block_stats_mod
   implicit none
   BEGIN_DOC
   ! Second order perturbative correction to the wave function contained
@@ -53,10 +54,17 @@ program pt2
   ! Building them here, serially, makes every guard a no-op for the
   ! rest of the program.
   PROVIDE mo_two_e_integrals_jj
+  ! Arm the pair-block cache (Stage 1 of PAIR_BLOCK_CACHE.md) from this
+  ! serial block: it is sized from qp_max_mem (half of qp_max_mem),
+  ! allocated and announced here, so the walk's threads only ever read it.
+  ! Where the cache does not apply (no Cholesky, or fp32) it allocates one
+  ! slot and prints nothing.
+  PROVIDE pair_cache
   read_wf = .True.
   threshold_generators = 1.d0
   SOFT_TOUCH read_wf threshold_generators
   PROVIDE psi_energy
+  call pair_block_stats_init(mo_num, trim(ezfio_filename))
   call run
 end program pt2
 
@@ -71,6 +79,7 @@ subroutine run
   ! energies are printed and saved in the |EZFIO| directory.
   END_DOC
   use selection_types
+  use pair_block_stats_mod
   integer                        :: i,j,k
   logical, external              :: detEq
 
@@ -78,6 +87,7 @@ subroutine run
   integer                        :: degree
   integer                        :: n_det_before, to_select
   double precision               :: threshold_davidson_in
+  double precision               :: walk_t0, walk_t1
 
   double precision               :: relative_error
   double precision, allocatable  :: E_CI_before(:)
@@ -89,11 +99,17 @@ subroutine run
   E_CI_before(:) = psi_energy(:) + nuclear_repulsion
   relative_error=PT2_relative_error
 
+  call wall_time(walk_t0)
   if (do_pt2) then
      call pt2_stochastic(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, relative_error, 0) ! Stochastic PT2
   else
      call omp_selection(0, pt2_data)
   endif
+  call wall_time(walk_t1)
+
+  ! Stage 0 of mo_two_e_ints/PAIR_BLOCK_CACHE.md; prints nothing unless
+  ! QP_PAIRBLOCK_STATS=1 was set at launch.
+  call pair_block_stats_report(walk_t1-walk_t0, max(nthreads_pt2,1))
 
   call print_summary(psi_energy_with_nucl_rep(1:N_states), &
        pt2_data, pt2_data_err, N_det,N_configuration,N_states,psi_s2)

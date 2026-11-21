@@ -303,9 +303,394 @@ double precision function get_two_e_integral(i,j,k,l,map)
   endif
 end
 
+! Pair-block cache, Stage 1 of PAIR_BLOCK_CACHE.md
+! ===============================================
+!
+! A block is the full mo_num x mo_num matrix <ij|kl> of one pair (k,l), the
+! object the walk recomputes 129 to 179 times per walk.  It is stored under
+! the flat key k + mo_num*(l-1) and, once published, serves both the block
+! requests (one copy) and the column requests on the same pair (one strided
+! column).  Only the block routine fills.
+!
+! Append-only: a slot is written once, by the thread that claimed it, and is
+! never moved or freed.  When the slot pool is empty the table freezes and
+! later pairs are computed uncached; PAIR_BLOCK_CACHE.md gives the
+! replacement policy that lifts that, and its price.
+
+BEGIN_PROVIDER [ integer, pair_cache_mb ]
+  implicit none
+  BEGIN_DOC
+  ! Memory cap in MB for the pair-block cache.
+  !
+  ! The cap is half of qp_max_mem, the target memory the rest of
+  ! QP already sizes itself against (physical RAM minus 1 GB, or QP_MAXMEM
+  ! when set).  Half is the share cholesky.irp.f gives its temporary AO
+  ! buffer, and the two do not overlap in time; the cache's array is not
+  ! zeroed by the allocate, so the cap is a ceiling on the fills and not a
+  ! reservation of that many pages.
+  !
+  ! The cap comes from qp_max_mem and not from the memory free at this
+  ! instant, deliberately.  Once the pool is smaller than the demand, which
+  ! pairs are admitted depends on the slot count; if the slot count depended
+  ! on what else the machine was doing when the provider was built, two runs
+  ! of the same input would differ in the last ulp of the PT2 row.  A stable
+  ! budget is worth more than a precise one.  QP_MAXMEM is the way to shrink
+  ! it on a shared machine.
+  !
+  ! There is no per-run override.  The switch existed for the A/B that
+  ! validated the cache, and it was removed once those arms were read: the cap
+  ! is a deduction from the machine's budget, not a policy knob, and a knob
+  ! only buys runs whose numbers cannot be compared with anything.  To measure
+  ! a smaller arm, set QP_MAXMEM - which also shrinks every other QP buffer
+  ! sized from it - or edit the line above in a scratch tree.
+  END_DOC
+  pair_cache_mb = 0
+  if (mo_num > 0 .and. do_mo_cholesky .and. mo_cholesky_double) then
+    pair_cache_mb = max(0, qp_max_mem) * 512
+    write(6,'(A,I0,A,I0,A)') 'Pair cache: cap ', pair_cache_mb, &
+      ' MiB (half of qp_max_mem = ', qp_max_mem, ' GB)'
+  endif
+END_PROVIDER
+
+BEGIN_PROVIDER [ integer, n_pair_cache ]
+&BEGIN_PROVIDER [ integer, n_pair_cache_padded ]
+&BEGIN_PROVIDER [ integer, pair_cache_nhash ]
+&BEGIN_PROVIDER [ integer, pair_cache_used ]
+&BEGIN_PROVIDER [ integer, pair_cache_check, (2) ]
+  implicit none
+  BEGIN_DOC
+  ! n_pair_cache is the number of blocks the cap buys, computed from the cap
+  ! arithmetically and before any array dimension is evaluated: IRPF90 emits
+  ! allocate(...,stat=) and carries on after a failure, so an over-large cap
+  ! has to be impossible rather than caught.
+  !
+  ! This block must stay separate from the arrays below.  IRPF90 emits the
+  ! allocations of a provider block before its body, so a dimension written
+  ! here would be read while it is still 0.
+  !
+  ! pair_cache_used counts the slots claimed so far, 0..n_pair_cache.  It is
+  ! the freeze test: with 2*n_pair_cache_padded+1 buckets and at most
+  ! n_pair_cache keys, at least n_pair_cache+1 buckets stay empty for the
+  ! life of the process, so a probe always ends at one, and it is the slot
+  ! pool, not the bucket table, that runs out.
+  !
+  ! pair_cache_check(i) is 1 once class i has run its once-per-process
+  ! comparison: i = 1 a block hit, i = 2 a column hit.  They are not gated on
+  ! an environment variable: one branch on a zero flag per hit is free, and
+  ! the comparison is the per-value guarantee at production shape.
+  END_DOC
+  integer(8) :: cap8, n8
+  n_pair_cache = 0
+  if (mo_num > 0 .and. do_mo_cholesky .and. mo_cholesky_double .and. pair_cache_mb > 0) then
+    cap8 = int(pair_cache_mb,8) * 131072_8
+    n8 = cap8 / (int(mo_num,8)*int(mo_num,8))
+    ! A slot holds one key k + mo_num*(l-1), and there are only mo_num**2
+    ! such keys: past that no slot can ever be written, and the only memory
+    ! an excess cap would buy is the 2*n+1-integer bucket table, which is
+    ! zeroed at startup.  Without this clamp a deduced cap gives a 30-orbital
+    ! run a multi-GB hash table.
+    n8 = min(n8, int(mo_num,8)*int(mo_num,8))
+    ! huge/2 and not huge: pair_cache_nhash below is 2*n_pair_cache+1, and a
+    ! negative dimension would leave the key table unallocated (IRPF90 skips
+    ! the allocate) for pair_cache_key = 0 to write into.  Only a cap of
+    ! gigabytes at mo_num = 1 reaches the clamp.
+    n_pair_cache = int(min(n8, int(huge(1)/2,8)))
+  endif
+  n_pair_cache_padded = max(1, n_pair_cache)
+  pair_cache_nhash = 2*n_pair_cache_padded + 1
+  pair_cache_used = 0
+  pair_cache_check = 0
+END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, pair_cache, (mo_num, mo_num, n_pair_cache_padded) ]
+  implicit none
+  BEGIN_DOC
+  ! pair_cache(i,j,slot) is <ij|kl> for the pair (k,l) whose key sits in the
+  ! bucket that points at slot.  Column j of the block is column j of this
+  ! array, so a column request is pair_cache(1:sze,j,slot).
+  !
+  ! The allocate does not zero the array: its pages are touched only by the
+  ! fills, so the RSS of a run follows the blocks it cached, not the cap.
+  END_DOC
+  if (n_pair_cache > 0) then
+    if (.not.allocated(pair_cache)) then
+      call qp_bug(irp_here, 1, 'pair_cache: allocation failed')
+    endif
+    write(6,'(A,I0,A,I0,A,I0,A,I0,A)') 'Pair cache: cap ', pair_cache_mb, &
+      ' MiB -> ', n_pair_cache, ' blocks of ', &
+      8_8*int(mo_num,8)*int(mo_num,8), ' B, ', &
+      int(n_pair_cache,8)*8_8*int(mo_num,8)**2/1048576_8, ' MiB allocated'
+  endif
+END_PROVIDER
+
+BEGIN_PROVIDER [ integer, pair_cache_key, (pair_cache_nhash) ]
+&BEGIN_PROVIDER [ integer, pair_cache_slot, (pair_cache_nhash) ]
+  implicit none
+  BEGIN_DOC
+  ! Open addressing over pair_cache_nhash buckets, linear probing from
+  ! mod(key,pair_cache_nhash)+1.  pair_cache_key(bucket) is 0 (empty), -1 (a
+  ! thread is filling the block) or the key k + mo_num*(l-1) of the block in
+  ! slot pair_cache_slot(bucket).  Only an empty bucket ends a probe; -1 is a
+  ! key that is not there yet, and the thread that meets it computes uncached
+  ! instead of waiting.
+  END_DOC
+  pair_cache_key = 0
+  pair_cache_slot = 0
+END_PROVIDER
+
+
+! Lookup side of the pair-block cache
+! ====================================
+!
+! Lock-free: a hit is a probe, one full FLUSH and a copy.  The probe never
+! waits.  A bucket holding -1 is a block some thread is filling right now;
+! the caller computes its own copy through the *_uncached routine instead,
+! because 34 ms of dgemm under a lock is worse than the duplicate it saves.
+!
+! Every function here arms the cache with PROVIDE pair_cache rather than
+! trusting a caller to have done it.  IRPF90 does not initialise a provider
+! variable, so a routine that reads n_pair_cache without building it reads
+! whatever was in memory - and get_mo_two_e_integrals_ij is called from mp2,
+! davidson, mu_of_r and casscf_cipsi, not only from the PT2 walk.  The
+! provider is lock-protected and its lock is initialised in every main, so
+! providing it twice, or from four threads at once, is a no-op after the
+! first.
+
+subroutine pair_cache_probe(k,l,slot)
+  implicit none
+  BEGIN_DOC
+  ! slot = the cache slot holding the block (k,l), or 0 if it is not ready.
+  ! Never waits: a block being filled by another thread reports 0.
+  END_DOC
+  integer, intent(in)  :: k,l
+  integer, intent(out) :: slot
+  integer              :: bucket, key, probe_key
+
+  slot = 0
+  key = k + mo_num*(l-1)
+  bucket = mod(key, pair_cache_nhash) + 1
+  do
+    probe_key = pair_cache_key(bucket)
+    if (probe_key == 0) then
+      return
+    elseif (probe_key == key) then
+      ! The writer copied the block, flushed, then wrote the key; the same
+      ! flush here orders the key before the data and the slot.
+      !$OMP FLUSH
+      slot = pair_cache_slot(bucket)
+      return
+    endif
+    bucket = bucket + 1
+    if (bucket > pair_cache_nhash) bucket = 1
+  enddo
+end
+
+
+subroutine pair_cache_claim(k,l,slot,bucket)
+  implicit none
+  BEGIN_DOC
+  ! Must be called under CRITICAL(pair_cache_probe).  Re-walks the chain,
+  ! because the state may have changed since the lock-free probe, and claims
+  ! the first empty bucket if the slot pool still has room.
+  !
+  ! slot =  0: the pool is exhausted and the table is frozen; the caller
+  !             computes uncached and stores nothing.
+  ! slot = -1: the block is there, or another thread is filling it; either way
+  !             the caller computes its own copy and stores nothing.
+  ! slot >  0: the caller owns the fill of this slot, and bucket is where the
+  !             key must be published once the block is written.
+  END_DOC
+  integer, intent(in)  :: k,l
+  integer, intent(out) :: slot, bucket
+  integer              :: key, probe_key
+
+  slot = 0
+  bucket = 0
+  key = k + mo_num*(l-1)
+  bucket = mod(key, pair_cache_nhash) + 1
+  do
+    probe_key = pair_cache_key(bucket)
+    if (probe_key == 0) then
+      if (pair_cache_used >= n_pair_cache) return
+      ! Only this critical writes these three, so no atomics are needed; the
+      ! slot number must be visible before the -1 that points at it, which is
+      ! what the flush does.
+      pair_cache_used = pair_cache_used + 1
+      slot = pair_cache_used
+      pair_cache_slot(bucket) = slot
+      !$OMP FLUSH
+      pair_cache_key(bucket) = -1
+      !$OMP FLUSH
+      return
+    elseif (probe_key == key .or. probe_key == -1) then
+      ! -1 may be another key's in-flight fill whose chain crosses ours.  We
+      ! do not know, and we do not need to: not waiting is always correct, and
+      ! the only cost is a fill opportunity lost while a colliding key is
+      ! being computed.
+      ! probe_key == key means the block became ready in the window between
+      ! the caller's lock-free probe and this critical.  We recompute its
+      ! uncached dgemm instead of returning the slot that is now there, on
+      ! purpose: one redundant 34 ms fill, once in a while, against a third
+      ! return state and a second copy path in both wrappers.
+      slot = -1
+      return
+    endif
+    bucket = bucket + 1
+    if (bucket > pair_cache_nhash) bucket = 1
+  enddo
+end
+
+
+subroutine pair_cache_verify_block(k,l,sze,cached)
+  use map_module
+  implicit none
+  BEGIN_DOC
+  ! Once per process: is the block the walk is about to use bit-identical to
+  ! what the uncached routine returns?  dgemm against dgemm, so the tolerance
+  ! is zero - this is the check that sees a transposed, shifted or
+  ! mis-strided block, and it runs at the production shape on the production
+  ! BLAS.  The reference goes to a local dummy map: naming mo_integrals_map
+  ! would ask IRPF90 to build the sparse MO map, which Cholesky mode never
+  ! builds.
+  END_DOC
+  integer, intent(in)           :: k,l,sze
+  double precision, intent(in)  :: cached(sze,sze)
+  double precision, allocatable :: ref(:,:)
+  type(map_type)                :: dummy_map
+  integer                       :: i,j
+  integer(8)                    :: bits_cached, bits_ref
+  logical                       :: mine
+
+  ! The caller's lock-free `pair_cache_check(1) == 0` read is not a claim:
+  ! several walkers can pass it in the same instant, and each would pay a
+  ! 34 ms dgemm to print the same line.  Claim under the critical, do the
+  ! work outside it.  Losing the race is the common case after the first
+  ! walker, and it costs one critical.
+  mine = .false.
+  !$OMP CRITICAL(pair_cache_probe)
+  if (pair_cache_check(1) == 0) then
+    pair_cache_check(1) = 1
+    mine = .true.
+  endif
+  !$OMP END CRITICAL(pair_cache_probe)
+  if (.not.mine) return
+
+  allocate(ref(sze,sze))
+  call get_mo_two_e_integrals_ij_uncached(k,l,sze,ref,dummy_map)
+  do j = 1, sze
+    do i = 1, sze
+      bits_cached = transfer(cached(i,j), bits_cached)
+      bits_ref    = transfer(ref(i,j),    bits_ref)
+      if (bits_cached /= bits_ref) then
+        write(6,'(A,I0,A,I0,A,I0,A,I0,A)') 'Pair cache: block (',k,',',l, &
+          ') element (',i,',',j,') differs from the uncached block'
+        write(6,'(A,ES24.16,A,ES24.16)') '  cached ', cached(i,j), ' uncached ', ref(i,j)
+        call qp_bug(irp_here, 1, 'pair_cache: a block hit is not bit-identical')
+      endif
+    enddo
+  enddo
+  deallocate(ref)
+
+  write(6,'(A,I0,A,I0,A)') 'Pair cache: first block hit, (',k,',',l, &
+    '), bit-identical to the uncached block'
+end
+
+
+subroutine pair_cache_verify_column(j,k,l,sze,cached)
+  implicit none
+  BEGIN_DOC
+  ! Once per process: does the column the walk reads from a cached block
+  ! carry the right values?  Not the same bits, and it cannot be: the block
+  ! was produced by a dgemm, today's column by a dgemv, and the two differ at
+  ! ~1e-11 relative on this BLAS (see PAIR_BLOCK_CACHE.md).  The test is on
+  ! the 2-norm of the difference against the 2-norm of the column, so a
+  ! near-zero element with a large relative error cannot fail it while a
+  ! transposed or shifted column - which scores O(1) - cannot pass it.
+  END_DOC
+  integer, intent(in)           :: j,k,l,sze
+  double precision, intent(in)  :: cached(sze)
+  double precision, allocatable :: ref(:)
+  type(map_type)                :: dummy_map
+  double precision              :: ratio, num, den
+  integer                       :: i
+  logical                       :: mine
+
+  mine = .false.
+  !$OMP CRITICAL(pair_cache_probe)
+  if (pair_cache_check(2) == 0) then
+    pair_cache_check(2) = 1
+    mine = .true.
+  endif
+  !$OMP END CRITICAL(pair_cache_probe)
+  if (.not.mine) return
+
+  allocate(ref(sze))
+  call get_mo_two_e_integrals_uncached(j,k,l,sze,ref,dummy_map)
+  num = 0.d0
+  den = 0.d0
+  do i = 1, sze
+    num = num + (ref(i) - cached(i))**2
+    den = den + ref(i)**2
+  enddo
+  ratio = sqrt(num) / max(sqrt(den), 1.d-300)
+  deallocate(ref)
+
+  if (ratio > 1.d-9) then
+    write(6,'(A,I0,A,I0,A,I0,A,ES12.4)') 'Pair cache: column (',j,',',k, &
+      ',',l,') deviates from the dgemv column by ', ratio
+    call qp_bug(irp_here, 2, 'pair_cache: a column hit is not the right column')
+  endif
+
+  write(6,'(A,I0,A,I0,A,I0,A,ES12.4,A)') 'Pair cache: first column hit, (',j, &
+    ',',k,',',l, '), relative deviation from the dgemv column ', ratio, &
+    ' (gemm roundings; expected ~1e-11)'
+end
+
 
 subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
   use map_module
+  implicit none
+  BEGIN_DOC
+  ! Returns multiple integrals <ij|kl> in the MO basis, all
+  ! i for j,k,l fixed.
+  !
+  ! Served from the pair-block cache when the block (k,l) is cached: this is
+  ! then column j of that block.  Otherwise, and always when the cache is
+  ! disabled, the call is get_mo_two_e_integrals_uncached, unchanged.
+  END_DOC
+  integer, intent(in)            :: j,k,l, sze
+  double precision, intent(out)  :: out_val(sze)
+  type(map_type), intent(inout)  :: map
+  integer                        :: slot
+
+  PROVIDE pair_cache
+
+  if (n_pair_cache == 0 .or. sze /= mo_num) then
+    call get_mo_two_e_integrals_uncached(j,k,l,sze,out_val,map)
+    return
+  endif
+
+  ! Before the probe, and deliberately duplicated in the uncached body: a
+  ! banned (j,l) returns zeros, which is not column j of the block, so a hit
+  ! that skipped this test would return the true integral.
+  if (banned_excitation(j,l)) then
+    out_val(1:sze) = 0.d0
+    return
+  endif
+
+  call pair_cache_probe(k,l,slot)
+  if (slot > 0) then
+    out_val(1:sze) = pair_cache(1:sze,j,slot)
+    if (pair_cache_check(2) == 0) call pair_cache_verify_column(j,k,l,sze,out_val)
+  else
+    call get_mo_two_e_integrals_uncached(j,k,l,sze,out_val,map)
+  endif
+end
+
+
+subroutine get_mo_two_e_integrals_uncached(j,k,l,sze,out_val,map)
+  use map_module
+  use pair_block_stats_mod
   implicit none
   BEGIN_DOC
   ! Returns multiple integrals <ij|kl> in the MO basis, all
@@ -323,12 +708,22 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
   real, allocatable :: out_val_sp(:)
 
   integer :: iproc
+  logical          :: stat_timed
+  double precision :: stat_t0, stat_t1
 
   PROVIDE mo_two_e_integrals_in_map mo_integrals_cache 
 
   if (banned_excitation(j,l)) then
       out_val(1:sze) = 0.d0
       return
+  endif
+
+  ! Stage 0 of PAIR_BLOCK_CACHE.md: time the whole column request.  Column j
+  ! of the block (k,l) is exactly what this returns, so the two entry points
+  ! share the (k,l) key and the cache is sized on both.
+  stat_timed = pair_block_stats_on .and. do_mo_cholesky
+  if (stat_timed) then
+    call wall_time(stat_t0)
   endif
 
   ii = l-mo_integrals_cache_min
@@ -603,6 +998,11 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 
   endif
 
+  if (stat_timed) then
+    call wall_time(stat_t1)
+    call pair_block_stats_add_col(k,l,stat_t1-stat_t0)
+  endif
+
 end
 
 double precision function mo_two_e_integral(i,j,k,l)
@@ -648,12 +1048,69 @@ subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
   ! Returns multiple integrals <ij|kl> in the MO basis, all
   ! i(1)j(2) 1/r12 k(1)l(2)
   ! i, j for k,l fixed.
+  !
+  ! Served from the pair-block cache when the block (k,l) is cached.
+  ! Otherwise, and always when the cache is disabled, the call is
+  ! get_mo_two_e_integrals_ij_uncached, unchanged.
+  END_DOC
+  integer, intent(in)            :: k,l, sze
+  double precision, intent(out)  :: out_array(sze,sze)
+  type(map_type), intent(inout)  :: map
+  integer                        :: slot, bucket
+
+  PROVIDE pair_cache
+
+  if (n_pair_cache == 0 .or. sze /= mo_num) then
+    call get_mo_two_e_integrals_ij_uncached(k,l,sze,out_array,map)
+    return
+  endif
+
+  call pair_cache_probe(k,l,slot)
+  if (slot > 0) then
+    out_array(1:sze,1:sze) = pair_cache(1:sze,1:sze,slot)
+    if (pair_cache_check(1) == 0) call pair_cache_verify_block(k,l,sze,out_array)
+    return
+  endif
+
+  ! Miss: claim a slot under the critical, then compute and publish outside it,
+  ! so a 34 ms dgemm never serialises the other walkers.
+  !$OMP CRITICAL(pair_cache_probe)
+  call pair_cache_claim(k,l,slot,bucket)
+  !$OMP END CRITICAL(pair_cache_probe)
+
+  if (slot <= 0) then
+    ! Frozen table, or a colliding fill in flight: today's cost, stored nowhere.
+    call get_mo_two_e_integrals_ij_uncached(k,l,sze,out_array,map)
+    return
+  endif
+
+  call get_mo_two_e_integrals_ij_uncached(k,l,sze,out_array,map)
+
+  ! Only the claimer writes this slot, so the publish needs no lock: the data
+  ! first, a flush, then the key.  A reader that sees the key flushes and then
+  ! reads, which is what orders the data before its copy.
+  pair_cache(1:sze,1:sze,slot) = out_array(1:sze,1:sze)
+  !$OMP FLUSH
+  pair_cache_key(bucket) = k + mo_num*(l-1)
+  !$OMP FLUSH
+end
+
+
+subroutine get_mo_two_e_integrals_ij_uncached(k,l,sze,out_array,map)
+  use map_module
+  use pair_block_stats_mod
+  implicit none
+  BEGIN_DOC
+  ! Returns multiple integrals <ij|kl> in the MO basis, all
+  ! i(1)j(2) 1/r12 k(1)l(2)
+  ! i, j for k,l fixed.
   END_DOC
   integer, intent(in)            :: k,l, sze
   double precision, intent(out)  :: out_array(sze,sze)
   type(map_type), intent(inout)  :: map
   integer                        :: i,j
   integer :: iproc
+  double precision :: t_block0, t_block1
 
   if (sze /= mo_num) then
     call qp_bug(irp_here, sze, 'sze /= mo_num')
@@ -663,6 +1120,10 @@ subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
 
     if (do_mo_cholesky) then
 
+      ! Stage 0 of PAIR_BLOCK_CACHE.md: measures the cost and the (k,l)
+      ! multiplicity of this block.  No-op unless QP_PAIRBLOCK_STATS=1, and
+      ! it touches no arithmetic.
+      call wall_time(t_block0)
       iproc = omp_get_thread_num()
       if (iproc >= nproc_max) then
         call qp_bug(irp_here,iproc,'iproc >= nproc_max')
@@ -731,6 +1192,9 @@ subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
         deallocate(out_array_sp)
 
       endif
+
+      call wall_time(t_block1)
+      call pair_block_stats_add(k,l,cholesky_mo_num,t_block1-t_block0)
 
     else
 
