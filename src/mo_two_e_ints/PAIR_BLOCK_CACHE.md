@@ -32,6 +32,16 @@ decides whether Stage 1 is written at all.
   out of the same run: the walk settles its *membership* early but says nothing
   about *ordering*, so an offline ranking is still the right answer if a
   production cap cannot hold the whole set.
+* **The loop-swap alternative is answered, and it loses.** A block's key is a
+  property of the interesting determinant, not of any loop that iterates it, so
+  there is no invariant block to hoist; inverting onto the pair moves the cost
+  from an 803 MiB table of blocks to a resident set of partial `mat` arrays of the
+  same order, and buys only the 47 % block half. The same read did turn up a free
+  fix: `get_d0` mallocs a full 545 KiB block on each of its 235 888 calls
+  (*The one hoist that does pay*).
+* **Replacement, not freeze, is specified for the capped regime** (*When the cap
+  binds*), and it is the last thing to implement: it is a thrash bound, not the
+  value ranking, and it costs a seqlock on the hit path.
 * **Stage 1 is specified below and not started.** The gate is still one number
   the laptop cannot supply: the production pair set - the pairs touched by a
   production determinant list at production `mo_num` - and how much of the block
@@ -457,10 +467,12 @@ reader that sees `-1` or `0` takes the uncached path, which is always correct.
 The reader's flush is a `dmb ish` on arm64, tens of cycles against a 0.3-3 us
 hit.
 
-No eviction. When no empty bucket remains the table freezes: later pairs are
-computed uncached and the run stays correct, only slower. That is the whole
-policy, and it is the right one here because the block a walk needs last is the
-one it needs least often (the first-come argument above).
+With no empty bucket left the table freezes: later pairs are computed uncached and
+the run stays correct, only slower. That is the default, and the only policy the
+four steps above implement. It is the right one whenever the cap holds the whole
+pair set, which is true of both completed benches; where the cap binds it is
+wrong, because arrival order is not a ranking, and *When the cap binds* below
+gives the replacement that fixes it together with its price.
 
 The fill passes a locally declared `type(map_type) :: dummy_map` to the uncached
 block routine. Naming `mo_integrals_map` there would ask IRPF90 to build the
@@ -556,8 +568,9 @@ Properties:
   such a cache (every column call served from a gemm-filled block), so a
   completed walk at shift 7 against a completed walk at shift 6 is the A/B. See
   Validation for the first half of that measurement.
-* The array is append-only: a slot is written once, by the thread that claimed
-  it, and never moved or freed. No eviction, no LRU, no resize.
+* By default the array is append-only: a slot is written once, by the thread that
+  claimed it, and never moved or freed. No eviction, no resize. The bounded mode
+  below is the one exception and changes exactly this sentence.
 * On a block hit the cost is one `8*mo_num^2` byte copy: 0.53 MiB at 264 MOs,
   ~50 us, **0.15 %** of the 33.9 ms dgemm it replaces. On a column hit it is a
   strided read of one column - `mo_num` cache lines, 912 B but 114 lines at 114
@@ -572,10 +585,54 @@ Properties:
   hit is a probe, one `FLUSH`, one branch and a copy: no locks, no atomics, no
   per-thread state.
 
-Not in scope: eviction, a traced key sequence, a runtime-adaptive policy. If the
-cap turns out to be too small for the production pair set, the fork is not more
-caching machinery - it is the batched device GEMM discussed under the decision
-rule.
+Not in scope: a traced key sequence, a runtime-adaptive policy. Replacement is in
+scope only as the bounded mode below, with its price stated there. If the cap
+turns out to be too small for the production pair set, the first answer is that
+mode; the second is the batched device GEMM discussed under the decision rule.
+
+### When the cap binds: replace instead of freeze
+
+Freeze is wrong at production size, and the numbers above say why: the cap holds
+1031 blocks at 510 MOs against a pair set already 1833 at 264, and the pairs the
+walk goes on to ask for again are not the ones that arrived first - the two are
+uncorrelated in the measurement. Freezing hands the first 1031 arrivals a
+permanent monopoly on the table.
+
+In-place replacement is not free here, and this table makes it cost two things:
+
+* **probe integrity.** Linear probing looks a key up along `mod(key,nhash)+1`,
+  `+2`, ... and stops at `key == 0`, so every key must sit on its own probe path.
+  A replacement may only claim a bucket that lies on the *new* key's path -
+  possible only when that path holds no empty bucket, which is exactly the case
+  that reaches replacement - so the new key is still found. The evicted key then
+  vanishes from its own path, which reads as a miss by construction, because its
+  probe walks past the foreign key to the `0` terminator. Replacing at a hand
+  pointer instead - classic clock - would strand the new key off its own path and
+  make it unfindable.
+* **the reader may be copying the block being overwritten.** The `-1` state is
+  written before the data is touched, so a reader that has not yet passed the
+  probe takes the uncached path; a reader already copying cannot. It must
+  therefore validate: re-read the key after the copy and discard the copy if it
+  changed. That is sound except for ABA - the evicted key re-admitted into the
+  same bucket during the ~50 us copy - which needs a sequence number:
+  `pair_cache_stamp(nhash)`, odd while a slot is being rewritten, read before and
+  after the copy. Because a block is bit-identical every time it is computed, the
+  key alone would do if keys were never re-admitted, and the stamp is what buys
+  the right to re-admit.
+
+Cost: one `integer` array of `nhash` (31 KB at 264 MOs with the 2 GB cap), two
+loads and two `FLUSH`es on the hit path, and a rare lost hit, which recomputes at
+today's cost.
+What it buys is a *thrash bound*: two colliding pairs take turns instead of one
+starving for the rest of the walk. It does **not** buy the value ranking - with
+1031 slots for 1833+ pairs the concentrated pairs still have to be chosen, not
+discovered - so if the production dump comes back with the 264-MO shape (top 530
+pairs = 80 % of the value) then the ranking is what pays, and this mode is not a
+substitute for it.
+
+Implement it last, behind the same keyword, and only after the cap-0 arm and the
+append-only arm have both been timed on the same binary. Until then the case for
+replacement is an argument, not a number.
 
 ## Stage 0 result (benzene cc-pVDZ probe, 20 November 2026)
 
@@ -707,8 +764,9 @@ What does not transfer, and must be measured at production size:
 The decision this supports: at a 1 GB cap (1422 blocks at 300 MOs) Stage 1
 removes 35-55 % of the integral time - 28-43 % of the walk - *if* the production
 pair set is as concentrated as this one; the production curve is the only thing
-that settles it. Nothing here justifies a larger cap than ~2 GB per process, and
-nothing justifies eviction.
+that settles it. Nothing here justifies a larger cap than ~2 GB per process.
+Eviction never pays while the set fits; its only justification is the capped
+regime, which is exactly the regime this paragraph cannot see.
 
 One model did not survive contact with the data, and the design does not need it.
 The obvious byte model - `t_col` linear in the number of MOs outside the window,
@@ -894,6 +952,82 @@ slab stay in L2/L3. That needs no arithmetic change at all. It is only
 plausible because the slab is 1-2 MB per thread; at the production thread count
 with 8 MB of slabs in flight it is exactly the kind of assumption that stops
 holding on the machine you did not test on, so it must be measured, not assumed.
+
+## The other no-memory alternative: swap the loops so the block stays hot
+
+The cache keeps *data*. The obvious alternative keeps nothing: turn the walk
+inside out so a block is materialised once and every consumer of it runs while it
+is still in L1-L3. That is the right shape of idea, and it does not work here, for
+a reason that is four lines of `get_d0` (`selection.irp.f:1551`):
+
+```
+if(sp == 3) then ! AB
+  h1 = p(1,1)
+  h2 = p(1,2)
+  call get_mo_two_e_integrals_ij(h2,h1,mo_num,hij_cache,mo_integrals_map)
+```
+
+`p` is refilled for every `i` of `splash_pq`'s loop over `interesting`
+(`:1004-1013`), from `mobMask = not(mask) .and. det(i)`. **The block key is a
+property of the interesting determinant, not of the loop that iterates it.** So
+there is no loop whose body is "the block is invariant": one call of `splash_pq` -
+one (generator, hole pair) unit - issues a fetch (or a set of column reads) per
+interesting determinant that reaches `get_d0`, and the 235 888 fetches over 1833
+pairs are spread over the units whose interesting lists contain the pair. There is
+nothing to hoist.
+
+To make a block hot you must invert onto the pair and run the units that fetch it
+back to back - 129 fetches per pair on average. That collides with `mat`, the
+unit's carrier: allocated once per generator (`:338`), zeroed at the top of
+`splash_pq` (`:973`), accumulated over the **whole** interesting list, and consumed
+only at the end by `fill_buffer_double` (`:540-541`). A unit cannot be re-entered
+piecewise - the `mo_num^2` sweep needs the complete `mat` - so splitting one
+across pair iterations means keeping its partial `mat` alive, and each open unit
+also holds `banned`/`bannedOrb` (2 x `mo_num^2` logicals, 136 KB at 264 MOs,
+rebuilt per unit from `banned_excitation`, `:506-507`) plus its `interesting`
+list.
+
+The two orders cannot both be optimal, which is the whole argument:
+
+* iterate **units**, and the block is refetched per unit - that is today's
+  235 888 calls for 1833 blocks;
+* iterate **pairs**, and you pay 0.56 MB of partial `mat` (2.1 MB at 510 MOs) per
+  open unit. A unit can only close after its *last* pair, so the open set is not
+  the consumers of the current block: it is every unit whose first pair precedes
+  this point and whose last follows it. At a minimum it holds the units that fetch
+  a single pair - 129 fetches per pair on average, so 72 MB at 264 MOs, and more
+  for the hot pairs - and in practice, with the pair graph a single connected
+  component (58 MOs, 55 % dense at 264 MOs), most of the walk is open at once. So
+  the resident set becomes accumulators of the same order as the table it
+  replaces, and it grows with hole pairs per generator while the cache does not.
+
+So the menu is: hold the per-consumer state (partial accumulators) or the shared
+object (blocks). The cache is the cheaper encoding of the same idea, and it
+leaves the control flow, the dedup arrays and the accumulation order untouched,
+which is what makes it bit-identical instead of a rewrite of the selection. Its
+ceiling is higher too: the loop swap buys the block half (47 %, 1.9x) and does
+nothing for the 36 % column half, which the same table serves at no extra cost.
+
+### The one hoist that does pay: the block allocation in `get_d0`
+
+The same read turned up a real cost that has nothing to do with caching. `get_d0`
+allocates and frees a full block on every call - `:1545`
+`allocate(hij_cache(mo_num,mo_num))`, `:1600` `deallocate` - so at 264 MOs the
+walk runs 235 888 malloc/free pairs of 545 KiB, **131 GB of first-touch page
+faults** interleaved with the dgemms, for a buffer that is the same size every
+time.
+
+Fix: thread one workspace down from `select_singles_and_doubles`, allocated beside
+`mat` at `:338` (inside the `!$OMP PARALLEL`, so one per thread), through
+`splash_pq` into `get_d0`; delete the local `allocate`/`deallocate`. Two
+signatures, no result change, and it applies to the map path as well as the
+Cholesky path. `get_d1` has the same shape (`:1280-1281`: two small allocations
+plus `lbanned = bannedOrb`, 136 KB copied per call) - hoist the allocations with
+the same workspace, but leave the `lbanned` copy alone: it is semantics, not
+scratch. Independent of Stage 1, so do it whether or not the cache lands -
+but it moves the baseline, so any A/B against the times in this file must
+re-measure the cap-0 arm on the same binary. Its own effect lands in the `other`
+counters bucket, which is where to look for it.
 
 ## Decision rule
 
