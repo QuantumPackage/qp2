@@ -1757,7 +1757,7 @@ below.
 ### Stage 1 gate at 264 MOs
 
 > **Note (21 November 2026, after the gate).** These arms were produced with
-> a temporary `QP_PAIR_CACHE_MB` override, since removed from the code. The
+> a temporary environment override, since removed from the code. The
 > cap is now always half of `qp_max_mem`, so the `auto` row is the shipped
 > behaviour and the only arm reproducible with no environment. A smaller
 > arm is reproduced with `QP_MAXMEM` (3 GB gives 1536 MiB and 2888 slots,
@@ -1809,11 +1809,7 @@ That includes `rPT2`'s ulp, which *is* the column-class difference and is
 therefore absent between two arms that both serve every column from a block.
 The deduction was checked to follow the budget rather than return a constant:
 `QP_MAXMEM=3` gives 1536 MiB and 2888 slots, still above the demand, and both
-arms fill and hit with the block assertion silent. A malformed value was
-announced - `QP_PAIR_CACHE_MB=2G` printed `QP_PAIR_CACHE_MB="2G" is not an
-integer; cache disabled` - because a silent fall back to 0 would have turned a
-typo into the whole 8.6x and left nothing in the log to find it by. The
-override was removed after this gate, and with it the check.
+arms fill and hit with the block assertion silent.
 
 **The freeze branch executed.** It is not announced, and it does not need to be:
 a pair's first miss claims a slot and publishes its key, so a pair that misses a
