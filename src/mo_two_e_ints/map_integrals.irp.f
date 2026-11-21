@@ -337,35 +337,18 @@ BEGIN_PROVIDER [ integer, pair_cache_mb ]
   ! budget is worth more than a precise one.  QP_MAXMEM is the way to shrink
   ! it on a shared machine.
   !
-  ! QP_PAIR_CACHE_MB overrides the cap, in MiB; 0 disables the cache.  It
-  ! stays an environment variable and not an EZFIO key for two reasons.  The
-  ! provider that the EZFIO generator writes for a new key stops the program
-  ! when the key is absent from the file, so a new key would refuse every
-  ! existing EZFIO directory until it is rewritten.  And the A/B that
-  ! validates the cache needs the cap per run, not per wavefunction: the two
-  ! arms differ in this number and nothing else.  The startup lines printed
-  ! by pair_cache are the record of what a run used.
+  ! There is no per-run override.  The switch existed for the A/B that
+  ! validated the cache, and it was removed once those arms were read: the cap
+  ! is a deduction from the machine's budget, not a policy knob, and a knob
+  ! only buys runs whose numbers cannot be compared with anything.  To measure
+  ! a smaller arm, set QP_MAXMEM - which also shrinks every other QP buffer
+  ! sized from it - or edit the line above in a scratch tree.
   END_DOC
-  character*(32) :: env
-  integer        :: iostat_read
   pair_cache_mb = 0
-  env = ''
-  call get_environment_variable('QP_PAIR_CACHE_MB', env)
-  if (len_trim(env) > 0) then
-    read(env, *, iostat=iostat_read) pair_cache_mb
-    if (iostat_read /= 0) then
-      write(6,'(A,A,A)') 'Pair cache: QP_PAIR_CACHE_MB="', &
-        trim(env), '" is not an integer; cache disabled'
-      pair_cache_mb = 0
-    else
-      write(6,'(A,I0,A)') 'Pair cache: cap ', pair_cache_mb, &
-        ' MiB (QP_PAIR_CACHE_MB)'
-    endif
-    if (pair_cache_mb < 0) pair_cache_mb = 0
-  else if (mo_num > 0 .and. do_mo_cholesky .and. mo_cholesky_double) then
+  if (mo_num > 0 .and. do_mo_cholesky .and. mo_cholesky_double) then
     pair_cache_mb = max(0, qp_max_mem) * 512
     write(6,'(A,I0,A,I0,A)') 'Pair cache: cap ', pair_cache_mb, &
-      ' MiB (auto: half of qp_max_mem = ', qp_max_mem, ' GB)'
+      ' MiB (half of qp_max_mem = ', qp_max_mem, ' GB)'
   endif
 END_PROVIDER
 
@@ -412,10 +395,6 @@ BEGIN_PROVIDER [ integer, n_pair_cache ]
     ! the allocate) for pair_cache_key = 0 to write into.  Only a cap of
     ! gigabytes at mo_num = 1 reaches the clamp.
     n_pair_cache = int(min(n8, int(huge(1)/2,8)))
-  endif
-  if (pair_cache_mb > 0 .and. n_pair_cache == 0) then
-    write(6,'(A,I0,A)') 'Pair cache: cap ', pair_cache_mb, &
-      ' MiB ignored: needs do_mo_cholesky and mo_cholesky_double'
   endif
   n_pair_cache_padded = max(1, n_pair_cache)
   pair_cache_nhash = 2*n_pair_cache_padded + 1

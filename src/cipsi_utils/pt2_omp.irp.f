@@ -327,9 +327,9 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
     PROVIDE psi_selectors_coef_transp psi_det_sorted_order psi_det_sorted
     PROVIDE banned_excitation mo_integrals_threshold mo_integrals_map
     ! Pair-block cache table (PAIR_BLOCK_CACHE.md): sized from qp_max_mem
-    ! (QP_PAIR_CACHE_MB overrides) and allocated once, here, before the
-    ! parallel walk reads it.  With the cache disabled it allocates one
-    ! slot and prints nothing.
+    ! (half of qp_max_mem) and allocated once, here, before the
+    ! parallel walk reads it.  Where the cache does not apply (no Cholesky,
+    ! or fp32) it allocates one slot and prints nothing.
     PROVIDE pair_cache
     PROVIDE generators_bitmask
 

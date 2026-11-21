@@ -48,7 +48,7 @@ built, and gated (*Stage 1 gate at 264 MOs*).
   binds*), and it is the last thing to implement: it is a thrash bound, not the
   value ranking, and it costs a seqlock on the hit path.
 * **Stage 1 is implemented, built and gated at 264 MOs** (`map_integrals.irp.f`,
-  cap deduced from `qp_max_mem`, `QP_PAIR_CACHE_MB` overriding it): ~9x CPU and
+  cap deduced from `qp_max_mem`): ~9x CPU and
   8.6-9.9x wall on the 264-MO fixture,
   `rPT2` one ulp from the cap-0 row against a 1e-9 gate, both hit classes
   asserted in-process, the freeze branch exercised by a 512 MiB cap, and the
@@ -69,9 +69,9 @@ built, and gated (*Stage 1 gate at 264 MOs*).
   pages. The deduction reads the budget and never the memory free at that
   instant: below the demand the admitted set depends on the slot count, and a
   slot count that moved with the machine's load would move the PT2 row in its
-  last ulp between two runs of the same input. `QP_PAIR_CACHE_MB` remains the
-  per-run override, and 0 disables the cache, which is what keeps the three gate
-  arms reproducible.
+  last ulp between two runs of the same input. There is no override: the cap
+  is a deduction, not a policy knob, and the arms below were measured while a
+  temporary one existed (see the note in *Stage 1 gate at 264 MOs*).
 * The device fork that this spec opened was costed on an A100 and **closed by
   measurement**; the numbers are in `GPU_ROUTE.md` in the measurement scratch,
   and the short version is under *Decision rule*.
@@ -320,7 +320,7 @@ For a walk that cannot finish, kill it and read the snapshots:
 
 ## Stage 1 - a lazily filled block cache (only if the Stage 0 curve pays)
 
-The cap is deduced, and `QP_PAIR_CACHE_MB` only overrides it. By default
+The cap is deduced. By default
 `pair_cache_mb` is half of `qp_max_mem` - QP's own target, physical RAM minus
 1 GB, or `QP_MAXMEM` when set - which is the same half `cholesky.irp.f`
 already gives its temporary AO buffer (the two do not overlap in time). The
@@ -328,7 +328,7 @@ deduction reads the budget and never the memory free at that instant: once the
 pool is smaller than the demand, the admitted set depends on the slot count, so
 a slot count that moved with the machine's load would move the PT2 row in its
 last ulp from run to run. `QP_MAXMEM` is how a shared machine is told to take
-less; `QP_PAIR_CACHE_MB` overrides the cap per run, and 0 disables the cache.
+less.
 
 `qp_max_mem` is `MemTotal - 1 GB` on Linux, so on a cgroup-limited node it is
 the node's RAM and not the job's allocation, exactly as it already is for the
@@ -349,8 +349,8 @@ does not fall back to `default:` when the key is absent. It prints
 `src/mo_two_e_ints/ezfio_interface.irp.f`, which is the template. A new key
 would therefore refuse every EZFIO directory written before it, including the
 3.38 GB TZ fixture, until it is rewritten - and a cache that sizes itself needs
-no key at all. The override remains what the A/B wants: the two arms differ in
-the cap and in nothing else, in the same directory, with the same binary.
+no key at all. The override was what the A/B wanted - two arms differing in
+the cap and in nothing else - and was removed once the arms were read.
 `QP_PAIRBLOCK_STATS` (Stage 0) and `QP_NTHREADS_PT2` are the same pattern. The
 startup line is the record of what a given run used; nothing else is needed.
 
@@ -406,18 +406,13 @@ only (2105/2112 elements, ~1e-11 relative), and nothing says the fp32 sums diffe
 by the same amount - `sgemm` kernels are frequently blocked differently from their
 dp counterparts. Putting an unmeasured rounding difference into a mode that is
 dead by default is not a trade worth making, so the cache is not armed there. A
-run that set `QP_PAIR_CACHE_MB` anyway says why; the deduced cap stays silent,
-since the integral mode is a choice and not a misconfiguration:
+run in fp32 or without Cholesky does not arm the cache and prints nothing; when
+it is armed, the two lines say what the cap bought:
 
 ```
-Pair cache: cap 2048 MiB (QP_PAIR_CACHE_MB)
-Pair cache: cap 2048 MiB ignored: needs do_mo_cholesky and mo_cholesky_double
-Pair cache: QP_PAIR_CACHE_MB="2G" is not an integer; cache disabled
+Pair cache: cap 3584 MiB (half of qp_max_mem = 7 GB)
+Pair cache: cap 3584 MiB -> 6740 blocks of 557568 B, 3583 MiB allocated
 ```
-
-The third line exists because `read` of a malformed value returns a nonzero
-`iostat`, and a silent fall back to 0 would turn a typo into the 8.6x and leave
-nothing in the log to find it by.
 
 Allocation is not residency: the emitted `allocate` does not zero the array, so
 its pages stay untouched until a fill writes them, and RSS follows the blocks
@@ -500,7 +495,7 @@ cannot say is *which to keep* if the cap binds (last bullet).
   what a block cache is.
 
 So Stage 1 has one knob, the cap, and no artifact - and no reason to exclude the
-CIPSI driver, where a disabled cache (`QP_PAIR_CACHE_MB=0`) leaves today's
+CIPSI driver, where a run that does not arm the cache leaves today's
 behaviour untouched.
 
 Filling, on miss, with single-flight:
@@ -578,10 +573,9 @@ Where the cache is armed, and by whom:
   provider is armed before it, twice for good measure: `PROVIDE pair_cache` in
   `pt2`'s pre-loop block (`fci/pt2.irp.f`, next to
   `PROVIDE mo_two_e_integrals_jj`, `:59`) and in `pt2_omp_task`'s
-  (`cipsi_utils/pt2_omp.irp.f:272`, next to `PROVIDE banned_excitation`). With
-  the cache disabled (`QP_PAIR_CACHE_MB=0`) the body allocates one slot, prints
-  nothing, and returns; with the deduced cap it prints its line and allocates
-  the pool;
+  (`cipsi_utils/pt2_omp.irp.f:272`, next to `PROVIDE banned_excitation`). Where
+  the cache does not apply the body allocates one slot, prints nothing, and
+  returns; with the deduced cap it prints its line and allocates the pool;
 * that is about *when*, not *whether*. IRPF90 already inserts a guarded
   `provide_pair_cache` at the top of every routine that references any of the
   entities - the generated `get_mo_two_e_integrals_ij` opens with
@@ -772,8 +766,8 @@ per-value assertion below is the only one that can see a 1-ulp column error.
    `overlap = 0.28631724830176858`) and `block_thread_s/block_requests` is
    reported, not gated.
 2. **The cap, the providers and the split, cache still at 0.** No `EZFIO.cfg`
-   edit and no interface regeneration: the cap is `QP_PAIR_CACHE_MB`, read by
-   `pair_cache_mb`. The four provider blocks of `map_integrals.irp.f`; the
+   edit and no interface regeneration: the cap is `pair_cache_mb`, deduced
+   from `qp_max_mem`. The four provider blocks of `map_integrals.irp.f`; the
    `*_uncached` bodies copied verbatim; each wrapper starts with
    `if (n_pair_cache == 0 .or. sze /= mo_num)` -> uncached, so a cap-0 run pays
    one integer test and one comparison per call and nothing else, and the
@@ -1113,9 +1107,9 @@ only while the whole set fits, and beyond that every extra MO costs a slot and
 buys nothing. What the production run must print is the pair set at 510 MOs and
 its curve - the two numbers that decide whether the capped regime is worth 2x or
 worth nothing. That is why the cap, and not the cache, is the switch: at 264 MOs
-the deduced cap holds the whole set and the cache is a free 8.6x, at 510 it is
-an open question, and `QP_PAIR_CACHE_MB=0` turns it off while the production run
-answers it.
+the deduced cap holds the whole set and the cache is a free 8.6x; at 510 the
+deduced cap binds, and the two numbers the production run prints are what say
+whether the capped regime pays.
 
 The run decides, in this order:
 
@@ -1762,6 +1756,14 @@ below.
 
 ### Stage 1 gate at 264 MOs
 
+> **Note (21 November 2026, after the gate).** These arms were produced with
+> a temporary `QP_PAIR_CACHE_MB` override, since removed from the code. The
+> cap is now always half of `qp_max_mem`, so the `auto` row is the shipped
+> behaviour and the only arm reproducible with no environment. A smaller
+> arm is reproduced with `QP_MAXMEM` (3 GB gives 1536 MiB and 2888 slots,
+> still above the 1844-pair demand); a cap of 0 would need a one-line edit
+> of `pair_cache_mb` in a scratch tree.
+
 Four arms, two binaries - the three of 21 November 11:55 and the deduced cap on
 the build that carries it - one fixture, `shift = 6`, four threads,
 `QP_PAIRBLOCK_STATS=1`, `tz_basis_test.ezfio`:
@@ -1799,18 +1801,19 @@ Pair cache: first block hit, (7,8), bit-identical to the uncached block
 Pair cache: first column hit, (20,21,23), relative deviation 6.8296E-16
 ```
 
-**The deduced cap is the same run, not a nearby one.** With `QP_PAIR_CACHE_MB`
-unset the provider gives 3584 MiB on this 7 GB box - 6740 slots against a
+**The deduced cap is the same run, not a nearby one.** With no environment
+the provider gives 3584 MiB on this 7 GB box - 6740 slots against a
 1844-pair demand - so the pool never freezes, and all nine printed numbers are
 bit-identical to the 2048 MiB row: a `diff` of the five row lines is empty.
 That includes `rPT2`'s ulp, which *is* the column-class difference and is
 therefore absent between two arms that both serve every column from a block.
 The deduction was checked to follow the budget rather than return a constant:
 `QP_MAXMEM=3` gives 1536 MiB and 2888 slots, still above the demand, and both
-arms fill and hit with the block assertion silent. A malformed value is
-announced - `QP_PAIR_CACHE_MB=2G` prints `QP_PAIR_CACHE_MB="2G" is not an
-integer; cache disabled` - because a silent fall back to 0 turns a typo into the
-whole 8.6x and leaves nothing in the log to find it by.
+arms fill and hit with the block assertion silent. A malformed value was
+announced - `QP_PAIR_CACHE_MB=2G` printed `QP_PAIR_CACHE_MB="2G" is not an
+integer; cache disabled` - because a silent fall back to 0 would have turned a
+typo into the whole 8.6x and left nothing in the log to find it by. The
+override was removed after this gate, and with it the check.
 
 **The freeze branch executed.** It is not announced, and it does not need to be:
 a pair's first miss claims a slot and publishes its key, so a pair that misses a

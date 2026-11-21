@@ -55,10 +55,10 @@ program pt2
   ! rest of the program.
   PROVIDE mo_two_e_integrals_jj
   ! Arm the pair-block cache (Stage 1 of PAIR_BLOCK_CACHE.md) from this
-  ! serial block: it is sized from qp_max_mem (QP_PAIR_CACHE_MB overrides),
+  ! serial block: it is sized from qp_max_mem (half of qp_max_mem),
   ! allocated and announced here, so the walk's threads only ever read it.
-  ! With the cache disabled (QP_PAIR_CACHE_MB=0) it allocates one slot and
-  ! prints nothing.
+  ! Where the cache does not apply (no Cholesky, or fp32) it allocates one
+  ! slot and prints nothing.
   PROVIDE pair_cache
   read_wf = .True.
   threshold_generators = 1.d0
