@@ -8,15 +8,24 @@ import configparser
 from module_handler import get_binaries
 
 
-def generate_modules(abs_module, entities):
-  """Generates the doc for modules"""
+def generate_modules(abs_module, entities, local_entities=None):
+  """Generates the doc for modules. local_entities is the entity dict read
+     from the module's own IRPF90_man (built modules); when it is None the
+     module is provider-only and its entities are looked up in the global
+     `entities` dict under its module name."""
   MODULE = os.path.split(abs_module)[-1]
   module = MODULE.lower()
   if module == "dummy":
     return
 
-  with open(os.path.join(abs_module, 'README.rst'), 'r') as f:
-    readme = f.read()
+  readme_file = os.path.join(abs_module, 'README.rst')
+  if os.path.exists(readme_file):
+    with open(readme_file, 'r') as f:
+      readme = f.read()
+  else:
+    readme = ("%s\n%s\n\nNo README.rst in this module; the providers and\n"
+              "subroutines below are documented from the irpf90 man "
+              "pages." % (module, "="*len(module)))
   rst = [
     ".. _module_%s:"%(module), "", 
     ".. program:: %s"%(module), "", 
@@ -41,30 +50,38 @@ def generate_modules(abs_module, entities):
                 default = ""
             rst += [".. option:: %s\n"%(section), doc, default]
 
+  src = local_entities if local_entities is not None \
+      else {k: e for k, e in entities.items()
+            if e.get("module", "").lower() == module.lower()}
   providers = []
   subroutines = {}
-  for k in sorted(entities.keys()):
-    e = entities[k]
-    if e["module"].lower() == module.lower():
+  for k in sorted(src.keys()):
+    e = src[k]
+    if e.get("module", "").lower() == module.lower():
         if "/" not in e["file"] and e["file"] != "ezfio_interface.irp.f":
             if e["type"] == 's':
                 subroutines[e["name"]] = e
             elif e["type"] == 'p':
                 providers.append(e)
 
-  binaries = [os.path.basename(f) for f in get_binaries(abs_module)]
+  progs = get_binaries(abs_module)
+  binaries = [os.path.basename(p[0]) for p in progs]
+  prog_names = set(p[1].lower() for p in progs)
 
-  if binaries:
+  if progs:
     rst += ["", "Programs", "--------", ""]
-    for b in binaries:
+    for binary, prog in progs:
         try:
-            b = subroutines[b]
+            subroutines[prog.lower()]
         except KeyError:
-            print("Error: The program %s in %s does not have the same name as the file, \
-or you did not run ninja at the root."%
-                (b, abs_module))
+            print("Error: The program %s (binary %s) in %s has no man page; \
+you probably did not run ninja at the root."%
+                (prog, os.path.basename(binary), abs_module))
             sys.exit(1)
-        rst += [" * :ref:`%s`"%(b["name"])]
+        # The program page is anchored by the binary (file) name, which is
+        # unique. The program statement name need not be: two tools
+        # programs both declare 'program print_hamiltonian'.
+        rst += [" * :ref:`%s`"%(os.path.basename(binary))]
 
   if providers:
     rst += ["", "Providers", "---------", ""]
@@ -75,7 +92,7 @@ or you did not run ninja at the root."%
     rst += [ "", "Subroutines / functions", "-----------------------", "" ]
     for p in sorted(subroutines.keys()):
         p = subroutines[p]
-        if p["name"] in binaries:
+        if p["name"] in binaries or p["name"] in prog_names:
            continue
         rst += [p["rst"]]
 
@@ -83,10 +100,11 @@ or you did not run ninja at the root."%
   with open(rst_file,'w') as f: 
       f.write(" \n".join(rst))
 
-  for b in subroutines:
-    if b not in binaries:
+  for binary, prog in progs:
+    p = subroutines.get(prog.lower())
+    if p is None:
       continue
-    p = subroutines[b]
+    b = os.path.basename(binary)
     rst = [".. _%s:"%(b), "", 
            ".. program:: %s"%(b), "", 
            "="*len(b), b, "="*len(b), "", ""]
@@ -156,12 +174,16 @@ def generate_providers(abs_module):
 
                     if state == 1:
                         entity["decl"] += [line]
-                        if line.startswith("subroutine") \
-                        or line.startswith("function ") \
-                        or " function " in line:
-                            entity["type"] = 's'
-                        else:
-                            entity["type"] = 'p'
+                        # Multi-line declarations (Fortran continuation '&')
+                        # would otherwise let a continuation line override
+                        # the type decided by the first line.
+                        if "type" not in entity:
+                            if line.startswith("subroutine") \
+                            or line.startswith("function ") \
+                            or " function " in line:
+                                entity["type"] = 's'
+                            else:
+                                entity["type"] = 'p'
                     elif state == 2:
                         if line.startswith(".br"):
                           line = "\n\n"
@@ -193,6 +215,11 @@ def generate_index(entities):
 
     for e in sorted(entities.keys()):
         e = entities[e]
+        # Entities declared in the auto-generated ezfio_interface.irp.f are
+        # not documented here: they are the EZFIO parameters of their module
+        # and are rendered from EZFIO.cfg in the module page.
+        if e.get("file") == "ezfio_interface.irp.f":
+            continue
         if e["type"] == 'p':
             rst.append("    * :c:data:`%s`" % (e["name"]))
 
@@ -205,6 +232,8 @@ def generate_index(entities):
 
     for e in sorted(entities.keys()):
         e = entities[e]
+        if e.get("file") == "ezfio_interface.irp.f":
+            continue
         if e["type"] == 's':
             rst.append("    * :c:func:`%s`" % (e["name"]))
 
@@ -223,22 +252,45 @@ def main():
   SRC = os.path.join(QP_ROOT, "src")
 
   entities = {}
+  local_entities = {}
   for abs_module in os.listdir(SRC):
     if os.path.islink(os.path.join(SRC,abs_module)):
       continue
     abs_module = os.path.join(SRC,abs_module)
-    if os.path.exists( os.path.join(abs_module, "README.rst") ):
+    # Collect every entity from every IRPF90_man: provider-only modules
+    # have no main, are never built, and only get their man pages inside
+    # the IRPF90_man of the programs that NEED them; the owning module of
+    # each page is recovered from the .SH File section of the .l file.
+    if os.path.isdir( os.path.join(abs_module, "IRPF90_man") ):
       read_entities = generate_providers(abs_module)
       if read_entities:
+        local_entities[os.path.basename(abs_module).lower()] = read_entities
         for k in read_entities:
             entities[k] = read_entities[k]
 
+  owned = set(e["module"].lower() for e in entities.values()
+              if isinstance(e.get("module"), str))
+
+  generated_modules = set()
   for abs_module in os.listdir(SRC):
     abs_module = os.path.join(SRC,abs_module)
-    if os.path.islink(os.path.join(SRC,abs_module)):
+    if os.path.islink(abs_module):
       continue
-    if os.path.exists( os.path.join(abs_module, "README.rst") ):
-        generate_modules(abs_module,entities)
+    base = os.path.basename(abs_module).lower()
+    if os.path.exists( os.path.join(abs_module, "README.rst") ) \
+       or base in owned:
+        generate_modules(abs_module,entities,local_entities.get(base))
+        generated_modules.add(base)
+
+  # Prune module pages for modules that no longer exist in src/ (renamed or
+  # merged). generate_modules only overwrites the pages it generates, so a
+  # page for a vanished module would otherwise persist forever and keep
+  # emitting its stale C-domain declarations.
+  moddir = os.path.join('modules')
+  if os.path.isdir(moddir):
+    for page in os.listdir(moddir):
+      if page.endswith('.rst') and page[:-4] not in generated_modules:
+        os.remove(os.path.join(moddir, page))
 
   generate_index(entities)
 

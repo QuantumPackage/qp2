@@ -8,15 +8,21 @@
 davidson_undressed
 ==================
 
-Module for main files Davidson's algorithm with no dressing.
+Davidson diagonalization with no dressing.
 
+For the programs that diagonalize the undressed Hamiltonian, this
+module provides the dressing machinery with null dressing vectors:
+:c:data:`dressing_column_h`, :c:data:`dressing_column_s` and
+:c:data:`dressing_delta` are all zero, so that the Davidson algorithm
+of the :ref:`module_davidson_dressed` module applies to the bare
+Hamiltonian.
  
  
  
 Providers 
 --------- 
  
-.. c:var:: dressing_column_h
+.. c:var:: double dressing_column_h
 
 
     File : :file:`davidson_undressed/null_dressing_vector.irp.f`
@@ -46,7 +52,7 @@ Providers
        * :c:data:`ci_electronic_energy`
 
  
-.. c:var:: dressing_column_s
+.. c:var:: double dressing_column_s
 
 
     File : :file:`davidson_undressed/null_dressing_vector.irp.f`
@@ -76,7 +82,7 @@ Providers
        * :c:data:`ci_electronic_energy`
 
  
-.. c:var:: dressing_delta
+.. c:var:: double dressing_delta
 
 
     File : :file:`davidson_undressed/null_dressing_vector.irp.f`

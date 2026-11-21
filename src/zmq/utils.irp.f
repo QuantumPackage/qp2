@@ -369,10 +369,10 @@ function new_zmq_sub_socket()
      stop 'Unable to create zmq sub socket'
   endif
 
-!  rc = f77_zmq_setsockopt(new_zmq_sub_socket,ZMQ_RCVTIMEO,10000,4)
-!  if (rc /= 0) then
-!    stop 'Unable to set timeout in new_zmq_sub_socket'
-!  endif
+  rc = f77_zmq_setsockopt(new_zmq_sub_socket,ZMQ_RCVTIMEO,10000,4)
+  if (rc /= 0) then
+    stop 'Unable to set recv timeout in new_zmq_sub_socket'
+  endif
 
   rc = f77_zmq_setsockopt(new_zmq_sub_socket,ZMQ_CONFLATE,1,4)
   if (rc /= 0) then
@@ -1275,30 +1275,6 @@ integer function zmq_delete_tasks_async_recv(zmq_to_qp_run_socket,more,sending)
   endif
   sending = .False.
 end
-
-
-subroutine wait_for_next_state(state)
-  use f77_zmq
-  implicit none
-
-  character*(64), intent(out)    :: state
-  integer(ZMQ_PTR)               :: zmq_socket_sub
-  integer(ZMQ_PTR), external     :: new_zmq_sub_socket
-  integer                        :: rc
-
-  zmq_socket_sub       = new_zmq_sub_socket()
-  state = 'Waiting'
-  do while(state == "Waiting")
-    rc = f77_zmq_recv( zmq_socket_sub, state, 64, 0)
-    if (rc > 0) then
-      state = trim(state(1:rc))
-    else
-      print *,  'Timeout reached. Stopping'
-      state = "Stopped"
-    end if
-  end do
-  call end_zmq_sub_socket(zmq_socket_sub)
-end subroutine
 
 
 subroutine wait_for_state(state_wait,state)

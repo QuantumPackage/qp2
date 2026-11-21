@@ -205,7 +205,7 @@ end
 double precision function bielec_PxxQ_no(i_mo, j_ca, i_ca, j_mo)
  implicit none 
   BEGIN_DOC
-  ! function that computes (i_mo j_ca |i_ca j_mo) with Cholesky decomposition  on the NO basis for active orbitals 
+  ! function that computes (i_mo j_ca \|i_ca j_mo) with Cholesky decomposition  on the NO basis for active orbitals
   ! 
   ! where i_ca, j_ca are in [1:n_core_inact_act_orb]
   END_DOC
@@ -226,7 +226,7 @@ end
 
 double precision function bielec_PQxx(i_mo, j_mo, i_ca, j_ca)
   BEGIN_DOC
-  ! function that computes (i_mo j_mo |i_ca j_ca) with Cholesky decomposition 
+  ! function that computes (i_mo j_mo \|i_ca j_ca) with Cholesky decomposition
   ! 
   ! indices are unshifted orbital numbers
   ! 
@@ -243,7 +243,7 @@ end
 
 double precision function bielec_PxxQ(i_mo, i_ca, j_ca, j_mo)
   BEGIN_DOC
-  ! function that computes (i_mo j_mo |i_ca j_ca) with Cholesky decomposition 
+  ! function that computes (i_mo j_mo \|i_ca j_ca) with Cholesky decomposition
   ! 
   ! where i_ca, j_ca are in [1:n_core_inact_act_orb]
   END_DOC

@@ -1,6 +1,14 @@
 ! First gradient
 
 subroutine first_gradient_list_opt(tmp_n,m,list,v_grad)
+  BEGIN_DOC
+  ! Gradient of the energy with respect to orbital rotations,
+  ! restricted to the m orbitals given by list.
+  ! Original implementation; the debug program
+  ! debug_gradient_list_opt compares it with gradient_list_opt.
+  ! n is m*(m-1)/2 and v_grad(k) is the element for the pair (p,q)
+  ! given by vec_to_mat_index(k,p,q).
+  END_DOC
 
   include 'constants.h'
 

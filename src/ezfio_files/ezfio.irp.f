@@ -5,7 +5,7 @@ BEGIN_PROVIDER [ character*(1024), ezfio_filename ]
   ! variable if it is set, or as the 1st argument of the command line.
   END_DOC
 
-  PROVIDE mpi_initialized output_wall_time_0 
+  PROVIDE mpi_initialized output_wall_time_0  nproc
 
   integer :: i
 
@@ -64,7 +64,7 @@ BEGIN_PROVIDER [ character*(1024), ezfio_work_dir_pid ]
  use c_functions
  implicit none
  BEGIN_DOC
- ! EZFIO/work/pid_
+ ! EZFIO/work/pid\_
  END_DOC
  character*(32)                 :: pid_str
  integer :: getpid

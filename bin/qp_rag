@@ -1,0 +1,5 @@
+#!/bin/bash
+# qp_rag: build and interrogate the QP2 code-model RAG (share/rag).
+# Thin wrapper around scripts/rag/qp_rag.py; called through `qp rag …`.
+# NOTE: bin/ is gitignored — this file needs `git add -f` when committing.
+exec python3 "${QP_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}/scripts/rag/qp_rag.py" "$@"

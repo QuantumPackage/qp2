@@ -10,11 +10,14 @@ BEGIN_PROVIDER[double precision, aos_in_r_array, (ao_num,n_points_final_grid)]
   implicit none
   integer          :: i
 
+  ! For provide outside of openMP section
+  call give_all_aos_at_r(final_grid_points(1,1), aos_in_r_array(1,1))
+
   !$OMP PARALLEL DO               &
   !$OMP DEFAULT (NONE)            &
   !$OMP PRIVATE (i) &
   !$OMP SHARED(aos_in_r_array,n_points_final_grid,final_grid_points)
-  do i = 1, n_points_final_grid
+  do i = 2, n_points_final_grid
     call give_all_aos_at_r(final_grid_points(1,i), aos_in_r_array(1,i))
   enddo
   !$OMP END PARALLEL DO
@@ -58,6 +61,16 @@ BEGIN_PROVIDER[double precision, aos_grad_in_r_array, (ao_num,n_points_final_gri
   double precision :: r(3)
   double precision, allocatable :: aos_grad_array(:,:), aos_array(:)
 
+  ! For provide outside of openMP section
+  allocate(aos_grad_array(3,ao_num), aos_array(ao_num))
+  call give_all_aos_and_grad_at_r(final_grid_points(1,1),aos_array,aos_grad_array)
+  do m = 1, 3
+    do j = 1, ao_num
+      aos_grad_in_r_array(j,1,m) = aos_grad_array(m,j)
+    enddo
+  enddo
+  deallocate(aos_grad_array, aos_array)
+
   !$OMP PARALLEL                                   &
   !$OMP DEFAULT (NONE)                             &
   !$OMP PRIVATE (i,j,m,r,aos_array,aos_grad_array) &
@@ -65,7 +78,7 @@ BEGIN_PROVIDER[double precision, aos_grad_in_r_array, (ao_num,n_points_final_gri
   allocate(aos_grad_array(3,ao_num), aos_array(ao_num))
 
   !$OMP DO
-  do i = 1, n_points_final_grid
+  do i = 2, n_points_final_grid
     call give_all_aos_and_grad_at_r(final_grid_points(1,i),aos_array,aos_grad_array)
     do m = 1, 3
       do j = 1, ao_num
@@ -103,6 +116,12 @@ END_PROVIDER
 
  BEGIN_PROVIDER [double precision, aos_lapl_in_r_array_transp, (ao_num, n_points_final_grid,3)]
  implicit none
+ BEGIN_DOC
+ ! aos_lapl_in_r_array_transp(i,j,k) = value of the kth component of the
+ ! laplacian of the ith ao on the jth grid point
+ !
+ ! k = 1 : x, k = 2 : y, k = 3 : z
+ END_DOC
  integer :: i,j,m
  do i = 1, n_points_final_grid
   do j = 1, ao_num
@@ -123,13 +142,23 @@ END_PROVIDER
  integer :: i,j,m
  double precision, allocatable :: aos_lapl_array(:,:), aos_grad_array(:,:), aos_array(:)
 
+ ! For provide outside of openMP section
+ allocate( aos_array(ao_num), aos_grad_array(3,ao_num), aos_lapl_array(3,ao_num))
+ call give_all_aos_and_grad_and_lapl_at_r(final_grid_points(1,1),aos_array,aos_grad_array,aos_lapl_array)
+ do j = 1, ao_num
+  do m = 1, 3
+   aos_lapl_in_r_array(m,j,1) = aos_lapl_array(m,j)
+  enddo
+ enddo
+ deallocate( aos_array, aos_grad_array, aos_lapl_array)
+
  !$OMP PARALLEL        &
  !$OMP DEFAULT (NONE)  &
  !$OMP PRIVATE (i,aos_array,aos_grad_array,aos_lapl_array,j,m) &
  !$OMP SHARED(aos_lapl_in_r_array,n_points_final_grid,ao_num,final_grid_points)
  allocate( aos_array(ao_num), aos_grad_array(3,ao_num), aos_lapl_array(3,ao_num))
  !$OMP DO 
- do i = 1, n_points_final_grid
+ do i = 2, n_points_final_grid
   call give_all_aos_and_grad_and_lapl_at_r(final_grid_points(1,i),aos_array,aos_grad_array,aos_lapl_array)
   do j = 1, ao_num
    do m = 1, 3
@@ -185,10 +214,13 @@ END_PROVIDER
  ! aos_in_r_array_extra(i,j)        = value of the ith ao on the jth grid point of the EXTRA grid
  END_DOC
  integer :: i
+ ! For provide outside of OpenMP
+ call give_all_aos_at_r(final_grid_points_extra(1,1),aos_in_r_array_extra(1,1))
+
  !$OMP PARALLEL DO &
  !$OMP DEFAULT (NONE)  PRIVATE (i) &
  !$OMP SHARED(aos_in_r_array_extra,n_points_extra_final_grid,final_grid_points_extra)
- do i = 1, n_points_extra_final_grid
+ do i = 2, n_points_extra_final_grid
   call give_all_aos_at_r(final_grid_points_extra(1,i),aos_in_r_array_extra(1,i))
  enddo
  !$OMP END PARALLEL DO
@@ -221,9 +253,24 @@ END_PROVIDER
 BEGIN_PROVIDER[double precision, aos_grad_in_r_array_extra, (ao_num,n_points_extra_final_grid,3)]
 
   implicit none
+  BEGIN_DOC
+  ! aos_grad_in_r_array_extra(i,j,k) = value of the kth component of the
+  ! gradient of the ith ao on the jth grid point of the EXTRA grid
+  !
+  ! k = 1 : x, k = 2 : y, k = 3 : z
+  END_DOC
   integer          :: i, j, m
   double precision, allocatable :: aos_array(:), aos_grad_array(:,:)
 
+!  For provide outside of OpenMP
+  allocate(aos_array(ao_num), aos_grad_array(3,ao_num))
+  call give_all_aos_and_grad_at_r(final_grid_points_extra(1,1), aos_array, aos_grad_array)
+  do m = 1, 3
+    do j = 1, ao_num
+      aos_grad_in_r_array_extra(j,1,m) = aos_grad_array(m,j)
+    enddo
+  enddo
+  deallocate(aos_array,aos_grad_array)
 
   !$OMP PARALLEL                                   &
   !$OMP DEFAULT (NONE)                             &
@@ -231,7 +278,7 @@ BEGIN_PROVIDER[double precision, aos_grad_in_r_array_extra, (ao_num,n_points_ext
   !$OMP SHARED(aos_grad_in_r_array_extra,n_points_extra_final_grid,ao_num,final_grid_points_extra)
   allocate(aos_array(ao_num), aos_grad_array(3,ao_num))
   !$OMP DO
-  do i = 1, n_points_extra_final_grid
+  do i = 2, n_points_extra_final_grid
     call give_all_aos_and_grad_at_r(final_grid_points_extra(1,i), aos_array, aos_grad_array)
     do m = 1, 3
       do j = 1, ao_num

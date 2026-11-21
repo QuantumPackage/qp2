@@ -1,5 +1,13 @@
 
 subroutine run_optimization_mos_CIPSI
+  BEGIN_DOC
+  ! Orbital optimization with a wave function that grows as the
+  ! optimization proceeds: each cycle runs a stochastic CIPSI step
+  ! (run_stochastic_cipsi) then an orbital optimization
+  ! (run_orb_opt_trust_v2), and doubles N_det_max. n_det, the
+  ! energy before and after each optimization and their difference
+  ! are appended to mo_optimization/result_opt in the EZFIO file.
+  END_DOC
 
   implicit none
 

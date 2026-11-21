@@ -34,6 +34,7 @@ subroutine resident_memory(value)
 
   value = 0.d0
 IRP_IF MACOS
+  value = dble(qp_rss_bytes()) / (1024.d0*1024.d0*1024.d0)
 IRP_ELSE
   iunit = getUnitAndOpen('/proc/self/status','r')
   do
@@ -45,13 +46,16 @@ IRP_ELSE
   end do
   20 continue
   close(iunit)
-IRP_ENDIF
   value = value / (1024.d0*1024.d0)
+IRP_ENDIF
   call unlock_io()
 end function
 
 subroutine total_memory(value)
   implicit none
+IRP_IF MACOS
+  use c_functions
+IRP_ENDIF
   BEGIN_DOC
 ! Returns the current used memory in gigabytes used by the current process.
   END_DOC
@@ -63,6 +67,7 @@ subroutine total_memory(value)
   call lock_io()
   value = 0.d0
 IRP_IF MACOS
+  value = dble(qp_vsize_bytes()) / (1024.d0*1024.d0*1024.d0)
 IRP_ELSE
   iunit = getUnitAndOpen('/proc/self/status','r')
   do
@@ -74,8 +79,8 @@ IRP_ELSE
   end do
   20 continue
   close(iunit)
-IRP_ENDIF
   value = value / (1024.d0*1024.d0)
+IRP_ENDIF
   call unlock_io()
 end function
 
@@ -153,6 +158,9 @@ end
 
 integer function get_total_available_memory() result(res)
   implicit none
+IRP_IF MACOS
+  use c_functions
+IRP_ENDIF
   BEGIN_DOC
 ! Returns the total available memory on the current machine
   END_DOC
@@ -165,6 +173,10 @@ integer function get_total_available_memory() result(res)
   integer*8 :: kb_read
   integer, external :: getUnitAndOpen
 
+IRP_IF MACOS
+  res = max(int(qp_phys_mem_bytes() / GiB, 4), 1)
+  return
+IRP_ELSE
   iunit = getUnitAndOpen('/proc/meminfo','r')
 
   res = 512
@@ -179,6 +191,7 @@ integer function get_total_available_memory() result(res)
   end do
  10 continue
   close(iunit)
+IRP_ENDIF
 
 end function get_total_available_memory
 

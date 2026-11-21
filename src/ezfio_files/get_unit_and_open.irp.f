@@ -3,12 +3,18 @@ integer function getUnitAndOpen(f,mode)
   implicit none
 
   BEGIN_DOC
+!  Returns a free Fortran unit number, searched from 20 upward,
+!  on which file `f` is opened in the mode given by `mode`.
+!  In modes 'r' and 'R', a missing file is created as empty
+!  before the file is opened for reading.
+!
 !  :f:
 !     file name
 !
 !  :mode:
 !     'R' : READ, UNFORMATTED
 !     'W' : WRITE, UNFORMATTED
+!     'A' : APPEND, UNFORMATTED
 !     'r' : READ, FORMATTED
 !     'w' : WRITE, FORMATTED
 !     'a' : APPEND, FORMATTED

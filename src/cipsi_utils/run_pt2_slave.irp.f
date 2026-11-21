@@ -28,6 +28,14 @@ subroutine run_pt2_slave(thread,iproc,energy)
  use selection_types
  use f77_zmq
   implicit none
+  BEGIN_DOC
+  ! Slave of the stochastic PT2 computation. Currently always
+  ! calls run_pt2_slave_large (the switch to
+  ! run_pt2_slave_small for small N_det is commented out).
+  ! energy: state energies, passed to select_connected.
+  ! thread: 1 uses in-process (inproc) ZeroMQ sockets, 0 uses TCP.
+  ! iproc: OpenMP thread number.
+  END_DOC
 
   double precision, intent(in)    :: energy(N_states_diag)
   integer,  intent(in)            :: thread, iproc
@@ -43,6 +51,14 @@ subroutine run_pt2_slave_small(thread,iproc,energy)
  use selection_types
  use f77_zmq
   implicit none
+  BEGIN_DOC
+  ! Slave of the stochastic PT2 computation. Processes batches of
+  ! up to pt2_n_tasks_max tasks: for each task, select_connected
+  ! accumulates the PT2 contribution of the excitations of one
+  ! generator determinant. The batch results are sent to the
+  ! master in a single push_pt2_results message; the batch size is
+  ! adjusted to take about nproc/2 seconds.
+  END_DOC
 
   double precision, intent(in)    :: energy(N_states_diag)
   integer,  intent(in)            :: thread, iproc
@@ -165,6 +181,14 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
  use selection_types
  use f77_zmq
   implicit none
+  BEGIN_DOC
+  ! Slave of the stochastic PT2 computation that processes one
+  ! task at a time: for each task, select_connected accumulates
+  ! the PT2 contribution of the excitations of one generator
+  ! determinant. The local buffer is merged into the shared
+  ! global_selection_buffer; the thread with iproc == 1 sends the
+  ! merged buffer, the other threads send their local buffer.
+  END_DOC
 
   double precision, intent(in)    :: energy(N_states_diag)
   integer,  intent(in)            :: thread, iproc
@@ -291,6 +315,13 @@ subroutine push_pt2_results(zmq_socket_push, index, pt2_data, b, task_id, n_task
  use selection_types
  use f77_zmq
   implicit none
+  BEGIN_DOC
+  ! Sends to the master, over a ZeroMQ socket, the results of
+  ! n_tasks tasks: the generator indices index, the serialized
+  ! pt2_data, the task_id list, and the selection buffer content
+  ! (b%cur, and b%val and b%det when b%cur > 0).
+  ! The exchange is completed with push_pt2_results_async_recv.
+  END_DOC
 
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_push
   type(pt2_type), intent(in)     :: pt2_data(n_tasks)
@@ -308,6 +339,14 @@ subroutine push_pt2_results_async_send(zmq_socket_push, index, pt2_data, b, task
  use selection_types
  use f77_zmq
   implicit none
+  BEGIN_DOC
+  ! Sends to the master the results of n_tasks tasks (generator
+  ! indices, serialized pt2_data, task_id list, and the selection
+  ! buffer content when b%cur > 0) as a single ZeroMQ message.
+  ! Requires sending == .false. on entry and sets it to .true.;
+  ! the caller must call push_pt2_results_async_recv to complete
+  ! the exchange. Stops if sending is already .true.
+  END_DOC
 
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_push
   type(pt2_type), intent(in)     :: pt2_data(n_tasks)
@@ -420,6 +459,13 @@ subroutine push_pt2_results_async_recv(zmq_socket_push,mini,sending)
  use selection_types
  use f77_zmq
   implicit none
+  BEGIN_DOC
+  ! Completes the exchange started by push_pt2_results_async_send.
+  ! When the socket is a REQ, receives the 'ok' acknowledgment
+  ! and the current threshold mini of the master selection buffer.
+  ! Returns without action when sending is .false.; on exit
+  ! sending is .false.
+  END_DOC
 
   integer(ZMQ_PTR), intent(in)    :: zmq_socket_push
   double precision, intent(out) :: mini
@@ -460,6 +506,14 @@ subroutine pull_pt2_results(zmq_socket_pull, index, pt2_data, task_id, n_tasks, 
  use selection_types
  use f77_zmq
   implicit none
+  BEGIN_DOC
+  ! Master-side counterpart of push_pt2_results: receives a batch
+  ! of slave results (n_tasks, index, pt2_data, task_id) and the
+  ! slave selection buffer content (b%cur, b%val and b%det when
+  ! non-empty). When the socket is a REP, replies 'ok' and the
+  ! current threshold b%mini. On communication error, sets
+  ! n_tasks = 1 and task_id(1) = 0.
+  END_DOC
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_pull
   type(pt2_type), intent(inout)  :: pt2_data(*)
   type(selection_buffer), intent(inout) :: b

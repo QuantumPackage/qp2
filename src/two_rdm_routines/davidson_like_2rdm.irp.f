@@ -80,11 +80,11 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
    use omp_lib
    implicit none
    BEGIN_DOC
-   ! Computes the two rdm for the N_st vectors |u_t>
+   ! Computes the two rdm for the N_st vectors \|u_t>
    ! if ispin == 1 :: alpha/alpha 2rdm
-   !          == 2 :: beta /beta  2rdm
-   !          == 3 :: alpha/beta  2rdm
-   !          == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
+   ! if ispin == 2 :: beta /beta  2rdm
+   ! if ispin == 3 :: alpha/beta  2rdm
+   ! if ispin == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
    ! The 2rdm will be computed only on the list of orbitals list_orb, which contains norb
    ! Default should be 1,N_det,0,1 for istart,iend,ishift,istep
    END_DOC
@@ -152,13 +152,27 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
    enddo
    call omp_init_lock(lock_2rdm)
 
+   integer:: nthreads_davidson_local
+   nthreads_davidson_local = nthreads_davidson
+
+   double precision :: rss, mem
+   call resident_memory(rss)
+
+   mem = 8*N_states*dble(dim1)**4 & ! big_array_local
+       + 8*(4+$N_int)*maxab &
+       + 8*sze_buff*(4+n_st)
+   mem = mem / 1024.d0**3
+
+   nthreads_davidson_local = min(nthreads_davidson, int((qp_max_mem - rss) / mem))
+
+
    ! Prepare the array of all alpha single excitations
    ! -------------------------------------------------
 
    double precision, allocatable :: big_array_local(:,:,:,:,:)
 
    PROVIDE N_int nthreads_davidson elec_alpha_num
-    !$OMP PARALLEL DEFAULT(NONE) NUM_THREADS(nthreads_davidson)      &
+    !$OMP PARALLEL DEFAULT(NONE) NUM_THREADS(nthreads_davidson_local) &
             !$OMP   SHARED(psi_bilinear_matrix_rows, N_det,lock_2rdm,&
             !$OMP          psi_bilinear_matrix_columns,              &
             !$OMP          psi_det_alpha_unique, psi_det_beta_unique,&
@@ -177,6 +191,10 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
             !$OMP          tmp_det2, idx, l, kcol_prev,              &
             !$OMP          singles_a, n_singles_a, singles_b,        &
             !$OMP          n_singles_b, nkeys, keys, values, big_array_local)
+
+   if (omp_get_level() > 1) then
+     print *, irp_here, ': Nested openMP section (', omp_get_level(),')'
+   endif
 
    ! Alpha/Beta double excitations
    ! =============================
@@ -210,9 +228,9 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
      tmp_det(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
 
      if (kcol /= kcol_prev) then
-       call get_all_spin_singles_$N_int(                             &
-           psi_det_beta_unique, idx0,                                &
-           tmp_det(1,2), N_det_beta_unique,                          &
+       call get_all_spin_singles(                  &
+           psi_det_beta_unique, idx0,              &
+           tmp_det(1,2), N_int, N_det_beta_unique, &
            singles_b, n_singles_b)
      endif
      kcol_prev = kcol
@@ -240,8 +258,8 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
        enddo
        j = j-1
 
-       call get_all_spin_singles_$N_int(                             &
-           buffer, idx, tmp_det(1,1), j,                             &
+       call get_all_spin_singles(                 &
+           buffer, idx, tmp_det(1,1), N_int,  j,  &
            singles_a, n_singles_a )
 
        ! Loop over alpha singles
@@ -332,8 +350,8 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
      enddo
      i = i-1
 
-     call get_all_spin_singles_and_doubles_$N_int(                   &
-         buffer, idx, spindet, i,                                    &
+     call get_all_spin_singles_and_doubles(   &
+         buffer, idx, spindet, N_int, i,      &
          singles_a, doubles, n_singles_a, n_doubles )
 
      ! Compute Hij for all alpha singles
@@ -437,8 +455,8 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
      enddo
      i = i-1
 
-     call get_all_spin_singles_and_doubles_$N_int(                   &
-         buffer, idx, spindet, i,                                    &
+     call get_all_spin_singles_and_doubles( &
+         buffer, idx, spindet, N_int, i,    &
          singles_b, doubles, n_singles_b, n_doubles )
 
      ! Compute Hij for all beta singles
@@ -571,6 +589,15 @@ end
 subroutine update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
  use omp_lib
  implicit none
+ BEGIN_DOC
+ ! Adds the buffered contributions to the two-rdm big_array
+ ! for all n_st states: keys(1:4,i) gives the orbital
+ ! indices (h1,h2,p1,p2) of the element, values(istate,i) is
+ ! added to big_array(h1,h2,p1,p2,istate) under lock_2rdm.
+ ! Every call site in this file is commented out and the
+ ! routine is superseded by update_keys_values_n_states_local
+ ! (author-confirmed 2026-10-31).
+ END_DOC
  integer, intent(in) :: n_st,nkeys,dim1
  integer, intent(in) :: keys(4,nkeys)
  double precision, intent(in) :: values(n_st,nkeys)
@@ -623,6 +650,14 @@ end
 subroutine update_keys_values_n_states_local(keys,values,nkeys,dim1,n_st,big_array_local)
  use omp_lib
  implicit none
+ BEGIN_DOC
+ ! Adds the buffered contributions to the thread-private
+ ! two-rdm big_array_local: keys(1:4,i) gives the orbital
+ ! indices (h1,h2,p1,p2) of the element, values(istate,i)
+ ! is added to big_array_local(istate,h1,h2,p1,p2) for all
+ ! n_st states. No lock: the caller allocates one
+ ! big_array_local per OpenMP thread and merges them.
+ END_DOC
  integer, intent(in) :: n_st,nkeys,dim1
  integer, intent(in) :: keys(4,nkeys)
  double precision, intent(in) :: values(n_st,nkeys)

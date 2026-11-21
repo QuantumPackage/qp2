@@ -1,7 +1,7 @@
 
 ! ---
 
-program select_dets_bi_ortho()
+program select_dets_bi_ortho
 
   BEGIN_DOC
   ! TODO : Put the documentation of the program here

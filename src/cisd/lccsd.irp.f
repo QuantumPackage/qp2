@@ -52,6 +52,11 @@ end
 
 subroutine run
   implicit none
+  BEGIN_DOC
+  ! Builds the CISD space (H_apply_cisd, or H_apply_cisd_sym when
+  ! pseudo_sym), then calls get_lccsd_2 to compute and print the
+  ! LCCSD energies.
+  END_DOC
 
   if(pseudo_sym)then
    call H_apply_cisd_sym
@@ -63,6 +68,13 @@ end
 
 subroutine get_lccsd_2
   implicit none
+  BEGIN_DOC
+  ! Sets psi_coef to the LCCSD coefficients (lccsd_coef provider),
+  ! saves the wave functions (save_wavefunction_truncated), stores
+  ! the LCCSD energies in the |EZFIO| file
+  ! (ezfio_set_cisd_lcc_energy) and prints the state and
+  ! excitation energies.
+  END_DOC
   integer                        :: i,k
   double precision               :: cisdq(N_states), delta_e
   double precision,external      :: diag_h_mat_elem

@@ -3,6 +3,7 @@ program basis_correction
   BEGIN_DOC
 ! TODO : Put the documentation of the program here
   END_DOC
+  PROVIDE all_mo_integrals
   read_wf = .True.
   touch read_wf
   no_core_density = .True.

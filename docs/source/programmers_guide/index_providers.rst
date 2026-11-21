@@ -5,7 +5,6 @@ Index of Providers
  
     * :c:data:`abs_psi_coef_max` 
     * :c:data:`abs_psi_coef_min` 
-    * :c:data:`absolute_eig` 
     * :c:data:`act_2_rdm_aa_mo` 
     * :c:data:`act_2_rdm_ab_mo` 
     * :c:data:`act_2_rdm_bb_mo` 
@@ -14,42 +13,40 @@ Index of Providers
     * :c:data:`act_bitmask` 
     * :c:data:`act_mos_in_r_array` 
     * :c:data:`act_mos_in_r_array_transp` 
-    * :c:data:`act_mos_opt` 
-    * :c:data:`adaptive_pt2_max` 
     * :c:data:`aijpqcontainer` 
     * :c:data:`aijpqmatrixdimslist` 
+    * :c:data:`all_mo_integrals` 
     * :c:data:`all_shells_closed` 
     * :c:data:`alpha_dens_kin_in_r` 
     * :c:data:`alpha_knowles` 
+    * :c:data:`angle_left_right` 
     * :c:data:`angular_quadrature_points` 
     * :c:data:`angular_quadrature_points_extra` 
     * :c:data:`ao_2e_cgtos_schwartz` 
-    * :c:data:`ao_2e_cosgtos_schwartz` 
+    * :c:data:`ao_abs_comb_b2_j1b` 
+    * :c:data:`ao_abs_comb_b3_j1b` 
     * :c:data:`ao_abs_int_grid` 
+    * :c:data:`ao_basis_prod_threshold` 
     * :c:data:`ao_cart_to_sphe_coef` 
+    * :c:data:`ao_cart_to_sphe_coef_transp` 
     * :c:data:`ao_cart_to_sphe_inv` 
+    * :c:data:`ao_cart_to_sphe_normalization` 
     * :c:data:`ao_cart_to_sphe_num` 
     * :c:data:`ao_cart_to_sphe_overlap` 
-    * :c:data:`ao_cartesian` 
-    * :c:data:`ao_cholesky_threshold` 
-    * :c:data:`ao_coef` 
+    * :c:data:`ao_cart_to_sphe_overlap_inv` 
     * :c:data:`ao_coef_cgtos_norm_ord_transp` 
     * :c:data:`ao_coef_norm_cgtos` 
     * :c:data:`ao_coef_norm_cgtos_ord` 
-    * :c:data:`ao_coef_norm_cosgtos` 
-    * :c:data:`ao_coef_norm_ord_cosgtos` 
-    * :c:data:`ao_coef_norm_ord_transp_cosgtos` 
     * :c:data:`ao_coef_normalization_factor` 
     * :c:data:`ao_coef_normalized` 
     * :c:data:`ao_coef_normalized_ordered` 
     * :c:data:`ao_coef_normalized_ordered_transp` 
     * :c:data:`ao_coef_normalized_ordered_transp_per_nucl` 
+    * :c:data:`ao_coef_ord_grad_transp` 
+    * :c:data:`ao_coef_ord_xyz_grad_transp` 
     * :c:data:`ao_deriv2_cgtos_x` 
     * :c:data:`ao_deriv2_cgtos_y` 
     * :c:data:`ao_deriv2_cgtos_z` 
-    * :c:data:`ao_deriv2_cosgtos_x` 
-    * :c:data:`ao_deriv2_cosgtos_y` 
-    * :c:data:`ao_deriv2_cosgtos_z` 
     * :c:data:`ao_deriv2_x` 
     * :c:data:`ao_deriv2_y` 
     * :c:data:`ao_deriv2_z` 
@@ -63,22 +60,35 @@ Index of Providers
     * :c:data:`ao_effective_one_e_potential_sa` 
     * :c:data:`ao_effective_one_e_potential_without_kin` 
     * :c:data:`ao_effective_one_e_potential_without_kin_sa` 
-    * :c:data:`ao_expo` 
     * :c:data:`ao_expo_cgtos_ord` 
     * :c:data:`ao_expo_cgtos_ord_transp` 
-    * :c:data:`ao_expo_im` 
-    * :c:data:`ao_expo_ord_cosgtos` 
-    * :c:data:`ao_expo_ord_transp_cosgtos` 
     * :c:data:`ao_expo_ordered` 
     * :c:data:`ao_expo_ordered_transp` 
     * :c:data:`ao_expo_ordered_transp_per_nucl` 
-    * :c:data:`ao_expo_phase` 
     * :c:data:`ao_expo_phase_ord` 
     * :c:data:`ao_expo_phase_ord_transp` 
-    * :c:data:`ao_expo_pw` 
     * :c:data:`ao_expo_pw_ord` 
     * :c:data:`ao_expo_pw_ord_transp` 
-    * :c:data:`ao_expoim_cosgtos` 
+    * :c:data:`ao_extra_center` 
+    * :c:data:`ao_extra_center_1s` 
+    * :c:data:`ao_extra_center_1s_dist` 
+    * :c:data:`ao_extra_coef_normalization_factor` 
+    * :c:data:`ao_extra_coef_normalized` 
+    * :c:data:`ao_extra_coef_normalized_ordered` 
+    * :c:data:`ao_extra_coef_normalized_ordered_transp` 
+    * :c:data:`ao_extra_coef_normalized_ordered_transp_per_nucl` 
+    * :c:data:`ao_extra_expo_ordered` 
+    * :c:data:`ao_extra_expo_ordered_transp` 
+    * :c:data:`ao_extra_expo_ordered_transp_per_nucl` 
+    * :c:data:`ao_extra_first_of_shell` 
+    * :c:data:`ao_extra_l` 
+    * :c:data:`ao_extra_l_char` 
+    * :c:data:`ao_extra_l_char_space` 
+    * :c:data:`ao_extra_l_max` 
+    * :c:data:`ao_extra_one_e_dm_at_extra_r` 
+    * :c:data:`ao_extra_power_ordered_transp_per_nucl` 
+    * :c:data:`ao_extra_prim_num_max` 
+    * :c:data:`ao_extra_shell` 
     * :c:data:`ao_first_of_shell` 
     * :c:data:`ao_integrals_cache` 
     * :c:data:`ao_integrals_cache_max` 
@@ -91,31 +101,25 @@ Index of Providers
     * :c:data:`ao_integrals_map` 
     * :c:data:`ao_integrals_n_e` 
     * :c:data:`ao_integrals_n_e_cgtos` 
-    * :c:data:`ao_integrals_n_e_cosgtos` 
     * :c:data:`ao_integrals_n_e_imag` 
     * :c:data:`ao_integrals_n_e_per_atom` 
     * :c:data:`ao_integrals_pt_chrg` 
-    * :c:data:`ao_integrals_threshold` 
     * :c:data:`ao_kinetic_integrals` 
     * :c:data:`ao_kinetic_integrals_cgtos` 
-    * :c:data:`ao_kinetic_integrals_cosgtos` 
     * :c:data:`ao_kinetic_integrals_imag` 
     * :c:data:`ao_l` 
     * :c:data:`ao_l_char` 
     * :c:data:`ao_l_char_space` 
     * :c:data:`ao_l_max` 
-    * :c:data:`ao_md5` 
-    * :c:data:`ao_normalized` 
-    * :c:data:`ao_nucl` 
-    * :c:data:`ao_num` 
+    * :c:data:`ao_non_hermit_term_chemist` 
     * :c:data:`ao_one_e_integrals` 
     * :c:data:`ao_one_e_integrals_diag` 
     * :c:data:`ao_one_e_integrals_from_mo` 
     * :c:data:`ao_one_e_integrals_imag` 
-    * :c:data:`ao_one_e_integrals_threshold` 
+    * :c:data:`ao_one_e_integrals_tc_tot` 
     * :c:data:`ao_ortho_canonical_coef` 
     * :c:data:`ao_ortho_canonical_coef_inv` 
-    * :c:data:`ao_ortho_canonical_nucl_elec_integrals` 
+    * :c:data:`ao_canonical_nucl_elec_ints` 
     * :c:data:`ao_ortho_canonical_num` 
     * :c:data:`ao_ortho_canonical_overlap` 
     * :c:data:`ao_ortho_lowdin_coef` 
@@ -129,19 +133,13 @@ Index of Providers
     * :c:data:`ao_overlap_cgtos_y` 
     * :c:data:`ao_overlap_cgtos_z` 
     * :c:data:`ao_overlap_complex` 
-    * :c:data:`ao_overlap_cosgtos` 
-    * :c:data:`ao_overlap_cosgtos_x` 
-    * :c:data:`ao_overlap_cosgtos_y` 
-    * :c:data:`ao_overlap_cosgtos_z` 
     * :c:data:`ao_overlap_imag` 
     * :c:data:`ao_overlap_x` 
     * :c:data:`ao_overlap_y` 
     * :c:data:`ao_overlap_z` 
     * :c:data:`ao_potential_alpha_xc` 
     * :c:data:`ao_potential_beta_xc` 
-    * :c:data:`ao_power` 
     * :c:data:`ao_power_ordered_transp_per_nucl` 
-    * :c:data:`ao_prim_num` 
     * :c:data:`ao_prim_num_max` 
     * :c:data:`ao_prod_abs_r` 
     * :c:data:`ao_prod_center` 
@@ -151,9 +149,29 @@ Index of Providers
     * :c:data:`ao_pseudo_integrals_local` 
     * :c:data:`ao_pseudo_integrals_non_local` 
     * :c:data:`ao_shell` 
+    * :c:data:`ao_sphe_coef_normalization_factor` 
+    * :c:data:`ao_sphe_integrals_n_e` 
+    * :c:data:`ao_sphe_kinetic_integrals` 
+    * :c:data:`ao_sphe_num` 
+    * :c:data:`ao_sphe_one_e_integrals` 
+    * :c:data:`ao_sphe_one_e_integrals_diag` 
+    * :c:data:`ao_sphe_one_e_integrals_from_mo` 
+    * :c:data:`ao_sphe_overlap` 
+    * :c:data:`ao_sphe_pseudo_integrals` 
+    * :c:data:`ao_sphe_pseudo_integrals_local` 
+    * :c:data:`ao_sphe_pseudo_integrals_non_local` 
+    * :c:data:`ao_sphe_shell` 
     * :c:data:`ao_spread_x` 
     * :c:data:`ao_spread_y` 
     * :c:data:`ao_spread_z` 
+    * :c:data:`ao_tc_int_chemist` 
+    * :c:data:`ao_tc_int_chemist_test` 
+    * :c:data:`ao_tc_sym_two_e_pot_cache` 
+    * :c:data:`ao_tc_sym_two_e_pot_cache_max` 
+    * :c:data:`ao_tc_sym_two_e_pot_cache_min` 
+    * :c:data:`ao_tc_sym_two_e_pot_in_map` 
+    * :c:data:`ao_tc_sym_two_e_pot_map` 
+    * :c:data:`ao_two_e_coul` 
     * :c:data:`ao_two_e_integral_alpha` 
     * :c:data:`ao_two_e_integral_alpha_chol` 
     * :c:data:`ao_two_e_integral_beta` 
@@ -162,6 +180,9 @@ Index of Providers
     * :c:data:`ao_two_e_integral_schwartz` 
     * :c:data:`ao_two_e_integrals_erf_in_map` 
     * :c:data:`ao_two_e_integrals_in_map` 
+    * :c:data:`ao_two_e_tc_tot` 
+    * :c:data:`ao_two_e_vartc_tot` 
+    * :c:data:`ao_vartc_int_chemist` 
     * :c:data:`aos_d_vc_alpha_pbe_w` 
     * :c:data:`aos_d_vc_alpha_sr_pbe_w` 
     * :c:data:`aos_d_vc_beta_pbe_w` 
@@ -213,13 +234,13 @@ Index of Providers
     * :c:data:`attachment_orbitals` 
     * :c:data:`au_to_d` 
     * :c:data:`average_on_top` 
-    * :c:data:`avoid_saddle` 
-    * :c:data:`backend` 
     * :c:data:`banned_excitation` 
     * :c:data:`barycentric_electronic_energy` 
-    * :c:data:`basis` 
     * :c:data:`basis_mos_in_r_array` 
-    * :c:data:`basis_nucleus_index` 
+    * :c:data:`basis_prod_idx` 
+    * :c:data:`basis_prod_num` 
+    * :c:data:`basis_prod_overlap` 
+    * :c:data:`basis_prod_overlap_inv` 
     * :c:data:`bavard` 
     * :c:data:`best_overlap_casscf` 
     * :c:data:`best_vector_ovrlp_casscf` 
@@ -236,11 +257,9 @@ Index of Providers
     * :c:data:`binom_int` 
     * :c:data:`binom_int_transp` 
     * :c:data:`binom_transp` 
+    * :c:data:`blas_handle` 
+    * :c:data:`blas_handle_mt` 
     * :c:data:`c0_weight` 
-    * :c:data:`calc_dipole_moment` 
-    * :c:data:`calc_energy_components` 
-    * :c:data:`calc_osc_str` 
-    * :c:data:`calc_tr_dipole_moment` 
     * :c:data:`cart_to_sphe_0` 
     * :c:data:`cart_to_sphe_1` 
     * :c:data:`cart_to_sphe_2` 
@@ -251,6 +270,82 @@ Index of Providers
     * :c:data:`cart_to_sphe_7` 
     * :c:data:`cart_to_sphe_8` 
     * :c:data:`cart_to_sphe_9` 
+    * :c:data:`cart_to_sphe_norm_0` 
+    * :c:data:`cart_to_sphe_norm_1` 
+    * :c:data:`cart_to_sphe_norm_2` 
+    * :c:data:`cart_to_sphe_norm_3` 
+    * :c:data:`cart_to_sphe_norm_4` 
+    * :c:data:`cart_to_sphe_norm_5` 
+    * :c:data:`cart_to_sphe_norm_6` 
+    * :c:data:`cart_to_sphe_norm_7` 
+    * :c:data:`cart_to_sphe_norm_8` 
+    * :c:data:`cart_to_sphe_norm_9` 
+    * :c:data:`cc_list_gen` 
+    * :c:data:`cc_list_occ` 
+    * :c:data:`cc_list_occ_spin` 
+    * :c:data:`cc_list_vir` 
+    * :c:data:`cc_list_vir_spin` 
+    * :c:data:`cc_n_mo` 
+    * :c:data:`cc_no_m` 
+    * :c:data:`cc_no_s` 
+    * :c:data:`cc_noa` 
+    * :c:data:`cc_noab` 
+    * :c:data:`cc_nob` 
+    * :c:data:`cc_nv_m` 
+    * :c:data:`cc_nv_s` 
+    * :c:data:`cc_nva` 
+    * :c:data:`cc_nvab` 
+    * :c:data:`cc_nvb` 
+    * :c:data:`cc_ref_is_open_shell` 
+    * :c:data:`cc_space_f_o` 
+    * :c:data:`cc_space_f_oo` 
+    * :c:data:`cc_space_f_ov` 
+    * :c:data:`cc_space_f_v` 
+    * :c:data:`cc_space_f_vo` 
+    * :c:data:`cc_space_f_vv` 
+    * :c:data:`cc_space_v` 
+    * :c:data:`cc_space_v_aabb` 
+    * :c:data:`cc_space_v_aaii` 
+    * :c:data:`cc_space_v_aiia` 
+    * :c:data:`cc_space_v_iaai` 
+    * :c:data:`cc_space_v_iaia` 
+    * :c:data:`cc_space_v_iiaa` 
+    * :c:data:`cc_space_v_iijj` 
+    * :c:data:`cc_space_v_oo_chol` 
+    * :c:data:`cc_space_v_oooo` 
+    * :c:data:`cc_space_v_ooov` 
+    * :c:data:`cc_space_v_oovo` 
+    * :c:data:`cc_space_v_oovv` 
+    * :c:data:`cc_space_v_ov_chol` 
+    * :c:data:`cc_space_v_ovoo` 
+    * :c:data:`cc_space_v_ovov` 
+    * :c:data:`cc_space_v_ovvo` 
+    * :c:data:`cc_space_v_ovvv` 
+    * :c:data:`cc_space_v_ppqq` 
+    * :c:data:`cc_space_v_vo_chol` 
+    * :c:data:`cc_space_v_vooo` 
+    * :c:data:`cc_space_v_voov` 
+    * :c:data:`cc_space_v_vovo` 
+    * :c:data:`cc_space_v_vovv` 
+    * :c:data:`cc_space_v_vv_chol` 
+    * :c:data:`cc_space_v_vvoo` 
+    * :c:data:`cc_space_v_vvov` 
+    * :c:data:`cc_space_v_vvvo` 
+    * :c:data:`cc_space_v_vvvv` 
+    * :c:data:`cc_space_w_oovv` 
+    * :c:data:`cc_space_w_vvoo` 
+    * :c:data:`cc_spin_f_oo` 
+    * :c:data:`cc_spin_f_ov` 
+    * :c:data:`cc_spin_f_vv` 
+    * :c:data:`cc_spin_v_oo_chol` 
+    * :c:data:`cc_spin_v_oooo` 
+    * :c:data:`cc_spin_v_ooov` 
+    * :c:data:`cc_spin_v_oovo` 
+    * :c:data:`cc_spin_v_oovv` 
+    * :c:data:`cc_spin_v_ovoo` 
+    * :c:data:`cc_spin_v_ovov` 
+    * :c:data:`cc_spin_v_ovvo` 
+    * :c:data:`cc_spin_v_vvoo` 
     * :c:data:`center_of_mass` 
     * :c:data:`cfg_nsomo_max` 
     * :c:data:`cfg_seniority_index` 
@@ -259,7 +354,12 @@ Index of Providers
     * :c:data:`cholesky_ao_transp` 
     * :c:data:`cholesky_mo` 
     * :c:data:`cholesky_mo_num` 
+    * :c:data:`cholesky_mo_num_split` 
+    * :c:data:`cholesky_mo_sp` 
     * :c:data:`cholesky_mo_transp` 
+    * :c:data:`cholesky_mo_transp_d` 
+    * :c:data:`cholesky_mo_transp_sp` 
+    * :c:data:`cholesky_mo_transp_sp_d` 
     * :c:data:`cholesky_no_1_idx_transp` 
     * :c:data:`cholesky_no_2_idx_transp` 
     * :c:data:`cholesky_no_total_transp` 
@@ -270,7 +370,18 @@ Index of Providers
     * :c:data:`ci_energy_no_diag` 
     * :c:data:`ci_s2` 
     * :c:data:`closed_shell_ref_bitmask` 
+    * :c:data:`coef_fit_slat_gauss` 
+    * :c:data:`coef_gauss_1_erf_x` 
+    * :c:data:`coef_gauss_1_erf_x_2` 
+    * :c:data:`coef_gauss_eff_pot` 
+    * :c:data:`coef_gauss_j_mu_1_erf` 
+    * :c:data:`coef_gauss_j_mu_x` 
+    * :c:data:`coef_gauss_j_mu_x_2` 
+    * :c:data:`coef_good_j_mu_1gauss` 
     * :c:data:`coef_hf_selector` 
+    * :c:data:`coef_j_xmu_1gauss` 
+    * :c:data:`coef_pt1_bi_ortho` 
+    * :c:data:`coef_xyz_ao` 
     * :c:data:`colsmax` 
     * :c:data:`core_bitmask` 
     * :c:data:`core_density` 
@@ -286,26 +397,18 @@ Index of Providers
     * :c:data:`core_inact_virt_bitmask` 
     * :c:data:`core_mos_in_r_array` 
     * :c:data:`core_mos_in_r_array_transp` 
-    * :c:data:`correlation_energy_ratio_max` 
-    * :c:data:`correlation_functional` 
-    * :c:data:`criterion_casscf` 
-    * :c:data:`csf_based` 
+    * :c:data:`csf_unique_vector_index` 
+    * :c:data:`csf_unique_vector_value` 
+    * :c:data:`csf_unique_vector_value_size` 
     * :c:data:`d0tu` 
     * :c:data:`d0tu_alpha_ao` 
     * :c:data:`d0tu_beta_ao` 
-    * :c:data:`damping_for_rs_dft` 
-    * :c:data:`data_energy_proj` 
-    * :c:data:`data_energy_var` 
-    * :c:data:`data_one_e_dm_alpha_ao` 
-    * :c:data:`data_one_e_dm_alpha_mo` 
-    * :c:data:`data_one_e_dm_beta_ao` 
-    * :c:data:`data_one_e_dm_beta_mo` 
-    * :c:data:`davidson_sze_max` 
+    * :c:data:`d_dx_v_ij_erf_rk_cst_mu` 
+    * :c:data:`d_dx_v_ij_erf_rk_cst_mu_tmp` 
     * :c:data:`degree_max_generators` 
     * :c:data:`degree_max_integration_lebedev` 
     * :c:data:`del_bitmask` 
     * :c:data:`delta_e_per_selector` 
-    * :c:data:`density_for_dft` 
     * :c:data:`det_alpha_norm` 
     * :c:data:`det_beta_norm` 
     * :c:data:`det_to_configuration` 
@@ -314,7 +417,7 @@ Index of Providers
     * :c:data:`dettocsftransformationmatrix` 
     * :c:data:`dft_type` 
     * :c:data:`diag_algorithm` 
-    * :c:data:`diag_hess_cas` 
+    * :c:data:`diag_three_elem_hf` 
     * :c:data:`diagonal_h_matrix_on_psi_det` 
     * :c:data:`difference_dm` 
     * :c:data:`difference_dm_eigval` 
@@ -326,20 +429,10 @@ Index of Providers
     * :c:data:`dim_list_inact_orb` 
     * :c:data:`dim_list_virt_orb` 
     * :c:data:`dim_n_max_overlap` 
-    * :c:data:`disk_based_davidson` 
-    * :c:data:`distributed_davidson` 
-    * :c:data:`do_ao_cholesky` 
     * :c:data:`do_ddci` 
     * :c:data:`do_direct_integrals` 
-    * :c:data:`do_mo_cholesky` 
-    * :c:data:`do_mom` 
     * :c:data:`do_only_1h1p` 
     * :c:data:`do_only_cas` 
-    * :c:data:`do_ormas` 
-    * :c:data:`do_pseudo` 
-    * :c:data:`do_pt2` 
-    * :c:data:`do_signed_mono_excitation` 
-    * :c:data:`do_spinfree_mono_excitation` 
     * :c:data:`dominant_cfg` 
     * :c:data:`dominant_det` 
     * :c:data:`dominant_dets_of_cfgs` 
@@ -352,14 +445,36 @@ Index of Providers
     * :c:data:`dressing_column_s` 
     * :c:data:`dressing_delta` 
     * :c:data:`dtranspose` 
+    * :c:data:`e_corr_bi_orth` 
+    * :c:data:`e_corr_bi_orth_proj` 
+    * :c:data:`e_corr_double_bi_orth` 
     * :c:data:`e_corr_double_only` 
     * :c:data:`e_corr_per_selectors` 
     * :c:data:`e_corr_second_order` 
+    * :c:data:`e_corr_single_bi_orth` 
     * :c:data:`e_correlation_dft` 
     * :c:data:`e_exchange_dft` 
+    * :c:data:`e_pq_ao_extra` 
+    * :c:data:`e_pt2_tc_bi_orth` 
+    * :c:data:`e_pt2_tc_bi_orth_double` 
+    * :c:data:`e_pt2_tc_bi_orth_single` 
+    * :c:data:`e_tc_left_right` 
+    * :c:data:`e_tilde_00` 
+    * :c:data:`e_tilde_bi_orth_00` 
+    * :c:data:`ecmd_lda_eff_xi_mu_of_r` 
+    * :c:data:`ecmd_lda_mu_of_r` 
+    * :c:data:`ecmd_pbe_on_top_mu_of_r` 
+    * :c:data:`ecmd_pbe_on_top_no_extrap_su_mu_of_r` 
+    * :c:data:`ecmd_pbe_on_top_su_mu_of_r` 
+    * :c:data:`ecmd_pbe_ueg_eff_xi_mu_of_r` 
+    * :c:data:`ecmd_pbe_ueg_mu_of_r` 
     * :c:data:`ecore` 
     * :c:data:`ecore_bis` 
+    * :c:data:`eff_2_e_from_3_e_aa` 
+    * :c:data:`eff_2_e_from_3_e_ab` 
+    * :c:data:`eff_2_e_from_3_e_bb` 
     * :c:data:`effective_alpha_dm` 
+    * :c:data:`effective_ao_extra_dm` 
     * :c:data:`effective_beta_dm` 
     * :c:data:`effective_one_e_potential` 
     * :c:data:`effective_one_e_potential_sa` 
@@ -369,15 +484,19 @@ Index of Providers
     * :c:data:`eigenvalues_fock_matrix_ao` 
     * :c:data:`eigenvectors_fock_matrix_ao` 
     * :c:data:`eigenvectors_fock_matrix_mo` 
-    * :c:data:`elec_alpha_num` 
+    * :c:data:`eigval_fock_tc_mo` 
+    * :c:data:`eigval_ht` 
+    * :c:data:`eigval_left_tc_bi_orth` 
+    * :c:data:`eigval_right_tc_bi_orth` 
+    * :c:data:`eigval_tc_cisd_sc2_bi_ortho` 
     * :c:data:`elec_alpha_num_grid_becke` 
-    * :c:data:`elec_beta_num` 
     * :c:data:`elec_beta_num_grid_becke` 
     * :c:data:`elec_num` 
     * :c:data:`elec_num_grid_becke` 
     * :c:data:`elec_num_tab` 
     * :c:data:`element_mass` 
     * :c:data:`element_name` 
+    * :c:data:`energy_by_projection` 
     * :c:data:`energy_c` 
     * :c:data:`energy_c_lda` 
     * :c:data:`energy_c_none` 
@@ -398,27 +517,29 @@ Index of Providers
     * :c:data:`etwo_bis` 
     * :c:data:`etwo_ter` 
     * :c:data:`exc_degree_per_selectors` 
-    * :c:data:`exchange_functional` 
     * :c:data:`excit` 
     * :c:data:`excit_class` 
-    * :c:data:`excitation_alpha_max` 
-    * :c:data:`excitation_beta_max` 
-    * :c:data:`excitation_max` 
-    * :c:data:`excitation_ref` 
     * :c:data:`expected_s2` 
-    * :c:data:`export_ao_one_e_ints` 
-    * :c:data:`export_ao_two_e_ints` 
-    * :c:data:`export_ao_two_e_ints_cholesky` 
-    * :c:data:`export_basis` 
-    * :c:data:`export_mo_one_e_ints` 
-    * :c:data:`export_mo_two_e_ints` 
-    * :c:data:`export_mo_two_e_ints_cholesky` 
-    * :c:data:`export_mos` 
-    * :c:data:`export_rdm` 
+    * :c:data:`expo_erfc_gauss` 
+    * :c:data:`expo_erfc_mu_gauss` 
+    * :c:data:`expo_fit_slat_gauss` 
+    * :c:data:`expo_gauss_1_erf_x` 
+    * :c:data:`expo_gauss_1_erf_x_2` 
+    * :c:data:`expo_gauss_eff_pot` 
+    * :c:data:`expo_gauss_j_mu_1_erf` 
+    * :c:data:`expo_gauss_j_mu_x` 
+    * :c:data:`expo_gauss_j_mu_x_2` 
+    * :c:data:`expo_good_j_mu_1gauss` 
+    * :c:data:`expo_j_xmu` 
+    * :c:data:`expo_j_xmu_1gauss` 
+    * :c:data:`expos_slat_gauss_1_erf_x` 
+    * :c:data:`extra_center_of_mass` 
     * :c:data:`extra_e_contrib_density` 
-    * :c:data:`extra_grid_type_sgn` 
-    * :c:data:`extra_rad_grid_type` 
-    * :c:data:`extrapolate_fock_matrix` 
+    * :c:data:`extra_fictious_nucl` 
+    * :c:data:`extra_nucl_coord` 
+    * :c:data:`extra_nucl_coord_transp` 
+    * :c:data:`extra_nucl_dist` 
+    * :c:data:`extra_nucl_real_fictious_list_prov` 
     * :c:data:`extrapolated_energy` 
     * :c:data:`ezfio_filename` 
     * :c:data:`ezfio_work_dir` 
@@ -431,7 +552,6 @@ Index of Providers
     * :c:data:`f_psi_hf_ab` 
     * :c:data:`fact_inv` 
     * :c:data:`fapq` 
-    * :c:data:`fast_2rdm` 
     * :c:data:`file_lock` 
     * :c:data:`final_grid_points` 
     * :c:data:`final_grid_points_extra` 
@@ -441,8 +561,34 @@ Index of Providers
     * :c:data:`final_weight_at_r_extra` 
     * :c:data:`final_weight_at_r_vector` 
     * :c:data:`final_weight_at_r_vector_extra` 
-    * :c:data:`final_weight_at_r_vector_per_atom` 
+    * :c:data:`final_weight_at_r_per_atom` 
     * :c:data:`fipq` 
+    * :c:data:`fock_3_mat` 
+    * :c:data:`fock_3_mat_a_op_sh` 
+    * :c:data:`fock_3_mat_b_op_sh` 
+    * :c:data:`fock_3_rho_beta` 
+    * :c:data:`fock_3_trace_w_tilde` 
+    * :c:data:`fock_3_w_ki_mos_k` 
+    * :c:data:`fock_3_w_ki_wk_a` 
+    * :c:data:`fock_3_w_kk_sum` 
+    * :c:data:`fock_3_w_kl_mo_k_mo_l` 
+    * :c:data:`fock_3_w_kl_w_kl` 
+    * :c:data:`fock_3_w_kl_wla_phi_k` 
+    * :c:data:`fock_3e_uhf_ao_a` 
+    * :c:data:`fock_3e_uhf_ao_b` 
+    * :c:data:`fock_3e_uhf_mo_a` 
+    * :c:data:`fock_3e_uhf_mo_b` 
+    * :c:data:`fock_3e_uhf_mo_cs` 
+    * :c:data:`fock_a_tmp1_bi_ortho` 
+    * :c:data:`fock_a_tmp2_bi_ortho` 
+    * :c:data:`fock_a_tot_3e_bi_orth` 
+    * :c:data:`fock_b_tmp1_bi_ortho` 
+    * :c:data:`fock_b_tmp2_bi_ortho` 
+    * :c:data:`fock_b_tot_3e_bi_orth` 
+    * :c:data:`fock_cs_3e_bi_orth` 
+    * :c:data:`fock_diag_sorted_l_natorb` 
+    * :c:data:`fock_diag_sorted_r_natorb` 
+    * :c:data:`fock_diag_sorted_v_natorb` 
     * :c:data:`fock_matrix_alpha_no_xc_ao` 
     * :c:data:`fock_matrix_ao` 
     * :c:data:`fock_matrix_ao_alpha` 
@@ -453,11 +599,34 @@ Index of Providers
     * :c:data:`fock_matrix_mo` 
     * :c:data:`fock_matrix_mo_alpha` 
     * :c:data:`fock_matrix_mo_beta` 
+    * :c:data:`fock_matrix_param` 
+    * :c:data:`fock_matrix_tc_ao_alpha` 
+    * :c:data:`fock_matrix_tc_ao_beta` 
+    * :c:data:`fock_matrix_tc_ao_tot` 
+    * :c:data:`fock_matrix_tc_diag_mo_tot` 
+    * :c:data:`fock_matrix_tc_mo_alpha` 
+    * :c:data:`fock_matrix_tc_mo_beta` 
+    * :c:data:`fock_matrix_tc_mo_tot` 
+    * :c:data:`fock_matrix_vartc_ao_alpha` 
+    * :c:data:`fock_matrix_vartc_ao_beta` 
+    * :c:data:`fock_matrix_vartc_ao_tot` 
+    * :c:data:`fock_matrix_vartc_diag_mo_tot` 
+    * :c:data:`fock_matrix_vartc_mo_alpha` 
+    * :c:data:`fock_matrix_vartc_mo_beta` 
+    * :c:data:`fock_matrix_vartc_mo_tot` 
+    * :c:data:`fock_op_2_e_tc_closed_shell` 
     * :c:data:`fock_operator_closed_shell_ref_bitmask` 
+    * :c:data:`fock_tc_leigvec_ao` 
+    * :c:data:`fock_tc_leigvec_mo` 
+    * :c:data:`fock_tc_reigvec_ao` 
+    * :c:data:`fock_tc_reigvec_mo` 
+    * :c:data:`fock_vartc_eigvec_ao` 
+    * :c:data:`fock_vartc_eigvec_mo` 
     * :c:data:`fock_wee_closed_shell` 
     * :c:data:`fps_spf_matrix_ao` 
     * :c:data:`fps_spf_matrix_mo` 
-    * :c:data:`frozen_orb_scf` 
+    * :c:data:`fqs_sqf_ao` 
+    * :c:data:`fqs_sqf_mo` 
     * :c:data:`full_ijkl_bitmask` 
     * :c:data:`full_ijkl_bitmask_4` 
     * :c:data:`full_occ_2_rdm_aa_mo` 
@@ -467,24 +636,38 @@ Index of Providers
     * :c:data:`full_occ_2_rdm_cntrctd_trans` 
     * :c:data:`full_occ_2_rdm_spin_trace_mo` 
     * :c:data:`full_occ_v_kl_cntrctd` 
+    * :c:data:`gamma_pq_ao_extra` 
     * :c:data:`gauleg_t2` 
     * :c:data:`gauleg_w` 
-    * :c:data:`general_primitive_integral` 
-    * :c:data:`general_primitive_integral_cgtos` 
-    * :c:data:`general_primitive_integral_cosgtos` 
-    * :c:data:`general_primitive_integral_erf` 
     * :c:data:`generators_bitmask` 
-    * :c:data:`gga_sr_type_functionals` 
-    * :c:data:`give_cpolynom_mult_center_x` 
-    * :c:data:`give_cpolynomial_mult_center_one_e` 
-    * :c:data:`give_explicit_cpoly_and_cgaussian` 
-    * :c:data:`give_explicit_cpoly_and_cgaussian_x` 
     * :c:data:`global_selection_buffer` 
     * :c:data:`global_selection_buffer_lock` 
+    * :c:data:`good_hermit_tc_fock_mat` 
+    * :c:data:`gpu_busy` 
+    * :c:data:`gpu_busy_max_ddot` 
+    * :c:data:`gpu_busy_max_dgemm` 
+    * :c:data:`gpu_busy_max_dgemv` 
+    * :c:data:`gpu_default_stream` 
+    * :c:data:`gpu_integral_buffer1` 
+    * :c:data:`gpu_integral_buffer2` 
+    * :c:data:`gpu_integral_buffer_sp1` 
+    * :c:data:`gpu_integral_buffer_sp2` 
+    * :c:data:`gpu_mem` 
+    * :c:data:`gpu_num` 
+    * :c:data:`grad12_j12` 
+    * :c:data:`grad12_j12_test` 
     * :c:data:`grad_effective_alpha_dm` 
     * :c:data:`grad_effective_beta_dm` 
     * :c:data:`grad_effective_spin_dm` 
+    * :c:data:`grad_good_hermit_tc_fock_mat` 
+    * :c:data:`grad_hermit` 
+    * :c:data:`grad_hermit_average_tc_fock_mat` 
+    * :c:data:`grad_non_hermit` 
+    * :c:data:`grad_non_hermit_left` 
+    * :c:data:`grad_non_hermit_right` 
     * :c:data:`grad_total_cas_on_top_density` 
+    * :c:data:`grad_vartc` 
+    * :c:data:`gradu_squared_u_ij_mu` 
     * :c:data:`gradvec2` 
     * :c:data:`gradvec_old` 
     * :c:data:`grid_atomic_number` 
@@ -492,56 +675,50 @@ Index of Providers
     * :c:data:`grid_points_extra_radial` 
     * :c:data:`grid_points_per_atom` 
     * :c:data:`grid_points_radial` 
-    * :c:data:`grid_type_sgn` 
-    * :c:data:`h0_type` 
     * :c:data:`h_apply_buffer_allocated` 
     * :c:data:`h_apply_buffer_lock` 
     * :c:data:`h_core_ri` 
     * :c:data:`h_matrix_all_dets` 
     * :c:data:`h_matrix_cas` 
     * :c:data:`h_matrix_diag_all_dets` 
+    * :c:data:`h_non_hermit` 
+    * :c:data:`h_non_hermit_transp` 
     * :c:data:`ha_to_ev` 
     * :c:data:`ha_to_j` 
     * :c:data:`ha_to_nm` 
-    * :c:data:`hess_cv_cv` 
+    * :c:data:`hermit_average_tc_fock_mat` 
     * :c:data:`hessdiag` 
     * :c:data:`hessmat` 
     * :c:data:`hessmat_old` 
     * :c:data:`hessmat_peter` 
     * :c:data:`hf_bitmask` 
     * :c:data:`hf_energy` 
-    * :c:data:`hf_exchange` 
     * :c:data:`hf_kinetic_energy` 
     * :c:data:`hf_n_e_energy` 
     * :c:data:`hf_one_electron_energy` 
     * :c:data:`hf_two_electron_energy` 
+    * :c:data:`htilde_matrix_elmt_bi_ortho` 
+    * :c:data:`htilde_matrix_elmt_bi_ortho_tranp` 
     * :c:data:`i_h_hf_per_selectors` 
     * :c:data:`i_x1_new` 
     * :c:data:`i_x1_new_cgtos` 
-    * :c:data:`i_x1_new_cosgtos` 
     * :c:data:`i_x1_pol_mult_a1` 
     * :c:data:`i_x1_pol_mult_a1_cgtos` 
-    * :c:data:`i_x1_pol_mult_a1_cosgtos` 
     * :c:data:`i_x1_pol_mult_a2` 
     * :c:data:`i_x1_pol_mult_a2_cgtos` 
-    * :c:data:`i_x1_pol_mult_a2_cosgtos` 
     * :c:data:`i_x1_pol_mult_one_e` 
     * :c:data:`i_x1_pol_mult_one_e_cgtos` 
-    * :c:data:`i_x1_pol_mult_one_e_cosgtos` 
     * :c:data:`i_x1_pol_mult_recurs` 
     * :c:data:`i_x1_pol_mult_recurs_cgtos` 
-    * :c:data:`i_x1_pol_mult_recurs_cosgtos` 
     * :c:data:`i_x2_new` 
     * :c:data:`i_x2_new_cgtos` 
-    * :c:data:`i_x2_new_cosgtos` 
     * :c:data:`i_x2_pol_mult` 
     * :c:data:`i_x2_pol_mult_cgtos` 
-    * :c:data:`i_x2_pol_mult_cosgtos` 
     * :c:data:`i_x2_pol_mult_one_e` 
     * :c:data:`i_x2_pol_mult_one_e_cgtos` 
-    * :c:data:`i_x2_pol_mult_one_e_cosgtos` 
     * :c:data:`idx_cas` 
     * :c:data:`idx_non_cas` 
+    * :c:data:`igpu_mt` 
     * :c:data:`inact_bitmask` 
     * :c:data:`inact_density` 
     * :c:data:`inact_mos_in_r_array` 
@@ -551,8 +728,9 @@ Index of Providers
     * :c:data:`index_final_points_extra` 
     * :c:data:`index_final_points_extra_reverse` 
     * :c:data:`index_final_points_per_atom` 
-    * :c:data:`index_final_points_per_atom_reverse` 
+    * :c:data:`index_final_pts_per_atom_rev` 
     * :c:data:`index_final_points_reverse` 
+    * :c:data:`index_hf_psi_det` 
     * :c:data:`index_holes_bitmask` 
     * :c:data:`index_orb_swap` 
     * :c:data:`index_particl_bitmask` 
@@ -560,36 +738,35 @@ Index of Providers
     * :c:data:`inertia_tensor_eigenvalues` 
     * :c:data:`inertia_tensor_eigenvectors` 
     * :c:data:`initialize_pt2_e0_denominator` 
-    * :c:data:`insert_into_mo_integrals_erf_map` 
-    * :c:data:`insert_into_mo_integrals_map` 
+    * :c:data:`int1_grad2_u12_ao` 
+    * :c:data:`int2_grad1_u12_ao` 
+    * :c:data:`int2_grad1_u12_ao_t` 
+    * :c:data:`int2_grad1_u12_ao_test` 
+    * :c:data:`int2_grad1_u12_ao_transp` 
+    * :c:data:`int2_grad1_u12_bimo_t` 
+    * :c:data:`int2_grad1_u12_bimo_transp` 
+    * :c:data:`int2_grad1u2_grad2u2_j1b2` 
+    * :c:data:`int2_grad1u2_grad2u2_j1b2_test` 
+    * :c:data:`int2_grad1u2_grad2u2_j1b2_test_v` 
+    * :c:data:`int2_u2_j1b2` 
+    * :c:data:`int2_u2_j1b2_test` 
+    * :c:data:`int2_u_grad1u_j1b2` 
+    * :c:data:`int2_u_grad1u_j1b2_test` 
+    * :c:data:`int2_u_grad1u_x_j1b2` 
+    * :c:data:`int2_u_grad1u_x_j1b2_test` 
     * :c:data:`int_erf_3_index` 
     * :c:data:`int_erf_3_index_exc` 
+    * :c:data:`inv_gamma_pq_ao_extra` 
     * :c:data:`inv_int` 
+    * :c:data:`inv_pi_gamma_pq_3_2_ao_extra` 
     * :c:data:`inv_selectors_coef_hf` 
     * :c:data:`inv_selectors_coef_hf_squared` 
-    * :c:data:`io_ao_cholesky` 
-    * :c:data:`io_ao_integrals_kinetic` 
-    * :c:data:`io_ao_integrals_n_e` 
-    * :c:data:`io_ao_integrals_overlap` 
-    * :c:data:`io_ao_integrals_pseudo` 
-    * :c:data:`io_ao_one_e_integrals` 
-    * :c:data:`io_ao_two_e_integrals` 
-    * :c:data:`io_ao_two_e_integrals_erf` 
-    * :c:data:`io_mo_cholesky` 
-    * :c:data:`io_mo_integrals_kinetic` 
-    * :c:data:`io_mo_integrals_n_e` 
-    * :c:data:`io_mo_integrals_pseudo` 
-    * :c:data:`io_mo_one_e_integrals` 
-    * :c:data:`io_mo_two_e_integrals` 
-    * :c:data:`io_mo_two_e_integrals_erf` 
-    * :c:data:`io_mu_of_r` 
-    * :c:data:`io_nuclear_repulsion` 
-    * :c:data:`io_two_body_rdm_aa` 
-    * :c:data:`io_two_body_rdm_ab` 
-    * :c:data:`io_two_body_rdm_bb` 
-    * :c:data:`io_two_body_rdm_spin_trace` 
-    * :c:data:`is_periodic` 
     * :c:data:`is_zmq_slave` 
+    * :c:data:`j1b_coeff` 
+    * :c:data:`j1b_gauss_hermi` 
+    * :c:data:`j1b_gauss_hermii` 
+    * :c:data:`j1b_gauss_nonherm` 
+    * :c:data:`j1b_pen` 
     * :c:data:`json_array_close_fmt` 
     * :c:data:`json_array_close_fmtx` 
     * :c:data:`json_array_close_uopen_fmt` 
@@ -617,15 +794,34 @@ Index of Providers
     * :c:data:`l_to_character` 
     * :c:data:`lccsd_coef` 
     * :c:data:`lccsd_energies` 
-    * :c:data:`level_shift` 
-    * :c:data:`level_shift_casscf` 
+    * :c:data:`leigvec_ht` 
+    * :c:data:`leigvec_tc_bi_orth` 
+    * :c:data:`leigvec_tc_cisd_sc2_bi_ortho` 
     * :c:data:`light_speed` 
-    * :c:data:`lin_dep_cutoff` 
+    * :c:data:`list_2p_functions` 
     * :c:data:`list_act` 
     * :c:data:`list_act_reverse` 
     * :c:data:`list_all_but_del_orb` 
+    * :c:data:`list_all_comb_b2` 
+    * :c:data:`list_all_comb_b2_cent` 
+    * :c:data:`list_all_comb_b2_coef` 
+    * :c:data:`list_all_comb_b2_expo` 
+    * :c:data:`list_all_comb_b2_size` 
+    * :c:data:`list_all_comb_b3` 
+    * :c:data:`list_all_comb_b3_cent` 
+    * :c:data:`list_all_comb_b3_coef` 
+    * :c:data:`list_all_comb_b3_expo` 
+    * :c:data:`list_all_comb_b3_size` 
     * :c:data:`list_attachment` 
     * :c:data:`list_basis` 
+    * :c:data:`list_comb_thr_b2_cent` 
+    * :c:data:`list_comb_thr_b2_coef` 
+    * :c:data:`list_comb_thr_b2_expo` 
+    * :c:data:`list_comb_thr_b2_size` 
+    * :c:data:`list_comb_thr_b3_cent` 
+    * :c:data:`list_comb_thr_b3_coef` 
+    * :c:data:`list_comb_thr_b3_expo` 
+    * :c:data:`list_comb_thr_b3_size` 
     * :c:data:`list_core` 
     * :c:data:`list_core_inact` 
     * :c:data:`list_core_inact_act` 
@@ -637,6 +833,7 @@ Index of Providers
     * :c:data:`list_del` 
     * :c:data:`list_del_reverse` 
     * :c:data:`list_dettachment` 
+    * :c:data:`list_fict_nucl` 
     * :c:data:`list_idx_a_v` 
     * :c:data:`list_idx_c_a` 
     * :c:data:`list_idx_c_v` 
@@ -644,18 +841,23 @@ Index of Providers
     * :c:data:`list_inact_act` 
     * :c:data:`list_inact_act_reverse` 
     * :c:data:`list_inact_reverse` 
+    * :c:data:`list_real_nucl` 
     * :c:data:`list_valence_orb_for_hf` 
     * :c:data:`list_virt` 
     * :c:data:`list_virt_reverse` 
+    * :c:data:`lmax_too_big` 
     * :c:data:`lowest_super_ci_coef_mo` 
     * :c:data:`m_knowles` 
     * :c:data:`mat_idx_a_v` 
     * :c:data:`mat_idx_c_a` 
     * :c:data:`mat_idx_c_v` 
     * :c:data:`mat_tmp_dm_super_ci` 
+    * :c:data:`max_angle_left_right` 
     * :c:data:`max_degree_exc` 
-    * :c:data:`max_dim_diis` 
     * :c:data:`max_exc_pert` 
+    * :c:data:`max_list_comb_thr_b2_size` 
+    * :c:data:`max_list_comb_thr_b3_size` 
+    * :c:data:`max_n_pts_grid_ao_prod` 
     * :c:data:`max_overlap` 
     * :c:data:`maxdetdimperbf` 
     * :c:data:`mcscf_fock_alpha_ao` 
@@ -664,27 +866,44 @@ Index of Providers
     * :c:data:`mcscf_fock_beta_mo` 
     * :c:data:`mcscf_fock_diag_mo` 
     * :c:data:`mcscf_fock_mo` 
+    * :c:data:`mo_bi_orth_bipole_x` 
+    * :c:data:`mo_bi_orth_bipole_y` 
+    * :c:data:`mo_bi_orth_bipole_z` 
+    * :c:data:`mo_bi_ortho_coul_e` 
+    * :c:data:`mo_bi_ortho_coul_e_chemist` 
+    * :c:data:`mo_bi_ortho_one_e` 
+    * :c:data:`mo_bi_ortho_tc_one_e` 
+    * :c:data:`mo_bi_ortho_tc_two_e` 
+    * :c:data:`mo_bi_ortho_tc_two_e_chemist` 
+    * :c:data:`mo_bi_ortho_tc_two_e_jj` 
+    * :c:data:`mo_bi_ortho_tc_two_e_jj_anti` 
+    * :c:data:`mo_bi_ortho_tc_two_e_jj_exchange` 
     * :c:data:`mo_class` 
     * :c:data:`mo_coef` 
     * :c:data:`mo_coef_aux` 
     * :c:data:`mo_coef_begin_iteration` 
     * :c:data:`mo_coef_imag` 
     * :c:data:`mo_coef_in_ao_ortho_basis` 
+    * :c:data:`mo_coef_novirt` 
     * :c:data:`mo_coef_transp` 
     * :c:data:`mo_deriv_1_x` 
     * :c:data:`mo_deriv_1_y` 
     * :c:data:`mo_deriv_1_z` 
     * :c:data:`mo_dipole_x` 
+    * :c:data:`mo_dipole_x_becke` 
     * :c:data:`mo_dipole_y` 
+    * :c:data:`mo_dipole_y_becke` 
     * :c:data:`mo_dipole_z` 
+    * :c:data:`mo_dipole_z_becke` 
     * :c:data:`mo_grad_ints` 
     * :c:data:`mo_grad_ints_transp` 
-    * :c:data:`mo_guess_type` 
     * :c:data:`mo_integrals_cache` 
     * :c:data:`mo_integrals_cache_max` 
+    * :c:data:`mo_integrals_cache_max_8` 
     * :c:data:`mo_integrals_cache_min` 
-    * :c:data:`mo_integrals_cache_shift` 
+    * :c:data:`mo_integrals_cache_min_8` 
     * :c:data:`mo_integrals_cache_size` 
+    * :c:data:`mo_integrals_cache_size_8` 
     * :c:data:`mo_integrals_erf_cache` 
     * :c:data:`mo_integrals_erf_cache_max` 
     * :c:data:`mo_integrals_erf_cache_min` 
@@ -692,42 +911,81 @@ Index of Providers
     * :c:data:`mo_integrals_map` 
     * :c:data:`mo_integrals_n_e` 
     * :c:data:`mo_integrals_n_e_per_atom` 
-    * :c:data:`mo_integrals_threshold` 
     * :c:data:`mo_kinetic_integrals` 
+    * :c:data:`mo_l_coef` 
+    * :c:data:`mo_l_coef_transp` 
     * :c:data:`mo_label` 
+    * :c:data:`mo_non_hermit_term` 
+    * :c:data:`mo_non_hermit_term_chemist` 
     * :c:data:`mo_num` 
     * :c:data:`mo_occ` 
     * :c:data:`mo_one_e_integrals` 
     * :c:data:`mo_overlap` 
+    * :c:data:`mo_prop_dipole_x` 
+    * :c:data:`mo_prop_dipole_y` 
+    * :c:data:`mo_prop_dipole_z` 
     * :c:data:`mo_pseudo_integrals` 
     * :c:data:`mo_pseudo_integrals_local` 
     * :c:data:`mo_pseudo_integrals_non_local` 
+    * :c:data:`mo_r_coef` 
+    * :c:data:`mo_r_coef_normalized` 
+    * :c:data:`mo_r_coef_transp` 
+    * :c:data:`mo_sphe_coef` 
     * :c:data:`mo_spread_centered_x` 
     * :c:data:`mo_spread_centered_y` 
     * :c:data:`mo_spread_centered_z` 
     * :c:data:`mo_spread_x` 
     * :c:data:`mo_spread_y` 
     * :c:data:`mo_spread_z` 
+    * :c:data:`mo_symmetry` 
     * :c:data:`mo_two_e_int_erf_jj` 
     * :c:data:`mo_two_e_int_erf_jj_anti` 
     * :c:data:`mo_two_e_int_erf_jj_anti_from_ao` 
     * :c:data:`mo_two_e_int_erf_jj_exchange` 
     * :c:data:`mo_two_e_int_erf_jj_exchange_from_ao` 
     * :c:data:`mo_two_e_int_erf_jj_from_ao` 
+    * :c:data:`mo_two_e_integral_jj_from_ao` 
     * :c:data:`mo_two_e_integrals_erf_in_map` 
     * :c:data:`mo_two_e_integrals_in_map` 
     * :c:data:`mo_two_e_integrals_jj` 
     * :c:data:`mo_two_e_integrals_jj_anti` 
+    * :c:data:`mo_two_e_integrals_jj_anti_from_ao` 
     * :c:data:`mo_two_e_integrals_jj_exchange` 
+    * :c:data:`mo_two_e_integrals_jj_exchange_from_ao` 
+    * :c:data:`mo_two_e_integrals_vv_anti_from_ao` 
+    * :c:data:`mo_two_e_integrals_vv_exchange_from_ao` 
+    * :c:data:`mo_two_e_integrals_vv_from_ao` 
+    * :c:data:`mo_v_ij_erf_rk_cst_mu` 
+    * :c:data:`mo_v_ij_erf_rk_cst_mu_naive` 
+    * :c:data:`mo_v_ij_erf_rk_cst_mu_transp` 
+    * :c:data:`mo_v_ki_bi_ortho_erf_rk_cst_mu` 
+    * :c:data:`mo_v_ki_bi_ortho_erf_rk_cst_mu_transp` 
+    * :c:data:`mo_x_v_ij_erf_rk_cst_mu` 
+    * :c:data:`mo_x_v_ij_erf_rk_cst_mu_naive` 
+    * :c:data:`mo_x_v_ij_erf_rk_cst_mu_transp` 
+    * :c:data:`mo_x_v_ki_bi_ortho_erf_rk_cst_mu` 
+    * :c:data:`mo_x_v_ki_bi_ortho_erf_rk_cst_mu_transp` 
     * :c:data:`mos_grad_in_r_array` 
     * :c:data:`mos_grad_in_r_array_tranp` 
     * :c:data:`mos_grad_in_r_array_transp_3` 
     * :c:data:`mos_grad_in_r_array_transp_bis` 
     * :c:data:`mos_in_r_array` 
+    * :c:data:`mos_in_r_array_extra_omp` 
+    * :c:data:`mos_in_r_array_extra_transp` 
     * :c:data:`mos_in_r_array_omp` 
     * :c:data:`mos_in_r_array_transp` 
+    * :c:data:`mos_l_grad_in_r_array` 
+    * :c:data:`mos_l_grad_in_r_array_transp` 
+    * :c:data:`mos_l_grad_in_r_array_transp_bis` 
+    * :c:data:`mos_l_in_r_array` 
+    * :c:data:`mos_l_in_r_array_transp` 
     * :c:data:`mos_lapl_in_r_array` 
     * :c:data:`mos_lapl_in_r_array_tranp` 
+    * :c:data:`mos_r_grad_in_r_array` 
+    * :c:data:`mos_r_grad_in_r_array_transp` 
+    * :c:data:`mos_r_grad_in_r_array_transp_bis` 
+    * :c:data:`mos_r_in_r_array` 
+    * :c:data:`mos_r_in_r_array_transp` 
     * :c:data:`mos_times_cholesky_r1` 
     * :c:data:`mos_times_cholesky_r2` 
     * :c:data:`mpi_bit_kind` 
@@ -735,9 +993,11 @@ Index of Providers
     * :c:data:`mpi_master` 
     * :c:data:`mpi_rank` 
     * :c:data:`mpi_size` 
+    * :c:data:`mu_average_proj` 
     * :c:data:`mu_average_prov` 
-    * :c:data:`mu_dft_type` 
-    * :c:data:`mu_erf` 
+    * :c:data:`mu_average_prov2` 
+    * :c:data:`mu_average_prov3` 
+    * :c:data:`mu_average_prov_ot` 
     * :c:data:`mu_erf_dft` 
     * :c:data:`mu_grad_rho` 
     * :c:data:`mu_of_r_dft` 
@@ -745,7 +1005,8 @@ Index of Providers
     * :c:data:`mu_of_r_hf` 
     * :c:data:`mu_of_r_hf_old` 
     * :c:data:`mu_of_r_hf_sparse` 
-    * :c:data:`mu_of_r_potential` 
+    * :c:data:`mu_of_r_projector_ao_prod` 
+    * :c:data:`mu_of_r_projector_mo` 
     * :c:data:`mu_of_r_prov` 
     * :c:data:`mu_of_r_psi_cas` 
     * :c:data:`mu_rsc_of_r` 
@@ -763,19 +1024,15 @@ Index of Providers
     * :c:data:`multi_s_z_dipole_moment` 
     * :c:data:`multi_s_z_dipole_moment_eigenval` 
     * :c:data:`multi_s_z_dipole_moment_eigenvec` 
-    * :c:data:`my_extra_grid_becke` 
-    * :c:data:`my_grid_becke` 
-    * :c:data:`my_n_pt_a_extra_grid` 
-    * :c:data:`my_n_pt_a_grid` 
-    * :c:data:`my_n_pt_r_extra_grid` 
-    * :c:data:`my_n_pt_r_grid` 
+    * :c:data:`n_2p_func_orig` 
+    * :c:data:`n_2p_func_tot` 
     * :c:data:`n_a_v_prov` 
     * :c:data:`n_act_orb` 
     * :c:data:`n_all_but_del_orb` 
+    * :c:data:`n_ao_extras_max` 
     * :c:data:`n_aos_max` 
     * :c:data:`n_attachment` 
     * :c:data:`n_basis_orb` 
-    * :c:data:`n_big_act_orb` 
     * :c:data:`n_c_a_prov` 
     * :c:data:`n_c_v_prov` 
     * :c:data:`n_configuration` 
@@ -791,11 +1048,8 @@ Index of Providers
     * :c:data:`n_det_beta_unique` 
     * :c:data:`n_det_cas` 
     * :c:data:`n_det_generators` 
-    * :c:data:`n_det_max` 
-    * :c:data:`n_det_max_full` 
-    * :c:data:`n_det_max_opt` 
     * :c:data:`n_det_non_cas` 
-    * :c:data:`n_det_print_wf` 
+    * :c:data:`n_det_per_config_max` 
     * :c:data:`n_det_qp_edit` 
     * :c:data:`n_det_selectors` 
     * :c:data:`n_dettachment` 
@@ -803,13 +1057,18 @@ Index of Providers
     * :c:data:`n_double_exc_bitmasks` 
     * :c:data:`n_double_selectors` 
     * :c:data:`n_elec_alpha_for_psi_configuration` 
+    * :c:data:`n_fit_1_erf_x` 
+    * :c:data:`n_func_tot` 
+    * :c:data:`n_gauss_eff_pot` 
+    * :c:data:`n_gauss_eff_pot_deriv` 
     * :c:data:`n_guess_sx_mat` 
     * :c:data:`n_inact_act_orb` 
     * :c:data:`n_inact_orb` 
     * :c:data:`n_int` 
-    * :c:data:`n_it_scf_max` 
     * :c:data:`n_iter` 
     * :c:data:`n_iter_max` 
+    * :c:data:`n_mat` 
+    * :c:data:`n_max_fit_slat` 
     * :c:data:`n_max_occ_val_orb_for_hf` 
     * :c:data:`n_max_overlap` 
     * :c:data:`n_occ_val_orb_for_hf` 
@@ -823,40 +1082,60 @@ Index of Providers
     * :c:data:`n_points_integration_angular` 
     * :c:data:`n_points_integration_angular_lebedev` 
     * :c:data:`n_points_radial_grid` 
+    * :c:data:`n_prim_tot_orig` 
+    * :c:data:`n_pt_max_extra_basis_i_x` 
+    * :c:data:`n_pt_max_extra_basis_integrals` 
     * :c:data:`n_pt_max_i_x` 
     * :c:data:`n_pt_max_integrals` 
     * :c:data:`n_pts_charge` 
+    * :c:data:`n_pts_grid_ao_prod` 
     * :c:data:`n_pts_max_per_atom` 
     * :c:data:`n_pts_per_atom` 
+    * :c:data:`n_real_ht` 
     * :c:data:`n_single_exc_bitmasks` 
-    * :c:data:`n_states` 
     * :c:data:`n_states_diag` 
     * :c:data:`n_virt_orb` 
-    * :c:data:`nai_pol_mult_cgtos` 
-    * :c:data:`nai_pol_mult_erf_with1s` 
+    * :c:data:`natorb_tc_eigval` 
+    * :c:data:`natorb_tc_leigvec_ao` 
+    * :c:data:`natorb_tc_leigvec_mo` 
+    * :c:data:`natorb_tc_reigvec_ao` 
+    * :c:data:`natorb_tc_reigvec_mo` 
     * :c:data:`natorbsci` 
     * :c:data:`natorbsci_mos` 
     * :c:data:`natorbsfci` 
-    * :c:data:`nb_it_max_lambda` 
-    * :c:data:`nb_it_max_pre_search` 
     * :c:data:`nbfmax` 
     * :c:data:`ncsfmax` 
+    * :c:data:`new_ao_coef_1s` 
+    * :c:data:`new_ao_expo_1s` 
+    * :c:data:`new_ao_nucl_1s` 
+    * :c:data:`new_ao_power_1s` 
+    * :c:data:`new_ao_prim_num_1s` 
+    * :c:data:`new_n_aos_max` 
+    * :c:data:`new_nucl_aos_transposed` 
+    * :c:data:`new_nucl_charge_1s` 
+    * :c:data:`new_nucl_coord_1s` 
+    * :c:data:`new_nucl_coord_1s_transp` 
+    * :c:data:`new_nucl_label_1s` 
+    * :c:data:`new_nucl_n_aos` 
+    * :c:data:`new_nucl_num` 
     * :c:data:`neworbs` 
     * :c:data:`nmo` 
     * :c:data:`nmonoex` 
-    * :c:data:`no_core_density` 
-    * :c:data:`no_oa_or_av_opt` 
     * :c:data:`norm_grad_vec2` 
     * :c:data:`norm_grad_vec2_tab` 
-    * :c:data:`normalize_dm` 
+    * :c:data:`norm_ground_left_right_bi_orth` 
+    * :c:data:`normal_two_body_bi_orth` 
+    * :c:data:`normal_two_body_bi_orth_aa_bb` 
+    * :c:data:`normal_two_body_bi_orth_ab` 
     * :c:data:`nproc` 
+    * :c:data:`nproc_max` 
     * :c:data:`nsomomax` 
     * :c:data:`nthreads_davidson` 
     * :c:data:`nthreads_pt2` 
+    * :c:data:`nucl_ao_extras` 
+    * :c:data:`nucl_ao_extras_transposed` 
     * :c:data:`nucl_aos` 
     * :c:data:`nucl_aos_transposed` 
-    * :c:data:`nucl_charge` 
-    * :c:data:`nucl_charge_remove` 
     * :c:data:`nucl_coord` 
     * :c:data:`nucl_coord_transp` 
     * :c:data:`nucl_dist` 
@@ -865,13 +1144,13 @@ Index of Providers
     * :c:data:`nucl_dist_vec_x` 
     * :c:data:`nucl_dist_vec_y` 
     * :c:data:`nucl_dist_vec_z` 
-    * :c:data:`nucl_label` 
+    * :c:data:`nucl_list_shell_ao_extras` 
     * :c:data:`nucl_list_shell_aos` 
+    * :c:data:`nucl_n_ao_extras` 
     * :c:data:`nucl_n_aos` 
-    * :c:data:`nucl_num` 
+    * :c:data:`nucl_num_shell_ao_extras` 
     * :c:data:`nucl_num_shell_aos` 
     * :c:data:`nuclear_repulsion` 
-    * :c:data:`nucleus_shell_num` 
     * :c:data:`occ_act` 
     * :c:data:`occnum` 
     * :c:data:`on_top_cas_mu_r` 
@@ -921,9 +1200,6 @@ Index of Providers
     * :c:data:`one_e_tr_dm_mo_alpha` 
     * :c:data:`one_e_tr_dm_mo_beta` 
     * :c:data:`one_ints_no` 
-    * :c:data:`only_expected_s2` 
-    * :c:data:`optimization_max_nb_iter` 
-    * :c:data:`optimization_method` 
     * :c:data:`orb_swap` 
     * :c:data:`ormas_bitmask` 
     * :c:data:`ormas_list_orb` 
@@ -932,18 +1208,25 @@ Index of Providers
     * :c:data:`ormas_min_e` 
     * :c:data:`ormas_mstart` 
     * :c:data:`ormas_n_orb` 
-    * :c:data:`ormas_n_space` 
     * :c:data:`output_cpu_time_0` 
     * :c:data:`output_wall_time_0` 
-    * :c:data:`overlap_cgaussian_xyz` 
+    * :c:data:`overlap_bi_ortho` 
+    * :c:data:`overlap_diag_bi_ortho` 
+    * :c:data:`overlap_fock_tc_eigvec_ao` 
+    * :c:data:`overlap_fock_tc_eigvec_mo` 
+    * :c:data:`overlap_mo_l` 
+    * :c:data:`overlap_mo_l_mo` 
+    * :c:data:`overlap_mo_r` 
+    * :c:data:`overlap_mo_r_mo` 
+    * :c:data:`overlap_natorb_tc_eigvec_ao` 
     * :c:data:`overlap_states` 
     * :c:data:`overlap_states_inv` 
     * :c:data:`p0tuvx` 
     * :c:data:`p0tuvx_no` 
     * :c:data:`p0tuvx_peter` 
+    * :c:data:`partial_occupation` 
     * :c:data:`phi_angular_integration_lebedev` 
     * :c:data:`planck_cte` 
-    * :c:data:`point_charges` 
     * :c:data:`pot_grad_c_alpha_ao_pbe` 
     * :c:data:`pot_grad_c_alpha_ao_sr_pbe` 
     * :c:data:`pot_grad_c_beta_ao_pbe` 
@@ -1010,34 +1293,21 @@ Index of Providers
     * :c:data:`potential_xc_beta_ao_sr_lda` 
     * :c:data:`potential_xc_beta_ao_sr_pbe` 
     * :c:data:`potential_xc_beta_mo` 
-    * :c:data:`prim_coef` 
-    * :c:data:`prim_expo` 
+    * :c:data:`power_ord_grad_transp` 
+    * :c:data:`power_ord_xyz_grad_transp` 
+    * :c:data:`power_xyz_ao` 
     * :c:data:`prim_normalization_factor` 
-    * :c:data:`prim_num` 
-    * :c:data:`primitives_normalized` 
-    * :c:data:`print_all_transitions` 
     * :c:data:`pruned` 
-    * :c:data:`pruning` 
-    * :c:data:`pseudo_dz_k` 
     * :c:data:`pseudo_dz_k_transp` 
-    * :c:data:`pseudo_dz_kl` 
     * :c:data:`pseudo_dz_kl_transp` 
-    * :c:data:`pseudo_grid_rmax` 
-    * :c:data:`pseudo_grid_size` 
-    * :c:data:`pseudo_klocmax` 
-    * :c:data:`pseudo_kmax` 
-    * :c:data:`pseudo_lmax` 
-    * :c:data:`pseudo_n_k` 
     * :c:data:`pseudo_n_k_transp` 
-    * :c:data:`pseudo_n_kl` 
     * :c:data:`pseudo_n_kl_transp` 
-    * :c:data:`pseudo_sym` 
-    * :c:data:`pseudo_v_k` 
     * :c:data:`pseudo_v_k_transp` 
-    * :c:data:`pseudo_v_kl` 
     * :c:data:`pseudo_v_kl_transp` 
     * :c:data:`psi_average_norm_contrib` 
     * :c:data:`psi_average_norm_contrib_sorted` 
+    * :c:data:`psi_average_norm_contrib_sorted_tc` 
+    * :c:data:`psi_average_norm_contrib_tc` 
     * :c:data:`psi_bilinear_matrix` 
     * :c:data:`psi_bilinear_matrix_columns` 
     * :c:data:`psi_bilinear_matrix_columns_loc` 
@@ -1051,6 +1321,7 @@ Index of Providers
     * :c:data:`psi_bilinear_matrix_transp_rows_loc` 
     * :c:data:`psi_bilinear_matrix_transp_values` 
     * :c:data:`psi_bilinear_matrix_values` 
+    * :c:data:`psi_bitcleft_bilinear_matrix_values` 
     * :c:data:`psi_cas` 
     * :c:data:`psi_cas_coef` 
     * :c:data:`psi_cas_coef_sorted_bit` 
@@ -1065,14 +1336,20 @@ Index of Providers
     * :c:data:`psi_coef_min` 
     * :c:data:`psi_coef_sorted` 
     * :c:data:`psi_coef_sorted_bit` 
+    * :c:data:`psi_coef_sorted_bit_order` 
     * :c:data:`psi_coef_sorted_gen` 
+    * :c:data:`psi_coef_sorted_tc` 
+    * :c:data:`psi_coef_sorted_tc_bit` 
+    * :c:data:`psi_coef_sorted_tc_gen` 
     * :c:data:`psi_config_data` 
     * :c:data:`psi_configuration` 
     * :c:data:`psi_configuration_hii` 
+    * :c:data:`psi_configuration_n_csf` 
     * :c:data:`psi_configuration_n_det` 
     * :c:data:`psi_configuration_sorted` 
     * :c:data:`psi_configuration_sorted_order` 
     * :c:data:`psi_configuration_sorted_order_reverse` 
+    * :c:data:`psi_configuration_to_psi_csf` 
     * :c:data:`psi_configuration_to_psi_det` 
     * :c:data:`psi_configuration_to_psi_det_data` 
     * :c:data:`psi_csf_coef` 
@@ -1086,9 +1363,17 @@ Index of Providers
     * :c:data:`psi_det_size` 
     * :c:data:`psi_det_sorted` 
     * :c:data:`psi_det_sorted_bit` 
+    * :c:data:`psi_det_sorted_bit_tc` 
     * :c:data:`psi_det_sorted_gen` 
     * :c:data:`psi_det_sorted_gen_order` 
     * :c:data:`psi_det_sorted_order` 
+    * :c:data:`psi_det_sorted_tc` 
+    * :c:data:`psi_det_sorted_tc_bit` 
+    * :c:data:`psi_det_sorted_tc_gen` 
+    * :c:data:`psi_det_sorted_tc_gen_order` 
+    * :c:data:`psi_det_sorted_tc_left` 
+    * :c:data:`psi_det_sorted_tc_order` 
+    * :c:data:`psi_det_sorted_tc_right` 
     * :c:data:`psi_dft_energy_h_core` 
     * :c:data:`psi_dft_energy_kinetic` 
     * :c:data:`psi_dft_energy_nuclear_elec` 
@@ -1097,14 +1382,24 @@ Index of Providers
     * :c:data:`psi_energy_two_e` 
     * :c:data:`psi_energy_two_e_trans` 
     * :c:data:`psi_energy_with_nucl_rep` 
+    * :c:data:`psi_l_coef_bi_ortho` 
+    * :c:data:`psi_l_coef_sorted_bi_ortho` 
+    * :c:data:`psi_l_coef_sorted_bi_ortho_left` 
+    * :c:data:`psi_l_coef_sorted_bit` 
     * :c:data:`psi_non_cas` 
     * :c:data:`psi_non_cas_coef` 
     * :c:data:`psi_non_cas_coef_sorted_bit` 
     * :c:data:`psi_non_cas_sorted_bit` 
+    * :c:data:`psi_r_coef_bi_ortho` 
+    * :c:data:`psi_r_coef_sorted_bi_ortho` 
+    * :c:data:`psi_r_coef_sorted_bi_ortho_right` 
+    * :c:data:`psi_r_coef_sorted_bit` 
     * :c:data:`psi_s2` 
     * :c:data:`psi_selectors` 
     * :c:data:`psi_selectors_coef` 
+    * :c:data:`psi_selectors_coef_tc` 
     * :c:data:`psi_selectors_coef_transp` 
+    * :c:data:`psi_selectors_coef_transp_tc` 
     * :c:data:`psi_selectors_diag_h_mat` 
     * :c:data:`psi_selectors_size` 
     * :c:data:`pt2_cw` 
@@ -1113,9 +1408,6 @@ Index of Providers
     * :c:data:`pt2_iterations` 
     * :c:data:`pt2_j` 
     * :c:data:`pt2_match_weight` 
-    * :c:data:`pt2_max` 
-    * :c:data:`pt2_min_casscf` 
-    * :c:data:`pt2_min_parallel_tasks` 
     * :c:data:`pt2_mindetinfirstteeth` 
     * :c:data:`pt2_n_0` 
     * :c:data:`pt2_n_tasks` 
@@ -1123,7 +1415,6 @@ Index of Providers
     * :c:data:`pt2_n_teeth` 
     * :c:data:`pt2_overlap` 
     * :c:data:`pt2_r` 
-    * :c:data:`pt2_relative_error` 
     * :c:data:`pt2_stoch_istate` 
     * :c:data:`pt2_u` 
     * :c:data:`pt2_u_0` 
@@ -1133,35 +1424,15 @@ Index of Providers
     * :c:data:`pt_chrg_nuclei_interaction` 
     * :c:data:`pts_charge_coord` 
     * :c:data:`pts_charge_z` 
+    * :c:data:`q_alpha` 
+    * :c:data:`q_beta` 
+    * :c:data:`q_matrix` 
     * :c:data:`qp_kill_filename` 
     * :c:data:`qp_max_mem` 
     * :c:data:`qp_run_address` 
     * :c:data:`qp_stop_filename` 
     * :c:data:`qp_stop_variable` 
     * :c:data:`r_gill` 
-    * :c:data:`rad_grid_type` 
-    * :c:data:`read_ao_cholesky` 
-    * :c:data:`read_ao_integrals_kinetic` 
-    * :c:data:`read_ao_integrals_n_e` 
-    * :c:data:`read_ao_integrals_overlap` 
-    * :c:data:`read_ao_integrals_pseudo` 
-    * :c:data:`read_ao_one_e_integrals` 
-    * :c:data:`read_ao_two_e_integrals` 
-    * :c:data:`read_ao_two_e_integrals_erf` 
-    * :c:data:`read_mo_cholesky` 
-    * :c:data:`read_mo_integrals_kinetic` 
-    * :c:data:`read_mo_integrals_n_e` 
-    * :c:data:`read_mo_integrals_pseudo` 
-    * :c:data:`read_mo_one_e_integrals` 
-    * :c:data:`read_mo_two_e_integrals` 
-    * :c:data:`read_mo_two_e_integrals_erf` 
-    * :c:data:`read_mu_of_r` 
-    * :c:data:`read_nuclear_repulsion` 
-    * :c:data:`read_two_body_rdm_aa` 
-    * :c:data:`read_two_body_rdm_ab` 
-    * :c:data:`read_two_body_rdm_bb` 
-    * :c:data:`read_two_body_rdm_spin_trace` 
-    * :c:data:`read_wf` 
     * :c:data:`ref_bitmask` 
     * :c:data:`ref_bitmask_energy` 
     * :c:data:`ref_bitmask_energy_aa` 
@@ -1172,9 +1443,16 @@ Index of Providers
     * :c:data:`ref_bitmask_one_e_energy` 
     * :c:data:`ref_bitmask_two_e_energy` 
     * :c:data:`ref_closed_shell_bitmask` 
+    * :c:data:`ref_tc_energy_1e` 
+    * :c:data:`ref_tc_energy_2e` 
+    * :c:data:`ref_tc_energy_3e` 
+    * :c:data:`ref_tc_energy_tot` 
+    * :c:data:`ref_vhxc` 
     * :c:data:`regular_range_hartree` 
     * :c:data:`regular_range_hartree_operator` 
-    * :c:data:`restore_symm` 
+    * :c:data:`reigvec_ht` 
+    * :c:data:`reigvec_tc_bi_orth` 
+    * :c:data:`reigvec_tc_cisd_sc2_bi_ortho` 
     * :c:data:`reunion_of_act_virt_bitmask` 
     * :c:data:`reunion_of_bitmask` 
     * :c:data:`reunion_of_core_inact_act_bitmask` 
@@ -1182,7 +1460,6 @@ Index of Providers
     * :c:data:`reunion_of_inact_act_bitmask` 
     * :c:data:`rowsmax` 
     * :c:data:`rs_ks_energy` 
-    * :c:data:`s2_eig` 
     * :c:data:`s2_matrix_all_dets` 
     * :c:data:`s2_values` 
     * :c:data:`s_half` 
@@ -1190,14 +1467,12 @@ Index of Providers
     * :c:data:`s_inv` 
     * :c:data:`s_inv_complex` 
     * :c:data:`s_mo_coef` 
+    * :c:data:`s_mo_sphe_coef` 
     * :c:data:`s_values` 
     * :c:data:`s_z` 
     * :c:data:`s_z2_sz` 
     * :c:data:`same_xc_func` 
-    * :c:data:`save_threshold` 
-    * :c:data:`save_wf_after_selection` 
     * :c:data:`scal_prod_grad_one_e_dm_ab` 
-    * :c:data:`scf_algorithm` 
     * :c:data:`scf_density_matrix_ao` 
     * :c:data:`scf_density_matrix_ao_alpha` 
     * :c:data:`scf_density_matrix_ao_beta` 
@@ -1206,14 +1481,8 @@ Index of Providers
     * :c:data:`selection_criterion` 
     * :c:data:`selection_criterion_factor` 
     * :c:data:`selection_criterion_min` 
-    * :c:data:`selection_factor` 
     * :c:data:`selection_weight` 
-    * :c:data:`seniority_max` 
-    * :c:data:`shell_ang_mom` 
-    * :c:data:`shell_index` 
     * :c:data:`shell_normalization_factor` 
-    * :c:data:`shell_num` 
-    * :c:data:`shell_prim_num` 
     * :c:data:`shiftfact_op5_inv` 
     * :c:data:`short_range_hartree` 
     * :c:data:`short_range_hartree_operator` 
@@ -1233,8 +1502,9 @@ Index of Providers
     * :c:data:`slater_bragg_radii_ua` 
     * :c:data:`slater_bragg_type_inter_distance` 
     * :c:data:`slater_bragg_type_inter_distance_ua` 
-    * :c:data:`small_active_space` 
     * :c:data:`spin_multiplicity` 
+    * :c:data:`sqrt_gamma_pq_ao_extra` 
+    * :c:data:`sqrt_weight_at_r` 
     * :c:data:`state_av_act_2_rdm_aa_mo` 
     * :c:data:`state_av_act_2_rdm_ab_mo` 
     * :c:data:`state_av_act_2_rdm_bb_mo` 
@@ -1242,10 +1512,8 @@ Index of Providers
     * :c:data:`state_av_full_occ_2_rdm_aa_mo` 
     * :c:data:`state_av_full_occ_2_rdm_ab_mo` 
     * :c:data:`state_av_full_occ_2_rdm_bb_mo` 
-    * :c:data:`state_av_full_occ_2_rdm_spin_trace_mo` 
+    * :c:data:`state_av_occ_2_rdm_spin_trace_mo` 
     * :c:data:`state_average_weight` 
-    * :c:data:`state_following` 
-    * :c:data:`state_following_casscf` 
     * :c:data:`super_ci_dm` 
     * :c:data:`superci_nat_occ` 
     * :c:data:`superci_natorb` 
@@ -1255,31 +1523,65 @@ Index of Providers
     * :c:data:`sxmatrix` 
     * :c:data:`sxvector` 
     * :c:data:`sxvector_lowest` 
-    * :c:data:`target_energy` 
+    * :c:data:`tc_2e_3idx_coulomb_integrals` 
+    * :c:data:`tc_2e_3idx_exchange_integrals` 
+    * :c:data:`tc_bi_ortho_dipole` 
+    * :c:data:`tc_grad_and_lapl_ao` 
+    * :c:data:`tc_grad_and_lapl_ao_loop` 
+    * :c:data:`tc_grad_and_lapl_ao_test` 
+    * :c:data:`tc_grad_square_ao` 
+    * :c:data:`tc_grad_square_ao_loop` 
+    * :c:data:`tc_grad_square_ao_test` 
+    * :c:data:`tc_grad_square_ao_test_ref` 
+    * :c:data:`tc_hf_energy` 
+    * :c:data:`tc_hf_one_e_energy` 
+    * :c:data:`tc_hf_two_e_energy` 
+    * :c:data:`tc_mulliken_spin_densities` 
+    * :c:data:`tc_scf_dm_in_r` 
+    * :c:data:`tc_spin_dens_right_only` 
+    * :c:data:`tc_spin_gross_orbital_product` 
+    * :c:data:`tc_spin_population` 
+    * :c:data:`tc_spin_population_angular_momentum` 
+    * :c:data:`tc_spin_population_angular_momentum_per_atom` 
+    * :c:data:`tc_spin_transition_matrix_ao` 
+    * :c:data:`tc_spin_transition_matrix_mo` 
+    * :c:data:`tc_transition_matrix_ao` 
+    * :c:data:`tc_transition_matrix_mo` 
+    * :c:data:`tc_transition_matrix_mo_alpha` 
+    * :c:data:`tc_transition_matrix_mo_beta` 
+    * :c:data:`tcscf_bi_ort_dm_ao` 
+    * :c:data:`tcscf_bi_ort_dm_ao_alpha` 
+    * :c:data:`tcscf_bi_ort_dm_ao_beta` 
+    * :c:data:`tcscf_density_matrix_ao_alpha` 
+    * :c:data:`tcscf_density_matrix_ao_beta` 
+    * :c:data:`tcscf_density_matrix_ao_tot` 
     * :c:data:`theta_angular_integration_lebedev` 
-    * :c:data:`thresh_casscf` 
-    * :c:data:`thresh_cc` 
-    * :c:data:`thresh_delta` 
-    * :c:data:`thresh_eig` 
-    * :c:data:`thresh_extra_grid` 
-    * :c:data:`thresh_grid` 
-    * :c:data:`thresh_model` 
-    * :c:data:`thresh_model_2` 
-    * :c:data:`thresh_opt_max_elem_grad` 
+    * :c:data:`three_body_ints_bi_ort` 
+    * :c:data:`three_e_3_idx_cycle_1_bi_ort` 
+    * :c:data:`three_e_3_idx_cycle_2_bi_ort` 
+    * :c:data:`three_e_3_idx_direct_bi_ort` 
+    * :c:data:`three_e_3_idx_exch12_bi_ort` 
+    * :c:data:`three_e_3_idx_exch12_bi_ort_new` 
+    * :c:data:`three_e_3_idx_exch13_bi_ort` 
+    * :c:data:`three_e_3_idx_exch23_bi_ort` 
+    * :c:data:`three_e_4_idx_cycle_1_bi_ort` 
+    * :c:data:`three_e_4_idx_cycle_2_bi_ort` 
+    * :c:data:`three_e_4_idx_direct_bi_ort` 
+    * :c:data:`three_e_4_idx_exch12_bi_ort` 
+    * :c:data:`three_e_4_idx_exch13_bi_ort` 
+    * :c:data:`three_e_4_idx_exch23_bi_ort` 
+    * :c:data:`three_e_5_idx_cycle_1_bi_ort` 
+    * :c:data:`three_e_5_idx_cycle_2_bi_ort` 
+    * :c:data:`three_e_5_idx_direct_bi_ort` 
+    * :c:data:`three_e_5_idx_exch12_bi_ort` 
+    * :c:data:`three_e_5_idx_exch13_bi_ort` 
+    * :c:data:`three_e_5_idx_exch23_bi_ort` 
+    * :c:data:`three_e_diag_parrallel_spin_prov` 
+    * :c:data:`three_e_double_parrallel_spin_prov` 
+    * :c:data:`three_e_single_parrallel_spin_prov` 
     * :c:data:`thresh_overlap_switch` 
-    * :c:data:`thresh_rho` 
-    * :c:data:`thresh_rho_2` 
-    * :c:data:`thresh_scf` 
-    * :c:data:`thresh_sym` 
-    * :c:data:`thresh_wtg` 
-    * :c:data:`thresh_wtg2` 
-    * :c:data:`threshold_davidson` 
-    * :c:data:`threshold_davidson_from_pt2` 
     * :c:data:`threshold_davidson_pt2` 
-    * :c:data:`threshold_diis` 
     * :c:data:`threshold_diis_nonzero` 
-    * :c:data:`threshold_generators` 
-    * :c:data:`threshold_nonsym_davidson` 
     * :c:data:`threshold_selectors` 
     * :c:data:`total_cas_on_top_density` 
     * :c:data:`trace_potential_xc` 
@@ -1288,67 +1590,80 @@ Index of Providers
     * :c:data:`trace_v_xc` 
     * :c:data:`trace_v_xc_new` 
     * :c:data:`transpose` 
-    * :c:data:`trexio_file` 
     * :c:data:`trexio_filename` 
-    * :c:data:`twice_hierarchy_max` 
     * :c:data:`two_e_dm_mo` 
     * :c:data:`two_e_energy` 
     * :c:data:`two_e_int_aa_f` 
     * :c:data:`two_e_int_hf_f` 
     * :c:data:`two_e_int_ia_f` 
     * :c:data:`two_e_int_ii_f` 
-    * :c:data:`typ` 
+    * :c:data:`two_e_tc_non_hermit_integral_alpha` 
+    * :c:data:`two_e_tc_non_hermit_integral_beta` 
+    * :c:data:`two_e_tc_non_hermit_integral_seq_alpha` 
+    * :c:data:`two_e_tc_non_hermit_integral_seq_beta` 
+    * :c:data:`two_e_vartc_integral_alpha` 
+    * :c:data:`two_e_vartc_integral_beta` 
+    * :c:data:`u12_grad1_u12_j1b_grad1_j1b` 
+    * :c:data:`u12_grad1_u12_j1b_grad1_j1b_test` 
+    * :c:data:`u12sq_j1bsq` 
+    * :c:data:`u12sq_j1bsq_test` 
     * :c:data:`umat` 
     * :c:data:`unpaired_alpha_electrons` 
     * :c:data:`use_banned_excitation` 
     * :c:data:`use_cgtos` 
-    * :c:data:`use_cosgtos` 
-    * :c:data:`use_only_lr` 
     * :c:data:`use_pw` 
+    * :c:data:`v_1b` 
+    * :c:data:`v_1b_grad` 
+    * :c:data:`v_1b_lapl` 
+    * :c:data:`v_1b_list_b2` 
+    * :c:data:`v_1b_list_b3` 
+    * :c:data:`v_ij_erf_rk_cst_mu` 
+    * :c:data:`v_ij_erf_rk_cst_mu_j1b` 
+    * :c:data:`v_ij_erf_rk_cst_mu_j1b_test` 
+    * :c:data:`v_ij_erf_rk_cst_mu_transp` 
+    * :c:data:`v_ij_u_cst_mu_j1b` 
+    * :c:data:`v_ij_u_cst_mu_j1b_ng_1_test` 
+    * :c:data:`v_ij_u_cst_mu_j1b_test` 
     * :c:data:`v_ne_psi_energy` 
+    * :c:data:`v_sum_in_r` 
     * :c:data:`var_pt2_ratio` 
     * :c:data:`variance_match_weight` 
-    * :c:data:`variance_max` 
-    * :c:data:`version_avoid_saddle` 
-    * :c:data:`version_lambda_search` 
+    * :c:data:`vartc_hf_energy` 
+    * :c:data:`vartc_hf_one_e_energy` 
+    * :c:data:`vartc_hf_two_e_energy` 
     * :c:data:`virt_bitmask` 
     * :c:data:`virt_bitmask_4` 
     * :c:data:`virt_mos_in_r_array` 
     * :c:data:`virt_mos_in_r_array_transp` 
+    * :c:data:`w1_diag_in_r` 
+    * :c:data:`w1_in_r` 
+    * :c:data:`w1_l_in_r` 
+    * :c:data:`w1_r_in_r` 
+    * :c:data:`w1_w1_l_in_r` 
+    * :c:data:`w1_w1_r_in_r` 
+    * :c:data:`w_sum_in_r` 
     * :c:data:`wall_time_core_inact_act_on_top_of_r` 
     * :c:data:`weight_at_r` 
     * :c:data:`weight_at_r_extra` 
     * :c:data:`weight_configuration` 
     * :c:data:`weight_configuration_average` 
     * :c:data:`weight_configuration_average_sorted` 
-    * :c:data:`weight_one_e_dm` 
-    * :c:data:`weight_selection` 
     * :c:data:`weights_angular_integration_lebedev` 
     * :c:data:`weights_angular_points` 
     * :c:data:`weights_angular_points_extra` 
-    * :c:data:`without_diagonal` 
-    * :c:data:`write_ao_cholesky` 
-    * :c:data:`write_ao_integrals_kinetic` 
-    * :c:data:`write_ao_integrals_n_e` 
-    * :c:data:`write_ao_integrals_overlap` 
-    * :c:data:`write_ao_integrals_pseudo` 
-    * :c:data:`write_ao_one_e_integrals` 
-    * :c:data:`write_ao_two_e_integrals` 
-    * :c:data:`write_ao_two_e_integrals_erf` 
-    * :c:data:`write_mo_cholesky` 
-    * :c:data:`write_mo_integrals_kinetic` 
-    * :c:data:`write_mo_integrals_n_e` 
-    * :c:data:`write_mo_integrals_pseudo` 
-    * :c:data:`write_mo_one_e_integrals` 
-    * :c:data:`write_mo_two_e_integrals` 
-    * :c:data:`write_mo_two_e_integrals_erf` 
-    * :c:data:`write_mu_of_r` 
-    * :c:data:`write_nuclear_repulsion` 
-    * :c:data:`write_two_body_rdm_aa` 
-    * :c:data:`write_two_body_rdm_ab` 
-    * :c:data:`write_two_body_rdm_bb` 
-    * :c:data:`write_two_body_rdm_spin_trace` 
+    * :c:data:`ww_sum_in_r` 
+    * :c:data:`x_d_dx_v_ij_erf_rk_cst_mu` 
+    * :c:data:`x_d_dx_v_ij_erf_rk_cst_mu_tmp` 
     * :c:data:`x_dipole_moment` 
+    * :c:data:`x_v_ij_erf_rk_cst_mu` 
+    * :c:data:`x_v_ij_erf_rk_cst_mu_j1b` 
+    * :c:data:`x_v_ij_erf_rk_cst_mu_j1b_test` 
+    * :c:data:`x_v_ij_erf_rk_cst_mu_tmp` 
+    * :c:data:`x_v_ij_erf_rk_cst_mu_transp` 
+    * :c:data:`x_v_ij_erf_rk_cst_mu_transp_bis` 
+    * :c:data:`x_w_ij_erf_rk` 
+    * :c:data:`x_w_ki_bi_ortho_erf_rk` 
+    * :c:data:`x_w_ki_bi_ortho_erf_rk_diag` 
     * :c:data:`y_dipole_moment` 
     * :c:data:`z_dipole_moment` 
     * :c:data:`zmq_context` 
@@ -1370,20 +1685,30 @@ Index of Subroutines/Functions
  
     * :c:func:`a_operator` 
     * :c:func:`a_operator_two_e` 
+    * :c:func:`a_tc_operator` 
+    * :c:func:`a_tc_operator_no_3e` 
     * :c:func:`ac_operator` 
     * :c:func:`ac_operator_two_e` 
+    * :c:func:`ac_tc_operator` 
+    * :c:func:`ac_tc_operator_no_3e` 
     * :c:func:`act_on_top_on_grid_pt` 
     * :c:func:`add_cpoly` 
     * :c:func:`add_cpoly_multiply` 
     * :c:func:`add_integrals_to_map` 
     * :c:func:`add_integrals_to_map_cholesky` 
+    * :c:func:`add_integrals_to_map_cholesky_sp` 
     * :c:func:`add_integrals_to_map_erf` 
+    * :c:func:`add_integrals_to_map_no_exit_34` 
+    * :c:func:`add_integrals_to_map_three_indices` 
     * :c:func:`add_poly` 
     * :c:func:`add_poly_multiply` 
     * :c:func:`add_task_to_taskserver` 
     * :c:func:`add_to_selection_buffer` 
+    * :c:func:`analyze_ccsd` 
     * :c:func:`ao_2e_cgtos_schwartz_accel` 
-    * :c:func:`ao_2e_cosgtos_schwartz_accel` 
+    * :c:func:`ao_cart_to_ao_sphe` 
+    * :c:func:`ao_extra_power_index` 
+    * :c:func:`ao_extra_value` 
     * :c:func:`ao_idx2_sq` 
     * :c:func:`ao_idx2_sq_rev` 
     * :c:func:`ao_idx2_tri_key` 
@@ -1392,11 +1717,18 @@ Index of Subroutines/Functions
     * :c:func:`ao_one_e_integral_zero` 
     * :c:func:`ao_ortho_cano_to_ao` 
     * :c:func:`ao_power_index` 
+    * :c:func:`ao_tc_sym_two_e_pot` 
+    * :c:func:`ao_tc_sym_two_e_pot_in_map_collector` 
+    * :c:func:`ao_tc_sym_two_e_pot_in_map_slave` 
+    * :c:func:`ao_tc_sym_two_e_pot_in_map_slave_inproc` 
+    * :c:func:`ao_tc_sym_two_e_pot_in_map_slave_tcp` 
     * :c:func:`ao_to_mo` 
+    * :c:func:`ao_to_mo_bi_ortho` 
+    * :c:func:`ao_to_mo_novirt` 
     * :c:func:`ao_two_e_integral` 
     * :c:func:`ao_two_e_integral_cgtos` 
-    * :c:func:`ao_two_e_integral_cosgtos` 
     * :c:func:`ao_two_e_integral_erf` 
+    * :c:func:`ao_two_e_integral_general` 
     * :c:func:`ao_two_e_integral_schwartz_accel` 
     * :c:func:`ao_two_e_integral_schwartz_accel_erf` 
     * :c:func:`ao_two_e_integral_zero` 
@@ -1418,13 +1750,23 @@ Index of Subroutines/Functions
     * :c:func:`apply_rotation` 
     * :c:func:`approx_dble` 
     * :c:func:`attachement_orb` 
+    * :c:func:`basis_corr_su_pbe_ot` 
+    * :c:func:`basis_correction` 
+    * :c:func:`basis_prod_overlap_func` 
     * :c:func:`berf` 
     * :c:func:`beta_rs` 
+    * :c:func:`bi_normalize` 
+    * :c:func:`bi_ort_ints` 
+    * :c:func:`bi_ortho_gram_schmidt` 
+    * :c:func:`bi_ortho_mo_coul_ints` 
+    * :c:func:`bi_ortho_mo_ints` 
+    * :c:func:`bi_ortho_s_inv_half` 
     * :c:func:`bielec_no_basis` 
     * :c:func:`bielec_pqxx` 
     * :c:func:`bielec_pqxx_no` 
     * :c:func:`bielec_pxxq` 
     * :c:func:`bielec_pxxq_no` 
+    * :c:func:`binary_search` 
     * :c:func:`binary_search_cfg` 
     * :c:func:`binom_func` 
     * :c:func:`bitstring_to_hexa` 
@@ -1437,31 +1779,100 @@ Index of Subroutines/Functions
     * :c:func:`broadcast_chunks_integer` 
     * :c:func:`broadcast_chunks_integer8` 
     * :c:func:`build_fock_tmp` 
+    * :c:func:`build_fock_tmp_tc` 
+    * :c:func:`build_s_matrix` 
     * :c:func:`build_singly_excited_wavefunction` 
     * :c:func:`calc_grad_elem` 
     * :c:func:`calc_hess_elem` 
+    * :c:func:`cancel_small_elmts` 
     * :c:func:`cas_based_density` 
     * :c:func:`cas_based_on_top` 
     * :c:func:`cas_based_on_top_density` 
     * :c:func:`cas_complete` 
     * :c:func:`casscf` 
+    * :c:func:`ccsd` 
+    * :c:func:`ccsd_energy_space_x` 
+    * :c:func:`ccsd_energy_spin` 
+    * :c:func:`ccsd_par_t_space` 
+    * :c:func:`ccsd_par_t_space_stoch` 
+    * :c:func:`ccsd_par_t_space_v2` 
+    * :c:func:`ccsd_par_t_space_v3` 
+    * :c:func:`ccsd_par_t_spin` 
+    * :c:func:`ccsd_par_t_spin_v2` 
+    * :c:func:`ccsd_space_orb` 
+    * :c:func:`ccsd_spin_orb` 
+    * :c:func:`ccsd_t_task_aba` 
+    * :c:func:`ccsd_t_task_abc` 
     * :c:func:`cell_function_becke` 
+    * :c:func:`cgaussian_pair_bound` 
     * :c:func:`cgaussian_product` 
     * :c:func:`cgaussian_product_x` 
+    * :c:func:`check_bi_ortho` 
+    * :c:func:`check_biorthog` 
+    * :c:func:`check_biorthog_binormalize` 
     * :c:func:`check_coherence_functional` 
+    * :c:func:`check_degen` 
+    * :c:func:`check_eigvec` 
     * :c:func:`check_mem` 
+    * :c:func:`check_orthog` 
+    * :c:func:`check_orthonormality` 
     * :c:func:`check_sym` 
+    * :c:func:`check_weighted_biorthog` 
+    * :c:func:`check_weighted_biorthog_binormalize` 
+    * :c:func:`cipsi_orb_opt` 
     * :c:func:`cis` 
     * :c:func:`cisd` 
     * :c:func:`clear_ao_erf_map` 
     * :c:func:`clear_ao_map` 
+    * :c:func:`clear_ao_tc_sym_two_e_pot_map` 
     * :c:func:`clear_bit_to_integer` 
     * :c:func:`clear_mo_erf_map` 
     * :c:func:`clear_mo_map` 
+    * :c:func:`comb_orbitals` 
+    * :c:func:`combine_lr_tcscf` 
+    * :c:func:`compute_a1` 
+    * :c:func:`compute_a1_chol` 
     * :c:func:`compute_ao_integrals_erf_jl` 
+    * :c:func:`compute_ao_integrals_gauss_jl` 
     * :c:func:`compute_ao_integrals_jl` 
+    * :c:func:`compute_ao_tc_sym_two_e_pot_jl` 
     * :c:func:`compute_ao_two_e_integrals` 
     * :c:func:`compute_ao_two_e_integrals_erf` 
+    * :c:func:`compute_b1` 
+    * :c:func:`compute_b1_gam` 
+    * :c:func:`compute_cf_oo` 
+    * :c:func:`compute_cf_ov` 
+    * :c:func:`compute_cf_vv` 
+    * :c:func:`compute_cw_oooo` 
+    * :c:func:`compute_cw_ovvo` 
+    * :c:func:`compute_cw_vvvf` 
+    * :c:func:`compute_cw_vvvv` 
+    * :c:func:`compute_deltamu_right` 
+    * :c:func:`compute_err1` 
+    * :c:func:`compute_err2` 
+    * :c:func:`compute_g_occ` 
+    * :c:func:`compute_g_occ_chol` 
+    * :c:func:`compute_g_vir` 
+    * :c:func:`compute_g_vir_chol` 
+    * :c:func:`compute_h_oo` 
+    * :c:func:`compute_h_oo_chol` 
+    * :c:func:`compute_h_vo` 
+    * :c:func:`compute_h_vo_chol` 
+    * :c:func:`compute_h_vv` 
+    * :c:func:`compute_h_vv_chol` 
+    * :c:func:`compute_j1` 
+    * :c:func:`compute_j1_chol` 
+    * :c:func:`compute_k1` 
+    * :c:func:`compute_k1_chol` 
+    * :c:func:`compute_mp2` 
+    * :c:func:`compute_r1_space` 
+    * :c:func:`compute_r1_space_chol` 
+    * :c:func:`compute_r1_spin` 
+    * :c:func:`compute_r2_space` 
+    * :c:func:`compute_r2_space_chol` 
+    * :c:func:`compute_r2_spin` 
+    * :c:func:`compute_tau_spin` 
+    * :c:func:`compute_tau_t_spin` 
     * :c:func:`configuration_of_det` 
     * :c:func:`configuration_search_key` 
     * :c:func:`configuration_to_dets` 
@@ -1472,13 +1883,18 @@ Index of Subroutines/Functions
     * :c:func:`connected_to_hf` 
     * :c:func:`connected_to_ref` 
     * :c:func:`connected_to_ref_by_single` 
+    * :c:func:`contrib_3e_diag_soo` 
+    * :c:func:`contrib_3e_diag_sss` 
+    * :c:func:`contrib_3e_soo` 
+    * :c:func:`contrib_3e_sos` 
+    * :c:func:`contrib_3e_sss` 
     * :c:func:`convertorbidstomodelspaceids` 
     * :c:func:`convertwffromcsftodet` 
     * :c:func:`convertwffromdettocsf` 
     * :c:func:`copy_h_apply_buffer_to_wf` 
+    * :c:func:`copy_h_apply_buffer_to_wf_tc` 
     * :c:func:`copy_psi_bilinear_to_psi` 
     * :c:func:`correction_to_on_top_from_ueg` 
-    * :c:func:`cpx_erf` 
     * :c:func:`cpx_erf_1` 
     * :c:func:`create_guess` 
     * :c:func:`create_microlist` 
@@ -1486,7 +1902,6 @@ Index of Subroutines/Functions
     * :c:func:`create_minilist_find_previous` 
     * :c:func:`create_selection_buffer` 
     * :c:func:`create_wf_of_psi_bilinear_matrix` 
-    * :c:func:`crint` 
     * :c:func:`crint_1` 
     * :c:func:`crint_1_vec` 
     * :c:func:`crint_2` 
@@ -1498,6 +1913,8 @@ Index of Subroutines/Functions
     * :c:func:`crint_smallz` 
     * :c:func:`crint_smallz_vec` 
     * :c:func:`crint_sum` 
+    * :c:func:`cyclic_term_jim_bi_ortho` 
+    * :c:func:`cyclic_term_mji_bi_ortho` 
     * :c:func:`d1_norm_inverse_trust_region` 
     * :c:func:`d1_norm_inverse_trust_region_omp` 
     * :c:func:`d1_norm_trust_region` 
@@ -1555,11 +1972,18 @@ Index of Subroutines/Functions
     * :c:func:`dble_logfact` 
     * :c:func:`debug_cfg` 
     * :c:func:`debug_det` 
+    * :c:func:`debug_fit` 
+    * :c:func:`debug_gradient_list_opt` 
+    * :c:func:`debug_gradient_opt` 
+    * :c:func:`debug_hessian_list_opt` 
+    * :c:func:`debug_hessian_opt` 
+    * :c:func:`debug_integ_jmu_modif` 
     * :c:func:`debug_spindet` 
     * :c:func:`decode_exc` 
     * :c:func:`decode_exc_spin` 
     * :c:func:`delete_selection_buffer` 
     * :c:func:`delta_lrsr_ldaerf` 
+    * :c:func:`delta_right` 
     * :c:func:`dens_grad_a_b_no_core_and_aos_grad_aos_at_r` 
     * :c:func:`density_and_grad_alpha_beta` 
     * :c:func:`density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r` 
@@ -1568,6 +1992,7 @@ Index of Subroutines/Functions
     * :c:func:`derivative_knowles_function` 
     * :c:func:`det_allowed_ormas` 
     * :c:func:`det_copy` 
+    * :c:func:`det_energy` 
     * :c:func:`det_extract` 
     * :c:func:`det_inf` 
     * :c:func:`det_search_key` 
@@ -1578,6 +2003,11 @@ Index of Subroutines/Functions
     * :c:func:`diag_h_mat_elem_one_e` 
     * :c:func:`diag_hessian_list_opt` 
     * :c:func:`diag_hessian_opt` 
+    * :c:func:`diag_hmat_bi_ortho` 
+    * :c:func:`diag_htilde_mu_mat_bi_ortho` 
+    * :c:func:`diag_htilde_mu_mat_fock_bi_ortho` 
+    * :c:func:`diag_htilde_mu_mat_fock_bi_ortho_no_3e` 
+    * :c:func:`diag_htilde_three_body_ints_bi_ort` 
     * :c:func:`diag_mat_per_fock_degen` 
     * :c:func:`diag_mat_per_fock_degen_core` 
     * :c:func:`diag_nonsym_right` 
@@ -1585,17 +2015,31 @@ Index of Subroutines/Functions
     * :c:func:`diag_wee_mat_elem` 
     * :c:func:`diagonalization_hessian` 
     * :c:func:`diagonalize_ci` 
+    * :c:func:`diagonalize_ci_tc` 
+    * :c:func:`diagonalize_ci_tc_bi_ortho` 
     * :c:func:`diagonalize_h` 
     * :c:func:`diagonalize_sym_matrix` 
+    * :c:func:`diis_cc` 
+    * :c:func:`direct_sym_3_e_int` 
+    * :c:func:`direct_term_ijj_bi_ortho` 
+    * :c:func:`direct_term_imj_bi_ortho` 
     * :c:func:`disconnect_from_taskserver` 
     * :c:func:`disconnect_from_taskserver_state` 
     * :c:func:`dm_dft_alpha_beta_and_all_aos_at_r` 
     * :c:func:`dm_dft_alpha_beta_at_r` 
     * :c:func:`dm_dft_alpha_beta_no_core_at_r` 
+    * :c:func:`do_print` 
     * :c:func:`do_schwartz_accel` 
+    * :c:func:`do_signed_mono_excitation` 
     * :c:func:`do_single_excitation` 
     * :c:func:`do_single_excitation_cfg` 
     * :c:func:`do_single_excitation_cfg_with_type` 
+    * :c:func:`do_spinfree_mono_excitation` 
+    * :c:func:`double_hmat_bi_ortho` 
+    * :c:func:`double_htilde_mu_mat_bi_ortho` 
+    * :c:func:`double_htilde_mu_mat_fock_bi_ortho` 
+    * :c:func:`double_htilde_mu_mat_fock_bi_ortho_no_3e` 
+    * :c:func:`double_htilde_three_body_ints_bi_ort` 
     * :c:func:`dpol` 
     * :c:func:`dpold` 
     * :c:func:`dpoldd` 
@@ -1605,6 +2049,7 @@ Index of Subroutines/Functions
     * :c:func:`dset_order` 
     * :c:func:`dset_order_big` 
     * :c:func:`dump_ao_integrals_erf` 
+    * :c:func:`dump_ao_tc_sym_two_e_pot` 
     * :c:func:`dump_mo_integrals` 
     * :c:func:`ec_lda` 
     * :c:func:`ec_lda_sr` 
@@ -1619,6 +2064,8 @@ Index of Subroutines/Functions
     * :c:func:`ecmd_pbe_ueg_at_r` 
     * :c:func:`ecorrlr` 
     * :c:func:`ecpw` 
+    * :c:func:`eff_pot_fit_gauss` 
+    * :c:func:`eff_pot_gauss` 
     * :c:func:`eigsvd` 
     * :c:func:`end_parallel_job` 
     * :c:func:`end_zmq_pair_socket` 
@@ -1632,9 +2079,14 @@ Index of Subroutines/Functions
     * :c:func:`erf_f` 
     * :c:func:`erf_g` 
     * :c:func:`erf_h` 
+    * :c:func:`erf_mu_gauss` 
+    * :c:func:`erf_mu_gauss_ij_ao` 
+    * :c:func:`erf_mu_stg_gauss` 
+    * :c:func:`erf_mu_stg_gauss_int_phi_ij` 
+    * :c:func:`erfc_mu_gauss_xyz` 
+    * :c:func:`erfc_mu_gauss_xyz_ij_ao` 
     * :c:func:`eri` 
     * :c:func:`eri_cgtos` 
-    * :c:func:`eri_cosgtos` 
     * :c:func:`eri_erf` 
     * :c:func:`esrc_md_ldaerf` 
     * :c:func:`ex_lda` 
@@ -1645,17 +2097,34 @@ Index of Subroutines/Functions
     * :c:func:`example_bitmask` 
     * :c:func:`example_determinants` 
     * :c:func:`example_determinants_psi_det` 
+    * :c:func:`exch_term_ijm_bi_ortho` 
+    * :c:func:`exch_term_jmi_bi_ortho` 
+    * :c:func:`exp_dl` 
+    * :c:func:`exp_dl_erf_stg_phi_ij` 
+    * :c:func:`exp_dl_ovlp_stg_phi_ij` 
+    * :c:func:`exp_dl_rout` 
     * :c:func:`exp_matrix` 
     * :c:func:`exp_matrix_taylor` 
+    * :c:func:`exp_tau_h` 
+    * :c:func:`expo_fit_slater_gam` 
     * :c:func:`export_trexio` 
-    * :c:func:`export_trexio_prog` 
+    * :c:func:`export_trexio_subroutine` 
+    * :c:func:`extra_basis` 
+    * :c:func:`extra_density_at_r` 
+    * :c:func:`extra_nuclei` 
     * :c:func:`extract_cas` 
+    * :c:func:`extract_list_orb_space` 
+    * :c:func:`extract_list_orb_spin` 
+    * :c:func:`extract_n_spin` 
     * :c:func:`extrapolate_data` 
+    * :c:func:`extrapolate_fock_matrix` 
+    * :c:func:`extrapolate_tc_fock_matrix` 
     * :c:func:`f_function_becke` 
     * :c:func:`f_hf_valence_ab` 
     * :c:func:`f_integral` 
     * :c:func:`f_norm_trust_region` 
     * :c:func:`f_norm_trust_region_omp` 
+    * :c:func:`f_x_j` 
     * :c:func:`fact` 
     * :c:func:`factorial` 
     * :c:func:`fc_integral` 
@@ -1676,9 +2145,24 @@ Index of Subroutines/Functions
     * :c:func:`first_gradient_opt` 
     * :c:func:`first_hessian_list_opt` 
     * :c:func:`first_hessian_opt` 
+    * :c:func:`fit_1_erf_x` 
+    * :c:func:`fit_1_erf_x_2` 
+    * :c:func:`fit_1s_basis` 
+    * :c:func:`fix_right_to_one` 
+    * :c:func:`fock_a_tc_operator` 
+    * :c:func:`fock_ac_tc_operator` 
+    * :c:func:`form_v` 
+    * :c:func:`form_v_abc` 
+    * :c:func:`form_v_ijk` 
+    * :c:func:`form_w` 
+    * :c:func:`form_w_abc` 
+    * :c:func:`form_w_ijk` 
     * :c:func:`format_w_error` 
     * :c:func:`four_idx_dgemm` 
     * :c:func:`four_idx_dgemm_erf` 
+    * :c:func:`four_idx_novvvv` 
+    * :c:func:`four_idx_novvvv2` 
+    * :c:func:`four_idx_novvvv_old` 
     * :c:func:`four_idx_transform` 
     * :c:func:`g0_dg0` 
     * :c:func:`g0_dg0_d2g0` 
@@ -1693,6 +2177,21 @@ Index of Subroutines/Functions
     * :c:func:`gaussian_product_v` 
     * :c:func:`gaussian_product_x` 
     * :c:func:`gaussian_product_x_v` 
+    * :c:func:`gen_f_space` 
+    * :c:func:`gen_f_spin` 
+    * :c:func:`gen_v_space` 
+    * :c:func:`gen_v_space_chol` 
+    * :c:func:`gen_v_spin` 
+    * :c:func:`gen_v_spin_3idx` 
+    * :c:func:`gen_v_spin_3idx_i_kl` 
+    * :c:func:`gen_v_spin_3idx_ij_l` 
+    * :c:func:`general_overlap_integral` 
+    * :c:func:`general_primitive_integral` 
+    * :c:func:`general_primitive_integral_cgtos` 
+    * :c:func:`general_primitive_integral_coul_shifted` 
+    * :c:func:`general_primitive_integral_erf` 
+    * :c:func:`general_primitive_integral_erf_shifted` 
+    * :c:func:`general_primitive_integral_gauss` 
     * :c:func:`generate_all_alpha_beta_det_products` 
     * :c:func:`generate_all_singles_cfg` 
     * :c:func:`generate_all_singles_cfg_with_type` 
@@ -1720,6 +2219,8 @@ Index of Subroutines/Functions
     * :c:func:`get_ao_erf_map_size` 
     * :c:func:`get_ao_integ_chol` 
     * :c:func:`get_ao_map_size` 
+    * :c:func:`get_ao_tc_sym_two_e_pot` 
+    * :c:func:`get_ao_tc_sym_two_e_pot_map_size` 
     * :c:func:`get_ao_two_e_integral` 
     * :c:func:`get_ao_two_e_integral_erf` 
     * :c:func:`get_ao_two_e_integral_periodic` 
@@ -1730,17 +2231,28 @@ Index of Subroutines/Functions
     * :c:func:`get_ao_two_e_integrals_non_zero_jl` 
     * :c:func:`get_ao_two_e_integrals_non_zero_jl_from_list` 
     * :c:func:`get_ao_two_e_integrals_periodic` 
+    * :c:func:`get_cisd_sc2_dressing` 
+    * :c:func:`get_cxcycz_j1` 
+    * :c:func:`get_cxcycz_j2` 
     * :c:func:`get_d0` 
+    * :c:func:`get_d0_new` 
     * :c:func:`get_d0_reference` 
     * :c:func:`get_d1` 
+    * :c:func:`get_d1_new` 
     * :c:func:`get_d1_reference` 
     * :c:func:`get_d2` 
+    * :c:func:`get_d2_new` 
     * :c:func:`get_d2_reference` 
+    * :c:func:`get_d3_h` 
+    * :c:func:`get_d3_htc` 
+    * :c:func:`get_delta_bitc_right` 
+    * :c:func:`get_det_csf_transformation` 
     * :c:func:`get_double_excitation` 
     * :c:func:`get_double_excitation_spin` 
     * :c:func:`get_energy` 
     * :c:func:`get_excitation` 
     * :c:func:`get_excitation_degree` 
+    * :c:func:`get_excitation_degree_ref` 
     * :c:func:`get_excitation_degree_spin` 
     * :c:func:`get_excitation_degree_vector` 
     * :c:func:`get_excitation_degree_vector_double_alpha_beta` 
@@ -1749,16 +2261,25 @@ Index of Subroutines/Functions
     * :c:func:`get_excitation_degree_vector_single_or_exchange_verbose` 
     * :c:func:`get_excitation_general` 
     * :c:func:`get_excitation_spin` 
+    * :c:func:`get_extrapolated_energy` 
+    * :c:func:`get_fock_matrix_spin` 
+    * :c:func:`get_h_bitc_right` 
+    * :c:func:`get_halfinv_svd` 
     * :c:func:`get_holes_general` 
+    * :c:func:`get_htc_bitc_right` 
     * :c:func:`get_index_in_psi_det_alpha_unique` 
     * :c:func:`get_index_in_psi_det_beta_unique` 
     * :c:func:`get_index_in_psi_det_sorted_bit` 
+    * :c:func:`get_inv_half_nonsymmat_diago` 
+    * :c:func:`get_inv_half_svd` 
     * :c:func:`get_inverse` 
     * :c:func:`get_inverse_complex` 
     * :c:func:`get_lccsd_2` 
     * :c:func:`get_m0` 
     * :c:func:`get_m1` 
     * :c:func:`get_m2` 
+    * :c:func:`get_many_ao_tc_sym_two_e_pot` 
+    * :c:func:`get_many_ao_tc_sym_two_e_pot_non_zero` 
     * :c:func:`get_mask_phase` 
     * :c:func:`get_mo_erf_map_size` 
     * :c:func:`get_mo_map_size` 
@@ -1786,6 +2307,8 @@ Index of Subroutines/Functions
     * :c:func:`get_s2` 
     * :c:func:`get_single_excitation` 
     * :c:func:`get_single_excitation_from_fock` 
+    * :c:func:`get_single_excitation_from_fock_tc` 
+    * :c:func:`get_single_excitation_from_fock_tc_no_3e` 
     * :c:func:`get_single_excitation_spin` 
     * :c:func:`get_task_from_taskserver` 
     * :c:func:`get_tasks_from_taskserver` 
@@ -1796,20 +2319,43 @@ Index of Subroutines/Functions
     * :c:func:`getmobiles` 
     * :c:func:`getnsomo` 
     * :c:func:`getunitandopen` 
+    * :c:func:`gga_sr_type_functionals` 
+    * :c:func:`give_aaa_contraction` 
+    * :c:func:`give_aaa_contrib` 
+    * :c:func:`give_aaa_contrib_bis` 
+    * :c:func:`give_aab_contraction` 
+    * :c:func:`give_aab_contrib` 
+    * :c:func:`give_aab_contrib_bis` 
+    * :c:func:`give_aba_contraction` 
+    * :c:func:`give_abb_contrib` 
+    * :c:func:`give_abb_contrib_bis` 
     * :c:func:`give_active_on_top_in_r_one_state` 
     * :c:func:`give_all_aos_and_grad_and_lapl_at_r` 
     * :c:func:`give_all_aos_and_grad_at_r` 
     * :c:func:`give_all_aos_at_r` 
+    * :c:func:`give_all_aos_extra_at_r` 
     * :c:func:`give_all_erf_kl_ao` 
     * :c:func:`give_all_mos_and_grad_and_lapl_at_r` 
     * :c:func:`give_all_mos_and_grad_at_r` 
     * :c:func:`give_all_mos_at_r` 
+    * :c:func:`give_all_mos_l_at_r` 
+    * :c:func:`give_all_mos_r_at_r` 
+    * :c:func:`give_all_perm_for_three_e` 
     * :c:func:`give_all_stuffs_in_r_for_lyp_88` 
+    * :c:func:`give_bbb_contrib` 
+    * :c:func:`give_bbb_contrib_bis` 
     * :c:func:`give_cas_density_in_r` 
+    * :c:func:`give_contrib_for_aaaa` 
+    * :c:func:`give_contrib_for_abab` 
+    * :c:func:`give_contrib_for_bbbb` 
     * :c:func:`give_core_inact_act_density_in_r` 
+    * :c:func:`give_cpolynom_mult_center_x` 
+    * :c:func:`give_cpolynomial_mult_center_one_e` 
     * :c:func:`give_degen` 
     * :c:func:`give_degen_full_list` 
     * :c:func:`give_degen_full_listcore` 
+    * :c:func:`give_explicit_cpoly_and_cgaussian` 
+    * :c:func:`give_explicit_cpoly_and_cgaussian_x` 
     * :c:func:`give_explicit_poly_and_gaussian` 
     * :c:func:`give_explicit_poly_and_gaussian_double` 
     * :c:func:`give_explicit_poly_and_gaussian_v` 
@@ -1817,6 +2363,11 @@ Index of Subroutines/Functions
     * :c:func:`give_f_aa_val_ab` 
     * :c:func:`give_f_ia_val_ab` 
     * :c:func:`give_f_ii_val_ab` 
+    * :c:func:`give_fock_ia_three_e_total` 
+    * :c:func:`give_integrals_3_body` 
+    * :c:func:`give_integrals_3_body_bi_ort` 
+    * :c:func:`give_integrals_3_body_bi_ort_ao` 
+    * :c:func:`give_integrals_3_body_bi_ort_old` 
     * :c:func:`give_mu_of_r_cas` 
     * :c:func:`give_n2_aa_val_ab` 
     * :c:func:`give_n2_cas` 
@@ -1829,15 +2380,30 @@ Index of Subroutines/Functions
     * :c:func:`give_polynomial_mult_center_one_e` 
     * :c:func:`give_polynomial_mult_center_one_e_erf` 
     * :c:func:`give_polynomial_mult_center_one_e_erf_opt` 
+    * :c:func:`gpu_free_memory` 
+    * :c:func:`gpu_set_busy` 
+    * :c:func:`gpu_unset_busy` 
     * :c:func:`gpw` 
+    * :c:func:`grad1_j12_mu_exc` 
+    * :c:func:`grad1_jmu_modif_num` 
+    * :c:func:`grad1_x_j12_mu_num` 
+    * :c:func:`grad1_x_jmu_modif` 
+    * :c:func:`grad1_y_j12_mu_num` 
+    * :c:func:`grad1_y_jmu_modif` 
+    * :c:func:`grad1_z_j12_mu_num` 
+    * :c:func:`grad1_z_jmu_modif` 
+    * :c:func:`grad_phi_ao` 
     * :c:func:`grad_rho_ab_to_grad_rho_oc` 
+    * :c:func:`grad_x_j1b_nucl` 
+    * :c:func:`grad_y_j1b_nucl` 
+    * :c:func:`grad_z_j1b_nucl` 
     * :c:func:`gradient_list_opt` 
     * :c:func:`gradient_opt` 
     * :c:func:`gradvec_ia` 
     * :c:func:`gradvec_it` 
     * :c:func:`gradvec_ta` 
-    * :c:func:`guess_hcore` 
-    * :c:func:`guess_huckel` 
+    * :c:func:`guess_t1` 
+    * :c:func:`guess_t2` 
     * :c:func:`h_apply_cis` 
     * :c:func:`h_apply_cis_diexc` 
     * :c:func:`h_apply_cis_diexcorg` 
@@ -1869,13 +2435,19 @@ Index of Subroutines/Functions
     * :c:func:`h_apply_mp2_selection_diexcp` 
     * :c:func:`h_apply_mp2_selection_monoexc` 
     * :c:func:`h_func` 
+    * :c:func:`h_non_hermite` 
     * :c:func:`h_s2_u_0_nstates_openmp` 
     * :c:func:`h_s2_u_0_nstates_openmp_work` 
     * :c:func:`h_s2_u_0_nstates_openmp_work_1` 
+    * :c:func:`h_s2_u_0_nstates_openmp_work_1_cholesky` 
     * :c:func:`h_s2_u_0_nstates_openmp_work_2` 
+    * :c:func:`h_s2_u_0_nstates_openmp_work_2_cholesky` 
     * :c:func:`h_s2_u_0_nstates_openmp_work_3` 
+    * :c:func:`h_s2_u_0_nstates_openmp_work_3_cholesky` 
     * :c:func:`h_s2_u_0_nstates_openmp_work_4` 
+    * :c:func:`h_s2_u_0_nstates_openmp_work_4_cholesky` 
     * :c:func:`h_s2_u_0_nstates_openmp_work_n_int` 
+    * :c:func:`h_s2_u_0_nstates_openmp_work_n_int_cholesky` 
     * :c:func:`h_s2_u_0_nstates_zmq` 
     * :c:func:`h_s2_u_0_two_e_nstates_openmp` 
     * :c:func:`h_s2_u_0_two_e_nstates_openmp_work` 
@@ -1884,6 +2456,15 @@ Index of Subroutines/Functions
     * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_3` 
     * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_4` 
     * :c:func:`h_s2_u_0_two_e_nstates_openmp_work_n_int` 
+    * :c:func:`h_tc_dagger_u_0_opt` 
+    * :c:func:`h_tc_u_0_nstates_openmp` 
+    * :c:func:`h_tc_u_0_nstates_openmp_work` 
+    * :c:func:`h_tc_u_0_nstates_openmp_work_1` 
+    * :c:func:`h_tc_u_0_nstates_openmp_work_2` 
+    * :c:func:`h_tc_u_0_nstates_openmp_work_3` 
+    * :c:func:`h_tc_u_0_nstates_openmp_work_4` 
+    * :c:func:`h_tc_u_0_nstates_openmp_work_n_int` 
+    * :c:func:`h_tc_u_0_opt` 
     * :c:func:`h_u_0_nstates_openmp` 
     * :c:func:`h_u_0_nstates_openmp_work` 
     * :c:func:`h_u_0_nstates_openmp_work_1` 
@@ -1892,6 +2473,8 @@ Index of Subroutines/Functions
     * :c:func:`h_u_0_nstates_openmp_work_4` 
     * :c:func:`h_u_0_nstates_openmp_work_n_int` 
     * :c:func:`h_u_0_nstates_zmq` 
+    * :c:func:`hcalc_l_tmp` 
+    * :c:func:`hcalc_r_tmp` 
     * :c:func:`hcalc_template` 
     * :c:func:`hcore_guess` 
     * :c:func:`hermite` 
@@ -1903,7 +2486,15 @@ Index of Subroutines/Functions
     * :c:func:`hessmat_itju` 
     * :c:func:`hessmat_itua` 
     * :c:func:`hessmat_taub` 
+    * :c:func:`hmat_bi_ortho` 
     * :c:func:`hpsi` 
+    * :c:func:`htc_bi_ortho_calc_tdav` 
+    * :c:func:`htcdag_bi_ortho_calc_tdav` 
+    * :c:func:`htilde_mu_mat_bi_ortho` 
+    * :c:func:`htilde_mu_mat_bi_ortho_tot` 
+    * :c:func:`htilde_mu_mat_opt_bi_ortho` 
+    * :c:func:`htilde_mu_mat_opt_bi_ortho_no_3e` 
+    * :c:func:`htilde_mu_mat_opt_bi_ortho_tot` 
     * :c:func:`huckel_guess` 
     * :c:func:`i2set_order` 
     * :c:func:`i2set_order_big` 
@@ -1911,6 +2502,8 @@ Index of Subroutines/Functions
     * :c:func:`i8set_order_big` 
     * :c:func:`i_h_j` 
     * :c:func:`i_h_j_double_alpha_beta` 
+    * :c:func:`i_h_j_double_alpha_beta_s2` 
+    * :c:func:`i_h_j_double_alpha_beta_s2_sorted` 
     * :c:func:`i_h_j_double_spin` 
     * :c:func:`i_h_j_mono_spin_one_e` 
     * :c:func:`i_h_j_one_e` 
@@ -1924,22 +2517,43 @@ Index of Subroutines/Functions
     * :c:func:`i_wee_j_single` 
     * :c:func:`i_x1_pol_mult` 
     * :c:func:`i_x1_pol_mult_cgtos` 
-    * :c:func:`i_x1_pol_mult_cosgtos` 
     * :c:func:`idx2_tri_int` 
     * :c:func:`idx2_tri_rev_int` 
-    * :c:func:`import_integrals_ao` 
+    * :c:func:`import_integrals_ao_periodic` 
+    * :c:func:`import_mo_coef_periodic` 
     * :c:func:`import_trexio_determinants` 
     * :c:func:`import_trexio_integrals` 
+    * :c:func:`impose_biorthog_degen_eigvec` 
+    * :c:func:`impose_biorthog_lu` 
+    * :c:func:`impose_biorthog_qr` 
+    * :c:func:`impose_biorthog_svd` 
+    * :c:func:`impose_orthog_biorthog_degen_eigvec` 
+    * :c:func:`impose_orthog_degen_eigvec` 
+    * :c:func:`impose_orthog_gramschmidt` 
+    * :c:func:`impose_orthog_ones` 
+    * :c:func:`impose_orthog_svd` 
+    * :c:func:`impose_orthog_svd_overlap` 
+    * :c:func:`impose_unique_biorthog_degen_eigvec` 
+    * :c:func:`impose_weighted_biorthog_qr` 
+    * :c:func:`impose_weighted_biorthog_svd` 
+    * :c:func:`impose_weighted_orthog_svd` 
     * :c:func:`increment_n_iter` 
     * :c:func:`initialize_mo_coef_begin_iteration` 
     * :c:func:`insert_into_ao_integrals_erf_map` 
     * :c:func:`insert_into_ao_integrals_map` 
+    * :c:func:`insert_into_ao_tc_sym_two_e_pot_map` 
+    * :c:func:`insert_into_mo_integrals_erf_map` 
+    * :c:func:`insert_into_mo_integrals_map` 
     * :c:func:`int_gaus_pol` 
+    * :c:func:`int_gauss_4g` 
+    * :c:func:`int_gauss_deriv` 
+    * :c:func:`int_gauss_r0` 
+    * :c:func:`int_gauss_r2` 
     * :c:func:`integral_f_hf_valence_ab` 
     * :c:func:`integrale_new` 
     * :c:func:`integrale_new_cgtos` 
-    * :c:func:`integrale_new_cosgtos` 
     * :c:func:`integrale_new_erf` 
+    * :c:func:`inv_r_times_poly` 
     * :c:func:`is_a_1h` 
     * :c:func:`is_a_1h1p` 
     * :c:func:`is_a_1h2p` 
@@ -1950,34 +2564,59 @@ Index of Subroutines/Functions
     * :c:func:`is_a_two_holes_two_particles` 
     * :c:func:`is_connected_to` 
     * :c:func:`is_connected_to_by_single` 
+    * :c:func:`is_core` 
+    * :c:func:`is_del` 
+    * :c:func:`is_i_in_core` 
     * :c:func:`is_i_in_virtual` 
     * :c:func:`is_in_wavefunction` 
     * :c:func:`is_integer_in_string` 
+    * :c:func:`is_integer_in_string_local` 
     * :c:func:`is_same_spin` 
     * :c:func:`is_spin_flip_possible` 
     * :c:func:`is_the_hole_in_det` 
     * :c:func:`is_the_particl_in_det` 
     * :c:func:`iset_order` 
     * :c:func:`iset_order_big` 
+    * :c:func:`isnan` 
+    * :c:func:`j12_mu` 
+    * :c:func:`j12_mu_gauss` 
+    * :c:func:`j12_mu_r12` 
+    * :c:func:`j12_nucl` 
+    * :c:func:`j1b_gauss_2e_j1` 
+    * :c:func:`j1b_gauss_2e_j1_schwartz` 
+    * :c:func:`j1b_gauss_2e_j2` 
+    * :c:func:`j1b_gauss_2e_j2_schwartz` 
+    * :c:func:`j1b_nucl` 
+    * :c:func:`j_mu` 
+    * :c:func:`j_mu_f_x_j` 
+    * :c:func:`j_mu_fit_gauss` 
+    * :c:func:`jmu_modif` 
     * :c:func:`json_close` 
     * :c:func:`knowles_function` 
     * :c:func:`kronecker_delta` 
     * :c:func:`ks_scf` 
     * :c:func:`lapack_diag` 
     * :c:func:`lapack_diag_complex` 
+    * :c:func:`lapack_diag_general_non_sym` 
+    * :c:func:`lapack_diag_non_sym` 
+    * :c:func:`lapack_diag_non_sym_new` 
+    * :c:func:`lapack_diag_non_sym_right` 
     * :c:func:`lapack_diagd` 
     * :c:func:`lapack_diagd_complex` 
     * :c:func:`lapack_diagd_diag_complex` 
     * :c:func:`lapack_diagd_diag_in_place_complex` 
+    * :c:func:`lapl_j1b_nucl` 
     * :c:func:`lccsd` 
     * :c:func:`list_to_bitstring` 
     * :c:func:`load_ao_integrals_erf` 
+    * :c:func:`load_ao_tc_sym_two_e_pot` 
     * :c:func:`load_mo_integrals` 
     * :c:func:`load_mo_integrals_erf` 
     * :c:func:`lock_io` 
     * :c:func:`logabsgamma` 
     * :c:func:`logfact` 
     * :c:func:`lowercase` 
+    * :c:func:`ltxsxr` 
     * :c:func:`main` 
     * :c:func:`make_s2_eigenfunction` 
     * :c:func:`make_selection_buffer_s2` 
@@ -1985,18 +2624,25 @@ Index of Subroutines/Functions
     * :c:func:`map_save_to_disk` 
     * :c:func:`mat_to_vec_index` 
     * :c:func:`matrix_vector_product_complex` 
+    * :c:func:`max_overlap_invprod` 
+    * :c:func:`max_overlap_qr` 
+    * :c:func:`maximize_overlap` 
     * :c:func:`memory_of_double` 
     * :c:func:`memory_of_double8` 
     * :c:func:`memory_of_int` 
     * :c:func:`memory_of_int8` 
     * :c:func:`merge_selection_buffers` 
+    * :c:func:`minimize_tc_orb_angles` 
     * :c:func:`mix_mo_jk` 
     * :c:func:`mo_as_eigvectors_of_mo_matrix` 
     * :c:func:`mo_as_svd_vectors_of_mo_matrix` 
     * :c:func:`mo_as_svd_vectors_of_mo_matrix_eig` 
     * :c:func:`mo_coef_new_as_svd_vectors_of_mo_matrix_eig` 
     * :c:func:`mo_to_ao` 
+    * :c:func:`mo_to_ao_bi_ortho` 
     * :c:func:`mo_to_ao_no_overlap` 
+    * :c:func:`mo_to_ao_sphe` 
+    * :c:func:`mo_to_ao_sphe_no_overlap` 
     * :c:func:`mo_two_e_integral` 
     * :c:func:`mo_two_e_integral_erf` 
     * :c:func:`mo_two_e_integrals_erf_index` 
@@ -2004,11 +2650,12 @@ Index of Subroutines/Functions
     * :c:func:`modify_bitmasks_for_hole` 
     * :c:func:`modify_bitmasks_for_hole_in_out` 
     * :c:func:`modify_bitmasks_for_particl` 
-    * :c:func:`mol_properties` 
     * :c:func:`molden` 
     * :c:func:`molden_attachment` 
+    * :c:func:`molden_lr` 
     * :c:func:`mp2` 
     * :c:func:`mpi_print` 
+    * :c:func:`mrci` 
     * :c:func:`mu_correction_of_on_top` 
     * :c:func:`mu_grad_rho_func` 
     * :c:func:`mu_rs_c` 
@@ -2025,24 +2672,64 @@ Index of Subroutines/Functions
     * :c:func:`multiply_poly_v` 
     * :c:func:`n_pt_sup` 
     * :c:func:`nai_pol_mult` 
-    * :c:func:`nai_pol_mult_cosgtos` 
+    * :c:func:`nai_pol_mult_cgtos` 
     * :c:func:`nai_pol_mult_erf` 
     * :c:func:`nai_pol_mult_erf_ao` 
     * :c:func:`nai_pol_mult_erf_ao_with1s` 
+    * :c:func:`nai_pol_mult_erf_gauss_r12` 
     * :c:func:`nai_pol_mult_erf_v` 
+    * :c:func:`nai_pol_mult_erf_with1s` 
     * :c:func:`nai_pol_mult_erf_with1s_v` 
+    * :c:func:`nai_pol_x_mult_erf_ao` 
+    * :c:func:`nai_pol_x_mult_erf_ao_v` 
+    * :c:func:`nai_pol_x_mult_erf_ao_v0` 
+    * :c:func:`nai_pol_x_mult_erf_ao_with1s` 
+    * :c:func:`nai_pol_x_mult_erf_ao_with1s_v` 
+    * :c:func:`nai_pol_x_mult_erf_ao_with1s_v0` 
+    * :c:func:`nai_pol_x_mult_erf_ao_with1s_x` 
+    * :c:func:`nai_pol_x_mult_erf_ao_with1s_y` 
+    * :c:func:`nai_pol_x_mult_erf_ao_with1s_z` 
+    * :c:func:`nai_pol_x_mult_erf_ao_x` 
+    * :c:func:`nai_pol_x_mult_erf_ao_y` 
+    * :c:func:`nai_pol_x_mult_erf_ao_z` 
+    * :c:func:`nai_pol_x_specify_mult_erf_ao` 
     * :c:func:`new_parallel_job` 
     * :c:func:`new_zmq_pair_socket` 
     * :c:func:`new_zmq_pull_socket` 
     * :c:func:`new_zmq_push_socket` 
     * :c:func:`new_zmq_sub_socket` 
     * :c:func:`new_zmq_to_qp_run_socket` 
+    * :c:func:`non_hrmt_bieig` 
+    * :c:func:`non_hrmt_bieig_fullvect` 
+    * :c:func:`non_hrmt_bieig_random_diag` 
+    * :c:func:`non_hrmt_diag_split_degen` 
+    * :c:func:`non_hrmt_diag_split_degen_bi_orthog` 
+    * :c:func:`non_hrmt_diag_split_degen_s_inv_half` 
+    * :c:func:`non_hrmt_fock_mat` 
+    * :c:func:`non_hrmt_general_real_diag` 
+    * :c:func:`non_hrmt_generalized_real_im` 
+    * :c:func:`non_hrmt_real_diag` 
+    * :c:func:`non_hrmt_real_diag_new` 
+    * :c:func:`non_hrmt_real_im` 
+    * :c:func:`non_sym_diag_inv_right` 
     * :c:func:`normalize` 
     * :c:func:`nullify_small_elements` 
+    * :c:func:`num_grad12_j12` 
+    * :c:func:`num_gradu_squared_u_ij_mu` 
+    * :c:func:`num_int2_grad1_u12_ao` 
+    * :c:func:`num_int2_grad1u2_grad2u2_j1b2` 
+    * :c:func:`num_int2_u2_j1b2` 
+    * :c:func:`num_int2_u_grad1u_total_j1b2` 
+    * :c:func:`num_u12_grad1_u12_j1b_grad1_j1b` 
+    * :c:func:`num_u12sq_j1bsq` 
+    * :c:func:`num_v_ij_erf_rk_cst_mu_j1b` 
+    * :c:func:`num_v_ij_u_cst_mu_j1b` 
+    * :c:func:`num_x_v_ij_erf_rk_cst_mu_j1b` 
     * :c:func:`number_of_holes` 
     * :c:func:`number_of_holes_verbose` 
     * :c:func:`number_of_particles` 
     * :c:func:`number_of_particles_verbose` 
+    * :c:func:`orb_opt` 
     * :c:func:`orb_range_2_rdm_openmp` 
     * :c:func:`orb_range_2_rdm_openmp_work` 
     * :c:func:`orb_range_2_rdm_openmp_work_1` 
@@ -2095,16 +2782,35 @@ Index of Subroutines/Functions
     * :c:func:`ortho_qr_unblocked` 
     * :c:func:`ortho_qr_unblocked_complex` 
     * :c:func:`ortho_svd` 
+    * :c:func:`orthog_functions` 
     * :c:func:`orthonormalize_mos` 
+    * :c:func:`overlap_abs_gauss_r12` 
+    * :c:func:`overlap_abs_gauss_r12_ao` 
     * :c:func:`overlap_bourrin_deriv_x` 
     * :c:func:`overlap_bourrin_dipole` 
     * :c:func:`overlap_bourrin_spread` 
     * :c:func:`overlap_bourrin_x` 
     * :c:func:`overlap_cgaussian_x` 
+    * :c:func:`overlap_cgaussian_xyz` 
+    * :c:func:`overlap_gauss_r12` 
+    * :c:func:`overlap_gauss_r12_all_ao` 
+    * :c:func:`overlap_gauss_r12_ao` 
+    * :c:func:`overlap_gauss_r12_ao_v` 
+    * :c:func:`overlap_gauss_r12_ao_with1s` 
+    * :c:func:`overlap_gauss_r12_ao_with1s_v` 
+    * :c:func:`overlap_gauss_r12_v` 
+    * :c:func:`overlap_gauss_xyz_r12` 
+    * :c:func:`overlap_gauss_xyz_r12_ao` 
+    * :c:func:`overlap_gauss_xyz_r12_ao_specific` 
+    * :c:func:`overlap_gauss_xyz_r12_specific` 
     * :c:func:`overlap_gaussian_x` 
     * :c:func:`overlap_gaussian_xyz` 
     * :c:func:`overlap_gaussian_xyz_v` 
+    * :c:func:`overlap_stg_gauss` 
     * :c:func:`overlap_x_abs` 
+    * :c:func:`ovlp_stg_gauss_int_phi_ij` 
+    * :c:func:`past_d1` 
+    * :c:func:`past_d2` 
     * :c:func:`perturb_buffer_by_mono_dummy` 
     * :c:func:`perturb_buffer_by_mono_epstein_nesbet` 
     * :c:func:`perturb_buffer_by_mono_epstein_nesbet_2x2` 
@@ -2117,12 +2823,20 @@ Index of Subroutines/Functions
     * :c:func:`perturb_buffer_epstein_nesbet_2x2_no_ci_diag` 
     * :c:func:`perturb_buffer_moller_plesset` 
     * :c:func:`perturb_buffer_qdpt` 
+    * :c:func:`phi_j_erf_mu_r_dxyz_phi` 
+    * :c:func:`phi_j_erf_mu_r_dxyz_phi_bis` 
+    * :c:func:`phi_j_erf_mu_r_phi` 
+    * :c:func:`phi_j_erf_mu_r_xyz_dxyz_phi` 
+    * :c:func:`phi_j_erf_mu_r_xyz_phi` 
     * :c:func:`pivoted_cholesky` 
     * :c:func:`pol_modif_center` 
     * :c:func:`pol_modif_center_x` 
     * :c:func:`primitive_value` 
     * :c:func:`primitive_value_explicit` 
-    * :c:func:`print_2rdm` 
+    * :c:func:`print_angles` 
+    * :c:func:`print_angles_tc` 
+    * :c:func:`print_basis_correction` 
+    * :c:func:`print_ci_dressed` 
     * :c:func:`print_ci_vectors` 
     * :c:func:`print_det` 
     * :c:func:`print_det_one_dimension` 
@@ -2131,29 +2845,37 @@ Index of Subroutines/Functions
     * :c:func:`print_dipole_moment` 
     * :c:func:`print_dipole_moments` 
     * :c:func:`print_energy` 
+    * :c:func:`print_energy1` 
+    * :c:func:`print_energy_and_mos` 
     * :c:func:`print_energy_components` 
     * :c:func:`print_exc` 
     * :c:func:`print_extrapolated_energy` 
-    * :c:func:`print_fock_diag` 
+    * :c:func:`print_fit_param` 
     * :c:func:`print_generators_bitmasks_holes` 
     * :c:func:`print_generators_bitmasks_particles` 
     * :c:func:`print_grad` 
     * :c:func:`print_hamiltonian` 
+    * :c:func:`print_he_tc_energy` 
     * :c:func:`print_memory_usage` 
     * :c:func:`print_mol_properties` 
-    * :c:func:`print_mos` 
     * :c:func:`print_oscillator_strength` 
-    * :c:func:`print_pseudo_overlap` 
-    * :c:func:`print_scf_int` 
+    * :c:func:`print_overlap` 
     * :c:func:`print_sorted_wf_coef` 
     * :c:func:`print_spindet` 
+    * :c:func:`print_su_pbe_ot` 
     * :c:func:`print_summary` 
     * :c:func:`print_summary_tc` 
+    * :c:func:`print_tc_bi_ortho` 
     * :c:func:`print_transition_dipole_moment` 
     * :c:func:`print_var_energy` 
     * :c:func:`print_wf` 
+    * :c:func:`print_wf_qp_edit` 
+    * :c:func:`print_wf_qp_edit_subroutine` 
+    * :c:func:`project_phi0` 
     * :c:func:`projected_operators` 
+    * :c:func:`properties` 
     * :c:func:`provide_all_mo_integrals_erf` 
+    * :c:func:`provide_all_three_ints_bi_ortho` 
     * :c:func:`provide_everything` 
     * :c:func:`provide_for_selection_slave` 
     * :c:func:`provide_for_zmq_pt2` 
@@ -2174,6 +2896,7 @@ Index of Subroutines/Functions
     * :c:func:`pt2_qdpt` 
     * :c:func:`pt2_serialize` 
     * :c:func:`pt2_slave_inproc` 
+    * :c:func:`pt2_tc_bi_ortho` 
     * :c:func:`pull_pt2_results` 
     * :c:func:`pull_selection_results` 
     * :c:func:`push_integrals` 
@@ -2181,30 +2904,42 @@ Index of Subroutines/Functions
     * :c:func:`push_pt2_results_async_recv` 
     * :c:func:`push_pt2_results_async_send` 
     * :c:func:`push_selection_results` 
+    * :c:func:`qp_bug` 
     * :c:func:`qp_stop` 
     * :c:func:`qrpa` 
     * :c:func:`qrpad` 
     * :c:func:`qrpadd` 
+    * :c:func:`r_phi_theta_psi_matrix` 
     * :c:func:`randomized_svd` 
+    * :c:func:`read_array_6_index_tensor` 
     * :c:func:`read_array_two_rdm` 
     * :c:func:`read_array_two_trans_rdm` 
     * :c:func:`read_dets` 
+    * :c:func:`read_fcidump_3_tc` 
     * :c:func:`read_spindeterminants` 
+    * :c:func:`read_t1` 
+    * :c:func:`read_t2` 
     * :c:func:`recentered_cpoly2` 
     * :c:func:`recentered_poly2` 
     * :c:func:`recentered_poly2_v` 
     * :c:func:`recentered_poly2_v0` 
     * :c:func:`remove_duplicates_in_psi_det` 
+    * :c:func:`remove_duplicates_in_psi_det_tc` 
     * :c:func:`remove_duplicates_in_selection_buffer` 
     * :c:func:`remove_small_contributions` 
     * :c:func:`reorder_core_orb` 
     * :c:func:`reorder_mo_max_overlap` 
     * :c:func:`reorder_orbitals_for_casscf` 
     * :c:func:`replace_wf` 
+    * :c:func:`report` 
     * :c:func:`reset_zmq_addresses` 
     * :c:func:`resident_memory` 
     * :c:func:`resize_h_apply_buffer` 
     * :c:func:`restore_symmetry` 
+    * :c:func:`return_xyz_int` 
+    * :c:func:`rh_tcscf_diis` 
+    * :c:func:`rh_tcscf_simple` 
+    * :c:func:`rh_vartcscf_simple` 
     * :c:func:`rho_ab_to_rho_oc` 
     * :c:func:`rho_oc_to_rho_ab` 
     * :c:func:`rint` 
@@ -2212,22 +2947,47 @@ Index of Subroutines/Functions
     * :c:func:`rint_large_n` 
     * :c:func:`rint_sum` 
     * :c:func:`roothaan_hall_scf` 
+    * :c:func:`rotate_degen_eigvec_to_maximize_overlap` 
     * :c:func:`rotate_mos` 
+    * :c:func:`rotate_nuclei` 
+    * :c:func:`rotate_tcscf_orbitals` 
     * :c:func:`rotation_matrix` 
     * :c:func:`rotation_matrix_iterative` 
     * :c:func:`routine` 
+    * :c:func:`routine_3` 
     * :c:func:`routine_active_only` 
     * :c:func:`routine_active_only_trans` 
     * :c:func:`routine_bielec_pqxx_no` 
     * :c:func:`routine_bielec_pxxq_no_array` 
+    * :c:func:`routine_diag` 
     * :c:func:`routine_example_psi_det` 
+    * :c:func:`routine_fit` 
     * :c:func:`routine_full_mos` 
+    * :c:func:`routine_grad_squared` 
+    * :c:func:`routine_int2_grad1u2_grad2u2_j1b2` 
+    * :c:func:`routine_int2_u2_j1b2` 
+    * :c:func:`routine_int2_u_grad1u_j1b2` 
+    * :c:func:`routine_int2_u_grad1u_x_j1b2` 
+    * :c:func:`routine_lapl_grad` 
     * :c:func:`routine_s2` 
+    * :c:func:`routine_save_left_right_bi_ortho` 
     * :c:func:`routine_save_one_e_dm` 
+    * :c:func:`routine_save_right_bi_ortho` 
+    * :c:func:`routine_save_rotated_mos` 
+    * :c:func:`routine_test` 
     * :c:func:`routine_test_cas_based_density` 
+    * :c:func:`routine_test_j1b` 
+    * :c:func:`routine_tot` 
+    * :c:func:`routine_v_ij_erf_rk_cst_mu_j1b` 
+    * :c:func:`routine_v_ij_u_cst_mu_j1b` 
+    * :c:func:`routine_v_ij_u_cst_mu_j1b_test` 
+    * :c:func:`routine_x_v_ij_erf_rk_cst_mu_j1b` 
     * :c:func:`rs_ks_scf` 
     * :c:func:`run` 
+    * :c:func:`run_ccsd_space_orb` 
+    * :c:func:`run_ccsd_spin_orb` 
     * :c:func:`run_cipsi` 
+    * :c:func:`run_cipsi_tc` 
     * :c:func:`run_cisd` 
     * :c:func:`run_optimization_mos_cipsi` 
     * :c:func:`run_orb_opt_trust_v2` 
@@ -2245,6 +3005,8 @@ Index of Subroutines/Functions
     * :c:func:`save_erf_two_e_integrals_mo` 
     * :c:func:`save_erf_two_e_ints_ao_into_ints_ao` 
     * :c:func:`save_erf_two_e_ints_mo_into_ints_mo` 
+    * :c:func:`save_good_hermit_tc_eigvectors` 
+    * :c:func:`save_iterations` 
     * :c:func:`save_mos` 
     * :c:func:`save_mos_no_occ` 
     * :c:func:`save_mos_truncated` 
@@ -2257,6 +3019,10 @@ Index of Subroutines/Functions
     * :c:func:`save_one_e_dm` 
     * :c:func:`save_ortho_mos` 
     * :c:func:`save_ref_determinant` 
+    * :c:func:`save_ref_determinant_nstates_1` 
+    * :c:func:`save_tc_bi_ortho_wavefunction` 
+    * :c:func:`save_tc_natorb` 
+    * :c:func:`save_tc_wavefunction_general` 
     * :c:func:`save_wavefunction` 
     * :c:func:`save_wavefunction_general` 
     * :c:func:`save_wavefunction_general_unormalized` 
@@ -2281,8 +3047,16 @@ Index of Subroutines/Functions
     * :c:func:`shank` 
     * :c:func:`shank_function` 
     * :c:func:`shank_general` 
+    * :c:func:`shift_idx_spin` 
     * :c:func:`single_excitation_wee` 
+    * :c:func:`single_hmat_bi_ortho` 
+    * :c:func:`single_htilde_mu_mat_bi_ortho` 
+    * :c:func:`single_htilde_mu_mat_fock_bi_ortho` 
+    * :c:func:`single_htilde_mu_mat_fock_bi_ortho_no_3e` 
+    * :c:func:`single_htilde_three_body_ints_bi_ort` 
+    * :c:func:`slater_fit_gam` 
     * :c:func:`sort_by_fock_energies` 
+    * :c:func:`sort_by_tc_fock` 
     * :c:func:`sort_dets_ab` 
     * :c:func:`sort_dets_ab_v` 
     * :c:func:`sort_dets_ba_v` 
@@ -2297,6 +3071,7 @@ Index of Subroutines/Functions
     * :c:func:`spin_det_search_key` 
     * :c:func:`splash_p` 
     * :c:func:`splash_pq` 
+    * :c:func:`split_matrix_degen` 
     * :c:func:`spot_hasbeen` 
     * :c:func:`spot_isinwf` 
     * :c:func:`state_average_energy` 
@@ -2311,11 +3086,22 @@ Index of Subroutines/Functions
     * :c:func:`svd_symm` 
     * :c:func:`swap_mos` 
     * :c:func:`switch_qp_run_to_master` 
+    * :c:func:`sym_3_e_int_from_6_idx_tensor` 
     * :c:func:`tamiser` 
     * :c:func:`task_done_to_taskserver` 
     * :c:func:`tasks_done_to_taskserver` 
+    * :c:func:`tc_bi_ortho` 
+    * :c:func:`tc_bi_ortho_prop` 
+    * :c:func:`tc_keywords` 
+    * :c:func:`tc_natorb_bi_ortho` 
+    * :c:func:`tc_petermann_factor` 
+    * :c:func:`tc_print_mulliken_sd` 
+    * :c:func:`tc_scf` 
+    * :c:func:`tc_som` 
     * :c:func:`test` 
     * :c:func:`test_2_rdm` 
+    * :c:func:`test_3e` 
+    * :c:func:`test_ao_tc_int_chemist` 
     * :c:func:`test_bielec_pqxx` 
     * :c:func:`test_bielec_pxxq_chol` 
     * :c:func:`test_chol` 
@@ -2325,8 +3111,59 @@ Index of Subroutines/Functions
     * :c:func:`test_f_ia_valence_ab` 
     * :c:func:`test_f_ii_ia_aa_valence_ab` 
     * :c:func:`test_f_ii_valence_ab` 
+    * :c:func:`test_fit_u` 
+    * :c:func:`test_fit_u2` 
+    * :c:func:`test_fit_ugradu` 
+    * :c:func:`test_fock_3e_uhf_ao` 
+    * :c:func:`test_fock_3e_uhf_mo` 
+    * :c:func:`test_grad12_j12` 
+    * :c:func:`test_grad_j1b_nucl` 
+    * :c:func:`test_gradu_squared_u_ij_mu` 
+    * :c:func:`test_grid_points_ao` 
+    * :c:func:`test_h_u0` 
+    * :c:func:`test_int2_grad1_u12_ao` 
+    * :c:func:`test_int2_grad1u2_grad2u2_j1b2` 
+    * :c:func:`test_int2_u2_j1b2` 
+    * :c:func:`test_int2_u_grad1u_total_j1b2` 
+    * :c:func:`test_int_gauss` 
+    * :c:func:`test_ints` 
+    * :c:func:`test_ints_semi_bis` 
+    * :c:func:`test_j1b_nucl` 
+    * :c:func:`test_lapl_j1b_nucl` 
+    * :c:func:`test_list_b2` 
+    * :c:func:`test_list_b3` 
+    * :c:func:`test_natorb` 
+    * :c:func:`test_non_h` 
+    * :c:func:`test_normal_order` 
+    * :c:func:`test_pol_xyz` 
     * :c:func:`test_proj_op` 
+    * :c:func:`test_slater_tc_opt` 
+    * :c:func:`test_spin_dens` 
+    * :c:func:`test_tc_fock` 
+    * :c:func:`test_tc_grad_and_lapl_ao` 
+    * :c:func:`test_tc_grad_square_ao` 
+    * :c:func:`test_tc_grad_square_ao_test` 
+    * :c:func:`test_tc_scf` 
+    * :c:func:`test_total_grad_lapl` 
+    * :c:func:`test_total_grad_square` 
+    * :c:func:`test_two_e_tc_non_hermit_integral` 
+    * :c:func:`test_u12_grad1_u12_j1b_grad1_j1b` 
+    * :c:func:`test_u12sq_j1bsq` 
+    * :c:func:`test_v_ij_erf_rk_cst_mu_j1b` 
+    * :c:func:`test_v_ij_u_cst_mu_j1b` 
+    * :c:func:`test_vect_overlap_gauss_r12_ao` 
+    * :c:func:`test_vect_overlap_gauss_r12_ao_with1s` 
+    * :c:func:`test_x_v_ij_erf_rk_cst_mu_j1b` 
     * :c:func:`testteethbuilding` 
+    * :c:func:`three_comp_fock_elem` 
+    * :c:func:`three_comp_two_e_elem` 
+    * :c:func:`three_e_diag_parrallel_spin` 
+    * :c:func:`three_e_double_parrallel_spin` 
+    * :c:func:`three_e_single_parrallel_spin` 
+    * :c:func:`timing_diag` 
+    * :c:func:`timing_double` 
+    * :c:func:`timing_single` 
+    * :c:func:`timing_tot` 
     * :c:func:`total_memory` 
     * :c:func:`truncate_wf` 
     * :c:func:`trust_region_expected_e` 
@@ -2339,6 +3176,7 @@ Index of Subroutines/Functions
     * :c:func:`two_e_integrals_index_2fold` 
     * :c:func:`two_e_integrals_index_reverse` 
     * :c:func:`two_e_integrals_index_reverse_2fold` 
+    * :c:func:`u_0_h_tc_u_0` 
     * :c:func:`u_0_h_u_0` 
     * :c:func:`u_0_h_u_0_two_e` 
     * :c:func:`u_0_hs2_u_0` 
@@ -2346,47 +3184,64 @@ Index of Subroutines/Functions
     * :c:func:`u_dot_u` 
     * :c:func:`u_dot_v` 
     * :c:func:`unlock_io` 
+    * :c:func:`update_all_err` 
+    * :c:func:`update_all_t` 
     * :c:func:`update_keys_values` 
     * :c:func:`update_keys_values_n_states` 
+    * :c:func:`update_keys_values_n_states_local` 
     * :c:func:`update_keys_values_n_states_trans` 
     * :c:func:`update_parameters` 
     * :c:func:`update_pt2_and_variance_weights` 
     * :c:func:`update_st_av_ci_energy` 
+    * :c:func:`update_t1` 
+    * :c:func:`update_t2` 
+    * :c:func:`update_t_ccsd` 
+    * :c:func:`update_t_ccsd_diis` 
+    * :c:func:`update_t_ccsd_diis_v3` 
+    * :c:func:`update_tau_space` 
+    * :c:func:`update_tau_x_space` 
     * :c:func:`update_wf_of_psi_bilinear_matrix` 
+    * :c:func:`use_cf_oo` 
+    * :c:func:`use_cf_ov` 
+    * :c:func:`use_cf_vv` 
+    * :c:func:`use_cw_vvvf` 
     * :c:func:`v2_over_x` 
     * :c:func:`v_grad_rho_ab_to_v_grad_rho_oc` 
     * :c:func:`v_grad_rho_oc_to_v_grad_rho_ab` 
     * :c:func:`v_n_e` 
     * :c:func:`v_n_e_cgtos` 
-    * :c:func:`v_n_e_cosgtos` 
     * :c:func:`v_phi` 
     * :c:func:`v_r` 
     * :c:func:`v_r_cgtos` 
-    * :c:func:`v_r_cosgtos` 
     * :c:func:`v_rho_ab_to_v_rho_oc` 
     * :c:func:`v_rho_oc_to_v_rho_ab` 
     * :c:func:`v_theta` 
     * :c:func:`vcorrlr` 
     * :c:func:`vec_to_mat_index` 
     * :c:func:`vec_to_mat_v2` 
-    * :c:func:`wait_for_next_state` 
     * :c:func:`wait_for_state` 
     * :c:func:`wait_for_states` 
     * :c:func:`wall_time` 
     * :c:func:`wallis` 
     * :c:func:`wf_of_psi_bilinear_matrix` 
+    * :c:func:`write_array_6_index_tensor` 
     * :c:func:`write_array_two_rdm` 
     * :c:func:`write_array_two_trans_rdm` 
     * :c:func:`write_bool` 
-    * :c:func:`write_c_ij_ab` 
     * :c:func:`write_cipsi_json` 
     * :c:func:`write_double` 
+    * :c:func:`write_extra_grid_in_ezfio` 
     * :c:func:`write_git_log` 
     * :c:func:`write_int` 
     * :c:func:`write_integrals_erf` 
+    * :c:func:`write_l_r_wf` 
     * :c:func:`write_on_top_in_real_space` 
     * :c:func:`write_spindeterminants` 
+    * :c:func:`write_t1` 
+    * :c:func:`write_t2` 
     * :c:func:`write_time` 
+    * :c:func:`xyz_grad_phi_ao` 
+    * :c:func:`xyz_phi_ao` 
     * :c:func:`zboysfun` 
     * :c:func:`zboysfun00_1` 
     * :c:func:`zboysfun00_2` 
@@ -2457,4 +3312,5 @@ Index of Subroutines/Functions
     * :c:func:`zmq_put_psi_det_size` 
     * :c:func:`zmq_selection` 
     * :c:func:`zmq_set_running` 
+    * :c:func:`zz_test_chol_check` 
 

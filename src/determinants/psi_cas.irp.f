@@ -112,6 +112,11 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, H_matrix_cas, (N_det_cas,N_det_cas)]
  implicit none
+ BEGIN_DOC
+ ! Hamiltonian matrix in the CAS determinant basis:
+ ! H_matrix_cas(i,j) is the matrix element
+ ! <psi_cas(i) | H | psi_cas(j)>, computed with i_H_j.
+ END_DOC
  integer :: i,j
  double precision :: hij
   do i = 1, N_det_cas
@@ -125,6 +130,14 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, psi_coef_cas_diagonalized, (N_det_cas,N_states)]
 &BEGIN_PROVIDER [double precision, psi_cas_energy_diagonalized, (N_states)]
  implicit none
+ BEGIN_DOC
+ ! Diagonalizes H_matrix_cas with lapack_diag (eigenvalues
+ ! sorted by increasing value).
+ ! For each state i (1..N_states):
+ ! psi_cas_energy_diagonalized(i) is the i-th eigenvalue and
+ ! psi_coef_cas_diagonalized(j,i) the j-th component of the
+ ! corresponding eigenvector in the CAS determinant basis.
+ END_DOC
  integer :: i,j
   double precision, allocatable  :: eigenvectors(:,:), eigenvalues(:)
   allocate (eigenvectors(size(H_matrix_cas,1),N_det_cas))

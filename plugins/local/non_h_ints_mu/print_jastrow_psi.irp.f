@@ -1,4 +1,4 @@
-program print_j_psi
+program print_jastrow_psi
  implicit none
  integer :: i,j,a,b
  do i = 1, elec_beta_num ! r2

@@ -3,6 +3,13 @@ use bitmasks
 subroutine get_mask_phase(det1, pm, Nint)
   use bitmasks
   implicit none
+  BEGIN_DOC
+  ! Computes the phase mask pm of the determinant det1:
+  ! bit b of pm(i,1) is 1 when the number of occupied
+  ! orbitals of det1 with index less than or equal to the
+  ! orbital of word i, bit b, is odd. Used by get_phase_bi
+  ! for the sign of the matrix element of an excitation.
+  END_DOC
   integer, intent(in) :: Nint
   integer(bit_kind), intent(in) :: det1(Nint,2)
   integer(bit_kind), intent(out) :: pm(Nint,2)
@@ -66,11 +73,20 @@ subroutine select_connected(i_generator,E0,pt2_data,b,subset,csubset)
   use bitmasks
   use selection_types
   implicit none
+  BEGIN_DOC
+  ! CIPSI selection of the excitations of i_generator:
+  ! accumulates in pt2_data the PT2 contribution, variance
+  ! and overlap of each single or double excitation, and
+  ! adds the determinant to the selection buffer b when
+  ! its weight is below b%mini. Only excitations numbered
+  ! (subset-1) mod csubset are processed.
+  END_DOC
   integer, intent(in)            :: i_generator, subset, csubset
   type(selection_buffer), intent(inout) :: b
   type(pt2_type), intent(inout)   :: pt2_data
   integer :: k,l
   double precision, intent(in)   :: E0(N_states)
+  ! E0 is the PT2 denominator (pt2_e0_denominator)
 
   integer(bit_kind)              :: hole_mask(N_int,2), particle_mask(N_int,2)
 
@@ -539,6 +555,14 @@ subroutine fill_buffer_$DOUBLE(i_generator, sp, h1, h2, bannedOrb, banned, fock_
   use bitmasks
   use selection_types
   implicit none
+  BEGIN_DOC
+  ! For the excitation (h1[, h2]) of i_generator, loops over
+  ! the particle orbitals (p1, p2) and, using mat(istate,
+  ! p1, p2) = <psi(istate)|H|det>, accumulates in pt2_data
+  ! the PT2 contribution, the variance and the overlap of
+  ! each state; the determinant is added to buf when its
+  ! selection weight is below buf%mini.
+  END_DOC
 
   integer, intent(in) :: i_generator, sp, h1, h2
   double precision, intent(in) :: mat(N_states, mo_num, mo_num)
@@ -1034,6 +1058,14 @@ end
 subroutine get_d2(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
   use bitmasks
   implicit none
+  BEGIN_DOC
+  ! nt == 4 case of splash_pq: the internal determinant
+  ! occupies 4 orbitals not in the two-hole mask. Adds to
+  ! mat(k, r, s) the contribution coefs(k) * <det|H|alpha>,
+  ! alpha = mask + (r, s) with (r, s) among the 4 orbitals;
+  ! the element is a two-electron integral (or difference
+  ! of two) signed by get_phase_bi.
+  END_DOC
 
   integer(bit_kind), intent(in) :: mask(N_int, 2), gen(N_int, 2)
   integer(bit_kind), intent(in) :: phasemask(N_int,2)
@@ -1201,6 +1233,14 @@ end
 subroutine get_d1(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
   use bitmasks
   implicit none
+  BEGIN_DOC
+  ! nt == 3 case of splash_pq: the internal determinant
+  ! occupies 3 orbitals not in the two-hole mask. Adds to
+  ! mat(k, r, s) the contribution coefs(k) * <det|H|alpha>,
+  ! alpha = mask + (r, s) with one of (r, s) among the 3
+  ! orbitals; the element is a two-electron integral with
+  ! a fixed orbital, or i_h_j when both are among them.
+  END_DOC
 
   integer(bit_kind), intent(in)  :: mask(N_int, 2), gen(N_int, 2)
   integer(bit_kind), intent(in)  :: phasemask(N_int,2)
@@ -1462,6 +1502,14 @@ end
 subroutine get_d0(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
   use bitmasks
   implicit none
+  BEGIN_DOC
+  ! Case of splash_pq where the internal determinant has
+  ! at most 2 orbitals not in the two-hole mask. Adds to
+  ! mat(k, r, s) the contribution coefs(k) * <det|H|alpha>,
+  ! alpha = mask + (r, s); the element is a two-electron
+  ! integral signed by get_phase_bi, or i_h_j when (r, s)
+  ! overlaps those orbitals.
+  END_DOC
 
   integer(bit_kind), intent(in) :: gen(N_int, 2), mask(N_int, 2)
   integer(bit_kind), intent(in) :: phasemask(N_int,2)

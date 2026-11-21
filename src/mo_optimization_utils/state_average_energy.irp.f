@@ -31,6 +31,11 @@
 
 
 subroutine state_average_energy(energy)
+  BEGIN_DOC
+  ! State average energy of the current wave function, from the MO
+  ! integrals and density matrices: nuclear repulsion, plus the
+  ! one-electron part, plus half of the two-electron part.
+  END_DOC
 
   implicit none
 

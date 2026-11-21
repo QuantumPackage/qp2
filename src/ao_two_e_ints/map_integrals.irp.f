@@ -131,9 +131,17 @@ end
 
 
 subroutine ao_idx2_sq(i,j,ij)
+  BEGIN_DOC
+  ! Computes the square compound index $ij$ of the ordered pair of
+  ! AO indices $(i,j)$. For $i \neq j$, the indices of $(i,j)$ and
+  ! $(j,i)$ are different; for $i = j$, $ij = i^2$. For
+  ! $1 \le i,j \le ao\_num$, $ij$ runs over $1$ to $ao\_num^2$.
+  ! Reverse operation: ao_idx2_sq_rev.
+  END_DOC
   implicit none
   integer, intent(in)  :: i,j
   integer, intent(out) :: ij
+  ! the mod term makes (i,j) and (j,i) map to different offsets
   if (i<j) then
     ij=(j-1)*(j-1)+2*i-mod(j+1,2)
   else if (i>j) then
@@ -144,6 +152,11 @@ subroutine ao_idx2_sq(i,j,ij)
 end
 
 subroutine idx2_tri_int(i,j,ij)
+  BEGIN_DOC
+  ! Computes the triangular compound index $ij$ of the pair of AO
+  ! indices $(i,j)$: $ij = \min(i,j) + (\max(i,j)^2 - \max(i,j))/2$.
+  ! The index is the same for $(i,j)$ and $(j,i)$.
+  END_DOC
   implicit none
   integer, intent(in)  :: i,j
   integer, intent(out) :: ij
@@ -154,6 +167,12 @@ subroutine idx2_tri_int(i,j,ij)
 end
 
 subroutine ao_idx2_tri_key(i,j,ij)
+  BEGIN_DOC
+  ! Computes the triangular compound index of the pair of AO
+  ! indices $(i,j)$: $ij = \min(i,j) + (\max(i,j)^2 - \max(i,j))/2$.
+  ! The index is the same for $(i,j)$ and $(j,i)$, and $ij$ is a
+  ! key_kind integer.
+  END_DOC
   use map_module
   implicit none
   integer, intent(in)  :: i,j
@@ -165,6 +184,13 @@ subroutine ao_idx2_tri_key(i,j,ij)
 end
 
 subroutine two_e_integrals_index_2fold(i,j,k,l,i1)
+  BEGIN_DOC
+  ! Computes a unique index $i_1$ for the four AO indices
+  ! $i,j,k,l$, using only the symmetry of the two pairs $(i,k)$
+  ! and $(j,l)$: $(i,j,k,l) \leftrightarrow (j,i,l,k)$. The index
+  ! of each pair is the square compound index ao_idx2_sq, so the
+  ! order of the indices within a pair matters.
+  END_DOC
   use map_module
   implicit none
   integer, intent(in)            :: i,j,k,l
@@ -225,6 +251,13 @@ subroutine idx2_tri_rev_int(i,k,ik)
 end
 
 subroutine two_e_integrals_index_reverse_2fold(i,j,k,l,i1)
+  BEGIN_DOC
+  ! Computes the four AO indices $i,j,k,l$ from a unique index
+  ! $i_1$ produced by two_e_integrals_index_2fold. Two tuples are
+  ! returned: $(i(1),j(1),k(1),l(1))$ and the pair-swapped tuple
+  ! $(j(1),i(1),l(1),k(1))$. If the two tuples are identical,
+  ! $i(2)$ is set to 0.
+  END_DOC
   use map_module
   implicit none
   integer, intent(out)           :: i(2),j(2),k(2),l(2)
@@ -329,7 +362,7 @@ double precision function get_ao_two_e_integral(i, j, k, l, map) result(result)
   BEGIN_DOC
   ! Gets one AO bi-electronic integral from the AO map in PHYSICIST NOTATION
   !
-  ! <1:k, 2:l |1:i, 2:j> 
+  ! <1:k, 2:l \|1:i, 2:j> 
   END_DOC
   integer, intent(in)            :: i,j,k,l
   integer(key_kind)              :: idx

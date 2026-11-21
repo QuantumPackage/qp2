@@ -13,6 +13,14 @@ end
 
 subroutine routine
  implicit none
+  BEGIN_DOC
+! Example driver for the two non-dressed Davidson routines
+! of this module: h_mat is the provider H_matrix_all_dets
+! (|H| on the determinants of psi_det) with nuclear_repulsion
+! added to the diagonal; davidson_general is called with
+! h_mat, and davidson_general_ext_rout with hcalc_template
+! ($v = H u$). Prints the eigenvalues after each call.
+  END_DOC
  double precision, allocatable :: u_in(:,:), H_jj(:), energies(:),h_mat(:,:)
  integer :: dim_in,sze,N_st,N_st_diag_in
  logical :: converged 
@@ -49,6 +57,14 @@ end
 
 subroutine test_dav_dress
  implicit none
+  BEGIN_DOC
+! Dressed variant of the test: H_jj is the diagonal of the
+! provider H_matrix_all_dets plus nuclear_repulsion, and
+! davidson_general_ext_rout_dressed is called with
+! hcalc_template ($v = H u$). dressing_state is 0, so the
+! zero dressing_vec does not enter H_jj in the called
+! routine. Prints the first computed energy.
+  END_DOC
  double precision, allocatable :: u_in(:,:), H_jj(:), energies(:)
  integer :: sze,N_st,N_st_diag_in,dressing_state
  logical :: converged 

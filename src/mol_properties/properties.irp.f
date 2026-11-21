@@ -1,4 +1,4 @@
-program mol_properties
+program properties
 
   implicit none
 

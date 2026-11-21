@@ -20,6 +20,13 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, D0tu_alpha_ao, (ao_num, ao_num)]
 &BEGIN_PROVIDER [double precision, D0tu_beta_ao, (ao_num, ao_num)]
  implicit none
+  BEGIN_DOC
+  ! State-averaged first-order density matrices in the AO basis (alpha
+  ! and beta). In the MO basis the core/inactive orbitals are doubly
+  ! occupied, the active block is built from the one_e_dm_mo matrices
+  ! and the virtual orbitals are empty; the result is then transformed
+  ! to the AO basis with mo_to_ao_no_overlap.
+  END_DOC
  integer :: i,ii,j,u,t,uu,tt
  double precision, allocatable :: D0_tmp_alpha(:,:),D0_tmp_beta(:,:)
  allocate(D0_tmp_alpha(mo_num, mo_num),D0_tmp_beta(mo_num, mo_num))

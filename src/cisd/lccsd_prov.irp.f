@@ -1,6 +1,14 @@
  BEGIN_PROVIDER [ double precision, lccsd_coef, (N_det, N_states)]
 &BEGIN_PROVIDER [ double precision, lccsd_energies, (N_states)]
  implicit none
+ BEGIN_DOC
+ ! LCCSD coefficients of the N_states states (N_det x N_states):
+ ! Davidson diagonalization (davidson_general_ext_rout_diag_dressed)
+ ! with an iterated diagonal dressing Dress_jj(i) = ecorr =
+ ! lccsd_energies(1) - H_jj(1) for i > 1, determinants 1 and those
+ ! with H_jj(i) + ecorr < H_jj(1) not dressed; lccsd_energies(i)
+ ! are the eigenvalues of the last Davidson iteration.
+ END_DOC
  double precision, allocatable :: Dress_jj(:), H_jj(:), u_in(:,:)
  double precision :: ebefore, eafter, ecorr, thresh
  integer :: i,it,degree

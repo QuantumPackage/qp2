@@ -22,6 +22,14 @@ end
 
 subroutine routine
  implicit none
+ BEGIN_DOC
+ ! For the first min(N_det_print_wf,N_det) determinants of the sorted
+ ! wave function, prints each determinant and its excitation degree
+ ! with respect to the reference determinant, and, for degree <= 2,
+ ! <D|H|D>, <Ref|H|D>, coef_1 = hij/(h00-hii) and the 2x2 coefficient
+ ! coef_2_2. Also prints L1 and L2 norms of the amplitudes |c_i/c_1|
+ ! of the singles and double excitations (state 1).
+ END_DOC
  integer :: i
  integer :: degree
  double precision :: hij,hii,coef_1,h00

@@ -4,6 +4,15 @@ subroutine ccsd_par_t_spin(nO,nV,t1,t2,f_o,f_v,f_ov,v_ooov,v_vvoo,v_vvvo,energy)
 
   implicit none
 
+  BEGIN_DOC
+  ! (T) correction to the CCSD energy (CCSD(T)), in spin orbitals (v1).
+  ! Builds the triple amplitudes t3 from T2 against the vvvo and
+  ! ooov integrals, divided by f_o(i)+f_o(j)+f_o(k)-f_v(a)-f_v(b)-
+  ! f_v(c), then adds to energy the terms e_t (t3*delta*t3, /36),
+  ! e_st (T1 against v_vvoo acting on t3, *1/4) and e_dt (T2 against
+  ! f_ov times t3, *1/4).
+  END_DOC
+
   integer, intent(in)           :: nO, nV
   double precision, intent(in)  :: t1(nO,nV), t2(nO,nO,nV,nV)
   double precision, intent(in)  :: f_o(nO), f_v(nV), f_ov(nO,nV)
@@ -134,6 +143,14 @@ end
 subroutine ccsd_par_t_spin_v2(nO,nV,t1,t2,f_o,f_v,f_ov,v_ooov,v_vvoo,energy)
 
   implicit none
+
+  BEGIN_DOC
+  ! (T) correction to the CCSD energy (CCSD(T)), in spin orbitals
+  ! (v2), OpenMP version of ccsd_par_t_spin: the triple amplitudes
+  ! t3 are built for one (b,c) virtual pair at a time, and the vvvo
+  ! integrals are generated in the module with gen_v_spin instead of
+  ! being passed as an argument.
+  END_DOC
 
   integer, intent(in)           :: nO, nV
   double precision, intent(in)  :: t1(nO,nV), t2(nO,nO,nV,nV)

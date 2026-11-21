@@ -199,6 +199,16 @@ end
 subroutine getMobiles(key,key_mask, mobiles,Nint)
   use bitmasks
   implicit none
+  BEGIN_DOC
+  ! Gives the two spin orbitals in which key and key_mask
+  ! differ (the "mobiles"), as 1-based spin-orbital
+  ! indices, beta offset by mo_num.
+  ! The alpha bits are taken first, then the beta ones. The
+  ! code assumes that key and key_mask differ by exactly two
+  ! spin orbitals.
+  ! In perturb_buffer_$PERT the mobiles are used to pick the
+  ! smaller of the two microlist buckets.
+  END_DOC
   integer(bit_kind),intent(in) :: key(Nint,2), key_mask(Nint,2)
   integer,intent(out) :: mobiles(2)
   integer,intent(in) :: Nint
@@ -230,6 +240,20 @@ end subroutine
 subroutine create_microlist(minilist, N_minilist, key_mask, microlist, idx_microlist, N_microlist, ptr_microlist, Nint)
   use bitmasks
   implicit none
+  BEGIN_DOC
+  ! Splits the minilist into buckets indexed by the mobile
+  ! spin orbital of each determinant: the mobile spin
+  ! orbitals are the ones it occupies that key_mask does not.
+  ! Determinants with exactly four mobile spin orbitals are
+  ! copied once in the bucket of each of them. The others go
+  ! to bucket 0.
+  ! N_microlist(i) is the size of bucket i (i = 0, or
+  ! 1..2*mo_num, beta orbitals offset by mo_num),
+  ! ptr_microlist(i) the start of bucket i in the flat
+  ! arrays, idx_microlist(n) the index in the original
+  ! minilist of the n-th entry, microlist(:, :, n) the
+  ! determinant itself.
+  END_DOC
   integer, intent(in) :: Nint, N_minilist
   integer(bit_kind), intent(in) :: minilist(Nint,2,N_minilist), key_mask(Nint,2)
 

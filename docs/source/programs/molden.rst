@@ -24,7 +24,7 @@ molden
     * :c:data:`ao_prim_num` 
     * :c:data:`element_name` 
     * :c:data:`ezfio_filename` 
-    * :c:data:`fock_matrix_mo` 
+    * :c:data:`fock_matrix_diag_mo` 
     * :c:data:`mo_coef` 
     * :c:data:`mo_num` 
     * :c:data:`mo_occ` 

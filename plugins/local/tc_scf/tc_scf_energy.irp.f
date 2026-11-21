@@ -27,6 +27,18 @@
                           * (TCSCF_density_matrix_ao_alpha(i,j) + TCSCF_density_matrix_ao_beta (i,j) )
     enddo
   enddo
+  if(core_tc_op)then
+   do j = 1, ao_num
+    do i = 1, ao_num
+     ! core-core
+     TC_HF_two_e_energy += 0.5d0 * ao_two_e_core_integral(i,j) * TCSCF_bi_ort_core_dm_ao(i,j)
+     ! core-valence
+     TC_HF_two_e_energy += ao_two_e_valence_integral_alpha(i,j) * 0.5d0 * TCSCF_bi_ort_core_dm_ao(i,j)
+     TC_HF_two_e_energy += ao_two_e_valence_integral_beta(i,j) * 0.5d0 * TCSCF_bi_ort_core_dm_ao(i,j)
+     TC_HF_one_e_energy += ao_one_e_integrals_tc_tot(i,j) * TCSCF_bi_ort_core_dm_ao(i,j)
+    enddo
+   enddo
+  endif
 
   if((three_body_h_tc .eqv. .False.) .and. (.not. noL_standard)) then
     TC_HF_three_e_energy = 0.d0

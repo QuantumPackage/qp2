@@ -28,7 +28,7 @@
        !$OMP local_threshold)&
        !$OMP SHARED(ao_num,SCF_density_matrix_ao_alpha,SCF_density_matrix_ao_beta,&
        !$OMP ao_integrals_map,ao_integrals_threshold, ao_two_e_integral_schwartz, &
-       !$OMP ao_two_e_integral_alpha, ao_two_e_integral_beta)
+       !$OMP ao_two_e_integral_alpha, ao_two_e_integral_beta, HF_exchange)
 
    allocate(keys(1), values(1))
    allocate(ao_two_e_integral_alpha_tmp(ao_num,ao_num), &
@@ -86,8 +86,8 @@
              ao_two_e_integral_alpha_tmp(i,j) += integral
              ao_two_e_integral_beta_tmp (i,j) += integral
              integral = values(1)
-             ao_two_e_integral_alpha_tmp(l,j) -= c1 * integral
-             ao_two_e_integral_beta_tmp (l,j) -= c2 * integral
+             ao_two_e_integral_alpha_tmp(l,j) -= HF_exchange * c1 * integral
+             ao_two_e_integral_beta_tmp (l,j) -= HF_exchange * c2 * integral
            enddo
    enddo
    !$OMP END DO NOWAIT

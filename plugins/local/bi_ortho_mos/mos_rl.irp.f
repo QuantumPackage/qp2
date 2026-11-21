@@ -86,6 +86,34 @@ end subroutine mo_to_ao_bi_ortho
 
 ! ---
 
+BEGIN_PROVIDER [ double precision, mo_r_valence_coef, (ao_num, mo_num) ]
+ implicit none
+ BEGIN_DOC
+ ! mo_r_valence_coef(i,j) = coefficient of the jth right MO on the ith AO 
+ ! 
+ ! BUT WHERE THE FIRST n_core_orb COLUMNS ARE ZERO
+ END_DOC
+ integer :: i
+ mo_r_valence_coef = 0.d0
+ do i = n_core_orb+1,mo_num
+  mo_r_valence_coef(1:ao_num,i) = mo_r_coef(1:ao_num,i)
+ enddo
+END_PROVIDER 
+
+BEGIN_PROVIDER [ double precision, mo_r_core_coef, (ao_num, mo_num) ]
+ implicit none
+ BEGIN_DOC
+ ! mo_r_core_coef(i,j) = coefficient of the jth right MO on the ith AO 
+ ! 
+ ! BUT ONLY FOR THE n_core_orb FIRST ORBITALS 
+ END_DOC
+ integer :: i
+ mo_r_core_coef = 0.d0
+ do i = 1,n_core_orb+1
+  mo_r_core_coef(1:ao_num,i) = mo_r_coef(1:ao_num,i)
+ enddo
+END_PROVIDER 
+
 BEGIN_PROVIDER [ double precision, mo_r_coef, (ao_num, mo_num) ]
 
   BEGIN_DOC
@@ -141,6 +169,35 @@ BEGIN_PROVIDER [ double precision, mo_r_coef, (ao_num, mo_num) ]
 END_PROVIDER
 
 ! ---
+
+BEGIN_PROVIDER [ double precision, mo_l_valence_coef, (ao_num, mo_num) ]
+ implicit none
+ BEGIN_DOC
+ ! mo_l_valence_coef(i,j) = coefficient of the jth right MO on the ith AO 
+ ! 
+ ! BUT WHERE THE FIRST n_core_orb COLUMNS ARE ZERO
+ END_DOC
+ integer :: i
+ mo_l_valence_coef = 0.d0
+ do i = n_core_orb+1,mo_num
+  mo_l_valence_coef(1:ao_num,i) = mo_l_coef(1:ao_num,i)
+ enddo
+END_PROVIDER 
+
+BEGIN_PROVIDER [ double precision, mo_l_core_coef, (ao_num, mo_num) ]
+ implicit none
+ BEGIN_DOC
+ ! mo_l_core_coef(i,j) = coefficient of the jth right MO on the ith AO 
+ ! 
+ ! BUT ONLY FOR THE n_core_orb FIRST ORBITALS 
+ END_DOC
+ integer :: i
+ mo_l_core_coef = 0.d0
+ do i = 1,n_core_orb
+  mo_l_core_coef(1:ao_num,i) = mo_l_coef(1:ao_num,i)
+ enddo
+END_PROVIDER 
+! --- 
 
 BEGIN_PROVIDER [ double precision, mo_l_coef, (ao_num, mo_num) ]
 

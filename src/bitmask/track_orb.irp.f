@@ -14,6 +14,14 @@ subroutine initialize_mo_coef_begin_iteration
  ! Initialize :c:data:`mo_coef_begin_iteration` to the current :c:data:`mo_coef`
  END_DOC
  mo_coef_begin_iteration = mo_coef
+!integer :: i,j,iorb
+!print*,'in initialize_mo_coef_begin_iteration'
+!do i = 1, n_core_orb
+! iorb = list_core(i)
+! do j = 1, ao_num
+!  print*,'coef initialized to ',mo_coef_begin_iteration(j,iorb)
+! enddo
+!enddo
 end
 
 subroutine reorder_core_orb

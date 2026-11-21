@@ -1,4 +1,4 @@
-program tc_bi_ortho
+program print_tc_dump
 
   BEGIN_DOC
   ! TODO

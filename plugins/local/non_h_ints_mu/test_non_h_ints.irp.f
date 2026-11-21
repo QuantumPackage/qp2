@@ -1,7 +1,7 @@
 
 ! ---
 
-program test_non_h
+program test_non_h_ints
 
   implicit none
 

@@ -1,4 +1,4 @@
-program my_program
+program print_traces_on_e
   implicit none
   BEGIN_DOC
 ! This program is there essentially to show how one can use providers in programs 

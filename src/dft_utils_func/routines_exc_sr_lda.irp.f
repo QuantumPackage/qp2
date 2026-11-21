@@ -1,4 +1,11 @@
 subroutine ex_lda(rho_a,rho_b,ex,vx_a,vx_b)
+ BEGIN_DOC
+ ! LDA exchange: energy density ex and potentials vx_a, vx_b
+ ! computed from the alpha and beta spin densities rho_a and rho_b.
+ ! ex is the sum of the cst_lda * rho**(4/3) terms for the two
+ ! spins, and vx_a and vx_b are its derivatives with respect to
+ ! rho_a and rho_b.
+ END_DOC
  include 'constants.include.F'
  implicit none
  double precision, intent(in) :: rho_a,rho_b
@@ -14,6 +21,13 @@ end
 
 
 subroutine ec_lda(rho_a,rho_b,ec,vc_a,vc_b)
+ BEGIN_DOC
+ ! LDA correlation: energy density ec and potentials vc_a, vc_b
+ ! computed from the alpha and beta spin densities. The correlation
+ ! per particle is taken from ecPW (uniform gas, Coulomb
+ ! interaction); ec is that value times rho = rho_a + rho_b. For
+ ! total densities below 1.d-10 the outputs are set to 1.d-15.
+ END_DOC
       implicit none
  include 'constants.include.F'
       double precision, intent(out) ::  ec
@@ -54,6 +68,14 @@ subroutine ec_lda(rho_a,rho_b,ec,vc_a,vc_b)
 end
 
 subroutine ec_lda_sr(mu,rho_a,rho_b,ec,vc_a,vc_b)
+ BEGIN_DOC
+ ! Short-range LDA correlation: energy density ec and potentials
+ ! vc_a, vc_b for the spin densities, with range-separation
+ ! parameter mu. Each quantity is the full LDA value minus the
+ ! long-range part: ec from ecPW and ecorrlr, vc_a and vc_b from
+ ! the LDA correlation potential and vcorrlr. ec is multiplied by
+ ! rho = rho_a + rho_b.
+ END_DOC
       implicit none
  include 'constants.include.F'
       double precision, intent(out) ::  ec
@@ -100,6 +122,14 @@ subroutine ec_lda_sr(mu,rho_a,rho_b,ec,vc_a,vc_b)
 end
 
 subroutine ex_lda_sr(mu,rho_a,rho_b,ex,vx_a,vx_b)
+ BEGIN_DOC
+ ! Short-range LDA exchange: energy density ex and potentials
+ ! vx_a, vx_b for the spin densities, with range-separation
+ ! parameter mu. For each spin the expression branches on
+ ! a = mu / (2 kF), kF = (6 pi**2 rho_s)**(1/3) from the spin
+ ! density rho_s: small-a limit, exact expression, large-a
+ ! expansion. ex is half of the sum of the two spin contributions.
+ END_DOC
  include 'constants.include.F'
  implicit none
  double precision, intent(out) ::  ex
@@ -148,6 +178,13 @@ subroutine ex_lda_sr(mu,rho_a,rho_b,ex,vx_a,vx_b)
 !Test on the value of a
 
 !Limit for small a (expansion not so important as for large a)
+! KNOWN QUIRK (2026-10-28, found while fixing bug 1): in this mu->0
+! small-a limit the ENERGY is 2x the standard per-spin LDA value
+! (ex_a(1) = -1.86105 here vs -0.930526 = cst_lda for plain ex_lda),
+! while the POTENTIAL is standard (vx_a(1) = -1.24070). Harmless for
+! callers reading only vx (plain `lda` in ks_scf: energy from ex_lda,
+! potential from ex_lda_sr at mu=1e-9); a caller that accumulates ex at
+! tiny mu (sr_lda energy_x_sr_lda) would get 2x the exchange energy.
  if (a.lt.1.d-9) then
    ex_a = -z3/z8*rho_a_2*(z24*rho_a_2/pi)**f13
    vx_a = - ((z3/pi)*rho_a_2)**f13
@@ -215,6 +252,13 @@ end
 
 
 subroutine ec_only_lda_sr(mu,rho_a,rho_b,ec)
+ BEGIN_DOC
+ ! Short-range LDA correlation energy density only (no potentials),
+ ! for the spin densities rho_a and rho_b with range-separation
+ ! parameter mu: the full LDA correlation (ecPW) minus the
+ ! long-range part (ecorrlr), times rho = rho_a + rho_b. ec is 0
+ ! for total densities below 1.d-12.
+ END_DOC
       implicit none
  include 'constants.include.F'
       double precision, intent(out) ::  ec
@@ -247,6 +291,13 @@ end
 
 !-------------------------------------------
       function berf(a)
+ BEGIN_DOC
+ ! Second-order exchange gradient expansion coefficient for the erf
+ ! interaction, as a function of a = mu / (2 kF). The value is
+ ! multiplied by the damping factor 2.540118935556 * exp(-19 a**2);
+ ! series for a < 0.075 and for a > 50, exact expression (with
+ ! derf) in between.
+ END_DOC
 !-------------------------------------------
 !  Second-order exchange gradient expansion coefficient for erf
 !  interaction
@@ -267,6 +318,9 @@ end
       eta=19.0d0
       if(dabs(eta*a*a).lt.50.d0)then
        fak=2.540118935556d0*dexp(-eta*a*a)
+       ! Origin of the prefactor 2.540118935556 and of eta = 19:
+       ! unknown to the author, probably a value from a paper
+       ! (author, 2026-10-31).
       else
        fak=0.d0
       endif
@@ -300,6 +354,11 @@ end
 
 !-------------------------------------------
       function dberfda(a)
+ BEGIN_DOC
+ ! Derivative with respect to a = mu / (2 kF) of the coefficient
+ ! berf for the erf interaction. Same branches and damping factor
+ ! as berf.
+ END_DOC
 !-------------------------------------------
 !  Derivative of second-order exchange gradient
 !  expansion coefficient for erf interaction
@@ -361,6 +420,14 @@ end
 
 
 subroutine ecorrlr(rs,z,mu,eclr)
+ BEGIN_DOC
+ ! Long-range LDA correlation energy per particle of the uniform
+ ! gas for the screened interaction, in Hartree, given rs (density
+ ! parameter), z (spin polarization) and mu (range-separation
+ ! parameter). The Coulomb part comes from ecPW, the screened part
+ ! from Qrpa evaluated at x = mu * sqrt(rs) / phi. eclr is the
+ ! result.
+ END_DOC
   !cc Hartree atomic units used
   !cc for given density parameter rs, spin polarization z
   !cc and cutoff parameter mu
@@ -453,6 +520,15 @@ subroutine ecorrlr(rs,z,mu,eclr)
 end
 
 subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
+ BEGIN_DOC
+ ! Long-range LDA correlation potentials for the screened
+ ! interaction, in Hartree: vclrup (spin-up) and vclrdown
+ ! (spin-down) for given rs, z and mu. vclrupd and vclrdownd are
+ ! built from d(eclr)/drs and d2(eclr)/dr2.
+ ! vclrupd and vclrdownd have no use (author, 2026-10-31); they
+ ! are kept because external plugins may use them (author
+ ! policy, 2026-10-31).
+ END_DOC
 !SCF
 !cc Hartree atomic units used
 !cc for given density parameter rs, spin polarization z
@@ -966,6 +1042,13 @@ subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
 !     subroutine ecPW(x,y,ec,ecd,ecz)
 !SCD
       subroutine ecPW(x,y,ec,ecd,ecz,ecdd,eczd)
+ BEGIN_DOC
+ ! Correlation energy per particle of the uniform gas in the limit
+ ! mu = infinity, in Hartree: ec = ec(rs, zeta) with x -> rs and
+ ! y -> zeta. ecd and ecz are the first derivatives with respect
+ ! to rs and zeta, ecdd the second derivative with respect to rs,
+ ! eczd is set to 0.
+ END_DOC
 !SCF
 ! in Hartree; ec=ec(rs,zeta)
 ! x -> rs; y -> zeta
@@ -1019,6 +1102,12 @@ subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
       end
 
       subroutine GPW(x,Ac,alfa1,beta1,beta2,beta3,beta4,G,Gd,Gdd)
+ BEGIN_DOC
+ ! Fit form G(x) used by ecPW, with x -> rs:
+ ! G = -2 Ac (1 + alfa1 x) log(1 + 1/(2 Ac A(x))), where
+ ! A(x) = beta1 x**0.5 + beta2 x + beta3 x**1.5 + beta4 x**2.
+ ! Gd is dG/dx, Gdd is d2G/dx**2.
+ END_DOC
 !SCF
 !cc Gd is d/drs G
 !cc Gdd is d/drs Gd

@@ -1,8 +1,8 @@
 program cisd
   implicit none
   BEGIN_DOC
-! Configuration Interaction with Single and Double excitations.
-!
+  ! Configuration Interaction with Single and Double excitations.
+  !
   ! This program takes a reference Slater determinant of ROHF-like occupancy,
   !
   ! and performs all single and double excitations on top of it, disregarding
@@ -52,6 +52,18 @@ end
 
 subroutine run
   implicit none
+  BEGIN_DOC
+  ! Builds the CISD space (H_apply_cisd, or H_apply_cisd_sym when
+  ! pseudo_sym), diagonalizes the CI matrix (CI_eigenvectors
+  ! provider), saves wave functions and energies in the |EZFIO|
+  ! file, and prints the state and excitation energies; with 4+
+  ! electrons it also prints the "CISD+Q" energies cisdq(i).
+  ! cisdq(i) is the Davidson correction (CISD+Q(Davidson)):
+  ! CI_energy(i) + (CI_energy(i) - <D_k|H|D_k>) * (1 - c_k^2), k
+  ! the dominant determinant; it estimates the missing
+  ! disconnected-quadruples contribution (Jensen, Introduction to
+  ! Computational Chemistry, 2nd ed., sec. 4.10, eq. (4.70)).
+  END_DOC
   integer                        :: i,k
   double precision               :: cisdq(N_states), delta_e
   double precision,external      :: diag_h_mat_elem
@@ -68,6 +80,7 @@ subroutine run
 
   do i = 1,N_states
     k = maxloc(dabs(psi_coef_sorted(1:N_det,i)),dim=1)
+    ! delta_E: energy of state i minus the diagonal H element of k
     delta_E  = CI_electronic_energy(i) - diag_h_mat_elem(psi_det_sorted(1,1,k),N_int)
     if (elec_alpha_num + elec_beta_num >= 4) then
       cisdq(i) = CI_energy(i) + delta_E * (1.d0 - psi_coef_sorted(k,i)**2)

@@ -96,8 +96,6 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth_v0, (mo_num, mo_num, 
     print*,' Providing aba_contraction_v0 ...'
     call wall_time(wall0)
 
-    call set_multiple_levels_omp(.false.)
-
     !$OMP PARALLEL                                                                         &
     !$OMP DEFAULT (NONE)                                                                   &
     !$OMP PRIVATE (ipoint, h1, p1, h2, p2, i, ii,                                          &
@@ -222,7 +220,6 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth_v0, (mo_num, mo_num, 
     ! purely open-shell part 
     if(Ne(2) < Ne(1)) then
 
-      call set_multiple_levels_omp(.false.)
 
       !$OMP PARALLEL                                                                         &
       !$OMP DEFAULT (NONE)                                                                   &
@@ -355,7 +352,6 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth_v0, (mo_num, mo_num, 
     print*,' Providing aab_contraction_v0 ...'
     call wall_time(wall0)
 
-    call set_multiple_levels_omp(.false.)
 
     !$OMP PARALLEL                                                                         &
     !$OMP DEFAULT (NONE)                                                                   &
@@ -521,7 +517,6 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth_v0, (mo_num, mo_num, 
       print*,' Providing aaa_contraction_v0 ...'
       call wall_time(wall0)
 
-      call set_multiple_levels_omp(.false.)
 
       !$OMP PARALLEL                                                                         &
       !$OMP DEFAULT (NONE)                                                                   &
@@ -738,7 +733,6 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth_v0, (mo_num, mo_num, 
       ! purely open-shell part 
       if(Ne(2) < Ne(1)) then
 
-        call set_multiple_levels_omp(.false.)
 
         !$OMP PARALLEL                                                                         &
         !$OMP DEFAULT (NONE)                                                                   &

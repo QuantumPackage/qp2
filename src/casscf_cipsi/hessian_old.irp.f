@@ -2,8 +2,8 @@
 use bitmasks
 BEGIN_PROVIDER [real*8, hessmat_old, (nMonoEx,nMonoEx)]
   BEGIN_DOC
-  ! calculate the orbital hessian 2 <Psi| E_pq H E_rs |Psi>
-  ! + <Psi| E_pq E_rs H |Psi> + <Psi| E_rs E_pq H |Psi> by hand,
+  ! calculate the orbital hessian 2 <Psi\| E_pq H E_rs \|Psi>
+  ! + <Psi\| E_pq E_rs H \|Psi> + <Psi\| E_rs E_pq H \|Psi> by hand,
   ! determinant per determinant, as for the gradient
   !
   ! we assume that we have natural active orbitals
@@ -44,8 +44,8 @@ END_PROVIDER
 subroutine calc_hess_elem(ihole,ipart,jhole,jpart,res)
   BEGIN_DOC
   ! eq 19 of Siegbahn et al, Physica Scripta 1980
-  ! we calculate  2 <Psi| E_pq H E_rs |Psi>
-  !  + <Psi| E_pq E_rs H |Psi> + <Psi| E_rs E_pq H |Psi>
+  ! we calculate  2 <Psi\| E_pq H E_rs \|Psi>
+  ! + <Psi\| E_pq E_rs H \|Psi> + <Psi\| E_rs E_pq H \|Psi>
   ! average over all states is performed.
   ! no transition between states.
   END_DOC

@@ -9,14 +9,20 @@ program print_energy
  read_wf = .True.
  touch read_wf
  PROVIDE N_states
+ PROVIDE all_mo_integrals HF_energy
  call run
 end
 
 subroutine run
  implicit none
+ BEGIN_DOC
+ ! Prints the molecular properties and the energy components
+ ! of the states, then the Hartree-Fock energy HF_energy and
+ ! the CI energy psi_energy + nuclear_repulsion for each state.
+ END_DOC
   call print_mol_properties
   call print_energy_components
-! print *, 'E(HF) = ', HF_energy
+ print *, 'E(HF) = ', HF_energy
  print *, 'E(CI) = ', psi_energy + nuclear_repulsion
 ! print *, ''
 ! print *, 'E_kin(CI) = ', ref_bitmask_kinetic_energy

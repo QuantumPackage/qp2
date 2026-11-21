@@ -1,4 +1,12 @@
 subroutine first_hessian_list_opt(tmp_n,m,list,H,h_tmpr)
+  BEGIN_DOC
+  ! Hessian of the energy with respect to orbital rotations,
+  ! restricted to the m orbitals given by list.
+  ! Original implementation; the debug program
+  ! debug_hessian_list_opt compares it with hessian_list_opt.
+  ! H is the n by n hessian, n is m*(m-1)/2, indexed by the pairs
+  ! (p,q) and (r,s) with p < q, r < s; h_tmpr is the 4D hessian.
+  END_DOC
 
   include 'constants.h' 
 

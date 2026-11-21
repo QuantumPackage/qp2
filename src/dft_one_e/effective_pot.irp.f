@@ -32,11 +32,19 @@ END_PROVIDER
 
  BEGIN_PROVIDER [double precision, ref_vhxc]
  implicit none
+ BEGIN_DOC
+ ! Sums effective_one_e_potential(i,i,1) (state 1) with weight 2
+ ! for the beta electrons (i = 1..elec_beta_num) and weight 1 for
+ ! the unpaired alpha electrons (i =
+ ! elec_beta_num+1..elec_alpha_num). The second loop originally
+ ! had an empty range (bug, author-fixed 2026-10-31); the code
+ ! assumes elec_alpha_num >= elec_beta_num.
+ END_DOC
  integer :: i
  do i = 1, elec_beta_num
   ref_vhxc += effective_one_e_potential(i,i,1)*2.d0
  enddo
- do i = elec_beta_num+1, elec_beta_num
+ do i = elec_beta_num+1, elec_alpha_num
   ref_vhxc += effective_one_e_potential(i,i,1)*1.d0
  enddo
  END_PROVIDER 

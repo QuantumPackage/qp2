@@ -1,5 +1,11 @@
 BEGIN_PROVIDER [integer, list_couple_hf_orb_r1, (2,n_couple_orb_r1)]
  implicit none
+ BEGIN_DOC
+ ! Couples (i,m): i an occupied alpha valence orbital of
+ ! list_valence_orb_for_hf(:,1), m an orbital of list_basis.
+ ! First index: 1 is i, 2 is m; second index: couple number
+ ! (1..n_couple_orb_r1).
+ END_DOC
  integer :: ii,i,mm,m,itmp
  itmp = 0
   do ii = 1, n_occ_val_orb_for_hf(1)
@@ -16,6 +22,12 @@ END_PROVIDER
 
 BEGIN_PROVIDER [integer, list_couple_hf_orb_r2, (2,n_couple_orb_r2)]
  implicit none
+ BEGIN_DOC
+ ! Couples (i,m): i an occupied beta valence orbital of
+ ! list_valence_orb_for_hf(:,2), m an orbital of list_basis.
+ ! First index: 1 is i, 2 is m; second index: couple number
+ ! (1..n_couple_orb_r2).
+ END_DOC
  integer :: ii,i,mm,m,itmp
  itmp = 0
   do ii = 1, n_occ_val_orb_for_hf(2)
@@ -138,6 +150,14 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, f_hf_cholesky, (n_points_final_grid)]
  implicit none
+ BEGIN_DOC
+ ! f(R) for an HF wave function, evaluated with the Cholesky
+ ! decomposition of the two-electron integrals:
+ ! $f(R) = 2 \sum_A V_{A R}^2$, $V_{A R} = \sum_I \Phi_I(R) V_{A I}$,
+ ! $\Phi_I(R) = \phi_i(R) \phi_b(R)$, i an occupied alpha valence
+ ! orbital, b in list_basis, R the grid point index. If the alpha
+ ! and beta electron numbers differ: $f(R) = 2 \sum_A V^1_{A R} V^2_{A R}$.
+ END_DOC
  integer :: ipoint,m,k
  !!f(R) =  \sum_{I} \sum_{J} Phi_I(R) Phi_J(R) V_IJ
  !!     =  \sum_{I}\sum_{J}\sum_A Phi_I(R) Phi_J(R) V_AI V_AJ
@@ -191,6 +211,22 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, f_hf_cholesky_sparse, (n_points_final_grid)]
  implicit none
+ BEGIN_DOC
+ ! f(R) for an HF wave function, same expression as f_hf_cholesky
+ ! when the alpha and beta electron numbers are equal. The couple
+ ! (i,b) is skipped if |phi_i(R)| < sqrt(100*ao_cholesky_threshold)
+ ! or |phi_i(R)*phi_b(R)| < 100*ao_cholesky_threshold.
+ ! The factor 100 (and its sqrt) applied to
+ ! ao_cholesky_threshold comes from empirical measurements
+ ! (author, 2026-10-31).
+ ! The open-shell branch differs from f_hf_cholesky: the sparse
+ ! branch computes 2 sum_A V2_A (V2_A + V_delta_A), with V_delta
+ ! the sum over the alpha orbitals beyond the first n_occ(2),
+ ! instead of the dense 2 sum_A V1_A V2_A; the two agree if the
+ ! first n_occ(2) alpha valence orbitals are the beta valence
+ ! orbitals, which is the usual case in QP2 because there is no
+ ! UHF (author, 2026-10-31).
+ END_DOC
  integer :: ipoint,m,mm,i,ii,p
  !!f(R) =  \sum_{I} \sum_{J} Phi_I(R) Phi_J(R) V_IJ
  !!     =  \sum_{I}\sum_{J}\sum_A Phi_I(R) Phi_J(R) V_AI V_AJ
@@ -291,6 +327,14 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, f_hf_cholesky_sparse_bis, (n_points_final_grid)]
  implicit none
+ BEGIN_DOC
+ ! Alternative implementation of f_hf_cholesky_sparse, compared
+ ! against it by the subroutine test of program test_proj_op.
+ ! When the alpha and beta electron numbers are equal, the loop
+ ! runs over the AOs (1..ao_num) and uses cholesky_semi_mo_transp_simple
+ ! instead of cholesky_mo_transp; otherwise the code is identical
+ ! to the one of f_hf_cholesky_sparse.
+ END_DOC
  integer :: ipoint,m,mm,i,ii,p
  !!f(R) =  \sum_{I} \sum_{J} Phi_I(R) Phi_J(R) V_IJ
  !!     =  \sum_{I}\sum_{J}\sum_A Phi_I(R) Phi_J(R) V_AI V_AJ
@@ -391,6 +435,13 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, on_top_hf_grid, (n_points_final_grid)]
  implicit none
+ BEGIN_DOC
+ ! 2 * (sum of phi_i(R)^2 over the occupied alpha valence orbitals)
+ ! * (sum of phi_j(R)^2 over the occupied beta valence orbitals),
+ ! i, j in list_valence_orb_for_hf(:,1), list_valence_orb_for_hf(:,2).
+ ! Index: grid point (1..n_points_final_grid).
+ ! Used by mu_of_r_hf and mu_of_r_hf_sparse.
+ END_DOC
  integer :: ipoint,i,ii
  double precision :: dm_a, dm_b,wall0,wall1
  print*,'providing on_top_hf_grid ...'

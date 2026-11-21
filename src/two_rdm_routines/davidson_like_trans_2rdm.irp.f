@@ -81,11 +81,11 @@ subroutine orb_range_2_trans_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb
    use omp_lib
    implicit none
    BEGIN_DOC
-   ! Computes the two trans_rdm for the N_st vectors |u_t>
+   ! Computes the two trans_rdm for the N_st vectors \|u_t>
    ! if ispin == 1 :: alpha/alpha 2trans_rdm
-   !          == 2 :: beta /beta  2trans_rdm
-   !          == 3 :: alpha/beta  2trans_rdm
-   !          == 4 :: spin traced 2trans_rdm :: aa + bb + 0.5 (ab + ba))
+   ! if ispin == 2 :: beta /beta  2trans_rdm
+   ! if ispin == 3 :: alpha/beta  2trans_rdm
+   ! if ispin == 4 :: spin traced 2trans_rdm :: aa + bb + 0.5 (ab + ba))
    ! The 2trans_rdm will be computed only on the list of orbitals list_orb, which contains norb
    ! Default should be 1,N_det,0,1 for istart,iend,ishift,istep
    END_DOC
@@ -206,9 +206,9 @@ subroutine orb_range_2_trans_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb
      tmp_det(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
 
      if (kcol /= kcol_prev) then
-       call get_all_spin_singles_$N_int(                             &
-           psi_det_beta_unique, idx0,                                &
-           tmp_det(1,2), N_det_beta_unique,                          &
+       call get_all_spin_singles(                  &
+           psi_det_beta_unique, idx0,              &
+           tmp_det(1,2), N_int, N_det_beta_unique, &
            singles_b, n_singles_b)
      endif
      kcol_prev = kcol
@@ -236,8 +236,8 @@ subroutine orb_range_2_trans_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb
        enddo
        j = j-1
 
-       call get_all_spin_singles_$N_int(                             &
-           buffer, idx, tmp_det(1,1), j,                             &
+       call get_all_spin_singles(               &
+           buffer, idx, tmp_det(1,1), N_int, j, &
            singles_a, n_singles_a )
 
        ! Loop over alpha singles
@@ -327,8 +327,8 @@ subroutine orb_range_2_trans_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb
      enddo
      i = i-1
 
-     call get_all_spin_singles_and_doubles_$N_int(                   &
-         buffer, idx, spindet, i,                                    &
+     call get_all_spin_singles_and_doubles( &
+         buffer, idx, spindet, N_int, i,    &
          singles_a, doubles, n_singles_a, n_doubles )
 
      ! Compute Hij for all alpha singles
@@ -432,8 +432,8 @@ subroutine orb_range_2_trans_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb
      enddo
      i = i-1
 
-     call get_all_spin_singles_and_doubles_$N_int(                   &
-         buffer, idx, spindet, i,                                    &
+     call get_all_spin_singles_and_doubles( &
+         buffer, idx, spindet, N_int, i,    &
          singles_b, doubles, n_singles_b, n_doubles )
 
      ! Compute Hij for all beta singles
@@ -554,6 +554,14 @@ end
 subroutine update_keys_values_n_states_trans(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
  use omp_lib
  implicit none
+ BEGIN_DOC
+ ! Adds the buffered contributions to the transition
+ ! two-rdm big_array: keys(1:4,i) gives the orbital
+ ! indices (h1,h2,p1,p2) of the element, and
+ ! values(istate,jstate,i) is added to
+ ! big_array(h1,h2,p1,p2,istate,jstate) for all pairs of
+ ! states, under the OpenMP lock lock_2rdm.
+ END_DOC
  integer, intent(in) :: n_st,nkeys,dim1
  integer, intent(in) :: keys(4,nkeys)
  double precision, intent(in) :: values(n_st,n_st,nkeys)

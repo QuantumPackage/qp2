@@ -2,6 +2,14 @@ subroutine run_selection_slave(thread,iproc,energy)
   use f77_zmq
   use selection_types
   implicit none
+  BEGIN_DOC
+! Slave of the CIPSI determinant selection: for each task received
+! from the task server, select_connected accumulates the PT2
+! contribution of the excitations of one generator determinant and
+! fills the local selection buffer, which is sent to the master
+! with push_selection_results after each task.
+! thread: 1 uses in-process (inproc) ZeroMQ sockets, 0 uses TCP.
+  END_DOC
 
   double precision, intent(in)    :: energy(N_states)
   integer,  intent(in)            :: thread, iproc
@@ -126,6 +134,13 @@ subroutine push_selection_results(zmq_socket_push, pt2_data, b, task_id, ntasks)
   use f77_zmq
   use selection_types
   implicit none
+  BEGIN_DOC
+! Sends to the master, over a ZeroMQ socket, the partial PT2 data
+! of the slave (the serialized pt2_data) and the content of the
+! selection buffer b (b%cur, and b%val and b%det when b%cur > 0),
+! followed by ntasks and the task_id list.
+! When the socket is a REQ, waits for the 'ok' reply.
+  END_DOC
 
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_push
   type(pt2_type), intent(in)     :: pt2_data
@@ -195,6 +210,13 @@ subroutine pull_selection_results(zmq_socket_pull, pt2_data, val, det, N, task_i
   use f77_zmq
   use selection_types
   implicit none
+  BEGIN_DOC
+! Master-side counterpart of push_selection_results: receives the
+! partial PT2 data of a slave (deserialized into pt2_data) and
+! the content of its selection buffer (N, and val and det when
+! N > 0), followed by ntasks and the task_id list.
+! When the socket is a REP, replies 'ok'.
+  END_DOC
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_pull
   type(pt2_type), intent(inout) :: pt2_data
   double precision, intent(out) :: val(*)

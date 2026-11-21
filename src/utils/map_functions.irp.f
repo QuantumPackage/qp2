@@ -2,6 +2,14 @@ subroutine map_save_to_disk(filename,map)
   use map_module
   use mmap_module
   implicit none
+  BEGIN_DOC
+  ! Consolidates the map and writes it to disk. After sorting each
+  ! block by key, the keys and values of all blocks are copied into
+  ! three new files (filename//'_consolidated_idx', '_key',
+  ! '_value') mapped with mmap, and the block arrays become views
+  ! into them. The map is left in the consolidated state. Stops if
+  ! the map is empty or already consolidated.
+  END_DOC
   character*(*), intent(in)      :: filename
   type(map_type), intent(inout)  :: map
   type(c_ptr)                    :: c_pointer(3)
@@ -71,6 +79,13 @@ subroutine map_load_from_disk(filename,map)
   use map_module
   use mmap_module
   implicit none
+  BEGIN_DOC
+  ! Loads a consolidated map from the three files written by
+  ! map_save_to_disk: the files are mapped read only with mmap and
+  ! the key and value arrays of each block become views into them.
+  ! The map is left in the consolidated state; the run stops if it
+  ! is already consolidated or if a key < 0 or a value > 1.e30.
+  END_DOC
   character*(*), intent(in)      :: filename
   type(map_type), intent(inout)  :: map
   double precision               :: x

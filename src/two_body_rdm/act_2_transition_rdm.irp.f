@@ -3,7 +3,7 @@
  BEGIN_DOC
 ! act_2_rdm_trans_spin_trace_mo(i,j,k,l,istate,jstate) =  STATE SPECIFIC physicist notation for 2rdm_trans 
 ! 
-! \sum_{\sigma,\sigma'}<Psi_{istate}| a^{\dagger}_{i \sigma} a^{\dagger}_{j \sigma'} a_{l \sigma'} a_{k \sigma} |Psi_{jstate}>
+! \sum_{\sigma,\sigma'}<Psi_{istate}\| a^{\dagger}_{i \sigma} a^{\dagger}_{j \sigma'} a_{l \sigma'} a_{k \sigma} \|Psi_{jstate}>
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !

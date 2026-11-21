@@ -37,28 +37,26 @@ Now all the requirements are met, you can compile the programs using
    make
 
 
-Installation of dependencies via a Conda environment
-====================================================
+.. note::
 
-.. code:: bash
-
-  conda env create -f qp2.yml
-￼￼
+   No Conda environment is needed. The easiest way to install the external
+   dependencies is to let :command:`configure` do it for you, see
+   "Help for installing external dependencies" below.
 
 
 Requirements
 ============
 
 - Linux OS
-- Fortran compiler : GNU Fortran, Intel Fortran or IBM XL Fortran
+- Fortran compiler : GNU Fortran, Intel Fortran, NVIDIA Fortran or LLVM flang
 - `GNU make`_
-- `Autoconf`_
 - `Python`_ > 3.7
 - |IRPF90| : Fortran code generator
 - |EZFIO| : Easy Fortran Input/Output library generator
 - |BLAS| and |LAPACK|
+- cmake
+- TREXIO : library to import and export TREXIO format files
 - `Zlib`_
-- `GNU Patch`_
 - |ZeroMQ| : networking library
 - `GMP <https://gmplib.org/>`_ : Gnu Multiple Precision Arithmetic Library
 - |OCaml| compiler with |OPAM| package manager
@@ -66,22 +64,16 @@ Requirements
 - |pkg-config| : a tool which returns information about installed libraries
 
 
-When all the dependencies have been installed, go into the :file:`config`
-directory, and copy the configuration file that corresponds to your
-architecture. Modify it if needed, and run :command:`configure` with
-:option:`configure -c`.
+When all the dependencies have been installed, pick in the :file:`config`
+directory the configuration file that corresponds to your machine, copy
+it to a new file, modify the copy, and run :command:`configure` with the
+:file:`-c` option. The configuration files, and the choice for each
+machine, are detailed on the :ref:`configure` page.
 
 .. code:: bash
 
-   cp ./config/gfortran.example config/gfortran_avx.cfg
-   ./configure -c config/gfortran_avx.cfg
-
-
-.. note::
-
-   The ``popcnt`` instruction accelerates *a lot* the programs, so the
-   SSE4.2, AVX or AVX2 instruction sets should be enabled in the
-   configuration file if possible.
+   cp config/gfortran.cfg config/gfortran_mybox.cfg
+   ./configure -c config/gfortran_mybox.cfg
 
 
 Help for installing external dependencies
@@ -99,6 +91,7 @@ The command is to be used as follows:
 
 The following packages are supported by the :command:`configure` installer:
 
+* zlib
 * ninja
 * zeromq
 * f77zmq
@@ -107,7 +100,9 @@ The following packages are supported by the :command:`configure` installer:
 * docopt
 * resultsFile
 * bats
-* zlib
+* trexio
+* simple_gpu
+* bse (adds the Basis Set Exchange CLI)
 
 Example:
 
@@ -146,7 +141,7 @@ IRPF90
 *IRPF90* is a Fortran code generator for programming using the Implicit Reference
 to Parameters (IRP) method.
 
-If you have *pip* for Python2, you can do
+If you have *pip* for Python3, you can do
 
 .. code:: bash
 
@@ -154,8 +149,8 @@ If you have *pip* for Python2, you can do
 
 Otherwise,
 
-* Download the latest version of IRPF90
-  here : `<https://gitlab.com/scemama/irpf90/-/archive/v1.7.2/irpf90-v1.7.2.tar.gz>`_ and move
+* Download the latest version of IRPF90 (v2.2.0)
+  here : `<https://gitlab.com/scemama/irpf90/-/archive/v2.2.0/irpf90-v2.2.0.tar.gz>`_ and move
   the downloaded archive in the :file:`${QP_ROOT}/external` directory
 
 * Extract the archive and go into the :file:`irpf90-*` directory to run
@@ -298,18 +293,19 @@ OCaml
   use it as an answer to where :command:`opam` should be installed.
 
 
-* Install the OCaml compiler
+* Install the OCaml compiler (the prebuilt opam pack installed by
+  :command:`configure -i ocaml` ships 4.14.1):
 
   .. code:: bash
 
-      opam init --comp=4.11.1
+      opam init --comp=4.14.1
       eval `${QP_ROOT}/bin/opam env`
 
   If the installation fails because of bwrap, you can initialize opam using:
 
   .. code:: bash
 
-      opam init --disable-sandboxing --comp=4.11.1
+      opam init --disable-sandboxing --comp=4.14.1
       eval `${QP_ROOT}/bin/opam env`
 
 * Install the required external OCaml libraries

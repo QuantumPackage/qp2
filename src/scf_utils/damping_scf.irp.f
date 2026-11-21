@@ -1,4 +1,16 @@
 subroutine damping_SCF
+  BEGIN_DOC
+  ! Damped SCF iterations on the restricted alpha and beta density
+  ! matrices. Each step mixes the old and new densities with a
+  ! lambda from a line search: it starts at 0.5 and is halved
+  ! while the trial energy is above the current one; it is then
+  ! set from a quadratic fit of the trial energies. Stops when
+  ! the energy has decreased by less than thresh_scf or after
+  ! n_it_scf_max steps; on exit the lowest energy is stored in
+  ! the EZFIO database.
+  ! No in-tree caller; dead code (author, 2026-10-31); kept
+  ! because external plugins may use it.
+  END_DOC
   implicit none
   double precision               :: E
   double precision, allocatable  :: D_alpha(:,:), D_beta(:,:)
@@ -38,6 +50,7 @@ subroutine damping_SCF
     '====','================','================','================', '===='
 
   E = SCF_energy + 1.d0
+  ! the printed energy difference is -1, not 0, on the first iteration
   E_min = SCF_energy
   delta_D = 0.d0
   do k=1,n_it_scf_max
@@ -107,6 +120,7 @@ subroutine damping_SCF
 
     a = (E_new + E - 2.d0*E_half)*2.d0
     b = -E_new - 3.d0*E + 4.d0*E_half
+    ! a = 0 when E_half = (E + E_new)/2; 1.d-16 guards the division
     lambda = -lambda*b/(a+1.d-16)
     D_alpha = (1.d0-lambda) * D_alpha + lambda * D_new_alpha
     D_beta  = (1.d0-lambda) * D_beta  + lambda * D_new_beta

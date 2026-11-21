@@ -19,6 +19,13 @@
 
 
 subroutine diagonalization_hessian(n,H,e_val,w)
+  BEGIN_DOC
+  ! Diagonalization of the n by n hessian H of the energy with
+  ! respect to orbital rotations. For optimization_method ==
+  ! 'full', LAPACK dsyev is used; for 'diag', the diagonal elements
+  ! are sorted and w is the corresponding permutation matrix.
+  ! e_val receives the eigenvalues and w the eigenvectors.
+  END_DOC
 
   include 'constants.h'
 

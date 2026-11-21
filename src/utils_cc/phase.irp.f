@@ -2,6 +2,13 @@
 
 subroutine get_phase_general(det1,det2,phase,degree,Nint)
   implicit none
+  BEGIN_DOC
+  ! Phase and degree of the excitation that maps det1 onto det2.
+  ! Thin wrapper around get_excitation_general: the orbital lists
+  ! are discarded, only phase and degree are returned. det1 and
+  ! det2 must have the same number of electrons per spin,
+  ! otherwise the subroutine aborts.
+  END_DOC
 
   integer, intent(in)           :: Nint
   integer(bit_kind), intent(in) :: det1(Nint,2), det2(Nint,2)
@@ -23,6 +30,14 @@ subroutine get_excitation_general(det1,det2,degree,n,list_anni,list_crea,phase,N
   use bitmasks
 
   implicit none
+  BEGIN_DOC
+  ! Excitation that maps det1 onto det2. list_anni (list_crea) are
+  ! the 1-based orbital indices, increasing per spin, of the orbitals
+  ! occupied in det1 (det2) but not in det2 (det1). n and degree are
+  ! the excitation degrees per spin and total. phase is $(-1)^d$, d
+  ! the sum, per spin, of the distance between the i-th annihilation
+  ! and creation positions in the occupied lists of det1 (det2).
+  END_DOC
 
   integer, intent(in) :: Nint
   integer(bit_kind), intent(in)  :: det1(Nint,2), det2(Nint,2)

@@ -6,6 +6,14 @@
 &BEGIN_PROVIDER [real*8, ecore]
 &BEGIN_PROVIDER [real*8, ecore_bis]
    implicit none
+   BEGIN_DOC
+   ! Active-space two-electron energy: sum over active t,u,v,x
+   ! of P0tuvx(t,u,v,x)*bielec_PQxx(tt,uu,v3,x3). Also provides
+   ! eone, ecore (casscf.irp.f: energy = eone+etwo+ecore) and
+   ! the variants eone_bis, etwo_bis, etwo_ter, ecore_bis which
+   ! evaluate the integrals via bielec_PxxQ and bielecCI;
+   ! mismatches are printed with the tag "aie: ".
+   END_DOC
    integer                        :: t,u,v,x,i,ii,tt,uu,vv,xx,j,jj,t3,u3,v3,x3
    real*8                         :: e_one_all,e_two_all
    double precision :: bielec_PQxx,bielec_PxxQ

@@ -1,4 +1,4 @@
-program basis_corr_su_pbe_ot
+program print_su_pbe_ot
   implicit none
   BEGIN_DOC
 ! TODO : Put the documentation of the program here
@@ -11,11 +11,11 @@ program basis_corr_su_pbe_ot
    provide ao_two_e_integrals_in_map
   endif
   provide mo_two_e_integrals_in_map
-  call print_su_pbe_ot
+  call print_su_pbe_ot_subroutine
  
 end
 
-subroutine print_su_pbe_ot
+subroutine print_su_pbe_ot_subroutine
  implicit none
  integer :: istate 
  print*,'Two flavours of PBE functionals :'

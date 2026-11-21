@@ -3,7 +3,7 @@ subroutine get_excitation_general(key_i,key_j, Nint,degree_array,holes_array, pa
  BEGIN_DOC
 ! returns the array, for each spin, of holes/particles between key_i and key_j 
 !
-! with the following convention: a^+_{particle} a_{hole}|key_i> = |key_j>
+! with the following convention: a^+_{particle} a_{hole}\|key_i> = \|key_j>
  END_DOC
   include 'utils/constants.include.F'
  implicit none
@@ -94,7 +94,7 @@ subroutine get_holes_general(key_i, key_j,Nint, holes_array)
  BEGIN_DOC
 ! returns the array, per spin, of holes between key_i and key_j 
 !
-! with the following convention: a_{hole}|key_i> --> |key_j>
+! with the following convention: a_{hole}\|key_i> --> \|key_j>
  END_DOC
  implicit none
  integer, intent(in)            :: Nint
@@ -128,7 +128,7 @@ subroutine get_particles_general(key_i, key_j,Nint,particles_array)
  BEGIN_DOC
 ! returns the array, per spin, of particles between key_i and key_j 
 !
-! with the following convention: a^dagger_{particle}|key_i> --> |key_j>
+! with the following convention: a^dagger_{particle}\|key_i> --> \|key_j>
  END_DOC
  implicit none
  integer, intent(in)            :: Nint
@@ -162,6 +162,15 @@ end
 
 subroutine get_phase_general(key_i,Nint,degree, holes_array, particles_array,phase)
  implicit none
+ BEGIN_DOC
+ ! Computes the phase of the excitation obtained by applying,
+ ! successively to the determinant key_i, the single
+ ! excitations holes_array(i,ispin) ->
+ ! particles_array(i,ispin) (i = 1..degree(ispin), ispin =
+ ! 1,2), with the convention a^{dagger}_{particle}
+ ! a_{hole} | key_i > = | key_j > of get_excitation_general.
+ ! phase is the resulting fermionic phase.
+ END_DOC
  integer, intent(in)            :: degree(2), Nint
  integer(bit_kind), intent(in)  :: key_i(Nint,2)
  integer, intent(in)            :: holes_array(100,2),particles_array(100,2)

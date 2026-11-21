@@ -311,9 +311,9 @@ compute_singles=.True.
     if (kcol /= kcol_prev) then
       tmp_det(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
       if (compute_singles) then
-        call get_all_spin_singles_$N_int(                              &
+        call get_all_spin_singles(                              &
             psi_det_beta_unique, idx0,                                 &
-            tmp_det(1,2), N_det_beta_unique,                           &
+            tmp_det(1,2), $N_int, N_det_beta_unique,                           &
             singles_b, n_singles_b)
       else
         n_singles_b = 0
@@ -371,8 +371,8 @@ compute_singles=.True.
 
         ! Get all single excitations from tmp_det(1,1) to buffer(1,?)
 
-        call get_all_spin_singles_$N_int(                              &
-            buffer, idx, tmp_det(1,1), j,                              &
+        call get_all_spin_singles(                              &
+            buffer, idx, tmp_det(1,1), $N_int, j,                              &
             singles_a, n_singles_a )
 
       ! Loop over alpha singles
@@ -479,8 +479,8 @@ compute_singles=.True.
     enddo
     i = i-1
 
-    call get_all_spin_singles_and_doubles_$N_int(                    &
-        buffer, idx, spindet, i,                                     &
+    call get_all_spin_singles_and_doubles(                    &
+        buffer, idx, spindet, $N_int, i,                                     &
         singles_a, doubles, n_singles_a, n_doubles )
 
     ! Compute Hij for all alpha singles
@@ -626,8 +626,8 @@ compute_singles=.True.
     enddo
     i = i-1
 
-    call get_all_spin_singles_and_doubles_$N_int(                    &
-        buffer, idx, spindet, i,                                     &
+    call get_all_spin_singles_and_doubles(                    &
+        buffer, idx, spindet, $N_int, i,                                     &
         singles_b, doubles, n_singles_b, n_doubles )
 
     ! Compute Hij for all beta singles

@@ -10,8 +10,16 @@ BEGIN_PROVIDER [ double precision, mo_one_e_integrals,(mo_num,mo_num)]
   IF (read_mo_one_e_integrals) THEN
         call ezfio_get_mo_one_e_ints_mo_one_e_integrals(mo_one_e_integrals)
   ELSE
-      mo_one_e_integrals  = mo_integrals_n_e + mo_kinetic_integrals
-
+      IF (read_ao_one_e_integrals) THEN
+        call ao_to_mo(                                                &
+            ao_one_e_integrals,                                       &
+            size(ao_one_e_integrals,1),                               &
+            mo_one_e_integrals,                                       &
+            size(mo_one_e_integrals,1)                                &
+            )
+      ELSE
+        mo_one_e_integrals  = mo_integrals_n_e + mo_kinetic_integrals
+      ENDIF
   ENDIF
 
   IF (write_mo_one_e_integrals) THEN

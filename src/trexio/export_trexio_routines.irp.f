@@ -1,9 +1,14 @@
-subroutine export_trexio(update,full_path)
+subroutine export_trexio_subroutine(update,full_path)
   use trexio
   implicit none
-  BEGIN_DOC
-  !     Exports the wave function in TREXIO format
-  END_DOC
+   BEGIN_DOC
+   ! Writes the wave function and, per the export_*
+   ! providers, the basis, MOs, integrals and density
+   ! matrices to one TREXIO file per state, the first
+   ! named by trexio_filename. With update, existing
+   ! files are opened for update instead of rewritten;
+   ! full_path makes the path absolute.
+   END_DOC
 
   logical, intent(in)            :: update, full_path
   integer(trexio_t), allocatable :: f(:) ! TREXIO file handle
@@ -129,11 +134,15 @@ subroutine export_trexio(update,full_path)
 
   print *, 'Electrons'
 
-  rc = trexio_write_electron_up_num(f(1), elec_alpha_num)
-  call trexio_assert(rc, TREXIO_SUCCESS)
-
-  rc = trexio_write_electron_dn_num(f(1), elec_beta_num)
-  call trexio_assert(rc, TREXIO_SUCCESS)
+  ! TREXIO >= 2.6.0 validates every determinant written to a file against
+  ! that file's own electron_up_num/electron_dn_num attributes, so these
+  ! must be written to every state file, not just f(1).
+  do k=1,N_states
+    rc = trexio_write_electron_up_num(f(k), elec_alpha_num)
+    call trexio_assert(rc, TREXIO_SUCCESS)
+    rc = trexio_write_electron_dn_num(f(k), elec_beta_num)
+    call trexio_assert(rc, TREXIO_SUCCESS)
+  enddo
 
 
 ! Nuclei
@@ -257,14 +266,14 @@ subroutine export_trexio(update,full_path)
   endif
 
 
-  if (export_basis) then
+  if (export_basis.or. trim(basis_type) /= 'None') then
 
 ! Basis
 ! -----
 
     print *, 'Basis'
 
-    rc = trexio_write_basis_type(f(1), 'Gaussian', len('Gaussian'))
+    rc = trexio_write_basis_type(f(1), basis_type, len(trim(basis_type)))
     call trexio_assert(rc, TREXIO_SUCCESS)
 
     rc = trexio_write_basis_prim_num(f(1), prim_num)
@@ -296,7 +305,39 @@ subroutine export_trexio(update,full_path)
     call trexio_assert(rc, TREXIO_SUCCESS)
 
     allocate(factor(prim_num))
-    if (primitives_normalized) then
+    if (use_cgtos) then
+      ! cGTO AOs:  chi = poly sum_k c_k n_k [ g_k + g_k^* ] = poly sum_k c_k (2 n_k) exp(-a_k r^2) cos(b_k r^2)
+      ! with g_k = exp(-(a_k + i b_k) r^2).  This is the TREXIO oscillating Gaussian of kind "Cos2"
+      ! with oscillation_arg = b_k and prim_factor = 2 n_k (n_k of the first AO of the shell; the
+      ! other Cartesian components are handled by ao_normalization).
+      double precision, allocatable :: osc_arg(:)
+      integer :: s_prev, j_in_shell, l_first
+      if (use_pw .or. (maxval(dabs(ao_expo_phase)) > 0.d0)) then
+        print *, 'Warning: plane-wave / phase parts of the cGTOs cannot be exported to TREXIO'
+      endif
+      allocate(osc_arg(prim_num))
+      s_prev = -1
+      j_in_shell = 0
+      do i = 1, prim_num
+        if (shell_index(i) /= s_prev) then
+          s_prev = shell_index(i)
+          j_in_shell = 0
+        endif
+        j_in_shell += 1
+        l_first = ao_first_of_shell(shell_index(i))
+        osc_arg(i) = ao_expo_im(l_first,j_in_shell)
+        if (primitives_normalized .and. (ao_coef(l_first,j_in_shell) /= 0.d0)) then
+          factor(i) = 2.d0 * ao_coef_norm_cgtos(l_first,j_in_shell) / ao_coef(l_first,j_in_shell)
+        else
+          factor(i) = 2.d0
+        endif
+      enddo
+      rc = trexio_write_basis_oscillation_kind(f(1), 'Cos2', 4)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+      rc = trexio_write_basis_oscillation_arg(f(1), osc_arg)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+      deallocate(osc_arg)
+    else if (primitives_normalized) then
       factor(1:prim_num) = prim_normalization_factor(1:prim_num)
     else
       factor(1:prim_num) = 1.d0
@@ -304,6 +345,12 @@ subroutine export_trexio(update,full_path)
 
     rc = trexio_write_basis_prim_factor(f(1), factor)
     call trexio_assert(rc, TREXIO_SUCCESS)
+
+    if (trim(basis_type) == 'Slater') then
+      rc = trexio_write_basis_r_power(f(1), slater_r_power)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+    endif
+
     deallocate(factor)
 
 
@@ -311,6 +358,7 @@ subroutine export_trexio(update,full_path)
 ! ---------------
 
     print *, 'AOs'
+
 
     if (export_cartesian) then
       rc = trexio_write_ao_cartesian(f(1), 1)
@@ -322,20 +370,33 @@ subroutine export_trexio(update,full_path)
       rc = trexio_write_ao_shell(f(1), ao_shell)
       call trexio_assert(rc, TREXIO_SUCCESS)
 
-      if (ezfio_convention >= 20250211) then
-        rc = trexio_write_ao_normalization(f(1), ao_coef_normalization_factor)
-      else
+!      if (trim(basis_type) /= 'Slater') then
 
-        allocate(factor(ao_num))
-        do i=1,ao_num
-          l = ao_first_of_shell(ao_shell(i))
-          factor(i) = (ao_coef_normalized(i,1)+tiny(1.d0))/(ao_coef_normalized(l,1)+tiny(1.d0))
-        enddo
-        rc = trexio_write_ao_normalization(f(1), factor)
-        deallocate(factor)
-      endif
+        if (use_cgtos) then
+          ! ratio of the cGTO primitive normalizations of a Cartesian component to the first
+          ! component of the shell (independent of the exponent, so taken on the first primitive)
+          allocate(factor(ao_num))
+          do i=1,ao_num
+            l = ao_first_of_shell(ao_shell(i))
+            factor(i) = (ao_coef_norm_cgtos(i,1)+tiny(1.d0))/(ao_coef_norm_cgtos(l,1)+tiny(1.d0))
+          enddo
+          rc = trexio_write_ao_normalization(f(1), factor)
+          deallocate(factor)
+        else if (ezfio_convention >= 20250211) then
+          rc = trexio_write_ao_normalization(f(1), ao_coef_normalization_factor)
+        else
 
-      call trexio_assert(rc, TREXIO_SUCCESS)
+          allocate(factor(ao_num))
+          do i=1,ao_num
+            l = ao_first_of_shell(ao_shell(i))
+            factor(i) = (ao_coef_normalized(i,1)+tiny(1.d0))/(ao_coef_normalized(l,1)+tiny(1.d0))
+          enddo
+          rc = trexio_write_ao_normalization(f(1), factor)
+          deallocate(factor)
+        endif
+
+        call trexio_assert(rc, TREXIO_SUCCESS)
+!      endif
 
 
     else
@@ -348,10 +409,24 @@ subroutine export_trexio(update,full_path)
       rc = trexio_write_ao_shell(f(1), ao_sphe_shell)
       call trexio_assert(rc, TREXIO_SUCCESS)
 
-      rc = trexio_write_ao_normalization(f(1), ao_sphe_coef_normalization_factor)
-      call trexio_assert(rc, TREXIO_SUCCESS)
+!      if (trim(basis_type) /= 'Slater') then
+        rc = trexio_write_ao_normalization(f(1), ao_sphe_coef_normalization_factor)
+        call trexio_assert(rc, TREXIO_SUCCESS)
+!      endif
 
     endif
+
+!    if (trim(basis_type) == 'Slater') then
+!
+!      allocate(factor(ao_num))
+!      do i=1,ao_num
+!        factor(i) = 1.d0 !/dsqrt(ao_overlap(i,i))
+!      enddo
+!      rc = trexio_write_ao_normalization(f(1), factor)
+!      call trexio_assert(rc, TREXIO_SUCCESS)
+!      deallocate(factor)
+!
+!    endif
 
   endif
 
@@ -505,6 +580,7 @@ subroutine export_trexio(update,full_path)
       call trexio_assert(rc, TREXIO_SUCCESS)
     enddo
 
+    rc = trexio_write_ao_num(f(1), ao_num)
     if (export_cartesian) then
       rc = trexio_write_mo_coefficient(f(1), mo_coef)
       call trexio_assert(rc, TREXIO_SUCCESS)
@@ -529,15 +605,17 @@ subroutine export_trexio(update,full_path)
   if (export_mo_one_e_ints) then
     print *, 'MO one-e integrals'
 
-    rc = trexio_write_mo_1e_int_kinetic(f(1),mo_kinetic_integrals)
-    call trexio_assert(rc, TREXIO_SUCCESS)
-
-    rc = trexio_write_mo_1e_int_potential_n_e(f(1),mo_integrals_n_e)
-    call trexio_assert(rc, TREXIO_SUCCESS)
-
-    if (do_pseudo) then
-      rc = trexio_write_mo_1e_int_ecp(f(1),mo_pseudo_integrals_local)
+    if (trim(basis_type) /= 'None') then
+      rc = trexio_write_mo_1e_int_kinetic(f(1),mo_kinetic_integrals)
       call trexio_assert(rc, TREXIO_SUCCESS)
+
+      rc = trexio_write_mo_1e_int_potential_n_e(f(1),mo_integrals_n_e)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+
+      if (do_pseudo) then
+        rc = trexio_write_mo_1e_int_ecp(f(1),mo_pseudo_integrals_local)
+        call trexio_assert(rc, TREXIO_SUCCESS)
+      endif
     endif
 
     rc = trexio_write_mo_1e_int_core_hamiltonian(f(1),mo_one_e_integrals)

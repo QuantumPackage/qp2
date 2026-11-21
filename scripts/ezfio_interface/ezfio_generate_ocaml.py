@@ -7,6 +7,7 @@ You can see `ezfio_generate_provider.py`
 for an example.
 """
 
+import re
 import sys
 
 # If type in **kwargs
@@ -309,6 +310,14 @@ class EZFIO_ocaml(object):
                       '  Printf.sprintf "']
 
         for p, d in zip(self.l_ezfio_name, self.l_doc):
+            # Docs are RST in the cfg, but qp edit displays them verbatim
+            # (Rst_string is the identity module), so unescape RST
+            # backslash escapes (backslash + ASCII punctuation -> the
+            # punctuation); a backslash before any other character is
+            # not an RST escape and is kept. Then escape for the OCaml
+            # string literal / printf format below.
+            d = re.sub(r'\\([\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e])', r'\1', d)
+            d = d.replace('\\', '\\\\').replace('"', '\\"').replace('%', '%%')
 
             l_template += ["{0} ::".format(d),
                            "",

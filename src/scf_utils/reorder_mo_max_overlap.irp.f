@@ -10,13 +10,13 @@
    double precision, allocatable :: mo_coef_tmp(:,:)
    double precision, allocatable :: tmp(:,:)
    allocate(overlap(mo_num,mo_num),proj(mo_num),iorder(mo_num),mo_coef_tmp(ao_num,mo_num),tmp(mo_num,ao_num))
-   
+
    overlap(:,:) = 0d0
    mo_coef_tmp(:,:) = 0d0
    proj(:) = 0d0
    iorder(:) = 0d0
    tmp(:,:) = 0d0
-   
+
    ! These matrix products compute the overlap bewteen the initial and the current MOs
    call dgemm('T','N', mo_num, ao_num, ao_num, 1.d0, &
         mo_coef_begin_iteration, size(mo_coef_begin_iteration,1), &
@@ -27,8 +27,8 @@
         tmp, size(tmp,1), &
         mo_coef, size(mo_coef, 1), 0.d0, &
         overlap, size(overlap,1) )
-   
-   
+
+
    ! for each orbital compute the best overlap
    do i = 1, mo_num
       iorder(i) = i ! initialize the iorder list as we need it to sort later
@@ -38,16 +38,18 @@
       proj(i) = dsqrt(proj(i))
    enddo
    ! sort the list of projection to find the mos with the largest overlap
+   proj = -proj
    call dsort(proj(:),iorder(:),mo_num)
+   proj = -proj
    ! reorder orbitals according to projection
    do i=1,mo_num
-      mo_coef_tmp(:,i) = mo_coef(:,iorder(mo_num+1-i)) 
+      mo_coef_tmp(:,i) = mo_coef(:,iorder(i))
    enddo
 
    ! update the orbitals
    mo_coef(:,:) =  mo_coef_tmp(:,:)
-   
-   ! if the determinant is open-shell we need to make sure that the singly occupied orbital correspond to the initial ones
+
+   ! if the determinant is open-shell we need to make sure that the singly occupied orbital corresponds to the initial ones
    if (elec_alpha_num > elec_beta_num) then
       double precision, allocatable :: overlap_alpha(:,:)
       double precision, allocatable :: proj_alpha(:)
@@ -57,7 +59,7 @@
       mo_coef_tmp(:,:) = 0d0
       proj_alpha(:) = 0d0
       iorder_alpha(:) = 0d0
-      tmp(:,:) = 0d0 
+      tmp(:,:) = 0d0
       ! These matrix products compute the overlap bewteen the initial and the current MOs
       call dgemm('T','N', mo_num, ao_num, ao_num, 1.d0, &
            mo_coef_begin_iteration, size(mo_coef_begin_iteration,1), &
@@ -76,20 +78,22 @@
          enddo
          proj_alpha(i) = dsqrt(proj_alpha(i))
       enddo
-      
+
       ! sort the list of projection to find the mos with the largest overlap
+      proj_alpha = -proj_alpha
       call dsort(proj_alpha(:),iorder_alpha(:),elec_alpha_num)
+      proj_alpha = -proj_alpha
       ! reorder orbitals according to projection
       do i=1,elec_alpha_num
-         mo_coef_tmp(:,i) = mo_coef(:,iorder_alpha(elec_alpha_num+1-i)) 
+         mo_coef_tmp(:,i) = mo_coef(:,iorder_alpha(i))
       enddo
       do i=1,elec_alpha_num
-         mo_coef(:,i) = mo_coef_tmp(:,i) 
+         mo_coef(:,i) = mo_coef_tmp(:,i)
       enddo
 
       deallocate(overlap_alpha, proj_alpha, iorder_alpha)
    endif
-   
+
    deallocate(overlap, proj, iorder, mo_coef_tmp, tmp)
 
  end

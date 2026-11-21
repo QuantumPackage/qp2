@@ -45,12 +45,18 @@ def is_plugin(path_module_rel):
 
 def get_binaries(path_module):
     """
-    Return the list of binaries
+    Return the list of (binary, program) tuples, one per `program`
+    statement in the top-level .irp.f files of the module.
+    binary is the path of the executable file (named after the .irp.f
+    file); program is the name of the `program` statement. The irpf90 man
+    pages and the doc pages are keyed by the program name, which need not
+    be the same as the file name (e.g. tools/analyze_ccsd.irp.f contains
+    'program read_t2_ccsd').
     """
     import subprocess
 
     try:
-        cmd = 'grep -l -i --regexp="^\\s*program\\s" {0}/*.irp.f'.format(path_module)
+        cmd = 'grep -H -i --regexp="^\\s*program\\s" {0}/*.irp.f'.format(path_module)
         process = subprocess.Popen([cmd],
                                    shell=True,
                                    stdout=subprocess.PIPE,
@@ -63,8 +69,15 @@ def get_binaries(path_module):
         if not stdout:
             return []
         elif "No such file or directory" not in stdout:
-            l_bin = [i.replace(".irp.f", "", 1) for i in stdout.split()]
-            return [os.path.realpath(bin_) for bin_ in l_bin]
+            l_bin = []
+            for line in stdout.splitlines():
+                fname, _, stmt = line.partition(':')
+                if fname.endswith('.irp.f'):
+                    fname = fname[:-len('.irp.f')]
+                words = stmt.split()
+                if len(words) >= 2:
+                    l_bin.append((os.path.realpath(fname), words[1]))
+            return l_bin
         else:
             return []
 
@@ -274,7 +287,7 @@ if __name__ == '__main__':
                     pass
 
             if arguments["clean"]:
-                for f in l_exe:
+                for f, _ in l_exe:
 
                     try:
                         os.remove(os.path.join(module_abs, f))

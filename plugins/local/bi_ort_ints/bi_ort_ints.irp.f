@@ -9,9 +9,9 @@ program bi_ort_ints
   implicit none
 
   my_grid_becke = .True.
-  PROVIDE tc_grid1_a tc_grid1_r
-  my_n_pt_r_grid = tc_grid1_r
-  my_n_pt_a_grid = tc_grid1_a
+  PROVIDE tc_grid2_a tc_grid2_r
+  my_n_pt_r_grid = tc_grid2_r
+  my_n_pt_a_grid = tc_grid2_a
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
 ! call test_3e
@@ -23,8 +23,63 @@ program bi_ort_ints
   !call test_5idx2
   !call test_5idx
 
-  call test_mos_in_r()
-  call test_int2_grad1_u12_bimo_t()
+!  call test_mos_in_r()
+!  call test_int2_grad2_u22_bimo_t()
+!  call test_nol_fc
+ call test_total_fc
+
+end
+
+subroutine test_nol_fc
+ implicit none
+ integer :: i,j,k,l
+ double precision :: accu
+ print*,'noL_0e_v0 = ',noL_0e_v0
+ print*,'noL_0e    = ',noL_0e   
+ accu = 0.d0
+ do i = 2, mo_num
+  do j = 2, mo_num
+   accu += dabs(noL_1e_v0(j,i) - noL_1e(j,i))
+  enddo
+ enddo
+ print*,'accu = ',accu
+ accu = 0.d0
+ do i = 2, mo_num
+  do j = 2, mo_num
+   do k = 2, mo_num
+    do l = 2, mo_num
+     accu += dabs(noL_2e_v0(l,k,j,i) - noL_2e(l,k,j,i))
+    enddo
+   enddo
+  enddo
+ enddo
+ print*,'accu = ',accu
+end
+
+subroutine test_total_fc
+ implicit none
+ integer :: i,j,k,l
+ double precision :: accu
+ logical :: is_i_in_core, core_i, core_j, core_k, core_l
+ accu = 0.d0
+ do i = 1, mo_num
+  core_i = is_i_in_core(i)
+  do j = 1, mo_num
+   core_j = is_i_in_core(j)
+   do k = 1, mo_num
+    core_k = is_i_in_core(k)
+    do l = 1, mo_num
+     core_l = is_i_in_core(l)
+     if(core_i.or.core_j.or.core_k.or.core_l)then
+      if(dabs(mo_bi_ortho_tc_two_e_chemist(l,k,j,i)).ne.0.d0)then
+       print*,'pb !! '
+       print*,i,j,k,l,mo_bi_ortho_tc_two_e_chemist(l,k,j,i)
+      endif
+     endif
+    enddo
+   enddo
+  enddo
+ enddo
 
 end
 

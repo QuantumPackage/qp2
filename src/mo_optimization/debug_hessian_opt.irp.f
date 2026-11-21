@@ -24,7 +24,15 @@
 ! | nb_error_H                        | integer          | number of errors in the 2D hessian |
 
 
-program debug_hessian
+program debug_hessian_opt
+  BEGIN_DOC
+  ! Debug program for the orbital hessian, for all mo_num orbitals
+  ! (n = mo_num*(mo_num-1)/2 rotation pairs), in the 2D and 4D
+  ! forms. For optimization_method 'full' or 'diag', compares the
+  ! current implementation (hessian_opt or diag_hessian_opt) with the
+  ! original one (first_hessian_opt or first_diag_hessian_opt) and
+  ! lists the elements differing by more than 1d-12.
+  END_DOC
 
   implicit none
 

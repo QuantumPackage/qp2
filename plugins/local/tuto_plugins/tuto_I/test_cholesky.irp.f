@@ -1,4 +1,4 @@
-program my_program_to_print_stuffs
+program test_cholesky
   implicit none
   BEGIN_DOC
 ! TODO : Put the documentation of the program here

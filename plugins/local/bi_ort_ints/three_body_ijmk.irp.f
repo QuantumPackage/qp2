@@ -70,8 +70,6 @@
 
   ! loops approach to break the O(N^4) scaling in memory
 
-  call set_multiple_levels_omp(.false.)
-
   !$OMP PARALLEL                                                            &
   !$OMP DEFAULT (NONE)                                                      &
   !$OMP PRIVATE (k, i, j, m, n, ipoint, tmp_loc_1, tmp_loc_2, tmp_2d, tmp1, tmp2) &

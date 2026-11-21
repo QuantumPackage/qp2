@@ -159,6 +159,11 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, H_matrix_ref, (N_det_ref,N_det_ref)]
  implicit none
+  BEGIN_DOC
+  ! Hamiltonian matrix in the reference space:
+  ! H_matrix_ref(i,j) is <psi_ref(i)|H|psi_ref(j)>, computed by i_H_j
+  ! for i, j = 1..N_det_ref.
+  END_DOC
  integer :: i,j
  double precision :: hij
   do i = 1, N_det_ref
@@ -172,6 +177,12 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, psi_ref_coef_diagonalized, (N_det_ref,N_states)]
 &BEGIN_PROVIDER [double precision, psi_ref_energy_diagonalized, (N_states)]
  implicit none
+  BEGIN_DOC
+  ! Diagonalizes the Hamiltonian matrix H_matrix_ref in the reference
+  ! space. psi_ref_energy_diagonalized(i) is the i-th eigenvalue and
+  ! psi_ref_coef_diagonalized(j,i) the corresponding eigenvector,
+  ! for i = 1..N_states.
+  END_DOC
  integer :: i,j
   double precision, allocatable  :: eigenvectors(:,:), eigenvalues(:)
   allocate (eigenvectors(size(H_matrix_ref,1),N_det_ref))
@@ -192,6 +203,12 @@ END_PROVIDER
 
  BEGIN_PROVIDER [double precision, psi_ref_energy, (N_states)]
  implicit none
+  BEGIN_DOC
+  ! Energy of the reference wave function, state by state:
+  ! psi_ref_energy(k) = <psi_ref|H|psi_ref> / <psi_ref|psi_ref>,
+  ! the sums running over the N_det_ref reference determinants with
+  ! coefficients psi_ref_coef(:,k) and matrix elements H_matrix_ref.
+  END_DOC
  integer :: i,j,k
  double precision :: hij,norm,u_dot_v
   psi_ref_energy = 0.d0
@@ -328,6 +345,13 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ integer, idx_non_ref_from_sorted, (N_det) ]
   implicit none
+  BEGIN_DOC
+  ! For each determinant of the sorted wave function, gives its index
+  ! in the psi_non_ref array: idx_non_ref_from_sorted(p) is the index
+  ! of psi_det_sorted(:,:,p) in psi_non_ref, or 0 if that determinant
+  ! is in the reference. Stops if a determinant is not in the sorted
+  ! list.
+  END_DOC
   integer :: i,inpsisor
 
   idx_non_ref_from_sorted = 0

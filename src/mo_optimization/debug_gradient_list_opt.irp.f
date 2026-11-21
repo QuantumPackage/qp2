@@ -18,7 +18,13 @@
 ! | nb_error   | integer          | number of error in the gradient    |
 
 
-program debug_gradient_list
+program debug_gradient_list_opt
+  BEGIN_DOC
+  ! Debug program for the orbital gradient, same check as
+  ! debug_gradient_opt but restricted to the active orbitals list_act
+  ! (m = dim_list_act_orb orbitals, n = m*(m-1)/2 rotation pairs),
+  ! using gradient_list_opt and first_gradient_list_opt.
+  END_DOC
 
   implicit none
 

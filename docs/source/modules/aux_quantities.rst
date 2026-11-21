@@ -61,3 +61,8 @@ EZFIO parameters
  
     Beta one body density matrix on the |AO| basis computed with the wave function
  
+ 
+.. option:: data_one_e_dm_tot_ao
+ 
+    TOTAL (Alpha+Beta) one body density matrix on the |AO| basis computed with the wave function
+ 

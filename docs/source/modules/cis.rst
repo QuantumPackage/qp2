@@ -69,7 +69,7 @@ Programs
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: h_apply_cis:
+.. c:function:: void h_apply_cis(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -87,10 +87,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`all_mo_integrals`
        * :c:data:`generators_bitmask`
        * :c:data:`h_apply_buffer_allocated`
        * :c:data:`mo_num`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det`
        * :c:data:`n_det_generators`
        * :c:data:`n_int`
@@ -124,13 +124,14 @@ Subroutines / functions
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
 
  
-.. c:function:: h_apply_cis_diexc:
+.. c:function:: void h_apply_cis_diexc(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -140,6 +141,12 @@ Subroutines / functions
         subroutine H_apply_cis_diexc(key_in, key_prev, hole_1,particl_1, hole_2, particl_2, fock_diag_tmp, i_generator, iproc_in  )
 
 
+    Generate the double excitations of key_in: each pair of distinct
+    occupied orbitals p1 and p2, one in hole_1 and the other in hole_2,
+    same spin or alpha and beta, is passed once to H_apply_cis_diexcP,
+    which builds the excited determinants as two successive single
+    excitations (particles from particl_1 and particl_2) and hands the
+    keys to the call fill_H_apply_buffer_no_selection(key_idx,keys_out,N_int,iproc) codelet. key_prev is unused.
 
     Needs:
 
@@ -165,7 +172,7 @@ Subroutines / functions
        * :c:func:`h_apply_cis_diexcp`
 
  
-.. c:function:: h_apply_cis_diexcorg:
+.. c:function:: void h_apply_cis_diexcorg(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -204,7 +211,7 @@ Subroutines / functions
        * :c:func:`fill_h_apply_buffer_no_selection`
 
  
-.. c:function:: h_apply_cis_diexcp:
+.. c:function:: void h_apply_cis_diexcp(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -214,6 +221,12 @@ Subroutines / functions
         subroutine H_apply_cis_diexcP(key_in, fs1, fh1, particl_1, fs2, fh2, particl_2, fock_diag_tmp, i_generator, iproc_in  )
 
 
+    Build, for the two holes (spins fs1, fs2, orbitals fh1, fh2) of
+    key_in, the single-bit masks p1_mask and p2_mask, and key_mask,
+    key_in with both hole orbitals cleared. fh1 and fh2 are 1-based
+    orbital indices in the whole bitstring. Calls H_apply_cis_diexcOrg,
+    which generates the double-excited determinants and hands the keys
+    to the call fill_H_apply_buffer_no_selection(key_idx,keys_out,N_int,iproc) codelet.
 
     Needs:
 
@@ -239,7 +252,7 @@ Subroutines / functions
        * :c:func:`h_apply_cis_diexcorg`
 
  
-.. c:function:: h_apply_cis_monoexc:
+.. c:function:: void h_apply_cis_monoexc(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -278,7 +291,7 @@ Subroutines / functions
        * :c:func:`fill_h_apply_buffer_no_selection`
 
  
-.. c:function:: h_apply_cis_sym:
+.. c:function:: void h_apply_cis_sym(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -296,10 +309,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`all_mo_integrals`
        * :c:data:`generators_bitmask`
        * :c:data:`h_apply_buffer_allocated`
        * :c:data:`mo_num`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det`
        * :c:data:`n_det_generators`
        * :c:data:`n_int`
@@ -333,13 +346,14 @@ Subroutines / functions
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
 
  
-.. c:function:: h_apply_cis_sym_diexc:
+.. c:function:: void h_apply_cis_sym_diexc(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -349,6 +363,12 @@ Subroutines / functions
         subroutine H_apply_cis_sym_diexc(key_in, key_prev, hole_1,particl_1, hole_2, particl_2, fock_diag_tmp, i_generator, iproc_in  )
 
 
+    Generate the double excitations of key_in: each pair of distinct
+    occupied orbitals p1 and p2, one in hole_1 and the other in hole_2,
+    same spin or alpha and beta, is passed once to H_apply_cis_sym_diexcP,
+    which builds the excited determinants as two successive single
+    excitations (particles from particl_1 and particl_2) and hands the
+    keys to the call fill_H_apply_buffer_no_selection(key_idx,keys_out,N_int,iproc) codelet. key_prev is unused.
 
     Needs:
 
@@ -374,7 +394,7 @@ Subroutines / functions
        * :c:func:`h_apply_cis_sym_diexcp`
 
  
-.. c:function:: h_apply_cis_sym_diexcorg:
+.. c:function:: void h_apply_cis_sym_diexcorg(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -414,7 +434,7 @@ Subroutines / functions
        * :c:func:`fill_h_apply_buffer_no_selection`
 
  
-.. c:function:: h_apply_cis_sym_diexcp:
+.. c:function:: void h_apply_cis_sym_diexcp(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`
@@ -424,6 +444,12 @@ Subroutines / functions
         subroutine H_apply_cis_sym_diexcP(key_in, fs1, fh1, particl_1, fs2, fh2, particl_2, fock_diag_tmp, i_generator, iproc_in  )
 
 
+    Build, for the two holes (spins fs1, fs2, orbitals fh1, fh2) of
+    key_in, the single-bit masks p1_mask and p2_mask, and key_mask,
+    key_in with both hole orbitals cleared. fh1 and fh2 are 1-based
+    orbital indices in the whole bitstring. Calls H_apply_cis_sym_diexcOrg,
+    which generates the double-excited determinants and hands the keys
+    to the call fill_H_apply_buffer_no_selection(key_idx,keys_out,N_int,iproc) codelet.
 
     Needs:
 
@@ -449,7 +475,7 @@ Subroutines / functions
        * :c:func:`h_apply_cis_sym_diexcorg`
 
  
-.. c:function:: h_apply_cis_sym_monoexc:
+.. c:function:: void h_apply_cis_sym_monoexc(void)
 
 
     File : :file:`h_apply.irp.f_shell_13`

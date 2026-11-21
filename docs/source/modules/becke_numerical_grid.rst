@@ -122,6 +122,16 @@ EZFIO parameters
     Total number of extra_grid points
  
  
+.. option:: final_grid_points_extra
+ 
+    Grid points on the extra grid
+ 
+ 
+.. option:: final_weight_at_r_vector_extra
+ 
+    Weights of the points on the extra grid
+ 
+ 
 .. option:: extra_grid_type_sgn
  
     Type of extra_grid used for the Becke's numerical extra_grid. Can be, by increasing accuracy: [ 0 | 1 | 2 | 3 ]
@@ -164,11 +174,17 @@ EZFIO parameters
  
     Default: KNOWLES
  
+.. option:: io_extra_grid
+ 
+    Read/Write the extra grid from/to disk [ Write | Read | None ]
+ 
+    Default: None
+ 
  
 Providers 
 --------- 
  
-.. c:var:: alpha_knowles
+.. c:var:: double alpha_knowles
 
 
     File : :file:`becke_numerical_grid/integration_radial.irp.f`
@@ -192,7 +208,7 @@ Providers
        * :c:data:`grid_points_per_atom`
 
  
-.. c:var:: angular_quadrature_points
+.. c:var:: double angular_quadrature_points
 
 
     File : :file:`becke_numerical_grid/angular_grid_pts.irp.f`
@@ -223,7 +239,7 @@ Providers
        * :c:data:`grid_points_per_atom`
 
  
-.. c:var:: angular_quadrature_points_extra
+.. c:var:: double angular_quadrature_points_extra
 
 
     File : :file:`becke_numerical_grid/angular_extra_grid.irp.f`
@@ -254,7 +270,7 @@ Providers
        * :c:data:`grid_points_extra_per_atom`
 
  
-.. c:var:: dr_radial_extra_integral
+.. c:var:: double dr_radial_extra_integral
 
 
     File : :file:`becke_numerical_grid/extra_grid.irp.f`
@@ -283,7 +299,7 @@ Providers
        * :c:data:`grid_points_extra_per_atom`
 
  
-.. c:var:: dr_radial_integral
+.. c:var:: double dr_radial_integral
 
 
     File : :file:`becke_numerical_grid/grid_becke.irp.f`
@@ -312,7 +328,7 @@ Providers
        * :c:data:`grid_points_per_atom`
 
  
-.. c:var:: final_grid_points
+.. c:var:: double final_grid_points
 
 
     File : :file:`becke_numerical_grid/grid_becke_vector.irp.f`
@@ -358,36 +374,16 @@ Providers
        * :c:data:`aos_grad_in_r_array`
        * :c:data:`aos_in_r_array`
        * :c:data:`aos_lapl_in_r_array`
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`average_on_top`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`f_psi_cas_ab`
-       * :c:data:`f_psi_hf_ab`
        * :c:data:`final_grid_points_transp`
+       * :c:data:`mo_dipole_x_becke`
        * :c:data:`mo_grad_ints`
        * :c:data:`mos_in_r_array`
        * :c:data:`mos_in_r_array_omp`
-       * :c:data:`mu_average_prov`
-       * :c:data:`mu_grad_rho`
-       * :c:data:`mu_of_r_dft_average`
-       * :c:data:`mu_rsc_of_r`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
  
-.. c:var:: final_grid_points_extra
+.. c:var:: double final_grid_points_extra
 
 
     File : :file:`becke_numerical_grid/extra_grid_vector.irp.f`
@@ -418,6 +414,7 @@ Providers
        * :c:data:`n_points_extra_final_grid`
        * :c:data:`n_points_extra_radial_grid`
        * :c:data:`nucl_num`
+       * :c:data:`read_extra_grid`
        * :c:data:`thresh_extra_grid`
 
     Needed by:
@@ -427,9 +424,10 @@ Providers
 
        * :c:data:`aos_grad_in_r_array_extra`
        * :c:data:`aos_in_r_array_extra`
+       * :c:data:`mos_in_r_array_extra_omp`
 
  
-.. c:var:: final_grid_points_per_atom
+.. c:var:: double final_grid_points_per_atom
 
 
     File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
@@ -437,11 +435,28 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: final_grid_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        double precision, allocatable	:: final_weight_at_r_vector_per_atom	(n_pts_max_per_atom,nucl_num)
+        double precision, allocatable	:: final_weight_at_r_per_atom	(n_pts_max_per_atom,nucl_num)
         integer, allocatable	:: index_final_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        integer, allocatable	:: index_final_points_per_atom_reverse	(n_points_integration_angular,n_points_radial_grid,nucl_num)
+        integer, allocatable	:: index_final_pts_per_atom_rev	(n_points_integration_angular,n_points_radial_grid,nucl_num)
 
 
+     final_grid_points_per_atom(1:3,i,j) = x, y, z coordinates of the
+     i-th grid point kept for atom j. Points whose weight satisfies
+     |w| < thresh_grid are discarded. Kept points are stored in loop
+     order (radial index, then angular index); only the first
+     n_pts_per_atom(j) entries of the second dimension are set, whose
+     length is n_pts_max_per_atom.
+    
+    final_weight_at_r_vector_per_atom(i,j) = total weight at the i-th
+    kept grid point of atom j (the value of final_weight_at_r at that
+    point)
+    
+    index_final_points_per_atom(1:3,i,j) = angular, radial and atomic
+    indices of the i-th kept grid point of atom j
+    
+    index_final_points_per_atom_reverse(k,i,j) = position in the
+    per-atom list of kept points of the point with angular index k
+    and radial index i around atom j (assigned only for kept points)
 
     Needs:
 
@@ -457,7 +472,7 @@ Providers
 
 
  
-.. c:var:: final_grid_points_transp
+.. c:var:: double final_grid_points_transp
 
 
     File : :file:`becke_numerical_grid/grid_becke_vector.irp.f`
@@ -479,7 +494,7 @@ Providers
 
 
  
-.. c:var:: final_weight_at_r
+.. c:var:: double final_weight_at_r
 
 
     File : :file:`becke_numerical_grid/grid_becke.irp.f`
@@ -518,7 +533,7 @@ Providers
        * :c:data:`n_pts_per_atom`
 
  
-.. c:var:: final_weight_at_r_extra
+.. c:var:: double final_weight_at_r_extra
 
 
     File : :file:`becke_numerical_grid/extra_grid.irp.f`
@@ -555,7 +570,7 @@ Providers
        * :c:data:`n_points_extra_final_grid`
 
  
-.. c:var:: final_weight_at_r_vector
+.. c:var:: double final_weight_at_r_vector
 
 
     File : :file:`becke_numerical_grid/grid_becke_vector.irp.f`
@@ -601,36 +616,16 @@ Providers
        * :c:data:`aos_grad_in_r_array`
        * :c:data:`aos_in_r_array`
        * :c:data:`aos_lapl_in_r_array`
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`average_on_top`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`f_psi_cas_ab`
-       * :c:data:`f_psi_hf_ab`
        * :c:data:`final_grid_points_transp`
+       * :c:data:`mo_dipole_x_becke`
        * :c:data:`mo_grad_ints`
        * :c:data:`mos_in_r_array`
        * :c:data:`mos_in_r_array_omp`
-       * :c:data:`mu_average_prov`
-       * :c:data:`mu_grad_rho`
-       * :c:data:`mu_of_r_dft_average`
-       * :c:data:`mu_rsc_of_r`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
  
-.. c:var:: final_weight_at_r_vector_extra
+.. c:var:: double final_weight_at_r_vector_extra
 
 
     File : :file:`becke_numerical_grid/extra_grid_vector.irp.f`
@@ -661,6 +656,7 @@ Providers
        * :c:data:`n_points_extra_final_grid`
        * :c:data:`n_points_extra_radial_grid`
        * :c:data:`nucl_num`
+       * :c:data:`read_extra_grid`
        * :c:data:`thresh_extra_grid`
 
     Needed by:
@@ -670,9 +666,10 @@ Providers
 
        * :c:data:`aos_grad_in_r_array_extra`
        * :c:data:`aos_in_r_array_extra`
+       * :c:data:`mos_in_r_array_extra_omp`
 
  
-.. c:var:: final_weight_at_r_vector_per_atom
+.. c:var:: double final_weight_at_r_per_atom
 
 
     File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
@@ -680,11 +677,28 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: final_grid_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        double precision, allocatable	:: final_weight_at_r_vector_per_atom	(n_pts_max_per_atom,nucl_num)
+        double precision, allocatable	:: final_weight_at_r_per_atom	(n_pts_max_per_atom,nucl_num)
         integer, allocatable	:: index_final_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        integer, allocatable	:: index_final_points_per_atom_reverse	(n_points_integration_angular,n_points_radial_grid,nucl_num)
+        integer, allocatable	:: index_final_pts_per_atom_rev	(n_points_integration_angular,n_points_radial_grid,nucl_num)
 
 
+     final_grid_points_per_atom(1:3,i,j) = x, y, z coordinates of the
+     i-th grid point kept for atom j. Points whose weight satisfies
+     |w| < thresh_grid are discarded. Kept points are stored in loop
+     order (radial index, then angular index); only the first
+     n_pts_per_atom(j) entries of the second dimension are set, whose
+     length is n_pts_max_per_atom.
+    
+    final_weight_at_r_vector_per_atom(i,j) = total weight at the i-th
+    kept grid point of atom j (the value of final_weight_at_r at that
+    point)
+    
+    index_final_points_per_atom(1:3,i,j) = angular, radial and atomic
+    indices of the i-th kept grid point of atom j
+    
+    index_final_points_per_atom_reverse(k,i,j) = position in the
+    per-atom list of kept points of the point with angular index k
+    and radial index i around atom j (assigned only for kept points)
 
     Needs:
 
@@ -700,7 +714,7 @@ Providers
 
 
  
-.. c:var:: grid_atomic_number
+.. c:var:: int grid_atomic_number
 
 
     File : :file:`becke_numerical_grid/atomic_number.irp.f`
@@ -731,7 +745,7 @@ Providers
        * :c:data:`grid_points_per_atom`
 
  
-.. c:var:: grid_points_extra_per_atom
+.. c:var:: double grid_points_extra_per_atom
 
 
     File : :file:`becke_numerical_grid/extra_grid.irp.f`
@@ -768,7 +782,7 @@ Providers
        * :c:data:`weight_at_r_extra`
 
  
-.. c:var:: grid_points_extra_radial
+.. c:var:: double grid_points_extra_radial
 
 
     File : :file:`becke_numerical_grid/extra_grid.irp.f`
@@ -797,7 +811,7 @@ Providers
        * :c:data:`grid_points_extra_per_atom`
 
  
-.. c:var:: grid_points_per_atom
+.. c:var:: double grid_points_per_atom
 
 
     File : :file:`becke_numerical_grid/grid_becke.irp.f`
@@ -835,7 +849,7 @@ Providers
        * :c:data:`weight_at_r`
 
  
-.. c:var:: grid_points_radial
+.. c:var:: double grid_points_radial
 
 
     File : :file:`becke_numerical_grid/grid_becke.irp.f`
@@ -864,7 +878,7 @@ Providers
        * :c:data:`grid_points_per_atom`
 
  
-.. c:var:: index_final_points
+.. c:var:: int index_final_points
 
 
     File : :file:`becke_numerical_grid/grid_becke_vector.irp.f`
@@ -910,36 +924,16 @@ Providers
        * :c:data:`aos_grad_in_r_array`
        * :c:data:`aos_in_r_array`
        * :c:data:`aos_lapl_in_r_array`
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`average_on_top`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`f_psi_cas_ab`
-       * :c:data:`f_psi_hf_ab`
        * :c:data:`final_grid_points_transp`
+       * :c:data:`mo_dipole_x_becke`
        * :c:data:`mo_grad_ints`
        * :c:data:`mos_in_r_array`
        * :c:data:`mos_in_r_array_omp`
-       * :c:data:`mu_average_prov`
-       * :c:data:`mu_grad_rho`
-       * :c:data:`mu_of_r_dft_average`
-       * :c:data:`mu_rsc_of_r`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
  
-.. c:var:: index_final_points_extra
+.. c:var:: int index_final_points_extra
 
 
     File : :file:`becke_numerical_grid/extra_grid_vector.irp.f`
@@ -970,6 +964,7 @@ Providers
        * :c:data:`n_points_extra_final_grid`
        * :c:data:`n_points_extra_radial_grid`
        * :c:data:`nucl_num`
+       * :c:data:`read_extra_grid`
        * :c:data:`thresh_extra_grid`
 
     Needed by:
@@ -979,9 +974,10 @@ Providers
 
        * :c:data:`aos_grad_in_r_array_extra`
        * :c:data:`aos_in_r_array_extra`
+       * :c:data:`mos_in_r_array_extra_omp`
 
  
-.. c:var:: index_final_points_extra_reverse
+.. c:var:: int index_final_points_extra_reverse
 
 
     File : :file:`becke_numerical_grid/extra_grid_vector.irp.f`
@@ -1012,6 +1008,7 @@ Providers
        * :c:data:`n_points_extra_final_grid`
        * :c:data:`n_points_extra_radial_grid`
        * :c:data:`nucl_num`
+       * :c:data:`read_extra_grid`
        * :c:data:`thresh_extra_grid`
 
     Needed by:
@@ -1021,9 +1018,10 @@ Providers
 
        * :c:data:`aos_grad_in_r_array_extra`
        * :c:data:`aos_in_r_array_extra`
+       * :c:data:`mos_in_r_array_extra_omp`
 
  
-.. c:var:: index_final_points_per_atom
+.. c:var:: int index_final_points_per_atom
 
 
     File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
@@ -1031,11 +1029,28 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: final_grid_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        double precision, allocatable	:: final_weight_at_r_vector_per_atom	(n_pts_max_per_atom,nucl_num)
+        double precision, allocatable	:: final_weight_at_r_per_atom	(n_pts_max_per_atom,nucl_num)
         integer, allocatable	:: index_final_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        integer, allocatable	:: index_final_points_per_atom_reverse	(n_points_integration_angular,n_points_radial_grid,nucl_num)
+        integer, allocatable	:: index_final_pts_per_atom_rev	(n_points_integration_angular,n_points_radial_grid,nucl_num)
 
 
+     final_grid_points_per_atom(1:3,i,j) = x, y, z coordinates of the
+     i-th grid point kept for atom j. Points whose weight satisfies
+     |w| < thresh_grid are discarded. Kept points are stored in loop
+     order (radial index, then angular index); only the first
+     n_pts_per_atom(j) entries of the second dimension are set, whose
+     length is n_pts_max_per_atom.
+    
+    final_weight_at_r_vector_per_atom(i,j) = total weight at the i-th
+    kept grid point of atom j (the value of final_weight_at_r at that
+    point)
+    
+    index_final_points_per_atom(1:3,i,j) = angular, radial and atomic
+    indices of the i-th kept grid point of atom j
+    
+    index_final_points_per_atom_reverse(k,i,j) = position in the
+    per-atom list of kept points of the point with angular index k
+    and radial index i around atom j (assigned only for kept points)
 
     Needs:
 
@@ -1051,7 +1066,7 @@ Providers
 
 
  
-.. c:var:: index_final_points_per_atom_reverse
+.. c:var:: int index_final_pts_per_atom_rev
 
 
     File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
@@ -1059,11 +1074,28 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: final_grid_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        double precision, allocatable	:: final_weight_at_r_vector_per_atom	(n_pts_max_per_atom,nucl_num)
+        double precision, allocatable	:: final_weight_at_r_per_atom	(n_pts_max_per_atom,nucl_num)
         integer, allocatable	:: index_final_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
-        integer, allocatable	:: index_final_points_per_atom_reverse	(n_points_integration_angular,n_points_radial_grid,nucl_num)
+        integer, allocatable	:: index_final_pts_per_atom_rev	(n_points_integration_angular,n_points_radial_grid,nucl_num)
 
 
+     final_grid_points_per_atom(1:3,i,j) = x, y, z coordinates of the
+     i-th grid point kept for atom j. Points whose weight satisfies
+     |w| < thresh_grid are discarded. Kept points are stored in loop
+     order (radial index, then angular index); only the first
+     n_pts_per_atom(j) entries of the second dimension are set, whose
+     length is n_pts_max_per_atom.
+    
+    final_weight_at_r_vector_per_atom(i,j) = total weight at the i-th
+    kept grid point of atom j (the value of final_weight_at_r at that
+    point)
+    
+    index_final_points_per_atom(1:3,i,j) = angular, radial and atomic
+    indices of the i-th kept grid point of atom j
+    
+    index_final_points_per_atom_reverse(k,i,j) = position in the
+    per-atom list of kept points of the point with angular index k
+    and radial index i around atom j (assigned only for kept points)
 
     Needs:
 
@@ -1079,7 +1111,7 @@ Providers
 
 
  
-.. c:var:: index_final_points_reverse
+.. c:var:: int index_final_points_reverse
 
 
     File : :file:`becke_numerical_grid/grid_becke_vector.irp.f`
@@ -1125,36 +1157,16 @@ Providers
        * :c:data:`aos_grad_in_r_array`
        * :c:data:`aos_in_r_array`
        * :c:data:`aos_lapl_in_r_array`
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`average_on_top`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`f_psi_cas_ab`
-       * :c:data:`f_psi_hf_ab`
        * :c:data:`final_grid_points_transp`
+       * :c:data:`mo_dipole_x_becke`
        * :c:data:`mo_grad_ints`
        * :c:data:`mos_in_r_array`
        * :c:data:`mos_in_r_array_omp`
-       * :c:data:`mu_average_prov`
-       * :c:data:`mu_grad_rho`
-       * :c:data:`mu_of_r_dft_average`
-       * :c:data:`mu_rsc_of_r`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
  
-.. c:var:: m_knowles
+.. c:var:: int m_knowles
 
 
     File : :file:`becke_numerical_grid/grid_becke.irp.f`
@@ -1177,7 +1189,7 @@ Providers
        * :c:data:`grid_points_per_atom`
 
  
-.. c:var:: n_points_extra_final_grid
+.. c:var:: int n_points_extra_final_grid
 
 
     File : :file:`becke_numerical_grid/extra_grid_vector.irp.f`
@@ -1197,6 +1209,7 @@ Providers
        * :c:data:`final_weight_at_r_extra`
        * :c:data:`n_points_extra_radial_grid`
        * :c:data:`nucl_num`
+       * :c:data:`read_extra_grid`
        * :c:data:`thresh_extra_grid`
 
     Needed by:
@@ -1208,9 +1221,11 @@ Providers
        * :c:data:`aos_in_r_array_extra`
        * :c:data:`aos_in_r_array_extra_transp`
        * :c:data:`final_grid_points_extra`
+       * :c:data:`mos_in_r_array_extra_omp`
+       * :c:data:`mos_in_r_array_extra_transp`
 
  
-.. c:var:: n_points_extra_grid_per_atom
+.. c:var:: int n_points_extra_grid_per_atom
 
 
     File : :file:`becke_numerical_grid/extra_grid.irp.f`
@@ -1231,7 +1246,7 @@ Providers
 
 
  
-.. c:var:: n_points_extra_integration_angular
+.. c:var:: int n_points_extra_integration_angular
 
 
     File : :file:`becke_numerical_grid/extra_grid.irp.f`
@@ -1273,7 +1288,7 @@ Providers
        * :c:data:`weight_at_r_extra`
 
  
-.. c:var:: n_points_extra_radial_grid
+.. c:var:: int n_points_extra_radial_grid
 
 
     File : :file:`becke_numerical_grid/extra_grid.irp.f`
@@ -1315,7 +1330,7 @@ Providers
        * :c:data:`weight_at_r_extra`
 
  
-.. c:var:: n_points_final_grid
+.. c:var:: int n_points_final_grid
 
 
     File : :file:`becke_numerical_grid/grid_becke_vector.irp.f`
@@ -1342,7 +1357,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`act_mos_in_r_array`
        * :c:data:`alpha_dens_kin_in_r`
        * :c:data:`ao_abs_int_grid`
        * :c:data:`ao_overlap_abs_grid`
@@ -1357,45 +1371,11 @@ Providers
        * :c:data:`aos_in_r_array_transp`
        * :c:data:`aos_lapl_in_r_array`
        * :c:data:`aos_lapl_in_r_array_transp`
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`average_on_top`
-       * :c:data:`basis_mos_in_r_array`
-       * :c:data:`core_density`
-       * :c:data:`core_inact_act_mos_grad_in_r_array`
-       * :c:data:`core_inact_act_mos_in_r_array`
-       * :c:data:`core_inact_act_v_kl_contracted`
-       * :c:data:`core_mos_in_r_array`
-       * :c:data:`effective_alpha_dm`
-       * :c:data:`effective_spin_dm`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`f_hf_cholesky`
-       * :c:data:`f_hf_cholesky_sparse`
-       * :c:data:`f_hf_cholesky_sparse_bis`
-       * :c:data:`f_psi_cas_ab`
-       * :c:data:`f_psi_cas_ab_old`
-       * :c:data:`f_psi_hf_ab`
        * :c:data:`final_grid_points`
        * :c:data:`final_grid_points_transp`
-       * :c:data:`full_occ_2_rdm_cntrctd`
-       * :c:data:`full_occ_2_rdm_cntrctd_trans`
-       * :c:data:`full_occ_v_kl_cntrctd`
-       * :c:data:`grad_total_cas_on_top_density`
-       * :c:data:`inact_density`
-       * :c:data:`inact_mos_in_r_array`
        * :c:data:`kinetic_density_generalized`
+       * :c:data:`mo_dipole_x_becke`
        * :c:data:`mo_grad_ints`
        * :c:data:`mos_grad_in_r_array`
        * :c:data:`mos_grad_in_r_array_tranp`
@@ -1406,42 +1386,10 @@ Providers
        * :c:data:`mos_in_r_array_transp`
        * :c:data:`mos_lapl_in_r_array`
        * :c:data:`mos_lapl_in_r_array_tranp`
-       * :c:data:`mos_times_cholesky_r1`
-       * :c:data:`mos_times_cholesky_r2`
-       * :c:data:`mu_average_prov`
-       * :c:data:`mu_grad_rho`
-       * :c:data:`mu_of_r_dft`
-       * :c:data:`mu_of_r_dft_average`
-       * :c:data:`mu_of_r_hf`
-       * :c:data:`mu_of_r_hf_old`
-       * :c:data:`mu_of_r_hf_sparse`
-       * :c:data:`mu_of_r_prov`
-       * :c:data:`mu_of_r_psi_cas`
-       * :c:data:`mu_rsc_of_r`
-       * :c:data:`on_top_hf_grid`
-       * :c:data:`one_e_act_density_alpha`
-       * :c:data:`one_e_act_density_beta`
-       * :c:data:`one_e_cas_total_density`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
-       * :c:data:`pot_grad_x_alpha_ao_pbe`
-       * :c:data:`pot_grad_x_alpha_ao_sr_pbe`
-       * :c:data:`pot_grad_xc_alpha_ao_pbe`
-       * :c:data:`pot_grad_xc_alpha_ao_sr_pbe`
-       * :c:data:`pot_scal_x_alpha_ao_pbe`
-       * :c:data:`pot_scal_x_alpha_ao_sr_pbe`
-       * :c:data:`pot_scal_xc_alpha_ao_pbe`
-       * :c:data:`pot_scal_xc_alpha_ao_sr_pbe`
-       * :c:data:`potential_c_alpha_ao_lda`
-       * :c:data:`potential_c_alpha_ao_sr_lda`
-       * :c:data:`potential_x_alpha_ao_lda`
-       * :c:data:`potential_x_alpha_ao_sr_lda`
-       * :c:data:`potential_xc_alpha_ao_lda`
-       * :c:data:`potential_xc_alpha_ao_sr_lda`
-       * :c:data:`total_cas_on_top_density`
-       * :c:data:`virt_mos_in_r_array`
 
  
-.. c:var:: n_points_grid_per_atom
+.. c:var:: int n_points_grid_per_atom
 
 
     File : :file:`becke_numerical_grid/grid_becke.irp.f`
@@ -1462,7 +1410,7 @@ Providers
 
 
  
-.. c:var:: n_points_integration_angular
+.. c:var:: int n_points_integration_angular
 
 
     File : :file:`becke_numerical_grid/grid_becke.irp.f`
@@ -1506,7 +1454,7 @@ Providers
        * :c:data:`weight_at_r`
 
  
-.. c:var:: n_points_radial_grid
+.. c:var:: int n_points_radial_grid
 
 
     File : :file:`becke_numerical_grid/grid_becke.irp.f`
@@ -1550,7 +1498,7 @@ Providers
        * :c:data:`weight_at_r`
 
  
-.. c:var:: n_pts_max_per_atom
+.. c:var:: int n_pts_max_per_atom
 
 
     File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
@@ -1581,7 +1529,7 @@ Providers
        * :c:data:`final_grid_points_per_atom`
 
  
-.. c:var:: n_pts_per_atom
+.. c:var:: int n_pts_per_atom
 
 
     File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
@@ -1612,7 +1560,7 @@ Providers
        * :c:data:`final_grid_points_per_atom`
 
  
-.. c:var:: r_gill
+.. c:var:: double r_gill
 
 
     File : :file:`becke_numerical_grid/grid_becke.irp.f`
@@ -1622,6 +1570,28 @@ Providers
         double precision	:: r_gill	
 
 
+    R_gill = scaling parameter of the radial coordinates of the GILL
+    radial grid (rad_grid_type = "GILL"), set to 3.0
+    
+    The radial distance of the j-th point around a nucleus is
+    :math:`r = R_{gill} (j-1)^2 / (N_r - j + 1)^2` 
+    with :math:`j = 1, \ldots, N_r-1`  and :math:`N_r`  the number of radial
+    points per atom. The same parameter scales the GILL radial
+    integration weight (factor :math:`2 R_{gill}^3 N_r` ) and is also used
+    by the GILL branch of the extra grid (extra_grid.irp.f).
+    
+    No paper prescribes R = 3.0; it is an in-tree implementation
+    choice (author, 2026-10-31). Checked Gill and
+    Chien, J. Comput. Chem. 24 (2003) 732, DOI 10.1002/jcc.10211,
+    whose footnote 7 (p. 740) states "the scale factor R is
+    arbitrary, but the best accuracy is achieved if R reflects the
+    domain of r over which f(r) is large", and Chien and Gill,
+    J. Comput. Chem. 27 (2006) 730, DOI 10.1002/jcc.20383, which
+    optimizes R per element (1.10 to 2.30 in their Table 1); 3.0
+    is larger, so the grid extends further out. The in-tree
+    comment "GILL & CHIEN, 2002" is off by one year: the paper was
+    received 30 August 2002 and published in 2003 (Gill and
+    Chien).
 
     Needed by:
 
@@ -1634,7 +1604,7 @@ Providers
        * :c:data:`grid_points_per_atom`
 
  
-.. c:var:: weight_at_r
+.. c:var:: double weight_at_r
 
 
     File : :file:`becke_numerical_grid/grid_becke.irp.f`
@@ -1671,7 +1641,7 @@ Providers
        * :c:data:`final_weight_at_r`
 
  
-.. c:var:: weight_at_r_extra
+.. c:var:: double weight_at_r_extra
 
 
     File : :file:`becke_numerical_grid/extra_grid.irp.f`
@@ -1708,7 +1678,7 @@ Providers
        * :c:data:`final_weight_at_r_extra`
 
  
-.. c:var:: weights_angular_points
+.. c:var:: double weights_angular_points
 
 
     File : :file:`becke_numerical_grid/angular_grid_pts.irp.f`
@@ -1739,7 +1709,7 @@ Providers
        * :c:data:`grid_points_per_atom`
 
  
-.. c:var:: weights_angular_points_extra
+.. c:var:: double weights_angular_points_extra
 
 
     File : :file:`becke_numerical_grid/angular_extra_grid.irp.f`
@@ -1774,7 +1744,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: cell_function_becke:
+.. c:function:: void cell_function_becke(void)
 
 
     File : :file:`becke_numerical_grid/step_function_becke.irp.f`
@@ -1798,7 +1768,7 @@ Subroutines / functions
        * :c:data:`slater_bragg_type_inter_distance_ua`
 
  
-.. c:function:: derivative_knowles_function:
+.. c:function:: void derivative_knowles_function(void)
 
 
     File : :file:`becke_numerical_grid/integration_radial.irp.f`
@@ -1811,7 +1781,7 @@ Subroutines / functions
     Derivative of the function proposed by Knowles (JCP, 104, 1996) for distributing the radial points
 
  
-.. c:function:: example_becke_numerical_grid:
+.. c:function:: void example_becke_numerical_grid(void)
 
 
     File : :file:`becke_numerical_grid/example.irp.f`
@@ -1837,7 +1807,7 @@ Subroutines / functions
        * :c:data:`nucl_num`
 
  
-.. c:function:: f_function_becke:
+.. c:function:: void f_function_becke(void)
 
 
     File : :file:`becke_numerical_grid/step_function_becke.irp.f`
@@ -1849,7 +1819,7 @@ Subroutines / functions
 
 
  
-.. c:function:: knowles_function:
+.. c:function:: void knowles_function(void)
 
 
     File : :file:`becke_numerical_grid/integration_radial.irp.f`
@@ -1863,7 +1833,7 @@ Subroutines / functions
     the Log "m" function ( equation (7) in the paper )
 
  
-.. c:function:: step_function_becke:
+.. c:function:: void step_function_becke(void)
 
 
     File : :file:`becke_numerical_grid/step_function_becke.irp.f`

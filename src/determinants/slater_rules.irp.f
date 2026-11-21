@@ -1,5 +1,19 @@
 subroutine get_excitation_degree(key1,key2,degree,Nint)
   use bitmasks
+  use slater_rules_opt
+  implicit none
+  BEGIN_DOC
+  ! Optimized version of get_excitation_degree_ref
+  END_DOC
+  integer, intent(in)            :: Nint
+  integer(bit_kind), intent(in)  :: key1(Nint*2)
+  integer(bit_kind), intent(in)  :: key2(Nint*2)
+  integer, intent(out)           :: degree
+  call get_excitation_degree_c(key1,key2,degree,Nint)
+end
+
+subroutine get_excitation_degree_ref(key1,key2,degree,Nint)
+  use bitmasks
   include 'utils/constants.include.F'
   implicit none
   BEGIN_DOC
@@ -324,6 +338,19 @@ end
 subroutine get_phasemask_bit(det1, pm, Nint)
   use bitmasks
   implicit none
+  BEGIN_DOC
+  ! Computes the phase mask of the determinant det1: bit b of
+  ! pm(i,ispin) is 1 when the number of occupied spin orbitals
+  ! of spin ispin at or below bit b of word i is odd, i.e. the
+  ! running parity of the occupied bits, including the words
+  ! before i.
+  ! The same mask is built by get_mask_phase
+  ! (cipsi/selection.irp.f), where it is used to compute the
+  ! phase of double excitations (get_phase_bi).
+  ! No in-tree caller (the code is probably inlined at the
+  ! former call sites); kept at disposal if needed again
+  ! (author, 2026-10-31).
+  END_DOC
   integer, intent(in) :: Nint
   integer(bit_kind), intent(in) :: det1(Nint,2)
   integer(bit_kind), intent(out) :: pm(Nint,2)
@@ -339,6 +366,7 @@ subroutine get_phasemask_bit(det1, pm, Nint)
     pm(i,ispin) = xor(pm(i,ispin), shiftl(pm(i,ispin), 16))
     pm(i,ispin) = xor(pm(i,ispin), shiftl(pm(i,ispin), 32))
     pm(i,ispin) = xor(pm(i,ispin), tmp)
+    ! carry the parity of the occupied bits of the words before i
     if(iand(popcnt(det1(i,ispin)), 1) == 1) tmp = not(tmp)
   end do
   end do
@@ -846,6 +874,15 @@ end
 subroutine create_minilist(key_mask, fullList, miniList, idx_miniList, N_fullList, N_miniList, Nint)
   use bitmasks
   implicit none
+  BEGIN_DOC
+  ! Keeps, in miniList, the determinants of fullList for
+  ! which the number of spin orbitals occupied by key_mask
+  ! and not by the determinant is at most 2.
+  ! idx_miniList(i) is the index in fullList of the i-th kept
+  ! determinant, N_miniList their number.
+  ! If key_mask has no occupied orbital, fullList is copied
+  ! unchanged.
+  END_DOC
 
   integer, intent(in)                      :: N_fullList
   integer, intent(in)                      :: Nint
@@ -908,6 +945,20 @@ end subroutine
 subroutine create_minilist_find_previous(key_mask, fullList, miniList, N_fullList, N_miniList, fullMatch, Nint)
   use bitmasks
   implicit none
+  BEGIN_DOC
+  ! Same filter as create_minilist, applied in reverse order
+  ! (from N_fullList down to 1): the determinants for which 0
+  ! or 1 spin orbitals of key_mask are not occupied are kept
+  ! first, the ones for which exactly 2 are not occupied are
+  ! appended at the end of miniList.
+  ! N_miniList is the total number of kept determinants.
+  ! fullMatch is always returned as .false.; the statements
+  ! that would set it to .true. are commented out.
+  ! fullMatch was an optimization removed because it was wrong
+  ! (author, 2026-10-31). The commented-out lines predate the
+  ! 2019-01-25 initial import of this repository, so no commit
+  ! records it.
+  END_DOC
 
   integer, intent(in)                      :: N_fullList
   integer, intent(in)                      :: Nint
@@ -2282,22 +2333,158 @@ subroutine i_H_j_double_alpha_beta(key_i,key_j,Nint,hij)
   call get_single_excitation_spin(key_i(1,1),key_j(1,1),exc(0,1,1),phase,Nint)
   call get_single_excitation_spin(key_i(1,2),key_j(1,2),exc(0,1,2),phase2,Nint)
   phase = phase*phase2
-  if (exc(1,1,1) == exc(1,2,2)) then
-    hij = phase * big_array_exchange_integrals(exc(1,1,1),exc(1,1,2),exc(1,2,1))
-  else if (exc(1,2,1) == exc(1,1,2)) then
-    hij = phase * big_array_exchange_integrals(exc(1,2,1),exc(1,1,1),exc(1,2,2))
-  else
-    hij = phase*get_two_e_integral(                              &
+  hij = phase*get_two_e_integral(                              &
         exc(1,1,1),                                                  &
         exc(1,1,2),                                                  &
         exc(1,2,1),                                                  &
         exc(1,2,2) ,mo_integrals_map)
+
+end
+
+subroutine i_H_j_double_alpha_beta_s2_sorted(key_i,key_ja,key_jb,Nint,hij,s2,n)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Returns $\langle i|H|j \rangle$ where $i$ and $j$ are determinants differing by
+  ! an opposite-spin double excitation.
+  END_DOC
+  integer, intent(in)            :: Nint, n
+  integer(bit_kind), intent(in)  :: key_i(Nint,2), key_ja(Nint,n), key_jb(Nint)
+  double precision, intent(out)  :: hij(n), s2(n)
+
+  integer                        :: exc(0:2,2,2)
+  double precision               :: phase, phase2
+  double precision, external     :: get_two_e_integral
+  double precision, allocatable  :: integral(:,:)
+  integer, allocatable :: integral_count(:), iorder(:), ii(:), kk(:)
+  integer :: i,j,k,l,m,mm
+
+  PROVIDE all_mo_integrals
+
+  call get_single_excitation_spin(key_i(1,2),key_jb,exc(0,1,2),phase2,Nint)
+  j=exc(1,1,2)
+  l=exc(1,2,2)
+!  if (do_mo_cholesky.and.(n > (3*mo_num))) then
+  if (do_mo_cholesky.and.(n > mo_num)) then
+    allocate (integral(mo_num,mo_num), integral_count(mo_num), ii(n), kk(n), iorder(n))
+    do m=1,mo_num
+      integral_count(m) = 0
+    enddo
+    do m=1,n
+      call get_single_excitation_spin(key_i(1,1),key_ja(1,m),exc(0,1,1),phase,Nint)
+      ii(m)=exc(1,1,1)
+      kk(m)=exc(1,2,1)
+      integral_count(ii(m)) = integral_count(ii(m))+1
+      integral_count(kk(m)) = integral_count(kk(m))+1
+      iorder(m) = m
+      s2(m) = 0.d0
+      hij(m) = phase
+      if ( (ii(m) == l).and.(j == kk(m)) ) then
+        s2(m) =  -phase*phase2
+      endif
+    enddo
+    call isort(ii,iorder,n)
+!    call get_mo_two_e_integrals_i1j1(j,l,mo_num,integral,mo_integrals_map)
+
+    do mm=1,n
+      m = iorder(mm)
+      i = ii(mm)
+      k = kk(m)
+      if (integral_count(i) > mo_num/4) then
+        call get_mo_two_e_integrals(j,k,l,mo_num,integral(1,k),mo_integrals_map)
+        integral_count(i) = -1
+      else if (integral_count(i) > 0) then
+        integral(i,k) = get_two_e_integral(i,j,k,l,mo_integrals_map)
+      endif
+      hij(m) = hij(m)*integral(i,k)
+    enddo
+    deallocate(integral, ii, kk, iorder, integral_count)
+  else
+    do m=1,n
+      call get_single_excitation_spin(key_i(1,1),key_ja(1,m),exc(0,1,1),phase,Nint)
+      phase = phase*phase2
+      i=exc(1,1,1)
+      k=exc(1,2,1)
+      hij(m) = phase*get_two_e_integral(i,j,k,l,mo_integrals_map)
+
+      s2(m) = 0.d0
+      if ( (i == l).and.(j == k) ) then
+        s2(m) =  -phase
+      endif
+    enddo
   endif
+
+end
+
+
+subroutine i_H_j_double_alpha_beta_s2(key_i,key_ja,key_jb,Nint,hij,s2,n)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Returns $\langle i|H|j \rangle$ where $i$ and $j$ are determinants differing by
+  ! an opposite-spin double excitation.
+  END_DOC
+  integer, intent(in)            :: Nint, n
+  integer(bit_kind), intent(in)  :: key_i(Nint,2), key_ja(Nint,n), key_jb(Nint)
+  double precision, intent(out)  :: hij(n), s2(n)
+
+  integer                        :: exc(0:2,2,2)
+  double precision               :: phase, phase2
+  double precision, external     :: get_two_e_integral
+  double precision, allocatable  :: integral(:,:)
+  integer :: i,j,k,l,m,mm
+
+  PROVIDE all_mo_integrals
+
+  call get_single_excitation_spin(key_i(1,2),key_jb,exc(0,1,2),phase2,Nint)
+  j=exc(1,1,2)
+  l=exc(1,2,2)
+  if (do_mo_cholesky.and.(n > (3*mo_num))) then
+    allocate (integral(mo_num,mo_num))
+    call get_mo_two_e_integrals_i1j1(j,l,mo_num,integral,mo_integrals_map)
+    do m=1,n
+      call get_single_excitation_spin(key_i(1,1),key_ja(1,m),exc(0,1,1),phase,Nint)
+      i=exc(1,1,1)
+      k=exc(1,2,1)
+      phase = phase*phase2
+      s2(m) = 0.d0
+      if ( (i == l).and.(j == k) ) then
+        s2(m) =  -phase
+      endif
+      hij(m) = phase*integral(i,k)
+    enddo
+    deallocate(integral)
+  else
+    do m=1,n
+      call get_single_excitation_spin(key_i(1,1),key_ja(1,m),exc(0,1,1),phase,Nint)
+      phase = phase*phase2
+      i=exc(1,1,1)
+      k=exc(1,2,1)
+      hij(m) = phase*get_two_e_integral(i,j,k,l,mo_integrals_map)
+      s2(m) = 0.d0
+      if ( (i == l).and.(j == k) ) then
+        s2(m) =  -phase
+      endif
+    enddo
+  endif
+
 end
 
 
 subroutine connected_to_hf(key_i,yes_no)
- implicit none 
+ implicit none
+  BEGIN_DOC
+  ! Tests whether the determinant key_i is connected to the
+  ! HF reference ref_bitmask, with the threshold thresh_sym:
+  ! - degree 0: yes_no is set to .true.
+  ! - degree 1: yes_no is set to .false. when the one-
+  !   electron integral mo_one_e_integrals(m,p) of the
+  !   excitation (m,p) is below thresh_sym in absolute value.
+  ! - degree 2: yes_no is set to .false. when the matrix
+  !   element <ref_bitmask | H | key_i> computed with i_H_j
+  !   is below thresh_sym in absolute value.
+  ! - other degrees: yes_no is left .true.
+  END_DOC
  use bitmasks
  integer(bit_kind), intent(in)  :: key_i(N_int,2)
  logical , intent(out) :: yes_no
@@ -2310,9 +2497,9 @@ subroutine connected_to_hf(key_i,yes_no)
  if(degree == 2)then
   call i_H_j(ref_bitmask,key_i,N_int,hij)
   if(dabs(hij) .lt. thresh_sym)then
-   yes_no = .False. 
+   yes_no = .False.
   endif
- else if(degree == 1)then  
+ else if(degree == 1)then
   call get_single_excitation(ref_bitmask,key_i,exc,phase,N_int)
   ! Single alpha
   if (exc(0,1,1) == 1) then
@@ -2325,7 +2512,7 @@ subroutine connected_to_hf(key_i,yes_no)
   endif
   hij = mo_one_e_integrals(m,p)
   if(dabs(hij) .lt. thresh_sym)then
-   yes_no = .False. 
+   yes_no = .False.
   endif
  else if(degree == 0)then
   yes_no = .True.

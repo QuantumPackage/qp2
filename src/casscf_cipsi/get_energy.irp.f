@@ -14,6 +14,11 @@ program get_energy
 end
 
 subroutine print_grad
+ BEGIN_DOC
+ ! Prints, for each mono-excitation i of the table excit, the component
+ ! gradvec2(i) of the orbital gradient and the orbital pair excit(:,i),
+ ! when dabs(gradvec2(i)) is greater than 1.d-5.
+ END_DOC
  implicit none
  integer :: i 
  do i = 1, nMonoEx
@@ -25,6 +30,14 @@ subroutine print_grad
 end
 
 subroutine routine
+ BEGIN_DOC
+ ! Computes the active part of the bielectronic energy: sum over active
+ ! orbitals of the two-electron integrals weighted by the spin-traced
+ ! state-averaged active 2-RDM. The result is printed (accu(1)).
+ ! Not currently called (the only call in the get_energy program is
+ ! commented out); kept because it may need to be reactivated for
+ ! debugging (author, 2026-10-31).
+ END_DOC
  integer :: i,j,k,l
  integer :: ii,jj,kk,ll
  double precision :: accu(4),twodm,thr,act_twodm2,integral,get_two_e_integral

@@ -16,7 +16,7 @@ complex*16 function crint_1(n, rho)
 
   complex*16             :: crint_smallz
 
-  rho_mod = zabs(rho)
+  rho_mod = abs(rho)
 
   if(rho_mod < 3.5d0) then
 
@@ -94,7 +94,7 @@ complex*16 function crint_1(n, rho)
 
   else
 
-    rho_exp = 0.5d0 * zexp(-rho)
+    rho_exp = 0.5d0 * exp(-rho)
     rho_inv = (1.d0, 0.d0) / rho
 
     call zboysfun00_1(rho, crint_1)
@@ -111,6 +111,14 @@ end
 
 subroutine crint_1_vec(n_max, rho, vals)
 
+  BEGIN_DOC
+  ! Stores crint_1(n, rho) for n = 0, 1, ..., n_max in vals(0:n_max),
+  ! where crint_1(n, rho) = $\int_0^1 t^{2n} \exp(-\rho t^2) dt$ for
+  ! a complex argument rho. For |rho| < 0.35 a Taylor polynomial is
+  ! used, for 0.35 <= |rho| < 3.5 crint_smallz_vec, and for
+  ! |rho| >= 3.5 zboysfun00_1 plus the recurrence
+  ! $vals(n) = ((n - 0.5) vals(n-1) - 0.5 \exp(-\rho)) / \rho$.
+  END_DOC
   implicit none
   include 'constants.include.F'
 
@@ -125,7 +133,7 @@ subroutine crint_1_vec(n_max, rho, vals)
 
   complex*16             :: crint_smallz
 
-  rho_mod = zabs(rho)
+  rho_mod = abs(rho)
 
   if(rho_mod < 3.5d0) then
 
@@ -212,7 +220,7 @@ subroutine crint_1_vec(n_max, rho, vals)
 
   else
 
-    rho_exp = 0.5d0 * zexp(-rho)
+    rho_exp = 0.5d0 * exp(-rho)
     rho_inv = (1.d0, 0.d0) / rho
 
     call zboysfun00_1(rho, vals(0))
@@ -237,14 +245,14 @@ complex*16 function crint_smallz(n, rho)
   integer,    intent(in)      :: n
   complex*16, intent(in)      :: rho
 
-  integer,          parameter :: kmax = 40
-  double precision, parameter :: eps = 1.d-10
+  integer,          parameter :: kmax = 100
+  double precision, parameter :: eps = 1.d-17
 
   integer                     :: k
   double precision            :: delta_mod
   complex*16                  :: rho_k, ct, delta_k
 
-  ct           = 0.5d0 * zexp(-rho) * gamma(dble(n) + 0.5d0)
+  ct           = 0.5d0 * exp(-rho) * gamma(dble(n) + 0.5d0)
   crint_smallz = ct / gamma(dble(n) + 1.5d0)
 
   rho_k = (1.d0, 0.d0)
@@ -254,11 +262,11 @@ complex*16 function crint_smallz(n, rho)
     delta_k      = ct * rho_k / gamma(dble(n+k) + 1.5d0)
     crint_smallz = crint_smallz + delta_k
 
-    delta_mod = dsqrt(real(delta_k)*real(delta_k) + aimag(delta_k)*aimag(delta_k))
-    if(delta_mod .lt. eps) return
+    delta_mod = abs(delta_k)
+    if(delta_mod .lt. eps * abs(crint_smallz)) return
   enddo
 
-  if(delta_mod > eps) then
+  if(delta_mod > eps * abs(crint_smallz)) then
     write(*,*) ' pb in crint_smallz !'
     write(*,*) ' n, rho = ', n, rho
     write(*,*) ' value = ', crint_smallz
@@ -282,7 +290,7 @@ complex*16 function crint_2(n, rho)
 
   complex*16, external   :: crint_smallz
 
-  abs_rho = zabs(rho)
+  abs_rho = abs(rho)
 
   if(abs_rho < 3.5d0) then
 
@@ -368,7 +376,7 @@ complex*16 function crint_2(n, rho)
     else
 
       call zboysfunnrp(n, rho, vals)
-      crint_2 = vals(n) * zexp(-rho)
+      crint_2 = vals(n) * exp(-rho)
 
     endif
   endif
@@ -404,7 +412,7 @@ subroutine zboysfun(n_max, x, vals)
 
   call zboysfun00_2(x, vals(0))
 
-  yy = 0.5d0 * zexp(-x)
+  yy = 0.5d0 * exp(-x)
   x_inv = (1.d0, 0.d0) / x
   do n = 1, n_max
     vals(n) = ((dble(n) - 0.5d0) * vals(n-1) - yy) * x_inv
@@ -423,7 +431,7 @@ subroutine zboysfunnrp(n_max, x, vals)
   ! (where F(n,z) are the Boys functions)
   ! for a complex valued argument WITH NEGATIVE REAL PART
   !
-  ! Input: x  --- argument, complex *16 Re(x)<=0
+  ! Input: x  --- argument, complex \*16 Re(x)<=0
   ! Output: vals  --- values of e^z F(n,z), n = 0, 1, ..., n_max
   !
   ! Beylkin & Sharma, J. Chem. Phys. 155, 174117 (2021)
@@ -486,6 +494,14 @@ end
 
 subroutine crint_2_vec(n_max, rho, vals)
 
+  BEGIN_DOC
+  ! Stores crint_2(n, rho) for n = 0, 1, ..., n_max in vals(0:n_max),
+  ! where crint_2(n, rho) = $\int_0^1 t^{2n} \exp(-\rho t^2) dt$ for
+  ! a complex argument rho. For |rho| < 3.5 the same branches as
+  ! crint_1_vec are used; for |rho| >= 3.5, zboysfun if Re(rho) >= 0,
+  ! and zboysfunnrp (which returns $\exp(\rho)$ times the integral)
+  ! followed by the $\exp(-\rho)$ rescaling if Re(rho) < 0.
+  END_DOC
   implicit none
 
   integer,    intent(in)  :: n_max
@@ -591,7 +607,7 @@ subroutine crint_2_vec(n_max, rho, vals)
     else
 
       call zboysfunnrp(n_max, rho, vals)
-      erho = zexp(-rho)
+      erho = exp(-rho)
       do n = 0, n_max
         vals(n) = vals(n) * erho
       enddo
@@ -616,8 +632,8 @@ subroutine crint_smallz_vec(n_max, rho, vals)
   complex*16, intent(in)      :: rho
   complex*16, intent(out)     :: vals(0:n_max)
 
-  integer,          parameter :: kmax = 40
-  double precision, parameter :: eps = 1.d-10
+  integer,          parameter :: kmax = 100
+  double precision, parameter :: eps = 1.d-17
 
   integer                     :: k, n
   complex*16                  :: ct, delta_k
@@ -632,7 +648,7 @@ subroutine crint_smallz_vec(n_max, rho, vals)
     rho_k(k) = rho_k(k-1) * rho
   enddo
 
-  rhoe = 0.5d0 * zexp(-rho)
+  rhoe = 0.5d0 * exp(-rho)
 
   do n = 0, n_max
 
@@ -642,12 +658,12 @@ subroutine crint_smallz_vec(n_max, rho, vals)
     do k = 1, kmax
       delta_k = ct * rho_k(k) / gamma(dble(n+k) + 1.5d0)
       vals(n) += delta_k
-      if(abs(delta_k) .lt. eps) then
+      if(abs(delta_k) .lt. eps * abs(vals(n))) then
         exit
       endif
     enddo
   
-    if(abs(delta_k) > eps) then
+    if(abs(delta_k) > eps * abs(vals(n))) then
       write(*,*) ' pb in crint_smallz_vec !'
       write(*,*) ' n, rho = ', n, rho
       write(*,*) ' value = ', vals(n)
@@ -664,6 +680,12 @@ end
 
 subroutine crint_quad_1(n, rho, n_quad, crint_quad)
 
+  BEGIN_DOC
+  ! Approximates crint_1(n, rho) with a fixed n_quad-point quadrature
+  ! of $\int_0^1 t^{2n} \exp(-\rho t^2) dt$: nodes t = i/n_quad,
+  ! weights cycling 32, 12, 32, 14 with period 4 (indexed by i mod 4),
+  ! weight 7 at the endpoint t = 1, factor 2/(45 n_quad).
+  END_DOC
   implicit none
 
   integer,    intent(in)  :: n, n_quad
@@ -676,7 +698,7 @@ subroutine crint_quad_1(n, rho, n_quad, crint_quad)
 
   tmp_inv = 1.d0 / dble(n_quad)
 
-  crint_quad = 7.d0 * zexp(-rho)
+  crint_quad = 7.d0 * exp(-rho)
 
   tmp0 = 0.d0
   select case (n)
@@ -685,7 +707,7 @@ subroutine crint_quad_1(n, rho, n_quad, crint_quad)
       do i_quad = 1, n_quad - 1
         tmp0 = tmp0 + tmp_inv
         tmp1 = tmp0 * tmp0
-        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1)
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * exp(-rho*tmp1)
       enddo
       crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
 
@@ -693,7 +715,7 @@ subroutine crint_quad_1(n, rho, n_quad, crint_quad)
       do i_quad = 1, n_quad - 1
         tmp0 = tmp0 + tmp_inv
         tmp1 = tmp0 * tmp0
-        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1) * tmp1
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * exp(-rho*tmp1) * tmp1
       enddo
       crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
 
@@ -701,7 +723,7 @@ subroutine crint_quad_1(n, rho, n_quad, crint_quad)
       do i_quad = 1, n_quad - 1
         tmp0 = tmp0 + tmp_inv
         tmp1 = tmp0 * tmp0
-        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1) * tmp1 * tmp1
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * exp(-rho*tmp1) * tmp1 * tmp1
       enddo
       crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
 
@@ -709,7 +731,7 @@ subroutine crint_quad_1(n, rho, n_quad, crint_quad)
       do i_quad = 1, n_quad - 1
         tmp0 = tmp0 + tmp_inv
         tmp1 = tmp0 * tmp0
-        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1) * tmp1 * tmp1 * tmp1
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * exp(-rho*tmp1) * tmp1 * tmp1 * tmp1
       enddo
       crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
 
@@ -718,7 +740,7 @@ subroutine crint_quad_1(n, rho, n_quad, crint_quad)
         tmp0 = tmp0 + tmp_inv
         tmp1 = tmp0 * tmp0
         tmp2 = tmp1 * tmp1
-        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1) * tmp2 * tmp2
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * exp(-rho*tmp1) * tmp2 * tmp2
       enddo
       crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
 
@@ -726,7 +748,7 @@ subroutine crint_quad_1(n, rho, n_quad, crint_quad)
       do i_quad = 1, n_quad - 1
         tmp0 = tmp0 + tmp_inv
         tmp1 = tmp0 * tmp0
-        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1) * tmp1**n
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * exp(-rho*tmp1) * tmp1**n
       enddo
       crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
   end select
@@ -737,6 +759,13 @@ end
 
 subroutine crint_quad_2(n, rho, n_quad, crint_quad)
 
+  BEGIN_DOC
+  ! Approximates crint_2(n, rho) with a fixed n_quad-point quadrature
+  ! of $\frac{1}{2}\int_0^1 t^{n-1/2} \exp(-\rho t) dt$, the form
+  ! obtained from the crint_2 integrand with the change of variable
+  ! t = s^2: nodes t = i/n_quad, weights cycling 32, 12, 32, 14 with
+  ! period 4, weight 7 at the endpoint t = 1, factor 1/(45 n_quad).
+  END_DOC
   implicit none
 
   integer,    intent(in)  :: n, n_quad
@@ -750,10 +779,10 @@ subroutine crint_quad_2(n, rho, n_quad, crint_quad)
 
   tmp_inv = 1.d0 / dble(n_quad)
 
-  crint_quad = 7.d0 * zexp(-rho)
+  crint_quad = 7.d0 * exp(-rho)
 
   tmp0 = 0.d0
-  rhoc = zexp(-rho*tmp_inv)
+  rhoc = exp(-rho*tmp_inv)
   rhoe = (1.d0, 0.d0)
   select case (n)
 
@@ -826,6 +855,12 @@ end
 
 subroutine crint_quad_12(n, rho, n_quad, crint_quad)
 
+  BEGIN_DOC
+  ! Approximates crint_1(n, rho) with a fixed n_quad-point quadrature:
+  ! the rule of crint_quad_1 (nodes t = i/n_quad for
+  ! $\int_0^1 t^{2n} \exp(-\rho t^2) dt$) is used for n = 0 and the
+  ! rule of crint_quad_2 for n >= 1.
+  END_DOC
   implicit none
 
   integer,    intent(in)  :: n, n_quad
@@ -839,10 +874,10 @@ subroutine crint_quad_12(n, rho, n_quad, crint_quad)
 
   tmp_inv = 1.d0 / dble(n_quad)
 
-  crint_quad = 7.d0 * zexp(-rho)
+  crint_quad = 7.d0 * exp(-rho)
 
   tmp0 = 0.d0
-  rhoc = zexp(-rho*tmp_inv)
+  rhoc = exp(-rho*tmp_inv)
   rhoe = (1.d0, 0.d0)
   select case (n)
 
@@ -850,7 +885,7 @@ subroutine crint_quad_12(n, rho, n_quad, crint_quad)
       do i_quad = 1, n_quad - 1
         tmp0 = tmp0 + tmp_inv
         tmp1 = tmp0 * tmp0
-        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1)
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * exp(-rho*tmp1)
       enddo
       crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
 
@@ -908,6 +943,10 @@ end
 
 subroutine crint_quad_12_vec(n_max, rho, vals)
 
+  BEGIN_DOC
+  ! Stores crint_quad_12(n, rho) for n = 0, 1, ..., n_max in
+  ! vals(0:n_max), with n_quad fixed to 10000000.
+  END_DOC
   implicit none
 
   integer,    intent(in)  :: n_max

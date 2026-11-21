@@ -27,8 +27,8 @@ pt2
  .. hlist:: 
     :columns: 3 
  
+    * :c:data:`all_mo_integrals` 
     * :c:data:`is_zmq_slave` 
-    * :c:data:`mo_two_e_integrals_in_map` 
     * :c:data:`psi_energy` 
     * :c:data:`read_wf` 
     * :c:data:`threshold_generators` 

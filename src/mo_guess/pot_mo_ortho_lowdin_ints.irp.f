@@ -1,5 +1,14 @@
 BEGIN_PROVIDER [double precision, ao_ortho_lowdin_nucl_elec_integrals, (mo_num,mo_num)]
  implicit none
+ BEGIN_DOC
+ ! Nuclear attraction (nucleus-electron) integrals in the Lowdin
+ ! orthonormalized AO basis (ao_ortho_lowdin_coef).
+ ! Element (j,i) is the matrix element between the jth and the ith
+ ! ao_ortho_lowdin orbital, obtained by transforming
+ ! ao_integrals_n_e (the nucleus-electron integrals in the AO basis,
+ ! including the pseudopotential integrals) with the coefficient
+ ! matrix.
+ END_DOC
  integer :: i1,j1,i,j
  double precision :: c_i1,c_j1
 

@@ -24,7 +24,7 @@ Usage
 
 .. option:: -r <new_name> --rename=<new_name>
 
-   Renames the provider/subroutine/function and all its occurences.
+   Renames the provider/subroutine/function and all its occurrences.
 
 
 .. note::

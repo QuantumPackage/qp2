@@ -101,6 +101,13 @@
  BEGIN_PROVIDER [double precision, alpha_dens_kin_in_r, (n_points_final_grid)]
 &BEGIN_PROVIDER [double precision, beta_dens_kin_in_r, (n_points_final_grid)]
  implicit none
+ BEGIN_DOC
+ ! alpha_dens_kin_in_r(i) = alpha kinetic energy density at the ith
+ ! grid point: 0.5 * sum over j = 1, elec_alpha_num of the squared
+ ! norm of the gradient of the jth MO
+ !
+ ! beta_dens_kin_in_r(i) = same for j = 1, elec_beta_num
+ END_DOC
  integer  :: i,m,j
  alpha_dens_kin_in_r = 0.d0
  beta_dens_kin_in_r = 0.d0

@@ -8,20 +8,107 @@
 mo_two_e_ints
 ==================
 
-Here, all two-electron integrals (:math:`1/r_{12}`) are computed.
-As they have 4 indices and many are zero, they are stored in a map, as defined
-in :file:`Utils/map_module.f90`.
+This module computes and manages molecular orbital (MO) two-electron integrals.
 
-To fetch an |AO| integral, use the
-`get_ao_two_e_integral(i,j,k,l,ao_integrals_map)` function, and
-to fetch an |MO| integral, use
-`get_two_e_integral(i,j,k,l,mo_integrals_map)` or
-`mo_two_e_integral(i,j,k,l)`.
+The module implements several algorithms and optimization strategies for handling
+the large number of two-electron integrals that arise in quantum chemical calculations.
 
-The conventions are:
+Key Features
+------------
 
-* For |AO| integrals : (ik|jl) = (11|22)
-* For |MO| integrals : <ij|kl> = <12|12>
+1. **Convention Awareness**: 
+   - AO integrals use the chemists' convention: (ik|jl) = (11|22)
+   - MO integrals use the physicist's convention: <ij|kl> = <12|12>
+
+2. **Efficient Storage**: Two-electron integrals are stored in a sparse map structure
+   to minimize memory usage, as most integrals are zero due to symmetry and
+   selection rules.
+
+3. **Specialized Dense Arrays**:
+
+   For integrals with 2 identical indices such as <ij|ik> and <ij|jk>,
+   dedicated dense arrays are maintained to accelerate computations
+   involving single excitations. These arrays significantly improve
+   performance for CI calculations that frequently compute single
+   excitation amplitudes.
+
+4. **Multi-Level Caching System**:
+   - Implements a sophisticated cache mechanism for frequently accessed integrals
+   - Cache size is configurable via ``mo_integrals_cache_shift`` parameter
+   - Automatically manages memory usage while maximizing hit rates for common integrals
+   - Reduces redundant computations and improves overall performance
+
+5. **Multiple Computation Strategies**:
+   - Direct AO-to-MO transformation using DGEMM operations
+   - Sparse transformation methods for memory-efficient calculation
+   - Cholesky decomposition for large-scale calculations
+
+6. **Hardware Acceleration**:
+   - GPU acceleration support for faster computation
+   - Multi-threading with OpenMP
+   - Optimized memory access patterns
+
+7. **Flexible Configuration**:
+   - Configurable integral thresholds for pruning negligible values
+   - Adjustable cache sizes for optimal performance
+   - Support for both single and double precision
+
+8. **I/O Options**:
+   - Read/write integrals from/to disk for memory-constrained environments
+   - Integration with Cholesky decompositions for enhanced efficiency
+
+Implementation Details
+----------------------
+
+The module provides several key routines:
+
+- ``get_two_e_integral(i,j,k,l,mo_integrals_map)``: Fetches a specific MO integral
+- ``mo_two_e_integral(i,j,k,l)``: Direct access to MO integrals
+- ``mo_two_e_integrals_jj``, ``mo_two_e_integrals_jj_exchange``, ``mo_two_e_integrals_jj_anti``: Specialized routines for 2-index integrals
+- ``big_array_exchange_integrals`` and ``big_array_coulomb_integrals``: 3-index arrays for efficient exchange and Coulomb integrals computation
+
+Storage Format
+--------------
+
+Integrals are stored in a sparse map data structure optimized for:
+- Memory efficiency by storing only non-zero integrals
+- Fast lookup of integrals by their 4-index notation
+- Support for both symmetric and antisymmetric integral combinations
+- Integration with multi-level caching for frequently accessed integrals
+
+The caching system automatically manages memory usage while maximizing hit rates for common integrals,
+reducing redundant computations and improving overall performance. The cache size can be adjusted via
+the ``mo_integrals_cache_shift`` parameter in the EZFIO configuration.
+
+The module automatically determines the most efficient computation strategy based on:
+- Available memory (``qp_max_mem``)
+- System architecture (CPU/GPU)
+- Configuration settings (``do_mo_cholesky``, ``mo_integrals_threshold``)
+
+Cholesky Decomposition
+----------------------
+
+When ``do_mo_cholesky`` is enabled, the module uses Cholesky decomposition to:
+- Reduce memory footprint for large systems
+- Enable faster integral evaluation in CI calculations
+- Support efficient handling of the large number of integrals in correlated wavefunction methods
+
+Usage Example
+-------------
+
+To use the two-electron integrals in your code:
+
+.. code-block:: fortran
+
+   ! Get a specific 4-index MO integral
+   double precision :: integral_value
+   integral_value = mo_two_e_integral(i, j, k, l)
+
+   ! Or use the map-based approach for more control
+   integral_value = get_two_e_integral(i, j, k, l, mo_integrals_map)
+
+The module is automatically initialized during the configuration process and
+provides the integrals as part of the standard quantum package environment.
 
 
 
@@ -30,6 +117,12 @@ The conventions are:
  
 EZFIO parameters 
 ---------------- 
+ 
+.. option:: do_mo_cholesky
+ 
+    Use Cholesky decomposition of MO integrals in CI calculations
+ 
+    Default: False
  
 .. option:: io_mo_cholesky
  
@@ -61,11 +154,58 @@ EZFIO parameters
  
     Default: None
  
+.. option:: mo_cholesky_double
+ 
+    Use double precision to build integrals from Cholesky vectors
+ 
+    Default: True
+ 
  
 Providers 
 --------- 
  
-.. c:var:: banned_excitation
+.. c:var:: bool all_mo_integrals
+
+
+    File : :file:`mo_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        logical	:: all_mo_integrals	
+
+
+    Used to provide everything needed before using MO integrals
+    PROVIDE all_mo_integrals
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`gpu_integral_buffer1`
+       * :c:data:`gpu_integral_buffer1`
+       * :c:data:`mo_integrals_cache`
+       * :c:data:`mo_one_e_integrals`
+       * :c:data:`mo_two_e_integrals_in_map`
+       * :c:data:`mo_two_e_integrals_jj`
+       * :c:data:`mo_two_e_integrals_jj`
+       * :c:data:`mo_two_e_integrals_jj`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ci_electronic_energy`
+       * :c:data:`h_matrix_all_dets`
+       * :c:data:`h_matrix_cas`
+       * :c:data:`h_matrix_diag_all_dets`
+       * :c:data:`psi_energy_two_e_trans`
+
+ 
+.. c:var:: bool banned_excitation
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -90,12 +230,11 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
        * :c:data:`core_fock_operator`
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: big_array_coulomb_integrals
+.. c:var:: double big_array_coulomb_integrals
 
 
     File : :file:`mo_two_e_ints/integrals_3_index.irp.f`
@@ -115,30 +254,32 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`banned_excitation`
+       * :c:data:`blas_handle`
        * :c:data:`cholesky_mo_num`
        * :c:data:`cholesky_mo_transp`
        * :c:data:`do_mo_cholesky`
-       * :c:data:`mo_integrals_cache`
-       * :c:data:`mo_integrals_cache_min`
+       * :c:data:`gpu_num`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
-       * :c:data:`mo_two_e_integrals_in_map`
 
     Needed by:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`coef_hf_selector`
+       * :c:data:`all_mo_integrals`
+       * :c:data:`core_fock_operator`
+       * :c:data:`fock_operator_closed_shell_ref_bitmask`
+       * :c:data:`fock_wee_closed_shell`
        * :c:data:`h_core_ri`
        * :c:data:`h_matrix_all_dets`
        * :c:data:`h_matrix_cas`
        * :c:data:`h_matrix_diag_all_dets`
+       * :c:data:`mo_two_e_integrals_jj`
        * :c:data:`psi_energy_two_e_trans`
 
  
-.. c:var:: big_array_exchange_integrals
+.. c:var:: double big_array_exchange_integrals
 
 
     File : :file:`mo_two_e_ints/integrals_3_index.irp.f`
@@ -158,30 +299,32 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`banned_excitation`
+       * :c:data:`blas_handle`
        * :c:data:`cholesky_mo_num`
        * :c:data:`cholesky_mo_transp`
        * :c:data:`do_mo_cholesky`
-       * :c:data:`mo_integrals_cache`
-       * :c:data:`mo_integrals_cache_min`
+       * :c:data:`gpu_num`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
-       * :c:data:`mo_two_e_integrals_in_map`
 
     Needed by:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`coef_hf_selector`
+       * :c:data:`all_mo_integrals`
+       * :c:data:`core_fock_operator`
+       * :c:data:`fock_operator_closed_shell_ref_bitmask`
+       * :c:data:`fock_wee_closed_shell`
        * :c:data:`h_core_ri`
        * :c:data:`h_matrix_all_dets`
        * :c:data:`h_matrix_cas`
        * :c:data:`h_matrix_diag_all_dets`
+       * :c:data:`mo_two_e_integrals_jj`
        * :c:data:`psi_energy_two_e_trans`
 
  
-.. c:var:: cholesky_mo
+.. c:var:: double cholesky_mo
 
 
     File : :file:`mo_two_e_ints/cholesky.irp.f`
@@ -204,7 +347,7 @@ Providers
 
 
  
-.. c:var:: cholesky_mo_num
+.. c:var:: int cholesky_mo_num
 
 
     File : :file:`mo_two_e_ints/cholesky.irp.f`
@@ -212,6 +355,7 @@ Providers
     .. code:: fortran
 
         integer	:: cholesky_mo_num	
+        integer, allocatable	:: cholesky_mo_num_split	(1:5)
 
 
     Number of Cholesky vectors in MO basis
@@ -230,24 +374,83 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`bielec_pqxx_array`
-       * :c:data:`bielec_pxxq_array`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`cholesky_mo`
+       * :c:data:`cholesky_mo_sp`
        * :c:data:`cholesky_mo_transp`
-       * :c:data:`cholesky_no_1_idx_transp`
-       * :c:data:`cholesky_no_2_idx_transp`
-       * :c:data:`cholesky_no_total_transp`
+       * :c:data:`cholesky_mo_transp_sp`
+       * :c:data:`cholesky_mo_transp_sp_d`
        * :c:data:`cholesky_semi_mo_transp_simple`
        * :c:data:`core_fock_operator`
-       * :c:data:`fock_operator_closed_shell_ref_bitmask`
-       * :c:data:`fock_wee_closed_shell`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: cholesky_mo_transp
+.. c:var:: int cholesky_mo_num_split
+
+
+    File : :file:`mo_two_e_ints/cholesky.irp.f`
+
+    .. code:: fortran
+
+        integer	:: cholesky_mo_num	
+        integer, allocatable	:: cholesky_mo_num_split	(1:5)
+
+
+    Number of Cholesky vectors in MO basis
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`cholesky_ao_num`
+       * :c:data:`ezfio_work_dir`
+       * :c:data:`read_mo_cholesky`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`cholesky_mo`
+       * :c:data:`cholesky_mo_sp`
+       * :c:data:`cholesky_mo_transp`
+       * :c:data:`cholesky_mo_transp_sp`
+       * :c:data:`cholesky_mo_transp_sp_d`
+       * :c:data:`cholesky_semi_mo_transp_simple`
+       * :c:data:`core_fock_operator`
+       * :c:data:`mo_integrals_cache`
+       * :c:data:`mo_two_e_integrals_in_map`
+       * :c:data:`mo_two_e_integrals_jj`
+
+ 
+.. c:var:: float cholesky_mo_sp
+
+
+    File : :file:`mo_two_e_ints/cholesky.irp.f`
+
+    .. code:: fortran
+
+        real, allocatable	:: cholesky_mo_sp	(mo_num,mo_num,cholesky_mo_num)
+
+
+    Cholesky vectors in MO basis in stored in single precision
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`cholesky_mo_num`
+       * :c:data:`cholesky_mo_transp_sp`
+       * :c:data:`mo_num`
+
+
+ 
+.. c:var:: double cholesky_mo_transp
 
 
     File : :file:`mo_two_e_ints/cholesky.irp.f`
@@ -255,11 +458,12 @@ Providers
     .. code:: fortran
 
         double precision, allocatable	:: cholesky_mo_transp	(cholesky_mo_num,mo_num,mo_num)
+        type(gpu_double3), allocatable	:: cholesky_mo_transp_d	(0:gpu_num)
 
 
     Cholesky vectors in MO basis. Warning: it is transposed wrt cholesky_ao:
     
-    -  cholesky_ao        is (ao_num^2 x cholesky_ao_num)
+    - cholesky_ao        is (ao_num^2 x cholesky_ao_num)
     
     - cholesky_mo_transp is (cholesky_mo_num x mo_num^2)
 
@@ -269,9 +473,11 @@ Providers
        :columns: 3
 
        * :c:data:`ao_num`
+       * :c:data:`blas_handle`
        * :c:data:`cholesky_ao_num`
        * :c:data:`cholesky_mo_num`
        * :c:data:`ezfio_work_dir`
+       * :c:data:`gpu_num`
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
        * :c:data:`read_mo_cholesky`
@@ -281,22 +487,124 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`bielec_pqxx_array`
-       * :c:data:`bielec_pxxq_array`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`cholesky_mo`
-       * :c:data:`cholesky_no_1_idx_transp`
-       * :c:data:`cholesky_no_total_transp`
+       * :c:data:`cholesky_mo_transp_sp`
        * :c:data:`cholesky_semi_mo_transp_simple`
        * :c:data:`core_fock_operator`
-       * :c:data:`fock_operator_closed_shell_ref_bitmask`
-       * :c:data:`fock_wee_closed_shell`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: cholesky_semi_mo_transp_simple
+.. c:var:: int cholesky_mo_transp_d
+
+
+    File : :file:`mo_two_e_ints/cholesky.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: cholesky_mo_transp	(cholesky_mo_num,mo_num,mo_num)
+        type(gpu_double3), allocatable	:: cholesky_mo_transp_d	(0:gpu_num)
+
+
+    Cholesky vectors in MO basis. Warning: it is transposed wrt cholesky_ao:
+    
+    - cholesky_ao        is (ao_num^2 x cholesky_ao_num)
+    
+    - cholesky_mo_transp is (cholesky_mo_num x mo_num^2)
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`blas_handle`
+       * :c:data:`cholesky_ao_num`
+       * :c:data:`cholesky_mo_num`
+       * :c:data:`ezfio_work_dir`
+       * :c:data:`gpu_num`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_num`
+       * :c:data:`read_mo_cholesky`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`cholesky_mo`
+       * :c:data:`cholesky_mo_transp_sp`
+       * :c:data:`cholesky_semi_mo_transp_simple`
+       * :c:data:`core_fock_operator`
+       * :c:data:`mo_integrals_cache`
+       * :c:data:`mo_two_e_integrals_in_map`
+       * :c:data:`mo_two_e_integrals_jj`
+
+ 
+.. c:var:: float cholesky_mo_transp_sp
+
+
+    File : :file:`mo_two_e_ints/cholesky.irp.f`
+
+    .. code:: fortran
+
+        real, allocatable	:: cholesky_mo_transp_sp	(cholesky_mo_num,mo_num,mo_num)
+
+
+    Cholesky vectors in MO basis in s. Warning: it is transposed wrt cholesky_ao:
+    
+    - cholesky_ao        is (ao_num^2 x cholesky_ao_num)
+    
+    - cholesky_mo_transp is (cholesky_mo_num x mo_num^2)
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`cholesky_mo_num`
+       * :c:data:`cholesky_mo_transp`
+       * :c:data:`mo_num`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`cholesky_mo_sp`
+       * :c:data:`cholesky_mo_transp_sp_d`
+       * :c:data:`core_fock_operator`
+       * :c:data:`mo_two_e_integrals_jj`
+
+ 
+.. c:var:: int cholesky_mo_transp_sp_d
+
+
+    File : :file:`mo_two_e_ints/cholesky.irp.f`
+
+    .. code:: fortran
+
+        type(gpu_real3), allocatable	:: cholesky_mo_transp_sp_d	(0:gpu_num)
+
+
+    Cholesky vectors in MO basis, on GPU, single precision.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`cholesky_mo_num`
+       * :c:data:`cholesky_mo_transp_sp`
+       * :c:data:`gpu_num`
+       * :c:data:`mo_num`
+
+
+ 
+.. c:var:: double cholesky_semi_mo_transp_simple
 
 
     File : :file:`mo_two_e_ints/cholesky.irp.f`
@@ -321,7 +629,7 @@ Providers
 
 
  
-.. c:var:: core_energy
+.. c:var:: double core_energy
 
 
     File : :file:`mo_two_e_ints/core_quantities.irp.f`
@@ -346,7 +654,7 @@ Providers
 
 
  
-.. c:var:: core_energy_erf
+.. c:var:: double core_energy_erf
 
 
     File : :file:`mo_two_e_ints/core_quantities_erf.irp.f`
@@ -370,7 +678,7 @@ Providers
 
 
  
-.. c:var:: core_fock_operator
+.. c:var:: double core_fock_operator
 
 
     File : :file:`mo_two_e_ints/core_quantities.irp.f`
@@ -388,13 +696,17 @@ Providers
        :columns: 3
 
        * :c:data:`banned_excitation`
+       * :c:data:`big_array_coulomb_integrals`
        * :c:data:`cholesky_mo_num`
        * :c:data:`cholesky_mo_transp`
+       * :c:data:`cholesky_mo_transp_sp`
        * :c:data:`do_mo_cholesky`
        * :c:data:`list_act`
        * :c:data:`list_core`
+       * :c:data:`mo_cholesky_double`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_integrals_cache_min`
+       * :c:data:`mo_integrals_cache_shift`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_in_map`
@@ -403,7 +715,7 @@ Providers
 
 
  
-.. c:var:: core_fock_operator_erf
+.. c:var:: double core_fock_operator_erf
 
 
     File : :file:`mo_two_e_ints/core_quantities_erf.irp.f`
@@ -432,42 +744,135 @@ Providers
 
 
  
-.. c:var:: do_mo_cholesky
+.. c:var:: int gpu_integral_buffer1
 
 
-    File : :file:`mo_two_e_ints/cholesky.irp.f`
+    File : :file:`mo_two_e_ints/map_integrals.irp.f`
 
     .. code:: fortran
 
-        logical	:: do_mo_cholesky	
+        type(gpu_double1), allocatable	:: gpu_integral_buffer1	(0:nproc_max)
+        type(gpu_real1), allocatable	:: gpu_integral_buffer_sp1	(0:nproc_max)
+        type(gpu_double2), allocatable	:: gpu_integral_buffer2	(0:nproc_max)
+        type(gpu_real2), allocatable	:: gpu_integral_buffer_sp2	(0:nproc_max)
 
 
-    If True, use Cholesky vectors for MO integrals
+    Temporary buffers for gpu_dgemv
 
     Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`do_ao_cholesky`
+       * :c:data:`gpu_num`
+       * :c:data:`mo_num`
+       * :c:data:`nproc_max`
 
     Needed by:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`bielec_pqxx_array`
-       * :c:data:`bielec_pxxq_array`
-       * :c:data:`big_array_coulomb_integrals`
-       * :c:data:`core_fock_operator`
-       * :c:data:`fock_operator_closed_shell_ref_bitmask`
-       * :c:data:`fock_wee_closed_shell`
-       * :c:data:`mo_integrals_cache`
-       * :c:data:`mo_two_e_integrals_in_map`
-       * :c:data:`mo_two_e_integrals_jj`
+       * :c:data:`all_mo_integrals`
 
  
-.. c:var:: h_core_ri
+.. c:var:: int gpu_integral_buffer2
+
+
+    File : :file:`mo_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        type(gpu_double1), allocatable	:: gpu_integral_buffer1	(0:nproc_max)
+        type(gpu_real1), allocatable	:: gpu_integral_buffer_sp1	(0:nproc_max)
+        type(gpu_double2), allocatable	:: gpu_integral_buffer2	(0:nproc_max)
+        type(gpu_real2), allocatable	:: gpu_integral_buffer_sp2	(0:nproc_max)
+
+
+    Temporary buffers for gpu_dgemv
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`gpu_num`
+       * :c:data:`mo_num`
+       * :c:data:`nproc_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`all_mo_integrals`
+
+ 
+.. c:var:: int gpu_integral_buffer_sp1
+
+
+    File : :file:`mo_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        type(gpu_double1), allocatable	:: gpu_integral_buffer1	(0:nproc_max)
+        type(gpu_real1), allocatable	:: gpu_integral_buffer_sp1	(0:nproc_max)
+        type(gpu_double2), allocatable	:: gpu_integral_buffer2	(0:nproc_max)
+        type(gpu_real2), allocatable	:: gpu_integral_buffer_sp2	(0:nproc_max)
+
+
+    Temporary buffers for gpu_dgemv
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`gpu_num`
+       * :c:data:`mo_num`
+       * :c:data:`nproc_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`all_mo_integrals`
+
+ 
+.. c:var:: int gpu_integral_buffer_sp2
+
+
+    File : :file:`mo_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        type(gpu_double1), allocatable	:: gpu_integral_buffer1	(0:nproc_max)
+        type(gpu_real1), allocatable	:: gpu_integral_buffer_sp1	(0:nproc_max)
+        type(gpu_double2), allocatable	:: gpu_integral_buffer2	(0:nproc_max)
+        type(gpu_real2), allocatable	:: gpu_integral_buffer_sp2	(0:nproc_max)
+
+
+    Temporary buffers for gpu_dgemv
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`gpu_num`
+       * :c:data:`mo_num`
+       * :c:data:`nproc_max`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`all_mo_integrals`
+
+ 
+.. c:var:: double h_core_ri
 
 
     File : :file:`mo_two_e_ints/core_quantities.irp.f`
@@ -492,77 +897,7 @@ Providers
 
 
  
-.. c:function:: insert_into_mo_integrals_erf_map:
-
-
-    File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
-
-    .. code:: fortran
-
-        subroutine insert_into_mo_integrals_erf_map(n_integrals,                 &
-      buffer_i, buffer_values, thr)
-
-
-    Create new entry into |MO| map, or accumulate in an existing entry
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mo_integrals_erf_map`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`add_integrals_to_map_erf`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`map_update`
-
- 
-.. c:function:: insert_into_mo_integrals_map:
-
-
-    File : :file:`mo_two_e_ints/map_integrals.irp.f`
-
-    .. code:: fortran
-
-        subroutine insert_into_mo_integrals_map(n_integrals,                 &
-      buffer_i, buffer_values, thr)
-
-
-    Create new entry into MO map, or accumulate in an existing entry
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mo_integrals_map`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`add_integrals_to_map`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`map_update`
-
- 
-.. c:var:: int_erf_3_index
+.. c:var:: double int_erf_3_index
 
 
     File : :file:`mo_two_e_ints/ints_erf_3_index.irp.f`
@@ -590,7 +925,7 @@ Providers
 
 
  
-.. c:var:: int_erf_3_index_exc
+.. c:var:: double int_erf_3_index_exc
 
 
     File : :file:`mo_two_e_ints/ints_erf_3_index.irp.f`
@@ -618,14 +953,38 @@ Providers
 
 
  
-.. c:var:: mo_integrals_cache
+.. c:var:: mo_coef_novirt
+
+
+    File : :file:`mo_two_e_ints/four_idx_novvvv.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_coef_novirt	(ao_num,n_core_inact_act_orb)
+
+
+    MO coefficients without virtual MOs
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`list_core_inact_act`
+       * :c:data:`mo_coef`
+       * :c:data:`n_core_inact_act_orb`
+
+
+ 
+.. c:var:: double mo_integrals_cache
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
 
     .. code:: fortran
 
-        double precision, allocatable	:: mo_integrals_cache	(0_8:(1_8*mo_integrals_cache_size)**4)
+        double precision, allocatable	:: mo_integrals_cache	(0_8:mo_integrals_cache_size_8)
 
 
     Cache of MO integrals for fast access
@@ -638,6 +997,7 @@ Providers
        * :c:data:`cholesky_mo_num`
        * :c:data:`cholesky_mo_transp`
        * :c:data:`do_mo_cholesky`
+       * :c:data:`gpu_num`
        * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_cache_shift`
        * :c:data:`mo_integrals_map`
@@ -648,13 +1008,12 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`bielecci`
-       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`all_mo_integrals`
        * :c:data:`core_fock_operator`
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: mo_integrals_cache_max
+.. c:var:: int mo_integrals_cache_max
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -664,6 +1023,7 @@ Providers
         integer	:: mo_integrals_cache_min	
         integer	:: mo_integrals_cache_max	
         integer	:: mo_integrals_cache_size	
+        integer*8	:: mo_integrals_cache_size_8	
 
 
     Min and max values of the MOs for which the integrals are in the cache
@@ -682,17 +1042,46 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`bielec_pqxx_array`
-       * :c:data:`bielec_pxxq_array`
-       * :c:data:`big_array_coulomb_integrals`
        * :c:data:`core_fock_operator`
-       * :c:data:`fock_operator_closed_shell_ref_bitmask`
-       * :c:data:`fock_wee_closed_shell`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: mo_integrals_cache_min
+.. c:var:: mo_integrals_cache_max_8
+
+
+    File : :file:`mo_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        integer*4	:: mo_integrals_cache_min	
+        integer*4	:: mo_integrals_cache_max	
+        integer*8	:: mo_integrals_cache_min_8	
+        integer*8	:: mo_integrals_cache_max_8	
+
+
+    Min and max values of the MOs for which the integrals are in the cache
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`elec_alpha_num`
+       * :c:data:`mo_num`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`core_fock_operator`
+       * :c:data:`mo_integrals_cache`
+       * :c:data:`mo_two_e_integrals_jj`
+
+ 
+.. c:var:: int mo_integrals_cache_min
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -702,6 +1091,7 @@ Providers
         integer	:: mo_integrals_cache_min	
         integer	:: mo_integrals_cache_max	
         integer	:: mo_integrals_cache_size	
+        integer*8	:: mo_integrals_cache_size_8	
 
 
     Min and max values of the MOs for which the integrals are in the cache
@@ -720,17 +1110,46 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`bielec_pqxx_array`
-       * :c:data:`bielec_pxxq_array`
-       * :c:data:`big_array_coulomb_integrals`
        * :c:data:`core_fock_operator`
-       * :c:data:`fock_operator_closed_shell_ref_bitmask`
-       * :c:data:`fock_wee_closed_shell`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: mo_integrals_cache_size
+.. c:var:: mo_integrals_cache_min_8
+
+
+    File : :file:`mo_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        integer*4	:: mo_integrals_cache_min	
+        integer*4	:: mo_integrals_cache_max	
+        integer*8	:: mo_integrals_cache_min_8	
+        integer*8	:: mo_integrals_cache_max_8	
+
+
+    Min and max values of the MOs for which the integrals are in the cache
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`elec_alpha_num`
+       * :c:data:`mo_num`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`core_fock_operator`
+       * :c:data:`mo_integrals_cache`
+       * :c:data:`mo_two_e_integrals_jj`
+
+ 
+.. c:var:: int mo_integrals_cache_size
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -740,6 +1159,7 @@ Providers
         integer	:: mo_integrals_cache_min	
         integer	:: mo_integrals_cache_max	
         integer	:: mo_integrals_cache_size	
+        integer*8	:: mo_integrals_cache_size_8	
 
 
     Min and max values of the MOs for which the integrals are in the cache
@@ -758,17 +1178,46 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`bielec_pqxx_array`
-       * :c:data:`bielec_pxxq_array`
-       * :c:data:`big_array_coulomb_integrals`
        * :c:data:`core_fock_operator`
-       * :c:data:`fock_operator_closed_shell_ref_bitmask`
-       * :c:data:`fock_wee_closed_shell`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_two_e_integrals_jj`
 
  
-.. c:var:: mo_integrals_erf_cache
+.. c:var:: long mo_integrals_cache_size_8
+
+
+    File : :file:`mo_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        integer	:: mo_integrals_cache_min	
+        integer	:: mo_integrals_cache_max	
+        integer	:: mo_integrals_cache_size	
+        integer*8	:: mo_integrals_cache_size_8	
+
+
+    Min and max values of the MOs for which the integrals are in the cache
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`elec_alpha_num`
+       * :c:data:`mo_integrals_cache_shift`
+       * :c:data:`mo_num`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`core_fock_operator`
+       * :c:data:`mo_integrals_cache`
+       * :c:data:`mo_two_e_integrals_jj`
+
+ 
+.. c:var:: double mo_integrals_erf_cache
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -799,7 +1248,7 @@ Providers
        * :c:data:`mo_two_e_int_erf_jj`
 
  
-.. c:var:: mo_integrals_erf_cache_max
+.. c:var:: int mo_integrals_erf_cache_max
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -831,7 +1280,7 @@ Providers
        * :c:data:`mo_two_e_int_erf_jj`
 
  
-.. c:var:: mo_integrals_erf_cache_min
+.. c:var:: int mo_integrals_erf_cache_min
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -863,7 +1312,7 @@ Providers
        * :c:data:`mo_two_e_int_erf_jj`
 
  
-.. c:var:: mo_integrals_erf_map
+.. c:var:: int mo_integrals_erf_map
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -894,7 +1343,7 @@ Providers
        * :c:data:`mo_two_e_integrals_erf_in_map`
 
  
-.. c:var:: mo_integrals_map
+.. c:var:: int mo_integrals_map
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -918,14 +1367,8 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`bielec_pqxx_array`
-       * :c:data:`bielec_pxxq_array`
-       * :c:data:`bielecci`
        * :c:data:`big_array_coulomb_integrals`
-       * :c:data:`coef_hf_selector`
        * :c:data:`core_fock_operator`
-       * :c:data:`fock_operator_closed_shell_ref_bitmask`
-       * :c:data:`fock_wee_closed_shell`
        * :c:data:`h_matrix_all_dets`
        * :c:data:`h_matrix_cas`
        * :c:data:`h_matrix_diag_all_dets`
@@ -935,7 +1378,7 @@ Providers
        * :c:data:`psi_energy_two_e_trans`
 
  
-.. c:var:: mo_two_e_int_erf_jj
+.. c:var:: double mo_two_e_int_erf_jj
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -970,7 +1413,7 @@ Providers
        * :c:data:`core_energy_erf`
 
  
-.. c:var:: mo_two_e_int_erf_jj_anti
+.. c:var:: double mo_two_e_int_erf_jj_anti
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -1005,7 +1448,7 @@ Providers
        * :c:data:`core_energy_erf`
 
  
-.. c:var:: mo_two_e_int_erf_jj_anti_from_ao
+.. c:var:: double mo_two_e_int_erf_jj_anti_from_ao
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -1038,7 +1481,7 @@ Providers
 
 
  
-.. c:var:: mo_two_e_int_erf_jj_exchange
+.. c:var:: double mo_two_e_int_erf_jj_exchange
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -1073,7 +1516,7 @@ Providers
        * :c:data:`core_energy_erf`
 
  
-.. c:var:: mo_two_e_int_erf_jj_exchange_from_ao
+.. c:var:: double mo_two_e_int_erf_jj_exchange_from_ao
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -1106,7 +1549,7 @@ Providers
 
 
  
-.. c:var:: mo_two_e_int_erf_jj_from_ao
+.. c:var:: double mo_two_e_int_erf_jj_from_ao
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -1139,7 +1582,39 @@ Providers
 
 
  
-.. c:var:: mo_two_e_integrals_erf_in_map
+.. c:var:: mo_two_e_integral_jj_from_ao
+
+
+    File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_two_e_integral_jj_from_ao	(mo_num,mo_num)
+        double precision, allocatable	:: mo_two_e_integrals_jj_exchange_from_ao	(mo_num,mo_num)
+        double precision, allocatable	:: mo_two_e_integrals_jj_anti_from_ao	(mo_num,mo_num)
+
+
+    mo_two_e_integral_jj_from_ao(i,j) = J_ij
+    mo_two_e_integrals_jj_exchange_from_ao(i,j) = J_ij
+    mo_two_e_integrals_jj_anti_from_ao(i,j) = J_ij - K_ij
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_map`
+       * :c:data:`ao_integrals_threshold`
+       * :c:data:`ao_num`
+       * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`do_direct_integrals`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_coef_transp`
+       * :c:data:`mo_num`
+
+
+ 
+.. c:var:: bool mo_two_e_integrals_erf_in_map
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -1183,7 +1658,7 @@ Providers
        * :c:data:`mo_two_e_int_erf_jj`
 
  
-.. c:var:: mo_two_e_integrals_in_map
+.. c:var:: bool mo_two_e_integrals_in_map
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
@@ -1202,12 +1677,16 @@ Providers
 
        * :c:data:`ao_num`
        * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`gpu_num`
        * :c:data:`cholesky_mo_num`
+       * :c:data:`cholesky_mo_transp`
        * :c:data:`cholesky_mo_transp`
        * :c:data:`do_ao_cholesky`
        * :c:data:`do_mo_cholesky`
        * :c:data:`ezfio_filename`
        * :c:data:`full_ijkl_bitmask_4`
+       * :c:data:`gpu_num`
+       * :c:data:`mo_cholesky_double`
        * :c:data:`mo_class`
        * :c:data:`mo_coef`
        * :c:data:`mo_coef_transp`
@@ -1224,31 +1703,13 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`act_2_rdm_aa_mo`
-       * :c:data:`act_2_rdm_ab_mo`
-       * :c:data:`act_2_rdm_bb_mo`
-       * :c:data:`act_2_rdm_spin_trace_mo`
-       * :c:data:`act_2_rdm_trans_spin_trace_mo`
-       * :c:data:`bielec_pqxx_array`
-       * :c:data:`bielec_pxxq_array`
-       * :c:data:`bielecci`
-       * :c:data:`big_array_coulomb_integrals`
-       * :c:data:`ci_electronic_energy`
-       * :c:data:`coef_hf_selector`
+       * :c:data:`all_mo_integrals`
        * :c:data:`core_fock_operator`
-       * :c:data:`fock_operator_closed_shell_ref_bitmask`
-       * :c:data:`fock_wee_closed_shell`
-       * :c:data:`h_matrix_all_dets`
-       * :c:data:`h_matrix_cas`
-       * :c:data:`h_matrix_diag_all_dets`
-       * :c:data:`hessmat`
-       * :c:data:`hessmat_peter`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_two_e_integrals_jj`
-       * :c:data:`psi_energy_two_e_trans`
 
  
-.. c:var:: mo_two_e_integrals_jj
+.. c:var:: double mo_two_e_integrals_jj
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
@@ -1270,11 +1731,17 @@ Providers
        :columns: 3
 
        * :c:data:`banned_excitation`
+       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`blas_handle`
        * :c:data:`cholesky_mo_num`
        * :c:data:`cholesky_mo_transp`
+       * :c:data:`cholesky_mo_transp_sp`
        * :c:data:`do_mo_cholesky`
+       * :c:data:`gpu_num`
+       * :c:data:`mo_cholesky_double`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_integrals_cache_min`
+       * :c:data:`mo_integrals_cache_shift`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_in_map`
@@ -1284,11 +1751,13 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`all_mo_integrals`
        * :c:data:`core_energy`
-       * :c:data:`ref_bitmask_energy`
+       * :c:data:`ref_bitmask_energy_ab`
+       * :c:data:`ref_bitmask_two_e_energy`
 
  
-.. c:var:: mo_two_e_integrals_jj_anti
+.. c:var:: double mo_two_e_integrals_jj_anti
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
@@ -1310,11 +1779,17 @@ Providers
        :columns: 3
 
        * :c:data:`banned_excitation`
+       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`blas_handle`
        * :c:data:`cholesky_mo_num`
        * :c:data:`cholesky_mo_transp`
+       * :c:data:`cholesky_mo_transp_sp`
        * :c:data:`do_mo_cholesky`
+       * :c:data:`gpu_num`
+       * :c:data:`mo_cholesky_double`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_integrals_cache_min`
+       * :c:data:`mo_integrals_cache_shift`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_in_map`
@@ -1324,11 +1799,45 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`all_mo_integrals`
        * :c:data:`core_energy`
-       * :c:data:`ref_bitmask_energy`
+       * :c:data:`ref_bitmask_energy_ab`
+       * :c:data:`ref_bitmask_two_e_energy`
 
  
-.. c:var:: mo_two_e_integrals_jj_exchange
+.. c:var:: mo_two_e_integrals_jj_anti_from_ao
+
+
+    File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_two_e_integral_jj_from_ao	(mo_num,mo_num)
+        double precision, allocatable	:: mo_two_e_integrals_jj_exchange_from_ao	(mo_num,mo_num)
+        double precision, allocatable	:: mo_two_e_integrals_jj_anti_from_ao	(mo_num,mo_num)
+
+
+    mo_two_e_integral_jj_from_ao(i,j) = J_ij
+    mo_two_e_integrals_jj_exchange_from_ao(i,j) = J_ij
+    mo_two_e_integrals_jj_anti_from_ao(i,j) = J_ij - K_ij
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_map`
+       * :c:data:`ao_integrals_threshold`
+       * :c:data:`ao_num`
+       * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`do_direct_integrals`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_coef_transp`
+       * :c:data:`mo_num`
+
+
+ 
+.. c:var:: double mo_two_e_integrals_jj_exchange
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
@@ -1350,11 +1859,17 @@ Providers
        :columns: 3
 
        * :c:data:`banned_excitation`
+       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`blas_handle`
        * :c:data:`cholesky_mo_num`
        * :c:data:`cholesky_mo_transp`
+       * :c:data:`cholesky_mo_transp_sp`
        * :c:data:`do_mo_cholesky`
+       * :c:data:`gpu_num`
+       * :c:data:`mo_cholesky_double`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_integrals_cache_min`
+       * :c:data:`mo_integrals_cache_shift`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_in_map`
@@ -1364,11 +1879,150 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`all_mo_integrals`
        * :c:data:`core_energy`
-       * :c:data:`ref_bitmask_energy`
+       * :c:data:`ref_bitmask_energy_ab`
+       * :c:data:`ref_bitmask_two_e_energy`
 
  
-.. c:var:: use_banned_excitation
+.. c:var:: mo_two_e_integrals_jj_exchange_from_ao
+
+
+    File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_two_e_integral_jj_from_ao	(mo_num,mo_num)
+        double precision, allocatable	:: mo_two_e_integrals_jj_exchange_from_ao	(mo_num,mo_num)
+        double precision, allocatable	:: mo_two_e_integrals_jj_anti_from_ao	(mo_num,mo_num)
+
+
+    mo_two_e_integral_jj_from_ao(i,j) = J_ij
+    mo_two_e_integrals_jj_exchange_from_ao(i,j) = J_ij
+    mo_two_e_integrals_jj_anti_from_ao(i,j) = J_ij - K_ij
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_map`
+       * :c:data:`ao_integrals_threshold`
+       * :c:data:`ao_num`
+       * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`do_direct_integrals`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_coef_transp`
+       * :c:data:`mo_num`
+
+
+ 
+.. c:var:: mo_two_e_integrals_vv_anti_from_ao
+
+
+    File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_two_e_integrals_vv_from_ao	(mo_num,mo_num)
+        double precision, allocatable	:: mo_two_e_integrals_vv_exchange_from_ao	(mo_num,mo_num)
+        double precision, allocatable	:: mo_two_e_integrals_vv_anti_from_ao	(mo_num,mo_num)
+
+
+    mo_two_e_integrals_vv_from_ao(i,j) = J_ij
+    mo_two_e_integrals_vv_exchange_from_ao(i,j) = J_ij
+    mo_two_e_integrals_vv_anti_from_ao(i,j) = J_ij - K_ij
+    but only for the virtual orbitals
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_map`
+       * :c:data:`ao_integrals_threshold`
+       * :c:data:`ao_num`
+       * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`do_direct_integrals`
+       * :c:data:`list_virt`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_coef_transp`
+       * :c:data:`mo_num`
+       * :c:data:`n_virt_orb`
+
+
+ 
+.. c:var:: mo_two_e_integrals_vv_exchange_from_ao
+
+
+    File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_two_e_integrals_vv_from_ao	(mo_num,mo_num)
+        double precision, allocatable	:: mo_two_e_integrals_vv_exchange_from_ao	(mo_num,mo_num)
+        double precision, allocatable	:: mo_two_e_integrals_vv_anti_from_ao	(mo_num,mo_num)
+
+
+    mo_two_e_integrals_vv_from_ao(i,j) = J_ij
+    mo_two_e_integrals_vv_exchange_from_ao(i,j) = J_ij
+    mo_two_e_integrals_vv_anti_from_ao(i,j) = J_ij - K_ij
+    but only for the virtual orbitals
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_map`
+       * :c:data:`ao_integrals_threshold`
+       * :c:data:`ao_num`
+       * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`do_direct_integrals`
+       * :c:data:`list_virt`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_coef_transp`
+       * :c:data:`mo_num`
+       * :c:data:`n_virt_orb`
+
+
+ 
+.. c:var:: mo_two_e_integrals_vv_from_ao
+
+
+    File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_two_e_integrals_vv_from_ao	(mo_num,mo_num)
+        double precision, allocatable	:: mo_two_e_integrals_vv_exchange_from_ao	(mo_num,mo_num)
+        double precision, allocatable	:: mo_two_e_integrals_vv_anti_from_ao	(mo_num,mo_num)
+
+
+    mo_two_e_integrals_vv_from_ao(i,j) = J_ij
+    mo_two_e_integrals_vv_exchange_from_ao(i,j) = J_ij
+    mo_two_e_integrals_vv_anti_from_ao(i,j) = J_ij - K_ij
+    but only for the virtual orbitals
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_map`
+       * :c:data:`ao_integrals_threshold`
+       * :c:data:`ao_num`
+       * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`do_direct_integrals`
+       * :c:data:`list_virt`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_coef_transp`
+       * :c:data:`mo_num`
+       * :c:data:`n_virt_orb`
+
+
+ 
+.. c:var:: bool use_banned_excitation
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -1393,7 +2047,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`big_array_coulomb_integrals`
        * :c:data:`core_fock_operator`
        * :c:data:`mo_two_e_integrals_jj`
 
@@ -1402,7 +2055,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: add_integrals_to_map:
+.. c:function:: void add_integrals_to_map(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
@@ -1448,7 +2101,7 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:function:: add_integrals_to_map_cholesky:
+.. c:function:: void add_integrals_to_map_cholesky(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
@@ -1465,8 +2118,12 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`gpu_num`
        * :c:data:`cholesky_mo_num`
        * :c:data:`cholesky_mo_transp`
+       * :c:data:`cholesky_mo_transp`
+       * :c:data:`gpu_num`
+       * :c:data:`mo_cholesky_double`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_integrals_threshold`
        * :c:data:`mo_num`
@@ -1483,15 +2140,70 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`add_integrals_to_map_cholesky_sp`
        * :c:func:`dgemm`
+       * :c:func:`gpu_allocate`
+       * :c:func:`gpu_deallocate`
+       * :c:func:`gpu_dgemm`
+       * :c:func:`gpu_download`
+       * :c:func:`gpu_set_device`
        * :c:func:`map_append`
        * :c:func:`map_sort`
        * :c:func:`map_unique`
        * :c:func:`mo_two_e_integrals_index`
-       * :c:func:`set_multiple_levels_omp`
 
  
-.. c:function:: add_integrals_to_map_erf:
+.. c:function:: void add_integrals_to_map_cholesky_sp(void)
+
+
+    File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
+
+    .. code:: fortran
+
+        subroutine add_integrals_to_map_cholesky_sp
+
+
+    Adds integrals to the MO map using Cholesky vectors
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`gpu_num`
+       * :c:data:`cholesky_mo_num`
+       * :c:data:`cholesky_mo_transp_sp`
+       * :c:data:`cholesky_mo_transp_sp_d`
+       * :c:data:`gpu_num`
+       * :c:data:`mo_integrals_map`
+       * :c:data:`mo_integrals_threshold`
+       * :c:data:`mo_num`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`add_integrals_to_map_cholesky`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`gpu_allocate`
+       * :c:func:`gpu_deallocate`
+       * :c:func:`gpu_download`
+       * :c:func:`gpu_set_device`
+       * :c:func:`gpu_sgemm`
+       * :c:func:`map_append`
+       * :c:func:`map_sort`
+       * :c:func:`map_unique`
+       * :c:func:`mo_two_e_integrals_index`
+       * :c:func:`sgemm`
+
+ 
+.. c:function:: void add_integrals_to_map_erf(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -1539,7 +2251,139 @@ Subroutines / functions
        * :c:func:`wall_time`
 
  
-.. c:function:: clear_mo_erf_map:
+.. c:function:: add_integrals_to_map_no_exit_34:
+
+
+    File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
+
+    .. code:: fortran
+
+        subroutine add_integrals_to_map_no_exit_34(mask_ijkl)
+
+
+    Adds integrals to tha MO map according to some bitmask
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_coef_transp`
+       * :c:data:`mo_integrals_map`
+       * :c:data:`mo_integrals_threshold`
+       * :c:data:`mo_num`
+       * :c:data:`n_int`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`four_idx_novvvv_old`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`bitstring_to_list`
+       * :c:func:`cpu_time`
+       * :c:func:`get_ao_two_e_integrals`
+       * :c:func:`insert_into_mo_integrals_map`
+       * :c:func:`map_merge`
+       * :c:func:`mo_two_e_integrals_index`
+       * :c:func:`wall_time`
+
+ 
+.. c:function:: add_integrals_to_map_three_indices:
+
+
+    File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
+
+    .. code:: fortran
+
+        subroutine add_integrals_to_map_three_indices(mask_ijk)
+
+
+    Adds integrals to tha MO map according to some bitmask
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_coef_transp`
+       * :c:data:`mo_integrals_map`
+       * :c:data:`mo_integrals_threshold`
+       * :c:data:`mo_num`
+       * :c:data:`n_int`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`four_idx_novvvv_old`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`bitstring_to_list`
+       * :c:func:`cpu_time`
+       * :c:func:`get_ao_two_e_integrals`
+       * :c:func:`insert_into_mo_integrals_map`
+       * :c:func:`map_merge`
+       * :c:func:`mo_two_e_integrals_index`
+       * :c:func:`wall_time`
+
+ 
+.. c:function:: ao_to_mo_novirt:
+
+
+    File : :file:`mo_two_e_ints/four_idx_novvvv.irp.f`
+
+    .. code:: fortran
+
+        subroutine ao_to_mo_novirt(A_ao,LDA_ao,A_mo,LDA_mo)
+
+
+    Transform A from the |AO| basis to the |MO| basis excluding virtuals
+    
+    $C^\dagger.A_{ao}.C$
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`mo_coef_novirt`
+       * :c:data:`n_core_inact_act_orb`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`four_idx_novvvv`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dgemm`
+
+ 
+.. c:function:: void clear_mo_erf_map(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -1566,7 +2410,7 @@ Subroutines / functions
        * :c:func:`map_deinit`
 
  
-.. c:function:: clear_mo_map:
+.. c:function:: void clear_mo_map(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
@@ -1585,14 +2429,6 @@ Subroutines / functions
 
        * :c:data:`mo_integrals_map`
 
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_orb_opt_trust_v2`
-       * :c:func:`update_parameters`
-
     Calls:
 
     .. hlist::
@@ -1601,7 +2437,7 @@ Subroutines / functions
        * :c:func:`map_deinit`
 
  
-.. c:function:: dump_mo_integrals:
+.. c:function:: void dump_mo_integrals(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -1629,7 +2465,7 @@ Subroutines / functions
        * :c:func:`ezfio_set_work_empty`
 
  
-.. c:function:: four_idx_dgemm:
+.. c:function:: void four_idx_dgemm(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
@@ -1639,6 +2475,12 @@ Subroutines / functions
         subroutine four_idx_dgemm
 
 
+    Dense AO->MO transformation of the two-electron integrals by
+    four successive DGEMM multiplications by mo_coef. Integrals with
+    modulus at least mo_integrals_threshold are stored in
+    mo_integrals_map with the mo_two_e_integrals_index key (i<=k,
+    j<=l only). Called from the provider mo_two_e_integrals_in_map
+    when do_ao_cholesky is False and ao_num**4*32.d-9 < qp_max_mem.
 
     Needs:
 
@@ -1672,7 +2514,7 @@ Subroutines / functions
        * :c:func:`mo_two_e_integrals_index`
 
  
-.. c:function:: four_idx_dgemm_erf:
+.. c:function:: void four_idx_dgemm_erf(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -1682,6 +2524,12 @@ Subroutines / functions
         subroutine four_idx_dgemm_erf
 
 
+    Dense AO->MO transformation of the ERF two-electron integrals by
+    four successive DGEMM multiplications by mo_coef. Integrals with
+    modulus at least mo_integrals_threshold are stored in
+    mo_integrals_erf_map with the mo_two_e_integrals_index key
+    (i<=k, j<=l only). Called from the provider
+    mo_two_e_integrals_erf_in_map when ao_num**4*32.d-9 < qp_max_mem.
 
     Needs:
 
@@ -1714,7 +2562,113 @@ Subroutines / functions
        * :c:func:`mo_two_e_integrals_index`
 
  
-.. c:function:: get_mo_erf_map_size:
+.. c:function:: four_idx_novvvv:
+
+
+    File : :file:`mo_two_e_ints/four_idx_novvvv.irp.f`
+
+    .. code:: fortran
+
+        subroutine four_idx_novvvv
+
+
+    Retransform MO integrals for next CAS-SCF step
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_map`
+       * :c:data:`ao_num`
+       * :c:data:`list_core_inact_act`
+       * :c:data:`mo_integrals_map`
+       * :c:data:`mo_integrals_threshold`
+       * :c:data:`mo_num`
+       * :c:data:`n_core_inact_act_orb`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`ao_to_mo`
+       * :c:func:`ao_to_mo_novirt`
+       * :c:func:`map_append`
+       * :c:func:`map_shrink`
+       * :c:func:`map_sort`
+       * :c:func:`map_unique`
+       * :c:func:`two_e_integrals_index`
+
+ 
+.. c:function:: four_idx_novvvv2:
+
+
+    File : :file:`mo_two_e_ints/four_idx_novvvv.irp.f`
+
+    .. code:: fortran
+
+        subroutine four_idx_novvvv2
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`core_inact_act_bitmask_4`
+       * :c:data:`full_ijkl_bitmask_4`
+       * :c:data:`n_int`
+       * :c:data:`virt_bitmask`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`add_integrals_to_map`
+
+ 
+.. c:function:: four_idx_novvvv_old:
+
+
+    File : :file:`mo_two_e_ints/no_vvvv.irp.f`
+
+    .. code:: fortran
+
+        subroutine four_idx_novvvv_old
+
+
+    Retransform MO integrals for next CAS-SCF step
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`core_inact_act_bitmask_4`
+       * :c:data:`n_int`
+       * :c:data:`virt_bitmask`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_two_e_integrals_in_map`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`add_integrals_to_map`
+       * :c:func:`add_integrals_to_map_no_exit_34`
+       * :c:func:`add_integrals_to_map_three_indices`
+
+ 
+.. c:function:: void get_mo_erf_map_size(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -1734,7 +2688,7 @@ Subroutines / functions
        * :c:data:`mo_integrals_erf_map`
 
  
-.. c:function:: get_mo_map_size:
+.. c:function:: void get_mo_map_size(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -1754,7 +2708,7 @@ Subroutines / functions
        * :c:data:`mo_integrals_map`
 
  
-.. c:function:: get_mo_two_e_integral_erf:
+.. c:function:: void get_mo_two_e_integral_erf(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -1784,7 +2738,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:function:: get_mo_two_e_integrals:
+.. c:function:: void get_mo_two_e_integrals(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -1805,21 +2759,27 @@ Subroutines / functions
        * :c:data:`banned_excitation`
        * :c:data:`cholesky_mo_num`
        * :c:data:`cholesky_mo_transp`
+       * :c:data:`cholesky_mo_transp_sp`
+       * :c:data:`cholesky_mo_transp_sp_d`
        * :c:data:`do_mo_cholesky`
+       * :c:data:`gpu_busy`
+       * :c:data:`gpu_integral_buffer1`
+       * :c:data:`gpu_num`
+       * :c:data:`mo_cholesky_double`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_in_map`
+       * :c:data:`nproc_max`
 
     Called by:
 
     .. hlist::
        :columns: 3
 
-       * :c:func:`get_d0`
-       * :c:func:`get_d1`
        * :c:func:`get_mo_two_e_integrals_i1j1`
        * :c:func:`get_mo_two_e_integrals_ij`
+       * :c:func:`i_h_j_double_alpha_beta_s2_sorted`
 
     Calls:
 
@@ -1828,10 +2788,18 @@ Subroutines / functions
 
        * :c:func:`dgemv`
        * :c:func:`get_mo_two_e_integrals_cache`
+       * :c:func:`gpu_dgemv`
+       * :c:func:`gpu_download`
+       * :c:func:`gpu_set_busy`
+       * :c:func:`gpu_set_device`
+       * :c:func:`gpu_sgemv`
+       * :c:func:`gpu_unset_busy`
        * :c:func:`map_get`
+       * :c:func:`qp_bug`
+       * :c:func:`sgemv`
 
  
-.. c:function:: get_mo_two_e_integrals_cache:
+.. c:function:: void get_mo_two_e_integrals_cache(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -1882,11 +2850,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`cholesky_mo_num`
-       * :c:data:`cholesky_mo_transp`
-       * :c:data:`do_mo_cholesky`
-       * :c:data:`mo_integrals_cache_min`
-       * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_in_map`
 
     Called by:
@@ -1897,15 +2860,8 @@ Subroutines / functions
        * :c:data:`fock_operator_closed_shell_ref_bitmask`
        * :c:data:`fock_wee_closed_shell`
 
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`dgemv`
-
  
-.. c:function:: get_mo_two_e_integrals_erf:
+.. c:function:: void get_mo_two_e_integrals_erf(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -1934,7 +2890,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:function:: get_mo_two_e_integrals_erf_coulomb_ii:
+.. c:function:: void get_mo_two_e_integrals_erf_coulomb_ii(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -1965,7 +2921,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:function:: get_mo_two_e_integrals_erf_exch_ii:
+.. c:function:: void get_mo_two_e_integrals_erf_exch_ii(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -1996,7 +2952,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:function:: get_mo_two_e_integrals_erf_i1j1:
+.. c:function:: void get_mo_two_e_integrals_erf_i1j1(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -2030,7 +2986,7 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:function:: get_mo_two_e_integrals_erf_ij:
+.. c:function:: void get_mo_two_e_integrals_erf_ij(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -2083,11 +3039,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`cholesky_mo_num`
-       * :c:data:`cholesky_mo_transp`
-       * :c:data:`do_mo_cholesky`
-       * :c:data:`mo_integrals_cache_min`
-       * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_in_map`
 
     Called by:
@@ -2099,7 +3050,7 @@ Subroutines / functions
        * :c:data:`fock_wee_closed_shell`
 
  
-.. c:function:: get_mo_two_e_integrals_i1j1:
+.. c:function:: void get_mo_two_e_integrals_i1j1(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -2121,16 +3072,20 @@ Subroutines / functions
        * :c:data:`cholesky_mo_num`
        * :c:data:`cholesky_mo_transp`
        * :c:data:`do_mo_cholesky`
+       * :c:data:`gpu_busy`
+       * :c:data:`gpu_integral_buffer1`
+       * :c:data:`gpu_num`
        * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_in_map`
+       * :c:data:`nproc_max`
 
     Called by:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`bielec_pqxx_array`
+       * :c:func:`i_h_j_double_alpha_beta_s2`
 
     Calls:
 
@@ -2140,9 +3095,15 @@ Subroutines / functions
        * :c:func:`dgemv`
        * :c:func:`get_mo_two_e_integrals`
        * :c:func:`get_mo_two_e_integrals_cache`
+       * :c:func:`gpu_dgemv`
+       * :c:func:`gpu_download`
+       * :c:func:`gpu_set_busy`
+       * :c:func:`gpu_set_device`
+       * :c:func:`gpu_unset_busy`
+       * :c:func:`qp_bug`
 
  
-.. c:function:: get_mo_two_e_integrals_ij:
+.. c:function:: void get_mo_two_e_integrals_ij(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -2163,16 +3124,27 @@ Subroutines / functions
 
        * :c:data:`cholesky_mo_num`
        * :c:data:`cholesky_mo_transp`
+       * :c:data:`cholesky_mo_transp_sp`
+       * :c:data:`cholesky_mo_transp_sp_d`
        * :c:data:`do_mo_cholesky`
+       * :c:data:`gpu_busy`
+       * :c:data:`gpu_integral_buffer1`
+       * :c:data:`gpu_num`
+       * :c:data:`mo_cholesky_double`
        * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_num`
+       * :c:data:`nproc_max`
 
     Called by:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`bielec_pxxq_array`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_1_cholesky`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_2_cholesky`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_3_cholesky`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_4_cholesky`
+       * :c:func:`h_s2_u_0_nstates_openmp_work_n_int_cholesky`
 
     Calls:
 
@@ -2182,9 +3154,17 @@ Subroutines / functions
        * :c:func:`dgemm`
        * :c:func:`get_mo_two_e_integrals`
        * :c:func:`get_mo_two_e_integrals_cache`
+       * :c:func:`gpu_dgemm`
+       * :c:func:`gpu_download`
+       * :c:func:`gpu_set_busy`
+       * :c:func:`gpu_set_device`
+       * :c:func:`gpu_sgemm`
+       * :c:func:`gpu_unset_busy`
+       * :c:func:`qp_bug`
+       * :c:func:`sgemm`
 
  
-.. c:function:: get_two_e_integral:
+.. c:function:: void get_two_e_integral(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -2202,11 +3182,15 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`banned_excitation`
+       * :c:data:`big_array_coulomb_integrals`
        * :c:data:`cholesky_mo_num`
        * :c:data:`cholesky_mo_transp`
+       * :c:data:`cholesky_mo_transp_sp`
        * :c:data:`do_mo_cholesky`
+       * :c:data:`mo_cholesky_double`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_integrals_cache_min`
+       * :c:data:`mo_integrals_cache_shift`
        * :c:data:`mo_two_e_integrals_in_map`
 
     Calls:
@@ -2218,29 +3202,90 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
-.. c:function:: get_two_e_integral_cache:
+.. c:function:: void get_two_e_integral_cache(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
 
     .. code:: fortran
 
-        double precision function get_two_e_integral_cache(i,j,k,l)
+        double precision function get_two_e_integral_cache(i,j,k,l,cache,m,s)
 
 
     Returns one integral <ij|kl> in the MO basis taken from the cache
+
+ 
+.. c:function:: void insert_into_mo_integrals_erf_map(void)
+
+
+    File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
+
+    .. code:: fortran
+
+        subroutine insert_into_mo_integrals_erf_map(n_integrals,                 &
+              buffer_i, buffer_values, thr)
+
+
+    Create new entry into |MO| map, or accumulate in an existing entry
 
     Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_integrals_cache`
-       * :c:data:`mo_integrals_cache_min`
-       * :c:data:`mo_integrals_cache_shift`
+       * :c:data:`mo_integrals_erf_map`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`add_integrals_to_map_erf`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`map_update`
 
  
-.. c:function:: load_mo_integrals:
+.. c:function:: void insert_into_mo_integrals_map(void)
+
+
+    File : :file:`mo_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        subroutine insert_into_mo_integrals_map(n_integrals,                 &
+              buffer_i, buffer_values, thr)
+
+
+    Create new entry into MO map, or accumulate in an existing entry
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_integrals_map`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`add_integrals_to_map`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`map_update`
+
+ 
+.. c:function:: void load_mo_integrals(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -2271,7 +3316,7 @@ Subroutines / functions
        * :c:func:`unlock_io`
 
  
-.. c:function:: load_mo_integrals_erf:
+.. c:function:: void load_mo_integrals_erf(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -2300,7 +3345,7 @@ Subroutines / functions
        * :c:func:`map_sort`
 
  
-.. c:function:: mo_two_e_integral:
+.. c:function:: void mo_two_e_integral(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals.irp.f`
@@ -2317,12 +3362,11 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_integrals_cache`
+       * :c:data:`all_mo_integrals`
        * :c:data:`mo_integrals_map`
-       * :c:data:`mo_two_e_integrals_in_map`
 
  
-.. c:function:: mo_two_e_integral_erf:
+.. c:function:: void mo_two_e_integral_erf(void)
 
 
     File : :file:`mo_two_e_ints/map_integrals_erf.irp.f`
@@ -2344,7 +3388,7 @@ Subroutines / functions
        * :c:data:`mo_two_e_integrals_erf_in_map`
 
  
-.. c:function:: mo_two_e_integrals_erf_index:
+.. c:function:: void mo_two_e_integrals_erf_index(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -2357,7 +3401,7 @@ Subroutines / functions
     Computes an unique index for i,j,k,l integrals
 
  
-.. c:function:: mo_two_e_integrals_index:
+.. c:function:: void mo_two_e_integrals_index(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
@@ -2376,12 +3420,13 @@ Subroutines / functions
 
        * :c:func:`add_integrals_to_map`
        * :c:func:`add_integrals_to_map_cholesky`
+       * :c:func:`add_integrals_to_map_cholesky_sp`
        * :c:func:`add_integrals_to_map_erf`
        * :c:func:`four_idx_dgemm`
        * :c:func:`four_idx_dgemm_erf`
 
  
-.. c:function:: provide_all_mo_integrals_erf:
+.. c:function:: void provide_all_mo_integrals_erf(void)
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals_erf.irp.f`
@@ -2391,6 +3436,11 @@ Subroutines / functions
         subroutine provide_all_mo_integrals_erf
 
 
+    Provides all the main ERF MO two-electron integral quantities in
+    one call: the map mo_integrals_erf_map, the 2-index arrays
+    mo_two_e_int_erf_jj (=J_ij), mo_two_e_int_erf_jj_exchange
+    (=K_ij), mo_two_e_int_erf_jj_anti (=J_ij-K_ij), and the logical
+    mo_two_e_integrals_erf_in_map.
 
     Needs:
 
@@ -2404,7 +3454,7 @@ Subroutines / functions
        * :c:data:`mo_two_e_integrals_erf_in_map`
 
  
-.. c:function:: save_erf_two_e_integrals_mo:
+.. c:function:: void save_erf_two_e_integrals_mo(void)
 
 
     File : :file:`mo_two_e_ints/routines_save_integrals_erf.irp.f`
@@ -2414,6 +3464,11 @@ Subroutines / functions
         subroutine save_erf_two_e_integrals_mo
 
 
+    Saves the map of the MO range-separated (erf) two-electron
+    integrals to the EZFIO file, in the work directory
+    (work/mo_ints_erf), marks the work directory as not empty, and
+    sets io_mo_two_e_integrals_erf to 'Read', so that the
+    integrals are read back from the file at the next run.
 
     Needs:
 
@@ -2434,7 +3489,7 @@ Subroutines / functions
        * :c:func:`map_save_to_disk`
 
  
-.. c:function:: save_erf_two_e_ints_mo_into_ints_mo:
+.. c:function:: void save_erf_two_e_ints_mo_into_ints_mo(void)
 
 
     File : :file:`mo_two_e_ints/routines_save_integrals_erf.irp.f`
@@ -2444,6 +3499,11 @@ Subroutines / functions
         subroutine save_erf_two_e_ints_mo_into_ints_mo
 
 
+    Saves the map of the MO range-separated (erf) two-electron
+    integrals to the EZFIO file, but in the file of the regular MO
+    integrals (work/mo_ints), marks the work directory as not empty,
+    and sets io_mo_two_e_integrals to 'Read', so that at the next run
+    the erf integrals are read as the regular two-electron integrals.
 
     Needs:
 

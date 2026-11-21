@@ -1,4 +1,4 @@
-program tc_bi_ortho
+program diagonalize_tc_h
 
   BEGIN_DOC
   !

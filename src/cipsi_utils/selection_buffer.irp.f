@@ -30,6 +30,10 @@ end subroutine
 subroutine delete_selection_buffer(b)
   use selection_types
   implicit none
+  BEGIN_DOC
+! Deallocates the storage of the selection buffer b (the det and
+! val pointers), and resets b%cur, b%mini and b%N to zero.
+  END_DOC
   type(selection_buffer), intent(inout) :: b
   if (associated(b%det)) then
     deallocate(b%det)
@@ -48,6 +52,13 @@ end
 subroutine add_to_selection_buffer(b, det, val)
   use selection_types
   implicit none
+  BEGIN_DOC
+! Adds the determinant det with weight val to the selection buffer
+! b, but only if b%N > 0 and val <= b%mini, where b%mini is the
+! current threshold of the buffer.
+! If adding det fills the storage, the buffer is sorted by
+! increasing val and the element with the largest val is dropped.
+  END_DOC
 
   type(selection_buffer), intent(inout) :: b
   integer(bit_kind), intent(in) :: det(N_int, 2)
@@ -147,6 +158,12 @@ end
 subroutine sort_selection_buffer(b)
   use selection_types
   implicit none
+  BEGIN_DOC
+! Sorts the b%cur determinants of the selection buffer b by
+! increasing val, and keeps the first min(b%N, b%cur) of them.
+! b%mini is set to the smallest of its previous value and the
+! largest kept val, b%val(b%N).
+  END_DOC
 
   type(selection_buffer), intent(inout) :: b
   integer, allocatable :: iorder(:)
@@ -177,6 +194,14 @@ end subroutine
 
 subroutine make_selection_buffer_s2(b)
   use selection_types
+  BEGIN_DOC
+! Groups the determinants of the selection buffer b by
+! configuration (the bitwise exclusive-or and and of the alpha and
+! beta masks): duplicates are removed keeping the smallest val,
+! and the result is sorted by increasing val.
+! The configurations are then expanded back into determinants with
+! configuration_to_dets, at most the original b%cur of them.
+  END_DOC
   type(selection_buffer), intent(inout) :: b
 
   integer(bit_kind), allocatable :: o(:,:,:)
@@ -324,6 +349,13 @@ end
 
 subroutine remove_duplicates_in_selection_buffer(b)
   use selection_types
+  BEGIN_DOC
+! Removes duplicate determinants from the selection buffer b:
+! determinants are sorted with det_search_key, and within each
+! group of identical determinants all but one copy is dropped.
+! If duplicates are found, b is compacted in place and b%cur and
+! b%N are set to the resulting number of determinants.
+  END_DOC
   type(selection_buffer), intent(inout) :: b
 
   integer(bit_kind), allocatable :: o(:,:,:)

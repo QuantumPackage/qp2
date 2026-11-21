@@ -15,12 +15,26 @@ subroutine dress_slave
 end
 
 subroutine provide_everything
+  BEGIN_DOC
+! Provides the data needed by the dress slaves: the current wave
+! function (its determinants as generators) with their
+! coefficients, the MO integrals, and the ZMQ context.
+  END_DOC
   PROVIDE H_apply_buffer_allocated all_mo_integrals psi_det_generators psi_coef_generators psi_det_sorted_bit psi_selectors n_det_generators n_states generators_bitmask zmq_context
 end
 
 subroutine run_wf
   use f77_zmq
   implicit none
+  BEGIN_DOC
+! Main loop of a dress_slave process. For every 'dress' state
+! received over ZMQ, fetches from qp_run the wave function, the
+! state energies, the number of generator and selector
+! determinants, the state-average and selection weights, and the
+! index of the state to dress; stores the energies in
+! pt2_e0_denominator and psi_energy, and calls dress_slave_tcp.
+! Exits on 'Stopped'.
+  END_DOC
 
   integer(ZMQ_PTR), external :: new_zmq_to_qp_run_socket
   integer(ZMQ_PTR) :: zmq_to_qp_run_socket
@@ -75,6 +89,12 @@ end
 
 subroutine dress_slave_tcp(i,energy)
   implicit none
+  BEGIN_DOC
+! Wrapper for the distributed (TCP) mode: calls
+! run_dress_slave(0, i, energy). run_dress_slave does not use
+! energy itself; run_wf has already copied it into
+! pt2_e0_denominator.
+  END_DOC
   double precision, intent(in) :: energy(N_states_diag)
   integer, intent(in)            :: i
   call run_dress_slave(0,i,energy)

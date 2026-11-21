@@ -1,4 +1,4 @@
-program pouet
+program ref_extra_basis
  implicit none
 ! call ref_overlap
 ! call ref_pot

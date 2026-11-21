@@ -32,12 +32,12 @@
   ! <\Psi_m|\mu_z|\Psi_n>
   ! ||\mu|| = \sqrt{\mu_x^2 + \mu_y^2 + \mu_z^2}
   !
-  ! <\Psi_n|x| \Psi_m > = \sum_p \gamma_{pp}^{nm} \bra{\phi_p} x \ket{\phi_p} 
-  !   + \sum_{pq, p \neq q} \gamma_{pq}^{nm} \bra{\phi_p} x \ket{\phi_q}
-  ! \Psi: wf
+  ! <\Psi_n|x| \Psi_m > = \sum_p \gamma_{pp}^{nm} \bra{\phi_p} x \ket{\phi_p}
+  ! + \sum_{pq, p \neq q} \gamma_{pq}^{nm} \bra{\phi_p} x \ket{\phi_q}
+  ! \Psi\: wf
   ! n,m indexes for the states
-  ! p,q: general spatial MOs 
-  ! gamma^{nm}: density matrix \bra{\Psi^n} a^{\dagger}_a a_i \ket{\Psi^m}
+  ! p,q\: general spatial MOs 
+  ! gamma^{nm}\: density matrix \bra{\Psi^n} a^{\dagger}_a a_i \ket{\Psi^m}
   END_DOC
   USE OMP_LIB
   integer          :: istate, jstate ! States
@@ -233,6 +233,14 @@ END_PROVIDER
 &BEGIN_PROVIDER [double precision, multi_s_z_dipole_moment_eigenval,           (N_states)]
 
   implicit none
+  BEGIN_DOC
+  ! Eigenvectors of the x dipole matrix multi_s_x_dipole_moment
+  ! (the <\Psi_m|\mu_x|\Psi_n> matrix): column j is eigenvector
+  ! j, eigenvector(i,j) = <i|psi_j>, with eigenvalue
+  ! multi_s_x_dipole_moment_eigenval(j), lowest to highest.
+  ! multi_s_y_dipole_moment_eigenvec and
+  ! multi_s_z_dipole_moment_eigenvec are the y and z components.
+  END_DOC
   double precision, allocatable :: eigval(:), eigvec(:,:), A(:,:)
 
   PROVIDE multi_s_x_dipole_moment multi_s_y_dipole_moment multi_s_z_dipole_moment

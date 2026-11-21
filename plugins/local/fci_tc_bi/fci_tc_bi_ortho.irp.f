@@ -1,7 +1,7 @@
 
 ! ---
 
-program fci_tc_bi
+program fci_tc_bi_ortho
 
   BEGIN_DOC
   ! Selected Full Configuration Interaction with stochastic selection

@@ -2,6 +2,24 @@
 subroutine single_excitation_wee(det_1,det_2,h,p,spin,phase,hij)
  use bitmasks
  implicit none
+  BEGIN_DOC
+  ! For a determinant det_1 that differs from the closed-shell
+  ! reference (ref_closed_shell_bitmask), computes the
+  ! two-electron part of the Hamiltonian matrix element
+  ! <det_1|H|det_2>, where det_2 is the single excitation (h, p)
+  ! of spin `spin` from det_1:
+  ! hij = fock_wee_closed_shell(h, p)
+  !       - Coulomb integrals of the holes
+  !       + exchange integrals of the same-spin holes
+  !       + Coulomb integrals of the particles
+  !       - exchange integrals of the same-spin particles,
+  ! times phase.
+  ! Holes are the spin orbitals occupied in the reference but
+  ! not in det_1, particles the opposite. det_2 is a single
+  ! excitation from det_1 (cf. its use in i_H_j_s2); it is not
+  ! used because the hole and particle are already given as
+  ! parameters (author-corrected 2026-10-31).
+  END_DOC
  integer,intent(in) :: h,p,spin
  double precision, intent(in)  :: phase
  integer(bit_kind), intent(in) :: det_1(N_int,2), det_2(N_int,2)
@@ -62,6 +80,16 @@ end
 
 BEGIN_PROVIDER [double precision, fock_wee_closed_shell, (mo_num, mo_num) ]
  implicit none
+  BEGIN_DOC
+  ! Two-electron part of the Fock matrix of the closed-shell
+  ! reference, for orbitals i and j in the union of the
+  ! occupied and virtual orbitals:
+  ! fock_wee_closed_shell(i,j) = sum_k [ 2 (i j | k k) - (i k | j k) ]
+  ! with k running over the occupied orbitals.
+  ! Only the alpha orbitals are used to build the occupied
+  ! and virtual lists, as the reference is closed-shell.
+  ! Entries for other pairs of orbitals are not set.
+  END_DOC
  integer :: i0,j0,i,j,k0,k
  integer :: n_occ_ab(2)
  integer :: occ(N_int*bit_kind_size,2)
@@ -77,20 +105,17 @@ BEGIN_PROVIDER [double precision, fock_wee_closed_shell, (mo_num, mo_num) ]
   key_virt(i,1) = xor(key_virt(i,1),ref_closed_shell_bitmask(i,1))
   key_virt(i,2) = xor(key_virt(i,2),ref_closed_shell_bitmask(i,2))
  enddo
- double precision :: array_coulomb(mo_num),array_exchange(mo_num)
  call bitstring_to_list_ab(key_virt, occ_virt, n_occ_ab_virt, N_int)
  ! docc ---> virt single excitations
  do i0 = 1,  n_occ_ab(1)
   i=occ(i0,1)
   do j0 = 1, n_occ_ab_virt(1)
    j = occ_virt(j0,1)
-   call get_mo_two_e_integrals_coulomb_ii(i,j,mo_num,array_coulomb,mo_integrals_map)
-   call get_mo_two_e_integrals_exch_ii(i,j,mo_num,array_exchange,mo_integrals_map)
    double precision :: accu
    accu = 0.d0
    do k0 = 1, n_occ_ab(1)
     k = occ(k0,1)
-    accu += 2.d0 * array_coulomb(k) - array_exchange(k)
+    accu += 2.d0 * big_array_coulomb_integrals(k,i,j) - big_array_exchange_integrals(k,i,j)
    enddo
    fock_wee_closed_shell(i,j) = accu
    fock_wee_closed_shell(j,i) = accu
@@ -102,12 +127,10 @@ BEGIN_PROVIDER [double precision, fock_wee_closed_shell, (mo_num, mo_num) ]
   i=occ_virt(i0,1)
   do j0 = 1, n_occ_ab_virt(1)
    j = occ_virt(j0,1)
-   call get_mo_two_e_integrals_coulomb_ii(i,j,mo_num,array_coulomb,mo_integrals_map)
-   call get_mo_two_e_integrals_exch_ii(i,j,mo_num,array_exchange,mo_integrals_map)
    accu = 0.d0
    do k0 = 1, n_occ_ab(1)
     k = occ(k0,1)
-    accu += 2.d0 * array_coulomb(k) - array_exchange(k)
+    accu += 2.d0 * big_array_coulomb_integrals(k,i,j) - big_array_exchange_integrals(k,i,j)
    enddo
    fock_wee_closed_shell(i,j) = accu
    fock_wee_closed_shell(j,i) = accu
@@ -119,12 +142,10 @@ BEGIN_PROVIDER [double precision, fock_wee_closed_shell, (mo_num, mo_num) ]
   i=occ(i0,1)
   do j0 = 1, n_occ_ab(1)
    j = occ(j0,1)
-   call get_mo_two_e_integrals_coulomb_ii(i,j,mo_num,array_coulomb,mo_integrals_map)
-   call get_mo_two_e_integrals_exch_ii(i,j,mo_num,array_exchange,mo_integrals_map)
    accu = 0.d0
    do k0 = 1, n_occ_ab(1)
     k = occ(k0,1)
-    accu += 2.d0 * array_coulomb(k) - array_exchange(k)
+    accu += 2.d0 * big_array_coulomb_integrals(k,i,j) - big_array_exchange_integrals(k,i,j)
    enddo
    fock_wee_closed_shell(i,j) = accu
    fock_wee_closed_shell(j,i) = accu

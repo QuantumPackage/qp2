@@ -20,13 +20,16 @@
 # -- Project information -----------------------------------------------------
 
 project = 'Quantum Package'
-copyright = '2019, A. Scemama, E. Giner'
-author = 'A. Scemama, E. Giner'
+copyright = '2019-2026, Quantum Package contributors'
+author = 'A. Scemama, E. Giner, and contributors'
 
+from pathlib import Path
+
+# The full version, including alpha/beta/rc tags: read from the VERSION file
+# at the root of the git repository (docs/source/conf.py -> ../../VERSION).
+release = Path(__file__).resolve().parents[2].joinpath("VERSION").read_text().strip()
 # The short X.Y version
-version = '2.1'
-# The full version, including alpha/beta/rc tags
-release = '2.1'
+version = ".".join(release.split(".")[:2])
 
 
 # -- General configuration ---------------------------------------------------
@@ -35,12 +38,16 @@ release = '2.1'
 #
 # needs_sphinx = '1.0'
 
-with open("_static/links.rst",'r') as f:
+with open(Path(__file__).resolve().parent / "_static" / "links.rst") as f:
     rst_epilog = f.read()
 
 suppress_warnings = [
   'ref.citation',
-  'ref.option'
+  'ref.option',
+  # the in-page bibliography of intro/selected_ci.rst shares its keys
+  # with the :all: bibliography of appendix/references.rst; both render
+  # correctly, the warning is purely cosmetic
+  'bibtex.duplicate_citation'
 ]
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -163,13 +170,13 @@ latex_documents = [
 man_pages = []
 qpdoc = ' | Quantum Package >'
 import os
-for f in os.listdir("users_guide"):
+for f in os.listdir(Path(__file__).resolve().parent / "users_guide"):
   name = f.split('.')[0]
   if name not in ["index","quickstart"]:
     filename = os.path.join("users_guide",name)
     man_pages.append( (filename, name, qpdoc, [author], 1) )
 
-for f in os.listdir("programs"):
+for f in os.listdir(Path(__file__).resolve().parent / "programs"):
   name = f.split('.')[0]
   if name not in [""]:
     filename = os.path.join("programs",name)

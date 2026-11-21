@@ -8,17 +8,44 @@
 ezfio_files
 ===========
 
-This modules essentially contains the name of the |EZFIO| directory in the
-:c:data:`ezfio_filename` variable. This is read as the first argument of the
-command-line, or as the :envvar:`QP_INPUT` environment variable.
+Access to the |EZFIO| database and to the basic execution
+information.
 
+The provider :c:data:`ezfio_filename` is the name of the |EZFIO|
+directory: it is read from the :envvar:`QPACKAGE_INPUT` environment
+variable, or from the first argument of the command line.
+
+The other providers and subroutines of this module are:
+
+* the process and thread counts: :c:data:`nproc`,
+  :c:data:`nproc_max`, :c:data:`nthreads_pt2`,
+  :c:data:`nthreads_davidson`
+* the file locking: :c:func:`lock_io`, :c:func:`unlock_io`,
+  :c:data:`file_lock`, and :c:func:`getunitandopen` to open a file
+  with a free unit number
+* the output helpers: :c:func:`write_time`, :c:func:`wall_time`,
+  :c:data:`output_wall_time_0`, :c:data:`output_cpu_time_0`, and
+  :c:func:`write_bool`, :c:func:`write_int`, :c:func:`write_double`
+* the clean stopping of the calculation: :c:data:`qp_stop`,
+  :c:data:`qp_stop_variable`, :c:data:`qp_stop_filename` and
+  :c:data:`qp_kill_filename`
  
+ 
+ 
+EZFIO parameters 
+---------------- 
+ 
+.. option:: ezfio_convention
+ 
+    Version of the EZFIO conventions
+ 
+    Default: 20210101
  
  
 Providers 
 --------- 
  
-.. c:var:: ezfio_filename
+.. c:var:: char ezfio_filename
 
 
     File : :file:`ezfio_files/ezfio.irp.f`
@@ -38,6 +65,7 @@ Providers
 
        * :c:data:`file_lock`
        * :c:data:`mpi_initialized`
+       * :c:data:`nproc`
        * :c:data:`output_wall_time_0`
 
     Needed by:
@@ -45,13 +73,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`absolute_eig`
-       * :c:data:`act_2_rdm_aa_mo`
-       * :c:data:`act_2_rdm_ab_mo`
-       * :c:data:`act_2_rdm_bb_mo`
-       * :c:data:`act_2_rdm_spin_trace_mo`
-       * :c:data:`act_mos_opt`
-       * :c:data:`adaptive_pt2_max`
        * :c:data:`ao_cartesian`
        * :c:data:`ao_cholesky_threshold`
        * :c:data:`ao_coef`
@@ -69,16 +90,14 @@ Providers
        * :c:data:`ao_prim_num`
        * :c:data:`ao_two_e_integrals_erf_in_map`
        * :c:data:`ao_two_e_integrals_in_map`
-       * :c:data:`avoid_saddle`
        * :c:data:`basis`
        * :c:data:`basis_nucleus_index`
+       * :c:data:`basis_type`
        * :c:data:`calc_dipole_moment`
        * :c:data:`calc_energy_components`
        * :c:data:`calc_osc_str`
        * :c:data:`calc_tr_dipole_moment`
-       * :c:data:`correlation_energy_ratio_max`
        * :c:data:`correlation_functional`
-       * :c:data:`criterion_casscf`
        * :c:data:`csf_based`
        * :c:data:`damping_for_rs_dft`
        * :c:data:`data_energy_proj`
@@ -87,30 +106,26 @@ Providers
        * :c:data:`data_one_e_dm_alpha_mo`
        * :c:data:`data_one_e_dm_beta_ao`
        * :c:data:`data_one_e_dm_beta_mo`
+       * :c:data:`data_one_e_dm_tot_ao`
        * :c:data:`davidson_sze_max`
        * :c:data:`density_for_dft`
-       * :c:data:`diag_hess_cas`
+       * :c:data:`dft_grid_mo_dipole`
        * :c:data:`disk_based_davidson`
        * :c:data:`distributed_davidson`
        * :c:data:`do_ao_cholesky`
-       * :c:data:`do_mom`
+       * :c:data:`do_mo_cholesky`
        * :c:data:`do_ormas`
        * :c:data:`do_pseudo`
-       * :c:data:`do_pt2`
        * :c:data:`elec_alpha_num`
        * :c:data:`elec_beta_num`
        * :c:data:`elec_num`
        * :c:data:`exchange_functional`
-       * :c:data:`excitation_alpha_max`
-       * :c:data:`excitation_beta_max`
-       * :c:data:`excitation_max`
-       * :c:data:`excitation_ref`
+       * :c:data:`extra_grid_type_sgn`
+       * :c:data:`extra_rad_grid_type`
+       * :c:data:`ezfio_convention`
        * :c:data:`ezfio_work_dir`
-       * :c:data:`fast_2rdm`
-       * :c:data:`frozen_orb_scf`
        * :c:data:`generators_bitmask`
-       * :c:data:`h0_type`
-       * :c:data:`hess_cv_cv`
+       * :c:data:`grid_type_sgn`
        * :c:data:`hf_exchange`
        * :c:data:`io_ao_cholesky`
        * :c:data:`io_ao_integrals_kinetic`
@@ -120,6 +135,7 @@ Providers
        * :c:data:`io_ao_one_e_integrals`
        * :c:data:`io_ao_two_e_integrals`
        * :c:data:`io_ao_two_e_integrals_erf`
+       * :c:data:`io_extra_grid`
        * :c:data:`io_mo_cholesky`
        * :c:data:`io_mo_integrals_kinetic`
        * :c:data:`io_mo_integrals_n_e`
@@ -128,44 +144,37 @@ Providers
        * :c:data:`io_mo_two_e_integrals`
        * :c:data:`io_mo_two_e_integrals_erf`
        * :c:data:`io_nuclear_repulsion`
-       * :c:data:`io_two_body_rdm_aa`
-       * :c:data:`io_two_body_rdm_ab`
-       * :c:data:`io_two_body_rdm_bb`
-       * :c:data:`io_two_body_rdm_spin_trace`
        * :c:data:`is_periodic`
-       * :c:data:`json_filename`
-       * :c:data:`level_shift`
-       * :c:data:`level_shift_casscf`
        * :c:data:`lin_dep_cutoff`
-       * :c:data:`max_dim_diis`
+       * :c:data:`mo_cholesky_double`
        * :c:data:`mo_class`
        * :c:data:`mo_coef`
        * :c:data:`mo_coef_aux`
        * :c:data:`mo_coef_imag`
-       * :c:data:`mo_guess_type`
        * :c:data:`mo_integrals_cache_shift`
        * :c:data:`mo_integrals_threshold`
        * :c:data:`mo_label`
        * :c:data:`mo_num`
        * :c:data:`mo_occ`
+       * :c:data:`mo_symmetry`
        * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mu_dft_type`
        * :c:data:`mu_erf`
-       * :c:data:`n_big_act_orb`
+       * :c:data:`my_extra_grid_becke`
+       * :c:data:`my_grid_becke`
+       * :c:data:`my_n_pt_a_extra_grid`
+       * :c:data:`my_n_pt_a_grid`
+       * :c:data:`my_n_pt_r_extra_grid`
+       * :c:data:`my_n_pt_r_grid`
        * :c:data:`n_det`
        * :c:data:`n_det_max`
        * :c:data:`n_det_max_full`
-       * :c:data:`n_det_max_opt`
        * :c:data:`n_det_print_wf`
-       * :c:data:`n_it_scf_max`
        * :c:data:`n_pts_charge`
        * :c:data:`n_states`
        * :c:data:`n_states_diag`
-       * :c:data:`nb_it_max_lambda`
-       * :c:data:`nb_it_max_pre_search`
        * :c:data:`no_core_density`
-       * :c:data:`no_oa_or_av_opt`
        * :c:data:`normalize_dm`
        * :c:data:`nucl_charge`
        * :c:data:`nucl_charge_remove`
@@ -174,8 +183,6 @@ Providers
        * :c:data:`nucl_num`
        * :c:data:`nucleus_shell_num`
        * :c:data:`only_expected_s2`
-       * :c:data:`optimization_max_nb_iter`
-       * :c:data:`optimization_method`
        * :c:data:`ormas_max_e`
        * :c:data:`ormas_min_e`
        * :c:data:`ormas_mstart`
@@ -203,61 +210,36 @@ Providers
        * :c:data:`psi_coef`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
-       * :c:data:`pt2_max`
-       * :c:data:`pt2_min_casscf`
-       * :c:data:`pt2_min_parallel_tasks`
-       * :c:data:`pt2_relative_error`
        * :c:data:`pts_charge_coord`
        * :c:data:`pts_charge_z`
        * :c:data:`qp_stop_filename`
+       * :c:data:`rad_grid_type`
        * :c:data:`read_wf`
        * :c:data:`restore_symm`
        * :c:data:`s2_eig`
        * :c:data:`save_threshold`
-       * :c:data:`save_wf_after_selection`
-       * :c:data:`scf_algorithm`
        * :c:data:`selection_factor`
-       * :c:data:`seniority_max`
        * :c:data:`shell_ang_mom`
        * :c:data:`shell_index`
-       * :c:data:`shell_normalization_factor`
        * :c:data:`shell_num`
        * :c:data:`shell_prim_num`
-       * :c:data:`small_active_space`
+       * :c:data:`slater_r_power`
        * :c:data:`state_following`
-       * :c:data:`state_following_casscf`
        * :c:data:`target_energy`
-       * :c:data:`thresh_casscf`
-       * :c:data:`thresh_cc`
-       * :c:data:`thresh_delta`
-       * :c:data:`thresh_eig`
-       * :c:data:`thresh_model`
-       * :c:data:`thresh_model_2`
-       * :c:data:`thresh_opt_max_elem_grad`
-       * :c:data:`thresh_rho`
-       * :c:data:`thresh_rho_2`
-       * :c:data:`thresh_scf`
+       * :c:data:`thresh_extra_grid`
+       * :c:data:`thresh_grid`
        * :c:data:`thresh_sym`
-       * :c:data:`thresh_wtg`
-       * :c:data:`thresh_wtg2`
        * :c:data:`threshold_davidson`
        * :c:data:`threshold_davidson_from_pt2`
-       * :c:data:`threshold_diis`
        * :c:data:`threshold_generators`
        * :c:data:`threshold_nonsym_davidson`
-       * :c:data:`twice_hierarchy_max`
-       * :c:data:`typ`
        * :c:data:`use_cgtos`
        * :c:data:`use_only_lr`
-       * :c:data:`variance_max`
-       * :c:data:`version_avoid_saddle`
-       * :c:data:`version_lambda_search`
        * :c:data:`weight_one_e_dm`
        * :c:data:`weight_selection`
-       * :c:data:`without_diagonal`
 
  
-.. c:var:: ezfio_work_dir
+.. c:var:: char ezfio_work_dir
 
 
     File : :file:`ezfio_files/ezfio.irp.f`
@@ -287,7 +269,7 @@ Providers
        * :c:data:`ezfio_work_dir_pid`
 
  
-.. c:var:: ezfio_work_dir_pid
+.. c:var:: char ezfio_work_dir_pid
 
 
     File : :file:`ezfio_files/ezfio.irp.f`
@@ -297,7 +279,7 @@ Providers
         character*(1024)	:: ezfio_work_dir_pid	
 
 
-    EZFIO/work/pid_
+    EZFIO/work/pid\_
 
     Needs:
 
@@ -308,7 +290,7 @@ Providers
 
 
  
-.. c:var:: file_lock
+.. c:var:: int file_lock
 
 
     File : :file:`ezfio_files/lock.irp.f`
@@ -326,14 +308,97 @@ Providers
        :columns: 3
 
        * :c:data:`ezfio_filename`
-       * :c:data:`json_filename`
-       * :c:data:`json_unit`
        * :c:data:`nthreads_davidson`
        * :c:data:`nthreads_pt2`
        * :c:data:`qp_max_mem`
 
  
-.. c:var:: nthreads_pt2
+.. c:var:: int nproc
+
+
+    File : :file:`ezfio_files/environment.irp.f`
+
+    .. code:: fortran
+
+        integer	:: nproc	
+
+
+    Number of default OpenMP threads
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`cholesky_ao_num`
+       * :c:data:`ezfio_filename`
+       * :c:data:`h_apply_buffer_allocated`
+       * :c:data:`n_det`
+       * :c:data:`nproc_max`
+       * :c:data:`nthreads_davidson`
+       * :c:data:`nthreads_pt2`
+
+ 
+.. c:var:: int nproc_max
+
+
+    File : :file:`ezfio_files/environment.irp.f`
+
+    .. code:: fortran
+
+        integer	:: nproc_max	
+
+
+    Max number of threads
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`nproc`
+       * :c:data:`nthreads_davidson`
+       * :c:data:`nthreads_pt2`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`gpu_integral_buffer1`
+
+ 
+.. c:var:: int nthreads_davidson
+
+
+    File : :file:`ezfio_files/environment.irp.f`
+
+    .. code:: fortran
+
+        integer	:: nthreads_davidson	
+
+
+    Number of threads for Davidson
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`file_lock`
+       * :c:data:`mpi_master`
+       * :c:data:`nproc`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ci_electronic_energy`
+       * :c:data:`nproc_max`
+
+ 
+.. c:var:: int nthreads_pt2
 
 
     File : :file:`ezfio_files/environment.irp.f`
@@ -354,9 +419,17 @@ Providers
        * :c:data:`mpi_master`
        * :c:data:`nproc`
 
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`gpu_busy`
+       * :c:data:`gpu_num`
+       * :c:data:`nproc_max`
 
  
-.. c:var:: output_cpu_time_0
+.. c:var:: double output_cpu_time_0
 
 
     File : :file:`ezfio_files/output.irp.f`
@@ -376,16 +449,13 @@ Providers
 
        * :c:data:`ci_energy`
        * :c:data:`ezfio_filename`
-       * :c:data:`n_det_generators`
-       * :c:data:`n_det_selectors`
        * :c:data:`n_pts_charge`
        * :c:data:`nucl_coord`
        * :c:data:`nuclear_repulsion`
        * :c:data:`prim_normalization_factor`
-       * :c:data:`shell_normalization_factor`
 
  
-.. c:var:: output_wall_time_0
+.. c:var:: double output_wall_time_0
 
 
     File : :file:`ezfio_files/output.irp.f`
@@ -405,16 +475,13 @@ Providers
 
        * :c:data:`ci_energy`
        * :c:data:`ezfio_filename`
-       * :c:data:`n_det_generators`
-       * :c:data:`n_det_selectors`
        * :c:data:`n_pts_charge`
        * :c:data:`nucl_coord`
        * :c:data:`nuclear_repulsion`
        * :c:data:`prim_normalization_factor`
-       * :c:data:`shell_normalization_factor`
 
  
-.. c:var:: qp_kill_filename
+.. c:var:: char qp_kill_filename
 
 
     File : :file:`ezfio_files/qp_stop.irp.f`
@@ -437,7 +504,7 @@ Providers
 
 
  
-.. c:var:: qp_stop_filename
+.. c:var:: char qp_stop_filename
 
 
     File : :file:`ezfio_files/qp_stop.irp.f`
@@ -460,7 +527,7 @@ Providers
 
 
  
-.. c:var:: qp_stop_variable
+.. c:var:: int qp_stop_variable
 
 
     File : :file:`ezfio_files/qp_stop.irp.f`
@@ -487,7 +554,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: getunitandopen:
+.. c:function:: void getunitandopen(void)
 
 
     File : :file:`ezfio_files/get_unit_and_open.irp.f`
@@ -497,12 +564,18 @@ Subroutines / functions
         integer function getUnitAndOpen(f,mode)
 
 
+    Returns a free Fortran unit number, searched from 20 upward,
+    on which file `f` is opened in the mode given by `mode`.
+    In modes 'r' and 'R', a missing file is created as empty
+    before the file is opened for reading.
+    
     :f:
        file name
     
     :mode:
        'R' : READ, UNFORMATTED
        'W' : WRITE, UNFORMATTED
+       'A' : APPEND, UNFORMATTED
        'r' : READ, FORMATTED
        'w' : WRITE, FORMATTED
        'a' : APPEND, FORMATTED
@@ -510,7 +583,7 @@ Subroutines / functions
     
 
  
-.. c:function:: lock_io:
+.. c:function:: void lock_io(void)
 
 
     File : :file:`ezfio_files/lock.irp.f`
@@ -537,21 +610,12 @@ Subroutines / functions
 
        * :c:func:`davidson_slave_work`
        * :c:func:`format_w_error`
-       * :c:func:`json_close`
-       * :c:data:`json_filename`
-       * :c:data:`json_unit`
        * :c:func:`load_mo_integrals`
        * :c:data:`nthreads_davidson`
        * :c:data:`nthreads_pt2`
        * :c:data:`qp_max_mem`
-       * :c:func:`read_array_two_rdm`
-       * :c:func:`read_array_two_trans_rdm`
        * :c:func:`resident_memory`
-       * :c:func:`roothaan_hall_scf`
        * :c:func:`total_memory`
-       * :c:func:`write_array_two_rdm`
-       * :c:func:`write_array_two_trans_rdm`
-       * :c:func:`write_cipsi_json`
 
     Calls:
 
@@ -561,7 +625,7 @@ Subroutines / functions
        * :c:func:`omp_set_lock`
 
  
-.. c:function:: qp_stop:
+.. c:function:: void qp_stop(void)
 
 
     File : :file:`ezfio_files/qp_stop.irp.f`
@@ -581,7 +645,7 @@ Subroutines / functions
        * :c:data:`qp_stop_filename`
 
  
-.. c:function:: unlock_io:
+.. c:function:: void unlock_io(void)
 
 
     File : :file:`ezfio_files/lock.irp.f`
@@ -608,21 +672,12 @@ Subroutines / functions
 
        * :c:func:`davidson_slave_work`
        * :c:func:`format_w_error`
-       * :c:func:`json_close`
-       * :c:data:`json_filename`
-       * :c:data:`json_unit`
        * :c:func:`load_mo_integrals`
        * :c:data:`nthreads_davidson`
        * :c:data:`nthreads_pt2`
        * :c:data:`qp_max_mem`
-       * :c:func:`read_array_two_rdm`
-       * :c:func:`read_array_two_trans_rdm`
        * :c:func:`resident_memory`
-       * :c:func:`roothaan_hall_scf`
        * :c:func:`total_memory`
-       * :c:func:`write_array_two_rdm`
-       * :c:func:`write_array_two_trans_rdm`
-       * :c:func:`write_cipsi_json`
 
     Calls:
 
@@ -632,7 +687,7 @@ Subroutines / functions
        * :c:func:`omp_unset_lock`
 
  
-.. c:function:: write_bool:
+.. c:function:: void write_bool(void)
 
 
     File : :file:`ezfio_files/output.irp.f`
@@ -652,7 +707,7 @@ Subroutines / functions
        * :c:data:`mpi_master`
 
  
-.. c:function:: write_double:
+.. c:function:: void write_double(void)
 
 
     File : :file:`ezfio_files/output.irp.f`
@@ -678,30 +733,14 @@ Subroutines / functions
 
        * :c:data:`ao_ortho_canonical_coef`
        * :c:data:`ci_energy`
-       * :c:func:`damping_scf`
-       * :c:func:`dav_double_dressed`
        * :c:func:`davidson_diag_csf_hjj`
-       * :c:func:`davidson_diag_hjj`
        * :c:func:`davidson_diag_hjj_sjj`
        * :c:func:`davidson_diag_nonsym_hjj`
-       * :c:func:`davidson_general`
-       * :c:func:`davidson_general_diag_dressed_ext_rout_nonsym_b1space`
-       * :c:func:`davidson_general_ext_rout`
-       * :c:func:`davidson_general_ext_rout_diag_dressed`
-       * :c:func:`davidson_general_ext_rout_dressed`
-       * :c:func:`davidson_general_ext_rout_nonsym_b1space`
        * :c:data:`nuclear_repulsion`
        * :c:data:`psi_coef_max`
-       * :c:data:`pt2_e0_denominator`
-       * :c:func:`roothaan_hall_scf`
-       * :c:func:`run_cipsi`
-       * :c:func:`run_slave_main`
-       * :c:func:`run_stochastic_cipsi`
-       * :c:func:`zmq_pt2`
-       * :c:func:`zmq_selection`
 
  
-.. c:function:: write_int:
+.. c:function:: void write_int(void)
 
 
     File : :file:`ezfio_files/output.irp.f`
@@ -725,25 +764,15 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`dav_double_dressed`
        * :c:func:`davidson_diag_csf_hjj`
-       * :c:func:`davidson_diag_hjj`
        * :c:func:`davidson_diag_hjj_sjj`
        * :c:func:`davidson_diag_nonsym_hjj`
-       * :c:func:`davidson_general`
-       * :c:func:`davidson_general_diag_dressed_ext_rout_nonsym_b1space`
-       * :c:func:`davidson_general_ext_rout`
-       * :c:func:`davidson_general_ext_rout_diag_dressed`
-       * :c:func:`davidson_general_ext_rout_dressed`
-       * :c:func:`davidson_general_ext_rout_nonsym_b1space`
        * :c:func:`make_s2_eigenfunction`
        * :c:data:`mo_num`
        * :c:data:`n_act_orb`
        * :c:data:`n_core_orb`
        * :c:data:`n_del_orb`
        * :c:data:`n_det`
-       * :c:data:`n_det_generators`
-       * :c:data:`n_det_selectors`
        * :c:data:`n_inact_orb`
        * :c:data:`n_int`
        * :c:data:`n_virt_orb`
@@ -753,17 +782,13 @@ Subroutines / functions
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_beta_unique`
        * :c:data:`psi_det_size`
-       * :c:data:`pt2_f`
-       * :c:data:`pt2_n_teeth`
        * :c:data:`qp_max_mem`
-       * :c:func:`remove_small_contributions`
        * :c:func:`save_wavefunction_general`
        * :c:func:`save_wavefunction_general_unormalized`
        * :c:func:`save_wavefunction_specified`
-       * :c:func:`zmq_pt2`
 
  
-.. c:function:: write_time:
+.. c:function:: void write_time(void)
 
 
     File : :file:`ezfio_files/output.irp.f`
@@ -789,31 +814,18 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ci_energy`
-       * :c:func:`damping_scf`
-       * :c:func:`dav_double_dressed`
        * :c:func:`davidson_diag_csf_hjj`
-       * :c:func:`davidson_diag_hjj`
        * :c:func:`davidson_diag_hjj_sjj`
        * :c:func:`davidson_diag_nonsym_hjj`
-       * :c:func:`davidson_general`
-       * :c:func:`davidson_general_diag_dressed_ext_rout_nonsym_b1space`
-       * :c:func:`davidson_general_ext_rout`
-       * :c:func:`davidson_general_ext_rout_diag_dressed`
-       * :c:func:`davidson_general_ext_rout_dressed`
-       * :c:func:`davidson_general_ext_rout_nonsym_b1space`
        * :c:func:`make_s2_eigenfunction`
        * :c:func:`mo_as_eigvectors_of_mo_matrix`
        * :c:func:`mo_as_svd_vectors_of_mo_matrix`
        * :c:func:`mo_as_svd_vectors_of_mo_matrix_eig`
        * :c:func:`mo_coef_new_as_svd_vectors_of_mo_matrix_eig`
-       * :c:data:`n_det_generators`
-       * :c:data:`n_det_selectors`
        * :c:data:`n_pts_charge`
        * :c:data:`nucl_coord`
        * :c:data:`nuclear_repulsion`
        * :c:data:`prim_normalization_factor`
-       * :c:func:`roothaan_hall_scf`
-       * :c:data:`shell_normalization_factor`
 
     Calls:
 

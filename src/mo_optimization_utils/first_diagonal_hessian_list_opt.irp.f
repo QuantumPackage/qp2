@@ -1,4 +1,12 @@
 subroutine first_diag_hessian_list_opt(tmp_n,m,list,H)!, h_tmpr)
+  BEGIN_DOC
+  ! Diagonal of the hessian of the energy with respect to orbital
+  ! rotations, restricted to the m orbitals given by list.
+  ! Original implementation; the debug program
+  ! debug_hessian_list_opt compares it with diag_hessian_list_opt.
+  ! n is m*(m-1)/2 and H(k) is the diagonal element for the pair
+  ! (p,q) given by vec_to_mat_index(k,p,q).
+  END_DOC
 
   include 'constants.h' 
 

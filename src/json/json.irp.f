@@ -36,6 +36,10 @@ BEGIN_PROVIDER [ integer, json_unit]
 END_PROVIDER
 
 subroutine json_close
+ BEGIN_DOC
+ ! Closes the JSON output file: writes the final closing brace,
+ ! closes the file on unit json_unit and frees json_unit.
+ END_DOC
  call lock_io
  write(json_unit, '(A)') '}'
  close(json_unit)

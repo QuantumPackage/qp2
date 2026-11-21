@@ -55,6 +55,13 @@ end
 
 subroutine run
   implicit none
+  BEGIN_DOC
+  ! Builds the CIS space (H_apply_cis, or H_apply_cis_sym when
+  ! pseudo_sym), diagonalizes the CI matrix (CI_eigenvectors
+  ! provider), stores the CIS energies in the |EZFIO| file, saves
+  ! a wave function truncated by save_threshold and prints the
+  ! state energies, plus the excitation energies when N_states > 1.
+  END_DOC
   integer                        :: i
 
   if(pseudo_sym)then
@@ -75,6 +82,7 @@ subroutine run
     print*,'Excitation energies (au)                     (eV)'
     do i = 2, N_states
       print*, i ,CI_energy(i) - CI_energy(1), (CI_energy(i) - CI_energy(1))/0.0367502d0
+      ! 0.0367502d0 converts the excitation energy from hartree to eV
     enddo
     print*,''
   endif

@@ -3,11 +3,25 @@ use bitmasks
 
 BEGIN_PROVIDER [ integer , N_det_delta_ij ]
   implicit none
+  BEGIN_DOC
+  ! Number of determinant columns stored in delta_ij_tmp:
+  ! equal to N_det, so delta_ij and delta_ij_tmp currently
+  ! have the same number of columns.
+  END_DOC
   N_det_delta_ij = N_det
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, delta_ij, (N_states, N_det, 2) ]
   implicit none
+  BEGIN_DOC
+  ! Dressing contribution $\Delta_{ij}$, per state and
+  ! determinant: the first N_det_delta_ij columns are copied
+  ! from delta_ij_tmp, the remaining columns are zeroed.
+  ! Component 1 feeds dressing_column_h, component 2
+  ! dressing_column_s: the two components are a contribution to
+  ! the Hamiltonian (component 1) and a contribution to $S^2$
+  ! (component 2) (author, 2026-10-31).
+  END_DOC
   if(.true.) then
     delta_ij(:,:N_det_delta_ij, :) = delta_ij_tmp(:,:,:)
   endif
@@ -17,6 +31,15 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, delta_ij_tmp, (N_states,N_det_delta_ij,2) ]
   use bitmasks
   implicit none
+  BEGIN_DOC
+  ! Stochastic estimate of the dressing, computed by
+  ! ZMQ_dress with reference energies
+  ! dress_E0_denominator + nuclear_repulsion and relative error
+  ! criterion dress_relative_error. Component 1 is del,
+  ! component 2 is del_s2: a contribution to the Hamiltonian
+  ! (component 1) and a contribution to $S^2$ (component 2)
+  ! (author, 2026-10-31).
+  END_DOC
 
   integer                        :: i,j,k
 

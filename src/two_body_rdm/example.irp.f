@@ -340,7 +340,7 @@ subroutine routine_full_mos
      rdm_aa_st_av  = state_av_full_occ_2_rdm_aa_mo(l,k,j,i)
      rdm_bb_st_av  = state_av_full_occ_2_rdm_bb_mo(l,k,j,i)
      rdm_ab_st_av  = state_av_full_occ_2_rdm_ab_mo(l,k,j,i)
-     rdm_tot_st_av = state_av_full_occ_2_rdm_spin_trace_mo(l,k,j,i)
+     rdm_tot_st_av = state_av_occ_2_rdm_spin_trace_mo(l,k,j,i)
 
      wee_aa_st_av  += 0.5d0 * vijkl * rdm_aa_st_av
      wee_bb_st_av  += 0.5d0 * vijkl * rdm_bb_st_av

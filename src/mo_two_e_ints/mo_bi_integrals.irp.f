@@ -16,6 +16,8 @@
 ! - 1,2,3-index arrays are built from the map
 !
 
+use gpu
+
 subroutine mo_two_e_integrals_index(i,j,k,l,i1)
   use map_module
   implicit none
@@ -61,7 +63,7 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
   call cpu_time(cpu_1)
 
   if (do_mo_cholesky) then
-     PROVIDE cholesky_mo_transp
+     PROVIDE cholesky_mo_transp_d
   else
     if (do_ao_cholesky) then
       call add_integrals_to_map_cholesky
@@ -95,6 +97,14 @@ END_PROVIDER
 
 subroutine four_idx_dgemm
   implicit none
+  BEGIN_DOC
+  ! Dense AO->MO transformation of the two-electron integrals by
+  ! four successive DGEMM multiplications by mo_coef. Integrals with
+  ! modulus at least mo_integrals_threshold are stored in
+  ! mo_integrals_map with the mo_two_e_integrals_index key (i<=k,
+  ! j<=l only). Called from the provider mo_two_e_integrals_in_map
+  ! when do_ao_cholesky is False and ao_num**4*32.d-9 < qp_max_mem.
+  END_DOC
   integer :: p,q,r,s,i,j,k,l
   double precision, allocatable :: a1(:,:,:,:)
   double precision, allocatable :: a2(:,:,:,:)
@@ -281,15 +291,14 @@ subroutine add_integrals_to_map(mask_ijkl)
   print*, 'Buffers : ', 8.*(mo_num*(n_j)*(n_k+1) + mo_num+&
       ao_num+ao_num*ao_num+ size_buffer*3)/(1024*1024), 'MB / core'
 
+  PROVIDE mo_coef mo_coef_transp
   !$OMP PARALLEL PRIVATE(l1,k1,j1,i1,i2,i3,i4,i,j,k,l,c, ii1,kmax,   &
       !$OMP  two_e_tmp_0_idx, two_e_tmp_0, two_e_tmp_1,two_e_tmp_2,two_e_tmp_3,&
       !$OMP  buffer_i,buffer_value,n_integrals,wall_2,i0,j0,k0,l0,   &
-      !$OMP  wall_0,thread_num)                             &
+      !$OMP  wall_0,thread_num)                                      &
       !$OMP  DEFAULT(NONE)                                           &
-      !$OMP  SHARED(size_buffer,ao_num,mo_num,n_i,n_j,n_k,n_l,   &
-      !$OMP  mo_coef_transp,                                         &
-      !$OMP  mo_coef_transp_is_built, list_ijkl,                     &
-      !$OMP  mo_coef_is_built, wall_1,                               &
+      !$OMP  SHARED(size_buffer,ao_num,mo_num,n_i,n_j,n_k,n_l,       &
+      !$OMP  mo_coef_transp, list_ijkl, wall_1,                      &
       !$OMP  mo_coef,mo_integrals_threshold,mo_integrals_map)
 
   thread_num = 0
@@ -299,10 +308,10 @@ subroutine add_integrals_to_map(mask_ijkl)
   wall_0 = wall_1
   allocate(two_e_tmp_3(mo_num, n_j, n_k),                 &
       two_e_tmp_1(mo_num),                                &
-      two_e_tmp_0(ao_num,ao_num),                                   &
-      two_e_tmp_0_idx(ao_num),                                      &
+      two_e_tmp_0(ao_num,ao_num),                         &
+      two_e_tmp_0_idx(ao_num),                            &
       two_e_tmp_2(mo_num, n_j),                           &
-      buffer_i(size_buffer),                                         &
+      buffer_i(size_buffer),                              &
       buffer_value(size_buffer) )
 
   !$OMP DO SCHEDULE(guided)
@@ -486,34 +495,56 @@ subroutine add_integrals_to_map_cholesky
   ! Adds integrals to the MO map using Cholesky vectors
   END_DOC
 
-  integer :: i,j,k,l,m
+  integer :: i,j,k,l,m, iproc
   integer :: size_buffer, n_integrals
   size_buffer = min(mo_num*mo_num*mo_num,16000000)
 
+  type(gpu_double3) :: Vtmp_d
   double precision, allocatable :: Vtmp(:,:,:)
   integer(key_kind)  , allocatable :: buffer_i(:)
   real(integral_kind), allocatable :: buffer_value(:)
+  PROVIDE blas_handle_mt
 
-  PROVIDE cholesky_mo_transp
-  call set_multiple_levels_omp(.False.)
+  if (.not.mo_cholesky_double) then
+    call add_integrals_to_map_cholesky_sp
+    return
+  endif
+
+  PROVIDE cholesky_mo_transp_d
 
   !$OMP PARALLEL DEFAULT(SHARED) &
-  !$OMP PRIVATE(i,j,k,l,n_integrals,buffer_value, buffer_i, Vtmp)
+  !$OMP PRIVATE(i,j,k,l,n_integrals,buffer_value, buffer_i, Vtmp_d, Vtmp, iproc)
   allocate (buffer_i(size_buffer), buffer_value(size_buffer))
-  allocate (Vtmp(mo_num,mo_num,mo_num))
   n_integrals = 0
+  iproc = omp_get_thread_num()
 
-  !$OMP DO SCHEDULE(dynamic)
-  do l=1,mo_num
-    call dgemm('T','N',mo_num*mo_num,mo_num,cholesky_mo_num,1.d0, &
-       cholesky_mo_transp, cholesky_mo_num, &
-       cholesky_mo_transp(1,1,l), cholesky_mo_num, 0.d0, &
-       Vtmp, mo_num*mo_num)
+  if (gpu_num > 0) then
+    call gpu_set_device(igpu_mt(iproc))
+    call gpu_allocate(Vtmp_d,mo_num,mo_num,mo_num)
+  endif
+
+  allocate(Vtmp(mo_num,mo_num,mo_num))
+
+  !$OMP DO SCHEDULE(dynamic,4)
+  do l=mo_num,1,-1
+
+    if (gpu_num > 0) then
+      call gpu_dgemm(blas_handle_mt(iproc), 'T','N',mo_num*mo_num,l,cholesky_mo_num,1.d0, &
+         cholesky_mo_transp_d(igpu_mt(iproc))%f(1,1,1), cholesky_mo_num, &
+         cholesky_mo_transp_d(igpu_mt(iproc))%f(1,1,l), cholesky_mo_num, 0.d0, &
+         Vtmp_d%f(1,1,1), mo_num*mo_num)
+      call gpu_download(Vtmp_d,Vtmp)
+    else
+      call dgemm('T','N',mo_num*mo_num,l,cholesky_mo_num,1.d0, &
+         cholesky_mo_transp(1,1,1), cholesky_mo_num, &
+         cholesky_mo_transp(1,1,l), cholesky_mo_num, 0.d0, &
+         Vtmp(1,1,1), mo_num*mo_num)
+    endif
 
     do k=1,l
       do j=1,mo_num
         do i=1,j
-          if (dabs(Vtmp(i,j,k)) > mo_integrals_threshold) then
+          if (abs(Vtmp(i,j,k)) > mo_integrals_threshold) then
             n_integrals = n_integrals + 1
             buffer_value(n_integrals) = Vtmp(i,j,k)
             !DIR$ FORCEINLINE
@@ -532,8 +563,102 @@ subroutine add_integrals_to_map_cholesky
   if (n_integrals > 0) then
     call map_append(mo_integrals_map, buffer_i, buffer_value, n_integrals)
   endif
-  deallocate(buffer_i, buffer_value, Vtmp)
-  !$OMP BARRIER
+
+  deallocate(buffer_i, buffer_value)
+  deallocate(Vtmp)
+
+  if (gpu_num > 0) then
+    call gpu_deallocate(Vtmp_d)
+  endif
+
+  !$OMP END PARALLEL
+  call gpu_set_device(0)
+
+  call map_sort(mo_integrals_map)
+  call map_unique(mo_integrals_map)
+
+end
+
+
+subroutine add_integrals_to_map_cholesky_sp
+  use bitmasks
+  implicit none
+
+  BEGIN_DOC
+  ! Adds integrals to the MO map using Cholesky vectors
+  END_DOC
+
+  integer :: i,j,k,l,m
+  integer :: size_buffer, n_integrals, iproc
+  size_buffer = min(mo_num*mo_num*mo_num,16000000)
+
+  type(gpu_real3) :: Vtmp_d
+  real, allocatable :: Vtmp(:,:,:)
+  integer(key_kind)  , allocatable :: buffer_i(:)
+  real(integral_kind), allocatable :: buffer_value(:)
+
+
+  PROVIDE cholesky_mo_transp_sp cholesky_mo_transp_sp_d blas_handle_mt
+
+  !$OMP PARALLEL DEFAULT(SHARED) &
+  !$OMP PRIVATE(i,j,k,l,n_integrals,buffer_value, buffer_i, Vtmp_d, Vtmp, iproc)
+  allocate (buffer_i(size_buffer), buffer_value(size_buffer))
+  n_integrals = 0
+
+
+  iproc = omp_get_thread_num()
+  if (gpu_num > 0) then
+    call gpu_set_device(igpu_mt(iproc))
+    call gpu_allocate(Vtmp_d,mo_num,mo_num,mo_num)
+  endif
+  allocate(Vtmp(mo_num,mo_num,mo_num))
+
+  !$OMP DO SCHEDULE(dynamic,4)
+  do l=mo_num,1,-1
+
+    if (gpu_num > 0) then
+      call gpu_sgemm(blas_handle_mt(iproc), 'T','N',mo_num*mo_num,l,cholesky_mo_num,1.0, &
+         cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,1,1), cholesky_mo_num, &
+         cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,1,l), cholesky_mo_num, 0.0, &
+         Vtmp_d%f(1,1,1), mo_num*mo_num)
+      call gpu_download(Vtmp_d,Vtmp)
+    else
+      call sgemm('T','N',mo_num*mo_num,l,cholesky_mo_num,1.0, &
+         cholesky_mo_transp_sp(1,1,1), cholesky_mo_num, &
+         cholesky_mo_transp_sp(1,1,l), cholesky_mo_num, 0.0, &
+         Vtmp(1,1,1), mo_num*mo_num)
+    endif
+
+    do k=1,l
+      do j=1,mo_num
+        do i=1,j
+          if (abs(Vtmp(i,j,k)) > mo_integrals_threshold) then
+            n_integrals = n_integrals + 1
+            buffer_value(n_integrals) = Vtmp(i,j,k)
+            !DIR$ FORCEINLINE
+            call mo_two_e_integrals_index(i,k,j,l,buffer_i(n_integrals))
+            if (n_integrals == size_buffer) then
+              call map_append(mo_integrals_map, buffer_i, buffer_value, n_integrals)
+              n_integrals = 0
+            endif
+          endif
+        enddo
+      enddo
+    enddo
+  enddo
+  !$OMP END DO NOWAIT
+
+  if (n_integrals > 0) then
+    call map_append(mo_integrals_map, buffer_i, buffer_value, n_integrals)
+  endif
+
+  deallocate(buffer_i, buffer_value)
+  deallocate(Vtmp)
+
+  if (gpu_num > 0) then
+    call gpu_deallocate(Vtmp_d)
+  endif
+
   !$OMP END PARALLEL
 
   call map_sort(mo_integrals_map)
@@ -559,26 +684,56 @@ end
 
 
   if (do_mo_cholesky) then
-    double precision, allocatable :: buffer(:,:)
-    allocate (buffer(cholesky_mo_num,mo_num))
-    do k=1,cholesky_mo_num
-      do i=1,mo_num
-        buffer(k,i) = cholesky_mo_transp(k,i,i)
-      enddo
-    enddo
-    call dgemm('T','N',mo_num,mo_num,cholesky_mo_num,1.d0, &
-      buffer, cholesky_mo_num, buffer, cholesky_mo_num, 0.d0, mo_two_e_integrals_jj, mo_num)
-    deallocate(buffer)
 
+!   The following dgemm call is equivalent to
+!
+!    double precision, allocatable :: buffer(:,:)
+!    allocate (buffer(cholesky_mo_num,mo_num))
+!    do k=1,cholesky_mo_num
+!      do i=1,mo_num
+!        buffer(k,i) = cholesky_mo_transp(k,i,i)
+!      enddo
+!    enddo
+!
+!    call dgemm('T','N',mo_num,mo_num,cholesky_mo_num,1.d0, &
+!      buffer, cholesky_mo_num, buffer, cholesky_mo_num, 0.d0, mo_two_e_integrals_jj, mo_num)
+!
+!    deallocate(buffer)
+
+    if (gpu_num > 0) then
+      type(gpu_double2) :: mo_two_e_integrals_jj_d
+      call gpu_allocate(mo_two_e_integrals_jj_d, mo_num, mo_num)
+
+      call gpu_dgemm(blas_handle, 'T','N',mo_num,mo_num,cholesky_mo_num,1.d0, &
+        cholesky_mo_transp_d(0)%f(1,1,1), cholesky_mo_num*(mo_num+1), &
+        cholesky_mo_transp_d(0)%f(1,1,1), cholesky_mo_num*(mo_num+1), &
+        0.d0, mo_two_e_integrals_jj_d%f(1,1), mo_num)
+    else
+
+      call dgemm('T','N',mo_num,mo_num,cholesky_mo_num,1.d0, &
+        cholesky_mo_transp(1,1,1), cholesky_mo_num*(mo_num+1), &
+        cholesky_mo_transp(1,1,1), cholesky_mo_num*(mo_num+1), &
+
+        0.d0, mo_two_e_integrals_jj(1,1), mo_num)
+    endif
+
+    double precision, external :: ddot
+    !$OMP PARALLEL DO  PRIVATE(i,j)
     do j=1,mo_num
       do i=1,mo_num
-          mo_two_e_integrals_jj_exchange(i,j) = 0.d0
-          do k=1,cholesky_mo_num
-            mo_two_e_integrals_jj_exchange(i,j) = mo_two_e_integrals_jj_exchange(i,j) + &
-                          cholesky_mo_transp(k,i,j)*cholesky_mo_transp(k,j,i)
-          enddo
+          mo_two_e_integrals_jj_exchange(i,j) = &
+          ddot(cholesky_mo_num, &
+             cholesky_mo_transp(1,i,j), 1, &
+             cholesky_mo_transp(1,j,i), 1, &
+             mo_two_e_integrals_jj_exchange(i,j))
       enddo
     enddo
+    !$OMP END PARALLEL DO
+
+    if (gpu_num > 0) then
+      call gpu_download(mo_two_e_integrals_jj_d,mo_two_e_integrals_jj)
+      call gpu_deallocate(mo_two_e_integrals_jj_d)
+    endif
 
   else
 

@@ -1,4 +1,4 @@
-program test_e_pol
+program test_e_pol_grid
  implicit none
  io_extra_grid = "Read"
  touch io_extra_grid

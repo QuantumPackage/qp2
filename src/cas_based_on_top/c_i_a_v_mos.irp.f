@@ -92,6 +92,10 @@ END_PROVIDER
  BEGIN_PROVIDER[double precision, core_inact_act_mos_in_r_array, (n_core_inact_act_orb,n_points_final_grid)]
 &BEGIN_PROVIDER[double precision, core_inact_act_mos_in_r_array_transp,(n_points_final_grid,n_core_inact_act_orb)]
  implicit none
+ BEGIN_DOC
+! all CORE, INACTIVE and ACTIVE MOs on the grid points,
+! arranged in two different ways
+ END_DOC
  integer :: i,j,k
  do i = 1, n_core_inact_act_orb
   j = list_core_inact_act(i) 
@@ -110,6 +114,12 @@ END_PROVIDER
 
  BEGIN_PROVIDER[double precision, core_inact_act_mos_grad_in_r_array, (3,n_core_inact_act_orb,n_points_final_grid)]
  implicit none
+ BEGIN_DOC
+! gradients of the CORE, INACTIVE and ACTIVE MOs on the grid
+! points. index (l,i,k) is the l-th Cartesian component
+! (l=1 x, 2 y, 3 z) of the gradient of the i-th MO (order of
+! list_core_inact_act) at grid point k
+ END_DOC
  integer :: i,j,k,l
  do i = 1, n_core_inact_act_orb
   j = list_core_inact_act(i) 

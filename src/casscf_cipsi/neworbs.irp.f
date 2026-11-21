@@ -91,6 +91,12 @@ END_PROVIDER
 
  BEGIN_PROVIDER [real*8, energy_improvement]
  implicit none
+  BEGIN_DOC
+  ! Predicted energy improvement of the next orbital update, an
+  ! eigenvalue of the single-excitation matrix: the eigenvalue of
+  ! best_vector_ovrlp_casscf when state_following_casscf is set, the
+  ! lowest eigenvalue otherwise.
+  END_DOC
  if(state_following_casscf)then
   energy_improvement = SXeigenval(best_vector_ovrlp_casscf)
  else
@@ -103,6 +109,12 @@ END_PROVIDER
  BEGIN_PROVIDER [ integer, best_vector_ovrlp_casscf ]
 &BEGIN_PROVIDER [ double precision,  best_overlap_casscf ]
   implicit none
+  BEGIN_DOC
+  ! Index of the eigenvector of the single-excitation matrix used for
+  ! the orbital update: among the eigenvectors with negative eigenvalue,
+  ! the one with the largest dabs(SXeigenvec(1,i)); best_overlap_casscf
+  ! is that maximum overlap. If no eigenvalue is negative, the index is 1.
+  END_DOC
   integer :: i
   double precision :: c0
   best_overlap_casscf = 0.D0

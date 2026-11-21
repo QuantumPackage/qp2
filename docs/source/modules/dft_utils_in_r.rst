@@ -8,23 +8,34 @@
 dft_utils_in_r
 ==============
 
-This module contains most of the fundamental quantities (AOs, MOs or density derivatives) evaluated in real-space representation that are needed for the various DFT modules.
+Quantities of the |DFT| calculation evaluated in real space, on the
+Becke numerical grid.
 
-As these quantities might be used and re-used, the values at each point of the grid are stored (see ``becke_numerical_grid`` for more information on the grid).
+The |AOs|, the |MOs|, the density and its derivatives are evaluated
+at each point of the grid and stored, as these quantities are used
+and re-used by the different |DFT| modules (see the
+:ref:`module_becke_numerical_grid` module for the grid).
 
 The main providers for this module are:
 
-* `aos_in_r_array`: values of the |AO| basis on the grid point.
-* `mos_in_r_array`: values of the |MO| basis on the grid point.
-* `one_e_dm_and_grad_alpha_in_r`: values of the density and its gradienst on the grid points.
-
+* `aos_in_r_array`: values of the |AO| basis on the grid points
+  (`ao_in_r.irp.f`)
+* `mos_in_r_array`: values of the |MO| basis on the grid points
+  (`mo_in_r.irp.f`)
+* `one_e_dm_and_grad_alpha_in_r` and
+  `one_e_dm_and_grad_beta_in_r`: the spin densities and their
+  gradients on the grid points (`dm_in_r.irp.f`)
+* `alpha_dens_kin_in_r` and `beta_dens_kin_in_r`: the kinetic
+  densities (`kin_dens.irp.f`)
+* the dipole moments on the grid (`dipole_becke.irp.f`) and the
+  gradient integrals (`ints_grad.irp.f`)
  
  
  
 Providers 
 --------- 
  
-.. c:var:: alpha_dens_kin_in_r
+.. c:var:: double alpha_dens_kin_in_r
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -35,6 +46,11 @@ Providers
         double precision, allocatable	:: beta_dens_kin_in_r	(n_points_final_grid)
 
 
+    alpha_dens_kin_in_r(i) = alpha kinetic energy density at the ith
+    grid point: 0.5 * sum over j = 1, elec_alpha_num of the squared
+    norm of the gradient of the jth MO
+    
+    beta_dens_kin_in_r(i) = same for j = 1, elec_beta_num
 
     Needs:
 
@@ -48,7 +64,7 @@ Providers
 
 
  
-.. c:var:: ao_abs_int_grid
+.. c:var:: double ao_abs_int_grid
 
 
     File : :file:`dft_utils_in_r/ao_prod_mlti_pl.irp.f`
@@ -58,7 +74,7 @@ Providers
         double precision, allocatable	:: ao_abs_int_grid	(ao_num)
 
 
-    ao_abs_int_grid(i) = \int dr |phi_i(r) |
+    ao_abs_int_grid(i) = \int dr \|phi_i(r) \|
 
     Needs:
 
@@ -72,7 +88,7 @@ Providers
 
 
  
-.. c:var:: ao_overlap_abs_grid
+.. c:var:: double ao_overlap_abs_grid
 
 
     File : :file:`dft_utils_in_r/ao_prod_mlti_pl.irp.f`
@@ -82,7 +98,7 @@ Providers
         double precision, allocatable	:: ao_overlap_abs_grid	(ao_num,ao_num)
 
 
-    ao_overlap_abs_grid(j,i) = \int dr |phi_i(r) phi_j(r)|
+    ao_overlap_abs_grid(j,i) = \int dr \|phi_i(r) phi_j(r)\|
 
     Needs:
 
@@ -103,7 +119,7 @@ Providers
        * :c:data:`ao_prod_sigma`
 
  
-.. c:var:: ao_prod_abs_r
+.. c:var:: double ao_prod_abs_r
 
 
     File : :file:`dft_utils_in_r/ao_prod_mlti_pl.irp.f`
@@ -113,7 +129,7 @@ Providers
         double precision, allocatable	:: ao_prod_abs_r	(ao_num,ao_num)
 
 
-    ao_prod_abs_r(i,j) = \int |phi_i(r) phi_j(r)| dsqrt((x - <|i|x|j|>)^2 + (y - <|i|y|j|>)^2 +(z - <|i|z|j|>)^2) / \int |phi_i(r) phi_j(r)|
+    ao_prod_abs_r(i,j) = \int \|phi_i(r) phi_j(r)\| dsqrt((x - <\|i\|x\|j\|>)^2 + (y - <\|i\|y\|j\|>)^2 +(z - <\|i\|z\|j\|>)^2) / \int \|phi_i(r) phi_j(r)\|
     
 
     Needs:
@@ -135,7 +151,7 @@ Providers
        * :c:data:`ao_prod_sigma`
 
  
-.. c:var:: ao_prod_center
+.. c:var:: double ao_prod_center
 
 
     File : :file:`dft_utils_in_r/ao_prod_mlti_pl.irp.f`
@@ -145,9 +161,9 @@ Providers
         double precision, allocatable	:: ao_prod_center	(3,ao_num,ao_num)
 
 
-    ao_prod_center(1:3,j,i) = \int dr |phi_i(r) phi_j(r)| x/y/z / \int |phi_i(r) phi_j(r)|
+    ao_prod_center(1:3,j,i) = \int dr \|phi_i(r) phi_j(r)\| x/y/z / \int \|phi_i(r) phi_j(r)\|
     
-    if \int |phi_i(r) phi_j(r)| < 1.d-10 then ao_prod_center = 10000.
+    if \int \|phi_i(r) phi_j(r)\| < 1.d-10 then ao_prod_center = 10000.
 
     Needs:
 
@@ -169,7 +185,7 @@ Providers
        * :c:data:`ao_prod_dist_grid`
 
  
-.. c:var:: ao_prod_dist_grid
+.. c:var:: double ao_prod_dist_grid
 
 
     File : :file:`dft_utils_in_r/ao_prod_mlti_pl.irp.f`
@@ -179,7 +195,7 @@ Providers
         double precision, allocatable	:: ao_prod_dist_grid	(ao_num,ao_num,n_points_final_grid)
 
 
-    ao_prod_dist_grid(j,i,ipoint) = distance between the center of |phi_i(r) phi_j(r)| and the grid point r(ipoint)
+    ao_prod_dist_grid(j,i,ipoint) = distance between the center of \|phi_i(r) phi_j(r)\| and the grid point r(ipoint)
 
     Needs:
 
@@ -193,7 +209,7 @@ Providers
 
 
  
-.. c:var:: ao_prod_sigma
+.. c:var:: double ao_prod_sigma
 
 
     File : :file:`dft_utils_in_r/ao_prod_mlti_pl.irp.f`
@@ -203,9 +219,9 @@ Providers
         double precision, allocatable	:: ao_prod_sigma	(ao_num,ao_num)
 
 
-    Gaussian exponent reproducing the product |chi_i(r) chi_j(r)|
+    Gaussian exponent reproducing the product \|chi_i(r) chi_j(r)\|
     
-    Therefore |chi_i(r) chi_j(r)|  \approx e^{-ao_prod_sigma(j,i) (r - ao_prod_center(1:3,j,i))**2}
+    Therefore \|chi_i(r) chi_j(r)\|  \approx e^{-ao_prod_sigma(j,i) (r - ao_prod_center(1:3,j,i))**2}
 
     Needs:
 
@@ -218,7 +234,7 @@ Providers
 
 
  
-.. c:var:: aos_grad_in_r_array
+.. c:var:: double aos_grad_in_r_array
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -262,7 +278,7 @@ Providers
        * :c:data:`mos_grad_in_r_array`
 
  
-.. c:var:: aos_grad_in_r_array_extra
+.. c:var:: double aos_grad_in_r_array_extra
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -272,6 +288,10 @@ Providers
         double precision, allocatable	:: aos_grad_in_r_array_extra	(ao_num,n_points_extra_final_grid,3)
 
 
+    aos_grad_in_r_array_extra(i,j,k) = value of the kth component of the
+    gradient of the ith ao on the jth grid point of the EXTRA grid
+    
+    k = 1 : x, k = 2 : y, k = 3 : z
 
     Needs:
 
@@ -292,7 +312,7 @@ Providers
 
 
  
-.. c:var:: aos_grad_in_r_array_transp
+.. c:var:: double aos_grad_in_r_array_transp
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -315,18 +335,9 @@ Providers
        * :c:data:`aos_grad_in_r_array`
        * :c:data:`n_points_final_grid`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
 
  
-.. c:var:: aos_grad_in_r_array_transp_3
+.. c:var:: double aos_grad_in_r_array_transp_3
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -350,7 +361,7 @@ Providers
 
 
  
-.. c:var:: aos_grad_in_r_array_transp_bis
+.. c:var:: double aos_grad_in_r_array_transp_bis
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -374,7 +385,7 @@ Providers
 
 
  
-.. c:var:: aos_in_r_array
+.. c:var:: double aos_in_r_array
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -413,28 +424,9 @@ Providers
        * :c:data:`ao_prod_abs_r`
        * :c:data:`ao_prod_center`
        * :c:data:`aos_in_r_array_transp`
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`f_hf_cholesky_sparse_bis`
-       * :c:data:`pot_scal_x_alpha_ao_pbe`
-       * :c:data:`pot_scal_x_alpha_ao_sr_pbe`
-       * :c:data:`pot_scal_xc_alpha_ao_pbe`
-       * :c:data:`pot_scal_xc_alpha_ao_sr_pbe`
-       * :c:data:`potential_c_alpha_ao_lda`
-       * :c:data:`potential_c_alpha_ao_sr_lda`
-       * :c:data:`potential_x_alpha_ao_lda`
-       * :c:data:`potential_x_alpha_ao_sr_lda`
-       * :c:data:`potential_xc_alpha_ao_lda`
-       * :c:data:`potential_xc_alpha_ao_sr_lda`
 
  
-.. c:var:: aos_in_r_array_extra
+.. c:var:: double aos_in_r_array_extra
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -444,7 +436,7 @@ Providers
         double precision, allocatable	:: aos_in_r_array_extra	(ao_num,n_points_extra_final_grid)
 
 
-    aos_in_r_array_extra(i,j)        = value of the ith ao on the jth grid point
+    aos_in_r_array_extra(i,j)        = value of the ith ao on the jth grid point of the EXTRA grid
 
     Needs:
 
@@ -471,7 +463,7 @@ Providers
        * :c:data:`aos_in_r_array_extra_transp`
 
  
-.. c:var:: aos_in_r_array_extra_transp
+.. c:var:: double aos_in_r_array_extra_transp
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -481,7 +473,7 @@ Providers
         double precision, allocatable	:: aos_in_r_array_extra_transp	(n_points_extra_final_grid,ao_num)
 
 
-    aos_in_r_array_extra_transp(i,j) = value of the jth ao on the ith grid point
+    aos_in_r_array_extra_transp(i,j) = value of the jth ao on the ith grid point of the EXTRA grid
 
     Needs:
 
@@ -494,7 +486,7 @@ Providers
 
 
  
-.. c:var:: aos_in_r_array_transp
+.. c:var:: double aos_in_r_array_transp
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -515,18 +507,9 @@ Providers
        * :c:data:`aos_in_r_array`
        * :c:data:`n_points_final_grid`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pot_grad_x_alpha_ao_pbe`
-       * :c:data:`pot_grad_x_alpha_ao_sr_pbe`
-       * :c:data:`pot_grad_xc_alpha_ao_pbe`
-       * :c:data:`pot_grad_xc_alpha_ao_sr_pbe`
 
  
-.. c:var:: aos_lapl_in_r_array
+.. c:var:: double aos_lapl_in_r_array
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -565,7 +548,7 @@ Providers
        * :c:data:`aos_lapl_in_r_array_transp`
 
  
-.. c:var:: aos_lapl_in_r_array_transp
+.. c:var:: double aos_lapl_in_r_array_transp
 
 
     File : :file:`dft_utils_in_r/ao_in_r.irp.f`
@@ -575,6 +558,10 @@ Providers
         double precision, allocatable	:: aos_lapl_in_r_array_transp	(ao_num,n_points_final_grid,3)
 
 
+    aos_lapl_in_r_array_transp(i,j,k) = value of the kth component of the
+    laplacian of the ith ao on the jth grid point
+    
+    k = 1 : x, k = 2 : y, k = 3 : z
 
     Needs:
 
@@ -593,7 +580,7 @@ Providers
        * :c:data:`mos_lapl_in_r_array`
 
  
-.. c:var:: beta_dens_kin_in_r
+.. c:var:: double beta_dens_kin_in_r
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -604,6 +591,11 @@ Providers
         double precision, allocatable	:: beta_dens_kin_in_r	(n_points_final_grid)
 
 
+    alpha_dens_kin_in_r(i) = alpha kinetic energy density at the ith
+    grid point: 0.5 * sum over j = 1, elec_alpha_num of the squared
+    norm of the gradient of the jth MO
+    
+    beta_dens_kin_in_r(i) = same for j = 1, elec_beta_num
 
     Needs:
 
@@ -617,7 +609,7 @@ Providers
 
 
  
-.. c:var:: elec_alpha_num_grid_becke
+.. c:var:: double elec_alpha_num_grid_becke
 
 
     File : :file:`dft_utils_in_r/dm_in_r.irp.f`
@@ -643,15 +635,9 @@ Providers
        * :c:data:`n_states`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mu_average_prov`
 
  
-.. c:var:: elec_beta_num_grid_becke
+.. c:var:: double elec_beta_num_grid_becke
 
 
     File : :file:`dft_utils_in_r/dm_in_r.irp.f`
@@ -677,15 +663,9 @@ Providers
        * :c:data:`n_states`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mu_average_prov`
 
  
-.. c:var:: elec_num_grid_becke
+.. c:var:: double elec_num_grid_becke
 
 
     File : :file:`dft_utils_in_r/dm_in_r.irp.f`
@@ -711,15 +691,9 @@ Providers
        * :c:data:`n_states`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mu_average_prov`
 
  
-.. c:var:: kinetic_density_generalized
+.. c:var:: double kinetic_density_generalized
 
 
     File : :file:`dft_utils_in_r/kin_dens.irp.f`
@@ -729,6 +703,10 @@ Providers
         double precision, allocatable	:: kinetic_density_generalized	(n_points_final_grid)
 
 
+    kinetic_density_generalized(p) = generalized kinetic energy density
+    at the pth grid point: 0.5 times the double sum over MOs (i,j) of
+    the MO density matrix element one_e_dm_mo_for_dft(j,i,1) (alpha +
+    beta, state 1) times the scalar product of the MO gradients
 
     Needs:
 
@@ -742,7 +720,115 @@ Providers
 
 
  
-.. c:var:: mo_grad_ints
+.. c:var:: double mo_dipole_x_becke
+
+
+    File : :file:`dft_utils_in_r/dipole_becke.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_dipole_x_becke	(mo_num,mo_num)
+        double precision, allocatable	:: mo_dipole_y_becke	(mo_num,mo_num)
+        double precision, allocatable	:: mo_dipole_z_becke	(mo_num,mo_num)
+
+
+    mo_dipole_x_becke(i,j) = the x-component of the MO dipole matrix
+    element between MO i and MO j, evaluated by quadrature on the
+    Becke grid as sum over grid points of x * weight * MO_i * MO_j
+    
+    mo_dipole_y_becke and mo_dipole_z_becke are the y and z components
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`final_grid_points`
+       * :c:data:`mo_num`
+       * :c:data:`mos_in_r_array_transp`
+       * :c:data:`n_points_final_grid`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_prop_dipole_x`
+
+ 
+.. c:var:: double mo_dipole_y_becke
+
+
+    File : :file:`dft_utils_in_r/dipole_becke.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_dipole_x_becke	(mo_num,mo_num)
+        double precision, allocatable	:: mo_dipole_y_becke	(mo_num,mo_num)
+        double precision, allocatable	:: mo_dipole_z_becke	(mo_num,mo_num)
+
+
+    mo_dipole_x_becke(i,j) = the x-component of the MO dipole matrix
+    element between MO i and MO j, evaluated by quadrature on the
+    Becke grid as sum over grid points of x * weight * MO_i * MO_j
+    
+    mo_dipole_y_becke and mo_dipole_z_becke are the y and z components
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`final_grid_points`
+       * :c:data:`mo_num`
+       * :c:data:`mos_in_r_array_transp`
+       * :c:data:`n_points_final_grid`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_prop_dipole_x`
+
+ 
+.. c:var:: double mo_dipole_z_becke
+
+
+    File : :file:`dft_utils_in_r/dipole_becke.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_dipole_x_becke	(mo_num,mo_num)
+        double precision, allocatable	:: mo_dipole_y_becke	(mo_num,mo_num)
+        double precision, allocatable	:: mo_dipole_z_becke	(mo_num,mo_num)
+
+
+    mo_dipole_x_becke(i,j) = the x-component of the MO dipole matrix
+    element between MO i and MO j, evaluated by quadrature on the
+    Becke grid as sum over grid points of x * weight * MO_i * MO_j
+    
+    mo_dipole_y_becke and mo_dipole_z_becke are the y and z components
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`final_grid_points`
+       * :c:data:`mo_num`
+       * :c:data:`mos_in_r_array_transp`
+       * :c:data:`n_points_final_grid`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_prop_dipole_x`
+
+ 
+.. c:var:: double mo_grad_ints
 
 
     File : :file:`dft_utils_in_r/ints_grad.irp.f`
@@ -773,7 +859,7 @@ Providers
        * :c:data:`mo_grad_ints_transp`
 
  
-.. c:var:: mo_grad_ints_transp
+.. c:var:: double mo_grad_ints_transp
 
 
     File : :file:`dft_utils_in_r/ints_grad.irp.f`
@@ -795,7 +881,7 @@ Providers
 
 
  
-.. c:var:: mos_grad_in_r_array
+.. c:var:: double mos_grad_in_r_array
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -827,14 +913,13 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`core_inact_act_mos_grad_in_r_array`
        * :c:data:`mo_grad_ints`
        * :c:data:`mos_grad_in_r_array_tranp`
        * :c:data:`mos_grad_in_r_array_transp_3`
        * :c:data:`mos_grad_in_r_array_transp_bis`
 
  
-.. c:var:: mos_grad_in_r_array_tranp
+.. c:var:: double mos_grad_in_r_array_tranp
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -866,7 +951,7 @@ Providers
        * :c:data:`kinetic_density_generalized`
 
  
-.. c:var:: mos_grad_in_r_array_transp_3
+.. c:var:: double mos_grad_in_r_array_transp_3
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -890,7 +975,7 @@ Providers
 
 
  
-.. c:var:: mos_grad_in_r_array_transp_bis
+.. c:var:: double mos_grad_in_r_array_transp_bis
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -914,7 +999,7 @@ Providers
 
 
  
-.. c:var:: mos_in_r_array
+.. c:var:: double mos_in_r_array
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -942,11 +1027,64 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`basis_mos_in_r_array`
        * :c:data:`mo_grad_ints`
 
  
-.. c:var:: mos_in_r_array_omp
+.. c:var:: double mos_in_r_array_extra_omp
+
+
+    File : :file:`dft_utils_in_r/mo_in_r.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mos_in_r_array_extra_omp	(mo_num,n_points_extra_final_grid)
+
+
+    mos_in_r_array_extra(i,j)        = value of the ith mo on the jth grid point on the EXTRA GRID
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`final_grid_points_extra`
+       * :c:data:`mo_coef_transp`
+       * :c:data:`mo_num`
+       * :c:data:`n_points_extra_final_grid`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mos_in_r_array_extra_transp`
+
+ 
+.. c:var:: double mos_in_r_array_extra_transp
+
+
+    File : :file:`dft_utils_in_r/mo_in_r.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mos_in_r_array_extra_transp	(n_points_extra_final_grid,mo_num)
+
+
+    mos_in_r_array_extra_transp(i,j) = value of the jth mo on the ith grid point
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_num`
+       * :c:data:`mos_in_r_array_extra_omp`
+       * :c:data:`n_points_extra_final_grid`
+
+
+ 
+.. c:var:: double mos_in_r_array_omp
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -974,15 +1112,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`f_hf_cholesky_sparse`
-       * :c:data:`f_hf_cholesky_sparse_bis`
        * :c:data:`mos_in_r_array_transp`
-       * :c:data:`mos_times_cholesky_r1`
-       * :c:data:`mos_times_cholesky_r2`
-       * :c:data:`on_top_hf_grid`
 
  
-.. c:var:: mos_in_r_array_transp
+.. c:var:: double mos_in_r_array_transp
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -1008,14 +1141,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`act_mos_in_r_array`
-       * :c:data:`core_inact_act_mos_in_r_array`
-       * :c:data:`core_mos_in_r_array`
-       * :c:data:`inact_mos_in_r_array`
-       * :c:data:`virt_mos_in_r_array`
+       * :c:data:`mo_dipole_x_becke`
 
  
-.. c:var:: mos_lapl_in_r_array
+.. c:var:: double mos_lapl_in_r_array
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -1048,7 +1177,7 @@ Providers
        * :c:data:`mos_lapl_in_r_array_tranp`
 
  
-.. c:var:: mos_lapl_in_r_array_tranp
+.. c:var:: double mos_lapl_in_r_array_tranp
 
 
     File : :file:`dft_utils_in_r/mo_in_r.irp.f`
@@ -1073,7 +1202,7 @@ Providers
 
 
  
-.. c:var:: one_e_dm_and_grad_alpha_in_r
+.. c:var:: double one_e_dm_and_grad_alpha_in_r
 
 
     File : :file:`dft_utils_in_r/dm_in_r.irp.f`
@@ -1120,27 +1249,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`effective_alpha_dm`
-       * :c:data:`effective_spin_dm`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`mu_average_prov`
 
  
-.. c:var:: one_e_dm_and_grad_beta_in_r
+.. c:var:: double one_e_dm_and_grad_beta_in_r
 
 
     File : :file:`dft_utils_in_r/dm_in_r.irp.f`
@@ -1187,27 +1299,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`effective_alpha_dm`
-       * :c:data:`effective_spin_dm`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`mu_average_prov`
 
  
-.. c:var:: one_e_grad_2_dm_alpha_at_r
+.. c:var:: double one_e_grad_2_dm_alpha_at_r
 
 
     File : :file:`dft_utils_in_r/dm_in_r.irp.f`
@@ -1254,27 +1349,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`effective_alpha_dm`
-       * :c:data:`effective_spin_dm`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`mu_average_prov`
 
  
-.. c:var:: one_e_grad_2_dm_beta_at_r
+.. c:var:: double one_e_grad_2_dm_beta_at_r
 
 
     File : :file:`dft_utils_in_r/dm_in_r.irp.f`
@@ -1321,27 +1399,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`effective_alpha_dm`
-       * :c:data:`effective_spin_dm`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`mu_average_prov`
 
  
-.. c:var:: one_e_stuff_for_pbe
+.. c:var:: double one_e_stuff_for_pbe
 
 
     File : :file:`dft_utils_in_r/dm_in_r.irp.f`
@@ -1388,27 +1449,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`effective_alpha_dm`
-       * :c:data:`effective_spin_dm`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`mu_average_prov`
 
  
-.. c:var:: scal_prod_grad_one_e_dm_ab
+.. c:var:: double scal_prod_grad_one_e_dm_ab
 
 
     File : :file:`dft_utils_in_r/dm_in_r.irp.f`
@@ -1455,31 +1499,14 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_lda_w`
-       * :c:data:`aos_vc_alpha_pbe_w`
-       * :c:data:`aos_vc_alpha_sr_pbe_w`
-       * :c:data:`aos_vxc_alpha_lda_w`
-       * :c:data:`aos_vxc_alpha_pbe_w`
-       * :c:data:`aos_vxc_alpha_sr_pbe_w`
-       * :c:data:`effective_alpha_dm`
-       * :c:data:`effective_spin_dm`
        * :c:data:`elec_beta_num_grid_becke`
-       * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_x_lda`
-       * :c:data:`energy_x_pbe`
-       * :c:data:`energy_x_sr_lda`
-       * :c:data:`energy_x_sr_pbe`
-       * :c:data:`mu_average_prov`
 
  
  
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: dens_grad_a_b_no_core_and_aos_grad_aos_at_r:
+.. c:function:: void dens_grad_a_b_no_core_and_aos_grad_aos_at_r(void)
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`
@@ -1521,7 +1548,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_and_grad_at_r`
 
  
-.. c:function:: density_and_grad_alpha_beta:
+.. c:function:: void density_and_grad_alpha_beta(void)
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`
@@ -1552,13 +1579,6 @@ Subroutines / functions
        * :c:data:`n_states`
        * :c:data:`one_e_dm_alpha_ao_for_dft`
 
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`mu_grad_rho_func`
-
     Calls:
 
     .. hlist::
@@ -1568,7 +1588,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_and_grad_at_r`
 
  
-.. c:function:: density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r:
+.. c:function:: void density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r(void)
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`
@@ -1606,9 +1626,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`ec_md_on_top_pbe_mu_corrected`
-       * :c:func:`ecmd_pbe_ueg_at_r`
-       * :c:func:`give_all_stuffs_in_r_for_lyp_88`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
 
     Calls:
@@ -1620,7 +1637,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_and_grad_at_r`
 
  
-.. c:function:: density_and_grad_lapl_alpha_beta_and_all_aos_and_grad_aos_at_r:
+.. c:function:: void density_and_grad_lapl_alpha_beta_and_all_aos_and_grad_aos_at_r(void)
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`
@@ -1662,7 +1679,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_and_grad_and_lapl_at_r`
 
  
-.. c:function:: dm_dft_alpha_beta_and_all_aos_at_r:
+.. c:function:: void dm_dft_alpha_beta_and_all_aos_at_r(void)
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`
@@ -1695,7 +1712,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_at_r`
 
  
-.. c:function:: dm_dft_alpha_beta_at_r:
+.. c:function:: void dm_dft_alpha_beta_at_r(void)
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`
@@ -1718,16 +1735,6 @@ Subroutines / functions
        * :c:data:`n_states`
        * :c:data:`one_e_dm_alpha_ao_for_dft`
 
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`correction_to_on_top_from_ueg`
-       * :c:data:`mu_of_r_dft_average`
-       * :c:data:`mu_rsc_of_r`
-       * :c:func:`print_mos`
-
     Calls:
 
     .. hlist::
@@ -1737,7 +1744,7 @@ Subroutines / functions
        * :c:func:`give_all_aos_at_r`
 
  
-.. c:function:: dm_dft_alpha_beta_no_core_at_r:
+.. c:function:: void dm_dft_alpha_beta_no_core_at_r(void)
 
 
     File : :file:`dft_utils_in_r/dm_in_r_routines.irp.f`

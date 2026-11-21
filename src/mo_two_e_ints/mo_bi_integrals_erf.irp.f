@@ -78,6 +78,14 @@ END_PROVIDER
 
 subroutine four_idx_dgemm_erf
   implicit none
+  BEGIN_DOC
+  ! Dense AO->MO transformation of the ERF two-electron integrals by
+  ! four successive DGEMM multiplications by mo_coef. Integrals with
+  ! modulus at least mo_integrals_threshold are stored in
+  ! mo_integrals_erf_map with the mo_two_e_integrals_index key
+  ! (i<=k, j<=l only). Called from the provider
+  ! mo_two_e_integrals_erf_in_map when ao_num**4*32.d-9 < qp_max_mem.
+  END_DOC
   integer :: p,q,r,s,i,j,k,l
   double precision, allocatable :: a1(:,:,:,:)
   double precision, allocatable :: a2(:,:,:,:)
@@ -348,6 +356,13 @@ end
 
 subroutine provide_all_mo_integrals_erf
   implicit none
+  BEGIN_DOC
+  ! Provides all the main ERF MO two-electron integral quantities in
+  ! one call: the map mo_integrals_erf_map, the 2-index arrays
+  ! mo_two_e_int_erf_jj (=J_ij), mo_two_e_int_erf_jj_exchange
+  ! (=K_ij), mo_two_e_int_erf_jj_anti (=J_ij-K_ij), and the logical
+  ! mo_two_e_integrals_erf_in_map.
+  END_DOC
   provide mo_integrals_erf_map mo_two_e_int_erf_jj mo_two_e_int_erf_jj_anti
   provide mo_two_e_int_erf_jj_exchange mo_two_e_integrals_erf_in_map
 
@@ -457,19 +472,17 @@ subroutine add_integrals_to_map_erf(mask_ijkl)
       !$OMP  buffer_i,buffer_value,n_integrals,wall_2,i0,j0,k0,l0,   &
       !$OMP  wall_0,thread_num,accu_bis)                             &
       !$OMP  DEFAULT(NONE)                                           &
-      !$OMP  SHARED(size_buffer,ao_num,mo_num,n_i,n_j,n_k,n_l,   &
-      !$OMP  mo_coef_transp,                                         &
-      !$OMP  mo_coef_transp_is_built, list_ijkl,                     &
-      !$OMP  mo_coef_is_built, wall_1,                               &
+      !$OMP  SHARED(size_buffer,ao_num,mo_num,n_i,n_j,n_k,n_l,       &
+      !$OMP  mo_coef_transp, list_ijkl, wall_1,                      &
       !$OMP  mo_coef,mo_integrals_threshold,mo_integrals_erf_map)
   n_integrals = 0
   wall_0 = wall_1
   allocate(two_e_tmp_3(mo_num, n_j, n_k),                 &
       two_e_tmp_1(mo_num),                                &
-      two_e_tmp_0(ao_num,ao_num),                                   &
-      two_e_tmp_0_idx(ao_num),                                      &
+      two_e_tmp_0(ao_num,ao_num),                         &
+      two_e_tmp_0_idx(ao_num),                            &
       two_e_tmp_2(mo_num, n_j),                           &
-      buffer_i(size_buffer),                                         &
+      buffer_i(size_buffer),                              &
       buffer_value(size_buffer) )
 
   thread_num = 0

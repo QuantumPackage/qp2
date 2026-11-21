@@ -1,5 +1,13 @@
 !****************************************************************************
       subroutine ESRC_MD_LDAERF (mu,rho_a,rho_b,dospin,e)
+ BEGIN_DOC
+ ! Short-range spin-dependent LDA correlation energy density with a
+ ! multideterminant reference, for OEP calculations. e is the sum of
+ ! ec_only_lda_sr and the multideterminant correction
+ ! DELTA_LRSR_LDAERF. mu is the range-separation parameter; rho_a and
+ ! rho_b are the spin densities. If dospin is false, the Delta term is
+ ! evaluated at zero spin polarization.
+ END_DOC
 !*****************************************************************************
 !     Short-range spin-dependent LDA correlation functional with multideterminant reference
 !       for OEP calculations from Section V of 
@@ -46,6 +54,13 @@
 
 !****************************************************************************
       subroutine DELTA_LRSR_LDAERF (rhot,rhos,mu,dospin,e)
+ BEGIN_DOC
+ ! LDA approximation of the Delta_(LR-SR) term of the
+ ! multideterminant short-range LDA correlation. rhot is the total
+ ! density, rhos the spin density, mu the range-separation
+ ! parameter. If dospin is false, z = 0. e is the contribution to
+ ! the energy density (delta * rhot). Not tested for z != 0.
+ END_DOC
 !*****************************************************************************
 !     LDA approximation to term Delta_(LR-SR) from  Eq. 42 of
 !       Paziani, Moroni, Gori-Giorgi and Bachelet, PRB 73, 155111 (2006)

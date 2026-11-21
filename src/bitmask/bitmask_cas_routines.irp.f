@@ -3,6 +3,8 @@ integer function number_of_holes(key_in)
  BEGIN_DOC
  ! Function that returns the number of holes in the inact space
  !
+ ! ::
+ !
  !   popcnt(
  !      xor(
  !        iand(
@@ -17,14 +19,17 @@ integer function number_of_holes(key_in)
  !        reunion_of_core_inact_bitmask(1,1)) )
  !
  ! (key_in && act_bitmask)
- ! +---------------------+
- !    electrons in cas     xor key_in
- ! +---------------------------------+
- !        electrons outside of cas     && reunion_of_core_inact_bitmask 
- ! +------------------------------------------------------------------+ 
- !            electrons in the core/inact space     xor reunion_of_core_inact_bitmask
- ! +---------------------------------------------------------------------------------+ 
- !              holes
+ !
+ ! ::
+ !
+ !  +---------------------+
+ !     electrons in cas     xor key_in
+ !  +---------------------------------+
+ !     electrons outside of cas     && reunion_of_core_inact_bitmask
+ !  +------------------------------------------------------------------+
+ !     electrons in the core/inact space     xor reunion_of_core_inact_bitmask
+ !  +---------------------------------------------------------------------------------+
+ !     holes
  END_DOC
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
@@ -215,9 +220,10 @@ integer function number_of_holes_verbose(key_in)
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
  integer :: i
- integer(bit_kind) :: key_tmp(N_int,2)
+ integer(bit_kind), allocatable :: key_tmp(:,:)
+ allocate(key_tmp(N_int,2))
  print*,'HOLES '
- print*,'jey_in = '
+ print*,'key_in = '
  call debug_det(key_in,N_int)
  number_of_holes_verbose = 0
    key_tmp(1,1) = xor(key_in(1,1),iand(key_in(1,1),act_bitmask(1,1)))
@@ -245,9 +251,10 @@ integer function number_of_particles_verbose(key_in)
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
  integer :: i
- integer(bit_kind) :: key_tmp(N_int,2)
+ integer(bit_kind), allocatable :: key_tmp(:,:)
+ allocate(key_tmp(N_int,2))
  print*,'PARTICLES '
- print*,'jey_in = '
+ print*,'key_in = '
  call debug_det(key_in,N_int)
  number_of_particles_verbose = 0
    key_tmp(1,1) = xor(key_in(1,2),iand(key_in(1,2),act_bitmask(1,1)))
@@ -267,6 +274,11 @@ integer function number_of_particles_verbose(key_in)
 end
 
 logical function is_a_1h1p(key_in)
+ BEGIN_DOC
+ ! Returns .True. if key_in has exactly 1 hole in the core/inactive
+ ! space and exactly 1 particle in the virtual space, i.e. belongs
+ ! to the 1h1p excitation class.
+ END_DOC
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
  integer :: number_of_particles, number_of_holes
@@ -276,6 +288,11 @@ logical function is_a_1h1p(key_in)
 end
 
 logical function is_a_1h2p(key_in)
+ BEGIN_DOC
+ ! Returns .True. if key_in has exactly 1 hole in the core/inactive
+ ! space and exactly 2 particles in the virtual space, i.e. belongs
+ ! to the 1h2p excitation class.
+ END_DOC
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
  integer :: number_of_particles, number_of_holes
@@ -285,6 +302,11 @@ logical function is_a_1h2p(key_in)
 end
 
 logical function is_a_2h1p(key_in)
+ BEGIN_DOC
+ ! Returns .True. if key_in has exactly 2 holes in the core/inactive
+ ! space and exactly 1 particle in the virtual space, i.e. belongs
+ ! to the 2h1p excitation class.
+ END_DOC
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
  integer :: number_of_particles, number_of_holes
@@ -294,6 +316,10 @@ logical function is_a_2h1p(key_in)
 end
 
 logical function is_a_1h(key_in)
+ BEGIN_DOC
+ ! Returns .True. if key_in has exactly 1 hole in the core/inactive
+ ! space and no particle in the virtual space.
+ END_DOC
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
  integer :: number_of_particles, number_of_holes
@@ -303,6 +329,10 @@ logical function is_a_1h(key_in)
 end
 
 logical function is_a_1p(key_in)
+ BEGIN_DOC
+ ! Returns .True. if key_in has exactly 1 particle in the virtual
+ ! space and no hole in the core/inactive space.
+ END_DOC
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
  integer :: number_of_particles, number_of_holes
@@ -312,6 +342,10 @@ logical function is_a_1p(key_in)
 end
 
 logical function is_a_2p(key_in)
+ BEGIN_DOC
+ ! Returns .True. if key_in has exactly 2 particles in the virtual
+ ! space and no hole in the core/inactive space.
+ END_DOC
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
  integer :: number_of_particles, number_of_holes
@@ -321,6 +355,10 @@ logical function is_a_2p(key_in)
 end
 
 logical function is_a_2h(key_in)
+ BEGIN_DOC
+ ! Returns .True. if key_in has exactly 2 holes in the core/inactive
+ ! space and no particle in the virtual space.
+ END_DOC
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
  integer :: number_of_particles, number_of_holes
@@ -330,9 +368,14 @@ logical function is_a_2h(key_in)
 end
 
 logical function is_i_in_virtual(i)
+ BEGIN_DOC
+ ! Returns .True. if the MO with 1-based index i belongs to the
+ ! virtual space, i.e. the bit of MO i is set in virt_bitmask.
+ END_DOC
  implicit none
  integer,intent(in) :: i
- integer(bit_kind) :: key(N_int)
+ integer(bit_kind), allocatable :: key(:)
+ allocate(key(N_int))
  integer :: k,j
  integer :: accu
  is_i_in_virtual = .False.
@@ -346,6 +389,32 @@ logical function is_i_in_virtual(i)
  enddo
  if(accu .ne. 0)then
   is_i_in_virtual = .True.
+ endif
+
+end
+
+logical function is_i_in_core(i)
+ BEGIN_DOC
+ ! Returns .True. if the MO with 1-based index i belongs to the core
+ ! space, i.e. the bit of MO i is set in core_bitmask.
+ END_DOC
+ implicit none
+ integer,intent(in) :: i
+ integer(bit_kind), allocatable :: key(:)
+ allocate(key(N_int))
+ integer :: k,j
+ integer :: accu
+ is_i_in_core = .False.
+ key= 0_bit_kind
+ k = shiftr(i-1,bit_kind_shift)+1
+ j = i-shiftl(k-1,bit_kind_shift)-1
+ key(k) = ibset(key(k),j)
+ accu = 0
+ do k = 1, N_int
+  accu += popcnt(iand(key(k),core_bitmask(k,1)))
+ enddo
+ if(accu .ne. 0)then
+  is_i_in_core = .True.
  endif
 
 end

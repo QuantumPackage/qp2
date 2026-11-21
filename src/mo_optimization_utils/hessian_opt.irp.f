@@ -76,6 +76,14 @@
 
 
 subroutine hessian_opt(n,H,h_tmpr)
+  BEGIN_DOC
+  ! Hessian of the energy with respect to orbital rotations, for
+  ! all mo_num orbitals.
+  ! H is the n by n hessian, n is mo_num*(mo_num-1)/2, indexed by
+  ! the pairs (p,q) and (r,s) with p < q, r < s (vec_to_mat_index).
+  ! h_tmpr is the 4D hessian after the permutations, kept for
+  ! debugging.
+  END_DOC
   use omp_lib
   include 'constants.h' 
 

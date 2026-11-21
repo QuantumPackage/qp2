@@ -1,5 +1,12 @@
 logical function is_integer_in_string_local(orb,bitmask,Nint)
   use bitmasks
+  BEGIN_DOC
+  ! Returns .true. if the bit of orbital orb (1-based) is
+  ! set in bitmask(Nint). Each bitmask word is an
+  ! integer(bit_kind) holding bit_kind_size (64) orbitals.
+  ! Callers use it to test whether an orbital index belongs
+  ! to the orbital range represented by the bitmask.
+  END_DOC
   implicit none
   integer, intent(in)            :: orb, Nint
   integer(bit_kind), intent(in)  :: bitmask(Nint)

@@ -27,13 +27,13 @@ complex*16 function overlap_cgaussian_x(Ae_center, Be_center, alpha, beta, power
   call give_explicit_cpoly_and_cgaussian_x(P_new, P_center, p, fact_p, iorder_p, &
                                            alpha, beta, power_A, power_B, Ae_center, Be_center, Ap_center, Bp_center, dim)
  
-  if(zabs(fact_p) .lt. 1.d-14) then
+  if(abs(fact_p) .lt. 1.d-14) then
     overlap_cgaussian_x = (0.d0, 0.d0)
     return
   endif
 
 
-  inv_sq_p = (1.d0, 0.d0) / zsqrt(p)
+  inv_sq_p = (1.d0, 0.d0) / sqrt(p)
 
   overlap_cgaussian_x = (0.d0, 0.d0)
   do i = 0, iorder_p
@@ -79,7 +79,7 @@ subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, pow
   call give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_p, iorder_p, &
            alpha, beta, power_A, power_B, Ae_center, Be_center, Ap_center, Bp_center, dim)
 
-  if(zabs(fact_p) .lt. 1.d-14) then
+  if(abs(fact_p) .lt. 1.d-14) then
     overlap_x = (0.d0, 0.d0)
     overlap_y = (0.d0, 0.d0)
     overlap_z = (0.d0, 0.d0)
@@ -88,7 +88,7 @@ subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, pow
   endif
 
   nmax = maxval(iorder_p)
-  inv_sq_p = (1.d0, 0.d0) / zsqrt(p)
+  inv_sq_p = (1.d0, 0.d0) / sqrt(p)
   do i = 0, nmax
     F_integral_tab(i) = Fc_integral(i, inv_sq_p)
   enddo
@@ -104,7 +104,7 @@ subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, pow
     do i = 1, iorder_p(1)
       overlap_x = overlap_x + P_new(i,1) * F_integral_tab(i)
     enddo
-    overlap_x = overlap_x * zexp(-arg)
+    overlap_x = overlap_x * exp(-arg)
   endif
 
   arg = ab * (Ae_center(2) - Be_center(2)) &
@@ -116,7 +116,7 @@ subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, pow
     do i = 1, iorder_p(2)
       overlap_y = overlap_y + P_new(i,2) * F_integral_tab(i)
     enddo
-    overlap_y = overlap_y * zexp(-arg)
+    overlap_y = overlap_y * exp(-arg)
   endif
 
   arg = ab * (Ae_center(3) - Be_center(3)) &
@@ -128,7 +128,7 @@ subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, pow
     do i = 1, iorder_p(3)
       overlap_z = overlap_z + P_new(i,3) * F_integral_tab(i)
     enddo
-    overlap_z = overlap_z * zexp(-arg)
+    overlap_z = overlap_z * exp(-arg)
   endif
 
   overlap = overlap_x * overlap_y * overlap_z

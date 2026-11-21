@@ -46,12 +46,11 @@ Programs
 -------- 
  
  * :ref:`ks_scf` 
- * :ref:`print_mos` 
  
 Providers 
 --------- 
  
-.. c:var:: ao_potential_alpha_xc
+.. c:var:: double ao_potential_alpha_xc
 
 
     File : :file:`pot_functionals.irp.f`
@@ -62,6 +61,12 @@ Providers
         double precision, allocatable	:: ao_potential_beta_xc	(ao_num,ao_num)
 
 
+    AO-basis (ao_num x ao_num) exchange/correlation potential for
+    alpha and beta electrons (both provided in this block); added to
+    the KS Fock matrix in fock_matrix_ks.irp.f. If same_xc_func,
+    copies potential_xc_alpha_ao / potential_xc_beta_ao at state
+    index 1; otherwise sums potential_x_*_ao and potential_c_*_ao
+    at state index 1.
 
     Needs:
 
@@ -83,7 +88,7 @@ Providers
        * :c:data:`ks_energy`
 
  
-.. c:var:: ao_potential_beta_xc
+.. c:var:: double ao_potential_beta_xc
 
 
     File : :file:`pot_functionals.irp.f`
@@ -94,6 +99,12 @@ Providers
         double precision, allocatable	:: ao_potential_beta_xc	(ao_num,ao_num)
 
 
+    AO-basis (ao_num x ao_num) exchange/correlation potential for
+    alpha and beta electrons (both provided in this block); added to
+    the KS Fock matrix in fock_matrix_ks.irp.f. If same_xc_func,
+    copies potential_xc_alpha_ao / potential_xc_beta_ao at state
+    index 1; otherwise sums potential_x_*_ao and potential_c_*_ao
+    at state index 1.
 
     Needs:
 
@@ -115,7 +126,101 @@ Providers
        * :c:data:`ks_energy`
 
  
-.. c:var:: e_correlation_dft
+.. c:var:: double ao_two_e_integral_alpha
+
+
+    File : :file:`fock_matrix_ks.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_two_e_integral_alpha	(ao_num,ao_num)
+        double precision, allocatable	:: ao_two_e_integral_beta	(ao_num,ao_num)
+
+
+    Alpha Fock matrix in ao basis set
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_normalized_ordered_transp`
+       * :c:data:`ao_expo_ordered_transp`
+       * :c:data:`ao_integrals_map`
+       * :c:data:`ao_integrals_threshold`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_overlap_abs`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`ao_two_e_integral_schwartz`
+       * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`do_direct_integrals`
+       * :c:data:`hf_exchange`
+       * :c:data:`is_periodic`
+       * :c:data:`read_ao_two_e_integrals`
+       * :c:data:`scf_density_matrix_ao_alpha`
+       * :c:data:`scf_density_matrix_ao_beta`
+       * :c:data:`use_cgtos`
+       * :c:data:`use_only_lr`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`fock_matrix_alpha_no_xc_ao`
+       * :c:data:`ks_energy`
+
+ 
+.. c:var:: double ao_two_e_integral_beta
+
+
+    File : :file:`fock_matrix_ks.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_two_e_integral_alpha	(ao_num,ao_num)
+        double precision, allocatable	:: ao_two_e_integral_beta	(ao_num,ao_num)
+
+
+    Alpha Fock matrix in ao basis set
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_normalized_ordered_transp`
+       * :c:data:`ao_expo_ordered_transp`
+       * :c:data:`ao_integrals_map`
+       * :c:data:`ao_integrals_threshold`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_overlap_abs`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`ao_two_e_integral_schwartz`
+       * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`do_direct_integrals`
+       * :c:data:`hf_exchange`
+       * :c:data:`is_periodic`
+       * :c:data:`read_ao_two_e_integrals`
+       * :c:data:`scf_density_matrix_ao_alpha`
+       * :c:data:`scf_density_matrix_ao_beta`
+       * :c:data:`use_cgtos`
+       * :c:data:`use_only_lr`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`fock_matrix_alpha_no_xc_ao`
+       * :c:data:`ks_energy`
+
+ 
+.. c:var:: double e_correlation_dft
 
 
     File : :file:`pot_functionals.irp.f`
@@ -125,6 +230,11 @@ Providers
         double precision	:: e_correlation_dft	
 
 
+    DFT correlation energy: energy_c(1), i.e. the correlation
+    energy at state index 1 for the functional named by
+    correlation_functional (general provider energy_c in
+    dft_one_e/e_xc_general.irp.f). Added to KS_energy in
+    ks_enery.irp.f.
 
     Needs:
 
@@ -142,7 +252,7 @@ Providers
        * :c:data:`ks_energy`
 
  
-.. c:var:: e_exchange_dft
+.. c:var:: double e_exchange_dft
 
 
     File : :file:`pot_functionals.irp.f`
@@ -152,6 +262,11 @@ Providers
         double precision	:: e_exchange_dft	
 
 
+    DFT exchange energy: energy_x(1), i.e. the exchange energy at
+    state index 1 for the functional named by exchange_functional,
+    scaled by (1 - HF_exchange) (general provider energy_x in
+    dft_one_e/e_xc_general.irp.f). Added to KS_energy in
+    ks_enery.irp.f.
 
     Needs:
 
@@ -169,7 +284,40 @@ Providers
        * :c:data:`ks_energy`
 
  
-.. c:var:: fock_matrix_alpha_no_xc_ao
+.. c:var:: double extra_e_contrib_density
+
+
+    File : :file:`ks_enery.irp.f`
+
+    .. code:: fortran
+
+        double precision	:: extra_e_contrib_density	
+
+
+    Extra contribution to the SCF energy coming from the density.
+    
+    For a Hartree-Fock calculation: extra_e_contrib_density = 0
+    
+    For a Kohn-Sham or Range-separated Kohn-Sham: the exchange/correlation - 1/2 trace of the V_xc potential
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`e_correlation_dft`
+       * :c:data:`e_exchange_dft`
+       * :c:data:`ks_energy`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`scf_energy`
+
+ 
+.. c:var:: double fock_matrix_alpha_no_xc_ao
 
 
     File : :file:`fock_matrix_ks.irp.f`
@@ -199,7 +347,75 @@ Providers
        * :c:data:`fock_matrix_ao_alpha`
 
  
-.. c:var:: fock_matrix_beta_no_xc_ao
+.. c:var:: double fock_matrix_ao_alpha
+
+
+    File : :file:`fock_matrix_ks.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: fock_matrix_ao_alpha	(ao_num,ao_num)
+        double precision, allocatable	:: fock_matrix_ao_beta	(ao_num,ao_num)
+
+
+    Alpha Fock matrix in ao basis set
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`ao_potential_alpha_xc`
+       * :c:data:`fock_matrix_alpha_no_xc_ao`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`fock_matrix_ao`
+       * :c:data:`fock_matrix_mo_alpha`
+       * :c:data:`fock_matrix_mo_beta`
+       * :c:data:`ks_energy`
+       * :c:data:`scf_energy`
+
+ 
+.. c:var:: double fock_matrix_ao_beta
+
+
+    File : :file:`fock_matrix_ks.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: fock_matrix_ao_alpha	(ao_num,ao_num)
+        double precision, allocatable	:: fock_matrix_ao_beta	(ao_num,ao_num)
+
+
+    Alpha Fock matrix in ao basis set
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`ao_potential_alpha_xc`
+       * :c:data:`fock_matrix_alpha_no_xc_ao`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`fock_matrix_ao`
+       * :c:data:`fock_matrix_mo_alpha`
+       * :c:data:`fock_matrix_mo_beta`
+       * :c:data:`ks_energy`
+       * :c:data:`scf_energy`
+
+ 
+.. c:var:: double fock_matrix_beta_no_xc_ao
 
 
     File : :file:`fock_matrix_ks.irp.f`
@@ -229,7 +445,7 @@ Providers
        * :c:data:`fock_matrix_ao_alpha`
 
  
-.. c:var:: fock_matrix_energy
+.. c:var:: double fock_matrix_energy
 
 
     File : :file:`ks_enery.irp.f`
@@ -269,7 +485,7 @@ Providers
        * :c:data:`extra_e_contrib_density`
 
  
-.. c:var:: ks_energy
+.. c:var:: double ks_energy
 
 
     File : :file:`ks_enery.irp.f`
@@ -309,7 +525,7 @@ Providers
        * :c:data:`extra_e_contrib_density`
 
  
-.. c:var:: one_e_energy
+.. c:var:: double one_e_energy
 
 
     File : :file:`ks_enery.irp.f`
@@ -349,7 +565,7 @@ Providers
        * :c:data:`extra_e_contrib_density`
 
  
-.. c:var:: trace_potential_xc
+.. c:var:: double trace_potential_xc
 
 
     File : :file:`ks_enery.irp.f`
@@ -389,7 +605,7 @@ Providers
        * :c:data:`extra_e_contrib_density`
 
  
-.. c:var:: two_e_energy
+.. c:var:: double two_e_energy
 
 
     File : :file:`ks_enery.irp.f`
@@ -433,7 +649,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: check_coherence_functional:
+.. c:function:: void check_coherence_functional(void)
 
 
     File : :file:`ks_scf.irp.f`
@@ -443,6 +659,15 @@ Subroutines / functions
         subroutine check_coherence_functional
 
 
+    ks_scf start-up check: stop with a diagnostic if
+    exchange_functional or correlation_functional is "None" or
+    contains the substring "short_range".
+    TODO(doc): intent unknown to the author (author, 2026-10-31).
+    The code literally stops when a functional is "None" or
+    contains the substring "short_range"; in-tree functionals are
+    named sr_*, so the substring branch is dead for them, and the
+    diagnostic text is copy-pasted from
+    kohn_sham_rs/rs_ks_scf.irp.f (there the test is "sr").
 
     Needs:
 
@@ -458,4 +683,103 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`ks_scf`
+
+ 
+.. c:function:: void create_guess(void)
+
+
+    File : :file:`ks_scf.irp.f`
+
+    .. code:: fortran
+
+        subroutine create_guess
+
+
+    Create a MO guess if no MOs are present in the EZFIO directory
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_ortho_lowdin_coef`
+       * :c:data:`ezfio_filename`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_guess_type`
+       * :c:data:`mo_label`
+       * :c:data:`mo_one_e_integrals`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`ks_scf`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`ezfio_has_mo_basis_mo_coef`
+       * :c:func:`huckel_guess`
+       * :c:func:`mo_as_eigvectors_of_mo_matrix`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`fock_matrix_ao_alpha`
+       * :c:data:`fock_matrix_ao_alpha`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_label`
+
+ 
+.. c:function:: void run(void)
+
+
+    File : :file:`ks_scf.irp.f`
+
+    .. code:: fortran
+
+        subroutine run
+
+
+    Run SCF calculation
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`json_unit`
+       * :c:data:`ks_energy`
+       * :c:data:`mo_label`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`ks_scf`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`json_close`
+       * :c:func:`roothaan_hall_scf`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`fock_matrix_ao_alpha`
+       * :c:data:`fock_matrix_ao_alpha`
+       * :c:data:`mo_coef`
+       * :c:data:`level_shift`
+       * :c:data:`mo_coef`
 

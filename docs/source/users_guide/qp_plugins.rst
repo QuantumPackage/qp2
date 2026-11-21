@@ -16,16 +16,18 @@ Usage
 .. code:: bash
 
     qp_plugins list [-i] [-u] [-q]
-    qp_plugins download <url>
+    qp_plugins download <url> [-n <name>]
     qp_plugins install <name>...
     qp_plugins uninstall <name>
+    qp_plugins remove <name>
+    qp_plugins update [-r <repo>]
     qp_plugins create -n <name> [-r <repo>] [<needed_modules>...]
 
 .. option:: list
 
     List all the available plugins.
 
-.. option:: -i, --installed 
+.. option:: -i, --installed
 
     List all the *installed* plugins.
 
@@ -45,6 +47,13 @@ Usage
     * http://example.com/site/example.tar.gz
     * git@gitlab.com:user/example_repository
 
+.. option:: -n, --name=<name>
+
+    With ``download``, give the name of the local directory created by
+    ``git clone`` instead of using the name of the repository. With
+    ``create``, create a new plugin named ``name`` (in the local
+    repository by default).
+
 .. option:: install <plugin_name>
 
     Install the plugin ``plugin_name``.
@@ -53,17 +62,19 @@ Usage
 
     Uninstall the plugin ``plugin_name``.
 
-.. option:: update 
+.. option:: remove <plugin_name>
 
-    Update the repositories of the plugins. Should be followed by a re-compilation.
+    Same as ``uninstall``.
 
-.. option:: -n, --name=<plugin_name>
+.. option:: update
 
-    Create a new plugin named ``plugin_name`` (in local repository by default).
+    Update the repositories of the plugins by running ``git pull`` in
+    each of them. Should be followed by a re-compilation.
 
 .. option:: -r, --repository=<repo>
 
-    Specify in which repository the new plugin will be created.
+    With ``update``, restrict the update to the repository ``repo``. With
+    ``create``, specify in which repository the new plugin will be created.
 
 
 

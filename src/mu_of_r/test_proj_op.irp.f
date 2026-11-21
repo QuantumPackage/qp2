@@ -22,6 +22,11 @@ end
 
 
 subroutine test
+ BEGIN_DOC
+ ! Prints the sum over the grid points of
+ ! |f_hf_cholesky_sparse(R) - f_hf_cholesky_sparse_bis(R)|
+ ! times final_weight_at_r_vector(R), the grid weight.
+ END_DOC
  implicit none
  integer :: i_point
  double precision :: ref, new, accu, weight

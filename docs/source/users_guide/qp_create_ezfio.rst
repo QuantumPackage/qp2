@@ -13,8 +13,8 @@ Usage
 
 .. code:: bash
 
-   qp_create_ezfio [-a] -b <string> [-c <int>] [-d <float>] 
-      [-h] [-m <int>] [-o EZFIO_DIR] [-p <string>] [-x] [--] FILE
+   qp_create_ezfio [-a] -b <string> [-c <int>] [-g <float>] [-h]
+      [-m <int>] [-o EZFIO_DIR] [-p <string>] [-q] [-x] [--] FILE
 
 
 .. option:: -a, --au
@@ -31,20 +31,25 @@ Usage
       -b "cc-pcvdz | H:cc-pvdz | C:6-31g"
       -b "cc-pvtz | 1,H:sto-3g | 3,H:6-31g"
 
-   By default, the basis set is obtained from the local database of the.
-   |qp| This option is mandatory                                       .
+   By default, the basis set is obtained from the local database of |qp|
+   in ``$QP_ROOT/data/basis``. If a file with the same name exists in the
+   current directory, that file is read instead. This option is mandatory.
 
 
 .. option:: -c, --charge=<int>
 
-   Total charge of the molecule. Default is 0.
+   Total charge of the molecule. Default is 0. Negative values are
+   written with an ``m`` replacing the minus sign, for example ``m1``
+   for a charge of :math:`-1`.
 
 
-.. option:: -d, --dummy=<float>
+.. option:: -g, --ghost=<float>
 
-   Add dummy atoms (X) between atoms when the distance between two atoms
-   is less than :math:`x \times \sum R_\mathrm{cov}`, the covalent radii
-   of the atoms. The default is x=0, so no dummy atom is added.
+   Add ghost atoms (X) between atoms when the distance between two atoms
+   is less than :math:`x \times \sum R_\mathrm{cov}`, the sum of the covalent
+   radii of the atoms, where :math:`x` is the value given here. The ghost
+   atom is placed on the bond at the ratio of the two radii. The default
+   is x=0, so no ghost atom is added.
 
 
 .. option:: -h, --help
@@ -65,7 +70,14 @@ Usage
 
    Name of the pseudo-potential. Follows the same conventions as the basis set.
 
-.. option:: -x, --cart
+
+.. option:: -q, --qmc
+
+   Write the |EZFIO| directory with the old conventions, for compatibility
+   with `QMC=Chem`_ and `QMCPack`_.
+
+
+.. option:: -x, --cartesian
 
    Compute |AOs| in the Cartesian basis set (6d, 10f, ...)
 

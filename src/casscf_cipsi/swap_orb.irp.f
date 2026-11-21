@@ -1,5 +1,11 @@
  BEGIN_PROVIDER [double precision, SXvector_lowest, (nMonoEx)]
  implicit none
+ BEGIN_DOC
+ ! Excitation components of the lowest eigenvector of the
+ ! single-excitation matrix (SXeigenvec, column 1).
+ ! SXvector_lowest(i-1) = SXeigenvec(i,1); the first
+ ! eigenvector component (SXeigenvec(1,1)) is omitted.
+ END_DOC
  integer :: i 
   do i=2,nMonoEx+1
    SXvector_lowest(i-1)=SXeigenvec(i,1)
@@ -8,6 +14,18 @@
 
  BEGIN_PROVIDER [double precision, thresh_overlap_switch]
  implicit none
+ BEGIN_DOC
+ ! Threshold on the absolute value of the components of
+ ! SXvector_lowest. The max_overlap provider lists the
+ ! monoexcitations with |SXvector_lowest(i)| above this
+ ! value. The value 0.5d0 is hard coded.
+ ! Heuristic dominance threshold: the lowest SX eigenvector
+ ! is normalized, so |c| > 0.5 means the monoexcitation
+ ! carries >25 % of its norm (at most 4 can qualify). No
+ ! published justification found; the exact value is a
+ ! code-local convention (cf. the c0^2 vs 0.5 test in
+ ! neworbs.irp.f).
+ END_DOC
  thresh_overlap_switch = 0.5d0
  END_PROVIDER 
 
@@ -15,6 +33,12 @@
 &BEGIN_PROVIDER [integer, n_max_overlap]
 &BEGIN_PROVIDER [integer, dim_n_max_overlap]
  implicit none
+ BEGIN_DOC
+ ! Monoexcitations whose |SXvector_lowest| component is
+ ! above thresh_overlap_switch, ordered by decreasing
+ ! magnitude of that component. n_max_overlap is their
+ ! number; dim_n_max_overlap = max(1, n_max_overlap).
+ END_DOC
  double precision, allocatable :: vec_tmp(:)
  integer, allocatable :: iorder(:)
  allocate(vec_tmp(nMonoEx),iorder(nMonoEx))
@@ -38,6 +62,14 @@
 &BEGIN_PROVIDER [integer, index_orb_swap, (dim_n_max_overlap)]
 &BEGIN_PROVIDER [integer, n_orb_swap ]
  implicit none
+ BEGIN_DOC
+ ! Candidate orbital rotations, one per monoexcitation of
+ ! max_overlap with positive Hessian diagonal: core->active
+ ! ("c-a") and active->virtual ("a-v") pairs of orbitals.
+ ! orb_swap(1,i), orb_swap(2,i) are the two orbitals of
+ ! rotation i, index_orb_swap(i) its index, n_orb_swap the
+ ! count. Candidate pairs sharing an orbital are dropped.
+ END_DOC
  use bitmasks ! you need to include the bitmasks_module.f90 features
  integer :: i,imono,iorb,jorb,j
  n_orb_swap = 0
@@ -87,6 +119,7 @@
    do k = 1, N_int
     icount += popcnt(ior(det_i(k),det_j(k)))
    enddo
+   ! keep the pair only if the two rotations involve 4 distinct orbitals
    if (icount.ne.4)then
     good_orb_rot(i) = .False.
     good_orb_rot(j) = .False.
@@ -116,6 +149,12 @@
 
  BEGIN_PROVIDER [double precision, switch_mo_coef, (ao_num,mo_num)]
   implicit none
+  BEGIN_DOC
+  ! FCI natural orbitals (NatOrbsFCI) with the columns of
+  ! the swapped orbital pairs of orb_swap exchanged. Used
+  ! as the NewOrbs guess in neworbs.irp.f when the lowest
+  ! single-excitation eigenvector is taken (n_orb_swap.ne.0).
+  END_DOC
   integer :: i,j,iorb,jorb
   switch_mo_coef = NatOrbsFCI
   do i = 1, n_orb_swap

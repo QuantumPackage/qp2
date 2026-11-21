@@ -1,5 +1,14 @@
 BEGIN_PROVIDER [ double precision, ao_extra_center]
  implicit none
+  BEGIN_DOC
+  ! ao_extra_center :: shift used when a p function is fitted:
+  ! each p primitive is replaced by two s functions centered at
+  ! R +/- ao_extra_center along the axis of the p power.
+  ! The value is fixed to 0.01 and written to the EZFIO file
+  ! by the program fit_1s_basis.
+  ! The fixed shift 0.01 is in atomic units (author-confirmed
+  ! 2026-10-31).
+  END_DOC
  ao_extra_center = 0.01d0
 END_PROVIDER 
 
@@ -27,6 +36,10 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ integer, n_prim_tot_orig]
  implicit none
+  BEGIN_DOC
+  ! n_prim_tot_orig :: total number of primitives of the
+  ! original AO basis: sum of ao_prim_num over the ao_num AOs.
+  END_DOC
  integer :: i
  n_prim_tot_orig = 0
  do i = 1, ao_num
@@ -37,6 +50,13 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ logical, lmax_too_big]
  implicit none
+  BEGIN_DOC
+  ! lmax_too_big :: true when the original basis contains
+  ! functions with l > 1 (ao_l_max > 1).
+  !
+  ! The fit onto s functions is implemented for l <= 1 only, so
+  ! this provider prints a message and stops when lmax_too_big.
+  END_DOC
  if (ao_l_max.gt.1)then
   lmax_too_big = .True.
  else
@@ -86,11 +106,23 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ integer, extra_fictious_nucl]
  implicit none
+  BEGIN_DOC
+  ! extra_fictious_nucl :: number of fictitious nuclei added by
+  ! the fit: equal to n_2p_func_tot, i.e. two fictitious centers
+  ! per p primitive of the original basis.
+  ! Written to the EZFIO file as extra_nucl_fictious_num by the
+  ! program fit_1s_basis.
+  END_DOC
  extra_fictious_nucl = n_2p_func_tot
 END_PROVIDER 
 
 BEGIN_PROVIDER [ integer, new_nucl_num]
  implicit none
+  BEGIN_DOC
+  ! new_nucl_num :: number of nuclei of the fitted system: the
+  ! nucl_num real atoms plus n_2p_func_tot fictitious atoms,
+  ! one per s function fitted from a p primitive.
+  END_DOC
  new_nucl_num = nucl_num + n_2p_func_tot
  print*,'new_nucl_num = ',new_nucl_num
 END_PROVIDER 
@@ -99,6 +131,11 @@ END_PROVIDER
 &BEGIN_PROVIDER [ integer, list_real_nucl, (nucl_num) ]
 &BEGIN_PROVIDER [ integer, list_fict_nucl, (extra_fictious_nucl) ]
  implicit none
+ BEGIN_DOC
+ ! new_nucl_label_1s :: labels of the nuclei of the fitted
+ ! system. Entries 1 to nucl_num are the real atoms, with their
+ ! original labels; the fictitious atoms are all labelled "X".
+ END_DOC
  integer :: i,j
  do i = 1, nucl_num 
   new_nucl_label_1s(i) = nucl_label(i)
@@ -114,6 +151,12 @@ END_PROVIDER
  
  BEGIN_PROVIDER [ double precision,  new_nucl_coord_1s, (new_nucl_num,3)]
  implicit none
+ BEGIN_DOC
+ ! new_nucl_coord_1s :: coordinates of the nuclei of the
+ ! fitted system, in the (atom, x, y, z) layout: entry i is
+ ! new_nucl_coord_1s_transp(1:3,i). The real atoms come first,
+ ! then the fictitious centers.
+ END_DOC
  integer :: i,j
  do i = 1, new_nucl_num
   new_nucl_coord_1s(i,1:3) = new_nucl_coord_1s_transp(1:3,i)
@@ -170,6 +213,12 @@ END_PROVIDER
 
  BEGIN_PROVIDER [ integer, new_n_AOs_max]
  implicit none
+ BEGIN_DOC
+ ! new_n_AOs_max :: upper bound on the number of fitted s
+ ! functions per atom: ao_prim_num_max times n_AOs_max (the
+ ! maximum number of AOs per atom of the original basis).
+ ! Sizes the first dimension of new_nucl_aos_transposed.
+ END_DOC
  new_n_AOs_max = ao_prim_num_max * n_AOs_max
  
  END_PROVIDER 
@@ -180,6 +229,12 @@ END_PROVIDER
 &BEGIN_PROVIDER [ double precision, new_ao_expo_1s , (n_func_tot) ]
 &BEGIN_PROVIDER [ integer, new_ao_nucl_1s, (n_func_tot)]
  implicit none
+ BEGIN_DOC
+ ! new_Nucl_N_Aos :: number of fitted s functions attached to
+ ! each nucleus of the fitted system. For a real atom (entries
+ ! 1 to nucl_num), this is the number of primitives of its s
+ ! AOs; each fictitious atom carries exactly one s function.
+ END_DOC
  integer :: i,j,ii,i_ao,n_func,n_func_total,n_nucl
  double precision :: coef
  n_func_total = 0
@@ -240,6 +295,10 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ integer, new_ao_prim_num_1s, (n_func_tot)]
  implicit none
+ BEGIN_DOC
+ ! new_ao_prim_num_1s :: number of primitives of each fitted
+ ! function: always 1, the fitted basis is uncontracted.
+ END_DOC
  integer :: i
  do i = 1, n_func_tot
   new_ao_prim_num_1s(i) = 1
@@ -248,10 +307,21 @@ END_PROVIDER
 
 BEGIN_PROVIDER [integer, new_ao_power_1s, (n_func_tot,3)]
  implicit none
+ BEGIN_DOC
+ ! new_ao_power_1s :: powers of x, y, z of each fitted
+ ! function: all zeros, since the fitted basis contains s
+ ! functions only.
+ END_DOC
  new_ao_power_1s = 0
 END_PROVIDER 
 
 integer function return_xyz_int(power)
+ BEGIN_DOC
+ ! return_xyz_int :: maps the power of a p function to the
+ ! axis index of the corresponding displacement: 1 for x
+ ! (1,0,0), 2 for y (0,1,0), 3 for z (0,0,1); returns -1000
+ ! for any other power.
+ END_DOC
  implicit none
  integer,intent(in) :: power(3)
  if(power(1) == 1 .and. power(2) ==0 .and. power(3) ==0)then

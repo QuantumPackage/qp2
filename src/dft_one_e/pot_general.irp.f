@@ -172,6 +172,12 @@ print("endif")
   BEGIN_PROVIDER [double precision, potential_xc_alpha_mo,(mo_num,mo_num,N_states)]
  &BEGIN_PROVIDER [double precision, potential_xc_beta_mo,(mo_num,mo_num,N_states)]
   implicit none
+   BEGIN_DOC
+  ! Exchange/correlation potentials for alpha and beta electrons on the
+  ! MO basis, for each state: the ao_to_mo transform of the
+  ! potential_xc_alpha_ao / potential_xc_beta_ao AO-basis providers
+  ! (selected per functional). Only used by Trace_v_xc_new.
+   END_DOC
   integer :: istate
 
   do istate = 1, N_states

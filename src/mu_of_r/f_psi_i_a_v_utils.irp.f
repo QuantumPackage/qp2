@@ -177,8 +177,6 @@ subroutine give_f_aa_val_ab(r1,r2,f_aa_val_ab,two_bod_dens,istate)
  allocate( mos_array_act_r1(n_basis_orb) , mos_array_act_r2(n_basis_orb) )
  do i= 1, n_act_orb
   mos_array_act_r1(i) = mos_array_r1(list_act(i))
- enddo
- do i= 1, n_act_orb
   mos_array_act_r2(i) = mos_array_r2(list_act(i))
  enddo
 
@@ -186,48 +184,87 @@ subroutine give_f_aa_val_ab(r1,r2,f_aa_val_ab,two_bod_dens,istate)
  allocate( mos_array_basis_r1(n_basis_orb) , mos_array_basis_r2(n_basis_orb) )
  do i= 1, n_basis_orb
   mos_array_basis_r1(i) = mos_array_r1(list_basis(i))
- enddo
- do i= 1, n_basis_orb
   mos_array_basis_r2(i) = mos_array_r2(list_basis(i))
  enddo
 
- ! Contracted density : intermediate quantity
- ! rho_tilde(i,a) = \sum_b rho(b,a) * phi_i(1) * phi_j(2)
- allocate(rho_tilde(n_act_orb,n_act_orb))
- two_bod_dens = 0.d0
- rho_tilde = 0.d0
- do a = 1, n_act_orb  ! 1
-  do b = 1, n_act_orb  ! 2
-   do c = 1, n_act_orb  ! 1
-    do d = 1, n_act_orb  ! 2
-     rho = mos_array_act_r1(c) * mos_array_act_r2(d) * act_2_rdm_ab_mo(d,c,b,a,istate)
-     rho_tilde(b,a) += rho
-     two_bod_dens += rho * mos_array_act_r1(a) * mos_array_act_r2(b)
-    enddo
-   enddo
+ double precision, allocatable :: prod(:,:)
+ allocate(prod(n_act_orb,n_act_orb))
+ do b = 1, n_act_orb  ! 2
+  do a = 1, n_act_orb  ! 1
+   prod(a,b) = mos_array_act_r1(a) * mos_array_act_r2(b)
   enddo
  enddo
 
- ! Contracted two-e integrals : intermediate quantity
- ! v_tilde(i,a) = \sum_{m,n} phi_m(1) * phi_n(2) < i a | m n >
- allocate( v_tilde(n_act_orb,n_act_orb)   )
- v_tilde = 0.d0
- do a = 1, n_act_orb
-  do b = 1, n_act_orb
-   v_tilde(b,a) = 0.d0
-   do m = 1, n_basis_orb
-    do n = 1, n_basis_orb
-     v_tilde(b,a) += two_e_int_aa_f(n,m,b,a) * mos_array_basis_r2(n) * mos_array_basis_r1(m)
-    enddo
-   enddo
+! ! Contracted density : intermediate quantity
+! ! rho_tilde(i,a) = \sum_b rho(b,a) * phi_i(1) * phi_j(2)
+! allocate(rho_tilde(n_act_orb,n_act_orb))
+! two_bod_dens = 0.d0
+! rho_tilde = 0.d0
+! do a = 1, n_act_orb  ! 1
+!  do b = 1, n_act_orb  ! 2
+!   do c = 1, n_act_orb  ! 1
+!    do d = 1, n_act_orb  ! 2
+!     rho = prod(c,d) * act_2_rdm_ab_mo(d,c,b,a,istate)
+!     rho_tilde(b,a) = rho_tilde(b,a) + rho
+!     two_bod_dens = two_bod_dens + rho * prod(a,b)
+!    enddo
+!   enddo
+!  enddo
+! enddo
+
+  ! Matrix-vector multiplication: rho_tilde(::) = act_2_rdm_ab_mo(::,::,istate) * prod(::)
+  ! Treating both rho_tilde and prod as vectors of length n_act_orb^2
+  ! and act_2_rdm_ab_mo as a (n_act_orb^2) x (n_act_orb^2) matrix
+  allocate(rho_tilde(n_act_orb,n_act_orb))
+  call dgemv('N', n_act_orb*n_act_orb, n_act_orb*n_act_orb, &
+           1.d0, act_2_rdm_ab_mo(1,1,1,1,istate), n_act_orb*n_act_orb, &
+           prod, 1, 0.d0, rho_tilde, 1)
+
+  ! Final dot product
+  double precision, external :: ddot
+  two_bod_dens = ddot(n_act_orb*n_act_orb, rho_tilde, 1, prod, 1)
+
+ deallocate(prod)
+
+ allocate(prod(n_basis_orb,n_basis_orb))
+ do b = 1, n_basis_orb ! 1
+  do a = 1, n_basis_orb ! 2
+   prod(a,b) = mos_array_basis_r2(a) * mos_array_basis_r1(b)
   enddo
  enddo
 
- do a = 1, n_act_orb
-  do b = 1, n_act_orb
-   f_aa_val_ab += v_tilde(b,a) * rho_tilde(b,a)
-  enddo
- enddo
+! ! Contracted two-e integrals : intermediate quantity
+! ! v_tilde(i,a) = \sum_{m,n} phi_m(1) * phi_n(2) < i a | m n >
+! allocate( v_tilde(n_act_orb,n_act_orb)   )
+! v_tilde = 0.d0
+! do a = 1, n_act_orb
+!  do b = 1, n_act_orb
+!   v_tilde(b,a) = 0.d0
+!   do m = 1, n_basis_orb
+!    do n = 1, n_basis_orb
+!     v_tilde(b,a) = v_tilde(b,a) + two_e_int_aa_f(n,m,b,a) * prod(n,m)
+!    enddo
+!   enddo
+!  enddo
+! enddo
+!
+! do a = 1, n_act_orb
+!  do b = 1, n_act_orb
+!   f_aa_val_ab += v_tilde(b,a) * rho_tilde(b,a)
+!  enddo
+! enddo
+
+
+  ! Matrix-vector multiplication with transpose
+  ! Treating (n,m) as composite index (length n_basis_orb²)
+  ! and (b,a) as composite index (length n_act_orb²)
+  allocate( v_tilde(n_act_orb,n_act_orb) )
+  call dgemv('T', n_basis_orb*n_basis_orb, n_act_orb*n_act_orb, &
+            1.d0, two_e_int_aa_f, n_basis_orb*n_basis_orb, &
+            prod, 1, 0.d0, v_tilde, 1)
+
+  ! Final contraction: dot product
+  f_aa_val_ab = f_aa_val_ab + ddot(n_act_orb*n_act_orb, v_tilde, 1, rho_tilde, 1)
 
  ! DO NOT multiply by two as in give_f_ii_val_ab and give_f_ia_val_ab because the N(N-1) normalization condition of the active two-rdm
 end

@@ -1,4 +1,4 @@
-program test_tc_rdm
+program test_tc_two_rdm
 
   BEGIN_DOC
   !

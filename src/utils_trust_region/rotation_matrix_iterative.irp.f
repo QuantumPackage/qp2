@@ -9,6 +9,14 @@
 
 subroutine rotation_matrix_iterative(m,X,R)
 
+  BEGIN_DOC
+  ! Compute R as the power series R = sum_k X^k / k! (the
+  ! matrix exponential of X), the series being summed until
+  ! all the entries of R R^T - I are below 1d-12 in absolute
+  ! value, or until 1/k! is below 1d-15.
+  ! The subroutine is not functional: it ends with a message
+  ! and a call to abort.
+  END_DOC
   implicit none
 
   ! in
@@ -120,6 +128,10 @@ end
 
 function factorial(n)
 
+  BEGIN_DOC
+  ! Compute the factorial n! of the integer n as the product
+  ! of the integers from 1 to n (0! is 1).
+  END_DOC
   implicit none
 
   integer, intent(in) :: n

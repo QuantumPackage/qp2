@@ -9,13 +9,16 @@ struct TYPE_comp_big {
   int32_t i;
 };
 
-int compare_TYPE_big( const void * l, const void * r )
+int compare_TYPE_big( const void * restrict l, const void * restrict r )
 {
   const TYPE * restrict _l= l;
   const TYPE * restrict _r= r;
+  /*
   if( *_l > *_r ) return 1;
   if( *_l < *_r ) return -1;
   return 0;
+  */
+  return (*_l>*_r) - (*_l<*_r);
 }
 
 void qsort_TYPE_big(TYPE* restrict A_in, int32_t* restrict iorder, int32_t isize) {

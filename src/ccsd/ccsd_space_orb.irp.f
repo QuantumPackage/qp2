@@ -1,4 +1,4 @@
-program ccsd
+program ccsd_space_orb
 
   implicit none
 

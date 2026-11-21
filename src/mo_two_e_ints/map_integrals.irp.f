@@ -1,4 +1,5 @@
 use map_module
+use gpu
 
 BEGIN_PROVIDER [ logical, all_mo_integrals ]
   implicit none
@@ -6,7 +7,8 @@ BEGIN_PROVIDER [ logical, all_mo_integrals ]
 ! Used to provide everything needed before using MO integrals
 ! PROVIDE all_mo_integrals
   END_DOC
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache mo_two_e_integrals_jj_exchange mo_two_e_integrals_jj_anti mo_two_e_integrals_jj big_array_exchange_integrals big_array_coulomb_integrals mo_one_e_integrals
+  PROVIDE gpu_integral_buffer2 gpu_integral_buffer1
+  PROVIDE mo_integrals_cache mo_two_e_integrals_in_map big_array_exchange_integrals big_array_coulomb_integrals mo_two_e_integrals_jj_exchange mo_two_e_integrals_jj_anti mo_two_e_integrals_jj mo_one_e_integrals 
 END_PROVIDER
 
 !! MO Map
@@ -71,29 +73,66 @@ BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:mo_integrals_cache_s
  integer*8                      :: ii
  integer(key_kind)              :: idx
  real(integral_kind)            :: integral
+
  FREE ao_integrals_cache
 
  if (do_mo_cholesky) then
 
-   call set_multiple_levels_omp(.False.)
 
-   !$OMP PARALLEL DO PRIVATE(k,l,ii) SCHEDULE(dynamic)
-   do l=mo_integrals_cache_min,mo_integrals_cache_max
-     do k=mo_integrals_cache_min,mo_integrals_cache_max
-         ii = int(l-mo_integrals_cache_min,8)
-         ii = ior( shiftl(ii,mo_integrals_cache_shift), int(k-mo_integrals_cache_min,8))
-         ii = shiftl(ii,2*mo_integrals_cache_shift)
-         call dgemm('T','N', mo_integrals_cache_max-mo_integrals_cache_min+1, &
-                             mo_integrals_cache_max-mo_integrals_cache_min+1, &
-           cholesky_mo_num, 1.d0, &
-           cholesky_mo_transp(1,mo_integrals_cache_min,k), cholesky_mo_num, &
-           cholesky_mo_transp(1,mo_integrals_cache_min,l), cholesky_mo_num, 0.d0, &
-           mo_integrals_cache(ii), mo_integrals_cache_size)
+   if (gpu_num == 0) then
+
+     !$OMP PARALLEL DO PRIVATE(k,l,ii) SCHEDULE(dynamic)
+     do l=mo_integrals_cache_min,mo_integrals_cache_max
+       do k=mo_integrals_cache_min,mo_integrals_cache_max
+           ii = int(l-mo_integrals_cache_min,8)
+           ii = ior( shiftl(ii,mo_integrals_cache_shift), int(k-mo_integrals_cache_min,8))
+           ii = shiftl(ii,2*mo_integrals_cache_shift)
+           call dgemm('T','N', mo_integrals_cache_max-mo_integrals_cache_min+1, &
+                               mo_integrals_cache_max-mo_integrals_cache_min+1, &
+             cholesky_mo_num, 1.d0, &
+             cholesky_mo_transp(1,mo_integrals_cache_min,k), cholesky_mo_num, &
+             cholesky_mo_transp(1,mo_integrals_cache_min,l), cholesky_mo_num, 0.d0, &
+             mo_integrals_cache(ii), mo_integrals_cache_size)
+       enddo
      enddo
-   enddo
-   !$OMP END PARALLEL DO
+     !$OMP END PARALLEL DO
+
+   else
+
+     !$OMP PARALLEL PRIVATE(k,l,ii, mo_integrals_cache_d, iproc)
+     type(gpu_double1) :: mo_integrals_cache_d
+     integer :: iproc
+
+     iproc = omp_get_thread_num()
+     call gpu_set_device(igpu_mt(iproc))
+     call gpu_allocate(mo_integrals_cache_d, mo_integrals_cache_size*(mo_integrals_cache_max-mo_integrals_cache_min+1))
+
+     !$OMP DO
+     do l=mo_integrals_cache_min,mo_integrals_cache_max
+       do k=mo_integrals_cache_min,mo_integrals_cache_max
+           ii = int(l-mo_integrals_cache_min,8)
+           ii = ior( shiftl(ii,mo_integrals_cache_shift), int(k-mo_integrals_cache_min,8))
+           ii = shiftl(ii,2*mo_integrals_cache_shift)
+           call gpu_dgemm(blas_handle_mt(iproc),'T','N', mo_integrals_cache_max-mo_integrals_cache_min+1, &
+                               mo_integrals_cache_max-mo_integrals_cache_min+1, &
+             cholesky_mo_num, 1.d0, &
+             cholesky_mo_transp_d(igpu_mt(iproc))%f(1,mo_integrals_cache_min,k), cholesky_mo_num, &
+             cholesky_mo_transp_d(igpu_mt(iproc))%f(1,mo_integrals_cache_min,l), cholesky_mo_num, 0.d0, &
+             mo_integrals_cache_d%f(1), mo_integrals_cache_size)
+           call gpu_download(mo_integrals_cache_d%f(1),mo_integrals_cache(ii),size(mo_integrals_cache_d%f))
+       enddo
+     enddo
+     !$OMP END DO
+
+     call gpu_synchronize()
+     call gpu_deallocate(mo_integrals_cache_d)
+     !$OMP END PARALLEL
+     call gpu_set_device(0)
+
+   endif
 
  else
+
    !$OMP PARALLEL DO PRIVATE (i,j,k,l,idx,ii,integral) SCHEDULE(dynamic)
    do l=mo_integrals_cache_min,mo_integrals_cache_max
      do k=mo_integrals_cache_min,mo_integrals_cache_max
@@ -113,25 +152,49 @@ BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:mo_integrals_cache_s
      enddo
    enddo
    !$OMP END PARALLEL DO
+
  endif
 
 END_PROVIDER
 
+ BEGIN_PROVIDER [ type(gpu_double1), gpu_integral_buffer1, (0:nproc_max) ]
+&BEGIN_PROVIDER [ type(gpu_real1), gpu_integral_buffer_sp1, (0:nproc_max) ]
+&BEGIN_PROVIDER [ type(gpu_double2), gpu_integral_buffer2, (0:nproc_max) ]
+&BEGIN_PROVIDER [ type(gpu_real2), gpu_integral_buffer_sp2, (0:nproc_max) ]
+ implicit none
+ BEGIN_DOC
+ ! Temporary buffers for gpu_dgemv
+ END_DOC
 
-double precision function get_two_e_integral_cache(i,j,k,l)
+ integer :: i
+ if (gpu_num > 0) then
+   do i=0, nproc_max
+       call gpu_set_device(igpu_mt(i))
+       call gpu_allocate(gpu_integral_buffer1(i), mo_num)
+       call gpu_allocate(gpu_integral_buffer_sp1(i), mo_num)
+       call gpu_allocate(gpu_integral_buffer2(i), mo_num, mo_num)
+       call gpu_allocate(gpu_integral_buffer_sp2(i), mo_num, mo_num)
+   enddo
+   call gpu_set_device(0)
+ endif
+END_PROVIDER
+
+
+double precision function get_two_e_integral_cache(i,j,k,l,cache,m,s)
   use map_module
   implicit none
   BEGIN_DOC
   ! Returns one integral <ij|kl> in the MO basis taken from the cache
   END_DOC
-  integer, intent(in)            :: i,j,k,l
+  integer, intent(in)            :: i,j,k,l,m,s
+  double precision, intent(in)   :: cache(0:*)
   integer*8                      :: ii
 
-  ii = int(l-mo_integrals_cache_min,8)
-  ii = ior( shiftl(ii,mo_integrals_cache_shift), int(k-mo_integrals_cache_min,8))
-  ii = ior( shiftl(ii,mo_integrals_cache_shift), int(j-mo_integrals_cache_min,8))
-  ii = ior( shiftl(ii,mo_integrals_cache_shift), int(i-mo_integrals_cache_min,8))
-  get_two_e_integral_cache = mo_integrals_cache(ii)
+  ii = int(l-m,8)
+  ii = ior( shiftl(ii,s), int(k-m,8))
+  ii = ior( shiftl(ii,s), int(j-m,8))
+  ii = ior( shiftl(ii,s), int(i-m,8))
+  get_two_e_integral_cache = cache(ii)
 
 end
 
@@ -170,28 +233,62 @@ double precision function get_two_e_integral(i,j,k,l,map)
   if (iand(ii, -mo_integrals_cache_size) == 0) then
 
     double precision, external :: get_two_e_integral_cache
-    get_two_e_integral = get_two_e_integral_cache(i,j,k,l)
+    get_two_e_integral = get_two_e_integral_cache(i,j,k,l,mo_integrals_cache,mo_integrals_cache_min,mo_integrals_cache_shift)
 
   else
 
     ! Integral is not in the cache
+    if (j == l) then
+      get_two_e_integral = big_array_coulomb_integrals(j,i,k)
+    else if (i == k) then
+      get_two_e_integral = big_array_coulomb_integrals(i,j,l)
+    else if (j == k) then
+      get_two_e_integral = big_array_exchange_integrals(j,i,l)
+    else if (i == l) then
+      get_two_e_integral = big_array_exchange_integrals(i,j,k)
 
-    if  (do_mo_cholesky) then
+    else if  (do_mo_cholesky) then
 
-      double precision, external :: ddot
-      real, external :: sdot
-      integer :: isplit
+      integer :: iproc
+!      iproc = omp_get_thread_num()
       if (mo_cholesky_double) then
-        get_two_e_integral = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, cholesky_mo_transp(1,j,l), 1)
+!          if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_ddot) then
+!            call gpu_set_device(igpu_mt(iproc))
+!            call gpu_set_busy(igpu_mt(iproc))
+!            call gpu_ddot(blas_handle_mt(iproc), cholesky_mo_num, &
+!              cholesky_mo_transp_d(igpu_mt(iproc))%f(1,i,k), 1, &
+!              cholesky_mo_transp_d(igpu_mt(iproc))%f(1,j,l), 1, &
+!              get_two_e_integral)
+!            call gpu_unset_busy(igpu_mt(iproc))
+!            call gpu_set_device(0)
+!          else
+            double precision, external :: ddot
+            get_two_e_integral = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, cholesky_mo_transp(1,j,l), 1)
+!          endif
       else
-        get_two_e_integral = sdot(cholesky_mo_num, cholesky_mo_transp_sp(1,i,k), 1, cholesky_mo_transp_sp(1,j,l), 1)
-!        get_two_e_integral = 0.d0
-!        do isplit=1,4
-!          get_two_e_integral = get_two_e_integral + &
-!                               sdot(cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
-!                                    cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),i,k), 1, &
-!                                    cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),j,l), 1)
-!        enddo
+!          if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_ddot) then
+!            call gpu_set_device(igpu_mt(iproc))
+!            call gpu_set_busy(igpu_mt(iproc))
+!            call gpu_sdot(blas_handle_mt(iproc), cholesky_mo_num, &
+!                cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,i,k), 1, &
+!                cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,j,l), 1, &
+!                res)
+!            call gpu_unset_busy(igpu_mt(iproc))
+!            call gpu_set_device(0)
+!            get_two_e_integral = res
+!          else
+            real :: res
+            integer :: isp
+            ! Explicit loop instead of BLAS sdot: the single-precision
+            ! Fortran-ABI sdot_ entry point is broken on arm64 macOS
+            ! (Accelerate returns 0.0), and the loop keeps this path free
+            ! of BLAS dependencies.
+            res = 0.0
+            do isp = 1, cholesky_mo_num
+               res = res + cholesky_mo_transp_sp(isp,i,k) * cholesky_mo_transp_sp(isp,j,l)
+            end do
+            get_two_e_integral = res
+!          endif
       endif
 
     else
@@ -224,19 +321,30 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
   integer(key_kind)              :: i1, idx
   integer(key_kind)              :: p,q,r,s,i2
   real, allocatable :: out_val_sp(:)
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache cholesky_mo_transp cholesky_mo_transp_sp
+
+  integer :: iproc
+
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache 
 
   if (banned_excitation(j,l)) then
       out_val(1:sze) = 0.d0
       return
   endif
-!
+
   ii = l-mo_integrals_cache_min
   ii = ior(ii, k-mo_integrals_cache_min)
   ii = ior(ii, j-mo_integrals_cache_min)
 
   if (do_mo_cholesky.and. .not.mo_cholesky_double) then
     allocate(out_val_sp(mo_num))
+  endif
+  iproc = omp_get_thread_num()
+  if (iproc >= nproc_max) then
+    call qp_bug(irp_here,iproc,'iproc >= nproc_max')
+  endif
+
+  if (sze /= mo_num) then
+    call qp_bug(irp_here, sze, 'sze /= mo_num')
   endif
 
   if (iand(ii, -mo_integrals_cache_size) == 0) then
@@ -245,35 +353,49 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
     if (mo_integrals_cache_min > 1) then
 
       if (do_mo_cholesky) then
-
         !TODO: bottleneck here
         if (mo_cholesky_double) then
-          call dgemv('T', cholesky_mo_num, mo_integrals_cache_min-1, 1.d0, &
-            cholesky_mo_transp(1,1,k), cholesky_mo_num, &
-            cholesky_mo_transp(1,j,l), 1, 0.d0, &
-            out_val, 1)
+
+          if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_dgemv) then
+            call gpu_set_device(igpu_mt(iproc))
+            call gpu_set_busy(igpu_mt(iproc))
+            call gpu_dgemv(blas_handle_mt(iproc),'T', cholesky_mo_num, mo_integrals_cache_min-1, 1.d0, &
+              cholesky_mo_transp_d(igpu_mt(iproc))%f(1,1,k), cholesky_mo_num, &
+              cholesky_mo_transp_d(igpu_mt(iproc))%f(1,j,l), 1, 0.d0, &
+              gpu_integral_buffer1(iproc)%f(1), 1)
+            call gpu_download(gpu_integral_buffer1(iproc)%f(1),out_val(1),mo_integrals_cache_min-1)
+            call gpu_unset_busy(igpu_mt(iproc))
+            call gpu_set_device(0)
+          else
+            call dgemv('T', cholesky_mo_num, mo_integrals_cache_min-1, 1.d0, &
+              cholesky_mo_transp(1,1,k), cholesky_mo_num, &
+              cholesky_mo_transp(1,j,l), 1, 0.d0, &
+              out_val(1), 1)
+          endif
+
         else
-          call sgemv('T', cholesky_mo_num, mo_integrals_cache_min-1, 1., &
-            cholesky_mo_transp_sp(1,1,k), cholesky_mo_num, &
-            cholesky_mo_transp_sp(1,j,l), 1, 0., &
-            out_val_sp, 1)
-          out_val(1:mo_integrals_cache_min-1) = out_val_sp(1:mo_integrals_cache_min-1)
-!          integer :: isplit
-!          isplit=1
-!          call sgemv('T', cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
-!              mo_integrals_cache_min-1, 1., &
-!              cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,k), cholesky_mo_num, &
-!              cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),j,l), 1, 0., &
-!              out_val_sp, 1)
-!          out_val(1:mo_integrals_cache_min-1) = out_val_sp(1:mo_integrals_cache_min-1)
-!          do isplit=2,4
-!              call sgemv('T', cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
-!                mo_integrals_cache_min-1, 1., &
-!                cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,k), cholesky_mo_num, &
-!                cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),j,l), 1, 0., &
-!                out_val_sp, 1)
-!              out_val(1:mo_integrals_cache_min-1) += out_val_sp(1:mo_integrals_cache_min-1)
-!          enddo
+
+          if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_dgemv) then
+            call gpu_set_device(igpu_mt(iproc))
+            call gpu_set_busy(igpu_mt(iproc))
+            call gpu_sgemv(blas_handle_mt(iproc),'T', cholesky_mo_num, mo_integrals_cache_min-1, 1., &
+              cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,1,k), cholesky_mo_num, &
+              cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,j,l), 1, 0., &
+              gpu_integral_buffer_sp1(iproc)%f(1), 1)
+            call gpu_download(gpu_integral_buffer_sp1(iproc)%f(1),out_val_sp(1),mo_integrals_cache_min-1)
+            call gpu_unset_busy(igpu_mt(iproc))
+            call gpu_set_device(0)
+          else
+            call sgemv('T', cholesky_mo_num, mo_integrals_cache_min-1, 1., &
+              cholesky_mo_transp_sp(1,1,k), cholesky_mo_num, &
+              cholesky_mo_transp_sp(1,j,l), 1, 0., &
+              out_val_sp(1), 1)
+          endif
+
+          do i=1,mo_integrals_cache_min-1
+            out_val(i) = out_val_sp(i)
+          enddo
+
         endif
 
       else
@@ -310,31 +432,63 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 
         !TODO: bottleneck here
         if (mo_cholesky_double) then
-          call dgemv('T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1.d0, &
-             cholesky_mo_transp(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
-             cholesky_mo_transp(1,j,l), 1, 0.d0, &
-             out_val(mo_integrals_cache_max+1), 1)
+
+          if (gpu_num > 0) then
+            if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_dgemv) then
+              call gpu_set_device(igpu_mt(iproc))
+              call gpu_dgemv(blas_handle_mt(iproc), 'T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1.d0, &
+                 cholesky_mo_transp_d(igpu_mt(iproc))%f(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
+                 cholesky_mo_transp_d(igpu_mt(iproc))%f(1,j,l), 1, 0.d0, &
+                 gpu_integral_buffer1(iproc)%f(1), 1)
+              call gpu_download(gpu_integral_buffer1(iproc)%f(1), &
+                                out_val(mo_integrals_cache_max+1),    &
+                                mo_num-mo_integrals_cache_max)
+              call gpu_set_device(0)
+            else
+              call dgemv('T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1.d0, &
+                 cholesky_mo_transp(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
+                 cholesky_mo_transp(1,j,l), 1, 0.d0, &
+                 out_val(mo_integrals_cache_max+1), 1)
+            endif
+          else
+              call dgemv('T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1.d0, &
+               cholesky_mo_transp(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
+               cholesky_mo_transp(1,j,l), 1, 0.d0, &
+               out_val(mo_integrals_cache_max+1), 1)
+          endif
+
         else
-          call sgemv('T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1., &
-             cholesky_mo_transp_sp(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
-             cholesky_mo_transp_sp(1,j,l), 1, 0., &
-             out_val_sp(mo_integrals_cache_max+1), 1)
-          out_val(mo_integrals_cache_max+1:sze) = out_val_sp(mo_integrals_cache_max+1:sze)
-!          isplit=1
-!          call sgemv('T', cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
-!            mo_num-mo_integrals_cache_max, 1., &
-!            cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),mo_integrals_cache_max+1,k), cholesky_mo_num, &
-!            cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),j,l), 1, 0., &
-!            out_val_sp(mo_integrals_cache_max+1), 1)
-!          out_val(mo_integrals_cache_max+1:sze) = out_val_sp(mo_integrals_cache_max+1:sze)
-!          do isplit=2,4
-!            call sgemv('T', cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
-!              mo_num-mo_integrals_cache_max, 1., &
-!              cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),mo_integrals_cache_max+1,k), cholesky_mo_num, &
-!              cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),j,l), 1, 0., &
-!              out_val_sp(mo_integrals_cache_max+1), 1)
-!            out_val(mo_integrals_cache_max+1:sze) += out_val_sp(mo_integrals_cache_max+1:sze)
-!          enddo
+
+          if (gpu_num > 0) then
+            if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_dgemv) then
+              call gpu_set_device(igpu_mt(iproc))
+              call gpu_set_busy(igpu_mt(iproc))
+              call gpu_sgemv(blas_handle_mt(iproc), 'T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1., &
+                 cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
+                 cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,j,l), 1, 0., &
+                 gpu_integral_buffer_sp1(iproc)%f(1), 1)
+              call gpu_download(gpu_integral_buffer_sp1(iproc)%f(1), &
+                                out_val_sp(mo_integrals_cache_max+1),    &
+                                mo_num-mo_integrals_cache_max)
+              call gpu_unset_busy(igpu_mt(iproc))
+              call gpu_set_device(0)
+            else
+              call dgemv('T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1.d0, &
+                 cholesky_mo_transp(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
+                 cholesky_mo_transp(1,j,l), 1, 0.d0, &
+                 out_val(mo_integrals_cache_max+1), 1)
+            endif
+          else
+            call sgemv('T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1., &
+               cholesky_mo_transp_sp(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
+               cholesky_mo_transp_sp(1,j,l), 1, 0., &
+               out_val_sp(mo_integrals_cache_max+1), 1)
+          endif
+
+          do i=mo_integrals_cache_max+1,sze
+            out_val(i) = out_val_sp(i)
+          enddo
+
         endif
 
       else
@@ -369,31 +523,61 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 
       !TODO: bottleneck here
       if (mo_cholesky_double) then
+
+        if (gpu_num > 0) then
+          if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_dgemv) then
+            call gpu_set_device(igpu_mt(iproc))
+            call gpu_set_busy(igpu_mt(iproc))
+            call gpu_dgemv(blas_handle_mt(iproc), 'T', cholesky_mo_num, sze, 1.d0, &
+                 cholesky_mo_transp_d(igpu_mt(iproc))%f(1,1,k), cholesky_mo_num, &
+                 cholesky_mo_transp_d(igpu_mt(iproc))%f(1,j,l), 1, 0.d0, &
+                 gpu_integral_buffer1(iproc)%f(1), 1)
+            call gpu_download(gpu_integral_buffer1(iproc)%f(1),out_val(1),sze)
+            call gpu_unset_busy(igpu_mt(iproc))
+            call gpu_set_device(0)
+          else
+            call dgemv('T', cholesky_mo_num, sze, 1.d0, &
+                 cholesky_mo_transp(1,1,k), cholesky_mo_num, &
+                 cholesky_mo_transp(1,j,l), 1, 0.d0, &
+                 out_val(1), 1)
+          endif
+        else
           call dgemv('T', cholesky_mo_num, sze, 1.d0, &
                cholesky_mo_transp(1,1,k), cholesky_mo_num, &
                cholesky_mo_transp(1,j,l), 1, 0.d0, &
-               out_val, 1)
+               out_val(1), 1)
+        endif
+
       else
+
+        if (gpu_num > 0) then
+          if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_dgemv) then
+            call gpu_set_device(igpu_mt(iproc))
+            call gpu_set_busy(igpu_mt(iproc))
+            call gpu_sgemv(blas_handle_mt(iproc), 'T', cholesky_mo_num, sze, 1., &
+                 cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,1,k), cholesky_mo_num, &
+                 cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,j,l), 1, 0., &
+                 gpu_integral_buffer_sp1(iproc)%f(1), 1)
+            call gpu_download(gpu_integral_buffer_sp1(iproc)%f(1),out_val_sp(1),sze)
+            call gpu_unset_busy(igpu_mt(iproc))
+            call gpu_set_device(0)
+          else
+            call sgemv('T', cholesky_mo_num, sze, 1., &
+                 cholesky_mo_transp_sp(1,1,k), cholesky_mo_num, &
+                 cholesky_mo_transp_sp(1,j,l), 1, 0., &
+                 out_val_sp(1), 1)
+          endif
+        else
           call sgemv('T', cholesky_mo_num, sze, 1., &
                cholesky_mo_transp_sp(1,1,k), cholesky_mo_num, &
                cholesky_mo_transp_sp(1,j,l), 1, 0., &
-               out_val_sp, 1)
-          out_val(1:sze) = out_val_sp(1:sze)
-!          isplit=1
-!          call sgemv('T', cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
-!            sze, 1., &
-!            cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,k), cholesky_mo_num, &
-!            cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),j,l), 1, 0., &
-!            out_val_sp, 1)
-!          out_val(1:sze) = out_val_sp(1:sze)
-!          do isplit=2,4
-!            call sgemv('T', cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
-!              sze, 1., &
-!              cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,k), cholesky_mo_num, &
-!              cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),j,l), 1, 0., &
-!              out_val_sp, 1)
-!            out_val(1:sze) += out_val_sp(1:sze)
-!          enddo
+               out_val_sp(1), 1)
+        endif
+
+        do i=1,sze
+          out_val(i) = out_val_sp(i)
+        enddo
+
       endif
 
     else
@@ -444,14 +628,16 @@ subroutine get_mo_two_e_integrals_cache(j,k,l,sze,out_val)
   END_DOC
   integer, intent(in)            :: j,k,l, sze
   double precision, intent(out)  :: out_val(sze)
-  integer*8                      :: ii
+  integer*8                      :: ii, jj
 
   ii = int(l-mo_integrals_cache_min,8)
   ii = ior( shiftl(ii, mo_integrals_cache_shift), int(k-mo_integrals_cache_min,8))
   ii = ior( shiftl(ii, mo_integrals_cache_shift), int(j-mo_integrals_cache_min,8))
   ii = shiftl(ii, mo_integrals_cache_shift)
-  out_val(mo_integrals_cache_min:mo_integrals_cache_max) = &
-       mo_integrals_cache(ii:ii+int(mo_integrals_cache_max-mo_integrals_cache_min,8))
+  do jj=0_8, mo_integrals_cache_max-mo_integrals_cache_min
+    out_val(mo_integrals_cache_min+jj) = mo_integrals_cache(ii+jj)
+  enddo
+
 
 end
 
@@ -466,43 +652,84 @@ subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
   integer, intent(in)            :: k,l, sze
   double precision, intent(out)  :: out_array(sze,sze)
   type(map_type), intent(inout)  :: map
-  integer                        :: j
+  integer                        :: i,j
+  integer :: iproc
+
+  if (sze /= mo_num) then
+    call qp_bug(irp_here, sze, 'sze /= mo_num')
+  endif
 
   if ( (mo_integrals_cache_min>1).or.(mo_integrals_cache_max<mo_num) ) then
 
     if (do_mo_cholesky) then
 
+      iproc = omp_get_thread_num()
+      if (iproc >= nproc_max) then
+        call qp_bug(irp_here,iproc,'iproc >= nproc_max')
+      endif
       if (mo_cholesky_double) then
+          type(gpu_double2) :: out_array_d
+
+        if (gpu_num > 0) then
+          if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_dgemm) then
+            call gpu_set_device(igpu_mt(iproc))
+            call gpu_set_busy(igpu_mt(iproc))
+            call gpu_dgemm(blas_handle_mt(iproc), 'T', 'N', mo_num, mo_num, cholesky_mo_num, 1.d0, &
+               cholesky_mo_transp_d(igpu_mt(iproc))%f(1,1,k), cholesky_mo_num, &
+               cholesky_mo_transp_d(igpu_mt(iproc))%f(1,1,l), cholesky_mo_num, 0.d0, &
+               gpu_integral_buffer2(iproc)%f(1,1), sze)
+            call gpu_download(gpu_integral_buffer2(iproc),out_array)
+            call gpu_unset_busy(igpu_mt(iproc))
+            call gpu_set_device(0)
+          else
+            call dgemm('T', 'N', mo_num, mo_num, cholesky_mo_num, 1.d0, &
+               cholesky_mo_transp(1,1,k), cholesky_mo_num, &
+               cholesky_mo_transp(1,1,l), cholesky_mo_num, 0.d0, &
+               out_array(1,1), sze)
+          endif
+        else
           call dgemm('T', 'N', mo_num, mo_num, cholesky_mo_num, 1.d0, &
              cholesky_mo_transp(1,1,k), cholesky_mo_num, &
              cholesky_mo_transp(1,1,l), cholesky_mo_num, 0.d0, &
-             out_array, sze)
+             out_array(1,1), sze)
+        endif
+
       else
-          real, allocatable :: out_array_sp(:,:)
-          allocate(out_array_sp(sze,sze))
+
+        real, allocatable :: out_array_sp(:,:)
+        allocate(out_array_sp(sze,sze))
+
+        if (gpu_num > 0) then
+          if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_dgemm) then
+            call gpu_set_device(igpu_mt(iproc))
+            call gpu_set_busy(igpu_mt(iproc))
+            call gpu_sgemm(blas_handle_mt(iproc), 'T', 'N', mo_num, mo_num, cholesky_mo_num, 1.0, &
+               cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,1,k), cholesky_mo_num, &
+               cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,1,l), cholesky_mo_num, 0.0, &
+               gpu_integral_buffer_sp2(iproc)%f(1,1), sze)
+            call gpu_download(gpu_integral_buffer_sp2(iproc),out_array_sp)
+            call gpu_unset_busy(igpu_mt(iproc))
+            call gpu_set_device(0)
+          else
+            call sgemm('T', 'N', mo_num, mo_num, cholesky_mo_num, 1.0, &
+               cholesky_mo_transp_sp(1,1,k), cholesky_mo_num, &
+               cholesky_mo_transp_sp(1,1,l), cholesky_mo_num, 0.0, &
+               out_array_sp(1,1), sze)
+          endif
+        else
           call sgemm('T', 'N', mo_num, mo_num, cholesky_mo_num, 1.0, &
              cholesky_mo_transp_sp(1,1,k), cholesky_mo_num, &
              cholesky_mo_transp_sp(1,1,l), cholesky_mo_num, 0.0, &
-             out_array_sp, sze)
-          out_array(1:sze,1:sze) = out_array_sp(1:sze,1:sze)
-!
-!          isplit=1
-!          call sgemm('T', 'N', mo_num, mo_num, &
-!             cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), 1., &
-!             cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,k), cholesky_mo_num, &
-!             cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,l), cholesky_mo_num, 0., &
-!             out_array_sp, sze)
-!          out_array(1:sze,1:sze) = out_array_sp(1:sze,1:sze)
-!          integer :: isplit
-!          do isplit=2,4
-!            call sgemm('T', 'N', mo_num, mo_num, &
-!             cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), 1., &
-!             cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,k), cholesky_mo_num, &
-!             cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),1,l), cholesky_mo_num, 0., &
-!             out_array_sp, sze)
-!            out_array(1:sze,1:sze) = out_array(1:sze,1:sze) + out_array_sp(1:sze,1:sze)
-!         enddo
-         deallocate(out_array_sp)
+             out_array_sp(1,1), sze)
+        endif
+
+        do j=1,sze
+         do i=1,sze
+          out_array(i,j) = out_array_sp(i,j)
+         enddo
+        enddo
+        deallocate(out_array_sp)
+
       endif
 
     else
@@ -515,7 +742,6 @@ subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
 
   else
 
-    double precision, external :: get_two_e_integral_cache
     do j=1,sze
       call get_mo_two_e_integrals_cache(j,k,l,sze,out_array(1,j))
     enddo
@@ -538,14 +764,36 @@ subroutine get_mo_two_e_integrals_i1j1(k,l,sze,out_array,map)
   integer                        :: j
   PROVIDE mo_two_e_integrals_in_map
 
+  if (sze /= mo_num) then
+    call qp_bug(irp_here, sze, 'sze /= mo_num')
+  endif
+
   if ( (mo_integrals_cache_min>1).or.(mo_integrals_cache_max<mo_num) ) then
 
     if (do_mo_cholesky) then
 
-      call dgemv('T', cholesky_mo_num, mo_num*mo_num, 1.d0, &
-         cholesky_mo_transp(1,1,1), cholesky_mo_num, &
-         cholesky_mo_transp(1,k,l), 1, 0.d0, &
-         out_array, 1)
+      integer :: iproc
+      iproc = omp_get_thread_num()
+      if (iproc >= nproc_max) then
+        call qp_bug(irp_here,iproc,'iproc >= nproc_max')
+      endif
+
+      if (gpu_busy(igpu_mt(iproc)) < gpu_busy_max_dgemv) then
+        call gpu_set_device(igpu_mt(iproc))
+        call gpu_set_busy(igpu_mt(iproc))
+        call gpu_dgemv(blas_handle_mt(iproc), 'T', cholesky_mo_num, mo_num*mo_num, 1.d0, &
+           cholesky_mo_transp_d(igpu_mt(iproc))%f(1,1,1), cholesky_mo_num, &
+           cholesky_mo_transp_d(igpu_mt(iproc))%f(1,k,l), 1, 0.d0, &
+           gpu_integral_buffer2(iproc)%f(1,1), 1)
+        call gpu_download(gpu_integral_buffer2(iproc),out_array)
+        call gpu_unset_busy(igpu_mt(iproc))
+        call gpu_set_device(0)
+      else
+        call dgemv('T', cholesky_mo_num, mo_num*mo_num, 1.d0, &
+           cholesky_mo_transp(1,1,1), cholesky_mo_num, &
+           cholesky_mo_transp(1,k,l), 1, 0.d0, &
+           out_array(1,1), 1)
+      endif
 
     else
 
@@ -557,7 +805,6 @@ subroutine get_mo_two_e_integrals_i1j1(k,l,sze,out_array,map)
 
   else
 
-    double precision, external :: get_two_e_integral_cache
     do j=1,sze
       call get_mo_two_e_integrals_cache(k,j,l,sze,out_array(1,j))
     enddo
@@ -566,162 +813,6 @@ subroutine get_mo_two_e_integrals_i1j1(k,l,sze,out_array,map)
 
 end
 
-
-subroutine get_mo_two_e_integrals_coulomb_ii(k,l,sze,out_val,map)
-  use map_module
-  implicit none
-  BEGIN_DOC
-  ! Returns multiple integrals <ki|li>
-  ! k(1)i(2) 1/r12 l(1)i(2) :: out_val(i1)
-  ! for k,l fixed.
-  END_DOC
-  integer, intent(in)            :: k,l, sze
-  double precision, intent(out)  :: out_val(sze)
-  type(map_type), intent(inout)  :: map
-  integer                        :: i
-  double precision, external     :: get_two_e_integral
-  PROVIDE mo_two_e_integrals_in_map
-
-  if ( (mo_integrals_cache_min>1).or.(mo_integrals_cache_max<mo_num) ) then
-
-    if (do_mo_cholesky) then
-
-      call dgemv('T', cholesky_mo_num, mo_num, 1.d0, &
-         cholesky_mo_transp(1,1,1), cholesky_mo_num*(mo_num+1), &
-         cholesky_mo_transp(1,k,l), 1, 0.d0, &
-         out_val, 1)
-
-    else
-
-      do i=1,sze
-        out_val(i) = get_two_e_integral(i,k,i,l,map)
-      enddo
-
-    endif
-
-  else
-
-    double precision, external :: get_two_e_integral_cache
-    do i=1,sze
-      out_val(i) = get_two_e_integral_cache(i,k,i,l)
-    enddo
-
-  endif
-
-
-end
-
-subroutine get_mo_two_e_integrals_exch_ii(k,l,sze,out_val,map)
-  use map_module
-  implicit none
-  BEGIN_DOC
-  ! Returns multiple integrals <ki|il>
-  ! k(1)i(2) 1/r12 i(1)l(2) :: out_val(i1)
-  ! for k,l fixed.
-  END_DOC
-  integer, intent(in)            :: k,l, sze
-  double precision, intent(out)  :: out_val(sze)
-  type(map_type), intent(inout)  :: map
-  integer                        :: i
-  double precision, external     :: get_two_e_integral
-  PROVIDE mo_two_e_integrals_in_map mo_cholesky_double
-
-  if ( (mo_integrals_cache_min>1).or.(mo_integrals_cache_max<mo_num) ) then
-
-    if (do_mo_cholesky) then
-
-      if ( (k>=mo_integrals_cache_min).and.(k<=mo_integrals_cache_max).and. &
-           (l>=mo_integrals_cache_min).and.(l<=mo_integrals_cache_max) ) then
-
-        double precision, external :: ddot
-        real, external :: sdot
-        integer :: kk
-
-        if (mo_cholesky_double) then
-
-          do i=1,mo_integrals_cache_min-1
-            out_val(i) = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, &
-                                               cholesky_mo_transp(1,i,l), 1)
-          enddo
-
-          do i=mo_integrals_cache_min,mo_integrals_cache_max
-            out_val(i) = get_two_e_integral_cache(i,i,k,l)
-          enddo
-
-          do i=mo_integrals_cache_max, sze
-            out_val(i) = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, &
-                                               cholesky_mo_transp(1,i,l), 1)
-          enddo
-
-        else
-
-          integer :: isplit
-          do i=1,mo_integrals_cache_min-1
-             out_val(i) = sdot(cholesky_mo_num, cholesky_mo_transp_sp(1,i,k), 1, cholesky_mo_transp_sp(1,i,l), 1)
-!             out_val(i) = 0.d0
-!             do isplit=1,4
-!               out_val(i) += sdot(cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
-!                                          cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),i,k), 1, &
-!                                          cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),i,l), 1)
-!             enddo
-          enddo
-
-          do i=mo_integrals_cache_min,mo_integrals_cache_max
-            out_val(i) = get_two_e_integral_cache(i,i,k,l)
-          enddo
-
-          do i=mo_integrals_cache_max, sze
-             out_val(i) = sdot(cholesky_mo_num, cholesky_mo_transp_sp(1,i,k), 1, cholesky_mo_transp_sp(1,i,l), 1)
-!             out_val(i) = 0.d0
-!             do isplit=1,4
-!               out_val(i) += sdot(cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
-!                                          cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),i,k), 1, &
-!                                          cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),i,l), 1)
-!             enddo
-          enddo
-
-        endif
-
-      else
-
-        if (mo_cholesky_double) then
-          do i=1,sze
-            out_val(i) = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, &
-                                               cholesky_mo_transp(1,i,l), 1)
-          enddo
-        else
-          do i=1,sze
-             out_val(i) = sdot(cholesky_mo_num, cholesky_mo_transp_sp(1,i,k), 1, cholesky_mo_transp_sp(1,i,l), 1)
-!             out_val(i) = 0.d0
-!             do isplit=1,4
-!               out_val(i) += sdot(cholesky_mo_num_split(isplit+1) - cholesky_mo_num_split(isplit), &
-!                                          cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),i,k), 1, &
-!                                          cholesky_mo_transp_sp(cholesky_mo_num_split(isplit),i,l), 1)
-!             enddo
-          enddo
-        endif
-
-      endif
-
-    else
-
-      do i=1,sze
-        out_val(i) = get_two_e_integral(i,i,k,l,map)
-      enddo
-
-    endif
-
-  else
-
-    double precision, external :: get_two_e_integral_cache
-    do i=1,sze
-      out_val(i) = get_two_e_integral_cache(i,i,k,l)
-    enddo
-
-  endif
-
-
-end
 
  BEGIN_PROVIDER [ logical, banned_excitation, (mo_num,mo_num) ]
 &BEGIN_PROVIDER [ logical, use_banned_excitation  ]

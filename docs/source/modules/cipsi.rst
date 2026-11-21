@@ -184,7 +184,7 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:var:: initialize_pt2_e0_denominator
+.. c:var:: bool initialize_pt2_e0_denominator
 
 
     File : :file:`cipsi/energy.irp.f`
@@ -204,7 +204,7 @@ Providers
        * :c:data:`pt2_e0_denominator`
 
  
-.. c:var:: pt2_e0_denominator
+.. c:var:: double pt2_e0_denominator
 
 
     File : :file:`cipsi/energy.irp.f`
@@ -237,7 +237,7 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
-.. c:function:: bitstring_to_list_in_selection:
+.. c:function:: void bitstring_to_list_in_selection(void)
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -258,16 +258,22 @@ Subroutines / functions
        * :c:func:`spot_isinwf`
 
  
-.. c:function:: fill_buffer_double:
+.. c:function:: void fill_buffer_double(void)
 
 
-    File : :file:`cipsi/selection.irp.f_template_915`
+    File : :file:`cipsi/selection.irp.f_template_939`
 
     .. code:: fortran
 
         subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf)
 
 
+    For the excitation (h1[, h2]) of i_generator, loops over
+    the particle orbitals (p1, p2) and, using mat(istate,
+    p1, p2) = <psi(istate)|H|det>, accumulates in pt2_data
+    the PT2 contribution, the variance and the overlap of
+    each state; the determinant is added to buf when its
+    selection weight is below buf%mini.
 
     Needs:
 
@@ -324,16 +330,22 @@ Subroutines / functions
        * :c:func:`get_excitation_degree_spin`
 
  
-.. c:function:: fill_buffer_single:
+.. c:function:: void fill_buffer_single(void)
 
 
-    File : :file:`cipsi/selection.irp.f_template_915`
+    File : :file:`cipsi/selection.irp.f_template_939`
 
     .. code:: fortran
 
         subroutine fill_buffer_single(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf)
 
 
+    For the excitation (h1[, h2]) of i_generator, loops over
+    the particle orbitals (p1, p2) and, using mat(istate,
+    p1, p2) = <psi(istate)|H|det>, accumulates in pt2_data
+    the PT2 contribution, the variance and the overlap of
+    each state; the determinant is added to buf when its
+    selection weight is below buf%mini.
 
     Needs:
 
@@ -390,7 +402,7 @@ Subroutines / functions
        * :c:func:`get_excitation_degree_spin`
 
  
-.. c:function:: get_d0:
+.. c:function:: void get_d0(void)
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -400,6 +412,12 @@ Subroutines / functions
         subroutine get_d0(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
 
 
+    Case of splash_pq where the internal determinant has
+    at most 2 orbitals not in the two-hole mask. Adds to
+    mat(k, r, s) the contribution coefs(k) * <det|H|alpha>,
+    alpha = mask + (r, s); the element is a two-electron
+    integral signed by get_phase_bi, or i_h_j when (r, s)
+    overlaps those orbitals.
 
     Needs:
 
@@ -425,11 +443,11 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`apply_particles`
-       * :c:func:`get_mo_two_e_integrals`
+       * :c:func:`get_mo_two_e_integrals_ij`
        * :c:func:`i_h_j`
 
  
-.. c:function:: get_d0_reference:
+.. c:function:: void get_d0_reference(void)
 
 
     File : :file:`cipsi/selection_old.irp.f`
@@ -439,6 +457,9 @@ Subroutines / functions
         subroutine get_d0_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
 
 
+    Unoptimized reference version of get_d0, kept for
+    debugging: same contribution to mat(k, r, s), with
+    mo_two_e_integral called directly for every (r, s).
 
     Needs:
 
@@ -458,7 +479,7 @@ Subroutines / functions
        * :c:func:`i_h_j`
 
  
-.. c:function:: get_d1:
+.. c:function:: void get_d1(void)
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -468,6 +489,12 @@ Subroutines / functions
         subroutine get_d1(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
 
 
+    nt == 3 case of splash_pq: the internal determinant
+    occupies 3 orbitals not in the two-hole mask. Adds to
+    mat(k, r, s) the contribution coefs(k) * <det|H|alpha>,
+    alpha = mask + (r, s) with one of (r, s) among the 3
+    orbitals; the element is a two-electron integral with
+    a fixed orbital, or i_h_j when both are among them.
 
     Needs:
 
@@ -496,7 +523,7 @@ Subroutines / functions
        * :c:func:`i_h_j`
 
  
-.. c:function:: get_d1_reference:
+.. c:function:: void get_d1_reference(void)
 
 
     File : :file:`cipsi/selection_old.irp.f`
@@ -506,6 +533,9 @@ Subroutines / functions
         subroutine get_d1_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
 
 
+    Unoptimized reference version of get_d1, kept for
+    debugging: same contribution to mat(k, r, s), with
+    mo_two_e_integral called directly for every (r, s).
 
     Needs:
 
@@ -525,7 +555,7 @@ Subroutines / functions
        * :c:func:`i_h_j`
 
  
-.. c:function:: get_d2:
+.. c:function:: void get_d2(void)
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -535,6 +565,12 @@ Subroutines / functions
         subroutine get_d2(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
 
 
+    nt == 4 case of splash_pq: the internal determinant
+    occupies 4 orbitals not in the two-hole mask. Adds to
+    mat(k, r, s) the contribution coefs(k) * <det|H|alpha>,
+    alpha = mask + (r, s) with (r, s) among the 4 orbitals;
+    the element is a two-electron integral (or difference
+    of two) signed by get_phase_bi.
 
     Needs:
 
@@ -554,7 +590,7 @@ Subroutines / functions
        * :c:func:`splash_pq`
 
  
-.. c:function:: get_d2_reference:
+.. c:function:: void get_d2_reference(void)
 
 
     File : :file:`cipsi/selection_old.irp.f`
@@ -564,6 +600,11 @@ Subroutines / functions
         subroutine get_d2_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
 
 
+    Unoptimized reference version of get_d2, kept for
+    debugging: same contribution to mat(k, r, s), with
+    mo_two_e_integral called directly for every (r, s).
+    phasemask is declared (2, N_int) here, but should be
+    (N_int, 2) as in get_d2 - bug (author-confirmed 2026-10-31).
 
     Needs:
 
@@ -575,7 +616,7 @@ Subroutines / functions
        * :c:data:`n_states`
 
  
-.. c:function:: get_m0:
+.. c:function:: void get_m0(void)
 
 
     File : :file:`cipsi/selection_singles.irp.f`
@@ -585,6 +626,12 @@ Subroutines / functions
         subroutine get_m0(gen, phasemask, bannedOrb, vect, mask, h, p, sp, coefs)
 
 
+    nt == 1 case of splash_p: the selector determinant is
+    the one-hole mask plus 1 orbital. For each orbital i,
+    skipping the banned ones and the one added by the
+    determinant, adds to vect(:, i) the contribution
+    coefs * <det|H|alpha>, alpha = mask + i, computed with
+    i_h_j.
 
     Needs:
 
@@ -611,7 +658,7 @@ Subroutines / functions
        * :c:func:`i_h_j`
 
  
-.. c:function:: get_m1:
+.. c:function:: void get_m1(void)
 
 
     File : :file:`cipsi/selection_singles.irp.f`
@@ -621,6 +668,12 @@ Subroutines / functions
         subroutine get_m1(gen, phasemask, bannedOrb, vect, mask, h, p, sp, coefs)
 
 
+    nt == 2 case of splash_p: the selector determinant has
+    2 occupied orbitals not in the one-hole mask. For
+    alpha = mask + i, adds to vect(:, i) the contribution
+    coefs * <det|H|alpha>: a two-electron integral, or a
+    difference of two, for generic i, and i_h_j when alpha
+    is a single excitation of the generator.
 
     Needs:
 
@@ -647,7 +700,7 @@ Subroutines / functions
        * :c:func:`i_h_j`
 
  
-.. c:function:: get_m2:
+.. c:function:: void get_m2(void)
 
 
     File : :file:`cipsi/selection_singles.irp.f`
@@ -657,6 +710,12 @@ Subroutines / functions
         subroutine get_m2(gen, phasemask, bannedOrb, vect, mask, h, p, sp, coefs)
 
 
+    nt == 3 case of splash_p: the selector determinant
+    occupies 3 orbitals not in the one-hole mask. Adds to
+    vect(:, p) the contribution coefs * <det|H|alpha>,
+    alpha = mask + p, p a spin-sp orbital among those 3
+    (banned orbitals skipped); the element is a two-electron
+    integral, or a difference of two, signed by get_phase_bi.
 
     Needs:
 
@@ -675,7 +734,7 @@ Subroutines / functions
        * :c:func:`splash_p`
 
  
-.. c:function:: get_mask_phase:
+.. c:function:: void get_mask_phase(void)
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -685,6 +744,11 @@ Subroutines / functions
         subroutine get_mask_phase(det1, pm, Nint)
 
 
+    Computes the phase mask pm of the determinant det1:
+    bit b of pm(i,1) is 1 when the number of occupied
+    orbitals of det1 with index less than or equal to the
+    orbital of word i, bit b, is odd. Used by get_phase_bi
+    for the sign of the matrix element of an excitation.
 
     Called by:
 
@@ -695,7 +759,7 @@ Subroutines / functions
        * :c:func:`splash_pq`
 
  
-.. c:function:: get_phase_bi:
+.. c:function:: void get_phase_bi(void)
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -707,7 +771,7 @@ Subroutines / functions
 
 
  
-.. c:function:: provide_for_selection_slave:
+.. c:function:: void provide_for_selection_slave(void)
 
 
     File : :file:`cipsi/run_selection_slave.irp.f`
@@ -717,6 +781,12 @@ Subroutines / functions
         subroutine provide_for_selection_slave
 
 
+    Provides, beyond the values listed in the caller, the
+    values used by the CIPSI selection slaves: the
+    norm-sorted wave function (psi_det_sorted,
+    psi_det_sorted_order) and the transposed coefficients
+    of the selected determinants
+    (psi_selectors_coef_transp).
 
     Needs:
 
@@ -735,7 +805,7 @@ Subroutines / functions
        * :c:func:`run_selection_slave`
 
  
-.. c:function:: provide_for_zmq_pt2:
+.. c:function:: void provide_for_zmq_pt2(void)
 
 
     File : :file:`cipsi/pt2_stoch_routines.irp.f`
@@ -745,6 +815,12 @@ Subroutines / functions
         subroutine provide_for_zmq_pt2
 
 
+    Provides, beyond the values listed in the caller, the
+    values used by the stochastic PT2 slaves: the
+    norm-sorted wave function (psi_det_sorted,
+    psi_det_sorted_order), the transposed coefficients of
+    the selected determinants (psi_selectors_coef_transp),
+    and the diagonal of H in the determinant basis (psi_det_hii).
 
     Needs:
 
@@ -765,7 +841,7 @@ Subroutines / functions
        * :c:func:`zmq_pt2`
 
  
-.. c:function:: run_cipsi:
+.. c:function:: void run_cipsi(void)
 
 
     File : :file:`cipsi/cipsi.irp.f`
@@ -843,6 +919,7 @@ Subroutines / functions
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
@@ -859,7 +936,7 @@ Subroutines / functions
        * :c:data:`variance_match_weight`
 
  
-.. c:function:: run_stochastic_cipsi:
+.. c:function:: void run_stochastic_cipsi(void)
 
 
     File : :file:`cipsi/stochastic_cipsi.irp.f`
@@ -876,10 +953,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`all_mo_integrals`
        * :c:data:`correlation_energy_ratio_max`
        * :c:data:`distributed_davidson`
        * :c:data:`h_apply_buffer_allocated`
-       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`n_det`
        * :c:data:`n_det_max`
        * :c:data:`n_states`
@@ -943,6 +1020,7 @@ Subroutines / functions
        * :c:data:`c0_weight`
        * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det_sorted_bit`
        * :c:data:`psi_configuration`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
@@ -959,7 +1037,7 @@ Subroutines / functions
        * :c:data:`variance_match_weight`
 
  
-.. c:function:: select_connected:
+.. c:function:: void select_connected(void)
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -969,6 +1047,12 @@ Subroutines / functions
         subroutine select_connected(i_generator,E0,pt2_data,b,subset,csubset)
 
 
+    CIPSI selection of the excitations of i_generator:
+    accumulates in pt2_data the PT2 contribution, variance
+    and overlap of each single or double excitation, and
+    adds the determinant to the selection buffer b when
+    its weight is below b%mini. Only excitations numbered
+    (subset-1) mod csubset are processed.
 
     Needs:
 
@@ -1000,7 +1084,7 @@ Subroutines / functions
        * :c:func:`select_singles_and_doubles`
 
  
-.. c:function:: select_singles:
+.. c:function:: void select_singles(void)
 
 
     File : :file:`cipsi/selection_singles.irp.f`
@@ -1046,7 +1130,7 @@ Subroutines / functions
        * :c:func:`spot_hasbeen`
 
  
-.. c:function:: select_singles_and_doubles:
+.. c:function:: void select_singles_and_doubles(void)
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -1105,7 +1189,7 @@ Subroutines / functions
        * :c:func:`spot_isinwf`
 
  
-.. c:function:: splash_p:
+.. c:function:: void splash_p(void)
 
 
     File : :file:`cipsi/selection_singles.irp.f`
@@ -1115,6 +1199,12 @@ Subroutines / functions
         subroutine splash_p(mask, sp, det, coefs, N_sel, bannedOrb, vect)
 
 
+    For the one-hole mask of the generator (hole in spin
+    sp), adds to vect(:, p) the contribution coefs(:, i) *
+    <det(i)|H|alpha>, alpha = mask + p, for each selector
+    det(i) with at most 3 occupied orbitals not in the
+    mask; the count nt of such orbitals selects get_m2
+    (nt == 3), get_m1 (nt == 2) or get_m0 (otherwise).
 
     Needs:
 
@@ -1145,7 +1235,7 @@ Subroutines / functions
        * :c:func:`get_mask_phase`
 
  
-.. c:function:: splash_pq:
+.. c:function:: void splash_pq(void)
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -1189,7 +1279,7 @@ Subroutines / functions
        * :c:func:`get_mask_phase`
 
  
-.. c:function:: spot_hasbeen:
+.. c:function:: void spot_hasbeen(void)
 
 
     File : :file:`cipsi/selection_singles.irp.f`
@@ -1199,6 +1289,16 @@ Subroutines / functions
         subroutine spot_hasBeen(mask, sp, det, i_gen, N, banned, fullMatch)
 
 
+    For the one-hole mask of generator i_gen, nt is the
+    number of occupied orbitals of det(i) not in mask. Sets
+    fullMatch if some det(i) with i < i_gen has nt <= 2;
+    otherwise adds to banned the spin-sp orbitals of det(i)
+    outside mask, when nt == 1 or (nt == 3 and i < i_gen).
+    fullMatch is .true. when some det(i), i < i_gen, lies within
+    2 excitations of the mask, i.e. this mask's candidates were
+    already generated by an earlier generator; the caller
+    (select_singles) then skips the singles work of this hole.
+    CIPSI deduplication rule, Garniron thesis, sec. 5.1.
 
     Needs:
 
@@ -1223,7 +1323,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list`
 
  
-.. c:function:: spot_isinwf:
+.. c:function:: void spot_isinwf(void)
 
 
     File : :file:`cipsi/selection.irp.f`
@@ -1259,7 +1359,7 @@ Subroutines / functions
        * :c:func:`bitstring_to_list_in_selection`
 
  
-.. c:function:: write_cipsi_json:
+.. c:function:: void write_cipsi_json(void)
 
 
     File : :file:`cipsi/write_cipsi_json.irp.f`
@@ -1279,10 +1379,10 @@ Subroutines / functions
        * :c:data:`energy_iterations`
        * :c:data:`json_int_fmt`
        * :c:data:`json_unit`
+       * :c:data:`n_csf`
        * :c:data:`n_det`
        * :c:data:`n_iter`
        * :c:data:`n_states`
-       * :c:data:`nsomomax`
        * :c:data:`only_expected_s2`
        * :c:data:`psi_configuration`
        * :c:data:`psi_energy`

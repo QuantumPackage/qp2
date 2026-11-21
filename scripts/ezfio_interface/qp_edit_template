@@ -93,8 +93,11 @@ let get s =
 
 
 
-(** Applies the changes from the string [str] corresponding to section [s] *)
-let set str s =
+(** Applies the changes from the string [str] corresponding to section [s].
+    With [apply=false] (check-only mode) the section is still parsed, so
+    that a malformed input is reported, but nothing is written back to
+    EZFIO: checking the input must not modify it. *)
+let set ?(apply=true) str s =
   let header = (make_header s) in
   match String_ext.substr_index ~pos:0 ~pattern:header str with
   | None -> ()
@@ -114,7 +117,7 @@ let set str s =
       let write (of_rst,w) s =
         try
         match of_rst str with
-        | Some data -> w data
+        | Some data -> if apply then w data
         | None -> ()
         with
         | _ -> (Printf.eprintf "Info: Read error in %s\n%!"
@@ -291,7 +294,11 @@ let run check_only ?ndet ?state ?read ?write ezfio_filename =
       close_in ic;
       result
     in
-    List.iter (fun x -> set temp_string x) tasks
+    (* In check-only mode the data is validated but not written: qp_run
+       calls `qp_edit -c` before every program, and rewriting the values
+       that were just read back from the RST would degrade them (the RST
+       is a decimal rendering of the EZFIO data). *)
+    List.iter (fun x -> set ~apply:(not check_only) temp_string x) tasks
 
 
 

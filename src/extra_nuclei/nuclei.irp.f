@@ -123,6 +123,11 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, extra_nucl_dist, (extra_nucl_num,extra_nucl_num)]
  implicit none
+ BEGIN_DOC
+ ! Pair distances between the extra nuclei, in Bohr (atomic units).
+ ! Element (j,i) is the distance between extra nuclei j and i,
+ ! from extra_nucl_coord; the matrix is symmetric, diagonal zero.
+ END_DOC
  integer :: i,j
  double precision :: x,y,z
  do i = 1, extra_nucl_num

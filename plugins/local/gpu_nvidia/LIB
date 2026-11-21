@@ -1,1 +1,1 @@
--lcudart -lcublas -lcublasLt
+-lsimple_gpu-nvidia

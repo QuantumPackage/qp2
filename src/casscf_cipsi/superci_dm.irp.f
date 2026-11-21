@@ -161,6 +161,14 @@ END_PROVIDER
  
  BEGIN_PROVIDER [double precision, lowest_super_ci_coef_mo, (mo_num,mo_num)]
  implicit none
+  BEGIN_DOC
+  ! Coefficients of the lowest eigenvector of the single-excitation
+  ! matrix, in the MO basis. For each pair (p,q) of the table excit,
+  ! both entries are set to SXeigenvec(i+1,1). Entries are then
+  ! rescaled: (2 - occ_act)**(-0.5) for core/inactive-active pairs,
+  ! 1/sqrt(2) for core/inactive-virtual pairs, occ_act**(-0.5) for
+  ! active-virtual pairs.
+  END_DOC
  integer :: i,j,iorb,jorb
  integer :: a, aorb,t, torb
  double precision :: sqrt2

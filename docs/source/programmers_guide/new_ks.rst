@@ -1,94 +1,160 @@
 ============================================
-Developping new functionals for KS or RS-DFT
+Developing new functionals for KS and RS-DFT
 ============================================
 
-The very basics
-===============
+How the functionals are used
+============================
 
-To develop new functionals for |DFT| (or |RSDFT|) to be used in the SCF programs (:ref:`ks_scf` or :ref:`rs_ks_scf` ) or in multi-configurational |RSDFT| (see `<https://gitlab.com/eginer/qp_plugins_eginer>`_), you need to specify, at the end of the day, two things:
+A |DFT| (or |RSDFT|) calculation needs two kinds of quantities: the
+*exchange/correlation* energy functionals, which give the energy, and the
+*exchange/correlation* potentials of the alpha and beta electrons, which
+are used to optimize the wave function.
 
-* *exchange/correlation* **energy functionals** used to compute the **energy**
+All the |DFT| programs get these quantities from six general providers,
+declared in the :ref:`module_dft_one_e` module:
 
-* *exchange/correlation* **potentials** for (alpha/beta electrons) used to **optimize the wave function**
+* :c:data:`energy_x` and :c:data:`energy_c`: the *exchange* and
+  *correlation* energies,
 
+* :c:data:`potential_x_alpha_ao` and :c:data:`potential_x_beta_ao`: the
+  exchange potentials on the |AO| basis,
 
-The providers to define such quantities, and then used by all the all the |DFT| programs, are (see :ref:`module_dft_one_e`):  
+* :c:data:`potential_c_alpha_ao` and :c:data:`potential_c_beta_ao`: the
+  correlation potentials on the |AO| basis.
 
-* :c:data:`energy_x` and :c:data:`energy_c` : the *exchange* and *correlation* energy functionals (see :file:`e_xc_genera l.irp.f`)
- 
-* :c:data:`potential_x_alpha_ao` and :c:data:`potential_x_beta_ao` : the exchange potential for alpha/beta electrons on the |AO| basis (se e :file:`pot_general.irp.f`)
- 
-* :c:data:`potential_c_alpha_ao` and :c:data:`potential_c_beta_ao` : the correlation potential for alpha/beta electrons on the |AO| basis ( see :file:`pot_general.irp.f`)
+The potentials on the |MO| basis are then obtained automatically by the
+|AO| to |MO| transformation, which is done downstream of these
+providers.
 
-From the |AO| basis, the providers for the exchange/correlation potentials of alpha/beta electrons on the |MO| basis are automatically obtained by a |AO| --> |MO| transformation. 
+Which functional fills the general providers is selected by two
+keywords of the :ref:`module_dft_keywords` module, which the programs
+such as :ref:`ks_scf` and :ref:`rs_ks_scf` read:
 
-So, at the end of the day, adding a new functional consists only in **setting a new value to these providers**. 
+* :option:`dft_keywords exchange_functional`
+* :option:`dft_keywords correlation_functional`
 
+The exchange and the correlation functionals are chosen independently,
+so that range-separated hybrids (|RSDFT|) are built for instance by
+combining a short-range exchange functional with a long-range
+correlation functional. The fraction of exact (Hartree-Fock) exchange
+is controlled by the :option:`dft_keywords HF_exchange` keyword: the
+contribution of the exchange functional is scaled by (1 - HF_exchange).
 
-The general philosphy
----------------------
+The selection is done at pre-processing time. The files
+:file:`e_xc_general.irp.f` and :file:`pot_general.irp.f` of the
+:ref:`module_dft_one_e` module contain a shell block which scans the
+:file:`functionals` directory and generates an if/else chain on the
+keyword values. As a consequence, adding a functional requires no manual
+change of these files: it is enough to add the new providers and to
+rebuild.
 
-The directory **functionals** contains only files ending with .irp.f whose name being the name of a specific functional. 
-All files in *a_functional*.irp.f **must** contain **at least** the following providers
+Adding a new functional
+=======================
 
-* :c:data:`energy_x_a_functional` and  :c:data:`energy_c_a_functional` which are of course the exchange and correlation energies
+Create a file :file:`<name>.irp.f` in the
+:file:`$QP_ROOT/src/functionals` directory. The current functionals
+are :file:`lda.irp.f`, :file:`pbe.irp.f`, :file:`sr_lda.irp.f`,
+:file:`sr_pbe.irp.f` and :file:`none.irp.f`. The name must be in
+lowercase, and it must be the value given to
+:option:`dft_keywords exchange_functional` or
+:option:`dft_keywords correlation_functional` when the functional is
+used.
 
-* :c:data:`potential_x_alpha_ao_a_functional` and :c:data:`potential_x_beta_ao_a_functional` which are the exchange alpha/beta potentials 
+Both keywords can take the name, so the file has to define six
+providers:
 
-* :c:data:`potential_c_alpha_ao_a_functional` and :c:data:`potential_c_beta_ao_a_functional` which are the correlation alpha/beta potentials 
+* ``energy_x_<name>`` and ``energy_c_<name>``: the exchange and
+  correlation energies (``double precision`` arrays of size
+  ``(N_states)``),
 
-For instance, the file :file:`sr_lda.irp.f` contains the following providers 
+* ``potential_x_alpha_ao_<name>``, ``potential_x_beta_ao_<name>``,
+  ``potential_c_alpha_ao_<name>``, ``potential_c_beta_ao_<name>``: the
+  exchange and correlation potentials of the alpha and beta electrons
+  on the |AO| basis (``double precision`` arrays of size
+  ``(ao_num,ao_num,N_states)``).
 
-* :c:data:`energy_x_sr_lda` and  :c:data:`energy_c_sr_lda` which are of course the exchange and correlation energies
+They can be coupled (several ``BEGIN_PROVIDER`` blocks chained with
+``&``) as in the existing files. As an example, the file
+:file:`sr_pbe.irp.f` defines the energies ``energy_x_sr_pbe`` and
+``energy_c_sr_pbe`` together with the four potential arrays on the
+|AO| basis, and the file
+:file:`none.irp.f` sets the same six quantities to zero.
 
-* :c:data:`potential_x_alpha_ao_sr_lda` and :c:data:`potential_x_beta_ao_sr_lda` which are the exchange alpha/beta potentials 
+After adding the file, rebuild the repository from the root
+(:command:`ninja`), which regenerates the if/else chain with the new
+functional included. The functional is then used by setting
+:option:`dft_keywords exchange_functional` and/or
+:option:`dft_keywords correlation_functional` to its name.
 
-* :c:data:`potential_c_alpha_ao_sr_lda` and :c:data:`potential_c_beta_ao_sr_lda` which are the correlation alpha/beta potentials 
-
-
-Therefore, if you want to develop a new functional, just design a provider 
-
-To use a functional 
-
-Using the density for DFT calculations in the |QP|
-==================================================
-
-Different ways of defining the density for the DFT
---------------------------------------------------
-
-There are many ways of defining a density, and the keyword to define it is :option:`density_for_dft density_for_dft`. 
-Here are the following options for that keyword: 
-
-* "KS" : density is obtained from **a single Slater determinant** 
-
-* "WFT" : density is obtained from **the wave function** which is stored in the |EZFIO| data base
-
-* "input_density" : a one-body density matrix on the |MO| basis is read from the |EZFIO| data base, and the density is built from there (see :c:data:`data_one_e_dm_alpha_mo`)  
-
-* "damping_rs_dft" : damped density between "WFT" and "input_density" with the damping factor :option:`density_for_dft damping_for_rs_dft`. 
-
- .. note:: 
-    If an |MO| basis is already defined in the  |EZFIO| data base, the one-body density matrices will be defined 
-    according to this |MO| basis. For instance, if "KS", the density constructed will be density of a single Slater 
-    determinant built with the current |MO| basis stored in the |EZFIO| data base. 
-
-Once that you have defined how to define the density, you can easily access to the providers associated to it.  
-
-
-Value of the density and its gradients in real space
-----------------------------------------------------
-
-The density and its gradients evaluated on all grid points are (see :ref:`module_dft_utils_in_r`): 
-
-* :c:data:`one_e_dm_alpha_at_r` and :c:data:`one_e_dm_beta_at_r` : alpha/beta density at grid points 
-
-* :c:data:`one_e_dm_and_grad_alpha_in_r`, :c:data:`one_e_dm_and_grad_beta_in_r`: alpha/beta gradients (and densities)
-
-If you want to evaluate the density and its gradients at a given point in space, please refer to: 
-
-* :c:func:`density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r`
-
-If you use these *providers* and subroutines, the density computed will be coherent with the choice of density that you specified 
-with :option:`density_for_dft density_for_dft`, and it will impact automatically the general providers of :ref:`module_dft_one_e`. 
+For a multi-configurational |RSDFT| use, external functional plugins
+exist, see `the plugin repository of E. Giner
+<https://gitlab.com/eginer/qp_plugins_eginer>`_.
 
 
+The density used in DFT
+=======================
+
+Different ways of building the density
+--------------------------------------
+
+The keyword which controls the density is
+:option:`density_for_dft density_for_dft`, declared in the
+:ref:`module_density_for_dft` module. The accepted values are:
+
+* ``WFT`` (the default): the density is the one of the wave function
+  stored in the |EZFIO| directory (the determinants and coefficients),
+
+* ``KS``: the density is the one of a single Slater determinant built
+  with the first :c:data:`elec_alpha_num` and
+  :c:data:`elec_beta_num` molecular orbitals,
+
+* ``input_density``: a one-body density matrix on the |MO| basis is
+  read from the |EZFIO| directory (it is stored in the
+  :file:`aux_quantities` group),
+
+* ``input_density_ao``: a one-body density matrix on the |AO| basis is
+  read from the |EZFIO| directory and transformed to the |MO| basis,
+
+* ``damping_rs_dft``: a damped mixture of the ``WFT`` and
+  ``input_density`` densities, with the damping factor
+  :option:`density_for_dft damping_for_rs_dft`,
+
+* ``state_average_dens``: the state-average density of all states,
+  stored in the slot of the first state.
+
+The programs :ref:`ks_scf` and :ref:`rs_ks_scf` run with the ``WFT``
+choice. If an |MO| basis is already stored in the |EZFIO| directory,
+the one-body density matrices are built on this |MO| basis; for the
+``KS`` choice, the determinant is built with the current |MO| basis
+stored in the |EZFIO| directory.
+
+The resulting density matrices are the providers
+:c:data:`one_e_dm_mo_alpha_for_dft`, :c:data:`one_e_dm_mo_beta_for_dft`
+and :c:data:`one_e_dm_mo_for_dft` (|MO| basis) and
+:c:data:`one_e_dm_alpha_ao_for_dft`, :c:data:`one_e_dm_beta_ao_for_dft`
+(|AO| basis) of the :ref:`module_density_for_dft` module.
+
+The density and its gradients on the grid
+-----------------------------------------
+
+The values of the density and of its gradients on the |DFT| grid points
+are provided by the :ref:`module_dft_utils_in_r` module:
+
+* :c:data:`one_e_dm_and_grad_alpha_in_r` and
+  :c:data:`one_e_dm_and_grad_beta_in_r` hold, for each grid point and
+  state, the density (line 4) and its three spatial gradients (lines
+  1 to 3),
+
+* the :c:func:`density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r`
+  subroutine evaluates the density, its gradients, the |AOs| and the
+  gradients of the |AOs| at a single point of space.
+
+If the density and its gradients are read through these providers,
+their values are coherent with the choice of
+:option:`density_for_dft density_for_dft`, because they are built from
+the ``for_dft`` density matrices. Symmetrically, the energy and the
+potentials are read by every |DFT| program from the general providers
+of the :ref:`module_dft_one_e` module, so that the choice of the
+:option:`dft_keywords exchange_functional` and
+:option:`dft_keywords correlation_functional` keywords is coherent
+through the whole calculation.

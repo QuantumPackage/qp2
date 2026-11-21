@@ -26,6 +26,13 @@ end function
 subroutine tamiser(key, idx, no, n, Nint, N_key)
   use bitmasks
   implicit none
+  BEGIN_DOC
+ ! Sift-down step of the heap sort used by sort_dets_ab and
+ ! sort_dets_ab_v: assuming that key(1:n) is a min-heap for
+ ! the det_inf ordering except possibly at position no, moves
+ ! the element at position no down to its correct position.
+ ! idx is swapped in parallel with key.
+  END_DOC
   integer,intent(in)                    :: no, n, Nint, N_key
   integer(bit_kind),intent(inout)       :: key(Nint, 2, N_key)
   integer,intent(inout)                 :: idx(N_key)

@@ -330,12 +330,6 @@ Providers
        * :c:data:`energy_x_sr_pbe`
        * :c:data:`n_states`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`e_correlation_dft`
 
  
 .. c:var:: energy_x
@@ -364,12 +358,6 @@ Providers
        * :c:data:`hf_exchange`
        * :c:data:`n_states`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`e_exchange_dft`
 
  
 .. c:var:: mu_erf_dft
@@ -384,7 +372,7 @@ Providers
 
     range separation parameter used in RS-DFT.
     
-    It is set to mu_erf in order to be consistent with the module "hamiltonian"
+    It is set to mu_erf in order to be consistent with the module "ao_two_e_erf_ints"
 
     Needs:
 
@@ -557,7 +545,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_potential_alpha_xc`
        * :c:data:`potential_c_alpha_mo`
 
  
@@ -627,7 +614,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_potential_alpha_xc`
        * :c:data:`potential_c_alpha_mo`
 
  
@@ -698,7 +684,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_potential_alpha_xc`
        * :c:data:`potential_x_alpha_mo`
 
  
@@ -769,7 +754,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_potential_alpha_xc`
        * :c:data:`potential_x_alpha_mo`
 
  
@@ -839,7 +823,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_potential_alpha_xc`
        * :c:data:`potential_xc_alpha_mo`
 
  
@@ -907,7 +890,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_potential_alpha_xc`
        * :c:data:`potential_xc_alpha_mo`
 
  
@@ -1032,6 +1014,34 @@ Providers
 
 
  
+.. c:var:: double ref_vhxc
+
+
+    File : :file:`dft_one_e/effective_pot.irp.f`
+
+    .. code:: fortran
+
+        double precision	:: ref_vhxc	
+
+
+    Sums effective_one_e_potential(i,i,1) (state 1) with weight 2
+    for the beta electrons (i = 1..elec_beta_num) and weight 1 for
+    the unpaired alpha electrons (i =
+    elec_beta_num+1..elec_alpha_num). The second loop originally
+    had an empty range (bug, author-fixed 2026-10-31); the code
+    assumes elec_alpha_num >= elec_beta_num.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`effective_one_e_potential`
+       * :c:data:`elec_alpha_num`
+       * :c:data:`elec_beta_num`
+
+
+ 
 .. c:var:: regular_range_hartree
 
 
@@ -1054,10 +1064,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`cholesky_mo_num`
-       * :c:data:`cholesky_mo_transp`
-       * :c:data:`do_mo_cholesky`
-       * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_in_map`
@@ -1089,10 +1095,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`cholesky_mo_num`
-       * :c:data:`cholesky_mo_transp`
-       * :c:data:`do_mo_cholesky`
-       * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_in_map`
@@ -1124,10 +1126,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`cholesky_mo_num`
-       * :c:data:`cholesky_mo_transp`
-       * :c:data:`do_mo_cholesky`
-       * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_erf_map`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
@@ -1168,10 +1166,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`cholesky_mo_num`
-       * :c:data:`cholesky_mo_transp`
-       * :c:data:`do_mo_cholesky`
-       * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_erf_map`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`

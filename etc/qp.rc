@@ -49,6 +49,15 @@ Usage:
     qp set_mo_class
     qp update
 
+  RAG (code-model corpus, see share/rag):
+
+    qp rag build                    Rebuild the corpus (== ninja rag at the root).
+    qp rag query "<text>" [-k N]    BM25 search over entities and routines.
+    qp rag graph <entity> [--depth N]
+                                    What an entity depends on / what breaks
+                                    when it changes.
+    qp rag stats                    Counts, doc coverage, external surface.
+
 EOF
 }
 
@@ -77,13 +86,17 @@ function qp()
     "create_ezfio")
       shift
       NAME=$(qp_create_ezfio "$@")
-      if [[ -d $NAME ]] ; then
+      result=$?
+      if [[ $result -ne 0 ]] ; then
+        >&2 echo "qp: create_ezfio failed (exit $result); see the message above, or run 'qp create_ezfio -h'"
+      elif [[ -d $NAME ]] ; then
         [[ -d $EZFIO_FILE ]] && ezfio unset_file
         ezfio set_file $NAME
       else
         qp_create_ezfio -h | more
       fi
       unset _ARGS
+      return $result
       ;;
 
     "man")
@@ -113,6 +126,15 @@ function qp()
     "test")
       shift
       qp_test $@
+      ;;
+
+    "rag")
+      # The code-model corpus (share/rag): no EZFIO file is involved.
+      # Direct call with quoted "$@": the eval-based idiom used by the
+      # generic fallback re-splits the words, which would break
+      # `qp rag query "several words"`.
+      shift
+      qp_rag "$@"
       ;;
 
     *)
@@ -223,11 +245,58 @@ _qp_Complete()
         COMPREPLY=( $(compgen -W "-v -a " -- $cur ) )
         return 0
         ;;
+      rag)
+        # key on the subcommand at position 2, then complete the
+        # known flags of query/graph wherever they appear
+        case "${COMP_WORDS[2]}" in
+          query)  # qp rag query "<text>" [-k N] [--kind entity|routine]
+            case "${prev}" in
+              -k)
+                COMPREPLY=( $(compgen -W "" -- $cur ) )
+                return 0
+                ;;
+              --kind)
+                COMPREPLY=( $(compgen -W "entity routine" -- $cur ) )
+                return 0
+                ;;
+              *)
+                COMPREPLY=( $(compgen -W "-k --kind --json -h" -- $cur ) )
+                return 0
+                ;;
+            esac
+            ;;
+          graph)  # qp rag graph <entity> [--depth N] [--dir needs|needed_by|both]
+            case "${prev}" in
+              --dir)
+                COMPREPLY=( $(compgen -W "needs needed_by both" -- $cur ) )
+                return 0
+                ;;
+              --depth)
+                COMPREPLY=( $(compgen -W "" -- $cur ) )
+                return 0
+                ;;
+              *)
+                COMPREPLY=( $(compgen -W "--depth --dir -h" -- $cur ) )
+                return 0
+                ;;
+            esac
+            ;;
+          build|stats)
+            COMPREPLY=( $(compgen -W "-h" -- $cur ) )
+            return 0
+            ;;
+          *)
+            COMPREPLY=( $(compgen -W "build query graph stats -h" -- $cur ) )
+            return 0
+            ;;
+        esac
+        ;;
       *)
         COMPREPLY=( $(compgen -W 'plugins set_file \
                                    unset_file man \
                                    create_ezfio \
                                    test \
+                                   rag \
                                    convert_output_to_ezfio \
                                    -h update' -- $cur ) )
 

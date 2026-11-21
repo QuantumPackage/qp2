@@ -6,7 +6,7 @@
  BEGIN_DOC
 ! state_av_full_occ_2_rdm_ab_mo(i,j,k,l) =  STATE AVERAGE physicist notation for 2RDM of alpha/beta + beta/alpha electrons
 !
-!                                     = \sum_{istate} w(istate) * <Psi_{istate}| a^{\dagger}_{i,alpha} a^{\dagger}_{j,beta} a_{l,beta} a_{k,alpha} |Psi_{istate}>
+!                                     = \sum_{istate} w(istate) * <Psi_{istate}\| a^{\dagger}_{i,alpha} a^{\dagger}_{j,beta} a_{l,beta} a_{k,alpha} \|Psi_{istate}>
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONG TO ALL OCCUPIED ORBITALS : core, inactive and active
 !
@@ -147,7 +147,7 @@
  BEGIN_DOC
 ! state_av_full_occ_2_rdm_aa_mo(i,j,k,l) =  STATE AVERAGE physicist notation for 2RDM of alpha/alpha electrons
 !
-!                                     = \sum_{istate} w(istate) * <Psi_{istate}| a^{\dagger}_{i,alpha} a^{\dagger}_{j,alpha} a_{l,alpha} a_{k,alpha} |Psi_{istate}>
+!                                     = \sum_{istate} w(istate) * <Psi_{istate}\| a^{\dagger}_{i,alpha} a^{\dagger}_{j,alpha} a_{l,alpha} a_{k,alpha} \|Psi_{istate}>
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONG TO ALL OCCUPIED ORBITALS : core, inactive and active
 !
@@ -260,7 +260,7 @@
  BEGIN_DOC
 ! state_av_full_occ_2_rdm_bb_mo(i,j,k,l) =  STATE AVERAGE physicist notation for 2RDM of beta/beta electrons
 !
-!                                     = \sum_{istate} w(istate) * <Psi_{istate}| a^{\dagger}_{i,beta} a^{\dagger}_{j,beta} a_{l,beta} a_{k,beta} |Psi_{istate}>
+!                                     = \sum_{istate} w(istate) * <Psi_{istate}\| a^{\dagger}_{i,beta} a^{\dagger}_{j,beta} a_{l,beta} a_{k,beta} \|Psi_{istate}>
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONG TO ALL OCCUPIED ORBITALS : core, inactive and active
 !
@@ -366,14 +366,14 @@
 
  END_PROVIDER
 
- BEGIN_PROVIDER [double precision, state_av_full_occ_2_rdm_spin_trace_mo, (n_core_inact_act_orb,n_core_inact_act_orb,n_core_inact_act_orb,n_core_inact_act_orb)]
+ BEGIN_PROVIDER [double precision, state_av_occ_2_rdm_spin_trace_mo, (n_core_inact_act_orb,n_core_inact_act_orb,n_core_inact_act_orb,n_core_inact_act_orb)]
  implicit none
- state_av_full_occ_2_rdm_spin_trace_mo = 0.d0
+ state_av_occ_2_rdm_spin_trace_mo = 0.d0
  integer :: i,j,k,l,iorb,jorb,korb,lorb
  BEGIN_DOC
 ! state_av_full_occ_2_rdm_bb_mo(i,j,k,l) =  STATE AVERAGE physicist notation for 2RDM of beta/beta electrons
 !
-!                                     = \sum_{istate} w(istate) * \sum_{sigma,sigma'} <Psi_{istate}| a^{\dagger}_{i,sigma} a^{\dagger'}_{j,sigma} a_{l,sigma'} a_{k,sigma} |Psi_{istate}>
+!                                     = \sum_{istate} w(istate) * \sum_{sigma,sigma'} <Psi_{istate}\| a^{\dagger}_{i,sigma} a^{\dagger'}_{j,sigma} a_{l,sigma'} a_{k,sigma} \|Psi_{istate}>
 !
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONG TO ALL OCCUPIED ORBITALS : core, inactive and active
@@ -391,7 +391,7 @@
  !$OMP DEFAULT(NONE) SHARED(n_act_orb, n_inact_orb, n_core_orb, &
  !$OMP list_core, list_act, list_inact, no_core_density, &
  !$OMP one_e_dm_mo_alpha_average, one_e_dm_mo_beta_average, &
- !$OMP state_av_act_2_rdm_spin_trace_mo, state_av_full_occ_2_rdm_spin_trace_mo)
+ !$OMP state_av_act_2_rdm_spin_trace_mo, state_av_occ_2_rdm_spin_trace_mo)
    !!!!!!!!!!!!!!!!
    !!!!!!!!!!!!!!!!
    !! PURE ACTIVE PART SPIN-TRACE
@@ -404,7 +404,7 @@
       korb = list_act(k)
       do l = 1, n_act_orb
        lorb = list_act(l)
-       state_av_full_occ_2_rdm_spin_trace_mo(lorb,korb,jorb,iorb) += &
+       state_av_occ_2_rdm_spin_trace_mo(lorb,korb,jorb,iorb) += &
         state_av_act_2_rdm_spin_trace_mo(l,k,j,i)
        enddo
       enddo
@@ -424,11 +424,11 @@
      do k = 1, n_inact_orb
       korb = list_inact(k)
       !                                       1     2   1    2    : DIRECT TERM
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) +=  1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
-      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) +=  1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
+      state_av_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) +=  1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
+      state_av_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) +=  1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
       !                                       1     2   1    2    : EXCHANGE TERM
-      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb) += -1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb) += -1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
+      state_av_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb) += -1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
+      state_av_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb) += -1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
      enddo
     enddo
    enddo
@@ -439,8 +439,8 @@
     jorb = list_inact(j)
     do k = 1, n_inact_orb
      korb = list_inact(k)
-     state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) +=  1.0d0
-     state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb) -=  1.0d0
+     state_av_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) +=  1.0d0
+     state_av_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb) -=  1.0d0
     enddo
    enddo
    !$OMP END DO
@@ -454,11 +454,11 @@
       do k = 1, n_core_orb
        korb = list_core(k)
        !                                       1     2   1    2    : DIRECT TERM
-       state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) +=  1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
-       state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) +=  1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
+       state_av_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) +=  1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
+       state_av_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) +=  1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
        !                                       1     2   1    2    : EXCHANGE TERM
-       state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb) += -1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
-       state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb) += -1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
+       state_av_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb) += -1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
+       state_av_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb) += -1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
       enddo
      enddo
     enddo
@@ -469,8 +469,8 @@
      jorb = list_core(j)
      do k = 1, n_core_orb
       korb = list_core(k)
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) +=  1.0d0
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb) -=  1.0d0
+      state_av_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) +=  1.0d0
+      state_av_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb) -=  1.0d0
      enddo
     enddo
     !$OMP END DO
@@ -488,11 +488,11 @@
      do k = 1, n_inact_orb
       korb = list_inact(k)
       !                                       1     2   1    2    : DIRECT TERM
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) +=  1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
-      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) +=  1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+      state_av_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) +=  1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+      state_av_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) +=  1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
       !                                       1     2   1    2    : EXCHANGE TERM
-      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb) += -1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb) += -1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+      state_av_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb) += -1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+      state_av_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb) += -1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
      enddo
     enddo
    enddo
@@ -503,8 +503,8 @@
     jorb = list_inact(j)
     do k = 1, n_inact_orb
      korb = list_inact(k)
-     state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) +=  1.0d0
-     state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb) -=  1.0d0
+     state_av_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) +=  1.0d0
+     state_av_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb) -=  1.0d0
     enddo
    enddo
    !$OMP END DO
@@ -518,11 +518,11 @@
       do k = 1, n_core_orb
        korb = list_core(k)
        !                                       1     2   1    2    : DIRECT TERM
-       state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) +=  1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
-       state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) +=  1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+       state_av_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) +=  1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+       state_av_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) +=  1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
        !                                       1     2   1    2    : EXCHANGE TERM
-       state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb) += -1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
-       state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb) += -1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+       state_av_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb) += -1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+       state_av_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb) += -1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
       enddo
      enddo
     enddo
@@ -533,8 +533,8 @@
      jorb = list_core(j)
      do k = 1, n_core_orb
       korb = list_core(k)
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) +=  1.0d0
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb) -=  1.0d0
+      state_av_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) +=  1.0d0
+      state_av_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb) -=  1.0d0
      enddo
     enddo
     !$OMP END DO
@@ -552,14 +552,14 @@
       korb = list_inact(k)
       ! ALPHA INACTIVE - BETA ACTIVE
       !                                     alph beta alph beta
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) += 1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
+      state_av_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) += 1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
       !                                     beta alph beta alph
-      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) += 1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
+      state_av_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) += 1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
       ! BETA INACTIVE - ALPHA ACTIVE
       !                                     beta alph beta alpha
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) += 1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+      state_av_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) += 1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
       !                                     alph beta alph beta
-      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) += 1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+      state_av_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) += 1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
      enddo
     enddo
    enddo
@@ -571,8 +571,8 @@
      do k = 1, n_inact_orb
       korb = list_inact(k)
       !                                     alph beta alph beta
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) += 1.0d0
-      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,jorb,korb) += 1.0d0
+      state_av_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) += 1.0d0
+      state_av_occ_2_rdm_spin_trace_mo(jorb,korb,jorb,korb) += 1.0d0
      enddo
     enddo
     !$OMP END DO
@@ -590,14 +590,14 @@
        korb = list_core(k)
        !! BETA ACTIVE - ALPHA CORE
        !                                     alph beta alph beta
-       state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) += 1.0D0 * one_e_dm_mo_beta_average(jorb,iorb)
+       state_av_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) += 1.0D0 * one_e_dm_mo_beta_average(jorb,iorb)
        !                                     beta alph beta alph
-       state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) += 1.0D0 * one_e_dm_mo_beta_average(jorb,iorb)
+       state_av_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) += 1.0D0 * one_e_dm_mo_beta_average(jorb,iorb)
        !! ALPHA ACTIVE - BETA CORE
        !                                     alph beta alph beta
-       state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) += 1.0D0 * one_e_dm_mo_alpha_average(jorb,iorb)
+       state_av_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) += 1.0D0 * one_e_dm_mo_alpha_average(jorb,iorb)
        !                                     beta alph beta alph
-       state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) += 1.0D0 * one_e_dm_mo_alpha_average(jorb,iorb)
+       state_av_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) += 1.0D0 * one_e_dm_mo_alpha_average(jorb,iorb)
       enddo
      enddo
     enddo
@@ -609,8 +609,8 @@
      do k = 1, n_core_orb
       korb = list_core(k)
       !                                     alph beta alph beta
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) += 1.0D0
-      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,jorb,korb) += 1.0D0
+      state_av_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) += 1.0D0
+      state_av_occ_2_rdm_spin_trace_mo(jorb,korb,jorb,korb) += 1.0D0
      enddo
     enddo
     !$OMP END DO

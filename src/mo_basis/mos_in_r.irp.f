@@ -13,6 +13,10 @@ end
 
 subroutine give_all_mos_and_grad_at_r(r,mos_array,mos_grad_array)
  implicit none
+ BEGIN_DOC
+ ! mos_array(j) = jth MO function evaluated at r
+ ! mos_grad_array(i,j) = derivative of the jth MO along axis i (x, y, z) at r
+ END_DOC
  double precision, intent(in) :: r(3)
  double precision, intent(out) :: mos_array(mo_num)
  double precision, intent(out) :: mos_grad_array(3,mo_num)
@@ -34,6 +38,13 @@ end
 
 subroutine give_all_mos_and_grad_and_lapl_at_r(r,mos_array,mos_grad_array,mos_lapl_array)
  implicit none
+ BEGIN_DOC
+ ! mos_array(j) = jth MO function evaluated at r
+ ! mos_grad_array(i,j) = derivative of the jth MO along axis i (x, y, z) at r
+ ! mos_lapl_array(i,j) = second derivative of the jth MO along axis i at r:
+ ! d2/dx2 for i=1, d2/dy2 for i=2, d2/dz2 for i=3; the three pure
+ ! second derivatives are stored separately, not their sum
+ END_DOC
  double precision, intent(in) :: r(3)
  double precision, intent(out) :: mos_array(mo_num)
  double precision, intent(out) :: mos_grad_array(3,mo_num),mos_lapl_array(3,mo_num)

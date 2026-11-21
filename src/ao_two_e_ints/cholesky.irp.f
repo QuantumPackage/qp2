@@ -1,3 +1,5 @@
+use gpu
+
 double precision function get_ao_integ_chol(i,j,k,l)
  implicit none
   BEGIN_DOC
@@ -73,6 +75,7 @@ END_PROVIDER
 
    integer, external              :: getUnitAndOpen
    integer                        :: iunit, ierr
+   logical :: do_gpu
 
    ndim8 = ao_num*ao_num*1_8+1
    double precision :: wall0,wall1
@@ -81,7 +84,6 @@ END_PROVIDER
 
    PROVIDE nproc ao_cholesky_threshold do_direct_integrals qp_max_mem
    PROVIDE nucl_coord
-   call set_multiple_levels_omp(.False.)
 
    call wall_time(wall0)
 
@@ -98,8 +100,6 @@ END_PROVIDER
      cholesky_ao_num = rank
 
    else
-
-     call set_multiple_levels_omp(.False.)
 
      if (do_direct_integrals) then
        if (ao_two_e_integral(1,1,1,1) < huge(1.d0)) then
@@ -286,18 +286,55 @@ END_PROVIDER
        !$OMP BARRIER
        !$OMP END PARALLEL
 
+       double precision :: gpu_free
+       call gpu_free_memory(gpu_free)
+
+       integer*8 :: nbytes, nbytes_gpu
+       nbytes_gpu = int(gpu_free,8)/8_8 * 1024_8**3
+       nbytes = int(np,8)*int(block_size,8) + int(nq,8)*int(block_size,8) + int(np,8)*int(nq,8)
+       do_gpu = nbytes < nbytes_gpu
+
+       if (do_gpu) then
+           type(gpu_double2) :: Ltmp_p_d, Ltmp_q_d, Delta_d
+           call gpu_allocate(Ltmp_p_d, np, block_size)
+           call gpu_upload(Ltmp_p, Ltmp_p_d)
+
+           call gpu_allocate(Ltmp_q_d, nq, block_size)
+           call gpu_upload(Ltmp_q, Ltmp_q_d)
+
+           call gpu_allocate(Delta_d, np, nq)
+       endif
+
        if (N>0) then
+
+         if (do_gpu) then
+
+           call gpu_dgemm(blas_handle, 'N', 'T', np, nq, N, -1.d0, &
+                  Ltmp_p_d%f(1,1), np, &
+                  Ltmp_q_d%f(1,1), nq, &
+                  0.d0, Delta_d%f(1,1), np)
+
+         else
 
            call dgemm('N', 'T', np, nq, N, -1.d0,                       &
                   Ltmp_p(1,1), np, Ltmp_q(1,1), nq, 0.d0, Delta, np)
 
+         endif
+
        else
 
-         !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q,j)
-         do q=1,nq
-           Delta(:,q) = 0.d0
-         enddo
-         !$OMP END PARALLEL DO
+         if (do_gpu) then
+           call gpu_dgeam(blas_handle, 'N', 'N', np, nq,  &
+               0.d0, Delta_d%f(1,1), np, &
+               0.d0, Delta_d%f(1,1), np, &
+                     Delta_d%f(1,1), np)
+         else
+           !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q,j)
+           do q=1,nq
+             Delta(:,q) = 0.d0
+           enddo
+           !$OMP END PARALLEL DO
+         endif
 
        endif
 
@@ -307,7 +344,14 @@ END_PROVIDER
          Qmax = max(Qmax, D(Dset(q)))
        enddo
 
-       if (Qmax < Dmin) exit
+       if (Qmax < Dmin) then
+         if (do_gpu) then
+           call gpu_deallocate(Ltmp_p_d)
+           call gpu_deallocate(Ltmp_q_d)
+           call gpu_deallocate(Delta_d)
+         endif
+         exit
+       endif
 
        ! g.
 
@@ -327,9 +371,19 @@ END_PROVIDER
 
          if (iblock == block_size) then
 
-            call dgemm('N','T',np,nq,block_size,-1.d0,                &
-                 Ltmp_p, np, Ltmp_q, nq, 1.d0, Delta, np)
+            if (do_gpu) then
 
+                 call gpu_dgemm(blas_handle, 'N', 'T', np, nq, block_size, -1.d0, &
+                      Ltmp_p_d%f(1,1), np, &
+                      Ltmp_q_d%f(1,1), nq, &
+                      1.d0, Delta_d%f(1,1), np)
+
+            else
+
+                 call dgemm('N','T',np,nq,block_size,-1.d0,                &
+                     Ltmp_p, np, Ltmp_q, nq, 1.d0, Delta, np)
+
+            endif
             iblock = 0
 
          endif
@@ -347,11 +401,16 @@ END_PROVIDER
          enddo
 
          iblock = iblock+1
-         !$OMP PARALLEL DO PRIVATE(p)
-         do p=1,np
-           Ltmp_p(p,iblock) = Delta(p,dj)
-         enddo
-         !$OMP END PARALLEL DO
+
+         if (do_gpu) then
+           call gpu_copy(Delta_d%f(1,dj), Ltmp_p_d%f(1,iblock), np)
+         else
+           !$OMP PARALLEL DO PRIVATE(p)
+           do p=1,np
+             Ltmp_p(p,iblock) = Delta(p,dj)
+           enddo
+           !$OMP END PARALLEL DO
+         endif
 
          if (.not.computed(dj)) then
            m = dj
@@ -382,29 +441,60 @@ END_PROVIDER
                !$OMP END PARALLEL DO
            endif
 
-           !$OMP PARALLEL DO PRIVATE(p)
-           do p=1,np
-             Ltmp_p(p,iblock) =  Ltmp_p(p,iblock) + Delta_col(p)
-             Delta(p,dj) =  Ltmp_p(p,iblock)
-           enddo
-           !$OMP END PARALLEL DO
+           if (do_gpu) then
+             call gpu_upload(Delta_col(1), Ltmp_p_d%f(1,iblock), np)
+             call gpu_dgeam(blas_handle, 'N', 'N', np, 1, &
+               1.d0, Ltmp_p_d%f(1,iblock), np, &
+               1.d0, Delta_d%f(1,dj), np, &
+                     Ltmp_p_d%f(1,iblock), np)
+             call gpu_copy(Ltmp_p_d%f(1,iblock), Delta_d%f(1,dj), np)
+           else
+             !$OMP PARALLEL DO PRIVATE(p)
+             do p=1,np
+               Ltmp_p(p,iblock) =  Ltmp_p(p,iblock) + Delta_col(p)
+               Delta(p,dj) =  Ltmp_p(p,iblock)
+             enddo
+             !$OMP END PARALLEL DO
+           endif
 
            computed(dj) = .True.
          endif
 
          ! iv.
          if (iblock > 1) then
-           call dgemv('N', np, iblock-1, -1.d0, Ltmp_p, np, Ltmp_q(dj,1), nq, 1.d0,&
+           if (do_gpu) then
+
+             call gpu_dgemv(blas_handle, 'N', np, iblock-1, -1.d0, &
+                Ltmp_p_d%f(1,1), np, Ltmp_q_d%f(dj,1), nq, 1.d0,&
+                Ltmp_p_d%f(1,iblock), 1)
+
+           else
+
+             call dgemv('N', np, iblock-1, -1.d0, Ltmp_p, np, Ltmp_q(dj,1), nq, 1.d0,&
                Ltmp_p(1,iblock), 1)
+
+           endif
          endif
 
          ! iii.
          f = 1.d0/dsqrt(Qmax)
 
+         if (do_gpu) then
+           call gpu_dgeam(blas_handle, 'N', 'N', np, 1, &
+             f  , Ltmp_p_d%f(1,iblock), np, &
+             0d0, Ltmp_p_d%f(1,iblock), np, &
+                  Ltmp_p_d%f(1,iblock), np)
+
+           call gpu_download(Ltmp_p_d%f(1,iblock), Ltmp_p(1,iblock), np)
+         else
+           do p=1,np
+             Ltmp_p(p,iblock) = Ltmp_p(p,iblock) * f
+           enddo
+         endif
+
          !$OMP PARALLEL PRIVATE(p,q) DEFAULT(shared)
          !$OMP DO
          do p=1,np
-           Ltmp_p(p,iblock) = Ltmp_p(p,iblock) * f
            L(Lset(p), rank) = Ltmp_p(p,iblock)
            D(Lset(p)) = D(Lset(p)) - Ltmp_p(p,iblock) * Ltmp_p(p,iblock)
          enddo
@@ -417,12 +507,21 @@ END_PROVIDER
          !$OMP END DO
          !$OMP END PARALLEL
 
+         if (do_gpu) then
+           call gpu_upload(Ltmp_q(1,iblock), Ltmp_q_d%f(1,iblock), nq)
+         endif
+
          Qmax = D(Dset(1))
          do q=1,nq
            Qmax = max(Qmax, D(Dset(q)))
          enddo
 
        enddo
+       if (do_gpu) then
+         call gpu_deallocate(Ltmp_p_d)
+         call gpu_deallocate(Ltmp_q_d)
+         call gpu_deallocate(Delta_d)
+       endif
 
        print '(I10, 4X, ES12.3)', rank, Qmax
 

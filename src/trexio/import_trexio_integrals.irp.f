@@ -1,9 +1,17 @@
 program import_trexio_integrals
   use trexio
   implicit none
+  BEGIN_DOC
+  ! Reads the nuclear repulsion and the one- and
+  ! two-electron integrals (AO and MO) from the TREXIO
+  ! file named by the trexio_file option and stores
+  ! them in the |EZFIO| database. The two-electron
+  ! integrals may come as Cholesky vectors or as the
+  ! list of nonzero integrals.
+  END_DOC
   integer(trexio_t)              :: f ! TREXIO file handle
   integer(trexio_exit_code)      :: rc
-  PROVIDE mo_num
+!  PROVIDE mo_num
 
   f = trexio_open(trexio_filename, 'r', TREXIO_AUTO, rc)
   if (f == 0_8) then
@@ -134,11 +142,13 @@ subroutine run(f)
       call trexio_assert(rc, TREXIO_SUCCESS)
       stop -1
     endif
-    call ezfio_set_ao_one_e_ints_ao_integrals_n_e(A)
-    call ezfio_set_ao_one_e_ints_io_ao_integrals_n_e('Read')
-    A=0.d0
-    call ezfio_set_ao_one_e_ints_ao_integrals_kinetic(A)
-    call ezfio_set_ao_one_e_ints_io_ao_integrals_kinetic('Read')
+!    call ezfio_set_ao_one_e_ints_ao_integrals_n_e(A)
+!    call ezfio_set_ao_one_e_ints_io_ao_integrals_n_e('Read')
+!    A=0.d0
+!    call ezfio_set_ao_one_e_ints_ao_integrals_kinetic(A)
+!    call ezfio_set_ao_one_e_ints_io_ao_integrals_kinetic('Read')
+    call ezfio_set_ao_one_e_ints_ao_one_e_integrals(A)
+    call ezfio_set_ao_one_e_ints_io_ao_one_e_integrals('Read')
   endif
 
   deallocate(A,B)
@@ -242,8 +252,8 @@ subroutine run(f)
   ! MO integrals
   ! ------------
 
-  allocate(A(mo_num, mo_num))
   if (trexio_has_mo_1e_int_core_hamiltonian(f) == TREXIO_SUCCESS) then
+    allocate(A(mo_num, mo_num))
     rc = trexio_read_mo_1e_int_core_hamiltonian(f, A)
     if (rc /= TREXIO_SUCCESS) then
       print *, irp_here
@@ -253,8 +263,8 @@ subroutine run(f)
     endif
     call ezfio_set_mo_one_e_ints_mo_one_e_integrals(A)
     call ezfio_set_mo_one_e_ints_io_mo_one_e_integrals('Read')
+    deallocate(A)
   endif
-  deallocate(A)
 
   ! MO 2e integrals
   ! ---------------

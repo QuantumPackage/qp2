@@ -6,6 +6,14 @@
 &BEGIN_PROVIDER [double precision, ao_deriv2_cgtos_z, (ao_num, ao_num)]
 
   implicit none
+  BEGIN_DOC
+  ! Second derivative matrix elements in the cgtos |AO| basis:
+  !
+  ! $\langle \chi_i | \frac{\partial^2}{\partial x^2} | \chi_j \rangle$
+  !
+  ! (and y, z analogously). The three arrays are combined in the
+  ! provider ao_kinetic_integrals_cgtos as -1/2 of their sum.
+  END_DOC
   integer          :: i, j, m, n, l, ii, jj, dim1, power_A(3), power_B(3)
   double precision :: c, deriv_tmp
   double precision :: KA2, phiA
@@ -97,8 +105,8 @@
 
           c = ao_coef_cgtos_norm_ord_transp(n,j) * ao_coef_cgtos_norm_ord_transp(l,i)
 
-          C1 = zexp((0.d0, 1.d0) * (-phiA - phiB) - 0.25d0 * (alpha_inv * KA2 + beta_inv        * KB2))
-          C2 = zexp((0.d0, 1.d0) * (-phiA + phiB) - 0.25d0 * (alpha_inv * KA2 + conjg(beta_inv) * KB2))
+          C1 = exp((0.d0, 1.d0) * (-phiA - phiB) - 0.25d0 * (alpha_inv * KA2 + beta_inv        * KB2))
+          C2 = exp((0.d0, 1.d0) * (-phiA + phiB) - 0.25d0 * (alpha_inv * KA2 + conjg(beta_inv) * KB2))
 
           call overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
                                      Ap_center, Bp_center, overlap_x0_1, overlap_y0_1, overlap_z0_1, overlap, dim1)

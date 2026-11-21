@@ -37,6 +37,12 @@ subroutine mat_to_vec_index(p,q,i)
 
   include 'pi.h'
 
+  BEGIN_DOC
+  ! Compute the index i of the element of the vector that
+  ! corresponds to the element (p,q) of the lower diagonal of
+  ! an antisymmetric matrix, where p is the row index, q the
+  ! column index (p > q), as i = q + (p-1)*(p-2)/2.
+  END_DOC
   implicit none
   
   ! Variables

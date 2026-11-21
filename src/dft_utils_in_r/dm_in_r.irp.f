@@ -27,8 +27,16 @@
  double precision :: r(3)
  double precision, allocatable :: aos_array(:),grad_aos_array(:,:)
  double precision, allocatable :: dm_a(:),dm_b(:), dm_a_grad(:,:), dm_b_grad(:,:)
+
  allocate(dm_a(N_states),dm_b(N_states), dm_a_grad(3,N_states), dm_b_grad(3,N_states))
  allocate(aos_array(ao_num),grad_aos_array(3,ao_num))
+
+ ! For provide outside of OpenMP
+ r(1) = final_grid_points(1,1)
+ r(2) = final_grid_points(2,1)
+ r(3) = final_grid_points(3,1)
+ call density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r(r,dm_a,dm_b,  dm_a_grad, dm_b_grad, aos_array, grad_aos_array)
+
  !$OMP PARALLEL DO                                                                    &
  !$OMP DEFAULT (NONE)                                                                 &
  !$OMP SHARED(n_points_final_grid,final_grid_points,N_states,                         &

@@ -135,6 +135,14 @@ subroutine print_generators_bitmasks_holes
  implicit none
  integer :: i,j,k,l
  integer(bit_kind),allocatable :: key_tmp(:,:)
+ BEGIN_DOC
+ ! For each of the 3 hole bitmasks (index_holes_bitmask), print the
+ ! alpha and beta bitstrings of generators_bitmask in '+-' notation
+ ! via print_det.
+ ! The print statements are currently commented out, so the subroutine
+ ! performs no action; they are debug only and the commented-out
+ ! lines may be erased (author, 2026-10-31).
+ END_DOC
 
  allocate(key_tmp(N_int,2))
  do l = 1, 3
@@ -156,6 +164,11 @@ subroutine print_generators_bitmasks_particles
  implicit none
  integer :: i,j,k,l
  integer(bit_kind),allocatable :: key_tmp(:,:)
+ BEGIN_DOC
+ ! For each of the 3 particle bitmasks (index_particl_bitmask), print
+ ! the alpha and beta bitstrings of generators_bitmask in '+-'
+ ! notation, one block per row, via print_det.
+ END_DOC
 
  allocate(key_tmp(N_int,2))
  do l = 1, 3

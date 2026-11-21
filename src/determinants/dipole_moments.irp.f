@@ -56,6 +56,10 @@ END_PROVIDER
 
 
  subroutine print_dipole_moments
+ BEGIN_DOC
+ ! Prints a table with the x, y and z dipole moments of all states,
+ ! as provided by the x, y and z_dipole_moment providers.
+ END_DOC
  implicit none
   integer :: i
   print*, ''
