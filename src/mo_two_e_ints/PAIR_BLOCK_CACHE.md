@@ -3,6 +3,47 @@
 Spec for implementation. Stage 0 is a measurement with no behaviour change and
 decides whether Stage 1 is written at all.
 
+## Where this stands (21 November 2026)
+
+* **Stage 0 is done and committed** (`pair_block_stats.f90`, opt-in via
+  `QP_PAIRBLOCK_STATS=1`), and it has been run to the *end* of a walk, not just
+  into its head: 114 MOs, one thread, fp64, `shift = 6` -> 7673.7 s of walk,
+  1 447 862 block calls (1273.7 s, 16.6 %), 139 365 752 column calls (4777.2 s,
+  62.3 %), 8144 pairs of which 8100 are in both classes, `block-only = 0`.
+  **78.9 % of the walk is these two contractions**, and 139 349 290 of the
+  column calls land on a pair the walk fills a block for regardless.
+* **The ceiling is measured twice, and it is 80 %.** The same binary with
+  `mo_integrals_cache_shift = 7` - every column served from a gemm-filled block,
+  i.e. Stage 1 with an infinite cap - completes in 1524 s against 7739 s:
+  **5.08x, 80.3 % saved**, with 1438 s of non-integral work that no integral-side
+  change touches. See *Validation*.
+* **At this fixture size that one EZFIO line is the whole win**, and Stage 1
+  would land at or slightly above it (1438 s floor + 139.4M hits at 0.29-0.40 us
+  + ~7 s of fill = 1485-1500 s predicted, and a strided column read costs more
+  than the contiguous copy the shift-7 path does). Stage 1 earns its code only
+  where the window cannot cover `mo_num`, which is production: at 300 MOs,
+  `shift = 7` is 550 GB (see *Stage 0 at production size*).
+* **The 264-MO probe changed the design, and simplified it.** At 264 MOs the
+  walk asks for 235 888 blocks covering 1833 distinct pairs - **129 recomputations
+  per pair**, 99.2 % of the block time - and 4.68M columns over 1844 pairs. The
+  whole pair set is settled after 135 s of a 4226 s walk and it is 975 MiB, so
+  the cache fills itself on first miss, with no selection file and no pre-walk
+  pass, and the cap is the only knob (*Stage 1*, revised below). One caveat came
+  out of the same run: the walk settles its *membership* early but says nothing
+  about *ordering*, so an offline ranking is still the right answer if a
+  production cap cannot hold the whole set.
+* **Stage 1 is specified below and not started.** The gate is still one number
+  the laptop cannot supply: the production pair set - the pairs touched by a
+  production determinant list at production `mo_num` - and how much of the block
+  and column mass fits a 1-2 GB cap. That needs a Stage 0 run on a production
+  wavefunction, which needs a QP3 build and a fixture on a cluster - a separate
+  effort. What the 264-MO run does supply is that the *shape* of the answer does
+  not depend on the window: the block path is 129x redundant there, against 179x
+  at 114 MOs, and it is the larger half of the integral time.
+* The device fork that this spec opened was costed on an A100 and **closed by
+  measurement**; the numbers are in `GPU_ROUTE.md` in the measurement scratch,
+  and the short version is under *Decision rule*.
+
 ## The cost being attacked
 
 The PT2 selection reaches `mo_two_e_ints` through two Cholesky entry points, and
@@ -160,8 +201,8 @@ It prints, and nothing more:
 
 ```
  PT2 pair-block stats: mo_num=<n> cholesky_mo_num=<m> (Stage 0 of ...)
-   block  calls=<n> distinct=<n> thread-s=<t> = <s>% of the walk, <t> s/call
-   column calls=<n> distinct=<n> thread-s=<t> = <s>% of the walk, <t> s/call
+   block  calls=<n> distinct=<n> thread-s=<t> = <s>% of the walk, <us> us/call
+   column calls=<n> distinct=<n> thread-s=<t> = <s>% of the walk, <us> us/call
    union  pairs=<n> both=<n> block-only=<n> memory if all cached=<MB> MB
    already paid: <n> column calls land on a pair whose block is computed anyway; <t> s
      caching those <MB> MB costs nothing beyond the block the walk computes regardless
@@ -237,7 +278,7 @@ For a walk that cannot finish, kill it and read the snapshots:
 * `QP_NTHREADS_PT2` (default `nproc`) is the team size the report divides by;
   it must equal `OMP_NUM_THREADS`, so set both. More threads covers more walk
   positions per wall minute and sharpens the multiplicities, at the cost of
-  memory-bandwidth contention inflating both `s/call`. Take the call counts
+  memory-bandwidth contention inflating both per-call means. Take the call counts
   and the pair-set sizes from the many-thread run, and the `t_block/t_column`
   ratio from a one-thread run;
 * the multiplicities transfer to production because the `(k,l)` request
@@ -245,18 +286,29 @@ For a walk that cannot finish, kill it and read the snapshots:
   `mo_num`; the pair-set *size* does not, so only the production run sizes the
   cache.
 
-## Stage 1 - static hot-block cache (only if the Stage 0 curve pays)
+## Stage 1 - a lazily filled block cache (only if the Stage 0 curve pays)
 
 New EZFIO variable, `mo_two_e_ints/EZFIO.cfg`, after `[mo_cholesky_double]`:
 
 ```
 [mo_cholesky_pair_cache_mb]
 type: integer
-doc: Memory cap (MB) for a static cache of MO integral blocks keyed by the
+doc: Memory cap (MB) for a cache of MO integral blocks keyed by the
      virtual orbital pair of the zero-order PT2 determinants. 0 disables.
 interface: ezfio, provider, ocaml
 default: 0
 ```
+
+Nothing else is hand-edited for this variable. `ezfio_interface.irp.f` is
+generated (not tracked) by `scripts/ezfio_interface/ei_handler.py`, which ninja
+runs as a rule over `EZFIO.cfg`, so `ninja` after the edit is the whole step;
+`data/qp_edit_config/*.toml` is a second generated artifact off the same input
+and is likewise not tracked. `rust/crates/qp-ezfio/src/keys.rs` is a tracked
+registry that `gen_keys.py --check` would flag, but that generator needs
+`ocaml/qptypes_generator.ml`, which this tree no longer has, so it cannot be and
+need not be regenerated. An existing EZFIO file without the key is fine: the
+value is only read through `ezfio_has_mo_two_e_ints_mo_cholesky_pair_cache_mb`,
+and the default is 0.
 
 Providers in `map_integrals.irp.f` (chained `&BEGIN_PROVIDER`, same block):
 
@@ -265,59 +317,150 @@ Providers in `map_integrals.irp.f` (chained `&BEGIN_PROVIDER`, same block):
 &BEGIN_PROVIDER [ integer, n_pair_cache_padded ]   ! max(1,n_pair_cache)
 &BEGIN_PROVIDER [ integer, pair_cache_nhash ]      ! 2*n_pair_cache_padded+1
 &BEGIN_PROVIDER [ double precision, pair_cache, (mo_num, mo_num, n_pair_cache_padded) ]
-&BEGIN_PROVIDER [ integer, pair_cache_key, (pair_cache_nhash) ]    ! encoded key, 0 = empty
+&BEGIN_PROVIDER [ integer, pair_cache_key, (pair_cache_nhash) ]    ! 0 empty, -1 filling, >0 ready
 &BEGIN_PROVIDER [ integer, pair_cache_slot, (pair_cache_nhash) ]   ! 1..n_pair_cache
 ```
 
 Build block: `n_pair_cache = 0` unless `do_mo_cholesky` and
-`mo_cholesky_pair_cache_mb > 0` and `work/mo_pair_cache.select` exists.
+`mo_cholesky_pair_cache_mb > 0`, else
+`n_pair_cache = mo_cholesky_pair_cache_mb*131072/(mo_num*mo_num)` slots - the cap
+in doubles divided by one block. That bound is computed *before* the array's
+dimension expression, which is the whole point of the chained providers: the cap
+is enforced by arithmetic, not by catching an allocation failure. IRPF90 emits a
+plain `allocate(...,stat=irp_err)` and on failure only prints
+`Allocation failed: pair_cache` and carries on with an unallocated array
+(`external/irpf90/src/variable.py:581-597`), so there is nothing to catch: the
+cap must be chosen to fit, and the startup line below says what it bought. The
+dimension is `max(1, n_pair_cache)` because IRPF90 guards every allocation with
+`dim > 0`.
 
-That file is **not** the Stage 0 snapshot. The snapshot is raw counts in index
-order; the selection is a fitted artifact, produced offline by the 30-line
-ranking in the decision rule below and written as one `k l` line per pair,
-best first. Keeping the ranking out of Fortran costs nothing and buys three
-things: no sort in the library, no marginal-value formula duplicated in two
-languages, and a fitted set that can be inspected, diffed and regenerated
-without recompiling. Stage 1 reads `n` lines, takes
-`n = min(nlines, mo_cholesky_pair_cache_mb*131072/(mo_num*mo_num))` so a
-mismatched cap or a stale file cannot overflow the array, and refuses
-(`n_pair_cache = 0`) if any line is malformed. That bound is computed *before*
-the array's dimension expression, which is the whole point of the chained
-providers: the cap is enforced by arithmetic, not by catching an allocation
-failure. IRPF90 allocates `pair_cache` from its declared bounds and there is no
-`stat=` hook, so an over-large cap aborts like any other QP3 allocation - the
-remedy is to lower it, and the startup line below says which of the two numbers
-bound it.
+Allocation is not residency: the emitted `allocate` does not zero the array, so
+its pages stay untouched until a fill writes them, and RSS follows the blocks
+actually cached rather than the cap. Do not lean on that - with over-commit an
+over-large cap succeeds silently and surfaces later as swap.
 
-The generator is one call, so the artifact is reproducible from the snapshot:
+### Why the cache fills lazily, with no selection file and no pre-walk pass
 
-```
-pair_curve.py SNAPSHOT --threads N [--prod-mo M] --cap-mb C \
-             --emit-select $EZFIO/work/mo_pair_cache.select
-```
+The first version of this section fitted a hot set offline (`pair_curve.py
+--emit-select`), read it back at startup and filled it with a `!$OMP PARALLEL DO`
+before the walk. The 264-MO run retired that machinery - not because it was
+wrong about *what* to fill, but because the walk already knows that; what it
+cannot say is *which to keep* if the cap binds (last bullet).
 
-`--emit-select` is the only addition the tool needs (about six lines): write the
-ranked `(k,l)` pairs it already computes, best first, one per line, and nothing
-else - no header, no comment, `mo_num` is already known to the reader. It emits
-the first `slots` entries of `ranked` (`slots = cap_mb*131072/(mo_num*mo_num)`,
-the same expression Stage 1 uses), so the file's *order* is the value order and
-writing more pairs than the cap can hold is harmless: Stage 1's truncation then
-drops exactly the least valuable ones. With `--prod-mo` it ranks on the projected
-production multiplicities, with the `t_col`/`t_blk` extrapolations the decision
-rule describes; without it, on the raw snapshot counts.
+| probe | MOs | rank | block calls / distinct pairs | column calls / distinct pairs | integrals of walk |
+|---|---|---|---|---|---|
+| cc-pVDZ, 46 880 det, complete, 1 thread | 114 | 2694 | 1 447 862 / 8100 = **179x** | 139 365 752 / 8144 | 80 % |
+| cc-pVTZ, 1428 det, complete, 4 threads | 264 | 6064 | 235 888 / 1833 = **129x** | 4 684 818 / 1844 = **2541x** | 84 % |
 
-Filling, in two phases:
+* **the block path recomputes the same GEMM 129 to 179 times per walk.** A block
+  is a `dgemm` of `mo_num x mo_num x rank`, identical on every call for a given
+  `(k, l)`. At 264 MOs it measures 33.9 ms of thread time and the walk spends
+  8008 thread-s issuing it 235 888 times to produce 1833 distinct matrices:
+  **99.2 % of the block time is recomputation** - 62 thread-s of fill against
+  8008. The redundancy, not the window, is what Stage 1 removes; at 114 MOs the
+  same accounting gives 1377 of 1385 block thread-s wasted.
+* **the split is 57:43 and it does not drift.** 47.4 % of the four-thread budget
+  went to blocks, 36.2 % to columns, 16.4 % to everything else (4226 s x 4 =
+  16 904 thread-s). The same walk cut at 60 % of its
+  length reports the same 57:43 split of the integral time. The two timers are disjoint - `get_mo_two_e_integrals_ij`'s wraps only
+  a `dgemm` in the Cholesky branch, and the column calls it appears to contain
+  belong to the map-mode `else` branches, unreachable when `do_mo_cholesky`
+  (`map_integrals.irp.f:687-770`) - so the percentages add up rather than
+  overlap.
+* **the whole pair set is settled in the first 3 % of the walk, but arrival order
+  is not a ranking.** At 264 MOs the snapshot holds 1656 of the final 1844 pairs
+  after 45 s, 1804 after 90 s and all 1844 after 135 s, against a 4226 s walk:
+  the mask structure touches nearly the entire set before the walk has revealed
+  anything about multiplicity. Membership is therefore free, *ordering* is not.
+  Measured on the final table, the top 155 pairs carry 50 % of the value, the top
+  530 80 % and the top 1073 95 % - but a cap that keeps the first 530 to arrive
+  keeps the same *number* of pairs with no reason for them to be the valuable
+  ones. This is the one place the offline ranking still earns its keep: if the
+  cap holds the whole set (975 MiB here, 803 MiB at 114 MOs) the question
+  disappears, which is the case this spec is written for. If a production cap
+  binds, rank offline - no online admission filter can recover the ordering, be-
+  cause the pairs are all seen within the first 1 % of the walk, long before
+  their multiplicities diverge.
+* **a miss is rare: 0.8 % of block calls, 0.03 % of column calls.** One lazy fill
+  per pair, paid by the first request that needs it, costs exactly the work that
+  request was going to do anyway. Nothing to schedule, nothing to warm up,
+  nothing to go stale when the determinant list changes. 11 pairs (1381 of the
+  4.68M column calls) never see a block call at all, which is why they are never
+  cached.
+* **the cache is small**: 1833 x 0.53 MiB = 975 MiB at 264 MOs, 8100 x 0.10 MiB =
+  803 MiB at 114. Both fit the 8 GiB laptop with the fixture in RAM (the TZ
+  fixture peaks at 4.2 GB, so 5.2 GB with the cache).
+* **what that buys at 264 MOs**: the walk's 16 904 thread-s split into 8008 block
+  + 6119 column + 2777 other. Stage 1 keeps 62 s of fill (priced at the contended
+  33.9 ms, i.e. conservative - filled one or two at a time it measures 9.75 ms),
+  ~12 s of block copies, ~16 s of column reads and *all* of the other, so the
+  walk becomes ~2870 thread-s = **5.9x** (wall ~715 s), against 4.8x measured at
+  114 MOs. While the cap holds the set, the win grows with `mo_num` because the
+  block path scales as `mo_num^2 * rank` and the column path as `rank * mo_num`;
+  at 114 MOs the block path is 16 % of the walk, at 264 it is 47 %. And 5.9x is a
+  *floor*: on the contended laptop the 16.4 %
+  residual (2777 thread-s) is mostly preemption, not work - the walk's CPU time
+  was 10 753 s against 14 126 thread-s inside the two timers, 3.55M involuntary
+  context switches' worth - and Stage 1 shortens the duration that preemption
+  eats into. The procedure that conserves the residual is the one validated at
+  114 MOs, where the residual *is* real bookkeeping and the projection landed at
+  1747 s against 1748 s measured.
+* **the column path is at the bandwidth wall**: 1.386 ms of thread time to
+  stream 9.7 MB per call is 7.0 GB/s per thread and 28 GB/s for four - the
+  socket's DRAM bandwidth. Threads cannot reduce it (the one-thread calibration
+  `t = 0.276 us + 18.3 us/MB` predicts 177 us for the same 9.7 MB), and a
+  narrower window makes every miss read a bigger slab. So the column side is not
+  short of arithmetic or of threads; it is short of a copy of the data, which is
+  what a block cache is.
 
-1. `!$OMP PARALLEL DO` over the `n` slots: `pair_cache(1,1,i)` computed through
-   the uncached routine. Each iteration reads slot `i` of the selection file and
-   writes only its own slice, so the phase is race-free by construction;
-2. a **serial** loop over `i=1,n` inserting `key = k + mo_num*(l-1)` into the
-   open-addressing table (linear probing, `slot = mod(key, pair_cache_nhash)+1`).
-   Serial on purpose: two threads inserting into the same probe chain can both
-   see the same bucket empty and one key is silently lost. The table build is `n`
-   probes, microseconds against the GEMMs of phase 1, and serial order makes the
-   final layout a function of the file alone - the build is deterministic and
-   happens once.
+So Stage 1 has one knob, the cap, and no artifact - and no reason to exclude the
+CIPSI driver, where a cap of 0 leaves today's behaviour untouched.
+
+Filling, on miss, with single-flight:
+
+The table is open-addressing over `pair_cache_nhash = 2*n_pair_cache+1` buckets,
+linear probing, `slot = mod(key, pair_cache_nhash)+1` with
+`key = k + mo_num*(l-1)`. `pair_cache_key` carries three states: `0` empty, `-1`
+being filled by some thread, `> 0` ready (an empty bucket ends a probe). A block
+request is:
+
+1. **lock-free probe** - plain reads along the chain. `> 0`: `!$OMP
+   FLUSH(pair_cache_key)`, copy the block out, return. `-1`: call the uncached
+   routine and return - **never wait**. This is the path 99.2 % of the calls
+   take at 264 MOs, where 235 888 block calls cover 1 833 pairs;
+2. on a miss, `!$OMP CRITICAL(pair_cache_probe)` and re-probe, because the state
+   may have changed in between. Ready: leave, copy out, return. `-1`: leave,
+   uncached, return. Empty: claim it by writing `-1`, remember the slot, leave.
+   No empty bucket: leave, uncached, return;
+3. compute the block through the uncached routine into the caller's `out_array` -
+   outside the critical, so a 34 ms GEMM does not serialize the other walkers;
+4. copy `out_array` into the claimed slot, `!$OMP FLUSH`, then write `key`. Only
+   the claimer writes that slot, so no critical and no atomics are needed on the
+   publish; the flush is what orders the data before the key.
+
+So the walk pays one critical section per *pair*, 1844 of them at 264 MOs, and
+none per hit: a hit is a probe, one flush and a copy. A thread that loses the
+race for the same block computes its own copy, exactly as today, and does not
+store it - the cost of the race is bounded by today's cost, and the bits are the
+same either way, because both threads run the same routine.
+
+**Only the block routine fills.** The column routine probes and, on a miss,
+takes today's streamed path; it never writes to the cache. A column call has no
+block to store, and the pairs that only ever see column calls carry 0.01 % of
+the column calls at 114 MOs (16 462 of 139.4M, 44 pairs) and 0.03 % at 264
+(1 381 of 4.68M, 11 pairs), so the case does not deserve a second fill path.
+
+One hazard remains, and it is the only one: a reader could see `key > 0` and
+stale data. The flush pair closes it - the writer's flush after the copy and
+before the key, the reader's flush after the key and before the copy - and a
+reader that sees `-1` or `0` takes the uncached path, which is always correct.
+The reader's flush is a `dmb ish` on arm64, tens of cycles against a 0.3-3 us
+hit.
+
+No eviction. When no empty bucket remains the table freezes: later pairs are
+computed uncached and the run stays correct, only slower. That is the whole
+policy, and it is the right one here because the block a walk needs last is the
+one it needs least often (the first-come argument above).
 
 The fill passes a locally declared `type(map_type) :: dummy_map` to the uncached
 block routine. Naming `mo_integrals_map` there would ask IRPF90 to build the
@@ -325,66 +468,55 @@ sparse MO map, which Cholesky mode never builds and does not need; the map
 argument is only read in the `do_mo_cholesky = False` branch, and the provider
 already requires `do_mo_cholesky`.
 
-Stage 0 writes the full table, so the cap and the fitted set can be chosen after
-the measuring run. Nothing in Stage 1 depends on the snapshot format.
+Stage 0 writes the full table, so the cap can be chosen after the measuring run.
+Nothing in Stage 1 depends on the snapshot format.
 
-Where the fill is triggered, and where it must not be:
+Where the cache is armed, and by whom:
 
-* the fill is paid by an explicit `PROVIDE pair_cache` in the pre-loop block of
-  `fci/pt2.irp.f`, immediately after `PROVIDE psi_energy` (`:64`). That region is
-  serial, before `call run`, so the build is outside the walk clock that Stage 0
-  reports and inside `WALL` - which is where it belongs, since the A/B compares
-  walks and the fill is a fixed startup cost;
-* `pt2_omp_task` also gets `PROVIDE pair_cache` in its pre-loop block
-  (`cipsi_utils/pt2_omp.irp.f:272`, next to `PROVIDE psi_det_hii ...`). The
-  generated `provide_*` routines are lock-protected, so this is correct for any
-  caller; in the `pt2` program it is a no-op because the pre-provide already ran.
-  It matters when the cap is 0 (the default): then the body allocates one dummy
-  slot, reads no file, and returns at once;
-* the phase-1 `!$OMP PARALLEL DO` carries `IF(parallel_fill)` with
-  `parallel_fill = .not. omp_in_parallel()`, computed before the directive. If a
-  future caller with `n_pair_cache > 0` reaches the lazy path from inside a
-  `!$OMP PARALLEL`, nested parallelism is off by default and the fill would
-  silently run serial - correct but slow, and it would be slow exactly once, in a
-  way nobody attributes to the cache. The `IF` clause makes that explicit rather
-  than mysterious. It is one logical variable, not a second code path.
+* the block and column routines run inside the walk's `!$OMP PARALLEL`, so the
+  provider must be armed before it. Both `pt2`'s pre-loop block
+  (`fci/pt2.irp.f`, next to `PROVIDE mo_two_e_integrals_jj`, `:59`) and
+  `pt2_omp_task`'s (`cipsi_utils/pt2_omp.irp.f:272`, next to
+  `PROVIDE psi_det_hii ...`) get `PROVIDE pair_cache`; the generated `provide_*`
+  routines are lock-protected, so the first caller arms it and the rest are
+  no-ops. With the default cap of 0 the body allocates one slot and returns;
+* nothing else links these routines into a walker, and an executable that calls
+  them without arming the cache sees `n_pair_cache = 0`, i.e. exactly today's
+  code path.
 
-`pt2` is a standalone OpenMP program: the cache is process-local and pays no MPI
-broadcast. The other executables that link `get_mo_two_e_integrals_ij` never
-provide `pair_cache`, and with the default cap of 0 the split routines behave
-exactly as today.
+`pt2` is a standalone OpenMP program: the cache is process-local, shared by the
+walk threads, and pays no MPI broadcast.
 
 The provider prints one line when it is enabled, and nothing when the cap is 0 -
 the same contract as Stage 0's report, and the only way to tell afterwards that
 the run you are looking at actually had the cache it claims:
 
 ```
-Pair cache: 1422 of 1422 blocks, 977 MiB, fill 5.4 s, 8144 pairs in the file
+Pair cache: cap 2048 MiB -> 3851 blocks of 545 KiB, 2047 MiB allocated
 ```
 
-Four numbers: what was requested, what fits, what was allocated and how long the
-fill took, plus the file's size so a stale selection is visible. `fill` is
-measured around the two phases (both of them, so the serial insert is inside the
-number rather than hidden), and it is *not* part of the Stage 0 walk time.
+What the cap bought, in blocks, with the block size in the line so the
+arithmetic can be checked without knowing `mo_num`; nothing is printed when the
+cap is 0. Hits and misses are Stage 0's own counters, which already separate the
+two classes per `(k, l)`, so a Stage 1 run needs no new instrumentation: the
+snapshot's `block_requests` against the number of distinct pairs *is* the hit
+rate.
 
-Out of scope by design: the iterative CIPSI driver. It does not fill, and
-`n_pair_cache` stays 0 there unless someone sets the cap by hand. The block set
-is fitted offline from one snapshot of one determinant list, and in a CIPSI run
-that list grows every iteration, so the set would be stale after the first one;
-re-fitting per iteration would put an I/O and a ranking inside the SCF-like loop
-to serve a single walk whose reuse is already captured by the deterministic
-hit-anyway order within that walk. Stage 1 is a measured experiment on a frozen
-wavefunction, and the production-size measurement is a `pt2` run on a
-production wavefunction - which is the same program, so nothing is lost by not
-touching the driver.
+Out of scope by design: the iterative CIPSI driver needs no change. With the cap
+at 0 it is untouched; with a cap it fills lazily, per process, and a growing
+determinant list is harmless - a block is a function of `(k, l)`, not of the
+determinants, so blocks cached in one iteration stay valid in the next, and the
+cap simply stops admitting new ones. The production-size measurement remains a
+`pt2` run on a production wavefunction, which is the same program.
 
 Split both routines:
 
 * `get_mo_two_e_integrals_ij_uncached(k,l,sze,out_array,map)` = today's body,
   unchanged, all branches (GPU, dgemm, sgemm, map).
 * `get_mo_two_e_integrals_ij(k,l,sze,out_array,map)` = `PROVIDE pair_cache`,
-  then: probe; hit -> `out_array(1:sze,1:sze) = pair_cache(:,:,slot)`; miss ->
-  call the uncached routine. `sze == mo_num` is already asserted (`:658`).
+  then: probe; hit -> `out_array(1:sze,1:sze) = pair_cache(1:sze,1:sze,slot)`; miss ->
+  the single-flight fill of *Filling* above, which ends by returning the block it
+  just stored. `sze == mo_num` is already asserted (`:658`).
   The `banned_excitation` test is not in this routine; it stays where it is.
 * `get_mo_two_e_integrals_uncached(j,k,l,sze,out_val,map)` = today's body of the
   column routine, unchanged, with its `banned_excitation(j,l)` early return
@@ -407,14 +539,13 @@ Properties:
 
 * Bit-identical by construction in both precision modes: the block is always
   produced by the one existing routine, with the same operands and shape. No
-  second implementation of the integral computation. The fill runs inside the
-  serial table-build region before the walk - the same place as
-  `PROVIDE mo_two_e_integrals_jj` (`fci/pt2.irp.f:59`) - and every fill dgemm is
-  issued from one thread with the BLAS thread count pinned to 1 by
-  `qp_blas_env_init`, exactly like a walk dgemm; a hit therefore returns the bits
-  a miss would have returned. The `!$OMP PARALLEL DO` of phase 1 is harmless
-  under the launch contract (`OMP_NUM_THREADS=1`, walk team via
-  `QP_NTHREADS_PT2`), where it degenerates to one thread anyway.
+  second implementation of the integral computation. A fill dgemm is issued from
+  a walk thread, inside the parallel region, with the BLAS thread count pinned to
+  1 by `qp_blas_env_init`, exactly like the walk dgemm it replaces - and that
+  equivalence is measured, not assumed: arm A of the closed A/B issued 1.45M
+  block dgemms from four threads, arm B read the same matrices from an array the
+  fill had built, and the two printed rows are identical to all 17 digits. So the
+  bits do not depend on which thread runs the dgemm or on when it runs.
 
   "A hit returns what a miss would have returned" compares a *block* gemm with a
   *block* gemm, so it holds by construction. What it does not settle is whether
@@ -425,28 +556,34 @@ Properties:
   such a cache (every column call served from a gemm-filled block), so a
   completed walk at shift 7 against a completed walk at shift 6 is the A/B. See
   Validation for the first half of that measurement.
-* The array is read-only after the build: no locks, no eviction.
-* On a block hit the cost is one `8*mo_num^2` byte copy: 720 KB at 300 MOs,
-  ~50 us, about 1-2 % of the 3.6 ms dgemm it replaces (`t_blk` measured 0.93 ms
-  at 114 MOs, scaling as `mo_num^2*nvec`). On a column hit it is a strided read
-  of one column - `mo_num` cache lines, 912 B but 114 lines here, 19 KB at 300
-  MOs - so 3-10 us: a hit saves 85-95 % of the 36 us call it replaces, not all
-  of it. The Stage 0 saving table is an upper bound by that margin, and that is
-  the one number Stage 1 should re-measure rather than assume.
-* A miss is exactly today's cost plus a hash probe. A hit is a hash probe, one
-  branch and a copy: no locks, no atomics, no per-thread state.
+* The array is append-only: a slot is written once, by the thread that claimed
+  it, and never moved or freed. No eviction, no LRU, no resize.
+* On a block hit the cost is one `8*mo_num^2` byte copy: 0.53 MiB at 264 MOs,
+  ~50 us, **0.15 %** of the 33.9 ms dgemm it replaces. On a column hit it is a
+  strided read of one column - `mo_num` cache lines, 912 B but 114 lines at 114
+  MOs, 19 KB at 300 MOs - and the line is the unit paid for, so 0.3-3 us is the
+  defensible range and the one number Stage 1 must re-measure rather than assume.
+  The anchor is measured: the shift-7 walk's copy path, whole call included, is
+  **0.293 us** for a 912-byte contiguous copy (40.9 s for 139 365 752 calls). A
+  strided column read cannot be faster than that and will not be much slower. A
+  hit therefore saves 85-99 % of the 38 us call it replaces at 114 MOs, and
+  >99.9 % of the 1.31 ms call at 264.
+* A miss is exactly today's cost plus a hash probe and two critical sections. A
+  hit is a probe, one `FLUSH`, one branch and a copy: no locks, no atomics, no
+  per-thread state.
 
-Not in scope: LRU/eviction, a traced key sequence, a runtime-adaptive hot set.
-If the static set turns out to cover too little, the fork is not more caching
-machinery - it is the batched device GEMM discussed under the decision rule.
+Not in scope: eviction, a traced key sequence, a runtime-adaptive policy. If the
+cap turns out to be too small for the production pair set, the fork is not more
+caching machinery - it is the batched device GEMM discussed under the decision
+rule.
 
 ## Stage 0 result (benzene cc-pVDZ probe, 20 November 2026)
 
 Four runs of the forced-Cholesky fixture (`benzene_chol.ezfio`: 114 MOs, rank
 2694, window 1-64), same binary, `QP_PAIRBLOCK_STATS=1`,
 `QP_PAIRBLOCK_DUMP=30`, each stopped at a fixed time budget rather than at the
-end of the walk (the walk does finish: ~1.5-2 h at shift 6 and ~28 min at shift
-7, one thread - see Validation). The 8-thread runs maximise the number of walk
+end of the walk (the walk does finish: 2 h 09 at shift 6 and 26 min at shift 7,
+one thread, measured - see Validation). The 8-thread runs maximise the number of walk
 positions covered; the 1-thread runs give uncontended per-call costs.
 
 | wall | thr | block calls | block share | column calls | column share | pairs | both |
@@ -455,10 +592,18 @@ positions covered; the 1-thread runs give uncontended per-call costs.
 | 570 s | 8 | 79 149  | 10.2 % | 13 667 186 | 84.1 % | 8 144 | 6 132 |
 | 480 s | 1 | 46 679  |  9.0 % | 10 973 097 | 83.2 % | 8 144 | 5 470 |
 | 870 s | 1 | 90 299  | 10.5 % | 17 944 922 | 78.5 % | 8 144 | 6 412 |
+| **7674 s** | **1** | **1 447 862** | **16.6 %** | **139 365 752** | **62.3 %** | **8 144** | **8 100** |
 
-The last row ran alongside two other single-thread probes for its final minutes,
-which is why its column share is lower and "everything else" higher; its counts
-are the deepest of the four and the per-call costs match the 480 s row.
+The last three rows ran alongside other single-thread probes for their final
+minutes, which is why their column share is lower and "everything else" higher;
+their counts are the deeper ones and the per-call costs match the 480 s row.
+
+The bold row is the **completed walk** (`full_s6_T.log`, flags `QP_PAIRBLOCK_STATS=1`,
+no dump), the only unbiased row in the table: the others are 60-870 s of a 7674 s
+walk, so they sample the head, where `pt2_J` puts the generators that issue the
+most calls. Over the whole walk the two contractions are **78.9 %** (16.6 + 62.3),
+not the 92-94 % the head shows, and the per-call means of that row (0.8796 ms
+block, 34.28 us column) are what the ceiling arithmetic below uses.
 
 Per-call cost, one thread: `t_blk` 0.93-1.55 ms (70 MFlop, 45-75 GFlop/s),
 `t_col` 36 us (1.08 MB, 30 GB/s), ratio **21-26**. With eight threads the block
@@ -468,14 +613,19 @@ shares are robust, the absolute times are not.
 What the numbers say:
 
 * the `sample` profile is confirmed by an independent instrument: 9-11 % block,
-  82-84 % column, i.e. 92 % of the walk in the two contractions;
+  82-84 % column in the head, i.e. 92 % of the *head* in the two contractions -
+  and 78.9 % of the whole walk, which is the number that bounds any change;
 * the pair set **saturates**: 7979 pairs after 60 s, 8144 after 480 s, and it
   does not grow afterwards while the call counts keep climbing. 8144 is 63 % of
   the 12 996 ordered pairs of 114 orbitals. Coverage therefore *converges* with
   walk time instead of decaying - the opposite of the staleness worry, at least
   within one wavefunction;
 * 60-80 % of column calls land on a pair whose block the walk computes anyway
-  (69 % at 60 s, 80 % at 570 s, 83 % at 870 s), for 3.4-6.4 k blocks;
+  (69 % at 60 s, 80 % at 570 s, 83 % at 870 s), for 3.4-6.4 k blocks. The
+  completed walk closes this: 139 349 290 of its 139 365 752 column calls land on
+  a pair the walk fills a block for anyway - **all but 2462 calls, on 44 of the
+  8144 pairs**. There is nothing left for a smarter admission policy to find at
+  this size: the set is not merely saturating, it is closed;
 * `block-only = 0` in all four snapshots: the block key set is a strict subset
   of the column key set. No cached block serves a pair that only the block
   routine wanted, and no column pair is unreachable by the block routine;
@@ -507,28 +657,33 @@ pays the whole pre-fill up front - 114 x 114 = 12 996 blocks, the same
 each, ~13 s, once. So the curve's 88 % is not an upper bound any more: an
 all-resident cache really does remove 88 % of the integral time, block term
 included. It removes nothing else, which is why the walk-time fraction is lower -
-and the completed-walk proxy measures that remainder directly, at 1530 s spent
-on ~93 % of the calls with only 44 s of it in the column path. Same fixture,
-same binary, same call sequence: the residual is not-integral work, and it is
-what `T_walk - T_int` means below.
+and the completed walk measures that remainder directly: at shift 7 the whole
+walk takes 1478.9 s with 40.9 s of it in the column path and no block call at
+all. Same fixture, same binary, same call sequence (verified pair by pair): the
+residual is not-integral work, and it is what `T_walk - T_int` means below.
 
 The arithmetic that ties the two measurements together, one thread, shift 6:
 
 ```
 T_walk = C_total x t_col + B_total x t_blk + T_other
-       = 1.3x10^8 x 38.07 us + 6.6x10^5 x 1.010 ms + T_other
-       = 4950 s              + 660 s               + T_other
-T_other, from the shift-7 proxy (1530 s, 93 % of the calls, 44 s column path) = 1510 s
-T_walk ~ 7100 s (2.0 h),   T_int/T_walk ~ 0.79
+       = 139 365 752 x 34.28 us + 1 447 862 x 0.8796 ms + T_other
+       = 4777 s               + 1274 s                + T_other
+T_other, measured on the completed shift-7 walk       = 1438 s   (1478.9 - 40.9)
+T_walk, measured                                      = 7673.7 s (residual 1623 s)
+T_int/T_walk = 6051/7674 ~ 0.79
 ```
 
-`C_total` is the measured 1.3x10^8 (the shift-7 run issued 1.278x10^8 for 93 % of
-the positions), `B_total` follows from the head's one-block-per-198-columns
-ratio, and `T_other` is the independent number. The head's own rate gives a
-lower `T_walk`, ~6300 s, and the gap is explained by `T_other` being mostly per
-walk *position*: a head rate weighs the call-rich positions more than the whole
-walk does. Arm A settles it and reports its own split, turning `T_int/T_walk`
-into a measurement. The curve conversion above uses 0.8 and is insensitive to
+The residual is 185 s larger in arm A than in arm B. The streamed column evicts
+the walk's own working set - 1.08 MB through the caches per call - and that costs
+13 % on the work no counter attributes. So the integral share is 79 % of the
+walk and the ceiling for any integral-side change is 80 %, above the 75-78 % the
+two extrapolations bracketed.
+
+`C_total` and `B_total` are counted rather than inferred now (139 365 752 and
+1 447 862), and `t_col`/`t_blk` are the class means the same run reports. The
+head's own rate gave a lower `T_walk`, ~6300 s, and the gap is `T_other` being
+mostly per walk *position*: a head rate weighs the call-rich positions more than
+the whole walk does. The curve conversion above uses 0.8 and is insensitive to
 the choice: 35.5 % of the integral time is 28-32 % of the walk either way.
 
 What does not transfer, and must be measured at production size:
@@ -627,9 +782,53 @@ QP_PAIRBLOCK_STATS=1 QP_PAIRBLOCK_DUMP=60 $QP_ROOT/src/fci/pt2 <fixture>
 ```
 
 `QP_NTHREADS_PT2` is the walk team and is free (`src/fci/BENCHMARK.md`); the OMP
-default must stay 1. Kill the job once a snapshot covers a few million column
-calls - the counters are rates - and read it with `pair_curve.py` from the
-measurement scratch (carry the file along; it is not in the tree).
+default must stay 1. `pt2_J` puts the call-rich generators first, so the
+**pair set and its multiplicities saturate in the first 3 % of the walk** and a
+two-minute snapshot is enough for coverage. The **split is the opposite** and the
+264-MO run measures how badly it drifts:
+
+| fraction of walk | 1 % | 2 % | 4 % | 10 % | 31 % | 36 % | 47 % | 63 % | 100 % |
+|---|---|---|---|---|---|---|---|---|---|
+| block share of integral time | 18.5 % | 14.5 % | 24.1 % | 31.7 % | 26.2 % | 57.8 % | 57.2 % | 57.0 % | 56.7 % |
+| integrals / walk | 23.5 % | 23.6 % | 41.2 % | 68.8 % | 48.6 % | 87.5 % | 86.4 % | 85.2 % | 83.6 % |
+
+It converges at ~36 % of the walk and then holds to within one point for the
+remaining 64 %, but the head says 18 % block when the answer is 57 %. So: kill
+the job early for the pair set, **do not kill it early for the split** - and never
+for a per-call cost, which is contention-dependent by a factor of 3.5 (the block
+dgemm measures 9.75 ms/call at 1 % of the walk when one thread at a time is
+issuing it, and 34 ms/call once four are). Walk-time prediction is what the
+completed A/B is for.
+
+The contention is not noise, it is the regime: a block call streams
+`2*mo_num*cholesky_mo_num*8` bytes (25.6 MB at 264 MOs) to do `2*mo_num^2*rank`
+flops, so its arithmetic intensity is `mo_num/8` flop/byte - 14 at 114 MOs,
+33 at 264, 64 at 510 - against a single-core machine balance near 40. The block
+path is bandwidth-bound at 114, at balance at 264, and compute-bound beyond;
+that, not the call counts, is what makes its share rise with `mo_num`.
+
+### Both benches are in the uncapped regime, and production is not
+
+The one conclusion the two completed walks cannot support by extrapolation is the
+headline. A cap buys `cap*131072/(mo_num*mo_num)` slots, so the slot count falls
+as `mo_num^-2` while the pair set grows with the determinant list:
+
+| `mo_num` | bytes per block | slots in a 2048 MiB cap | pair set measured |
+|---|---|---|---|
+| 114 | 104 KB | 20 600 | 8 100 (2.5x the set, holds) |
+| 264 | 545 KB | 3 851 | 1 833 (2.1x the set, holds) |
+| 510 | 2.0 MB | 1 031 | unmeasured - and already 1 833 at 264 with only 1 428 determinants |
+
+At the 510-MO fixture the cap therefore binds with certainty, and by the 264-MO
+concentration curve the slice that fits carries well under its share of the
+value. So **4.8x at 114 and 5.9x at 264 are the ceiling of the uncapped regime,
+not rungs on the way to a bigger production number**: the win grows with `mo_num`
+only while the whole set fits, and beyond that every extra MO costs a slot and
+buys nothing. What the production run must print is the pair set at 510 MOs and
+its curve - the two numbers that decide whether the capped regime is worth 2x or
+worth nothing. That is why Stage 1 ships behind `mo_cholesky_pair_cache_mb = 0`
+rather than as a default: at 264 MOs it is a free 5.9x, at 510 it is an open
+question, and the same binary answers it.
 
 The run decides, in this order:
 
@@ -704,24 +903,34 @@ plus the size of the shared key set. The decision is then bookkeeping:
 
 * A pair with `n_block >= 1`: the fill computes the block once, and from then on
   every block call is a copy, so caching saves `(n_block-1)*t_blk + n_col*t_col`
-  for one slot. Never negative, and not small: the probe's block class averages
-  **12.9 calls per pair** (79 149 calls on 6 132 pairs), so e.g. 11 ms of GEMM
-  per pair before the first column is counted. Today's walk pays the block
-  `n_block` times; the cache pays it once.
+  for one slot. Never negative, and not small: the completed walks average
+  **179 block calls per pair at 114 MOs and 129 at 264**, and at 264 a block is
+  33.9 ms against a 1.3 ms column, so one slot pays for itself 26 columns in.
+  Today's walk pays the block `n_block` times; the cache pays it once.
 * A pair with `n_block = 0` (column-only): caching it means computing a dgemm
   the walk never asked for, which pays back after `ceil(t_blk/(t_col-t_hit))`
   hits - 27 on the probe, where `t_hit = 0.40 us` is now measured rather than
   assumed (Validation), so the earlier `t_blk/t_col` form overstates the
-  threshold by 1 %. The 2674 column-only pairs of that run average 1647 calls
-  each, so the threshold is not close: in this regime column-only pairs are as
-  profitable as the others.
+  threshold by 1 %. Where those pairs exist they are usually cheap to justify:
+  in the 870 s snapshot 2674 of them average 1647 calls each, far past the
+  threshold. The completed walks leave **44** column-only pairs carrying 2462
+  calls at 114 MOs and **11** carrying 1381 at 264 (0.03 % of the columns): over
+  a whole walk this class is noise, and the ranking below needs it only for
+  honesty, not for value.
 * The marginal-value curve is therefore: rank the pairs by
   `n_col*t_col + (n_block-1)*t_blk` for `n_block >= 1` and `n_col*t_col - t_blk`
   for `n_block = 0`, walk the ranking, keep the prefix that fits
-  `cap/(8*mo_num^2)` blocks, and the saving is the sum over that prefix. The
-  report prints the ingredients; `pair_curve.py` (in the measurement scratch,
-  not in the tree) is the 60-line version of that ranking. No eviction, no
-  adaptivity, no runtime decision.
+  `cap/(8*mo_num^2)` blocks, and the saving is the sum over that prefix. That is
+  an **offline projection** - what a cap of C would have bought on this
+  snapshot - and at 264 MOs the curve is steep: 155 pairs (8 %) carry 50 % of
+  the value, 530 carry 80 %, 1073 carry 95 %. Stage 1 fills in arrival order
+  instead, which is free and exactly right when the cap holds the whole set (975
+  MiB at 264 MOs, 803 MiB at 114) and is *not* a substitute for the ranking when
+  it does not: the walk touches 90 % of its pairs in the first 45 s of 4226,
+  before any multiplicity exists, so arrival order carries no value information
+  at all. Rank offline if the production cap binds. The report prints the
+  ingredients; `pair_curve.py` (in the measurement scratch, not in the tree) is
+  the 60-line version of that ranking.
 * `block-only = 0` on the probe means the two key sets nest; expect that to
   hold, but the rule does not depend on it.
 * If the union of the production key set fits the cap outright, there is no
@@ -732,9 +941,15 @@ plus the size of the shared key set. The decision is then bookkeeping:
   `diag_H_mat_elem_fock`).
 
 If the curve instead shows reuse ~1 in both classes (every mask a fresh pair),
-the contractions are genuinely irreducible *and* the case for a device becomes
-the strongest one available - but not for the reason this spec started with. The
-quantities are:
+the contractions are genuinely irreducible and the cache has nothing to hoist.
+That was the branch on which a device was worth costing - and the device was
+costed and closed by measurement before this spec left draft: a per-call round
+trip on an A100 is 26.8 us, one serialized server, against 68.5 us on one host
+core but 40 host threads answering 15x more columns per second, and the only
+shape the device wins is the whole `(k,l)` block in one gemm - which is the
+cache's fill. The probe, its numbers and the rejected variants are in
+`GPU_ROUTE.md` in the measurement scratch (`~/OpenCode/tmp/prof/`, not in the
+tree). What survives of the argument, for the record:
 
 * the column stream is bandwidth-bound **on the host**: 2 MB read per call at
   300 MOs, ~30 GB/s on one core, ~15 GB/s per core when eight share the socket;
@@ -749,18 +964,22 @@ quantities are:
 * the block GEMM is the opposite case and the one a device genuinely accelerates:
   0.18-0.36 GFlop, compute-bound, 200x the fp64 throughput of one host core.
 
-Two consequences for the fork, both worth writing down before opening it. A host
-cache and a resident device copy attack the same bandwidth problem, so they are
-alternatives rather than complements; only the block GEMM is unique to the
-device. And Vulkan - the portability route - has no fp64: Apple's GPUs have none
-at all, and most consumer devices expose `shaderFloat64` as false. The Vulkan
-path is therefore fp32, which is exactly what `mo_cholesky_double = False`
-already selects (`EZFIO.cfg:38-42`), and why an fp32 host build is needed as the
-oracle before any device number is believed.
+Two consequences were written down before opening the fork, and the measurement
+confirmed both. A host cache and a resident device copy attack the same bandwidth
+problem, so they are alternatives rather than complements; only the block GEMM is
+unique to the device. And Vulkan - the portability route - has no fp64: Apple's
+GPUs have none at all, and most consumer devices expose `shaderFloat64` as false.
+The Vulkan path is therefore fp32, which is exactly what
+`mo_cholesky_double = False` already selects (`EZFIO.cfg:38-42`), and why an fp32
+host build would have been needed as the oracle. Neither is built: with the
+device closed by the per-call round trip and the cache taking the host walk to
+~80 % saved, the fp32 build lost its only client.
 
-Caveat for the report: the hot set is fitted to one wavefunction. In a CIPSI
-loop it must be refreshed by re-running Stage 0, and the curve's decay with `M`
-is the only evidence about how fast such a set goes stale.
+Caveat for the report: the reuse structure is a property of one determinant list.
+A CIPSI loop changes that list every iteration, and the cache - now filled in
+arrival order rather than from a fitted set - simply keeps whatever it admitted
+and stops admitting when the cap is reached. The cap is therefore the thing to
+choose from a production snapshot, not a set.
 
 ## Validation (and why benzene is not a Cholesky test bench)
 
@@ -770,25 +989,23 @@ MO basis) for 114 MOs, and it is *map* mode (`do_mo_cholesky = False`,
 the Cholesky path on it is not the hopeless case an early estimate suggested -
 "~80x map mode, the first 256 walk positions do not complete in 8 minutes" came
 from a cold window that was still paying the provider chain and the cache fill,
-and it survives in no table here. Measured, one thread, fp64, on this fixture: **20 600 column calls/s at shift 6**
-(870 s of walk) and 83 500/s at shift 7. The shift-7 rate *decays* along the walk
-(93 900/s at 600 s, 87 700 at 1110 s) because `pt2_J` orders the generators most
-expensive first, so the only trustworthy completion number is the direct one:
-killed at 1530 s, that walk had issued 1.278x10^8 calls and was ~7 % short of the
-end - `C_total > 1.3x10^8`, ~1700 s. At shift 6 the same count at the
-head-of-walk rate is ~2.0 h; budget 4 h, expect 1.5-2.2 h. Both fit on an idle
+and it survives in no table here. Measured, one thread, fp64, on this fixture: **18 162 column calls/s at shift 6**
+(7673.7 s of walk for 139 365 752 calls) and 94 234/s at shift 7 (1478.9 s for
+the same calls). The shift-7 rate *decays* along the walk (93 900/s at 600 s,
+87 700 at 1110 s) because `pt2_J` orders the generators most expensive first, so
+a rate measured in the head overstates the whole walk; the completion numbers
+are the direct ones, 2 h 09 at shift 6 and 26 min at shift 7. Both fit on an idle
 laptop overnight, so the fixture validates mechanics, coverage *and* end-to-end
-bit-identity without production size; the coverage curve transfers to production
+identity without production size; the coverage curve transfers to production
 because the `(k,l)` request sequence does not depend on the window. Only the
 per-block memory and the pair set do.
 
-The same 1530 s spent 44.1 s in the column path - **2.9 %** - so with free
-integrals the walk is bounded below by its non-integral work, and the Stage 0
-shares (89 % at shift 6) are shares of the expensive *head*, not of the walk.
-The end-to-end saving is therefore capped in the 75-78 % range, not 88 %: the
-88 % is a fraction of the integral time, and ~22 % of the walk is not integral
-work at all. That gap is exactly what the completed A/B measures, and why it is
-worth two overnight runs rather than a model.
+The shift-7 walk spent 40.9 s of its 1478.9 s in the column path - **2.8 %** -
+and 1438.1 s in work no integral-side change touches. So the end-to-end saving
+is capped at **80 %**, not 88 %: the 88 % is a fraction of the integral time, and
+21 % of the walk is not integral work at all. That gap is exactly what the
+completed A/B measures, and why it was worth two overnight runs rather than a
+model.
 
 The acceptance tests that follow from all this:
 
@@ -796,9 +1013,20 @@ The acceptance tests that follow from all this:
   few minutes), then inspect `work/mo_pair_cache.txt` and the summary block.
   `no request` at level 7 is expected on 114 MOs and is not a bug.
 * Stage 1 bit-identity, mechanical: in the hit path, **on the first hit only**,
-  recompute the block through `*_uncached` into a scratch buffer and compare bit
-  patterns (`transfer()` to `integer(8)`); on mismatch `qp_bug(irp_here,...)`.
-  One extra dgemm per run, and it executes at production scale where it matters.
+  recompute through `*_uncached` into a scratch buffer and compare bit patterns
+  (`transfer()` to `integer(8)`); on mismatch `qp_bug(irp_here,...)`. One extra
+  dgemm per run, and it executes at production scale where it matters. Do it for
+  **both** classes, because they exercise two different BLAS paths: the block hit
+  against the block `*_uncached` (dgemm vs dgemm), and the first *column* hit
+  against the streamed `dgemv` - that is the comparison the standalone program was
+  going to make, and the 114-MO A/B has already made it end-to-end: at shift 7
+  every column call is served from a gemm-filled block, and the printed row came
+  out byte-identical to shift 6 on all eight numbers with 139.4M calls. That is
+  an aggregate statement, and the block/column pair above is the per-value one:
+  with it in the code, the 30-line offline program the spec used to owe is
+  retired - same comparison, but at the production shape, on the production BLAS,
+  on the real data, at the cost of one dgemv the first time a column hits a
+  cached block (1.3 ms at 264 MOs, once per process).
 * Stage 1 end-to-end: run with the cap at 0, then with the cap set, on the
   same binary and fixture; compare the printed row (`PT2`, `rPT2`, `E+PT2`,
   `E+rPT2` with their errors) to all digits. The `PT2 Energy denominator` line
@@ -853,56 +1081,98 @@ So the agreement above is a genuine statement about integrals:
   array that `dgemm('T','N',114,114,2694)` filled, at `ldc = 16384`
   (`map_integrals.irp.f:76-92`).
 
-Identical to all 16 printed digits, same fixture, same flags, fp64, one thread.
+Identical to all 17 printed digits, same fixture, same flags, fp64, one thread.
 The terms of that contraction are O(10^2) Ha with alternating signs and the
 result is -231.2, so the sum is heavily cancelling and a *systematic* or
 *widespread* 1-ulp difference in the streamed columns would reach the last digit.
 A single 1-ulp change in one integral would not - an aggregate is a weak
-per-value test, which is why the 30-line program below stays on the list. What
-the aggregate does rule out is the failure mode that actually threatens the
-design: a wrong index or a misaligned column, i.e. an O(1) error on some pairs.
+per-value test, and the per-value test is the one-shot assertion in the Stage 1
+hit path (see *Bit-identity* below, and the acceptance list). What the aggregate
+does rule out is the failure mode that actually threatens the design: a wrong
+index or a misaligned column, i.e. an O(1) error on some pairs.
 
-### The completed A/B, and the two numbers it produces
+### The completed A/B: 5.08x, and a row identical to the last digit
 
-A completed walk looked out of reach when this section was first written - ~26 h,
-from a window-based extrapolation that the measured per-call rates replaced. One
-thread now needs ~2 h at shift 6 and ~28 min at shift 7: two overnight runs on an
-idle laptop rather than a research project.
+Both arms ran to the last sample, one thread, fp64, same binary, same 46 880
+determinants, `QP_PAIRBLOCK_STATS=1`. Two campaigns: v1 timed the arms on an
+idle machine, v2 was launched only for the printed row - and v2's arm B shared
+the machine with a 264-MO probe for ~13 min, so v1 remains the timing and v2 is
+the row. v1's arm A also died in the report (see below), which is why v1 has no
+row at all.
 
-The walk issues the same call sequence in both window settings - the integrals
-are bit-identical, so the determinant trajectory is too - and `C_total > 1.3x10^8`
-column calls.
+| campaign | arm | `shift` | window | walk | `PT2` wall | block | column | residual |
+|---|---|---|---|---|---|---|---|---|
+| v1 | A | 6 | MOs 1-64 of 114 | 7673.7 s | 7739.3 s | 1273.7 s | 4777.2 s | 1622.8 s |
+| v1 | B | 7 | all | 1478.9 s | 1524.4 s | 0 | 40.9 s | 1438.1 s |
+| v2 | A | 6 | MOs 1-64 of 114 | 8405.4 s | 8461.3 s | 1385.2 s | 5333.3 s | 1682.8 s |
+| v2 | B | 7 | all | 1673.6 s | 1748.0 s | 0 | 52.3 s | 1621.3 s |
 
-* **bit-identity.** The printed `PT2`/`rPT2` row must agree to all digits. That
-  is much sharper than the E0 line above: PT2 is a nonlinear function of the
-  ~10^8 matrix elements the walk evaluates - squares and `E0 - H_jj` denominators
-  - and every one of them is an integral or a diagonal element built from
-  integrals, so any per-value disagreement anywhere is amplified into the
-  printed digits rather than averaged away.
-* **the cache's worth.** `WALL` arm A against `WALL` arm B. The floor is
-  measured, not modelled: arm B runs 1530 s for ~93 % of the calls with 44.1 s
-  in the column path, so a full walk with free integrals costs ~1600 s, and no
-  integral-side change can go below it. The ceiling saving is therefore
-  `1 - 1600/T_A`, where `T_A` is arm A's time. Two extrapolations disagree about
-  `T_A` and arm A settles it:
-  - head-of-walk rate: 20 900 calls/s over 840 s at one thread, i.e. ~6300 s for
-    `C_total = 1.3x10^8`;
-  - integral + floor: `C_total*t_col + B_total*t_blk` = 4950 + 660 s, plus the
-    1510 s of non-integral work the shift-7 arm measured, i.e. ~7100 s.
+* **the cache's worth: 5.08x** on the `PT2` wall, 80.3 % saved, 5.19x on the
+  walk. v2 measures 4.84x on a contended arm B, which bounds the same quantity
+  from below; the idle-run 5.08x stands. That is the ceiling for every
+  integral-side change at this fixture, and the v2 arm-B breakdown says why:
+  of its 1748 s, 52.3 s are integrals and **1621 s are the walk itself** -
+  mask construction, the `out_val` protocol, the comb bookkeeping. Stage 1
+  should land at arm B or a little above it, and nothing that speeds up
+  integrals further can go below that floor.
+* **the books close to 4 %.** Price arm A's counters with the model Stage 1
+  implements - 8100 distinct blocks at 0.96 ms (7.8 s of fill), 139.4M hits at
+  the 0.37 us arm B measures (52 s), and arm A's own non-integral residual
+  (1687 s) - and the walk comes to 1747 s against arm B's measured 1673.6 s. The
+  73 s gap is arm A's per-call overhead on 1.45M block calls, which arm B never
+  pays and which arm A books outside the block timer. Three measured terms, no
+  fitted parameter, so the infinite-cap cache is fully described - and the
+  264-MO projection of 5.9x below is the same accounting with every term
+  re-measured at 264.
+* **the row is identical on all eight printed numbers**, not just the four
+  energies (`ab_compare.py full_s6_T.log full_s7_T.log`, exit 0):
 
-  They differ because the non-integral cost is mostly per walk *position*
-  (46 824 of them) while `C_total` counts calls: the head, where the expensive
-  generators issue many calls each, amortises that cost better than the tail
-  does, so a rate measured in the head overstates the whole walk. Either way the
-  ceiling is 75-78 % of arm A, and the "88 % of the two contractions" figure is
-  unreachable *whatever* the cache does - it counted only the contractions.
+  ```
+   PT2      -0.32987731016744182   +/-  6.4086257836338200E-004
+   rPT2     -0.30537770372701645   +/-  5.9326645559783155E-004
+   E+PT2    -231.53059579321010
+   E+rPT2   -231.50609618676967
+  ```
 
-What the A/B cannot give is a per-*value* statement, because it aggregates. For
-that, a 30-line Fortran program against the real slab shape (`nvec` 2694, 114
-columns, stride `nvec`): one dgemv for column `j`, one dgemm for the block,
-compare `transfer()`ed bit patterns. Seconds to run, no QP3 dependency, on the
-BLAS that will run the walk. It is the only test that compares the two numbers
-one at a time.
+  Both arms issued exactly 139 365 752 column calls. Arm B served every one of
+  them from a block the fill `dgemm('T','N',114,114,2694)` produced; arm A
+  streamed them all through dgemv. What that excludes is the failure mode Stage
+  1 can actually commit - a misindexed or misaligned column, or a *systematic*
+  kernel difference between "read the block" and "stream the column" - because
+  a difference of that kind is O(1) relative on many pairs and the sum being
+  printed is a heavily cancelling -231.2 built from O(10^2) terms. What it does
+  not exclude is a 1-ulp difference on one matrix element, which no aggregate
+  can see. That case is covered by the one-shot assertion in the Stage 1 hit
+  path (acceptance tests above): the first column hit recomputes the column
+  through the streamed `dgemv` and compares bits - the per-value check, at the
+  real shape and on the real data.
+* **the per-pair counts are identical too**, and that is a separate statement.
+  Both arms wrote `<ezfio>/work/mo_pair_cache.txt`, and on the `(k, l, n_col)`
+  projection the two tables are byte-identical: 8144 pairs, 139 365 752 column
+  calls, zero differing lines. Every pair was requested the same number of
+  times. A swapped index changes those counts and the walk with them; a 1-ulp
+  difference in one matrix element changes neither. So the two tests are
+  complementary rather than redundant.
+* **v1's missing row was a Stage 0 bug, not arithmetic.** Arm A died with
+  `Fortran runtime error: Expected REAL for item 8 in formatted transfer, got
+  CHARACTER` - the `column-only` line of the report, one `A` descriptor short
+  (fixed). The walk had already finished and its counters were intact; the abort
+  was in the report, before `print_summary`. `ab_compare.py` reporting the row
+  as missing is the correct reading of that log, and v2 is the re-run.
+* **a snapshot cosmetic worth knowing**: v2 arm B's header reports
+  `cholesky_mo_num: 0`, because `nvec_stats` is only set by a block call and arm
+  B issues none (`block_requests: 0`). The field is the first `nvec` seen, not
+  the run's `cholesky_mo_num`; an all-window walk leaves it at 0.
+
+What the A/B cannot give is a per-*value* statement, because it aggregates. The
+per-value statement is now made by the code rather than by a side program: on the
+first column hit in a process, recompute that column through the streamed `dgemv`
+into a scratch vector and compare `transfer()`ed bit patterns. That is the
+30-line Fortran program the spec used to owe - one dgemv, one dgemm, compare bits
+- except it runs on the real `nvec` and the real stride, on the BLAS that will
+run the walk, on data the walk actually asked for, and it cannot drift from the
+production code path because it *is* the production code path. Cost: one extra
+dgemv and one extra dgemm per process, 1.3 ms and 34 ms at 264 MOs.
 
 Two shape details keep that A/B honest, and one of them is a design rule:
 
@@ -917,17 +1187,19 @@ Two shape details keep that A/B honest, and one of them is a design rule:
   own `get_mo_two_e_integrals_ij`, so the cached block *is* the array the walk's
   block call returns. Block identity is then by construction on any BLAS, and
   the only claim left is column-of-block versus streamed dgemv, which is exactly
-  what the A/B and the 30-line program test.
+  what the A/B tests in aggregate and what the first-column-hit assertion tests
+  per value.
 
 One design consequence worth stating, because it explains why the key is the
 pair and not the column: a cache keyed by `(k,l,j)` would be bit-identical *by
 construction* (it stores the dgemv result it computed), needs no offline fit and
 no fill GEMM, and is `mo_num` times smaller per entry. It is rejected because
-the reuse is not there: 10.97x10^6 column calls at one thread land on 8144
-distinct pairs, i.e. ~1350 calls per pair, while a given `(k,l,j)` triple is
-requested by the masks that share `j = hfix` - the reuse is in the pair, which is
-exactly what `n_block` and `both` measure. Stage 0 does not count the triple set,
-so this is an inference from `both = 80 %`, not a measurement; adding a
+the reuse is not there: over the completed walk 139 365 752 column calls land on
+8144 distinct pairs, **17 113 calls per pair**, while a given `(k,l,j)` triple is
+requested only by the masks that share `j = hfix` - the reuse is in the pair,
+which is exactly what `n_block` and `both` measure. Stage 0 does not count the
+triple set, so the `(k,l,j)` side is an inference from `both = 99.98 %` (all but
+2462 of the completed walk's column calls), not a measurement; adding a
 `(k,l,j)` counter is one hash and would close it.
 
 Do not compare across `do_mo_cholesky` modes. Map mode on this same fixture
@@ -960,9 +1232,45 @@ runs, `mo_cholesky_double` True, `h0_type` EN, `OMP_NUM_THREADS=1`,
 ```
 
 Stage 1 is accepted when a run with the cap set reproduces `PT2`, `rPT2`,
-`E+PT2`, `E+rPT2` printed to full precision against a run with cap 0 on this
-same fixture. Two caveats: the fixture has `h0_type = EN`, so it never enters
-the CFG branches - it validates mechanics and arithmetic, not the CFG path; and
-a single run does not prove the walk deterministic, so the cap-0 row must be
-regenerated by the same binary in the same session as the cap-on row rather
-than trusted across sessions.
+`E+PT2`, `E+rPT2` printed to full precision against a run with cap 0 **on the
+same fixture and in the same precision mode**, and never across
+`do_mo_cholesky` modes (see above: map mode differs in the 6th digit of E0, at
+either precision). Which cap-0 row depends on the mode being tested: this
+map-mode row is the wrong one for Stage 1, whose whole point is the Cholesky
+branch - the Cholesky cap-0 row is `full_s6_T.log` (same 46 880 determinants,
+`shift = 6`, one thread). Two caveats on this row: the fixture has
+`h0_type = EN`, so it never enters the CFG branches - it validates mechanics and
+arithmetic, not the CFG path; and one run does not prove the walk deterministic,
+which is why the acceptance must regenerate its cap-0 row with the same binary
+rather than trust a row from an older session. The walk itself is now known to
+be deterministic given the integrals: two completed walks that differ only in
+the window produced byte-identical per-pair call counts on all 8144 pairs (the
+A/B above), which is a much stricter statement than repeating a printed row.
+
+## Reference row, 264 MOs (cc-pVTZ, 4 threads)
+
+The 264-MO fixture is the second Cholesky bench and the first one at a `mo_num`
+where the block path outweighs the column path. Same contract: `pt2` on
+`tz_basis_test.ezfio` (`mo_num` 264, `ao_num` 300, rank 6064, `n_det` 1428,
+`do_mo_cholesky` True, `mo_cholesky_double` True, `mo_integrals_cache_shift` 6
+so the window is (1,64), `h0_type` EN, `OMP_NUM_THREADS=4`,
+`QP_NTHREADS_PT2=4`, `io_mo_cholesky = Read` so no AO Cholesky vector is in
+memory):
+
+```
+ N_det = 1428    N_cfg = 352    < S^2 > = 9.08e-11
+ E       = -230.91538522016455      (also the "PT2 Energy denominator" line)
+ Variance=  3.4123389912803850      +/- 8.1684089150127015E-004
+ PT norm =  0.53508620642076787     +/- 4.8551242274436647E-005
+ PT2     = -0.86579718276647843     +/- 1.6078615206390628E-004
+ rPT2    = -0.67308215287443873     +/- 1.2499727596452631E-004
+ E+PT2   = -231.78118240293102      +/- 1.6078615206390628E-004
+ E+rPT2  = -231.58846737303898      +/- 1.2499727596452631E-004
+ WALL 4279.1 s, CPU 10871.3 s, peak RSS 4.2 GB, walk clock 4226.0 s
+```
+
+This is the cap-0 row for a Stage 1 A/B at 264 MOs. Read it with the tree's own
+caveat: TZ total energies are good to ~4e-4 Ha (the basis-normalization residual
+of that tree, see the fixture notes), which is the scale of the PT2 error bar, so
+the row is a *mechanical* reference - it is the printed digits that Stage 1 must
+reproduce, not a number to compare with any other calculation.

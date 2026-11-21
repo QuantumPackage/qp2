@@ -288,12 +288,12 @@ contains
         ' cholesky_mo_num=', nvec_stats, ' (Stage 0 of PAIR_BLOCK_CACHE.md)'
     share = 0.d0
     if (walk_time > 0.d0 .and. nthreads > 0) share = 1.d0/(walk_time*dble(nthreads))
-    write(6,'(A,I0,A,I0,A,F10.2,A,F6.1,A,F9.4,A)') '   block  calls=', tot_blk, &
+    write(6,'(A,I0,A,I0,A,F10.2,A,F6.1,A,F9.2,A)') '   block  calls=', tot_blk, &
         ' distinct=', nb_set, ' thread-s=', tim_blk, ' = ', &
-        100.d0*tim_blk*share, '% of the walk,', mblk, ' s/call'
-    write(6,'(A,I0,A,I0,A,F10.2,A,F6.1,A,F9.4,A)') '   column calls=', tot_col, &
+        100.d0*tim_blk*share, '% of the walk,', 1.d6*mblk, ' us/call'
+    write(6,'(A,I0,A,I0,A,F10.2,A,F6.1,A,F9.2,A)') '   column calls=', tot_col, &
         ' distinct=', nc_set, ' thread-s=', tim_col, ' = ', &
-        100.d0*tim_col*share, '% of the walk,', mcol, ' s/call'
+        100.d0*tim_col*share, '% of the walk,', 1.d6*mcol, ' us/call'
     write(6,'(A,I0,A,I0,A,I0,A,F8.1,A)') '   union  pairs=', n_union, &
         ' both=', n_both, ' block-only=', blk_only, &
         ' memory if all cached=', dble(n_union)*mem_pair, ' MB'
@@ -303,7 +303,7 @@ contains
     write(6,'(A,F8.1,A)') '     caching those ', dble(nb_set)*mem_pair, &
         ' MB costs nothing beyond the block the walk computes regardless'
     if (mcol > 0.d0 .and. mblk > 0.d0) then
-      write(6,'(A,I0,A,I0,A,I0,A,F8.2,A)') '   column-only: ', col_unpaid, &
+      write(6,'(A,I0,A,I0,A,I0,A,A,F8.2,A)') '   column-only: ', col_unpaid, &
           ' calls on ', n_union - nb_set, ' pairs; a pair needs ', &
           ceiling(mblk/mcol), ' hits to pay for its block', &
           ' (mean block/mean column = ', mblk/mcol, ')'
