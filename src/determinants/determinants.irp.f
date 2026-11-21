@@ -886,7 +886,10 @@ subroutine apply_particles(det, s1, p1, s2, p2, res, ok, Nint)
   integer                        :: ii, pos
 
   ok = .false.
-  res = det
+  do ii = 1, Nint
+    res(ii,1) = det(ii,1)
+    res(ii,2) = det(ii,2)
+  end do
 
   if(p1 /= 0) then
     ii =shiftr(p1-1,bit_kind_shift) + 1
