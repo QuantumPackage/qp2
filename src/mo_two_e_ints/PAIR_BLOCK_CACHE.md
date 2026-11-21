@@ -48,10 +48,13 @@ built, and gated (*Stage 1 gate at 264 MOs*).
   binds*), and it is the last thing to implement: it is a thrash bound, not the
   value ranking, and it costs a seqlock on the hit path.
 * **Stage 1 is implemented, built and gated at 264 MOs** (`map_integrals.irp.f`,
-  cap from `QP_PAIR_CACHE_MB`): 8.63x wall and 8.71x CPU on the 264-MO fixture,
+  cap deduced from `qp_max_mem`, `QP_PAIR_CACHE_MB` overriding it): ~9x CPU and
+  8.6-9.9x wall on the 264-MO fixture,
   `rPT2` one ulp from the cap-0 row against a 1e-9 gate, both hit classes
-  asserted in-process, and the freeze branch exercised by a 512 MiB cap. What the
-  laptop still cannot supply is the production pair set - the pairs touched by a
+  asserted in-process, the freeze branch exercised by a 512 MiB cap, and the
+  deduced cap reproducing the best capped arm **bit for bit** - all nine printed
+  numbers, `diff`-clean. What the laptop still cannot supply is the production
+  pair set - the pairs touched by a
   production determinant list at production `mo_num` - and how much of the block
   and column mass fits a 1-2 GB cap. That needs a Stage 0 run on a production
   wavefunction, which needs a QP3 build and a fixture on a cluster - a separate
@@ -59,6 +62,16 @@ built, and gated (*Stage 1 gate at 264 MOs*).
   *shape* of the answer does not depend on the window: the block path is 129x
   redundant there, against 179x at 114 MOs, and it is the larger half of the
   integral time.
+* **The cap is deduced, not configured** (21 November 2026). `pair_cache_mb` is
+  half of `qp_max_mem`, QP's own memory target, which is the share
+  `cholesky.irp.f` already gives its temporary AO buffer; the arrays are not
+  zeroed by the allocate, so the cap bounds the fills and does not reserve the
+  pages. The deduction reads the budget and never the memory free at that
+  instant: below the demand the admitted set depends on the slot count, and a
+  slot count that moved with the machine's load would move the PT2 row in its
+  last ulp between two runs of the same input. `QP_PAIR_CACHE_MB` remains the
+  per-run override, and 0 disables the cache, which is what keeps the three gate
+  arms reproducible.
 * The device fork that this spec opened was costed on an A100 and **closed by
   measurement**; the numbers are in `GPU_ROUTE.md` in the measurement scratch,
   and the short version is under *Decision rule*.
@@ -307,8 +320,25 @@ For a walk that cannot finish, kill it and read the snapshots:
 
 ## Stage 1 - a lazily filled block cache (only if the Stage 0 curve pays)
 
-The cap is an environment variable, `QP_PAIR_CACHE_MB`, read once by the
-`pair_cache_mb` provider; 0 or unset disables the cache, which is the default.
+The cap is deduced, and `QP_PAIR_CACHE_MB` only overrides it. By default
+`pair_cache_mb` is half of `qp_max_mem` - QP's own target, physical RAM minus
+1 GB, or `QP_MAXMEM` when set - which is the same half `cholesky.irp.f`
+already gives its temporary AO buffer (the two do not overlap in time). The
+deduction reads the budget and never the memory free at that instant: once the
+pool is smaller than the demand, the admitted set depends on the slot count, so
+a slot count that moved with the machine's load would move the PT2 row in its
+last ulp from run to run. `QP_MAXMEM` is how a shared machine is told to take
+less; `QP_PAIR_CACHE_MB` overrides the cap per run, and 0 disables the cache.
+
+`qp_max_mem` is `MemTotal - 1 GB` on Linux, so on a cgroup-limited node it is
+the node's RAM and not the job's allocation, exactly as it already is for the
+AO Cholesky buffer and every Davidson sized from it. A job under a memory limit
+sets `QP_MAXMEM` to that limit, the cache follows, and nothing new is
+introduced. What the cache adds under that misreading is virtual address space
+and not resident memory: the pool is not zeroed and its pages are touched only
+by the blocks it actually fills. If the commit fails anyway, the `allocated()`
+guard turns it into `qp_bug` with a line naming the cache, which is the one
+failure mode worth paying for here.
 
 It was an EZFIO keyword (`mo_cholesky_pair_cache_mb`) in the first version of
 this section, and the generated interface is what killed it: the provider that
@@ -318,9 +348,9 @@ does not fall back to `default:` when the key is absent. It prints
 `mo_cholesky_double` provider in the generated
 `src/mo_two_e_ints/ezfio_interface.irp.f`, which is the template. A new key
 would therefore refuse every EZFIO directory written before it, including the
-3.38 GB TZ fixture, until it is rewritten, for a knob that is off by default.
-The environment variable is also what the A/B wants: the two arms differ in the
-cap and in nothing else, in the same directory, with the same binary.
+3.38 GB TZ fixture, until it is rewritten - and a cache that sizes itself needs
+no key at all. The override remains what the A/B wants: the two arms differ in
+the cap and in nothing else, in the same directory, with the same binary.
 `QP_PAIRBLOCK_STATS` (Stage 0) and `QP_NTHREADS_PT2` are the same pattern. The
 startup line is the record of what a given run used; nothing else is needed.
 
@@ -350,17 +380,21 @@ on the `END_PROVIDER` that closes it.
 
 Build block: `n_pair_cache = 0` unless `do_mo_cholesky` **and**
 `mo_cholesky_double` and `pair_cache_mb > 0`, else
-`n_pair_cache = pair_cache_mb*131072/(mo_num*mo_num)` slots - the cap in doubles
-divided by one block. That bound is computed *before* the array's dimension
-expression, which is the whole point of the separate provider blocks: the cap
-is enforced by arithmetic, and the `allocated()` test in the `pair_cache` body
-turns IRPF90's silent `stat=` failure into a `qp_bug` instead of a segfault
-three minutes into the walk. IRPF90 emits a
-plain `allocate(...,stat=irp_err)` and on failure only prints
-`Allocation failed: pair_cache` and carries on with an unallocated array
-(`external/irpf90/src/variable.py:581-597`). So the cap must be chosen to fit, the
-`allocated()` test is the only thing between a failed allocation and a segfault,
-and the startup line below says what the cap bought. The
+`n_pair_cache = min(pair_cache_mb*131072/(mo_num*mo_num), mo_num*mo_num)` slots -
+the cap in doubles divided by one block, clamped to the number of keys
+`k + mo_num*(l-1)` that can exist. Past that no slot can be written, and the
+only thing an excess cap buys is the zeroed `2*n+1`-integer bucket table, which
+*is* real memory at startup: without the clamp a deduced cap gives a
+30-orbital system gigabytes of it. The slot bound is computed *before* the
+array's dimension expression, which is the whole point of the separate provider
+blocks: the cap is enforced by arithmetic, and the `allocated()` test in the
+`pair_cache` body turns IRPF90's silent `stat=` failure into a `qp_bug` instead
+of a segfault three minutes into the walk. IRPF90 emits a plain
+`allocate(...,stat=irp_err)` and on failure only prints `Allocation failed:
+pair_cache` and carries on with an unallocated array
+(`external/irpf90/src/variable.py:581-597`). So the cap must be chosen to fit,
+the `allocated()` test is the only thing between a failed allocation and a
+segfault, and the startup line below says what the cap bought. The
 dimension is `max(1, n_pair_cache)` because IRPF90 guards every allocation with
 `dim > 0`.
 
@@ -371,12 +405,19 @@ returns the `sgemv` ones. The gemm-against-gemv difference was measured in doubl
 only (2105/2112 elements, ~1e-11 relative), and nothing says the fp32 sums differ
 by the same amount - `sgemm` kernels are frequently blocked differently from their
 dp counterparts. Putting an unmeasured rounding difference into a mode that is
-dead by default is not a trade worth making, so the cache is not armed there, and
-the run says why:
+dead by default is not a trade worth making, so the cache is not armed there. A
+run that set `QP_PAIR_CACHE_MB` anyway says why; the deduced cap stays silent,
+since the integral mode is a choice and not a misconfiguration:
 
 ```
+Pair cache: cap 2048 MiB (QP_PAIR_CACHE_MB)
 Pair cache: cap 2048 MiB ignored: needs do_mo_cholesky and mo_cholesky_double
+Pair cache: QP_PAIR_CACHE_MB="2G" is not an integer; cache disabled
 ```
+
+The third line exists because `read` of a malformed value returns a nonzero
+`iostat`, and a silent fall back to 0 would turn a typo into the 8.6x and leave
+nothing in the log to find it by.
 
 Allocation is not residency: the emitted `allocate` does not zero the array, so
 its pages stay untouched until a fill writes them, and RSS follows the blocks
@@ -459,7 +500,8 @@ cannot say is *which to keep* if the cap binds (last bullet).
   what a block cache is.
 
 So Stage 1 has one knob, the cap, and no artifact - and no reason to exclude the
-CIPSI driver, where a cap of 0 leaves today's behaviour untouched.
+CIPSI driver, where a disabled cache (`QP_PAIR_CACHE_MB=0`) leaves today's
+behaviour untouched.
 
 Filling, on miss, with single-flight:
 
@@ -537,7 +579,9 @@ Where the cache is armed, and by whom:
   `pt2`'s pre-loop block (`fci/pt2.irp.f`, next to
   `PROVIDE mo_two_e_integrals_jj`, `:59`) and in `pt2_omp_task`'s
   (`cipsi_utils/pt2_omp.irp.f:272`, next to `PROVIDE banned_excitation`). With
-  the default cap of 0 the body allocates one slot, prints nothing, and returns;
+  the cache disabled (`QP_PAIR_CACHE_MB=0`) the body allocates one slot, prints
+  nothing, and returns; with the deduced cap it prints its line and allocates
+  the pool;
 * that is about *when*, not *whether*. IRPF90 already inserts a guarded
   `provide_pair_cache` at the top of every routine that references any of the
   entities - the generated `get_mo_two_e_integrals_ij` opens with
@@ -685,8 +729,10 @@ Properties:
     depend on who filled it or when. In the *capped* regime, where the freeze
     cuts different pairs in different runs, which pairs are hits varies with
     arrival order and the row varies at 1e-11. That caveat belongs to the capped
-    regime, it does not exist for the default cap of 0, and the replacement
-    policy below only ships if it fixes admission deterministically.
+    regime, it does not exist when the cap holds the whole pair set - which the
+    deduced cap does for every bench whose demand is under half the budget -
+    and the replacement policy below only ships if it fixes admission
+    deterministically.
 * By default the array is append-only: a slot is written once, by the thread that
   claimed it, and never moved or freed. No eviction, no resize. The bounded mode
   below is the one exception and changes exactly this sentence.
@@ -1066,9 +1112,10 @@ not rungs on the way to a bigger production number**: the win grows with `mo_num
 only while the whole set fits, and beyond that every extra MO costs a slot and
 buys nothing. What the production run must print is the pair set at 510 MOs and
 its curve - the two numbers that decide whether the capped regime is worth 2x or
-worth nothing. That is why Stage 1 ships behind `QP_PAIR_CACHE_MB` (0 by
-default) rather than as a default: at 264 MOs it is a free 8.6x, at 510 it is an open
-question, and the same binary answers it.
+worth nothing. That is why the cap, and not the cache, is the switch: at 264 MOs
+the deduced cap holds the whole set and the cache is a free 8.6x, at 510 it is
+an open question, and `QP_PAIR_CACHE_MB=0` turns it off while the production run
+answers it.
 
 The run decides, in this order:
 
@@ -1715,14 +1762,16 @@ below.
 
 ### Stage 1 gate at 264 MOs
 
-Three arms, one binary (21 November 11:55), one fixture, `shift = 6`, four
-threads, `QP_PAIRBLOCK_STATS=1`, `tz_basis_test.ezfio`:
+Four arms, two binaries - the three of 21 November 11:55 and the deduced cap on
+the build that carries it - one fixture, `shift = 6`, four threads,
+`QP_PAIRBLOCK_STATS=1`, `tz_basis_test.ezfio`:
 
 ```
- cap   slots   block req. (miss)   column req. (miss)      WALL        CPU    vs cap 0
- 0        -        235 888             4 684 818        3698.2 s   11 927.3 s     1
- 512    962         10 078             1 808 581        1174.7 s    3 330.8 s   3.15x
- 2048  3851              0                     1         428.4 s    1 368.9 s   8.63x
+ cap        slots   block req. (miss)   column req. (miss)      WALL        CPU    vs cap 0
+ 0             -        235 888             4 684 818        3698.2 s   11 927.3 s     1
+ 512         962         10 078             1 808 581        1174.7 s    3 330.8 s   3.15x
+ 2048       3851              0                     1         428.4 s    1 368.9 s   8.63x
+ auto(3584) 6740              0                     1         372.6 s    1 300.0 s   9.93x
 ```
 
 With the cache off every request is a call; with it on, a request that misses is
@@ -1749,6 +1798,19 @@ production shape and stayed silent:
 Pair cache: first block hit, (7,8), bit-identical to the uncached block
 Pair cache: first column hit, (20,21,23), relative deviation 6.8296E-16
 ```
+
+**The deduced cap is the same run, not a nearby one.** With `QP_PAIR_CACHE_MB`
+unset the provider gives 3584 MiB on this 7 GB box - 6740 slots against a
+1844-pair demand - so the pool never freezes, and all nine printed numbers are
+bit-identical to the 2048 MiB row: a `diff` of the five row lines is empty.
+That includes `rPT2`'s ulp, which *is* the column-class difference and is
+therefore absent between two arms that both serve every column from a block.
+The deduction was checked to follow the budget rather than return a constant:
+`QP_MAXMEM=3` gives 1536 MiB and 2888 slots, still above the demand, and both
+arms fill and hit with the block assertion silent. A malformed value is
+announced - `QP_PAIR_CACHE_MB=2G` prints `QP_PAIR_CACHE_MB="2G" is not an
+integer; cache disabled` - because a silent fall back to 0 turns a typo into the
+whole 8.6x and leaves nothing in the log to find it by.
 
 **The freeze branch executed.** It is not announced, and it does not need to be:
 a pair's first miss claims a slot and publishes its key, so a pair that misses a
@@ -1791,6 +1853,11 @@ bookkeeping-bound, so further speedup on this fixture comes from
 `fill_buffer_double`, not from more caching.
 
 **Not gated: wall time.** `WALL` is the clock, and this box was under load 37 for
-the cap-0 arm and nearly idle for the capped ones, so 8.63x is an upper bound;
-the two capped runs (462.6 s under load, 428.4 s clean) differ by 8 % between
-themselves. CPU time, 8.71x, is the number to quote.
+the cap-0 arm and nearly idle for the capped ones, so every ratio below is an
+upper bound: the reference is the inflated arm. The scatter within the capped
+side is large enough to matter - three runs of the zero-miss walk took 428.4,
+440.1 and 372.6 s of wall and 1368.9, 1437.3 and 1300.0 s of CPU, for work that
+computes no integral element differently (18 % on wall, 10 % on CPU). CPU time is
+the steadier number and the one to quote: **9.18x** against the cap-0 arm with
+the deduced cap, 8.71x with the 2048 MiB cap, so ~9x with a few per cent of
+slack. The wall column's 9.93x is the same cache measured on a quieter box.

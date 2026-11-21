@@ -320,16 +320,31 @@ end
 BEGIN_PROVIDER [ integer, pair_cache_mb ]
   implicit none
   BEGIN_DOC
-  ! Memory cap in MB for the pair-block cache, from QP_PAIR_CACHE_MB.
-  ! 0, or unset, disables the cache, which is the default.
+  ! Memory cap in MB for the pair-block cache.
   !
-  ! An environment variable and not an EZFIO key, for two reasons.  The
+  ! By default the cap is half of qp_max_mem, the target memory the rest of
+  ! QP already sizes itself against (physical RAM minus 1 GB, or QP_MAXMEM
+  ! when set).  Half is the share cholesky.irp.f gives its temporary AO
+  ! buffer, and the two do not overlap in time; the cache's array is not
+  ! zeroed by the allocate, so the cap is a ceiling on the fills and not a
+  ! reservation of that many pages.
+  !
+  ! The cap comes from qp_max_mem and not from the memory free at this
+  ! instant, deliberately.  Once the pool is smaller than the demand, which
+  ! pairs are admitted depends on the slot count; if the slot count depended
+  ! on what else the machine was doing when the provider was built, two runs
+  ! of the same input would differ in the last ulp of the PT2 row.  A stable
+  ! budget is worth more than a precise one.  QP_MAXMEM is the way to shrink
+  ! it on a shared machine.
+  !
+  ! QP_PAIR_CACHE_MB overrides the cap, in MiB; 0 disables the cache.  It
+  ! stays an environment variable and not an EZFIO key for two reasons.  The
   ! provider that the EZFIO generator writes for a new key stops the program
   ! when the key is absent from the file, so a new key would refuse every
   ! existing EZFIO directory until it is rewritten.  And the A/B that
   ! validates the cache needs the cap per run, not per wavefunction: the two
-  ! arms differ in this number and nothing else.  The startup line printed
-  ! by pair_cache is the record of what a run used.
+  ! arms differ in this number and nothing else.  The startup lines printed
+  ! by pair_cache are the record of what a run used.
   END_DOC
   character*(32) :: env
   integer        :: iostat_read
@@ -338,9 +353,20 @@ BEGIN_PROVIDER [ integer, pair_cache_mb ]
   call get_environment_variable('QP_PAIR_CACHE_MB', env)
   if (len_trim(env) > 0) then
     read(env, *, iostat=iostat_read) pair_cache_mb
-    if (iostat_read /= 0) pair_cache_mb = 0
+    if (iostat_read /= 0) then
+      write(6,'(A,A,A)') 'Pair cache: QP_PAIR_CACHE_MB="', &
+        trim(env), '" is not an integer; cache disabled'
+      pair_cache_mb = 0
+    else
+      write(6,'(A,I0,A)') 'Pair cache: cap ', pair_cache_mb, &
+        ' MiB (QP_PAIR_CACHE_MB)'
+    endif
+    if (pair_cache_mb < 0) pair_cache_mb = 0
+  else if (mo_num > 0 .and. do_mo_cholesky .and. mo_cholesky_double) then
+    pair_cache_mb = max(0, qp_max_mem) * 512
+    write(6,'(A,I0,A,I0,A)') 'Pair cache: cap ', pair_cache_mb, &
+      ' MiB (auto: half of qp_max_mem = ', qp_max_mem, ' GB)'
   endif
-  if (pair_cache_mb < 0) pair_cache_mb = 0
 END_PROVIDER
 
 BEGIN_PROVIDER [ integer, n_pair_cache ]
@@ -375,6 +401,12 @@ BEGIN_PROVIDER [ integer, n_pair_cache ]
   if (mo_num > 0 .and. do_mo_cholesky .and. mo_cholesky_double .and. pair_cache_mb > 0) then
     cap8 = int(pair_cache_mb,8) * 131072_8
     n8 = cap8 / (int(mo_num,8)*int(mo_num,8))
+    ! A slot holds one key k + mo_num*(l-1), and there are only mo_num**2
+    ! such keys: past that no slot can ever be written, and the only memory
+    ! an excess cap would buy is the 2*n+1-integer bucket table, which is
+    ! zeroed at startup.  Without this clamp a deduced cap gives a 30-orbital
+    ! run a multi-GB hash table.
+    n8 = min(n8, int(mo_num,8)*int(mo_num,8))
     ! huge/2 and not huge: pair_cache_nhash below is 2*n_pair_cache+1, and a
     ! negative dimension would leave the key table unallocated (IRPF90 skips
     ! the allocate) for pair_cache_key = 0 to write into.  Only a cap of
