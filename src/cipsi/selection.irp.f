@@ -195,6 +195,7 @@ subroutine select_singles_and_doubles(i_generator, hole_mask, particle_mask, foc
   logical, allocatable                  :: banned(:,:,:), bannedOrb(:,:)
   double precision, allocatable         :: coef_fullminilist_rev(:,:)
   double precision, allocatable         :: mat(:,:,:)
+  double precision, allocatable         :: hij_cache(:,:)
 
 
   PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
@@ -336,6 +337,7 @@ subroutine select_singles_and_doubles(i_generator, hole_mask, particle_mask, foc
 
   allocate(banned(mo_num, mo_num,2), bannedOrb(mo_num, 2))
   allocate(mat(N_states, mo_num, mo_num))
+  allocate(hij_cache(mo_num, mo_num))
   maskInd = -1
 
   do s1 = 1, 2
@@ -537,7 +539,7 @@ subroutine select_singles_and_doubles(i_generator, hole_mask, particle_mask, foc
             call spot_isinwf(mask, fullminilist, i_generator, fullinteresting(0), banned, fullMatch, fullinteresting)
             if(fullMatch) cycle
 
-            call splash_pq(mask, sp, minilist, i_generator, interesting(0), bannedOrb, banned, mat, interesting)
+            call splash_pq(mask, sp, minilist, i_generator, interesting(0), bannedOrb, banned, mat, hij_cache, interesting)
 
             call fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf)
           end if
@@ -553,7 +555,7 @@ subroutine select_singles_and_doubles(i_generator, hole_mask, particle_mask, foc
     enddo
   enddo
   deallocate(preinteresting, prefullinteresting, interesting, fullinteresting)
-  deallocate(banned, bannedOrb, mat)
+  deallocate(banned, bannedOrb, mat, hij_cache)
 end subroutine
 
 BEGIN_TEMPLATE
@@ -950,7 +952,7 @@ single ; do p1=1,mo_num ; enddo ; p2=1            ;       ; .False. ;;
 
 END_TEMPLATE
 
-subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, interesting)
+subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, hij_cache, interesting)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -964,6 +966,7 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
   integer(bit_kind),intent(in)   :: mask(N_int, 2), det(N_int, 2, N_sel)
   logical, intent(inout)         :: bannedOrb(mo_num, 2), banned(mo_num, mo_num, 2)
   double precision, intent(inout) :: mat(N_states, mo_num, mo_num)
+  double precision, intent(inout) :: hij_cache(mo_num, mo_num)
 
   integer                        :: i, ii, j, k, l, h(0:2,2), p(0:4,2), nt
   integer(bit_kind)              :: perMask(N_int, 2), mobMask(N_int, 2), negMask(N_int, 2)
@@ -1033,7 +1036,7 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
         else if(nt == 3) then
           call get_d1(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
         else
-          call get_d0(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
+          call get_d0(det(1,1,i), phasemask, bannedOrb, banned, mat, hij_cache, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
         end if
     else if(nt == 4) then
         call bitstring_to_list_in_selection(mobMask(1,1), p(1,1), p(0,1), N_int)
@@ -1511,7 +1514,7 @@ end
 
 
 
-subroutine get_d0(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
+subroutine get_d0(gen, phasemask, bannedOrb, banned, mat, hij_cache, mask, h, p, sp, coefs)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -1538,11 +1541,9 @@ subroutine get_d0(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
 
   integer, parameter :: bant=1
 
-  double precision, allocatable :: hij_cache(:,:)
+  double precision, intent(inout) :: hij_cache(mo_num, mo_num)
 
   PROVIDE mo_integrals_threshold
-
-  allocate(hij_cache(mo_num,mo_num))
 
   if(sp == 3) then ! AB
 
@@ -1596,8 +1597,6 @@ subroutine get_d0(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
     end do
 
   end if
-
-  deallocate(hij_cache)
 
 end
 
