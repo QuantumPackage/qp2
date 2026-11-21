@@ -54,6 +54,11 @@ program pt2
   ! Building them here, serially, makes every guard a no-op for the
   ! rest of the program.
   PROVIDE mo_two_e_integrals_jj
+  ! Arm the pair-block cache (Stage 1 of PAIR_BLOCK_CACHE.md) from this
+  ! serial block: it is sized from QP_PAIR_CACHE_MB, allocated and announced
+  ! here, so the walk's threads only ever read it.  With the default cap of
+  ! 0 it allocates one slot and prints nothing.
+  PROVIDE pair_cache
   read_wf = .True.
   threshold_generators = 1.d0
   SOFT_TOUCH read_wf threshold_generators
