@@ -36,9 +36,10 @@ decides whether Stage 1 is written at all.
   property of the interesting determinant, not of any loop that iterates it, so
   there is no invariant block to hoist; inverting onto the pair moves the cost
   from an 803 MiB table of blocks to a resident set of partial `mat` arrays of the
-  same order, and buys only the 47 % block half. The same read did turn up a free
-  fix: `get_d0` mallocs a full 545 KiB block on each of its 235 888 calls
-  (*The one hoist that does pay*).
+  same order, and buys only the 47 % block half. The same read did turn up a
+  loose end worth ten lines: `get_d0` mallocs a full 545 KiB block on each of its
+  235 888 calls (*The one hoist that does pay*) - bounded at 0.2 % of the walk, so
+  hygiene rather than a rung on the way to the 5.9x.
 * **Replacement, not freeze, is specified for the capped regime** (*When the cap
   binds*), and it is the last thing to implement: it is a thrash bound, not the
   value ranking, and it costs a seqlock on the hit path.
@@ -1010,24 +1011,74 @@ nothing for the 36 % column half, which the same table serves at no extra cost.
 
 ### The one hoist that does pay: the block allocation in `get_d0`
 
-The same read turned up a real cost that has nothing to do with caching. `get_d0`
+The same read turned up a loose end that has nothing to do with caching. `get_d0`
 allocates and frees a full block on every call - `:1545`
 `allocate(hij_cache(mo_num,mo_num))`, `:1600` `deallocate` - so at 264 MOs the
-walk runs 235 888 malloc/free pairs of 545 KiB, **131 GB of first-touch page
-faults** interleaved with the dgemms, for a buffer that is the same size every
-time.
+walk runs 235 888 malloc/free pairs of 545 KiB, **131 GB of allocator traffic**,
+for a buffer that is the same size every time.
 
-Fix: thread one workspace down from `select_singles_and_doubles`, allocated beside
-`mat` at `:338` (inside the `!$OMP PARALLEL`, so one per thread), through
-`splash_pq` into `get_d0`; delete the local `allocate`/`deallocate`. Two
-signatures, no result change, and it applies to the map path as well as the
-Cholesky path. `get_d1` has the same shape (`:1280-1281`: two small allocations
-plus `lbanned = bannedOrb`, 136 KB copied per call) - hoist the allocations with
-the same workspace, but leave the `lbanned` copy alone: it is semantics, not
-scratch. Independent of Stage 1, so do it whether or not the cache lands -
-but it moves the baseline, so any A/B against the times in this file must
-re-measure the cap-0 arm on the same binary. Its own effect lands in the `other`
-counters bucket, which is where to look for it.
+The chain is three deep with one call site each, so the buffer has an obvious
+owner:
+
+```
+select_singles_and_doubles  (:160)   already owns banned/bannedOrb/mat, :337-338
+  -> splash_pq              (:953)   called once, :540
+       -> get_d0            (:1514)  called once, :1036
+```
+
+Ten lines, all in `cipsi/selection.irp.f`:
+
+| line | now | after |
+|---|---|---|
+| `:197` | `double precision, allocatable :: mat(:,:,:)` | add `double precision, allocatable :: hij_cache(:,:)` |
+| `:338` | `allocate(mat(N_states, mo_num, mo_num))` | add `allocate(hij_cache(mo_num, mo_num))` |
+| `:540` | `call splash_pq(..., banned, mat, interesting)` | `..., banned, mat, hij_cache, interesting)` |
+| `:556` | `deallocate(banned, bannedOrb, mat)` | `deallocate(banned, bannedOrb, mat, hij_cache)` |
+| `:953` | `subroutine splash_pq(..., banned, mat, interesting)` | `hij_cache` after `mat` |
+| `:966` | `double precision, intent(inout) :: mat(N_states, mo_num, mo_num)` | add `double precision, intent(inout) :: hij_cache(mo_num, mo_num)` |
+| `:1036` | `call get_d0(det(1,1,i), ..., banned, mat, mask, ...)` | `..., banned, mat, hij_cache, mask, ...` |
+| `:1514` | `subroutine get_d0(..., banned, mat, mask, ...)` | `hij_cache` after `mat` |
+| `:1541` | `double precision, allocatable :: hij_cache(:,:)` | `double precision, intent(inout) :: hij_cache(mo_num, mo_num)` |
+| `:1545`, `:1600` | `allocate(hij_cache(mo_num,mo_num))`, `deallocate(hij_cache)` | both deleted |
+
+The result is bit-identical, not merely equivalent: both branches of `get_d0`
+call `get_mo_two_e_integrals_ij`, whose `out_array` is `intent(out)` and written
+whole on both of its branches, and the dgemm runs with `beta = 0`, so the buffer
+is overwritten before every read. The allocation sits inside the parallel-do over
+tasks (one task, one call of `select_singles_and_doubles`), so the buffer is
+private by construction and needs no clause; and there is no early `return`
+between `:338` and `:556`, so there is no leak.
+
+Per task, not per thread. A per-thread buffer means threading it through
+`omp_selection_task` and `select_connected` - both callers,
+`selection_omp.irp.f:325` and `pt2_omp.irp.f:889` - to turn 1 428 allocations
+into 40, and up to 80 MB of resident scratch at 510 MOs. Not worth it. Not a
+module variable either: a provider-shaped global sized by `mo_num` is the
+lazy-provider trap the header of this subtree warns about.
+
+**What it is worth, and where to look.** Less than the call count suggests, and
+the faults are inside the timed region, not outside it. The buffer *is* the
+dgemm's C matrix, so the first touch happens between `t_block0` and `t_block1`
+and lands in **`block_thread_s`**; only the allocator call itself lands in
+`other`. The bound is 545 KiB = 34 pages at 16 KiB (arm64) to 136 at 4 KiB, at
+~1 us a fault: 34-136 us against the measured 33.95 ms per call, **0.1-0.4 % of
+the block path and at most 0.2 % of the walk**. On the cluster at 80 threads the
+`munmap` TLB shootdowns across the team are the part that can grow, which is the
+reason to do it there. On the laptop: hygiene, not a speedup - it makes a cache
+miss exactly "probe + dgemm + copy" with no allocator in the loop, which is what
+makes hit-versus-miss a clean comparison. Expect the cap-0 A/B at 264 MOs to land
+within noise, and that is the expected outcome: the timings elsewhere in this
+file do not need re-measuring for it.
+
+**Two things beside it that must not be touched.** `get_d1` looks the same and is
+not: `:1280-1281` allocates 4.2 KB and 0.5 KB, both under any mmap threshold so
+both free-list hits, and 4.68 M x ~100 ns is 0.5 s out of 6 119 thread-s.
+Cosmetic. The `lbanned = bannedOrb` copy beside it is semantics, not scratch, and
+stays. And the fp32 branch is the one per-call allocation that would actually
+hurt: `get_mo_two_e_integrals_ij` allocates `real :: out_array_sp(sze,sze)` at
+`:722` and copies it back at `:750`, inside the block timer, 272 KiB at 264 MOs -
+dead code under the default `mo_cholesky_double = True`. If fp32 is ever used,
+hoist that, not `hij_cache`.
 
 ## Decision rule
 
