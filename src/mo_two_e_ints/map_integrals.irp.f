@@ -322,7 +322,7 @@ BEGIN_PROVIDER [ integer, pair_cache_mb ]
   BEGIN_DOC
   ! Memory cap in MB for the pair-block cache.
   !
-  ! By default the cap is half of qp_max_mem, the target memory the rest of
+  ! The cap is half of qp_max_mem, the target memory the rest of
   ! QP already sizes itself against (physical RAM minus 1 GB, or QP_MAXMEM
   ! when set).  Half is the share cholesky.irp.f gives its temporary AO
   ! buffer, and the two do not overlap in time; the cache's array is not
