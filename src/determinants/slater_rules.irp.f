@@ -1742,6 +1742,53 @@ double precision function diag_H_mat_elem_fock(det_ref,det_pert,fock_diag_tmp,Ni
   endif
 end
 
+double precision function diag_H_mat_elem_fock_exc(h1,p1,h2,p2,s1,s2,fock_diag_tmp)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Computes $\langle i|H|i \rangle$ for the double excitation (h1,p1) of spin s1
+  ! and (h2,p2) of spin s2, given the indices instead of the two determinants.
+  ! The caller guarantees degree 2: h1,h2 occupied in the reference, p1,p2
+  ! virtual in the hole-applied determinant, and p1,p2 not equal to h1 or h2.
+  END_DOC
+  integer, intent(in)            :: h1, p1, h2, p2, s1, s2
+  double precision, intent(in)   :: fock_diag_tmp(2,mo_num+1)
+  double precision               :: E0
+
+  E0 = fock_diag_tmp(1,mo_num+1)
+
+  if ( (s1 == 1).and.(s2 == 1) ) then      ! alpha/alpha
+    diag_H_mat_elem_fock_exc = E0 &
+      - fock_diag_tmp(1,h1) &
+      + ( fock_diag_tmp(1,p1) - mo_two_e_integrals_jj_anti(h1,p1) ) &
+      - ( fock_diag_tmp(1,h2) - mo_two_e_integrals_jj_anti(h1,h2)   &
+          + mo_two_e_integrals_jj_anti(p1,h2) )                     &
+      + ( fock_diag_tmp(1,p2) - mo_two_e_integrals_jj_anti(h1,p2)   &
+          + mo_two_e_integrals_jj_anti(p1,p2) - mo_two_e_integrals_jj_anti(h2,p2) )
+
+  else if ( (s1 == 2).and.(s2 == 2) ) then ! beta/beta
+    diag_H_mat_elem_fock_exc = E0 &
+      - fock_diag_tmp(2,h1) &
+      + ( fock_diag_tmp(2,p1) - mo_two_e_integrals_jj_anti(h1,p1) ) &
+      - ( fock_diag_tmp(2,h2) - mo_two_e_integrals_jj_anti(h1,h2)   &
+          + mo_two_e_integrals_jj_anti(p1,h2) )                     &
+      + ( fock_diag_tmp(2,p2) - mo_two_e_integrals_jj_anti(h1,p2)   &
+          + mo_two_e_integrals_jj_anti(p1,p2) - mo_two_e_integrals_jj_anti(h2,p2) )
+
+  else if ( (s1 == 1).and.(s2 == 2) ) then ! alpha/beta
+    diag_H_mat_elem_fock_exc = E0 &
+      - fock_diag_tmp(1,h1) &
+      + ( fock_diag_tmp(1,p1) - mo_two_e_integrals_jj_anti(h1,p1) ) &
+      - ( fock_diag_tmp(2,h2) - mo_two_e_integrals_jj(h1,h2)        &
+          + mo_two_e_integrals_jj(p1,h2) )                          &
+      + ( fock_diag_tmp(2,p2) - mo_two_e_integrals_jj(h1,p2)        &
+          + mo_two_e_integrals_jj(p1,p2) - mo_two_e_integrals_jj_anti(h2,p2) )
+
+  else
+    STOP 'diag_H_mat_elem_fock_exc: unexpected spin order'
+  endif
+end
+
 double precision function diag_H_mat_elem(det_in,Nint)
   implicit none
   BEGIN_DOC
