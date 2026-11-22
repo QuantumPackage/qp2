@@ -580,12 +580,13 @@ subroutine fill_buffer_$DOUBLE(i_generator, sp, h1, h2, bannedOrb, banned, fock_
   double precision, intent(in)    :: E0(N_states)
   type(pt2_type), intent(inout)   :: pt2_data
   type(selection_buffer), intent(inout) :: buf
-  logical :: ok
+  logical :: ok, ok_h, use_exc
   integer :: s1, s2, p1, p2, ib, j, istate, jstate
   integer(bit_kind) :: mask(N_int, 2), det(N_int, 2)
   double precision :: e_pert(N_states), coef(N_states)
   double precision :: delta_E, val, Hii, w, tmp, alpha_h_psi
   double precision, external :: diag_H_mat_elem_fock
+  double precision, external :: diag_H_mat_elem_fock_exc
   double precision :: E_shift
   double precision :: s_weight(N_states,N_states)
   logical :: is_cfg
@@ -621,6 +622,7 @@ subroutine fill_buffer_$DOUBLE(i_generator, sp, h1, h2, bannedOrb, banned, fock_
     endif
     call apply_hole(psi_det_generators(1,1,i_generator), s1, h1, mask, ok, N_int)
   endif
+  ok_h = ok
   E_shift = 0.d0
 
   if (is_cfg) then
@@ -767,7 +769,14 @@ subroutine fill_buffer_$DOUBLE(i_generator, sp, h1, h2, bannedOrb, banned, fock_
         if (twice_hierarchy > twice_hierarchy_max) cycle
       endif
 
-      Hii = diag_H_mat_elem_fock(psi_det_generators(1,1,i_generator),det,fock_diag_tmp,N_int)
+      use_exc = .false.
+      if ($IS_DOUBLE) use_exc = ok_h .and. ok .and. &
+        p1 /= h1 .and. p1 /= h2 .and. p2 /= h1 .and. p2 /= h2
+      if (use_exc) then
+        Hii = diag_H_mat_elem_fock_exc(h1,p1,h2,p2,s1,s2,fock_diag_tmp)
+      else
+        Hii = diag_H_mat_elem_fock(psi_det_generators(1,1,i_generator),det,fock_diag_tmp,N_int)
+      endif
 
       w = 0d0
 
