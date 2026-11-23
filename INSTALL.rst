@@ -26,6 +26,13 @@ installed. The required dependencies are located in the
 `external/qp2-dependencies` directory, such that once |qp| is configured the
 internet connection is not needed any more.
 
+The tree can be moved or renamed after configuration: everything is derived
+from the location of :file:`quantum_package.rc`, not from the path where
+:command:`configure` was first run. After a move, re-run :command:`./configure
+-c <your configuration file>`: :file:`build.ninja` embeds the old absolute
+paths and only :command:`configure` regenerates it. If the tree is a linked
+git worktree, run :command:`git worktree repair` in it first.
+
 When all dependencies have been installed, (the :command:`configure` will
 inform you what is missing) source the :file:`quantum_package.rc` in order to
 load all environment variables and compile |QP|.
