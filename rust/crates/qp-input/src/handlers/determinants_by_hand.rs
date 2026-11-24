@@ -876,38 +876,54 @@ fn mo_label_field(pair: &Sexp, node: &Sexp) -> std::result::Result<String, SexpE
     }
 }
 
-/// `int_of_string` as OCaml defines it.
+/// `Int64.of_string` as the OCaml runtime parses it
+/// (`caml_int64_of_string`): an optional sign, an optional base prefix
+/// (`0x`/`0o`/`0b`, and `0u` for unsigned decimal), `_` separators, and the
+/// full int64 range.
+///
+/// A prefixed form is read as an unsigned 64-bit magnitude, reinterpreted two's
+/// complement, and then negated when the sign is `-`: `0x8000000000000000` is
+/// `i64::MIN`, `0xFFFFFFFFFFFFFFFF` is `-1`, and `-0xFFFFFFFFFFFFFFFF` wraps
+/// back to `1` (measured on OCaml 4.11/4.13). Only the unprefixed decimal form
+/// is range-checked (`-2^63 ..= 2^63-1`); the sign applies to both.
+///
+/// Accepting `-9223372036854775808` is what lets the determinant words, which
+/// the sexp writer prints with `%Ld`, round-trip through `of_rst`: a word with
+/// bit 63 set (MO 64, 128, ... occupied) used to be rejected as
+/// `psi_det_of_sexp: invalid int64 "-9223372036854775808"`.
 fn ocaml_int_of_string(text: &str) -> Option<i64> {
-    let (sign, rest) = match text.as_bytes().first() {
-        Some(b'-') => (-1i64, &text[1..]),
-        Some(b'+') => (1, &text[1..]),
-        _ => (1, text),
+    let (negative, rest) = match text.as_bytes().first() {
+        Some(b'-') => (true, &text[1..]),
+        Some(b'+') => (false, &text[1..]),
+        _ => (false, text),
     };
-    let cleaned: String = rest.chars().filter(|c| *c != '_').collect();
-    let (radix, digits) = if let Some(digits) = cleaned
-        .strip_prefix("0x")
-        .or_else(|| cleaned.strip_prefix("0X"))
-    {
-        (16, digits)
-    } else if let Some(digits) = cleaned
-        .strip_prefix("0o")
-        .or_else(|| cleaned.strip_prefix("0O"))
-    {
-        (8, digits)
-    } else if let Some(digits) = cleaned
-        .strip_prefix("0b")
-        .or_else(|| cleaned.strip_prefix("0B"))
-    {
-        (2, digits)
-    } else {
-        (10, cleaned.as_str())
+    // The prefix is recognised *before* the `_` separators are dropped, so
+    // `0_x10` is decimal (and fails), not hexadecimal, as in OCaml.  `0u` is
+    // unsigned decimal: it consumes a prefix but keeps radix 10.
+    let (radix, range_checked) = match rest.get(..2) {
+        Some("0x" | "0X") => (16, false),
+        Some("0o" | "0O") => (8, false),
+        Some("0b" | "0B") => (2, false),
+        Some("0u" | "0U") => (10, false),
+        _ => (10, true),
     };
-    if digits.is_empty() {
+    let digits = if range_checked { rest } else { &rest[2..] };
+    // OCaml reads the first digit before it starts skipping `_`, so a leading
+    // separator (`_1`) is an error while a trailing one (`1_`) is not.
+    digits.chars().next()?.to_digit(radix)?;
+    let magnitude = u64::from_str_radix(&digits.replace('_', ""), radix).ok()?;
+    // The unprefixed decimal form is range-checked: `i64::MAX` when positive,
+    // one more (`2^63`) when negative, since `-2^63` is representable.
+    let limit = (i64::MAX as u64) + u64::from(negative);
+    if range_checked && magnitude > limit {
         return None;
     }
-    i64::from_str_radix(digits, radix)
-        .ok()
-        .map(|value| sign * value)
+    let value = magnitude as i64;
+    if negative {
+        Some(value.wrapping_neg())
+    } else {
+        Some(value)
+    }
 }
 
 /// `float_of_string` as OCaml defines it for the forms the editor emits.
@@ -1302,5 +1318,95 @@ mod tests {
             error.to_string(),
             "State to extract should not be greater than n_states"
         );
+    }
+
+    /// `Int64.of_string` parity, each row measured on OCaml 4.13.1 (4.11
+    /// agrees).  The first row is the one that broke `frame1.ezfio`: the
+    /// decimal spelling of `i64::MIN`, which the sexp writer emits for a word
+    /// whose bit 63 is set.
+    #[test]
+    fn ocaml_int_of_string_covers_the_int64_range() {
+        let cases = [
+            // Decimal: range-checked, `-2^63` included.
+            ("-9223372036854775808", Some(i64::MIN)),
+            ("9223372036854775807", Some(i64::MAX)),
+            ("9223372036854775808", None),
+            ("+9223372036854775808", None),
+            ("-9223372036854775809", None),
+            ("-0", Some(0)),
+            ("00012_3", Some(123)),
+            // Prefixed: unsigned 64-bit wrap, then the sign.
+            ("0x8000000000000000", Some(i64::MIN)),
+            ("+0x8000000000000000", Some(i64::MIN)),
+            ("0xFFFFFFFFFFFFFFFF", Some(-1)),
+            ("-0x1", Some(-1)),
+            ("-0x8000000000000000", Some(i64::MIN)),
+            ("-0xFFFFFFFFFFFFFFFF", Some(1)),
+            ("0x1_0000_0000_0000_0000", None),
+            ("0xFFFFFFFFFFFFFFFFF", None),
+            ("0u9223372036854775808", Some(i64::MIN)),
+            ("0u18446744073709551615", Some(-1)),
+            ("0u18446744073709551616", None),
+            ("-0u1", Some(-1)),
+            ("0U1", Some(1)),
+            ("0B10", Some(2)),
+            ("0O10", Some(8)),
+            ("-0b1", Some(-1)),
+            // `_` separators: skipped after the first digit.
+            ("1_000", Some(1000)),
+            ("1__0", Some(10)),
+            ("1_", Some(1)),
+            ("_1", None),
+            ("-_1", None),
+            ("0x_1", None),
+            ("0x1_", Some(1)),
+            // The prefix is read before separators are dropped.
+            ("0_x10", None),
+            // Rejected atoms (the empty string, a bare sign, padding).
+            ("", None),
+            ("+", None),
+            (" 1", None),
+            ("1 ", None),
+        ];
+        for (text, expected) in cases {
+            assert_eq!(ocaml_int_of_string(text), expected, "{text:?}");
+        }
+    }
+
+    /// End-to-end regression for a determinant whose **last** word has bit 63
+    /// set (MO 128 occupied, the `frame1` case): the rendered bit string
+    /// rebuilds the word, the sexp writer prints it as
+    /// `-9223372036854775808`, and `of_rst` must read it back.
+    #[test]
+    fn of_rst_round_trips_a_last_word_top_bit() {
+        let (_dir, ezfio) = hcn_like();
+        ezfio
+            .set::<i64>("mo_basis", "mo_num", &128)
+            .expect("mo_num");
+        ezfio
+            .set::<i64>("electrons", "elec_alpha_num", &1)
+            .expect("alpha");
+        ezfio
+            .set::<i64>("electrons", "elec_beta_num", &1)
+            .expect("beta");
+        let record = DeterminantsByHand {
+            n_int: 2,
+            bit_kind: 8,
+            n_det: 1,
+            n_det_qp_edit: 1,
+            n_states: 1,
+            expected_s2: 0.0,
+            psi_coef: vec![1.0],
+            psi_det: vec![Determinant::from_words(&[1, 0, 0, 1u64 << 63])],
+            state_average_weight: vec![1.0],
+            mo_label: "Canonical".to_string(),
+        };
+        write(&ezfio, &record, true).expect("write");
+        let reread = read(&ezfio, false).expect("read").expect("some");
+        let rendered = to_rst(&ezfio, &reread).expect("render");
+        // `set` hands `of_rst` the text with one trailing newline removed.
+        let body = rendered.strip_suffix('\n').expect("one final newline");
+        let parsed = parsed(of_rst(&ezfio, body));
+        assert_eq!(parsed.psi_det, record.psi_det);
     }
 }
