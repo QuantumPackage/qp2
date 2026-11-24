@@ -1,8 +1,8 @@
 //! The launcher body of `qp_run`: program resolution, the banner, the
 //! `qp_edit -c` pre-check, the job's exit status, and the two early failures
 //! (missing EZFIO directory, unknown program). The job inherits the
-//! environment: no task-server address variables, no address file, no
-//! launcher-created `work/`.
+//! environment, minus the task-server address variables and plus the one
+//! buffering switch: no address file, no launcher-created `work/`.
 
 mod common;
 
@@ -58,6 +58,27 @@ fn the_job_inherits_no_task_server_environment() {
         "{outcome}"
     );
     assert!(outcome.stdout.contains("Wall time: "), "{outcome}");
+}
+
+/// The job's Fortran runtime does not buffer a redirected log.
+///
+/// libgfortran keeps stdout in memory until `exit` when it is a regular file,
+/// so `qp_run fci h2o.ezfio > fci.out` left the file empty for the whole run.
+/// The launcher sets the runtime's own switch for every job; the value is
+/// asserted here because the shim is a shell script and cannot buffer.
+#[test]
+fn the_job_output_is_not_buffered() {
+    let fixture = Fixture::new();
+    fixture.program("scf", &observe_script("exit 0"));
+    let outcome = fixture.run(&["scf", fixture.ezfio_str()]);
+    assert_eq!(outcome.code(), 0, "{outcome}");
+    assert_eq!(
+        observed(&fixture.work())
+            .get("unbuffered")
+            .map(String::as_str),
+        Some("1"),
+        "GFORTRAN_UNBUFFERED_PRECONNECTED must reach the job\n{outcome}"
+    );
 }
 
 /// A non-zero job status is reported and becomes the tool's status, after

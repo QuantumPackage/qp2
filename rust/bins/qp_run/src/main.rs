@@ -200,10 +200,10 @@ fn drive(config: &RunConfig, programs: &Programs) -> Result<i32, Fatal> {
         return Err(Fatal::failure(INCONSISTENT_INPUT));
     }
 
-    // 6. Run the executable. The job inherits the environment: the launcher
-    //    sets no extra variables (the task-server address is gone).
+    // 6. Run the executable. The job inherits the environment, plus the
+    //    switch that keeps a redirected log live (`launch::JOB_ENV`).
     let command = launch::job_command(config.prefix.as_deref(), program, ezfio);
-    let mut child = launch::spawn_command(&command, &[])?;
+    let mut child = launch::spawn_command(&command, &launch::JOB_ENV)?;
     let status = signal::wait_for_job(&mut child, ezfio)?;
     let job_code = launch::exit_code(status);
     if job_code != 0 {

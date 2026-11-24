@@ -324,6 +324,8 @@ pub fn observed(work: &Path) -> std::collections::BTreeMap<String, String> {
 /// * `address` — `QP_RUN_ADDRESS` as the job sees it; `UNSET` is expected
 ///   (the task-server environment is gone);
 /// * `master` — `QP_RUN_ADDRESS_MASTER`; `UNSET` is expected;
+/// * `unbuffered` — `GFORTRAN_UNBUFFERED_PRECONNECTED`; `1` is expected
+///   (the launcher's only addition to the environment);
 /// * `file` — whether `<work>/qp_run_address` exists *while* the job runs;
 ///   `absent` is expected;
 /// * `workdir` — whether `<ezfio>/work` existed before the job created it;
@@ -341,6 +343,7 @@ mkdir -p \"$dir/work\"
 printf 'arg1=%s\n' \"$1\"
 printf 'address=%s\n' \"${{QP_RUN_ADDRESS-UNSET}}\"
 printf 'master=%s\n' \"${{QP_RUN_ADDRESS_MASTER-UNSET}}\"
+printf 'unbuffered=%s\n' \"${{GFORTRAN_UNBUFFERED_PRECONNECTED-UNSET}}\"
 printf 'file=%s\n' \"$file\"
 printf 'workdir=%s\n' \"$workdir\"
 }} > \"$dir/work/observed\"
