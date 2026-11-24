@@ -267,7 +267,7 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
   ! first.  Building them here, in the pre-loop block, guarantees they
   ! exist before the bilinear-matrix providers are built in the loop, so
   ! the lazy-build guards are no-ops for every worker.
-  PROVIDE psi_det_alpha_unique psi_det_beta_unique
+  PROVIDE psi_det_alpha_unique psi_det_beta_unique pair_cache_mb
   PROVIDE psi_det_hii selection_weight pseudo_sym
   PROVIDE n_act_orb n_inact_orb n_core_orb n_virt_orb n_del_orb seniority_max
   PROVIDE excitation_beta_max  excitation_alpha_max excitation_max

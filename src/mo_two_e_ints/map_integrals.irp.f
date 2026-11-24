@@ -7,7 +7,7 @@ BEGIN_PROVIDER [ logical, all_mo_integrals ]
 ! Used to provide everything needed before using MO integrals
 ! PROVIDE all_mo_integrals
   END_DOC
-  PROVIDE gpu_integral_buffer2 gpu_integral_buffer1
+  PROVIDE gpu_integral_buffer2 gpu_integral_buffer1 pair_cache pair_cache_mb
   PROVIDE mo_integrals_cache mo_two_e_integrals_in_map big_array_exchange_integrals big_array_coulomb_integrals mo_two_e_integrals_jj_exchange mo_two_e_integrals_jj_anti mo_two_e_integrals_jj mo_one_e_integrals 
 END_PROVIDER
 
@@ -560,6 +560,7 @@ subroutine pair_cache_verify_block(k,l,sze,cached)
   integer                       :: i,j
   integer(8)                    :: bits_cached, bits_ref
   logical                       :: mine
+  PROVIDE pair_cache
 
   ! The caller's lock-free `pair_cache_check(1) == 0` read is not a claim:
   ! several walkers can pass it in the same instant, and each would pay a
@@ -591,8 +592,8 @@ subroutine pair_cache_verify_block(k,l,sze,cached)
   enddo
   deallocate(ref)
 
-  write(6,'(A,I0,A,I0,A)') 'Pair cache: first block hit, (',k,',',l, &
-    '), bit-identical to the uncached block'
+!  write(6,'(A,I0,A,I0,A)') 'Pair cache: first block hit, (',k,',',l, &
+!    '), bit-identical to the uncached block'
 end
 
 
@@ -641,9 +642,9 @@ subroutine pair_cache_verify_column(j,k,l,sze,cached)
     call qp_bug(irp_here, 2, 'pair_cache: a column hit is not the right column')
   endif
 
-  write(6,'(A,I0,A,I0,A,I0,A,ES12.4,A)') 'Pair cache: first column hit, (',j, &
-    ',',k,',',l, '), relative deviation from the dgemv column ', ratio, &
-    ' (gemm roundings; expected ~1e-11)'
+!  write(6,'(A,I0,A,I0,A,I0,A,ES12.4,A)') 'Pair cache: first column hit, (',j, &
+!    ',',k,',',l, '), relative deviation from the dgemv column ', ratio, &
+!    ' (gemm roundings; expected ~1e-11)'
 end
 
 
