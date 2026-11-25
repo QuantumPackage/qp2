@@ -36,10 +36,10 @@ program mrci
 !
   END_DOC
 
+  call json_init('mrci')
+
   PROVIDE all_mo_integrals
   PROVIDE psi_det psi_coef
-
-  write(json_unit,json_array_open_fmt) 'fci'
 
   double precision, allocatable :: Ev(:),PT2(:)
   allocate(Ev(N_states), PT2(N_states))
@@ -48,10 +48,5 @@ program mrci
   else
     call run_cipsi
   endif
-
-  write(json_unit,json_dict_uopen_fmt)
-  write(json_unit,json_dict_close_fmtx)
-  write(json_unit,json_array_close_fmtx)
-  call json_close
 
 end

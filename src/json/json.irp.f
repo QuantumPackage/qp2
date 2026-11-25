@@ -1,16 +1,19 @@
-BEGIN_PROVIDER [ character*(128), json_filename ]
+BEGIN_PROVIDER [ character*(2048), json_filename ]
  implicit none
  BEGIN_DOC
- ! Fortran unit of the JSON file
+ ! Path of the JSON result file of this run: <EZFIO>/json/NNNNN.json
+ !
+ ! The EZFIO setter below creates the json/ directory and marks the EZFIO
+ ! file as carrying JSON output; it has to run before the file is opened.
  END_DOC
- integer, external            :: getUnitAndOpen
  integer                      :: counter
- character*(128)              :: prefix
+ character*(2048)             :: prefix
  logical                      :: exists
 
  prefix = trim(ezfio_filename)//'/json/'
 
  call lock_io
+ call ezfio_set_json_empty(.False.)
  exists = .True.
  counter = 0
  do while (exists)
@@ -22,28 +25,24 @@ BEGIN_PROVIDER [ character*(128), json_filename ]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, json_unit]
- implicit none
- BEGIN_DOC
- ! Unit file for JSON output
- END_DOC
- integer, external :: getUnitAndOpen
- call ezfio_set_json_empty(.False.)
- call lock_io
- json_unit = getUnitAndOpen(json_filename, 'w')
- write(json_unit, '(A)') '{'
- call unlock_io
-END_PROVIDER
+subroutine json_init(kind)
+  use iso_c_binding, only: c_int
+  use qp_json, only: qp_json_begin, json_add
+  implicit none
+  BEGIN_DOC
+  ! Start the JSON logging of this run and write the first version of the
+  ! file. Called once per program, before any json_add.
+  END_DOC
+  character(len=*), intent(in) :: kind
 
-subroutine json_close
- BEGIN_DOC
- ! Closes the JSON output file: writes the final closing brace,
- ! closes the file on unit json_unit and frees json_unit.
- END_DOC
- call lock_io
- write(json_unit, '(A)') '}'
- close(json_unit)
- call unlock_io
- FREE json_unit
+  PROVIDE json_filename
+  call qp_json_begin(trim(kind), trim(json_filename), trim(ezfio_filename), &
+                     merge(1_c_int, 0_c_int, mpi_master))
+  if (mpi_master) then
+    ! ezfio_files is excluded from the automatic input capture: a NEED
+    ! entry on json would close a dependency cycle. Its one input that
+    ! the calculation really inspects (ao_basis checks it against a
+    ! format version) is logged here by hand.
+    call json_add('/input/ezfio_files/ezfio_convention', ezfio_convention)
+  endif
 end
-

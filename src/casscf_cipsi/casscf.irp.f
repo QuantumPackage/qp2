@@ -27,11 +27,13 @@ subroutine run
   ! compares norm_grad_vec2 with thresh_scf, "e_pt2" compares the
   ! variation of the E+PT2 energies with thresh_casscf.
   END_DOC
+  use qp_json, only: json_add
   implicit none
   double precision               :: energy_old, energy, pt2_max_before,delta_E
   logical                        :: converged,state_following_casscf_cipsi_save
   integer                        :: iteration,istate
   double precision, allocatable :: E_PT2(:), PT2(:), Ev(:), ept2_before(:)
+  call json_init('casscf')
   allocate(E_PT2(N_states), PT2(N_states), Ev(N_states), ept2_before(N_states))
   converged = .False.
 
@@ -122,6 +124,15 @@ subroutine run
       enddo
       converged = dabs(delta_E) < thresh_casscf
      endif
+
+     call json_add('/results/casscf/iteration', iteration)
+     call json_add('/results/casscf/energy', e_av)
+     call json_add('/results/casscf/states/energy', Ev(1:N_states))
+     call json_add('/results/casscf/states/energy_pt2', E_PT2(1:N_states))
+     call json_add('/results/casscf/states/pt2', PT2(1:N_states))
+     call json_add('/results/casscf/norm_grad', norm_grad_vec2)
+     call json_add('/results/casscf/converged', converged)
+
      ept2_before = E_PT2
      if(.not.small_active_space)then
       if(adaptive_pt2_max)then

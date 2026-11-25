@@ -78,9 +78,9 @@ subroutine run
 
   integer                        :: i_it, i, j, k
 
-  mo_label = 'Orthonormalized'
+  call json_init('scf')
 
-  write(json_unit,json_array_open_fmt) 'scf'
+  mo_label = 'Orthonormalized'
 
   if (use_optimal_damping.and.all_shells_closed) then
 !    call OpenOrbitalOptimiserSCF
@@ -88,9 +88,6 @@ subroutine run
   else
     call Roothaan_Hall_SCF
   endif
-
-  write(json_unit,json_array_close_fmtx)
-  call json_close
 
   call ezfio_set_hartree_fock_energy(SCF_energy)
 

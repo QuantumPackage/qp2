@@ -36,10 +36,10 @@ program fci
   !
   END_DOC
 
+  call json_init('fci')
+
   PROVIDE all_mo_integrals
   PROVIDE psi_det psi_coef
-
-  write(json_unit,json_array_open_fmt) 'fci'
 
   double precision, allocatable :: Ev(:),PT2(:)
   allocate(Ev(N_states), PT2(N_states))
@@ -54,10 +54,5 @@ program fci
   call pg_zero_state_irreps()
   call save_wavefunction
   call pg_print_state_irreps(psi_energy_with_nucl_rep, psi_s2)
-
-  write(json_unit,json_dict_uopen_fmt)
-  write(json_unit,json_dict_close_fmtx)
-  write(json_unit,json_array_close_fmtx)
-  call json_close
 
 end

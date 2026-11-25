@@ -5,3 +5,4 @@ pseudo
 bitmask
 ao_basis
 libcint_ao_integrals
+json

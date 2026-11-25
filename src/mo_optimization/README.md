@@ -26,10 +26,11 @@ qp run orb_opt
 ## For a complete optimization, i.e, with a larger and larger wave function
 To optimize the MOs with a larger and larger wave function:  
 ``` 
-qp run optimization  
+qp run cipsi_orb_opt  
 ``` 
 
-The results are stored in the EZFIO in "mo_optimization/result_opt",
+Each cycle prints its four numbers and stores them in `/results/mo_opt` of
+the run's JSON document (`<EZFIO>/json/NNNNN.json`, last cycle only),
 with the following format:  
 (1) (2) (3) (4)  
 1: Number of determinants in the wf,  

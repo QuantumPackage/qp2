@@ -95,17 +95,15 @@ subroutine run
 
   double precision               :: EHF
 
+  call json_init('ks_scf')
+
   EHF = KS_energy
 
   mo_label = "Orthonormalized"
 
 ! Choose SCF algorithm
 
-  write(json_unit,*) '"scf" : ['
   call Roothaan_Hall_SCF
-  write(json_unit,*) ']'
-
-  call json_close
 
   call pg_print_mo_energies(Fock_matrix_diag_mo, mo_num)
   call pg_report_mo_symmetry()
