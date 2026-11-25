@@ -22,6 +22,7 @@
   - Using now standard convention in RDM
   - Added molecular properties
   - Added GTOs with complex exponent
+  - Added domain perturbation theory (module ~domain_perturbation~)
 
 *** TODO: take from dev
   - Updated version of f77-zmq
