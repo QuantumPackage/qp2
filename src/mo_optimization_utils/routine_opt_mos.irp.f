@@ -4,9 +4,9 @@ subroutine run_optimization_mos_CIPSI
   ! Orbital optimization with a wave function that grows as the
   ! optimization proceeds: each cycle runs a stochastic CIPSI step
   ! (run_stochastic_cipsi) then an orbital optimization
-  ! (run_orb_opt_trust_v2), and doubles N_det_max. n_det, the
-  ! energy before and after each optimization and their difference
-  ! are appended to mo_optimization/result_opt in the EZFIO file.
+  ! (run_orb_opt_trust_v2), and doubles N_det_max. Each cycle writes
+  ! n_det, the energy before and after the optimization and their
+  ! difference to /results/mo_opt of the JSON result document.
   END_DOC
 
   use qp_json, only: json_add
@@ -16,7 +16,6 @@ subroutine run_optimization_mos_CIPSI
   double precision, allocatable :: Ev(:),PT2(:)
   integer :: nb_iter,i
   logical :: not_converged
-  character (len=100) :: filename
 
   call json_init('cipsi_orb_opt')
 
@@ -30,11 +29,8 @@ subroutine run_optimization_mos_CIPSI
   N_det_max = max(n_det,5)
   TOUCH N_det_max
 
-  open(unit=10, file=trim(ezfio_filename)//'/mo_optimization/result_opt')
-  write(10,*) "   Ndet        E_cipsi         E_opt          Delta_e"
+  ! State average energy of the wave function we start from
   call state_average_energy(e_cipsi)
-  write(10,'(I10, 3F15.7)') n_det, e_cipsi, e_cipsi, 0d0
-  close(10)
 
   do while (not_converged)
       print*,''
@@ -68,10 +64,6 @@ subroutine run_optimization_mos_CIPSI
       call json_add('/results/mo_opt/energy_cipsi', e_cipsi)
       call json_add('/results/mo_opt/energy_opt', e_opt)
       call json_add('/results/mo_opt/delta_energy', delta_e)
-
-      open(unit=10, file=trim(ezfio_filename)//'/mo_optimization/result_opt', position='append')
-      write(10,'(I10, 3F15.7)') n_det, e_cipsi, e_opt, delta_e
-      close(10)
 
       ! Exit
       if (delta_e > 1d-12) then
