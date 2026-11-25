@@ -22,6 +22,11 @@
     ~qp_run~ is a thin launcher; the slave and task-server modes are
     gone, along with the ~qp_tunnel~, ~qp_srun~ and ~qp_mpirun~
     launchers and the MPI build configurations.
+  - ~qp_run~ prints the git information of the running tree again, as
+    ~qp2~ did: the commit subject, date and SHA1 of the ~QP_ROOT~ tree
+    are read at run time (the ~QP_GIT_MESSAGE~, ~QP_GIT_DATE~ and
+    ~QP_GIT_SHA1~ variables override them). A tree that is not a git
+    checkout prints ~unknown~.
   - The CIPSI/MRCI selected spaces at the default threshold may differ
     from the pre-removal release: the old distributed selection merged
     the worker contributions in arrival order, so its result was

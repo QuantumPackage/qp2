@@ -37,7 +37,7 @@
 //! | variable | meaning |
 //! |---|---|
 //! | `QP_ROOT` | QP2 tree (else derived from the executable) |
-//! | `QP_GIT_SHA1`/`QP_GIT_DATE`/`QP_GIT_MESSAGE` | banner stamp, `unknown` when unset |
+//! | `QP_GIT_SHA1`/`QP_GIT_DATE`/`QP_GIT_MESSAGE` | banner stamp overrides (else the `QP_ROOT` tree's `HEAD`, else `unknown`) |
 //! | `QP_RUN_QP_EDIT` | program used for the `-c` pre-check (default `qp_edit`) |
 //!
 //! The last one is a documented test seam; nothing else in the tool reads
@@ -51,7 +51,9 @@
 //!   the exit code match, including the `255` of a signalled shell.
 //! * SIGUSR1 sets a flag; `qp_stop` runs from the main thread at most 200 ms
 //!   later instead of inside the handler (see `qp_cli::signal`).
-//! * The Git stamp comes from the environment instead of being compiled in.
+//! * The Git stamp is resolved at run time from the `QP_ROOT` tree
+//!   (`git log -1`) instead of being compiled in, so it names the sources the
+//!   run uses and the build stays reproducible.
 //! * Error text: `<tool>: <message>` on stderr with the reference's exit
 //!   status (2 for a `failwith`) instead of
 //!   `Fatal error: exception Failure("…")`.
@@ -158,11 +160,11 @@ fn run() -> Result<i32, Fatal> {
     // prints its own plain diagnostic and exits 2.
     let args = RunArgs::parse();
     let config = args.validate();
-    drive(&config, &programs)
+    drive(&config, &programs, &root)
 }
 
 /// The launcher body.
-fn drive(config: &RunConfig, programs: &Programs) -> Result<i32, Fatal> {
+fn drive(config: &RunConfig, programs: &Programs, root: &Path) -> Result<i32, Fatal> {
     let time_start = unix_time();
 
     // 1. The EZFIO directory must exist.
@@ -191,7 +193,7 @@ fn drive(config: &RunConfig, programs: &Programs) -> Result<i32, Fatal> {
     };
 
     // 4. Banner.
-    print_banner(ezfio, time_start)?;
+    print_banner(ezfio, time_start, root)?;
 
     // 5. Input consistency.
     let editor = std::env::var(QP_EDIT_VAR).unwrap_or_else(|_| DEFAULT_QP_EDIT.to_string());
@@ -218,6 +220,10 @@ fn drive(config: &RunConfig, programs: &Programs) -> Result<i32, Fatal> {
 
 /// Print the startup block.
 ///
+/// The Git stamp is [`GitStamp::resolve`]d from `root`: the tree whose
+/// `data/executables` named the program about to run, overridden value by
+/// value by `QP_GIT_SHA1`/`QP_GIT_DATE`/`QP_GIT_MESSAGE`.
+///
 /// The hour is `tm_hour + (if tm_isdst then 1 else 0)`: the reference adds an
 /// hour when daylight saving is in effect, although `localtime` already
 /// applied it. Reproduced as-is — the line is informational, and the QP2
@@ -226,9 +232,9 @@ fn drive(config: &RunConfig, programs: &Programs) -> Result<i32, Fatal> {
 /// # Errors
 ///
 /// [`Fatal`] when `localtime_r` fails (an epoch outside `time_t`'s range).
-fn print_banner(ezfio: &str, start: i64) -> Result<(), Fatal> {
+fn print_banner(ezfio: &str, start: i64, root: &Path) -> Result<(), Fatal> {
     let tm = qp_cli::ffi::local_time(start)?;
-    let stamp = GitStamp::from_env();
+    let stamp = GitStamp::resolve(root);
     let hour = tm.hour + u32::from(tm.isdst);
     println!(
         "Date: {:02}/{:02}/{:04} {hour:02}:{:02}:{:02}",
