@@ -1,5 +1,6 @@
 subroutine run_stochastic_cipsi(Ev,PT2)
   use selection_types
+  use qp_json, only: json_add
   implicit none
   BEGIN_DOC
 ! Selected Full Configuration Interaction with Stochastic selection and PT2.
@@ -101,6 +102,7 @@ subroutine run_stochastic_cipsi(Ev,PT2)
     call increment_n_iter(psi_energy_with_nucl_rep, pt2_data)
     call print_extrapolated_energy()
     call print_mol_properties()
+    call json_add('/results/cipsi/algorithm', 'stochastic')
     call write_cipsi_json(pt2_data,pt2_data_err)
 
     if (qp_stop()) exit

@@ -4,6 +4,7 @@ BEGIN_DOC
 ! Roothaan-Hall algorithm for SCF Hartree-Fock calculation
 END_DOC
 
+  use qp_json, only: json_add
   implicit none
 
   double precision               :: energy_SCF,energy_SCF_previous,Delta_energy_SCF
@@ -185,39 +186,21 @@ END_DOC
 
 !   Write data in JSON file
 
-    call lock_io
-    if (iteration_SCF == 1) then
-      write(json_unit, json_dict_uopen_fmt)
-    else
-      write(json_unit, json_dict_close_uopen_fmt)
-    endif
-    write(json_unit, json_int_fmt) 'iteration', iteration_SCF
-    write(json_unit, json_real_fmt) 'energy', energy_SCF
-    write(json_unit, json_real_fmt) 'delta_energy_SCF', Delta_energy_SCF
-    write(json_unit, json_real_fmt) 'max_error_DIIS', max_error_DIIS
-    write(json_unit, json_real_fmt) 'level_shift', level_shift
-    write(json_unit, json_int_fmt) 'dim_DIIS', dim_DIIS
-    call unlock_io
+    call json_add('/results/scf/iteration', iteration_SCF)
+    call json_add('/results/scf/energy', energy_SCF)
+    call json_add('/results/scf/delta_energy', Delta_energy_SCF)
+    call json_add('/results/scf/max_error_diis', max_error_DIIS)
+    call json_add('/results/scf/level_shift', level_shift)
+    call json_add('/results/scf/dim_diis', dim_DIIS)
+    call json_add('/results/scf/converged', converged)
 
     if (Delta_energy_SCF < 0.d0) then
       call save_mos
-      write(json_unit, json_true_fmt) 'saved'
-    else
-      write(json_unit, json_false_fmt) 'saved'
     endif
-
-    call lock_io
-    if (converged) then
-      write(json_unit, json_true_fmtx) 'converged'
-    else
-      write(json_unit, json_false_fmtx) 'converged'
-    endif
-    call unlock_io
 
     if (qp_stop()) exit
 
   enddo
-  write(json_unit, json_dict_close_fmtx)
 
  if (iteration_SCF < n_it_SCF_max) then
    mo_label = 'Canonical'

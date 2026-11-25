@@ -41,6 +41,7 @@ class EZFIO_Provider(object):
 
     data = """
 BEGIN_PROVIDER [ %(type)s, %(name)s %(size)s ]
+%(json_use)s
   implicit none
   BEGIN_DOC
 ! %(doc)s
@@ -54,6 +55,7 @@ BEGIN_PROVIDER [ %(type)s, %(name)s %(size)s ]
     if (has) then
 !      write(6,'(A)') '.. >>>>> [ IO READ: %(name)s ] <<<<< ..'
       call ezfio_get_%(ezfio_dir)s_%(ezfio_name)s(%(name)s)
+%(json_log)s
     else
       print *, '%(ezfio_dir)s/%(ezfio_name)s not found in EZFIO file'
       stop 1
@@ -75,6 +77,7 @@ END_PROVIDER
     def __repr__(self):
         self.set_write()
         self.set_test_null_size()
+        self.set_json_hook()
         for v in self.values:
             if not v:
                 msg = "Error : %s is not set in EZFIO.cfg" % (v)
@@ -92,6 +95,30 @@ END_PROVIDER
             self.test_null_size = "if (size(%s) == 0) return\n" % ( self.name )
         else:
             self.test_null_size = ""
+
+    json_type_ok = ("logical", "integer", "double precision")
+
+    # Modules inside json's own NEED closure: json -> ezfio_files -> utils.
+    # A generated `use qp_json` there would close a dependency cycle, so
+    # their providers are not hooked (src/json/DESIGN.md section 9.2).
+    # ezfio_files/ezfio_convention is logged by hand in json_init, and
+    # utils/restore_symm is never read by any source file.
+    json_no_need_modules = ("ezfio_files", "utils")
+
+    def set_json_hook(self):
+        if "size" not in self.__dict__:
+            self.__dict__["size"] = ""
+        scalar = (self.size == "")
+        typed = (self.type in self.json_type_ok
+                 or self.type.startswith("character"))
+        hooked = getattr(self, "module_lower", None) not in self.json_no_need_modules
+        if scalar and typed and hooked:
+            self.json_use = "  use qp_json, only: json_add"
+            self.json_log = ("      call json_add('/input/%(ezfio_dir)s/%(ezfio_name)s',"
+                             " %(name)s)" % self.__dict__)
+        else:
+            self.json_use = ""
+            self.json_log = ""
 
     def set_write(self):
         output = self.output

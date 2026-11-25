@@ -348,6 +348,7 @@ def create_ezfio_provider(dict_ezfio_cfg):
             ez_p.set_ezfio_dir(dict_info['ezfio_dir'])
             ez_p.set_ezfio_name(dict_info['ezfio_name'])
             ez_p.set_output("6")
+            ez_p.module_lower = dict_info['module'].lower
 
             # (nuclei.nucl_num,pseudo.klocmax) => (nucl_num,klocmax)
             ez_p.set_size(re.sub(r'\w+\.', "", dict_info['size']))
