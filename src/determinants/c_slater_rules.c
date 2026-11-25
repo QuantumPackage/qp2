@@ -24,7 +24,7 @@ void get_excitation_degree_c(const uint64_t *restrict key1,
    * High efficiency for small Nint using masking to avoid remainder loops.
    */
   __m512i vsum = _mm512_setzero_si512();
-  for (; i <= (n >= 8 ? n - 8 : -1); i += 8) {
+  for (; i + 8 <= n; i += 8) {
     __m512i x = _mm512_xor_si512(_mm512_loadu_si512(&key1[i]),
                                  _mm512_loadu_si512(&key2[i]));
     vsum = _mm512_add_epi64(vsum, _mm512_popcnt_epi64(x));
