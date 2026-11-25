@@ -48,8 +48,8 @@ subroutine domain_replica(istate,irep,e_ref,tv,exact,delta2,delta)
   ! of the reference space.
   !
   ! If exact, tv contains the exact v, and delta2 is the
-  ! exact $\Delta_2$. Otherwise two independent samples of v are used,
-  ! so $\Delta_2$ is unbiased.
+  ! exact $\Delta_2$. Otherwise $c_0$ is a sample of v, and the elements
+  ! of v needed by the scores are computed exactly on the fly.
   END_DOC
   integer, intent(in)           :: istate, irep
   double precision, intent(in)  :: e_ref
@@ -57,7 +57,7 @@ subroutine domain_replica(istate,irep,e_ref,tv,exact,delta2,delta)
   logical, intent(in)           :: exact
   double precision, intent(in)  :: delta2(0:domain_njet)
   double precision, intent(out) :: delta(2:n_pert,0:domain_njet)
-  type(det_table) :: c, cn, t1, t2
+  type(det_table) :: c, cn, t1
   double precision, allocatable :: d0(:,:), z(:,:), zphi(:,:), score(:)
   double precision :: mw
   integer(8) :: seed
@@ -77,9 +77,6 @@ subroutine domain_replica(istate,irep,e_ref,tv,exact,delta2,delta)
     call table_create(t1,2*N_int,njet)
     call domain_make_seed(istate,irep,1,seed)
     call domain_spawn_d0(zphi,njet,mw,seed,t1)
-    call table_create(t2,2*N_int,njet)
-    call domain_make_seed(istate,irep,2,seed)
-    call domain_spawn_d0(zphi,njet,mw,seed,t2)
   endif
 
   do q=0,n_pert-2
@@ -91,20 +88,20 @@ subroutine domain_replica(istate,irep,e_ref,tv,exact,delta2,delta)
       if (q == 0) then
         score = delta2
         if (spawn) then
-          call domain_generation(e_ref,tv,.False.,tv,    &
-              score,.True.,mw,seed,cn,d0)
+          call domain_generation(istate,e_ref,tv,.False.,.False., &
+              tv,score,.True.,mw,seed,cn,d0)
           score = delta2
         endif
       else
-        call domain_generation(e_ref,c,.True.,tv,        &
+        call domain_generation(istate,e_ref,c,.True.,.False.,tv,   &
             score,spawn,mw,seed,cn,d0)
       endif
     else
       if (q == 0) then
-        call domain_generation(e_ref,t1,.True.,t2,       &
+        call domain_generation(istate,e_ref,t1,.True.,.True.,tv,   &
             score,spawn,mw,seed,cn,d0)
       else
-        call domain_generation(e_ref,c,.True.,t2,        &
+        call domain_generation(istate,e_ref,c,.True.,.True.,tv,    &
             score,spawn,mw,seed,cn,d0)
       endif
     endif
@@ -128,7 +125,6 @@ subroutine domain_replica(istate,irep,e_ref,tv,exact,delta2,delta)
   call table_free(c)
   if (.not.exact) then
     call table_free(t1)
-    call table_free(t2)
   endif
   deallocate(d0,z,zphi,score)
 end
@@ -171,7 +167,7 @@ subroutine domain_samples(istate,e_ref,nrep,exact,first,delta2,dr)
   logical, intent(in)           :: exact, first
   double precision, intent(out) :: delta2(0:domain_njet)
   double precision, intent(out) :: dr(2:n_pert,0:domain_njet,nrep)
-  type(det_table) :: tv, tdum, t1, t2
+  type(det_table) :: tv, tdum, t1
   double precision, allocatable :: zphi(:,:), d0(:,:)
   integer(8) :: seed
   integer :: r, njet
@@ -193,17 +189,13 @@ subroutine domain_samples(istate,e_ref,nrep,exact,first,delta2,dr)
     call table_create(t1,2*N_int,njet)
     call domain_make_seed(istate,0,1,seed)
     call domain_spawn_d0(zphi,njet,dble(n_walkers),seed,t1)
-    call table_create(t2,2*N_int,njet)
-    call domain_make_seed(istate,0,2,seed)
-    call domain_spawn_d0(zphi,njet,dble(n_walkers),seed,t2)
-    call domain_generation(e_ref,t1,.True.,t2,delta2,.False.,        &
-        0.d0,0_8,tdum,d0)
+    call domain_generation(istate,e_ref,t1,.True.,.True.,tv,delta2,  &
+        .False.,0.d0,0_8,tdum,d0)
     call table_free(t1)
-    call table_free(t2)
   endif
   if (exact) then
-    call domain_generation(e_ref,tv,.True.,tv,delta2,.False.,        &
-        0.d0,0_8,tdum,d0)
+    call domain_generation(istate,e_ref,tv,.True.,.False.,tv,        &
+        delta2,.False.,0.d0,0_8,tdum,d0)
   endif
   call table_free(tdum)
   if (.not.first) then

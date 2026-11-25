@@ -172,6 +172,15 @@ contains
     end do
   end function
 
+  ! Mixing of an integer, to obtain independent streams of random numbers
+  pure integer(8) function det_mix(x)
+    integer(8), intent(in) :: x
+    integer(8) :: z
+    z = ieor(x,shiftr(x,30)) * (-4658895280553007687_8)
+    z = ieor(z,shiftr(z,27)) * (-7723592293110705685_8)
+    det_mix = ieor(z,shiftr(z,31))
+  end function
+
   ! Reproducible random numbers, independent of the number of threads
   double precision function det_rnd(state)
     integer(8), intent(inout) :: state

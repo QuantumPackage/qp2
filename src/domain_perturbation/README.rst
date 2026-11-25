@@ -29,8 +29,15 @@ states.
   which the statistical errors are computed.
 
 * :option:`domain_perturbation exact_coupling` : if |true|, the coupling between
-  the reference and the external determinants is stored. If |false|, it is
-  sampled.
+  the reference and the external determinants is stored, which is possible
+  only for small systems. If |false|, it is sampled, and its elements needed by
+  the scores are computed on the fly.
+
+* :option:`domain_perturbation domain_heat_bath` : if |true|, the
+  excitations are drawn with the heat-bath algorithm, without enumerating the
+  connected determinants. This is needed for large systems. If |false|, all
+  the connected determinants are enumerated: the statistical error is smaller for
+  a given number of walkers.
 
 * :option:`domain_perturbation domain_seed` : seed of the random numbers. The
   random numbers do not depend on the number of threads.
@@ -118,6 +125,15 @@ Limitations:
 
 * the external domains are not spin-adapted.
 
+* domains with more than one determinant (n_det_domain > 1) are built by
+  enumerating the connected determinants, which is too slow for large systems.
+
+* in large spaces the annihilation is not effective, and the statistical error
+  grows quickly with the order. For benzene in cc-pVDZ (frozen core, 1176
+  determinants, 2e7 walkers, 40 replicas, 8 minutes on 20 threads) the errors
+  are 1.2e-4 at order 2 and 1.6e-3 at order 3. The fourth order was not
+  computed with a useful precision.
+
 
 Validation
 ----------
@@ -156,11 +172,12 @@ The implementation was compared to the following data.
   10833 determinants the differences are 1e-9 and 2e-10, because :ref:`pt2`
   uses only 1080 and 10678 selectors and generators.
 
-* Stochastic evaluation, compared to the deterministic one: 150 seeds with
-  20 replicas, for 3 states and orders 2 to 7, with exact_coupling=False. No
-  bias is seen (largest deviation 1.9 standard deviations), and the standard
-  deviation of the results is between 0.8 and 1.04 times the mean of
-  the estimated error.
+* Stochastic evaluation, compared to the deterministic one, water, STO-3G: 150
+  seeds with 20 replicas, for 3 states and orders 2 to 7, with
+  exact_coupling=False and domain_heat_bath=True. No bias is seen (largest
+  deviation 2.1 standard deviations over 18 values), and the standard
+  deviation of the results is between 0.87 and 1.17 times the mean of the
+  estimated error. The results do not depend on the number of threads.
 
 * Chebyshev series: agreement of the weights, of the plain series and of the
   accelerated series with the dense code (1e-8 for the first two states of
@@ -184,5 +201,7 @@ The programmer's point of view
 * ``propagate.irp.f`` : one generation.
 
 * ``domain_series.irp.f`` : replicas, and Rayleigh-Schrodinger series.
+
+* ``heat_bath.irp.f`` : tables and sampling of the excitations.
 
 * ``chebyshev.irp.f`` : weights, interval and self-consistent energy.

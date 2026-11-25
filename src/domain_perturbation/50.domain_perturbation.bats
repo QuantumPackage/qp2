@@ -50,6 +50,7 @@ function run_stoch() {
   qp set domain_perturbation n_pert $1
   qp set domain_perturbation n_det_domain $2
   qp set domain_perturbation exact_coupling $3
+  qp set domain_perturbation domain_heat_bath $5
   qp set domain_perturbation n_walkers 5000
   qp set domain_perturbation n_replicas 20
   qp set domain_perturbation domain_seed 1
@@ -84,6 +85,7 @@ function run_stoch() {
   qp reset -d
   run "-2.017046423901" 4 1
   run "-2.016898059074" 4 4
-  run_stoch 4 4 true  "-2.016898059074"
-  run_stoch 4 1 false "-2.017046423901"
+  run_stoch 4 4 true  "-2.016898059074" false
+  run_stoch 4 4 true  "-2.016898059074" true
+  run_stoch 4 1 false "-2.017046423901" true
 }

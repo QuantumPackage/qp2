@@ -18,13 +18,31 @@ subroutine domain_spawn_d0(z,njet,n_walk,seed,tout)
   integer(bit_kind), allocatable :: list(:,:,:)
   double precision, allocatable  :: h(:), cum(:)
   double precision :: norm, a, u, x(0:njet), wt, fac
+  integer, allocatable :: t_det(:), t_nd(:), t_id(:)
+  double precision, allocatable :: t_a(:)
+  integer          :: ntask, itask, m, nw
+  integer, parameter :: chunk = 10000
   integer          :: i, k, n, nq, nd, it
   integer(8)       :: state
+  integer          :: no(2), nv(2), npair, nlist
+  integer          :: occ(N_int*bit_kind_size,2)
+  integer          :: vir(N_int*bit_kind_size,2)
+  integer, allocatable :: pij(:), ptype(:)
+  double precision, allocatable :: pcum(:)
+  integer(bit_kind) :: d2(N_int,2)
+  double precision :: hij, pgen
+  logical          :: hb
   integer, external :: domain_index_d0
 
   PROVIDE all_mo_integrals N_int generators_bitmask domain_jet_scale
   PROVIDE psi_det psi_det_sorted_bit psi_coef_sorted_bit_order
   PROVIDE n_connected_max domain_hij_threshold
+  hb = domain_heat_bath.and.(n_walk > 0.d0)
+  nlist = n_connected_max
+  if (hb) then
+    PROVIDE hb_cum hb_ab hb_sum hb_start hb_inv hb_orb hb_n_pair_max
+    nlist = 1
+  endif
 
   norm = 0.d0
   do i=1,N_det
@@ -32,24 +50,72 @@ subroutine domain_spawn_d0(z,njet,n_walk,seed,tout)
   enddo
   if (norm == 0.d0) return
 
+  ! List of tasks: the walkers of a determinant are split in chunks, for
+  ! load balancing. The random numbers of a chunk depend only on the
+  ! determinant and on the chunk.
+  ntask = 0
+  do m=1,2
+    if (m == 2) then
+      allocate(t_det(ntask),t_nd(ntask),t_id(ntask),t_a(ntask))
+      ntask = 0
+    endif
+    do i=1,N_det
+      wt = sum(dabs(z(:,i))*domain_jet_scale(0:njet))
+      if (wt == 0.d0) cycle
+      nd = 1
+      a = 1.d0
+      if (n_walk > 0.d0) then
+        state = ieor(det_hash(psi_det(1,1,i),2*N_int),seed)
+        u = det_rnd(state)
+        u = det_rnd(state)
+        a = n_walk*wt/norm
+        nd = int(a+u)
+        if (nd == 0) cycle
+      endif
+      k = 0
+      do while (nd > 0)
+        nw = nd
+        if (n_walk > 0.d0) nw = min(nd,chunk)
+        if ((n_walk > 0.d0).and.(.not.domain_heat_bath)) nw = nd
+        k = k+1
+        ntask = ntask+1
+        if (m == 2) then
+          t_det(ntask) = i
+          t_nd(ntask) = nw
+          t_id(ntask) = k
+          t_a(ntask) = a
+        endif
+        nd = nd-nw
+      enddo
+    enddo
+  enddo
+
   !$OMP PARALLEL DEFAULT(SHARED)                                     &
-      !$OMP PRIVATE(list,h,cum,i,k,n,nq,nd,it,a,u,x,wt,fac,state)
-  allocate(list(N_int,2,n_connected_max),h(n_connected_max))
-  allocate(cum(0:n_connected_max))
-  !$OMP DO SCHEDULE(DYNAMIC,4)
-  do i=1,N_det
-    wt = sum(dabs(z(:,i))*domain_jet_scale(0:njet))
-    if (wt == 0.d0) cycle
-    nd = 0
-    a = 1.d0
-    state = det_hash(psi_det(1,1,i),2*N_int)
-    state = ieor(state,seed)
-    if (n_walk > 0.d0) then
-      u = det_rnd(state)
-      u = det_rnd(state)
-      a = n_walk*wt/norm
-      nd = int(a+u)
-      if (nd == 0) cycle
+      !$OMP PRIVATE(list,h,cum,i,k,n,nq,nd,it,a,u,x,fac,state,itask)  &
+      !$OMP PRIVATE(no,nv,npair,occ,vir,pij,ptype,pcum,d2,hij,pgen)
+  allocate(list(N_int,2,nlist),h(nlist),cum(0:nlist))
+  allocate(pij(hb_n_pair_max),ptype(hb_n_pair_max))
+  allocate(pcum(0:hb_n_pair_max))
+  !$OMP DO SCHEDULE(DYNAMIC,1)
+  do itask=1,ntask
+    i = t_det(itask)
+    nd = t_nd(itask)
+    a = t_a(itask)
+    state = ieor(det_hash(psi_det(1,1,i),2*N_int),seed)
+    state = ieor(state,int(t_id(itask),8)*(-7046029254386353131_8))
+    state = det_mix(state)
+    if (hb) then
+      call hb_prepare(psi_det(1,1,i),no,occ,nv,vir,npair,pij,ptype,  &
+          pcum)
+      do it=1,nd
+        call hb_draw(psi_det(1,1,i),no,occ,nv,vir,npair,pij,ptype,   &
+            pcum,state,d2,hij,pgen)
+        if (hij == 0.d0) cycle
+        if (domain_index_d0(d2) > 0) cycle
+        x(:) = z(:,i)*(hij/(a*pgen))
+        call table_add(tout,d2,x)
+      enddo
+      cycle
     endif
     call domain_connected(psi_det(1,1,i),n,list,h)
     ! Keep the external determinants
@@ -79,8 +145,9 @@ subroutine domain_spawn_d0(z,njet,n_walk,seed,tout)
     endif
   enddo
   !$OMP END DO
-  deallocate(list,h,cum)
+  deallocate(list,h,cum,pij,ptype,pcum)
   !$OMP END PARALLEL
+  deallocate(t_det,t_nd,t_id,t_a)
 end
 
 subroutine domain_search(cum,n,u,k)
@@ -105,8 +172,8 @@ subroutine domain_search(cum,n,u,k)
   k = lo
 end
 
-subroutine domain_generation(e_ref,tin,do_score,tv,score,do_spawn,   &
-      n_walk,seed,tout,d0)
+subroutine domain_generation(istate,e_ref,tin,do_score,otf,tv,score, &
+      do_spawn,n_walk,seed,tout,d0)
   use bitmasks
   use det_table_module
   implicit none
@@ -116,7 +183,8 @@ subroutine domain_generation(e_ref,tin,do_score,tv,score,do_spawn,   &
   ! $u_{jl}(E) = - c_j(E) \langle j | (P_j H P_j - E)^{-1} | l \rangle$
   ! for all l in the domain of j.
   !
-  ! * if do_score: score = $\sum_{jl} u_{jl} v_l$, with v in the table tv
+  ! * if do_score: score = $\sum_{jl} u_{jl} v_l$. The elements of v are
+  !   in the table tv, or computed on the fly if otf.
   !
   ! * if do_spawn: $\sum_{jl} u_{jl} H_{lk}$ for k outside the domain of j
   !   is added to tout if k is an external determinant, and to d0
@@ -127,9 +195,10 @@ subroutine domain_generation(e_ref,tin,do_score,tv,score,do_spawn,   &
   ! All the quantities are Taylor expansions around e_ref, up to the
   ! order njet of the table.
   END_DOC
+  integer, intent(in)            :: istate
   double precision, intent(in)   :: e_ref
   type(det_table), intent(in)    :: tin, tv
-  logical, intent(in)            :: do_score, do_spawn
+  logical, intent(in)            :: do_score, do_spawn, otf
   double precision, intent(in)   :: n_walk
   integer(8), intent(in)         :: seed
   double precision, intent(out)  :: score(0:tin%njet)
@@ -146,12 +215,27 @@ subroutine domain_generation(e_ref,tin,do_score,tv,score,do_spawn,   &
   integer(8) :: ii, state, nmax_sh
   logical    :: skip
   double precision, external :: diag_H_mat_elem
+  integer          :: no(2), nv(2), npair, nlist
+  integer          :: occ(N_int*bit_kind_size,2)
+  integer          :: vir(N_int*bit_kind_size,2)
+  integer, allocatable :: pij(:), ptype(:)
+  double precision, allocatable :: pcum(:)
+  integer(bit_kind) :: d2(N_int,2)
+  double precision :: hij, pgen, va(1)
+  logical          :: hb
 
   PROVIDE all_mo_integrals N_int generators_bitmask domain_jet_scale
   PROVIDE psi_det psi_det_sorted_bit psi_coef_sorted_bit_order
   PROVIDE n_connected_max domain_hij_threshold n_det_domain
   PROVIDE ref_bitmask_energy mo_two_e_integrals_jj_anti
-  PROVIDE domain_min_gap_seen
+  PROVIDE domain_min_gap_seen domain_phi0
+  hb = domain_heat_bath.and.(n_walk > 0.d0)
+  nlist = n_connected_max
+  if (hb) then
+    PROVIDE hb_cum hb_ab hb_sum hb_start hb_inv hb_orb hb_n_pair_max
+    if (n_det_domain == 1) nlist = 1
+  endif
+  if (.not.do_spawn.and.(n_det_domain == 1)) nlist = 1
   PROVIDE mo_two_e_integrals_jj mo_one_e_integrals
 
   njet = tin%njet
@@ -186,9 +270,12 @@ subroutine domain_generation(e_ref,tin,do_score,tv,score,do_spawn,   &
 
   !$OMP PARALLEL DEFAULT(SHARED)                                     &
       !$OMP PRIVATE(list,dom,h,cum,g,u,pl,nl,sc,x,a,r,hd,v,fac,is,l) &
-      !$OMP PRIVATE(k,m,mm,n,nd,nw,it,ii,state,skip)
-  allocate(list(N_int,2,n_connected_max),h(n_connected_max))
-  allocate(cum(0:n_connected_max),dom(N_int,2,n_det_domain))
+      !$OMP PRIVATE(k,m,mm,n,nd,nw,it,ii,state,skip,no,nv,npair,occ)   &
+      !$OMP PRIVATE(vir,pij,ptype,pcum,d2,hij,pgen,va)
+  allocate(list(N_int,2,nlist),h(nlist))
+  allocate(cum(0:nlist),dom(N_int,2,n_det_domain))
+  allocate(pij(hb_n_pair_max),ptype(hb_n_pair_max))
+  allocate(pcum(0:hb_n_pair_max))
   allocate(g(n_det_domain,0:njet),u(0:njet,n_det_domain))
   allocate(pl(0:n_det_domain),nl(n_det_domain))
   sc = 0.d0
@@ -223,7 +310,13 @@ subroutine domain_generation(e_ref,tin,do_score,tv,score,do_spawn,   &
 
       if (do_score) then
         do l=1,nd
-          v = table_get(tv,dom(1,1,l))
+          if (otf) then
+            call i_H_psi(dom(1,1,l),psi_det,domain_phi0(1,istate),   &
+                N_int,N_det,N_det,1,va)
+            v = va(1)
+          else
+            v = table_get(tv,dom(1,1,l))
+          endif
           sc(:) = sc(:) + u(:,l)*v
         enddo
       endif
@@ -247,6 +340,21 @@ subroutine domain_generation(e_ref,tin,do_score,tv,score,do_spawn,   &
       do l=1,nd
         if (n_walk > 0.d0) then
           if (nl(l) == 0) cycle
+        endif
+        if (hb) then
+          call hb_prepare(dom(1,1,l),no,occ,nv,vir,npair,pij,ptype,  &
+              pcum)
+          fac = pl(nd)/(a*(pl(l)-pl(l-1)))
+          do it=1,nl(l)
+            call hb_draw(dom(1,1,l),no,occ,nv,vir,npair,pij,ptype,   &
+                pcum,state,d2,hij,pgen)
+            if (hij == 0.d0) cycle
+            call domain_in_list(d2,dom,nd,skip)
+            if (skip) cycle
+            x(:) = u(:,l)*(hij*fac/pgen)
+            call domain_deposit(d2,x,njet,tout,d0)
+          enddo
+          cycle
         endif
         call domain_connected(dom(1,1,l),n,list,h)
         if (n_walk <= 0.d0) then
@@ -279,7 +387,7 @@ subroutine domain_generation(e_ref,tin,do_score,tv,score,do_spawn,   &
   !$OMP CRITICAL
   score(:) = score(:) + sc(:)
   !$OMP END CRITICAL
-  deallocate(list,h,cum,dom,g,u,pl,nl)
+  deallocate(list,h,cum,dom,g,u,pl,nl,pij,ptype,pcum)
   !$OMP END PARALLEL
   deallocate(imp)
 end
