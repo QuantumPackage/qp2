@@ -45,14 +45,13 @@ subroutine check_coherence_functional
  else
   ifound_c = index(correlation_functional,"sr")
  endif
- print*,ifound_x,ifound_c
  if(ifound_x .eq.0 .or. ifound_c .eq. 0)then
   print*,'YOU ARE USING THE RANGE SEPARATED KS PROGRAM BUT YOUR INPUT KEYWORD FOR '
   print*,'exchange_functional is ',exchange_functional
   print*,'correlation_functional is ',correlation_functional
   print*,'CHANGE THE exchange_functional and correlation_functional keywords to range separated functionals'
   print*,'or switch to the KS_SCF program that uses regular functionals'
-  stop
+  stop 1
  endif
 
 end
