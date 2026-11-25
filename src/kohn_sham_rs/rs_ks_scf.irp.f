@@ -91,9 +91,12 @@ subroutine run
   END_DOC
 
   use bitmasks
+  use qp_json, only: json_add
   implicit none
 
   double precision               :: EHF
+
+  call json_init('rs_ks_scf')
 
   EHF = RS_KS_energy
 
@@ -101,11 +104,13 @@ subroutine run
 
   level_shift += 1.d0
   touch level_shift
-  write(json_unit,*) '"scf" : ['
   call Roothaan_Hall_SCF
-  write(json_unit,*) ']'
-  call json_close
   call ezfio_set_kohn_sham_rs_energy(SCF_energy)
+
+  call json_add('/results/ks/one_e_energy', one_e_energy)
+  call json_add('/results/ks/two_e_energy', two_e_energy)
+  call json_add('/results/ks/exchange_dft', e_exchange_dft)
+  call json_add('/results/ks/correlation_dft', e_correlation_dft)
 
   call pg_print_mo_energies(Fock_matrix_diag_mo, mo_num)
   call pg_report_mo_symmetry()

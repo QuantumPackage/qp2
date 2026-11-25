@@ -9,6 +9,7 @@ subroutine run_optimization_mos_CIPSI
   ! are appended to mo_optimization/result_opt in the EZFIO file.
   END_DOC
 
+  use qp_json, only: json_add
   implicit none
 
   double precision :: e_cipsi, e_opt, delta_e
@@ -16,6 +17,8 @@ subroutine run_optimization_mos_CIPSI
   integer :: nb_iter,i
   logical :: not_converged
   character (len=100) :: filename
+
+  call json_init('cipsi_orb_opt')
 
   PROVIDE psi_det psi_coef all_mo_integrals ao_pseudo_integrals
   allocate(Ev(N_states),PT2(N_states))
@@ -59,6 +62,12 @@ subroutine run_optimization_mos_CIPSI
       ! Gain in energy
       delta_e = e_opt - e_cipsi
       print*, 'Gain in energy during the orbital optimization:', delta_e
+
+      call json_add('/results/mo_opt/iteration', nb_iter)
+      call json_add('/results/mo_opt/n_det', n_det)
+      call json_add('/results/mo_opt/energy_cipsi', e_cipsi)
+      call json_add('/results/mo_opt/energy_opt', e_opt)
+      call json_add('/results/mo_opt/delta_energy', delta_e)
 
       open(unit=10, file=trim(ezfio_filename)//'/mo_optimization/result_opt', position='append')
       write(10,'(I10, 3F15.7)') n_det, e_cipsi, e_opt, delta_e

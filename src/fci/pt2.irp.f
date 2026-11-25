@@ -92,6 +92,8 @@ subroutine run
   double precision               :: relative_error
   double precision, allocatable  :: E_CI_before(:)
 
+  call json_init('pt2')
+
   allocate ( E_CI_before(N_states))
   call pt2_alloc(pt2_data, N_states)
   call pt2_alloc(pt2_data_err, N_states)
@@ -113,6 +115,8 @@ subroutine run
 
   call print_summary(psi_energy_with_nucl_rep(1:N_states), &
        pt2_data, pt2_data_err, N_det,N_configuration,N_states,psi_s2)
+
+  call write_cipsi_json(pt2_data, pt2_data_err)
 
   call save_energy(E_CI_before, pt2_data % pt2)
   call pt2_dealloc(pt2_data)

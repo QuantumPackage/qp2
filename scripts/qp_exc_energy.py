@@ -50,26 +50,39 @@ import qp_json
 
 
 def read_data(ezfio_filename,state):
-  """ Read energies and PT2 from input file """
-  data = qp_json.load_last(ezfio_filename)
-  for method in data.keys():
-    x = data[method]
-  lines = x
+  """ Read energies and PT2 from the newest document of the EZFIO file """
+  doc = qp_json.load_last(ezfio_filename)
+  if 'cipsi' not in doc.get('results', {}):
+      sys.exit('%s: the newest document is a %s run, it has no CIPSI results'
+               % (ezfio_filename, doc.get('run', {}).get('kind', '?')))
+  data = doc['results']['cipsi']
+  h = data.get('history')
+  if h is None:
+      st = data['states']
+      n = len(st['energy'])
+      lines = [{'n_det': data['n_det'],
+                'states': [{'energy': st['energy'][i], 'pt2': st['rpt2'][i]}
+                           for i in range(n)]}]
+  else:
+      n, m = h['shape']
+      lines = [{'n_det': data['n_det'],
+                'states': [{'energy': h['energy'][i + j*n],
+                            'pt2': h['rpt2'][i + j*n]} for i in range(n)]}
+               for j in range(m)]
 
   print(f"State: {state}")
 
-  gs = []
-  es = []
+  if not 0 <= state < n:
+      sys.exit('%s: state %d requested, the document holds %d state(s)'
+               % (ezfio_filename, state, n))
+  if len(lines) < 2:
+      sys.exit('%s: the error estimate needs at least 2 points, the newest '
+               'document holds 1 (a CIPSI run with no iteration)'
+               % ezfio_filename)
 
-  for l in lines:
-      try:
-        pt2_0 = l['states'][0]['pt2']
-        e_0   = l['states'][0]['energy']
-        pt2_1 = l['states'][state]['pt2']
-        e_1   = l['states'][state]['energy']
-        gs.append( (e_0, pt2_0) )
-        es.append( (e_1, pt2_1) )
-      except: pass
+  gs = [ (l['states'][0]['energy'], l['states'][0]['pt2']) for l in lines ]
+  es = [ (l['states'][state]['energy'], l['states'][state]['pt2'])
+         for l in lines ]
 
   def f(p_1, p0, p1):
       e, pt2 = p0

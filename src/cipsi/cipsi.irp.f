@@ -6,6 +6,7 @@ subroutine run_cipsi
   END_DOC
 
   use selection_types
+  use qp_json, only: json_add
 
   implicit none
   integer                        :: i,j,k
@@ -110,6 +111,7 @@ subroutine run_cipsi
     call increment_n_iter(psi_energy_with_nucl_rep, pt2_data)
     call print_extrapolated_energy()
     call print_mol_properties()
+    call json_add('/results/cipsi/algorithm', 'deterministic')
     call write_cipsi_json(pt2_data,pt2_data_err)
 
     if (qp_stop()) exit
