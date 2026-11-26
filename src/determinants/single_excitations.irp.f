@@ -102,6 +102,7 @@ END_PROVIDER
 
 subroutine get_single_excitation_from_fock(det_1,det_2,h,p,spin,phase,hij)
  use bitmasks
+ use davidson_apply_stats_mod
  implicit none
   BEGIN_DOC
   ! For a determinant det_1 that differs from the closed-shell
@@ -138,6 +139,8 @@ subroutine get_single_excitation_from_fock(det_1,det_2,h,p,spin,phase,hij)
    buffer_c(i) = big_array_coulomb_integrals(i,h,p)
    buffer_x(i) = big_array_exchange_integrals(i,h,p)
  enddo
+ ! QP_DVDSN_STATS: the two full-column fills (2*mo_num*8 B per call)
+ call davidson_apply_stats_single(mo_num)
  do i = 1, N_int
   differences(i,1) = xor(det_1(i,1),ref_closed_shell_bitmask(i,1))
   differences(i,2) = xor(det_1(i,2),ref_closed_shell_bitmask(i,2))

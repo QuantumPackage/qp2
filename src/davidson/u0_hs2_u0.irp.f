@@ -95,6 +95,7 @@ end
 
 subroutine H_S2_u_0_nstates_openmp(v_0,s_0,u_0,N_st,sze)
   use bitmasks
+  use davidson_apply_stats_mod
   implicit none
   BEGIN_DOC
   ! Computes $v_0 = H | u_0\rangle$ and $s_0 = S^2  | u_0\rangle$.
@@ -107,6 +108,7 @@ subroutine H_S2_u_0_nstates_openmp(v_0,s_0,u_0,N_st,sze)
   double precision, intent(inout)  :: v_0(sze,N_st), s_0(sze,N_st), u_0(sze,N_st)
   integer :: k
   double precision, allocatable  :: u_t(:,:), v_t(:,:), s_t(:,:)
+  double precision :: st0, st1
   allocate(u_t(N_st,N_det),v_t(N_st,N_det),s_t(N_st,N_det))
 
   do k=1,N_st
@@ -114,16 +116,20 @@ subroutine H_S2_u_0_nstates_openmp(v_0,s_0,u_0,N_st,sze)
   enddo
   v_t = 0.d0
   s_t = 0.d0
+  call wall_time(st0)
   call dtranspose(                                                   &
       u_0,                                                           &
       size(u_0, 1),                                                  &
       u_t,                                                           &
       size(u_t, 1),                                                  &
       N_det, N_st)
+  call wall_time(st1)
+  call davidson_apply_stats_add('transp_in', st1-st0)
 
   call H_S2_u_0_nstates_openmp_work(v_t,s_t,u_t,N_st,sze,1,N_det,0,1)
   deallocate(u_t)
 
+  call wall_time(st0)
   call dtranspose(                                                   &
       v_t,                                                           &
       size(v_t, 1),                                                  &
@@ -136,6 +142,8 @@ subroutine H_S2_u_0_nstates_openmp(v_0,s_0,u_0,N_st,sze)
       s_0,                                                           &
       size(s_0, 1),                                                  &
       N_st, N_det)
+  call wall_time(st1)
+  call davidson_apply_stats_add('transp_out', st1-st0)
   deallocate(v_t,s_t)
 
   do k=1,N_st
@@ -794,6 +802,7 @@ end
 
 subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
   use bitmasks
+  use davidson_apply_stats_mod
   implicit none
   BEGIN_DOC
   ! Computes $v_t = H | u_t \\rangle$ and $s_t = S^2 | u_t\\rangle$
@@ -831,6 +840,11 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
   integer, parameter             :: block_size=1024
   logical                        :: u_is_sparse
   double precision, allocatable  :: hij_block(:), sij_block(:)
+
+  ! QP_DVDSN_STATS instrumentation (see utils/davidson_apply_stats.f90):
+  ! per-thread section brackets and counters; no arithmetic touched.
+  double precision               :: st0, st1
+  integer                        :: slab_idx, n_slabs_exec, nkk
 
   integer                        :: exc(0:2,2,2), i_, j_, k_, l_, m, iexc_loop
   double precision               :: phase, phase2
@@ -891,6 +905,10 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
   allocate (integral(mo_num,mo_num,mo_num,norb_block))
 
   PROVIDE N_int nthreads_davidson
+
+  ! QP_DVDSN_STATS: open the apply line (no-op unless the env var is set)
+  call davidson_apply_stats_begin(mo_num, cholesky_mo_num, sze, nthreads_davidson)
+
   !$OMP PARALLEL DEFAULT(SHARED) NUM_THREADS(nthreads_davidson)        &
       !$OMP   SHARED(psi_bilinear_matrix_rows, N_det,                &
       !$OMP          psi_bilinear_matrix_columns,                    &
@@ -914,7 +932,8 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
       !$OMP          singles_a, n_singles_a, singles_b, ratio,       &
       !$OMP          n_singles_b, k8, last_found,left,right,right_max, &
       !$OMP          hij_block, sij_block, exc, phase, phase2,       &
-      !$OMP          i_, k_, j_, l_, m, iexc_loop)
+      !$OMP          i_, k_, j_, l_, m, iexc_loop,             &
+      !$OMP          st0, st1, slab_idx, nkk)
 
   ! Alpha/Beta double excitations
   ! =============================
@@ -928,6 +947,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
 
   ! Check if u has multiple zeros
   kk=1 ! Avoid division by zero
+  call wall_time(st0)
   !$OMP DO
   do k=1,N_det
     umax = 0.d0
@@ -940,12 +960,15 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
     endif
   enddo
   !$OMP END DO
+  call wall_time(st1)
+  call davidson_apply_stats_add('uscan', st1-st0)
   u_is_sparse = N_det / kk < 20  ! 5%
 
   ASSERT (iend <= N_det)
   ASSERT (istart > 0)
   ASSERT (istep  > 0)
 
+  n_slabs_exec = 0
   do iexc_loop = 1, mo_num, norb_block
 
     ! Skip MOs that are always unoccupied
@@ -954,6 +977,13 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
     ! Skip MOs that are always occupied
     if (minval( count(iexc_loop:iexc_loop+norb_block-1) ) == count_max) cycle
 
+    ! QP_DVDSN_STATS: executed-slab census.  All threads write the same
+    ! slab_idx (no conflict); only thread 0 counts the slab, and the
+    ! counter is read only after the region's end barrier.
+    slab_idx = (iexc_loop-1)/norb_block + 1
+    if (omp_get_thread_num() == 0) n_slabs_exec = n_slabs_exec + 1
+
+    call wall_time(st0)
     !$OMP DO SCHEDULE(static,1) COLLAPSE(2)
     do k=1,mo_num
       do l=iexc_loop,iexc_loop+norb_block-1
@@ -963,9 +993,12 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
       end do
     end do
     !$OMP END DO
+    call wall_time(st1)
+    call davidson_apply_stats_add('fill', st1-st0)
 
     kcol_prev=-1
 
+    call wall_time(st0)
     !$OMP DO SCHEDULE(dynamic,64)
     do k_a=istart+ishift,iend,istep   ! Doubles ab
 
@@ -976,9 +1009,11 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
       ASSERT (kcol <= N_det_beta_unique)
 
       tmp_det(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
+      call davidson_apply_stats_bytes(int(8*$N_int,8))
 
       if (kcol /= kcol_prev) then
         tmp_det(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
+        call davidson_apply_stats_bytes(int(8*$N_int,8))
         if (compute_singles) then
           call get_all_spin_singles(                  &
               psi_det_beta_unique, idx0,              &
@@ -993,6 +1028,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
         endif
 
       endif
+      call davidson_apply_stats_kcol(kcol == kcol_prev)
       kcol_prev = kcol
 
 
@@ -1029,10 +1065,13 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
             buffer(1:$N_int,j) = psi_det_alpha_unique(1:$N_int, buffer_lrow(j))  ! hot spot
           enddo
           j = j-1
+          call davidson_apply_stats_bytes(int(j,8)*8*$N_int)
+          call davidson_apply_stats_col_occ(j)
 
           call get_all_spin_singles(               &
               buffer, idx, tmp_det(1,1), N_int, j, &
               singles_a, n_singles_a )
+          call davidson_apply_stats_conn('ab_g', n_singles_a)
 
         else
 
@@ -1092,6 +1131,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
             l_a = l_a+1
           enddo
           j = j-1
+          call davidson_apply_stats_conn('ab_g', n_singles_a)
 
         endif
 
@@ -1122,6 +1162,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
             umax = 1.d0
           endif
           if (umax < 1.d-20) cycle
+          call davidson_apply_stats_conn('ab_k', min(block_size, n_singles_a-k+1))
 
           do kk=0,min(block_size-1, n_singles_a-k)
             l_a = singles_a(k+kk)
@@ -1140,6 +1181,8 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
             if ( (i_ == l_).and.(j_ == k_) ) then
               sij_block(m) =  -phase
             endif
+            call davidson_apply_stats_census(i_, j_, k_, slab_idx)
+            call davidson_apply_stats_conn('ra', 1)
             hij_block(m) = phase*integral(i_,j_,k_,l_-iexc_loop+1)
           enddo
 
@@ -1156,10 +1199,13 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
 
     enddo
     !$OMP END DO
+    call wall_time(st1)
+    call davidson_apply_stats_add('ab', st1-st0)
 
     ! Double alpha excitations
     ! ========================
 
+    call wall_time(st0)
     !$OMP DO SCHEDULE(dynamic,64)
     do k_a=istart+ishift,iend,istep ! Doubles a
 
@@ -1174,7 +1220,9 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
       ASSERT (kcol <= N_det_beta_unique)
 
       tmp_det(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
+      call davidson_apply_stats_bytes(int(8*$N_int,8))
       tmp_det(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
+      call davidson_apply_stats_bytes(int(8*$N_int,8))
 
       spindet(1:$N_int) = tmp_det(1:$N_int,1)
 
@@ -1200,16 +1248,20 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
         l_a = l_a+1
       enddo
       i = i-1
+      call davidson_apply_stats_bytes(int(i,8)*8*$N_int)
+      call davidson_apply_stats_col_occ(i)
 
       call get_all_spin_doubles( &
           buffer, idx, spindet, N_int, i, &
           doubles, n_doubles )
+      call davidson_apply_stats_conn('ss_g', n_doubles)
 
       ! Compute Hij for all alpha doubles
       ! ----------------------------------
 
       do i=1,n_doubles,block_size
         umax = 0.d0
+        nkk = 0
         ! Prefetch u_t(:,l_a)
         if (u_is_sparse) then
           do kk=0,min(block_size-1,n_doubles-i)
@@ -1242,6 +1294,10 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
           k_=exc(1,2,1)
           l_=exc(2,2,1)
           if ((j_ < iexc_loop).or.(j_ >= iexc_loop+norb_block)) cycle
+          nkk = nkk + 1
+          call davidson_apply_stats_census(k_, l_, i_, slab_idx)
+          call davidson_apply_stats_census(l_, k_, i_, slab_idx)
+          call davidson_apply_stats_conn('rs', 2)
 
           hij = phase*(integral(k_, l_, i_, j_-iexc_loop+1) - &
                        integral(l_, k_, i_, j_-iexc_loop+1))
@@ -1250,6 +1306,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
             ! same spin => sij = 0
           enddo
         enddo
+        call davidson_apply_stats_conn('ss_k', nkk)
       enddo
 
       ! Double beta excitations
@@ -1275,10 +1332,12 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
         l_b = l_b+1
       enddo
       i = i-1
+      call davidson_apply_stats_bytes(int(i,8)*8*$N_int)
 
       call get_all_spin_doubles( &
           buffer, idx, spindet, N_int, i,      &
           doubles, n_doubles )
+      call davidson_apply_stats_conn('ss_g', n_doubles)
 
 
       ! Compute Hij for all beta doubles
@@ -1286,6 +1345,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
 
       do i=1,n_doubles,block_size
         umax = 0.d0
+        nkk = 0
         if (u_is_sparse) then
           do kk=0,min(block_size-1,n_doubles-i)
             l_b = doubles(i+kk)
@@ -1321,6 +1381,10 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
           k_=exc(1,2,1)
           l_=exc(2,2,1)
           if ((j_ < iexc_loop).or.(j_ >= iexc_loop+norb_block)) cycle
+          nkk = nkk + 1
+          call davidson_apply_stats_census(k_, l_, i_, slab_idx)
+          call davidson_apply_stats_census(l_, k_, i_, slab_idx)
+          call davidson_apply_stats_conn('rs', 2)
 
           hij = phase*(integral(k_, l_, i_, j_-iexc_loop+1) - &
                        integral(l_, k_, i_, j_-iexc_loop+1))
@@ -1330,13 +1394,17 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
             ! same spin => sij = 0
           enddo
         enddo
+        call davidson_apply_stats_conn('ss_k', nkk)
       enddo
 
     end do
     !$OMP END DO
+    call wall_time(st1)
+    call davidson_apply_stats_add('ss', st1-st0)
 
   end do  ! iexc_loop
 
+  call wall_time(st0)
   !$OMP DO SCHEDULE(dynamic,64)
   do k_a=istart+ishift,iend,istep ! Singles a
 
@@ -1354,7 +1422,9 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
     ASSERT (kcol <= N_det_beta_unique)
 
     tmp_det(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
+    call davidson_apply_stats_bytes(int(8*$N_int,8))
     tmp_det(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
+    call davidson_apply_stats_bytes(int(8*$N_int,8))
 
     ! Initial determinant is at k_b in beta-major representation
     ! ----------------------------------------------------------------------
@@ -1380,10 +1450,13 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
       l_a = l_a+1
     enddo
     i = i-1
+    call davidson_apply_stats_bytes(int(i,8)*8*$N_int)
+    call davidson_apply_stats_col_occ(i)
 
     call get_all_spin_singles(  &
         buffer, idx, spindet, N_int, i,       &
         singles_a, n_singles_a)
+    call davidson_apply_stats_conn('sd_g', n_singles_a)
 
     ! Compute Hij for all alpha singles
     ! ----------------------------------
@@ -1412,6 +1485,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
         umax = 1.d0
       endif
       if (umax < 1.d-20) cycle
+      call davidson_apply_stats_conn('sd_k', min(block_size, n_singles_a-i+1))
 
       do kk=0,min(block_size-1,n_singles_a-i)
         l_a = singles_a(i+kk)
@@ -1455,10 +1529,12 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
       l_b = l_b+1
     enddo
     i = i-1
+    call davidson_apply_stats_bytes(int(i,8)*8*$N_int)
 
     call get_all_spin_singles(  &
         buffer, idx, spindet, N_int, i,       &
         singles_b, n_singles_b)
+    call davidson_apply_stats_conn('sd_g', n_singles_b)
 
     tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
 
@@ -1490,6 +1566,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
         umax = 1.d0
       endif
       if (umax < 1.d-20) cycle
+      call davidson_apply_stats_conn('sd_k', min(block_size, n_singles_b-i+1))
 
       do kk=0,min(block_size-1,n_singles_b-i)
         l_b = singles_b(i+kk)
@@ -1534,11 +1611,18 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int_cholesky(v_t,s_t,u_t,N_st,sze,ist
 
   end do
   !$OMP END DO
+  call wall_time(st1)
+  call davidson_apply_stats_add('sd', st1-st0)
 
   deallocate(buffer, singles_a, singles_b, doubles, idx, buffer_lrow, utl, &
    tmp_det4, hij_block, sij_block)
 
   !$OMP END PARALLEL
+
+  ! QP_DVDSN_STATS: close the apply line (prints unless a Davidson
+  ! driver is active, in which case the driver prints it)
+  call davidson_apply_stats_end_work(n_slabs_exec)
+
   deallocate(integral)
 
 end
