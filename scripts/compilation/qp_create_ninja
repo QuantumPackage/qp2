@@ -315,11 +315,18 @@ def create_make_global(l_module, d_genealogy_path, d_irp, l_util,
     # T a r g e t s #
     # ~#~#~#~#~#~ #
 
+    # The Rust tools (and the data/executables table that
+    # build_rust_tools.sh regenerates) are built AFTER all the modules:
+    # the ninja graph orders it that way (`build rust_target: make_rust
+    # all` — the make_rust edge takes `all` as its input). Without the
+    # ordering, a bare `make` on a clean tree would ship an executables
+    # table that does not list any Fortran binary, and `qp run` /
+    # `qp_test` could not resolve them.
     l_string += [".DEFAULT_GOAL := rust_target",
                  ".PHONY: rust_target all make_rust clean tidy rag",
                  "",
-                 "rust_target: make_rust all",
-                 "make_rust:",
+                 "rust_target: make_rust",
+                 "make_rust: all",
                  "\tcd \"{0}\" && source quantum_package.rc &&"
                  " scripts/compilation/build_rust_tools.sh".format(QP_ROOT),
                  "",
