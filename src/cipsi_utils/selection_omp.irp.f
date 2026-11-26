@@ -73,6 +73,7 @@
 
 subroutine omp_selection(N_in, pt2_data)
   use selection_types
+  use c_functions, only: qp_epoch_c
   implicit none
   BEGIN_DOC
   ! Performs the deterministic determinant selection.
@@ -93,6 +94,10 @@ subroutine omp_selection(N_in, pt2_data)
   type(pt2_type), allocatable    :: pt2_sub(:,:)
   double precision               :: f(N_states), mem
   integer                        :: gend, kstart, maxF
+
+  pt2_data % epoch_start = qp_epoch_c()
+  ! No estimator on the deterministic path.
+  pt2_data % samples = 0.d0
 
   N = max(N_in,1)
   N = min(N, (elec_alpha_num * (mo_num-elec_alpha_num))**2)
@@ -196,6 +201,7 @@ subroutine omp_selection(N_in, pt2_data)
         tsub(ntask) = k
       enddo
     enddo
+    pt2_data % tasks = pt2_data % tasks + ntask
 
     ! Zero the slots of this window: each one is written by exactly
     ! one task and folded in the consume phase.
@@ -236,6 +242,7 @@ subroutine omp_selection(N_in, pt2_data)
       enddo
     enddo
   enddo
+  pt2_data % windows = (N_det_generators + window - 1) / window
 
   ! Free the per-window scratch and the worker buffers.
   do j = 1, maxF
@@ -285,6 +292,9 @@ subroutine omp_selection(N_in, pt2_data)
   endif
   SOFT_TOUCH pt2_overlap
   call update_pt2_and_variance_weights(pt2_data, N_states)
+
+  pt2_data % epoch_end = qp_epoch_c()
+  pt2_data % time = pt2_data % epoch_end - pt2_data % epoch_start
 
 end subroutine
 

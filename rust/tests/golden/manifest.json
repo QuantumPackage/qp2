@@ -41,7 +41,6 @@
       "^\\* Total available memory \\(GB\\)",
       "^\\* Target maximum memory \\(GB\\)",
       "^\\s*Time to provide ",
-      "^qp3  \\|  ",
       "^  converged   E\\(HF\\) ="
     ]
   },

@@ -1,5 +1,7 @@
 
 subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sze,N_st,N_st_diag_in,converged,hcalc)
+  use davidson_json, only: davidson_json_begin, davidson_json_step
+  use c_functions, only: qp_epoch_c
   implicit none
   BEGIN_DOC
   ! Generic Davidson diagonalization with ONE DIAGONAL DRESSING OPERATOR 
@@ -64,6 +66,8 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
 
   itermax = max(2,min(davidson_sze_max, sze/N_st_diag))+1
   itertot = 0
+  call davidson_json_begin('davidson_general_ext_rout_diag_dressed', N_st, &
+      qp_epoch_c())
 
   if (state_following) then
     allocate(overlap(N_st_diag*itermax, N_st_diag*itermax))
@@ -329,6 +333,8 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
         !don't print 
         continue
       else
+        call davidson_json_step(iter-1, to_print(1,1:N_st), &
+            to_print(2,1:N_st), N_st)
         write(*,'(1X,I3,1X,100(1X,F16.10,1X,F11.6,1X,ES11.3))') iter-1, to_print(1:2,1:N_st)
       endif
 
@@ -386,6 +392,8 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
       endif
     enddo
   enddo
+
+  call davidson_json_end(itertot, converged)
 
   do k=1,N_st
     energies(k) = lambda(k)

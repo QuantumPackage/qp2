@@ -5,6 +5,7 @@ BEGIN_DOC
 END_DOC
 
   use qp_json, only: json_add
+  use c_functions, only: qp_epoch_c
   implicit none
 
   double precision               :: energy_SCF,energy_SCF_previous,Delta_energy_SCF
@@ -23,12 +24,26 @@ END_DOC
   logical, external              :: qp_stop
   double precision, allocatable :: mo_coef_save(:,:), S(:,:)
 
+  integer                        :: nhist
+  integer, allocatable           :: h_dim(:), h_conv(:)
+  double precision               :: wt, mem
+  double precision, allocatable  :: h_e(:), h_de(:), h_diis(:), &
+                                    h_shift(:), h_wall(:), h_mem(:), &
+                                    h_epoch(:)
+
   PROVIDE ao_md5 mo_occ level_shift
 
   allocate(mo_coef_save(ao_num,mo_num),                          &
       Fock_matrix_DIIS (ao_num,ao_num,max_dim_DIIS),                 &
       error_matrix_DIIS(ao_num,ao_num,max_dim_DIIS)                  &
       )
+
+  allocate(h_e(max(n_it_SCF_max,1)), h_de(max(n_it_SCF_max,1)), &
+      h_diis(max(n_it_SCF_max,1)), h_shift(max(n_it_SCF_max,1)), &
+      h_wall(max(n_it_SCF_max,1)), h_mem(max(n_it_SCF_max,1)), &
+      h_epoch(max(n_it_SCF_max,1)), h_dim(max(n_it_SCF_max,1)), &
+      h_conv(max(n_it_SCF_max,1)))
+  nhist = 0
 
   Fock_matrix_DIIS = 0.d0
   error_matrix_DIIS = 0.d0
@@ -192,6 +207,19 @@ END_DOC
     call json_add('/results/scf/dim_diis', dim_DIIS)
     call json_add('/results/scf/converged', converged)
 
+    nhist = nhist + 1
+    h_e(nhist)     = energy_SCF
+    h_de(nhist)    = Delta_energy_SCF
+    h_diis(nhist)  = max_error_DIIS
+    h_shift(nhist) = level_shift
+    h_dim(nhist)   = dim_DIIS
+    h_conv(nhist)  = merge(1,0,converged)
+    h_epoch(nhist) = qp_epoch_c()
+    call wall_time(wt)
+    h_wall(nhist)  = wt - human_t0
+    call resident_memory(mem)
+    h_mem(nhist)   = mem
+
     if (Delta_energy_SCF < 0.d0) then
       call save_mos
     endif
@@ -201,6 +229,19 @@ END_DOC
   enddo
 
   call wall_time(scf_t1)
+
+  if (nhist > 0) then
+    call json_add('/results/scf/history/energy', h_e(1:nhist))
+    call json_add('/results/scf/history/delta_energy', h_de(1:nhist))
+    call json_add('/results/scf/history/max_error_diis', h_diis(1:nhist))
+    call json_add('/results/scf/history/level_shift', h_shift(1:nhist))
+    call json_add('/results/scf/history/dim_diis', h_dim(1:nhist))
+    call json_add('/results/scf/history/converged', h_conv(1:nhist))
+    call json_add('/results/scf/history/epoch', h_epoch(1:nhist))
+    call json_add('/results/scf/history/wall_time', h_wall(1:nhist))
+    call json_add('/results/scf/history/memory', h_mem(1:nhist))
+  endif
+
   scf_tcf = scf_t1 - scf_t0
 
  if (iteration_SCF < n_it_SCF_max) then

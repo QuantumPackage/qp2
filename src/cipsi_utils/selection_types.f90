@@ -11,6 +11,13 @@ module selection_types
     double precision, allocatable :: rpt2(:)
     double precision, allocatable :: variance(:)
     double precision, allocatable :: overlap(:,:)
+    ! Per-call logging counters (JSON history); zeroed by pt2_alloc.
+    integer          :: windows      ! windows walked, 0 if not run
+    integer          :: tasks        ! (generator, subset) tasks, 0 if not run
+    double precision :: samples      ! estimator draws, summed over states
+    double precision :: time         ! seconds spent in this PT2 call
+    double precision :: epoch_start  ! qp_epoch_c() at entry
+    double precision :: epoch_end    ! qp_epoch_c() at exit
   endtype
 
   contains

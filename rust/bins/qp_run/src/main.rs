@@ -23,9 +23,13 @@
 //! 3. EZFIO directory exists (`the EZFIO directory does not exist: <d>`).
 //! 4. SIGUSR1 handler (→ `qp_stop`, see [`qp_cli::signal`]).
 //! 5. Program in `data/executables`, else `Possible choices:` + failure.
-//! 6. Banner: one line `qp3  |  <program>  |  <ezfio>  |  <date>  |  <sha8>`
-//!    (local time, Git stamp from `QP_ROOT`), then — when the EZFIO carries
-//!    the fields — an info line `  <n> AOs  |  <n> atoms  |  <basis>`.
+//! 6. Banner: the reference's header, verbatim — `Date: DD/MM/YYYY hh:mm:ss`
+//!    (local time, Git stamp from `QP_ROOT`), the `Quantum Package` box,
+//!    `Git Commit:` / `Git Date  :` / `Git SHA1  :` / `EZFIO Dir :` — then,
+//!    when the EZFIO carries the fields, an info line
+//!    `  <n> AOs  |  <n> atoms  |  <basis>`, and the run-configuration block
+//!    (`  Run:`, `  SCF:`, `  Davidson:`, `  AO integrals:`, `  MO integrals:`)
+//!    of the readable keys.
 //! 7. `qp_edit -c <dir>`; non-zero → `the input is inconsistent
 //!    (qp_edit -c failed)`.
 //! 8. The executable runs with its inherited environment (no extra
@@ -193,8 +197,9 @@ fn drive(config: &RunConfig, programs: &Programs, root: &Path) -> Result<i32, Fa
         )));
     };
 
-    // 4. Banner.
-    print_banner(&config.program, ezfio, time_start, root)?;
+    // 4. Banner, then the curated run-configuration block.
+    print_banner(ezfio, time_start, root)?;
+    print_run_config(ezfio);
 
     // 5. Input consistency.
     let editor = std::env::var(QP_EDIT_VAR).unwrap_or_else(|_| DEFAULT_QP_EDIT.to_string());
@@ -218,23 +223,36 @@ fn drive(config: &RunConfig, programs: &Programs, root: &Path) -> Result<i32, Fa
     Ok(job_code)
 }
 
-/// Print the one-line banner and the EZFIO info line.
+/// Print the legacy banner — the reference's header, verbatim — and the
+/// EZFIO info line.
 ///
-/// Line 1: `qp3  |  <program>  |  <ezfio>  |  <dd/mm/yyyy hh:mm:ss>  |  <sha8>`.
-/// The hour keeps the reference's `tm_hour + isdst` quirk.
-/// Line 2 (optional): `  <n> AOs  |  <n> atoms  |  <basis>`, read from the
-/// EZFIO. A field that cannot be read is omitted; a launcher must never fail
-/// because the banner could not be enriched.
-fn print_banner(program: &str, ezfio: &str, start: i64, root: &Path) -> Result<(), Fatal> {
+/// The header is: `Date: DD/MM/YYYY hh:mm:ss` (local time; the hour keeps
+/// the reference's `tm_hour + isdst` quirk), the `===============` /
+/// `Quantum Package` / `===============` box, one empty line, the four
+/// `Git Commit:` / `Git Date  :` / `Git SHA1  :` / `EZFIO Dir :` lines
+/// (from [`GitStamp::resolve`]), and one empty line. Then — when the EZFIO
+/// carries the fields — the info line `  <n> AOs  |  <n> atoms  |  <basis>`
+/// and its trailing empty line. A field that cannot be read is omitted; a
+/// launcher must never fail because the banner could not be enriched. The
+/// `Result` therefore covers only the `localtime` call: the git stamp is
+/// total and the EZFIO reads are tolerant.
+fn print_banner(ezfio: &str, start: i64, root: &Path) -> Result<(), Fatal> {
     let tm = qp_cli::ffi::local_time(start)?;
     let stamp = GitStamp::resolve(root);
     let hour = tm.hour + u32::from(tm.isdst);
-    let sha = stamp.sha1.as_str();
-    let short = sha.get(..8).unwrap_or(sha);
     println!(
-        "qp3  |  {program}  |  {ezfio}  |  {:02}/{:02}/{:04} {hour:02}:{:02}:{:02}  |  {short}",
+        "Date: {:02}/{:02}/{:04} {hour:02}:{:02}:{:02}",
         tm.mday, tm.mon, tm.year, tm.min, tm.sec
     );
+    println!("=================");
+    println!("Quantum Package");
+    println!("=================");
+    println!();
+    println!("Git Commit: {}", stamp.message);
+    println!("Git Date  : {}", stamp.date);
+    println!("Git SHA1  : {}", stamp.sha1);
+    println!("EZFIO Dir : {ezfio}");
+    println!();
     println!();
     let info = ezfio_info(ezfio);
     if !info.is_empty() {
@@ -242,6 +260,126 @@ fn print_banner(program: &str, ezfio: &str, start: i64, root: &Path) -> Result<(
         println!();
     }
     Ok(())
+}
+
+/// Print the curated run-configuration block, one line per group.
+///
+/// The group labels and the field order are fixed (two leading spaces
+/// before the label, two spaces between fields):
+///
+/// ```text
+///   Run: n_states=…  s2_eig=…  n_det_max=…  weight_selection=…  do_pt2=…  pt2_max=…
+///   SCF: algorithm=…  n_it_scf_max=…  thresh_scf=…
+///   Davidson: sze_max=…
+///   AO integrals: threshold=…  cholesky=…  do_cholesky=…  use_only_lr=…
+///   MO integrals: do_cholesky=…  double_cholesky=…  threshold=…
+/// ```
+///
+/// A key that cannot be read is omitted; a group with no readable key
+/// prints no line at all; when nothing at all is readable, nothing is
+/// printed (not even a blank line). When at least one line is printed, the
+/// block is followed by exactly one empty line. As with the banner's info
+/// line, a launcher must never fail because the configuration could not be
+/// read. `symmetry/auto_symmetry` is deliberately not read: it has no
+/// `/input/` provider and is unreadable by design.
+fn print_run_config(ezfio: &str) {
+    let Ok(ezfio) = qp_ezfio::EzFio::open(ezfio) else {
+        return;
+    };
+    let mut lines: Vec<String> = Vec::new();
+
+    // `  Run:` — the determinants and perturbation groups.
+    let mut parts: Vec<String> = Vec::new();
+    if let Ok(v) = ezfio.get::<i64>("determinants", "n_states") {
+        parts.push(format!("n_states={v}"));
+    }
+    if let Ok(v) = ezfio.get::<bool>("determinants", "s2_eig") {
+        parts.push(format!("s2_eig={}", tf(v)));
+    }
+    if let Ok(v) = ezfio.get::<i64>("determinants", "n_det_max") {
+        parts.push(format!("n_det_max={v}"));
+    }
+    if let Ok(v) = ezfio.get::<i64>("determinants", "weight_selection") {
+        parts.push(format!("weight_selection={v}"));
+    }
+    if let Ok(v) = ezfio.get::<bool>("perturbation", "do_pt2") {
+        parts.push(format!("do_pt2={}", tf(v)));
+    }
+    if let Ok(v) = ezfio.get::<f64>("perturbation", "pt2_max") {
+        parts.push(format!("pt2_max={v:e}"));
+    }
+    if !parts.is_empty() {
+        lines.push(format!("  Run: {}", parts.join("  ")));
+    }
+
+    // `  SCF:` — the scf_utils group.
+    let mut parts: Vec<String> = Vec::new();
+    if let Ok(v) = ezfio.get::<String>("scf_utils", "scf_algorithm") {
+        let v = v.trim();
+        if !v.is_empty() {
+            parts.push(format!("algorithm={v}"));
+        }
+    }
+    if let Ok(v) = ezfio.get::<i64>("scf_utils", "n_it_scf_max") {
+        parts.push(format!("n_it_scf_max={v}"));
+    }
+    if let Ok(v) = ezfio.get::<f64>("scf_utils", "thresh_scf") {
+        parts.push(format!("thresh_scf={v:e}"));
+    }
+    if !parts.is_empty() {
+        lines.push(format!("  SCF: {}", parts.join("  ")));
+    }
+
+    // `  Davidson:` — the davidson_keywords group.
+    if let Ok(v) = ezfio.get::<i64>("davidson_keywords", "davidson_sze_max") {
+        lines.push(format!("  Davidson: sze_max={v}"));
+    }
+
+    // `  AO integrals:` — the ao_two_e_ints group.
+    let mut parts: Vec<String> = Vec::new();
+    if let Ok(v) = ezfio.get::<f64>("ao_two_e_ints", "threshold_ao") {
+        parts.push(format!("threshold={v:e}"));
+    }
+    if let Ok(v) = ezfio.get::<f64>("ao_two_e_ints", "ao_cholesky_threshold") {
+        parts.push(format!("cholesky={v:e}"));
+    }
+    if let Ok(v) = ezfio.get::<bool>("ao_two_e_ints", "do_ao_cholesky") {
+        parts.push(format!("do_cholesky={}", tf(v)));
+    }
+    if let Ok(v) = ezfio.get::<bool>("ao_two_e_ints", "use_only_lr") {
+        parts.push(format!("use_only_lr={}", tf(v)));
+    }
+    if !parts.is_empty() {
+        lines.push(format!("  AO integrals: {}", parts.join("  ")));
+    }
+
+    // `  MO integrals:` — the mo_two_e_ints group.
+    let mut parts: Vec<String> = Vec::new();
+    if let Ok(v) = ezfio.get::<bool>("mo_two_e_ints", "do_mo_cholesky") {
+        parts.push(format!("do_cholesky={}", tf(v)));
+    }
+    if let Ok(v) = ezfio.get::<bool>("mo_two_e_ints", "mo_cholesky_double") {
+        parts.push(format!("double_cholesky={}", tf(v)));
+    }
+    if let Ok(v) = ezfio.get::<f64>("mo_two_e_ints", "threshold_mo") {
+        parts.push(format!("threshold={v:e}"));
+    }
+    if !parts.is_empty() {
+        lines.push(format!("  MO integrals: {}", parts.join("  ")));
+    }
+
+    if lines.is_empty() {
+        return;
+    }
+    for line in &lines {
+        println!("{line}");
+    }
+    println!();
+}
+
+/// The EZFIO spelling of a logical: `T`/`F`.
+fn tf(value: bool) -> &'static str {
+    if value { "T" } else { "F" }
 }
 
 /// `  <n> AOs  |  <n> atoms  |  <basis>`, with the readable fields only.
