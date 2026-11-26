@@ -258,7 +258,9 @@ MO classes (`Core`, `Inactive`, `Active`, `Virtual`, `Deleted`) are set with
 
 ## 8. Programs and algorithms
 
-Compute programs are run through `qp_run <name> <ezfio>`:
+Compute programs are run through `qp_run <name> <ezfio>`. Their stdout is a
+human summary; the numbers to consume are in the run's JSON document,
+`<EZFIO>/json/NNNNN.json` (§9).
 
 - `scf` (RHF/ROHF/UHF, DIIS/damping in `scf_utils`); `ks_scf` (Kohn-Sham),
   `rs_ks_scf` (range-separated). DFT dispatch is by string providers
@@ -290,7 +292,70 @@ Compute programs are run through `qp_run <name> <ezfio>`:
   in `src/mpi/`. Thread counts come from `etc/local.rc`
   (`QP_NTHREADS_DAVIDSON`, `QP_NTHREADS_PT2`, `OMP_NUM_THREADS`).
 
-## 9. Recipes
+## 9. Output: human summary on stdout, JSON record
+
+Two streams with different readers. Only the second is a contract.
+
+**stdout is the human summary.** Short banner, a table that grows by one
+row per iteration, the extrapolation table at the end, the answer in a box.
+It is ASCII-only (0x20-0x7E) and aimed at a person watching a run: no
+script should parse it, and a number meant for a machine never goes there.
+`human_quiet` (`src/utils/human.irp.f`) silences the legacy provenance
+dump through the `write_double` / `write_int` / `write_bool` helpers of
+`src/ezfio_files/output.irp.f`; `QP_VERBOSE=1` restores it for debugging.
+One transitional exception: the machine lines `# Ndet,E,E+PT2,...=` (ground
+state) and `# S,Ndet,E,E+PT2,...=` (each excited state) printed after the
+CIPSI table rows (`src/iterations/print_summary.irp.f`, tagged
+`! TODO(json)`); `scripts/qp_geom_opt.py` and `scripts/get_fci_conv.sh`
+still read them, and they go away once those scripts read the JSON.
+
+**The JSON document is the record, and it holds more than stdout.**
+`<EZFIO>/json/NNNNN.json` (first unused number, so a restart never touches
+an earlier run), `"schema": "qp3/1"`, opened once by
+`json_init('<program>')` (`scf`, `ks_scf`, `rs_ks_scf`, `fci`, `pt2`,
+`mrci`, `casscf`, `cipsi_orb_opt`) and filled by
+`call json_add('/results/<method>/<key>', value)`.
+`src/json/README.rst` is the reference, `src/json/DESIGN.md` the design.
+
+- `provenance`: `ezfio_file`, `host`, `pid`, `started`; `units`: hartree,
+  bohr, second, declared once; `run`: `kind`, `timestamp`, `elapsed`.
+- `input`: the scalar EZFIO inputs the calculation actually read
+  (integer, double precision, logical, fixed-length string), nested as
+  `input/<ezfio_group>/<ezfio_name>`. Array-valued inputs and `integer*8`
+  are not hooked. Emitted by the EZFIO provider generator
+  (`scripts/ezfio_interface/`), not by the call site.
+- `results`: grouped by method, not by program. `scf` logs `iteration`,
+  `energy`, `delta_energy`, `max_error_diis`, `level_shift`, `dim_diis`,
+  `converged`; `cipsi` logs `algorithm`, `n_det`, `n_cfg` (when `s2_eig`),
+  per-state `states/{energy,s2,pt2,rpt2,variance,extrapolated_energy}`
+  plus `pt2_err`, `rpt2_err`, `variance_err`, and the full per-iteration
+  `history/{energy,rpt2}` (2-D flattened in Fortran order, with a `shape`
+  sibling: reshape with `order='F'`); `ks`, `casscf` and `mo_opt` have
+  their own objects. stdout carries the same last-row numbers and one
+  extrapolated energy, but the full per-iteration history survives only
+  here.
+
+Each write replaces the whole document (`.tmp.<pid>` + `fsync` +
+`rename`), so the file is valid JSON after `kill -9` and always complete;
+doubles round-trip bit-exactly; a non-finite value becomes `null`, meaning
+"not available". `QP_JSON_MIN_INTERVAL` (default 1 s, `0` = synchronous
+write after each `json_add`) bounds the staleness. After a restart the
+highest-numbered file is the complete state; older files are history and
+are never merged. `scripts/utility/qp_json.py` (`files`, `load`,
+`load_all`, `load_last`) implements that rule and is what
+`qp_extract_cipsi_data.py` and `qp_exc_energy.py` use.
+
+**The `input` hooks live in generated per-module files.**
+`src/<module>/ezfio_interface.irp.f` is written by `ei_handler.py` from
+`EZFIO.cfg`; it is not versioned (`.gitignore`d) and carries the
+`call json_add('/input/...')` lines. The ninja edge
+`build_ezfio_interface` takes the generator scripts as implicit inputs
+(`scripts/compilation/qp_create_ninja`), so `ninja` regenerates them
+whenever `EZFIO.cfg` or the generator changes. If a tree shows an `input`
+object with only `ezfio_files.ezfio_convention`, its interfaces predate the
+generator: `rm src/*/ezfio_interface.irp.f && ninja` and run again.
+
+## 10. Recipes
 
 - **New keyword**: add a block to the module `EZFIO.cfg`, then use it as a
   provider (or `ezfio_get_<module>_<param>`). No registration step.
@@ -320,7 +385,7 @@ Compute programs are run through `qp_run <name> <ezfio>`:
   should build a fresh EZFIO (`qp create_ezfio -b <basis> <file.xyz>`) rather
   than reuse a modified one.
 
-## 10. Tests and CI
+## 11. Tests and CI
 
 - `cd tests && qp_test [-a] [TEST]` (bats). `-a` runs all installed modules,
   otherwise only the current directory; `TEST` is a bats number/name.
@@ -331,7 +396,7 @@ Compute programs are run through `qp_run <name> <ezfio>`:
   `.github/workflows/configuration.yml` (exercises `./configure -i <pkg>` for
   each dependency on a bare ubuntu-24.04) and `.drone.yml`.
 
-## 11. Pitfalls checklist
+## 12. Pitfalls checklist
 
 - Executable name = **file** basename, not the `program` name.
 - `bin/` is gitignored: `git add -f bin/qp_newcommand`.
@@ -348,8 +413,13 @@ Compute programs are run through `qp_run <name> <ezfio>`:
   it gives wrong or stale values, not a compile error.
 - `TOUCH` is for values assigned by side effect; using it in an iteration
   without a convergence test silently produces stale dynamics.
+- `src/<module>/ezfio_interface.irp.f` is generated output: it holds the
+  `json_add('/input/...')` hooks and is rebuilt whenever `EZFIO.cfg` or
+  `scripts/ezfio_interface/` changes (implicit ninja inputs). An `input`
+  block holding only `ezfio_files.ezfio_convention` means the interfaces
+  are stale: `rm src/*/ezfio_interface.irp.f && ninja` (§9).
 
-## 12. Code-model RAG (`ninja rag` / `qp rag`)
+## 13. Code-model RAG (`ninja rag` / `qp rag`)
 
 `ninja rag` (repo root) builds a machine-readable model of the whole
 source tree — one `irpf90 -J` dump per build edge of `config/build.ninja`
