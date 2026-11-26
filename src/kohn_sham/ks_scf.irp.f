@@ -24,36 +24,28 @@ end
 subroutine check_coherence_functional
   BEGIN_DOC
   ! ks_scf start-up check: stop with a diagnostic if
-  ! exchange_functional or correlation_functional is "None" or
-  ! contains the substring "short_range".
-  ! TODO(doc): intent unknown to the author (author, 2026-10-31).
-  ! The code literally stops when a functional is "None" or
-  ! contains the substring "short_range"; in-tree functionals are
-  ! named sr_*, so the substring branch is dead for them, and the
-  ! diagnostic text is copy-pasted from
-  ! kohn_sham_rs/rs_ks_scf.irp.f (there the test is "sr").
+  ! exchange_functional or correlation_functional names a
+  ! range-separated functional, that is, contains the substring
+  ! "sr" (the in-tree range-separated functionals are sr_lda and
+  ! sr_pbe). The regular KS program builds the full-range Coulomb
+  ! operator, so a short-range functional would be combined with
+  ! the wrong electron-electron interaction. The null functional
+  ! (none) is allowed.
+  ! The range-separated twin kohn_sham_rs/rs_ks_scf.irp.f performs
+  ! the opposite check.
   END_DOC
  implicit none
  integer :: ifound_x,ifound_c
- if(exchange_functional.eq."None")then
-  ifound_x = 1
- else
-  ifound_x = index(exchange_functional,"short_range")
- endif
+ ifound_x = index(exchange_functional,"sr")
+ ifound_c = index(correlation_functional,"sr")
 
- if(correlation_functional.eq."None")then
-  ifound_c = 1
- else
-  ifound_c = index(correlation_functional,"short_range")
- endif
- print*,ifound_x,ifound_c
  if(ifound_x .ne.0 .or. ifound_c .ne. 0)then
-  print*,'YOU ARE USING THE RANGE SEPARATED KS PROGRAM BUT YOUR INPUT KEYWORD FOR '
+  print*,'YOU ARE USING THE KS_SCF PROGRAM THAT USES FULL-RANGE FUNCTIONALS BUT YOUR INPUT KEYWORD FOR'
   print*,'exchange_functional is ',exchange_functional
   print*,'correlation_functional is ',correlation_functional
-  print*,'CHANGE THE exchange_functional and correlation_functional keywords to range separated functionals'
-  print*,'or switch to the KS_SCF program that uses regular functionals'
-  stop
+  print*,'CHANGE THE exchange_functional and correlation_functional keywords to full-range functionals'
+  print*,'or switch to the RS_KS_SCF program that uses range separated functionals'
+  stop 1
  endif
 
 end
