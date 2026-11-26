@@ -122,6 +122,12 @@ Limitations:
   states, and the reduced resolvent :math:`R` contains the other eigenstates of
   :math:`PHP`. An external determinant which is almost degenerate with the state
   gives large corrections. The smallest :math:`|H_{jj}-E_n|` is printed.
+  External determinants whose domain matrix is singular (pivot below 1e-8,
+  for example with unconverged or symmetry-broken orbitals) are skipped, and
+  their number is printed with a warning.
+
+* the energies depend on the orbitals, not only through the reference: the
+  orbitals should be converged (the automatic test runs the SCF first).
 
 * the external domains are not spin-adapted.
 
@@ -203,5 +209,8 @@ The programmer's point of view
 * ``domain_series.irp.f`` : replicas, and Rayleigh-Schrodinger series.
 
 * ``heat_bath.irp.f`` : tables and sampling of the excitations.
+
+* ``h_phi.irp.f`` : :math:`\langle l | H | \Phi_n \rangle` on the fly, visiting only
+  the determinants of the reference which can be connected to :math:`l`.
 
 * ``chebyshev.irp.f`` : weights, interval and self-consistent energy.

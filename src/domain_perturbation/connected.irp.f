@@ -238,7 +238,7 @@ logical function domain_lower(xa,da,xb,db)
   endif
 end
 
-subroutine domain_resolvent(e_ref,nd,dom,njet,g,ldg,hdiag)
+subroutine domain_resolvent(e_ref,nd,dom,njet,g,ldg,hdiag,ok)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -247,17 +247,26 @@ subroutine domain_resolvent(e_ref,nd,dom,njet,g,ldg,hdiag)
   ! $\sum_m g_l^{(m)} (E - E_{ref})^m$.
   ! $g^{(0)} = A^{-1} e_1$, $g^{(m)} = A^{-1} g^{(m-1)}$, with
   ! $A = P H P - E_{ref}$.
+  ! ok is |false| if the domain matrix is singular (an external
+  ! determinant degenerate with the state): the determinant is then
+  ! skipped by the caller.
   END_DOC
   double precision, intent(in)  :: e_ref
   integer, intent(in)           :: nd, njet, ldg
   integer(bit_kind), intent(in) :: dom(N_int,2,nd)
   double precision, intent(in)  :: hdiag
   double precision, intent(out) :: g(ldg,0:njet)
+  logical, intent(out)          :: ok
   double precision :: A(nd,nd), hij
   double precision, external :: diag_H_mat_elem
   integer :: i, j, m, ipiv(nd), info
 
+  ok = .True.
   if (nd == 1) then
+    if (dabs(hdiag-e_ref) < domain_singular_threshold) then
+      ok = .False.
+      return
+    endif
     g(1,0) = 1.d0/(hdiag-e_ref)
     do m=1,njet
       g(1,m) = g(1,m-1)*g(1,0)
@@ -274,8 +283,15 @@ subroutine domain_resolvent(e_ref,nd,dom,njet,g,ldg,hdiag)
   enddo
   call dgetrf(nd,nd,A,nd,ipiv,info)
   if (info /= 0) then
-    stop 'domain_resolvent: singular domain matrix'
+    ok = .False.
+    return
   endif
+  do i=1,nd
+    if (dabs(A(i,i)) < domain_singular_threshold) then
+      ok = .False.
+      return
+    endif
+  enddo
   g(1:nd,0) = 0.d0
   g(1,0) = 1.d0
   do m=0,njet
@@ -283,3 +299,22 @@ subroutine domain_resolvent(e_ref,nd,dom,njet,g,ldg,hdiag)
     call dgetrs('N',nd,1,A,nd,ipiv,g(1,m),ldg,info)
   enddo
 end
+
+BEGIN_PROVIDER [ double precision, domain_singular_threshold ]
+ implicit none
+ BEGIN_DOC
+ ! External determinants whose domain matrix $P_j(H-E)P_j$ has a pivot
+ ! smaller than this value (determinants degenerate with the state) are
+ ! skipped, and counted in domain_n_singular.
+ END_DOC
+ domain_singular_threshold = 1.d-8
+END_PROVIDER
+
+BEGIN_PROVIDER [ integer(8), domain_n_singular ]
+ implicit none
+ BEGIN_DOC
+ ! Number of external determinants skipped because their domain matrix
+ ! is singular
+ END_DOC
+ domain_n_singular = 0_8
+END_PROVIDER

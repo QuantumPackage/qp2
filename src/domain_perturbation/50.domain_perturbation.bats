@@ -4,8 +4,19 @@ source $QP_ROOT/tests/bats/common.bats.sh
 source $QP_ROOT/quantum_package.rc
 
 # Deterministic evaluation, compared to reference values
+# The tests need converged orbitals: the SCF is run first. The
+# perturbative energies depend on the orbitals (not only on the HF energy),
+# for example on the rotations of degenerate orbitals, hence the tolerances.
+function scf() {
+  test_exe scf || skip
+  qp set_file $1
+  qp reset --mos
+  qp set scf_utils n_it_scf_max 50
+  qp run scf
+}
+
 function run() {
-  thresh=1.e-6
+  thresh=1.e-5
   test_exe domain_pert || skip
   qp edit --check
   qp set domain_perturbation domain_chebyshev false
@@ -63,14 +74,14 @@ function run_stoch() {
 }
 
 @test "H3_2 HF" {
-  qp set_file h3_2.ezfio
+  scf h3_2.ezfio
   qp reset -d
   run "-1.610273153311" 4 1
   run "-1.609959380386" 4 4
 }
 
 @test "H3_2 CIS 3 states" {
-  qp set_file h3_2.ezfio
+  scf h3_2.ezfio
   qp reset -d
   qp set determinants n_states 3
   qp run cis
@@ -81,7 +92,7 @@ function run_stoch() {
 }
 
 @test "H4_1 HF" {
-  qp set_file h4_1.ezfio
+  scf h4_1.ezfio
   qp reset -d
   run "-2.017046423901" 4 1
   run "-2.016898059074" 4 4

@@ -213,7 +213,7 @@ subroutine domain_generation(istate,e_ref,tin,do_score,otf,tv,score, &
   double precision :: v, fac, dmin
   integer    :: is, l, k, m, mm, n, nd, nw, it, njet
   integer(8) :: ii, state, nmax_sh
-  logical    :: skip
+  logical    :: skip, okr
   double precision, external :: diag_H_mat_elem
   integer          :: no(2), nv(2), npair, nlist
   integer          :: occ(N_int*bit_kind_size,2)
@@ -221,14 +221,21 @@ subroutine domain_generation(istate,e_ref,tin,do_score,otf,tv,score, &
   integer, allocatable :: pij(:), ptype(:)
   double precision, allocatable :: pcum(:)
   integer(bit_kind) :: d2(N_int,2)
-  double precision :: hij, pgen, va(1)
+  double precision :: hij, pgen
+  double precision, external :: domain_h_phi
   logical          :: hb
 
   PROVIDE all_mo_integrals N_int generators_bitmask domain_jet_scale
   PROVIDE psi_det psi_det_sorted_bit psi_coef_sorted_bit_order
   PROVIDE n_connected_max domain_hij_threshold n_det_domain
   PROVIDE ref_bitmask_energy mo_two_e_integrals_jj_anti
-  PROVIDE domain_min_gap_seen domain_phi0
+  PROVIDE domain_min_gap_seen domain_phi0 domain_alpha_det
+  PROVIDE domain_n_singular domain_singular_threshold
+  PROVIDE psi_det_alpha_unique psi_det_beta_unique
+  PROVIDE psi_bilinear_matrix_transp_rows_loc
+  PROVIDE psi_bilinear_matrix_transp_columns
+  PROVIDE psi_bilinear_matrix_columns_loc psi_bilinear_matrix_rows
+  PROVIDE psi_bilinear_matrix_order
   hb = domain_heat_bath.and.(n_walk > 0.d0)
   nlist = n_connected_max
   if (hb) then
@@ -270,8 +277,8 @@ subroutine domain_generation(istate,e_ref,tin,do_score,otf,tv,score, &
 
   !$OMP PARALLEL DEFAULT(SHARED)                                     &
       !$OMP PRIVATE(list,dom,h,cum,g,u,pl,nl,sc,x,a,r,hd,v,fac,is,l) &
-      !$OMP PRIVATE(k,m,mm,n,nd,nw,it,ii,state,skip,no,nv,npair,occ)   &
-      !$OMP PRIVATE(vir,pij,ptype,pcum,d2,hij,pgen,va)
+      !$OMP PRIVATE(k,m,mm,n,nd,nw,it,ii,state,skip,okr,no,nv,npair,occ)   &
+      !$OMP PRIVATE(vir,pij,ptype,pcum,d2,hij,pgen)
   allocate(list(N_int,2,nlist),h(nlist))
   allocate(cum(0:nlist),dom(N_int,2,n_det_domain))
   allocate(pij(hb_n_pair_max),ptype(hb_n_pair_max))
@@ -298,7 +305,12 @@ subroutine domain_generation(istate,e_ref,tin,do_score,otf,tv,score, &
 
       hd = diag_H_mat_elem(tin%sh(is)%key(1,ii),N_int)
       call domain_build(tin%sh(is)%key(1,ii),hd,nd,dom,list,h)
-      call domain_resolvent(e_ref,nd,dom,njet,g,n_det_domain,hd)
+      call domain_resolvent(e_ref,nd,dom,njet,g,n_det_domain,hd,okr)
+      if (.not.okr) then
+        !$OMP ATOMIC
+        domain_n_singular = domain_n_singular + 1_8
+        cycle
+      endif
       do l=1,nd
         do m=0,njet
           u(m,l) = 0.d0

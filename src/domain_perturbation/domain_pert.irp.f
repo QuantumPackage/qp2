@@ -85,6 +85,11 @@ subroutine run_domain_pert
     call write_double(6,t1-t0,'Wall time (s)')
   enddo
   call write_double(6,domain_min_gap_seen,'Smallest |H_jj - E_0|')
+  if (domain_n_singular > 0_8) then
+    print *, 'Warning: external determinants with a singular domain matrix'
+    print *, '(degenerate with the state) were skipped:', domain_n_singular
+    print *, 'Check the orbitals (for example, run the SCF first).'
+  endif
   call ezfio_set_domain_perturbation_domain_energy(etot)
   call ezfio_set_domain_perturbation_domain_energy_error(eerr)
   deallocate(e,err,errt,ecb)
