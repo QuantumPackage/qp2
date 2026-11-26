@@ -311,9 +311,7 @@ subroutine domain_generation(istate,e_ref,tin,do_score,otf,tv,score, &
       if (do_score) then
         do l=1,nd
           if (otf) then
-            call i_H_psi(dom(1,1,l),psi_det,domain_phi0(1,istate),   &
-                N_int,N_det,N_det,1,va)
-            v = va(1)
+            v = domain_h_phi(dom(1,1,l),istate)
           else
             v = table_get(tv,dom(1,1,l))
           endif
