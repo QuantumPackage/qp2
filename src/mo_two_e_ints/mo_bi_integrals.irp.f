@@ -53,9 +53,9 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
 
   mo_two_e_integrals_in_map = .True.
   if (read_mo_two_e_integrals) then
-    print*,'Reading the MO integrals'
+    if (.not.human_quiet) print*,'Reading the MO integrals'
     call map_load_from_disk(trim(ezfio_filename)//'/work/mo_ints',mo_integrals_map)
-    print*, 'MO integrals provided'
+    if (.not.human_quiet) print*, 'MO integrals provided'
     return
   endif
 
@@ -76,16 +76,16 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
     integer*8                      :: get_mo_map_size, mo_map_size
     mo_map_size = get_mo_map_size()
     double precision, external     :: map_mb
-    print*,'Molecular integrals provided:'
-    print*,' Size of MO map           ', map_mb(mo_integrals_map) ,'MB'
-    print*,' Number of MO integrals: ',  mo_map_size
+    if (.not.human_quiet) print*,'Molecular integrals provided:'
+    if (.not.human_quiet) print*,' Size of MO map           ', map_mb(mo_integrals_map) ,'MB'
+    if (.not.human_quiet) print*,' Number of MO integrals: ',  mo_map_size
   endif
 
   call wall_time(wall_2)
   call cpu_time(cpu_2)
 
-  print*,' cpu  time :',cpu_2 - cpu_1, 's'
-  print*,' wall time :',wall_2 - wall_1, 's  ( x ', (cpu_2-cpu_1)/(wall_2-wall_1), ')'
+  if (.not.human_quiet) print*,' cpu  time :',cpu_2 - cpu_1, 's'
+  if (.not.human_quiet) print*,' wall time :',wall_2 - wall_1, 's  ( x ', (cpu_2-cpu_1)/(wall_2-wall_1), ')'
 
   if (write_mo_two_e_integrals.and.mpi_master) then
     call ezfio_set_work_empty(.False.)

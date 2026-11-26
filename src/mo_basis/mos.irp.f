@@ -43,7 +43,7 @@ BEGIN_PROVIDER [ double precision, mo_coef, (ao_num,mo_num) ]
   if (exists) then
     if (mpi_master) then
       call ezfio_get_mo_basis_mo_coef(mo_coef)
-      write(*,*) 'Read  mo_coef'
+      if (.not.human_quiet) write(*,*) 'Read  mo_coef'
     endif
   else
     ! Orthonormalized AO basis
@@ -76,7 +76,7 @@ BEGIN_PROVIDER [ double precision, mo_coef_imag, (ao_num,mo_num) ]
   if (exists) then
     if (mpi_master) then
       call ezfio_get_mo_basis_mo_coef_imag(mo_coef_imag)
-      write(*,*) 'Read  mo_coef_imag'
+      if (.not.human_quiet) write(*,*) 'Read  mo_coef_imag'
     endif
   else
     ! Orthonormalized AO basis
@@ -120,7 +120,7 @@ BEGIN_PROVIDER [ character*(64), mo_label ]
     else
       mo_label = 'no_label'
     endif
-    write(*,*) '* mo_label          ', trim(mo_label)
+    if (.not.human_quiet) write(*,*) '* mo_label          ', trim(mo_label)
   endif
 
 END_PROVIDER
@@ -162,7 +162,7 @@ BEGIN_PROVIDER [ double precision, mo_occ, (mo_num) ]
         mo_occ(i) = 1.d0
       enddo
     endif
-    write(*,*) 'Read mo_occ'
+    if (.not.human_quiet) write(*,*) 'Read mo_occ'
   endif
 
 END_PROVIDER

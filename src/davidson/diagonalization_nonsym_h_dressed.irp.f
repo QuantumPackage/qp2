@@ -162,10 +162,12 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
   PROVIDE threshold_nonsym_davidson
 
   call write_time(6)
-  write(6,'(A)') ''
-  write(6,'(A)') 'Davidson Diagonalization'
-  write(6,'(A)') '------------------------'
-  write(6,'(A)') ''
+  if (.not.human_quiet) then
+    write(6,'(A)') ''
+    write(6,'(A)') 'Davidson Diagonalization'
+    write(6,'(A)') '------------------------'
+    write(6,'(A)') ''
+  endif
 
   ! Find max number of cores to fit in memory
   ! -----------------------------------------
@@ -227,22 +229,24 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
 
   !---------------
 
-  write(6,'(A)') ''
-  write_buffer = '====='
-  do i = 1, N_st
-    write_buffer = trim(write_buffer)//' ================ ==========='
-  enddo
-  write(6, '(A)') write_buffer(1:6+41*N_st)
-  write_buffer = 'Iter'
-  do i = 1, N_st
-    write_buffer = trim(write_buffer)//'       Energy        Residual '
-  enddo
-  write(6,'(A)') write_buffer(1:6+41*N_st)
-  write_buffer = '====='
-  do i = 1, N_st
-    write_buffer = trim(write_buffer)//' ================ ==========='
-  enddo
-  write(6,'(A)') write_buffer(1:6+41*N_st)
+  if (.not.human_quiet) then
+      write(6,'(A)') ''
+      write_buffer = '====='
+      do i = 1, N_st
+        write_buffer = trim(write_buffer)//' ================ ==========='
+      enddo
+      write(6, '(A)') write_buffer(1:6+41*N_st)
+      write_buffer = 'Iter'
+      do i = 1, N_st
+        write_buffer = trim(write_buffer)//'       Energy        Residual '
+      enddo
+      write(6,'(A)') write_buffer(1:6+41*N_st)
+      write_buffer = '====='
+      do i = 1, N_st
+        write_buffer = trim(write_buffer)//' ================ ==========='
+      enddo
+      write(6,'(A)') write_buffer(1:6+41*N_st)
+  endif
 
 
   if(disk_based) then
@@ -435,7 +439,9 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
         !don't print
         continue
       else
-        write(*, '(1X, I3, 1X, 100(1X, F16.10, 1X, ES11.3))') iter-1, to_print(1:2,1:N_st)
+        if (.not.human_quiet) then
+          write(*, '(1X, I3, 1X, 100(1X, F16.10, 1X, ES11.3))') iter-1, to_print(1:2,1:N_st)
+        endif
       endif
 
       ! Check convergence
@@ -505,8 +511,10 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
   do i = 1, N_st
     write_buffer = trim(write_buffer)//' ================ ==========='
   enddo
-  write(6,'(A)') trim(write_buffer)
-  write(6,'(A)') ''
+  if (.not.human_quiet) then
+    write(6,'(A)') trim(write_buffer)
+    write(6,'(A)') ''
+  endif
   call write_time(6)
 
   if(disk_based) then

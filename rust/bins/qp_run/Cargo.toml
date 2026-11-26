@@ -7,8 +7,8 @@ edition.workspace = true
 [dependencies]
 clap = { workspace = true }
 qp-cli = { path = "../../crates/qp-cli" }
+qp-ezfio = { path = "../../crates/qp-ezfio" }
 qp-types = { path = "../../crates/qp-types" }
 
 [dev-dependencies]
-qp-ezfio = { path = "../../crates/qp-ezfio" }
 tempfile = { workspace = true }

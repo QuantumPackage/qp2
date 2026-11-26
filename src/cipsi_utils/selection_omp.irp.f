@@ -276,11 +276,13 @@ subroutine omp_selection(N_in, pt2_data)
 
   pt2_overlap(:,:) = pt2_data % overlap(:,:)
 
+  if (.not.human_quiet) then
   print *, 'Overlap of perturbed states:'
   do l=1,N_states
     print *, pt2_overlap(l,:)
   enddo
   print *, '-------'
+  endif
   SOFT_TOUCH pt2_overlap
   call update_pt2_and_variance_weights(pt2_data, N_states)
 

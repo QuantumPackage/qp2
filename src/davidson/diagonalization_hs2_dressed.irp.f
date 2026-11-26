@@ -206,10 +206,12 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   PROVIDE nuclear_repulsion expected_s2 psi_bilinear_matrix_order psi_bilinear_matrix_order_reverse threshold_davidson_pt2 threshold_davidson_from_pt2
 
   call write_time(6)
-  write(6,'(A)') ''
-  write(6,'(A)') 'Davidson Diagonalization'
-  write(6,'(A)') '------------------------'
-  write(6,'(A)') ''
+  if (.not.human_quiet) then
+    write(6,'(A)') ''
+    write(6,'(A)') 'Davidson Diagonalization'
+    write(6,'(A)') '------------------------'
+    write(6,'(A)') ''
+  endif
 
   ! Find max number of cores to fit in memory
   ! -----------------------------------------
@@ -271,22 +273,22 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
   !---------------
 
-  write(6,'(A)') ''
+  if (.not.human_quiet) write(6,'(A)') ''
   write_buffer = '====='
   do i=1,N_st
     write_buffer = trim(write_buffer)//' ================ =========== ==========='
   enddo
-  write(6,'(A)') write_buffer(1:6+41*N_st)
+  if (.not.human_quiet) write(6,'(A)') write_buffer(1:6+41*N_st)
   write_buffer = 'Iter'
   do i=1,N_st
     write_buffer = trim(write_buffer)//'       Energy          S^2       Residual '
   enddo
-  write(6,'(A)') write_buffer(1:6+41*N_st)
+  if (.not.human_quiet) write(6,'(A)') write_buffer(1:6+41*N_st)
   write_buffer = '====='
   do i=1,N_st
     write_buffer = trim(write_buffer)//' ================ =========== ==========='
   enddo
-  write(6,'(A)') write_buffer(1:6+41*N_st)
+  if (.not.human_quiet) write(6,'(A)') write_buffer(1:6+41*N_st)
 
 
   if (disk_based) then
@@ -684,7 +686,9 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
         ! Don't print
         continue
       else
-        write(*,'(1X,I3,1X,100(1X,F16.10,1X,F11.6,1X,ES11.3))') iter-1, to_print(1:3,1:N_st)
+        if (.not.human_quiet) then
+          write(*,'(1X,I3,1X,100(1X,F16.10,1X,F11.6,1X,ES11.3))') iter-1, to_print(1:3,1:N_st)
+        endif
       endif
 
       ! Check convergence
@@ -764,8 +768,10 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   do i=1,N_st
     write_buffer = trim(write_buffer)//' ================ =========== ==========='
   enddo
-  write(6,'(A)') trim(write_buffer)
-  write(6,'(A)') ''
+  if (.not.human_quiet) then
+    write(6,'(A)') trim(write_buffer)
+    write(6,'(A)') ''
+  endif
   call write_time(6)
 
   if (disk_based)then

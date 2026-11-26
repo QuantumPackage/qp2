@@ -146,8 +146,13 @@ subroutine print_memory_usage()
   implicit none
   BEGIN_DOC
 ! Prints the memory usage in the output
+  !
+! Silenced while the summary stream is on: the memory figures are legacy
+! provenance noise. Callers keep calling it (the OOM path still prints its
+! own message and stops).
   END_DOC
   double precision :: rss, mem
+  if (human_quiet) return
   call resident_memory(rss)
   call total_memory(mem)
 

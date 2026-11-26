@@ -28,6 +28,7 @@ subroutine pg_write_state_irrep(iunit, istate, label, dom, purity)
   character*(64) :: val
 
   if (.not. mpi_master) return
+  if (human_quiet) return
   write(st,'(I8)') istate
   lab = 'Irrep of state '//trim(adjustl(st))
   if (label > 0) then
@@ -59,6 +60,7 @@ subroutine pg_print_state_irreps(energy, s2)
   if (.not. pg_symmetry_ready()) return
   if (mo_num < 1) return
   if (N_det < 1 .or. N_states < 1) return
+  if (human_quiet) return
   call pg_state_irreps_label(energy, s2)
 end subroutine pg_print_state_irreps
 

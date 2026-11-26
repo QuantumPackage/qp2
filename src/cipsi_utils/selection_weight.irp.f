@@ -82,57 +82,57 @@ BEGIN_PROVIDER [ double precision, selection_weight, (N_states) ]
    select case (weight_selection)
 
      case (0)
-      print *,  'Using input weights in selection'
+      if (.not.human_quiet) print *,  'Using input weights in selection'
       selection_weight(1:N_states) = c0_weight(1:N_states) * state_average_weight(1:N_states)
 
      case (1)
-      print *,  'Using 1/c_max^2 weight in selection'
+      if (.not.human_quiet) print *,  'Using 1/c_max^2 weight in selection'
       selection_weight(1:N_states) = c0_weight(1:N_states)
 
      case (2)
-      print *,  'Using PT2-matching weight in selection'
+      if (.not.human_quiet) print *,  'Using PT2-matching weight in selection'
       selection_weight(1:N_states) = c0_weight(1:N_states) * pt2_match_weight(1:N_states)
-      print *, '# PT2 weight ', real(pt2_match_weight(:),4)
+      if (.not.human_quiet) print *, '# PT2 weight ', real(pt2_match_weight(:),4)
 
      case (3)
-      print *,  'Using variance-matching weight in selection'
+      if (.not.human_quiet) print *,  'Using variance-matching weight in selection'
       selection_weight(1:N_states) = c0_weight(1:N_states) * variance_match_weight(1:N_states)
-      print *, '# var weight ', real(variance_match_weight(:),4)
+      if (.not.human_quiet) print *, '# var weight ', real(variance_match_weight(:),4)
 
      case (4)
-      print *,  'Using variance- and PT2-matching weights in selection'
+      if (.not.human_quiet) print *,  'Using variance- and PT2-matching weights in selection'
       selection_weight(1:N_states) = c0_weight(1:N_states) * sqrt(variance_match_weight(1:N_states) * pt2_match_weight(1:N_states))
-      print *, '# PT2 weight ', real(pt2_match_weight(:),4)
-      print *, '# var weight ', real(variance_match_weight(:),4)
+      if (.not.human_quiet) print *, '# PT2 weight ', real(pt2_match_weight(:),4)
+      if (.not.human_quiet) print *, '# var weight ', real(variance_match_weight(:),4)
 
      case (5)
-      print *,  'Using variance-matching weight in selection'
+      if (.not.human_quiet) print *,  'Using variance-matching weight in selection'
       selection_weight(1:N_states) = c0_weight(1:N_states) * variance_match_weight(1:N_states)
-      print *, '# var weight ', real(variance_match_weight(:),4)
+      if (.not.human_quiet) print *, '# var weight ', real(variance_match_weight(:),4)
 
      case (6)
-      print *,  'Using CI coefficient-based selection'
+      if (.not.human_quiet) print *,  'Using CI coefficient-based selection'
       selection_weight(1:N_states) = c0_weight(1:N_states)
 
      case (7)
-      print *,  'Input weights multiplied by variance- and PT2-matching'
+      if (.not.human_quiet) print *,  'Input weights multiplied by variance- and PT2-matching'
       selection_weight(1:N_states) = c0_weight(1:N_states) * sqrt(variance_match_weight(1:N_states) * pt2_match_weight(1:N_states)) * state_average_weight(1:N_states)
-      print *, '# PT2 weight ', real(pt2_match_weight(:),4)
-      print *, '# var weight ', real(variance_match_weight(:),4)
+      if (.not.human_quiet) print *, '# PT2 weight ', real(pt2_match_weight(:),4)
+      if (.not.human_quiet) print *, '# var weight ', real(variance_match_weight(:),4)
 
      case (8)
-      print *,  'Input weights multiplied by pt2-matching'
+      if (.not.human_quiet) print *,  'Input weights multiplied by pt2-matching'
       selection_weight(1:N_states) = c0_weight(1:N_states) * pt2_match_weight(1:N_states) * state_average_weight(1:N_states)
-      print *, '# PT2 weight ', real(pt2_match_weight(:),4)
+      if (.not.human_quiet) print *, '# PT2 weight ', real(pt2_match_weight(:),4)
 
      case (9)
-      print *,  'Input weights multiplied by variance-matching'
+      if (.not.human_quiet) print *,  'Input weights multiplied by variance-matching'
       selection_weight(1:N_states) = c0_weight(1:N_states) * variance_match_weight(1:N_states) * state_average_weight(1:N_states)
-      print *, '# var weight ', real(variance_match_weight(:),4)
+      if (.not.human_quiet) print *, '# var weight ', real(variance_match_weight(:),4)
 
     end select
      selection_weight(:) = selection_weight(:)/sum(selection_weight(:))
-     print *, '# Total weight ', real(selection_weight(:),4)
+     if (.not.human_quiet) print *, '# Total weight ', real(selection_weight(:),4)
 
 END_PROVIDER
 

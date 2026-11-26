@@ -64,11 +64,22 @@ def get_energy(file, state, arguments):
     energy = None
     with open(f"{file}.energy.out", 'r') as f:
         for line in f:
-            if "Energy of state" in line and f"{state}" in line:
-                energy = float(line.split()[-1])  # Extracts the energy value
+            stripped = line.lstrip()
+            if stripped.startswith("# Ndet,E,E+PT2,E+RPT2,absPT2="):
+                # Single-state machine line: fields after '=' are
+                # Ndet, E, E+PT2, E+RPT2, absPT2.
+                energy = float(line.split("=", 1)[1].split()[1])
+            elif stripped.startswith("# S,Ndet,E,E+PT2,E+RPT2,absPT2="):
+                # Multi-state machine line: fields after '=' are
+                # S, Ndet, E, E+PT2, E+RPT2, absPT2.
+                fields = line.split("=", 1)[1].split()
+                if int(fields[0]) == int(state):
+                    energy = float(fields[2])
+
+    if energy is None:
+        raise ValueError("Energy not found in Quantum Package output. Update script {sys.argv[0]}")
 
     return energy
-    raise ValueError("Energy not found in Quantum Package output. Update script {sys.argv[0]}")
 
 def set_coordinates(coord):
     """Update the nuclear coordinates in EZFIO."""

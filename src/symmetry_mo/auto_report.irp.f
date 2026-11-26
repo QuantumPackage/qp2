@@ -172,6 +172,7 @@ subroutine pg_print_mo_energies(e, n)
   double precision, intent(in) :: e(n)
   logical, external :: pg_symmetry_ready
 
+  if (human_quiet) return
   if (n < 1) return
   if (.not. pg_symmetry_ready()) then
     call pg_print_mo_energies_plain(e, n)
@@ -287,6 +288,7 @@ subroutine pg_report_mo_symmetry()
   ! IRPF90 does not emit the declaration of a function for its callers.
   logical, external :: pg_symmetry_ready
 
+  if (human_quiet) return
   if (.not. pg_symmetry_ready()) return
   call pg_report_mo_symmetry_work()
 end subroutine pg_report_mo_symmetry

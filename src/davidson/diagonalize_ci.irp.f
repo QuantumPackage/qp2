@@ -161,7 +161,7 @@ END_PROVIDER
 
    else if (diag_algorithm == "Lapack") then
 
-     print *,  'Diagonalization of H using Lapack'
+     if (.not.human_quiet) print *,  'Diagonalization of H using Lapack'
      allocate (eigenvectors(size(H_matrix_all_dets,1),N_det))
      allocate (eigenvalues(N_det))
 

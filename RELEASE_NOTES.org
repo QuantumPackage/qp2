@@ -27,6 +27,14 @@
     are read at run time (the ~QP_GIT_MESSAGE~, ~QP_GIT_DATE~ and
     ~QP_GIT_SHA1~ variables override them). A tree that is not a git
     checkout prints ~unknown~.
+  - The standard output of the programs launched by ~qp_run~ is now a
+    short human summary: a one-line banner, the SCF table, the CIPSI
+    table, the extrapolation tables and a final box with the energies.
+    The legacy provenance dump (time stamps, memory figures, integral
+    and Davidson traces) is suppressed by a single ~human_quiet~ gate
+    and restored by ~QP_VERBOSE=1~.  A machine-readable line
+    (~# Ndet,E,E+PT2,E+RPT2,absPT2=~, or ~# S,Ndet,...~ with several
+    states) follows each CIPSI row for the analysis scripts.
   - The CIPSI/MRCI selected spaces at the default threshold may differ
     from the pre-removal release: the old distributed selection merged
     the worker contributions in arrival order, so its result was

@@ -9,6 +9,8 @@ END_DOC
 
   double precision               :: energy_SCF,energy_SCF_previous,Delta_energy_SCF
   double precision               :: max_error_DIIS,max_error_DIIS_alpha,max_error_DIIS_beta
+  double precision               :: scf_t0, scf_t1, scf_tcf
+  character*(8)                  :: tbuf
   double precision, allocatable  :: Fock_matrix_DIIS(:,:,:),error_matrix_DIIS(:,:,:)
 
   integer                        :: iteration_SCF,dim_DIIS,index_dim_DIIS
@@ -34,13 +36,9 @@ END_DOC
 
   call write_time(6)
 
-  print*,'Energy of the guess = ',SCF_energy
-  write(6,'(A4, 1X, A16, 1X, A16, 1X, A16, 1X, A16)')  &
-    '====','================','================','================','================'
-  write(6,'(A4, 1X, A16, 1X, A16, 1X, A16, 1X, A16)')  &
-    '  N ', 'Energy  ', 'Energy diff  ',  'DIIS error  ', 'Level shift   '
-  write(6,'(A4, 1X, A16, 1X, A16, 1X, A16, 1X, A16)')  &
-    '====','================','================','================','================'
+  write(6,'(A,F13.8,A)') '  SCF       guess E =', SCF_energy, ' Ha'
+  write(6,'(A)') '   it            E(HF)            dE'
+  write(6,'(A)') repeat('-',36)
 
 ! Initialize energies and density matrices
   energy_SCF_previous = SCF_energy
@@ -51,6 +49,7 @@ END_DOC
   max_error_DIIS      = 1.d0
   n_level_shift_try   = 5
 
+  call wall_time(scf_t0)
 
 !
 ! Start of main SCF loop
@@ -166,7 +165,7 @@ END_DOC
           max_error_DIIS = maxval(Abs(FPS_SPF_Matrix_MO))
        enddo
        if (n_retry == n_level_shift_try .and. Delta_Energy_SCF > 0.d0) then
-          write(6,'(A,I2,A)') ' Level shift: no downhill step after ', &
+          if (.not.human_quiet) write(6,'(A,I2,A)') ' Level shift: no downhill step after ', &
              n_retry, ' tries, keeping the last one'
        endif
        if (n_retry > 0) then
@@ -181,8 +180,7 @@ END_DOC
 
 !   Print results at the end of each iteration
 
-    write(6,'(I4, 1X, F16.10, 1X, F16.10, 1X, F16.10, 1X, F16.10, 1X, I3)')  &
-      iteration_SCF, energy_SCF, Delta_energy_SCF, max_error_DIIS, level_shift, dim_DIIS
+    write(6,'(1X,I4,1X,F16.8,SP,F14.8)') iteration_SCF, energy_SCF, Delta_energy_SCF
 
 !   Write data in JSON file
 
@@ -202,6 +200,9 @@ END_DOC
 
   enddo
 
+  call wall_time(scf_t1)
+  scf_tcf = scf_t1 - scf_t0
+
  if (iteration_SCF < n_it_SCF_max) then
    mo_label = 'Canonical'
    if (do_mom) then
@@ -212,11 +213,12 @@ END_DOC
 ! End of Main SCF loop
 !
 
-  write(6,'(A4, 1X, A16, 1X, A16, 1X, A16, 1X, A16)')  &
-    '====','================','================','================','================'
-  write(6,*)
+  write(6,'(A)') repeat('-',36)
   if (converged) then
-    write(6,*) 'SCF converged'
+    write(tbuf,'(F8.1)') scf_tcf
+    write(6,'(A,F13.8,A,I0,A,A,A)') '  converged   E(HF) =', energy_SCF, &
+      ' Ha   (', iteration_SCF, ' iterations, ', trim(adjustl(tbuf)), ' s)'
+    write(6,'(A)')
     call sleep(1)   ! When too fast, the MOs aren't saved.
   endif
 

@@ -421,9 +421,9 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
     call write_double(6,mem,'Memory (Gb)')
 
     PROVIDE pt2_e0_denominator
-    print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
-    print '(A)', ' Samples           Energy             PT2            Variance          Norm^2       Convergence    Seconds'
-    print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
+    if (.not.human_quiet) print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
+    if (.not.human_quiet) print '(A)', ' Samples           Energy             PT2            Variance          Norm^2       Convergence    Seconds'
+    if (.not.human_quiet) print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
 
     ! One worker buffer per member of the team.  Member t (OpenMP thread
     ! number t-1) owns slot t; slot 1 is also the serial warm-up slot:
@@ -465,7 +465,7 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
     pt2_data_err % rpt2(pt2_stoch_istate) =  &
       pt2_data_err % pt2(pt2_stoch_istate)/(1.d0 + pt2_data % overlap(pt2_stoch_istate,pt2_stoch_istate))
 
-    print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
+    if (.not.human_quiet) print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
 
     do k=1,N_states
       pt2_overlap(pt2_stoch_istate,k) = pt2_data % overlap(k,pt2_stoch_istate)
@@ -503,11 +503,13 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
    enddo
   enddo
 
+  if (.not.human_quiet) then
   print *, 'Overlap of perturbed states:'
   do k=1,N_states
     print *, pt2_overlap(k,:)
   enddo
   print *, '-------'
+  endif
 
   if (N_in > 0) then
     b%cur = min(N_in,b%cur)
@@ -757,7 +759,7 @@ subroutine pt2_omp_walk(E, relative_error, pt2_data, pt2_data_err, b, b_workers,
 
           ! Only the printing is throttled to one second; the stopping
           ! criterion must not depend on the machine.
-          if ((time - time1 > 1.d0) .or. (n==N_det_generators)) then
+          if (.not.human_quiet .and. ((time - time1 > 1.d0) .or. (n==N_det_generators))) then
             time1 = time
 
             value1 =  pt2_data     % pt2(pt2_stoch_istate) + E

@@ -2,152 +2,91 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_configuration_,n_st,s
   use selection_types
   implicit none
   BEGIN_DOC
-! Print the extrapolated energy in the output
+  ! One row per state of the CIPSI table of the summary stream.
+  !
+  ! The header and the rule are printed on the first call; each call then
+  ! prints one row per state, immediately followed by the machine-readable
+  ! line the legacy python helpers parse.
+  !
+  ! `it` counts the calls, so the iteration number stays right in the
+  ! extra-iteration block, which runs after the rolling window `N_iter` is
+  ! full (N_iter stops at N_iter_max = 8).
+  !
+  ! dE+PT2 is the difference with the same state at the previous call, `--`
+  ! when there is none. t(s) is the elapsed wall time of the run, printed on
+  ! the state-1 row only.
+  !
+  ! TODO(json): the machine line is a transition artifact. Delete it once the
+  ! JSON output (write_cipsi_json) covers Ndet/E/PT2 for every iteration.
   END_DOC
 
   integer, intent(in)            :: n_det_, n_configuration_, n_st
   double precision, intent(in)   :: e_(n_st), s2_(n_st)
   type(pt2_type)  , intent(in)   :: pt2_data, pt2_data_err
-  integer                        :: i, k
-  integer                        :: N_states_p
-  integer, allocatable           :: irlab(:), irdom(:)
-  double precision, allocatable  :: irpur(:)
-  logical                        :: have_irr, impure
-  logical, external              :: pg_state_irreps_psi
-  character*(9)                  :: pt2_string
-  character*(512)                :: fmt
-  character*(13)                 :: raw13
-  character*(14)                 :: clab
 
-  if (do_pt2) then
-    pt2_string = '        '
-  else
-    pt2_string = '(approx)'
+  integer                        :: k, N_states_p
+  integer, save                  :: it = 0
+  integer, save                  :: prev_n = -1
+  double precision, allocatable, save :: ept2_prev(:)
+  logical, allocatable, save     :: prev_ok(:)
+  double precision               :: ept2, wt
+  character*(14)                 :: de14
+  character*(9)                  :: t9
+
+  N_states_p = min(n_det_,n_st)
+  if (N_states_p < 1) return
+
+  it = it + 1
+
+  if (prev_n /= n_st) then
+    if (allocated(ept2_prev)) deallocate(ept2_prev)
+    if (allocated(prev_ok)) deallocate(prev_ok)
+    allocate(ept2_prev(max(n_st,1)), prev_ok(max(n_st,1)))
+    ept2_prev = 0.d0
+    prev_ok = .false.
+    prev_n = n_st
   endif
 
-  N_states_p = min(N_det_,n_st)
-
-  allocate(irlab(N_states_p), irdom(N_states_p), irpur(N_states_p))
-  have_irr = pg_state_irreps_psi(N_states_p, irlab, irdom, irpur)
-  impure = .false.
-  if (have_irr) then
-    do k = 1, N_states_p
-      if (irlab(k) == 0) impure = .true.
-    enddo
-  endif
-
-  print *, ''
-  print '(A,I12)',  'Summary at N_det = ', N_det_
-  print '(A)',      '-----------------------------------'
-  print *, ''
-
-  write(fmt,*) '(''# ============'',', N_states_p, '(1X,''=============================''))'
-  write(*,fmt)
-  write(fmt,*) '(13X,', N_states_p, '(6X,A7,1X,I6,10X))'
-  write(*,fmt) ('State',k, k=1,N_states_p)
-  write(fmt,*) '(''# ============'',', N_states_p, '(1X,''=============================''))'
-  write(*,fmt)
-  if (have_irr) then
-    ! One 30-wide field per state, the width of the numeric columns above
-    ! and below it. Both strings go through a full-length buffer: an Aw
-    ! edit descriptor right-justifies a shorter literal, and the label
-    ! must sit on the left edge of its field.
-    raw13 = '# Irrep'
-    write(*,'(A13)',advance='no') raw13
-    do k = 1, N_states_p
-      clab = ' '
-      if (irlab(k) > 0) then
-        clab = trim(adjustl(pg_irrep_name(irlab(k))))
-      else if (irdom(k) > 0) then
-        clab = trim(adjustl(pg_irrep_name(irdom(k))))
-      endif
-      write(*,'(1X,A14,15X)',advance='no') clab
-    enddo
-    write(*,*)
-    ! When a state has no definite irrep, name its dominant one above and
-    ! say here how much weight it carries. Pure states keep the historical
-    ! single row.
-    if (impure) then
-      raw13 = '# Purity'
-      write(*,'(A13)',advance='no') raw13
-      do k = 1, N_states_p
-        write(clab,'(F14.4)') irpur(k)
-        write(*,'(1X,A14,15X)',advance='no') clab
-      enddo
-      write(*,*)
+  if (it == 1) then
+    write(6,'(A)') '  CIPSI'
+    if (n_st > 1) then
+      write(6,'(A)') '    it  S    N_det           E+PT2        dE+PT2     t(s)'
+      write(6,'(A)') repeat('-',57)
+    else
+      write(6,'(A)') '    it    N_det           E+PT2        dE+PT2     t(s)'
+      write(6,'(A)') repeat('-',54)
     endif
   endif
-  write(fmt,*) '(A13,', N_states_p, '(1X,F14.8,15X))'
-  write(*,fmt) '# E          ', e_(1:N_states_p)
-  if (N_states_p > 1) then
-    write(*,fmt) '# Excit. (au)', e_(1:N_states_p)-e_(1)
-    write(*,fmt) '# Excit. (eV)', (e_(1:N_states_p)-e_(1))*27.211396641308d0
-  endif
-  write(fmt,*) '(A13,', 2*N_states_p, '(1X,F14.8))'
-  write(*,fmt) '# PT2 '//pt2_string, (pt2_data % pt2(k), pt2_data_err % pt2(k), k=1,N_states_p)
-  write(*,fmt) '# rPT2'//pt2_string, (pt2_data % rpt2(k), pt2_data_err % rpt2(k), k=1,N_states_p)
-  write(*,'(A)') '#'
-  write(*,fmt) '# E+PT2      ', (e_(k)+pt2_data % pt2(k),pt2_data_err % pt2(k), k=1,N_states_p)
-  write(*,fmt) '# E+rPT2     ', (e_(k)+pt2_data % rpt2(k),pt2_data_err % rpt2(k), k=1,N_states_p)
-  if (N_states_p > 1) then
-    write(*,fmt) '# Excit. (au)', ( (e_(k)+pt2_data % pt2(k)-e_(1)-pt2_data % pt2(1)), &
-      dsqrt(pt2_data_err % pt2(k)*pt2_data_err % pt2(k)+pt2_data_err % pt2(1)*pt2_data_err % pt2(1)), k=1,N_states_p)
-    write(*,fmt) '# Excit. (eV)', ( (e_(k)+pt2_data % pt2(k)-e_(1)-pt2_data % pt2(1))*27.211396641308d0, &
-      dsqrt(pt2_data_err % pt2(k)*pt2_data_err % pt2(k)+pt2_data_err % pt2(1)*pt2_data_err % pt2(1))*27.211396641308d0, k=1,N_states_p)
-  endif
-  write(fmt,*) '(''# ============'',', N_states_p, '(1X,''=============================''))'
-  write(*,fmt)
-  print *,  ''
 
-  print *,  'N_det             = ', N_det_
-  print *,  'N_states          = ', n_st
-  if (s2_eig) then
-    print *,  'N_cfg             = ', N_configuration_
-    if (csf_based) then
-      print *,  'N_csf             = ', N_csf
-    endif
-  endif
-  print *,  ''
+  call wall_time(wt)
 
-  do k=1, N_states_p
-    print*,'* State ',k
-    print *,  '< S^2 >         = ', s2_(k)
-    print *,  'E               = ', e_(k)
-    print *,  'Variance        = ', pt2_data % variance(k), ' +/- ', pt2_data_err % variance(k)
-    if(dabs(pt2_data % overlap(k,k)).gt.0.d0)then
-     print *,  'PT norm         = ', dsqrt(pt2_data % overlap(k,k)), ' +/- ', 0.5d0*dsqrt(pt2_data % overlap(k,k)) * pt2_data_err % overlap(k,k) / (pt2_data % overlap(k,k))
+  do k = 1, N_states_p
+    ept2 = e_(k) + pt2_data % pt2(k)
+
+    if (prev_ok(k)) then
+      write(de14,'(SP,F14.8)') ept2 - ept2_prev(k)
+    else
+      de14 = '            --'
     endif
-    print *,  'PT2             = ', pt2_data % pt2(k), ' +/- ', pt2_data_err % pt2(k)
-    print *,  'rPT2            = ', pt2_data % rpt2(k), ' +/- ', pt2_data_err % rpt2(k)
-    print *,  'E+PT2 '//pt2_string//' = ', e_(k)+pt2_data % pt2(k), ' +/- ', pt2_data_err % pt2(k)
-    print *,  'E+rPT2'//pt2_string//' = ', e_(k)+pt2_data % rpt2(k), ' +/- ', pt2_data_err % rpt2(k)
-    print *,  ''
+
+    if (k == 1) then
+      write(t9,'(F9.1)') wt - human_t0
+    else
+      t9 = '         '
+    endif
+
+    if (n_st > 1) then
+      write(6,'(1X,I5,I3,I9,F16.8,A,A)') it, k, n_det_, ept2, de14, t9
+      write(6,'(A,I3,I8,4F16.8)') '  # S,Ndet,E,E+PT2,E+RPT2,absPT2=', k, n_det_, &
+        e_(k), ept2, e_(k)+pt2_data % rpt2(k), abs(pt2_data % pt2(k))
+    else
+      write(6,'(1X,I5,I9,F16.8,A,A)') it, n_det_, ept2, de14, t9
+      write(6,'(A,I8,4F16.8)') '  # Ndet,E,E+PT2,E+RPT2,absPT2=', n_det_, &
+        e_(k), ept2, e_(k)+pt2_data % rpt2(k), abs(pt2_data % pt2(k))
+    endif
+
+    ept2_prev(k) = ept2
+    prev_ok(k) = .true.
   enddo
 
-  print *,  '-----'
-  if(n_st.gt.1)then
-    print *, 'Variational Energy difference (au | eV)'
-    do i=2, N_states_p
-      print*,'Delta E = ', (e_(i) - e_(1)), &
-        (e_(i) - e_(1)) * 27.211396641308d0
-    enddo
-    print *,  '-----'
-    print*, 'Variational + perturbative Energy difference (au | eV)'
-    do i=2, N_states_p
-      print*,'Delta E = ', (e_(i)+ pt2_data % pt2(i) - (e_(1) + pt2_data % pt2(1))), &
-        (e_(i)+ pt2_data % pt2(i) - (e_(1) + pt2_data % pt2(1))) * 27.211396641308d0
-    enddo
-    print *,  '-----'
-    print*, 'Variational + renormalized perturbative Energy difference (au | eV)'
-    do i=2, N_states_p
-      print*,'Delta E = ', (e_(i)+ pt2_data % rpt2(i) - (e_(1) + pt2_data % rpt2(1))), &
-        (e_(i)+ pt2_data % rpt2(i) - (e_(1) + pt2_data % rpt2(1))) * 27.211396641308d0
-    enddo
-  endif
-
-!  call print_energy_components()
-
-  deallocate(irlab, irdom, irpur)
-
 end subroutine
-

@@ -135,6 +135,8 @@ NOISE = (
     r"^\* Total available memory \(GB\)",
     r"^\* Target maximum memory \(GB\)",
     r"^\s*Time to provide ",
+    r"^qp3  \|  ",
+    r"^  converged   E\(HF\) =",
 )
 NOISE_RE = tuple(re.compile(p) for p in NOISE)
 

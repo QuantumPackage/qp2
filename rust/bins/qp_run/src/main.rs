@@ -9,9 +9,8 @@
 //!
 //! # What it computes
 //!
-//! Nothing physical: it is a launcher. The numbers it produces are the wall
-//! time of the run (whole seconds, printed as `h:mm:ss`) and the exit status
-//! of the executable it ran.
+//! Nothing physical: it is a launcher. The only number it produces is the
+//! exit status of the executable it ran.
 //!
 //! # Flow (order is observable; do not reorder)
 //!
@@ -24,13 +23,15 @@
 //! 3. EZFIO directory exists (`the EZFIO directory does not exist: <d>`).
 //! 4. SIGUSR1 handler (→ `qp_stop`, see [`qp_cli::signal`]).
 //! 5. Program in `data/executables`, else `Possible choices:` + failure.
-//! 6. Banner: `Date:` (local time), Quantum Package, Git stamp, EZFIO dir.
+//! 6. Banner: one line `qp3  |  <program>  |  <ezfio>  |  <date>  |  <sha8>`
+//!    (local time, Git stamp from `QP_ROOT`), then — when the EZFIO carries
+//!    the fields — an info line `  <n> AOs  |  <n> atoms  |  <basis>`.
 //! 7. `qp_edit -c <dir>`; non-zero → `the input is inconsistent
 //!    (qp_edit -c failed)`.
 //! 8. The executable runs with its inherited environment (no extra
 //!    variables).
-//! 9. `Program exited with code %d.` (non-zero only), `Wall time:`,
-//!    one-second pause, exit with the executable's status.
+//! 9. `Program exited with code %d.` (non-zero only), one-second pause,
+//!    exit with the executable's status.
 //!
 //! # Environment variables
 //!
@@ -91,8 +92,8 @@ const DEFAULT_QP_EDIT: &str = "qp_edit";
 /// The failed `qp_edit -c` pre-check.
 const INCONSISTENT_INPUT: &str = "the input is inconsistent (qp_edit -c failed)";
 
-/// Pause after the `Wall time:` line (`Unix.sleep 1`), so a terminal that
-/// launched `qp_run` shows the final output before the prompt.
+/// Pause at the end of the run (`Unix.sleep 1`), so a terminal that launched
+/// `qp_run` shows the final output before the prompt.
 const FINAL_SLEEP: Duration = Duration::from_secs(1);
 
 /// A fatal error and the status the process exits with.
@@ -193,7 +194,7 @@ fn drive(config: &RunConfig, programs: &Programs, root: &Path) -> Result<i32, Fa
     };
 
     // 4. Banner.
-    print_banner(ezfio, time_start, root)?;
+    print_banner(&config.program, ezfio, time_start, root)?;
 
     // 5. Input consistency.
     let editor = std::env::var(QP_EDIT_VAR).unwrap_or_else(|_| DEFAULT_QP_EDIT.to_string());
@@ -212,60 +213,60 @@ fn drive(config: &RunConfig, programs: &Programs, root: &Path) -> Result<i32, Fa
         println!("Program exited with code {job_code}.");
     }
 
-    // 7. Timing and the final status.
-    print_wall_time(time_start);
+    // 7. The final status.
     std::thread::sleep(FINAL_SLEEP);
     Ok(job_code)
 }
 
-/// Print the startup block.
+/// Print the one-line banner and the EZFIO info line.
 ///
-/// The Git stamp is [`GitStamp::resolve`]d from `root`: the tree whose
-/// `data/executables` named the program about to run, overridden value by
-/// value by `QP_GIT_SHA1`/`QP_GIT_DATE`/`QP_GIT_MESSAGE`.
-///
-/// The hour is `tm_hour + (if tm_isdst then 1 else 0)`: the reference adds an
-/// hour when daylight saving is in effect, although `localtime` already
-/// applied it. Reproduced as-is — the line is informational, and the QP2
-/// logs it is compared against contain the extra hour.
-///
-/// # Errors
-///
-/// [`Fatal`] when `localtime_r` fails (an epoch outside `time_t`'s range).
-fn print_banner(ezfio: &str, start: i64, root: &Path) -> Result<(), Fatal> {
+/// Line 1: `qp3  |  <program>  |  <ezfio>  |  <dd/mm/yyyy hh:mm:ss>  |  <sha8>`.
+/// The hour keeps the reference's `tm_hour + isdst` quirk.
+/// Line 2 (optional): `  <n> AOs  |  <n> atoms  |  <basis>`, read from the
+/// EZFIO. A field that cannot be read is omitted; a launcher must never fail
+/// because the banner could not be enriched.
+fn print_banner(program: &str, ezfio: &str, start: i64, root: &Path) -> Result<(), Fatal> {
     let tm = qp_cli::ffi::local_time(start)?;
     let stamp = GitStamp::resolve(root);
     let hour = tm.hour + u32::from(tm.isdst);
+    let sha = stamp.sha1.as_str();
+    let short = sha.get(..8).unwrap_or(sha);
     println!(
-        "Date: {:02}/{:02}/{:04} {hour:02}:{:02}:{:02}",
+        "qp3  |  {program}  |  {ezfio}  |  {:02}/{:02}/{:04} {hour:02}:{:02}:{:02}  |  {short}",
         tm.mday, tm.mon, tm.year, tm.min, tm.sec
     );
-    println!("===============");
-    println!("Quantum Package");
-    println!("===============");
     println!();
-    println!("Git Commit: {}", stamp.message);
-    println!("Git Date  : {}", stamp.date);
-    println!("Git SHA1  : {}", stamp.sha1);
-    println!("EZFIO Dir : {ezfio}");
-    println!();
-    println!();
+    let info = ezfio_info(ezfio);
+    if !info.is_empty() {
+        println!("{info}");
+        println!();
+    }
     Ok(())
 }
 
-/// Print `Wall time: <h>:<mm>:<ss>` and the blank line.
-///
-/// The duration is in whole seconds (`Unix.time` resolution), truncated
-/// toward zero like `Unix.gmtime`.
-fn print_wall_time(start: i64) {
-    let elapsed = (unix_time() - start).max(0);
-    println!(
-        "Wall time: {}:{:02}:{:02}",
-        elapsed / 3600,
-        (elapsed % 3600) / 60,
-        elapsed % 60
-    );
-    println!();
+/// `  <n> AOs  |  <n> atoms  |  <basis>`, with the readable fields only.
+fn ezfio_info(dir: &str) -> String {
+    let Ok(ezfio) = qp_ezfio::EzFio::open(dir) else {
+        return String::new();
+    };
+    let mut parts: Vec<String> = Vec::new();
+    if let Ok(n) = ezfio.get::<i64>("ao_basis", "ao_num") {
+        parts.push(format!("{n} AO{}", if n == 1 { "" } else { "s" }));
+    }
+    if let Ok(n) = ezfio.get::<i64>("nuclei", "nucl_num") {
+        parts.push(format!("{n} atom{}", if n == 1 { "" } else { "s" }));
+    }
+    if let Ok(name) = ezfio.get::<String>("ao_basis", "ao_basis") {
+        let name = name.trim();
+        if !name.is_empty() {
+            parts.push(name.to_string());
+        }
+    }
+    if parts.is_empty() {
+        String::new()
+    } else {
+        format!("  {}", parts.join("  |  "))
+    }
 }
 
 /// Seconds since the Unix epoch, truncated to whole seconds (`Unix.time`).

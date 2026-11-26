@@ -354,8 +354,8 @@ END_PROVIDER
        list_act_reverse(i) = n
      endif
    enddo
-   print *,  'Active MOs:'
-   print *,  list_act(1:n_act_orb)
+   if (.not.human_quiet) print *,  'Active MOs:'
+   if (.not.human_quiet) print *,  list_act(1:n_act_orb)
    
 END_PROVIDER
  
@@ -374,8 +374,8 @@ END_PROVIDER
    do i = 1, n_core_inact_orb
      list_core_inact_reverse(list_core_inact(i)) = i
    enddo
-   print *,  'Core and Inactive MOs:'
-   print *,  list_core_inact(1:n_core_inact_orb)
+   if (.not.human_quiet) print *,  'Core and Inactive MOs:'
+   if (.not.human_quiet) print *,  list_core_inact(1:n_core_inact_orb)
 END_PROVIDER
  
  
@@ -392,8 +392,8 @@ END_PROVIDER
    do i = 1, n_core_inact_act_orb
      list_core_inact_act_reverse(list_core_inact_act(i)) = i
    enddo
-   print *,  'Core, Inactive and Active MOs:'
-   print *,  list_core_inact_act(1:n_core_inact_act_orb)
+   if (.not.human_quiet) print *,  'Core, Inactive and Active MOs:'
+   if (.not.human_quiet) print *,  list_core_inact_act(1:n_core_inact_act_orb)
 END_PROVIDER
  
  
@@ -410,8 +410,8 @@ END_PROVIDER
    do i = 1, n_inact_act_orb
      list_inact_act_reverse(list_inact_act(i)) = i
    enddo
-   print *,  'Inactive and Active MOs:'
-   print *,  list_inact_act(1:n_inact_act_orb)
+   if (.not.human_quiet) print *,  'Inactive and Active MOs:'
+   if (.not.human_quiet) print *,  list_inact_act(1:n_inact_act_orb)
 END_PROVIDER
  
 

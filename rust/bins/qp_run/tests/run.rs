@@ -10,7 +10,7 @@ use common::{Fixture, observe_script, observed};
 
 /// The job sees the EZFIO directory as its first argument and none of the
 /// task-server environment; the launcher creates no `work/` and no address
-/// file; the banner and the wall time are printed.
+/// file; the banner is printed.
 #[test]
 fn the_job_inherits_no_task_server_environment() {
     let fixture = Fixture::new();
@@ -49,15 +49,19 @@ fn the_job_inherits_no_task_server_environment() {
         "the address file is absent after the run"
     );
 
-    assert!(outcome.stdout.contains("Date: "), "{outcome}");
-    assert!(outcome.stdout.contains("Quantum Package"), "{outcome}");
+    assert!(outcome.stdout.contains("qp3  |  "), "{outcome}");
     assert!(
         outcome
             .stdout
-            .contains(&format!("EZFIO Dir : {}", fixture.ezfio_str())),
-        "{outcome}"
+            .contains(&format!("qp3  |  scf  |  {}", fixture.ezfio_str())),
+        "the banner names the program and the EZFIO directory\n{outcome}"
     );
-    assert!(outcome.stdout.contains("Wall time: "), "{outcome}");
+    assert!(
+        outcome
+            .stdout
+            .contains(&format!("  |  {}  |  ", fixture.ezfio_str())),
+        "the EZFIO directory is in the banner\n{outcome}"
+    );
 }
 
 /// The job's Fortran runtime does not buffer a redirected log.
@@ -81,8 +85,7 @@ fn the_job_output_is_not_buffered() {
     );
 }
 
-/// A non-zero job status is reported and becomes the tool's status, after
-/// the wall time was printed.
+/// A non-zero job status is reported and becomes the tool's status.
 #[test]
 fn the_job_exit_code_is_propagated() {
     let fixture = Fixture::new();
@@ -92,10 +95,6 @@ fn the_job_exit_code_is_propagated() {
     assert!(
         outcome.stdout.contains("Program exited with code 3."),
         "{outcome}"
-    );
-    assert!(
-        outcome.stdout.contains("Wall time: "),
-        "the reference prints the wall time before exiting:\n{outcome}"
     );
     assert!(!fixture.work().join("qp_run_address").exists());
 }
@@ -218,5 +217,5 @@ fn an_unknown_program_lists_the_choices() {
         outcome.stderr,
         "qp_run: program not found in data/executables: nope\n"
     );
-    assert!(!outcome.stdout.contains("Quantum Package"), "{outcome}");
+    assert!(!outcome.stdout.contains("qp3  |  "), "{outcome}");
 }

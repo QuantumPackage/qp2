@@ -30,7 +30,7 @@ BEGIN_PROVIDER [double precision, mo_coef_aux, (ao_num,mo_num)]
   if (exists) then
     if (mpi_master) then
       call ezfio_get_mo_basis_mo_coef_aux(mo_coef_aux)
-      write(*,*) 'Read  mo_coef_aux'
+      if (.not.human_quiet) write(*,*) 'Read  mo_coef_aux'
     endif
   else
     ! Orthonormalized AO basis

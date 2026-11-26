@@ -77,7 +77,6 @@ subroutine run_cipsi
         (maxval(abs(pt2_data % variance(1:N_states))) > variance_max) .and.     &
         (correlation_energy_ratio <= correlation_energy_ratio_max)   &
         )
-      write(*,'(A)')  '--------------------------------------------------------------------------------'
 
     to_select = int(sqrt(dble(N_states))*dble(N_det)*selection_factor)
     to_select = max(N_states_diag, to_select)
@@ -109,7 +108,6 @@ subroutine run_cipsi
     call save_energy(psi_energy_with_nucl_rep, pt2_data % pt2)
 
     call increment_n_iter(psi_energy_with_nucl_rep, pt2_data)
-    call print_extrapolated_energy()
     call print_mol_properties()
     call json_add('/results/cipsi/algorithm', 'deterministic')
     call write_cipsi_json(pt2_data,pt2_data_err)
@@ -150,19 +148,20 @@ subroutine run_cipsi
       call pt2_stochastic(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, relative_error, 0) ! Stochastic PT2
       SOFT_TOUCH threshold_generators
     endif
-    print *,  'N_det             = ', N_det
-    print *,  'N_cfg             = ', N_configuration
-    print *,  'N_states          = ', N_states
-    print*,   'correlation_ratio = ', correlation_energy_ratio
 
     call save_energy(psi_energy_with_nucl_rep, pt2_data % pt2)
     call print_summary(psi_energy_with_nucl_rep(1:N_states), &
       pt2_data, pt2_data_err, N_det,N_configuration,N_states,psi_s2)
     call increment_n_iter(psi_energy_with_nucl_rep, pt2_data)
-    call print_extrapolated_energy()
     call print_mol_properties()
     call write_cipsi_json(pt2_data,pt2_data_err)
   endif
+  if (N_states == 1) then
+    write(6,'(A)') repeat('-',54)
+  else
+    write(6,'(A)') repeat('-',57)
+  endif
+  call print_extrapolated_energy(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, N_det)
   call pt2_dealloc(pt2_data)
   call pt2_dealloc(pt2_data_err)
 

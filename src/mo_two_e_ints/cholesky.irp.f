@@ -63,7 +63,7 @@ END_PROVIDER
  integer :: igpu
 
  if (read_mo_cholesky) then
-      print *,  'Reading Cholesky MO vectors from disk...'
+      if (.not.human_quiet) print *,  'Reading Cholesky MO vectors from disk...'
      iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_mo_transp', 'R')
      read(iunit) rank
      if (cholesky_mo_num /= rank) then
@@ -80,10 +80,10 @@ END_PROVIDER
      call gpu_set_device(0)
      close(iunit)
  else
-     print *, ''
-     print *, 'AO->MO Transformation of Cholesky vectors'
-     print *, '-----------------------------------------'
-     print *, ''
+     if (.not.human_quiet) print *, ''
+     if (.not.human_quiet) print *, 'AO->MO Transformation of Cholesky vectors'
+     if (.not.human_quiet) print *, '-----------------------------------------'
+     if (.not.human_quiet) print *, ''
 
      call wall_time(wall0)
 
@@ -137,11 +137,11 @@ END_PROVIDER
      endif
 
      call wall_time(wall1)
-     print*,'Time to provide MO cholesky vectors = ',(wall1-wall0)/60.d0, ' min'
+     if (.not.human_quiet) print*,'Time to provide MO cholesky vectors = ',(wall1-wall0)/60.d0, ' min'
 
 
      if (write_mo_cholesky) then
-       print *,  'Writing Cholesky MO vectors to disk...'
+       if (.not.human_quiet) print *,  'Writing Cholesky MO vectors to disk...'
        iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_mo_transp', 'W')
        write(iunit) cholesky_mo_num
        write(iunit) cholesky_mo_transp

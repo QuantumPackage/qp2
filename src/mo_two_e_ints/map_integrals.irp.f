@@ -24,7 +24,7 @@ BEGIN_PROVIDER [ type(map_type), mo_integrals_map ]
   call two_e_integrals_index(mo_num,mo_num,mo_num,mo_num,key_max)
   sze = key_max
   call map_init(mo_integrals_map,sze)
-  print*, 'MO map initialized: ', sze
+  if (.not.human_quiet) print*, 'MO map initialized: ', sze
 END_PROVIDER
 
 subroutine insert_into_mo_integrals_map(n_integrals,                 &
@@ -58,7 +58,7 @@ end
 
  mo_integrals_cache_min = max(1,elec_alpha_num - (mo_integrals_cache_size/2 - 1) )
  mo_integrals_cache_max = min(mo_num, mo_integrals_cache_min + mo_integrals_cache_size - 1)
- print *, 'MO integrals cache: (', mo_integrals_cache_min, ', ', mo_integrals_cache_max, '), ', &
+ if (.not.human_quiet) print *, 'MO integrals cache: (', mo_integrals_cache_min, ', ', mo_integrals_cache_max, '), ', &
           shiftr(mo_integrals_cache_size_8, 17), 'MiB'
 
 END_PROVIDER

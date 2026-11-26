@@ -62,11 +62,11 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_erf_in_map ]
   mo_erf_map_size = get_mo_erf_map_size()
 
   double precision, external     :: map_mb
-  print*,'Molecular integrals provided:'
-  print*,' Size of MO map           ', map_mb(mo_integrals_erf_map) ,'MB'
-  print*,' Number of MO integrals: ',  mo_erf_map_size
-  print*,' cpu  time :',cpu_2 - cpu_1, 's'
-  print*,' wall time :',wall_2 - wall_1, 's  ( x ', (cpu_2-cpu_1)/(wall_2-wall_1), ')'
+  if (.not.human_quiet) print*,'Molecular integrals provided:'
+  if (.not.human_quiet) print*,' Size of MO map           ', map_mb(mo_integrals_erf_map) ,'MB'
+  if (.not.human_quiet) print*,' Number of MO integrals: ',  mo_erf_map_size
+  if (.not.human_quiet) print*,' cpu  time :',cpu_2 - cpu_1, 's'
+  if (.not.human_quiet) print*,' wall time :',wall_2 - wall_1, 's  ( x ', (cpu_2-cpu_1)/(wall_2-wall_1), ')'
 
   if (write_mo_two_e_integrals_erf.and.mpi_master) then
     call ezfio_set_work_empty(.False.)
@@ -665,8 +665,8 @@ subroutine add_integrals_to_map_erf(mask_ijkl)
   print*,'Molecular ERF integrals provided:'
   print*,' Size of MO ERF map           ', map_mb(mo_integrals_erf_map) ,'MB'
   print*,' Number of MO ERF integrals: ',  mo_map_size
-  print*,' cpu  time :',cpu_2 - cpu_1, 's'
-  print*,' wall time :',wall_2 - wall_1, 's  ( x ', (cpu_2-cpu_1)/(wall_2-wall_1), ')'
+  if (.not.human_quiet) print*,' cpu  time :',cpu_2 - cpu_1, 's'
+  if (.not.human_quiet) print*,' wall time :',wall_2 - wall_1, 's  ( x ', (cpu_2-cpu_1)/(wall_2-wall_1), ')'
 
 end
 
