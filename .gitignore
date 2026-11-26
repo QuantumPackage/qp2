@@ -1,6 +1,9 @@
 config/ifort.cfg
 quantum_package_static.tar.gz
 build.ninja
+config/Makefile
+src/*/Makefile
+irpf90.make
 .ninja_log
 .ninja_deps
 bin/

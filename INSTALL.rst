@@ -29,9 +29,9 @@ internet connection is not needed any more.
 The tree can be moved or renamed after configuration: everything is derived
 from the location of :file:`quantum_package.rc`, not from the path where
 :command:`configure` was first run. After a move, re-run :command:`./configure
--c <your configuration file>`: :file:`build.ninja` embeds the old absolute
-paths and only :command:`configure` regenerates it. If the tree is a linked
-git worktree, run :command:`git worktree repair` in it first.
+-c <your configuration file>`: the generated build manifest embeds the old
+absolute paths and only :command:`configure` regenerates it. If the tree is a
+linked git worktree, run :command:`git worktree repair` in it first.
 
 When all dependencies have been installed, (the :command:`configure` will
 inform you what is missing) source the :file:`quantum_package.rc` in order to
@@ -41,7 +41,16 @@ Now all the requirements are met, you can compile the programs using
 
 .. code:: bash
 
+   ./configure -c <your configuration file>
    make
+
+The build system is GNU make by default: :command:`./configure -c <cfg>`
+generates the make graph (:file:`config/Makefile` and one :file:`Makefile`
+per module) and the build command is :command:`make`. The previous ninja
+build is kept as an opt-in alternative: :command:`./configure -c <cfg> -b
+ninja` generates :file:`config/build.ninja` and the build command is
+:command:`ninja` (it needs the ninja tool, installable with
+:command:`./configure -i ninja`).
 
 
 .. note::
@@ -65,8 +74,10 @@ Requirements
 - TREXIO : library to import and export TREXIO format files
 - `Zlib`_
 - Rust toolchain (:command:`cargo`, edition 2024) : https://rustup.rs
-- |Ninja| : a parallel build system
 - |pkg-config| : a tool which returns information about installed libraries
+- |Ninja| : a parallel build system (only needed for the opt-in ninja
+  build system, :command:`./configure -c <cfg> -b ninja`; the default GNU
+  make build does not use it)
 
 
 When all the dependencies have been installed, pick in the :file:`config`
@@ -130,7 +141,11 @@ Before doing anything below, try to install the packages with your package manag
 Ninja
 -----
 
-*Ninja* is a build system (like GNU make), with a focus on speed.
+*Ninja* is a build system (like GNU make), with a focus on speed. It is
+only needed if you choose the ninja build system
+(:command:`./configure -c <cfg> -b ninja`); the default GNU make build
+does not use it. The easiest installation is :command:`./configure -i
+ninja`.
 
 * Download the latest binary version of Ninja
   here : `<https://github.com/ninja-build/ninja/releases/latest>`_

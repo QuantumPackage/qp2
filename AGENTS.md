@@ -3,7 +3,8 @@
 Repo root = this directory. `VERSION` = 2.3.1. Determinant-driven
 quantum-chemistry suite: **Fortran + IRPF90** code generation for the compute
 part, **Rust** for the CLI / EZFIO bindings, **EZFIO** for the data model,
-**Ninja** for the build.
+**GNU make** for the build (default), **Ninja** as the opt-in alternative
+(`./configure -c <cfg> -b ninja`).
 
 Authoritative in-tree references (prefer them over guessing):
 
@@ -30,10 +31,13 @@ Online: <https://quantum-package.readthedocs.io> (manual) and
    `NEED`, `README.rst`, `EZFIO.cfg`, `*.irp.f`, `*.template.f`, `*.include.f`,
    `*.ezfio_config`, and the per-module `FC`/`FCFLAGS`/`CFLAGS`/`LIB`.
    Everything else there — symlinks to needed modules, `.gitignore`,
-   `ezfio_interface.irp.f`, `IRPF90_temp/`, `build.ninja` — is generated.
+   `ezfio_interface.irp.f`, `IRPF90_temp/`, the per-module `Makefile`
+   (make mode) or `build.ninja` (ninja mode) — is generated.
    Edit the source, then build; never patch generated output.
-4. Never edit generated files: root `build.ninja`, `config/build.ninja`,
-   `config/qp_create_ninja.pickle`, `data/executables`,
+4. Never edit generated files: the build manifest (`config/Makefile` in
+   make mode, `config/build.ninja` in ninja mode), the per-module
+   `Makefile`/`build.ninja`, `irpf90.make`, `config/qp_create_ninja.pickle`,
+   `data/executables`,
    `data/qp_edit_config/`, `data/list_element.txt`, `rust/target/`, `lib/`,
    `share/`.
 5. **Ask the user before any git commit.**
@@ -72,17 +76,29 @@ external/              git submodules: ezfio, irpf90, qp2-dependencies
 
 ```bash
 source quantum_package.rc      # or: ./bin/qpsh   (interactive QP shell)
-ninja                          # root: build every module, then the Rust tool layer
-ninja                          # inside a module dir: build that module + Rust tool layer
-ninja -f $QP_ROOT/config/build.ninja module_<name>   # build one module from anywhere
-make                           # == source quantum_package.rc; ninja
+make                           # root: build every module, then the Rust tool layer
+make                           # inside a module dir: build that module + Rust tool layer
+make -f $QP_ROOT/config/Makefile module_<name>   # build one module from anywhere
 ```
 
-- `./configure -c config/<cfg> [-g nvidia|intel|none]` writes the root
-  `build.ninja`, `config/build.ninja`, `etc/00.qp_root.rc`, and the
+The build system is GNU make by default. The opt-in ninja alternative is
+`./configure -c config/<cfg> -b ninja`; from then on the same three
+invocations work with `ninja` instead of `make` (`ninja -f
+$QP_ROOT/config/build.ninja module_<name>`).
+
+- `./configure -c config/<cfg> [-g nvidia|intel|none] [-b make|ninja]`
+  writes the build manifest — `config/Makefile` plus one `Makefile` per
+  module in make mode (default), or `config/build.ninja` with `-b ninja` —
+  `etc/00.qp_root.rc` (which exports `QP_BUILD_SYSTEM`), and the
   `src/gpu_arch` symlink. Only run it when the user asks.
-- Before all that, `configure` checks: `irpf90`, `ninja`, `cmake`,
-  TREXIO (`-ltrexio`), zlib, the python
+- The root `Makefile` is a tracked dispatcher: it re-runs the build-graph
+  generator (`update`) and delegates to `config/Makefile` in make mode, or
+  to `ninja -f config/build.ninja` in ninja mode; in make mode it runs the
+  build inside a shell that has sourced `quantum_package.rc` (the per-module
+  compiler commands rely on that environment, e.g. `CPATH`/`C_INCLUDE_PATH`
+  pointing at `include/` for the C headers).
+- Before all that, `configure` checks: `irpf90`, the selected build tool
+  (`make` or `ninja`), `cmake`, TREXIO (`-ltrexio`), zlib, the python
   packages `docopt` and `resultsFile`, SimpleGPU (`-lsimple_gpu-cpu`), and
   BLAS/LAPACK through the compilation config. Missing dependencies are
   installed with `./configure -i <pkg>` (or `-i all`), where `<pkg>` is one of:
@@ -98,9 +114,11 @@ make                           # == source quantum_package.rc; ninja
 - `-g amd` in the script points at `plugins/local/gpu_amd`, which is *not*
   in-tree (it ships with a plugin repository); the in-tree GPU backends are
   `gpu_x86`, `gpu_nvidia`, `gpu_intel`.
-- Every build first re-runs `qp_create_ninja update` (ninja target
-  `dummy_target`), so new files, new modules and edited `NEED` files are
-  picked up automatically. Nothing is ever edited by hand in the build files.
+- Every build first re-runs `qp_create_ninja update` (the `update` target
+  of the root `Makefile`; the ninja graph does the same through its
+  `dummy_target` edge), so new files, new modules and edited `NEED` files
+  are picked up automatically. Nothing is ever edited by hand in the build
+  files.
 - A program `program foo` living in `src/m/foo.irp.f` is built as
   `src/m/IRPF90_temp/foo`; `data/executables` maps `foo` → that path, and
   `qp_run foo <dir.ezfio>` resolves it there.
@@ -167,11 +185,13 @@ END_PROVIDER
   Separately, a `*.template.f` file is a codelet template whose `$subroutine`
   placeholders are instantiated by the `.irp.f` that includes it
   (see `src/determinants/h_apply.template.f`).
-- IRPF90 is invoked by ninja (pool `depth = 1`, i.e. serialized) as
-  `irpf90 -I <needed modules> $IRPF90_FLAGS`; **`IRPF90_FLAGS` comes from the
-  compilation config** (`config/*.cfg`): `--ninja --align=32` there, while
-  `*debug*.cfg` / `travis.cfg` add `--assert`. Don't hardcode the flags:
-  read the config in use.
+- IRPF90 is invoked serialized (one call per module) as
+  `irpf90 -I <needed modules> $IRPF90_FLAGS` — by the per-module `Makefile`
+  in make mode (where `$IRPF90_FLAGS` is the config's flags minus the
+  `--ninja` token), or by the ninja graph in ninja mode; **`IRPF90_FLAGS`
+  comes from the compilation config** (`config/*.cfg`): `--ninja
+  --align=32` there, while `*debug*.cfg` / `travis.cfg` add `--assert`.
+  Don't hardcode the flags: read the config in use.
   Useful tools inside a module:
   `irpf90_entities` (table `file : type :: name (dims)`), `irpman <entity>`,
   `irpf90 -t <entity>` (what breaks when it is touched), `tags`.
@@ -364,8 +384,8 @@ generator: `rm src/*/ezfio_interface.irp.f && ninja` and run again.
 - **New subroutine/provider in an existing module**: add it to an existing
   `*.irp.f`; nothing to declare. Keep the file's theme.
 - **New module**: `mkdir src/<name>`, add `NEED`, `README.rst`, sources;
-  the next `ninja` finds it. `module_handler.py print_descendant <name>`
-  shows what it pulls in.
+  the next build (`make`, or `ninja` in a ninja-configured tree) finds it.
+  `module_handler.py print_descendant <name>` shows what it pulls in.
 - **New plugin**: `qp_plugins create -n <name> [-r <repo>] <needed modules…>`;
   `qp_plugins install <name>` symlinks `plugins/<repo>/<name>` into `src/`.
   Never edit files through the symlink in `src/`.
@@ -392,7 +412,8 @@ generator: `rm src/*/ezfio_interface.irp.f && ninja` and run again.
   Helpers: `tests/bats/common.bats.sh` (`eq` for float compare, `test_exe`,
   `run_only_test`), inputs in `tests/input/`.
 - Modules may carry their own `NN.<name>.bats` (e.g. `src/hartree_fock/10.hf.bats`).
-- CI: `.github/workflows/compilation.yml` (build + `qp_test -a`),
+- CI: `.github/workflows/compilation.yml` (a ninja job and a make job, the
+  make one exercising the default build; both run `qp_test -a`),
   `.github/workflows/configuration.yml` (exercises `./configure -i <pkg>` for
   each dependency on a bare ubuntu-24.04) and `.drone.yml`.
 
@@ -419,21 +440,23 @@ generator: `rm src/*/ezfio_interface.irp.f && ninja` and run again.
   block holding only `ezfio_files.ezfio_convention` means the interfaces
   are stale: `rm src/*/ezfio_interface.irp.f && ninja` (§9).
 
-## 13. Code-model RAG (`ninja rag` / `qp rag`)
+## 13. Code-model RAG (`make rag` / `ninja rag` / `qp rag`)
 
-`ninja rag` (repo root) builds a machine-readable model of the whole
-source tree — one `irpf90 -J` dump per build edge of `config/build.ninja`
-(25 modules, run with the exact `$IRPF90_FLAGS`) — merged into one
-corpus with a SQLite FTS5/BM25 index. It lands in
+`make rag` (repo root; `ninja rag` in a ninja-configured tree) builds a
+machine-readable model of the whole source tree — one `irpf90 -J` dump
+per build edge of the configured build manifest (`config/Makefile` in
+make mode, `config/build.ninja` in ninja mode; 25 modules, run with the
+exact `$IRPF90_FLAGS` of the build) — merged into one corpus with a
+SQLite FTS5/BM25 index. It lands in
 `$QP_ROOT/share/rag/` (gitignored): `per-module/<M>.json` × 25,
 `qp2.json` (merged model), `qp2_rag.db` (index), `merge-report.json`
 (counts, collisions, applied renames). It is not part of the default
-build; ninja rebuilds it automatically when any module source or the
-tool changes, and a rebuild takes a few minutes.
+build; the build tool rebuilds it automatically when any module source
+or the tool changes, and a rebuild takes a few minutes.
 
 Requirement: an irpf90 with `-J` (≥ 2.3.3) — the in-tree
 `external/irpf90` pin carries it (it is on `$PATH` through
-`etc/irpf90.rc`, so `ninja rag` just works). `RAG_IRPF90=/path/to/bin/irpf90`
+`etc/irpf90.rc`, so `make rag` just works). `RAG_IRPF90=/path/to/bin/irpf90`
 is a dev override to run the RAG against a different irpf90; with an
 irpf90 that lacks `-J` the target fails with a clear error.
 
@@ -444,7 +467,7 @@ qp rag query "PT2 selection" -k 5
 qp rag query "bitmask" --kind routine
 qp rag graph <entity> --depth 3
 qp rag stats
-qp rag build                    # == ninja rag (explicit rebuild)
+qp rag build                    # == make rag / ninja rag (explicit rebuild)
 ```
 
 Underneath, `qp rag …` calls `bin/qp_rag` →
