@@ -301,11 +301,20 @@ def ninja_ezfio_cfg_build(l_util):
     """
     l_string = []
 
+    # The interface files are generator output: a change in the generator
+    # must invalidate every one of them. Without these implicit inputs the
+    # edge only watches EZFIO.cfg, and a new provider hook (e.g. the JSON
+    # input capture) never reaches an already-built tree.
+    generator = " ".join(comp_path(join(QP_ROOT, "scripts",
+                                        "ezfio_interface", name))
+                         for name in ("ei_handler.py",
+                                      "ezfio_generate_provider.py"))
+
     for m in l_util.values():
 
-        str_ = "build {1} {2}: build_ezfio_interface {0}"
+        str_ = "build {1} {2}: build_ezfio_interface {0} | {3}"
         l_string += [str_.format(*list(map(comp_path,(m.ez_cfg.abs, m.ez_interface.abs,
-                                 m.ez_config.abs))))]
+                                 m.ez_config.abs))), generator)]
 
         l_string += ["   sub_module = {0}".format(comp_path(m.ez_module.abs))]
         l_string += [""]
