@@ -116,6 +116,7 @@ END_PROVIDER
 
 
 subroutine gpu_free_memory(value)
+ use sizet
   use gpu
   implicit none
   BEGIN_DOC

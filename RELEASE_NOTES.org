@@ -31,6 +31,15 @@
     releases converge to the same 69-determinant space
     (E = -7.8823243929132 to 13 digits; the 14th depends on the
     release's saved determinant order).
+  - System-sized integers (AO/MO counts, integral-map keys,
+    determinant-space indices, grid-point counts) are now 64-bit
+    (~integer(size_t)~, defined in the new ~sizet~ module,
+    ~src/utils/sizet.f90~), removing the in-memory 2^31 ceiling.
+    The EZFIO file format and the external interfaces (BLAS/LAPACK,
+    libcint, json-C, all ~bind(C)~ code) stay 32-bit on the wire,
+    with casts at the boundary.  Energies are unchanged on the
+    verification suite: bit-identical on the deterministic replay,
+    within the statistical error bar on the stochastic PT2.
 
 * Version 2.3
 
