@@ -1,3 +1,4 @@
+
 program import_mo_coef_periodic
   BEGIN_DOC
   ! Imports the MO coefficients (real and imaginary parts)
@@ -12,6 +13,7 @@ program import_mo_coef_periodic
 end
 
 subroutine run
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
@@ -26,7 +28,7 @@ subroutine run
   integer :: iunit
   integer :: getunitandopen
 
-  integer ::i,j
+  integer(size_t) ::i,j
   double precision :: int_re, int_im
 
   

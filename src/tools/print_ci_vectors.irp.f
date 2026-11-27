@@ -1,3 +1,4 @@
+
 program print_ci_vectors
  implicit none
  BEGIN_DOC
@@ -21,6 +22,7 @@ program print_ci_vectors
 end
 
 subroutine routine
+ use sizet
  implicit none
  BEGIN_DOC
  ! Prints the energy components, then for each determinant of
@@ -28,7 +30,8 @@ subroutine routine
  ! notation (debug_det) and its coefficients for all N_states
  ! states.
  END_DOC
- integer :: i,k
+ integer(size_t) :: i
+ integer :: k
  integer :: degree
  call print_energy_components
  do i = 1, N_det

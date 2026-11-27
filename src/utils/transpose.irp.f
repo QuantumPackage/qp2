@@ -1,14 +1,17 @@
+use sizet
+
 !DIR$ attributes forceinline :: transpose
 recursive subroutine transpose(A,LDA,B,LDB,d1,d2)
+ use sizet
  implicit none
  BEGIN_DOC
 ! Transpose input matrix A into output matrix B
  END_DOC
- integer, intent(in) :: d1, d2, LDA, LDB
+ integer(size_t), intent(in) :: d1, d2, LDA, LDB
  real, intent(in) :: A(LDA,d2)
  real, intent(out) :: B(LDB,d1)
 
- integer :: i,j,k
+ integer(size_t) :: i,j,k
  if ( d2 < 32 ) then
    do j=1,d1
      !DIR$ LOOP COUNT (16)
@@ -39,11 +42,12 @@ end
 
 !DIR$ attributes forceinline :: dtranspose
 recursive subroutine dtranspose(A,LDA,B,LDB,d1,d2)
+ use sizet
  implicit none
  BEGIN_DOC
 ! Transpose input matrix A into output matrix B
  END_DOC
- integer, intent(in) :: d1, d2, LDA, LDB
+ integer(size_t), intent(in) :: d1, d2, LDA, LDB
  double precision, intent(in) :: A(LDA,d2)
  double precision, intent(out) :: B(LDB,d1)
 
@@ -55,7 +59,7 @@ recursive subroutine dtranspose(A,LDA,B,LDB,d1,d2)
 ! enddo
 ! return
 
- integer :: i,j,k
+ integer(size_t) :: i,j,k
  if ( d2 < 32 ) then
    do j=1,d1
      !DIR$ LOOP COUNT (16)

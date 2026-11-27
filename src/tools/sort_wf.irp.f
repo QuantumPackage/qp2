@@ -1,3 +1,4 @@
+
 program sort_wf
  implicit none
  BEGIN_DOC
@@ -12,12 +13,13 @@ program sort_wf
 end
 
 subroutine routine
+ use sizet
  implicit none
  BEGIN_DOC
  ! Writes <ezfio_filename>.wf_sorted: one line per determinant, with
  ! its index i and |psi_coef_sorted(i,1)|/|psi_coef_sorted(1,1)|.
  END_DOC
- integer :: i
+ integer(size_t) :: i
  character*(128) :: output
  integer :: i_unit_output,getUnitAndOpen
  output=trim(ezfio_filename)//'.wf_sorted'

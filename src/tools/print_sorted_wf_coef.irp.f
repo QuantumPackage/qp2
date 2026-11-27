@@ -1,3 +1,4 @@
+
 program print_sorted_wf_coef
  implicit none
  BEGIN_DOC
@@ -12,13 +13,14 @@ program print_sorted_wf_coef
 end
 
 subroutine routine
+ use sizet
  implicit none
  BEGIN_DOC
  ! Writes one line per determinant to
  ! <ezfio_filename>.wf_sorted: the index i, the magnitude of
  ! psi_coef_sorted(i,1) and its ratio to psi_coef_sorted(1,1).
  END_DOC
- integer :: i
+ integer(size_t) :: i
  character*(128) :: output
  integer :: i_unit_output,getUnitAndOpen
  output=trim(ezfio_filename)//'.wf_sorted'

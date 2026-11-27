@@ -16,6 +16,7 @@ program diagonalize_h
 end
 
 subroutine routine
+ use sizet
  implicit none
  BEGIN_DOC
  ! Replaces the coefficients of the CI states by the eigenstates
@@ -25,6 +26,8 @@ subroutine routine
  END_DOC
  call diagonalize_CI
  print*,'N_det = ',N_det
- call save_wavefunction_general(N_det,N_states,psi_det_sorted,size(psi_coef_sorted,1),psi_coef_sorted)
+  call save_wavefunction_general(N_det, N_states, psi_det_sorted, &
+                                int(size(psi_coef_sorted,1),size_t), &
+                                psi_coef_sorted)
  call print_mol_properties
 end

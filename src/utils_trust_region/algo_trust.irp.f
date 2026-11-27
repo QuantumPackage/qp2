@@ -1,3 +1,5 @@
+use sizet
+
 ! Algorithm for the trust region
 
 ! step_in_trust_region:
@@ -134,6 +136,7 @@
 
 
 subroutine trust_region_step_w_expected_e(n,n2,H,W,e_val,v_grad,prev_criterion,rho,nb_iter,delta,criterion_model,x,must_exit)
+ use sizet
 
   include 'pi.h'
 
@@ -144,7 +147,8 @@ subroutine trust_region_step_w_expected_e(n,n2,H,W,e_val,v_grad,prev_criterion,r
   implicit none
 
   ! in
-  integer, intent(in)             :: n,n2, nb_iter
+  integer(size_t), intent(in)     :: n,n2
+  integer, intent(in)             :: nb_iter
   double precision, intent(in)    :: H(n,n2), W(n,n2), v_grad(n)
   double precision, intent(in)    :: rho, prev_criterion
 

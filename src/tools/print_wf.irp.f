@@ -1,3 +1,4 @@
+
 program print_wf
  implicit none
  BEGIN_DOC
@@ -21,6 +22,7 @@ program print_wf
 end
 
 subroutine routine
+ use sizet
  implicit none
  BEGIN_DOC
  ! For the first min(N_det_print_wf,N_det) determinants of the sorted
@@ -30,12 +32,12 @@ subroutine routine
  ! coef_2_2. Also prints L1 and L2 norms of the amplitudes |c_i/c_1|
  ! of the singles and double excitations (state 1).
  END_DOC
- integer :: i
+ integer(size_t) :: i
  integer :: degree
  double precision :: hij,hii,coef_1,h00
- integer          :: exc(0:2,2,2)
+ integer(size_t)  :: exc(0:2,2,2)
  double precision :: phase
- integer :: h1,p1,h2,p2,s1,s2
+ integer(size_t) :: h1,p1,h2,p2,s1,s2
  double precision :: get_two_e_integral
  double precision :: norm_mono_a,norm_mono_b
  double precision :: norm_mono_a_2,norm_mono_b_2

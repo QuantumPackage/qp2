@@ -1,3 +1,4 @@
+
 program truncate_wf
  implicit none
  BEGIN_DOC
@@ -12,6 +13,7 @@ program truncate_wf
 end
 
 subroutine routine
+ use sizet
  implicit none
  BEGIN_DOC
  ! Truncates the sorted wave function to the number of determinants
@@ -19,14 +21,14 @@ subroutine routine
  ! state, and saves the result with save_wavefunction_general.
  ! Called by the program when s2_eig is false.
  END_DOC
- integer :: ndet_max
+ integer(size_t) :: ndet_max
  print*, 'Max number of determinants ?'
  read(5,*) ndet_max
  integer(bit_kind), allocatable :: psi_det_tmp(:,:,:)
  double precision, allocatable :: psi_coef_tmp(:,:)
  allocate(psi_det_tmp(N_int,2,ndet_max),psi_coef_tmp(ndet_max, N_states))
  
- integer :: i,j
+ integer(size_t) :: i,j
  double precision :: accu(N_states)
  accu = 0.d0
  do i = 1, ndet_max
@@ -48,11 +50,13 @@ subroutine routine
   enddo
  enddo
 
- call save_wavefunction_general(ndet_max,N_states,psi_det_tmp,size(psi_coef_tmp,1),psi_coef_tmp)
+  call save_wavefunction_general(ndet_max, N_states, psi_det_tmp, &
+                                int(size(psi_coef_tmp,1),size_t), psi_coef_tmp)
  
 end
 
 subroutine routine_s2
+ use sizet
  implicit none
  BEGIN_DOC
  ! Prints the configuration weights of the stored wave function,
@@ -62,11 +66,11 @@ subroutine routine_s2
  ! truncated wave function with save_wavefunction_general. Called
  ! by the program when s2_eig is true.
  END_DOC
- integer :: ndet_max
+ integer(size_t) :: ndet_max
  double precision :: wmin
  integer(bit_kind), allocatable :: psi_det_tmp(:,:,:)
  double precision, allocatable :: psi_coef_tmp(:,:)
- integer :: i,j,k
+ integer(size_t) :: i,j,k
  double precision :: accu(N_states)
 
  print *,  'Weights of the CFG'
@@ -112,6 +116,7 @@ subroutine routine_s2
   enddo
  enddo
 
- call save_wavefunction_general(ndet_max,N_states,psi_det_tmp,size(psi_coef_tmp,1),psi_coef_tmp)
+  call save_wavefunction_general(ndet_max, N_states, psi_det_tmp, &
+                                int(size(psi_coef_tmp,1),size_t), psi_coef_tmp)
  
 end

@@ -1,4 +1,6 @@
+
 program fcidump_pyscf
+  use sizet
   implicit none
   BEGIN_DOC
 ! Produce a regular `FCIDUMP` file from the |MOs| stored in the |EZFIO|
@@ -24,8 +26,8 @@ program fcidump_pyscf
   i_unit_output = getUnitAndOpen(output,'w')
 
   integer :: i,j,k,l
-  integer :: i1,j1,k1,l1
-  integer :: i2,j2,k2,l2
+  integer(size_t) :: i1,j1,k1,l1
+  integer(size_t) :: i2,j2,k2,l2
   integer*8 :: m
   character*(2), allocatable :: A(:)
 

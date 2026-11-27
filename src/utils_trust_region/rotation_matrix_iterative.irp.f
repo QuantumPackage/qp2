@@ -1,3 +1,5 @@
+use sizet
+
 ! Rotation matrix with the iterative method
 
 ! \begin{align*}
@@ -8,6 +10,7 @@
 
 
 subroutine rotation_matrix_iterative(m,X,R)
+ use sizet
 
   BEGIN_DOC
   ! Compute R as the power series R = sum_k X^k / k! (the
@@ -20,7 +23,7 @@ subroutine rotation_matrix_iterative(m,X,R)
   implicit none
 
   ! in
-  integer, intent(in) :: m
+  integer(size_t), intent(in) :: m
   double precision, intent(in) :: X(m,m)
   
   ! out
@@ -29,7 +32,8 @@ subroutine rotation_matrix_iterative(m,X,R)
   ! internal
   double precision :: max_elem, pre_factor
   double precision :: t1,t2,t3
-  integer :: k,l,i,j
+  integer :: k,l
+  integer(size_t) :: i,j
   logical :: not_converged 
   double precision, allocatable :: RRT(:,:), A(:,:), B(:,:)
 
@@ -65,7 +69,8 @@ subroutine rotation_matrix_iterative(m,X,R)
     A = X
     B = 0d0
     do l = 1, k-1
-      call dgemm('N','N',m,m,m,1d0,X,size(X,1),A,size(A,1),0d0,B,size(B,1))
+      call dgemm('N','N',int(m,4),int(m,4),int(m,4),1d0,X,size(X,1),A, &
+         size(A,1),0d0,B,size(B,1))
       A = B
     enddo
 
@@ -77,7 +82,8 @@ subroutine rotation_matrix_iterative(m,X,R)
     R = R + pre_factor * B
 
     k = k + 1
-    call dgemm('T','N',m,m,m,1d0,R,size(R,1),R,size(R,1),0d0,RRT,size(RRT,1))
+    call dgemm('T','N',int(m,4),int(m,4),int(m,4),1d0,R,size(R,1),R, &
+       size(R,1),0d0,RRT,size(RRT,1))
 
     !print*,'R'
     !do i = 1, m

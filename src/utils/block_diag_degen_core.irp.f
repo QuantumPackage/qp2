@@ -1,5 +1,8 @@
 
+use sizet
+
 subroutine diag_mat_per_fock_degen_core(fock_diag, mat_ref, listcore,ncore, n, thr_d, thr_nd, thr_deg, leigvec, reigvec, eigval)
+ use sizet
 
 
   BEGIN_DOC
@@ -21,16 +24,18 @@ subroutine diag_mat_per_fock_degen_core(fock_diag, mat_ref, listcore,ncore, n, t
   END_DOC
 
   implicit none
-  integer,          intent(in)  :: n,ncore, listcore(ncore)
+  integer(size_t),  intent(in)  :: n,ncore, listcore(ncore)
   double precision, intent(in)  :: fock_diag(n), mat_ref(n,n), thr_d, thr_nd, thr_deg
   double precision, intent(out) :: leigvec(n,n), reigvec(n,n), eigval(n)
 
-  integer                       :: n_degen_list, n_degen,size_mat, i, j, k, icount, m, index_degen
-  integer                       :: ii, jj, i_good, j_good, n_real
-  integer                       :: icount_eigval
+  integer(size_t)               :: n_degen_list, n_degen,size_mat
+  integer(size_t)               :: i, j, k, icount, m, index_degen
+  integer(size_t)               :: ii, jj, i_good, j_good, n_real
+  integer(size_t)               :: icount_eigval
   logical,          allocatable :: is_ok(:)
-  integer,          allocatable :: list_degen(:,:), list_same_degen(:)
-  integer,          allocatable :: iorder(:), list_degen_sorted(:)
+  integer(size_t),  allocatable :: list_degen(:,:), list_same_degen(:)
+  integer,          allocatable :: list_degen_sorted(:)
+  integer(size_t),  allocatable :: iorder(:)
   double precision, allocatable :: leigvec_unsrtd(:,:), reigvec_unsrtd(:,:), eigval_unsrtd(:)
   double precision, allocatable :: mat_tmp(:,:), eigval_tmp(:), leigvec_tmp(:,:), reigvec_tmp(:,:)
 
@@ -50,8 +55,8 @@ subroutine diag_mat_per_fock_degen_core(fock_diag, mat_ref, listcore,ncore, n, t
     iorder(i) = i
   enddo
 
-  ! sort by number of degeneracies 
-  call isort(list_degen_sorted, iorder, n_degen_list)
+  ! sort by number of degeneracies
+  call isort_big(list_degen_sorted, iorder, n_degen_list)
 
   allocate(is_ok(n_degen_list))
   is_ok = .True.
@@ -143,7 +148,7 @@ subroutine diag_mat_per_fock_degen_core(fock_diag, mat_ref, listcore,ncore, n, t
   do i = 1, n
     iorder(i) = i
   enddo
-  call dsort(eigval_unsrtd, iorder, n)
+  call dsort_big(eigval_unsrtd, iorder, n)
 
   do i = 1, n
     print*,'sorted eigenvalues '
@@ -166,6 +171,7 @@ end
 ! ---
 
 subroutine give_degen_full_listcore(A, n, listcore, ncore, thr, list_degen, n_degen_list)
+ use sizet
 
   BEGIN_DOC
   ! you enter with an array A(n) and spits out all the elements degenerated up to thr
@@ -187,9 +193,9 @@ subroutine give_degen_full_listcore(A, n, listcore, ncore, thr, list_degen, n_de
 
   double precision, intent(in)  :: A(n)
   double precision, intent(in)  :: thr
-  integer,          intent(in)  :: n,ncore, listcore(ncore)
-  integer,          intent(out) :: list_degen(n,0:n), n_degen_list
-  integer                       :: i, j, icount, icheck,k
+  integer(size_t),  intent(in)  :: n,ncore, listcore(ncore)
+  integer(size_t),  intent(out) :: list_degen(n,0:n), n_degen_list
+  integer(size_t)               :: i, j, icount, icheck,k
   logical, allocatable          :: is_ok(:)
 
 

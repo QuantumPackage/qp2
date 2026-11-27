@@ -1,3 +1,5 @@
+use sizet
+
 ! Apply MO rotation
 ! Subroutine to apply the rotation matrix to the coefficients of the
 ! MOs.
@@ -22,6 +24,7 @@
 ! | i,j                    | integer          | indexes                      |
 
 subroutine apply_mo_rotation(R,prev_mos)
+ use sizet
   
   include 'pi.h'
 
@@ -41,7 +44,7 @@ subroutine apply_mo_rotation(R,prev_mos)
   
   ! internal
   double precision, allocatable :: new_mos(:,:)
-  integer                       :: i,j
+  integer(size_t)               :: i,j
   double precision              :: t1,t2,t3
 
   print*,''
@@ -55,7 +58,8 @@ subroutine apply_mo_rotation(R,prev_mos)
   ! Calculation
 
   ! Product of old MOs (mo_coef) by Rotation matrix (R) 
-  call dgemm('N','N',ao_num,mo_num,mo_num,1d0,mo_coef,size(mo_coef,1),R,size(R,1),0d0,new_mos,size(new_mos,1))
+  call dgemm('N','N',int(ao_num,4),int(mo_num,4),int(mo_num,4),1d0,mo_coef, &
+             size(mo_coef,1),R,size(R,1),0d0,new_mos,size(new_mos,1))
 
   prev_mos = mo_coef
   mo_coef = new_mos

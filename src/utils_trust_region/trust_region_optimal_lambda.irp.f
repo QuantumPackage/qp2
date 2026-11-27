@@ -1,3 +1,5 @@
+use sizet
+
 ! Newton's method to find the optimal lambda
 
 ! *Compute the lambda value for the trust region*
@@ -150,6 +152,7 @@
 
 
 subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
+ use sizet
 
   include 'pi.h'
 
@@ -162,7 +165,7 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
   ! Variables
   
   ! in
-  integer, intent(in)             :: n
+  integer(size_t), intent(in)     :: n
   double precision, intent(inout) :: e_val(n)
   double precision, intent(in)    :: delta
   double precision, intent(in)    :: tmp_wtg(n)
@@ -500,6 +503,7 @@ end subroutine
 
 
 function d1_norm_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
+ use sizet
   
   use omp_lib
   include 'pi.h'
@@ -511,7 +515,7 @@ function d1_norm_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   implicit none
 
   ! in
-  integer, intent(in)           :: n
+  integer(size_t), intent(in)   :: n
   double precision, intent(in)  :: e_val(n)
   double precision, intent(in)  :: tmp_wtg(n)
   double precision, intent(in)  :: lambda
@@ -519,7 +523,7 @@ function d1_norm_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
    
   ! Internal
   double precision              :: wtg,accu1,accu2
-  integer                       :: i,j
+  integer(size_t)               :: i,j
   double precision, allocatable :: tmp_accu1(:), tmp_accu2(:)
 
   ! Functions
@@ -636,6 +640,7 @@ end function
 
 
 function d2_norm_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
+ use sizet
   
   use omp_lib
   include 'pi.h'
@@ -649,7 +654,7 @@ function d2_norm_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   ! Variables
 
   ! in
-  integer, intent(in)           :: n
+  integer(size_t), intent(in)   :: n
   double precision, intent(in)  :: e_val(n)
   double precision, intent(in)  :: tmp_wtg(n)
   double precision, intent(in)  :: lambda
@@ -662,7 +667,7 @@ function d2_norm_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   ! Internal
   double precision              :: accu1,accu2,accu3
   double precision, allocatable :: tmp_accu1(:), tmp_accu2(:), tmp_accu3(:)
-  integer :: i, j
+  integer(size_t) :: i, j
   
   ! Allocation
   allocate(tmp_accu1(n), tmp_accu2(n), tmp_accu3(n))
@@ -783,6 +788,7 @@ end function
 
 
 function f_norm_trust_region_omp(n,e_val,tmp_wtg,lambda)
+ use sizet
 
   use omp_lib
 
@@ -797,7 +803,7 @@ function f_norm_trust_region_omp(n,e_val,tmp_wtg,lambda)
   ! Variables
 
   ! in
-  integer, intent(in)           :: n
+  integer(size_t), intent(in)   :: n
   double precision, intent(in)  :: e_val(n)
   double precision, intent(in)  :: tmp_wtg(n)
   double precision, intent(in)  :: lambda
@@ -807,7 +813,7 @@ function f_norm_trust_region_omp(n,e_val,tmp_wtg,lambda)
  
   ! internal
   double precision, allocatable :: tmp_fN(:)
-  integer                       :: i,j
+  integer(size_t)               :: i,j
 
   ! Allocation
   allocate(tmp_fN(n))
@@ -896,6 +902,7 @@ end function
 
 
 function d1_norm_trust_region(n,e_val,w,v_grad,lambda,delta)
+ use sizet
 
   include 'pi.h'
 
@@ -908,7 +915,7 @@ function d1_norm_trust_region(n,e_val,w,v_grad,lambda,delta)
   ! Variables
   
   ! in
-  integer, intent(in)          :: n
+  integer(size_t), intent(in)  :: n
   double precision, intent(in) :: e_val(n)
   double precision, intent(in) :: w(n,n)
   double precision, intent(in) :: v_grad(n)
@@ -917,7 +924,7 @@ function d1_norm_trust_region(n,e_val,w,v_grad,lambda,delta)
 
   ! Internal
   double precision             :: wtg, accu1, accu2
-  integer                      :: i, j
+  integer(size_t)              :: i, j
 
   ! Functions
   double precision             :: d1_norm_trust_region
@@ -993,6 +1000,7 @@ end function
 
 
 function d2_norm_trust_region(n,e_val,w,v_grad,lambda,delta)
+ use sizet
 
   include 'pi.h'
 
@@ -1005,7 +1013,7 @@ function d2_norm_trust_region(n,e_val,w,v_grad,lambda,delta)
   ! Variables
 
   ! in
-  integer, intent(in) :: n
+  integer(size_t), intent(in) :: n
   double precision, intent(in) :: e_val(n)
   double precision, intent(in) :: w(n,n)
   double precision, intent(in) :: v_grad(n)
@@ -1018,7 +1026,7 @@ function d2_norm_trust_region(n,e_val,w,v_grad,lambda,delta)
 
   ! Internal
   double precision :: wtg,accu1,accu2,accu3
-  integer :: i, j
+  integer(size_t) :: i, j
 
   ! Initialization
   accu1 = 0d0
@@ -1095,6 +1103,7 @@ end function
 
 
 function f_norm_trust_region(n,e_val,tmp_wtg,lambda)
+ use sizet
 
   include 'pi.h'
 
@@ -1107,7 +1116,7 @@ function f_norm_trust_region(n,e_val,tmp_wtg,lambda)
   ! Variables
 
   ! in
-  integer, intent(in)          :: n
+  integer(size_t), intent(in)  :: n
   double precision, intent(in) :: e_val(n)
   double precision, intent(in) :: tmp_wtg(n)
   double precision, intent(in) :: lambda
@@ -1117,7 +1126,7 @@ function f_norm_trust_region(n,e_val,tmp_wtg,lambda)
   double precision             :: ddot
 
   ! internal
-  integer                      :: i,j
+  integer(size_t)              :: i,j
 
   ! Initialization
   f_norm_trust_region = 0d0
@@ -1176,6 +1185,7 @@ end function
 
 
 function d1_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
+ use sizet
 
   use omp_lib
   include 'pi.h'
@@ -1189,7 +1199,7 @@ function d1_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   ! Variables
   
   ! in
-  integer, intent(in)           :: n
+  integer(size_t), intent(in)   :: n
   double precision, intent(in)  :: e_val(n)
   double precision, intent(in)  :: tmp_wtg(n)
   double precision, intent(in)  :: lambda
@@ -1197,7 +1207,7 @@ function d1_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
 
   ! Internal
   double precision              :: accu1, accu2
-  integer                       :: i,j
+  integer(size_t)               :: i,j
   double precision, allocatable :: tmp_accu1(:), tmp_accu2(:)
 
   ! Functions
@@ -1332,6 +1342,7 @@ end
 
 
 function d2_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
+ use sizet
 
   use omp_lib
   include 'pi.h'
@@ -1345,7 +1356,7 @@ function d2_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   ! Variables
   
   ! in
-  integer, intent(in)          :: n
+  integer(size_t), intent(in)  :: n
   double precision, intent(in) :: e_val(n)
   double precision, intent(in) :: tmp_wtg(n)
   double precision, intent(in) :: lambda
@@ -1353,7 +1364,7 @@ function d2_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
 
   ! Internal
   double precision :: accu1, accu2, accu3
-  integer          :: i,j
+  integer(size_t)  :: i,j
   double precision, allocatable :: tmp_accu1(:), tmp_accu2(:), tmp_accu3(:)
 
   ! Functions
@@ -1491,6 +1502,7 @@ end
 
 
 function d1_norm_inverse_trust_region(n,e_val,w,v_grad,lambda,delta)
+ use sizet
 
   include 'pi.h'
 
@@ -1503,7 +1515,7 @@ function d1_norm_inverse_trust_region(n,e_val,w,v_grad,lambda,delta)
   ! Variables
   
   ! in
-  integer, intent(in)          :: n
+  integer(size_t), intent(in)  :: n
   double precision, intent(in) :: e_val(n)
   double precision, intent(in) :: w(n,n)
   double precision, intent(in) :: v_grad(n)
@@ -1512,7 +1524,7 @@ function d1_norm_inverse_trust_region(n,e_val,w,v_grad,lambda,delta)
 
   ! Internal
   double precision             :: wtg, accu1, accu2
-  integer                      :: i,j
+  integer(size_t)              :: i,j
 
   ! Functions
   double precision             :: d1_norm_inverse_trust_region
@@ -1585,6 +1597,7 @@ end
 
 
 function d2_norm_inverse_trust_region(n,e_val,w,v_grad,lambda,delta)
+ use sizet
 
   include 'pi.h'
 
@@ -1597,7 +1610,7 @@ function d2_norm_inverse_trust_region(n,e_val,w,v_grad,lambda,delta)
   ! Variables
   
   ! in
-  integer, intent(in)          :: n
+  integer(size_t), intent(in)  :: n
   double precision, intent(in) :: e_val(n)
   double precision, intent(in) :: w(n,n)
   double precision, intent(in) :: v_grad(n)
@@ -1606,7 +1619,7 @@ function d2_norm_inverse_trust_region(n,e_val,w,v_grad,lambda,delta)
 
   ! Internal
   double precision             :: wtg, accu1, accu2, accu3
-  integer                      :: i,j
+  integer(size_t)              :: i,j
 
   ! Functions
   double precision             :: d2_norm_inverse_trust_region

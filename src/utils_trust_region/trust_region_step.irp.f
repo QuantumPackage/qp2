@@ -1,3 +1,5 @@
+use sizet
+
 ! Trust region
 
 ! *Compute the next step with the trust region algorithm*
@@ -373,6 +375,7 @@
 
 
 subroutine trust_region_step(n,n2,nb_iter,v_grad,rho,e_val,w,x,delta)
+ use sizet
 
   include 'pi.h'
 
@@ -385,7 +388,7 @@ subroutine trust_region_step(n,n2,nb_iter,v_grad,rho,e_val,w,x,delta)
   ! Variables
 
   ! in
-  integer, intent(in)             :: n,n2
+  integer(size_t), intent(in)     :: n,n2
   double precision, intent(in)    :: v_grad(n), rho
   integer, intent(inout)          :: nb_iter
   double precision, intent(in)    :: e_val(n), w(n,n2)
@@ -400,7 +403,7 @@ subroutine trust_region_step(n,n2,nb_iter,v_grad,rho,e_val,w,x,delta)
   double precision                :: accu, lambda, trust_radius2
   double precision                :: norm2_x, norm2_g
   double precision, allocatable   :: tmp_wtg(:)
-  integer                         :: i,j,k
+  integer(size_t)                 :: i,j,k
   double precision                :: t1,t2,t3
   integer                         :: n_neg_eval
 
@@ -482,7 +485,7 @@ norm2_x = f_norm_trust_region_omp(n,e_val,tmp_wtg,0d0)
 !print*,'||x||^2 :', norm2_x
 
 ! Norm^2 of the gradient, ||v_grad||^2
-norm2_g = (dnrm2(n,v_grad,1))**2
+norm2_g = (dnrm2(int(n,4),v_grad,1))**2
 !print*,'||grad||^2 :', norm2_g
 
 ! Trust radius initialization
@@ -690,7 +693,7 @@ if (avoid_saddle .and. e_val(1) < - thresh_eig) then
   if (tmp_wtg(1) < 1d-15 .and. (1d0 - dsqrt(norm2_x)/delta) > 1d-3 ) then
 
     ! norm of x
-    norm_x = dnrm2(n,x,1)
+    norm_x = dnrm2(int(n,4),x,1)
 
     ! Computes the coefficient for the w_1 
     beta = delta**2 - norm_x**2
@@ -699,7 +702,7 @@ if (avoid_saddle .and. e_val(1) < - thresh_eig) then
     x = x + W(:,1) * dsqrt(beta)
 
     ! Recomputes the norm to check
-    norm_x = dnrm2(n,x,1)
+    norm_x = dnrm2(int(n,4),x,1)
 
     print*, 'Add w_1 * dsqrt(delta^2 - ||x||^2):'
     print*, '||x||', norm_x 

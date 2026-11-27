@@ -1,3 +1,5 @@
+use sizet
+
 ! Predicted energy : e_model
 
 ! *Compute the energy predicted by the Taylor series*
@@ -31,6 +33,7 @@
 
 
 subroutine trust_region_expected_e(n,n2,v_grad,H,x,prev_energy,e_model)
+ use sizet
    
   include 'pi.h'
 
@@ -43,7 +46,7 @@ subroutine trust_region_expected_e(n,n2,v_grad,H,x,prev_energy,e_model)
   ! Variables
 
   ! in
-  integer, intent(in)           :: n,n2
+  integer(size_t), intent(in)   :: n,n2
   double precision, intent(in)  :: v_grad(n),H(n,n2),x(n)
   double precision, intent(in)  :: prev_energy
 
@@ -54,7 +57,7 @@ subroutine trust_region_expected_e(n,n2,v_grad,H,x,prev_energy,e_model)
   double precision              :: part_1, part_2, t1,t2,t3
   double precision, allocatable :: part_2a(:)
 
-  integer                       :: i,j
+  integer(size_t)               :: i,j
 
   !Function
   double precision              :: ddot
@@ -77,7 +80,7 @@ subroutine trust_region_expected_e(n,n2,v_grad,H,x,prev_energy,e_model)
 
 
 ! Product v_grad.x
-  part_1 = ddot(n,v_grad,1,x,1)
+  part_1 = ddot(int(n,4),v_grad,1,x,1)
  
   !if (debug) then
   !  print*,'g.x : ', part_1
@@ -85,7 +88,7 @@ subroutine trust_region_expected_e(n,n2,v_grad,H,x,prev_energy,e_model)
     
   ! Product H.x
   if (n == n2) then
-    call dgemv('N',n,n,1d0,H,size(H,1),x,1,0d0,part_2a,1)
+    call dgemv('N',int(n,4),int(n,4),1d0,H,size(H,1),x,1,0d0,part_2a,1)
   else
     ! If the hessian is diagonal
     do i = 1, n
@@ -94,7 +97,7 @@ subroutine trust_region_expected_e(n,n2,v_grad,H,x,prev_energy,e_model)
   endif
 
   ! Product 1/2 . x^T.H.x
-  part_2 = 0.5d0 * ddot(n,x,1,part_2a,1)
+  part_2 = 0.5d0 * ddot(int(n,4),x,1,part_2a,1)
 
   !if (debug) then
   !  print*,'1/2*x^T.H.x : ', part_2 

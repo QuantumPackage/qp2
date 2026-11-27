@@ -1,3 +1,5 @@
+use sizet
+
 ! Rotation matrix in a subspace to rotation matrix in the full space
 
 ! Usually, we are using a list of MOs, for exemple the active ones. When
@@ -31,6 +33,7 @@
 
 
 subroutine sub_to_full_rotation_matrix(m,tmp_list,tmp_R,R)
+ use sizet
 
   !BEGIN_DOC
   ! Compute the full rotation matrix from a smaller one
@@ -39,14 +42,14 @@ subroutine sub_to_full_rotation_matrix(m,tmp_list,tmp_R,R)
   implicit none
 
   ! in
-  integer, intent(in)           :: m, tmp_list(m)
+  integer(size_t), intent(in)   :: m, tmp_list(m)
   double precision, intent(in)  :: tmp_R(m,m)
   
   ! out
   double precision, intent(out) :: R(mo_num,mo_num)
  
   ! internal
-  integer                       :: i,j,tmp_i,tmp_j
+  integer(size_t)               :: i,j,tmp_i,tmp_j
 
   ! tmp_R to R, subspace to full space
   R = 0d0

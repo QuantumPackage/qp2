@@ -1,12 +1,14 @@
+
 program sort_by_fock_energies
+  use sizet
   BEGIN_DOC
   ! Program that saves the current |MOs| ordered by diagonal element of the Fock operator.
   !
   ! Warning : the Fock operator, and therefore its matrix elements, depends on the occupancy.
   END_DOC
   implicit none
-  integer                        :: i,j,k
-  integer, allocatable           :: iorder(:)
+  integer(size_t)                :: i,j,k
+  integer(size_t), allocatable   :: iorder(:)
   double precision, allocatable  :: fock_energies_tmp(:), new_mo_coef(:,:)
 
   allocate(iorder(mo_num), fock_energies_tmp(mo_num),new_mo_coef(ao_num,mo_num))
@@ -21,7 +23,7 @@ program sort_by_fock_energies
   print*,'Sorting by Fock energies'
   print*,''
 
-  call dsort(fock_energies_tmp,iorder,mo_num)
+  call dsort_big(fock_energies_tmp,iorder,int(mo_num, size_t))
 
   do i = 1, mo_num
     k = iorder(i)

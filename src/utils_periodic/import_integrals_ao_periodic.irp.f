@@ -1,3 +1,4 @@
+
 program import_integrals_ao_periodic
   BEGIN_DOC
   ! Asks for the number of AOs, then imports the one-
@@ -14,6 +15,7 @@ program import_integrals_ao_periodic
 end
 
 subroutine run
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
@@ -28,12 +30,12 @@ subroutine run
   integer :: iunit
   integer :: getunitandopen
 
-  integer ::i,j,k,l
+  integer(size_t) ::i,j,k,l
   double precision :: integral
   double precision, allocatable :: A(:,:), B(:,:)
   double precision :: tmp_re, tmp_im
 
-  integer             :: n_integrals 
+  integer(size_t)     :: n_integrals 
   integer(key_kind), allocatable   :: buffer_i(:) 
   real(integral_kind), allocatable :: buffer_values(:)
 

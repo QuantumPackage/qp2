@@ -1,3 +1,4 @@
+
 program print_detweights
 
   implicit none
@@ -18,6 +19,7 @@ end
 ! ---
 
 subroutine main()
+ use sizet
 
   implicit none
   BEGIN_DOC
@@ -26,7 +28,7 @@ subroutine main()
   ! the first state by decreasing magnitude and writes the
   ! degrees and the sorted coefficients to the file coef.bin.
   END_DOC
-  integer                       :: i
+  integer(size_t)               :: i
   integer                       :: degree
   integer                       :: ios
   integer,          allocatable :: deg(:), ii(:), deg_sorted(:)
@@ -49,7 +51,7 @@ subroutine main()
     c  (i) = dabs(psi_coef(i,1))
   enddo
 
-  call dsort(c, ii, N_det)
+  call dsort(c, ii, int(N_det,4))
 
   do i = 1, N_det
     deg_sorted(i) = deg(ii(i))
@@ -79,6 +81,7 @@ end
 ! ---
 
 subroutine print_exc()
+ use sizet
 
   implicit none
   BEGIN_DOC
@@ -87,7 +90,7 @@ subroutine print_exc()
   ! exc.dat, preceded by N_det.
   END_DOC
 
-  integer              :: i
+  integer(size_t)      :: i
   integer, allocatable :: deg(:)
 
   PROVIDE N_int
