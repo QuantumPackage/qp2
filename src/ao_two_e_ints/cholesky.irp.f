@@ -130,13 +130,13 @@ END_PROVIDER
 
      call print_memory_usage()
 
-     print *,  ''
-     print *,  'Cholesky decomposition of AO integrals'
-     print *,  '======================================'
-     print *,  ''
-     print *,  '============ ============='
-     print *,  '    Rank       Threshold'
-     print *,  '============ ============='
+     if (.not.human_quiet) print *,  ''
+     if (.not.human_quiet) print *,  'Cholesky decomposition of AO integrals'
+     if (.not.human_quiet) print *,  '======================================'
+     if (.not.human_quiet) print *,  ''
+     if (.not.human_quiet) print *,  '============ ============='
+     if (.not.human_quiet) print *,  '    Rank       Threshold'
+     if (.not.human_quiet) print *,  '============ ============='
 
 
      ! 1.
@@ -545,7 +545,7 @@ END_PROVIDER
          call gpu_deallocate(Delta_d)
        endif
 
-       print '(I10, 4X, ES12.3)', rank, Qmax
+       if (.not.human_quiet) print '(I10, 4X, ES12.3)', rank, Qmax
 
        deallocate(Ltmp_p)
        deallocate(Ltmp_q)
@@ -573,8 +573,8 @@ END_PROVIDER
      enddo
 
 
-     print *,  '============ ============='
-     print *,  ''
+     if (.not.human_quiet) print *,  '============ ============='
+     if (.not.human_quiet) print *,  ''
 
      deallocate( D, Lset, Dset, D_sorted )
      deallocate( addr1, addr2, Delta_col, computed )
@@ -603,7 +603,7 @@ END_PROVIDER
      cholesky_ao_num = rank
 
      if (write_ao_cholesky.and.mpi_master) then
-       print *,  'Writing Cholesky AO vectors to disk...'
+       if (.not.human_quiet) print *,  'Writing Cholesky AO vectors to disk...'
        iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_ao', 'W')
        write(iunit) int(rank,4)
        write(iunit) cholesky_ao
@@ -613,12 +613,12 @@ END_PROVIDER
 
    endif
 
-   print *, 'Rank  : ', cholesky_ao_num, '(', &
+   if (.not.human_quiet) print *, 'Rank  : ', cholesky_ao_num, '(', &
        100.d0*dble(cholesky_ao_num)/dble(int(ao_num,size_t)* &
        int(ao_num,size_t)), ' %)'
-   print *,  ''
+   if (.not.human_quiet) print *,  ''
    call wall_time(wall1)
-   print*,'Time to provide AO cholesky vectors = ',(wall1-wall0)/60.d0, ' min'
+   if (.not.human_quiet) print*,'Time to provide AO cholesky vectors = ',(wall1-wall0)/60.d0, ' min'
 
 
 END_PROVIDER

@@ -817,9 +817,12 @@ final `write(json_unit, json_dict_close_fmtx)` after the loop) with:
 
 placed after the `write(6,'(I4, 1X, ...)')` line, i.e. once `converged` has
 been computed for this iteration. Each iteration overwrites the previous
-values; the file therefore always holds the last completed iteration, which
-is the useful thing to have after a crash. `saved` is dropped: the MO state
-is EZFIO's business, not a result. `scf_utils/NEED` already contains `json`;
+values, so these scalars hold the last completed iteration, which is the
+useful thing to have after a crash; the whole per-iteration series is
+carried in `/results/scf/history/`, one element per iteration:
+`energy`, `delta_energy`, `max_error_diis`, `level_shift`, `dim_diis`,
+`converged`, `epoch`, `wall_time`, `memory` (§10.7). `saved` is dropped:
+the MO state is EZFIO's business, not a result. `scf_utils/NEED` already contains `json`;
 `scf_utils/roothaan_hall_scf.irp.f` needs `use qp_json, only: json_add` above
 `implicit none`.
 
@@ -848,7 +851,6 @@ subroutine write_cipsi_json(pt2_data, pt2_data_err)
   END_DOC
   type(pt2_type), intent(in) :: pt2_data, pt2_data_err
   integer :: n
-  double precision, allocatable :: buf(:)
 
   n = min(N_states,N_det)
   if (n < 1) return
@@ -868,16 +870,16 @@ subroutine write_cipsi_json(pt2_data, pt2_data_err)
     call json_add('/results/cipsi/history/n_iter_max', N_iter_max)
     call json_add('/results/cipsi/states/extrapolated_energy', &
                   extrapolated_energy(N_iter,1:n))
-    call json_add('/results/cipsi/history/shape', (/ n, N_iter /))
-    allocate(buf(n*N_iter))
-    buf = reshape(energy_iterations(1:n,1:N_iter), (/ n*N_iter /))
-    call json_add('/results/cipsi/history/energy', buf)
-    buf = reshape(pt2_iterations(1:n,1:N_iter), (/ n*N_iter /))
-    call json_add('/results/cipsi/history/rpt2', buf)
-    deallocate(buf)
   endif
+  ! history/shape and the per-iteration series keys: see §10.7
 end
 ```
+
+`/results/cipsi/states/*` is the final state of the calculation (every
+call overwrites it with the current iteration's values), while the
+per-iteration series is carried in `/results/cipsi/history/*`, with
+`shape` = `[n, nh]` and the flat arrays indexed state-fastest, i.e.
+element `(s, i)` at flat index `(i-1)*n + (s-1)` (§10.7).
 
 Notes that a build agent must honour:
 
@@ -887,11 +889,12 @@ Notes that a build agent must honour:
   components: `pt2`, `rpt2`, `variance`, `overlap`. The `_err` values are the
   same components of the `pt2_data_err` object — there are no `rpt2_err` or
   `variance_err` components.
-* `pt2_iterations` stores `pt2_data % rpt2`, not `pt2` (see
-  `src/iterations/iterations.irp.f`), hence the key `history/rpt2`.
-  `history` is the sliding `N_iter_max = 8` window; `extrapolated_energy` is
-  declared `(N_iter_max, N_states)`, so `extrapolated_energy(N_iter,1:n)` is
-  the strided section holding the current value for each state.
+* `history/rpt2` stores `pt2_data % rpt2`, not `pt2` (the quantity QP
+  extrapolates); it is the same key the old sliding `N_iter_max = 8`
+  window used, with the corrected content of §10.7.
+  `extrapolated_energy` is declared `(N_iter_max, N_states)`, so
+  `extrapolated_energy(N_iter,1:n)` is the strided section holding the
+  current value for each state.
 * `history/n_iter` is `N_iter` as maintained by `increment_n_iter`: the number
   of iterations the extrapolation window holds, **not** the number of
   iterations the run performed. It saturates at `N_iter_max = 8` and starts
@@ -1039,6 +1042,74 @@ One semantic note for the commit message: the trajectory stored in the
 document is `rpt2` (the quantity QP extrapolates), so the script's `pt2` slot
 is fed with `rpt2`. That is the same choice `extrapolate_data` makes.
 
+### 10.7 Per-iteration history and symmetry keys
+
+Convention (stated once): one array per quantity, index-aligned; the
+iteration number is index + 1 (no `iteration` array, except Davidson, where
+the printed step number is not an index). `epoch` = Unix seconds,
+`wall_time` = seconds since `human_t0`, `memory` = resident GiB.
+
+```
+/results/cipsi/history/   shape[n,nh] energy pt2 rpt2 variance pt2_err   (n,nh)
+                          n_det n_cfg pt2_windows pt2_tasks samples
+                          pt2_time pt2_epoch_start pt2_epoch_end
+                          epoch wall_time memory                      (nh)
+                          n_iter n_iter_max   (rolling extrapolation window)
+/results/scf/history/     energy delta_energy max_error_diis level_shift
+                          dim_diis converged epoch wall_time memory    (nit)
+/results/davidson/calls/NNNN/  algorithm n_state epoch itertot converged
+                          wall_time shape[n,nstep] iteration energy
+                          residual s2[n,nstep]
+/results/symmetry/        group n_irrep  states/<s>/irrep  states/<s>/purity
+```
+
+* CIPSI. `write_cipsi_json` appends one row per call to SAVE arrays and
+  rewrites the history keys every call; the document is the state of the
+  run. The series is continuous across the orbital-optimisation cycles of
+  `cipsi_orb_opt` (the SAVE arrays persist in one process; there is no
+  reset and no cycle index). If the CI space changes under a running
+  program (`n = min(N_states,N_det)` differs), the series restarts, by
+  design. `samples` is one value per iteration (all states share the
+  total). `pt2_err` is `+huge` on the first stochastic iteration by the
+  existing seeding in `pt2_stochastic`; that is the record. `history/rpt2`
+  holds `rpt2` (the same key the rolling window used, corrected content).
+* PT2 counters. `pt2_type` carries `windows`, `tasks`, `samples`, `time`,
+  `epoch_start`, `epoch_end`; `pt2_alloc` zeroes them. They are per-call
+  scalars, so `pt2_type_size` (which counts the allocatable doubles only)
+  is unchanged; `pt2_data_I` holds `N_det_generators` instances, so the
+  cost is ~40 B per generator, acceptable. The counters are per-process
+  (no MPI broadcast exists). In `pt2_stochastic` the walk is run once per
+  state, so `windows`, `tasks` and `samples` are summed over the states:
+  they count the work of the whole call, not of the last state. The walk
+  also stops as soon as the statistical criterion is met (`do_exit` and
+  `conv_crit <= relative_error`, or the last position), so `windows` and
+  `tasks` measure the work actually done and stay below the full sweep
+  once the determinant space is large enough for the comb; below the comb
+  threshold the sweep is exhaustive and one (generator, subset) task is
+  run per generator. On the
+  deterministic path (`omp_selection`) there is one window pass for all
+  states, `samples = 0` (no estimator).
+* SCF. The history is appended in the loop and written once after it,
+  guarded by `nhist > 0`; scalar series are 1-D, no `shape` key.
+* Davidson. One block per solve; `calls/NNNN` is monotone for the whole
+  process and shared by the four variants (`davidson_diag_hjj_sjj`,
+  `davidson_diag_nonsym_hjj`, `davidson_diag_csf_hjj`,
+  `davidson_general_ext_rout_diag_dressed`). A skipped step is neither
+  printed nor recorded. The state-following retry -- the routine returns
+  when not every state can be attributed, so that the caller may raise
+  `N_st_diag` -- closes its block before returning, with `converged =
+  false`, its `itertot` and the steps recorded so far: an aborted attempt
+  is a call, and if it were dropped the counter would show a hole. On the
+  `stop -1` divergence of
+  `dav_diag_dressed_ext_rout` a half-written block (algorithm, epoch,
+  itertot, converged, wall_time) is acceptable. The `energy` of the
+  generic variant excludes the nuclear repulsion: the record says what is
+  printed, it does not "fix" it.
+* Symmetry. `results/symmetry/group` and `n_irrep` come from
+  `pg_report_mo_symmetry_work` (SCF and symmetry runs) and
+  `pg_print_state_irreps_work` (CI runs); `states/<s>/irrep` reuses the
+  exact variable the table prints, so JSON == stdout.
+
 ## 11. Reconstruction from several files
 
 The rule consumers must implement:
@@ -1139,8 +1210,13 @@ MIT licence, the `-Ofast` round-trip measurement.
 * Build-time `creator.version` (a generated `git describe` string) — the
   field exists and reads `"unknown"` until then.
 * Append-only per-iteration trace (`jsonl`), for people who want to plot a
-  whole convergence from a single file. The per-run document keeps the last 8
-  iterations only (§10.4).
+  convergence that spans several restarts. The per-run document now carries
+  the whole per-iteration series of the run in its history (§10.7).
+* PT2 counters are per-process (no MPI reduction exists); in
+  `pt2_stochastic` the walk runs once per state, so `windows`, `tasks` and
+  `samples` are summed over the states (§10.7).
+* A Davidson block left half-written by an abnormal exit stays
+  half-written (§10.7).
 * `n_csf` (§10.4) and array-valued EZFIO inputs (43 of 246 providers), if a
   consumer ever asks for them.
 * `/results/<method>/energy` for `cis`, `cisd`, `ccsd`, `mp2`, which log

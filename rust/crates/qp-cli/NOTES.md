@@ -9,7 +9,7 @@ pieces of the OCaml tools that `qp_run` shared with no other crate:
 | `executables` | **done**, `data/executables` parser | 3 |
 | `launch` | **done**, `Sys.command` equivalent (job line, exit codes) | 5 |
 | `ffi` | **done**, the only two `unsafe` blocks of the workspace | 2 |
-| `git` | **done**, banner stamp from the environment | 2 |
+| `git` | **done**, banner stamp from the tree's `HEAD` (env override) | 4 |
 | `signal` | **done**, SIGUSR1 poll + `qp_stop` orchestration | 0 (e2e) |
 | `stop` | **done**, `ignore @@ Sys.command ("qp_stop "^ezfio)` | 0 (e2e) |
 | `lib` | **done**, `Error`/`Result` | 1 |
@@ -79,12 +79,15 @@ deadlock on the allocator or on an internal lock. The main thread polls
    runs on the main thread (delaying job-exit detection by its duration). Two
    signals inside one interval collapse into one `qp_stop` (idempotent
    `touch`). A signal after the job's exit is dropped. See `signal.rs`.
-2. **Git stamp from the environment** (`QP_GIT_SHA1`, `QP_GIT_DATE`,
-   `QP_GIT_MESSAGE`, default `unknown`). The reference bakes the values into
-   `Git.ml` at build time; baking them into a Rust binary would print the
-   build-time commit of a *copied* binary and make the build
-   non-reproducible. `qp_run`'s banner therefore shows `unknown` unless the
-   wrapper exports the three variables.
+2. **Git stamp resolved at run time** (`QP_GIT_SHA1`, `QP_GIT_DATE`,
+   `QP_GIT_MESSAGE` override it value by value). The reference bakes the
+   values into `Git.ml` at build time; baking them into a Rust binary would
+   print the build-time commit of a *copied* binary and make the build
+   non-reproducible. `qp_run` therefore queries `git log -1` in the
+   `QP_ROOT` tree it resolved (the tree whose `data/executables` names the
+   program about to run) and prints the three fields the reference parses:
+   SHA1, `--date=default` commit date, subject. A tree that is not a
+   checkout, or a host without `git`, falls back to `unknown` silently.
 3. **`Sys.command` is `/bin/sh -c`** with inherited standard streams, in
    both `launch` and `stop`. Exit status is `status.code()`, or 255 when the
    *shell* was signalled (`caml_sys_system_command`). A grandchild killed by a

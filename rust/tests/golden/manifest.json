@@ -40,7 +40,8 @@
       "^\\.\\. >>>>> \\[ ",
       "^\\* Total available memory \\(GB\\)",
       "^\\* Target maximum memory \\(GB\\)",
-      "^\\s*Time to provide "
+      "^\\s*Time to provide ",
+      "^  converged   E\\(HF\\) ="
     ]
   },
   "fixtures": [

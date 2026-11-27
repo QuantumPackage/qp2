@@ -8,8 +8,10 @@ configure
 
 The :command:`configure` script prepares the compilation of |qp|. It
 initializes the git submodules, checks that the external dependencies
-are installed, and generates the |Ninja| build file
-(:file:`config/build.ninja`) from a compilation configuration file.
+are installed, and generates the build manifest — the make graph
+(:file:`config/Makefile`, default) or the |Ninja| build file
+(:file:`config/build.ninja`, with :samp:`-b ninja`) — from a
+compilation configuration file.
 
 Usage
 =====
@@ -18,6 +20,7 @@ Usage
 
    ./configure
    ./configure -c <file>
+   ./configure -c <file> -b [make|ninja]
    ./configure -c <file> -g <gpu>
    ./configure -i <package>
    ./configure -h
@@ -25,11 +28,20 @@ Usage
 Options
 -------
 
+.. option:: -b [make|ninja]
+
+   Choose the build system. The default, :samp:`make`, generates the
+   make graph (:file:`config/Makefile` and one :file:`Makefile` per
+   module) and the build command is :command:`make`. :samp:`-b ninja`
+   generates the :file:`config/build.ninja` file that drives the
+   compilation and the build command is :command:`ninja`; it needs the
+   ninja tool (installable with :command:`./configure -i ninja`).
+
 .. option:: -c <file>
 
    Define the COMPILATION configuration file, in
-   :file:`${QP_ROOT}/config/`. This generates the
-   :file:`config/build.ninja` file that drives the compilation. See
+   :file:`${QP_ROOT}/config/`. This generates the build manifest that
+   drives the compilation. See
    "Choosing the compilation configuration file" below.
 
 .. option:: -g [nvidia|intel|none]

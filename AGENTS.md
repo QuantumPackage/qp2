@@ -3,7 +3,8 @@
 Repo root = this directory. `VERSION` = 2.3.1. Determinant-driven
 quantum-chemistry suite: **Fortran + IRPF90** code generation for the compute
 part, **Rust** for the CLI / EZFIO bindings, **EZFIO** for the data model,
-**Ninja** for the build.
+**GNU make** for the build (default), **Ninja** as the opt-in alternative
+(`./configure -c <cfg> -b ninja`).
 
 Authoritative in-tree references (prefer them over guessing):
 
@@ -30,10 +31,13 @@ Online: <https://quantum-package.readthedocs.io> (manual) and
    `NEED`, `README.rst`, `EZFIO.cfg`, `*.irp.f`, `*.template.f`, `*.include.f`,
    `*.ezfio_config`, and the per-module `FC`/`FCFLAGS`/`CFLAGS`/`LIB`.
    Everything else there — symlinks to needed modules, `.gitignore`,
-   `ezfio_interface.irp.f`, `IRPF90_temp/`, `build.ninja` — is generated.
+   `ezfio_interface.irp.f`, `IRPF90_temp/`, the per-module `Makefile`
+   (make mode) or `build.ninja` (ninja mode) — is generated.
    Edit the source, then build; never patch generated output.
-4. Never edit generated files: root `build.ninja`, `config/build.ninja`,
-   `config/qp_create_ninja.pickle`, `data/executables`,
+4. Never edit generated files: the build manifest (`config/Makefile` in
+   make mode, `config/build.ninja` in ninja mode), the per-module
+   `Makefile`/`build.ninja`, `irpf90.make`, `config/qp_create_ninja.pickle`,
+   `data/executables`,
    `data/qp_edit_config/`, `data/list_element.txt`, `rust/target/`, `lib/`,
    `share/`.
 5. **Ask the user before any git commit.**
@@ -72,17 +76,29 @@ external/              git submodules: ezfio, irpf90, qp2-dependencies
 
 ```bash
 source quantum_package.rc      # or: ./bin/qpsh   (interactive QP shell)
-ninja                          # root: build every module, then the Rust tool layer
-ninja                          # inside a module dir: build that module + Rust tool layer
-ninja -f $QP_ROOT/config/build.ninja module_<name>   # build one module from anywhere
-make                           # == source quantum_package.rc; ninja
+make                           # root: build every module, then the Rust tool layer
+make                           # inside a module dir: build that module + Rust tool layer
+make -f $QP_ROOT/config/Makefile module_<name>   # build one module from anywhere
 ```
 
-- `./configure -c config/<cfg> [-g nvidia|intel|none]` writes the root
-  `build.ninja`, `config/build.ninja`, `etc/00.qp_root.rc`, and the
+The build system is GNU make by default. The opt-in ninja alternative is
+`./configure -c config/<cfg> -b ninja`; from then on the same three
+invocations work with `ninja` instead of `make` (`ninja -f
+$QP_ROOT/config/build.ninja module_<name>`).
+
+- `./configure -c config/<cfg> [-g nvidia|intel|none] [-b make|ninja]`
+  writes the build manifest — `config/Makefile` plus one `Makefile` per
+  module in make mode (default), or `config/build.ninja` with `-b ninja` —
+  `etc/00.qp_root.rc` (which exports `QP_BUILD_SYSTEM`), and the
   `src/gpu_arch` symlink. Only run it when the user asks.
-- Before all that, `configure` checks: `irpf90`, `ninja`, `cmake`,
-  TREXIO (`-ltrexio`), zlib, the python
+- The root `Makefile` is a tracked dispatcher: it re-runs the build-graph
+  generator (`update`) and delegates to `config/Makefile` in make mode, or
+  to `ninja -f config/build.ninja` in ninja mode; in make mode it runs the
+  build inside a shell that has sourced `quantum_package.rc` (the per-module
+  compiler commands rely on that environment, e.g. `CPATH`/`C_INCLUDE_PATH`
+  pointing at `include/` for the C headers).
+- Before all that, `configure` checks: `irpf90`, the selected build tool
+  (`make` or `ninja`), `cmake`, TREXIO (`-ltrexio`), zlib, the python
   packages `docopt` and `resultsFile`, SimpleGPU (`-lsimple_gpu-cpu`), and
   BLAS/LAPACK through the compilation config. Missing dependencies are
   installed with `./configure -i <pkg>` (or `-i all`), where `<pkg>` is one of:
@@ -98,9 +114,11 @@ make                           # == source quantum_package.rc; ninja
 - `-g amd` in the script points at `plugins/local/gpu_amd`, which is *not*
   in-tree (it ships with a plugin repository); the in-tree GPU backends are
   `gpu_x86`, `gpu_nvidia`, `gpu_intel`.
-- Every build first re-runs `qp_create_ninja update` (ninja target
-  `dummy_target`), so new files, new modules and edited `NEED` files are
-  picked up automatically. Nothing is ever edited by hand in the build files.
+- Every build first re-runs `qp_create_ninja update` (the `update` target
+  of the root `Makefile`; the ninja graph does the same through its
+  `dummy_target` edge), so new files, new modules and edited `NEED` files
+  are picked up automatically. Nothing is ever edited by hand in the build
+  files.
 - A program `program foo` living in `src/m/foo.irp.f` is built as
   `src/m/IRPF90_temp/foo`; `data/executables` maps `foo` → that path, and
   `qp_run foo <dir.ezfio>` resolves it there.
@@ -167,11 +185,13 @@ END_PROVIDER
   Separately, a `*.template.f` file is a codelet template whose `$subroutine`
   placeholders are instantiated by the `.irp.f` that includes it
   (see `src/determinants/h_apply.template.f`).
-- IRPF90 is invoked by ninja (pool `depth = 1`, i.e. serialized) as
-  `irpf90 -I <needed modules> $IRPF90_FLAGS`; **`IRPF90_FLAGS` comes from the
-  compilation config** (`config/*.cfg`): `--ninja --align=32` there, while
-  `*debug*.cfg` / `travis.cfg` add `--assert`. Don't hardcode the flags:
-  read the config in use.
+- IRPF90 is invoked serialized (one call per module) as
+  `irpf90 -I <needed modules> $IRPF90_FLAGS` — by the per-module `Makefile`
+  in make mode (where `$IRPF90_FLAGS` is the config's flags minus the
+  `--ninja` token), or by the ninja graph in ninja mode; **`IRPF90_FLAGS`
+  comes from the compilation config** (`config/*.cfg`): `--ninja
+  --align=32` there, while `*debug*.cfg` / `travis.cfg` add `--assert`.
+  Don't hardcode the flags: read the config in use.
   Useful tools inside a module:
   `irpf90_entities` (table `file : type :: name (dims)`), `irpman <entity>`,
   `irpf90 -t <entity>` (what breaks when it is touched), `tags`.
@@ -258,7 +278,9 @@ MO classes (`Core`, `Inactive`, `Active`, `Virtual`, `Deleted`) are set with
 
 ## 8. Programs and algorithms
 
-Compute programs are run through `qp_run <name> <ezfio>`:
+Compute programs are run through `qp_run <name> <ezfio>`. Their stdout is a
+human summary; the numbers to consume are in the run's JSON document,
+`<EZFIO>/json/NNNNN.json` (§9).
 
 - `scf` (RHF/ROHF/UHF, DIIS/damping in `scf_utils`); `ks_scf` (Kohn-Sham),
   `rs_ks_scf` (range-separated). DFT dispatch is by string providers
@@ -290,7 +312,74 @@ Compute programs are run through `qp_run <name> <ezfio>`:
   in `src/mpi/`. Thread counts come from `etc/local.rc`
   (`QP_NTHREADS_DAVIDSON`, `QP_NTHREADS_PT2`, `OMP_NUM_THREADS`).
 
-## 9. Recipes
+## 9. Output: human summary on stdout, JSON record
+
+Two streams with different readers. Only the second is a contract.
+
+**stdout is the human summary.** Short banner, a table that grows by one
+row per iteration, the extrapolation table at the end, the answer in a box.
+It is ASCII-only (0x20-0x7E) and aimed at a person watching a run: no
+script should parse it, and a number meant for a machine never goes there.
+`human_quiet` (`src/utils/human.irp.f`) silences the legacy provenance
+dump through the `write_double` / `write_int` / `write_bool` helpers of
+`src/ezfio_files/output.irp.f`; `QP_VERBOSE=1` restores it for debugging.
+No machine-readable line is printed: scripts read the JSON document, never
+stdout (`scripts/get_fci_conv.sh` and `scripts/qp_geom_opt.py` go through
+`scripts/utility/qp_json.py`).
+
+**The JSON document is the record, and it holds more than stdout.**
+`<EZFIO>/json/NNNNN.json` (first unused number, so a restart never touches
+an earlier run), `"schema": "qp3/1"`, opened once by
+`json_init('<program>')` (`scf`, `ks_scf`, `rs_ks_scf`, `cis`, `cisd`,
+`fci`, `pt2`, `mrci`, `casscf`, `cipsi_orb_opt`) and filled by
+`call json_add('/results/<method>/<key>', value)`.
+`src/json/README.rst` is the reference, `src/json/DESIGN.md` the design.
+
+- `provenance`: `ezfio_file`, `host`, `pid`, `started`; `units`: hartree,
+  bohr, second, declared once; `run`: `kind`, `timestamp`, `elapsed`.
+- `input`: the scalar EZFIO inputs the calculation actually read
+  (integer, double precision, logical, fixed-length string), nested as
+  `input/<ezfio_group>/<ezfio_name>`. Array-valued inputs and `integer*8`
+  are not hooked. Emitted by the EZFIO provider generator
+  (`scripts/ezfio_interface/`), not by the call site.
+- `results`: grouped by method, not by program. `scf` logs `iteration`,
+  `energy`, `delta_energy`, `max_error_diis`, `level_shift`, `dim_diis`,
+  `converged`, plus the per-iteration `history/*`; `cipsi` logs
+  `algorithm`, `n_det`, `n_cfg` (when `s2_eig`), per-state
+  `states/{energy,s2,pt2,rpt2,variance,extrapolated_energy}` plus
+  `pt2_err`, `rpt2_err`, `variance_err`, and the per-iteration series under
+  `history/`; `davidson` logs one `calls/NNNN/{algorithm,n_state,epoch,
+  itertot,converged,wall_time,shape,iteration,energy,residual,s2}` block
+  per solve; `symmetry` logs `group`, `n_irrep` and per-state
+  `states/<s>/{irrep,purity}`. The history convention (one index-aligned
+  array per quantity, `shape[n,nh]` with the state index fastest, and the
+  `(nh)` scalars such as `n_det`, `epoch`, `memory`) is stated once in
+  `src/json/DESIGN.md` §10.7; reshape the 2-D arrays with `order='F'`.
+  `ks`, `casscf` and `mo_opt` have their own objects. stdout carries the
+  same last-row numbers and one extrapolated energy, but the full
+  per-iteration history survives only here.
+
+Each write replaces the whole document (`.tmp.<pid>` + `fsync` +
+`rename`), so the file is valid JSON after `kill -9` and always complete;
+doubles round-trip bit-exactly; a non-finite value becomes `null`, meaning
+"not available". `QP_JSON_MIN_INTERVAL` (default 1 s, `0` = synchronous
+write after each `json_add`) bounds the staleness. After a restart the
+highest-numbered file is the complete state; older files are history and
+are never merged. `scripts/utility/qp_json.py` (`files`, `load`,
+`load_all`, `load_last`) implements that rule and is what
+`qp_extract_cipsi_data.py` and `qp_exc_energy.py` use.
+
+**The `input` hooks live in generated per-module files.**
+`src/<module>/ezfio_interface.irp.f` is written by `ei_handler.py` from
+`EZFIO.cfg`; it is not versioned (`.gitignore`d) and carries the
+`call json_add('/input/...')` lines. The ninja edge
+`build_ezfio_interface` takes the generator scripts as implicit inputs
+(`scripts/compilation/qp_create_ninja`), so `ninja` regenerates them
+whenever `EZFIO.cfg` or the generator changes. If a tree shows an `input`
+object with only `ezfio_files.ezfio_convention`, its interfaces predate the
+generator: `rm src/*/ezfio_interface.irp.f && ninja` and run again.
+
+## 10. Recipes
 
 - **New keyword**: add a block to the module `EZFIO.cfg`, then use it as a
   provider (or `ezfio_get_<module>_<param>`). No registration step.
@@ -299,8 +388,8 @@ Compute programs are run through `qp_run <name> <ezfio>`:
 - **New subroutine/provider in an existing module**: add it to an existing
   `*.irp.f`; nothing to declare. Keep the file's theme.
 - **New module**: `mkdir src/<name>`, add `NEED`, `README.rst`, sources;
-  the next `ninja` finds it. `module_handler.py print_descendant <name>`
-  shows what it pulls in.
+  the next build (`make`, or `ninja` in a ninja-configured tree) finds it.
+  `module_handler.py print_descendant <name>` shows what it pulls in.
 - **New plugin**: `qp_plugins create -n <name> [-r <repo>] <needed modules…>`;
   `qp_plugins install <name>` symlinks `plugins/<repo>/<name>` into `src/`.
   Never edit files through the symlink in `src/`.
@@ -320,18 +409,19 @@ Compute programs are run through `qp_run <name> <ezfio>`:
   should build a fresh EZFIO (`qp create_ezfio -b <basis> <file.xyz>`) rather
   than reuse a modified one.
 
-## 10. Tests and CI
+## 11. Tests and CI
 
 - `cd tests && qp_test [-a] [TEST]` (bats). `-a` runs all installed modules,
   otherwise only the current directory; `TEST` is a bats number/name.
   Helpers: `tests/bats/common.bats.sh` (`eq` for float compare, `test_exe`,
   `run_only_test`), inputs in `tests/input/`.
 - Modules may carry their own `NN.<name>.bats` (e.g. `src/hartree_fock/10.hf.bats`).
-- CI: `.github/workflows/compilation.yml` (build + `qp_test -a`),
+- CI: `.github/workflows/compilation.yml` (a ninja job and a make job, the
+  make one exercising the default build; both run `qp_test -a`),
   `.github/workflows/configuration.yml` (exercises `./configure -i <pkg>` for
   each dependency on a bare ubuntu-24.04) and `.drone.yml`.
 
-## 11. Pitfalls checklist
+## 12. Pitfalls checklist
 
 - Executable name = **file** basename, not the `program` name.
 - `bin/` is gitignored: `git add -f bin/qp_newcommand`.
@@ -348,22 +438,29 @@ Compute programs are run through `qp_run <name> <ezfio>`:
   it gives wrong or stale values, not a compile error.
 - `TOUCH` is for values assigned by side effect; using it in an iteration
   without a convergence test silently produces stale dynamics.
+- `src/<module>/ezfio_interface.irp.f` is generated output: it holds the
+  `json_add('/input/...')` hooks and is rebuilt whenever `EZFIO.cfg` or
+  `scripts/ezfio_interface/` changes (implicit ninja inputs). An `input`
+  block holding only `ezfio_files.ezfio_convention` means the interfaces
+  are stale: `rm src/*/ezfio_interface.irp.f && ninja` (§9).
 
-## 12. Code-model RAG (`ninja rag` / `qp rag`)
+## 13. Code-model RAG (`make rag` / `ninja rag` / `qp rag`)
 
-`ninja rag` (repo root) builds a machine-readable model of the whole
-source tree — one `irpf90 -J` dump per build edge of `config/build.ninja`
-(25 modules, run with the exact `$IRPF90_FLAGS`) — merged into one
-corpus with a SQLite FTS5/BM25 index. It lands in
+`make rag` (repo root; `ninja rag` in a ninja-configured tree) builds a
+machine-readable model of the whole source tree — one `irpf90 -J` dump
+per build edge of the configured build manifest (`config/Makefile` in
+make mode, `config/build.ninja` in ninja mode; 25 modules, run with the
+exact `$IRPF90_FLAGS` of the build) — merged into one corpus with a
+SQLite FTS5/BM25 index. It lands in
 `$QP_ROOT/share/rag/` (gitignored): `per-module/<M>.json` × 25,
 `qp2.json` (merged model), `qp2_rag.db` (index), `merge-report.json`
 (counts, collisions, applied renames). It is not part of the default
-build; ninja rebuilds it automatically when any module source or the
-tool changes, and a rebuild takes a few minutes.
+build; the build tool rebuilds it automatically when any module source
+or the tool changes, and a rebuild takes a few minutes.
 
 Requirement: an irpf90 with `-J` (≥ 2.3.3) — the in-tree
 `external/irpf90` pin carries it (it is on `$PATH` through
-`etc/irpf90.rc`, so `ninja rag` just works). `RAG_IRPF90=/path/to/bin/irpf90`
+`etc/irpf90.rc`, so `make rag` just works). `RAG_IRPF90=/path/to/bin/irpf90`
 is a dev override to run the RAG against a different irpf90; with an
 irpf90 that lacks `-J` the target fails with a clear error.
 
@@ -374,7 +471,7 @@ qp rag query "PT2 selection" -k 5
 qp rag query "bitmask" --kind routine
 qp rag graph <entity> --depth 3
 qp rag stats
-qp rag build                    # == ninja rag (explicit rebuild)
+qp rag build                    # == make rag / ninja rag (explicit rebuild)
 ```
 
 Underneath, `qp rag …` calls `bin/qp_rag` →

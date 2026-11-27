@@ -13,9 +13,15 @@ subroutine write_time(iunit)
   implicit none
   BEGIN_DOC
   ! Write a time stamp in the output for chronological reconstruction
+  !
+  ! In the human summary the timestamp stream is suppressed (human_quiet);
+  ! the summary carries its own timing (the `t(s)` column and the `wall
+  ! time` row of the final box). Under QP_VERBOSE the legacy behaviour is
+  ! restored, including the print_memory_usage call.
   END_DOC
   integer, intent(in)            :: iunit
   double precision               :: wt, ct
+  if (human_quiet) return
   if (.not.mpi_master) then
     return
   endif
@@ -38,6 +44,7 @@ subroutine write_double(iunit,value,label)
   if (.not.mpi_master) then
     return
   endif
+  if (human_quiet) return
   integer, intent(in)            :: iunit
   double precision               :: value
   character*(*)                  :: label
@@ -56,6 +63,7 @@ subroutine write_int(iunit,value,label)
   if (.not.mpi_master) then
     return
   endif
+  if (human_quiet) return
   integer, intent(in)            :: iunit
   integer                        :: value
   character*(*)                  :: label
@@ -74,6 +82,7 @@ subroutine write_bool(iunit,value,label)
   if (.not.mpi_master) then
     return
   endif
+  if (human_quiet) return
   integer, intent(in)            :: iunit
   logical                        :: value
   character*(*)                  :: label

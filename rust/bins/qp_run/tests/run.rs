@@ -1,8 +1,9 @@
-//! The launcher body of `qp_run`: program resolution, the banner, the
-//! `qp_edit -c` pre-check, the job's exit status, and the two early failures
-//! (missing EZFIO directory, unknown program). The job inherits the
-//! environment: no task-server address variables, no address file, no
-//! launcher-created `work/`.
+//! The launcher body of `qp_run`: program resolution, the banner and the
+//! run-configuration block, the `qp_edit -c` pre-check, the job's exit
+//! status, and the two early failures (missing EZFIO directory, unknown
+//! program). The job inherits the environment, minus the task-server
+//! address variables and plus the one buffering switch: no address file,
+//! no launcher-created `work/`.
 
 mod common;
 
@@ -10,7 +11,7 @@ use common::{Fixture, observe_script, observed};
 
 /// The job sees the EZFIO directory as its first argument and none of the
 /// task-server environment; the launcher creates no `work/` and no address
-/// file; the banner and the wall time are printed.
+/// file; the banner is printed.
 #[test]
 fn the_job_inherits_no_task_server_environment() {
     let fixture = Fixture::new();
@@ -49,19 +50,37 @@ fn the_job_inherits_no_task_server_environment() {
         "the address file is absent after the run"
     );
 
-    assert!(outcome.stdout.contains("Date: "), "{outcome}");
     assert!(outcome.stdout.contains("Quantum Package"), "{outcome}");
     assert!(
         outcome
             .stdout
             .contains(&format!("EZFIO Dir : {}", fixture.ezfio_str())),
-        "{outcome}"
+        "the banner names the EZFIO directory\n{outcome}"
     );
-    assert!(outcome.stdout.contains("Wall time: "), "{outcome}");
 }
 
-/// A non-zero job status is reported and becomes the tool's status, after
-/// the wall time was printed.
+/// The job's Fortran runtime does not buffer a redirected log.
+///
+/// libgfortran keeps stdout in memory until `exit` when it is a regular file,
+/// so `qp_run fci h2o.ezfio > fci.out` left the file empty for the whole run.
+/// The launcher sets the runtime's own switch for every job; the value is
+/// asserted here because the shim is a shell script and cannot buffer.
+#[test]
+fn the_job_output_is_not_buffered() {
+    let fixture = Fixture::new();
+    fixture.program("scf", &observe_script("exit 0"));
+    let outcome = fixture.run(&["scf", fixture.ezfio_str()]);
+    assert_eq!(outcome.code(), 0, "{outcome}");
+    assert_eq!(
+        observed(&fixture.work())
+            .get("unbuffered")
+            .map(String::as_str),
+        Some("1"),
+        "GFORTRAN_UNBUFFERED_PRECONNECTED must reach the job\n{outcome}"
+    );
+}
+
+/// A non-zero job status is reported and becomes the tool's status.
 #[test]
 fn the_job_exit_code_is_propagated() {
     let fixture = Fixture::new();
@@ -71,10 +90,6 @@ fn the_job_exit_code_is_propagated() {
     assert!(
         outcome.stdout.contains("Program exited with code 3."),
         "{outcome}"
-    );
-    assert!(
-        outcome.stdout.contains("Wall time: "),
-        "the reference prints the wall time before exiting:\n{outcome}"
     );
     assert!(!fixture.work().join("qp_run_address").exists());
 }
@@ -197,5 +212,68 @@ fn an_unknown_program_lists_the_choices() {
         outcome.stderr,
         "qp_run: program not found in data/executables: nope\n"
     );
-    assert!(!outcome.stdout.contains("Quantum Package"), "{outcome}");
+    assert!(!outcome.stdout.contains("EZFIO Dir : "), "{outcome}");
+}
+
+/// The run-configuration block prints one line per group of readable keys,
+/// with the fixed labels and field order; a group with no readable key
+/// (here `AO integrals` / `MO integrals`) prints no line at all. The
+/// fixture's EZFIO is created bare, so the test writes the keys of the
+/// groups it asserts.
+#[test]
+fn the_run_configuration_block_prints_the_readable_groups() {
+    let fixture = Fixture::new();
+    {
+        let ezfio = qp_ezfio::EzFio::open(fixture.ezfio()).expect("open the fixture EZFIO");
+        ezfio
+            .set("determinants", "n_states", &2i64)
+            .expect("n_states");
+        ezfio.set("determinants", "s2_eig", &false).expect("s2_eig");
+        ezfio
+            .set("determinants", "n_det_max", &100_000i64)
+            .expect("n_det_max");
+        ezfio
+            .set("determinants", "weight_selection", &0i64)
+            .expect("weight_selection");
+        ezfio.set("perturbation", "do_pt2", &false).expect("do_pt2");
+        ezfio
+            .set("perturbation", "pt2_max", &1e-6f64)
+            .expect("pt2_max");
+        ezfio
+            .set("scf_utils", "scf_algorithm", &"DF".to_string())
+            .expect("scf_algorithm");
+        ezfio
+            .set("scf_utils", "n_it_scf_max", &100i64)
+            .expect("n_it_scf_max");
+        ezfio
+            .set("scf_utils", "thresh_scf", &1e-13f64)
+            .expect("thresh_scf");
+        ezfio
+            .set("davidson_keywords", "davidson_sze_max", &50i64)
+            .expect("davidson_sze_max");
+    }
+    fixture.program("scf", "exit 0");
+    let outcome = fixture.run(&["scf", fixture.ezfio_str()]);
+    assert_eq!(outcome.code(), 0, "{outcome}");
+    assert!(
+        outcome.stdout.contains(
+            "  Run: n_states=2  s2_eig=F  n_det_max=100000  \
+             weight_selection=0  do_pt2=F  pt2_max=1e-6",
+        ),
+        "the Run: line names the readable determinants and perturbation keys\n{outcome}"
+    );
+    assert!(
+        outcome
+            .stdout
+            .contains("  SCF: algorithm=DF  n_it_scf_max=100  thresh_scf=1e-13"),
+        "the SCF: line names the readable scf_utils keys\n{outcome}"
+    );
+    assert!(
+        outcome.stdout.contains("  Davidson: sze_max=50"),
+        "the Davidson: line names davidson_sze_max\n{outcome}"
+    );
+    assert!(
+        !outcome.stdout.contains("AO integrals") && !outcome.stdout.contains("MO integrals"),
+        "a group with no readable key prints no line at all\n{outcome}"
+    );
 }

@@ -11,7 +11,7 @@ BEGIN_PROVIDER [ character*(32), mo_class , (mo_num) ]
 
     call ezfio_has_mo_basis_mo_class(has)
     if (has) then
-      write(6,'(A)') '.. >>>>> [ IO READ: mo_class ] <<<<< ..'
+      if (.not.human_quiet) write(6,'(A)') '.. >>>>> [ IO READ: mo_class ] <<<<< ..'
       call ezfio_get_mo_basis_mo_class(mo_class)
     else
       mo_class(:) = 'Active'

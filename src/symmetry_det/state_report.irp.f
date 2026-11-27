@@ -28,6 +28,7 @@ subroutine pg_write_state_irrep(iunit, istate, label, dom, purity)
   character*(64) :: val
 
   if (.not. mpi_master) return
+  if (human_quiet) return
   write(st,'(I8)') istate
   lab = 'Irrep of state '//trim(adjustl(st))
   if (label > 0) then
@@ -77,6 +78,7 @@ subroutine pg_state_irreps_label(energy, s2)
 end subroutine pg_state_irreps_label
 
 subroutine pg_print_state_irreps_work(energy, s2)
+  use qp_json, only: json_add
   implicit none
   BEGIN_DOC
   ! The table. :c:data:`pg_state_irrep_weight` delivers the weights, the labels,
@@ -86,6 +88,7 @@ subroutine pg_print_state_irreps_work(energy, s2)
   integer :: s, a, nw, nf
   double precision :: wsum, s2v
   character*(8) :: lab
+  character*(64) :: base
   ! Fixed-width irrep column, so that "(none)" and a short label line up
   ! with a long one whatever the padding of pg_irrep_name.
   character*(12) :: col
@@ -93,6 +96,8 @@ subroutine pg_print_state_irreps_work(energy, s2)
   provide pg_state_irrep_weight pg_state_dom pg_irrep_allowed
 
   if (.not. mpi_master) return
+  call json_add('/results/symmetry/group', trim(pg_group_name))
+  call json_add('/results/symmetry/n_irrep', pg_n_irrep)
   ! The group name is in the header so that a CI log kept on its own says
   ! which irreps the symbols below belong to: the detection summary is printed
   ! by the SCF program and by "qp_run symmetry_mo", not here.
@@ -131,6 +136,9 @@ subroutine pg_print_state_irreps_work(energy, s2)
     else
       lab = '(none)'
     endif
+    write(base,'("/results/symmetry/states/",I0)') s
+    call json_add(trim(base)//'/irrep', trim(lab))
+    call json_add(trim(base)//'/purity', pg_state_purity(s))
     write (col,'(A)') trim(lab)
     ! S^2 is non-negative; a value a few 1e-16 negative is roundoff and F9.4
     ! would print it as -0.0000. Clamp only what would print as a negative

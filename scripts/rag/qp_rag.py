@@ -7,11 +7,12 @@ corpus:
 
   1. picks the irpf90 binary ($RAG_IRPF90 or external/irpf90/bin/irpf90)
      and requires the `-J` capability (irpf90 >= 2.3.3);
-  2. reads config/build.ninja for the (module, include_dir) build edges
-     (one per build_irpf90.ninja edge, core modules under src/ and
-     plugin modules under plugins/ alike) and the exact $IRPF90_FLAGS of
-     the build (-J output depends on the flags, so the verbatim build
-     set is used);
+  2. reads the configured build manifest for the (module, include_dir)
+     build edges (one per build_irpf90.ninja edge in config/build.ninja,
+     ninja mode; one per '# qp-rag-edge' comment in config/Makefile,
+     make mode; core modules under src/ and plugin modules under
+     plugins/ alike) and the exact $IRPF90_FLAGS of the build (-J output
+     depends on the flags, so the verbatim build set is used);
   3. runs `irpf90 <include_dir> <IRPF90_FLAGS> -J` in each module
      directory with the build environment (QP_ROOT, QP_EZFIO and the
      PYTHONPATH of etc/paths.rc, needed by the embedded `! shell`
@@ -40,9 +41,11 @@ pre-plugin reference corpus).
 
 `query`, `graph` and `stats` only read share/rag: query is BM25 over the
 index, graph is a BFS over the entity needs/needed_by edges, stats gives
-counts and the external API surface. If the corpus is missing: ninja rag.
+counts and the external API surface. If the corpus is missing: make rag
+(or: ninja rag in a ninja-configured tree).
 
-The `ninja rag` target at the repo root runs `build`; ninja rebuilds the
+The `rag` target at the repo root (make mode: config/Makefile; ninja
+mode: config/build.ninja) runs `build`; the build tool rebuilds the
 corpus automatically when any module source (or this tool) changes. It
 is not part of the default build.
 
@@ -207,6 +210,80 @@ def parse_build_ninja(path):
     if not edges:
         die("config/build.ninja: no build_irpf90.ninja edges found")
     return edges, dirmap, flags.split()
+
+
+def parse_make_file(path):
+    """Return (edges, dirmap, flags) from config/Makefile (make mode),
+    the same contract as parse_build_ninja.
+
+    The generator embeds the RAG data as comment lines, so the build
+    manifest stays pure make:
+      - '# qp-rag-dir: <alias> <tree-dir>' per include-dir alias
+        (the alias -> $QP_ROOT-relative directory map; configure
+        symlinks are already resolved to the plugin's real location,
+        e.g. 'gpu_arch' -> 'plugins/local/gpu_x86');
+      - one '# qp-rag-edge: <key>|<alias...>' line per buildable
+        module (key = the module directory relative to $QP_ROOT,
+        aliases in the build's -I order, the same order the ninja
+        include_dir variable carries).
+    flags is the verbatim make-mode $IRPF90_FLAGS (the build's
+    IRPF90_FLAGS minus the '--ninja' token); the -J dump does not
+    depend on the manifest-writing mode."""
+    with open(path, encoding="utf-8") as f:
+        lines = f.readlines()
+    flags = None
+    dirmap = {}
+    edges = []
+    for line in lines:
+        m = re.match(r"^IRPF90_FLAGS_MAKE\s*=\s*(\S.*)$", line)
+        if m:
+            flags = m.group(1).strip()
+            continue
+        m = re.match(r"^# qp-rag-dir: (\S+) (\S+)$", line)
+        if m:
+            alias, target = m.group(1), m.group(2)
+            if dirmap.setdefault(alias, target) != target:
+                die("make RAG data: include dir %r resolves to both %r "
+                    "and %r" % (alias, dirmap[alias], target))
+            continue
+        m = re.match(r"^# qp-rag-edge: (\S+)\|(.*)$", line)
+        if not m:
+            continue
+        key, rest = m.group(1), m.group(2).strip()
+        if not key.startswith(("src/", "plugins/")):
+            die("make edge %s: neither a src/ nor a plugins/ module" % key)
+        if not (QP_ROOT / key).is_dir():
+            die("make edge %s: module directory %s missing" % (key, key))
+        name = key.rsplit("/", 1)[-1]
+        pairs = []
+        for alias in rest.split():
+            if alias not in dirmap:
+                die("make edge %s: include dir %r has no qp-rag-dir "
+                    "resolution" % (key, alias))
+            pairs.append((alias, dirmap[alias]))
+        edges.append({"key": key, "name": name, "dirs": pairs})
+    names = Counter(e["name"] for e in edges)
+    for e in edges:
+        e["dump"] = (e["name"] if names[e["name"]] == 1
+                     else e["key"].replace("/", "__"))
+    if not flags:
+        die("config/Makefile: no IRPF90_FLAGS_MAKE variable")
+    if not edges:
+        die("config/Makefile: no qp-rag-edge lines found")
+    return edges, dirmap, flags.split()
+
+
+def parse_manifest():
+    """(edges, dirmap, flags) from the configured build manifest:
+    config/build.ninja (ninja mode) else config/Makefile (make mode)."""
+    ninja_path = QP_ROOT / "config" / "build.ninja"
+    make_path = QP_ROOT / "config" / "Makefile"
+    if ninja_path.is_file():
+        return parse_build_ninja(ninja_path)
+    if make_path.is_file():
+        return parse_make_file(make_path)
+    die("no configured build manifest (config/build.ninja or "
+        "config/Makefile); run ./configure -c config/<config_file>")
 
 
 def resolve_dir(alias, dirmap):
@@ -630,8 +707,7 @@ def cmd_build(no_plugins=False):
     PER_MODULE.mkdir(parents=True)
 
     irpf90 = find_irpf90()
-    edges, dirmap, flags = parse_build_ninja(
-        QP_ROOT / "config" / "build.ninja")
+    edges, dirmap, flags = parse_manifest()
     if no_plugins:
         edges = [e for e in edges if not e["key"].startswith("plugins/")]
     env = parse_env()
@@ -814,13 +890,13 @@ def index_model(doc):
 
 def open_db():
     if not os.path.exists(DB):
-        die("qp2_rag.db not found; run: ninja rag")
+        die("qp2_rag.db not found; run: make rag (or: ninja rag)")
     return sqlite3.connect(str(DB))
 
 
 def load_model():
     if not os.path.exists(MODEL):
-        die("qp2.json not found; run: ninja rag")
+        die("qp2.json not found; run: make rag (or: ninja rag)")
     with open(MODEL, encoding="utf-8") as fh:
         return json.load(fh)
 

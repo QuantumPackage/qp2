@@ -4,6 +4,11 @@
 
 ** Changes
 
+  - The build system is now GNU make by default: ~./configure -c <cfg>~
+    generates the Makefiles (~config/Makefile~ and one ~Makefile~ per
+    module) and the build command is ~make~.  The previous ninja build
+    is kept as an opt-in with ~./configure -c <cfg> -b ninja~ (full
+    parity either way: per-module builds, clean/tidy, rag).
   - The command-line tools are now written in Rust: ~qp_create_ezfio~,
     ~qp_edit~, ~qp_run~, ~qp_set_mo_class~, ~qp_print_basis~ and
     ~element_create_db~.  OCaml and OPAM are no longer needed to build
@@ -22,6 +27,19 @@
     ~qp_run~ is a thin launcher; the slave and task-server modes are
     gone, along with the ~qp_tunnel~, ~qp_srun~ and ~qp_mpirun~
     launchers and the MPI build configurations.
+  - ~qp_run~ prints the git information of the running tree again, as
+    ~qp2~ did: the commit subject, date and SHA1 of the ~QP_ROOT~ tree
+    are read at run time (the ~QP_GIT_MESSAGE~, ~QP_GIT_DATE~ and
+    ~QP_GIT_SHA1~ variables override them). A tree that is not a git
+    checkout prints ~unknown~.
+  - The standard output of the programs launched by ~qp_run~ is now a
+    short human summary: a one-line banner, the SCF table, the CIPSI
+    table, the extrapolation tables and a final box with the energies.
+    The legacy provenance dump (time stamps, memory figures, integral
+    and Davidson traces) is suppressed by a single ~human_quiet~ gate
+    and restored by ~QP_VERBOSE=1~.  A machine-readable line
+    (~# Ndet,E,E+PT2,E+RPT2,absPT2=~, or ~# S,Ndet,...~ with several
+    states) follows each CIPSI row for the analysis scripts.
   - The CIPSI/MRCI selected spaces at the default threshold may differ
     from the pre-removal release: the old distributed selection merged
     the worker contributions in arrival order, so its result was

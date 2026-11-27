@@ -145,3 +145,10 @@ long long qp_vsize_bytes(void)
 }
 #endif
 
+#include <time.h>
+double qp_epoch_c(void) {
+  struct timespec ts;
+  if (clock_gettime(CLOCK_REALTIME, &ts) != 0) return 0.0;
+  return (double)ts.tv_sec + 1.0e-9 * (double)ts.tv_nsec;
+}
+

@@ -77,8 +77,6 @@ subroutine run_stochastic_cipsi(Ev,PT2)
         (maxval(abs(pt2_data % variance(1:N_states))) > variance_max) .and.     &
         (correlation_energy_ratio <= correlation_energy_ratio_max)   &
         )
-      write(*,'(A)')  '--------------------------------------------------------------------------------'
-
 
     to_select = int(sqrt(dble(N_states))*dble(N_det)*selection_factor, size_t)
     to_select = max(int(N_states_diag, size_t), to_select)
@@ -103,7 +101,6 @@ subroutine run_stochastic_cipsi(Ev,PT2)
     call save_energy(psi_energy_with_nucl_rep, pt2_data % pt2)
 
     call increment_n_iter(psi_energy_with_nucl_rep, pt2_data)
-    call print_extrapolated_energy()
     call print_mol_properties()
     call json_add('/results/cipsi/algorithm', 'stochastic')
     call write_cipsi_json(pt2_data,pt2_data_err)
@@ -144,10 +141,15 @@ subroutine run_stochastic_cipsi(Ev,PT2)
     call print_summary(psi_energy_with_nucl_rep, &
        pt2_data , pt2_data_err, N_det, N_configuration, N_states, psi_s2)
     call increment_n_iter(psi_energy_with_nucl_rep, pt2_data)
-    call print_extrapolated_energy()
     call print_mol_properties()
     call write_cipsi_json(pt2_data,pt2_data_err)
   endif
+  if (N_states == 1) then
+    write(6,'(A)') repeat('-',54)
+  else
+    write(6,'(A)') repeat('-',57)
+  endif
+  call print_extrapolated_energy(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, N_det)
   call pt2_dealloc(pt2_data)
   call pt2_dealloc(pt2_data_err)
 

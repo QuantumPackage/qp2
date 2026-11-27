@@ -8,7 +8,7 @@ BEGIN_PROVIDER [ logical, all_mo_integrals ]
 ! Used to provide everything needed before using MO integrals
 ! PROVIDE all_mo_integrals
   END_DOC
-  PROVIDE gpu_integral_buffer2 gpu_integral_buffer1
+  PROVIDE gpu_integral_buffer2 gpu_integral_buffer1 pair_cache pair_cache_mb
   PROVIDE mo_integrals_cache mo_two_e_integrals_in_map big_array_exchange_integrals big_array_coulomb_integrals mo_two_e_integrals_jj_exchange mo_two_e_integrals_jj_anti mo_two_e_integrals_jj mo_one_e_integrals 
 END_PROVIDER
 
@@ -26,7 +26,7 @@ BEGIN_PROVIDER [ type(map_type), mo_integrals_map ]
       int(mo_num, size_t), int(mo_num, size_t), key_max)
   sze = key_max
   call map_init(mo_integrals_map,sze)
-  print*, 'MO map initialized: ', sze
+  if (.not.human_quiet) print*, 'MO map initialized: ', sze
 END_PROVIDER
 
 subroutine insert_into_mo_integrals_map(n_integrals,                 &
@@ -61,7 +61,7 @@ end
 
  mo_integrals_cache_min = max(1,elec_alpha_num - (mo_integrals_cache_size/2 - 1) )
  mo_integrals_cache_max = min(mo_num, mo_integrals_cache_min + mo_integrals_cache_size - 1)
- print *, 'MO integrals cache: (', mo_integrals_cache_min, ', ', mo_integrals_cache_max, '), ', &
+ if (.not.human_quiet) print *, 'MO integrals cache: (', mo_integrals_cache_min, ', ', mo_integrals_cache_max, '), ', &
           shiftr(mo_integrals_cache_size_8, 17), 'MiB'
 
 END_PROVIDER
@@ -580,6 +580,7 @@ subroutine pair_cache_verify_block(k,l,sze,cached)
   integer(size_t)               :: i,j
   integer(8)                    :: bits_cached, bits_ref
   logical                       :: mine
+  PROVIDE pair_cache
 
   ! The caller's lock-free `pair_cache_check(1) == 0` read is not a claim:
   ! several walkers can pass it in the same instant, and each would pay a
@@ -611,8 +612,8 @@ subroutine pair_cache_verify_block(k,l,sze,cached)
   enddo
   deallocate(ref)
 
-  write(6,'(A,I0,A,I0,A)') 'Pair cache: first block hit, (',k,',',l, &
-    '), bit-identical to the uncached block'
+!  write(6,'(A,I0,A,I0,A)') 'Pair cache: first block hit, (',k,',',l, &
+!    '), bit-identical to the uncached block'
 end
 
 
@@ -662,9 +663,9 @@ subroutine pair_cache_verify_column(j,k,l,sze,cached)
     call qp_bug(irp_here, 2, 'pair_cache: a column hit is not the right column')
   endif
 
-  write(6,'(A,I0,A,I0,A,I0,A,ES12.4,A)') 'Pair cache: first column hit, (',j, &
-    ',',k,',',l, '), relative deviation from the dgemv column ', ratio, &
-    ' (gemm roundings; expected ~1e-11)'
+!  write(6,'(A,I0,A,I0,A,I0,A,ES12.4,A)') 'Pair cache: first column hit, (',j, &
+!    ',',k,',',l, '), relative deviation from the dgemv column ', ratio, &
+!    ' (gemm roundings; expected ~1e-11)'
 end
 
 
@@ -1153,6 +1154,7 @@ subroutine get_mo_two_e_integrals_ij_uncached(k,l,sze,out_array,map)
  use sizet
   use map_module
   use pair_block_stats_mod
+  use davidson_apply_stats_mod
   implicit none
   BEGIN_DOC
   ! Returns multiple integrals <ij|kl> in the MO basis, all
@@ -1259,6 +1261,9 @@ subroutine get_mo_two_e_integrals_ij_uncached(k,l,sze,out_array,map)
 
       call wall_time(t_block1)
       call pair_block_stats_add(k,l,cholesky_mo_num,t_block1-t_block0)
+      ! QP_DVDSN_STATS: one (k,l) block actually computed by the H-apply
+      ! fill (no-op unless the env var is set and an apply is open)
+      call davidson_apply_stats_fill(k,l)
 
     else
 

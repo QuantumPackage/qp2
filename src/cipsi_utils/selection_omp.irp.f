@@ -76,6 +76,7 @@ use sizet
 subroutine omp_selection(N_in, pt2_data)
  use sizet
   use selection_types
+  use c_functions, only: qp_epoch_c
   implicit none
   BEGIN_DOC
   ! Performs the deterministic determinant selection.
@@ -99,6 +100,10 @@ subroutine omp_selection(N_in, pt2_data)
   double precision               :: f(N_states), mem
   integer(size_t)                :: gend
   integer                        :: kstart, maxF
+
+  pt2_data % epoch_start = qp_epoch_c()
+  ! No estimator on the deterministic path.
+  pt2_data % samples = 0.d0
 
   N = max(N_in, int(1, size_t))
   N = min(N, int((elec_alpha_num * (mo_num-elec_alpha_num))**2, size_t))
@@ -202,6 +207,7 @@ subroutine omp_selection(N_in, pt2_data)
         tsub(ntask) = k
       enddo
     enddo
+    pt2_data % tasks = pt2_data % tasks + ntask
 
     ! Zero the slots of this window: each one is written by exactly
     ! one task and folded in the consume phase.
@@ -242,6 +248,7 @@ subroutine omp_selection(N_in, pt2_data)
       enddo
     enddo
   enddo
+  pt2_data % windows = (N_det_generators + window - 1) / window
 
   ! Free the per-window scratch and the worker buffers.
   do j = 1, maxF
@@ -282,13 +289,18 @@ subroutine omp_selection(N_in, pt2_data)
 
   pt2_overlap(:,:) = pt2_data % overlap(:,:)
 
+  if (.not.human_quiet) then
   print *, 'Overlap of perturbed states:'
   do l=1,N_states
     print *, pt2_overlap(l,:)
   enddo
   print *, '-------'
+  endif
   SOFT_TOUCH pt2_overlap
   call update_pt2_and_variance_weights(pt2_data, N_states)
+
+  pt2_data % epoch_end = qp_epoch_c()
+  pt2_data % time = pt2_data % epoch_end - pt2_data % epoch_start
 
 end subroutine
 

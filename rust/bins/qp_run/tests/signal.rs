@@ -71,7 +71,13 @@ fn sigusr1_runs_qp_stop() {
         "qp_stop receives the EZFIO directory verbatim"
     );
     assert_eq!(outcome.code(), 0, "{outcome}");
-    assert!(outcome.stdout.contains("Wall time: "), "{outcome}");
+    assert!(outcome.stdout.contains("Quantum Package"), "{outcome}");
+    assert!(
+        outcome
+            .stdout
+            .contains(&format!("EZFIO Dir : {}", fixture.ezfio_str())),
+        "{outcome}"
+    );
 }
 
 /// Without a signal, `qp_stop` is never run.
@@ -112,7 +118,13 @@ fn a_job_killed_by_a_signal_exits_128_plus_the_signal() {
         outcome.stdout.contains("Program exited with code 143."),
         "{outcome}"
     );
-    assert!(outcome.stdout.contains("Wall time: "), "{outcome}");
+    assert!(outcome.stdout.contains("Quantum Package"), "{outcome}");
+    assert!(
+        outcome
+            .stdout
+            .contains(&format!("EZFIO Dir : {}", fixture.ezfio_str())),
+        "{outcome}"
+    );
 }
 
 /// SIGUSR1 runs the *real* `bin/qp_stop` (not a shim): `<ezfio>/work/qpkill`

@@ -113,6 +113,8 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
 
   use bitmasks
   use mmap_module
+  use davidson_json, only: davidson_json_begin, davidson_json_step
+  use c_functions, only: qp_epoch_c
 
   implicit none
 
@@ -157,6 +159,7 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
 
   itermax = max(2, min(davidson_sze_max, sze/N_st_diag)) + 1
   itertot = 0
+  call davidson_json_begin('davidson_diag_nonsym_hjj', N_st, qp_epoch_c())
 
   if(state_following) then
     allocate(overlap(N_st_diag*itermax, N_st_diag*itermax))
@@ -169,10 +172,12 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
   PROVIDE threshold_nonsym_davidson
 
   call write_time(6)
-  write(6,'(A)') ''
-  write(6,'(A)') 'Davidson Diagonalization'
-  write(6,'(A)') '------------------------'
-  write(6,'(A)') ''
+  if (.not.human_quiet) then
+    write(6,'(A)') ''
+    write(6,'(A)') 'Davidson Diagonalization'
+    write(6,'(A)') '------------------------'
+    write(6,'(A)') ''
+  endif
 
   ! Find max number of cores to fit in memory
   ! -----------------------------------------
@@ -234,22 +239,24 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
 
   !---------------
 
-  write(6,'(A)') ''
-  write_buffer = '====='
-  do i = 1, N_st
-    write_buffer = trim(write_buffer)//' ================ ==========='
-  enddo
-  write(6, '(A)') write_buffer(1:6+41*N_st)
-  write_buffer = 'Iter'
-  do i = 1, N_st
-    write_buffer = trim(write_buffer)//'       Energy        Residual '
-  enddo
-  write(6,'(A)') write_buffer(1:6+41*N_st)
-  write_buffer = '====='
-  do i = 1, N_st
-    write_buffer = trim(write_buffer)//' ================ ==========='
-  enddo
-  write(6,'(A)') write_buffer(1:6+41*N_st)
+  if (.not.human_quiet) then
+      write(6,'(A)') ''
+      write_buffer = '====='
+      do i = 1, N_st
+        write_buffer = trim(write_buffer)//' ================ ==========='
+      enddo
+      write(6, '(A)') write_buffer(1:6+41*N_st)
+      write_buffer = 'Iter'
+      do i = 1, N_st
+        write_buffer = trim(write_buffer)//'       Energy        Residual '
+      enddo
+      write(6,'(A)') write_buffer(1:6+41*N_st)
+      write_buffer = '====='
+      do i = 1, N_st
+        write_buffer = trim(write_buffer)//' ================ ==========='
+      enddo
+      write(6,'(A)') write_buffer(1:6+41*N_st)
+  endif
 
 
   if(disk_based) then
@@ -445,7 +452,11 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
         !don't print
         continue
       else
-        write(*, '(1X, I3, 1X, 100(1X, F16.10, 1X, ES11.3))') iter-1, to_print(1:2,1:N_st)
+        call davidson_json_step(iter-1, to_print(1,1:N_st), &
+            to_print(2,1:N_st), N_st)
+        if (.not.human_quiet) then
+          write(*, '(1X, I3, 1X, 100(1X, F16.10, 1X, ES11.3))') iter-1, to_print(1:2,1:N_st)
+        endif
       endif
 
       ! Check convergence
@@ -500,6 +511,8 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
 
   enddo
 
+  call davidson_json_end(itertot, converged)
+
 
   call nullify_small_elements(sze, int(N_st_diag, size_t), U, &
       int(size(U, 1), size_t), threshold_davidson_pt2)
@@ -516,8 +529,10 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
   do i = 1, N_st
     write_buffer = trim(write_buffer)//' ================ ==========='
   enddo
-  write(6,'(A)') trim(write_buffer)
-  write(6,'(A)') ''
+  if (.not.human_quiet) then
+    write(6,'(A)') trim(write_buffer)
+    write(6,'(A)') ''
+  endif
   call write_time(6)
 
   if(disk_based) then

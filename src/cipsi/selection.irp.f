@@ -845,8 +845,13 @@ subroutine fill_buffer_$DOUBLE(i_generator, sp, h1, h2, bannedOrb, banned, fock_
           stop -1
         endif
         pt2_matrix = dabs(pt2_matrix)
-        iwork(1:N_states+1) = maxloc(pt2_matrix,DIM=1)
+        ! pt2_matrix holds the eigenvectors in its columns (column j is the
+        ! eigenvector of eigvalues(j)).  State k keeps the eigenvalue of the
+        ! eigenvector whose largest component is in row k.  Reading the
+        ! per-column maxloc instead mixed the eigenvector and state indices
+        ! and corrupted e_pert for N_states >= 3 (issue #433).
         do k=1,N_states
+          iwork(k) = maxloc(pt2_matrix(k,1:N_states+1),DIM=1)
           e_pert(k) = eigvalues(iwork(k)) - E0(k)
         enddo
       endif

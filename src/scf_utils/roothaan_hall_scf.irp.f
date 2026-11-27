@@ -8,10 +8,13 @@ BEGIN_DOC
 END_DOC
 
   use qp_json, only: json_add
+  use c_functions, only: qp_epoch_c
   implicit none
 
   double precision               :: energy_SCF,energy_SCF_previous,Delta_energy_SCF
   double precision               :: max_error_DIIS,max_error_DIIS_alpha,max_error_DIIS_beta
+  double precision               :: scf_t0, scf_t1, scf_tcf
+  character*(8)                  :: tbuf
   double precision, allocatable  :: Fock_matrix_DIIS(:,:,:),error_matrix_DIIS(:,:,:)
 
   integer                        :: iteration_SCF,dim_DIIS,index_dim_DIIS
@@ -24,6 +27,13 @@ END_DOC
   logical, external              :: qp_stop
   double precision, allocatable :: mo_coef_save(:,:), S(:,:)
 
+  integer                        :: nhist
+  integer, allocatable           :: h_dim(:), h_conv(:)
+  double precision               :: wt, mem
+  double precision, allocatable  :: h_e(:), h_de(:), h_diis(:), &
+                                    h_shift(:), h_wall(:), h_mem(:), &
+                                    h_epoch(:)
+
   PROVIDE ao_md5 mo_occ level_shift
 
   allocate(mo_coef_save(ao_num,mo_num),                          &
@@ -31,19 +41,22 @@ END_DOC
       error_matrix_DIIS(ao_num,ao_num,max_dim_DIIS)                  &
       )
 
+  allocate(h_e(max(n_it_SCF_max,1)), h_de(max(n_it_SCF_max,1)), &
+      h_diis(max(n_it_SCF_max,1)), h_shift(max(n_it_SCF_max,1)), &
+      h_wall(max(n_it_SCF_max,1)), h_mem(max(n_it_SCF_max,1)), &
+      h_epoch(max(n_it_SCF_max,1)), h_dim(max(n_it_SCF_max,1)), &
+      h_conv(max(n_it_SCF_max,1)))
+  nhist = 0
+
   Fock_matrix_DIIS = 0.d0
   error_matrix_DIIS = 0.d0
   mo_coef_save = 0.d0
 
   call write_time(6)
 
-  print*,'Energy of the guess = ',SCF_energy
-  write(6,'(A4, 1X, A16, 1X, A16, 1X, A16, 1X, A16)')  &
-    '====','================','================','================','================'
-  write(6,'(A4, 1X, A16, 1X, A16, 1X, A16, 1X, A16)')  &
-    '  N ', 'Energy  ', 'Energy diff  ',  'DIIS error  ', 'Level shift   '
-  write(6,'(A4, 1X, A16, 1X, A16, 1X, A16, 1X, A16)')  &
-    '====','================','================','================','================'
+  write(6,'(A,F13.8,A)') '  SCF       guess E =', SCF_energy, ' Ha'
+  write(6,'(A)') '   it            E(HF)            dE'
+  write(6,'(A)') repeat('-',36)
 
 ! Initialize energies and density matrices
   energy_SCF_previous = SCF_energy
@@ -54,6 +67,7 @@ END_DOC
   max_error_DIIS      = 1.d0
   n_level_shift_try   = 5
 
+  call wall_time(scf_t0)
 
 !
 ! Start of main SCF loop
@@ -169,7 +183,7 @@ END_DOC
           max_error_DIIS = maxval(Abs(FPS_SPF_Matrix_MO))
        enddo
        if (n_retry == n_level_shift_try .and. Delta_Energy_SCF > 0.d0) then
-          write(6,'(A,I2,A)') ' Level shift: no downhill step after ', &
+          if (.not.human_quiet) write(6,'(A,I2,A)') ' Level shift: no downhill step after ', &
              n_retry, ' tries, keeping the last one'
        endif
        if (n_retry > 0) then
@@ -184,8 +198,7 @@ END_DOC
 
 !   Print results at the end of each iteration
 
-    write(6,'(I4, 1X, F16.10, 1X, F16.10, 1X, F16.10, 1X, F16.10, 1X, I3)')  &
-      iteration_SCF, energy_SCF, Delta_energy_SCF, max_error_DIIS, level_shift, dim_DIIS
+    write(6,'(1X,I4,1X,F16.8,SP,F14.8)') iteration_SCF, energy_SCF, Delta_energy_SCF
 
 !   Write data in JSON file
 
@@ -197,6 +210,19 @@ END_DOC
     call json_add('/results/scf/dim_diis', dim_DIIS)
     call json_add('/results/scf/converged', converged)
 
+    nhist = nhist + 1
+    h_e(nhist)     = energy_SCF
+    h_de(nhist)    = Delta_energy_SCF
+    h_diis(nhist)  = max_error_DIIS
+    h_shift(nhist) = level_shift
+    h_dim(nhist)   = dim_DIIS
+    h_conv(nhist)  = merge(1,0,converged)
+    h_epoch(nhist) = qp_epoch_c()
+    call wall_time(wt)
+    h_wall(nhist)  = wt - human_t0
+    call resident_memory(mem)
+    h_mem(nhist)   = mem
+
     if (Delta_energy_SCF < 0.d0) then
       call save_mos
     endif
@@ -204,6 +230,22 @@ END_DOC
     if (qp_stop()) exit
 
   enddo
+
+  call wall_time(scf_t1)
+
+  if (nhist > 0) then
+    call json_add('/results/scf/history/energy', h_e(1:nhist))
+    call json_add('/results/scf/history/delta_energy', h_de(1:nhist))
+    call json_add('/results/scf/history/max_error_diis', h_diis(1:nhist))
+    call json_add('/results/scf/history/level_shift', h_shift(1:nhist))
+    call json_add('/results/scf/history/dim_diis', h_dim(1:nhist))
+    call json_add('/results/scf/history/converged', h_conv(1:nhist))
+    call json_add('/results/scf/history/epoch', h_epoch(1:nhist))
+    call json_add('/results/scf/history/wall_time', h_wall(1:nhist))
+    call json_add('/results/scf/history/memory', h_mem(1:nhist))
+  endif
+
+  scf_tcf = scf_t1 - scf_t0
 
  if (iteration_SCF < n_it_SCF_max) then
    mo_label = 'Canonical'
@@ -215,11 +257,12 @@ END_DOC
 ! End of Main SCF loop
 !
 
-  write(6,'(A4, 1X, A16, 1X, A16, 1X, A16, 1X, A16)')  &
-    '====','================','================','================','================'
-  write(6,*)
+  write(6,'(A)') repeat('-',36)
   if (converged) then
-    write(6,*) 'SCF converged'
+    write(tbuf,'(F8.1)') scf_tcf
+    write(6,'(A,F13.8,A,I0,A,A,A)') '  converged   E(HF) =', energy_SCF, &
+      ' Ha   (', iteration_SCF, ' iterations, ', trim(adjustl(tbuf)), ' s)'
+    write(6,'(A)')
     call sleep(1)   ! When too fast, the MOs aren't saved.
   endif
 

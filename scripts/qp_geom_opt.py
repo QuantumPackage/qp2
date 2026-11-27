@@ -9,6 +9,11 @@ Options:
       -f --scf                 Perform an SCF after each geomety change
       -r --qp_run=executable   Excited state to optimize
       -t --tol=tolerance       Convergence criterion on the energy
+
+The energies are read from the JSON result document that qp_run writes
+at <EZFIO_FILE>/json/NNNNN.json (the newest document, read with
+scripts/utility/qp_json.py), not from the "# Ndet,E,..." machine lines
+it used to print on stdout.
 """
 
 
@@ -17,6 +22,7 @@ try:
     from module_handler import ModuleHandler, get_dict_child
     from module_handler import get_l_module_descendant
     from qp_path import QP_SRC, QP_PLUGINS, QP_DATA, QP_ROOT
+    import qp_json
 except ImportError:
     print("Please check if you have sourced the ${QP_ROOT}/quantum_package.rc")
     print("(`source ${QP_ROOT}/quantum_package.rc`)")
@@ -61,14 +67,36 @@ def get_energy(file, state, arguments):
     result = subprocess.run( f"qp_run {executable} {file} > {file}.energy.out",
                              shell=True)
 
-    energy = None
-    with open(f"{file}.energy.out", 'r') as f:
-        for line in f:
-            if "Energy of state" in line and f"{state}" in line:
-                energy = float(line.split()[-1])  # Extracts the energy value
+    # The machine-readable "# Ndet,E,..." lines are gone; the data now
+    # lives in the newest <EZFIO>/json/NNNNN.json document.
+    try:
+        doc = qp_json.load_last(file)
+    except FileNotFoundError:
+        raise ValueError("No JSON result document found under "
+                         f"{file}. Update script {sys.argv[0]}")
 
-    return energy
-    raise ValueError("Energy not found in Quantum Package output. Update script {sys.argv[0]}")
+    cipsi = (doc.get("results") or {}).get("cipsi")
+    if cipsi is None:
+        raise ValueError("No CIPSI results in the JSON document. "
+                         f"Update script {sys.argv[0]}")
+
+    states = cipsi.get("states") or {}
+    energy = states.get("energy")
+    if energy is None:
+        raise ValueError("CIPSI state energies missing from the JSON "
+                         f"document. Update script {sys.argv[0]}")
+
+    # state is 1-based in the CLI, 0-based in the arrays.
+    idx = int(state) - 1
+    if idx < 0 or idx >= len(energy):
+        raise ValueError(f"State {state} out of range. "
+                         f"Update script {sys.argv[0]}")
+
+    # Variational CI energy of the target state, in hartree with nuclear
+    # repulsion: the same E column the old machine line carried (never
+    # E+PT2, which is not variational and is not what the geometry was
+    # optimized on).
+    return energy[idx]
 
 def set_coordinates(coord):
     """Update the nuclear coordinates in EZFIO."""

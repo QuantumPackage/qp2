@@ -506,6 +506,9 @@ void qp_json_begin(const char *kind, const char *filename,
   (void)put_locked("/units/energy", T_STR, 0, 0.0, "hartree", NULL, 0);
   (void)put_locked("/units/length", T_STR, 0, 0.0, "bohr", NULL, 0);
   (void)put_locked("/units/time", T_STR, 0, 0.0, "second", NULL, 0);
+  (void)put_locked("/units/memory", T_STR, 0, 0.0, "gibibyte", NULL, 0);
+  (void)put_locked("/units/epoch",  T_STR, 0, 0.0,
+                   "unix second (UTC)", NULL, 0);
   ensure_empty_obj("input");
   ensure_empty_obj("results");
   (void)put_locked("/run/kind", T_STR, 0, 0.0, run_kind, NULL, 0);

@@ -8,7 +8,7 @@ BEGIN_PROVIDER [ double precision, H_matrix_all_dets,(N_det,N_det) ]
  integer(size_t) :: i,j
  double precision :: hij
  PROVIDE all_mo_integrals
- print*,'Providing the H_matrix_all_dets ...'
+ if (.not.human_quiet) print*,'Providing the H_matrix_all_dets ...'
  !$OMP PARALLEL DO SCHEDULE(GUIDED) DEFAULT(NONE) PRIVATE(i,j,hij) &
  !$OMP SHARED (N_det, psi_det, N_int,H_matrix_all_dets)
  do i =1,N_det
@@ -19,7 +19,7 @@ BEGIN_PROVIDER [ double precision, H_matrix_all_dets,(N_det,N_det) ]
   enddo
  enddo
  !$OMP END PARALLEL DO
- print*,'H_matrix_all_dets done '
+ if (.not.human_quiet) print*,'H_matrix_all_dets done '
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, H_matrix_diag_all_dets,(N_det) ]

@@ -38,20 +38,20 @@ BEGIN_PROVIDER [ double precision, nucl_coord,  (nucl_num,3) ]
      write(6,'(A)') 'Nuclear Coordinates (Angstroms)'
      write(6,'(A)') '==============================='
      write(6,'(A)') ''
-     write(6,ft)                                         &
+     write(6,ft)                                                               &
          '================','============','============','============','============'
-     write(6,*)                                          &
+     write(6,*)                                                                &
          '     Atom          Charge          X            Y            Z '
-     write(6,ft)                                         &
+     write(6,ft)                                                               &
          '================','============','============','============','============'
 
      do i=1,nucl_num
-       write(6,f) nucl_label(i), nucl_charge(i),         &
+       write(6,f) nucl_label(i), nucl_charge(i),                               &
            nucl_coord(i,1)*a0,                                       &
            nucl_coord(i,2)*a0,                                       &
            nucl_coord(i,3)*a0
      enddo
-     write(6,ft)                                         &
+     write(6,ft)                                                               &
          '================','============','============','============','============'
      write(6,'(A)') ''
 
@@ -163,7 +163,7 @@ BEGIN_PROVIDER [ double precision, nuclear_repulsion ]
          print *, 'nuclei/nuclear_repulsion not found in EZFIO file'
          stop 1
        endif
-       print*, 'Read nuclear_repulsion'
+       if (.not.human_quiet) print*, 'Read nuclear_repulsion'
      endif
 
 

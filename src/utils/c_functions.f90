@@ -85,6 +85,14 @@ interface
     end function
   end interface
 
+! Unix time in seconds (CLOCK_REALTIME, see c_funcs.c).  Declared next to
+! the memory probes but defined on every platform.
+interface
+    real(c_double) function qp_epoch_c() bind(C, name="qp_epoch_c")
+      use iso_c_binding
+    end function
+  end interface
+
 contains
 
   integer function atoi(a)

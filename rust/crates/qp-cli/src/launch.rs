@@ -26,6 +26,23 @@ pub const SHELL: &str = "/bin/sh";
 /// (`WIFSIGNALED` in `caml_sys_system_command`).
 pub const SIGNALED_EXIT_CODE: i32 = 255;
 
+/// The environment `qp_run` adds to a job, on top of the inherited one.
+///
+/// The single entry turns off libgfortran's output buffering. When the job's
+/// stdout is a regular file — `qp_run scf h2o.ezfio > scf.out`, the way every
+/// log is produced — the runtime keeps the output in memory and writes it at
+/// `exit`, so `tail -f scf.out` shows an empty file for the whole run and a
+/// watching user cannot tell a slow program from a stuck one. With this
+/// variable each `write` reaches the file as it is made.
+///
+/// libgfortran is already unbuffered on a terminal and on a pipe; only the
+/// regular-file case changes. The setting costs one `write(2)` per output
+/// statement and leaves the text untouched. It is gfortran's own switch: a
+/// build with another runtime (the `ifort_*` and `flang_*` configs) keeps its
+/// default buffering, where an explicit `flush` in the Fortran source is the
+/// only portable way to publish one line at a time.
+pub const JOB_ENV: [(&str, &str); 1] = [("GFORTRAN_UNBUFFERED_PRECONNECTED", "1")];
+
 /// The command line `qp_run` runs for one job (`ocaml/qp_run.ml:185-195`).
 ///
 /// `prefix` is the `-p` value: `Some("gdb")` becomes `gdb --args `, any other
@@ -48,7 +65,8 @@ pub fn job_command(prefix: Option<&str>, program: &str, ezfio: &str) -> String {
 /// environment is inherited and untouched. The reference used the same
 /// mechanism for `QP_RUN_ADDRESS`, with `Unix.putenv` on the parent,
 /// which would need `unsafe` in edition 2024 and would race the
-/// SIGUSR1 handler; the thin launcher passes no env pairs.
+/// SIGUSR1 handler. `qp_run` passes [`JOB_ENV`], which overrides an
+/// inherited value of the same name.
 ///
 /// # Errors
 ///

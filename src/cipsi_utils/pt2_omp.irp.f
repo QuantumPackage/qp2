@@ -227,6 +227,7 @@ END_PROVIDER
 subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
  use sizet
   use selection_types
+  use c_functions, only: qp_epoch_c
   implicit none
   BEGIN_DOC
 ! Stochastic |PT2| on OpenMP tasks: the only implementation (see the
@@ -255,6 +256,8 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
   double precision                :: state_average_weight_save(N_states), mem, rss, &
                                      mem_shared, mem_worker
 
+  pt2_data % epoch_start = qp_epoch_c()
+
   ! The unique spin determinants (psi_det_{alpha,beta}_unique) MUST be
   ! built in this pre-loop block, and the psi_bilinear_matrix_* providers
   ! must NOT be provided here (they are provided in the per-state loop
@@ -272,7 +275,7 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
   ! first.  Building them here, in the pre-loop block, guarantees they
   ! exist before the bilinear-matrix providers are built in the loop, so
   ! the lazy-build guards are no-ops for every worker.
-  PROVIDE psi_det_alpha_unique psi_det_beta_unique
+  PROVIDE psi_det_alpha_unique psi_det_beta_unique pair_cache_mb
   PROVIDE psi_det_hii selection_weight pseudo_sym
   PROVIDE n_act_orb n_inact_orb n_core_orb n_virt_orb n_del_orb seniority_max
   PROVIDE excitation_beta_max  excitation_alpha_max excitation_max
@@ -426,9 +429,9 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
     call write_double(6,mem,'Memory (Gb)')
 
     PROVIDE pt2_e0_denominator
-    print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
-    print '(A)', ' Samples           Energy             PT2            Variance          Norm^2       Convergence    Seconds'
-    print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
+    if (.not.human_quiet) print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
+    if (.not.human_quiet) print '(A)', ' Samples           Energy             PT2            Variance          Norm^2       Convergence    Seconds'
+    if (.not.human_quiet) print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
 
     ! One worker buffer per member of the team.  Member t (OpenMP thread
     ! number t-1) owns slot t; slot 1 is also the serial warm-up slot:
@@ -470,7 +473,7 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
     pt2_data_err % rpt2(pt2_stoch_istate) =  &
       pt2_data_err % pt2(pt2_stoch_istate)/(1.d0 + pt2_data % overlap(pt2_stoch_istate,pt2_stoch_istate))
 
-    print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
+    if (.not.human_quiet) print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
 
     do k=1,N_states
       pt2_overlap(pt2_stoch_istate,k) = pt2_data % overlap(k,pt2_stoch_istate)
@@ -508,11 +511,13 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
    enddo
   enddo
 
+  if (.not.human_quiet) then
   print *, 'Overlap of perturbed states:'
   do k=1,N_states
     print *, pt2_overlap(k,:)
   enddo
   print *, '-------'
+  endif
 
   if (N_in > 0) then
     b%cur = min(N_in,b%cur)
@@ -528,6 +533,9 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
   state_average_weight(:) = state_average_weight_save(:)
   TOUCH state_average_weight
   call update_pt2_and_variance_weights(pt2_data, N_states)
+
+  pt2_data % epoch_end = qp_epoch_c()
+  pt2_data % time = pt2_data % epoch_end - pt2_data % epoch_start
 
   ! Future hook (not implemented here): selection_census_raw(istate,b)
   ! goes at the end of this routine, where the legacy collector ended.
@@ -639,6 +647,10 @@ subroutine pt2_omp_walk(E, relative_error, pt2_data, pt2_data_err, b, b_workers,
         tsub(ntask) = j
       enddo
     enddo
+    ! JSON history counters: one window walked, ntask (generator, subset)
+    ! tasks in it.
+    pt2_data % windows = pt2_data % windows + 1
+    pt2_data % tasks = pt2_data % tasks + ntask
 
     ! Zero the accumulators of this window: each one is written by
     ! exactly one task and folded in the consume phase.
@@ -765,7 +777,7 @@ subroutine pt2_omp_walk(E, relative_error, pt2_data, pt2_data_err, b, b_workers,
 
           ! Only the printing is throttled to one second; the stopping
           ! criterion must not depend on the machine.
-          if ((time - time1 > 1.d0) .or. (n==N_det_generators)) then
+          if (.not.human_quiet .and. ((time - time1 > 1.d0) .or. (n==N_det_generators))) then
             time1 = time
 
             value1 =  pt2_data     % pt2(pt2_stoch_istate) + E
@@ -823,6 +835,12 @@ subroutine pt2_omp_walk(E, relative_error, pt2_data, pt2_data_err, b, b_workers,
     if (walk_stop) exit
     pos = hi + 1
   end do
+
+  ! Per-state epilogue: c holds the index of the last comb drawn, i.e. the
+  ! number of estimator draws consumed by this state's walk.  The walk is
+  ! run once per state, so accumulate: the counter is the total number of
+  ! draws of the whole PT2 call, not the value of its last state.
+  pt2_data % samples = pt2_data % samples + dble(c)
 
   call pt2_dealloc(pt2_data_teeth)
   deallocate(d)

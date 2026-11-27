@@ -22,6 +22,12 @@ will contain work files which can be large, so it is recommended to
 work in the scratch directory. To archive the |EZFIO| directory, it is
 recommended to remove the :file:`work` directory.
 
+The output of ``PROGRAM`` is written as it is produced, so a redirected
+log can be followed while the job runs::
+
+    qp_run fci h2o.ezfio > fci.out &
+    tail -f fci.out
+
 Usage
 -----
 
