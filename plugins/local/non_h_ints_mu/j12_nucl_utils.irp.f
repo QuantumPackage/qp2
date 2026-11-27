@@ -1,10 +1,13 @@
+use sizet
 
 ! ---
 
 BEGIN_PROVIDER [double precision, env_val, (n_points_final_grid)]
 
   implicit none
-  integer          :: ipoint, i, j, phase
+  integer          :: i, phase
+  integer(size_t)  :: j
+  integer(size_t)  :: ipoint
   double precision :: x, y, z, dx, dy, dz
   double precision :: a, d, e, fact_r
 
@@ -75,7 +78,9 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, env_grad, (3, n_points_final_grid)]
 
   implicit none
-  integer          :: ipoint, i, j, phase
+  integer          :: i, phase
+  integer(size_t)  :: j
+  integer(size_t)  :: ipoint
   double precision :: x, y, z, dx, dy, dz, r2
   double precision :: a, d, e
   double precision :: fact_x, fact_y, fact_z
@@ -177,7 +182,8 @@ END_PROVIDER
 &BEGIN_PROVIDER [double precision, env_square_lapl, (n_points_final_grid)  ]
 
   implicit none
-  integer          :: ipoint, i
+  integer          :: i
+  integer(size_t)  :: ipoint
   double precision :: x, y, z, dx, dy, dz, r2
   double precision :: coef, expo, a_expo, tmp
   double precision :: fact_x, fact_y, fact_z, fact_r

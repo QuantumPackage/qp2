@@ -1,9 +1,10 @@
 program test_cholesky
+  use sizet
   implicit none
   BEGIN_DOC
 ! TODO : Put the documentation of the program here
   END_DOC
- integer :: i,j,k,l,m
+ integer(size_t) :: i,j,k,l,m
  double precision :: integral, accu, accu_tot, integral_cholesky
  double precision :: get_ao_two_e_integral, get_two_e_integral ! declaration of the functions 
  print*,'AO integrals, physicist notations : <i j|k l>'

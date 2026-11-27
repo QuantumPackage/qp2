@@ -1,10 +1,13 @@
+use sizet
 
 ! ---
 
 BEGIN_PROVIDER [double precision, j1e_val, (n_points_final_grid)]
 
   implicit none
-  integer          :: ipoint, i, j, p
+  integer          :: i, p
+  integer(size_t)  :: j
+  integer(size_t)  :: ipoint
   double precision :: x, y, z, dx, dy, dz, d2
   double precision :: a, c, tmp
   double precision :: time0, time1
@@ -70,7 +73,8 @@ END_PROVIDER
 &BEGIN_PROVIDER [double precision, j1e_gradz, (n_points_final_grid)]
 
   implicit none
-  integer                       :: ipoint, i, j, ij, p
+  integer                       :: ij, p
+  integer(size_t)               :: ipoint, i, j
   integer                       :: ierr
   logical                       :: exists
   double precision              :: x, y, z, dx, dy, dz, d2
@@ -155,9 +159,15 @@ END_PROVIDER
 
     g = -0.5d0 * (dble(elec_num) - 1.d0) / dble(elec_num)
 
-    call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_grad1_u2e_ao(1,1,1,1), ao_num*ao_num, Pt, 1, 0.d0, j1e_gradx, 1)
-    call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_grad1_u2e_ao(1,1,1,2), ao_num*ao_num, Pt, 1, 0.d0, j1e_grady, 1)
-    call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_grad1_u2e_ao(1,1,1,3), ao_num*ao_num, Pt, 1, 0.d0, j1e_gradz, 1)
+    call dgemv("T", ao_num*ao_num, int(n_points_final_grid, 4), g &
+              , int2_grad1_u2e_ao(1,1,1,1), ao_num*ao_num, Pt, 1 &
+              , 0.d0, j1e_gradx, 1)
+    call dgemv("T", ao_num*ao_num, int(n_points_final_grid, 4), g &
+              , int2_grad1_u2e_ao(1,1,1,2), ao_num*ao_num, Pt, 1 &
+              , 0.d0, j1e_grady, 1)
+    call dgemv("T", ao_num*ao_num, int(n_points_final_grid, 4), g &
+              , int2_grad1_u2e_ao(1,1,1,3), ao_num*ao_num, Pt, 1 &
+              , 0.d0, j1e_gradz, 1)
 
     FREE int2_grad1_u2e_ao
 
@@ -185,7 +195,7 @@ END_PROVIDER
         call ezfio_get_jastrow_j1e_coef_ao2(coef_fit2)
       endif
     else
-      call get_j1e_coef_fit_ao2(ao_num, coef_fit2)
+      call get_j1e_coef_fit_ao2(int(ao_num, size_t), coef_fit2)
       call ezfio_set_jastrow_j1e_coef_ao2(coef_fit2)
     endif
 
@@ -235,7 +245,9 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, j1e_lapl, (n_points_final_grid)]
 
   implicit none
-  integer          :: ipoint, i, j, p
+  integer          :: i, p
+  integer(size_t)  :: j
+  integer(size_t)  :: ipoint
   double precision :: x, y, z, dx, dy, dz, d2
   double precision :: a, c, g, tmp
 

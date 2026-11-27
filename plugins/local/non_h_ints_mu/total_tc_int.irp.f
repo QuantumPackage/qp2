@@ -1,6 +1,8 @@
 
 ! ---
 
+use sizet
+
 BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_num)]
 
   BEGIN_DOC
@@ -29,7 +31,9 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
   END_DOC
 
   implicit none
-  integer                       :: i, j, k, l, m, ipoint
+  integer(size_t)               :: i, j, k, l
+  integer                       :: m
+  integer(size_t)               :: ipoint
   double precision              :: weight1, ao_k_r, ao_i_r
   double precision              :: der_envsq_x, der_envsq_y, der_envsq_z, lap_envsq
   double precision              :: time0, time1
@@ -116,8 +120,10 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
       enddo
       !$OMP END DO
       !$OMP END PARALLEL
-      call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0                 &
-                , int2_grad1_u12_square_ao(1,1,1), ao_num*ao_num, c_mat(1,1,1), n_points_final_grid &
+      call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num &
+                , int(n_points_final_grid, 4), 1.d0 &
+                , int2_grad1_u12_square_ao(1,1,1), ao_num*ao_num &
+                , c_mat(1,1,1), int(n_points_final_grid, 4) &
                 , 0.d0, ao_two_e_tc_tot(1,1,1,1), ao_num*ao_num)
       deallocate(c_mat)
     endif
@@ -160,8 +166,10 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
       !$OMP END DO
       !$OMP END PARALLEL
 
-      call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0     &
-                , int2_u2_env2(1,1,1), ao_num*ao_num, c_mat(1,1,1), n_points_final_grid &
+      call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num &
+                , int(n_points_final_grid, 4), 1.d0 &
+                , int2_u2_env2(1,1,1), ao_num*ao_num &
+                , c_mat(1,1,1), int(n_points_final_grid, 4) &
                 , 1.d0, ao_two_e_tc_tot(1,1,1,1), ao_num*ao_num)
 
       deallocate(c_mat)
@@ -236,8 +244,10 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
           !$OMP END DO
           !$OMP END PARALLEL
 
-          call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, -1.d0           &
-                    , int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num, c_mat(1,1,1), n_points_final_grid &
+          call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num &
+                    , int(n_points_final_grid, 4), -1.d0 &
+                    , int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num &
+                    , c_mat(1,1,1), int(n_points_final_grid, 4) &
                     , 1.d0, ao_two_e_tc_tot(1,1,1,1), ao_num*ao_num)
         enddo
         deallocate(c_mat)
@@ -256,7 +266,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
 
     ! ---
 
-    call sum_A_At(ao_two_e_tc_tot(1,1,1,1), ao_num*ao_num)
+    call sum_A_At(ao_two_e_tc_tot(1,1,1,1), int(ao_num, size_t)*ao_num)
 
     ! ---
   
@@ -292,7 +302,8 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
 !      PROVIDE ao_integrals_map
       print*,'Cholesky vectors will be used '
       double precision :: get_ao_integ_chol,eri
-      eri = get_ao_integ_chol(1,1,1,1) ! FOR OPENMP 
+      eri = get_ao_integ_chol(int(1, size_t), int(1, size_t), &
+          int(1, size_t), int(1, size_t)) ! FOR OPENMP
       !$OMP PARALLEL DEFAULT(NONE)                            &
 !!!    !$OMP SHARED(ao_num, ao_two_e_tc_tot, ao_integrals_map) &
       !$OMP SHARED(ao_num, ao_two_e_tc_tot) &

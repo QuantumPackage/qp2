@@ -27,8 +27,9 @@ end
 
 subroutine print_mos()
 
+  use sizet
   implicit none
-  integer          :: i, ipoint
+  integer(size_t) :: i, ipoint
   double precision :: r(3)
   double precision :: mo_val, mo_der(3), mo_lap
 

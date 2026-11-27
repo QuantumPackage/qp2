@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -13,7 +14,7 @@
   END_DOC
 
   implicit none
-  integer                    :: ipoint, jpoint
+  integer(size_t)          :: ipoint, jpoint
   double precision           :: r1(3), r2(3)
   double precision           :: v_r1, v_r2, u2b_r12
   double precision           :: grad1_v(3), grad1_u2b(3)
@@ -116,8 +117,8 @@
     f = 1.d0 / dble(elec_num - 1)
 
     integer*8 :: n_points, n_points_max, k
-    integer :: ipoint_block, ipoint_end
-    integer :: block_size
+    integer(size_t) :: ipoint_block, ipoint_end
+    integer         :: block_size
     ! TODO block_size in the EZFIO
     block_size = 10
     n_points_max = n_points_extra_final_grid * n_points_final_grid

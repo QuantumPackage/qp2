@@ -1,6 +1,8 @@
 
 ! ---
 
+use sizet
+
  BEGIN_PROVIDER [integer, n_points_extra_radial_grid]
 &BEGIN_PROVIDER [integer, n_points_extra_integration_angular]
 
@@ -80,7 +82,8 @@ BEGIN_PROVIDER [double precision, grid_points_extra_per_atom, (3,n_points_extra_
   END_DOC
 
   implicit none
-  integer                    :: i, j, k
+  integer                    :: j, k
+  integer(size_t)             :: i
   double precision           :: dr, x_ref, y_ref, z_ref
   double precision           :: x, r, tmp
   double precision, external :: knowles_function
@@ -154,7 +157,8 @@ BEGIN_PROVIDER [double precision, weight_at_r_extra, (n_points_extra_integration
   END_DOC
 
   implicit none
-  integer                    :: i, j, k, l, m
+  integer                    :: k, l, m
+  integer(size_t)             :: i, j
   double precision           :: r(3)
   double precision           :: accu
   double precision           :: tmp_array(nucl_num)
@@ -213,7 +217,8 @@ BEGIN_PROVIDER [double precision, final_weight_at_r_extra, (n_points_extra_integ
   END_DOC
 
   implicit none
-  integer                    :: i, j, k, l, m
+  integer                    :: i, k, l, m
+  integer(size_t)             :: j
   double precision           :: r(3)
   double precision           :: tmp_array(nucl_num)
   double precision           :: contrib_integration, x, tmp

@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [double precision, ecmd_pbe_ueg_eff_xi_mu_of_r, (N_states)]
  BEGIN_DOC
  ! ecmd_pbe_ueg_eff_xi_mu_of_r = multi-determinantal Ecmd within the PBE-UEG and effective spin polarization approximation with mu(r),
@@ -14,7 +16,8 @@ BEGIN_PROVIDER [double precision, ecmd_pbe_ueg_eff_xi_mu_of_r, (N_states)]
  END_DOC
  implicit none
  double precision :: weight,density
- integer :: ipoint,istate
+ integer(size_t) :: ipoint
+ integer         :: istate
  double precision :: eps_c_md_PBE,mu,rho_a,rho_b,grad_rho_a(3),grad_rho_b(3),g0_UEG_mu_inf,on_top
 
  ecmd_pbe_ueg_eff_xi_mu_of_r = 0.d0
@@ -60,7 +63,8 @@ END_PROVIDER
  ! See P. Perdew, A. Savin, and K. Burke, Phys. Rev. A 51, 4531 (1995). for original Ref., and Eq. 29 in ???????????
  END_DOC
  implicit none
- integer :: ipoint,istate
+ integer(size_t) :: ipoint
+ integer         :: istate
  double precision :: rho_a, rho_b, ec
  logical :: dospin
  double precision :: wall0,wall1,weight,mu,density

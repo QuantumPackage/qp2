@@ -22,10 +22,17 @@ subroutine delta_right()
 
   implicit none
   integer                       :: k
+  integer                       :: N_det4
+  integer, allocatable          :: order4(:)
   double precision, allocatable :: delta(:,:) 
 
   allocate( delta(N_det,N_states) )
   delta = 0.d0
+
+  ! dset_order is a 32-bit template routine : down-cast the order
+  N_det4 = int(N_det, 4)
+  allocate(order4(N_det4))
+  order4(1:N_det4) = psi_bilinear_matrix_order(1:N_det4)
 
   do k = 1, N_states
   !do k = 1, 1
@@ -35,7 +42,7 @@ subroutine delta_right()
     call get_delta_bitc_right(psi_det, psi_r_coef_bi_ortho(:,k), N_det, N_int, delta(:,k))
 
     ! order as QMCCHEM
-    call dset_order(delta(:,k), psi_bilinear_matrix_order, N_det)
+    call dset_order(delta(:,k), order4, N_det4)
 
   enddo
 

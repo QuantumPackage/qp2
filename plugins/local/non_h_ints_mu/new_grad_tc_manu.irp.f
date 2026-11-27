@@ -1,4 +1,6 @@
 
+use sizet
+
 BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_test, (ao_num, ao_num, n_points_final_grid, 3)]
 
   BEGIN_DOC
@@ -33,7 +35,8 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_test, (ao_num, ao_num, n_po
   END_DOC
 
   implicit none
-  integer          :: ipoint, i, j, m
+  integer          :: m
+  integer(size_t)  :: i, j, ipoint
   double precision :: time0, time1
   double precision :: x, y, z, tmp_x, tmp_y, tmp_z, tmp0, tmp1, tmp2
 
@@ -106,7 +109,9 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao_test, (ao_num, ao_num, ao_
   END_DOC
 
   implicit none
-  integer                       :: ipoint, i, j, k, l, m
+  integer(size_t)               :: i, j, k, l
+  integer                       :: m
+  integer(size_t)               :: ipoint
   double precision              :: weight1, contrib_x, contrib_y, contrib_z, tmp_x, tmp_y, tmp_z
   double precision              :: ao_k_r, ao_i_r, ao_i_dx, ao_i_dy, ao_i_dz
   double precision              :: time0, time1
@@ -153,8 +158,10 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao_test, (ao_num, ao_num, ao_
 
     ac_mat = 0.d0
     do m = 1, 3
-      call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0                   &
-                , int2_grad1_u12_ao_test(1,1,1,m), ao_num*ao_num, b_mat(1,1,1,m), n_points_final_grid &
+      call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num &
+                , int(n_points_final_grid, 4), 1.d0 &
+                , int2_grad1_u12_ao_test(1,1,1,m), ao_num*ao_num &
+                , b_mat(1,1,1,m), int(n_points_final_grid, 4) &
                 , 1.d0, ac_mat, ao_num*ao_num)
 
     enddo

@@ -39,8 +39,9 @@ end
 
 subroutine test_env_nucl()
 
+  use sizet
   implicit none
-  integer                    :: ipoint
+  integer(size_t)          :: ipoint
   double precision           :: acc_ij, acc_tot, eps_ij, i_exc, i_num, normalz
   double precision           :: r(3)
   double precision, external :: env_nucl
@@ -83,8 +84,9 @@ end
 
 subroutine test_grad_env_nucl()
 
+  use sizet
   implicit none
-  integer                    :: ipoint
+  integer(size_t)          :: ipoint
   double precision           :: acc_ij, acc_tot, eps_ij, i_exc, i_num, normalz
   double precision           :: r(3)
   double precision, external :: grad_x_env_nucl_num
@@ -149,9 +151,11 @@ end
 
 subroutine test_fit_ugradu()
 
+  use sizet
   implicit none
 
-  integer                    :: jpoint, ipoint, i
+  integer                    :: i
+  integer(size_t)          :: jpoint, ipoint
   double precision           :: i_exc, i_fit, i_num, x2, tmp, dx, dy, dz
   double precision           :: r1(3), r2(3), grad(3)
   double precision           :: eps_ij, acc_tot, acc_ij, normalz, coef, expo
@@ -250,9 +254,11 @@ end
 
 subroutine test_fit_u()
 
+  use sizet
   implicit none
 
-  integer                    :: jpoint, ipoint, i
+  integer                    :: i
+  integer(size_t)          :: jpoint, ipoint
   double precision           :: i_exc, i_fit, i_num, x2
   double precision           :: r1(3), r2(3), dx, dy, dz
   double precision           :: eps_ij, acc_tot, acc_ij, normalz, coef, expo
@@ -316,9 +322,11 @@ end
 
 subroutine test_fit_u2()
 
+  use sizet
   implicit none
 
-  integer                    :: jpoint, ipoint, i
+  integer                    :: i
+  integer(size_t)          :: jpoint, ipoint
   double precision           :: i_exc, i_fit, i_num, x2
   double precision           :: r1(3), r2(3), dx, dy, dz, tmp
   double precision           :: eps_ij, acc_tot, acc_ij, normalz, coef, expo
@@ -383,8 +391,10 @@ end
 
 subroutine test_grad1_u12_withsq_num()
 
+  use sizet
   implicit none
-  integer                       :: ipoint, jpoint, m
+  integer                       :: m
+  integer(size_t)               :: ipoint, jpoint
   double precision              :: acc_ij, acc_tot, eps_ij, i_exc, i_num, normalz
   double precision, allocatable :: tmp_grad1_u12_squared(:,:), tmp_grad1_u12(:,:,:)
 

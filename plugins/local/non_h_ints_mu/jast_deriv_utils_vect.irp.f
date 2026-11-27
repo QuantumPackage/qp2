@@ -2,6 +2,7 @@
 ! ---
 
 subroutine get_grad1_u12_withsq_r1_seq(ipoint, n_grid2, resx, resy, resz, res)
+  use sizet
 
   BEGIN_DOC
   ! 
@@ -12,10 +13,10 @@ subroutine get_grad1_u12_withsq_r1_seq(ipoint, n_grid2, resx, resy, resz, res)
   END_DOC
 
   implicit none
-  integer,          intent(in)  :: ipoint, n_grid2
+  integer(size_t), intent(in)  :: ipoint, n_grid2
   double precision, intent(out) :: resx(n_grid2), resy(n_grid2), resz(n_grid2), res(n_grid2)
 
-  integer                       :: jpoint
+  integer(size_t)               :: jpoint
   double precision              :: env_r1, tmp
   double precision              :: grad1_env(3), r1(3)
   double precision, allocatable :: env_r2(:)
@@ -150,6 +151,7 @@ end
 ! ---
 
 subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
+  use sizet
 
   BEGIN_DOC
   !
@@ -162,14 +164,15 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
   include 'constants.include.F'
 
   implicit none
-  integer         , intent(in)  :: n_grid2
+  integer(size_t) , intent(in)  :: n_grid2
   double precision, intent(in)  :: r1(3)
   double precision, intent(out) :: gradx(n_grid2)
   double precision, intent(out) :: grady(n_grid2)
   double precision, intent(out) :: gradz(n_grid2)
 
-  integer                       :: jpoint
-  integer                       :: i_nucl, p, mpA, npA, opA
+  integer(size_t)               :: jpoint
+  integer                       :: p, mpA, npA, opA
+  integer(size_t)                :: i_nucl
   double precision              :: r2(3)
   double precision              :: dx, dy, dz, r12, tmp
   double precision              :: mu_val, mu_tmp, mu_der(3)
@@ -442,6 +445,7 @@ end
 ! ---
 
 subroutine grad1_jmu_r1_seq(mu, r1, n_grid2, gradx, grady, gradz)
+  use sizet
 
   BEGIN_DOC
   !
@@ -452,13 +456,13 @@ subroutine grad1_jmu_r1_seq(mu, r1, n_grid2, gradx, grady, gradz)
   END_DOC
 
   implicit none
-  integer         , intent(in)  :: n_grid2
+  integer(size_t) , intent(in)  :: n_grid2
   double precision, intent(in)  :: mu, r1(3)
   double precision, intent(out) :: gradx(n_grid2)
   double precision, intent(out) :: grady(n_grid2)
   double precision, intent(out) :: gradz(n_grid2)
 
-  integer                       :: jpoint
+  integer(size_t)               :: jpoint
   double precision              :: r2(3)
   double precision              :: dx, dy, dz, r12, tmp
 
@@ -494,15 +498,16 @@ end
 ! ---
 
 subroutine j12_r1_seq(r1, n_grid2, res)
+  use sizet
 
   include 'constants.include.F'
 
   implicit none
-  integer,          intent(in)  :: n_grid2
+  integer(size_t), intent(in)  :: n_grid2
   double precision, intent(in)  :: r1(3)
   double precision, intent(out) :: res(n_grid2)
 
-  integer                       :: jpoint
+  integer(size_t)               :: jpoint
   double precision              :: r2(3)
   double precision              :: dx, dy, dz
   double precision              :: mu_tmp, r12
@@ -562,15 +567,16 @@ end
 ! ---
 
 subroutine jmu_r1_seq(mu, r1, n_grid2, res)
+  use sizet
 
   include 'constants.include.F'
 
   implicit none
-  integer,          intent(in)  :: n_grid2
+  integer(size_t), intent(in)  :: n_grid2
   double precision, intent(in)  :: mu, r1(3)
   double precision, intent(out) :: res(n_grid2)
 
-  integer                       :: jpoint
+  integer(size_t)               :: jpoint
   double precision              :: r2(3)
   double precision              :: dx, dy, dz
   double precision              :: r12, tmp1, tmp2
@@ -600,16 +606,18 @@ end
 
 
 subroutine env_nucl_r1_seq(n_grid2, res)
+  use sizet
 
   ! TODO
   ! change loops order
 
   implicit none
-  integer,          intent(in)  :: n_grid2
+  integer(size_t), intent(in)  :: n_grid2
   double precision, intent(out) :: res(n_grid2)
 
   double precision               :: r(3)
-  integer                        :: i, jpoint
+  integer(size_t)                :: i
+  integer(size_t)                :: jpoint
   double precision               :: a, d, e, x, y, z
 
   if(env_type .eq. "Sum_Slat") then
@@ -701,6 +709,7 @@ end
 ! ---
 
 subroutine get_grad1_u12_2e_r1_seq(ipoint, n_grid2, resx, resy, resz)
+  use sizet
 
   BEGIN_DOC
   ! 
@@ -711,10 +720,10 @@ subroutine get_grad1_u12_2e_r1_seq(ipoint, n_grid2, resx, resy, resz)
   END_DOC
 
   implicit none
-  integer,          intent(in)  :: ipoint, n_grid2
+  integer(size_t), intent(in)  :: ipoint, n_grid2
   double precision, intent(out) :: resx(n_grid2), resy(n_grid2), resz(n_grid2)
 
-  integer                       :: jpoint
+  integer(size_t)               :: jpoint
   double precision              :: env_r1, tmp
   double precision              :: grad1_env(3), r1(3)
   double precision, allocatable :: env_r2(:)
@@ -825,6 +834,7 @@ end
 ! ---
 
 subroutine get_u12_2e_r1_seq(ipoint, n_grid2, res)
+  use sizet
 
   BEGIN_DOC
   ! 
@@ -835,10 +845,10 @@ subroutine get_u12_2e_r1_seq(ipoint, n_grid2, res)
   END_DOC
 
   implicit none
-  integer,          intent(in)  :: ipoint, n_grid2
+  integer(size_t), intent(in)  :: ipoint, n_grid2
   double precision, intent(out) :: res(n_grid2)
 
-  integer                       :: jpoint
+  integer(size_t)               :: jpoint
   double precision              :: env_r1, tmp
   double precision              :: grad1_env(3), r1(3)
   double precision, allocatable :: env_r2(:)

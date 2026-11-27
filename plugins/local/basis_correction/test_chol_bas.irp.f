@@ -3,10 +3,11 @@ program test_chol_bas
  call test
 end
 subroutine test
+ use sizet
  implicit none
 ! provide mos_times_cholesky_r1
 ! provide mos_times_cholesky_r2
- integer :: ipoint
+ integer(size_t) :: ipoint
  double precision :: accu,weight
  accu = 0.d0
  do ipoint = 1, n_points_final_grid

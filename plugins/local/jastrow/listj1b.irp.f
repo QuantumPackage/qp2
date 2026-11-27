@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -61,7 +62,8 @@ END_PROVIDER
 &BEGIN_PROVIDER [ double precision, List_env1s_cent, (3, List_env1s_size)]
 
   implicit none
-  integer          :: i, j, k, phase
+  integer(size_t)    :: i, j, k
+  integer            :: phase
   double precision :: tmp_alphaj, tmp_alphak
   double precision :: tmp_cent_x, tmp_cent_y, tmp_cent_z
 
@@ -189,7 +191,8 @@ END_PROVIDER
 BEGIN_PROVIDER [integer, List_env1s_square, (nucl_num, List_env1s_square_size)]
 
   implicit none
-  integer              :: i, j, ii, jj
+  integer              :: i, ii
+  integer(size_t)      :: j, jj
   integer, allocatable :: M(:,:), p(:)
 
   if(nucl_num .gt. 32) then
@@ -225,8 +228,9 @@ END_PROVIDER
 &BEGIN_PROVIDER [ double precision, List_env1s_square_cent, (3, List_env1s_square_size)]
 
   implicit none
-  integer          :: i, j, k, phase
-  integer          :: ii
+  integer(size_t)    :: i, j, k
+  integer            :: phase
+  integer            :: ii
   double precision :: tmp_alphaj, tmp_alphak, facto
   double precision :: tmp1, tmp2, tmp3, tmp4
   double precision :: xi, yi, zi, xj, yj, zj

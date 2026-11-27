@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -11,12 +12,12 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth_old, (mo_num, mo_num,
 
   implicit none
 
-  integer                        :: i, h1, p1, h2, p2
+  integer(size_t)                :: i, h1, p1, h2, p2
   integer                        :: hh1, hh2, pp1, pp2
   integer                        :: Ne(2)
   double precision               :: hthree_aba, hthree_aaa, hthree_aab
   double precision               :: wall0, wall1
-  integer,           allocatable :: occ(:,:)
+  integer(size_t), allocatable :: occ(:,:)
   integer(bit_kind), allocatable :: key_i_core(:,:)
 
   print*,' Providing normal_two_body_bi_orth_old ...'
@@ -67,24 +68,29 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth_old, (mo_num, mo_num,
       
 
             ! opposite spin double excitations : s1 /= s2
-            call give_aba_contraction(N_int, h1, h2, p1, p2, Ne, occ, hthree_aba)
+            call give_aba_contraction(N_int, h1, h2, p1, p2, &
+                Ne, occ, hthree_aba)
 
             ! same spin double excitations : s1 == s2 
             if(h1<h2.and.p1.gt.p2)then
              ! with opposite spin contributions 
-             call give_aab_contraction(N_int, h2, h1, p1, p2, Ne, occ, hthree_aab) ! exchange h1<->h2
+             call give_aab_contraction(N_int, h2, h1, p1, p2, &
+                 Ne, occ, hthree_aab) ! exchange h1<->h2
              ! same spin double excitations with same spin contributions 
              if(Ne(2).ge.3)then
-               call give_aaa_contraction(N_int, h2, h1, p1, p2, Ne, occ, hthree_aaa) ! exchange h1<->h2
+               call give_aaa_contraction(N_int, h2, h1, p1, p2, &
+                   Ne, occ, hthree_aaa) ! exchange h1<->h2
              else
                hthree_aaa = 0.d0
              endif
             else
              ! with opposite spin contributions 
-             call give_aab_contraction(N_int, h1, h2, p1, p2, Ne, occ, hthree_aab)
+             call give_aab_contraction(N_int, h1, h2, p1, p2, &
+                 Ne, occ, hthree_aab)
              if(Ne(2).ge.3)then
               ! same spin double excitations with same spin contributions 
-               call give_aaa_contraction(N_int, h1, h2, p1, p2, Ne, occ, hthree_aaa)
+               call give_aaa_contraction(N_int, h1, h2, p1, p2, &
+                   Ne, occ, hthree_aaa)
              else
                hthree_aaa = 0.d0
              endif
@@ -120,6 +126,7 @@ END_PROVIDER
 subroutine give_aba_contraction(Nint, h1, h2, p1, p2, Ne, occ, hthree)
 
   use bitmasks ! you need to include the bitmasks_module.f90 features
+  use sizet
   BEGIN_DOC
 !  give the contribution for a double excitation of opposite spin BUT averaged over spin
 !
@@ -129,10 +136,12 @@ subroutine give_aba_contraction(Nint, h1, h2, p1, p2, Ne, occ, hthree)
   END_DOC
 
   implicit none
-  integer, intent(in)           :: Nint, h1, h2, p1, p2
-  integer, intent(in)           :: Ne(2), occ(Nint*bit_kind_size,2)
+  integer(size_t), intent(in)   :: Nint, h1, h2, p1, p2
+  integer, intent(in)           :: Ne(2)
+  integer(size_t), intent(in)   :: occ(Nint*bit_kind_size,2)
   double precision, intent(out) :: hthree
-  integer                       :: ii, i
+  integer                       :: ii
+  integer(size_t)               :: i
   double precision              :: int_direct, int_exc_12, int_exc_13, integral
 
   !!!! double alpha/beta
@@ -141,13 +150,16 @@ subroutine give_aba_contraction(Nint, h1, h2, p1, p2, Ne, occ, hthree)
   do ii = 1, Ne(2) ! purely closed shell part 
     i = occ(ii,2)
 
-    call give_integrals_3_body_bi_ort(i, p2, p1, i, h2, h1, integral)
+    call give_integrals_3_body_bi_ort(int(i,4), int(p2,4), int(p1,4), &
+        int(i,4), int(h2,4), int(h1,4), integral)
     int_direct = -1.d0 * integral
 
-    call give_integrals_3_body_bi_ort(p1, p2, i, i, h2, h1, integral)
+    call give_integrals_3_body_bi_ort(int(p1,4), int(p2,4), int(i,4), &
+        int(i,4), int(h2,4), int(h1,4), integral)
     int_exc_13 = -1.d0 * integral
 
-    call give_integrals_3_body_bi_ort(p2, i, p1, i, h2, h1, integral)
+    call give_integrals_3_body_bi_ort(int(p2,4), int(i,4), int(p1,4), &
+        int(i,4), int(h2,4), int(h1,4), integral)
     int_exc_12 = -1.d0 * integral
 
     hthree += 2.d0 * int_direct - 1.d0 * (int_exc_13 + int_exc_12)
@@ -156,13 +168,16 @@ subroutine give_aba_contraction(Nint, h1, h2, p1, p2, Ne, occ, hthree)
   do ii = Ne(2) + 1, Ne(1) ! purely open-shell part 
     i = occ(ii,1)
 
-    call give_integrals_3_body_bi_ort(i, p2, p1, i, h2, h1, integral)
+    call give_integrals_3_body_bi_ort(int(i,4), int(p2,4), int(p1,4), &
+        int(i,4), int(h2,4), int(h1,4), integral)
     int_direct = -1.d0 * integral
 
-    call give_integrals_3_body_bi_ort(p1, p2, i, i, h2, h1, integral)
+    call give_integrals_3_body_bi_ort(int(p1,4), int(p2,4), int(i,4), &
+        int(i,4), int(h2,4), int(h1,4), integral)
     int_exc_13 = -1.d0 * integral
 
-    call give_integrals_3_body_bi_ort(p2, i, p1, i, h2, h1, integral)
+    call give_integrals_3_body_bi_ort(int(p2,4), int(i,4), int(p1,4), &
+        int(i,4), int(h2,4), int(h1,4), integral)
     int_exc_12 = -1.d0 * integral
 
     hthree += 1.d0 * int_direct - 0.5d0 * (int_exc_13 + int_exc_12) ! spin average
@@ -183,10 +198,10 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth_ab, (mo_num, mo_num, 
   use bitmasks ! you need to include the bitmasks_module.f90 features
 
   implicit none
-  integer                        :: h1, p1, h2, p2, i
+  integer(size_t)                :: h1, p1, h2, p2, i
   integer                        :: hh1, hh2, pp1, pp2
   integer                        :: Ne(2)
-  integer,           allocatable :: occ(:,:)
+  integer(size_t), allocatable :: occ(:,:)
   integer(bit_kind), allocatable :: key_i_core(:,:)
   double precision               :: hthree
 
@@ -214,7 +229,8 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth_ab, (mo_num, mo_num, 
         h2 = list_act(hh2) 
         do pp2 = 1, n_act_orb
           p2 = list_act(pp2)
-          call give_aba_contraction(N_int, h1, h2, p1, p2, Ne, occ, hthree)
+          call give_aba_contraction(N_int, h1, h2, p1, p2, &
+              Ne, occ, hthree)
 
           normal_two_body_bi_orth_ab(p2,h2,p1,h1) = hthree    
         enddo
@@ -238,10 +254,10 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth_aa_bb, (n_act_orb, n_
   use bitmasks ! you need to include the bitmasks_module.f90 features
 
   implicit none
-  integer                        :: i,ii,j,h1,p1,h2,p2
-  integer                        :: hh1,hh2,pp1,pp2
+  integer(size_t)                :: i,h1,p1,h2,p2
+  integer                        :: ii,j,hh1,hh2,pp1,pp2
   integer                        :: Ne(2)
-  integer,           allocatable :: occ(:,:)
+  integer(size_t), allocatable :: occ(:,:)
   integer(bit_kind), allocatable :: key_i_core(:,:)
   double precision               :: hthree_aab, hthree_aaa
 
@@ -270,16 +286,20 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth_aa_bb, (n_act_orb, n_
         do pp2 = 1 , n_act_orb
           p2 = list_act(pp2)
           if(h1<h2.and.p1.gt.p2)then
-           call give_aab_contraction(N_int, h2, h1, p1, p2, Ne, occ, hthree_aab) ! exchange h1<->h2
+           call give_aab_contraction(N_int, h2, h1, p1, p2, &
+               Ne, occ, hthree_aab) ! exchange h1<->h2
            if(Ne(2).ge.3)then
-             call give_aaa_contraction(N_int, h2, h1, p1, p2, Ne, occ, hthree_aaa) ! exchange h1<->h2
+             call give_aaa_contraction(N_int, h2, h1, p1, p2, &
+                 Ne, occ, hthree_aaa) ! exchange h1<->h2
            else
              hthree_aaa = 0.d0
            endif
           else
-           call give_aab_contraction(N_int, h1, h2, p1, p2, Ne, occ, hthree_aab)
+           call give_aab_contraction(N_int, h1, h2, p1, p2, &
+               Ne, occ, hthree_aab)
            if(Ne(2).ge.3)then
-             call give_aaa_contraction(N_int, h1, h2, p1, p2, Ne, occ, hthree_aaa)
+             call give_aaa_contraction(N_int, h1, h2, p1, p2, &
+                 Ne, occ, hthree_aaa)
            else
              hthree_aaa = 0.d0
            endif
@@ -304,12 +324,15 @@ subroutine give_aaa_contraction(Nint, h1, h2, p1, p2, Ne, occ, hthree)
   END_DOC
 
   use bitmasks ! you need to include the bitmasks_module.f90 features
+  use sizet
 
   implicit none
-  integer, intent(in)           :: Nint, h1, h2, p1, p2
-  integer, intent(in)           :: Ne(2), occ(Nint*bit_kind_size,2)
+  integer(size_t), intent(in)   :: Nint, h1, h2, p1, p2
+  integer, intent(in)           :: Ne(2)
+  integer(size_t), intent(in)   :: occ(Nint*bit_kind_size,2)
   double precision, intent(out) :: hthree
-  integer                       :: ii,i
+  integer                       :: ii
+  integer(size_t)               :: i
   double precision              :: int_direct,int_exc_12,int_exc_13,int_exc_23
   double precision              :: integral,int_exc_l,int_exc_ll
 
@@ -317,22 +340,28 @@ subroutine give_aaa_contraction(Nint, h1, h2, p1, p2, Ne, occ, hthree)
   do ii = 1, Ne(2) ! purely closed shell part 
     i = occ(ii,2)
 
-    call give_integrals_3_body_bi_ort(i, p2, p1, i, h2, h1, integral)
+    call give_integrals_3_body_bi_ort(int(i,4), int(p2,4), int(p1,4), &
+        int(i,4), int(h2,4), int(h1,4), integral)
     int_direct = -1.d0 * integral
 
-    call give_integrals_3_body_bi_ort(p2, p1, i, i, h2, h1, integral)
+    call give_integrals_3_body_bi_ort(int(p2,4), int(p1,4), int(i,4), &
+        int(i,4), int(h2,4), int(h1,4), integral)
     int_exc_l = -1.d0 * integral
 
-    call give_integrals_3_body_bi_ort(p1, i, p2, i, h2, h1, integral)
+    call give_integrals_3_body_bi_ort(int(p1,4), int(i,4), int(p2,4), &
+        int(i,4), int(h2,4), int(h1,4), integral)
     int_exc_ll= -1.d0 * integral
 
-    call give_integrals_3_body_bi_ort(p2, i, p1, i, h2, h1, integral)
+    call give_integrals_3_body_bi_ort(int(p2,4), int(i,4), int(p1,4), &
+        int(i,4), int(h2,4), int(h1,4), integral)
     int_exc_12= -1.d0 * integral
 
-    call give_integrals_3_body_bi_ort(p1, p2, i, i, h2, h1, integral)
+    call give_integrals_3_body_bi_ort(int(p1,4), int(p2,4), int(i,4), &
+        int(i,4), int(h2,4), int(h1,4), integral)
     int_exc_13= -1.d0 * integral
 
-    call give_integrals_3_body_bi_ort(i, p1, p2, i, h2, h1, integral)
+    call give_integrals_3_body_bi_ort(int(i,4), int(p1,4), int(p2,4), &
+        int(i,4), int(h2,4), int(h1,4), integral)
     int_exc_23= -1.d0 * integral
 
     hthree +=  1.d0 * int_direct + int_exc_l + int_exc_ll - (int_exc_12 + int_exc_13 + int_exc_23)
@@ -341,22 +370,28 @@ subroutine give_aaa_contraction(Nint, h1, h2, p1, p2, Ne, occ, hthree)
   do ii = Ne(2)+1,Ne(1) ! purely open-shell part 
     i = occ(ii,1)
 
-    call give_integrals_3_body_bi_ort(i, p2, p1, i, h2, h1, integral)
+    call give_integrals_3_body_bi_ort(int(i,4), int(p2,4), int(p1,4), &
+        int(i,4), int(h2,4), int(h1,4), integral)
     int_direct = -1.d0 * integral
 
-    call give_integrals_3_body_bi_ort(p2, p1, i , i, h2, h1, integral)
+    call give_integrals_3_body_bi_ort(int(p2,4), int(p1,4), int(i,4), &
+        int(i,4), int(h2,4), int(h1,4), integral)
     int_exc_l = -1.d0 * integral
 
-    call give_integrals_3_body_bi_ort(p1, i, p2, i, h2, h1, integral)
+    call give_integrals_3_body_bi_ort(int(p1,4), int(i,4), int(p2,4), &
+        int(i,4), int(h2,4), int(h1,4), integral)
     int_exc_ll = -1.d0 * integral
 
-    call give_integrals_3_body_bi_ort(p2, i, p1, i, h2, h1, integral)
+    call give_integrals_3_body_bi_ort(int(p2,4), int(i,4), int(p1,4), &
+        int(i,4), int(h2,4), int(h1,4), integral)
     int_exc_12 = -1.d0 * integral
 
-    call give_integrals_3_body_bi_ort(p1, p2, i, i, h2, h1, integral)
+    call give_integrals_3_body_bi_ort(int(p1,4), int(p2,4), int(i,4), &
+        int(i,4), int(h2,4), int(h1,4), integral)
     int_exc_13 = -1.d0 * integral
 
-    call give_integrals_3_body_bi_ort(i, p1, p2, i, h2, h1, integral)
+    call give_integrals_3_body_bi_ort(int(i,4), int(p1,4), int(p2,4), &
+        int(i,4), int(h2,4), int(h1,4), integral)
     int_exc_23 = -1.d0 * integral
 
     !hthree +=  1.d0 * int_direct + 0.5d0 * (int_exc_l + int_exc_ll - (int_exc_12 + int_exc_13 + int_exc_23))
@@ -371,12 +406,15 @@ end
 subroutine give_aab_contraction(Nint, h1, h2, p1, p2, Ne, occ, hthree)
 
   use bitmasks ! you need to include the bitmasks_module.f90 features
+  use sizet
 
   implicit none
-  integer,          intent(in)  :: Nint, h1, h2, p1, p2
-  integer,          intent(in)  :: Ne(2), occ(Nint*bit_kind_size,2)
+  integer(size_t),   intent(in) :: Nint, h1, h2, p1, p2
+  integer,          intent(in)  :: Ne(2)
+  integer(size_t), intent(in)   :: occ(Nint*bit_kind_size,2)
   double precision, intent(out) :: hthree
-  integer                       :: ii, i
+  integer                       :: ii
+  integer(size_t)               :: i
   double precision              :: int_direct, int_exc_12, int_exc_13, int_exc_23
   double precision              :: integral, int_exc_l, int_exc_ll
 
@@ -384,10 +422,12 @@ subroutine give_aab_contraction(Nint, h1, h2, p1, p2, Ne, occ, hthree)
   do ii = 1, Ne(2) ! purely closed shell part 
     i = occ(ii,2)
 
-    call give_integrals_3_body_bi_ort(p2, p1, i, h2, h1, i, integral)
+    call give_integrals_3_body_bi_ort(int(p2,4), int(p1,4), int(i,4), &
+        int(h2,4), int(h1,4), int(i,4), integral)
     int_direct = -1.d0 * integral
 
-    call give_integrals_3_body_bi_ort(p1, p2, i, h2, h1, i, integral)
+    call give_integrals_3_body_bi_ort(int(p1,4), int(p2,4), int(i,4), &
+        int(h2,4), int(h1,4), int(i,4), integral)
     int_exc_23= -1.d0 * integral
 
     hthree +=  1.d0 * int_direct - int_exc_23

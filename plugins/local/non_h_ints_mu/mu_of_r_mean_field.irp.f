@@ -1,6 +1,8 @@
+use sizet
+
 BEGIN_PROVIDER [ double precision, two_e_int_mf, (elec_beta_num,elec_alpha_num,elec_beta_num,elec_alpha_num)]
  implicit none
- integer :: i,j,k,l 
+ integer(size_t) :: i,j,k,l 
  double precision :: get_two_e_integral
  do i = 1, elec_alpha_num
   do j = 1, elec_beta_num
@@ -14,11 +16,12 @@ BEGIN_PROVIDER [ double precision, two_e_int_mf, (elec_beta_num,elec_alpha_num,e
 END_PROVIDER 
 
 subroutine get_f_mf_ab(r,f_mf_ab,two_bod_dens, dm_a, dm_b)
+ use sizet
  implicit none
  double precision, intent(in) :: r(3)
  double precision, intent(out):: f_mf_ab,two_bod_dens, dm_a, dm_b
  double precision, allocatable :: mos_array_r(:),mos_array_a(:), mos_array_b(:)
- integer :: i,j,k,l
+ integer(size_t) :: i,j,k,l
  allocate(mos_array_r(mo_num), mos_array_a(elec_alpha_num), mos_array_b(elec_alpha_num))
  call give_all_mos_at_r(r,mos_array_r) 
  do i = 1, elec_alpha_num
@@ -56,6 +59,7 @@ subroutine get_f_mf_ab(r,f_mf_ab,two_bod_dens, dm_a, dm_b)
 end
 
 subroutine get_grad_f_mf_ab(r,grad_f_mf_ab, grad_two_bod_dens,f_mf_ab,two_bod_dens, dm_a, dm_b,grad_dm_a, grad_dm_b)
+ use sizet
  implicit none
  BEGIN_DOC
  ! gradient of mu(r) mean field, together with the gradient of the one- and two-body HF density. 
@@ -71,7 +75,7 @@ subroutine get_grad_f_mf_ab(r,grad_f_mf_ab, grad_two_bod_dens,f_mf_ab,two_bod_de
  double precision :: mo_i, mo_j, mo_k, mo_l
  double precision :: grad_mo_i(3), grad_mo_j(3), grad_mo_k(3), grad_mo_l(3)
  
- integer :: i,j,k,l
+ integer(size_t) :: i,j,k,l
  allocate(mos_array_r(mo_num),mos_grad_array_r(3,mo_num))
  allocate(mos_array_a(elec_alpha_num), mos_array_b(elec_beta_num))
  allocate(mos_grad_array_a(3,elec_alpha_num), mos_grad_array_b(3,elec_beta_num))

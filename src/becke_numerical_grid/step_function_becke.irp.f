@@ -23,6 +23,7 @@ end
 ! ---
 
 double precision function cell_function_becke(r, atom_number)
+ use sizet
 
   BEGIN_DOC
   ! atom_number :: atom on which the cell function of Becke (1988, JCP,88(4))
@@ -31,8 +32,8 @@ double precision function cell_function_becke(r, atom_number)
 
   implicit none
   double precision, intent(in) :: r(3)
-  integer,          intent(in) :: atom_number
-  integer                      :: j
+  integer(size_t), intent(in) :: atom_number
+  integer(size_t)              :: j
   double precision             :: mu_ij, nu_ij
   double precision             :: distance_i, distance_j, step_function_becke
 

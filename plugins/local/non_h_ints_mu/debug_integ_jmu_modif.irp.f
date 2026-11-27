@@ -37,8 +37,9 @@ end
 
 subroutine test_v_ij_u_cst_mu_env()
 
+  use sizet
   implicit none
-  integer                    :: i, j, ipoint
+  integer(size_t)          :: i, j, ipoint
   double precision           :: acc_ij, acc_tot, eps_ij, i_exc, i_num, normalz
   double precision, external :: num_v_ij_u_cst_mu_env
 
@@ -79,8 +80,9 @@ end
 
 subroutine test_v_ij_erf_rk_cst_mu_env()
 
+  use sizet
   implicit none
-  integer                    :: i, j, ipoint
+  integer(size_t)          :: i, j, ipoint
   double precision           :: acc_ij, acc_tot, eps_ij, i_exc, i_num, normalz
   double precision, external :: num_v_ij_erf_rk_cst_mu_env
 
@@ -123,8 +125,9 @@ end
 
 subroutine test_x_v_ij_erf_rk_cst_mu_env()
 
+  use sizet
   implicit none
-  integer          :: i, j, ipoint
+  integer(size_t)  :: i, j, ipoint
   double precision :: acc_ij, acc_tot, eps_ij, i_exc, i_num, normalz
   double precision :: integ(3)
 
@@ -193,8 +196,9 @@ end
 
 subroutine test_int2_u2_env2()
 
+  use sizet
   implicit none
-  integer                    :: i, j, ipoint
+  integer(size_t)          :: i, j, ipoint
   double precision           :: acc_ij, acc_tot, eps_ij, i_exc, i_num, normalz
   double precision, external :: num_int2_u2_env2
 
@@ -237,8 +241,9 @@ end
 
 subroutine test_int2_grad1u2_grad2u2_env2()
 
+  use sizet
   implicit none
-  integer                    :: i, j, ipoint
+  integer(size_t)          :: i, j, ipoint
   double precision           :: acc_ij, acc_tot, eps_ij, i_exc, i_num, normalz
   double precision, external :: num_int2_grad1u2_grad2u2_env2
 
@@ -281,8 +286,9 @@ end
 
 subroutine test_int2_grad1_u12_ao_num()
 
+  use sizet
   implicit none
-  integer          :: i, j, ipoint
+  integer(size_t)  :: i, j, ipoint
   double precision :: acc_ij, acc_tot, eps_ij, i_exc, i_num, normalz
   double precision :: integ(3)
 
@@ -350,8 +356,9 @@ end
 
 subroutine test_int2_u_grad1u_total_env2()
 
+  use sizet
   implicit none
-  integer          :: i, j, ipoint
+  integer(size_t)  :: i, j, ipoint
   double precision :: acc_ij, acc_tot, eps_ij, i_exc, i_num, normalz
   double precision :: x, y, z
   double precision :: integ(3)
@@ -426,8 +433,9 @@ end
 
 subroutine test_grad12_j12()
 
+  use sizet
   implicit none
-  integer                    :: i, j, ipoint
+  integer(size_t)          :: i, j, ipoint
   double precision           :: acc_ij, acc_tot, eps_ij, i_exc, i_num, normalz
   double precision, external :: num_grad12_j12
 
@@ -469,8 +477,9 @@ end
 
 subroutine test_u12sq_envsq()
 
+  use sizet
   implicit none
-  integer                    :: i, j, ipoint
+  integer(size_t)          :: i, j, ipoint
   double precision           :: acc_ij, acc_tot, eps_ij, i_exc, i_num, normalz
   double precision, external :: num_u12sq_envsq
 
@@ -512,8 +521,9 @@ end
 
 subroutine test_u12_grad1_u12_env_grad1_env()
 
+  use sizet
   implicit none
-  integer                    :: i, j, ipoint
+  integer(size_t)          :: i, j, ipoint
   double precision           :: acc_ij, acc_tot, eps_ij, i_exc, i_num, normalz
   double precision, external :: num_u12_grad1_u12_env_grad1_env
 
@@ -555,9 +565,10 @@ end
 
 subroutine test_vect_overlap_gauss_r12_ao()
 
+  use sizet
   implicit none
 
-  integer                       :: i, j, ipoint
+  integer(size_t)               :: i, j, ipoint
   double precision              :: acc_ij, acc_tot, eps_ij, i_exc, i_num, normalz
   double precision              :: expo_fit, r(3)
   double precision, allocatable :: I_vec(:,:,:), I_ref(:,:,:), int_fit_v(:)
@@ -642,9 +653,10 @@ end
 
 subroutine test_vect_overlap_gauss_r12_ao_with1s()
 
+  use sizet
   implicit none
 
-  integer                       :: i, j, ipoint
+  integer(size_t)               :: i, j, ipoint
   double precision              :: acc_ij, acc_tot, eps_ij, i_exc, i_num, normalz
   double precision              :: expo_fit, r(3), beta, B_center(3)
   double precision, allocatable :: I_vec(:,:,:), I_ref(:,:,:), int_fit_v(:)
@@ -733,8 +745,9 @@ end
 
 subroutine test_Ir2_Mu_long_Du_0()
 
+  use sizet
   implicit none
-  integer          :: i, j, ipoint
+  integer(size_t)  :: i, j, ipoint
   double precision :: i_old, i_new
   double precision :: acc_ij, acc_tot, eps_ij, normalz
 

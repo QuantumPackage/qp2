@@ -1,5 +1,7 @@
 
- BEGIN_PROVIDER [double precision, jBH_ee,           (nucl_num)]
+ use sizet
+
+BEGIN_PROVIDER [double precision, jBH_ee,           (nucl_num)]
 &BEGIN_PROVIDER [double precision, jBH_en,           (nucl_num)]
 &BEGIN_PROVIDER [double precision, jBH_c , (jBH_size, nucl_num)]
 &BEGIN_PROVIDER [integer         , jBH_m , (jBH_size, nucl_num)]
@@ -14,8 +16,9 @@
 
   implicit none
   logical :: exists
-  integer :: i_nucl, p
-  integer :: ierr
+  integer(size_t) :: i_nucl
+  integer         :: p
+  integer         :: ierr
 
   PROVIDE ezfio_filename
 

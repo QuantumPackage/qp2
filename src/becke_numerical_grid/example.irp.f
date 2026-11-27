@@ -1,10 +1,12 @@
 subroutine example_becke_numerical_grid
+ use sizet
  implicit none
  include 'constants.include.F'
  BEGIN_DOC
 ! subroutine that illustrates the main features available in becke_numerical_grid
  END_DOC
- integer :: i,j,k,ipoint
+ integer(size_t) :: i
+ integer         :: j,k,ipoint
  double precision :: integral_1, integral_2,alpha,center(3)
  print*,''
  print*,'**************'
