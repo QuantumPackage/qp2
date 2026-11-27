@@ -2,6 +2,7 @@ subroutine write_cipsi_json(pt2_data, pt2_data_err)
     use selection_types
     use qp_json, only: json_add
     use c_functions, only: qp_epoch_c
+    use sizet
     implicit none
     BEGIN_DOC
 !  Logs the CIPSI results of the current iteration.
@@ -14,7 +15,8 @@ subroutine write_cipsi_json(pt2_data, pt2_data_err)
     double precision, allocatable, save :: h_energy(:), h_pt2(:), h_rpt2(:), &
         h_var(:), h_perr(:), h_samp(:), h_epoch(:), h_wall(:), h_mem(:), &
         h_ptime(:), h_pstart(:), h_pend(:)
-    integer, allocatable, save :: h_ndet(:), h_ncfg(:), h_win(:), h_task(:)
+    integer(size_t), allocatable, save :: h_ndet(:), h_ncfg(:)
+    integer, allocatable, save :: h_win(:), h_task(:)
 
     integer :: n
     double precision :: wt, mem
@@ -41,7 +43,7 @@ subroutine write_cipsi_json(pt2_data, pt2_data_err)
     h_perr   = [h_perr,   pt2_data_err % pt2(1:n)]
     h_samp   = [h_samp,   pt2_data % samples]      ! scalar, broadcast by shape
     h_ndet   = [h_ndet,   N_det]
-    h_ncfg   = [h_ncfg,   merge(N_Configuration, 0, s2_eig)]
+    h_ncfg   = [h_ncfg,   merge(N_Configuration, int(0,size_t), s2_eig)]
     h_win    = [h_win,    pt2_data % windows]
     h_task   = [h_task,   pt2_data % tasks]
     h_ptime  = [h_ptime,  pt2_data % time]
