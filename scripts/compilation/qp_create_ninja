@@ -291,6 +291,25 @@ def create_make_global(l_module, d_genealogy_path, d_irp, l_util,
     l_string = make_create_env_variable(pwd_config_file, jobs, modules,
                                         per_module)
 
+    # Decoupled job budgets (consumed by the ezfio and module recipes
+    # below): each sub-make gets an explicit -j$(QP_PER_MODULE_JOBS)
+    # instead of joining the top-level jobserver (a `+` recipe holds
+    # one slot for its whole build while its compiles compete for the
+    # rest, which starved `make -jN`). N_MODULES is baked as the
+    # literal number of module_<M> targets emitted in this file.
+    n_modules = len([m for m in l_module if m.rel != "dummy"])
+    l_string += ["# in-flight modules = min(N_MODULES, top-level jobs);"
+                 " per-module depth = budget / in-flight;"
+                 " total ~= budget; module recipe shells are idle"
+                 " waiters (~0 CPU).",
+                 "N_MODULES = {0}".format(n_modules),
+                 "QP_BUILD_JOBS ?= $(shell nproc 2>/dev/null ||"
+                 " sysctl -n hw.ncpu)",
+                 "QP_PER_MODULE_JOBS := $(shell python3 -c"
+                 " \"print(max(1, $(QP_BUILD_JOBS) // min({0},"
+                 " $(QP_BUILD_JOBS))))\")".format(n_modules),
+                 ""]
+
     # ~#~#~#~#~#~ #
     # E Z F I O   #
     # ~#~#~#~#~#~ #
@@ -319,17 +338,21 @@ def create_make_global(l_module, d_genealogy_path, d_irp, l_util,
                                                  m.ez_module.abs),
                      ""]
 
-    # The ezfio library: serial (no `+`), like the ninja rule's
-    # pool = console. The values are baked and quoted, mirroring
-    # ninja_ezfio_rule (rm the QP-side symlink, ln it back).
+    # The ezfio library: one top-level job (no `+`), like the ninja
+    # rule's pool = console. The values are baked and quoted,
+    # mirroring ninja_ezfio_rule (rm the QP-side symlink, ln it
+    # back). The inner build runs with the same explicit budget as
+    # the modules (-j$(QP_PER_MODULE_JOBS)): it is a C library,
+    # small, but keep the accounting honest.
     l_prereq = [m.path_in_ezfio for m in l_ezfio_config] + \
                [m.ez_config.abs for m in l_util.values()]
     l_flag = ["{0}='{1}'".format(flag, _flag_value(pwd_config_file, flag))
               for flag in ["FC", "CC", "FCFLAGS", "CFLAGS", "IRPF90"]]
     l_string += ["$(EZFIO_LIB): {0}".format(" ".join(l_prereq)),
-                 "\tcd \"{0}\" && export {1} && make veryclean && make &&"
-                 " rm -f \"$(EZFIO_LIB)\" && ln -sf {0}/lib/libezfio_irp.a"
-                 " \"$(EZFIO_LIB)\"".format(QP_EZFIO, " ".join(l_flag)),
+                 "\tcd \"{0}\" && export {1} && make veryclean && make"
+                 " -j$(QP_PER_MODULE_JOBS) && rm -f \"$(EZFIO_LIB)\" &&"
+                 " ln -sf {0}/lib/libezfio_irp.a \"$(EZFIO_LIB)\""
+                 .format(QP_EZFIO, " ".join(l_flag)),
                  ""]
 
     # ~#~#~#~#~#~ #
@@ -405,10 +428,20 @@ def create_make_global(l_module, d_genealogy_path, d_irp, l_util,
                        for f in d_irp[module]["l_src"])
         l_obj = sorted(os.path.relpath(f, module.abs)
                        for f in d_irp[module]["l_obj"])
-        l_string += ["\t+cd \"{0}\" && SRC=\"{1}\" OBJ=\"{2}\""
-                     " $(MAKE) -f Makefile all".format(module.abs,
-                                                       " ".join(l_src),
-                                                       " ".join(l_obj)),
+        # No `+`: the sub-make must not join this make's jobserver.
+        # With `+`, the recipe shell held one slot for the whole
+        # module build while the compiles inside competed for the
+        # same slots (make -j28 left ~2 slots for 26 modules).
+        # The explicit -j is the sub-make's independent budget
+        # (QP_PER_MODULE_JOBS above); a command-line -jN wins over
+        # the jobserver inherited through the MAKEFLAGS environment
+        # (verified: make 3.81, "make[1]: warning: -jN forced in
+        # submake: disabling jobserver mode" is the visible proof).
+        l_string += ["\tcd \"{0}\" && SRC=\"{1}\" OBJ=\"{2}\""
+                     " $(MAKE) -f Makefile -j$(QP_PER_MODULE_JOBS)"
+                     " all".format(module.abs,
+                                   " ".join(l_src),
+                                   " ".join(l_obj)),
                      ""]
 
     # ~#~#~#~#~#~ #

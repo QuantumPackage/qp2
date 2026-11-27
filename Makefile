@@ -6,7 +6,22 @@ SHELL := /bin/bash
 endif
 
 QP_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+# Total job budget of the build: the user's top-level -jN when given,
+# else nproc; an env/command-line QP_BUILD_JOBS keeps overriding the
+# nproc default (as before).
 QP_BUILD_JOBS ?= $(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 2)
+# Capture the default before the lazy redefinition below (a recursive
+# reference to QP_BUILD_JOBS inside its own definition would recurse).
+QP_BUDGET_DEFAULT := $(QP_BUILD_JOBS)
+# Extract the user's top-level -jN. $(MAKEFLAGS) must be read lazily,
+# at recipe (execution) time: with GNU make 3.81 (macOS stock) it is
+# still empty while the makefile is parsed. 3.81 records a parallel
+# run as a bare `-j` (the number only lives in the jobserver's token
+# pool), so when no explicit number is found the budget is probed from
+# the jobserver: every free token is read out and handed back, plus
+# one, because this recipe already holds its own slot when its line
+# is expanded (verified on make 3.81).
+QP_BUILD_JOBS = $(or $(strip $(shell python3 -c 'exec("import os,re,select,sys\nmf=sys.argv[1]\nj=re.search(r\"(?:^|\\s)-j(\\d+)\",mf)\njs=re.search(r\"(?:^|\\s)-j\\s+(\\d+)\",mf)\njb=re.search(r\"(?:^|\\s)--jobs=(\\d+)\",mf)\nfs=re.search(r\"--jobserver-fds=(\\d+),(\\d+)\",mf)\nn=int(j.group(1)) if j else (int(js.group(1)) if js else (int(jb.group(1)) if jb else None))\nif n is None and fs:\n    rf,wr=int(fs.group(1)),int(fs.group(2))\n    try:\n        toks=[]\n        while len(toks)<8192 and select.select([rf],[],[],0)[0]:\n            b=os.read(rf,1)\n            if not b: break\n            toks.append(b)\n        os.write(wr,b\"x\"*len(toks))\n        n=len(toks)+1\n    except OSError:\n        n=None\nprint(n if n else \"\")")' "$(MAKEFLAGS)")),$(QP_BUDGET_DEFAULT))
 # JFLAGS must be expanded at recipe (execution) time, not at makefile parse
 # time: with GNU make 3.81 (macOS stock) $(MAKEFLAGS) is still empty while
 # the makefile is parsed, so a parse-time ifeq would never see a user-passed
@@ -25,9 +40,9 @@ ifneq ($(wildcard $(QP_ROOT)/config/Makefile),)
 # blocks) and for the rest of the QP paths.
 .PHONY: rust_target all clean tidy rag update
 rust_target all clean tidy rag: update
-	cd $(QP_ROOT) && bash -c 'source quantum_package.rc && exec make $(JFLAGS) -f config/Makefile $@'
+	+cd $(QP_ROOT) && bash -c 'source quantum_package.rc && exec make $(JFLAGS) -f config/Makefile QP_BUILD_JOBS=$(QP_BUILD_JOBS) $@'
 module_%: update
-	cd $(QP_ROOT) && bash -c 'source quantum_package.rc && exec make $(JFLAGS) -f config/Makefile $@'
+	+cd $(QP_ROOT) && bash -c 'source quantum_package.rc && exec make $(JFLAGS) -f config/Makefile QP_BUILD_JOBS=$(QP_BUILD_JOBS) $@'
 update:
 	cd $(QP_ROOT) && bash -c 'source quantum_package.rc && exec scripts/compilation/qp_create_ninja update'
 else
