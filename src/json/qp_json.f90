@@ -88,6 +88,7 @@ module qp_json
     module procedure json_add_bool
     module procedure json_add_str
     module procedure json_add_arr_int
+    module procedure json_add_arr_int64
     module procedure json_add_arr_real
   end interface
 
@@ -165,6 +166,14 @@ contains
                                int(size(buf), c_int))
     deallocate(buf)
   end subroutine json_add_arr_int
+
+  subroutine json_add_arr_int64(path, values)
+    character(len=*), intent(in) :: path
+    integer(c_int64_t), intent(in), dimension(:) :: values
+
+    call qp_json_add_arr_int_c(trim(path)//c_null_char, values, &
+                               int(size(values), c_int))
+  end subroutine json_add_arr_int64
 
   subroutine json_add_arr_real(path, values)
     use iso_fortran_env, only: error_unit
