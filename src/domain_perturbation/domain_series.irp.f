@@ -35,6 +35,31 @@ subroutine domain_rs_energies(delta,np,nj,e)
   enddo
 end
 
+subroutine domain_rpt_energies(delta,np,nj,e)
+  implicit none
+  BEGIN_DOC
+  ! Renormalized corrections rPTp, p=2,np: the equation
+  ! $E - E_0 = \sum_{q=2}^p \Delta_q(E)$ linearized around $E_0$
+  ! (one Newton step),
+  ! $rPT_p = \sum_q \Delta_{q,0} / (1 - \sum_q \Delta_{q,1})$.
+  ! For p=2 with singletons this is the rPT2 of the CIPSI programs,
+  ! as $\Delta_{2,1} = -\langle \psi_1 | \psi_1 \rangle$.
+  ! Requires nj >= 1.
+  END_DOC
+  integer, intent(in)           :: np, nj
+  double precision, intent(in)  :: delta(2:np,0:nj)
+  double precision, intent(out) :: e(2:np)
+  double precision :: s0, s1
+  integer :: p
+  s0 = 0.d0
+  s1 = 0.d0
+  do p=2,np
+    s0 = s0 + delta(p,0)
+    s1 = s1 + delta(p,1)
+    e(p) = s0/(1.d0 - s1)
+  enddo
+end
+
 subroutine domain_replica(istate,irep,e_ref,tv,exact,delta2,delta)
   use det_table_module
   implicit none
@@ -207,21 +232,24 @@ subroutine domain_samples(istate,e_ref,nrep,exact,first,delta2,dr)
   deallocate(zphi,d0)
 end
 
-subroutine domain_state(istate,e_order,err_order,err_tot)
+subroutine domain_state(istate,e_order,err_order,err_tot,e_rpt,err_rpt)
   implicit none
   BEGIN_DOC
   ! Rayleigh-Schrodinger series for one state. e_order(p) is $E_p$, and
   ! err_order(p) and err_tot(p) are the statistical errors on $E_p$ and
   ! on the sum of the orders 2 to p, estimated by a jackknife over
-  ! the replicas.
+  ! the replicas. e_rpt(p) is the renormalized correction rPTp
+  ! (domain_rpt_energies) and err_rpt(p) its error; they are zero if
+  ! the Taylor expansions are of order 0 (n_pert < 4).
   END_DOC
   integer, intent(in)           :: istate
   double precision, intent(out) :: e_order(2:n_pert)
   double precision, intent(out) :: err_order(2:n_pert), err_tot(2:n_pert)
+  double precision, intent(out) :: e_rpt(2:n_pert), err_rpt(2:n_pert)
 
   double precision, allocatable :: delta2(:)
   double precision, allocatable :: dr(:,:,:), dmean(:,:), dl(:,:)
-  double precision, allocatable :: el(:,:), etot(:,:), em(:)
+  double precision, allocatable :: el(:,:), etot(:,:), em(:), erl(:,:)
   integer :: nrep, r, p, njet
   logical :: exact
   double precision :: f
@@ -234,12 +262,15 @@ subroutine domain_state(istate,e_order,err_order,err_tot)
   allocate(delta2(0:njet))
   allocate(dr(2:n_pert,0:njet,nrep),dmean(2:n_pert,0:njet))
   allocate(dl(2:n_pert,0:njet),el(2:n_pert,nrep),etot(2:n_pert,nrep))
-  allocate(em(2:n_pert))
+  allocate(em(2:n_pert),erl(2:n_pert,nrep))
   call domain_samples(istate,domain_e0(istate),nrep,exact,.False.,   &
       delta2,dr)
 
   dmean = sum(dr,3)/dble(nrep)
   call domain_rs_energies(dmean,n_pert,njet,e_order)
+  e_rpt   = 0.d0
+  err_rpt = 0.d0
+  if (njet >= 1) call domain_rpt_energies(dmean,n_pert,njet,e_rpt)
   err_order = 0.d0
   err_tot   = 0.d0
   if (nrep > 1) then
@@ -250,6 +281,7 @@ subroutine domain_state(istate,e_order,err_order,err_tot)
       do p=3,n_pert
         etot(p,r) = etot(p-1,r) + el(p,r)
       enddo
+      if (njet >= 1) call domain_rpt_energies(dl,n_pert,njet,erl(2,r))
     enddo
     f = dble(nrep-1)/dble(nrep)
     em = sum(el,2)/dble(nrep)
@@ -263,6 +295,13 @@ subroutine domain_state(istate,e_order,err_order,err_tot)
     do p=2,n_pert
       err_tot(p) = dsqrt(f*sum((etot(p,:)-em(p))**2))
     enddo
+    if (njet >= 1) then
+      em = sum(erl,2)/dble(nrep)
+      do p=2,n_pert
+        err_rpt(p) = dsqrt(f*sum((erl(p,:)-em(p))**2))
+      enddo
+      e_rpt = dble(nrep)*e_rpt - dble(nrep-1)*em
+    endif
   endif
-  deallocate(delta2,dr,dmean,dl,el,etot,em)
+  deallocate(delta2,dr,dmean,dl,el,etot,em,erl)
 end

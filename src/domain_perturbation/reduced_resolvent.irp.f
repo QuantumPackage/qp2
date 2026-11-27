@@ -90,6 +90,7 @@ subroutine domain_r0(istate,e,b,z)
 
   z = 0.d0
   if (N_det == 1) return
+  PROVIDE domain_minres_tol domain_minres_stat
   allocate(r1(N_det),r2(N_det),y(N_det),v(N_det),w(N_det))
   allocate(w1(N_det),w2(N_det),prec(N_det),q(N_det))
   do i=1,N_det
@@ -142,12 +143,15 @@ subroutine domain_r0(istate,e,b,z)
     w2 = w
     w = (v - oldeps*w1 - delta*w2)/gam
     z = z + phi*w
-    if (dabs(phibar) < 1.d-11*beta1) exit
+    if (dabs(phibar) < domain_minres_tol*beta1) exit
     if (beta < 1.d-300) exit
   enddo
   if (iter > itmax) then
     print *, 'Warning: domain_r0 not converged', phibar/beta1
   endif
+  domain_minres_stat(1) = domain_minres_stat(1) + 1_8
+  domain_minres_stat(2) = domain_minres_stat(2) + int(min(iter,itmax),8)
+  domain_minres_stat(3) = max(domain_minres_stat(3),int(min(iter,itmax),8))
   z = z - domain_phi0(:,istate)*sum(domain_phi0(:,istate)*z)
   deallocate(r1,r2,y,v,w,w1,w2,prec,q)
 end
@@ -186,3 +190,13 @@ subroutine domain_r0_jets(istate,e,d,z,njet)
   enddo
   deallocate(b,x)
 end
+
+BEGIN_PROVIDER [ integer(8), domain_minres_stat, (3) ]
+ implicit none
+ BEGIN_DOC
+ ! Statistics of the minimal residual method in domain_r0: number of
+ ! solutions, total and maximum number of iterations. Reset for each
+ ! state by the main program.
+ END_DOC
+ domain_minres_stat(:) = 0_8
+END_PROVIDER

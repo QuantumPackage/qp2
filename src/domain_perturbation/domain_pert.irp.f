@@ -22,6 +22,7 @@ subroutine run_domain_pert
   ! Runs the calculation for all the states and prints the results.
   END_DOC
   double precision, allocatable :: e(:), err(:), errt(:), ecb(:)
+  double precision, allocatable :: erp(:), errp(:)
   double precision :: etot(N_states), eerr(N_states), s, t0, t1
   double precision :: eg, a, b
   integer :: k, p
@@ -31,6 +32,7 @@ subroutine run_domain_pert
     stop 'n_pert should be at least 2'
   endif
   allocate(e(2:n_pert),err(2:n_pert),errt(2:n_pert),ecb(2:n_pert))
+  allocate(erp(2:n_pert),errp(2:n_pert))
 
   call write_int(6,N_det,'Number of determinants in the reference')
   call write_int(6,n_pert,'Maximum order')
@@ -42,11 +44,13 @@ subroutine run_domain_pert
       print *, 'Warning: the reference state', k, ' is not converged.'
       print *, 'Norm of the residual : ', domain_residual(k)
     endif
+    PROVIDE domain_minres_stat
+    domain_minres_stat(:) = 0_8
     call wall_time(t0)
     if (domain_chebyshev) then
       call domain_state_cheb(k,eg,a,b,auto,positive,e,err,ecb,errt)
     else
-      call domain_state(k,e,err,errt)
+      call domain_state(k,e,err,errt,erp,errp)
     endif
     call wall_time(t1)
     print *, ''
@@ -80,8 +84,22 @@ subroutine run_domain_pert
             s, errt(p)
       enddo
       etot(k) = s
+      if (domain_njet >= 1) then
+        ! Renormalized series: E_0 + rPTp
+        print '(A4,A22,A14)', 'p', 'E_0+rPTp', 'error'
+        do p=2,n_pert
+          print '(I4,F22.12,E14.4)', p,                              &
+              domain_e0(k)+nuclear_repulsion+erp(p), errp(p)
+        enddo
+      endif
     endif
     eerr(k) = errt(n_pert)
+    if (domain_minres_stat(1) > 0_8) then
+      print '(A,I10,A,F8.1,A,I6)', ' MINRES (reduced resolvent):',     &
+          domain_minres_stat(1), ' solutions, iterations: mean',     &
+          dble(domain_minres_stat(2))/dble(domain_minres_stat(1)),   &
+          ', max', domain_minres_stat(3)
+    endif
     call write_double(6,t1-t0,'Wall time (s)')
   enddo
   call write_double(6,domain_min_gap_seen,'Smallest |H_jj - E_0|')
@@ -92,5 +110,5 @@ subroutine run_domain_pert
   endif
   call ezfio_set_domain_perturbation_domain_energy(etot)
   call ezfio_set_domain_perturbation_domain_energy_error(eerr)
-  deallocate(e,err,errt,ecb)
+  deallocate(e,err,errt,ecb,erp,errp)
 end

@@ -52,6 +52,17 @@ states.
   :option:`domain_perturbation domain_cheb_max` : interval of the Chebyshev
   polynomials.
 
+* :option:`domain_perturbation domain_minres_tol` : relative convergence
+  threshold of the minimal residual method applying the reduced resolvent
+  (default 1.e-8). The number of solutions and of iterations is printed for
+  each state.
+
+When the Chebyshev acceleration is not used and ``n_pert`` is at least 4, the
+renormalized series :math:`E_n + rPT_p` is also printed, with
+:math:`rPT_p = \sum_{q=2}^p \Delta_q(E_n) / (1 - \sum_{q=2}^p \Delta_q'(E_n))`,
+the self-consistent equation linearized around :math:`E_n`. For :math:`p=2`
+and singletons it is the rPT2 of the CIPSI programs.
+
 Example::
 
   qp set determinants n_det_max 1000
