@@ -64,6 +64,8 @@ subroutine run
   END_DOC
   integer                        :: i
 
+  call json_init('cis')
+
   if(pseudo_sym)then
    call H_apply_cis_sym
   else

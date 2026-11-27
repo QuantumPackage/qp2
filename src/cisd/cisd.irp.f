@@ -68,6 +68,8 @@ subroutine run
   double precision               :: cisdq(N_states), delta_e
   double precision,external      :: diag_h_mat_elem
 
+  call json_init('cisd')
+
   if(pseudo_sym)then
    call H_apply_cisd_sym
   else

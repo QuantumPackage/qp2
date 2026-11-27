@@ -5,8 +5,9 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_configuration_,n_st,s
   ! One row per state of the CIPSI table of the summary stream.
   !
   ! The header and the rule are printed on the first call; each call then
-  ! prints one row per state, immediately followed by the machine-readable
-  ! line the legacy python helpers parse.
+  ! prints one row per state. The per-iteration record (Ndet, E, E+PT2,
+  ! E+RPT2, |PT2|) is written to the JSON document by
+  ! :c:func:`write_cipsi_json`; this table is for the human reader.
   !
   ! `it` counts the calls, so the iteration number stays right in the
   ! extra-iteration block, which runs after the rolling window `N_iter` is
@@ -15,9 +16,6 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_configuration_,n_st,s
   ! dE+PT2 is the difference with the same state at the previous call, `--`
   ! when there is none. t(s) is the elapsed wall time of the run, printed on
   ! the state-1 row only.
-  !
-  ! TODO(json): the machine line is a transition artifact. Delete it once the
-  ! JSON output (write_cipsi_json) covers Ndet/E/PT2 for every iteration.
   END_DOC
 
   integer, intent(in)            :: n_det_, n_configuration_, n_st
@@ -77,12 +75,8 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_configuration_,n_st,s
 
     if (n_st > 1) then
       write(6,'(1X,I5,I3,I9,F16.8,A,A)') it, k, n_det_, ept2, de14, t9
-      write(6,'(A,I3,I8,4F16.8)') '  # S,Ndet,E,E+PT2,E+RPT2,absPT2=', k, n_det_, &
-        e_(k), ept2, e_(k)+pt2_data % rpt2(k), abs(pt2_data % pt2(k))
     else
       write(6,'(1X,I5,I9,F16.8,A,A)') it, n_det_, ept2, de14, t9
-      write(6,'(A,I8,4F16.8)') '  # Ndet,E,E+PT2,E+RPT2,absPT2=', n_det_, &
-        e_(k), ept2, e_(k)+pt2_data % rpt2(k), abs(pt2_data % pt2(k))
     endif
 
     ept2_prev(k) = ept2

@@ -32,26 +32,26 @@ BEGIN_PROVIDER [ double precision, nucl_coord,  (nucl_num,3) ]
      double precision, parameter    :: a0= 0.529177249d0
 
      call write_time(6)
-     if (.not.human_quiet) write(6,'(A)') ''
-     if (.not.human_quiet) write(6,'(A)') 'Nuclear Coordinates (Angstroms)'
-     if (.not.human_quiet) write(6,'(A)') '==============================='
-     if (.not.human_quiet) write(6,'(A)') ''
-     if (.not.human_quiet) write(6,ft)                                         &
+     write(6,'(A)') ''
+     write(6,'(A)') 'Nuclear Coordinates (Angstroms)'
+     write(6,'(A)') '==============================='
+     write(6,'(A)') ''
+     write(6,ft)                                                               &
          '================','============','============','============','============'
-     if (.not.human_quiet) write(6,*)                                          &
+     write(6,*)                                                                &
          '     Atom          Charge          X            Y            Z '
-     if (.not.human_quiet) write(6,ft)                                         &
+     write(6,ft)                                                               &
          '================','============','============','============','============'
 
      do i=1,nucl_num
-       if (.not.human_quiet) write(6,f) nucl_label(i), nucl_charge(i),         &
+       write(6,f) nucl_label(i), nucl_charge(i),                               &
            nucl_coord(i,1)*a0,                                       &
            nucl_coord(i,2)*a0,                                       &
            nucl_coord(i,3)*a0
      enddo
-     if (.not.human_quiet) write(6,ft)                                         &
+     write(6,ft)                                                               &
          '================','============','============','============','============'
-     if (.not.human_quiet) write(6,'(A)') ''
+     write(6,'(A)') ''
 
      if (nucl_num > 1) then
        double precision               :: dist_min, x, y, z
@@ -64,7 +64,7 @@ BEGIN_PROVIDER [ double precision, nucl_coord,  (nucl_num,3) ]
            dist_min = min(x*x + y*y + z*z, dist_min)
          enddo
        enddo
-       if (.not.human_quiet) write(6,'(A,F12.4,A)') 'Minimal interatomic distance found: ', &
+       write(6,'(A,F12.4,A)') 'Minimal interatomic distance found: ', &
           dsqrt(dist_min)*a0,' Angstrom'
      endif
 

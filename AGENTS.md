@@ -323,17 +323,15 @@ script should parse it, and a number meant for a machine never goes there.
 `human_quiet` (`src/utils/human.irp.f`) silences the legacy provenance
 dump through the `write_double` / `write_int` / `write_bool` helpers of
 `src/ezfio_files/output.irp.f`; `QP_VERBOSE=1` restores it for debugging.
-One transitional exception: the machine lines `# Ndet,E,E+PT2,...=` (ground
-state) and `# S,Ndet,E,E+PT2,...=` (each excited state) printed after the
-CIPSI table rows (`src/iterations/print_summary.irp.f`, tagged
-`! TODO(json)`); `scripts/qp_geom_opt.py` and `scripts/get_fci_conv.sh`
-still read them, and they go away once those scripts read the JSON.
+No machine-readable line is printed: scripts read the JSON document, never
+stdout (`scripts/get_fci_conv.sh` and `scripts/qp_geom_opt.py` go through
+`scripts/utility/qp_json.py`).
 
 **The JSON document is the record, and it holds more than stdout.**
 `<EZFIO>/json/NNNNN.json` (first unused number, so a restart never touches
 an earlier run), `"schema": "qp3/1"`, opened once by
-`json_init('<program>')` (`scf`, `ks_scf`, `rs_ks_scf`, `fci`, `pt2`,
-`mrci`, `casscf`, `cipsi_orb_opt`) and filled by
+`json_init('<program>')` (`scf`, `ks_scf`, `rs_ks_scf`, `cis`, `cisd`,
+`fci`, `pt2`, `mrci`, `casscf`, `cipsi_orb_opt`) and filled by
 `call json_add('/results/<method>/<key>', value)`.
 `src/json/README.rst` is the reference, `src/json/DESIGN.md` the design.
 
@@ -346,14 +344,20 @@ an earlier run), `"schema": "qp3/1"`, opened once by
   (`scripts/ezfio_interface/`), not by the call site.
 - `results`: grouped by method, not by program. `scf` logs `iteration`,
   `energy`, `delta_energy`, `max_error_diis`, `level_shift`, `dim_diis`,
-  `converged`; `cipsi` logs `algorithm`, `n_det`, `n_cfg` (when `s2_eig`),
-  per-state `states/{energy,s2,pt2,rpt2,variance,extrapolated_energy}`
-  plus `pt2_err`, `rpt2_err`, `variance_err`, and the full per-iteration
-  `history/{energy,rpt2}` (2-D flattened in Fortran order, with a `shape`
-  sibling: reshape with `order='F'`); `ks`, `casscf` and `mo_opt` have
-  their own objects. stdout carries the same last-row numbers and one
-  extrapolated energy, but the full per-iteration history survives only
-  here.
+  `converged`, plus the per-iteration `history/*`; `cipsi` logs
+  `algorithm`, `n_det`, `n_cfg` (when `s2_eig`), per-state
+  `states/{energy,s2,pt2,rpt2,variance,extrapolated_energy}` plus
+  `pt2_err`, `rpt2_err`, `variance_err`, and the per-iteration series under
+  `history/`; `davidson` logs one `calls/NNNN/{algorithm,n_state,epoch,
+  itertot,converged,wall_time,shape,iteration,energy,residual,s2}` block
+  per solve; `symmetry` logs `group`, `n_irrep` and per-state
+  `states/<s>/{irrep,purity}`. The history convention (one index-aligned
+  array per quantity, `shape[n,nh]` with the state index fastest, and the
+  `(nh)` scalars such as `n_det`, `epoch`, `memory`) is stated once in
+  `src/json/DESIGN.md` §10.7; reshape the 2-D arrays with `order='F'`.
+  `ks`, `casscf` and `mo_opt` have their own objects. stdout carries the
+  same last-row numbers and one extrapolated energy, but the full
+  per-iteration history survives only here.
 
 Each write replaces the whole document (`.tmp.<pid>` + `fsync` +
 `rename`), so the file is valid JSON after `kill -9` and always complete;

@@ -66,6 +66,8 @@ end
 subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N_st,N_st_diag_in,Nint,dressing_state,converged)
   use bitmasks
   use mmap_module
+  use davidson_json, only: davidson_json_begin, davidson_json_step
+  use c_functions, only: qp_epoch_c
   implicit none
   BEGIN_DOC
   ! Davidson diagonalization with specific diagonal elements of the H matrix
@@ -141,6 +143,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
 
   itermax = max(2,min(davidson_sze_max, sze/N_st_diag))+1
   itertot = 0
+  call davidson_json_begin('davidson_diag_csf_hjj', N_st, qp_epoch_c())
 
   if (state_following) then
     allocate(overlap(N_st_diag*itermax, N_st_diag*itermax))
@@ -494,9 +497,13 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
           state(l) = idx
         enddo
 
-        ! Check if all states are attributed. If not, exit and N_st_diag will be increased.
+        ! Check if all states are attributed. If not, exit and N_st_diag will be
+        ! increased. The aborted attempt is still a block of its own: the caller
+        ! retries with a larger N_st_diag, and a hole in the solve counter would
+        ! read as a lost call.
         do l=1,N_st
           if (state(l) == 0) then
+            call davidson_json_end(itertot, converged)
             return
           endif
         enddo
@@ -575,6 +582,8 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
         ! Don't print
         continue
       else
+        call davidson_json_step(iter-1, to_print(1,1:N_st), &
+            to_print(2,1:N_st), N_st)
         if (.not.human_quiet) then
           write(*,'(1X,I3,1X,100(1X,F16.10,1X,ES11.3))') iter-1, to_print(1:2,1:N_st)
         endif
@@ -629,6 +638,8 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
     call convertWFfromCSFtoDET(N_st_diag,U_csf,U)
 
   enddo
+
+  call davidson_json_end(itertot, converged)
 
 
   call nullify_small_elements(sze,N_st_diag,U,size(U,1),threshold_davidson_pt2)

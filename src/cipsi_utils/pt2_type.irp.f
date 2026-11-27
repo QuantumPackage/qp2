@@ -19,6 +19,12 @@ subroutine pt2_alloc(pt2_data,N)
   pt2_data % variance(:)      = 0.d0
   pt2_data % rpt2(:)          = 0.d0
   pt2_data % overlap(:,:)     = 0.d0
+  pt2_data % windows          = 0
+  pt2_data % tasks            = 0
+  pt2_data % samples          = 0.d0
+  pt2_data % time             = 0.d0
+  pt2_data % epoch_start      = 0.d0
+  pt2_data % epoch_end        = 0.d0
 
 end subroutine
 

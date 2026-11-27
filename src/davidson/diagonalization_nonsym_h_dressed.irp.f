@@ -108,6 +108,8 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
 
   use bitmasks
   use mmap_module
+  use davidson_json, only: davidson_json_begin, davidson_json_step
+  use c_functions, only: qp_epoch_c
 
   implicit none
 
@@ -150,6 +152,7 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
 
   itermax = max(2, min(davidson_sze_max, sze/N_st_diag)) + 1
   itertot = 0
+  call davidson_json_begin('davidson_diag_nonsym_hjj', N_st, qp_epoch_c())
 
   if(state_following) then
     allocate(overlap(N_st_diag*itermax, N_st_diag*itermax))
@@ -439,6 +442,8 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
         !don't print
         continue
       else
+        call davidson_json_step(iter-1, to_print(1,1:N_st), &
+            to_print(2,1:N_st), N_st)
         if (.not.human_quiet) then
           write(*, '(1X, I3, 1X, 100(1X, F16.10, 1X, ES11.3))') iter-1, to_print(1:2,1:N_st)
         endif
@@ -495,6 +500,8 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
     enddo
 
   enddo
+
+  call davidson_json_end(itertot, converged)
 
 
   call nullify_small_elements(sze, N_st_diag, U, size(U, 1), threshold_davidson_pt2)

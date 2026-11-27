@@ -288,12 +288,12 @@ subroutine pg_report_mo_symmetry()
   ! IRPF90 does not emit the declaration of a function for its callers.
   logical, external :: pg_symmetry_ready
 
-  if (human_quiet) return
   if (.not. pg_symmetry_ready()) return
   call pg_report_mo_symmetry_work()
 end subroutine pg_report_mo_symmetry
 
 subroutine pg_report_mo_symmetry_work()
+  use qp_json, only: json_add
   implicit none
   BEGIN_DOC
   ! Worker of :c:func:`pg_report_mo_symmetry`: names the chain, so it may only be
@@ -341,6 +341,8 @@ subroutine pg_report_mo_symmetry_work()
     write(6,'(A,A,A,I0,A,ES8.1,A)') 'Point group ', &
          trim(pg_group_name), ', |G| = ', pg_n_elem, &
          ', geometry residual', pg_geom_residual, ' bohr'
+    call json_add('/results/symmetry/group', trim(pg_group_name))
+    call json_add('/results/symmetry/n_irrep', pg_n_irrep)
     n_shown = 0
     do a = 1, pg_n_irrep
       if (linear .and. pg_irrep_weight(a) == 0) cycle
