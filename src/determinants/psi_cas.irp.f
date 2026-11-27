@@ -1,15 +1,17 @@
 use bitmasks
+use sizet
 
  BEGIN_PROVIDER [ integer(bit_kind), psi_cas, (N_int,2,psi_det_size) ]
 &BEGIN_PROVIDER [ double precision, psi_cas_coef,  (psi_det_size,n_states) ]
-&BEGIN_PROVIDER [ integer, idx_cas, (psi_det_size) ]
-&BEGIN_PROVIDER [ integer, N_det_cas ]
+&BEGIN_PROVIDER [ integer(size_t), idx_cas, (psi_det_size) ]
+&BEGIN_PROVIDER [ integer(size_t), N_det_cas ]
   implicit none
   BEGIN_DOC
   ! |CAS| wave function, defined from the application of the |CAS| bitmask on the
   ! determinants. idx_cas gives the indice of the |CAS| determinant in psi_det.
   END_DOC
-  integer                        :: i, k, l
+  integer(size_t)                :: i, k
+  integer                        :: l
   logical                        :: good
   N_det_cas = 0
   do i=1,N_det
@@ -39,7 +41,7 @@ use bitmasks
       enddo
     endif
   enddo
-  call write_int(6,N_det_cas, 'Number of determinants in the CAS')
+  call write_int(6,int(N_det_cas,4), 'Number of determinants in the CAS')
 
 END_PROVIDER
 
@@ -51,8 +53,10 @@ END_PROVIDER
  ! |CAS| determinants sorted to accelerate the search of a random determinant in the wave
  ! function.
  END_DOC
- call sort_dets_by_det_search_key(N_det_cas, psi_cas, psi_cas_coef, size(psi_cas_coef,1), &
-     psi_cas_sorted_bit, psi_cas_coef_sorted_bit, N_states)
+  call sort_dets_by_det_search_key(N_det_cas, psi_cas, psi_cas_coef, &
+                                  int(size(psi_cas_coef,1),size_t), &
+                                  psi_cas_sorted_bit, psi_cas_coef_sorted_bit, &
+                                  N_states)
 
 END_PROVIDER
 
@@ -60,15 +64,15 @@ END_PROVIDER
 
  BEGIN_PROVIDER [ integer(bit_kind), psi_non_cas,  (N_int,2,psi_det_size) ]
 &BEGIN_PROVIDER [ double precision, psi_non_cas_coef, (psi_det_size,n_states) ]
-&BEGIN_PROVIDER [ integer, idx_non_cas,  (psi_det_size) ]
-&BEGIN_PROVIDER [ integer, N_det_non_cas ]
+&BEGIN_PROVIDER [ integer(size_t), idx_non_cas,  (psi_det_size) ]
+&BEGIN_PROVIDER [ integer(size_t), N_det_non_cas ]
  implicit none
  BEGIN_DOC
   ! Set of determinants which are not part of the |CAS|, defined from the application
   ! of the |CAS| bitmask on the determinants.
   ! idx_non_cas gives the indice of the determinant in psi_det.
  END_DOC
- integer                        :: i_non_cas,j,k
+ integer(size_t)                :: i_non_cas,j,k
  integer                        :: degree
  logical                        :: in_cas
  i_non_cas =0
@@ -104,8 +108,10 @@ END_PROVIDER
  ! |CAS| determinants sorted to accelerate the search of a random determinant in the wave
  ! function.
  END_DOC
- call sort_dets_by_det_search_key(N_det_cas, psi_non_cas, psi_non_cas_coef, size(psi_non_cas_coef,1), &
-     psi_non_cas_sorted_bit, psi_non_cas_coef_sorted_bit, N_states)
+  call sort_dets_by_det_search_key(N_det_cas, psi_non_cas, psi_non_cas_coef, &
+                                  int(size(psi_non_cas_coef,1),size_t), &
+                                  psi_non_cas_sorted_bit, &
+                                  psi_non_cas_coef_sorted_bit, N_states)
 
 END_PROVIDER
 
@@ -117,7 +123,7 @@ BEGIN_PROVIDER [double precision, H_matrix_cas, (N_det_cas,N_det_cas)]
  ! H_matrix_cas(i,j) is the matrix element
  ! <psi_cas(i) | H | psi_cas(j)>, computed with i_H_j.
  END_DOC
- integer :: i,j
+ integer(size_t) :: i,j
  double precision :: hij
   do i = 1, N_det_cas
    do j = 1, N_det_cas
@@ -138,12 +144,13 @@ END_PROVIDER
  ! psi_coef_cas_diagonalized(j,i) the j-th component of the
  ! corresponding eigenvector in the CAS determinant basis.
  END_DOC
- integer :: i,j
+ integer(size_t) :: j
+ integer :: i
   double precision, allocatable  :: eigenvectors(:,:), eigenvalues(:)
   allocate (eigenvectors(size(H_matrix_cas,1),N_det_cas))
   allocate (eigenvalues(N_det_cas))
   call lapack_diag(eigenvalues,eigenvectors,                       &
-      H_matrix_cas,size(H_matrix_cas,1),N_det_cas)
+      H_matrix_cas,int(size(H_matrix_cas,1),size_t),N_det_cas)
   do i = 1, N_states
    psi_cas_energy_diagonalized(i) = eigenvalues(i)
    do j = 1, N_det_cas
@@ -159,7 +166,8 @@ END_PROVIDER
  BEGIN_DOC
 ! Variational energy of $\Psi_{CAS}$, where $\Psi_{CAS} =  \sum_{I \in CAS} \I \rangle \langle I | \Psi \rangle$.
  END_DOC
- integer :: i,j,k
+ integer(size_t) :: i,j
+ integer :: k
  double precision :: hij,norm,u_dot_v
   psi_cas_energy = 0.d0
 

@@ -4,19 +4,21 @@
 !                                                                              !
 !==============================================================================!
 
+use sizet
 use bitmasks
 use spin_excitations
 
 integer*8 function spin_det_search_key(det,Nint)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
 ! Returns an integer(8) corresponding to a determinant index for searching
   END_DOC
-  integer, intent(in) :: Nint
+  integer(size_t), intent(in) :: Nint
   integer(bit_kind), intent(in) :: det(Nint)
   integer(bit_kind), parameter :: unsigned_shift = 0_bit_kind ! 1_bit_kind-huge(1_bit_kind) ! 100...00
-  integer :: i
+  integer(size_t) :: i
   spin_det_search_key = det(1) !+unsigned_shift
   do i=2,Nint
     spin_det_search_key = ieor(spin_det_search_key,det(i))
@@ -29,7 +31,7 @@ BEGIN_PROVIDER [ integer(bit_kind), psi_det_alpha, (N_int,psi_det_size) ]
   BEGIN_DOC
   ! List of $\alpha$ determinants of psi_det
   END_DOC
-  integer                        :: i,k
+  integer(size_t)                :: i,k
 
   do i=1,N_det
     do k=1,N_int
@@ -44,7 +46,7 @@ BEGIN_PROVIDER [ integer(bit_kind), psi_det_beta, (N_int,psi_det_size) ]
   BEGIN_DOC
   ! List of $\beta$ determinants of psi_det
   END_DOC
-  integer                        :: i,k
+  integer(size_t)                :: i,k
 
   do i=1,N_det
     do k=1,N_int
@@ -57,14 +59,14 @@ END_PROVIDER
 BEGIN_TEMPLATE
 
  BEGIN_PROVIDER [ integer(bit_kind), psi_det_$alpha_unique, (N_int,psi_det_size) ]
-&BEGIN_PROVIDER [ integer, N_det_$alpha_unique ]
+&BEGIN_PROVIDER [ integer(size_t), N_det_$alpha_unique ]
   implicit none
   BEGIN_DOC
   ! Unique $\\$alpha$ determinants
   END_DOC
 
-  integer                        :: i,j,k
-  integer, allocatable           :: iorder(:)
+  integer(size_t)                :: i,j,k
+  integer(size_t), allocatable   :: iorder(:)
   integer*8, allocatable         :: bit_tmp(:)
   integer*8                      :: last_key
   integer*8, external            :: spin_det_search_key
@@ -80,7 +82,7 @@ BEGIN_TEMPLATE
   !$OMP END PARALLEL DO
 
 
-  call i8sort(bit_tmp,iorder,N_det)
+  call i8sort_big(bit_tmp,iorder,N_det)
 
   N_det_$alpha_unique = 0
   last_key = 0_8
@@ -129,7 +131,8 @@ BEGIN_TEMPLATE
   enddo
   N_det_$alpha_unique = j
 
-  call write_int(6,N_det_$alpha_unique,'Number of unique $alpha determinants')
+  call write_int(6,int(N_det_$alpha_unique,4), &
+      'Number of unique $alpha determinants')
 
   deallocate (iorder, bit_tmp, duplicate)
 
@@ -146,17 +149,19 @@ END_TEMPLATE
 
 
 
-integer function get_index_in_psi_det_alpha_unique(key,Nint)
+function get_index_in_psi_det_alpha_unique(key,Nint)
+ use sizet
   use bitmasks
   BEGIN_DOC
   ! Returns the index of the determinant in the :c:data:`psi_det_alpha_unique` array
   END_DOC
   implicit none
 
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: key(Nint)
 
-  integer                        :: i, ibegin, iend, istep, l
+  integer(size_t)                :: get_index_in_psi_det_alpha_unique
+  integer(size_t)                :: i, ibegin, iend, istep, l
   integer(8)                     :: det_ref, det_search
   integer(8), external           :: spin_det_search_key
   logical                        :: in_wavefunction
@@ -198,7 +203,7 @@ integer function get_index_in_psi_det_alpha_unique(key,Nint)
   i += 1
 
   if (i> N_det_alpha_unique) then
-    call qp_bug(irp_here, i, 'i> N_det_alpha_unique')
+    call qp_bug(irp_here, int(i,4), 'i> N_det_alpha_unique')
   endif
 
   !DIR$ FORCEINLINE
@@ -227,22 +232,25 @@ integer function get_index_in_psi_det_alpha_unique(key,Nint)
   enddo
 
   if (get_index_in_psi_det_alpha_unique <= 0) then
-    call qp_bug(irp_here, get_index_in_psi_det_alpha_unique, 'get_index_in_psi_det_alpha_unique <= 0')
+    call qp_bug(irp_here, int(get_index_in_psi_det_alpha_unique,4), &
+        'get_index_in_psi_det_alpha_unique <= 0')
   endif
 
 end
 
-integer function get_index_in_psi_det_beta_unique(key,Nint)
+function get_index_in_psi_det_beta_unique(key,Nint)
+ use sizet
   use bitmasks
   BEGIN_DOC
   ! Returns the index of the determinant in the :c:data:`psi_det_beta_unique` array
   END_DOC
   implicit none
 
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: key(Nint)
 
-  integer                        :: i, ibegin, iend, istep, l
+  integer(size_t)                :: get_index_in_psi_det_beta_unique
+  integer(size_t)                :: i, ibegin, iend, istep, l
   integer(8)                     :: det_ref, det_search
   integer(8), external           :: spin_det_search_key
   logical                        :: in_wavefunction
@@ -283,7 +291,7 @@ integer function get_index_in_psi_det_beta_unique(key,Nint)
   i += 1
 
   if (i > N_det_beta_unique) then
-    call qp_bug(irp_here, i, 'i> N_det_beta_unique')
+    call qp_bug(irp_here, int(i,4), 'i> N_det_beta_unique')
   endif
 
   !DIR$ FORCEINLINE
@@ -312,13 +320,14 @@ integer function get_index_in_psi_det_beta_unique(key,Nint)
   enddo
 
   if (get_index_in_psi_det_beta_unique <= 0) then
-    call qp_bug(irp_here, i, 'get_index_in_psi_det_beta_unique <= 0')
+    call qp_bug(irp_here, int(i,4), 'get_index_in_psi_det_beta_unique <= 0')
   endif
 
 end
 
 
 subroutine write_spindeterminants
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -329,17 +338,19 @@ subroutine write_spindeterminants
   ! $D_\alpha^\dagger C D_\beta$.
   END_DOC
   integer(8), allocatable        :: tmpdet(:,:)
-  integer                        :: N_int2
-  integer                        :: i,j,k
+  integer, allocatable         :: rows4(:), cols4(:)
+  integer(size_t)                :: N_int2
+  integer(size_t)                :: i,k
+  integer                        :: j
   integer(8)                     :: det_8(100)
   integer(bit_kind)              :: det_bk((100*8)/bit_kind)
   equivalence (det_8, det_bk)
 
   N_int2 = (N_int*bit_kind)/8
-  call ezfio_set_spindeterminants_n_det_alpha(N_det_alpha_unique)
-  call ezfio_set_spindeterminants_n_det_beta(N_det_beta_unique)
-  call ezfio_set_spindeterminants_n_det(N_det)
-  call ezfio_set_spindeterminants_n_int(N_int)
+  call ezfio_set_spindeterminants_n_det_alpha(int(N_det_alpha_unique,4))
+  call ezfio_set_spindeterminants_n_det_beta(int(N_det_beta_unique,4))
+  call ezfio_set_spindeterminants_n_det(int(N_det,4))
+  call ezfio_set_spindeterminants_n_int(int(N_int,4))
   call ezfio_set_spindeterminants_bit_kind(bit_kind)
   call ezfio_set_spindeterminants_n_states(N_states)
 
@@ -368,12 +379,19 @@ subroutine write_spindeterminants
   deallocate(tmpdet)
 
   call ezfio_set_spindeterminants_psi_coef_matrix_values(psi_bilinear_matrix_values)
-  call ezfio_set_spindeterminants_psi_coef_matrix_rows(psi_bilinear_matrix_rows)
-  call ezfio_set_spindeterminants_psi_coef_matrix_columns(psi_bilinear_matrix_columns)
+  ! On-disk format of rows/columns is 32-bit integer: the providers
+  ! are integer(size_t), so convert at the boundary.
+  allocate(rows4(N_det), cols4(N_det))
+  rows4 = psi_bilinear_matrix_rows
+  cols4 = psi_bilinear_matrix_columns
+  call ezfio_set_spindeterminants_psi_coef_matrix_rows(rows4)
+  call ezfio_set_spindeterminants_psi_coef_matrix_columns(cols4)
+  deallocate(rows4, cols4)
 
 end
 
 subroutine read_spindeterminants
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -384,17 +402,28 @@ subroutine read_spindeterminants
   ! :c:func:`wf_of_psi_bilinear_matrix` to fill
   ! :c:data:`psi_det` and :c:data:`psi_coef`.
   END_DOC
-  integer                        :: k
+  integer(size_t)                :: k
+  integer, allocatable         :: rows4(:), cols4(:)
+  integer                        :: n_det4, n_det_alpha4, n_det_beta4
 
-  call ezfio_get_spindeterminants_n_det(N_det)
+  call ezfio_get_spindeterminants_n_det(n_det4)
+  N_det = n_det4
   call ezfio_get_spindeterminants_n_states(N_states)
   TOUCH N_det N_states
 
-  call ezfio_get_spindeterminants_n_det_alpha(N_det_alpha_unique)
-  call ezfio_get_spindeterminants_n_det_beta(N_det_beta_unique)
+  call ezfio_get_spindeterminants_n_det_alpha(n_det_alpha4)
+  N_det_alpha_unique = n_det_alpha4
+  call ezfio_get_spindeterminants_n_det_beta(n_det_beta4)
+  N_det_beta_unique = n_det_beta4
   call ezfio_get_spindeterminants_psi_coef_matrix_values(psi_bilinear_matrix_values)
-  call ezfio_get_spindeterminants_psi_coef_matrix_rows(psi_bilinear_matrix_rows)
-  call ezfio_get_spindeterminants_psi_coef_matrix_columns(psi_bilinear_matrix_columns)
+  ! On-disk format of rows/columns is 32-bit integer: read into a
+  ! temporary and convert at the boundary.
+  allocate(rows4(N_det), cols4(N_det))
+  call ezfio_get_spindeterminants_psi_coef_matrix_rows(rows4)
+  call ezfio_get_spindeterminants_psi_coef_matrix_columns(cols4)
+  psi_bilinear_matrix_rows = rows4
+  psi_bilinear_matrix_columns = cols4
+  deallocate(rows4, cols4)
   call ezfio_get_spindeterminants_psi_det_alpha(psi_det_alpha_unique)
   call ezfio_get_spindeterminants_psi_det_beta(psi_det_beta_unique)
   do k=1,N_det
@@ -415,7 +444,8 @@ end
   ! $||D_\alpha||_i = \sum_j C_{ij}^2$
   END_DOC
 
-  integer                        :: i,j,k,l
+  integer(size_t)                :: i,j,k
+  integer                        :: l
   double precision               :: f
 
   det_alpha_norm = 0.d0
@@ -443,9 +473,9 @@ END_PROVIDER
 !==============================================================================!
 
  BEGIN_PROVIDER  [ double precision, psi_bilinear_matrix_values, (N_det,N_states) ]
-&BEGIN_PROVIDER [ integer, psi_bilinear_matrix_rows   , (N_det) ]
-&BEGIN_PROVIDER [ integer, psi_bilinear_matrix_columns, (N_det) ]
-&BEGIN_PROVIDER [ integer, psi_bilinear_matrix_order  , (N_det) ]
+&BEGIN_PROVIDER [ integer(size_t), psi_bilinear_matrix_rows   , (N_det) ]
+&BEGIN_PROVIDER [ integer(size_t), psi_bilinear_matrix_columns, (N_det) ]
+&BEGIN_PROVIDER [ integer(size_t), psi_bilinear_matrix_order  , (N_det) ]
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -456,9 +486,10 @@ END_PROVIDER
   !
   ! Order refers to psi_det
   END_DOC
-  integer                        :: i,j,k, l
+  integer(size_t)                :: i,j,k
+  integer                        :: l
   integer(bit_kind)              :: tmp_det(N_int,2)
-  integer, external              :: get_index_in_psi_det_sorted_bit
+  integer(size_t), external      :: get_index_in_psi_det_sorted_bit
 
 
   PROVIDE psi_coef_sorted_bit
@@ -476,8 +507,8 @@ END_PROVIDER
   PROVIDE psi_det_alpha_unique psi_det_beta_unique
 
   integer*8, allocatable         :: to_sort(:)
-  integer, external              :: get_index_in_psi_det_alpha_unique
-  integer, external              :: get_index_in_psi_det_beta_unique
+  integer(size_t), external      :: get_index_in_psi_det_alpha_unique
+  integer(size_t), external      :: get_index_in_psi_det_beta_unique
   allocate(to_sort(N_det))
   !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,j,k,l)
   do k=1,N_det
@@ -499,17 +530,20 @@ END_PROVIDER
     psi_bilinear_matrix_order(k) = k
   enddo
   !$OMP END PARALLEL DO
-  call i8sort(to_sort, psi_bilinear_matrix_order, N_det)
+  call i8sort_big(to_sort, psi_bilinear_matrix_order, N_det)
   !$OMP PARALLEL
   !$OMP SINGLE
-  call iset_order(psi_bilinear_matrix_rows,psi_bilinear_matrix_order,N_det)
+  call i8set_order_big(psi_bilinear_matrix_rows, &
+      psi_bilinear_matrix_order,N_det)
   !$OMP END SINGLE
   !$OMP SINGLE
-  call iset_order(psi_bilinear_matrix_columns,psi_bilinear_matrix_order,N_det)
+  call i8set_order_big(psi_bilinear_matrix_columns, &
+      psi_bilinear_matrix_order,N_det)
   !$OMP END SINGLE
   !$OMP DO
   do l=1,N_states
-    call dset_order(psi_bilinear_matrix_values(1,l),psi_bilinear_matrix_order,N_det)
+    call dset_order_big(psi_bilinear_matrix_values(1,l), &
+        psi_bilinear_matrix_order,N_det)
   enddo
   !$OMP END DO
   !$OMP END PARALLEL
@@ -524,13 +558,13 @@ END_PROVIDER
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ integer, psi_bilinear_matrix_order_reverse , (N_det) ]
+BEGIN_PROVIDER [ integer(size_t), psi_bilinear_matrix_order_reverse , (N_det) ]
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Order which allows to go from :c:data:`psi_bilinear_matrix` to :c:data:`psi_det`
   END_DOC
-  integer                        :: k
+  integer(size_t)                :: k
   !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(k)
   do k=1,N_det
     psi_bilinear_matrix_order_reverse(psi_bilinear_matrix_order(k)) = k
@@ -541,7 +575,7 @@ BEGIN_PROVIDER [ integer, psi_bilinear_matrix_order_reverse , (N_det) ]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ integer, psi_bilinear_matrix_columns_loc, (N_det_beta_unique+1) ]
+BEGIN_PROVIDER [ integer(size_t), psi_bilinear_matrix_columns_loc, (N_det_beta_unique+1) ]
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -553,7 +587,8 @@ BEGIN_PROVIDER [ integer, psi_bilinear_matrix_columns_loc, (N_det_beta_unique+1)
   !
   ! Order refers to :c:data:`psi_det`
   END_DOC
-  integer                        :: i,j,k, l
+  integer                        :: i,j
+  integer(size_t)                :: k,l
 
   l = psi_bilinear_matrix_columns(1)
   psi_bilinear_matrix_columns_loc(l) = 1
@@ -577,9 +612,9 @@ BEGIN_PROVIDER [ integer, psi_bilinear_matrix_columns_loc, (N_det_beta_unique+1)
 END_PROVIDER
 
  BEGIN_PROVIDER  [ double precision, psi_bilinear_matrix_transp_values, (N_det,N_states) ]
-&BEGIN_PROVIDER [ integer, psi_bilinear_matrix_transp_rows   , (N_det) ]
-&BEGIN_PROVIDER [ integer, psi_bilinear_matrix_transp_columns, (N_det) ]
-&BEGIN_PROVIDER [ integer, psi_bilinear_matrix_transp_order  , (N_det) ]
+&BEGIN_PROVIDER [ integer(size_t), psi_bilinear_matrix_transp_rows   , (N_det) ]
+&BEGIN_PROVIDER [ integer(size_t), psi_bilinear_matrix_transp_columns, (N_det) ]
+&BEGIN_PROVIDER [ integer(size_t), psi_bilinear_matrix_transp_order  , (N_det) ]
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -590,7 +625,8 @@ END_PROVIDER
   ! Rows are $\alpha$ determinants and columns are $\beta$, but the matrix is stored in row major
   ! format.
   END_DOC
-  integer                        :: i,j,k,l
+  integer(size_t)                :: i,j,k
+  integer                        :: l
 
   PROVIDE psi_coef_sorted_bit
 
@@ -622,12 +658,15 @@ END_PROVIDER
   enddo
   !$OMP ENDDO
   !$OMP END PARALLEL
-  call i8sort(to_sort, psi_bilinear_matrix_transp_order, N_det)
-  call iset_order(psi_bilinear_matrix_transp_rows,psi_bilinear_matrix_transp_order,N_det)
-  call iset_order(psi_bilinear_matrix_transp_columns,psi_bilinear_matrix_transp_order,N_det)
+  call i8sort_big(to_sort, psi_bilinear_matrix_transp_order, N_det)
+  call i8set_order_big(psi_bilinear_matrix_transp_rows, &
+      psi_bilinear_matrix_transp_order,N_det)
+  call i8set_order_big(psi_bilinear_matrix_transp_columns, &
+      psi_bilinear_matrix_transp_order,N_det)
   !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(l)
   do l=1,N_states
-    call dset_order(psi_bilinear_matrix_transp_values(1,l),psi_bilinear_matrix_transp_order,N_det)
+    call dset_order_big(psi_bilinear_matrix_transp_values(1,l), &
+        psi_bilinear_matrix_transp_order,N_det)
   enddo
   !$OMP END PARALLEL DO
   deallocate(to_sort)
@@ -640,13 +679,14 @@ END_PROVIDER
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, psi_bilinear_matrix_transp_rows_loc, (N_det_alpha_unique+1) ]
+BEGIN_PROVIDER [ integer(size_t), psi_bilinear_matrix_transp_rows_loc, (N_det_alpha_unique+1) ]
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Location of the columns in the :c:data:`psi_bilinear_matrix`
   END_DOC
-  integer                        :: i,j,k, l
+  integer                        :: i,j
+  integer(size_t)                :: k,l
 
   l = psi_bilinear_matrix_transp_rows(1)
   psi_bilinear_matrix_transp_rows_loc(l) = 1
@@ -666,14 +706,14 @@ BEGIN_PROVIDER [ integer, psi_bilinear_matrix_transp_rows_loc, (N_det_alpha_uniq
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, psi_bilinear_matrix_order_transp_reverse , (N_det) ]
+BEGIN_PROVIDER [ integer(size_t), psi_bilinear_matrix_order_transp_reverse , (N_det) ]
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Order which allows to go from :c:data:`psi_bilinear_matrix_order_transp` to
   ! :c:data:`psi_bilinear_matrix`
   END_DOC
-  integer                        :: k
+  integer(size_t)                :: k
   psi_bilinear_matrix_order_transp_reverse = -1
   !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(k)
   do k=1,N_det
@@ -692,7 +732,8 @@ BEGIN_PROVIDER [ double precision, psi_bilinear_matrix, (N_det_alpha_unique,N_de
   !
   ! $D_\alpha^\dagger.C.D_\beta$
   END_DOC
-  integer                        :: i,j,k,istate
+  integer(size_t)                :: i,j,k
+  integer                        :: istate
   psi_bilinear_matrix = 0.d0
   do k=1,N_det
     i = psi_bilinear_matrix_rows(k)
@@ -718,16 +759,17 @@ subroutine create_wf_of_psi_bilinear_matrix(truncate)
 end
 
 subroutine update_wf_of_psi_bilinear_matrix(truncate)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Updates a wave function when psi_bilinear_matrix was modified
   END_DOC
   logical, intent(in)            :: truncate
-  integer                        :: i,j,k
+  integer(size_t)                :: i,j,k
   integer(bit_kind)              :: tmp_det(N_int,2)
-  integer                        :: idx
-  integer, external              :: get_index_in_psi_det_sorted_bit
+  integer(size_t)                :: idx
+  integer(size_t), external      :: get_index_in_psi_det_sorted_bit
   double precision               :: norm(N_states)
   PROVIDE psi_bilinear_matrix
 
@@ -787,13 +829,14 @@ subroutine update_wf_of_psi_bilinear_matrix(truncate)
 end
 
 subroutine generate_all_alpha_beta_det_products
+ use sizet
   implicit none
   BEGIN_DOC
   ! Creates a wave function from all possible $\alpha \times \beta$ determinants
   END_DOC
-  integer                        :: i,j,k,l
+  integer(size_t)                :: i,j,k,l
   integer                        :: iproc
-  integer, external              :: get_index_in_psi_det_sorted_bit
+  integer(size_t), external      :: get_index_in_psi_det_sorted_bit
   integer(bit_kind), allocatable :: tmp_det(:,:,:)
   logical, external              :: is_in_wavefunction
   PROVIDE H_apply_buffer_allocated
@@ -812,7 +855,7 @@ subroutine generate_all_alpha_beta_det_products
         tmp_det(k,1,l) = psi_det_alpha_unique(k,i)
         tmp_det(k,2,l) = psi_det_beta_unique (k,j)
       enddo
-      if (.not.is_in_wavefunction(tmp_det(1,1,l),N_int)) then
+      if (.not.is_in_wavefunction(tmp_det(1,1,l),int(N_int,size_t))) then
         l = l+1
       endif
     enddo
@@ -829,14 +872,16 @@ end
 
 
 subroutine copy_psi_bilinear_to_psi(psi, isize)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Overwrites :c:data:`psi_det` and :c:data:`psi_coef` with the wave function
   ! in bilinear order
   END_DOC
-  integer, intent(in)            :: isize
+  integer(size_t), intent(in)    :: isize
   integer(bit_kind), intent(out) :: psi(N_int,2,isize)
-  integer                        :: i,j,k,l
+  integer(size_t)                :: i,j,k
+  integer                        :: l
   do k=1,isize
     i = psi_bilinear_matrix_rows(k)
     j = psi_bilinear_matrix_columns(k)
@@ -856,8 +901,9 @@ use mmap_module
   !
   ! singles_alpha_csc_idx  : Index where the single excitations of determinant i start
   END_DOC
-  integer                        :: i,j
-  integer, allocatable           :: idx0(:), s(:)
+  integer(size_t)                :: i
+  integer(size_t)                :: j
+  integer(size_t), allocatable   :: idx0(:), s(:)
   allocate (idx0(N_det_alpha_unique))
   do i=1, N_det_alpha_unique
     idx0(i) = i
@@ -888,13 +934,14 @@ use mmap_module
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ integer, singles_alpha_csc, (singles_alpha_csc_size) ]
+BEGIN_PROVIDER [ integer(size_t), singles_alpha_csc, (singles_alpha_csc_size) ]
   implicit none
   BEGIN_DOC
   ! Indices of all single excitations
   END_DOC
-  integer                        :: i, k
-  integer, allocatable           :: idx0(:)
+  integer(size_t)                :: i
+  integer(size_t)                :: k
+  integer(size_t), allocatable   :: idx0(:)
   allocate (idx0(N_det_alpha_unique))
   do i=1, N_det_alpha_unique
     idx0(i) = i
@@ -920,10 +967,11 @@ BEGIN_PROVIDER [ type(mmap_type), singles_alpha_csc_map ]
   BEGIN_DOC
   ! Indices of all single excitations
   END_DOC
-  integer                        :: i, k
-  integer, allocatable           :: idx0(:)
+  integer(size_t)                :: i
+  integer(size_t)                :: k
+  integer(size_t), allocatable   :: idx0(:)
 
-  call mmap_create_i('', (/ 1_8*singles_alpha_csc_size /), &
+  call mmap_create_i8('', (/ 1_8*singles_alpha_csc_size /), &
                            .False., .False., singles_alpha_csc_map)
 
   allocate (idx0(N_det_alpha_unique))
@@ -937,8 +985,11 @@ BEGIN_PROVIDER [ type(mmap_type), singles_alpha_csc_map ]
       !$OMP   PRIVATE(i,k) SCHEDULE(static)
   do i=1, N_det_alpha_unique
     call get_all_spin_singles(                                       &
-        psi_det_alpha_unique, idx0, psi_det_alpha_unique(1,i), N_int, N_det_alpha_unique, &
-        singles_alpha_csc_map%i1(singles_alpha_csc_idx(i):singles_alpha_csc_idx(i)+N_det_alpha_unique-1),&
+        psi_det_alpha_unique, idx0, psi_det_alpha_unique(1,i),       &
+        N_int, N_det_alpha_unique,                                   &
+        singles_alpha_csc_map%i81(                                   &
+            singles_alpha_csc_idx(i):singles_alpha_csc_idx(i)+       &
+            N_det_alpha_unique-1),                                   &
         k)
   enddo
   !$OMP END PARALLEL DO
@@ -955,8 +1006,9 @@ END_PROVIDER
   !
   ! singles_beta_csc_idx  : Index where the single excitations of determinant i start
   END_DOC
-  integer                        :: i,j
-  integer, allocatable           :: idx0(:), s(:)
+  integer(size_t)                :: i
+  integer(size_t)                :: j
+  integer(size_t), allocatable   :: idx0(:), s(:)
   allocate (idx0(N_det_beta_unique))
   do i=1, N_det_beta_unique
     idx0(i) = i
@@ -987,13 +1039,14 @@ END_PROVIDER
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ integer, singles_beta_csc, (singles_beta_csc_size) ]
+BEGIN_PROVIDER [ integer(size_t), singles_beta_csc, (singles_beta_csc_size) ]
   implicit none
   BEGIN_DOC
   ! Indices of all single excitations
   END_DOC
-  integer                        :: i, k
-  integer, allocatable           :: idx0(:)
+  integer(size_t)                :: i
+  integer(size_t)                :: k
+  integer(size_t), allocatable   :: idx0(:)
   allocate (idx0(N_det_beta_unique))
   do i=1, N_det_beta_unique
     idx0(i) = i
@@ -1019,10 +1072,11 @@ BEGIN_PROVIDER [ type(mmap_type), singles_beta_csc_map ]
   BEGIN_DOC
   ! Indices of all single excitations
   END_DOC
-  integer                        :: i, k
-  integer, allocatable           :: idx0(:)
+  integer(size_t)                :: i
+  integer(size_t)                :: k
+  integer(size_t), allocatable   :: idx0(:)
 
-  call mmap_create_i('', (/ 1_8*singles_beta_csc_size /), &
+  call mmap_create_i8('', (/ 1_8*singles_beta_csc_size /), &
                            .False., .False., singles_beta_csc_map)
 
   allocate (idx0(N_det_beta_unique))
@@ -1036,8 +1090,11 @@ BEGIN_PROVIDER [ type(mmap_type), singles_beta_csc_map ]
       !$OMP   PRIVATE(i,k) SCHEDULE(static)
   do i=1, N_det_beta_unique
     call get_all_spin_singles(                                       &
-        psi_det_beta_unique, idx0, psi_det_beta_unique(1,i), N_int, N_det_beta_unique, &
-        singles_beta_csc_map%i1(singles_beta_csc_idx(i):singles_beta_csc_idx(i)+N_det_beta_unique-1),&
+        psi_det_beta_unique, idx0, psi_det_beta_unique(1,i),         &
+        N_int, N_det_beta_unique,                                    &
+        singles_beta_csc_map%i81(                                    &
+            singles_beta_csc_idx(i):singles_beta_csc_idx(i)+         &
+            N_det_beta_unique-1),                                    &
         k)
   enddo
   !$OMP END PARALLEL DO
@@ -1047,6 +1104,7 @@ END_PROVIDER
 
 
 subroutine wf_of_psi_bilinear_matrix(truncate)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -1054,10 +1112,10 @@ subroutine wf_of_psi_bilinear_matrix(truncate)
   ! of $\alpha$ and $\beta$ determinants
   END_DOC
   logical, intent(in)            :: truncate
-  integer                        :: i,j,k
+  integer(size_t)                :: i,j,k
   integer(bit_kind)              :: tmp_det(N_int,2)
-  integer                        :: idx
-  integer, external              :: get_index_in_psi_det_sorted_bit
+  integer(size_t)                :: idx
+  integer(size_t), external      :: get_index_in_psi_det_sorted_bit
   double precision               :: norm(N_states)
 
   do k=1,N_det

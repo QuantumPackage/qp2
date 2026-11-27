@@ -1,3 +1,4 @@
+use sizet
 BEGIN_PROVIDER [ logical, pruned, (N_det) ]
  implicit none
  BEGIN_DOC
@@ -10,7 +11,8 @@ BEGIN_PROVIDER [ logical, pruned, (N_det) ]
    return
  endif
 
- integer :: i,j,k,ndet_new,ncfg_max
+ integer(size_t) :: i,ndet_new
+ integer :: j,k,ncfg_max
  double precision :: thr
 
 ! if (s2_eig) then

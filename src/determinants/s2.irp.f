@@ -1,14 +1,17 @@
+use sizet
 double precision function diag_S_mat_elem(key_i,Nint)
+ use sizet
   implicit none
   use bitmasks
   include 'utils/constants.include.F'
 
-  integer                        :: Nint
+  integer(size_t)                :: Nint
   integer(bit_kind), intent(in)  :: key_i(Nint,2)
   BEGIN_DOC
 ! Returns <i|S^2|i>
   END_DOC
-  integer                        :: nup, ntot, i
+  integer                        :: nup, ntot
+  integer(size_t)                :: i
   integer(bit_kind)              :: xorvec(N_int_max), upvec(N_int_max)
 
   do i=1,Nint
@@ -41,16 +44,17 @@ double precision function diag_S_mat_elem(key_i,Nint)
 end
 
 subroutine get_s2(key_i,key_j,Nint,s2)
+ use sizet
   implicit none
   use bitmasks
   BEGIN_DOC
   ! Returns $\langle S^2 \rangle - S_z^2 S_z$
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: key_i(Nint,2)
   integer(bit_kind), intent(in)  :: key_j(Nint,2)
   double precision, intent(out)  :: s2
-  integer                        :: exc(0:2,2,2)
+  integer(size_t)                :: exc(0:2,2,2)
   integer                        :: degree
   double precision               :: phase_spsm
   integer                        :: nup, i
@@ -120,6 +124,7 @@ END_PROVIDER
 
 
 subroutine u_0_S2_u_0(e_0,u_0,n,keys_tmp,Nint,N_st,sze_8)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -128,7 +133,8 @@ subroutine u_0_S2_u_0(e_0,u_0,n,keys_tmp,Nint,N_st,sze_8)
   ! n : number of determinants
   !
   END_DOC
-  integer, intent(in)            :: n,Nint, N_st, sze_8
+  integer(size_t), intent(in)    :: n,Nint, sze_8
+  integer, intent(in)            :: N_st
   double precision, intent(out)  :: e_0(N_st)
   double precision, intent(in)   :: u_0(sze_8,N_st)
   integer(bit_kind),intent(in)   :: keys_tmp(Nint,2,n)
@@ -147,6 +153,7 @@ end
 
 
 subroutine S2_u_0(v_0,u_0,n,keys_tmp,Nint)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -155,7 +162,7 @@ subroutine S2_u_0(v_0,u_0,n,keys_tmp,Nint)
   ! n : number of determinants
   !
   END_DOC
-  integer, intent(in)            :: n,Nint
+  integer(size_t), intent(in)    :: n,Nint
   double precision, intent(out)  :: v_0(n)
   double precision, intent(in)   :: u_0(n)
   integer(bit_kind),intent(in)   :: keys_tmp(Nint,2,n)
@@ -163,6 +170,7 @@ subroutine S2_u_0(v_0,u_0,n,keys_tmp,Nint)
 end
 
 subroutine S2_u_0_nstates(v_0,u_0,n,keys_tmp,Nint,N_st,sze_8)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -171,20 +179,23 @@ subroutine S2_u_0_nstates(v_0,u_0,n,keys_tmp,Nint,N_st,sze_8)
   ! n : number of determinants
   !
   END_DOC
-  integer, intent(in)            :: N_st,n,Nint, sze_8
+  integer(size_t), intent(in)    :: n,Nint, sze_8
+  integer, intent(in)            :: N_st
   double precision, intent(out)  :: v_0(sze_8,N_st)
   double precision, intent(in)   :: u_0(sze_8,N_st)
   integer(bit_kind),intent(in)   :: keys_tmp(Nint,2,n)
   double precision               :: s2_tmp
   double precision, allocatable  :: vt(:,:)
-  integer                        :: i,j,k,l, jj,ii
+  integer(size_t)                :: i,j
+  integer                        :: k,l, jj,ii
   integer                        :: i0, j0
 
-  integer, allocatable           :: shortcut(:,:), sort_idx(:,:)
+  integer(size_t), allocatable   :: shortcut(:,:), sort_idx(:,:)
   integer(bit_kind), allocatable :: sorted(:,:,:), version(:,:,:)
   integer(bit_kind)              :: sorted_i(Nint)
 
-  integer                        :: sh, sh2, ni, exa, ext, org_i, org_j, endi, istate
+  integer(size_t)                :: sh, sh2, ni, org_i, org_j, endi
+  integer                        :: exa, ext, istate
 
 
   ASSERT (Nint > 0)
@@ -295,15 +306,18 @@ end
 
 
 subroutine get_uJ_s2_uI(psi_keys_tmp,psi_coefs_tmp,n,nmax_coefs,nmax_keys,s2,nstates)
+ use sizet
   implicit none
   use bitmasks
-  integer, intent(in)            :: n,nmax_coefs,nmax_keys,nstates
+  integer(size_t), intent(in)    :: n,nmax_coefs,nmax_keys
+  integer, intent(in)            :: nstates
   integer(bit_kind), intent(in)  :: psi_keys_tmp(N_int,2,nmax_keys)
   double precision, intent(in)   :: psi_coefs_tmp(nmax_coefs,nstates)
   double precision, intent(out)  :: s2(nstates,nstates)
   double precision               :: s2_tmp,accu
-  integer                        :: i,j,l,jj,ll,kk
-  integer, allocatable           :: idx(:)
+  integer(size_t)                :: i,j,kk
+  integer                        :: l,jj,ll
+  integer(size_t), allocatable   :: idx(:)
   BEGIN_DOC
   ! returns the matrix elements of S^2 "s2(i,j)" between the "nstates" states
   ! psi_coefs_tmp(:,i) and psi_coefs_tmp(:,j)
@@ -345,19 +359,23 @@ end
 
 
 subroutine i_S2_psi_minilist(key,keys,idx_key,N_minilist,coef,Nint,Ndet,Ndet_max,Nstate,i_S2_psi_array)
+ use sizet
   use bitmasks
   implicit none
-  integer, intent(in)            :: Nint, Ndet,Ndet_max,Nstate,idx_key(Ndet), N_minilist
+  integer(size_t), intent(in)    :: Nint, Ndet,Ndet_max,N_minilist
+  integer(size_t), intent(in)    :: idx_key(Ndet)
+  integer, intent(in)            :: Nstate
   integer(bit_kind), intent(in)  :: keys(Nint,2,Ndet)
   integer(bit_kind), intent(in)  :: key(Nint,2)
   double precision, intent(in)   :: coef(Ndet_max,Nstate)
   double precision, intent(out)  :: i_S2_psi_array(Nstate)
 
-  integer                        :: i, ii,j, i_in_key, i_in_coef
+  integer(size_t)                :: ii,j, i_in_key, i_in_coef
+  integer                        :: i
   double precision               :: phase
   integer                        :: exc(0:2,2,2)
   double precision               :: s2ij
-  integer                        :: idx(0:Ndet)
+  integer(size_t)                :: idx(0:Ndet)
   BEGIN_DOC
 ! Computes $\langle i|S^2|\Psi \rangle = \sum_J c_J \langle i|S^2|J \rangle$.
 !

@@ -1,3 +1,4 @@
+use sizet
 subroutine $subroutine($params_main)
   implicit none
   use omp_lib
@@ -9,10 +10,11 @@ subroutine $subroutine($params_main)
 
   $decls_main
 
-  integer                        :: i_generator
+  integer(size_t)                :: i_generator
   double precision               :: wall_0, wall_1
   integer(bit_kind), allocatable :: mask(:,:,:)
-  integer                        :: ispin, k
+  integer                        :: ispin
+  integer(size_t)                :: k
   integer                        :: iproc
   double precision, allocatable  :: fock_diag_tmp(:,:)
 

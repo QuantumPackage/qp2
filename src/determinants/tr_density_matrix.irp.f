@@ -1,3 +1,4 @@
+use sizet
 BEGIN_PROVIDER [double precision, one_e_tr_dm_mo, (mo_num, mo_num, N_states, N_states)]
  use OMP_LIB
   implicit none
@@ -6,15 +7,18 @@ BEGIN_PROVIDER [double precision, one_e_tr_dm_mo, (mo_num, mo_num, N_states, N_s
   ! One body transition density matrix for all pairs of states n and m, < Psi^n | a_i^\dagger a_a | Psi^m >
   END_DOC
 
-  integer                        :: j,l,m,k_a,k_b,n
-  integer                        :: occ(N_int*bit_kind_size,2)
+  integer(size_t)                :: j,l,k_a,k_b
+  integer                        :: m,n
+  integer(size_t)                :: occ(N_int*bit_kind_size,2)
   double precision               :: ck, ckl
   double precision               :: phase
-  integer                        :: h1,h2,p1,p2,degree
+  integer(size_t)                :: h1,h2,p1,p2
+  integer                        :: degree
   integer(bit_kind)              :: tmp_det(N_int,2), tmp_det2(N_int)
-  integer                        :: exc(0:2,2),n_occ(2)
+  integer(size_t)                :: exc(0:2,2)
+  integer                        :: n_occ(2)
   double precision, allocatable  :: tmp_a(:,:,:,:), tmp_b(:,:,:,:)
-  integer                        :: krow, kcol, lrow, lcol
+  integer(size_t)                :: krow, kcol, lrow, lcol
 
   double precision :: mem_tot_tr_dm
   integer :: nthreads
@@ -176,15 +180,18 @@ END_PROVIDER
   ! $\alpha$ and $\beta$ one-body transition density matrices for all pairs of states
   END_DOC
 
-  integer                        :: j,l,m,n,k_a,k_b
-  integer                        :: occ(N_int*bit_kind_size,2)
+  integer(size_t)                :: j,l,k_a,k_b
+  integer                        :: m,n
+  integer(size_t)                :: occ(N_int*bit_kind_size,2)
   double precision               :: ck, ckl
   double precision               :: phase
-  integer                        :: h1,h2,p1,p2,degree
+  integer(size_t)                :: h1,h2,p1,p2
+  integer                        :: degree
   integer(bit_kind)              :: tmp_det(N_int,2), tmp_det2(N_int)
-  integer                        :: exc(0:2,2),n_occ(2)
+  integer(size_t)                :: exc(0:2,2)
+  integer                        :: n_occ(2)
   double precision, allocatable  :: tmp_a(:,:,:,:), tmp_b(:,:,:,:)
-  integer                        :: krow, kcol, lrow, lcol
+  integer(size_t)                :: krow, kcol, lrow, lcol
 
   PROVIDE psi_det_alpha_unique psi_det_beta_unique
 

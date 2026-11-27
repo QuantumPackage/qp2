@@ -1,12 +1,14 @@
+use sizet
 use bitmasks
 
-BEGIN_PROVIDER [ integer, N_det ]
+BEGIN_PROVIDER [ integer(size_t), N_det ]
   implicit none
   BEGIN_DOC
   ! Number of determinants in the wave function
   END_DOC
   logical                        :: exists
   character*(64)                 :: label
+  integer                        :: n_det4
   PROVIDE read_wf mo_label ezfio_filename nproc
   if (mpi_master) then
     if (read_wf) then
@@ -19,14 +21,15 @@ BEGIN_PROVIDER [ integer, N_det ]
         endif
       endif
       if (exists) then
-        call ezfio_get_determinants_n_det(N_det)
+        call ezfio_get_determinants_n_det(n_det4)
+        N_det = n_det4
       else
         N_det = 1
       endif
     else
       N_det = 1
     endif
-    call write_int(6,N_det,'Number of determinants')
+    call write_int(6,int(N_det,4),'Number of determinants')
   endif
 
   ASSERT (N_det > 0)
@@ -44,7 +47,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [integer, max_degree_exc]
   implicit none
-  integer                        :: i,degree
+  integer(size_t)                :: i
+  integer                        :: degree
   max_degree_exc = 0
   BEGIN_DOC
   ! Maximum degree of excitation in the wave function with respect to the Hartree-Fock
@@ -58,24 +62,26 @@ BEGIN_PROVIDER [integer, max_degree_exc]
   enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, psi_det_size ]
+BEGIN_PROVIDER [ integer(size_t), psi_det_size ]
   implicit none
   BEGIN_DOC
   ! Size of the psi_det and psi_coef arrays
   END_DOC
   PROVIDE ezfio_filename
   logical                        :: exists
+  integer                        :: n_det4
   psi_det_size = 1
   PROVIDE mpi_master
   if (read_wf) then
     if (mpi_master) then
       call ezfio_has_determinants_n_det(exists)
       if (exists) then
-        call ezfio_get_determinants_n_det(psi_det_size)
+        call ezfio_get_determinants_n_det(n_det4)
+        psi_det_size = n_det4
       else
         psi_det_size = 1
       endif
-      call write_int(6,psi_det_size,'Dimension of the psi arrays')
+      call write_int(6,int(psi_det_size,4),'Dimension of the psi arrays')
     endif
   endif
 
@@ -87,7 +93,7 @@ BEGIN_PROVIDER [ integer(bit_kind), psi_det, (N_int,2,psi_det_size) ]
   ! The determinants of the wave function. Initialized with Hartree-Fock if the |EZFIO| file
   ! is empty.
   END_DOC
-  integer                        :: i
+  integer(size_t)                :: i
   logical                        :: exists
   character*(64)                 :: label
 
@@ -105,9 +111,9 @@ BEGIN_PROVIDER [ integer(bit_kind), psi_det, (N_int,2,psi_det_size) ]
             if (exists) then
               call ezfio_has_determinants_psi_det(exists)
               if (exists) then
-                call ezfio_has_determinants_mo_label(exists)
+        call ezfio_has_determinants_mo_label(exists)
                 if (exists) then
-                  call ezfio_get_determinants_mo_label(label)
+          call ezfio_get_determinants_mo_label(label)
                   exists = (label == mo_label)
                 endif
               endif
@@ -147,7 +153,8 @@ BEGIN_PROVIDER [ double precision, psi_coef, (psi_det_size,N_states) ]
   ! is empty.
   END_DOC
 
-  integer                        :: i,k, N_int2
+  integer(size_t)                :: i
+  integer                        :: k, N_int2
   logical                        :: exists
   character*(64)                 :: label
 
@@ -198,7 +205,8 @@ BEGIN_PROVIDER [ double precision, psi_average_norm_contrib, (psi_det_size) ]
   BEGIN_DOC
   ! Contribution of determinants to the state-averaged density.
   END_DOC
-  integer                        :: i,j,k
+  integer(size_t)                :: i
+  integer                        :: j,k
   double precision               :: f
 
   psi_average_norm_contrib(:) = 0.d0
@@ -214,12 +222,13 @@ BEGIN_PROVIDER [ double precision, psi_average_norm_contrib, (psi_det_size) ]
   enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, dominant_det, (N_states) ]
+BEGIN_PROVIDER [ integer(size_t), dominant_det, (N_states) ]
  implicit none
  BEGIN_DOC
  ! Determinant with the largest weight, for each state
  END_DOC
- integer :: i, k
+ integer(size_t) :: i
+ integer        :: k
  double precision :: wmax, c
  do k=1,N_states
    wmax = 0.d0
@@ -246,21 +255,22 @@ END_PROVIDER
  BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted, (N_int,2,psi_det_size) ]
 &BEGIN_PROVIDER [ double precision, psi_coef_sorted, (psi_det_size,N_states) ]
 &BEGIN_PROVIDER [ double precision, psi_average_norm_contrib_sorted, (psi_det_size) ]
-&BEGIN_PROVIDER [ integer, psi_det_sorted_order, (psi_det_size) ]
+&BEGIN_PROVIDER [ integer(size_t), psi_det_sorted_order, (psi_det_size) ]
    implicit none
    BEGIN_DOC
    ! Wave function sorted by determinants contribution to the norm (state-averaged)
    !
    ! psi_det_sorted_order(i) -> k : index in psi_det
    END_DOC
-   integer                        :: i,j,k
-   integer, allocatable           :: iorder(:)
+   integer(size_t)                :: i,j
+   integer                        :: k
+   integer(size_t), allocatable   :: iorder(:)
    allocate ( iorder(N_det) )
    do i=1,N_det
      psi_average_norm_contrib_sorted(i) = -psi_average_norm_contrib(i)
      iorder(i) = i
    enddo
-   call dsort(psi_average_norm_contrib_sorted,iorder,N_det)
+   call dsort_big(psi_average_norm_contrib_sorted,iorder,N_det)
    do i=1,N_det
      do j=1,N_int
        psi_det_sorted(j,1,i) = psi_det(j,1,iorder(i))
@@ -286,7 +296,7 @@ END_PROVIDER
 
  BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_bit, (N_int,2,psi_det_size) ]
 &BEGIN_PROVIDER [ double precision, psi_coef_sorted_bit, (psi_det_size,N_states) ]
-&BEGIN_PROVIDER [ integer, psi_coef_sorted_bit_order, (psi_det_size) ]
+&BEGIN_PROVIDER [ integer(size_t), psi_coef_sorted_bit_order, (psi_det_size) ]
    implicit none
    BEGIN_DOC
    ! Determinants on which we apply $\langle i|H|psi \rangle$ for perturbation.
@@ -295,19 +305,22 @@ END_PROVIDER
    ! function.
    END_DOC
 
-   call sort_dets_by_det_search_key(N_det, psi_det, psi_coef, size(psi_coef,1),       &
-       psi_det_sorted_bit, psi_coef_sorted_bit, psi_coef_sorted_bit_order, N_states)
+   call sort_dets_by_det_search_key(N_det, psi_det, psi_coef,           &
+       int(size(psi_coef,1),size_t),psi_det_sorted_bit,psi_coef_sorted_bit, &
+       psi_coef_sorted_bit_order, N_states)
 
 END_PROVIDER
 
 subroutine sort_dets_by_det_search_key(Ndet, det_in, coef_in, sze, det_out, coef_out, iorder, N_st)
+ use sizet
    use bitmasks
    implicit none
-   integer, intent(in)            :: Ndet, N_st, sze
+   integer(size_t), intent(in)    :: Ndet, sze
+   integer, intent(in)            :: N_st
    integer(bit_kind), intent(in)  :: det_in  (N_int,2,sze)
    double precision , intent(in)  :: coef_in(sze,N_st)
    integer(bit_kind), intent(out) :: det_out (N_int,2,sze)
-   integer,           intent(out) :: iorder(sze)
+   integer(size_t), intent(out)   :: iorder(sze)
    double precision , intent(out) :: coef_out(sze,N_st)
    BEGIN_DOC
    ! Determinants are sorted according to their :c:func:`det_search_key`.
@@ -317,7 +330,8 @@ subroutine sort_dets_by_det_search_key(Ndet, det_in, coef_in, sze, det_out, coef
    ! /!\ The first dimension of coef_out and coef_in need to be psi_det_size
    !
    END_DOC
-   integer                        :: i,j,k
+   integer(size_t)                :: i,j
+   integer                        :: k
    integer*8, allocatable         :: bit_tmp(:)
    integer*8, external            :: det_search_key
 
@@ -328,7 +342,7 @@ subroutine sort_dets_by_det_search_key(Ndet, det_in, coef_in, sze, det_out, coef
      !$DIR FORCEINLINE
      bit_tmp(i) = det_search_key(det_in(1,1,i),N_int)
    enddo
-   call i8sort(bit_tmp,iorder,Ndet)
+   call i8sort_big(bit_tmp,iorder,Ndet)
    !DIR$ IVDEP
    do i=1,Ndet
      do j=1,N_int
@@ -376,20 +390,21 @@ END_PROVIDER
 !==============================================================================!
 
 subroutine read_dets(det,Nint,Ndet)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Reads the determinants from the |EZFIO| file
   END_DOC
 
-  integer, intent(in)            :: Nint,Ndet
+  integer(size_t), intent(in)    :: Nint,Ndet
   integer(bit_kind), intent(out) :: det(Nint,2,Ndet)
   integer*8, allocatable         :: psi_det_read(:,:,:)
   double precision, allocatable  :: psi_coef_read(:,:)
   integer*8                      :: det_8(100)
   integer(bit_kind)              :: det_bk((100*8)/bit_kind)
   integer                        :: N_int2
-  integer                        :: i,k
+  integer(size_t)                :: i,k
   equivalence (det_8, det_bk)
 
   call ezfio_get_determinants_N_int(N_int2)
@@ -419,6 +434,7 @@ subroutine read_dets(det,Nint,Ndet)
 end
 
 subroutine save_ref_determinant
+ use sizet
   BEGIN_DOC
   ! Saves the reference determinant (ref_bitmask, the Hartree-Fock
   ! determinant) as a one-determinant wave function, with coefficient
@@ -429,21 +445,23 @@ subroutine save_ref_determinant
   double precision               :: buffer(1,N_states)
   buffer = 0.d0
   buffer(1,1) = 1.d0
-  call save_wavefunction_general(1,N_states,ref_bitmask,1,buffer)
+  call save_wavefunction_general(1_size_t,N_states,ref_bitmask,1_size_t,buffer)
 end
 
 
 
 
 subroutine save_wavefunction_truncated(thr)
+ use sizet
   implicit none
   double precision, intent(in) :: thr
   use bitmasks
   BEGIN_DOC
   !  Save the wave function into the |EZFIO| file
   END_DOC
-  integer :: N_det_save,i
-  call nullify_small_elements(N_det,N_states,psi_coef,size(psi_coef,1),thr)
+  integer(size_t)                :: N_det_save,i
+  call nullify_small_elements(N_det,int(N_states, size_t),psi_coef, &
+      int(size(psi_coef,1), size_t),thr)
   TOUCH psi_coef
   N_det_save = N_det
   do i=1,N_det
@@ -453,13 +471,18 @@ subroutine save_wavefunction_truncated(thr)
     endif
   enddo
   if (mpi_master) then
-    call save_wavefunction_general(N_det_save,min(N_states,N_det_save),psi_det_sorted,size(psi_coef_sorted,1),psi_coef_sorted)
+    call save_wavefunction_general(N_det_save, &
+                                   min(N_states,int(N_det_save,4)), &
+                                   psi_det_sorted, &
+                                   int(size(psi_coef_sorted,1),size_t), &
+                                   psi_coef_sorted)
   endif
 end
 
 subroutine save_wavefunction
   implicit none
   use bitmasks
+  use sizet
   BEGIN_DOC
   !  Save the wave function into the |EZFIO| file
   END_DOC
@@ -471,7 +494,8 @@ subroutine save_wavefunction
     return
   endif
   if (mpi_master) then
-    call save_wavefunction_general(N_det,N_states,psi_det_sorted,size(psi_coef_sorted,1),psi_coef_sorted)
+    call save_wavefunction_general(N_det,N_states,psi_det_sorted,          &
+        int(size(psi_coef_sorted,1),size_t),psi_coef_sorted)
   endif
 end
 
@@ -479,22 +503,26 @@ end
 subroutine save_wavefunction_unsorted
   implicit none
   use bitmasks
+  use sizet
   BEGIN_DOC
   !  Save the wave function into the |EZFIO| file
   END_DOC
   if (mpi_master) then
-    call save_wavefunction_general(N_det,min(N_states,N_det),psi_det,size(psi_coef,1),psi_coef)
+    call save_wavefunction_general(N_det, min(N_states,int(N_det,4)), psi_det, &
+                                   int(size(psi_coef,1),size_t), psi_coef)
   endif
 end
 
 subroutine save_wavefunction_general(ndet,nstates,psidet,dim_psicoef,psicoef)
+ use sizet
   implicit none
   BEGIN_DOC
   !  Save the wave function into the |EZFIO| file
   END_DOC
   use bitmasks
   include 'constants.include.F'
-  integer, intent(in)            :: ndet,nstates,dim_psicoef
+  integer(size_t), intent(in)    :: ndet, dim_psicoef
+  integer, intent(in)            :: nstates
   integer(bit_kind), intent(in)  :: psidet(N_int,2,ndet)
   double precision, intent(in)   :: psicoef(dim_psicoef,nstates)
   integer*8, allocatable         :: psi_det_save(:,:,:)
@@ -502,14 +530,15 @@ subroutine save_wavefunction_general(ndet,nstates,psidet,dim_psicoef,psicoef)
   double precision, allocatable  :: psi_coef_save2(:,:)
 
   double precision               :: accu_norm
-  integer                        :: i,j,k, ndet_qp_edit
+  integer(size_t)                :: i,k
+  integer                        :: j, ndet_qp_edit
 
   if (mpi_master) then
-    ndet_qp_edit = min(ndet,N_det_qp_edit)
+    ndet_qp_edit = min(int(ndet,4),N_det_qp_edit)
 
     call ezfio_set_determinants_N_int(N_int)
     call ezfio_set_determinants_bit_kind(bit_kind)
-    call ezfio_set_determinants_N_det(ndet)
+    call ezfio_set_determinants_N_det(int(ndet,4))
     call ezfio_set_determinants_N_det_qp_edit(ndet_qp_edit)
     call ezfio_set_determinants_n_states(nstates)
     call ezfio_set_determinants_mo_label(mo_label)
@@ -547,32 +576,35 @@ subroutine save_wavefunction_general(ndet,nstates,psidet,dim_psicoef,psicoef)
     deallocate (psi_coef_save)
     deallocate (psi_coef_save2)
 
-    call write_int(6,ndet,'Saved determinants')
+    call write_int(6,int(ndet,4),'Saved determinants')
   endif
 end
 
 subroutine save_wavefunction_general_unormalized(ndet,nstates,psidet,dim_psicoef,psicoef)
+ use sizet
   implicit none
   BEGIN_DOC
   !  Save the wave function into the |EZFIO| file
   END_DOC
   use bitmasks
   include 'constants.include.F'
-  integer, intent(in)            :: ndet,nstates,dim_psicoef
+  integer(size_t), intent(in)    :: ndet, dim_psicoef
+  integer, intent(in)            :: nstates
   integer(bit_kind), intent(in)  :: psidet(N_int,2,ndet)
   double precision, intent(in)   :: psicoef(dim_psicoef,nstates)
   integer*8, allocatable         :: psi_det_save(:,:,:)
   double precision, allocatable  :: psi_coef_save(:,:)
 
   double precision               :: accu_norm
-  integer                        :: i,j,k, ndet_qp_edit
+  integer(size_t)                :: i,k
+  integer                        :: j, ndet_qp_edit
 
   if (mpi_master) then
-    ndet_qp_edit = min(ndet,N_det_qp_edit)
+    ndet_qp_edit = min(int(ndet,4),N_det_qp_edit)
 
     call ezfio_set_determinants_N_int(N_int)
     call ezfio_set_determinants_bit_kind(bit_kind)
-    call ezfio_set_determinants_N_det(ndet)
+    call ezfio_set_determinants_N_det(int(ndet,4))
     call ezfio_set_determinants_N_det_qp_edit(ndet_qp_edit)
     call ezfio_set_determinants_n_states(nstates)
     call ezfio_set_determinants_mo_label(mo_label)
@@ -609,36 +641,39 @@ subroutine save_wavefunction_general_unormalized(ndet,nstates,psidet,dim_psicoef
     call ezfio_set_determinants_psi_coef_qp_edit(psi_coef_save)
     deallocate (psi_coef_save)
 
-    call write_int(6,ndet,'Saved determinants')
+    call write_int(6,int(ndet,4),'Saved determinants')
   endif
 end
 
 
 subroutine save_wavefunction_specified(ndet,nstates,psidet,psicoef,ndetsave,index_det_save)
+ use sizet
   implicit none
   BEGIN_DOC
   !  Save the wave function into the |EZFIO| file
   END_DOC
   use bitmasks
-  integer, intent(in)            :: ndet,nstates
+  integer(size_t), intent(in)    :: ndet
+  integer, intent(in)            :: nstates
   integer(bit_kind), intent(in)  :: psidet(N_int,2,ndet)
   double precision, intent(in)   :: psicoef(ndet,nstates)
-  integer, intent(in)            :: index_det_save(ndet)
-  integer, intent(in)            :: ndetsave
+  integer(size_t), intent(in)    :: index_det_save(ndet)
+  integer(size_t), intent(in)    :: ndetsave
   integer*8, allocatable         :: psi_det_save(:,:,:)
   double precision, allocatable  :: psi_coef_save(:,:)
   integer*8                      :: det_8(100)
   integer(bit_kind)              :: det_bk((100*8)/bit_kind)
-  integer                        :: N_int2
+  integer(size_t)                :: N_int2
   equivalence (det_8, det_bk)
 
-  integer                        :: i,j,k, ndet_qp_edit
+  integer(size_t)                :: i,k
+  integer                        :: j, ndet_qp_edit
 
   if (mpi_master) then
-    ndet_qp_edit = min(ndetsave,N_det_qp_edit)
+    ndet_qp_edit = min(int(ndetsave,4),N_det_qp_edit)
     call ezfio_set_determinants_N_int(N_int)
     call ezfio_set_determinants_bit_kind(bit_kind)
-    call ezfio_set_determinants_N_det(ndetsave)
+    call ezfio_set_determinants_N_det(int(ndetsave,4))
     call ezfio_set_determinants_N_det_qp_edit(ndet_qp_edit)
     call ezfio_set_determinants_n_states(nstates)
     call ezfio_set_determinants_mo_label(mo_label)
@@ -704,21 +739,23 @@ subroutine save_wavefunction_specified(ndet,nstates,psidet,psicoef,ndetsave,inde
     call ezfio_set_determinants_psi_coef(psi_coef_save)
     deallocate (psi_coef_save)
 
-    call write_int(6,ndet,'Saved determinants')
+    call write_int(6,int(ndet,4),'Saved determinants')
   endif
 end
 
 
 logical function detEq(a,b,Nint)
+ use sizet
   BEGIN_DOC
   ! Returns .true. if the determinants a and b (alpha and beta spin
   ! bitmasks) are bit-for-bit equal over the Nint words.
   END_DOC
   use bitmasks
   implicit none
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: a(Nint,2), b(Nint,2)
-  integer                        :: ni, i
+  integer(size_t)                :: ni
+  integer                        :: i
 
   detEq = .false.
   do i=1,2
@@ -731,6 +768,7 @@ end function
 
 
 integer function detCmp(a,b,Nint)
+ use sizet
   BEGIN_DOC
   ! Returns 0, -1 or 1 if the determinants a and b are equal, and a
   ! is smaller or greater than b. The alpha bitmask is compared from
@@ -739,9 +777,10 @@ integer function detCmp(a,b,Nint)
   END_DOC
   use bitmasks
   implicit none
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: a(Nint,2), b(Nint,2)
-  integer                        :: ni, i
+  integer(size_t)                :: ni
+  integer                        :: i
 
   detCmp = 0
   do i=1,2
@@ -761,6 +800,7 @@ end function
 
 
 subroutine apply_excitation(det, exc, res, ok, Nint)
+ use sizet
   BEGIN_DOC
   ! Applies to det the excitation described by exc and writes the
   ! excited determinant in res. exc uses the same encoding as
@@ -772,13 +812,15 @@ subroutine apply_excitation(det, exc, res, ok, Nint)
   use bitmasks
   implicit none
 
-  integer, intent(in)            :: Nint
-  integer, intent(in)            :: exc(0:2,2,2)
+  integer(size_t), intent(in)    :: Nint
+  integer(size_t), intent(in)    :: exc(0:2,2,2)
   integer(bit_kind),intent(in)   :: det(Nint, 2)
   integer(bit_kind),intent(out)  :: res(Nint, 2)
   logical, intent(out)           :: ok
-  integer                        :: h1,p1,h2,p2,s1,s2,degree
-  integer                        :: ii, pos
+  integer(size_t)                :: h1,p1,h2,p2
+  integer                        :: s1,s2,degree
+  integer(size_t)                :: ii
+  integer                        :: pos
 
 
   ok = .false.
@@ -870,6 +912,7 @@ end subroutine
 
 
 subroutine apply_particles(det, s1, p1, s2, p2, res, ok, Nint)
+ use sizet
   BEGIN_DOC
   ! Adds the particle p1 of spin s1 (skipped when p1 is 0) and the
   ! particle p2 of spin s2 to det, and writes the result in res.
@@ -878,12 +921,14 @@ subroutine apply_particles(det, s1, p1, s2, p2, res, ok, Nint)
   END_DOC
   use bitmasks
   implicit none
-  integer, intent(in)            :: Nint
-  integer, intent(in)            :: s1, p1, s2, p2
+  integer(size_t), intent(in)    :: Nint
+  integer(size_t), intent(in)    :: p1, p2
+  integer, intent(in)            :: s1, s2
   integer(bit_kind),intent(in)   :: det(Nint, 2)
   integer(bit_kind),intent(out)  :: res(Nint, 2)
   logical, intent(out)           :: ok
-  integer                        :: ii, pos
+  integer(size_t)                :: ii
+  integer                        :: pos
 
   ok = .false.
   do ii = 1, Nint
@@ -909,6 +954,7 @@ end subroutine
 
 
 subroutine apply_holes(det, s1, h1, s2, h2, res, ok, Nint)
+ use sizet
   BEGIN_DOC
   ! Removes from det the electrons of the orbitals h1 of spin s1
   ! (skipped when h1 is 0) and h2 of spin s2, and writes the result
@@ -917,12 +963,14 @@ subroutine apply_holes(det, s1, h1, s2, h2, res, ok, Nint)
   END_DOC
   use bitmasks
   implicit none
-  integer, intent(in)            :: Nint
-  integer, intent(in)            :: s1, h1, s2, h2
+  integer(size_t), intent(in)    :: Nint
+  integer(size_t), intent(in)    :: h1, h2
+  integer, intent(in)            :: s1, s2
   integer(bit_kind),intent(in)   :: det(Nint, 2)
   integer(bit_kind),intent(out)  :: res(Nint, 2)
   logical, intent(out)           :: ok
-  integer                        :: ii, pos
+  integer(size_t)                :: ii
+  integer                        :: pos
 
   ok = .false.
   res = det
@@ -944,6 +992,7 @@ subroutine apply_holes(det, s1, h1, s2, h2, res, ok, Nint)
 end subroutine
 
 subroutine apply_particle(det, s1, p1, res, ok, Nint)
+ use sizet
   BEGIN_DOC
   ! Adds the particle p1 of spin s1 to det and writes the result in
   ! res. ok is .true. only if p1 was virtual. res is not meaningful
@@ -951,12 +1000,14 @@ subroutine apply_particle(det, s1, p1, res, ok, Nint)
   END_DOC
   use bitmasks
   implicit none
-  integer, intent(in)            :: Nint
-  integer, intent(in)            :: s1, p1
+  integer(size_t), intent(in)    :: Nint
+  integer(size_t), intent(in)    :: p1
+  integer, intent(in)            :: s1
   integer(bit_kind),intent(in)   :: det(Nint, 2)
   integer(bit_kind),intent(out)  :: res(Nint, 2)
   logical, intent(out)           :: ok
-  integer                        :: ii, pos
+  integer(size_t)                :: ii
+  integer                        :: pos
 
   ok = .false.
   res = det
@@ -972,6 +1023,7 @@ end subroutine
 
 
 subroutine apply_hole(det, s1, h1, res, ok, Nint)
+ use sizet
   BEGIN_DOC
   ! Removes from det the electron of the orbital h1 of spin s1 and
   ! writes the result in res. ok is .true. only if h1 was occupied.
@@ -979,12 +1031,14 @@ subroutine apply_hole(det, s1, h1, res, ok, Nint)
   END_DOC
   use bitmasks
   implicit none
-  integer, intent(in)            :: Nint
-  integer, intent(in)            :: s1, h1
+  integer(size_t), intent(in)    :: Nint
+  integer(size_t), intent(in)    :: h1
+  integer, intent(in)            :: s1
   integer(bit_kind),intent(in)   :: det(Nint, 2)
   integer(bit_kind),intent(out)  :: res(Nint, 2)
   logical, intent(out)           :: ok
-  integer                        :: ii, pos
+  integer(size_t)                :: ii
+  integer                        :: pos
 
   ok = .false.
   res = det
@@ -1005,7 +1059,8 @@ BEGIN_PROVIDER [ double precision, psi_det_Hii, (N_det) ]
  BEGIN_DOC
  ! $\langle i|h|i \rangle$ for all determinants.
  END_DOC
- integer :: i,j
+ integer(size_t) :: i
+ integer        :: j
  double precision, external :: diag_H_mat_elem
  !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i)
  do i=1,N_det

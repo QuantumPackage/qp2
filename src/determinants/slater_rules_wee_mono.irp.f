@@ -1,16 +1,18 @@
-
+use sizet
 subroutine i_Wee_j_single(key_i,key_j,Nint,spin,hij)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Returns $\langle i|H|j \rangle$  where $i$ and $j$ are determinants differing by a
   ! single excitation.
   END_DOC
-  integer, intent(in)            :: Nint, spin
+  integer(size_t), intent(in)    :: Nint
+  integer, intent(in)            :: spin
   integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
   double precision, intent(out)  :: hij
 
-  integer                        :: exc(0:2,2)
+  integer(size_t)                :: exc(0:2,2)
   double precision               :: phase
 
   PROVIDE all_mo_integrals
@@ -21,18 +23,20 @@ end
 
 
 double precision function diag_wee_mat_elem(det_in,Nint)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Computes $\langle i|H|i \rangle$.
   END_DOC
-  integer,intent(in)             :: Nint
+  integer(size_t),intent(in)     :: Nint
   integer(bit_kind),intent(in)   :: det_in(Nint,2)
 
   integer(bit_kind)              :: hole(Nint,2)
   integer(bit_kind)              :: particle(Nint,2)
-  integer                        :: i, nexc(2), ispin
-  integer                        :: occ_particle(Nint*bit_kind_size,2)
-  integer                        :: occ_hole(Nint*bit_kind_size,2)
+  integer(size_t)                :: i
+  integer                        :: nexc(2), ispin
+  integer(size_t)                :: occ_particle(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ_hole(Nint*bit_kind_size,2)
   integer(bit_kind)              :: det_tmp(Nint,2)
   integer                        :: na, nb
 
@@ -59,7 +63,7 @@ double precision function diag_wee_mat_elem(det_in,Nint)
   endif
 
   !call debug_det(det_in,Nint)
-  integer                        :: tmp(2)
+  integer(size_t)                :: tmp(2)
   !DIR$ FORCEINLINE
   call bitstring_to_list_ab(particle, occ_particle, tmp, Nint)
   ASSERT (tmp(1) == nexc(1))
@@ -77,27 +81,30 @@ double precision function diag_wee_mat_elem(det_in,Nint)
       !DIR$ FORCEINLINE
       call ac_operator_two_e( occ_particle(i,ispin), ispin, det_tmp, diag_wee_mat_elem, Nint,na,nb)
       !DIR$ FORCEINLINE
-      call a_operator_two_e ( occ_hole    (i,ispin), ispin, det_tmp, diag_wee_mat_elem, Nint,na,nb)
+      call a_operator_two_e ( occ_hole (i,ispin), ispin, det_tmp, diag_wee_mat_elem, Nint,na,nb)
     enddo
   enddo
 end
 
 
 subroutine a_operator_two_e(iorb,ispin,key,hjj,Nint,na,nb)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Needed for :c:func:`diag_Wee_mat_elem`.
   END_DOC
-  integer, intent(in)            :: iorb, ispin, Nint
+  integer(size_t), intent(in)    :: iorb, Nint
+  integer, intent(in)            :: ispin
   integer, intent(inout)         :: na, nb
   integer(bit_kind), intent(inout) :: key(Nint,2)
   double precision, intent(inout) :: hjj
 
-  integer                        :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
   integer                        :: other_spin
-  integer                        :: k,l,i
-  integer                        :: tmp(2)
+  integer(size_t)                :: k
+  integer                        :: l,i
+  integer(size_t)                :: tmp(2)
 
   ASSERT (iorb > 0)
   ASSERT (ispin > 0)
@@ -128,26 +135,29 @@ end
 
 
 subroutine ac_operator_two_e(iorb,ispin,key,hjj,Nint,na,nb)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Needed for :c:func:`diag_Wee_mat_elem`.
   END_DOC
-  integer, intent(in)            :: iorb, ispin, Nint
+  integer(size_t), intent(in)    :: iorb, Nint
+  integer, intent(in)            :: ispin
   integer, intent(inout)         :: na, nb
   integer(bit_kind), intent(inout) :: key(Nint,2)
   double precision, intent(inout) :: hjj
 
-  integer                        :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
   integer                        :: other_spin
-  integer                        :: k,l,i
+  integer(size_t)                :: k
+  integer                        :: l,i
 
   ASSERT (iorb > 0)
   ASSERT (ispin > 0)
   ASSERT (ispin < 3)
   ASSERT (Nint > 0)
 
-  integer                        :: tmp(2)
+  integer(size_t)                :: tmp(2)
   !DIR$ FORCEINLINE
   call bitstring_to_list_ab(key, occ, tmp, Nint)
   ASSERT (tmp(1) == elec_alpha_num)
@@ -175,21 +185,23 @@ end
 
 
 subroutine i_H_j_mono_spin_one_e(key_i,key_j,Nint,spin,hij)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Returns $\langle i|H|j \rangle$  where $i$ and $j$ are determinants differing by
   ! a single excitation.
   END_DOC
-  integer, intent(in)            :: Nint, spin
+  integer(size_t), intent(in)    :: Nint
+  integer, intent(in)            :: spin
   integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
   double precision, intent(out)  :: hij
 
-  integer                        :: exc(0:2,2)
+  integer(size_t)                :: exc(0:2,2)
   double precision               :: phase
 
   call get_single_excitation_spin(key_i(1,spin),key_j(1,spin),exc,phase,Nint)
-  integer :: m,p
+  integer(size_t) :: m,p
   m = exc(1,1)
   p = exc(1,2)
   hij = phase * mo_one_e_integrals(m,p)
@@ -197,19 +209,20 @@ end
 
 
 double precision function diag_H_mat_elem_one_e(det_in,Nint)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Computes $\langle i|H|i \rangle$.
   END_DOC
-  integer,intent(in)             :: Nint
+  integer(size_t),intent(in)     :: Nint
   integer(bit_kind),intent(in)   :: det_in(Nint,2)
 
   integer(bit_kind)              :: hole(Nint,2)
   integer(bit_kind)              :: particle(Nint,2)
   integer                        :: i, nexc(2), ispin
-  integer                        :: occ_particle(Nint*bit_kind_size,2)
-  integer                        :: occ_hole(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ_particle(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ_hole(Nint*bit_kind_size,2)
   integer(bit_kind)              :: det_tmp(Nint,2)
   integer                        :: na, nb
 
@@ -220,7 +233,7 @@ double precision function diag_H_mat_elem_one_e(det_in,Nint)
   diag_H_mat_elem_one_e = 0.d0
 
   !call debug_det(det_in,Nint)
-  integer                        :: tmp(2)
+  integer(size_t)                :: tmp(2)
   !DIR$ FORCEINLINE
   call bitstring_to_list_ab(det_in, occ_particle, tmp, Nint)
   do ispin = 1,2
@@ -232,18 +245,20 @@ double precision function diag_H_mat_elem_one_e(det_in,Nint)
 end
 
 subroutine i_H_j_one_e(key_i,key_j,Nint,hij)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Returns $\langle i|H|j \rangle$  where $i$ and $j$ are determinants.
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
   double precision, intent(out)  :: hij
 
-  integer :: degree,m,p
+  integer(size_t) :: m,p
+  integer :: degree
   double precision :: diag_H_mat_elem_one_e,phase
-  integer                        :: exc(0:2,2,2)
+  integer(size_t)                :: exc(0:2,2,2)
   call get_excitation_degree(key_i,key_j,degree,Nint)
   hij = 0.d0
   if(degree>1)then
@@ -268,23 +283,24 @@ subroutine i_H_j_one_e(key_i,key_j,Nint,hij)
 end
 
 subroutine i_H_j_two_e(key_i,key_j,Nint,hij)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Returns $\langle i|H|j \rangle$  where $i$ and $j$ are determinants.
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
   double precision, intent(out)  :: hij
 
-  integer                        :: exc(0:2,2,2)
+  integer(size_t)                :: exc(0:2,2,2)
   integer                        :: degree
   double precision               :: get_two_e_integral
-  integer                        :: m,n,p,q
+  integer(size_t)                :: m,n,p,q
   integer                        :: i,j,k
-  integer                        :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
   double precision               :: diag_H_mat_elem, phase,phase_2
-  integer                        :: n_occ_ab(2)
+  integer(size_t)                :: n_occ_ab(2)
   PROVIDE all_mo_integrals ref_bitmask_two_e_energy
 
   ASSERT (Nint > 0)

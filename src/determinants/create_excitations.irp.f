@@ -1,4 +1,6 @@
+use sizet
 subroutine do_single_excitation(key_in,i_hole,i_particle,ispin,i_ok)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Apply the single excitation operator : a^{dager}_(i_particle) a_(i_hole) of spin = ispin
@@ -8,10 +10,12 @@ subroutine do_single_excitation(key_in,i_hole,i_particle,ispin,i_ok)
   ! i_ok = 1  == the excitation is possible
   ! i_ok = -1 == the excitation is not possible
   END_DOC
-  integer, intent(in)            :: i_hole,i_particle,ispin
+  integer(size_t), intent(in)    :: i_hole,i_particle
+  integer, intent(in)            :: ispin
   integer(bit_kind), intent(inout) :: key_in(N_int,2)
   integer, intent(out)           :: i_ok
-  integer                        :: k,j,i
+  integer(size_t)                :: k
+  integer                        :: j,i
   integer(bit_kind)              :: mask
   use bitmasks
   ASSERT (i_hole > 0 )
@@ -54,16 +58,18 @@ end
 
 
 subroutine build_singly_excited_wavefunction(i_hole,i_particle,ispin,det_out,coef_out)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Applies the single excitation operator : a^{dager}_(i_particle) a_(i_hole) of
   ! spin = ispin to the current wave function (psi_det, psi_coef)
   END_DOC
-  integer, intent(in)            :: i_hole,i_particle,ispin
+  integer(size_t), intent(in)    :: i_hole,i_particle
+  integer, intent(in)            :: ispin
   integer(bit_kind), intent(out) :: det_out(N_int,2,N_det)
   double precision, intent(out)  :: coef_out(N_det,N_states)
 
-  integer :: k
+  integer(size_t) :: k
   integer :: i_ok
   double precision :: phase
   do k=1,N_det
@@ -81,14 +87,17 @@ subroutine build_singly_excited_wavefunction(i_hole,i_particle,ispin,det_out,coe
 end
 
 logical function is_spin_flip_possible(key_in,i_flip,ispin)
+ use sizet
   implicit none
   BEGIN_DOC
   ! returns |true| if the spin-flip of spin ispin in the orbital i_flip is possible
   ! on key_in
   END_DOC
-  integer, intent(in)            :: i_flip,ispin
+  integer(size_t), intent(in)    :: i_flip
+  integer, intent(in)            :: ispin
   integer(bit_kind), intent(in)  :: key_in(N_int,2)
-  integer                        :: k,j,i
+  integer(size_t)                :: k
+  integer                        :: j,i
   integer(bit_kind)              :: key_tmp(N_int,2)
   is_spin_flip_possible = .False.
   key_tmp = 0_bit_kind

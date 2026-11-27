@@ -1,9 +1,10 @@
+use sizet
 use bitmasks
 use omp_lib
 
 type H_apply_buffer_type
-  integer                        :: N_det
-  integer                        :: sze
+  integer(size_t)                :: N_det
+  integer(size_t)                :: sze
   integer(bit_kind), pointer     :: det(:,:,:)
   double precision , pointer     :: coef(:,:)
   double precision , pointer     :: e2(:,:)
@@ -20,7 +21,8 @@ type(H_apply_buffer_type), pointer :: H_apply_buffer(:)
   ! Buffer of determinants/coefficients/perturbative energy for H_apply.
   ! Uninitialized. Filled by H_apply subroutines.
   END_DOC
-  integer                        :: iproc, sze
+  integer                        :: iproc
+  integer(size_t)                :: sze
   sze = 10000
   if (.not.associated(H_apply_buffer)) then
     allocate(H_apply_buffer(0:nproc-1))
@@ -55,13 +57,15 @@ END_PROVIDER
 
 
 subroutine resize_H_apply_buffer(new_size,iproc)
+ use sizet
   implicit none
-  integer, intent(in)            :: new_size, iproc
+  integer(size_t), intent(in)    :: new_size
+  integer, intent(in)            :: iproc
   integer(bit_kind), pointer     :: buffer_det(:,:,:)
   double precision,  pointer     :: buffer_coef(:,:)
   double precision,  pointer     :: buffer_e2(:,:)
-  integer                        :: i,j,k
-  integer                        :: Ndet
+  integer(size_t)                :: i,k
+  integer                        :: j,Ndet
 
   BEGIN_DOC
 ! Resizes the H_apply buffer of proc iproc. The buffer lock should
@@ -117,6 +121,7 @@ subroutine resize_H_apply_buffer(new_size,iproc)
 end
 
 subroutine copy_H_apply_buffer_to_wf
+ use sizet
   use omp_lib
   implicit none
   BEGIN_DOC
@@ -125,8 +130,8 @@ subroutine copy_H_apply_buffer_to_wf
   END_DOC
   integer(bit_kind), allocatable :: buffer_det(:,:,:)
   double precision, allocatable  :: buffer_coef(:,:)
-  integer                        :: i,j,k
-  integer                        :: N_det_old
+  integer(size_t)                :: i,j,k
+  integer(size_t)                :: N_det_old
 
   PROVIDE H_apply_buffer_allocated
 
@@ -225,12 +230,13 @@ subroutine copy_H_apply_buffer_to_wf
 end
 
 subroutine remove_duplicates_in_psi_det(found_duplicates)
+ use sizet
   implicit none
   logical, intent(out) :: found_duplicates
   BEGIN_DOC
 ! Removes duplicate determinants in the wave function.
   END_DOC
-  integer                        :: i,j,k
+  integer(size_t)                :: i,j,k
   integer(bit_kind), allocatable :: bit_tmp(:)
   logical,allocatable            :: duplicate(:)
   logical                        :: dup
@@ -313,16 +319,20 @@ end
 
 
 subroutine fill_H_apply_buffer_no_selection(n_selected,det_buffer,Nint,iproc)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   !  Fill the H_apply buffer with determiants for |CISD|
   END_DOC
 
-  integer, intent(in)            :: n_selected, Nint, iproc
+  integer(size_t), intent(in)    :: n_selected
+  integer(size_t), intent(in)    :: Nint
+  integer, intent(in)            :: iproc
   integer(bit_kind), intent(in)  :: det_buffer(Nint,2,n_selected)
-  integer                        :: i,j,k
-  integer                        :: new_size
+  integer(size_t)                :: i
+  integer                        :: j,k
+  integer(size_t)                :: new_size
   PROVIDE H_apply_buffer_allocated
   call omp_set_lock(H_apply_buffer_lock(1,iproc))
   new_size = H_apply_buffer(iproc)%N_det + n_selected
@@ -353,13 +363,14 @@ end
 
 
 subroutine replace_wf(N_det_new, LDA, psi_coef_new, psi_det_new)
+ use sizet
   use omp_lib
   implicit none
   BEGIN_DOC
 ! Replaces the wave function.
 ! After calling this subroutine, N_det, psi_det and psi_coef need to be touched
   END_DOC
-  integer, intent(in)            :: N_det_new, LDA
+  integer(size_t), intent(in)    :: N_det_new, LDA
   double precision, intent(in)   :: psi_coef_new(LDA,N_states)
   integer(bit_kind), intent(in)  :: psi_det_new(N_int,2,N_det_new)
 

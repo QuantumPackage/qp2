@@ -1,3 +1,4 @@
+use sizet
  BEGIN_PROVIDER [double precision, z_dipole_moment, (N_states)]
 &BEGIN_PROVIDER [double precision, y_dipole_moment, (N_states)]
 &BEGIN_PROVIDER [double precision, x_dipole_moment, (N_states)]
@@ -5,7 +6,8 @@
  BEGIN_DOC
  ! blablabla 
  END_DOC
- integer :: ipoint,istate,i,j 
+ integer(size_t) :: i,j
+ integer :: ipoint,istate
  double precision :: weight, r(3)  
  double precision :: cpu0,cpu1,nuclei_part_z,nuclei_part_y,nuclei_part_x
 

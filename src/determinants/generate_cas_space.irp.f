@@ -1,21 +1,26 @@
+use sizet
 subroutine generate_cas_space
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
 ! Generates the CAS space
   END_DOC
-  integer :: i, n_alpha_act, n_beta_act, N_det_tot
+  integer(size_t) :: N_det_tot
+  integer(size_t) :: i
+  integer :: n_alpha_act, n_beta_act
   integer(bit_kind) :: o(N_int)
-  integer :: mo_list(elec_alpha_num)
+  integer(size_t) :: mo_list(elec_alpha_num)
 
-  integer :: k,n,m
+  integer(size_t) :: k,n,m
+  integer :: m4
   integer(bit_kind) :: u, t, t1, t2
   integer(bit_kind), parameter :: one = 1_bit_kind
   integer(bit_kind), allocatable :: det_a(:,:), det_b(:,:)
   integer(bit_kind), allocatable :: psi_det_local(:,:,:)
   double precision, allocatable  :: psi_coef_local(:,:)
 
-  call list_to_bitstring(o, list_core_inact, n_core_inact_orb, N_int)
+  call list_to_bitstring(o, list_core_inact, int(n_core_inact_orb,4), N_int)
 
   ! Count number of active electrons
   n_alpha_act = 0
@@ -54,11 +59,11 @@ subroutine generate_cas_space
   k = 0
   do while (u < shiftl(one,n_act_orb))
     k += 1
-    call bitstring_to_list(u, mo_list, m, 1)
-    do i=1,m
+    call bitstring_to_list(u, mo_list, m4, int(1,size_t))
+    do i=1,m4
       mo_list(i) = list_act( mo_list(i) )
     enddo
-    call list_to_bitstring(det_a(1,k), mo_list, m, N_int)
+    call list_to_bitstring(det_a(1,k), mo_list, m4, N_int)
     do i=1,N_int
       det_a(i,k) = ior(det_a(i,k), o(i))
     enddo
@@ -75,11 +80,11 @@ subroutine generate_cas_space
   k = 0
   do while (u < shiftl(one,n_act_orb))
     k += 1
-    call bitstring_to_list(u, mo_list, m, 1)
-    do i=1,m
+    call bitstring_to_list(u, mo_list, m4, int(1,size_t))
+    do i=1,m4
       mo_list(i) = list_act( mo_list(i) )
     enddo
-    call list_to_bitstring(det_b(1,k), mo_list, m, N_int)
+    call list_to_bitstring(det_b(1,k), mo_list, m4, N_int)
     do i=1,N_int
       det_b(i,k) = ior(det_b(i,k), o(i))
     enddo
