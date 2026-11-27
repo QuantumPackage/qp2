@@ -148,8 +148,18 @@ Implementation and licensing
 
 Layers: ``src/json/json.irp.f`` (IRPF90 glue), ``src/json/qp_json.f90``
 (plain Fortran generic), ``src/json/qp_json_shim.c`` (document, path
-resolution, envelope, throttle, writer thread) and ``src/json/yyjson.c``,
-``src/json/yyjson.h``, a flat copy of yyjson 0.13.0 under the MIT licence.
+resolution, envelope, throttle, writer thread) and yyjson 0.13.0 under
+the MIT licence, vendored flat as ``external/yyjson/yyjson.c`` and
+``external/yyjson/yyjson.h`` (the upstream licence and a pointer to the
+release sit next to them; it is not a submodule).
+
+yyjson is an external library, compiled exactly once per tree, like
+ezfio: the build system compiles ``external/yyjson/yyjson.c`` with the
+global ``CFLAGS`` and archives it as ``external/yyjson/libyyjson.a``,
+exposed as ``$QP_ROOT/lib/libyyjson.a``.  ``src/json`` links it through
+``src/json/LIB`` and finds the header through the
+``-I$QP_ROOT/external/yyjson`` of ``src/json/CFLAGS``; no module compiles
+yyjson itself.
 
 yyjson's ``dtoa`` must print doubles that read back bit-exactly, and
 ``CFLAGS = -Ofast`` implies ``-ffast-math``.  The phase-0 gate compiled

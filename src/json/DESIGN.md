@@ -70,7 +70,7 @@ src/json/qp_json.f90      plain module: generic json_add over 6 specifics
         |                 (bind(C) interfaces, no state)
 src/json/qp_json_shim.c   C shim: owns the yyjson document, path resolution,
         |                 envelope, timestamps, throttle, writer thread
-src/json/yyjson.c/.h      vendored yyjson 0.13.0 (MIT)
+external/yyjson/yyjson.c/.h  vendored yyjson 0.13.0 (MIT)
 ```
 
 No JSON state is visible to Fortran. Fortran passes a value and an absolute
@@ -90,15 +90,21 @@ directory is shared by every source file of the module
 ## 4. Vendoring yyjson
 
 * Version 0.13.0 (tag `0.13.0`, `YYJSON_VERSION_STRING "0.13.0"`, MIT).
-* Two files copied flat into `src/json/`: `yyjson.c` and `yyjson.h`. The
-  quoted `#include "yyjson.h"` resolves next to `yyjson.c`, so no `-I`
-  change.
-* `get_l_file_for_module()` already picks up `.c` files in a module directory,
-  and IRPF90 generates the `compile_c_<hash>` rule for them
-  (`src/utils/c_funcs.c` is the precedent: `$T//utils/c_funcs.o:
-  compile_c_...`). Nothing else to wire.
-* `yyjson.o` is built once per module-directory build and archived into the
-  QP library with the other objects.
+* Two files, the flat amalgamation, in `external/yyjson/`: `yyjson.c` and
+  `yyjson.h`, with the upstream `LICENSE` and a `README` pointing at the
+  release. Not a submodule.
+* An external library, treated like ezfio: the build system compiles
+  `external/yyjson/yyjson.c` with the global `CFLAGS` and archives it once
+  per tree as `external/yyjson/libyyjson.a`, exposed as
+  `$QP_ROOT/lib/libyyjson.a`. `scripts/compilation/qp_create_ninja` emits
+  the `build_yyjson` edge (ninja mode) and the `$(YYJSON_LIB)` recipe
+  (make mode); every `build_binaries` edge and every `module_*` target
+  depends on it.
+* `src/json` consumes it like any module consumes an external library:
+  `src/json/LIB` lists `$QP_ROOT/lib/libyyjson.a`, and `src/json/CFLAGS`
+  adds `-I$QP_ROOT/external/yyjson`, which the shim's
+  `#include "yyjson.h"` now needs (the header no longer sits in the module
+  directory). No module compiles yyjson itself.
 
 **Trap.** `config/build.ninja` sets `CFLAGS = -Ofast`, which implies
 `-ffast-math`. yyjson's `dtoa` must print round-trip-exact doubles; a

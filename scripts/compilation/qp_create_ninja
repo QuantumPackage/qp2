@@ -41,6 +41,7 @@ from qp_path import QP_ROOT, QP_SRC, QP_EZFIO
 
 LIB = " -lz -lpthread -ldl -lm"
 EZFIO_LIB = join("$QP_ROOT", "lib", "libezfio_irp.a")
+YYJSON_LIB = join("$QP_ROOT", "lib", "libyyjson.a")
 ROOT_BUILD_NINJA = join("$QP_ROOT", "config", "build.ninja")
 ROOT_BUILD_NINJA_EXP =  join(QP_ROOT, "config", "build.ninja")
 ROOT_BUILD_NINJA_EXP_tmp =  join(QP_ROOT, "config", "build.ninja.tmp")
@@ -315,6 +316,7 @@ def create_make_global(l_module, d_genealogy_path, d_irp, l_util,
     # ~#~#~#~#~#~ #
 
     l_string += ["EZFIO_LIB = $(QP_ROOT)/lib/libezfio_irp.a", ""]
+    l_string += ["YYJSON_LIB = $(QP_ROOT)/lib/libyyjson.a", ""]
 
     # One cp edge per *.ezfio_config file (same command as the ninja
     # build_ezfio_config rule).
@@ -353,6 +355,18 @@ def create_make_global(l_module, d_genealogy_path, d_irp, l_util,
                  " -j$(QP_PER_MODULE_JOBS) && rm -f \"$(EZFIO_LIB)\" &&"
                  " ln -sf {0}/lib/libezfio_irp.a \"$(EZFIO_LIB)\""
                  .format(QP_EZFIO, " ".join(l_flag)),
+                 ""]
+
+    # The yyjson library: one top-level job (no `+`), like the ninja
+    # rule's pool = console. One compile of the amalgamation in
+    # external/yyjson, archived there and symlinked back, mirroring
+    # the $(EZFIO_LIB) recipe above.
+    l_string += ["$(YYJSON_LIB): $(QP_ROOT)/external/yyjson/yyjson.c"
+                 " $(QP_ROOT)/external/yyjson/yyjson.h",
+                 "\tcd \"$(QP_ROOT)/external/yyjson\" && $(CC) $(CFLAGS)"
+                 " -c yyjson.c -o yyjson.o && ar rcs libyyjson.a yyjson.o"
+                 " && rm -f \"$(YYJSON_LIB)\" && ln -sf"
+                 " \"$(QP_ROOT)/external/yyjson/libyyjson.a\" \"$(YYJSON_LIB)\"",
                  ""]
 
     # ~#~#~#~#~#~ #
@@ -412,7 +426,7 @@ def create_make_global(l_module, d_genealogy_path, d_irp, l_util,
         l_symlink = get_source_destination(module, l_children)
 
         l_string += [".PHONY: module_{0}".format(module.rel),
-                     "module_{0}: $(EZFIO_LIB)".format(module.rel)]
+                     "module_{0}: $(EZFIO_LIB) $(YYJSON_LIB)".format(module.rel)]
         for symlink in sorted(l_symlink,
                               key=lambda x: x.source + x.destination):
             l_string.append("\tln -sfn \"{0}\" \"{1}\"".format(
@@ -788,6 +802,34 @@ def ninja_ezfio_build(l_ezfio_config, l_util):
     return l_string
 
 
+def ninja_yyjson_rule():
+    """
+    Return the rule for the one-shot compilation of yyjson
+    (external/yyjson): a single .c/.h amalgamation, compiled once
+    into $QP_ROOT/lib/libyyjson.a (symlinked back from
+    external/yyjson), the same way EZFIO_LIB is created.
+    """
+    l_string = ["rule build_yyjson",
+                "   command = cd $QP_ROOT/external/yyjson && $CC $CFLAGS -c yyjson.c -o yyjson.o && ar rcs libyyjson.a yyjson.o && rm -f $QP_ROOT/lib/libyyjson.a && ln -sf $QP_ROOT/external/yyjson/libyyjson.a $QP_ROOT/lib/libyyjson.a",
+                "   pool = console", "   description = Create $out", ""]
+
+    return l_string
+
+
+def ninja_yyjson_build():
+    """
+    Rule for creating the yyjson library
+    we depend on the yyjson.c / yyjson.h amalgamation in external/yyjson
+    """
+    l_string = ["build {0}: build_yyjson {1} {2}".format(
+        YYJSON_LIB,
+        comp_path(join(QP_ROOT, "external", "yyjson", "yyjson.c")),
+        comp_path(join(QP_ROOT, "external", "yyjson", "yyjson.h"))),
+                ""]
+
+    return l_string
+
+
 #  __
 # (_     ._ _  | o ._  |
 # __) \/ | | | | | | | |<
@@ -1151,7 +1193,8 @@ def ninja_binaries_rule(per_module):
 
 def ninja_binaries_build(path_module, l_children, d_binaries):
     """
-    The binaries need the EZFIO_LIB, and the irpf90.make (aka build.ninja)
+    The binaries need the EZFIO_LIB, the YYJSON_LIB, and the
+    irpf90.make (aka build.ninja)
     """
 
     # ~#~#~ #
@@ -1165,9 +1208,10 @@ def ninja_binaries_build(path_module, l_children, d_binaries):
     # s t r i n g #
     # ~#~#~#~#~#~ #
 
-    l_string = ["build {0}: build_binaries {1} {2}".format(" ".join(l_abs_bin),
-                                                           EZFIO_LIB,
-                                                           ninja_module_path),
+    l_string = ["build {0}: build_binaries {1} {2} {3}".format(" ".join(l_abs_bin),
+                                                               EZFIO_LIB,
+                                                               YYJSON_LIB,
+                                                               ninja_module_path),
                 "   module_abs = {0}".format(comp_path(path_module.abs)),
                 "   module_rel = {0}".format(path_module.rel), ""]
 
@@ -1380,6 +1424,7 @@ if __name__ == "__main__":
 
     l_string += ninja_ezfio_config_rule()
     l_string += ninja_ezfio_rule()
+    l_string += ninja_yyjson_rule()
 
     #  _
     # |_)     o |  _|    _   _  ._   _  ._ _. |
@@ -1392,6 +1437,7 @@ if __name__ == "__main__":
     l_string += ninja_ezfio_cfg_build(l_util)
     l_string += ninja_ezfio_config_build(l_ezfio_config)
     l_string += ninja_ezfio_build(l_ezfio_config, l_util)
+    l_string += ninja_yyjson_build()
 
     #  _                  _
     # |_)     o |  _|   _|_ _  ._   ._ _   _   _|     |  _

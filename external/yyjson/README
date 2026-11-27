@@ -1,0 +1,8 @@
+yyjson 0.13.0, the JSON library behind the QP JSON output
+(https://github.com/ibireme/yyjson, MIT, copyright YaoYuan/ibireme, see
+LICENSE). Pinned at release 0.13.0 and vendored as the flat amalgamation
+(single .c/.h) instead of a submodule: it is a one-shot external library,
+compiled exactly once by the QP build system (rule build_yyjson / the
+$(YYJSON_LIB) recipe) into $QP_ROOT/lib/libyyjson.a, so no fetch is needed
+at build time. The shim src/json/qp_json_shim.c includes yyjson.h through
+src/json/CFLAGS (-I$QP_ROOT/external/yyjson).
