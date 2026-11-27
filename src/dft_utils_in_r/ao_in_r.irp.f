@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -8,7 +9,7 @@ BEGIN_PROVIDER[double precision, aos_in_r_array, (ao_num,n_points_final_grid)]
   END_DOC
 
   implicit none
-  integer          :: i
+  integer(size_t)  :: i
 
   ! For provide outside of openMP section
   call give_all_aos_at_r(final_grid_points(1,1), aos_in_r_array(1,1))
@@ -33,7 +34,7 @@ BEGIN_PROVIDER[double precision, aos_in_r_array_transp, (n_points_final_grid,ao_
   END_DOC
 
   implicit none
-  integer          :: i, j
+  integer(size_t)  :: i, j
   double precision :: aos_array(ao_num), r(3)
 
   do i = 1, n_points_final_grid
@@ -57,7 +58,8 @@ BEGIN_PROVIDER[double precision, aos_grad_in_r_array, (ao_num,n_points_final_gri
   END_DOC
 
   implicit none
-  integer          :: i, j, m
+  integer          :: m
+  integer(size_t)  :: i, j
   double precision :: r(3)
   double precision, allocatable :: aos_grad_array(:,:), aos_array(:)
 
@@ -102,7 +104,8 @@ END_PROVIDER
  !
  ! k = 1 : x, k= 2, y, k  3, z
  END_DOC
- integer :: i,j,m
+ integer :: m
+ integer(size_t) :: i,j
  double precision :: aos_array(ao_num), r(3)
  double precision :: aos_grad_array(3,ao_num)
  do i = 1, n_points_final_grid
@@ -122,7 +125,8 @@ END_PROVIDER
  !
  ! k = 1 : x, k = 2 : y, k = 3 : z
  END_DOC
- integer :: i,j,m
+ integer :: m
+ integer(size_t) :: i,j
  do i = 1, n_points_final_grid
   do j = 1, ao_num
    do m = 1, 3
@@ -139,7 +143,8 @@ END_PROVIDER
  !
  ! k = 1 : x, k= 2, y, k  3, z
  END_DOC
- integer :: i,j,m
+ integer :: m
+ integer(size_t) :: i,j
  double precision, allocatable :: aos_lapl_array(:,:), aos_grad_array(:,:), aos_array(:)
 
  ! For provide outside of openMP section
@@ -177,7 +182,8 @@ END_PROVIDER
 ! Transposed gradients
 !
  END_DOC
- integer :: i,j,m
+ integer :: m
+ integer(size_t) :: i,j
  double precision :: aos_array(ao_num), r(3)
  double precision :: aos_grad_array(3,ao_num)
  do m = 1, 3
@@ -196,7 +202,8 @@ END_PROVIDER
 ! Transposed gradients
 !
  END_DOC
- integer :: i,j,m
+ integer :: m
+ integer(size_t) :: i,j
  double precision :: aos_array(ao_num), r(3)
  double precision :: aos_grad_array(3,ao_num)
  do m = 1, 3
@@ -213,7 +220,7 @@ END_PROVIDER
  BEGIN_DOC
  ! aos_in_r_array_extra(i,j)        = value of the ith ao on the jth grid point of the EXTRA grid
  END_DOC
- integer :: i
+ integer(size_t) :: i
  ! For provide outside of OpenMP
  call give_all_aos_at_r(final_grid_points_extra(1,1),aos_in_r_array_extra(1,1))
 
@@ -237,7 +244,7 @@ BEGIN_PROVIDER[double precision, aos_in_r_array_extra_transp, (n_points_extra_fi
   END_DOC
 
   implicit none
-  integer          :: i, j
+  integer(size_t)  :: i, j
   double precision :: aos_array(ao_num), r(3)
 
   do i = 1, n_points_extra_final_grid
@@ -259,7 +266,8 @@ BEGIN_PROVIDER[double precision, aos_grad_in_r_array_extra, (ao_num,n_points_ext
   !
   ! k = 1 : x, k = 2 : y, k = 3 : z
   END_DOC
-  integer          :: i, j, m
+  integer          :: m
+  integer(size_t)  :: i, j
   double precision, allocatable :: aos_array(:), aos_grad_array(:,:)
 
 !  For provide outside of OpenMP

@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [double precision, two_e_int_hf_f, (n_basis_orb,n_basis_orb,n_max_occ_val_orb_for_hf,n_max_occ_val_orb_for_hf)]
  implicit none
  BEGIN_DOC
@@ -7,7 +9,7 @@ BEGIN_PROVIDER [double precision, two_e_int_hf_f, (n_basis_orb,n_basis_orb,n_max
 !
 ! two_e_int_hf_f(j,i,n,m) = < j i | n m > where all orbitals belong to "list_basis"
  END_DOC
- integer :: orb_i,orb_j,i,j,orb_m,orb_n,m,n
+ integer(size_t) :: orb_i,orb_j,i,j,orb_m,orb_n,m,n
  double precision :: get_two_e_integral
  PROVIDE all_mo_integrals big_array_exchange_integrals
  do orb_m = 1, n_max_occ_val_orb_for_hf! electron 1
@@ -27,6 +29,7 @@ BEGIN_PROVIDER [double precision, two_e_int_hf_f, (n_basis_orb,n_basis_orb,n_max
 END_PROVIDER
 
 subroutine f_HF_valence_ab(r1,r2,f_HF_val_ab,two_bod_dens)
+ use sizet
  implicit none
  BEGIN_DOC
 ! f_HF_val_ab(r1,r2) = function f_{\Psi^B}(X_1,X_2) of Eq. (22) of J. Chem. Phys. 149, 194301 (2018)
@@ -39,7 +42,8 @@ subroutine f_HF_valence_ab(r1,r2,f_HF_val_ab,two_bod_dens)
  END_DOC
  double precision, intent(in) :: r1(3), r2(3)
  double precision, intent(out):: f_HF_val_ab,two_bod_dens
- integer :: i,j,m,n,i_m,i_n
+ integer(size_t) :: i,j,m,n,i_m
+ integer :: i_n
  integer :: i_i,i_j
  double precision :: mo_two_e_integral
  double precision, allocatable :: mos_array_r1(:)
@@ -93,6 +97,7 @@ end
 
 
 subroutine integral_f_HF_valence_ab(r1,int_f_HF_val_ab)
+ use sizet
  implicit none
  BEGIN_DOC
 ! in_f_HF_val_ab(r_1) = \int dr_2 f_{\Psi^B}(r_1,r_2)
@@ -107,7 +112,8 @@ subroutine integral_f_HF_valence_ab(r1,int_f_HF_val_ab)
  END_DOC
  double precision, intent(in) :: r1(3)
  double precision, intent(out):: int_f_HF_val_ab
- integer :: i,j,m,n,i_m,i_n
+ integer(size_t) :: i,j,m,n,i_m
+ integer :: i_n
  integer :: i_i,i_j
  double precision :: mo_two_e_integral
  double precision :: mos_array_r1(mo_num)

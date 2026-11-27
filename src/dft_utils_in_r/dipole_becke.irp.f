@@ -1,3 +1,5 @@
+use sizet
+
  BEGIN_PROVIDER [ double precision, mo_dipole_x_becke, (mo_num,mo_num)]
 &BEGIN_PROVIDER [ double precision, mo_dipole_y_becke, (mo_num,mo_num)]
 &BEGIN_PROVIDER [ double precision, mo_dipole_z_becke, (mo_num,mo_num)]
@@ -9,7 +11,7 @@
  !
  ! mo_dipole_y_becke and mo_dipole_z_becke are the y and z components
  END_DOC
- integer :: i,j,ipoint
+ integer(size_t) :: i,j,ipoint
  double precision :: r(3), weight
  mo_dipole_x_becke=0.d0
  mo_dipole_y_becke=0.d0

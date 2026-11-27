@@ -1,3 +1,4 @@
+use sizet
 
 subroutine dm_dft_alpha_beta_at_r(r,dm_a,dm_b)
  implicit none
@@ -53,6 +54,7 @@ end
 
 
  subroutine density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r(r,dm_a,dm_b, grad_dm_a, grad_dm_b, aos_array, grad_aos_array)
+ use sizet
  implicit none
  BEGIN_DOC
 ! input:
@@ -73,7 +75,8 @@ end
  double precision, intent(out) :: dm_a(N_states),dm_b(N_states)
  double precision, intent(out) :: grad_dm_a(3,N_states),grad_dm_b(3,N_states)
  double precision, intent(out) :: grad_aos_array(3,ao_num)
- integer :: i,j,istate
+ integer :: j,istate
+ integer(size_t) :: i
  double precision  :: aos_array(ao_num),aos_array_bis(ao_num),u_dot_v
  double precision  :: aos_grad_array(ao_num,3), aos_grad_array_bis(ao_num,3)
 
@@ -111,6 +114,7 @@ end
  end
 
  subroutine density_and_grad_alpha_beta(r,dm_a,dm_b, grad_dm_a, grad_dm_b)
+ use sizet
  implicit none
  BEGIN_DOC
 ! input:
@@ -129,7 +133,8 @@ end
  double precision, intent(out) :: dm_a(N_states),dm_b(N_states)
  double precision, intent(out) :: grad_dm_a(3,N_states),grad_dm_b(3,N_states)
  double precision              :: grad_aos_array(3,ao_num)
- integer :: i,j,istate
+ integer :: j,istate
+ integer(size_t) :: i
  double precision  :: aos_array(ao_num),aos_array_bis(ao_num),u_dot_v
  double precision  :: aos_grad_array(ao_num,3), aos_grad_array_bis(ao_num,3)
 
@@ -171,6 +176,7 @@ end
 
 
  subroutine density_and_grad_lapl_alpha_beta_and_all_aos_and_grad_aos_at_r(r,dm_a,dm_b, grad_dm_a, grad_dm_b, lapl_dm_a, lapl_dm_b, aos_array, grad_aos_array, lapl_aos_array)
+ use sizet
  implicit none
  BEGIN_DOC
 ! input:
@@ -193,7 +199,8 @@ end
  double precision, intent(out) :: lapl_dm_a(3,N_states),lapl_dm_b(3,N_states)
  double precision, intent(out) :: grad_aos_array(3,ao_num)
  double precision, intent(out) :: lapl_aos_array(3,ao_num)
- integer :: i,j,istate
+ integer :: j,istate
+ integer(size_t) :: i
  double precision  :: aos_array(ao_num),aos_array_bis(ao_num),u_dot_v
  double precision  :: aos_grad_array(ao_num,3), aos_grad_array_bis(ao_num,3)
  double precision  :: aos_lapl_array(ao_num,3)
@@ -288,6 +295,7 @@ subroutine dm_dft_alpha_beta_no_core_at_r(r,dm_a,dm_b)
 end
 
  subroutine dens_grad_a_b_no_core_and_aos_grad_aos_at_r(r,dm_a,dm_b, grad_dm_a, grad_dm_b, aos_array, grad_aos_array)
+ use sizet
  implicit none
  BEGIN_DOC
 ! input:
@@ -308,7 +316,8 @@ end
  double precision, intent(out) :: dm_a(N_states),dm_b(N_states)
  double precision, intent(out) :: grad_dm_a(3,N_states),grad_dm_b(3,N_states)
  double precision, intent(out) :: grad_aos_array(3,ao_num)
- integer :: i,j,istate
+ integer :: j,istate
+ integer(size_t) :: i
  double precision  :: aos_array(ao_num),aos_array_bis(ao_num),u_dot_v
  double precision  :: aos_grad_array(ao_num,3), aos_grad_array_bis(ao_num,3)
 

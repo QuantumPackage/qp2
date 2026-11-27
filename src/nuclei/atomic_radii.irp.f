@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [ double precision, slater_bragg_radii, (0:100)]
  implicit none
  BEGIN_DOC
@@ -125,7 +127,7 @@ BEGIN_PROVIDER [double precision, slater_bragg_radii_per_atom, (nucl_num)]
  ! i = 1 to nucl_num, the table value slater_bragg_radii(Z_i),
  ! Z_i being int(nucl_charge(i)) floored at 1.
  END_DOC
- integer :: i
+ integer(size_t) :: i
  do i = 1, nucl_num
   slater_bragg_radii_per_atom(i) = slater_bragg_radii(max(1,int(nucl_charge(i))))
  enddo
@@ -137,7 +139,7 @@ BEGIN_PROVIDER [double precision, slater_bragg_radii_per_atom_ua, (nucl_num)]
  ! As slater_bragg_radii_per_atom, but with the radii in atomic
  ! units (a0) taken from slater_bragg_radii_ua.
  END_DOC
- integer :: i
+ integer(size_t) :: i
  do i = 1, nucl_num
   slater_bragg_radii_per_atom_ua(i) = slater_bragg_radii_ua(max(1,int(nucl_charge(i))))
  enddo
@@ -159,7 +161,7 @@ BEGIN_PROVIDER [double precision, slater_bragg_type_inter_distance, (nucl_num, n
  ! to the two nuclei equals the Bragg-Slater radii ratio X
  ! (Eqs. (A4)-(A6)).
  END_DOC
- integer :: i,j
+ integer(size_t) :: i,j
  double precision :: xhi_tmp,u_ij
  slater_bragg_type_inter_distance = 0.d0
  do i = 1, nucl_num
@@ -185,7 +187,7 @@ BEGIN_PROVIDER [double precision, slater_bragg_type_inter_distance_ua, (nucl_num
  ! happens when the Bragg-Slater radii differ by a factor
  ! above about 2.4).
  END_DOC
- integer :: i,j
+ integer(size_t) :: i,j
  double precision :: xhi_tmp,u_ij
  slater_bragg_type_inter_distance_ua = 0.d0
  do i = 1, nucl_num

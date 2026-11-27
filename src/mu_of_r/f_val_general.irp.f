@@ -1,3 +1,5 @@
+use sizet
+
  BEGIN_PROVIDER [double precision, f_psi_cas_ab, (n_points_final_grid,N_states)]
 &BEGIN_PROVIDER [double precision, on_top_cas_mu_r, (n_points_final_grid,N_states)]
  implicit none
@@ -8,7 +10,8 @@
 ! Assumes that the wave function in psi_det is developped within an active space defined
 !
  END_DOC 
- integer :: ipoint,istate
+ integer(size_t) :: ipoint
+ integer :: istate
  double precision :: wall0,wall1,r(3)
  double precision :: f_ii_val_ab,two_bod_dens_ii,f_ia_val_ab,two_bod_dens_ia,f_aa_val_ab,two_bod_dens_aa
  double precision :: accu
@@ -61,7 +64,7 @@ END_PROVIDER
 ! Function f_{\Psi^B}(r,r) of Eq. (22) of J. Chem. Phys. 149, 194301 (2018) on each point of the grid for a HF wave function
 !
  END_DOC 
- integer :: ipoint
+ integer(size_t) :: ipoint
  double precision :: wall0,wall1,r(3),f_HF_val_ab,two_bod_dens
  f_psi_hf_ab = 0.d0
  r = 0.d0

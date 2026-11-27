@@ -1,7 +1,9 @@
+use sizet
+
 ! ---
 
 
-BEGIN_PROVIDER [ integer, n_pts_charge  ]
+BEGIN_PROVIDER [ integer(size_t), n_pts_charge  ]
   implicit none
   BEGIN_DOC
 ! Number of point charges to be added to the potential
@@ -14,7 +16,9 @@ BEGIN_PROVIDER [ integer, n_pts_charge  ]
     call ezfio_has_nuclei_n_pts_charge(has)
     if (has) then
       write(6,'(A)') '.. >>>>> [ IO READ: n_pts_charge ] <<<<< ..'
-      call ezfio_get_nuclei_n_pts_charge(n_pts_charge)
+      integer :: n_pts_charge4
+      call ezfio_get_nuclei_n_pts_charge(n_pts_charge4)
+      n_pts_charge = int(n_pts_charge4, size_t)
     else
       print *, 'nuclei/n_pts_charge not found in EZFIO file'
       stop 1
@@ -51,7 +55,7 @@ BEGIN_PROVIDER [ double precision, pts_charge_z, (n_pts_charge) ]
 
   else
  
-    integer :: i
+    integer(size_t) :: i
     do i = 1, n_pts_charge
       pts_charge_z(i) = 0.d0
     enddo
@@ -89,7 +93,7 @@ BEGIN_PROVIDER [ double precision, pts_charge_coord, (n_pts_charge,3) ]
      allocate (buffer(n_pts_charge,3))
       write(6,'(A)') '.. >>>>> [ IO READ: pts_charge_coord ] <<<<< ..'
       call ezfio_get_nuclei_pts_charge_coord(buffer)
-      integer :: i,j
+      integer(size_t) :: i,j
       do i=1,3
         do j=1,n_pts_charge
           pts_charge_coord(j,i) = buffer(j,i)
@@ -118,7 +122,7 @@ BEGIN_PROVIDER [ double precision, pt_chrg_interaction]
  BEGIN_DOC
  ! Interaction between the point charges 
  END_DOC
- integer :: i,j
+ integer(size_t) :: i,j
  double precision               :: Z_A, z_B,A_center(3), B_center(3), dist
  pt_chrg_interaction = 0.d0
  do  i = 1, n_pts_charge
@@ -141,7 +145,7 @@ BEGIN_PROVIDER [ double precision, pt_chrg_nuclei_interaction]
  BEGIN_DOC
  ! repulsion between the point charges and the nuclei
  END_DOC
- integer :: i,j
+ integer(size_t) :: i,j
  double precision               :: Z_A, z_B,A_center(3), B_center(3), dist
  pt_chrg_nuclei_interaction = 0.d0
  do  i = 1, n_pts_charge

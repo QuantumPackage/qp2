@@ -1,3 +1,4 @@
+
 program import_trexio_integrals
   use trexio
   implicit none
@@ -26,6 +27,7 @@ program import_trexio_integrals
 end
 
 subroutine run(f)
+ use sizet
   use trexio
   use map_module
   implicit none
@@ -36,7 +38,8 @@ subroutine run(f)
   integer(trexio_t), intent(in)  :: f ! TREXIO file handle
   integer(trexio_exit_code)      :: rc
 
-  integer :: i,j,k,l, iunit
+  integer(size_t) :: i,j,k,l
+  integer :: iunit
   integer(8) :: m, n_integrals
   double precision :: integral
 
@@ -49,8 +52,9 @@ subroutine run(f)
   integer         , allocatable :: Vi(:,:)
   double precision              :: s
 
-  integer*4 :: BUFSIZE
-  integer :: rank
+  integer(size_t) :: BUFSIZE
+  integer(size_t) :: rank
+  integer :: rank4
   double precision, allocatable :: tmp(:,:,:)
   integer*8 :: offset, icount
 
@@ -163,8 +167,9 @@ subroutine run(f)
       rc = trexio_has_ao_2e_int_eri_cholesky(f)
       if (rc /= TREXIO_HAS_NOT) then
 
-          rc = trexio_read_ao_2e_int_eri_cholesky_num(f, rank)
+          rc = trexio_read_ao_2e_int_eri_cholesky_num(f, rank4)
           call trexio_assert(rc, TREXIO_SUCCESS)
+          rank = int(rank4, size_t)
 
           allocate(tmp(ao_num,ao_num,rank))
           tmp(:,:,:) = 0.d0
@@ -226,7 +231,8 @@ subroutine run(f)
                   call two_e_integrals_index(i, j, k, l, buffer_i(m) )
                   buffer_values(m) = integral
                 enddo
-                call insert_into_ao_integrals_map(int(icount,4),buffer_i,buffer_values)
+                call insert_into_ao_integrals_map(int(icount,size_t), &
+                                                  buffer_i, buffer_values)
                 offset = offset + icount
                 if (rc /= TREXIO_SUCCESS) then
                     exit
@@ -275,8 +281,9 @@ subroutine run(f)
       rc = trexio_has_mo_2e_int_eri_cholesky(f)
       if (rc /= TREXIO_HAS_NOT) then
 
-          rc = trexio_read_mo_2e_int_eri_cholesky_num(f, rank)
+          rc = trexio_read_mo_2e_int_eri_cholesky_num(f, rank4)
           call trexio_assert(rc, TREXIO_SUCCESS)
+          rank = int(rank4, size_t)
 
           allocate(tmp(rank,mo_num,mo_num))
           tmp(:,:,:) = 0.d0
@@ -336,7 +343,8 @@ subroutine run(f)
                 call two_e_integrals_index(i, j, k, l, buffer_i(m) )
                 buffer_values(m) = integral
               enddo
-              call map_append(mo_integrals_map, buffer_i, buffer_values, int(icount,4))
+              call map_append(mo_integrals_map, buffer_i, buffer_values, &
+                              int(icount,4))
               offset = offset + icount
               if (rc /= TREXIO_SUCCESS) then
                   exit

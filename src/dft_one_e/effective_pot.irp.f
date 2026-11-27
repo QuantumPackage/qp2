@@ -1,7 +1,10 @@
+use sizet
+
  BEGIN_PROVIDER [double precision, effective_one_e_potential, (mo_num, mo_num,N_states)]
 &BEGIN_PROVIDER [double precision, effective_one_e_potential_without_kin, (mo_num, mo_num,N_states)]
  implicit none
- integer :: i,j,istate
+ integer :: istate
+ integer(size_t) :: i,j
  effective_one_e_potential = 0.d0
  BEGIN_DOC
 ! Effective_one_e_potential(i,j) = $\rangle i_{MO}| v_{H}^{sr} |j_{MO}\rangle  + \rangle i_{MO}| h_{core} |j_{MO}\rangle  + \rangle i_{MO}|v_{xc} |j_{MO}\rangle$
@@ -71,7 +74,8 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, ao_effective_one_e_potential, (ao_num, ao_num,N_states)]
 &BEGIN_PROVIDER [double precision, ao_effective_one_e_potential_without_kin, (ao_num, ao_num,N_states)]
  implicit none
- integer :: i,j,istate
+ integer :: istate
+ integer(size_t) :: i,j
  ao_effective_one_e_potential = 0.d0
  ao_effective_one_e_potential_without_kin = 0.d0
  BEGIN_DOC
@@ -86,8 +90,12 @@ END_PROVIDER
 ! and it is used in any RS-DFT based calculations  
  END_DOC
  do istate = 1, N_states
-    call mo_to_ao(effective_one_e_potential(1,1,istate),mo_num,ao_effective_one_e_potential(1,1,istate),ao_num)
-    call mo_to_ao(effective_one_e_potential_without_kin(1,1,istate),mo_num,ao_effective_one_e_potential_without_kin(1,1,istate),ao_num)
+    call mo_to_ao(effective_one_e_potential(1,1,istate), int(mo_num,size_t), &
+                  ao_effective_one_e_potential(1,1,istate), int(ao_num,size_t))
+        call mo_to_ao(effective_one_e_potential_without_kin(1,1,istate), &
+                  int(mo_num,size_t), &
+                  ao_effective_one_e_potential_without_kin(1,1,istate), &
+                  int(ao_num,size_t))
  enddo
 END_PROVIDER
 

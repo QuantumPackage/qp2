@@ -1,9 +1,11 @@
+use sizet
+
  BEGIN_PROVIDER[double precision, mos_in_r_array, (mo_num,n_points_final_grid)]
  implicit none
  BEGIN_DOC
  ! mos_in_r_array(i,j)        = value of the ith mo on the jth grid point
  END_DOC
- integer :: i,j
+ integer(size_t) :: i,j
  double precision :: mos_array(mo_num), r(3)
  do i = 1, n_points_final_grid
   r(1) = final_grid_points(1,i)
@@ -21,7 +23,7 @@
  BEGIN_DOC
  ! mos_in_r_array(i,j)        = value of the ith mo on the jth grid point
  END_DOC
- integer :: i
+ integer(size_t) :: i
  !$OMP PARALLEL DO DEFAULT(NONE) PRIVATE (i) & 
  !$OMP SHARED(mos_in_r_array_omp,n_points_final_grid,mo_num,final_grid_points)
  do i = 1, n_points_final_grid
@@ -36,7 +38,7 @@
  BEGIN_DOC
  ! mos_in_r_array_transp(i,j) = value of the jth mo on the ith grid point
  END_DOC
- integer :: i,j
+ integer(size_t) :: i,j
  do i = 1, n_points_final_grid
   do j = 1, mo_num
    mos_in_r_array_transp(i,j) = mos_in_r_array_omp(j,i) 
@@ -57,7 +59,9 @@
  integer :: m
  mos_grad_in_r_array = 0.d0
  do m=1,3
-  call dgemm('N','N',mo_num,n_points_final_grid,ao_num,1.d0,mo_coef_transp,mo_num,aos_grad_in_r_array(1,1,m),ao_num,0.d0,mos_grad_in_r_array(1,1,m),mo_num)
+    call dgemm('N', 'N', int(mo_num,4), int(n_points_final_grid,4), ao_num, &
+             1.d0, mo_coef_transp, int(mo_num,4), aos_grad_in_r_array(1,1,m), &
+             ao_num, 0.d0, mos_grad_in_r_array(1,1,m), int(mo_num,4))
  enddo
  END_PROVIDER
 
@@ -69,7 +73,7 @@
  ! k = 1 : x, k= 2, y, k  3, z
  END_DOC
  integer :: m
- integer  :: i,j
+ integer(size_t)  :: i,j
  mos_grad_in_r_array_tranp = 0.d0
  do i = 1, n_points_final_grid
   do j = 1, mo_num
@@ -86,7 +90,8 @@
 ! Transposed gradients 
 ! 
  END_DOC
- integer :: i,j,m
+ integer :: m
+ integer(size_t) :: i,j
  do m = 1, 3
   do j = 1, mo_num
    do i = 1, n_points_final_grid
@@ -108,7 +113,8 @@
  !
  ! beta_dens_kin_in_r(i) = same for j = 1, elec_beta_num
  END_DOC
- integer  :: i,m,j
+ integer  :: m,j
+ integer(size_t) :: i
  alpha_dens_kin_in_r = 0.d0
  beta_dens_kin_in_r = 0.d0
  do i = 1, n_points_final_grid
@@ -136,7 +142,10 @@
  integer :: m
  mos_lapl_in_r_array = 0.d0
  do m=1,3
-  call dgemm('N','N',mo_num,n_points_final_grid,ao_num,1.d0,mo_coef_transp,mo_num,aos_lapl_in_r_array_transp(1,1,m),ao_num,0.d0,mos_lapl_in_r_array(1,1,m),mo_num)
+    call dgemm('N', 'N', int(mo_num,4), int(n_points_final_grid,4), ao_num, &
+             1.d0, mo_coef_transp, int(mo_num,4), &
+             aos_lapl_in_r_array_transp(1,1,m), ao_num, 0.d0, &
+             mos_lapl_in_r_array(1,1,m), int(mo_num,4))
  enddo
  END_PROVIDER
 
@@ -149,7 +158,7 @@
  ! k = 1 : x, k= 2, y, k  3, z
  END_DOC
  integer :: m
- integer  :: i,j
+ integer(size_t)  :: i,j
  mos_lapl_in_r_array_tranp = 0.d0
  do i = 1, n_points_final_grid
   do j = 1, mo_num
@@ -166,7 +175,8 @@
 ! Transposed gradients 
 ! 
  END_DOC
- integer :: i,j,m
+ integer :: m
+ integer(size_t) :: i,j
  double precision :: mos_array(mo_num), r(3)
  double precision :: mos_grad_array(3,mo_num)
  do m = 1, 3
@@ -187,7 +197,7 @@
  BEGIN_DOC
  ! mos_in_r_array_extra(i,j)        = value of the ith mo on the jth grid point on the EXTRA GRID 
  END_DOC
- integer :: i,j
+ integer(size_t) :: i,j
  double precision :: mos_array_extra(mo_num), r(3)
  print*,'coucou'
  !$OMP PARALLEL DO &
@@ -213,7 +223,7 @@
  BEGIN_DOC
  ! mos_in_r_array_extra_transp(i,j) = value of the jth mo on the ith grid point
  END_DOC
- integer :: i,j
+ integer(size_t) :: i,j
  do i = 1, n_points_extra_final_grid
   do j = 1, mo_num
    mos_in_r_array_extra_transp(i,j) = mos_in_r_array_extra_omp(j,i) 

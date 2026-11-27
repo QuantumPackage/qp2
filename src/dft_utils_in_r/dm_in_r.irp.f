@@ -1,3 +1,5 @@
+use sizet
+
  BEGIN_PROVIDER [double precision, one_e_dm_and_grad_alpha_in_r, (4,n_points_final_grid,N_states) ]
 &BEGIN_PROVIDER [double precision, one_e_dm_and_grad_beta_in_r,  (4,n_points_final_grid,N_states) ]
 &BEGIN_PROVIDER [double precision, one_e_grad_2_dm_alpha_at_r, (n_points_final_grid,N_states) ]
@@ -22,7 +24,8 @@
  ! !!!!! WARNING !!!! if no_core_density = .True. then all core electrons are removed
  END_DOC
  implicit none
- integer :: i,j,k,l,m,istate
+ integer :: j,k,l,m,istate
+ integer(size_t) :: i
  double precision :: contrib
  double precision :: r(3)
  double precision, allocatable :: aos_array(:),grad_aos_array(:,:)
@@ -104,7 +107,8 @@ END_PROVIDER
  !
  ! !!!!! WARNING !!!! if no_core_density = .True. then all core electrons are removed
  END_DOC
- integer :: i,istate
+ integer :: istate
+ integer(size_t) :: i
  double precision :: r(3),weight
  do istate = 1, N_states
   do i = 1, n_points_final_grid

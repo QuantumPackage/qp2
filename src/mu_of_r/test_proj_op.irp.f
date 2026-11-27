@@ -1,3 +1,4 @@
+
 program test_proj_op
   implicit none
   BEGIN_DOC
@@ -22,13 +23,14 @@ end
 
 
 subroutine test
+ use sizet
  BEGIN_DOC
  ! Prints the sum over the grid points of
  ! |f_hf_cholesky_sparse(R) - f_hf_cholesky_sparse_bis(R)|
  ! times final_weight_at_r_vector(R), the grid weight.
  END_DOC
  implicit none
- integer :: i_point
+ integer(size_t) :: i_point
  double precision :: ref, new, accu, weight
  accu = 0.d0
  do i_point = 1, n_points_final_grid

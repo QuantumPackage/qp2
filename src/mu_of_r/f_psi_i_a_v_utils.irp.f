@@ -1,11 +1,15 @@
+use sizet
+
 subroutine give_f_ii_val_ab(r1,r2,f_ii_val_ab,two_bod_dens)
+ use sizet
  implicit none
  BEGIN_DOC
 ! contribution from purely inactive orbitals to f_{\Psi^B}(r_1,r_2) for a CAS wave function
  END_DOC
  double precision, intent(in) :: r1(3),r2(3)
  double precision, intent(out):: f_ii_val_ab,two_bod_dens
- integer :: i,j,m,n,i_m,i_n
+ integer(size_t) :: i,j,m,n,i_m
+ integer :: i_n
  integer :: i_i,i_j
  double precision, allocatable :: mos_array_inact_r1(:),mos_array_inact_r2(:)
  double precision, allocatable :: mos_array_basis_r1(:),mos_array_basis_r2(:)
@@ -56,6 +60,7 @@ end
 
 
 subroutine give_f_ia_val_ab(r1,r2,f_ia_val_ab,two_bod_dens,istate)
+ use sizet
  BEGIN_DOC
 ! contribution from inactive and active orbitals to f_{\Psi^B}(r_1,r_2) for the "istate" state of a CAS wave function
  END_DOC
@@ -63,7 +68,7 @@ subroutine give_f_ia_val_ab(r1,r2,f_ia_val_ab,two_bod_dens,istate)
  integer, intent(in) :: istate
  double precision, intent(in) :: r1(3),r2(3)
  double precision, intent(out):: f_ia_val_ab,two_bod_dens
- integer :: i,orb_i,a,orb_a,n,m,b
+ integer(size_t) :: i,orb_i,a,orb_a,n,m,b
  double precision :: rho
  double precision, allocatable :: mos_array_r1(:) , mos_array_r2(:)
  double precision, allocatable :: mos_array_inact_r1(:),mos_array_inact_r2(:)
@@ -152,6 +157,7 @@ end
 
 
 subroutine give_f_aa_val_ab(r1,r2,f_aa_val_ab,two_bod_dens,istate)
+ use sizet
  BEGIN_DOC
 ! contribution from purely active orbitals to f_{\Psi^B}(r_1,r_2) for the "istate" state of a CAS wave function
  END_DOC
@@ -159,7 +165,8 @@ subroutine give_f_aa_val_ab(r1,r2,f_aa_val_ab,two_bod_dens,istate)
  integer, intent(in) :: istate
  double precision, intent(in) :: r1(3),r2(3)
  double precision, intent(out):: f_aa_val_ab,two_bod_dens
- integer :: i,orb_i,a,orb_a,n,m,b,c,d
+ integer(size_t) :: i,a,b
+ integer :: orb_i,orb_a,n,m,c,d
  double precision :: rho
  double precision, allocatable :: mos_array_r1(:) , mos_array_r2(:)
  double precision, allocatable :: mos_array_basis_r1(:),mos_array_basis_r2(:)
@@ -216,13 +223,13 @@ subroutine give_f_aa_val_ab(r1,r2,f_aa_val_ab,two_bod_dens,istate)
   ! Treating both rho_tilde and prod as vectors of length n_act_orb^2
   ! and act_2_rdm_ab_mo as a (n_act_orb^2) x (n_act_orb^2) matrix
   allocate(rho_tilde(n_act_orb,n_act_orb))
-  call dgemv('N', n_act_orb*n_act_orb, n_act_orb*n_act_orb, &
-           1.d0, act_2_rdm_ab_mo(1,1,1,1,istate), n_act_orb*n_act_orb, &
-           prod, 1, 0.d0, rho_tilde, 1)
+  call dgemv('N', int(n_act_orb*n_act_orb, 4), int(n_act_orb*n_act_orb, 4), &
+           1.d0, act_2_rdm_ab_mo(1,1,1,1,istate), &
+           int(n_act_orb*n_act_orb, 4), prod, 1, 0.d0, rho_tilde, 1)
 
   ! Final dot product
   double precision, external :: ddot
-  two_bod_dens = ddot(n_act_orb*n_act_orb, rho_tilde, 1, prod, 1)
+  two_bod_dens = ddot(int(n_act_orb*n_act_orb, 4), rho_tilde, 1, prod, 1)
 
  deallocate(prod)
 
@@ -259,12 +266,13 @@ subroutine give_f_aa_val_ab(r1,r2,f_aa_val_ab,two_bod_dens,istate)
   ! Treating (n,m) as composite index (length n_basis_orb²)
   ! and (b,a) as composite index (length n_act_orb²)
   allocate( v_tilde(n_act_orb,n_act_orb) )
-  call dgemv('T', n_basis_orb*n_basis_orb, n_act_orb*n_act_orb, &
-            1.d0, two_e_int_aa_f, n_basis_orb*n_basis_orb, &
-            prod, 1, 0.d0, v_tilde, 1)
+  call dgemv('T', int(n_basis_orb*n_basis_orb, 4), &
+            int(n_act_orb*n_act_orb, 4), 1.d0, two_e_int_aa_f, &
+            int(n_basis_orb*n_basis_orb, 4), prod, 1, 0.d0, v_tilde, 1)
 
   ! Final contraction: dot product
-  f_aa_val_ab = f_aa_val_ab + ddot(n_act_orb*n_act_orb, v_tilde, 1, rho_tilde, 1)
+  f_aa_val_ab = f_aa_val_ab + ddot(int(n_act_orb*n_act_orb, 4), &
+          v_tilde, 1, rho_tilde, 1)
 
  ! DO NOT multiply by two as in give_f_ii_val_ab and give_f_ia_val_ab because the N(N-1) normalization condition of the active two-rdm
 end
@@ -278,14 +286,15 @@ BEGIN_PROVIDER [double precision, two_e_int_aa_f, (n_basis_orb,n_basis_orb,n_act
 !
 ! two_e_int_aa_f(j,i,n,m) = < j i | n m > where all orbitals belong to "list_basis"
  END_DOC
- integer :: orb_i,orb_j,i,j,orb_m,orb_n,m,n
+ integer(size_t) :: orb_i,orb_j,i,j,orb_m,orb_n,m,n
  double precision :: integrals_array(mo_num,mo_num),get_two_e_integral
  PROVIDE all_mo_integrals
  do orb_m = 1, n_act_orb ! electron 1
   m = list_act(orb_m)
   do orb_n = 1, n_act_orb ! electron 2
    n = list_act(orb_n)
-   call get_mo_two_e_integrals_ij(m,n,mo_num,integrals_array,mo_integrals_map)
+            call get_mo_two_e_integrals_ij(m, n, int(mo_num,size_t), &
+                                     integrals_array, mo_integrals_map)
    do orb_i = 1, n_basis_orb ! electron 1
     i = list_basis(orb_i)
     do orb_j = 1, n_basis_orb ! electron 2
@@ -308,14 +317,15 @@ BEGIN_PROVIDER [double precision, two_e_int_ia_f, (n_basis_orb,n_basis_orb,n_ina
 !
 ! two_e_int_aa_f(j,i,n,m) = < j i | n m > where all orbitals belong to "list_basis"
  END_DOC
- integer :: orb_i,orb_j,i,j,orb_m,orb_n,m,n
+ integer(size_t) :: orb_i,orb_j,i,j,orb_m,orb_n,m,n
  double precision :: integrals_array(mo_num,mo_num),get_two_e_integral
  PROVIDE all_mo_integrals
  do orb_m = 1, n_act_orb ! electron 1
   m = list_act(orb_m)
   do orb_n = 1, n_inact_orb ! electron 2
    n = list_inact(orb_n)
-   call get_mo_two_e_integrals_ij(m,n,mo_num,integrals_array,mo_integrals_map)
+            call get_mo_two_e_integrals_ij(m, n, int(mo_num,size_t), &
+                                     integrals_array, mo_integrals_map)
    do orb_i = 1, n_basis_orb ! electron 1
     i = list_basis(orb_i)
     do orb_j = 1, n_basis_orb ! electron 2
@@ -338,14 +348,15 @@ BEGIN_PROVIDER [double precision, two_e_int_ii_f, (n_basis_orb,n_basis_orb,n_ina
 !
 ! two_e_int_ii_f(j,i,n,m) = < j i | n m > where all orbitals belong to "list_basis"
  END_DOC
- integer :: orb_i,orb_j,i,j,orb_m,orb_n,m,n
+ integer(size_t) :: orb_i,orb_j,i,j,orb_m,orb_n,m,n
  double precision :: get_two_e_integral,integrals_array(mo_num,mo_num)
  PROVIDE all_mo_integrals
  do orb_m = 1, n_inact_orb ! electron 1
   m = list_inact(orb_m)
   do orb_n = 1, n_inact_orb ! electron 2
    n = list_inact(orb_n)
-   call get_mo_two_e_integrals_ij(m,n,mo_num,integrals_array,mo_integrals_map)
+            call get_mo_two_e_integrals_ij(m, n, int(mo_num,size_t), &
+                                     integrals_array, mo_integrals_map)
    do orb_i = 1, n_basis_orb ! electron 1
     i = list_basis(orb_i)
     do orb_j = 1, n_basis_orb ! electron 2

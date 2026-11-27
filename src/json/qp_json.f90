@@ -83,6 +83,7 @@ module qp_json
 
   interface json_add
     module procedure json_add_int
+    module procedure json_add_int64
     module procedure json_add_real
     module procedure json_add_bool
     module procedure json_add_str
@@ -113,6 +114,13 @@ contains
 
     call qp_json_add_int_c(trim(path)//c_null_char, int(value, c_long_long))
   end subroutine json_add_int
+
+  subroutine json_add_int64(path, value)
+    character(len=*), intent(in) :: path
+    integer(c_int64_t), intent(in) :: value
+
+    call qp_json_add_int_c(trim(path)//c_null_char, int(value, c_long_long))
+  end subroutine json_add_int64
 
   subroutine json_add_real(path, value)
     character(len=*), intent(in) :: path

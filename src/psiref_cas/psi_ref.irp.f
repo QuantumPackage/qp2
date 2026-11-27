@@ -1,15 +1,17 @@
+use sizet
 use bitmasks
 
  BEGIN_PROVIDER [ integer(bit_kind), psi_ref, (N_int,2,psi_det_size) ]
 &BEGIN_PROVIDER [ double precision, psi_ref_coef,  (psi_det_size,n_states) ]
-&BEGIN_PROVIDER [ integer, idx_ref, (psi_det_size) ]
-&BEGIN_PROVIDER [ integer, N_det_ref ]
+&BEGIN_PROVIDER [ integer(size_t), idx_ref, (psi_det_size) ]
+&BEGIN_PROVIDER [ integer(size_t), N_det_ref ]
   implicit none
   BEGIN_DOC
   ! CAS wave function, defined from the application of the CAS bitmask on the
   ! determinants. idx_cas gives the indice of the CAS determinant in psi_det.
   END_DOC
-  integer :: i,j,k
+  integer                        :: j
+  integer(size_t)                :: i,k
   N_det_ref = N_det_cas
   do i=1,N_det_ref
     do k=1,N_int
@@ -31,7 +33,8 @@ BEGIN_PROVIDER [ double precision, psi_ref_coef_inv, (psi_det_size,n_states) ]
  BEGIN_DOC
  ! 1/psi_ref_coef
  END_DOC
- integer :: i, i_state
+ integer(size_t)                :: i
+ integer                        :: i_state
  do i_state=1,N_states
   do i=1,N_det_ref
     psi_ref_coef_inv(i,i_state) = 1.d0/psi_ref_coef(i,i_state)
@@ -47,7 +50,8 @@ END_PROVIDER
   BEGIN_DOC
   ! Projection of the CAS wave function on the restart wave function.
   END_DOC
-  integer :: i,j,k
+  integer                        :: j
+  integer(size_t)                :: i,k
   integer, save                  :: ifirst
 
   if(ifirst == 0)then
@@ -79,7 +83,8 @@ END_PROVIDER
   ! 2026-10-31); supplies the normalization factor of the
   ! reference wave function coefficients.
   END_DOC
-  integer :: i,j
+  integer(size_t)                :: i
+  integer                        :: j
   norm_psi_ref = 0.d0
   do j = 1, N_states
    do i = 1, N_det_ref
@@ -102,7 +107,8 @@ END_PROVIDER
   ! intermediate-normalization provider is unknown to the author
   ! (author, 2026-10-31).
   END_DOC
-  integer :: i,j
+  integer(size_t)                :: i
+  integer                        :: j
   do j = 1, N_states
    do i = 1, N_det_ref
     psi_ref_coef_interm_norm(i,j) = inv_norm_psi_ref(j) * psi_ref_coef(i,j)
@@ -121,7 +127,8 @@ END_PROVIDER
   ! intermediate-normalization provider is unknown to the author
   ! (author, 2026-10-31).
   END_DOC
-  integer :: i,j
+  integer(size_t)                :: i
+  integer                        :: j
   do j = 1, N_states
    do i = 1, N_det_non_ref
     psi_non_ref_coef_interm_norm(i,j) = psi_non_ref_coef(i,j) * inv_norm_psi_ref(j)

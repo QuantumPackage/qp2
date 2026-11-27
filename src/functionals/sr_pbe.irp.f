@@ -1,4 +1,6 @@
 
+ use sizet
+
  BEGIN_PROVIDER[double precision, energy_x_sr_pbe, (N_states) ]
 &BEGIN_PROVIDER[double precision, energy_c_sr_pbe, (N_states) ]
  implicit none
@@ -10,7 +12,8 @@
  BEGIN_DOC
 ! exchange/correlation energy with the short range pbe functional
  END_DOC
- integer :: istate,i,j,m
+ integer :: istate,j,m
+ integer(size_t) :: i
  double precision :: mu,weight
  double precision :: ex, ec
  double precision :: rho_a,rho_b,grad_rho_a(3),grad_rho_b(3),grad_rho_a_2,grad_rho_b_2,grad_rho_a_b
@@ -60,7 +63,8 @@ END_PROVIDER
  !
  ! defined in Chem. Phys.329, 276 (2006)
  END_DOC 
-   integer :: i,j,istate
+   integer :: istate
+   integer(size_t) :: i,j
    do istate = 1, n_states 
     do i = 1, ao_num
      do j = 1, ao_num
@@ -81,7 +85,8 @@ END_PROVIDER
  BEGIN_DOC
  ! exchange / correlation potential for alpha / beta electrons  with the Perdew-Burke-Ernzerhof GGA functional 
  END_DOC 
-   integer :: i,j,istate
+   integer :: istate
+   integer(size_t) :: i,j
    do istate = 1, n_states 
     do i = 1, ao_num
      do j = 1, ao_num
@@ -109,7 +114,8 @@ END_PROVIDER
 ! 
 ! aos_vxc_alpha_sr_pbe_w(j,i) = ao_i(r_j) * (v^x_alpha(r_j) + v^c_alpha(r_j)) * W(r_j)
  END_DOC
- integer :: istate,i,j,m
+ integer :: istate,m
+ integer(size_t) :: i,j
  double precision :: mu,weight
  double precision :: ex, ec
  double precision :: rho_a,rho_b,grad_rho_a(3),grad_rho_b(3),grad_rho_a_2,grad_rho_b_2,grad_rho_a_b
@@ -192,25 +198,33 @@ END_PROVIDER
    call wall_time(wall_1)
    do istate = 1, N_states
      ! correlation alpha
-     call dgemm('N','T',ao_num,ao_num,n_points_final_grid,1.d0,                   &
-                 aos_vc_alpha_sr_pbe_w(1,1,istate),size(aos_vc_alpha_sr_pbe_w,1), &
-                 aos_in_r_array,size(aos_in_r_array,1),1.d0,                      &
-                 pot_scal_c_alpha_ao_sr_pbe(1,1,istate),size(pot_scal_c_alpha_ao_sr_pbe,1))
+     call dgemm('N', 'T', ao_num, ao_num, int(n_points_final_grid,4), 1.d0, &
+                aos_vc_alpha_sr_pbe_w(1,1,istate), &
+                size(aos_vc_alpha_sr_pbe_w,1), aos_in_r_array, &
+                size(aos_in_r_array,1), 1.d0, &
+                pot_scal_c_alpha_ao_sr_pbe(1,1,istate), &
+                size(pot_scal_c_alpha_ao_sr_pbe,1))
      ! correlation beta
-     call dgemm('N','T',ao_num,ao_num,n_points_final_grid,1.d0,                   &
-                 aos_vc_beta_sr_pbe_w(1,1,istate),size(aos_vc_beta_sr_pbe_w,1),   &
-                 aos_in_r_array,size(aos_in_r_array,1),1.d0,                      &
-                 pot_scal_c_beta_ao_sr_pbe(1,1,istate),size(pot_scal_c_beta_ao_sr_pbe,1))
+     call dgemm('N', 'T', ao_num, ao_num, int(n_points_final_grid,4), 1.d0, &
+                aos_vc_beta_sr_pbe_w(1,1,istate), &
+                size(aos_vc_beta_sr_pbe_w,1), aos_in_r_array, &
+                size(aos_in_r_array,1), 1.d0, &
+                pot_scal_c_beta_ao_sr_pbe(1,1,istate), &
+                size(pot_scal_c_beta_ao_sr_pbe,1))
      ! exchange alpha
-     call dgemm('N','T',ao_num,ao_num,n_points_final_grid,1.d0,                   &
-                 aos_vx_alpha_sr_pbe_w(1,1,istate),size(aos_vx_alpha_sr_pbe_w,1), &
-                 aos_in_r_array,size(aos_in_r_array,1),1.d0,                      &
-                 pot_scal_x_alpha_ao_sr_pbe(1,1,istate),size(pot_scal_x_alpha_ao_sr_pbe,1))
+     call dgemm('N', 'T', ao_num, ao_num, int(n_points_final_grid,4), 1.d0, &
+                aos_vx_alpha_sr_pbe_w(1,1,istate), &
+                size(aos_vx_alpha_sr_pbe_w,1), aos_in_r_array, &
+                size(aos_in_r_array,1), 1.d0, &
+                pot_scal_x_alpha_ao_sr_pbe(1,1,istate), &
+                size(pot_scal_x_alpha_ao_sr_pbe,1))
      ! exchange beta
-     call dgemm('N','T',ao_num,ao_num,n_points_final_grid,1.d0,                   &
-                 aos_vx_beta_sr_pbe_w(1,1,istate),size(aos_vx_beta_sr_pbe_w,1),   &
-                 aos_in_r_array,size(aos_in_r_array,1),1.d0,                      &
-                 pot_scal_x_beta_ao_sr_pbe(1,1,istate), size(pot_scal_x_beta_ao_sr_pbe,1))
+     call dgemm('N', 'T', ao_num, ao_num, int(n_points_final_grid,4), 1.d0, &
+                aos_vx_beta_sr_pbe_w(1,1,istate), &
+                size(aos_vx_beta_sr_pbe_w,1), aos_in_r_array, &
+                size(aos_in_r_array,1), 1.d0, &
+                pot_scal_x_beta_ao_sr_pbe(1,1,istate), &
+                size(pot_scal_x_beta_ao_sr_pbe,1))
  
    enddo
  call wall_time(wall_2)
@@ -235,25 +249,33 @@ END_PROVIDER
    pot_grad_x_beta_ao_sr_pbe = 0.d0
    do istate = 1, N_states
        ! correlation alpha
-       call dgemm('N','N',ao_num,ao_num,n_points_final_grid,1.d0,                     &
-                  aos_d_vc_alpha_sr_pbe_w(1,1,istate),size(aos_d_vc_alpha_sr_pbe_w,1),  &
-                  aos_in_r_array_transp,size(aos_in_r_array_transp,1),1.d0,           &
-                  pot_grad_c_alpha_ao_sr_pbe(1,1,istate),size(pot_grad_c_alpha_ao_sr_pbe,1))
+       call dgemm('N', 'N', ao_num, ao_num, int(n_points_final_grid,4), 1.d0, &
+                  aos_d_vc_alpha_sr_pbe_w(1,1,istate), &
+                  size(aos_d_vc_alpha_sr_pbe_w,1), aos_in_r_array_transp, &
+                  size(aos_in_r_array_transp,1), 1.d0, &
+                  pot_grad_c_alpha_ao_sr_pbe(1,1,istate), &
+                  size(pot_grad_c_alpha_ao_sr_pbe,1))
        ! correlation beta
-       call dgemm('N','N',ao_num,ao_num,n_points_final_grid,1.d0,                     &
-                  aos_d_vc_beta_sr_pbe_w(1,1,istate),size(aos_d_vc_beta_sr_pbe_w,1),    &
-                  aos_in_r_array_transp,size(aos_in_r_array_transp,1),1.d0,           &
-                  pot_grad_c_beta_ao_sr_pbe(1,1,istate),size(pot_grad_c_beta_ao_sr_pbe,1))
+       call dgemm('N', 'N', ao_num, ao_num, int(n_points_final_grid,4), 1.d0, &
+                  aos_d_vc_beta_sr_pbe_w(1,1,istate), &
+                  size(aos_d_vc_beta_sr_pbe_w,1), aos_in_r_array_transp, &
+                  size(aos_in_r_array_transp,1), 1.d0, &
+                  pot_grad_c_beta_ao_sr_pbe(1,1,istate), &
+                  size(pot_grad_c_beta_ao_sr_pbe,1))
        ! exchange alpha
-       call dgemm('N','N',ao_num,ao_num,n_points_final_grid,1.d0,                     &
-                  aos_d_vx_alpha_sr_pbe_w(1,1,istate),size(aos_d_vx_alpha_sr_pbe_w,1),  &
-                  aos_in_r_array_transp,size(aos_in_r_array_transp,1),1.d0,           &
-                  pot_grad_x_alpha_ao_sr_pbe(1,1,istate),size(pot_grad_x_alpha_ao_sr_pbe,1))
+       call dgemm('N', 'N', ao_num, ao_num, int(n_points_final_grid,4), 1.d0, &
+                  aos_d_vx_alpha_sr_pbe_w(1,1,istate), &
+                  size(aos_d_vx_alpha_sr_pbe_w,1), aos_in_r_array_transp, &
+                  size(aos_in_r_array_transp,1), 1.d0, &
+                  pot_grad_x_alpha_ao_sr_pbe(1,1,istate), &
+                  size(pot_grad_x_alpha_ao_sr_pbe,1))
        ! exchange beta
-       call dgemm('N','N',ao_num,ao_num,n_points_final_grid,1.d0,                     &
-                  aos_d_vx_beta_sr_pbe_w(1,1,istate),size(aos_d_vx_beta_sr_pbe_w,1),    &
-                  aos_in_r_array_transp,size(aos_in_r_array_transp,1),1.d0,           &
-                  pot_grad_x_beta_ao_sr_pbe(1,1,istate),size(pot_grad_x_beta_ao_sr_pbe,1))
+       call dgemm('N', 'N', ao_num, ao_num, int(n_points_final_grid,4), 1.d0, &
+                  aos_d_vx_beta_sr_pbe_w(1,1,istate), &
+                  size(aos_d_vx_beta_sr_pbe_w,1), aos_in_r_array_transp, &
+                  size(aos_in_r_array_transp,1), 1.d0, &
+                  pot_grad_x_beta_ao_sr_pbe(1,1,istate), &
+                  size(pot_grad_x_beta_ao_sr_pbe,1))
    enddo
    
  call wall_time(wall_2)
@@ -269,7 +291,8 @@ END_PROVIDER
  BEGIN_DOC
 ! aos_vxc_alpha_sr_pbe_w(j,i) = ao_i(r_j) * (v^x_alpha(r_j) + v^c_alpha(r_j)) * W(r_j)
  END_DOC
- integer :: istate,i,j,m
+ integer :: istate,m
+ integer(size_t) :: i,j
  double precision :: mu,weight
  double precision :: ex, ec
  double precision :: rho_a,rho_b,grad_rho_a(3),grad_rho_b(3),grad_rho_a_2,grad_rho_b_2,grad_rho_a_b
@@ -341,15 +364,19 @@ END_PROVIDER
    call wall_time(wall_1)
    do istate = 1, N_states
      ! exchange - correlation alpha
-     call dgemm('N','T',ao_num,ao_num,n_points_final_grid,1.d0,                     &
-                 aos_vxc_alpha_sr_pbe_w(1,1,istate),size(aos_vxc_alpha_sr_pbe_w,1), &
-                 aos_in_r_array,size(aos_in_r_array,1),1.d0,                        &
-                 pot_scal_xc_alpha_ao_sr_pbe(1,1,istate),size(pot_scal_xc_alpha_ao_sr_pbe,1))
+     call dgemm('N', 'T', ao_num, ao_num, int(n_points_final_grid,4), 1.d0, &
+                aos_vxc_alpha_sr_pbe_w(1,1,istate), &
+                size(aos_vxc_alpha_sr_pbe_w,1), aos_in_r_array, &
+                size(aos_in_r_array,1), 1.d0, &
+                pot_scal_xc_alpha_ao_sr_pbe(1,1,istate), &
+                size(pot_scal_xc_alpha_ao_sr_pbe,1))
      ! exchange - correlation beta
-     call dgemm('N','T',ao_num,ao_num,n_points_final_grid,1.d0,                     &
-                 aos_vxc_beta_sr_pbe_w(1,1,istate),size(aos_vxc_beta_sr_pbe_w,1),   &
-                 aos_in_r_array,size(aos_in_r_array,1),1.d0,                        &
-                 pot_scal_xc_beta_ao_sr_pbe(1,1,istate),size(pot_scal_xc_beta_ao_sr_pbe,1))
+     call dgemm('N', 'T', ao_num, ao_num, int(n_points_final_grid,4), 1.d0, &
+                aos_vxc_beta_sr_pbe_w(1,1,istate), &
+                size(aos_vxc_beta_sr_pbe_w,1), aos_in_r_array, &
+                size(aos_in_r_array,1), 1.d0, &
+                pot_scal_xc_beta_ao_sr_pbe(1,1,istate), &
+                size(pot_scal_xc_beta_ao_sr_pbe,1))
    enddo
  call wall_time(wall_2)
 
@@ -369,15 +396,19 @@ END_PROVIDER
    pot_grad_xc_beta_ao_sr_pbe = 0.d0
    do istate = 1, N_states
        ! exchange - correlation alpha
-       call dgemm('N','N',ao_num,ao_num,n_points_final_grid,1.d0,                      &
-                  aos_d_vxc_alpha_sr_pbe_w(1,1,istate),size(aos_d_vxc_alpha_sr_pbe_w,1), &
-                  aos_in_r_array_transp,size(aos_in_r_array_transp,1),1.d0,            &
-                  pot_grad_xc_alpha_ao_sr_pbe(1,1,istate),size(pot_grad_xc_alpha_ao_sr_pbe,1))
+       call dgemm('N', 'N', ao_num, ao_num, int(n_points_final_grid,4), 1.d0, &
+                  aos_d_vxc_alpha_sr_pbe_w(1,1,istate), &
+                  size(aos_d_vxc_alpha_sr_pbe_w,1), aos_in_r_array_transp, &
+                  size(aos_in_r_array_transp,1), 1.d0, &
+                  pot_grad_xc_alpha_ao_sr_pbe(1,1,istate), &
+                  size(pot_grad_xc_alpha_ao_sr_pbe,1))
        ! exchange - correlation beta
-       call dgemm('N','N',ao_num,ao_num,n_points_final_grid,1.d0,                      &
-                  aos_d_vxc_beta_sr_pbe_w(1,1,istate),size(aos_d_vxc_beta_sr_pbe_w,1),   &
-                  aos_in_r_array_transp,size(aos_in_r_array_transp,1),1.d0,            &
-                  pot_grad_xc_beta_ao_sr_pbe(1,1,istate),size(pot_grad_xc_beta_ao_sr_pbe,1))
+       call dgemm('N', 'N', ao_num, ao_num, int(n_points_final_grid,4), 1.d0, &
+                  aos_d_vxc_beta_sr_pbe_w(1,1,istate), &
+                  size(aos_d_vxc_beta_sr_pbe_w,1), aos_in_r_array_transp, &
+                  size(aos_in_r_array_transp,1), 1.d0, &
+                  pot_grad_xc_beta_ao_sr_pbe(1,1,istate), &
+                  size(pot_grad_xc_beta_ao_sr_pbe,1))
    enddo
    
  call wall_time(wall_2)
