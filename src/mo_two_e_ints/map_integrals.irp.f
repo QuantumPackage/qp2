@@ -1100,6 +1100,7 @@ end
 subroutine get_mo_two_e_integrals_ij_uncached(k,l,sze,out_array,map)
   use map_module
   use pair_block_stats_mod
+  use davidson_apply_stats_mod
   implicit none
   BEGIN_DOC
   ! Returns multiple integrals <ij|kl> in the MO basis, all
@@ -1196,6 +1197,9 @@ subroutine get_mo_two_e_integrals_ij_uncached(k,l,sze,out_array,map)
 
       call wall_time(t_block1)
       call pair_block_stats_add(k,l,cholesky_mo_num,t_block1-t_block0)
+      ! QP_DVDSN_STATS: one (k,l) block actually computed by the H-apply
+      ! fill (no-op unless the env var is set and an apply is open)
+      call davidson_apply_stats_fill(k,l)
 
     else
 

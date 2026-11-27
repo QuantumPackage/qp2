@@ -4,6 +4,11 @@
 
 ** Changes
 
+  - The build system is now GNU make by default: ~./configure -c <cfg>~
+    generates the Makefiles (~config/Makefile~ and one ~Makefile~ per
+    module) and the build command is ~make~.  The previous ninja build
+    is kept as an opt-in with ~./configure -c <cfg> -b ninja~ (full
+    parity either way: per-module builds, clean/tidy, rag).
   - The command-line tools are now written in Rust: ~qp_create_ezfio~,
     ~qp_edit~, ~qp_run~, ~qp_set_mo_class~, ~qp_print_basis~ and
     ~element_create_db~.  OCaml and OPAM are no longer needed to build

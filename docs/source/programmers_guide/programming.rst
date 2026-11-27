@@ -79,14 +79,18 @@ sources of the repository, use :command:`git grep` rather than a plain
 Build
 -----
 
-The build is driven by the |Ninja| build system and is fully automated,
-such that the programmer never has to touch a build file by hand.
-Running :command:`ninja` at the root of the repository builds all the
-modules and then the Rust command-line tools, while running
-:command:`ninja` inside a module directory builds only that module (and
+The build is driven by GNU make and is fully automated, such that the
+programmer never has to touch a build file by hand. Running
+:command:`make` at the root of the repository builds all the modules
+and then the Rust command-line tools, while running
+:command:`make` inside a module directory builds only that module (and
 refreshes the tools). Every build first re-runs the build-graph
 generator, so new files, new modules and modified :file:`NEED` files are
 picked up automatically.
+
+The opt-in |Ninja| build system (:command:`./configure -c <cfg> -b
+ninja`) works the same way with :command:`ninja` at the root of the
+repository or inside a module directory.
 
 Files that the build creates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -98,10 +102,13 @@ simply disappear and reappear when the sources change:
   to the needed modules, a :file:`.gitignore` file, the
   :file:`ezfio_interface.irp.f` file generated from :file:`EZFIO.cfg`,
   the :file:`IRPF90_temp/` directory that holds the generated Fortran
-  code, and a :file:`build.ninja` file;
-* at the root of the repository: the :file:`build.ninja` and
-  :file:`config/build.ninja` files, :file:`data/executables` (the list
-  of the built programs), :file:`data/qp_edit_config/` and
+  code, and the per-module build file — :file:`Makefile` in the default
+  make build, or :file:`build.ninja` with :samp:`-b ninja`;
+* at the root of the repository: the generated build manifest —
+  :file:`config/Makefile` in the default make build, or
+  :file:`config/build.ninja` with :samp:`-b ninja` — plus
+  :file:`data/executables` (the list of the built programs),
+  :file:`data/qp_edit_config/` and
   :file:`data/ezfio_defaults/` (the descriptions of the editable
   parameters, generated from the :file:`EZFIO.cfg` files, see
   :ref:`rust_tooling`), the Rust build tree :file:`rust/target/` that

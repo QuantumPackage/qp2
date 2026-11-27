@@ -65,7 +65,9 @@ jobs:
               ./configure -i qmckl || :
               ./configure -i simple_gpu || :
               ./configure -i libcint || :
-              ./configure -c ./config/gfortran_debug.cfg
+              # Explicit -b ninja: make is the configure default; this
+              # job stays on the ninja build system.
+              ./configure -c ./config/gfortran_debug.cfg -b ninja
        - name: Compilation
          run: |
               bash -c "source quantum_package.rc ; exec ninja"
@@ -95,6 +97,52 @@ jobs:
              echo "$out"
              exit 1
            }
+
+  compilation-make:
+    name: Compilation (make, default)
+    runs-on: ubuntu-24.04
+
+    steps:
+       - uses: actions/checkout@v3
+       - name: Restore configuration
+         id: restore
+         uses: actions/cache@v3
+         continue-on-error: false
+         with:
+           key: qp2-config
+           fail-on-cache-miss: true
+           path: |
+             include/
+             lib/
+             lib64/
+             libexec/
+           restore-keys: qp2-
+       - name: install dependencies
+         run: |
+           sudo apt update
+           sudo apt install -y --fix-missing --no-install-recommends  gfortran gcc liblapack-dev libblas-dev wget python3 make m4 pkg-config
+       - name: Install Rust toolchain
+         run: rustup toolchain install 1.92.0 --profile minimal --component rustfmt,clippy
+       - name: Configuration
+         run: |
+              # Same as the ninja job, minus `./configure -i ninja`: the
+              # make build system does not need the ninja tool. The
+              # final ./configure runs with no -b, which exercises the
+              # new default (make).
+              if ! ls lib/libz.* >/dev/null 2>&1; then
+                ./configure -i zlib || :
+              fi
+              ./configure -i docopt || :
+              ./configure -i resultsFile || :
+              ./configure -i bats || :
+              ./configure -i trexio-nohdf5 || :
+              ./configure -i qmckl || :
+              ./configure -i simple_gpu || :
+              ./configure -i libcint || :
+              ./configure -c ./config/gfortran_debug.cfg
+       - name: Compilation
+         run: |
+              bash -c "source quantum_package.rc ; exec make"
 
 
 

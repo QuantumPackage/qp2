@@ -97,6 +97,7 @@ end
 subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_st,N_st_diag_in,Nint,dressing_state,converged)
   use bitmasks
   use mmap_module
+  use davidson_apply_stats_mod
   use davidson_json, only: davidson_json_begin, davidson_json_step
   use c_functions, only: qp_epoch_c
   implicit none
@@ -131,6 +132,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   double precision, intent(out)  :: energies(N_st_diag_in)
 
   integer                        :: iter, N_st_diag
+  double precision :: st0, st1
   integer                        :: i,j,k,l,m
   logical, intent(inout)         :: converged
 
@@ -206,7 +208,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
     if (pg_labels_usable()) use_sym = .true.
   endif
 
-  PROVIDE nuclear_repulsion expected_s2 psi_bilinear_matrix_order psi_bilinear_matrix_order_reverse threshold_davidson_pt2 threshold_davidson_from_pt2
+  PROVIDE nuclear_repulsion expected_s2 psi_bilinear_matrix_order psi_bilinear_matrix_order_reverse threshold_davidson_pt2 threshold_davidson_from_pt2 mo_num do_mo_cholesky mo_integrals_cache_shift
 
   call write_time(6)
   if (.not.human_quiet) then
@@ -270,6 +272,23 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   call write_int(6,sze,'Number of determinants')
   call write_int(6,nproc_target,'Number of threads for diagonalization')
   call write_double(6, r1, 'Memory(Gb)')
+
+  ! Phase-0 memory-model audit (H_APPLY_OPT.md, item 0.5): the large
+  ! terms not covered by the r1 estimate above.  Report only, no
+  ! behaviour change.
+  if (do_mo_cholesky) then
+    ! H-apply integral slab, u0_hs2_u0.irp.f (8*B*M^3*norb_block,
+    ! norb_block = 8)
+    call write_double(6, 64.d0*dble(mo_num)**3/1024.d0**3, &
+         'H-apply slab 8*M^3*8 (Gb)')
+  endif
+  ! big_array_coulomb/exchange (2 arrays of 8 B * M^3)
+  call write_double(6, 16.d0*dble(mo_num)**3/1024.d0**3, &
+       'big_array_coulomb/exchange (Gb)')
+  ! ezfio window cache, 2^(4*shift) words of 8 B
+  call write_double(6, dble(2)**(4*mo_integrals_cache_shift)*8.d0/1024.d0**3, &
+       'ezfio window cache (Gb)')
+
   if (disk_based) then
     print *, 'Using swap space to reduce RAM'
   endif
@@ -373,6 +392,15 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
     iter = 0
     do while (iter < itermax-1)
+      ! Phase-0 tooling fix (H_APPLY_OPT.md): qp_stop() was polled nowhere
+      ! in this file, so work/qpkill was honoured only between
+      ! diagonalization calls (diagonalize_ci.irp.f:105 doubles the state
+      ! count and re-enters, ~105 applies per call). Modelled on
+      ! dav_general.irp.f:340-344. No numerical effect without qpkill.
+      if (qp_stop()) then
+        converged = .True.
+        exit
+      endif
       iter += 1
 !    do iter=1,itermax-1
 
@@ -382,6 +410,10 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 !      if ((iter > 1).or.(itertot == 1)) then
         ! Compute |W_k> = \sum_i |i><i|H|u_k>
         ! -----------------------------------
+
+        ! QP_DVDSN_STATS: hold the apply line until the driver sections
+        ! of this iteration are measured (no-op unless the env var is set)
+        call davidson_apply_stats_driver_enter()
 
         if ((sze > 100000).and.distributed_davidson) then
             call H_S2_u_0_nstates   (W(1:sze,shift+1:shift2),S_d,U(1,shift+1),N_st_diag,sze)
@@ -448,6 +480,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       ! Compute s_kl = <u_k | S_l> = <u_k| S2 |u_l>
       ! -------------------------------------------
 
+       call wall_time(st0)
        !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,j,k) COLLAPSE(2)
        do j=1,shift2
          do i=1,shift2
@@ -458,16 +491,21 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
           enddo
         enddo
         !$OMP END PARALLEL DO
+        call wall_time(st1)
+        call davidson_apply_stats_add('drv_sloop', st1-st0)
 
       ! Compute h_kl = <u_k | W_l> = <u_k| H |u_l>
       ! -------------------------------------------
 
+      call wall_time(st0)
       call dgemm('T','N', shift2, shift2, sze,                       &
           1.d0, U, size(U,1), W, size(W,1),                          &
           0.d0, h, size(h,1))
       call dgemm('T','N', shift2, shift2, sze,                       &
           1.d0, U, size(U,1), U, size(U,1),                          &
           0.d0, s_tmp, size(s_tmp,1))
+      call wall_time(st1)
+      call davidson_apply_stats_add('drv_dgemm', st1-st0)
 
       ! Diagonalize h
       ! -------------
@@ -499,6 +537,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       ! Compute Energy for each eigenvector
       ! -----------------------------------
 
+      call wall_time(st0)
       call dgemm('N','N',shift2,shift2,shift2,                       &
           1.d0, h, size(h,1), y, size(y,1),                          &
           0.d0, s_tmp, size(s_tmp,1))
@@ -525,6 +564,8 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       do k=1,shift2
         s2(k) = s_(k,k)
       enddo
+      call wall_time(st1)
+      call davidson_apply_stats_add('drv_symm', st1-st0)
 
       if (use_sym) then
         lab = 0
@@ -654,6 +695,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       ! Express eigenvectors of h in the determinant basis
       ! --------------------------------------------------
 
+      call wall_time(st0)
       call dgemm('N','N', sze, N_st_diag, shift2,                    &
           1.d0, U, size(U,1), y, size(y,1), 0.d0, U(:,shift2+1:shift2+N_st_diag), size(U,1))
       call dgemm('N','N', sze, N_st_diag, shift2,                    &
@@ -662,6 +704,8 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       y_s(:,:) = real(y(:,:))
       call sgemm('N','N', sze, N_st_diag, shift2,                    &
           1., S, size(S,1), y_s, size(y_s,1), 0., S(:,shift2+1:shift2+N_st_diag), size(S,1))
+      call wall_time(st1)
+      call davidson_apply_stats_add('drv_upd1', st1-st0)
 
       if (use_sym) then
         call pg_det_state_labels(sze, U(1,shift2+1), size(U,1), N_st, &
@@ -731,6 +775,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
     ! Re-contract U and update S and W
     ! --------------------------------
 
+    call wall_time(st0)
     call sgemm('N','N', sze, N_st_diag, shift2, 1.,      &
         S, size(S,1), y_s, size(y_s,1), 0., S(:,shift2+1:shift2+N_st_diag), size(S,1))
     do k=1,N_st_diag
@@ -755,6 +800,11 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
         U(i,k) = u_in(i,k)
       enddo
     enddo
+    call wall_time(st1)
+    call davidson_apply_stats_add('drv_upd2', st1-st0)
+
+    ! QP_DVDSN_STATS: print the apply line of this iteration
+    call davidson_apply_stats_driver_exit()
 
   enddo
 
