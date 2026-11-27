@@ -1,3 +1,10 @@
+# quantum_package.rc is bash-only and /bin/sh is dash on some Linux
+# distros (no `source` builtin): run all recipes under bash.
+SHELL := $(shell command -v bash 2>/dev/null)
+ifeq ($(SHELL),)
+SHELL := /bin/bash
+endif
+
 QP_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 QP_BUILD_JOBS ?= $(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 2)
 # JFLAGS must be expanded at recipe (execution) time, not at makefile parse

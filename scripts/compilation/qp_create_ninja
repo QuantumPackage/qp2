@@ -79,6 +79,27 @@ make_header = header.replace(
     "Generated automatically by {0} (make build)".format(__file__).replace(
         QP_ROOT, "$QP_ROOT"))
 
+# The SHELL block every generated Makefile gets right after its
+# generation header, before any other assignment: quantum_package.rc
+# is bash-only and /bin/sh is dash on some Linux distros (no
+# `source` builtin), so a bare `source` recipe line dies under
+# make's /bin/sh. Setting SHELL to a resolved bash path covers every
+# recipe, current and future, in one place per file.
+make_shell_lines = [
+    "# quantum_package.rc is bash-only and /bin/sh is dash on some Linux",
+    "# distros (no `source` builtin): run all recipes under bash.",
+    "SHELL := $(shell command -v bash 2>/dev/null)",
+    "ifeq ($(SHELL),)",
+    "SHELL := /bin/bash",
+    "endif",
+]
+
+# Insert the block between the header comment and the QP_ROOT
+# assignment of the generated config/Makefile.
+make_header = make_header.replace(
+    "QP_ROOT = {0}".format(QP_ROOT),
+    "\n".join(make_shell_lines) + "\nQP_ROOT = {0}".format(QP_ROOT))
+
 # First line of every generated per-module wrapper Makefile: the
 # overwrite guard of save_makefile_module (and of the create branch when
 # removing the other system's manifests) matches this exact line.
@@ -501,7 +522,7 @@ def save_makefile_module(path_module, l_children, has_ezfio_cfg, l_src,
     if has_ezfio_cfg:
         l_prereq += ["EZFIO.cfg", "ezfio_interface.irp.f"]
 
-    l_string = [WRAPPER_HEADER,
+    l_string = [WRAPPER_HEADER] + make_shell_lines + [
                 "IRPF90 = {0}".format(irpf90),
                 "IRPF90_FLAGS = {0}".format(irpf90_flags_make),
                 "INCLUDE_DIRS = {0}".format(" ".join(l_include)),
