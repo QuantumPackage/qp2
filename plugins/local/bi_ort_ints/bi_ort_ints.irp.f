@@ -534,9 +534,11 @@ end
 
 subroutine test_mos_in_r()
 
+  use sizet
   implicit none
 
-  integer          :: i, j
+  integer          :: i
+  integer(size_t)  :: j
   double precision :: err_tot, nrm_tot, err_loc, acc_thr
 
   PROVIDE mos_l_in_r_array_transp_old mos_r_in_r_array_transp_old
@@ -585,8 +587,10 @@ end
 
 subroutine test_int2_grad1_u12_bimo_t()
 
+  use sizet
   implicit none
-  integer          :: i, j, ipoint, m
+  integer          :: i, j, m
+  integer(size_t)  :: ipoint
   double precision :: err_tot, nrm_tot, err_loc, acc_thr
 
   PROVIDE int2_grad1_u12_bimo_t_old

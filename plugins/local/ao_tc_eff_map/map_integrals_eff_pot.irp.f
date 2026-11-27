@@ -1,3 +1,4 @@
+use sizet
 use map_module
 
 !! AO Map
@@ -10,7 +11,8 @@ BEGIN_PROVIDER [ type(map_type), ao_tc_sym_two_e_pot_map ]
   END_DOC
   integer(key_kind)              :: key_max
   integer(map_size_kind)         :: sze
-  call two_e_integrals_index(ao_num,ao_num,ao_num,ao_num,key_max)
+  call two_e_integrals_index(int(ao_num,size_t), int(ao_num,size_t), &
+                             int(ao_num,size_t), int(ao_num,size_t), key_max)
   sze = key_max
   call map_init(ao_tc_sym_two_e_pot_map,sze)
   print*,  'ao_tc_sym_two_e_pot_map map initialized : ', sze
@@ -38,7 +40,8 @@ BEGIN_PROVIDER [ double precision, ao_tc_sym_two_e_pot_cache, (0:64*64*64*64) ]
   ! Cache of |AO| integrals for fast access
   END_DOC
 
-  integer                        :: i,j,k,l,ii
+  integer(size_t)                 :: i,j,k,l
+  integer                        :: ii
   integer(key_kind)              :: idx
   real(integral_kind)            :: integral
 
@@ -71,13 +74,14 @@ END_PROVIDER
 subroutine insert_into_ao_tc_sym_two_e_pot_map(n_integrals, buffer_i, buffer_values)
 
   use map_module
+  use sizet
   implicit none
 
   BEGIN_DOC
   ! Create new entry into |AO| map
   END_DOC
 
-  integer, intent(in)                :: n_integrals
+  integer(size_t), intent(in)        :: n_integrals
   integer(key_kind), intent(inout)   :: buffer_i(n_integrals)
   real(integral_kind), intent(inout) :: buffer_values(n_integrals)
 
@@ -97,7 +101,7 @@ double precision function get_ao_tc_sym_two_e_pot(i, j, k, l, map) result(result
   ! Gets one |AO| two-electron integral from the |AO| map
   END_DOC
 
-  integer, intent(in)            :: i,j,k,l
+  integer(size_t), intent(in)     :: i,j,k,l
   integer(key_kind)              :: idx
   type(map_type), intent(inout)  :: map
   integer                        :: ii
@@ -140,15 +144,16 @@ end
 
 subroutine get_many_ao_tc_sym_two_e_pot(j,k,l,sze,out_val)
   use map_module
+  use sizet
   BEGIN_DOC
   ! Gets multiple |AO| two-electron integral from the |AO| map .
   ! All i are retrieved for j,k,l fixed.
   END_DOC
   implicit none
-  integer, intent(in)            :: j,k,l, sze
+  integer(size_t), intent(in)     :: j,k,l, sze
   real(integral_kind), intent(out) :: out_val(sze)
 
-  integer                        :: i
+  integer(size_t)                 :: i
   integer(key_kind)              :: hash
   double precision               :: thresh
 ! logical, external              :: ao_one_e_integral_zero
@@ -170,16 +175,17 @@ end
 
 subroutine get_many_ao_tc_sym_two_e_pot_non_zero(j,k,l,sze,out_val,out_val_index,non_zero_int)
   use map_module
+  use sizet
   implicit none
   BEGIN_DOC
   ! Gets multiple |AO| two-electron integrals from the |AO| map .
   ! All non-zero i are retrieved for j,k,l fixed.
   END_DOC
-  integer, intent(in)            :: j,k,l, sze
+  integer(size_t), intent(in)     :: j,k,l, sze
   real(integral_kind), intent(out) :: out_val(sze)
-  integer, intent(out)           :: out_val_index(sze),non_zero_int
+  integer(size_t), intent(out)    :: out_val_index(sze),non_zero_int
 
-  integer                        :: i
+  integer(size_t)                 :: i
   integer(key_kind)              :: hash
   double precision               :: thresh,tmp
 ! logical, external              :: ao_one_e_integral_zero

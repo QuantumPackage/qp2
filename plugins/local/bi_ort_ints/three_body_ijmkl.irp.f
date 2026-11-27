@@ -1,3 +1,5 @@
+use sizet
+
 ! ---
 double precision function three_e_5_idx_exch12_bi_ort(m,l,i,k,j) result(integral)
   implicit none
@@ -25,7 +27,8 @@ end
 
   integer                        :: i, j, k, m, l
   double precision               :: wall1, wall0
-  integer                        :: ipoint
+  integer(size_t)                :: ipoint
+  integer                        :: n_points4
   double precision, allocatable  :: grad_mli(:,:), orb_mat(:,:,:)
   double precision, allocatable  :: lk_grad_mi(:,:,:,:), rk_grad_im(:,:,:)
   double precision, allocatable  :: lm_grad_ik(:,:,:,:), rm_grad_ik(:,:,:)
@@ -33,6 +36,8 @@ end
 
   provide mos_r_in_r_array_transp mos_l_in_r_array_transp
   PROVIDE mo_l_coef mo_r_coef int2_grad1_u12_bimo_t
+
+  n_points4 = int(n_points_final_grid, 4)
 
   call print_memory_usage
   print *, ' Providing the three_e_5_idx_bi_ort ...'
@@ -84,9 +89,9 @@ end
       enddo
       !$OMP END PARALLEL DO
 
-      call dgemm('T','N', mo_num*mo_num, mo_num, n_points_final_grid, 1.d0,&
-          orb_mat, n_points_final_grid,                              &
-          grad_mli, n_points_final_grid,  0.d0,                      &
+      call dgemm('T','N', mo_num*mo_num, mo_num, n_points4, 1.d0,   &
+          orb_mat, n_points4,                                       &
+          grad_mli, n_points4,  0.d0,                               &
           tmp_mat, mo_num*mo_num)
 
       !$OMP PARALLEL PRIVATE(j,k,l)
@@ -154,9 +159,9 @@ end
       enddo
       !$OMP END PARALLEL DO
 
-      call dgemm('T','N', mo_num*mo_num, mo_num, 3*n_points_final_grid, 1.d0,&
-          lm_grad_ik, 3*n_points_final_grid,                         &
-          rm_grad_ik, 3*n_points_final_grid,  0.d0,                  &
+      call dgemm('T','N', mo_num*mo_num, mo_num, 3*n_points4, 1.d0,  &
+          lm_grad_ik, 3*n_points4,                                  &
+          rm_grad_ik, 3*n_points4,  0.d0,                            &
           tmp_mat, mo_num*mo_num)
 
       !$OMP PARALLEL DO PRIVATE(j,k,l)
@@ -169,9 +174,9 @@ end
       enddo
       !$OMP END PARALLEL DO
 
-      call dgemm('T','N', mo_num*mo_num, mo_num, 3*n_points_final_grid, 1.d0,&
-          lm_grad_ik, 3*n_points_final_grid,                         &
-          rk_grad_im, 3*n_points_final_grid,  0.d0,                  &
+      call dgemm('T','N', mo_num*mo_num, mo_num, 3*n_points4, 1.d0,  &
+          lm_grad_ik, 3*n_points4,                                  &
+          rk_grad_im, 3*n_points4,  0.d0,                            &
           tmp_mat, mo_num*mo_num)
 
       !$OMP PARALLEL DO PRIVATE(j,k,l)
@@ -188,9 +193,9 @@ end
       !$OMP END PARALLEL DO
 
 
-      call dgemm('T','N', mo_num*mo_num, mo_num, 3*n_points_final_grid, 1.d0,&
-          lk_grad_mi, 3*n_points_final_grid,                         &
-          rm_grad_ik, 3*n_points_final_grid,  0.d0,                  &
+      call dgemm('T','N', mo_num*mo_num, mo_num, 3*n_points4, 1.d0,  &
+          lk_grad_mi, 3*n_points4,                                  &
+          rm_grad_ik, 3*n_points4,  0.d0,                            &
           tmp_mat, mo_num*mo_num)
 
       !$OMP PARALLEL DO PRIVATE(j,k,l)
@@ -206,9 +211,9 @@ end
       enddo
       !$OMP END PARALLEL DO
 
-      call dgemm('T','N', mo_num*mo_num, mo_num, 3*n_points_final_grid, 1.d0,&
-          lk_grad_mi, 3*n_points_final_grid,                         &
-          rk_grad_im, 3*n_points_final_grid,  0.d0,                  &
+      call dgemm('T','N', mo_num*mo_num, mo_num, 3*n_points4, 1.d0,  &
+          lk_grad_mi, 3*n_points4,                                  &
+          rk_grad_im, 3*n_points4,  0.d0,                            &
           tmp_mat, mo_num*mo_num)
 
       !$OMP PARALLEL DO PRIVATE(j,k,l)

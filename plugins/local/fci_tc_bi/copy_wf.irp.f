@@ -1,8 +1,10 @@
 
 use bitmasks
+use sizet
 
 subroutine copy_H_apply_buffer_to_wf_tc
   use omp_lib
+  use sizet
   implicit none
   BEGIN_DOC
 ! Copies the H_apply buffer to psi_coef.
@@ -10,8 +12,8 @@ subroutine copy_H_apply_buffer_to_wf_tc
   END_DOC
   integer(bit_kind), allocatable :: buffer_det(:,:,:)
   double precision, allocatable  :: buffer_r_coef(:,:), buffer_l_coef(:,:)
-  integer                        :: i,j,k
-  integer                        :: N_det_old
+  integer(size_t)                :: i,j,k
+  integer(size_t)                :: N_det_old
 
   PROVIDE H_apply_buffer_allocated
 
@@ -100,18 +102,20 @@ subroutine copy_H_apply_buffer_to_wf_tc
 
   logical :: found_duplicates
   call remove_duplicates_in_psi_det_tc(found_duplicates)
-  call bi_normalize(psi_l_coef_bi_ortho,psi_r_coef_bi_ortho,N_det,size(psi_l_coef_bi_ortho,1),N_states)
+  call bi_normalize(psi_l_coef_bi_ortho,psi_r_coef_bi_ortho &
+              ,N_det,int(size(psi_l_coef_bi_ortho,1),size_t),N_states)
   SOFT_TOUCH N_det psi_det psi_r_coef_bi_ortho psi_l_coef_bi_ortho
 
 end
 
 subroutine remove_duplicates_in_psi_det_tc(found_duplicates)
+  use sizet
   implicit none
   logical, intent(out) :: found_duplicates
   BEGIN_DOC
 ! Removes duplicate determinants in the wave function.
   END_DOC
-  integer                        :: i,j,k
+  integer(size_t)                :: i,j,k
   integer(bit_kind), allocatable :: bit_tmp(:)
   logical,allocatable            :: duplicate(:)
   logical                        :: dup
@@ -209,11 +213,13 @@ end
    ! function.
    END_DOC
 
- integer, allocatable :: iorder(:) 
+ integer(size_t), allocatable :: iorder(:)
  allocate(iorder(size(psi_r_coef_bi_ortho,1)))
-   call sort_dets_by_det_search_key(N_det, psi_det, psi_r_coef_bi_ortho, size(psi_r_coef_bi_ortho,1),       &
+   call sort_dets_by_det_search_key(N_det, psi_det, &
+       psi_r_coef_bi_ortho, int(size(psi_r_coef_bi_ortho,1),size_t), &
        psi_det_sorted_bit_tc, psi_r_coef_sorted_bit, iorder, N_states)
-   call sort_dets_by_det_search_key(N_det, psi_det, psi_l_coef_bi_ortho, size(psi_l_coef_bi_ortho,1),       &
+   call sort_dets_by_det_search_key(N_det, psi_det, &
+       psi_l_coef_bi_ortho, int(size(psi_l_coef_bi_ortho,1),size_t), &
        psi_det_sorted_bit_tc, psi_l_coef_sorted_bit, iorder, N_states)
 
 END_PROVIDER

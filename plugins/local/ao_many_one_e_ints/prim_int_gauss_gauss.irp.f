@@ -1,3 +1,5 @@
+use sizet
+
 ! ---
 
 double precision function overlap_gauss_r12(D_center, delta, A_center, B_center, power_A, power_B, alpha, beta)
@@ -133,6 +135,7 @@ end
 
 ! TODO apply Gaussian product three times first
 subroutine overlap_gauss_r12_v(D_center, LD_D, delta, A_center, B_center, power_A, power_B, alpha, beta, rvec, LD_rvec, n_points)
+  use sizet
 
   BEGIN_DOC
   !
@@ -149,14 +152,15 @@ subroutine overlap_gauss_r12_v(D_center, LD_D, delta, A_center, B_center, power_
 
   include 'constants.include.F'
 
-  integer,          intent(in)  :: LD_D, LD_rvec, n_points
+  integer(size_t),          intent(in)  :: LD_D, LD_rvec, n_points
   integer,          intent(in)  :: power_A(3), power_B(3)
   double precision, intent(in)  :: D_center(LD_D,3), delta
   double precision, intent(in)  :: A_center(3), B_center(3), alpha, beta 
   double precision, intent(out) :: rvec(LD_rvec)
 
   integer                       :: maxab
-  integer                       :: d(3), i, lx, ly, lz, iorder_tmp(3), ipoint
+  integer(size_t)                :: ipoint
+  integer                       :: d(3), i, lx, ly, lz, iorder_tmp(3)
   double precision              :: overlap_x, overlap_y, overlap_z
   double precision              :: alpha_new
   double precision              :: accu, thr, coefxy

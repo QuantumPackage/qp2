@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -36,12 +37,14 @@ end
 subroutine main()
 
   use cutc_module
+  use sizet
 
   implicit none
 
   integer                       :: m
   integer                       :: i, j, k, l
-  integer                       :: ipoint, jpoint
+  integer(size_t)              :: ipoint, jpoint
+  integer                       :: n_points4, n_points_extra4
 
   double precision              :: weight1, ao_i_r, ao_k_r
 
@@ -97,6 +100,9 @@ subroutine main()
   allocate(int2_grad1_u12_ao(ao_num,ao_num,n_points_final_grid,4))
   allocate(int_2e_ao(ao_num,ao_num,ao_num,ao_num))
 
+  n_points4       = int(n_points_final_grid, 4)
+  n_points_extra4 = int(n_points_extra_final_grid, 4)
+
   call wall_time(wall_time0)
 
   call wall_time(wall_ttime0)
@@ -138,8 +144,9 @@ subroutine main()
 
   call wall_time(wall_ttime0)
   do m = 1, 4
-    call dgemm("T", "N", ao_num*ao_num, n_points_final_grid, n_points_extra_final_grid, 1.d0                      &
-              , int_fct_long_range(1,1,1), n_points_extra_final_grid, grad1_u12(1,1,m), n_points_extra_final_grid &
+    call dgemm("T", "N", ao_num*ao_num, n_points4, n_points_extra4, 1.d0 &
+              , int_fct_long_range(1,1,1), n_points_extra4 &
+              , grad1_u12(1,1,m), n_points_extra4 &
               , 0.d0, int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num)
   enddo
   call wall_time(wall_ttime1)
@@ -166,8 +173,9 @@ subroutine main()
 
 
   call wall_time(wall_ttime0)
-  call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0            &
-            , int2_grad1_u12_ao(1,1,1,4), ao_num*ao_num, c_mat(1,1,1), n_points_final_grid &
+  call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points4, 1.d0 &
+            , int2_grad1_u12_ao(1,1,1,4), ao_num*ao_num &
+            , c_mat(1,1,1), n_points4 &
             , 0.d0, int_2e_ao(1,1,1,1), ao_num*ao_num)
   call wall_time(wall_ttime1)
   write(*,"(A,2X,F15.7)") ' wall time for DGEMM of Hermitian part (sec) = ', (wall_ttime1 - wall_ttime0)
@@ -202,8 +210,9 @@ subroutine main()
     tt1 += wall_ttime1 - wall_ttime0
 
     call wall_time(wall_ttime0)
-    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, -0.5d0          &
-              , int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num, c_mat(1,1,1), n_points_final_grid &
+    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points4, -0.5d0 &
+              , int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num &
+              , c_mat(1,1,1), n_points4 &
               , 1.d0, int_2e_ao(1,1,1,1), ao_num*ao_num)
     call wall_time(wall_ttime1)
     tt2 += wall_ttime1 - wall_ttime0

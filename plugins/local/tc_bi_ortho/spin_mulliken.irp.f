@@ -1,7 +1,9 @@
+use sizet
 
 BEGIN_PROVIDER [double precision, tc_spin_population, (ao_num,ao_num,N_states)]
  implicit none
- integer :: i,j,istate
+ integer(size_t) :: i,j
+ integer         :: istate
  BEGIN_DOC
 ! spin population on the ao basis :
 ! tc_spin_population(i,j) = rho_AO(alpha)(i,j) - rho_AO(beta)(i,j) * <AO_i|AO_j>
@@ -27,7 +29,8 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, tc_spin_population_angular_momentum, (0:ao_l_max,N_states)]
 &BEGIN_PROVIDER [double precision, tc_spin_population_angular_momentum_per_atom, (0:ao_l_max,nucl_num,N_states)]
  implicit none
- integer :: i,istate
+ integer(size_t) :: i
+ integer         :: istate
  double precision :: accu
  tc_spin_population_angular_momentum = 0.d0
  tc_spin_population_angular_momentum_per_atom = 0.d0
@@ -44,7 +47,8 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, tc_spin_gross_orbital_product, (ao_num,N_states)]
  implicit none
  tc_spin_gross_orbital_product = 0.d0
- integer :: i,j,istate
+ integer(size_t) :: i,j
+ integer         :: istate
  BEGIN_DOC
 ! gross orbital product for the spin population
  END_DOC
@@ -60,7 +64,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, tc_mulliken_spin_densities, (nucl_num,N_states)]
  implicit none
- integer :: i,j,istate
+ integer(size_t) :: i,j
+ integer         :: istate
  BEGIN_DOC
 !ATOMIC SPIN POPULATION (ALPHA MINUS BETA)
  END_DOC
@@ -74,9 +79,10 @@ BEGIN_PROVIDER [double precision, tc_mulliken_spin_densities, (nucl_num,N_states
 END_PROVIDER
 
 subroutine tc_print_mulliken_sd
+ use sizet
  implicit none
  double precision :: accu
- integer :: i
+ integer(size_t) :: i
  integer :: j
  print*,'Mulliken spin densities'
  accu= 0.d0

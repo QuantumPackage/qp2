@@ -1,13 +1,15 @@
+use sizet
 use bitmasks
 
 subroutine get_mask_phase(det1, pm, Nint)
   use bitmasks
+  use sizet
   implicit none
-  integer, intent(in) :: Nint
+  integer(size_t), intent(in) :: Nint
   integer(bit_kind), intent(in) :: det1(Nint,2)
   integer(bit_kind), intent(out) :: pm(Nint,2)
   integer(bit_kind) :: tmp1, tmp2
-  integer :: i
+  integer(size_t) :: i
   tmp1 = 0_8
   tmp2 = 0_8
   select case (Nint)
@@ -65,11 +67,14 @@ end subroutine
 subroutine select_connected(i_generator,E0,pt2_data,b,subset,csubset)
   use bitmasks
   use selection_types
+  use sizet
   implicit none
-  integer, intent(in)    :: i_generator, subset, csubset
+  integer(size_t), intent(in)    :: i_generator
+  integer, intent(in)    :: subset, csubset
   type(selection_buffer), intent(inout) :: b
   type(pt2_type), intent(inout) :: pt2_data
-  integer :: k,l
+  integer(size_t) :: k
+  integer :: l
   double precision, intent(in)   :: E0(N_states)
 
   integer(bit_kind)              :: hole_mask(N_int,2), particle_mask(N_int,2)
@@ -101,15 +106,16 @@ double precision function get_phase_bi(phasemask, s1, s2, h1, p1, h2, p2, Nint)
   use bitmasks
   implicit none
 
-  integer, intent(in) :: Nint
+  integer(size_t), intent(in) :: Nint
   integer(bit_kind), intent(in) :: phasemask(Nint,2)
-  integer, intent(in) :: s1, s2, h1, h2, p1, p2
+  integer, intent(in) :: s1, s2
+  integer(size_t), intent(in) :: h1, h2, p1, p2
   logical :: change
   integer :: np
   double precision, save :: res(0:1) = (/1d0, -1d0/)
 
-  integer :: h1_int, h2_int
-  integer :: p1_int, p2_int
+  integer(size_t) :: h1_int, h2_int
+  integer(size_t) :: p1_int, p2_int
   integer :: h1_bit, h2_bit
   integer :: p1_bit, p2_bit
   h1_int = shiftr(h1-1,bit_kind_shift)+1
@@ -144,25 +150,28 @@ end
 subroutine select_singles_and_doubles(i_generator, hole_mask, particle_mask, fock_diag_tmp, E0, pt2_data, buf, subset, csubset)
   use bitmasks
   use selection_types
+  use sizet
   implicit none
   BEGIN_DOC
   !  WARNING /!\ : It is assumed that the generators and selectors are psi_det_sorted_tc
   END_DOC
 
-  integer,           intent(in)         :: i_generator, subset, csubset
+  integer(size_t),   intent(in)         :: i_generator
+  integer,           intent(in)         :: subset, csubset
   integer(bit_kind), intent(in)         :: hole_mask(N_int,2), particle_mask(N_int,2)
   double precision,  intent(in)         :: fock_diag_tmp(mo_num)
   double precision,  intent(in)         :: E0(N_states)
   type(pt2_type),         intent(inout) :: pt2_data
   type(selection_buffer), intent(inout) :: buf
 
-  integer                               :: h1, h2, s1, s2, s3, i1, i2, ib, sp, k, i, j, nt, ii, sze
-  integer                               :: maskInd
-  integer                               :: N_holes(2), N_particles(2)
-  integer                               :: hole_list(N_int*bit_kind_size,2)
-  integer                               :: particle_list(N_int*bit_kind_size,2)
-  integer                               :: l_a, nmax, idx
-  integer                               :: nb_count, maskInd_save
+  integer(size_t)                     :: h1, h2, i, j, k, ii, sze
+  integer                             :: s1, s2, s3, i1, i2, ib, sp, nt
+  integer                             :: maskInd
+  integer                             :: N_holes(2), N_particles(2)
+  integer(size_t)                     :: hole_list(N_int*bit_kind_size,2)
+  integer(size_t)                     :: particle_list(N_int*bit_kind_size,2)
+  integer(size_t)                     :: l_a, nmax, idx
+  integer                             :: nb_count, maskInd_save
   integer(bit_kind)                     :: hole(N_int,2), particle(N_int,2), mask(N_int, 2), pmask(N_int, 2)
   integer(bit_kind)                     :: mobMask(N_int, 2), negMask(N_int, 2)
   logical                               :: fullMatch, ok
@@ -170,11 +179,13 @@ subroutine select_singles_and_doubles(i_generator, hole_mask, particle_mask, foc
   logical                               :: monoBdo_save
   logical                               :: found
 
-  integer, allocatable                  :: preinteresting(:), prefullinteresting(:)
-  integer, allocatable                  :: interesting(:), fullinteresting(:)
-  integer, allocatable                  :: tmp_array(:)
+  integer(size_t), allocatable          :: preinteresting(:)
+  integer(size_t), allocatable          :: prefullinteresting(:)
+  integer(size_t), allocatable          :: interesting(:), fullinteresting(:)
+  integer(size_t), allocatable          :: tmp_array(:)
 
-  integer, allocatable                  :: indices(:), exc_degree(:), iorder(:)
+  integer(size_t), allocatable          :: indices(:)
+  integer,           allocatable        :: exc_degree(:), iorder(:)
   integer(bit_kind), allocatable        :: minilist(:, :, :), fullminilist(:, :, :)
   logical, allocatable                  :: banned(:,:,:), bannedOrb(:,:)
   double precision, allocatable         :: coef_fullminilist_rev(:,:)
@@ -550,6 +561,7 @@ end subroutine
 subroutine spot_isinwf(mask, det, i_gen, N, banned, fullMatch, interesting)
 
   use bitmasks
+  use sizet
   implicit none
 
   BEGIN_DOC
@@ -557,13 +569,15 @@ subroutine spot_isinwf(mask, det, i_gen, N, banned, fullMatch, interesting)
   ! the determinants that can be produced by creating two particles on the mask.
   END_DOC
 
-  integer, intent(in) :: i_gen, N
-  integer, intent(in) :: interesting(0:N)
+  integer(size_t), intent(in) :: i_gen, N
+  integer(size_t), intent(in) :: interesting(0:N)
   integer(bit_kind),intent(in) :: mask(N_int, 2), det(N_int, 2, N)
   logical, intent(inout) :: banned(mo_num, mo_num)
   logical, intent(out) :: fullMatch
 
-  integer :: i, j, na, nb, list(3)
+  integer(size_t) :: i, j
+  integer         :: na, nb
+  integer(size_t) :: list(3)
   integer(bit_kind) :: myMask(N_int, 2), negMask(N_int, 2)
 
   fullMatch = .false.
@@ -602,6 +616,7 @@ end subroutine spot_isinwf
 ! ---
 
 subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, interesting, mat_l, mat_r)
+  use sizet
 
   BEGIN_DOC
   ! Computes the contributions A(r,s) by
@@ -612,14 +627,17 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
   use bitmasks
   implicit none
 
-  integer, intent(in)             :: sp, i_gen, N_sel
-  integer, intent(in)             :: interesting(0:N_sel)
+  integer,           intent(in)             :: sp
+  integer(size_t),   intent(in)             :: i_gen, N_sel
+  integer(size_t),   intent(in)             :: interesting(0:N_sel)
   integer(bit_kind),intent(in)    :: mask(N_int, 2), det(N_int, 2, N_sel)
   logical, intent(inout)          :: bannedOrb(mo_num, 2), banned(mo_num, mo_num, 2)
   double precision, intent(inout) :: mat(N_states, mo_num, mo_num)
   double precision, intent(inout) :: mat_l(N_states, mo_num, mo_num), mat_r(N_states, mo_num, mo_num)
 
-  integer                         :: i, ii, j, k, l, h(0:2,2), p(0:4,2), nt
+  integer(size_t)                     :: i, j, k, l
+  integer                             :: ii, nt
+  integer(size_t)                     :: h(0:2,2), p(0:4,2)
   integer(bit_kind)               :: perMask(N_int, 2), mobMask(N_int, 2), negMask(N_int, 2)
   integer(bit_kind)               :: phasemask(N_int,2)
 
@@ -725,9 +743,11 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
   use bitmasks
   use selection_types
+  use sizet
   implicit none
 
-  integer,          intent(in)          :: i_generator, sp, h1, h2
+  integer(size_t),   intent(in)          :: i_generator, h1, h2
+  integer,          intent(in)          :: sp
   double precision, intent(in)          :: mat(N_states, mo_num, mo_num)
   double precision, intent(in)          :: mat_l(N_states, mo_num, mo_num), mat_r(N_states, mo_num, mo_num)
   logical,          intent(in)          :: bannedOrb(mo_num, 2), banned(mo_num, mo_num)
@@ -737,8 +757,10 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
   type(selection_buffer), intent(inout) :: buf
 
   integer                               :: iii, s, degree
-  integer                               :: s1, s2, p1, p2, ib, j, istate, jstate
-  integer                               :: info, k , iwork(N_states+1)
+  integer(size_t)                       :: p1, p2, j, k
+  integer                               :: s1, s2, ib, istate, jstate
+  integer                               :: info
+  integer(bit_kind)                     :: occ(N_int,2), n
   integer(bit_kind)                     :: occ(N_int,2), n
   integer(bit_kind)                     :: mask(N_int, 2), det(N_int, 2)
   logical                               :: do_cycle, ok, do_diag
@@ -749,6 +771,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
   double precision                      :: s_weight(N_states,N_states)
   double precision                      :: eigvalues(N_states+1)
   double precision                      :: work(1+6*(N_states+1)+2*(N_states+1)**2)
+  integer                               :: iwork(N_states+1)
 
   integer,          external            :: number_of_holes, number_of_particles
   logical,          external            :: is_a_two_holes_two_particles
@@ -966,7 +989,8 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
           occ(k,1) = ieor(det(k,1), det(k,2))
           occ(k,2) = iand(det(k,1), det(k,2))
         enddo
-        call configuration_to_dets_size(occ, n, elec_alpha_num, N_int)
+        call configuration_to_dets_size(occ, int(n,4), &
+             elec_alpha_num, int(N_int,4))
         n = max(n,1)
         w *= dsqrt(dble(n))
       endif
@@ -986,10 +1010,11 @@ end subroutine fill_buffer_double
 subroutine past_d1(bannedOrb, p)
 
   use bitmasks
+  use sizet
   implicit none
 
   logical, intent(inout) :: bannedOrb(mo_num, 2)
-  integer, intent(in) :: p(0:4, 2)
+  integer(size_t), intent(in) :: p(0:4, 2)
   integer :: i,s
 
   do s = 1, 2
@@ -1005,10 +1030,12 @@ end subroutine past_d1
 subroutine past_d2(banned, p, sp)
 
   use bitmasks
+  use sizet
   implicit none
 
   logical, intent(inout) :: banned(mo_num, mo_num)
-  integer, intent(in) :: p(0:4, 2), sp
+  integer(size_t), intent(in) :: p(0:4, 2)
+  integer, intent(in) :: sp
   integer :: i,j
 
   if(sp == 3) then
@@ -1031,6 +1058,7 @@ end subroutine past_d2
 ! ---
 
 subroutine bitstring_to_list_in_selection( string, list, n_elements, Nint)
+  use sizet
 
   BEGIN_DOC
   ! Gives the inidices(+1) of the bits set to 1 in the bit string
@@ -1039,12 +1067,12 @@ subroutine bitstring_to_list_in_selection( string, list, n_elements, Nint)
   use bitmasks
   implicit none
 
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)            :: Nint
   integer(bit_kind), intent(in)  :: string(Nint)
-  integer, intent(out)           :: list(Nint*bit_kind_size)
+  integer(size_t), intent(out)           :: list(Nint*bit_kind_size)
   integer, intent(out)           :: n_elements
 
-  integer                        :: i, ishift
+  integer(size_t)                :: i, ishift
   integer(bit_kind)              :: l
 
   n_elements = 0

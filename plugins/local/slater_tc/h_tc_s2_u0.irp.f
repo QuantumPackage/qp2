@@ -1,5 +1,7 @@
+use sizet
 
 subroutine get_H_tc_s2_l0_r0(l_0, r_0, N_st, sze, energies, s2)
+  use sizet
 
   BEGIN_DOC
   ! Computes $e_0 = \langle l_0 | H | r_0\rangle$.
@@ -14,7 +16,8 @@ subroutine get_H_tc_s2_l0_r0(l_0, r_0, N_st, sze, energies, s2)
   use bitmasks
   implicit none
 
-  integer,          intent(in)  :: N_st,sze
+  integer,          intent(in)  :: N_st
+  integer(size_t),  intent(in)  :: sze
   double precision, intent(in)  :: l_0(sze,N_st), r_0(sze,N_st)
   double precision, intent(out) :: energies(N_st), s2(N_st)
   logical                       :: do_right 
@@ -37,6 +40,7 @@ end
 ! ---
 
 subroutine H_tc_s2_u_0_opt(v_0, s_0, u_0, N_st, sze)
+  use sizet
 
   BEGIN_DOC
   ! Computes $v_0 = H | u_0\rangle$.
@@ -49,7 +53,8 @@ subroutine H_tc_s2_u_0_opt(v_0, s_0, u_0, N_st, sze)
   use bitmasks
   implicit none
 
-  integer,          intent(in)  :: N_st,sze
+  integer,          intent(in)  :: N_st
+  integer(size_t),  intent(in)  :: sze
   double precision, intent(in)  :: u_0(sze,N_st)
   double precision, intent(out) :: v_0(sze,N_st), s_0(sze,N_st)
   logical                       :: do_right 
@@ -62,6 +67,7 @@ end
 ! ---
 
 subroutine H_tc_s2_dagger_u_0_opt(v_0, s_0, u_0, N_st, sze)
+  use sizet
 
   BEGIN_DOC
   ! Computes $v_0 = H | u_0\rangle$.
@@ -73,7 +79,8 @@ subroutine H_tc_s2_dagger_u_0_opt(v_0, s_0, u_0, N_st, sze)
 
   use bitmasks
   implicit none
-  integer,          intent(in)  :: N_st,sze
+  integer,          intent(in)  :: N_st
+  integer(size_t),  intent(in)  :: sze
   double precision, intent(in)  :: u_0(sze,N_st)
   double precision, intent(out) :: v_0(sze,N_st), s_0(sze,N_st)
   logical                       :: do_right 
@@ -86,6 +93,7 @@ end
 ! ---
 
 subroutine H_tc_s2_u_0_nstates_openmp(v_0, s_0, u_0, N_st, sze, do_right)
+  use sizet
 
   BEGIN_DOC
   ! Computes $v_0 = H | u_0\rangle$.
@@ -100,7 +108,8 @@ subroutine H_tc_s2_u_0_nstates_openmp(v_0, s_0, u_0, N_st, sze, do_right)
   use bitmasks
   implicit none
 
-  integer,          intent(in)  :: N_st,sze
+  integer,          intent(in)  :: N_st
+  integer(size_t),  intent(in)  :: sze
   logical,          intent(in)  :: do_right 
   double precision, intent(in)  :: u_0(sze,N_st)
   double precision, intent(out) :: v_0(sze,N_st), s_0(sze,N_st)
@@ -116,26 +125,26 @@ subroutine H_tc_s2_u_0_nstates_openmp(v_0, s_0, u_0, N_st, sze, do_right)
   s_t = 0.d0
   call dtranspose(                                                   &
       u_0,                                                           &
-      size(u_0, 1),                                                  &
+      int(size(u_0, 1), size_t),                                     &
       u_t,                                                           &
-      size(u_t, 1),                                                  &
-      N_det, N_st)
+      int(size(u_t, 1), size_t),                                     &
+      N_det, int(N_st, size_t))
 
   call H_tc_s2_u_0_nstates_openmp_work(v_t,s_t,u_t,N_st,sze,1,N_det,0,1, do_right)
   deallocate(u_t)
 
   call dtranspose(                                                   &
       v_t,                                                           &
-      size(v_t, 1),                                                  &
+      int(size(v_t, 1), size_t),                                     &
       v_0,                                                           &
-      size(v_0, 1),                                                  &
-      N_st, N_det)
+      int(size(v_0, 1), size_t),                                     &
+      int(N_st, size_t), N_det)
   call dtranspose(                                                   &
       s_t,                                                           &
-      size(s_t, 1),                                                  &
+      int(size(s_t, 1), size_t),                                     &
       s_0,                                                           &
-      size(s_0, 1),                                                  &
-      N_st, N_det)
+      int(size(s_0, 1), size_t),                                     &
+      int(N_st, size_t), N_det)
   deallocate(v_t,s_t)
 
   do k=1,N_st
@@ -150,6 +159,7 @@ end
 
 subroutine H_tc_s2_u_0_nstates_openmp_work(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep, do_right)
   use bitmasks
+  use sizet
   implicit none
   BEGIN_DOC
   ! Computes $v_t = H | u_t\rangle$
@@ -158,7 +168,8 @@ subroutine H_tc_s2_u_0_nstates_openmp_work(v_t,s_t,u_t,N_st,sze,istart,iend,ishi
   !
   ! if do_right == True then you compute H_TC |Psi>, else H_TC^T |Psi>
   END_DOC
-  integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep
+  integer, intent(in)            :: N_st
+  integer(size_t), intent(in)    :: sze,istart,iend,ishift,istep
   double precision, intent(in)   :: u_t(N_st,N_det)
   logical, intent(in)             :: do_right
   double precision, intent(out)  :: v_t(N_st,sze), s_t(N_st,sze)
@@ -183,6 +194,7 @@ BEGIN_TEMPLATE
 
 subroutine H_tc_s2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep,do_right)
   use bitmasks
+  use sizet
   implicit none
   BEGIN_DOC
   ! Computes $v_t = H | u_t \\rangle$ and $s_t = S^2 | u_t\\rangle$
@@ -191,29 +203,31 @@ subroutine H_tc_s2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,ie
   !
   ! if do_right == True then you compute H_TC |Psi>, else H_TC^T |Psi>
   END_DOC
-  integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep
+  integer, intent(in)            :: N_st
+  integer(size_t), intent(in)    :: sze,istart,iend,ishift,istep
   double precision, intent(in)   :: u_t(N_st,N_det)
   logical, intent(in)            :: do_right
   double precision, intent(out)  :: v_t(N_st,sze), s_t(N_st,sze)
 
   double precision               :: hij, sij
-  integer                        :: i,j,k,l,kk
-  integer                        :: k_a, k_b, l_a, l_b, m_a, m_b
+  integer(size_t)                 :: i,j,k
+  integer                        :: l,kk
+  integer(size_t)                 :: k_a, k_b, l_a, l_b, m_a, m_b
   integer                        :: istate
-  integer                        :: krow, kcol, krow_b, kcol_b
-  integer                        :: lrow, lcol
-  integer                        :: mrow, mcol
+  integer(size_t)                 :: krow, kcol, krow_b, kcol_b
+  integer(size_t)                 :: lrow, lcol
+  integer(size_t)                 :: mrow, mcol
   integer(bit_kind)              :: spindet($N_int)
   integer(bit_kind)              :: tmp_det($N_int,2)
   integer(bit_kind)              :: tmp_det2($N_int,2)
   integer(bit_kind)              :: tmp_det3($N_int,2)
   integer(bit_kind), allocatable :: buffer(:,:)
-  integer                        :: n_doubles
-  integer, allocatable           :: doubles(:)
-  integer, allocatable           :: singles_a(:)
-  integer, allocatable           :: singles_b(:)
-  integer, allocatable           :: idx(:), idx0(:)
-  integer                        :: maxab, n_singles_a, n_singles_b, kcol_prev
+  integer(size_t)                 :: n_doubles
+  integer(size_t), allocatable    :: doubles(:)
+  integer(size_t), allocatable    :: singles_a(:)
+  integer(size_t), allocatable    :: singles_b(:)
+  integer(size_t), allocatable    :: idx(:), idx0(:)
+  integer(size_t)                 :: maxab, n_singles_a, n_singles_b, kcol_prev
   integer*8                      :: k8
   logical                        :: compute_singles
   integer*8                      :: last_found, left, right, right_max

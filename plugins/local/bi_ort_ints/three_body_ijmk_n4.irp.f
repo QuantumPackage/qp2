@@ -1,4 +1,6 @@
 
+use sizet
+
 ! ---
 
  BEGIN_PROVIDER [ double precision, three_e_4_idx_direct_bi_ort_n4 ,  (mo_num, mo_num, mo_num, mo_num)]
@@ -28,7 +30,9 @@
   END_DOC
 
   implicit none
-  integer                       :: ipoint, i, j, k, l, m
+  integer                       :: i, j, k, l, m
+  integer(size_t)               :: ipoint
+  integer                       :: n_points4
   double precision              :: wall1, wall0
   double precision, allocatable :: tmp1(:,:,:,:), tmp2(:,:,:,:), tmp3(:,:,:,:)
   double precision, allocatable :: tmp_4d(:,:,:,:)
@@ -41,6 +45,7 @@
 
   provide mos_r_in_r_array_transp mos_l_in_r_array_transp
 
+  n_points4 = int(n_points_final_grid, 4)
 
   allocate(tmp_4d(mo_num,mo_num,mo_num,mo_num))
 
@@ -78,8 +83,8 @@
   !$OMP END PARALLEL
 
 
-  call dgemm( 'T', 'N', mo_num*mo_num, mo_num*mo_num, 3*n_points_final_grid, 1.d0        &
-            , tmp1(1,1,1,1), 3*n_points_final_grid, tmp2(1,1,1,1), 3*n_points_final_grid &
+  call dgemm( 'T', 'N', mo_num*mo_num, mo_num*mo_num, 3*n_points4, 1.d0        &
+            , tmp1(1,1,1,1), 3*n_points4, tmp2(1,1,1,1), 3*n_points4           &
             , 0.d0, tmp_4d(1,1,1,1), mo_num*mo_num)
 
   !$OMP PARALLEL DO PRIVATE(i,j,k,m)
@@ -94,8 +99,8 @@
   enddo
   !$OMP END PARALLEL DO
 
-  call dgemm( 'T', 'N', mo_num*mo_num, mo_num*mo_num, 3*n_points_final_grid, 1.d0        &
-            , tmp3(1,1,1,1), 3*n_points_final_grid, tmp1(1,1,1,1), 3*n_points_final_grid &
+  call dgemm( 'T', 'N', mo_num*mo_num, mo_num*mo_num, 3*n_points4, 1.d0        &
+            , tmp3(1,1,1,1), 3*n_points4, tmp1(1,1,1,1), 3*n_points4           &
             , 0.d0, tmp_4d(1,1,1,1), mo_num*mo_num)
 
 
@@ -134,8 +139,8 @@
   !$OMP END PARALLEL
 
 
-  call dgemm( 'T', 'N', mo_num*mo_num, mo_num*mo_num, 3*n_points_final_grid, 1.d0        &
-            , tmp1(1,1,1,1), 3*n_points_final_grid, tmp2(1,1,1,1), 3*n_points_final_grid &
+  call dgemm( 'T', 'N', mo_num*mo_num, mo_num*mo_num, 3*n_points4, 1.d0        &
+            , tmp1(1,1,1,1), 3*n_points4, tmp2(1,1,1,1), 3*n_points4           &
             , 0.d0, tmp_4d(1,1,1,1), mo_num*mo_num)
 
 
@@ -153,8 +158,8 @@
   enddo
   !$OMP END PARALLEL DO
 
-  call dgemm( 'T', 'N', mo_num*mo_num, mo_num*mo_num, 3*n_points_final_grid, 1.d0        &
-            , tmp1(1,1,1,1), 3*n_points_final_grid, tmp3(1,1,1,1), 3*n_points_final_grid &
+  call dgemm( 'T', 'N', mo_num*mo_num, mo_num*mo_num, 3*n_points4, 1.d0        &
+            , tmp1(1,1,1,1), 3*n_points4, tmp3(1,1,1,1), 3*n_points4           &
             , 0.d0, tmp_4d(1,1,1,1), mo_num*mo_num)
 
   deallocate(tmp3)
@@ -193,9 +198,10 @@
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm( 'T', 'N', mo_num*mo_num, mo_num*mo_num, 3*n_points_final_grid, 1.d0                         &
-            , tmp1(1,1,1,1), 3*n_points_final_grid, int2_grad1_u12_bimo_t(1,1,1,1), 3*n_points_final_grid &
-            , 0.d0, tmp_4d(1,1,1,1), mo_num*mo_num)
+  call dgemm( 'T', 'N', mo_num*mo_num, mo_num*mo_num, 3*n_points4, 1.d0        &
+            , tmp1(1,1,1,1), 3*n_points4,                                      &
+            int2_grad1_u12_bimo_t(1,1,1,1), 3*n_points4, 0.d0,                 &
+            tmp_4d(1,1,1,1), mo_num*mo_num)
 
   deallocate(tmp1)
 
@@ -258,8 +264,8 @@
     !$OMP END DO
     !$OMP END PARALLEL
 
-    call dgemm( 'T', 'N', mo_num, mo_num*mo_num, n_points_final_grid, 1.d0       &
-              , tmp5(1,1), n_points_final_grid, tmp4(1,1,1), n_points_final_grid &
+    call dgemm( 'T', 'N', mo_num, mo_num*mo_num, n_points4, 1.d0               &
+              , tmp5(1,1), n_points4, tmp4(1,1,1), n_points4                   &
               , 0.d0, tmp_3d(1,1,1), mo_num)
 
     !$OMP PARALLEL DO PRIVATE(i,j,k)
@@ -296,9 +302,10 @@
     !$OMP END DO
     !$OMP END PARALLEL
 
-    call dgemm( 'T', 'N', mo_num*mo_num, mo_num, n_points_final_grid, 1.d0                          &
-              , tmp4(1,1,1), n_points_final_grid, mos_r_in_r_array_transp(1,1), n_points_final_grid &
-              , 0.d0, tmp_3d(1,1,1), mo_num*mo_num)
+    call dgemm( 'T', 'N', mo_num*mo_num, mo_num, n_points4, 1.d0               &
+              , tmp4(1,1,1), n_points4,                                        &
+              mos_r_in_r_array_transp(1,1), n_points4, 0.d0,                   &
+              tmp_3d(1,1,1), mo_num*mo_num)
 
     !$OMP PARALLEL DO PRIVATE(i,j,k)
     do i = 1, mo_num
@@ -341,9 +348,10 @@
     !$OMP END DO
     !$OMP END PARALLEL
 
-    call dgemm( 'T', 'N', mo_num*mo_num, mo_num, n_points_final_grid, -1.d0                         &
-              , tmp4(1,1,1), n_points_final_grid, mos_l_in_r_array_transp(1,1), n_points_final_grid &
-              , 1.d0, three_e_4_idx_cycle_1_bi_ort_n4(1,1,1,i), mo_num*mo_num)
+    call dgemm( 'T', 'N', mo_num*mo_num, mo_num, n_points4, -1.d0              &
+              , tmp4(1,1,1), n_points4,                                        &
+              mos_l_in_r_array_transp(1,1), n_points4, 1.d0,                   &
+              three_e_4_idx_cycle_1_bi_ort_n4(1,1,1,i), mo_num*mo_num)
 
   enddo
 
@@ -387,7 +395,9 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_exch23_bi_ort_n4 , (mo_num, mo_
   END_DOC
 
   implicit none
-  integer                       :: i, j, k, l, m, ipoint
+  integer                       :: i, j, k, l, m
+  integer(size_t)               :: ipoint
+  integer                       :: n_points4
   double precision              :: wall1, wall0
   double precision, allocatable :: tmp1(:,:,:,:), tmp_4d(:,:,:,:)
   double precision, allocatable :: tmp5(:,:,:), tmp6(:,:,:)
@@ -397,6 +407,7 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_exch23_bi_ort_n4 , (mo_num, mo_
 
   provide mos_r_in_r_array_transp mos_l_in_r_array_transp
 
+  n_points4 = int(n_points_final_grid, 4)
 
   allocate(tmp5(n_points_final_grid,mo_num,mo_num))
   allocate(tmp6(n_points_final_grid,mo_num,mo_num))
@@ -424,8 +435,8 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_exch23_bi_ort_n4 , (mo_num, mo_
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm( 'T', 'N', mo_num*mo_num, mo_num*mo_num, n_points_final_grid, -1.d0 &
-            , tmp5(1,1,1), n_points_final_grid, tmp6(1,1,1), n_points_final_grid &
+  call dgemm( 'T', 'N', mo_num*mo_num, mo_num*mo_num, n_points4, -1.d0         &
+            , tmp5(1,1,1), n_points4, tmp6(1,1,1), n_points4                   &
             , 0.d0, three_e_4_idx_exch23_bi_ort_n4(1,1,1,1), mo_num*mo_num)
 
   deallocate(tmp5)
@@ -455,9 +466,10 @@ BEGIN_PROVIDER [ double precision, three_e_4_idx_exch23_bi_ort_n4 , (mo_num, mo_
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm( 'T', 'N', mo_num*mo_num, mo_num*mo_num, 3*n_points_final_grid, 1.d0                         &
-            , tmp1(1,1,1,1), 3*n_points_final_grid, int2_grad1_u12_bimo_t(1,1,1,1), 3*n_points_final_grid &
-            , 0.d0, tmp_4d(1,1,1,1), mo_num*mo_num)
+  call dgemm( 'T', 'N', mo_num*mo_num, mo_num*mo_num, 3*n_points4, 1.d0        &
+            , tmp1(1,1,1,1), 3*n_points4,                                      &
+            int2_grad1_u12_bimo_t(1,1,1,1), 3*n_points4, 0.d0,                 &
+            tmp_4d(1,1,1,1), mo_num*mo_num)
 
   deallocate(tmp1)
 

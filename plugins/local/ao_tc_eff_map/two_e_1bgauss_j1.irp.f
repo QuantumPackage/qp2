@@ -1,3 +1,4 @@
+use sizet
 ! ---
 
 double precision function env_gauss_2e_j1(i, j, k, l)
@@ -20,10 +21,10 @@ double precision function env_gauss_2e_j1(i, j, k, l)
 
   implicit none
 
-  integer, intent(in) :: i, j, k, l
+  integer(size_t), intent(in) :: i, j, k, l
 
   integer             :: p, q, r, s
-  integer             :: num_i, num_j, num_k, num_l, num_ii 
+  integer(size_t)     :: num_i, num_j, num_k, num_l, num_ii
   integer             :: I_power(3), J_power(3), K_power(3), L_power(3)
   integer             :: iorder_p(3), iorder_q(3)
   integer             :: shift_P(3), shift_Q(3)
@@ -120,10 +121,10 @@ double precision function env_gauss_2e_j1_schwartz(i, j, k, l)
 
   implicit none
 
-  integer, intent(in)           :: i, j, k, l
+  integer(size_t), intent(in)   :: i, j, k, l
 
   integer                       :: p, q, r, s
-  integer                       :: num_i, num_j, num_k, num_l, num_ii 
+  integer(size_t)               :: num_i, num_j, num_k, num_l, num_ii
   integer                       :: I_power(3), J_power(3), K_power(3), L_power(3)
   integer                       :: iorder_p(3), iorder_q(3)
   integer                       :: dim1
@@ -237,6 +238,7 @@ end
 ! ---
 
 subroutine get_cxcycz_j1( dim1, cx, cy, cz                                  &
+                        use sizet
                         , P1_center, P1_new, pp1, fact_p1, p1_inv, iorder_p &
                         , Q1_center, Q1_new, qq1, fact_q1, q1_inv, iorder_q )
 
@@ -250,7 +252,7 @@ subroutine get_cxcycz_j1( dim1, cx, cy, cz                                  &
   double precision, intent(in)  :: Q1_new(0:max_dim,3), Q1_center(3), fact_q1, qq1, q1_inv
   double precision, intent(out) :: cx, cy, cz
 
-  integer                       :: ii
+  integer(size_t)               :: ii
   integer                       :: shift_P(3), shift_Q(3)
   double precision              :: expoii, factii, Centerii(3)
   double precision              :: P2_new(0:max_dim,3), P2_center(3), fact_p2, pp2, p2_inv

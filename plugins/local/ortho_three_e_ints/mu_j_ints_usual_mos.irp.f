@@ -1,4 +1,7 @@
+use sizet
+
 subroutine give_integrals_3_body(i,j,m,k,l,n,integral)
+ use sizet
  implicit none
  double precision, intent(out) :: integral
  integer, intent(in) :: i,j,m,k,l,n
@@ -6,7 +9,8 @@ subroutine give_integrals_3_body(i,j,m,k,l,n,integral)
  BEGIN_DOC
 ! <ijm|L|kln>
  END_DOC
- integer :: ipoint,mm
+ integer :: mm
+ integer(size_t) :: ipoint
  integral = 0.d0
  do mm = 1, 3
   do ipoint = 1, n_points_final_grid
@@ -25,7 +29,8 @@ BEGIN_PROVIDER [ double precision, mo_v_ij_erf_rk_cst_mu_naive, ( mo_num, mo_num
 !
 ! WARNING: not on the BI-ORTHO MOs
  END_DOC
- integer :: i,j,k,l,ipoint
+ integer :: i,j,k,l
+ integer(size_t) :: ipoint
  do ipoint = 1, n_points_final_grid
   mo_v_ij_erf_rk_cst_mu_naive(:,:,ipoint) = 0.d0
   do i = 1, mo_num
@@ -47,14 +52,17 @@ BEGIN_PROVIDER [ double precision, mo_v_ij_erf_rk_cst_mu, ( mo_num, mo_num,n_poi
 !
 ! WARNING: not on the BI-ORTHO MOs
  END_DOC
- integer :: ipoint
+ integer(size_t) :: ipoint
  !$OMP PARALLEL                  &
  !$OMP DEFAULT (NONE)            &
  !$OMP PRIVATE (ipoint) & 
  !$OMP SHARED (n_points_final_grid,v_ij_erf_rk_cst_mu,mo_v_ij_erf_rk_cst_mu)
  !$OMP DO SCHEDULE (dynamic)
  do ipoint = 1, n_points_final_grid
-   call ao_to_mo(v_ij_erf_rk_cst_mu(1,1,ipoint),size(v_ij_erf_rk_cst_mu,1),mo_v_ij_erf_rk_cst_mu(1,1,ipoint),size(mo_v_ij_erf_rk_cst_mu,1))
+   call ao_to_mo(v_ij_erf_rk_cst_mu(1,1,ipoint) &
+      , int(size(v_ij_erf_rk_cst_mu,1),size_t) &
+      , mo_v_ij_erf_rk_cst_mu(1,1,ipoint) &
+      , int(size(mo_v_ij_erf_rk_cst_mu,1),size_t))
  enddo
  !$OMP END DO
  !$OMP END PARALLEL
@@ -68,7 +76,8 @@ BEGIN_PROVIDER [ double precision, mo_v_ij_erf_rk_cst_mu_transp, ( n_points_fina
 !
 ! WARNING: not on the BI-ORTHO MOs
  END_DOC
- integer :: ipoint,i,j
+ integer :: i,j
+ integer(size_t) :: ipoint
  do i = 1, mo_num
   do j = 1, mo_num
    do ipoint = 1, n_points_final_grid
@@ -87,7 +96,8 @@ BEGIN_PROVIDER [ double precision, mo_x_v_ij_erf_rk_cst_mu_naive, ( mo_num, mo_n
 !
 ! WARNING: not on the BI-ORTHO MOs
  END_DOC
- integer :: i,j,k,l,ipoint,m
+ integer :: i,j,k,l,m
+ integer(size_t) :: ipoint
  do ipoint = 1, n_points_final_grid
   mo_x_v_ij_erf_rk_cst_mu_naive(:,:,:,ipoint) = 0.d0
   do i = 1, mo_num
@@ -111,7 +121,8 @@ BEGIN_PROVIDER [ double precision, mo_x_v_ij_erf_rk_cst_mu, ( mo_num, mo_num,3,n
 !
 ! WARNING: not on the BI-ORTHO MOs
  END_DOC
- integer :: ipoint,m
+ integer :: m
+ integer(size_t) :: ipoint
  !$OMP PARALLEL                  &
  !$OMP DEFAULT (NONE)            &
  !$OMP PRIVATE (ipoint,m) & 
@@ -119,7 +130,10 @@ BEGIN_PROVIDER [ double precision, mo_x_v_ij_erf_rk_cst_mu, ( mo_num, mo_num,3,n
  !$OMP DO SCHEDULE (dynamic)
  do ipoint = 1, n_points_final_grid
   do m = 1, 3
-   call ao_to_mo(x_v_ij_erf_rk_cst_mu_transp(1,1,m,ipoint),size(x_v_ij_erf_rk_cst_mu_transp,1),mo_x_v_ij_erf_rk_cst_mu(1,1,m,ipoint),size(mo_x_v_ij_erf_rk_cst_mu,1))
+   call ao_to_mo(x_v_ij_erf_rk_cst_mu_transp(1,1,m,ipoint) &
+      , int(size(x_v_ij_erf_rk_cst_mu_transp,1),size_t) &
+      , mo_x_v_ij_erf_rk_cst_mu(1,1,m,ipoint) &
+      , int(size(mo_x_v_ij_erf_rk_cst_mu,1),size_t))
   enddo
  enddo
  !$OMP END DO
@@ -130,7 +144,8 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, mo_x_v_ij_erf_rk_cst_mu_transp, (n_points_final_grid,3, mo_num, mo_num)]
  implicit none
- integer :: i,j,m,ipoint
+ integer :: i,j,m
+ integer(size_t) :: ipoint
  do i = 1, mo_num
   do j = 1, mo_num
    do m = 1, 3
@@ -152,7 +167,8 @@ BEGIN_PROVIDER [ double precision, x_W_ij_erf_rk, ( n_points_final_grid,3,mo_num
 ! WARNING: not on the BI-ORTHO MOs
  END_DOC
  include 'constants.include.F'
- integer :: ipoint,m,i,j
+ integer :: m,i,j
+ integer(size_t) :: ipoint
  double precision :: xyz,cst
  double precision :: wall0, wall1
 

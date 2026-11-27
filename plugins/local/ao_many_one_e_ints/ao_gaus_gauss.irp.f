@@ -1,6 +1,9 @@
+use sizet
+
 ! ---
 
 subroutine overlap_gauss_xyz_r12_ao(D_center,delta,i,j,gauss_ints)
+ use sizet
 
  implicit none
  BEGIN_DOC
@@ -8,11 +11,12 @@ subroutine overlap_gauss_xyz_r12_ao(D_center,delta,i,j,gauss_ints)
 !
 ! with m == 1 ==> x, m == 2 ==> y, m == 3 ==> z
  END_DOC
- integer, intent(in) :: i,j
+ integer(size_t), intent(in) :: i,j
  double precision, intent(in)  :: D_center(3), delta
  double precision, intent(out) :: gauss_ints(3)
 
- integer :: num_a,num_b,power_A(3), power_B(3),l,k,m
+ integer(size_t) :: num_a, num_b
+ integer :: power_A(3), power_B(3),l,k,m
  double precision :: A_center(3), B_center(3),overlap_gauss_r12,alpha,beta,gauss_ints_tmp(3)
  gauss_ints = 0.d0
  if(ao_overlap_abs(j,i).lt.1.d-12)then
@@ -47,10 +51,12 @@ double precision function overlap_gauss_xyz_r12_ao_specific(D_center,delta,i,j,m
 !
 ! with mx == 1 ==> x, mx == 2 ==> y, mx == 3 ==> z
  END_DOC
- integer, intent(in) :: i,j,mx
+ integer(size_t), intent(in) :: i,j
+ integer, intent(in) :: mx
  double precision, intent(in)  :: D_center(3), delta
 
- integer :: num_a,num_b,power_A(3), power_B(3),l,k
+ integer(size_t) :: num_a, num_b
+ integer :: power_A(3), power_B(3),l,k
  double precision :: gauss_int
  double precision :: A_center(3), B_center(3),overlap_gauss_r12,alpha,beta
  double precision :: overlap_gauss_xyz_r12_specific
@@ -77,11 +83,13 @@ end
 
 
 subroutine overlap_gauss_r12_all_ao(D_center,delta,aos_ints)
+ use sizet
  implicit none
  double precision, intent(in) :: D_center(3), delta
  double precision, intent(out):: aos_ints(ao_num,ao_num)
 
- integer :: num_a,num_b,power_A(3), power_B(3),l,k,i,j
+ integer(size_t) :: num_a, num_b, i, j
+ integer :: power_A(3), power_B(3),l,k
  double precision :: A_center(3), B_center(3),overlap_gauss_r12,alpha,beta,analytical_j
  aos_ints = 0.d0
  do i = 1, ao_num
@@ -116,7 +124,7 @@ double precision function overlap_gauss_r12_ao(D_center, delta, i, j)
   END_DOC
 
   implicit none
-  integer,          intent(in) :: i, j
+  integer(size_t),          intent(in) :: i, j
   double precision, intent(in) :: D_center(3), delta
 
   integer                      :: power_A(3), power_B(3), l, k
@@ -163,7 +171,7 @@ double precision function overlap_abs_gauss_r12_ao(D_center, delta, i, j)
   END_DOC
 
   implicit none
-  integer,          intent(in) :: i, j
+  integer(size_t),          intent(in) :: i, j
   double precision, intent(in) :: D_center(3), delta
 
   integer                      :: power_A(3), power_B(3), l, k
@@ -204,6 +212,7 @@ end
 ! --
 
 subroutine overlap_gauss_r12_ao_v(D_center, LD_D, delta, i, j, resv, LD_resv, n_points)
+  use sizet
 
   BEGIN_DOC
   !
@@ -214,11 +223,11 @@ subroutine overlap_gauss_r12_ao_v(D_center, LD_D, delta, i, j, resv, LD_resv, n_
   END_DOC
 
   implicit none
-  integer,          intent(in)  :: i, j, LD_D, LD_resv, n_points
+  integer(size_t),          intent(in)  :: i, j, LD_D, LD_resv, n_points
   double precision, intent(in)  :: D_center(LD_D,3), delta
   double precision, intent(out) :: resv(LD_resv)
 
-  integer                       :: ipoint
+  integer(size_t)                :: ipoint
   integer                       :: power_A(3), power_B(3), l, k
   double precision              :: A_center(3), B_center(3), alpha, beta, coef, coef1 
   double precision, allocatable :: analytical_j(:)
@@ -270,7 +279,7 @@ double precision function overlap_gauss_r12_ao_with1s(B_center, beta, D_center, 
   END_DOC
 
   implicit none
-  integer,          intent(in) :: i, j
+  integer(size_t),          intent(in) :: i, j
   double precision, intent(in) :: B_center(3), beta, D_center(3), delta
 
   integer                      :: power_A1(3), power_A2(3), l, k
@@ -332,6 +341,7 @@ end
 ! ---
 
 subroutine overlap_gauss_r12_ao_with1s_v(B_center, beta, D_center, LD_D, delta, i, j, resv, LD_resv, n_points)
+  use sizet
 
   BEGIN_DOC
   !
@@ -341,11 +351,11 @@ subroutine overlap_gauss_r12_ao_with1s_v(B_center, beta, D_center, LD_D, delta, 
   END_DOC
 
   implicit none
-  integer,          intent(in)  :: i, j, n_points, LD_D, LD_resv
+  integer(size_t),          intent(in)  :: i, j, n_points, LD_D, LD_resv
   double precision, intent(in)  :: B_center(3), beta, D_center(LD_D,3), delta
   double precision, intent(out) :: resv(LD_resv)
 
-  integer                       :: ipoint
+  integer(size_t)                :: ipoint
   integer                       :: power_A1(3), power_A2(3), l, k
   double precision              :: A1_center(3), A2_center(3), alpha1, alpha2, coef1
   double precision              :: coef12, coef12f
@@ -425,6 +435,7 @@ end
 ! ---
 
 subroutine overlap_gauss_r12_ao_012(D_center, delta, i, j, ints)
+  use sizet
 
   BEGIN_DOC
   !
@@ -446,7 +457,7 @@ subroutine overlap_gauss_r12_ao_012(D_center, delta, i, j, ints)
 
   implicit none
 
-  integer,          intent(in)  :: i, j
+  integer(size_t),          intent(in)  :: i, j
   double precision, intent(in)  :: delta, D_center(3)
   double precision, intent(out) :: ints(7)
 

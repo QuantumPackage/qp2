@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -15,7 +16,8 @@ BEGIN_PROVIDER  [ double precision, psi_bitcleft_bilinear_matrix_values, (N_det,
   use bitmasks
 
   implicit none
-  integer :: k, l
+  integer(size_t) :: k
+  integer         :: l
 
   !print *, ' providing psi_bitcleft_bilinear_matrix_values'
 

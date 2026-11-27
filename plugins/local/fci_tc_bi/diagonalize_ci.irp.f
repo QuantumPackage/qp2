@@ -9,10 +9,12 @@ subroutine diagonalize_CI_tc_bi_ortho(ndet, E_tc, norm )
   END_DOC
 
   use selection_types
+  use sizet
   implicit none
-  integer,          intent(inout) :: ndet       ! number of determinants from before 
+  integer(size_t),  intent(inout) :: ndet ! number of determinants from before
   double precision, intent(inout) :: E_tc(N_states), norm(N_states) ! E and norm from previous wave function 
-  integer                         :: i, j,k
+  integer                         :: j, k
+  integer(size_t)                 :: i
 
   PROVIDE mo_l_coef mo_r_coef
 

@@ -1,8 +1,10 @@
+use sizet
 
 
 ! ---
 
 subroutine run_pouet
+  use sizet
 
   BEGIN_DOC
   ! Selected Full Configuration Interaction with Stochastic selection and PT2.
@@ -10,7 +12,8 @@ subroutine run_pouet
 
   use selection_types
   implicit none
-  integer                       :: i, j, k, ndet
+  integer                       :: j, k, ndet
+  integer(size_t)                 :: i
   integer                       :: to_select
   logical                       :: has
   type(pt2_type)                :: pt2_data, pt2_data_err
@@ -34,6 +37,7 @@ end
 ! ---
 
 subroutine run_stochastic_cipsi
+  use sizet
 
   BEGIN_DOC
   ! Selected Full Configuration Interaction with Stochastic selection and PT2.
@@ -41,8 +45,9 @@ subroutine run_stochastic_cipsi
 
   use selection_types
   implicit none
-  integer                       :: i, j, k, ndet
-  integer                       :: to_select
+  integer                       :: j, k
+  integer(size_t)                 :: i, ndet
+  integer(size_t)                 :: to_select
   logical                       :: has
   type(pt2_type)                :: pt2_data, pt2_data_err
   double precision              :: rss
@@ -113,7 +118,7 @@ subroutine run_stochastic_cipsi
     write(*,'(A)')  '--------------------------------------------------------------------------------'
 
     to_select = int(sqrt(dble(N_states))*dble(N_det)*selection_factor)
-    to_select = max(N_states_diag, to_select)
+    to_select = max(int(N_states_diag, size_t), to_select)
 
     print*,'E_tc = ',E_tc
     call pt2_dealloc(pt2_data)
@@ -127,7 +132,8 @@ subroutine run_stochastic_cipsi
     call pt2_stochastic(E_tc, pt2_data, pt2_data_err, relative_error,to_select) ! Stochastic PT2 and selection
 !    stop
 
-    call print_summary_tc(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, N_det, N_configuration, N_states, psi_s2)
+    call print_summary_tc(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, &
+         int(N_det,4), int(N_configuration,4), N_states, psi_s2)
 
     call save_energy(psi_energy_with_nucl_rep, pt2_data % pt2)
 
@@ -155,9 +161,11 @@ subroutine run_stochastic_cipsi
   call pt2_alloc(pt2_data, N_states)
   call pt2_alloc(pt2_data_err, N_states)
   call provide_for_tc_pt2
-  call pt2_stochastic(E_tc, pt2_data, pt2_data_err, relative_error,0) ! Stochastic PT2 and selection
+  call pt2_stochastic(E_tc, pt2_data, pt2_data_err, &
+       relative_error, int(0, size_t)) ! Stochastic PT2 and selection
   call diagonalize_CI_tc_bi_ortho(ndet, E_tc,norm)
-  call print_summary_tc(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, N_det, N_configuration, N_states, psi_s2)
+  call print_summary_tc(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, &
+       int(N_det,4), int(N_configuration,4), N_states, psi_s2)
   call pt2_dealloc(pt2_data)
   call pt2_dealloc(pt2_data_err)
 

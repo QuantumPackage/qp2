@@ -1,7 +1,9 @@
- BEGIN_PROVIDER [ integer, n_pts_grid_ao_prod, (ao_num, ao_num)]
-&BEGIN_PROVIDER [ integer, max_n_pts_grid_ao_prod]
+use sizet
+
+ BEGIN_PROVIDER [ integer(size_t), n_pts_grid_ao_prod, (ao_num, ao_num)]
+&BEGIN_PROVIDER [ integer(size_t), max_n_pts_grid_ao_prod]
  implicit none
- integer :: i,j,ipoint
+ integer(size_t) :: i,j,ipoint
  double precision :: overlap, r(3),thr, overlap_abs_gauss_r12_ao,overlap_gauss_r12_ao
  double precision :: sigma,dist,center_ij(3),fact_gauss, alpha, center(3)
  n_pts_grid_ao_prod = 0
@@ -51,7 +53,7 @@
  !$OMP END DO
  !$OMP END PARALLEL
 
- integer :: list(ao_num)
+ integer(size_t) :: list(ao_num)
  do i = 1, ao_num
   list(i) = maxval(n_pts_grid_ao_prod(:,i))
  enddo

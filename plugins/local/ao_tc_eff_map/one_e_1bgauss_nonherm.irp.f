@@ -1,4 +1,5 @@
 
+use sizet
 ! ---
 
 BEGIN_PROVIDER [double precision, env_gauss_nonherm, (ao_num,ao_num)]
@@ -11,9 +12,10 @@ BEGIN_PROVIDER [double precision, env_gauss_nonherm, (ao_num,ao_num)]
 
   implicit none
 
-  integer          :: num_A, num_B
+  integer(size_t)  :: num_A, num_B
   integer          :: power_A(3), power_B(3)
-  integer          :: i, j, k, l, m
+  integer(size_t)  :: i, j, k
+  integer          :: l, m
   double precision :: alpha, beta, gama, coef
   double precision :: A_center(3), B_center(3), C_center(3)
   double precision :: c1, c

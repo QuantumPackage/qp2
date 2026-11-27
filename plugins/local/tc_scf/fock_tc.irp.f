@@ -1,4 +1,4 @@
-
+use sizet
 
 ! ---
 
@@ -281,7 +281,9 @@ END_PROVIDER
   END_DOC
 
   implicit none
-  integer                       :: a, b, i, j, ipoint
+  integer                       :: a, b, i, j
+  integer(size_t)               :: ipoint
+  integer                       :: n_points4
   double precision              :: loc_1, loc_2, loc_3, loc_4
   double precision              :: ti, tf
   double precision, allocatable :: Okappa(:), Jkappa(:,:), Obarkappa(:), Jbarkappa(:,:)
@@ -298,6 +300,8 @@ END_PROVIDER
   PROVIDE mo_l_coef mo_r_coef
 
   ! ---
+
+  n_points4 = int(n_points_final_grid, 4)
 
   allocate(Jkappa(n_points_final_grid,3), Okappa(n_points_final_grid))
   allocate(Jbarkappa(n_points_final_grid,3), Obarkappa(n_points_final_grid))
@@ -485,8 +489,8 @@ END_PROVIDER
 
   ! ---
 
-  call dgemv( 'T', 4*n_points_final_grid, mo_num*mo_num, 1.d0 &
-            , tmp_2(1,1,1,1), size(tmp_2, 1) * size(tmp_2, 2) &
+  call dgemv( 'T', 4*n_points4, mo_num*mo_num, 1.d0           &
+            , tmp_2(1,1,1,1), 4*n_points4                     &
             , tmp_1(1,1), 1                                   &
             , 0.d0, fock_3e_mo_b_os(1,1), 1)
 
@@ -591,9 +595,9 @@ END_PROVIDER
 
   ! ---
 
-  call dgemm( 'T', 'N', mo_num, mo_num, 2*n_points_final_grid, 1.d0 &
-            , tmp_3(1,1,1), 2*n_points_final_grid                   &
-            , tmp_4(1,1,1), 2*n_points_final_grid                   &
+  call dgemm( 'T', 'N', mo_num, mo_num, 2*n_points4, 1.d0          &
+            , tmp_3(1,1,1), 2*n_points4                            &
+            , tmp_4(1,1,1), 2*n_points4                            &
             , 1.d0, fock_3e_mo_b_os(1,1), mo_num)
 
   deallocate(tmp_3, tmp_4)
@@ -633,8 +637,8 @@ END_PROVIDER
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemv( 'T', n_points_final_grid, mo_num*mo_num, 1.d0   &
-            , tmp_2(1,1,1,1), size(tmp_2, 1) * size(tmp_2, 2) &
+  call dgemv( 'T', n_points4, mo_num*mo_num, 1.d0              &
+            , tmp_2(1,1,1,1), n_points4                        &
             , tmp_1(1,1), 1                                   &
             , 1.d0, fock_3e_mo_a_os(1,1), 1)
 
@@ -786,9 +790,9 @@ END_PROVIDER
 
   ! ---
 
-  call dgemm( 'T', 'N', mo_num, mo_num, 8*n_points_final_grid, 1.d0 &
-            , tmp_3(1,1,1), 8*n_points_final_grid                   &
-            , tmp_4(1,1,1), 8*n_points_final_grid                   &
+  call dgemm( 'T', 'N', mo_num, mo_num, 8*n_points4, 1.d0          &
+            , tmp_3(1,1,1), 8*n_points4                            &
+            , tmp_4(1,1,1), 8*n_points4                            &
             , 1.d0, fock_3e_mo_a_os(1,1), mo_num)
 
   deallocate(tmp_3, tmp_4)
@@ -808,7 +812,9 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
   END_DOC
 
   implicit none
-  integer                       :: a, b, i, j, ipoint, istart
+  integer                       :: a, b, i, j, istart
+  integer(size_t)               :: ipoint
+  integer                       :: n_points4
   double precision              :: ti, tf
   double precision              :: loc_1, loc_2, loc_3
   double precision, allocatable :: Okappa(:), Jkappa(:,:)
@@ -825,6 +831,8 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
   PROVIDE mo_l_coef mo_r_coef
 
   ! ---
+
+  n_points4 = int(n_points_final_grid, 4)
 
   allocate(Jkappa(n_points_final_grid,3), Okappa(n_points_final_grid))
   Jkappa = 0.d0
@@ -944,8 +952,8 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
       enddo
       !$OMP END DO
       !$OMP END PARALLEL
-      call dgemv( 'T', 4*n_points_final_grid, mo_num, -2.d0        &
-                , tmp_22(1,1,1), size(tmp_22, 1) * size(tmp_22, 2) &
+      call dgemv( 'T', 4*n_points4, mo_num, -2.d0                  &
+                , tmp_22(1,1,1), 4*n_points4                       &
                 , tmp_1(1,1), 1                                    &
                 , 0.d0, fock_3e_mo_cs(1,a), 1)
     enddo
@@ -981,8 +989,8 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
-    call dgemv( 'T', 4*n_points_final_grid, mo_num*mo_num, -2.d0 &
-              , tmp_2(1,1,1,1), size(tmp_2, 1) * size(tmp_2, 2)  &
+    call dgemv( 'T', 4*n_points4, mo_num*mo_num, -2.d0           &
+              , tmp_2(1,1,1,1), 4*n_points4                      &
               , tmp_1(1,1), 1                                    &
               , 0.d0, fock_3e_mo_cs(1,1), 1)
     deallocate(tmp_2)
@@ -1087,9 +1095,9 @@ BEGIN_PROVIDER [double precision, fock_3e_mo_cs, (mo_num, mo_num)]
 
   ! ---
 
-  call dgemm( 'T', 'N', mo_num, mo_num, 5*n_points_final_grid, 1.d0 &
-            , tmp_3(1,1,1), 5*n_points_final_grid                   &
-            , tmp_4(1,1,1), 5*n_points_final_grid                   &
+  call dgemm( 'T', 'N', mo_num, mo_num, 5*n_points4, 1.d0          &
+            , tmp_3(1,1,1), 5*n_points4                            &
+            , tmp_4(1,1,1), 5*n_points4                            &
             , 1.d0, fock_3e_mo_cs(1,1), mo_num)
 
   deallocate(tmp_3, tmp_4)

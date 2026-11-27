@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -36,11 +37,13 @@ end
 subroutine main()
 
   use cutc_module
+  use sizet
 
   implicit none
 
   integer                       :: i, j, k, l
-  integer                       :: ipoint
+  integer(size_t)              :: ipoint
+  integer                       :: n_points4, n_points_extra4
 
   double precision              :: time0, time1
 
@@ -91,8 +94,11 @@ subroutine main()
   PROVIDE nxBlocks nyBlocks nzBlocks
   PROVIDE blockxSize blockySize blockzSize
 
+  n_points4       = int(n_points_final_grid, 4)
+  n_points_extra4 = int(n_points_extra_final_grid, 4)
+
   sB = 32
-  nB = (n_points_final_grid + sB - 1) / sB
+  nB = (n_points4 + sB - 1) / sB
 
   call ezfio_set_tc_int_blockxSize(sB)
   call ezfio_set_tc_int_nxBlocks(nB)
@@ -101,7 +107,7 @@ subroutine main()
   allocate(int_2e_ao_gpu(ao_num,ao_num,ao_num,ao_num))
 
   call cutc_int(nxBlocks, nyBlocks, nzBlocks, blockxSize, blockySize, blockzSize,           &
-                n_points_final_grid, n_points_extra_final_grid, ao_num, nucl_num, jBH_size, &
+                n_points4, n_points_extra4, ao_num, nucl_num, jBH_size, &
                 final_grid_points, final_weight_at_r_vector,                                &
                 final_grid_points_extra, final_weight_at_r_vector_extra,                    &
                 rn, aos_data1, aos_data2, jBH_c, jBH_m, jBH_n, jBH_o,                       &

@@ -1,11 +1,14 @@
+use sizet
 
 ! ---
 
 subroutine provide_no_2e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, int2_grad1_u12, noL_2e)
+  use sizet
 
   implicit none
 
-  integer,          intent(in)  :: n_grid, n_mo
+  integer(size_t),  intent(in)  :: n_grid
+  integer,          intent(in)  :: n_mo
   integer,          intent(in)  :: ne_a, ne_b
   double precision, intent(in)  :: wr1(n_grid)
   double precision, intent(in)  :: mos_l_in_r(n_grid,n_mo)
@@ -13,7 +16,9 @@ subroutine provide_no_2e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
   double precision, intent(in)  :: int2_grad1_u12(n_grid,3,n_mo,n_mo)
   double precision, intent(out) :: noL_2e(n_mo,n_mo,n_mo,n_mo)
 
-  integer                       :: p, q, s, t, i, ipoint
+  integer(size_t)              :: ipoint
+  integer                       :: p, q, s, t, i
+  integer                       :: n_grid4
   double precision              :: t0, t1
   double precision, allocatable :: tmpO(:), tmpJ(:,:)
   double precision, allocatable :: tmpA(:,:,:), tmpB(:,:,:)
@@ -22,6 +27,8 @@ subroutine provide_no_2e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
 
 
   call wall_time(t0)
+
+  n_grid4 = int(n_grid, 4)
 
   if(ne_a .eq. ne_b) then
 
@@ -122,8 +129,8 @@ subroutine provide_no_2e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     deallocate(tmpO, tmpJ, tmpA, tmpB)
 
 
-    call dgemm( 'T', 'N', n_mo*n_mo, n_mo*n_mo, 4*n_grid, 0.5d0  &
-              , tmpC(1,1,1,1), 4*n_grid, tmpD(1,1,1,1), 4*n_grid &
+    call dgemm( 'T', 'N', n_mo*n_mo, n_mo*n_mo, 4*n_grid4, 0.5d0  &
+              , tmpC(1,1,1,1), 4*n_grid4, tmpD(1,1,1,1), 4*n_grid4 &
               , 0.d0, tmpE(1,1,1,1), n_mo*n_mo)
 
     deallocate(tmpC, tmpD)
@@ -274,8 +281,8 @@ subroutine provide_no_2e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     deallocate(tmpO, tmpJ, tmpA, tmpB)
 
 
-    call dgemm( 'T', 'N', n_mo*n_mo, n_mo*n_mo, 4*n_grid, 0.5d0  &
-              , tmpC(1,1,1,1), 4*n_grid, tmpD(1,1,1,1), 4*n_grid &
+    call dgemm( 'T', 'N', n_mo*n_mo, n_mo*n_mo, 4*n_grid4, 0.5d0  &
+              , tmpC(1,1,1,1), 4*n_grid4, tmpD(1,1,1,1), 4*n_grid4 &
               , 0.d0, tmpE(1,1,1,1), n_mo*n_mo)
 
     deallocate(tmpC, tmpD)
@@ -314,10 +321,12 @@ end
 
 subroutine provide_no_2e_tmp(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, int2_grad1_u12, &
                              tmpO, tmpJ, tmpA, tmpB, tmpC, tmpD, tmpE, noL_2e)
+  use sizet
 
   implicit none
 
-  integer,          intent(in)  :: n_grid, n_mo
+  integer(size_t),  intent(in)  :: n_grid
+  integer,          intent(in)  :: n_mo
   integer,          intent(in)  :: ne_a, ne_b
   double precision, intent(in)  :: wr1(n_grid)
   double precision, intent(in)  :: mos_l_in_r(n_grid,n_mo)
@@ -329,11 +338,15 @@ subroutine provide_no_2e_tmp(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in
   double precision, intent(out) :: tmpE(n_mo,n_mo,n_mo,n_mo)
   double precision, intent(out) :: noL_2e(n_mo,n_mo,n_mo,n_mo)
 
-  integer                       :: p, q, s, t, i, ipoint
+  integer(size_t)              :: ipoint
+  integer                       :: p, q, s, t, i
+  integer                       :: n_grid4
   double precision              :: t0, t1
 
 
   call wall_time(t0)
+
+  n_grid4 = int(n_grid, 4)
 
   if(ne_a .eq. ne_b) then
 
@@ -427,8 +440,8 @@ subroutine provide_no_2e_tmp(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in
     !$OMP END PARALLEL
 
 
-    call dgemm( 'T', 'N', n_mo*n_mo, n_mo*n_mo, 4*n_grid, 0.5d0  &
-              , tmpC(1,1,1,1), 4*n_grid, tmpD(1,1,1,1), 4*n_grid &
+    call dgemm( 'T', 'N', n_mo*n_mo, n_mo*n_mo, 4*n_grid4, 0.5d0  &
+              , tmpC(1,1,1,1), 4*n_grid4, tmpD(1,1,1,1), 4*n_grid4 &
               , 0.d0, tmpE(1,1,1,1), n_mo*n_mo)
 
     call sum_a_at(tmpE, n_mo*n_mo)
@@ -568,8 +581,8 @@ subroutine provide_no_2e_tmp(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in
     !$OMP END PARALLEL
 
 
-    call dgemm( 'T', 'N', n_mo*n_mo, n_mo*n_mo, 4*n_grid, 0.5d0  &
-              , tmpC(1,1,1,1), 4*n_grid, tmpD(1,1,1,1), 4*n_grid &
+    call dgemm( 'T', 'N', n_mo*n_mo, n_mo*n_mo, 4*n_grid4, 0.5d0  &
+              , tmpC(1,1,1,1), 4*n_grid4, tmpD(1,1,1,1), 4*n_grid4 &
               , 0.d0, tmpE(1,1,1,1), n_mo*n_mo)
 
     call sum_a_at(tmpE, n_mo*n_mo)

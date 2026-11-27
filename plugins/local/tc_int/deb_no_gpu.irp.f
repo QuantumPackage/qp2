@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -36,10 +37,13 @@ end
 subroutine main()
 
   use cutc_module
+  use sizet
 
   implicit none
 
-  integer                       :: i, j, k, l, ipoint
+  integer(size_t)              :: ipoint
+  integer                       :: i, j, k, l
+  integer                       :: n_points4
   double precision              :: time0, time1
   double precision              :: tt0, tt1
   double precision              :: acc_thr, err_tot, nrm_tot, err_loc
@@ -117,7 +121,9 @@ subroutine main()
   allocate(noL_2e_gpu(mo_num,mo_num,mo_num,mo_num))
   allocate(noL_1e_gpu(mo_num,mo_num))
 
-  call cutc_no(n_points_final_grid, mo_num, elec_alpha_num, elec_beta_num, &
+  n_points4 = int(n_points_final_grid, 4)
+
+  call cutc_no(n_points4, mo_num, elec_alpha_num, elec_beta_num, &
                final_weight_at_r_vector(1),                                &
                mos_l_in_r_array_transp(1,1), mos_r_in_r_array_transp(1,1), &
                int2_grad1_u12_bimo_t(1,1,1,1), noL_2e_gpu(1,1,1,1), noL_1e_gpu(1,1), noL_0e_gpu(1))

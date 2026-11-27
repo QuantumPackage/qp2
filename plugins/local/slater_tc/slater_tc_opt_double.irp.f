@@ -1,7 +1,9 @@
+use sizet
 
 ! ---
 
 subroutine double_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
+  use sizet
 
   BEGIN_DOC
   ! <key_j |H_tilde | key_i> for double excitation  ONLY FOR ONE- AND TWO-BODY TERMS
@@ -14,13 +16,15 @@ subroutine double_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, 
   use bitmasks
 
   implicit none
-  integer,           intent(in) :: Nint
+  integer(size_t), intent(in) :: Nint
   integer(bit_kind), intent(in) :: key_j(Nint,2), key_i(Nint,2)
   double precision, intent(out) :: hmono, htwoe, hthree, htot
-  integer                       :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
   integer                       :: Ne(2), i, j, ii, jj, ispin, jspin, k, kk
-  integer                       :: degree,exc(0:2,2,2)
-  integer                       :: h1, p1, h2, p2, s1, s2
+  integer                       :: degree
+  integer(size_t)                :: exc(0:2,2,2)
+  integer(size_t)                :: h1, p1, h2, p2
+  integer                       :: s1, s2
   double precision              :: get_mo_two_e_integral_tc_int,phase
 
 
@@ -104,18 +108,21 @@ end
 ! ---
 
 subroutine three_comp_two_e_elem(key_i,h1,h2,p1,p2,s1,s2,hthree)
+ use sizet
  implicit none
  integer(bit_kind), intent(in) :: key_i(N_int,2)
- integer, intent(in) :: h1,h2,p1,p2,s1,s2
+ integer(size_t), intent(in) :: h1,h2,p1,p2
+ integer, intent(in) :: s1,s2
  double precision, intent(out) :: hthree
- integer :: nexc(2),i,ispin,na,nb
+ integer(size_t) :: i
+ integer :: nexc(2),ispin,na,nb
  integer(bit_kind) :: hole(N_int,2)
  integer(bit_kind) :: particle(N_int,2)
- integer :: occ_hole(N_int*bit_kind_size,2)
- integer :: occ_particle(N_int*bit_kind_size,2)
+ integer(size_t) :: occ_hole(N_int*bit_kind_size,2)
+ integer(size_t) :: occ_particle(N_int*bit_kind_size,2)
  integer :: n_occ_ab_hole(2),n_occ_ab_particle(2)
  integer(bit_kind)              :: det_tmp(N_int,2)
- integer :: ipart, ihole
+ integer(size_t) :: ipart, ihole
  double precision :: direct_int, exchange_int
 
 
@@ -239,14 +246,16 @@ BEGIN_PROVIDER [ double precision, eff_2_e_from_3_e_ab, (mo_num, mo_num, mo_num,
 !
 ! from contraction with HF density = a^{dagger}_p1_alpha a^{dagger}_p2_beta a_h2_beta a_h1_alpha
  END_DOC
- integer :: i,h1,p1,h2,p2
+ integer(size_t) :: h1,p1,h2,p2
+ integer :: i
  integer :: hh1,hh2,pp1,pp2,m,mm
  integer                        :: Ne(2)
- integer,           allocatable :: occ(:,:)
+ integer(size_t), allocatable :: occ(:,:)
  double precision :: contrib
  allocate( occ(N_int*bit_kind_size,2) )
  call bitstring_to_list_ab(ref_bitmask,occ,Ne,N_int)
- call give_contrib_for_abab(1,1,1,1,occ,Ne,contrib)
+ call give_contrib_for_abab(int(1,size_t),int(1,size_t), &
+                            int(1,size_t),int(1,size_t),occ,Ne,contrib)
  eff_2_e_from_3_e_ab = 0.d0
  !$OMP PARALLEL                                                                         &
  !$OMP DEFAULT (NONE)                                                                   &
@@ -273,15 +282,19 @@ BEGIN_PROVIDER [ double precision, eff_2_e_from_3_e_ab, (mo_num, mo_num, mo_num,
 END_PROVIDER
 
 subroutine give_contrib_for_abab(h1,h2,p1,p2,occ,Ne,contrib)
+ use sizet
  implicit none
  BEGIN_DOC
 ! gives the contribution for a double excitation (h1,p1)_alpha (h2,p2)_beta
 !
 ! on top of a determinant whose occupied orbitals is in (occ, Ne)
  END_DOC
- integer, intent(in) :: h1,h2,p1,p2,occ(N_int*bit_kind_size,2),Ne(2)
+ integer(size_t), intent(in) :: h1,h2,p1,p2
+ integer(size_t), intent(in) :: occ(N_int*bit_kind_size,2)
+ integer, intent(in) :: Ne(2)
  double precision, intent(out) :: contrib
- integer :: mm,m
+ integer :: mm
+ integer(size_t) :: m
  double precision :: direct_int, exchange_int
  !! h1,p1 == alpha
  !! h2,p2 == beta
@@ -314,14 +327,16 @@ BEGIN_PROVIDER [ double precision, eff_2_e_from_3_e_aa, (mo_num, mo_num, mo_num,
 !
 ! ||||    h2>h1, p2>p1   ||||
  END_DOC
- integer :: i,h1,p1,h2,p2
+ integer(size_t) :: h1,p1,h2,p2
+ integer :: i
  integer :: hh1,hh2,pp1,pp2,m,mm
  integer                        :: Ne(2)
- integer,           allocatable :: occ(:,:)
+ integer(size_t), allocatable :: occ(:,:)
  double precision :: contrib
  allocate( occ(N_int*bit_kind_size,2) )
  call bitstring_to_list_ab(ref_bitmask,occ,Ne,N_int)
- call give_contrib_for_aaaa(1 ,1 ,1 ,1 ,occ,Ne,contrib)
+ call give_contrib_for_aaaa(int(1,size_t) ,int(1,size_t) , &
+                            int(1,size_t) ,int(1,size_t) ,occ,Ne,contrib)
  eff_2_e_from_3_e_aa = 100000000.d0
  !$OMP PARALLEL                                                                         &
  !$OMP DEFAULT (NONE)                                                                   &
@@ -348,15 +363,19 @@ BEGIN_PROVIDER [ double precision, eff_2_e_from_3_e_aa, (mo_num, mo_num, mo_num,
 END_PROVIDER
 
 subroutine give_contrib_for_aaaa(h1,h2,p1,p2,occ,Ne,contrib)
+ use sizet
  implicit none
  BEGIN_DOC
 ! gives the contribution for a double excitation (h1,p1)_alpha (h2,p2)_alpha
 !
 ! on top of a determinant whose occupied orbitals is in (occ, Ne)
  END_DOC
- integer, intent(in) :: h1,h2,p1,p2,occ(N_int*bit_kind_size,2),Ne(2)
+ integer(size_t), intent(in) :: h1,h2,p1,p2
+ integer(size_t), intent(in) :: occ(N_int*bit_kind_size,2)
+ integer, intent(in) :: Ne(2)
  double precision, intent(out) :: contrib
- integer :: mm,m
+ integer :: mm
+ integer(size_t) :: m
  double precision :: direct_int, exchange_int
  !! h1,p1 == alpha
  !! h2,p2 == alpha
@@ -388,14 +407,16 @@ BEGIN_PROVIDER [ double precision, eff_2_e_from_3_e_bb, (mo_num, mo_num, mo_num,
 !
 ! ||||    h2>h1, p2>p1   ||||
  END_DOC
- integer :: i,h1,p1,h2,p2
+ integer(size_t) :: h1,p1,h2,p2
+ integer :: i
  integer :: hh1,hh2,pp1,pp2,m,mm
  integer                        :: Ne(2)
- integer,           allocatable :: occ(:,:)
+ integer(size_t), allocatable :: occ(:,:)
  double precision :: contrib
  allocate( occ(N_int*bit_kind_size,2) )
  call bitstring_to_list_ab(ref_bitmask,occ,Ne,N_int)
- call give_contrib_for_bbbb(1,1 ,1 ,1 ,occ,Ne,contrib)
+ call give_contrib_for_bbbb(int(1,size_t),int(1,size_t) , &
+                            int(1,size_t) ,int(1,size_t) ,occ,Ne,contrib)
  eff_2_e_from_3_e_bb = 100000000.d0
  !$OMP PARALLEL                                                                         &
  !$OMP DEFAULT (NONE)                                                                   &
@@ -422,15 +443,19 @@ BEGIN_PROVIDER [ double precision, eff_2_e_from_3_e_bb, (mo_num, mo_num, mo_num,
 END_PROVIDER
 
 subroutine give_contrib_for_bbbb(h1,h2,p1,p2,occ,Ne,contrib)
+ use sizet
  implicit none
  BEGIN_DOC
 ! gives the contribution for a double excitation (h1,p1)_beta (h2,p2)_beta
 !
 ! on top of a determinant whose occupied orbitals is in (occ, Ne)
  END_DOC
- integer, intent(in) :: h1,h2,p1,p2,occ(N_int*bit_kind_size,2),Ne(2)
+ integer(size_t), intent(in) :: h1,h2,p1,p2
+ integer(size_t), intent(in) :: occ(N_int*bit_kind_size,2)
+ integer, intent(in) :: Ne(2)
  double precision, intent(out) :: contrib
- integer :: mm,m
+ integer :: mm
+ integer(size_t) :: m
  double precision :: direct_int, exchange_int
  !! h1,p1 == beta
  !! h2,p2 == beta
@@ -452,6 +477,7 @@ end
 
 
 subroutine double_htilde_mu_mat_fock_bi_ortho_no_3e(Nint, key_j, key_i, htot)
+  use sizet
 
   BEGIN_DOC
   ! <key_j |H_tilde | key_i> for double excitation  ONLY FOR ONE- AND TWO-BODY TERMS
@@ -464,14 +490,16 @@ subroutine double_htilde_mu_mat_fock_bi_ortho_no_3e(Nint, key_j, key_i, htot)
   use bitmasks
 
   implicit none
-  integer,           intent(in) :: Nint
+  integer(size_t), intent(in) :: Nint
   integer(bit_kind), intent(in) :: key_j(Nint,2), key_i(Nint,2)
   double precision, intent(out) :: htot
   double precision :: hmono, htwoe
-  integer                       :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
   integer                       :: Ne(2), i, j, ii, jj, ispin, jspin, k, kk
-  integer                       :: degree,exc(0:2,2,2)
-  integer                       :: h1, p1, h2, p2, s1, s2
+  integer                       :: degree
+  integer(size_t)                :: exc(0:2,2,2)
+  integer(size_t)                :: h1, p1, h2, p2
+  integer                       :: s1, s2
   double precision              :: get_mo_two_e_integral_tc_int,phase
 
 
@@ -506,6 +534,7 @@ subroutine double_htilde_mu_mat_fock_bi_ortho_no_3e(Nint, key_j, key_i, htot)
 end
 
 subroutine double_htilde_mu_mat_fock_bi_ortho_no_3e_both(Nint, key_j, key_i, hji,hij)
+  use sizet
 
   BEGIN_DOC
   ! <key_j |H_tilde | key_i> and <key_i |H_tilde | key_j> for double excitation  ONLY FOR ONE- AND TWO-BODY TERMS
@@ -518,14 +547,16 @@ subroutine double_htilde_mu_mat_fock_bi_ortho_no_3e_both(Nint, key_j, key_i, hji
   use bitmasks
 
   implicit none
-  integer,           intent(in) :: Nint
+  integer(size_t), intent(in) :: Nint
   integer(bit_kind), intent(in) :: key_j(Nint,2), key_i(Nint,2)
   double precision, intent(out) :: hji,hij
   double precision :: hmono, htwoe_ji, htwoe_ij
-  integer                       :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
   integer                       :: Ne(2), i, j, ii, jj, ispin, jspin, k, kk
-  integer                       :: degree,exc(0:2,2,2)
-  integer                       :: h1, p1, h2, p2, s1, s2
+  integer                       :: degree
+  integer(size_t)                :: exc(0:2,2,2)
+  integer(size_t)                :: h1, p1, h2, p2
+  integer                       :: s1, s2
   double precision              :: get_mo_two_e_integral_tc_int,phase
 
 

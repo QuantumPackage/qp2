@@ -1,4 +1,6 @@
 
+use sizet
+
  BEGIN_PROVIDER [real*8, gradvec_detail_right_old, (0:3,nMonoEx)]
 &BEGIN_PROVIDER [real*8, gradvec_detail_left_old,  (0:3,nMonoEx)]
   BEGIN_DOC
@@ -10,7 +12,8 @@
   ! E_pq = a^+_pa_q + a^+_Pa_Q
   END_DOC
   implicit none
-  integer                        :: ii,tt,aa,indx,ihole,ipart,istate,ll
+  integer                        :: ii,tt,aa,indx,istate,ll
+  integer(size_t)                :: ihole,ipart
   real*8                         :: res_l(0:3), res_r(0:3)
   
  do ii = 1, n_core_inact_orb
@@ -89,9 +92,11 @@ subroutine calc_grad_elem_h_tc(ihole,ipart,res_l, res_r)
   ! 
   END_DOC
   implicit none
-  integer, intent(in)            :: ihole,ipart
+  use sizet
+  integer(size_t), intent(in)    :: ihole,ipart
   double precision, intent(out)  :: res_l(0:3), res_r(0:3)
-  integer                        :: mu,iii,ispin,ierr,nu,istate,ll
+  integer(size_t)                :: mu,nu
+  integer                        :: iii,ispin,ierr,istate,ll
   integer(bit_kind), allocatable :: det_mu(:,:),det_mu_ex(:,:)
   real*8                         :: chi_H_mu_ex_array(0:3,N_states),mu_ex_H_phi_array(0:3,N_states),phase
   allocate(det_mu(N_int,2))
@@ -110,8 +115,10 @@ subroutine calc_grad_elem_h_tc(ihole,ipart,res_l, res_r)
           ,ihole,ipart,ispin,phase,ierr)
       ! |det_mu_ex> = a^dagger_{p,ispin} a_{q,ispin} |mu> 
       if (ierr.eq.1) then
-        call i_H_tc_psi_phi(det_mu_ex,psi_det,psi_l_coef_bi_ortho,psi_r_coef_bi_ortho,N_int & 
-            ,N_det,psi_det_size,N_states,chi_H_mu_ex_array,mu_ex_H_phi_array)
+                call i_H_tc_psi_phi(det_mu_ex, psi_det, psi_l_coef_bi_ortho, &
+                            psi_r_coef_bi_ortho, N_int, N_det, &
+                            int(psi_det_size,size_t), N_states, &
+                            chi_H_mu_ex_array, mu_ex_H_phi_array)
         ! chi_H_mu_ex_array = <Chi|H E_qp |mu >
         ! mu_ex_H_phi_array = <mu |E_qp H |Phi>
         do istate=1,N_states

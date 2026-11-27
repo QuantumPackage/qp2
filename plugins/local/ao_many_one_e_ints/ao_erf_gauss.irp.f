@@ -1,17 +1,19 @@
-
+use sizet
 ! ---
 
 subroutine phi_j_erf_mu_r_xyz_phi(i,j,mu_in, C_center, xyz_ints)
+ use sizet
  implicit none
  BEGIN_DOC
 ! xyz_ints(1/2/3) = int dr phi_j(r) [erf(mu  |r - C|)/|r-C|]  x/y/z phi_i(r)
 !
 ! where phi_i and phi_j are AOs
  END_DOC
- integer, intent(in) :: i,j
+ integer(size_t), intent(in) :: i,j
  double precision, intent(in) :: mu_in, C_center(3)
  double precision, intent(out):: xyz_ints(3)
- integer :: num_A,power_A(3), num_b, power_B(3),power_B_tmp(3)
+ integer(size_t) :: num_A,num_b
+ integer :: power_A(3), power_B(3),power_B_tmp(3)
  double precision :: alpha, beta, A_center(3), B_center(3),contrib,NAI_pol_mult_erf
  integer :: n_pt_in,l,m,mm
  xyz_ints = 0.d0
@@ -60,10 +62,11 @@ double precision function phi_j_erf_mu_r_phi(i, j, mu_in, C_center)
   END_DOC
 
   implicit none
-  integer,          intent(in) :: i,j
+  integer(size_t),          intent(in) :: i,j
   double precision, intent(in) :: mu_in, C_center(3)
 
-  integer          :: num_A, power_A(3), num_b, power_B(3)
+  integer(size_t)  :: num_A, num_b
+  integer          :: power_A(3), power_B(3)
   integer          :: n_pt_in, l, m
   double precision :: alpha, beta, A_center(3), B_center(3), contrib
 
@@ -103,6 +106,7 @@ end
 ! ---
 
 subroutine erfc_mu_gauss_xyz_ij_ao(i, j, mu, C_center, delta, gauss_ints)
+ use sizet
  implicit none
  BEGIN_DOC
   ! gauss_ints(m) =   \int dr exp(-delta (r - C)^2 ) x/y/z * ( 1 - erf(mu |r-r'|))/ |r-r'| * AO_i(r') * AO_j(r')
@@ -111,11 +115,12 @@ subroutine erfc_mu_gauss_xyz_ij_ao(i, j, mu, C_center, delta, gauss_ints)
   !
   !      m = 4 ==> no x/y/z
  END_DOC
- integer, intent(in) :: i,j
+ integer(size_t), intent(in) :: i,j
  double precision, intent(in) :: mu, C_center(3),delta
  double precision, intent(out):: gauss_ints(4)
 
- integer :: num_A,power_A(3), num_b, power_B(3)
+ integer(size_t) :: num_A,num_b
+ integer :: power_A(3), power_B(3)
  double precision :: alpha, beta, A_center(3), B_center(3),contrib,NAI_pol_mult_erf
  double precision :: xyz_ints(4)
  integer :: n_pt_in,l,m,mm
@@ -150,6 +155,7 @@ end
 ! ---
 
 subroutine erf_mu_gauss_ij_ao(i, j, mu, C_center, delta, gauss_ints)
+  use sizet
 
   BEGIN_DOC
   !
@@ -158,12 +164,13 @@ subroutine erf_mu_gauss_ij_ao(i, j, mu, C_center, delta, gauss_ints)
   END_DOC
 
   implicit none
-  integer,          intent(in)  :: i, j
+  integer(size_t),          intent(in)  :: i, j
   double precision, intent(in)  :: mu, C_center(3), delta
   double precision, intent(out) :: gauss_ints
 
   integer                       :: n_pt_in, l, m
-  integer                       :: num_A, power_A(3), num_b, power_B(3)
+  integer(size_t)               :: num_A, num_b
+  integer                       :: power_A(3), power_B(3)
   double precision              :: alpha, beta, A_center(3), B_center(3), coef
   double precision              :: integral
 
@@ -206,6 +213,7 @@ end
 ! ---
 
 subroutine NAI_pol_x_mult_erf_ao(i_ao, j_ao, mu_in, C_center, ints)
+  use sizet
 
   BEGIN_DOC
   !
@@ -221,11 +229,13 @@ subroutine NAI_pol_x_mult_erf_ao(i_ao, j_ao, mu_in, C_center, ints)
 
   implicit none
 
-  integer,          intent(in)  :: i_ao, j_ao
+  integer(size_t),          intent(in)  :: i_ao, j_ao
   double precision, intent(in)  :: mu_in, C_center(3)
   double precision, intent(out) :: ints(3)
 
-  integer                       :: i, j, num_A, num_B, power_A(3), power_B(3), n_pt_in, power_xA(3), m
+  integer(size_t)               :: num_A, num_B
+  integer                       :: i, j, power_A(3), power_B(3)
+  integer                       :: n_pt_in, power_xA(3), m
   double precision              :: A_center(3), B_center(3), integral, alpha, beta, coef
 
   double precision              :: NAI_pol_mult_erf
@@ -271,6 +281,7 @@ end
 ! ---
 
 subroutine NAI_pol_x_mult_erf_ao_v0(i_ao, j_ao, mu_in, C_center, LD_C, ints, LD_ints, n_points)
+  use sizet
 
   BEGIN_DOC
   !
@@ -286,11 +297,13 @@ subroutine NAI_pol_x_mult_erf_ao_v0(i_ao, j_ao, mu_in, C_center, LD_C, ints, LD_
 
   implicit none
 
-  integer,          intent(in)  :: i_ao, j_ao, LD_C, LD_ints, n_points
+  integer(size_t),          intent(in)  :: i_ao, j_ao
+  integer,          intent(in)  :: LD_C, LD_ints, n_points
   double precision, intent(in)  :: mu_in, C_center(LD_C,3)
   double precision, intent(out) :: ints(LD_ints,3)
 
-  integer                       :: i, j, num_A, num_B, power_A(3), power_B(3), n_pt_in
+  integer(size_t)               :: num_A, num_B
+  integer                       :: i, j, power_A(3), power_B(3), n_pt_in
   integer                       :: power_xA(3), m, ipoint
   double precision              :: A_center(3), B_center(3), alpha, beta, coef
   double precision, allocatable :: integral(:)
@@ -345,6 +358,7 @@ end
 ! ---
 
 subroutine NAI_pol_x_mult_erf_ao_v(i_ao, j_ao, mu_in, C_center, LD_C, ints, LD_ints, n_points)
+  use sizet
 
   BEGIN_DOC
   !
@@ -362,11 +376,14 @@ subroutine NAI_pol_x_mult_erf_ao_v(i_ao, j_ao, mu_in, C_center, LD_C, ints, LD_i
 
   implicit none
 
-  integer,          intent(in)  :: i_ao, j_ao, LD_C, LD_ints, n_points(3)
+  integer(size_t),          intent(in)  :: i_ao, j_ao
+  integer,          intent(in)  :: LD_C, LD_ints, n_points(3)
   double precision, intent(in)  :: mu_in, C_center(LD_C,3,3)
   double precision, intent(out) :: ints(LD_ints,3)
 
-  integer                       :: i, j, num_A, num_B, power_A(3), power_B(3), n_pt_in, LD_integral
+  integer(size_t)               :: num_A, num_B
+  integer                       :: i, j, power_A(3), power_B(3)
+  integer                       :: n_pt_in, LD_integral
   integer                       :: power_xA(3), m, ipoint, n_points_m
   double precision              :: A_center(3), B_center(3), alpha, beta, coef
   double precision, allocatable :: integral(:)
@@ -438,10 +455,12 @@ double precision function NAI_pol_x_mult_erf_ao_x(i_ao, j_ao, mu_in, C_center)
 
   implicit none
 
-  integer,          intent(in)  :: i_ao, j_ao
+  integer(size_t),          intent(in)  :: i_ao, j_ao
   double precision, intent(in)  :: mu_in, C_center(3)
 
-  integer                       :: i, j, num_A, num_B, power_A(3), power_B(3), n_pt_in, power_xA(3)
+  integer(size_t)               :: num_A, num_B
+  integer                       :: i, j, power_A(3), power_B(3)
+  integer                       :: n_pt_in, power_xA(3)
   double precision              :: A_center(3), B_center(3), integral, alpha, beta, coef
 
   double precision              :: NAI_pol_mult_erf
@@ -497,10 +516,12 @@ double precision function NAI_pol_x_mult_erf_ao_y(i_ao, j_ao, mu_in, C_center)
 
   implicit none
 
-  integer,          intent(in)  :: i_ao, j_ao
+  integer(size_t),          intent(in)  :: i_ao, j_ao
   double precision, intent(in)  :: mu_in, C_center(3)
 
-  integer                       :: i, j, num_A, num_B, power_A(3), power_B(3), n_pt_in, power_xA(3)
+  integer(size_t)               :: num_A, num_B
+  integer                       :: i, j, power_A(3), power_B(3)
+  integer                       :: n_pt_in, power_xA(3)
   double precision              :: A_center(3), B_center(3), integral, alpha, beta, coef
 
   double precision              :: NAI_pol_mult_erf
@@ -556,10 +577,12 @@ double precision function NAI_pol_x_mult_erf_ao_z(i_ao, j_ao, mu_in, C_center)
 
   implicit none
 
-  integer,          intent(in)  :: i_ao, j_ao
+  integer(size_t),          intent(in)  :: i_ao, j_ao
   double precision, intent(in)  :: mu_in, C_center(3)
 
-  integer                       :: i, j, num_A, num_B, power_A(3), power_B(3), n_pt_in, power_xA(3)
+  integer(size_t)               :: num_A, num_B
+  integer                       :: i, j, power_A(3), power_B(3)
+  integer                       :: n_pt_in, power_xA(3)
   double precision              :: A_center(3), B_center(3), integral, alpha, beta, coef
 
   double precision              :: NAI_pol_mult_erf
@@ -615,7 +638,7 @@ double precision function NAI_pol_x_mult_erf_ao_with1s_x(i_ao, j_ao, beta, B_cen
 
   implicit none
 
-  integer,          intent(in)  :: i_ao, j_ao
+  integer(size_t),          intent(in)  :: i_ao, j_ao
   double precision, intent(in)  :: beta, B_center(3), mu_in, C_center(3)
 
   integer                       :: i, j, power_Ai(3), power_Aj(3), n_pt_in, power_xA(3)
@@ -685,7 +708,7 @@ double precision function NAI_pol_x_mult_erf_ao_with1s_y(i_ao, j_ao, beta, B_cen
 
   implicit none
 
-  integer,          intent(in)  :: i_ao, j_ao
+  integer(size_t),          intent(in)  :: i_ao, j_ao
   double precision, intent(in)  :: beta, B_center(3), mu_in, C_center(3)
 
   integer                       :: i, j, power_Ai(3), power_Aj(3), n_pt_in, power_xA(3)
@@ -755,7 +778,7 @@ double precision function NAI_pol_x_mult_erf_ao_with1s_z(i_ao, j_ao, beta, B_cen
 
   implicit none
 
-  integer,          intent(in)  :: i_ao, j_ao
+  integer(size_t),          intent(in)  :: i_ao, j_ao
   double precision, intent(in)  :: beta, B_center(3), mu_in, C_center(3)
 
   integer                       :: i, j, power_Ai(3), power_Aj(3), n_pt_in, power_xA(3)
@@ -812,6 +835,7 @@ end
 ! ---
 
 subroutine NAI_pol_x_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center, mu_in, C_center, ints)
+  use sizet
 
   BEGIN_DOC
   !
@@ -829,7 +853,7 @@ subroutine NAI_pol_x_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center, mu_in, C_cen
 
   implicit none
 
-  integer,          intent(in)  :: i_ao, j_ao
+  integer(size_t),          intent(in)  :: i_ao, j_ao
   double precision, intent(in)  :: beta, B_center(3), mu_in, C_center(3)
   double precision, intent(out) :: ints(3)
 
@@ -885,6 +909,7 @@ end
 ! ---
 
 subroutine NAI_pol_x_mult_erf_ao_with1s_v0(i_ao, j_ao, beta, B_center, LD_B, mu_in, C_center, LD_C, ints, LD_ints, n_points)
+  use sizet
 
   BEGIN_DOC
   !
@@ -902,7 +927,8 @@ subroutine NAI_pol_x_mult_erf_ao_with1s_v0(i_ao, j_ao, beta, B_center, LD_B, mu_
 
   implicit none
 
-  integer,          intent(in)  :: i_ao, j_ao, LD_B, LD_C, LD_ints, n_points
+  integer(size_t),          intent(in)  :: i_ao, j_ao
+  integer,          intent(in)  :: LD_B, LD_C, LD_ints, n_points
   double precision, intent(in)  :: beta, mu_in
   double precision, intent(in)  :: B_center(LD_B,3), C_center(LD_C,3)
   double precision, intent(out) :: ints(LD_ints,3)
@@ -972,6 +998,7 @@ end
 ! ---
 
 subroutine NAI_pol_x_mult_erf_ao_with1s_v(i_ao, j_ao, beta, B_center, LD_B, mu_in, C_center, LD_C, ints, LD_ints, n_points)
+  use sizet
 
   BEGIN_DOC
   !
@@ -989,7 +1016,8 @@ subroutine NAI_pol_x_mult_erf_ao_with1s_v(i_ao, j_ao, beta, B_center, LD_B, mu_i
 
   implicit none
 
-  integer,          intent(in)  :: i_ao, j_ao, LD_B, LD_C, LD_ints, n_points(3)
+  integer(size_t),          intent(in)  :: i_ao, j_ao
+  integer,          intent(in)  :: LD_B, LD_C, LD_ints, n_points(3)
   double precision, intent(in)  :: beta, mu_in
   double precision, intent(in)  :: B_center(LD_B,3,3), C_center(LD_C,3,3)
   double precision, intent(out) :: ints(LD_ints,3)
@@ -1062,6 +1090,7 @@ end
 ! ---
 
 subroutine NAI_pol_x_specify_mult_erf_ao(i_ao,j_ao,mu_in,C_center,m,ints)
+ use sizet
  implicit none
   BEGIN_DOC
   ! Computes the following integral :
@@ -1070,12 +1099,15 @@ subroutine NAI_pol_x_specify_mult_erf_ao(i_ao,j_ao,mu_in,C_center,m,ints)
   ! if m == 1 X(m) = x, m == 1 X(m) = y, m == 1 X(m) = z
   END_DOC
  include 'utils/constants.include.F'
- integer, intent(in) :: i_ao,j_ao,m
+ integer(size_t), intent(in) :: i_ao,j_ao
+ integer, intent(in) :: m
  double precision, intent(in) :: mu_in, C_center(3)
  double precision, intent(out):: ints
  double precision               :: A_center(3), B_center(3),integral, alpha,beta
  double precision               :: NAI_pol_mult_erf
- integer                        :: i,j,num_A,num_B, power_A(3), power_B(3), n_pt_in, power_xA(3)
+ integer(size_t)                 :: num_A,num_B
+ integer                        :: i,j, power_A(3), power_B(3)
+ integer                        :: n_pt_in, power_xA(3)
  ints = 0.d0
  if(ao_overlap_abs(j_ao,i_ao).lt.1.d-12)then
   return
@@ -1108,6 +1140,7 @@ end
 ! ---
 
 subroutine NAI_pol_x2_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center, mu_in, C_center, ints)
+  use sizet
 
   BEGIN_DOC
   !
@@ -1123,7 +1156,7 @@ subroutine NAI_pol_x2_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center, mu_in, C_ce
 
   implicit none
 
-  integer,          intent(in)  :: i_ao, j_ao
+  integer(size_t),          intent(in)  :: i_ao, j_ao
   double precision, intent(in)  :: beta, B_center(3), mu_in, C_center(3)
   double precision, intent(out) :: ints(3)
 
@@ -1180,6 +1213,7 @@ end
 ! ---
 
 subroutine NAI_pol_x2_mult_erf_ao(i_ao, j_ao, mu_in, C_center, ints)
+  use sizet
 
   BEGIN_DOC
   !
@@ -1195,11 +1229,12 @@ subroutine NAI_pol_x2_mult_erf_ao(i_ao, j_ao, mu_in, C_center, ints)
 
   implicit none
 
-  integer,          intent(in)  :: i_ao, j_ao
+  integer(size_t),          intent(in)  :: i_ao, j_ao
   double precision, intent(in)  :: mu_in, C_center(3)
   double precision, intent(out) :: ints(3)
 
-  integer                       :: i, j, num_A, num_B, power_A(3), power_B(3), n_pt_in, m
+  integer(size_t)               :: num_A, num_B
+  integer                       :: i, j, power_A(3), power_B(3), n_pt_in, m
   integer                       :: power_A1(3), power_A2(3)
   double precision              :: A_center(3), B_center(3), alpha, beta, coef
   double precision              :: integral0, integral1, integral2
@@ -1246,6 +1281,7 @@ end
 ! ---
 
 subroutine NAI_pol_012_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center, mu_in, C_center, ints)
+  use sizet
 
   BEGIN_DOC
   !
@@ -1267,7 +1303,7 @@ subroutine NAI_pol_012_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center, mu_in, C_c
 
   implicit none
 
-  integer,          intent(in)  :: i_ao, j_ao
+  integer(size_t),          intent(in)  :: i_ao, j_ao
   double precision, intent(in)  :: beta, B_center(3), mu_in, C_center(3)
   double precision, intent(out) :: ints(7)
 
@@ -1325,6 +1361,7 @@ end
 ! ---
 
 subroutine NAI_pol_012_mult_erf_ao(i_ao, j_ao, mu_in, C_center, ints)
+  use sizet
 
   BEGIN_DOC
   !
@@ -1346,11 +1383,12 @@ subroutine NAI_pol_012_mult_erf_ao(i_ao, j_ao, mu_in, C_center, ints)
 
   implicit none
 
-  integer,          intent(in)  :: i_ao, j_ao
+  integer(size_t),          intent(in)  :: i_ao, j_ao
   double precision, intent(in)  :: mu_in, C_center(3)
   double precision, intent(out) :: ints(7)
 
-  integer                       :: i, j, num_A, num_B, power_A(3), power_B(3), n_pt_in, m
+  integer(size_t)               :: num_A, num_B
+  integer                       :: i, j, power_A(3), power_B(3), n_pt_in, m
   integer                       :: power_A1(3), power_A2(3)
   double precision              :: A_center(3), B_center(3), alpha, beta, coef
   double precision              :: integral0, integral1, integral2

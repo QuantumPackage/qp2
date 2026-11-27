@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -10,7 +11,8 @@ BEGIN_PROVIDER [double precision, int2_grad1u2_grad2u2_env2_test, (ao_num, ao_nu
   END_DOC
 
   implicit none
-  integer                       :: i, j, ipoint, i_1s, i_fit
+  integer(size_t)                :: i, j, ipoint, i_1s
+  integer                      :: i_fit
   double precision              :: r(3), expo_fit, coef_fit
   double precision              :: coef, beta, B_center(3)
   double precision              :: tmp
@@ -119,7 +121,8 @@ BEGIN_PROVIDER [double precision, int2_grad1u2_grad2u2_env2_test_v, (ao_num, ao_
   END_DOC
 
   implicit none
-  integer                       :: i, j, ipoint, i_1s, i_fit
+  integer(size_t)                :: i, j, ipoint, i_1s
+  integer                      :: i_fit
   double precision              :: r(3), expo_fit, coef_fit
   double precision              :: coef, beta, B_center(3)
   double precision              :: tmp
@@ -169,8 +172,11 @@ BEGIN_PROVIDER [double precision, int2_grad1u2_grad2u2_env2_test_v, (ao_num, ao_
          expo_fit = expo_gauss_1_erf_x_2(i_fit)
          coef_fit = -0.25d0 *  coef_gauss_1_erf_x_2(i_fit) * coef
 
-         call overlap_gauss_r12_ao_with1s_v(B_center, beta, final_grid_points_transp, size(final_grid_points_transp,1),&
-               expo_fit, i, j, int_fit_v, size(int_fit_v,1),n_points_final_grid)
+         call overlap_gauss_r12_ao_with1s_v(B_center, beta, &
+              final_grid_points_transp, &
+              int(size(final_grid_points_transp,1),size_t), &
+              expo_fit, i, j, int_fit_v, int(size(int_fit_v,1),size_t), &
+              n_points_final_grid)
 
          do ipoint = 1, n_points_final_grid
            big_array(ipoint,j,i) += coef_fit * int_fit_v(ipoint)
@@ -216,7 +222,8 @@ BEGIN_PROVIDER [double precision, int2_u2_env2_test, (ao_num, ao_num, n_points_f
   END_DOC
 
   implicit none
-  integer                       :: i, j, ipoint, i_1s, i_fit
+  integer(size_t)                :: i, j, ipoint, i_1s
+  integer                      :: i_fit
   double precision              :: r(3), int_fit, expo_fit, coef_fit
   double precision              :: coef, beta, B_center(3), tmp
   double precision              :: wall0, wall1,int_env
@@ -323,7 +330,8 @@ BEGIN_PROVIDER [double precision, int2_u_grad1u_x_env2_test, (ao_num,ao_num,n_po
   END_DOC
 
   implicit none
-  integer          :: i, j, ipoint, i_1s, i_fit
+  integer(size_t)  :: i, j, ipoint, i_1s
+  integer          :: i_fit
   double precision :: r(3), int_fit(3), expo_fit, coef_fit
   double precision :: coef, beta, B_center(3), dist
   double precision :: alpha_1s, alpha_1s_inv, centr_1s(3), expo_coef_1s, coef_tmp
@@ -437,7 +445,8 @@ BEGIN_PROVIDER [double precision, int2_u_grad1u_env2_test, (ao_num, ao_num, n_po
   END_DOC
 
   implicit none
-  integer                       :: i, j, ipoint, i_1s, i_fit
+  integer(size_t)                :: i, j, ipoint, i_1s
+  integer                      :: i_fit
   double precision              :: r(3), int_fit, expo_fit, coef_fit, coef_tmp
   double precision              :: coef, beta, B_center(3), dist
   double precision              :: alpha_1s, alpha_1s_inv, centr_1s(3), expo_coef_1s, tmp

@@ -1,4 +1,5 @@
 use bitmasks
+use sizet
 
 subroutine do_signed_mono_excitation(key1,key2,nu,ihole,ipart,       &
       ispin,phase,ierr)
@@ -6,10 +7,12 @@ subroutine do_signed_mono_excitation(key1,key2,nu,ihole,ipart,       &
   ! we create the mono-excitation, and determine, if possible,
   ! the phase and the number in the list of determinants
   END_DOC
+  use sizet
   implicit none
   integer(bit_kind)              :: key1(N_int,2),key2(N_int,2)
   integer(bit_kind), allocatable :: keytmp(:,:)
-  integer                        :: exc(0:2,2,2),ihole,ipart,ierr,nu,ispin
+  integer(size_t)                :: exc(0:2,2,2),ihole,ipart,nu
+  integer                        :: ierr,ispin
   real*8                         :: phase
   logical                        :: found
   allocate(keytmp(N_int,2))
@@ -62,8 +65,10 @@ subroutine det_extract(key,nu,Nint)
   BEGIN_DOC
   ! extract a determinant from the list of determinants
   END_DOC
+  use sizet
   implicit none
-  integer                        :: ispin,i,nu,Nint
+  integer(size_t)                :: nu,Nint
+  integer                        :: ispin,i
   integer(bit_kind)              :: key(Nint,2)
   do ispin=1,2
     do i=1,Nint
@@ -74,11 +79,13 @@ end subroutine det_extract
 
 subroutine det_copy(key1,key2,Nint)
   use bitmasks ! you need to include the bitmasks_module.f90 features
+  use sizet
   BEGIN_DOC
   ! copy a determinant from key1 to key2
   END_DOC
   implicit none
-  integer                        :: ispin,i,Nint
+  integer(size_t)                :: Nint
+  integer                        :: ispin,i
   integer(bit_kind)              :: key1(Nint,2),key2(Nint,2)
   do ispin=1,2
     do i=1,Nint
@@ -94,10 +101,12 @@ subroutine do_spinfree_mono_excitation(key_in,key_out1,key_out2      &
   ! we may create two determinants as result
   !
   END_DOC
+  use sizet
   implicit none
   integer(bit_kind)              :: key_in(N_int,2),key_out1(N_int,2)
   integer(bit_kind)              :: key_out2(N_int,2)
-  integer                        :: ihole,ipart,ierr,jerr,nu1,nu2
+  integer(size_t)                :: ihole,ipart,nu1,nu2
+  integer                        :: ierr,jerr
   integer                        :: ispin
   real*8                         :: phase1,phase2
   

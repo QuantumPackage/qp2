@@ -1,6 +1,7 @@
+use sizet
 BEGIN_PROVIDER [ double precision, mo_r_coef_normalized, (ao_num,mo_num) ]
  implicit none
- integer :: i,j,k
+ integer(size_t) :: i,j,k
  double precision :: norm
  do i = 1, mo_num
   norm = 0.d0
@@ -18,7 +19,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, tc_spin_dens_right_only, (ao_num, ao_num)]
  implicit none
- integer :: i,j,k
+ integer(size_t) :: i,j,k
  tc_spin_dens_right_only = 0.d0
  do i = elec_beta_num+1, elec_alpha_num
   do j = 1, ao_num

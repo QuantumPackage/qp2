@@ -1,3 +1,5 @@
+use sizet
+
 ! ---
 
 program write_tc_int_cuda
@@ -57,10 +59,12 @@ end
 subroutine do_work_on_gpu()
 
   use cutc_module
+  use sizet
 
   implicit none
 
-  integer :: k, ipoint
+  integer :: k
+  integer(size_t) :: ipoint
 
   double precision, allocatable :: rn(:,:), aos_data1(:,:,:), aos_data2(:,:,:)
   double precision, allocatable :: int2_grad1_u12_ao(:,:,:,:)
@@ -105,12 +109,17 @@ subroutine do_work_on_gpu()
 
   integer :: nB
   integer :: sB
+  integer :: n_points4
+  integer :: n_points_extra4
 
   PROVIDE nxBlocks nyBlocks nzBlocks
   PROVIDE blockxSize blockySize blockzSize
 
+  n_points4       = int(n_points_final_grid, 4)
+  n_points_extra4 = int(n_points_extra_final_grid, 4)
+
   sB = 32
-  nB = (n_points_final_grid + sB - 1) / sB
+  nB = (n_points4 + sB - 1) / sB
 
   call ezfio_set_tc_int_blockxSize(sB)
   call ezfio_set_tc_int_nxBlocks(nB)
@@ -121,7 +130,7 @@ subroutine do_work_on_gpu()
   print*, ' start CUDA kernel'
 
   call cutc_int(nxBlocks, nyBlocks, nzBlocks, blockxSize, blockySize, blockzSize,           &
-                n_points_final_grid, n_points_extra_final_grid, ao_num, nucl_num, jBH_size, &
+                n_points4, n_points_extra4, ao_num, nucl_num, jBH_size, &
                 final_grid_points, final_weight_at_r_vector,                                &
                 final_grid_points_extra, final_weight_at_r_vector_extra,                    &
                 rn, aos_data1, aos_data2, jBH_c, jBH_m, jBH_n, jBH_o,                       &

@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -8,7 +9,8 @@
 BEGIN_PROVIDER [integer, index_HF_psi_det]                                                                                                            
 
   implicit none
-  integer :: i, degree
+  integer(size_t) :: i
+  integer         :: degree
 
   do i = 1, N_det
     call get_excitation_degree(HF_bitmask, psi_det(1,1,i), degree, N_int)
@@ -29,8 +31,10 @@ subroutine diagonalize_CI_tc()
   !  eigenstates of the |CI| matrix.
   END_DOC
 
+  use sizet
   implicit none
-  integer :: i, j
+  integer(size_t) :: i
+  integer         :: j
 
   do j = 1, N_states
     do i = 1, N_det
@@ -57,12 +61,14 @@ end
   END_DOC
 
   implicit none
-  integer                       :: i, idx_dress, j, istate, k
+  integer(size_t)                  :: i, j
+  integer                       :: idx_dress, istate, k
   integer                       :: i_good_state, i_other_state, i_state
-  integer                       :: n_real_tc_bi_orth_eigval_right, igood_r, igood_l
+  integer                       :: n_real_tc_bi_orth_eigval_right
+  integer(size_t)                 :: igood_r, igood_l
   logical                       :: converged, dagger
   double precision, parameter   :: alpha = 0.1d0
-  integer,          allocatable :: index_good_state_array(:)
+  integer(size_t),  allocatable :: index_good_state_array(:)
   integer,          allocatable :: iorder(:)
   logical,          allocatable :: good_state_array(:)
   double precision, allocatable :: reigvec_tc_bi_orth_tmp(:,:), leigvec_tc_bi_orth_tmp(:,:),eigval_right_tmp(:)
@@ -85,7 +91,9 @@ end
       enddo
     endif
 
-    call non_hrmt_real_diag(N_det, H_prime, leigvec_tc_bi_orth_tmp, reigvec_tc_bi_orth_tmp, n_real_tc_bi_orth_eigval_right, eigval_right_tmp)
+    call non_hrmt_real_diag(int(N_det,4), H_prime, leigvec_tc_bi_orth_tmp, &
+         reigvec_tc_bi_orth_tmp, n_real_tc_bi_orth_eigval_right, &
+         eigval_right_tmp)
     if(N_states.gt.1)then
      print*,'n_real_tc_bi_orth_eigval_right = ',n_real_tc_bi_orth_eigval_right
     endif
@@ -177,14 +185,14 @@ end
         iorder(i) = i
         coef_hf_r(i) = -dabs(reigvec_tc_bi_orth_tmp(index_HF_psi_det,i))
       enddo
-      call dsort(coef_hf_r,iorder,N_det)
+      call dsort(coef_hf_r,iorder,int(N_det,4))
       igood_r = iorder(1)
       print*,'igood_r, coef_hf_r = ',igood_r,coef_hf_r(1)
       do i = 1,N_det
         iorder(i) = i
         coef_hf_l(i) = -dabs(leigvec_tc_bi_orth_tmp(index_HF_psi_det,i))
       enddo
-      call dsort(coef_hf_l,iorder,N_det)
+      call dsort(coef_hf_l,iorder,int(N_det,4))
       igood_l = iorder(1)
       print*,'igood_l, coef_hf_l = ',igood_l,coef_hf_l(1)
        
@@ -302,12 +310,14 @@ end
     deallocate(H_jj)
   endif
 
-  call bi_normalize(leigvec_tc_bi_orth, reigvec_tc_bi_orth, size(reigvec_tc_bi_orth, 1), N_det, N_states)
+  call bi_normalize(leigvec_tc_bi_orth, reigvec_tc_bi_orth, &
+       int(size(reigvec_tc_bi_orth, 1), size_t), N_det, N_states)
   ! check bi-orthogonality
   allocate(Stmp(N_states,N_states))
-  call dgemm( 'T', 'N', N_states, N_states, N_det, 1.d0                                                              &
-        , leigvec_tc_bi_orth(1,1), size(leigvec_tc_bi_orth, 1), reigvec_tc_bi_orth(1,1), size(reigvec_tc_bi_orth, 1) &
-        , 0.d0, Stmp(1,1), size(Stmp, 1) )
+    call dgemm('T', 'N', N_states, N_states, int(N_det,4), 1.d0, &
+             leigvec_tc_bi_orth(1,1), size(leigvec_tc_bi_orth,1), &
+             reigvec_tc_bi_orth(1,1), size(reigvec_tc_bi_orth,1), 0.d0, &
+             Stmp(1,1), size(Stmp,1))
   print *, ' overlap matrix between states:'
   do i = 1, N_states
     write(*,'(1000(F16.10,X))') Stmp(i,:)
@@ -361,10 +371,13 @@ subroutine bi_normalize(u_l, u_r, n, ld, nstates)
   !!!! Normalization of the scalar product of the left/right eigenvectors
   END_DOC
 
+  use sizet
   implicit none
-  integer,          intent(in)    :: n, ld, nstates
+  integer(size_t),  intent(in)    :: n, ld
+  integer,          intent(in)    :: nstates
   double precision, intent(inout) :: u_l(ld,nstates), u_r(ld,nstates)
-  integer                         :: i, j,j_loc
+  integer                         :: i
+  integer(size_t)                 :: j, j_loc
   double precision                :: accu, tmp, maxval_tmp
 
   do i = 1, nstates

@@ -1,3 +1,4 @@
+use sizet
 program diagonalize_tc_h
 
   BEGIN_DOC
@@ -49,8 +50,10 @@ end
 subroutine test()
 
   use bitmasks
+  use sizet
   implicit none
-  integer          :: i, j 
+  integer(size_t)  :: i
+  integer          :: j
   double precision :: hmono, htwoe, hthree, htot
 
   print*, 'reading the wave function '
@@ -65,9 +68,11 @@ end
 ! ---
 
 subroutine routine_diag()
+  use sizet
 
   implicit none
-  integer          :: i, j, k
+  integer(size_t)  :: i
+  integer          :: j, k
   double precision :: dE
 
   ! provide eigval_right_tc_bi_orth

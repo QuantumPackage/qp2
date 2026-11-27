@@ -1,11 +1,14 @@
+use sizet
 
 ! ---
 
 subroutine provide_no_0e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, int2_grad1_u12, noL_0e)
+  use sizet
 
   implicit none
 
-  integer,          intent(in)  :: n_grid, n_mo
+  integer(size_t),  intent(in)  :: n_grid
+  integer,          intent(in)  :: n_mo
   integer,          intent(in)  :: ne_a, ne_b
   double precision, intent(in)  :: wr1(n_grid)
   double precision, intent(in)  :: mos_l_in_r(n_grid,n_mo)
@@ -13,7 +16,8 @@ subroutine provide_no_0e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
   double precision, intent(in)  :: int2_grad1_u12(n_grid,3,n_mo,n_mo)
   double precision, intent(out) :: noL_0e
 
-  integer                       :: i, j, k, ipoint
+  integer(size_t)              :: ipoint
+  integer                       :: i, j, k
   double precision              :: t0, t1
   double precision, allocatable :: tmp(:)
   double precision, allocatable :: tmpL(:,:), tmpR(:,:)

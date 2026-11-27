@@ -66,10 +66,12 @@ end
 subroutine write_lr_spindeterminants()
 
   use bitmasks
+  use sizet
 
   implicit none
 
-  integer                       :: k, l
+  integer(size_t)               :: k
+  integer                       :: l
   double precision, allocatable :: buffer(:,:)
 
   PROVIDE psi_bitcleft_bilinear_matrix_values

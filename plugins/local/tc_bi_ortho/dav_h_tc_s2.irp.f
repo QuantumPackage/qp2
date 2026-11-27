@@ -4,6 +4,7 @@
 subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N_st_diag_in, n_it_max_dav, converged, hcalc)
 
   use mmap_module
+  use sizet
 
   BEGIN_DOC
   ! Generic modified-Davidson diagonalization 
@@ -31,7 +32,8 @@ subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N
 
   implicit none
 
-  integer,           intent(in)   :: sze, N_st, N_st_diag_in, n_it_max_dav
+  integer(size_t),   intent(in)   :: sze
+  integer,           intent(in)   :: N_st, N_st_diag_in, n_it_max_dav
   double precision,  intent(in)   :: H_jj(sze)
   logical,          intent(inout) :: converged
   double precision, intent(inout) :: u_in(sze,N_st_diag_in)
@@ -41,7 +43,9 @@ subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N
 
   character*(16384)               :: write_buffer
   integer                         :: iter, N_st_diag
-  integer                         :: i, j, k, l, m
+  integer(size_t)                   :: i, j, k
+  integer                         :: l, m
+  integer                         :: sze4
   integer                         :: iter2, itertot
   logical                         :: disk_based
   integer                         :: shift, shift2, itermax
@@ -71,7 +75,8 @@ subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N
 
   include 'constants.include.F'
 
-  N_st_diag = N_st_diag_in 
+  N_st_diag = N_st_diag_in
+  sze4 = int(sze, 4)
 !  print*,'trial vector'
    do i = 1, sze
     if(isnan(u_in(i,1)))then
@@ -106,7 +111,7 @@ subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N
 
   nproc_target = nproc
   double precision :: rss
-  integer :: maxab
+  integer(size_t) :: maxab
   maxab = sze 
 
   m=1
@@ -153,7 +158,7 @@ subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N
 
   call write_int(6, N_st, 'Number of states')
   call write_int(6, N_st_diag, 'Number of states in diagonalization')
-  call write_int(6, sze, 'Number of basis functions')
+  call write_int(6, sze4, 'Number of basis functions')
   call write_int(6, nproc_target, 'Number of threads for diagonalization')
   call write_double(6, r1, 'Memory(Gb)')
   if(disk_based) then
@@ -267,8 +272,8 @@ subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N
       if( (iter > 1) .or. (itertot == 1) ) then
 
         ! Gram-Schmidt to orthogonalize all new guess with the previous vectors 
-        call ortho_qr(U, size(U, 1), sze, shift2)
-        call ortho_qr(U, size(U, 1), sze, shift2)
+        call ortho_qr(U, sze, sze, int(shift2, size_t))
+        call ortho_qr(U, sze, sze, int(shift2, size_t))
 
         ! W = H U
 !        call hcalc(W(1,shift+1), U(1,shift+1), N_st_diag, sze)
@@ -296,7 +301,7 @@ subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N
 
       ! Compute h_kl = <u_k | W_l> = <u_k| H |u_l>
       ! -------------------------------------------
-      call dgemm( 'T', 'N', shift2, shift2, sze, 1.d0 &
+      call dgemm( 'T', 'N', shift2, shift2, sze4, 1.d0 &
                 , U, size(U, 1), W, size(W, 1)        &
                 , 0.d0, h, size(h, 1) )
       ! Penalty method
@@ -355,7 +360,7 @@ subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N
       ! y(:,k) = rk
       ! U(:,k) = Bk 
       ! U(:,shift2+k) = Rk = Bk x rk
-      call dgemm( 'N', 'N', sze, N_st_diag, shift2, 1.d0 &
+      call dgemm( 'N', 'N', sze4, N_st_diag, shift2, 1.d0 &
                 , U, size(U, 1), y, size(y, 1)           & 
                 , 0.d0, U(1,shift2+1), size(U, 1) )
 
@@ -436,7 +441,7 @@ subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N
       ! W(:,k) = H x Bk 
       ! W(:,shift2+k) = H x Bk x rk
       !               = Wk
-      call dgemm( 'N', 'N', sze, N_st_diag, shift2, 1.d0 &
+      call dgemm( 'N', 'N', sze4, N_st_diag, shift2, 1.d0 &
                 , W, size(W, 1), y, size(y, 1)           &
                 , 0.d0, W(1,shift2+1), size(W, 1) )
 
@@ -498,7 +503,7 @@ subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N
     ! Re-contract U and update W
     ! --------------------------------
 
-    call dgemm( 'N', 'N', sze, N_st_diag, shift2, 1.d0  &
+    call dgemm( 'N', 'N', sze4, N_st_diag, shift2, 1.d0  &
               , W, size(W, 1), y, size(y, 1)            &
               , 0.d0, u_in, size(u_in, 1) )
     do k = 1, N_st_diag
@@ -507,7 +512,7 @@ subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N
       enddo
     enddo
 
-    call dgemm( 'N', 'N', sze, N_st_diag, shift2, 1.d0 &
+    call dgemm( 'N', 'N', sze4, N_st_diag, shift2, 1.d0 &
               , U, size(U, 1), y, size(y, 1)           &
               , 0.d0, u_in, size(u_in, 1) )
     do k = 1, N_st_diag
@@ -516,8 +521,8 @@ subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N
       enddo
     enddo
 
-    call ortho_qr(U, size(U, 1), sze, N_st_diag)
-    call ortho_qr(U, size(U, 1), sze, N_st_diag)
+    call ortho_qr(U, sze, sze, int(N_st_diag, size_t))
+    call ortho_qr(U, sze, sze, int(N_st_diag, size_t))
     do j = 1, N_st_diag
       k = 1
       do while( (k < sze) .and. (U(k,j) == 0.d0) )

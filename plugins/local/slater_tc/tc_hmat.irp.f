@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -12,7 +13,7 @@ BEGIN_PROVIDER [double precision, htilde_matrix_elmt_bi_ortho, (N_det,N_det)]
   END_DOC
  
   implicit none
-  integer          :: i, j
+  integer(size_t)  :: i, j
   double precision :: t1, t2
   double precision :: htot
  
@@ -64,7 +65,7 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, htilde_matrix_elmt_bi_ortho_tranp, (N_det,N_det)]
 
   implicit none
-  integer ::i,j
+  integer(size_t) ::i,j
 
   do i = 1, N_det
     do j = 1, N_det

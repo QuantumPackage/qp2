@@ -1,3 +1,4 @@
+use sizet
   use bitmasks ! you need to include the bitmasks_module.f90 features
  BEGIN_PROVIDER [ double precision, e_tilde_00]
  implicit none
@@ -10,7 +11,8 @@
 &BEGIN_PROVIDER [ double precision, e_pt2_tc_bi_orth_single]
 &BEGIN_PROVIDER [ double precision, e_pt2_tc_bi_orth_double]
  implicit none 
- integer :: i,degree
+ integer(size_t) :: i
+ integer :: degree
  double precision :: hmono,htwoe,hthree,htilde_ij,coef_pt1,e_i0,delta_e
  e_pt2_tc_bi_orth = 0.d0
  e_pt2_tc_bi_orth_single = 0.d0
@@ -48,7 +50,8 @@
 &BEGIN_PROVIDER [ double precision, e_corr_single_bi_orth_abs ]
 &BEGIN_PROVIDER [ double precision, e_corr_double_bi_orth_abs ]
  implicit none 
- integer :: i,degree
+ integer(size_t) :: i
+ integer :: degree
  double precision :: hmono,htwoe,hthree,htilde_ij
  
  e_corr_bi_orth = 0.d0
@@ -72,7 +75,7 @@
 
  BEGIN_PROVIDER [ double precision, e_tc_left_right ]
  implicit none
- integer :: i,j
+ integer(size_t) :: i,j
  double precision :: hmono,htwoe,hthree,htilde_ij,accu
  e_tc_left_right = 0.d0
  accu = 0.d0
@@ -91,7 +94,8 @@
 
 BEGIN_PROVIDER [ double precision, coef_pt1_bi_ortho, (N_det)]
  implicit none
- integer :: i,degree
+ integer(size_t) :: i
+ integer :: degree
  double precision :: hmono,htwoe,hthree,htilde_ij,coef_pt1,e_i0,delta_e
  do i = 1, N_det
   call get_excitation_degree(HF_bitmask,psi_det(1,1,i),degree,N_int)

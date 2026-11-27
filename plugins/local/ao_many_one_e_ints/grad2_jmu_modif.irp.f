@@ -1,5 +1,7 @@
 
 
+use sizet
+
 ! ---
 
 BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2, (ao_num, ao_num, n_points_final_grid)]
@@ -11,7 +13,8 @@ BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2, (ao_num, ao_num, n_poin
   END_DOC
 
   implicit none
-  integer                       :: i, j, ipoint, i_fit
+  integer(size_t)                :: i, j, ipoint
+  integer                      :: i_fit
   double precision              :: r(3), expo_fit, coef_fit
   double precision              :: tmp
   double precision              :: wall0, wall1
@@ -79,7 +82,8 @@ BEGIN_PROVIDER [double precision, int2_grad1u2_grad2u2_env2, (ao_num, ao_num, n_
   END_DOC
 
   implicit none
-  integer                       :: i, j, ipoint, i_1s, i_fit
+  integer(size_t)                :: i, j, ipoint, i_1s
+  integer                      :: i_fit
   double precision              :: r(3), int_fit, expo_fit, coef_fit
   double precision              :: coef, beta, B_center(3)
   double precision              :: tmp
@@ -176,7 +180,8 @@ BEGIN_PROVIDER [double precision, int2_u2_env2, (ao_num, ao_num, n_points_final_
   END_DOC
 
   implicit none
-  integer                       :: i, j, ipoint, i_1s, i_fit
+  integer(size_t)                :: i, j, ipoint, i_1s
+  integer                      :: i_fit
   double precision              :: r(3), int_fit, expo_fit, coef_fit
   double precision              :: coef, beta, B_center(3), tmp
   double precision              :: wall0, wall1
@@ -272,7 +277,8 @@ BEGIN_PROVIDER [double precision, int2_u_grad1u_x_env2, (ao_num, ao_num, n_point
   END_DOC
 
   implicit none
-  integer          :: i, j, ipoint, i_1s, i_fit
+  integer(size_t)  :: i, j, ipoint, i_1s
+  integer          :: i_fit
   double precision :: r(3), int_fit(3), expo_fit, coef_fit
   double precision :: coef, beta, B_center(3), dist
   double precision :: alpha_1s, alpha_1s_inv, centr_1s(3), expo_coef_1s, coef_tmp
@@ -394,7 +400,8 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_env2, (ao_num, ao_num, n_points
   END_DOC
 
   implicit none
-  integer                       :: i, j, ipoint, i_1s, i_fit
+  integer(size_t)                :: i, j, ipoint, i_1s
+  integer                      :: i_fit
   double precision              :: r(3), int_fit, expo_fit, coef_fit, coef_tmp
   double precision              :: coef, beta, B_center(3), dist
   double precision              :: alpha_1s, alpha_1s_inv, centr_1s(3), expo_coef_1s, tmp

@@ -1,12 +1,13 @@
+use sizet
 
 ! ---
 
- BEGIN_PROVIDER [integer, List_comb_thr_b2_size, (ao_num, ao_num)]
-&BEGIN_PROVIDER [integer, max_List_comb_thr_b2_size]
+ BEGIN_PROVIDER [integer(size_t), List_comb_thr_b2_size, (ao_num, ao_num)]
+&BEGIN_PROVIDER [integer(size_t), max_List_comb_thr_b2_size]
 
   implicit none
-  integer          :: i_1s, i, j, ipoint
-  integer          :: list(ao_num)
+  integer(size_t)  :: i_1s, i, j, ipoint
+  integer(size_t)  :: list(ao_num)
   double precision :: coef,beta,center(3),int_env
   double precision :: r(3),weight,dist
 
@@ -59,7 +60,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [ double precision, ao_abs_comb_b2_env   , (  max_List_comb_thr_b2_size,ao_num,ao_num)]
 
   implicit none
-  integer :: i_1s,i,j,ipoint,icount
+  integer(size_t) :: i_1s,i,j,ipoint,icount
   double precision :: coef,beta,center(3),int_env
   double precision :: r(3),weight,dist
 
@@ -106,12 +107,12 @@ END_PROVIDER
 
 ! ---
 
- BEGIN_PROVIDER [integer, List_comb_thr_b3_size, (ao_num,ao_num)]
-&BEGIN_PROVIDER [integer, max_List_comb_thr_b3_size]
+ BEGIN_PROVIDER [integer(size_t), List_comb_thr_b3_size, (ao_num,ao_num)]
+&BEGIN_PROVIDER [integer(size_t), max_List_comb_thr_b3_size]
 
   implicit none
-  integer :: i_1s,i,j,ipoint
- integer :: list(ao_num)
+  integer(size_t) :: i_1s,i,j,ipoint
+ integer(size_t) :: list(ao_num)
   double precision :: coef,beta,center(3),int_env
   double precision :: r(3),weight,dist
 
@@ -157,7 +158,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [double precision, ao_abs_comb_b3_env   , (   max_List_comb_thr_b3_size,ao_num,ao_num)]
 
   implicit none
-  integer :: i_1s,i,j,ipoint,icount
+  integer(size_t) :: i_1s,i,j,ipoint,icount
   double precision :: coef,beta,center(3),int_env
   double precision :: r(3),weight,dist
 
