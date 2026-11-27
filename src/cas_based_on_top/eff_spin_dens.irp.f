@@ -1,3 +1,5 @@
+use sizet
+
  BEGIN_PROVIDER [double precision, effective_spin_dm, (n_points_final_grid,N_states) ]
 &BEGIN_PROVIDER [double precision, grad_effective_spin_dm, (3,n_points_final_grid,N_states) ]
  implicit none
@@ -7,7 +9,8 @@
 ! see equation (6) of Phys. Chem. Chem. Phys., 2015, 17, 22412--22422 | 22413
  END_DOC
  provide total_cas_on_top_density 
- integer :: i_point,i_state,i
+ integer(size_t) :: i_point
+ integer         :: i_state,i
  double precision :: n2,m2,thr
  thr = 1.d-14
  effective_spin_dm = 0.d0
@@ -48,7 +51,8 @@ END_PROVIDER
 ! effective_beta_dm(r_i) = 1/2 * (-effective_spin_dm(r_i) + n(r_i))
  END_DOC
  provide total_cas_on_top_density 
- integer :: i_point,i_state,i
+ integer(size_t) :: i_point
+ integer         :: i_state,i
  double precision :: n,grad_n
  do i_state = 1, N_states
   do i_point = 1, n_points_final_grid

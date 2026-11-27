@@ -1,3 +1,4 @@
+use sizet
  BEGIN_PROVIDER [real*8, SXmatrix, (nMonoEx+1,nMonoEx+1)]
 &BEGIN_PROVIDER [integer, n_guess_sx_mat ]
   implicit none
@@ -73,7 +74,8 @@ END_PROVIDER
    if(bavard)then
     print*,'Diagonalize the SXmatrix with Lapack'
    endif
-   call lapack_diag(SXeigenval,SXeigenvec,SXmatrix,nMonoEx+1,nMonoEx+1)
+            call lapack_diag(SXeigenval, SXeigenvec, SXmatrix, &
+                       int(nMonoEx+1,size_t), int(nMonoEx+1,size_t))
   endif
   if (bavard) then
     write(6,*) ' SXdiag : lowest eigenvalues '
@@ -381,7 +383,7 @@ BEGIN_PROVIDER [real*8, Umat, (mo_num,mo_num) ]
   end do
 
   ! Form the exponential
-  call exp_matrix_taylor(Tmat,mo_num,Umat,converged)
+  call exp_matrix_taylor(Tmat,int(mo_num,size_t),Umat,converged)
   if (bavard) then
     print *, 'maxval(Tmat), minval(Tmat)', maxval(Tmat), minval(Tmat)
     print *, 'maxval(Umat), minval(Umat)', maxval(Umat), minval(Umat)

@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [real*8, bielec_PQxx_array, (mo_num, mo_num,n_core_inact_act_orb,n_core_inact_act_orb)]
   BEGIN_DOC
   ! WARNING !!! Old version !!! NOT USED ANYMORE IN THE PROGRAM !!! TOO BIG TO BE STORED ON LARGE SYSTEMS !!!
@@ -27,13 +29,15 @@ BEGIN_PROVIDER [real*8, bielec_PQxx_array, (mo_num, mo_num,n_core_inact_act_orb,
     ii=list_core_inact(i)
     do j=i,n_core_inact_orb
       jj=list_core_inact(j)
-      call get_mo_two_e_integrals_i1j1(ii,jj,mo_num,bielec_PQxx_array(1,1,i,j),mo_integrals_map)
+      call get_mo_two_e_integrals_i1j1(int(ii,size_t),int(jj,size_t), &
+           int(mo_num,size_t),bielec_PQxx_array(1,1,i,j),mo_integrals_map)
       bielec_PQxx_array(:,:,j,i)=bielec_PQxx_array(:,:,i,j)
     end do
     do j=1,n_act_orb
       jj=list_act(j)
       j3=j+n_core_inact_orb
-      call get_mo_two_e_integrals_i1j1(ii,jj,mo_num,bielec_PQxx_array(1,1,i,j3),mo_integrals_map)
+      call get_mo_two_e_integrals_i1j1(int(ii,size_t),int(jj,size_t), &
+           int(mo_num,size_t),bielec_PQxx_array(1,1,i,j3),mo_integrals_map)
       bielec_PQxx_array(:,:,j3,i)=bielec_PQxx_array(:,:,i,j3)
     end do
   end do
@@ -47,7 +51,8 @@ BEGIN_PROVIDER [real*8, bielec_PQxx_array, (mo_num, mo_num,n_core_inact_act_orb,
     do j=i,n_act_orb
       jj=list_act(j)
       j3=j+n_core_inact_orb
-      call get_mo_two_e_integrals_i1j1(ii,jj,mo_num,bielec_PQxx_array(1,1,i3,j3),mo_integrals_map)
+      call get_mo_two_e_integrals_i1j1(int(ii,size_t),int(jj,size_t), &
+           int(mo_num,size_t),bielec_PQxx_array(1,1,i3,j3),mo_integrals_map)
       bielec_PQxx_array(:,:,j3,i3)=bielec_PQxx_array(:,:,i3,j3)
     end do
   end do
@@ -69,7 +74,8 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ_array, (mo_num,n_core_inact_act_orb,n_core_i
   ! indices are unshifted orbital numbers
   END_DOC
   implicit none
-  integer                        :: i,j,ii,jj,p,q,i3,j3,t3,v3
+  integer                        :: i,j,ii,jj,i3,j3,t3,v3
+  integer(size_t)                :: p,q
   double precision, allocatable  :: integrals_array(:,:)
   real*8                         :: mo_two_e_integral
 
@@ -91,7 +97,9 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ_array, (mo_num,n_core_inact_act_orb,n_core_i
     ii=list_core_inact(i)
     do j=i,n_core_inact_orb
       jj=list_core_inact(j)
-      call get_mo_two_e_integrals_ij(ii,jj,mo_num,integrals_array,mo_integrals_map)
+            call get_mo_two_e_integrals_ij(int(ii,size_t), int(jj,size_t), &
+                                     int(mo_num,size_t), integrals_array, &
+                                     mo_integrals_map)
       do q=1,mo_num
         do p=1,mo_num
           bielec_PxxQ_array(p,i,j,q)=integrals_array(p,q)
@@ -102,7 +110,9 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ_array, (mo_num,n_core_inact_act_orb,n_core_i
     do j=1,n_act_orb
       jj=list_act(j)
       j3=j+n_core_inact_orb
-      call get_mo_two_e_integrals_ij(ii,jj,mo_num,integrals_array,mo_integrals_map)
+            call get_mo_two_e_integrals_ij(int(ii,size_t), int(jj,size_t), &
+                                     int(mo_num,size_t), integrals_array, &
+                                     mo_integrals_map)
       do q=1,mo_num
         do p=1,mo_num
           bielec_PxxQ_array(p,i,j3,q)=integrals_array(p,q)
@@ -122,7 +132,9 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ_array, (mo_num,n_core_inact_act_orb,n_core_i
     do j=i,n_act_orb
       jj=list_act(j)
       j3=j+n_core_inact_orb
-      call get_mo_two_e_integrals_ij(ii,jj,mo_num,integrals_array,mo_integrals_map)
+            call get_mo_two_e_integrals_ij(int(ii,size_t), int(jj,size_t), &
+                                     int(mo_num,size_t), integrals_array, &
+                                     mo_integrals_map)
       do q=1,mo_num
         do p=1,mo_num
           bielec_PxxQ_array(p,i3,j3,q)=integrals_array(p,q)
@@ -147,7 +159,8 @@ BEGIN_PROVIDER [real*8, bielecCI, (n_act_orb,n_act_orb,n_act_orb, mo_num)]
   ! This array can be stored anyway. Ex: 50 active orbitals, 1500 MOs ==> 8x50^3x1500 = 1.5 Gb
   END_DOC
   implicit none
-  integer                        :: i,j,k,p,t,u,v
+  integer                        :: i,j,k
+  integer(size_t)                :: t,u,v,p
   double precision, external     :: mo_two_e_integral
   double precision :: wall0, wall1
   call wall_time(wall0)

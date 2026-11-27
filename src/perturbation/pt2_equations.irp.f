@@ -2,6 +2,7 @@ BEGIN_TEMPLATE
 
 subroutine pt2_epstein_nesbet ($arguments)
   use bitmasks
+  use sizet
   implicit none
   $declarations
 
@@ -23,7 +24,10 @@ subroutine pt2_epstein_nesbet ($arguments)
   ASSERT (Nint == N_int)
   ASSERT (Nint > 0)
   !call i_H_psi(det_pert,psi_selectors,psi_selectors_coef,Nint,N_det_selectors,psi_selectors_size,N_st,i_H_psi_array)
-  call i_H_psi_minilist(det_pert,minilist,idx_minilist,N_minilist,psi_selectors_coef,Nint,N_minilist,psi_selectors_size,N_st,i_H_psi_array)
+    call i_H_psi_minilist(det_pert, minilist, idx_minilist, &
+                        int(N_minilist,size_t), psi_selectors_coef, &
+                        int(Nint,size_t), int(N_minilist,size_t), &
+                        int(psi_selectors_size,size_t), N_st, i_H_psi_array)
 
 
   h = diag_H_mat_elem_fock(det_ref,det_pert,fock_diag_tmp,Nint)
@@ -46,6 +50,7 @@ end
 
 subroutine pt2_qdpt ($arguments)
   use bitmasks
+  use sizet
   implicit none
   $declarations
 
@@ -67,13 +72,17 @@ subroutine pt2_qdpt ($arguments)
   ASSERT (Nint == N_int)
   ASSERT (Nint > 0)
   !call i_H_psi(det_pert,psi_selectors,psi_selectors_coef,Nint,N_det_selectors,psi_selectors_size,N_st,i_H_psi_array)
-  call i_H_psi_minilist(det_pert,minilist,idx_minilist,N_minilist,psi_selectors_coef,Nint,N_minilist,psi_selectors_size,N_st,i_H_psi_array)
+    call i_H_psi_minilist(det_pert, minilist, idx_minilist, &
+                        int(N_minilist,size_t), psi_selectors_coef, &
+                        int(Nint,size_t), int(N_minilist,size_t), &
+                        int(psi_selectors_size,size_t), N_st, i_H_psi_array)
 
 
   h = diag_H_mat_elem_fock(det_ref,det_pert,fock_diag_tmp,Nint)
   c_pert = 0.d0
   do j=1,N_det_selectors
-    call get_excitation_degree(det_ref, psi_selectors(1,1,j), degree, Nint)
+        call get_excitation_degree(det_ref, psi_selectors(1,1,j), degree, &
+                               int(Nint,size_t))
     if (degree > 2) then
       E = diag_H_mat_elem(psi_selectors(1,1,j),Nint)
     else
@@ -81,7 +90,7 @@ subroutine pt2_qdpt ($arguments)
     endif
     delta_E = E-h
 !    delta_E = electronic_energy(1) - h
-    call i_H_j(psi_selectors(1,1,j),det_pert,Nint,hij)
+    call i_H_j(psi_selectors(1,1,j),det_pert,int(Nint,size_t),hij)
     if (dabs(delta_e) > 1.d-3) then
         do i =1,N_st
           c_pert(i) += psi_selectors_coef(j,i) * hij / delta_e
@@ -98,6 +107,7 @@ end
 
 subroutine pt2_epstein_nesbet_2x2 ($arguments)
   use bitmasks
+  use sizet
   implicit none
   $declarations
 
@@ -117,7 +127,9 @@ subroutine pt2_epstein_nesbet_2x2 ($arguments)
   ASSERT (Nint == N_int)
   ASSERT (Nint > 0)
 
-   call i_H_psi(det_pert,psi_selectors,psi_selectors_coef,Nint,N_det_selectors,psi_selectors_size,N_st,i_H_psi_array)
+            call i_H_psi(det_pert, psi_selectors, psi_selectors_coef, &
+                   int(Nint,size_t), int(N_det_selectors,size_t), &
+                   int(psi_selectors_size,size_t), N_st, i_H_psi_array)
   !call i_H_psi_minilist(det_pert,minilist,idx_minilist,N_minilist,psi_selectors_coef,Nint,N_minilist,psi_selectors_size,N_st,i_H_psi_array)
 
   h = diag_H_mat_elem_fock(det_ref,det_pert,fock_diag_tmp,Nint)
@@ -148,6 +160,7 @@ end
 
 subroutine pt2_epstein_nesbet_2x2_no_ci_diag($arguments)
   use bitmasks
+  use sizet
   implicit none
   $declarations
 
@@ -169,7 +182,9 @@ subroutine pt2_epstein_nesbet_2x2_no_ci_diag($arguments)
   ASSERT (Nint > 0)
   PROVIDE psi_energy
 
-   call i_H_psi(det_pert,psi_selectors,psi_selectors_coef,Nint,N_det_selectors,psi_selectors_size,N_st,i_H_psi_array)
+            call i_H_psi(det_pert, psi_selectors, psi_selectors_coef, &
+                   int(Nint,size_t), int(N_det_selectors,size_t), &
+                   int(psi_selectors_size,size_t), N_st, i_H_psi_array)
 
   h = diag_H_mat_elem_fock(det_ref,det_pert,fock_diag_tmp,Nint)
   do i =1,N_st
@@ -199,6 +214,7 @@ end
 
 subroutine pt2_moller_plesset ($arguments)
   use bitmasks
+  use sizet
   implicit none
   $declarations
 
@@ -214,20 +230,22 @@ subroutine pt2_moller_plesset ($arguments)
 
   integer                        :: i,j
   double precision               :: diag_H_mat_elem_fock
-  integer                        :: exc(0:2,2,2)
+  integer(size_t)                :: exc(0:2,2,2)
   integer                        :: degree
   double precision               :: phase,delta_e,h
   double precision               :: i_H_psi_array(N_st)
   integer                        :: h1,h2,p1,p2,s1,s2
   ASSERT (Nint == N_int)
   ASSERT (Nint > 0)
-  call get_excitation(ref_bitmask,det_pert,exc,degree,phase,Nint)
+  call get_excitation(ref_bitmask,det_pert,exc,degree,phase,int(Nint,size_t))
   if (degree == 2) then
-    call decode_exc(exc,degree,h1,p1,h2,p2,s1,s2)
+        call decode_exc(exc, degree, int(h1,size_t), int(p1,size_t), &
+                    int(h2,size_t), int(p2,size_t), s1, s2)
     delta_e = (Fock_matrix_diag_mo(h1) - Fock_matrix_diag_mo(p1)) + &
               (Fock_matrix_diag_mo(h2) - Fock_matrix_diag_mo(p2))
   else if (degree == 1) then
-    call decode_exc(exc,degree,h1,p1,h2,p2,s1,s2)
+        call decode_exc(exc, degree, int(h1,size_t), int(p1,size_t), &
+                    int(h2,size_t), int(p2,size_t), s1, s2)
     delta_e = Fock_matrix_diag_mo(h1) - Fock_matrix_diag_mo(p1)
   else
     delta_e = 0.d0
@@ -235,7 +253,10 @@ subroutine pt2_moller_plesset ($arguments)
 
   if (dabs(delta_e) > 1.d-10) then
         delta_e = 1.d0/delta_e
-    call i_H_psi_minilist(det_pert,minilist,idx_minilist,N_minilist,psi_selectors_coef,Nint,N_minilist,psi_selectors_size,N_st,i_H_psi_array)
+        call i_H_psi_minilist(det_pert, minilist, idx_minilist, &
+                          int(N_minilist,size_t), psi_selectors_coef, &
+                          int(Nint,size_t), int(N_minilist,size_t), &
+                          int(psi_selectors_size,size_t), N_st, i_H_psi_array)
     h = diag_H_mat_elem_fock(det_ref,det_pert,fock_diag_tmp,Nint)
   else
     i_H_psi_array(:) = 0.d0
@@ -251,6 +272,7 @@ end
 
 subroutine pt2_dummy ($arguments)
   use bitmasks
+  use sizet
   implicit none
   $declarations
 
@@ -263,7 +285,10 @@ subroutine pt2_dummy ($arguments)
   double precision               :: i_H_psi_array(N_st)
   PROVIDE  selection_criterion
 
-  call i_H_psi_minilist(det_pert,minilist,idx_minilist,N_minilist,psi_selectors_coef,Nint,N_minilist,psi_selectors_size,N_st,i_H_psi_array)
+    call i_H_psi_minilist(det_pert, minilist, idx_minilist, &
+                        int(N_minilist,size_t), psi_selectors_coef, &
+                        int(Nint,size_t), int(N_minilist,size_t), &
+                        int(psi_selectors_size,size_t), N_st, i_H_psi_array)
 
   h = diag_H_mat_elem_fock(det_ref,det_pert,fock_diag_tmp,Nint)
   do i =1,N_st
@@ -297,7 +322,7 @@ electronic_energy,det_ref,det_pert,fock_diag_tmp,c_pert,e_2_pert,H_pert_diag,Nin
     double precision , intent(out)  :: c_pert(N_st)
     double precision , intent(out)  :: e_2_pert(N_st)
     double precision, intent(out)   :: H_pert_diag(N_st)
-    integer, intent(in)             :: idx_minilist(0:N_det_selectors)
+    integer(size_t), intent(in)      :: idx_minilist(0:N_det_selectors)
     integer(bit_kind), intent(in)   :: minilist(Nint,2,N_det_selectors)
 ;;
 

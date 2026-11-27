@@ -1,3 +1,4 @@
+use sizet
 use bitmasks
 
 BEGIN_PROVIDER [real*8, D0tu, (n_act_orb,n_act_orb) ]
@@ -48,8 +49,10 @@ END_PROVIDER
    enddo
  enddo
 
- call mo_to_ao_no_overlap(D0_tmp_alpha,mo_num,D0tu_alpha_ao,ao_num)
- call mo_to_ao_no_overlap(D0_tmp_beta,mo_num,D0tu_beta_ao,ao_num)
+  call mo_to_ao_no_overlap(D0_tmp_alpha, int(mo_num,size_t), D0tu_alpha_ao, &
+                          int(ao_num,size_t))
+  call mo_to_ao_no_overlap(D0_tmp_beta, int(mo_num,size_t), D0tu_beta_ao, &
+                          int(ao_num,size_t))
 
 END_PROVIDER 
 

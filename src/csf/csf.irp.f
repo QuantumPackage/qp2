@@ -1,4 +1,6 @@
-BEGIN_PROVIDER [ integer, csf_unique_vector_value_size ]
+use sizet
+
+BEGIN_PROVIDER [ integer(size_t), csf_unique_vector_value_size ]
  implicit none
  BEGIN_DOC
  ! Is reset in the provider of csf_unique_vector_value
@@ -7,10 +9,10 @@ BEGIN_PROVIDER [ integer, csf_unique_vector_value_size ]
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ integer, N_csf ]
-&BEGIN_PROVIDER [ integer, psi_configuration_to_psi_csf, (2,N_configuration) ]
+ BEGIN_PROVIDER [ integer(size_t), N_csf ]
+&BEGIN_PROVIDER [ integer(size_t), psi_configuration_to_psi_csf, (2,N_configuration) ]
 &BEGIN_PROVIDER [ integer, psi_configuration_n_csf, (N_configuration) ]
-&BEGIN_PROVIDER [ integer, csf_unique_vector_index, (N_det) ]
+&BEGIN_PROVIDER [ integer(size_t), csf_unique_vector_index, (N_det) ]
 &BEGIN_PROVIDER [ double precision, csf_unique_vector_value, (csf_unique_vector_value_size) ]
  implicit none
  BEGIN_DOC
@@ -18,20 +20,21 @@ END_PROVIDER
  END_DOC
 
  integer :: i_det, j_det
- integer :: i_cfg, i_csf, i, j, k, lwork
+ integer(size_t) :: i_cfg, i_csf
+ integer         :: i, j, k, lwork
  integer :: sze, istart, iend
  double precision, allocatable :: s2mat(:,:)
  double precision :: sij
 
  double precision, allocatable :: eigenvalues(:), work(:)
  integer :: info
- integer :: index, index_max, n_unique
+ integer(size_t) :: index, index_max, n_unique
  integer*2 :: compressed
  double precision, parameter :: undefined = 2.d0
 
  double precision, allocatable :: resize_array(:)
  logical :: found
- integer, allocatable :: unique_index(:)
+ integer(size_t), allocatable :: unique_index(:)
 
  PROVIDE expected_s2 N_int psi_det 
  lwork = n_det_per_config_max**3
@@ -113,7 +116,7 @@ END_PROVIDER
 
            ! Reallocate csf_unique_vector_value 2x larger if needed
            if (index_max+sze >= csf_unique_vector_value_size) then
-             integer :: csf_unique_vector_value_size_new
+             integer(size_t) :: csf_unique_vector_value_size_new
              csf_unique_vector_value_size_new = &
                max(2*csf_unique_vector_value_size, index_max+sze)
              allocate(resize_array(csf_unique_vector_value_size))
@@ -152,6 +155,7 @@ END_PROVIDER
 
 
 subroutine get_det_csf_transformation(matrix, sze, i_cfg)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Fills matrix with the det-csf transformation matrix of
@@ -161,7 +165,8 @@ subroutine get_det_csf_transformation(matrix, sze, i_cfg)
   ! psi_configuration_to_psi_det_data. For a single-determinant
   ! configuration, matrix(1,1) = 1. sze must be >= ndet and >= ncsf.
   END_DOC
-  integer, intent(in) :: sze, i_cfg
+  integer(size_t), intent(in) :: i_cfg
+  integer, intent(in)         :: sze
   double precision, intent(out) :: matrix(sze,sze)
 
   integer :: ncsf, ndet
@@ -177,8 +182,9 @@ subroutine get_det_csf_transformation(matrix, sze, i_cfg)
   if (sze< ndet) call qp_bug(irp_here, 1, 'dimensions too small')
   if (sze< ncsf) call qp_bug(irp_here, 2, 'dimensions too small')
 
-  integer :: i, j, i_csf
-  integer :: index
+  integer         :: i, j
+  integer(size_t) :: i_csf
+  integer(size_t) :: index
   i_csf = psi_configuration_to_psi_csf(1,i_cfg)
   do j=1,ncsf
     i = csf_unique_vector_index(i_csf+j-1)
@@ -191,6 +197,7 @@ end
 
 
 subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_csf_out)
+ use sizet
  implicit none
  BEGIN_DOC
  ! Converts a wave functions from determinant space to CSF space
@@ -199,7 +206,8 @@ subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_csf_out)
  double precision, intent(in)   :: psi_coef_det_in(N_det,N_st)
  double precision, intent(out)  :: psi_coef_csf_out(N_csf,N_st)
 
- integer :: i_state, i, i_csf, i_cfg, j
+ integer         :: i_state, i, i_csf, j
+ integer(size_t) :: i_cfg
  integer :: startdet, enddet, i_det, j_det
 
  double precision, allocatable :: coef(:,:), matrix(:,:)
@@ -249,6 +257,7 @@ end
 
 
 subroutine convertWFfromCSFtoDET(N_st,psi_coef_csf_in, psi_coef_det_out)
+ use sizet
  implicit none
  BEGIN_DOC
  ! Converts a wave functions from determinant space to CSF space
@@ -257,7 +266,8 @@ subroutine convertWFfromCSFtoDET(N_st,psi_coef_csf_in, psi_coef_det_out)
  double precision, intent(in)   :: psi_coef_csf_in(N_csf,N_st)
  double precision, intent(out)  :: psi_coef_det_out(N_det,N_st)
 
- integer :: i_state, i, i_csf, i_cfg, j
+ integer         :: i_state, i, i_csf, j
+ integer(size_t) :: i_cfg
  integer :: startdet, enddet, i_det, j_det
 
  double precision, allocatable :: coef(:,:), matrix(:,:)

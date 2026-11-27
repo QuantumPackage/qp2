@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [ logical, initialize_pt2_E0_denominator ]
  implicit none
  BEGIN_DOC
@@ -11,7 +13,8 @@ BEGIN_PROVIDER [ double precision, pt2_E0_denominator, (N_states) ]
  BEGIN_DOC
  ! E0 in the denominator of the PT2
  END_DOC
- integer :: i,j
+ integer :: i
+ integer(size_t) :: j
  if (initialize_pt2_E0_denominator) then
    if (h0_type == "EN") then
      pt2_E0_denominator(1:N_states) = psi_energy(1:N_states)

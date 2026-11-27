@@ -1,3 +1,4 @@
+use sizet
  BEGIN_PROVIDER [double precision, SXvector_lowest, (nMonoEx)]
  implicit none
  BEGIN_DOC
@@ -109,12 +110,12 @@
  do i = 1, n_orb_swap
   if(.not.good_orb_rot(i))cycle
   det_i = 0_bit_kind 
-  call set_bit_to_integer(orb_swap(1,i),det_i,N_int)
-  call set_bit_to_integer(orb_swap(2,i),det_i,N_int)
+  call set_bit_to_integer(int(orb_swap(1,i),size_t),det_i,N_int)
+  call set_bit_to_integer(int(orb_swap(2,i),size_t),det_i,N_int)
   do j = i+1, n_orb_swap
    det_j = 0_bit_kind 
-   call set_bit_to_integer(orb_swap(1,j),det_j,N_int)
-   call set_bit_to_integer(orb_swap(2,j),det_j,N_int)
+   call set_bit_to_integer(int(orb_swap(1,j),size_t),det_j,N_int)
+   call set_bit_to_integer(int(orb_swap(2,j),size_t),det_j,N_int)
    icount = 0
    do k = 1, N_int
     icount += popcnt(ior(det_i(k),det_j(k)))

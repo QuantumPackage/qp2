@@ -1,3 +1,4 @@
+
 program casscf
   implicit none
   BEGIN_DOC
@@ -19,6 +20,7 @@ program casscf
 end
 
 subroutine run
+ use sizet
   BEGIN_DOC
   ! CASSCF iterations. Each iteration calls run_stochastic_cipsi and
   ! then replaces the orbitals by NewOrbs (mo_label "MCSCF"). The
@@ -178,7 +180,7 @@ subroutine run
   enddo
   call save_energy(Ev,PT2)
   if(.True.)then
-     integer :: i
+     integer(size_t) :: i
     print*,'Converged CASSCF '
     print*,'--------------------------'
     write(6,*) ' Occupation numbers of orbitals     Fock matrix diagonal'

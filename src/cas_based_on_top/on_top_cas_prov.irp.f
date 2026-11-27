@@ -1,12 +1,15 @@
+use sizet
 
 subroutine act_on_top_on_grid_pt(ipoint,istate,pure_act_on_top_of_r)
+ use sizet
  implicit none
  BEGIN_DOC
  ! act_on_top_on_grid_pt returns the purely ACTIVE part of the on top pair density
  !
  ! at the grid point ipoint, for the state istate
  END_DOC
- integer, intent(in) :: ipoint,istate
+ integer(size_t), intent(in) :: ipoint
+ integer, intent(in)         :: istate
  double precision, intent(out) :: pure_act_on_top_of_r
  double precision :: phi_i,phi_j,phi_k,phi_l
  integer :: i,j,k,l
@@ -78,7 +81,8 @@ end
  !
  ! !!!!! WARNING !!!!! If no_core_density then you REMOVE ALL CONTRIBUTIONS COMING FROM THE CORE ORBITALS
  END_DOC
- integer :: i_point,istate
+ integer(size_t) :: i_point
+ integer         :: istate
  double precision :: wall_0,wall_1,core_inact_dm,pure_act_on_top_of_r
  logical :: no_core
  print*,'providing the total_cas_on_top_density'
@@ -122,7 +126,8 @@ end
  ! over the Becke grid, with weights final_weight_at_r_vector.
  ! Printed as "Average on top pair density".
  END_DOC
- integer :: i_point,istate
+ integer(size_t) :: i_point
+ integer         :: istate
  double precision :: wall_0,wall_1,core_inact_dm,pure_act_on_top_of_r,weight
  average_on_top = 0.d0
  do istate = 1, N_states

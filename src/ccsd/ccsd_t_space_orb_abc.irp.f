@@ -1,6 +1,9 @@
+use sizet
+
 ! Main
 
 subroutine ccsd_par_t_space_v3(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
+ use sizet
 
   implicit none
 
@@ -21,7 +24,7 @@ subroutine ccsd_par_t_space_v3(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
 
   double precision, allocatable :: X_vovv(:,:,:,:), X_ooov(:,:,:,:), X_oovv(:,:,:,:)
   double precision, allocatable :: T_voov(:,:,:,:), T_oovv(:,:,:,:)
-  integer                       :: i,j,k,l,a,b,c,d
+  integer(size_t)               :: i,j,k,l,a,b,c,d
   double precision              :: e,ta,tb
 
 
@@ -141,15 +144,17 @@ end
 
 double precision function ccsd_t_task_abc(a,b,c,nO,nV,t1,T_oovv,T_voov,&
       X_ooov,X_oovv,X_vovv,f_o,f_v) result(e)
+ use sizet
   implicit none
-  integer, intent(in)              :: nO,nV,a,b,c
+  integer, intent(in)              :: nO, nV
+  integer(size_t), intent(in)      :: a, b, c
   double precision, intent(in)     :: t1(nO,nV), f_o(nO), f_v(nV)
   double precision, intent(in)     :: X_oovv(nO,nO,nV,nV)
   double precision, intent(in)     :: T_voov(nV,nO,nO,nV), T_oovv(nO,nO,nV,nV)
   double precision, intent(in)     :: X_vovv(nV,nO,nV,nV), X_ooov(nO,nO,nO,nV)
 
   double precision :: delta, delta_abc
-  integer  :: i,j,k
+  integer(size_t) :: i,j,k
 
   double precision, allocatable :: W_abc(:,:,:), W_cab(:,:,:), W_bca(:,:,:)
   double precision, allocatable :: W_bac(:,:,:), W_cba(:,:,:), W_acb(:,:,:)
@@ -193,15 +198,17 @@ end
 
 double precision function ccsd_t_task_aba(a,b,nO,nV,t1,T_oovv,T_voov,&
       X_ooov,X_oovv,X_vovv,f_o,f_v) result(e)
+ use sizet
   implicit none
-  integer, intent(in)              :: nO,nV,a,b
+  integer, intent(in)              :: nO, nV
+  integer(size_t), intent(in)      :: a, b
   double precision, intent(in)     :: t1(nO,nV), f_o(nO), f_v(nV)
   double precision, intent(in)     :: X_oovv(nO,nO,nV,nV)
   double precision, intent(in)     :: T_voov(nV,nO,nO,nV), T_oovv(nO,nO,nV,nV)
   double precision, intent(in)     :: X_vovv(nV,nO,nV,nV), X_ooov(nO,nO,nO,nV)
 
   double precision :: delta, delta_abc
-  integer  :: i,j,k
+  integer(size_t) :: i,j,k
 
   double precision, allocatable :: W_abc(:,:,:), W_cab(:,:,:), W_bca(:,:,:)
   double precision, allocatable :: W_bac(:,:,:), W_cba(:,:,:), W_acb(:,:,:)
@@ -239,6 +246,7 @@ double precision function ccsd_t_task_aba(a,b,nO,nV,t1,T_oovv,T_voov,&
 end
 
 subroutine form_w_abc(nO,nV,a,b,c,T_voov,T_oovv,X_vovv,X_ooov,W_abc,W_cba,W_bca,W_cab,W_bac,W_acb)
+ use sizet
 
   implicit none
 
@@ -250,7 +258,8 @@ subroutine form_w_abc(nO,nV,a,b,c,T_voov,T_oovv,X_vovv,X_ooov,W_abc,W_cba,W_bca,
   ! dgemm.
   END_DOC
 
-  integer, intent(in)           :: nO,nV,a,b,c
+  integer, intent(in)           :: nO, nV
+  integer(size_t), intent(in)   :: a, b, c
   double precision, intent(in)  :: T_voov(nV,nO,nO,nV), T_oovv(nO,nO,nV,nV)
   double precision, intent(in)  :: X_vovv(nV,nO,nV,nV), X_ooov(nO,nO,nO,nV)
   double precision, intent(out) :: W_abc(nO,nO,nO)
@@ -260,7 +269,7 @@ subroutine form_w_abc(nO,nV,a,b,c,T_voov,T_oovv,X_vovv,X_ooov,W_abc,W_cba,W_bca,
   double precision, intent(out) :: W_bac(nO,nO,nO)
   double precision, intent(out) :: W_acb(nO,nO,nO)
 
-  integer :: l,i,j,k,d
+  integer(size_t) :: l,i,j,k,d
   double precision, allocatable, dimension(:,:,:,:) :: W_ikj
   double precision, allocatable :: X(:,:,:,:)
 
@@ -279,57 +288,111 @@ subroutine form_w_abc(nO,nV,a,b,c,T_voov,T_oovv,X_vovv,X_ooov,W_abc,W_cba,W_bca,
 
 !   X_vovv(d,i,c,a) * T_voov(d,j,k,b) : i jk
 
-  call dgemm('T','N', nO, nO*nO, nV, 1.d0, X_vovv(1,1,c,a), nV, T_voov(1,1,1,b), nV, 0.d0, W_abc, nO)
-  call dgemm('T','N', nO, nO*nO, nV, 1.d0, X_vovv(1,1,c,b), nV, T_voov(1,1,1,a), nV, 0.d0, W_bac, nO)
-  call dgemm('T','N', nO, nO*nO, nV, 1.d0, X_vovv(1,1,a,c), nV, T_voov(1,1,1,b), nV, 0.d0, W_cba, nO)
-  call dgemm('T','N', nO, nO*nO, nV, 1.d0, X_vovv(1,1,a,b), nV, T_voov(1,1,1,c), nV, 0.d0, W_bca, nO)
-  call dgemm('T','N', nO, nO*nO, nV, 1.d0, X_vovv(1,1,b,c), nV, T_voov(1,1,1,a), nV, 0.d0, W_cab, nO)
-  call dgemm('T','N', nO, nO*nO, nV, 1.d0, X_vovv(1,1,b,a), nV, T_voov(1,1,1,c), nV, 0.d0, W_acb, nO)
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nV,4), 1.d0 &
+    , X_vovv(1,1,c,a), int(nV,4), T_voov(1,1,1,b), int(nV,4), 0.d0, W_abc &
+    , int(nO,4))
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nV,4), 1.d0 &
+    , X_vovv(1,1,c,b), int(nV,4), T_voov(1,1,1,a), int(nV,4), 0.d0, W_bac &
+    , int(nO,4))
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nV,4), 1.d0 &
+    , X_vovv(1,1,a,c), int(nV,4), T_voov(1,1,1,b), int(nV,4), 0.d0, W_cba &
+    , int(nO,4))
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nV,4), 1.d0 &
+    , X_vovv(1,1,a,b), int(nV,4), T_voov(1,1,1,c), int(nV,4), 0.d0, W_bca &
+    , int(nO,4))
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nV,4), 1.d0 &
+    , X_vovv(1,1,b,c), int(nV,4), T_voov(1,1,1,a), int(nV,4), 0.d0, W_cab &
+    , int(nO,4))
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nV,4), 1.d0 &
+    , X_vovv(1,1,b,a), int(nV,4), T_voov(1,1,1,c), int(nV,4), 0.d0, W_acb &
+    , int(nO,4))
 
 !   T_voov(d,i,j,a) * X_vovv(d,k,b,c) : ij k
 
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, T_voov(1,1,1,a), nV, X_vovv(1,1,b,c), nV, 1.d0, W_abc, nO*nO)
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, T_voov(1,1,1,b), nV, X_vovv(1,1,a,c), nV, 1.d0, W_bac, nO*nO)
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, T_voov(1,1,1,c), nV, X_vovv(1,1,b,a), nV, 1.d0, W_cba, nO*nO)
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, T_voov(1,1,1,b), nV, X_vovv(1,1,c,a), nV, 1.d0, W_bca, nO*nO)
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, T_voov(1,1,1,c), nV, X_vovv(1,1,a,b), nV, 1.d0, W_cab, nO*nO)
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, T_voov(1,1,1,a), nV, X_vovv(1,1,c,b), nV, 1.d0, W_acb, nO*nO)
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0 &
+    , T_voov(1,1,1,a), int(nV,4), X_vovv(1,1,b,c), int(nV,4), 1.d0, W_abc &
+    , int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0 &
+    , T_voov(1,1,1,b), int(nV,4), X_vovv(1,1,a,c), int(nV,4), 1.d0, W_bac &
+    , int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0 &
+    , T_voov(1,1,1,c), int(nV,4), X_vovv(1,1,b,a), int(nV,4), 1.d0, W_cba &
+    , int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0 &
+    , T_voov(1,1,1,b), int(nV,4), X_vovv(1,1,c,a), int(nV,4), 1.d0, W_bca &
+    , int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0 &
+    , T_voov(1,1,1,c), int(nV,4), X_vovv(1,1,a,b), int(nV,4), 1.d0, W_cab &
+    , int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0 &
+    , T_voov(1,1,1,a), int(nV,4), X_vovv(1,1,c,b), int(nV,4), 1.d0, W_acb &
+    , int(nO*nO,4))
 
 
 !   X_vovv(d,k,a,c) * T_voov(d,j,i,b) : k ji
 
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, X(1,1,1,2), nV, X_vovv(1,1,a,c), nV, 1.d0, W_abc, nO*nO)
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, X(1,1,1,1), nV, X_vovv(1,1,b,c), nV, 1.d0, W_bac, nO*nO)
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, X(1,1,1,2), nV, X_vovv(1,1,c,a), nV, 1.d0, W_cba, nO*nO)
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, X(1,1,1,3), nV, X_vovv(1,1,b,a), nV, 1.d0, W_bca, nO*nO)
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, X(1,1,1,1), nV, X_vovv(1,1,c,b), nV, 1.d0, W_cab, nO*nO)
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, X(1,1,1,3), nV, X_vovv(1,1,a,b), nV, 1.d0, W_acb, nO*nO)
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0, X(1,1,1,2) &
+    , int(nV,4), X_vovv(1,1,a,c), int(nV,4), 1.d0, W_abc, int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0, X(1,1,1,1) &
+    , int(nV,4), X_vovv(1,1,b,c), int(nV,4), 1.d0, W_bac, int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0, X(1,1,1,2) &
+    , int(nV,4), X_vovv(1,1,c,a), int(nV,4), 1.d0, W_cba, int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0, X(1,1,1,3) &
+    , int(nV,4), X_vovv(1,1,b,a), int(nV,4), 1.d0, W_bca, int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0, X(1,1,1,1) &
+    , int(nV,4), X_vovv(1,1,c,b), int(nV,4), 1.d0, W_cab, int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0, X(1,1,1,3) &
+    , int(nV,4), X_vovv(1,1,a,b), int(nV,4), 1.d0, W_acb, int(nO*nO,4))
 
 !   X_vovv(d,i,b,a) * T_voov(d,k,j,c) : i kj
 
-  call dgemm('T','N', nO, nO*nO, nV, 1.d0, X_vovv(1,1,b,a), nV, X(1,1,1,3), nV, 1.d0, W_abc, nO)
-  call dgemm('T','N', nO, nO*nO, nV, 1.d0, X_vovv(1,1,a,b), nV, X(1,1,1,3), nV, 1.d0, W_bac, nO)
-  call dgemm('T','N', nO, nO*nO, nV, 1.d0, X_vovv(1,1,b,c), nV, X(1,1,1,1), nV, 1.d0, W_cba, nO)
-  call dgemm('T','N', nO, nO*nO, nV, 1.d0, X_vovv(1,1,c,b), nV, X(1,1,1,1), nV, 1.d0, W_bca, nO)
-  call dgemm('T','N', nO, nO*nO, nV, 1.d0, X_vovv(1,1,a,c), nV, X(1,1,1,2), nV, 1.d0, W_cab, nO)
-  call dgemm('T','N', nO, nO*nO, nV, 1.d0, X_vovv(1,1,c,a), nV, X(1,1,1,2), nV, 1.d0, W_acb, nO)
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nV,4), 1.d0 &
+    , X_vovv(1,1,b,a), int(nV,4), X(1,1,1,3), int(nV,4), 1.d0, W_abc, int(nO,4))
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nV,4), 1.d0 &
+    , X_vovv(1,1,a,b), int(nV,4), X(1,1,1,3), int(nV,4), 1.d0, W_bac, int(nO,4))
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nV,4), 1.d0 &
+    , X_vovv(1,1,b,c), int(nV,4), X(1,1,1,1), int(nV,4), 1.d0, W_cba, int(nO,4))
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nV,4), 1.d0 &
+    , X_vovv(1,1,c,b), int(nV,4), X(1,1,1,1), int(nV,4), 1.d0, W_bca, int(nO,4))
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nV,4), 1.d0 &
+    , X_vovv(1,1,a,c), int(nV,4), X(1,1,1,2), int(nV,4), 1.d0, W_cab, int(nO,4))
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nV,4), 1.d0 &
+    , X_vovv(1,1,c,a), int(nV,4), X(1,1,1,2), int(nV,4), 1.d0, W_acb, int(nO,4))
 
 !  T_voov(d,k,i,c) * X_vovv(d,j,a,b) : ki j
 
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, X(1,1,1,3), nV, X_vovv(1,1,a,b), nV, 0.d0, W_ikj(1,1,1,1), nO*nO)
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, X(1,1,1,3), nV, X_vovv(1,1,b,a), nV, 0.d0, W_ikj(1,1,1,2), nO*nO)
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, X(1,1,1,1), nV, X_vovv(1,1,c,b), nV, 0.d0, W_ikj(1,1,1,3), nO*nO)
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, X(1,1,1,1), nV, X_vovv(1,1,b,c), nV, 0.d0, W_ikj(1,1,1,4), nO*nO)
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, X(1,1,1,2), nV, X_vovv(1,1,c,a), nV, 0.d0, W_ikj(1,1,1,5), nO*nO)
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, X(1,1,1,2), nV, X_vovv(1,1,a,c), nV, 0.d0, W_ikj(1,1,1,6), nO*nO)
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0, X(1,1,1,3) &
+    , int(nV,4), X_vovv(1,1,a,b), int(nV,4), 0.d0, W_ikj(1,1,1,1), int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0, X(1,1,1,3) &
+    , int(nV,4), X_vovv(1,1,b,a), int(nV,4), 0.d0, W_ikj(1,1,1,2), int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0, X(1,1,1,1) &
+    , int(nV,4), X_vovv(1,1,c,b), int(nV,4), 0.d0, W_ikj(1,1,1,3), int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0, X(1,1,1,1) &
+    , int(nV,4), X_vovv(1,1,b,c), int(nV,4), 0.d0, W_ikj(1,1,1,4), int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0, X(1,1,1,2) &
+    , int(nV,4), X_vovv(1,1,c,a), int(nV,4), 0.d0, W_ikj(1,1,1,5), int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0, X(1,1,1,2) &
+    , int(nV,4), X_vovv(1,1,a,c), int(nV,4), 0.d0, W_ikj(1,1,1,6), int(nO*nO,4))
 
 !   T_voov(d,i,k,a) * X_vovv(d,j,c,b) : ik j
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, T_voov(1,1,1,a), nV, X_vovv(1,1,c,b), nV, 1.d0, W_ikj(1,1,1,1), nO*nO)
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, T_voov(1,1,1,b), nV, X_vovv(1,1,c,a), nV, 1.d0, W_ikj(1,1,1,2), nO*nO)
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, T_voov(1,1,1,c), nV, X_vovv(1,1,a,b), nV, 1.d0, W_ikj(1,1,1,3), nO*nO)
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, T_voov(1,1,1,b), nV, X_vovv(1,1,a,c), nV, 1.d0, W_ikj(1,1,1,4), nO*nO)
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, T_voov(1,1,1,c), nV, X_vovv(1,1,b,a), nV, 1.d0, W_ikj(1,1,1,5), nO*nO)
-  call dgemm('T','N', nO*nO, nO, nV, 1.d0, T_voov(1,1,1,a), nV, X_vovv(1,1,b,c), nV, 1.d0, W_ikj(1,1,1,6), nO*nO)
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0 &
+    , T_voov(1,1,1,a), int(nV,4), X_vovv(1,1,c,b), int(nV,4), 1.d0 &
+    , W_ikj(1,1,1,1), int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0 &
+    , T_voov(1,1,1,b), int(nV,4), X_vovv(1,1,c,a), int(nV,4), 1.d0 &
+    , W_ikj(1,1,1,2), int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0 &
+    , T_voov(1,1,1,c), int(nV,4), X_vovv(1,1,a,b), int(nV,4), 1.d0 &
+    , W_ikj(1,1,1,3), int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0 &
+    , T_voov(1,1,1,b), int(nV,4), X_vovv(1,1,a,c), int(nV,4), 1.d0 &
+    , W_ikj(1,1,1,4), int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0 &
+    , T_voov(1,1,1,c), int(nV,4), X_vovv(1,1,b,a), int(nV,4), 1.d0 &
+    , W_ikj(1,1,1,5), int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nV,4), 1.d0 &
+    , T_voov(1,1,1,a), int(nV,4), X_vovv(1,1,b,c), int(nV,4), 1.d0 &
+    , W_ikj(1,1,1,6), int(nO*nO,4))
 
   deallocate(X)
 
@@ -347,52 +410,106 @@ subroutine form_w_abc(nO,nV,a,b,c,T_voov,T_oovv,X_vovv,X_ooov,W_abc,W_cba,W_bca,
 
 
 !   - T_oovv(l,i,a,b) * X_ooov(l,j,k,c) : i jk
-  call dgemm('T','N', nO, nO*nO, nO, -1.d0, T_oovv(1,1,a,b), nO, X_ooov(1,1,1,c), nO, 1.d0, W_abc, nO)
-  call dgemm('T','N', nO, nO*nO, nO, -1.d0, T_oovv(1,1,b,a), nO, X_ooov(1,1,1,c), nO, 1.d0, W_bac, nO)
-  call dgemm('T','N', nO, nO*nO, nO, -1.d0, T_oovv(1,1,c,b), nO, X_ooov(1,1,1,a), nO, 1.d0, W_cba, nO)
-  call dgemm('T','N', nO, nO*nO, nO, -1.d0, T_oovv(1,1,b,c), nO, X_ooov(1,1,1,a), nO, 1.d0, W_bca, nO)
-  call dgemm('T','N', nO, nO*nO, nO, -1.d0, T_oovv(1,1,c,a), nO, X_ooov(1,1,1,b), nO, 1.d0, W_cab, nO)
-  call dgemm('T','N', nO, nO*nO, nO, -1.d0, T_oovv(1,1,a,c), nO, X_ooov(1,1,1,b), nO, 1.d0, W_acb, nO)
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nO,4), -1.d0 &
+    , T_oovv(1,1,a,b), int(nO,4), X_ooov(1,1,1,c), int(nO,4), 1.d0, W_abc &
+    , int(nO,4))
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nO,4), -1.d0 &
+    , T_oovv(1,1,b,a), int(nO,4), X_ooov(1,1,1,c), int(nO,4), 1.d0, W_bac &
+    , int(nO,4))
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nO,4), -1.d0 &
+    , T_oovv(1,1,c,b), int(nO,4), X_ooov(1,1,1,a), int(nO,4), 1.d0, W_cba &
+    , int(nO,4))
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nO,4), -1.d0 &
+    , T_oovv(1,1,b,c), int(nO,4), X_ooov(1,1,1,a), int(nO,4), 1.d0, W_bca &
+    , int(nO,4))
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nO,4), -1.d0 &
+    , T_oovv(1,1,c,a), int(nO,4), X_ooov(1,1,1,b), int(nO,4), 1.d0, W_cab &
+    , int(nO,4))
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nO,4), -1.d0 &
+    , T_oovv(1,1,a,c), int(nO,4), X_ooov(1,1,1,b), int(nO,4), 1.d0, W_acb &
+    , int(nO,4))
 
 !   - T_oovv(l,i,a,c) * X_ooov(l,k,j,b) : i kj
-  call dgemm('T','N', nO, nO*nO, nO, -1.d0, T_oovv(1,1,a,c), nO, X(1,1,1,2), nO, 1.d0, W_abc, nO)
-  call dgemm('T','N', nO, nO*nO, nO, -1.d0, T_oovv(1,1,b,c), nO, X(1,1,1,1), nO, 1.d0, W_bac, nO)
-  call dgemm('T','N', nO, nO*nO, nO, -1.d0, T_oovv(1,1,c,a), nO, X(1,1,1,2), nO, 1.d0, W_cba, nO)
-  call dgemm('T','N', nO, nO*nO, nO, -1.d0, T_oovv(1,1,b,a), nO, X(1,1,1,3), nO, 1.d0, W_bca, nO)
-  call dgemm('T','N', nO, nO*nO, nO, -1.d0, T_oovv(1,1,c,b), nO, X(1,1,1,1), nO, 1.d0, W_cab, nO)
-  call dgemm('T','N', nO, nO*nO, nO, -1.d0, T_oovv(1,1,a,b), nO, X(1,1,1,3), nO, 1.d0, W_acb, nO)
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nO,4), -1.d0 &
+    , T_oovv(1,1,a,c), int(nO,4), X(1,1,1,2), int(nO,4), 1.d0, W_abc, int(nO,4))
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nO,4), -1.d0 &
+    , T_oovv(1,1,b,c), int(nO,4), X(1,1,1,1), int(nO,4), 1.d0, W_bac, int(nO,4))
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nO,4), -1.d0 &
+    , T_oovv(1,1,c,a), int(nO,4), X(1,1,1,2), int(nO,4), 1.d0, W_cba, int(nO,4))
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nO,4), -1.d0 &
+    , T_oovv(1,1,b,a), int(nO,4), X(1,1,1,3), int(nO,4), 1.d0, W_bca, int(nO,4))
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nO,4), -1.d0 &
+    , T_oovv(1,1,c,b), int(nO,4), X(1,1,1,1), int(nO,4), 1.d0, W_cab, int(nO,4))
+  call dgemm('T', 'N', int(nO,4), int(nO*nO,4), int(nO,4), -1.d0 &
+    , T_oovv(1,1,a,b), int(nO,4), X(1,1,1,3), int(nO,4), 1.d0, W_acb, int(nO,4))
 
 !   - X_ooov(l,i,j,b) * T_oovv(l,k,c,a) : ij k
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X_ooov(1,1,1,b), nO, T_oovv(1,1,c,a), nO, 1.d0, W_abc, nO*nO)
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X_ooov(1,1,1,a), nO, T_oovv(1,1,c,b), nO, 1.d0, W_bac, nO*nO)
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X_ooov(1,1,1,b), nO, T_oovv(1,1,a,c), nO, 1.d0, W_cba, nO*nO)
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X_ooov(1,1,1,c), nO, T_oovv(1,1,a,b), nO, 1.d0, W_bca, nO*nO)
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X_ooov(1,1,1,a), nO, T_oovv(1,1,b,c), nO, 1.d0, W_cab, nO*nO)
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X_ooov(1,1,1,c), nO, T_oovv(1,1,b,a), nO, 1.d0, W_acb, nO*nO)
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0 &
+    , X_ooov(1,1,1,b), int(nO,4), T_oovv(1,1,c,a), int(nO,4), 1.d0, W_abc &
+    , int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0 &
+    , X_ooov(1,1,1,a), int(nO,4), T_oovv(1,1,c,b), int(nO,4), 1.d0, W_bac &
+    , int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0 &
+    , X_ooov(1,1,1,b), int(nO,4), T_oovv(1,1,a,c), int(nO,4), 1.d0, W_cba &
+    , int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0 &
+    , X_ooov(1,1,1,c), int(nO,4), T_oovv(1,1,a,b), int(nO,4), 1.d0, W_bca &
+    , int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0 &
+    , X_ooov(1,1,1,a), int(nO,4), T_oovv(1,1,b,c), int(nO,4), 1.d0, W_cab &
+    , int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0 &
+    , X_ooov(1,1,1,c), int(nO,4), T_oovv(1,1,b,a), int(nO,4), 1.d0, W_acb &
+    , int(nO*nO,4))
 
 !   - X_ooov(l,j,i,a) * T_oovv(l,k,c,b) : ji k
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X(1,1,1,1), nO, T_oovv(1,1,c,b), nO, 1.d0, W_abc, nO*nO)
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X(1,1,1,2), nO, T_oovv(1,1,c,a), nO, 1.d0, W_bac, nO*nO)
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X(1,1,1,3), nO, T_oovv(1,1,a,b), nO, 1.d0, W_cba, nO*nO)
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X(1,1,1,2), nO, T_oovv(1,1,a,c), nO, 1.d0, W_bca, nO*nO)
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X(1,1,1,3), nO, T_oovv(1,1,b,a), nO, 1.d0, W_cab, nO*nO)
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X(1,1,1,1), nO, T_oovv(1,1,b,c), nO, 1.d0, W_acb, nO*nO)
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0, X(1,1,1,1) &
+    , int(nO,4), T_oovv(1,1,c,b), int(nO,4), 1.d0, W_abc, int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0, X(1,1,1,2) &
+    , int(nO,4), T_oovv(1,1,c,a), int(nO,4), 1.d0, W_bac, int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0, X(1,1,1,3) &
+    , int(nO,4), T_oovv(1,1,a,b), int(nO,4), 1.d0, W_cba, int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0, X(1,1,1,2) &
+    , int(nO,4), T_oovv(1,1,a,c), int(nO,4), 1.d0, W_bca, int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0, X(1,1,1,3) &
+    , int(nO,4), T_oovv(1,1,b,a), int(nO,4), 1.d0, W_cab, int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0, X(1,1,1,1) &
+    , int(nO,4), T_oovv(1,1,b,c), int(nO,4), 1.d0, W_acb, int(nO*nO,4))
 
 !   - X_ooov(l,k,i,a) * T_oovv(l,j,b,c) : ki j
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X(1,1,1,1), nO, T_oovv(1,1,b,c), nO, 1.d0, W_ikj(1,1,1,1), nO*nO)
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X(1,1,1,2), nO, T_oovv(1,1,a,c), nO, 1.d0, W_ikj(1,1,1,2), nO*nO)
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X(1,1,1,3), nO, T_oovv(1,1,b,a), nO, 1.d0, W_ikj(1,1,1,3), nO*nO)
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X(1,1,1,2), nO, T_oovv(1,1,c,a), nO, 1.d0, W_ikj(1,1,1,4), nO*nO)
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X(1,1,1,3), nO, T_oovv(1,1,a,b), nO, 1.d0, W_ikj(1,1,1,5), nO*nO)
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X(1,1,1,1), nO, T_oovv(1,1,c,b), nO, 1.d0, W_ikj(1,1,1,6), nO*nO)
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0, X(1,1,1,1) &
+    , int(nO,4), T_oovv(1,1,b,c), int(nO,4), 1.d0, W_ikj(1,1,1,1), int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0, X(1,1,1,2) &
+    , int(nO,4), T_oovv(1,1,a,c), int(nO,4), 1.d0, W_ikj(1,1,1,2), int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0, X(1,1,1,3) &
+    , int(nO,4), T_oovv(1,1,b,a), int(nO,4), 1.d0, W_ikj(1,1,1,3), int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0, X(1,1,1,2) &
+    , int(nO,4), T_oovv(1,1,c,a), int(nO,4), 1.d0, W_ikj(1,1,1,4), int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0, X(1,1,1,3) &
+    , int(nO,4), T_oovv(1,1,a,b), int(nO,4), 1.d0, W_ikj(1,1,1,5), int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0, X(1,1,1,1) &
+    , int(nO,4), T_oovv(1,1,c,b), int(nO,4), 1.d0, W_ikj(1,1,1,6), int(nO*nO,4))
 
 !   - X_ooov(l,i,k,c) * T_oovv(l,j,b,a) : ik j
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X_ooov(1,1,1,c), nO, T_oovv(1,1,b,a), nO, 1.d0, W_ikj(1,1,1,1), nO*nO)
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X_ooov(1,1,1,c), nO, T_oovv(1,1,a,b), nO, 1.d0, W_ikj(1,1,1,2), nO*nO)
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X_ooov(1,1,1,a), nO, T_oovv(1,1,b,c), nO, 1.d0, W_ikj(1,1,1,3), nO*nO)
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X_ooov(1,1,1,a), nO, T_oovv(1,1,c,b), nO, 1.d0, W_ikj(1,1,1,4), nO*nO)
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X_ooov(1,1,1,b), nO, T_oovv(1,1,a,c), nO, 1.d0, W_ikj(1,1,1,5), nO*nO)
-  call dgemm('T','N', nO*nO, nO, nO, -1.d0, X_ooov(1,1,1,b), nO, T_oovv(1,1,c,a), nO, 1.d0, W_ikj(1,1,1,6), nO*nO)
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0 &
+    , X_ooov(1,1,1,c), int(nO,4), T_oovv(1,1,b,a), int(nO,4), 1.d0 &
+    , W_ikj(1,1,1,1), int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0 &
+    , X_ooov(1,1,1,c), int(nO,4), T_oovv(1,1,a,b), int(nO,4), 1.d0 &
+    , W_ikj(1,1,1,2), int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0 &
+    , X_ooov(1,1,1,a), int(nO,4), T_oovv(1,1,b,c), int(nO,4), 1.d0 &
+    , W_ikj(1,1,1,3), int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0 &
+    , X_ooov(1,1,1,a), int(nO,4), T_oovv(1,1,c,b), int(nO,4), 1.d0 &
+    , W_ikj(1,1,1,4), int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0 &
+    , X_ooov(1,1,1,b), int(nO,4), T_oovv(1,1,a,c), int(nO,4), 1.d0 &
+    , W_ikj(1,1,1,5), int(nO*nO,4))
+  call dgemm('T', 'N', int(nO*nO,4), int(nO,4), int(nO,4), -1.d0 &
+    , X_ooov(1,1,1,b), int(nO,4), T_oovv(1,1,c,a), int(nO,4), 1.d0 &
+    , W_ikj(1,1,1,6), int(nO*nO,4))
 
   do k=1,nO
     do j=1,nO
@@ -414,6 +531,7 @@ end
 ! V_abc
 
 subroutine form_v_abc(nO,nV,a,b,c,T_ov,X_oovv,W_abc,V_abc,W_cba,V_cba,W_bca,V_bca,W_cab,V_cab,W_bac,V_bac,W_acb,V_acb)
+ use sizet
 
 implicit none
 
@@ -426,7 +544,8 @@ implicit none
   ! X_oovv(i,j,a,b)*T_ov(k,c).
   END_DOC
 
-  integer, intent(in)           :: nO,nV,a,b,c
+  integer, intent(in)           :: nO, nV
+  integer(size_t), intent(in)   :: a, b, c
   double precision, intent(in)  :: T_ov(nO,nV)
   double precision, intent(in)  :: X_oovv(nO,nO,nV,nV)
   double precision, intent(in)  :: W_abc(nO,nO,nO), W_cab(nO,nO,nO), W_bca(nO,nO,nO)
@@ -434,7 +553,7 @@ implicit none
   double precision, intent(out) :: V_abc(nO,nO,nO), V_cab(nO,nO,nO), V_bca(nO,nO,nO)
   double precision, intent(out) :: V_bac(nO,nO,nO), V_cba(nO,nO,nO), V_acb(nO,nO,nO)
 
-  integer :: i,j,k
+  integer(size_t) :: i,j,k
 
   do k = 1, nO
     do j = 1, nO

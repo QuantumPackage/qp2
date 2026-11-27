@@ -1,3 +1,4 @@
+use sizet
 
  BEGIN_PROVIDER [double precision, one_e_cas_total_density ,(n_points_final_grid,N_states) ]
  implicit none
@@ -6,7 +7,8 @@
  !
  ! WARNING : if "no_core_density" == .True. then the core part of density is ignored 
  END_DOC
- integer :: ipoint,i,j,istate
+ integer(size_t) :: ipoint
+ integer         :: i,j,istate
  do istate = 1, N_states
   do ipoint = 1, n_points_final_grid
    one_e_cas_total_density(ipoint,istate)   = one_e_act_density_alpha(ipoint,istate) + one_e_act_density_beta(ipoint,istate) & 
@@ -24,7 +26,8 @@
  ! one_e_act_density_alpha = pure ACTIVE part of the DENSITY for ALPHA ELECTRONS 
  END_DOC
  one_e_act_density_alpha = 0.d0
- integer :: ipoint,i,j,istate
+ integer(size_t) :: ipoint
+ integer         :: i,j,istate
  do istate = 1, N_states
   do ipoint = 1, n_points_final_grid
    do i = 1, n_act_orb
@@ -45,7 +48,8 @@
  ! one_e_act_density_beta = pure ACTIVE part of the DENSITY for BETA ELECTRONS 
  END_DOC
  one_e_act_density_beta = 0.d0
- integer :: ipoint,i,j,istate
+ integer(size_t) :: ipoint
+ integer         :: i,j,istate
  do istate = 1, N_states
   do ipoint = 1, n_points_final_grid
    do i = 1, n_act_orb
@@ -68,7 +72,8 @@
 !
 !            YOU MUST MULTIPLY BY TWO 
  END_DOC
- integer :: i,j
+ integer(size_t) :: i
+ integer         :: j
  inact_density = 0.d0
  do i = 1, n_points_final_grid
   do j = 1, n_inact_orb
@@ -87,7 +92,8 @@ END_PROVIDER
 !
 !            YOU MUST MULTIPLY BY TWO 
  END_DOC
- integer :: i,j
+ integer(size_t) :: i
+ integer         :: j
  core_density = 0.d0
  do i = 1, n_points_final_grid
   do j = 1, n_core_orb

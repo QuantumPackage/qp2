@@ -1,6 +1,9 @@
+use sizet
+
 ! phase
 
 subroutine get_phase_general(det1,det2,phase,degree,Nint)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Phase and degree of the excitation that maps det1 onto det2.
@@ -10,12 +13,12 @@ subroutine get_phase_general(det1,det2,phase,degree,Nint)
   ! otherwise the subroutine aborts.
   END_DOC
 
-  integer, intent(in)           :: Nint
+  integer(size_t), intent(in)   :: Nint
   integer(bit_kind), intent(in) :: det1(Nint,2), det2(Nint,2)
   double precision, intent(out) :: phase
   integer, intent(out)          :: degree
   integer :: n(2)
-  integer, allocatable :: list_anni(:,:), list_crea(:,:)
+  integer(size_t), allocatable :: list_anni(:,:), list_crea(:,:)
 
   allocate(list_anni(N_int*bit_kind_size,2))
   allocate(list_crea(N_int*bit_kind_size,2))
@@ -26,6 +29,7 @@ end
 ! Get excitation general
 
 subroutine get_excitation_general(det1,det2,degree,n,list_anni,list_crea,phase,Nint)
+ use sizet
 
   use bitmasks
 
@@ -39,18 +43,19 @@ subroutine get_excitation_general(det1,det2,degree,n,list_anni,list_crea,phase,N
   ! and creation positions in the occupied lists of det1 (det2).
   END_DOC
 
-  integer, intent(in) :: Nint
+  integer(size_t), intent(in) :: Nint
   integer(bit_kind), intent(in)  :: det1(Nint,2), det2(Nint,2)
   double precision, intent(out)  :: phase
-  integer, intent(out)           :: list_crea(Nint*bit_kind_size,2)
-  integer, intent(out)           :: list_anni(Nint*bit_kind_size,2)
+  integer(size_t), intent(out)   :: list_crea(Nint*bit_kind_size,2)
+  integer(size_t), intent(out)   :: list_anni(Nint*bit_kind_size,2)
   integer, intent(out)           :: degree, n(2)
   
-  integer, allocatable           :: l1(:,:), l2(:,:) 
+  integer(size_t), allocatable   :: l1(:,:), l2(:,:)
   integer(bit_kind), allocatable :: det_crea(:,:), det_anni(:,:)
-  integer, allocatable           :: pos_anni(:,:), pos_crea(:,:)
+  integer(size_t), allocatable   :: pos_anni(:,:), pos_crea(:,:)
 
-  integer :: n1(2),n2(2),n_crea(2),n_anni(2),i,j,k,d
+  integer :: n1(2),n2(2),n_crea(2),n_anni(2),j,k,d
+  integer(size_t) :: i
 
   allocate(l1(Nint*bit_kind_size,2))
   allocate(l2(Nint*bit_kind_size,2))

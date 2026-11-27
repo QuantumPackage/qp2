@@ -1,3 +1,5 @@
+use sizet
+
 ! F
 
 subroutine gen_f_space(det,n1,n2,list1,list2,f)
@@ -44,6 +46,7 @@ end
 ! V
 
 subroutine gen_v_space(n1,n2,n3,n4,list1,list2,list3,list4,v)
+ use sizet
 
   implicit none
   BEGIN_DOC
@@ -67,12 +70,12 @@ subroutine gen_v_space(n1,n2,n3,n4,list1,list2,list3,list4,v)
     allocate(v1(cholesky_mo_num,n1,n3), v2(cholesky_mo_num,n2,n4))
     allocate(buffer(n1,n3,n2,n4))
 
-    call gen_v_space_chol(n1,n3,list1,list3,v1,cholesky_mo_num)
-    call gen_v_space_chol(n2,n4,list2,list4,v2,cholesky_mo_num)
+    call gen_v_space_chol(n1,n3,list1,list3,v1,int(cholesky_mo_num,4))
+    call gen_v_space_chol(n2,n4,list2,list4,v2,int(cholesky_mo_num,4))
 
-    call dgemm('T','N', n1*n3, n2*n4, cholesky_mo_num, 1.d0, &
-         v1, cholesky_mo_num, &
-         v2, cholesky_mo_num, 0.d0, buffer, n1*n3)
+    call dgemm('T','N', n1*n3, n2*n4, int(cholesky_mo_num,4), 1.d0, &
+         v1, int(cholesky_mo_num,4), &
+         v2, int(cholesky_mo_num,4), 0.d0, buffer, n1*n3)
 
     deallocate(v1,v2)
 
@@ -106,7 +109,9 @@ subroutine gen_v_space(n1,n2,n3,n4,list1,list2,list3,list4,v)
             idx3 = list3(i3)
             idx2 = list2(i2)
             idx1 = list1(i1)
-            v(i1,i2,i3,i4) = get_two_e_integral(idx1,idx2,idx3,idx4,mo_integrals_map)
+            v(i1,i2,i3,i4) = &
+                get_two_e_integral(int(idx1,size_t),int(idx2,size_t), &
+                    int(idx3,size_t),int(idx4,size_t),mo_integrals_map)
           enddo
         enddo
       enddo
@@ -119,6 +124,7 @@ subroutine gen_v_space(n1,n2,n3,n4,list1,list2,list3,list4,v)
 end
 
 subroutine gen_v_space_chol(n1,n3,list1,list3,v,ldv)
+ use sizet
 
   implicit none
   BEGIN_DOC
@@ -133,7 +139,8 @@ subroutine gen_v_space_chol(n1,n3,list1,list3,v,ldv)
   integer, intent(in)           :: list1(n1),list3(n3)
   double precision, intent(out) :: v(ldv,n1,n3)
 
-  integer                       :: i1,i3,idx1,idx3,k
+  integer                       :: i1,i3,idx1,idx3
+  integer(size_t)               :: k
 
   !$OMP PARALLEL DO PRIVATE(i1,i3,idx1,idx3,k)
   do i3=1,n3
@@ -161,7 +168,7 @@ BEGIN_PROVIDER [double precision, cc_space_v, (mo_num,mo_num,mo_num,mo_num)]
   ! get_two_e_integral.
   END_DOC
   if (do_mo_cholesky) then
-    integer                       :: i1,i2,i3,i4
+    integer(size_t)               :: i1,i2,i3,i4
     double precision, allocatable :: buffer(:,:,:)
     !$OMP PARALLEL &
     !$OMP SHARED(cc_space_v,mo_num,cholesky_mo_transp,cholesky_mo_num) &
@@ -170,9 +177,11 @@ BEGIN_PROVIDER [double precision, cc_space_v, (mo_num,mo_num,mo_num,mo_num)]
     allocate(buffer(mo_num,mo_num,mo_num))
     !$OMP DO
     do i4 = 1, mo_num
-      call dgemm('T','N', mo_num*mo_num, mo_num, cholesky_mo_num, 1.d0, &
-           cholesky_mo_transp, cholesky_mo_num, &
-           cholesky_mo_transp(1,1,i4), cholesky_mo_num, 0.d0, buffer, mo_num*mo_num)
+      call dgemm('T','N', int(mo_num*mo_num,4), int(mo_num,4), &
+           int(cholesky_mo_num,4), 1.d0, &
+           cholesky_mo_transp, int(cholesky_mo_num,4), &
+           cholesky_mo_transp(1,1,i4), int(cholesky_mo_num,4), 0.d0, buffer, &
+           int(mo_num*mo_num,4))
       do i2 = 1, mo_num
         do i3 = 1, mo_num
           do i1 = 1, mo_num
@@ -185,7 +194,7 @@ BEGIN_PROVIDER [double precision, cc_space_v, (mo_num,mo_num,mo_num,mo_num)]
     deallocate(buffer)
     !$OMP END PARALLEL
   else
-    integer          :: i,j,k,l
+    integer(size_t)  :: i,j,k,l
     double precision :: get_two_e_integral
 
     PROVIDE all_mo_integrals
@@ -237,9 +246,9 @@ BEGIN_PROVIDER [double precision, cc_space_v_oooo, (cc_nOa, cc_nOa, cc_nOa, cc_n
     double precision, allocatable :: buffer(:,:,:,:)
     allocate(buffer(n1,n3,n2,n4))
 
-    call dgemm('T','N', n1*n3, n2*n4, cholesky_mo_num, 1.d0, &
-         cc_space_v_oo_chol, cholesky_mo_num, &
-         cc_space_v_oo_chol, cholesky_mo_num, 0.d0, buffer, n1*n3)
+    call dgemm('T','N', n1*n3, n2*n4, int(cholesky_mo_num,4), 1.d0, &
+         cc_space_v_oo_chol, int(cholesky_mo_num,4), &
+         cc_space_v_oo_chol, int(cholesky_mo_num,4), 0.d0, buffer, n1*n3)
 
     !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i4) COLLAPSE(2)
     do i4 = 1, n4
@@ -312,9 +321,9 @@ BEGIN_PROVIDER [double precision, cc_space_v_vooo, (cc_nVa, cc_nOa, cc_nOa, cc_n
     double precision, allocatable :: buffer(:,:,:,:)
     allocate(buffer(n1,n3,n2,n4))
 
-    call dgemm('T','N', n1*n3, n2*n4, cholesky_mo_num, 1.d0, &
-         cc_space_v_vo_chol, cholesky_mo_num, &
-         cc_space_v_oo_chol, cholesky_mo_num, 0.d0, buffer, n1*n3)
+    call dgemm('T','N', n1*n3, n2*n4, int(cholesky_mo_num,4), 1.d0, &
+         cc_space_v_vo_chol, int(cholesky_mo_num,4), &
+         cc_space_v_oo_chol, int(cholesky_mo_num,4), 0.d0, buffer, n1*n3)
 
     !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i4) COLLAPSE(2)
     do i4 = 1, n4
@@ -554,9 +563,9 @@ BEGIN_PROVIDER [double precision, cc_space_v_vvoo, (cc_nVa, cc_nVa, cc_nOa, cc_n
     double precision, allocatable :: buffer(:,:,:,:)
     allocate(buffer(n1,n3,n2,n4))
 
-    call dgemm('T','N', n1*n3, n2*n4, cholesky_mo_num, 1.d0, &
-         cc_space_v_vo_chol, cholesky_mo_num, &
-         cc_space_v_vo_chol, cholesky_mo_num, 0.d0, buffer, n1*n3)
+    call dgemm('T','N', n1*n3, n2*n4, int(cholesky_mo_num,4), 1.d0, &
+         cc_space_v_vo_chol, int(cholesky_mo_num,4), &
+         cc_space_v_vo_chol, int(cholesky_mo_num,4), 0.d0, buffer, n1*n3)
 
     !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i4) COLLAPSE(2)
     do i4 = 1, n4
@@ -634,9 +643,9 @@ BEGIN_PROVIDER [double precision, cc_space_v_vovo, (cc_nVa, cc_nOa, cc_nVa, cc_n
     double precision, allocatable :: buffer(:,:,:,:)
     allocate(buffer(n1,n3,n2,n4))
 
-    call dgemm('T','N', n1*n3, n2*n4, cholesky_mo_num, 1.d0, &
-         cc_space_v_vv_chol, cholesky_mo_num, &
-         cc_space_v_oo_chol, cholesky_mo_num, 0.d0, buffer, n1*n3)
+    call dgemm('T','N', n1*n3, n2*n4, int(cholesky_mo_num,4), 1.d0, &
+         cc_space_v_vv_chol, int(cholesky_mo_num,4), &
+         cc_space_v_oo_chol, int(cholesky_mo_num,4), 0.d0, buffer, n1*n3)
 
     !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i4) COLLAPSE(2)
     do i4 = 1, n4
@@ -989,7 +998,8 @@ BEGIN_PROVIDER [double precision, cc_space_v_vv_chol, (cholesky_mo_num, cc_nVa, 
   ! k = 1,cholesky_mo_num, filled by gen_v_space_chol.
   END_DOC
 
-  call gen_v_space_chol(cc_nVa, cc_nVa, cc_list_vir, cc_list_vir, cc_space_v_vv_chol, cholesky_mo_num)
+  call gen_v_space_chol(cc_nVa, cc_nVa, cc_list_vir, cc_list_vir, &
+         cc_space_v_vv_chol, int(cholesky_mo_num,4))
 
 END_PROVIDER
 
@@ -1003,7 +1013,8 @@ BEGIN_PROVIDER [double precision, cc_space_v_vo_chol, (cholesky_mo_num, cc_nVa, 
   ! k = 1,cholesky_mo_num, filled by gen_v_space_chol.
   END_DOC
 
-  call gen_v_space_chol(cc_nVa, cc_nOa, cc_list_vir, cc_list_occ, cc_space_v_vo_chol, cholesky_mo_num)
+  call gen_v_space_chol(cc_nVa, cc_nOa, cc_list_vir, cc_list_occ, &
+         cc_space_v_vo_chol, int(cholesky_mo_num,4))
 
 END_PROVIDER
 
@@ -1017,7 +1028,8 @@ BEGIN_PROVIDER [double precision, cc_space_v_ov_chol, (cholesky_mo_num, cc_nOa, 
   ! k = 1,cholesky_mo_num, filled by gen_v_space_chol.
   END_DOC
 
-  call gen_v_space_chol(cc_nOa, cc_nVa, cc_list_occ, cc_list_vir, cc_space_v_ov_chol, cholesky_mo_num)
+  call gen_v_space_chol(cc_nOa, cc_nVa, cc_list_occ, cc_list_vir, &
+         cc_space_v_ov_chol, int(cholesky_mo_num,4))
 
 END_PROVIDER
 
@@ -1031,7 +1043,8 @@ BEGIN_PROVIDER [double precision, cc_space_v_oo_chol, (cholesky_mo_num, cc_nOa, 
   ! k = 1,cholesky_mo_num, filled by gen_v_space_chol.
   END_DOC
 
-  call gen_v_space_chol(cc_nOa, cc_nOa, cc_list_occ, cc_list_occ, cc_space_v_oo_chol, cholesky_mo_num)
+  call gen_v_space_chol(cc_nOa, cc_nOa, cc_list_occ, cc_list_occ, &
+         cc_space_v_oo_chol, int(cholesky_mo_num,4))
 
 END_PROVIDER
 
@@ -1050,7 +1063,7 @@ BEGIN_PROVIDER [double precision, cc_spin_v_oo_chol, (cholesky_mo_num, cc_nOab, 
   list_occ(1:cc_nOa) = cc_list_occ_spin(1:cc_nOa,1)
   list_occ(cc_nOa+1:cc_nOab) = cc_list_occ_spin(1:cc_nOb,2)
   call gen_v_space_chol(cc_nOab, cc_nOab, list_occ, list_occ, &
-         cc_spin_v_oo_chol, cholesky_mo_num)
+         cc_spin_v_oo_chol, int(cholesky_mo_num,4))
 
 END_PROVIDER
 
@@ -1064,7 +1077,7 @@ BEGIN_PROVIDER [double precision, cc_space_v_ppqq, (cc_n_mo, cc_n_mo)]
   ! <pp|qq> integrals for general MOs (excepted core and deleted ones)
   END_DOC
 
-  integer                       :: p,q
+  integer(size_t)               :: p,q
   double precision, allocatable :: tmp_v(:,:,:,:)
 
   allocate(tmp_v(cc_n_mo,cc_n_mo,cc_n_mo,cc_n_mo))
@@ -1491,6 +1504,7 @@ end
 ! F
 
 subroutine gen_f_spin(det, n1,n2, n1_S,n2_S, list1,list2, dim1,dim2, f)
+ use sizet
 
   implicit none
 
@@ -1507,7 +1521,8 @@ subroutine gen_f_spin(det, n1,n2, n1_S,n2_S, list1,list2, dim1,dim2, f)
   double precision, intent(out) :: f(dim1, dim2)
 
   double precision, allocatable :: tmp_F(:,:)
-  integer                       :: i,j, idx_i,idx_j,i_shift,j_shift
+  integer                       :: idx_i,idx_j,i_shift,j_shift
+  integer(size_t)               :: i,j
   integer                       :: tmp_i,tmp_j
   integer                       :: si,sj,s
   PROVIDE big_array_exchange_integrals big_array_coulomb_integrals
@@ -1550,6 +1565,7 @@ end
 ! Get F
 
 subroutine get_fock_matrix_spin(det,s,f)
+ use sizet
 
   implicit none
 
@@ -1562,7 +1578,8 @@ subroutine get_fock_matrix_spin(det,s,f)
 
   double precision, intent(out) :: f(mo_num,mo_num)
 
-  integer                       :: p,q,i,s1,s2
+  integer                       :: s1,s2
+  integer(size_t)               :: p,q,i
   integer(bit_kind)             :: res(N_int,2)
   logical                       :: ok
   double precision              :: mo_two_e_integral
@@ -1608,6 +1625,7 @@ end
 ! V
 
 subroutine gen_v_spin(n1,n2,n3,n4, n1_S,n2_S,n3_S,n4_S, list1,list2,list3,list4, dim1,dim2,dim3,dim4, v)
+ use sizet
 
   implicit none
 
@@ -1648,12 +1666,15 @@ subroutine gen_v_spin(n1,n2,n3,n4, n1_S,n2_S,n3_S,n4_S, list1,list2,list3,list4,
               allocate(v1(cholesky_mo_num,n1_S(si),n3_S(sk)), v2(cholesky_mo_num,n2_S(sj),n4_S(sl)))
               allocate(buffer(n1_S(si),n3_S(sk),n2_S(sj),n4_S(sl)))
 
-              call gen_v_space_chol(n1_S(si),n3_S(sk),list1(1,si),list3(1,sk),v1,cholesky_mo_num)
-              call gen_v_space_chol(n2_S(sj),n4_S(sl),list2(1,sj),list4(1,sl),v2,cholesky_mo_num)
+              call gen_v_space_chol(n1_S(si), n3_S(sk), list1(1,si), &
+                                    list3(1,sk), v1, int(cholesky_mo_num,4))
+              call gen_v_space_chol(n2_S(sj), n4_S(sl), list2(1,sj), &
+                                    list4(1,sl), v2, int(cholesky_mo_num,4))
 
-              call dgemm('T','N', n1_S(si)*n3_S(sk), n2_S(sj)*n4_S(sl), cholesky_mo_num, 1.d0, &
-                    v1, cholesky_mo_num, &
-                    v2, cholesky_mo_num, 0.d0, buffer, n1_S(si)*n3_S(sk))
+              call dgemm('T', 'N', n1_S(si)*n3_S(sk), n2_S(sj)*n4_S(sl), &
+                         int(cholesky_mo_num,4), 1.d0, v1, &
+                         int(cholesky_mo_num,4), v2, int(cholesky_mo_num,4), &
+                         0.d0, buffer, n1_S(si)*n3_S(sk))
 
               !$OMP PARALLEL &
               !$OMP DEFAULT(SHARED) &
@@ -1680,12 +1701,15 @@ subroutine gen_v_spin(n1,n2,n3,n4, n1_S,n2_S,n3_S,n4_S, list1,list2,list3,list4,
               allocate(v1(cholesky_mo_num,n2_S(sj),n3_S(sk)), v2(cholesky_mo_num,n1_S(si),n4_S(sl)))
               allocate(buffer(n2_S(sj),n3_S(sk),n1_S(si),n4_S(sl)))
 
-              call gen_v_space_chol(n2_S(sj),n3_S(sk),list2(1,sj),list3(1,sk),v1,cholesky_mo_num)
-              call gen_v_space_chol(n1_S(si),n4_S(sl),list1(1,si),list4(1,sl),v2,cholesky_mo_num)
+              call gen_v_space_chol(n2_S(sj), n3_S(sk), list2(1,sj), &
+                                    list3(1,sk), v1, int(cholesky_mo_num,4))
+              call gen_v_space_chol(n1_S(si), n4_S(sl), list1(1,si), &
+                                    list4(1,sl), v2, int(cholesky_mo_num,4))
 
-              call dgemm('T','N', n2_S(sj)*n3_S(sk), n1_S(si)*n4_S(sl), cholesky_mo_num, 1.d0, &
-                    v1, cholesky_mo_num, &
-                    v2, cholesky_mo_num, 0.d0, buffer, n2_S(sj)*n3_S(sk))
+              call dgemm('T', 'N', n2_S(sj)*n3_S(sk), n1_S(si)*n4_S(sl), &
+                         int(cholesky_mo_num,4), 1.d0, v1, &
+                         int(cholesky_mo_num,4), v2, int(cholesky_mo_num,4), &
+                         0.d0, buffer, n2_S(sj)*n3_S(sk))
 
               !$OMP PARALLEL &
               !$OMP DEFAULT(SHARED) &
@@ -1715,12 +1739,15 @@ subroutine gen_v_spin(n1,n2,n3,n4, n1_S,n2_S,n3_S,n4_S, list1,list2,list3,list4,
               allocate(v1(cholesky_mo_num,n1_S(si),n3_S(sk)), v2(cholesky_mo_num,n2_S(sj),n4_S(sl)))
               allocate(buffer(n1_S(si),n3_S(sk),n2_S(sj),n4_S(sl)))
 
-              call gen_v_space_chol(n1_S(si),n3_S(sk),list1(1,si),list3(1,sk),v1,cholesky_mo_num)
-              call gen_v_space_chol(n2_S(sj),n4_S(sl),list2(1,sj),list4(1,sl),v2,cholesky_mo_num)
+              call gen_v_space_chol(n1_S(si), n3_S(sk), list1(1,si), &
+                                    list3(1,sk), v1, int(cholesky_mo_num,4))
+              call gen_v_space_chol(n2_S(sj), n4_S(sl), list2(1,sj), &
+                                    list4(1,sl), v2, int(cholesky_mo_num,4))
 
-              call dgemm('T','N', n1_S(si)*n3_S(sk), n2_S(sj)*n4_S(sl), cholesky_mo_num, 1.d0, &
-                    v1, cholesky_mo_num, &
-                    v2, cholesky_mo_num, 0.d0, buffer, n1_S(si)*n3_S(sk))
+              call dgemm('T', 'N', n1_S(si)*n3_S(sk), n2_S(sj)*n4_S(sl), &
+                         int(cholesky_mo_num,4), 1.d0, v1, &
+                         int(cholesky_mo_num,4), v2, int(cholesky_mo_num,4), &
+                         0.d0, buffer, n1_S(si)*n3_S(sk))
 
               !$OMP PARALLEL &
               !$OMP DEFAULT(SHARED) &
@@ -1750,12 +1777,15 @@ subroutine gen_v_spin(n1,n2,n3,n4, n1_S,n2_S,n3_S,n4_S, list1,list2,list3,list4,
               allocate(v1(cholesky_mo_num,n2_S(sj),n3_S(sk)), v2(cholesky_mo_num,n1_S(si),n4_S(sl)))
               allocate(buffer(n2_S(sj),n3_S(sk),n1_S(si),n4_S(sl)))
 
-              call gen_v_space_chol(n2_S(sj),n3_S(sk),list2(1,sj),list3(1,sk),v1,cholesky_mo_num)
-              call gen_v_space_chol(n1_S(si),n4_S(sl),list1(1,si),list4(1,sl),v2,cholesky_mo_num)
+              call gen_v_space_chol(n2_S(sj), n3_S(sk), list2(1,sj), &
+                                    list3(1,sk), v1, int(cholesky_mo_num,4))
+              call gen_v_space_chol(n1_S(si), n4_S(sl), list1(1,si), &
+                                    list4(1,sl), v2, int(cholesky_mo_num,4))
 
-              call dgemm('T','N', n2_S(sj)*n3_S(sk), n1_S(si)*n4_S(sl), cholesky_mo_num, -1.d0, &
-                    v1, cholesky_mo_num, &
-                    v2, cholesky_mo_num, 0.d0, buffer, n2_S(sj)*n3_S(sk))
+              call dgemm('T', 'N', n2_S(sj)*n3_S(sk), n1_S(si)*n4_S(sl), &
+                         int(cholesky_mo_num,4), -1.d0, v1, &
+                         int(cholesky_mo_num,4), v2, int(cholesky_mo_num,4), &
+                         0.d0, buffer, n2_S(sj)*n3_S(sk))
 
               !$OMP PARALLEL &
               !$OMP DEFAULT(SHARED) &
@@ -1841,7 +1871,11 @@ subroutine gen_v_spin(n1,n2,n3,n4, n1_S,n2_S,n3_S,n4_S, list1,list2,list3,list4,
                     do tmp_i = 1, n1_S(si)
                       i = list1(tmp_i,si)
                       idx_i = tmp_i + i_shift
-                      v(idx_i,idx_j,idx_k,idx_l) = mo_two_e_integral(i,j,k,l) - mo_two_e_integral(j,i,k,l)
+                      v(idx_i,idx_j,idx_k,idx_l) = &
+                          mo_two_e_integral(int(i,size_t), &
+                              int(j,size_t),int(k,size_t),int(l,size_t)) - &
+                          mo_two_e_integral(int(j,size_t), &
+                              int(i,size_t),int(k,size_t),int(l,size_t))
                     enddo
                   enddo
                 enddo
@@ -1863,7 +1897,9 @@ subroutine gen_v_spin(n1,n2,n3,n4, n1_S,n2_S,n3_S,n4_S, list1,list2,list3,list4,
                     do tmp_i = 1, n1_S(si)
                       i = list1(tmp_i,si)
                       idx_i = tmp_i + i_shift
-                      v(idx_i,idx_j,idx_k,idx_l) = mo_two_e_integral(i,j,k,l)
+                      v(idx_i,idx_j,idx_k,idx_l) = &
+                          mo_two_e_integral(int(i,size_t), &
+                              int(j,size_t),int(k,size_t),int(l,size_t))
                     enddo
                   enddo
                 enddo
@@ -1885,7 +1921,9 @@ subroutine gen_v_spin(n1,n2,n3,n4, n1_S,n2_S,n3_S,n4_S, list1,list2,list3,list4,
                     do tmp_i = 1, n1_S(si)
                       i = list1(tmp_i,si)
                       idx_i = tmp_i + i_shift
-                      v(idx_i,idx_j,idx_k,idx_l) = - mo_two_e_integral(j,i,k,l)
+                      v(idx_i,idx_j,idx_k,idx_l) = &
+                          - mo_two_e_integral(int(j,size_t), &
+                              int(i,size_t),int(k,size_t),int(l,size_t))
                     enddo
                   enddo
                 enddo
@@ -1971,12 +2009,15 @@ subroutine gen_v_spin_3idx(n1,n2,n3,n4, idx_l, n1_S,n2_S,n3_S,n4_S, list1,list2,
               allocate(v1(cholesky_mo_num,n1_S(si),n3_S(sk)), v2(cholesky_mo_num,n2_S(sj),1))
               allocate(buffer(n1_S(si),n3_S(sk),n2_S(sj)))
 
-              call gen_v_space_chol(n1_S(si),n3_S(sk),list1(1,si),list3(1,sk),v1,cholesky_mo_num)
-              call gen_v_space_chol(n2_S(sj),1,list2(1,sj),list4(tmp_l,sl),v2,cholesky_mo_num)
+              call gen_v_space_chol(n1_S(si), n3_S(sk), list1(1,si), &
+                                    list3(1,sk), v1, int(cholesky_mo_num,4))
+              call gen_v_space_chol(n2_S(sj), 1, list2(1,sj), list4(tmp_l,sl), &
+                                    v2, int(cholesky_mo_num,4))
 
-              call dgemm('T','N', n1_S(si)*n3_S(sk), n2_S(sj), cholesky_mo_num, 1.d0, &
-                    v1, cholesky_mo_num, &
-                    v2, cholesky_mo_num, 0.d0, buffer, n1_S(si)*n3_S(sk))
+              call dgemm('T', 'N', n1_S(si)*n3_S(sk), n2_S(sj), &
+                         int(cholesky_mo_num,4), 1.d0, v1, &
+                         int(cholesky_mo_num,4), v2, int(cholesky_mo_num,4), &
+                         0.d0, buffer, n1_S(si)*n3_S(sk))
 
               !$OMP PARALLEL &
               !$OMP DEFAULT(SHARED) &
@@ -2000,12 +2041,15 @@ subroutine gen_v_spin_3idx(n1,n2,n3,n4, idx_l, n1_S,n2_S,n3_S,n4_S, list1,list2,
               allocate(v1(cholesky_mo_num,n2_S(sj),n3_S(sk)), v2(cholesky_mo_num,n1_S(si),1))
               allocate(buffer(n2_S(sj),n3_S(sk),n1_S(si)))
 
-              call gen_v_space_chol(n2_S(sj),n3_S(sk),list2(1,sj),list3(1,sk),v1,cholesky_mo_num)
-              call gen_v_space_chol(n1_S(si),1,list1(1,si),list4(tmp_l,sl),v2,cholesky_mo_num)
+              call gen_v_space_chol(n2_S(sj), n3_S(sk), list2(1,sj), &
+                                    list3(1,sk), v1, int(cholesky_mo_num,4))
+              call gen_v_space_chol(n1_S(si), 1, list1(1,si), list4(tmp_l,sl), &
+                                    v2, int(cholesky_mo_num,4))
 
-              call dgemm('T','N', n2_S(sj)*n3_S(sk), n1_S(si), cholesky_mo_num, 1.d0, &
-                    v1, cholesky_mo_num, &
-                    v2, cholesky_mo_num, 0.d0, buffer, n2_S(sj)*n3_S(sk))
+              call dgemm('T', 'N', n2_S(sj)*n3_S(sk), n1_S(si), &
+                         int(cholesky_mo_num,4), 1.d0, v1, &
+                         int(cholesky_mo_num,4), v2, int(cholesky_mo_num,4), &
+                         0.d0, buffer, n2_S(sj)*n3_S(sk))
 
               !$OMP PARALLEL &
               !$OMP DEFAULT(SHARED) &
@@ -2032,12 +2076,15 @@ subroutine gen_v_spin_3idx(n1,n2,n3,n4, idx_l, n1_S,n2_S,n3_S,n4_S, list1,list2,
               allocate(v1(cholesky_mo_num,n1_S(si),n3_S(sk)), v2(cholesky_mo_num,n2_S(sj),1))
               allocate(buffer(n1_S(si),n3_S(sk),n2_S(sj)))
 
-              call gen_v_space_chol(n1_S(si),n3_S(sk),list1(1,si),list3(1,sk),v1,cholesky_mo_num)
-              call gen_v_space_chol(n2_S(sj),1,list2(1,sj),list4(tmp_l,sl),v2,cholesky_mo_num)
+              call gen_v_space_chol(n1_S(si), n3_S(sk), list1(1,si), &
+                                    list3(1,sk), v1, int(cholesky_mo_num,4))
+              call gen_v_space_chol(n2_S(sj), 1, list2(1,sj), list4(tmp_l,sl), &
+                                    v2, int(cholesky_mo_num,4))
 
-              call dgemm('T','N', n1_S(si)*n3_S(sk), n2_S(sj), cholesky_mo_num, 1.d0, &
-                    v1, cholesky_mo_num, &
-                    v2, cholesky_mo_num, 0.d0, buffer, n1_S(si)*n3_S(sk))
+              call dgemm('T', 'N', n1_S(si)*n3_S(sk), n2_S(sj), &
+                         int(cholesky_mo_num,4), 1.d0, v1, &
+                         int(cholesky_mo_num,4), v2, int(cholesky_mo_num,4), &
+                         0.d0, buffer, n1_S(si)*n3_S(sk))
 
               !$OMP PARALLEL &
               !$OMP DEFAULT(SHARED) &
@@ -2064,12 +2111,15 @@ subroutine gen_v_spin_3idx(n1,n2,n3,n4, idx_l, n1_S,n2_S,n3_S,n4_S, list1,list2,
               allocate(v1(cholesky_mo_num,n2_S(sj),n3_S(sk)), v2(cholesky_mo_num,n1_S(si),1))
               allocate(buffer(n2_S(sj),n3_S(sk),n1_S(si)))
 
-              call gen_v_space_chol(n2_S(sj),n3_S(sk),list2(1,sj),list3(1,sk),v1,cholesky_mo_num)
-              call gen_v_space_chol(n1_S(si),1,list1(1,si),list4(tmp_l,sl),v2,cholesky_mo_num)
+              call gen_v_space_chol(n2_S(sj), n3_S(sk), list2(1,sj), &
+                                    list3(1,sk), v1, int(cholesky_mo_num,4))
+              call gen_v_space_chol(n1_S(si), 1, list1(1,si), list4(tmp_l,sl), &
+                                    v2, int(cholesky_mo_num,4))
 
-              call dgemm('T','N', n2_S(sj)*n3_S(sk), n1_S(si), cholesky_mo_num, -1.d0, &
-                    v1, cholesky_mo_num, &
-                    v2, cholesky_mo_num, 0.d0, buffer, n2_S(sj)*n3_S(sk))
+              call dgemm('T', 'N', n2_S(sj)*n3_S(sk), n1_S(si), &
+                         int(cholesky_mo_num,4), -1.d0, v1, &
+                         int(cholesky_mo_num,4), v2, int(cholesky_mo_num,4), &
+                         0.d0, buffer, n2_S(sj)*n3_S(sk))
 
               !$OMP PARALLEL &
               !$OMP DEFAULT(SHARED) &
@@ -2257,12 +2307,15 @@ subroutine gen_v_spin_3idx_ij_l(n1,n2,n3,n4, idx_k, n1_S,n2_S,n3_S,n4_S, list1,l
               allocate(v1(cholesky_mo_num,n1_S(si),1), v2(cholesky_mo_num,n2_S(sj),n4_S(sl)))
               allocate(buffer(n1_S(si),n2_S(sj),n4_S(sl)))
 
-              call gen_v_space_chol(n1_S(si),1,list1(1,si),list3(tmp_k,sk),v1,cholesky_mo_num)
-              call gen_v_space_chol(n2_S(sj),n4_S(sl),list2(1,sj),list4(1,sl),v2,cholesky_mo_num)
+              call gen_v_space_chol(n1_S(si), 1, list1(1,si), list3(tmp_k,sk), &
+                                    v1, int(cholesky_mo_num,4))
+              call gen_v_space_chol(n2_S(sj), n4_S(sl), list2(1,sj), &
+                                    list4(1,sl), v2, int(cholesky_mo_num,4))
 
-              call dgemm('T','N', n1_S(si), n2_S(sj)*n4_S(sl), cholesky_mo_num, 1.d0, &
-                    v1, cholesky_mo_num, &
-                    v2, cholesky_mo_num, 0.d0, buffer, n1_S(si))
+              call dgemm('T', 'N', n1_S(si), n2_S(sj)*n4_S(sl), &
+                         int(cholesky_mo_num,4), 1.d0, v1, &
+                         int(cholesky_mo_num,4), v2, int(cholesky_mo_num,4), &
+                         0.d0, buffer, n1_S(si))
 
               !$OMP PARALLEL &
               !$OMP DEFAULT(SHARED) &
@@ -2286,12 +2339,15 @@ subroutine gen_v_spin_3idx_ij_l(n1,n2,n3,n4, idx_k, n1_S,n2_S,n3_S,n4_S, list1,l
               allocate(v1(cholesky_mo_num,n2_S(sj),1), v2(cholesky_mo_num,n1_S(si),n4_S(sl)))
               allocate(buffer(n2_S(sj),n1_S(si),n4_S(sl)))
 
-              call gen_v_space_chol(n2_S(sj),1,list2(1,sj),list3(tmp_k,sk),v1,cholesky_mo_num)
-              call gen_v_space_chol(n1_S(si),n4_S(sl),list1(1,si),list4(1,sl),v2,cholesky_mo_num)
+              call gen_v_space_chol(n2_S(sj), 1, list2(1,sj), list3(tmp_k,sk), &
+                                    v1, int(cholesky_mo_num,4))
+              call gen_v_space_chol(n1_S(si), n4_S(sl), list1(1,si), &
+                                    list4(1,sl), v2, int(cholesky_mo_num,4))
 
-              call dgemm('T','N', n2_S(sj), n1_S(si)*n4_S(sl), cholesky_mo_num, 1.d0, &
-                    v1, cholesky_mo_num, &
-                    v2, cholesky_mo_num, 0.d0, buffer, n2_S(sj))
+              call dgemm('T', 'N', n2_S(sj), n1_S(si)*n4_S(sl), &
+                         int(cholesky_mo_num,4), 1.d0, v1, &
+                         int(cholesky_mo_num,4), v2, int(cholesky_mo_num,4), &
+                         0.d0, buffer, n2_S(sj))
 
               !$OMP PARALLEL &
               !$OMP DEFAULT(SHARED) &
@@ -2318,12 +2374,15 @@ subroutine gen_v_spin_3idx_ij_l(n1,n2,n3,n4, idx_k, n1_S,n2_S,n3_S,n4_S, list1,l
               allocate(v1(cholesky_mo_num,n1_S(si),1), v2(cholesky_mo_num,n2_S(sj),n4_S(sl)))
               allocate(buffer(n1_S(si),n2_S(sj),n4_S(sl)))
 
-              call gen_v_space_chol(n1_S(si),1,list1(1,si),list3(tmp_k,sk),v1,cholesky_mo_num)
-              call gen_v_space_chol(n2_S(sj),n4_S(sl),list2(1,sj),list4(1,sl),v2,cholesky_mo_num)
+              call gen_v_space_chol(n1_S(si), 1, list1(1,si), list3(tmp_k,sk), &
+                                    v1, int(cholesky_mo_num,4))
+              call gen_v_space_chol(n2_S(sj), n4_S(sl), list2(1,sj), &
+                                    list4(1,sl), v2, int(cholesky_mo_num,4))
 
-              call dgemm('T','N', n1_S(si), n2_S(sj)*n4_S(sl), cholesky_mo_num, 1.d0, &
-                    v1, cholesky_mo_num, &
-                    v2, cholesky_mo_num, 0.d0, buffer, n1_S(si))
+              call dgemm('T', 'N', n1_S(si), n2_S(sj)*n4_S(sl), &
+                         int(cholesky_mo_num,4), 1.d0, v1, &
+                         int(cholesky_mo_num,4), v2, int(cholesky_mo_num,4), &
+                         0.d0, buffer, n1_S(si))
 
               !$OMP PARALLEL &
               !$OMP DEFAULT(SHARED) &
@@ -2350,12 +2409,15 @@ subroutine gen_v_spin_3idx_ij_l(n1,n2,n3,n4, idx_k, n1_S,n2_S,n3_S,n4_S, list1,l
               allocate(v1(cholesky_mo_num,n2_S(sj),1), v2(cholesky_mo_num,n1_S(si),n4_S(sl)))
               allocate(buffer(n2_S(sj),n1_S(si),n4_S(sl)))
 
-              call gen_v_space_chol(n2_S(sj),1,list2(1,sj),list3(tmp_k,sk),v1,cholesky_mo_num)
-              call gen_v_space_chol(n1_S(si),n4_S(sl),list1(1,si),list4(1,sl),v2,cholesky_mo_num)
+              call gen_v_space_chol(n2_S(sj), 1, list2(1,sj), list3(tmp_k,sk), &
+                                    v1, int(cholesky_mo_num,4))
+              call gen_v_space_chol(n1_S(si), n4_S(sl), list1(1,si), &
+                                    list4(1,sl), v2, int(cholesky_mo_num,4))
 
-              call dgemm('T','N', n2_S(sj), n1_S(si)*n4_S(sl), cholesky_mo_num, -1.d0, &
-                    v1, cholesky_mo_num, &
-                    v2, cholesky_mo_num, 0.d0, buffer, n2_S(sj))
+              call dgemm('T', 'N', n2_S(sj), n1_S(si)*n4_S(sl), &
+                         int(cholesky_mo_num,4), -1.d0, v1, &
+                         int(cholesky_mo_num,4), v2, int(cholesky_mo_num,4), &
+                         0.d0, buffer, n2_S(sj))
 
               !$OMP PARALLEL &
               !$OMP DEFAULT(SHARED) &
@@ -2544,12 +2606,15 @@ subroutine gen_v_spin_3idx_i_kl(n1,n2,n3,n4, idx_j, n1_S,n2_S,n3_S,n4_S, list1,l
               allocate(v1(cholesky_mo_num,n1_S(si),n3_S(sk)), v2(cholesky_mo_num,1,n4_S(sl)))
               allocate(buffer(n1_S(si),n3_S(sk),n4_S(sl)))
 
-              call gen_v_space_chol(n1_S(si),n3_S(sk),list1(1,si),list3(1,sk),v1,cholesky_mo_num)
-              call gen_v_space_chol(1,n4_S(sl),list2(tmp_j,sj),list4(1,sl),v2,cholesky_mo_num)
+              call gen_v_space_chol(n1_S(si), n3_S(sk), list1(1,si), &
+                                    list3(1,sk), v1, int(cholesky_mo_num,4))
+              call gen_v_space_chol(1, n4_S(sl), list2(tmp_j,sj), list4(1,sl), &
+                                    v2, int(cholesky_mo_num,4))
 
-              call dgemm('T','N', n1_S(si)*n3_S(sk), n4_S(sl), cholesky_mo_num, 1.d0, &
-                    v1, cholesky_mo_num, &
-                    v2, cholesky_mo_num, 0.d0, buffer, n1_S(si)*n3_S(sk))
+              call dgemm('T', 'N', n1_S(si)*n3_S(sk), n4_S(sl), &
+                         int(cholesky_mo_num,4), 1.d0, v1, &
+                         int(cholesky_mo_num,4), v2, int(cholesky_mo_num,4), &
+                         0.d0, buffer, n1_S(si)*n3_S(sk))
 
               !$OMP PARALLEL &
               !$OMP DEFAULT(SHARED) &
@@ -2573,12 +2638,15 @@ subroutine gen_v_spin_3idx_i_kl(n1,n2,n3,n4, idx_j, n1_S,n2_S,n3_S,n4_S, list1,l
               allocate(v1(cholesky_mo_num,1,n3_S(sk)), v2(cholesky_mo_num,n1_S(si),n4_S(sl)))
               allocate(buffer(n3_S(sk),n1_S(si),n4_S(sl)))
 
-              call gen_v_space_chol(1,n3_S(sk),list2(tmp_j,sj),list3(1,sk),v1,cholesky_mo_num)
-              call gen_v_space_chol(n1_S(si),n4_S(sl),list1(1,si),list4(1,sl),v2,cholesky_mo_num)
+              call gen_v_space_chol(1, n3_S(sk), list2(tmp_j,sj), list3(1,sk), &
+                                    v1, int(cholesky_mo_num,4))
+              call gen_v_space_chol(n1_S(si), n4_S(sl), list1(1,si), &
+                                    list4(1,sl), v2, int(cholesky_mo_num,4))
 
-              call dgemm('T','N', n3_S(sk), n1_S(si)*n4_S(sl), cholesky_mo_num, 1.d0, &
-                    v1, cholesky_mo_num, &
-                    v2, cholesky_mo_num, 0.d0, buffer, n3_S(sk))
+              call dgemm('T', 'N', n3_S(sk), n1_S(si)*n4_S(sl), &
+                         int(cholesky_mo_num,4), 1.d0, v1, &
+                         int(cholesky_mo_num,4), v2, int(cholesky_mo_num,4), &
+                         0.d0, buffer, n3_S(sk))
 
               !$OMP PARALLEL &
               !$OMP DEFAULT(SHARED) &
@@ -2605,12 +2673,15 @@ subroutine gen_v_spin_3idx_i_kl(n1,n2,n3,n4, idx_j, n1_S,n2_S,n3_S,n4_S, list1,l
               allocate(v1(cholesky_mo_num,n1_S(si),n3_S(sk)), v2(cholesky_mo_num,1,n4_S(sl)))
               allocate(buffer(n1_S(si),n3_S(sk),n4_S(sl)))
 
-              call gen_v_space_chol(n1_S(si),n3_S(sk),list1(1,si),list3(1,sk),v1,cholesky_mo_num)
-              call gen_v_space_chol(1,n4_S(sl),list2(tmp_j,sj),list4(1,sl),v2,cholesky_mo_num)
+              call gen_v_space_chol(n1_S(si), n3_S(sk), list1(1,si), &
+                                    list3(1,sk), v1, int(cholesky_mo_num,4))
+              call gen_v_space_chol(1, n4_S(sl), list2(tmp_j,sj), list4(1,sl), &
+                                    v2, int(cholesky_mo_num,4))
 
-              call dgemm('T','N', n1_S(si)*n3_S(sk), n4_S(sl), cholesky_mo_num, 1.d0, &
-                    v1, cholesky_mo_num, &
-                    v2, cholesky_mo_num, 0.d0, buffer, n1_S(si)*n3_S(sk))
+              call dgemm('T', 'N', n1_S(si)*n3_S(sk), n4_S(sl), &
+                         int(cholesky_mo_num,4), 1.d0, v1, &
+                         int(cholesky_mo_num,4), v2, int(cholesky_mo_num,4), &
+                         0.d0, buffer, n1_S(si)*n3_S(sk))
 
               !$OMP PARALLEL &
               !$OMP DEFAULT(SHARED) &
@@ -2637,12 +2708,15 @@ subroutine gen_v_spin_3idx_i_kl(n1,n2,n3,n4, idx_j, n1_S,n2_S,n3_S,n4_S, list1,l
               allocate(v1(cholesky_mo_num,1,n3_S(sk)), v2(cholesky_mo_num,n1_S(si),n4_S(sl)))
               allocate(buffer(n3_S(sk),n1_S(si),n4_S(sl)))
 
-              call gen_v_space_chol(1,n3_S(sk),list2(tmp_j,sj),list3(1,sk),v1,cholesky_mo_num)
-              call gen_v_space_chol(n1_S(si),n4_S(sl),list1(1,si),list4(1,sl),v2,cholesky_mo_num)
+              call gen_v_space_chol(1, n3_S(sk), list2(tmp_j,sj), list3(1,sk), &
+                                    v1, int(cholesky_mo_num,4))
+              call gen_v_space_chol(n1_S(si), n4_S(sl), list1(1,si), &
+                                    list4(1,sl), v2, int(cholesky_mo_num,4))
 
-              call dgemm('T','N', n3_S(sk), n1_S(si)*n4_S(sl), cholesky_mo_num, -1.d0, &
-                    v1, cholesky_mo_num, &
-                    v2, cholesky_mo_num, 0.d0, buffer, n3_S(sk))
+              call dgemm('T', 'N', n3_S(sk), n1_S(si)*n4_S(sl), &
+                         int(cholesky_mo_num,4), -1.d0, v1, &
+                         int(cholesky_mo_num,4), v2, int(cholesky_mo_num,4), &
+                         0.d0, buffer, n3_S(sk))
 
               !$OMP PARALLEL &
               !$OMP DEFAULT(SHARED) &

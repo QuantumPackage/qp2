@@ -1,4 +1,5 @@
 use bitmasks
+use sizet
 
 BEGIN_PROVIDER [ integer, spin_multiplicity ]
  implicit none
@@ -195,7 +196,7 @@ end
 
 
  BEGIN_PROVIDER [ integer(bit_kind), psi_configuration, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ integer, N_configuration ]
+&BEGIN_PROVIDER [ integer(size_t), N_configuration ]
  implicit none
  BEGIN_DOC
   ! Array of the configurations present in the wave function.
@@ -232,7 +233,7 @@ end
    bit_tmp(i) = configuration_search_key(psi_configuration(1,1,i),N_int)
  enddo
 
- call i8sort(bit_tmp,iorder,N_det)
+ call i8sort(bit_tmp,iorder,int(N_det,4))
 
 
  !$OMP PARALLEL DEFAULT(shared) PRIVATE(i,j,k,dup)
@@ -320,7 +321,7 @@ end
 
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer, cfg_seniority_index, (0:elec_num) ]
+ BEGIN_PROVIDER [ integer(size_t), cfg_seniority_index, (0:elec_num) ]
 &BEGIN_PROVIDER [ integer, cfg_nsomo_max ]
   implicit none
   BEGIN_DOC
@@ -329,7 +330,8 @@ END_PROVIDER
  !
  ! cfg_nsomo_max : Max number of SOMO in the current wave function
  END_DOC
- integer :: i, k, s, sold
+ integer(size_t)               :: i
+ integer                        :: k, s, sold
  cfg_seniority_index(:) = -1
  sold = -1
  cfg_nsomo_max = 0
@@ -347,12 +349,13 @@ END_PROVIDER
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, det_to_configuration, (N_det) ]
+BEGIN_PROVIDER [ integer(size_t), det_to_configuration, (N_det) ]
  implicit none
  BEGIN_DOC
  ! Returns the index of the configuration for each determinant
  END_DOC
- integer :: i,j,k,r,l
+ integer                      :: i,k
+ integer(size_t)              :: j,r,l
  integer*8 :: key, key2
  integer(bit_kind) :: occ(N_int,2)
  logical :: found
@@ -419,7 +422,8 @@ BEGIN_PROVIDER [ double precision, psi_configuration_Hii, (N_configuration) ]
  ! This is the minimum $H_{ii}$, where the $|i\rangle$ are the
  ! determinants of $|I\rangle$.
  END_DOC
- integer :: j, i
+ integer(size_t) :: j
+ integer         :: i
 
  psi_configuration_Hii(:) = huge(1.d0)
  do i=1,N_det
@@ -435,7 +439,8 @@ BEGIN_PROVIDER [ double precision, weight_configuration, (N_configuration,N_stat
  BEGIN_DOC
  ! Weight of the configurations in the wave function
  END_DOC
- integer :: i,j,k
+ integer(size_t) :: j
+ integer         :: i,k
  weight_configuration = 0.d0
  do i=1,N_det
   j = det_to_configuration(i)
@@ -450,7 +455,8 @@ BEGIN_PROVIDER [ double precision, weight_configuration_average, (N_configuratio
  BEGIN_DOC
  ! State-average weight of the configurations in the wave function
  END_DOC
- integer :: i,j,k
+ integer(size_t) :: j
+ integer         :: i,k
  weight_configuration_average(:) = 0.d0
  do i=1,N_det
   j = det_to_configuration(i)
@@ -462,20 +468,21 @@ END_PROVIDER
 
  BEGIN_PROVIDER [ integer(bit_kind), psi_configuration_sorted, (N_int,2,N_configuration) ]
 &BEGIN_PROVIDER [ double precision, weight_configuration_average_sorted, (N_configuration) ]
-&BEGIN_PROVIDER [ integer, psi_configuration_sorted_order, (N_configuration) ]
-&BEGIN_PROVIDER [ integer, psi_configuration_sorted_order_reverse, (N_configuration) ]
+&BEGIN_PROVIDER [ integer(size_t), psi_configuration_sorted_order, (N_configuration) ]
+&BEGIN_PROVIDER [ integer(size_t), psi_configuration_sorted_order_reverse, (N_configuration) ]
  implicit none
  BEGIN_DOC
  ! Configurations sorted by weight
  END_DOC
- integer                        :: i,j,k
- integer, allocatable           :: iorder(:)
+ integer(size_t)               :: i
+ integer                        :: j,k
+ integer(size_t), allocatable   :: iorder(:)
  allocate ( iorder(N_configuration) )
  do i=1,N_configuration
    weight_configuration_average_sorted(i) = -weight_configuration_average(i)
    iorder(i) = i
  enddo
- call dsort(weight_configuration_average_sorted,iorder,N_configuration)
+ call dsort_big(weight_configuration_average_sorted,iorder,N_configuration)
  do i=1,N_configuration
    do j=1,N_int
      psi_configuration_sorted(j,1,i) = psi_configuration(j,1,iorder(i))
@@ -492,6 +499,7 @@ END_PROVIDER
 
 
 subroutine make_s2_eigenfunction
+ use sizet
   implicit none
   BEGIN_DOC
   ! Adds to the wavefunction the determinants missing from each of its
@@ -501,45 +509,51 @@ subroutine make_s2_eigenfunction
   ! when s2_eig is true, so that the eigenstates of H can also be
   ! eigenstates of S^2.
   END_DOC
-  integer                        :: i,j,k
+  integer(size_t)               :: i
+  integer                        :: j,k
   integer                        :: smax, s
   integer(bit_kind), allocatable :: d(:,:,:), det_buffer(:,:,:)
-  integer                        :: N_det_new, ithread, omp_get_thread_num
+  integer                        :: N_det_new
+  integer                        :: ithread, omp_get_thread_num
   integer, parameter             :: bufsze = 1000
   logical, external              :: is_in_wavefunction
   logical                        :: update
 
   update=.False.
-  call write_int(6,N_configuration,'Number of configurations')
+  call write_int(6,int(N_configuration,4),'Number of configurations')
 
   !$OMP PARALLEL DEFAULT(NONE) &
   !$OMP  SHARED(N_configuration, psi_configuration, elec_alpha_num,N_int,update) &
   !$OMP  PRIVATE(s,ithread, d, det_buffer, smax, N_det_new,i,j,k)
   N_det_new = 0
-  call configuration_to_dets_size(psi_configuration(1,1,1),s,elec_alpha_num,N_int)
+  call configuration_to_dets_size(psi_configuration(1,1,1),s, &
+      elec_alpha_num,int(N_int,4))
   allocate (d(N_int,2,s+64), det_buffer(N_int,2,bufsze) )
   smax = s
   ithread=0
   !$ ithread = omp_get_thread_num()
   !$OMP DO SCHEDULE (dynamic,1000)
   do i=1,N_configuration
-    call configuration_to_dets_size(psi_configuration(1,1,i),s,elec_alpha_num,N_int)
+    call configuration_to_dets_size(psi_configuration(1,1,i),s, &
+        elec_alpha_num,int(N_int,4))
     s += 1
     if (s > smax) then
       deallocate(d)
       allocate ( d(N_int,2,s+64) )
       smax = s
     endif
-    call configuration_to_dets(psi_configuration(1,1,i),d,s,elec_alpha_num,N_int)
+    call configuration_to_dets(psi_configuration(1,1,i),d,s, &
+        elec_alpha_num,int(N_int,4))
     do j=1,s
-      if ( is_in_wavefunction(d(1,1,j), N_int) ) then
+      if ( is_in_wavefunction(d(1,1,j), int(N_int,size_t)) ) then
         cycle
       endif
       update = .true.
       N_det_new += 1
       det_buffer(:,:,N_det_new) = d(:,:,j)
       if (N_det_new == bufsze) then
-        call fill_H_apply_buffer_no_selection(bufsze,det_buffer,N_int,ithread)
+        call fill_H_apply_buffer_no_selection(int(bufsze,size_t), det_buffer, &
+                                              N_int, ithread)
         N_det_new = 0
       endif
     enddo
@@ -547,7 +561,8 @@ subroutine make_s2_eigenfunction
   !$OMP END DO NOWAIT
 
   if (N_det_new > 0) then
-    call fill_H_apply_buffer_no_selection(N_det_new,det_buffer,N_int,ithread)
+    call fill_H_apply_buffer_no_selection(int(N_det_new,size_t), det_buffer, &
+                                          N_int, ithread)
   endif
   !$OMP BARRIER
   deallocate(d,det_buffer)
@@ -563,7 +578,7 @@ end
 
 
 
-BEGIN_PROVIDER [ integer, dominant_cfg, (N_states) ]
+BEGIN_PROVIDER [ integer(size_t), dominant_cfg, (N_states) ]
  implicit none
  BEGIN_DOC
  ! Configuration of the determinants with the largest weight, for each state
@@ -591,7 +606,7 @@ BEGIN_PROVIDER [ integer, N_dominant_dets_of_cfgs ]
  do k=1,N_states
    call configuration_to_dets_size(  &
           psi_configuration(1,1,dominant_cfg(k)), &
-          sze, elec_alpha_num, N_int)
+          sze, elec_alpha_num, int(N_int,4))
    N_dominant_dets_of_cfgs += sze
  enddo
 END_PROVIDER
@@ -608,7 +623,7 @@ BEGIN_PROVIDER [ integer(bit_kind), dominant_dets_of_cfgs, (N_int,2,N_dominant_d
    call configuration_to_dets( &
           psi_configuration(1,1,dominant_cfg(k)), &
           dominant_dets_of_cfgs(1,1,i), &
-          sze,elec_alpha_num,N_int)
+          sze,elec_alpha_num,int(N_int,4))
    i += sze
  enddo
 END_PROVIDER
@@ -664,7 +679,8 @@ end subroutine
  ! n_det_per_config_max: Maximum number of determinants per configuration
  END_DOC
 
- integer :: i, k, iorder
+ integer          :: i, iorder
+ integer(size_t) :: k
  integer, allocatable :: confs(:)
  allocate (confs(N_det))
 
@@ -673,7 +689,7 @@ end subroutine
    confs(i) = det_to_configuration(i)
  enddo
 
- call isort(confs, psi_configuration_to_psi_det_data, N_det)
+ call isort(confs, psi_configuration_to_psi_det_data, int(N_det,4))
  k=1
  psi_configuration_to_psi_det(1,1) = 1
  do i=2,N_det
@@ -721,7 +737,7 @@ end subroutine
 
    sze = nmax
    call configuration_to_dets( psi_configuration(1,1,k), &
-       dets, sze, elec_alpha_num, N_int)
+       dets, sze, elec_alpha_num, int(N_int,4))
 
    if (sze /= iend-istart+1) then
       call qp_bug(irp_here, iend-istart+1, 'sze /= iend-istart+1')
@@ -772,7 +788,8 @@ BEGIN_PROVIDER [ integer, n_elec_alpha_for_psi_configuration, (N_configuration)]
  ! det_alpha(l) = iand(det_tmp(l,1),psi_configuration(l,1,i)) -
  ! bug (author, 2026-10-31).
  END_DOC
- integer :: i,j,k,l
+ integer(size_t) :: i
+ integer         :: j,k,l
  integer(bit_kind) :: det_tmp(N_int,2),det_alpha(N_int)
  n_elec_alpha_for_psi_configuration = 0
  do i = 1, N_configuration

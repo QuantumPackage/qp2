@@ -6,10 +6,12 @@ subroutine do_signed_mono_excitation(key1,key2,nu,ihole,ipart,       &
   ! we create the mono-excitation, and determine, if possible,
   ! the phase and the number in the list of determinants
   END_DOC
+  use sizet
   implicit none
   integer(bit_kind)              :: key1(N_int,2),key2(N_int,2)
   integer(bit_kind), allocatable :: keytmp(:,:)
-  integer                        :: exc(0:2,2,2),ihole,ipart,ierr,nu,ispin
+  integer(size_t)                :: exc(0:2,2,2)
+  integer                        :: ihole,ipart,ierr,nu,ispin
   real*8                         :: phase
   logical                        :: found
   allocate(keytmp(N_int,2))
@@ -17,10 +19,10 @@ subroutine do_signed_mono_excitation(key1,key2,nu,ihole,ipart,       &
   nu=-1
   phase=1.D0
   ierr=0
-  call det_copy(key1,key2,N_int)
+  call det_copy(key1,key2,int(N_int,4))
   !        write(6,*) ' key2 before excitation ',ihole,' -> ',ipart,' spin = ',ispin
   !        call print_det(key2,N_int)
-  call do_single_excitation(key2,ihole,ipart,ispin,ierr)
+  call do_single_excitation(key2,int(ihole,size_t),int(ipart,size_t),ispin,ierr)
   !        write(6,*) ' key2 after ',ihole,' -> ',ipart,' spin = ',ispin
   !        call print_det(key2,N_int)
   !        write(6,*) ' excitation ',ihole,' -> ',ipart,' gives ierr = ',ierr
@@ -40,7 +42,7 @@ subroutine do_signed_mono_excitation(key1,key2,nu,ihole,ipart,       &
         found=.true.
         nu=-1
       else
-        call det_extract(keytmp,nu,N_int)
+        call det_extract(keytmp,nu,int(N_int,4))
         integer                        :: i,ii
         found=.true.
         do ii=1,2

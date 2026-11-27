@@ -1,3 +1,4 @@
+use sizet
 
  BEGIN_PROVIDER[double precision, core_mos_in_r_array, (n_core_orb,n_points_final_grid)]
 &BEGIN_PROVIDER[double precision, core_mos_in_r_array_transp,(n_points_final_grid,n_core_orb)]
@@ -5,7 +6,8 @@
  BEGIN_DOC
 ! all COREE  MOs on the grid points, arranged in two different ways
  END_DOC
- integer :: i,j,k
+ integer         :: i,j
+ integer(size_t) :: k
  do i = 1, n_core_orb
   j = list_core(i) 
   do k = 1, n_points_final_grid
@@ -28,7 +30,8 @@ END_PROVIDER
  BEGIN_DOC
 ! all INACTIVE MOs on the grid points, arranged in two different ways
  END_DOC
- integer :: i,j,k
+ integer         :: i,j
+ integer(size_t) :: k
  do i = 1, n_inact_orb
   j = list_inact(i) 
   do k = 1, n_points_final_grid
@@ -50,7 +53,8 @@ END_PROVIDER
  BEGIN_DOC
 ! all ACTIVE MOs on the grid points, arranged in two different ways
  END_DOC
- integer :: i,j,k
+ integer         :: i,j
+ integer(size_t) :: k
  do i = 1, n_act_orb
   j = list_act(i) 
   do k = 1, n_points_final_grid
@@ -73,7 +77,8 @@ END_PROVIDER
  BEGIN_DOC
 ! all VIRTUAL MOs on the grid points, arranged in two different ways
  END_DOC
- integer :: i,j,k
+ integer         :: i,j
+ integer(size_t) :: k
  do i = 1, n_virt_orb
   j = list_virt(i) 
   do k = 1, n_points_final_grid
@@ -96,7 +101,8 @@ END_PROVIDER
 ! all CORE, INACTIVE and ACTIVE MOs on the grid points,
 ! arranged in two different ways
  END_DOC
- integer :: i,j,k
+ integer         :: i,j
+ integer(size_t) :: k
  do i = 1, n_core_inact_act_orb
   j = list_core_inact_act(i) 
   do k = 1, n_points_final_grid
@@ -120,7 +126,8 @@ END_PROVIDER
 ! (l=1 x, 2 y, 3 z) of the gradient of the i-th MO (order of
 ! list_core_inact_act) at grid point k
  END_DOC
- integer :: i,j,k,l
+ integer         :: i,j,l
+ integer(size_t) :: k
  do i = 1, n_core_inact_act_orb
   j = list_core_inact_act(i) 
   do k = 1, n_points_final_grid

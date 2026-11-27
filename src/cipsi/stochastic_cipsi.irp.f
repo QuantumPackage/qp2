@@ -1,4 +1,7 @@
+use sizet
+
 subroutine run_stochastic_cipsi(Ev,PT2)
+ use sizet
   use selection_types
   use qp_json, only: json_add
   implicit none
@@ -8,7 +11,7 @@ subroutine run_stochastic_cipsi(Ev,PT2)
   integer                        :: i,j,k
   double precision, intent(out)  :: Ev(N_states), PT2(N_states)
   double precision, allocatable  :: zeros(:)
-  integer                        :: to_select
+  integer(size_t)                :: to_select
   type(pt2_type)                 :: pt2_data, pt2_data_err
   logical, external              :: qp_stop
 
@@ -20,7 +23,7 @@ subroutine run_stochastic_cipsi(Ev,PT2)
   threshold_generators = 1.d0
   SOFT_TOUCH threshold_generators
 
-  rss = memory_of_double(N_states)*4.d0
+  rss = memory_of_double(int(N_states, size_t))*4.d0
   call check_mem(rss,irp_here)
 
   allocate (zeros(N_states))
@@ -77,8 +80,8 @@ subroutine run_stochastic_cipsi(Ev,PT2)
       write(*,'(A)')  '--------------------------------------------------------------------------------'
 
 
-    to_select = int(sqrt(dble(N_states))*dble(N_det)*selection_factor)
-    to_select = max(N_states_diag, to_select)
+    to_select = int(sqrt(dble(N_states))*dble(N_det)*selection_factor, size_t)
+    to_select = max(int(N_states_diag, size_t), to_select)
 
 
     Ev(1:N_states) = psi_energy_with_nucl_rep(1:N_states)
@@ -134,7 +137,8 @@ subroutine run_stochastic_cipsi(Ev,PT2)
     call pt2_dealloc(pt2_data_err)
     call pt2_alloc(pt2_data, N_states)
     call pt2_alloc(pt2_data_err, N_states)
-    call pt2_stochastic(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, relative_error, 0) ! Stochastic PT2
+    call pt2_stochastic(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, &
+                        relative_error, int(0,size_t)) ! Stochastic PT2
 
     call save_energy(psi_energy_with_nucl_rep, pt2_data % pt2)
     call print_summary(psi_energy_with_nucl_rep, &

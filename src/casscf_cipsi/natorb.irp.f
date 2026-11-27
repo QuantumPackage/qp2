@@ -1,3 +1,5 @@
+use sizet
+
  BEGIN_PROVIDER [real*8, occnum, (mo_num)]
   implicit none
   BEGIN_DOC
@@ -34,7 +36,9 @@ END_PROVIDER
  double precision               :: Vt(n_act_orb,n_act_orb)
  
 ! call lapack_diag(occ_act,natorbsCI,D0tu,n_act_orb,n_act_orb)
- call svd(D0tu, size(D0tu,1), natorbsCI,size(natorbsCI,1), occ_act, Vt, size(Vt,1),n_act_orb,n_act_orb) 
+  call svd(D0tu, int(size(D0tu,1),size_t), natorbsCI, &
+          int(size(natorbsCI,1),size_t), occ_act, Vt, int(size(Vt,1),size_t), &
+          n_act_orb, n_act_orb) 
  
  if (bavard) then
    write(6,*) ' found occupation numbers as '
@@ -76,21 +80,25 @@ BEGIN_PROVIDER [real*8, P0tuvx_no, (n_act_orb,n_act_orb,n_act_orb,n_act_orb)]
   double precision, allocatable :: tmp(:,:,:,:)
   allocate(tmp(n_act_orb,n_act_orb,n_act_orb,n_act_orb))
 
-  call dgemm('T','N',(n_act_orb*n_act_orb*n_act_orb), n_act_orb, n_act_orb, 1.d0, &
-          P0tuvx, n_act_orb, natorbsCI, n_act_orb, 0.d0, &
-          tmp, (n_act_orb*n_act_orb*n_act_orb))
+  call dgemm('T','N',int(n_act_orb*n_act_orb*n_act_orb,4), &
+       int(n_act_orb,4), int(n_act_orb,4), 1.d0, P0tuvx, &
+       int(n_act_orb,4), natorbsCI, int(n_act_orb,4), 0.d0, &
+       tmp, int(n_act_orb*n_act_orb*n_act_orb,4))
 
-  call dgemm('T','N',(n_act_orb*n_act_orb*n_act_orb), n_act_orb, n_act_orb, 1.d0, &
-          tmp, n_act_orb, natorbsCI, n_act_orb, 0.d0, &
-          P0tuvx_no, (n_act_orb*n_act_orb*n_act_orb))
+  call dgemm('T','N',int(n_act_orb*n_act_orb*n_act_orb,4), &
+       int(n_act_orb,4), int(n_act_orb,4), 1.d0, tmp, &
+       int(n_act_orb,4), natorbsCI, int(n_act_orb,4), 0.d0, &
+       P0tuvx_no, int(n_act_orb*n_act_orb*n_act_orb,4))
 
-  call dgemm('T','N',(n_act_orb*n_act_orb*n_act_orb), n_act_orb, n_act_orb, 1.d0, &
-          P0tuvx_no, n_act_orb, natorbsCI, n_act_orb, 0.d0, &
-          tmp, (n_act_orb*n_act_orb*n_act_orb))
+  call dgemm('T','N',int(n_act_orb*n_act_orb*n_act_orb,4), &
+       int(n_act_orb,4), int(n_act_orb,4), 1.d0, P0tuvx_no, &
+       int(n_act_orb,4), natorbsCI, int(n_act_orb,4), 0.d0, &
+       tmp, int(n_act_orb*n_act_orb*n_act_orb,4))
 
-  call dgemm('T','N',(n_act_orb*n_act_orb*n_act_orb), n_act_orb, n_act_orb, 1.d0, &
-          tmp, n_act_orb, natorbsCI, n_act_orb, 0.d0, &
-          P0tuvx_no, (n_act_orb*n_act_orb*n_act_orb))
+  call dgemm('T','N',int(n_act_orb*n_act_orb*n_act_orb,4), &
+       int(n_act_orb,4), int(n_act_orb,4), 1.d0, tmp, &
+       int(n_act_orb,4), natorbsCI, int(n_act_orb,4), 0.d0, &
+       P0tuvx_no, int(n_act_orb*n_act_orb*n_act_orb,4))
 
   deallocate(tmp)
 
@@ -104,7 +112,8 @@ BEGIN_PROVIDER [real*8, one_ints_no, (mo_num,mo_num)]
   ! Transformed one-e integrals
   END_DOC
 
-  integer :: i,j, p, q
+  integer :: i, p, q
+  integer(size_t) :: j
   real*8 :: d(n_act_orb)
   one_ints_no(:,:)=mo_one_e_integrals(:,:)
 
@@ -141,7 +150,8 @@ BEGIN_PROVIDER [ double precision, NatOrbsCI_mos, (mo_num, mo_num) ]
   BEGIN_DOC
   ! Rotation matrix from current MOs to the CI natural MOs
   END_DOC
-  integer :: p,q
+  integer :: p
+  integer(size_t) :: q
 
   NatOrbsCI_mos(:,:) = 0.d0
 

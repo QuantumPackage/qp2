@@ -1,5 +1,8 @@
 
+use sizet
+
 subroutine create_selection_buffer(N, size_in, res)
+ use sizet
   use selection_types
   implicit none
   BEGIN_DOC
@@ -7,10 +10,10 @@ subroutine create_selection_buffer(N, size_in, res)
 ! The arrays have dimension size_in and the maximum number of elements is N
   END_DOC
 
-  integer, intent(in) :: N, size_in
+  integer(size_t), intent(in) :: N, size_in
   type(selection_buffer), intent(out) :: res
 
-  integer :: siz
+  integer(size_t) :: siz
   siz = max(size_in,1)
 
   double precision :: rss
@@ -77,6 +80,7 @@ subroutine add_to_selection_buffer(b, det, val)
 end subroutine
 
 subroutine merge_selection_buffers(b1, b2)
+ use sizet
   use selection_types
   implicit none
   BEGIN_DOC
@@ -86,7 +90,8 @@ subroutine merge_selection_buffers(b1, b2)
   type(selection_buffer), intent(inout) :: b2
   integer(bit_kind), pointer     :: detmp(:,:,:)
   double precision, pointer      :: val(:)
-  integer                        :: i, i1, i2, k, nmwen, sze
+  integer(size_t)                :: i, i1, i2, nmwen, sze
+  integer                        :: k
   if (b1%cur == 0) return
   do while (b1%val(b1%cur) > b2%mini)
     b1%cur = b1%cur-1
@@ -156,6 +161,7 @@ end
 
 
 subroutine sort_selection_buffer(b)
+ use sizet
   use selection_types
   implicit none
   BEGIN_DOC
@@ -166,9 +172,9 @@ subroutine sort_selection_buffer(b)
   END_DOC
 
   type(selection_buffer), intent(inout) :: b
-  integer, allocatable :: iorder(:)
+  integer(size_t), allocatable :: iorder(:)
   integer(bit_kind), pointer :: detmp(:,:,:)
-  integer :: i, nmwen
+  integer(size_t) :: i, nmwen
   logical, external :: detEq
   if (b%N == 0 .or. b%cur == 0) return
   nmwen = min(b%N, b%cur)
@@ -181,7 +187,7 @@ subroutine sort_selection_buffer(b)
   do i=1,b%cur
     iorder(i) = i
   end do
-  call dsort(b%val, iorder, b%cur)
+  call dsort_big(b%val, iorder, b%cur)
   do i=1, nmwen
     detmp(1:N_int,1,i) = b%det(1:N_int,1,iorder(i))
     detmp(1:N_int,2,i) = b%det(1:N_int,2,iorder(i))
@@ -193,6 +199,7 @@ subroutine sort_selection_buffer(b)
 end subroutine
 
 subroutine make_selection_buffer_s2(b)
+ use sizet
   use selection_types
   BEGIN_DOC
 ! Groups the determinants of the selection buffer b by
@@ -207,12 +214,13 @@ subroutine make_selection_buffer_s2(b)
   integer(bit_kind), allocatable :: o(:,:,:)
   double precision, allocatable  :: val(:)
 
-  integer :: n_d
-  integer :: i,k,sze,n_alpha,j,n
+  integer(size_t) :: n_d
+  integer(size_t) :: i,k,j
+  integer :: sze,n_alpha,n
   logical                        :: dup
 
   ! Sort
-  integer, allocatable           :: iorder(:)
+  integer(size_t), allocatable   :: iorder(:)
   integer*8, allocatable         :: bit_tmp(:)
   integer*8, external            :: configuration_search_key
   integer(bit_kind), allocatable :: tmp_array(:,:,:)
@@ -237,7 +245,7 @@ subroutine make_selection_buffer_s2(b)
 
   deallocate(b%det)
 
-  call i8sort(bit_tmp,iorder,n_d)
+  call i8sort_big(bit_tmp,iorder,n_d)
 
   do i=1,n_d
     do k=1,N_int
@@ -283,7 +291,7 @@ subroutine make_selection_buffer_s2(b)
 
   deallocate (b%val)
   ! Copy filtered result
-  integer :: n_p
+  integer(size_t) :: n_p
   n_p=0
   do i=1,n_d
     if (duplicate(i)) then
@@ -301,7 +309,7 @@ subroutine make_selection_buffer_s2(b)
   do i=1,n_p
     iorder(i) = i
   end do
-  call dsort(val,iorder,n_p)
+  call dsort_big(val,iorder,n_p)
   do i=1,n_p
     do k=1,N_int
       tmp_array(k,1,i) = o(k,1,iorder(i))
@@ -348,6 +356,7 @@ end
 
 
 subroutine remove_duplicates_in_selection_buffer(b)
+ use sizet
   use selection_types
   BEGIN_DOC
 ! Removes duplicate determinants from the selection buffer b:
@@ -361,12 +370,13 @@ subroutine remove_duplicates_in_selection_buffer(b)
   integer(bit_kind), allocatable :: o(:,:,:)
   double precision, allocatable  :: val(:)
 
-  integer :: n_d
-  integer :: i,k,sze,n_alpha,j,n
+  integer(size_t) :: n_d
+  integer(size_t) :: i,k,j
+  integer :: sze,n_alpha,n
   logical                        :: dup
 
   ! Sort
-  integer, allocatable           :: iorder(:)
+  integer(size_t), allocatable   :: iorder(:)
   integer*8, allocatable         :: bit_tmp(:)
   integer*8, external            :: det_search_key
   integer(bit_kind), allocatable :: tmp_array(:,:,:)
@@ -389,7 +399,7 @@ subroutine remove_duplicates_in_selection_buffer(b)
     bit_tmp(i) = det_search_key(b%det(1,1,i),N_int)
   enddo
 
-  call i8sort(bit_tmp,iorder,n_d)
+  call i8sort_big(bit_tmp,iorder,n_d)
 
   do i=1,n_d
     do k=1,N_int
@@ -436,7 +446,7 @@ subroutine remove_duplicates_in_selection_buffer(b)
   if (found_duplicates) then
 
     ! Copy filtered result
-    integer :: n_p
+    integer(size_t) :: n_p
     n_p=0
     do i=1,n_d
       if (duplicate(i)) then

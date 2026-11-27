@@ -1,4 +1,7 @@
+use sizet
+
 subroutine run_cipsi
+ use sizet
 
   BEGIN_DOC
   ! Selected Full Configuration Interaction with deterministic selection and
@@ -12,7 +15,7 @@ subroutine run_cipsi
   integer                        :: i,j,k
   type(pt2_type)                 :: pt2_data, pt2_data_err
   double precision, allocatable  :: zeros(:)
-  integer                        :: to_select
+  integer(size_t)                :: to_select
   logical, external :: qp_stop
 
   double precision :: threshold_generators_save
@@ -23,7 +26,7 @@ subroutine run_cipsi
   threshold_generators = 1.d0
   SOFT_TOUCH threshold_generators
 
-  rss = memory_of_double(N_states)*4.d0
+  rss = memory_of_double(int(N_states, size_t))*4.d0
   call check_mem(rss,irp_here)
 
   allocate (zeros(N_states))
@@ -79,8 +82,8 @@ subroutine run_cipsi
         )
       write(*,'(A)')  '--------------------------------------------------------------------------------'
 
-    to_select = int(sqrt(dble(N_states))*dble(N_det)*selection_factor)
-    to_select = max(N_states_diag, to_select)
+    to_select = int(sqrt(dble(N_states))*dble(N_det)*selection_factor, size_t)
+    to_select = max(int(N_states_diag, size_t), to_select)
     if (do_pt2) then
       call pt2_dealloc(pt2_data)
       call pt2_dealloc(pt2_data_err)
@@ -89,7 +92,8 @@ subroutine run_cipsi
       threshold_generators_save = threshold_generators
       threshold_generators = 1.d0
       SOFT_TOUCH threshold_generators
-      call pt2_stochastic(psi_energy_with_nucl_rep,pt2_data,pt2_data_err,relative_error, 0) ! Stochastic PT2
+      call pt2_stochastic(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, &
+                          relative_error, int(0,size_t)) ! Stochastic PT2
       threshold_generators = threshold_generators_save
       SOFT_TOUCH threshold_generators
     else
@@ -147,7 +151,8 @@ subroutine run_cipsi
       call pt2_alloc(pt2_data_err, N_states)
       threshold_generators = 1d0
       SOFT_TOUCH threshold_generators
-      call pt2_stochastic(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, relative_error, 0) ! Stochastic PT2
+      call pt2_stochastic(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, &
+                          relative_error, int(0,size_t)) ! Stochastic PT2
       SOFT_TOUCH threshold_generators
     endif
     print *,  'N_det             = ', N_det

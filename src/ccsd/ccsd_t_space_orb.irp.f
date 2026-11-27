@@ -1,6 +1,9 @@
+use sizet
+
 ! Dumb way
 
 subroutine ccsd_par_t_space(nO,nV,t1,t2,energy)
+ use sizet
 
   implicit none
 
@@ -20,7 +23,7 @@ subroutine ccsd_par_t_space(nO,nV,t1,t2,energy)
 
   double precision, allocatable :: W(:,:,:,:,:,:)
   double precision, allocatable :: V(:,:,:,:,:,:)
-  integer :: i,j,k,a,b,c
+  integer(size_t) :: i,j,k,a,b,c
 
   allocate(W(nO,nO,nO,nV,nV,nV))
   allocate(V(nO,nO,nO,nV,nV,nV))
@@ -49,6 +52,7 @@ subroutine ccsd_par_t_space(nO,nV,t1,t2,energy)
 end
 
 subroutine form_w(nO,nV,t2,W)
+ use sizet
 
   implicit none
 
@@ -64,7 +68,7 @@ subroutine form_w(nO,nV,t2,W)
   double precision, intent(in)  :: t2(nO, nO, nV, nV)
   double precision, intent(out) :: W(nO, nO, nO, nV, nV, nV)
 
-  integer :: i,j,k,l,a,b,c,d
+  integer(size_t) :: i,j,k,l,a,b,c,d
 
   W = 0d0
   do c = 1, nV
@@ -109,6 +113,7 @@ subroutine form_w(nO,nV,t2,W)
 end
 
 subroutine form_v(nO,nV,t1,w,v)
+ use sizet
 
 implicit none
 
@@ -124,7 +129,7 @@ implicit none
   double precision, intent(in)  :: W(nO, nO, nO, nV, nV, nV)
   double precision, intent(out) :: V(nO, nO, nO, nV, nV, nV)
 
-  integer :: i,j,k,a,b,c
+  integer(size_t) :: i,j,k,a,b,c
 
   V = 0d0
   do c = 1, nV
@@ -149,6 +154,7 @@ end
 ! Main
 
 subroutine ccsd_par_t_space_v2(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
+ use sizet
 
   implicit none
 
@@ -172,7 +178,7 @@ subroutine ccsd_par_t_space_v2(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
   double precision, allocatable :: W_ijk(:,:,:), V_ijk(:,:,:)
   double precision, allocatable :: X_vvvo(:,:,:,:), X_ovoo(:,:,:,:), X_vvoo(:,:,:,:)
   double precision, allocatable :: T_vvoo(:,:,:,:), T_ovvo(:,:,:,:), T_vo(:,:)
-  integer                       :: i,j,k,l,a,b,c,d
+  integer(size_t)               :: i,j,k,l,a,b,c,d
   double precision              :: e,ta,tb, delta, delta_ijk
 
   !allocate(W(nV,nV,nV,nO,nO,nO))
@@ -310,6 +316,7 @@ end
 ! W_ijk
 
 subroutine form_w_ijk(nO,nV,i,j,k,T_vvoo,T_ovvo,X_vvvo,X_ovoo,W)
+ use sizet
 
   implicit none
 
@@ -320,13 +327,14 @@ subroutine form_w_ijk(nO,nV,i,j,k,T_vvoo,T_ovvo,X_vvvo,X_ovoo,W)
   ! arrays X_vvvo, X_ovoo, using BLAS dgemm.
   END_DOC
 
-  integer, intent(in)           :: nO,nV,i,j,k
+  integer, intent(in)           :: nO, nV
+  integer(size_t), intent(in)   :: i, j, k
   !double precision, intent(in) :: t2(nO,nO,nV,nV)
   double precision, intent(in)  :: T_vvoo(nV,nV,nO,nO), T_ovvo(nO,nV,nV,nO)
   double precision, intent(in)  :: X_vvvo(nV,nV,nV,nO), X_ovoo(nO,nV,nO,nO)
   double precision, intent(out) :: W(nV,nV,nV)!,nO,nO,nO)
 
-  integer :: l,a,b,c,d
+  integer(size_t) :: l,a,b,c,d
   double precision, allocatable, dimension(:,:,:) :: X, Y, Z
 
   !W = 0d0
@@ -348,8 +356,8 @@ subroutine form_w_ijk(nO,nV,i,j,k,T_vvoo,T_ovvo,X_vvvo,X_ovoo,W)
   enddo
   !$OMP END PARALLEL DO
 
-  call dgemm('T','N',nV*nV,nV,nV, 1.d0, &
-     Z, nV, T_vvoo(1,1,k,j), nV, 0.d0, W, nV*nV)
+  call dgemm('T','N', int(nV*nV,4), int(nV,4), int(nV,4), 1.d0, &
+     Z, int(nV,4), T_vvoo(1,1,k,j), int(nV,4), 0.d0, W, int(nV*nV,4))
 
   !$OMP PARALLEL DO
   do c = 1, nV
@@ -361,31 +369,35 @@ subroutine form_w_ijk(nO,nV,i,j,k,T_vvoo,T_ovvo,X_vvvo,X_ovoo,W)
   enddo
   !$OMP END PARALLEL DO
 
-  call dgemm('T','N',nV*nV,nV,nV, 1.d0, &
-     Z, nV, T_vvoo(1,1,j,k), nV, 0.d0, Y, nV*nV)
+  call dgemm('T','N', int(nV*nV,4), int(nV,4), int(nV,4), 1.d0, &
+     Z, int(nV,4), T_vvoo(1,1,j,k), int(nV,4), 0.d0, Y, int(nV*nV,4))
 
-  call dgemm('T','N',nV*nV,nV,nV, 1.d0, &
-     X_vvvo(1,1,1,k), nV, T_vvoo(1,1,j,i), nV, 1.d0, Y, nV*nV)
+  call dgemm('T','N', int(nV*nV,4), int(nV,4), int(nV,4), 1.d0, &
+     X_vvvo(1,1,1,k), int(nV,4), T_vvoo(1,1,j,i), &
+     int(nV,4), 1.d0, Y, int(nV*nV,4))
 
-  call dgemm('T','N',nV,nV*nV,nV, 1.d0, &
-     T_vvoo(1,1,i,j), nV, X_vvvo(1,1,1,k), nV, 1.d0, W, nV)
+  call dgemm('T','N', int(nV,4), int(nV*nV,4), int(nV,4), 1.d0, &
+     T_vvoo(1,1,i,j), int(nV,4), X_vvvo(1,1,1,k), int(nV,4), 1.d0, W, int(nV,4))
 
-  call dgemm('T','N',nV,nV*nV,nV, 1.d0, &
-     T_vvoo(1,1,i,k), nV, X_vvvo(1,1,1,j), nV, 1.d0, Y, nV)
+  call dgemm('T','N', int(nV,4), int(nV*nV,4), int(nV,4), 1.d0, &
+     T_vvoo(1,1,i,k), int(nV,4), X_vvvo(1,1,1,j), int(nV,4), 1.d0, Y, int(nV,4))
 
-  call dgemm('T','N',nV*nV,nV,nV, 1.d0, &
-     X_vvvo(1,1,1,j), nV, T_vvoo(1,1,k,i), nV, 1.d0, W, nV*nV)
+  call dgemm('T','N', int(nV*nV,4), int(nV,4), int(nV,4), 1.d0, &
+     X_vvvo(1,1,1,j), int(nV,4), T_vvoo(1,1,k,i), &
+     int(nV,4), 1.d0, W, int(nV*nV,4))
 
   deallocate(Z)
 
 
   allocate(Z(nO,nV,nV))
 
-  call dgemm('T','N',nV*nV,nV,nO, -1.d0, &
-     T_ovvo(1,1,1,i), nO, X_ovoo(1,1,j,k), nO, 1.d0, W, nV*nV)
+  call dgemm('T','N', int(nV*nV,4), int(nV,4), int(nO,4), -1.d0, &
+     T_ovvo(1,1,1,i), int(nO,4), X_ovoo(1,1,j,k), &
+     int(nO,4), 1.d0, W, int(nV*nV,4))
 
-  call dgemm('T','N',nV*nV,nV,nO, -1.d0, &
-     T_ovvo(1,1,1,i), nO, X_ovoo(1,1,k,j), nO, 1.d0, Y, nV*nV)
+  call dgemm('T','N', int(nV*nV,4), int(nV,4), int(nO,4), -1.d0, &
+     T_ovvo(1,1,1,i), int(nO,4), X_ovoo(1,1,k,j), &
+     int(nO,4), 1.d0, Y, int(nV*nV,4))
 
   !$OMP PARALLEL DO
   do c = 1, nV
@@ -397,14 +409,14 @@ subroutine form_w_ijk(nO,nV,i,j,k,T_vvoo,T_ovvo,X_vvvo,X_ovoo,W)
   enddo
   !$OMP END PARALLEL DO
 
-  call dgemm('T','N',nV*nV,nV,nO, -1.d0, &
-     Z, nO, X_ovoo(1,1,i,j), nO, 1.d0, Y, nV*nV)
+  call dgemm('T','N', int(nV*nV,4), int(nV,4), int(nO,4), -1.d0, &
+     Z, int(nO,4), X_ovoo(1,1,i,j), int(nO,4), 1.d0, Y, int(nV*nV,4))
 
-  call dgemm('T','N',nV,nV*nV,nO, -1.d0, &
-     X_ovoo(1,1,j,i), nO, T_ovvo(1,1,1,k), nO, 1.d0, Y, nV)
+  call dgemm('T','N', int(nV,4), int(nV*nV,4), int(nO,4), -1.d0, &
+     X_ovoo(1,1,j,i), int(nO,4), T_ovvo(1,1,1,k), int(nO,4), 1.d0, Y, int(nV,4))
 
-  call dgemm('T','N',nV,nV*nV,nO, -1.d0, &
-     X_ovoo(1,1,k,i), nO, T_ovvo(1,1,1,j), nO, 1.d0, W, nV)
+  call dgemm('T','N', int(nV,4), int(nV*nV,4), int(nO,4), -1.d0, &
+     X_ovoo(1,1,k,i), int(nO,4), T_ovvo(1,1,1,j), int(nO,4), 1.d0, W, int(nV,4))
 
   !$OMP PARALLEL DO
   do b = 1, nV
@@ -416,8 +428,8 @@ subroutine form_w_ijk(nO,nV,i,j,k,T_vvoo,T_ovvo,X_vvvo,X_ovoo,W)
   enddo
   !$OMP END PARALLEL DO
 
-  call dgemm('T','N',nV*nV,nV,nO, -1.d0, &
-     Z, nO, X_ovoo(1,1,i,k), nO, 1.d0, W, nV*nV)
+  call dgemm('T','N', int(nV*nV,4), int(nV,4), int(nO,4), -1.d0, &
+     Z, int(nO,4), X_ovoo(1,1,i,k), int(nO,4), 1.d0, W, int(nV*nV,4))
 
   !$OMP PARALLEL DO
   do c = 1, nV
@@ -506,6 +518,7 @@ end
 ! V_ijk
 
 subroutine form_v_ijk(nO,nV,i,j,k,T_vo,X_vvoo,w,v)
+ use sizet
 
 implicit none
 
@@ -516,14 +529,15 @@ implicit none
   ! parallel over a,b,c.
   END_DOC
 
-  integer, intent(in)           :: nO,nV,i,j,k
+  integer, intent(in)           :: nO, nV
+  integer(size_t), intent(in)   :: i, j, k
   !double precision, intent(in)  :: t1(nO,nV)
   double precision, intent(in)  :: T_vo(nV,nO)
   double precision, intent(in)  :: X_vvoo(nV,nV,nO,nO)
   double precision, intent(in)  :: W(nV,nV,nV)!,nO,nO,nO)
   double precision, intent(out) :: V(nV,nV,nV)!,nO,nO,nO)
 
-  integer :: a,b,c
+  integer(size_t) :: a,b,c
 
   !V = 0d0
   !do i = 1, nO
