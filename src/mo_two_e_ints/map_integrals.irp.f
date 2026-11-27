@@ -1263,7 +1263,7 @@ subroutine get_mo_two_e_integrals_ij_uncached(k,l,sze,out_array,map)
       call pair_block_stats_add(k,l,cholesky_mo_num,t_block1-t_block0)
       ! QP_DVDSN_STATS: one (k,l) block actually computed by the H-apply
       ! fill (no-op unless the env var is set and an apply is open)
-      call davidson_apply_stats_fill(k,l)
+      call davidson_apply_stats_fill(int(k,4),int(l,4))
 
     else
 
