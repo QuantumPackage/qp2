@@ -4,6 +4,7 @@
 !*/
 */*
 !*/*.*
+*/.qp_make_steps.json
 */*.o
 */build.ninja
 */ezfio_interface.irp.f

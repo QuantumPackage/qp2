@@ -86,6 +86,11 @@ The build system is GNU make by default. The opt-in ninja alternative is
 invocations work with `ninja` instead of `make` (`ninja -f
 $QP_ROOT/config/build.ninja module_<name>`).
 
+By default `make` prints ninja-style progress: one short `[k/N]` line
+per build step (one per compile and link), no compiler flags.
+`V=1 make` (or an exported `V=1`, as in CMake) shows the full command
+lines instead, as ninja does by default.
+
 - `./configure -c config/<cfg> [-g nvidia|intel|none] [-b make|ninja]`
   writes the build manifest — `config/Makefile` plus one `Makefile` per
   module in make mode (default), or `config/build.ninja` with `-b ninja` —

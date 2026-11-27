@@ -86,7 +86,9 @@ and then the Rust command-line tools, while running
 :command:`make` inside a module directory builds only that module (and
 refreshes the tools). Every build first re-runs the build-graph
 generator, so new files, new modules and modified :file:`NEED` files are
-picked up automatically.
+picked up automatically. The build prints one short ``[k/N]`` line per
+step by default (ninja-style progress); exporting :envvar:`V=1` shows
+the full command lines instead.
 
 The opt-in |Ninja| build system (:command:`./configure -c <cfg> -b
 ninja`) works the same way with :command:`ninja` at the root of the

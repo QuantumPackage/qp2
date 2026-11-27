@@ -37,6 +37,30 @@ Options
    compilation and the build command is :command:`ninja`; it needs the
    ninja tool (installable with :command:`./configure -i ninja`).
 
+   In make mode the build prints one short ``[k/N]`` line per build
+   step by default (ninja-style progress, no compiler flags);
+   exporting :envvar:`V=1` (as in CMake and ninja) shows the full
+   command lines instead::
+
+      $ make
+      [1/72] copy spindeterminants.ezfio_config
+      [46/72] build external/ezfio
+      [2/464] mp2: compiling pseudopot
+      [524/524] ccsd: linking print_wf_qp_edit
+      make: 74 steps, 1622.5s elapsed
+
+   The counter is scoped: the root graph counts its own steps, each
+   module counts its compiles and links. A :command:`make` with
+   nothing to rebuild prints ``make: no work to do.`` instead of
+   the step-count summary.
+
+   Every step is counted by a small wrapper
+   (:file:`scripts/compilation/qp_make_fc.sh`) in front of the
+   compiler, which adds about 0.1 s per step (a :command:`python3`
+   startup plus a lock on the counter file). A full clean build of a
+   25-module tree measures about 27 min with the progress output,
+   versus about 20 min without it.
+
 .. option:: -c <file>
 
    Define the COMPILATION configuration file, in

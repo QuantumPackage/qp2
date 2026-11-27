@@ -2,7 +2,10 @@ config/ifort.cfg
 quantum_package_static.tar.gz
 build.ninja
 config/Makefile
+config/.qp_make_steps.json
 src/*/Makefile
+src/*/.qp_make_steps.json
+plugins/local/*/.qp_make_steps.json
 irpf90.make
 .ninja_log
 .ninja_deps
