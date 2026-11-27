@@ -1,11 +1,14 @@
 
 
+use sizet
+
  BEGIN_PROVIDER [integer, n_pts_per_atom, (nucl_num)]
 &BEGIN_PROVIDER [integer, n_pts_max_per_atom]
   BEGIN_DOC
   ! Number of points which are non zero
   END_DOC
-  integer                        :: i,j,k,l
+  integer                        :: i,k,l
+  integer(size_t)                 :: j
   n_pts_per_atom = 0
   do j = 1, nucl_num
     do i = 1, n_points_radial_grid -1
@@ -44,7 +47,8 @@ END_PROVIDER
  ! per-atom list of kept points of the point with angular index k
  ! and radial index i around atom j (assigned only for kept points)
  END_DOC
- integer                        :: i,j,k,l,i_count(nucl_num)
+ integer                        :: i,k,l,i_count(nucl_num)
+  integer(size_t)                 :: j
  double precision               :: r(3)
  i_count = 0
   do j = 1, nucl_num

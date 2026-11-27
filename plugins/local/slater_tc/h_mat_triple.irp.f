@@ -1,4 +1,7 @@
+use sizet
+
 subroutine H_tc_s2_u_0_with_pure_three(v_0, s_0, u_0, N_st, sze)
+  use sizet
   BEGIN_DOC
   ! Computes $v_0 = H^TC | u_0\rangle$ WITH PURE TRIPLE EXCITATION TERMS 
   !
@@ -10,11 +13,13 @@ subroutine H_tc_s2_u_0_with_pure_three(v_0, s_0, u_0, N_st, sze)
   use bitmasks
   implicit none
 
-  integer,          intent(in)  :: N_st,sze
+  integer,          intent(in)  :: N_st
+  integer(size_t),  intent(in)  :: sze
   double precision, intent(in)  :: u_0(sze,N_st)
   double precision, intent(out) :: v_0(sze,N_st), s_0(sze,N_st)
   call H_tc_s2_u_0_opt(v_0, s_0, u_0, N_st, sze)
-  integer :: i,j,degree,ist
+  integer(size_t) :: i,j
+  integer         :: degree,ist
   double precision :: hmono, htwoe, hthree, htot
   do i = 1, N_det
    do j = 1, N_det
@@ -29,6 +34,7 @@ subroutine H_tc_s2_u_0_with_pure_three(v_0, s_0, u_0, N_st, sze)
 end
 
 subroutine H_tc_s2_u_0_with_pure_three_omp(v_0, s_0, u_0, N_st, sze)
+  use sizet
   BEGIN_DOC
   ! Computes $v_0 = H^TC | u_0\rangle$ WITH PURE TRIPLE EXCITATION TERMS 
   !
@@ -40,11 +46,13 @@ subroutine H_tc_s2_u_0_with_pure_three_omp(v_0, s_0, u_0, N_st, sze)
   use bitmasks
   implicit none
 
-  integer,          intent(in)  :: N_st,sze
+  integer,          intent(in)  :: N_st
+  integer(size_t),  intent(in)  :: sze
   double precision, intent(in)  :: u_0(sze,N_st)
   double precision, intent(out) :: v_0(sze,N_st), s_0(sze,N_st)
   call H_tc_s2_u_0_opt(v_0, s_0, u_0, N_st, sze)
-  integer :: i,j,degree,ist
+  integer(size_t) :: i,j
+  integer         :: degree,ist
   double precision :: hmono, htwoe, hthree, htot
   !$OMP PARALLEL DO DEFAULT(NONE) SCHEDULE(dynamic,8) &
   !$OMP SHARED(N_st, N_det, N_int, psi_det, u_0, v_0)       &
@@ -65,6 +73,7 @@ end
 ! ---
 
 subroutine H_tc_s2_dagger_u_0_with_pure_three(v_0, s_0, u_0, N_st, sze)
+  use sizet
   BEGIN_DOC
   ! Computes $v_0 = (H^TC)^dagger | u_0\rangle$ WITH PURE TRIPLE EXCITATION TERMS 
   !
@@ -76,11 +85,13 @@ subroutine H_tc_s2_dagger_u_0_with_pure_three(v_0, s_0, u_0, N_st, sze)
   use bitmasks
   implicit none
 
-  integer,          intent(in)  :: N_st,sze
+  integer,          intent(in)  :: N_st
+  integer(size_t),  intent(in)  :: sze
   double precision, intent(in)  :: u_0(sze,N_st)
   double precision, intent(out) :: v_0(sze,N_st), s_0(sze,N_st)
   call H_tc_s2_dagger_u_0_opt(v_0, s_0, u_0, N_st, sze)
-  integer :: i,j,degree,ist
+  integer(size_t) :: i,j
+  integer         :: degree,ist
   double precision :: hmono, htwoe, hthree, htot
   do i = 1, N_det
    do j = 1, N_det
@@ -95,6 +106,7 @@ subroutine H_tc_s2_dagger_u_0_with_pure_three(v_0, s_0, u_0, N_st, sze)
 end
 
 subroutine H_tc_s2_dagger_u_0_with_pure_three_omp(v_0, s_0, u_0, N_st, sze)
+  use sizet
   BEGIN_DOC
   ! Computes $v_0 = (H^TC)^dagger | u_0\rangle$ WITH PURE TRIPLE EXCITATION TERMS 
   !
@@ -106,11 +118,13 @@ subroutine H_tc_s2_dagger_u_0_with_pure_three_omp(v_0, s_0, u_0, N_st, sze)
   use bitmasks
   implicit none
 
-  integer,          intent(in)  :: N_st,sze
+  integer,          intent(in)  :: N_st
+  integer(size_t),  intent(in)  :: sze
   double precision, intent(in)  :: u_0(sze,N_st)
   double precision, intent(out) :: v_0(sze,N_st), s_0(sze,N_st)
   call H_tc_s2_dagger_u_0_opt(v_0, s_0, u_0, N_st, sze)
-  integer :: i,j,degree,ist
+  integer(size_t) :: i,j
+  integer         :: degree,ist
   double precision :: hmono, htwoe, hthree, htot
   !$OMP PARALLEL DO DEFAULT(NONE) SCHEDULE(dynamic,8) &
   !$OMP SHARED(N_st, N_det, N_int, psi_det, u_0, v_0)       &
@@ -131,6 +145,7 @@ end
 ! ---
 subroutine triple_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
   use bitmasks
+  use sizet
   BEGIN_DOC
 ! <key_j | H_tilde | key_i> for triple excitation  
 !!
@@ -140,11 +155,14 @@ subroutine triple_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, 
   END_DOC
   implicit none
   integer(bit_kind), intent(in)  :: key_j(N_int,2),key_i(N_int,2)
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)  :: Nint
   double precision, intent(out)  :: hmono, htwoe, hthree, htot
   integer                        :: degree
-  integer                        :: h1, p1, h2, p2, s1, s2, h3, p3, s3
-  integer                        :: holes_array(100,2),particles_array(100,2),degree_array(2)
+  integer(size_t)                :: h1, p1, h2, p2, h3, p3
+  integer                        :: s1, s2, s3
+  integer(size_t)                :: holes_array(100,2)
+  integer(size_t)                :: particles_array(100,2)
+  integer                        :: degree_array(2)
   double precision               :: phase,sym_3_e_int_from_6_idx_tensor
 
   hmono  = 0.d0

@@ -1,4 +1,7 @@
+use sizet
+
 subroutine svd(A,LDA,U,LDU,D,Vt,LDVt,m,n)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Compute A = U.D.Vt
@@ -9,14 +12,15 @@ subroutine svd(A,LDA,U,LDU,D,Vt,LDVt,m,n)
   !
   END_DOC
 
-  integer, intent(in)             :: LDA, LDU, LDVt, m, n
+  integer(size_t), intent(in)     :: LDA, LDU, LDVt, m, n
   double precision, intent(in)    :: A(LDA,n)
   double precision, intent(out)   :: U(LDU,min(m,n))
   double precision,intent(out)    :: Vt(LDVt,n)
   double precision,intent(out)    :: D(min(m,n))
   double precision,allocatable    :: work(:)
   integer, allocatable            :: iwork(:)
-  integer                         :: info, lwork, liwork, i, j, k
+  integer                         :: info, lwork, liwork
+  integer(size_t)                 :: i, j, k
 
   double precision,allocatable    :: A_tmp(:,:)
   allocate (A_tmp(LDA,n))
@@ -27,19 +31,19 @@ subroutine svd(A,LDA,U,LDU,D,Vt,LDVt,m,n)
   enddo
 
   ! Find optimal size for temp arrays
-  liwork = 8*min(m,n)
+  liwork = int(8*min(m,n), 4)
   lwork = -1
   allocate(work(1), iwork(liwork))
 
-  call dgesdd('S', m, n, A_tmp, LDA,                             &
-      D, U, LDU, Vt, LDVt, work, lwork, iwork, info)
+  call dgesdd('S', int(m,4), int(n,4), A_tmp, int(LDA,4),       &
+      D, U, int(LDU,4), Vt, int(LDVt,4), work, lwork, iwork, info)
   ! /!\ int(WORK(1)) becomes negative when WORK(1) > 2147483648
-  lwork = max(int(work(1)), 10*MIN(M,N))
+  lwork = max(int(work(1),4), int(10*min(m,n),4))
   deallocate(work)
 
   allocate(work(lwork))
-  call dgesdd('S', m, n, A_tmp, LDA,                             &
-      D, U, LDU, Vt, LDVt, work, lwork, iwork, info)
+  call dgesdd('S', int(m,4), int(n,4), A_tmp, int(LDA,4),       &
+      D, U, int(LDU,4), Vt, int(LDVt,4), work, lwork, iwork, info)
   deallocate(A_tmp,work,iwork)
 
   if (info /= 0) then
@@ -62,6 +66,7 @@ subroutine svd(A,LDA,U,LDU,D,Vt,LDVt,m,n)
 end
 
 subroutine svd_symm(A,LDA,U,LDU,D,Vt,LDVt,m,n)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Compute A = U.D.Vt
@@ -72,13 +77,14 @@ subroutine svd_symm(A,LDA,U,LDU,D,Vt,LDVt,m,n)
   !
   END_DOC
 
-  integer, intent(in)             :: LDA, LDU, LDVt, m, n
+  integer(size_t), intent(in)     :: LDA, LDU, LDVt, m, n
   double precision, intent(in)    :: A(LDA,n)
   double precision, intent(out)   :: U(LDU,min(m,n))
   double precision,intent(out)    :: Vt(LDVt,n)
   double precision,intent(out)    :: D(min(m,n))
   double precision,allocatable    :: work(:)
-  integer                         :: info, lwork, i, j, k
+  integer                         :: info, lwork
+  integer(size_t)                 :: i, j, k
 
   double precision,allocatable    :: A_tmp(:,:)
   allocate (A_tmp(LDA,n))
@@ -87,15 +93,15 @@ subroutine svd_symm(A,LDA,U,LDU,D,Vt,LDVt,m,n)
   ! Find optimal size for temp arrays
   allocate(work(1))
   lwork = -1
-  call dgesvd('A','A', m, n, A_tmp, LDA,                             &
-      D, U, LDU, Vt, LDVt, work, lwork, info)
+  call dgesvd('A','A', int(m,4), int(n,4), A_tmp, int(LDA,4),     &
+      D, U, int(LDU,4), Vt, int(LDVt,4), work, lwork, info)
   ! /!\ int(WORK(1)) becomes negative when WORK(1) > 2147483648
-  lwork = max(int(work(1)), 5*MIN(M,N))
+  lwork = max(int(work(1),4), int(5*min(m,n),4))
   deallocate(work)
 
   allocate(work(lwork))
-  call dgesvd('A','A', m, n, A_tmp, LDA,                             &
-      D, U, LDU, Vt, LDVt, work, lwork, info)
+  call dgesvd('A','A', int(m,4), int(n,4), A_tmp, int(LDA,4),     &
+      D, U, int(LDU,4), Vt, int(LDVt,4), work, lwork, info)
   deallocate(A_tmp,work)
 
   if (info /= 0) then
@@ -121,37 +127,37 @@ subroutine svd_symm(A,LDA,U,LDU,D,Vt,LDVt,m,n)
   G = 0.d0
 
   thresh = 1.d-8
-  call restore_symmetry(m,m,U,size(U,1),thresh)
-  call restore_symmetry(n,n,Vt,size(Vt,1),thresh)
+  call restore_symmetry(m,m,U,int(size(U,1),size_t),thresh)
+  call restore_symmetry(n,n,Vt,int(size(Vt,1),size_t),thresh)
 
   do iter=1,4
     do k=1,n
       A_tmp(1:m,k) = D(k) * U(1:m,k)
     enddo
 
-    call dgemm('N','N',m,n,n,1.d0,A_tmp,size(A_tmp,1), &
+    call dgemm('N','N',int(m,4),int(n,4),int(n,4),1.d0,A_tmp,size(A_tmp,1), &
        Vt,size(Vt,1),0.d0,R,size(R,1))
 
     print *, maxval(dabs(R(1:m,1:n) - A(1:m,1:n)))
 
 
-    call dgemm('T','N',m,m,m,-1.d0,U,size(U,1), &
+    call dgemm('T','N',int(m,4),int(m,4),int(m,4),-1.d0,U,size(U,1), &
       U,size(U,1),0.d0,R,size(R,1))
     do i=1,m
       R(i,i) = R(i,i) + 1.d0
     enddo
 
-    call dgemm('N','T',n,n,n,-1.d0,Vt,size(Vt,1), &
+    call dgemm('N','T',int(n,4),int(n,4),int(n,4),-1.d0,Vt,size(Vt,1), &
       Vt,size(Vt,1),0.d0,S,size(S,1))
     do i=1,n
       S(i,i) = S(i,i) + 1.d0
     enddo
 
 
-    call dgemm('T','N',m,n,m,1.d0,U,size(U,1), &
+    call dgemm('T','N',int(m,4),int(n,4),int(m,4),1.d0,U,size(U,1), &
        A,size(A,1),0.d0,A_tmp,size(A_tmp,1))
 
-    call dgemm('N','T',m,n,n,1.d0,A_tmp,size(A_tmp,1), &
+    call dgemm('N','T',int(m,4),int(n,4),int(n,4),1.d0,A_tmp,size(A_tmp,1), &
        Vt,size(Vt,1),0.d0,T,size(T,1))
 
 
@@ -192,16 +198,16 @@ subroutine svd_symm(A,LDA,U,LDU,D,Vt,LDVt,m,n)
     enddo
 
     D(1:min(n,m)) = sigma(1:min(n,m))
-    call dgemm('N','N',m,m,m,1.d0,U,size(U,1),F,size(F,1), &
-       0.d0, A_tmp, size(A_tmp,1))
+    call dgemm('N', 'N', int(m,4), int(m,4), int(m,4), 1.d0, U, size(U,1), F, &
+               size(F,1), 0.d0, A_tmp, size(A_tmp,1))
     do j=1,m
       do i=1,m
         U(i,j) = U(i,j) + A_tmp(i,j)
       enddo
     enddo
 
-    call dgemm('T','N',n,n,n,1.d0,G,size(G,1),Vt,size(Vt,1), &
-       0.d0, A_tmp, size(A_tmp,1))
+    call dgemm('T', 'N', int(n,4), int(n,4), int(n,4), 1.d0, G, size(G,1), Vt, &
+               size(Vt,1), 0.d0, A_tmp, size(A_tmp,1))
     do j=1,n
       do i=1,n
         Vt(i,j) = Vt(i,j) + A_tmp(i,j)
@@ -209,8 +215,8 @@ subroutine svd_symm(A,LDA,U,LDU,D,Vt,LDVt,m,n)
     enddo
 
     thresh = 0.01d0 * thresh
-    call restore_symmetry(m,m,U,size(U,1),thresh)
-    call restore_symmetry(n,n,Vt,size(Vt,1),thresh)
+    call restore_symmetry(m,m,U,int(size(U,1),size_t),thresh)
+    call restore_symmetry(n,n,Vt,int(size(Vt,1),size_t),thresh)
 
   enddo
 
@@ -218,19 +224,20 @@ subroutine svd_symm(A,LDA,U,LDU,D,Vt,LDVt,m,n)
 end
 
 subroutine eigSVD(A,LDA,U,LDU,D,Vt,LDVt,m,n)
+ use sizet
   implicit none
   BEGIN_DOC
 ! Algorithm 3 of https://arxiv.org/pdf/1810.06860.pdf
 !
 ! A(m,n) = U(m,n) D(n) Vt(n,n) with m>n
   END_DOC
-  integer, intent(in)            :: LDA, LDU, LDVt, m, n
+  integer(size_t), intent(in)    :: LDA, LDU, LDVt, m, n
   double precision, intent(in)   :: A(LDA,n)
   double precision, intent(out)  :: U(LDU,n)
   double precision,intent(out)   :: Vt(LDVt,n)
   double precision,intent(out)   :: D(n)
 
-  integer                        :: i,j,k
+  integer(size_t)                :: i,j,k
 
   if (m<n) then
     stop -1
@@ -241,7 +248,8 @@ subroutine eigSVD(A,LDA,U,LDU,D,Vt,LDVt,m,n)
   double precision, allocatable :: B(:,:), V(:,:)
   allocate(B(n,n))
   ! B = - At . A
-  call dgemm('T','N',n,n,m,-1.d0,A,size(A,1),A,size(A,1),0.d0,B,size(B,1))
+  call dgemm('T', 'N', int(n,4), int(n,4), int(m,4), -1.d0, A, size(A,1), A, &
+             size(A,1), 0.d0, B, size(B,1))
 
   ! V, D = eig(B)
   allocate(V(n,n))
@@ -262,16 +270,18 @@ subroutine eigSVD(A,LDA,U,LDU,D,Vt,LDVt,m,n)
       exit
     endif
     D(k) = dsqrt(-D(k))
-    call dscal(n, 1.d0/D(k), V(1,k), 1)
+    call dscal(int(n,4), 1.d0/D(k), V(1,k), 1)
   enddo
   D(k:n) = 0.d0
   k=k-1
-  call dgemm('N','N',m,n,k,1.d0,A,size(A,1),V,size(V,1),0.d0,U,size(U,1))
+    call dgemm('N', 'N', int(m,4), int(n,4), int(k,4), 1.d0, A, size(A,1), V, &
+             size(V,1), 0.d0, U, size(U,1))
 
 end
 
 
 subroutine randomized_svd(A,LDA,U,LDU,D,Vt,LDVt,m,n,q,r)
+ use sizet
   implicit none
   include 'constants.include.F'
   BEGIN_DOC
@@ -288,12 +298,14 @@ subroutine randomized_svd(A,LDA,U,LDU,D,Vt,LDVt,m,n,q,r)
 ! 5. U = Q U'
   END_DOC
 
-  integer, intent(in)             :: LDA, LDU, LDVt, m, n, q, r
+  integer(size_t), intent(in)     :: LDA, LDU, LDVt, m, n
+  integer, intent(in)             :: q, r
   double precision, intent(in)    :: A(LDA,n)
   double precision, intent(out)   :: U(LDU,r)
   double precision,intent(out)    :: Vt(LDVt,r)
   double precision,intent(out)    :: D(r)
-  integer                         :: i, j, k
+  integer                         :: j, k
+  integer(size_t)                 :: i
 
   double precision,allocatable    :: Z(:,:), P(:,:), Y(:,:), UY(:,:)
   double precision :: r1,r2
@@ -311,36 +323,43 @@ subroutine randomized_svd(A,LDA,U,LDU,D,Vt,LDVt,m,n,q,r)
   enddo
 
   ! Z(m,r) = A(m,n).P(n,r)
-  call dgemm('N','N',m,r,n,1.d0,A,size(A,1),P,size(P,1),0.d0,Z,size(Z,1))
+    call dgemm('N', 'N', int(m,4), r, int(n,4), 1.d0, A, size(A,1), P, &
+             size(P,1), 0.d0, Z, size(Z,1))
 
   ! Power iterations
   do k=1,q
     ! P(n,r) = At(n,m).Z(m,r)
-    call dgemm('T','N',n,r,m,1.d0,A,size(A,1),Z,size(Z,1),0.d0,P,size(P,1))
+        call dgemm('T', 'N', int(n,4), r, int(m,4), 1.d0, A, size(A,1), Z, &
+               size(Z,1), 0.d0, P, size(P,1))
     ! Z(m,r) = A(m,n).P(n,r)
-    call dgemm('N','N',m,r,n,1.d0,A,size(A,1),P,size(P,1),0.d0,Z,size(Z,1))
+        call dgemm('N', 'N', int(m,4), r, int(n,4), 1.d0, A, size(A,1), P, &
+               size(P,1), 0.d0, Z, size(Z,1))
   enddo
 
   deallocate(P)
 
   ! QR factorization of Z
-  call ortho_svd(Z,size(Z,1),m,r)
+  call ortho_svd(Z,int(size(Z,1),size_t),m,int(r,size_t))
 
   allocate(Y(r,n), UY(r,r))
   ! Y(r,n) = Zt(r,m).A(m,n)
-  call dgemm('T','N',r,n,m,1.d0,Z,size(Z,1),A,size(A,1),0.d0,Y,size(Y,1))
+    call dgemm('T', 'N', r, int(n,4), int(m,4), 1.d0, Z, size(Z,1), A, &
+             size(A,1), 0.d0, Y, size(Y,1))
 
   ! SVD of Y
-  call svd(Y,size(Y,1),UY,size(UY,1),D,Vt,size(Vt,1),r,n)
+  call svd(Y,int(size(Y,1),size_t),UY,int(size(UY,1),size_t), &
+      D,Vt,int(size(Vt,1),size_t),int(r,size_t),n)
   deallocate(Y)
 
   ! U(m,r) = Z(m,r).UY(r,r)
-  call dgemm('N','N',m,r,r,1.d0,Z,size(Z,1),UY,size(UY,1),0.d0,U,size(U,1))
+    call dgemm('N', 'N', int(m,4), r, r, 1.d0, Z, size(Z,1), UY, size(UY,1), &
+             0.d0, U, size(U,1))
   deallocate(UY,Z)
 
 end
 
 subroutine svd_complex(A,LDA,U,LDU,D,Vt,LDVt,m,n)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Compute A = U.D.Vt
@@ -352,31 +371,32 @@ subroutine svd_complex(A,LDA,U,LDU,D,Vt,LDVt,m,n)
   ! D is double precision
   END_DOC
 
-  integer, intent(in)             :: LDA, LDU, LDVt, m, n
+  integer(size_t), intent(in)     :: LDA, LDU, LDVt, m, n
   complex*16, intent(in)          :: A(LDA,n)
   complex*16, intent(out)         :: U(LDU,m)
   complex*16, intent(out)         :: Vt(LDVt,n)
   double precision,intent(out)    :: D(min(m,n))
   complex*16,allocatable          :: work(:)
   double precision,allocatable    :: rwork(:)
-  integer                         :: info, lwork, i, j, k, lrwork
+  integer                         :: info, lwork, lrwork
+  integer(size_t)                 :: i, j, k
 
   complex*16,allocatable          :: A_tmp(:,:)
   allocate (A_tmp(LDA,n))
   A_tmp = A
-  lrwork = 5*min(m,n)
+  lrwork = int(5*min(m,n), 4)
 
   ! Find optimal size for temp arrays
   allocate(work(1),rwork(lrwork))
   lwork = -1
-  call zgesvd('A','A', m, n, A_tmp, LDA,                             &
-      D, U, LDU, Vt, LDVt, work, lwork, rwork, info)
+  call zgesvd('A','A', int(m,4), int(n,4), A_tmp, int(LDA,4),     &
+      D, U, int(LDU,4), Vt, int(LDVt,4), work, lwork, rwork, info)
   lwork = int(work(1))
   deallocate(work)
 
   allocate(work(lwork))
-  call zgesvd('A','A', m, n, A_tmp, LDA,                             &
-      D, U, LDU, Vt, LDVt, work, lwork, rwork, info)
+  call zgesvd('A','A', int(m,4), int(n,4), A_tmp, int(LDA,4),     &
+      D, U, int(LDU,4), Vt, int(LDVt,4), work, lwork, rwork, info)
   deallocate(work,rwork,A_tmp)
 
   if (info /= 0) then
@@ -387,6 +407,7 @@ subroutine svd_complex(A,LDA,U,LDU,D,Vt,LDVt,m,n)
 end
 
 subroutine ortho_canonical_complex(overlap,LDA,N,C,LDC,m,cutoff)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Compute C_new=C_old.U.s^-1/2 canonical orthogonalization.
@@ -406,8 +427,8 @@ subroutine ortho_canonical_complex(overlap,LDA,N,C,LDC,m,cutoff)
   !
   END_DOC
 
-  integer, intent(in)            :: lda, ldc, n
-  integer, intent(out)           :: m
+  integer(size_t), intent(in)    :: lda, ldc, n
+  integer(size_t), intent(out)   :: m
   complex*16, intent(in)   :: overlap(lda,n)
   double precision, intent(in)   :: cutoff
   complex*16, intent(inout) :: C(ldc,n)
@@ -416,7 +437,8 @@ subroutine ortho_canonical_complex(overlap,LDA,N,C,LDC,m,cutoff)
   double precision, allocatable  :: D(:)
   complex*16, allocatable  :: S(:,:)
   !DIR$ ATTRIBUTES ALIGN : 64    :: U, Vt, D
-  integer                        :: info, i, j
+  integer                        :: info
+  integer(size_t)                :: i, j
   double precision :: local_cutoff
 
   if (n < 2) then
@@ -455,13 +477,15 @@ subroutine ortho_canonical_complex(overlap,LDA,N,C,LDC,m,cutoff)
     enddo
   enddo
 
-  call zgemm('N','N',n,n,n,(1.d0,0.d0),U,size(U,1),S,size(S,1),(0.d0,0.d0),C,size(C,1))
+    call zgemm('N', 'N', int(n,4), int(n,4), int(n,4), (1.d0,0.d0), U, &
+             size(U,1), S, size(S,1), (0.d0,0.d0), C, size(C,1))
   deallocate (U, Vt, D, S)
 
 end
 
 
 subroutine ortho_qr_complex(A,LDA,m,n)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Orthogonalization using Q.R factorization
@@ -475,7 +499,7 @@ subroutine ortho_qr_complex(A,LDA,m,n)
   ! m : Number of columns of A
   !
   END_DOC
-  integer, intent(in)            :: m,n, LDA
+  integer(size_t), intent(in)    :: m,n, LDA
   complex*16, intent(inout) :: A(LDA,n)
 
   integer                        :: lwork, info
@@ -484,16 +508,18 @@ subroutine ortho_qr_complex(A,LDA,m,n)
 
   allocate (jpvt(n), tau(n), work(1))
   LWORK=-1
-  call  zgeqrf( m, n, A, LDA, TAU, WORK, LWORK, INFO )
+  call  zgeqrf( int(m,4), int(n,4), A, int(LDA,4), TAU, WORK, LWORK, INFO )
   LWORK=2*int(WORK(1))
   deallocate(WORK)
   allocate(WORK(LWORK))
-  call  zgeqrf(m, n, A, LDA, TAU, WORK, LWORK, INFO )
-  call  zungqr(m, n, n, A, LDA, tau, WORK, LWORK, INFO)
+  call  zgeqrf(int(m,4), int(n,4), A, int(LDA,4), TAU, WORK, LWORK, INFO )
+        call  zungqr(int(m,4), int(n,4), int(n,4), A, int(LDA,4), tau, WORK, &
+                 LWORK, INFO)
   deallocate(WORK,jpvt,tau)
 end
 
 subroutine ortho_qr_unblocked_complex(A,LDA,m,n)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Orthogonalization using Q.R factorization
@@ -507,7 +533,7 @@ subroutine ortho_qr_unblocked_complex(A,LDA,m,n)
   ! m : Number of columns of A
   !
   END_DOC
-  integer, intent(in)            :: m,n, LDA
+  integer(size_t), intent(in)    :: m,n, LDA
   double precision, intent(inout) :: A(LDA,n)
 
   integer                        :: info
@@ -524,6 +550,7 @@ subroutine ortho_qr_unblocked_complex(A,LDA,m,n)
 end
 
 subroutine ortho_lowdin_complex(overlap,LDA,N,C,LDC,m,cutoff)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Compute C_new=C_old.S^-1/2 orthogonalization.
@@ -543,7 +570,7 @@ subroutine ortho_lowdin_complex(overlap,LDA,N,C,LDC,m,cutoff)
   !
   END_DOC
 
-  integer, intent(in)            :: LDA, ldc, n, m
+  integer(size_t), intent(in)    :: LDA, ldc, n, m
   complex*16, intent(in)   :: overlap(lda,n)
   complex*16, intent(inout) :: C(ldc,n)
   complex*16, allocatable  :: U(:,:)
@@ -552,7 +579,8 @@ subroutine ortho_lowdin_complex(overlap,LDA,N,C,LDC,m,cutoff)
   complex*16, allocatable  :: S(:,:)
   double precision, intent(in) :: cutoff
   double precision :: local_cutoff
-  integer                        :: info, i, j, k, mm
+  integer                        :: info
+  integer(size_t)                :: i, j, k, mm
 
   if (n < 2) then
     return
@@ -607,17 +635,19 @@ subroutine ortho_lowdin_complex(overlap,LDA,N,C,LDC,m,cutoff)
 
   !$OMP END PARALLEL
 
-  call zgemm('N','N',m,n,n,(1.d0,0.d0),U,size(U,1),S,size(S,1),(0.d0,0.d0),C,size(C,1))
+    call zgemm('N', 'N', int(m,4), int(n,4), int(n,4), (1.d0,0.d0), U, &
+             size(U,1), S, size(S,1), (0.d0,0.d0), C, size(C,1))
 
   deallocate(U,Vt,S,D)
 end
 
 subroutine get_inverse_complex(A,LDA,m,C,LDC)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Returns the inverse of the square matrix A
   END_DOC
-  integer, intent(in)            :: m, LDA, LDC
+  integer(size_t), intent(in)    :: m, LDA, LDC
   complex*16, intent(in)   :: A(LDA,m)
   complex*16, intent(out)  :: C(LDC,m)
 
@@ -627,12 +657,12 @@ subroutine get_inverse_complex(A,LDA,m,C,LDC)
   allocate (ipiv(m), work(m*m))
   lwork = size(work)
   C(1:m,1:m) = A(1:m,1:m)
-  call zgetrf(m,m,C,size(C,1),ipiv,info)
+  call zgetrf(int(m,4),int(m,4),C,size(C,1),ipiv,info)
   if (info /= 0) then
     print *,  info
     stop 'error in inverse (zgetrf)'
   endif
-  call zgetri(m,C,size(C,1),ipiv,work,lwork,info)
+  call zgetri(int(m,4),C,size(C,1),ipiv,work,lwork,info)
   if (info /= 0) then
     print *,  info
     stop 'error in inverse (zgetri)'
@@ -642,11 +672,12 @@ end
 
 
 subroutine get_pseudo_inverse_complex(A,LDA,m,n,C,LDC,cutoff)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Find C = A^-1
   END_DOC
-  integer, intent(in)            :: m,n, LDA, LDC
+  integer(size_t), intent(in)    :: m,n, LDA, LDC
   complex*16, intent(in)   :: A(LDA,n)
   double precision, intent(in)   :: cutoff
   complex*16, intent(out)  :: C(LDC,m)
@@ -654,7 +685,7 @@ subroutine get_pseudo_inverse_complex(A,LDA,m,n,C,LDC,cutoff)
   double precision, allocatable  :: D(:), rwork(:)
   complex*16, allocatable  :: U(:,:), Vt(:,:), work(:), A_tmp(:,:)
   integer                        :: info, lwork
-  integer                        :: i,j,k
+  integer(size_t)                :: i,j,k
   double precision  :: d1
   allocate (D(n),U(m,n),Vt(n,n),work(1),A_tmp(m,n),rwork(5*n))
   do j=1,n
@@ -663,7 +694,8 @@ subroutine get_pseudo_inverse_complex(A,LDA,m,n,C,LDC,cutoff)
     enddo
   enddo
   lwork = -1
-  call zgesvd('S','A', m, n, A_tmp, m,D,U,m,Vt,n,work,lwork,rwork,info)
+    call zgesvd('S', 'A', int(m,4), int(n,4), A_tmp, int(m,4), D, U, int(m,4), &
+              Vt, int(n,4), work, lwork, rwork, info)
   if (info /= 0) then
     print *,  info, ': SVD failed'
     stop
@@ -671,7 +703,8 @@ subroutine get_pseudo_inverse_complex(A,LDA,m,n,C,LDC,cutoff)
   lwork = int(real(work(1)))
   deallocate(work)
   allocate(work(lwork))
-  call zgesvd('S','A', m, n, A_tmp, m,D,U,m,Vt,n,work,lwork,rwork,info)
+    call zgesvd('S', 'A', int(m,4), int(n,4), A_tmp, int(m,4), D, U, int(m,4), &
+              Vt, int(n,4), work, lwork, rwork, info)
   if (info /= 0) then
     print *,  info, ':: SVD failed'
     stop 1
@@ -700,6 +733,7 @@ subroutine get_pseudo_inverse_complex(A,LDA,m,n,C,LDC,cutoff)
 end
 
 subroutine lapack_diagd_diag_in_place_complex(eigvalues,eigvectors,nmax,n)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Diagonalize matrix H(complex)
@@ -711,7 +745,7 @@ subroutine lapack_diagd_diag_in_place_complex(eigvalues,eigvectors,nmax,n)
   ! eigvectors(i,j) = <i|psi_j> where i is the basis function and psi_j is the j th eigenvector
   !
   END_DOC
-  integer, intent(in)            :: n,nmax
+  integer(size_t), intent(in)    :: n,nmax
 !  double precision, intent(out)  :: eigvectors(nmax,n)
   complex*16, intent(inout)        :: eigvectors(nmax,n)
   double precision, intent(out)  :: eigvalues(n)
@@ -720,22 +754,23 @@ subroutine lapack_diagd_diag_in_place_complex(eigvalues,eigvectors,nmax,n)
   integer         ,allocatable   :: iwork(:)
 !  complex*16,allocatable         :: A(:,:)
   double precision, allocatable  :: rwork(:)
-  integer                        :: lrwork, lwork, info, i,j,l,k, liwork
+  integer                        :: lrwork, lwork, info, liwork
+  integer(size_t)                :: i,j,l,k
 
 ! print*,'Diagonalization by jacobi'
 ! print*,'n = ',n
 
-  lwork = 2*n*n + 2*n
-  lrwork = 2*n*n + 5*n+ 1
-  liwork = 5*n + 3
+  lwork = int(2*n*n + 2*n, 4)
+  lrwork = int(2*n*n + 5*n+ 1, 4)
+  liwork = int(5*n + 3, 4)
   allocate (work(lwork),iwork(liwork),rwork(lrwork))
 
   lwork = -1
   liwork = -1
   lrwork = -1
   ! get optimal work size
-  call ZHEEVD( 'V', 'U', n, eigvectors, nmax, eigvalues, work, lwork, &
-    rwork, lrwork, iwork, liwork, info )
+    call ZHEEVD('V', 'U', int(n,4), eigvectors, int(nmax,4), eigvalues, work, &
+              lwork, rwork, lrwork, iwork, liwork, info)
   if (info < 0) then
     print *, irp_here, ': ZHEEVD: the ',-info,'-th argument had an illegal value'
     stop 2
@@ -746,8 +781,8 @@ subroutine lapack_diagd_diag_in_place_complex(eigvalues,eigvectors,nmax,n)
   deallocate (work,iwork,rwork)
 
   allocate (work(lwork),iwork(liwork),rwork(lrwork))
-  call ZHEEVD( 'V', 'U', n, eigvectors, nmax, eigvalues, work, lwork, &
-    rwork, lrwork, iwork, liwork, info )
+    call ZHEEVD('V', 'U', int(n,4), eigvectors, int(nmax,4), eigvalues, work, &
+              lwork, rwork, lrwork, iwork, liwork, info)
   deallocate(work,iwork,rwork)
 
 
@@ -756,11 +791,12 @@ subroutine lapack_diagd_diag_in_place_complex(eigvalues,eigvectors,nmax,n)
     stop 2
   else if( info > 0  ) then
      write(*,*)'ZHEEVD Failed; calling ZHEEV'
-     lwork = 2*n - 1
-     lrwork = 3*n - 2
+     lwork = int(2*n - 1, 4)
+     lrwork = int(3*n - 2, 4)
      allocate(work(lwork),rwork(lrwork))
      lwork = -1
-     call ZHEEV('V','L',n,eigvectors,nmax,eigvalues,work,lwork,rwork,info)
+     call ZHEEV('V', 'L', int(n,4), eigvectors, int(nmax,4), eigvalues, work, &
+                lwork, rwork, info)
      if (info < 0) then
        print *, irp_here, ': ZHEEV: the ',-info,'-th argument had an illegal value'
        stop 2
@@ -768,7 +804,8 @@ subroutine lapack_diagd_diag_in_place_complex(eigvalues,eigvectors,nmax,n)
      lwork = int(work(1))
      deallocate(work)
      allocate(work(lwork))
-     call ZHEEV('V','L',n,eigvectors,nmax,eigvalues,work,lwork,rwork,info)
+     call ZHEEV('V', 'L', int(n,4), eigvectors, int(nmax,4), eigvalues, work, &
+                lwork, rwork, info)
      if (info /= 0 ) then
        write(*,*)'ZHEEV Failed'
        stop 1
@@ -779,6 +816,7 @@ subroutine lapack_diagd_diag_in_place_complex(eigvalues,eigvectors,nmax,n)
 end
 
 subroutine lapack_diagd_diag_complex(eigvalues,eigvectors,H,nmax,n)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Diagonalize matrix H(complex)
@@ -790,7 +828,7 @@ subroutine lapack_diagd_diag_complex(eigvalues,eigvectors,H,nmax,n)
   ! eigvectors(i,j) = <i|psi_j> where i is the basis function and psi_j is the j th eigenvector
   !
   END_DOC
-  integer, intent(in)            :: n,nmax
+  integer(size_t), intent(in)    :: n,nmax
 !  double precision, intent(out)  :: eigvectors(nmax,n)
   complex*16, intent(out)        :: eigvectors(nmax,n)
   double precision, intent(out)  :: eigvalues(n)
@@ -801,23 +839,24 @@ subroutine lapack_diagd_diag_complex(eigvalues,eigvectors,H,nmax,n)
   integer         ,allocatable   :: iwork(:)
   complex*16,allocatable         :: A(:,:)
   double precision, allocatable  :: rwork(:)
-  integer                        :: lrwork, lwork, info, i,j,l,k, liwork
+  integer                        :: lrwork, lwork, info, liwork
+  integer(size_t)                :: i,j,l,k
 
   allocate(A(nmax,n),eigenvalues(n))
 ! print*,'Diagonalization by jacobi'
 ! print*,'n = ',n
 
   A=H
-  lwork = 2*n*n + 2*n
-  lrwork = 2*n*n + 5*n+ 1
-  liwork = 5*n + 3
+  lwork = int(2*n*n + 2*n, 4)
+  lrwork = int(2*n*n + 5*n+ 1, 4)
+  liwork = int(5*n + 3, 4)
   allocate (work(lwork),iwork(liwork),rwork(lrwork))
 
   lwork = -1
   liwork = -1
   lrwork = -1
   ! get optimal work size
-  call ZHEEVD( 'V', 'U', n, A, nmax, eigenvalues, work, lwork, &
+  call ZHEEVD( 'V', 'U', int(n,4), A, int(nmax,4), eigenvalues, work, lwork, &
     rwork, lrwork, iwork, liwork, info )
   if (info < 0) then
     print *, irp_here, ': ZHEEVD: the ',-info,'-th argument had an illegal value'
@@ -829,7 +868,7 @@ subroutine lapack_diagd_diag_complex(eigvalues,eigvectors,H,nmax,n)
   deallocate (work,iwork,rwork)
 
   allocate (work(lwork),iwork(liwork),rwork(lrwork))
-  call ZHEEVD( 'V', 'U', n, A, nmax, eigenvalues, work, lwork, &
+  call ZHEEVD( 'V', 'U', int(n,4), A, int(nmax,4), eigenvalues, work, lwork, &
     rwork, lrwork, iwork, liwork, info )
   deallocate(work,iwork,rwork)
 
@@ -838,11 +877,12 @@ subroutine lapack_diagd_diag_complex(eigvalues,eigvectors,H,nmax,n)
     stop 2
   else if( info > 0  ) then
      write(*,*)'ZHEEVD Failed; calling ZHEEV'
-     lwork = 2*n - 1
-     lrwork = 3*n - 2
+     lwork = int(2*n - 1, 4)
+     lrwork = int(3*n - 2, 4)
      allocate(work(lwork),rwork(lrwork))
      lwork = -1
-     call ZHEEV('V','L',n,A,nmax,eigenvalues,work,lwork,rwork,info)
+     call ZHEEV('V', 'L', int(n,4), A, int(nmax,4), eigenvalues, work, lwork, &
+                rwork, info)
      if (info < 0) then
        print *, irp_here, ': ZHEEV: the ',-info,'-th argument had an illegal value'
        stop 2
@@ -850,7 +890,8 @@ subroutine lapack_diagd_diag_complex(eigvalues,eigvectors,H,nmax,n)
      lwork = int(work(1))
      deallocate(work)
      allocate(work(lwork))
-     call ZHEEV('V','L',n,A,nmax,eigenvalues,work,lwork,rwork,info)
+     call ZHEEV('V', 'L', int(n,4), A, int(nmax,4), eigenvalues, work, lwork, &
+                rwork, info)
      if (info /= 0 ) then
        write(*,*)'ZHEEV Failed'
        stop 1
@@ -870,6 +911,7 @@ subroutine lapack_diagd_diag_complex(eigvalues,eigvectors,H,nmax,n)
 end
 
 subroutine lapack_diagd_complex(eigvalues,eigvectors,H,nmax,n)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Diagonalize matrix H(complex)
@@ -881,7 +923,7 @@ subroutine lapack_diagd_complex(eigvalues,eigvectors,H,nmax,n)
   ! eigvectors(i,j) = <i|psi_j> where i is the basis function and psi_j is the j th eigenvector
   !
   END_DOC
-  integer, intent(in)            :: n,nmax
+  integer(size_t), intent(in)    :: n,nmax
 !  double precision, intent(out)  :: eigvectors(nmax,n)
   complex*16, intent(out)        :: eigvectors(nmax,n)
   double precision, intent(out)  :: eigvalues(n)
@@ -892,22 +934,23 @@ subroutine lapack_diagd_complex(eigvalues,eigvectors,H,nmax,n)
   integer         ,allocatable   :: iwork(:)
   complex*16,allocatable         :: A(:,:)
   double precision, allocatable  :: rwork(:)
-  integer                        :: lrwork, lwork, info, i,j,l,k, liwork
+  integer                        :: lrwork, lwork, info, liwork
+  integer(size_t)                :: i,j,l,k
 
   allocate(A(nmax,n),eigenvalues(n))
 ! print*,'Diagonalization by jacobi'
 ! print*,'n = ',n
 
   A=H
-  lwork = 2*n*n + 2*n
-  lrwork = 2*n*n + 5*n+ 1
-  liwork = 5*n + 3
+  lwork = int(2*n*n + 2*n, 4)
+  lrwork = int(2*n*n + 5*n+ 1, 4)
+  liwork = int(5*n + 3, 4)
   allocate (work(lwork),iwork(liwork),rwork(lrwork))
 
   lwork = -1
   liwork = -1
   lrwork = -1
-  call ZHEEVD( 'V', 'U', n, A, nmax, eigenvalues, work, lwork, &
+  call ZHEEVD( 'V', 'U', int(n,4), A, int(nmax,4), eigenvalues, work, lwork, &
     rwork, lrwork, iwork, liwork, info )
   if (info < 0) then
     print *, irp_here, ': ZHEEVD: the ',-info,'-th argument had an illegal value'
@@ -919,7 +962,7 @@ subroutine lapack_diagd_complex(eigvalues,eigvectors,H,nmax,n)
   deallocate (work,iwork,rwork)
 
   allocate (work(lwork),iwork(liwork),rwork(lrwork))
-  call ZHEEVD( 'V', 'U', n, A, nmax, eigenvalues, work, lwork, &
+  call ZHEEVD( 'V', 'U', int(n,4), A, int(nmax,4), eigenvalues, work, lwork, &
     rwork, lrwork, iwork, liwork, info )
   deallocate(work,iwork,rwork)
 
@@ -944,6 +987,7 @@ subroutine lapack_diagd_complex(eigvalues,eigvectors,H,nmax,n)
 end
 
 subroutine lapack_diag_complex(eigvalues,eigvectors,H,nmax,n)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Diagonalize matrix H (complex)
@@ -955,7 +999,7 @@ subroutine lapack_diag_complex(eigvalues,eigvectors,H,nmax,n)
   ! eigvectors(i,j) = <i|psi_j> where i is the basis function and psi_j is the j th eigenvector
   !
   END_DOC
-  integer, intent(in)            :: n,nmax
+  integer(size_t), intent(in)    :: n,nmax
   complex*16, intent(out)        :: eigvectors(nmax,n)
   double precision, intent(out)  :: eigvalues(n)
   complex*16, intent(in)   :: H(nmax,n)
@@ -963,7 +1007,8 @@ subroutine lapack_diag_complex(eigvalues,eigvectors,H,nmax,n)
   complex*16,allocatable   :: work(:)
   complex*16,allocatable   :: A(:,:)
   double precision,allocatable   :: rwork(:)
-  integer                        :: lwork, info, i,j,l,k,lrwork
+  integer                        :: lwork, info, lrwork
+  integer(size_t)                :: i,j,l,k
 
   allocate(A(nmax,n),eigenvalues(n))
 ! print*,'Diagonalization by jacobi'
@@ -976,7 +1021,7 @@ subroutine lapack_diag_complex(eigvalues,eigvectors,H,nmax,n)
   allocate (work(lwork),rwork(lrwork))
 
   lwork = -1
-  call ZHEEV( 'V', 'U', n, A, nmax, eigenvalues, work, lwork, &
+  call ZHEEV( 'V', 'U', int(n,4), A, int(nmax,4), eigenvalues, work, lwork, &
     rwork, info )
   if (info < 0) then
     print *, irp_here, ': ZHEEV: the ',-info,'-th argument had an illegal value'
@@ -986,7 +1031,7 @@ subroutine lapack_diag_complex(eigvalues,eigvectors,H,nmax,n)
   deallocate (work)
 
   allocate (work(lwork))
-  call ZHEEV( 'V', 'U', n, A, nmax, eigenvalues, work, lwork, &
+  call ZHEEV( 'V', 'U', int(n,4), A, int(nmax,4), eigenvalues, work, lwork, &
     rwork, info )
   deallocate(work,rwork)
 
@@ -1015,11 +1060,12 @@ subroutine lapack_diag_complex(eigvalues,eigvectors,H,nmax,n)
 end
 
 subroutine matrix_vector_product_complex(u0,u1,matrix,sze,lda)
+ use sizet
  implicit none
  BEGIN_DOC
 ! performs u1 += u0 * matrix
  END_DOC
- integer, intent(in)             :: sze,lda
+ integer(size_t), intent(in)     :: sze,lda
  complex*16, intent(in)    :: u0(sze)
  complex*16, intent(inout) :: u1(sze)
  complex*16, intent(in)    :: matrix(lda,sze)
@@ -1028,10 +1074,12 @@ subroutine matrix_vector_product_complex(u0,u1,matrix,sze,lda)
  incx = 1
  incy = 1
  !call dsymv('U', sze, 1.d0, matrix, lda, u0, incx, 1.d0, u1, incy)
- call zhemv('U', sze, (1.d0,0.d0), matrix, lda, u0, incx, (1.d0,0.d0), u1, incy)
+  call zhemv('U', int(sze,4), (1.d0,0.d0), matrix, int(lda,4), &
+      u0, incx, (1.d0,0.d0), u1, incy)
 end
 
 subroutine ortho_canonical(overlap,LDA,N,C,LDC,m,cutoff)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Compute C_new=C_old.U.s^-1/2 canonical orthogonalization.
@@ -1051,8 +1099,8 @@ subroutine ortho_canonical(overlap,LDA,N,C,LDC,m,cutoff)
   !
   END_DOC
 
-  integer, intent(in)            :: lda, ldc, n
-  integer, intent(out)           :: m
+  integer(size_t), intent(in)    :: lda, ldc, n
+  integer(size_t), intent(out)   :: m
   double precision, intent(in)   :: overlap(lda,n)
   double precision, intent(in)   :: cutoff
   double precision, intent(inout) :: C(ldc,n)
@@ -1061,7 +1109,8 @@ subroutine ortho_canonical(overlap,LDA,N,C,LDC,m,cutoff)
   double precision, allocatable  :: D(:)
   double precision, allocatable  :: S(:,:)
   !DIR$ ATTRIBUTES ALIGN : 64    :: U, Vt, D
-  integer                        :: info, i, j
+  integer                        :: info
+  integer(size_t)                :: i, j
   double precision :: local_cutoff
 
   if (n < 2) then
@@ -1101,13 +1150,15 @@ subroutine ortho_canonical(overlap,LDA,N,C,LDC,m,cutoff)
     enddo
   enddo
 
-  call dgemm('N','N',n,n,n,1.d0,U,size(U,1),S,size(S,1),0.d0,C,size(C,1))
+    call dgemm('N', 'N', int(n,4), int(n,4), int(n,4), 1.d0, U, size(U,1), S, &
+             size(S,1), 0.d0, C, size(C,1))
   deallocate (U, Vt, D, S)
 
 end
 
 
 subroutine ortho_svd(A,LDA,m,n)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Orthogonalization via fast SVD
@@ -1121,15 +1172,15 @@ subroutine ortho_svd(A,LDA,m,n)
   ! n : Number of columns of A
   !
   END_DOC
-  integer, intent(in)            :: m,n, LDA
+  integer(size_t), intent(in)    :: m,n, LDA
   double precision, intent(inout) :: A(LDA,n)
   if (m < n) then
     call ortho_qr(A,LDA,m,n)
   endif
   double precision, allocatable :: U(:,:), D(:), Vt(:,:)
   allocate(U(m,n), D(n), Vt(n,n))
-  call SVD(A,LDA,U,size(U,1),D,Vt,size(Vt,1),m,n)
-  integer :: i,j
+  call SVD(A,LDA,U,int(size(U,1),size_t),D,Vt,int(size(Vt,1),size_t),m,n)
+  integer(size_t) :: i,j
   do j=1,n
     do i=1,m
       A(i,j) = U(i,j)
@@ -1140,6 +1191,7 @@ subroutine ortho_svd(A,LDA,m,n)
 end
 
 subroutine ortho_qr(A,LDA,m,n)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Orthogonalization using Q.R factorization
@@ -1153,7 +1205,7 @@ subroutine ortho_qr(A,LDA,m,n)
   ! n : Number of columns of A
   !
   END_DOC
-  integer, intent(in)            :: m,n, LDA
+  integer(size_t), intent(in)    :: m,n, LDA
   double precision, intent(inout) :: A(LDA,n)
 
   integer                        :: LWORK, INFO
@@ -1162,27 +1214,30 @@ subroutine ortho_qr(A,LDA,m,n)
   allocate (TAU(min(m,n)), WORK(1))
 
   LWORK=-1
-  call dgeqrf( m, n, A, LDA, TAU, WORK, LWORK, INFO )
+  call dgeqrf( int(m,4), int(n,4), A, int(LDA,4), TAU, WORK, LWORK, INFO )
   ! /!\ int(WORK(1)) becomes negative when WORK(1) > 2147483648
-  LWORK=max(n,int(WORK(1)))
+  LWORK=max(int(n,4),int(WORK(1),4))
 
   deallocate(WORK)
   allocate(WORK(LWORK))
-  call dgeqrf(m, n, A, LDA, TAU, WORK, LWORK, INFO )
+  call dgeqrf(int(m,4), int(n,4), A, int(LDA,4), TAU, WORK, LWORK, INFO )
 
   LWORK=-1
-  call dorgqr(m, n, n, A, LDA, TAU, WORK, LWORK, INFO)
+    call dorgqr(int(m,4), int(n,4), int(n,4), A, int(LDA,4), TAU, WORK, LWORK, &
+              INFO)
   ! /!\ int(WORK(1)) becomes negative when WORK(1) > 2147483648
-  LWORK=max(n,int(WORK(1)))
+  LWORK=max(int(n,4),int(WORK(1),4))
 
   deallocate(WORK)
   allocate(WORK(LWORK))
-  call dorgqr(m, n, n, A, LDA, TAU, WORK, LWORK, INFO)
+    call dorgqr(int(m,4), int(n,4), int(n,4), A, int(LDA,4), TAU, WORK, LWORK, &
+              INFO)
 
   deallocate(WORK,TAU)
 end
 
 subroutine ortho_qr_unblocked(A,LDA,m,n)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Orthogonalization using Q.R factorization
@@ -1196,19 +1251,20 @@ subroutine ortho_qr_unblocked(A,LDA,m,n)
   ! m : Number of columns of A
   !
   END_DOC
-  integer, intent(in)            :: m,n, LDA
+  integer(size_t), intent(in)    :: m,n, LDA
   double precision, intent(inout) :: A(LDA,n)
 
   integer                        :: info
   double precision, allocatable  :: TAU(:), WORK(:)
 
   allocate (TAU(n), WORK(n))
-  call dgeqr2( m, n, A, LDA, TAU, WORK, INFO )
-  call dorg2r(m, n, n, A, LDA, TAU, WORK, INFO)
+  call dgeqr2( int(m,4), int(n,4), A, int(LDA,4), TAU, WORK, INFO )
+  call dorg2r(int(m,4), int(n,4), int(n,4), A, int(LDA,4), TAU, WORK, INFO)
   deallocate(WORK,TAU)
 end
 
 subroutine ortho_lowdin(overlap,LDA,N,C,LDC,m,cutoff)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Compute C_new=C_old.S^-1/2 orthogonalization.
@@ -1228,7 +1284,7 @@ subroutine ortho_lowdin(overlap,LDA,N,C,LDC,m,cutoff)
   !
   END_DOC
 
-  integer, intent(in)            :: LDA, ldc, n, m
+  integer(size_t), intent(in)    :: LDA, ldc, n, m
   double precision, intent(in)   :: overlap(lda,n)
   double precision, intent(in)   :: cutoff
   double precision, intent(inout) :: C(ldc,n)
@@ -1236,7 +1292,8 @@ subroutine ortho_lowdin(overlap,LDA,N,C,LDC,m,cutoff)
   double precision, allocatable  :: Vt(:,:)
   double precision, allocatable  :: D(:)
   double precision, allocatable  :: S(:,:)
-  integer                        :: info, i, j, k, mm
+  integer                        :: info
+  integer(size_t)                :: i, j, k, mm
   double precision :: local_cutoff
 
   if (n < 2) then
@@ -1292,7 +1349,8 @@ subroutine ortho_lowdin(overlap,LDA,N,C,LDC,m,cutoff)
 
   !$OMP END PARALLEL
 
-  call dgemm('N','N',m,n,n,1.d0,U,size(U,1),S,size(S,1),0.d0,C,size(C,1))
+  call dgemm('N','N',int(m,4),int(n,4),int(n,4),1.d0, &
+      U,size(U,1),S,size(S,1),0.d0,C,size(C,1))
 
   deallocate(U,Vt,S,D)
 end
@@ -1300,11 +1358,12 @@ end
 
 
 subroutine get_inverse(A,LDA,m,C,LDC)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Returns the inverse of the square matrix A
   END_DOC
-  integer, intent(in)            :: m, LDA, LDC
+  integer(size_t), intent(in)    :: m, LDA, LDC
   double precision, intent(in)   :: A(LDA,m)
   double precision, intent(out)  :: C(LDC,m)
 
@@ -1314,12 +1373,12 @@ subroutine get_inverse(A,LDA,m,C,LDC)
   allocate (ipiv(m), work(m*m))
   lwork = size(work)
   C(1:m,1:m) = A(1:m,1:m)
-  call dgetrf(m,m,C,size(C,1),ipiv,info)
+  call dgetrf(int(m,4),int(m,4),C,int(size(C,1),4),ipiv,info)
   if (info /= 0) then
     print *,  info
     stop 'error in inverse (dgetrf)'
   endif
-  call dgetri(m,C,size(C,1),ipiv,work,lwork,info)
+  call dgetri(int(m,4),C,int(size(C,1),4),ipiv,work,lwork,info)
   if (info /= 0) then
     print *,  info
     stop 'error in inverse (dgetri)'
@@ -1328,19 +1387,20 @@ subroutine get_inverse(A,LDA,m,C,LDC)
 end
 
 subroutine get_pseudo_inverse(A, LDA, m, n, C, LDC, cutoff)
+ use sizet
 
   BEGIN_DOC
   ! Find C = A^-1: A(m,n), C(n,m)
   END_DOC
 
   implicit none
-  integer, intent(in)           :: m, n, LDA, LDC
+  integer(size_t), intent(in)   :: m, n, LDA, LDC
   double precision, intent(in)  :: A(LDA,n)
   double precision, intent(in)  :: cutoff
   double precision, intent(out) :: C(LDC,m)
 
   integer                       :: info, lwork
-  integer                       :: i, j, k, n_svd
+  integer(size_t)               :: i, j, k, n_svd
   double precision              :: D1_inv
   double precision, allocatable :: U(:,:), D(:), Vt(:,:), work(:), A_tmp(:,:)
 
@@ -1351,15 +1411,17 @@ subroutine get_pseudo_inverse(A, LDA, m, n, C, LDC, cutoff)
     enddo
   enddo
   lwork = -1
-  call dgesvd('S','A', m, n, A_tmp, m,D,U,m,Vt,n,work,lwork,info)
+  call dgesvd('S','A', int(m,4), int(n,4), A_tmp, int(m,4), &
+      D,U,int(m,4),Vt,int(n,4),work,lwork,info)
   if (info /= 0) then
     print *,  info, ': SVD failed'
     stop
   endif
-  LWORK=max(5*min(m,n),int(WORK(1)))
+  LWORK=max(int(5*min(m,n),4),int(WORK(1),4))
   deallocate(work)
   allocate(work(lwork))
-  call dgesvd('S','A', m, n, A_tmp, m,D,U,m,Vt,n,work,lwork,info)
+  call dgesvd('S','A', int(m,4), int(n,4), A_tmp, int(m,4), &
+      D,U,int(m,4),Vt,int(n,4),work,lwork,info)
   if (info /= 0) then
     print *,  info, ':: SVD failed'
     stop 1
@@ -1394,7 +1456,8 @@ subroutine get_pseudo_inverse(A, LDA, m, n, C, LDC, cutoff)
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm('T', 'T', n, m, n_svd, 1.d0, Vt, size(Vt,1), U, size(U,1), 0.d0, C, size(C,1))
+  call dgemm('T', 'T', int(n,4), int(m,4), int(n_svd,4), &
+      1.d0, Vt, size(Vt,1), U, size(U,1), 0.d0, C, size(C,1))
 
   deallocate(U,D,Vt,work,A_tmp)
 
@@ -1403,11 +1466,12 @@ end
 
 
 subroutine find_rotation(A,LDA,B,m,C,n)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Find A.C = B
   END_DOC
-  integer, intent(in)            :: m,n, LDA
+  integer(size_t), intent(in)    :: m,n, LDA
   double precision, intent(in)   :: A(LDA,n), B(LDA,n)
   double precision, intent(out)  :: C(n,n)
 
@@ -1416,24 +1480,28 @@ subroutine find_rotation(A,LDA,B,m,C,n)
   call get_pseudo_inverse(A,LDA,m,n,A_inv,LDA,1.d-10)
 
   integer                        :: i,j,k
-  call dgemm('N','N',n,n,m,1.d0,A_inv,n,B,LDA,0.d0,C,n)
+  call dgemm('N','N',int(n,4),int(n,4),int(m,4), &
+      1.d0,A_inv,int(n,4),B,int(LDA,4),0.d0,C,int(n,4))
   deallocate(A_inv)
 end
 
 
 subroutine apply_rotation(A,LDA,R,LDR,B,LDB,m,n)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Apply the rotation found by find_rotation
   END_DOC
-  integer, intent(in)            :: m,n, LDA, LDB, LDR
+  integer(size_t), intent(in)    :: m,n, LDA, LDB, LDR
   double precision, intent(in)   :: R(LDR,n)
   double precision, intent(in)   :: A(LDA,n)
   double precision, intent(out)  :: B(LDB,n)
-  call dgemm('N','N',m,n,n,1.d0,A,LDA,R,LDR,0.d0,B,LDB)
+  call dgemm('N','N',int(m,4),int(n,4),int(n,4), &
+      1.d0,A,int(LDA,4),R,int(LDR,4),0.d0,B,int(LDB,4))
 end
 
 subroutine lapack_diagd(eigvalues,eigvectors,H,nmax,n)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Diagonalize matrix H
@@ -1445,7 +1513,7 @@ subroutine lapack_diagd(eigvalues,eigvectors,H,nmax,n)
   ! eigvectors(i,j) = <i|psi_j> where i is the basis function and psi_j is the j th eigenvector
   !
   END_DOC
-  integer, intent(in)            :: n,nmax
+  integer(size_t), intent(in)    :: n,nmax
   double precision, intent(out)  :: eigvectors(nmax,n)
   double precision, intent(out)  :: eigvalues(n)
   double precision, intent(in)   :: H(nmax,n)
@@ -1453,7 +1521,8 @@ subroutine lapack_diagd(eigvalues,eigvectors,H,nmax,n)
   double precision,allocatable   :: work(:)
   integer         ,allocatable   :: iwork(:)
   double precision,allocatable   :: A(:,:)
-  integer                        :: lwork, info, i,j,l,k, liwork
+  integer                        :: lwork, info, liwork
+  integer(size_t)                :: i,j,l,k
 
   allocate(A(nmax,n),eigenvalues(n))
   ! print*,'Diagonalization by jacobi'
@@ -1502,6 +1571,7 @@ subroutine lapack_diagd(eigvalues,eigvectors,H,nmax,n)
 end
 
 subroutine lapack_diag(eigvalues,eigvectors,H,nmax,n)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Diagonalize matrix H
@@ -1513,14 +1583,15 @@ subroutine lapack_diag(eigvalues,eigvectors,H,nmax,n)
   ! eigvectors(i,j) = <i|psi_j> where i is the basis function and psi_j is the j th eigenvector
   !
   END_DOC
-  integer, intent(in)            :: n,nmax
+  integer(size_t), intent(in)    :: n,nmax
   double precision, intent(out)  :: eigvectors(nmax,n)
   double precision, intent(out)  :: eigvalues(n)
   double precision, intent(in)   :: H(nmax,n)
   double precision,allocatable   :: eigenvalues(:)
   double precision,allocatable   :: work(:)
   double precision,allocatable   :: A(:,:)
-  integer                        :: lwork, info, i,j,l,k, liwork
+  integer                        :: lwork, info, liwork
+  integer(size_t)                :: i,j,l,k
 
   allocate(A(nmax,n),eigenvalues(n))
 
@@ -1569,6 +1640,7 @@ subroutine lapack_diag(eigvalues,eigvectors,H,nmax,n)
 end
 
 subroutine nullify_small_elements(m,n,A,LDA,thresh)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Nullifies, in place, the small elements of the m by n matrix A
@@ -1576,10 +1648,10 @@ subroutine nullify_small_elements(m,n,A,LDA,thresh)
   ! 1.d-99 or |A(i,j)| / amax < thresh, where amax is the largest
   ! modulus of the elements of A. If amax = 0, A is left unchanged.
   END_DOC
-  integer, intent(in) :: m,n,LDA
+  integer(size_t), intent(in) :: m,n,LDA
   double precision, intent(inout) :: A(LDA,n)
   double precision, intent(in) :: thresh
-  integer :: i,j
+  integer(size_t) :: i,j
   double precision :: amax
 
   ! Find max value
@@ -1604,6 +1676,7 @@ subroutine nullify_small_elements(m,n,A,LDA,thresh)
 end
 
 subroutine restore_symmetry(m,n,A,LDA,thresh)
+ use sizet
 
   implicit none
 
@@ -1613,13 +1686,13 @@ subroutine restore_symmetry(m,n,A,LDA,thresh)
   ! If restore_symm is False, only nullify small elements
   END_DOC
 
-  integer, intent(in) :: m,n,LDA
+  integer(size_t), intent(in) :: m,n,LDA
   double precision, intent(inout) :: A(LDA,n)
   double precision, intent(in) :: thresh
 
   double precision, allocatable :: copy(:), copy_sign(:)
-  integer, allocatable :: key(:), ii(:), jj(:)
-  integer :: sze, pi, pf, idx, i,j,k
+  integer(size_t), allocatable :: key(:), ii(:), jj(:)
+  integer(size_t) :: sze, pi, pf, idx, i,j,k
   double precision :: average, val, thresh2
 
   thresh2 = dsqrt(thresh)
@@ -1649,10 +1722,10 @@ subroutine restore_symmetry(m,n,A,LDA,thresh)
   !$OMP END PARALLEL
 
   ! Sort
-  call dsort(copy,key,sze)
-  call iset_order(ii,key,sze)
-  call iset_order(jj,key,sze)
-  call dset_order(copy_sign,key,sze)
+  call dsort_big(copy,key,sze)
+  call i8set_order_big(ii,key,sze)
+  call i8set_order_big(jj,key,sze)
+  call dset_order_big(copy_sign,key,sze)
 
   !TODO
   ! Parallelization with OMP
@@ -1720,6 +1793,7 @@ subroutine restore_symmetry(m,n,A,LDA,thresh)
 end
 
 subroutine diag_nonsym_right(n, A, A_ldim, V, V_ldim, energy, E_ldim)
+ use sizet
 
   implicit none
   BEGIN_DOC
@@ -1731,15 +1805,16 @@ subroutine diag_nonsym_right(n, A, A_ldim, V, V_ldim, energy, E_ldim)
   ! eigenvalue and of the eigenvalue times the eigenvector.
   END_DOC
 
-  integer,          intent(in)  :: n, A_ldim, V_ldim, E_ldim
+  integer(size_t), intent(in)   :: n, A_ldim, V_ldim, E_ldim
   double precision, intent(in)  :: A(A_ldim,n)
   double precision, intent(out) :: energy(E_ldim), V(V_ldim,n)
 
   character*1                   :: JOBVL, JOBVR, BALANC, SENSE
-  integer                       :: i, j
+  integer(size_t)               :: i, j
   integer                       :: ILO, IHI, lda, ldvl, ldvr, LWORK, INFO
   double precision              :: ABNRM
-  integer,          allocatable :: iorder(:), IWORK(:)
+  integer(size_t), allocatable  :: iorder(:)
+  integer,          allocatable :: IWORK(:)
   double precision, allocatable :: WORK(:), SCALE_array(:), RCONDE(:), RCONDV(:)
   double precision, allocatable :: Atmp(:,:), WR(:), WI(:), VL(:,:), VR(:,:), Vtmp(:)
   double precision, allocatable :: energy_loc(:), V_loc(:,:)
@@ -1755,15 +1830,15 @@ subroutine diag_nonsym_right(n, A, A_ldim, V, V_ldim, energy, E_ldim)
   JOBVR  = "V" ! computes the right eigenvectors
   BALANC = "B" ! Diagonal scaling and Permutation for optimization
   SENSE  = "V" ! Determines which reciprocal condition numbers are computed
-  lda  = n
-  ldvr = n
+  lda  = int(n,4)
+  ldvr = int(n,4)
   ldvl = 1
 
   allocate( WORK(1), SCALE_array(n), RCONDE(n), RCONDV(n), IWORK(2*n-2) )
 
   LWORK = -1 ! to ask for the optimal size of WORK
   call dgeevx( BALANC, JOBVL, JOBVR, SENSE                  & ! CHARACTERS
-             , n, Atmp, lda                                 & ! MATRIX TO DIAGONALIZE
+             , int(n,4), Atmp, lda & ! MATRIX TO DIAGONALIZE
              , WR, WI                                       & ! REAL AND IMAGINARY PART OF EIGENVALUES
              , VL, ldvl, VR, ldvr                           & ! LEFT AND RIGHT EIGENVECTORS
              , ILO, IHI, SCALE_array, ABNRM, RCONDE, RCONDV & ! OUTPUTS OF OPTIMIZATION
@@ -1778,7 +1853,7 @@ subroutine diag_nonsym_right(n, A, A_ldim, V, V_ldim, energy, E_ldim)
   deallocate(WORK)
   allocate(WORK(LWORK))
   call dgeevx( BALANC, JOBVL, JOBVR, SENSE                  &
-             , n, Atmp, lda                                 &
+             , int(n,4), Atmp, lda                         &
              , WR, WI                                       &
              , VL, ldvl, VR, ldvr                           &
              , ILO, IHI, SCALE_array, ABNRM, RCONDE, RCONDV &
@@ -1839,7 +1914,7 @@ subroutine diag_nonsym_right(n, A, A_ldim, V, V_ldim, energy, E_ldim)
   do i = 1, n
     iorder(i) = i
   enddo
-  call dsort(energy_loc, iorder, n)
+  call dsort_big(energy_loc, iorder, n)
   do i = 1, n
     energy(i) = energy_loc(i)
     do j = 1, n
@@ -1860,6 +1935,7 @@ end subroutine diag_nonsym_right
 
 
 subroutine pivoted_cholesky( A, rank, tol, ndim, U)
+ use sizet
 BEGIN_DOC
 ! Cholesky factorization with complete pivoting (LAPACK dpstrf).
 ! On exit, A is destroyed and A = U * U**T, where U(ndim, 1:rank)
@@ -1877,8 +1953,8 @@ END_DOC
 ! U is allocated inside this subroutine
 ! rank is the number of Cholesky vectors depending on tol
 !
-integer                          :: ndim
-integer, intent(inout)           :: rank
+integer(size_t)                  :: ndim
+integer(size_t), intent(inout)   :: rank
 double precision, intent(inout)  :: A(ndim, ndim)
 double precision, intent(out)    :: U(ndim, rank)
 double precision, intent(in)     :: tol
@@ -1888,13 +1964,17 @@ double precision, dimension(:), allocatable :: work
 character, parameter :: uplo = 'L'
 integer :: LDA
 integer :: info
-integer :: k, l, rank0
+integer :: rank4
+integer(size_t) :: k, rank0
+integer :: l
 
 rank0 = rank
-LDA = ndim
+LDA = int(ndim,4)
 allocate(piv(ndim))
 allocate(work(2*ndim))
-call dpstrf(uplo, ndim, A, LDA, piv, rank, tol, work, info)
+rank4 = int(rank, 4)
+call dpstrf(uplo, int(ndim,4), A, LDA, piv, rank4, tol, work, info)
+rank = int(rank4, size_t)
 
 if (rank > rank0) then
   print *, 'Bug: rank > rank0 in pivoted cholesky. Increase rank before calling'
@@ -1915,9 +1995,10 @@ end do
 end subroutine pivoted_cholesky
 
 subroutine exp_matrix(X,n,exp_X)
+ use sizet
  implicit none
  double precision, intent(in) :: X(n,n)
- integer, intent(in):: n
+ integer(size_t), intent(in):: n
  double precision, intent(out):: exp_X(n,n)
  BEGIN_DOC
  ! exponential of the matrix X: X has to be ANTI HERMITIAN !! 
@@ -1926,7 +2007,7 @@ subroutine exp_matrix(X,n,exp_X)
  !
  ! section evaluation of matrix exponential (Eqs. 3.1.29 to 3.1.31)
  END_DOC
- integer :: i
+ integer(size_t) :: i
  double precision, allocatable :: r2_mat(:,:),eigvalues(:),eigvectors(:,:)
  double precision, allocatable :: matrix_tmp1(:,:),eigvalues_mat(:,:),matrix_tmp2(:,:)
  include 'constants.include.F'
@@ -1955,10 +2036,12 @@ subroutine exp_matrix(X,n,exp_X)
    do i = 1,n
     eigvalues_mat(i,i) = eigvalues(i)*eigvalues(i)
    enddo
-   call dgemm('N','N',n,n,n,1.d0,eigvectors,size(eigvectors,1), &
-   eigvalues_mat,size(eigvalues_mat,1),0.d0,matrix_tmp1,size(matrix_tmp1,1))
-   call dgemm('N','T',n,n,n,-1.d0,matrix_tmp1,size(matrix_tmp1,1), &
-   eigvectors,size(eigvectors,1),0.d0,matrix_tmp2,size(matrix_tmp2,1))
+   call dgemm('N','N',int(n,4),int(n,4),int(n,4),1.d0, &
+   eigvectors,size(eigvectors,1),eigvalues_mat,size(eigvalues_mat,1), &
+   0.d0,matrix_tmp1,size(matrix_tmp1,1))
+   call dgemm('N','T',int(n,4),int(n,4),int(n,4),-1.d0, &
+   matrix_tmp1,size(matrix_tmp1,1),eigvectors,size(eigvectors,1), &
+   0.d0,matrix_tmp2,size(matrix_tmp2,1))
    print*,'r2_mat = '
    do i = 1, n
     write(*,'(100(F16.10,X))')r2_mat(:,i)
@@ -1976,11 +2059,13 @@ subroutine exp_matrix(X,n,exp_X)
   eigvalues_mat(i,i) = dcos(eigvalues(i))
  enddo
  ! matrix_tmp2 = W cos(t)
- call dgemm('N','N',n,n,n,1.d0,eigvectors,size(eigvectors,1), &
- eigvalues_mat,size(eigvalues_mat,1),0.d0,matrix_tmp1,size(matrix_tmp1,1))
+ call dgemm('N','N',int(n,4),int(n,4),int(n,4),1.d0, &
+ eigvectors,size(eigvectors,1),eigvalues_mat,size(eigvalues_mat,1), &
+ 0.d0,matrix_tmp1,size(matrix_tmp1,1))
  ! matrix_tmp2 = W cos(t) W^T
- call dgemm('N','T',n,n,n,-1.d0,matrix_tmp1,size(matrix_tmp1,1), &
- eigvectors,size(eigvectors,1),0.d0,matrix_tmp2,size(matrix_tmp2,1))
+ call dgemm('N','T',int(n,4),int(n,4),int(n,4),-1.d0, &
+ matrix_tmp1,size(matrix_tmp1,1),eigvectors,size(eigvectors,1), &
+ 0.d0,matrix_tmp2,size(matrix_tmp2,1))
  exp_X = matrix_tmp2
  ! matrix_tmp2 = W t^-1 sin(t) W^T X
  do i = 1,n
@@ -1992,19 +2077,23 @@ subroutine exp_matrix(X,n,exp_X)
   endif
  enddo
  ! matrix_tmp1 = W t^-1 sin(t) 
- call dgemm('N','N',n,n,n,1.d0,eigvectors,size(eigvectors,1), &
- eigvalues_mat,size(eigvalues_mat,1),0.d0,matrix_tmp1,size(matrix_tmp1,1))
+ call dgemm('N','N',int(n,4),int(n,4),int(n,4),1.d0, &
+ eigvectors,size(eigvectors,1),eigvalues_mat,size(eigvalues_mat,1), &
+ 0.d0,matrix_tmp1,size(matrix_tmp1,1))
  ! matrix_tmp2 = W t^-1 sin(t) W^T 
- call dgemm('N','T',n,n,n,-1.d0,matrix_tmp1,size(matrix_tmp1,1), &
- eigvectors,size(eigvectors,1),0.d0,matrix_tmp2,size(matrix_tmp2,1))
+ call dgemm('N','T',int(n,4),int(n,4),int(n,4),-1.d0, &
+ matrix_tmp1,size(matrix_tmp1,1),eigvectors,size(eigvectors,1), &
+ 0.d0,matrix_tmp2,size(matrix_tmp2,1))
  ! exp_X += matrix_tmp2 X 
- call dgemm('N','N',n,n,n,1.d0,matrix_tmp2,size(matrix_tmp2,1), &
- X,size(X,1),1.d0,exp_X,size(exp_X,1))
+ call dgemm('N','N',int(n,4),int(n,4),int(n,4),1.d0, &
+ matrix_tmp2,size(matrix_tmp2,1),X,size(X,1), &
+ 1.d0,exp_X,size(exp_X,1))
  
 end
 
 
 subroutine exp_matrix_taylor(X,n,exp_X,converged)
+ use sizet
  implicit none
  BEGIN_DOC
  ! exponential of a general real matrix X using the Taylor expansion of exp(X) 
@@ -2012,11 +2101,12 @@ subroutine exp_matrix_taylor(X,n,exp_X,converged)
  ! returns the logical converged which checks the convergence 
  END_DOC
  double precision, intent(in) :: X(n,n)
- integer, intent(in):: n
+ integer(size_t), intent(in):: n
  double precision, intent(out):: exp_X(n,n)
  logical :: converged
  double precision :: f
- integer :: i,iter
+ integer(size_t) :: i
+ integer :: iter
  double precision, allocatable :: Tpotmat(:,:),Tpotmat2(:,:)
  allocate(Tpotmat(n,n),Tpotmat2(n,n))
  BEGIN_DOC
@@ -2034,7 +2124,7 @@ subroutine exp_matrix_taylor(X,n,exp_X,converged)
    iter+=1
    f = 1.d0 / dble(iter)
    Tpotmat2(:,:) = Tpotmat(:,:) * f
-   call dgemm('N','N', n,n,n,1.d0,                   &
+   call dgemm('N','N', int(n,4),int(n,4),int(n,4),1.d0, &
        Tpotmat2, size(Tpotmat2,1),                                  &
        X, size(X,1), 0.d0,                                    &
        Tpotmat, size(Tpotmat,1))
@@ -2049,23 +2139,26 @@ subroutine exp_matrix_taylor(X,n,exp_X,converged)
 end
 
 subroutine get_A_squared(A,n,A2)
+ use sizet
  implicit none
  BEGIN_DOC
 ! A2 = A A where A is n x n matrix. Use the dgemm routine 
  END_DOC
  double precision, intent(in) :: A(n,n)
- integer, intent(in) :: n
+ integer(size_t), intent(in) :: n
  double precision, intent(out):: A2(n,n) 
- call dgemm('N','N',n,n,n,1.d0,A,size(A,1),A,size(A,1),0.d0,A2,size(A2,1))
+ call dgemm('N','N',int(n,4),int(n,4),int(n,4),1.d0, &
+     A,size(A,1),A,size(A,1),0.d0,A2,size(A2,1))
 end
 
 subroutine get_AB_prod(A,n,m,B,l,AB)
+ use sizet
  implicit none
  BEGIN_DOC
 ! AB = A B where A is n x m, B is m x l. Use the dgemm routine 
  END_DOC
  double precision, intent(in) :: A(n,m),B(m,l)
- integer, intent(in) :: n,m,l
+ integer(size_t), intent(in) :: n,m,l
  double precision, intent(out):: AB(n,l) 
  if(size(A,2).ne.m.or.size(B,1).ne.m)then
   print*,'error in get_AB_prod ! '
@@ -2075,5 +2168,6 @@ subroutine get_AB_prod(A,n,m,B,l,AB)
   print*,'m         = ',m
   stop
  endif
- call dgemm('N','N',n,l,m,1.d0,A,size(A,1),B,size(B,1),0.d0,AB,size(AB,1))
+ call dgemm('N','N',int(n,4),int(l,4),int(m,4),1.d0, &
+     A,size(A,1),B,size(B,1),0.d0,AB,size(AB,1))
 end

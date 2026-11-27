@@ -1,11 +1,14 @@
+use sizet
+
 BEGIN_PROVIDER [ double precision, eigenvectors_Fock_matrix_mo, (ao_num,mo_num) ]
    implicit none
    BEGIN_DOC
    ! Eigenvectors of the Fock matrix in the |MO| basis obtained with level shift.
    END_DOC
 
-   integer                        :: i,j
-   integer                        :: liwork, lwork, n, info
+   integer(size_t)                :: i,j
+   integer                        :: liwork, lwork, info
+   integer(size_t)                :: n
    integer, allocatable           :: iwork(:)
    double precision, allocatable  :: work(:), F(:,:), F_save(:,:)
    double precision, allocatable  :: diag(:)
@@ -21,7 +24,7 @@ BEGIN_PROVIDER [ double precision, eigenvectors_Fock_matrix_mo, (ao_num,mo_num) 
    enddo
 
    if(frozen_orb_scf)then
-     integer                        :: iorb,jorb
+     integer(size_t)                :: iorb,jorb
      do i = 1, n_core_orb
       iorb = list_core(i)
       do j = 1, n_act_orb
@@ -103,9 +106,9 @@ BEGIN_PROVIDER [ double precision, eigenvectors_Fock_matrix_mo, (ao_num,mo_num) 
      endif
    endif
 
-   call dgemm('N','N',ao_num,mo_num,mo_num, 1.d0,            &
-       mo_coef, size(mo_coef,1), F, size(F,1),                       &
-       0.d0, eigenvectors_Fock_matrix_mo, size(eigenvectors_Fock_matrix_mo,1))
+   call dgemm('N','N',int(ao_num,4),int(mo_num,4),int(mo_num,4), 1.d0, &
+       mo_coef, int(size(mo_coef,1),4), F, int(size(F,1),4), 0.d0, &
+       eigenvectors_Fock_matrix_mo, int(size(eigenvectors_Fock_matrix_mo,1),4))
    deallocate(work, F, F_save, diag)
 
 

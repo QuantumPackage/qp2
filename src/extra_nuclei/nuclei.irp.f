@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [ double precision, extra_nucl_coord,  (extra_nucl_num,3) ]
    implicit none
 
@@ -18,7 +20,7 @@ BEGIN_PROVIDER [ double precision, extra_nucl_coord,  (extra_nucl_num,3) ]
        stop 1
      endif
      call ezfio_get_extra_nuclei_extra_nucl_coord(buffer)
-     integer                        :: i,j
+     integer(size_t)                :: i,j
 
      do i=1,3
        do j=1,extra_nucl_num
@@ -79,7 +81,8 @@ BEGIN_PROVIDER [ double precision, extra_nucl_coord_transp, (3,extra_nucl_num) ]
    BEGIN_DOC
    ! Transposed array of extra_nucl_coord
    END_DOC
-   integer                        :: i, k
+   integer(size_t)                :: i
+   integer                        :: k
    extra_nucl_coord_transp = 0.d0
 
    do i=1,extra_nucl_num
@@ -94,7 +97,8 @@ BEGIN_PROVIDER [ double precision, extra_center_of_mass, (3) ]
   BEGIN_DOC
   ! Center of mass of the molecule
   END_DOC
-  integer                        :: i,j
+  integer(size_t)                :: i
+  integer                        :: j
   double precision               :: s
   extra_center_of_mass(:) = 0.d0
   s = 0.d0
@@ -116,7 +120,7 @@ BEGIN_PROVIDER [ double precision, extra_nucl_dist, (extra_nucl_num,extra_nucl_n
  ! Element (j,i) is the distance between extra nuclei j and i,
  ! from extra_nucl_coord; the matrix is symmetric, diagonal zero.
  END_DOC
- integer :: i,j
+ integer(size_t) :: i,j
  double precision :: x,y,z
  do i = 1, extra_nucl_num
   do j = 1, extra_nucl_num

@@ -26,9 +26,10 @@ end
 ! ---
 
 subroutine print_j1ecoef()
+ use sizet
 
   implicit none
-  integer                       :: i, j, ij
+  integer(size_t)               :: i, j, ij
   integer                       :: ierr
   logical                       :: exists
   character(len=10)             :: ni, nj
@@ -48,7 +49,7 @@ subroutine print_j1ecoef()
     endif
   else
 
-    call get_j1e_coef_fit_ao2(ao_num*ao_num, coef_fit2)
+    call get_j1e_coef_fit_ao2(int(ao_num, size_t)*ao_num, coef_fit2)
     call ezfio_set_jastrow_j1e_coef_ao2(coef_fit2)
 
   endif

@@ -1,12 +1,15 @@
 
 
 
+use sizet
+
  BEGIN_PROVIDER[double precision, energy_x_lda, (N_states) ]
  implicit none
  BEGIN_DOC
 ! exchange energy with the lda functional
  END_DOC
- integer :: istate,i,j
+ integer :: istate,j
+ integer(size_t) :: i
  double precision :: r(3)
  double precision :: mu,weight
  double precision :: e_x,vx_a,vx_b
@@ -33,7 +36,8 @@
  BEGIN_DOC
 ! correlation energy with the lda functional
  END_DOC
- integer :: istate,i,j
+ integer :: istate,j
+ integer(size_t) :: i
  double precision :: r(3)
  double precision :: mu,weight
  double precision :: e_c,vc_a,vc_b
@@ -66,11 +70,11 @@
   ! Second dimension is given as ao_num * N_states so that Lapack does the loop over N_states.
  integer :: istate
   do istate = 1, N_states
-   call dgemm('N','T',ao_num,ao_num,n_points_final_grid,1.d0,         &
+   call dgemm('N','T',ao_num,ao_num,int(n_points_final_grid, 4),1.d0,         &
        aos_in_r_array,size(aos_in_r_array,1),                         &
        aos_vx_alpha_lda_w(1,1,istate),size(aos_vx_alpha_lda_w,1),0.d0,&
        potential_x_alpha_ao_lda(1,1,istate),size(potential_x_alpha_ao_lda,1))
-   call dgemm('N','T',ao_num,ao_num,n_points_final_grid,1.d0,         &
+   call dgemm('N','T',ao_num,ao_num,int(n_points_final_grid, 4),1.d0,         &
        aos_in_r_array,size(aos_in_r_array,1),                         &
        aos_vx_beta_lda_w(1,1,istate),size(aos_vx_beta_lda_w,1),0.d0,&
        potential_x_beta_ao_lda(1,1,istate),size(potential_x_beta_ao_lda,1))
@@ -87,11 +91,11 @@ END_PROVIDER
  ! Second dimension is given as ao_num * N_states so that Lapack does the loop over N_states.
  integer :: istate
  do istate = 1, N_states
-  call dgemm('N','T',ao_num,ao_num,n_points_final_grid,1.d0,         &
+  call dgemm('N','T',ao_num,ao_num,int(n_points_final_grid, 4),1.d0,         &
        aos_in_r_array,size(aos_in_r_array,1),                         &
        aos_vc_alpha_lda_w(1,1,istate),size(aos_vc_alpha_lda_w,1),0.d0,&
        potential_c_alpha_ao_lda(1,1,istate),size(potential_c_alpha_ao_lda,1))
-  call dgemm('N','T',ao_num,ao_num,n_points_final_grid,1.d0,         &
+  call dgemm('N','T',ao_num,ao_num,int(n_points_final_grid, 4),1.d0,         &
        aos_in_r_array,size(aos_in_r_array,1),                         &
        aos_vc_beta_lda_w(1,1,istate),size(aos_vc_beta_lda_w,1),0.d0,&
        potential_c_beta_ao_lda(1,1,istate),size(potential_c_beta_ao_lda,1))
@@ -112,8 +116,14 @@ END_PROVIDER
  call wall_time(wall_1)
  print*,'providing the XC potentials lda '
  do istate = 1, N_states
-  call dgemm('N','N',ao_num,ao_num,n_points_final_grid,1.d0,aos_in_r_array,ao_num,aos_vxc_alpha_lda_w(1,1,istate),n_points_final_grid,0.d0,potential_xc_alpha_ao_lda(1,1,istate),ao_num)
-  call dgemm('N','N',ao_num,ao_num,n_points_final_grid,1.d0,aos_in_r_array,ao_num,aos_vxc_beta_lda_w(1,1,istate) ,n_points_final_grid,0.d0,potential_xc_beta_ao_lda(1,1,istate),ao_num)
+        call dgemm('N', 'N', ao_num, ao_num, int(n_points_final_grid,4), 1.d0, &
+               aos_in_r_array, ao_num, aos_vxc_alpha_lda_w(1,1,istate), &
+               int(n_points_final_grid,4), 0.d0, &
+               potential_xc_alpha_ao_lda(1,1,istate), ao_num)
+    call dgemm('N', 'N', ao_num, ao_num, int(n_points_final_grid,4), 1.d0, &
+             aos_in_r_array, ao_num, aos_vxc_beta_lda_w(1,1,istate), &
+             int(n_points_final_grid,4), 0.d0, &
+             potential_xc_beta_ao_lda(1,1,istate), ao_num)
  enddo
  call wall_time(wall_2)
 
@@ -128,7 +138,8 @@ END_PROVIDER
  BEGIN_DOC
 ! aos_vxc_alpha_lda_w(j,i) = ao_i(r_j) * (v^x_alpha(r_j) + v^c_alpha(r_j)) * W(r_j)
  END_DOC
- integer :: istate,i,j
+ integer :: istate
+ integer(size_t) :: i,j
  double precision :: r(3)
  double precision :: mu,weight
  double precision :: e_c,vc_a,vc_b,e_x,vx_a,vx_b
@@ -167,7 +178,8 @@ END_PROVIDER
  BEGIN_DOC
 ! aos_vxc_alpha_lda_w(j,i) = ao_i(r_j) * (v^x_alpha(r_j) + v^c_alpha(r_j)) * W(r_j)
  END_DOC
- integer :: istate,i,j
+ integer :: istate
+ integer(size_t) :: i,j
  double precision :: r(3)
  double precision :: mu,weight
  double precision :: e_c,vc_a,vc_b,e_x,vx_a,vx_b

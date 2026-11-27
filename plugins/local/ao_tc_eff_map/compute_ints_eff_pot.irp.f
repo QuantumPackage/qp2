@@ -1,8 +1,9 @@
-
+use sizet
 
 subroutine compute_ao_tc_sym_two_e_pot_jl(j, l, n_integrals, buffer_i, buffer_value)
 
   use map_module
+  use sizet
 
   BEGIN_DOC
   !  Parallel client for AO integrals
@@ -10,13 +11,14 @@ subroutine compute_ao_tc_sym_two_e_pot_jl(j, l, n_integrals, buffer_i, buffer_va
 
   implicit none
 
-  integer, intent(in)             :: j, l
-  integer,intent(out)             :: n_integrals
+  integer(size_t), intent(in)     :: j, l
+  integer(size_t),intent(out)     :: n_integrals
   integer(key_kind),intent(out)   :: buffer_i(ao_num*ao_num)
   real(integral_kind),intent(out) :: buffer_value(ao_num*ao_num)
 
-  integer                         :: i, k
-  integer                         :: kk, m, j1, i1
+  integer(size_t)                 :: i, k
+  integer(size_t)                 :: j1, i1
+  integer                         :: kk, m
   double precision                :: cpu_1, cpu_2, wall_1, wall_2
   double precision                :: integral, wall_0, integral_pot, integral_erf
   double precision                :: thr

@@ -1,4 +1,4 @@
-
+use sizet
 BEGIN_PROVIDER [ logical, ao_tc_sym_two_e_pot_in_map ]
   implicit none
   use omp_lib
@@ -22,7 +22,8 @@ BEGIN_PROVIDER [ logical, ao_tc_sym_two_e_pot_in_map ]
   ! only the first pair of each task string].
   END_DOC
 
-  integer                        :: i,j,k,l
+  integer(size_t)                 :: l
+  integer                        :: i,j,k
   double precision               :: ao_tc_sym_two_e_pot,cpu_1,cpu_2, wall_1, wall_2
   double precision               :: integral, wall_0
   include 'utils/constants.include.F'
@@ -32,7 +33,8 @@ BEGIN_PROVIDER [ logical, ao_tc_sym_two_e_pot_in_map ]
   integer,parameter              :: size_buffer = 1024*64
   real(integral_kind),allocatable :: buffer_value(:)
 
-  integer                        :: n_integrals, rc
+  integer(size_t)                 :: n_integrals
+  integer                        :: rc
   integer                        :: kk, m, j1, i1, lmax
   character*(64)                 :: fmt
 

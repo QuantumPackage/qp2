@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [double precision, ecmd_pbe_on_top_mu_of_r, (N_states)]
  BEGIN_DOC
 !
@@ -24,7 +26,8 @@ BEGIN_PROVIDER [double precision, ecmd_pbe_on_top_mu_of_r, (N_states)]
  implicit none
  double precision :: weight
  double precision  :: eps_c_md_on_top_PBE,on_top_extrap,mu_correction_of_on_top
- integer :: ipoint,istate
+ integer(size_t) :: ipoint
+ integer         :: istate
  double precision :: eps_c_md_PBE,mu,rho_a,rho_b,grad_rho_a(3),grad_rho_b(3),on_top
  ecmd_pbe_on_top_mu_of_r = 0.d0
 
@@ -83,7 +86,8 @@ BEGIN_PROVIDER [double precision, ecmd_pbe_on_top_mu_of_r, (N_states)]
  implicit none
  double precision :: weight
  double precision  :: eps_c_md_on_top_PBE,on_top_extrap,mu_correction_of_on_top
- integer :: ipoint,istate
+ integer(size_t) :: ipoint
+ integer         :: istate
  double precision :: eps_c_md_PBE,mu,rho_a,rho_b,grad_rho_a(3),grad_rho_b(3),on_top,density
  ecmd_pbe_on_top_su_mu_of_r = 0.d0
 
@@ -145,7 +149,8 @@ BEGIN_PROVIDER [double precision, ecmd_pbe_on_top_mu_of_r, (N_states)]
  implicit none
  double precision :: weight
  double precision  :: eps_c_md_on_top_PBE,on_top_extrap,mu_correction_of_on_top
- integer :: ipoint,istate
+ integer(size_t) :: ipoint
+ integer         :: istate
  double precision :: eps_c_md_PBE,mu,rho_a,rho_b,grad_rho_a(3),grad_rho_b(3),on_top,density
  ecmd_pbe_on_top_no_extrap_su_mu_of_r = 0.d0
 
@@ -184,7 +189,8 @@ BEGIN_PROVIDER [double precision, ecmd_pbe_on_top_mu_of_r, (N_states)]
 &BEGIN_PROVIDER [ double precision, average_extrapolated_on_top, (N_states)]
  implicit none
  double precision :: weight,on_top, on_top_extrap, mu_correction_of_on_top,mu
- integer :: istate, ipoint
+ integer         :: istate
+ integer(size_t) :: ipoint
  extrapolated_on_top = 0.d0
  average_extrapolated_on_top = 0.d0
  do istate = 1, N_states

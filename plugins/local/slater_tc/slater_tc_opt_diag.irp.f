@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -51,15 +52,17 @@ subroutine diag_htilde_mu_mat_fock_bi_ortho(Nint, det_in, hmono, htwoe, hthree, 
   END_DOC
 
   implicit none
-  integer,           intent(in)  :: Nint
+  use sizet
+  integer(size_t),   intent(in)  :: Nint
   integer(bit_kind), intent(in)  :: det_in(Nint,2)
   double precision,  intent(out) :: hmono, htwoe, htot, hthree
 
   integer(bit_kind)              :: hole(Nint,2)
   integer(bit_kind)              :: particle(Nint,2)
-  integer                        :: i, nexc(2), ispin
-  integer                        :: occ_particle(Nint*bit_kind_size,2)
-  integer                        :: occ_hole(Nint*bit_kind_size,2)
+  integer(size_t)                 :: i
+  integer                        :: nexc(2), ispin
+  integer(size_t)                 :: occ_particle(Nint*bit_kind_size,2)
+  integer(size_t)                 :: occ_hole(Nint*bit_kind_size,2)
   integer(bit_kind)              :: det_tmp(Nint,2)
   integer                        :: na, nb
 
@@ -145,14 +148,17 @@ subroutine ac_tc_operator(iorb, ispin, key, hmono, htwoe, hthree, Nint, na, nb)
 
   use bitmasks
   implicit none
-  integer,           intent(in)    :: iorb, ispin, Nint
+  use sizet
+  integer(size_t),   intent(in)    :: iorb, Nint
+  integer,           intent(in)    :: ispin
   integer,           intent(inout) :: na, nb
   integer(bit_kind), intent(inout) :: key(Nint,2)
   double precision,  intent(inout) :: hmono, htwoe, hthree
 
-  integer                          :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                   :: occ(Nint*bit_kind_size,2)
   integer                          :: other_spin
-  integer                          :: k, l, i, jj, mm, j, m
+  integer(size_t)                   :: k, jj, mm
+  integer                          :: l, i, j, m
   integer                          :: tmp(2)
   double precision                 :: direct_int, exchange_int
   
@@ -238,6 +244,7 @@ subroutine a_tc_operator(iorb, ispin, key, hmono, htwoe, hthree, Nint, na, nb)
 
   use bitmasks
   implicit none
+  use sizet
 
   BEGIN_DOC
   !
@@ -253,15 +260,17 @@ subroutine a_tc_operator(iorb, ispin, key, hmono, htwoe, hthree, Nint, na, nb)
   !
   END_DOC
 
-  integer,           intent(in)    :: iorb, ispin, Nint
+  integer(size_t),   intent(in)    :: iorb, Nint
+  integer,           intent(in)    :: ispin
   integer,           intent(inout) :: na, nb
   integer(bit_kind), intent(inout) :: key(Nint,2)
   double precision,  intent(inout) :: hmono,htwoe,hthree
   
   double precision                 :: direct_int, exchange_int
-  integer                          :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                   :: occ(Nint*bit_kind_size,2)
   integer                          :: other_spin
-  integer                          :: k, l, i, jj, mm, j, m
+  integer(size_t)                   :: k, jj
+  integer                          :: l, i, mm, j, m
   integer                          :: tmp(2)
 
   ASSERT (iorb > 0)
@@ -335,15 +344,17 @@ subroutine diag_htilde_mu_mat_fock_bi_ortho_no_3e(Nint, det_in,htot)
   END_DOC
 
   implicit none
-  integer,           intent(in)  :: Nint
+  use sizet
+  integer(size_t),   intent(in)  :: Nint
   integer(bit_kind), intent(in)  :: det_in(Nint,2)
   double precision,  intent(out) :: htot
   double precision               :: hmono, htwoe
   integer(bit_kind)              :: hole(Nint,2)
   integer(bit_kind)              :: particle(Nint,2)
-  integer                        :: i, nexc(2), ispin
-  integer                        :: occ_particle(Nint*bit_kind_size,2)
-  integer                        :: occ_hole(Nint*bit_kind_size,2)
+  integer(size_t)                 :: i
+  integer                        :: nexc(2), ispin
+  integer(size_t)                 :: occ_particle(Nint*bit_kind_size,2)
+  integer(size_t)                 :: occ_hole(Nint*bit_kind_size,2)
   integer(bit_kind)              :: det_tmp(Nint,2)
   integer                        :: na, nb
 
@@ -403,6 +414,7 @@ end
 subroutine ac_tc_operator_no_3e(iorb,ispin,key,hmono,htwoe,Nint,na,nb)
   use bitmasks
   implicit none
+  use sizet
   BEGIN_DOC
   ! Routine that computes one- and two-body energy corresponding 
   ! 
@@ -414,14 +426,16 @@ subroutine ac_tc_operator_no_3e(iorb,ispin,key,hmono,htwoe,Nint,na,nb)
   !
   ! and the quantities hmono,htwoe are INCREMENTED 
   END_DOC
-  integer, intent(in)            :: iorb, ispin, Nint
+  integer(size_t), intent(in)      :: iorb, Nint
+  integer,           intent(in)    :: ispin
   integer, intent(inout)         :: na, nb
   integer(bit_kind), intent(inout) :: key(Nint,2)
   double precision, intent(inout) :: hmono,htwoe
 
-  integer                        :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                 :: occ(Nint*bit_kind_size,2)
   integer                        :: other_spin
-  integer                        :: k,l,i,jj,mm,j,m
+  integer(size_t)                 :: k, jj
+  integer                        :: l, i, mm, j, m
   double precision ::  direct_int, exchange_int
   
 
@@ -471,6 +485,7 @@ end
 subroutine a_tc_operator_no_3e(iorb,ispin,key,hmono,htwoe,Nint,na,nb)
   use bitmasks
   implicit none
+  use sizet
   BEGIN_DOC
   ! Routine that computes one- and two-body energy corresponding 
   ! 
@@ -482,15 +497,17 @@ subroutine a_tc_operator_no_3e(iorb,ispin,key,hmono,htwoe,Nint,na,nb)
   !
   ! and the quantities hmono,htwoe are INCREMENTED 
   END_DOC
-  integer, intent(in)            :: iorb, ispin, Nint
+  integer(size_t), intent(in)      :: iorb, Nint
+  integer,           intent(in)    :: ispin
   integer, intent(inout)         :: na, nb
   integer(bit_kind), intent(inout) :: key(Nint,2)
   double precision, intent(inout) :: hmono,htwoe
   
   double precision  :: direct_int, exchange_int
-  integer                        :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                 :: occ(Nint*bit_kind_size,2)
   integer                        :: other_spin
-  integer                        :: k,l,i,jj,mm,j,m
+  integer(size_t)                 :: k, jj
+  integer                        :: l, i, mm, j, m
   integer                        :: tmp(2)
 
   ASSERT (iorb > 0)
@@ -535,11 +552,13 @@ subroutine diag_htc_bi_orth_2e_brute(Nint, key_i, hmono, htwoe, htot)
   use bitmasks
 
   implicit none
-  integer,           intent(in)  :: Nint
+  use sizet
+  integer(size_t),   intent(in)  :: Nint
   integer(bit_kind), intent(in)  :: key_i(Nint,2)
   double precision, intent(out)  :: hmono,htwoe,htot
-  integer                        :: occ(Nint*bit_kind_size,2)
-  integer                        :: Ne(2), i, j, ii, jj, ispin, jspin, k, kk
+  integer(size_t)                 :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                 :: ii, jj
+  integer                        :: Ne(2), i, j, ispin, jspin, k, kk
   double precision               :: get_mo_two_e_integral_tc_int
   integer(bit_kind)              :: key_i_core(Nint,2)
 
@@ -602,11 +621,13 @@ subroutine diag_htc_bi_orth_3e_brute(Nint, key_i, hthree)
   use bitmasks
 
   implicit none
-  integer,           intent(in) :: Nint
+  use sizet
+  integer(size_t), intent(in) :: Nint
   integer(bit_kind), intent(in) :: key_i(Nint,2)
   double precision, intent(out) :: hthree
-  integer                       :: occ(Nint*bit_kind_size,2)
-  integer                       :: Ne(2),i,j,ii,jj,ispin,jspin,m,mm
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                :: ii,jj,mm
+  integer                       :: Ne(2),i,j,ispin,jspin,m
   integer(bit_kind)             :: key_i_core(Nint,2)
   double precision              :: direct_int, exchange_int, ref
   double precision, external    :: sym_3_e_int_from_6_idx_tensor
@@ -705,7 +726,7 @@ BEGIN_PROVIDER [ double precision, three_e_diag_parrallel_spin_prov, (mo_num, mo
   END_DOC
 
   implicit none
-  integer          :: i, j, m
+  integer(size_t)  :: i, j, m
   double precision :: integral, wall1, wall0, three_e_diag_parrallel_spin
 
   three_e_diag_parrallel_spin_prov = 0.d0
@@ -754,7 +775,7 @@ BEGIN_PROVIDER [ double precision, three_e_single_parrallel_spin_prov, (mo_num, 
   END_DOC
 
  implicit none
- integer          :: i, j, k, m
+ integer(size_t)   :: i, j, k, m
  double precision :: integral, wall1, wall0, three_e_single_parrallel_spin
 
   three_e_single_parrallel_spin_prov = 0.d0
@@ -799,7 +820,7 @@ BEGIN_PROVIDER [ double precision, three_e_double_parrallel_spin_prov, (mo_num, 
   END_DOC
 
   implicit none
-  integer          :: i, j, k, m, l
+  integer(size_t)  :: i, j, k, m, l
   double precision :: integral, wall1, wall0, three_e_double_parrallel_spin
 
   three_e_double_parrallel_spin_prov = 0.d0

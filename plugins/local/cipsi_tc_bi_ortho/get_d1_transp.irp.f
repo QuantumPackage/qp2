@@ -1,4 +1,7 @@
+use sizet
+
 subroutine get_d1_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, coefs)
+  use sizet
   !todo: indices should be okay for complex?
   use bitmasks
   implicit none
@@ -10,14 +13,17 @@ subroutine get_d1_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, 
   double precision, intent(in)   :: coefs(N_states,2)
   double precision, intent(inout) :: mat_l(N_states, mo_num, mo_num)
   double precision, intent(inout) :: mat_r(N_states, mo_num, mo_num)
-  integer, intent(in)            :: h(0:2,2), p(0:4,2), sp
+  integer(size_t), intent(in)    :: h(0:2,2), p(0:4,2)
+  integer, intent(in)            :: sp
   double precision, external     :: get_phase_bi
   double precision, external     :: mo_two_e_integral_complex
   logical                        :: ok
 
   logical, allocatable           :: lbanned(:,:)
-  integer                        :: puti, putj, ma, mi, s1, s2, i, i1, i2, j, istate
-  integer                        :: hfix, pfix, h1, h2, p1, p2, ib, k, l, mm
+  integer                        :: ma, mi, s1, s2, i, i1, i2, j, istate
+  integer(size_t)                  :: puti, putj
+  integer(size_t)                  :: hfix, pfix, h1, h2, p1, p2, l, mm
+  integer                          :: ib, k
 
   integer, parameter             :: turn2(2) = (/2,1/)
   integer, parameter             :: turn3(2,3) = reshape((/2,3,  1,3, 1,2/), (/2,3/))

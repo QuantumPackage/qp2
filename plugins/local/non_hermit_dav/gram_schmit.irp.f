@@ -1,3 +1,5 @@
+use sizet
+
 subroutine bi_ortho_gram_schmidt(wi,vi,n,ni,wk,wk_schmidt)
  implicit none
  BEGIN_DOC
@@ -19,12 +21,14 @@ subroutine bi_ortho_gram_schmidt(wi,vi,n,ni,wk,wk_schmidt)
 !
 ! https://doi.org/10.1016/0045-7949(94)00565-K
  END_DOC
- integer, intent(in) :: n,ni
+ integer(size_t), intent(in) :: n
+ integer, intent(in) :: ni
  double precision, intent(in) :: wi(n,ni),vi(n,ni),wk(n)
  double precision, intent(out):: wk_schmidt(n)
  double precision :: vi_wk,u_dot_v,tmp,u_dot_u
  double precision, allocatable :: sii(:)
- integer :: i,j
+ integer :: i
+ integer(size_t) :: j
  allocate( sii(ni) )
  wk_schmidt = wk
  do i = 1, ni

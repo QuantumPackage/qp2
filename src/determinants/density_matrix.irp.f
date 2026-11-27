@@ -1,3 +1,4 @@
+use sizet
  BEGIN_PROVIDER [ double precision, one_e_dm_mo_alpha_average, (mo_num,mo_num) ]
 &BEGIN_PROVIDER [ double precision, one_e_dm_mo_beta_average, (mo_num,mo_num) ]
    implicit none
@@ -18,7 +19,8 @@ BEGIN_PROVIDER [ double precision, one_e_dm_mo_diff, (mo_num,mo_num,2:N_states) 
   BEGIN_DOC
   ! Difference of the one-body density matrix with respect to the ground state
   END_DOC
-  integer                        :: i,j, istate
+  integer(size_t)                :: i,j
+  integer                        :: istate
 
   do istate=2,N_states
     do j=1,mo_num
@@ -40,7 +42,8 @@ BEGIN_PROVIDER [ double precision, one_e_dm_mo_spin_index, (mo_num,mo_num,N_stat
   ! fourth index 1 holds one_e_dm_mo_alpha, the fourth index 2 holds
   ! one_e_dm_mo_beta.
   END_DOC
-  integer                        :: i,j,ispin,istate
+  integer(size_t)                :: i,j
+  integer                        :: ispin,istate
   ispin = 1
   do istate = 1, N_states
     do j = 1, mo_num
@@ -72,7 +75,8 @@ BEGIN_PROVIDER [ double precision, one_e_dm_dagger_mo_spin_index, (mo_num,mo_num
    ! 2026-10-31); no in-tree caller found, probably consumed by an
    ! external plugin.
    END_DOC
-   integer                        :: i,j,ispin,istate
+   integer(size_t)                :: i,j
+   integer                        :: ispin,istate
    ispin = 1
    do istate = 1, N_states
      do j = 1, mo_num
@@ -104,15 +108,18 @@ END_PROVIDER
   ! $\alpha$ and $\beta$ one-body density matrix for each state
   END_DOC
 
-  integer                        :: j,k,l,m,k_a,k_b
-  integer                        :: occ(N_int*bit_kind_size,2)
+  integer(size_t)                :: j,l,k_a,k_b
+  integer                        :: k,m
+  integer(size_t)                :: occ(N_int*bit_kind_size,2)
   double precision               :: ck, cl, ckl
   double precision               :: phase
-  integer                        :: h1,h2,p1,p2,s1,s2, degree
+  integer(size_t)                :: h1,h2,p1,p2
+  integer                        :: s1,s2, degree
   integer(bit_kind)              :: tmp_det(N_int,2), tmp_det2(N_int)
-  integer                        :: exc(0:2,2),n_occ(2)
+  integer(size_t)                :: exc(0:2,2)
+  integer                        :: n_occ(2)
   double precision, allocatable  :: tmp_a(:,:,:), tmp_b(:,:,:)
-  integer                        :: krow, kcol, lrow, lcol
+  integer(size_t)                :: krow, kcol, lrow, lcol
 
   PROVIDE psi_det
 
@@ -261,6 +268,7 @@ BEGIN_PROVIDER [ double precision, one_e_spin_density_mo, (mo_num,mo_num) ]
 END_PROVIDER
 
 subroutine set_natural_mos
+ use sizet
    implicit none
    BEGIN_DOC
    ! Set natural orbitals, obtained by diagonalization of the one-body density matrix
@@ -270,31 +278,37 @@ subroutine set_natural_mos
    double precision, allocatable  :: tmp(:,:)
 
    label = "Natural"
-    integer :: i,j,iorb,jorb
+    integer(size_t) :: i,j,iorb,jorb
     do i = 1, n_virt_orb
      iorb = list_virt(i)
      do j = 1, n_core_inact_act_orb
       jorb = list_core_inact_act(j)
      enddo
     enddo
-   call mo_as_svd_vectors_of_mo_matrix_eig(one_e_dm_mo,size(one_e_dm_mo,1),mo_num,mo_num,mo_occ,label)
+      call mo_as_svd_vectors_of_mo_matrix_eig(one_e_dm_mo, &
+                                           int(size(one_e_dm_mo,1),size_t), &
+                                           int(mo_num,size_t), &
+                                           int(mo_num,size_t), mo_occ, label)
    soft_touch mo_occ
 end
 
 
 subroutine save_natural_mos_canon_label
+   use sizet
    implicit none
    BEGIN_DOC
    ! Save natural orbitals, obtained by diagonalization of the one-body density matrix in
    ! the |MO| basis
    END_DOC
    call set_natural_mos_canon_label
-   call nullify_small_elements(ao_num,mo_num,mo_coef,size(mo_coef,1),1.d-10)
+   call nullify_small_elements(int(ao_num, size_t),int(mo_num, size_t), &
+        mo_coef, int(size(mo_coef,1), size_t), 1.d-10)
    call orthonormalize_mos
    call save_mos
 end
 
 subroutine set_natural_mos_canon_label
+ use sizet
    implicit none
    BEGIN_DOC
    ! Set natural orbitals, obtained by diagonalization of the one-body density matrix
@@ -304,14 +318,17 @@ subroutine set_natural_mos_canon_label
    double precision, allocatable  :: tmp(:,:)
 
    label = "Canonical"
-    integer :: i,j,iorb,jorb
+    integer(size_t) :: i,j,iorb,jorb
     do i = 1, n_virt_orb
      iorb = list_virt(i)
      do j = 1, n_core_inact_act_orb
       jorb = list_core_inact_act(j)
      enddo
     enddo
-   call mo_as_svd_vectors_of_mo_matrix_eig(one_e_dm_mo,size(one_e_dm_mo,1),mo_num,mo_num,mo_occ,label)
+      call mo_as_svd_vectors_of_mo_matrix_eig(one_e_dm_mo, &
+                                           int(size(one_e_dm_mo,1),size_t), &
+                                           int(mo_num,size_t), &
+                                           int(mo_num,size_t), mo_occ, label)
    soft_touch mo_occ
 end
 
@@ -320,6 +337,7 @@ end
 
 
 subroutine set_natorb_no_ov_rot
+ use sizet
    implicit none
    BEGIN_DOC
    ! Set natural orbitals, obtained by diagonalization of the one-body density matrix
@@ -330,7 +348,7 @@ subroutine set_natorb_no_ov_rot
    allocate(tmp(mo_num, mo_num))
    label = "Natural"
    tmp = one_e_dm_mo
-    integer :: i,j,iorb,jorb
+    integer(size_t) :: i,j,iorb,jorb
     do i = 1, n_virt_orb
      iorb = list_virt(i)
      do j = 1, n_core_inact_act_orb
@@ -339,30 +357,35 @@ subroutine set_natorb_no_ov_rot
       tmp(jorb, iorb) = 0.d0
      enddo
     enddo
-   call mo_as_svd_vectors_of_mo_matrix_eig(tmp,size(tmp,1),mo_num,mo_num,mo_occ,label)
+   call mo_as_svd_vectors_of_mo_matrix_eig(tmp,int(size(tmp,1),size_t)&
+        ,int(mo_num,size_t),int(mo_num,size_t),mo_occ,label)
    soft_touch mo_occ
 end
 
 subroutine save_natural_mos_no_ov_rot
+   use sizet
    implicit none
    BEGIN_DOC
    ! Save natural orbitals, obtained by diagonalization of the one-body density matrix in
    ! the |MO| basis
    END_DOC
    call set_natorb_no_ov_rot
-   call nullify_small_elements(ao_num,mo_num,mo_coef,size(mo_coef,1),1.d-10)
+   call nullify_small_elements(int(ao_num, size_t),int(mo_num, size_t), &
+        mo_coef, int(size(mo_coef,1), size_t), 1.d-10)
    call orthonormalize_mos
    call save_mos
 end
 
 subroutine save_natural_mos
+   use sizet
    implicit none
    BEGIN_DOC
    ! Save natural orbitals, obtained by diagonalization of the one-body density matrix in
    ! the |MO| basis
    END_DOC
    call set_natural_mos
-   call nullify_small_elements(ao_num,mo_num,mo_coef,size(mo_coef,1),1.d-10)
+   call nullify_small_elements(int(ao_num, size_t),int(mo_num, size_t), &
+        mo_coef, int(size(mo_coef,1), size_t), 1.d-10)
    call orthonormalize_mos
    call save_mos
 end
@@ -506,14 +529,16 @@ END_PROVIDER
 
 
 subroutine get_occupation_from_dets(istate,occupation)
+ use sizet
   implicit none
   double precision, intent(out)  :: occupation(mo_num)
   integer, intent(in)            :: istate
   BEGIN_DOC
   ! Returns the average occupation of the MOs
   END_DOC
-  integer                        :: i,j, ispin
-  integer                        :: list(N_int*bit_kind_size,2)
+  integer(size_t)                :: i
+  integer                        :: j, ispin
+  integer(size_t)                :: list(N_int*bit_kind_size,2)
   integer                        :: n_elements(2)
   double precision               :: c, norm_2
   ASSERT (istate > 0)
@@ -554,10 +579,13 @@ END_PROVIDER
  BEGIN_DOC
 ! eigenvalues and eigevenctors of the difference_dm
  END_DOC
- integer :: istate,i
+ integer :: istate
+ integer(size_t) :: i
  do istate = 2, N_states
-  call lapack_diag(difference_dm_eigval(1,istate),difference_dm_eigvect(1,1,istate)& 
-                  ,difference_dm(1,1,istate),mo_num,mo_num)
+    call lapack_diag(difference_dm_eigval(1,istate), &
+                   difference_dm_eigvect(1,1,istate), &
+                   difference_dm(1,1,istate), int(mo_num,size_t), &
+                   int(mo_num,size_t))
   print*,'Eigenvalues of difference_dm for state ',istate
   do i = 1, mo_num
    print*,i,difference_dm_eigval(i,istate)
@@ -565,10 +593,10 @@ END_PROVIDER
  enddo
 END_PROVIDER 
 
- BEGIN_PROVIDER [ integer         , n_attachment,  (N_states)]
-&BEGIN_PROVIDER [ integer         , n_dettachment, (N_states)]
-&BEGIN_PROVIDER [ integer         , list_attachment,  (mo_num,N_states)]
-&BEGIN_PROVIDER [ integer         , list_dettachment, (mo_num,N_states)]
+ BEGIN_PROVIDER [ integer(size_t) , n_attachment,  (N_states)]
+&BEGIN_PROVIDER [ integer(size_t) , n_dettachment, (N_states)]
+&BEGIN_PROVIDER [ integer(size_t) , list_attachment,  (mo_num,N_states)]
+&BEGIN_PROVIDER [ integer(size_t) , list_dettachment, (mo_num,N_states)]
  implicit none
  BEGIN_DOC
  ! For each state (2..N_states), number and list of the MOs whose
@@ -577,8 +605,9 @@ END_PROVIDER
  ! untouched. list_dettachment is in ascending MO index order;
  ! list_attachment is stored in the reverse order.
  END_DOC
- integer :: i,istate
- integer :: list_attachment_tmp(mo_num)
+ integer(size_t) :: i
+ integer :: istate
+ integer(size_t) :: list_attachment_tmp(mo_num)
  n_attachment = 0
  n_dettachment = 0
  do istate = 2, N_states
@@ -607,7 +636,8 @@ END_PROVIDER
  ! dettachment and attachment orbitals, in the order of
  ! list_dettachment and list_attachment.
  END_DOC
- integer :: i,istate
+ integer(size_t) :: i
+ integer :: istate
  do istate = 2, N_states
   print*,'dettachment'
   do i = 1, n_dettachment(istate)
@@ -632,7 +662,8 @@ END_PROVIDER
  ! list_dettachment or list_attachment, not of MO
  ! list_dettachment(i,istate) or list_attachment(i,istate).
  END_DOC
- integer :: i,j,k,istate
+ integer(size_t) :: i,j,k
+ integer :: istate
  attachment_orbitals = 0.d0
  dettachment_orbitals = 0.d0
  do istate = 2, N_states

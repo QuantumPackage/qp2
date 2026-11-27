@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [double precision, ao_ortho_lowdin_coef, (ao_num,ao_num)]
   implicit none
   BEGIN_DOC
@@ -5,7 +7,7 @@ BEGIN_PROVIDER [double precision, ao_ortho_lowdin_coef, (ao_num,ao_num)]
 ! orthonormalization by the S^{-1/2} canonical transformation of the aos
 ! ao_ortho_lowdin_coef(i,j) = coefficient of the ith ao on the jth ao_ortho_lowdin orbital
   END_DOC
-  integer                        :: i,j,k,l
+  integer(size_t)                :: i,j,k,l
   double precision               :: accu
   double precision, allocatable  :: tmp_matrix(:,:)
   allocate (tmp_matrix(ao_num,ao_num))
@@ -13,7 +15,9 @@ BEGIN_PROVIDER [double precision, ao_ortho_lowdin_coef, (ao_num,ao_num)]
   do j=1, ao_num
     tmp_matrix(j,j) = 1.d0
   enddo
-  call ortho_lowdin(ao_overlap,ao_num,ao_num,tmp_matrix,ao_num,ao_num,lin_dep_cutoff)
+    call ortho_lowdin(ao_overlap, int(ao_num,size_t), int(ao_num,size_t), &
+                    tmp_matrix, int(ao_num,size_t), int(ao_num,size_t), &
+                    lin_dep_cutoff)
   do i=1, ao_num
     do j=1, ao_num
       ao_ortho_lowdin_coef(j,i) = tmp_matrix(i,j)
@@ -28,7 +32,7 @@ BEGIN_PROVIDER [double precision, ao_ortho_lowdin_overlap, (ao_num,ao_num)]
 ! overlap matrix of the ao_ortho_lowdin
 ! supposed to be the Identity
   END_DOC
-  integer                        :: i,j,k,l
+  integer(size_t)                :: i,j,k,l
   double precision               :: c
   do j=1, ao_num
     do i=1, ao_num

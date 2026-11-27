@@ -6,8 +6,9 @@ program test_e_pol_grid
 end
 
 subroutine routine
+ use sizet
  implicit none
- integer :: i1,i2
+ integer(size_t) :: i1,i2
  double precision :: integral_12, r1(3), r2(3), weight1, weight2
  double precision :: dm_r1_alpha,dm_r1_beta,dm_r1,dm_r2
  integral_12 = 0.d0

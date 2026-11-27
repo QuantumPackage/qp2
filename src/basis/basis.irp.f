@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [ double precision, prim_normalization_factor , (prim_num) ]
   implicit none
   BEGIN_DOC
@@ -23,7 +25,8 @@ BEGIN_PROVIDER [ double precision, prim_normalization_factor , (prim_num) ]
 
       double precision               :: norm,overlap_x,overlap_y,overlap_z,C_A(3), c
       integer                        :: l, powA(3), nz
-      integer                        :: i,j,k
+      integer(size_t)                :: i,k
+      integer                        :: j
       nz=100
       C_A(1) = 0.d0
       C_A(2) = 0.d0

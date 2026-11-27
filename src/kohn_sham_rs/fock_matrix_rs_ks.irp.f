@@ -1,3 +1,5 @@
+use sizet
+
  BEGIN_PROVIDER [ double precision, ao_two_e_integral_alpha, (ao_num, ao_num) ]
 &BEGIN_PROVIDER [ double precision, ao_two_e_integral_beta ,  (ao_num, ao_num) ]
  use map_module
@@ -6,8 +8,9 @@
  ! Alpha Fock matrix in ao basis set
  END_DOC
 
- integer                        :: i,j,k,l,k1,r,s
- integer                        :: i0,j0,k0,l0
+ integer(size_t)                :: i,j,k,l,k1
+ integer                        :: r,s
+ integer(size_t)                :: i0,j0,k0,l0
  integer*8                      :: p,q
  double precision               :: integral, c0, c1, c2
  double precision               :: ao_two_e_integral, local_threshold
@@ -23,7 +26,8 @@
 
    integer(omp_lock_kind) :: lck(ao_num)
    integer*8                      :: i8
-   integer                        :: ii(8), jj(8), kk(8), ll(8), k2
+   integer(size_t)                :: ii(8), jj(8), kk(8), ll(8)
+   integer                        :: k2
    integer(cache_map_size_kind)   :: n_elements_max, n_elements
    integer(key_kind), allocatable :: keys(:)
    double precision, allocatable  :: values(:)
@@ -131,7 +135,7 @@ END_PROVIDER
  ! Alpha Fock matrix in ao basis set
  END_DOC
 
- integer                        :: i,j
+ integer(size_t)                :: i,j
  do j=1,ao_num
    do i=1,ao_num
      Fock_matrix_ao_alpha(i,j) = Fock_matrix_alpha_no_xc_ao(i,j) + ao_potential_alpha_xc(i,j)
@@ -149,7 +153,7 @@ END_PROVIDER
  ! Mono electronic an Coulomb matrix in ao basis set
  END_DOC
 
- integer                        :: i,j
+ integer(size_t)                :: i,j
  do j=1,ao_num
    do i=1,ao_num
      Fock_matrix_alpha_no_xc_ao(i,j) = ao_one_e_integrals(i,j) + ao_two_e_integral_alpha(i,j)

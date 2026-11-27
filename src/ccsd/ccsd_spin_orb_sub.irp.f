@@ -1,4 +1,7 @@
+use sizet
+
 subroutine run_ccsd_spin_orb
+ use sizet
   use gpu
 
   implicit none
@@ -17,7 +20,9 @@ subroutine run_ccsd_spin_orb
 
   logical                       :: not_converged
   integer                       :: n_spin(4)
-  integer                       :: nb_iter, i,j,a,b
+  integer                       :: nb_iter, j,a,b
+  integer(size_t)               :: i
+  integer                       :: nO, nV
   double precision              :: uncorr_energy, energy, max_r, max_r1, max_r2, cc, ta, tb,ti,tf,tbi,tfi
 
   type(gpu_double4) :: t2, r2, tau, tau_t
@@ -33,54 +38,58 @@ subroutine run_ccsd_spin_orb
   print*,'Reference determinant:'
   call print_det(psi_det(1,1,cc_ref),N_int)
 
+  nO = cc_nOab
+  nV = cc_nVab
+
   ! Allocation
-  allocate(cF_oo(cc_nOab,cc_nOab), cF_ov(cc_nOab,cc_nVab), cF_vv(cc_nVab,cc_nVab))
-  allocate(cW_oooo(cc_nOab,cc_nOab,cc_nOab,cc_nOab), cW_ovvo(cc_nOab,cc_nVab,cc_nVab,cc_nOab))!, cW_vvvv(cc_nVab,cc_nVab,cc_nVab,cc_nVab))
+  allocate(cF_oo(nO,nO), cF_ov(nO,nV), cF_vv(nV,nV))
+  allocate(cW_oooo(nO,nO,nO,nO), cW_ovvo(nO,nV,nV,nO))!, cW_vvvv(nV,nV,nV,nV))
 
-  allocate(f_o(cc_nOab), f_v(cc_nVab))
+  allocate(f_o(nO), f_v(nV))
 
-  call gpu_allocate(t1, cc_nOab,cc_nVab)
-  call gpu_allocate(r1, cc_nOab,cc_nVab)
-  call gpu_allocate(t2, cc_nOab,cc_nOab,cc_nVab,cc_nVab)
-  call gpu_allocate(r2, cc_nOab,cc_nOab,cc_nVab,cc_nVab)
-  call gpu_allocate(tau,   cc_nOab,cc_nOab,cc_nVab,cc_nVab)
-  call gpu_allocate(tau_t, cc_nOab,cc_nOab,cc_nVab,cc_nVab)
+  call gpu_allocate(t1, int(nO,4),int(nV,4))
+  call gpu_allocate(r1, int(nO,4),int(nV,4))
+  call gpu_allocate(t2, int(nO,4),int(nO,4),int(nV,4),int(nV,4))
+  call gpu_allocate(r2, int(nO,4),int(nO,4),int(nV,4),int(nV,4))
+  call gpu_allocate(tau,   int(nO,4),int(nO,4),int(nV,4),int(nV,4))
+  call gpu_allocate(tau_t, int(nO,4),int(nO,4),int(nV,4),int(nV,4))
 
   ! Allocation for the diis
   if (cc_update_method == 'diis') then
-    allocate(all_err(cc_nOab*cc_nVab+cc_nOab*cc_nOab*cc_nVab*cc_nVab,cc_diis_depth), all_t(cc_nOab*cc_nVab+cc_nOab*cc_nOab*cc_nVab*cc_nVab,cc_diis_depth))
+    allocate(all_err(nO*nV+nO*nO*nV*nV,cc_diis_depth) &
+      , all_t(nO*nV+nO*nO*nV*nV,cc_diis_depth))
     all_err = 0d0
     all_t   = 0d0
   endif
 
   ! Diag elements
-  do i = 1, cc_nOab
+  do i = 1, nO
     f_o(i) = cc_spin_f_oo(i,i)
   enddo
-  do i = 1, cc_nVab
+  do i = 1, nV
     f_v(i) = cc_spin_f_vv(i,i)
   enddo
 
 
   ! Init of T
   double precision, allocatable :: h_t1(:,:),  h_t2(:,:,:,:)
-  allocate(h_t1(cc_nOab,cc_nVab), h_t2(cc_nOab,cc_nOab,cc_nVab,cc_nVab))
+  allocate(h_t1(nO,nV), h_t2(nO,nO,nV,nV))
   h_t1 = 0d0
-  call guess_t1(cc_nOab,cc_nVab,f_o,f_v,cc_spin_f_ov,h_t1)
+  call guess_t1(nO,nV,f_o,f_v,cc_spin_f_ov,h_t1)
   call gpu_upload(h_t1, t1)
 
-  call guess_t2(cc_nOab,cc_nVab,f_o,f_v,cc_spin_v_oovv,h_t2)
+  call guess_t2(nO,nV,f_o,f_v,cc_spin_v_oovv,h_t2)
   call gpu_upload(h_t2, t2)
 
   deallocate(h_t1,h_t2)
 
-  call compute_tau_spin(cc_nOab,cc_nVab,t1%f,t2%f,tau%f)
-  call compute_tau_t_spin(cc_nOab,cc_nVab,t1%f,t2%f,tau_t%f)
+  call compute_tau_spin(nO,nV,t1%f,t2%f,tau%f)
+  call compute_tau_t_spin(nO,nV,t1%f,t2%f,tau_t%f)
 
   call det_energy(psi_det(1,1,cc_ref),uncorr_energy)
   print*,'Det energy', uncorr_energy
 
-  call ccsd_energy_spin(cc_nOab,cc_nVab,t1%f,t2%f,cc_spin_F_ov,cc_spin_v_oovv,energy)
+  call ccsd_energy_spin(nO,nV,t1%f,t2%f,cc_spin_F_ov,cc_spin_v_oovv,energy)
   print*,'guess energy', uncorr_energy+energy, energy
   print *, 'Update_method: ', cc_update_method
 
@@ -101,16 +110,23 @@ subroutine run_ccsd_spin_orb
   do while (not_converged)
 
     ! Intermediates
-    call compute_cF_oo(cc_nOab,cc_nVab,t1%f,tau_t%f,cc_spin_F_oo,cc_spin_F_ov,cc_spin_v_ooov,cc_spin_v_oovv,cF_oo)
-    call compute_cF_ov(cc_nOab,cc_nVab,t1%f,cc_spin_F_ov,cc_spin_v_oovv,cF_ov)
-    call compute_cF_vv(cc_nOab,cc_nVab,t1%f,tau_t%f,cc_spin_F_ov,cc_spin_F_vv,cc_spin_v_oovv,cF_vv)
+    call compute_cF_oo(nO, nV, t1%f, tau_t%f, cc_spin_F_oo, cc_spin_F_ov &
+      , cc_spin_v_ooov, cc_spin_v_oovv, cF_oo)
+    call compute_cF_ov(nO,nV,t1%f,cc_spin_F_ov,cc_spin_v_oovv,cF_ov)
+    call compute_cF_vv(nO, nV, t1%f, tau_t%f, cc_spin_F_ov, cc_spin_F_vv &
+      , cc_spin_v_oovv, cF_vv)
 
-    call compute_cW_oooo(cc_nOab,cc_nVab,t1%f,t2%f,tau%f,cc_spin_v_oooo,cc_spin_v_ooov,cc_spin_v_oovv,cW_oooo)
-    call compute_cW_ovvo(cc_nOab,cc_nVab,t1%f,t2%f,tau%f,cc_spin_v_ovvo,cc_spin_v_oovo,cc_spin_v_oovv,cW_ovvo)
+    call compute_cW_oooo(nO, nV, t1%f, t2%f, tau%f, cc_spin_v_oooo &
+      , cc_spin_v_ooov, cc_spin_v_oovv, cW_oooo)
+    call compute_cW_ovvo(nO, nV, t1%f, t2%f, tau%f, cc_spin_v_ovvo &
+      , cc_spin_v_oovo, cc_spin_v_oovv, cW_ovvo)
 
     ! Residuals
-    call compute_r1_spin(cc_nOab,cc_nVab,t1%f,t2%f,f_o,f_v,cc_spin_F_ov,cF_oo,cF_ov,cF_vv,cc_spin_v_oovo,cc_spin_v_ovov,r1%f)
-    call compute_r2_spin(cc_nOab,cc_nVab,t1%f,t2%f,tau%f,f_o,f_v,cF_oo,cF_ov,cF_vv,cW_oooo,cW_ovvo,cc_spin_v_ovoo,cc_spin_v_oovv,cc_spin_v_ovvo,r2%f)
+    call compute_r1_spin(nO, nV, t1%f, t2%f, f_o, f_v, cc_spin_F_ov, cF_oo &
+      , cF_ov, cF_vv, cc_spin_v_oovo, cc_spin_v_ovov, r1%f)
+    call compute_r2_spin(nO, nV, t1%f, t2%f, tau%f, f_o, f_v, cF_oo, cF_ov &
+      , cF_vv, cW_oooo, cW_ovvo, cc_spin_v_ovoo, cc_spin_v_oovv &
+      , cc_spin_v_ovvo, r2%f)
 
     ! Max elements in the residuals
     max_r1 = maxval(abs(r1%f(:,:)))
@@ -120,27 +136,30 @@ subroutine run_ccsd_spin_orb
     call wall_time(ti)
     ! Update
     if (cc_update_method == 'diis') then
-      !call update_t_ccsd(cc_nOab,cc_nVab,nb_iter,f_o,f_v,r1%f,r2%f,t1%f,t2%f,all_err1,all_err2,all_t1%f,all_t2)
-      !call update_t_ccsd_diis(cc_nOab,cc_nVab,nb_iter,f_o,f_v,r1%f,r2%f,t1%f,t2%f,all_err1,all_err2,all_t1%f,all_t2)
-      call update_t_ccsd_diis_v3(cc_nOab,cc_nVab,nb_iter,f_o,f_v,r1%f,r2%f,t1%f,t2%f,all_err,all_t)
+      !call update_t_ccsd(nO,nV,nb_iter,f_o,f_v,r1%f,r2%f,t1%f,t2%f,all_err1, &
+      !all_err2,all_t1%f,all_t2)
+      !call update_t_ccsd_diis(nO,nV,nb_iter,f_o,f_v,r1%f,r2%f,t1%f,t2%f, &
+      !all_err1,all_err2,all_t1%f,all_t2)
+      call update_t_ccsd_diis_v3(nO, nV, nb_iter, f_o, f_v, r1%f, r2%f, t1%f &
+        , t2%f, all_err, all_t)
 
     ! Standard update as T = T - Delta
     elseif (cc_update_method == 'none') then
-      call update_t1(cc_nOab,cc_nVab,f_o,f_v,r1%f,t1%f)
-      call update_t2(cc_nOab,cc_nVab,f_o,f_v,r2%f,t2%f)
+      call update_t1(nO,nV,f_o,f_v,r1%f,t1%f)
+      call update_t2(nO,nV,f_o,f_v,r2%f,t2%f)
     else
       print*,'Unknown cc_method_method: '//cc_update_method
     endif
 
-    call compute_tau_spin(cc_nOab,cc_nVab,t1%f,t2%f,tau%f)
-    call compute_tau_t_spin(cc_nOab,cc_nVab,t1%f,t2%f,tau_t%f)
+    call compute_tau_spin(nO,nV,t1%f,t2%f,tau%f)
+    call compute_tau_t_spin(nO,nV,t1%f,t2%f,tau_t%f)
     call wall_time(tf)
     if (cc_dev) then
       print*,'Update:',tf-ti,'s'
     endif
 
     ! Print
-    call ccsd_energy_spin(cc_nOab,cc_nVab,t1%f,t2%f,cc_spin_F_ov,cc_spin_v_oovv,energy)
+    call ccsd_energy_spin(nO,nV,t1%f,t2%f,cc_spin_F_ov,cc_spin_v_oovv,energy)
     call wall_time(tfi)
 
     write(*,'(A3,I6,A3,F18.12,A3,F16.12,A3,ES10.2,A3,ES10.2,A2)') ' | ',nb_iter,' | ', &
@@ -172,8 +191,8 @@ subroutine run_ccsd_spin_orb
   print*,''
 
   if (write_amplitudes) then
-    call write_t1(cc_nOab,cc_nVab,t1%f)
-    call write_t2(cc_nOab,cc_nVab,t2%f)
+    call write_t1(nO,nV,t1%f)
+    call write_t2(nO,nV,t2%f)
     call ezfio_set_utils_cc_io_amplitudes('Read')
   endif
 
@@ -189,7 +208,8 @@ subroutine run_ccsd_spin_orb
   if (cc_par_t .and. elec_alpha_num  +elec_beta_num > 2) then
     print*,'CCSD(T) calculation...'
     call wall_time(ta)
-    call ccsd_par_t_spin_v2(cc_nOab,cc_nVab,t1%f,t2%f,f_o,f_v,cc_spin_f_ov,cc_spin_v_ooov,cc_spin_v_vvoo,t_corr)
+    call ccsd_par_t_spin_v2(nO, nV, t1%f, t2%f, f_o, f_v, cc_spin_f_ov &
+      , cc_spin_v_ooov, cc_spin_v_vvoo, t_corr)
     call wall_time(tb)
     print*,'Done'
     print*,'Time: ',tb-ta, ' s'
@@ -216,6 +236,7 @@ end
 ! Energy
 
 subroutine ccsd_energy_spin(nO,nV,t1,t2,Fov,v_oovv,energy)
+ use sizet
 
   implicit none
 
@@ -231,7 +252,7 @@ subroutine ccsd_energy_spin(nO,nV,t1,t2,Fov,v_oovv,energy)
 
   double precision,intent(out)  :: energy
 
-  integer                       :: i,j,a,b
+  integer(size_t)               :: i,j,a,b
 
 
   energy = 0d0
@@ -259,6 +280,7 @@ end
 ! Tau
 
 subroutine compute_tau_spin(nO,nV,t1,t2,tau)
+ use sizet
 
   implicit none
 
@@ -274,8 +296,8 @@ subroutine compute_tau_spin(nO,nV,t1,t2,tau)
 
   double precision,intent(out)  :: tau(nO,nO,nV,nV)
 
-  integer                       :: i,j,k,l
-  integer                       :: a,b,c,d
+  integer(size_t)               :: i,j,k,l
+  integer(size_t)               :: a,b,c,d
 
   !$OMP PARALLEL &
   !$OMP SHARED(tau,t1,t2,nO,nV) &
@@ -299,6 +321,7 @@ end
 ! Tau_t
 
 subroutine compute_tau_t_spin(nO,nV,t1,t2,tau_t)
+ use sizet
 
   implicit none
 
@@ -314,8 +337,8 @@ subroutine compute_tau_t_spin(nO,nV,t1,t2,tau_t)
 
   double precision,intent(out)  :: tau_t(nO,nO,nV,nV)
 
-  integer                       :: i,j,k,l
-  integer                       :: a,b,c,d
+  integer(size_t)               :: i,j,k,l
+  integer(size_t)               :: a,b,c,d
 
   !$OMP PARALLEL &
   !$OMP SHARED(tau_t,t1,t2,nO,nV) &
@@ -339,6 +362,7 @@ end
 ! R1
 
 subroutine compute_r1_spin(nO,nV,t1,t2,f_o,f_v,Fov,cF_oo,cF_ov,cF_vv,v_oovo,v_ovov,r1)
+ use sizet
 
   implicit none
 
@@ -363,8 +387,8 @@ subroutine compute_r1_spin(nO,nV,t1,t2,f_o,f_v,Fov,cF_oo,cF_ov,cF_vv,v_oovo,v_ov
 
   double precision,intent(out)  :: r1(nO,nV)
 
-  integer                       :: i,j,m,n
-  integer                       :: a,b,e,f
+  integer(size_t)               :: i,j,m,n
+  integer(size_t)               :: a,b,e,f
   !double precision, allocatable :: X_vovv(:,:,:,:)
   double precision, allocatable :: X_oovv(:,:,:,:)
   double precision              :: accu
@@ -401,7 +425,7 @@ subroutine compute_r1_spin(nO,nV,t1,t2,f_o,f_v,Fov,cF_oo,cF_ov,cF_vv,v_oovo,v_ov
   !    end do
   !  end do
   !end do
-  call dgemm('N','T', nO, nV, nV, &
+  call dgemm('N','T',int(nO,4), int(nV,4), int(nV,4), &
              1d0, t1   , size(t1,1), &
                   cF_vv, size(cF_vv,1), &
              1d0, r1   , size(r1,1))
@@ -413,7 +437,7 @@ subroutine compute_r1_spin(nO,nV,t1,t2,f_o,f_v,Fov,cF_oo,cF_ov,cF_vv,v_oovo,v_ov
   !    end do
   !  end do
   !end do
-  call dgemm('T','N', nO, nV, nO, &
+  call dgemm('T','N',int(nO,4), int(nV,4), int(nO,4), &
              -1d0, cF_oo, size(cF_oo,1), &
                    t1   , size(t1,1), &
               1d0, r1   , size(r1,1))
@@ -435,9 +459,10 @@ subroutine compute_r1_spin(nO,nV,t1,t2,f_o,f_v,Fov,cF_oo,cF_ov,cF_vv,v_oovo,v_ov
   allocate(v_ovvf(nO,nV,nV),X_vovf(nV,nO,nV))
 
   do f = 1, nV
-    call gen_v_spin_3idx(cc_nO_m,cc_nV_m,cc_nV_m,cc_nV_m, f, cc_nO_S,cc_nV_S,cc_nV_S,cc_nV_S, &
-           cc_list_occ_spin,cc_list_vir_spin,cc_list_vir_spin,cc_list_vir_spin, &
-           nO,nV,nV, v_ovvf)
+    call gen_v_spin_3idx(cc_nO_m, cc_nV_m, cc_nV_m, cc_nV_m, int(f,4), cc_nO_S &
+      , cc_nV_S, cc_nV_S, cc_nV_S, cc_list_occ_spin, cc_list_vir_spin &
+      , cc_list_vir_spin, cc_list_vir_spin, int(nO,4), int(nV,4), int(nV,4) &
+      , v_ovvf)
     !$OMP PARALLEL &
     !$OMP SHARED(r1,t1,t2,X_vovf,v_ovvf,nO,nV) &
     !$OMP PRIVATE(i,j,a,b,e,f,m,n) &
@@ -458,7 +483,7 @@ subroutine compute_r1_spin(nO,nV,t1,t2,f_o,f_v,Fov,cF_oo,cF_ov,cF_vv,v_oovo,v_ov
     !$OMP END DO
     !$OMP END PARALLEL
 
-    call dgemm('N','T', nO, nV, nO*nV, &
+    call dgemm('N','T',int(nO,4), int(nV,4), int(nO*nV,4), &
              -0.5d0, t2(1,1,1,f), size(t2,1), &
                      X_vovf, size(X_vovf,1), &
               1d0  , r1    , size(r1,1))
@@ -504,7 +529,7 @@ subroutine compute_r1_spin(nO,nV,t1,t2,f_o,f_v,Fov,cF_oo,cF_ov,cF_vv,v_oovo,v_ov
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm('T','N', nO, nV, nO*nO*nV, &
+  call dgemm('T','N',int(nO,4), int(nV,4), int(nO*nO*nV,4), &
              -0.5d0, v_oovo, size(v_oovo,1) * size(v_oovo,2) * size(v_oovo,3), &
                      X_oovv, size(X_oovv,1) * size(X_oovv,2) * size(X_oovv,3), &
              1d0   , r1    , size(r1,1))
@@ -529,6 +554,7 @@ end
 ! R2
 
 subroutine compute_r2_spin(nO,nV,t1,t2,tau,f_o,f_v,cF_oo,cF_ov,cF_vv,cW_oooo,cW_ovvo,v_ovoo,v_oovv,v_ovvo,r2)
+ use sizet
 
   implicit none
 
@@ -558,8 +584,8 @@ subroutine compute_r2_spin(nO,nV,t1,t2,tau,f_o,f_v,cF_oo,cF_ov,cF_vv,cW_oooo,cW_
 
   double precision,intent(out)  :: r2(nO,nO,nV,nV)
 
-  integer                       :: i,j,m,n
-  integer                       :: a,b,e,f
+  integer(size_t)               :: i,j,m,n
+  integer(size_t)               :: a,b,e,f
   double precision, allocatable :: X_vvoo(:,:,:,:)
   !double precision, allocatable :: A_vvov(:,:,:,:)
   double precision, allocatable :: X_oovv(:,:,:,:), Y_oovv(:,:,:,:)
@@ -594,7 +620,7 @@ subroutine compute_r2_spin(nO,nV,t1,t2,tau,f_o,f_v,cF_oo,cF_ov,cF_vv,cW_oooo,cW_
   !  end do
   !end do
   allocate(X_oovv(nO,nO,nV,nV))
-  call dgemm('N','T',nO*nO*nV, nV, nV, &
+  call dgemm('N','T',int(nO*nO*nV,4), int(nV,4), int(nV,4), &
              1d0, t2    , size(t2,1) * size(t2,2) * size(t2,3), &
                   cF_VV , size(cF_vv,1), &
              0d0, X_oovv, size(X_oovv,1) * size(X_oovv,2) * size(X_oovv,3))
@@ -636,12 +662,12 @@ subroutine compute_r2_spin(nO,nV,t1,t2,tau,f_o,f_v,cF_oo,cF_ov,cF_vv,cW_oooo,cW_
   !  end do
   !end do
   allocate(A_vv(nV,nV))!, X_oovv(nO,nO,nV,nV))
-  call dgemm('T','N', nV, nV, nO, &
+  call dgemm('T','N',int(nV,4), int(nV,4), int(nO,4), &
              1d0, t1   , size(t1,1), &
                   cF_ov, size(cF_ov,1), &
              0d0, A_vv , size(A_vv,1))
 
-  call dgemm('N','T', nO*nO*nV, nV, nV, &
+  call dgemm('N','T',int(nO*nO*nV,4), int(nV,4), int(nV,4), &
              0.5d0, t2    , size(t2,1) * size(t2,2) * size(t2,3), &
                     A_vv  , size(A_vv,1), &
              0d0  , X_oovv, size(X_oovv,1) * size(X_oovv,2) * size(X_oovv,3))
@@ -699,7 +725,7 @@ subroutine compute_r2_spin(nO,nV,t1,t2,tau,f_o,f_v,cF_oo,cF_ov,cF_vv,cW_oooo,cW_
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm('T','N', nO, nO*nV*nV, nO, &
+  call dgemm('T','N',int(nO,4), int(nO*nV*nV,4), int(nO,4), &
              1d0, cF_oo , size(cF_oo,1), &
                   X_oovv, size(X_oovv,1), &
              0d0, Y_oovv, size(Y_oovv,1))
@@ -741,7 +767,7 @@ subroutine compute_r2_spin(nO,nV,t1,t2,tau,f_o,f_v,cF_oo,cF_ov,cF_vv,cW_oooo,cW_
   !end do
   allocate(A_oo(nO,nO),B_oovv(nO,nO,nV,nV))!,X_oovv(nO,nO,nV,nV))
 
-  call dgemm('N','T', nO, nO, nV, &
+  call dgemm('N','T',int(nO,4), int(nO,4), int(nV,4), &
         1d0, t1   , size(t1,1), &
              cF_ov, size(cF_ov,1), &
         0d0, A_oo , size(A_oo,1))
@@ -764,7 +790,7 @@ subroutine compute_r2_spin(nO,nV,t1,t2,tau,f_o,f_v,cF_oo,cF_ov,cF_vv,cW_oooo,cW_
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm('N','N', nO, nO*nV*nV, nO, &
+  call dgemm('N','N',int(nO,4), int(nO*nV*nV,4), int(nO,4), &
              0.5d0, A_oo, size(A_oo,1), &
                     B_oovv, size(B_oovv,1), &
              0d0  , X_oovv, size(X_oovv,1))
@@ -803,7 +829,7 @@ subroutine compute_r2_spin(nO,nV,t1,t2,tau,f_o,f_v,cF_oo,cF_ov,cF_vv,cW_oooo,cW_
   !    end do
   !  end do
   !end do
-  call dgemm('T','N', nO*nO, nV*nV, nO*nO, &
+  call dgemm('T','N',int(nO*nO,4), int(nV*nV,4), int(nO*nO,4), &
              0.5d0, cW_oooo, size(cW_oooo,1) * size(cW_oooo,2), &
                     tau    , size(tau,1) * size(tau,2), &
              1d0  , r2     , size(r2,1) * size(r2,2))
@@ -889,7 +915,7 @@ subroutine compute_r2_spin(nO,nV,t1,t2,tau,f_o,f_v,cF_oo,cF_ov,cF_vv,cW_oooo,cW_
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm('T','N', nO*nV, nV*nO, nO*nV, &
+  call dgemm('T','N',int(nO*nV,4), int(nV*nO,4), int(nO*nV,4), &
              1d0, A_ovov, size(A_ovov,1) * size(A_ovov,2), &
                   B_ovvo, size(B_ovvo,1) * size(B_ovvo,2), &
              0d0, X_ovvo, size(X_ovvo,1) * size(X_ovvo,2))
@@ -934,12 +960,12 @@ subroutine compute_r2_spin(nO,nV,t1,t2,tau,f_o,f_v,cF_oo,cF_ov,cF_vv,cW_oooo,cW_
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm('N','N', nO, nV*nO*nO, nV, &
+  call dgemm('N','N',int(nO,4), int(nV*nO*nO,4), int(nV,4), &
              1d0, t1    , size(t1,1), &
                   A_vvoo, size(A_vvoo,1), &
              0d0, B_ovoo, size(B_ovoo,1))
 
-  call dgemm('N','N', nO*nV*nO, nV, nO, &
+  call dgemm('N','N',int(nO*nV*nO,4), int(nV,4), int(nO,4), &
              1d0, B_ovoo, size(B_ovoo,1) * size(B_ovoo,2) * size(B_ovoo,3), &
                   t1    , size(t1,1), &
              0d0, C_ovov, size(C_ovov,1) * size(C_ovov,2) * size(C_ovov,3))
@@ -982,9 +1008,10 @@ subroutine compute_r2_spin(nO,nV,t1,t2,tau,f_o,f_v,cF_oo,cF_ov,cF_vv,cW_oooo,cW_
   allocate(A_vbov(nV,nO,nV), X_vboo(nV,nO,nO), v_vbvo(nV,nV,nO))
   do b = 1, nV
 
-    call gen_v_spin_3idx_i_kl(cc_nV_m,cc_nV_m,cc_nV_m,cc_nO_m, b, cc_nV_S,cc_nV_S,cc_nV_S,cc_nO_S, &
-         cc_list_vir_spin,cc_list_vir_spin,cc_list_vir_spin,cc_list_occ_spin, &
-         nV,nV,nO, v_vbvo)
+    call gen_v_spin_3idx_i_kl(cc_nV_m, cc_nV_m, cc_nV_m, cc_nO_m, int(b,4) &
+      , cc_nV_S, cc_nV_S, cc_nV_S, cc_nO_S, cc_list_vir_spin, cc_list_vir_spin &
+      , cc_list_vir_spin, cc_list_occ_spin, int(nV,4), int(nV,4), int(nO,4) &
+      , v_vbvo)
 
     !$OMP PARALLEL &
     !$OMP SHARED(b,A_vbov,v_vbvo,nO,nV) &
@@ -1005,7 +1032,7 @@ subroutine compute_r2_spin(nO,nV,t1,t2,tau,f_o,f_v,cF_oo,cF_ov,cF_vv,cW_oooo,cW_
     !$OMP END DO
     !$OMP END PARALLEL
 
-    call dgemm('N','T', nV*nO, nO, nV, &
+    call dgemm('N','T',int(nV*nO,4), int(nO,4), int(nV,4), &
                1d0, A_vbov, size(A_vbov,1) * size(A_vbov,2), &
                     t1    , size(t1,1), &
                0d0, X_vboo, size(X_vboo,1) * size(X_vboo,2))
@@ -1053,7 +1080,7 @@ subroutine compute_r2_spin(nO,nV,t1,t2,tau,f_o,f_v,cF_oo,cF_ov,cF_vv,cW_oooo,cW_
   !end do
   !allocate(X_vvoo(nV,nV,nO,nO))
 
-  call dgemm('T','N', nV, nV*nO*nO, nO, &
+  call dgemm('T','N',int(nV,4), int(nV*nO*nO,4), int(nO,4), &
              1d0, t1    , size(t1,1), &
                   v_ovoo, size(v_ovoo,1), &
              0d0, X_vvoo, size(X_vvoo,1))
@@ -1095,6 +1122,7 @@ end
 ! Use cF_oo
 
 subroutine use_cF_oo(nO,nV,t1,t2,tau_t,F_oo,F_ov,v_ooov,v_oovv,r1,r2)
+ use sizet
 
   implicit none
 
@@ -1113,7 +1141,7 @@ subroutine use_cF_oo(nO,nV,t1,t2,tau_t,F_oo,F_ov,v_ooov,v_oovv,r1,r2)
   double precision, intent(inout) :: r1(nO,nV), r2(nO,nO,nV,nV)
 
   double precision, allocatable   :: cF_oo(:,:), X_oovv(:,:,:,:),Y_oovv(:,:,:,:)
-  integer                         :: i,j,m,a,b
+  integer(size_t)                 :: i,j,m,a,b
 
   allocate(cF_oo(nO,nO))
 
@@ -1126,7 +1154,7 @@ subroutine use_cF_oo(nO,nV,t1,t2,tau_t,F_oo,F_ov,v_ooov,v_oovv,r1,r2)
   !    end do
   !  end do
   !end do
-  call dgemm('T','N', nO, nV, nO, &
+  call dgemm('T','N',int(nO,4), int(nV,4), int(nO,4), &
              -1d0, cF_oo, size(cF_oo,1), &
                    t1   , size(t1,1), &
               1d0, r1   , size(r1,1))
@@ -1165,7 +1193,7 @@ subroutine use_cF_oo(nO,nV,t1,t2,tau_t,F_oo,F_ov,v_ooov,v_oovv,r1,r2)
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm('T','N', nO, nO*nV*nV, nO, &
+  call dgemm('T','N',int(nO,4), int(nO*nV*nV,4), int(nO,4), &
              1d0, cF_oo , size(cF_oo,1), &
                   X_oovv, size(X_oovv,1), &
              0d0, Y_oovv, size(Y_oovv,1))
@@ -1195,6 +1223,7 @@ end
 ! Use cF_ov
 
 subroutine use_cF_ov(nO,nV,t1,t2,F_ov,v_oovv,r1,r2)
+ use sizet
 
   implicit none
 
@@ -1214,7 +1243,7 @@ subroutine use_cF_ov(nO,nV,t1,t2,F_ov,v_oovv,r1,r2)
 
   double precision, allocatable   :: cF_ov(:,:), A_oo(:,:), A_vv(:,:)
   double precision, allocatable   :: X_oovv(:,:,:,:), B_oovv(:,:,:,:)
-  integer                         :: i,j,a,b,e,m
+  integer(size_t)                 :: i,j,a,b,e,m
 
   allocate(cF_ov(nO,nV))
 
@@ -1255,12 +1284,12 @@ subroutine use_cF_ov(nO,nV,t1,t2,F_ov,v_oovv,r1,r2)
   !  end do
   !end do
   allocate(A_vv(nV,nV), X_oovv(nO,nO,nV,nV))
-  call dgemm('T','N', nV, nV, nO, &
+  call dgemm('T','N',int(nV,4), int(nV,4), int(nO,4), &
              1d0, t1   , size(t1,1), &
                   cF_ov, size(cF_ov,1), &
              0d0, A_vv , size(A_vv,1))
 
-  call dgemm('N','T', nO*nO*nV, nV, nV, &
+  call dgemm('N','T',int(nO*nO*nV,4), int(nV,4), int(nV,4), &
              0.5d0, t2    , size(t2,1) * size(t2,2) * size(t2,3), &
                     A_vv  , size(A_vv,1), &
              0d0  , X_oovv, size(X_oovv,1) * size(X_oovv,2) * size(X_oovv,3))
@@ -1303,7 +1332,7 @@ subroutine use_cF_ov(nO,nV,t1,t2,F_ov,v_oovv,r1,r2)
   !end do
   allocate(A_oo(nO,nO),B_oovv(nO,nO,nV,nV))!,X_oovv(nO,nO,nV,nV))
 
-  call dgemm('N','T', nO, nO, nV, &
+  call dgemm('N','T',int(nO,4), int(nO,4), int(nV,4), &
         1d0, t1   , size(t1,1), &
              cF_ov, size(cF_ov,1), &
         0d0, A_oo , size(A_oo,1))
@@ -1326,7 +1355,7 @@ subroutine use_cF_ov(nO,nV,t1,t2,F_ov,v_oovv,r1,r2)
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm('N','N', nO, nO*nV*nV, nO, &
+  call dgemm('N','N',int(nO,4), int(nO*nV*nV,4), int(nO,4), &
              0.5d0, A_oo, size(A_oo,1), &
                     B_oovv, size(B_oovv,1), &
              0d0  , X_oovv, size(X_oovv,1))
@@ -1356,6 +1385,7 @@ end
 ! Use cF_vv
 
 subroutine use_cF_vv(nO,nV,t1,t2,r1,r2)
+ use sizet
 
   implicit none
 
@@ -1370,7 +1400,7 @@ subroutine use_cF_vv(nO,nV,t1,t2,r1,r2)
   double precision, intent(inout) :: r1(nO,nV), r2(nO,nO,nV,nV)
 
   double precision, allocatable   :: cF_vv(:,:)
-  integer                         :: i,j,a,b,e,m
+  integer(size_t)                 :: i,j,a,b,e,m
 
   allocate(cF_vv(nV,nV))
 
@@ -1383,6 +1413,7 @@ end
 ! Use cW_vvvd
 
 subroutine use_cW_vvvf(nO,nV,t1,t2,tau,v_oovv,r2)
+ use sizet
 
   implicit none
 
@@ -1401,7 +1432,7 @@ subroutine use_cW_vvvf(nO,nV,t1,t2,tau,v_oovv,r2)
   double precision, intent(inout) :: r2(nO,nO,nV,nV)
 
   double precision, allocatable   :: cW_vvvf(:,:,:), v_vvvf(:,:,:), tau_f(:,:,:), v_vovf(:,:,:)
-  integer                         :: i,j,e,f
+  integer(size_t)                 :: i,j,e,f
   double precision                :: ti,tf
 
   allocate(cW_vvvf(nV,nV,nV),v_vvvf(nV,nV,nV),tau_f(nO,nO,nV),v_vovf(nV,nO,nV))
@@ -1447,17 +1478,19 @@ subroutine use_cW_vvvf(nO,nV,t1,t2,tau,v_oovv,r2)
     endif
 
     call wall_time(ti)
-    call gen_v_spin_3idx(cc_nV_m,cc_nV_m,cc_nV_m,cc_nV_m, f, cc_nV_S,cc_nV_S,cc_nV_S,cc_nV_S, &
-         cc_list_vir_spin,cc_list_vir_spin,cc_list_vir_spin,cc_list_vir_spin, &
-         nV,nV,nV, v_vvvf)
+    call gen_v_spin_3idx(cc_nV_m, cc_nV_m, cc_nV_m, cc_nV_m, int(f,4), cc_nV_S &
+      , cc_nV_S, cc_nV_S, cc_nV_S, cc_list_vir_spin, cc_list_vir_spin &
+      , cc_list_vir_spin, cc_list_vir_spin, int(nV,4), int(nV,4), int(nV,4) &
+      , v_vvvf)
     call wall_time(tf)
     if (cc_dev .and. f == 1) then
       print*,'vvvf', tf-ti
     endif
     call wall_time(ti)
-    call gen_v_spin_3idx(cc_nV_m,cc_nO_m,cc_nV_m,cc_nV_m, f, cc_nV_S,cc_nO_S,cc_nV_S,cc_nV_S, &
-         cc_list_vir_spin,cc_list_occ_spin,cc_list_vir_spin,cc_list_vir_spin, &
-         nV,nO,nV, v_vovf)
+    call gen_v_spin_3idx(cc_nV_m, cc_nO_m, cc_nV_m, cc_nV_m, int(f,4), cc_nV_S &
+      , cc_nO_S, cc_nV_S, cc_nV_S, cc_list_vir_spin, cc_list_occ_spin &
+      , cc_list_vir_spin, cc_list_vir_spin, int(nV,4), int(nO,4), int(nV,4) &
+      , v_vovf)
     call wall_time(tf)
     if (cc_dev .and. f == 1) then
       print*,'vovf', tf-ti
@@ -1471,7 +1504,7 @@ subroutine use_cW_vvvf(nO,nV,t1,t2,tau,v_oovv,r2)
     endif
 
     call wall_time(ti)
-    call dgemm('N','T', nO*nO, nV*nV, nV, &
+    call dgemm('N','T',int(nO*nO,4), int(nV*nV,4), int(nV,4), &
                0.5d0, tau_f    , size(tau_f,1) * size(tau_f,2), &
                       cW_vvvf, size(cW_vvvf,1) * size(cW_vvvf,2), &
                1d0  , r2     , size(r2,1) * size(r2,2))
@@ -1488,6 +1521,7 @@ end
 ! cF_oo
 
 subroutine compute_cF_oo(nO,nV,t1,tau_t,Foo,Fov,v_ooov,v_oovv,cF_oo)
+ use sizet
 
   implicit none
 
@@ -1508,8 +1542,8 @@ subroutine compute_cF_oo(nO,nV,t1,tau_t,Foo,Fov,v_ooov,v_oovv,cF_oo)
 
   double precision,intent(out)  :: cF_oo(nO,nO)
 
-  integer                       :: i,j,m,n
-  integer                       :: a,b,e,f
+  integer(size_t)               :: i,j,m,n
+  integer(size_t)               :: a,b,e,f
   double precision,external     :: Kronecker_Delta
 
   !$OMP PARALLEL &
@@ -1555,7 +1589,7 @@ subroutine compute_cF_oo(nO,nV,t1,tau_t,Foo,Fov,v_ooov,v_oovv,cF_oo)
   !    end do
   !  end do
   !end do
-  call dgemm('N','T', nO, nO, nV,&
+  call dgemm('N','T',int(nO,4), int(nO,4), int(nV,4), &
              0.5d0, Fov  , size(Fov,1), &
                     t1   , size(t1,1), &
              1d0  , cF_oo, size(cF_oo,1))
@@ -1571,7 +1605,7 @@ subroutine compute_cF_oo(nO,nV,t1,tau_t,Foo,Fov,v_ooov,v_oovv,cF_oo)
   !    end do
   !  end do
   !end do
-  call dgemm('N','T', nO, nO, nO*nV*nV, &
+  call dgemm('N','T',int(nO,4), int(nO,4), int(nO*nV*nV,4), &
              0.5d0, v_oovv, size(v_oovv,1), &
                     tau_t , size(tau_t,1), &
              1d0  , cF_oo , size(cF_oo,1))
@@ -1581,6 +1615,7 @@ end
 ! cF_ov
 
 subroutine compute_cF_ov(nO,nV,t1,Fov,v_oovv,cF_ov)
+ use sizet
 
   implicit none
 
@@ -1595,8 +1630,8 @@ subroutine compute_cF_ov(nO,nV,t1,Fov,v_oovv,cF_ov)
 
   double precision,intent(out)  :: cF_ov(nO,nV)
 
-  integer                       :: i,j,m,n
-  integer                       :: a,b,e,f
+  integer(size_t)               :: i,j,m,n
+  integer(size_t)               :: a,b,e,f
 
   !$OMP PARALLEL &
   !$OMP SHARED(cF_ov,Fov,t1,v_oovv,nO,nV) &
@@ -1624,6 +1659,7 @@ end
 ! cF_vv
 
 subroutine compute_cF_vv(nO,nV,t1,tau_t,Fov,Fvv,v_oovv,cF_vv)
+ use sizet
 
   implicit none
 
@@ -1644,8 +1680,8 @@ subroutine compute_cF_vv(nO,nV,t1,tau_t,Fov,Fvv,v_oovv,cF_vv)
   double precision,intent(out)  :: cF_vv(nV,nV)
 
   double precision, allocatable :: v_ovfv(:,:,:),X_ovfv(:,:,:)
-  integer                       :: i,j,m,n
-  integer                       :: a,b,e,f
+  integer(size_t)               :: i,j,m,n
+  integer(size_t)               :: a,b,e,f
 
   !$OMP PARALLEL &
   !$OMP SHARED(cF_vv,Fvv,nO,nV) &
@@ -1672,7 +1708,7 @@ subroutine compute_cF_vv(nO,nV,t1,tau_t,Fov,Fvv,v_oovv,cF_vv)
   !    end do
   !  end do
   !end do
-  call dgemm('T','N', nV, nV, nO, &
+  call dgemm('T','N',int(nV,4), int(nV,4), int(nO,4), &
              -0.5d0, t1   , size(t1,1), &
                      Fov  , size(Fov,1), &
               1d0  , cF_vv, size(cF_vv,1))
@@ -1689,9 +1725,10 @@ subroutine compute_cF_vv(nO,nV,t1,tau_t,Fov,Fvv,v_oovv,cF_vv)
   allocate(v_ovfv(nO,nV,nV),X_ovfv(nO,nV,nV))
   do f = 1, nV
 
-     call gen_v_spin_3idx_ij_l(cc_nO_m,cc_nV_m,cc_nV_m,cc_nV_m, f, cc_nO_S,cc_nV_S,cc_nV_S,cc_nV_S, &
-                              cc_list_occ_spin,cc_list_vir_spin,cc_list_vir_spin,cc_list_vir_spin, &
-                              nO,nV,nV, v_ovfv)
+     call gen_v_spin_3idx_ij_l(cc_nO_m, cc_nV_m, cc_nV_m, cc_nV_m, int(f,4) &
+       , cc_nO_S, cc_nV_S, cc_nV_S, cc_nV_S, cc_list_occ_spin &
+       , cc_list_vir_spin, cc_list_vir_spin, cc_list_vir_spin, int(nO,4) &
+       , int(nV,4), int(nV,4), v_ovfv)
 
     !$OMP PARALLEL &
     !$OMP SHARED(nO,nV,v_ovfv,X_ovfv,f) &
@@ -1708,7 +1745,7 @@ subroutine compute_cF_vv(nO,nV,t1,tau_t,Fov,Fvv,v_oovv,cF_vv)
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
-    call dgemv('T', nO, nV*nV, &
+    call dgemv('T',int(nO,4), int(nV*nV,4), &
                !1d0, v_ovvv(:,:,f,:), size(v_ovvv,1), &
                1d0, X_ovfv, size(X_ovfv,1), &
                     t1(1,f), 1, &
@@ -1728,7 +1765,7 @@ subroutine compute_cF_vv(nO,nV,t1,tau_t,Fov,Fvv,v_oovv,cF_vv)
   !  end do
   !end do
   do f = 1, nV
-     call dgemm('T','N', nV, nV, nO*nO,&
+     call dgemm('T','N',int(nV,4), int(nV,4), int(nO*nO,4), &
                 -0.5d0, tau_t(1,1,1,f) , size(tau_t,1) * size(tau_t,2), &
                         v_oovv(1,1,1,f), size(v_oovv,1) * size(v_oovv,2), &
                 1d0   , cF_vv, size(cF_vv,1))
@@ -1739,6 +1776,7 @@ end
 ! cW_oooo
 
 subroutine compute_cW_oooo(nO,nV,t1,t2,tau,v_oooo,v_ooov,v_oovv,cW_oooo)
+ use sizet
 
   implicit none
 
@@ -1759,8 +1797,8 @@ subroutine compute_cW_oooo(nO,nV,t1,t2,tau,v_oooo,v_ooov,v_oovv,cW_oooo)
 
   double precision,intent(out)  :: cW_oooo(nO,nO,nO,nO)
 
-  integer                       :: i,j,m,n
-  integer                       :: a,b,e,f
+  integer(size_t)               :: i,j,m,n
+  integer(size_t)               :: a,b,e,f
   double precision, allocatable :: X_oooo(:,:,:,:)
 
   ! oooo block
@@ -1782,7 +1820,7 @@ subroutine compute_cW_oooo(nO,nV,t1,t2,tau,v_oooo,v_ooov,v_oovv,cW_oooo)
   !end do
   allocate(X_oooo(nO,nO,nO,nO))
 
-  call dgemm('N','T', nO*nO*nO, nO, nV, &
+  call dgemm('N','T',int(nO*nO*nO,4), int(nO,4), int(nV,4), &
              1d0, v_ooov, size(v_ooov,1) * size(v_ooov,2) * size(v_ooov,3), &
                   t1    , size(t1,1), &
              0d0, X_oooo, size(X_oooo,1) * size(X_oooo,1) * size(X_oooo,3))
@@ -1821,7 +1859,7 @@ subroutine compute_cW_oooo(nO,nV,t1,t2,tau,v_oooo,v_ooov,v_oovv,cW_oooo)
   !  end do
   !end do
 
-  call dgemm('N','T', nO*nO, nO*nO, nV*nV, &
+  call dgemm('N','T',int(nO*nO,4), int(nO*nO,4), int(nV*nV,4), &
              0.25d0, v_oovv , size(v_oovv,1) * size(v_oovv,2), &
                      tau    , size(tau,1) * size(tau,2), &
              1.d0  , cW_oooo, size(cW_oooo,1) * size(cW_oooo,2))
@@ -1831,6 +1869,7 @@ end
 ! cW_ovvo
 
 subroutine compute_cW_ovvo(nO,nV,t1,t2,tau,v_ovvo,v_oovo,v_oovv,cW_ovvo)
+ use sizet
 
   implicit none
 
@@ -1853,8 +1892,8 @@ subroutine compute_cW_ovvo(nO,nV,t1,t2,tau,v_ovvo,v_oovo,v_oovv,cW_ovvo)
 
   double precision,intent(out)  :: cW_ovvo(nO,nV,nV,nO)
 
-  integer                       :: i,j,m,n
-  integer                       :: a,b,e,f
+  integer(size_t)               :: i,j,m,n
+  integer(size_t)               :: a,b,e,f
   double precision, allocatable :: A_oovo(:,:,:,:), B_vovo(:,:,:,:)
   double precision, allocatable :: A_voov(:,:,:,:), B_voov(:,:,:,:), C_ovov(:,:,:,:)
   double precision, allocatable :: v_ovev(:,:,:), cW_oveo(:,:,:)
@@ -1890,11 +1929,12 @@ subroutine compute_cW_ovvo(nO,nV,t1,t2,tau,v_ovvo,v_oovo,v_oovv,cW_ovvo)
   allocate(v_ovev(nO,nV,nV),cW_oveo(nO,nV,nO))
   do e = 1, nV
 
-    call gen_v_spin_3idx_ij_l(cc_nO_m,cc_nV_m,cc_nV_m,cc_nV_m, e, cc_nO_S,cc_nV_S,cc_nV_S,cc_nV_S, &
-                              cc_list_occ_spin,cc_list_vir_spin,cc_list_vir_spin,cc_list_vir_spin, &
-                              nO,nV,nV, v_ovev)
+    call gen_v_spin_3idx_ij_l(cc_nO_m, cc_nV_m, cc_nV_m, cc_nV_m, int(e,4) &
+      , cc_nO_S, cc_nV_S, cc_nV_S, cc_nV_S, cc_list_occ_spin, cc_list_vir_spin &
+      , cc_list_vir_spin, cc_list_vir_spin, int(nO,4), int(nV,4), int(nV,4) &
+      , v_ovev)
 
-    call dgemm('N','T', nO*nV, nO, nV, &
+    call dgemm('N','T',int(nO*nV,4), int(nO,4), int(nV,4), &
                1.d0, v_ovev , size(v_ovev,1) * size(v_ovev,2), &
                      t1     , size(t1,1), &
                0.d0, cW_oveo, size(cW_oveo,1) * size(cW_oveo,2))
@@ -1951,7 +1991,7 @@ subroutine compute_cW_ovvo(nO,nV,t1,t2,tau,v_ovvo,v_oovo,v_oovv,cW_ovvo)
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm('T','N', nV, nO*nV*nO, nO, &
+  call dgemm('T','N',int(nV,4), int(nO*nV*nO,4), int(nO,4), &
              1d0, t1    , size(t1,1), &
                   A_oovo, size(A_oovo,1), &
              0d0, B_vovo, size(B_vovo,1))
@@ -2020,7 +2060,7 @@ subroutine compute_cW_ovvo(nO,nV,t1,t2,tau,v_ovvo,v_oovo,v_oovv,cW_ovvo)
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm('T','N', nO*nV, nV*nO, nV*nO, &
+  call dgemm('T','N',int(nO*nV,4), int(nV*nO,4), int(nV*nO,4), &
              1d0, A_voov, size(A_voov,1) * size(A_voov,2), &
                   B_voov, size(B_voov,1) * size(B_voov,2), &
              0d0, C_ovov, size(C_ovov,1) * size(C_ovov,2))
@@ -2052,6 +2092,7 @@ end
 ! cW_vvvv
 
 subroutine compute_cW_vvvv(nO,nV,t1,t2,tau,v_vvvv,v_vovv,v_oovv,cW_vvvv)
+ use sizet
 
   implicit none
 
@@ -2073,8 +2114,8 @@ subroutine compute_cW_vvvv(nO,nV,t1,t2,tau,v_vvvv,v_vovv,v_oovv,cW_vvvv)
 
   double precision,intent(out)  :: cW_vvvv(nV,nV,nV,nV)
 
-  integer                       :: i,j,m,n
-  integer                       :: a,b,c,d,e,f
+  integer(size_t)               :: i,j,m,n
+  integer(size_t)               :: a,b,c,d,e,f
   double precision, allocatable :: A_ovvv(:,:,:,:), B_vvvv(:,:,:,:)
 
   allocate(A_ovvv(nO,nV,nV,nV), B_vvvv(nV,nV,nV,nV))
@@ -2120,7 +2161,7 @@ subroutine compute_cW_vvvv(nO,nV,t1,t2,tau,v_vvvv,v_vovv,v_oovv,cW_vvvv)
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm('T','N', nV, nV*nV*nV, nO, &
+  call dgemm('T','N',int(nV,4), int(nV*nV*nV,4), int(nO,4), &
              1d0, t1    , size(t1,1), &
                   A_ovvv, size(A_ovvv,1), &
              0d0, B_vvvv, size(B_vvvv,1))
@@ -2160,7 +2201,7 @@ subroutine compute_cW_vvvv(nO,nV,t1,t2,tau,v_vvvv,v_vovv,v_oovv,cW_vvvv)
   !    end do
   !  end do
   !end do
-  call dgemm('T','N', nV*nV, nV*nV, nO*nO, &
+  call dgemm('T','N',int(nV*nV,4), int(nV*nV,4), int(nO*nO,4), &
              0.25d0, tau    , size(tau,1) * size(tau,2), &
                      v_oovv , size(v_oovv,1) * size(v_oovv,2), &
              1.d0  , cW_vvvv, size(cW_vvvv,1) * size(cW_vvvv,2))
@@ -2170,6 +2211,7 @@ end
 ! cW_vvvf
 
 subroutine compute_cW_vvvf(nO,nV,t1,t2,tau,f,v_vvvf,v_vovf,v_oovv,cW_vvvf)
+ use sizet
 
   implicit none
 
@@ -2180,7 +2222,8 @@ subroutine compute_cW_vvvf(nO,nV,t1,t2,tau,f,v_vvvf,v_vovf,v_oovv,cW_vvvf)
   !   - sum_m t1(m,b)*v_vovf(a,m,e) + t1(m,a)*v_vovf(b,m,e)
   !   + 0.25*sum tau(m,n,a,b)*v_oovv(m,n,e,f).
   END_DOC
-  integer,intent(in)            :: nO,nV,f
+  integer,intent(in)            :: nO, nV
+  integer(size_t),intent(in)    :: f
   double precision,intent(in)   :: t1(nO,nV)
   double precision,intent(in)   :: t2(nO,nO,nV,nV)
   double precision,intent(in)   :: tau(nO,nO,nV,nV)
@@ -2190,8 +2233,8 @@ subroutine compute_cW_vvvf(nO,nV,t1,t2,tau,f,v_vvvf,v_vovf,v_oovv,cW_vvvf)
 
   double precision,intent(out)  :: cW_vvvf(nV,nV,nV)
 
-  integer                       :: i,j,m,n
-  integer                       :: a,b,c,d,e
+  integer(size_t)               :: i,j,m,n
+  integer(size_t)               :: a,b,c,d,e
   double precision, allocatable :: A_ovvf(:,:,:), B_vvvf(:,:,:), v_oovf(:,:,:)
   double precision :: ti,tf
 
@@ -2239,7 +2282,7 @@ subroutine compute_cW_vvvf(nO,nV,t1,t2,tau,f,v_vvvf,v_vovf,v_oovv,cW_vvvf)
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm('T','N', nV, nV*nV, nO, &
+  call dgemm('T','N',int(nV,4), int(nV*nV,4), int(nO,4), &
              1d0, t1    , size(t1,1), &
                   A_ovvf, size(A_ovvf,1), &
              0d0, B_vvvf, size(B_vvvf,1))
@@ -2289,7 +2332,7 @@ subroutine compute_cW_vvvf(nO,nV,t1,t2,tau,f,v_vvvf,v_vovf,v_oovv,cW_vvvf)
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm('T','N', nV*nV, nV, nO*nO, &
+  call dgemm('T','N',int(nV*nV,4), int(nV,4), int(nO*nO,4), &
              0.25d0, tau    , size(tau,1) * size(tau,2), &
                      v_oovf , size(v_oovf,1) * size(v_oovf,2), &
              1.d0  , cW_vvvf, size(cW_vvvf,1) * size(cW_vvvf,2))

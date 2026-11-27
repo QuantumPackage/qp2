@@ -1,4 +1,6 @@
+use sizet
 subroutine get_excitation_general(key_i,key_j, Nint,degree_array,holes_array, particles_array,phase)
+ use sizet
  use bitmasks
  BEGIN_DOC
 ! returns the array, for each spin, of holes/particles between key_i and key_j 
@@ -7,11 +9,13 @@ subroutine get_excitation_general(key_i,key_j, Nint,degree_array,holes_array, pa
  END_DOC
   include 'utils/constants.include.F'
  implicit none
- integer, intent(in)            :: Nint
+ integer(size_t), intent(in)    :: Nint
  integer(bit_kind), intent(in)  :: key_j(Nint,2),key_i(Nint,2)
- integer, intent(out)           :: holes_array(100,2),particles_array(100,2),degree_array(2)
+ integer(size_t), intent(out)   :: holes_array(100,2),particles_array(100,2)
+ integer, intent(out)           :: degree_array(2)
  double precision, intent(out)  :: phase
- integer :: ispin,k,i,pos
+ integer(size_t) :: i
+ integer :: ispin,k,pos
  integer(bit_kind) :: key_hole, key_particle
  integer(bit_kind) :: xorvec(N_int_max,2)
  holes_array = -1
@@ -64,9 +68,10 @@ subroutine get_excitation_general(key_i,key_j, Nint,degree_array,holes_array, pa
    enddo
   enddo 
  enddo
- integer :: h,p, i_ok
+ integer(size_t) :: h,p
+ integer :: i_ok
  integer(bit_kind), allocatable :: det_i(:,:),det_ip(:,:)
- integer                        :: exc(0:2,2,2)
+ integer(size_t)                :: exc(0:2,2,2)
  double precision :: phase_tmp
  allocate(det_i(Nint,2),det_ip(N_int,2))
  det_i = key_i
@@ -90,6 +95,7 @@ subroutine get_excitation_general(key_i,key_j, Nint,degree_array,holes_array, pa
 end
 
 subroutine get_holes_general(key_i, key_j,Nint, holes_array)
+ use sizet
  use bitmasks
  BEGIN_DOC
 ! returns the array, per spin, of holes between key_i and key_j 
@@ -97,11 +103,12 @@ subroutine get_holes_general(key_i, key_j,Nint, holes_array)
 ! with the following convention: a_{hole}\|key_i> --> \|key_j>
  END_DOC
  implicit none
- integer, intent(in)            :: Nint
+ integer(size_t), intent(in)    :: Nint
  integer(bit_kind), intent(in)  :: key_j(Nint,2),key_i(Nint,2)
- integer, intent(out)           :: holes_array(100,2)
+ integer(size_t), intent(out)   :: holes_array(100,2)
  integer(bit_kind) :: key_hole
- integer :: ispin,k,i,pos
+ integer(size_t) :: i
+ integer :: ispin,k,pos
  holes_array = -1
  do ispin = 1, 2
   k = 1
@@ -124,6 +131,7 @@ subroutine get_holes_general(key_i, key_j,Nint, holes_array)
 end
 
 subroutine get_particles_general(key_i, key_j,Nint,particles_array)
+ use sizet
  use bitmasks
  BEGIN_DOC
 ! returns the array, per spin, of particles between key_i and key_j 
@@ -131,11 +139,12 @@ subroutine get_particles_general(key_i, key_j,Nint,particles_array)
 ! with the following convention: a^dagger_{particle}\|key_i> --> \|key_j>
  END_DOC
  implicit none
- integer, intent(in)            :: Nint
+ integer(size_t), intent(in)    :: Nint
  integer(bit_kind), intent(in)  :: key_j(Nint,2),key_i(Nint,2)
- integer, intent(out)           :: particles_array(100,2)
+ integer(size_t), intent(out)   :: particles_array(100,2)
  integer(bit_kind) :: key_particle
- integer :: ispin,k,i,pos
+ integer(size_t) :: i
+ integer :: ispin,k,pos
  particles_array = -1
  do ispin = 1, 2
   k = 1
@@ -161,6 +170,7 @@ subroutine get_particles_general(key_i, key_j,Nint,particles_array)
 end
 
 subroutine get_phase_general(key_i,Nint,degree, holes_array, particles_array,phase)
+ use sizet
  implicit none
  BEGIN_DOC
  ! Computes the phase of the excitation obtained by applying,
@@ -171,13 +181,15 @@ subroutine get_phase_general(key_i,Nint,degree, holes_array, particles_array,pha
  ! a_{hole} | key_i > = | key_j > of get_excitation_general.
  ! phase is the resulting fermionic phase.
  END_DOC
- integer, intent(in)            :: degree(2), Nint
+ integer(size_t), intent(in)    :: Nint
+ integer, intent(in)            :: degree(2)
  integer(bit_kind), intent(in)  :: key_i(Nint,2)
- integer, intent(in)            :: holes_array(100,2),particles_array(100,2)
+ integer(size_t), intent(in)    :: holes_array(100,2),particles_array(100,2)
  double precision, intent(out)  :: phase
- integer :: i,ispin,h,p, i_ok
+ integer(size_t) :: h,p
+ integer :: i,ispin, i_ok
  integer(bit_kind), allocatable :: det_i(:,:),det_ip(:,:)
- integer                        :: exc(0:2,2,2)
+ integer(size_t)                :: exc(0:2,2,2)
  double precision :: phase_tmp
  allocate(det_i(Nint,2),det_ip(N_int,2))
  det_i = key_i

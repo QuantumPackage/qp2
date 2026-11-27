@@ -1,3 +1,4 @@
+use sizet
 
  BEGIN_PROVIDER[double precision, mos_l_in_r_array_transp, (n_points_final_grid, mo_num)]
 &BEGIN_PROVIDER[double precision, mos_r_in_r_array_transp, (n_points_final_grid, mo_num)]
@@ -11,12 +12,15 @@
 
   implicit none
 
-  integer                       :: i
+  integer(size_t)               :: i
+  integer                       :: n_points4
   double precision              :: tt0, tt1, tt2, tt3
   double precision              :: r(3)
   double precision, allocatable :: aos_r(:,:)
 
   call wall_time(tt0)
+
+  n_points4 = int(n_points_final_grid, 4)
 
   allocate(aos_r(ao_num,n_points_final_grid))
 
@@ -47,19 +51,19 @@
   write(*,"(A,2X,F15.7)") ' wall time for AOs on r (sec) = ', (tt3 - tt2)
 
 
-  call dgemm("T", "N", n_points_final_grid, mo_num, ao_num, &
-             1.d0,                                          &
-             aos_r(1,1), ao_num,                            &
-             mo_l_coef(1,1), ao_num,                        &
-             0.d0,                                          &
-             mos_l_in_r_array_transp(1,1), n_points_final_grid)
+  call dgemm("T", "N", n_points4, mo_num, ao_num, &
+             1.d0,                             &
+             aos_r(1,1), ao_num,               &
+             mo_l_coef(1,1), ao_num,           &
+             0.d0,                             &
+             mos_l_in_r_array_transp(1,1), n_points4)
 
-  call dgemm("T", "N", n_points_final_grid, mo_num, ao_num, &
-             1.d0,                                          &
-             aos_r(1,1), ao_num,                            &
-             mo_r_coef(1,1), ao_num,                        &
-             0.d0,                                          &
-             mos_r_in_r_array_transp(1,1), n_points_final_grid)
+  call dgemm("T", "N", n_points4, mo_num, ao_num, &
+             1.d0,                             &
+             aos_r(1,1), ao_num,               &
+             mo_r_coef(1,1), ao_num,           &
+             0.d0,                             &
+             mos_r_in_r_array_transp(1,1), n_points4)
 
   deallocate(aos_r)
 

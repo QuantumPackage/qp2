@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [ integer, mo_num ]
   implicit none
   BEGIN_DOC
@@ -29,7 +31,7 @@ BEGIN_PROVIDER [ double precision, mo_coef, (ao_num,mo_num) ]
   !
   ! mo_coef(i,j) = coefficient of the i-th |AO| on the jth |MO|
   END_DOC
-  integer                        :: i, j
+  integer(size_t)                :: i, j
   double precision, allocatable  :: buffer(:,:)
   logical                        :: exists
   PROVIDE ezfio_filename
@@ -62,7 +64,7 @@ BEGIN_PROVIDER [ double precision, mo_coef_imag, (ao_num,mo_num) ]
   !
   ! mo_coef_imag(i,j) = coefficient of the i-th |AO| on the jth |MO|
   END_DOC
-  integer                        :: i, j
+  integer(size_t)                :: i, j
   double precision, allocatable  :: buffer(:,:)
   logical                        :: exists
   PROVIDE ezfio_filename
@@ -95,10 +97,10 @@ BEGIN_PROVIDER [ double precision, mo_coef_in_ao_ortho_basis, (ao_num, mo_num) ]
  !
  ! $C^{-1}.C_{mo}$
  END_DOC
- call dgemm('N','N',ao_num,mo_num,ao_num,1.d0,                   &
-     ao_ortho_canonical_coef_inv, size(ao_ortho_canonical_coef_inv,1),&
-     mo_coef, size(mo_coef,1), 0.d0,                                 &
-     mo_coef_in_ao_ortho_basis, size(mo_coef_in_ao_ortho_basis,1))
+ call dgemm('N','N',int(ao_num,4),int(mo_num,4),int(ao_num,4),1.d0,&
+     ao_ortho_canonical_coef_inv, int(size(ao_ortho_canonical_coef_inv,1),4),&
+     mo_coef, int(size(mo_coef,1),4), 0.d0,                           &
+     mo_coef_in_ao_ortho_basis, int(size(mo_coef_in_ao_ortho_basis,1),4))
 
 END_PROVIDER
 
@@ -130,7 +132,7 @@ BEGIN_PROVIDER [ double precision, mo_coef_transp, (mo_num,ao_num) ]
   BEGIN_DOC
   ! |MO| coefficients on |AO| basis set
   END_DOC
-  integer                        :: i, j
+  integer(size_t)                :: i, j
 
   do j=1,ao_num
     do i=1,mo_num
@@ -154,7 +156,7 @@ BEGIN_PROVIDER [ double precision, mo_occ, (mo_num) ]
       call ezfio_get_mo_basis_mo_occ(mo_occ)
     else
       mo_occ = 0.d0
-      integer :: i
+      integer(size_t) :: i
       do i=1,elec_beta_num
         mo_occ(i) = 2.d0
       enddo
@@ -169,13 +171,14 @@ END_PROVIDER
 
 
 subroutine ao_to_mo(A_ao,LDA_ao,A_mo,LDA_mo)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Transform A from the |AO| basis to the |MO| basis
   !
   ! $C^\dagger.A_{ao}.C$
   END_DOC
-  integer, intent(in)            :: LDA_ao,LDA_mo
+  integer(size_t), intent(in)    :: LDA_ao,LDA_mo
   double precision, intent(in)   :: A_ao(LDA_ao,ao_num)
   double precision, intent(out)  :: A_mo(LDA_mo,mo_num)
   double precision, allocatable  :: T(:,:)
@@ -183,25 +186,27 @@ subroutine ao_to_mo(A_ao,LDA_ao,A_mo,LDA_mo)
   allocate ( T(ao_num,mo_num) )
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: T
 
-  call dgemm('N','N', ao_num, mo_num, ao_num,                    &
-      1.d0, A_ao,LDA_ao,                                             &
-      mo_coef, size(mo_coef,1),                                      &
-      0.d0, T, size(T,1))
+  call dgemm('N','N', int(ao_num,4), int(mo_num,4), int(ao_num,4), &
+      1.d0, A_ao,int(LDA_ao,4),                                       &
+      mo_coef, int(size(mo_coef,1),4),                                &
+      0.d0, T, int(size(T,1),4))
 
-  call dgemm('T','N', mo_num, mo_num, ao_num,                &
-      1.d0, mo_coef,size(mo_coef,1),                                 &
-      T, ao_num,                                                     &
-      0.d0, A_mo, size(A_mo,1))
+  call dgemm('T','N', int(mo_num,4), int(mo_num,4), int(ao_num,4),  &
+      1.d0, mo_coef,int(size(mo_coef,1),4),                          &
+      T, int(ao_num,4),                                              &
+      0.d0, A_mo, int(size(A_mo,1),4))
 
-  call restore_symmetry(mo_num,mo_num,A_mo,size(A_mo,1),1.d-15)
+  call restore_symmetry(int(mo_num, size_t),int(mo_num, size_t),A_mo,&
+      int(size(A_mo,1), size_t),1.d-15)
   deallocate(T)
 end
 
 
 subroutine mix_mo_jk(j,k)
+ use sizet
   implicit none
-  integer, intent(in)            :: j,k
-  integer                        :: i,i_plus,i_minus
+  integer(size_t), intent(in)    :: j,k
+  integer(size_t)                :: i,i_plus,i_minus
   BEGIN_DOC
   ! Rotates the j-th |MO| with the k-th |MO| to give two new |MOs| that are
   !
@@ -235,29 +240,30 @@ subroutine mix_mo_jk(j,k)
 end
 
 subroutine ao_ortho_cano_to_ao(A_ao,LDA_ao,A,LDA)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Transform A from the |AO| basis to the orthogonal |AO| basis
   !
   ! $C^{-1}.A_{ao}.C^{\dagger-1}$
   END_DOC
-  integer, intent(in)            :: LDA_ao,LDA
+  integer(size_t), intent(in)    :: LDA_ao,LDA
   double precision, intent(in)   :: A_ao(LDA_ao,*)
   double precision, intent(out)  :: A(LDA,*)
   double precision, allocatable  :: T(:,:)
 
   allocate ( T(ao_num,ao_num) )
 
-  call dgemm('T','N', ao_num, ao_num, ao_num,                        &
+  call dgemm('T','N', int(ao_num,4), int(ao_num,4), int(ao_num,4),   &
       1.d0,                                                          &
-      ao_ortho_canonical_coef_inv, size(ao_ortho_canonical_coef_inv,1),&
-      A_ao,size(A_ao,1),                                             &
-      0.d0, T, size(T,1))
+      ao_ortho_canonical_coef_inv, int(size(ao_ortho_canonical_coef_inv,1),4),&
+      A_ao,int(size(A_ao,1),4),                                      &
+      0.d0, T, int(size(T,1),4))
 
-  call dgemm('N','N', ao_num, ao_num, ao_num, 1.d0,                  &
-      T, size(T,1),                                                  &
-      ao_ortho_canonical_coef_inv,size(ao_ortho_canonical_coef_inv,1),&
-      0.d0, A, size(A,1))
+  call dgemm('N','N', int(ao_num,4), int(ao_num,4), int(ao_num,4), 1.d0, &
+      T, int(size(T,1),4),                                           &
+      ao_ortho_canonical_coef_inv,int(size(ao_ortho_canonical_coef_inv,1),4),&
+      0.d0, A, int(size(A,1),4))
 
   deallocate(T)
 end
@@ -271,26 +277,27 @@ BEGIN_PROVIDER [ double precision, mo_sphe_coef, (ao_sphe_num, mo_num) ]
  double precision, allocatable, dimension (:,:) :: C0, S, tmp
  allocate(C0(ao_sphe_num,mo_num), S(mo_num,mo_num), tmp(mo_num,ao_sphe_num))
 
- call dgemm('T','N',ao_sphe_num,mo_num,ao_num, 1.d0, &
-   ao_cart_to_sphe_coef,ao_num, &
-   mo_coef,size(mo_coef,1), 0.d0, &
-   C0, size(C0,1))
+ call dgemm('T','N',int(ao_sphe_num,4),int(mo_num,4),int(ao_num,4), 1.d0, &
+   ao_cart_to_sphe_coef,int(ao_num,4), &
+   mo_coef,int(size(mo_coef,1),4), 0.d0, &
+   C0, int(size(C0,1),4))
 
  ! C0^T S S^0
- call dgemm('T','N',mo_num,ao_sphe_num,ao_sphe_num, 1.d0, &
-   C0,size(C0,1), &
-   ao_sphe_overlap,size(ao_sphe_overlap,1), 0.d0, &
-   tmp, size(tmp,1))
+ call dgemm('T','N',int(mo_num,4),int(ao_sphe_num,4),int(ao_sphe_num,4), 1.d0, &
+   C0,int(size(C0,1),4), &
+   ao_sphe_overlap,int(size(ao_sphe_overlap,1),4), 0.d0, &
+   tmp, int(size(tmp,1),4))
 
- call dgemm('N','N',mo_num,mo_num,ao_sphe_num, 1.d0, &
-   tmp, size(tmp,1), &
-   C0,size(C0,1), 0.d0, &
-   S, size(S,1))
+ call dgemm('N','N',int(mo_num,4),int(mo_num,4),int(ao_sphe_num,4), 1.d0, &
+   tmp, int(size(tmp,1),4), &
+   C0,int(size(C0,1),4), 0.d0, &
+   S, int(size(S,1),4))
 
- integer :: m
+ integer(size_t) :: m
  m = ao_sphe_num
  mo_sphe_coef = C0
- call ortho_lowdin(S,size(S,1),mo_num,mo_sphe_coef,ao_sphe_num,m,1.d-10)
+ call ortho_lowdin(S,int(size(S,1), size_t),int(mo_num, size_t),mo_sphe_coef, &
+     int(ao_sphe_num, size_t),m,1.d-10)
 
 
  deallocate (tmp, S, C0)

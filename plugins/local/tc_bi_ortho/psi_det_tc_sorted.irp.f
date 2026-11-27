@@ -1,3 +1,4 @@
+use sizet
 use bitmasks
 
 BEGIN_PROVIDER [ double precision, psi_average_norm_contrib_tc, (psi_det_size) ]                                                                
@@ -5,7 +6,8 @@ BEGIN_PROVIDER [ double precision, psi_average_norm_contrib_tc, (psi_det_size) ]
   BEGIN_DOC
   ! Contribution of determinants to the state-averaged density.
   END_DOC
-  integer                        :: i,j,k
+  integer(size_t)                  :: i
+  integer                        :: j,k
   double precision               :: f
     
   psi_average_norm_contrib_tc(:) = 0.d0
@@ -48,14 +50,15 @@ END_PROVIDER
    !
    ! psi_l_coef_sorted_bi_ortho : left  coefficients corresponding to psi_det_sorted_tc
    END_DOC
-   integer                        :: i,j,k
+   integer(size_t)                   :: i
+   integer                        :: j,k
    integer, allocatable           :: iorder(:)
    allocate ( iorder(N_det) )
    do i=1,N_det
      iorder(i) = i
      psi_average_norm_contrib_sorted_tc(i) = -psi_average_norm_contrib_tc(i)
    enddo
-   call dsort(psi_average_norm_contrib_sorted_tc,iorder,N_det)
+   call dsort(psi_average_norm_contrib_sorted_tc,iorder,int(N_det,4))
    do i=1,N_det
      psi_average_norm_contrib_sorted_tc(i) = -psi_average_norm_contrib_sorted_tc(i)
      do j=1,N_int
@@ -102,8 +105,9 @@ END_PROVIDER
    ! function.
    END_DOC
 
-   call sort_dets_by_det_search_key(N_det, psi_det, psi_coef, size(psi_coef,1),       &
-       psi_det_sorted_tc_bit, psi_coef_sorted_tc_bit, N_states)
+   call sort_dets_by_det_search_key(N_det, psi_det, psi_coef, &
+       int(size(psi_coef,1),size_t), psi_det_sorted_tc_bit, &
+       psi_coef_sorted_tc_bit, N_states)
 
 END_PROVIDER
 
@@ -118,13 +122,14 @@ END_PROVIDER
  END_DOC
  integer, allocatable           :: iorder(:)
  double precision, allocatable :: coef(:)
- integer :: i,j
+ integer(size_t) :: i
+ integer         :: j
  allocate ( iorder(N_det) , coef(N_det))
  do i=1,N_det
    coef(i) = -dabs(psi_r_coef_bi_ortho(i,1)/psi_r_coef_bi_ortho(1,1))
    iorder(i) = i
  enddo
- call dsort(coef,iorder,N_det)
+ call dsort(coef,iorder,int(N_det,4))
  do i=1,N_det
    do j=1,N_int
      psi_det_sorted_tc_right(j,1,i) = psi_det(j,1,iorder(i))
@@ -144,13 +149,14 @@ END_PROVIDER
  END_DOC
  integer, allocatable           :: iorder(:)
  double precision, allocatable :: coef(:)
- integer :: i,j
+ integer(size_t) :: i
+ integer         :: j
  allocate ( iorder(N_det) , coef(N_det))
  do i=1,N_det
    coef(i) = -dabs(psi_l_coef_bi_ortho(i,1)/psi_r_coef_bi_ortho(1,1))
    iorder(i) = i
  enddo
- call dsort(coef,iorder,N_det)
+ call dsort(coef,iorder,int(N_det,4))
  do i=1,N_det
    do j=1,N_int
      psi_det_sorted_tc_left(j,1,i) = psi_det(j,1,iorder(i))

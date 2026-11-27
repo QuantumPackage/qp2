@@ -1,3 +1,4 @@
+use sizet
 BEGIN_PROVIDER [ double precision, mo_one_e_integrals,(mo_num,mo_num)]
   implicit none
   integer                        :: i,j,n,l
@@ -11,12 +12,10 @@ BEGIN_PROVIDER [ double precision, mo_one_e_integrals,(mo_num,mo_num)]
         call ezfio_get_mo_one_e_ints_mo_one_e_integrals(mo_one_e_integrals)
   ELSE
       IF (read_ao_one_e_integrals) THEN
-        call ao_to_mo(                                                &
-            ao_one_e_integrals,                                       &
-            size(ao_one_e_integrals,1),                               &
-            mo_one_e_integrals,                                       &
-            size(mo_one_e_integrals,1)                                &
-            )
+        call ao_to_mo(ao_one_e_integrals, &
+                      int(size(ao_one_e_integrals,1),size_t), &
+                      mo_one_e_integrals, &
+                      int(size(mo_one_e_integrals,1),size_t))
       ELSE
         mo_one_e_integrals  = mo_integrals_n_e + mo_kinetic_integrals
       ENDIF
@@ -26,7 +25,8 @@ BEGIN_PROVIDER [ double precision, mo_one_e_integrals,(mo_num,mo_num)]
         call ezfio_set_mo_one_e_ints_mo_one_e_integrals(mo_one_e_integrals)
        print *,  'MO one-e integrals written to disk'
   ENDIF
-  call nullify_small_elements(mo_num,mo_num,mo_one_e_integrals,size(mo_one_e_integrals,1),1.d-15)
+  call nullify_small_elements(int(mo_num, size_t),int(mo_num, size_t), &
+      mo_one_e_integrals,int(size(mo_one_e_integrals,1), size_t),1.d-15)
 
 END_PROVIDER
 

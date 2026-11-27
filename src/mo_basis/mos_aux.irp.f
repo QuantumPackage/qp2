@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -14,7 +15,7 @@ BEGIN_PROVIDER [double precision, mo_coef_aux, (ao_num,mo_num)]
   ! integral evaluation (author's reading, 2026-10-31); introduced
   ! by AbdAmmar (commit 868d5a162, 2023-05-06, "jast 201 added").
   END_DOC
-  integer                        :: i, j
+  integer(size_t)                :: i, j
   logical                        :: exists
   double precision, allocatable  :: buffer(:,:)
 

@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -21,7 +22,7 @@
 
   implicit none
 
-  integer          :: i, j, ipoint, i_1s
+  integer(size_t)  :: i, j, ipoint, i_1s
   double precision :: r(3), int_clb(7), int_erf(7)
   double precision :: c_1s, e_1s, R_1s(3)
   double precision :: tmp_Du_0, tmp_Du_x, tmp_Du_y, tmp_Du_z, tmp_Du_2
@@ -121,7 +122,7 @@ BEGIN_PROVIDER [double precision, Ir2_Mu_gauss_Du, (ao_num, ao_num, n_points_fin
 
   implicit none
 
-  integer                    :: i, j, ipoint, i_1s
+  integer(size_t)                :: i, j, ipoint, i_1s
   double precision           :: r(3)
   double precision           :: coef, beta, B_center(3)
   double precision           :: tmp_Du
@@ -229,7 +230,7 @@ END_PROVIDER
 
   implicit none
 
-  integer          :: i, j, ipoint, i_1s
+  integer(size_t)  :: i, j, ipoint, i_1s
   double precision :: r(3), int_clb(7), int_erf(7)
   double precision :: coef, beta, B_center(3)
   double precision :: tmp_Du2_0, tmp_Du2_x, tmp_Du2_y, tmp_Du2_z, tmp_Du2_2
@@ -350,7 +351,7 @@ BEGIN_PROVIDER [double precision, Ir2_Mu_gauss_Du2, (ao_num, ao_num, n_points_fi
 
   implicit none
 
-  integer                    :: i, j, ipoint, i_1s
+  integer(size_t)                :: i, j, ipoint, i_1s
   double precision           :: r(3)
   double precision           :: coef, beta, B_center(3)
   double precision           :: tmp_Du2
@@ -458,7 +459,8 @@ END_PROVIDER
 
   implicit none
 
-  integer          :: i, j, ipoint, i_1s, i_fit
+  integer(size_t)  :: i, j, ipoint, i_1s
+  integer          :: i_fit
   double precision :: r(3), ints(7)
   double precision :: coef, beta, B_center(3)
   double precision :: tmp_Du2_0, tmp_Du2_x, tmp_Du2_y, tmp_Du2_z, tmp_Du2_2

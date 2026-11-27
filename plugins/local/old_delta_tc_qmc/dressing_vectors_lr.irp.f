@@ -10,15 +10,16 @@ subroutine get_delta_bitc_right(psidet, psicoef, ndet, Nint, delta)
   END_DOC
 
   use bitmasks
+  use sizet
 
   implicit none
 
-  integer,           intent(in)  :: ndet, Nint
+  integer(size_t),   intent(in)  :: ndet, Nint
   double precision,  intent(in)  :: psicoef(ndet)
   integer(bit_kind), intent(in)  :: psidet(Nint,2,ndet)
   double precision, intent(out)  :: delta(ndet)
 
-  integer                        :: i, j
+  integer(size_t)                :: i, j
   double precision               :: h_mono, h_twoe, h_tot
   double precision               :: htc_mono, htc_twoe, htc_three, htc_tot
   double precision               :: delta_mat
@@ -63,15 +64,16 @@ subroutine get_htc_bitc_right(psidet, psicoef, ndet, Nint, delta)
   END_DOC
 
   use bitmasks
+  use sizet
 
   implicit none
 
-  integer,           intent(in)  :: ndet, Nint
+  integer(size_t),   intent(in)  :: ndet, Nint
   double precision,  intent(in)  :: psicoef(ndet)
   integer(bit_kind), intent(in)  :: psidet(Nint,2,ndet)
   double precision, intent(out)  :: delta(ndet)
 
-  integer                        :: i, j
+  integer(size_t)                :: i, j
   double precision               :: htc_mono, htc_twoe, htc_three, htc_tot
 
   print *, ' get_htc_bitc_right ...'
@@ -108,15 +110,16 @@ subroutine get_h_bitc_right(psidet, psicoef, ndet, Nint, delta)
   END_DOC
 
   use bitmasks
+  use sizet
 
   implicit none
 
-  integer,           intent(in)  :: ndet, Nint
+  integer(size_t),   intent(in)  :: ndet, Nint
   double precision,  intent(in)  :: psicoef(ndet)
   integer(bit_kind), intent(in)  :: psidet(Nint,2,ndet)
   double precision, intent(out)  :: delta(ndet)
 
-  integer                        :: i, j
+  integer(size_t)                :: i, j
   double precision               :: h_mono, h_twoe, h_tot
 
   print *, ' get_h_bitc_right ...'

@@ -1,11 +1,14 @@
+use sizet
 
 ! ---
 
 subroutine provide_no_1e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, int2_grad1_u12, noL_1e)
+  use sizet
 
   implicit none
 
-  integer,          intent(in)  :: n_grid, n_mo
+  integer(size_t),  intent(in)  :: n_grid
+  integer,          intent(in)  :: n_mo
   integer,          intent(in)  :: ne_a, ne_b
   double precision, intent(in)  :: wr1(n_grid)
   double precision, intent(in)  :: mos_l_in_r(n_grid,n_mo)
@@ -13,7 +16,9 @@ subroutine provide_no_1e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
   double precision, intent(in)  :: int2_grad1_u12(n_grid,3,n_mo,n_mo)
   double precision, intent(out) :: noL_1e(n_mo,n_mo)
 
-  integer                       :: p, s, i, j, ipoint
+  integer(size_t)              :: ipoint
+  integer                       :: p, s, i, j
+  integer                       :: n_grid4
   double precision              :: t0, t1
   double precision, allocatable :: tmpC(:,:,:,:), tmpD(:,:), tmpE(:,:,:), tmpF(:,:,:)
   double precision, allocatable :: tmpL(:,:,:), tmpR(:,:,:), tmpM(:,:), tmpS(:), tmpO(:), tmpJ(:,:)
@@ -23,6 +28,7 @@ subroutine provide_no_1e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
 
   call wall_time(t0)
 
+  n_grid4 = int(n_grid, 4)
 
   if(ne_a .eq. ne_b) then
 
@@ -149,7 +155,7 @@ subroutine provide_no_1e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     !$OMP END DO
     !$OMP END PARALLEL
 
-    call dgemv( 'T', 4*n_grid, n_mo*n_mo, 2.d0               &
+    call dgemv( 'T', 4*n_grid4, n_mo*n_mo, 2.d0               &
               , tmpC(1,1,1,1), size(tmpC, 1) * size(tmpC, 2) &
               , tmpD(1,1), 1                                 &
               , 0.d0, noL_1e(1,1), 1)
@@ -243,8 +249,8 @@ subroutine provide_no_1e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
 
     deallocate(tmpL, tmpR, tmpJ, tmpS)
 
-    call dgemm( 'T', 'N', n_mo, n_mo, 5*n_grid, 1.d0         &
-              , tmpE(1,1,1), 5*n_grid, tmpF(1,1,1), 5*n_grid &
+    call dgemm( 'T', 'N', n_mo, n_mo, 5*n_grid4, 1.d0         &
+              , tmpE(1,1,1), 5*n_grid4, tmpF(1,1,1), 5*n_grid4 &
               , 1.d0, noL_1e(1,1), n_mo)
    
     deallocate(tmpE, tmpF)
@@ -432,7 +438,7 @@ subroutine provide_no_1e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     !$OMP END DO
     !$OMP END PARALLEL
 
-    call dgemv( 'T', 4*n_grid, n_mo*n_mo, 2.d0               &
+    call dgemv( 'T', 4*n_grid4, n_mo*n_mo, 2.d0               &
               , tmpC(1,1,1,1), size(tmpC, 1) * size(tmpC, 2) &
               , tmpD(1,1), 1                                 &
               , 0.d0, noL_1e(1,1), 1)
@@ -583,8 +589,8 @@ subroutine provide_no_1e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
 
     deallocate(tmpL0, tmpL, tmpR0, tmpR, tmpJ, tmpS)
 
-    call dgemm( 'T', 'N', n_mo, n_mo, 8*n_grid, 1.d0         &
-              , tmpE(1,1,1), 8*n_grid, tmpF(1,1,1), 8*n_grid &
+    call dgemm( 'T', 'N', n_mo, n_mo, 8*n_grid4, 1.d0         &
+              , tmpE(1,1,1), 8*n_grid4, tmpF(1,1,1), 8*n_grid4 &
               , 1.d0, noL_1e(1,1), n_mo)
    
     deallocate(tmpE, tmpF)
@@ -602,11 +608,13 @@ end
 
 subroutine provide_no_1e_tmp(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, int2_grad1_u12, &
                              tmpO, tmpJ, tmpM, tmpS, tmpC, tmpD, tmpL, tmpR, tmpE, tmpF, noL_1e)
+  use sizet
 
 
   implicit none
 
-  integer,          intent(in)  :: n_grid, n_mo
+  integer(size_t),  intent(in)  :: n_grid
+  integer,          intent(in)  :: n_mo
   integer,          intent(in)  :: ne_a, ne_b
   double precision, intent(in)  :: wr1(n_grid)
   double precision, intent(in)  :: mos_l_in_r(n_grid,n_mo)
@@ -619,7 +627,9 @@ subroutine provide_no_1e_tmp(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in
   double precision, intent(out) :: tmpE(n_grid,5,n_mo), tmpF(n_grid,5,n_mo)
   double precision, intent(out) :: noL_1e(n_mo,n_mo)
 
-  integer                       :: p, s, i, j, ipoint
+  integer(size_t)              :: ipoint
+  integer                       :: p, s, i, j
+  integer                       :: n_grid4
   double precision              :: t0, t1
   double precision, allocatable :: tmpM_priv(:,:), tmpS_priv(:), tmpO_priv(:), tmpJ_priv(:,:)
   double precision, allocatable :: tmpL0(:,:,:), tmpR0(:,:,:)
@@ -628,6 +638,7 @@ subroutine provide_no_1e_tmp(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in
 
   call wall_time(t0)
 
+  n_grid4 = int(n_grid, 4)
 
   if(ne_a .eq. ne_b) then
 
@@ -747,7 +758,7 @@ subroutine provide_no_1e_tmp(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in
     !$OMP END DO
     !$OMP END PARALLEL
 
-    call dgemv( 'T', 4*n_grid, n_mo*n_mo, 2.d0               &
+    call dgemv( 'T', 4*n_grid4, n_mo*n_mo, 2.d0               &
               , tmpC(1,1,1,1), size(tmpC, 1) * size(tmpC, 2) &
               , tmpD(1,1), 1                                 &
               , 0.d0, noL_1e(1,1), 1)
@@ -831,8 +842,8 @@ subroutine provide_no_1e_tmp(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in
     !$OMP END DO
     !$OMP END PARALLEL
 
-    call dgemm( 'T', 'N', n_mo, n_mo, 5*n_grid, 1.d0         &
-              , tmpE(1,1,1), 5*n_grid, tmpF(1,1,1), 5*n_grid &
+    call dgemm( 'T', 'N', n_mo, n_mo, 5*n_grid4, 1.d0         &
+              , tmpE(1,1,1), 5*n_grid4, tmpF(1,1,1), 5*n_grid4 &
               , 1.d0, noL_1e(1,1), n_mo)
    
     ! ---
@@ -1011,7 +1022,7 @@ subroutine provide_no_1e_tmp(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in
     !$OMP END DO
     !$OMP END PARALLEL
 
-    call dgemv( 'T', 4*n_grid, n_mo*n_mo, 2.d0               &
+    call dgemv( 'T', 4*n_grid4, n_mo*n_mo, 2.d0               &
               , tmpC(1,1,1,1), size(tmpC, 1) * size(tmpC, 2) &
               , tmpD(1,1), 1                                 &
               , 0.d0, noL_1e(1,1), 1)
@@ -1160,8 +1171,8 @@ subroutine provide_no_1e_tmp(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in
 
     deallocate(tmpL0, tmpR0)
 
-    call dgemm( 'T', 'N', n_mo, n_mo, 8*n_grid, 1.d0               &
-              , tmpE_os(1,1,1), 8*n_grid, tmpF_os(1,1,1), 8*n_grid &
+    call dgemm( 'T', 'N', n_mo, n_mo, 8*n_grid4, 1.d0               &
+              , tmpE_os(1,1,1), 8*n_grid4, tmpF_os(1,1,1), 8*n_grid4 &
               , 1.d0, noL_1e(1,1), n_mo)
    
     deallocate(tmpE_os, tmpF_os)

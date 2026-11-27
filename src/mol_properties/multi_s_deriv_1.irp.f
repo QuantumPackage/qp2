@@ -1,3 +1,5 @@
+use sizet
+
  BEGIN_PROVIDER [double precision, multi_s_deriv_1, (N_states, N_states)]
 &BEGIN_PROVIDER [double precision, multi_s_x_deriv_1, (N_states, N_states)]
 &BEGIN_PROVIDER [double precision, multi_s_y_deriv_1, (N_states, N_states)]
@@ -16,7 +18,7 @@
   END_DOC
 
   integer          :: istate,jstate ! States
-  integer          :: i,j           ! general spatial MOs
+  integer(size_t)  :: i,j           ! general spatial MOs
   double precision :: nuclei_part_x, nuclei_part_y, nuclei_part_z
  
   multi_s_x_deriv_1 = 0.d0

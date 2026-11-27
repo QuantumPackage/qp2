@@ -1,4 +1,6 @@
 
+use sizet
+
 subroutine $subroutine_diexc(key_in, key_prev, hole_1,particl_1, hole_2, particl_2, fock_diag_tmp, i_generator, iproc_in $parameters )
   implicit none
   BEGIN_DOC
@@ -12,9 +14,11 @@ subroutine $subroutine_diexc(key_in, key_prev, hole_1,particl_1, hole_2, particl
   integer(bit_kind), intent(in)         :: key_in(N_int, 2), hole_1(N_int, 2), hole_2(N_int, 2)
   integer(bit_kind), intent(in)         :: particl_1(N_int, 2), particl_2(N_int, 2)
   integer(bit_kind)                     :: p1_mask(N_int, 2), p2_mask(N_int, 2), tmp
-  integer,intent(in)                    :: i_generator,iproc_in
+  integer(size_t),intent(in)            :: i_generator
+  integer,intent(in)                    :: iproc_in
   integer                               :: status(N_int*bit_kind_size, 2)
-  integer                               :: highest, p1,p2,sp,ni,i,mi,nt,ns,k
+  integer(size_t)                       :: highest, p1,p2,ni,mi,k
+  integer                               :: sp,i,nt,ns
   double precision, intent(in)          :: fock_diag_tmp(2,mo_num+1)
   integer(bit_kind), intent(in)         :: key_prev(N_int, 2, *)
   PROVIDE N_int
@@ -92,9 +96,12 @@ subroutine $subroutine_diexcP(key_in, fs1, fh1, particl_1, fs2, fh2, particl_2, 
   integer(bit_kind), intent(in)         :: key_in(N_int, 2), particl_1(N_int, 2), particl_2(N_int, 2)
   double precision, intent(in)          :: fock_diag_tmp(2,mo_num+1)
   integer(bit_kind)                     :: p1_mask(N_int, 2), p2_mask(N_int, 2), key_mask(N_int, 2)
-  integer,intent(in)                    :: fs1,fs2,i_generator,iproc_in, fh1,fh2
+  integer(size_t),intent(in)            :: i_generator,fh1,fh2
+  integer,intent(in)                    :: fs1,fs2,iproc_in
   integer(bit_kind)                     :: miniList(N_int, 2, N_det)
-  integer                               :: n_minilist, n_alpha, n_beta, deg(2), i, ni, k
+  integer                               :: n_minilist, n_alpha, n_beta, deg(2)
+  integer                               :: i, ni
+  integer(size_t)                       :: k
   $declarations
   integer(bit_kind), parameter :: one = 1_bit_kind
 
@@ -105,16 +112,20 @@ subroutine $subroutine_diexcP(key_in, fs1, fh1, particl_1, fs2, fh2, particl_2, 
     p2_mask(k,2) = 0_bit_kind
   enddo
   ! Decompose the 1-based orbital index (fh1, fh2) into word and bit position
-  p1_mask(shiftr(fh1-1,bit_kind_shift) + 1, fs1) = shiftl(one,iand(fh1-1,bit_kind_size-1))
-  p2_mask(shiftr(fh2-1,bit_kind_shift) + 1, fs2) = shiftl(one,iand(fh2-1,bit_kind_size-1))
+  p1_mask(shiftr(fh1-1,bit_kind_shift) + 1, fs1) = &
+      shiftl(one,iand(fh1-1,int(bit_kind_size-1, size_t)))
+  p2_mask(shiftr(fh2-1,bit_kind_shift) + 1, fs2) = &
+      shiftl(one,iand(fh2-1,int(bit_kind_size-1, size_t)))
 
   do k=1,N_int
     key_mask(k,1) = key_in(k,1)
     key_mask(k,2) = key_in(k,2)
   enddo
 
-  key_mask(shiftr(fh1-1,bit_kind_shift) + 1, fs1) -= shiftl(one,iand(fh1-1,bit_kind_size-1))
-  key_mask(shiftr(fh2-1,bit_kind_shift) + 1, fs2) -= shiftl(one,iand(fh2-1,bit_kind_size-1))
+  key_mask(shiftr(fh1-1,bit_kind_shift) + 1, fs1) -= &
+      shiftl(one,iand(fh1-1,int(bit_kind_size-1, size_t)))
+  key_mask(shiftr(fh2-1,bit_kind_shift) + 1, fs2) -= &
+      shiftl(one,iand(fh2-1,int(bit_kind_size-1, size_t)))
 
 
   call $subroutine_diexcOrg(key_in, key_mask, p1_mask, particl_1, p2_mask, particl_2, fock_diag_tmp, i_generator, iproc_in $parameters )
@@ -132,7 +143,7 @@ subroutine $subroutine_diexcOrg(key_in,key_mask,hole_1,particl_1,hole_2, particl
   END_DOC
   integer,parameter              :: size_max = $size_max
   $declarations
-  integer          ,intent(in)   :: i_generator
+  integer(size_t)  ,intent(in)   :: i_generator
   integer(bit_kind),intent(in)   :: key_in(N_int,2), key_mask(N_int, 2)
   integer(bit_kind),allocatable  :: keys_out(:,:,:)
   integer(bit_kind), intent(in)  :: hole_1(N_int,2), particl_1(N_int,2)
@@ -143,17 +154,19 @@ subroutine $subroutine_diexcOrg(key_in,key_mask,hole_1,particl_1,hole_2, particl
   integer(bit_kind), allocatable :: key(:,:),hole(:,:), particle(:,:)
   integer(bit_kind), allocatable :: hole_tmp(:,:), particle_tmp(:,:)
   integer(bit_kind), allocatable :: key_union_hole_part(:)
-  integer                        :: ii,i,jj,j,k,ispin,l
-  integer, allocatable           :: occ_particle(:,:), occ_hole(:,:)
-  integer, allocatable           :: occ_particle_tmp(:,:), occ_hole_tmp(:,:)
-  integer                        :: kk,pp,other_spin,key_idx
+  integer(size_t)                :: j,k
+  integer                        :: ii,i,jj,ispin,l
+  integer(size_t), allocatable   :: occ_particle(:,:), occ_hole(:,:)
+  integer(size_t), allocatable   :: occ_particle_tmp(:,:), occ_hole_tmp(:,:)
+  integer(size_t)                :: key_idx
+  integer                        :: kk,pp,other_spin
   integer                        :: N_elec_in_key_hole_1(2),N_elec_in_key_part_1(2)
   integer                        :: N_elec_in_key_hole_2(2),N_elec_in_key_part_2(2)
 
   double precision               :: mo_two_e_integral
   logical                        :: is_a_two_holes_two_particles
-  integer, allocatable           :: ia_ja_pairs(:,:,:)
-  integer, allocatable           :: ib_jb_pairs(:,:)
+  integer(size_t), allocatable   :: ia_ja_pairs(:,:,:)
+  integer(size_t), allocatable   :: ib_jb_pairs(:,:)
   double precision               :: diag_H_mat_elem
   integer                        :: iproc
   integer                        :: jtest_vvvv
@@ -219,7 +232,8 @@ subroutine $subroutine_diexcOrg(key_in,key_mask,hole_1,particl_1,hole_2, particl
 
   key_idx = 0
 
-  integer                        :: i_a,j_a,i_b,j_b,k_a,l_a,k_b,l_b
+  integer(size_t)                :: i_a,j_a,i_b,j_b,k_a,k_b
+  integer                        :: l_a,l_b
   integer(bit_kind)              :: test(N_int,2)
   double precision               :: accu
   logical, allocatable           :: array_pairs(:,:)
@@ -397,7 +411,7 @@ subroutine $subroutine_monoexc(key_in, hole_1,particl_1,fock_diag_tmp,i_generato
   END_DOC
   integer,parameter              :: size_max = $size_max
   $declarations
-  integer          ,intent(in)   :: i_generator
+  integer(size_t)  ,intent(in)   :: i_generator
   integer(bit_kind),intent(in)   :: key_in(N_int,2)
   integer(bit_kind),intent(in)   :: hole_1(N_int,2), particl_1(N_int,2)
   integer, intent(in)            :: iproc_in
@@ -407,17 +421,19 @@ subroutine $subroutine_monoexc(key_in, hole_1,particl_1,fock_diag_tmp,i_generato
   integer(bit_kind),allocatable  :: key(:,:),hole(:,:), particle(:,:)
   integer(bit_kind),allocatable  :: hole_tmp(:,:), particle_tmp(:,:)
   integer(bit_kind),allocatable  :: hole_2(:,:), particl_2(:,:)
-  integer                        :: ii,i,jj,j,k,ispin,l
-  integer,allocatable            :: occ_particle(:,:), occ_hole(:,:)
-  integer,allocatable            :: occ_particle_tmp(:,:), occ_hole_tmp(:,:)
-  integer,allocatable            :: ib_jb_pairs(:,:)
-  integer                        :: kk,pp,other_spin,key_idx
+  integer(size_t)                :: j,k
+  integer                        :: ii,i,jj,ispin,l
+  integer(size_t),allocatable    :: occ_particle(:,:), occ_hole(:,:)
+  integer(size_t),allocatable    :: occ_particle_tmp(:,:), occ_hole_tmp(:,:)
+  integer(size_t),allocatable    :: ib_jb_pairs(:,:)
+  integer(size_t)                :: key_idx
+  integer                        :: kk,pp,other_spin
   integer                        :: N_elec_in_key_hole_1(2),N_elec_in_key_part_1(2)
   integer                        :: N_elec_in_key_hole_2(2),N_elec_in_key_part_2(2)
   logical                        :: is_a_two_holes_two_particles
   integer(bit_kind), allocatable :: key_union_hole_part(:)
 
-  integer, allocatable           :: ia_ja_pairs(:,:,:)
+  integer(size_t), allocatable   :: ia_ja_pairs(:,:,:)
   logical, allocatable           :: array_pairs(:,:)
   double precision               :: diag_H_mat_elem
   integer                        :: iproc
@@ -483,7 +499,8 @@ subroutine $subroutine_monoexc(key_in, hole_1,particl_1,fock_diag_tmp,i_generato
 
   key_idx = 0
 
-  integer                        :: i_a,j_a,i_b,j_b,k_a,l_a,k_b,l_b
+  integer(size_t)                :: i_a,j_a,i_b,j_b,k_a,k_b
+  integer                        :: l_a,l_b
   integer(bit_kind)              :: test(N_int,2)
   double precision               :: accu
   accu = 0.d0

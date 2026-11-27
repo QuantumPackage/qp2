@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -14,7 +15,7 @@
   END_DOC
 
   implicit none
-  integer                       :: i, j, k
+  integer(size_t)                 :: i, j, k
   double precision              :: thr_d, thr_nd, thr_deg, accu
   double precision              :: accu_d, accu_nd
   double precision, allocatable :: dm_tmp(:,:), fock_diag(:)
@@ -101,7 +102,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [ double precision, fock_diag_sorted_v_natorb, (mo_num)]
 
   implicit none
-  integer                       :: i,j,k
+  integer(size_t)                 :: i,j,k
   integer,          allocatable :: iorder(:)
   double precision, allocatable :: fock_diag(:)
 
@@ -158,7 +159,8 @@ END_PROVIDER
   END_DOC
  
   implicit none
-  integer                       :: i, j, k, q, p
+  integer(size_t)                 :: i, j
+  integer                       :: k, q, p
   double precision              :: accu, accu_d
   double precision, allocatable :: tmp(:,:)
  

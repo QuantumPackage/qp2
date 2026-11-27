@@ -1,10 +1,13 @@
 
 use bitmasks
+use sizet
 
 subroutine modify_bitmasks_for_hole(i_hole)
+ use sizet
  implicit none
- integer, intent(in) :: i_hole
- integer :: i,j,k,l,m
+ integer(size_t), intent(in) :: i_hole
+ integer(size_t) :: j,k
+ integer :: i,l,m
  integer :: ispin
  BEGIN_DOC
 ! modify the generators_bitmask in order that one can only excite
@@ -33,9 +36,11 @@ subroutine modify_bitmasks_for_hole(i_hole)
 end
 
 subroutine modify_bitmasks_for_hole_in_out(i_hole)
+ use sizet
  implicit none
- integer, intent(in) :: i_hole
- integer :: i,j,k,l,m
+ integer(size_t), intent(in) :: i_hole
+ integer(size_t) :: j,k
+ integer :: i,l,m
  integer :: ispin
  BEGIN_DOC
 ! modify the generators_bitmask in order that one can only excite
@@ -54,9 +59,11 @@ subroutine modify_bitmasks_for_hole_in_out(i_hole)
 end
 
 subroutine modify_bitmasks_for_particl(i_part)
+ use sizet
  implicit none
- integer, intent(in) :: i_part
- integer :: i,j,k,l,m
+ integer(size_t), intent(in) :: i_part
+ integer(size_t) :: j,k
+ integer :: i,l,m
  integer :: ispin
  BEGIN_DOC
 ! modify the generators_bitmask in order that one can only excite
@@ -86,9 +93,11 @@ end
 
 
 subroutine set_bitmask_particl_as_input(input_bitmask)
+ use sizet
  implicit none
  integer(bit_kind), intent(in) :: input_bitmask(N_int,2)
- integer :: i,j,k,l,m
+ integer(size_t) :: j
+ integer :: i,k,l,m
  integer :: ispin
  BEGIN_DOC
 ! set the generators_bitmask for the particles
@@ -109,9 +118,11 @@ end
 
 
 subroutine set_bitmask_hole_as_input(input_bitmask)
+ use sizet
  implicit none
  integer(bit_kind), intent(in) :: input_bitmask(N_int,2)
- integer :: i,j,k,l,m
+ integer(size_t) :: j
+ integer :: i,k,l,m
  integer :: ispin
  BEGIN_DOC
 ! set the generators_bitmask for the holes
@@ -132,8 +143,10 @@ end
 
 
 subroutine print_generators_bitmasks_holes
+ use sizet
  implicit none
- integer :: i,j,k,l
+ integer(size_t) :: j
+ integer :: i,k,l
  integer(bit_kind),allocatable :: key_tmp(:,:)
  BEGIN_DOC
  ! For each of the 3 hole bitmasks (index_holes_bitmask), print the
@@ -161,8 +174,10 @@ subroutine print_generators_bitmasks_holes
 end
 
 subroutine print_generators_bitmasks_particles
+ use sizet
  implicit none
- integer :: i,j,k,l
+ integer(size_t) :: j
+ integer :: i,k,l
  integer(bit_kind),allocatable :: key_tmp(:,:)
  BEGIN_DOC
  ! For each of the 3 particle bitmasks (index_particl_bitmask), print

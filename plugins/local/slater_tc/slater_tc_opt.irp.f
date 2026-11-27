@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -44,6 +45,7 @@ end
 ! ---
 
 subroutine htilde_mu_mat_opt_bi_ortho_tot(key_j, key_i, Nint, htot)
+  use sizet
 
   implicit none
 
@@ -59,7 +61,7 @@ subroutine htilde_mu_mat_opt_bi_ortho_tot(key_j, key_i, Nint, htot)
   END_DOC
 
   use bitmasks
-  integer,           intent(in) :: Nint
+  integer(size_t),  intent(in) :: Nint
   integer(bit_kind), intent(in) :: key_i(Nint,2), key_j(Nint,2)
   double precision, intent(out) :: htot
   double precision              :: hmono, htwoe, hthree
@@ -71,6 +73,7 @@ end
 ! ---
 
 subroutine htilde_mu_mat_opt_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, htot)
+  use sizet
 
   BEGIN_DOC
   !
@@ -86,7 +89,7 @@ subroutine htilde_mu_mat_opt_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, 
   use bitmasks
 
   implicit none
-  integer,           intent(in) :: Nint
+  integer(size_t),  intent(in) :: Nint
   integer(bit_kind), intent(in) :: key_i(Nint,2), key_j(Nint,2)
   double precision, intent(out) :: hmono, htwoe, hthree, htot
 
@@ -138,6 +141,7 @@ end
 ! ---
 
 subroutine htilde_mu_mat_opt_bi_ortho_no_3e(key_j, key_i, Nint, htot)
+  use sizet
 
   BEGIN_DOC
   !
@@ -153,7 +157,7 @@ subroutine htilde_mu_mat_opt_bi_ortho_no_3e(key_j, key_i, Nint, htot)
   use bitmasks
 
   implicit none
-  integer,           intent(in) :: Nint
+  integer(size_t),  intent(in) :: Nint
   integer(bit_kind), intent(in) :: key_i(Nint,2), key_j(Nint,2)
   double precision, intent(out) :: htot
   integer                       :: degree
@@ -180,6 +184,7 @@ end
 ! ---
 
 subroutine htilde_mu_mat_opt_bi_ortho_no_3e_both(key_j, key_i, Nint, hji,hij)
+  use sizet
 
   BEGIN_DOC
   !
@@ -195,7 +200,7 @@ subroutine htilde_mu_mat_opt_bi_ortho_no_3e_both(key_j, key_i, Nint, hji,hij)
   use bitmasks
 
   implicit none
-  integer,           intent(in) :: Nint
+  integer(size_t),  intent(in) :: Nint
   integer(bit_kind), intent(in) :: key_i(Nint,2), key_j(Nint,2)
   double precision, intent(out) :: hji,hij
   integer                       :: degree

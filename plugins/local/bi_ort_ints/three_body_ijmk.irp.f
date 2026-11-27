@@ -1,4 +1,6 @@
 
+use sizet
+
 ! ---
 
  BEGIN_PROVIDER [ double precision, three_e_4_idx_direct_bi_ort , (mo_num, mo_num, mo_num, mo_num)]
@@ -25,7 +27,9 @@
   END_DOC
 
   implicit none
-  integer                       :: ipoint, i, j, k, m, n
+  integer                       :: i, j, k, m, n
+  integer(size_t)               :: ipoint
+  integer                       :: n_points4
   double precision              :: wall1, wall0
   double precision              :: tmp_loc_1, tmp_loc_2
   double precision, allocatable :: tmp1(:,:,:), tmp2(:,:,:)
@@ -37,6 +41,7 @@
 
   provide mos_r_in_r_array_transp mos_l_in_r_array_transp
 
+  n_points4 = int(n_points_final_grid, 4)
 
   ! to reduce the number of operations
   allocate(tmp_aux_1(n_points_final_grid,4,mo_num))
@@ -109,8 +114,8 @@
         enddo
       enddo
 
-      call dgemm( 'T', 'N', mo_num, mo_num, 4*n_points_final_grid, 1.d0                       &
-                , tmp_aux_1(1,1,1), 4*n_points_final_grid, tmp1(1,1,1), 4*n_points_final_grid &
+      call dgemm( 'T', 'N', mo_num, mo_num, 4*n_points4, 1.d0                  &
+                , tmp_aux_1(1,1,1), 4*n_points4, tmp1(1,1,1), 4*n_points4     &
                 , 0.d0, tmp_2d(1,1), mo_num)
 
       do j = 1, mo_num
@@ -143,8 +148,8 @@
 
       ! ---
 
-      call dgemm( 'T', 'N', mo_num, mo_num, 4*n_points_final_grid, 1.d0                       &
-                , tmp1(1,1,1), 4*n_points_final_grid, tmp_aux_1(1,1,1), 4*n_points_final_grid &
+      call dgemm( 'T', 'N', mo_num, mo_num, 4*n_points4, 1.d0                  &
+                , tmp1(1,1,1), 4*n_points4, tmp_aux_1(1,1,1), 4*n_points4     &
                 , 0.d0, tmp_2d(1,1), mo_num)
 
       do j = 1, mo_num
@@ -155,8 +160,8 @@
 
       ! ---
 
-      call dgemm( 'T', 'N', mo_num, mo_num, 4*n_points_final_grid, 1.d0                  &
-                , tmp1(1,1,1), 4*n_points_final_grid, tmp2(1,1,1), 4*n_points_final_grid &
+      call dgemm( 'T', 'N', mo_num, mo_num, 4*n_points4, 1.d0                  &
+                , tmp1(1,1,1), 4*n_points4, tmp2(1,1,1), 4*n_points4          &
                 , 0.d0, tmp_2d(1,1), mo_num)
 
       do j = 1, mo_num
@@ -193,8 +198,8 @@
         enddo
       enddo
 
-      call dgemm( 'T', 'N', mo_num, mo_num, 4*n_points_final_grid, 1.d0                  &
-                , tmp1(1,1,1), 4*n_points_final_grid, tmp2(1,1,1), 4*n_points_final_grid &
+      call dgemm( 'T', 'N', mo_num, mo_num, 4*n_points4, 1.d0                  &
+                , tmp1(1,1,1), 4*n_points4, tmp2(1,1,1), 4*n_points4          &
                 , 0.d0, tmp_2d(1,1), mo_num)
 
       do i = 1, mo_num

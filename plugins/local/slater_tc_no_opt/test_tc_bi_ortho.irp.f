@@ -45,18 +45,19 @@ subroutine test_tc_bi_ortho
 end
 
 subroutine test_h_u0
+ use sizet
  implicit none
  double precision, allocatable :: v_0_ref(:),v_0_new(:),u_0(:), v_0_ref_dagger(:)
  double precision :: accu 
  logical :: do_right
- integer :: i
+ integer(size_t) :: i
  allocate(v_0_new(N_det),v_0_ref(N_det),u_0(N_det),v_0_ref_dagger(N_det))
  do_right = .True.
  do i = 1, N_det
   u_0(i) = psi_r_coef_bi_ortho(i,1)
  enddo
- call H_tc_u_0_nstates_openmp(v_0_new,u_0,N_states,N_det, do_right)
- call htc_bi_ortho_calc_tdav_slow (v_0_ref,u_0,N_states,N_det)
+ call H_tc_u_0_nstates_openmp(v_0_new,u_0,N_states,int(N_det,size_t), do_right)
+ call htc_bi_ortho_calc_tdav_slow (v_0_ref,u_0,N_states,int(N_det,size_t))
  print*,'difference right '
  accu = 0.d0
  do i = 1, N_det
@@ -66,8 +67,9 @@ subroutine test_h_u0
  print*,'accu = ',accu
  do_right = .False.
  v_0_new = 0.d0
- call H_tc_u_0_nstates_openmp(v_0_new,u_0,N_states,N_det, do_right)
- call htcdag_bi_ortho_calc_tdav_slow(v_0_ref_dagger,u_0,N_states,N_det, do_right)
+ call H_tc_u_0_nstates_openmp(v_0_new,u_0,N_states,int(N_det,size_t), do_right)
+ call htcdag_bi_ortho_calc_tdav_slow(v_0_ref_dagger,u_0, &
+      N_states,int(N_det,size_t), do_right)
  print*,'difference left'
  accu = 0.d0
  do i = 1, N_det
@@ -78,8 +80,10 @@ subroutine test_h_u0
 end
 
 subroutine test_slater_tc_opt
+ use sizet
  implicit none
- integer :: i,j,degree
+ integer(size_t) :: i,j
+ integer :: degree
  double precision :: hmono, htwoe, htot, hthree 
  double precision :: hnewmono, hnewtwoe, hnewthree, hnewtot
  double precision :: accu_d ,i_count, accu
@@ -110,8 +114,9 @@ subroutine test_slater_tc_opt
 end
 
 subroutine timing_tot
+ use sizet
  implicit none
- integer :: i,j
+ integer(size_t) :: i,j
  double precision :: wall0, wall1
  double precision, allocatable :: mat_old(:,:),mat_new(:,:)
  double precision :: hmono, htwoe, hthree, htot, i_count
@@ -159,8 +164,9 @@ subroutine timing_tot
 end
 
 subroutine timing_diag
+ use sizet
  implicit none
- integer :: i,j
+ integer(size_t) :: i,j
  double precision :: wall0, wall1
  double precision, allocatable :: mat_old(:,:),mat_new(:,:)
  double precision :: hmono, htwoe, hthree, htot, i_count
@@ -193,8 +199,9 @@ subroutine timing_diag
 end
 
 subroutine timing_single
+ use sizet
  implicit none
- integer :: i,j
+ integer(size_t) :: i,j
  double precision :: wall0, wall1,accu
  double precision, allocatable :: mat_old(:,:),mat_new(:,:)
  double precision :: hmono, htwoe, hthree, htot, i_count
@@ -235,8 +242,9 @@ subroutine timing_single
 end
 
 subroutine timing_double
+ use sizet
  implicit none
- integer :: i,j
+ integer(size_t) :: i,j
  double precision :: wall0, wall1,accu
  double precision, allocatable :: mat_old(:,:),mat_new(:,:)
  double precision :: hmono, htwoe, hthree, htot, i_count
@@ -281,8 +289,9 @@ end
 
 subroutine test_no_v0()
 
+  use sizet
   implicit none
-  integer          :: i, j, k, l
+  integer(size_t)   :: i, j, k, l
   double precision :: accu, contrib, new, ref, thr, norm
 
   print*, ' test_no_v0 ...'
@@ -327,8 +336,9 @@ end
 
 subroutine test_no()
 
+  use sizet
   implicit none
-  integer          :: i, j, k, l
+  integer(size_t)   :: i, j, k, l
   double precision :: accu, contrib, new, ref, thr, norm
 
   print*, ' test_no ...'
@@ -372,8 +382,9 @@ end
 
 subroutine test_no_aba()
 
+  use sizet
   implicit none
-  integer          :: i, j, k, l
+  integer(size_t)   :: i, j, k, l
   double precision :: accu, contrib, new, ref, thr, norm
 
   print*, ' testing no_aba_contraction ...'
@@ -417,8 +428,9 @@ end
 
 subroutine test_no_aab()
 
+  use sizet
   implicit none
-  integer          :: i, j, k, l
+  integer(size_t)   :: i, j, k, l
   double precision :: accu, contrib, new, ref, thr, norm
 
   print*, ' testing no_aab_contraction ...'
@@ -461,8 +473,9 @@ end
 
 subroutine test_no_aaa()
 
+  use sizet
   implicit none
-  integer          :: i, j, k, l
+  integer(size_t)   :: i, j, k, l
   double precision :: accu, contrib, new, ref, thr, norm
 
   print*, ' testing no_aaa_contraction ...'
@@ -534,8 +547,9 @@ end
 
 subroutine test_noL_1e()
 
+  use sizet
   implicit none
-  integer          :: i, j
+  integer(size_t)   :: i, j
   double precision :: accu, contrib, new, ref, thr, norm
 
   print*, ' testing noL_1e ...'
@@ -575,8 +589,9 @@ end
 
 subroutine test_noL_2e_v0()
 
+  use sizet
   implicit none
-  integer          :: i, j, k, l
+  integer(size_t)   :: i, j, k, l
   double precision :: accu, contrib, new, ref, thr, norm
 
   print*, ' testing noL_2e_v0 ...'
@@ -621,8 +636,9 @@ end
 
 subroutine test_noL_2e()
 
+  use sizet
   implicit none
-  integer          :: i, j, k, l
+  integer(size_t)   :: i, j, k, l
   double precision :: accu, contrib, new, ref, thr, norm
 
   print*, ' testing noL_2e ...'

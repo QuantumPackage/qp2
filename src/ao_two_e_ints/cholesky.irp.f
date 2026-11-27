@@ -1,14 +1,17 @@
+use sizet
 use gpu
 
 double precision function get_ao_integ_chol(i,j,k,l)
+ use sizet
  implicit none
   BEGIN_DOC
   !  CHOLESKY representation of the integral of the AO basis <ik|jl> or (ij|kl)
   !     i(r1) j(r1) 1/r12 k(r2) l(r2)
   END_DOC
- integer, intent(in) :: i,j,k,l
+ integer(size_t), intent(in) :: i,j,k,l
  double precision, external :: ddot
- get_ao_integ_chol = ddot(cholesky_ao_num, cholesky_ao_transp(1,i,j), 1, cholesky_ao_transp(1,k,l), 1)
+ get_ao_integ_chol = ddot(int(cholesky_ao_num,4), &
+    cholesky_ao_transp(1,i,j), 1, cholesky_ao_transp(1,k,l), 1)
 
 end
 
@@ -17,7 +20,7 @@ BEGIN_PROVIDER [ double precision, cholesky_ao_transp, (cholesky_ao_num, ao_num,
  BEGIN_DOC
 ! Transposed of the Cholesky vectors in AO basis set
  END_DOC
- integer :: i,j,k
+ integer(size_t) :: i,j,k
  do j=1,ao_num
   do i=1,ao_num
    do k=1,cholesky_ao_num
@@ -28,7 +31,7 @@ BEGIN_PROVIDER [ double precision, cholesky_ao_transp, (cholesky_ao_num, ao_num,
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ integer, cholesky_ao_num ]
+ BEGIN_PROVIDER [ integer(size_t), cholesky_ao_num ]
 &BEGIN_PROVIDER [ double precision, cholesky_ao, (ao_num, ao_num, 1) ]
    use mmap_module
    implicit none
@@ -46,20 +49,22 @@ END_PROVIDER
    END_DOC
 
    integer*8                      :: ndim8
-   integer                        :: rank
+   integer(size_t)                :: rank
+   integer                        :: rank_io
    double precision               :: tau, tau2
    double precision, pointer      :: L(:,:)
 
    double precision               :: s
 
    double precision, allocatable  :: D(:), Ltmp_p(:,:), Ltmp_q(:,:), D_sorted(:), Delta_col(:), Delta(:,:)
-   integer, allocatable           :: addr1(:), addr2(:)
+   integer(size_t), allocatable   :: addr1(:), addr2(:)
    integer*8, allocatable         :: Lset(:), Dset(:)
    logical, allocatable           :: computed(:)
 
-   integer                        :: i,j,k,m,p,q, dj, p2, q2, ii, jj
+   integer(size_t)                :: i,j,k,m,p,q, dj, ii
+   integer                        :: p2, q2, jj
    integer*8                      :: i8, j8, p8, qj8, rank_max, np8
-   integer                        :: N, np, nq
+   integer(size_t)                :: N, np, nq
    logical                        :: rank_max_reached
 
    double precision               :: Dmax, Dmin, Qmax, f
@@ -68,7 +73,7 @@ END_PROVIDER
 
    double precision, external     :: ao_two_e_integral
    double precision, external     :: ao_two_e_integral_cgtos_prim
-   integer                        :: block_size, iblock
+   integer(size_t)                :: block_size, iblock
 
    double precision               :: mem, mem0
    double precision, external     :: memory_of_double, memory_of_int
@@ -78,7 +83,7 @@ END_PROVIDER
    integer                        :: iunit, ierr
    logical :: do_gpu
 
-   ndim8 = ao_num*ao_num*1_8+1
+   ndim8 = int(ao_num,size_t)*int(ao_num,size_t)+1
    double precision :: wall0,wall1
 
    type(mmap_type) :: map
@@ -94,7 +99,8 @@ END_PROVIDER
    if (read_ao_cholesky) then
      print *,  'Reading Cholesky AO vectors from disk...'
      iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_ao', 'R')
-     read(iunit) rank
+     read(iunit) rank_io
+     rank = int(rank_io, size_t)
      allocate(cholesky_ao(ao_num,ao_num,rank), stat=ierr)
      read(iunit) cholesky_ao
      close(iunit)
@@ -103,7 +109,8 @@ END_PROVIDER
    else
 
      if (do_direct_integrals) then
-       if (ao_two_e_integral(1,1,1,1) < huge(1.d0)) then
+       if (ao_two_e_integral(1_size_t,1_size_t,1_size_t,1_size_t) &
+           < huge(1.d0)) then
          ! Trigger providers inside ao_two_e_integral
          continue
        endif
@@ -183,7 +190,7 @@ END_PROVIDER
        endif
      enddo
      if (np8 > ndim8) stop 'np>ndim8'
-     np = int(np8,4)
+     np = int(np8,size_t)
      if (np <= 0) stop 'np<=0'
 
      rank_max = np
@@ -306,38 +313,40 @@ END_PROVIDER
 
        if (do_gpu) then
            type(gpu_double2) :: Ltmp_p_d, Ltmp_q_d, Delta_d
-           call gpu_allocate(Ltmp_p_d, np, block_size)
+           call gpu_allocate(Ltmp_p_d, int(np,4), int(block_size,4))
            call gpu_upload(Ltmp_p, Ltmp_p_d)
 
-           call gpu_allocate(Ltmp_q_d, nq, block_size)
+           call gpu_allocate(Ltmp_q_d, int(nq,4), int(block_size,4))
            call gpu_upload(Ltmp_q, Ltmp_q_d)
 
-           call gpu_allocate(Delta_d, np, nq)
+           call gpu_allocate(Delta_d, int(np,4), int(nq,4))
        endif
 
        if (N>0) then
 
          if (do_gpu) then
 
-           call gpu_dgemm(blas_handle, 'N', 'T', np, nq, N, -1.d0, &
-                  Ltmp_p_d%f(1,1), np, &
-                  Ltmp_q_d%f(1,1), nq, &
-                  0.d0, Delta_d%f(1,1), np)
+           call gpu_dgemm(blas_handle, 'N', 'T', int(np,4), int(nq,4), &
+                  int(N,4), -1.d0, &
+                  Ltmp_p_d%f(1,1), int(np,4), &
+                  Ltmp_q_d%f(1,1), int(nq,4), &
+                  0.d0, Delta_d%f(1,1), int(np,4))
 
          else
 
-           call dgemm('N', 'T', np, nq, N, -1.d0,                       &
-                  Ltmp_p(1,1), np, Ltmp_q(1,1), nq, 0.d0, Delta, np)
+           call dgemm('N', 'T', int(np,4), int(nq,4), int(N,4), -1.d0, &
+                  Ltmp_p(1,1), int(np,4), Ltmp_q(1,1), int(nq,4), &
+                  0.d0, Delta, int(np,4))
 
          endif
 
        else
 
          if (do_gpu) then
-           call gpu_dgeam(blas_handle, 'N', 'N', np, nq,  &
-               0.d0, Delta_d%f(1,1), np, &
-               0.d0, Delta_d%f(1,1), np, &
-                     Delta_d%f(1,1), np)
+           call gpu_dgeam(blas_handle, 'N', 'N', int(np,4), int(nq,4),  &
+               0.d0, Delta_d%f(1,1), int(np,4), &
+               0.d0, Delta_d%f(1,1), int(np,4), &
+                     Delta_d%f(1,1), int(np,4))
          else
            !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q,j)
            do q=1,nq
@@ -383,15 +392,16 @@ END_PROVIDER
 
             if (do_gpu) then
 
-                 call gpu_dgemm(blas_handle, 'N', 'T', np, nq, block_size, -1.d0, &
-                      Ltmp_p_d%f(1,1), np, &
-                      Ltmp_q_d%f(1,1), nq, &
-                      1.d0, Delta_d%f(1,1), np)
+                 call gpu_dgemm(blas_handle, 'N', 'T', int(np,4), int(nq,4), &
+                                int(block_size,4), -1.d0, Ltmp_p_d%f(1,1), &
+                                int(np,4), Ltmp_q_d%f(1,1), int(nq,4), 1.d0, &
+                                Delta_d%f(1,1), int(np,4))
 
             else
 
-                 call dgemm('N','T',np,nq,block_size,-1.d0,                &
-                     Ltmp_p, np, Ltmp_q, nq, 1.d0, Delta, np)
+                 call dgemm('N', 'T', int(np,4), int(nq,4), int(block_size,4), &
+                            -1.d0, Ltmp_p, int(np,4), Ltmp_q, int(nq,4), 1.d0, &
+                            Delta, int(np,4))
 
             endif
             iblock = 0
@@ -413,7 +423,7 @@ END_PROVIDER
          iblock = iblock+1
 
          if (do_gpu) then
-           call gpu_copy(Delta_d%f(1,dj), Ltmp_p_d%f(1,iblock), np)
+           call gpu_copy(Delta_d%f(1,dj), Ltmp_p_d%f(1,iblock), int(np,4))
          else
            !$OMP PARALLEL DO PRIVATE(p)
            do p=1,np
@@ -452,12 +462,12 @@ END_PROVIDER
            endif
 
            if (do_gpu) then
-             call gpu_upload(Delta_col(1), Ltmp_p_d%f(1,iblock), np)
-             call gpu_dgeam(blas_handle, 'N', 'N', np, 1, &
-               1.d0, Ltmp_p_d%f(1,iblock), np, &
-               1.d0, Delta_d%f(1,dj), np, &
-                     Ltmp_p_d%f(1,iblock), np)
-             call gpu_copy(Ltmp_p_d%f(1,iblock), Delta_d%f(1,dj), np)
+             call gpu_upload(Delta_col(1), Ltmp_p_d%f(1,iblock), int(np,4))
+             call gpu_dgeam(blas_handle, 'N', 'N', int(np,4), 1, &
+               1.d0, Ltmp_p_d%f(1,iblock), int(np,4), &
+               1.d0, Delta_d%f(1,dj), int(np,4), &
+                     Ltmp_p_d%f(1,iblock), int(np,4))
+             call gpu_copy(Ltmp_p_d%f(1,iblock), Delta_d%f(1,dj), int(np,4))
            else
              !$OMP PARALLEL DO PRIVATE(p)
              do p=1,np
@@ -474,14 +484,16 @@ END_PROVIDER
          if (iblock > 1) then
            if (do_gpu) then
 
-             call gpu_dgemv(blas_handle, 'N', np, iblock-1, -1.d0, &
-                Ltmp_p_d%f(1,1), np, Ltmp_q_d%f(dj,1), nq, 1.d0,&
-                Ltmp_p_d%f(1,iblock), 1)
+             call gpu_dgemv(blas_handle, 'N', int(np,4), int(iblock-1,4), &
+                            -1.d0, Ltmp_p_d%f(1,1), int(np,4), &
+                            Ltmp_q_d%f(dj,1), int(nq,4), 1.d0, &
+                            Ltmp_p_d%f(1,iblock), 1)
 
            else
 
-             call dgemv('N', np, iblock-1, -1.d0, Ltmp_p, np, Ltmp_q(dj,1), nq, 1.d0,&
-               Ltmp_p(1,iblock), 1)
+             call dgemv('N', int(np,4), int(iblock-1,4), -1.d0, Ltmp_p, &
+                        int(np,4), Ltmp_q(dj,1), int(nq,4), 1.d0, &
+                        Ltmp_p(1,iblock), 1)
 
            endif
          endif
@@ -490,12 +502,12 @@ END_PROVIDER
          f = 1.d0/dsqrt(Qmax)
 
          if (do_gpu) then
-           call gpu_dgeam(blas_handle, 'N', 'N', np, 1, &
-             f  , Ltmp_p_d%f(1,iblock), np, &
-             0d0, Ltmp_p_d%f(1,iblock), np, &
-                  Ltmp_p_d%f(1,iblock), np)
+           call gpu_dgeam(blas_handle, 'N', 'N', int(np,4), 1, &
+             f  , Ltmp_p_d%f(1,iblock), int(np,4), &
+             0d0, Ltmp_p_d%f(1,iblock), int(np,4), &
+                  Ltmp_p_d%f(1,iblock), int(np,4))
 
-           call gpu_download(Ltmp_p_d%f(1,iblock), Ltmp_p(1,iblock), np)
+           call gpu_download(Ltmp_p_d%f(1,iblock), Ltmp_p(1,iblock), int(np,4))
          else
            do p=1,np
              Ltmp_p(p,iblock) = Ltmp_p(p,iblock) * f
@@ -518,7 +530,7 @@ END_PROVIDER
          !$OMP END PARALLEL
 
          if (do_gpu) then
-           call gpu_upload(Ltmp_q(1,iblock), Ltmp_q_d%f(1,iblock), nq)
+           call gpu_upload(Ltmp_q(1,iblock), Ltmp_q_d%f(1,iblock), int(nq,4))
          endif
 
          Qmax = D(Dset(1))
@@ -556,7 +568,7 @@ END_PROVIDER
            Lset(np8) = p8
          endif
        enddo
-       np = int(np8,4)
+       np = int(np8,size_t)
 
      enddo
 
@@ -593,7 +605,7 @@ END_PROVIDER
      if (write_ao_cholesky.and.mpi_master) then
        if (.not.human_quiet) print *,  'Writing Cholesky AO vectors to disk...'
        iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_ao', 'W')
-       write(iunit) rank
+       write(iunit) int(rank,4)
        write(iunit) cholesky_ao
        close(iunit)
        call ezfio_set_ao_two_e_ints_io_ao_cholesky('Read')
@@ -601,7 +613,9 @@ END_PROVIDER
 
    endif
 
-   if (.not.human_quiet) print *, 'Rank  : ', cholesky_ao_num, '(', 100.d0*dble(cholesky_ao_num)/dble(ao_num*ao_num), ' %)'
+   if (.not.human_quiet) print *, 'Rank  : ', cholesky_ao_num, '(', &
+       100.d0*dble(cholesky_ao_num)/dble(int(ao_num,size_t)* &
+       int(ao_num,size_t)), ' %)'
    if (.not.human_quiet) print *,  ''
    call wall_time(wall1)
    if (.not.human_quiet) print*,'Time to provide AO cholesky vectors = ',(wall1-wall0)/60.d0, ' min'

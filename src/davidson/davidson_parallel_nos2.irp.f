@@ -1,7 +1,9 @@
+use sizet
 use bitmasks
 
 
 subroutine H_u_0_nstates(v_0,u_0,N_st,sze)
+ use sizet
   use omp_lib
   use bitmasks
   implicit none
@@ -26,7 +28,8 @@ subroutine H_u_0_nstates(v_0,u_0,N_st,sze)
   ! N_st) block first, exactly as the former collector did before
   ! accumulating the worker results.
   END_DOC
-  integer, intent(in)            :: N_st, sze
+  integer, intent(in)            :: N_st
+  integer(size_t), intent(in)    :: sze
   double precision, intent(out)  :: v_0(sze,N_st)
   double precision, intent(inout):: u_0(sze,N_st)
   integer                        :: j,k
@@ -39,7 +42,7 @@ subroutine H_u_0_nstates(v_0,u_0,N_st,sze)
 
   allocate(u_t(N_st,N_det))
   do k=1,N_st
-    call dset_order(u_0(1,k),psi_bilinear_matrix_order,N_det)
+    call dset_order_big(u_0(1,k),psi_bilinear_matrix_order,N_det)
   enddo
 
   call dtranspose(                                                   &
@@ -58,12 +61,13 @@ subroutine H_u_0_nstates(v_0,u_0,N_st,sze)
 
   ! Work chunks (the task partition of the former dispatch)
   ! ========================================================
-  integer :: istep, imin, imax, ishift
+  integer :: istep, ishift
+  integer(size_t) :: imin, imax
   integer, parameter :: tasksize=20000
 
   allocate(v_t(N_st,N_det))
   do imin=1,N_det,tasksize
-    imax = min(N_det,imin-1+tasksize)
+    imax = min(int(N_det,size_t),imin-1+tasksize)
     if (imin==1) then
       istep = 2
     else
@@ -85,10 +89,10 @@ subroutine H_u_0_nstates(v_0,u_0,N_st,sze)
   !$OMP SINGLE
   do k=1,N_st
     !$OMP TASK DEFAULT(SHARED) FIRSTPRIVATE(k,N_det)
-    call dset_order(v_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
+    call dset_order_big(v_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
     !$OMP END TASK
     !$OMP TASK DEFAULT(SHARED) FIRSTPRIVATE(k,N_det)
-    call dset_order(u_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
+    call dset_order_big(u_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
     !$OMP END TASK
   enddo
   !$OMP END SINGLE

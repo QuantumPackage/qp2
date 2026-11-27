@@ -8,13 +8,15 @@ subroutine diag_htc_bi_orth_3e_brute(Nint, key_i, hthree)
   END_DOC
 
   use bitmasks
+  use sizet
 
   implicit none
-  integer,           intent(in) :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in) :: key_i(Nint,2)
   double precision, intent(out) :: hthree
-  integer                       :: occ(Nint*bit_kind_size,2)
-  integer                       :: Ne(2),i,j,ii,jj,ispin,jspin,m,mm
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
+  integer                       :: Ne(2),j,ispin,jspin,m
+  integer(size_t)                :: i,ii,jj,mm
   integer(bit_kind)             :: key_i_core(Nint,2)
   double precision              :: direct_int, exchange_int, ref
   double precision, external    :: sym_3_e_int_from_6_idx_tensor
@@ -111,15 +113,19 @@ subroutine single_htilde_three_body_ints_bi_ort_slow(Nint, key_j, key_i, hthree)
   END_DOC
 
   use bitmasks
+  use sizet
 
   implicit none
-  integer,           intent(in) :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in) :: key_j(Nint,2),key_i(Nint,2)
   double precision, intent(out) :: hthree
-  integer                       :: occ(Nint*bit_kind_size,2)
-  integer                       :: Ne(2),i,j,ii,jj,ispin,jspin,k,kk
-  integer                       :: degree,exc(0:2,2,2)
-  integer                       :: h1, p1, h2, p2, s1, s2
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
+  integer                       :: Ne(2),j,ispin,jspin,k,kk
+  integer(size_t)                :: i,ii,jj
+  integer                       :: degree
+  integer(size_t)                :: exc(0:2,2,2)
+  integer(size_t)                :: h1, p1, h2, p2
+  integer                       :: s1, s2
   double precision              :: direct_int,phase,exchange_int,three_e_single_parrallel_spin
   double precision              :: sym_3_e_int_from_6_idx_tensor
   integer                       :: other_spin(2)
@@ -206,15 +212,19 @@ subroutine double_htilde_three_body_ints_bi_ort_slow(Nint, key_j, key_i, hthree)
   END_DOC
 
   use bitmasks
+  use sizet
 
   implicit none
-  integer,           intent(in) :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in) :: key_j(Nint,2),key_i(Nint,2)
   double precision, intent(out) :: hthree
-  integer                       :: occ(Nint*bit_kind_size,2)
-  integer                       :: Ne(2),i,j,ii,jj,ispin,jspin,m,mm
-  integer                       :: degree,exc(0:2,2,2)
-  integer                       :: h1, p1, h2, p2, s1, s2
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
+  integer                       :: Ne(2),j,ispin,jspin,m
+  integer(size_t)                :: i,ii,jj,mm
+  integer                       :: degree
+  integer(size_t)                :: exc(0:2,2,2)
+  integer(size_t)                :: h1, p1, h2, p2
+  integer                       :: s1, s2
   double precision              :: phase
   integer                       :: other_spin(2)
   integer(bit_kind)             :: key_i_core(Nint,2)

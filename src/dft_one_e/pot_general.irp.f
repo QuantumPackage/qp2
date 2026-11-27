@@ -1,3 +1,5 @@
+use sizet
+
  BEGIN_PROVIDER [double precision, potential_x_alpha_ao,(ao_num,ao_num,N_states)]
  &BEGIN_PROVIDER [double precision, potential_x_beta_ao ,(ao_num,ao_num,N_states)]
   implicit none
@@ -80,19 +82,15 @@ print("endif")
   END_DOC
   integer :: istate
   do istate = 1, N_states
-     call ao_to_mo(                                                   &
-         potential_x_alpha_ao(1,1,istate),                                 &
-         size(potential_x_alpha_ao,1),                                &
-         potential_x_alpha_mo(1,1,istate),                                 &
-         size(potential_x_alpha_mo,1)                                 &
-         )
+          call ao_to_mo(potential_x_alpha_ao(1,1,istate), &
+                   int(size(potential_x_alpha_ao,1),size_t), &
+                   potential_x_alpha_mo(1,1,istate), &
+                   int(size(potential_x_alpha_mo,1),size_t))
 
-     call ao_to_mo(                                                   &
-         potential_x_beta_ao(1,1,istate),                                  &
-         size(potential_x_beta_ao,1),                                 &
-         potential_x_beta_mo(1,1,istate),                                  &
-         size(potential_x_beta_mo,1)                                  &
-         )
+          call ao_to_mo(potential_x_beta_ao(1,1,istate), &
+                   int(size(potential_x_beta_ao,1),size_t), &
+                   potential_x_beta_mo(1,1,istate), &
+                   int(size(potential_x_beta_mo,1),size_t))
   enddo
 
  END_PROVIDER
@@ -105,19 +103,15 @@ print("endif")
   END_DOC
   integer :: istate
   do istate = 1, N_states
-     call ao_to_mo(                                                   &
-         potential_c_alpha_ao(1,1,istate),                                 &
-         size(potential_c_alpha_ao,1),                                &
-         potential_c_alpha_mo(1,1,istate),                                 &
-         size(potential_c_alpha_mo,1)                                 &
-         )
+          call ao_to_mo(potential_c_alpha_ao(1,1,istate), &
+                   int(size(potential_c_alpha_ao,1),size_t), &
+                   potential_c_alpha_mo(1,1,istate), &
+                   int(size(potential_c_alpha_mo,1),size_t))
 
-     call ao_to_mo(                                                   &
-         potential_c_beta_ao(1,1,istate),                                  &
-         size(potential_c_beta_ao,1),                                 &
-         potential_c_beta_mo(1,1,istate),                                  &
-         size(potential_c_beta_mo,1)                                  &
-         )
+          call ao_to_mo(potential_c_beta_ao(1,1,istate), &
+                   int(size(potential_c_beta_ao,1),size_t), &
+                   potential_c_beta_mo(1,1,istate), &
+                   int(size(potential_c_beta_mo,1),size_t))
   enddo
 
  END_PROVIDER
@@ -127,7 +121,8 @@ print("endif")
  &BEGIN_PROVIDER [double precision, Trace_v_H, (N_states)]
  &BEGIN_PROVIDER [double precision, Trace_v_Hxc, (N_states)]
   implicit none
-  integer :: i,j,istate
+  integer :: istate
+  integer(size_t) :: i,j
   double precision :: dm
   BEGIN_DOC
  ! Trace_v_xc  = \sum_{i,j} (rho_{ij}_\alpha v^{xc}_{ij}^\alpha  + rho_{ij}_\beta v^{xc}_{ij}^\beta)
@@ -152,7 +147,8 @@ print("endif")
 
   BEGIN_PROVIDER [double precision, Trace_v_xc_new, (N_states)]
   implicit none
-  integer :: i,j,istate
+  integer :: istate
+  integer(size_t) :: i,j
   double precision :: dm
   BEGIN_DOC
  ! Trace_v_xc  = \sum_{i,j} (rho_{ij}_\alpha v^{xc}_{ij}^\alpha  + rho_{ij}_\beta v^{xc}_{ij}^\beta)
@@ -181,19 +177,15 @@ print("endif")
   integer :: istate
 
   do istate = 1, N_states
-     call ao_to_mo(                                                   &
-         potential_xc_alpha_ao(1,1,istate),                                 &
-         size(potential_xc_alpha_ao,1),                                &
-         potential_xc_alpha_mo(1,1,istate),                                 &
-         size(potential_xc_alpha_mo,1)                                 &
-         )
+          call ao_to_mo(potential_xc_alpha_ao(1,1,istate), &
+                   int(size(potential_xc_alpha_ao,1),size_t), &
+                   potential_xc_alpha_mo(1,1,istate), &
+                   int(size(potential_xc_alpha_mo,1),size_t))
 
-     call ao_to_mo(                                                   &
-         potential_xc_beta_ao(1,1,istate),                                  &
-         size(potential_xc_beta_ao,1),                                 &
-         potential_xc_beta_mo(1,1,istate),                                  &
-         size(potential_xc_beta_mo,1)                                  &
-         )
+          call ao_to_mo(potential_xc_beta_ao(1,1,istate), &
+                   int(size(potential_xc_beta_ao,1),size_t), &
+                   potential_xc_beta_mo(1,1,istate), &
+                   int(size(potential_xc_beta_mo,1),size_t))
   enddo
 
  END_PROVIDER

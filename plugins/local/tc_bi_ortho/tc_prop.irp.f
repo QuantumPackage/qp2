@@ -1,3 +1,4 @@
+use sizet
 
  BEGIN_PROVIDER [ double precision, tc_transition_matrix_mo_beta, (mo_num, mo_num,N_states,N_states) ]
 &BEGIN_PROVIDER [ double precision, tc_transition_matrix_mo_alpha, (mo_num, mo_num,N_states,N_states) ]
@@ -9,10 +10,12 @@
  !
  ! where <Chi_istate| and |Phi_jstate> are the left/right eigenvectors on a bi-ortho basis
  END_DOC
- integer :: i,j,istate,jstate,m,n,p,h
+ integer(size_t) :: i,j,m,p,h
+ integer         :: istate,jstate,n
  double precision :: phase
- integer, allocatable           :: occ(:,:)
- integer                        :: n_occ_ab(2),degree,exc(0:2,2,2)
+ integer(size_t), allocatable  :: occ(:,:)
+ integer                        :: n_occ_ab(2),degree
+ integer(size_t)                :: exc(0:2,2,2)
  allocate(occ(N_int*bit_kind_size,2))
  tc_transition_matrix_mo_alpha = 0.d0
  tc_transition_matrix_mo_beta  = 0.d0
@@ -78,7 +81,8 @@
 
  BEGIN_PROVIDER [double precision, tc_bi_ortho_dipole, (3,N_states)]
  implicit none
- integer :: i,j,istate,m
+ integer(size_t) :: i,j
+ integer         :: istate,m
  double precision :: nuclei_part(3)
  tc_bi_ortho_dipole = 0.d0
  do istate = 1, N_states
@@ -112,7 +116,7 @@
  BEGIN_DOC 
 ! tc_transition_matrix(p,h,istate,jstate) in the AO basis  
  END_DOC 
- integer :: i,j,k,l
+ integer(size_t) :: i,j,k,l
  double precision :: dm_mo
  tc_transition_matrix_ao = 0.d0
  integer :: istate,jstate
@@ -138,7 +142,7 @@
  BEGIN_DOC 
 ! tc_spin_transition_matrix_ao(p,h,istate,jstate) in the AO basis  
  END_DOC 
- integer :: i,j,k,l
+ integer(size_t) :: i,j,k,l
  double precision :: dm_mo
  tc_spin_transition_matrix_ao = 0.d0
  integer :: istate,jstate

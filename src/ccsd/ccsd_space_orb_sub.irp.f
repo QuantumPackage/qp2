@@ -1,4 +1,7 @@
+use sizet
+
 subroutine run_ccsd_space_orb
+ use sizet
   use gpu
 
   implicit none
@@ -11,7 +14,8 @@ subroutine run_ccsd_space_orb
   ! energies through save_energy, and evaluates the (T) correction
   ! with ccsd_par_t_space_stoch when cc_par_t is set.
   END_DOC
-  integer :: i,j,k,l,a,b,c,d,tmp_a,tmp_b,tmp_c,tmp_d
+  integer(size_t) :: i
+  integer :: j,k,l,a,b,c,d,tmp_a,tmp_b,tmp_c,tmp_d
   integer :: u,v,gam,beta,tmp_gam,tmp_beta
   integer :: nb_iter
   double precision :: get_two_e_integral
@@ -63,10 +67,10 @@ subroutine run_ccsd_space_orb
   list_vir = cc_list_vir
 
   ! GPU arrays
-  call gpu_allocate(d_cc_space_f_oo, nO, nO)
-  call gpu_allocate(d_cc_space_f_vo, nV, nO)
-  call gpu_allocate(d_cc_space_f_ov, nO, nV)
-  call gpu_allocate(d_cc_space_f_vv, nV, nV)
+  call gpu_allocate(d_cc_space_f_oo, int(nO,4), int(nO,4))
+  call gpu_allocate(d_cc_space_f_vo, int(nV,4), int(nO,4))
+  call gpu_allocate(d_cc_space_f_ov, int(nO,4), int(nV,4))
+  call gpu_allocate(d_cc_space_f_vv, int(nV,4), int(nV,4))
 
   call gpu_upload(cc_space_f_oo, d_cc_space_f_oo)
   call gpu_upload(cc_space_f_vo, d_cc_space_f_vo)
@@ -78,10 +82,14 @@ subroutine run_ccsd_space_orb
 !  FREE cc_space_f_vv
 
   if (do_mo_cholesky) then
-    call gpu_allocate(d_cc_space_v_oo_chol, cholesky_mo_num, nO, nO)
-    call gpu_allocate(d_cc_space_v_ov_chol, cholesky_mo_num, nO, nV)
-    call gpu_allocate(d_cc_space_v_vo_chol, cholesky_mo_num, nV, nO)
-    call gpu_allocate(d_cc_space_v_vv_chol, cholesky_mo_num, nV, nV)
+    call gpu_allocate(d_cc_space_v_oo_chol, int(cholesky_mo_num,4), &
+         int(nO,4), int(nO,4))
+    call gpu_allocate(d_cc_space_v_ov_chol, int(cholesky_mo_num,4), &
+         int(nO,4), int(nV,4))
+    call gpu_allocate(d_cc_space_v_vo_chol, int(cholesky_mo_num,4), &
+         int(nV,4), int(nO,4))
+    call gpu_allocate(d_cc_space_v_vv_chol, int(cholesky_mo_num,4), &
+         int(nV,4), int(nV,4))
 
     call gpu_upload(cc_space_v_oo_chol, d_cc_space_v_oo_chol)
     call gpu_upload(cc_space_v_ov_chol, d_cc_space_v_ov_chol)
@@ -94,15 +102,24 @@ subroutine run_ccsd_space_orb
 !    FREE cc_space_v_vv_chol
   endif
 
-  call gpu_allocate(d_cc_space_v_oovv, nO, nO, nV, nV)
-  call gpu_allocate(d_cc_space_v_voov, nV, nO, nO, nV)
-  call gpu_allocate(d_cc_space_v_ovov, nO, nV, nO, nV)
-  call gpu_allocate(d_cc_space_v_oovo, nO, nO, nV, nO)
-  call gpu_allocate(d_cc_space_v_ovvo, nO, nV, nV, nO)
-  call gpu_allocate(d_cc_space_v_vooo, nV, nO, nO, nO)
-  call gpu_allocate(d_cc_space_v_oooo, nO, nO, nO, nO)
-  call gpu_allocate(d_cc_space_v_vvoo, nV, nV, nO, nO)
-  call gpu_allocate(d_cc_space_v_ovoo, nO, nV, nO, nO)
+  call gpu_allocate(d_cc_space_v_oovv, int(nO,4), int(nO,4), int(nV,4), &
+       int(nV,4))
+  call gpu_allocate(d_cc_space_v_voov, int(nV,4), int(nO,4), int(nO,4), &
+       int(nV,4))
+  call gpu_allocate(d_cc_space_v_ovov, int(nO,4), int(nV,4), int(nO,4), &
+       int(nV,4))
+  call gpu_allocate(d_cc_space_v_oovo, int(nO,4), int(nO,4), int(nV,4), &
+       int(nO,4))
+  call gpu_allocate(d_cc_space_v_ovvo, int(nO,4), int(nV,4), int(nV,4), &
+       int(nO,4))
+  call gpu_allocate(d_cc_space_v_vooo, int(nV,4), int(nO,4), int(nO,4), &
+       int(nO,4))
+  call gpu_allocate(d_cc_space_v_oooo, int(nO,4), int(nO,4), int(nO,4), &
+       int(nO,4))
+  call gpu_allocate(d_cc_space_v_vvoo, int(nV,4), int(nV,4), int(nO,4), &
+       int(nO,4))
+  call gpu_allocate(d_cc_space_v_ovoo, int(nO,4), int(nV,4), int(nO,4), &
+       int(nO,4))
 
   call gpu_upload(cc_space_v_oovv, d_cc_space_v_oovv)
   call gpu_upload(cc_space_v_voov, d_cc_space_v_voov)
@@ -124,20 +141,20 @@ subroutine run_ccsd_space_orb
 !  FREE cc_space_v_ovvo
 !  FREE cc_space_v_ovoo
 
-  call gpu_allocate(t2, nO,nO,nV,nV)
-  call gpu_allocate(r2, nO,nO,nV,nV)
-  call gpu_allocate(tau, nO,nO,nV,nV)
-  call gpu_allocate(tau_x, nO,nO,nV,nV)
-  call gpu_allocate(t1, nO,nV)
-  call gpu_allocate(r1, nO,nV)
-  call gpu_allocate(H_oo, nO, nO)
-  call gpu_allocate(H_vo, nV, nO)
-  call gpu_allocate(H_vv, nV, nV)
+  call gpu_allocate(t2, int(nO,4), int(nO,4), int(nV,4), int(nV,4))
+  call gpu_allocate(r2, int(nO,4), int(nO,4), int(nV,4), int(nV,4))
+  call gpu_allocate(tau, int(nO,4), int(nO,4), int(nV,4), int(nV,4))
+  call gpu_allocate(tau_x, int(nO,4), int(nO,4), int(nV,4), int(nV,4))
+  call gpu_allocate(t1, int(nO,4), int(nV,4))
+  call gpu_allocate(r1, int(nO,4), int(nV,4))
+  call gpu_allocate(H_oo, int(nO,4), int(nO,4))
+  call gpu_allocate(H_vo, int(nV,4), int(nO,4))
+  call gpu_allocate(H_vv, int(nV,4), int(nV,4))
 
   if (cc_update_method == 'diis') then
     double precision :: rss, diis_mem, extra_mem
     double precision, external :: memory_of_double
-    diis_mem = 2.d0*memory_of_double(nO*nV)*(1.d0+nO*nV)
+    diis_mem = 2.d0*memory_of_double(int(nO*nV, size_t))*(1.d0+nO*nV)
     call resident_memory(rss)
     do while (cc_diis_depth > 1)
       if (rss + diis_mem * cc_diis_depth > qp_max_mem) then
@@ -376,7 +393,8 @@ subroutine ccsd_energy_space_x(nO,nV,d_cc_space_v_oovv,d_cc_space_f_vo,tau_x,t1,
   call gpu_stream_create(s2)
 
   call gpu_set_stream(blas_handle,s1)
-  call gpu_ddot(blas_handle, nO*nV, d_cc_space_f_vo%f(1,1), 1, t1%f(1,1), 1, e)
+  call gpu_ddot(blas_handle, int(nO*nV,4), d_cc_space_f_vo%f(1,1), 1, &
+       t1%f(1,1), 1, e)
 
   call gpu_set_stream(blas_handle,s2)
   call gpu_ddot_64(blas_handle, nO*nO*nV*nV*1_8, tau_x%f(1,1,1,1), 1_8, d_cc_space_v_oovv%f(1,1,1,1), 1_8, energy)
@@ -393,6 +411,7 @@ end
 ! Tau
 
 subroutine update_tau_space(nO,nV,h_t1,t1,t2,tau)
+ use sizet
   use gpu
   implicit none
 
@@ -410,7 +429,8 @@ subroutine update_tau_space(nO,nV,h_t1,t1,t2,tau)
   type(gpu_double4) :: tau
 
   ! internal
-  integer                       :: i,j,a,b
+  integer(size_t)               :: j, b
+  integer                       :: i, a
 
   type(gpu_stream) :: stream(nV)
 
@@ -423,10 +443,10 @@ subroutine update_tau_space(nO,nV,h_t1,t1,t2,tau)
     call gpu_stream_create(stream(b))
     call gpu_set_stream(blas_handle,stream(b))
     do j=1,nO
-      call gpu_dgeam(blas_handle, 'N', 'N', nO, nV, &
-         1.d0, t2%f(1,j,1,b), nO*nO, &
-         h_t1(j,b), t1%f(1,1), nO, &
-         tau%f(1,j,1,b), nO*nO)
+      call gpu_dgeam(blas_handle, 'N', 'N', int(nO,4), int(nV,4), &
+         1.d0, t2%f(1,j,1,b), int(nO*nO,4), &
+         h_t1(j,b), t1%f(1,1), int(nO,4), &
+         tau%f(1,j,1,b), int(nO*nO,4))
     enddo
   enddo
   !$OMP END DO
@@ -443,6 +463,7 @@ subroutine update_tau_space(nO,nV,h_t1,t1,t2,tau)
 end
 
 subroutine update_tau_x_space(nO,nV,tau,tau_x)
+ use sizet
   use gpu
   implicit none
 
@@ -457,7 +478,8 @@ subroutine update_tau_x_space(nO,nV,tau,tau_x)
   type(gpu_double4) :: tau_x
 
   ! internal
-  integer                       :: i,j,a,b
+  integer(size_t)               :: a, b
+  integer                       :: i, j
 
   type(gpu_stream) :: stream(nV)
 
@@ -473,10 +495,10 @@ subroutine update_tau_x_space(nO,nV,tau,tau_x)
   do b=1,nV
     do a=1,nV
       call gpu_set_stream(blas_handle,stream(a))
-      call gpu_dgeam(blas_handle, 'N', 'N', nO, nO, &
-          2.d0, tau%f(1,1,a,b), nO, &
-         -1.d0, tau%f(1,1,b,a), nO, &
-         tau_x%f(1,1,a,b), nO)
+      call gpu_dgeam(blas_handle, 'N', 'N', int(nO,4), int(nO,4), &
+          2.d0, tau%f(1,1,a,b), int(nO,4), &
+         -1.d0, tau%f(1,1,b,a), int(nO,4), &
+         tau_x%f(1,1,a,b), int(nO,4))
     enddo
   enddo
   !$OMP END DO
@@ -495,6 +517,7 @@ end
 ! R1
 
 subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
+ use sizet
 
   implicit none
 
@@ -515,7 +538,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   double precision, intent(out) :: r1(nO,nV), max_r1
 
   ! internal
-  integer                       :: u,i,j,beta,a,b
+  integer(size_t)               :: u,i,j,beta,a,b
 
   !$omp parallel &
   !$omp shared(nO,nV,r1,cc_space_f_ov) &
@@ -546,12 +569,12 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   !enddo
   double precision, allocatable :: X_oo(:,:)
   allocate(X_oo(nO,nO))
-  call dgemm('N','N', nO, nO, nV, &
+  call dgemm('N','N', int(nO,4), int(nO,4), int(nV,4), &
              -2d0, t1    , size(t1,1), &
                    cc_space_f_vo, size(cc_space_f_vo,1), &
               0d0, X_oo  , size(X_oo,1))
 
-  call dgemm('T','N', nO, nV, nO, &
+  call dgemm('T','N', int(nO,4), int(nV,4), int(nO,4), &
              1d0, X_oo, size(X_oo,2), &
                   t1  , size(t1,1), &
              1d0, r1  , size(r1,1))
@@ -565,7 +588,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   !    enddo
   !  enddo
   !enddo
-  call dgemm('N','N', nO, nV, nV, &
+  call dgemm('N','N', int(nO,4), int(nV,4), int(nV,4), &
              1d0, t1  , size(t1,1), &
                   H_vv, size(H_vv,1), &
              1d0, r1  , size(r1,1))
@@ -578,7 +601,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   !    enddo
   !  enddo
   !enddo
-  call dgemm('N','N', nO, nV, nO, &
+  call dgemm('N','N', int(nO,4), int(nV,4), int(nO,4), &
              -1d0, H_oo, size(H_oo,1), &
                    t1  , size(t1,1), &
               1d0, r1, size(r1,1))
@@ -616,7 +639,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   !$omp end do
   !$omp end parallel
 
-  call dgemv('T', nV*nO, nO*nV, &
+  call dgemv('T', int(nV*nO,4), int(nO*nV,4), &
              1d0, X_voov, size(X_voov,1) * size(X_voov,2), &
                   H_vo  , 1, &
              1d0, r1    , 1)
@@ -655,7 +678,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   !$omp end do
   !$omp end parallel
 
-  call dgemv('T', nO*nV, nO*nV, &
+  call dgemv('T', int(nO*nV,4), int(nO*nV,4), &
              1d0, X_ovov, size(X_ovov,1) * size(X_ovov,2), &
                   t1     , 1, &
              1d0, r1     , 1)
@@ -676,7 +699,8 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   !  enddo
   !enddo
 
-  integer :: iblock, block_size, nVmax
+  integer(size_t) :: iblock
+  integer         :: block_size, nVmax
   double precision, allocatable :: W_vvov(:,:,:,:), T_vvoo(:,:,:,:)
   block_size = 8
   ! W_vvov holds only block_size beta values at a time
@@ -700,7 +724,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   !$omp end parallel
 
   do iblock = 1, nV, block_size
-    nVmax = min(block_size,nV-iblock+1)
+    nVmax = min(block_size,int(nV-iblock+1,4))
     !$omp parallel &
     !$omp shared(nO,nV,cc_space_v_vvov,W_vvov,T_vvoo,tau,nVmax,iblock) &
     !$omp private(b,i,a,beta) &
@@ -718,7 +742,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
     !$omp end do nowait
     !$omp end parallel
 
-    call dgemm('T','N',nO,nVmax,nO*nV*nV, &
+    call dgemm('T','N',int(nO,4),int(nVmax,4),int(nO*nV*nV,4), &
              1d0, T_vvoo, nV*nV*nO, &
                   W_vvov, nO*nV*nV, &
              1d0, r1(1,iblock), nO)
@@ -759,7 +783,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   enddo
   !$omp end parallel
 
-  call dgemm('T','N', nO, nV, nO*nO*nV, &
+  call dgemm('T','N', int(nO,4), int(nV,4), int(nO*nO*nV,4), &
              -1d0, W_oovo, size(W_oovo,1) * size(W_oovo,2) * size(W_oovo,3), &
                    tau   , size(tau,1) * size(tau,2) * size(tau,3), &
               1d0, r1    , size(r1,1))
@@ -792,6 +816,7 @@ end
 ! H_oo
 
 subroutine compute_H_oo(nO,nV,t1,t2,tau,H_oo)
+ use sizet
 
   implicit none
 
@@ -806,7 +831,8 @@ subroutine compute_H_oo(nO,nV,t1,t2,tau,H_oo)
   double precision, intent(in)  :: tau(nO, nO, nV, nV)
   double precision, intent(out) :: H_oo(nO, nO)
 
-  integer :: a,tmp_a,k,b,l,c,d,tmp_c,tmp_d,i,j,u
+  integer(size_t) :: i,u
+  integer         :: a,tmp_a,k,b,l,c,d,tmp_c,tmp_d,j
 
   !H_oo = 0d0
 
@@ -843,7 +869,7 @@ subroutine compute_H_oo(nO,nV,t1,t2,tau,H_oo)
 
   ! H_oo(u,i) += cc_space_w_oovv(i,j,a,b) * tau(u,j,a,b)
   ! H_oo(u,i) += tau(u,j,a,b) * cc_space_w_oovv(i,j,a,b)
-  call dgemm('N','T', nO, nO, nO*nV*nV,       &
+  call dgemm('N','T', int(nO,4), int(nO,4), int(nO*nV*nV,4), &
              1d0, tau     , size(tau,1),      &
                   cc_space_w_oovv, size(cc_space_w_oovv,1), &
              1d0, H_oo    , size(H_oo,1))
@@ -853,6 +879,7 @@ end
 ! H_vv
 
 subroutine compute_H_vv(nO,nV,t1,t2,tau,H_vv)
+ use sizet
 
   implicit none
 
@@ -867,7 +894,8 @@ subroutine compute_H_vv(nO,nV,t1,t2,tau,H_vv)
   double precision, intent(in)  :: tau(nO, nO, nV, nV)
   double precision, intent(out) :: H_vv(nV, nV)
 
-  integer :: a,tmp_a,b,k,l,c,d,tmp_c,tmp_d,i,j,u, beta
+  integer(size_t) :: a,b,i,j,beta
+  integer         :: tmp_a,k,l,c,d,tmp_c,tmp_d,u
 
   !H_vv = 0d0
 
@@ -920,9 +948,9 @@ subroutine compute_H_vv(nO,nV,t1,t2,tau,H_vv)
   !$omp end do
   !$omp end parallel
 
-  call dgemm('N','N',nV,nV,nO*nO*nV,           &
+    call dgemm('N','N',int(nV,4),int(nV,4),int(nO*nO*nV,4),           &
              -1d0, cc_space_w_vvoo, size(cc_space_w_vvoo,1), &
-                   tmp_tau , size(tmp_tau,1) * size(tmp_tau,2) * size(tmp_tau,3), &
+                   tmp_tau , size(tmp_tau,1)*size(tmp_tau,2)*size(tmp_tau,3), &
               1d0, H_vv    , size(H_vv,1))
 
   deallocate(tmp_tau)
@@ -932,6 +960,7 @@ end
 ! H_vo
 
 subroutine compute_H_vo(nO,nV,t1,t2,H_vo)
+ use sizet
 
   implicit none
 
@@ -945,7 +974,8 @@ subroutine compute_H_vo(nO,nV,t1,t2,H_vo)
   double precision, intent(in)  :: t2(nO, nO, nV, nV)
   double precision, intent(out) :: H_vo(nV, nO)
 
-  integer :: a,tmp_a,b,k,l,c,d,tmp_c,tmp_d,i,j,u, beta
+  integer(size_t) :: a,b,i,j
+  integer         :: tmp_a,k,l,c,d,tmp_c,tmp_d,u,beta
 
   !H_vo = 0d0
 
@@ -995,7 +1025,7 @@ subroutine compute_H_vo(nO,nV,t1,t2,H_vo)
   !$omp end do
   !$omp end parallel
 
-  call dgemv('N',nV*nO, nO*nV, &
+  call dgemv('N',int(nV*nO,4), int(nO*nV,4), &
              1d0, w   , size(w,1) * size(w,2), &
                   t1  , 1, &
              1d0, H_vo, 1)
@@ -1007,6 +1037,7 @@ end
 ! R2
 
 subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
+ use sizet
 
   implicit none
 
@@ -1037,7 +1068,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   ! internal
   double precision, allocatable :: g_occ(:,:), g_vir(:,:), J1(:,:,:,:), K1(:,:,:,:)
   double precision, allocatable :: A1(:,:,:,:), B1_gam(:,:,:)
-  integer                       :: u,v,i,j,beta,gam,a,b
+  integer(size_t)               :: u,v,i,j,beta,gam,a,b
 
   allocate(g_occ(nO,nO), g_vir(nV,nV))
   allocate(J1(nO,nV,nV,nO), K1(nO,nV,nO,nV))
@@ -1086,7 +1117,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !  enddo
   !enddo
 
-  call dgemm('N','N',nO*nO,nV*nV,nO*nO, &
+  call dgemm('N','N',int(nO*nO,4),int(nV*nV,4),int(nO*nO,4), &
              1d0, A1, size(A1,1) * size(A1,2), &
                   tau, size(tau,1) * size(tau,2), &
              1d0, r2, size(r2,1) * size(r2,2))
@@ -1115,7 +1146,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   allocate(B1_gam(nV,nV,nV))
   do gam=1,nV
     call compute_B1_gam(nO,nV,t1,t2,B1_gam,gam)
-    call dgemm('N','N',nO*nO,nV,nV*nV, &
+    call dgemm('N','N',int(nO*nO,4),int(nV,4),int(nV*nV,4), &
                 1d0, tau, size(tau,1) * size(tau,2), &
                      B1_gam        , size(B1_gam,1) * size(B1_gam,2), &
                 1d0, r2(1,1,1,gam), size(r2,1) * size(r2,2))
@@ -1156,7 +1187,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp end do
   !$omp end parallel
 
-  call dgemm('N','N',nO*nO*nV,nV,nV, &
+  call dgemm('N','N',int(nO*nO*nV,4),int(nV,4),int(nV,4), &
              1d0, X_oovv, size(X_oovv,1) * size(X_oovv,2) * size(X_oovv,3), &
                   g_vir, size(g_vir,1), &
              0d0, Y_oovv, size(Y_oovv,1) * size(Y_oovv,2) * size(Y_oovv,3))
@@ -1192,7 +1223,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !  enddo
   !enddo
 
-  call dgemm('N','N',nO,nO*nV*nV,nO, &
+  call dgemm('N','N',int(nO,4),int(nO*nV*nV,4),int(nO,4), &
              1d0, g_occ , size(g_occ,1), &
                   t2    , size(t2,1), &
              0d0, X_oovv, size(X_oovv,1))
@@ -1250,7 +1281,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp end do
   !$omp end parallel
 
-  call dgemm('N','N',nO,nO*nV*nV,nV, &
+  call dgemm('N','N',int(nO,4),int(nO*nV*nV,4),int(nV,4), &
              1d0, t1    , size(t1,1), &
                   X_vovv, size(X_vovv,1), &
              0d0, Y_oovv, size(Y_oovv,1))
@@ -1307,12 +1338,12 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   enddo
   !$omp end parallel
 
-  call dgemm('N','N',nV*nO*nV,nV,nO, &
+  call dgemm('N','N',int(nV*nO*nV,4),int(nV,4),int(nO,4), &
               1d0, X_vovo, size(X_vovo,1) * size(X_vovo,2) * size(X_vovo,3), &
                    t1    , size(t1,1), &
               0d0, Y_vovv, size(Y_vovv,1) * size(Y_vovv,2) * size(Y_vovv,3))
 
-  call dgemm('N','N',nO,nO*nV*nV,nV, &
+  call dgemm('N','N',int(nO,4),int(nO*nV*nV,4),int(nV,4), &
              1d0, t1, size(t1,1), &
                   Y_vovv, size(Y_vovv,1), &
              0d0, X_oovv, size(X_oovv,1))
@@ -1350,10 +1381,10 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !  enddo
   !enddo
 
-  call dgemm('N','N',nO*nO*nV,nV,nO, &
-             1d0, cc_space_v_oovo, size(cc_space_v_oovo,1) * size(cc_space_v_oovo,2) * size(cc_space_v_oovo,3), &
-                  t1 , size(t1,1), &
-             0d0, X_oovv, size(X_oovv,1) * size(X_oovv,2) * size(X_oovv,3))
+  call dgemm('N', 'N', int(nO*nO*nV,4), int(nV,4), int(nO,4), 1d0, &
+      cc_space_v_oovo, &
+      size(cc_space_v_oovo,1)*size(cc_space_v_oovo,2)*size(cc_space_v_oovo,3), &
+      t1, size(t1,1), 0d0, X_oovv, size(X_oovv,1)*size(X_oovv,2)*size(X_oovv,3))
 
   !$omp parallel &
   !$omp shared(nO,nV,r2,X_oovv) &
@@ -1409,12 +1440,12 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   enddo
   !$omp end parallel
 
-  call dgemm('N','N',nO,nO*nV*nO,nV, &
+  call dgemm('N','N',int(nO,4),int(nO*nV*nO,4),int(nV,4), &
              1d0, t1, size(t1,1), &
                   X_vovo, size(X_vovo,1), &
              0d0, Y_oovo, size(Y_oovo,1))
 
-  call dgemm('N','N',nO*nO*nV, nV, nO, &
+  call dgemm('N','N',int(nO*nO*nV,4), int(nV,4), int(nO,4), &
              1d0, Y_oovo, size(Y_oovo,1) * size(Y_oovo,2) * size(Y_oovo,3), &
                   t1    , size(t1,1), &
              0d0, X_oovv, size(X_oovv,1) * size(X_oovv,2) * size(X_oovv,3))
@@ -1487,7 +1518,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp end do
   !$omp end parallel
 
-  call dgemm('N','N', nO*nV,nO*nV,nV*nO, &
+  call dgemm('N','N', int(nO*nV,4),int(nO*nV,4),int(nV*nO,4), &
              1d0, X_ovvo, size(X_ovvo,1) * size(X_ovvo,2), &
                   Y_voov, size(Y_voov,1) * size(Y_voov,2), &
              0d0, Z_ovov, size(Z_ovov,1) * size(Z_ovov,2))
@@ -1557,7 +1588,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp end do
   !$omp end parallel
 
-  call dgemm('T','N',nO*nV,nO*nV,nO*nV, &
+  call dgemm('T','N',int(nO*nV,4),int(nO*nV,4),int(nO*nV,4), &
              1d0, X_ovov, size(X_ovov,1) * size(X_ovov,2), &
                   Y_ovov, size(Y_ovov,1) * size(Y_ovov,2), &
              0d0, Z_ovov, size(Y_ovov,1) * size(Y_ovov,2))
@@ -1624,7 +1655,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp end do
   !$omp end parallel
 
-  call dgemm('N','N',nO*nV,nO*nV,nO*nV, &
+  call dgemm('N','N',int(nO*nV,4),int(nO*nV,4),int(nO*nV,4), &
              1d0, X_ovov, size(X_ovov,1) * size(X_ovov,2), &
                   Y_ovov, size(Y_ovov,1) * size(Y_ovov,2), &
              0d0, Z_ovov, size(Y_ovov,1) * size(Y_ovov,2))
@@ -1684,6 +1715,7 @@ end
 ! A1
 
 subroutine compute_A1(nO,nV,t1,t2,tau,A1)
+ use sizet
 
   implicit none
 
@@ -1700,7 +1732,8 @@ subroutine compute_A1(nO,nV,t1,t2,tau,A1)
   double precision, intent(in)  :: tau(nO, nO, nV, nV)
   double precision, intent(out) :: A1(nO, nO, nO, nO)
 
-  integer :: a,tmp_a,b,k,l,c,d,tmp_c,tmp_d,i,j,u,v, beta
+  integer(size_t) :: a,i,j,u,v
+  integer         :: tmp_a,b,k,l,c,d,tmp_c,tmp_d,beta
 
   !A1 = 0d0
 
@@ -1760,7 +1793,7 @@ subroutine compute_A1(nO,nV,t1,t2,tau,A1)
   !$omp end do
   !$omp end parallel
 
-  call dgemm('N','N', nO, nO*nO*nO, nV, &
+  call dgemm('N','N', int(nO,4), int(nO*nO*nO,4), int(nV,4), &
              1d0, t1    , size(t1,1), &
                   X_vooo, size(X_vooo,1), &
              0d0, Y_oooo, size(Y_oooo,1))
@@ -1785,22 +1818,23 @@ subroutine compute_A1(nO,nV,t1,t2,tau,A1)
   deallocate(X_vooo,Y_oooo)
 
   ! A1(u,v,i,j) += cc_space_v_vooo(a,v,i,j) * t1(u,a)
-  call dgemm('N','N', nO, nO*nO*nO, nV, &
+  call dgemm('N','N', int(nO,4), int(nO*nO*nO,4), int(nV,4), &
              1d0, t1      , size(t1,1), &
                   cc_space_v_vooo, size(cc_space_v_vooo,1), &
              1d0, A1      , size(A1,1))
 
   ! A1(u,v,i,j) += cc_space_v_vvoo(a,b,i,j) * tau(u,v,a,b)
-  call dgemm('N','N', nO*nO, nO*nO, nV*nV, &
-             1d0, tau     , size(tau,1) * size(tau,2), &
-                  cc_space_v_vvoo, size(cc_space_v_vvoo,1) * size(cc_space_v_vvoo,2), &
-             1d0, A1      , size(A1,1) * size(A1,2))
+    call dgemm('N', 'N', int(nO*nO,4), int(nO*nO,4), int(nV*nV,4), 1d0, tau, &
+             size(tau,1)*size(tau,2), cc_space_v_vvoo, &
+             size(cc_space_v_vvoo,1)*size(cc_space_v_vvoo,2), 1d0, A1, &
+             size(A1,1)*size(A1,2))
 
 end
 
 ! B1
 
 subroutine compute_B1_gam(nO,nV,t1,t2,B1,gam)
+ use sizet
 
   implicit none
 
@@ -1811,12 +1845,14 @@ subroutine compute_B1_gam(nO,nV,t1,t2,B1,gam)
   ! v_vvvo(a,b,beta,i) * t1(i,gam)
   ! - sum over i of v_vvov(a,b,i,gam) * t1(i,beta).
   END_DOC
-  integer, intent(in)           :: nO,nV,gam
+  integer, intent(in)           :: nO, nV
+  integer(size_t), intent(in)   :: gam
   double precision, intent(in)  :: t1(nO, nV)
   double precision, intent(in)  :: t2(nO, nO, nV, nV)
   double precision, intent(out) :: B1(nV, nV, nV)
 
-  integer :: a,tmp_a,b,k,l,c,d,tmp_c,tmp_d,i,j,u,v, beta
+  integer(size_t) :: a,b,i,beta
+  integer         :: tmp_a,k,l,c,d,tmp_c,tmp_d,j,u,v
 
 !  do beta = 1, nV
 !    do b = 1, nV
@@ -1869,13 +1905,12 @@ subroutine compute_B1_gam(nO,nV,t1,t2,B1,gam)
   !$omp end parallel
 
 !  ! B1(a,b,beta) -= cc_space_v_vvvo(a,b,beta,i) * t1(i,gam) &
-  call dgemm('N','N', nV*nV*nV, 1, nO, &
-             -1d0, cc_space_v_vvvo, size(cc_space_v_vvvo,1) * size(cc_space_v_vvvo,2) * size(cc_space_v_vvvo,3), &
-                   t1(1,gam), size(t1,1), &
-              1d0, B1      , size(B1,1) * size(B1,2) * size(B1,3))
+  call dgemm('N', 'N', int(nV*nV*nV,4), 1, int(nO,4), -1d0, cc_space_v_vvvo, &
+      size(cc_space_v_vvvo,1)*size(cc_space_v_vvvo,2)*size(cc_space_v_vvvo,3), &
+      t1(1,gam), size(t1,1), 1d0, B1, size(B1,1)*size(B1,2)*size(B1,3))
 
   ! B1(a,b,beta,gam) -= cc_space_v_vvov(a,b,i,gam) * t1(i,beta)
-  call dgemm('N','N', nV*nV, nV, nO, &
+  call dgemm('N','N', int(nV*nV,4), int(nV,4), int(nO,4), &
              -1d0, X_vvvo, size(X_vvvo,1) * size(X_vvvo,2), &
                    t1    , size(t1,1), &
               0d0, Y_vvvv, size(Y_vvvv,1) * size(Y_vvvv,2))
@@ -1900,6 +1935,7 @@ subroutine compute_B1_gam(nO,nV,t1,t2,B1,gam)
 end
 
 subroutine compute_B1(nO,nV,t1,t2,B1)
+ use sizet
 
   implicit none
 
@@ -1917,7 +1953,8 @@ subroutine compute_B1(nO,nV,t1,t2,B1)
   double precision, intent(in)  :: t2(nO, nO, nV, nV)
   double precision, intent(out) :: B1(nV, nV, nV, nV)
 
-  integer :: a,tmp_a,b,k,l,c,d,tmp_c,tmp_d,i,j,u,v, beta, gam
+  integer(size_t) :: a,b,gam,i,beta
+  integer         :: tmp_a,k,l,c,d,tmp_c,tmp_d,j,u,v
 
   !B1 = 0d0
 
@@ -1971,14 +2008,14 @@ subroutine compute_B1(nO,nV,t1,t2,B1)
   !$omp end parallel
 
   ! B1(a,b,beta,gam) -= cc_space_v_vvvo(a,b,beta,i) * t1(i,gam) &
-  call dgemm('N','N', nV*nV*nV, nV, nO, &
-             -1d0, cc_space_v_vvvo, size(cc_space_v_vvvo,1) * size(cc_space_v_vvvo,2) * size(cc_space_v_vvvo,3), &
-                   t1      , size(t1,1), &
-              1d0, B1      , size(B1,1) * size(B1,2) * size(B1,3))
+  call dgemm('N', 'N', int(nV*nV*nV,4), int(nV,4), int(nO,4), -1d0, &
+      cc_space_v_vvvo, &
+      size(cc_space_v_vvvo,1)*size(cc_space_v_vvvo,2)*size(cc_space_v_vvvo,3), &
+      t1, size(t1,1), 1d0, B1, size(B1,1)*size(B1,2)*size(B1,3))
 
 
   ! B1(a,b,beta,gam) -= cc_space_v_vvov(a,b,i,gam) * t1(i,beta)
-  call dgemm('N','N', nV*nV*nV, nV, nO, &
+  call dgemm('N','N', int(nV*nV*nV,4), int(nV,4), int(nO,4), &
              -1d0, X_vvvo, size(X_vvvo,1) * size(X_vvvo,2) * size(X_vvvo,3), &
                    t1    , size(t1,1), &
               0d0, Y_vvvv, size(Y_vvvv,1) * size(Y_vvvv,2) * size(Y_vvvv,3))
@@ -2007,6 +2044,7 @@ end
 ! g_occ
 
 subroutine compute_g_occ(nO,nV,t1,t2,H_oo,g_occ)
+ use sizet
 
   implicit none
 
@@ -2022,7 +2060,8 @@ subroutine compute_g_occ(nO,nV,t1,t2,H_oo,g_occ)
   double precision, intent(in)  :: t2(nO, nO, nV, nV)
   double precision, intent(out) :: g_occ(nO, nO)
 
-  integer :: a,tmp_a,b,k,l,c,d,tmp_c,tmp_d,i,j,u,v, beta, gam
+  integer(size_t) :: a,i,j,u
+  integer         :: tmp_a,b,k,l,c,d,tmp_c,tmp_d,v,beta,gam
 
   !g_occ = 0d0
 
@@ -2041,7 +2080,7 @@ subroutine compute_g_occ(nO,nV,t1,t2,H_oo,g_occ)
   !  enddo
   !enddo
 
-  call dgemm('N','N',nO,nO,nV, &
+  call dgemm('N','N',int(nO,4),int(nO,4),int(nV,4), &
              1d0, t1, size(t1,1), &
                   cc_space_f_vo, size(cc_space_f_vo,1), &
              0d0, g_occ, size(g_occ,1))
@@ -2076,6 +2115,7 @@ end
 ! g_vir
 
 subroutine compute_g_vir(nO,nV,t1,t2,H_vv,g_vir)
+ use sizet
 
   implicit none
 
@@ -2091,7 +2131,8 @@ subroutine compute_g_vir(nO,nV,t1,t2,H_vv,g_vir)
   double precision, intent(in)  :: t2(nO, nO, nV, nV)
   double precision, intent(out) :: g_vir(nV, nV)
 
-  integer :: a,tmp_a,b,k,l,c,d,tmp_c,tmp_d,i,j,u,v, beta, gam
+  integer(size_t) :: a,b,i,beta
+  integer         :: tmp_a,k,l,c,d,tmp_c,tmp_d,j,u,v,gam
 
   !g_vir = 0d0
 
@@ -2110,7 +2151,7 @@ subroutine compute_g_vir(nO,nV,t1,t2,H_vv,g_vir)
   !  enddo
   !enddo
 
-  call dgemm('N','N',nV,nV,nO, &
+  call dgemm('N','N',int(nV,4),int(nV,4),int(nO,4), &
              -1d0, cc_space_f_vo , size(cc_space_f_vo,1), &
                    t1   , size(t1,1), &
               0d0, g_vir, size(g_vir,1))
@@ -2145,6 +2186,7 @@ end
 ! J1
 
 subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
+ use sizet
 
   implicit none
 
@@ -2161,7 +2203,8 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
   double precision, intent(in)  :: v_vvvo(nV,nV,nV,nO), v_vvoo(nV,nV,nO,nO)
   double precision, intent(out) :: J1(nO, nV, nV, nO)
 
-  integer :: a,tmp_a,b,k,l,c,d,tmp_c,tmp_d,i,j,u,v, beta, gam
+  integer(size_t) :: a,b,i,j,u,beta
+  integer         :: tmp_a,k,l,c,d,tmp_c,tmp_d,v,gam
 
   !J1 = 0d0
 
@@ -2226,7 +2269,7 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
   !$omp end do
   !$omp end parallel
 
-  call dgemm('N','N',nO*nV*nO,nV,nO, &
+  call dgemm('N','N',int(nO*nV*nO,4),int(nV,4),int(nO,4), &
             -1d0, X_ovoo, size(X_ovoo,1) * size(X_ovoo,2) * size(X_ovoo,3), &
                   t1    , size(t1,1), &
              0d0, Y_ovov, size(Y_ovov,1) * size(Y_ovov,2) * size(Y_ovov,3))
@@ -2250,7 +2293,7 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
   deallocate(X_ovoo)
 
   ! v_vvvo(b,a,beta,i) * t1(u,b)
-  call dgemm('N','N',nO,nV*nV*nO,nV, &
+  call dgemm('N','N',int(nO,4),int(nV*nV*nO,4),int(nV,4), &
              1d0, t1    , size(t1,1), &
                   v_vvvo, size(v_vvvo,1), &
              1d0, J1    , size(J1,1))
@@ -2287,7 +2330,7 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
   !$omp end do
   !$omp end parallel
 
-  call dgemm('N','T',nO*nV,nV*nO,nO*nV, &
+  call dgemm('N','T',int(nO*nV,4),int(nV*nO,4),int(nO*nV,4), &
              -1d0, Y_ovov, size(Y_ovov,1) * size(Y_ovov,2), &
                    X_voov, size(X_voov,1) * size(X_voov,2), &
               0d0, Z_ovvo, size(Z_ovvo,1) * size(Z_ovvo,2))
@@ -2337,7 +2380,7 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
   enddo
   !$omp end parallel
 
-  call dgemm('N','T',nO*nV,nV*nO,nV*nO, &
+  call dgemm('N','T',int(nO*nV,4),int(nV*nO,4),int(nV*nO,4), &
              1d0, X_ovvo, size(X_ovvo,1) * size(X_ovvo,2), &
                   Y_vovo, size(Y_vovo,1) * size(Y_vovo,2), &
              0d0, Z_ovvo, size(Z_ovvo,1) * size(Z_ovvo,2))
@@ -2366,6 +2409,7 @@ end
 ! K1
 
 subroutine compute_K1(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov,v_vvov,K1)
+ use sizet
 
   implicit none
 
@@ -2384,7 +2428,8 @@ subroutine compute_K1(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov,v_vvov,K1)
 
   double precision, allocatable :: X(:,:,:,:), Y(:,:,:,:), Z(:,:,:,:)
 
-  integer :: a,tmp_a,b,k,l,c,d,tmp_c,tmp_d,i,j,u,v, beta, gam
+  integer(size_t) :: a,b,i,j,u,beta
+  integer         :: tmp_a,k,l,c,d,tmp_c,tmp_d,v,gam
 
   !K1 = 0d0
 
@@ -2459,18 +2504,18 @@ subroutine compute_K1(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov,v_vvov,K1)
   enddo
   !$omp end parallel
 
-  call dgemm('N','N',nO*nV*nO,nV,nO, &
+  call dgemm('N','N',int(nO*nV*nO,4),int(nV,4),int(nO,4), &
             -1d0, v_ovoo, size(v_ovoo,1) * size(v_ovoo,2) * size(v_ovoo,3), &
                   t1    , size(t1,1), &
             1d0, K1    , size(K1,1) * size(K1,2) * size(K1,3))
 
-  call dgemm('N','N',nO,nV*nO*nV,nV, &
+  call dgemm('N','N',int(nO,4),int(nV*nO*nV,4),int(nV,4), &
              1d0, t1    , size(t1,1), &
                   v_vvov, size(v_vvov,1), &
              1d0, K1    , size(K1,1))
 
   ! Y(u,beta,b,j) * X(b,j,a,i) = Z(u,beta,a,i)
-  call dgemm('N','N',nV*nO,nO*nV,nV*nO, &
+  call dgemm('N','N',int(nV*nO,4),int(nO*nV,4),int(nV*nO,4), &
              1d0, Y, size(Y,1) * size(Y,2), &
                   X, size(X,1) * size(X,2), &
              0d0, Z, size(Z,1) * size(Z,2))

@@ -12,9 +12,10 @@ subroutine htilde_mu_mat_bi_ortho_tot_slow(key_j, key_i, Nint, htot)
   END_DOC
 
   use bitmasks
+  use sizet
 
   implicit none
-  integer, intent(in)           :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in) :: key_j(Nint,2),key_i(Nint,2)
   double precision, intent(out) :: htot
   double precision              :: hmono, htwoe, hthree
@@ -45,9 +46,10 @@ subroutine htilde_mu_mat_bi_ortho_slow(key_j, key_i, Nint, hmono, htwoe, hthree,
   END_DOC
 
   use bitmasks
+  use sizet
 
   implicit none
-  integer,           intent(in) :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in) :: key_i(Nint,2), key_j(Nint,2)
   double precision, intent(out) :: hmono, htwoe, hthree, htot
   integer                       :: degree 
@@ -106,15 +108,19 @@ subroutine double_htilde_mu_mat_bi_ortho_slow(Nint, key_j, key_i, hmono, htwoe, 
   END_DOC
 
   use bitmasks
+  use sizet
 
   implicit none
-  integer,           intent(in) :: Nint 
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in) :: key_j(Nint,2), key_i(Nint,2)
   double precision, intent(out) :: hmono, htwoe, htot
-  integer                       :: occ(Nint*bit_kind_size,2)
-  integer                       :: Ne(2), i, j, ii, jj, ispin, jspin, k, kk
-  integer                       :: degree,exc(0:2,2,2)
-  integer                       :: h1, p1, h2, p2, s1, s2
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
+  integer                       :: Ne(2), i, j, ispin, jspin, k, kk
+  integer(size_t)                :: ii, jj
+  integer                       :: degree
+  integer(size_t)                :: exc(0:2,2,2)
+  integer(size_t)                :: h1, p1, h2, p2
+  integer                       :: s1, s2
   integer                       :: other_spin(2)
   integer(bit_kind)             :: key_i_core(Nint,2)
   double precision              :: get_mo_two_e_integral_tc_int,phase
@@ -173,15 +179,19 @@ subroutine single_htilde_mu_mat_bi_ortho_slow(Nint, key_j, key_i, hmono, htwoe, 
   END_DOC
 
   use bitmasks
+  use sizet
 
   implicit none
-  integer,           intent(in) :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in) :: key_j(Nint,2), key_i(Nint,2)
   double precision, intent(out) :: hmono, htwoe, htot
-  integer                       :: occ(Nint*bit_kind_size,2)
-  integer                       :: Ne(2), i, j, ii, jj, ispin, jspin, k, kk
-  integer                       :: degree,exc(0:2,2,2)
-  integer                       :: h1, p1, h2, p2, s1, s2
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
+  integer                       :: Ne(2), i, j, ispin, jspin, k, kk
+  integer(size_t)                :: ii, jj
+  integer                       :: degree
+  integer(size_t)                :: exc(0:2,2,2)
+  integer(size_t)                :: h1, p1, h2, p2
+  integer                       :: s1, s2
   double precision              :: get_mo_two_e_integral_tc_int, phase
   double precision              :: direct_int, exchange_int_12, exchange_int_23, exchange_int_13
   integer                       :: other_spin(2)

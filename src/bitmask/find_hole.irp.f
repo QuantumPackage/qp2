@@ -5,13 +5,16 @@ logical function is_the_hole_in_det(key_in,ispin,i_hole)
  ! (1: alpha, 2: beta) in the determinant key_in.
  END_DOC
   use bitmasks
+  use sizet
   ! returns true if the electron ispin is absent from i_hole
  implicit none
- integer, intent(in) :: i_hole,ispin
+ integer(size_t), intent(in) :: i_hole
+ integer, intent(in) :: ispin
  integer(bit_kind), intent(in) :: key_in(N_int,2)
  integer(bit_kind) :: key_tmp(N_int)
  integer(bit_kind) :: itest(N_int)
- integer :: i,j,k
+ integer(size_t) :: i,k
+ integer :: j
  do i = 1, N_int
   itest(i) = 0_bit_kind
  enddo
@@ -39,13 +42,16 @@ logical function is_the_particl_in_det(key_in,ispin,i_particl)
  ! (1: alpha, 2: beta) in the determinant key_in.
  END_DOC
   use bitmasks
+  use sizet
   ! returns true if the electron ispin is absent from i_particl
  implicit none
- integer, intent(in) :: i_particl,ispin
+ integer(size_t), intent(in) :: i_particl
+ integer, intent(in) :: ispin
  integer(bit_kind), intent(in) :: key_in(N_int,2)
  integer(bit_kind) :: key_tmp(N_int)
  integer(bit_kind) :: itest(N_int)
- integer :: i,j,k
+ integer(size_t) :: i,k
+ integer :: j
  do i = 1, N_int
   itest(i) = 0_bit_kind
  enddo

@@ -1,3 +1,4 @@
+use sizet
 use map_module
 
 
@@ -56,7 +57,8 @@ BEGIN_PROVIDER [ type(map_type), mo_integrals_erf_map ]
   END_DOC
   integer(key_kind)              :: key_max
   integer(map_size_kind)         :: sze
-  call two_e_integrals_index(mo_num,mo_num,mo_num,mo_num,key_max)
+  call two_e_integrals_index(int(mo_num, size_t), int(mo_num, size_t), &
+      int(mo_num, size_t), int(mo_num, size_t), key_max)
   sze = key_max
   call map_init(mo_integrals_erf_map,sze)
   print*, 'MO erf map initialized'
@@ -64,6 +66,7 @@ END_PROVIDER
 
 subroutine insert_into_mo_integrals_erf_map(n_integrals,                 &
       buffer_i, buffer_values, thr)
+ use sizet
   use map_module
   implicit none
 
@@ -71,15 +74,15 @@ subroutine insert_into_mo_integrals_erf_map(n_integrals,                 &
   ! Create new entry into |MO| map, or accumulate in an existing entry
   END_DOC
 
-  integer, intent(in)                :: n_integrals
+  integer(size_t), intent(in)         :: n_integrals
   integer(key_kind), intent(inout)   :: buffer_i(n_integrals)
   real(integral_kind), intent(inout) :: buffer_values(n_integrals)
   real(integral_kind), intent(in)    :: thr
   call map_update(mo_integrals_erf_map, buffer_i, buffer_values, n_integrals, thr)
 end
 
- BEGIN_PROVIDER [ integer, mo_integrals_erf_cache_min ]
-&BEGIN_PROVIDER [ integer, mo_integrals_erf_cache_max ]
+ BEGIN_PROVIDER [ integer(size_t), mo_integrals_erf_cache_min ]
+&BEGIN_PROVIDER [ integer(size_t), mo_integrals_erf_cache_max ]
  implicit none
  BEGIN_DOC
  ! Min and max values of the MOs for which the integrals are in the cache
@@ -95,7 +98,7 @@ BEGIN_PROVIDER [ double precision, mo_integrals_erf_cache, (0:64*64*64*64) ]
  ! Cache of |MO| integrals for fast access
  END_DOC
  PROVIDE mo_two_e_integrals_erf_in_map
- integer                        :: i,j,k,l
+ integer(size_t)                :: i,j,k,l
  integer                        :: ii
  integer(key_kind)              :: idx
  real(integral_kind)            :: integral
@@ -110,9 +113,9 @@ BEGIN_PROVIDER [ double precision, mo_integrals_erf_cache, (0:64*64*64*64) ]
          !DIR$ FORCEINLINE
          call map_get(mo_integrals_erf_map,idx,integral)
          ii = l-mo_integrals_erf_cache_min
-         ii = ior( ishft(ii,6), k-mo_integrals_erf_cache_min)
-         ii = ior( ishft(ii,6), j-mo_integrals_erf_cache_min)
-         ii = ior( ishft(ii,6), i-mo_integrals_erf_cache_min)
+         ii = ior( ishft(ii,6), int(k-mo_integrals_erf_cache_min,4))
+         ii = ior( ishft(ii,6), int(j-mo_integrals_erf_cache_min,4))
+         ii = ior( ishft(ii,6), int(i-mo_integrals_erf_cache_min,4))
          mo_integrals_erf_cache(ii) = integral
        enddo
      enddo
@@ -124,21 +127,22 @@ END_PROVIDER
 
 
 double precision function get_mo_two_e_integral_erf(i,j,k,l,map)
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
   ! Returns one integral $\langle ij|kl \rangle$ in the |MO| basis
   END_DOC
-  integer, intent(in)            :: i,j,k,l
+  integer(size_t), intent(in)    :: i,j,k,l
   integer(key_kind)              :: idx
   integer                        :: ii
   type(map_type), intent(inout)  :: map
   real(integral_kind)            :: tmp
   PROVIDE mo_two_e_integrals_erf_in_map mo_integrals_erf_cache
   ii = l-mo_integrals_erf_cache_min
-  ii = ior(ii, k-mo_integrals_erf_cache_min)
-  ii = ior(ii, j-mo_integrals_erf_cache_min)
-  ii = ior(ii, i-mo_integrals_erf_cache_min)
+  ii = ior(ii, int(k-mo_integrals_erf_cache_min,4))
+  ii = ior(ii, int(j-mo_integrals_erf_cache_min,4))
+  ii = ior(ii, int(i-mo_integrals_erf_cache_min,4))
   if (iand(ii, -64) /= 0) then
     !DIR$ FORCEINLINE
     call two_e_integrals_index(i,j,k,l,idx)
@@ -147,20 +151,21 @@ double precision function get_mo_two_e_integral_erf(i,j,k,l,map)
     get_mo_two_e_integral_erf = dble(tmp)
   else
     ii = l-mo_integrals_erf_cache_min
-    ii = ior( ishft(ii,6), k-mo_integrals_erf_cache_min)
-    ii = ior( ishft(ii,6), j-mo_integrals_erf_cache_min)
-    ii = ior( ishft(ii,6), i-mo_integrals_erf_cache_min)
+    ii = ior( ishft(ii,6), int(k-mo_integrals_erf_cache_min,4))
+    ii = ior( ishft(ii,6), int(j-mo_integrals_erf_cache_min,4))
+    ii = ior( ishft(ii,6), int(i-mo_integrals_erf_cache_min,4))
     get_mo_two_e_integral_erf = mo_integrals_erf_cache(ii)
   endif
 end
 
 
 double precision function mo_two_e_integral_erf(i,j,k,l)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Returns one integral $\langle ij|kl \rangle$ in the |MO| basis
   END_DOC
-  integer, intent(in)            :: i,j,k,l
+  integer(size_t), intent(in)    :: i,j,k,l
   double precision               :: get_mo_two_e_integral_erf
   PROVIDE mo_two_e_integrals_erf_in_map mo_integrals_erf_cache
   !DIR$ FORCEINLINE
@@ -170,16 +175,17 @@ double precision function mo_two_e_integral_erf(i,j,k,l)
 end
 
 subroutine get_mo_two_e_integrals_erf(j,k,l,sze,out_val,map)
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
   ! Returns multiple integrals $\langle ij|kl \rangle$ in the |MO| basis, all
   ! i for j,k,l fixed.
   END_DOC
-  integer, intent(in)            :: j,k,l, sze
+  integer(size_t), intent(in)    :: j,k,l, sze
   double precision, intent(out)  :: out_val(sze)
   type(map_type), intent(inout)  :: map
-  integer                        :: i
+  integer(size_t)                :: i
   integer(key_kind)              :: hash(sze)
   real(integral_kind)            :: tmp_val(sze)
   PROVIDE mo_two_e_integrals_erf_in_map
@@ -201,6 +207,7 @@ subroutine get_mo_two_e_integrals_erf(j,k,l,sze,out_val,map)
 end
 
 subroutine get_mo_two_e_integrals_erf_ij(k,l,sze,out_array,map)
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
@@ -208,10 +215,11 @@ subroutine get_mo_two_e_integrals_erf_ij(k,l,sze,out_array,map)
   ! $\int i(1)j(2) \frac{1}{r_{12}} k(1)l(2)$
   ! i, j for k,l fixed.
   END_DOC
-  integer, intent(in)            :: k,l, sze
+  integer(size_t), intent(in)    :: k,l, sze
   double precision, intent(out)  :: out_array(sze,sze)
   type(map_type), intent(inout)  :: map
-  integer                        :: i,j,kk,ll,m
+  integer(size_t)                :: i,j,kk,ll
+  integer                        :: m
   integer(key_kind),allocatable  :: hash(:)
   integer  ,allocatable          :: pairs(:,:), iorder(:)
   real(integral_kind), allocatable :: tmp_val(:)
@@ -235,11 +243,11 @@ subroutine get_mo_two_e_integrals_erf_ij(k,l,sze,out_array,map)
 
   logical :: integral_is_in_map
   if (key_kind == 8) then
-    call i8sort(hash,iorder,kk)
+    call i8sort(hash,iorder,int(kk,4))
   else if (key_kind == 4) then
-    call isort(hash,iorder,kk)
+    call isort(hash,iorder,int(kk,4))
   else if (key_kind == 2) then
-    call i2sort(hash,iorder,kk)
+    call i2sort(hash,iorder,int(kk,4))
   endif
 
   call map_get_many(mo_integrals_erf_map, hash, tmp_val, kk)
@@ -256,6 +264,7 @@ end
 
 
 subroutine get_mo_two_e_integrals_erf_i1j1(k,l,sze,out_array,map)
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
@@ -263,10 +272,11 @@ subroutine get_mo_two_e_integrals_erf_i1j1(k,l,sze,out_array,map)
   ! $\int i(1)j(1) \frac{\erf(\mu * r_{12})}{r_{12}} k(2)l(2)$
   ! i, j for k,l fixed.
   END_DOC
-  integer, intent(in)            :: k,l, sze
+  integer(size_t), intent(in)    :: k,l, sze
   double precision, intent(out)  :: out_array(sze,sze)
   type(map_type), intent(inout)  :: map
-  integer                        :: i,j,kk,ll,m
+  integer(size_t)                :: i,j,kk,ll
+  integer                        :: m
   integer(key_kind),allocatable  :: hash(:)
   integer  ,allocatable          :: pairs(:,:), iorder(:)
   real(integral_kind), allocatable :: tmp_val(:)
@@ -290,11 +300,11 @@ subroutine get_mo_two_e_integrals_erf_i1j1(k,l,sze,out_array,map)
 
   logical :: integral_is_in_map
   if (key_kind == 8) then
-    call i8sort(hash,iorder,kk)
+    call i8sort(hash,iorder,int(kk,4))
   else if (key_kind == 4) then
-    call isort(hash,iorder,kk)
+    call isort(hash,iorder,int(kk,4))
   else if (key_kind == 2) then
-    call i2sort(hash,iorder,kk)
+    call i2sort(hash,iorder,int(kk,4))
   endif
 
   call map_get_many(mo_integrals_erf_map, hash, tmp_val, kk)
@@ -311,6 +321,7 @@ end
 
 
 subroutine get_mo_two_e_integrals_erf_coulomb_ii(k,l,sze,out_val,map)
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
@@ -319,10 +330,10 @@ subroutine get_mo_two_e_integrals_erf_coulomb_ii(k,l,sze,out_val,map)
   ! k(1)i(2) 1/r12 l(1)i(2) :: out_val(i1)
   ! for k,l fixed.
   END_DOC
-  integer, intent(in)            :: k,l, sze
+  integer(size_t), intent(in)    :: k,l, sze
   double precision, intent(out)  :: out_val(sze)
   type(map_type), intent(inout)  :: map
-  integer                        :: i
+  integer(size_t)                :: i
   integer(key_kind)              :: hash(sze)
   real(integral_kind)            :: tmp_val(sze)
   PROVIDE mo_two_e_integrals_erf_in_map
@@ -345,6 +356,7 @@ subroutine get_mo_two_e_integrals_erf_coulomb_ii(k,l,sze,out_val,map)
 end
 
 subroutine get_mo_two_e_integrals_erf_exch_ii(k,l,sze,out_val,map)
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
@@ -353,10 +365,10 @@ subroutine get_mo_two_e_integrals_erf_exch_ii(k,l,sze,out_val,map)
   ! $\int k(1)i(2) \frac{1}{r_{12}} i(1)l(2)$ :: out_val(i1)
   ! for k,l fixed.
   END_DOC
-  integer, intent(in)            :: k,l, sze
+  integer(size_t), intent(in)    :: k,l, sze
   double precision, intent(out)  :: out_val(sze)
   type(map_type), intent(inout)  :: map
-  integer                        :: i
+  integer(size_t)                :: i
   integer(key_kind)              :: hash(sze)
   real(integral_kind)            :: tmp_val(sze)
   PROVIDE mo_two_e_integrals_erf_in_map

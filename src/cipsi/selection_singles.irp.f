@@ -1,13 +1,15 @@
 use bitmasks
+use sizet
 
 subroutine select_singles(i_gen,hole_mask,particle_mask,fock_diag_tmp,E0,pt2_data,buf)
+ use sizet
   use bitmasks
   use selection_types
   implicit none
   BEGIN_DOC
 ! Select determinants connected to i_det by H
   END_DOC
-  integer, intent(in)             :: i_gen
+  integer(size_t), intent(in)   :: i_gen
   integer(bit_kind), intent(in)   :: hole_mask(N_int,2), particle_mask(N_int,2)
   double precision, intent(in)    :: fock_diag_tmp(mo_num)
   double precision, intent(in)    :: E0(N_states)
@@ -16,8 +18,10 @@ subroutine select_singles(i_gen,hole_mask,particle_mask,fock_diag_tmp,E0,pt2_dat
 
   logical, allocatable            :: banned(:,:), bannedOrb(:)
   double precision, allocatable   :: mat(:,:,:)
-  integer                         :: i, j, k
-  integer                         :: h1,h2,s1,s2,i1,i2,ib,sp
+  integer                         :: i, j
+  integer(size_t)                 :: k
+  integer                         :: h1
+  integer                         :: h2,s1,s2,i1,i2,ib,sp
   integer(bit_kind)               :: hole(N_int,2), particle(N_int,2), mask(N_int, 2)
   logical                         :: fullMatch, ok
 
@@ -36,8 +40,8 @@ subroutine select_singles(i_gen,hole_mask,particle_mask,fock_diag_tmp,E0,pt2_dat
   ! -----------------------------------
 
   integer                        :: N_holes(2), N_particles(2)
-  integer                        :: hole_list(N_int*bit_kind_size,2)
-  integer                        :: particle_list(N_int*bit_kind_size,2)
+  integer(size_t)                 :: hole_list(N_int*bit_kind_size,2)
+  integer(size_t)                 :: particle_list(N_int*bit_kind_size,2)
 
   call bitstring_to_list_ab(hole    , hole_list    , N_holes    , N_int)
   call bitstring_to_list_ab(particle, particle_list, N_particles, N_int)
@@ -45,7 +49,8 @@ subroutine select_singles(i_gen,hole_mask,particle_mask,fock_diag_tmp,E0,pt2_dat
   do sp=1,2
     do i=1, N_holes(sp)
       h1 = hole_list(i,sp)
-      call apply_hole(psi_det_generators(1,1,i_gen), sp, h1, mask, ok, N_int)
+      call apply_hole(psi_det_generators(1,1,i_gen), sp, int(h1,size_t), mask, &
+                      ok, N_int)
       bannedOrb = .true.
       do j=1,N_particles(sp)
         bannedOrb(particle_list(j, sp)) = .false.
@@ -61,6 +66,7 @@ end subroutine
 
 
 subroutine spot_hasBeen(mask, sp, det, i_gen, N, banned, fullMatch)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -77,12 +83,16 @@ subroutine spot_hasBeen(mask, sp, det, i_gen, N, banned, fullMatch)
   END_DOC
 
   integer(bit_kind),intent(in) :: mask(N_int, 2), det(N_int, 2, N)
-  integer, intent(in) :: i_gen, N, sp
+  integer, intent(in) :: sp
+  integer(size_t), intent(in) :: i_gen, N
   logical, intent(inout) :: banned(mo_num)
   logical, intent(out) :: fullMatch
 
 
-  integer :: i, j, na, nb, list(3), nt
+  integer(size_t) :: i, j
+  integer(size_t) :: na, nb
+  integer(size_t) :: list(3)
+  integer :: nt
   integer(bit_kind) :: myMask(N_int, 2), negMask(N_int, 2)
 
   fullMatch = .false.
@@ -122,6 +132,7 @@ end subroutine
 
 
 subroutine splash_p(mask, sp, det, coefs, N_sel, bannedOrb, vect)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -135,11 +146,14 @@ subroutine splash_p(mask, sp, det, coefs, N_sel, bannedOrb, vect)
 
   integer(bit_kind),intent(in) :: mask(N_int, 2), det(N_int,2,N_sel)
   double precision, intent(in) :: coefs(N_states, N_sel)
-  integer, intent(in) :: sp, N_sel
+  integer, intent(in) :: sp
+  integer(size_t), intent(in) :: N_sel
   logical, intent(inout) :: bannedOrb(mo_num)
   double precision, intent(inout)     :: vect(N_states, mo_num)
 
-  integer :: i, j, h(0:2,2), p(0:3,2), nt
+  integer(size_t) :: i, j
+  integer(size_t) :: h(0:2,2), p(0:3,2)
+  integer :: nt
   integer(bit_kind) :: perMask(N_int, 2), mobMask(N_int, 2), negMask(N_int, 2)
   integer(bit_kind) :: phasemask(N_int, 2)
 
@@ -183,6 +197,7 @@ end subroutine
 
 
 subroutine get_m2(gen, phasemask, bannedOrb, vect, mask, h, p, sp, coefs)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -199,8 +214,10 @@ subroutine get_m2(gen, phasemask, bannedOrb, vect, mask, h, p, sp, coefs)
   logical, intent(in) :: bannedOrb(mo_num)
   double precision, intent(in) :: coefs(N_states)
   double precision, intent(inout) :: vect(N_states, mo_num)
-  integer, intent(in) :: sp, h(0:2, 2), p(0:3, 2)
-  integer :: i, j, h1, h2, p1, p2, sfix, hfix, pfix, hmob, pmob, puti
+  integer, intent(in) :: sp
+  integer(size_t), intent(in) :: h(0:2, 2), p(0:3, 2)
+  integer(size_t) :: h1, h2, p1, p2, hfix, pfix, hmob, pmob, puti
+  integer :: i, j, sfix
   double precision :: hij
   double precision, external :: get_phase_bi, mo_two_e_integral
 
@@ -250,6 +267,7 @@ subroutine get_m2(gen, phasemask, bannedOrb, vect, mask, h, p, sp, coefs)
 end subroutine
 
 subroutine get_m1(gen, phasemask, bannedOrb, vect, mask, h, p, sp, coefs)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -266,8 +284,10 @@ subroutine get_m1(gen, phasemask, bannedOrb, vect, mask, h, p, sp, coefs)
   logical, intent(in) :: bannedOrb(mo_num)
   double precision, intent(in) :: coefs(N_states)
   double precision, intent(inout) :: vect(N_states, mo_num)
-  integer, intent(in) :: sp, h(0:2, 2), p(0:3, 2)
-  integer :: i, hole, p1, p2, sh
+  integer, intent(in) :: sp
+  integer(size_t), intent(in) :: h(0:2, 2), p(0:3, 2)
+  integer(size_t) :: i, hole, p1, p2
+  integer :: sh
   logical :: ok, lbanned(mo_num)
   integer(bit_kind) :: det(N_int, 2)
   double precision :: hij
@@ -320,6 +340,7 @@ subroutine get_m1(gen, phasemask, bannedOrb, vect, mask, h, p, sp, coefs)
 end subroutine
 
 subroutine get_m0(gen, phasemask, bannedOrb, vect, mask, h, p, sp, coefs)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -336,8 +357,9 @@ subroutine get_m0(gen, phasemask, bannedOrb, vect, mask, h, p, sp, coefs)
   logical, intent(in) :: bannedOrb(mo_num)
   double precision, intent(in) :: coefs(N_states)
   double precision, intent(inout) :: vect(N_states, mo_num)
-  integer, intent(in) :: sp, h(0:2, 2), p(0:3, 2)
-  integer :: i
+  integer, intent(in) :: sp
+  integer(size_t), intent(in) :: h(0:2, 2), p(0:3, 2)
+  integer(size_t) :: i
   logical :: ok, lbanned(mo_num)
   integer(bit_kind) :: det(N_int, 2)
   double precision :: hij

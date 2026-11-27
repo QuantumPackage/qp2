@@ -1,4 +1,7 @@
+use sizet
+
 subroutine save_erf_two_e_integrals_ao
+ use sizet
   BEGIN_DOC
   ! Saves the map of the AO range-separated (erf) two-electron
   ! integrals to the EZFIO file, in the work directory
@@ -7,7 +10,7 @@ subroutine save_erf_two_e_integrals_ao
   ! integrals are read back from the file at the next run.
   END_DOC
  implicit none
- integer :: i,j,k,l
+ integer(size_t) :: i,j,k,l
  PROVIDE ao_two_e_integrals_erf_in_map
  call ezfio_set_work_empty(.False.)
  call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints_erf',ao_integrals_erf_map)
@@ -15,6 +18,7 @@ subroutine save_erf_two_e_integrals_ao
 end
 
 subroutine save_erf_two_e_ints_ao_into_ints_ao
+ use sizet
   BEGIN_DOC
   ! Saves the map of the AO range-separated (erf) two-electron
   ! integrals to the EZFIO file, but in the file of the regular AO
@@ -24,7 +28,7 @@ subroutine save_erf_two_e_ints_ao_into_ints_ao
   ! the regular two-electron integrals.
   END_DOC
  implicit none
- integer :: i,j,k,l
+ integer(size_t) :: i,j,k,l
  PROVIDE ao_two_e_integrals_erf_in_map
  call ezfio_set_work_empty(.False.)
  call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints',ao_integrals_erf_map)

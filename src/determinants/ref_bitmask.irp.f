@@ -1,3 +1,4 @@
+use sizet
 BEGIN_PROVIDER [ double precision, ref_bitmask_one_e_energy ]
 
   use bitmasks
@@ -6,7 +7,7 @@ BEGIN_PROVIDER [ double precision, ref_bitmask_one_e_energy ]
   ! One-electron energy of the reference bitmask used in Slater rules
   END_DOC
 
-  integer                        :: occ(N_int*bit_kind_size,2)
+  integer(size_t)                :: occ(N_int*bit_kind_size,2)
   integer                        :: i
 
   call bitstring_to_list(ref_bitmask(1,1), occ(1,1), i, N_int)
@@ -33,7 +34,7 @@ BEGIN_PROVIDER [ double precision, ref_bitmask_kinetic_energy ]
   ! Kinetic energy of the reference bitmask used in Slater rules
   END_DOC
 
-  integer                        :: occ(N_int*bit_kind_size,2)
+  integer(size_t)                :: occ(N_int*bit_kind_size,2)
   integer                        :: i
 
   call bitstring_to_list(ref_bitmask(1,1), occ(1,1), i, N_int)
@@ -60,7 +61,7 @@ BEGIN_PROVIDER [ double precision, ref_bitmask_n_e_energy ]
   ! Nucleus-electron energy of the reference bitmask used in Slater rules
   END_DOC
 
-  integer                        :: occ(N_int*bit_kind_size,2)
+  integer(size_t)                :: occ(N_int*bit_kind_size,2)
   integer                        :: i
 
   call bitstring_to_list(ref_bitmask(1,1), occ(1,1), i, N_int)
@@ -87,7 +88,7 @@ BEGIN_PROVIDER [ double precision, ref_bitmask_two_e_energy ]
   ! Energy of the reference bitmask used in Slater rules
   END_DOC
 
-  integer                        :: occ(N_int*bit_kind_size,2)
+  integer(size_t)                :: occ(N_int*bit_kind_size,2)
   integer                        :: i,j
 
   call bitstring_to_list(ref_bitmask(1,1), occ(1,1), i, N_int)
@@ -125,7 +126,7 @@ END_PROVIDER
   ! Energy of the reference bitmask used in Slater rules
   END_DOC
 
-  integer                        :: occ(N_int*bit_kind_size,2)
+  integer(size_t)                :: occ(N_int*bit_kind_size,2)
   integer                        :: i,j
 
   call bitstring_to_list(ref_bitmask(1,1), occ(1,1), i, N_int)

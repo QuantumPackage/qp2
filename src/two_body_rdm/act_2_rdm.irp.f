@@ -39,7 +39,9 @@
   print*,'Reading act_2_rdm_ab_mo from disk ...'
   call read_array_two_rdm(n_act_orb,N_states,act_2_rdm_ab_mo,name_file)
  else
-  call orb_range_2_rdm_openmp(act_2_rdm_ab_mo,n_act_orb,n_act_orb,list_act,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+  call orb_range_2_rdm_openmp(act_2_rdm_ab_mo, int(n_act_orb,4), &
+      int(n_act_orb,4), list_act, ispin, psi_coef, &
+      size(psi_coef,2), size(psi_coef,1))
  endif
  if(write_two_body_rdm_ab)then
   print*,'Writing act_2_rdm_ab_mo on disk ...'
@@ -79,7 +81,9 @@
   print*,'Reading act_2_rdm_aa_mo from disk ...'
   call read_array_two_rdm(n_act_orb,N_states,act_2_rdm_aa_mo,name_file)
  else
-  call orb_range_2_rdm_openmp(act_2_rdm_aa_mo,n_act_orb,n_act_orb,list_act,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+  call orb_range_2_rdm_openmp(act_2_rdm_aa_mo, int(n_act_orb,4), &
+      int(n_act_orb,4), list_act, ispin, psi_coef, &
+      size(psi_coef,2), size(psi_coef,1))
  endif
  if(write_two_body_rdm_aa)then
   print*,'Writing act_2_rdm_aa_mo on disk ...'
@@ -120,7 +124,9 @@
   print*,'Reading act_2_rdm_bb_mo from disk ...'
   call read_array_two_rdm(n_act_orb,N_states,act_2_rdm_bb_mo,name_file)
  else
-  call orb_range_2_rdm_openmp(act_2_rdm_bb_mo,n_act_orb,n_act_orb,list_act,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+  call orb_range_2_rdm_openmp(act_2_rdm_bb_mo, int(n_act_orb,4), &
+      int(n_act_orb,4), list_act, ispin, psi_coef, &
+      size(psi_coef,2), size(psi_coef,1))
  endif
  if(write_two_body_rdm_bb)then
   print*,'Writing act_2_rdm_bb_mo on disk ...'
@@ -161,7 +167,9 @@
   print*,'Reading act_2_rdm_spin_trace_mo from disk ...'
   call read_array_two_rdm(n_act_orb,N_states,act_2_rdm_spin_trace_mo,name_file)
  else
-  call orb_range_2_rdm_openmp(act_2_rdm_spin_trace_mo,n_act_orb,n_act_orb,list_act,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+  call orb_range_2_rdm_openmp(act_2_rdm_spin_trace_mo, &
+      int(n_act_orb,4), int(n_act_orb,4), list_act, ispin, psi_coef, &
+      size(psi_coef,2), size(psi_coef,1))
  endif
  if(write_two_body_rdm_spin_trace)then
   print*,'Writing act_2_rdm_spin_trace_mo on disk ...'

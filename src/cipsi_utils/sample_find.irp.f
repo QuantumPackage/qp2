@@ -1,4 +1,7 @@
-integer function dress_find_sample(v, w)
+use sizet
+
+function dress_find_sample(v, w)
+  use sizet
   BEGIN_DOC
   ! Binary search on the cumulative weight array
   ! w(0:N_det_generators), assumed non-decreasing: returns the
@@ -17,8 +20,9 @@ integer function dress_find_sample(v, w)
   ! pt2_stoch_routines stays untouched.
   END_DOC
   implicit none
+  integer(size_t) :: dress_find_sample
   double precision, intent(in) :: v, w(0:N_det_generators)
-  integer :: i,l,r
+  integer(size_t) :: i,l,r
 
   l = 0
   r = N_det_generators

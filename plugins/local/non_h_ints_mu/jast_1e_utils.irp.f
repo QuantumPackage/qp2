@@ -3,11 +3,12 @@
 
 subroutine get_j1e_coef_fit_ao(dim_fit, coef_fit)
 
+  use sizet
   implicit none
-  integer         , intent(in)  :: dim_fit
+  integer(size_t)  , intent(in)  :: dim_fit
   double precision, intent(out) :: coef_fit(dim_fit)
 
-  integer                       :: i, ipoint
+  integer(size_t)               :: i, ipoint
   double precision              :: g
   double precision              :: t0, t1
   double precision, allocatable :: A(:,:), b(:), A_inv(:,:)
@@ -45,7 +46,8 @@ subroutine get_j1e_coef_fit_ao(dim_fit, coef_fit)
   allocate(u1e_tmp(n_points_final_grid))
   
   g = -0.5d0 * (dble(elec_num) - 1.d0) / dble(elec_num)
-  call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_u2e_ao, ao_num*ao_num, Pt, 1, 0.d0, u1e_tmp, 1)
+  call dgemv("T", ao_num*ao_num, int(n_points_final_grid, 4), g &
+            , int2_u2e_ao, ao_num*ao_num, Pt, 1, 0.d0, u1e_tmp, 1)
 
   FREE int2_u2e_ao
 
@@ -79,12 +81,13 @@ subroutine get_j1e_coef_fit_ao(dim_fit, coef_fit)
   ! solve Ax = b
 
   allocate(A_inv(ao_num,ao_num))
-  call get_inverse(A, ao_num, ao_num, A_inv, ao_num)
+  call get_inverse(A, int(ao_num, size_t), int(ao_num, size_t), &
+      A_inv, int(ao_num, size_t))
 
   ! coef_fit = A_inv x b
   call dgemv("N", ao_num, ao_num, 1.d0, A_inv, ao_num, b, 1, 0.d0, coef_fit, 1)
 
-  integer          :: j
+  integer(size_t)  :: j
   double precision :: tmp, acc, nrm
 
   acc = 0.d0
@@ -118,13 +121,17 @@ end
 
 subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
 
+  use sizet
   implicit none
-  integer         , intent(in)  :: dim_fit
+  integer(size_t)  , intent(in)  :: dim_fit
   double precision, intent(out) :: coef_fit(dim_fit,dim_fit)
 
-  integer                       :: i, j, k, l, ipoint
-  integer                       :: ij, kl, mn
-  integer                       :: info, n_svd, LWORK
+  integer                       :: k, l
+  integer(size_t)               :: i, j, ipoint
+  integer                       :: mn
+  integer(size_t)               :: ij, kl
+  integer                       :: info, LWORK
+  integer(size_t)               :: n_svd
   double precision              :: g
   double precision              :: t0, t1, svd_t0, svd_t1
   double precision              :: cutoff_svd, D1_inv
@@ -168,7 +175,8 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   allocate(u1e_tmp(n_points_final_grid))
   
   g = -0.5d0 * (dble(elec_num) - 1.d0) / dble(elec_num)
-  call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_u2e_ao, ao_num*ao_num, Pt, 1, 0.d0, u1e_tmp, 1)
+  call dgemv("T", ao_num*ao_num, int(n_points_final_grid, 4), g &
+            , int2_u2e_ao, ao_num*ao_num, Pt, 1, 0.d0, u1e_tmp, 1)
 
   FREE int2_u2e_ao
 
@@ -196,8 +204,10 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm( "T", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0  &
-            , tmp1(1,1,1), n_points_final_grid, tmp2(1,1,1), n_points_final_grid &
+  call dgemm( "T", "N", ao_num*ao_num, ao_num*ao_num &
+            , int(n_points_final_grid, 4), 1.d0 &
+            , tmp1(1,1,1), int(n_points_final_grid, 4) &
+            , tmp2(1,1,1), int(n_points_final_grid, 4) &
             , 0.d0, A(1,1,1,1), ao_num*ao_num)
 
   allocate(A_tmp(ao_num,ao_num,ao_num,ao_num))
@@ -212,7 +222,9 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
     u1e_tmp(ipoint) = u1e_tmp(ipoint)
   enddo
 
-  call dgemv("T", n_points_final_grid, ao_num*ao_num, 1.d0, tmp1(1,1,1), n_points_final_grid, u1e_tmp(1), 1, 0.d0, b(1), 1)
+  call dgemv("T", int(n_points_final_grid, 4), ao_num*ao_num, 1.d0 &
+            , tmp1(1,1,1), int(n_points_final_grid, 4), u1e_tmp(1), 1 &
+            , 0.d0, b(1), 1)
 
   deallocate(u1e_tmp)
   deallocate(tmp1, tmp2)
@@ -279,8 +291,8 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   !$OMP END PARALLEL
 
   ! A = A_inv
-  call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_svd, 1.d0 &
-            , U(1,1), ao_num*ao_num, Vt(1,1), ao_num*ao_num       &
+  call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, int(n_svd, 4) &
+            , 1.d0, U(1,1), ao_num*ao_num, Vt(1,1), ao_num*ao_num  &
             , 0.d0, A(1,1,1,1), ao_num*ao_num)
 
   deallocate(D, U, Vt)
@@ -315,11 +327,13 @@ end
 
 subroutine get_j1e_coef_fit_ao3(dim_fit, coef_fit)
 
+  use sizet
   implicit none
-  integer         , intent(in)  :: dim_fit
+  integer(size_t)  , intent(in)  :: dim_fit
   double precision, intent(out) :: coef_fit(dim_fit,3)
 
-  integer                       :: i, d, ipoint
+  integer                       :: d
+  integer(size_t)               :: i, ipoint
   double precision              :: g
   double precision              :: t0, t1
   double precision, allocatable :: A(:,:), b(:,:), A_inv(:,:)
@@ -358,7 +372,9 @@ subroutine get_j1e_coef_fit_ao3(dim_fit, coef_fit)
   
   g = -0.5d0 * (dble(elec_num) - 1.d0) / dble(elec_num)
   do d = 1, 3
-    call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_grad1_u2e_ao(1,1,1,d), ao_num*ao_num, Pt, 1, 0.d0, u1e_tmp(1,d), 1)
+    call dgemv("T", ao_num*ao_num, int(n_points_final_grid, 4), g &
+              , int2_grad1_u2e_ao(1,1,1,d), ao_num*ao_num, Pt, 1 &
+              , 0.d0, u1e_tmp(1,d), 1)
   enddo
 
   deallocate(Pa, Pb, Pt)
@@ -395,14 +411,15 @@ subroutine get_j1e_coef_fit_ao3(dim_fit, coef_fit)
   ! solve Ax = b
 
   allocate(A_inv(ao_num,ao_num))
-  call get_inverse(A, ao_num, ao_num, A_inv, ao_num)
+  call get_inverse(A, int(ao_num, size_t), int(ao_num, size_t), &
+      A_inv, int(ao_num, size_t))
 
   ! coef_fit = A_inv x b
   do d = 1, 3
     call dgemv("N", ao_num, ao_num, 1.d0, A_inv, ao_num, b(1,d), 1, 0.d0, coef_fit(1,d), 1)
   enddo
 
-  integer          :: j
+  integer(size_t)  :: j
   double precision :: tmp, acc, nrm
 
   acc = 0.d0

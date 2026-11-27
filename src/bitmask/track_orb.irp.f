@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [ double precision, mo_coef_begin_iteration, (ao_num,mo_num) ]
    implicit none
    BEGIN_DOC
@@ -25,14 +27,16 @@ subroutine initialize_mo_coef_begin_iteration
 end
 
 subroutine reorder_core_orb
+ use sizet
  implicit none
  BEGIN_DOC
 ! routines that takes the current :c:data:`mo_coef` and reorder the core orbitals (see :c:data:`list_core` and :c:data:`n_core_orb`) according to the overlap with :c:data:`mo_coef_begin_iteration`
  END_DOC
- integer :: i,j,iorb
- integer :: k,l
+ integer(size_t) :: i,j,iorb
+ integer(size_t) :: k,l
  double precision, allocatable :: accu(:)
- integer, allocatable :: index_core_orb(:),iorder(:)
+ integer(size_t), allocatable :: index_core_orb(:)
+ integer, allocatable :: iorder(:)
  double precision, allocatable :: mo_coef_tmp(:,:)
  allocate(accu(mo_num),index_core_orb(n_core_orb),iorder(mo_num))
  allocate(mo_coef_tmp(ao_num,mo_num))
@@ -54,7 +58,7 @@ subroutine reorder_core_orb
  enddo
 
  double precision :: x
- integer :: i1,i2
+ integer(size_t) :: i1,i2
  do j = 1, n_core_orb
   i1 = list_core(j)
   i2 = index_core_orb(j)

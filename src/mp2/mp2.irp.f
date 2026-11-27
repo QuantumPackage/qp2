@@ -45,6 +45,7 @@ subroutine compute_mp2(emp2)
   ! integrals are taken from mo_two_e_integrals_in_map. Orbitals
   ! listed in list_core_reverse or list_del_reverse are skipped.
   END_DOC
+  use sizet
   implicit none
   double precision, intent(out) :: emp2
   integer :: i,j,a,b, k, sze
@@ -84,8 +85,11 @@ subroutine compute_mp2(emp2)
 
       singles = singles + Fock_matrix_mo(b,j)*Fock_matrix_mo(b,j) / (ej - eb)
 
-      call get_mo_two_e_integrals_i1j1(j,b,mo_num,ijab,mo_integrals_map)
-      call get_mo_two_e_integrals_ij(b,j,mo_num,ijba,mo_integrals_map)
+            call get_mo_two_e_integrals_i1j1(int(j,size_t), int(b,size_t), &
+                                       int(mo_num,size_t), ijab, &
+                                       mo_integrals_map)
+            call get_mo_two_e_integrals_ij(int(b,size_t), int(j,size_t), &
+                                     int(mo_num,size_t), ijba, mo_integrals_map)
 
       do i=1,elec_alpha_num
         if (list_core_reverse(i) > 0) cycle
@@ -148,8 +152,11 @@ subroutine compute_mp2(emp2)
 
       singles = singles + Fock_matrix_mo(b,j)*Fock_matrix_mo(b,j) / (ej - eb)
 
-      call get_mo_two_e_integrals_i1j1(j,b,mo_num,ijab,mo_integrals_map)
-      call get_mo_two_e_integrals_ij(b,j,mo_num,ijba,mo_integrals_map)
+            call get_mo_two_e_integrals_i1j1(int(j,size_t), int(b,size_t), &
+                                       int(mo_num,size_t), ijab, &
+                                       mo_integrals_map)
+            call get_mo_two_e_integrals_ij(int(b,size_t), int(j,size_t), &
+                                     int(mo_num,size_t), ijba, mo_integrals_map)
 
       do i=j+1,elec_alpha_num
         if (list_core_reverse(i) > 0) cycle

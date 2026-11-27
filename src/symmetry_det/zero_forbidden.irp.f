@@ -37,6 +37,7 @@ subroutine pg_zero_state_irreps()
 end subroutine pg_zero_state_irreps
 
 subroutine pg_zero_state_irreps_work()
+  use sizet
   implicit none
   BEGIN_DOC
   ! Worker of :c:func:`pg_zero_state_irreps`: names the providers, so it
@@ -45,7 +46,8 @@ subroutine pg_zero_state_irreps_work()
   ! ``TOUCH psi_coef`` runs only when something was actually zeroed, so a
   ! wave function that is already clean does not force a re-sort.
   END_DOC
-  integer :: i, s, nzero
+  integer :: s
+  integer(size_t) :: i, nzero
 
   PROVIDE pg_det_irrep pg_state_irrep
   if (pg_label_ierr /= 0) return

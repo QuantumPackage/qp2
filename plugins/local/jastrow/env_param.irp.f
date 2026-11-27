@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -12,8 +13,8 @@
 
   implicit none
   logical :: exists
-  integer :: i
-  integer :: ierr
+  integer(size_t) :: i
+  integer         :: ierr
 
   PROVIDE ezfio_filename
 

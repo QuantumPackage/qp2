@@ -20,8 +20,8 @@
 ! Usage example:
 !   use spin_excitations_c
 !   integer(c_int64_t), allocatable :: buffer(:,:), spindet(:)
-!   integer,           allocatable :: idx(:), singles(:), doubles(:)
-!   integer :: n_singles, n_doubles, Nint, size_buffer
+!   integer(c_int64_t), allocatable :: idx(:), doubles(:), singles(:)
+!   integer(c_int64_t) :: n_singles, n_doubles, Nint, size_buffer
 !   ...
 !   call get_all_spin_singles(buffer, idx, spindet, Nint, size_buffer,
 !                               singles, n_singles)
@@ -310,18 +310,24 @@ contains
         Nint, size_buffer,                           &
         singles, n_singles)
     implicit none
-    integer,            intent(in)  :: Nint, size_buffer
+    integer(c_int64_t), intent(in)  :: Nint, size_buffer
     integer(c_int64_t), intent(in)  :: buffer(Nint, size_buffer)
-    integer,            intent(in)  :: idx(size_buffer)
+    integer(c_int64_t), intent(in)  :: idx(size_buffer)
     integer(c_int64_t), intent(in)  :: spindet(Nint)
-    integer,            intent(out) :: singles(size_buffer)
-    integer,            intent(out) :: n_singles
+    integer(c_int64_t), intent(out) :: singles(size_buffer)
+    integer(c_int64_t), intent(out) :: n_singles
+    integer             :: idx_tmp(size_buffer)
+    integer             :: singles_tmp(size_buffer)
+    integer             :: n_singles_tmp
 
+    idx_tmp = int(idx(1:size_buffer), c_int)
     call c_get_all_spin_singles_raw(           &
-          buffer, idx, spindet,                &
+          buffer, idx_tmp, spindet,            &
           int(Nint, c_int),                    &
           int(size_buffer, c_int),             &
-          singles, n_singles)
+          singles_tmp, n_singles_tmp)
+    n_singles = int(n_singles_tmp, c_int64_t)
+    singles(1:n_singles) = int(singles_tmp(1:n_singles), c_int64_t)
   end subroutine
 
   ! ------------------------------------------------------------------
@@ -344,18 +350,24 @@ contains
         Nint, size_buffer,                           &
         doubles, n_doubles)
     implicit none
-    integer,            intent(in)  :: Nint, size_buffer
+    integer(c_int64_t), intent(in)  :: Nint, size_buffer
     integer(c_int64_t), intent(in)  :: buffer(Nint, size_buffer)
-    integer,            intent(in)  :: idx(size_buffer)
+    integer(c_int64_t), intent(in)  :: idx(size_buffer)
     integer(c_int64_t), intent(in)  :: spindet(Nint)
-    integer,            intent(out) :: doubles(size_buffer)
-    integer,            intent(out) :: n_doubles
+    integer(c_int64_t), intent(out) :: doubles(size_buffer)
+    integer(c_int64_t), intent(out) :: n_doubles
+    integer             :: idx_tmp(size_buffer)
+    integer             :: doubles_tmp(size_buffer)
+    integer             :: n_doubles_tmp
 
+    idx_tmp = int(idx(1:size_buffer), c_int)
     call c_get_all_spin_doubles_raw(           &
-          buffer, idx, spindet,                &
+          buffer, idx_tmp, spindet,            &
           int(Nint, c_int),                    &
           int(size_buffer, c_int),             &
-          doubles, n_doubles)
+          doubles_tmp, n_doubles_tmp)
+    n_doubles = int(n_doubles_tmp, c_int64_t)
+    doubles(1:n_doubles) = int(doubles_tmp(1:n_doubles), c_int64_t)
   end subroutine
 
   ! ------------------------------------------------------------------
@@ -381,21 +393,31 @@ contains
         singles, doubles,                            &
         n_singles, n_doubles)
     implicit none
-    integer,            intent(in)  :: Nint, size_buffer
+    integer(c_int64_t), intent(in)  :: Nint, size_buffer
     integer(c_int64_t), intent(in)  :: buffer(Nint, size_buffer)
-    integer,            intent(in)  :: idx(size_buffer)
+    integer(c_int64_t), intent(in)  :: idx(size_buffer)
     integer(c_int64_t), intent(in)  :: spindet(Nint)
-    integer,            intent(out) :: singles(size_buffer)
-    integer,            intent(out) :: doubles(size_buffer)
-    integer,            intent(out) :: n_singles
-    integer,            intent(out) :: n_doubles
+    integer(c_int64_t), intent(out) :: singles(size_buffer)
+    integer(c_int64_t), intent(out) :: doubles(size_buffer)
+    integer(c_int64_t), intent(out) :: n_singles
+    integer(c_int64_t), intent(out) :: n_doubles
+    integer             :: idx_tmp(size_buffer)
+    integer             :: singles_tmp(size_buffer)
+    integer             :: doubles_tmp(size_buffer)
+    integer             :: n_singles_tmp
+    integer             :: n_doubles_tmp
 
+    idx_tmp = int(idx(1:size_buffer), c_int)
     call c_get_all_spin_singles_and_doubles_raw( &
-          buffer, idx, spindet,                  &
+          buffer, idx_tmp, spindet,              &
           int(Nint, c_int),                      &
           int(size_buffer, c_int),               &
-          singles, doubles,                      &
-          n_singles, n_doubles)
+          singles_tmp, doubles_tmp,              &
+          n_singles_tmp, n_doubles_tmp)
+    n_singles = int(n_singles_tmp, c_int64_t)
+    n_doubles = int(n_doubles_tmp, c_int64_t)
+    singles(1:n_singles) = int(singles_tmp(1:n_singles), c_int64_t)
+    doubles(1:n_doubles) = int(doubles_tmp(1:n_doubles), c_int64_t)
   end subroutine
 
 end module spin_excitations

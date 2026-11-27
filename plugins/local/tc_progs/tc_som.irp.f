@@ -28,8 +28,10 @@ end
 
 subroutine main()
 
+  use sizet
   implicit none
-  integer          :: i, i_HF, degree
+  integer(size_t)  :: i, i_HF
+  integer          :: degree
   double precision :: hmono_1, htwoe_1, hthree_1, htot_1
   double precision :: hmono_2, htwoe_2, hthree_2, htot_2
   double precision :: U_SOM

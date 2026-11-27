@@ -16,6 +16,7 @@
 !> which carries the per-|AO| normalization that libcint cannot represent.
 double precision function libcint_ao_two_e_integral(i, j, k, l, lr)
 
+  use sizet
   use libcint_block_cache, only: libcint_two_e_block
   implicit none
 
@@ -24,12 +25,12 @@ double precision function libcint_ao_two_e_integral(i, j, k, l, lr)
   ! Coulomb operator.
   END_DOC
 
-  integer, intent(in) :: i, j, k, l
+  integer(size_t), intent(in) :: i, j, k, l
   logical, intent(in) :: lr
 
   integer        :: si, sj, sk, sl, ni, nj, nk
   integer        :: dims(4)
-  integer        :: ip, jp, kp, lp
+  integer(size_t) :: ip, jp, kp, lp
   double precision, pointer :: blk(:)
 
   PROVIDE ao_shell ao_first_of_shell

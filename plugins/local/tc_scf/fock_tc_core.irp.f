@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [double precision, Fock_matrix_tc_mo_core_eri, (mo_num, mo_num)]
 
   BEGIN_DOC
@@ -333,7 +335,8 @@ END_PROVIDER
  END_DOC
  integer(omp_lock_kind)         :: lck(ao_num)
  integer(map_size_kind)         :: i8
- integer                        :: ii(8), jj(8), kk(8), ll(8), k2,i,j,k,l,k1
+ integer(size_t)                :: ii(8), jj(8), kk(8), ll(8)
+ integer                        :: k2,i,j,k,l,k1
  integer(cache_map_size_kind)   :: n_elements_max, n_elements
  integer(key_kind), allocatable :: keys(:)
  double precision, allocatable  :: values(:)
@@ -413,7 +416,8 @@ END_PROVIDER
  double precision               :: dm_core,exch_dm
  integer(omp_lock_kind)         :: lck(ao_num)
  integer(map_size_kind)         :: i8
- integer                        :: ii(8), jj(8), kk(8), ll(8), k2
+ integer(size_t)                :: ii(8), jj(8), kk(8), ll(8)
+ integer                        :: k2
  integer(cache_map_size_kind)   :: n_elements_max, n_elements
  integer(key_kind), allocatable :: keys(:)
  double precision, allocatable  :: values(:)

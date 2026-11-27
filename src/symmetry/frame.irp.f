@@ -1,3 +1,5 @@
+use sizet
+!
 ! Canonical frame.
 !
 ! Conventions fixed here (all geometric vectors are stored in the INPUT frame,
@@ -49,7 +51,7 @@ END_PROVIDER
   ! Eigenvector signs are fixed deterministically (largest component
   ! positive) so that repeated runs are byte-identical.
   END_DOC
-  integer :: i
+  integer(size_t) :: i
   double precision :: tensor(3,3), v(3), m
 
   ! Defaults first: IRPF90 sets the built flag after the body returns, so
@@ -113,7 +115,7 @@ END_PROVIDER
   ! the run would end on "element does not realise its permutation" instead
   ! of being treated as linear.
   END_DOC
-  integer :: i
+  integer(size_t) :: i
   double precision :: v(3), d, ax(3)
 
   pg_is_linear = .false.
@@ -138,7 +140,7 @@ END_PROVIDER
   ! normal is the inertia eigenvector with the largest eigenvalue (for a
   ! planar molecule that eigenvalue belongs to the normal).
   END_DOC
-  integer :: i
+  integer(size_t) :: i
   double precision :: v(3), d
 
   pg_is_planar = .true.
@@ -177,7 +179,7 @@ END_PROVIDER
   ! axes, so no attempt is made to impose a "standard cube orientation".
   END_DOC
   integer :: znum(nucl_num), ierr, n_max, n_axes
-  integer :: i
+  integer(size_t) :: i
   double precision :: zaxis(3), xaxis(3), yaxis(3)
   double precision :: d
 
@@ -186,7 +188,7 @@ END_PROVIDER
   enddo
 
   ! Step 3-4: z.
-  call pg_proper_scan(nucl_num, nucl_coord, znum, pg_center, &
+  call pg_proper_scan(int(nucl_num, size_t), nucl_coord, znum, pg_center, &
        pg_inertia_eval, pg_inertia_evec, pg_tol, 2000, &
        n_max, n_axes, zaxis, pg_is_linear, ierr)
   if (ierr /= 0) then
@@ -202,16 +204,18 @@ END_PROVIDER
     ! Highest-order proper axis; already sign-oriented by pg_proper_scan.
   else if (pg_is_planar) then
     zaxis(1:3) = pg_plane_normal(1:3)
-    call pg_orient_axis(nucl_num, nucl_coord, pg_center, pg_tol, zaxis)
+    call pg_orient_axis(int(nucl_num, size_t), nucl_coord, &
+         pg_center, pg_tol, zaxis)
   else
     zaxis(1:3) = pg_inertia_evec(1:3,3)
-    call pg_orient_axis(nucl_num, nucl_coord, pg_center, pg_tol, zaxis)
+    call pg_orient_axis(int(nucl_num, size_t), nucl_coord, &
+         pg_center, pg_tol, zaxis)
   endif
 
   ! Step 5: x. Branch (a) is the Mulliken rule (x perpendicular to the
   ! molecular plane) and it must be tested first: it is the only
   ! deterministic choice for a planar D2h molecule.
-  call pg_select_x(nucl_num, nucl_coord, znum, pg_center, &
+  call pg_select_x(int(nucl_num, size_t), nucl_coord, znum, pg_center, &
        pg_inertia_evec, pg_tol, 2000, zaxis, pg_is_planar, &
        pg_plane_normal, xaxis, ierr)
   if (ierr /= 0) then
@@ -379,14 +383,15 @@ end subroutine pg_reflection
 ! with a non-zero projection; fall back to pg_fix_sign.
 !-----------------------------------------------------------------------
 subroutine pg_orient_axis(nat, xyz, ctr, tol, axis)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Deterministic orientation of an axis.
   END_DOC
-  integer, intent(in) :: nat
+  integer(size_t), intent(in) :: nat
   double precision, intent(in) :: xyz(nat,3), ctr(3), tol
   double precision, intent(inout) :: axis(3)
-  integer :: i
+  integer(size_t) :: i
   double precision :: v(3), d
 
   do i = 1, nat
@@ -408,19 +413,22 @@ end subroutine pg_orient_axis
 !-----------------------------------------------------------------------
 subroutine pg_build_candidates(nat, xyz, znum, ctr, evecs, ncandmax, &
      cand, ncand, ierr)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Build the list of candidate symmetry axes / plane normals.
   ! ``ierr`` = 1 when the list overflows ``ncandmax``.
   END_DOC
-  integer, intent(in) :: nat, ncandmax
+  integer(size_t), intent(in) :: nat
+  integer, intent(in) :: ncandmax
   double precision, intent(in) :: xyz(nat,3), ctr(3), evecs(3,3)
   integer, intent(in) :: znum(nat)
   double precision, intent(out) :: cand(3,ncandmax)
   integer, intent(out) :: ncand, ierr
   double precision :: base(3,ncandmax), v(3), w(3), c(3)
   double precision :: dn
-  integer :: i, j, nbase
+  integer(size_t) :: i, j
+  integer :: nbase
 
   ncand = 0
   nbase = 0
@@ -511,16 +519,18 @@ end subroutine pg_add_direction
 ! nearest-partner map is not injective.
 !-----------------------------------------------------------------------
 subroutine pg_maps_to_self(nat, xyz, znum, ctr, rot, tol, perm, ok)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Test rot r_i == r_{perm(i)} for every atom.
   END_DOC
-  integer, intent(in) :: nat
+  integer(size_t), intent(in) :: nat
   double precision, intent(in) :: xyz(nat,3), ctr(3), rot(3,3), tol
   integer, intent(in) :: znum(nat)
-  integer, intent(out) :: perm(nat)
+  integer(size_t), intent(out) :: perm(nat)
   logical, intent(out) :: ok
-  integer :: i, j, jmin, used(nat)
+  integer(size_t) :: i, j, jmin
+  integer :: used(nat)
   double precision :: v(3), w(3), d, dmin
 
   ok = .false.
@@ -555,6 +565,7 @@ end subroutine pg_maps_to_self
 !-----------------------------------------------------------------------
 subroutine pg_proper_scan(nat, xyz, znum, ctr, evals, evecs, tol, &
      ncandmax, n_max, n_axes_max, axis, linear, ierr)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Enumerate proper rotations of order 2..32 among the candidate
@@ -568,7 +579,8 @@ subroutine pg_proper_scan(nat, xyz, znum, ctr, evals, evecs, tol, &
   ! 31 is the largest odd order <= 32, and 4*31 = 124 still fits the
   ! 160-element arrays; the tables shipped are C31v and D31h.
   END_DOC
-  integer, intent(in) :: nat, ncandmax
+  integer(size_t), intent(in) :: nat
+  integer, intent(in) :: ncandmax
   double precision, intent(in) :: xyz(nat,3), ctr(3), evals(3), evecs(3,3), tol
   integer, intent(in) :: znum(nat)
   logical, intent(in) :: linear
@@ -576,8 +588,10 @@ subroutine pg_proper_scan(nat, xyz, znum, ctr, evals, evecs, tol, &
   double precision, intent(out) :: axis(3)
   double precision, parameter :: pi = 3.1415926535897932d0
   double precision :: cand(3,ncandmax), rot(3,3), v(3)
-  integer :: order(ncandmax), perm(nat), ncap
-  integer :: ncand, i, j, k, n, kbest, icount, ibest
+  integer :: order(ncandmax), ncap
+  integer(size_t) :: perm(nat)
+  integer :: ncand, k, n, kbest, ibest
+  integer(size_t) :: i, j, icount
   double precision :: d, dmetric, dbest, gap, gapbest
   logical :: ok
 
@@ -661,11 +675,13 @@ end subroutine pg_proper_scan
 !-----------------------------------------------------------------------
 subroutine pg_select_x(nat, xyz, znum, ctr, evecs, tol, ncandmax, &
      zaxis, planar, pnormal, xaxis, ierr)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Choose the canonical x from the branches below.
   END_DOC
-  integer, intent(in) :: nat, ncandmax
+  integer(size_t), intent(in) :: nat
+  integer, intent(in) :: ncandmax
   double precision, intent(in) :: xyz(nat,3), ctr(3), evecs(3,3), tol
   integer, intent(in) :: znum(nat)
   double precision, intent(in) :: zaxis(3), pnormal(3)
@@ -674,8 +690,9 @@ subroutine pg_select_x(nat, xyz, znum, ctr, evecs, tol, ncandmax, &
   integer, intent(out) :: ierr
   double precision, parameter :: pi = 3.1415926535897932d0
   double precision :: cand(3,ncandmax), rot(3,3), v(3)
-  integer :: perm(nat)
-  integer :: ncand, i, j, k, best, icount, ibest
+  integer(size_t) :: perm(nat)
+  integer :: ncand, k, best, ibest
+  integer(size_t) :: i, j, icount
   double precision :: d, dmetric, dbest
   logical :: ok
 

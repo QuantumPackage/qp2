@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [double precision, mu_erf_dft]
  implicit none
  BEGIN_DOC
@@ -17,7 +19,7 @@ BEGIN_PROVIDER [double precision, mu_of_r_dft, (n_points_final_grid)]
  ! set from mu_erf_dft ("cst"), mu_of_r_hf ("hf"), mu_rsc_of_r ("rsc")
  ! or mu_grad_rho ("grad_rho"); stops otherwise.
  END_DOC
- integer :: i
+ integer(size_t) :: i
  if(mu_dft_type == "Read")then
    call ezfio_get_mu_of_r_mu_of_r_disk(mu_of_r_dft)
  else
@@ -49,7 +51,7 @@ BEGIN_PROVIDER [double precision, mu_rsc_of_r, (n_points_final_grid)]
  ! (dm_dft_alpha_beta_at_r). mu_rs_c is defined in
  ! dft_utils_func/mu_of_r_dft.irp.f.
  END_DOC
- integer :: i
+ integer(size_t) :: i
  double precision :: mu_rs_c,rho,r(3), dm_a, dm_b
  do i = 1, n_points_final_grid
   r(1) = final_grid_points(1,i)
@@ -69,7 +71,7 @@ BEGIN_PROVIDER [double precision, mu_grad_rho, (n_points_final_grid)]
  ! mu_grad_rho_func(r), defined in dft_utils_func/mu_of_r_dft.irp.f
  ! (eta * |grad rho| / rho with eta = mu_erf; 1.d-10 where rho < 1.d-12).
  END_DOC
- integer :: i
+ integer(size_t) :: i
  double precision :: mu_grad_rho_func, r(3)
  do i = 1, n_points_final_grid
   r(1) = final_grid_points(1,i)
@@ -91,7 +93,7 @@ BEGIN_PROVIDER [double precision, mu_of_r_dft_average]
  ! The 1.d+3 threshold is a cutoff to avoid unphysical values of
  ! mu_of_r_dft (author, 2026-10-31).
  END_DOC
- integer :: i
+ integer(size_t) :: i
  double precision :: mu_rs_c,rho,r(3), dm_a, dm_b
  mu_of_r_dft_average = 0.d0
  do i = 1, n_points_final_grid

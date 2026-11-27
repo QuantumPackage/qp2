@@ -9,11 +9,12 @@ double precision function num_v_ij_u_cst_mu_env(i, j, ipoint)
   !
   END_DOC
 
+  use sizet
   implicit none
 
-  integer, intent(in)        :: i, j, ipoint
+  integer(size_t), intent(in)  :: i, j, ipoint
 
-  integer                    :: jpoint
+  integer(size_t)          :: jpoint
   double precision           :: r1(3), r2(3)
 
   double precision, external :: ao_value
@@ -45,11 +46,13 @@ double precision function num_int2_u2_env2(i, j, ipoint)
   !
   END_DOC
 
+  use sizet
   implicit none
 
-  integer, intent(in)        :: i, j, ipoint
+  integer(size_t), intent(in)  :: i, j, ipoint
 
-  integer                    :: jpoint, i_fit
+  integer(size_t)          :: jpoint
+  integer                 :: i_fit
   double precision           :: r1(3), r2(3)
   double precision           :: dx, dy, dz, r12, x2, tmp1, tmp2, tmp3, coef, expo
 
@@ -100,11 +103,13 @@ double precision function num_int2_grad1u2_grad2u2_env2(i, j, ipoint)
   !
   END_DOC
 
+  use sizet
   implicit none
 
-  integer, intent(in)        :: i, j, ipoint
+  integer(size_t), intent(in)  :: i, j, ipoint
 
-  integer                    :: jpoint, i_fit
+  integer(size_t)          :: jpoint
+  integer                 :: i_fit
   double precision           :: r1(3), r2(3)
   double precision           :: dx, dy, dz, r12, x2, tmp1, tmp2, tmp3, coef, expo
 
@@ -156,11 +161,12 @@ double precision function num_v_ij_erf_rk_cst_mu_env(i, j, ipoint)
   !
   END_DOC
 
+  use sizet
   implicit none
 
-  integer, intent(in)        :: i, j, ipoint
+  integer(size_t), intent(in)  :: i, j, ipoint
 
-  integer                    :: jpoint
+  integer(size_t)          :: jpoint
   double precision           :: r1(3), r2(3)
   double precision           :: dx, dy, dz, r12, tmp1, tmp2
 
@@ -201,12 +207,13 @@ subroutine num_x_v_ij_erf_rk_cst_mu_env(i, j, ipoint, integ)
   !
   END_DOC
 
+  use sizet
   implicit none
 
-  integer,          intent(in)  :: i, j, ipoint
+  integer(size_t),  intent(in)  :: i, j, ipoint
   double precision, intent(out) :: integ(3)
 
-  integer                       :: jpoint
+  integer(size_t)               :: jpoint
   double precision              :: r1(3), r2(3), grad(3)
   double precision              :: dx, dy, dz, r12, tmp1, tmp2
   double precision              :: tmp_x, tmp_y, tmp_z
@@ -256,12 +263,13 @@ subroutine num_int2_grad1_u12_ao(i, j, ipoint, integ)
   !
   END_DOC
 
+  use sizet
   implicit none
 
-  integer,          intent(in)  :: i, j, ipoint
+  integer(size_t),  intent(in)  :: i, j, ipoint
   double precision, intent(out) :: integ(3)
 
-  integer                       :: jpoint
+  integer(size_t)               :: jpoint
   double precision              :: tmp, r1(3), r2(3), grad(3)
   double precision              :: tmp_x, tmp_y, tmp_z
 
@@ -305,11 +313,12 @@ double precision function num_grad12_j12(i, j, ipoint)
   END_DOC
 
 
+  use sizet
   implicit none
 
-  integer, intent(in)        :: i, j, ipoint
+  integer(size_t), intent(in)  :: i, j, ipoint
 
-  integer                    :: jpoint
+  integer(size_t)          :: jpoint
   double precision           :: r1(3), r2(3)
   double precision           :: tmp_x, tmp_y, tmp_z, r12
   double precision           :: dx1_v1, dy1_v1, dz1_v1, grad_u12(3)
@@ -371,11 +380,12 @@ double precision function num_u12sq_envsq(i, j, ipoint)
   END_DOC
 
 
+  use sizet
   implicit none
 
-  integer, intent(in)        :: i, j, ipoint
+  integer(size_t), intent(in)  :: i, j, ipoint
 
-  integer                    :: jpoint
+  integer(size_t)          :: jpoint
   double precision           :: r1(3), r2(3)
   double precision           :: tmp_x, tmp_y, tmp_z, r12
   double precision           :: dx1_v1, dy1_v1, dz1_v1, grad_u12(3)
@@ -437,11 +447,12 @@ double precision function num_u12_grad1_u12_env_grad1_env(i, j, ipoint)
   END_DOC
 
 
+  use sizet
   implicit none
 
-  integer, intent(in)        :: i, j, ipoint
+  integer(size_t), intent(in)  :: i, j, ipoint
 
-  integer                    :: jpoint
+  integer(size_t)          :: jpoint
   double precision           :: r1(3), r2(3)
   double precision           :: tmp_x, tmp_y, tmp_z, r12
   double precision           :: dx1_v1, dy1_v1, dz1_v1, grad_u12(3)
@@ -502,12 +513,13 @@ subroutine num_int2_u_grad1u_total_env2(i, j, ipoint, integ)
   !
   END_DOC
 
+  use sizet
   implicit none
 
-  integer,          intent(in)  :: i, j, ipoint
+  integer(size_t),  intent(in)  :: i, j, ipoint
   double precision, intent(out) :: integ(3)
 
-  integer                       :: jpoint
+  integer(size_t)               :: jpoint
   double precision              :: r1(3), r2(3), grad(3)
   double precision              :: dx, dy, dz, r12, tmp0, tmp1, tmp2
   double precision              :: tmp_x, tmp_y, tmp_z

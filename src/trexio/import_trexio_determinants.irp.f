@@ -1,3 +1,4 @@
+
 program import_trexio_determinants
   BEGIN_DOC
   ! Reads the determinants and coefficients of a wave
@@ -11,6 +12,7 @@ program import_trexio_determinants
 end
 
 subroutine run
+ use sizet
   use trexio
   use map_module
   implicit none
@@ -38,8 +40,10 @@ subroutine run
   ! Determinants
   ! ------------
 
-  integer :: nint, nstates
-  integer :: bufsize
+  integer(size_t) :: nint
+  integer :: nstates
+  integer(size_t) :: bufsize
+  integer :: bufsize4
 
   rc = trexio_has_state_num(f)
   if (rc == TREXIO_SUCCESS) then
@@ -59,8 +63,9 @@ subroutine run
 
   integer*8 :: offset, icount
 
-  rc = trexio_read_determinant_num(f, bufsize)
+  rc = trexio_read_determinant_num(f, bufsize4)
   call trexio_assert(rc, TREXIO_SUCCESS)
+  bufsize = int(bufsize4, size_t)
   print *, 'N_det = ', bufsize
   N_det = bufsize
 
@@ -95,7 +100,8 @@ subroutine run
 !    endif
 !  enddo
 
-  call save_wavefunction_general(bufsize,nstates,det_buffer,size(coef_buffer,1),coef_buffer)
+    call save_wavefunction_general(bufsize, nstates, det_buffer, &
+                                 int(size(coef_buffer,1),size_t), coef_buffer)
 
 
 end

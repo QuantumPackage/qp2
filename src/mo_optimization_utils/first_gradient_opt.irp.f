@@ -1,6 +1,9 @@
+use sizet
+
 ! First gradient
 
 subroutine first_gradient_opt(n,v_grad)
+ use sizet
 
   include 'constants.h'
 
@@ -23,7 +26,7 @@ subroutine first_gradient_opt(n,v_grad)
   END_DOC
 
   ! in
-  integer, intent(in) :: n
+  integer(size_t), intent(in) :: n
   ! n : integer, n = mo_num*(mo_num-1)/2
   
   ! out
@@ -33,7 +36,7 @@ subroutine first_gradient_opt(n,v_grad)
   ! internal
   double precision, allocatable :: grad(:,:),A(:,:)
   double precision :: norm
-  integer :: i,p,q,r,s,t
+  integer(size_t) :: i,p,q,r,s,t
   integer :: istate
   ! grad : double precision matrix containing the gradient before the permutation
   ! A : double precision matrix containing the gradient after the permutation

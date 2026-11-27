@@ -1,6 +1,9 @@
+use sizet
+
 ! v1
 
 subroutine ccsd_par_t_spin(nO,nV,t1,t2,f_o,f_v,f_ov,v_ooov,v_vvoo,v_vvvo,energy)
+ use sizet
 
   implicit none
 
@@ -22,7 +25,7 @@ subroutine ccsd_par_t_spin(nO,nV,t1,t2,f_o,f_v,f_ov,v_ooov,v_vvoo,v_vvvo,energy)
 
   double precision, allocatable :: t3(:,:,:,:,:,:), s(:,:)
   double precision              :: e_t, e_st, e_dt, delta_abc, delta
-  integer                       :: i,j,k,l,m,a,b,c,d,e
+  integer(size_t)               :: i,j,k,l,m,a,b,c,d,e
 
   allocate(t3(nO,nO,nO,nV,nV,nV), s(nO,nV))
 
@@ -141,6 +144,7 @@ end
 ! v2
 
 subroutine ccsd_par_t_spin_v2(nO,nV,t1,t2,f_o,f_v,f_ov,v_ooov,v_vvoo,energy)
+ use sizet
 
   implicit none
 
@@ -163,7 +167,7 @@ subroutine ccsd_par_t_spin_v2(nO,nV,t1,t2,f_o,f_v,f_ov,v_ooov,v_vvoo,energy)
   double precision, allocatable :: A_vovv(:,:,:,:), v_vvvo(:,:,:,:)
   double precision, allocatable :: T_voov(:,:,:,:), B_ooov(:,:,:,:)
   double precision              :: e_st, delta_abc, delta, ta, tb
-  integer                       :: i,j,k,l,m,a,b,c,d,e
+  integer(size_t)               :: i,j,k,l,m,a,b,c,d,e
 
   allocate(t3_bc(nO,nO,nO,nV), s(nO,nV), e_t(nV), e_dt(nV))
   allocate(A_vovv(nV,nO,nV,nV),v_vvvo(nV,nV,nV,nO),T_voov(nV,nO,nO,nV),B_ooov(nO,nO,nO,nV))
@@ -171,7 +175,7 @@ subroutine ccsd_par_t_spin_v2(nO,nV,t1,t2,f_o,f_v,f_ov,v_ooov,v_vvoo,energy)
   call gen_v_spin(cc_nV_m,cc_nV_m,cc_nV_m,cc_nO_m, &
        cc_nV_S,cc_nV_S,cc_nV_S,cc_nO_S, &
        cc_list_vir_spin,cc_list_vir_spin,cc_list_vir_spin,cc_list_occ_spin, &
-       nV,nV,nV,nO, v_vvvo)
+       int(nV,4),int(nV,4),int(nV,4),int(nO,4), v_vvvo)
   
   ! Init 
   s = 0d0

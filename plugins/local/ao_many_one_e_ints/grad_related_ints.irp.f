@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -10,7 +11,7 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu, (ao_num, ao_num, n_points
   END_DOC
 
   implicit none
-  integer          :: i, j, ipoint
+  integer(size_t)  :: i, j, ipoint
   double precision :: r(3)
   double precision :: int_mu, int_coulomb
   double precision :: wall0, wall1
@@ -69,7 +70,7 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_transp, (n_points_final_gr
   END_DOC
 
   implicit none
-  integer          :: i, j, ipoint
+  integer(size_t)  :: i, j, ipoint
   double precision :: r(3)
   double precision :: int_mu, int_coulomb
   double precision :: wall0, wall1
@@ -124,7 +125,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp, (3, ao_num, ao_num,
   END_DOC
 
   implicit none
-  integer          :: i, j, ipoint
+  integer(size_t)  :: i, j, ipoint
   double precision :: r(3), ints(3), ints_coulomb(3)
   double precision :: wall0, wall1
 
@@ -181,7 +182,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu, (ao_num, ao_num, n_poin
   END_DOC
 
   implicit none
-  integer          :: i, j, ipoint
+  integer(size_t)  :: i, j, ipoint
   double precision :: wall0, wall1
 
   print *, ' providing x_v_ij_erf_rk_cst_mu ...'
@@ -212,7 +213,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_transp, (ao_num, ao_num,
   END_DOC
 
   implicit none
-  integer          :: i, j, ipoint
+  integer(size_t)  :: i, j, ipoint
   double precision :: wall0, wall1
 
   print *, ' providing x_v_ij_erf_rk_cst_mu_transp ...'
@@ -243,7 +244,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_transp_bis, (n_points_fi
   END_DOC
 
   implicit none
-  integer          :: i, j, ipoint
+  integer(size_t)  :: i, j, ipoint
   double precision :: wall0, wall1
 
   print *, ' providing x_v_ij_erf_rk_cst_mu_transp_bis ...'
@@ -276,7 +277,7 @@ BEGIN_PROVIDER [ double precision, d_dx_v_ij_erf_rk_cst_mu_tmp, (3, n_points_fin
   END_DOC
 
  implicit none
- integer          :: i, j, ipoint
+ integer(size_t)  :: i, j, ipoint
  double precision :: r(3), ints(3), ints_coulomb(3)
  double precision :: wall0, wall1
 
@@ -326,7 +327,7 @@ BEGIN_PROVIDER [ double precision, d_dx_v_ij_erf_rk_cst_mu, (n_points_final_grid
   END_DOC
 
   implicit none
-  integer          :: i, j, ipoint
+  integer(size_t)  :: i, j, ipoint
   double precision :: wall0, wall1
 
   print *, ' providing d_dx_v_ij_erf_rk_cst_mu ...'
@@ -360,7 +361,7 @@ BEGIN_PROVIDER [ double precision, x_d_dx_v_ij_erf_rk_cst_mu_tmp, (3, n_points_f
   END_DOC
 
   implicit none
-  integer          :: i, j, ipoint
+  integer(size_t)  :: i, j, ipoint
   double precision :: r(3), ints(3), ints_coulomb(3)
   double precision :: wall0, wall1
 
@@ -410,7 +411,7 @@ BEGIN_PROVIDER [ double precision, x_d_dx_v_ij_erf_rk_cst_mu, (n_points_final_gr
   END_DOC
 
   implicit none
-  integer          :: i, j, ipoint
+  integer(size_t)  :: i, j, ipoint
   double precision :: wall0, wall1
 
   print *, ' providing x_d_dx_v_ij_erf_rk_cst_mu ...'

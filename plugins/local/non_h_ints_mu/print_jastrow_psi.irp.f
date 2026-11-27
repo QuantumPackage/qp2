@@ -1,6 +1,7 @@
 program print_jastrow_psi
+ use sizet
  implicit none
- integer :: i,j,a,b
+ integer(size_t) :: i,j,a,b
  do i = 1, elec_beta_num ! r2
   do j = 1, elec_alpha_num ! r1
    do a = elec_beta_num+1, mo_num ! r2

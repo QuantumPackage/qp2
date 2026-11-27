@@ -1,3 +1,5 @@
+use sizet
+
 ! -*- mode: f90 -*-
 !=======================================================================
 ! Window size of the OpenMP PT2 walk
@@ -223,6 +225,7 @@ END_PROVIDER
 
 
 subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
+ use sizet
   use selection_types
   use c_functions, only: qp_epoch_c
   implicit none
@@ -238,7 +241,7 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
 ! `N_in' is the number of determinants to select (0 for qp_run pt2).
   END_DOC
 
-  integer, intent(in)            :: N_in
+  integer(size_t), intent(in)       :: N_in
   double precision, intent(in)   :: relative_error, E(N_states)
   type(pt2_type), intent(inout)  :: pt2_data, pt2_data_err
 
@@ -246,8 +249,10 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
   type(selection_buffer), allocatable :: b_workers(:)
   type(pt2_type), allocatable         :: pt2_data_I(:), pt2_data_S(:), pt2_data_S2(:)
 
-  integer                         :: i, j, k, N, bsize, nproc_target, pos_warm, ii
-  integer                         :: g_warm, maxF
+  integer(size_t)                   :: i, N, bsize, pos_warm, ii
+  integer                           :: j, k, nproc_target
+  integer(size_t)                   :: g_warm
+  integer                           :: maxF
   double precision                :: state_average_weight_save(N_states), mem, rss, &
                                      mem_shared, mem_worker
 
@@ -286,7 +291,7 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
     return
   endif
 
-  N = max(N_in,1) * N_states
+  N = max(N_in, int(1, size_t)) * N_states
   state_average_weight_save(:) = state_average_weight(:)
   if (int(N,8)*2_8 > huge(1)) then
     print *,  irp_here, ': integer too large'
@@ -303,7 +308,7 @@ subroutine pt2_stochastic(E, pt2_data, pt2_data_err, relative_error, N_in)
   ASSERT (associated(b%val))
 
   ! Storage of the per-task local buffers, as in the legacy slave.
-  bsize = min(N, (elec_alpha_num*(mo_num-elec_alpha_num))**2)
+  bsize = min(N, int((elec_alpha_num*(mo_num-elec_alpha_num))**2, size_t))
 
   do pt2_stoch_istate=1,N_states
     state_average_weight(:) = 0.d0
@@ -540,6 +545,7 @@ end subroutine
 
 subroutine pt2_omp_walk(E, relative_error, pt2_data, pt2_data_err, b, b_workers, &
                         pt2_data_I, pt2_data_S, pt2_data_S2, pos_warm, nproc_target)
+ use sizet
   use selection_types
   implicit none
   BEGIN_DOC
@@ -561,21 +567,23 @@ subroutine pt2_omp_walk(E, relative_error, pt2_data, pt2_data_err, b, b_workers,
   type(pt2_type), intent(inout)           :: pt2_data_I(N_det_generators)
   type(pt2_type), intent(inout)           :: pt2_data_S(pt2_N_teeth+1)
   type(pt2_type), intent(inout)           :: pt2_data_S2(pt2_N_teeth+1)
-  integer, intent(in)                     :: pos_warm
+  integer(size_t), intent(in)             :: pos_warm
   integer, intent(in)                     :: nproc_target
 
   type(pt2_type)                 :: pt2_data_teeth
-  integer                        :: n, i, p, c, t, U, pos, hi, j, g
+  integer(size_t)                :: n, i, p, c, t, U, pos, hi, g
+  integer                        :: j
   integer                        :: maxF, ntask, k, ioff, itask
   double precision               :: v, avg, avg2, avg3(N_states), eqt, E0, v0, n0(N_states)
   double precision               :: eqta(N_states)
   double precision               :: time, time1, time0
   logical, allocatable           :: d(:)
-  integer, allocatable           :: tpos(:), tsub(:)
+  integer(size_t), allocatable   :: tpos(:)
+  integer, allocatable           :: tsub(:)
   type(pt2_type), allocatable    :: pt2_sub(:,:)
   logical                        :: do_exit, stop_now, walk_stop
   logical, external              :: qp_stop
-  integer, external              :: pt2_find_sample_lr
+  integer(size_t), external      :: pt2_find_sample_lr
 
   character(len=20) :: str_error1, str_error2, str_error3, str_error4
   character(len=20) :: format_value1, format_value2, format_value3, format_value4
@@ -847,6 +855,7 @@ end subroutine
 
 
 subroutine pt2_omp_task(pos, j, b_workers, b, pt2_out)
+ use sizet
   use omp_lib
   use selection_types
   implicit none
@@ -871,12 +880,14 @@ subroutine pt2_omp_task(pos, j, b_workers, b, pt2_out)
 ! have kept).
   END_DOC
 
-  integer, intent(in)                     :: pos, j
+  integer(size_t), intent(in)              :: pos
+  integer, intent(in)                      :: j
   type(selection_buffer), intent(inout)   :: b_workers(nthreads_pt2+1)
   type(selection_buffer), intent(inout)   :: b
   type(pt2_type), intent(inout)           :: pt2_out
 
-  integer :: g, it
+  integer(size_t) :: g
+  integer         :: it
 
   g = pt2_J(pos)
 
@@ -926,6 +937,7 @@ end subroutine
 
 
 subroutine pt2_omp_merge(src, dst)
+ use sizet
   use selection_types
   implicit none
   BEGIN_DOC
@@ -944,7 +956,7 @@ subroutine pt2_omp_merge(src, dst)
 
   type(selection_buffer), intent(in)    :: src
   type(selection_buffer), intent(inout) :: dst
-  integer :: i
+  integer(size_t) :: i
   logical, external :: pt2_omp_lt
 
   if (src%cur == 0) return
@@ -953,10 +965,10 @@ subroutine pt2_omp_merge(src, dst)
     if (dst%cur == dst%N) then
       ! Cheap reject on the value only, then the exact tie-break.
       if (src%val(i) > dst%mini) cycle
-      if (.not. pt2_omp_lt(src, i, dst, 1)) cycle
+      if (.not. pt2_omp_lt(src, i, dst, 1_size_t)) cycle
       dst%val(1) = src%val(i)
       dst%det(1:N_int,1:2,1) = src%det(1:N_int,1:2,i)
-      call pt2_omp_sift_down(dst, 1)
+      call pt2_omp_sift_down(dst, 1_size_t)
     else
       dst%cur = dst%cur + 1
       dst%val(dst%cur) = src%val(i)
@@ -971,6 +983,7 @@ end subroutine
 
 
 logical function pt2_omp_lt(b1, i1, b2, i2)
+ use sizet
   use selection_types
   implicit none
   BEGIN_DOC
@@ -989,8 +1002,9 @@ logical function pt2_omp_lt(b1, i1, b2, i2)
   END_DOC
 
   type(selection_buffer), intent(in) :: b1, b2
-  integer, intent(in)                :: i1, i2
-  integer                            :: k, s
+  integer(size_t), intent(in)        :: i1, i2
+  integer(size_t)                    :: k
+  integer                            :: s
 
   pt2_omp_lt = .false.
 
@@ -1015,6 +1029,7 @@ end function
 
 
 subroutine pt2_omp_sift_up(b, i)
+ use sizet
   use selection_types
   implicit none
   BEGIN_DOC
@@ -1023,9 +1038,9 @@ subroutine pt2_omp_sift_up(b, i)
   END_DOC
 
   type(selection_buffer), intent(inout) :: b
-  integer, intent(in)                   :: i
+  integer(size_t), intent(in)           :: i
 
-  integer          :: k, p
+  integer(size_t)  :: k, p
   double precision :: val_tmp
   integer(8)       :: det_tmp(N_int,2)
   logical, external :: pt2_omp_lt
@@ -1047,6 +1062,7 @@ end subroutine
 
 
 subroutine pt2_omp_sift_down(b, i)
+ use sizet
   use selection_types
   implicit none
   BEGIN_DOC
@@ -1057,9 +1073,9 @@ subroutine pt2_omp_sift_down(b, i)
   END_DOC
 
   type(selection_buffer), intent(inout) :: b
-  integer, intent(in)                   :: i
+  integer(size_t), intent(in)           :: i
 
-  integer          :: k, l, largest
+  integer(size_t)  :: k, l, largest
   double precision :: val_tmp
   integer(8)       :: det_tmp(N_int,2)
   logical, external :: pt2_omp_lt
@@ -1086,6 +1102,7 @@ end subroutine
 
 
 subroutine pt2_omp_sort(b)
+ use sizet
   use selection_types
   implicit none
   BEGIN_DOC
@@ -1100,7 +1117,7 @@ subroutine pt2_omp_sort(b)
 
   type(selection_buffer), intent(inout) :: b
 
-  integer          :: n, nmwen
+  integer(size_t)  :: n, nmwen
   double precision :: val_tmp
   integer(8)       :: det_tmp(N_int,2)
 
@@ -1116,7 +1133,7 @@ subroutine pt2_omp_sort(b)
     b%det(1:N_int,1:2,1) = det_tmp(1:N_int,1:2)
     n = n - 1
     b%cur = n
-    call pt2_omp_sift_down(b, 1)
+    call pt2_omp_sift_down(b, 1_size_t)
   enddo
   b%cur = nmwen
 

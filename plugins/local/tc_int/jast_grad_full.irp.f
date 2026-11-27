@@ -1,7 +1,10 @@
 
+use sizet
+
 ! ---
 
 subroutine get_grad1_u12_for_tc(ipoint, n_grid2, resx, resy, resz, res)
+  use sizet
 
   BEGIN_DOC
   !
@@ -19,10 +22,11 @@ subroutine get_grad1_u12_for_tc(ipoint, n_grid2, resx, resy, resz, res)
   include 'constants.include.F'
 
   implicit none
-  integer,          intent(in)  :: ipoint, n_grid2
+  integer(size_t),  intent(in)  :: ipoint, n_grid2
   double precision, intent(out) :: resx(n_grid2), resy(n_grid2), resz(n_grid2), res(n_grid2)
 
-  integer                       :: jpoint, i_nucl, p, mpA, npA, opA, pp
+  integer(size_t)              :: jpoint
+  integer                       :: i_nucl, p, mpA, npA, opA, pp
   integer                       :: powmax1, powmax, powmax2
   double precision              :: r1(3), r2(3)
   double precision              :: tmp, tmp1, tmp2, tmp11, tmp22
@@ -45,17 +49,19 @@ end
 ! ---
 
 subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
+  use sizet
 
   include 'constants.include.F'
 
   implicit none
-  integer         , intent(in)  :: n_grid2
+  integer(size_t), intent(in)  :: n_grid2
   double precision, intent(in)  :: r1(3)
   double precision, intent(out) :: gradx(n_grid2)
   double precision, intent(out) :: grady(n_grid2)
   double precision, intent(out) :: gradz(n_grid2)
 
-  integer                       :: jpoint, i_nucl, p, mpA, npA, opA
+  integer(size_t)              :: jpoint
+  integer                       :: i_nucl, p, mpA, npA, opA
   double precision              :: r2(3)
   double precision              :: dx, dy, dz, r12, tmp
   double precision              :: rn(3), f1A, grad1_f1A(3), f2A, g12, grad1_g12(3)

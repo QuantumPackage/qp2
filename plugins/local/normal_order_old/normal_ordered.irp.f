@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -13,12 +14,13 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
   implicit none
 
-  integer                        :: i, ii, ipoint
-  integer                        :: h1, p1, h2, p2
+  integer(size_t)                :: i, ipoint
+  integer                        :: ii
+  integer(size_t)                :: h1, p1, h2, p2
   integer                        :: hh1, hh2, pp1, pp2
   integer                        :: Ne(2)
   double precision               :: wall0, wall1, walli, wallf
-  integer,           allocatable :: occ(:,:)
+  integer(size_t), allocatable :: occ(:,:)
   integer(bit_kind), allocatable :: key_i_core(:,:)
 
   PROVIDE mo_class
@@ -148,9 +150,11 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
       enddo ! ii
 
-      call dgemm( 'T', 'N', mo_num*mo_num, mo_num, 3*n_points_final_grid, 1.d0 &
-                , int2_grad1_u12_bimo_t_tmp(1,1,1,1), 3*n_points_final_grid    &
-                , tmp1(1,1,1), 3*n_points_final_grid                           &
+      call dgemm( 'T', 'N', mo_num*mo_num, mo_num &
+                , int(3*n_points_final_grid, 4), 1.d0 &
+                , int2_grad1_u12_bimo_t_tmp(1,1,1,1) &
+                , int(3*n_points_final_grid, 4) &
+                , tmp1(1,1,1), int(3*n_points_final_grid, 4) &
                 , 1.d0, tmp(1,1,1,h1), mo_num*mo_num)
 
       do pp1 = 1, n_act_orb
@@ -179,9 +183,11 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
         enddo ! ii
 
-        call dgemm( 'T', 'N', mo_num, mo_num, n_points_final_grid, 1.d0   &
-                  , mos_l_in_r_array_transp_tmp(1,1), n_points_final_grid &
-                  , tmp2(1,1), n_points_final_grid                        &
+        call dgemm( 'T', 'N', mo_num, mo_num, int(n_points_final_grid, 4) &
+                  , 1.d0 &
+                  , mos_l_in_r_array_transp_tmp(1,1) &
+                  , int(n_points_final_grid, 4) &
+                  , tmp2(1,1), int(n_points_final_grid, 4) &
                   , 1.d0, tmp(1,1,p1,h1), mo_num)
 
       enddo ! p1
@@ -249,9 +255,11 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
         enddo ! ii
 
-        call dgemm( 'T', 'N', mo_num*mo_num, mo_num, 3*n_points_final_grid, 0.5d0 &
-                  , int2_grad1_u12_bimo_t_tmp(1,1,1,1), 3*n_points_final_grid     &
-                  , tmp1(1,1,1), 3*n_points_final_grid                            &
+        call dgemm( 'T', 'N', mo_num*mo_num, mo_num &
+                  , int(3*n_points_final_grid, 4), 0.5d0 &
+                  , int2_grad1_u12_bimo_t_tmp(1,1,1,1) &
+                  , int(3*n_points_final_grid, 4) &
+                  , tmp1(1,1,1), int(3*n_points_final_grid, 4) &
                   , 1.d0, tmp(1,1,1,h1), mo_num*mo_num)
 
         do pp1 = 1, n_act_orb
@@ -280,9 +288,11 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
           enddo ! ii
 
-          call dgemm( 'T', 'N', mo_num, mo_num, n_points_final_grid, 0.5d0  &
-                    , mos_l_in_r_array_transp_tmp(1,1), n_points_final_grid &
-                    , tmp2(1,1), n_points_final_grid                        &
+          call dgemm( 'T', 'N', mo_num, mo_num, int(n_points_final_grid, 4) &
+                    , 0.5d0 &
+                    , mos_l_in_r_array_transp_tmp(1,1) &
+                    , int(n_points_final_grid, 4) &
+                    , tmp2(1,1), int(n_points_final_grid, 4) &
                     , 1.d0, tmp(1,1,p1,h1), mo_num)
 
         enddo ! p1
@@ -297,7 +307,7 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
     endif
 
     tmp = -0.5d0 * tmp
-    call sum_A_At(tmp(1,1,1,1), mo_num*mo_num)
+    call sum_A_At(tmp(1,1,1,1), int(mo_num, size_t)*mo_num)
 
     call wall_time(wall1)
     print*,' Wall time for aba_contraction', wall1-wall0
@@ -355,9 +365,11 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
       enddo ! ii
 
-      call dgemm( 'T', 'N', mo_num*mo_num, mo_num, 3*n_points_final_grid, 1.d0 &
-                , int2_grad1_u12_bimo_t_tmp(1,1,1,1), 3*n_points_final_grid    &
-                , tmp1(1,1,1), 3*n_points_final_grid                           &
+      call dgemm( 'T', 'N', mo_num*mo_num, mo_num &
+                , int(3*n_points_final_grid, 4), 1.d0 &
+                , int2_grad1_u12_bimo_t_tmp(1,1,1,1) &
+                , int(3*n_points_final_grid, 4) &
+                , tmp1(1,1,1), int(3*n_points_final_grid, 4) &
                 , 1.d0, tmp(1,1,1,h1), mo_num*mo_num)
 
       do pp1 = 1, n_act_orb
@@ -382,9 +394,11 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
         enddo ! ii
 
-        call dgemm( 'T', 'N', mo_num, mo_num, n_points_final_grid, 1.d0   &
-                  , mos_l_in_r_array_transp_tmp(1,1), n_points_final_grid &
-                  , tmp2(1,1), n_points_final_grid                        &
+        call dgemm( 'T', 'N', mo_num, mo_num, int(n_points_final_grid, 4) &
+                  , 1.d0 &
+                  , mos_l_in_r_array_transp_tmp(1,1) &
+                  , int(n_points_final_grid, 4) &
+                  , tmp2(1,1), int(n_points_final_grid, 4) &
                   , 1.d0, tmp(1,1,p1,h1), mo_num)
 
       enddo ! p1
@@ -506,9 +520,11 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
         enddo ! ii
 
-        call dgemm( 'T', 'N', mo_num*mo_num, mo_num, 3*n_points_final_grid, 1.d0 &
-                  , int2_grad1_u12_bimo_t_tmp(1,1,1,1), 3*n_points_final_grid    &
-                  , tmp1(1,1,1), 3*n_points_final_grid                           &
+        call dgemm( 'T', 'N', mo_num*mo_num, mo_num &
+                  , int(3*n_points_final_grid, 4), 1.d0 &
+                  , int2_grad1_u12_bimo_t_tmp(1,1,1,1) &
+                  , int(3*n_points_final_grid, 4) &
+                  , tmp1(1,1,1), int(3*n_points_final_grid, 4) &
                   , 1.d0, tmp(1,1,1,h1), mo_num*mo_num)
 
         tmp1 = 0.d0
@@ -535,9 +551,11 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
         enddo ! ii
 
-        call dgemm( 'T', 'N', mo_num, mo_num*mo_num, 3*n_points_final_grid, 1.d0 &
-                  , tmp1(1,1,1), 3*n_points_final_grid                           &
-                  , int2_grad1_u12_bimo_t_tmp(1,1,1,1), 3*n_points_final_grid    &
+        call dgemm( 'T', 'N', mo_num, mo_num*mo_num &
+                  , int(3*n_points_final_grid, 4), 1.d0 &
+                  , tmp1(1,1,1), int(3*n_points_final_grid, 4) &
+                  , int2_grad1_u12_bimo_t_tmp(1,1,1,1) &
+                  , int(3*n_points_final_grid, 4) &
                   , 0.d0, tmp_3d(1,1,1), mo_num)
   
         do p1 = 1, mo_num
@@ -581,9 +599,11 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
           enddo ! ii
 
-          call dgemm( 'T', 'N', mo_num, mo_num, n_points_final_grid, 1.d0   &
-                    , mos_l_in_r_array_transp_tmp(1,1), n_points_final_grid &
-                    , tmp2(1,1), n_points_final_grid                        &
+          call dgemm( 'T', 'N', mo_num, mo_num, int(n_points_final_grid, 4) &
+                    , 1.d0 &
+                    , mos_l_in_r_array_transp_tmp(1,1) &
+                    , int(n_points_final_grid, 4) &
+                    , tmp2(1,1), int(n_points_final_grid, 4) &
                     , 1.d0, tmp(1,1,p1,h1), mo_num)
 
           tmp1 = 0.d0
@@ -620,14 +640,18 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
           enddo ! ii
 
-          call dgemm( 'T', 'N', mo_num, mo_num, 3*n_points_final_grid, 1.d0       &
-                    , int2_grad1_u12_bimo_t_tmp(1,1,1,h1), 3*n_points_final_grid  &
-                    , tmp1(1,1,1), 3*n_points_final_grid                          &
+          call dgemm( 'T', 'N', mo_num, mo_num, int(3*n_points_final_grid, 4) &
+                    , 1.d0 &
+                    , int2_grad1_u12_bimo_t_tmp(1,1,1,h1) &
+                    , int(3*n_points_final_grid, 4) &
+                    , tmp1(1,1,1), int(3*n_points_final_grid, 4) &
                     , 1.d0, tmp(1,1,p1,h1), mo_num)
 
-          call dgemm( 'T', 'N', mo_num, mo_num, n_points_final_grid, 1.d0   &
-                    , tmp2(1,1), n_points_final_grid                        &
-                    , mos_r_in_r_array_transp_tmp(1,1), n_points_final_grid &
+          call dgemm( 'T', 'N', mo_num, mo_num, int(n_points_final_grid, 4) &
+                    , 1.d0 &
+                    , tmp2(1,1), int(n_points_final_grid, 4) &
+                    , mos_r_in_r_array_transp_tmp(1,1) &
+                    , int(n_points_final_grid, 4) &
                     , 1.d0, tmp(1,1,p1,h1), mo_num)
 
         enddo ! p1
@@ -697,9 +721,11 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
           enddo ! ii
 
-          call dgemm( 'T', 'N', mo_num*mo_num, mo_num, 3*n_points_final_grid, 0.5d0 &
-                    , int2_grad1_u12_bimo_t_tmp(1,1,1,1), 3*n_points_final_grid     &
-                    , tmp1(1,1,1), 3*n_points_final_grid                            &
+          call dgemm( 'T', 'N', mo_num*mo_num, mo_num &
+                    , int(3*n_points_final_grid, 4), 0.5d0 &
+                    , int2_grad1_u12_bimo_t_tmp(1,1,1,1) &
+                    , int(3*n_points_final_grid, 4) &
+                    , tmp1(1,1,1), int(3*n_points_final_grid, 4) &
                     , 1.d0, tmp(1,1,1,h1), mo_num*mo_num)
 
           tmp1 = 0.d0
@@ -726,9 +752,11 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
           enddo ! ii
 
-          call dgemm( 'T', 'N', mo_num, mo_num*mo_num, 3*n_points_final_grid, 0.5d0 &
-                    , tmp1(1,1,1), 3*n_points_final_grid                            &
-                    , int2_grad1_u12_bimo_t_tmp(1,1,1,1), 3*n_points_final_grid     &
+          call dgemm( 'T', 'N', mo_num, mo_num*mo_num &
+                    , int(3*n_points_final_grid, 4), 0.5d0 &
+                    , tmp1(1,1,1), int(3*n_points_final_grid, 4) &
+                    , int2_grad1_u12_bimo_t_tmp(1,1,1,1) &
+                    , int(3*n_points_final_grid, 4) &
                     , 0.d0, tmp_3d(1,1,1), mo_num)
 
           do p1 = 1, mo_num
@@ -770,9 +798,11 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
             enddo ! ii
 
-            call dgemm( 'T', 'N', mo_num, mo_num, n_points_final_grid, 0.5d0  &
-                      , mos_l_in_r_array_transp_tmp(1,1), n_points_final_grid &
-                      , tmp2(1,1), n_points_final_grid                        &
+            call dgemm( 'T', 'N', mo_num, mo_num, int(n_points_final_grid, 4) &
+                      , 0.5d0 &
+                      , mos_l_in_r_array_transp_tmp(1,1) &
+                      , int(n_points_final_grid, 4) &
+                      , tmp2(1,1), int(n_points_final_grid, 4) &
                       , 1.d0, tmp(1,1,p1,h1), mo_num)
 
 
@@ -808,14 +838,18 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
 
             enddo ! ii
 
-            call dgemm( 'T', 'N', mo_num, mo_num, n_points_final_grid, 0.5d0  &
-                      , tmp2(1,1), n_points_final_grid                        &
-                      , mos_r_in_r_array_transp_tmp(1,1), n_points_final_grid &
+            call dgemm( 'T', 'N', mo_num, mo_num, int(n_points_final_grid, 4) &
+                      , 0.5d0 &
+                      , tmp2(1,1), int(n_points_final_grid, 4) &
+                      , mos_r_in_r_array_transp_tmp(1,1) &
+                      , int(n_points_final_grid, 4) &
                       , 1.d0, tmp(1,1,p1,h1), mo_num)
 
-            call dgemm( 'T', 'N', mo_num, mo_num, 3*n_points_final_grid, 0.5d0     &
-                      , int2_grad1_u12_bimo_t_tmp(1,1,1,h1), 3*n_points_final_grid &
-                      , tmp1(1,1,1), 3*n_points_final_grid                         &
+            call dgemm( 'T', 'N', mo_num, mo_num &
+                      , int(3*n_points_final_grid, 4), 0.5d0 &
+                      , int2_grad1_u12_bimo_t_tmp(1,1,1,h1) &
+                      , int(3*n_points_final_grid, 4) &
+                      , tmp1(1,1,1), int(3*n_points_final_grid, 4) &
                       , 1.d0, tmp(1,1,p1,h1), mo_num)
 
           enddo ! p1

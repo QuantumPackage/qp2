@@ -1,4 +1,6 @@
+use sizet
 subroutine example_determinants
+ use sizet
   use bitmasks ! you need to include the bitmasks_module.f90 features
   implicit none
   BEGIN_DOC
@@ -12,7 +14,8 @@ subroutine example_determinants
   allocate(det_i(N_int,2))
   print*,'det_i(1,:) alpha spins '
   print*,'det_i(2,:) beta  spins '
-  integer                        :: i,j
+  integer(size_t)                :: i
+  integer                        :: j
   print*,'initialize det_i to an electron occupation corresponding RHF or ROHF: ref_bitmask '
   do i = 1, N_int
     det_i(i,1) = ref_bitmask(i,1)
@@ -22,7 +25,8 @@ subroutine example_determinants
   print*,'print a human readable representation of the determinant '
   call print_det(det_i,N_int)
   print*,'doing a single excitation on top of det_i'
-  integer                        :: h1,p1,s1,i_ok
+  integer(size_t)                :: h1,p1
+  integer                        :: s1,i_ok
   h1 = 1
   p1 = elec_alpha_num + 1
   s1 = 1
@@ -65,9 +69,10 @@ subroutine example_determinants
   print*,'c_i^{(1)} = ',c_i
   print*,''
   print*,'Finding the excitation degree between two arbitrary determinants '
-  integer                        :: exc(0:2,2,2)
+  integer(size_t)                :: exc(0:2,2,2)
   double precision               :: phase
-  integer                        :: h2,p2,s2,degree
+  integer(size_t)                :: h2,p2
+  integer                        :: s2,degree
   call get_excitation_degree(ref_bitmask,det_i,degree,N_int)
   print*,'degree = ',degree
   print*,'Finding the differences in terms of holes and particles, together with the fermionic phase '
@@ -82,7 +87,7 @@ subroutine example_determinants
   print*,'h2,p2 = ',h2,p2
   print*,''
   print*,'Finding the occupancy of det_i'
-  integer, allocatable           :: occ(:,:)
+  integer(size_t), allocatable   :: occ(:,:)
   integer                        :: n_occ_ab(2)
   allocate(occ(N_int*bit_kind_size,2))
   call bitstring_to_list_ab(det_i, occ, n_occ_ab, N_int)
@@ -110,14 +115,16 @@ subroutine example_determinants_psi_det
 end
 
 subroutine routine_example_psi_det
+ use sizet
   use bitmasks ! you need to include the bitmasks_module.f90 features
   implicit none
   BEGIN_DOC
   ! subroutine that illustrates the main features available in determinants using many determinants
   END_DOC
-  integer                        :: i,j
+  integer(size_t)                :: i
+  integer                        :: j
   integer, allocatable           :: degree_list(:)
-  integer, allocatable           :: idx(:)
+  integer(size_t), allocatable   :: idx(:)
   allocate(degree_list(N_det),idx(0:N_det))
 
   print*,'Number of determinants in the wave function'

@@ -1,3 +1,5 @@
+use sizet
+
 ! Providers for the dipole moments along x,y,z and the total dipole
 ! moments.
 
@@ -41,7 +43,7 @@
   END_DOC
   USE OMP_LIB
   integer          :: istate, jstate ! States
-  integer          :: i, j           ! general spatial MOs
+  integer(size_t)  :: i, j           ! general spatial MOs
   double precision :: nuclei_part_x, nuclei_part_y, nuclei_part_z
   double precision :: mem_tot_tr_dm
   integer :: nthreads
@@ -74,11 +76,13 @@
 
     PROVIDE psi_det_alpha_unique psi_det_beta_unique
 
-    integer           :: l, k_a, k_b
-    integer           :: occ(N_int*bit_kind_size,2)
-    integer           :: h1, h2, p1, p2, degree
-    integer           :: exc(0:2,2), n_occ(2)
-    integer           :: krow, kcol, lrow, lcol
+    integer(size_t)   :: l, k_a, k_b
+    integer(size_t)   :: occ(N_int*bit_kind_size,2)
+    integer(size_t)   :: h1, h2, p1, p2
+    integer           :: degree
+    integer(size_t)   :: exc(0:2,2)
+    integer           :: n_occ(2)
+    integer(size_t)   :: krow, kcol, lrow, lcol
     integer(bit_kind) :: tmp_det(N_int,2), tmp_det2(N_int)
     double precision  :: ck, ckl, phase
 
@@ -248,17 +252,20 @@ END_PROVIDER
   allocate(A(N_states,N_states), eigvec(N_states,N_states), eigval(N_states))
 
   A = multi_s_x_dipole_moment
-  call lapack_diag(eigval(1), eigvec(1,1), A(1,1), N_states, N_states)
+    call lapack_diag(eigval(1), eigvec(1,1), A(1,1), int(N_states,size_t), &
+                   int(N_states,size_t))
   multi_s_x_dipole_moment_eigenval = eigval
   multi_s_x_dipole_moment_eigenvec = eigvec
 
   A = multi_s_y_dipole_moment
-  call lapack_diag(eigval(1), eigvec(1,1), A(1,1), N_states, N_states)
+    call lapack_diag(eigval(1), eigvec(1,1), A(1,1), int(N_states,size_t), &
+                   int(N_states,size_t))
   multi_s_y_dipole_moment_eigenval = eigval
   multi_s_y_dipole_moment_eigenvec = eigvec
 
   A = multi_s_z_dipole_moment
-  call lapack_diag(eigval(1), eigvec(1,1), A(1,1), N_states, N_states)
+    call lapack_diag(eigval(1), eigvec(1,1), A(1,1), int(N_states,size_t), &
+                   int(N_states,size_t))
   multi_s_z_dipole_moment_eigenval = eigval
   multi_s_z_dipole_moment_eigenvec = eigvec
 

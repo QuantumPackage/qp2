@@ -1,5 +1,6 @@
 program test_libcint
 
+  use sizet
   implicit none
 
   BEGIN_DOC
@@ -14,7 +15,7 @@ program test_libcint
   ! and the accompanying `INFO` lines are not compared.
   END_DOC
 
-  integer                    :: i, j, k, l
+  integer(size_t)            :: i, j, k, l
   double precision           :: dmax, s
   double precision, external :: ao_two_e_integral
   double precision, external :: ao_two_e_integral_erf

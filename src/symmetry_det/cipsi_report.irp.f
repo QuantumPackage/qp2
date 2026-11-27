@@ -67,6 +67,7 @@ subroutine pg_state_irreps_psi_work(nst, label, dom, purity)
 end subroutine pg_state_irreps_psi_work
 
 logical function pg_state_irreps_vec(nst, coef, lda, label, dom, purity)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Irrep labels of ``nst`` CI vectors stored in ``coef(lda,*)``, for the
@@ -79,7 +80,8 @@ logical function pg_state_irreps_vec(nst, coef, lda, label, dom, purity)
   ! Returns .false. -- and writes nothing -- when the symmetry is not
   ! usable.
   END_DOC
-  integer, intent(in)  :: nst, lda
+  integer, intent(in)  :: nst
+  integer(size_t), intent(in)  :: lda
   double precision, intent(in) :: coef(lda,*)
   integer, intent(out) :: label(*), dom(*)
   double precision, intent(out) :: purity(*)
@@ -116,11 +118,13 @@ subroutine pg_state_irrep_head(label, dom, purity, head)
 end subroutine pg_state_irrep_head
 
 subroutine pg_state_irreps_vec_work(nst, coef, lda, label, dom, purity)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Entered only after :c:func:`pg_state_irreps_vec` returned true.
   END_DOC
-  integer, intent(in)  :: nst, lda
+  integer, intent(in)  :: nst
+  integer(size_t), intent(in)  :: lda
   double precision, intent(in) :: coef(lda,*)
   integer, intent(out) :: label(*), dom(*)
   double precision, intent(out) :: purity(*)
@@ -128,5 +132,6 @@ subroutine pg_state_irreps_vec_work(nst, coef, lda, label, dom, purity)
   ! ndet is N_det, not nst: ``coef`` holds one column per state over the
   ! N_det determinants. Passing nst here silently labels the first nst
   ! determinants only, and the weights then exceed one.
-  call pg_state_labels_exact(N_det, coef, lda, nst, label, dom, purity)
+  call pg_state_labels_exact(int(N_det, size_t), coef, lda, &
+       nst, label, dom, purity)
 end subroutine pg_state_irreps_vec_work

@@ -1,8 +1,11 @@
+use sizet
 
 subroutine write_tc_energy()
 
+  use sizet
   implicit none
-  integer                       :: i, j, k
+  integer(size_t)                 :: i, j
+  integer                       :: k
   double precision              :: hmono, htwoe, hthree, htot
   double precision              :: E_TC, O_TC
   double precision              :: E_1e, E_2e, E_3e
@@ -104,8 +107,11 @@ end
 
 subroutine write_tc_var()
 
+  use sizet
   implicit none
-  integer          :: i, j, k
+  integer          :: i
+  integer(size_t)  :: j
+  integer          :: k
   double precision :: hmono, htwoe, hthree, htot_1j, htot_j1
   double precision :: SIGMA_TC
 
@@ -129,8 +135,11 @@ end
 
 subroutine write_tc_gs_var_HF()
 
+  use sizet
   implicit none
-  integer          :: i, j, k
+  integer          :: i
+  integer(size_t)  :: j
+  integer          :: k
   double precision :: hmono, htwoe, hthree, htot
   double precision :: SIGMA_TC
 

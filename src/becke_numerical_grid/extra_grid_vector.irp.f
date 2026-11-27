@@ -1,14 +1,16 @@
+use sizet
 
 ! ---
 
-BEGIN_PROVIDER [integer, n_points_extra_final_grid]
+BEGIN_PROVIDER [integer(size_t), n_points_extra_final_grid]
 
   BEGIN_DOC
   ! Number of points_extra which are non zero
   END_DOC
 
   implicit none
-  integer :: i, j, k, l
+  integer         :: i, k, l
+  integer(size_t) :: j
 
   if (read_extra_grid)then
    print*,'Reading number of extra grid points '
@@ -32,7 +34,8 @@ BEGIN_PROVIDER [integer, n_points_extra_final_grid]
   print*, ' n_points_extra_final_grid = ', n_points_extra_final_grid
   if(write_extra_grid)then
    print*,'Writing number of extra grid points and weights based on a sperical grid'
-   call ezfio_set_becke_numerical_grid_n_points_extra_final_grid(n_points_extra_final_grid)
+   call ezfio_set_becke_numerical_grid_n_points_extra_final_grid( &
+     int(n_points_extra_final_grid, 4))
   endif
 
 END_PROVIDER
@@ -42,7 +45,7 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, final_grid_points_extra, (3,n_points_extra_final_grid)]
 &BEGIN_PROVIDER [double precision, final_weight_at_r_vector_extra, (n_points_extra_final_grid)]
 &BEGIN_PROVIDER [integer, index_final_points_extra, (3,n_points_extra_final_grid)]
-&BEGIN_PROVIDER [integer, index_final_points_extra_reverse, (n_points_extra_integration_angular,n_points_extra_radial_grid,nucl_num)]
+&BEGIN_PROVIDER [integer(size_t), index_final_points_extra_reverse, (n_points_extra_integration_angular,n_points_extra_radial_grid,nucl_num)]
 
   BEGIN_DOC
   !  final_grid_points_extra(1:3,j) = (/ x, y, z /) of the jth grid point
@@ -55,7 +58,9 @@ END_PROVIDER
   END_DOC
 
   implicit none
-  integer          :: i, j, k, l, i_count
+  integer          :: i, k, l
+  integer(size_t)  :: i_count
+  integer(size_t)  :: j
   double precision :: r(3)
   double precision :: wall0, wall1
 

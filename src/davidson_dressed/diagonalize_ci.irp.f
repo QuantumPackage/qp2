@@ -1,10 +1,12 @@
+use sizet
+
 BEGIN_PROVIDER [ double precision, CI_energy_dressed, (N_states_diag) ]
   implicit none
   BEGIN_DOC
   ! N_states lowest eigenvalues of the CI matrix
   END_DOC
 
-  integer                        :: j
+  integer(size_t)                :: j
   character*(8)                  :: st
   call write_time(6)
   do j=1,min(N_det,N_states_diag)
@@ -27,14 +29,15 @@ END_PROVIDER
    implicit none
    double precision               :: ovrlp,u_dot_v
    integer                        :: i_good_state
-   integer, allocatable           :: index_good_state_array(:)
+   integer(size_t), allocatable   :: index_good_state_array(:)
    logical, allocatable           :: good_state_array(:)
    double precision, allocatable  :: s2_values_tmp(:)
    integer                        :: i_other_state
    double precision, allocatable  :: eigenvectors(:,:), eigenvectors_s2(:,:), eigenvalues(:)
    integer                        :: i_state
    double precision               :: e_0
-   integer                        :: i,j,k,mrcc_state
+   integer(size_t)                :: i,j,k
+   integer                        :: mrcc_state
    double precision, allocatable  :: s2_eigvalues(:)
    double precision, allocatable  :: e_array(:)
    integer, allocatable           :: iorder(:)
@@ -225,7 +228,8 @@ subroutine diagonalize_CI_dressed
 !  Replace the coefficients of the CI states by the coefficients of the
 !  eigenstates of the CI matrix
   END_DOC
-  integer :: i,j
+  integer(size_t) :: i
+  integer :: j
 !  PROVIDE delta_ij
   PROVIDE dressing_column_h 
   do j=1,N_states
@@ -243,12 +247,14 @@ BEGIN_PROVIDER [ double precision, h_matrix_dressed, (N_det,N_det) ]
  BEGIN_DOC
  ! Dressed H with Delta_ij
  END_DOC
- integer                        :: i, j, k
+ integer(size_t)                :: i, j
+ integer                        :: k
 
   h_matrix_dressed(1:N_det,1:N_det) = h_matrix_all_dets(1:N_det,1:N_det)
 
   if (N_states == 1) then
-    integer                        :: l,jj
+    integer(size_t)                :: l
+    integer                        :: jj
     double precision               :: f
     l = dressed_column_idx(1)
     f = 1.0d0/psi_coef(l,1)

@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [double precision, core_inact_act_V_kl_contracted, (n_core_inact_act_orb,n_core_inact_act_orb,n_points_final_grid)]
  implicit none
  BEGIN_DOC
@@ -6,7 +8,7 @@ BEGIN_PROVIDER [double precision, core_inact_act_V_kl_contracted, (n_core_inact_
 ! This is needed to build the function f_{\Psi^B}(X_1,X_2) of Eq. (22) of J. Chem. Phys. 149, 194301 (2018) 
 ! 
  END_DOC
- integer :: ipoint,k,l
+ integer(size_t) :: ipoint,k,l
  do k = 1, n_core_inact_act_orb
   do l = 1, n_core_inact_act_orb
    do ipoint = 1, n_points_final_grid
@@ -28,7 +30,8 @@ BEGIN_PROVIDER [double precision, full_occ_2_rdm_cntrctd, (n_core_inact_act_orb,
 ! This is needed to build the function f_{\Psi^B}(X_1,X_2) of Eq. (22) of J. Chem. Phys. 149, 194301 (2018) 
 ! 
  END_DOC
- integer :: ipoint,k,l,istate
+ integer(size_t) :: ipoint,k,l
+ integer :: istate
  do istate = 1, N_states
   do k = 1, n_core_inact_act_orb
    do l = 1, n_core_inact_act_orb
@@ -54,8 +57,8 @@ BEGIN_PROVIDER [double precision, full_occ_2_rdm_cntrctd_trans, (n_points_final_
 ! This is needed to build the function f_{\Psi^B}(X_1,X_2) of Eq. (22) of J. Chem. Phys. 149, 194301 (2018) 
 ! 
  END_DOC
- integer :: i,j,k,l,istate
- integer :: ipoint
+ integer(size_t) :: i,j,k,l,ipoint
+ integer :: istate
  double precision, allocatable :: mos_array_r(:),r(:)
  provide full_occ_2_rdm_ab_mo
  double precision :: wall0,wall1
@@ -98,14 +101,14 @@ BEGIN_PROVIDER [double precision, full_occ_v_kl_cntrctd, (n_points_final_grid,n_
 ! This is needed to build the function f_{\Psi^B}(X_1,X_2) of Eq. (22) of J. Chem. Phys. 149, 194301 (2018) 
 ! 
  END_DOC
- integer :: i,j,k,l,kk,ll,ii,jj
- integer :: ipoint
+ integer(size_t) :: i,j,k,l,kk,ll,ii,jj,ipoint
  double precision, allocatable :: integrals_array(:,:), mos_array_r(:),r(:), integrals_basis(:,:)
  ! just not to mess with parallelization
  allocate(integrals_array(mo_num,mo_num))
   k = 1
   l = 1
-  call get_mo_two_e_integrals_ij(k,l,mo_num,integrals_array,mo_integrals_map) 
+    call get_mo_two_e_integrals_ij(k, l, int(mo_num,size_t), integrals_array, &
+                                 mo_integrals_map) 
   provide basis_mos_in_r_array
  deallocate(integrals_array)
  double precision :: wall0,wall1
@@ -123,7 +126,8 @@ BEGIN_PROVIDER [double precision, full_occ_v_kl_cntrctd, (n_points_final_grid,n_
    ll = list_core_inact_act(l)
    do k = 1, n_core_inact_act_orb ! 1 
     kk = list_core_inact_act(k)
-    call get_mo_two_e_integrals_ij(kk,ll,mo_num,integrals_array,mo_integrals_map) 
+        call get_mo_two_e_integrals_ij(kk, ll, int(mo_num,size_t), &
+                                   integrals_array, mo_integrals_map) 
     do j = 1, n_basis_orb 
      jj = list_basis(j)
      do i = 1, n_basis_orb 

@@ -195,10 +195,11 @@ end
 ! ---
 
 double precision function env_nucl(r)
+  use sizet
 
   implicit none
   double precision, intent(in) :: r(3)
-  integer                      :: i
+  integer(size_t)              :: i
   double precision             :: a, d, e, x, y, z
 
   if(env_type .eq. "Sum_Slat") then
@@ -260,10 +261,11 @@ end
 ! ---
 
 double precision function env_nucl_square(r)
+  use sizet
 
   implicit none
   double precision, intent(in) :: r(3)
-  integer                      :: i
+  integer(size_t)              :: i
   double precision             :: a, d, e, x, y, z
 
   if(env_type .eq. "Sum_Slat") then
@@ -329,11 +331,13 @@ end
 ! ---
 
 subroutine grad1_env_nucl(r, grad)
+  use sizet
 
   implicit none
   double precision, intent(in)  :: r(3)
   double precision, intent(out) :: grad(3)
-  integer                       :: ipoint, i, j, phase
+  integer                       :: ipoint, phase
+  integer(size_t)               :: i, j
   double precision              :: x, y, z, dx, dy, dz
   double precision              :: a, d, e
   double precision              :: fact_x, fact_y, fact_z

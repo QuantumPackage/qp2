@@ -1,3 +1,5 @@
+use sizet
+
 ! Rotation matrix
 
 ! *Build a rotation matrix from an antisymmetric matrix*
@@ -58,6 +60,7 @@
 
 
 subroutine rotation_matrix(A,LDA,R,LDR,n,info,enforce_step_cancellation)
+ use sizet
 
   implicit none
 
@@ -71,7 +74,7 @@ subroutine rotation_matrix(A,LDA,R,LDR,n,info,enforce_step_cancellation)
   ! Variables
 
   ! in
-  integer, intent(in)             :: n,LDA,LDR
+  integer(size_t), intent(in)     :: n,LDA,LDR
   double precision, intent(inout) :: A(LDA,n)
 
   ! out
@@ -87,7 +90,7 @@ subroutine rotation_matrix(A,LDA,R,LDR,n,info,enforce_step_cancellation)
   double precision, allocatable   :: part_1(:,:),part_1a(:,:)
   double precision, allocatable   :: part_2(:,:),part_2a(:,:),part_2b(:,:),part_2c(:,:)
   double precision, allocatable   :: RR_t(:,:)
-  integer                         :: i,j
+  integer(size_t)                 :: i,j
   integer                         :: info2, lwork ! for dsyev
   double precision                :: norm, max_elem, max_elem_A, t1,t2,t3
 
@@ -204,7 +207,8 @@ endif
 
 ! Compute B=A.A
 
-call dgemm('N','N',n,n,n,1d0,A,size(A,1),A,size(A,1),0d0,B,size(B,1))
+call dgemm('N','N',int(n,4),int(n,4),int(n,4),1d0,A,size(A,1),A, &
+   size(A,1),0d0,B,size(B,1))
 
 ! Copy B in W, diagonalization will put the eigenvectors in W
 W=B
@@ -212,12 +216,12 @@ W=B
 ! Diagonalization of B
 ! Eigenvalues -> e_val
 ! Eigenvectors -> W
-lwork = 3*n-1
+lwork = int(3*n-1, 4)
 allocate(work(lwork,n))
 
 !print*,'Starting diagonalization ...'
 
-call dsyev('V','U',n,W,size(W,1),e_val,work,lwork,info2)
+call dsyev('V','U',int(n,4),W,size(W,1),e_val,work,lwork,info2)
 
 deallocate(work)
 
@@ -344,14 +348,20 @@ enddo
 !     $R.R^T=R^T.R=\textbf{1}$
 
 ! part_1
-call dgemm('N','T',n,n,n,1d0,cos_tau,size(cos_tau,1),W,size(W,1),0d0,part_1a,size(part_1a,1))
-call dgemm('N','N',n,n,n,1d0,W,size(W,1),part_1a,size(part_1a,1),0d0,part_1,size(part_1,1))
+call dgemm('N','T',int(n,4),int(n,4),int(n,4),1d0,cos_tau,size(cos_tau,1),W, &
+   size(W,1),0d0,part_1a,size(part_1a,1))
+call dgemm('N','N',int(n,4),int(n,4),int(n,4),1d0,W,size(W,1),part_1a, &
+   size(part_1a,1),0d0,part_1,size(part_1,1))
 
 ! part_2
-call dgemm('T','N',n,n,n,1d0,W,size(W,1),A,size(A,1),0d0,part_2a,size(part_2a,1))
-call dgemm('N','N',n,n,n,1d0,sin_tau,size(sin_tau,1),part_2a,size(part_2a,1),0d0,part_2b,size(part_2b,1))
-call dgemm('N','N',n,n,n,1d0,tau_m1,size(tau_m1,1),part_2b,size(part_2b,1),0d0,part_2c,size(part_2c,1))
-call dgemm('N','N',n,n,n,1d0,W,size(W,1),part_2c,size(part_2c,1),0d0,part_2,size(part_2,1))
+call dgemm('T','N',int(n,4),int(n,4),int(n,4),1d0,W,size(W,1),A, &
+   size(A,1),0d0,part_2a,size(part_2a,1))
+call dgemm('N','N',int(n,4),int(n,4),int(n,4),1d0,sin_tau,size(sin_tau,1), &
+   part_2a,size(part_2a,1),0d0,part_2b,size(part_2b,1))
+call dgemm('N','N',int(n,4),int(n,4),int(n,4),1d0,tau_m1,size(tau_m1,1), &
+   part_2b,size(part_2b,1),0d0,part_2c,size(part_2c,1))
+call dgemm('N','N',int(n,4),int(n,4),int(n,4),1d0,W,size(W,1),part_2c, &
+   size(part_2c,1),0d0,part_2,size(part_2,1))
 
 ! Rotation matrix R
 R = part_1 + part_2
@@ -368,9 +378,10 @@ do j = 1, n
    enddo
 enddo
 
-call dgemm('N','T',n,n,n,1d0,R,size(R,1),R,size(R,1),-1d0,RR_t,size(RR_t,1))
+call dgemm('N','T',int(n,4),int(n,4),int(n,4),1d0,R,size(R,1),R, &
+   size(R,1),-1d0,RR_t,size(RR_t,1))
 
-norm = dnrm2(n*n,RR_t,1)
+norm = dnrm2(int(n*n,4),RR_t,1)
 !print*, 'Rotation matrix check, norm R.R^T = ', norm 
 
 ! Debug

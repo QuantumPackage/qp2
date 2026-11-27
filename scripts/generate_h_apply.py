@@ -366,7 +366,8 @@ class H_apply(object):
       self.data["generate_psi_guess"] = ""
 
       self.data["params_main"] = "pt2, norm_pert, H_pert_diag, N_st"
-      self.data["params_post"] = ","+self.data["params_main"] +", N_int"
+      self.data["params_post"] = (
+          ","+self.data["params_main"] +", int(N_int,4)")
       self.data["decls_main"] = """  integer, intent(in)            :: N_st
   double precision, intent(inout):: pt2(N_st)
   double precision, intent(inout):: norm_pert(N_st)

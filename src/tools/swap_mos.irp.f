@@ -1,9 +1,11 @@
+
 program swap_mos
+  use sizet
   implicit none
   BEGIN_DOC
   ! Swaps the indices of two molecular orbitals
   END_DOC
-  integer                        :: i,j, i1, i2
+  integer(size_t)                :: i,j, i1, i2
   double precision               :: x
   print *, 'Swaps molecular orbitals i and j.'
   print *, ''

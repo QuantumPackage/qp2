@@ -1,10 +1,12 @@
+use sizet
 
 ! ---
 
 BEGIN_PROVIDER [double precision, grad12_j12, (ao_num, ao_num, n_points_final_grid)]
 
   implicit none
-  integer                    :: ipoint, i, j, m, igauss
+  integer                    :: m, igauss
+  integer(size_t)          :: ipoint, i, j
   double precision           :: r(3), delta, coef
   double precision           :: tmp1
   double precision           :: time0, time1
@@ -37,7 +39,7 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, u12sq_envsq, (ao_num, ao_num, n_points_final_grid)]
 
   implicit none
-  integer                    :: ipoint, i, j
+  integer(size_t)          :: ipoint, i, j
   double precision           :: tmp_x, tmp_y, tmp_z
   double precision           :: tmp1
   double precision           :: time0, time1
@@ -70,7 +72,8 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, u12_grad1_u12_env_grad1_env, (ao_num, ao_num, n_points_final_grid)]
 
   implicit none
-  integer                    :: ipoint, i, j, m, igauss
+  integer                    :: m, igauss
+  integer(size_t)          :: ipoint, i, j
   double precision           :: x, y, z
   double precision           :: tmp_v, tmp_x, tmp_y, tmp_z
   double precision           :: tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9

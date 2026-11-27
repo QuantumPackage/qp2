@@ -13,7 +13,9 @@ end
 
 subroutine test_grad_f_mean_field
  implicit none
- integer :: i_point,k
+ use sizet
+ integer(size_t) :: i_point
+ integer         :: k
  double precision :: weight,r(3)
  double precision :: grad_f_mf_ab(3), grad_two_bod_dens(3)
  double precision :: grad_dm_a(3), grad_dm_b(3)
@@ -84,7 +86,9 @@ end
 
 subroutine test_grad_mu_mf
  implicit none
- integer :: i_point,k
+ use sizet
+ integer(size_t) :: i_point
+ integer         :: k
  double precision :: weight,r(3),rbis(3)
  double precision :: mu_mf, dm,grad_mu_mf(3), grad_dm(3)
  double precision :: mu_mf_p, mu_mf_m, dm_m, dm_p, num_grad_mu_mf(3),dr, num_grad_dm(3)

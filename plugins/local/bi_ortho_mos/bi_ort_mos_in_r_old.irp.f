@@ -1,3 +1,4 @@
+use sizet
 
 ! TODO: left & right MO without duplicate AO calculation
 
@@ -10,7 +11,8 @@ BEGIN_PROVIDER[double precision, mos_r_in_r_array, (mo_num, n_points_final_grid)
   END_DOC
 
   implicit none
-  integer          :: i, j
+  integer          :: j
+  integer(size_t)  :: i
   double precision :: mos_array(mo_num), r(3)
 
  !$OMP PARALLEL DO &
@@ -39,7 +41,8 @@ BEGIN_PROVIDER[double precision, mos_r_in_r_array_transp_old, (n_points_final_gr
   END_DOC
 
   implicit none
-  integer :: i,j
+  integer :: j
+  integer(size_t) :: i
 
   do i = 1, n_points_final_grid
     do j = 1, mo_num
@@ -76,7 +79,8 @@ BEGIN_PROVIDER[double precision, mos_l_in_r_array, (mo_num, n_points_final_grid)
   END_DOC
 
   implicit none
-  integer          :: i, j
+  integer          :: j
+  integer(size_t)  :: i
   double precision :: mos_array(mo_num), r(3)
 
  !$OMP PARALLEL DO &
@@ -123,7 +127,8 @@ BEGIN_PROVIDER[double precision, mos_l_in_r_array_transp_old, (n_points_final_gr
   END_DOC
 
   implicit none
-  integer :: i, j
+  integer :: j
+  integer(size_t) :: i
 
   do i = 1, n_points_final_grid
     do j = 1, mo_num

@@ -8,6 +8,7 @@ subroutine davidson_diag_sx_mat(N_st, u_in, energies)
  ! SXmatrix; the initial guesses are unit vectors along those elements,
  ! and u_in holds the eigenvectors on exit.
  END_DOC
+ use sizet
  implicit none
  integer, intent(in) :: N_st
  double precision, intent(out) :: u_in(nMonoEx+1,N_st*n_states_diag), energies(N_st)
@@ -45,7 +46,8 @@ subroutine davidson_diag_sx_mat(N_st, u_in, energies)
   print*,'SX(i,i) = ',H_jj(j)
   u_in(j,i) = 1.d0
  enddo
- call davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,converged,SXmatrix)
+  call davidson_general(u_in, H_jj, energies, int(dim_in,size_t), &
+                       int(sze,size_t), N_st, N_st_diag_in, converged, SXmatrix)
  print*,'energies = ',energies
 
 end

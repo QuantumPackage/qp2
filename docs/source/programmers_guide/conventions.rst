@@ -125,3 +125,50 @@ in the file :file:`fci.irp.f`. This matters because the executable
 takes its name from the file, not from the ``program`` statement: a
 file named :file:`foo.irp.f` produces the executable :file:`foo`,
 whatever the name of the program it contains.
+
+Integer kinds
+ -----------
+
+Integers that index or size system-sized data (AO/MO counts,
+integral-map keys, determinant-space indices, grid-point counts)
+use the 64-bit kind ``integer(size_t)``, where ``size_t = 8`` is
+defined by the hand-written module :file:`src/utils/sizet.f90`.
+Small chemistry-bounded or machine-bounded values (state counts,
+CAS orbital counts, irreps, flags, file descriptors, thread
+counts) keep the default 32-bit ``integer``.
+
+Placement of ``use sizet``:
+
+* ``.irp.f`` providers: at file level (IRPF90 hoists it into the
+  generated module scope).
+* hand-written procedures in ``.irp.f``: inside the procedure
+  body (IRPF90 does not hoist file-level uses into them).
+* program files: inside the ``program`` body, never at file level
+  — a file-level use in a program file lands in the generated
+  wrapper module, whose compile edge has no dependency on
+  :file:`sizet.o` and races on :file:`sizet.mod`.
+* hand-written ``.f90``: at module scope. The five
+  directly-compiled ``.f90`` files built in an unordered ninja
+  pool (``selection_types.f90``, ``qp_json.f90``,
+  ``pair_block_stats.f90``, ``map_module.f90``, ``spin_exc.F90``)
+  spell the kind ``integer(8)`` or ``integer(c_int64_t)`` instead,
+  which is type-identical.
+
+Kinds never mix across a call boundary: gfortran rejects an
+actual/dummy integer kind mismatch on explicit-interface calls
+and only warns (while silently corrupting the value) on
+same-file calls. Cast at the call site — ``int(x, size_t)`` up,
+``int(x, 4)`` down — and name 32-bit boundary temporaries
+``*_4``. The same casts guard the 32-bit external interfaces
+(BLAS/LAPACK, MPI, libcint, json-C, the EZFIO file format, all
+``bind(C)`` code); those interfaces stay 32-bit.
+
+IRPF90 cannot parse a typed function header such as
+``integer(size_t) function f(a)`` (it exits 0 and the damage is
+in the generated file). Declare the result in the body instead::
+
+    function f(a)
+      implicit none
+      integer(size_t) :: f
+      ...
+    end function f

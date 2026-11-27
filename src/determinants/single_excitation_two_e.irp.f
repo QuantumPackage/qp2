@@ -1,5 +1,7 @@
   use bitmasks
+  use sizet
 subroutine single_excitation_wee(det_1,det_2,h,p,spin,phase,hij)
+ use sizet
  use bitmasks
  implicit none
   BEGIN_DOC
@@ -20,17 +22,19 @@ subroutine single_excitation_wee(det_1,det_2,h,p,spin,phase,hij)
   ! used because the hole and particle are already given as
   ! parameters (author-corrected 2026-10-31).
   END_DOC
- integer,intent(in) :: h,p,spin
+ integer(size_t),intent(in) :: h,p
+ integer,intent(in) :: spin
  double precision, intent(in)  :: phase
  integer(bit_kind), intent(in) :: det_1(N_int,2), det_2(N_int,2)
  double precision, intent(out) :: hij
  integer(bit_kind) :: differences(N_int,2)
  integer(bit_kind) :: hole(N_int,2)
  integer(bit_kind) :: partcl(N_int,2)
- integer :: occ_hole(N_int*bit_kind_size,2)
- integer :: occ_partcl(N_int*bit_kind_size,2)
+ integer(size_t) :: occ_hole(N_int*bit_kind_size,2)
+ integer(size_t) :: occ_partcl(N_int*bit_kind_size,2)
  integer :: n_occ_ab_hole(2),n_occ_ab_partcl(2)
- integer :: i0,i
+ integer :: i0
+ integer(size_t) :: i
  do i = 1, N_int
   differences(i,1) = xor(det_1(i,1),ref_closed_shell_bitmask(i,1))
   differences(i,2) = xor(det_1(i,2),ref_closed_shell_bitmask(i,2))
@@ -90,11 +94,12 @@ BEGIN_PROVIDER [double precision, fock_wee_closed_shell, (mo_num, mo_num) ]
   ! and virtual lists, as the reference is closed-shell.
   ! Entries for other pairs of orbitals are not set.
   END_DOC
- integer :: i0,j0,i,j,k0,k
+ integer(size_t) :: i,j,k
+ integer :: i0,j0,k0
  integer :: n_occ_ab(2)
- integer :: occ(N_int*bit_kind_size,2)
+ integer(size_t) :: occ(N_int*bit_kind_size,2)
  integer :: n_occ_ab_virt(2)
- integer :: occ_virt(N_int*bit_kind_size,2)
+ integer(size_t) :: occ_virt(N_int*bit_kind_size,2)
  integer(bit_kind) :: key_test(N_int)
  integer(bit_kind) :: key_virt(N_int,2)
 

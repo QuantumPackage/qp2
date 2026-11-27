@@ -1,7 +1,9 @@
 
 
- BEGIN_PROVIDER [integer, n_occ_val_orb_for_hf,(2)]
-&BEGIN_PROVIDER [integer, n_max_occ_val_orb_for_hf]
+use sizet
+
+ BEGIN_PROVIDER [integer(size_t), n_occ_val_orb_for_hf,(2)]
+&BEGIN_PROVIDER [integer(size_t), n_max_occ_val_orb_for_hf]
  implicit none
  BEGIN_DOC
  ! Number of OCCUPIED VALENCE ORBITALS for each spin to build the f_{HF}(r_1,r_2) function 
@@ -10,7 +12,7 @@
  !
  ! This determines the size of the space \mathcal{A} of Eqs. (15-16) of Phys.Chem.Lett.2019, 10, 2931   2937
  END_DOC
- integer :: i
+ integer(size_t) :: i
  n_occ_val_orb_for_hf = 0
  ! You browse the ALPHA ELECTRONS and check if its not a CORE ORBITAL 
  do i = 1, elec_alpha_num
@@ -33,7 +35,7 @@
 
 END_PROVIDER 
 
-BEGIN_PROVIDER [integer, list_valence_orb_for_hf, (n_max_occ_val_orb_for_hf,2)]
+BEGIN_PROVIDER [integer(size_t), list_valence_orb_for_hf, (n_max_occ_val_orb_for_hf,2)]
  implicit none
  BEGIN_DOC
  ! List of OCCUPIED valence orbitals for each spin to build the f_{HF}(r_1,r_2) function 
@@ -42,7 +44,7 @@ BEGIN_PROVIDER [integer, list_valence_orb_for_hf, (n_max_occ_val_orb_for_hf,2)]
  !
  ! This determines the space \mathcal{A} of Eqs. (15-16) of Phys.Chem.Lett.2019, 10, 2931   2937
  END_DOC
- integer :: i,j
+ integer(size_t) :: i,j
  j = 0
  ! You browse the ALPHA ELECTRONS and check if its not a CORE ORBITAL 
  do i = 1, elec_alpha_num
@@ -67,7 +69,7 @@ BEGIN_PROVIDER [integer, list_valence_orb_for_hf, (n_max_occ_val_orb_for_hf,2)]
 
 END_PROVIDER 
 
-BEGIN_PROVIDER [integer, n_basis_orb]
+BEGIN_PROVIDER [integer(size_t), n_basis_orb]
  implicit none
  BEGIN_DOC
  ! Defines the number of orbitals you will use to explore the basis set 
@@ -83,7 +85,7 @@ BEGIN_PROVIDER [integer, n_basis_orb]
  endif
 END_PROVIDER 
 
-BEGIN_PROVIDER [integer, list_basis, (n_basis_orb)]
+BEGIN_PROVIDER [integer(size_t), list_basis, (n_basis_orb)]
  implicit none
  BEGIN_DOC
  ! Defines the set of orbitals you will use to explore the basis set 
@@ -92,7 +94,7 @@ BEGIN_PROVIDER [integer, list_basis, (n_basis_orb)]
  !
  ! It corresponds to all MOs except those defined as "deleted" 
  END_DOC
- integer :: i
+ integer(size_t) :: i
  if(mu_of_r_potential == "pure_act")then
   do i = 1, n_act_orb
    list_basis(i) = list_act(i)
@@ -112,7 +114,7 @@ BEGIN_PROVIDER [double precision, basis_mos_in_r_array, (n_basis_orb,n_points_fi
  ! First index: position in list_basis (1..n_basis_orb),
  ! second index: grid point (1..n_points_final_grid).
  END_DOC
- integer :: ipoint,i,ii
+ integer(size_t) :: ipoint,i,ii
  do ipoint = 1, n_points_final_grid
   do i = 1, n_basis_orb 
    ii = list_basis(i)
@@ -129,7 +131,7 @@ END_PROVIDER
 ! !
 ! ! This determines the size of the space \mathcal{A} of Eqs. (15-16) of Phys.Chem.Lett.2019, 10, 2931   2937
 ! END_DOC
-! integer :: i
+! integer(size_t) :: i
 ! n_docc_val_orb_for_cas = 0
 ! ! You browse the BETA  ELECTRONS and check if its not a CORE ORBITAL 
 ! do i = 1, elec_beta_num

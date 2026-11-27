@@ -1,6 +1,9 @@
+use sizet
+
 ! ---
 
 double precision function ao_two_e_integral_cgtos(i, j, k, l)
+ use sizet
 
   BEGIN_DOC
   !  integral of the AO basis <ik|jl> or (ij|kl)
@@ -10,7 +13,7 @@ double precision function ao_two_e_integral_cgtos(i, j, k, l)
   END_DOC
 
   implicit none
-  integer, intent(in)        :: i, j, k, l
+  integer(size_t), intent(in) :: i, j, k, l
   double precision, external :: ao_2e_cgtos_schwartz_accel
   double precision, external :: ao_two_e_integral_cgtos_prim
 
@@ -26,6 +29,7 @@ end
 ! ---
 
 double precision function ao_two_e_integral_cgtos_prim(i, j, k, l)
+ use sizet
 
   BEGIN_DOC
   !  integral of the AO basis <ik|jl> or (ij|kl)
@@ -37,9 +41,10 @@ double precision function ao_two_e_integral_cgtos_prim(i, j, k, l)
   implicit none
   include 'utils/constants.include.F'
 
-  integer, intent(in)        :: i, j, k, l
+  integer(size_t), intent(in) :: i, j, k, l
                              
-  integer                    :: p, q, r, s, m
+  integer(size_t)            :: p, q, r, s
+  integer                    :: m
   integer                    :: ii, jj, kk, ll, dim1, I_power(3), J_power(3), K_power(3), L_power(3)
   integer                    :: iorder_p1(3), iorder_p2(3), iorder_q1(3), iorder_q2(3)
   double precision           :: coef1, coef2, coef3, coef4
@@ -301,6 +306,7 @@ end
 ! ---
 
 double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
+ use sizet
 
   BEGIN_DOC
   !  integral of the AO basis <ik|jl> or (ij|kl)
@@ -310,9 +316,10 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
   implicit none
   include 'utils/constants.include.F'
 
-  integer, intent(in)           :: i, j, k, l
+  integer(size_t), intent(in)    :: i, j, k, l
 
-  integer                       :: p, q, r, s, m
+  integer(size_t)             :: p, q, r, s
+  integer                       :: m
   integer                       :: ii, jj, kk, ll, dim1, I_power(3), J_power(3), K_power(3), L_power(3)
   integer                       :: iorder_p1(3), iorder_p2(3), iorder_q1(3), iorder_q2(3)
   double precision              :: coef1, coef2, coef3, coef4
@@ -863,10 +870,11 @@ BEGIN_PROVIDER [double precision, ao_2e_cgtos_schwartz, (ao_num, ao_num)]
   END_DOC
 
   implicit none
-  integer          :: i, k
+  integer(size_t) :: i, k
   double precision :: ao_two_e_integral_cgtos
 
-  ao_2e_cgtos_schwartz(1,1) = ao_two_e_integral_cgtos(1, 1, 1, 1)
+  ao_2e_cgtos_schwartz(1,1) = &
+      ao_two_e_integral_cgtos(1_size_t,1_size_t,1_size_t,1_size_t)
 
   !$OMP PARALLEL DO PRIVATE(i,k)                         &
   !$OMP             DEFAULT(NONE)                        &

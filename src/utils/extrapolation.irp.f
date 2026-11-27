@@ -1,4 +1,5 @@
 subroutine extrapolate_data(N_data, data, pt2, output)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Extrapolate the data to the FCI limit
@@ -23,7 +24,9 @@ subroutine extrapolate_data(N_data, data, pt2, output)
     x(i,2) = pt2_rev(i)
   enddo
   do ifit=2,N_data
-    call get_pseudo_inverse(x,size(x,1),ifit,2,x_inv,size(x_inv,1),1.d-10)
+        call get_pseudo_inverse(x, int(size(x,1),size_t), int(ifit,size_t), &
+                            int(2,size_t), x_inv, int(size(x_inv,1),size_t), &
+                            1.d-10)
     ab = matmul(x_inv(1:2,1:ifit),y(1:ifit))
     output(ifit) = ab(1)
   enddo

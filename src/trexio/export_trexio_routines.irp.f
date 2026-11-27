@@ -1,4 +1,7 @@
+use sizet
+
 subroutine export_trexio_subroutine(update,full_path)
+ use sizet
   use trexio
   implicit none
    BEGIN_DOC
@@ -13,7 +16,8 @@ subroutine export_trexio_subroutine(update,full_path)
   logical, intent(in)            :: update, full_path
   integer(trexio_t), allocatable :: f(:) ! TREXIO file handle
   integer(trexio_exit_code)      :: rc
-  integer                        :: k, iunit
+  integer(size_t)                :: k
+  integer                        :: iunit
   double precision, allocatable  :: factor(:)
   character*(256)  :: fp
   character*(256), allocatable  :: filenames(:)
@@ -21,7 +25,7 @@ subroutine export_trexio_subroutine(update,full_path)
 
   integer, external :: getunitandopen
 
-  integer :: i,j,l
+  integer(size_t) :: i,j,l
 
   allocate(f(N_states), filenames(N_states))
 
@@ -97,7 +101,7 @@ subroutine export_trexio_subroutine(update,full_path)
     endif
     if (i == code_num+1) then
       code(i) = qp2_code
-      rc = trexio_write_metadata_code_num(f(k), i)
+      rc = trexio_write_metadata_code_num(f(k), int(i, 4))
       call trexio_assert(rc, TREXIO_SUCCESS)
       rc = trexio_write_metadata_code(f(k), code, 64)
       call trexio_assert(rc, TREXIO_SUCCESS)
@@ -119,7 +123,7 @@ subroutine export_trexio_subroutine(update,full_path)
       endif
       if (i == author_num+1) then
         author(i) = user
-        rc = trexio_write_metadata_author_num(f(k), i)
+        rc = trexio_write_metadata_author_num(f(k), int(i, 4))
         call trexio_assert(rc, TREXIO_SUCCESS)
         rc = trexio_write_metadata_author(f(k), author, 64)
         call trexio_assert(rc, TREXIO_SUCCESS)
@@ -315,7 +319,8 @@ subroutine export_trexio_subroutine(update,full_path)
       ! basis is then tagged with a non-standard oscillation_kind, so that readers (QMCkl,
       ! qp_import_trexio) refuse it instead of silently evaluating wrong AOs.
       double precision, allocatable :: osc_arg(:)
-      integer :: s_prev, j_in_shell, l_first, l_ao, n_cart, m
+      integer :: s_prev, j_in_shell, n_cart, m
+      integer(size_t) :: l_first, l_ao
       double precision :: phi, phi_l
       logical :: representable
       ! plane waves are tested component by component below (not with use_pw,
@@ -428,7 +433,7 @@ subroutine export_trexio_subroutine(update,full_path)
       rc = trexio_write_ao_cartesian(f(1), 0)
       call trexio_assert(rc, TREXIO_SUCCESS)
 
-      rc = trexio_write_ao_num(f(1), ao_sphe_num)
+      rc = trexio_write_ao_num(f(1), int(ao_sphe_num, 4))
       call trexio_assert(rc, TREXIO_SUCCESS)
 
       rc = trexio_write_ao_shell(f(1), ao_sphe_shell)
@@ -534,7 +539,7 @@ subroutine export_trexio_subroutine(update,full_path)
             eri_index(4,icount) = l
             if (icount == BUFSIZE) then
               rc = trexio_write_ao_2e_int_eri(f(1), offset, icount, eri_index, eri_buffer)
-              call trexio_assert(rc, TREXIO_SUCCESS)
+      call trexio_assert(rc, TREXIO_SUCCESS)
               offset += icount
               icount = 0_8
             end if
@@ -558,7 +563,7 @@ subroutine export_trexio_subroutine(update,full_path)
   if (export_ao_two_e_ints_cholesky) then
     print *, 'AO two-e integrals Cholesky'
 
-    rc = trexio_write_ao_2e_int_eri_cholesky_num(f(1), cholesky_ao_num)
+    rc = trexio_write_ao_2e_int_eri_cholesky_num(f(1), int(cholesky_ao_num, 4))
     call trexio_assert(rc, TREXIO_SUCCESS)
 
     icount = 0_8
@@ -601,7 +606,7 @@ subroutine export_trexio_subroutine(update,full_path)
     call trexio_assert(rc, TREXIO_SUCCESS)
 
     do k=1,N_states
-      rc = trexio_write_mo_num(f(k), mo_num)
+      rc = trexio_write_mo_num(f(k), int(mo_num, 4))
       call trexio_assert(rc, TREXIO_SUCCESS)
     enddo
 
@@ -678,7 +683,7 @@ subroutine export_trexio_subroutine(update,full_path)
             eri_index(4,icount) = l
             if (icount == BUFSIZE) then
               rc = trexio_write_mo_2e_int_eri(f(1), offset, icount, eri_index, eri_buffer)
-              call trexio_assert(rc, TREXIO_SUCCESS)
+      call trexio_assert(rc, TREXIO_SUCCESS)
               offset += icount
               icount = 0_8
             end if
@@ -703,7 +708,7 @@ subroutine export_trexio_subroutine(update,full_path)
     endif
     print *, 'MO two-e integrals Cholesky'
 
-    rc = trexio_write_mo_2e_int_eri_cholesky_num(f(1), cholesky_ao_num)
+    rc = trexio_write_mo_2e_int_eri_cholesky_num(f(1), int(cholesky_ao_num, 4))
     call trexio_assert(rc, TREXIO_SUCCESS)
 
     icount = 0_8
@@ -773,7 +778,7 @@ subroutine export_trexio_subroutine(update,full_path)
             eri_index(4,icount) = l
             if (icount == BUFSIZE) then
               rc = trexio_write_rdm_2e(f(1), offset, icount, eri_index, eri_buffer)
-              call trexio_assert(rc, TREXIO_SUCCESS)
+        call trexio_assert(rc, TREXIO_SUCCESS)
               offset += icount
               icount = 0_8
             end if
@@ -791,7 +796,8 @@ subroutine export_trexio_subroutine(update,full_path)
 
 ! ------------------------------------------------------------------------------
 
-  integer :: nint
+  integer(size_t) :: nint
+  integer :: nint4
   integer*8, allocatable :: det_buffer(:,:,:)
   double precision, allocatable :: coef_buffer(:,:)
 
@@ -799,15 +805,16 @@ subroutine export_trexio_subroutine(update,full_path)
     rc = trexio_write_state_num(f(k), n_states)
     call trexio_assert(rc, TREXIO_SUCCESS)
 
-    rc = trexio_write_state_id(f(k), k)
+    rc = trexio_write_state_id(f(k), int(k, 4))
     call trexio_assert(rc, TREXIO_SUCCESS)
 
     rc = trexio_write_state_file_name(f(k), filenames, len(filenames(1)))
     call trexio_assert(rc, TREXIO_SUCCESS)
   enddo
 
-  rc = trexio_get_int64_num(f(1), nint)
+  rc = trexio_get_int64_num(f(1), nint4)
   call trexio_assert(rc, TREXIO_SUCCESS)
+  nint = int(nint4, size_t)
 
   if (nint /= N_int) then
      stop 'Problem with N_int'
@@ -849,7 +856,9 @@ subroutine export_trexio_subroutine(update,full_path)
     ! CSFs
     ! ----
 
-    integer :: startdet, enddet, s, bfIcfg, icsf, ii, idx
+    integer :: s, bfIcfg, icsf, idx
+    integer(size_t) :: ii
+    integer(size_t) :: startdet, enddet
     integer, allocatable :: dc_index(:,:)
     double precision, allocatable :: dc_value(:)
     double precision               :: phasedet
@@ -890,7 +899,8 @@ subroutine export_trexio_subroutine(update,full_path)
     allocate (dc_index(2,BUFSIZE))
     allocate (dc_value(BUFSIZE))
 
-    integer :: i_cfg, i_csf, i_det
+    integer(size_t) :: i_cfg, i_csf
+    integer(size_t) :: i_det
     double precision, allocatable :: tmp(:,:)
     double precision :: c
     allocate(tmp(n_det_per_config_max,n_det_per_config_max))
@@ -910,14 +920,14 @@ subroutine export_trexio_subroutine(update,full_path)
           if (dabs(c) > 1.d-12) then
             i_det = psi_configuration_to_psi_det_data(i)
             icount += 1_8
-            dc_index(1,icount) = i_csf
-            dc_index(2,icount) = i_det
+            dc_index(1,icount) = int(i_csf, 4)
+            dc_index(2,icount) = int(i_det, 4)
             dc_value(icount) = c
             if (icount == BUFSIZE) then
               do ii=1,N_states
                 rc = trexio_write_csf_det_coefficient(f(ii), offset, icount, dc_index, &
                             dc_value)
-                call trexio_assert(rc, TREXIO_SUCCESS)
+        call trexio_assert(rc, TREXIO_SUCCESS)
                 offset += icount
                 icount = 0_8
               end do

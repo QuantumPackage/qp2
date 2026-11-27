@@ -5,8 +5,10 @@ program deb_j_gauss
 end
 
 subroutine routine_test_mu_of_r_tot
+ use sizet
  implicit none
- integer :: ipoint,k 
+ integer(size_t) :: ipoint
+ integer         :: k
  double precision :: r2(3), weight, dr, r1(3), r1bis(3)
  double precision :: accu_grad(3)
  double precision :: jast,grad_jast(3),j_bump,j12_mu

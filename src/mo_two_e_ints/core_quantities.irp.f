@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [double precision, core_energy]
  implicit none
  BEGIN_DOC
@@ -45,7 +47,7 @@ BEGIN_PROVIDER [ double precision, h_core_ri, (mo_num, mo_num) ]
  ! $\tilde{h}{pq} = h_{pq} - \frac{1}{2}\sum_{k} g(pk,kq)$
  END_DOC
 
- integer :: i,j, k
+ integer(size_t) :: i,j, k
 
  do j=1,mo_num
    do i=1,mo_num

@@ -1,10 +1,13 @@
 
+use sizet
+
 ! ---
 
 BEGIN_PROVIDER [double precision, int2_grad1_u12_bimo_t, (n_points_final_grid, 3, mo_num, mo_num)]
 
   implicit none
-  integer                       :: i, j, ipoint
+  integer                       :: i, j
+  integer(size_t)               :: ipoint
   double precision              :: tt1, tt2
   double precision, allocatable :: tmp(:,:,:,:)
 

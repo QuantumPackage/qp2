@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [double precision, ao_ortho_lowdin_nucl_elec_integrals, (mo_num,mo_num)]
  implicit none
  BEGIN_DOC
@@ -9,7 +11,7 @@ BEGIN_PROVIDER [double precision, ao_ortho_lowdin_nucl_elec_integrals, (mo_num,m
  ! including the pseudopotential integrals) with the coefficient
  ! matrix.
  END_DOC
- integer :: i1,j1,i,j
+ integer(size_t) :: i1,j1,i,j
  double precision :: c_i1,c_j1
 
  ao_ortho_lowdin_nucl_elec_integrals = 0.d0

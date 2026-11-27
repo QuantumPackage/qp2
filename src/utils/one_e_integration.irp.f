@@ -1,3 +1,5 @@
+use sizet
+
 double precision function overlap_gaussian_x(A_center,B_center,alpha,beta,power_A,power_B,dim)
   implicit none
   BEGIN_DOC
@@ -159,6 +161,7 @@ end
 ! ---
 
 subroutine overlap_gaussian_xyz_v(A_center, B_center, alpha, beta, power_A, power_B, overlap, n_points)
+ use sizet
 
   BEGIN_DOC
   !.. math::
@@ -172,14 +175,15 @@ subroutine overlap_gaussian_xyz_v(A_center, B_center, alpha, beta, power_A, powe
 
   implicit none
 
-  integer,          intent(in)  :: n_points
+  integer(size_t),  intent(in)  :: n_points
   integer,          intent(in)  :: power_A(3), power_B(3)             ! power of the x1 functions
   double precision, intent(in)  :: A_center(n_points,3), B_center(3)  ! center of the x1 functions
   double precision, intent(in)  :: alpha, beta
   double precision, intent(out) :: overlap(n_points)
 
   integer                       :: i
-  integer                       :: iorder_p(3), ipoint, ldp
+  integer                       :: iorder_p(3), ldp
+  integer(size_t)               :: ipoint
   integer                       :: nmax
   double precision              :: F_integral_tab(0:max_dim)
   double precision              :: p, overlap_x, overlap_y, overlap_z

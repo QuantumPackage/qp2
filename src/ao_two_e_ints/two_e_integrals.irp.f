@@ -1,12 +1,14 @@
+use sizet
 
 ! ---
 
 logical function do_schwartz_accel(i,j,k,l)
+ use sizet
  implicit none
  BEGIN_DOC
  ! If true, use Schwatrz to accelerate direct integral calculation
  END_DOC
-  integer, intent(in)            :: i, j, k, l
+  integer(size_t), intent(in)    :: i, j, k, l
   if (do_ao_cholesky) then
     do_schwartz_accel = .False.
   else
@@ -18,6 +20,7 @@ end function
 
 
 double precision function ao_two_e_integral(i, j, k, l)
+ use sizet
 
   BEGIN_DOC
   !  integral of the AO basis <ik|jl> or (ij|kl)
@@ -27,9 +30,9 @@ double precision function ao_two_e_integral(i, j, k, l)
   implicit none
   include 'utils/constants.include.F'
 
-  integer, intent(in)            :: i, j, k, l
+  integer(size_t), intent(in)    :: i, j, k, l
 
-  integer                        :: p, q, r, s
+  integer(size_t)                :: p, q, r, s
   integer                        :: num_i,num_j,num_k,num_l,dim1,I_power(3),J_power(3),K_power(3),L_power(3)
   integer                        :: iorder_p(3), iorder_q(3)
   double precision               :: I_center(3), J_center(3), K_center(3), L_center(3)
@@ -117,6 +120,7 @@ end
 ! ---
 
 double precision function ao_two_e_integral_general(i, j, k, l, op)
+ use sizet
 
   BEGIN_DOC
   !  integral of the AO basis <ik|jl> or (ij|kl)
@@ -126,10 +130,10 @@ double precision function ao_two_e_integral_general(i, j, k, l, op)
   implicit none
   include 'utils/constants.include.F'
 
-  integer, intent(in)            :: i, j, k, l
+  integer(size_t), intent(in)    :: i, j, k, l
   double precision, external     :: op   ! Operator function
 
-  integer                        :: p, q, r, s
+  integer(size_t)                :: p, q, r, s
   integer                        :: num_i,num_j,num_k,num_l,dim1,I_power(3),J_power(3),K_power(3),L_power(3)
   integer                        :: iorder_p(3), iorder_q(3)
   double precision               :: I_center(3), J_center(3), K_center(3), L_center(3)
@@ -187,13 +191,14 @@ double precision function ao_two_e_integral_general(i, j, k, l, op)
 end
 
 double precision function ao_two_e_integral_schwartz_accel(i,j,k,l)
+ use sizet
   implicit none
   BEGIN_DOC
   !  integral of the AO basis <ik|jl> or (ij|kl)
   !     i(r1) j(r1) 1/r12 k(r2) l(r2)
   END_DOC
-  integer,intent(in)             :: i,j,k,l
-  integer                        :: p,q,r,s
+  integer(size_t),intent(in)     :: i,j,k,l
+  integer(size_t)                :: p,q,r,s
   double precision               :: I_center(3),J_center(3),K_center(3),L_center(3)
   integer                        :: num_i,num_j,num_k,num_l,dim1,I_power(3),J_power(3),K_power(3),L_power(3)
   double precision               :: integral
@@ -359,17 +364,19 @@ end
 
 
 integer function ao_l4(i,j,k,l)
+ use sizet
   implicit none
   BEGIN_DOC
 ! Computes the product of l values of i,j,k,and l
   END_DOC
-  integer, intent(in) :: i,j,k,l
+  integer(size_t), intent(in) :: i,j,k,l
   ao_l4 = ao_l(i)*ao_l(j)*ao_l(k)*ao_l(l)
 end
 
 
 
 subroutine compute_ao_two_e_integrals(j,k,l,sze,buffer_value)
+ use sizet
   implicit none
   use map_module
 
@@ -378,11 +385,11 @@ subroutine compute_ao_two_e_integrals(j,k,l,sze,buffer_value)
   END_DOC
 
   include 'utils/constants.include.F'
-  integer, intent(in)            :: j,k,l,sze
+  integer(size_t), intent(in)    :: j,k,l,sze
   real(integral_kind), intent(out) :: buffer_value(sze)
   double precision               :: ao_two_e_integral
 
-  integer                        :: i
+  integer(size_t)                :: i
   logical, external              :: ao_one_e_integral_zero
   logical, external              :: ao_two_e_integral_zero
 
@@ -411,17 +418,18 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_in_map ]
   !     i(r1) j(r2) 1/r12 k(r1) l(r2)
   END_DOC
 
-  integer                        :: i,j,k,l
+  integer(size_t)                :: i,j,k,l
   double precision               :: ao_two_e_integral,cpu_1,cpu_2, wall_1, wall_2
   double precision               :: integral, wall_0
   include 'utils/constants.include.F'
 
   ! For integrals file
   integer(key_kind),allocatable  :: buffer_i(:)
-  integer                        :: size_buffer 
+  integer(size_t)                :: size_buffer 
   real(integral_kind),allocatable :: buffer_value(:)
 
-  integer                        :: n_integrals, rc
+  integer(size_t)                :: n_integrals
+  integer                        :: rc
   integer                        :: kk, m, j1, i1, lmax
   character*(64)                 :: fmt
 
@@ -443,10 +451,10 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_in_map ]
 
   if (.True.) then
     ! Avoid openMP
-    integral = ao_two_e_integral(1,1,1,1)
+    integral = ao_two_e_integral(1_size_t,1_size_t,1_size_t,1_size_t)
   endif
 
-  size_buffer = ao_num*ao_num
+  size_buffer = int(ao_num,size_t)*int(ao_num,size_t)
   !$OMP PARALLEL DEFAULT(shared) private(j,l) &
   !$OMP PRIVATE(buffer_i, buffer_value, n_integrals)
   allocate(buffer_i(size_buffer), buffer_value(size_buffer))
@@ -494,10 +502,11 @@ BEGIN_PROVIDER [ double precision, ao_two_e_integral_schwartz, (ao_num, ao_num) 
   END_DOC
 
   implicit none
-  integer          :: i, k
+  integer(size_t) :: i, k
   double precision :: ao_two_e_integral,cpu_1,cpu_2, wall_1, wall_2
 
-  ao_two_e_integral_schwartz(1,1) = ao_two_e_integral(1,1,1,1)
+  ao_two_e_integral_schwartz(1,1) = &
+      ao_two_e_integral(1_size_t,1_size_t,1_size_t,1_size_t)
   !$OMP PARALLEL DO PRIVATE(i,k)                                     &
       !$OMP DEFAULT(NONE)                                            &
       !$OMP SHARED (ao_num,ao_two_e_integral_schwartz)              &
@@ -533,7 +542,7 @@ BEGIN_PROVIDER [ double precision, ao_two_e_integral_schwartz_cgtos, (ao_num, ao
   END_DOC
 
   implicit none
-  integer          :: i, k
+  integer(size_t) :: i, k
   double precision, external :: ao_two_e_integral_cgtos_prim
 
   !$OMP PARALLEL DO PRIVATE(i,k)                                     &
@@ -1700,24 +1709,28 @@ end
 
 
 subroutine compute_ao_integrals_jl(j,l,n_integrals,buffer_i,buffer_value)
+ use sizet
   implicit none
   use map_module
   BEGIN_DOC
   !  Parallel client for AO integrals
   END_DOC
 
-  integer, intent(in)             :: j,l
-  integer,intent(out)             :: n_integrals
-  integer(key_kind),intent(out)   :: buffer_i(ao_num*ao_num)
-  real(integral_kind),intent(out) :: buffer_value(ao_num*ao_num)
+  integer(size_t), intent(in)     :: j,l
+  integer(size_t),intent(out)     :: n_integrals
+  integer(key_kind),intent(out)   :: buffer_i(int(ao_num,size_t)* &
+      int(ao_num,size_t))
+  real(integral_kind),intent(out) :: buffer_value(int(ao_num,size_t)* &
+      int(ao_num,size_t))
   logical, external               :: ao_two_e_integral_zero
 
-  integer                         :: i,k
+  integer(size_t)                 :: i,k
   double precision, external      :: ao_two_e_integral
   double precision                :: cpu_1,cpu_2, wall_1, wall_2
   double precision                :: integral, wall_0
   double precision                :: thr
-  integer                         :: kk, m, j1, i1
+  integer                        :: kk, m
+  integer(size_t)                :: j1, i1
 
   thr = ao_integrals_threshold
 

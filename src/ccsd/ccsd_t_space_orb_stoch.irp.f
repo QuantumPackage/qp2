@@ -1,5 +1,8 @@
+use sizet
+
 ! Main
 subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy,t_error)
+ use sizet
 
   implicit none
 
@@ -20,7 +23,7 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
 
   double precision, allocatable :: X_vovv(:,:,:,:), X_ooov(:,:,:,:), X_oovv(:,:,:,:)
   double precision, allocatable :: T_voov(:,:,:,:), T_oovv(:,:,:,:)
-  integer                       :: i,j,k,l,a,b,c,d
+  integer(size_t)               :: i,j,k,l,a,b,c,d
   double precision              :: e,ta,tb,eccsd
 
   eccsd = energy

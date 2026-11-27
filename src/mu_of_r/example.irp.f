@@ -1,12 +1,15 @@
 
+use sizet
+
 subroutine test_f_HF_valence_ab
+ use sizet
  implicit none
  BEGIN_DOC
 ! routine to test the function f_HF(r1,r2) 
 !
 ! the integral over r1,r2 should be equal to the alpha/beta interaction of HF determinant
  END_DOC
- integer :: ipoint,i,j,i_i,j_j,jpoint
+ integer(size_t) :: ipoint,i,j,i_i,j_j,jpoint
  double precision :: accu_val,accu_ful, weight1,weight2, r1(3),integral_psi_val,integral_psi,r2(3),two_bod
  accu_2 = 0.d0
  ! You compute the coulomb repulsion between alpha-beta electrons for HF
@@ -93,13 +96,14 @@ end
 
 
 subroutine test_f_ii_valence_ab
+ use sizet
  implicit none
  BEGIN_DOC
 ! routine to test the function f_ii(r1,r2) 
 !
 ! it should be the same that f_HF(r1,r2) only for inactive orbitals 
  END_DOC
- integer :: ipoint
+ integer(size_t) :: ipoint
  double precision :: accu_f, accu_n2, weight, r1(3),r2(3)
  double precision :: accu_f_on_top
  double precision :: f_HF_val_ab,two_bod_dens_hf,f_ii_val_ab,two_bod_dens_ii
@@ -127,11 +131,13 @@ end
 
 
 subroutine test_f_ia_valence_ab
+ use sizet
  implicit none
  BEGIN_DOC
 ! routine to test the function f_ii(r1,r2), f_ia(r1,r2) and f_aa(r1,r2)
  END_DOC
- integer :: ipoint,istate
+ integer(size_t) :: ipoint
+ integer :: istate
  double precision :: accu_f, accu_n2, weight, r1(3),r2(3)
  double precision :: accu_f_on_top
  double precision :: f_ref,f_comp,on_top_ref,on_top_comp
@@ -168,11 +174,13 @@ subroutine test_f_ia_valence_ab
 end
 
 subroutine test_f_ii_ia_aa_valence_ab
+ use sizet
  implicit none
  BEGIN_DOC
 ! routine to test the function f_Psi(r1,r2) based on core/inactive/active orbitals 
  END_DOC
- integer :: ipoint,istate
+ integer(size_t) :: ipoint
+ integer :: istate
  double precision :: accu_f, accu_n2, weight, r1(3),r2(3)
  double precision :: accu_f_on_top
  double precision :: f_ref,f_comp,on_top_ref,on_top_comp

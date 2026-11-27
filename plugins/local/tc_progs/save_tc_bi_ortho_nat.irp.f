@@ -66,12 +66,14 @@ end
 subroutine save_ref_determinant_nstates_1()
 
    use bitmasks
+   use sizet
    implicit none
    double precision :: buffer(1,N_states)
 
    buffer = 0.d0
    buffer(1,1) = 1.d0
-   call save_wavefunction_general(1, 1, ref_bitmask, 1, buffer)
+   call save_wavefunction_general(int(1,size_t), 1, ref_bitmask, &
+                                  int(1,size_t), buffer)
 
 end
 

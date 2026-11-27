@@ -1,4 +1,5 @@
 use bitmasks
+use sizet
 
 BEGIN_PROVIDER [ double precision, threshold_selectors ]
  implicit none
@@ -8,7 +9,7 @@ BEGIN_PROVIDER [ double precision, threshold_selectors ]
  threshold_selectors = dsqrt(threshold_generators)
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, N_det_selectors]
+BEGIN_PROVIDER [ integer(size_t), N_det_selectors]
   implicit none
   BEGIN_DOC
   ! For Single reference wave functions, the number of selectors is 1 : the
@@ -18,7 +19,7 @@ BEGIN_PROVIDER [ integer, N_det_selectors]
   double precision               :: norm, norm_max
   call write_time(6)
   N_det_selectors = N_det
-  call write_int(6,N_det_selectors,'Number of selectors')
+  call write_int(6, int(N_det_selectors,4), 'Number of selectors')
 END_PROVIDER
 
  BEGIN_PROVIDER [ integer(bit_kind), psi_selectors, (N_int,2,psi_selectors_size) ]
@@ -30,7 +31,7 @@ END_PROVIDER
   ! psi_selectors_coef_tc(iii,1,istate) = left  coefficient of the iii determinant
   ! psi_selectors_coef_tc(iii,2,istate) = right coefficient of the iii determinant
   END_DOC
-  integer                        :: i,k
+  integer(size_t)                :: i,k
 
   do i=1,N_det_selectors
     do k=1,N_int
@@ -54,7 +55,8 @@ END_PROVIDER
   BEGIN_DOC
   ! Transposed psi_selectors
   END_DOC
-  integer                        :: i,k
+  integer(size_t)                :: i
+  integer                        :: k
 
   do i=1,N_det_selectors
     do k=1,N_states
@@ -65,7 +67,7 @@ END_PROVIDER
   enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, psi_selectors_size ]
+BEGIN_PROVIDER [ integer(size_t), psi_selectors_size ]
  implicit none
  psi_selectors_size = psi_det_size
 END_PROVIDER

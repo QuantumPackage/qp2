@@ -1,3 +1,4 @@
+use sizet
 BEGIN_PROVIDER [ double precision, ao_pseudo_integrals, (ao_num,ao_num)]
   implicit none
   BEGIN_DOC
@@ -40,7 +41,8 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
   integer                        :: num_A,num_B
   double precision               :: A_center(3),B_center(3),C_center(3)
   integer                        :: power_A(3),power_B(3)
-  integer                        :: i,j,k,l,m
+  integer(size_t)                :: i, j
+  integer                        :: k, l, m
   double precision               :: Vloc, Vpseudo
 
   double precision               :: wall_1, wall_2, wall_0
@@ -177,7 +179,8 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
   integer                        :: num_A,num_B
   double precision               :: A_center(3),B_center(3),C_center(3)
   integer                        :: power_A(3),power_B(3)
-  integer                        :: i,j,k,l,m
+  integer(size_t)                :: i, j
+  integer                        :: k, l, m
   double precision               :: Vloc, Vpseudo
 
   double precision               :: wall_1, wall_2, wall_0

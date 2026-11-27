@@ -1,4 +1,5 @@
 
+use sizet
 ! ---
 
 ! TODO :: optimization : transform into a DGEMM
@@ -16,7 +17,7 @@ BEGIN_PROVIDER [ double precision, mo_v_ki_bi_ortho_erf_rk_cst_mu, (mo_num, mo_n
   END_DOC
 
   implicit none
-  integer :: ipoint
+  integer(size_t) :: ipoint
  !$OMP PARALLEL         &
  !$OMP DEFAULT (NONE)   &
  !$OMP PRIVATE (ipoint) & 
@@ -44,7 +45,8 @@ BEGIN_PROVIDER [ double precision, mo_v_ki_bi_ortho_erf_rk_cst_mu_transp, (n_poi
   END_DOC
 
   implicit none
-  integer :: ipoint, i, j
+  integer(size_t) :: ipoint
+  integer :: i, j
 
   do i = 1, mo_num
     do j = 1, mo_num
@@ -75,7 +77,7 @@ BEGIN_PROVIDER [ double precision, mo_x_v_ki_bi_ortho_erf_rk_cst_mu, (mo_num, mo
   END_DOC
 
   implicit none
-  integer :: ipoint
+  integer(size_t) :: ipoint
 
  !$OMP PARALLEL         &
  !$OMP DEFAULT (NONE)   &
@@ -104,7 +106,8 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_transp, (ao_num, ao_num, 3, n_points_final_grid)]
 
   implicit none
-  integer          :: i, j, ipoint
+  integer          :: i, j
+  integer(size_t) :: ipoint
   double precision :: wall0, wall1
 
   !print *, ' providing int2_grad1_u12_ao_transp ...'
@@ -153,7 +156,7 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, int2_grad1_u12_bimo_transp, (mo_num, mo_num, 3, n_points_final_grid)]
 
   implicit none
-  integer          :: ipoint
+  integer(size_t) :: ipoint
   double precision :: wall0, wall1
 
   PROVIDE mo_l_coef mo_r_coef
@@ -191,7 +194,8 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, int2_grad1_u12_bimo_t_old, (n_points_final_grid, 3, mo_num, mo_num)]
 
   implicit none
-  integer          :: i, j, ipoint
+  integer          :: i, j
+  integer(size_t) :: ipoint
   double precision :: wall0, wall1
 
   !call wall_time(wall0)
@@ -223,7 +227,8 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, int2_grad1_u12_ao_t, (n_points_final_grid, 3, ao_num, ao_num)]
 
   implicit none
-  integer          :: i, j, ipoint
+  integer          :: i, j
+  integer(size_t) :: ipoint
   double precision :: wall0, wall1
 
   !call wall_time(wall0)
@@ -252,7 +257,8 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, mo_x_v_ki_bi_ortho_erf_rk_cst_mu_transp, (n_points_final_grid, 3, mo_num, mo_num)]
 
   implicit none
-  integer :: i, j, ipoint
+  integer(size_t) :: ipoint
+  integer :: i, j
 
   do i = 1, mo_num
     do j = 1, mo_num
@@ -281,7 +287,8 @@ BEGIN_PROVIDER [ double precision, x_W_ki_bi_ortho_erf_rk, (n_points_final_grid,
   implicit none
   include 'constants.include.F'
  
-  integer          :: ipoint, m, i, k
+  integer(size_t) :: ipoint
+  integer          :: m, i, k
   double precision :: xyz
   double precision :: wall0, wall1
  
@@ -329,7 +336,8 @@ BEGIN_PROVIDER [ double precision, x_W_ki_bi_ortho_erf_rk_diag, (n_points_final_
   implicit none
   include 'constants.include.F'
  
-  integer          :: ipoint, m, i
+  integer(size_t) :: ipoint
+  integer          :: m, i
   double precision :: xyz
   double precision :: wall0, wall1
  

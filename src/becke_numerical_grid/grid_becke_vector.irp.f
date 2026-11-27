@@ -1,12 +1,14 @@
+use sizet
 
-BEGIN_PROVIDER [integer, n_points_final_grid]
+BEGIN_PROVIDER [integer(size_t), n_points_final_grid]
 
   BEGIN_DOC
   ! Number of points which are non zero
   END_DOC
 
   implicit none
-  integer :: i, j, k, l
+  integer         :: i, k, l
+  integer(size_t) :: j
 
   n_points_final_grid = 0
   do j = 1, nucl_num
@@ -32,7 +34,7 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, final_grid_points,      (3,n_points_final_grid)]
 &BEGIN_PROVIDER [double precision, final_weight_at_r_vector, (n_points_final_grid)]
 &BEGIN_PROVIDER [integer,          index_final_points,     (3,n_points_final_grid)]
-&BEGIN_PROVIDER [integer, index_final_points_reverse, (n_points_integration_angular,n_points_radial_grid,nucl_num)]
+&BEGIN_PROVIDER [integer(size_t), index_final_points_reverse, (n_points_integration_angular,n_points_radial_grid,nucl_num)]
 
   BEGIN_DOC
   !  final_grid_points(1:3,j) = (/ x, y, z /) of the jth grid point
@@ -45,7 +47,9 @@ END_PROVIDER
   END_DOC
 
   implicit none
-  integer          :: i, j, k, l, i_count
+  integer          :: i, k, l
+  integer(size_t)  :: i_count
+  integer(size_t)  :: j
   double precision :: r(3)
   double precision :: wall0, wall1
 
@@ -90,7 +94,8 @@ BEGIN_PROVIDER [double precision, final_grid_points_transp, (n_points_final_grid
   END_DOC
 
   implicit none
-  integer :: i,j
+  integer(size_t) :: i
+  integer         :: j
 
   do j = 1, 3
     do i = 1, n_points_final_grid

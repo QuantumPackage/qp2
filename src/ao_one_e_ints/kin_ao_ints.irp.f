@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -16,7 +17,8 @@
   END_DOC
 
   implicit none
-  integer          :: i, j, n, l, dim1, power_A(3), power_B(3)
+  integer(size_t) :: i, j
+  integer          :: n, l, dim1, power_A(3), power_B(3)
   double precision :: overlap, overlap_y, overlap_z
   double precision :: overlap_x0, overlap_y0, overlap_z0
   double precision :: alpha, beta, c
@@ -146,7 +148,8 @@ BEGIN_PROVIDER [double precision, ao_kinetic_integrals, (ao_num,ao_num)]
   ! $\langle \chi_i |\hat{T}| \chi_j \rangle$
   !
   END_DOC
-  integer                        :: i,j,k,l
+  integer(size_t)                :: i,j
+  integer                        :: k,l
 
   if (read_ao_integrals_kinetic) then
     call ezfio_get_ao_one_e_ints_ao_integrals_kinetic(ao_kinetic_integrals)

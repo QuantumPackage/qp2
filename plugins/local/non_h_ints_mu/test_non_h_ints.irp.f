@@ -1,6 +1,8 @@
 
 ! ---
 
+use sizet
+
 program test_non_h_ints
 
   implicit none
@@ -73,7 +75,9 @@ end
 subroutine test_ipp()
 
   implicit none
-  integer                       :: i, j, k, l, ipoint
+  use sizet
+  integer(size_t)               :: i, j, k, l
+  integer(size_t)               :: ipoint
   double precision              :: accu, norm, diff, old, new, eps, int_num
   double precision              :: weight1, ao_i_r, ao_k_r
   double precision, allocatable :: b_mat(:,:,:), I1(:,:,:,:), I2(:,:,:,:)
@@ -107,8 +111,10 @@ subroutine test_ipp()
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0                    &
-            , u12_grad1_u12_env_grad1_env(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid &
+  call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num &
+            , int(n_points_final_grid, 4), 1.d0 &
+            , u12_grad1_u12_env_grad1_env(1,1,1), ao_num*ao_num &
+            , b_mat(1,1,1), int(n_points_final_grid, 4) &
             , 0.d0, I1, ao_num*ao_num)
 
   ! ---
@@ -146,8 +152,10 @@ subroutine test_ipp()
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0     &
-            , int2_u2_env2(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid &
+  call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num &
+            , int(n_points_final_grid, 4), 1.d0 &
+            , int2_u2_env2(1,1,1), ao_num*ao_num &
+            , b_mat(1,1,1), int(n_points_final_grid, 4) &
             , 0.d0, I2, ao_num*ao_num)
  
   ! ---
@@ -205,9 +213,11 @@ end subroutine test_ipp
 subroutine I_grade_gradu_naive1(i, j, k, l, int)
 
   implicit none
-  integer,          intent(in)  :: i, j, k, l
+  integer(size_t), intent(in)  :: i, j, k, l
   double precision, intent(out) :: int
-  integer                       :: ipoint, jpoint
+  use sizet
+  integer(size_t)               :: ipoint
+  integer(size_t)               :: jpoint
   double precision              :: r1(3), r2(3)
   double precision              :: weight1_x, weight1_y, weight1_z
   double precision              :: weight2_x, weight2_y, weight2_z
@@ -263,9 +273,11 @@ end subroutine I_grade_gradu_naive1
 subroutine I_grade_gradu_naive2(i, j, k, l, int)
 
   implicit none
-  integer,          intent(in)  :: i, j, k, l
+  integer(size_t), intent(in)  :: i, j, k, l
   double precision, intent(out) :: int
-  integer                       :: ipoint, jpoint
+  use sizet
+  integer(size_t)               :: ipoint
+  integer(size_t)               :: jpoint
   double precision              :: r1(3), r2(3)
   double precision              :: weight1_x, weight1_y, weight1_z
   double precision              :: weight2_x, weight2_y, weight2_z
@@ -318,9 +330,11 @@ end subroutine I_grade_gradu_naive2
 subroutine I_grade_gradu_naive3(i, j, k, l, int)
 
   implicit none
-  integer,          intent(in)  :: i, j, k, l
+  integer(size_t), intent(in)  :: i, j, k, l
   double precision, intent(out) :: int
-  integer                       :: ipoint, jpoint
+  use sizet
+  integer(size_t)               :: ipoint
+  integer(size_t)               :: jpoint
   double precision              :: r1(3), r2(3)
   double precision              :: weight1, weight2
   double precision              :: aor_j, aor_l
@@ -365,9 +379,11 @@ end subroutine I_grade_gradu_naive3
 subroutine I_grade_gradu_naive4(i, j, k, l, int)
 
   implicit none
-  integer,          intent(in)  :: i, j, k, l
+  integer(size_t), intent(in)  :: i, j, k, l
   double precision, intent(out) :: int
-  integer                       :: ipoint, jpoint
+  use sizet
+  integer(size_t)               :: ipoint
+  integer(size_t)               :: jpoint
   double precision              :: r1(3), r2(3)
   double precision              :: weight1, weight2
   double precision              :: aor_j, aor_l, aor_k, aor_i
@@ -416,9 +432,10 @@ end
 subroutine I_grade_gradu_seminaive(i, j, k, l, int)
 
   implicit none
-  integer,          intent(in)  :: i, j, k, l
+  integer(size_t), intent(in)  :: i, j, k, l
   double precision, intent(out) :: int
-  integer                       :: ipoint
+  use sizet
+  integer(size_t)               :: ipoint
   double precision              :: r1(3)
   double precision              :: weight1
   double precision              :: aor_i, aor_k
@@ -444,9 +461,10 @@ end
 ! ---
 
 subroutine aos_ik_grad1_esquare(i, k, r1, val)
+ use sizet
 
   implicit none
-  integer,          intent(in)  :: i, k
+  integer(size_t), intent(in)  :: i, k
   double precision, intent(in)  :: r1(3)
   double precision, intent(out) :: val(3)
   double precision              :: tmp
@@ -466,9 +484,10 @@ end subroutine phi_ik_grad1_esquare
 ! ---
 
 subroutine grad1_aos_ik_grad1_esquare(i, k, r1, grad)
+ use sizet
 
   implicit none
-  integer,          intent(in)  :: i, k
+  integer(size_t), intent(in)  :: i, k
   double precision, intent(in)  :: r1(3)
   double precision, intent(out) :: grad(3)
   double precision              :: r(3), eps, tmp_eps, val_p(3), val_m(3)
@@ -507,7 +526,9 @@ end subroutine grad1_aos_ik_grad1_esquare
 subroutine test_v_ij_u_cst_mu_env_an()
 
   implicit none
-  integer          :: i, j, ipoint
+  use sizet
+  integer(size_t)  :: i, j
+  integer(size_t)  :: ipoint
   double precision :: I_old, I_new
   double precision :: norm, accu, thr, diff
 
@@ -547,7 +568,9 @@ end
 subroutine test_int2_grad1_u12_square_ao()
 
   implicit none
-  integer          :: i, j, ipoint
+  use sizet
+  integer(size_t)  :: i, j
+  integer(size_t)  :: ipoint
   double precision :: I_old, I_new
   double precision :: norm, accu, thr, diff
 
@@ -589,7 +612,10 @@ end
 subroutine test_int2_grad1_u12_ao()
 
   implicit none
-  integer          :: i, j, ipoint, m
+  use sizet
+  integer(size_t)  :: i, j
+  integer          :: m
+  integer(size_t)  :: ipoint
   double precision :: I_old, I_new
   double precision :: norm, accu, thr, diff
 
@@ -633,7 +659,9 @@ end
 subroutine test_j1e_grad()
 
   implicit none
-  integer                       :: i, j, ipoint
+  use sizet
+  integer(size_t)               :: i, j
+  integer(size_t)               :: ipoint
   double precision              :: g
   double precision              :: x_loops, x_dgemm, diff, thr, accu, norm
   double precision, allocatable :: pa(:,:), Pb(:,:), Pt(:,:)
@@ -734,7 +762,9 @@ end
 subroutine test_j1e_fit_ao()
 
   implicit none
-  integer                       :: i, j, ipoint
+  use sizet
+  integer(size_t)               :: i, j
+  integer(size_t)               :: ipoint
   double precision              :: g, c
   double precision              :: x_loops, x_dgemm, diff, thr, accu, norm
   double precision, allocatable :: pa(:,:), Pb(:,:), Pt(:,:)
@@ -765,9 +795,15 @@ subroutine test_j1e_fit_ao()
 
   g = -0.5d0 * (dble(elec_num) - 1.d0) / dble(elec_num)
 
-  call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_grad1_u2e_ao(1,1,1,1), ao_num*ao_num, Pt, 1, 0.d0, x, 1)
-  call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_grad1_u2e_ao(1,1,1,2), ao_num*ao_num, Pt, 1, 0.d0, y, 1)
-  call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_grad1_u2e_ao(1,1,1,3), ao_num*ao_num, Pt, 1, 0.d0, z, 1)
+  call dgemv("T", ao_num*ao_num, int(n_points_final_grid, 4) &
+            , g, int2_grad1_u2e_ao(1,1,1,1), ao_num*ao_num &
+            , Pt, 1, 0.d0, x, 1)
+  call dgemv("T", ao_num*ao_num, int(n_points_final_grid, 4) &
+            , g, int2_grad1_u2e_ao(1,1,1,2), ao_num*ao_num &
+            , Pt, 1, 0.d0, y, 1)
+  call dgemv("T", ao_num*ao_num, int(n_points_final_grid, 4) &
+            , g, int2_grad1_u2e_ao(1,1,1,3), ao_num*ao_num &
+            , Pt, 1, 0.d0, z, 1)
 
   FREE int2_grad1_u2e_ao
 
@@ -778,7 +814,7 @@ subroutine test_j1e_fit_ao()
   allocate(x_fit(n_points_final_grid), y_fit(n_points_final_grid), z_fit(n_points_final_grid))
   allocate(coef_fit(ao_num))
 
-  call get_j1e_coef_fit_ao(ao_num, coef_fit)
+  call get_j1e_coef_fit_ao(int(ao_num, size_t), coef_fit)
   !print *, ' coef fit in AO:'
   !print*, coef_fit
 
@@ -860,7 +896,7 @@ end
 subroutine test_tc_grad_and_lapl_ao_new()
 
   implicit none
-  integer                       :: i, j, k, l
+  integer(size_t)               :: i, j, k, l
   double precision              :: i_old, i_new, diff, thr, accu, norm
   double precision, allocatable :: tc_grad_and_lapl_ao_old(:,:,:,:)
 
@@ -908,7 +944,7 @@ end
 subroutine test_tc_grad_square_ao_new()
 
   implicit none
-  integer                       :: i, j, k, l
+  integer(size_t)               :: i, j, k, l
   double precision              :: i_old, i_new, diff, thr, accu, norm
   double precision, allocatable :: tc_grad_square_ao_old(:,:,:,:)
 
@@ -956,7 +992,9 @@ end
 BEGIN_PROVIDER [double precision, tc_grad_square_ao_new, (ao_num, ao_num, ao_num, ao_num)]
 
   implicit none
-  integer                       :: i, j, k, l, m, ipoint
+  integer(size_t)               :: i, j, k, l
+  integer                       :: m
+  integer(size_t)               :: ipoint
   double precision              :: weight1, ao_k_r, ao_i_r
   double precision              :: der_envsq_x, der_envsq_y, der_envsq_z, lap_envsq
   double precision              :: time0, time1
@@ -991,8 +1029,10 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_new, (ao_num, ao_num, ao_num
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0                 &
-            , int2_grad1_u12_square_ao(1,1,1), ao_num*ao_num, c_mat(1,1,1), n_points_final_grid &
+  call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num &
+            , int(n_points_final_grid, 4), 1.d0 &
+            , int2_grad1_u12_square_ao(1,1,1), ao_num*ao_num &
+            , c_mat(1,1,1), int(n_points_final_grid, 4) &
             , 0.d0, tc_grad_square_ao_new, ao_num*ao_num)
 
   FREE int2_grad1_u12_square_ao
@@ -1032,8 +1072,10 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_new, (ao_num, ao_num, ao_num
     !$OMP END DO
     !$OMP END PARALLEL
 
-    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0     &
-              , int2_u2_env2(1,1,1), ao_num*ao_num, c_mat(1,1,1), n_points_final_grid &
+    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num &
+              , int(n_points_final_grid, 4), 1.d0 &
+              , int2_u2_env2(1,1,1), ao_num*ao_num &
+              , c_mat(1,1,1), int(n_points_final_grid, 4) &
               , 1.d0, tc_grad_square_ao_new, ao_num*ao_num)
 
     FREE int2_u2_env2
@@ -1041,7 +1083,7 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_new, (ao_num, ao_num, ao_num
 
   deallocate(c_mat)
 
-  call sum_A_At(tc_grad_square_ao_new(1,1,1,1), ao_num*ao_num)
+  call sum_A_At(tc_grad_square_ao_new(1,1,1,1), int(ao_num, size_t)*ao_num)
 
   call wall_time(time1)
   print*, ' Wall time for tc_grad_square_ao_new (min) = ', (time1 - time0) / 60.d0
@@ -1053,7 +1095,9 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao_new, (ao_num, ao_num, ao_num, ao_num)]
 
   implicit none
-  integer                       :: i, j, k, l, m, ipoint
+  integer(size_t)               :: i, j, k, l
+  integer                       :: m
+  integer(size_t)               :: ipoint
   double precision              :: weight1, ao_k_r, ao_i_r
   double precision              :: der_envsq_x, der_envsq_y, der_envsq_z, lap_envsq
   double precision              :: time0, time1
@@ -1099,8 +1143,10 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao_new, (ao_num, ao_num, ao_n
 
   tc_grad_and_lapl_ao_new = 0.d0
   do m = 1, 3
-    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, -1.d0             &
-              , int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num, b_mat(1,1,1,m), n_points_final_grid &
+    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num &
+              , int(n_points_final_grid, 4), -1.d0 &
+              , int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num &
+              , b_mat(1,1,1,m), int(n_points_final_grid, 4) &
               , 1.d0, tc_grad_and_lapl_ao_new, ao_num*ao_num)
     enddo
   deallocate(b_mat)
@@ -1108,7 +1154,7 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao_new, (ao_num, ao_num, ao_n
   FREE int2_grad1_u12_ao
   FREE int2_grad1_u2e_ao
 
-  call sum_A_At(tc_grad_and_lapl_ao_new(1,1,1,1), ao_num*ao_num)
+  call sum_A_At(tc_grad_and_lapl_ao_new(1,1,1,1), int(ao_num, size_t)*ao_num)
 
   call wall_time(time1)
   print*, ' Wall time for tc_grad_and_lapl_ao_new (min) = ', (time1 - time0) / 60.d0
@@ -1120,7 +1166,9 @@ END_PROVIDER
 subroutine test_fit_coef_A1()
 
   implicit none
-  integer                       :: i, j, k, l, ij, kl, ipoint
+  use sizet
+  integer(size_t)               :: i, j, k, l, ij, kl
+  integer(size_t)               :: ipoint
   double precision              :: t1, t2
   double precision              :: accu, norm, diff
   double precision, allocatable :: A1(:,:)
@@ -1185,8 +1233,9 @@ subroutine test_fit_coef_A1()
 
   allocate(A2(ao_num,ao_num,ao_num,ao_num))
 
-  call dgemm( "N", "T", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0 &
-            , tmp1(1,1,1), ao_num*ao_num, tmp2(1,1,1), ao_num*ao_num            &
+  call dgemm( "N", "T", ao_num*ao_num, ao_num*ao_num &
+            , int(n_points_final_grid, 4), 1.d0 &
+            , tmp1(1,1,1), ao_num*ao_num, tmp2(1,1,1), ao_num*ao_num &
             , 0.d0, A2(1,1,1,1), ao_num*ao_num)
   deallocate(tmp1, tmp2)
 
@@ -1232,8 +1281,11 @@ end
 subroutine test_fit_coef_inv()
 
   implicit none
-  integer                       :: i, j, k, l, ij, kl, ipoint
-  integer                       :: n_svd, info, lwork, mn, m, n
+  use sizet
+  integer(size_t)               :: i, j, k, l, ij, kl
+  integer(size_t)               :: ipoint
+  integer(size_t)               :: n_svd
+  integer                       :: info, lwork, mn, m, n
   double precision              :: t1, t2
   double precision              :: accu, norm, diff
   double precision              :: cutoff_svd, D1_inv
@@ -1280,7 +1332,9 @@ subroutine test_fit_coef_inv()
   print*, ' WALL TIME FOR A1 (min) =', (t2-t1)/60.d0
 
   allocate(A1_inv(ao_num*ao_num,ao_num*ao_num))
-  call get_pseudo_inverse(A1, ao_num*ao_num, ao_num*ao_num, ao_num*ao_num, A1_inv, ao_num*ao_num, cutoff_svd)
+  call get_pseudo_inverse(A1, int(ao_num, size_t)*ao_num, &
+      int(ao_num, size_t)*ao_num, int(ao_num, size_t)*ao_num, &
+      A1_inv, int(ao_num, size_t)*ao_num, cutoff_svd)
 
   call wall_time(t1)
   print*, ' WALL TIME FOR A1_inv (min) =', (t1-t2)/60.d0
@@ -1308,8 +1362,10 @@ subroutine test_fit_coef_inv()
 
   allocate(A2(ao_num,ao_num,ao_num,ao_num))
 
-  call dgemm( "T", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0  &
-            , tmp1(1,1,1), n_points_final_grid, tmp2(1,1,1), n_points_final_grid &
+  call dgemm( "T", "N", ao_num*ao_num, ao_num*ao_num &
+            , int(n_points_final_grid, 4), 1.d0 &
+            , tmp1(1,1,1), int(n_points_final_grid, 4) &
+            , tmp2(1,1,1), int(n_points_final_grid, 4) &
             , 0.d0, A2(1,1,1,1), ao_num*ao_num)
 
   deallocate(tmp1, tmp2)
@@ -1377,8 +1433,9 @@ subroutine test_fit_coef_inv()
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_svd, 1.d0 &
-            , U(1,1), ao_num*ao_num, Vt(1,1), ao_num*ao_num       &
+  call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num &
+            , int(n_svd, 4), 1.d0 &
+            , U(1,1), ao_num*ao_num, Vt(1,1), ao_num*ao_num &
             , 0.d0, A2_inv(1,1,1,1), ao_num*ao_num)
 
   deallocate(D, U, Vt)
@@ -1453,7 +1510,10 @@ end
 subroutine test_fit_coef_testinvA()
 
   implicit none
-  integer                       :: i, j, k, l, m, n, ij, kl, mn, ipoint
+  use sizet
+  integer(size_t)               :: i, j, k, l, ij, kl, mn
+  integer                       :: m, n
+  integer(size_t)               :: ipoint
   double precision              :: t1, t2
   double precision              :: accu, norm, diff
   double precision              :: cutoff_svd
@@ -1497,7 +1557,9 @@ subroutine test_fit_coef_testinvA()
   print*, ' WALL TIME FOR A1 (min) =', (t2-t1)/60.d0
 
   allocate(A1_inv(ao_num*ao_num,ao_num*ao_num))
-  call get_pseudo_inverse(A1, ao_num*ao_num, ao_num*ao_num, ao_num*ao_num, A1_inv, ao_num*ao_num, cutoff_svd)
+  call get_pseudo_inverse(A1, int(ao_num, size_t)*ao_num, &
+      int(ao_num, size_t)*ao_num, int(ao_num, size_t)*ao_num, &
+      A1_inv, int(ao_num, size_t)*ao_num, cutoff_svd)
 
   call wall_time(t1)
   print*, ' WALL TIME FOR A1_inv (min) =', (t1-t2)/60.d0

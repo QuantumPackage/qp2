@@ -1,9 +1,10 @@
 program print_one_e_h
+  use sizet
   implicit none
   BEGIN_DOC
 ! TODO : Put the documentation of the program here
   END_DOC
- integer :: i,j
+ integer(size_t) :: i,j
  print*,'AO integrals '
  do i = 1, ao_num
   do j = 1, ao_num

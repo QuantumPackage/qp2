@@ -1,3 +1,4 @@
+
 program attachement_orb
  implicit none
  BEGIN_DOC
@@ -13,13 +14,14 @@ program attachement_orb
 end
 
 subroutine molden_attachment
+ use sizet
   implicit none
   BEGIN_DOC
   ! Produces a Molden file
   END_DOC
   character*(128)                :: output
   integer                        :: i_unit_output,getUnitAndOpen
-  integer                        :: i,j,k,l
+  integer(size_t)               :: i,j,k,l
   double precision, parameter :: a0 = 0.529177249d0
 
   PROVIDE ezfio_filename
@@ -43,7 +45,7 @@ subroutine molden_attachment
   write(i_unit_output,'(A)') '[GTO]'
 
   character*(1)                  :: character_shell
-  integer                        :: i_shell,i_prim,i_ao
+  integer(size_t)               :: i_shell,i_prim,i_ao
   integer                        :: iorder(ao_num)
   integer                        :: nsort(ao_num)
 

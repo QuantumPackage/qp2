@@ -1,3 +1,4 @@
+use sizet
 
 ! This file is an example of the kind of manipulations that you can do with providers 
 !
@@ -12,7 +13,7 @@ BEGIN_PROVIDER [ double precision, trace_mo_one_e_ints]
 !
 !                     = sum_i mo_one_e_integrals(i,i)
  END_DOC
- integer :: i
+ integer(size_t) :: i
  trace_mo_one_e_ints = 0.d0
  do i = 1, mo_num
   trace_mo_one_e_ints += mo_one_e_integrals(i,i)
@@ -29,12 +30,14 @@ BEGIN_PROVIDER [ double precision, trace_ao_one_e_ints]
 ! WARNING: it is equal to the trace on the MO basis if and only if the AO basis and MO basis 
 !          have the same number of functions
  END_DOC
- integer :: i,j
+ integer(size_t) :: i,j
  double precision, allocatable :: inv_overlap_times_integrals(:,:) ! = h S^{-1}
  allocate(inv_overlap_times_integrals(ao_num,ao_num))
  ! routine that computes the product of two matrices, you can check it with 
  ! irpman get_AB_prod
- call get_AB_prod(ao_one_e_integrals,ao_num,ao_num,s_inv,ao_num,inv_overlap_times_integrals)
+ call get_AB_prod(ao_one_e_integrals,int(ao_num, size_t) &
+     ,int(ao_num, size_t),s_inv,int(ao_num, size_t) &
+     ,inv_overlap_times_integrals)
  ! Tr(inv_overlap_times_integrals) = Tr(h S^{-1})
  trace_ao_one_e_ints = 0.d0
  do i = 1, ao_num
@@ -65,11 +68,13 @@ BEGIN_PROVIDER [ double precision, trace_ao_one_e_ints_from_mo]
 !                             = Be aware that the trace of an operator in a non orthonormal basis is = Tr(A S^{-1}) where S is the metric
 ! Must be equal to the trace_mo_one_e_ints 
  END_DOC
- integer :: i
+ integer(size_t) :: i
  double precision, allocatable :: inv_overlap_times_integrals(:,:)
  allocate(inv_overlap_times_integrals(ao_num,ao_num))
  ! Using the provider ao_one_e_integrals_from_mo = [SC h {SC}^+] 
- call get_AB_prod(ao_one_e_integrals_from_mo,ao_num,ao_num,s_inv,ao_num,inv_overlap_times_integrals)
+ call get_AB_prod(ao_one_e_integrals_from_mo,int(ao_num, size_t) &
+     ,int(ao_num, size_t),s_inv,int(ao_num, size_t) &
+     ,inv_overlap_times_integrals)
  ! inv_overlap_times_integrals = [SC h {SC}^+] S^{-1}
  trace_ao_one_e_ints_from_mo = 0.d0
  ! Computing the trace
@@ -86,7 +91,8 @@ BEGIN_PROVIDER [ double precision, ao_one_e_int_no_ov_from_mo, (ao_num, ao_num) 
  !
  ! WARNING : NON EQUAL TO ao_one_e_integrals due to the non orthogonality 
  END_DOC
- call mo_to_ao_no_overlap(mo_one_e_integrals,mo_num,ao_one_e_int_no_ov_from_mo,ao_num) 
+ call mo_to_ao_no_overlap(mo_one_e_integrals,int(mo_num, size_t) &
+     ,ao_one_e_int_no_ov_from_mo,int(ao_num, size_t))
 END_PROVIDER 
 
 BEGIN_PROVIDER [ double precision, ao_one_e_int_no_ov_from_mo_ov_ov, (ao_num, ao_num)]
@@ -97,8 +103,12 @@ BEGIN_PROVIDER [ double precision, ao_one_e_int_no_ov_from_mo_ov_ov, (ao_num, ao
  END_DOC
  double precision, allocatable :: tmp(:,:)
  allocate(tmp(ao_num, ao_num))
- call get_AB_prod(ao_overlap,ao_num,ao_num,ao_one_e_int_no_ov_from_mo,ao_num,tmp)
- call get_AB_prod(tmp,ao_num,ao_num,ao_overlap,ao_num,ao_one_e_int_no_ov_from_mo_ov_ov)
+ call get_AB_prod(ao_overlap,int(ao_num, size_t) &
+     ,int(ao_num, size_t),ao_one_e_int_no_ov_from_mo &
+     ,int(ao_num, size_t),tmp)
+ call get_AB_prod(tmp,int(ao_num, size_t) &
+     ,int(ao_num, size_t),ao_overlap &
+     ,int(ao_num, size_t),ao_one_e_int_no_ov_from_mo_ov_ov)
 END_PROVIDER 
 
 BEGIN_PROVIDER [ double precision, c_t_s_c, (mo_num, mo_num)]
@@ -106,6 +116,7 @@ BEGIN_PROVIDER [ double precision, c_t_s_c, (mo_num, mo_num)]
  BEGIN_DOC
 ! C^T S C = should be the identity 
  END_DOC 
- call get_AB_prod(mo_coef_transp,mo_num,ao_num,S_mo_coef,mo_num,c_t_s_c)
+ call get_AB_prod(mo_coef_transp,int(mo_num, size_t) &
+     ,int(ao_num, size_t),S_mo_coef,int(mo_num, size_t),c_t_s_c)
 END_PROVIDER 
 

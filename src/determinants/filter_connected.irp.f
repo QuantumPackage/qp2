@@ -1,5 +1,6 @@
-
+use sizet
 subroutine filter_not_connected(key1,key2,Nint,sze,idx)
+ use sizet
   use bitmasks
  implicit none
   BEGIN_DOC
@@ -11,12 +12,12 @@ subroutine filter_not_connected(key1,key2,Nint,sze,idx)
   !
   ! idx(0) is the number of determinants that DO NOT interact with key1
   END_DOC
-  integer, intent(in)            :: Nint, sze
+  integer(size_t), intent(in)    :: Nint, sze
   integer(bit_kind), intent(in)  :: key1(Nint,2,sze)
   integer(bit_kind), intent(in)  :: key2(Nint,2)
-  integer, intent(out)           :: idx(0:sze)
+  integer(size_t), intent(out)   :: idx(0:sze)
 
-  integer                        :: i,j,l
+  integer(size_t)                :: i,j,l
   integer                        :: degree_x2
 
 
@@ -98,6 +99,7 @@ end
 
 
 subroutine filter_connected(key1,key2,Nint,sze,idx)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -111,12 +113,12 @@ subroutine filter_connected(key1,key2,Nint,sze,idx)
   !
   ! idx(0) is the number of determinants that interact with key1
   END_DOC
-  integer, intent(in)            :: Nint, sze
+  integer(size_t), intent(in)    :: Nint, sze
   integer(bit_kind), intent(in)  :: key1(Nint,2,sze)
   integer(bit_kind), intent(in)  :: key2(Nint,2)
-  integer, intent(out)           :: idx(0:sze)
+  integer(size_t), intent(out)   :: idx(0:sze)
 
-  integer                        :: i,j,l
+  integer(size_t)                :: i,j,l
   integer                        :: degree_x2
 
   ASSERT (Nint > 0)
@@ -197,6 +199,7 @@ end
 
 
 subroutine getMobiles(key,key_mask, mobiles,Nint)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -210,11 +213,12 @@ subroutine getMobiles(key,key_mask, mobiles,Nint)
   ! smaller of the two microlist buckets.
   END_DOC
   integer(bit_kind),intent(in) :: key(Nint,2), key_mask(Nint,2)
-  integer,intent(out) :: mobiles(2)
-  integer,intent(in) :: Nint
+  integer(size_t),intent(out) :: mobiles(2)
+  integer(size_t),intent(in) :: Nint
 
   integer(bit_kind) :: mobileMask(Nint,2)
-  integer :: list(Nint*bit_kind_size), nel,j
+  integer(size_t) :: list(Nint*bit_kind_size), j
+  integer :: nel
 
   do j=1,Nint
     mobileMask(j,1) = xor(key(j,1), key_mask(j,1))
@@ -238,6 +242,7 @@ end subroutine
 
 
 subroutine create_microlist(minilist, N_minilist, key_mask, microlist, idx_microlist, N_microlist, ptr_microlist, Nint)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -254,18 +259,21 @@ subroutine create_microlist(minilist, N_minilist, key_mask, microlist, idx_micro
   ! minilist of the n-th entry, microlist(:, :, n) the
   ! determinant itself.
   END_DOC
-  integer, intent(in) :: Nint, N_minilist
+  integer(size_t), intent(in) :: Nint, N_minilist
   integer(bit_kind), intent(in) :: minilist(Nint,2,N_minilist), key_mask(Nint,2)
 
-  integer, intent(out) :: N_microlist(0:mo_num*2), ptr_microlist(0:mo_num*2+1), idx_microlist(N_minilist*4)
+  integer(size_t), intent(out) :: &
+      N_microlist(0:mo_num*2), ptr_microlist(0:mo_num*2+1), &
+      idx_microlist(N_minilist*4)
   integer(bit_kind), intent(out) :: microlist(Nint,2,N_minilist*4)
 
-  integer :: i,j,k,nt,n_element(2)
-  integer :: list(Nint*bit_kind_size,2)
-  integer, allocatable :: cur_microlist(:)
+  integer(size_t) :: i,j,k,nt
+  integer :: n_element(2)
+  integer(size_t) :: list(Nint*bit_kind_size,2)
+  integer(size_t), allocatable :: cur_microlist(:)
   allocate (cur_microlist(0:mo_num*2+1))
   integer(bit_kind) :: key_mask_neg(Nint,2), mobileMask(Nint,2)
-  integer :: mo_num_2
+  integer(size_t) :: mo_num_2
   mo_num_2 = mo_num+mo_num
 
 
@@ -357,6 +365,7 @@ end subroutine
 
 
 subroutine filter_connected_i_H_psi0(key1,key2,Nint,sze,idx)
+ use sizet
   use bitmasks
   BEGIN_DOC
   ! Returns the array idx which contains the index of the
@@ -368,12 +377,12 @@ subroutine filter_connected_i_H_psi0(key1,key2,Nint,sze,idx)
   ! idx(0) is the number of determinants that interact with key1
   END_DOC
   implicit none
-  integer, intent(in)            :: Nint, sze
+  integer(size_t), intent(in)    :: Nint, sze
   integer(bit_kind), intent(in)  :: key1(Nint,2,sze)
   integer(bit_kind), intent(in)  :: key2(Nint,2)
-  integer, intent(out)           :: idx(0:sze)
+  integer(size_t), intent(out)   :: idx(0:sze)
 
-  integer                        :: i,l,m
+  integer(size_t)                :: i,l,m
   integer                        :: degree_x2
 
   ASSERT (Nint > 0)

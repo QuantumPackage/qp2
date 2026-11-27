@@ -1,6 +1,7 @@
 subroutine htc_bi_ortho_calc_tdav_slow(v, u, N_st, sze)
 
   use bitmasks
+  use sizet
 
   BEGIN_DOC
     ! Application of H_TC on a vector 
@@ -12,11 +13,13 @@ subroutine htc_bi_ortho_calc_tdav_slow(v, u, N_st, sze)
 
   implicit none
 
-  integer, intent(in)             :: N_st, sze
+  integer, intent(in)             :: N_st
+  integer(size_t), intent(in)     :: sze
   double precision, intent(in)    :: u(sze,N_st)
   double precision, intent(inout) :: v(sze,N_st)
 
-  integer                         :: i, j, istate
+  integer                         :: istate
+  integer(size_t)                 :: i, j
   double precision                :: htot
 
   PROVIDE N_int 
@@ -48,6 +51,7 @@ end
 subroutine htcdag_bi_ortho_calc_tdav_slow(v, u, N_st, sze)
 
   use bitmasks
+  use sizet
 
   BEGIN_DOC
     ! Application of (H_TC)^dagger on a vector 
@@ -59,11 +63,13 @@ subroutine htcdag_bi_ortho_calc_tdav_slow(v, u, N_st, sze)
 
   implicit none
 
-  integer, intent(in)             :: N_st, sze
+  integer, intent(in)             :: N_st
+  integer(size_t), intent(in)     :: sze
   double precision, intent(in)    :: u(sze,N_st)
   double precision, intent(inout) :: v(sze,N_st)
 
-  integer                         :: i, j, istate
+  integer                         :: istate
+  integer(size_t)                 :: i, j
   double precision                :: htot
 
   PROVIDE N_int
@@ -92,6 +98,7 @@ end
 
 subroutine i_H_tc_psi_phi(key,keys,coef_l,coef_r,Nint,Ndet,Ndet_max,Nstate,chi_H_i_array,i_H_phi_array)
   use bitmasks
+  use sizet
   implicit none
   BEGIN_DOC
 ! Computes $\langle i|H|Phi \rangle  = \sum_J c^R_J \langle i | H | J \rangle$.
@@ -112,17 +119,19 @@ subroutine i_H_tc_psi_phi(key,keys,coef_l,coef_r,Nint,Ndet,Ndet_max,Nstate,chi_H
 ! The i_H_psi_minilist is much faster but requires to build the
 ! minilists.
   END_DOC
-  integer, intent(in)            :: Nint, Ndet,Ndet_max,Nstate
+  integer(size_t), intent(in)    :: Nint, Ndet, Ndet_max
+  integer, intent(in)            :: Nstate
   integer(bit_kind), intent(in)  :: keys(Nint,2,Ndet)
   integer(bit_kind), intent(in)  :: key(Nint,2)
   double precision, intent(in)   :: coef_l(Ndet_max,Nstate),coef_r(Ndet_max,Nstate)
   double precision, intent(out)  :: chi_H_i_array(0:3,Nstate),i_H_phi_array(0:3,Nstate)
 
-  integer                        :: i, ii,j
+  integer                        :: j
+  integer(size_t)                :: i, ii
   double precision               :: phase
-  integer                        :: exc(0:2,2,2)
+  integer(size_t)                :: exc(0:2,2,2)
   double precision               :: hmono, htwoe, hthree, htot
-  integer, allocatable           :: idx(:)
+  integer(size_t), allocatable   :: idx(:)
 
   ASSERT (Nint > 0)
   ASSERT (N_int == Nint)

@@ -1,4 +1,7 @@
+use sizet
+
 subroutine get_d0_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, coefs)
+  use sizet
   !todo: indices/conjg should be okay for complex
   use bitmasks
   implicit none
@@ -10,9 +13,11 @@ subroutine get_d0_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, 
   double precision, intent(in) :: coefs(N_states,2)
   double precision, intent(inout) :: mat_l(N_states, mo_num, mo_num)
   double precision, intent(inout) :: mat_r(N_states, mo_num, mo_num)
-  integer, intent(in) :: h(0:2,2), p(0:4,2), sp
+  integer(size_t), intent(in) :: h(0:2,2), p(0:4,2)
+  integer, intent(in) :: sp
 
-  integer :: i, j, k, s, h1, h2, p1, p2, puti, putj, mm
+  integer :: i, j, k, s
+  integer(size_t) :: h1, h2, p1, p2, puti, putj, mm
   double precision :: phase
   double precision :: hij,hji
   double precision, external :: get_phase_bi

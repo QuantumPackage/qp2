@@ -1,3 +1,4 @@
+use sizet
 !-----------------------------------------------------------------------
 ! Determinant irreps.
 !
@@ -94,9 +95,9 @@ integer, parameter :: pg_det_nmax = 12
 !-----------------------------------------------------------------------
 ! MOs grouped by symmetry block.
 !-----------------------------------------------------------------------
-BEGIN_PROVIDER [ integer, pg_block_start, (pg_n_mo_block) ]
-&BEGIN_PROVIDER [ integer, pg_block_mo, (mo_num) ]
-&BEGIN_PROVIDER [ integer, pg_block_dim, (pg_n_mo_block) ]
+BEGIN_PROVIDER [ integer(size_t), pg_block_start, (pg_n_mo_block) ]
+&BEGIN_PROVIDER [ integer(size_t), pg_block_mo, (mo_num) ]
+&BEGIN_PROVIDER [ integer(size_t), pg_block_dim, (pg_n_mo_block) ]
   implicit none
   BEGIN_DOC
   ! ``pg_block_mo(pg_block_start(b) : pg_block_start(b)+pg_block_dim(b)-1)``
@@ -108,8 +109,9 @@ BEGIN_PROVIDER [ integer, pg_block_start, (pg_n_mo_block) ]
   ! of the family goes through this indirection and never through
   ! ``pg_mo_block(i)`` arithmetic.
   END_DOC
-  integer :: i, b, k
-  integer :: pos(pg_n_mo_block)
+  integer(size_t) :: i, k
+  integer :: b
+  integer(size_t) :: pos(pg_n_mo_block)
 
   if (mo_num == 0 .or. pg_n_mo_block == 0) return
 
@@ -395,15 +397,17 @@ end function pg_small_det
 !-----------------------------------------------------------------------
 subroutine pg_det_counts(idet, nsel)
   use bitmasks
+  use sizet
   implicit none
   BEGIN_DOC
   ! ``nsel(s,b)`` = number of spin-``s`` electrons of determinant ``idet`` in
   ! symmetry block ``b``. Two determinants are in the same family if and
   ! only if their ``nsel`` agree.
   END_DOC
-  integer, intent(in) :: idet
+  integer(size_t), intent(in) :: idet
   integer, intent(out) :: nsel(2,pg_n_mo_block)
-  integer :: list(N_int*bit_kind_size,2), n_el(2)
+  integer(size_t) :: list(N_int*bit_kind_size,2)
+  integer :: n_el(2)
   integer :: s, k, b
 
   nsel(1:2,1:pg_n_mo_block) = 0
@@ -523,6 +527,7 @@ end subroutine pg_family_fill
 !-----------------------------------------------------------------------
 subroutine pg_family_index(np, mask, idx, imin)
   use bitmasks
+  use sizet
   implicit none
   BEGIN_DOC
   ! ``idx(ip)`` is the index in :c:data:`psi_det` of family member ``ip``,
@@ -535,9 +540,9 @@ subroutine pg_family_index(np, mask, idx, imin)
   ! and not compared determinantal by determinantal.
   END_DOC
   integer, intent(in) :: np, mask(2,pg_n_mo_block,np)
-  integer, intent(out) :: idx(np), imin
+  integer(size_t), intent(out) :: idx(np), imin
   integer :: ip, b, k, nd, na, nb
-  integer :: la(N_int*bit_kind_size), lb(N_int*bit_kind_size)
+  integer(size_t) :: la(N_int*bit_kind_size), lb(N_int*bit_kind_size)
   integer(bit_kind) :: key(N_int,2)
   integer, external :: get_index_in_psi_det_sorted_bit
 
@@ -574,6 +579,7 @@ end subroutine pg_family_index
 !-----------------------------------------------------------------------
 subroutine pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow, xcol, &
                         mrad, strd, rep, aoff, si)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Classifies the sectors of one family once, independently of the group
@@ -645,13 +651,14 @@ subroutine pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow,
   integer, intent(in) :: np, nsel(2,pg_n_mo_block), mask(2,pg_n_mo_block,np)
   integer, intent(out) :: npart, nfull, pn(2*pg_n_mo_block)
   integer, intent(out) :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
-  integer, intent(out) :: pos(pg_det_nmax,np,2*pg_n_mo_block)
-  integer, intent(out) :: xrow(pg_det_nmax,np,2*pg_n_mo_block)
-  integer, intent(out) :: xcol(pg_det_nmax,np,2*pg_n_mo_block)
+  integer(size_t), intent(out) :: pos(pg_det_nmax,np,2*pg_n_mo_block)
+  integer(size_t), intent(out) :: xrow(pg_det_nmax,np,2*pg_n_mo_block)
+  integer(size_t), intent(out) :: xcol(pg_det_nmax,np,2*pg_n_mo_block)
   integer, intent(out) :: mrad(2*pg_n_mo_block), strd(2*pg_n_mo_block)
   integer, intent(out) :: aoff(2*pg_n_mo_block)
   integer, intent(out) :: rep(2*pg_n_mo_block,np), si(np,2*pg_n_mo_block)
-  integer :: s, b, nd, n, p, ip, k, k1, m, ne, nen
+  integer :: s, b, nd, n, p, ip, k, k1
+  integer(size_t) :: m, ne, nen
   integer :: mm, msum, odo, nfound, i, koff
   integer, external :: pg_binom
 
@@ -703,7 +710,7 @@ subroutine pg_fam_setup(np, nsel, mask, npart, nfull, fsec, psec, pn, pos, xrow,
   !---------------------------------------------------------------------
   msum = 1
   do p = 1, npart
-    mm = pg_binom(pg_block_dim(psec(2,p)), pn(p))
+    mm = pg_binom(int(pg_block_dim(psec(2,p)),4), pn(p))
     mrad(p) = mm
     ! Divide, never multiply: the product must not overflow, and np/mm
     ! with mm > 0 tests mtot*mm <= np exactly.
@@ -924,6 +931,7 @@ end subroutine pg_elem_me
 !-----------------------------------------------------------------------
 subroutine pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, xcol, &
                         mrad, rep, aoff, si, amat, xgf, v)
+  use sizet
   implicit none
   BEGIN_DOC
   ! ``v(ip,jp)`` = :math:`<D_{ip}|U(g)|D_{jp}>` on the family, i.e. the
@@ -983,16 +991,17 @@ subroutine pg_family_vg(g, np, nfull, fsec, npart, psec, pn, pos, xrow, xcol, &
   integer, parameter :: nmax = 12
   integer, intent(in) :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
   integer, intent(in) :: pn(2*pg_n_mo_block)
-  integer, intent(in) :: pos(nmax,np,2*pg_n_mo_block)
-  integer, intent(in) :: xrow(nmax,np,2*pg_n_mo_block)
-  integer, intent(in) :: xcol(nmax,np,2*pg_n_mo_block)
+  integer(size_t), intent(in) :: pos(nmax,np,2*pg_n_mo_block)
+  integer(size_t), intent(in) :: xrow(nmax,np,2*pg_n_mo_block)
+  integer(size_t), intent(in) :: xcol(nmax,np,2*pg_n_mo_block)
   integer, intent(in) :: mrad(2*pg_n_mo_block), aoff(2*pg_n_mo_block)
   integer, intent(in) :: rep(2*pg_n_mo_block,np)
   integer, intent(in) :: si(np,2*pg_n_mo_block)
   double precision, intent(inout) :: amat(*)
   double precision, intent(in) :: xgf(*)
   double precision, intent(out) :: v(np,np)
-  integer :: ip, jp, p, n, m, i, j, ir, jr, i1, i2, j1, j2, ii, jj
+  integer :: ip, jp, p, n, m, i, j, ir, jr, ii, jj
+  integer(size_t) :: i1, i2, j1, j2
   double precision :: cfac, val
   double precision :: sub(nmax,nmax)
   double precision, external :: pg_fam_cfac, pg_small_det
@@ -1062,6 +1071,7 @@ end subroutine pg_family_vg
 ! Diagonal kernel: :math:`<D_{ip}|U(g)|D_{ip}>` and its accumulation.
 !-----------------------------------------------------------------------
 subroutine pg_family_diag_acc(np, nfull, fsec, npart, psec, pn, xrow, xcol, xgf, acc)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Adds ``pg_proj_w(a,g) * <D_ip|U(g)|D_ip>`` to ``acc(ip,a)`` for every
@@ -1093,11 +1103,12 @@ subroutine pg_family_diag_acc(np, nfull, fsec, npart, psec, pn, xrow, xcol, xgf,
   integer, parameter :: nmax = 12
   integer, intent(in) :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
   integer, intent(in) :: pn(2*pg_n_mo_block)
-  integer, intent(in) :: xrow(nmax,np,2*pg_n_mo_block)
-  integer, intent(in) :: xcol(nmax,np,2*pg_n_mo_block)
+  integer(size_t), intent(in) :: xrow(nmax,np,2*pg_n_mo_block)
+  integer(size_t), intent(in) :: xcol(nmax,np,2*pg_n_mo_block)
   double precision, intent(in) :: xgf(*)
   double precision, intent(inout) :: acc(np,pg_n_irrep)
-  integer :: g, a, ip, p, n, i1, i2, j1, j2, ii, jj
+  integer :: g, a, ip, p, n, ii, jj
+  integer(size_t) :: i1, i2, j1, j2
   double precision :: cfac, d, sub(nmax,nmax)
   double precision, external :: pg_fam_cfac, pg_small_det
 
@@ -1140,6 +1151,7 @@ end subroutine pg_family_diag_acc
 ! Diagonal of the projector on one family: the determinant labels.
 !-----------------------------------------------------------------------
 subroutine pg_family_labels(np, nsel, mask, lab, pur)
+  use sizet
   implicit none
   BEGIN_DOC
   ! ``pur(ip)`` = max_a T^a_{ip,ip} and ``lab(ip)`` = the argmax when it
@@ -1163,9 +1175,9 @@ subroutine pg_family_labels(np, nsel, mask, lab, pur)
   integer :: ip, a, amax, npart, nfull
   integer :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
   integer :: pn(2*pg_n_mo_block)
-  integer :: pos(pg_det_nmax,np,2*pg_n_mo_block)
-  integer :: xrow(pg_det_nmax,np,2*pg_n_mo_block)
-  integer :: xcol(pg_det_nmax,np,2*pg_n_mo_block)
+  integer(size_t) :: pos(pg_det_nmax,np,2*pg_n_mo_block)
+  integer(size_t) :: xrow(pg_det_nmax,np,2*pg_n_mo_block)
+  integer(size_t) :: xcol(pg_det_nmax,np,2*pg_n_mo_block)
   ! The mixed-radix tables of pg_fam_setup are part of its interface; the
   ! diagonal kernel does not read them (it keeps the per-member sector
   ! loop, which is bit-identical by construction), but the setup builds
@@ -1209,6 +1221,7 @@ end subroutine pg_family_labels
 ! State irrep weights of one family.
 !-----------------------------------------------------------------------
 subroutine pg_family_wadd(np, nsel, mask, c, ldc, nst, xgf, gsel, qtot)
+  use sizet
   implicit none
   BEGIN_DOC
   ! ``qtot(g,s) += c^T V_g c`` for the ``nst`` CI columns ``c`` on this
@@ -1297,13 +1310,14 @@ subroutine pg_family_wadd(np, nsel, mask, c, ldc, nst, xgf, gsel, qtot)
   integer :: g, s, ip, p, n, m, k, l, qq, h, j0, sp, npart, nfull
   integer :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
   integer :: pn(2*pg_n_mo_block)
-  integer :: pos(pg_det_nmax,np,2*pg_n_mo_block)
-  integer :: xrow(pg_det_nmax,np,2*pg_n_mo_block)
-  integer :: xcol(pg_det_nmax,np,2*pg_n_mo_block)
+  integer(size_t) :: pos(pg_det_nmax,np,2*pg_n_mo_block)
+  integer(size_t) :: xrow(pg_det_nmax,np,2*pg_n_mo_block)
+  integer(size_t) :: xcol(pg_det_nmax,np,2*pg_n_mo_block)
   integer :: mrad(2*pg_n_mo_block), strd(2*pg_n_mo_block)
   integer :: aoff(2*pg_n_mo_block)
   integer :: rep(2*pg_n_mo_block,np), si(np,2*pg_n_mo_block)
-  integer :: i, j, ir, jr, i1, i2, j1, j2, ii, jj
+  integer :: i, j, ir, jr, ii, jj
+  integer(size_t) :: i1, i2, j1, j2
   double precision, allocatable :: u(:,:), un(:,:), utmp(:,:), amat(:)
   double precision :: q(nst), cfac, acc
   double precision :: sub(nmax,nmax)
@@ -1414,6 +1428,7 @@ end subroutine pg_family_wadd
 ! The MO projector applied to one family.
 !-----------------------------------------------------------------------
 subroutine pg_family_projector(np, nsel, mask, t)
+  use sizet
   implicit none
   BEGIN_DOC
   ! ``t(ip,jp,a)`` = T^a_{ip,jp} = (d_a/(mult_a*:math:`|G|`)) sum_g chi_a(col(g)) :math:`<D_ip|U(g)|D_jp>`.
@@ -1440,9 +1455,9 @@ subroutine pg_family_projector(np, nsel, mask, t)
   integer :: g, a, ip, jp, npart, nfull
   integer :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
   integer :: pn(2*pg_n_mo_block)
-  integer :: pos(pg_det_nmax,np,2*pg_n_mo_block)
-  integer :: xrow(pg_det_nmax,np,2*pg_n_mo_block)
-  integer :: xcol(pg_det_nmax,np,2*pg_n_mo_block)
+  integer(size_t) :: pos(pg_det_nmax,np,2*pg_n_mo_block)
+  integer(size_t) :: xrow(pg_det_nmax,np,2*pg_n_mo_block)
+  integer(size_t) :: xcol(pg_det_nmax,np,2*pg_n_mo_block)
   integer :: mrad(2*pg_n_mo_block), strd(2*pg_n_mo_block)
   integer :: aoff(2*pg_n_mo_block)
   integer :: rep(2*pg_n_mo_block,np), si(np,2*pg_n_mo_block)
@@ -1476,9 +1491,9 @@ end subroutine pg_family_projector
 BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
 &BEGIN_PROVIDER [ double precision, pg_det_purity, (N_det) ]
 &BEGIN_PROVIDER [ integer, pg_det_block, (N_det) ]
-&BEGIN_PROVIDER [ integer, pg_det_family, (N_det) ]
-&BEGIN_PROVIDER [ integer, pg_n_family ]
-&BEGIN_PROVIDER [ integer, pg_family_first, (N_det) ]
+&BEGIN_PROVIDER [ integer(size_t), pg_det_family, (N_det) ]
+&BEGIN_PROVIDER [ integer(size_t), pg_n_family ]
+&BEGIN_PROVIDER [ integer(size_t), pg_family_first, (N_det) ]
   implicit none
   BEGIN_DOC
   ! ``pg_det_irrep(D)`` = argmax_a T^a_{DD}, or 0 when max_a T^a_{DD} <
@@ -1508,9 +1523,11 @@ BEGIN_PROVIDER [ integer, pg_det_irrep, (N_det) ]
   ! :c:func:`pg_family_labels`, whose working set is ``np*pg_n_irrep``
   ! instead of ``np^2*pg_n_irrep``.
   END_DOC
-  integer :: i, np, ip, j, ifam, imin
+  integer(size_t) :: i, j, ifam, imin
+  integer :: np, ip
   integer :: nsel(2,pg_n_mo_block)
-  integer, allocatable :: mask(:,:,:), idx(:), lab(:)
+  integer, allocatable :: mask(:,:,:), lab(:)
+  integer(size_t), allocatable :: idx(:)
   double precision, allocatable :: pur(:)
 
   pg_n_family = 0
@@ -1635,6 +1652,7 @@ END_PROVIDER
 ! The irrep probability distribution of one determinant.
 !-----------------------------------------------------------------------
 subroutine pg_det_weights(idet, w)
+  use sizet
   implicit none
   BEGIN_DOC
   ! ``w(a)`` = T^a_{DD} = <D|P^a|D> for determinant ``idet``: the probability
@@ -1654,11 +1672,13 @@ subroutine pg_det_weights(idet, w)
   ! caller decides what to print. Call it only after :c:data:`pg_det_irrep` is
   ! built: it re-enumerates the family and does not relabel anything.
   END_DOC
-  integer, intent(in) :: idet
+  integer(size_t), intent(in) :: idet
   double precision, intent(out) :: w(pg_n_irrep)
-  integer :: ip, jp, imin, np, ig, c, a
+  integer :: ip, jp, np, ig, c, a
+  integer(size_t) :: imin
   integer :: nsel(2,pg_n_mo_block)
-  integer, allocatable :: mask(:,:,:), idx(:)
+  integer, allocatable :: mask(:,:,:)
+  integer(size_t), allocatable :: idx(:)
   double precision :: coef(pg_n_irrep), val
 
   w(1:pg_n_irrep) = 0.d0

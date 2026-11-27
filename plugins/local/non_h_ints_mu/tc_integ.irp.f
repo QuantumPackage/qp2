@@ -1,3 +1,4 @@
+use sizet
 
 BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_final_grid, 3)]
 
@@ -10,7 +11,8 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
   END_DOC
 
   implicit none
-  integer          :: ipoint, i, j, m, jpoint
+  integer          :: m
+  integer(size_t)  :: ipoint, i, j, jpoint
   double precision :: time0, time1
   double precision :: x, y, z, r2 
   double precision :: dx, dy, dz
@@ -47,8 +49,8 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
 
       if(tc_save_mem) then
 
-        integer                       :: n_blocks, n_rest, n_pass
-        integer                       :: i_blocks, i_rest, i_pass, ii
+        integer(size_t)               :: n_blocks, n_rest, n_pass
+        integer(size_t)               :: i_blocks, i_rest, i_pass, ii
         double precision              :: mem, n_double
         double precision, allocatable :: tmp(:,:,:), xx(:)
         double precision, allocatable :: tmp_grad1_u12(:,:,:)
@@ -73,12 +75,13 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
         call total_memory(mem)
         mem      = max(1.d0, qp_max_mem - mem)
         n_double = mem * 1.d8
-        n_blocks = int(min(n_double / (n_points_extra_final_grid * 4.d0), 1.d0*n_points_final_grid))
-        n_rest   = int(mod(n_points_final_grid, n_blocks))
-        n_pass   = int((n_points_final_grid - n_rest) / n_blocks)
-        call write_int(6, n_pass, 'Number of passes')
-        call write_int(6, n_blocks, 'Size of the blocks')
-        call write_int(6, n_rest, 'Size of the last block')
+        n_blocks = int(min(n_double / (n_points_extra_final_grid * 4.d0), &
+                           1.d0*n_points_final_grid), size_t)
+        n_rest   = int(mod(n_points_final_grid, n_blocks), size_t)
+        n_pass   = int((n_points_final_grid - n_rest) / n_blocks, size_t)
+        call write_int(6, int(n_pass, 4), 'Number of passes')
+        call write_int(6, int(n_blocks, 4), 'Size of the blocks')
+        call write_int(6, int(n_rest, 4), 'Size of the last block')
         allocate(tmp_grad1_u12(n_points_extra_final_grid,n_blocks,3))
         do i_pass = 1, n_pass
           ii = (i_pass-1)*n_blocks + 1
@@ -94,9 +97,11 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
           !$OMP END DO
           !$OMP END PARALLEL
           do m = 1, 3
-            call dgemm( "T", "N", ao_num*ao_num, n_blocks, n_points_extra_final_grid, 1.d0                     &
-                      , tmp(1,1,1), n_points_extra_final_grid, tmp_grad1_u12(1,1,m), n_points_extra_final_grid &
-                      , 0.d0, int2_grad1_u12_ao(1,1,ii,m), ao_num*ao_num)
+            call dgemm( "T", "N", ao_num*ao_num, int(n_blocks, 4) &
+                , int(n_points_extra_final_grid, 4), 1.d0 &
+                , tmp(1,1,1), int(n_points_extra_final_grid, 4) &
+                , tmp_grad1_u12(1,1,m), int(n_points_extra_final_grid, 4) &
+                , 0.d0, int2_grad1_u12_ao(1,1,ii,m), ao_num*ao_num)
           enddo
         enddo
         deallocate(tmp_grad1_u12)
@@ -115,9 +120,11 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
           !$OMP END DO
           !$OMP END PARALLEL
           do m = 1, 3
-            call dgemm( "T", "N", ao_num*ao_num, n_rest, n_points_extra_final_grid, 1.d0                       &
-                      , tmp(1,1,1), n_points_extra_final_grid, tmp_grad1_u12(1,1,m), n_points_extra_final_grid &
-                      , 0.d0, int2_grad1_u12_ao(1,1,ii,m), ao_num*ao_num)
+            call dgemm( "T", "N", ao_num*ao_num, int(n_rest, 4) &
+                , int(n_points_extra_final_grid, 4), 1.d0 &
+                , tmp(1,1,1), int(n_points_extra_final_grid, 4) &
+                , tmp_grad1_u12(1,1,m), int(n_points_extra_final_grid, 4) &
+                , 0.d0, int2_grad1_u12_ao(1,1,ii,m), ao_num*ao_num)
           enddo
           deallocate(tmp_grad1_u12)
         endif
@@ -227,7 +234,8 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
   END_DOC
 
   implicit none
-  integer          :: ipoint, i, j, m, jpoint
+  integer          :: m
+  integer(size_t)  :: ipoint, i, j, jpoint
   double precision :: x, y, z, r2 
   double precision :: dx, dy, dz, dr2
   double precision :: dx1, dy1, dz1, dx2, dy2, dz2, dr12
@@ -257,8 +265,8 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
   
     if(tc_save_mem) then
 
-      integer                       :: n_blocks, n_rest, n_pass
-      integer                       :: i_blocks, i_rest, i_pass, ii
+      integer(size_t)               :: n_blocks, n_rest, n_pass
+      integer(size_t)               :: i_blocks, i_rest, i_pass, ii
       double precision              :: mem, n_double
       double precision, allocatable :: tmp(:,:,:), xx(:,:,:)
       double precision, allocatable :: tmp_grad1_u12_squared(:,:)
@@ -283,12 +291,13 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
       call total_memory(mem)
       mem      = max(1.d0, qp_max_mem - mem)
       n_double = mem * 1.d8
-      n_blocks = int(min(n_double / (n_points_extra_final_grid * 4.d0), 1.d0*n_points_final_grid))
-      n_rest   = int(mod(n_points_final_grid, n_blocks))
-      n_pass   = int((n_points_final_grid - n_rest) / n_blocks)
-      call write_int(6, n_pass, 'Number of passes')
-      call write_int(6, n_blocks, 'Size of the blocks')
-      call write_int(6, n_rest, 'Size of the last block')
+      n_blocks = int(min(n_double / (n_points_extra_final_grid * 4.d0), &
+                         1.d0*n_points_final_grid), size_t)
+      n_rest   = int(mod(n_points_final_grid, n_blocks), size_t)
+      n_pass   = int((n_points_final_grid - n_rest) / n_blocks, size_t)
+      call write_int(6, int(n_pass, 4), 'Number of passes')
+      call write_int(6, int(n_blocks, 4), 'Size of the blocks')
+      call write_int(6, int(n_rest, 4), 'Size of the last block')
       allocate(tmp_grad1_u12_squared(n_points_extra_final_grid,n_blocks), xx(n_points_extra_final_grid,n_blocks,3))
       do i_pass = 1, n_pass
         ii = (i_pass-1)*n_blocks + 1
@@ -303,9 +312,11 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
         enddo
         !$OMP END DO
         !$OMP END PARALLEL
-        call dgemm( "T", "N", ao_num*ao_num, n_blocks, n_points_extra_final_grid, -0.5d0                         &
-                  , tmp(1,1,1), n_points_extra_final_grid, tmp_grad1_u12_squared(1,1), n_points_extra_final_grid &
-                  , 0.d0, int2_grad1_u12_square_ao(1,1,ii), ao_num*ao_num)
+        call dgemm( "T", "N", ao_num*ao_num, int(n_blocks, 4) &
+            , int(n_points_extra_final_grid, 4), -0.5d0 &
+            , tmp(1,1,1), int(n_points_extra_final_grid, 4) &
+            , tmp_grad1_u12_squared(1,1), int(n_points_extra_final_grid, 4) &
+            , 0.d0, int2_grad1_u12_square_ao(1,1,ii), ao_num*ao_num)
       enddo
       deallocate(tmp_grad1_u12_squared, xx)
       if(n_rest .gt. 0) then
@@ -322,9 +333,11 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
         enddo
         !$OMP END DO
         !$OMP END PARALLEL
-        call dgemm( "T", "N", ao_num*ao_num, n_rest, n_points_extra_final_grid, -0.5d0                           &
-                  , tmp(1,1,1), n_points_extra_final_grid, tmp_grad1_u12_squared(1,1), n_points_extra_final_grid &
-                  , 0.d0, int2_grad1_u12_square_ao(1,1,ii), ao_num*ao_num)
+        call dgemm( "T", "N", ao_num*ao_num, int(n_rest, 4) &
+            , int(n_points_extra_final_grid, 4), -0.5d0 &
+            , tmp(1,1,1), int(n_points_extra_final_grid, 4) &
+            , tmp_grad1_u12_squared(1,1), int(n_points_extra_final_grid, 4) &
+            , 0.d0, int2_grad1_u12_square_ao(1,1,ii), ao_num*ao_num)
         deallocate(tmp_grad1_u12_squared, xx)
       endif
       deallocate(tmp)

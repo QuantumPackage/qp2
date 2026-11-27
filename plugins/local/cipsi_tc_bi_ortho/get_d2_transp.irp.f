@@ -1,5 +1,7 @@
+use sizet
 
 subroutine get_d2_new_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, coefs)
+  use sizet
   !todo: indices/conjg should be correct for complex
   use bitmasks
   implicit none
@@ -10,12 +12,15 @@ subroutine get_d2_new_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, ma
   double precision, intent(in) :: coefs(N_states,2)
   double precision, intent(inout) :: mat_r(N_states, mo_num, mo_num)
   double precision, intent(inout) :: mat_l(N_states, mo_num, mo_num)
-  integer, intent(in) :: h(0:2,2), p(0:4,2), sp
+  integer(size_t), intent(in) :: h(0:2,2), p(0:4,2)
+  integer, intent(in) :: sp
 
   double precision, external :: get_phase_bi
 
-  integer :: i, j, k, tip, ma, mi, puti, putj
-  integer :: h1, h2, p1, p2, i1, i2
+  integer :: i, j, k, tip, ma, mi
+  integer(size_t) :: puti, putj
+  integer(size_t) :: h1, h2, p1, p2
+  integer :: i1, i2
   double precision :: phase
   double precision :: hij,hji
 

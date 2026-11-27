@@ -1,4 +1,6 @@
 
+use sizet
+
  BEGIN_PROVIDER [double precision, mu_of_r_prov, (n_points_final_grid,N_states) ]
  implicit none
  BEGIN_DOC
@@ -10,7 +12,8 @@
  !
  ! in the two-body density matrix are excluded
  END_DOC
- integer :: ipoint,istate
+ integer(size_t) :: ipoint
+ integer :: istate
  double precision :: wall0,wall1
  print*,'providing mu_of_r ...'
  call wall_time(wall0)
@@ -73,7 +76,7 @@
  !
  ! in the two-body density matrix are excluded
  END_DOC
- integer :: ipoint
+ integer(size_t) :: ipoint
  double precision :: wall0,wall1,f_hf,on_top,w_hf,sqpi
  print*,'providing mu_of_r_hf ...'
  call wall_time(wall0)
@@ -109,7 +112,7 @@
  !
  ! in the two-body density matrix are excluded
  END_DOC
- integer :: ipoint
+ integer(size_t) :: ipoint
  double precision :: wall0,wall1,f_hf,on_top,w_hf,sqpi
  print*,'providing mu_of_r_hf_sparse ...'
  call wall_time(wall0)
@@ -145,7 +148,7 @@
  !
  ! in the two-body density matrix are excluded
  END_DOC
- integer :: ipoint
+ integer(size_t) :: ipoint
  double precision :: wall0,wall1,f_hf,on_top,w_hf,sqpi
  PROVIDE all_mo_integrals
  print*,'providing mu_of_r_hf_old ...'
@@ -186,7 +189,8 @@
  ! The average value of mu is set where the density is too low for the computation
  ! to be accurate
  END_DOC
- integer :: ipoint,istate
+ integer(size_t) :: ipoint
+ integer :: istate
  double precision :: wall0,wall1,f_psi,on_top,w_psi,sqpi, ave, count
  print*,'providing mu_of_r_psi_cas ...'
  call wall_time(wall0)
@@ -229,7 +233,8 @@ BEGIN_PROVIDER [double precision, mu_average_prov, (N_states)]
  !
  ! in the one- and two-body density matrix are excluded
  END_DOC
- integer :: ipoint,istate
+ integer(size_t) :: ipoint
+ integer :: istate
  double precision :: weight,density
  mu_average_prov = 0.d0
  do istate = 1, N_states
@@ -253,7 +258,8 @@ BEGIN_PROVIDER [double precision, mu_average_prov2, (N_states)]
  !
  ! in the one- and two-body density matrix are excluded
  END_DOC
- integer :: ipoint,istate
+ integer(size_t) :: ipoint
+ integer :: istate
  double precision :: weight,density,norm
  do istate = 1, N_states
   mu_average_prov2(istate) = 0.d0
@@ -279,7 +285,8 @@ BEGIN_PROVIDER [double precision, mu_average_prov_ot, (N_states)]
  !
  ! in the one- and two-body density matrix are excluded
  END_DOC
- integer :: ipoint,istate
+ integer(size_t) :: ipoint
+ integer :: istate
  double precision :: weight,density,norm
  mu_average_prov_ot = 0.d0
  do istate = 1, N_states
@@ -306,7 +313,8 @@ BEGIN_PROVIDER [double precision, mu_average_prov3, (N_states)]
  !
  ! in the one- and two-body density matrix are excluded
  END_DOC
- integer :: ipoint,istate
+ integer(size_t) :: ipoint
+ integer :: istate
  double precision :: weight,density,norm, ratio
  do istate = 1, N_states
   mu_average_prov3(istate) = 0.d0
@@ -338,12 +346,12 @@ BEGIN_PROVIDER [double precision, mu_of_r_projector_mo, (n_points_final_grid) ]
 
  double precision, parameter :: factor = dsqrt(2.d0*dacos(-1.d0))
  double precision, allocatable :: tmp(:,:)
- integer :: ipoint
+ integer(size_t) :: ipoint
 
 
  do ipoint=1,n_points_final_grid
    mu_of_r_projector_mo(ipoint) = 0.d0
-   integer :: i,j
+   integer(size_t) :: i,j
    do j=1,n_inact_act_orb
      i = list_inact_act(j)
      mu_of_r_projector_mo(ipoint) = mu_of_r_projector_mo(ipoint) + &
@@ -377,7 +385,8 @@ BEGIN_PROVIDER [double precision, mu_average_proj, (N_states)]
  !
  ! in the one- and two-body density matrix are excluded
  END_DOC
- integer :: ipoint,istate
+ integer(size_t) :: ipoint
+ integer :: istate
  double precision :: weight,density
  do istate = 1, N_states
   mu_average_proj(istate) = 0.d0
@@ -401,10 +410,11 @@ BEGIN_PROVIDER [double precision, mu_of_r_projector_ao_prod, (n_points_final_gri
  !  \] where $i$ and $j$ denote all atomic orbitals.
  END_DOC
 
- integer :: ipoint
+ integer(size_t) :: ipoint
  double precision :: f
 
- integer :: i,j,a,b
+ integer(size_t) :: i,j,a
+ integer :: b
  double precision, allocatable :: tmp(:), tmp2(:)
  double precision :: epsilon, pb
  double precision, external :: ddot
@@ -427,9 +437,9 @@ BEGIN_PROVIDER [double precision, mu_of_r_projector_ao_prod, (n_points_final_gri
 !     enddo
 !   enddo
 !
-   call dgemv('N', basis_prod_num, basis_prod_num, 1.d0, basis_prod_overlap_inv, &
-     basis_prod_num, tmp, 1, 0.d0, tmp2, 1)
-   pb = ddot(basis_prod_num, tmp, 1, tmp2, 1)
+   call dgemv('N', int(basis_prod_num, 4), int(basis_prod_num, 4), 1.d0, &
+     basis_prod_overlap_inv, int(basis_prod_num, 4), tmp, 1, 0.d0, tmp2, 1)
+   pb = ddot(int(basis_prod_num, 4), tmp, 1, tmp2, 1)
 
    pb = max(tiny(1.e0), pb)
    epsilon = 1.d0/(2.d0*dacos(-1.d0) * pb**(2.d0/3.d0))

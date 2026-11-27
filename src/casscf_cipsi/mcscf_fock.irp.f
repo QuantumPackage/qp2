@@ -1,9 +1,12 @@
+use sizet
+
 BEGIN_PROVIDER [real*8, Fipq, (mo_num,mo_num) ]
    BEGIN_DOC
    ! the inactive Fock matrix, in molecular orbitals
    END_DOC
    implicit none
-   integer                        :: i,p,q,k,kk,t,tt,u,uu
+   integer                        :: k,kk,t,tt,u,uu
+   integer(size_t)                :: i,p,q
 
    do q=1,mo_num
      do p=1,mo_num
@@ -92,7 +95,7 @@ BEGIN_PROVIDER [real*8, Fapq, (mo_num,mo_num) ]
    end do
 
    if (bavard) then
-     integer                        :: i
+     integer(size_t)               :: i
      write(6,*)
      write(6,*) ' the effective Fock matrix over MOs'
      write(6,*)
@@ -131,8 +134,10 @@ END_PROVIDER
   ! Mo_mcscf_fock_alpha are set to usual Fock like operator but computed with the MCSCF densities on the MO basis
  END_DOC
 
- call ao_to_mo(mcscf_fock_alpha_ao,ao_num,mcscf_fock_alpha_mo,mo_num)
- call ao_to_mo(mcscf_fock_beta_ao,ao_num,mcscf_fock_beta_mo,mo_num)
+  call ao_to_mo(mcscf_fock_alpha_ao, int(ao_num,size_t), mcscf_fock_alpha_mo, &
+               int(mo_num,size_t))
+  call ao_to_mo(mcscf_fock_beta_ao, int(ao_num,size_t), mcscf_fock_beta_mo, &
+               int(mo_num,size_t))
 
 END_PROVIDER
 
@@ -169,7 +174,8 @@ END_PROVIDER
    !  B   1.5  0.5 -0.5
    !
    END_DOC
-   integer                        :: i,j,n
+   integer                        :: n
+   integer(size_t)                :: i,j
    if (elec_alpha_num == elec_beta_num) then
      mcscf_fock_mo = mcscf_fock_alpha_mo
    else

@@ -1,7 +1,9 @@
+use sizet
 
 ! ---
 
 subroutine  single_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
+  use sizet
 
   BEGIN_DOC
   !
@@ -16,14 +18,16 @@ subroutine  single_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe,
   use bitmasks
 
   implicit none
-  integer,           intent(in) :: Nint
+  integer(size_t), intent(in) :: Nint
   integer(bit_kind), intent(in) :: key_j(Nint,2), key_i(Nint,2)
   double precision, intent(out) :: hmono, htwoe, hthree, htot
 
-  integer                       :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
   integer                       :: Ne(2), i, j, ii, jj, ispin, jspin, k, kk
-  integer                       :: degree,exc(0:2,2,2)
-  integer                       :: h1, p1, h2, p2, s1, s2
+  integer                       :: degree
+  integer(size_t)                :: exc(0:2,2,2)
+  integer(size_t)                :: h1, p1, h2, p2
+  integer                       :: s1, s2
   double precision              :: get_mo_two_e_integral_tc_int, phase
   double precision              :: direct_int, exchange_int_12, exchange_int_23, exchange_int_13
   integer                       :: other_spin(2)
@@ -54,10 +58,12 @@ end
 subroutine get_single_excitation_from_fock_tc(Nint, key_i, key_j, h, p, spin, phase, hmono, htwoe, hthree, htot)
 
   use bitmasks
+  use sizet
 
   implicit none
-  integer,           intent(in)  :: Nint
-  integer,           intent(in)  :: h, p, spin
+  integer(size_t),   intent(in)  :: Nint
+  integer(size_t),   intent(in)  :: h, p
+  integer,           intent(in)  :: spin
   double precision,  intent(in)  :: phase
   integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
   double precision,  intent(out) :: hmono, htwoe, hthree, htot
@@ -65,10 +71,11 @@ subroutine get_single_excitation_from_fock_tc(Nint, key_i, key_j, h, p, spin, ph
   integer(bit_kind)              :: differences(Nint,2)
   integer(bit_kind)              :: hole(Nint,2)
   integer(bit_kind)              :: partcl(Nint,2)
-  integer                        :: occ_hole(Nint*bit_kind_size,2)
-  integer                        :: occ_partcl(Nint*bit_kind_size,2)
+  integer(size_t)                 :: occ_hole(Nint*bit_kind_size,2)
+  integer(size_t)                 :: occ_partcl(Nint*bit_kind_size,2)
   integer                        :: n_occ_ab_hole(2),n_occ_ab_partcl(2)
-  integer                        :: i0,i
+  integer(size_t)                 :: i
+  integer                        :: i0
   double precision               :: buffer_c(mo_num),buffer_x(mo_num)
 
   do i = 1, mo_num
@@ -137,18 +144,21 @@ end
 ! ---
 
 subroutine three_comp_fock_elem(Nint, key_i, h_fock, p_fock, ispin_fock, hthree)
+  use sizet
 
   implicit none
-  integer,           intent(in)  :: Nint
-  integer,           intent(in)  :: h_fock, p_fock, ispin_fock
+  integer(size_t),   intent(in)  :: Nint
+  integer(size_t),   intent(in)  :: h_fock, p_fock
+  integer,           intent(in)  :: ispin_fock
   integer(bit_kind), intent(in)  :: key_i(Nint,2)
   double precision,  intent(out) :: hthree
 
-  integer                        :: nexc(2),i,ispin,na,nb
+  integer(size_t)                 :: i
+  integer                        :: nexc(2),ispin,na,nb
   integer(bit_kind)              :: hole(Nint,2)
   integer(bit_kind)              :: particle(Nint,2)
-  integer                        :: occ_hole(Nint*bit_kind_size,2)
-  integer                        :: occ_particle(Nint*bit_kind_size,2)
+  integer(size_t)                 :: occ_hole(Nint*bit_kind_size,2)
+  integer(size_t)                 :: occ_particle(Nint*bit_kind_size,2)
   integer                        :: n_occ_ab_hole(2),n_occ_ab_particle(2)
   integer(bit_kind)              :: det_tmp(Nint,2)
 
@@ -201,6 +211,7 @@ end
 
 subroutine fock_ac_tc_operator(iorb,ispin,key, h_fock,p_fock, ispin_fock,hthree,Nint,na,nb)
   use bitmasks
+  use sizet
   implicit none
   BEGIN_DOC
   ! Routine that computes the contribution to the three-electron part of the Fock operator 
@@ -213,14 +224,16 @@ subroutine fock_ac_tc_operator(iorb,ispin,key, h_fock,p_fock, ispin_fock,hthree,
   !
   ! the output hthree is INCREMENTED
   END_DOC
-  integer, intent(in)              :: iorb, ispin, Nint, h_fock,p_fock, ispin_fock
+  integer(size_t), intent(in)   :: iorb, Nint, h_fock,p_fock
+  integer,           intent(in) :: ispin, ispin_fock
   integer, intent(inout)           :: na, nb
   integer(bit_kind), intent(inout) :: key(Nint,2)
   double precision, intent(inout)  :: hthree
 
-  integer                        :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                 :: occ(Nint*bit_kind_size,2)
   integer                        :: other_spin
-  integer                        :: k,l,i,jj,j
+  integer(size_t)                 :: k, jj
+  integer                        :: l, i, j
   double precision :: direct_int, exchange_int
   
 
@@ -297,6 +310,7 @@ end
 
 subroutine fock_a_tc_operator(iorb,ispin,key, h_fock,p_fock, ispin_fock,hthree,Nint,na,nb)
   use bitmasks
+  use sizet
   implicit none
   BEGIN_DOC
   ! Routine that computes the contribution to the three-electron part of the Fock operator 
@@ -309,15 +323,17 @@ subroutine fock_a_tc_operator(iorb,ispin,key, h_fock,p_fock, ispin_fock,hthree,N
   !
   ! the output hthree is INCREMENTED
   END_DOC
-  integer, intent(in)            :: iorb, ispin, Nint, h_fock,p_fock, ispin_fock
+  integer(size_t), intent(in)  :: iorb, Nint, h_fock,p_fock
+  integer,           intent(in) :: ispin, ispin_fock
   integer, intent(inout)         :: na, nb
   integer(bit_kind), intent(inout) :: key(Nint,2)
   double precision, intent(inout) :: hthree
   
   double precision  :: direct_int, exchange_int
-  integer                        :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                 :: occ(Nint*bit_kind_size,2)
   integer                        :: other_spin
-  integer                        :: k,l,i,jj,mm,j,m
+  integer(size_t)                 :: k, jj
+  integer                        :: l, i, mm, j, m
   integer                        :: tmp(2)
 
   ASSERT (iorb > 0)
@@ -386,11 +402,12 @@ BEGIN_PROVIDER [double precision, fock_op_2_e_tc_closed_shell, (mo_num, mo_num)]
 
   PROVIDE N_int
 
-  integer           :: h0,p0,h,p,k0,k,i
+  integer(size_t)   :: h,p,k,i
+  integer           :: h0,p0,k0
   integer           :: n_occ_ab(2)
-  integer           :: occ(N_int*bit_kind_size,2)
+  integer(size_t)   :: occ(N_int*bit_kind_size,2)
   integer           :: n_occ_ab_virt(2)
-  integer           :: occ_virt(N_int*bit_kind_size,2)
+  integer(size_t)   :: occ_virt(N_int*bit_kind_size,2)
   integer(bit_kind) :: key_test(N_int)
   integer(bit_kind) :: key_virt(N_int,2)
   double precision  :: accu
@@ -496,6 +513,7 @@ END_PROVIDER
 ! ---
 
 subroutine  single_htilde_mu_mat_fock_bi_ortho_no_3e(Nint, key_j, key_i, htot)
+  use sizet
 
   BEGIN_DOC
   ! <key_j |H_tilde | key_i> for single excitation ONLY FOR ONE- AND TWO-BODY TERMS 
@@ -508,15 +526,17 @@ subroutine  single_htilde_mu_mat_fock_bi_ortho_no_3e(Nint, key_j, key_i, htot)
   use bitmasks
 
   implicit none
-  integer,           intent(in) :: Nint
+  integer(size_t), intent(in) :: Nint
   integer(bit_kind), intent(in) :: key_j(Nint,2), key_i(Nint,2)
   double precision, intent(out) :: htot
 
   double precision              :: hmono, htwoe
-  integer                       :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
   integer                       :: Ne(2), i, j, ii, jj, ispin, jspin, k, kk
-  integer                       :: degree,exc(0:2,2,2)
-  integer                       :: h1, p1, h2, p2, s1, s2
+  integer                       :: degree
+  integer(size_t)                :: exc(0:2,2,2)
+  integer(size_t)                :: h1, p1, h2, p2
+  integer                       :: s1, s2
   double precision              :: get_mo_two_e_integral_tc_int, phase
   double precision              :: direct_int, exchange_int_12, exchange_int_23, exchange_int_13
   integer                       :: other_spin(2)
@@ -545,10 +565,12 @@ end
 subroutine get_single_excitation_from_fock_tc_no_3e(Nint, key_i, key_j, h, p, spin, phase, hmono, htwoe, htot)
 
   use bitmasks
+  use sizet
 
   implicit none
-  integer,           intent(in) :: Nint
-  integer,           intent(in) :: h, p, spin
+  integer(size_t), intent(in) :: Nint
+  integer(size_t), intent(in) :: h, p
+  integer,           intent(in) :: spin
   double precision,  intent(in) :: phase
   integer(bit_kind), intent(in) :: key_i(Nint,2), key_j(Nint,2)
   double precision, intent(out) :: hmono,htwoe,htot
@@ -556,10 +578,11 @@ subroutine get_single_excitation_from_fock_tc_no_3e(Nint, key_i, key_j, h, p, sp
   integer(bit_kind)             :: differences(Nint,2)
   integer(bit_kind)             :: hole(Nint,2)
   integer(bit_kind)             :: partcl(Nint,2)
-  integer                       :: occ_hole(Nint*bit_kind_size,2)
-  integer                       :: occ_partcl(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ_hole(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ_partcl(Nint*bit_kind_size,2)
   integer                       :: n_occ_ab_hole(2),n_occ_ab_partcl(2)
-  integer                       :: i0,i
+  integer(size_t)                :: i
+  integer                       :: i0
   double precision              :: buffer_c(mo_num), buffer_x(mo_num)
 
   do i = 1, mo_num
@@ -620,6 +643,7 @@ end
 
 
 subroutine  single_htilde_mu_mat_fock_bi_ortho_no_3e_both(Nint, key_j, key_i, hji,hij)
+  use sizet
 
   BEGIN_DOC
   ! <key_j |H_tilde | key_i> and <key_i |H_tilde | key_j> for single excitation ONLY FOR ONE- AND TWO-BODY TERMS 
@@ -632,15 +656,17 @@ subroutine  single_htilde_mu_mat_fock_bi_ortho_no_3e_both(Nint, key_j, key_i, hj
   use bitmasks
 
   implicit none
-  integer,           intent(in) :: Nint
+  integer(size_t), intent(in) :: Nint
   integer(bit_kind), intent(in) :: key_j(Nint,2), key_i(Nint,2)
   double precision, intent(out) :: hji,hij
 
   double precision              :: hmono, htwoe
-  integer                       :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
   integer                       :: Ne(2), i, j, ii, jj, ispin, jspin, k, kk
-  integer                       :: degree,exc(0:2,2,2)
-  integer                       :: h1, p1, h2, p2, s1, s2
+  integer                       :: degree
+  integer(size_t)                :: exc(0:2,2,2)
+  integer(size_t)                :: h1, p1, h2, p2
+  integer                       :: s1, s2
   double precision              :: get_mo_two_e_integral_tc_int, phase
   double precision              :: direct_int, exchange_int_12, exchange_int_23, exchange_int_13
   integer                       :: other_spin(2)
@@ -670,10 +696,12 @@ end
 subroutine get_single_excitation_from_fock_tc_no_3e_both(Nint, key_i, key_j, h, p, spin, phase, hji,hij)
 
   use bitmasks
+  use sizet
 
   implicit none
-  integer,           intent(in) :: Nint
-  integer,           intent(in) :: h, p, spin
+  integer(size_t), intent(in) :: Nint
+  integer(size_t), intent(in) :: h, p
+  integer,           intent(in) :: spin
   double precision,  intent(in) :: phase
   integer(bit_kind), intent(in) :: key_i(Nint,2), key_j(Nint,2)
   double precision, intent(out) :: hji,hij
@@ -683,10 +711,11 @@ subroutine get_single_excitation_from_fock_tc_no_3e_both(Nint, key_i, key_j, h, 
   integer(bit_kind)             :: differences(Nint,2)
   integer(bit_kind)             :: hole(Nint,2)
   integer(bit_kind)             :: partcl(Nint,2)
-  integer                       :: occ_hole(Nint*bit_kind_size,2)
-  integer                       :: occ_partcl(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ_hole(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ_partcl(Nint*bit_kind_size,2)
   integer                       :: n_occ_ab_hole(2),n_occ_ab_partcl(2)
-  integer                       :: i0,i
+  integer(size_t)                :: i
+  integer                       :: i0
   double precision              :: buffer_c_ji(mo_num), buffer_x_ji(mo_num)
   double precision              :: buffer_c_ij(mo_num), buffer_x_ij(mo_num)
 

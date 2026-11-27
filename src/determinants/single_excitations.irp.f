@@ -1,4 +1,5 @@
   use bitmasks
+ use sizet
 BEGIN_PROVIDER [integer(bit_kind), ref_closed_shell_bitmask, (N_int,2)]
  implicit none
   BEGIN_DOC
@@ -8,9 +9,10 @@ BEGIN_PROVIDER [integer(bit_kind), ref_closed_shell_bitmask, (N_int,2)]
   ! list are cleared.
   ! For a closed-shell reference it is equal to ref_bitmask.
   END_DOC
- integer :: i,i0
+ integer(size_t) :: i
+ integer :: i0
  integer :: n_occ_ab(2)
- integer :: occ(N_int*bit_kind_size,2)
+ integer(size_t) :: occ(N_int*bit_kind_size,2)
  call bitstring_to_list_ab(ref_bitmask, occ, n_occ_ab, N_int)
  ! do the closed shell determinant
  do i = 1, N_int
@@ -36,11 +38,12 @@ BEGIN_PROVIDER [double precision, fock_operator_closed_shell_ref_bitmask, (mo_nu
   ! Only the alpha orbitals are used to build the occupied
   ! and virtual lists, as the reference is closed-shell.
   END_DOC
- integer :: i0,j0,i,j,k0,k
+ integer(size_t) :: i,j,k
+ integer :: i0,j0,k0
  integer :: n_occ_ab(2)
- integer :: occ(N_int*bit_kind_size,2)
+ integer(size_t) :: occ(N_int*bit_kind_size,2)
  integer :: n_occ_ab_virt(2)
- integer :: occ_virt(N_int*bit_kind_size,2)
+ integer(size_t) :: occ_virt(N_int*bit_kind_size,2)
  integer(bit_kind) :: key_test(N_int)
  integer(bit_kind) :: key_virt(N_int,2)
 
@@ -101,6 +104,7 @@ BEGIN_PROVIDER [double precision, fock_operator_closed_shell_ref_bitmask, (mo_nu
 END_PROVIDER
 
 subroutine get_single_excitation_from_fock(det_1,det_2,h,p,spin,phase,hij)
+ use sizet
  use bitmasks
  use davidson_apply_stats_mod
  implicit none
@@ -123,24 +127,26 @@ subroutine get_single_excitation_from_fock(det_1,det_2,h,p,spin,phase,hij)
   ! The (h, p) Coulomb and exchange integrals are preloaded
   ! in local buffers.
   END_DOC
- integer,intent(in) :: h,p,spin
+ integer(size_t),intent(in) :: h,p
+ integer,intent(in) :: spin
  double precision, intent(in)  :: phase
  integer(bit_kind), intent(in) :: det_1(N_int,2), det_2(N_int,2)
  double precision, intent(out) :: hij
  integer(bit_kind) :: differences(N_int,2)
  integer(bit_kind) :: hole(N_int,2)
  integer(bit_kind) :: partcl(N_int,2)
- integer :: occ_hole(N_int*bit_kind_size,2)
- integer :: occ_partcl(N_int*bit_kind_size,2)
+ integer(size_t) :: occ_hole(N_int*bit_kind_size,2)
+ integer(size_t) :: occ_partcl(N_int*bit_kind_size,2)
  integer :: n_occ_ab_hole(2),n_occ_ab_partcl(2)
- integer :: i0,i
+ integer :: i0
+ integer(size_t) :: i
  double precision :: buffer_c(mo_num),buffer_x(mo_num)
  do i=1, mo_num
    buffer_c(i) = big_array_coulomb_integrals(i,h,p)
    buffer_x(i) = big_array_exchange_integrals(i,h,p)
  enddo
  ! QP_DVDSN_STATS: the two full-column fills (2*mo_num*8 B per call)
- call davidson_apply_stats_single(mo_num)
+ call davidson_apply_stats_single(int(mo_num,4))
  do i = 1, N_int
   differences(i,1) = xor(det_1(i,1),ref_closed_shell_bitmask(i,1))
   differences(i,2) = xor(det_1(i,2),ref_closed_shell_bitmask(i,2))

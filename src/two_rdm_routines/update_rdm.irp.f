@@ -32,6 +32,7 @@ subroutine orb_range_diag_to_all_states_2_rdm_dm_buffer(det_1,c_1,N_st,orb_bitma
   !  ispin   == 3                :: alpha/ beta
   !  ispin   == 4                :: spin traced <=> total two-rdm
   END_DOC
+  use sizet
   implicit none
   integer, intent(in)            :: ispin,sze_buff,N_st
   integer, intent(in)            :: list_orb_reverse(mo_num)
@@ -42,7 +43,7 @@ subroutine orb_range_diag_to_all_states_2_rdm_dm_buffer(det_1,c_1,N_st,orb_bitma
   integer         , intent(out)  :: keys(4,sze_buff)
   integer         , intent(inout) :: nkeys
 
-  integer                        :: occ(N_int*bit_kind_size,2)
+  integer(size_t)                :: occ(N_int*bit_kind_size,2)
   integer                        :: n_occ_ab(2)
   integer                        :: i,j,h1,h2
   integer(bit_kind)              :: det_1_act(N_int,2)
@@ -247,6 +248,7 @@ subroutine orb_range_off_diag_double_to_all_states_ab_dm_buffer(det_1,det_2,c_1,
   !
   ! here, only ispin == 3 or 4 will do something
   END_DOC
+  use sizet
   implicit none
   integer, intent(in)            :: ispin,sze_buff,N_st
   integer(bit_kind), intent(in)  :: det_1(N_int,2),det_2(N_int,2)
@@ -256,7 +258,7 @@ subroutine orb_range_off_diag_double_to_all_states_ab_dm_buffer(det_1,det_2,c_1,
   integer         , intent(out)  :: keys(4,sze_buff)
   integer         , intent(inout) :: nkeys
   integer                        :: i,j,h1,h2,p1,p2,istate
-  integer                        :: exc(0:2,2,2)
+  integer(size_t)                :: exc(0:2,2,2)
   double precision               :: phase
   logical                        :: alpha_alpha,beta_beta,alpha_beta,spin_trace
   logical                        :: is_integer_in_string_local
@@ -349,6 +351,7 @@ subroutine orb_range_off_diag_single_to_all_states_ab_dm_buffer(det_1,det_2,c_1,
   !
   ! here, only ispin == 3 or 4 will do something
   END_DOC
+  use sizet
   implicit none
   integer, intent(in)            :: ispin,sze_buff,N_st
   integer(bit_kind), intent(in)  :: det_1(N_int,2),det_2(N_int,2)
@@ -359,10 +362,10 @@ subroutine orb_range_off_diag_single_to_all_states_ab_dm_buffer(det_1,det_2,c_1,
   integer         , intent(out)  :: keys(4,sze_buff)
   integer         , intent(inout) :: nkeys
 
-  integer                        :: occ(N_int*bit_kind_size,2)
+  integer(size_t)                :: occ(N_int*bit_kind_size,2)
   integer                        :: n_occ_ab(2)
   integer                        :: i,j,h1,h2,p1,istate
-  integer                        :: exc(0:2,2,2)
+  integer(size_t)                :: exc(0:2,2,2)
   double precision               :: phase
 
   logical                        :: alpha_alpha,beta_beta,alpha_beta,spin_trace
@@ -384,9 +387,9 @@ subroutine orb_range_off_diag_single_to_all_states_ab_dm_buffer(det_1,det_2,c_1,
     if (exc(0,1,1) == 1) then
       ! Mono alpha
       h1 = exc(1,1,1)
-      if(.not.is_integer_in_string_local(h1,orb_bitmask,N_int))return
+      if(.not.is_integer_in_string_local(h1,orb_bitmask,int(N_int,4)))return
       p1 = exc(1,2,1)
-      if(.not.is_integer_in_string_local(p1,orb_bitmask,N_int))return
+      if(.not.is_integer_in_string_local(p1,orb_bitmask,int(N_int,4)))return
 
       h1 = list_orb_reverse(h1)
       p1 = list_orb_reverse(p1)
@@ -394,7 +397,7 @@ subroutine orb_range_off_diag_single_to_all_states_ab_dm_buffer(det_1,det_2,c_1,
       phase = 0.5d0 * phase
       do i = 1, n_occ_ab(2)
         h2 = occ(i,2)
-        if(.not.is_integer_in_string_local(h2,orb_bitmask,N_int))cycle
+        if(.not.is_integer_in_string_local(h2,orb_bitmask,int(N_int,4)))cycle
         h2 = list_orb_reverse(h2)
         nkeys += 1
         do istate = 1, N_st
@@ -416,16 +419,16 @@ subroutine orb_range_off_diag_single_to_all_states_ab_dm_buffer(det_1,det_2,c_1,
     else
       ! Mono beta
       h1 = exc(1,1,2)
-      if(.not.is_integer_in_string_local(h1,orb_bitmask,N_int))return
+      if(.not.is_integer_in_string_local(h1,orb_bitmask,int(N_int,4)))return
       p1 = exc(1,2,2)
-      if(.not.is_integer_in_string_local(p1,orb_bitmask,N_int))return
+      if(.not.is_integer_in_string_local(p1,orb_bitmask,int(N_int,4)))return
 
       h1 = list_orb_reverse(h1)
       p1 = list_orb_reverse(p1)
       phase = 0.5d0 * phase
       do i = 1, n_occ_ab(1)
         h2 = occ(i,1)
-        if(.not.is_integer_in_string_local(h2,orb_bitmask,N_int))cycle
+        if(.not.is_integer_in_string_local(h2,orb_bitmask,int(N_int,4)))cycle
         h2 = list_orb_reverse(h2)
         nkeys += 1
         do istate = 1, N_st
@@ -451,16 +454,16 @@ subroutine orb_range_off_diag_single_to_all_states_ab_dm_buffer(det_1,det_2,c_1,
     if (exc(0,1,1) == 1) then
       ! Mono alpha
       h1 = exc(1,1,1)
-      if(.not.is_integer_in_string_local(h1,orb_bitmask,N_int))return
+      if(.not.is_integer_in_string_local(h1,orb_bitmask,int(N_int,4)))return
       p1 = exc(1,2,1)
-      if(.not.is_integer_in_string_local(p1,orb_bitmask,N_int))return
+      if(.not.is_integer_in_string_local(p1,orb_bitmask,int(N_int,4)))return
 
       h1 = list_orb_reverse(h1)
       p1 = list_orb_reverse(p1)
       phase = 0.5d0 * phase
       do i = 1, n_occ_ab(2)
         h2 = occ(i,2)
-        if(.not.is_integer_in_string_local(h2,orb_bitmask,N_int))cycle
+        if(.not.is_integer_in_string_local(h2,orb_bitmask,int(N_int,4)))cycle
         h2 = list_orb_reverse(h2)
         nkeys += 1
         do istate = 1, N_st
@@ -484,9 +487,9 @@ subroutine orb_range_off_diag_single_to_all_states_ab_dm_buffer(det_1,det_2,c_1,
 
       ! Mono beta
       h1 = exc(1,1,2)
-      if(.not.is_integer_in_string_local(h1,orb_bitmask,N_int))return
+      if(.not.is_integer_in_string_local(h1,orb_bitmask,int(N_int,4)))return
       p1 = exc(1,2,2)
-      if(.not.is_integer_in_string_local(p1,orb_bitmask,N_int))return
+      if(.not.is_integer_in_string_local(p1,orb_bitmask,int(N_int,4)))return
 
       h1 = list_orb_reverse(h1)
       p1 = list_orb_reverse(p1)
@@ -494,7 +497,7 @@ subroutine orb_range_off_diag_single_to_all_states_ab_dm_buffer(det_1,det_2,c_1,
       phase = 0.5d0 * phase
       do i = 1, n_occ_ab(1)
         h2 = occ(i,1)
-        if(.not.is_integer_in_string_local(h2,orb_bitmask,N_int))cycle
+        if(.not.is_integer_in_string_local(h2,orb_bitmask,int(N_int,4)))cycle
         h2 = list_orb_reverse(h2)
         nkeys += 1
         do istate = 1, N_st
@@ -540,6 +543,7 @@ subroutine orb_range_off_diag_single_to_all_states_aa_dm_buffer(det_1,det_2,c_1,
   ! here, only ispin == 1 or 4 will do something
   END_DOC
   use bitmasks
+  use sizet
   implicit none
   integer, intent(in)            :: ispin,sze_buff,N_st
   integer(bit_kind), intent(in)  :: det_1(N_int,2),det_2(N_int,2)
@@ -550,10 +554,10 @@ subroutine orb_range_off_diag_single_to_all_states_aa_dm_buffer(det_1,det_2,c_1,
   integer         , intent(out)  :: keys(4,sze_buff)
   integer         , intent(inout) :: nkeys
 
-  integer                        :: occ(N_int*bit_kind_size,2)
+  integer(size_t)                :: occ(N_int*bit_kind_size,2)
   integer                        :: n_occ_ab(2)
   integer                        :: i,j,h1,h2,p1,istate
-  integer                        :: exc(0:2,2,2)
+  integer(size_t)                :: exc(0:2,2,2)
   double precision               :: phase
 
   logical                        :: alpha_alpha,beta_beta,alpha_beta,spin_trace
@@ -575,9 +579,9 @@ subroutine orb_range_off_diag_single_to_all_states_aa_dm_buffer(det_1,det_2,c_1,
     if (exc(0,1,1) == 1) then
       ! Mono alpha
       h1 = exc(1,1,1)
-      if(.not.is_integer_in_string_local(h1,orb_bitmask,N_int))return
+      if(.not.is_integer_in_string_local(h1,orb_bitmask,int(N_int,4)))return
       p1 = exc(1,2,1)
-      if(.not.is_integer_in_string_local(p1,orb_bitmask,N_int))return
+      if(.not.is_integer_in_string_local(p1,orb_bitmask,int(N_int,4)))return
 
       call bitstring_to_list_ab(det_1, occ, n_occ_ab, N_int)
 
@@ -587,7 +591,7 @@ subroutine orb_range_off_diag_single_to_all_states_aa_dm_buffer(det_1,det_2,c_1,
       phase = 0.5d0*phase
       do i = 1, n_occ_ab(1)
         h2 = occ(i,1)
-        if(.not.is_integer_in_string_local(h2,orb_bitmask,N_int))cycle
+        if(.not.is_integer_in_string_local(h2,orb_bitmask,int(N_int,4)))cycle
         h2 = list_orb_reverse(h2)
 
         nkeys += 1
@@ -654,6 +658,7 @@ subroutine orb_range_off_diag_single_to_all_states_bb_dm_buffer(det_1,det_2,c_1,
   !
   ! here, only ispin == 2 or 4 will do something
   END_DOC
+  use sizet
   implicit none
   integer, intent(in)            :: ispin,sze_buff,N_st
   integer(bit_kind), intent(in)  :: det_1(N_int,2),det_2(N_int,2)
@@ -664,10 +669,10 @@ subroutine orb_range_off_diag_single_to_all_states_bb_dm_buffer(det_1,det_2,c_1,
   integer         , intent(out)  :: keys(4,sze_buff)
   integer         , intent(inout) :: nkeys
 
-  integer                        :: occ(N_int*bit_kind_size,2)
+  integer(size_t)                :: occ(N_int*bit_kind_size,2)
   integer                        :: n_occ_ab(2)
   integer                        :: i,j,h1,h2,p1,istate
-  integer                        :: exc(0:2,2,2)
+  integer(size_t)                :: exc(0:2,2,2)
   double precision               :: phase
   logical                        :: alpha_alpha,beta_beta,alpha_beta,spin_trace
   logical                        :: is_integer_in_string_local
@@ -691,9 +696,9 @@ subroutine orb_range_off_diag_single_to_all_states_bb_dm_buffer(det_1,det_2,c_1,
     else
       ! Mono beta
       h1 =  exc(1,1,2)
-      if(.not.is_integer_in_string_local(h1,orb_bitmask,N_int))return
+      if(.not.is_integer_in_string_local(h1,orb_bitmask,int(N_int,4)))return
       p1 =  exc(1,2,2)
-      if(.not.is_integer_in_string_local(p1,orb_bitmask,N_int))return
+      if(.not.is_integer_in_string_local(p1,orb_bitmask,int(N_int,4)))return
 
       call bitstring_to_list_ab(det_1, occ, n_occ_ab, N_int)
       h1 = list_orb_reverse(h1)
@@ -702,7 +707,7 @@ subroutine orb_range_off_diag_single_to_all_states_bb_dm_buffer(det_1,det_2,c_1,
       phase = 0.5d0*phase
       do i = 1, n_occ_ab(2)
         h2 = occ(i,2)
-        if(.not.is_integer_in_string_local(h2,orb_bitmask,N_int))cycle
+        if(.not.is_integer_in_string_local(h2,orb_bitmask,int(N_int,4)))cycle
         h2 = list_orb_reverse(h2)
         nkeys += 1
         do istate = 1, N_st
@@ -747,6 +752,7 @@ end
 
 subroutine orb_range_off_diag_double_to_all_states_aa_dm_buffer(det_1,det_2,c_1,N_st,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
   use bitmasks
+  use sizet
   BEGIN_DOC
   ! routine that update the OFF DIAGONAL PART of the two body rdms in a specific range of orbitals for
   !
@@ -778,7 +784,7 @@ subroutine orb_range_off_diag_double_to_all_states_aa_dm_buffer(det_1,det_2,c_1,
 
 
   integer                        :: i,j,h1,h2,p1,p2,istate
-  integer                        :: exc(0:2,2)
+  integer(size_t)                :: exc(0:2,2)
   double precision               :: phase
 
   logical                        :: alpha_alpha,beta_beta,alpha_beta,spin_trace
@@ -852,6 +858,7 @@ end
 
 subroutine orb_range_off_diag_double_to_all_states_bb_dm_buffer(det_1,det_2,c_1,N_st,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
   use bitmasks
+  use sizet
   BEGIN_DOC
   ! routine that update the OFF DIAGONAL PART of the two body rdms in a specific range of orbitals for
   !
@@ -883,7 +890,7 @@ subroutine orb_range_off_diag_double_to_all_states_bb_dm_buffer(det_1,det_2,c_1,
   integer         , intent(inout) :: nkeys
 
   integer                        :: i,j,h1,h2,p1,p2,istate
-  integer                        :: exc(0:2,2)
+  integer(size_t)                :: exc(0:2,2)
   double precision               :: phase
   logical                        :: alpha_alpha,beta_beta,alpha_beta,spin_trace
   logical                        :: is_integer_in_string_local

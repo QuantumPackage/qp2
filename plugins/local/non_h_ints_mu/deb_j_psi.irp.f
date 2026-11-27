@@ -5,8 +5,10 @@ program deb_j_psi
 end
 
 subroutine routine_deb_j_psi
+ use sizet
  implicit none
- integer :: ipoint,k 
+ integer(size_t) :: ipoint
+ integer         :: k
  double precision :: r2(3), weight, dr, r1(3), r1bis(3)
  double precision :: accu_grad(3)
  double precision :: jast,grad_jast(3),j_bump,jastrow_psi,grad_jast_bis(3)
@@ -62,8 +64,11 @@ end
 
 
 subroutine routine_deb_denom
+ use sizet
  implicit none
- integer :: ipoint,k,i,j
+ integer(size_t) :: ipoint
+ integer         :: k
+ integer(size_t) :: i,j
  double precision :: r2(3), weight, dr, r1(3), r1bis(3)
  double precision :: accu_grad(3)
  double precision :: jast,grad_jast(3),j_bump,jastrow_psi,grad_jast_bis(3)

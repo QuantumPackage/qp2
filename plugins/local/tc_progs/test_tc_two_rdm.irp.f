@@ -24,8 +24,10 @@ program test_tc_two_rdm
 end
 
 subroutine  test
+ use sizet
  implicit none
- integer :: h1,p1,h2,p2,i,j,istate,s1,s2
+ integer :: h1,p1,h2,p2,istate,s1,s2
+ integer(size_t) :: i,j
  double precision :: rdm, integral, accu,ref, accu_new ,rdm_new
  double precision :: hmono, htwoe, hthree, htot
  accu = 0.d0

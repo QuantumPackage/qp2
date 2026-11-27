@@ -1,9 +1,13 @@
+use sizet
+
  subroutine reorder_mo_max_overlap
+ use sizet
   implicit none
    BEGIN_DOC
    ! routines that compute the projection of each MO of the current `mo_coef` on the space spanned by the occupied orbitals of `mo_coef_begin_iteration`
    END_DOC
-   integer :: i,j,k,l
+   integer(size_t) :: i,j
+   integer         :: k,l
    double precision, allocatable :: overlap(:,:)
    double precision, allocatable :: proj(:)
    integer, allocatable :: iorder(:)
@@ -18,15 +22,15 @@
    tmp(:,:) = 0d0
 
    ! These matrix products compute the overlap bewteen the initial and the current MOs
-   call dgemm('T','N', mo_num, ao_num, ao_num, 1.d0, &
-        mo_coef_begin_iteration, size(mo_coef_begin_iteration,1), &
-        ao_overlap, size(ao_overlap,1), 0.d0, &
-        tmp, size(tmp,1))
+   call dgemm('T','N', int(mo_num,4), int(ao_num,4), int(ao_num,4), 1.d0, &
+        mo_coef_begin_iteration, int(size(mo_coef_begin_iteration,1),4), &
+        ao_overlap, int(size(ao_overlap,1),4), 0.d0, &
+        tmp, int(size(tmp,1),4))
 
-   call dgemm('N','N', mo_num, mo_num, ao_num, 1.d0, &
-        tmp, size(tmp,1), &
-        mo_coef, size(mo_coef, 1), 0.d0, &
-        overlap, size(overlap,1) )
+   call dgemm('N','N', int(mo_num,4), int(mo_num,4), int(ao_num,4), 1.d0, &
+        tmp, int(size(tmp,1),4), &
+        mo_coef, int(size(mo_coef, 1),4), 0.d0, &
+        overlap, int(size(overlap,1),4) )
 
 
    ! for each orbital compute the best overlap
@@ -61,15 +65,16 @@
       iorder_alpha(:) = 0d0
       tmp(:,:) = 0d0
       ! These matrix products compute the overlap bewteen the initial and the current MOs
-      call dgemm('T','N', mo_num, ao_num, ao_num, 1.d0, &
-           mo_coef_begin_iteration, size(mo_coef_begin_iteration,1), &
-           ao_overlap, size(ao_overlap,1), 0.d0, &
-           tmp, size(tmp,1))
+      call dgemm('T','N', int(mo_num,4), int(ao_num,4), int(ao_num,4), 1.d0, &
+           mo_coef_begin_iteration, int(size(mo_coef_begin_iteration,1),4), &
+           ao_overlap, int(size(ao_overlap,1),4), 0.d0, &
+           tmp, int(size(tmp,1),4))
 
-      call dgemm('N','N', mo_num, elec_alpha_num, ao_num, 1.d0, &
-           tmp, size(tmp,1), &
-           mo_coef, size(mo_coef, 1), 0.d0, &
-           overlap_alpha, size(overlap_alpha,1) )
+      call dgemm('N','N', int(mo_num,4), &
+           int(elec_alpha_num,4), int(ao_num,4), 1.d0, &
+           tmp, int(size(tmp,1),4), &
+           mo_coef, int(size(mo_coef, 1),4), 0.d0, &
+           overlap_alpha, int(size(overlap_alpha,1),4) )
 
       do i = 1, elec_alpha_num
          iorder_alpha(i) = i ! initialize the iorder list as we need it to sort later

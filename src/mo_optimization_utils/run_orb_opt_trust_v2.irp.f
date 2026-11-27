@@ -1,3 +1,5 @@
+use sizet
+
 ! Subroutine : run_orb_opt_trust
 
 
@@ -65,6 +67,7 @@
 
 
 subroutine run_orb_opt_trust_v2
+ use sizet
 
   include 'constants.h'
 
@@ -82,15 +85,16 @@ subroutine run_orb_opt_trust_v2
   double precision, allocatable :: prev_mos(:,:),new_mos(:,:)
   integer                       :: info
   integer                       :: n
-  integer                       :: i,j,p,q,k
+  integer(size_t)               :: i,j,p,q,k
   double precision              :: max_elem_grad, delta, rho, norm_grad, normalization_factor
   logical                       :: cancel_step
   integer                       :: nb_iter, nb_diag, nb_cancel, nb_cancel_tot, nb_sub_iter
   double precision              :: t1, t2, t3
   double precision              :: prev_criterion, criterion, criterion_model
   logical                       :: not_converged, must_exit, enforce_step_cancellation
-  integer                       :: m, tmp_n, tmp_i, tmp_j, tmp_k, tmp_n2
-  integer,allocatable           :: tmp_list(:), key(:)
+  integer(size_t)               :: m, tmp_n, tmp_i, tmp_j, tmp_k, tmp_n2
+  integer(size_t), allocatable  :: tmp_list(:)
+  integer, allocatable          :: key(:)
   double precision, allocatable :: tmp_m_x(:,:),tmp_R(:,:), tmp_x(:), W(:,:), e_val(:)
 
   PROVIDE all_mo_integrals ci_energy psi_det psi_coef
@@ -202,7 +206,7 @@ do while (not_converged)
       key(tmp_i) = tmp_i
       e_val(tmp_i) = H(tmp_i,1)
     enddo
-    call dsort(e_val,key,tmp_n)
+    call dsort(e_val,key,int(tmp_n,4))
 
     ! Eigenvalues and eigenvectors
     do tmp_i = 1, tmp_n

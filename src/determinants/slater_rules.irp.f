@@ -1,31 +1,34 @@
+use sizet
 subroutine get_excitation_degree(key1,key2,degree,Nint)
+ use sizet
   use bitmasks
   use slater_rules_opt
   implicit none
   BEGIN_DOC
   ! Optimized version of get_excitation_degree_ref
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)  :: Nint
   integer(bit_kind), intent(in)  :: key1(Nint*2)
   integer(bit_kind), intent(in)  :: key2(Nint*2)
   integer, intent(out)           :: degree
-  call get_excitation_degree_c(key1,key2,degree,Nint)
+  call get_excitation_degree_c(key1,key2,degree,int(Nint,4))
 end
 
 subroutine get_excitation_degree_ref(key1,key2,degree,Nint)
+ use sizet
   use bitmasks
   include 'utils/constants.include.F'
   implicit none
   BEGIN_DOC
   ! Returns the excitation degree between two determinants.
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)  :: Nint
   integer(bit_kind), intent(in)  :: key1(Nint*2)
   integer(bit_kind), intent(in)  :: key2(Nint*2)
   integer, intent(out)           :: degree
 
   integer(bit_kind)              :: xorvec(2*N_int_max)
-  integer                        :: l
+  integer(size_t)                :: l
 
   ASSERT (Nint > 0)
 
@@ -56,7 +59,7 @@ subroutine get_excitation_degree_ref(key1,key2,degree,Nint)
       degree = sum(popcnt(xorvec(1:8)))
 
     case default
-      integer :: lmax
+      integer(size_t) :: lmax
       lmax = shiftl(Nint,1)
       do l=1,lmax
         xorvec(l) = xor( key1(l), key2(l))
@@ -71,15 +74,16 @@ end
 
 
 subroutine get_excitation(det1,det2,exc,degree,phase,Nint)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Returns the excitation operators between two determinants and the phase.
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)  :: Nint
   integer(bit_kind), intent(in)  :: det1(Nint,2)
   integer(bit_kind), intent(in)  :: det2(Nint,2)
-  integer, intent(out)           :: exc(0:2,2,2)
+  integer(size_t), intent(out)  :: exc(0:2,2,2)
   integer, intent(out)           :: degree
   double precision, intent(out)  :: phase
   ! exc(number,hole/particle,spin)
@@ -127,6 +131,7 @@ subroutine get_excitation(det1,det2,exc,degree,phase,Nint)
 end
 
 subroutine decode_exc(exc,degree,h1,p1,h2,p2,s1,s2)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -136,8 +141,10 @@ subroutine decode_exc(exc,degree,h1,p1,h2,p2,s1,s2)
   ! s1,s2 : Spins (1:alpha, 2:beta)
   ! degree : Degree of excitation
   END_DOC
-  integer, intent(in)            :: exc(0:2,2,2),degree
-  integer, intent(out)           :: h1,h2,p1,p2,s1,s2
+  integer(size_t), intent(in)    :: exc(0:2,2,2)
+  integer, intent(in)            :: degree
+  integer(size_t), intent(out)   :: h1,h2,p1,p2
+  integer, intent(out)           :: s1,s2
   ASSERT (degree > 0)
   ASSERT (degree < 3)
 
@@ -192,22 +199,25 @@ subroutine decode_exc(exc,degree,h1,p1,h2,p2,s1,s2)
 end
 
 subroutine get_double_excitation(det1,det2,exc,phase,Nint)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Returns the two excitation operators between two doubly excited determinants and the phase.
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)  :: Nint
   integer(bit_kind), intent(in)  :: det1(Nint,2)
   integer(bit_kind), intent(in)  :: det2(Nint,2)
-  integer, intent(out)           :: exc(0:2,2,2)
+  integer(size_t), intent(out)  :: exc(0:2,2,2)
   double precision, intent(out)  :: phase
   integer                        :: tz
-  integer                        :: l, ispin, idx_hole, idx_particle, ishift
-  integer                        :: nperm
-  integer                        :: i,j,k,m,n
-  integer                        :: high, low
-  integer                        :: a,b,c,d
+  integer(size_t)                :: l, ishift
+  integer                        :: ispin, idx_hole, idx_particle
+  integer(size_t)                :: nperm
+  integer(size_t)                :: i,j,k
+  integer                        :: m,n
+  integer(size_t)                :: high, low
+  integer(size_t)                :: a,b,c,d
   integer(bit_kind)              :: hole, particle, tmp
   double precision, parameter    :: phase_dble(0:1) = (/ 1.d0, -1.d0 /)
 
@@ -265,8 +275,8 @@ subroutine get_double_excitation(det1,det2,exc,phase,Nint)
 
         k = shiftr(high,bit_kind_shift)+1
         j = shiftr(low,bit_kind_shift)+1
-        m = iand(high,bit_kind_size-1)
-        n = iand(low,bit_kind_size-1)
+        m = iand(high,int(bit_kind_size-1, size_t))
+        n = iand(low,int(bit_kind_size-1, size_t))
 
         if (j==k) then
           nperm = nperm + popcnt(iand(det1(j,ispin),           &
@@ -297,8 +307,8 @@ subroutine get_double_excitation(det1,det2,exc,phase,Nint)
 
           k = shiftr(high,bit_kind_shift)+1
           j = shiftr(low,bit_kind_shift)+1
-          m = iand(high,bit_kind_size-1)
-          n = iand(low,bit_kind_size-1)
+          m = iand(high,int(bit_kind_size-1, size_t))
+          n = iand(low,int(bit_kind_size-1, size_t))
 
           if (j==k) then
             nperm = nperm + popcnt(iand(det1(j,ispin),           &
@@ -331,11 +341,12 @@ subroutine get_double_excitation(det1,det2,exc,phase,Nint)
     end select
 
   enddo
-  phase = phase_dble(iand(nperm,1))
+  phase = phase_dble(iand(nperm,1_size_t))
 
 end
 
 subroutine get_phasemask_bit(det1, pm, Nint)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -351,11 +362,12 @@ subroutine get_phasemask_bit(det1, pm, Nint)
   ! former call sites); kept at disposal if needed again
   ! (author, 2026-10-31).
   END_DOC
-  integer, intent(in) :: Nint
+  integer(size_t), intent(in) :: Nint
   integer(bit_kind), intent(in) :: det1(Nint,2)
   integer(bit_kind), intent(out) :: pm(Nint,2)
   integer(bit_kind) :: tmp
- integer :: ispin, i
+ integer :: ispin
+ integer(size_t) :: i
   do ispin=1,2
   tmp = 0_8
   do i=1,Nint
@@ -375,22 +387,25 @@ end
 
 
 subroutine get_single_excitation(det1,det2,exc,phase,Nint)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Returns the excitation operator between two singly excited determinants and the phase.
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)  :: Nint
   integer(bit_kind), intent(in)  :: det1(Nint,2)
   integer(bit_kind), intent(in)  :: det2(Nint,2)
-  integer, intent(out)           :: exc(0:2,2,2)
+  integer(size_t), intent(out)  :: exc(0:2,2,2)
   double precision, intent(out)  :: phase
   integer                        :: tz
-  integer                        :: l, ispin, idx_hole, idx_particle, ishift
-  integer                        :: nperm
-  integer                        :: i,j,k,m,n
-  integer                        :: high, low
-  integer                        :: a,b,c,d
+  integer(size_t)                :: l, ishift
+  integer                        :: ispin, idx_hole, idx_particle
+  integer(size_t)                :: nperm
+  integer(size_t)                :: i,j,k
+  integer                        :: m,n
+  integer(size_t)                :: high, low
+  integer(size_t)                :: a,b,c,d
   integer(bit_kind)              :: hole, particle, tmp
   double precision, parameter    :: phase_dble(0:1) = (/ 1.d0, -1.d0 /)
 
@@ -433,8 +448,8 @@ subroutine get_single_excitation(det1,det2,exc,phase,Nint)
 
       k = shiftr(high,bit_kind_shift)+1
       j = shiftr(low,bit_kind_shift)+1
-      m = iand(high,bit_kind_size-1)
-      n = iand(low,bit_kind_size-1)
+      m = iand(high,int(bit_kind_size-1, size_t))
+      n = iand(low,int(bit_kind_size-1, size_t))
 
       if (j==k) then
         nperm = nperm + popcnt(iand(det1(j,ispin),           &
@@ -454,7 +469,7 @@ subroutine get_single_excitation(det1,det2,exc,phase,Nint)
 
       endif
 
-      phase = phase_dble(iand(nperm,1))
+      phase = phase_dble(iand(nperm,1_size_t))
       return
 
     enddo
@@ -463,18 +478,20 @@ subroutine get_single_excitation(det1,det2,exc,phase,Nint)
 end
 
 subroutine bitstring_to_list_ab( string, list, n_elements, Nint)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Gives the indices(+1) of the bits set to 1 in the bit string
   ! For alpha/beta determinants.
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)  :: Nint
   integer(bit_kind), intent(in)  :: string(Nint,2)
-  integer, intent(out)           :: list(Nint*bit_kind_size,2)
+  integer(size_t), intent(out)   :: list(Nint*bit_kind_size,2)
   integer, intent(out)           :: n_elements(2)
 
-  integer                        :: i, j, ishift
+  integer(size_t)                :: i, ishift
+  integer                        :: j
   integer(bit_kind)              :: l
 
   n_elements(1) = 0
@@ -531,22 +548,24 @@ end
 
 
 subroutine i_H_j_s2(key_i,key_j,Nint,hij,s2)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Returns $\langle i|H|j \rangle$ and $\langle i|S^2|j \rangle$
   ! where $i$ and $j$ are determinants.
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)  :: Nint
   integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
   double precision, intent(out)  :: hij, s2
 
-  integer                        :: exc(0:2,2,2)
+  integer(size_t)                :: exc(0:2,2,2)
   integer                        :: degree
   double precision               :: get_two_e_integral
-  integer                        :: m,n,p,q
+  integer(size_t)                :: m, p
+  integer                        :: n, q
   integer                        :: i,j,k
-  integer                        :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
   double precision               :: diag_H_mat_elem, phase
   integer                        :: n_occ_ab(2)
   PROVIDE all_mo_integrals
@@ -634,21 +653,23 @@ end
 
 
 subroutine i_H_j(key_i,key_j,Nint,hij)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Returns $\langle i|H|j \rangle$ where $i$ and $j$ are determinants.
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)  :: Nint
   integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
   double precision, intent(out)  :: hij
 
-  integer                        :: exc(0:2,2,2)
+  integer(size_t)                :: exc(0:2,2,2)
   integer                        :: degree
   double precision               :: get_two_e_integral
-  integer                        :: m,n,p,q
+  integer(size_t)                :: m, p
+  integer                        :: n, q
   integer                        :: i,j,k
-  integer                        :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
   double precision               :: diag_H_mat_elem, phase
   integer                        :: n_occ_ab(2)
   PROVIDE all_mo_integrals
@@ -733,21 +754,24 @@ end
 
 
 subroutine i_H_j_verbose(key_i,key_j,Nint,hij,hmono,hdouble,phase)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Returns $\langle i|H|j \rangle$ where $i$ and $j$ are determinants.
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)  :: Nint
   integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
   double precision, intent(out)  :: hij,hmono,hdouble,phase
 
-  integer                        :: exc(0:2,2,2)
+  integer(size_t)                :: exc(0:2,2,2)
   integer                        :: degree
   double precision               :: get_two_e_integral
-  integer                        :: m,n,p,q
-  integer                        :: i,j,k
-  integer                        :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                :: m, p
+  integer                        :: n, q
+  integer(size_t)                :: i
+  integer                        :: j, k
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
   double precision               :: diag_H_mat_elem
   integer                        :: n_occ_ab(2)
   logical                        :: has_mipi(Nint*bit_kind_size)
@@ -872,6 +896,7 @@ subroutine i_H_j_verbose(key_i,key_j,Nint,hij,hmono,hdouble,phase)
 end
 
 subroutine create_minilist(key_mask, fullList, miniList, idx_miniList, N_fullList, N_miniList, Nint)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -884,13 +909,15 @@ subroutine create_minilist(key_mask, fullList, miniList, idx_miniList, N_fullLis
   ! unchanged.
   END_DOC
 
-  integer, intent(in)                      :: N_fullList
-  integer, intent(in)                      :: Nint
+  integer(size_t), intent(in)              :: N_fullList
+  integer(size_t), intent(in)              :: Nint
   integer(bit_kind), intent(in)            :: fullList(Nint, 2, N_fullList)
   integer(bit_kind),intent(out)            :: miniList(Nint, 2, N_fullList)
-  integer,intent(out)                      :: idx_miniList(N_fullList), N_miniList
+  integer(size_t),intent(out)              :: idx_miniList(N_fullList)
+  integer(size_t),intent(out)              :: N_miniList
   integer(bit_kind)                        :: key_mask(Nint, 2)
-  integer                                  :: ni, k, i, n_a, n_b, e_a, e_b
+  integer(size_t)                          :: ni, k, i
+  integer                                  :: n_a, n_b, e_a, e_b
 
 
   n_a = popcnt(key_mask(1,1))
@@ -943,6 +970,7 @@ subroutine create_minilist(key_mask, fullList, miniList, idx_miniList, N_fullLis
 end subroutine
 
 subroutine create_minilist_find_previous(key_mask, fullList, miniList, N_fullList, N_miniList, fullMatch, Nint)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -960,15 +988,16 @@ subroutine create_minilist_find_previous(key_mask, fullList, miniList, N_fullLis
   ! records it.
   END_DOC
 
-  integer, intent(in)                      :: N_fullList
-  integer, intent(in)                      :: Nint
+  integer(size_t), intent(in)              :: N_fullList
+  integer(size_t), intent(in)              :: Nint
   integer(bit_kind), intent(in)            :: fullList(Nint, 2, N_fullList)
   integer(bit_kind),intent(out)            :: miniList(Nint, 2, N_fullList)
   integer(bit_kind), allocatable           :: subList(:,:,:)
   logical,intent(out)                      :: fullMatch
-  integer,intent(out)                      :: N_miniList
+  integer(size_t),intent(out)              :: N_miniList
   integer(bit_kind)                        :: key_mask(Nint, 2)
-  integer                                  :: ni, i, k, l, N_subList
+  integer(size_t)                          :: ni, i, k, N_subList
+  integer                                  :: l
 
   allocate (subList(Nint, 2, N_fullList))
 
@@ -1033,6 +1062,7 @@ end subroutine
 
 
 subroutine i_H_psi(key,keys,coef,Nint,Ndet,Ndet_max,Nstate,i_H_psi_array)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -1043,17 +1073,19 @@ subroutine i_H_psi(key,keys,coef,Nint,Ndet,Ndet_max,Nstate,i_H_psi_array)
 ! The i_H_psi_minilist is much faster but requires to build the
 ! minilists.
   END_DOC
-  integer, intent(in)            :: Nint, Ndet,Ndet_max,Nstate
+  integer(size_t), intent(in)    :: Nint, Ndet, Ndet_max
+  integer, intent(in)            :: Nstate
   integer(bit_kind), intent(in)  :: keys(Nint,2,Ndet)
   integer(bit_kind), intent(in)  :: key(Nint,2)
   double precision, intent(in)   :: coef(Ndet_max,Nstate)
   double precision, intent(out)  :: i_H_psi_array(Nstate)
 
-  integer                        :: i, ii,j
+  integer(size_t)                :: i, ii
+  integer                        :: j
   double precision               :: phase
   integer                        :: exc(0:2,2,2)
   double precision               :: hij
-  integer, allocatable           :: idx(:)
+  integer(size_t), allocatable   :: idx(:)
 
   ASSERT (Nint > 0)
   ASSERT (N_int == Nint)
@@ -1091,19 +1123,23 @@ end
 
 
 subroutine i_H_psi_minilist(key,keys,idx_key,N_minilist,coef,Nint,Ndet,Ndet_max,Nstate,i_H_psi_array)
+ use sizet
   use bitmasks
   implicit none
-  integer, intent(in)            :: Nint, Ndet,Ndet_max,Nstate,idx_key(Ndet), N_minilist
+  integer(size_t), intent(in)    :: Nint, Ndet, Ndet_max, N_minilist
+  integer(size_t), intent(in)    :: idx_key(Ndet)
+  integer, intent(in)            :: Nstate
   integer(bit_kind), intent(in)  :: keys(Nint,2,Ndet)
   integer(bit_kind), intent(in)  :: key(Nint,2)
   double precision, intent(in)   :: coef(Ndet_max,Nstate)
   double precision, intent(out)  :: i_H_psi_array(Nstate)
 
-  integer                        :: i, ii,j, i_in_key, i_in_coef
+  integer(size_t)                :: ii, i_in_key, i_in_coef
+  integer                        :: i, j
   double precision               :: phase
   integer                        :: exc(0:2,2,2)
   double precision               :: hij
-  integer, allocatable           :: idx(:)
+  integer(size_t), allocatable   :: idx(:)
   BEGIN_DOC
 ! Computes $\langle i|H|\Psi \rangle = \sum_J c_J \langle i|H|J\rangle$.
 !
@@ -1151,19 +1187,20 @@ end
 
 
 subroutine get_excitation_degree_vector_single(key1,key2,degree,Nint,sze,idx)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Applies get_excitation_degree to an array of determinants and returns only
   ! the single excitations.
   END_DOC
-  integer, intent(in)            :: Nint, sze
+  integer(size_t), intent(in)  :: Nint, sze
   integer(bit_kind), intent(in)  :: key1(Nint,2,sze)
   integer(bit_kind), intent(in)  :: key2(Nint,2)
   integer, intent(out)           :: degree(sze)
-  integer, intent(out)           :: idx(0:sze)
+  integer(size_t), intent(out)  :: idx(0:sze)
 
-  integer                        :: i,l,d,m
+  integer(size_t)                :: i,l,d,m
 
   ASSERT (Nint > 0)
   ASSERT (sze > 0)
@@ -1245,20 +1282,21 @@ end
 
 
 subroutine get_excitation_degree_vector_single_or_exchange(key1,key2,degree,Nint,sze,idx)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Applies get_excitation_degree to an array of determinants and return only the
   ! single excitations and the connections through exchange integrals.
   END_DOC
-  integer, intent(in)            :: Nint, sze
+  integer(size_t), intent(in)  :: Nint, sze
   integer(bit_kind), intent(in)  :: key1(Nint,2,sze)
   integer(bit_kind), intent(in)  :: key2(Nint,2)
   integer, intent(out)           :: degree(sze)
-  integer, intent(out)           :: idx(0:sze)
+  integer(size_t), intent(out)  :: idx(0:sze)
   integer(bit_kind)              :: key_tmp(Nint,2)
 
-  integer                        :: i,l,d,m
+  integer(size_t)                :: i,l,d,m
   integer                        :: exchange_1,exchange_2
 
   ASSERT (Nint > 0)
@@ -1303,21 +1341,22 @@ end
 
 
 subroutine get_excitation_degree_vector_double_alpha_beta(key1,key2,degree,Nint,sze,idx)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Applies get_excitation_degree to an array of determinants and return only the
   ! single excitations and the connections through exchange integrals.
   END_DOC
-  integer, intent(in)            :: Nint, sze
+  integer(size_t), intent(in)  :: Nint, sze
   integer(bit_kind), intent(in)  :: key1(Nint,2,sze)
   integer(bit_kind), intent(in)  :: key2(Nint,2)
   integer, intent(out)           :: degree(sze)
-  integer, intent(out)           :: idx(0:sze)
+  integer(size_t), intent(out)  :: idx(0:sze)
   integer(bit_kind)              :: key_tmp(Nint,2)
 
-  integer                        :: i,l,d,m
-  integer :: degree_alpha, degree_beta
+  integer(size_t)                :: i,l,d,m
+  integer(size_t) :: degree_alpha, degree_beta
 
   ASSERT (Nint > 0)
   ASSERT (sze > 0)
@@ -1413,20 +1452,21 @@ end
 
 
 subroutine get_excitation_degree_vector_single_or_exchange_verbose(key1,key2,degree,Nint,sze,idx)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Applies get_excitation_degree to an array of determinants and return only the single
   ! excitations and the connections through exchange integrals.
   END_DOC
-  integer, intent(in)            :: Nint, sze
+  integer(size_t), intent(in)  :: Nint, sze
   integer(bit_kind), intent(in)  :: key1(Nint,2,sze)
   integer(bit_kind), intent(in)  :: key2(Nint,2)
   integer, intent(out)           :: degree(sze)
-  integer, intent(out)           :: idx(0:sze)
+  integer(size_t), intent(out)  :: idx(0:sze)
 
-  integer                        :: i,l,d,m
-  integer                        :: exchange_1,exchange_2
+  integer(size_t)                :: i,l,d,m
+  integer(size_t)                :: exchange_1,exchange_2
 
   ASSERT (Nint > 0)
   ASSERT (sze > 0)
@@ -1584,18 +1624,19 @@ end
 
 
 subroutine get_excitation_degree_vector(key1,key2,degree,Nint,sze,idx)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Applies get_excitation_degree to an array of determinants.
   END_DOC
-  integer, intent(in)            :: Nint, sze
+  integer(size_t), intent(in)  :: Nint, sze
   integer(bit_kind), intent(in)  :: key1(Nint,2,sze)
   integer(bit_kind), intent(in)  :: key2(Nint,2)
   integer, intent(out)           :: degree(sze)
-  integer, intent(out)           :: idx(0:sze)
+  integer(size_t), intent(out)  :: idx(0:sze)
 
-  integer                        :: i,l,d,m
+  integer(size_t)                :: i,l,d,m
 
   ASSERT (Nint > 0)
   ASSERT (sze > 0)
@@ -1674,20 +1715,22 @@ end
 
 
 double precision function diag_H_mat_elem_fock(det_ref,det_pert,fock_diag_tmp,Nint)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Computes $\langle i|H|i \rangle$ when $i$ is at most a double excitation from
   ! a reference.
   END_DOC
-  integer,intent(in)             :: Nint
+  integer(size_t),intent(in)    :: Nint
   integer(bit_kind),intent(in)   :: det_ref(Nint,2), det_pert(Nint,2)
   double precision, intent(in)   :: fock_diag_tmp(2,mo_num+1)
 
   integer                        :: degree
   double precision               :: phase, E0
-  integer                        :: exc(0:2,2,2)
-  integer                        :: h1, p1, h2, p2, s1, s2
+  integer(size_t)                :: exc(0:2,2,2)
+  integer(size_t)                :: h1, p1, h2, p2
+  integer                        :: s1, s2
 
   call get_excitation_degree(det_ref,det_pert,degree,Nint)
   E0 = fock_diag_tmp(1,mo_num+1)
@@ -1743,6 +1786,7 @@ double precision function diag_H_mat_elem_fock(det_ref,det_pert,fock_diag_tmp,Ni
 end
 
 double precision function diag_H_mat_elem_fock_exc(h1,p1,h2,p2,s1,s2,fock_diag_tmp)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -1751,7 +1795,8 @@ double precision function diag_H_mat_elem_fock_exc(h1,p1,h2,p2,s1,s2,fock_diag_t
   ! The caller guarantees degree 2: h1,h2 occupied in the reference, p1,p2
   ! virtual in the hole-applied determinant, and p1,p2 not equal to h1 or h2.
   END_DOC
-  integer, intent(in)            :: h1, p1, h2, p2, s1, s2
+  integer(size_t), intent(in)    :: h1, p1, h2, p2
+  integer, intent(in)            :: s1, s2
   double precision, intent(in)   :: fock_diag_tmp(2,mo_num+1)
   double precision               :: E0
 
@@ -1790,18 +1835,20 @@ double precision function diag_H_mat_elem_fock_exc(h1,p1,h2,p2,s1,s2,fock_diag_t
 end
 
 double precision function diag_H_mat_elem(det_in,Nint)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Computes $\langle i|H|i \rangle$.
   END_DOC
-  integer,intent(in)             :: Nint
+  integer(size_t),intent(in)    :: Nint
   integer(bit_kind),intent(in)   :: det_in(Nint,2)
 
   integer(bit_kind)              :: hole(Nint,2)
   integer(bit_kind)              :: particle(Nint,2)
-  integer                        :: i, nexc(2), ispin
-  integer                        :: occ_particle(Nint*bit_kind_size,2)
-  integer                        :: occ_hole(Nint*bit_kind_size,2)
+  integer(size_t)                :: i
+  integer                        :: nexc(2), ispin
+  integer(size_t)                :: occ_particle(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ_hole(Nint*bit_kind_size,2)
   integer(bit_kind)              :: det_tmp(Nint,2)
   integer                        :: na, nb
 
@@ -1846,25 +1893,28 @@ double precision function diag_H_mat_elem(det_in,Nint)
       !DIR$ FORCEINLINE
       call ac_operator( occ_particle(i,ispin), ispin, det_tmp, diag_H_mat_elem, Nint,na,nb)
       !DIR$ FORCEINLINE
-      call a_operator ( occ_hole    (i,ispin), ispin, det_tmp, diag_H_mat_elem, Nint,na,nb)
+      call a_operator ( occ_hole (i,ispin), ispin, det_tmp, diag_H_mat_elem, Nint,na,nb)
     enddo
   enddo
 end
 
 subroutine a_operator(iorb,ispin,key,hjj,Nint,na,nb)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Needed for :c:func:`diag_H_mat_elem`.
   END_DOC
-  integer, intent(in)            :: iorb, ispin, Nint
+  integer(size_t), intent(in)    :: iorb, Nint
+  integer, intent(in)            :: ispin
   integer, intent(inout)         :: na, nb
   integer(bit_kind), intent(inout) :: key(Nint,2)
   double precision, intent(inout) :: hjj
 
-  integer                        :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
   integer                        :: other_spin
-  integer                        :: k,l,i
+  integer(size_t)                :: k
+  integer                        :: l, i
   integer                        :: tmp(2)
 
   ASSERT (iorb > 0)
@@ -1898,19 +1948,22 @@ end
 
 
 subroutine ac_operator(iorb,ispin,key,hjj,Nint,na,nb)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Needed for :c:func:`diag_H_mat_elem`.
   END_DOC
-  integer, intent(in)            :: iorb, ispin, Nint
+  integer(size_t), intent(in)    :: iorb, Nint
+  integer, intent(in)            :: ispin
   integer, intent(inout)         :: na, nb
   integer(bit_kind), intent(inout) :: key(Nint,2)
   double precision, intent(inout) :: hjj
 
-  integer                        :: occ(Nint*bit_kind_size,2)
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
   integer                        :: other_spin
-  integer                        :: k,l,i
+  integer(size_t)                :: k
+  integer                        :: l, i
 
   if (iorb < 1) then
     print *,  irp_here, ': iorb < 1'
@@ -1956,15 +2009,17 @@ end
 
 
 subroutine get_phase(key1,key2,phase,Nint)
+ use sizet
   use bitmasks
   implicit none
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)  :: Nint
   integer(bit_kind), intent(in)  :: key1(Nint,2), key2(Nint,2)
   double precision, intent(out)  :: phase
   BEGIN_DOC
 ! Returns the phase between key1 and key2.
   END_DOC
-  integer                        :: exc(0:2, 2, 2), degree
+  integer(size_t)                :: exc(0:2, 2, 2)
+  integer                        :: degree
 
   !DIR$ FORCEINLINE
   call get_excitation(key1, key2, exc, degree, phase, Nint)
@@ -1976,19 +2031,20 @@ end
 ! -------------------------
 
 subroutine get_excitation_degree_spin(key1,key2,degree,Nint)
+ use sizet
   use bitmasks
   include 'utils/constants.include.F'
   implicit none
   BEGIN_DOC
   ! Returns the excitation degree between two determinants.
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)  :: Nint
   integer(bit_kind), intent(in)  :: key1(Nint)
   integer(bit_kind), intent(in)  :: key2(Nint)
   integer, intent(out)           :: degree
 
   integer(bit_kind)              :: xorvec(N_int_max)
-  integer                        :: l
+  integer(size_t)                :: l
 
   ASSERT (Nint > 0)
 
@@ -2030,15 +2086,16 @@ end
 
 
 subroutine get_excitation_spin(det1,det2,exc,degree,phase,Nint)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Returns the excitation operators between two determinants and the phase.
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)  :: Nint
   integer(bit_kind), intent(in)  :: det1(Nint)
   integer(bit_kind), intent(in)  :: det2(Nint)
-  integer, intent(out)           :: exc(0:2,2)
+  integer(size_t), intent(out)  :: exc(0:2,2)
   integer, intent(out)           :: degree
   double precision, intent(out)  :: phase
   ! exc(number,hole/particle)
@@ -2073,6 +2130,7 @@ subroutine get_excitation_spin(det1,det2,exc,degree,phase,Nint)
 end
 
 subroutine decode_exc_spin(exc,h1,p1,h2,p2)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -2082,8 +2140,8 @@ subroutine decode_exc_spin(exc,h1,p1,h2,p2)
   !
   ! p1,p2 : Particles
   END_DOC
-  integer, intent(in)            :: exc(0:2,2)
-  integer, intent(out)           :: h1,h2,p1,p2
+  integer(size_t), intent(in)    :: exc(0:2,2)
+  integer(size_t), intent(out)   :: h1,h2,p1,p2
 
   select case (exc(0,1))
     case(2)
@@ -2106,23 +2164,26 @@ end
 
 
 subroutine get_double_excitation_spin(det1,det2,exc,phase,Nint)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Returns the two excitation operators between two doubly excited spin-determinants
   ! and the phase.
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)  :: Nint
   integer(bit_kind), intent(in)  :: det1(Nint)
   integer(bit_kind), intent(in)  :: det2(Nint)
-  integer, intent(out)           :: exc(0:2,2)
+  integer(size_t), intent(out)  :: exc(0:2,2)
   double precision, intent(out)  :: phase
   integer                        :: tz
-  integer                        :: l, idx_hole, idx_particle, ishift
-  integer                        :: nperm
-  integer                        :: i,j,k,m,n
-  integer                        :: high, low
-  integer                        :: a,b,c,d
+  integer(size_t)                :: l, ishift
+  integer                        :: idx_hole, idx_particle
+  integer(size_t)                :: nperm
+  integer(size_t)                :: i,j,k
+  integer                        :: m,n
+  integer(size_t)                :: high, low
+  integer(size_t)                :: a,b,c,d
   integer(bit_kind)              :: hole, particle, tmp
   double precision, parameter    :: phase_dble(0:1) = (/ 1.d0, -1.d0 /)
 
@@ -2172,10 +2233,10 @@ subroutine get_double_excitation_spin(det1,det2,exc,phase,Nint)
 
       ASSERT (low > 0)
       j = shiftr(low-1,bit_kind_shift)+1   ! Find integer in array(Nint)
-      n = iand(low-1,bit_kind_size-1)+1        ! mod(low,bit_kind_size)
+      n = iand(low-1,int(bit_kind_size-1, size_t))+1    ! mod(low,bit_kind_size)
       ASSERT (high > 0)
       k = shiftr(high-1,bit_kind_shift)+1
-      m = iand(high-1,bit_kind_size-1)+1
+      m = iand(high-1,int(bit_kind_size-1, size_t))+1
 
       if (j==k) then
         nperm = nperm + popcnt(iand(det1(j),                         &
@@ -2200,10 +2261,10 @@ subroutine get_double_excitation_spin(det1,det2,exc,phase,Nint)
 
         ASSERT (low > 0)
         j = shiftr(low-1,bit_kind_shift)+1   ! Find integer in array(Nint)
-        n = iand(low-1,bit_kind_size-1)+1        ! mod(low,bit_kind_size)
+        n = iand(low-1,int(bit_kind_size-1, size_t))+1  ! mod(low,bit_kind_size)
         ASSERT (high > 0)
         k = shiftr(high-1,bit_kind_shift)+1
-        m = iand(high-1,bit_kind_size-1)+1
+        m = iand(high-1,int(bit_kind_size-1, size_t))+1
 
         if (j==k) then
           nperm = nperm + popcnt(iand(det1(j),                       &
@@ -2231,27 +2292,30 @@ subroutine get_double_excitation_spin(det1,det2,exc,phase,Nint)
       endif
   end select
 
-  phase = phase_dble(iand(nperm,1))
+  phase = phase_dble(iand(nperm,1_size_t))
 
 end
 
 subroutine get_single_excitation_spin(det1,det2,exc,phase,Nint)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Returns the excitation operator between two singly excited determinants and the phase.
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)  :: Nint
   integer(bit_kind), intent(in)  :: det1(Nint)
   integer(bit_kind), intent(in)  :: det2(Nint)
-  integer, intent(out)           :: exc(0:2,2)
+  integer(size_t), intent(out)  :: exc(0:2,2)
   double precision, intent(out)  :: phase
   integer                        :: tz
-  integer                        :: l, idx_hole, idx_particle, ishift
-  integer                        :: nperm
-  integer                        :: i,j,k,m,n
-  integer                        :: high, low
-  integer                        :: a,b,c,d
+  integer(size_t)                :: l, ishift
+  integer                        :: idx_hole, idx_particle
+  integer(size_t)                :: nperm
+  integer(size_t)                :: i,j,k
+  integer                        :: m,n
+  integer(size_t)                :: high, low
+  integer(size_t)                :: a,b,c,d
   integer(bit_kind)              :: hole, particle, tmp
   double precision, parameter    :: phase_dble(0:1) = (/ 1.d0, -1.d0 /)
 
@@ -2289,10 +2353,10 @@ subroutine get_single_excitation_spin(det1,det2,exc,phase,Nint)
 
     ASSERT (low > 0)
     j = shiftr(low-1,bit_kind_shift)+1   ! Find integer in array(Nint)
-    n = iand(low-1,bit_kind_size-1)+1      ! mod(low,bit_kind_size)
+    n = iand(low-1,int(bit_kind_size-1, size_t))+1  ! mod(low,bit_kind_size)
     ASSERT (high > 0)
     k = shiftr(high-1,bit_kind_shift)+1
-    m = iand(high-1,bit_kind_size-1)+1
+    m = iand(high-1,int(bit_kind_size-1, size_t))+1
     if (j==k) then
       nperm = popcnt(iand(det1(j),                                   &
           iand(ibset(0_bit_kind,m-1)-1_bit_kind,ibclr(-1_bit_kind,n)+1_bit_kind)))
@@ -2305,24 +2369,26 @@ subroutine get_single_excitation_spin(det1,det2,exc,phase,Nint)
         nperm = nperm + popcnt(det1(i))
       end do
     endif
-    phase = phase_dble(iand(nperm,1))
+    phase = phase_dble(iand(nperm,1_size_t))
     return
 
   enddo
 end
 
 subroutine i_H_j_single_spin(key_i,key_j,Nint,spin,hij)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Returns $\langle i|H|j \rangle$ where $i$ and $j$ are determinants differing by
   ! a single excitation.
   END_DOC
-  integer, intent(in)            :: Nint, spin
+  integer(size_t), intent(in)    :: Nint
+  integer, intent(in)            :: spin
   integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
   double precision, intent(out)  :: hij
 
-  integer                        :: exc(0:2,2)
+  integer(size_t)                :: exc(0:2,2)
   double precision               :: phase
 
   PROVIDE all_mo_integrals
@@ -2332,17 +2398,18 @@ subroutine i_H_j_single_spin(key_i,key_j,Nint,spin,hij)
 end
 
 subroutine i_H_j_double_spin(key_i,key_j,Nint,hij)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Returns $\langle i|H|j \rangle$ where $i$ and $j$ are determinants differing by
   ! a same-spin double excitation.
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)  :: Nint
   integer(bit_kind), intent(in)  :: key_i(Nint), key_j(Nint)
   double precision, intent(out)  :: hij
 
-  integer                        :: exc(0:2,2)
+  integer(size_t)                :: exc(0:2,2)
   double precision               :: phase
   double precision, external     :: get_two_e_integral
 
@@ -2361,17 +2428,18 @@ subroutine i_H_j_double_spin(key_i,key_j,Nint,hij)
 end
 
 subroutine i_H_j_double_alpha_beta(key_i,key_j,Nint,hij)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Returns $\langle i|H|j \rangle$ where $i$ and $j$ are determinants differing by
   ! an opposite-spin double excitation.
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)  :: Nint
   integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
   double precision, intent(out)  :: hij
 
-  integer                        :: exc(0:2,2,2)
+  integer(size_t)                :: exc(0:2,2,2)
   double precision               :: phase, phase2
   double precision, external     :: get_two_e_integral
 
@@ -2389,22 +2457,25 @@ subroutine i_H_j_double_alpha_beta(key_i,key_j,Nint,hij)
 end
 
 subroutine i_H_j_double_alpha_beta_s2_sorted(key_i,key_ja,key_jb,Nint,hij,s2,n)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Returns $\langle i|H|j \rangle$ where $i$ and $j$ are determinants differing by
   ! an opposite-spin double excitation.
   END_DOC
-  integer, intent(in)            :: Nint, n
+  integer(size_t), intent(in)  :: Nint, n
   integer(bit_kind), intent(in)  :: key_i(Nint,2), key_ja(Nint,n), key_jb(Nint)
   double precision, intent(out)  :: hij(n), s2(n)
 
-  integer                        :: exc(0:2,2,2)
+  integer(size_t)                :: exc(0:2,2,2)
   double precision               :: phase, phase2
   double precision, external     :: get_two_e_integral
   double precision, allocatable  :: integral(:,:)
-  integer, allocatable :: integral_count(:), iorder(:), ii(:), kk(:)
-  integer :: i,j,k,l,m,mm
+  integer(size_t), allocatable :: integral_count(:)
+  integer, allocatable :: iorder(:), ii(:), kk(:)
+  integer(size_t) :: i,j,k,l,m,mm
+  integer :: n4
 
   PROVIDE all_mo_integrals
 
@@ -2430,7 +2501,8 @@ subroutine i_H_j_double_alpha_beta_s2_sorted(key_i,key_ja,key_jb,Nint,hij,s2,n)
         s2(m) =  -phase*phase2
       endif
     enddo
-    call isort(ii,iorder,n)
+    n4 = int(n, 4)
+    call isort(ii,iorder,n4)
 !    call get_mo_two_e_integrals_i1j1(j,l,mo_num,integral,mo_integrals_map)
 
     do mm=1,n
@@ -2438,7 +2510,8 @@ subroutine i_H_j_double_alpha_beta_s2_sorted(key_i,key_ja,key_jb,Nint,hij,s2,n)
       i = ii(mm)
       k = kk(m)
       if (integral_count(i) > mo_num/4) then
-        call get_mo_two_e_integrals(j,k,l,mo_num,integral(1,k),mo_integrals_map)
+        call get_mo_two_e_integrals(j, k, l, int(mo_num,size_t), &
+                                    integral(1,k), mo_integrals_map)
         integral_count(i) = -1
       else if (integral_count(i) > 0) then
         integral(i,k) = get_two_e_integral(i,j,k,l,mo_integrals_map)
@@ -2465,21 +2538,22 @@ end
 
 
 subroutine i_H_j_double_alpha_beta_s2(key_i,key_ja,key_jb,Nint,hij,s2,n)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Returns $\langle i|H|j \rangle$ where $i$ and $j$ are determinants differing by
   ! an opposite-spin double excitation.
   END_DOC
-  integer, intent(in)            :: Nint, n
+  integer(size_t), intent(in)  :: Nint, n
   integer(bit_kind), intent(in)  :: key_i(Nint,2), key_ja(Nint,n), key_jb(Nint)
   double precision, intent(out)  :: hij(n), s2(n)
 
-  integer                        :: exc(0:2,2,2)
+  integer(size_t)                :: exc(0:2,2,2)
   double precision               :: phase, phase2
   double precision, external     :: get_two_e_integral
   double precision, allocatable  :: integral(:,:)
-  integer :: i,j,k,l,m,mm
+  integer(size_t) :: i,j,k,l,m,mm
 
   PROVIDE all_mo_integrals
 
@@ -2488,7 +2562,8 @@ subroutine i_H_j_double_alpha_beta_s2(key_i,key_ja,key_jb,Nint,hij,s2,n)
   l=exc(1,2,2)
   if (do_mo_cholesky.and.(n > (3*mo_num))) then
     allocate (integral(mo_num,mo_num))
-    call get_mo_two_e_integrals_i1j1(j,l,mo_num,integral,mo_integrals_map)
+        call get_mo_two_e_integrals_i1j1(j, l, int(mo_num,size_t), integral, &
+                                     mo_integrals_map)
     do m=1,n
       call get_single_excitation_spin(key_i(1,1),key_ja(1,m),exc(0,1,1),phase,Nint)
       i=exc(1,1,1)
@@ -2519,6 +2594,7 @@ end
 
 
 subroutine connected_to_hf(key_i,yes_no)
+ use sizet
  implicit none
   BEGIN_DOC
   ! Tests whether the determinant key_i is connected to the
@@ -2536,9 +2612,9 @@ subroutine connected_to_hf(key_i,yes_no)
  integer(bit_kind), intent(in)  :: key_i(N_int,2)
  logical , intent(out) :: yes_no
  double precision :: hij,phase
- integer          :: exc(0:2,2,2)
+ integer(size_t)  :: exc(0:2,2,2)
  integer          :: degree
- integer          :: m,p
+ integer(size_t)  :: m,p
  yes_no = .True.
  call get_excitation_degree(ref_bitmask,key_i,degree,N_int)
  if(degree == 2)then

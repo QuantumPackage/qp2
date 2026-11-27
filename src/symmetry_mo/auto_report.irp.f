@@ -1,3 +1,4 @@
+use sizet
 !-----------------------------------------------------------------------
 ! Automatic point-group report at the end of SCF/DFT.
 !
@@ -150,6 +151,7 @@ end function pg_mo_labels_ok
 ! MO energies with their irrep.
 !-----------------------------------------------------------------------
 subroutine pg_print_mo_energies(e, n)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Prints the MO energies, with the irrep label of each MO next to the
@@ -168,7 +170,7 @@ subroutine pg_print_mo_energies(e, n)
   ! Printed by the master rank only: the table is a report, and every
   ! rank runs the same SCF.
   END_DOC
-  integer, intent(in) :: n
+  integer(size_t), intent(in) :: n
   double precision, intent(in) :: e(n)
   logical, external :: pg_symmetry_ready
 
@@ -183,14 +185,15 @@ end subroutine pg_print_mo_energies
 
 !-----------------------------------------------------------------------
 subroutine pg_print_mo_energies_plain(e, n)
+  use sizet
   implicit none
   BEGIN_DOC
   ! The historical ``Eigenvalues`` table, without any irrep. Used when
   ! the symmetry machinery is off or gave up.
   END_DOC
-  integer, intent(in) :: n
+  integer(size_t), intent(in) :: n
   double precision, intent(in) :: e(n)
-  integer :: i
+  integer(size_t) :: i
 
   if (.not. mpi_master) return
   print *, ''
@@ -206,6 +209,7 @@ end subroutine pg_print_mo_energies_plain
 
 !-----------------------------------------------------------------------
 subroutine pg_print_mo_energies_labelled(e, n)
+  use sizet
   implicit none
   BEGIN_DOC
   ! ``Eigenvalues`` plus one irrep label per MO.
@@ -220,9 +224,9 @@ subroutine pg_print_mo_energies_labelled(e, n)
   ! falls back when ``n`` does not describe the MO set of the EZFIO, since
   ! the labels are indexed by MO number.
   END_DOC
-  integer, intent(in) :: n
+  integer(size_t), intent(in) :: n
   double precision, intent(in) :: e(n)
-  integer :: i
+  integer(size_t) :: i
   character*(32) :: lab
   ! The irrep column is a fixed 12-character field filled by an internal
   ! write: this pads and truncates deterministically, whatever the storage
@@ -293,6 +297,7 @@ subroutine pg_report_mo_symmetry()
 end subroutine pg_report_mo_symmetry
 
 subroutine pg_report_mo_symmetry_work()
+  use sizet
   use qp_json, only: json_add
   implicit none
   BEGIN_DOC
@@ -318,7 +323,8 @@ subroutine pg_report_mo_symmetry_work()
   ! included): there a row is a standard chemical label and the zero is
   ! information.
   END_DOC
-  integer :: a, n_mixed, n_shown
+  integer(size_t) :: n_mixed
+  integer :: a, n_shown
   character*(8) :: lab
   logical :: linear
   logical, external :: pg_mo_labels_ok

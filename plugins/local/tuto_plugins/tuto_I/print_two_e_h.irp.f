@@ -1,9 +1,10 @@
 program print_two_e_h
+  use sizet
   implicit none
   BEGIN_DOC
 ! TODO : Put the documentation of the program here
   END_DOC
- integer :: i,j,k,l
+ integer(size_t) :: i,j,k,l
  double precision :: integral 
  double precision :: get_ao_two_e_integral, get_two_e_integral ! declaration of the functions 
  print*,'AO integrals, physicist notations : <i j|k l>'

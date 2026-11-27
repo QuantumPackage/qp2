@@ -1,3 +1,5 @@
+use sizet
+
 ! Matrix to vector index
 
 ! *Compute the index i of a vector element from the indexes p,q of a
@@ -34,6 +36,7 @@
 
 
 subroutine mat_to_vec_index(p,q,i)
+ use sizet
 
   include 'pi.h'
 
@@ -48,13 +51,13 @@ subroutine mat_to_vec_index(p,q,i)
   ! Variables
   
   ! in
-  integer, intent(in) :: p,q
+  integer(size_t), intent(in) :: p,q
   
   ! out
-  integer, intent(out) :: i 
+  integer(size_t), intent(out) :: i 
 
   ! internal
-  integer :: a,b
+  integer(size_t) :: a,b
   double precision :: da
 
   ! Calculation

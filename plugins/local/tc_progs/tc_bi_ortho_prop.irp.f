@@ -28,13 +28,14 @@ end
 ! ---
 
 subroutine test
+ use sizet
  implicit none
  integer :: i
  print*,'TC Dipole components'
  do i= 1, 3
   print*,tc_bi_ortho_dipole(i,1)
  enddo
- integer, allocatable           :: occ(:,:)
+ integer(size_t), allocatable   :: occ(:,:)
  integer                        :: n_occ_ab(2)
  allocate(occ(N_int*bit_kind_size,2))
  call bitstring_to_list_ab(ref_bitmask, occ, n_occ_ab, N_int)

@@ -1,3 +1,4 @@
+use sizet
  BEGIN_PROVIDER [double precision, coef_xyz_ao, (2,3,ao_num)]
 &BEGIN_PROVIDER [integer, power_xyz_ao, (2,3,ao_num)]
  implicit none
@@ -6,7 +7,8 @@
 !
 ! x * (x - A_x)^a_x = A_x (x - A_x)^a_x + 1 * (x - A_x)^{a_x+1}
  END_DOC
- integer :: i,j,k,num_ao,power_ao(1:3)
+ integer(size_t) :: i,j,k,num_ao
+ integer :: power_ao(1:3)
  double precision :: center_ao(1:3)
  do i = 1, ao_num
   power_ao(1:3)= ao_power(i,1:3) 
@@ -31,7 +33,8 @@ END_PROVIDER
   !
   ! WHEN IT IS THE CASE, coefficients are ZERO 
   END_DOC
-  integer                        :: i,j,power_ao(3), m,kk
+  integer(size_t)                :: i,j
+  integer                        :: power_ao(3), m,kk
   do j=1, ao_num
     power_ao(1:3)= ao_power(j,1:3) 
     do m = 1, 3
@@ -63,7 +66,8 @@ END_PROVIDER
   !
   ! WHEN IT IS THE CASE, coefficients are ZERO 
   END_DOC
-  integer                        :: i,j,power_ao(3), m,num_ao,kk
+  integer(size_t)                :: i,j,num_ao
+  integer                        :: power_ao(3), m,kk
   double precision :: center_ao(1:3)
   do j=1, ao_num
    power_ao(1:3)= ao_power(j,1:3) 
@@ -99,12 +103,14 @@ END_PROVIDER
 
 subroutine xyz_grad_phi_ao(r,i_ao,xyz_grad_phi)
  implicit none
- integer, intent(in) :: i_ao
+ use sizet
+ integer(size_t), intent(in) :: i_ao
  double precision, intent(in) :: r(3)
  double precision, intent(out):: xyz_grad_phi(3) ! x * d/dx phi i, y * d/dy phi_i, z * d/dz phi_
  double precision :: center_ao(3),beta
  double precision :: accu(3,4),dr(3),r2,pol_usual(3)
- integer :: m,power_ao(3),num_ao,j_prim
+ integer(size_t) :: num_ao
+ integer :: m,power_ao(3),j_prim
  power_ao(1:3)= ao_power(i_ao,1:3) 
  num_ao = ao_nucl(i_ao)
  center_ao(1:3) = nucl_coord(num_ao,1:3)
@@ -145,12 +151,14 @@ end
 
 subroutine grad_phi_ao(r,i_ao,grad_xyz_phi)
  implicit none
- integer, intent(in) :: i_ao
+ use sizet
+ integer(size_t), intent(in) :: i_ao
  double precision, intent(in) :: r(3)
  double precision, intent(out):: grad_xyz_phi(3) ! x * phi i, y * phi_i, z * phi_
  double precision :: center_ao(3),beta
  double precision :: accu(3,2),dr(3),r2,pol_usual(3)
- integer :: m,power_ao(3),num_ao,j_prim
+ integer(size_t) :: num_ao
+ integer :: m,power_ao(3),j_prim
  power_ao(1:3)= ao_power(i_ao,1:3) 
  num_ao = ao_nucl(i_ao)
  center_ao(1:3) = nucl_coord(num_ao,1:3)
@@ -185,12 +193,14 @@ end
 
 subroutine xyz_phi_ao(r,i_ao,xyz_phi)
  implicit none
- integer, intent(in) :: i_ao
+ use sizet
+ integer(size_t), intent(in) :: i_ao
  double precision, intent(in) :: r(3)
  double precision, intent(out):: xyz_phi(3) ! x * phi i, y * phi_i, z * phi_i
  double precision :: center_ao(3),beta
  double precision :: accu,dr(3),r2,pol_usual(3)
- integer :: m,power_ao(3),num_ao
+ integer(size_t) :: num_ao
+ integer :: m,power_ao(3)
  power_ao(1:3)= ao_power(i_ao,1:3) 
  num_ao = ao_nucl(i_ao)
  center_ao(1:3) = nucl_coord(num_ao,1:3)
@@ -221,7 +231,9 @@ end
 
 subroutine test_pol_xyz
  implicit none
- integer :: ipoint,i,j,m,jpoint
+ use sizet
+ integer(size_t) :: ipoint,i,j,jpoint
+ integer :: m
  double precision :: r1(3),derf_mu_x
  double precision :: weight1,r12,xyz_phi(3),grad_phi(3),xyz_grad_phi(3)
  double precision, allocatable :: aos_array(:),aos_grad_array(:,:)
@@ -282,7 +294,9 @@ end
 
 subroutine test_ints_semi_bis
  implicit none
- integer :: ipoint,i,j,m
+ use sizet
+ integer(size_t) :: ipoint,i,j
+ integer :: m
  double precision :: r1(3), aos_grad_array_r1(3, ao_num), aos_array_r1(ao_num)
  double precision :: C_center(3), weight1,mu_in,r12,derf_mu_x,dxyz_ints(3),NAI_pol_mult_erf_ao
  double precision :: ao_mat(ao_num,ao_num),ao_xmat(3,ao_num,ao_num),accu1, accu2(3)

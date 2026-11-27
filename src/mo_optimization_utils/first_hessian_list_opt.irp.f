@@ -1,4 +1,7 @@
+use sizet
+
 subroutine first_hessian_list_opt(tmp_n,m,list,H,h_tmpr)
+ use sizet
   BEGIN_DOC
   ! Hessian of the energy with respect to orbital rotations,
   ! restricted to the m orbitals given by list.
@@ -21,7 +24,7 @@ subroutine first_hessian_list_opt(tmp_n,m,list,H,h_tmpr)
   !===========
 
   ! in
-  integer, intent(in)           :: tmp_n, m, list(m)
+  integer(size_t), intent(in)   :: tmp_n, m, list(m)
   !tmp_n         : integer, tmp_n = m*(m-1)/2
   
   ! out
@@ -30,9 +33,9 @@ subroutine first_hessian_list_opt(tmp_n,m,list,H,h_tmpr)
  
   ! internal
   double precision, allocatable :: hessian(:,:,:,:)
-  integer                       :: p,q, tmp_p,tmp_q
-  integer                       :: r,s,t,u,v,tmp_r,tmp_s,tmp_t,tmp_u,tmp_v
-  integer                       :: pq,rs,tmp_pq,tmp_rs
+  integer(size_t)               :: p,q, tmp_p,tmp_q
+  integer(size_t)               :: r,s,t,u,v,tmp_r,tmp_s,tmp_t,tmp_u,tmp_v
+  integer(size_t)               :: pq,rs,tmp_pq,tmp_rs
   double precision              :: t1,t2,t3,t4,t5,t6
   ! hessian  : mo_num 4D double precision matrix containing the hessian before the permutations
   ! h_tmpr   : mo_num 4D double precision matrix containing the hessian after the permutations

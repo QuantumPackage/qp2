@@ -36,7 +36,9 @@ end
 subroutine routine_test
  implicit none
  use bitmasks ! you need to include the bitmasks_module.f90 features
- integer :: i,n_good,degree
+ use sizet
+ integer(size_t) :: i,n_good
+ integer :: degree
  integer(bit_kind), allocatable :: dets(:,:,:)
  integer, allocatable :: iorder(:)
  double precision, allocatable :: coef(:),coef_new(:,:)
@@ -51,7 +53,7 @@ subroutine routine_test
    coef(i) = -dabs(coef_pt1_bi_ortho(i))
   endif
  enddo
- call dsort(coef,iorder,N_det)
+ call dsort(coef,iorder,int(N_det,4))
  !thr = save_threshold
  thr = 1d-15
  n_good = 0

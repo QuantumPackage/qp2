@@ -1,15 +1,18 @@
+use sizet
  BEGIN_PROVIDER [ double precision, tc_two_rdm_chemist, (mo_num, mo_num, mo_num, mo_num)]
 &BEGIN_PROVIDER [ double precision, tc_two_rdm_chemist_s1s2, (mo_num, mo_num, mo_num, mo_num, 2,2)]
  implicit none
  BEGIN_DOC
  ! tc_two_rdm_chemist(p,s,q,r) = <Phi| a^dagger_p a^dagger_q q_r a_s |Phi> = CHEMIST NOTATION
  END_DOC
- integer :: i,j,istate,m,mm,nn
- integer                        :: exc(0:2,2,2)
+ integer(size_t) :: i,j,m
+ integer         :: istate,mm,nn
+ integer(size_t)                :: exc(0:2,2,2)
  double precision               :: phase
  double precision               :: contrib
- integer                        :: h1,p1,s1,h2,p2,s2,degree
- integer, allocatable           :: occ(:,:)
+ integer(size_t)                :: h1,p1,h2,p2
+ integer                        :: s1,s2,degree
+ integer(size_t), allocatable  :: occ(:,:)
  integer                        :: n_occ_ab(2),other_spin(2)
  other_spin(1) = 2
  other_spin(2) = 1
@@ -31,8 +34,10 @@
       contrib += psi_l_coef_bi_ortho(i,istate) * psi_r_coef_bi_ortho(j,istate) * phase * state_average_weight(istate)
      enddo
     if(degree == 2)then
-     call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
-     call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
+     call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist, &
+                        int(mo_num,size_t),contrib)
+     call update_tc_rdm(h1,p1,h2,p2,s1,s2, &
+        tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2), int(mo_num,size_t),contrib)
     else if(degree==1)then
      ! occupation of the determinant psi_det(j)
      call bitstring_to_list_ab(psi_det(1,1,j), occ, n_occ_ab, N_int) 
@@ -43,8 +48,10 @@
       m = occ(mm,s2)
       h2 = m 
       p2 = m 
-      call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
-      call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
+      call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist, &
+                        int(mo_num,size_t),contrib)
+      call update_tc_rdm(h1,p1,h2,p2,s1,s2, &
+        tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2), int(mo_num,size_t),contrib)
      enddo
      ! run over the electrons of same spin than the excitation
      s2 = s1
@@ -52,8 +59,10 @@
       m = occ(mm,s2)
       h2 = m 
       p2 = m 
-      call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
-      call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
+      call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist, &
+                        int(mo_num,size_t),contrib)
+      call update_tc_rdm(h1,p1,h2,p2,s1,s2, &
+        tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2), int(mo_num,size_t),contrib)
      enddo
     endif
    else if(degree == 0)then
@@ -74,8 +83,10 @@
        m = occ(mm,s2)
        h2 = m 
        p2 = m 
-       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
-       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
+       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist, &
+                        int(mo_num,size_t),contrib)
+       call update_tc_rdm(h1,p1,h2,p2,s1,s2, &
+        tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2), int(mo_num,size_t),contrib)
       enddo
       ! run over the couple of alpha-alpha electrons 
       s2 = s1
@@ -84,8 +95,10 @@
        h2 = m 
        p2 = m 
        if(h2.le.h1)cycle
-       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
-       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
+       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist, &
+                        int(mo_num,size_t),contrib)
+       call update_tc_rdm(h1,p1,h2,p2,s1,s2, &
+        tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2), int(mo_num,size_t),contrib)
       enddo
     enddo
     s1 = 2
@@ -99,8 +112,10 @@
        h2 = m 
        p2 = m 
        if(h2.le.h1)cycle
-       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
-       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
+       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist, &
+                        int(mo_num,size_t),contrib)
+       call update_tc_rdm(h1,p1,h2,p2,s1,s2, &
+        tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2), int(mo_num,size_t),contrib)
       enddo
     enddo
    endif
@@ -110,8 +125,10 @@
 END_PROVIDER 
 
 subroutine update_tc_rdm(h1,p1,h2,p2,s1,s2,array,sze,contrib)
+ use sizet
  implicit none
- integer, intent(in) :: h1,p1,h2,p2,s1,s2,sze
+ integer(size_t), intent(in) :: h1,p1,h2,p2,sze
+ integer,         intent(in) :: s1,s2
  double precision, intent(in) :: contrib
  double precision, intent(inout) :: array(sze, sze, sze, sze)
  integer :: istate
@@ -139,7 +156,8 @@ end
  BEGIN_DOC
  ! tc_two_rdm(p,q,s,r) = <Phi| a^dagger_p a^dagger_q q_r a_s |Phi> = PHYSICIST NOTATION
  END_DOC
- integer :: p,q,r,s,s1,s2
+ integer(size_t) :: p,q,r,s
+ integer         :: s1,s2
  do r = 1, mo_num
   do q = 1, mo_num
    do s = 1, mo_num

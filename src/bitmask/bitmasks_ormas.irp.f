@@ -1,4 +1,5 @@
 use bitmasks
+use sizet
 
 BEGIN_PROVIDER [integer, ormas_mstart, (ormas_n_space) ]
   implicit none
@@ -96,7 +97,7 @@ END_PROVIDER
   ormas_max_n_orb = maxval(ormas_n_orb)
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, ormas_list_orb, (ormas_max_n_orb, ormas_n_space) ]
+BEGIN_PROVIDER [ integer(size_t), ormas_list_orb, (ormas_max_n_orb, ormas_n_space) ]
   implicit none
   BEGIN_DOC
   ! list of orbitals in each ormas space
@@ -120,18 +121,22 @@ BEGIN_PROVIDER [ integer(bit_kind), ormas_bitmask, (N_int, ormas_n_space) ]
   integer :: j
   ormas_bitmask = 0_bit_kind
   do j = 1, ormas_n_space
-    call list_to_bitstring(ormas_bitmask(1,j), ormas_list_orb(:,j), ormas_n_orb(j), N_int)
+        call list_to_bitstring(ormas_bitmask(1,j), &
+                           int(ormas_list_orb(:,j),size_t), ormas_n_orb(j), &
+                           N_int)
   enddo
 END_PROVIDER
 
 subroutine ormas_occ(key_in, occupancies)
+ use sizet
   implicit none
   BEGIN_DOC
   ! number of electrons in each ormas space
   END_DOC
   integer(bit_kind), intent(in) :: key_in(N_int,2)
   integer, intent(out) :: occupancies(ormas_n_space)
-  integer :: i,ispin,ispace
+  integer(size_t) :: i
+  integer :: ispin,ispace
 
   occupancies = 0
   ! TODO: get start/end of each space within N_int
@@ -145,12 +150,14 @@ subroutine ormas_occ(key_in, occupancies)
 end
 
 logical function det_allowed_ormas(key_in)
+ use sizet
   implicit none
   BEGIN_DOC
   ! return true if det has allowable ormas occupations
   END_DOC
   integer(bit_kind), intent(in) :: key_in(N_int,2)
-  integer :: i,ispin,ispace,occ
+  integer(size_t) :: i
+  integer :: ispin,ispace,occ
 
   det_allowed_ormas = .True.
   if (ormas_n_space.eq.1) return

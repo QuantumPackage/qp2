@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [ double precision, nucl_coord,  (nucl_num,3) ]
    implicit none
 
@@ -18,7 +20,7 @@ BEGIN_PROVIDER [ double precision, nucl_coord,  (nucl_num,3) ]
        stop 1
      endif
      call ezfio_get_nuclei_nucl_coord(buffer)
-     integer                        :: i,j
+     integer(size_t)                :: i,j
 
      do i=1,3
        do j=1,nucl_num
@@ -79,7 +81,8 @@ BEGIN_PROVIDER [ double precision, nucl_coord_transp, (3,nucl_num) ]
    BEGIN_DOC
    ! Transposed array of nucl_coord
    END_DOC
-   integer                        :: i, k
+   integer(size_t)                :: i
+   integer                        :: k
    nucl_coord_transp = 0.d0
 
    do i=1,nucl_num
@@ -95,7 +98,8 @@ BEGIN_PROVIDER [ double precision, nucl_dist_inv, (nucl_num,nucl_num) ]
   ! Inverse of the distance between nucleus I and nucleus J
   END_DOC
 
-  integer                        :: ie1, ie2, l
+  integer(size_t)                :: ie1, ie2
+  integer                        :: l
 
   do ie1 = 1, nucl_num
     do ie2 = 1, nucl_num
@@ -123,7 +127,8 @@ END_PROVIDER
    ! nucl_dist_vec : Nucleus-nucleus distances vectors
    END_DOC
 
-   integer                        :: ie1, ie2, l
+   integer(size_t)                :: ie1, ie2
+   integer                        :: l
 
    do ie2 = 1,nucl_num
      do ie1 = 1,nucl_num
@@ -164,7 +169,7 @@ BEGIN_PROVIDER [ double precision, nuclear_repulsion ]
 
    else
 
-     integer                        :: k,l
+     integer(size_t)                :: k,l
      double precision               :: Z12, r2, x(3)
      nuclear_repulsion = 0.d0
      do l = 1, nucl_num
@@ -241,7 +246,8 @@ BEGIN_PROVIDER [ double precision, center_of_mass, (3) ]
   BEGIN_DOC
   ! Center of mass of the molecule
   END_DOC
-  integer                        :: i,j
+  integer(size_t)                :: i
+  integer                        :: j
   double precision               :: s
   center_of_mass(:) = 0.d0
   s = 0.d0

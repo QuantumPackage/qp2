@@ -1,4 +1,7 @@
+use sizet
+
  subroutine give_on_top_gradient(ipoint,istate,ontop_grad)
+ use sizet
  implicit none
  BEGIN_DOC
  ! on top pair density and its gradient evaluated at a given point of the grid 
@@ -6,7 +9,8 @@
  ! ontop_grad(4)   :: on-top pair density 
  END_DOC
  double precision, intent(out) :: ontop_grad(4)
- integer, intent(in) :: ipoint,istate
+ integer(size_t), intent(in) :: ipoint
+ integer, intent(in)         :: istate
  double precision :: phi_jkl,phi_ikl,phi_ijl,phi_ijk
  integer :: i,j,k,l,m
  
@@ -40,7 +44,8 @@
  !
  ! grad_total_cas_on_top_density(4,ipoint,istate)   : on top pair density for the point 'ipoint' and state 'istate'
  END_DOC
- integer :: i_point,i_state,i
+ integer(size_t) :: i_point
+ integer         :: i_state,i
  double precision :: wall_0,wall_1
  double precision :: core_inact_act_on_top_of_r_from_provider,ontop_grad(4)
 

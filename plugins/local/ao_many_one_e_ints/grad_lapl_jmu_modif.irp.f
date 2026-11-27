@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -10,7 +11,7 @@ BEGIN_PROVIDER [double precision, v_ij_erf_rk_cst_mu_env, (ao_num, ao_num, n_poi
   END_DOC
 
   implicit none
-  integer                    :: i, j, ipoint, i_1s
+  integer(size_t)                :: i, j, ipoint, i_1s
   double precision           :: r(3), int_mu, int_coulomb
   double precision           :: coef, beta, B_center(3)
   double precision           :: tmp
@@ -104,7 +105,7 @@ BEGIN_PROVIDER [double precision, x_v_ij_erf_rk_cst_mu_env, (ao_num, ao_num, n_p
   END_DOC
 
   implicit none
-  integer          :: i, j, ipoint, i_1s
+  integer(size_t)  :: i, j, ipoint, i_1s
   double precision :: coef, beta, B_center(3), r(3), ints(3), ints_coulomb(3)
   double precision :: tmp_x, tmp_y, tmp_z
   double precision :: wall0, wall1
@@ -207,7 +208,8 @@ BEGIN_PROVIDER [double precision, v_ij_u_cst_mu_env_fit, (ao_num, ao_num, n_poin
   END_DOC
 
   implicit none
-  integer                    :: i, j, ipoint, i_1s, i_fit
+  integer(size_t)                :: i, j, ipoint, i_1s
+  integer                    :: i_fit
   double precision           :: r(3), int_fit, expo_fit, coef_fit
   double precision           :: coef, beta, B_center(3)
   double precision           :: tmp
@@ -311,7 +313,7 @@ BEGIN_PROVIDER [double precision, v_ij_u_cst_mu_env_an_old, (ao_num, ao_num, n_p
   include 'constants.include.F'
 
   implicit none
-  integer                    :: i, j, ipoint, i_1s
+  integer(size_t)                :: i, j, ipoint, i_1s
   double precision           :: r(3), r1_2
   double precision           :: int_c1, int_e1, int_o
   double precision           :: int_c2(3), int_e2(3)
@@ -444,7 +446,7 @@ BEGIN_PROVIDER [double precision, v_ij_u_cst_mu_env_an, (ao_num, ao_num, n_point
   include 'constants.include.F'
 
   implicit none
-  integer                    :: i, j, ipoint, i_1s
+  integer(size_t)                :: i, j, ipoint, i_1s
   double precision           :: r(3), r1_2
   double precision           :: int_o
   double precision           :: int_c(7), int_e(7)

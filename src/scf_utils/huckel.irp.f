@@ -1,9 +1,12 @@
+use sizet
+
 subroutine huckel_guess
+ use sizet
   implicit none
   BEGIN_DOC
 ! Build the MOs using the extended Huckel model
   END_DOC
-  integer                        :: i,j
+  integer(size_t)                :: i,j
   double precision               :: accu
   double precision               :: c
   character*(64)                 :: label
@@ -26,7 +29,8 @@ subroutine huckel_guess
 
   TOUCH Fock_matrix_ao_alpha Fock_matrix_ao_beta
   mo_coef = eigenvectors_fock_matrix_mo
-  call restore_symmetry(ao_num,mo_num,mo_coef,size(mo_coef,1),1.d-10)
+  call restore_symmetry(int(ao_num, size_t),int(mo_num, size_t), &
+      mo_coef,int(size(mo_coef,1), size_t),1.d-10)
   call orthonormalize_mos
   SOFT_TOUCH mo_coef
   call save_mos

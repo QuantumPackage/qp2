@@ -1,10 +1,12 @@
 subroutine example_bitmask
  use bitmasks ! you need to include the bitmasks_module.f90 features
+ use sizet
  implicit none
  BEGIN_DOC
 ! subroutine that illustrates the main features available in bitmask
  END_DOC
- integer :: i,j
+ integer(size_t) :: i
+ integer :: j
  print*,''
  print*,'**************'
  print*,'**************'
@@ -54,7 +56,7 @@ subroutine example_bitmask
  print*,'print a human readable representation of the bitstring'
  call bitstring_to_str( output, key, N_int )
  print *,  trim(output)
- integer :: i_orb
+ integer(size_t) :: i_orb
  character*(2048) :: output
 
  do i_orb = 1, min(4,mo_num) ! you set the first four bits to 1 in key
@@ -65,7 +67,7 @@ subroutine example_bitmask
  print *,  trim(output)
  print*,''
  integer :: n_elements
- integer, allocatable :: list_occ(:)
+ integer(size_t), allocatable :: list_occ(:)
  allocate(list_occ(N_int*bit_kind_size))
  call bitstring_to_list( key, list_occ, n_elements, N_int)
  print*,'number of bits set to 1 = ',n_elements

@@ -5,8 +5,10 @@ program deb_j_bump
 end
 
 subroutine routine_test_mu_of_r_tot
+ use sizet
  implicit none
- integer :: ipoint,k 
+ integer(size_t) :: ipoint
+ integer         :: k
  double precision :: r2(3), weight, dr, r1(3), r1bis(3)
  double precision :: accu_grad(3)
  double precision :: jast,grad_jast_mu_r1(3),j_bump
@@ -61,8 +63,10 @@ subroutine routine_test_mu_of_r_tot
 end
 
 subroutine routine_test_mu_of_r
+ use sizet
  implicit none
- integer :: ipoint,k 
+ integer(size_t) :: ipoint
+ integer         :: k
  double precision :: weight, dr, r1(3), r1bis(3),accu_grad(3),num_grad_mu_r1(3)
  double precision :: mu_r1,dm_r1, mu_der_r1(3), grad_dm_r1(3)
  double precision :: mu_der_rp(3), grad_dm_rp(3),mu_rp

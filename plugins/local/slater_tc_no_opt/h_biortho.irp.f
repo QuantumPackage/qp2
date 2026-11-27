@@ -10,10 +10,11 @@ subroutine hmat_bi_ortho(key_j, key_i, Nint, hmono, htwoe, htot)
   END_DOC
 
   use bitmasks
+  use sizet
 
   implicit none
 
-  integer,           intent(in) :: Nint
+  integer(size_t),   intent(in) :: Nint
   integer(bit_kind), intent(in) :: key_i(Nint,2), key_j(Nint,2)
   double precision, intent(out) :: hmono, htwoe, htot
 
@@ -51,15 +52,17 @@ end subroutine hmat_bi_ortho
 subroutine diag_hmat_bi_ortho(Nint, key_i, hmono, htwoe)
 
   use bitmasks
+  use sizet
 
   implicit none
 
-  integer,           intent(in) :: Nint
+  integer(size_t),   intent(in) :: Nint
   integer(bit_kind), intent(in) :: key_i(Nint,2)
   double precision, intent(out) :: hmono, htwoe
 
-  integer                        :: occ(Nint*bit_kind_size,2)
-  integer                        :: Ne(2), i, j, ii, jj, ispin, jspin
+  integer(size_t)                 :: occ(Nint*bit_kind_size,2)
+  integer                        :: Ne(2), i, j, ispin, jspin
+  integer(size_t)                 :: ii, jj
 
   hmono = 0.d0
   htwoe = 0.d0
@@ -116,17 +119,21 @@ subroutine single_hmat_bi_ortho(Nint, key_j, key_i, hmono, htwoe)
   END_DOC
 
   use bitmasks
+  use sizet
 
   implicit none
 
-  integer,           intent(in) :: Nint
+  integer(size_t),   intent(in) :: Nint
   integer(bit_kind), intent(in) :: key_j(Nint,2), key_i(Nint,2)
   double precision, intent(out) :: hmono, htwoe
 
-  integer                       :: occ(Nint*bit_kind_size,2)
-  integer                       :: Ne(2), i, j, ii, ispin, jspin
-  integer                       :: degree,exc(0:2,2,2)
-  integer                       :: h1, p1, h2, p2, s1, s2
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
+  integer                       :: Ne(2), i, j, ispin, jspin
+  integer(size_t)                :: ii
+  integer                       :: degree
+  integer(size_t)                :: exc(0:2,2,2)
+  integer(size_t)                :: h1, p1, h2, p2
+  integer                       :: s1, s2
   integer                       :: other_spin(2)
   double precision              :: phase
 
@@ -190,17 +197,21 @@ subroutine double_hmat_bi_ortho(Nint, key_j, key_i, hmono, htwoe)
   END_DOC
 
   use bitmasks
+  use sizet
 
   implicit none
 
-  integer,           intent(in) :: Nint 
+  integer(size_t),   intent(in) :: Nint
   integer(bit_kind), intent(in) :: key_j(Nint,2), key_i(Nint,2)
   double precision, intent(out) :: hmono, htwoe
 
-  integer                       :: occ(Nint*bit_kind_size,2)
-  integer                       :: Ne(2), i, j, ii, ispin, jspin
-  integer                       :: degree,exc(0:2,2,2)
-  integer                       :: h1, p1, h2, p2, s1, s2
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
+  integer                       :: Ne(2), i, j, ispin, jspin
+  integer(size_t)                :: ii
+  integer                       :: degree
+  integer(size_t)                :: exc(0:2,2,2)
+  integer(size_t)                :: h1, p1, h2, p2
+  integer                       :: s1, s2
   integer                       :: other_spin(2)
   double precision              :: phase
 

@@ -1,9 +1,12 @@
+use sizet
+
  BEGIN_PROVIDER [ double precision, mo_grad_ints, (mo_num, mo_num,3)]
  implicit none
  BEGIN_DOC
 ! mo_grad_ints(i,j,m) = <phi_i^MO | d/dx | phi_j^MO>
  END_DOC
- integer :: i,j,ipoint,m
+ integer :: m
+ integer(size_t) :: i,j,ipoint
  double precision :: weight
  mo_grad_ints = 0.d0
  do m = 1, 3
@@ -25,7 +28,8 @@ END_PROVIDER
  BEGIN_DOC
 ! mo_grad_ints(i,j,m) = <phi_i^MO | d/dx | phi_j^MO>
  END_DOC
- integer :: i,j,ipoint,m
+ integer :: m
+ integer(size_t) :: i,j,ipoint
  double precision :: weight
  do m = 1, 3
   do j = 1, mo_num

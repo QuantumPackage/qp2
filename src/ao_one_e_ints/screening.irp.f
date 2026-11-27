@@ -1,4 +1,6 @@
+use sizet
 logical function ao_one_e_integral_zero(i,k)
+ use sizet
   BEGIN_DOC
   ! Returns .True. if the AO integrals between the |AO|s $i$ and
   ! $k$ can be taken as zero. No screening when
@@ -8,7 +10,7 @@ logical function ao_one_e_integral_zero(i,k)
   ! $ao\_overlap\_abs(i,k) < ao\_one\_e\_integrals\_threshold$.
   END_DOC
   implicit none
-  integer, intent(in) :: i,k
+  integer(size_t), intent(in) :: i,k
 
   ao_one_e_integral_zero = .False.
   if (.not.((io_ao_integrals_overlap/='None').or.is_periodic.or.use_cgtos)) then

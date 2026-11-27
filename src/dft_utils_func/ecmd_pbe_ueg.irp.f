@@ -1,3 +1,4 @@
+use sizet
 
 subroutine ecmd_pbe_ueg_at_r(mu,r,eps_c_md_PBE) 
   implicit none
@@ -123,6 +124,7 @@ subroutine eps_c_md_PBE_from_density(mu,rho_a,rho_b, grad_rho_a, grad_rho_b,eps_
 
 
 subroutine eps_c_md_PBE_at_grid_pt(mu,i_point,eps_c_md_PBE)
+ use sizet
   implicit none
   BEGIN_DOC
 ! provides the integrand of Eq. (13) of Phys.Chem.Lett.2019, 10, 2931   2937 
@@ -139,7 +141,7 @@ subroutine eps_c_md_PBE_at_grid_pt(mu,i_point,eps_c_md_PBE)
   END_DOC
   double precision, intent(in)  :: mu 
   double precision, intent(out) :: eps_c_md_PBE(N_states)
-  integer, intent(in) :: i_point
+  integer(size_t), intent(in) :: i_point
   double precision :: two_dm, pi, e_pbe,beta,mu_correction_of_on_top
   double precision :: grad_rho_a(3),grad_rho_b(3)
   double precision :: grad_rho_a_2,grad_rho_b_2,grad_rho_a_b

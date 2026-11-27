@@ -1,3 +1,4 @@
+ use sizet
  use gpu
  BEGIN_PROVIDER [double precision, big_array_coulomb_integrals, (mo_num,mo_num, mo_num)]
 &BEGIN_PROVIDER [double precision, big_array_exchange_integrals,(mo_num,mo_num, mo_num)]
@@ -7,7 +8,8 @@
  !
  ! big_array_exchange_integrals(j,i,k) = <ij|jk> = (ij|kj)
  END_DOC
- integer :: i,j,k,l,a
+ integer(size_t) :: i,j,k,l
+ integer :: a
  double precision :: get_two_e_integral
  double precision :: integral
  PROVIDE mo_integrals_map
@@ -22,17 +24,19 @@
       type(gpu_double2) :: buffer_jj_d
       type(gpu_double3) :: buffer_d
 
-      call gpu_allocate(buffer_jj_d,cholesky_mo_num,mo_num)
+      call gpu_allocate(buffer_jj_d,int(cholesky_mo_num,4),mo_num)
       call gpu_allocate(buffer_d,mo_num,mo_num,mo_num)
       !$OMP PARALLEL DO PRIVATE(j)
       do j=1,mo_num
-        call gpu_copy(cholesky_mo_transp_d(0)%f(1,j,j), buffer_jj_d%f(1,j), cholesky_mo_num)
+        call gpu_copy(cholesky_mo_transp_d(0)%f(1,j,j), &
+           buffer_jj_d%f(1,j), int(cholesky_mo_num,4))
       enddo
       !$OMP END PARALLEL DO
 
-      call gpu_dgemm(blas_handle, 'T','N', mo_num*mo_num,mo_num,cholesky_mo_num, 1.d0, &
-          cholesky_mo_transp_d(0)%f(1,1,1), cholesky_mo_num, &
-          buffer_jj_d%f(1,1), cholesky_mo_num, 0.d0, &
+      call gpu_dgemm(blas_handle, 'T','N', mo_num*mo_num,mo_num, &
+          int(cholesky_mo_num,4), 1.d0, &
+          cholesky_mo_transp_d(0)%f(1,1,1), int(cholesky_mo_num,4), &
+          buffer_jj_d%f(1,1), int(cholesky_mo_num,4), 0.d0, &
           buffer_d%f(1,1,1), mo_num*mo_num)
 
       call gpu_download(buffer_d,buffer)
@@ -47,9 +51,10 @@
       enddo
       !$OMP END PARALLEL DO
 
-      call dgemm('T','N', mo_num*mo_num,mo_num,cholesky_mo_num, 1.d0, &
-          cholesky_mo_transp(1,1,1), cholesky_mo_num, &
-          buffer_jj(1,1), cholesky_mo_num, 0.d0, &
+      call dgemm('T','N', mo_num*mo_num,mo_num, &
+          int(cholesky_mo_num,4), 1.d0, &
+          cholesky_mo_transp(1,1,1), int(cholesky_mo_num,4), &
+          buffer_jj(1,1), int(cholesky_mo_num,4), 0.d0, &
           buffer(1,1,1), mo_num*mo_num)
 
       deallocate(buffer_jj)
@@ -66,10 +71,11 @@
 
     if (gpu_num > 0) then
       do j = 1, mo_num
-        call gpu_dgemm(blas_handle,'T','N',mo_num,mo_num,cholesky_mo_num, 1.d0, &
-          cholesky_mo_transp_d(0)%f(1,1,j), cholesky_mo_num, &
-          cholesky_mo_transp_d(0)%f(1,1,j), cholesky_mo_num, 0.d0, &
-          buffer_d%f(1,1,j), mo_num)
+        call gpu_dgemm(blas_handle,'T','N',mo_num,mo_num, &
+          int(cholesky_mo_num,4), 1.d0, &
+          cholesky_mo_transp_d(0)%f(1,1,j), int(cholesky_mo_num,4), &
+          cholesky_mo_transp_d(0)%f(1,1,j), int(cholesky_mo_num,4), &
+          0.d0, buffer_d%f(1,1,j), mo_num)
       enddo
 
       call gpu_download(buffer_d,buffer)
@@ -78,10 +84,11 @@
     else
 
       do j = 1, mo_num
-        call dgemm('T','N',mo_num,mo_num,cholesky_mo_num, 1.d0, &
-          cholesky_mo_transp(1,1,j), cholesky_mo_num, &
-          cholesky_mo_transp(1,1,j), cholesky_mo_num, 0.d0, &
-          buffer(1,1,j), mo_num)
+        call dgemm('T','N',mo_num,mo_num, &
+          int(cholesky_mo_num,4), 1.d0, &
+          cholesky_mo_transp(1,1,j), int(cholesky_mo_num,4), &
+          cholesky_mo_transp(1,1,j), int(cholesky_mo_num,4), &
+          0.d0, buffer(1,1,j), mo_num)
       enddo
 
     endif

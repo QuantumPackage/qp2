@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -14,7 +15,8 @@
   ! (and y, z analogously). The three arrays are combined in the
   ! provider ao_kinetic_integrals_cgtos as -1/2 of their sum.
   END_DOC
-  integer          :: i, j, m, n, l, ii, jj, dim1, power_A(3), power_B(3)
+  integer(size_t) :: i, j
+  integer          :: m, n, l, ii, jj, dim1, power_A(3), power_B(3)
   double precision :: c, deriv_tmp
   double precision :: KA2, phiA
   double precision :: KB2, phiB
@@ -316,7 +318,7 @@ BEGIN_PROVIDER [double precision, ao_kinetic_integrals_cgtos, (ao_num, ao_num)]
 
   implicit none
 
-  integer :: i, j
+  integer(size_t) :: i, j
 
   !$OMP PARALLEL DO DEFAULT(NONE) &
   !$OMP PRIVATE(i, j)             &

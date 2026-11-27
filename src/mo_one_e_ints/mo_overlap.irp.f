@@ -1,11 +1,13 @@
+use sizet
+
 BEGIN_PROVIDER [ double precision, mo_overlap,(mo_num,mo_num) ]
   implicit none
   BEGIN_DOC
 ! Provider to check that the MOs are indeed orthonormal.
   END_DOC
-  integer :: i,j,n,l
+  integer(size_t) :: i,j,n,l
   double precision :: f
-  integer :: lmax
+  integer(size_t) :: lmax
 
 
   lmax = (ao_num/4) * 4

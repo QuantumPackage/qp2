@@ -1,3 +1,4 @@
+use sizet
 use bitmasks
 
  BEGIN_PROVIDER [integer(bit_kind), holes_operators, (N_int,2)]
@@ -16,7 +17,7 @@ use bitmasks
  integer(bit_kind), allocatable :: holes(:,:),particles(:,:)
  allocate(key_test(N_int,2))
  allocate(holes(N_int,2),particles(N_int,2))
- integer :: i,j,k
+ integer(size_t) :: i,j,k
  print*,'providing holes_operators and particles_operators'
  do i = 1, N_det_ref
   do j = 1, N_det_non_ref

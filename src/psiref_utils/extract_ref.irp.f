@@ -1,10 +1,13 @@
+use sizet
+
 subroutine extract_ref
   implicit none
   BEGIN_DOC
   ! Replaces the total wave function by the normalized projection on the reference
   END_DOC
 
-  integer                        :: i,j,k
+  integer                        :: i
+  integer(size_t)                :: j,k
   do k=1,N_states
     do j=1,N_det_ref
       psi_coef(j,k) = psi_ref_coef_normalized(j,k)

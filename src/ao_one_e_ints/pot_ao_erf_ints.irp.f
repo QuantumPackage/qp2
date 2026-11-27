@@ -1,7 +1,9 @@
+use sizet
 
 ! ---
 
 subroutine give_all_erf_kl_ao(integrals_ao,mu_in,C_center)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Subroutine that returns all integrals over $r$ of type
@@ -10,7 +12,8 @@ subroutine give_all_erf_kl_ao(integrals_ao,mu_in,C_center)
   double precision, intent(in)   :: mu_in,C_center(3)
   double precision, intent(out)  :: integrals_ao(ao_num,ao_num)
   double precision               :: NAI_pol_mult_erf_ao
-  integer                        :: i,j,l,k,m
+  integer(size_t)                :: k, m
+  integer                        :: i, j, l
   do k = 1, ao_num
     do m = 1, ao_num
       integrals_ao(m,k) = NAI_pol_mult_erf_ao(m,k,mu_in,C_center)
@@ -21,6 +24,7 @@ end
 ! ---
 
 double precision function NAI_pol_mult_erf_ao(i_ao, j_ao, mu_in, C_center)
+ use sizet
 
   BEGIN_DOC
   !
@@ -30,7 +34,7 @@ double precision function NAI_pol_mult_erf_ao(i_ao, j_ao, mu_in, C_center)
   END_DOC
 
   implicit none
-  integer,          intent(in)   :: i_ao, j_ao
+  integer(size_t),  intent(in)   :: i_ao, j_ao
   double precision, intent(in)   :: mu_in, C_center(3)
 
   integer                        :: i, j, num_A, num_B, power_A(3), power_B(3), n_pt_in
@@ -64,6 +68,7 @@ end function NAI_pol_mult_erf_ao
 ! ---
 
 double precision function NAI_pol_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center, mu_in, C_center)
+ use sizet
 
   BEGIN_DOC
   !
@@ -73,7 +78,7 @@ double precision function NAI_pol_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center,
   END_DOC
 
   implicit none
-  integer,          intent(in)   :: i_ao, j_ao
+  integer(size_t),  intent(in)   :: i_ao, j_ao
   double precision, intent(in)   :: beta, B_center(3)
   double precision, intent(in)   :: mu_in, C_center(3)
 

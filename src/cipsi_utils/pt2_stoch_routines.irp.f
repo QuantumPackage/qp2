@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [ integer, pt2_stoch_istate ]
  implicit none
  BEGIN_DOC
@@ -18,7 +20,8 @@ END_PROVIDER
   ! middle range, and 1 for the rest.
   END_DOC
   logical, external :: testTeethBuilding
-  integer :: i,j
+  integer(size_t) :: i
+  integer         :: j
   pt2_n_tasks_max = elec_alpha_num*elec_alpha_num + elec_alpha_num*elec_beta_num  - n_core_orb*2
   pt2_n_tasks_max = min(pt2_n_tasks_max,1+N_det_generators/10000)
   call write_int(6,pt2_n_tasks_max,'pt2_n_tasks_max')
@@ -87,6 +90,7 @@ END_PROVIDER
 
 
 logical function testTeethBuilding(minF, N)
+ use sizet
   implicit none
   BEGIN_DOC
 ! Checks whether the comb can be built with N teeth so that
@@ -97,16 +101,16 @@ logical function testTeethBuilding(minF, N)
 ! weight before n0); .false. if Wt <= 1e-3 or no offset works.
   END_DOC
   integer, intent(in) :: minF, N
-  integer :: n0, i
+  integer(size_t) :: n0, i
   double precision :: u0, Wt, r
 
   double precision, allocatable :: tilde_w(:), tilde_cW(:)
-  integer, external :: dress_find_sample
+  integer(size_t), external :: dress_find_sample
 
   double precision :: rss
   double precision, external :: memory_of_double, memory_of_int
 
-  rss = memory_of_double(2*N_det_generators+1)
+  rss = memory_of_double(int(2*N_det_generators+1, size_t))
   call check_mem(rss,irp_here)
 
   allocate(tilde_w(N_det_generators), tilde_cW(0:N_det_generators))
@@ -132,7 +136,7 @@ logical function testTeethBuilding(minF, N)
   n0 = 0
   testTeethBuilding = .false.
   double precision :: f
-  integer :: minFN
+  integer(size_t) :: minFN
   minFN = N_det_generators - minF * N
   f = 1.d0/dble(N)
   do
@@ -156,21 +160,25 @@ logical function testTeethBuilding(minF, N)
 end function
 
 
-integer function pt2_find_sample(v, w)
+function pt2_find_sample(v, w)
+  use sizet
   implicit none
   BEGIN_DOC
 ! Returns the index where the cumulative weight w crosses v,
 ! by calling pt2_find_sample_lr on the full range
 ! 0..N_det_generators.
   END_DOC
+  integer(size_t) :: pt2_find_sample
   double precision, intent(in) :: v, w(0:N_det_generators)
-  integer, external :: pt2_find_sample_lr
+  integer(size_t), external :: pt2_find_sample_lr
 
-  pt2_find_sample = pt2_find_sample_lr(v, w, 0, N_det_generators)
+  pt2_find_sample = pt2_find_sample_lr(v, w, 0_size_t, &
+      int(N_det_generators, size_t))
 end function
 
 
-integer function pt2_find_sample_lr(v, w, l_in, r_in)
+function pt2_find_sample_lr(v, w, l_in, r_in)
+  use sizet
   implicit none
   BEGIN_DOC
 ! Binary search on the cumulative weight array w for the
@@ -178,9 +186,10 @@ integer function pt2_find_sample_lr(v, w, l_in, r_in)
 ! l_in..r_in. If w is flat there (determinants of zero
 ! weight), the last index of the flat run is returned.
   END_DOC
+  integer(size_t) :: pt2_find_sample_lr
   double precision, intent(in) :: v, w(0:N_det_generators)
-  integer, intent(in) :: l_in,r_in
-  integer :: i,l,r
+  integer(size_t), intent(in) :: l_in,r_in
+  integer(size_t) :: i,l,r
 
   l=l_in
   r=r_in
@@ -203,7 +212,7 @@ integer function pt2_find_sample_lr(v, w, l_in, r_in)
 end function
 
 
-BEGIN_PROVIDER [ integer, pt2_n_tasks ]
+BEGIN_PROVIDER [ integer(size_t), pt2_n_tasks ]
  implicit none
  BEGIN_DOC
  ! Number of parallel tasks for the Monte Carlo
@@ -231,8 +240,8 @@ BEGIN_PROVIDER[ double precision, pt2_u, (N_det_generators)]
   call RANDOM_NUMBER(pt2_u)
  END_PROVIDER
 
- BEGIN_PROVIDER[ integer, pt2_J, (N_det_generators)]
-&BEGIN_PROVIDER[ integer, pt2_R, (N_det_generators)]
+ BEGIN_PROVIDER[ integer(size_t), pt2_J, (N_det_generators)]
+&BEGIN_PROVIDER[ integer(size_t), pt2_R, (N_det_generators)]
   implicit none
   BEGIN_DOC
 ! pt2_J contains the list of generators after ordering them according to the
@@ -240,22 +249,24 @@ BEGIN_PROVIDER[ double precision, pt2_u, (N_det_generators)]
 !
 ! pt2_R(i) is the number of combs drawn when determinant i is computed.
   END_DOC
-  integer                :: N_c, N_j
-  integer                :: U, t, i
+  integer(size_t)            :: N_c, N_j
+  integer(size_t)            :: U, i
+  integer                    :: t
   double precision       :: v
-  integer, external      :: pt2_find_sample_lr
+  integer(size_t), external  :: pt2_find_sample_lr
 
   logical, allocatable :: pt2_d(:)
   integer :: m,l,r,k
   integer :: ncache
-  integer, allocatable :: ii(:,:)
+  integer(size_t), allocatable :: ii(:,:)
   double precision :: dt
 
   ncache = min(N_det_generators,10000)
 
   double precision :: rss
   double precision, external :: memory_of_double, memory_of_int
-  rss = memory_of_int(ncache)*dble(pt2_N_teeth) + memory_of_int(N_det_generators)
+  rss = memory_of_int(int(ncache, size_t))*dble(pt2_N_teeth) &
+      + memory_of_int(int(N_det_generators, size_t))
   call check_mem(rss,irp_here)
 
   allocate(ii(pt2_N_teeth,ncache),pt2_d(N_det_generators))
@@ -330,7 +341,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [ double precision, pt2_cW, (0:N_det_generators) ]
 &BEGIN_PROVIDER [ double precision, pt2_W_T ]
 &BEGIN_PROVIDER [ double precision, pt2_u_0 ]
-&BEGIN_PROVIDER [ integer,          pt2_n_0, (pt2_N_teeth+1) ]
+&BEGIN_PROVIDER [ integer(size_t),  pt2_n_0, (pt2_N_teeth+1) ]
    implicit none
    BEGIN_DOC
    ! Weights of the Monte Carlo comb of the stochastic PT2.
@@ -340,14 +351,15 @@ END_PROVIDER
    ! of the first pt2_n_0(1) generators, always included in the
    ! comb. pt2_n_0: index bounds of the teeth.
    END_DOC
-   integer                        :: i, t
+   integer(size_t)                  :: i
+   integer                          :: t
    double precision, allocatable  :: tilde_w(:), tilde_cW(:)
    double precision               :: r, tooth_width
-   integer, external              :: pt2_find_sample
+   integer(size_t), external      :: pt2_find_sample
 
    double precision               :: rss
    double precision, external     :: memory_of_double, memory_of_int
-   rss = memory_of_double(2*N_det_generators+1)
+   rss = memory_of_double(int(2*N_det_generators+1, size_t))
    call check_mem(rss,irp_here)
 
    if (N_det_generators == 1) then

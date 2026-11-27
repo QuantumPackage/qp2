@@ -1,4 +1,6 @@
-BEGIN_PROVIDER [integer, list_couple_hf_orb_r1, (2,n_couple_orb_r1)]
+use sizet
+
+BEGIN_PROVIDER [integer(size_t), list_couple_hf_orb_r1, (2,n_couple_orb_r1)]
  implicit none
  BEGIN_DOC
  ! Couples (i,m): i an occupied alpha valence orbital of
@@ -6,7 +8,7 @@ BEGIN_PROVIDER [integer, list_couple_hf_orb_r1, (2,n_couple_orb_r1)]
  ! First index: 1 is i, 2 is m; second index: couple number
  ! (1..n_couple_orb_r1).
  END_DOC
- integer :: ii,i,mm,m,itmp
+ integer(size_t) :: ii,i,mm,m,itmp
  itmp = 0
   do ii = 1, n_occ_val_orb_for_hf(1)
    i = list_valence_orb_for_hf(ii,1)
@@ -20,7 +22,7 @@ BEGIN_PROVIDER [integer, list_couple_hf_orb_r1, (2,n_couple_orb_r1)]
 END_PROVIDER 
 
 
-BEGIN_PROVIDER [integer, list_couple_hf_orb_r2, (2,n_couple_orb_r2)]
+BEGIN_PROVIDER [integer(size_t), list_couple_hf_orb_r2, (2,n_couple_orb_r2)]
  implicit none
  BEGIN_DOC
  ! Couples (i,m): i an occupied beta valence orbital of
@@ -28,7 +30,7 @@ BEGIN_PROVIDER [integer, list_couple_hf_orb_r2, (2,n_couple_orb_r2)]
  ! First index: 1 is i, 2 is m; second index: couple number
  ! (1..n_couple_orb_r2).
  END_DOC
- integer :: ii,i,mm,m,itmp
+ integer(size_t) :: ii,i,mm,m,itmp
  itmp = 0
   do ii = 1, n_occ_val_orb_for_hf(2)
    i = list_valence_orb_for_hf(ii,2)
@@ -42,7 +44,7 @@ BEGIN_PROVIDER [integer, list_couple_hf_orb_r2, (2,n_couple_orb_r2)]
 END_PROVIDER 
 
 
-BEGIN_PROVIDER [integer, n_couple_orb_r1] 
+BEGIN_PROVIDER [integer(size_t), n_couple_orb_r1] 
  implicit none
  BEGIN_DOC
  ! number of couples of alpha occupied times any basis orbital
@@ -50,7 +52,7 @@ BEGIN_PROVIDER [integer, n_couple_orb_r1]
  n_couple_orb_r1 = n_occ_val_orb_for_hf(1) * n_basis_orb
 END_PROVIDER 
 
-BEGIN_PROVIDER [integer, n_couple_orb_r2] 
+BEGIN_PROVIDER [integer(size_t), n_couple_orb_r2] 
  implicit none
  BEGIN_DOC
  ! number of couples of beta occupied times any basis orbital
@@ -68,7 +70,7 @@ BEGIN_PROVIDER [ double precision, mos_times_cholesky_r1, (cholesky_mo_num,n_poi
  double precision, allocatable :: mos_ib_r1(:,:),mo_chol_r1(:,:)
  double precision, allocatable :: test(:,:)
  double precision :: mo_i_r1,mo_b_r1
- integer :: ii,i,mm,m,itmp,ipoint,ll
+ integer(size_t) :: ii,i,mm,m,itmp,ipoint,ll
  allocate(mos_ib_r1(n_couple_orb_r1,n_points_final_grid))
  allocate(mo_chol_r1(cholesky_mo_num,n_couple_orb_r1))
 
@@ -113,7 +115,7 @@ BEGIN_PROVIDER [ double precision, mos_times_cholesky_r2, (cholesky_mo_num,n_poi
  double precision, allocatable :: mos_ib_r2(:,:),mo_chol_r2(:,:)
  double precision, allocatable :: test(:,:)
  double precision :: mo_i_r2,mo_b_r2
- integer :: ii,i,mm,m,itmp,ipoint,ll
+ integer(size_t) :: ii,i,mm,m,itmp,ipoint,ll
  allocate(mos_ib_r2(n_couple_orb_r2,n_points_final_grid))
  allocate(mo_chol_r2(cholesky_mo_num,n_couple_orb_r2))
 
@@ -158,7 +160,8 @@ BEGIN_PROVIDER [ double precision, f_hf_cholesky, (n_points_final_grid)]
  ! orbital, b in list_basis, R the grid point index. If the alpha
  ! and beta electron numbers differ: $f(R) = 2 \sum_A V^1_{A R} V^2_{A R}$.
  END_DOC
- integer :: ipoint,m,k
+ integer(size_t) :: ipoint,m
+ integer :: k
  !!f(R) =  \sum_{I} \sum_{J} Phi_I(R) Phi_J(R) V_IJ
  !!     =  \sum_{I}\sum_{J}\sum_A Phi_I(R) Phi_J(R) V_AI V_AJ
  !!     =  \sum_A \sum_{I}Phi_I(R)V_AI \sum_{J}V_AJ Phi_J(R)
@@ -227,7 +230,7 @@ BEGIN_PROVIDER [ double precision, f_hf_cholesky_sparse, (n_points_final_grid)]
  ! orbitals, which is the usual case in QP2 because there is no
  ! UHF (author, 2026-10-31).
  END_DOC
- integer :: ipoint,m,mm,i,ii,p
+ integer(size_t) :: ipoint,m,mm,i,ii,p
  !!f(R) =  \sum_{I} \sum_{J} Phi_I(R) Phi_J(R) V_IJ
  !!     =  \sum_{I}\sum_{J}\sum_A Phi_I(R) Phi_J(R) V_AI V_AJ
  !!     =  \sum_A \sum_{I}Phi_I(R)V_AI \sum_{J}V_AJ Phi_J(R)
@@ -335,7 +338,7 @@ BEGIN_PROVIDER [ double precision, f_hf_cholesky_sparse_bis, (n_points_final_gri
  ! instead of cholesky_mo_transp; otherwise the code is identical
  ! to the one of f_hf_cholesky_sparse.
  END_DOC
- integer :: ipoint,m,mm,i,ii,p
+ integer(size_t) :: ipoint,m,mm,i,ii,p
  !!f(R) =  \sum_{I} \sum_{J} Phi_I(R) Phi_J(R) V_IJ
  !!     =  \sum_{I}\sum_{J}\sum_A Phi_I(R) Phi_J(R) V_AI V_AJ
  !!     =  \sum_A \sum_{I}Phi_I(R)V_AI \sum_{J}V_AJ Phi_J(R)
@@ -442,7 +445,7 @@ BEGIN_PROVIDER [ double precision, on_top_hf_grid, (n_points_final_grid)]
  ! Index: grid point (1..n_points_final_grid).
  ! Used by mu_of_r_hf and mu_of_r_hf_sparse.
  END_DOC
- integer :: ipoint,i,ii
+ integer(size_t) :: ipoint,i,ii
  double precision :: dm_a, dm_b,wall0,wall1
  print*,'providing on_top_hf_grid ...'
  provide mos_in_r_array_omp

@@ -1,3 +1,5 @@
+use sizet
+
 ! Hessian
 
 ! The hessian of the CI energy with respects to the orbital rotation is :
@@ -76,6 +78,7 @@
 
 
 subroutine hessian_list_opt(n,m,list,H,h_tmpr)
+ use sizet
   BEGIN_DOC
   ! Hessian of the energy with respect to orbital rotations,
   ! restricted to the m orbitals given by list.
@@ -92,7 +95,7 @@ subroutine hessian_list_opt(n,m,list,H,h_tmpr)
   ! Variables
 
   ! in
-  integer, intent(in)           :: n,m,list(m) 
+  integer(size_t), intent(in)   :: n,m,list(m) 
   
   ! out
   double precision, intent(out) :: H(n,n),h_tmpr(m,m,m,m)
@@ -100,9 +103,9 @@ subroutine hessian_list_opt(n,m,list,H,h_tmpr)
   ! internal
   double precision, allocatable :: hessian(:,:,:,:)!, h_tmpr(:,:,:,:)
   double precision, allocatable :: H_test(:,:)
-  integer                       :: p,q,tmp_p,tmp_q,tmp_r,tmp_s
-  integer                       :: r,s,t,u,v,k
-  integer                       :: pq,rs
+  integer(size_t)               :: p,q,tmp_p,tmp_q,tmp_r,tmp_s
+  integer(size_t)               :: r,s,t,u,v,k
+  integer(size_t)               :: pq,rs
   double precision              :: t1,t2,t3,t4,t5,t6
   ! H_test   : monum**2 by mo_num**2 double precision matrix to debug the H matrix
 
@@ -226,9 +229,9 @@ enddo
 !$OMP END DO
 
 
-call dgemm('T','N', m, m, mo_num, 1d0, tmp_mo_one_e_integrals,&
-           size(tmp_mo_one_e_integrals,1), tmp_one_e_dm_mo, size(tmp_one_e_dm_mo,1),&
-           0d0, tmp_accu, size(tmp_accu,1))
+call dgemm('T', 'N', int(m,4), int(m,4), mo_num, 1d0, tmp_mo_one_e_integrals, &
+           size(tmp_mo_one_e_integrals,1), tmp_one_e_dm_mo, &
+           size(tmp_one_e_dm_mo,1), 0d0, tmp_accu, size(tmp_accu,1))
 
 !$OMP DO
 do tmp_s = 1, m
@@ -286,9 +289,9 @@ print*,'l1 1',t6
 CALL wall_TIME(t4)
 !$OMP END MASTER
 
-call dgemm('T','N', m, m, mo_num, 1d0, tmp_mo_one_e_integrals,&
-           size(tmp_mo_one_e_integrals,1), tmp_one_e_dm_mo, size(tmp_one_e_dm_mo,1),&
-           0d0, tmp_accu, size(tmp_accu,1))
+call dgemm('T', 'N', int(m,4), int(m,4), mo_num, 1d0, tmp_mo_one_e_integrals, &
+           size(tmp_mo_one_e_integrals,1), tmp_one_e_dm_mo, &
+           size(tmp_one_e_dm_mo,1), 0d0, tmp_accu, size(tmp_accu,1))
 
 !$OMP DO
 do tmp_r = 1, m
@@ -444,7 +447,7 @@ do t = 1, mo_num
     enddo
   enddo
 
-  call dgemm('T','N', m, m, mo_num*mo_num, 1.d0, &
+  call dgemm('T','N', int(m,4), int(m,4), mo_num*mo_num, 1.d0, &
              tmp_bi_int_3_3, mo_num*mo_num, tmp_2rdm_3_3, mo_num*mo_num, &
              0.d0, tmp_accu, size(tmp_accu,1))
 
@@ -553,7 +556,7 @@ do t = 1, mo_num
     enddo
   enddo
 
-  call dgemm('T','N', m, m, mo_num*mo_num, 1.d0, &
+  call dgemm('T','N', int(m,4), int(m,4), mo_num*mo_num, 1.d0, &
              tmp_bi_int_3_3 , mo_num*mo_num, tmp_2rdm_3_3, mo_num*mo_num, &
              0.d0, tmp_accu, size(tmp_accu,1))
 
@@ -663,9 +666,10 @@ do v = 1, mo_num
 
   do tmp_s = 1, m
 
-    call dgemm('N','N',m*m, m, mo_num, 1d0, tmp_bi_int_3_3,&
-               size(tmp_bi_int_3_3,1)*size(tmp_bi_int_3_3,2), tmp_2rdm_3_3(1,1,tmp_s),&
-               mo_num, 0d0, ind_3_3, size(ind_3_3,1) * size(ind_3_3,2))
+    call dgemm('N', 'N', int(m*m,4), int(m,4), mo_num, 1d0, tmp_bi_int_3_3, &
+               size(tmp_bi_int_3_3,1)*size(tmp_bi_int_3_3,2), &
+               tmp_2rdm_3_3(1,1,tmp_s), mo_num, 0d0, ind_3_3, &
+               size(ind_3_3,1)*size(ind_3_3,2))
 
     !$OMP CRITICAL
     do tmp_r = 1, m
@@ -728,9 +732,10 @@ do v = 1, mo_num
 
   do tmp_r = 1, m
 
-    call dgemm('N','N', m*m, m, mo_num, 1d0, tmp_bi_int_3_3,& 
-               size(tmp_bi_int_3_3,1)*size(tmp_bi_int_3_3,2), tmp_2rdm_3_3(1,1,tmp_r),&
-               mo_num, 0d0, ind_3_3, size(ind_3_3,1) * size(ind_3_3,2))
+    call dgemm('N', 'N', int(m*m,4), int(m,4), mo_num, 1d0, tmp_bi_int_3_3, &
+               size(tmp_bi_int_3_3,1)*size(tmp_bi_int_3_3,2), &
+               tmp_2rdm_3_3(1,1,tmp_r), mo_num, 0d0, ind_3_3, &
+               size(ind_3_3,1)*size(ind_3_3,2))
 
     !$OMP CRITICAL
     do tmp_s = 1, m
@@ -828,8 +833,9 @@ do tmp_q = 1, m
       enddo
     enddo
 
-    call dgemm('T','N', m, m, mo_num*mo_num, 1d0, tmp_bi_int_3_3,&
-               mo_num*mo_num, tmp_2rdm_3_3, mo_num*mo_num, 0d0, tmp_accu, m)
+    call dgemm('T', 'N', int(m,4), int(m,4), mo_num*mo_num, 1d0, &
+               tmp_bi_int_3_3, mo_num*mo_num, tmp_2rdm_3_3, mo_num*mo_num, &
+               0d0, tmp_accu, int(m,4))
 
     !$OMP CRITICAL
     do tmp_s = 1, m
@@ -892,8 +898,9 @@ do tmp_q = 1, m
       enddo
     enddo   
 
-    call dgemm('T','N', m, m, mo_num*mo_num, 1d0, tmp_bi_int_3_3,&
-               mo_num*mo_num, tmp_2rdm_3_3, mo_num*mo_num, 0d0, tmp_accu, m)
+        call dgemm('T', 'N', int(m,4), int(m,4), mo_num*mo_num, 1d0, &
+               tmp_bi_int_3_3, mo_num*mo_num, tmp_2rdm_3_3, mo_num*mo_num, &
+               0d0, tmp_accu, int(m,4))
 
     !$OMP CRITICAL
     do tmp_s = 1, m
@@ -956,8 +963,9 @@ do tmp_q = 1, m
       enddo
     enddo
 
-    call dgemm('T','N', m, m, mo_num*mo_num, 1d0, tmp_2rdm_3_3,&
-               mo_num*mo_num, tmp_bi_int_3_3, mo_num*mo_num, 0d0, tmp_accu, m)
+    call dgemm('T', 'N', int(m,4), int(m,4), mo_num*mo_num, 1d0, tmp_2rdm_3_3, &
+               mo_num*mo_num, tmp_bi_int_3_3, mo_num*mo_num, 0d0, tmp_accu, &
+               int(m,4))
 
     !$OMP CRITICAL
     do tmp_s = 1, m
@@ -1020,8 +1028,9 @@ do tmp_q = 1, m
       enddo
     enddo
 
-    call dgemm('T','N', m, m, mo_num*mo_num, 1d0, tmp_2rdm_3_3,&
-               mo_num*mo_num, tmp_bi_int_3_3, mo_num*mo_num, 0d0, tmp_accu, m)
+    call dgemm('T', 'N', int(m,4), int(m,4), mo_num*mo_num, 1d0, tmp_2rdm_3_3, &
+               mo_num*mo_num, tmp_bi_int_3_3, mo_num*mo_num, 0d0, tmp_accu, &
+               int(m,4))
 
     !$OMP CRITICAL
     do tmp_s = 1, m

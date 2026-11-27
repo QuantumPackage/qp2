@@ -1,7 +1,8 @@
+use sizet
  BEGIN_PROVIDER [ double precision, psi_energy_h_core, (N_states) ]
   implicit none
   integer :: i
-  integer :: j,k
+  integer(size_t) :: j,k
   double precision :: tmp(mo_num,mo_num),mono_ints(mo_num,mo_num)
   BEGIN_DOC
 ! psi_energy_h_core = $\langle \Psi | h_{core} |\Psi \rangle$
@@ -31,7 +32,7 @@ END_PROVIDER
  BEGIN_PROVIDER [ double precision, v_ne_psi_energy, (N_states) ]
   implicit none
   integer :: i
-  integer :: j,k
+  integer(size_t) :: j,k
   double precision :: tmp(mo_num,mo_num),mono_ints(mo_num,mo_num)
   BEGIN_DOC
 ! v_ne_psi_energy = $\langle \Psi | v_ne |\Psi \rangle$

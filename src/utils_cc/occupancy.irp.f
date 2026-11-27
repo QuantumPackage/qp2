@@ -1,6 +1,9 @@
+use sizet
+
 ! N spin orb
 
 subroutine extract_n_spin(det,n)
+ use sizet
 
   implicit none
 
@@ -14,7 +17,8 @@ subroutine extract_n_spin(det,n)
   integer, intent(out)          :: n(4)
   
   integer(bit_kind)             :: res(N_int,2)
-  integer                       :: i, si
+  integer                       :: si
+  integer(size_t)               :: i
   logical                       :: ok, is_core, is_del
 
   ! Init
@@ -47,6 +51,7 @@ end
 ! Spin
 
 subroutine extract_list_orb_spin(det,nO_m,nV_m,list_occ,list_vir)
+ use sizet
 
   implicit none
 
@@ -61,7 +66,8 @@ subroutine extract_list_orb_spin(det,nO_m,nV_m,list_occ,list_vir)
   integer, intent(out)          :: list_occ(nO_m,2), list_vir(nV_m,2)
   
   integer(bit_kind)             :: res(N_int,2)
-  integer                       :: i, si, idx_o, idx_v, idx_i, idx_b
+  integer                       :: si, idx_o, idx_v, idx_i, idx_b
+  integer(size_t)               :: i
   logical                       :: ok, is_core, is_del
 
   list_occ = 0
@@ -104,6 +110,7 @@ end
 ! Space
 
 subroutine extract_list_orb_space(det,nO,nV,list_occ,list_vir)
+ use sizet
 
   implicit none
 
@@ -117,7 +124,8 @@ subroutine extract_list_orb_space(det,nO,nV,list_occ,list_vir)
   integer, intent(out)          :: list_occ(nO), list_vir(nV)
   
   integer(bit_kind)             :: res(N_int,2)
-  integer                       :: i, si, idx_o, idx_v, idx_i, idx_b
+  integer                       :: si, idx_o, idx_v, idx_i, idx_b
+  integer(size_t)               :: i
   logical                       :: ok, is_core, is_del
   
   if (elec_alpha_num /= elec_beta_num) then
@@ -160,6 +168,7 @@ end
 ! is_core
 
 function is_core(i)
+ use sizet
 
   implicit none
 
@@ -167,7 +176,7 @@ function is_core(i)
   ! True if the orbital i is a core orbital
   END_DOC
 
-  integer, intent(in) :: i
+  integer(size_t), intent(in) :: i
   logical             :: is_core
 
   integer             :: j
@@ -188,6 +197,7 @@ end
 ! is_del
 
 function is_del(i)
+ use sizet
 
   implicit none
 
@@ -195,7 +205,7 @@ function is_del(i)
   ! True if the orbital i is a deleted orbital
   END_DOC
 
-  integer, intent(in) :: i
+  integer(size_t), intent(in) :: i
   logical             :: is_del
 
   integer             :: j
@@ -271,7 +281,8 @@ BEGIN_PROVIDER [integer, cc_list_gen, (cc_n_mo)]
   ! List of general orbitals without core and deleted ones
   END_DOC
 
-  integer :: i,j
+  integer :: j
+  integer(size_t) :: i
   logical :: is_core, is_del
   
   j = 1

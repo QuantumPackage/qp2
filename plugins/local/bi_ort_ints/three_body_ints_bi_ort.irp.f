@@ -84,10 +84,11 @@ subroutine give_integrals_3_body_bi_ort_spin( n, sigma_n, l, sigma_l, k, sigma_k
   END_DOC
 
   implicit none
+  use sizet
   integer,          intent(in)  :: n, l, k, m, j, i
   double precision, intent(in)  :: sigma_n, sigma_l, sigma_k, sigma_m, sigma_j, sigma_i
   double precision, intent(out) :: integral
-  integer                       :: ipoint
+  integer(size_t)               :: ipoint
   double precision              :: weight, tmp
   logical, external             :: is_same_spin
 
@@ -138,9 +139,10 @@ subroutine give_integrals_3_body_bi_ort(n, l, k, m, j, i, integral)
   END_DOC
 
   implicit none
+  use sizet
   integer,          intent(in)  :: n, l, k, m, j, i
   double precision, intent(out) :: integral
-  integer                       :: ipoint
+  integer(size_t)               :: ipoint
   double precision              :: weight, tmp
 
   PROVIDE mo_l_coef mo_r_coef
@@ -183,9 +185,10 @@ subroutine give_integrals_3_body_bi_ort_old(n, l, k, m, j, i, integral)
   END_DOC
 
   implicit none
+  use sizet
   integer,          intent(in)  :: n, l, k, m, j, i
   double precision, intent(out) :: integral
-  integer                       :: ipoint
+  integer(size_t)               :: ipoint
   double precision              :: weight
 
   integral = 0.d0
@@ -221,9 +224,10 @@ subroutine give_integrals_3_body_bi_ort_ao(n, l, k, m, j, i, integral)
   END_DOC
 
   implicit none
+  use sizet
   integer,          intent(in)  :: n, l, k, m, j, i
   double precision, intent(out) :: integral
-  integer                       :: ipoint
+  integer(size_t)               :: ipoint
   double precision              :: weight
 
   integral = 0.d0

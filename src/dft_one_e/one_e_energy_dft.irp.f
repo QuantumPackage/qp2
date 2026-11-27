@@ -1,3 +1,5 @@
+use sizet
+
  BEGIN_PROVIDER [double precision, psi_dft_energy_kinetic, (N_states) ]
 &BEGIN_PROVIDER [double precision, psi_dft_energy_nuclear_elec, (N_states) ]
 &BEGIN_PROVIDER [double precision, psi_dft_energy_h_core, (N_states) ]
@@ -5,7 +7,8 @@
  BEGIN_DOC
 ! kinetic, electron-nuclear and total h_core energy computed with the density matrix one_e_dm_mo_beta_for_dft+one_e_dm_mo_alpha_for_dft
  END_DOC
- integer :: i,j,istate
+ integer :: istate
+ integer(size_t) :: i,j
  double precision :: accu
  psi_dft_energy_kinetic = 0.d0
  psi_dft_energy_nuclear_elec = 0.d0

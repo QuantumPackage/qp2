@@ -1,16 +1,19 @@
+use sizet
 subroutine build_fock_tmp(fock_diag_tmp,det_ref,Nint)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
 ! Build the diagonal of the Fock matrix corresponding to a generator
 ! determinant. $F_{00}$ is $\langle i|H|i \rangle = E_0$.
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: det_ref(Nint,2)
   double precision, intent(out)  :: fock_diag_tmp(2,mo_num+1)
 
-  integer                        :: occ(Nint*bit_kind_size,2)
-  integer                        :: ne(2), i, j, ii, jj
+  integer(size_t)                :: occ(Nint*bit_kind_size,2)
+  integer                        :: ne(2), ii, jj
+  integer(size_t)                :: i, j
   double precision               :: E0
 
   ! Compute Fock matrix diagonal elements

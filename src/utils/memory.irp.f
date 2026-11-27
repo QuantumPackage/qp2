@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [ integer, qp_max_mem ]
  implicit none
  BEGIN_DOC
@@ -105,21 +107,23 @@ double precision function memory_of_int8(n)
 end function
 
 double precision function memory_of_double(n)
+ use sizet
   implicit none
   BEGIN_DOC
 ! Computes the memory required for n double precision elements in gigabytes.
   END_DOC
-  integer, intent(in) :: n
+  integer(size_t), intent(in) :: n
   double precision, parameter :: f = 8.d0 / (1024.d0*1024.d0*1024.d0)
   memory_of_double = dble(n) * f
 end function
 
 double precision function memory_of_int(n)
+ use sizet
   implicit none
   BEGIN_DOC
 ! Computes the memory required for n double precision elements in gigabytes.
   END_DOC
-  integer, intent(in) :: n
+  integer(size_t), intent(in) :: n
   double precision, parameter :: f = 4.d0 / (1024.d0*1024.d0*1024.d0)
   memory_of_int = dble(n) * f
 end function

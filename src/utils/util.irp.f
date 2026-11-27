@@ -1,3 +1,5 @@
+use sizet
+
 logical function isnan(x)
   implicit none
   BEGIN_DOC
@@ -336,52 +338,55 @@ subroutine wall_time(t)
 end
 
 double precision function u_dot_v(u,v,sze)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Compute <u|v>
   END_DOC
-  integer, intent(in)            :: sze
+  integer(size_t), intent(in)    :: sze
   double precision, intent(in)   :: u(sze),v(sze)
   double precision, external     :: ddot
 
   !DIR$ FORCEINLINE
-  u_dot_v = ddot(sze,u,1,v,1)
+  u_dot_v = ddot(int(sze,4),u,1,v,1)
 
 end
 
 double precision function u_dot_u(u,sze)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Compute <u|u>
   END_DOC
-  integer, intent(in)            :: sze
+  integer(size_t), intent(in)    :: sze
   double precision, intent(in)   :: u(sze)
   double precision, external     :: ddot
 
   !DIR$ FORCEINLINE
-  u_dot_u = ddot(sze,u,1,u,1)
+  u_dot_u = ddot(int(sze,4),u,1,u,1)
 
 end
 
 subroutine normalize(u,sze)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Normalizes vector u
   END_DOC
-  integer, intent(in)            :: sze
+  integer(size_t), intent(in)    :: sze
   double precision, intent(inout):: u(sze)
   double precision               :: d
   double precision, external     :: dnrm2
   integer                        :: i
 
   !DIR$ FORCEINLINE
-  d = dnrm2(sze,u,1)
+  d = dnrm2(int(sze,4),u,1)
   if (d /= 0.d0) then
     d = 1.d0/d
   endif
   if (d /= 1.d0) then
     !DIR$ FORCEINLINE
-    call dscal(sze,d,u,1)
+    call dscal(int(sze,4),d,u,1)
   endif
 end
 
@@ -465,6 +470,7 @@ end
 ! ---
 
 subroutine check_sym(A, n)
+ use sizet
 
   BEGIN_DOC
   ! Print two diagnostics of the matrix A: the sum of squares
@@ -473,9 +479,9 @@ subroutine check_sym(A, n)
   ! positions (printed as "norm"). A is not modified.
   END_DOC
   implicit none
-  integer,          intent(in)  :: n
+  integer(size_t),  intent(in)  :: n
   double precision, intent(in)  :: A(n,n)
-  integer                       :: i, j
+  integer(size_t)               :: i, j
   double precision              :: dev_sym, norm, tmp
 
   dev_sym = 0.d0
@@ -496,6 +502,7 @@ end subroutine check_sym
 ! ---
 
 subroutine sum_A_At(A, N)
+ use sizet
 
   BEGIN_DOC
   ! Add the transpose of A to A in place, without a temporary
@@ -508,9 +515,9 @@ subroutine sum_A_At(A, N)
   !END_DOC
 
   implicit none
-  integer,          intent(in)    :: N
+  integer(size_t),  intent(in)    :: N
   double precision, intent(inout) :: A(N,N)
-  integer                         :: i, j
+  integer(size_t)                 :: i, j
 
  !$OMP PARALLEL       &
  !$OMP DEFAULT (NONE) &
@@ -538,6 +545,7 @@ end
 ! ---
 
 subroutine sub_A_At(A, N)
+ use sizet
 
   BEGIN_DOC
   ! Subtract the transpose of A from A in place, without a
@@ -551,9 +559,9 @@ subroutine sub_A_At(A, N)
   !END_DOC
 
   implicit none
-  integer,          intent(in)    :: N
+  integer(size_t),  intent(in)    :: N
   double precision, intent(inout) :: A(N,N)
-  integer                         :: i, j
+  integer(size_t)                 :: i, j
 
  !$OMP PARALLEL       &
  !$OMP DEFAULT (NONE) &
@@ -602,13 +610,14 @@ end
 ! ---
    
 function Kronecker_delta(i, j) result(delta)
+ use sizet
 
   BEGIN_DOC
   ! Kronecker Delta
   END_DOC
 
   implicit none
-  integer, intent(in) :: i, j
+  integer(size_t)      :: i, j
   double precision    :: delta
 
   if(i == j) then
@@ -622,6 +631,7 @@ end
 ! ---
 
 subroutine diagonalize_sym_matrix(N, A, e)
+ use sizet
 
   BEGIN_DOC
   !
@@ -631,7 +641,7 @@ subroutine diagonalize_sym_matrix(N, A, e)
 
   implicit none
 
-  integer,          intent(in)    :: N
+  integer(size_t),  intent(in)    :: N
   double precision, intent(inout) :: A(N,N)
   double precision, intent(out)   :: e(N)
 
@@ -641,14 +651,14 @@ subroutine diagonalize_sym_matrix(N, A, e)
   allocate(work(1))
 
   lwork = -1
-  call dsyev('V', 'U', N, A, N, e, work, lwork, info)
+  call dsyev('V', 'U', int(N,4), A, int(N,4), e, work, lwork, info)
   lwork = int(work(1))
 
   deallocate(work)
 
   allocate(work(lwork))
 
-  call dsyev('V', 'U', N, A, N, e, work, lwork, info)
+  call dsyev('V', 'U', int(N,4), A, int(N,4), e, work, lwork, info)
   deallocate(work)
 
   if(info /= 0) then
@@ -661,6 +671,7 @@ end
 
 
 subroutine give_degen(A, n, shift, list_degen, n_degen_list)
+ use sizet
 
   BEGIN_DOC
   ! returns n_degen_list :: the number of degenerated SET of elements (i.e. with \|A(i)-A(i+1)\| below shift)
@@ -674,10 +685,10 @@ subroutine give_degen(A, n, shift, list_degen, n_degen_list)
 
   double precision, intent(in)  :: A(n)
   double precision, intent(in)  :: shift
-  integer,          intent(in)  :: n
-  integer,          intent(out) :: list_degen(2,n), n_degen_list
+  integer(size_t),  intent(in)  :: n
+  integer(size_t),  intent(out) :: list_degen(2,n), n_degen_list
 
-  integer                       :: i, j, n_degen, k
+  integer(size_t)               :: i, j, n_degen, k
   logical                       :: keep_on
   double precision, allocatable :: Aw(:)
 

@@ -1,4 +1,6 @@
 
+use sizet
+
 ! ---
 
 BEGIN_PROVIDER [double precision, noL_0e_v0]
@@ -408,7 +410,8 @@ BEGIN_PROVIDER [double precision, noL_0e]
  END_DOC
 
   implicit none
-  integer                       :: i, j, k, ipoint, istart
+  integer                       :: i, j, k, istart
+  integer(size_t)               :: ipoint
   double precision              :: t0, t1
   double precision, allocatable :: tmp(:)
   double precision, allocatable :: tmp_L(:,:), tmp_R(:,:)
@@ -811,7 +814,9 @@ BEGIN_PROVIDER [double precision, noL_1e, (mo_num, mo_num)]
  ! then does not take into account any contribution from core orbitals
  END_DOC
   implicit none
-  integer                       :: p, s, i, j, ipoint, istart
+  integer                       :: p, s, i, j, istart
+  integer(size_t)               :: ipoint
+  integer                       :: n_points4
   double precision              :: t0, t1
   double precision, allocatable :: tmp1(:,:,:,:), tmp2(:,:), tmp3(:,:,:), tmp4(:,:,:)
   double precision, allocatable :: tmp_L(:,:,:), tmp_R(:,:,:), tmp_M(:,:), tmp_S(:), tmp_O(:), tmp_J(:,:)
@@ -827,6 +832,8 @@ BEGIN_PROVIDER [double precision, noL_1e, (mo_num, mo_num)]
 
   PROVIDE int2_grad1_u12_bimo_t
   PROVIDE mos_l_in_r_array_transp mos_r_in_r_array_transp
+
+  n_points4 = int(n_points_final_grid, 4)
 
   call wall_time(t0)
   print*, " Providing noL_1e ..."
@@ -956,8 +963,8 @@ BEGIN_PROVIDER [double precision, noL_1e, (mo_num, mo_num)]
     !$OMP END DO
     !$OMP END PARALLEL
 
-    call dgemv( 'T', 4*n_points_final_grid, mo_num*mo_num, 2.d0 &
-              , tmp1(1,1,1,1), size(tmp1, 1) * size(tmp1, 2)    &
+    call dgemv( 'T', 4*n_points4, mo_num*mo_num, 2.d0           &
+              , tmp1(1,1,1,1), 4*n_points4                      &
               , tmp2(1,1), 1                                    &
               , 0.d0, noL_1e(1,1), 1)
 
@@ -1050,8 +1057,8 @@ BEGIN_PROVIDER [double precision, noL_1e, (mo_num, mo_num)]
 
     deallocate(tmp_L, tmp_R, tmp_J, tmp_S)
 
-    call dgemm( 'T', 'N', mo_num, mo_num, 5*n_points_final_grid, 1.d0                  &
-              , tmp3(1,1,1), 5*n_points_final_grid, tmp4(1,1,1), 5*n_points_final_grid &
+    call dgemm( 'T', 'N', mo_num, mo_num, 5*n_points4, 1.d0                  &
+              , tmp3(1,1,1), 5*n_points4, tmp4(1,1,1), 5*n_points4           &
               , 1.d0, noL_1e(1,1), mo_num)
    
     deallocate(tmp3, tmp4)
@@ -1239,8 +1246,8 @@ BEGIN_PROVIDER [double precision, noL_1e, (mo_num, mo_num)]
     !$OMP END DO
     !$OMP END PARALLEL
 
-    call dgemv( 'T', 4*n_points_final_grid, mo_num*mo_num, 2.d0 &
-              , tmp1(1,1,1,1), size(tmp1, 1) * size(tmp1, 2)    &
+    call dgemv( 'T', 4*n_points4, mo_num*mo_num, 2.d0           &
+              , tmp1(1,1,1,1), 4*n_points4                      &
               , tmp2(1,1), 1                                    &
               , 0.d0, noL_1e(1,1), 1)
 
@@ -1390,8 +1397,8 @@ BEGIN_PROVIDER [double precision, noL_1e, (mo_num, mo_num)]
 
     deallocate(tmp_L0, tmp_L, tmp_R0, tmp_R, tmp_J, tmp_S)
 
-    call dgemm( 'T', 'N', mo_num, mo_num, 8*n_points_final_grid, 1.d0                  &
-              , tmp3(1,1,1), 8*n_points_final_grid, tmp4(1,1,1), 8*n_points_final_grid &
+    call dgemm( 'T', 'N', mo_num, mo_num, 8*n_points4, 1.d0                  &
+              , tmp3(1,1,1), 8*n_points4, tmp4(1,1,1), 8*n_points4           &
               , 1.d0, noL_1e(1,1), mo_num)
    
     deallocate(tmp3, tmp4)
@@ -1428,7 +1435,9 @@ BEGIN_PROVIDER [double precision, noL_2e, (mo_num, mo_num, mo_num, mo_num)]
  ! then does not take into account any contribution from core orbitals
  END_DOC
   implicit none
-  integer                       :: p, q, s, t, i, ipoint, istart
+  integer                       :: p, q, s, t, i, istart
+  integer(size_t)               :: ipoint
+  integer                       :: n_points4
   double precision              :: t0, t1
   double precision, allocatable :: tmp_O(:), tmp_J(:,:)
   double precision, allocatable :: tmp_A(:,:,:), tmp_B(:,:,:)
@@ -1443,6 +1452,8 @@ BEGIN_PROVIDER [double precision, noL_2e, (mo_num, mo_num, mo_num, mo_num)]
 
   PROVIDE int2_grad1_u12_bimo_t
   PROVIDE mos_l_in_r_array_transp mos_r_in_r_array_transp
+
+  n_points4 = int(n_points_final_grid, 4)
 
   call wall_time(t0)
   print*, " Providing noL_2e ..."
@@ -1544,13 +1555,13 @@ BEGIN_PROVIDER [double precision, noL_2e, (mo_num, mo_num, mo_num, mo_num)]
     deallocate(tmp_O, tmp_J, tmp_A, tmp_B)
 
 
-    call dgemm( 'T', 'N', mo_num*mo_num, mo_num*mo_num, 4*n_points_final_grid, 0.5d0       &
-              , tmp1(1,1,1,1), 4*n_points_final_grid, tmp2(1,1,1,1), 4*n_points_final_grid &
+    call dgemm( 'T', 'N', mo_num*mo_num, mo_num*mo_num, 4*n_points4, 0.5d0     &
+              , tmp1(1,1,1,1), 4*n_points4, tmp2(1,1,1,1), 4*n_points4         &
               , 0.d0, tmp(1,1,1,1), mo_num*mo_num)
 
     deallocate(tmp1, tmp2)
 
-    call sum_a_at(tmp, mo_num*mo_num)
+    call sum_a_at(tmp, int(mo_num*mo_num, size_t))
 
     !$OMP PARALLEL            &
     !$OMP DEFAULT(NONE)       &
@@ -1694,13 +1705,13 @@ BEGIN_PROVIDER [double precision, noL_2e, (mo_num, mo_num, mo_num, mo_num)]
     deallocate(tmp_O, tmp_J, tmp_A, tmp_B)
 
 
-    call dgemm( 'T', 'N', mo_num*mo_num, mo_num*mo_num, 4*n_points_final_grid, 0.5d0       &
-              , tmp1(1,1,1,1), 4*n_points_final_grid, tmp2(1,1,1,1), 4*n_points_final_grid &
+    call dgemm( 'T', 'N', mo_num*mo_num, mo_num*mo_num, 4*n_points4, 0.5d0     &
+              , tmp1(1,1,1,1), 4*n_points4, tmp2(1,1,1,1), 4*n_points4         &
               , 0.d0, tmp(1,1,1,1), mo_num*mo_num)
 
     deallocate(tmp1, tmp2)
 
-    call sum_a_at(tmp, mo_num*mo_num)
+    call sum_a_at(tmp, int(mo_num*mo_num, size_t))
 
     !$OMP PARALLEL            &
     !$OMP DEFAULT(NONE)       &

@@ -1,3 +1,5 @@
+use sizet
+
 ! Vect to antisymmetric matrix using mat_to_vec_index
 
 ! Vector to antisymmetric matrix transformation using mat_to_vec_index
@@ -7,6 +9,7 @@
 
 
 subroutine vec_to_mat_v2(n,m,v_x,m_x)
+ use sizet
 
   !BEGIN_DOC
   ! Vector to antisymmetric matrix
@@ -14,11 +17,11 @@ subroutine vec_to_mat_v2(n,m,v_x,m_x)
   
   implicit none
   
-  integer, intent(in) :: n,m
+  integer(size_t), intent(in) :: n,m
   double precision, intent(in) :: v_x(n)
   double precision, intent(out) :: m_x(m,m)
 
-  integer :: i,j,k
+  integer(size_t) :: i,j,k
 
   ! 1D -> 2D lower diagonal
   m_x = 0d0

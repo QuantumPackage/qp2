@@ -1,4 +1,4 @@
-
+use sizet
 
 ! ---
 
@@ -83,15 +83,17 @@ end
 
 subroutine routine_save_rotated_mos(thr_deg, good_angles)
 
+  use sizet
   implicit none
 
   double precision, intent(in)  :: thr_deg
   logical,          intent(out) :: good_angles
 
-  integer                       :: i, j, k, n_degen_list, m, n, n_degen, ilast, ifirst
+  integer                       :: i, j, k, m, n, n_degen, ilast, ifirst
+  integer(size_t)               :: n_degen_list
   double precision              :: max_angle, norm
   double precision              :: E_old, E_new, E_thr
-  integer,          allocatable :: list_degen(:,:)
+  integer(size_t),  allocatable :: list_degen(:,:)
   double precision, allocatable :: new_angles(:)
   double precision, allocatable :: mo_r_coef_old(:,:), mo_l_coef_old(:,:)
   double precision, allocatable :: mo_r_coef_good(:,:), mo_l_coef_good(:,:)
@@ -141,9 +143,12 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
   call build_s_matrix(ao_num, mo_num, mo_r_coef_new, mo_r_coef_new, ao_overlap, s_mat)
 ! call give_degen(fock_diag,mo_num,thr_deg,list_degen,n_degen_list)
   if(n_core_orb.ne.0)then
-    call give_degen_full_listcore(fock_diag, mo_num, list_core, n_core_orb, thr_deg, list_degen, n_degen_list)
+    call give_degen_full_listcore(fock_diag, int(mo_num, size_t), &
+                                  list_core, int(n_core_orb, size_t), &
+                                  thr_deg, list_degen, n_degen_list)
   else
-    call give_degen_full_list(fock_diag, mo_num, thr_deg, list_degen, n_degen_list)
+    call give_degen_full_list(fock_diag, int(mo_num, size_t), &
+                              thr_deg, list_degen, n_degen_list)
   endif
 
 !  print *, ' fock_matrix_mo'

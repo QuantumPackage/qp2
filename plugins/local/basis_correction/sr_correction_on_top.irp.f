@@ -1,3 +1,5 @@
+use sizet
+
 double precision function g0_gori_su(rs)
   implicit none
   double precision, intent(in) :: rs
@@ -140,7 +142,8 @@ end
  double precision, parameter :: pi = dacos(-1.d0)
  double precision, parameter :: four_over_sq_pi = 4.d0/dsqrt(pi)
  double precision, parameter :: a3 = -4.d0/3.d0 * dsqrt(pi) * (dsqrt(2.d0)-1.d0)
- integer :: ipoint,istate
+ integer(size_t) :: ipoint
+ integer         :: istate
 
  do istate = 1, N_states
   sr_correction_on_top_mu_of_r(istate) = 0.d0

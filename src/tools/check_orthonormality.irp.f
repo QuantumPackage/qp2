@@ -1,3 +1,4 @@
+
 program check_orthonormality
  implicit none
  BEGIN_DOC
@@ -15,6 +16,7 @@ program check_orthonormality
 end
 
 subroutine do_print
+ use sizet
  implicit none
  BEGIN_DOC
  ! Accumulates the absolute values of the elements of the MO
@@ -22,7 +24,7 @@ subroutine do_print
  ! average diagonal element from 1, and the average of the
  ! absolute values of the off-diagonal elements.
  END_DOC
- integer :: i,j
+ integer(size_t) :: i,j
  double precision :: off_diag, diag
 
  off_diag = 0.d0

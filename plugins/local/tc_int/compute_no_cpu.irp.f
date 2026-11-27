@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -36,10 +37,12 @@ end
 subroutine main()
 
   use cutc_module
+  use sizet
 
   implicit none
 
-  integer                       :: i, j, k, l, ipoint
+  integer(size_t)              :: ipoint
+  integer                       :: i, j, k, l
   double precision              :: time0, time1
   double precision              :: tt0, tt1
   double precision              :: acc_thr, err_tot, nrm_tot, err_loc

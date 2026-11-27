@@ -1,17 +1,21 @@
+use sizet
+
 subroutine fill_H_apply_buffer_selection(n_selected,det_buffer,e_2_pert_buffer,coef_pert_buffer, N_st,Nint,iproc,select_max_out)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   !  Fill the H_apply buffer with determiants for the selection
   END_DOC
 
-  integer, intent(in)            :: n_selected, Nint, N_st, iproc
+  integer(size_t), intent(in)    :: n_selected
+  integer, intent(in)            :: Nint, N_st, iproc
   integer(bit_kind), intent(in)  :: det_buffer(Nint,2,n_selected)
   double precision, intent(in)   :: e_2_pert_buffer(N_st,n_selected)
   double precision, intent(in)   :: coef_pert_buffer(N_st,n_selected)
   double precision, intent(inout):: select_max_out
-  integer                        :: i,j,k,l
-  integer                        :: new_size
+  integer(size_t)                :: i,l,new_size
+  integer                        :: j,k
   double precision               :: s, smin, smax
   logical                        :: is_selected
   PROVIDE H_apply_buffer_allocated N_int

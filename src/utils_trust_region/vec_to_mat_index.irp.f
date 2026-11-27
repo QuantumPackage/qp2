@@ -1,3 +1,5 @@
+use sizet
+
 ! Vector to matrix indexes
   
 ! *Compute the indexes p,q of a matrix element with the vector index i*
@@ -33,6 +35,7 @@
 
 
 subroutine vec_to_mat_index(i,p,q)
+ use sizet
 
   include 'pi.h'
 
@@ -46,13 +49,13 @@ subroutine vec_to_mat_index(i,p,q)
   ! Variables
 
   ! in
-  integer,intent(in)   :: i
+  integer(size_t),intent(in)   :: i
   
   ! out
-  integer, intent(out) :: p,q
+  integer(size_t), intent(out) :: p,q
   
   ! internal 
-  integer              :: a,b
+  integer(size_t)              :: a,b
   double precision     :: da
 
   da = 0.5d0*(1+ sqrt(1d0+8d0*DBLE(i)))

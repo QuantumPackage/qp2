@@ -1,3 +1,5 @@
+use sizet
+
  BEGIN_PROVIDER[double precision, mos_r_grad_in_r_array,(mo_num,n_points_final_grid,3)]
  implicit none
  BEGIN_DOC
@@ -6,9 +8,14 @@
  ! k = 1 : x, k= 2, y, k  3, z
  END_DOC
  integer :: m
+ integer :: n_points4
+ n_points4 = int(n_points_final_grid, 4)
  mos_r_grad_in_r_array = 0.d0
  do m=1,3
-  call dgemm('N','N',mo_num,n_points_final_grid,ao_num,1.d0,mo_r_coef_transp,mo_num,aos_grad_in_r_array(1,1,m),ao_num,0.d0,mos_r_grad_in_r_array(1,1,m),mo_num)
+  call dgemm('N','N',mo_num,n_points4,ao_num,1.d0,        &
+             mo_r_coef_transp,mo_num,                      &
+             aos_grad_in_r_array(1,1,m),ao_num,            &
+             0.d0,mos_r_grad_in_r_array(1,1,m),mo_num)
  enddo
  END_PROVIDER
 
@@ -20,7 +27,8 @@
  ! k = 1 : x, k= 2, y, k  3, z
  END_DOC
  integer :: m
- integer  :: i,j
+ integer  :: j
+ integer(size_t)  :: i
  mos_r_grad_in_r_array_transp = 0.d0
  do i = 1, n_points_final_grid
   do j = 1, mo_num
@@ -37,7 +45,8 @@
  ! mos_r_grad_in_r_array_transp(i,j,k)   = value of the ith component of the gradient on the jth grid point of jth RIGHT MO 
  END_DOC
  integer :: m
- integer  :: i,j
+ integer  :: j
+ integer(size_t)  :: i
  mos_r_grad_in_r_array_transp_bis = 0.d0
  do j = 1, mo_num
   do i = 1, n_points_final_grid
@@ -57,9 +66,14 @@
  ! k = 1 : x, k= 2, y, k  3, z
  END_DOC
  integer :: m
+ integer :: n_points4
+ n_points4 = int(n_points_final_grid, 4)
  mos_l_grad_in_r_array = 0.d0
  do m=1,3
-  call dgemm('N','N',mo_num,n_points_final_grid,ao_num,1.d0,mo_r_coef_transp,mo_num,aos_grad_in_r_array(1,1,m),ao_num,0.d0,mos_l_grad_in_r_array(1,1,m),mo_num)
+  call dgemm('N','N',mo_num,n_points4,ao_num,1.d0,        &
+             mo_r_coef_transp,mo_num,                      &
+             aos_grad_in_r_array(1,1,m),ao_num,            &
+             0.d0,mos_l_grad_in_r_array(1,1,m),mo_num)
  enddo
  END_PROVIDER
 
@@ -71,7 +85,8 @@
  ! k = 1 : x, k= 2, y, k  3, z
  END_DOC
  integer :: m
- integer  :: i,j
+ integer  :: j
+ integer(size_t)  :: i
  mos_l_grad_in_r_array_transp = 0.d0
  do i = 1, n_points_final_grid
   do j = 1, mo_num
@@ -88,7 +103,8 @@
  ! mos_l_grad_in_r_array_transp(i,j,k)   = value of the ith component of the gradient on the jth grid point of jth RIGHT MO 
  END_DOC
  integer :: m
- integer  :: i,j
+ integer  :: j
+ integer(size_t)  :: i
  mos_l_grad_in_r_array_transp_bis = 0.d0
  do j = 1, mo_num
   do i = 1, n_points_final_grid

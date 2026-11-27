@@ -1,3 +1,4 @@
+use sizet
 !-----------------------------------------------------------------------
 ! Exact AO and MO representation matrices.
 !
@@ -29,7 +30,7 @@
 ! needs no MOs.
 !-----------------------------------------------------------------------
 
-BEGIN_PROVIDER [ integer, pg_shell_target, (shell_num, pg_n_elem) ]
+BEGIN_PROVIDER [ integer(size_t), pg_shell_target, (shell_num, pg_n_elem) ]
 &BEGIN_PROVIDER [ integer, pg_basis_ierr ]
 &BEGIN_PROVIDER [ character*(512), pg_basis_msg ]
   implicit none
@@ -45,7 +46,8 @@ BEGIN_PROVIDER [ integer, pg_shell_target, (shell_num, pg_n_elem) ]
   ! Reporting is left to the caller (:c:data:`pg_ao_ok` and the gate report): a
   ! provider that stops cannot be reported on.
   END_DOC
-  integer :: s, sp, g, a, ap, n_match, s_match
+  integer(size_t) :: s, sp, a, ap, s_match
+  integer :: g, n_match
   logical, external :: pg_shell_same
 
   pg_basis_ierr = 0
@@ -95,6 +97,7 @@ END_PROVIDER
 ! Does the shell's primitive normalization depend on the AO powers?
 !-----------------------------------------------------------------------
 subroutine pg_check_ao_factor(ierr, msg)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Verifies, for every shell, that the ratios
@@ -106,7 +109,8 @@ subroutine pg_check_ao_factor(ierr, msg)
   integer, intent(out) :: ierr
   character*(512), intent(out) :: msg
   integer, parameter :: nmax = 55
-  integer :: s, p, p0, j, jref, np, nprim
+  integer(size_t) :: s, p0
+  integer :: p, j, jref, np, nprim
   double precision :: c_ref(nmax), ratio, c0_ref, dev
 
   ierr = 0
@@ -155,6 +159,7 @@ end subroutine pg_check_ao_factor
 ! Same contraction?
 !-----------------------------------------------------------------------
 logical function pg_shell_same(s1, s2)
+  use sizet
   implicit none
   BEGIN_DOC
   ! True when the two shells have the same angular momentum and the same
@@ -163,7 +168,7 @@ logical function pg_shell_same(s1, s2)
   ! ``ao_coef`` (raw), never :c:data:`ao_coef_normalized`: the latter legitimately
   ! differs between AOs of the same shell when their powers differ.
   END_DOC
-  integer, intent(in) :: s1, s2
+  integer(size_t), intent(in) :: s1, s2
   double precision :: e1(ao_prim_num_max), c1(ao_prim_num_max)
   double precision :: e2(ao_prim_num_max), c2(ao_prim_num_max)
   integer :: n1, n2, j
@@ -186,18 +191,20 @@ end function pg_shell_same
 ! Sorted (exponent, coefficient) list of a shell.
 !-----------------------------------------------------------------------
 subroutine pg_sorted_contraction(s, ex, cf, n)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Exponents of shell ``s`` in increasing order, each with its own raw
   ! coefficient. The pair must be sorted together: a basis that lists its
   ! primitives in another order is still the same contraction.
   END_DOC
-  integer, intent(in) :: s
+  integer(size_t), intent(in) :: s
   integer, intent(out) :: n
   double precision, intent(out) :: ex(ao_prim_num_max)
   double precision, intent(out) :: cf(ao_prim_num_max)
   double precision :: te, tc
-  integer :: p0, j, k, jmin
+  integer(size_t) :: p0
+  integer :: j, k, jmin
 
   p0 = ao_first_of_shell(s)
   n = ao_prim_num(p0)
@@ -240,6 +247,7 @@ end subroutine pg_ao_rep
 ! AO factor ratio B_p/B_q.
 !-----------------------------------------------------------------------
 double precision function pg_ao_ratio(p, q)
+  use sizet
   implicit none
   BEGIN_DOC
   ! ``B_p/B_q`` from ``ao_coef_normalized(p,j) = A_j B_p``: the ``j`` dependence
@@ -253,7 +261,7 @@ double precision function pg_ao_ratio(p, q)
   ! carries a power-dependent part, so using it would make a d shell not
   ! rotation covariant by an O(1) factor (found by G-iso on ammonia/6-31G*).
   END_DOC
-  integer, intent(in) :: p, q
+  integer(size_t), intent(in) :: p, q
   integer :: j, jref, nprim
   double precision :: den
 
@@ -276,6 +284,7 @@ end function pg_ao_ratio
 ! Builder of the AO representation matrix (see :c:func:`pg_ao_rep` above).
 !-----------------------------------------------------------------------
 subroutine pg_ao_rep_ex(ig, m)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Block-diagonal builder: the block of shell ``s`` is Sym^l(R_g) rescaled by
@@ -284,7 +293,8 @@ subroutine pg_ao_rep_ex(ig, m)
   integer, intent(in) :: ig
   double precision, intent(out) :: m(ao_num,ao_num)
   integer, parameter :: lmax = 9
-  integer :: s, sp, p0, q0, np, nq, l, p, q
+  integer(size_t) :: s, sp, p0, q0
+  integer :: np, nq, l, p, q
   double precision, external :: pg_ao_ratio
   integer :: powp(3, (lmax+1)*(lmax+2)/2), powq(3, (lmax+1)*(lmax+2)/2)
   double precision :: t((lmax+1)*(lmax+2)/2, (lmax+1)*(lmax+2)/2)

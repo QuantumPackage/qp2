@@ -1,7 +1,9 @@
+use sizet
 
 ! ---
 
 subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N_st, N_st_diag_in, converged, hcalc)
+ use sizet
 
   BEGIN_DOC
   ! Generic modified-Davidson diagonalization 
@@ -23,7 +25,8 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
 
   implicit none
 
-  integer,           intent(in)   :: sze, N_st, N_st_diag_in
+  integer(size_t),   intent(in)   :: sze
+  integer,           intent(in)   :: N_st, N_st_diag_in
   double precision,  intent(in)   :: H_jj(sze)
   logical,          intent(inout) :: converged
   double precision, intent(inout) :: u_in(sze,N_st_diag_in)
@@ -32,7 +35,8 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
 
   character*(16384)               :: write_buffer
   integer                         :: iter, N_st_diag
-  integer                         :: i, j, k, l, m
+  integer                         :: j, l, m
+  integer(size_t)                 :: i, k
   integer                         :: iter2, itertot
   logical                         :: disk_based
   integer                         :: shift, shift2, itermax
@@ -77,7 +81,7 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
     stop -1
   endif
 
-  itermax = max(2, min(davidson_sze_max, sze/N_st_diag)) + 1
+  itermax = max(2, min(davidson_sze_max, int(sze/N_st_diag,4))) + 1
 
   provide threshold_nonsym_davidson 
   call write_time(6)
@@ -92,7 +96,7 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
 
   nproc_target = nproc
   double precision :: rss
-  integer :: maxab
+  integer(size_t) :: maxab
   maxab = sze 
 
   m=1
@@ -140,7 +144,7 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
 
   call write_int(6, N_st, 'Number of states')
   call write_int(6, N_st_diag, 'Number of states in diagonalization')
-  call write_int(6, sze, 'Number of basis functions')
+  call write_int(6, int(sze,4), 'Number of basis functions')
   call write_int(6, nproc_target, 'Number of threads for diagonalization')
   call write_double(6, r1, 'Memory(Gb)')
   if(disk_based) then
@@ -241,8 +245,8 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
       if( (iter > 1) .or. (itertot == 1) ) then
 
         ! Gram-Schmidt to orthogonalize all new guess with the previous vectors 
-        call ortho_qr(U, size(U, 1), sze, shift2)
-        call ortho_qr(U, size(U, 1), sze, shift2)
+        call ortho_qr(U, int(size(U, 1),size_t), sze, int(shift2,size_t))
+        call ortho_qr(U, int(size(U, 1),size_t), sze, int(shift2,size_t))
 
         ! W = H U
         call hcalc(W(1,shift+1), U(1,shift+1), N_st_diag, sze)
@@ -255,14 +259,17 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
 
       ! Compute h_kl = <u_k | W_l> = <u_k| H |u_l>
       ! -------------------------------------------
-      call dgemm( 'T', 'N', shift2, shift2, sze, 1.d0 &
+      call dgemm( 'T', 'N', shift2, shift2, int(sze,4), 1.d0 &
                 , U, size(U, 1), W, size(W, 1)        &
                 , 0.d0, h, size(h, 1) )
 
 
       ! Diagonalize h y = lambda y
       ! ---------------------------
-      call diag_nonsym_right(shift2, h(1,1), size(h, 1), y(1,1), size(y, 1), lambda(1), size(lambda, 1))
+            call diag_nonsym_right(int(shift2,size_t), h(1,1), &
+                             int(size(h,1),size_t), y(1,1), &
+                             int(size(y,1),size_t), lambda(1), &
+                             int(size(lambda,1),size_t))
 
 
       ! Express eigenvectors of h in the determinant basis:
@@ -271,8 +278,8 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
       ! y(:,k) = rk
       ! U(:,k) = Bk 
       ! U(:,shift2+k) = Rk = Bk x rk
-      call dgemm( 'N', 'N', sze, N_st_diag, shift2, 1.d0 &
-                , U, size(U, 1), y, size(y, 1)           & 
+      call dgemm( 'N', 'N', int(sze,4), N_st_diag, shift2, 1.d0 &
+                , U, size(U, 1), y, size(y, 1)           &
                 , 0.d0, U(1,shift2+1), size(U, 1) )
 
       do k = 1, N_st_diag
@@ -352,7 +359,7 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
       ! W(:,k) = H x Bk 
       ! W(:,shift2+k) = H x Bk x rk
       !               = Wk
-      call dgemm( 'N', 'N', sze, N_st_diag, shift2, 1.d0 &
+      call dgemm( 'N', 'N', int(sze,4), N_st_diag, shift2, 1.d0 &
                 , W, size(W, 1), y, size(y, 1)           &
                 , 0.d0, W(1,shift2+1), size(W, 1) )
 
@@ -413,7 +420,7 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
     ! Re-contract U and update W
     ! --------------------------------
 
-    call dgemm( 'N', 'N', sze, N_st_diag, shift2, 1.d0  &
+    call dgemm( 'N', 'N', int(sze,4), N_st_diag, shift2, 1.d0  &
               , W, size(W, 1), y, size(y, 1)            &
               , 0.d0, u_in, size(u_in, 1) )
     do k = 1, N_st_diag
@@ -422,7 +429,7 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
       enddo
     enddo
 
-    call dgemm( 'N', 'N', sze, N_st_diag, shift2, 1.d0 &
+    call dgemm( 'N', 'N', int(sze,4), N_st_diag, shift2, 1.d0 &
               , U, size(U, 1), y, size(y, 1)           &
               , 0.d0, u_in, size(u_in, 1) )
     do k = 1, N_st_diag
@@ -431,8 +438,8 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
       enddo
     enddo
 
-    call ortho_qr(U, size(U, 1), sze, N_st_diag)
-    call ortho_qr(U, size(U, 1), sze, N_st_diag)
+    call ortho_qr(U, int(size(U, 1),size_t), sze, int(N_st_diag,size_t))
+    call ortho_qr(U, int(size(U, 1),size_t), sze, int(N_st_diag,size_t))
     do j = 1, N_st_diag
       k = 1
       do while( (k < sze) .and. (U(k,j) == 0.d0) )

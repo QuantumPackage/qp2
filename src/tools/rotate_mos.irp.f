@@ -1,12 +1,14 @@
+
 program rotate_mos
+  use sizet
   implicit none
   BEGIN_DOC
   ! Rotates molecular orbitals i and j by combining them as
   ! $1/\sqrt{2} ( \phi_i + \phi_j )$ and
   ! $1/\sqrt{2} ( \phi_i - \phi_j )$.
   END_DOC
-  integer                        :: iorb,jorb
-  integer                        :: i,j
+  integer(size_t)                :: iorb,jorb
+  integer(size_t)                :: i,j
   double precision               :: dsqrt2_inv
   double precision, allocatable  :: mo_coef_tmp(:,:)
 

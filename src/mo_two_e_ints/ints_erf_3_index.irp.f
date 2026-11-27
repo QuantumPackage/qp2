@@ -1,3 +1,5 @@
+use sizet
+
  BEGIN_PROVIDER [double precision, int_erf_3_index, (mo_num,mo_num, mo_num)]
 &BEGIN_PROVIDER [double precision, int_erf_3_index_exc,(mo_num,mo_num, mo_num)]
  implicit none
@@ -6,7 +8,7 @@
  !
  ! int_erf_3_index_exc(i,j) = <ij|ji> = (ij|ij) with the erf interaction
  END_DOC
- integer :: i,j,k,l
+ integer(size_t) :: i,j,k,l
  double precision :: get_mo_two_e_integral_erf
  double precision :: integral
 

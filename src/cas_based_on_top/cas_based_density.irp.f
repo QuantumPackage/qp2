@@ -1,3 +1,4 @@
+
 program cas_based_density
   implicit none
   BEGIN_DOC
@@ -14,6 +15,7 @@ program cas_based_density
 end
 
 subroutine routine_test_cas_based_density
+ use sizet
   BEGIN_DOC
 ! Example of the cas_based_density program. For each state it
 ! integrates the total CAS density over the Becke grid in two
@@ -23,7 +25,8 @@ subroutine routine_test_cas_based_density
 ! electrons of the state, so the two should agree.
   END_DOC
  implicit none
- integer :: ipoint, istate
+ integer(size_t) :: ipoint
+ integer         :: istate
  double precision :: accu_n_elec(N_states),accu_n_elec_2(N_states)
 
  ! PROVIDERS 

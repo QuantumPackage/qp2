@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [ double precision, threshold_DIIS_nonzero ]
  implicit none
  BEGIN_DOC
@@ -24,39 +26,39 @@ BEGIN_PROVIDER [double precision, FPS_SPF_Matrix_AO, (AO_num, AO_num)]
 
   ! Compute FP
 
-  call dgemm('N','N',AO_num,AO_num,AO_num,                           &
+  call dgemm('N','N',int(AO_num,4),int(AO_num,4),int(AO_num,4), &
       1.d0,                                                          &
-      Fock_Matrix_AO,Size(Fock_Matrix_AO,1),                         &
-      SCF_Density_Matrix_AO,Size(SCF_Density_Matrix_AO,1),             &
+      Fock_Matrix_AO,int(Size(Fock_Matrix_AO,1),4),                         &
+      SCF_Density_Matrix_AO,int(Size(SCF_Density_Matrix_AO,1),4),             &
       0.d0,                                                          &
-      scratch,Size(scratch,1))
+      scratch,int(Size(scratch,1),4))
 
   ! Compute FPS
 
-  call dgemm('N','N',AO_num,AO_num,AO_num,                           &
+  call dgemm('N','N',int(AO_num,4),int(AO_num,4),int(AO_num,4), &
       1.d0,                                                          &
-      scratch,Size(scratch,1),                                       &
-      AO_Overlap,Size(AO_Overlap,1),                                 &
+      scratch,int(Size(scratch,1),4),                                       &
+      AO_Overlap,int(Size(AO_Overlap,1),4),                                 &
       0.d0,                                                          &
-      FPS_SPF_Matrix_AO,Size(FPS_SPF_Matrix_AO,1))
+      FPS_SPF_Matrix_AO,int(Size(FPS_SPF_Matrix_AO,1),4))
 
   ! Compute SP
 
-  call dgemm('N','N',AO_num,AO_num,AO_num,                           &
+  call dgemm('N','N',int(AO_num,4),int(AO_num,4),int(AO_num,4), &
       1.d0,                                                          &
-      AO_Overlap,Size(AO_Overlap,1),                                 &
-      SCF_Density_Matrix_AO,Size(SCF_Density_Matrix_AO,1),             &
+      AO_Overlap,int(Size(AO_Overlap,1),4),                                 &
+      SCF_Density_Matrix_AO,int(Size(SCF_Density_Matrix_AO,1),4),             &
       0.d0,                                                          &
-      scratch,Size(scratch,1))
+      scratch,int(Size(scratch,1),4))
 
   ! Compute FPS - SPF
 
-  call dgemm('N','N',AO_num,AO_num,AO_num,                           &
+  call dgemm('N','N',int(AO_num,4),int(AO_num,4),int(AO_num,4), &
       -1.d0,                                                         &
-      scratch,Size(scratch,1),                                       &
-      Fock_Matrix_AO,Size(Fock_Matrix_AO,1),                         &
+      scratch,int(Size(scratch,1),4),                                       &
+      Fock_Matrix_AO,int(Size(Fock_Matrix_AO,1),4),                         &
       1.d0,                                                          &
-      FPS_SPF_Matrix_AO,Size(FPS_SPF_Matrix_AO,1))
+      FPS_SPF_Matrix_AO,int(Size(FPS_SPF_Matrix_AO,1),4))
 
 END_PROVIDER
 
@@ -65,8 +67,8 @@ BEGIN_PROVIDER [double precision, FPS_SPF_Matrix_MO, (mo_num, mo_num)]
   begin_doc
 !   Commutator FPS - SPF in MO basis
   end_doc
-  call ao_to_mo(FPS_SPF_Matrix_AO, size(FPS_SPF_Matrix_AO,1), &
-     FPS_SPF_Matrix_MO, size(FPS_SPF_Matrix_MO,1))
+  call ao_to_mo(FPS_SPF_Matrix_AO, int(size(FPS_SPF_Matrix_AO,1),size_t), &
+     FPS_SPF_Matrix_MO, int(size(FPS_SPF_Matrix_MO,1),size_t))
 END_PROVIDER
 
 
@@ -81,7 +83,7 @@ END_PROVIDER
 
    double precision, allocatable  :: scratch(:,:),work(:),Xt(:,:)
    integer                        :: lwork,info
-   integer                        :: i,j
+   integer(size_t)                :: i,j
 
    lwork = 3*AO_num - 1
    allocate(                                                         &
@@ -100,24 +102,24 @@ END_PROVIDER
 
 ! Calculate Fock matrix in orthogonal basis: F' = Xt.F.X
 
-  call dgemm('N','N',AO_num,AO_num,AO_num,     &
+  call dgemm('N','N',int(AO_num,4),int(AO_num,4),int(AO_num,4),     &
        1.d0,                                   &
-       Fock_matrix_AO,size(Fock_matrix_AO,1),  &
-       S_half_inv,size(S_half_inv,1),        &
+       Fock_matrix_AO,int(size(Fock_matrix_AO,1),4),  &
+       S_half_inv,int(size(S_half_inv,1),4),        &
        0.d0,                                   &
-       eigenvectors_Fock_matrix_AO,size(eigenvectors_Fock_matrix_AO,1))
+       eigenvectors_Fock_matrix_AO,int(size(eigenvectors_Fock_matrix_AO,1),4))
 
-  call dgemm('N','N',AO_num,AO_num,AO_num,                              &
+  call dgemm('N','N',int(AO_num,4),int(AO_num,4),int(AO_num,4), &
        1.d0,                                                            &
-       Xt,size(Xt,1),                                                   &
-       eigenvectors_Fock_matrix_AO,size(eigenvectors_Fock_matrix_AO,1), &
+       Xt,int(size(Xt,1),4),                                                   &
+       eigenvectors_Fock_matrix_AO,int(size(eigenvectors_Fock_matrix_AO,1),4), &
        0.d0,                                                            &
-       scratch,size(scratch,1))
+       scratch,int(size(scratch,1),4))
 
 ! Diagonalize F' to obtain eigenvectors in orthogonal basis C' and eigenvalues
 
-   call dsyev('V','U',AO_num,       &
-        scratch,size(scratch,1),    &
+   call dsyev('V','U',int(AO_num,4),       &
+        scratch,int(size(scratch,1),4),    &
         eigenvalues_Fock_matrix_AO, &
         work,lwork,info)
 
@@ -128,12 +130,12 @@ END_PROVIDER
 
 ! Back-transform eigenvectors: C =X.C'
 
-  call dgemm('N','N',AO_num,AO_num,AO_num,     &
+  call dgemm('N','N',int(AO_num,4),int(AO_num,4),int(AO_num,4),     &
        1.d0,                                   &
-       S_half_inv,size(S_half_inv,1),        &
-       scratch,size(scratch,1),                &
+       S_half_inv,int(size(S_half_inv,1),4),        &
+       scratch,int(size(scratch,1),4),                &
        0.d0,                                   &
-       eigenvectors_Fock_matrix_AO,size(eigenvectors_Fock_matrix_AO,1))
+       eigenvectors_Fock_matrix_AO,int(size(eigenvectors_Fock_matrix_AO,1),4))
 
 END_PROVIDER
 

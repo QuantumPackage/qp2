@@ -1,10 +1,12 @@
+use sizet
 subroutine mo_two_e_integrals_erf_index(i,j,k,l,i1)
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
   ! Computes an unique index for i,j,k,l integrals
   END_DOC
-  integer, intent(in)            :: i,j,k,l
+  integer(size_t), intent(in)    :: i,j,k,l
   integer(key_kind), intent(out) :: i1
   integer(key_kind)              :: p,q,r,s,i2
   p = min(i,k)
@@ -77,6 +79,7 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_erf_in_map ]
 END_PROVIDER
 
 subroutine four_idx_dgemm_erf
+ use sizet
   implicit none
   BEGIN_DOC
   ! Dense AO->MO transformation of the ERF two-electron integrals by
@@ -86,7 +89,7 @@ subroutine four_idx_dgemm_erf
   ! (i<=k, j<=l only). Called from the provider
   ! mo_two_e_integrals_erf_in_map when ao_num**4*32.d-9 < qp_max_mem.
   END_DOC
-  integer :: p,q,r,s,i,j,k,l
+  integer(size_t) :: p,q,r,s,i,j,k,l
   double precision, allocatable :: a1(:,:,:,:)
   double precision, allocatable :: a2(:,:,:,:)
 
@@ -97,13 +100,14 @@ subroutine four_idx_dgemm_erf
   allocate (a1(ao_num,ao_num,ao_num,ao_num))
 
   print *, 'Getting AOs'
-  call get_ao_two_e_integrals_erf(1,1,1,ao_num,a1(1,1,1,1))
+  call get_ao_two_e_integrals_erf(1_size_t,1_size_t,1_size_t, &
+      int(ao_num,size_t),a1(1,1,1,1))
   !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q,r,s) COLLAPSE(2)
   do s=1,ao_num
     do r=1,ao_num
       do q=1,ao_num
         a1(:,q,r,s) = 0.d0
-        call get_ao_two_e_integrals_erf(q,r,s,ao_num,a1(1,q,r,s))
+        call get_ao_two_e_integrals_erf(q,r,s,int(ao_num,size_t),a1(1,q,r,s))
       enddo
     enddo
   enddo
@@ -135,10 +139,11 @@ subroutine four_idx_dgemm_erf
 
   deallocate (a2)
 
-  integer :: n_integrals, size_buffer
+  integer(size_t) :: n_integrals, size_buffer
   integer(key_kind)  , allocatable :: buffer_i(:)
   real(integral_kind), allocatable :: buffer_value(:)
-  size_buffer = min(ao_num*ao_num*ao_num,16000000)
+  size_buffer = min(int(ao_num,size_t)*int(ao_num,size_t)* &
+      int(ao_num,size_t),16000000)
 
   !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(i,j,k,l,buffer_value,buffer_i,n_integrals)
   allocate ( buffer_i(size_buffer), buffer_value(size_buffer) )
@@ -189,12 +194,12 @@ end subroutine
   ! mo_two_e_integrals_jj_anti_from_ao(i,j) = J_ij - K_ij
   END_DOC
   implicit none
-  integer                        :: i,j,p,q,r,s
+  integer(size_t)                :: i,j,p,q,r,s
   double precision               :: c
   real(integral_kind)            :: integral
-  integer                        :: n, pp
+  integer(size_t)                :: n, pp
   real(integral_kind), allocatable :: int_value(:)
-  integer, allocatable           :: int_idx(:)
+  integer(size_t), allocatable   :: int_idx(:)
 
   double precision, allocatable  :: iqrs(:,:), iqsr(:,:), iqis(:), iqri(:)
 
@@ -234,7 +239,8 @@ end subroutine
       if (do_direct_integrals) then
         double precision               :: ao_two_e_integral_erf
         do r=1,ao_num
-          call compute_ao_two_e_integrals_erf(q,r,s,ao_num,int_value)
+          call compute_ao_two_e_integrals_erf(q, r, s, int(ao_num,size_t), &
+                                              int_value)
           do p=1,ao_num
             integral = int_value(p)
             if (abs(integral) > ao_integrals_threshold) then
@@ -244,7 +250,8 @@ end subroutine
               enddo
             endif
           enddo
-          call compute_ao_two_e_integrals_erf(q,s,r,ao_num,int_value)
+          call compute_ao_two_e_integrals_erf(q, s, r, int(ao_num,size_t), &
+                                              int_value)
           do p=1,ao_num
             integral = int_value(p)
             if (abs(integral) > ao_integrals_threshold) then
@@ -259,7 +266,9 @@ end subroutine
       else
 
         do r=1,ao_num
-          call get_ao_two_e_integrals_erf_non_zero(q,r,s,ao_num,int_value,int_idx,n)
+          call get_ao_two_e_integrals_erf_non_zero(q, r, s, &
+                                                   int(ao_num,size_t), &
+                                                   int_value, int_idx, n)
           do pp=1,n
             p = int_idx(pp)
             integral = int_value(pp)
@@ -270,7 +279,9 @@ end subroutine
               enddo
             endif
           enddo
-          call get_ao_two_e_integrals_erf_non_zero(q,s,r,ao_num,int_value,int_idx,n)
+          call get_ao_two_e_integrals_erf_non_zero(q, s, r, &
+                                                   int(ao_num,size_t), &
+                                                   int_value, int_idx, n)
           do pp=1,n
             p = int_idx(pp)
             integral = int_value(pp)
@@ -324,7 +335,7 @@ END_PROVIDER
   ! mo_two_e_integrals_jj_anti(i,j) = J_ij - K_ij
   END_DOC
 
-  integer                        :: i,j
+  integer(size_t)                :: i,j
   double precision               :: get_mo_two_e_integral_erf
 
   PROVIDE mo_two_e_integrals_erf_in_map
@@ -370,6 +381,7 @@ end
 
 
 subroutine add_integrals_to_map_erf(mask_ijkl)
+ use sizet
   use bitmasks
   implicit none
 
@@ -379,27 +391,28 @@ subroutine add_integrals_to_map_erf(mask_ijkl)
 
   integer(bit_kind), intent(in)  :: mask_ijkl(N_int,4)
 
-  integer                        :: i,j,k,l
-  integer                        :: i0,j0,k0,l0
+  integer(size_t)                :: i,j,k,l
+  integer(size_t)                :: i0,j0,k0,l0
   double precision               :: c, cpu_1, cpu_2, wall_1, wall_2, wall_0
 
-  integer, allocatable           :: list_ijkl(:,:)
-  integer                        :: n_i, n_j, n_k, n_l
-  integer, allocatable           :: two_e_tmp_0_idx(:)
+  integer(size_t), allocatable   :: list_ijkl(:,:)
+  integer(size_t)                :: n_i, n_j, n_k, n_l
+  integer(size_t), allocatable   :: two_e_tmp_0_idx(:)
   real(integral_kind), allocatable :: two_e_tmp_0(:,:)
   double precision, allocatable  :: two_e_tmp_1(:)
   double precision, allocatable  :: two_e_tmp_2(:,:)
   double precision, allocatable  :: two_e_tmp_3(:,:,:)
   !DIR$ ATTRIBUTES ALIGN : 64    :: two_e_tmp_1, two_e_tmp_2, two_e_tmp_3
 
-  integer                        :: n_integrals
-  integer                        :: size_buffer
+  integer(size_t)                :: n_integrals
+  integer(size_t)                :: size_buffer
   integer(key_kind),allocatable  :: buffer_i(:)
   real(integral_kind),allocatable :: buffer_value(:)
   double precision               :: map_mb
 
-  integer                        :: i1,j1,k1,l1, ii1, kmax, thread_num
-  integer                        :: i2,i3,i4
+  integer(size_t)                :: i1,j1,k1,l1, ii1, kmax
+  integer                        :: thread_num
+  integer(size_t)                :: i2,i3,i4
   double precision,parameter     :: thr_coef = 1.d-10
 
   PROVIDE ao_two_e_integrals_in_map  mo_coef
@@ -457,7 +470,8 @@ subroutine add_integrals_to_map_erf(mask_ijkl)
     return
   endif
 
-  size_buffer = min(ao_num*ao_num*ao_num,16000000)
+  size_buffer = min(int(ao_num,size_t)*int(ao_num,size_t)* &
+      int(ao_num,size_t),16000000)
   print*, 'Providing the ERF molecular integrals '
   print*, 'Buffers : ', 8.*(mo_num*(n_j)*(n_k+1) + mo_num+&
       ao_num+ao_num*ao_num+ size_buffer*3)/(1024*1024), 'MB / core'
@@ -493,7 +507,9 @@ subroutine add_integrals_to_map_erf(mask_ijkl)
     do k1 = 1,ao_num
       two_e_tmp_2 = 0.d0
       do j1 = 1,ao_num
-        call get_ao_two_e_integrals_erf(j1,k1,l1,ao_num,two_e_tmp_0(1,j1)) ! all integrals for a given l1, k1
+        ! all integrals for a given l1, k1
+        call get_ao_two_e_integrals_erf(j1,k1,l1, &
+             int(ao_num,size_t),two_e_tmp_0(1,j1))
         ! call compute_ao_two_e_integrals(j1,k1,l1,ao_num,two_e_tmp_0(1,j1))
       enddo
       do j1 = 1,ao_num

@@ -31,6 +31,7 @@ end program symmetry
 ! program per file, and the report is the whole program.
 !-----------------------------------------------------------------------
 subroutine pg_report(write_mo)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Prints the canonical frame, the group, its classes and the table.
@@ -41,7 +42,8 @@ subroutine pg_report(write_mo)
   character*(4096) :: plist
   double precision :: v(3), w(3), d, delta_mo
   integer :: ierr, n_mem
-  integer :: i, c, a, g, det, m, k
+  integer(size_t) :: i
+  integer :: c, a, g, det, m, k
 
   delta_mo = 0.d0
 
@@ -231,6 +233,7 @@ end subroutine pg_perm_string
 ! AO representation matrices, and gates G-iso, G1, G2.
 !-----------------------------------------------------------------------
 subroutine pg_report_ao(delta_mo)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Prints the AO basis summary, then the gates:
@@ -259,7 +262,8 @@ subroutine pg_report_ao(delta_mo)
   ! it is the accuracy floor of every MO purity.
   END_DOC
   logical :: has_ao
-  integer :: g, h, k, n_pair, ne, g_worst, h_worst, iw, jw, loc(2)
+  integer(size_t) :: k, iw, jw
+  integer :: g, h, n_pair, ne, g_worst, h_worst, loc(2)
   integer :: i, j, it
   double precision, intent(out) :: delta_mo
   double precision :: dev, dev_g1, dev_g2, s, cnorm
@@ -473,6 +477,7 @@ end subroutine pg_report_ao
 ! ``X_g X_h - X_{gh}`` for one pair, computed from scratch.
 !-----------------------------------------------------------------------
 subroutine pg_g2_pair(g, h, dev)
+  use sizet
   implicit none
   BEGIN_DOC
   ! ``dev`` = max ``X_g X_h - X_{gh}`` for one pair. The product element comes
@@ -482,7 +487,8 @@ subroutine pg_g2_pair(g, h, dev)
   integer, intent(in) :: g, h
   double precision, intent(out) :: dev
   double precision, allocatable :: xg(:,:), xh(:,:), xp(:,:), d(:,:)
-  integer :: gh, i, j
+  integer :: gh
+  integer(size_t) :: i, j
 
   gh = pg_elem_mul(g,h)
   allocate(xg(mo_num,mo_num), xh(mo_num,mo_num), xp(mo_num,mo_num), &
@@ -503,6 +509,7 @@ end subroutine pg_g2_pair
 ! MO irrep labels, and gates G3..G6.
 !-----------------------------------------------------------------------
 subroutine pg_report_mo(delta_mo, write_mo)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Prints the label of every MO and the last four MO purity gates:
@@ -547,8 +554,10 @@ subroutine pg_report_mo(delta_mo, write_mo)
   ! integral noise alone.
   END_DOC
   logical :: has_ao, failed
-  integer :: a, c, g, i, j, m, n_mixed, a1, a2
-  integer :: b, a0, nb, n_imp, n_bad, sdn
+  integer(size_t) :: i, j, n_mixed
+  integer :: a, c, g, m, a1, a2
+  integer(size_t) :: nb, sdn
+  integer :: b, a0, n_imp, n_bad
   double precision, intent(in) :: delta_mo
   logical, intent(in) :: write_mo
   double precision :: dev, s, wsum, na, pvnorm, w5

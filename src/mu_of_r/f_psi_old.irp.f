@@ -1,5 +1,7 @@
 
 
+use sizet
+
 BEGIN_PROVIDER [double precision, f_psi_cas_ab_old, (n_points_final_grid,N_states)]
  implicit none
  BEGIN_DOC
@@ -9,7 +11,8 @@ BEGIN_PROVIDER [double precision, f_psi_cas_ab_old, (n_points_final_grid,N_state
 ! Assumes that the wave function in psi_det is developped within an active space defined
 !
  END_DOC
- integer :: ipoint,k,l,istate 
+ integer(size_t) :: ipoint,k,l
+ integer :: istate
  double precision :: wall0,wall1
  print*,'Providing  f_psi_cas_ab_old ..... '
  provide full_occ_2_rdm_ab_mo 

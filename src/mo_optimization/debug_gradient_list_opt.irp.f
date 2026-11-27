@@ -18,7 +18,9 @@
 ! | nb_error   | integer          | number of error in the gradient    |
 
 
+
 program debug_gradient_list_opt
+  use sizet
   BEGIN_DOC
   ! Debug program for the orbital gradient, same check as
   ! debug_gradient_opt but restricted to the active orbitals list_act
@@ -31,11 +33,11 @@ program debug_gradient_list_opt
   ! Variables
 
   double precision, allocatable :: v_grad(:), v_grad2(:)
-  integer                       :: n,m
-  integer                       :: i
+  integer(size_t)               :: n,m
+  integer(size_t)               :: i
   double precision              :: threshold
   double precision              :: max_error, max_elem, norm
-  integer                       :: nb_error
+  integer(size_t)               :: nb_error
 
   m = dim_list_act_orb
   ! Definition of n

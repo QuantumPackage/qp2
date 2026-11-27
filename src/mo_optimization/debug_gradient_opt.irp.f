@@ -1,3 +1,4 @@
+
 ! Debug the gradient
 
 ! *Program to check the gradient*
@@ -19,6 +20,7 @@
 
 
 program debug_gradient_opt
+  use sizet
   BEGIN_DOC
   ! Debug program for the orbital gradient, for all mo_num orbitals
   ! (n = mo_num*(mo_num-1)/2 rotation pairs). Compares the gradient
@@ -33,11 +35,11 @@ program debug_gradient_opt
   ! Variables
 
   double precision, allocatable :: v_grad(:), v_grad2(:)
-  integer                       :: n
-  integer                       :: i
+  integer(size_t)               :: n
+  integer(size_t)               :: i
   double precision              :: threshold
   double precision              :: max_error, max_elem
-  integer                       :: nb_error
+  integer(size_t)               :: nb_error
 
   ! Definition of n
   n = mo_num*(mo_num-1)/2

@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -11,7 +12,8 @@ BEGIN_PROVIDER [double precision, ao_non_hermit_term_chemist, (ao_num, ao_num, a
   END_DOC
 
   implicit none
-  integer                       :: i, j, k, l, ipoint, m
+  integer                       :: m
+  integer(size_t)               :: i, j, k, l, ipoint
   double precision              :: weight1, r(3)
   double precision              :: wall1, wall0
   double precision, allocatable :: b_mat(:,:,:,:), ac_mat(:,:,:,:)
@@ -51,9 +53,11 @@ BEGIN_PROVIDER [double precision, ao_non_hermit_term_chemist, (ao_num, ao_num, a
   do m = 1, 3
     !           A   B^T  dim(A,1)       dim(B,2)       dim(A,2)        alpha * A                LDA 
 
-    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0             &
-              , v_ij_erf_rk_cst_mu(1,1,1), ao_num*ao_num, b_mat(1,1,1,m), n_points_final_grid &
-              , 1.d0, ac_mat, ao_num*ao_num) 
+    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num &
+              , int(n_points_final_grid, 4), 1.d0 &
+              , v_ij_erf_rk_cst_mu(1,1,1), ao_num*ao_num &
+              , b_mat(1,1,1,m), int(n_points_final_grid, 4) &
+              , 1.d0, ac_mat, ao_num*ao_num)
 
   enddo
 
@@ -80,9 +84,11 @@ BEGIN_PROVIDER [double precision, ao_non_hermit_term_chemist, (ao_num, ao_num, a
   do m = 1, 3
    !           A   B^T  dim(A,1)       dim(B,2)       dim(A,2)        alpha * A                LDA 
 
-    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, -1.d0                &
-              , x_v_ij_erf_rk_cst_mu(1,1,1,m), ao_num*ao_num, b_mat(1,1,1,m), n_points_final_grid &
-              , 1.d0, ac_mat, ao_num*ao_num) 
+    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num &
+              , int(n_points_final_grid, 4), -1.d0 &
+              , x_v_ij_erf_rk_cst_mu(1,1,1,m), ao_num*ao_num &
+              , b_mat(1,1,1,m), int(n_points_final_grid, 4) &
+              , 1.d0, ac_mat, ao_num*ao_num)
   enddo
 
  !$OMP PARALLEL          &
@@ -121,7 +127,7 @@ BEGIN_PROVIDER [double precision, mo_non_hermit_term_chemist, (mo_num, mo_num, m
   END_DOC
 
   implicit none
-  integer                       :: i, j, k, l, m, n, p, q
+  integer(size_t)               :: i, j, k, l, m, n, p, q
   double precision, allocatable :: mo_tmp_1(:,:,:,:), mo_tmp_2(:,:,:,:)
  
   allocate(mo_tmp_1(mo_num,ao_num,ao_num,ao_num))
@@ -201,7 +207,7 @@ BEGIN_PROVIDER [double precision, mo_non_hermit_term, (mo_num, mo_num, mo_num, m
   END_DOC
 
   implicit none
-  integer :: i, j, k, l
+  integer(size_t) :: i, j, k, l
 
   do j = 1, mo_num
     do i = 1, mo_num

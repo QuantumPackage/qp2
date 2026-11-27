@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [ integer, n_mat]
  implicit none
  n_mat = 2
@@ -43,10 +45,12 @@ subroutine hcalc_r_tmp(v,u,N_st,sze) ! v = H u
   ! Computes $v = H | u \rangle$ 
   !
   END_DOC
-  integer, intent(in)              :: N_st,sze
+  integer, intent(in)              :: N_st
+  integer(size_t), intent(in)      :: sze
   double precision, intent(in)     :: u(sze,N_st)
   double precision, intent(inout)  :: v(sze,N_st)
-  integer :: i,j,istate
+  integer :: istate
+  integer(size_t) :: i,j
   v = 0.d0
   do istate = 1, N_st
    do j = 1, sze
@@ -74,10 +78,12 @@ subroutine hcalc_l_tmp(v,u,N_st,sze) ! v = H^\dagger u
   ! Computes $v = H | u \rangle$ 
   !
   END_DOC
-  integer, intent(in)              :: N_st,sze
+  integer, intent(in)              :: N_st
+  integer(size_t), intent(in)      :: sze
   double precision, intent(in)     :: u(sze,N_st)
   double precision, intent(inout)  :: v(sze,N_st)
-  integer :: i,j,istate
+  integer :: istate
+  integer(size_t) :: i,j
   v = 0.d0
   do istate = 1, N_st
    do j = 1, sze

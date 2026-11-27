@@ -1,6 +1,7 @@
 ! -*- mode: f90 -*-
 program pt2
   use pair_block_stats_mod
+  use sizet
   implicit none
   BEGIN_DOC
   ! Second order perturbative correction to the wave function contained
@@ -64,11 +65,12 @@ program pt2
   threshold_generators = 1.d0
   SOFT_TOUCH read_wf threshold_generators
   PROVIDE psi_energy
-  call pair_block_stats_init(mo_num, trim(ezfio_filename))
+  call pair_block_stats_init(int(mo_num, size_t), trim(ezfio_filename))
   call run
 end program pt2
 
 subroutine run
+  use sizet
   implicit none
   BEGIN_DOC
   ! Main computation of the |pt2| program. Computes the |PT2|
@@ -103,9 +105,10 @@ subroutine run
 
   call wall_time(walk_t0)
   if (do_pt2) then
-     call pt2_stochastic(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, relative_error, 0) ! Stochastic PT2
+     call pt2_stochastic(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, &
+                         relative_error, int(0,size_t)) ! Stochastic PT2
   else
-     call omp_selection(0, pt2_data)
+     call omp_selection(int(0,size_t), pt2_data)
   endif
   call wall_time(walk_t1)
 

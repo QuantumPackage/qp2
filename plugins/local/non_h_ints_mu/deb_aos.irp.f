@@ -27,8 +27,9 @@ end
 
 subroutine print_aos()
 
+  use sizet
   implicit none
-  integer          :: i, ipoint
+  integer(size_t) :: i, ipoint
   double precision :: r(3)
   double precision :: ao_val, ao_der(3), ao_lap
   double precision :: accu_vgl(5)

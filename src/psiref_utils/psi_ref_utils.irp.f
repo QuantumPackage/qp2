@@ -1,3 +1,4 @@
+use sizet
 use bitmasks
 
 
@@ -19,7 +20,8 @@ BEGIN_PROVIDER [ double precision, psi_ref_coef_transp, (n_states,psi_det_size) 
  BEGIN_DOC
 ! Transposed psi_ref_coef
  END_DOC
- integer :: i,j
+ integer(size_t)                :: j
+ integer                        :: i
  do j=1,N_det_ref
    do i=1, n_states
      psi_ref_coef_transp(i,j) = psi_ref_coef(j,i)
@@ -32,7 +34,8 @@ BEGIN_PROVIDER [ double precision, psi_ref_coef_normalized,  (psi_det_size,n_sta
  BEGIN_DOC
 ! Normalized coefficients of the reference
  END_DOC
- integer :: i,j,k
+ integer(size_t)                :: j
+ integer                        :: i,k
  do k=1,N_states
    do j=1,N_det_ref
      psi_ref_coef_normalized(j,k) = psi_ref_coef(j,k)
@@ -48,7 +51,8 @@ BEGIN_PROVIDER [ double precision, psi_non_ref_coef_transp, (n_states,psi_det_si
  BEGIN_DOC
 ! Transposed psi_non_ref_coef
  END_DOC
- integer :: i,j
+ integer(size_t)                :: j
+ integer                        :: i
  do j=1,N_det_non_ref
    do i=1, n_states
      psi_non_ref_coef_transp(i,j) = psi_non_ref_coef(j,i)
@@ -58,9 +62,9 @@ END_PROVIDER
 
  BEGIN_PROVIDER [ integer(bit_kind), psi_non_ref,  (N_int,2,psi_det_size) ]
 &BEGIN_PROVIDER [ double precision, psi_non_ref_coef, (psi_det_size,n_states) ]
-&BEGIN_PROVIDER [ integer, idx_non_ref,  (psi_det_size) ]
-&BEGIN_PROVIDER [ integer, idx_non_ref_rev,  (psi_det_size) ]
-&BEGIN_PROVIDER [ integer, N_det_non_ref ]
+&BEGIN_PROVIDER [ integer(size_t), idx_non_ref,  (psi_det_size) ]
+&BEGIN_PROVIDER [ integer(size_t), idx_non_ref_rev,  (psi_det_size) ]
+&BEGIN_PROVIDER [ integer(size_t), N_det_non_ref ]
  implicit none
  BEGIN_DOC
   ! Set of determinants which are not part of the reference, defined from the application
@@ -68,7 +72,7 @@ END_PROVIDER
   ! idx_non_ref gives the indice of the determinant in psi_det.
   ! idx_non_ref_rev gives the reverse.
  END_DOC
- integer                        :: i_non_ref,j,k
+ integer(size_t)                :: i_non_ref,j,k
  integer                        :: degree
  logical                        :: in_ref
  i_non_ref =0
@@ -111,7 +115,7 @@ END_PROVIDER
   ! idx_non_ref gives the indice of the determinant in psi_det.
   ! But this is with respect to the restart wave function.
  END_DOC
- integer                        :: i_non_ref,j,k
+ integer(size_t)                :: i_non_ref,j,k
  integer                        :: degree
  logical                        :: in_ref
  integer, save                  :: ifirst = 0
@@ -151,7 +155,8 @@ END_PROVIDER
  ! Reference determinants sorted to accelerate the search of a random determinant in the wave
  ! function.
  END_DOC
- call sort_dets_by_det_search_key(N_det_ref, psi_non_ref, psi_non_ref_coef, size(psi_non_ref_coef,1), &
+ call sort_dets_by_det_search_key(N_det_ref, psi_non_ref, psi_non_ref_coef, &
+     int(size(psi_non_ref_coef,1), size_t), &
      psi_non_ref_sorted_bit, psi_non_ref_coef_sorted_bit, N_states)
 
 END_PROVIDER
@@ -164,7 +169,7 @@ BEGIN_PROVIDER [double precision, H_matrix_ref, (N_det_ref,N_det_ref)]
   ! H_matrix_ref(i,j) is <psi_ref(i)|H|psi_ref(j)>, computed by i_H_j
   ! for i, j = 1..N_det_ref.
   END_DOC
- integer :: i,j
+ integer(size_t)                :: i,j
  double precision :: hij
   do i = 1, N_det_ref
    do j = 1, N_det_ref
@@ -183,12 +188,13 @@ END_PROVIDER
   ! psi_ref_coef_diagonalized(j,i) the corresponding eigenvector,
   ! for i = 1..N_states.
   END_DOC
- integer :: i,j
+ integer(size_t)                :: j
+ integer                        :: i
   double precision, allocatable  :: eigenvectors(:,:), eigenvalues(:)
-  allocate (eigenvectors(size(H_matrix_ref,1),N_det_ref))
+  allocate (eigenvectors(int(size(H_matrix_ref,1), size_t),N_det_ref))
   allocate (eigenvalues(N_det_ref))
   call lapack_diag(eigenvalues,eigenvectors,                       &
-      H_matrix_ref,size(H_matrix_ref,1),N_det_ref)
+      H_matrix_ref,int(size(H_matrix_ref,1), size_t), N_det_ref)
   do i = 1, N_states
    psi_ref_energy_diagonalized(i) = eigenvalues(i)
    do j = 1, N_det_ref
@@ -209,7 +215,8 @@ END_PROVIDER
   ! the sums running over the N_det_ref reference determinants with
   ! coefficients psi_ref_coef(:,k) and matrix elements H_matrix_ref.
   END_DOC
- integer :: i,j,k
+ integer(size_t)                :: i,j
+ integer                        :: k
  double precision :: hij,norm,u_dot_v
   psi_ref_energy = 0.d0
 
@@ -234,25 +241,27 @@ logical function is_in_psi_ref(key,Nint)
   BEGIN_DOC
 ! True if the determinant ``det`` is in the wave function
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: key(Nint,2)
-  integer, external              :: get_index_in_psi_ref_sorted_bit
+  integer(size_t), external      :: get_index_in_psi_ref_sorted_bit
 
   !DIR$ FORCEINLINE
   is_in_psi_ref = get_index_in_psi_ref_sorted_bit(key,Nint) > 0
 end
 
-integer function get_index_in_psi_ref_sorted_bit(key,Nint)
+function get_index_in_psi_ref_sorted_bit(key,Nint)
   use bitmasks
+  use sizet
   BEGIN_DOC
 ! Returns the index of the determinant in the ``psi_ref_sorted_bit`` array
   END_DOC
+  integer(size_t) :: get_index_in_psi_ref_sorted_bit
   implicit none
 
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: key(Nint,2)
 
-  integer                        :: i, ibegin, iend, istep, l
+  integer(size_t)                :: i, ibegin, iend, istep, l
   integer*8                      :: det_ref, det_search
   integer*8, external            :: det_search_key
   logical                        :: in_wavefunction
@@ -332,7 +341,7 @@ BEGIN_PROVIDER [double precision, ref_hamiltonian_matrix, (n_det_ref,n_det_ref)]
  ! H matrix in the Reference space
  END_DOC
  implicit none
- integer :: i,j
+ integer(size_t)                :: i,j
  double precision :: hij
  do i = 1, N_det_ref
   do j = 1, N_det_ref
@@ -343,7 +352,7 @@ BEGIN_PROVIDER [double precision, ref_hamiltonian_matrix, (n_det_ref,n_det_ref)]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ integer, idx_non_ref_from_sorted, (N_det) ]
+BEGIN_PROVIDER [ integer(size_t), idx_non_ref_from_sorted, (N_det) ]
   implicit none
   BEGIN_DOC
   ! For each determinant of the sorted wave function, gives its index
@@ -352,7 +361,7 @@ BEGIN_PROVIDER [ integer, idx_non_ref_from_sorted, (N_det) ]
   ! is in the reference. Stops if a determinant is not in the sorted
   ! list.
   END_DOC
-  integer :: i,inpsisor
+  integer(size_t) :: i,inpsisor
 
   idx_non_ref_from_sorted = 0
 

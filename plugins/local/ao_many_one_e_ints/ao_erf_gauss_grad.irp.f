@@ -1,12 +1,16 @@
+use sizet
+
 subroutine phi_j_erf_mu_r_dxyz_phi(i,j,mu_in, C_center, dxyz_ints)
+ use sizet
  implicit none
  BEGIN_DOC
 ! dxyz_ints(1/2/3) = int dr phi_i(r) [erf(mu  |r - C|)/|r-C|]  d/d(x/y/z) phi_i(r)
  END_DOC
- integer, intent(in) :: i,j
+ integer(size_t), intent(in) :: i,j
  double precision, intent(in) :: mu_in, C_center(3)
  double precision, intent(out):: dxyz_ints(3)
- integer :: num_A,power_A(3), num_b, power_B(3),power_B_tmp(3)
+ integer(size_t) :: num_A, num_b
+ integer :: power_A(3), power_B(3),power_B_tmp(3)
  double precision :: alpha, beta, A_center(3), B_center(3),contrib,NAI_pol_mult_erf,coef,thr
  integer :: n_pt_in,l,m,mm
  thr = 1.d-12
@@ -56,14 +60,16 @@ end
 
 
 subroutine phi_j_erf_mu_r_dxyz_phi_bis(i,j,mu_in, C_center, dxyz_ints)
+ use sizet
  implicit none
  BEGIN_DOC
 ! dxyz_ints(1/2/3) = int dr phi_j(r) [erf(mu  |r - C|)/|r-C|]  d/d(x/y/z) phi_i(r)
  END_DOC
- integer, intent(in) :: i,j
+ integer(size_t), intent(in) :: i,j
  double precision, intent(in) :: mu_in, C_center(3)
  double precision, intent(out):: dxyz_ints(3)
- integer :: num_A,power_A(3), num_b, power_B(3),power_B_tmp(3)
+ integer(size_t) :: num_A, num_b
+ integer :: power_A(3), power_B(3),power_B_tmp(3)
  double precision :: alpha, beta, A_center(3), B_center(3),contrib,NAI_pol_mult_erf
  double precision :: thr, coef
  integer :: n_pt_in,l,m,mm,kk
@@ -103,14 +109,16 @@ subroutine phi_j_erf_mu_r_dxyz_phi_bis(i,j,mu_in, C_center, dxyz_ints)
 end
 
 subroutine phi_j_erf_mu_r_xyz_dxyz_phi(i,j,mu_in, C_center, dxyz_ints)
+ use sizet
  implicit none
  BEGIN_DOC
 ! dxyz_ints(1/2/3) = int dr phi_j(r) x/y/z [erf(mu  |r - C|)/|r-C|]  d/d(x/y/z) phi_i(r)
  END_DOC
- integer, intent(in) :: i,j
+ integer(size_t), intent(in) :: i,j
  double precision, intent(in) :: mu_in, C_center(3)
  double precision, intent(out):: dxyz_ints(3)
- integer :: num_A,power_A(3), num_b, power_B(3),power_B_tmp(3)
+ integer(size_t) :: num_A, num_b
+ integer :: power_A(3), power_B(3),power_B_tmp(3)
  double precision :: alpha, beta, A_center(3), B_center(3),contrib,NAI_pol_mult_erf
  double precision :: thr, coef
  integer :: n_pt_in,l,m,mm,kk

@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -6,15 +7,16 @@ double precision function get_phase_bi(phasemask, s1, s2, h1, p1, h2, p2, Nint)
   use bitmasks
   implicit none
 
-  integer,           intent(in) :: Nint
-  integer,           intent(in) :: s1, s2, h1, h2, p1, p2
+  integer(size_t),   intent(in) :: Nint
+  integer,           intent(in) :: s1, s2
+  integer(size_t),   intent(in) :: h1, h2, p1, p2
   integer(bit_kind), intent(in) :: phasemask(Nint,2)
 
   double precision, save        :: res(0:1) = (/1d0, -1d0/)
 
   integer                       :: np
-  integer                       :: h1_int, h2_int
-  integer                       :: p1_int, p2_int
+  integer(size_t)                :: h1_int, h2_int
+  integer(size_t)                :: p1_int, p2_int
   integer                       :: h1_bit, h2_bit
   integer                       :: p1_bit, p2_bit
   logical                       :: change
@@ -52,16 +54,19 @@ end function get_phase_bi
 subroutine get_d3_htc(gen, bannedOrb, banned, mat_m, mat_p, mask, p, sp, rcoefs, lcoefs)
 
   use bitmasks
+  use sizet
   implicit none
 
   integer(bit_kind), intent(in)   :: gen(N_int, 2), mask(N_int, 2)
-  integer,           intent(in)   :: p(0:4,2), sp
+  integer(size_t),   intent(in)   :: p(0:4,2)
+  integer,           intent(in)   :: sp
   logical,           intent(in)   :: bannedOrb(mo_num, 2), banned(mo_num, mo_num,2)
   double precision,  intent(in)   :: rcoefs(N_states), lcoefs(N_states)
   double precision, intent(inout) :: mat_m(N_states, mo_num, mo_num), mat_p(N_states, mo_num, mo_num)
 
   integer(bit_kind)               :: det(N_int, 2)
-  integer                         :: k, h1, h2, p1, p2, puti, putj
+  integer                         :: k
+  integer(size_t)                 :: h1, h2, p1, p2, puti, putj
   double precision                :: i_h_alpha, alpha_h_i 
   logical                         :: ok
 
@@ -134,16 +139,19 @@ end subroutine get_d3_htc
 subroutine get_d3_h(gen, bannedOrb, banned, mat, mask, p, sp, coefs)
 
   use bitmasks
+  use sizet
   implicit none
 
   integer(bit_kind), intent(in)   :: gen(N_int, 2), mask(N_int, 2)
-  integer,           intent(in)   :: p(0:4,2), sp
+  integer(size_t),   intent(in)   :: p(0:4,2)
+  integer,           intent(in)   :: sp
   logical,           intent(in)   :: bannedOrb(mo_num, 2), banned(mo_num, mo_num,2)
   double precision,  intent(in)   :: coefs(N_states)
   double precision, intent(inout) :: mat(N_states, mo_num, mo_num)
 
   integer(bit_kind)               :: det(N_int, 2)
-  integer                         :: k, h1, h2, p1, p2, puti, putj
+  integer                         :: k
+  integer(size_t)                 :: h1, h2, p1, p2, puti, putj
   double precision                :: hij
   logical                         :: ok
 
@@ -197,6 +205,7 @@ end subroutine get_d3_h
 subroutine get_d2(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, coefs)
 
   use bitmasks
+  use sizet
   implicit none
 
   integer(bit_kind), intent(in) :: mask(N_int, 2), gen(N_int, 2)
@@ -204,12 +213,15 @@ subroutine get_d2(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, s
   logical, intent(in) :: bannedOrb(mo_num, 2), banned(mo_num, mo_num,2)
   double precision, intent(in) :: coefs(N_states,2)
   double precision, intent(inout) :: mat_l(N_states, mo_num, mo_num), mat_r(N_states, mo_num, mo_num)
-  integer, intent(in) :: h(0:2,2), p(0:4,2), sp
+  integer(size_t), intent(in) :: h(0:2,2), p(0:4,2)
+  integer, intent(in) :: sp
 
   double precision, external :: get_phase_bi
 
-  integer :: i, j, k, tip, ma, mi, puti, putj
-  integer :: h1, h2, p1, p2, i1, i2
+  integer :: i, j, k, tip, ma, mi
+  integer(size_t) :: puti, putj
+  integer(size_t) :: h1, h2, p1, p2
+  integer :: i1, i2
   double precision :: hij, hji, phase
 
   integer, parameter:: turn2d(2,3,4) = reshape((/0,0, 0,0, 0,0,  3,4, 0,0, 0,0,  2,4, 1,4, 0,0,  2,3, 1,3, 1,2 /), (/2,3,4/))
@@ -391,6 +403,7 @@ end subroutine get_d2
 subroutine get_d1(gen, phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, sp, coefs)
 
   use bitmasks
+  use sizet
   implicit none
 
   integer(bit_kind), intent(in)  :: mask(N_int, 2), gen(N_int, 2)
@@ -399,14 +412,17 @@ subroutine get_d1(gen, phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, s
   integer(bit_kind)              :: det(N_int, 2)
   double precision, intent(in)   :: coefs(N_states,2)
   double precision, intent(inout) :: mat_p(N_states, mo_num, mo_num), mat_m(N_states, mo_num, mo_num)
-  integer, intent(in)            :: h(0:2,2), p(0:4,2), sp
+  integer(size_t), intent(in)    :: h(0:2,2), p(0:4,2)
+  integer, intent(in)            :: sp
   double precision, external     :: get_phase_bi
   logical                        :: ok
 
   logical, allocatable           :: lbanned(:,:)
-  integer                        :: puti, putj, ma, mi, s1, s2, i, i1, i2, j
-  integer                        :: hfix, pfix, h1, h2, p1, p2, ib, k, l
-  integer :: mm
+  integer(size_t)                 :: puti, putj
+  integer                        :: ma, mi, s1, s2, i, i1, i2, j
+  integer(size_t)                 :: hfix, pfix, h1, h2, p1, p2, l
+  integer                        :: ib, k
+  integer(size_t)                :: mm
 
   integer, parameter             :: turn2(2) = (/2,1/)
   integer, parameter             :: turn3(2,3) = reshape((/2,3,  1,3, 1,2/), (/2,3/))
@@ -768,6 +784,7 @@ end subroutine get_d1
 subroutine get_d0(gen, phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, sp, coefs)
 
   use bitmasks
+  use sizet
   implicit none
 
   integer(bit_kind), intent(in) :: gen(N_int, 2), mask(N_int, 2)
@@ -777,9 +794,11 @@ subroutine get_d0(gen, phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, s
   double precision, intent(in) :: coefs(N_states,2)
   double precision, intent(inout) :: mat_m(N_states, mo_num, mo_num)
   double precision, intent(inout) :: mat_p(N_states, mo_num, mo_num)
-  integer, intent(in) :: h(0:2,2), p(0:4,2), sp
+  integer(size_t), intent(in) :: h(0:2,2), p(0:4,2)
+  integer, intent(in) :: sp
 
-  integer :: i, j, k, s, h1, h2, p1, p2, puti, putj, mm
+  integer                         :: i, j, k, s
+  integer(size_t)                 :: h1, h2, p1, p2, puti, putj, mm
   double precision :: hij, phase, hji
   double precision, external :: get_phase_bi
   logical :: ok
@@ -1546,6 +1565,7 @@ end subroutine get_d0
 subroutine get_d0_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
 
   use bitmasks
+  use sizet
   implicit none
 
   integer(bit_kind), intent(in) :: gen(N_int, 2), mask(N_int, 2)
@@ -1554,9 +1574,11 @@ subroutine get_d0_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, 
   integer(bit_kind) :: det(N_int, 2)
   double precision, intent(in) :: coefs(N_states)
   double precision, intent(inout) :: mat(N_states, mo_num, mo_num)
-  integer, intent(in) :: h(0:2,2), p(0:4,2), sp
+  integer(size_t), intent(in) :: h(0:2,2), p(0:4,2)
+  integer, intent(in) :: sp
 
-  integer :: i, j, s, h1, h2, p1, p2, puti, putj
+  integer                         :: i, j, s
+  integer(size_t)                 :: h1, h2, p1, p2, puti, putj
   double precision :: hij, phase
   double precision, external :: get_phase_bi
   logical :: ok
@@ -1609,6 +1631,7 @@ end subroutine get_d0_reference
 subroutine get_d1_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
 
   use bitmasks
+  use sizet
   implicit none
 
   integer(bit_kind), intent(in)  :: mask(N_int, 2), gen(N_int, 2)
@@ -1617,14 +1640,17 @@ subroutine get_d1_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, 
   integer(bit_kind)              :: det(N_int, 2)
   double precision, intent(in)   :: coefs(N_states)
   double precision, intent(inout) :: mat(N_states, mo_num, mo_num)
-  integer, intent(in)            :: h(0:2,2), p(0:4,2), sp
+  integer(size_t), intent(in)    :: h(0:2,2), p(0:4,2)
+  integer, intent(in)            :: sp
   double precision               :: hij, tmp_row_ij(N_states, mo_num), tmp_row_ij2(N_states, mo_num), hji
   double precision, external     :: get_phase_bi
   logical                        :: ok
 
   logical, allocatable           :: lbanned(:,:)
-  integer                        :: puti, putj, ma, mi, s1, s2, i, i1, i2, j
-  integer                        :: hfix, pfix, h1, h2, p1, p2, ib
+  integer(size_t)                 :: puti, putj
+  integer                        :: ma, mi, s1, s2, i, i1, i2, j
+  integer(size_t)                 :: hfix, pfix, h1, h2, p1, p2
+  integer                        :: ib
 
   integer, parameter             :: turn2(2) = (/2,1/)
   integer, parameter             :: turn3(2,3) = reshape((/2,3,  1,3, 1,2/), (/2,3/))
@@ -1782,6 +1808,7 @@ end subroutine get_d1_reference
 subroutine get_d2_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
 
   use bitmasks
+  use sizet
   implicit none
 
   integer(bit_kind), intent(in) :: mask(N_int, 2), gen(N_int, 2)
@@ -1789,12 +1816,15 @@ subroutine get_d2_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, 
   logical, intent(in) :: bannedOrb(mo_num, 2), banned(mo_num, mo_num,2)
   double precision, intent(in) :: coefs(N_states)
   double precision, intent(inout) :: mat(N_states, mo_num, mo_num)
-  integer, intent(in) :: h(0:2,2), p(0:4,2), sp
+  integer(size_t), intent(in) :: h(0:2,2), p(0:4,2)
+  integer, intent(in) :: sp
 
   double precision, external :: get_phase_bi
 
-  integer :: i, j, tip, ma, mi, puti, putj
-  integer :: h1, h2, p1, p2, i1, i2, mm
+  integer :: i, j, tip, ma, mi
+  integer(size_t) :: puti, putj
+  integer(size_t) :: h1, h2, p1, p2
+  integer :: i1, i2, mm
   double precision :: hij, phase, hji
 
   integer, parameter:: turn2d(2,3,4) = reshape((/0,0, 0,0, 0,0,  3,4, 0,0, 0,0,  2,4, 1,4, 0,0,  2,3, 1,3, 1,2 /), (/2,3,4/))

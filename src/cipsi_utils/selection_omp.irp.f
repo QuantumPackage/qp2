@@ -1,3 +1,5 @@
+use sizet
+
 ! -*- mode: f90 -*-
 !=======================================================================
 ! Deterministic CIPSI selection on OpenMP (in-process)
@@ -72,6 +74,7 @@
 !=======================================================================
 
 subroutine omp_selection(N_in, pt2_data)
+ use sizet
   use selection_types
   use c_functions, only: qp_epoch_c
   implicit none
@@ -83,24 +86,27 @@ subroutine omp_selection(N_in, pt2_data)
   ! file for the design and the determinism contract.
   END_DOC
 
-  integer, intent(in)            :: N_in
+  integer(size_t), intent(in)      :: N_in
   type(pt2_type), intent(inout)  :: pt2_data
 
   type(selection_buffer)              :: b
   type(selection_buffer), allocatable :: b_workers(:)
-  integer                        :: i, j, k, l, N, nproc_target, ntask
+  integer(size_t)                :: i, j, N
+  integer                        :: k, l, nproc_target, ntask
   integer, parameter             :: window = 256
-  integer, allocatable           :: tgen(:), tsub(:)
+  integer(size_t), allocatable   :: tgen(:)
+  integer, allocatable           :: tsub(:)
   type(pt2_type), allocatable    :: pt2_sub(:,:)
   double precision               :: f(N_states), mem
-  integer                        :: gend, kstart, maxF
+  integer(size_t)                :: gend
+  integer                        :: kstart, maxF
 
   pt2_data % epoch_start = qp_epoch_c()
   ! No estimator on the deterministic path.
   pt2_data % samples = 0.d0
 
-  N = max(N_in,1)
-  N = min(N, (elec_alpha_num * (mo_num-elec_alpha_num))**2)
+  N = max(N_in, int(1, size_t))
+  N = min(N, int((elec_alpha_num * (mo_num-elec_alpha_num))**2, size_t))
 
   ! Every provider that select_connected (and its callees) PROVIDEs
   ! must be built HERE, before the parallel regions.  The list is the
@@ -300,6 +306,7 @@ end subroutine
 
 
 subroutine omp_selection_task(g, j, b_workers, b, pt2_out)
+ use sizet
   use omp_lib
   use selection_types
   implicit none
@@ -322,7 +329,8 @@ subroutine omp_selection_task(g, j, b_workers, b, pt2_out)
   ! b_workers(0), as in pt2_omp_task.
   END_DOC
 
-  integer, intent(in)                     :: g, j
+  integer(size_t), intent(in)              :: g
+  integer, intent(in)                      :: j
   type(selection_buffer), intent(inout)   :: b_workers(*)
   type(selection_buffer), intent(inout)   :: b
   type(pt2_type), intent(inout)           :: pt2_out

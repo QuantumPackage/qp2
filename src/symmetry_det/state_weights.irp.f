@@ -1,3 +1,4 @@
+use sizet
 !-----------------------------------------------------------------------
 ! State symmetry weights.
 !
@@ -67,7 +68,8 @@ BEGIN_PROVIDER [ double precision, pg_state_irrep_weight, (pg_n_irrep,N_states) 
 
   if (N_det <= 0 .or. N_states <= 0) return
 
-  call pg_state_weight_matrix(N_det, psi_coef, size(psi_coef,1), N_states, &
+  call pg_state_weight_matrix(int(N_det, size_t), psi_coef, &
+       int(size(psi_coef,1), size_t), N_states, &
        pg_state_irrep_weight, pg_state_norm, pg_det_mixed_frac)
   if (pg_label_ierr /= 0) return
 
@@ -96,6 +98,7 @@ END_PROVIDER
 
 subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
   use omp_lib
+  use sizet
   implicit none
   BEGIN_DOC
   ! Exact irrep weights of ``nst`` CI vectors stored in ``coef(lda,*)``.
@@ -164,12 +167,15 @@ subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
   ! pure-determinant seed stays in ``w`` and the irrep epilogue is applied
   ! to it once, after the merge.
   END_DOC
-  integer, intent(in) :: ndet, lda, nst
+  integer(size_t), intent(in) :: ndet, lda
+  integer, intent(in) :: nst
   double precision, intent(in) :: coef(lda,*)
   double precision, intent(out) :: w(pg_n_irrep,nst), norm(nst), dmix(nst)
-  integer :: i, s, a, g, ifam, i0, np, imin, ip, ic, nchunk, np_max
+  integer(size_t) :: i, ifam, i0, imin
+  integer :: s, a, g, np, ip, ic, nchunk, np_max
   integer :: nsel(2,pg_n_mo_block)
-  integer, allocatable :: mask(:,:,:), idx(:), err(:)
+  integer, allocatable :: mask(:,:,:), err(:)
+  integer(size_t), allocatable :: idx(:)
   double precision, allocatable :: c(:,:), qtot_c(:,:,:), qtot(:,:)
   double precision :: pmw
   ! Element selection passed to pg_family_wadd. The production path wants
@@ -243,7 +249,7 @@ subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
   ! dependency would be circular.
   nchunk = omp_get_max_threads()
   if (omp_in_parallel()) nchunk = 1
-  nchunk = max(1, min(nchunk, pg_n_family))
+  nchunk = max(1, min(nchunk, int(pg_n_family, 4)))
 
   allocate(qtot_c(pg_n_elem,nst,nchunk), qtot(pg_n_elem,nst), err(nchunk))
   qtot_c(1:pg_n_elem,1:nst,1:nchunk) = 0.d0
@@ -346,6 +352,7 @@ subroutine pg_state_weight_matrix(ndet, coef, lda, nst, w, norm, dmix)
 end subroutine pg_state_weight_matrix
 
 subroutine pg_state_labels_exact(ndet, coef, lda, nst, label, dom, purity)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Exact irrep labels of ``nst`` CI vectors, for the irrep filter.
@@ -364,7 +371,8 @@ subroutine pg_state_labels_exact(ndet, coef, lda, nst, label, dom, purity)
   ! :c:func:`pg_det_state_labels`, which only sums coef^2 by determinant
   ! label and is deliberately allowed to answer 0.
   END_DOC
-  integer, intent(in) :: ndet, lda, nst
+  integer(size_t), intent(in) :: ndet, lda
+  integer, intent(in) :: nst
   double precision, intent(in) :: coef(lda,*)
   integer, intent(out) :: label(*), dom(*)
   double precision, intent(out) :: purity(*)

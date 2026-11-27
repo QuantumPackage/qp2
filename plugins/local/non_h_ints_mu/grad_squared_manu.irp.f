@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -10,7 +11,7 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_test, (ao_num, ao_num, ao_nu
   END_DOC
 
   implicit none
-  integer                       :: ipoint, i, j, k, l
+  integer(size_t)               :: ipoint, i, j, k, l
   double precision              :: weight1, ao_ik_r, ao_i_r,contrib,contrib2
   double precision              :: time0, time1
   double precision, allocatable :: b_mat(:,:,:), tmp(:,:,:)
@@ -63,12 +64,14 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_test, (ao_num, ao_num, ao_nu
    !$OMP END PARALLEL
 
     tc_grad_square_ao_test = 0.d0
-    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0 &
-              , tmp(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid      &
+    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num &
+              , int(n_points_final_grid, 4), 1.d0 &
+              , tmp(1,1,1), ao_num*ao_num &
+              , b_mat(1,1,1), int(n_points_final_grid, 4) &
               , 1.d0, tc_grad_square_ao_test, ao_num*ao_num)
     deallocate(tmp, b_mat)
 
-    call sum_A_At(tc_grad_square_ao_test(1,1,1,1), ao_num*ao_num)
+    call sum_A_At(tc_grad_square_ao_test(1,1,1,1), int(ao_num, size_t)*ao_num)
 
   endif
 
@@ -96,7 +99,7 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_test_ref, (ao_num, ao_num, a
   END_DOC
 
   implicit none
-  integer                       :: ipoint, i, j, k, l
+  integer(size_t)               :: ipoint, i, j, k, l
   double precision              :: weight1, ao_ik_r, ao_i_r,contrib,contrib2
   double precision              :: time0, time1
   double precision, allocatable :: ac_mat(:,:,:,:), b_mat(:,:,:), tmp(:,:,:)
@@ -141,8 +144,10 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_test_ref, (ao_num, ao_num, a
  !$OMP END PARALLEL
 
   ac_mat = 0.d0
-  call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0 &
-            , tmp(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid      &
+  call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num &
+            , int(n_points_final_grid, 4), 1.d0 &
+            , tmp(1,1,1), ao_num*ao_num &
+            , b_mat(1,1,1), int(n_points_final_grid, 4) &
             , 1.d0, ac_mat, ao_num*ao_num)
   deallocate(tmp, b_mat)
 
@@ -175,7 +180,7 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, u12sq_envsq_test, (ao_num, ao_num, n_points_final_grid) ]
 
   implicit none
-  integer                    :: ipoint, i, j
+  integer(size_t)          :: ipoint, i, j
   double precision           :: tmp_x, tmp_y, tmp_z
   double precision           :: tmp1
   double precision           :: time0, time1
@@ -205,7 +210,8 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, u12_grad1_u12_env_grad1_env_test, (ao_num, ao_num, n_points_final_grid)]
 
   implicit none
-  integer                    :: ipoint, i, j, m, igauss
+  integer                    :: m, igauss
+  integer(size_t)          :: ipoint, i, j
   double precision           :: x, y, z
   double precision           :: tmp_v, tmp_x, tmp_y, tmp_z
   double precision           :: tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9
@@ -257,7 +263,8 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, grad12_j12_test, (ao_num, ao_num, n_points_final_grid)]
 
   implicit none
-  integer                    :: ipoint, i, j, m, igauss
+  integer                    :: m, igauss
+  integer(size_t)          :: ipoint, i, j
   double precision           :: r(3), delta, coef
   double precision           :: tmp1
   double precision           :: time0, time1

@@ -1,3 +1,5 @@
+use sizet
+
  BEGIN_PROVIDER [ double precision, RS_KS_energy ]
 &BEGIN_PROVIDER [ double precision, two_e_energy]
 &BEGIN_PROVIDER [ double precision, one_e_energy]
@@ -9,7 +11,7 @@
  END_DOC
  RS_KS_energy = nuclear_repulsion
 
- integer                        :: i,j
+ integer(size_t)                :: i,j
  double precision :: accu_mono,accu_fock
  one_e_energy = 0.d0
  two_e_energy = 0.d0

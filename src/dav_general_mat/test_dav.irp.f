@@ -1,3 +1,4 @@
+
 program test_dav
   implicit none
   BEGIN_DOC
@@ -12,6 +13,7 @@ program test_dav
 end
 
 subroutine routine
+ use sizet
  implicit none
   BEGIN_DOC
 ! Example driver for the two non-dressed Davidson routines
@@ -22,9 +24,10 @@ subroutine routine
 ! ($v = H u$). Prints the eigenvalues after each call.
   END_DOC
  double precision, allocatable :: u_in(:,:), H_jj(:), energies(:),h_mat(:,:)
- integer :: dim_in,sze,N_st,N_st_diag_in
+ integer(size_t) :: dim_in,sze
+ integer :: N_st,N_st_diag_in
  logical :: converged 
- integer :: i,j
+ integer(size_t) :: i,j
  external hcalc_template
  N_st = N_states
  N_st_diag_in = N_states_diag
@@ -56,6 +59,7 @@ end
 
 
 subroutine test_dav_dress
+ use sizet
  implicit none
   BEGIN_DOC
 ! Dressed variant of the test: H_jj is the diagonal of the
@@ -66,12 +70,14 @@ subroutine test_dav_dress
 ! routine. Prints the first computed energy.
   END_DOC
  double precision, allocatable :: u_in(:,:), H_jj(:), energies(:)
- integer :: sze,N_st,N_st_diag_in,dressing_state
+ integer(size_t) :: sze
+ integer :: N_st,N_st_diag_in,dressing_state
  logical :: converged 
- integer :: i,j
+ integer(size_t) :: i
+ integer :: j
  external hcalc_template
  double precision, allocatable :: dressing_vec(:)
- integer :: idress
+ integer(size_t) :: idress
  N_st = N_states
  N_st_diag_in = N_states_diag
  sze = N_det

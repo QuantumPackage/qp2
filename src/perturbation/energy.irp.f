@@ -1,3 +1,4 @@
+use sizet
 BEGIN_PROVIDER [ double precision, energy_by_projection, (N_states)]
  implicit none
  BEGIN_DOC
@@ -5,7 +6,8 @@ BEGIN_PROVIDER [ double precision, energy_by_projection, (N_states)]
  END_DOC
 
  integer :: i, k, iref
- integer, allocatable :: degree(:), idx(:)
+ integer, allocatable :: degree(:)
+ integer(size_t), allocatable :: idx(:)
  double precision :: hij, tmp
  allocate(degree(N_det),idx(0:N_det))
  call i_h_j(psi_det(1,1,1),psi_det(1,1,1),N_int,hij)

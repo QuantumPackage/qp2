@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [ integer*8, qmckl_ctx_jastrow ]
   use qmckl
   use iso_c_binding
@@ -128,7 +130,7 @@ END_PROVIDER
    stop -1
  endif
 
- integer :: i,k
+ integer(size_t) :: i,k
  do k=1,n_points_final_grid
    do i=1,ao_num
      aos_in_r_array_qmckl(i,k) = vgl(i,1,k)
@@ -179,7 +181,7 @@ END_PROVIDER
    stop -1
  endif
 
- integer :: i,k
+ integer(size_t) :: i,k
  do k=1,n_points_final_grid
    do i=1,mo_num
      mos_in_r_array_qmckl(i,k) = vgl(i,1,k)

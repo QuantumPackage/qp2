@@ -29,15 +29,17 @@ program print_tc_wf
 end
 
 subroutine write_l_r_wf
+ use sizet
  implicit none
  character*(128) :: output
- integer :: i_unit_output,getUnitAndOpen                                                                                 
+ integer :: i_unit_output,getUnitAndOpen
  output=trim(ezfio_filename)//'.tc_wf'
  i_unit_output = getUnitAndOpen(output,'w')
- integer :: i
+ integer(size_t) :: i
  print*,'Writing the left-right wf'
  do i = 1, N_det
-  write(i_unit_output,'(I8,X,10(F16.10,X))')i, psi_coef_sorted_tc(i,1),psi_coef_sorted_tc(i,1)/psi_coef_sorted_tc(1,1)&
+  write(i_unit_output,'(I12,X,10(F16.10,X))') &
+    i, psi_coef_sorted_tc(i,1),psi_coef_sorted_tc(i,1)/psi_coef_sorted_tc(1,1) &
                          , psi_l_coef_sorted_bi_ortho_left(i)/psi_l_coef_sorted_bi_ortho_left(1) &
                          , psi_r_coef_sorted_bi_ortho_right(i)/psi_r_coef_sorted_bi_ortho_right(1)
  enddo
@@ -46,9 +48,12 @@ subroutine write_l_r_wf
 end
 
 subroutine routine
+ use sizet
  implicit none
- integer :: i,degree
- integer          :: exc(0:2,2,2),h1,p1,s1,h2,p2,s2
+ integer(size_t) :: i
+ integer :: degree
+ integer(size_t)  :: exc(0:2,2,2),h1,p1,h2,p2
+ integer          :: s1,s2
  double precision :: hmono,htwoe,hthree,htilde_ij,coef_pt1,e_i0,delta_e,e_pt2
  double precision :: contrib_pt,e_corr,coef,contrib,phase
  double precision :: accu_positive,accu_positive_pt, accu_positive_core,accu_positive_core_pt

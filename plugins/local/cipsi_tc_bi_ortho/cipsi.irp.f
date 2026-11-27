@@ -1,4 +1,7 @@
+use sizet
+
 subroutine run_cipsi
+  use sizet
 
   BEGIN_DOC
   ! Selected Full Configuration Interaction with deterministic selection and
@@ -9,10 +12,11 @@ subroutine run_cipsi
 
   implicit none
 
-  integer                        :: i,j,k,ndet
+  integer                        :: j, k
+  integer(size_t)                  :: i, ndet
   type(pt2_type)                 :: pt2_data, pt2_data_err
   double precision, allocatable  :: zeros(:)
-  integer                        :: to_select
+  integer(size_t)                  :: to_select
   logical, external :: qp_stop
 
   double precision :: threshold_generators_save
@@ -87,7 +91,7 @@ subroutine run_cipsi
 
 
     to_select = int(sqrt(dble(N_states))*dble(N_det)*selection_factor)
-    to_select = max(N_states_diag, to_select)
+    to_select = max(int(N_states_diag, size_t), to_select)
 
     E_denom = E_tc ! TC Energy of the current wave function 
     if (do_pt2) then
@@ -133,7 +137,8 @@ subroutine run_cipsi
   call pt2_alloc(pt2_data, N_states)
   call pt2_alloc(pt2_data_err, N_states)
   call provide_for_tc_pt2
-  call pt2_stochastic(E_tc, pt2_data, pt2_data_err, relative_error,0) ! Stochastic PT2 and selection
+  call pt2_stochastic(E_tc, pt2_data, pt2_data_err, &
+       relative_error, int(0, size_t)) ! Stochastic PT2 and selection
   call diagonalize_CI_tc_bi_ortho(ndet, E_tc,norm,pt2_data,print_pt2)
 
 end

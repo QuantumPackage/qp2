@@ -1,11 +1,15 @@
+use sizet
+
 subroutine print_energy_components()
+ use sizet
   implicit none
   BEGIN_DOC
 ! Prints the different components of the energy.
   END_DOC
   integer, save :: ifirst = 0
   double precision :: Vee, Ven, Vnn, Vecp, T, f
-  integer  :: i,j,k
+  integer(size_t) :: i,j
+  integer         :: k
 
   Vnn = nuclear_repulsion
 

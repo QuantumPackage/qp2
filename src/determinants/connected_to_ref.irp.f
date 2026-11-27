@@ -1,12 +1,14 @@
+use sizet
 integer*8 function det_search_key(det,Nint)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
 ! Return an integer*8 corresponding to a determinant index for searching
   END_DOC
-  integer, intent(in) :: Nint
+  integer(size_t), intent(in) :: Nint
   integer(bit_kind), intent(in) :: det(Nint,2)
-  integer :: i
+  integer(size_t) :: i
   i = shiftr(elec_alpha_num, bit_kind_shift)+1
   det_search_key = int(shiftr(ior(det(i,1),det(i,2)),1)+sum(det),8)
 end
@@ -15,20 +17,22 @@ end
 
 
 logical function is_in_wavefunction(key,Nint)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
 ! |true| if the determinant ``det`` is in the wave function
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: key(Nint,2)
-  integer, external              :: get_index_in_psi_det_sorted_bit
+  integer(size_t), external      :: get_index_in_psi_det_sorted_bit
 
   !DIR$ FORCEINLINE
   is_in_wavefunction = get_index_in_psi_det_sorted_bit(key,Nint) > 0
 end
 
-integer function get_index_in_psi_det_sorted_bit(key,Nint)
+function get_index_in_psi_det_sorted_bit(key,Nint)
+ use sizet
   use bitmasks
   BEGIN_DOC
 ! Returns the index of the determinant in the ``psi_det_sorted_bit`` array
@@ -36,10 +40,11 @@ integer function get_index_in_psi_det_sorted_bit(key,Nint)
   END_DOC
   implicit none
 
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: key(Nint,2)
 
-  integer                        :: i, ibegin, iend, istep, l
+  integer(size_t)                :: get_index_in_psi_det_sorted_bit
+  integer(size_t)                :: i, ibegin, iend, istep, l
   integer*8                      :: det_ref, det_search
   integer*8, external            :: det_search_key
   logical                        :: in_wavefunction
@@ -135,16 +140,17 @@ end
 
 
 logical function is_connected_to(key,keys,Nint,Ndet)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
 ! Returns |true| if determinant ``key`` is connected to ``keys``
   END_DOC
-  integer, intent(in)            :: Nint, Ndet
+  integer(size_t), intent(in)    :: Nint, Ndet
   integer(bit_kind), intent(in)  :: keys(Nint,2,Ndet)
   integer(bit_kind), intent(in)  :: key(Nint,2)
 
-  integer                        :: i, l
+  integer(size_t)                :: i, l
   integer                        :: degree_x2
 
   ASSERT (Nint > 0)
@@ -172,16 +178,17 @@ end
 
 
 logical function is_connected_to_by_single(key,keys,Nint,Ndet)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
 ! Returns |true| is ``key`` is connected to ``keys`` by a single excitation.
   END_DOC
-  integer, intent(in)            :: Nint, Ndet
+  integer(size_t), intent(in)    :: Nint, Ndet
   integer(bit_kind), intent(in)  :: keys(Nint,2,Ndet)
   integer(bit_kind), intent(in)  :: key(Nint,2)
 
-  integer                        :: i, l
+  integer(size_t)                :: i, l
   integer                        :: degree_x2
 
 
@@ -207,15 +214,17 @@ logical function is_connected_to_by_single(key,keys,Nint,Ndet)
 end
 
 
-integer function connected_to_ref(key,keys,Nint,N_past_in,Ndet)
+function connected_to_ref(key,keys,Nint,N_past_in,Ndet)
+ use sizet
   use bitmasks
   implicit none
-  integer, intent(in)            :: Nint, N_past_in, Ndet
+  integer(size_t), intent(in)    :: Nint, N_past_in, Ndet
   integer(bit_kind), intent(in)  :: keys(Nint,2,Ndet)
   integer(bit_kind), intent(in)  :: key(Nint,2)
 
-  integer                        :: N_past
-  integer                        :: i, l
+  integer(size_t)                :: connected_to_ref
+  integer(size_t)                :: N_past
+  integer(size_t)                :: i, l
   integer                        :: degree_x2
   logical                        :: t
   double precision               :: hij_elec
@@ -319,18 +328,20 @@ end
 
 
 
-integer function connected_to_ref_by_single(key,keys,Nint,N_past_in,Ndet)
+function connected_to_ref_by_single(key,keys,Nint,N_past_in,Ndet)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
 ! Returns |true| is ``key`` is connected to the reference by a single excitation.
   END_DOC
-  integer, intent(in)            :: Nint, N_past_in, Ndet
+  integer(size_t), intent(in)    :: Nint, N_past_in, Ndet
   integer(bit_kind), intent(in)  :: keys(Nint,2,Ndet)
   integer(bit_kind), intent(in)  :: key(Nint,2)
 
-  integer                        :: N_past
-  integer                        :: i, l
+  integer(size_t)                :: connected_to_ref_by_single
+  integer(size_t)                :: N_past
+  integer(size_t)                :: i, l
   integer                        :: degree_x2
   logical                        :: t
   double precision               :: hij_elec

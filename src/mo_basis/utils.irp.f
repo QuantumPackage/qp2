@@ -1,11 +1,14 @@
+use sizet
+
 subroutine save_mos
+ use sizet
   implicit none
   BEGIN_DOC
   ! Write the current MO basis to the EZFIO database: mo_num,
   ! mo_label, ao_md5, mo_coef, mo_occ and mo_class.
   END_DOC
   double precision, allocatable  :: buffer(:,:)
-  integer                        :: i,j
+  integer(size_t)                :: i,j
 
   call ezfio_set_mo_basis_mo_num(mo_num)
   call ezfio_set_mo_basis_mo_label(mo_label)
@@ -26,6 +29,7 @@ end
 
 
 subroutine save_mos_no_occ
+ use sizet
   implicit none
   BEGIN_DOC
   ! Write only mo_coef to the EZFIO database. mo_num, mo_label,
@@ -33,7 +37,7 @@ subroutine save_mos_no_occ
   ! corresponding set calls are commented out).
   END_DOC
   double precision, allocatable  :: buffer(:,:)
-  integer                        :: i,j
+  integer(size_t)                :: i,j
 
 !  call system('$QP_ROOT/scripts/save_current_mos.sh '//trim(ezfio_filename))
  !call ezfio_set_mo_basis_mo_num(mo_num)
@@ -52,6 +56,7 @@ subroutine save_mos_no_occ
 end
 
 subroutine save_mos_truncated(n)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Write the first n MOs to the EZFIO database: mo_num is set
@@ -62,11 +67,11 @@ subroutine save_mos_truncated(n)
   ! intended and does not matter (author, 2026-10-31).
   END_DOC
   double precision, allocatable  :: buffer(:,:)
-  integer                        :: i,j,n
+  integer(size_t)                :: i,j,n
 
 !  call system('$QP_ROOT/scripts/save_current_mos.sh '//trim(ezfio_filename))
 
-  call ezfio_set_mo_basis_mo_num(n)
+  call ezfio_set_mo_basis_mo_num(int(n,4))
   call ezfio_set_mo_basis_mo_label(mo_label)
   call ezfio_set_mo_basis_ao_md5(ao_md5)
   allocate ( buffer(ao_num,n) )
@@ -84,6 +89,7 @@ subroutine save_mos_truncated(n)
 end
 
 subroutine mo_as_eigvectors_of_mo_matrix(matrix,n,m,label,sign,output)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Set the MOs to the eigenvectors of matrix in the current MO
@@ -95,12 +101,13 @@ subroutine mo_as_eigvectors_of_mo_matrix(matrix,n,m,label,sign,output)
   ! eigenvalues; changing the sign is a trick to reverse the
   ! sorting order when needed (author, 2026-10-31).
   END_DOC
-  integer,intent(in)             :: n,m, sign
+  integer(size_t),intent(in)     :: n,m
+  integer,intent(in)             :: sign
   character*(64), intent(in)     :: label
   double precision, intent(in)   :: matrix(n,m)
   logical, intent(in)            :: output
 
-  integer :: i,j
+  integer(size_t) :: i,j
   double precision, allocatable  :: mo_coef_new(:,:), R(:,:),eigvalues(:), A(:,:)
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: mo_coef_new, R
 
@@ -147,7 +154,9 @@ subroutine mo_as_eigvectors_of_mo_matrix(matrix,n,m,label,sign,output)
     write (6,'(A)')  ''
   endif
 
-  call dgemm('N','N',ao_num,m,m,1.d0,mo_coef_new,size(mo_coef_new,1),R,size(R,1),0.d0,mo_coef,size(mo_coef,1))
+  call dgemm('N','N',int(ao_num,4),int(m,4),int(m,4),1.d0,mo_coef_new, &
+      int(size(mo_coef_new,1),4),R,int(size(R,1),4),0.d0,mo_coef,      &
+      int(size(mo_coef,1),4))
   deallocate(A,mo_coef_new,R,eigvalues)
   call write_time(6)
 
@@ -155,6 +164,7 @@ subroutine mo_as_eigvectors_of_mo_matrix(matrix,n,m,label,sign,output)
 end
 
 subroutine mo_as_svd_vectors_of_mo_matrix(matrix,lda,m,n,label)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Set the MOs to the left singular vectors of matrix in the
@@ -164,11 +174,11 @@ subroutine mo_as_svd_vectors_of_mo_matrix(matrix,lda,m,n,label)
   ! singular values and their cumulative sum is printed on
   ! unit 6. mo_label is set to label.
   END_DOC
-  integer,intent(in)             :: lda,m,n
+  integer(size_t),intent(in)     :: lda,m,n
   character*(64), intent(in)     :: label
   double precision, intent(in)   :: matrix(lda,n)
 
-  integer :: i,j
+  integer(size_t) :: i,j
   double precision :: accu
   double precision, allocatable  :: mo_coef_new(:,:), U(:,:),D(:), A(:,:), Vt(:,:), work(:)
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: mo_coef_new, U, Vt, A
@@ -207,7 +217,9 @@ subroutine mo_as_svd_vectors_of_mo_matrix(matrix,lda,m,n,label)
   write (6,'(A)')  '======== ================ ================'
   write (6,'(A)')  ''
 
-  call dgemm('N','N',ao_num,m,m,1.d0,mo_coef_new,size(mo_coef_new,1),U,size(U,1),0.d0,mo_coef,size(mo_coef,1))
+  call dgemm('N','N',int(ao_num,4),int(m,4),int(m,4),1.d0,mo_coef_new, &
+      int(size(mo_coef_new,1),4),U,int(size(U,1),4),0.d0,mo_coef,      &
+      int(size(mo_coef,1),4))
   deallocate(A,mo_coef_new,U,Vt,D)
   call write_time(6)
 
@@ -215,6 +227,7 @@ subroutine mo_as_svd_vectors_of_mo_matrix(matrix,lda,m,n,label)
 end
 
 subroutine mo_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,eig,label)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Same as mo_as_svd_vectors_of_mo_matrix, plus eig(i)
@@ -223,12 +236,12 @@ subroutine mo_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,eig,label)
   ! 1.d-20 is a threshold for numerical noise (author-confirmed
   ! 2026-10-31).
   END_DOC
-  integer,intent(in)             :: lda,m,n
+  integer(size_t),intent(in)     :: lda,m,n
   character*(64), intent(in)     :: label
   double precision, intent(in)   :: matrix(lda,n)
   double precision, intent(out)  :: eig(m)
 
-  integer :: i,j
+  integer(size_t) :: i,j
   double precision :: accu
   double precision, allocatable  :: mo_coef_new(:,:), U(:,:),D(:), A(:,:), Vt(:,:), work(:)
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: mo_coef_new, U, Vt, A
@@ -267,7 +280,9 @@ subroutine mo_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,eig,label)
   write (6,'(A)')  '======== ================ ================'
   write (6,'(A)')  ''
 
-  call dgemm('N','N',ao_num,m,m,1.d0,mo_coef_new,size(mo_coef_new,1),U,size(U,1),0.d0,mo_coef,size(mo_coef,1))
+  call dgemm('N','N',int(ao_num,4),int(m,4),int(m,4),1.d0,mo_coef_new, &
+      int(size(mo_coef_new,1),4),U,int(size(U,1),4),0.d0,mo_coef,      &
+      int(size(mo_coef,1),4))
 
   do i=1,m
     if (D(i) > 1.d-20) then
@@ -286,17 +301,18 @@ end
 
 
 subroutine mo_coef_new_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,mo_coef_before,eig,mo_coef_new)
+ use sizet
   implicit none
   BEGIN_DOC
 ! You enter with matrix in the MO basis defined with the mo_coef_before. 
 !
 ! You SVD the matrix and set the eigenvectors as mo_coef_new ordered by increasing singular values 
   END_DOC
-  integer,intent(in)             :: lda,m,n
+  integer(size_t),intent(in)     :: lda,m,n
   double precision, intent(in)   :: matrix(lda,n),mo_coef_before(ao_num,m)
   double precision, intent(out)  :: eig(m),mo_coef_new(ao_num,m)
 
-  integer :: i,j
+  integer(size_t) :: i,j
   double precision :: accu
   double precision, allocatable  ::  mo_coef_tmp(:,:), U(:,:),D(:), A(:,:), Vt(:,:), work(:)
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: U, Vt, A
@@ -334,7 +350,9 @@ subroutine mo_coef_new_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,mo_coef_be
   write (6,'(A)')  '======== ================ ================'
   write (6,'(A)')  ''
 
-  call dgemm('N','N',ao_num,m,m,1.d0,mo_coef_tmp,size(mo_coef_new,1),U,size(U,1),0.d0,mo_coef_new,size(mo_coef_new,1))
+  call dgemm('N','N',int(ao_num,4),int(m,4),int(m,4),1.d0,mo_coef_tmp, &
+      int(size(mo_coef_new,1),4),U,int(size(U,1),4),0.d0,mo_coef_new,  &
+      int(size(mo_coef_new,1),4))
 
   do i=1,m
     eig(i) = D(i)

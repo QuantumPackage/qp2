@@ -1,5 +1,7 @@
+use sizet
 
 subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,converged,h_mat)
+ use sizet
 !  use mmap_module
   implicit none
   BEGIN_DOC
@@ -19,13 +21,15 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
   !
   ! Initial guess vectors are not necessarily orthonormal
   END_DOC
-  integer, intent(in)             :: dim_in, sze, N_st, N_st_diag_in
+  integer(size_t), intent(in)     :: dim_in, sze
+  integer, intent(in)             :: N_st, N_st_diag_in
   double precision,  intent(in)   :: H_jj(sze),h_mat(sze,sze)
   double precision, intent(inout) :: u_in(dim_in,N_st_diag_in)
   double precision, intent(out)   :: energies(N_st)
 
   integer                        :: iter, N_st_diag
-  integer                        :: i,j,k,l,m
+  integer                        :: j,l,m
+  integer(size_t)                :: i,k
   logical, intent(inout)         :: converged
 
   double precision, external     :: u_dot_v, u_dot_u
@@ -59,7 +63,7 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
     stop -1
   endif
 
-  itermax = max(2,min(davidson_sze_max, sze/N_st_diag))+1
+  itermax = max(2,min(davidson_sze_max, int(sze/N_st_diag,4)))+1
   itertot = 0
 
   if (state_following) then
@@ -81,7 +85,7 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
 
   nproc_target = nproc
   double precision :: rss
-  integer :: maxab
+  integer(size_t) :: maxab
   maxab = sze
 
   m=1
@@ -127,7 +131,7 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
   TOUCH nthreads_davidson
   call write_int(6,N_st,'Number of states')
   call write_int(6,N_st_diag,'Number of states in diagonalization')
-  call write_int(6,sze,'Number of basis functions')
+  call write_int(6,int(sze,4),'Number of basis functions')
   call write_int(6,nproc_target,'Number of threads for diagonalization')
   call write_double(6, r1, 'Memory(Gb)')
   if (disk_based) then
@@ -231,21 +235,21 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
       ! -----------------------------------
 
        ! Gram-Smitt to orthogonalize all new guess with the previous vectors
-      call ortho_qr(U,size(U,1),sze,shift2)
+      call ortho_qr(U,int(size(U,1),size_t),sze,int(shift2,size_t))
 
       call hpsi(W(:,shift+1),U(:,shift+1),N_st_diag,sze,h_mat)
 
       ! Compute h_kl = <u_k | W_l> = <u_k| H |u_l>
       ! -------------------------------------------
 
-      call dgemm('T','N', shift2, shift2, sze,                       &
+      call dgemm('T','N', shift2, shift2, int(sze,4),                &
           1.d0, U, size(U,1), W, size(W,1),                          &
           0.d0, h, size(h,1))
 
       ! Diagonalize h y = lambda y
       ! ---------------
 
-      call lapack_diag(lambda,y,h,size(h,1),shift2)
+      call lapack_diag(lambda,y,h,int(size(h,1),size_t),int(shift2,size_t))
 
       if (state_following) then
 
@@ -290,9 +294,9 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
       ! Express eigenvectors of h in the determinant basis
       ! --------------------------------------------------
 
-      call dgemm('N','N', sze, N_st_diag, shift2,                    &
+      call dgemm('N','N', int(sze,4), N_st_diag, shift2,             &
           1.d0, U, size(U,1), y, size(y,1), 0.d0, U(:,shift2+1), size(U,1))
-      call dgemm('N','N', sze, N_st_diag, shift2,                    &
+      call dgemm('N','N', int(sze,4), N_st_diag, shift2,             &
           1.d0, W, size(W,1), y, size(y,1), 0.d0, W(:,shift2+1), size(W,1))
 
       ! Compute residual vector and davidson step
@@ -347,7 +351,7 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
 
     enddo
 
-    call dgemm('N','N', sze, N_st_diag, shift2, 1.d0,      &
+    call dgemm('N','N', int(sze,4), N_st_diag, shift2, 1.d0,   &
         W, size(W,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
     do k=1,N_st_diag
       do i=1,sze
@@ -355,7 +359,7 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
       enddo
     enddo
 
-    call dgemm('N','N', sze, N_st_diag, shift2, 1.d0,      &
+    call dgemm('N','N', int(sze,4), N_st_diag, shift2, 1.d0,   &
         U, size(U,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
 
     do k=1,N_st_diag
@@ -364,7 +368,7 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
       enddo
     enddo
 
-    call ortho_qr(U,size(U,1),sze,N_st_diag)
+    call ortho_qr(U,int(size(U,1),size_t),sze,int(N_st_diag,size_t))
 
     do j=1,N_st_diag
       k=1
@@ -403,15 +407,18 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
 end
 
 subroutine hpsi(v,u,N_st,sze,h_mat)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Computes $v = H | u \rangle$ and
   END_DOC
-  integer, intent(in)              :: N_st,sze
+  integer, intent(in)              :: N_st
+  integer(size_t), intent(in)      :: sze
   double precision, intent(in)     :: u(sze,N_st),h_mat(sze,sze)
   double precision, intent(inout)  :: v(sze,N_st)
-  integer :: i,j,istate
+  integer :: istate
+  integer(size_t) :: i,j
   v = 0.d0
   do istate = 1, N_st
    do i = 1, sze

@@ -447,15 +447,15 @@ subroutine map_update(map, key, value, sze, thr)
   use map_module
   implicit none
   type (map_type), intent(inout) :: map
-  integer, intent(in)            :: sze
+  integer(8),        intent(in)    :: sze
   integer(key_kind), intent(inout) :: key(sze)
   real(integral_kind), intent(inout) :: value(sze)
   real(integral_kind), intent(in) :: thr
 
-  integer                        :: i
+  integer(8)                     :: i
   integer(map_size_kind)         :: idx_cache, idx_cache_new
   integer(cache_map_size_kind)   :: idx
-  integer                        :: sze2
+  integer(8)                     :: sze2
   integer(cache_key_kind)        :: cache_key
   integer(map_size_kind)         :: n_elements_temp
   type (cache_map_type)          :: local_map
@@ -530,11 +530,11 @@ subroutine map_append(map, key, value, sze)
   use map_module
   implicit none
   type (map_type), intent(inout) :: map
-  integer, intent(in)            :: sze
+  integer(8),        intent(in)    :: sze
   integer(key_kind), intent(inout) :: key(sze)
   real(integral_kind), intent(inout) :: value(sze)
 
-  integer                        :: i
+  integer(8)                     :: i
   integer(cache_map_size_kind)   :: n_elements
   integer(map_size_kind)         :: idx_cache
   integer(cache_key_kind)        :: cache_key
@@ -603,10 +603,10 @@ subroutine map_get_many(map, key, value, sze)
   use map_module
   implicit none
   type (map_type), intent(inout) :: map
-  integer, intent(in)            :: sze
+  integer(8),        intent(in)    :: sze
   integer(key_kind), intent(in)  :: key(sze)
   real(integral_kind), intent(out) :: value(sze)
-  integer                        :: i
+  integer(8)                     :: i
   integer(map_size_kind)         :: idx_cache
   integer(cache_map_size_kind)   :: ibegin, iend
   integer(cache_map_size_kind), allocatable :: idx(:)
@@ -634,9 +634,9 @@ subroutine map_exists_many(map, key, sze)
   use map_module
   implicit none
   type (map_type), intent(inout) :: map
-  integer, intent(in)            :: sze
+  integer(8),        intent(in)    :: sze
   integer(key_kind), intent(inout) :: key(sze)
-  integer                        :: i
+  integer(8)                     :: i
   integer(map_size_kind)         :: idx_cache, idx_cache_prev
   integer(cache_map_size_kind)   :: ibegin, iend
   integer(cache_map_size_kind), allocatable :: idx(:)

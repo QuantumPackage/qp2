@@ -1,3 +1,5 @@
+use sizet
+
 ! Diagonal hessian
 
 ! The hessian of the CI energy with respects to the orbital rotation is :
@@ -95,6 +97,7 @@
 
 
 subroutine diag_hessian_opt(n,H)!, h_tmpr)
+ use sizet
   BEGIN_DOC
   ! Diagonal of the hessian of the energy with respect to orbital
   ! rotations, for all mo_num orbitals.
@@ -111,16 +114,16 @@ subroutine diag_hessian_opt(n,H)!, h_tmpr)
   ! Variables
 
   ! in
-  integer, intent(in)           :: n 
+  integer(size_t), intent(in)   :: n 
  
   ! out
   double precision, intent(out) :: H(n)!,n),  h_tmpr(mo_num,mo_num,mo_num,mo_num)
   
   ! internal
   !double precision, allocatable :: hessian(:,:,:,:)!, h_tmpr(:,:,:,:)
-  integer                       :: p,q,k
-  integer                       :: r,s,t,u,v
-  integer                       :: pq,rs
+  integer(size_t)               :: p,q,k
+  integer(size_t)               :: r,s,t,u,v
+  integer(size_t)               :: pq,rs
   integer                       :: istate
   double precision              :: t1,t2,t3,t4,t5,t6
   double precision, allocatable :: tmp_bi_int_3(:,:,:),tmp_bi_int_3_shared(:,:,:)

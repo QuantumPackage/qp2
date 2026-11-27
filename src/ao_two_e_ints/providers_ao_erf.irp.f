@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [ logical, ao_two_e_integrals_erf_in_map ]
   implicit none
   use map_module
@@ -6,17 +8,18 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_erf_in_map ]
   !     i(r1) j(r2) 1/r12 k(r1) l(r2)
   END_DOC
 
-  integer                        :: i,j,k,l
+  integer(size_t)                :: i,j,k,l
   double precision               :: ao_two_e_integral_erf,cpu_1,cpu_2, wall_1, wall_2
   double precision               :: integral, wall_0
   include 'utils/constants.include.F'
 
   ! For integrals file
   integer(key_kind),allocatable  :: buffer_i(:)
-  integer                        :: size_buffer 
+  integer(size_t)                :: size_buffer 
   real(integral_kind),allocatable :: buffer_value(:)
 
-  integer                        :: n_integrals, rc
+  integer(size_t)                :: n_integrals
+  integer                        :: rc
   integer                        :: kk, m, j1, i1, lmax
   character*(64)                 :: fmt
 
@@ -38,10 +41,10 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_erf_in_map ]
 
   if (.True.) then
     ! Avoid openMP
-    integral = ao_two_e_integral_erf(1,1,1,1)
+    integral = ao_two_e_integral_erf(1_size_t,1_size_t,1_size_t,1_size_t)
   endif
 
-  size_buffer = ao_num*ao_num
+  size_buffer = int(ao_num,size_t)*int(ao_num,size_t)
   !$OMP PARALLEL DEFAULT(shared) private(j,l) &
   !$OMP PRIVATE(buffer_i, buffer_value, n_integrals)
   allocate(buffer_i(size_buffer), buffer_value(size_buffer))
@@ -91,10 +94,11 @@ BEGIN_PROVIDER [ double precision, ao_two_e_integral_erf_schwartz,(ao_num,ao_num
   !  Needed to compute Schwartz inequalities
   END_DOC
 
-  integer                        :: i,k
+  integer(size_t)                :: i,k
   double precision               :: ao_two_e_integral_erf,cpu_1,cpu_2, wall_1, wall_2
 
-  ao_two_e_integral_erf_schwartz(1,1) = ao_two_e_integral_erf(1,1,1,1)
+  ao_two_e_integral_erf_schwartz(1,1) = &
+      ao_two_e_integral_erf(1_size_t,1_size_t,1_size_t,1_size_t)
   !$OMP PARALLEL DO PRIVATE(i,k)                                     &
       !$OMP DEFAULT(NONE)                                            &
       !$OMP SHARED (ao_num,ao_two_e_integral_erf_schwartz)              &

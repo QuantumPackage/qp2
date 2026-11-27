@@ -1,3 +1,4 @@
+use sizet
 
  BEGIN_PROVIDER [double precision, ecmd_lda_mu_of_r, (N_states)]
  BEGIN_DOC
@@ -6,7 +7,8 @@
 ! see equation 40 in J. Chem. Phys. 149, 194301 (2018); https://doi.org/10.1063/1.5052714
  END_DOC
  implicit none
- integer :: ipoint,istate
+ integer(size_t) :: ipoint
+ integer         :: istate
  double precision :: rho_a, rho_b, ec, rho, p2
  double precision :: wall0,wall1,weight,mu
  logical :: dospin
@@ -49,7 +51,8 @@ BEGIN_PROVIDER [double precision, ecmd_pbe_ueg_mu_of_r, (N_states)]
  END_DOC
  implicit none
  double precision :: weight
- integer :: ipoint,istate
+ integer(size_t) :: ipoint
+ integer         :: istate
  double precision :: eps_c_md_PBE,mu,rho_a,rho_b,grad_rho_a(3),grad_rho_b(3),on_top
  double precision, external :: g0_UEG_mu_inf
 

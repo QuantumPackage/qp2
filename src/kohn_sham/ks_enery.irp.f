@@ -1,3 +1,5 @@
+use sizet
+
  BEGIN_PROVIDER [ double precision, KS_energy]
 &BEGIN_PROVIDER [ double precision, two_e_energy]
 &BEGIN_PROVIDER [ double precision, one_e_energy]
@@ -8,7 +10,7 @@
  ! Kohn-Sham energy containing the nuclear repulsion energy, and the various components of this quantity.
  END_DOC
 
- integer                        :: i,j
+ integer(size_t)                :: i,j
  double precision :: accu_mono,accu_fock
  KS_energy = nuclear_repulsion
  one_e_energy = 0.d0
