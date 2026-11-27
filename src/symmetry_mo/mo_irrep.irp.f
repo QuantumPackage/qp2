@@ -1,3 +1,4 @@
+use sizet
 !-----------------------------------------------------------------------
 ! MO irrep labels.
 !
@@ -40,7 +41,7 @@
 BEGIN_PROVIDER [ double precision, pg_col_diag, (mo_num,pg_n_col) ]
 &BEGIN_PROVIDER [ integer, pg_mo_block, (mo_num) ]
 &BEGIN_PROVIDER [ integer, pg_n_mo_block ]
-&BEGIN_PROVIDER [ integer, pg_mo_block_dim, (mo_num) ]
+&BEGIN_PROVIDER [ integer(size_t), pg_mo_block_dim, (mo_num) ]
   implicit none
   BEGIN_DOC
   ! ``pg_col_diag(i,c)`` = sum over the ELEMENTS of column ``c`` of X_g(i,i), and
@@ -62,9 +63,11 @@ BEGIN_PROVIDER [ double precision, pg_col_diag, (mo_num,pg_n_col) ]
   ! The guard on mo_num == 0 keeps a nuclei-only EZFIO (no ao_basis, hence no
   ! MOs) from reaching any of this.
   END_DOC
-  integer :: i, j, c, m, g, ri, rj, kk, b
-  integer :: parent(mo_num), isz(mo_num), root_of(mo_num), comp(mo_num)
-  integer :: blk_count(mo_num)
+  integer(size_t) :: i, j, ri, rj, kk
+  integer :: c, m, g, b
+  integer(size_t) :: parent(mo_num), isz(mo_num), root_of(mo_num)
+  integer :: comp(mo_num)
+  integer(size_t) :: blk_count(mo_num)
   double precision :: x(mo_num,mo_num)
 
   pg_n_mo_block = 0
@@ -189,7 +192,7 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, pg_mo_weight, (mo_num,pg_n_irrep) ]
 &BEGIN_PROVIDER [ integer, pg_mo_irrep, (mo_num) ]
 &BEGIN_PROVIDER [ double precision, pg_mo_purity, (mo_num) ]
-&BEGIN_PROVIDER [ integer, pg_irrep_weight, (pg_n_irrep) ]
+&BEGIN_PROVIDER [ integer(size_t), pg_irrep_weight, (pg_n_irrep) ]
   implicit none
   BEGIN_DOC
   ! ``pg_mo_weight(i,a)`` = p_a(i) = (d_a/(mult_a*:math:`|G|`)) * sum_c chi_a(c)
@@ -206,7 +209,8 @@ BEGIN_PROVIDER [ double precision, pg_mo_weight, (mo_num,pg_n_irrep) ]
   ! expressions would only ever disagree through a bug in one of them, and
   ! gates G3/G4 must test the very numbers the report prints.
   END_DOC
-  integer :: i, a, c, abest
+  integer(size_t) :: i
+  integer :: a, c, abest
   double precision :: pmax, norm, rowsum
 
   ! IRPF90 does not allocate the arrays when a dimension is 0, so nothing of
@@ -268,7 +272,7 @@ END_PROVIDER
 !-----------------------------------------------------------------------
 ! How many MOs have no definite irrep?
 !-----------------------------------------------------------------------
-BEGIN_PROVIDER [ integer, pg_n_mo_mixed ]
+BEGIN_PROVIDER [ integer(size_t), pg_n_mo_mixed ]
   implicit none
   BEGIN_DOC
   ! Number of MOs with :c:data:`pg_mo_irrep` = 0, i.e. ``max_a p_a < 1 - pg_thresh``.
@@ -280,7 +284,7 @@ BEGIN_PROVIDER [ integer, pg_n_mo_mixed ]
   ! nonzero count means that the basis is not symmetry adapted, and then
   ! the determinant and state irreps are probabilities, not labels.
   END_DOC
-  integer :: i
+  integer(size_t) :: i
 
   pg_n_mo_mixed = 0
   if (mo_num < 1) return
@@ -293,6 +297,7 @@ END_PROVIDER
 ! The two largest weights of an MO, for the reports.
 !-----------------------------------------------------------------------
 subroutine pg_mo_top2(i, a1, a2)
+  use sizet
   implicit none
   BEGIN_DOC
   ! ``a1`` and ``a2`` are the indices of the two largest entries of
@@ -300,7 +305,7 @@ subroutine pg_mo_top2(i, a1, a2)
   ! irrep. The reports use them to show the composition of a mixed MO
   ! (``A1 0.9856 B2 0.0144``) in one line; nothing else depends on them.
   END_DOC
-  integer, intent(in) :: i
+  integer(size_t), intent(in) :: i
   integer, intent(out) :: a1, a2
   integer :: a
 
@@ -327,6 +332,7 @@ end subroutine pg_mo_top2
 ! Persistence.
 !-----------------------------------------------------------------------
 subroutine pg_write_mo_symmetry()
+  use sizet
   implicit none
   BEGIN_DOC
   ! Writes :c:data:`pg_mo_irrep` into ``mo_basis/mo_symmetry`` of the EZFIO,
@@ -346,7 +352,7 @@ subroutine pg_write_mo_symmetry()
   ! EZFIO write alone would leave the in-memory provider stale: the
   ! ``soft_touch`` invalidates it without building it when it is not built.
   END_DOC
-  integer :: i, n_mixed
+  integer(size_t) :: i, n_mixed
   character*(32) :: names(mo_num)
 
   ! A zero-size character array would still reach ezfio_write_array_ch.

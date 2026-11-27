@@ -38,6 +38,7 @@ logical function pg_labels_usable()
 end function pg_labels_usable
 
 subroutine pg_det_state_labels(ndet, coef, lda, nst, label, purity, mixed)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Fast irrep labels of ``nst`` CI vectors stored in ``coef``.
@@ -61,11 +62,13 @@ subroutine pg_det_state_labels(ndet, coef, lda, nst, label, purity, mixed)
   ! :c:data:`pg_state_irrep_weight` (stage 3) stays the exact value, off-diagonal
   ! family terms included, and is what the report prints.
   END_DOC
-  integer, intent(in) :: ndet, lda, nst
+  integer(size_t), intent(in) :: ndet, lda
+  integer, intent(in) :: nst
   double precision, intent(in) :: coef(lda,*)
   integer, intent(inout) :: label(*)
   double precision, intent(inout) :: purity(*), mixed(*)
-  integer :: k, i, a, amax
+  integer :: k, a, amax
+  integer(size_t) :: i
   double precision :: wmax, tot
   double precision, allocatable :: w(:)
 

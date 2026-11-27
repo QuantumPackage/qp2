@@ -1,3 +1,5 @@
+use sizet
+!
 ! Group elements, classes and identification.
 !
 ! The whole finite set is named: 204 groups, checked one by one against the
@@ -33,6 +35,7 @@ integer, parameter :: pg_n_elem_max = 160
 !-----------------------------------------------------------------------
 subroutine pg_build_group(nat, xyz, znum, ctr, evecs, frame, linear, tol, &
      nmax, rot, perm, n_rot, ierr)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Build the group of the molecule and store it as matrices in the INPUT
@@ -45,12 +48,13 @@ subroutine pg_build_group(nat, xyz, znum, ctr, evecs, frame, linear, tol, &
   ! (:c:data:`pg_n_elem`, :c:data:`pg_rot_mat`) name :c:data:`pg_is_linear` and
   ! :c:data:`pg_rot` themselves so that the providers are ordered.
   END_DOC
-  integer, intent(in) :: nat, nmax
+  integer(size_t), intent(in) :: nat
+  integer, intent(in) :: nmax
   double precision, intent(in) :: xyz(nat,3), ctr(3), evecs(3,3), frame(3,3), tol
   integer, intent(in) :: znum(nat)
   logical, intent(in) :: linear
   double precision, intent(out) :: rot(3,3,nmax)
-  integer, intent(out) :: perm(nat,nmax)
+  integer(size_t), intent(out) :: perm(nat,nmax)
   integer, intent(out) :: n_rot, ierr
 
   if (linear) then
@@ -85,17 +89,19 @@ end subroutine pg_linear_to_input
 !-----------------------------------------------------------------------
 subroutine pg_linear_add(nat, xyz, znum, ctr, frame, rc, tol, nmax, &
      rot, perm, n_rot, ierr)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Transform ``rc`` to the input frame, check that it maps the molecule
   ! onto itself, and append it. ``ierr`` = 1 when ``nmax`` is exhausted, 2
   ! when the element does not realise a permutation.
   END_DOC
-  integer, intent(in) :: nat, nmax
+  integer(size_t), intent(in) :: nat
+  integer, intent(in) :: nmax
   double precision, intent(in) :: xyz(nat,3), ctr(3), frame(3,3), rc(3,3), tol
   integer, intent(in) :: znum(nat)
   double precision, intent(inout) :: rot(3,3,nmax)
-  integer, intent(inout) :: perm(nat,nmax)
+  integer(size_t), intent(inout) :: perm(nat,nmax)
   integer, intent(inout) :: n_rot, ierr
   double precision :: r(3,3)
   logical :: ok
@@ -119,6 +125,7 @@ end subroutine pg_linear_add
 !-----------------------------------------------------------------------
 subroutine pg_build_linear(nat, xyz, znum, ctr, frame, tol, nmax, &
      rot, perm, n_rot, ierr)
+  use sizet
   implicit none
   BEGIN_DOC
   ! The finite group used for a linear molecule is C31v, extended to
@@ -146,11 +153,12 @@ subroutine pg_build_linear(nat, xyz, znum, ctr, frame, tol, nmax, &
   ! ``ierr`` = 1 when the group does not fit in ``nmax``, 2 when a built
   ! element fails :c:func:`pg_maps_to_self`.
   END_DOC
-  integer, intent(in) :: nat, nmax
+  integer(size_t), intent(in) :: nat
+  integer, intent(in) :: nmax
   double precision, intent(in) :: xyz(nat,3), ctr(3), frame(3,3), tol
   integer, intent(in) :: znum(nat)
   double precision, intent(out) :: rot(3,3,nmax)
-  integer, intent(out) :: perm(nat,nmax)
+  integer(size_t), intent(out) :: perm(nat,nmax)
   integer, intent(out) :: n_rot, ierr
   double precision, parameter :: pi = 3.1415926535897932d0
   integer, parameter :: n = 31
@@ -266,6 +274,7 @@ end subroutine pg_build_linear
 !-----------------------------------------------------------------------
 subroutine pg_enumerate(nat, xyz, znum, ctr, evecs, tol, nmax, &
      rot, perm, n_rot, ierr)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Build the full group from the geometry. ``ierr`` = 1 when ``nmax`` is too
@@ -273,15 +282,16 @@ subroutine pg_enumerate(nat, xyz, znum, ctr, evecs, tol, nmax, &
   ! product (should never happen).
   END_DOC
   integer, parameter :: ncandmax = 2000
-  integer, intent(in) :: nat, nmax
+  integer(size_t), intent(in) :: nat
+  integer, intent(in) :: nmax
   double precision, intent(in) :: xyz(nat,3), ctr(3), evecs(3,3), tol
   integer, intent(in) :: znum(nat)
   double precision, intent(out) :: rot(3,3,nmax)
-  integer, intent(out) :: perm(nat,nmax)
+  integer(size_t), intent(out) :: perm(nat,nmax)
   integer, intent(out) :: n_rot, ierr
   double precision, parameter :: pi = 3.1415926535897932d0
   double precision :: cand(3,ncandmax), r(3,3)
-  integer :: perm_i(nat), pnew(nat)
+  integer(size_t) :: perm_i(nat), pnew(nat), ia
   integer :: ncand, i, j, k, n, nold
   logical :: ok, changed
   double precision :: a
@@ -292,8 +302,8 @@ subroutine pg_enumerate(nat, xyz, znum, ctr, evecs, tol, nmax, &
   rot(1,1,1) = 1.d0
   rot(2,2,1) = 1.d0
   rot(3,3,1) = 1.d0
-  do i = 1, nat
-    perm(i,1) = i
+  do ia = 1, nat
+    perm(ia,1) = ia
   enddo
 
   call pg_build_candidates(nat, xyz, znum, ctr, evecs, ncandmax, &
@@ -343,8 +353,8 @@ subroutine pg_enumerate(nat, xyz, znum, ctr, evecs, tol, nmax, &
     do i = 1, nold
       do j = 1, nold
         r(1:3,1:3) = matmul(rot(1:3,1:3,i), rot(1:3,1:3,j))
-        do k = 1, nat
-          pnew(k) = perm(perm(k,j),i)
+        do ia = 1, nat
+          pnew(ia) = perm(perm(ia,j),i)
         enddo
         call pg_add_element(r, pnew, nat, nmax, rot, perm, n_rot, ierr)
         if (ierr /= 0) return
@@ -385,6 +395,7 @@ end function pg_det3
 ! Append an element unless it is already stored.
 !-----------------------------------------------------------------------
 subroutine pg_add_element(r, p, nat, nmax, rot, perm, n_rot, ierr)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Add (r,p) to the list. Identical matrices to 1e-8 are duplicates;
@@ -403,14 +414,16 @@ subroutine pg_add_element(r, p, nat, nmax, rot, perm, n_rot, ierr)
   ! elements differs from the stored element by far more than 1e-8 and
   ! would be appended again, without bound, until the array overflows.
   END_DOC
-  integer, intent(in) :: nat, nmax
+  integer(size_t), intent(in) :: nat
+  integer, intent(in) :: nmax
   double precision, intent(in) :: r(3,3)
-  integer, intent(in) :: p(nat)
+  integer(size_t), intent(in) :: p(nat)
   double precision, intent(inout) :: rot(3,3,nmax)
-  integer, intent(inout) :: perm(nat,nmax)
+  integer(size_t), intent(inout) :: perm(nat,nmax)
   integer, intent(inout) :: n_rot, ierr
   double precision :: rr(3,3)
-  integer :: k, i, det
+  integer :: k, det
+  integer(size_t) :: i
   logical :: same_perm
   double precision, external :: pg_det3
 
@@ -751,7 +764,8 @@ end subroutine pg_read_int
   ! Highest proper-rotation order, and number of distinct lines carrying an
   ! axis of that order.
   END_DOC
-  integer :: znum(nucl_num), ierr, i
+  integer :: znum(nucl_num), ierr
+  integer(size_t) :: i
   double precision :: axis(3)
   integer :: nmax, naxes
 
@@ -764,7 +778,7 @@ end subroutine pg_read_int
   do i = 1, nucl_num
     znum(i) = nint(nucl_charge(i))
   enddo
-  call pg_proper_scan(nucl_num, nucl_coord, znum, pg_center, &
+  call pg_proper_scan(int(nucl_num, size_t), nucl_coord, znum, pg_center, &
        pg_inertia_eval, pg_inertia_evec, pg_tol, 2000, &
        nmax, naxes, axis, pg_is_linear, ierr)
   if (ierr /= 0) then
@@ -783,9 +797,10 @@ END_PROVIDER
   BEGIN_DOC
   ! Order of the molecular point group.
   END_DOC
-  integer :: znum(nucl_num), ierr, i, n
+  integer :: znum(nucl_num), ierr, n
+  integer(size_t) :: i
   double precision, allocatable :: rot(:,:,:)
-  integer, allocatable :: perm(:,:)
+  integer(size_t), allocatable :: perm(:,:)
   double precision :: frame(3,3)
   logical :: linear
 
@@ -803,7 +818,7 @@ END_PROVIDER
   ! is what orders them before this provider.
   linear = pg_is_linear
   frame(1:3,1:3) = pg_rot(1:3,1:3)
-  call pg_build_group(nucl_num, nucl_coord, znum, pg_center, &
+  call pg_build_group(int(nucl_num, size_t), nucl_coord, znum, pg_center, &
        pg_inertia_evec, frame, linear, pg_tol, pg_n_elem_max, &
        rot, perm, n, ierr)
   if (ierr == 1) then
@@ -842,10 +857,11 @@ END_PROVIDER
   ! axis (plane normal for a reflection), determinant sign, and the
   ! integer (det,m,k) key of every group element.
   END_DOC
-  integer :: znum(nucl_num), ierr, i, j, m, k
+  integer :: znum(nucl_num), ierr, m, k, ig
+  integer(size_t) :: i, j
   double precision, allocatable :: rot(:,:,:)
   double precision :: axis(3), v(3), d, frame(3,3)
-  integer, allocatable :: perm(:,:)
+  integer(size_t), allocatable :: perm(:,:)
   integer :: n
   logical :: linear
 
@@ -855,7 +871,7 @@ END_PROVIDER
   enddo
   linear = pg_is_linear
   frame(1:3,1:3) = pg_rot(1:3,1:3)
-  call pg_build_group(nucl_num, nucl_coord, znum, pg_center, &
+  call pg_build_group(int(nucl_num, size_t), nucl_coord, znum, pg_center, &
        pg_inertia_evec, frame, linear, pg_tol, pg_n_elem_max, &
        rot, perm, n, ierr)
   if (ierr /= 0 .or. n /= pg_n_elem) then
@@ -866,23 +882,23 @@ END_PROVIDER
     return
   endif
 
-  do i = 1, n
-    pg_rot_mat(1:3,1:3,i) = rot(1:3,1:3,i)
+  do ig = 1, n
+    pg_rot_mat(1:3,1:3,ig) = rot(1:3,1:3,ig)
     do j = 1, nucl_num
-      pg_perm(j,i) = perm(j,i)
+      pg_perm(j,ig) = perm(j,ig)
     enddo
     ! Consistency: the permutation must realise the matrix.
     do j = 1, nucl_num
       v(1:3) = nucl_coord(j,1:3) - pg_center(1:3)
-      d = (rot(1,1,i)*v(1) + rot(1,2,i)*v(2) + rot(1,3,i)*v(3) &
-           + pg_center(1) - nucl_coord(perm(j,i),1))**2 &
-        + (rot(2,1,i)*v(1) + rot(2,2,i)*v(2) + rot(2,3,i)*v(3) &
-           + pg_center(2) - nucl_coord(perm(j,i),2))**2 &
-        + (rot(3,1,i)*v(1) + rot(3,2,i)*v(2) + rot(3,3,i)*v(3) &
-           + pg_center(3) - nucl_coord(perm(j,i),3))**2
+      d = (rot(1,1,ig)*v(1) + rot(1,2,ig)*v(2) + rot(1,3,ig)*v(3) &
+           + pg_center(1) - nucl_coord(perm(j,ig),1))**2 &
+        + (rot(2,1,ig)*v(1) + rot(2,2,ig)*v(2) + rot(2,3,ig)*v(3) &
+           + pg_center(2) - nucl_coord(perm(j,ig),2))**2 &
+        + (rot(3,1,ig)*v(1) + rot(3,2,ig)*v(2) + rot(3,3,ig)*v(3) &
+           + pg_center(3) - nucl_coord(perm(j,ig),3))**2
       if (sqrt(d) > 10.d0*pg_tol) then
         if (.not. pg_detection_failed) then
-          write(6,'(A,I0,A,I0)') 'symmetry: element ', i, &
+          write(6,'(A,I0,A,I0)') 'symmetry: element ', ig, &
                ' does not realise its permutation (atom ', j, ')'
           pg_detection_failed = .true.
         endif
@@ -890,23 +906,24 @@ END_PROVIDER
       endif
     enddo
 
-    call pg_elem_props(rot(1:3,1:3,i), pg_elem_angle(i), axis, pg_elem_det(i))
+    call pg_elem_props(rot(1:3,1:3,ig), pg_elem_angle(ig), axis, &
+         pg_elem_det(ig))
     ! pg_elem_axis is the eigenvector of the stored matrix, and pg_rot_mat
     ! is in the input frame: keep pg_elem_axis in that same frame. The
     ! identification then compares it with pg_rot(3,:) (the canonical z
     ! expressed in the input frame); the column matching and the MO
     ! projectors must apply pg_rot if they want canonical components.
-    pg_elem_axis(1:3,i) = axis(1:3)
-    call pg_reduce_angle(pg_elem_angle(i), m, k, ierr)
+    pg_elem_axis(1:3,ig) = axis(1:3)
+    call pg_reduce_angle(pg_elem_angle(ig), m, k, ierr)
     if (ierr /= 0) then
       if (.not. pg_detection_failed) then
         write(6,'(A,F14.8)') 'symmetry: cannot rationalise element angle ', &
-             pg_elem_angle(i)
+             pg_elem_angle(ig)
         pg_detection_failed = .true.
       endif
       return
     endif
-    call pg_encode_kind(pg_elem_det(i), m, k, pg_elem_kind(i))
+    call pg_encode_kind(pg_elem_det(ig), m, k, pg_elem_kind(ig))
   enddo
 END_PROVIDER
 
@@ -924,7 +941,8 @@ END_PROVIDER
   ! max over the elements g and the atoms i of
   ! ``R_g (r_i - center) + center - r_{pg_perm(i,g)}``, in bohr.
   END_DOC
-  integer :: ig, i
+  integer :: ig
+  integer(size_t) :: i
   double precision :: v(3), e(3)
 
   pg_geom_residual = 0.d0
@@ -957,7 +975,8 @@ END_PROVIDER
   ! geometric class is not closed under inversion (in C3 the class {C3}
   ! has its inverse in the class {C3^2}), while a file column always is.
   END_DOC
-  integer :: inv_perm(nucl_num), i, j
+  integer :: i
+  integer(size_t) :: inv_perm(nucl_num), j
   double precision :: rm(3,3)
   integer, external :: pg_find_by_perm
   integer, external :: pg_find_by_mat
@@ -1016,7 +1035,8 @@ END_PROVIDER
   ! only consumer is gate G2; it is also what a product of two irreps will
   ! need once the module is in the core.
   END_DOC
-  integer :: g, h, k, pnew(nucl_num)
+  integer :: g, h
+  integer(size_t) :: k, pnew(nucl_num)
   logical :: seen(pg_n_elem)
   double precision :: rm(3,3)
   integer, external :: pg_find_by_perm
@@ -1073,6 +1093,7 @@ END_PROVIDER
 ! Look up a group element by (atom permutation, determinant).
 !-----------------------------------------------------------------------
 integer function pg_find_by_perm(p, det)
+  use sizet
   implicit none
   BEGIN_DOC
   ! Index of the unique element that induces the atom permutation ``p`` and has
@@ -1081,8 +1102,10 @@ integer function pg_find_by_perm(p, det)
   ! identically and share their determinant are the same element. No matrix
   ! is ever compared.
   END_DOC
-  integer, intent(in) :: p(nucl_num), det
-  integer :: j, k
+  integer(size_t), intent(in) :: p(nucl_num)
+  integer, intent(in) :: det
+  integer :: j
+  integer(size_t) :: k
   logical :: same
 
   pg_find_by_perm = 0
@@ -1147,8 +1170,9 @@ end function pg_find_by_mat
   ! identity, so the conjugation is done on the analytic matrices there
   ! (:c:func:`pg_find_by_mat`).
   END_DOC
-  integer :: p(nucl_num)
-  integer :: ih, c, g, k, i, j
+  integer(size_t) :: p(nucl_num)
+  integer :: ih, c, g, k, ig
+  integer(size_t) :: i, j
   logical :: same
   double precision :: rm(3,3)
   integer, external :: pg_find_by_mat
@@ -1176,17 +1200,17 @@ end function pg_find_by_mat
           p(i) = pg_perm(pg_perm(pg_perm(i,pg_elem_inv(k)), g), k)
         enddo
         ih = 0
-        do i = 1, pg_n_elem
-          if (pg_elem_det(i) /= pg_elem_det(g)) cycle
+        do ig = 1, pg_n_elem
+          if (pg_elem_det(ig) /= pg_elem_det(g)) cycle
           same = .true.
           do j = 1, nucl_num
-            if (pg_perm(j,i) /= p(j)) then
+            if (pg_perm(j,ig) /= p(j)) then
               same = .false.
               exit
             endif
           enddo
           if (same) then
-            ih = i
+            ih = ig
             exit
           endif
         enddo
@@ -1203,8 +1227,8 @@ end function pg_find_by_mat
   enddo
   pg_n_class = c
 
-  do i = 1, pg_n_elem
-    if (pg_class(i) == 0) then
+  do ig = 1, pg_n_elem
+    if (pg_class(ig) == 0) then
       if (.not. pg_detection_failed) then
         write(6,'(A)') 'symmetry: an element was left without a class'
         pg_detection_failed = .true.

@@ -25,6 +25,7 @@ end program symmetry_det
 !-----------------------------------------------------------------------
 subroutine pg_det_report
   use bitmasks
+  use sizet
   implicit none
   BEGIN_DOC
   ! Prints the labels and the gates, and stops with status 1 if any gate
@@ -34,8 +35,10 @@ subroutine pg_det_report
   integer, parameter :: ntmax = 200
   character*(256) :: soa, sob
   character*(8) :: lab
-  integer :: i, a, s, k, ipos, nlab, nunl, jmax, nmax, nshow, a1, a2, nw
-  integer :: list(N_int*bit_kind_size,2), n_el(2)
+  integer(size_t) :: i, nlab, nunl
+  integer :: a, s, k, ipos, jmax, nmax, nshow, a1, a2, nw
+  integer(size_t) :: list(N_int*bit_kind_size,2)
+  integer :: n_el(2)
   double precision :: c, cmax, q, cache_mb, wv
   double precision :: w(pg_n_irrep)
   logical :: failed
@@ -271,6 +274,7 @@ end subroutine pg_det_report
 !-----------------------------------------------------------------------
 logical function pg_det_gates()
   use bitmasks
+  use sizet
   implicit none
   BEGIN_DOC
   ! ``D1``
@@ -323,7 +327,8 @@ logical function pg_det_gates()
   !     The relative measure is ``max|q_contract - q_ref| / max|q_ref|``
   !     over the sample, gated at 1e-13.
   END_DOC
-  integer :: ifam, i0, np, ip, jp, a, i, s, idom, jmax
+  integer(size_t) :: ifam, i0, i, idom
+  integer :: np, ip, jp, a, s, jmax
   integer :: nsel(2,pg_n_mo_block)
   integer, allocatable :: mask(:,:,:)
   double precision, allocatable :: t(:,:,:), tt(:,:)
@@ -347,12 +352,14 @@ logical function pg_det_gates()
   ! D7 is reached only from :c:func:`pg_det_gates`, so ``cisd`` never
   ! pays for it.
   integer, parameter :: d7_nfam = 200, d7_pairs = 256
-  integer :: nsam, ng, g, k, imin, npart, nfull
+  integer(size_t) :: imin
+  integer :: nsam, ng, g, k, npart, nfull
   integer :: fsec(2,2*pg_n_mo_block), psec(2,2*pg_n_mo_block)
   integer :: pn(2*pg_n_mo_block)
   integer :: mrad(2*pg_n_mo_block), strd(2*pg_n_mo_block)
   integer :: aoff(2*pg_n_mo_block)
-  integer, allocatable :: pos(:,:,:), xrow(:,:,:), xcol(:,:,:), idx(:)
+  integer(size_t), allocatable :: pos(:,:,:), xrow(:,:,:), xcol(:,:,:)
+  integer(size_t), allocatable :: idx(:)
   integer, allocatable :: rep(:,:), si(:,:)
   double precision, allocatable :: vv(:,:), amat(:), qtot(:,:), cc(:,:)
   logical, allocatable :: gsel(:)

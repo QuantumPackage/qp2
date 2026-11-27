@@ -1,13 +1,14 @@
 use bitmasks
+use sizet
 
-BEGIN_PROVIDER [ integer, N_int ]
+BEGIN_PROVIDER [ integer(size_t), N_int ]
   implicit none
   include 'utils/constants.include.F'
   BEGIN_DOC
   ! Number of 64-bit integers needed to represent determinants as binary strings
   END_DOC
   N_int = (mo_num-1)/bit_kind_size + 1
-  call write_int(6,N_int, 'N_int')
+  call write_int(6,int(N_int,4), 'N_int')
   if (N_int > N_int_max) then
     stop 'N_int > N_int_max'
   endif
@@ -21,7 +22,8 @@ BEGIN_PROVIDER [ integer(bit_kind), full_ijkl_bitmask, (N_int) ]
   ! Bitmask to include all possible MOs
   END_DOC
   
-  integer                        :: i,j,k
+  integer(size_t)                :: j
+  integer                        :: i,k
   k=0
   do j=1,N_int
     full_ijkl_bitmask(j) = 0_bit_kind
@@ -41,7 +43,7 @@ BEGIN_PROVIDER [ integer(bit_kind), full_ijkl_bitmask_4, (N_int,4) ]
   ! (i, j, k, l) when adding the MO two-electron integrals to the
   ! MO map (add_integrals_to_map, add_integrals_to_map_erf).
   END_DOC
-  integer                        :: i
+  integer(size_t)                :: i
   do i=1,N_int
     full_ijkl_bitmask_4(i,1) = full_ijkl_bitmask(i)
     full_ijkl_bitmask_4(i,2) = full_ijkl_bitmask(i)
@@ -60,7 +62,7 @@ BEGIN_PROVIDER [ integer(bit_kind), core_inact_act_bitmask_4, (N_int,4) ]
   ! kept because external plugins may use it (author policy,
   ! 2026-10-31).
   END_DOC
-  integer                        :: i
+  integer(size_t)                :: i
   do i=1,N_int
     core_inact_act_bitmask_4(i,1) = reunion_of_core_inact_act_bitmask(i,1)
     core_inact_act_bitmask_4(i,2) = reunion_of_core_inact_act_bitmask(i,1)
@@ -78,7 +80,7 @@ BEGIN_PROVIDER [ integer(bit_kind), virt_bitmask_4, (N_int,4) ]
   ! kept because external plugins may use it (author policy,
   ! 2026-10-31).
   END_DOC
-  integer                        :: i
+  integer(size_t)                :: i
   do i=1,N_int
     virt_bitmask_4(i,1) = virt_bitmask(i,1)
     virt_bitmask_4(i,2) = virt_bitmask(i,1)
@@ -95,8 +97,9 @@ BEGIN_PROVIDER [ integer(bit_kind), HF_bitmask, (N_int,2)]
   BEGIN_DOC
   ! Hartree Fock bit mask
   END_DOC
-  integer                        :: i,j,n
-  integer                        :: occ(elec_alpha_num)
+  integer(size_t)                :: i
+  integer                        :: j,n
+  integer(size_t)                :: occ(elec_alpha_num)
   
   HF_bitmask = 0_bit_kind
   do i=1,elec_alpha_num
@@ -142,7 +145,8 @@ BEGIN_PROVIDER [ integer(bit_kind), generators_bitmask, (N_int,2,6) ]
   logical                        :: exists
   PROVIDE ezfio_filename full_ijkl_bitmask 
   
-  integer                        :: ispin, i
+  integer(size_t)                :: i
+  integer                        :: ispin
   do ispin=1,2
       do i=1,N_int
         generators_bitmask(i,ispin,s_hole ) = reunion_of_inact_act_bitmask(i,ispin)
@@ -161,7 +165,7 @@ BEGIN_PROVIDER [ integer(bit_kind), reunion_of_core_inact_bitmask, (N_int,2)]
   BEGIN_DOC
   ! Reunion of the core and inactive and virtual bitmasks
   END_DOC
-  integer                        :: i
+  integer(size_t)                :: i
   do i = 1, N_int
     reunion_of_core_inact_bitmask(i,1) = ior(core_bitmask(i,1),inact_bitmask(i,1))
     reunion_of_core_inact_bitmask(i,2) = ior(core_bitmask(i,2),inact_bitmask(i,2))
@@ -174,7 +178,8 @@ BEGIN_PROVIDER [integer(bit_kind), reunion_of_inact_act_bitmask, (N_int,2)]
   BEGIN_DOC
   ! Reunion of the  inactive and active bitmasks
   END_DOC
-  integer                        :: i,j
+  integer(size_t)                :: i
+  integer                        :: j
   
   do i = 1, N_int
     reunion_of_inact_act_bitmask(i,1) = ior(inact_bitmask(i,1),act_bitmask(i,1))
@@ -187,7 +192,8 @@ BEGIN_PROVIDER [integer(bit_kind), reunion_of_act_virt_bitmask, (N_int,2)]
   BEGIN_DOC
   ! Reunion of the  inactive and active bitmasks
   END_DOC
-  integer                        :: i,j
+  integer(size_t)                :: i
+  integer                        :: j
   
   do i = 1, N_int
     reunion_of_act_virt_bitmask(i,1) = ior(virt_bitmask(i,1),act_bitmask(i,1))
@@ -201,7 +207,8 @@ BEGIN_PROVIDER [integer(bit_kind), reunion_of_core_inact_act_bitmask, (N_int,2)]
   BEGIN_DOC
   ! Reunion of the core, inactive and active bitmasks
   END_DOC
-  integer                        :: i,j
+  integer(size_t)                :: i
+  integer                        :: j
   
   do i = 1, N_int
     reunion_of_core_inact_act_bitmask(i,1) = ior(reunion_of_core_inact_bitmask(i,1),act_bitmask(i,1))
@@ -215,7 +222,8 @@ BEGIN_PROVIDER [ integer(bit_kind), reunion_of_bitmask, (N_int,2)]
   BEGIN_DOC
   ! Reunion of the inactive, active and virtual bitmasks
   END_DOC
-  integer                        :: i,j
+  integer(size_t)                :: i
+  integer                        :: j
   do i = 1, N_int
     reunion_of_bitmask(i,1) = ior(ior(act_bitmask(i,1),inact_bitmask(i,1)),virt_bitmask(i,1))
     reunion_of_bitmask(i,2) = ior(ior(act_bitmask(i,2),inact_bitmask(i,2)),virt_bitmask(i,2))
@@ -229,7 +237,8 @@ END_PROVIDER
   BEGIN_DOC
   ! Reunion of the inactive and virtual bitmasks
   END_DOC
-  integer                        :: i,j
+  integer(size_t)                :: i
+  integer                        :: j
   do i = 1, N_int
     inact_virt_bitmask(i,1) = ior(inact_bitmask(i,1),virt_bitmask(i,1))
     inact_virt_bitmask(i,2) = ior(inact_bitmask(i,2),virt_bitmask(i,2))
@@ -244,7 +253,7 @@ BEGIN_PROVIDER [ integer(bit_kind), unpaired_alpha_electrons, (N_int)]
   BEGIN_DOC
   ! Bitmask reprenting the unpaired alpha electrons in the HF_bitmask
   END_DOC
-  integer                        :: i
+  integer(size_t)                :: i
   unpaired_alpha_electrons = 0_bit_kind
   do i = 1, N_int
     unpaired_alpha_electrons(i) = xor(HF_bitmask(i,1),HF_bitmask(i,2))
@@ -261,7 +270,8 @@ BEGIN_PROVIDER [integer(bit_kind), closed_shell_ref_bitmask, (N_int,2)]
   ! kept because external plugins may use it (author policy,
   ! 2026-10-31).
   END_DOC
-  integer                        :: i,j
+  integer(size_t)                :: i
+  integer                        :: j
   do i = 1, N_int
     closed_shell_ref_bitmask(i,1) = ior(ref_bitmask(i,1),act_bitmask(i,1))
     closed_shell_ref_bitmask(i,2) = ior(ref_bitmask(i,2),act_bitmask(i,2))

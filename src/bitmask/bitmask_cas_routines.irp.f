@@ -1,5 +1,6 @@
 use bitmasks
 integer function number_of_holes(key_in)
+ use sizet
  BEGIN_DOC
  ! Function that returns the number of holes in the inact space
  !
@@ -33,7 +34,7 @@ integer function number_of_holes(key_in)
  END_DOC
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
- integer :: i
+ integer(size_t) :: i
  number_of_holes = 0
 
  if(N_int == 1)then
@@ -85,12 +86,13 @@ end
 
 
 integer function number_of_particles(key_in)
+ use sizet
  BEGIN_DOC
  ! function that returns the number of particles in the virtual space
  END_DOC
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
- integer :: i
+ integer(size_t) :: i
  number_of_particles= 0
  if(N_int == 1)then
    number_of_particles= number_of_particles                                                                                  &
@@ -130,6 +132,7 @@ integer function number_of_particles(key_in)
 end
 
 logical function is_a_two_holes_two_particles(key_in)
+ use sizet
  BEGIN_DOC
  ! logical function that returns True if the determinant 'key_in'
  ! belongs to the 2h-2p excitation class of the DDCI space
@@ -139,7 +142,8 @@ logical function is_a_two_holes_two_particles(key_in)
  END_DOC
  implicit none
  integer(bit_kind), intent(in) :: key_in(N_int,2)
- integer :: i,i_diff
+ integer(size_t) :: i
+ integer :: i_diff
  integer :: number_of_holes, number_of_particles
  is_a_two_holes_two_particles = .False.
  if(number_of_holes(key_in) == 2 .and. number_of_particles(key_in) == 2)then
@@ -368,15 +372,17 @@ logical function is_a_2h(key_in)
 end
 
 logical function is_i_in_virtual(i)
+ use sizet
  BEGIN_DOC
  ! Returns .True. if the MO with 1-based index i belongs to the
  ! virtual space, i.e. the bit of MO i is set in virt_bitmask.
  END_DOC
  implicit none
- integer,intent(in) :: i
+ integer(size_t),intent(in) :: i
  integer(bit_kind), allocatable :: key(:)
  allocate(key(N_int))
- integer :: k,j
+ integer(size_t) :: k
+ integer :: j
  integer :: accu
  is_i_in_virtual = .False.
  key= 0_bit_kind
@@ -394,15 +400,17 @@ logical function is_i_in_virtual(i)
 end
 
 logical function is_i_in_core(i)
+ use sizet
  BEGIN_DOC
  ! Returns .True. if the MO with 1-based index i belongs to the core
  ! space, i.e. the bit of MO i is set in core_bitmask.
  END_DOC
  implicit none
- integer,intent(in) :: i
+ integer(size_t),intent(in) :: i
  integer(bit_kind), allocatable :: key(:)
  allocate(key(N_int))
- integer :: k,j
+ integer(size_t) :: k
+ integer :: j
  integer :: accu
  is_i_in_core = .False.
  key= 0_bit_kind

@@ -1,12 +1,14 @@
 subroutine set_bit_to_integer(i_physical,key,Nint)
  use bitmasks
+ use sizet
  BEGIN_DOC
  ! set to 1 the bit number i_physical in the bitstring key
  END_DOC
  implicit none
- integer, intent(in) :: i_physical,Nint
+ integer(size_t), intent(in) :: i_physical,Nint
  integer(bit_kind), intent(inout) :: key(Nint)
- integer :: k,j,i
+ integer(size_t) :: k
+ integer :: j,i
  k = ishft(i_physical-1,-bit_kind_shift)+1
  j = i_physical-ishft(k-1,bit_kind_shift)-1
  key(k) = ibset(key(k),j)
@@ -15,13 +17,15 @@ end
 
 subroutine clear_bit_to_integer(i_physical,key,Nint)
  use bitmasks
+ use sizet
  BEGIN_DOC
  ! set to 0 the bit number i_physical in the bitstring key
  END_DOC
  implicit none
- integer, intent(in) :: i_physical,Nint
+ integer(size_t), intent(in) :: i_physical,Nint
  integer(bit_kind), intent(inout) :: key(Nint)
- integer :: k,j,i
+ integer(size_t) :: k
+ integer :: j,i
  k = ishft(i_physical-1,-bit_kind_shift)+1
  j = i_physical-ishft(k-1,bit_kind_shift)-1
  key(k) = ibclr(key(k),j)
@@ -31,16 +35,17 @@ end
 
 subroutine bitstring_to_list( string, list, n_elements, Nint)
   use bitmasks
+  use sizet
   implicit none
   BEGIN_DOC
   ! Gives the indices(+1) of the bits set to 1 in the bit string
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: string(Nint)
-  integer, intent(out)           :: list(Nint*bit_kind_size)
+  integer(size_t), intent(out)   :: list(Nint*bit_kind_size)
   integer, intent(out)           :: n_elements
 
-  integer                        :: i, ishift
+  integer(size_t)                :: i, ishift
   integer(bit_kind)              :: l
 
   n_elements = 0
@@ -59,19 +64,21 @@ end
 
 subroutine list_to_bitstring( string, list, n_elements, Nint)
   use bitmasks
+  use sizet
   implicit none
   BEGIN_DOC
   ! Returns the physical string "string(N_int,2)" from the array of
   ! occupations "list(N_int*bit_kind_size,2)
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(out) :: string(Nint)
-  integer, intent(in)            :: list(Nint*bit_kind_size)
+  integer(size_t), intent(in)    :: list(Nint*bit_kind_size)
   integer, intent(in)            :: n_elements
 
 
   integer                        :: i, j
-  integer                        :: ipos, iint
+  integer                        :: ipos
+  integer(size_t)                :: iint
 
   !
   !                                       <== ipos ==>
@@ -95,15 +102,17 @@ end
 
 subroutine bitstring_to_str( output, string, Nint )
   use bitmasks
+  use sizet
   implicit none
   BEGIN_DOC
 ! Transform a bit string to a string for printing
   END_DOC
   character*(*), intent(out)     :: output
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: string(Nint)
 
-  integer                        :: i, j, ibuf
+  integer(size_t)                :: i
+  integer                        :: j, ibuf
   integer(bit_kind)              :: itemp
 
   ibuf = 1
@@ -127,15 +136,17 @@ end
 
 subroutine configuration_to_str( output, string, Nint )
   use bitmasks
+  use sizet
   implicit none
   BEGIN_DOC
 ! Transform the bit string of a configuration to a string for printing
   END_DOC
   character*(*), intent(out)     :: output
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: string(Nint,2)
 
-  integer                        :: i, j, ibuf
+  integer(size_t)                :: i
+  integer                        :: j, ibuf
   integer(bit_kind)              :: itemp
 
   ibuf = 1
@@ -163,14 +174,16 @@ end
 
 subroutine bitstring_to_hexa( output, string, Nint )
   use bitmasks
+  use sizet
   implicit none
   BEGIN_DOC
 ! Transform a bit string to a string in hexadecimal format for printing
   END_DOC
   character*(*), intent(out)     :: output
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: string(Nint)
-  integer                        :: i, j, ibuf
+  integer(size_t)                :: i
+  integer                        :: j, ibuf
   integer(bit_kind)              :: itemp
   character*(32)                 :: f
 
@@ -185,12 +198,13 @@ end
 
 subroutine debug_det(string,Nint)
   use bitmasks
+  use sizet
   implicit none
   BEGIN_DOC
   ! Subroutine to print the content of a determinant in '+-' notation and
   ! hexadecimal representation.
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: string(Nint,2)
   character*(2048)                :: output(2)
   call bitstring_to_hexa( output(1), string(1,1), Nint )
@@ -203,12 +217,13 @@ end
 
 subroutine debug_cfg(string,Nint)
   use bitmasks
+  use sizet
   implicit none
   BEGIN_DOC
   ! Subroutine to print the content of a determinant in '+-' notation and
   ! hexadecimal representation.
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: string(Nint,2)
   character*(2048)                :: output(2)
   call bitstring_to_hexa( output(1), string(1,1), Nint )
@@ -222,11 +237,12 @@ end
 
 subroutine print_det(string,Nint)
   use bitmasks
+  use sizet
   implicit none
   BEGIN_DOC
   ! Subroutine to print the content of a determinant using the '+-' notation
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: string(Nint,2)
   character*(2048)                :: output(2)
 
@@ -239,12 +255,13 @@ end
 
 subroutine debug_spindet(string,Nint)
   use bitmasks
+  use sizet
   implicit none
   BEGIN_DOC
   ! Subroutine to print the content of a determinant in '+-' notation and
   ! hexadecimal representation.
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: string(Nint,2)
   character*(2048)                :: output(1)
   call bitstring_to_hexa( output(1), string(1,1), Nint )
@@ -255,11 +272,12 @@ end
 
 subroutine print_spindet(string,Nint)
   use bitmasks
+  use sizet
   implicit none
   BEGIN_DOC
   ! Subroutine to print the content of a determinant using the '+-' notation
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: string(Nint,2)
   character*(2048)                :: output(1)
 
@@ -270,11 +288,12 @@ end
 
 subroutine print_det_one_dimension(string,Nint)
   use bitmasks
+  use sizet
   implicit none
   BEGIN_DOC
   ! Subroutine to print the content of a determinant using the '+-' notation
   END_DOC
-  integer, intent(in)            :: Nint
+  integer(size_t), intent(in)    :: Nint
   integer(bit_kind), intent(in)  :: string(Nint)
   character*(2048)                :: output(1)
 
@@ -285,13 +304,15 @@ end
 
 logical function is_integer_in_string(orb,bitmask,Nint)
  use bitmasks
+ use sizet
  implicit none
  BEGIN_DOC
 ! Checks is the orbital orb is set to 1 in the bit string
  END_DOC
- integer, intent(in) :: orb, Nint
+ integer(size_t), intent(in) :: orb, Nint
  integer(bit_kind), intent(in) :: bitmask(Nint)
- integer :: j, k
+ integer(size_t) :: k
+ integer :: j
  k = ishft(orb-1,-bit_kind_shift)+1
  j = orb-ishft(k-1,bit_kind_shift)-1
  is_integer_in_string = iand(bitmask(k), ibset(0_bit_kind, j)) /= 0_bit_kind

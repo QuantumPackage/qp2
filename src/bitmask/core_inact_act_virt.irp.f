@@ -1,118 +1,119 @@
 use bitmasks
+use sizet
 
-BEGIN_PROVIDER [ integer, n_core_orb]
+BEGIN_PROVIDER [ integer(size_t), n_core_orb]
   implicit none
   BEGIN_DOC
   ! Number of core MOs
   END_DOC
-  integer                        :: i
-  
+  integer(size_t)                :: i
+
   n_core_orb = 0
   do i = 1, mo_num
     if(mo_class(i) == 'Core')then
       n_core_orb += 1
     endif
   enddo
-  
-  call write_int(6,n_core_orb, 'Number of core     MOs')
-   
+
+  call write_int(6,int(n_core_orb,4), 'Number of core     MOs')
+
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, n_inact_orb ]
+BEGIN_PROVIDER [ integer(size_t), n_inact_orb ]
   implicit none
   BEGIN_DOC
   ! Number of inactive MOs
   END_DOC
-  integer                        :: i
-  
+  integer(size_t)                :: i
+
   n_inact_orb = 0
   do i = 1, mo_num
     if (mo_class(i) == 'Inactive')then
       n_inact_orb += 1
     endif
   enddo
-  
-  call write_int(6,n_inact_orb,'Number of inactive MOs')
-  
+
+  call write_int(6,int(n_inact_orb,4),'Number of inactive MOs')
+
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, n_act_orb]
+BEGIN_PROVIDER [ integer(size_t), n_act_orb]
   implicit none
   BEGIN_DOC
   ! Number of active MOs
   END_DOC
-  integer                        :: i
-  
+  integer(size_t)                :: i
+
   n_act_orb = 0
   do i = 1, mo_num
     if (mo_class(i) == 'Active')then
       n_act_orb += 1
     endif
   enddo
-  call write_int(6,n_act_orb, 'Number of active   MOs')
+  call write_int(6,int(n_act_orb,4), 'Number of active   MOs')
   if (mpi_master) then
     call ezfio_set_bitmask_n_act_orb(n_act_orb)
   endif
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, n_virt_orb ]
+BEGIN_PROVIDER [ integer(size_t), n_virt_orb ]
   implicit none
   BEGIN_DOC
   ! Number of virtual MOs
   END_DOC
-  integer                        :: i
-  
+  integer(size_t)                :: i
+
   n_virt_orb = 0
   do i = 1, mo_num
     if (mo_class(i) == 'Virtual')then
       n_virt_orb += 1
     endif
   enddo
-  
-  call write_int(6,n_virt_orb, 'Number of virtual  MOs')
-   
+
+  call write_int(6,int(n_virt_orb,4), 'Number of virtual  MOs')
+
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, n_del_orb ]
+BEGIN_PROVIDER [ integer(size_t), n_del_orb ]
   implicit none
   BEGIN_DOC
   ! Number of deleted MOs
   END_DOC
-  integer                        :: i
-  
+  integer(size_t)                :: i
+
   n_del_orb = 0
   do i = 1, mo_num
     if (mo_class(i) == 'Deleted')then
       n_del_orb += 1
     endif
   enddo
-  
-  call write_int(6,n_del_orb, 'Number of deleted  MOs')
-   
+
+  call write_int(6,int(n_del_orb,4), 'Number of deleted  MOs')
+
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ integer, n_core_inact_orb ]
+BEGIN_PROVIDER [ integer(size_t), n_core_inact_orb ]
   implicit none
   BEGIN_DOC
   ! n_core + n_inact
   END_DOC
-  integer                        :: i
+  integer(size_t)                :: i
   n_core_inact_orb = 0
   do i = 1, N_int
-    n_core_inact_orb += popcnt(reunion_of_core_inact_bitmask(i,1))
+    n_core_inact_orb += int(popcnt(reunion_of_core_inact_bitmask(i,1)),size_t)
   enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [integer, n_inact_act_orb ]
+BEGIN_PROVIDER [integer(size_t), n_inact_act_orb ]
    implicit none
   BEGIN_DOC
   ! n_inact + n_act
   END_DOC
    n_inact_act_orb = (n_inact_orb+n_act_orb)
 END_PROVIDER
- 
-BEGIN_PROVIDER [integer, dim_list_core_orb]
+
+BEGIN_PROVIDER [integer(size_t), dim_list_core_orb]
   implicit none
   BEGIN_DOC
   ! dimensions for the allocation of list_core.
@@ -121,7 +122,7 @@ BEGIN_PROVIDER [integer, dim_list_core_orb]
    dim_list_core_orb = max(n_core_orb,1)
 END_PROVIDER
 
-BEGIN_PROVIDER [integer, dim_list_inact_orb]
+BEGIN_PROVIDER [integer(size_t), dim_list_inact_orb]
    implicit none
    BEGIN_DOC
    ! dimensions for the allocation of list_inact.
@@ -130,7 +131,7 @@ BEGIN_PROVIDER [integer, dim_list_inact_orb]
    dim_list_inact_orb = max(n_inact_orb,1)
 END_PROVIDER
 
-BEGIN_PROVIDER [integer, dim_list_core_inact_orb]
+BEGIN_PROVIDER [integer(size_t), dim_list_core_inact_orb]
   implicit none
   BEGIN_DOC
   ! dimensions for the allocation of list_core.
@@ -139,7 +140,7 @@ BEGIN_PROVIDER [integer, dim_list_core_inact_orb]
    dim_list_core_inact_orb = max(n_core_inact_orb,1)
 END_PROVIDER
 
-BEGIN_PROVIDER [integer, dim_list_act_orb]
+BEGIN_PROVIDER [integer(size_t), dim_list_act_orb]
    implicit none
    BEGIN_DOC
    ! dimensions for the allocation of list_act.
@@ -148,7 +149,7 @@ BEGIN_PROVIDER [integer, dim_list_act_orb]
    dim_list_act_orb = max(n_act_orb,1)
 END_PROVIDER
 
-BEGIN_PROVIDER [integer, dim_list_virt_orb]
+BEGIN_PROVIDER [integer(size_t), dim_list_virt_orb]
    implicit none
    BEGIN_DOC
    ! dimensions for the allocation of list_virt.
@@ -157,7 +158,7 @@ BEGIN_PROVIDER [integer, dim_list_virt_orb]
    dim_list_virt_orb = max(n_virt_orb,1)
 END_PROVIDER
 
-BEGIN_PROVIDER [integer, dim_list_del_orb]
+BEGIN_PROVIDER [integer(size_t), dim_list_del_orb]
    implicit none
    BEGIN_DOC
    ! dimensions for the allocation of list_del.
@@ -166,7 +167,7 @@ BEGIN_PROVIDER [integer, dim_list_del_orb]
    dim_list_del_orb = max(n_del_orb,1)
 END_PROVIDER
 
-BEGIN_PROVIDER [integer, n_core_inact_act_orb ]
+BEGIN_PROVIDER [integer(size_t), n_core_inact_act_orb ]
   implicit none
   BEGIN_DOC
   !  Number of core inactive and active MOs
@@ -244,13 +245,13 @@ END_PROVIDER
 
 
  
- BEGIN_PROVIDER [ integer, list_core        , (dim_list_core_orb) ]
-&BEGIN_PROVIDER [ integer, list_core_reverse, (mo_num) ]
+ BEGIN_PROVIDER [ integer(size_t), list_core        , (dim_list_core_orb) ]
+&BEGIN_PROVIDER [ integer(size_t), list_core_reverse, (mo_num) ]
    implicit none
    BEGIN_DOC
    ! List of MO indices which are in the core.
    END_DOC
-   integer                        :: i, n
+   integer(size_t)                :: i, n
    list_core = 0
    list_core_reverse = 0
 
@@ -267,13 +268,13 @@ END_PROVIDER
    
 END_PROVIDER
  
- BEGIN_PROVIDER [ integer, list_inact        , (dim_list_inact_orb) ]
-&BEGIN_PROVIDER [ integer, list_inact_reverse, (mo_num) ]
+ BEGIN_PROVIDER [ integer(size_t), list_inact        , (dim_list_inact_orb) ]
+&BEGIN_PROVIDER [ integer(size_t), list_inact_reverse, (mo_num) ]
    implicit none
    BEGIN_DOC
    ! List of MO indices which are inactive.
    END_DOC
-   integer                        :: i, n
+   integer(size_t)                :: i, n
    list_inact = 0
    list_inact_reverse = 0
 
@@ -290,13 +291,13 @@ END_PROVIDER
    
 END_PROVIDER
  
- BEGIN_PROVIDER [ integer, list_virt        , (dim_list_virt_orb) ]
-&BEGIN_PROVIDER [ integer, list_virt_reverse, (mo_num) ]
+ BEGIN_PROVIDER [ integer(size_t), list_virt        , (dim_list_virt_orb) ]
+&BEGIN_PROVIDER [ integer(size_t), list_virt_reverse, (mo_num) ]
    implicit none
    BEGIN_DOC
    ! List of MO indices which are virtual
    END_DOC
-   integer                        :: i, n
+   integer(size_t)                :: i, n
    list_virt = 0
    list_virt_reverse = 0
 
@@ -313,13 +314,13 @@ END_PROVIDER
    
 END_PROVIDER
  
- BEGIN_PROVIDER [ integer, list_del        , (dim_list_del_orb) ]
-&BEGIN_PROVIDER [ integer, list_del_reverse, (mo_num) ]
+ BEGIN_PROVIDER [ integer(size_t), list_del        , (dim_list_del_orb) ]
+&BEGIN_PROVIDER [ integer(size_t), list_del_reverse, (mo_num) ]
    implicit none
    BEGIN_DOC
    ! List of MO indices which are deleted.
    END_DOC
-   integer                        :: i, n
+   integer(size_t)                :: i, n
    list_del = 0
    list_del_reverse = 0
 
@@ -336,13 +337,13 @@ END_PROVIDER
    
 END_PROVIDER
  
- BEGIN_PROVIDER [ integer, list_act        , (dim_list_act_orb) ]
-&BEGIN_PROVIDER [ integer, list_act_reverse, (mo_num) ]
+ BEGIN_PROVIDER [ integer(size_t), list_act        , (dim_list_act_orb) ]
+&BEGIN_PROVIDER [ integer(size_t), list_act_reverse, (mo_num) ]
    implicit none
    BEGIN_DOC
    ! List of MO indices which are in the active.
    END_DOC
-   integer                        :: i, n
+   integer(size_t)                :: i, n
    list_act = 0
    list_act_reverse = 0
 
@@ -361,13 +362,14 @@ END_PROVIDER
  
 
  
- BEGIN_PROVIDER [ integer, list_core_inact        , (dim_list_core_inact_orb) ]
-&BEGIN_PROVIDER [ integer, list_core_inact_reverse, (mo_num) ]
+ BEGIN_PROVIDER [ integer(size_t), list_core_inact, (dim_list_core_inact_orb) ]
+&BEGIN_PROVIDER [ integer(size_t), list_core_inact_reverse, (mo_num) ]
    implicit none
    BEGIN_DOC
    ! List of indices of the core and inactive MOs
    END_DOC
-   integer                        :: i,itmp
+   integer(size_t)                :: i
+   integer                        :: itmp
    call bitstring_to_list(reunion_of_core_inact_bitmask(1,1), list_core_inact, itmp, N_int)
    list_core_inact_reverse = 0
    ASSERT (itmp == n_core_inact_orb)
@@ -379,13 +381,14 @@ END_PROVIDER
 END_PROVIDER
  
  
- BEGIN_PROVIDER [ integer, list_core_inact_act        , (n_core_inact_act_orb) ]
-&BEGIN_PROVIDER [ integer, list_core_inact_act_reverse, (mo_num) ]
+ BEGIN_PROVIDER [ integer(size_t), list_core_inact_act, (n_core_inact_act_orb) ]
+&BEGIN_PROVIDER [ integer(size_t), list_core_inact_act_reverse, (mo_num) ]
    implicit none
    BEGIN_DOC
    ! List of indices of the core inactive and active MOs
    END_DOC
-   integer                        :: i,itmp
+   integer(size_t)                :: i
+   integer                        :: itmp
    call bitstring_to_list(reunion_of_core_inact_act_bitmask(1,1), list_core_inact_act, itmp, N_int)
    list_core_inact_act_reverse = 0
    ASSERT (itmp == n_core_inact_act_orb)
@@ -397,13 +400,14 @@ END_PROVIDER
 END_PROVIDER
  
  
- BEGIN_PROVIDER [ integer, list_inact_act        , (n_inact_act_orb) ]
-&BEGIN_PROVIDER [ integer, list_inact_act_reverse, (mo_num) ]
+ BEGIN_PROVIDER [ integer(size_t), list_inact_act        , (n_inact_act_orb) ]
+&BEGIN_PROVIDER [ integer(size_t), list_inact_act_reverse, (mo_num) ]
    implicit none
    BEGIN_DOC
    ! List of indices of the inactive and active MOs
    END_DOC
-   integer                        :: i,itmp
+   integer(size_t)                :: i
+   integer                        :: itmp
    call bitstring_to_list(reunion_of_inact_act_bitmask(1,1), list_inact_act, itmp, N_int)
    list_inact_act_reverse = 0
    ASSERT (itmp == n_inact_act_orb)
@@ -415,13 +419,13 @@ END_PROVIDER
 END_PROVIDER
  
 
-BEGIN_PROVIDER [integer, n_all_but_del_orb]
+BEGIN_PROVIDER [integer(size_t), n_all_but_del_orb]
  implicit none
  BEGIN_DOC
  ! Number of MOs whose mo_class is Core, Inactive, Active or
  ! Virtual, i.e. the number of MOs that are not "Deleted".
  END_DOC
- integer :: i
+ integer(size_t) :: i
  n_all_but_del_orb = 0
  do i = 1, mo_num
   if(  trim(mo_class(i))=="Core" & 
@@ -433,13 +437,13 @@ BEGIN_PROVIDER [integer, n_all_but_del_orb]
  enddo
 END_PROVIDER 
 
-BEGIN_PROVIDER [integer, list_all_but_del_orb, (n_all_but_del_orb)]
+BEGIN_PROVIDER [integer(size_t), list_all_but_del_orb, (n_all_but_del_orb)]
  implicit none
  BEGIN_DOC
  ! List of the indices of the MOs whose mo_class is Core,
  ! Inactive, Active or Virtual, i.e. all MOs that are not "Deleted".
  END_DOC
- integer :: i,j
+ integer(size_t) :: i,j
  j = 0 
  do i = 1, mo_num
   if(  trim(mo_class(i))=="Core" & 
