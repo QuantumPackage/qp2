@@ -1,4 +1,5 @@
 subroutine rotate_nuclei(phi,theta,psi,nucl_centers,n_nucl,nucl_centers_after)
+ use sizet
  implicit none
  BEGIN_DOC
  ! routine that rotates a set of nuclei according to three axis corresponding to angles phi, theta, psi.
@@ -9,7 +10,8 @@ subroutine rotate_nuclei(phi,theta,psi,nucl_centers,n_nucl,nucl_centers_after)
  double precision, intent(out):: nucl_centers_after(3,n_nucl)
  double precision :: r_mat(3,3)
  call r_phi_theta_psi_matrix(phi,theta,psi,r_mat)
- call get_AB_prod(r_mat,3,3,nucl_centers,n_nucl,nucl_centers_after)
+  call get_AB_prod(r_mat, int(3,size_t), int(3,size_t), nucl_centers, &
+                  int(n_nucl,size_t), nucl_centers_after)
 
 end
 

@@ -1,3 +1,4 @@
+use sizet
 ! ---
 
  BEGIN_PROVIDER [double precision, ao_overlap_cgtos,   (ao_num, ao_num)]
@@ -14,7 +15,8 @@
   ! copied to ao_overlap_x/_y/_z by the ao_overlap provider.
   END_DOC
 
-  integer          :: i, j, m, n, l, ii, jj, dim1, power_A(3), power_B(3)
+  integer(size_t) :: i, j
+  integer          :: m, n, l, ii, jj, dim1, power_A(3), power_B(3)
   double precision :: c, overlap, overlap_x, overlap_y, overlap_z
   double precision :: KA2(3), phiA(3)
   double precision :: KB2(3), phiB(3)

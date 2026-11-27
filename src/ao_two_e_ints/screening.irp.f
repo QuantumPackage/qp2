@@ -1,4 +1,7 @@
+use sizet
+
 logical function ao_two_e_integral_zero(i,j,k,l)
+ use sizet
   BEGIN_DOC
   ! Returns .True. if the AO integral $(ij|kl)$ can be taken as
   ! zero. No screening when the integrals are read from the EZFIO
@@ -12,7 +15,7 @@ logical function ao_two_e_integral_zero(i,j,k,l)
   ! rigorous for the real cGTO AOs ($ao\_two\_e\_integral\_schwartz\_cgtos$).
   END_DOC
   implicit none
-  integer, intent(in) :: i,j,k,l
+  integer(size_t), intent(in) :: i,j,k,l
 
   ao_two_e_integral_zero = .False.
   if (read_ao_two_e_integrals.or.is_periodic) return

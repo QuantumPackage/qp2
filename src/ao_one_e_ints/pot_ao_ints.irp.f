@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -13,7 +14,8 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
 
   implicit none
   integer          :: num_A, num_B, power_A(3), power_B(3)
-  integer          :: i, j, k, l, n_pt_in, m
+  integer(size_t) :: i, j
+  integer          :: k, l, n_pt_in, m
   double precision :: alpha, beta
   double precision :: A_center(3),B_center(3),C_center(3)
   double precision :: overlap_x,overlap_y,overlap_z,overlap,dx,NAI_pol_mult
@@ -157,7 +159,8 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e_per_atom, (ao_num,ao_num,nuc
   integer                        :: i_c,num_A,num_B
   double precision               :: A_center(3),B_center(3),C_center(3)
   integer                        :: power_A(3),power_B(3)
-  integer                        :: i,j,k,l,n_pt_in,m
+  integer(size_t)                :: i, j
+  integer                        :: k, l, n_pt_in, m
   double precision               :: overlap_x,overlap_y,overlap_z,overlap,dx,NAI_pol_mult
 
   ao_integrals_n_e_per_atom = 0.d0

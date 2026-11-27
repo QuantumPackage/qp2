@@ -14,6 +14,7 @@
  !  ispin   == 3 :: alpha/ beta
  !  ispin   == 4 :: spin traced <=> total two-rdm 
  END_DOC
+ use sizet
  implicit none
  integer, intent(in) :: ispin,sze_buff
  integer, intent(in) :: list_orb_reverse(mo_num)
@@ -24,7 +25,7 @@
  integer         , intent(out)  :: keys(4,sze_buff)
  integer         , intent(inout):: nkeys
 
- integer                        :: occ(N_int*bit_kind_size,2)
+ integer(size_t)                :: occ(N_int*bit_kind_size,2)
  integer                        :: n_occ_ab(2)
  integer :: i,j,h1,h2
  integer(bit_kind) :: det_1_act(N_int,2)
@@ -202,6 +203,7 @@
 !
 ! here, only ispin == 3 or 4 will do something
  END_DOC
+ use sizet
  implicit none
  integer, intent(in) :: ispin,sze_buff
  integer(bit_kind), intent(in)  :: det_1(N_int,2),det_2(N_int,2)
@@ -211,7 +213,7 @@
  integer         , intent(out)  :: keys(4,sze_buff)
  integer         , intent(inout):: nkeys
  integer :: i,j,h1,h2,p1,p2
- integer                        :: exc(0:2,2,2)
+ integer(size_t)                :: exc(0:2,2,2)
  double precision               :: phase
  logical                        :: alpha_alpha,beta_beta,alpha_beta,spin_trace
  logical :: is_integer_in_string
@@ -292,6 +294,7 @@
  !
  ! here, only ispin == 3 or 4 will do something
   END_DOC
+  use sizet
   implicit none
  integer, intent(in) :: ispin,sze_buff
  integer(bit_kind), intent(in)  :: det_1(N_int,2),det_2(N_int,2)
@@ -302,10 +305,10 @@
  integer         , intent(out)  :: keys(4,sze_buff)
  integer         , intent(inout):: nkeys
  
-  integer                        :: occ(N_int*bit_kind_size,2)
+  integer(size_t)                :: occ(N_int*bit_kind_size,2)
   integer                        :: n_occ_ab(2)
   integer :: i,j,h1,h2,p1
-  integer                        :: exc(0:2,2,2)
+  integer(size_t)                :: exc(0:2,2,2)
   double precision               :: phase
  
   logical                        :: alpha_alpha,beta_beta,alpha_beta,spin_trace
@@ -455,6 +458,7 @@
  ! here, only ispin == 1 or 4 will do something
   END_DOC
   use bitmasks
+  use sizet
   implicit none
  integer, intent(in) :: ispin,sze_buff
  integer(bit_kind), intent(in)  :: det_1(N_int,2),det_2(N_int,2)
@@ -465,10 +469,10 @@
  integer         , intent(out)  :: keys(4,sze_buff)
  integer         , intent(inout):: nkeys
  
-  integer                        :: occ(N_int*bit_kind_size,2)
+  integer(size_t)                :: occ(N_int*bit_kind_size,2)
   integer                        :: n_occ_ab(2)
   integer :: i,j,h1,h2,p1
-  integer                        :: exc(0:2,2,2)
+  integer(size_t)                :: exc(0:2,2,2)
   double precision               :: phase
  
   logical                        :: alpha_alpha,beta_beta,alpha_beta,spin_trace
@@ -559,6 +563,7 @@
  !
  ! here, only ispin == 2 or 4 will do something
   END_DOC
+  use sizet
   implicit none
  integer, intent(in) :: ispin,sze_buff
  integer(bit_kind), intent(in)  :: det_1(N_int,2),det_2(N_int,2)
@@ -569,10 +574,10 @@
  integer         , intent(out)  :: keys(4,sze_buff)
  integer         , intent(inout):: nkeys
  
-  integer                        :: occ(N_int*bit_kind_size,2)
+  integer(size_t)                :: occ(N_int*bit_kind_size,2)
   integer                        :: n_occ_ab(2)
   integer :: i,j,h1,h2,p1
-  integer                        :: exc(0:2,2,2)
+  integer(size_t)                :: exc(0:2,2,2)
   double precision               :: phase
   logical                        :: alpha_alpha,beta_beta,alpha_beta,spin_trace
   logical :: is_integer_in_string
@@ -643,6 +648,7 @@
 
   subroutine orb_range_off_diag_double_to_2_rdm_aa_dm_buffer(det_1,det_2,c_1,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
   use bitmasks
+  use sizet
   BEGIN_DOC
  ! routine that update the OFF DIAGONAL PART of the two body rdms in a specific range of orbitals for 
  !
@@ -674,7 +680,7 @@
  
  
   integer :: i,j,h1,h2,p1,p2
-  integer                        :: exc(0:2,2)
+  integer(size_t)                :: exc(0:2,2)
   double precision               :: phase
  
   logical                        :: alpha_alpha,beta_beta,alpha_beta,spin_trace
@@ -738,6 +744,7 @@
 
   subroutine orb_range_off_diag_double_to_2_rdm_bb_dm_buffer(det_1,det_2,c_1,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
   use bitmasks
+  use sizet
   BEGIN_DOC
  ! routine that update the OFF DIAGONAL PART of the two body rdms in a specific range of orbitals for 
  !
@@ -769,7 +776,7 @@
  integer         , intent(inout):: nkeys
  
   integer :: i,j,h1,h2,p1,p2
-  integer                        :: exc(0:2,2)
+  integer(size_t)                :: exc(0:2,2)
   double precision               :: phase
   logical                        :: alpha_alpha,beta_beta,alpha_beta,spin_trace
   logical :: is_integer_in_string

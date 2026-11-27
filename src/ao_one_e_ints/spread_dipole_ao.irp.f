@@ -1,3 +1,4 @@
+use sizet
   BEGIN_PROVIDER [ double precision, ao_spread_x, (ao_num,ao_num)]
  &BEGIN_PROVIDER [ double precision, ao_spread_y, (ao_num,ao_num)]
  &BEGIN_PROVIDER [ double precision, ao_spread_z, (ao_num,ao_num)]
@@ -9,7 +10,8 @@
  ! * array of the integrals of AO_i * z^2 AO_j
  END_DOC
  implicit none
-  integer :: i,j,n,l
+  integer(size_t) :: i,j
+  integer :: n,l
   double precision :: f, tmp
   integer :: dim1
   double precision :: overlap, overlap_x, overlap_y, overlap_z
@@ -83,7 +85,8 @@
  ! * array of the integrals of AO_i * z AO_j
  END_DOC
  implicit none
-  integer :: i,j,n,l
+  integer(size_t) :: i,j
+  integer :: n,l
   double precision :: f, tmp
   integer :: dim1
   double precision :: overlap, overlap_x, overlap_y, overlap_z,accu_x,accu_y,accu_z
@@ -156,7 +159,8 @@
  ! * array of the integrals of AO_i * d/dz  AO_j
  END_DOC
  implicit none
-  integer :: i,j,n,l
+  integer(size_t) :: i,j
+  integer :: n,l
   double precision :: f, tmp
   integer :: dim1
   double precision :: overlap, overlap_x, overlap_y, overlap_z

@@ -26,7 +26,9 @@
  state_av_act_2_rdm_ab_mo = 0.d0
  call wall_time(wall_1)
  double precision :: wall_1, wall_2
- call orb_range_2_rdm_state_av_openmp(state_av_act_2_rdm_ab_mo,n_act_orb,n_act_orb,list_act,state_weights,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+ call orb_range_2_rdm_state_av_openmp(state_av_act_2_rdm_ab_mo, &
+     int(n_act_orb,4), int(n_act_orb,4), list_act, state_weights, &
+     ispin, psi_coef, size(psi_coef,2), size(psi_coef,1))
  call wall_time(wall_2)
  print*,'Wall time to provide state_av_act_2_rdm_ab_mo',wall_2 - wall_1
  ! factor 2 to have the correct normalization factor 
@@ -57,7 +59,9 @@
  state_av_act_2_rdm_aa_mo = 0.D0
  call wall_time(wall_1)
  double precision :: wall_1, wall_2
- call orb_range_2_rdm_state_av_openmp(state_av_act_2_rdm_aa_mo,n_act_orb,n_act_orb,list_act,state_weights,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+ call orb_range_2_rdm_state_av_openmp(state_av_act_2_rdm_aa_mo, &
+     int(n_act_orb,4), int(n_act_orb,4), list_act, state_weights, &
+     ispin, psi_coef, size(psi_coef,2), size(psi_coef,1))
  call wall_time(wall_2)
  print*,'Wall time to provide state_av_act_2_rdm_aa_mo',wall_2 - wall_1
  ! factor 2 to have the correct normalization factor 
@@ -87,7 +91,9 @@
  state_av_act_2_rdm_bb_mo = 0.d0
  call wall_time(wall_1)
  double precision :: wall_1, wall_2
- call orb_range_2_rdm_state_av_openmp(state_av_act_2_rdm_bb_mo,n_act_orb,n_act_orb,list_act,state_weights,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+ call orb_range_2_rdm_state_av_openmp(state_av_act_2_rdm_bb_mo, &
+     int(n_act_orb,4), int(n_act_orb,4), list_act, state_weights, &
+     ispin, psi_coef, size(psi_coef,2), size(psi_coef,1))
  call wall_time(wall_2)
  print*,'Wall time to provide state_av_act_2_rdm_bb_mo',wall_2 - wall_1
  ! factor 2 to have the correct normalization factor 

@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -14,7 +15,8 @@ BEGIN_PROVIDER [double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
   implicit none
 
   integer              :: power_A(3), power_B(3)
-  integer              :: i, j, k, l, m, n, ii, jj
+  integer(size_t)      :: i, j
+  integer              :: k, l, m, n, ii, jj
   double precision     :: c, Z, C_center(3)
   double precision     :: phiA, KA2
   double precision     :: phiB, KB2

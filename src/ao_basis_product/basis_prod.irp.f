@@ -1,3 +1,4 @@
+use sizet
 BEGIN_PROVIDER [ double precision, ao_basis_prod_threshold ]
  implicit none
  BEGIN_DOC
@@ -7,12 +8,12 @@ BEGIN_PROVIDER [ double precision, ao_basis_prod_threshold ]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, basis_prod_num ]
+BEGIN_PROVIDER [ integer(size_t), basis_prod_num ]
   implicit none
   BEGIN_DOC
   ! Maximum number of basis functions for the projector
   END_DOC
-  basis_prod_num = ao_num * (ao_num+1) / 2
+  basis_prod_num = int(ao_num,size_t) * (ao_num+1) / 2
 !  basis_prod_num = ao_num 
 END_PROVIDER
 
@@ -21,7 +22,8 @@ BEGIN_PROVIDER [ integer, basis_prod_idx, (2,basis_prod_num) ]
   BEGIN_DOC
   ! Indices of main basis to create projector basis
   END_DOC
-  integer :: i,j,a
+  integer(size_t) :: a
+  integer :: i,j
   a=0
   do j=1,ao_num
      do i=1,j
@@ -77,13 +79,14 @@ double precision function general_overlap_integral(dim,            &
 end function general_overlap_integral
 
 double precision function basis_prod_overlap_func(a,b)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Overlap matrix element of the basis of products
   END_DOC
   include 'constants.include.F'
 
-  integer, intent(in)            :: a,b
+  integer(size_t), intent(in)      :: a,b
   double precision, external     :: general_overlap_integral
   double precision, external     :: ao_two_e_integral_general
 
@@ -106,10 +109,10 @@ end function basis_prod_overlap_func
   BEGIN_DOC
   ! Overlap matrix of the basis of products
   END_DOC
-  integer                        :: a,b
+  integer(size_t)                :: a,b
   double precision, external     :: basis_prod_overlap_func
 
-  basis_prod_overlap(1,1) = basis_prod_overlap_func(1,1)
+  basis_prod_overlap(1,1) = basis_prod_overlap_func(1_size_t,1_size_t)
   !$OMP PARALLEL DO PRIVATE(a,b) SCHEDULE(guided)
   do a=2,basis_prod_num
      basis_prod_overlap(a,a) = basis_prod_overlap_func(a,a)
@@ -137,14 +140,14 @@ end function basis_prod_overlap_func
   allocate(Vt(basis_prod_num,basis_prod_num))
 !
   call svd( &
-       basis_prod_overlap, size(basis_prod_overlap,1), &
-       U,  size(U,1), D, &
-       Vt, size(Vt,1), &
+       basis_prod_overlap, int(size(basis_prod_overlap,1),size_t), &
+       U,  int(size(U,1),size_t), D, &
+       Vt, int(size(Vt,1),size_t), &
        basis_prod_num,basis_prod_num)
 !  call lapack_diag(D,U,basis_prod_overlap,basis_prod_num,basis_prod_num)
 !
   double precision :: local_cutoff
-  integer          :: i, j, k, mm
+  integer(size_t)   :: i, j, k, mm
 
   local_cutoff = 1.d-10
 !  local_cutoff = -1.d-15
@@ -174,8 +177,10 @@ end function basis_prod_overlap_func
      enddo
   enddo
 
-  call dgemm('N','T', basis_prod_num, basis_prod_num, basis_prod_num, 1.d0, &
-       U2, basis_prod_num, U, basis_prod_num, 0.d0, basis_prod_overlap, basis_prod_num)
+  call dgemm('N','T', int(basis_prod_num,4), int(basis_prod_num,4), &
+       int(basis_prod_num,4), 1.d0, &
+       U2, int(basis_prod_num,4), U, int(basis_prod_num,4), 0.d0, &
+       basis_prod_overlap, int(basis_prod_num,4))
 
   do k=1,basis_prod_num
      if (D(k) == 0.d0) then
@@ -188,8 +193,10 @@ end function basis_prod_overlap_func
      enddo
   enddo
 
-  call dgemm('N','T', basis_prod_num, basis_prod_num, basis_prod_num, 1.d0, &
-       U2, basis_prod_num, U, basis_prod_num, 0.d0, basis_prod_overlap_inv, basis_prod_num)
+  call dgemm('N','T', int(basis_prod_num,4), int(basis_prod_num,4), &
+       int(basis_prod_num,4), 1.d0, &
+       U2, int(basis_prod_num,4), U, int(basis_prod_num,4), 0.d0, &
+       basis_prod_overlap_inv, int(basis_prod_num,4))
 
   deallocate(U,U2,D)
 !  deallocate(Vt)

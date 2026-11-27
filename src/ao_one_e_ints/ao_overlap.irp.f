@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -17,7 +18,8 @@
   END_DOC
 
   implicit none
-  integer          :: i, j, n, l, dim1, power_A(3), power_B(3)
+  integer(size_t) :: i, j
+  integer          :: n, l, dim1, power_A(3), power_B(3)
   double precision :: overlap, overlap_x, overlap_y, overlap_z
   double precision :: alpha, beta, c
   double precision :: A_center(3), B_center(3)
@@ -147,7 +149,7 @@ BEGIN_PROVIDER [ complex*16, ao_overlap_complex, (ao_num, ao_num) ]
   BEGIN_DOC
   ! Overlap for complex AOs
   END_DOC
-  integer                        :: i,j
+  integer(size_t)                :: i,j
   do j=1,ao_num
     do i=1,ao_num
       ao_overlap_complex(i,j) = dcmplx( ao_overlap(i,j), ao_overlap_imag(i,j) )
@@ -166,7 +168,8 @@ BEGIN_PROVIDER [ double precision, ao_overlap_abs, (ao_num, ao_num) ]
   END_DOC
 
   implicit none
-  integer          :: i, j, n, l, dim1, power_A(3), power_B(3)
+  integer(size_t) :: i, j
+  integer          :: n, l, dim1, power_A(3), power_B(3)
   double precision :: overlap_x, overlap_y, overlap_z
   double precision :: alpha, beta
   double precision :: A_center(3), B_center(3)
@@ -232,8 +235,9 @@ BEGIN_PROVIDER [ double precision, S_inv,(ao_num,ao_num) ]
  BEGIN_DOC
 ! Inverse of the overlap matrix
  END_DOC
- call get_pseudo_inverse(ao_overlap,size(ao_overlap,1),ao_num,ao_num,S_inv, &
-    size(S_inv,1),lin_dep_cutoff)
+  call get_pseudo_inverse(ao_overlap, int(size(ao_overlap,1),size_t), &
+                         int(ao_num,size_t), int(ao_num,size_t), S_inv, &
+                         int(size(S_inv,1),size_t), lin_dep_cutoff)
 END_PROVIDER
 
 BEGIN_PROVIDER [ complex*16, S_inv_complex,(ao_num,ao_num) ]
@@ -241,8 +245,12 @@ BEGIN_PROVIDER [ complex*16, S_inv_complex,(ao_num,ao_num) ]
  BEGIN_DOC
 ! Inverse of the overlap matrix
  END_DOC
- call get_pseudo_inverse_complex(ao_overlap_complex, size(ao_overlap_complex,1),&
-    ao_num,ao_num,S_inv_complex,size(S_inv_complex,1),lin_dep_cutoff)
+  call get_pseudo_inverse_complex(ao_overlap_complex, &
+                                 int(size(ao_overlap_complex,1),size_t), &
+                                 int(ao_num,size_t), int(ao_num,size_t), &
+                                 S_inv_complex, &
+                                 int(size(S_inv_complex,1),size_t), &
+                                 lin_dep_cutoff)
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, S_half_inv, (AO_num,AO_num) ]
@@ -254,13 +262,14 @@ BEGIN_PROVIDER [ double precision, S_half_inv, (AO_num,AO_num) ]
   implicit none
 
   integer                         :: num_linear_dependencies
-  integer                         :: LDA, LDC
+  integer(size_t)                  :: LDA, LDC
   double precision, allocatable   :: U(:,:),Vt(:,:), D(:)
-  integer                         :: info, i, j, k
+  integer                         :: info
+  integer(size_t)                  :: i, j, k
   double precision, parameter     :: threshold_overlap_AO_eigenvalues = 1.d-6
 
-  LDA = size(AO_overlap,1)
-  LDC = size(S_half_inv,1)
+  LDA = int(size(AO_overlap,1),size_t)
+  LDC = int(size(S_half_inv,1),size_t)
 
   allocate(         &
     U(LDC,AO_num),  &
@@ -272,7 +281,8 @@ BEGIN_PROVIDER [ double precision, S_half_inv, (AO_num,AO_num) ]
        U,LDC,          &
        D,              &
        Vt,LDA,         &
-       AO_num,AO_num)
+       int(AO_num,size_t), &
+       int(AO_num,size_t))
 
   num_linear_dependencies = 0
   do i=1,AO_num
@@ -310,14 +320,16 @@ BEGIN_PROVIDER [ double precision, S_half, (ao_num,ao_num)  ]
  ! :math:`S^{1/2}`
  END_DOC
 
-  integer :: i,j,k
+  integer(size_t) :: i,j,k
   double precision, allocatable  :: U(:,:)
   double precision, allocatable  :: Vt(:,:)
   double precision, allocatable  :: D(:)
 
   allocate(U(ao_num,ao_num),Vt(ao_num,ao_num),D(ao_num))
 
-  call svd(ao_overlap,size(ao_overlap,1),U,size(U,1),D,Vt,size(Vt,1),ao_num,ao_num)
+  call svd(ao_overlap,int(size(ao_overlap,1),size_t), &
+      U,int(size(U,1),size_t),D,Vt,int(size(Vt,1),size_t), &
+      int(ao_num,size_t),int(ao_num,size_t))
 
   do i=1,ao_num
     D(i) = dsqrt(D(i))

@@ -1,3 +1,4 @@
+use sizet
 use map_module
 
 !! AO Map
@@ -10,14 +11,15 @@ BEGIN_PROVIDER [ type(map_type), ao_integrals_erf_map ]
   END_DOC
   integer(key_kind)              :: key_max
   integer(map_size_kind)         :: sze
-  call two_e_integrals_index(ao_num,ao_num,ao_num,ao_num,key_max)
+  call two_e_integrals_index(int(ao_num, size_t), int(ao_num, size_t), &
+      int(ao_num, size_t), int(ao_num, size_t), key_max)
   sze = key_max
   call map_init(ao_integrals_erf_map,sze)
   print*,  'AO map initialized : ', sze
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer, ao_integrals_erf_cache_min ]
-&BEGIN_PROVIDER [ integer, ao_integrals_erf_cache_max ]
+ BEGIN_PROVIDER [ integer(size_t), ao_integrals_erf_cache_min ]
+&BEGIN_PROVIDER [ integer(size_t), ao_integrals_erf_cache_max ]
  implicit none
  BEGIN_DOC
  ! Min and max values of the AOs for which the integrals are in the cache
@@ -34,7 +36,8 @@ BEGIN_PROVIDER [ double precision, ao_integrals_erf_cache, (0:64*64*64*64) ]
  ! Cache of |AO| integrals for fast access
  END_DOC
  PROVIDE ao_two_e_integrals_erf_in_map
- integer                        :: i,j,k,l,ii
+ integer(size_t)                :: i,j,k,l
+ integer                        :: ii
  integer(key_kind)              :: idx
  real(integral_kind)            :: integral
  !$OMP PARALLEL DO PRIVATE (i,j,k,l,idx,ii,integral)
@@ -47,9 +50,9 @@ BEGIN_PROVIDER [ double precision, ao_integrals_erf_cache, (0:64*64*64*64) ]
          !DIR$ FORCEINLINE
          call map_get(ao_integrals_erf_map,idx,integral)
          ii = l-ao_integrals_erf_cache_min
-         ii = ior( ishft(ii,6), k-ao_integrals_erf_cache_min)
-         ii = ior( ishft(ii,6), j-ao_integrals_erf_cache_min)
-         ii = ior( ishft(ii,6), i-ao_integrals_erf_cache_min)
+         ii = ior( ishft(ii,6), int(k-ao_integrals_erf_cache_min,4))
+         ii = ior( ishft(ii,6), int(j-ao_integrals_erf_cache_min,4))
+         ii = ior( ishft(ii,6), int(i-ao_integrals_erf_cache_min,4))
          ao_integrals_erf_cache(ii) = integral
        enddo
      enddo
@@ -61,13 +64,14 @@ END_PROVIDER
 
 
 subroutine insert_into_ao_integrals_erf_map(n_integrals,buffer_i, buffer_values)
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
   ! Create new entry into |AO| map
   END_DOC
 
-  integer, intent(in)                :: n_integrals
+  integer(size_t), intent(in)        :: n_integrals
   integer(key_kind), intent(inout)   :: buffer_i(n_integrals)
   real(integral_kind), intent(inout) :: buffer_values(n_integrals)
 
@@ -75,12 +79,13 @@ subroutine insert_into_ao_integrals_erf_map(n_integrals,buffer_i, buffer_values)
 end
 
 double precision function get_ao_two_e_integral_erf(i,j,k,l,map) result(result)
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
   ! Gets one |AO| two-electron integral from the |AO| map
   END_DOC
-  integer, intent(in)            :: i,j,k,l
+  integer(size_t), intent(in)    :: i,j,k,l
   integer(key_kind)              :: idx
   type(map_type), intent(inout)  :: map
   integer                        :: ii
@@ -94,9 +99,9 @@ double precision function get_ao_two_e_integral_erf(i,j,k,l,map) result(result)
     tmp = 0.d0
   else
     ii = l-ao_integrals_erf_cache_min
-    ii = ior(ii, k-ao_integrals_erf_cache_min)
-    ii = ior(ii, j-ao_integrals_erf_cache_min)
-    ii = ior(ii, i-ao_integrals_erf_cache_min)
+    ii = ior(ii, int(k-ao_integrals_erf_cache_min,4))
+    ii = ior(ii, int(j-ao_integrals_erf_cache_min,4))
+    ii = ior(ii, int(i-ao_integrals_erf_cache_min,4))
     if (iand(ii, -64) /= 0) then
       !DIR$ FORCEINLINE
       call two_e_integrals_index(i,j,k,l,idx)
@@ -105,9 +110,9 @@ double precision function get_ao_two_e_integral_erf(i,j,k,l,map) result(result)
       tmp = tmp
     else
       ii = l-ao_integrals_erf_cache_min
-      ii = ior( ishft(ii,6), k-ao_integrals_erf_cache_min)
-      ii = ior( ishft(ii,6), j-ao_integrals_erf_cache_min)
-      ii = ior( ishft(ii,6), i-ao_integrals_erf_cache_min)
+      ii = ior( ishft(ii,6), int(k-ao_integrals_erf_cache_min,4))
+      ii = ior( ishft(ii,6), int(j-ao_integrals_erf_cache_min,4))
+      ii = ior( ishft(ii,6), int(i-ao_integrals_erf_cache_min,4))
       tmp = ao_integrals_erf_cache(ii)
     endif
   endif
@@ -116,16 +121,17 @@ end
 
 
 subroutine get_ao_two_e_integrals_erf(j,k,l,sze,out_val)
+ use sizet
   use map_module
   BEGIN_DOC
   ! Gets multiple |AO| two-electron integral from the |AO| map .
   ! All i are retrieved for j,k,l fixed.
   END_DOC
   implicit none
-  integer, intent(in)            :: j,k,l, sze
+  integer(size_t), intent(in)    :: j,k,l, sze
   real(integral_kind), intent(out) :: out_val(sze)
 
-  integer                        :: i
+  integer(size_t)                :: i
   integer(key_kind)              :: hash
   double precision               :: thresh
   logical, external              :: ao_one_e_integral_zero
@@ -145,17 +151,18 @@ subroutine get_ao_two_e_integrals_erf(j,k,l,sze,out_val)
 end
 
 subroutine get_ao_two_e_integrals_erf_non_zero(j,k,l,sze,out_val,out_val_index,non_zero_int)
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
   ! Gets multiple |AO| two-electron integrals from the |AO| map .
   ! All non-zero i are retrieved for j,k,l fixed.
   END_DOC
-  integer, intent(in)            :: j,k,l, sze
+  integer(size_t), intent(in)    :: j,k,l, sze
   real(integral_kind), intent(out) :: out_val(sze)
-  integer, intent(out)           :: out_val_index(sze),non_zero_int
+  integer(size_t), intent(out)   :: out_val_index(sze),non_zero_int
 
-  integer                        :: i
+  integer(size_t)                :: i
   integer(key_kind)              :: hash
   double precision               :: thresh,tmp
   logical, external              :: ao_one_e_integral_zero

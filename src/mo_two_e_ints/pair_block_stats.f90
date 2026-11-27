@@ -50,8 +50,8 @@ module pair_block_stats_mod
   integer(c_int64_t), save :: tot_blk = 0_c_int64_t, tot_col = 0_c_int64_t
   double precision,   save :: tim_blk = 0.d0, tim_col = 0.d0 ! thread-seconds
 
-  integer, save :: mo_stats   = 0
-  integer, save :: nvec_stats = 0
+  integer(c_int64_t), save :: mo_stats   = 0
+  integer(c_int64_t), save :: nvec_stats = 0
 
   character(len=1024), save :: stats_dir = ''
   double precision,   save :: t_start = 0.d0, t_lastdump = 0.d0
@@ -79,7 +79,7 @@ contains
   !-------------------------------------------------------------------
   subroutine pair_block_stats_init(mo_num, ezfio_dir)
     implicit none
-    integer,          intent(in) :: mo_num
+    integer(c_int64_t), intent(in) :: mo_num
     character(len=*), intent(in) :: ezfio_dir
     character(len=32)   :: env
     integer(c_int64_t)  :: n
@@ -122,7 +122,7 @@ contains
   !-------------------------------------------------------------------
   subroutine pair_block_stats_add(k, l, nvec, elapsed)
     implicit none
-    integer,          intent(in) :: k, l, nvec
+    integer(c_int64_t), intent(in) :: k, l, nvec
     double precision, intent(in) :: elapsed
     integer(c_int64_t)           :: ikey
 
@@ -144,7 +144,7 @@ contains
   !-------------------------------------------------------------------
   subroutine pair_block_stats_add_col(k, l, elapsed)
     implicit none
-    integer,          intent(in) :: k, l
+    integer(c_int64_t), intent(in) :: k, l
     double precision, intent(in) :: elapsed
     integer(c_int64_t)           :: ikey
 
@@ -180,7 +180,8 @@ contains
   !-------------------------------------------------------------------
   subroutine pair_block_stats_write()
     implicit none
-    integer :: iu, ios, k, l
+    integer :: iu, ios
+    integer(c_int64_t) :: k, l
     integer(c_int64_t) :: idx
 
     if (mo_stats < 1) return

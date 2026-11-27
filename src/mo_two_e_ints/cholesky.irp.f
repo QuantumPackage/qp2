@@ -1,16 +1,19 @@
+use sizet
 use gpu
 
- BEGIN_PROVIDER [ integer, cholesky_mo_num ]
-&BEGIN_PROVIDER [ integer, cholesky_mo_num_split, (1:5)]
+ BEGIN_PROVIDER [ integer(size_t), cholesky_mo_num ]
+&BEGIN_PROVIDER [ integer(size_t), cholesky_mo_num_split, (1:5)]
  implicit none
  BEGIN_DOC
  ! Number of Cholesky vectors in MO basis
  END_DOC
  integer, external              :: getUnitAndOpen
  integer                        :: iunit
+ integer                        :: rank_io
  if (read_mo_cholesky) then
    iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_mo_transp', 'R')
-   read(iunit) cholesky_mo_num
+   read(iunit) rank_io
+   cholesky_mo_num = int(rank_io, size_t)
    close(iunit)
  else
    cholesky_mo_num = cholesky_ao_num
@@ -29,7 +32,7 @@ BEGIN_PROVIDER [ double precision, cholesky_mo, (mo_num, mo_num, cholesky_mo_num
  ! Cholesky vectors in MO basis
  END_DOC
 
- integer :: k, i, j
+ integer(size_t) :: k, i, j
 
  !$OMP PARALLEL DO PRIVATE(k)
  do k=1,cholesky_mo_num
@@ -59,13 +62,15 @@ END_PROVIDER
  type(gpu_double2) :: mo_coef_d
  double precision :: wall0, wall1
  integer, external              :: getUnitAndOpen
- integer                        :: iunit, ierr, rank
- integer :: igpu
+ integer                        :: iunit, ierr
+ integer(size_t)                :: rank
+ integer :: rank_io, igpu
 
  if (read_mo_cholesky) then
       print *,  'Reading Cholesky MO vectors from disk...'
      iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_mo_transp', 'R')
-     read(iunit) rank
+     read(iunit) rank_io
+     rank = int(rank_io, size_t)
      if (cholesky_mo_num /= rank) then
         stop 'inconsistent rank'
      endif
@@ -73,7 +78,8 @@ END_PROVIDER
      !$OMP PARALLEL DO PRIVATE(igpu)
      do igpu=0,gpu_num-1
        call gpu_set_device(igpu)
-       call gpu_allocate(cholesky_mo_transp_d(igpu), cholesky_mo_num, mo_num, mo_num)
+       call gpu_allocate(cholesky_mo_transp_d(igpu), &
+           int(cholesky_mo_num,4), mo_num, mo_num)
        call gpu_upload(cholesky_mo_transp, cholesky_mo_transp_d(igpu))
      enddo
      !$OMP END PARALLEL DO
@@ -92,21 +98,27 @@ END_PROVIDER
      endif
 
      if (gpu_num > 0) then
-       call gpu_allocate(cholesky_mo_transp_d(0), cholesky_mo_num, mo_num, mo_num)
+       call gpu_allocate(cholesky_mo_transp_d(0), &
+           int(cholesky_mo_num,4), mo_num, mo_num)
 
        call gpu_allocate(mo_coef_d, ao_num,mo_num)
        call gpu_upload(mo_coef, mo_coef_d)
 
-       call gpu_allocate(cholesky_ao_d, ao_num,ao_num,cholesky_ao_num)
+       call gpu_allocate(cholesky_ao_d, ao_num,ao_num,int(cholesky_ao_num,4))
        call gpu_upload(cholesky_ao, cholesky_ao_d)
 
-       call gpu_allocate(X_d, mo_num,cholesky_mo_num,ao_num)
+       call gpu_allocate(X_d, mo_num,int(cholesky_mo_num,4),ao_num)
 
-       call gpu_dgemm(blas_handle, 'T','N', ao_num*cholesky_mo_num, mo_num, ao_num, 1.d0, &
-           cholesky_ao_d%f(1,1,1), ao_num, mo_coef_d%f(1,1), ao_num, 0.d0, X_d%f(1,1,1), ao_num*cholesky_mo_num)
+       call gpu_dgemm(blas_handle, 'T','N', &
+           int(ao_num*cholesky_mo_num,4), mo_num, ao_num, 1.d0, &
+           cholesky_ao_d%f(1,1,1), ao_num, mo_coef_d%f(1,1), ao_num, &
+           0.d0, X_d%f(1,1,1), int(ao_num*cholesky_mo_num,4))
 
-       call gpu_dgemm(blas_handle, 'T','N', cholesky_mo_num*mo_num, mo_num, ao_num, 1.d0, &
-           X_d%f(1,1,1), ao_num, mo_coef_d%f(1,1), ao_num, 0.d0, cholesky_mo_transp_d(0)%f(1,1,1), cholesky_mo_num*mo_num)
+       call gpu_dgemm(blas_handle, 'T','N', &
+           int(cholesky_mo_num*mo_num,4), mo_num, ao_num, 1.d0, &
+           X_d%f(1,1,1), ao_num, mo_coef_d%f(1,1), ao_num, &
+           0.d0, cholesky_mo_transp_d(0)%f(1,1,1), &
+           int(cholesky_mo_num*mo_num,4))
 
        call gpu_synchronize()
        call gpu_deallocate(cholesky_ao_d)
@@ -118,7 +130,8 @@ END_PROVIDER
        !$OMP PARALLEL DO PRIVATE(igpu)
        do igpu=1,gpu_num-1
          call gpu_set_device(igpu)
-         call gpu_allocate(cholesky_mo_transp_d(igpu), cholesky_mo_num, mo_num, mo_num)
+         call gpu_allocate(cholesky_mo_transp_d(igpu), &
+             int(cholesky_mo_num,4), mo_num, mo_num)
          call gpu_upload(cholesky_mo_transp, cholesky_mo_transp_d(igpu))
        enddo
        !$OMP END PARALLEL DO
@@ -127,11 +140,15 @@ END_PROVIDER
        double precision, allocatable :: X(:,:,:)
        allocate(X(mo_num,cholesky_mo_num,ao_num))
 
-       call dgemm('T','N', ao_num*cholesky_mo_num, mo_num, ao_num, 1.d0, &
-           cholesky_ao(1,1,1), ao_num, mo_coef(1,1), ao_num, 0.d0, X(1,1,1), ao_num*cholesky_mo_num)
+       call dgemm('T','N', &
+           int(ao_num*cholesky_mo_num,4), mo_num, ao_num, 1.d0, &
+           cholesky_ao(1,1,1), ao_num, mo_coef(1,1), ao_num, &
+           0.d0, X(1,1,1), int(ao_num*cholesky_mo_num,4))
 
-       call dgemm('T','N', cholesky_mo_num*mo_num, mo_num, ao_num, 1.d0, &
-           X(1,1,1), ao_num, mo_coef(1,1), ao_num, 0.d0, cholesky_mo_transp(1,1,1), cholesky_mo_num*mo_num)
+       call dgemm('T','N', &
+           int(cholesky_mo_num*mo_num,4), mo_num, ao_num, 1.d0, &
+           X(1,1,1), ao_num, mo_coef(1,1), ao_num, &
+           0.d0, cholesky_mo_transp(1,1,1), int(cholesky_mo_num*mo_num,4))
 
        deallocate(X)
      endif
@@ -143,7 +160,7 @@ END_PROVIDER
      if (write_mo_cholesky) then
        print *,  'Writing Cholesky MO vectors to disk...'
        iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_mo_transp', 'W')
-       write(iunit) cholesky_mo_num
+       write(iunit) int(cholesky_mo_num,4)
        write(iunit) cholesky_mo_transp
        close(iunit)
        call ezfio_set_mo_two_e_ints_io_mo_cholesky('Read')
@@ -170,7 +187,7 @@ BEGIN_PROVIDER [ double precision, cholesky_semi_mo_transp_simple, (cholesky_mo_
  if (ierr /= 0) then
    print *, irp_here, ': Allocation failed'
  endif
- integer :: i_chol, i_mo, j_mo, i_ao 
+ integer(size_t) :: i_chol, i_mo, j_mo, i_ao 
  cholesky_semi_mo_transp_simple = 0.d0
  do i_mo = 1, mo_num
   do i_ao = 1, ao_num
@@ -193,7 +210,7 @@ BEGIN_PROVIDER [ real, cholesky_mo_sp, (mo_num, mo_num, cholesky_mo_num) ]
  ! Cholesky vectors in MO basis in stored in single precision
  END_DOC
 
- integer :: k, i, j
+ integer(size_t) :: k, i, j
 
  !$OMP PARALLEL DO PRIVATE(k)
  do k=1,cholesky_mo_num
@@ -217,7 +234,7 @@ BEGIN_PROVIDER [ real, cholesky_mo_transp_sp, (cholesky_mo_num, mo_num, mo_num) 
  ! - cholesky_mo_transp is (cholesky_mo_num x mo_num^2)
  END_DOC
 
- integer :: i,j,k
+ integer(size_t) :: i,j,k
  !$OMP PARALLEL DO PRIVATE(k)
  do j=1,mo_num
   do i=1,mo_num
@@ -239,7 +256,8 @@ BEGIN_PROVIDER [ type(gpu_real3), cholesky_mo_transp_sp_d, (0:gpu_num) ]
    !$OMP PARALLEL DO PRIVATE(igpu)
    do igpu=0,gpu_num-1
      call gpu_set_device(igpu)
-     call gpu_allocate(cholesky_mo_transp_sp_d(igpu), cholesky_mo_num, mo_num, mo_num)
+     call gpu_allocate(cholesky_mo_transp_sp_d(igpu), &
+         int(cholesky_mo_num,4), mo_num, mo_num)
      call gpu_upload(cholesky_mo_transp_sp,cholesky_mo_transp_sp_d(igpu))
    enddo
    !$OMP END PARALLEL DO

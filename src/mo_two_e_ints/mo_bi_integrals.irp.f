@@ -16,15 +16,17 @@
 ! - 1,2,3-index arrays are built from the map
 !
 
+use sizet
 use gpu
 
 subroutine mo_two_e_integrals_index(i,j,k,l,i1)
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
   ! Computes an unique index for i,j,k,l integrals
   END_DOC
-  integer, intent(in)            :: i,j,k,l
+  integer(size_t), intent(in)    :: i,j,k,l
   integer(key_kind), intent(out) :: i1
   integer(key_kind)              :: p,q,r,s,i2
   p = min(i,k)
@@ -96,6 +98,7 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
 END_PROVIDER
 
 subroutine four_idx_dgemm
+ use sizet
   implicit none
   BEGIN_DOC
   ! Dense AO->MO transformation of the two-electron integrals by
@@ -105,7 +108,7 @@ subroutine four_idx_dgemm
   ! j<=l only). Called from the provider mo_two_e_integrals_in_map
   ! when do_ao_cholesky is False and ao_num**4*32.d-9 < qp_max_mem.
   END_DOC
-  integer :: p,q,r,s,i,j,k,l
+  integer(size_t) :: p,q,r,s,i,j,k,l
   double precision, allocatable :: a1(:,:,:,:)
   double precision, allocatable :: a2(:,:,:,:)
 
@@ -123,13 +126,14 @@ subroutine four_idx_dgemm
   allocate (a1(ao_num,ao_num,ao_num,ao_num))
 
   print *, 'Getting AOs'
-  call get_ao_two_e_integrals(1,1,1,ao_num,a1(1,1,1,1))
+  call get_ao_two_e_integrals(1_size_t,1_size_t,1_size_t, &
+      int(ao_num,size_t),a1(1,1,1,1))
   !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q,r,s) COLLAPSE(2)
   do s=1,ao_num
     do r=1,ao_num
       do q=1,ao_num
         a1(:,q,r,s) = 0.d0
-        call get_ao_two_e_integrals(q,r,s,ao_num,a1(1,q,r,s))
+        call get_ao_two_e_integrals(q,r,s,int(ao_num,size_t),a1(1,q,r,s))
       enddo
     enddo
   enddo
@@ -161,10 +165,11 @@ subroutine four_idx_dgemm
 
   deallocate (a2)
 
-  integer :: n_integrals, size_buffer
+  integer(size_t) :: n_integrals, size_buffer
   integer(key_kind)  , allocatable :: buffer_i(:)
   real(integral_kind), allocatable :: buffer_value(:)
-  size_buffer = min(ao_num*ao_num*ao_num,16000000)
+  size_buffer = min(int(ao_num,size_t)*int(ao_num,size_t)* &
+      int(ao_num,size_t),16000000)
 
   !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(i,j,k,l,buffer_value,buffer_i,n_integrals)
   allocate ( buffer_i(size_buffer), buffer_value(size_buffer) )
@@ -205,6 +210,7 @@ subroutine four_idx_dgemm
 end subroutine
 
 subroutine add_integrals_to_map(mask_ijkl)
+ use sizet
   use bitmasks
   implicit none
 
@@ -214,27 +220,28 @@ subroutine add_integrals_to_map(mask_ijkl)
 
   integer(bit_kind), intent(in)  :: mask_ijkl(N_int,4)
 
-  integer                        :: i,j,k,l
-  integer                        :: i0,j0,k0,l0
+  integer(size_t)                :: i,j,k,l
+  integer(size_t)                :: i0,j0,k0,l0
   double precision               :: c, cpu_1, cpu_2, wall_1, wall_2, wall_0
 
-  integer, allocatable           :: list_ijkl(:,:)
-  integer                        :: n_i, n_j, n_k, n_l
-  integer, allocatable           :: two_e_tmp_0_idx(:)
+  integer(size_t), allocatable   :: list_ijkl(:,:)
+  integer(size_t)                :: n_i, n_j, n_k, n_l
+  integer(size_t), allocatable   :: two_e_tmp_0_idx(:)
   real(integral_kind), allocatable :: two_e_tmp_0(:,:)
   double precision, allocatable  :: two_e_tmp_1(:)
   double precision, allocatable  :: two_e_tmp_2(:,:)
   double precision, allocatable  :: two_e_tmp_3(:,:,:)
   !DIR$ ATTRIBUTES ALIGN : 64    :: two_e_tmp_1, two_e_tmp_2, two_e_tmp_3
 
-  integer                        :: n_integrals
-  integer                        :: size_buffer
+  integer(size_t)                :: n_integrals
+  integer(size_t)                :: size_buffer
   integer(key_kind),allocatable  :: buffer_i(:)
   real(integral_kind),allocatable :: buffer_value(:)
   double precision, external     :: map_mb
 
-  integer                        :: i1,j1,k1,l1, ii1, kmax, thread_num
-  integer                        :: i2,i3,i4
+  integer(size_t)                :: i1,j1,k1,l1, ii1, kmax
+  integer                        :: thread_num
+  integer(size_t)                :: i2,i3,i4
   double precision,parameter     :: thr_coef = 1.d-10
 
   PROVIDE ao_two_e_integrals_in_map  mo_coef
@@ -287,7 +294,7 @@ subroutine add_integrals_to_map(mask_ijkl)
 
   call wall_time(wall_1)
 
-  size_buffer = min(ao_num*ao_num,8000000)
+  size_buffer = min(int(ao_num,size_t)*int(ao_num,size_t),8000000)
   print*, 'Buffers : ', 8.*(mo_num*(n_j)*(n_k+1) + mo_num+&
       ao_num+ao_num*ao_num+ size_buffer*3)/(1024*1024), 'MB / core'
 
@@ -320,7 +327,8 @@ subroutine add_integrals_to_map(mask_ijkl)
     do k1 = 1,ao_num
       two_e_tmp_2 = 0.d0
       do j1 = 1,ao_num
-        call get_ao_two_e_integrals(j1,k1,l1,ao_num,two_e_tmp_0(1,j1))
+        call get_ao_two_e_integrals(j1,k1,l1, &
+             int(ao_num,size_t),two_e_tmp_0(1,j1))
       enddo
       do j1 = 1,ao_num
         kmax = 0
@@ -488,6 +496,7 @@ end
 
 
 subroutine add_integrals_to_map_cholesky
+ use sizet
   use bitmasks
   implicit none
 
@@ -495,9 +504,11 @@ subroutine add_integrals_to_map_cholesky
   ! Adds integrals to the MO map using Cholesky vectors
   END_DOC
 
-  integer :: i,j,k,l,m, iproc
-  integer :: size_buffer, n_integrals
-  size_buffer = min(mo_num*mo_num*mo_num,16000000)
+  integer(size_t) :: i,j,k,l
+  integer         :: m, iproc
+  integer(size_t) :: size_buffer, n_integrals
+  size_buffer = min(int(mo_num,size_t)*int(mo_num,size_t)* &
+      int(mo_num,size_t),16000000)
 
   type(gpu_double3) :: Vtmp_d
   double precision, allocatable :: Vtmp(:,:,:)
@@ -529,15 +540,18 @@ subroutine add_integrals_to_map_cholesky
   do l=mo_num,1,-1
 
     if (gpu_num > 0) then
-      call gpu_dgemm(blas_handle_mt(iproc), 'T','N',mo_num*mo_num,l,cholesky_mo_num,1.d0, &
-         cholesky_mo_transp_d(igpu_mt(iproc))%f(1,1,1), cholesky_mo_num, &
-         cholesky_mo_transp_d(igpu_mt(iproc))%f(1,1,l), cholesky_mo_num, 0.d0, &
+      call gpu_dgemm(blas_handle_mt(iproc), 'T','N',mo_num*mo_num, &
+         int(l,4), int(cholesky_mo_num,4), 1.d0, &
+         cholesky_mo_transp_d(igpu_mt(iproc))%f(1,1,1), &
+         int(cholesky_mo_num,4), &
+         cholesky_mo_transp_d(igpu_mt(iproc))%f(1,1,l), &
+         int(cholesky_mo_num,4), 0.d0, &
          Vtmp_d%f(1,1,1), mo_num*mo_num)
       call gpu_download(Vtmp_d,Vtmp)
     else
-      call dgemm('T','N',mo_num*mo_num,l,cholesky_mo_num,1.d0, &
-         cholesky_mo_transp(1,1,1), cholesky_mo_num, &
-         cholesky_mo_transp(1,1,l), cholesky_mo_num, 0.d0, &
+      call dgemm('T','N',mo_num*mo_num,int(l,4),int(cholesky_mo_num,4),1.d0, &
+         cholesky_mo_transp(1,1,1), int(cholesky_mo_num,4), &
+         cholesky_mo_transp(1,1,l), int(cholesky_mo_num,4), 0.d0, &
          Vtmp(1,1,1), mo_num*mo_num)
     endif
 
@@ -550,7 +564,7 @@ subroutine add_integrals_to_map_cholesky
             !DIR$ FORCEINLINE
             call mo_two_e_integrals_index(i,k,j,l,buffer_i(n_integrals))
             if (n_integrals == size_buffer) then
-              call map_append(mo_integrals_map, buffer_i, buffer_value, n_integrals)
+  call map_append(mo_integrals_map, buffer_i, buffer_value, n_integrals)
               n_integrals = 0
             endif
           endif
@@ -581,6 +595,7 @@ end
 
 
 subroutine add_integrals_to_map_cholesky_sp
+ use sizet
   use bitmasks
   implicit none
 
@@ -588,9 +603,11 @@ subroutine add_integrals_to_map_cholesky_sp
   ! Adds integrals to the MO map using Cholesky vectors
   END_DOC
 
-  integer :: i,j,k,l,m
-  integer :: size_buffer, n_integrals, iproc
-  size_buffer = min(mo_num*mo_num*mo_num,16000000)
+  integer(size_t) :: i,j,k,l
+  integer         :: m, iproc
+  integer(size_t) :: size_buffer, n_integrals
+  size_buffer = min(int(mo_num,size_t)*int(mo_num,size_t)* &
+      int(mo_num,size_t),16000000)
 
   type(gpu_real3) :: Vtmp_d
   real, allocatable :: Vtmp(:,:,:)
@@ -617,15 +634,18 @@ subroutine add_integrals_to_map_cholesky_sp
   do l=mo_num,1,-1
 
     if (gpu_num > 0) then
-      call gpu_sgemm(blas_handle_mt(iproc), 'T','N',mo_num*mo_num,l,cholesky_mo_num,1.0, &
-         cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,1,1), cholesky_mo_num, &
-         cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,1,l), cholesky_mo_num, 0.0, &
+      call gpu_sgemm(blas_handle_mt(iproc), 'T','N',mo_num*mo_num, &
+         int(l,4), int(cholesky_mo_num,4), 1.0, &
+         cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,1,1), &
+         int(cholesky_mo_num,4), &
+         cholesky_mo_transp_sp_d(igpu_mt(iproc))%f(1,1,l), &
+         int(cholesky_mo_num,4), 0.0, &
          Vtmp_d%f(1,1,1), mo_num*mo_num)
       call gpu_download(Vtmp_d,Vtmp)
     else
-      call sgemm('T','N',mo_num*mo_num,l,cholesky_mo_num,1.0, &
-         cholesky_mo_transp_sp(1,1,1), cholesky_mo_num, &
-         cholesky_mo_transp_sp(1,1,l), cholesky_mo_num, 0.0, &
+      call sgemm('T','N',mo_num*mo_num,int(l,4),int(cholesky_mo_num,4),1.0, &
+         cholesky_mo_transp_sp(1,1,1), int(cholesky_mo_num,4), &
+         cholesky_mo_transp_sp(1,1,l), int(cholesky_mo_num,4), 0.0, &
          Vtmp(1,1,1), mo_num*mo_num)
     endif
 
@@ -679,7 +699,8 @@ end
   ! mo_two_e_integrals_jj_anti(i,j) = J_ij - K_ij
   END_DOC
 
-  integer                        :: i,j,k
+  integer(size_t)                :: i,j
+  integer                        :: k
   double precision               :: get_two_e_integral
 
 
@@ -704,15 +725,18 @@ end
       type(gpu_double2) :: mo_two_e_integrals_jj_d
       call gpu_allocate(mo_two_e_integrals_jj_d, mo_num, mo_num)
 
-      call gpu_dgemm(blas_handle, 'T','N',mo_num,mo_num,cholesky_mo_num,1.d0, &
-        cholesky_mo_transp_d(0)%f(1,1,1), cholesky_mo_num*(mo_num+1), &
-        cholesky_mo_transp_d(0)%f(1,1,1), cholesky_mo_num*(mo_num+1), &
+      call gpu_dgemm(blas_handle, 'T','N',mo_num,mo_num, &
+        int(cholesky_mo_num,4), 1.d0, &
+        cholesky_mo_transp_d(0)%f(1,1,1), &
+        int(cholesky_mo_num*(mo_num+1),4), &
+        cholesky_mo_transp_d(0)%f(1,1,1), &
+        int(cholesky_mo_num*(mo_num+1),4), &
         0.d0, mo_two_e_integrals_jj_d%f(1,1), mo_num)
     else
 
-      call dgemm('T','N',mo_num,mo_num,cholesky_mo_num,1.d0, &
-        cholesky_mo_transp(1,1,1), cholesky_mo_num*(mo_num+1), &
-        cholesky_mo_transp(1,1,1), cholesky_mo_num*(mo_num+1), &
+      call dgemm('T','N',mo_num,mo_num,int(cholesky_mo_num,4),1.d0, &
+        cholesky_mo_transp(1,1,1), int(cholesky_mo_num*(mo_num+1),4), &
+        cholesky_mo_transp(1,1,1), int(cholesky_mo_num*(mo_num+1),4), &
 
         0.d0, mo_two_e_integrals_jj(1,1), mo_num)
     endif
@@ -724,7 +748,7 @@ end
           ! The sixth argument used to be the current element of the array
           ! being written, i.e. uninitialised memory.  Initialise it at zero.
           mo_two_e_integrals_jj_exchange(i,j) = &
-          ddot(cholesky_mo_num, &
+          ddot(int(cholesky_mo_num,4), &
              cholesky_mo_transp(1,i,j), 1, &
              cholesky_mo_transp(1,j,i), 1, &
              0.d0)

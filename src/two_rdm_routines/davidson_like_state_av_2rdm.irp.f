@@ -1,5 +1,6 @@
 subroutine orb_range_2_rdm_state_av_openmp(big_array,dim1,norb,list_orb,state_weights,ispin,u_0,N_st,sze)
    use bitmasks
+   use sizet
    implicit none
    BEGIN_DOC
    ! if ispin == 1 :: alpha/alpha 2rdm
@@ -12,7 +13,8 @@ subroutine orb_range_2_rdm_state_av_openmp(big_array,dim1,norb,list_orb,state_we
    ! istart, iend, ishift, istep split the work between the OpenMP threads.
    END_DOC
    integer, intent(in)             :: N_st,sze
-   integer, intent(in)             :: dim1,norb,list_orb(norb),ispin
+   integer, intent(in)             :: dim1,norb,ispin
+   integer(size_t), intent(in)    :: list_orb(norb)
    double precision, intent(inout) :: big_array(dim1,dim1,dim1,dim1)
    double precision, intent(in)    :: u_0(sze,N_st),state_weights(N_st)
 
@@ -21,7 +23,7 @@ subroutine orb_range_2_rdm_state_av_openmp(big_array,dim1,norb,list_orb,state_we
    !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: u_t
    allocate(u_t(N_st,N_det))
    do k=1,N_st
-     call dset_order(u_0(1,k),psi_bilinear_matrix_order,N_det)
+     call dset_order_big(u_0(1,k),psi_bilinear_matrix_order,N_det)
    enddo
    call dtranspose(                                                  &
        u_0,                                                          &
@@ -30,17 +32,21 @@ subroutine orb_range_2_rdm_state_av_openmp(big_array,dim1,norb,list_orb,state_we
        size(u_t, 1),                                                 &
        N_det, N_st)
 
-   call orb_range_2_rdm_state_av_openmp_work(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,1,N_det,0,1)
+            call orb_range_2_rdm_state_av_openmp_work(big_array, dim1, norb, &
+                                                list_orb, state_weights, &
+                                                ispin, u_t, N_st, sze, 1, &
+                                                int(N_det,4), 0, 1)
    deallocate(u_t)
 
    do k=1,N_st
-     call dset_order(u_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
+     call dset_order_big(u_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
    enddo
 
 end
 
 subroutine orb_range_2_rdm_state_av_openmp_work(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
    use bitmasks
+   use sizet
    implicit none
    BEGIN_DOC
    ! Computes two-rdm
@@ -48,7 +54,8 @@ subroutine orb_range_2_rdm_state_av_openmp_work(big_array,dim1,norb,list_orb,sta
    ! Default should be 1,N_det,0,1
    END_DOC
    integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep
-   integer, intent(in)             :: dim1,norb,list_orb(norb),ispin
+   integer, intent(in)             :: dim1,norb,ispin
+   integer(size_t), intent(in)    :: list_orb(norb)
    double precision, intent(inout) :: big_array(dim1,dim1,dim1,dim1)
    double precision, intent(in)   :: u_t(N_st,N_det),state_weights(N_st)
 
@@ -75,6 +82,7 @@ end
 
  BEGIN_TEMPLATE
 subroutine orb_range_2_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+ use sizet
    use bitmasks
    use omp_lib
    implicit none
@@ -90,25 +98,27 @@ subroutine orb_range_2_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,list_
    END_DOC
    integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep
    double precision, intent(in)   :: u_t(N_st,N_det),state_weights(N_st)
-   integer, intent(in)            :: dim1,norb,list_orb(norb),ispin
+   integer, intent(in)            :: dim1,norb,ispin
+   integer(size_t), intent(in)   :: list_orb(norb)
    double precision, intent(inout) :: big_array(dim1,dim1,dim1,dim1)
 
    integer(omp_lock_kind)          :: lock_2rdm
-   integer                        :: i,j,k,l
-   integer                        :: k_a, k_b, l_a, l_b
-   integer                        :: krow, kcol
-   integer                        :: lrow, lcol
+   integer(size_t)                :: i,j,k
+   integer                        :: l
+   integer(size_t)                :: k_a, k_b, l_a, l_b
+   integer(size_t)                :: krow, kcol
+   integer(size_t)                :: lrow, lcol
    integer(bit_kind)              :: spindet($N_int)
    integer(bit_kind)              :: tmp_det($N_int,2)
    integer(bit_kind)              :: tmp_det2($N_int,2)
    integer(bit_kind)              :: tmp_det3($N_int,2)
    integer(bit_kind), allocatable :: buffer(:,:)
-   integer                        :: n_doubles
-   integer, allocatable           :: doubles(:)
-   integer, allocatable           :: singles_a(:)
-   integer, allocatable           :: singles_b(:)
-   integer, allocatable           :: idx(:), idx0(:)
-   integer                        :: maxab, n_singles_a, n_singles_b, kcol_prev
+   integer(size_t)                :: n_doubles
+   integer(size_t), allocatable   :: doubles(:)
+   integer(size_t), allocatable   :: singles_a(:)
+   integer(size_t), allocatable   :: singles_b(:)
+   integer(size_t), allocatable   :: idx(:), idx0(:)
+   integer(size_t)                :: maxab, n_singles_a, n_singles_b, kcol_prev
    double precision               :: c_average
 
    logical                        :: alpha_alpha,beta_beta,alpha_beta,spin_trace

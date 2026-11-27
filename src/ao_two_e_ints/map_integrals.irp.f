@@ -1,3 +1,4 @@
+use sizet
 use map_module
 
 !! AO Map
@@ -10,20 +11,22 @@ BEGIN_PROVIDER [ type(map_type), ao_integrals_map ]
   END_DOC
   integer(key_kind)              :: key_max
   integer(map_size_kind)         :: sze
-  call two_e_integrals_index(ao_num,ao_num,ao_num,ao_num,key_max)
+  call two_e_integrals_index(int(ao_num, size_t), int(ao_num, size_t), &
+    int(ao_num, size_t), int(ao_num, size_t), key_max)
   sze = key_max
   call map_init(ao_integrals_map,sze)
   print*,  'AO map initialized : ', sze
 END_PROVIDER
 
 subroutine two_e_integrals_index(i,j,k,l,i1)
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
 ! Gives a unique index for i,j,k,l using permtuation symmetry.
 ! i <-> k, j <-> l, and (i,k) <-> (j,l) for non-periodic systems
   END_DOC
-  integer, intent(in)            :: i,j,k,l
+  integer(size_t), intent(in)    :: i,j,k,l
   integer(key_kind), intent(out) :: i1
   integer(key_kind)              :: p,q,r,s,i2
   p = min(i,k)
@@ -40,6 +43,7 @@ end
 
 
 subroutine two_e_integrals_index_reverse(i,j,k,l,i1)
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
@@ -53,7 +57,7 @@ subroutine two_e_integrals_index_reverse(i,j,k,l,i1)
 ! This rule is applied 3 times. First for the symmetry of the
 ! pairs (i,k) and (j,l), and then for the symmetry within each pair.
   END_DOC
-  integer, intent(out)           :: i(8),j(8),k(8),l(8)
+  integer(size_t), intent(out)   :: i(8),j(8),k(8),l(8)
   integer(key_kind), intent(in)  :: i1
   integer(key_kind)              :: i2,i3
   i = 0
@@ -131,6 +135,7 @@ end
 
 
 subroutine ao_idx2_sq(i,j,ij)
+ use sizet
   BEGIN_DOC
   ! Computes the square compound index $ij$ of the ordered pair of
   ! AO indices $(i,j)$. For $i \neq j$, the indices of $(i,j)$ and
@@ -139,8 +144,8 @@ subroutine ao_idx2_sq(i,j,ij)
   ! Reverse operation: ao_idx2_sq_rev.
   END_DOC
   implicit none
-  integer, intent(in)  :: i,j
-  integer, intent(out) :: ij
+  integer(size_t), intent(in)  :: i,j
+  integer(size_t), intent(out) :: ij
   ! the mod term makes (i,j) and (j,i) map to different offsets
   if (i<j) then
     ij=(j-1)*(j-1)+2*i-mod(j+1,2)
@@ -152,21 +157,23 @@ subroutine ao_idx2_sq(i,j,ij)
 end
 
 subroutine idx2_tri_int(i,j,ij)
+ use sizet
   BEGIN_DOC
   ! Computes the triangular compound index $ij$ of the pair of AO
   ! indices $(i,j)$: $ij = \min(i,j) + (\max(i,j)^2 - \max(i,j))/2$.
   ! The index is the same for $(i,j)$ and $(j,i)$.
   END_DOC
   implicit none
-  integer, intent(in)  :: i,j
-  integer, intent(out) :: ij
-  integer :: p,q
+  integer(size_t), intent(in)  :: i,j
+  integer(size_t), intent(out) :: ij
+  integer(size_t) :: p,q
   p = max(i,j)
   q = min(i,j)
   ij = q+ishft(p*p-p,-1)
 end
 
 subroutine ao_idx2_tri_key(i,j,ij)
+ use sizet
   BEGIN_DOC
   ! Computes the triangular compound index of the pair of AO
   ! indices $(i,j)$: $ij = \min(i,j) + (\max(i,j)^2 - \max(i,j))/2$.
@@ -175,7 +182,7 @@ subroutine ao_idx2_tri_key(i,j,ij)
   END_DOC
   use map_module
   implicit none
-  integer, intent(in)  :: i,j
+  integer(size_t), intent(in)  :: i,j
   integer(key_kind), intent(out) :: ij
   integer(key_kind) :: p,q
   p = max(i,j)
@@ -184,6 +191,7 @@ subroutine ao_idx2_tri_key(i,j,ij)
 end
 
 subroutine two_e_integrals_index_2fold(i,j,k,l,i1)
+ use sizet
   BEGIN_DOC
   ! Computes a unique index $i_1$ for the four AO indices
   ! $i,j,k,l$, using only the symmetry of the two pairs $(i,k)$
@@ -193,9 +201,9 @@ subroutine two_e_integrals_index_2fold(i,j,k,l,i1)
   END_DOC
   use map_module
   implicit none
-  integer, intent(in)            :: i,j,k,l
+  integer(size_t), intent(in)    :: i,j,k,l
   integer(key_kind), intent(out) :: i1
-  integer                        :: ik,jl
+  integer(size_t)                :: ik,jl
 
   call ao_idx2_sq(i,k,ik)
   call ao_idx2_sq(j,l,jl)
@@ -203,6 +211,7 @@ subroutine two_e_integrals_index_2fold(i,j,k,l,i1)
 end
 
 subroutine ao_idx2_sq_rev(i,k,ik)
+ use sizet
   BEGIN_DOC
   ! reverse square compound index
   END_DOC
@@ -215,8 +224,8 @@ subroutine ao_idx2_sq_rev(i,k,ik)
 !    i=p
 !    k=q
 !  endif
-  integer, intent(in)           :: ik
-  integer, intent(out)          :: i,k
+  integer(size_t), intent(in)   :: ik
+  integer(size_t), intent(out)  :: i,k
   integer                       :: pq(0:1),i1,i2
   pq(0) = ceiling(dsqrt(dble(ik)))
   pq(1) = ceiling(0.5d0*(dble(ik)-dble((pq(0)-1)*(pq(0)-1))))
@@ -228,12 +237,13 @@ subroutine ao_idx2_sq_rev(i,k,ik)
 end
 
 subroutine ao_idx2_tri_rev_key(i,k,ik)
+ use sizet
   use map_module
   BEGIN_DOC
   !return i<=k
   END_DOC
   integer(key_kind), intent(in) :: ik
-  integer, intent(out)          :: i,k
+  integer(size_t), intent(out)  :: i,k
   integer(key_kind) :: tmp_k
   k = ceiling(0.5d0*(dsqrt(8.d0*dble(ik)+1.d0)-1.d0))
   tmp_k = k
@@ -241,16 +251,18 @@ subroutine ao_idx2_tri_rev_key(i,k,ik)
 end
 
 subroutine idx2_tri_rev_int(i,k,ik)
+ use sizet
   BEGIN_DOC
   !return i<=k
   END_DOC
-  integer, intent(in)           :: ik
-  integer, intent(out)          :: i,k
+  integer(size_t), intent(in)   :: ik
+  integer(size_t), intent(out)  :: i,k
   k = ceiling(0.5d0*(dsqrt(8.d0*dble(ik)+1.d0)-1.d0))
   i = int(ik - ishft(k*k-k,-1))
 end
 
 subroutine two_e_integrals_index_reverse_2fold(i,j,k,l,i1)
+ use sizet
   BEGIN_DOC
   ! Computes the four AO indices $i,j,k,l$ from a unique index
   ! $i_1$ produced by two_e_integrals_index_2fold. Two tuples are
@@ -260,10 +272,10 @@ subroutine two_e_integrals_index_reverse_2fold(i,j,k,l,i1)
   END_DOC
   use map_module
   implicit none
-  integer, intent(out)           :: i(2),j(2),k(2),l(2)
+  integer(size_t), intent(out)   :: i(2),j(2),k(2),l(2)
   integer(key_kind), intent(in)  :: i1
   integer(key_kind)              :: i0
-  integer                        :: i2,i3
+  integer(size_t)                :: i2,i3
   i = 0
   call ao_idx2_tri_rev_key(i3,i2,i1)
 
@@ -310,8 +322,8 @@ end
 
 
 
- BEGIN_PROVIDER [ integer, ao_integrals_cache_min ]
-&BEGIN_PROVIDER [ integer, ao_integrals_cache_max ]
+ BEGIN_PROVIDER [ integer(size_t), ao_integrals_cache_min ]
+&BEGIN_PROVIDER [ integer(size_t), ao_integrals_cache_max ]
  implicit none
  BEGIN_DOC
  ! Min and max values of the AOs for which the integrals are in the cache
@@ -327,7 +339,8 @@ BEGIN_PROVIDER [ double precision, ao_integrals_cache, (0:64*64*64*64) ]
  ! Cache of AO integrals for fast access
  END_DOC
  PROVIDE ao_two_e_integrals_in_map
- integer                        :: i,j,k,l,ii
+ integer(size_t)                :: i,j,k,l
+ integer                        :: ii
  integer(key_kind)              :: idx, idx2
  real(integral_kind)            :: integral
  real(integral_kind)            :: tmp_re, tmp_im
@@ -343,9 +356,9 @@ BEGIN_PROVIDER [ double precision, ao_integrals_cache, (0:64*64*64*64) ]
           !DIR$ FORCEINLINE
           call map_get(ao_integrals_map,idx,integral)
           ii = l-ao_integrals_cache_min
-          ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
-          ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
-          ii = ior( shiftl(ii,6), i-ao_integrals_cache_min)
+          ii = ior( shiftl(ii,6), int(k-ao_integrals_cache_min,4))
+          ii = ior( shiftl(ii,6), int(j-ao_integrals_cache_min,4))
+          ii = ior( shiftl(ii,6), int(i-ao_integrals_cache_min,4))
           ao_integrals_cache(ii) = integral
         enddo
       enddo
@@ -357,6 +370,7 @@ END_PROVIDER
 ! ---
 
 double precision function get_ao_two_e_integral(i, j, k, l, map) result(result)
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
@@ -364,7 +378,7 @@ double precision function get_ao_two_e_integral(i, j, k, l, map) result(result)
   !
   ! <1:k, 2:l \|1:i, 2:j> 
   END_DOC
-  integer, intent(in)            :: i,j,k,l
+  integer(size_t), intent(in)    :: i,j,k,l
   integer(key_kind)              :: idx
   type(map_type), intent(inout)  :: map
   integer                        :: ii
@@ -376,9 +390,9 @@ double precision function get_ao_two_e_integral(i, j, k, l, map) result(result)
     tmp = 0.d0
   else
     ii = l-ao_integrals_cache_min
-    ii = ior(ii, k-ao_integrals_cache_min)
-    ii = ior(ii, j-ao_integrals_cache_min)
-    ii = ior(ii, i-ao_integrals_cache_min)
+    ii = ior(ii, int(k-ao_integrals_cache_min,4))
+    ii = ior(ii, int(j-ao_integrals_cache_min,4))
+    ii = ior(ii, int(i-ao_integrals_cache_min,4))
     if (iand(ii, -64) /= 0) then
       !DIR$ FORCEINLINE
       call two_e_integrals_index(i,j,k,l,idx)
@@ -386,9 +400,9 @@ double precision function get_ao_two_e_integral(i, j, k, l, map) result(result)
       call map_get(map,idx,tmp)
     else
       ii = l-ao_integrals_cache_min
-      ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
-      ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
-      ii = ior( shiftl(ii,6), i-ao_integrals_cache_min)
+      ii = ior( shiftl(ii,6), int(k-ao_integrals_cache_min,4))
+      ii = ior( shiftl(ii,6), int(j-ao_integrals_cache_min,4))
+      ii = ior( shiftl(ii,6), int(i-ao_integrals_cache_min,4))
       tmp = ao_integrals_cache(ii)
     endif
   endif
@@ -401,7 +415,8 @@ BEGIN_PROVIDER [ complex*16, ao_integrals_cache_periodic, (0:64*64*64*64) ]
  ! Cache of AO integrals for fast access
  END_DOC
  PROVIDE ao_two_e_integrals_in_map
- integer                        :: i,j,k,l,ii
+ integer(size_t)                :: i,j,k,l
+ integer                        :: ii
  integer(key_kind)              :: idx1, idx2
  real(integral_kind)            :: tmp_re, tmp_im
  integer(key_kind)              :: idx_re,idx_im
@@ -434,9 +449,9 @@ BEGIN_PROVIDER [ complex*16, ao_integrals_cache_periodic, (0:64*64*64*64) ]
          endif
 
          ii = l-ao_integrals_cache_min
-         ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
-         ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
-         ii = ior( shiftl(ii,6), i-ao_integrals_cache_min)
+         ii = ior( shiftl(ii,6), int(k-ao_integrals_cache_min,4))
+         ii = ior( shiftl(ii,6), int(j-ao_integrals_cache_min,4))
+         ii = ior( shiftl(ii,6), int(i-ao_integrals_cache_min,4))
          ao_integrals_cache_periodic(ii) = integral
        enddo
      enddo
@@ -448,12 +463,13 @@ END_PROVIDER
 
 
 complex*16 function get_ao_two_e_integral_periodic(i,j,k,l,map) result(result)
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
   ! Gets one AO bi-electronic integral from the AO map
   END_DOC
-  integer, intent(in)            :: i,j,k,l
+  integer(size_t), intent(in)    :: i,j,k,l
   integer(key_kind)              :: idx1,idx2
   real(integral_kind)            :: tmp_re, tmp_im
   integer(key_kind)              :: idx_re,idx_im
@@ -467,9 +483,9 @@ complex*16 function get_ao_two_e_integral_periodic(i,j,k,l,map) result(result)
     tmp = (0.d0,0.d0)
   else
     ii = l-ao_integrals_cache_min
-    ii = ior(ii, k-ao_integrals_cache_min)
-    ii = ior(ii, j-ao_integrals_cache_min)
-    ii = ior(ii, i-ao_integrals_cache_min)
+    ii = ior(ii, int(k-ao_integrals_cache_min,4))
+    ii = ior(ii, int(j-ao_integrals_cache_min,4))
+    ii = ior(ii, int(i-ao_integrals_cache_min,4))
     if (iand(ii, -64) /= 0) then
          !DIR$ FORCEINLINE
          call two_e_integrals_index_2fold(i,j,k,l,idx1)
@@ -492,9 +508,9 @@ complex*16 function get_ao_two_e_integral_periodic(i,j,k,l,map) result(result)
          endif
     else
       ii = l-ao_integrals_cache_min
-      ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
-      ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
-      ii = ior( shiftl(ii,6), i-ao_integrals_cache_min)
+      ii = ior( shiftl(ii,6), int(k-ao_integrals_cache_min,4))
+      ii = ior( shiftl(ii,6), int(j-ao_integrals_cache_min,4))
+      ii = ior( shiftl(ii,6), int(i-ao_integrals_cache_min,4))
       tmp = ao_integrals_cache_periodic(ii)
     endif
     result = tmp
@@ -503,6 +519,7 @@ end
 
 
 subroutine get_ao_two_e_integrals(j,k,l,sze,out_val)
+ use sizet
   use map_module
   BEGIN_DOC
   ! Gets multiple AO bi-electronic integral from the AO map .
@@ -510,10 +527,10 @@ subroutine get_ao_two_e_integrals(j,k,l,sze,out_val)
   ! physicist convention : <ij|kl>
   END_DOC
   implicit none
-  integer, intent(in)            :: j,k,l, sze
+  integer(size_t), intent(in)    :: j,k,l, sze
   real(integral_kind), intent(out) :: out_val(sze)
 
-  integer                        :: i
+  integer(size_t)                :: i
   integer(key_kind)              :: hash
   logical, external              :: ao_one_e_integral_zero
   PROVIDE ao_two_e_integrals_in_map ao_integrals_map
@@ -532,6 +549,7 @@ end
 
 
 subroutine get_ao_two_e_integrals_periodic(j,k,l,sze,out_val)
+ use sizet
   use map_module
   BEGIN_DOC
   ! Gets multiple AO bi-electronic integral from the AO map .
@@ -539,10 +557,10 @@ subroutine get_ao_two_e_integrals_periodic(j,k,l,sze,out_val)
   ! physicist convention : <ij|kl>
   END_DOC
   implicit none
-  integer, intent(in)            :: j,k,l, sze
+  integer(size_t), intent(in)    :: j,k,l, sze
   complex(integral_kind), intent(out) :: out_val(sze)
 
-  integer                        :: i
+  integer(size_t)                :: i
   integer(key_kind)              :: hash
   logical, external              :: ao_one_e_integral_zero
   PROVIDE ao_two_e_integrals_in_map ao_integrals_map
@@ -560,17 +578,18 @@ subroutine get_ao_two_e_integrals_periodic(j,k,l,sze,out_val)
 end
 
 subroutine get_ao_two_e_integrals_non_zero(j,k,l,sze,out_val,out_val_index,non_zero_int)
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
   ! Gets multiple AO bi-electronic integral from the AO map .
   ! All non-zero i are retrieved for j,k,l fixed.
   END_DOC
-  integer, intent(in)            :: j,k,l, sze
+  integer(size_t), intent(in)    :: j,k,l, sze
   real(integral_kind), intent(out) :: out_val(sze)
-  integer, intent(out)           :: out_val_index(sze),non_zero_int
+  integer(size_t), intent(out)   :: out_val_index(sze),non_zero_int
 
-  integer                        :: i
+  integer(size_t)                :: i
   integer(key_kind)              :: hash
   double precision               :: tmp
   logical, external              :: ao_one_e_integral_zero
@@ -603,6 +622,7 @@ end
 
 
 subroutine get_ao_two_e_integrals_non_zero_jl(j,l,thresh,sze_max,sze,out_val,out_val_index,non_zero_int)
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
@@ -610,11 +630,11 @@ subroutine get_ao_two_e_integrals_non_zero_jl(j,l,thresh,sze_max,sze,out_val,out
   ! All non-zero i are retrieved for j,k,l fixed.
   END_DOC
   double precision, intent(in)   :: thresh
-  integer, intent(in)            :: j,l, sze,sze_max
+  integer(size_t), intent(in)    :: j,l, sze,sze_max
   real(integral_kind), intent(out) :: out_val(sze_max)
-  integer, intent(out)           :: out_val_index(2,sze_max),non_zero_int
+  integer(size_t), intent(out)   :: out_val_index(2,sze_max),non_zero_int
 
-  integer                        :: i,k
+  integer(size_t)                :: i,k
   integer(key_kind)              :: hash
   double precision               :: tmp
   logical, external              :: ao_one_e_integral_zero
@@ -650,6 +670,7 @@ end
 
 
 subroutine get_ao_two_e_integrals_non_zero_jl_from_list(j,l,thresh,list,n_list,sze_max,out_val,out_val_index,non_zero_int)
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
@@ -657,12 +678,12 @@ subroutine get_ao_two_e_integrals_non_zero_jl_from_list(j,l,thresh,list,n_list,s
   ! All non-zero i are retrieved for j,k,l fixed.
   END_DOC
   double precision, intent(in)   :: thresh
-  integer, intent(in)            :: sze_max
-  integer, intent(in)            :: j,l, n_list,list(2,sze_max)
+  integer(size_t), intent(in)    :: sze_max
+  integer(size_t), intent(in)    :: j,l, n_list,list(2,sze_max)
   real(integral_kind), intent(out) :: out_val(sze_max)
-  integer, intent(out)           :: out_val_index(2,sze_max),non_zero_int
+  integer(size_t), intent(out)   :: out_val_index(2,sze_max),non_zero_int
 
-  integer                        :: i,k
+  integer(size_t)                :: i,k
   integer(key_kind)              :: hash
   double precision               :: tmp
   logical, external              :: ao_one_e_integral_zero
@@ -676,7 +697,7 @@ subroutine get_ao_two_e_integrals_non_zero_jl_from_list(j,l,thresh,list,n_list,s
   endif
 
   non_zero_int = 0
- integer :: kk
+ integer(size_t) :: kk
   do kk = 1, n_list
    k = list(1,kk)
    i = list(2,kk)
@@ -720,13 +741,14 @@ end
 
 
 subroutine insert_into_ao_integrals_map(n_integrals,buffer_i, buffer_values)
+ use sizet
   use map_module
   implicit none
   BEGIN_DOC
   ! Create new entry into AO map
   END_DOC
 
-  integer, intent(in)                :: n_integrals
+  integer(size_t), intent(in)        :: n_integrals
   integer(key_kind), intent(inout)   :: buffer_i(n_integrals)
   real(integral_kind), intent(inout) :: buffer_values(n_integrals)
 
