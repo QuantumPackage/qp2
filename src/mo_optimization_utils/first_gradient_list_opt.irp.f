@@ -1,6 +1,9 @@
+use sizet
+
 ! First gradient
 
 subroutine first_gradient_list_opt(tmp_n,m,list,v_grad)
+ use sizet
   BEGIN_DOC
   ! Gradient of the energy with respect to orbital rotations,
   ! restricted to the m orbitals given by list.
@@ -22,7 +25,7 @@ subroutine first_gradient_list_opt(tmp_n,m,list,v_grad)
   ! qp set determinant read_wf true
 
   ! in
-  integer, intent(in) :: tmp_n,m,list(m)
+  integer(size_t), intent(in) :: tmp_n,m,list(m)
   ! n : integer, n = m*(m-1)/2
   ! m = list_size
   
@@ -33,7 +36,7 @@ subroutine first_gradient_list_opt(tmp_n,m,list,v_grad)
   ! internal
   double precision, allocatable :: grad(:,:),A(:,:)
   double precision :: norm
-  integer :: i,p,q,r,s,t,tmp_i,tmp_p,tmp_q,tmp_r,tmp_s,tmp_t
+  integer(size_t) :: i,p,q,r,s,t,tmp_i,tmp_p,tmp_q,tmp_r,tmp_s,tmp_t
   ! grad : double precision matrix containing the gradient before the permutation
   ! A : double precision matrix containing the gradient after the permutation
   ! norm : double precision number, the norm of the vector gradient

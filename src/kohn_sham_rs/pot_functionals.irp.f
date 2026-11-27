@@ -1,3 +1,5 @@
+use sizet
+
  BEGIN_PROVIDER [double precision, ao_potential_alpha_xc, (ao_num, ao_num)]
 &BEGIN_PROVIDER [double precision, ao_potential_beta_xc, (ao_num, ao_num)]
  implicit none
@@ -9,7 +11,8 @@
   ! potential_c_*_ao and potential_x_*_ao. Added to the KS Fock
   ! matrix in fock_matrix_rs_ks.irp.f.
   END_DOC
- integer :: i,j,k,l
+ integer(size_t) :: i,j
+ integer         :: k,l
  ao_potential_alpha_xc = 0.d0
  ao_potential_beta_xc = 0.d0
   if(same_xc_func)then

@@ -1,3 +1,5 @@
+use sizet
+
 ! Diagonal hessian
 
 ! The hessian of the CI energy with respects to the orbital rotation is :
@@ -95,6 +97,7 @@
 
 
 subroutine diag_hessian_list_opt(n, m, list, H)!, h_tmpr)
+ use sizet
   BEGIN_DOC
   ! Diagonal of the hessian of the energy with respect to orbital
   ! rotations, restricted to the m orbitals given by list.
@@ -111,17 +114,17 @@ subroutine diag_hessian_list_opt(n, m, list, H)!, h_tmpr)
   ! Variables
 
   ! in
-  integer, intent(in)           :: n, m, list(m)
+  integer(size_t), intent(in)   :: n, m, list(m)
  
   ! out
   double precision, intent(out) :: H(n)!,  h_tmpr(m,m,m,m)
   
   ! internal
   !double precision, allocatable :: !hessian(:,:,:,:)!, h_tmpr(:,:,:,:)
-  integer                       :: p,q,k
-  integer                       :: r,s,t,u,v
-  integer                       :: pq,rs
-  integer                       :: tmp_p,tmp_q,tmp_r,tmp_s,tmp_pq,tmp_rs
+  integer(size_t)               :: p,q,k
+  integer(size_t)               :: r,s,t,u,v
+  integer(size_t)               :: pq,rs
+  integer(size_t)               :: tmp_p,tmp_q,tmp_r,tmp_s,tmp_pq,tmp_rs
   double precision              :: t1,t2,t3,t4,t5,t6
   double precision, allocatable :: tmp_bi_int_3(:,:,:),tmp_bi_int_3_shared(:,:,:)
   double precision, allocatable :: tmp_2rdm_3(:,:,:),tmp_2rdm_3_shared(:,:,:)
@@ -1015,8 +1018,9 @@ do tmp_p = 1, m
 enddo
 !$OMP END DO
 
-call dgemm('T','N', m, m, mo_num*mo_num, 1d0, tmp_bi_int_3_shared,&
-           mo_num*mo_num, tmp_2rdm_3_shared, mo_num*mo_num, 0d0, tmp_accu, m)
+call dgemm('T', 'N', int(m,4), int(m,4), mo_num*mo_num, 1d0, &
+           tmp_bi_int_3_shared, mo_num*mo_num, tmp_2rdm_3_shared, &
+           mo_num*mo_num, 0d0, tmp_accu, int(m,4))
 
 !$OMP DO
 do tmp_q = 1, m
@@ -1376,8 +1380,9 @@ do tmp_p = 1, m
 enddo
 !$OMP END DO
 
-call dgemm('T','N', m, m, mo_num*mo_num, 1d0, tmp_bi_int_3_shared,&
-           mo_num*mo_num, tmp_2rdm_3_shared, mo_num*mo_num, 0d0, tmp_accu, m)
+call dgemm('T', 'N', int(m,4), int(m,4), mo_num*mo_num, 1d0, &
+           tmp_bi_int_3_shared, mo_num*mo_num, tmp_2rdm_3_shared, &
+           mo_num*mo_num, 0d0, tmp_accu, int(m,4))
 
 !$OMP DO
 do tmp_p = 1, m
@@ -1428,8 +1433,9 @@ do tmp_q = 1, m
 enddo
 !$OMP END DO
 
-call dgemm('T','N', m, m, mo_num*mo_num, 1d0, tmp_2rdm_3_shared,&
-           mo_num*mo_num, tmp_bi_int_3_shared, mo_num*mo_num, 0d0, tmp_accu, m)
+call dgemm('T', 'N', int(m,4), int(m,4), mo_num*mo_num, 1d0, &
+           tmp_2rdm_3_shared, mo_num*mo_num, tmp_bi_int_3_shared, &
+           mo_num*mo_num, 0d0, tmp_accu, int(m,4))
 
 !$OMP DO
 do tmp_q = 1, m

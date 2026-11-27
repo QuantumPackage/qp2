@@ -1,4 +1,6 @@
 
+use sizet
+
  BEGIN_PROVIDER [ double precision, ao_two_e_integral_alpha, (ao_num, ao_num) ]
 &BEGIN_PROVIDER [ double precision, ao_two_e_integral_beta ,  (ao_num, ao_num) ]
  use map_module
@@ -7,8 +9,9 @@
  ! Alpha and Beta Fock matrices in AO basis set
  END_DOC
 
- integer                        :: i,j,k,l,k1,r,s
- integer                        :: i0,j0,k0,l0
+ integer(size_t)                :: i,j,k,l,k1
+ integer                        :: r,s
+ integer(size_t)                :: i0,j0,k0,l0
  integer*8                      :: p,q
  double precision               :: integral, c0, c1, c2
  double precision               :: ao_two_e_integral, local_threshold
@@ -39,7 +42,7 @@
      ao_two_e_integral_alpha_tmp = 0.d0
      ao_two_e_integral_beta_tmp  = 0.d0
 
-     q = ao_num*ao_num*ao_num*ao_num
+     q = int(ao_num,size_t)*ao_num*ao_num*ao_num
      !$OMP DO SCHEDULE(static,64)
      do p=1_8,q
        call two_e_integrals_index_reverse(kk,ii,ll,jj,p)
@@ -105,7 +108,8 @@
 
      integer(omp_lock_kind)         :: lck(ao_num)
      integer(map_size_kind)         :: i8
-     integer                        :: ii(8), jj(8), kk(8), ll(8), k2
+     integer(size_t)                :: ii(8), jj(8), kk(8), ll(8)
+     integer                        :: k2
      integer(cache_map_size_kind)   :: n_elements_max, n_elements
      integer(key_kind), allocatable :: keys(:)
      double precision, allocatable  :: values(:)
@@ -168,24 +172,25 @@ END_PROVIDER
  ! Alpha and Beta Fock matrices in AO basis set
  END_DOC
 
- integer :: m,n,l,s,j
+ integer(size_t) :: m,n,l,s,j
  double precision :: integral
  double precision, allocatable :: X(:), X2(:,:,:,:), X3(:,:,:,:)
 
  allocate (X(cholesky_ao_num))
 
  ! X(j) = \sum_{mn} SCF_density_matrix_ao(m,n) * cholesky_ao(m,n,j)
- call dgemm('T','N',cholesky_ao_num,1,ao_num*ao_num,1.d0,            &
-     cholesky_ao, ao_num*ao_num,                                     &
-     SCF_density_matrix_ao, ao_num*ao_num,0.d0,                      &
-     X, cholesky_ao_num)
+    call dgemm('T', 'N', int(cholesky_ao_num,4), 1, &
+             int(int(ao_num,size_t)*ao_num,4), 1.d0, cholesky_ao, &
+             int(int(ao_num,size_t)*ao_num,4), SCF_density_matrix_ao, &
+             int(int(ao_num,size_t)*ao_num,4), 0.d0, X, int(cholesky_ao_num,4))
 !
 
  ! ao_two_e_integral_alpha(m,n) = \sum_{j} cholesky_ao(m,n,j) * X(j)
- call dgemm('N','N',ao_num*ao_num,1,cholesky_ao_num, 1.d0,           &
-     cholesky_ao, ao_num*ao_num,                                     &
-     X, cholesky_ao_num, 0.d0,                                       &
-     ao_two_e_integral_alpha_chol, ao_num*ao_num)
+    call dgemm('N', 'N', int(int(ao_num,size_t)*ao_num,4), 1, &
+             int(cholesky_ao_num,4), 1.d0, cholesky_ao, &
+             int(int(ao_num,size_t)*ao_num,4), X, int(cholesky_ao_num,4), &
+             0.d0, ao_two_e_integral_alpha_chol, &
+             int(int(ao_num,size_t)*ao_num,4))
 
  deallocate(X)
 
@@ -197,14 +202,14 @@ END_PROVIDER
  double precision :: rss, mem0, mem
  double precision :: memory_of_double
 
- integer :: iblock
+ integer(size_t) :: iblock
  integer :: block_size
 
  call resident_memory(mem0)
 
  block_size = 1024
 
- rss = memory_of_double(2.d0*ao_num*ao_num)
+ rss = memory_of_double(2_size_t*int(ao_num,size_t)*int(ao_num,size_t))
  do
    mem = mem0 + block_size*rss
    if ( (block_size < 2).or.(mem < qp_max_mem) ) exit
@@ -220,16 +225,18 @@ END_PROVIDER
 
  do iblock=1,cholesky_ao_num,block_size
 
-   call dgemm('N','N',ao_num,ao_num*min(cholesky_ao_num-iblock+1,block_size),ao_num, 1.d0,      &
-       SCF_density_matrix_ao_alpha, ao_num,    &
-       cholesky_ao(1,1,iblock), ao_num, 0.d0,  &
-       X2(1,1,1,1), ao_num)
+            call dgemm('N', 'N', int(ao_num,4), &
+                 int(ao_num*min(cholesky_ao_num-iblock+1,block_size),4), &
+                 int(ao_num,4), 1.d0, SCF_density_matrix_ao_alpha, &
+                 int(ao_num,4), cholesky_ao(1,1,iblock), int(ao_num,4), 0.d0, &
+                 X2(1,1,1,1), int(ao_num,4))
 
    if (elec_alpha_num > elec_beta_num) then
-     call dgemm('N','N',ao_num,ao_num*min(cholesky_ao_num-iblock+1,block_size),ao_num, 1.d0,      &
-       SCF_density_matrix_ao_beta, ao_num,     &
-       cholesky_ao(1,1,iblock), ao_num, 0.d0,  &
-       X2(1,1,1,2), ao_num)
+     call dgemm('N', 'N', int(ao_num,4), &
+                int(ao_num*min(cholesky_ao_num-iblock+1,block_size),4), &
+                int(ao_num,4), 1.d0, SCF_density_matrix_ao_beta, &
+                int(ao_num,4), cholesky_ao(1,1,iblock), int(ao_num,4), 0.d0, &
+                X2(1,1,1,2), int(ao_num,4))
 
      do s=1,ao_num
       do j=1,min(cholesky_ao_num-iblock+1,block_size)
@@ -251,16 +258,18 @@ END_PROVIDER
      enddo
    endif
 
-   call dgemm('N','N',ao_num,ao_num,ao_num*min(cholesky_ao_num-iblock+1,block_size), -1.d0,     &
-       cholesky_ao(1,1,iblock), ao_num,       &
-       X3(1,1,1,1), ao_num*block_size, 1.d0,  &
-       ao_two_e_integral_alpha_chol, ao_num)
+            call dgemm('N', 'N', int(ao_num,4), int(ao_num,4), &
+                 int(ao_num*min(cholesky_ao_num-iblock+1,block_size),4), &
+                 -1.d0, cholesky_ao(1,1,iblock), int(ao_num,4), X3(1,1,1,1), &
+                 int(int(ao_num,size_t)*block_size,4), 1.d0, &
+                 ao_two_e_integral_alpha_chol, int(ao_num,4))
 
    if (elec_alpha_num > elec_beta_num) then
-     call dgemm('N','N',ao_num,ao_num,ao_num*min(cholesky_ao_num-iblock+1,block_size), -1.d0,     &
-       cholesky_ao(1,1,iblock), ao_num,        &
-       X3(1,1,1,2), ao_num*block_size, 1.d0,   &
-       ao_two_e_integral_beta_chol, ao_num)
+     call dgemm('N', 'N', int(ao_num,4), int(ao_num,4), &
+                int(ao_num*min(cholesky_ao_num-iblock+1,block_size),4), -1.d0, &
+                cholesky_ao(1,1,iblock), int(ao_num,4), X3(1,1,1,2), &
+                int(int(ao_num,size_t)*block_size,4), 1.d0, &
+                ao_two_e_integral_beta_chol, int(ao_num,4))
    endif
 
  enddo
@@ -279,7 +288,7 @@ END_PROVIDER
  ! Alpha Fock matrix in AO basis set
  END_DOC
 
- integer                        :: i,j
+ integer(size_t)                :: i,j
  do j=1,ao_num
    do i=1,ao_num
      Fock_matrix_ao_alpha(i,j) = ao_one_e_integrals(i,j) + ao_two_e_integral_alpha(i,j)

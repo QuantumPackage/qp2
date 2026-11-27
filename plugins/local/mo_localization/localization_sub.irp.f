@@ -1,3 +1,5 @@
+use sizet
+
 ! Gathering
 ! Gradient/hessian/criterion for the localization:
 ! They are chosen in function of the localization method
@@ -29,7 +31,7 @@ subroutine gradient_localization(tmp_n, tmp_list_size, tmp_list, v_grad, max_ele
   ! Compute the gradient of the chosen localization method
   END_DOC
   
-  integer, intent(in)           :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
+  integer(size_t), intent(in)   :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: v_grad(tmp_n), max_elem, norm_grad
 
   if (localization_method == 'boys') then
@@ -64,7 +66,7 @@ subroutine hessian_localization(tmp_n, tmp_list_size, tmp_list, H)
   ! Compute the diagonal hessian of the chosen localization method
   END_DOC
 
-  integer, intent(in)           :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
+  integer(size_t), intent(in)   :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: H(tmp_n)
 
   if (localization_method == 'boys') then
@@ -97,7 +99,7 @@ subroutine criterion_localization(tmp_list_size, tmp_list,criterion)
   ! Compute the localization criterion of the chosen localization method
   END_DOC
 
-  integer, intent(in)           :: tmp_list_size, tmp_list(tmp_list_size)
+  integer(size_t), intent(in)   :: tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: criterion
 
   if (localization_method == 'boys') then
@@ -155,7 +157,7 @@ subroutine theta_localization(tmp_list, tmp_list_size, tmp_m_x, max_elem)
   ! Compute the rotation angles between the MOs for the chosen localization method
   END_DOC
   
-  integer, intent(in)           :: tmp_list_size, tmp_list(tmp_list_size)
+  integer(size_t), intent(in)   :: tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: tmp_m_x(tmp_list_size,tmp_list_size), max_elem
 
   if (localization_method == 'boys') then
@@ -195,10 +197,10 @@ subroutine gradient_FB(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gr
   ! Compute the gradient for the Foster-Boys localization
   END_DOC
   
-  integer, intent(in)           :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
+  integer(size_t), intent(in)   :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: v_grad(tmp_n), max_elem, norm_grad
   double precision, allocatable :: m_grad(:,:)
-  integer                       :: i,j,k,tmp_i,tmp_j,tmp_k
+  integer(size_t)                :: i,j,k,tmp_i,tmp_j,tmp_k
   double precision              :: t1, t2, t3
 
   print*,''
@@ -267,10 +269,10 @@ subroutine gradient_FB_omp(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, nor
   ! Compute the gradient for the Foster-Boys localization
   END_DOC
   
-  integer, intent(in)           :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
+  integer(size_t), intent(in)   :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: v_grad(tmp_n), max_elem, norm_grad
   double precision, allocatable :: m_grad(:,:)
-  integer                       :: i,j,k,tmp_i,tmp_j,tmp_k
+  integer(size_t)                :: i,j,k,tmp_i,tmp_j,tmp_k
   double precision              :: t1, t2, t3
 
   print*,''
@@ -366,10 +368,10 @@ subroutine hessian_FB(tmp_n, tmp_list_size, tmp_list, H)
   ! Compute the diagonal hessian for the Foster-Boys localization
   END_DOC
 
-  integer, intent(in)           :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
+  integer(size_t), intent(in)   :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: H(tmp_n)
   double precision, allocatable :: beta(:,:)
-  integer                       :: i,j,tmp_k,tmp_i, tmp_j
+  integer(size_t)                :: i,j,tmp_k,tmp_i, tmp_j
   double precision              :: max_elem, t1,t2,t3
    
   print*,''
@@ -420,10 +422,10 @@ subroutine hessian_FB_omp(tmp_n, tmp_list_size, tmp_list, H)
   ! Compute the diagonal hessian for the Foster-Boys localization
   END_DOC
 
-  integer, intent(in)           :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
+  integer(size_t), intent(in)   :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: H(tmp_n)
   double precision, allocatable :: beta(:,:)
-  integer                       :: i,j,tmp_k,tmp_i,tmp_j
+  integer(size_t)                :: i,j,tmp_k,tmp_i,tmp_j
   double precision              :: max_elem, t1,t2,t3
    
   print*,''
@@ -496,10 +498,11 @@ subroutine grad_pipek(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gra
   ! Compute gradient for the Pipek-Mezey localization
   END_DOC
 
-  integer, intent(in)           :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
+  integer(size_t), intent(in)   :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: v_grad(tmp_n), max_elem, norm_grad
   double precision, allocatable :: m_grad(:,:), tmp_int(:,:)
-  integer                       :: i,j,k,tmp_i,tmp_j,tmp_k, a, b, mu ,rho 
+  integer(size_t)                :: i,j,k,tmp_i,tmp_j,tmp_k, mu, rho
+  integer                        :: a, b
 
   ! Allocation
   allocate(m_grad(tmp_list_size, tmp_list_size), tmp_int(tmp_list_size, tmp_list_size))
@@ -622,10 +625,11 @@ subroutine gradient_PM(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gr
   ! Compute gradient for the Pipek-Mezey localization
   END_DOC
   
-  integer, intent(in)           :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
+  integer(size_t), intent(in)   :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: v_grad(tmp_n), max_elem, norm_grad
   double precision, allocatable :: m_grad(:,:), tmp_int(:,:), CS(:,:), tmp_mo_coef(:,:), tmp_mo_coef2(:,:),tmp_accu(:,:),tmp_CS(:,:)
-  integer                       :: i,j,k,tmp_i,tmp_j,tmp_k, a, b, mu ,rho
+  integer(size_t)                :: i,j,k,tmp_i,tmp_j,tmp_k, mu, rho
+  integer                        :: a, b
   double precision              :: t1,t2,t3
 
   print*,''
@@ -648,7 +652,9 @@ subroutine gradient_PM(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gr
     enddo
   enddo
 
-  call dgemm('T','N',tmp_list_size,ao_num,ao_num,1d0,tmp_mo_coef,size(tmp_mo_coef,1),ao_overlap,size(ao_overlap,1),0d0,CS,size(CS,1))
+    call dgemm('T', 'N', int(tmp_list_size,4), int(ao_num,4), int(ao_num,4), &
+             1d0, tmp_mo_coef, int(size(tmp_mo_coef,1),4), ao_overlap, &
+             int(size(ao_overlap,1),4), 0d0, CS, int(size(CS,1),4))
  
   m_grad = 0d0
 
@@ -689,7 +695,10 @@ subroutine gradient_PM(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gr
       enddo
     enddo   
 
-    call dgemm('N','N',tmp_list_size,tmp_list_size,nucl_n_aos(a),1d0,tmp_CS,size(tmp_CS,1),tmp_mo_coef2,size(tmp_mo_coef2,1),0d0,tmp_accu,size(tmp_accu,1))
+        call dgemm('N', 'N', int(tmp_list_size,4), int(tmp_list_size,4), &
+               int(nucl_n_aos(a),4), 1d0, tmp_CS, int(size(tmp_CS,1),4), &
+               tmp_mo_coef2, int(size(tmp_mo_coef2,1),4), 0d0, tmp_accu, &
+               int(size(tmp_accu,1),4))
  
     do tmp_j = 1, tmp_list_size
       do tmp_i = 1, tmp_list_size
@@ -756,10 +765,11 @@ subroutine hess_pipek(tmp_n, tmp_list_size, tmp_list, H)
   ! Compute diagonal hessian for the Pipek-Mezey localization
   END_DOC
 
-  integer, intent(in)           :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
+  integer(size_t), intent(in)   :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: H(tmp_n)
   double precision, allocatable :: beta(:,:),tmp_int(:,:)
-  integer                       :: i,j,tmp_k,tmp_i, tmp_j, a,b,rho,mu
+  integer(size_t)                :: i,j,tmp_k,tmp_i, tmp_j, rho, mu
+  integer                        :: a, b
   double precision              :: max_elem
     
   ! Allocation
@@ -835,10 +845,11 @@ subroutine hessian_PM(tmp_n, tmp_list_size, tmp_list, H)
   ! Compute diagonal hessian for the Pipek-Mezey localization
   END_DOC
 
-  integer, intent(in)           :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
+  integer(size_t), intent(in)   :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: H(tmp_n)
   double precision, allocatable :: beta(:,:),tmp_int(:,:),CS(:,:),tmp_mo_coef(:,:),tmp_mo_coef2(:,:),tmp_accu(:,:),tmp_CS(:,:)
-  integer                       :: i,j,tmp_k,tmp_i, tmp_j, a,b,rho,mu
+  integer(size_t)                :: i,j,tmp_k,tmp_i, tmp_j, rho, mu
+  integer                        :: a, b
   double precision              :: max_elem, t1,t2,t3
     
   print*,''
@@ -861,7 +872,9 @@ subroutine hessian_PM(tmp_n, tmp_list_size, tmp_list, H)
     enddo
   enddo
 
-  call dgemm('T','N',tmp_list_size,ao_num,ao_num,1d0,tmp_mo_coef,size(tmp_mo_coef,1),ao_overlap,size(ao_overlap,1),0d0,CS,size(CS,1))
+    call dgemm('T', 'N', int(tmp_list_size,4), int(ao_num,4), int(ao_num,4), &
+             1d0, tmp_mo_coef, int(size(tmp_mo_coef,1),4), ao_overlap, &
+             int(size(ao_overlap,1),4), 0d0, CS, int(size(CS,1),4))
  
   do a = 1, nucl_num ! loop over the nuclei
     tmp_int = 0d0
@@ -900,7 +913,10 @@ subroutine hessian_PM(tmp_n, tmp_list_size, tmp_list, H)
       enddo
     enddo   
 
-    call dgemm('N','N',tmp_list_size,tmp_list_size,nucl_n_aos(a),1d0,tmp_CS,size(tmp_CS,1),tmp_mo_coef2,size(tmp_mo_coef2,1),0d0,tmp_accu,size(tmp_accu,1))
+        call dgemm('N', 'N', int(tmp_list_size,4), int(tmp_list_size,4), &
+               int(nucl_n_aos(a),4), 1d0, tmp_CS, int(size(tmp_CS,1),4), &
+               tmp_mo_coef2, int(size(tmp_mo_coef2,1),4), 0d0, tmp_accu, &
+               int(size(tmp_accu,1),4))
  
     do tmp_j = 1, tmp_list_size
       do tmp_i = 1, tmp_list_size
@@ -952,7 +968,8 @@ subroutine compute_crit_pipek(criterion)
 
   double precision, intent(out) :: criterion
   double precision, allocatable :: tmp_int(:,:)
-  integer                       :: i,j,k,tmp_i,tmp_j,tmp_k, a, b, mu ,rho 
+  integer(size_t)                :: i,j,k,tmp_i,tmp_j,tmp_k, mu, rho
+  integer                        :: a, b
 
   ! Allocation
   allocate(tmp_int(mo_num, mo_num))
@@ -1006,10 +1023,11 @@ subroutine criterion_PM(tmp_list_size,tmp_list,criterion)
   ! Compute the Pipek-Mezey localization criterion
   END_DOC
 
-  integer, intent(in)           :: tmp_list_size, tmp_list(tmp_list_size)
+  integer(size_t), intent(in)   :: tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: criterion
   double precision, allocatable :: tmp_int(:,:),CS(:,:)
-  integer                       :: i,j,k,tmp_i,tmp_j,tmp_k, a, b, mu ,rho
+  integer(size_t)                :: i,j,k,tmp_i,tmp_j,tmp_k, mu, rho
+  integer                        :: a, b
   
   print*,''
   print*,'---criterion_PM---'
@@ -1020,7 +1038,9 @@ subroutine criterion_PM(tmp_list_size,tmp_list,criterion)
   ! Initialization
   criterion = 0d0
 
-  call dgemm('T','N',mo_num,ao_num,ao_num,1d0,mo_coef,size(mo_coef,1),ao_overlap,size(ao_overlap,1),0d0,CS,size(CS,1))
+  call dgemm('T','N',int(mo_num,4),int(ao_num,4),int(ao_num,4),1d0,mo_coef,&
+      int(size(mo_coef,1),4),ao_overlap,int(size(ao_overlap,1),4),&
+      0d0,CS,int(size(CS,1),4))
  
   do a = 1, nucl_num ! loop over the nuclei
     tmp_int = 0d0
@@ -1062,10 +1082,11 @@ subroutine criterion_PM_v3(tmp_list_size,tmp_list,criterion)
   ! Compute the Pipek-Mezey localization criterion
   END_DOC
   
-  integer, intent(in)           :: tmp_list_size, tmp_list(tmp_list_size)
+  integer(size_t), intent(in)   :: tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: criterion
   double precision, allocatable :: tmp_int(:,:), CS(:,:), tmp_mo_coef(:,:), tmp_mo_coef2(:,:),tmp_accu(:,:),tmp_CS(:,:)
-  integer                       :: i,j,k,tmp_i,tmp_j,tmp_k, a, b, mu ,rho,nu,c
+  integer(size_t)                :: i,j,k,tmp_i,tmp_j,tmp_k, mu, rho, nu, c
+  integer                        :: a, b
   double precision              :: t1,t2,t3
 
   print*,''
@@ -1091,7 +1112,9 @@ subroutine criterion_PM_v3(tmp_list_size,tmp_list,criterion)
 
   ! ao_overlap(ao_num,ao_num)
   ! mo_coef(ao_num,mo_num)
-  call dgemm('T','N',tmp_list_size,ao_num,ao_num,1d0,tmp_mo_coef,size(tmp_mo_coef,1),ao_overlap,size(ao_overlap,1),0d0,CS,size(CS,1))
+    call dgemm('T', 'N', int(tmp_list_size,4), int(ao_num,4), int(ao_num,4), &
+             1d0, tmp_mo_coef, int(size(tmp_mo_coef,1),4), ao_overlap, &
+             int(size(ao_overlap,1),4), 0d0, CS, int(size(CS,1),4))
  
   do a = 1, nucl_num ! loop over the nuclei
   
@@ -1135,7 +1158,10 @@ subroutine criterion_PM_v3(tmp_list_size,tmp_list,criterion)
       enddo
     enddo   
 
-    call dgemm('N','N',tmp_list_size,tmp_list_size,nucl_n_aos(a),1d0,tmp_CS,size(tmp_CS,1),tmp_mo_coef2,size(tmp_mo_coef2,1),0d0,tmp_accu,size(tmp_accu,1))
+        call dgemm('N', 'N', int(tmp_list_size,4), int(tmp_list_size,4), &
+               int(nucl_n_aos(a),4), 1d0, tmp_CS, int(size(tmp_CS,1),4), &
+               tmp_mo_coef2, int(size(tmp_mo_coef2,1),4), 0d0, tmp_accu, &
+               int(size(tmp_accu,1),4))
  
     ! Integrals
     do tmp_j = 1, tmp_list_size
@@ -1190,7 +1216,7 @@ subroutine criterion_FB_old(criterion)
   END_DOC
 
   double precision, intent(out) :: criterion
-  integer                       :: i
+  integer(size_t)                :: i
 
   ! Criterion (= \sum_i <i|r|i>^2 )
   criterion = 0d0
@@ -1211,9 +1237,9 @@ subroutine criterion_FB(tmp_list_size, tmp_list, criterion)
   ! Compute the Foster-Boys localization criterion
   END_DOC
 
-  integer, intent(in)           :: tmp_list_size, tmp_list(tmp_list_size)
+  integer(size_t), intent(in)   :: tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: criterion
-  integer                       :: i, tmp_i
+  integer(size_t)                :: i, tmp_i
 
   ! Criterion (= - \sum_i <i|r|i>^2 )
   criterion = 0d0
@@ -1236,13 +1262,13 @@ subroutine theta_FB(l, n, m_x, max_elem)
 
   implicit none
 
-  integer, intent(in)           :: n, l(n)
+  integer(size_t), intent(in)   :: n, l(n)
   double precision, intent(out) :: m_x(n,n), max_elem
 
-  integer                       :: i,j, tmp_i, tmp_j
+  integer(size_t)                :: i,j, tmp_i, tmp_j
   double precision, allocatable :: cos4theta(:,:), sin4theta(:,:)
   double precision, allocatable :: A(:,:), B(:,:), beta(:,:), gamma(:,:)
-  integer                       :: idx_i,idx_j
+  integer(size_t)                :: idx_i,idx_j
 
   allocate(cos4theta(n, n), sin4theta(n, n))
   allocate(A(n,n), B(n,n), beta(n,n), gamma(n,n))
@@ -1370,10 +1396,11 @@ subroutine theta_PM(l, n, m_x, max_elem)
 
   implicit none
 
-  integer, intent(in)           :: n, l(n)
+  integer(size_t), intent(in)   :: n, l(n)
   double precision, intent(out) :: m_x(n,n), max_elem
 
-  integer                       :: a,b,i,j,tmp_i,tmp_j,rho,mu,nu,idx_i,idx_j
+  integer(size_t)                :: i,j,tmp_i,tmp_j,rho,mu,nu,idx_i,idx_j
+  integer                        :: a, b
   double precision, allocatable :: Aij(:,:), Bij(:,:), Pa(:,:)
 
   allocate(Aij(n,n), Bij(n,n), Pa(n,n))
@@ -1476,7 +1503,7 @@ subroutine compute_spatial_extent(spatial_extent)
   double precision, intent(out) :: spatial_extent(mo_num)
   double precision              :: average_core, average_act, average_inact, average_virt
   double precision              :: std_var_core, std_var_act, std_var_inact, std_var_virt
-  integer                       :: i,j,k,l
+  integer(size_t)                :: i,j,k,l
 
   spatial_extent = 0d0
   
@@ -1626,7 +1653,8 @@ subroutine apply_pre_rotation()
 
   double precision, allocatable :: pre_rot(:,:), prev_mos(:,:), R(:,:)
   double precision              :: t1,t2,t3
-  integer                       :: i,j,tmp_i,tmp_j
+  integer(size_t)                :: i,j
+  integer                        :: tmp_i,tmp_j
   integer                       :: info
   logical                       :: enforce_step_cancellation
 
@@ -1739,13 +1767,13 @@ subroutine x_tmp_orb_loc_v2(tmp_n, tmp_list_size, tmp_list, v_grad, H,tmp_x, tmp
 
   implicit none
 
-  integer, intent(in)           :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
+  integer(size_t), intent(in)   :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(in)  :: v_grad(tmp_n)
   double precision, intent(in)  :: H(tmp_n, tmp_n)
   double precision, intent(out) :: tmp_m_x(tmp_list_size, tmp_list_size), tmp_x(tmp_list_size)
   !double precision, allocatable :: x(:)
   double precision              :: lambda , accu, max_elem
-  integer                       :: i,j,tmp_i,tmp_j,tmp_k
+  integer(size_t)                :: i,j,tmp_i,tmp_j,tmp_k
 
   ! Allocation
   !allocate(x(tmp_n))
@@ -1801,7 +1829,7 @@ subroutine ao_to_mo_no_sym(A_ao,LDA_ao,A_mo,LDA_mo)
   !
   ! $C^\dagger.A_{ao}.C$
   END_DOC
-  integer, intent(in)            :: LDA_ao,LDA_mo
+  integer(size_t), intent(in)    :: LDA_ao,LDA_mo
   double precision, intent(in)   :: A_ao(LDA_ao,ao_num)
   double precision, intent(out)  :: A_mo(LDA_mo,mo_num)
   double precision, allocatable  :: T(:,:)
@@ -1809,15 +1837,15 @@ subroutine ao_to_mo_no_sym(A_ao,LDA_ao,A_mo,LDA_mo)
   allocate ( T(ao_num,mo_num) )
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: T
 
-  call dgemm('N','N', ao_num, mo_num, ao_num,                    &
-      1.d0, A_ao,LDA_ao,                                             &
-      mo_coef, size(mo_coef,1),                                      &
-      0.d0, T, size(T,1))
+  call dgemm('N','N', int(ao_num,4), int(mo_num,4), int(ao_num,4), &
+      1.d0, A_ao,int(LDA_ao,4),                                       &
+      mo_coef, int(size(mo_coef,1),4),                                &
+      0.d0, T, int(size(T,1),4))
 
-  call dgemm('T','N', mo_num, mo_num, ao_num,                &
-      1.d0, mo_coef,size(mo_coef,1),                                 &
-      T, ao_num,                                                     &
-      0.d0, A_mo, size(A_mo,1))
+  call dgemm('T','N', int(mo_num,4), int(mo_num,4), int(ao_num,4),  &
+      1.d0, mo_coef,int(size(mo_coef,1),4),                          &
+      T, int(ao_num,4),                                              &
+      0.d0, A_mo, int(size(A_mo,1),4))
 
   deallocate(T)
 end
@@ -1830,8 +1858,10 @@ subroutine run_sort_by_fock_energies()
   ! Saves the current MOs ordered by diagonal element of the Fock operator.
   END_DOC
   
-  integer                        :: i,j,k,l,tmp_i,tmp_k,tmp_list_size
-  integer, allocatable           :: iorder(:), tmp_list(:)
+  integer(size_t)                :: j, tmp_i, tmp_k
+  integer                        :: i, k, l, tmp_list_size
+  integer, allocatable           :: iorder(:)
+  integer(size_t), allocatable   :: tmp_list(:)
   double precision, allocatable  :: fock_energies_tmp(:), tmp_mo_coef(:,:)
 
   ! Test
@@ -1915,7 +1945,7 @@ function is_core(i)
   ! True if the orbital i is a core orbital
   END_DOC
 
-  integer, intent(in) :: i
+  integer(size_t), intent(in) :: i
   logical             :: is_core
 
   integer             :: j
@@ -1941,7 +1971,7 @@ function is_del(i)
   ! True if the orbital i is a deleted orbital
   END_DOC
 
-  integer, intent(in) :: i
+  integer(size_t), intent(in) :: i
   logical             :: is_del
 
   integer             :: j
@@ -1963,7 +1993,7 @@ subroutine set_classes_loc()
 
   implicit none
 
-  integer :: i
+  integer(size_t) :: i
   logical :: ok1, ok2
   logical :: is_core, is_del
   integer(bit_kind) :: res(N_int,2)
@@ -1991,7 +2021,7 @@ subroutine unset_classes_loc()
 
   implicit none
 
-  integer :: i
+  integer(size_t) :: i
   logical :: ok1, ok2
   logical :: is_core, is_del
   integer(bit_kind) :: res(N_int,2)

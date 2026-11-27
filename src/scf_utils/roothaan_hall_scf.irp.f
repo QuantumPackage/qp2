@@ -1,4 +1,7 @@
+use sizet
+
 subroutine Roothaan_Hall_SCF
+ use sizet
 
 BEGIN_DOC
 ! Roothaan-Hall algorithm for SCF Hartree-Fock calculation
@@ -17,7 +20,7 @@ END_DOC
   integer                        :: n_level_shift_try
 
   logical                        :: converged,ok_DIIS
-  integer                        :: i,j,m
+  integer(size_t)                :: i,j,m
   logical, external              :: qp_stop
   double precision, allocatable :: mo_coef_save(:,:), S(:,:)
 
@@ -95,7 +98,7 @@ END_DOC
 
       call extrapolate_Fock_matrix(                                    &
           error_matrix_DIIS,Fock_matrix_DIIS,                          &
-          Fock_matrix_AO,size(Fock_matrix_AO,1),                       &
+          Fock_matrix_AO,int(size(Fock_matrix_AO,1),size_t), &
           index_dim_DIIS,dim_DIIS,ok_DIIS                              &
           )
 
@@ -225,7 +228,8 @@ END_DOC
    mo_coef(1:ao_num,1:mo_num) = eigenvectors_Fock_matrix_MO(1:ao_num,1:mo_num)
 !   call mo_as_eigvectors_of_mo_matrix(Fock_matrix_mo,size(Fock_matrix_mo,1), &
 !        size(Fock_matrix_mo,2),mo_label,1,.true.)
-   call restore_symmetry(ao_num, mo_num, mo_coef, size(mo_coef,1), 1.d-10)
+   call restore_symmetry(int(ao_num, size_t), int(mo_num, size_t), &
+       mo_coef, int(size(mo_coef,1), size_t), 1.d-10)
    call orthonormalize_mos
   endif
 
@@ -243,8 +247,11 @@ END_DOC
         if (j > mo_num) exit
       enddo
       if (m>1) then
-        call dgemm('N','T',ao_num,ao_num,m,1.d0,mo_coef(1,i),size(mo_coef,1),mo_coef(1,i),size(mo_coef,1),0.d0,S,size(S,1))
-        call pivoted_cholesky( S, m, -1.d0, ao_num, mo_coef(1,i))
+        call dgemm('N','T',int(ao_num,4),int(ao_num,4),int(m,4), 1.d0, &
+            mo_coef(1,i),int(size(mo_coef,1),4), &
+            mo_coef(1,i),int(size(mo_coef,1),4), 0.d0, &
+            S,int(size(S,1),4))
+        call pivoted_cholesky( S, m, -1.d0, int(ao_num,size_t), mo_coef(1,i))
       endif
       i = j
     enddo
@@ -280,6 +287,7 @@ subroutine extrapolate_Fock_matrix(               &
            Fock_matrix_AO_,size_Fock_matrix_AO,   &
            index_dim_DIIS,dim_DIIS,ok_DIIS        &
            )
+ use sizet
 
 BEGIN_DOC
 ! Compute the extrapolated Fock matrix using the DIIS procedure.
@@ -293,7 +301,8 @@ END_DOC
 
   implicit none
 
-  integer,intent(in)            :: index_dim_DIIS, dim_DIIS, size_Fock_matrix_AO
+  integer,intent(in)            :: index_dim_DIIS, dim_DIIS
+  integer(size_t),intent(in)    :: size_Fock_matrix_AO
   double precision,intent(in)   :: Fock_matrix_DIIS(ao_num,ao_num,max_dim_diis), &
                                    error_matrix_DIIS(ao_num,ao_num,max_dim_diis)
   double precision,intent(inout):: Fock_matrix_AO_(size_Fock_matrix_AO,ao_num)
@@ -304,7 +313,8 @@ END_DOC
   double precision,allocatable  :: scratch(:,:)
   integer, allocatable          :: iwork(:), ipiv(:)
   integer                       :: slot_DIIS(max_dim_diis)
-  integer                       :: i,j,k,l,ks,i_DIIS,j_DIIS
+  integer(size_t)               :: i,j,k,l
+  integer                       :: ks,i_DIIS,j_DIIS
   double precision              :: rcond, anorm
   double precision, external    :: dlange
   integer                       :: lwork, info

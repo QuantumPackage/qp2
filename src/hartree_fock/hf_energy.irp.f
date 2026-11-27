@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [double precision, extra_e_contrib_density]
  implicit none
  BEGIN_DOC
@@ -18,7 +20,7 @@ END_PROVIDER
  BEGIN_DOC
  ! Hartree-Fock energy containing the nuclear repulsion, and its one- and two-body components.
  END_DOC
- integer :: i,j
+ integer(size_t) :: i,j
  double precision :: tmp1, tmp2
  HF_energy = 0.d0
  HF_two_electron_energy = 0.d0
@@ -43,7 +45,7 @@ END_PROVIDER
  BEGIN_DOC
  ! Hartree-Fock energy containing the nuclear repulsion, and its one- and two-body components.
  END_DOC
- integer :: i,j
+ integer(size_t) :: i,j
  double precision :: tmp1, tmp2
  HF_n_e_energy = 0.d0
  HF_kinetic_energy = 0.d0

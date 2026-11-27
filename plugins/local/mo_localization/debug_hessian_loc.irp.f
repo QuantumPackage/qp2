@@ -1,3 +1,5 @@
+use sizet
+
 program debug_hessian_loc
 
   !BEGIN_DOC
@@ -6,11 +8,11 @@ program debug_hessian_loc
   
   implicit none
 
-  integer :: list_size, n
-  integer, allocatable :: list(:)
+  integer(size_t) :: list_size, n
+  integer(size_t), allocatable :: list(:)
   double precision, allocatable :: H(:), H2(:)
   double precision :: threshold, max_error, max_elem
-  integer :: i, nb_error
+  integer(size_t) :: i, nb_error
 
   threshold = 1d-12
 

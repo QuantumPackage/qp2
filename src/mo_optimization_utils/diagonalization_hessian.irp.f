@@ -1,3 +1,5 @@
+use sizet
+
 ! Diagonalization of the hessian
 
 ! Just a matrix diagonalization using Lapack
@@ -19,6 +21,7 @@
 
 
 subroutine diagonalization_hessian(n,H,e_val,w)
+ use sizet
   BEGIN_DOC
   ! Diagonalization of the n by n hessian H of the energy with
   ! respect to orbital rotations. For optimization_method ==
@@ -34,7 +37,7 @@ subroutine diagonalization_hessian(n,H,e_val,w)
   ! Variables
 
   ! in
-  integer, intent(in) :: n
+  integer(size_t), intent(in) :: n
   double precision, intent(in) :: H(n,n)
 
   ! out
@@ -44,8 +47,8 @@ subroutine diagonalization_hessian(n,H,e_val,w)
   double precision, allocatable :: work(:,:)
   integer, allocatable          :: key(:)
   integer                       :: info,lwork
-  integer                       :: i,j
-  integer                       :: nb_negative_vp
+  integer(size_t)               :: i,j
+  integer(size_t)               :: nb_negative_vp
   double precision              :: t1,t2,t3,max_elem
 
   print*,''
@@ -56,7 +59,7 @@ subroutine diagonalization_hessian(n,H,e_val,w)
   if (optimization_method == 'full') then
     ! Allocation
     ! For Lapack
-    lwork=3*n-1
+    lwork=int(3*n-1,4)
 
     allocate(work(lwork,n))
 
@@ -66,7 +69,7 @@ subroutine diagonalization_hessian(n,H,e_val,w)
     W=H
 
     ! Diagonalization of the hessian
-    call dsyev('V','U',n,W,size(W,1),e_val,work,lwork,info)
+    call dsyev('V','U',int(n,4),W,size(W,1),e_val,work,lwork,info)
 
     if (info /= 0) then
         print*, 'Error diagonalization : diagonalization_hessian'
@@ -119,7 +122,7 @@ subroutine diagonalization_hessian(n,H,e_val,w)
     enddo
 
     ! Sort of the eigenvalues
-    call dsort(e_val, key, n)
+    call dsort(e_val, key, int(n,4))
 
     ! Eigenvectors
     W = 0d0

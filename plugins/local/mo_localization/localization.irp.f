@@ -1,3 +1,5 @@
+use sizet
+
 program localization
 
   implicit none
@@ -73,12 +75,14 @@ subroutine run_localization
   double precision, allocatable :: pre_rot(:,:), R(:,:)
   double precision, allocatable :: prev_mos(:,:), spatial_extent(:), tmp_R(:,:)
   double precision              :: criterion, norm_grad
-  integer                       :: i,j,k,l,p, tmp_i, tmp_j, tmp_k
+  integer(size_t)               :: i,j,k,p, tmp_i, tmp_j, tmp_k
+  integer                       :: l
   integer                       :: info
-  integer                       :: n, tmp_n, tmp_list_size
+  integer(size_t)               :: n, tmp_n, tmp_list_size
   double precision, allocatable :: v_grad(:), H(:), tmp_m_x(:,:), tmp_x(:),W(:),e_val(:)
   double precision              :: max_elem, t1, t2, t3, t4, t5, t6
-  integer, allocatable          :: tmp_list(:), key(:)
+  integer(size_t), allocatable  :: tmp_list(:)
+  integer, allocatable          :: key(:)
   double precision              :: prev_criterion, rho, delta, criterion_model
   integer                       :: nb_iter, nb_sub_iter
   logical                       :: not_converged, not_core_converged
@@ -397,7 +401,7 @@ subroutine run_localization
         enddo
 
         ! Sort of the eigenvalues
-        call dsort(e_val, key, tmp_n)
+        call dsort(e_val, key, int(tmp_n,4))
 
         ! Eigenvectors
         W = 0d0

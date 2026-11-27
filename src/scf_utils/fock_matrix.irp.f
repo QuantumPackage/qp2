@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [ double precision, Fock_matrix_param, (2,3) ]
  implicit none
  BEGIN_DOC
@@ -102,7 +104,7 @@ END_PROVIDER
    ! Diagonal of the Fock matrix on the MO basis: element i
    ! (1 <= i <= mo_num) is Fock_matrix_mo(i,i).
    END_DOC
-   integer :: i
+   integer(size_t) :: i
    do i = 1, mo_num
      Fock_matrix_diag_mo(i) = Fock_matrix_mo(i,i)
    enddo
@@ -140,7 +142,8 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_mo, (mo_num,mo_num) ]
    !  B   1.5  0.5 -0.5
    !
    END_DOC
-   integer                        :: i,j,n
+   integer(size_t)                :: i,j
+   integer                        :: n
    if (all_shells_closed) then
      Fock_matrix_mo = Fock_matrix_mo_alpha
    else
@@ -198,7 +201,7 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_mo, (mo_num,mo_num) ]
 
 
    if(frozen_orb_scf)then
-     integer                        :: iorb,jorb
+     integer(size_t)                :: iorb,jorb
      !       active|core|active
      !active |     | 0  |
      !core   |  0  |    |   0
@@ -241,8 +244,9 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_mo_alpha, (mo_num,mo_num) ]
    BEGIN_DOC
    ! Fock matrix on the MO basis
    END_DOC
-   call ao_to_mo(Fock_matrix_ao_alpha,size(Fock_matrix_ao_alpha,1), &
-                 Fock_matrix_mo_alpha,size(Fock_matrix_mo_alpha,1))
+      call ao_to_mo(Fock_matrix_ao_alpha, &
+                 int(size(Fock_matrix_ao_alpha,1),size_t), &
+                 Fock_matrix_mo_alpha, int(size(Fock_matrix_mo_alpha,1),size_t))
 END_PROVIDER
 
 
@@ -251,8 +255,8 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_mo_beta, (mo_num,mo_num) ]
    BEGIN_DOC
    ! Fock matrix on the MO basis
    END_DOC
-   call ao_to_mo(Fock_matrix_ao_beta,size(Fock_matrix_ao_beta,1), &
-                 Fock_matrix_mo_beta,size(Fock_matrix_mo_beta,1))
+   call ao_to_mo(Fock_matrix_ao_beta,int(size(Fock_matrix_ao_beta,1),size_t), &
+                 Fock_matrix_mo_beta,int(size(Fock_matrix_mo_beta,1),size_t))
 END_PROVIDER
 
 
@@ -263,19 +267,19 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_ao, (ao_num, ao_num) ]
  END_DOC
 
  if(frozen_orb_scf)then
-   call mo_to_ao(Fock_matrix_mo,size(Fock_matrix_mo,1),              &
-       Fock_matrix_ao,size(Fock_matrix_ao,1))
+      call mo_to_ao(Fock_matrix_mo, int(size(Fock_matrix_mo,1),size_t), &
+                 Fock_matrix_ao, int(size(Fock_matrix_ao,1),size_t))
  else
    if (all_shells_closed.and. (level_shift == 0.)) then
-     integer                        :: i,j
+     integer(size_t)                :: i,j
      do j=1,ao_num
        do i=1,ao_num
          Fock_matrix_ao(i,j) = Fock_matrix_ao_alpha(i,j)
        enddo
      enddo
    else
-     call mo_to_ao(Fock_matrix_mo,size(Fock_matrix_mo,1),            &
-         Fock_matrix_ao,size(Fock_matrix_ao,1))
+          call mo_to_ao(Fock_matrix_mo, int(size(Fock_matrix_mo,1),size_t), &
+                   Fock_matrix_ao, int(size(Fock_matrix_ao,1),size_t))
    endif
  endif
 END_PROVIDER
@@ -286,7 +290,7 @@ BEGIN_PROVIDER [ double precision, SCF_energy ]
  BEGIN_DOC
  ! Hartree-Fock energy
  END_DOC
- integer                        :: i,j
+ integer(size_t)                :: i,j
 
  SCF_energy = 0.d0
 

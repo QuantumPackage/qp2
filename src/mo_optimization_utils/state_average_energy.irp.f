@@ -1,3 +1,5 @@
+use sizet
+
 ! State average energy
 
 ! Calculation of the state average energy from the integrals and the
@@ -31,6 +33,7 @@
 
 
 subroutine state_average_energy(energy)
+ use sizet
   BEGIN_DOC
   ! State average energy of the current wave function, from the MO
   ! integrals and density matrices: nuclear repulsion, plus the
@@ -43,7 +46,7 @@ subroutine state_average_energy(energy)
 
   double precision :: get_two_e_integral
   double precision :: mono_e, bi_e
-  integer :: i,j,k,l
+  integer(size_t) :: i,j,k,l
 
   energy = nuclear_repulsion
   ! mono electronic part

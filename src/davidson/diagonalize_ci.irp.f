@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [ double precision, CI_energy, (N_states_diag) ]
   implicit none
   BEGIN_DOC
@@ -5,7 +7,7 @@ BEGIN_PROVIDER [ double precision, CI_energy, (N_states_diag) ]
   END_DOC
   PROVIDE distributed_davidson
 
-  integer                        :: j, nirr
+  integer(size_t)                :: j, nirr
   integer, allocatable           :: irlab(:), irdom(:)
   double precision, allocatable  :: irpur(:)
   logical                        :: have_irr
@@ -43,18 +45,18 @@ END_PROVIDER
    implicit none
    double precision               :: ovrlp,u_dot_v
    integer                        :: i_good_state
-   integer, allocatable           :: index_good_state_array(:)
+   integer(size_t), allocatable   :: index_good_state_array(:)
    logical, allocatable           :: good_state_array(:)
    double precision, allocatable  :: s2_values_tmp(:)
    integer                        :: i_other_state
    double precision, allocatable  :: eigenvectors(:,:), eigenvalues(:), H_prime(:,:)
    integer                        :: i_state
    double precision               :: e_0
-   integer                        :: i,j,k
+   integer(size_t)                :: i,j,k
    double precision, allocatable  :: s2_eigvalues(:)
    double precision, allocatable  :: e_array(:)
-   integer, allocatable           :: iorder(:)
-   integer                        :: nslot, iord
+   integer(size_t), allocatable   :: iorder(:)
+   integer(size_t)                :: nslot, iord
    integer, allocatable           :: lab(:), lab_dom(:)
    double precision, allocatable  :: lab_pur(:), eig_tmp(:,:), s2_tmp(:)
    logical, allocatable           :: allowed(:)
@@ -91,13 +93,17 @@ END_PROVIDER
    if (diag_algorithm == "Davidson") then
 
     if (do_csf) then
-       call davidson_diag_H_csf(psi_det,CI_eigenvectors, &
-         size(CI_eigenvectors,1),CI_electronic_energy,               &
-         N_det,N_csf,min(N_det,N_states),min(N_det,N_states_diag),N_int,0,converged)
+       call davidson_diag_H_csf(psi_det, CI_eigenvectors, &
+                                int(size(CI_eigenvectors,1),size_t), &
+                                CI_electronic_energy, N_det, N_csf, &
+                                min(N_det,N_states), min(N_det,N_states_diag), &
+                                N_int, 0, converged)
      else
-       call davidson_diag_HS2(psi_det,CI_eigenvectors, CI_s2, &
-         size(CI_eigenvectors,1),CI_electronic_energy,               &
-         N_det,min(N_det,N_states),min(N_det,N_states_diag),N_int,0,converged)
+       call davidson_diag_HS2(psi_det, CI_eigenvectors, CI_s2, &
+                              int(size(CI_eigenvectors,1),size_t), &
+                              CI_electronic_energy, N_det, &
+                              min(N_det,N_states), min(N_det,N_states_diag), &
+                              N_int, 0, converged)
      endif
 
      integer :: N_states_diag_save
@@ -118,9 +124,12 @@ END_PROVIDER
           CI_electronic_energy_tmp(1:N_states_diag_save) = CI_electronic_energy(1:N_states_diag_save)
           CI_eigenvectors_tmp(1:N_det,1:N_states_diag_save) = CI_eigenvectors(1:N_det,1:N_states_diag_save)
 
-          call davidson_diag_H_csf(psi_det,CI_eigenvectors_tmp, &
-            size(CI_eigenvectors_tmp,1),CI_electronic_energy_tmp,               &
-            N_det,N_csf,min(N_det,N_states),min(N_det,N_states_diag),N_int,0,converged)
+          call davidson_diag_H_csf(psi_det, CI_eigenvectors_tmp, &
+                                   int(size(CI_eigenvectors_tmp,1),size_t), &
+                                   CI_electronic_energy_tmp, N_det, N_csf, &
+                                   min(N_det,N_states), &
+                                   min(N_det,N_states_diag), N_int, 0, &
+                                   converged)
 
           CI_electronic_energy(1:N_states_diag_save) = CI_electronic_energy_tmp(1:N_states_diag_save)
           CI_eigenvectors(1:N_det,1:N_states_diag_save) = CI_eigenvectors_tmp(1:N_det,1:N_states_diag_save)
@@ -138,9 +147,11 @@ END_PROVIDER
           CI_eigenvectors_tmp(1:N_det,1:N_states_diag_save) = CI_eigenvectors(1:N_det,1:N_states_diag_save)
           CI_s2_tmp(1:N_states_diag_save) = CI_s2(1:N_states_diag_save)
 
-          call davidson_diag_HS2(psi_det,CI_eigenvectors_tmp, CI_s2_tmp, &
-            size(CI_eigenvectors_tmp,1),CI_electronic_energy_tmp,               &
-            N_det,min(N_det,N_states),min(N_det,N_states_diag),N_int,0,converged)
+          call davidson_diag_HS2(psi_det, CI_eigenvectors_tmp, CI_s2_tmp, &
+                                 int(size(CI_eigenvectors_tmp,1),size_t), &
+                                 CI_electronic_energy_tmp, N_det, &
+                                 min(N_det,N_states), &
+                                 min(N_det,N_states_diag), N_int, 0, converged)
 
           CI_electronic_energy(1:N_states_diag_save) = CI_electronic_energy_tmp(1:N_states_diag_save)
           CI_eigenvectors(1:N_det,1:N_states_diag_save) = CI_eigenvectors_tmp(1:N_det,1:N_states_diag_save)
@@ -177,8 +188,10 @@ END_PROVIDER
          H_prime(j,j) = H_prime(j,j) - alpha*expected_s2
        enddo
 
-       call lapack_diag(eigenvalues,eigenvectors,H_prime,size(H_prime,1),N_det)
-       call nullify_small_elements(N_det,N_det,eigenvectors,size(eigenvectors,1),1.d-12)
+       call lapack_diag(eigenvalues, eigenvectors, H_prime, &
+                        int(size(H_prime,1),size_t), N_det)
+       call nullify_small_elements(N_det,N_det,eigenvectors, &
+            int(size(eigenvectors,1), size_t),1.d-12)
 
        CI_electronic_energy(:) = 0.d0
        i_state = 0
@@ -188,7 +201,7 @@ END_PROVIDER
 
        good_state_array = .False.
        call u_0_S2_u_0(s2_eigvalues,eigenvectors,N_det,psi_det,N_int,&
-         N_det,size(eigenvectors,1))
+         N_det,int(size(eigenvectors,1),size_t))
 
        if (state_following) then
          if (.not. only_expected_s2) then
@@ -205,7 +218,8 @@ END_PROVIDER
 
        if (state_following .and. only_expected_s2) then
 
-         integer :: state(N_states), idx,l
+         integer(size_t) :: state(N_states), idx
+         integer :: l
          double precision :: omax
          double precision, allocatable :: overlp(:)
          logical :: used
@@ -331,10 +345,10 @@ END_PROVIDER
      else
 
        call lapack_diag(eigenvalues,eigenvectors,                    &
-           H_matrix_all_dets,size(H_matrix_all_dets,1),N_det)
+           H_matrix_all_dets,int(size(H_matrix_all_dets,1),size_t),N_det)
        CI_electronic_energy(:) = 0.d0
        call u_0_S2_u_0(CI_s2,eigenvectors,N_det,psi_det,N_int,       &
-           min(N_det,N_states_diag),size(eigenvectors,1))
+           min(N_det,N_states_diag),int(size(eigenvectors,1),size_t))
 
        ! Select the "N_states_diag" states of lowest energy
        do j=1,min(N_det,N_states_diag)
@@ -380,7 +394,7 @@ END_PROVIDER
        ! degenerate irrep is selected on its projector weight, not on a
        ! determinant sum that would answer 0 for it.
        call pg_state_labels_exact(N_det, CI_eigenvectors, &
-            size(CI_eigenvectors,1), nslot, lab, lab_dom, lab_pur)
+            int(size(CI_eigenvectors,1),size_t), nslot, lab, lab_dom, lab_pur)
        allowed(:) = .true.
        call pg_state_apply(lab, nslot, allowed)
        iord = 0
@@ -418,12 +432,14 @@ END_PROVIDER
 END_PROVIDER
 
 subroutine diagonalize_CI
+ use sizet
   implicit none
   BEGIN_DOC
 !  Replace the coefficients of the |CI| states by the coefficients of the
 !  eigenstates of the |CI| matrix.
   END_DOC
-  integer                        :: i,j
+  integer                        :: j
+  integer(size_t)                :: i
   PROVIDE distributed_davidson
   do j=1,N_states
     do i=1,N_det

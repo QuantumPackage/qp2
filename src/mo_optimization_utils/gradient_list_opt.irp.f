@@ -44,6 +44,8 @@
 ! Thomas M. Henderson, Ireneusz W. Bulik, Tamar Stein, and Gustavo
 ! E. Scuseria
 
+use sizet
+
 ! *Compute the gradient of energy with respects to orbital rotations*
 
 ! Provided:
@@ -78,6 +80,7 @@
 
 
 subroutine gradient_list_opt(n,m,list,v_grad,max_elem,norm)
+ use sizet
   BEGIN_DOC
   ! Gradient of the energy with respect to orbital rotations,
   ! restricted to the m orbitals given by list.
@@ -94,14 +97,14 @@ subroutine gradient_list_opt(n,m,list,v_grad,max_elem,norm)
   ! Variables
   
   ! in
-  integer, intent(in) :: n,m,list(m)
+  integer(size_t), intent(in) :: n,m,list(m)
   
   ! out
   double precision, intent(out) :: v_grad(n), max_elem, norm
 
   ! internal
   double precision, allocatable :: grad(:,:),A(:,:)
-  integer                       :: i,p,q,r,s,t, tmp_p, tmp_q, tmp_i
+  integer(size_t)               :: i,p,q,r,s,t, tmp_p, tmp_q, tmp_i
   double precision              :: t1,t2,t3,t4,t5,t6
 
   double precision, allocatable :: tmp_accu(:,:), tmp_mo_one_e_integrals(:,:),tmp_one_e_dm_mo(:,:)
@@ -188,7 +191,7 @@ enddo
   enddo
   !$OMP END DO
 
-  call dgemm('N','N',m,m,mo_num,1d0,&
+  call dgemm('N','N',int(m,4),int(m,4),mo_num,1d0,&
   tmp_mo_one_e_integrals, size(tmp_mo_one_e_integrals,1),&
   tmp_one_e_dm_mo,size(tmp_one_e_dm_mo,1),0d0,tmp_accu,size(tmp_accu,1))
 
@@ -290,7 +293,7 @@ do t = 1, mo_num
     enddo
   enddo
 
-  call dgemm('T','N',m,m,mo_num*mo_num,1d0,tmp_bi_int_3,&
+  call dgemm('T','N',int(m,4),int(m,4),mo_num*mo_num,1d0,tmp_bi_int_3,&
     mo_num*mo_num,tmp_2rdm_3,mo_num*mo_num,0d0,tmp_accu,size(tmp_accu,1))
 
   !$OMP CRITICAL   
@@ -347,7 +350,7 @@ endif
 ! Norm of the gradient
 ! The norm can be useful.
 
-norm = dnrm2(n,v_grad,1)
+norm = dnrm2(int(n,4),v_grad,1)
 print*, 'Gradient norm : ', norm
 
 ! Maximum element in the gradient

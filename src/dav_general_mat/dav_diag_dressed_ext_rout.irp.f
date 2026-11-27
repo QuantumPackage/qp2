@@ -1,5 +1,7 @@
+use sizet
 
 subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sze,N_st,N_st_diag_in,converged,hcalc)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Generic Davidson diagonalization with ONE DIAGONAL DRESSING OPERATOR 
@@ -22,14 +24,16 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
   !
   ! hcalc subroutine to compute W = H U (see routine hcalc_template for template of input/output)
   END_DOC
-  integer, intent(in)             :: sze, N_st, N_st_diag_in
+  integer(size_t), intent(in)     :: sze
+  integer, intent(in)             :: N_st, N_st_diag_in
   double precision,  intent(in)   :: H_jj(sze),Dress_jj(sze)
   double precision, intent(inout) :: u_in(sze,N_st_diag_in)
   double precision, intent(out)   :: energies(N_st)
   external                        :: hcalc
 
   integer                        :: iter, N_st_diag
-  integer                        :: i,j,k,l,m
+  integer                        :: j,l,m
+  integer(size_t)                :: i,k
   logical, intent(inout)         :: converged
 
   double precision, external     :: u_dot_v, u_dot_u
@@ -62,7 +66,7 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
     stop -1
   endif
 
-  itermax = max(2,min(davidson_sze_max, sze/N_st_diag))+1
+  itermax = max(2,min(davidson_sze_max, int(sze/N_st_diag,4)))+1
   itertot = 0
 
   if (state_following) then
@@ -84,7 +88,7 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
 
   nproc_target = nproc
   double precision :: rss
-  integer :: maxab
+  integer(size_t) :: maxab
   maxab = sze 
 
   m=1
@@ -130,7 +134,7 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
   TOUCH nthreads_davidson
   call write_int(6,N_st,'Number of states')
   call write_int(6,N_st_diag,'Number of states in diagonalization')
-  call write_int(6,sze,'Number of basis functions')
+  call write_int(6,int(sze,4),'Number of basis functions')
   call write_int(6,nproc_target,'Number of threads for diagonalization')
   call write_double(6, r1, 'Memory(Gb)')
   if (disk_based) then
@@ -232,8 +236,8 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
         ! -----------------------------------
 
          ! Gram-Schmidt to orthogonalize all new guess with the previous vectors 
-          call ortho_qr(U,size(U,1),sze,shift2)
-          call ortho_qr(U,size(U,1),sze,shift2)
+          call ortho_qr(U,int(size(U,1),size_t),sze,int(shift2,size_t))
+          call ortho_qr(U,int(size(U,1),size_t),sze,int(shift2,size_t))
           !    it does W = H U with W(sze,N_st_diag),U(sze,N_st_diag)
           !    where sze is the size of the vector, N_st_diag is the number of states 
           call hcalc(W(:,shift+1),U(:,shift+1),N_st_diag,sze)
@@ -248,14 +252,14 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
       ! Compute h_kl = <u_k | W_l> = <u_k| H |u_l>
       ! -------------------------------------------
 
-      call dgemm('T','N', shift2, shift2, sze,                       &
+      call dgemm('T','N', shift2, shift2, int(sze,4),                &
           1.d0, U, size(U,1), W, size(W,1),                          &
           0.d0, h, size(h,1))
 
       ! Diagonalize h y = lambda y
       ! ---------------
 
-      call lapack_diag(lambda,y,h,size(h,1),shift2)
+      call lapack_diag(lambda,y,h,int(size(h,1),size_t),int(shift2,size_t))
 
       if (state_following) then
 
@@ -300,9 +304,9 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
       ! Express eigenvectors of h in the determinant basis
       ! --------------------------------------------------
 
-      call dgemm('N','N', sze, N_st_diag, shift2,                    &
+      call dgemm('N','N', int(sze,4), N_st_diag, shift2,             &
           1.d0, U, size(U,1), y, size(y,1), 0.d0, U(:,shift2+1), size(U,1))
-      call dgemm('N','N', sze, N_st_diag, shift2,                    &
+      call dgemm('N','N', int(sze,4), N_st_diag, shift2,             &
           1.d0, W, size(W,1), y, size(y,1), 0.d0, W(:,shift2+1), size(W,1))
 
       ! Compute residual vector and davidson step
@@ -357,7 +361,7 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
 
     enddo
 
-    call dgemm('N','N', sze, N_st_diag, shift2, 1.d0,      &
+    call dgemm('N','N', int(sze,4), N_st_diag, shift2, 1.d0,   &
         W, size(W,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
     do k=1,N_st_diag
       do i=1,sze
@@ -365,15 +369,15 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
       enddo
     enddo
 
-    call dgemm('N','N', sze, N_st_diag, shift2, 1.d0,      &
+    call dgemm('N','N', int(sze,4), N_st_diag, shift2, 1.d0,   &
         U, size(U,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
     do k=1,N_st_diag
       do i=1,sze
         U(i,k) = u_in(i,k)
       enddo
     enddo
-      call ortho_qr(U,size(U,1),sze,N_st_diag)
-      call ortho_qr(U,size(U,1),sze,N_st_diag)
+      call ortho_qr(U,int(size(U,1),size_t),sze,int(N_st_diag,size_t))
+      call ortho_qr(U,int(size(U,1),size_t),sze,int(N_st_diag,size_t))
     do j=1,N_st_diag
       k=1
       do while ((k<sze).and.(U(k,j) == 0.d0))
@@ -411,6 +415,7 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
 end
 
 subroutine dressing_diag_uv(v,u,dress_diag,N_st,sze)
+ use sizet
   implicit none
   BEGIN_DOC
   ! Routine that computes the diagonal part of the dressing 
@@ -421,10 +426,12 @@ subroutine dressing_diag_uv(v,u,dress_diag,N_st,sze)
   !
   ! !!!!!!!! SO MAKE SURE THERE ARE SOME MEANINGFUL VALUES IN THERE
   END_DOC
-  integer, intent(in)              :: N_st,sze
+  integer, intent(in)              :: N_st
+  integer(size_t), intent(in)      :: sze
   double precision, intent(in)     :: u(sze,N_st),dress_diag(sze)
   double precision, intent(inout)  :: v(sze,N_st)
-  integer :: i,istate
+  integer :: istate
+  integer(size_t) :: i
   do istate = 1, N_st
    do i = 1, sze
      v(i,istate) += dress_diag(i) * u(i,istate)

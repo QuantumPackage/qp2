@@ -1,3 +1,4 @@
+
 ! Debug the hessian
 
 ! *Program to check the hessian matrix*
@@ -25,6 +26,7 @@
 
 
 program debug_hessian_opt
+  use sizet
   BEGIN_DOC
   ! Debug program for the orbital hessian, for all mo_num orbitals
   ! (n = mo_num*(mo_num-1)/2 rotation pairs), in the 2D and 4D
@@ -39,10 +41,10 @@ program debug_hessian_opt
   ! Variables
 
   double precision, allocatable :: H(:,:),H2(:,:), h_f(:,:,:,:), h_f2(:,:,:,:)
-  integer                       :: n
-  integer                       :: i,j,k,l
+  integer(size_t)               :: n
+  integer(size_t)               :: i,j,k,l
   double precision              :: max_error, max_error_H
-  integer                       :: nb_error, nb_error_H
+  integer(size_t)               :: nb_error, nb_error_H
   double precision              :: threshold
 
   ! Definition of n

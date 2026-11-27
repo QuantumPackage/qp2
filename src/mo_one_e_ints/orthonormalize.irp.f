@@ -1,4 +1,7 @@
+use sizet
+
 subroutine orthonormalize_mos
+ use sizet
   implicit none
   BEGIN_DOC
   ! Replace mo_coef in place by the Lowdin-orthogonalized
@@ -8,10 +11,12 @@ subroutine orthonormalize_mos
   ! Linear dependencies of $S$ are dropped, controlled by
   ! lin_dep_cutoff (see ortho_lowdin).
   END_DOC
-  integer :: m,p,s,i
+  integer(size_t) :: m,p
+  integer :: s,i
   m = size(mo_coef,1)
   p = size(mo_overlap,1)
-  call ortho_lowdin(mo_overlap,p,mo_num,mo_coef,m,ao_num,lin_dep_cutoff)
+    call ortho_lowdin(mo_overlap, int(p,size_t), int(mo_num,size_t), mo_coef, &
+                    int(m,size_t), int(ao_num,size_t), lin_dep_cutoff)
   SOFT_TOUCH mo_coef
 end
 

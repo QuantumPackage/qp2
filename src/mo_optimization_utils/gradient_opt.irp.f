@@ -44,6 +44,8 @@
 ! Thomas M. Henderson, Ireneusz W. Bulik, Tamar Stein, and Gustavo
 ! E. Scuseria
 
+use sizet
+
 ! *Compute the gradient of energy with respects to orbital rotations*
 
 ! Provided:
@@ -78,6 +80,7 @@
 
 
 subroutine gradient_opt(n,v_grad,max_elem)
+ use sizet
   BEGIN_DOC
   ! Gradient of the energy with respect to orbital rotations, for
   ! all mo_num orbitals.
@@ -94,7 +97,7 @@ subroutine gradient_opt(n,v_grad,max_elem)
   ! Variables
   
   ! in
-  integer, intent(in) :: n
+  integer(size_t), intent(in) :: n
   
   ! out
   double precision, intent(out) :: v_grad(n), max_elem
@@ -102,7 +105,7 @@ subroutine gradient_opt(n,v_grad,max_elem)
   ! internal
   double precision, allocatable :: grad(:,:),A(:,:)
   double precision              :: norm
-  integer                       :: i,p,q,r,s,t
+  integer(size_t)               :: i,p,q,r,s,t
   double precision              :: t1,t2,t3,t4,t5,t6
 
   double precision, allocatable :: tmp_accu(:,:)
@@ -312,7 +315,7 @@ endif
 ! Norm of the gradient
 ! The norm can be useful.
 
-norm = dnrm2(n,v_grad,1)
+norm = dnrm2(int(n,4),v_grad,1)
 print*, 'Gradient norm : ', norm
 
 ! Maximum element in the gradient

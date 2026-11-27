@@ -1,3 +1,4 @@
+use sizet
 BEGIN_PROVIDER [double precision, mo_integrals_n_e, (mo_num,mo_num)]
  implicit none
  BEGIN_DOC
@@ -10,9 +11,9 @@ BEGIN_PROVIDER [double precision, mo_integrals_n_e, (mo_num,mo_num)]
   else
     call ao_to_mo(                                                   &
         ao_integrals_n_e,                                       &
-        size(ao_integrals_n_e,1),                               &
+        int(size(ao_integrals_n_e,1),size_t),                               &
         mo_integrals_n_e,                                       &
-        size(mo_integrals_n_e,1)                                &
+        int(size(mo_integrals_n_e,1),size_t)                                &
         )
   endif
   if (write_mo_integrals_n_e) then
@@ -36,9 +37,9 @@ BEGIN_PROVIDER [double precision, mo_integrals_n_e_per_atom, (mo_num,mo_num,nucl
  do k = 1, nucl_num
    call ao_to_mo(                                                    &
        ao_integrals_n_e_per_atom(1,1,k),                        &
-       size(ao_integrals_n_e_per_atom,1),                       &
+       int(size(ao_integrals_n_e_per_atom,1),size_t),                       &
        mo_integrals_n_e_per_atom(1,1,k),                        &
-       size(mo_integrals_n_e_per_atom,1)                        &
+       int(size(mo_integrals_n_e_per_atom,1),size_t)                        &
        )
  enddo
 

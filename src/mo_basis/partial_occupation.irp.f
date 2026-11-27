@@ -1,10 +1,12 @@
+use sizet
+
 BEGIN_PROVIDER [ double precision, partial_occupation, (mo_num) ]
  implicit none
  BEGIN_DOC
  ! Partial occupation numbers for optimal damping algorithm
  END_DOC
  partial_occupation = 0.d0
- integer  :: i
+ integer(size_t)  :: i
  do i=1,elec_beta_num
    partial_occupation(i) = 2.d0
  enddo

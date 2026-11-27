@@ -1,3 +1,5 @@
+use sizet
+
 BEGIN_PROVIDER [ character*(64), diag_algorithm ]
   implicit none
   BEGIN_DOC
@@ -16,7 +18,7 @@ END_PROVIDER
 
 
 
-BEGIN_PROVIDER [ integer, dressed_column_idx, (N_states) ]
+BEGIN_PROVIDER [ integer(size_t), dressed_column_idx, (N_states) ]
  implicit none
  BEGIN_DOC
  ! Index of the dressed columns
@@ -30,6 +32,7 @@ BEGIN_PROVIDER [ integer, dressed_column_idx, (N_states) ]
 END_PROVIDER
 
 subroutine davidson_diag_hs2(dets_in,u_in,s2_out,dim_in,energies,sze,N_st,N_st_diag,Nint,dressing_state,converged)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -48,7 +51,8 @@ subroutine davidson_diag_hs2(dets_in,u_in,s2_out,dim_in,energies,sze,N_st,N_st_d
   !
   ! Initial guess vectors are not necessarily orthonormal
   END_DOC
-  integer, intent(in)            :: dim_in, sze, N_st, N_st_diag, Nint
+  integer, intent(in)            :: N_st, N_st_diag
+  integer(size_t), intent(in)    :: dim_in, sze, Nint
   integer(bit_kind), intent(in)  :: dets_in(Nint,2,sze)
   double precision, intent(inout) :: u_in(dim_in,N_st_diag)
   double precision, intent(out)  :: energies(N_st_diag), s2_out(N_st_diag)
@@ -57,7 +61,8 @@ subroutine davidson_diag_hs2(dets_in,u_in,s2_out,dim_in,energies,sze,N_st,N_st_d
   double precision, allocatable  :: H_jj(:)
 
   double precision, external     :: diag_H_mat_elem, diag_S_mat_elem
-  integer                        :: i,k,l
+  integer                        :: k,l
+  integer(size_t)                :: i
   ASSERT (N_st > 0)
   ASSERT (sze > 0)
   ASSERT (Nint > 0)
@@ -95,6 +100,7 @@ end
 
 
 subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_st,N_st_diag_in,Nint,dressing_state,converged)
+ use sizet
   use bitmasks
   use mmap_module
   implicit none
@@ -120,7 +126,8 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   !
   ! Initial guess vectors are not necessarily orthonormal
   END_DOC
-  integer, intent(in)            :: dim_in, sze, N_st, N_st_diag_in, Nint
+  integer, intent(in)            :: N_st, N_st_diag_in
+  integer(size_t), intent(in)    :: dim_in, sze, Nint
   integer(bit_kind), intent(in)  :: dets_in(Nint,2,sze)
   double precision,  intent(in)  :: H_jj(sze)
   integer, intent(in)            :: dressing_state
@@ -129,7 +136,8 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   double precision, intent(out)  :: energies(N_st_diag_in)
 
   integer                        :: iter, N_st_diag
-  integer                        :: i,j,k,l,m
+  integer                        :: j,m
+  integer(size_t)                :: i,k,l
   logical, intent(inout)         :: converged
 
   double precision, external     :: u_dot_v, u_dot_u
@@ -216,7 +224,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
   nproc_target = nproc
   double precision :: rss
-  integer :: maxab
+  integer(size_t) :: maxab
   maxab = max(N_det_alpha_unique, N_det_beta_unique)+1
 
   m=1
@@ -262,7 +270,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   TOUCH nthreads_davidson
   call write_int(6,N_st,'Number of states')
   call write_int(6,N_st_diag,'Number of states in diagonalization')
-  call write_int(6,sze,'Number of determinants')
+  call write_int(6,int(sze,4),'Number of determinants')
   call write_int(6,nproc_target,'Number of threads for diagonalization')
   call write_double(6, r1, 'Memory(Gb)')
   if (disk_based) then
@@ -408,32 +416,32 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
         else
 
-          call dgemm('T','N', N_st, N_st_diag, sze, 1.d0, &
+          call dgemm('T','N', N_st, N_st_diag, int(sze,4), 1.d0, &
             psi_coef, size(psi_coef,1), &
             U(:,shift+1:shift2), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
 
-          call dgemm('N','N', sze, N_st_diag, N_st, 1.0d0, &
-            dressing_column_h, size(dressing_column_h,1), s_tmp, size(s_tmp,1), &
-            1.d0, W(:,shift+1:shift2), size(W,1))
+          call dgemm('N', 'N', int(sze,4), N_st_diag, N_st, 1.0d0, &
+                     dressing_column_h, size(dressing_column_h,1), s_tmp, &
+                     size(s_tmp,1), 1.d0, W(:,shift+1:shift2), size(W,1))
 
-          call dgemm('N','N', sze, N_st_diag, N_st, 1.0d0, &
-            dressing_column_s, size(dressing_column_s,1), s_tmp, size(s_tmp,1), &
-            1.d0, S_d, size(S_d,1))
+          call dgemm('N', 'N', int(sze,4), N_st_diag, N_st, 1.0d0, &
+                     dressing_column_s, size(dressing_column_s,1), s_tmp, &
+                     size(s_tmp,1), 1.d0, S_d, size(S_d,1))
 
 
-          call dgemm('T','N', N_st, N_st_diag, sze, 1.d0, &
+          call dgemm('T','N', N_st, N_st_diag, int(sze,4), 1.d0, &
             dressing_column_h, size(dressing_column_h,1), &
             U(:,shift+1), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
 
-          call dgemm('N','N', sze, N_st_diag, N_st, 1.0d0, &
+          call dgemm('N','N', int(sze,4), N_st_diag, N_st, 1.0d0, &
             psi_coef, size(psi_coef,1), s_tmp, size(s_tmp,1), &
             1.d0, W(:,shift+1:shift2), size(W,1))
 
-          call dgemm('T','N', N_st, N_st_diag, sze, 1.d0, &
+          call dgemm('T','N', N_st, N_st_diag, int(sze,4), 1.d0, &
             dressing_column_s, size(dressing_column_s,1), &
             U(:,shift+1:shift2), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
 
-          call dgemm('N','N', sze, N_st_diag, N_st, 1.0d0, &
+          call dgemm('N','N', int(sze,4), N_st_diag, N_st, 1.0d0, &
             psi_coef, size(psi_coef,1), s_tmp, size(s_tmp,1), &
             1.d0, S_d, size(S_d,1))
 
@@ -457,10 +465,10 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       ! Compute h_kl = <u_k | W_l> = <u_k| H |u_l>
       ! -------------------------------------------
 
-      call dgemm('T','N', shift2, shift2, sze,                       &
+      call dgemm('T','N', shift2, shift2, int(sze,4),                       &
           1.d0, U, size(U,1), W, size(W,1),                          &
           0.d0, h, size(h,1))
-      call dgemm('T','N', shift2, shift2, sze,                       &
+      call dgemm('T','N', shift2, shift2, int(sze,4),                       &
           1.d0, U, size(U,1), U, size(U,1),                          &
           0.d0, s_tmp, size(s_tmp,1))
 
@@ -525,10 +533,10 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
         lab = 0
         do j = 1, shift2, N_st_diag
           n_col = min(N_st_diag, shift2-j+1)
-          call dgemm('N','N', sze, n_col, shift2, 1.d0, U, size(U,1), &
+          call dgemm('N','N', int(sze,4), n_col, shift2, 1.d0, U, size(U,1), &
                y(1,j), size(y,1), 0.d0, U(1,shift2+1), size(U,1))
-          call pg_det_state_labels(sze, U(1,shift2+1), size(U,1), n_col, &
-               lab(j), lab_pur(j), lab_mix(j))
+          call pg_det_state_labels(sze, U(1,shift2+1), &
+               int(size(U,1),size_t), n_col, lab(j), lab_pur(j), lab_mix(j))
         enddo
       endif
 
@@ -558,8 +566,9 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
           ! Computes some states from the guess vectors
           ! Psi(:,j:j+N_st_diag) = U y(:,j:j+N_st_diag) and put them
           ! in U(1,shift2+1:shift2+1+N_st_diag) as temporary array
-          call dgemm('N','N', sze, N_st_diag, shift2,                    &
-          1.d0, U, size(U,1), y(1,j), size(y,1), 0.d0, U(1,shift2+1), size(U,1))
+          call dgemm('N', 'N', int(sze,4), N_st_diag, shift2, 1.d0, U, &
+                     size(U,1), y(1,j), size(y,1), 0.d0, U(1,shift2+1), &
+                     size(U,1))
 
           ! Overlap
           do l = 1, N_st
@@ -645,18 +654,19 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       ! Express eigenvectors of h in the determinant basis
       ! --------------------------------------------------
 
-      call dgemm('N','N', sze, N_st_diag, shift2,                    &
-          1.d0, U, size(U,1), y, size(y,1), 0.d0, U(:,shift2+1:shift2+N_st_diag), size(U,1))
-      call dgemm('N','N', sze, N_st_diag, shift2,                    &
-          1.d0, W, size(W,1), y, size(y,1), 0.d0, W(:,shift2+1:shift2+N_st_diag), size(W,1))
+      call dgemm('N', 'N', int(sze,4), N_st_diag, shift2, 1.d0, U, size(U,1), &
+                 y, size(y,1), 0.d0, U(:,shift2+1:shift2+N_st_diag), size(U,1))
+      call dgemm('N', 'N', int(sze,4), N_st_diag, shift2, 1.d0, W, size(W,1), &
+                 y, size(y,1), 0.d0, W(:,shift2+1:shift2+N_st_diag), size(W,1))
 
       y_s(:,:) = real(y(:,:))
-      call sgemm('N','N', sze, N_st_diag, shift2,                    &
-          1., S, size(S,1), y_s, size(y_s,1), 0., S(:,shift2+1:shift2+N_st_diag), size(S,1))
+      call sgemm('N', 'N', int(sze,4), N_st_diag, shift2, 1., S, size(S,1), &
+                 y_s, size(y_s,1), 0., S(:,shift2+1:shift2+N_st_diag), &
+                 size(S,1))
 
       if (use_sym) then
-        call pg_det_state_labels(sze, U(1,shift2+1), size(U,1), N_st, &
-             lab_prev, lab_pur, lab_mix)
+        call pg_det_state_labels(sze, U(1,shift2+1), &
+             int(size(U,1),size_t), N_st, lab_prev, lab_pur, lab_mix)
       endif
 
       ! Compute residual vector and davidson step
@@ -718,15 +728,15 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
     ! Re-contract U and update S and W
     ! --------------------------------
 
-    call sgemm('N','N', sze, N_st_diag, shift2, 1.,      &
-        S, size(S,1), y_s, size(y_s,1), 0., S(:,shift2+1:shift2+N_st_diag), size(S,1))
+    call sgemm('N', 'N', int(sze,4), N_st_diag, shift2, 1., S, size(S,1), y_s, &
+               size(y_s,1), 0., S(:,shift2+1:shift2+N_st_diag), size(S,1))
     do k=1,N_st_diag
       do i=1,sze
         S(i,k) = S(i,shift2+k)
       enddo
     enddo
 
-    call dgemm('N','N', sze, N_st_diag, shift2, 1.d0,      &
+    call dgemm('N','N', int(sze,4), N_st_diag, shift2, 1.d0,      &
         W, size(W,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
     do k=1,N_st_diag
       do i=1,sze
@@ -734,7 +744,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       enddo
     enddo
 
-    call dgemm('N','N', sze, N_st_diag, shift2, 1.d0,      &
+    call dgemm('N','N', int(sze,4), N_st_diag, shift2, 1.d0,      &
         U, size(U,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
 
     do k=1,N_st_diag
@@ -745,7 +755,8 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
   enddo
 
-  call nullify_small_elements(sze,N_st_diag,U,size(U,1),threshold_davidson_pt2)
+  call nullify_small_elements(sze,int(N_st_diag, size_t),U, &
+      int(size(U,1), size_t),threshold_davidson_pt2)
   do k=1,N_st_diag
     do i=1,sze
       u_in(i,k) = U(i,k)

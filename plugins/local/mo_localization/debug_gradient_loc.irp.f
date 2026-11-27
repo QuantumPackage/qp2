@@ -1,3 +1,5 @@
+use sizet
+
 program debug_gradient_loc
 
   !BEGIN_DOC
@@ -6,11 +8,11 @@ program debug_gradient_loc
 
   implicit none
 
-  integer :: list_size, n
-  integer, allocatable :: list(:)
+  integer(size_t) :: list_size, n
+  integer(size_t), allocatable :: list(:)
   double precision, allocatable :: v_grad(:), v_grad2(:)
   double precision :: norm, max_elem, threshold, max_error
-  integer :: i, nb_error
+  integer(size_t) :: i, nb_error
 
   threshold = 1d-12
 

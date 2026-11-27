@@ -1,3 +1,5 @@
+use sizet
+
  BEGIN_PROVIDER [double precision, mo_dipole_x , (mo_num,mo_num)]
 &BEGIN_PROVIDER [double precision, mo_dipole_y , (mo_num,mo_num)]
 &BEGIN_PROVIDER [double precision, mo_dipole_z , (mo_num,mo_num)]
@@ -8,24 +10,12 @@
  END_DOC
  implicit none
 
-  call ao_to_mo(                                                     &
-      ao_dipole_x,                                                   &
-      size(ao_dipole_x,1),                                           &
-      mo_dipole_x,                                                   &
-      size(mo_dipole_x,1)                                            &
-      )
-  call ao_to_mo(                                                     &
-      ao_dipole_y,                                                   &
-      size(ao_dipole_y,1),                                           &
-      mo_dipole_y,                                                   &
-      size(mo_dipole_y,1)                                            &
-      )
-  call ao_to_mo(                                                     &
-      ao_dipole_z,                                                   &
-      size(ao_dipole_z,1),                                           &
-      mo_dipole_z,                                                   &
-      size(mo_dipole_z,1)                                            &
-      )
+    call ao_to_mo(ao_dipole_x, int(size(ao_dipole_x,1),size_t), mo_dipole_x, &
+                int(size(mo_dipole_x,1),size_t))
+    call ao_to_mo(ao_dipole_y, int(size(ao_dipole_y,1),size_t), mo_dipole_y, &
+                int(size(mo_dipole_y,1),size_t))
+    call ao_to_mo(ao_dipole_z, int(size(ao_dipole_z,1),size_t), mo_dipole_z, &
+                int(size(mo_dipole_z,1),size_t))
 
 END_PROVIDER
 
@@ -38,24 +28,12 @@ END_PROVIDER
  ! array of the integrals of MO_i * z^2 MO_j
  END_DOC
  implicit none
-  call ao_to_mo(                                                     &
-      ao_spread_x,                                                   &
-      size(ao_spread_x,1),                                           &
-      mo_spread_x,                                                   &
-      size(mo_spread_x,1)                                            &
-      )
-  call ao_to_mo(                                                     &
-      ao_spread_y,                                                   &
-      size(ao_spread_y,1),                                           &
-      mo_spread_y,                                                   &
-      size(mo_spread_y,1)                                            &
-      )
-  call ao_to_mo(                                                     &
-      ao_spread_z,                                                   &
-      size(ao_spread_z,1),                                           &
-      mo_spread_z,                                                   &
-      size(mo_spread_z,1)                                            &
-      )
+    call ao_to_mo(ao_spread_x, int(size(ao_spread_x,1),size_t), mo_spread_x, &
+                int(size(mo_spread_x,1),size_t))
+    call ao_to_mo(ao_spread_y, int(size(ao_spread_y,1),size_t), mo_spread_y, &
+                int(size(mo_spread_y,1),size_t))
+    call ao_to_mo(ao_spread_z, int(size(ao_spread_z,1),size_t), mo_spread_z, &
+                int(size(mo_spread_z,1),size_t))
 END_PROVIDER
 
  BEGIN_PROVIDER [double precision, mo_spread_centered_x, (mo_num, mo_num) ]
@@ -67,7 +45,7 @@ END_PROVIDER
  ! array of the integrals of MO_i * (z^2 - <MO_i|z|MO_j>^2) MO_j = MO_i z^2 MO_j - (MO_i z MO_j)^2
  END_DOC
  implicit none
- integer :: i,j
+ integer(size_t) :: i,j
  do i = 1, mo_num
   do j = 1, mo_num
    mo_spread_centered_x(j,i) = mo_spread_x(j,i) - mo_dipole_x(j,i)**2

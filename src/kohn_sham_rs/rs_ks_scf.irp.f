@@ -58,6 +58,7 @@ end
 
 
 subroutine create_guess
+  use sizet
   implicit none
   BEGIN_DOC
 !   Create a MO guess if no MOs are present in the EZFIO directory
@@ -72,7 +73,9 @@ subroutine create_guess
       mo_coef = ao_ortho_lowdin_coef
       TOUCH mo_coef
       mo_label = 'Guess'
-      call mo_as_eigvectors_of_mo_matrix(mo_one_e_integrals,size(mo_one_e_integrals,1),size(mo_one_e_integrals,2),mo_label,.false.)
+      call mo_as_eigvectors_of_mo_matrix(mo_one_e_integrals, &
+          int(size(mo_one_e_integrals,1),size_t), &
+          int(size(mo_one_e_integrals,2),size_t), mo_label, .false.)
       SOFT_TOUCH mo_coef mo_label
     else if (mo_guess_type == "Huckel") then
       call huckel_guess
@@ -91,6 +94,7 @@ subroutine run
 
   use bitmasks
   use qp_json, only: json_add
+  use sizet
   implicit none
 
   double precision               :: EHF
@@ -111,7 +115,7 @@ subroutine run
   call json_add('/results/ks/exchange_dft', e_exchange_dft)
   call json_add('/results/ks/correlation_dft', e_correlation_dft)
 
-  call pg_print_mo_energies(Fock_matrix_diag_mo, mo_num)
+  call pg_print_mo_energies(Fock_matrix_diag_mo, int(mo_num, size_t))
   call pg_report_mo_symmetry()
 
  write(*, '(A22,X,F16.10)') 'one_e_energy = ',one_e_energy

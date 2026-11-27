@@ -1,4 +1,7 @@
+use sizet
+
 subroutine damping_SCF
+ use sizet
   BEGIN_DOC
   ! Damped SCF iterations on the restricted alpha and beta density
   ! matrices. Each step mixes the old and new densities with a
@@ -19,7 +22,8 @@ subroutine damping_SCF
   double precision, allocatable  :: delta_alpha(:,:), delta_beta(:,:)
   double precision               :: lambda, E_half, a, b, delta_D, delta_E, E_min
 
-  integer                        :: i,j,k
+  integer(size_t)                :: i,j
+  integer                        :: k
   logical                        :: saving
   character                      :: save_char
 
@@ -148,7 +152,10 @@ subroutine damping_SCF
   write(6,*)
 
   if(.not.frozen_orb_scf)then
-   call mo_as_eigvectors_of_mo_matrix(Fock_matrix_mo,size(Fock_matrix_mo,1),size(Fock_matrix_mo,2),mo_label,1,.true.)
+      call mo_as_eigvectors_of_mo_matrix(Fock_matrix_mo, &
+                                      int(size(Fock_matrix_mo,1),size_t), &
+                                      int(size(Fock_matrix_mo,2),size_t), &
+                                      mo_label, 1, .true.)
   endif
 
   call write_double(6, E_min, 'Hartree-Fock energy')

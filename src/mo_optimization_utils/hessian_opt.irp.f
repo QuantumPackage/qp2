@@ -1,3 +1,5 @@
+use sizet
+
 ! Hessian
 
 ! The hessian of the CI energy with respects to the orbital rotation is :
@@ -76,6 +78,7 @@
 
 
 subroutine hessian_opt(n,H,h_tmpr)
+ use sizet
   BEGIN_DOC
   ! Hessian of the energy with respect to orbital rotations, for
   ! all mo_num orbitals.
@@ -92,7 +95,7 @@ subroutine hessian_opt(n,H,h_tmpr)
   ! Variables
 
   ! in
-  integer, intent(in)           :: n 
+  integer(size_t), intent(in)   :: n 
   
   ! out
   double precision, intent(out) :: H(n,n),h_tmpr(mo_num,mo_num,mo_num,mo_num)
@@ -100,9 +103,9 @@ subroutine hessian_opt(n,H,h_tmpr)
   ! internal
   double precision, allocatable :: hessian(:,:,:,:)!, h_tmpr(:,:,:,:)
   double precision, allocatable :: H_test(:,:)
-  integer                       :: p,q
-  integer                       :: r,s,t,u,v,k
-  integer                       :: pq,rs
+  integer(size_t)               :: p,q
+  integer(size_t)               :: r,s,t,u,v,k
+  integer(size_t)               :: pq,rs
   double precision              :: t1,t2,t3,t4,t5,t6
   ! H_test   : monum**2 by mo_num**2 double precision matrix to debug the H matrix
 

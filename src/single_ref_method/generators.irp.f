@@ -1,3 +1,4 @@
+use sizet
 use bitmasks
 
 BEGIN_PROVIDER [ integer, N_det_generators ]
@@ -17,7 +18,7 @@ END_PROVIDER
  ! Hartree-Fock determinant
  END_DOC
  psi_det_generators = 0_bit_kind
- integer :: i,j,k
+ integer(size_t) :: i,j,k
  integer :: degree
 
  do i=1,N_int

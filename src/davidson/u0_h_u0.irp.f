@@ -1,4 +1,7 @@
+use sizet
+
 subroutine u_0_H_u_0(e_0,u_0,n,keys_tmp,Nint,N_st,sze)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -7,14 +10,17 @@ subroutine u_0_H_u_0(e_0,u_0,n,keys_tmp,Nint,N_st,sze)
   ! n : number of determinants
   !
   END_DOC
-  integer, intent(in)             :: n,Nint, N_st, sze
+  integer(size_t), intent(in)     :: n
+  integer, intent(in)             :: N_st
+  integer(size_t), intent(in)     :: Nint, sze
   double precision, intent(out)   :: e_0(N_st)
   double precision, intent(inout) :: u_0(sze,N_st)
   integer(bit_kind),intent(in)    :: keys_tmp(Nint,2,n)
 
   double precision, allocatable   :: v_0(:,:), u_1(:,:)
   double precision                :: u_dot_u,u_dot_v,diag_H_mat_elem
-  integer                         :: i,j, istate
+  integer                         :: istate
+  integer(size_t)                 :: i,j
 
   if ((n > 100000).and.distributed_davidson) then
     allocate (v_0(n,N_states_diag), u_1(n,N_states_diag))
@@ -60,6 +66,7 @@ end
 
 
 subroutine H_u_0_nstates_openmp(v_0,u_0,N_st,sze)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -69,7 +76,8 @@ subroutine H_u_0_nstates_openmp(v_0,u_0,N_st,sze)
   !
   ! istart, iend, ishift, istep split the work between the OpenMP threads.
   END_DOC
-  integer, intent(in)            :: N_st,sze
+  integer, intent(in)            :: N_st
+  integer(size_t), intent(in)    :: sze
   double precision, intent(inout)  :: v_0(sze,N_st), u_0(sze,N_st)
   integer :: k
   double precision, allocatable  :: u_t(:,:), v_t(:,:)
@@ -77,7 +85,7 @@ subroutine H_u_0_nstates_openmp(v_0,u_0,N_st,sze)
   allocate(u_t(N_st,N_det),v_t(N_st,N_det))
 
   do k=1,N_st
-    call dset_order(u_0(1,k),psi_bilinear_matrix_order,N_det)
+    call dset_order_big(u_0(1,k),psi_bilinear_matrix_order,N_det)
   enddo
   v_t = 0.d0
   call dtranspose(                                                   &
@@ -85,9 +93,9 @@ subroutine H_u_0_nstates_openmp(v_0,u_0,N_st,sze)
       size(u_0, 1),                                                  &
       u_t,                                                           &
       size(u_t, 1),                                                  &
-      N_det, N_st)
+      N_det, int(N_st, size_t))
 
-  call H_u_0_nstates_openmp_work(v_t,u_t,N_st,sze,1,N_det,0,1)
+  call H_u_0_nstates_openmp_work(v_t,u_t,N_st,sze,1_size_t,N_det,0,1)
   deallocate(u_t)
 
   call dtranspose(                                                   &
@@ -95,18 +103,19 @@ subroutine H_u_0_nstates_openmp(v_0,u_0,N_st,sze)
       size(v_t, 1),                                                  &
       v_0,                                                           &
       size(v_0, 1),                                                  &
-      N_st, N_det)
+      int(N_st, size_t), N_det)
   deallocate(v_t)
 
   do k=1,N_st
-    call dset_order(v_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
-    call dset_order(u_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
+    call dset_order_big(v_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
+    call dset_order_big(u_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
   enddo
 
 end
 
 
 subroutine H_u_0_nstates_openmp_work(v_t,u_t,N_st,sze,istart,iend,ishift,istep)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -114,7 +123,8 @@ subroutine H_u_0_nstates_openmp_work(v_t,u_t,N_st,sze,istart,iend,ishift,istep)
   !
   ! Default should be 1,N_det,0,1
   END_DOC
-  integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep
+  integer, intent(in)            :: N_st, ishift, istep
+  integer(size_t), intent(in)    :: sze, istart, iend
   double precision, intent(in)   :: u_t(N_st,N_det)
   double precision, intent(out)  :: v_t(N_st,sze)
 
@@ -137,6 +147,7 @@ end
 BEGIN_TEMPLATE
 
 subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,istep)
+ use sizet
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -144,28 +155,32 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
   !
   ! Default should be 1,N_det,0,1
   END_DOC
-  integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep
+  integer, intent(in)            :: N_st, ishift, istep
+  integer(size_t), intent(in)    :: sze, istart, iend
   double precision, intent(in)   :: u_t(N_st,N_det)
   double precision, intent(out)  :: v_t(N_st,sze)
 
   double precision               :: hij
-  integer                        :: i,j,k,l,kk
-  integer                        :: k_a, k_b, l_a, l_b, m_a, m_b
+  integer(size_t)                :: i,j,k
+  integer                        :: l, kk
+  integer(size_t)                :: k_a, k_b, l_a, l_b
+  integer                        :: m_a, m_b
   integer                        :: istate
-  integer                        :: krow, kcol, krow_b, kcol_b
-  integer                        :: lrow, lcol
+  integer(size_t)                :: krow, kcol
+  integer                        :: krow_b, kcol_b
+  integer(size_t)                :: lrow, lcol
   integer                        :: mrow, mcol
   integer(bit_kind)              :: spindet($N_int)
   integer(bit_kind)              :: tmp_det($N_int,2)
   integer(bit_kind)              :: tmp_det2($N_int,2)
   integer(bit_kind)              :: tmp_det3($N_int,2)
   integer(bit_kind), allocatable :: buffer(:,:)
-  integer                        :: n_doubles
-  integer, allocatable           :: doubles(:)
-  integer, allocatable           :: singles_a(:)
-  integer, allocatable           :: singles_b(:)
-  integer, allocatable           :: idx(:), buffer_lrow(:), idx0(:)
-  integer                        :: maxab, n_singles_a, n_singles_b, kcol_prev
+  integer(size_t)                :: n_doubles
+  integer(size_t), allocatable   :: doubles(:)
+  integer(size_t), allocatable   :: singles_a(:)
+  integer(size_t), allocatable   :: singles_b(:)
+  integer(size_t), allocatable   :: idx(:), buffer_lrow(:), idx0(:)
+  integer(size_t)                :: maxab, n_singles_a, n_singles_b, kcol_prev
   integer*8                      :: k8
   logical                        :: compute_singles
   integer*8                      :: last_found, left, right, right_max
@@ -416,7 +431,7 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
           ASSERT (lrow <= N_det_alpha_unique)
 
           tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
-          call i_H_j_double_alpha_beta(tmp_det,tmp_det2,$N_int,hij)
+          call i_H_j_double_alpha_beta(tmp_det,tmp_det2,int($N_int,size_t),hij)
           !DIR$ LOOP COUNT AVG(4)
           do l=1,N_st
             v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
@@ -516,7 +531,7 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
         ASSERT (lrow <= N_det_alpha_unique)
 
         tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
-        call i_h_j_single_spin( tmp_det, tmp_det2, $N_int, 1, hij)
+        call i_h_j_single_spin( tmp_det, tmp_det2, int($N_int,size_t), 1, hij)
 
         !DIR$ LOOP COUNT AVG(4)
         do l=1,N_st
@@ -562,7 +577,8 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
           ! single => sij = 0
         ASSERT (lrow <= N_det_alpha_unique)
 
-        call i_H_j_double_spin( tmp_det(1,1), psi_det_alpha_unique(1, lrow), $N_int, hij)
+        call i_H_j_double_spin( tmp_det(1,1),                          &
+            psi_det_alpha_unique(1, lrow), int($N_int,size_t), hij)
         !DIR$ LOOP COUNT AVG(4)
         do l=1,N_st
           v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
@@ -654,7 +670,7 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
         ASSERT (lcol <= N_det_beta_unique)
 
         tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, lcol)
-        call i_h_j_single_spin( tmp_det, tmp_det2, $N_int, 2, hij)
+        call i_h_j_single_spin( tmp_det, tmp_det2, int($N_int,size_t), 2, hij)
         !DIR$ LOOP COUNT AVG(4)
         do l=1,N_st
           v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
@@ -700,7 +716,8 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
         lcol = psi_bilinear_matrix_transp_columns(l_b)
         ASSERT (lcol <= N_det_beta_unique)
 
-        call i_H_j_double_spin( tmp_det(1,2), psi_det_beta_unique(1, lcol), $N_int, hij)
+        call i_H_j_double_spin( tmp_det(1,2),                          &
+            psi_det_beta_unique(1, lcol), int($N_int,size_t), hij)
 
         !DIR$ LOOP COUNT AVG(4)
         do l=1,N_st
@@ -738,7 +755,7 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
 
     double precision, external :: diag_H_mat_elem
 
-    hij = diag_H_mat_elem(tmp_det,$N_int)
+    hij = diag_H_mat_elem(tmp_det,int($N_int,size_t))
     !DIR$ LOOP COUNT AVG(4)
     do l=1,N_st
       v_t(l,k_a) = v_t(l,k_a) + hij * u_t(l,k_a)

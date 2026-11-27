@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -8,7 +9,7 @@ BEGIN_PROVIDER [ double precision, CI_energy_nonsym_dressed, (N_states_diag) ]
   END_DOC
 
   implicit none
-  integer       :: j
+  integer(size_t) :: j
   character*(8) :: st
 
   call write_time(6)
@@ -34,7 +35,7 @@ END_PROVIDER
 
   implicit none
   logical                       :: converged
-  integer                       :: i, j, k
+  integer(size_t)               :: i, j, k
   integer                       :: i_other_state
   integer                       :: i_state
   logical,          allocatable :: good_state_array(:)
@@ -112,7 +113,8 @@ subroutine diagonalize_CI_nonsym_dressed()
   END_DOC
 
   implicit none
-  integer :: i, j
+  integer(size_t) :: i
+  integer :: j
 
   PROVIDE dressing_delta
 
@@ -135,7 +137,8 @@ BEGIN_PROVIDER [ double precision, H_matrix_nonsym_dressed, (N_det,N_det) ]
   END_DOC
 
   implicit none
-  integer          :: i, j, l, k
+  integer(size_t)  :: i, j
+  integer          :: l, k
   double precision :: f
 
   H_matrix_nonsym_dressed(1:N_det,1:N_det) = h_matrix_all_dets(1:N_det,1:N_det)

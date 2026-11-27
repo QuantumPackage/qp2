@@ -1,4 +1,7 @@
+use sizet
+
 subroutine first_hessian_opt(n,H,h_tmpr)
+ use sizet
   BEGIN_DOC
   ! Hessian of the energy with respect to orbital rotations, for
   ! all mo_num orbitals.
@@ -22,7 +25,7 @@ subroutine first_hessian_opt(n,H,h_tmpr)
   !===========
 
   ! in
-  integer, intent(in)           :: n 
+  integer(size_t), intent(in)   :: n 
   !n         : integer, n = mo_num*(mo_num-1)/2
   
   ! out
@@ -31,9 +34,9 @@ subroutine first_hessian_opt(n,H,h_tmpr)
  
   ! internal
   double precision, allocatable :: hessian(:,:,:,:)
-  integer                       :: p,q
-  integer                       :: r,s,t,u,v
-  integer                       :: pq,rs
+  integer(size_t)               :: p,q
+  integer(size_t)               :: r,s,t,u,v
+  integer(size_t)               :: pq,rs
   double precision              :: t1,t2,t3,t4,t5,t6
   ! hessian  : mo_num 4D double precision matrix containing the hessian before the permutations
   ! h_tmpr   : mo_num 4D double precision matrix containing the hessian after the permutations

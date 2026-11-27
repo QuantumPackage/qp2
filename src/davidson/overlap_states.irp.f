@@ -1,3 +1,4 @@
+use sizet
 
 ! ---
 
@@ -12,7 +13,7 @@
   END_DOC
 
   implicit none
-  integer          :: i
+  integer(size_t)  :: i
   double precision :: o_tmp
 
   if(N_states == 1) then
@@ -30,7 +31,9 @@
               , psi_coef, size(psi_coef, 1), psi_coef, size(psi_coef, 1) &
               , 0.d0, overlap_states, size(overlap_states, 1)            )
 
-    call get_inverse(overlap_states, N_states, N_states, overlap_states_inv, N_states)
+        call get_inverse(overlap_states, int(N_states,size_t), &
+                     int(N_states,size_t), overlap_states_inv, &
+                     int(N_states,size_t))
 
   endif
 
